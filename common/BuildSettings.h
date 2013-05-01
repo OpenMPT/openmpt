@@ -38,6 +38,9 @@
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
 
+// Disable std::istream support in class FileReader (this is generally not needed for the tracker, local files can easily be mmapped as they have been before introducing std::istream support)
+#define NO_FILEREADER_STD_ISTREAM
+
 // Disable the built-in reverb effect
 //#define NO_REVERB
 

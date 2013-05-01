@@ -28,7 +28,7 @@ bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelInd
 
 	const size_t offset = channelIndex * sizeof(SampleConverter::input_t);
 
-	if(sample.AllocateSample() == 0 || file.BytesLeft() < offset)
+	if(sample.AllocateSample() == 0 || !file.CanRead(offset))
 	{
 		return false;
 	}

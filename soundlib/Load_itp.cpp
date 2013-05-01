@@ -49,7 +49,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	// Check file ID
-	if(file.BytesLeft() < 12 + 4 + 24 + 4
+	if(!file.CanRead(12 + 4 + 24 + 4)
 		|| file.ReadUint32LE() != ITP_FILE_ID				// Magic bytes
 		|| (version = file.ReadUint32LE()) > ITP_VERSION	// Format version
 		|| !ReadITPString(m_szNames[0], file))				// Song name
@@ -233,7 +233,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		code = file.ReadUint32LE();
 
 		INSTRUMENTINDEX ins = 1;
-		while(ins <= GetNumInstruments() && file.BytesLeft())
+		while(ins <= GetNumInstruments() && file.AreBytesLeft())
 		{
 			if(code == 'MPTS')
 			{

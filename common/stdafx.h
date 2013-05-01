@@ -50,6 +50,7 @@
 // this will be available everywhere
 #include "../common/typedefs.h"
 // this adds:
+// <memory>
 // <new>
 // <string>
 // <vector>

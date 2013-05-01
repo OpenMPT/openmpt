@@ -106,7 +106,7 @@ void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk
 	for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 	{
 		PatternRow baseRow = pattern.GetRow(row);
-		while(patternChunk.BytesLeft())
+		while(patternChunk.AreBytesLeft())
 		{
 			const uint8 flags = patternChunk.ReadUint8();
 			if(flags == emptyRow)
@@ -386,7 +386,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.ReadMagic("Extreme")
 		|| !file.ReadConvertEndianness(fileHeader)
 		|| !file.Skip(fileHeader.extraSize)
-		|| file.BytesLeft() < fileHeader.numSamps * sizeof(AMSSampleHeader)
+		|| !file.CanRead(fileHeader.numSamps * sizeof(AMSSampleHeader))
 		|| fileHeader.versionHigh != 0x01)
 	{
 		return false;

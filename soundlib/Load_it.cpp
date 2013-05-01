@@ -583,7 +583,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read mix plugins information
-	if(file.BytesLeft() > 8)
+	if(file.CanRead(9))
 	{
 		LoadMixPlugins(file);
 	}
@@ -697,7 +697,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		ROWINDEX row = 0;
 		vector<uint8> chnMask(GetNumChannels());
 
-		while(row < numRows && patternData.BytesLeft())
+		while(row < numRows && patternData.AreBytesLeft())
 		{
 			uint8 b = patternData.ReadUint8();
 			if(!b)
@@ -778,7 +778,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 		ModCommand *m = Patterns[pat];
 		ROWINDEX row = 0;
-		while(row < numRows && patternData.BytesLeft())
+		while(row < numRows && patternData.AreBytesLeft())
 		{
 			uint8 b = patternData.ReadUint8();
 			if(!b)
@@ -1745,7 +1745,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 void CSoundFile::LoadMixPlugins(FileReader &file)
 //-----------------------------------------------
 {
-	while(file.BytesLeft() > 8)
+	while(file.CanRead(9))
 	{
 		char code[4];
 		file.ReadArray(code);
@@ -1797,7 +1797,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 				//if dwMPTExtra is positive and there are dwMPTExtra bytes left in nPluginSize, we have some more data!
 				if(modularData.IsValid())
 				{
-					while(modularData.BytesLeft() > 4)
+					while(modularData.CanRead(5))
 					{
 						// do we recognize this chunk?
 						modularData.ReadArray(code);
@@ -2078,7 +2078,7 @@ void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInter
 	if(pInterpretMptMade != nullptr)
 		*pInterpretMptMade = true;
 
-	while(file.BytesLeft() >= 6) //Loop 'till beginning of end of file/mpt specific looking for inst. extensions
+	while(file.CanRead(6)) //Loop 'till beginning of end of file/mpt specific looking for inst. extensions
 	{
 		uint32 code = file.ReadUint32LE();
 
@@ -2123,7 +2123,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 	#define CASE_NOTXM(id, data) \
 		case id: if(modtype != MOD_TYPE_XM) { fadr = reinterpret_cast<char *>(&data); maxReadCount = std::min(size_t(size), sizeof(data));} break;
 
-	while(file.BytesLeft() > 6)
+	while(file.CanRead(7))
 	{
 		const uint32 code = file.ReadUint32LE();
 		const uint16 size = file.ReadUint16LE();
@@ -2274,7 +2274,7 @@ size_t CSoundFile::LoadModularInstrumentData(FileReader &file, ModInstrument &in
 	FileReader modularData = file.GetChunk(file.ReadUint32LE());
 
 	// Handle chunks
-	while(modularData.BytesLeft())
+	while(modularData.AreBytesLeft())
 	{
 		const uint32 chunkID = modularData.ReadUint32LE();
 

@@ -769,7 +769,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	char songname[20];
 	file.ReadArray(songname);
 	if(!IsValidName(songname, sizeof(songname), ' ')
-		|| file.BytesLeft() < sizeof(MODSampleHeader) * 15 + sizeof(MODFileHeader))
+		|| !file.CanRead(sizeof(MODSampleHeader) * 15 + sizeof(MODFileHeader)))
 	{
 		return false;
 	}

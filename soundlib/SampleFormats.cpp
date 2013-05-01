@@ -1425,7 +1425,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 	FileReader soundChunk(chunks.GetChunk(AIFFChunk::idSSND));
 	AIFFSoundChunk sampleHeader;
 	if(!soundChunk.ReadConvertEndianness(sampleHeader)
-		|| soundChunk.BytesLeft() <= sampleHeader.offset)
+		|| !soundChunk.CanRead(sampleHeader.offset))
 	{
 		return false;
 	}
@@ -1755,7 +1755,7 @@ void ReadExtendedInstrumentProperties(ModInstrument* pIns, FileReader &file)
 		return;
 	}
 
-	while(file.BytesLeft() > 6)
+	while(file.CanRead(7))
 	{
 		ReadExtendedInstrumentProperty(pIns, file.ReadUint32LE(), file);
 	}
@@ -1972,7 +1972,7 @@ struct FLACDecoder
 	static FLAC__bool eof_cb(const FLAC__StreamDecoder *, void *client_data)
 	{
 		FileReader &file = static_cast<FLACDecoder *>(client_data)->file;
-		return file.BytesLeft() == 0;
+		return file.NoBytesLeft();
 	}
 
 	static FLAC__StreamDecoderWriteStatus write_cb(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame, const FLAC__int32 *const buffer[], void *client_data)
@@ -2342,7 +2342,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 
 	// Check file for validity, or else mpg123 will happily munch many files that start looking vaguely resemble an MPEG stream mid-file.
 	file.Rewind();
-	while(file.BytesLeft() > 3)
+	while(file.CanRead(4))
 	{
 		uint8 header[3];
 		file.ReadArray(header);

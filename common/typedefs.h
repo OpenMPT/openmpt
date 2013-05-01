@@ -99,6 +99,15 @@ typedef std::bad_alloc & MPTMemoryException;
 
 
 
+#include <memory>
+#if defined(_MSC_VER) && (_MSC_VER <= MSVC_VER_2008)
+#define MPT_SHARED_PTR std::tr1::shared_ptr
+#else
+#define MPT_SHARED_PTR std::shared_ptr
+#endif
+
+
+
 #if !defined(_MFC_VER)
 void AssertHandler(const char *file, int line, const char *function, const char *expr);
 #if defined(_DEBUG)
