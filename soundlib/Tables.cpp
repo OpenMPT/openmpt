@@ -97,6 +97,7 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_MO3,		"MO3",						"mo3" },
 #endif // NO_MO3
 
+#ifndef NO_ARCHIVE_SUPPORT
 	// Compressed modules
 	{ MOD_TYPE_MOD,		"ProTracker",				"mdz" },
 	{ MOD_TYPE_MOD,		"ProTracker",				"mdr" },
@@ -104,6 +105,7 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_XM,		"FastTracker II",			"xmz" },
 	{ MOD_TYPE_IT,		"Impulse Tracker",			"itz" },
 	{ MOD_TYPE_MPT,		"OpenMPT",					"mptmz" },
+#endif
 };
 
 static const ModFormatInfo otherFormatInfo[] =
