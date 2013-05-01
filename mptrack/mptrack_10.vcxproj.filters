@@ -912,6 +912,9 @@
     <ClInclude Include="..\unarchiver\unrar\CONST.H">
       <Filter>Source Files\unarchiver\unrar</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\versionNumber.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">

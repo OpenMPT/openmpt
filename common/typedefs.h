@@ -256,6 +256,13 @@ int c99_snprintf(char *str, size_t size, const char *format, ...);
 
 
 
+//STRINGIZE makes a string of given argument. If used with #defined value,
+//the string is made of the contents of the defined value.
+#define HELPER_STRINGIZE(x)			#x
+#define STRINGIZE(x)				HELPER_STRINGIZE(x)
+
+
+
 #ifndef MAX
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif

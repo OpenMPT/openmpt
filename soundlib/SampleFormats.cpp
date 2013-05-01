@@ -397,7 +397,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
 //----------------------------------------------------------------------------------
 {
-	char *softwareId = "OpenMPT " MPT_VERSION_STR;
+	std::string softwareIdString = MptVersion::GetOpenMPTVersionStr();
+	const char *softwareId = softwareIdString.c_str();
 	size_t softwareIdLength = strlen(softwareId) + 1;
 
 	WAVEFILEHEADER header;
@@ -2166,7 +2167,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) 
 		FLAC__StreamMetadata_VorbisComment_Entry entry;
 		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "TITLE", m_szNames[nSample]);
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
-		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", "OpenMPT " MPT_VERSION_STR);
+		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", MptVersion::GetOpenMPTVersionStr().c_str());
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
 	}
 	if(metadata[1])

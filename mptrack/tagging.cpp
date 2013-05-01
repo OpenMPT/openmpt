@@ -20,7 +20,7 @@
 CFileTagging::CFileTagging()
 //--------------------------
 {
-	encoder = "OpenMPT " MPT_VERSION_STR;
+	encoder = MptVersion::GetOpenMPTVersionStr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
