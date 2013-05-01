@@ -18,7 +18,7 @@
 #pragma warning(disable:4725)	// Pentium fdiv bug
 #pragma warning(disable:4731)	// ebp modified
 
-extern VOID X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+extern void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 
 
 
@@ -403,7 +403,7 @@ void CReverb::Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples, 
 	UINT nIn, nOut;
 
 	if ((!gnReverbSend) && (!gnReverbSamples)) return;
-	if (!gnReverbSend) X86_StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
+	if (!gnReverbSend) StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
 	if (!(sysinfo & PROCSUPPORT_MMX)) return;
 	// Dynamically adjust reverb master gains
 	LONG lMasterGain;

@@ -35,17 +35,17 @@ PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 
 typedef DWORD (* LPCONVERTPROC)(LPVOID, int *, DWORD);
 
-extern DWORD X86_Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD X86_Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD X86_Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD X86_Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
+extern DWORD Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount);
 #ifdef ENABLE_X86
 extern VOID X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 #endif
-extern VOID X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames);
-extern VOID X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
-extern VOID X86_MonoFromStereo(int *pMixBuf, UINT nSamples);
+extern void InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames);
+extern void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+extern void MonoFromStereo(int *pMixBuf, UINT nSamples);
 
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
@@ -193,10 +193,10 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 	lSampleSize = m_MixerSettings.gnChannels;
 	switch(m_MixerSettings.m_SampleFormat)
 	{
-		case SampleFormatUnsigned8: pCvt = X86_Convert32To8 ;  break;
-		case SampleFormatInt16:     pCvt = X86_Convert32To16;  break;
-		case SampleFormatInt24:     pCvt = X86_Convert32To24;  break;
-		case SampleFormatInt32:     pCvt = X86_Convert32To32;  break;
+		case SampleFormatUnsigned8: pCvt = Convert32To8 ;      break;
+		case SampleFormatInt16:     pCvt = Convert32To16;      break;
+		case SampleFormatInt24:     pCvt = Convert32To24;      break;
+		case SampleFormatInt32:     pCvt = Convert32To32;      break;
 		case SampleFormatFloat32:   pCvt = Convert32ToFloat32; break;
 	}
 	lSampleSize *= m_MixerSettings.GetBitsPerSample()/8;
@@ -265,7 +265,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 #endif // NO_REVERB
 
 		// Resetting sound buffer
-		X86_StereoFill(MixSoundBuffer, lCount, &gnDryROfsVol, &gnDryLOfsVol);
+		StereoFill(MixSoundBuffer, lCount, &gnDryROfsVol, &gnDryLOfsVol);
 		
 		ASSERT(lCount<=MIXBUFFERSIZE);		// ensure MIXBUFFERSIZE really is our max buffer size
 		if (m_MixerSettings.gnChannels >= 2)
@@ -293,7 +293,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 #endif // NO_REVERB
 
 			if (nMaxPlugins) ProcessPlugins(lCount);
-			X86_MonoFromStereo(MixSoundBuffer, lCount);
+			MonoFromStereo(MixSoundBuffer, lCount);
 
 			// Apply global volume
 			if (m_PlayConfig.getGlobalVolumeAppliesToMaster())
@@ -337,7 +337,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		// Multichannel
 		if (m_MixerSettings.gnChannels > 2)
 		{
-			X86_InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, lCount);
+			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, lCount);
 			lTotalSampleCount *= 2;
 		}
 

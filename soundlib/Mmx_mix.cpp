@@ -27,6 +27,7 @@
 DWORD CSoundFile::GetSysInfo()
 //----------------------------
 {
+#ifdef ENABLE_X86
 	static unsigned int fProcessorExtensions = 0;
 	static bool bMMXChecked = false;
 
@@ -78,6 +79,9 @@ Done:
 		bMMXChecked = true;
     }
     return fProcessorExtensions;
+#else
+	return 0;
+#endif
 }
 
 
@@ -285,6 +289,8 @@ mainloop:
 
 
 // Convert floating-point mix to integer
+
+#ifdef ENABLE_X86
 void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
 //--------------------------------------------------------------------------------------------------------
 {
@@ -309,8 +315,22 @@ mainloop:
 	fstp st(0)
 	}
 }
+#endif
+
+void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
+//------------------------------------------------------------------------------------------------------
+{
+	for(UINT i=0; i<nCount; ++i)
+	{
+		*pOut++ = (int)(*pIn1++ * _f2ic);
+		*pOut++ = (int)(*pIn2++ * _f2ic);
+	}
+}
+
 
 // Convert integer mix to floating-point
+
+#ifdef ENABLE_X86
 void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
 //----------------------------------------------------------------------------------------------------
 {
@@ -335,8 +355,20 @@ mainloop:
 	fstp st(0)
 	}
 }
+#endif
+
+void C_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
+//--------------------------------------------------------------------------------------------------
+{
+	for(UINT i=0; i<nCount; ++i)
+	{
+		*pOut1++ = *pSrc++ * _i2fc;
+		*pOut2++ = *pSrc++ * _i2fc;
+	}
+}
 
 
+#ifdef ENABLE_X86
 void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
 //----------------------------------------------------------------------------------
 {
@@ -357,8 +389,19 @@ R2I_Loop:
 	fstp st(0)
 	}
 }
+#endif
+
+void C_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
+//--------------------------------------------------------------------------------
+{
+	for(UINT i=0; i<nCount; ++i)
+	{
+		*pOut++ = (int)(*pIn++ * _f2ic);
+	}
+}
 
 
+#ifdef ENABLE_X86
 void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
 //-----------------------------------------------------------------------------------
 {
@@ -377,5 +420,15 @@ I2R_Loop:
 	fstp DWORD PTR [edx]
 	jnz I2R_Loop
 	fstp st(0)
+	}
+}
+#endif
+
+void C_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
+//---------------------------------------------------------------------------------
+{
+	for(UINT i=0; i<nCount; ++i)
+	{
+		*pOut++ = *pSrc++ * _i2fc;
 	}
 }
