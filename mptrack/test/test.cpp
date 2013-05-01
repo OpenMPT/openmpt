@@ -109,8 +109,6 @@ void TestVersion()
 {
 	//Verify that macros and functions work.
 	{
-		VERIFY_EQUAL( MPT_VERSION_NUMERIC, MptVersion::num );
-		VERIFY_EQUAL( CString(MPT_VERSION_STR), CString(MptVersion::str) );
 		VERIFY_EQUAL( MptVersion::ToNum(MptVersion::ToStr(MptVersion::num)), MptVersion::num );
 		VERIFY_EQUAL( MptVersion::ToStr(MptVersion::ToNum(MptVersion::str)), MptVersion::str );
 		VERIFY_EQUAL( MptVersion::ToStr(18285096), "1.17.02.28" );

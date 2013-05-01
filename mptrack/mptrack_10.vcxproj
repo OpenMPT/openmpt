@@ -520,6 +520,7 @@
     <ClInclude Include="..\common\svn_version_default\svn_version.h" />
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\common\version.h" />
+    <ClInclude Include="..\common\versionNumber.h" />
     <ClInclude Include="..\sounddev\SoundDevice.h" />
     <ClInclude Include="..\sounddev\SoundDevices.h" />
     <ClInclude Include="..\sounddsp\AGC.h" />

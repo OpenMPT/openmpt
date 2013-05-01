@@ -10,11 +10,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Add manually edited resources here...
 
-#include "../common/version.h"
+#include "../common/versionNumber.h"
 #include <winver.h>
 
 #define VER_FILEVERSION             VER_MAJORMAJOR,VER_MAJOR,VER_MINOR,VER_MINORMINOR
-#define VER_FILEVERSION_STR			STRINGIZE(VER_FILEVERSION)
+#define VER_FILEVERSION_STR			VER_STRINGIZE(VER_FILEVERSION)
 
 #ifndef _DEBUG
 	#define VER_DEBUG				0

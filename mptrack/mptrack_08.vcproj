@@ -1153,6 +1153,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\versionNumber.h"
+				>
+			</File>
+			<File
 				RelativePath=".\view_com.h"
 				>
 			</File>
