@@ -406,7 +406,6 @@ CSoundFile::CSoundFile() :
 	MemsetZero(MixFloatBuffer);
 	gnDryLOfsVol = 0;
 	gnDryROfsVol = 0;
-	gnVolumeRampUpSamplesActual = 42;
 	m_nType = MOD_TYPE_NONE;
 	m_nChannels = 0;
 	m_nMixChannels = 0;
@@ -933,11 +932,18 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		Chn[i].Reset(resetMask, *this, i);
 
-	if (!nPos)
+	if(nPos == 0)
 	{
 		m_nGlobalVolume = m_nDefaultGlobalVolume;
 		m_nMusicSpeed = m_nDefaultSpeed;
 		m_nMusicTempo = m_nDefaultTempo;
+
+		// do not ramp global volume when starting playback
+		m_lHighResRampingGlobalVolume = m_nGlobalVolume<<VOLUMERAMPPRECISION;
+		m_nGlobalVolumeDestination = m_nGlobalVolume;
+		m_nSamplesToGlobalVolRampDest = 0;
+		m_nGlobalVolumeRampAmount = 0;
+
 		visitedSongRows.Initialize(true);
 	}
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);

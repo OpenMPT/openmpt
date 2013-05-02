@@ -88,9 +88,6 @@ inline RATIOTYPE TwoToPowerXOver12(const BYTE i)
 void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 //-------------------------------------------------------------------
 {
-	// Start with ramping disabled to avoid clicks on first read.
-	// Ramping is now set after the first read in CSoundFile::Read();
-	gnVolumeRampUpSamplesActual = 0;
 	SetPreAmp(mixersettings.m_nPreAmp); // adjust agc
 	bool reset = false;
 	if(
@@ -379,8 +376,6 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		lRead -= lCount;
 		m_nBufferCount -= lCount;
 		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
-		// Turn on ramping after first read (fix http://forum.openmpt.org/index.php?topic=523.0 )
-		gnVolumeRampUpSamplesActual = m_MixerSettings.glVolumeRampUpSamples;
 	}
 MixDone:
 	if (lRead) memset(lpBuffer, (m_MixerSettings.m_SampleFormat == SampleFormatUnsigned8) ? 0x80 : 0, lRead * lSampleSize);
@@ -1571,7 +1566,7 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 	{
 		const bool rampUp = (pChn->newLeftVol > pChn->leftVol) || (pChn->newRightVol > pChn->rightVol);
 		int32 rampLength, globalRampLength, instrRampLength = 0;
-		rampLength = globalRampLength = (rampUp ? gnVolumeRampUpSamplesActual : m_MixerSettings.glVolumeRampDownSamples);
+		rampLength = globalRampLength = (rampUp ? m_MixerSettings.glVolumeRampUpSamples : m_MixerSettings.glVolumeRampDownSamples);
 		//XXXih: add real support for bidi ramping here
 		
 		if(pChn->pModInstrument != nullptr && rampUp)
@@ -2234,12 +2229,18 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 {
 	long step = 0;
 
-	if (m_nGlobalVolumeDestination != m_nGlobalVolume)
+	if(IsGlobalVolumeUnset())
+	{
+		// do not ramp if no global volume was set before (which is the case at song start), to prevent audible glitches when default volume is > 0 and it is set to 0 in the first row
+		m_nGlobalVolumeDestination = m_nGlobalVolume;
+		m_nSamplesToGlobalVolRampDest = 0;
+		m_nGlobalVolumeRampAmount = 0;
+	} else if(m_nGlobalVolumeDestination != m_nGlobalVolume)
 	{
 		// User has provided new global volume
 		const bool rampUp = m_nGlobalVolumeDestination > m_nGlobalVolume;
 		m_nGlobalVolumeDestination = m_nGlobalVolume;
-		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? gnVolumeRampUpSamplesActual : m_MixerSettings.glVolumeRampDownSamples;
+		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? m_MixerSettings.glVolumeRampUpSamples : m_MixerSettings.glVolumeRampDownSamples;
 	} 
 
 	if (m_nSamplesToGlobalVolRampDest > 0)
