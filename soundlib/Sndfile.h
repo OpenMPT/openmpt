@@ -297,7 +297,7 @@ public:
 #ifndef NO_AGC
 	CAGC m_AGC;
 #endif
-	UINT gnVolumeRampUpSamplesActual;
+
 #ifdef MODPLUG_TRACKER
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 #endif
@@ -342,6 +342,7 @@ public:	// for Editing
 	UINT m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
 	long m_lHighResRampingGlobalVolume;
+	bool IsGlobalVolumeUnset() const { return IsFirstTick(); }
 	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
 	LONG m_nMinPeriod, m_nMaxPeriod;	// min period = highest possible frequency, max period = lowest possible frequency
 	LONG m_nRepeatCount;	// -1 means repeat infinitely.
@@ -459,6 +460,7 @@ public:
 	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
+	bool IsFirstTick() const { return (m_lTotalSampleCount == 0); }
 
 	//Get modlength in various cases: total length, length to
 	//specific order&row etc. Return value is in seconds.
