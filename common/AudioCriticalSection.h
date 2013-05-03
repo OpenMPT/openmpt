@@ -56,14 +56,20 @@ public:
 	{
 		Leave();
 	};
+	static bool IsLocked() // DEBUGGING only
+	{
+		bool islocked = false;
+		if(TryEnterCriticalSection(&g_csAudio))
+		{
+			islocked = (g_csAudioLockCount > 0);
+			LeaveCriticalSection(&g_csAudio);
+		}
+		return islocked;
+	}
 	static void AssertUnlocked()
 	{
 		// asserts that the critical section is currently not hold by THIS thread
-		if(TryEnterCriticalSection(&g_csAudio))
-		{
-			ALWAYS_ASSERT(g_csAudioLockCount==0);
-			LeaveCriticalSection(&g_csAudio);
-		}
+		ALWAYS_ASSERT(!IsLocked());
 	}
 };
 
