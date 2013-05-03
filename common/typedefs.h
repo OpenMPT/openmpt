@@ -119,9 +119,11 @@ void AssertHandler(const char *file, int line, const char *function, const char 
 
 #if defined(_DEBUG)
 #define ALWAYS_ASSERT(expr) ASSERT(expr)
+#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) ASSERT(expr)
 #else
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr);
+void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg=nullptr);
 #define ALWAYS_ASSERT(expr) do { if(!(expr)) { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) do { if(!(expr)) { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
 #endif
 
 // Compile time assert.

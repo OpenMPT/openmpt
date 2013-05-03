@@ -14,16 +14,29 @@
 
 
 #ifndef MODPLUG_TRACKER
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr)
-//------------------------------------------------------------------------------------------
+void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+//-----------------------------------------------------------------------------------------------------------
 {
-	std::cerr
-		<< "openmpt: ASSERTION FAILED: "
-		<< file << "(" << line << ")" << ": "
-		<< std::string(expr)
-		<< " [" << function << "]"
-		<< std::endl
-		;
+	if(msg)
+	{
+		std::cerr
+			<< "openmpt: ASSERTION FAILED: "
+			<< file << "(" << line << ")" << ": "
+			<< msg
+			<< " (" << std::string(expr) << ") "
+			<< " [" << function << "]"
+			<< std::endl
+			;
+	} else
+	{
+		std::cerr
+			<< "openmpt: ASSERTION FAILED: "
+			<< file << "(" << line << ")" << ": "
+			<< std::string(expr)
+			<< " [" << function << "]"
+			<< std::endl
+			;
+	}
 }
 #endif
 

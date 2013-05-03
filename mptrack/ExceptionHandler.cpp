@@ -25,8 +25,14 @@ typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hF
 	);
 
 
-static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionInfo=NULL)
-//---------------------------------------------------------------------------------------
+enum DumpMode
+{
+	DumpModeCrash   = 0,
+	DumpModeWarning = 1,
+};
+
+static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionInfo=NULL, DumpMode mode=DumpModeCrash)
+//--------------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 
@@ -114,7 +120,13 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 		MptVersion::GetVersionUrlString().c_str()
 		);
 
-	Reporting::Error(errorMessage, "OpenMPT Crash", pMainFrame);
+	if(mode == DumpModeWarning)
+	{
+		Reporting::Error(errorMessage, "OpenMPT Warning", pMainFrame);
+	} else
+	{
+		Reporting::Error(errorMessage, "OpenMPT Crash", pMainFrame);
+	}
 
 }
 
@@ -151,8 +163,9 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 
 
 #ifndef _DEBUG
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr)
-//------------------------------------------------------------------------------------------
+
+void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+//-----------------------------------------------------------------------------------------------------------
 {
 	if(IsDebuggerPresent())
 	{
@@ -162,10 +175,19 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 		DebugBreak();
 	} else
 	{
-		CString errorMessage;
-		errorMessage.Format("Internal error occured at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
-		GenerateDump(errorMessage);
+		if(msg)
+		{
+			CString errorMessage;
+			errorMessage.Format("Internal state inconsistency detected at %s(%d). This is just a warning that could potentially lead to a crash later on: %s [%s].", file, line, msg, function);
+			GenerateDump(errorMessage, NULL, DumpModeWarning);
+		} else
+		{
+			CString errorMessage;
+			errorMessage.Format("Internal error occured at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
+			GenerateDump(errorMessage);
+		}
 	}
 }
+
 #endif
 

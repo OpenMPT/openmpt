@@ -19,6 +19,9 @@
 #endif
 #include "../common/StringFixer.h"
 
+// DEBUG:
+#include "../common/AudioCriticalSection.h"
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1165,16 +1168,39 @@ abort:
 }
 
 
-void CASIODevice::WaitForRenderSilenceUpdated(bool on)
-//----------------------------------------------------
+void CASIODevice::SetRenderSilence(bool silence, bool wait)
+//---------------------------------------------------------
 {
+	InterlockedExchange(&m_RenderSilence, silence?1:0);
+	if(!wait)
+	{
+		return;
+	}
 	DWORD pollingstart = GetTickCount();
-	while(InterlockedExchangeAdd(&m_RenderingSilence, 0) != (on?1:0))
+	while(InterlockedExchangeAdd(&m_RenderingSilence, 0) != (silence?1:0))
 	{
 		Sleep(1);
-		if(GetTickCount() - pollingstart > 250)
+		if(GetTickCount() - pollingstart > 1000)
 		{
-			ALWAYS_ASSERT(false && "waiting for asio failed");
+			if(silence)
+			{
+				if(CriticalSection::IsLocked())
+				{
+					ALWAYS_ASSERT_WARN_MESSAGE(false, "AudioCriticalSection locked while stopping ASIO");
+				} else
+				{
+					ALWAYS_ASSERT_WARN_MESSAGE(false, "waiting for asio failed in Stop()");
+				}
+			} else
+			{
+				if(CriticalSection::IsLocked())
+				{
+					ALWAYS_ASSERT_WARN_MESSAGE(false, "AudioCriticalSection locked while starting ASIO");
+				} else
+				{
+					ALWAYS_ASSERT_WARN_MESSAGE(false, "waiting for asio failed in Start()");
+				}
+			}
 			break;
 		}
 	}
@@ -1184,12 +1210,14 @@ void CASIODevice::WaitForRenderSilenceUpdated(bool on)
 void CASIODevice::InternalStart()
 //-------------------------------
 {
+	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while starting ASIO");
+
 		ALWAYS_ASSERT(g_asio_startcount==0);
 		g_asio_startcount++;
 
-		InterlockedExchange(&m_RenderSilence, 0);
 		if(!m_bMixRunning)
 		{
+			SetRenderSilence(false);
 			m_bMixRunning = TRUE;
 			try
 			{
@@ -1197,10 +1225,11 @@ void CASIODevice::InternalStart()
 			} catch(...)
 			{
 				CASIODevice::ReportASIOException("ASIO crash in start()\n");
+				m_bMixRunning = FALSE;
 			}
 		} else
 		{
-			WaitForRenderSilenceUpdated(false);
+			SetRenderSilence(false, true);
 		}
 }
 
@@ -1208,8 +1237,10 @@ void CASIODevice::InternalStart()
 void CASIODevice::InternalStop()
 //------------------------------
 {
-		InterlockedExchange(&m_RenderSilence, 1);
-		WaitForRenderSilenceUpdated(true);
+	ALWAYS_ASSERT(g_asio_startcount==1);
+	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while stopping ASIO");
+
+		SetRenderSilence(true, true);
 		g_asio_startcount--;
 		ALWAYS_ASSERT(g_asio_startcount==0);
 }
@@ -1223,6 +1254,7 @@ BOOL CASIODevice::Close()
 		if (m_bMixRunning)
 		{
 			m_bMixRunning = FALSE;
+			ALWAYS_ASSERT(g_asio_startcount==1 || g_asio_startcount==0);
 			try
 			{
 				m_pAsioDrv->stop();
@@ -1231,6 +1263,7 @@ BOOL CASIODevice::Close()
 				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 			}
 		}
+		SetRenderSilence(false);
 		try
 		{
 			m_pAsioDrv->disposeBuffers();
@@ -1254,6 +1287,7 @@ void CASIODevice::InternalReset()
 		if(m_bMixRunning)
 		{
 			m_bMixRunning = FALSE;
+			ALWAYS_ASSERT(g_asio_startcount==1 || g_asio_startcount==0);
 			try
 			{
 				m_pAsioDrv->stop();
@@ -1262,7 +1296,7 @@ void CASIODevice::InternalReset()
 				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 			}
 			g_asio_startcount = 0;
-			InterlockedExchange(&m_RenderSilence, 0);
+			SetRenderSilence(false);
 		}
 }
 
@@ -1435,7 +1469,13 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 //----------------------------------------------------------------------------
 {
 	UNREFERENCED_PARAMETER(directProcess);
-	if(gpCurrentAsio) gpCurrentAsio->BufferSwitch(doubleBufferIndex);
+	if(gpCurrentAsio)
+	{
+		gpCurrentAsio->BufferSwitch(doubleBufferIndex);
+	} else
+	{
+		ALWAYS_ASSERT(false && "gpCurrentAsio");
+	}
 }
 
 

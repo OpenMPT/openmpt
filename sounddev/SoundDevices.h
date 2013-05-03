@@ -197,7 +197,7 @@ protected:
 	int m_FrameBuffer[ASIO_BLOCK_LEN];
 
 private:
-	void WaitForRenderSilenceUpdated(bool on);
+	void SetRenderSilence(bool silence, bool wait=false);
 
 public:
 	static int baseChannel;
