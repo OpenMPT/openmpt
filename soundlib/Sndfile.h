@@ -409,8 +409,8 @@ public:
 	enum ModLoadingFlags
 	{
 		onlyVerifyHeader	= 0x00,
-		loadPatternData		= 0x01,	// Advise loaders to not process any pattern data (if possible)
-		loadSampleData		= 0x02,	// Advise loaders to not process any sample data (if possible)
+		loadPatternData		= 0x01,	// If unset, advise loaders to not process any pattern data (if possible)
+		loadSampleData		= 0x02,	// If unset, advise loaders to not process any sample data (if possible)
 		// Shortcuts
 		loadCompleteModule	= loadSampleData | loadPatternData,
 		loadNoPatternData	= loadSampleData,
@@ -546,6 +546,8 @@ public:
 #endif // MODPLUG_NO_FILESAVE
 	void LoadExtendedSongProperties(const MODTYPE modtype, FileReader &file, bool* pInterpretMptMade = nullptr);
 	static size_t LoadModularInstrumentData(FileReader &file, ModInstrument &ins);
+
+	mpt::String GetSchismTrackerVersion(uint16 cwtv);
 
 	// Reads extended instrument properties(XM/IT/MPTM).
 	// If no errors occur and song extension tag is found, returns pointer to the beginning

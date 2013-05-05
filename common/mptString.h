@@ -65,6 +65,13 @@ namespace mpt
 
 		// Formats this string, like CString::Format.
 		void Format(const CharT* pszFormat, ...);
+
+		// Remove whitespaces at start of string
+		void LTrim();
+		// Remove whitespaces at end of string
+		void RTrim();
+		// Remove whitespaces at start and end of string
+		void Trim();
 	};
 }
 

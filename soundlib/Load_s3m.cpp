@@ -481,7 +481,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
 			trackerName = "BeRoTracker";
 		else
-			trackerName = "Schism Tracker";	// TODO Version Number
+			trackerName = GetSchismTrackerVersion(fileHeader.cwtv);
 		break;
 	case S3MFileHeader::trkOpenMPT:
 		trackerName = "OpenMPT %d.%02x";

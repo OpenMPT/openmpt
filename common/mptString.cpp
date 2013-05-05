@@ -46,4 +46,30 @@ void String::Format(const CharT* pszFormat, ...)
 	#endif
 }
 
+
+// Remove whitespaces at start of string
+void String::LTrim()
+{
+	size_type pos = find_first_not_of(" \n\r\t");
+	if(pos != npos)
+		erase(begin(), begin() + pos);
+}
+
+
+// Remove whitespaces at end of string
+void String::RTrim()
+{
+	size_type pos = find_last_not_of(" \n\r\t");
+	if(pos != npos)
+		erase(begin() + pos + 1, end());
+}
+
+
+// Remove whitespaces at start and end of string
+void String::Trim()
+{
+	LTrim();
+	RTrim();
+}
+
 } // namespace mpt
