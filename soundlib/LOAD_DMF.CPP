@@ -621,7 +621,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 				if((channelInfo & patVolume) != 0)
 				{
 					m->volcmd = VOLCMD_VOLUME;
-					m->vol = (file.ReadUint8() + 3) / 4;
+					m->vol = (file.ReadUint8() + 2) / 4;	// Should be + 3 instead of + 2, but volume 1 is silent in X-Tracker.
 				}
 
 				////////////////////////////////////////////////////////////////

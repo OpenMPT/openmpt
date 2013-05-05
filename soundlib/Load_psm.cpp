@@ -653,9 +653,9 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	madeWithTracker = "Epic MegaGames MASI (";
 	if(newFormat)
-		madeWithTracker = "New Version / Sinaria)";
+		madeWithTracker += "New Version / Sinaria)";
 	else
-		madeWithTracker = "New Version)";
+		madeWithTracker += "New Version)";
 
 	if(!(loadFlags & loadPatternData))
 	{
