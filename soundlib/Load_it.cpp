@@ -278,6 +278,31 @@ static void CopyPatternName(CPattern &pattern, FileReader &file)
 }
 
 
+// Get version of Schism Tracker that was used to create an IT/S3M file.
+mpt::String CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
+//----------------------------------------------------------
+{
+	cwtv &= 0xFFF;
+	mpt::String version;
+	if(cwtv > 0x050)
+	{
+		tm epoch, *verTime;
+		MemsetZero(epoch);
+		epoch.tm_year = 109, epoch.tm_mon = 9; epoch.tm_mday = 31;
+		time_t versionSec = ((cwtv - 0x050) * 86400) + mktime(&epoch);
+		if((verTime = localtime(&versionSec)) != nullptr)
+		{
+			version.Format("Schism Tracker %04d-%02d-%02d",
+				verTime->tm_year + 1900, verTime->tm_mon + 1, verTime->tm_mday);
+		}
+	} else
+	{
+		version.Format("Schism Tracker 0.%x", cwtv & 0xFF);
+	}
+	return version;
+}
+
+
 bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 //------------------------------------------------------------------
 {
@@ -960,25 +985,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			break;
 		case 1:
-			madeWithTracker = "Schism Tracker ";
-			if(fileHeader.cwtv > 0x1050)
-			{
-				mpt::String version;
-				tm epoch;
-				MemsetZero(epoch);
-				epoch.tm_year = 109, epoch.tm_mon = 9; epoch.tm_mday = 31;
-				//int32 versionSec = ((fileHeader.cwtv - 0x050) * 86400) + mktime(&epoch);
-				// TODO what's the difference between localtime and localtime_r?
-// 				if(localtime_r(&versionSec, &epoch)) {
-// 					sprintf(buf, "%04d-%02d-%02d",
-// 						version.tm_year + 1900, version.tm_mon + 1, version.tm_mday);
-// 					return;
-			} else
-			{
-				mpt::String version;
-				version.Format("0.%x", fileHeader.cwtv & 0xFF);
-				madeWithTracker += version;
-			}
+			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 			break;
 		case 6:
 			madeWithTracker.Format("BeRoTracker %x.%x");

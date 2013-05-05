@@ -282,17 +282,14 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			if(fileHeader.version < 0x0104)
 				madeWith = verFT2Generic | verConfirmed;
+			else if(memchr(fileHeader.songName, '\0', 20) != nullptr)
+				// FT2 pads the song title with spaces, some other trackers use null chars
+				madeWith = verFT2Clone | verNewModPlug;
 			else
-				madeWith = verFT2Generic | verNewModPlug;
-
-			// FT2 pads the song title with spaces, some other trackers don't
-			if(madeWith[verFT2Generic] && memchr(fileHeader.songName, '\0', 20) != nullptr)
 				madeWith = verFT2Generic | verNewModPlug;
 		} else if(!memcmp(fileHeader.trackerName + 12, "v 2.00  ", 8))
 		{
-			// Old MPT:
-			// - 1.00a5 (ihdr=245)
-			// - beta 3.3 (ihdr=263)
+			// MPT 1.0 (exact version to be determined later)
 			madeWith = verOldModPlug;
 		} else
 		{
@@ -303,8 +300,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	} else
 	{
 		// Something else!
-		madeWith.set(verConfirmed);
+		madeWith = verUnknown |verConfirmed;
 		madeWithTracker.AppendChars(fileHeader.trackerName);
+		madeWithTracker.RTrim();
 	}
 
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
@@ -362,21 +360,31 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// ModPlug Tracker Alpha
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
-				madeWithTracker = "ModPlug Tracker 1.0a5";
+				madeWithTracker = "ModPlug Tracker 1.0 alpha";
 			} else if(instrHeader.size == 263)
 			{
 				// ModPlug Tracker Beta (Beta 1 still behaves like Alpha, but Beta 3.3 does it this way)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, B3);
-				madeWithTracker = "ModPlug Tracker 1.0b3";
+				madeWithTracker = "ModPlug Tracker 1.0 beta";
 			} else
 			{
 				// WTF?
 				madeWith = (verUnknown | verConfirmed);
 			}
-		} else if(madeWith[verNewModPlug] && instrHeader.numSamples == 0)
+		} else if(instrHeader.numSamples == 0)
 		{
 			// Empty instruments make tracker identification pretty easy!
-			madeWith = ((instrHeader.size == 263 && instrHeader.sampleHeaderSize == 0) ? verNewModPlug : verUnknown) | verConfirmed;
+			if(instrHeader.size == 263 && instrHeader.sampleHeaderSize == 0 && madeWith[verNewModPlug])
+				madeWith.set(verConfirmed);
+			else if(instrHeader.size != 29 && madeWith[verDigiTracker])
+				madeWith.reset(verDigiTracker);
+			else if(madeWith[verFT2Clone |verFT2Generic] && instrHeader.size != 33)
+			{
+				// Sure isn't FT2.
+				// Note: FT2 NORMALLY writes shdr=40 for all samples, but sometimes it
+				// just happens to write random garbage there instead. Surprise!
+				madeWith = verUnknown;
+			}
 		}
 
 		if(AllocateInstrument(instr) == nullptr)
@@ -403,7 +411,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			if((instrHeader.instrument.midiEnabled | instrHeader.instrument.midiChannel | instrHeader.instrument.midiProgram | instrHeader.instrument.muteComputer) != 0)
 			{
 				// Definitely not an old MPT.
-				madeWith = verUnknown;
+				madeWith.reset(verOldModPlug | verNewModPlug);
 			}
 
 			// Read sample headers
