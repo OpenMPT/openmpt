@@ -238,12 +238,17 @@ void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile
 
 FLAGSET(TrackerVersions)
 {
-	verUnknown		= 0x00,	// Probably not made with MPT
-	verOldModPlug	= 0x01,	// Made with MPT Alpha / Beta
-	verNewModPlug	= 0x02,	// Made with MPT (not Alpha / Beta)
-	verModPlug1_09	= 0x04,	// Made with MPT 1.09 or possibly other version
-	verOpenMPT		= 0x08,	// Made with OpenMPT
-	verConfirmed	= 0x10,	// We are very sure that we found the correct tracker version.
+	verUnknown		= 0x00,		// Probably not made with MPT
+	verOldModPlug	= 0x01,		// Made with MPT Alpha / Beta
+	verNewModPlug	= 0x02,		// Made with MPT (not Alpha / Beta)
+	verModPlug1_09	= 0x04,		// Made with MPT 1.09 or possibly other version
+	verOpenMPT		= 0x08,		// Made with OpenMPT
+	verConfirmed	= 0x10,		// We are very sure that we found the correct tracker version.
+
+	verFT2Generic	= 0x20,		// "FastTracker v2.00", but FastTracker has NOT been ruled out
+	verOther		= 0x40,		// Something we don't know, testing for DigiTrakker.
+	verFT2Clone		= 0x80,		// NOT FT2: itype changed between instruments, or \0 found in song title
+	verDigiTracker	= 0x100,	// Probably DigiTrakker
 };
 
 
@@ -271,12 +276,35 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	FlagSet<TrackerVersions> madeWith(verUnknown);
 
-	if(!memcmp(fileHeader.trackerName, "FastTracker v 2.00  ", 20))
+	if(!memcmp(fileHeader.trackerName, "FastTracker ", 12))
 	{
-		madeWith = verOldModPlug;
-	} else if(fileHeader.size == 276 && fileHeader.version == 0x0104 && !memcmp(fileHeader.trackerName, "FastTracker v2.00   ", 20))
+		if(fileHeader.size && !memcmp(fileHeader.trackerName + 12, "v2.00   ", 8))
+		{
+			if(fileHeader.version < 0x0104)
+				madeWith = verFT2Generic | verConfirmed;
+			else
+				madeWith = verFT2Generic | verNewModPlug;
+
+			// FT2 pads the song title with spaces, some other trackers don't
+			if(madeWith[verFT2Generic] && memchr(fileHeader.songName, '\0', 20) != nullptr)
+				madeWith = verFT2Generic | verNewModPlug;
+		} else if(!memcmp(fileHeader.trackerName + 12, "v 2.00  ", 8))
+		{
+			// Old MPT:
+			// - 1.00a5 (ihdr=245)
+			// - beta 3.3 (ihdr=263)
+			madeWith = verOldModPlug;
+		} else
+		{
+			// ???
+			madeWith.set(verConfirmed);
+			madeWithTracker = "FastTracker Clone";
+		}
+	} else
 	{
-		madeWith = verNewModPlug;
+		// Something else!
+		madeWith.set(verConfirmed);
+		madeWithTracker.AppendChars(fileHeader.trackerName);
 	}
 
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
@@ -308,6 +336,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	// In case of XM versions < 1.04, we need to memorize the sample flags for all samples, as they are not stored immediately after the sample headers.
 	std::vector<SampleIO> sampleFlags;
 	uint8 sampleReserved = 0;
+	int instrType = -1;
 
 	// Reading instruments
 	for(INSTRUMENTINDEX instr = 1; instr <= m_nInstruments; instr++)
@@ -328,21 +357,23 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		// Time for some version detection stuff.
 		if(madeWith == verOldModPlug)
 		{
-			madeWith |= verConfirmed;
+			madeWith.set(verConfirmed);
 			if(instrHeader.size == 245)
 			{
 				// ModPlug Tracker Alpha
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
+				madeWithTracker = "ModPlug Tracker 1.0a5";
 			} else if(instrHeader.size == 263)
 			{
 				// ModPlug Tracker Beta (Beta 1 still behaves like Alpha, but Beta 3.3 does it this way)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, B3);
+				madeWithTracker = "ModPlug Tracker 1.0b3";
 			} else
 			{
 				// WTF?
 				madeWith = (verUnknown | verConfirmed);
 			}
-		} else if(madeWith == verNewModPlug && instrHeader.numSamples == 0)
+		} else if(madeWith[verNewModPlug] && instrHeader.numSamples == 0)
 		{
 			// Empty instruments make tracker identification pretty easy!
 			madeWith = ((instrHeader.size == 263 && instrHeader.sampleHeaderSize == 0) ? verNewModPlug : verUnknown) | verConfirmed;
@@ -354,6 +385,17 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		instrHeader.ConvertToMPT(*Instruments[instr]);
+
+		if(instrType == -1)
+		{
+			instrType = instrHeader.type;
+		} else if(instrType != instrHeader.type && madeWith[verFT2Generic])
+		{
+			// FT2 writes some random junk for the instrument type field,
+			// but it's always the SAME junk for every instrument saved.
+			madeWith.reset(verFT2Generic);
+			madeWith.set(verFT2Clone);
+		}
 
 		if(instrHeader.numSamples > 0)
 		{
@@ -501,9 +543,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		if(madeWith[verModPlug1_09])
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
+			madeWithTracker = "ModPlug Tracker 1.09";
 		} else if(madeWith[verNewModPlug])
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+			madeWithTracker = "ModPlug Tracker 1.16";
 		}
 	}
 
@@ -521,6 +565,20 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_nMixLevels = mixLevels_original;
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
+	}
+
+	if(madeWithTracker.empty())
+	{
+		if(madeWith[verDigiTracker] && sampleReserved == 0 && (instrType ? instrType : -1) == -1)
+		{
+			madeWithTracker = "DigiTrakker";
+		} else if(madeWith[verFT2Generic])
+		{
+			madeWithTracker = "FastTracker 2 or compatible";
+		} else
+		{
+			madeWithTracker = "Unknown";
+		}
 	}
 
 	// Leave if no extra instrument settings are available (end of file reached)
@@ -542,6 +600,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);	// early versions of OpenMPT had no version indication.
 		}
+	}
+
+	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))
+	{
+		madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
 	}
 
 	// We no longer allow any --- or +++ items in the order list now.

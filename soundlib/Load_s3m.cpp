@@ -176,10 +176,12 @@ struct PACKED S3MFileHeader
 		trkImpulseTracker	= 0x3000,
 		trkSchismTracker	= 0x4000,
 		trkOpenMPT			= 0x5000,
-		trkBeRoTracker		= 0x6000,	// Note: BeRoTracker also used version 0x4100 since 2004.
+		trkBeRoTracker		= 0x6000,
+		trkCreamTracker		= 0x7000,
 
 		trkST3_20			= 0x1320,
 		trkIT2_14			= 0x3214,
+		trkBeRoTrackerOld	= 0x4100,	// Used from 2004 to 2012
 	};
 
 	// Flags
@@ -390,7 +392,7 @@ struct PACKED S3MSampleHeader
 // Pattern decoding flags
 enum S3MPattern
 {
-	s3mEndOfRow		= 0x00,
+	s3mEndOfRow			= 0x00,
 	s3mChannelMask		= 0x1F,
 	s3mNotePresent		= 0x20,
 	s3mVolumePresent	= 0x40,
@@ -448,16 +450,51 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// ST3 ignored Zxx commands, so if we find that a file was made with ST3, we should erase all MIDI macros.
 	bool keepMidiMacros = false;
 
-	if((fileHeader.cwtv & S3MFileHeader::trackerMask) == S3MFileHeader::trkOpenMPT)
+	mpt::String trackerName;
+	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
 	{
-		// OpenMPT Version number (Major.Minor)
+	case S3MFileHeader::trkScreamTracker:
+		if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0)
+		{
+			// MPT 1.16 and older versions of OpenMPT - Simply keep default (filter) MIDI macros
+			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+			trackerName = "ModPlug Tracker / OpenMPT";
+			keepMidiMacros = true;
+		} else if(fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && fileHeader.usePanningTable == 0)
+		{
+			trackerName = "Velvet Studio";
+		} else
+		{
+			trackerName = "Scream Tracker %d.%02x";
+		}
+		break;
+	case S3MFileHeader::trkImagoOrpheus:
+		trackerName = "Imago Orpheus %d.%02x";
+		break;
+	case S3MFileHeader::trkImpulseTracker:
+		if(fileHeader.cwtv <= S3MFileHeader::trkIT2_14)
+			trackerName = "Impulse Tracker %d.%02x";
+		else
+			trackerName.Format("Impulse Tracker 2.14p%d", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
+		break;
+	case S3MFileHeader::trkSchismTracker:
+		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
+			trackerName = "BeRoTracker";
+		else
+			trackerName = "Schism Tracker";	// TODO Version Number
+		break;
+	case S3MFileHeader::trkOpenMPT:
+		trackerName = "OpenMPT %d.%02x";
 		m_dwLastSavedWithVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
-	} else if(fileHeader.cwtv  == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0)
-	{
-		// MPT 1.16 and older versions of OpenMPT - Simply keep default (filter) MIDI macros
-		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-		keepMidiMacros = true;
+		break; 
+	case S3MFileHeader::trkBeRoTracker:
+		trackerName = "BeRoTracker";
+		break;
+	case S3MFileHeader::trkCreamTracker:
+		trackerName = "CreamTracker";
+		break;
 	}
+	madeWithTracker.Format(trackerName, (fileHeader.cwtv & 0xF00) >> 8, (fileHeader.cwtv & 0xFF));
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)
 	{
@@ -616,7 +653,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// We won't convert if there are not enough Zxx commands, too "high" Zxx commands
 	// or there are only "left" or "right" pannings (we assume that stereo should be somewhat balanced),
 	// and modules not made with an old version of ST3 were probably made in a tracker that supports panning anyway.
-	bool pixPlayPanning = (fileHeader.cwtv  < S3MFileHeader::trkST3_20);
+	bool pixPlayPanning = (fileHeader.cwtv < S3MFileHeader::trkST3_20);
 	int zxxCountRight = 0, zxxCountLeft = 0;
 
 	// Reading patterns
@@ -707,7 +744,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 					S3MConvert(m, false);
 				}
 
-				if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xA0 && fileHeader.cwtv  < S3MFileHeader::trkST3_20)
+				if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xA0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)
 				{
 					// Convert old SAx panning to S8x (should only be found in PANIC.S3M by Purple Motion)
 					m.param = 0x80 | ((m.param & 0x0F) ^ 8);
@@ -723,7 +760,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 						if(m.param < 0x08)
 						{
 							zxxCountLeft++;
-						} else  if(m.param > 0x08)
+						} else if(m.param > 0x08)
 						{
 							zxxCountRight++;
 						}
