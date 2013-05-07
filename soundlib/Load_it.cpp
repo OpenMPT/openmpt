@@ -21,6 +21,7 @@
 #include <list>
 #include "../common/version.h"
 #include "ITTools.h"
+#include <time.h>
 
 #define str_tooMuchPatternData	(GetStrI18N((MPT_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
 #define str_pattern				(GetStrI18N((MPT_TEXT("pattern"))))
