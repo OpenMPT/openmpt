@@ -1,0 +1,329 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugStatic|Win32">
+      <Configuration>DebugStatic</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseStatic|Win32">
+      <Configuration>ReleaseStatic</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{812A654D-99BE-4D13-B97F-86332AD3E363}</ProjectGuid>
+    <RootNamespace>libopenmpt</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>bin\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..;../common;../include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>xmpin.def</ModuleDefinitionFile>
+      <DelayLoadDLLs>libopenmpt_settings.dll</DelayLoadDLLs>
+    </Link>
+    <PreBuildEvent>
+      <Command>subwcrev .. ..\common\svn_version\svn_version.template.h ..\common\svn_version\svn_version.h || del ..\common\svn_version\svn_version.h || true</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..;../common;../include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PreBuildEvent>
+      <Command>subwcrev .. ..\common\svn_version\svn_version.template.h ..\common\svn_version\svn_version.h || del ..\common\svn_version\svn_version.h || true</Command>
+    </PreBuildEvent>
+    <Lib>
+      <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..;../common;../include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <StringPooling>true</StringPooling>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>xmpin.def</ModuleDefinitionFile>
+      <DelayLoadDLLs>libopenmpt_settings.dll</DelayLoadDLLs>
+    </Link>
+    <PreBuildEvent>
+      <Command>subwcrev .. ..\common\svn_version\svn_version.template.h ..\common\svn_version\svn_version.h || del ..\common\svn_version\svn_version.h || true</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy /y bin\libopenmpt.dll bin\in_openmpt.dll
+copy /y bin\libopenmpt.dll bin\xmp-openmpt.dll
+copy /y bin\libopenmpt.dll bin\libmodplug.dll
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..;../common;../include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <StringPooling>true</StringPooling>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PreBuildEvent>
+      <Command>subwcrev .. ..\common\svn_version\svn_version.template.h ..\common\svn_version\svn_version.h || del ..\common\svn_version\svn_version.h || true</Command>
+    </PreBuildEvent>
+    <Lib>
+      <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\common\AudioCriticalSection.h" />
+    <ClInclude Include="..\common\BuildSettings.h" />
+    <ClInclude Include="..\common\FlagSet.h" />
+    <ClInclude Include="..\common\misc_util.h" />
+    <ClInclude Include="..\common\mptString.h" />
+    <ClInclude Include="..\common\mutex.h" />
+    <ClInclude Include="..\common\Profiler.h" />
+    <ClInclude Include="..\common\serialization_utils.h" />
+    <ClInclude Include="..\common\stdafx.h" />
+    <ClInclude Include="..\common\StringFixer.h" />
+    <ClInclude Include="..\common\svn_version\svn_version.template.h" />
+    <ClInclude Include="..\common\svn_version_default\svn_version.h" />
+    <ClInclude Include="..\common\typedefs.h" />
+    <ClInclude Include="..\common\version.h" />
+    <ClInclude Include="..\common\versionNumber.h" />
+    <ClInclude Include="..\soundlib\ChunkReader.h" />
+    <ClInclude Include="..\soundlib\Dlsbank.h" />
+    <ClInclude Include="..\soundlib\Endianness.h" />
+    <ClInclude Include="..\soundlib\FileReader.h" />
+    <ClInclude Include="..\soundlib\ITCompression.h" />
+    <ClInclude Include="..\soundlib\ITTools.h" />
+    <ClInclude Include="..\soundlib\Loaders.h" />
+    <ClInclude Include="..\soundlib\Message.h" />
+    <ClInclude Include="..\soundlib\MIDIEvents.h" />
+    <ClInclude Include="..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\soundlib\MixerSettings.h" />
+    <ClInclude Include="..\soundlib\ModChannel.h" />
+    <ClInclude Include="..\soundlib\modcommand.h" />
+    <ClInclude Include="..\soundlib\ModInstrument.h" />
+    <ClInclude Include="..\soundlib\ModSample.h" />
+    <ClInclude Include="..\soundlib\ModSequence.h" />
+    <ClInclude Include="..\soundlib\modsmp_ctrl.h" />
+    <ClInclude Include="..\soundlib\mod_specifications.h" />
+    <ClInclude Include="..\soundlib\pattern.h" />
+    <ClInclude Include="..\soundlib\patternContainer.h" />
+    <ClInclude Include="..\soundlib\Resampler.h" />
+    <ClInclude Include="..\soundlib\RowVisitor.h" />
+    <ClInclude Include="..\soundlib\SampleFormatConverters.h" />
+    <ClInclude Include="..\soundlib\SampleIO.h" />
+    <ClInclude Include="..\soundlib\Sndfile.h" />
+    <ClInclude Include="..\soundlib\Snd_defs.h" />
+    <ClInclude Include="..\soundlib\SoundFilePlayConfig.h" />
+    <ClInclude Include="..\soundlib\Tables.h" />
+    <ClInclude Include="..\soundlib\tuning.h" />
+    <ClInclude Include="..\soundlib\tuningbase.h" />
+    <ClInclude Include="..\soundlib\tuningcollection.h" />
+    <ClInclude Include="..\soundlib\Wav.h" />
+    <ClInclude Include="..\soundlib\WAVTools.h" />
+    <ClInclude Include="..\soundlib\WindowedFIR.h" />
+    <ClInclude Include="..\soundlib\XMTools.h" />
+    <ClInclude Include="libopenmpt.h" />
+    <ClInclude Include="libopenmpt.hpp" />
+    <ClInclude Include="libopenmpt_config.h" />
+    <ClInclude Include="libopenmpt_impl.hpp" />
+    <ClInclude Include="libopenmpt_interactive.hpp" />
+    <ClInclude Include="libopenmpt_internal.h" />
+    <ClInclude Include="libopenmpt_settings.h" />
+    <ClInclude Include="libopenmpt_stream_callbacks.h" />
+    <ClInclude Include="libopenmpt_version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\common\AudioCriticalSection.cpp" />
+    <ClCompile Include="..\common\misc_util.cpp" />
+    <ClCompile Include="..\common\mptString.cpp" />
+    <ClCompile Include="..\common\Profiler.cpp" />
+    <ClCompile Include="..\common\serialization_utils.cpp" />
+    <ClCompile Include="..\common\stdafx.cpp" />
+    <ClCompile Include="..\common\typedefs.cpp" />
+    <ClCompile Include="..\common\version.cpp" />
+    <ClCompile Include="..\soundlib\Dlsbank.cpp" />
+    <ClCompile Include="..\soundlib\Fastmix.cpp" />
+    <ClCompile Include="..\soundlib\ITCompression.cpp" />
+    <ClCompile Include="..\soundlib\ITTools.cpp" />
+    <ClCompile Include="..\soundlib\Load_669.cpp" />
+    <ClCompile Include="..\soundlib\LOAD_AMF.CPP" />
+    <ClCompile Include="..\soundlib\Load_ams.cpp" />
+    <ClCompile Include="..\soundlib\LOAD_DBM.CPP" />
+    <ClCompile Include="..\soundlib\Load_digi.cpp" />
+    <ClCompile Include="..\soundlib\LOAD_DMF.CPP" />
+    <ClCompile Include="..\soundlib\LOAD_DSM.CPP" />
+    <ClCompile Include="..\soundlib\Load_far.cpp" />
+    <ClCompile Include="..\soundlib\Load_gdm.cpp" />
+    <ClCompile Include="..\soundlib\Load_imf.cpp" />
+    <ClCompile Include="..\soundlib\Load_it.cpp" />
+    <ClCompile Include="..\soundlib\Load_itp.cpp" />
+    <ClCompile Include="..\soundlib\load_j2b.cpp" />
+    <ClCompile Include="..\soundlib\Load_mdl.cpp" />
+    <ClCompile Include="..\soundlib\Load_med.cpp" />
+    <ClCompile Include="..\soundlib\Load_mid.cpp" />
+    <ClCompile Include="..\soundlib\Load_mo3.cpp" />
+    <ClCompile Include="..\soundlib\Load_mod.cpp" />
+    <ClCompile Include="..\soundlib\Load_mt2.cpp" />
+    <ClCompile Include="..\soundlib\Load_mtm.cpp" />
+    <ClCompile Include="..\soundlib\Load_okt.cpp" />
+    <ClCompile Include="..\soundlib\Load_psm.cpp" />
+    <ClCompile Include="..\soundlib\Load_ptm.cpp" />
+    <ClCompile Include="..\soundlib\Load_s3m.cpp" />
+    <ClCompile Include="..\soundlib\Load_stm.cpp" />
+    <ClCompile Include="..\soundlib\Load_ult.cpp" />
+    <ClCompile Include="..\soundlib\Load_umx.cpp" />
+    <ClCompile Include="..\soundlib\Load_wav.cpp" />
+    <ClCompile Include="..\soundlib\Load_xm.cpp" />
+    <ClCompile Include="..\soundlib\Message.cpp" />
+    <ClCompile Include="..\soundlib\MIDIEvents.cpp" />
+    <ClCompile Include="..\soundlib\MIDIMacros.cpp" />
+    <ClCompile Include="..\soundlib\MixerSettings.cpp" />
+    <ClCompile Include="..\soundlib\Mmcmp.cpp" />
+    <ClCompile Include="..\soundlib\Mmx_mix.cpp" />
+    <ClCompile Include="..\soundlib\ModChannel.cpp" />
+    <ClCompile Include="..\soundlib\modcommand.cpp" />
+    <ClCompile Include="..\soundlib\ModInstrument.cpp" />
+    <ClCompile Include="..\soundlib\ModSample.cpp" />
+    <ClCompile Include="..\soundlib\ModSequence.cpp" />
+    <ClCompile Include="..\soundlib\modsmp_ctrl.cpp" />
+    <ClCompile Include="..\soundlib\mod_specifications.cpp" />
+    <ClCompile Include="..\soundlib\pattern.cpp" />
+    <ClCompile Include="..\soundlib\patternContainer.cpp" />
+    <ClCompile Include="..\soundlib\RowVisitor.cpp" />
+    <ClCompile Include="..\soundlib\SampleFormats.cpp" />
+    <ClCompile Include="..\soundlib\SampleIO.cpp" />
+    <ClCompile Include="..\soundlib\Sndfile.cpp" />
+    <ClCompile Include="..\soundlib\Sndmix.cpp" />
+    <ClCompile Include="..\soundlib\Snd_flt.cpp" />
+    <ClCompile Include="..\soundlib\Snd_fx.cpp" />
+    <ClCompile Include="..\soundlib\SoundFilePlayConfig.cpp" />
+    <ClCompile Include="..\soundlib\Tables.cpp" />
+    <ClCompile Include="..\soundlib\tuning.cpp" />
+    <ClCompile Include="..\soundlib\tuningbase.cpp" />
+    <ClCompile Include="..\soundlib\tuningCollection.cpp" />
+    <ClCompile Include="..\soundlib\Waveform.cpp" />
+    <ClCompile Include="..\soundlib\WAVTools.cpp" />
+    <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
+    <ClCompile Include="..\soundlib\XMTools.cpp" />
+    <ClCompile Include="libopenmpt.cpp" />
+    <ClCompile Include="libopenmpt_c.cpp" />
+    <ClCompile Include="libopenmpt_cxx.cpp" />
+    <ClCompile Include="libopenmpt_interactive.cpp" />
+    <ClCompile Include="libopenmpt_modplug.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_version.cpp" />
+    <ClCompile Include="libopenmpt_winamp.cpp" />
+    <ClCompile Include="libopenmpt_xmplay.cpp" />
+    <ClCompile Include="libopenmpt_xmplay_c.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
+      <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
