@@ -68,6 +68,7 @@ TrackerSettings::TrackerSettings()
 
 	// Audio device
 	gbLoopSong = TRUE;
+	m_MorePortaudio = false;
 	m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);	// Default value will be overridden
 	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
 	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
@@ -327,6 +328,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		rgbCustomColors[ncol] = CMainFrame::GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
 	}
 
+	m_MorePortaudio = CMainFrame::GetPrivateProfileBool("Sound Settings", "MorePortaudio", m_MorePortaudio, iniFile);
 	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT); // first WaveOut device
 #ifndef NO_ASIO
 	// If there's an ASIO device available, prefer it over DirectSound

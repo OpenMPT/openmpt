@@ -213,8 +213,18 @@ BOOL COptionsSoundcard::OnInitDialog()
 		}
 		COMBOBOXEXITEM cbi;
 		UINT iItem = 0;
+
 		for (UINT nDevType = 0; nDevType < SNDDEV_NUM_DEVTYPES; nDevType++)
 		{
+			if(!TrackerSettings::Instance().m_MorePortaudio)
+			{
+				if(nDevType == SNDDEV_PORTAUDIO_ASIO || nDevType == SNDDEV_PORTAUDIO_DS || nDevType == SNDDEV_PORTAUDIO_WMME)
+				{
+					// skip those portaudio apis that are already implemented via our own ISoundDevice class
+					// can be overwritten via [Sound Settings]MorePortaudio=1
+					continue;
+				}
+			}
 			UINT nDev = 0;
 
 			while (EnumerateSoundDevices(nDevType, nDev, s, CountOf(s)))
@@ -225,9 +235,11 @@ BOOL COptionsSoundcard::OnInitDialog()
 				switch(nDevType)
 				{
 				case SNDDEV_DSOUND:
+				case SNDDEV_PORTAUDIO_DS:
 					cbi.iImage = IMAGE_DIRECTX;
 					break;
 				case SNDDEV_ASIO:
+				case SNDDEV_PORTAUDIO_ASIO:
 					bAsio = TRUE;
 					cbi.iImage = IMAGE_ASIO;
 					break;
