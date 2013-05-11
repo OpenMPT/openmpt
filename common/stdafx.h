@@ -40,11 +40,15 @@
 #endif // MODPLUG_TRACKER
 
 
+#ifndef NO_PCH
+
 #include <istream>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#endif // NO_PCH
 
 
 // this will be available everywhere
