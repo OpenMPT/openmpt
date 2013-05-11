@@ -15,13 +15,22 @@
 #include "libopenmpt_impl.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 //#ifndef NO_LIBOPENMPT_CXX
 
 namespace openmpt {
 
-exception::exception( const char * text ) : std::exception( text ) {
+exception::exception( const char * text_ ) throw() : text(text_) {
 	return;
+}
+
+exception::~exception() throw() {
+	return;
+}
+
+const char * exception::what() const throw() {
+	return text;
 }
 
 std::uint32_t get_library_version() {

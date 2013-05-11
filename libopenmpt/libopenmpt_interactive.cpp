@@ -5,6 +5,8 @@
 #include "libopenmpt_interactive.hpp"
 #include "libopenmpt_impl.hpp"
 
+#include <stdexcept>
+
 namespace openmpt {
 
 class interactive_module_impl : public module_impl {
