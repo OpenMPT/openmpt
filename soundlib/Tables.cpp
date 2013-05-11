@@ -53,6 +53,7 @@ struct ModFormatInfo
 	char *extension;	// "mod"
 };
 
+// remember to also update libopenmpt/libopenmpt_foobar2000.cpp (all other plugins read these dynamically)
 static const ModFormatInfo modFormatInfo[] =
 {
 	{ MOD_TYPE_MOD,		"ProTracker",				"mod" },

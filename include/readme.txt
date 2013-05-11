@@ -48,3 +48,8 @@ xmplay input SDK
 To build libopenmpt with xmplay input plugin support, copy the contents of
 xmpin.zip into include/xmplay/.
 Use #define NO_XMPLAY in common/BuildSettings.h to disable.
+
+foobar2000 SDK
+==============
+Building the openmpt fooobar input service requires the contents of
+SDK-2011-03-11.zip being placed in include/foobar2000sdk/.
