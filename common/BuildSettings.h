@@ -90,21 +90,43 @@
 #endif
 
 #ifdef _WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1600)
+#define _WIN32_WINNT        0x0501 // _WIN32_WINNT_WINXP
+#else
+#define _WIN32_WINNT        0x0500 // _WIN32_WINNT_WIN2000
+#endif
+#define WINVER              _WIN32_WINNT
+#define WIN32_LEAN_AND_MEAN
 
-#define _WIN32_WINNT	0x0500	// 0x0500 = Windows 2000
+// windows.h excludes
+#define NOMEMMGR          // GMEM_*, LMEM_*, GHND, LHND, associated routines
+#define NOMINMAX          // Macros min(a,b) and max(a,b)
+#define NOSERVICE         // All Service Controller routines, SERVICE_ equates, etc.
+#define NOCOMM            // COMM driver routines
+#define NOKANJI           // Kanji support stuff.
+#define NOPROFILER        // Profiler interface.
+#define NOMCX             // Modem Configuration Extensions
 
-// no stupid min/max macros
-#define NOMINMAX
-// windows excludes
-#define NOMCX
-// mmreg excludes
+// mmsystem.h excludes
+#define MMNODRV
+//#define MMNOSOUND
+//#define MMNOWAVE
+//#define MMNOMIDI
+#define MMNOAUX
+#define MMNOMIXER
+//#define MMNOTIMER
+#define MMNOJOY
+#define MMNOMCI
+//#define MMNOMMIO
+//#define MMNOMMSYSTEM
+
+// mmreg.h excludes
 #define NOMMIDS
+//#define NONEWWAVE
+#define NONEWRIFF
 #define NOJPEGDIB
 #define NONEWIC
 #define NOBITMAP
-// mmsystem excludes
-#define MMNODRV
-#define MMNOMCI
 
 #endif
 
