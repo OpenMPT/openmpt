@@ -41,6 +41,17 @@
 
 #endif // ENABLE_ASM
 
+
+
+#if defined(MODPLUG_TRACKER) && defined(LIBOPENMPT_BUILD)
+
+#error "either MODPLUG_TRACKER or LIBOPENMPT_BUILD has to be defined"
+
+#elif defined(MODPLUG_TRACKER)
+
+// Disable any file saving functionality (not really useful except for the player library)
+//#define MODPLUG_NO_FILESAVE
+
 // Disable any debug logging
 //#define NO_LOGGING
 
@@ -82,6 +93,52 @@
 
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
+
+// Do not build libmodplug emulation layer (only makes sense for library)
+#define NO_LIBMODPLUG
+
+// Do not build xmplay input plugin cod (only makes snse for library)
+#define NO_XMPLAY
+
+// Do not build winamp input plugin code (only makes sense for library)
+#define NO_WINAMP
+
+// Do not build libopenmpt C api
+#define NO_LIBOPENMPT_C
+
+// Do not build libopenmpt C++ api
+#define NO_LIBOPENMPT_CXX
+
+#elif defined(LIBOPENMPT_BUILD)
+
+#define MODPLUG_NO_FILESAVE
+//#define NO_LOGGING
+#define NO_ARCHIVE_SUPPORT
+//#define NO_FILEREADER_STD_ISTREAM
+#define NO_REVERB
+#define NO_DSP
+#define NO_EQ
+#define NO_AGC
+#define NO_ASIO
+#define NO_VST
+#define NO_PORTAUDIO
+#if !defined(_WIN32)
+#define NO_MO3
+#endif
+#define NO_DSOUND
+#define NO_FLAC
+#define NO_MP3_SAMPLES
+//#define NO_LIBMODPLUG
+//#define NO_WINAMP
+//#define NO_XMPLAY
+//#define NO_LIBOPENMPT_C
+//#define NO_LIBOPENMPT_CXX
+
+#else
+
+#error "either MODPLUG_TRACKER or LIBOPENMPT_BUILD has to be defined"
+
+#endif
 
 
 

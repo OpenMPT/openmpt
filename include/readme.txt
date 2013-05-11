@@ -30,3 +30,21 @@ library should be easy.
 
 Please visit https://sourceforge.net/projects/portmedia/files/portmidi/
 to download the SDK.
+
+LibModplug
+===========
+To build libopenmpt with a libmodplug compatible interface, copy the libmodplug
+header files from xmms-modplug into libmodplug directory.
+Use #define NO_LIBMODPLUG in common/BuildSettings.h to disable.
+
+Winamp2 SDK
+===========
+To build libopenmpt as a winamp2 input plugin, copy the winamp2 SDK headers to
+include/winamp/.
+Use #define NO_WINAMP in common/BuildSettings.h to disable.
+
+xmplay input SDK
+================
+To build libopenmpt with xmplay input plugin support, copy the contents of
+xmpin.zip into include/xmplay/.
+Use #define NO_XMPLAY in common/BuildSettings.h to disable.
