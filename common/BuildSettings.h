@@ -12,6 +12,15 @@
 
 
 
+// Do not use precompiled headers (prevents include of commonly used headers in stdafx.h)
+#ifdef MODPLUG_TRACKER
+//#define NO_PCH
+#else
+#define NO_PCH
+#endif
+
+
+
 // Use inline assembly at all
 #define ENABLE_ASM
 
