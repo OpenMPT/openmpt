@@ -125,8 +125,8 @@ private:
 	}
 	void apply_mixer_settings( std::int32_t samplerate, int channels, SampleFormat format ) {
 		if (
-			m_sndFile.m_MixerSettings.gdwMixingFreq != samplerate ||
-			m_sndFile.m_MixerSettings.gnChannels != channels ||
+			static_cast<std::int32_t>( m_sndFile.m_MixerSettings.gdwMixingFreq ) != samplerate ||
+			static_cast<int>( m_sndFile.m_MixerSettings.gnChannels ) != channels ||
 			m_sndFile.m_MixerSettings.m_SampleFormat != format
 			) {
 			MixerSettings mixersettings = m_sndFile.m_MixerSettings;
@@ -249,6 +249,7 @@ public:
 					case SRCMODE_LINEAR: return module::INTERPOLATION_LINEAR; break;
 					case SRCMODE_SPLINE: return module::INTERPOLATION_SPLINE; break;
 					case SRCMODE_POLYPHASE: return module::INTERPOLATION_POLYPHASE; break;
+					case SRCMODE_DEFAULT:
 					case SRCMODE_FIRFILTER: {
 						switch ( m_sndFile.m_Resampler.m_Settings.gbWFIRType ) {
 							case WFIR_HANN: return module::INTERPOLATION_FIR_HANN; break;
@@ -261,6 +262,9 @@ public:
 							case WFIR_KAISER4T: return module::INTERPOLATION_FIR_KAISER4T; break;
 						}
 					} break;
+					case NUM_SRC_MODES:
+					default:
+					break;
 				}
 				throw exception("unknown interpolation mode set internally");
 			} break;
@@ -278,7 +282,7 @@ public:
 		switch ( command ) {
 			case module::RENDER_MASTERGAIN_DB: {
 				float gainFactor = static_cast<float>( std::pow( 10.0f, value * 0.1f * 0.5f ) );
-				if ( m_sndFile.m_MixerSettings.m_FinalOutputGain != float_to_fx16( gainFactor ) ) {
+				if ( static_cast<std::int32_t>( m_sndFile.m_MixerSettings.m_FinalOutputGain ) != float_to_fx16( gainFactor ) ) {
 					MixerSettings settings = m_sndFile.m_MixerSettings;
 					settings.m_FinalOutputGain = float_to_fx16( gainFactor );
 					m_sndFile.SetMixerSettings( settings );
@@ -286,7 +290,7 @@ public:
 			} break;
 			case module::RENDER_STEREOSEPARATION_PERCENT: {
 				std::int32_t newvalue = value * 128 / 100;
-				if ( newvalue != m_sndFile.m_MixerSettings.m_nStereoSeparation ) {
+				if ( newvalue != static_cast<std::int32_t>( m_sndFile.m_MixerSettings.m_nStereoSeparation ) ) {
 					MixerSettings settings = m_sndFile.m_MixerSettings;
 					settings.gdwMixingFreq = newvalue;
 					m_sndFile.SetMixerSettings( settings );
@@ -299,7 +303,7 @@ public:
 				set_quality( value );
 			} break;
 			case module::RENDER_MAXMIXCHANNELS: {
-				if ( value != m_sndFile.m_MixerSettings.m_nMaxMixChannels ) {
+				if ( value != static_cast<std::int32_t>( m_sndFile.m_MixerSettings.m_nMaxMixChannels ) ) {
 					MixerSettings settings = m_sndFile.m_MixerSettings;
 					settings.m_nMaxMixChannels = value;
 					m_sndFile.SetMixerSettings( settings );

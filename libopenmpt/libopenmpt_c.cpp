@@ -15,6 +15,8 @@
 
 #include "libopenmpt_impl.hpp"
 
+#include <stdexcept>
+
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -331,12 +333,12 @@ int openmpt_is_extension_supported( const char * extension ) {
 	return 0;
 }
 
-void openmpt_log_func_default( const char * message, void * user ) {
+void openmpt_log_func_default( const char * message, void * /*user*/ ) {
 	fprintf( stderr, "%s\n", message );
 	fflush( stderr );
 }
 
-void openmpt_log_func_silent( const char * message, void * user ) {
+void openmpt_log_func_silent( const char * /*message*/, void * /*user*/ ) {
 	return;
 }
 
@@ -434,7 +436,7 @@ int openmpt_module_select_subsong( openmpt_module * mod, int32_t subsong ) {
 double openmpt_module_seek_seconds( openmpt_module * mod, double seconds ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		return mod->impl->get_current_position_seconds();
+		return mod->impl->seek_seconds( seconds );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0;
 }

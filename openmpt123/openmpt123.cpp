@@ -20,6 +20,7 @@
 #include <vector>
 
 #include <cstdint>
+#include <cstring>
 
 #if defined(_MSC_VER)
 #include <fcntl.h>
@@ -33,25 +34,25 @@
 
 #include <portaudio.h>
 
-struct show_help_exception : public std::exception {
+struct show_help_exception {
 	std::string message;
 	show_help_exception( const std::string & msg = "" ) : message(msg) { }
 };
 
-struct openmpt123_exception : public std::exception {
-	openmpt123_exception( const char * text ) : std::exception( text ) { }
+struct openmpt123_exception : public openmpt::exception {
+	openmpt123_exception( const char * text ) throw() : openmpt::exception( text ) { }
 };
 
 struct silent_exit_exception : public std::exception {
-	silent_exit_exception() { }
+	silent_exit_exception() throw() { }
 };
 
 struct show_version_number_exception : public std::exception {
-	show_version_number_exception() { }
+	show_version_number_exception() throw() { }
 };
 
-struct portaudio_exception : public std::exception {
-	portaudio_exception( PaError code ) : std::exception( Pa_GetErrorText( code ) ) { }
+struct portaudio_exception : public openmpt::exception {
+	portaudio_exception( PaError code ) throw() : openmpt::exception( Pa_GetErrorText( code ) ) { }
 };
 
 struct openmpt123_flags {
@@ -196,7 +197,7 @@ public:
 		if ( verbose ) {
 			portaudio_log_stream = &log;
 		} else {
-			portaudio_log_stream = nullptr;
+			portaudio_log_stream = 0;
 		}
 		PaUtil_SetDebugPrintFunction( portaudio_log_function );
 		log_set = true;
@@ -213,13 +214,13 @@ public:
 		}
 		if ( log_set ) {
 			PaUtil_SetDebugPrintFunction( NULL );
-			portaudio_log_stream = nullptr;
+			portaudio_log_stream = 0;
 			log_set = false;
 		}
 	}
 };
 
-std::ostream * portaudio_raii::portaudio_log_stream = nullptr;
+std::ostream * portaudio_raii::portaudio_log_stream = 0;
 
 class write_buffers_interface {
 public:
@@ -454,8 +455,6 @@ static void render_file( const openmpt123_flags & flags, const std::string & fil
 		bool use_stdin = ( filename == "-" );
 		if ( !use_stdin ) {
 			file_stream.open( filename, std::ios::binary );
-		} else {
-			stdin_stream.setf( std::ios::binary );
 		}
 		std::istream & data_stream = use_stdin ? stdin_stream : file_stream;
 		if ( data_stream.fail() ) {
