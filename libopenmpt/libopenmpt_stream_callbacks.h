@@ -77,14 +77,14 @@ static int64_t openmpt_stream_file_tell_func( void * stream ) {
 	return retval;
 }
 
-static openmpt_stream_callbacks openmpt_stream_get_fd_callbacks(void) {
+static inline openmpt_stream_callbacks openmpt_stream_get_fd_callbacks(void) {
 	openmpt_stream_callbacks retval;
 	memset( &retval, 0, sizeof( openmpt_stream_callbacks ) );
 	retval.read = openmpt_stream_fd_read_func;
 	return retval;
 }
 
-static openmpt_stream_callbacks openmpt_stream_get_file_callbacks(void) {
+static inline openmpt_stream_callbacks openmpt_stream_get_file_callbacks(void) {
 	openmpt_stream_callbacks retval;
 	memset( &retval, 0, sizeof( openmpt_stream_callbacks ) );
 	retval.read = openmpt_stream_file_read_func;

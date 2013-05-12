@@ -98,7 +98,7 @@ interactive_module::~interactive_module() {
 	delete interactive_impl;
 	interactive_impl = nullptr;
 }
-interactive_module::interactive_module( const interactive_module & ) {
+interactive_module::interactive_module( const interactive_module & other ) : module(other) {
 	throw std::runtime_error("openmpt::interactive_module is non-copyable");
 }
 void interactive_module::operator = ( const interactive_module & ) {
