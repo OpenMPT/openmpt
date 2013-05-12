@@ -21,7 +21,7 @@
 
 namespace openmpt {
 
-exception::exception( const char * text_ ) throw() : text(text_) {
+exception::exception() throw() {
 	return;
 }
 
@@ -30,7 +30,7 @@ exception::~exception() throw() {
 }
 
 const char * exception::what() const throw() {
-	return text;
+	return "";
 }
 
 std::uint32_t get_library_version() {

@@ -40,7 +40,11 @@ struct show_help_exception {
 };
 
 struct openmpt123_exception : public openmpt::exception {
-	openmpt123_exception( const char * text ) throw() : openmpt::exception( text ) { }
+	openmpt123_exception( const char * text_ ) throw() : text(text_) { }
+	virtual const char * what() const throw() {
+		return text;
+	}
+	const char * text;
 };
 
 struct silent_exit_exception : public std::exception {
@@ -51,8 +55,8 @@ struct show_version_number_exception : public std::exception {
 	show_version_number_exception() throw() { }
 };
 
-struct portaudio_exception : public openmpt::exception {
-	portaudio_exception( PaError code ) throw() : openmpt::exception( Pa_GetErrorText( code ) ) { }
+struct portaudio_exception : public openmpt123_exception {
+	portaudio_exception( PaError code ) throw() : openmpt123_exception( Pa_GetErrorText( code ) ) { }
 };
 
 struct openmpt123_flags {
