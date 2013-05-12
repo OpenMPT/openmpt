@@ -60,8 +60,12 @@
 
 #ifdef __cplusplus
 namespace openmpt { namespace version {
+#ifndef NO_WINAMP
 extern char * in_openmpt_string;
+#endif // NO_WINAMP
+#ifndef NO_XMPLAY
 extern const char * xmp_openmpt_string;
+#endif // NO_XMPLAY
 } } // namespace openmpt::version
 #endif
 

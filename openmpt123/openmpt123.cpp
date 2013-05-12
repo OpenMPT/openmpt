@@ -168,7 +168,9 @@ std::string bytes_to_string( T bytes ) {
 }
 
 typedef void (*PaUtilLogCallback ) (const char *log);
+#ifdef _MSC_VER
 extern "C" void PaUtil_SetDebugPrintFunction(PaUtilLogCallback  cb);
+#endif
 
 class portaudio_raii {
 private:
@@ -199,8 +201,10 @@ public:
 		} else {
 			portaudio_log_stream = 0;
 		}
+#ifdef _MSC_VER
 		PaUtil_SetDebugPrintFunction( portaudio_log_function );
 		log_set = true;
+#endif
 		check_portaudio_error( Pa_Initialize() );
 		portaudio_initialized = true;
 		if ( verbose ) {
@@ -213,10 +217,12 @@ public:
 			portaudio_initialized = false;
 		}
 		if ( log_set ) {
+#ifdef _MSC_VER
 			PaUtil_SetDebugPrintFunction( NULL );
-			portaudio_log_stream = 0;
 			log_set = false;
+#endif
 		}
+		portaudio_log_stream = 0;
 	}
 };
 

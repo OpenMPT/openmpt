@@ -99,7 +99,7 @@ module::module( const std::vector<char> & data, std::ostream & log, const detail
 	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ) );
 }
 
-module::module( const char * beg, const char * end, std::ostream & log, const detail::api_version_checker & apicheck ) : impl(0) {
+module::module( const char * beg, const char * end, std::ostream & log, const detail::api_version_checker & ) : impl(0) {
 	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ) );
 }
 

@@ -95,9 +95,13 @@ int get_version_compatbility( std::uint32_t api_version ) {
 
 #define OPENMPT_API_VERSION_STRING STRINGIZE(OPENMPT_API_VERSION_MAJOR)"."STRINGIZE(OPENMPT_API_VERSION_MINOR)
 
+#ifndef NO_WINAMP
 char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING "." STRINGIZE(OPENMPT_VERSION_REVISION);
+#endif // NO_WINAMP
 
+#ifndef NO_XMPLAY
 const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING "." STRINGIZE(OPENMPT_VERSION_REVISION) ")";
+#endif // NO_XMPLAY
 
 } // namespace version
 
