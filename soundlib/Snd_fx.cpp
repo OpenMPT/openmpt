@@ -3632,7 +3632,7 @@ void CSoundFile::ExtendedChannelEffect(ModChannel *pChn, UINT param)
 		break;
 	// S9F: Go backward (and set playback position to the end if sample just started)
 	case 0x0F:
-		if(!pChn->nPos && pChn->nLength && !pChn->rowCommand.IsNote())
+		if(!pChn->nPos && pChn->nLength && (pChn->rowCommand.IsNote() || !pChn->dwFlags[CHN_LOOP]))
 		{
 			pChn->nPos = pChn->nLength - 1;
 			pChn->nPosLo = 0xFFFF;
@@ -4097,7 +4097,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 				pChn->nVolume = pChn->nPeriod = 0;
 			}
 		}
-	} else if ((param < pChn->nLength) && (GetType() & (MOD_TYPE_MTM|MOD_TYPE_DMF)))
+	} else if ((param < pChn->nLength) && (GetType() & (MOD_TYPE_MTM | MOD_TYPE_DMF | MOD_TYPE_MDL)))
 	{
 		// Some trackers can also call offset effects without notes next to them...
 		pChn->nPos = param;
