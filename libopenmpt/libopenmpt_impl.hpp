@@ -71,7 +71,7 @@ private:
 
 class std_ostream_log : public log_interface {
 private:
-	mutable std::ostream & destination;
+	std::ostream & destination;
 public:
 	std_ostream_log( std::ostream & dst ) : destination(dst) {
 		return;
