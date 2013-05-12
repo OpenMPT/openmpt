@@ -107,9 +107,18 @@ const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING "." STR
 
 namespace detail {
 
+class version_mismatch : public openmpt::exception {
+public:
+	version_mismatch() throw() { }
+	virtual ~version_mismatch() throw() { }
+	virtual const char * what() const throw() {
+		return "API and header version mismatch";
+	}
+}; // class version_mismatch
+
 void version_compatible_or_throw( std::int32_t api_version ) {
 	if ( version::get_version_compatbility( api_version ) <  2 ) {
-		throw exception( "API and header version mismatch" );
+		throw version_mismatch();
 	}
 }
 

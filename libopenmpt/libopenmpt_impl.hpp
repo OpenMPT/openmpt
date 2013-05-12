@@ -41,6 +41,18 @@ int get_version_compatbility( std::uint32_t api_version );
 
 } // namespace version
 
+class exception_message : public exception {
+public:
+	exception_message( const char * text_ ) throw() : text(text_) { }
+	virtual ~exception_message() throw() { }
+public:
+	virtual const char * what() const throw() {
+		return text;
+	}
+private:
+	const char * text;
+}; // class exception_message
+
 class log_interface : public ILog {
 protected:
 	log_interface() {
@@ -146,7 +158,7 @@ private:
 	}
 	static void load( CSoundFile & sndFile, FileReader file ) {
 		if ( !sndFile.Create( file, CSoundFile::loadCompleteModule ) ) {
-			throw openmpt::exception("error loading file");
+			throw openmpt::exception_message("error loading file");
 		}
 	}
 	void load( FileReader file ) {
@@ -266,7 +278,7 @@ public:
 					default:
 					break;
 				}
-				throw exception("unknown interpolation mode set internally");
+				throw openmpt::exception_message("unknown interpolation mode set internally");
 			} break;
 			case module::RENDER_VOLUMERAMP_IN_SAMPLES: {
 				return m_sndFile.m_MixerSettings.glVolumeRampUpSamples;
@@ -274,7 +286,7 @@ public:
 			case module::RENDER_VOLUMERAMP_OUT_SAMPLES: {
 				return m_sndFile.m_MixerSettings.glVolumeRampDownSamples;
 			} break;
-			default: throw exception("unknown command"); break;
+			default: throw openmpt::exception_message("unknown command"); break;
 		}
 		return 0;
 	}
@@ -343,12 +355,12 @@ public:
 					m_sndFile.SetMixerSettings( settings );
 				}
 			} break;
-			default: throw exception("unknown command"); break;
+			default: throw openmpt::exception_message("unknown command"); break;
 		}
 	}
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * mono ) {
 		if ( !mono ) {
-			throw exception("null pointer");
+			throw openmpt::exception_message("null pointer");
 		}
 		apply_mixer_settings( samplerate, 1, SampleFormatInt16 );
 		m_int16Buffer.resize( count * 1 );
@@ -361,7 +373,7 @@ public:
 	}
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right ) {
 		if ( !left || !right ) {
-			throw exception("null pointer");
+			throw openmpt::exception_message("null pointer");
 		}
 		apply_mixer_settings( samplerate, 2, SampleFormatInt16 );
 		m_int16Buffer.resize( count * 2 );
@@ -375,7 +387,7 @@ public:
 	}
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * back_left, std::int16_t * back_right ) {
 		if ( !left || !right || !back_left || !back_right ) {
-			throw exception("null pointer");
+			throw openmpt::exception_message("null pointer");
 		}
 		apply_mixer_settings( samplerate, 4, SampleFormatInt16 );
 		m_int16Buffer.resize( count * 4 );
@@ -391,7 +403,7 @@ public:
 	}
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * mono ) {
 		if ( !mono ) {
-			throw exception("null pointer");
+			throw openmpt::exception_message("null pointer");
 		}
 		apply_mixer_settings( samplerate, 1, SampleFormatFloat32 );
 		m_floatBuffer.resize( count * 1 );
@@ -404,7 +416,7 @@ public:
 	}
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right ) {
 		if ( !left || !right ) {
-			throw exception("null pointer");
+			throw openmpt::exception_message("null pointer");
 		}
 		apply_mixer_settings( samplerate, 2, SampleFormatFloat32 );
 		m_floatBuffer.resize( count * 2 );
@@ -418,7 +430,7 @@ public:
 	}
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * back_left, float * back_right ) {
 		if ( !left || !right || !back_left || !back_right ) {
-			throw exception("null pointer");
+			throw openmpt::exception_message("null pointer");
 		}
 		apply_mixer_settings( samplerate, 4, SampleFormatFloat32 );
 		m_floatBuffer.resize( count * 4 );

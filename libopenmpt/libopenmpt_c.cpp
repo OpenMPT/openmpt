@@ -254,7 +254,7 @@ struct openmpt_module {
 #define OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod ) \
 	do { \
 		if ( !(mod) ) { \
-			throw openmpt::exception("module * not valid"); \
+			throw openmpt::exception_message("module * not valid"); \
 		} \
 	} while(0) \
 /**/
@@ -262,7 +262,7 @@ struct openmpt_module {
 #define OPENMPT_INTERFACE_CHECK_POINTER( value ) \
 	do { \
 		if ( !(value) ) { \
-			throw openmpt::exception("null pointer"); \
+			throw openmpt::exception_message("null pointer"); \
 		} \
 	} while(0) \
 /**/
