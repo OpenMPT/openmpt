@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "MixerSettings.h"
 #include "Snd_defs.h"
+#include "../common/misc_util.h"
 
 MixerSettings::MixerSettings()
 {
@@ -35,4 +36,28 @@ MixerSettings::MixerSettings()
 	m_FinalOutputGain = 1 << 16; // +/- 0dB
 #endif
 
+}
+
+
+int32 MixerSettings::GetVolumeRampUpMicroseconds() const
+{
+	return Util::muldivr(glVolumeRampUpSamples, 1000000, gdwMixingFreq);
+}
+
+
+int32 MixerSettings::GetVolumeRampDownMicroseconds() const
+{
+	return Util::muldivr(glVolumeRampDownSamples, 1000000, gdwMixingFreq);
+}
+
+
+void MixerSettings::SetVolumeRampUpMicroseconds(int32 rampUpMicroseconds)
+{
+	glVolumeRampUpSamples = Util::muldivr(rampUpMicroseconds, gdwMixingFreq, 1000000);
+}
+
+
+void MixerSettings::SetVolumeRampDownMicroseconds(int32 rampDownMicroseconds)
+{
+	glVolumeRampDownSamples = Util::muldivr(rampDownMicroseconds, gdwMixingFreq, 1000000);
 }

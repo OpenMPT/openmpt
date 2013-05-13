@@ -35,6 +35,11 @@ struct MixerSettings
 	//rewbs.resamplerConf
 	long glVolumeRampUpSamples, glVolumeRampDownSamples;
 	//end rewbs.resamplerConf
+	
+	int32 GetVolumeRampUpMicroseconds() const;
+	int32 GetVolumeRampDownMicroseconds() const;
+	void SetVolumeRampUpMicroseconds(int32 rampUpMicroseconds);
+	void SetVolumeRampDownMicroseconds(int32 rampDownMicroseconds);
 
 #ifndef MODPLUG_TRACKER
 	DWORD m_FinalOutputGain; // factor multiplied to the final mixer output just before clipping and dithering, fixed point 16.16

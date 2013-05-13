@@ -68,8 +68,8 @@ struct openmpt123_flags {
 	std::int32_t samplerate;
 	std::int32_t gain;
 	std::int32_t quality;
-	std::int32_t rampinsamples;
-	std::int32_t rampoutsamples;
+	std::int32_t rampinus;
+	std::int32_t rampoutus;
 	bool quiet;
 	bool verbose;
 	bool show_message;
@@ -87,8 +87,8 @@ struct openmpt123_flags {
 		samplerate = 48000;
 		gain = 0;
 		quality = 100;
-		rampinsamples = 16;
-		rampoutsamples = 42;
+		rampinus = ( 16 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
+		rampoutus = ( 42 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
 		quiet = false;
 		verbose = false;
 		show_message = false;
@@ -362,8 +362,8 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 		std::clog << " --repeat n       Repeat song n times (-1 means forever) [default: " << openmpt123_flags().repeatcount << "]" << std::endl;
 		std::clog << " --quality n      Set rendering quality to n % [default: " << openmpt123_flags().quality << "]" << std::endl;
 		std::clog << " --seek n         Seek to n seconds on start [default: " << openmpt123_flags().seek_target << "]" << std::endl;
-		std::clog << " --volrampin n    Use n samples volume ramping on sample begin [default: " << openmpt123_flags().rampinsamples << "]" << std::endl;
-		std::clog << " --volrampout n   Use n samples volume ramping on sample end [default: " << openmpt123_flags().rampoutsamples << "]" << std::endl;
+		std::clog << " --volrampin n    Use n microseconds volume ramping on sample begin [default: " << openmpt123_flags().rampinus << "]" << std::endl;
+		std::clog << " --volrampout n   Use n microseconds volume ramping on sample end [default: " << openmpt123_flags().rampoutus << "]" << std::endl;
 		std::clog << std::endl;
 		std::clog << " --               Interpret further arguments as filenames" << std::endl;
 		std::clog << std::endl;
@@ -498,8 +498,8 @@ static void render_file( const openmpt123_flags & flags, const std::string & fil
 		mod.set_render_param( openmpt::module::RENDER_REPEATCOUNT, flags.repeatcount );
 		mod.set_render_param( openmpt::module::RENDER_QUALITY_PERCENT, flags.quality );
 		mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_DB, flags.gain );
-		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_IN_SAMPLES, flags.rampinsamples );
-		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_OUT_SAMPLES, flags.rampoutsamples );
+		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_IN_US, flags.rampinus );
+		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_OUT_US, flags.rampoutus );
 
 		if ( flags.seek_target > 0.0 ) {
 			mod.seek_seconds( flags.seek_target );
@@ -650,11 +650,11 @@ static openmpt123_flags parse_openmpt123( const std::vector<std::string> & args 
 				++i;
 			} else if ( arg == "--volrampin" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
-				istr >> flags.rampinsamples;
+				istr >> flags.rampinus;
 				++i;
 			} else if ( arg == "--volrampout" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
-				istr >> flags.rampoutsamples;
+				istr >> flags.rampoutus;
 				++i;
 			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == "-" ) {
 				throw show_help_exception();
