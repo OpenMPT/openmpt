@@ -491,7 +491,7 @@ public:
 		} else if ( key == std::string("title") ) {
 			return m_sndFile.GetTitle();
 		} else if ( key == std::string("message") ) {
-			std::string retval = m_sndFile.songMessage;
+			std::string retval = m_sndFile.songMessage.GetFormatted( SongMessage::leLF );
 			if ( retval.empty() ) {
 				std::ostringstream tmp;
 				bool valid = false;
