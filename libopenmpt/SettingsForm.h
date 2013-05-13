@@ -57,8 +57,8 @@ namespace libopenmpt {
 
 			trackBarStereoSeparation->Value = settings->stereoseparation;
 
-			trackBarVolrampin->Value = settings->volrampin;
-			trackBarVolrampout->Value = settings->volrampout;
+			trackBarVolrampin->Value = settings->volrampinus;
+			trackBarVolrampout->Value = settings->volrampoutus;
 
 			//
 			//TODO: Add the constructor code here
@@ -315,28 +315,28 @@ namespace libopenmpt {
 			// 
 			// trackBarVolrampin
 			// 
-			this->trackBarVolrampin->LargeChange = 16;
+			this->trackBarVolrampin->LargeChange = 1000;
 			this->trackBarVolrampin->Location = System::Drawing::Point(106, 261);
-			this->trackBarVolrampin->Maximum = 256;
+			this->trackBarVolrampin->Maximum = 10000;
 			this->trackBarVolrampin->Name = L"trackBarVolrampin";
 			this->trackBarVolrampin->Size = System::Drawing::Size(121, 42);
 			this->trackBarVolrampin->TabIndex = 17;
-			this->trackBarVolrampin->TickFrequency = 16;
+			this->trackBarVolrampin->TickFrequency = 1000;
 			this->trackBarVolrampin->TickStyle = System::Windows::Forms::TickStyle::Both;
-			this->trackBarVolrampin->Value = 16;
+			this->trackBarVolrampin->Value = 363;
 			this->trackBarVolrampin->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarVolrampin_Scroll);
 			// 
 			// trackBarVolrampout
 			// 
-			this->trackBarVolrampout->LargeChange = 16;
+			this->trackBarVolrampout->LargeChange = 1000;
 			this->trackBarVolrampout->Location = System::Drawing::Point(106, 309);
-			this->trackBarVolrampout->Maximum = 256;
+			this->trackBarVolrampout->Maximum = 10000;
 			this->trackBarVolrampout->Name = L"trackBarVolrampout";
 			this->trackBarVolrampout->Size = System::Drawing::Size(121, 42);
 			this->trackBarVolrampout->TabIndex = 18;
-			this->trackBarVolrampout->TickFrequency = 16;
+			this->trackBarVolrampout->TickFrequency = 1000;
 			this->trackBarVolrampout->TickStyle = System::Windows::Forms::TickStyle::Both;
-			this->trackBarVolrampout->Value = 42;
+			this->trackBarVolrampout->Value = 952;
 			this->trackBarVolrampout->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarVolrampout_Scroll);
 			// 
 			// SettingsForm
@@ -419,11 +419,11 @@ private: System::Void trackBarStereoSeparation_Scroll(System::Object^  sender, S
 					settings->changed();
 				}
 private: System::Void trackBarVolrampin_Scroll(System::Object^  sender, System::EventArgs^  e) {
-					 settings->volrampin = (int)trackBarVolrampin->Value;
+					 settings->volrampinus = (int)trackBarVolrampin->Value;
 					 settings->changed();
 				 }
 private: System::Void trackBarVolrampout_Scroll(System::Object^  sender, System::EventArgs^  e) {
-					 settings->volrampout = (int)trackBarVolrampout->Value;
+					 settings->volrampoutus = (int)trackBarVolrampout->Value;
 					 settings->changed();
 				 }
 };

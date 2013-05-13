@@ -142,9 +142,13 @@ private:
 			m_sndFile.m_MixerSettings.m_SampleFormat != format
 			) {
 			MixerSettings mixersettings = m_sndFile.m_MixerSettings;
+			std::int32_t volrampin_us = mixersettings.GetVolumeRampUpMicroseconds();
+			std::int32_t volrampout_us = mixersettings.GetVolumeRampDownMicroseconds();
 			mixersettings.gdwMixingFreq = samplerate;
 			mixersettings.gnChannels = channels;
 			mixersettings.m_SampleFormat = format;
+			mixersettings.SetVolumeRampUpMicroseconds( volrampin_us );
+			mixersettings.SetVolumeRampDownMicroseconds( volrampout_us );
 			m_sndFile.SetMixerSettings( mixersettings );
 		}
 	}
@@ -280,11 +284,11 @@ public:
 				}
 				throw openmpt::exception_message("unknown interpolation mode set internally");
 			} break;
-			case module::RENDER_VOLUMERAMP_IN_SAMPLES: {
-				return m_sndFile.m_MixerSettings.glVolumeRampUpSamples;
+			case module::RENDER_VOLUMERAMP_IN_US: {
+				return m_sndFile.m_MixerSettings.GetVolumeRampUpMicroseconds();
 			} break;
-			case module::RENDER_VOLUMERAMP_OUT_SAMPLES: {
-				return m_sndFile.m_MixerSettings.glVolumeRampDownSamples;
+			case module::RENDER_VOLUMERAMP_OUT_US: {
+				return m_sndFile.m_MixerSettings.GetVolumeRampDownMicroseconds();
 			} break;
 			default: throw openmpt::exception_message("unknown command"); break;
 		}
@@ -341,18 +345,18 @@ public:
 					m_sndFile.SetResamplerSettings( newsettings );
 				}
 			} break;
-			case module::RENDER_VOLUMERAMP_IN_SAMPLES: {
-				if ( m_sndFile.m_MixerSettings.glVolumeRampUpSamples != value ) {
-					MixerSettings settings = m_sndFile.m_MixerSettings;
-					settings.glVolumeRampUpSamples = value;
-					m_sndFile.SetMixerSettings( settings );
+			case module::RENDER_VOLUMERAMP_IN_US: {
+				MixerSettings newsettings = m_sndFile.m_MixerSettings;
+				newsettings.SetVolumeRampUpMicroseconds( value );
+				if ( m_sndFile.m_MixerSettings.glVolumeRampUpSamples != newsettings.glVolumeRampUpSamples ) {
+					m_sndFile.SetMixerSettings( newsettings );
 				}
 			} break;
-			case module::RENDER_VOLUMERAMP_OUT_SAMPLES: {
-				if ( m_sndFile.m_MixerSettings.glVolumeRampDownSamples != value ) {
-					MixerSettings settings = m_sndFile.m_MixerSettings;
-					settings.glVolumeRampDownSamples = value;
-					m_sndFile.SetMixerSettings( settings );
+			case module::RENDER_VOLUMERAMP_OUT_US: {
+				MixerSettings newsettings = m_sndFile.m_MixerSettings;
+				newsettings.SetVolumeRampDownMicroseconds( value );
+				if ( m_sndFile.m_MixerSettings.glVolumeRampDownSamples != newsettings.glVolumeRampDownSamples ) {
+					m_sndFile.SetMixerSettings( newsettings );
 				}
 			} break;
 			default: throw openmpt::exception_message("unknown command"); break;

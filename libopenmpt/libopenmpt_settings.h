@@ -42,8 +42,8 @@ public:
 	int repeatcount;
 	int maxmixchannels;
 	int interpolationmode;
-	int volrampin;
-	int volrampout;
+	int volrampinus;
+	int volrampoutus;
 	void load();
 	void save();
 	void edit( HWND parent, const char * title );
@@ -63,8 +63,8 @@ inline void settings::load() {
 	read_setting( "repeatcount", repeatcount );
 	read_setting( "maxmixchannels", maxmixchannels );
 	read_setting( "interpolationmode", interpolationmode );
-	read_setting( "volrampin", volrampin );
-	read_setting( "volrampout", volrampout );
+	read_setting( "volrampin_microseconds", volrampinus );
+	read_setting( "volrampout_microseconds", volrampoutus );
 }
 
 inline void settings::save() {
@@ -75,8 +75,8 @@ inline void settings::save() {
 	write_setting( "repeatcount", repeatcount );
 	write_setting( "maxmixchannels", maxmixchannels );
 	write_setting( "interpolationmode", interpolationmode );
-	write_setting( "volrampin", volrampin );
-	write_setting( "volrampout", volrampout );
+	write_setting( "volrampin_microseconds", volrampinus );
+	write_setting( "volrampout_microseconds", volrampoutus );
 }
 
 inline void settings::edit( HWND parent, const char * title ) {
@@ -91,8 +91,8 @@ inline settings::settings( bool with_outputformat_ ) : with_outputformat(with_ou
 	repeatcount = 0;
 	maxmixchannels = 256;
 	interpolationmode = OPENMPT_MODULE_RENDER_INTERPOLATION_FIR_KAISER4T;
-	volrampin = 16;
-	volrampout = 42;
+	volrampinus = 363;
+	volrampoutus = 952;
 }
 
 inline settings::~settings() {

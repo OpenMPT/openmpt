@@ -121,6 +121,8 @@ static void apply_options() {
 		self->mod->set_render_param( openmpt::module::RENDER_REPEATCOUNT, self->settings->repeatcount );
 		self->mod->set_render_param( openmpt::module::RENDER_MAXMIXCHANNELS, self->settings->maxmixchannels );
 		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATION_MODE, self->settings->interpolationmode );
+		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_IN_US, self->settings->volrampinus );
+		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_OUT_US, self->settings->volrampoutus );
 	}
 	self->settings->save();
 }

@@ -83,8 +83,8 @@ public:
 		RENDER_QUALITY_PERCENT          = 4,
 		RENDER_MAXMIXCHANNELS           = 5,
 		RENDER_INTERPOLATION_MODE       = 6,
-		RENDER_VOLUMERAMP_IN_SAMPLES    = 7,
-		RENDER_VOLUMERAMP_OUT_SAMPLES   = 8,
+		RENDER_VOLUMERAMP_IN_US         = 7,
+		RENDER_VOLUMERAMP_OUT_US        = 8,
 	};
 
 	enum interpolation_mode {
