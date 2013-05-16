@@ -255,7 +255,7 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 
 	// Sample Map
 	nos = 0;
-	vector<bool> smpcount(sndFile.GetNumSamples(), false);
+	std::vector<bool> smpCount(sndFile.GetNumSamples(), false);
 	for(size_t i = 0; i < 120; i++)
 	{
 		keyboard[i * 2] = (mptIns.NoteMap[i] >= NOTE_MIN && mptIns.NoteMap[i] <= NOTE_MAX) ? (mptIns.NoteMap[i] - NOTE_MIN) : static_cast<uint8>(i);
@@ -265,10 +265,10 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 		{
 			keyboard[i * 2 + 1] = static_cast<uint8>(smp);
 
-			if(smp && smp <= sndFile.GetNumSamples() && !smpcount[smp - 1])
+			if(smp && smp <= sndFile.GetNumSamples() && !smpCount[smp - 1])
 			{
 				// We haven't considered this sample yet. Update number of samples.
-				smpcount[smp - 1] = true;
+				smpCount[smp - 1] = true;
 				nos++;
 			}
 		}
@@ -395,10 +395,11 @@ size_t ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExpor
 	// Sample Map
 	bool usedExtension = false;
 	iti.nos = 0;
-	vector<bool>smpcount(sndFile.GetNumSamples(), false);
+	std::vector<bool> smpCount(sndFile.GetNumSamples(), false);
 	for(size_t i = 0; i < 120; i++)
 	{
 		const SAMPLEINDEX smp = mptIns.Keyboard[i];
+		keyboardhi[i] = 0;
 		if(smp < MAX_SAMPLES)
 		{
 			if(smp >= 256)
@@ -409,10 +410,10 @@ size_t ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExpor
 				usedExtension = true;
 			}
 
-			if(smp && smp <= sndFile.GetNumSamples() && !smpcount[smp - 1])
+			if(smp && smp <= sndFile.GetNumSamples() && !smpCount[smp - 1])
 			{
 				// We haven't considered this sample yet. Update number of samples.
-				smpcount[smp - 1] = true;
+				smpCount[smp - 1] = true;
 				iti.nos++;
 			}
 		}
