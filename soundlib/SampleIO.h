@@ -78,6 +78,7 @@ public:
 		PTM8Dto16,		// PTM 8-Bit delta value -> 16-Bit sample
 		PCM7to8,		// 8-Bit sample data with unused high bit
 		ADPCM,			// 4-Bit ADPCM-packed
+		MT2,			// MadTracker 2 stereo delta encoding
 	};
 
 	SampleIO(Bitdepth bits = _8bit, Channels channels = mono, Endianness endianness = littleEndian, Encoding encoding = signedPCM)

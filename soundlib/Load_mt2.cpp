@@ -132,7 +132,7 @@ typedef struct PACKED _MT2SAMPLE
 	DWORD dwFrequency;
 	BYTE nQuality;
 	BYTE nChannels;
-	BYTE nFlags;
+	BYTE nFlags;	// 8 = no interpolation
 	BYTE nLoop;
 	DWORD dwLoopStart;
 	DWORD dwLoopEnd;
@@ -146,10 +146,10 @@ STATIC_ASSERT(sizeof(MT2SAMPLE) == 62);
 
 typedef struct PACKED _MT2GROUP
 {
-	BYTE nSmpNo;
-	BYTE nVolume;	// 0-128
-	BYTE nFinePitch;
-	BYTE Reserved[5];
+	uint8 nSmpNo;
+	uint8 nVolume;	// 0-128
+	int8  nFinePitch;
+	int8  Reserved[5];
 } MT2GROUP;
 
 STATIC_ASSERT(sizeof(MT2GROUP) == 8);
@@ -240,7 +240,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 
 	InitializeGlobals();
 	InitializeChannels();
-	madeWithTracker.Format("MadTracker %d.%x", pfh->wVersion >> 8, pfh->wVersion & 0xFF);
+	madeWithTracker.AppendChars(pfh->szTrackerName);
 	m_nType = MOD_TYPE_MT2;
 	m_nChannels = pfh->wChannels;
 	m_nRestartPos = pfh->wRestart;
@@ -564,6 +564,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 			if (iSmp < MAX_SAMPLES)
 			{
 				ModSample *psmp = &Samples[iSmp];
+				psmp->Initialize(MOD_TYPE_XM);
 				psmp->nGlobalVol = 64;
 				psmp->nVolume = (pms->wVolume >> 7);
 				psmp->nPan = (pms->nPan == 0x80) ? 128 : (pms->nPan^0x80);
@@ -571,9 +572,6 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 				psmp->nC5Speed = pms->dwFrequency;
 				psmp->nLoopStart = pms->dwLoopStart;
 				psmp->nLoopEnd = pms->dwLoopEnd;
-				psmp->FrequencyToTranspose();
-				psmp->RelativeTone -= pms->nBaseNote - 49;
-				psmp->TransposeToFrequency();
 				if (pms->nQuality == 2) { psmp->uFlags |= CHN_16BIT; psmp->nLength >>= 1; }
 				if (pms->nChannels == 2) { psmp->nLength >>= 1; }
 				if (pms->nLoop == 1) psmp->uFlags |= CHN_LOOP;
@@ -611,6 +609,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 							Samples[nSmp].nVibSweep = pmi->bVibSweep;
 							Samples[nSmp].nVibDepth = pmi->bVibDepth;
 							Samples[nSmp].nVibRate = pmi->bVibRate;
+							Samples[nSmp].nC5Speed = Util::Round<uint32>(SampleMap[nSmp - 1]->dwFrequency * pow(2, -(SampleMap[nSmp - 1]->nBaseNote - 49 - (pmg->nFinePitch / 128.0f)) / 12.0f));
 						}
 					}
 				}
@@ -642,7 +641,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 					(sample.uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
 					(pms->nChannels == 2) ? SampleIO::stereoSplit : SampleIO::mono,
 					SampleIO::littleEndian,
-					SampleIO::deltaPCM)
+					SampleIO::MT2)
 					.ReadSample(sample, chunk);
 			}
 		} else

@@ -63,6 +63,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			bytesRead = CopyMonoSample<ReadInt8PCM<0x80u> >(sample, sourceBuf, fileSize);
 			break;
 		case deltaPCM:		// 8-Bit / Mono / Delta / PCM
+		case MT2:
 			bytesRead = CopyMonoSample<ReadInt8DeltaPCM>(sample, sourceBuf, fileSize);
 			break;
 		case PCM7to8:		// 7 Bit stored as 8-Bit with highest bit unused / Mono / Signed / PCM
@@ -84,6 +85,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			bytesRead = CopyStereoSplitSample<ReadInt8PCM<0x80u> >(sample, sourceBuf, fileSize);
 			break;
 		case deltaPCM:		// 8-Bit / Stereo Split / Delta / PCM
+		case MT2:
 			bytesRead = CopyStereoSplitSample<ReadInt8DeltaPCM>(sample, sourceBuf, fileSize);
 			break;
 		}
@@ -120,6 +122,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			bytesRead = CopyMonoSample<ReadInt16PCM<0x8000u, littleEndian16> >(sample, sourceBuf, fileSize);
 			break;
 		case deltaPCM:		// 16-Bit / Stereo Interleaved / Delta / PCM
+		case MT2:
 			bytesRead = CopyMonoSample<ReadInt16DeltaPCM<littleEndian16> >(sample, sourceBuf, fileSize);
 			break;
 		}
@@ -156,6 +159,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			bytesRead = CopyStereoSplitSample<ReadInt16PCM<0x8000u, littleEndian16> >(sample, sourceBuf, fileSize);
 			break;
 		case deltaPCM:		// 16-Bit / Stereo Split / Delta / PCM
+		case MT2:
 			bytesRead = CopyStereoSplitSample<ReadInt16DeltaPCM<littleEndian16> >(sample, sourceBuf, fileSize);
 			break;
 		}
@@ -357,6 +361,24 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			const uint8 *inBufMax = inBuf + fileSize;
 			uint8 *outBuf = static_cast<uint8 *>(sample.pSample);
 			bytesRead = DMFUnpack(outBuf, inBuf, inBufMax, sample.GetSampleSizeInBytes());
+		}
+	} else if(GetEncoding() == MT2 && GetChannelFormat() == stereoSplit && GetBitDepth() <= 16)
+	{
+		// MT2 stereo samples (right channel is stored as a difference from the left channel)
+		if(GetBitDepth() == 8)
+		{
+			int8 *outBuf = static_cast<int8 *>(sample.pSample);
+			for(SmpLength i = 0; i <= sample.nLength * 2; i += 2)
+			{
+				outBuf[i + 1] += outBuf[i];
+			}
+		} else
+		{
+			int16 *outBuf = static_cast<int16 *>(sample.pSample);
+			for(SmpLength i = 0; i <= sample.nLength * 2; i += 2)
+			{
+				outBuf[i + 1] += outBuf[i];
+			}
 		}
 	}
 
