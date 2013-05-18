@@ -856,7 +856,6 @@ bool CMainFrame::audioOpenDevice()
 //--------------------------------
 {
 	if(IsAudioDeviceOpen()) return true;
-	UINT nFixedBitsPerSample;
 	bool err = false;
 
 	if (!TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq) err = true;
@@ -866,13 +865,14 @@ bool CMainFrame::audioOpenDevice()
 		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
 								TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
 								TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
+		SampleFormat fixedBitsPerSample = SampleFormatInvalid;
 		{
 			Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-			nFixedBitsPerSample = (gpSoundDevice) ? gpSoundDevice->HasFixedBitsPerSample() : 0;
+			fixedBitsPerSample = (gpSoundDevice) ? static_cast<SampleFormat>(gpSoundDevice->HasFixedBitsPerSample()) : SampleFormatInvalid;
 		}
-		if(err && (nFixedBitsPerSample && (nFixedBitsPerSample != TrackerSettings::Instance().m_MixerSettings.m_SampleFormat)))
+		if(err && (fixedBitsPerSample && (fixedBitsPerSample != TrackerSettings::Instance().m_MixerSettings.m_SampleFormat)))
 		{
-			if(nFixedBitsPerSample) TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = (SampleFormat)nFixedBitsPerSample;
+			if(fixedBitsPerSample) TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = fixedBitsPerSample;
 			err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
 									TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
 									TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
