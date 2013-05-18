@@ -147,6 +147,12 @@ static void DoLog(const char *file, int line, const char *function, const char *
 				<< std::endl;
 		}
 	#endif // MODPLUG_TRACKER
+#else
+	UNREFERENCED_PARAMETER(file);
+	UNREFERENCED_PARAMETER(line);
+	UNREFERENCED_PARAMETER(function);
+	UNREFERENCED_PARAMETER(format);
+	UNREFERENCED_PARAMETER(args);
 #endif
 }
 

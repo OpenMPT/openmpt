@@ -14,6 +14,10 @@
 #include "../sounddsp/DSP.h"
 #include <math.h>
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4725) // instruction may be inaccurate on some Pentiums
+#endif
+
 
 #ifndef NO_DSP
 

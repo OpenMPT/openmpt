@@ -74,8 +74,8 @@ DWORD CSoundFile::GetSysInfo()
 			test edx, (1<<22) // Bit 22: AMD MMX extensions
 			jz Done
 			or      fProcessorExtensions, PROCSUPPORT_MMXEX	// MMX extensions supported
+		Done:
 		}
-Done:
 		bMMXChecked = true;
     }
     return fProcessorExtensions;

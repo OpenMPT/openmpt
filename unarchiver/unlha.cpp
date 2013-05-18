@@ -15,6 +15,10 @@ extern void Log(const char *, ...);
 #undef USHRT_MAX
 #undef SHRT_MIN
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4244) // conversion from 'type1' to 'type2', possible loss of data
+#endif
+
 #include "unlha/lharc.h"
 #include "unlha/slidehuf.h"
 #include "unlha/header.cpp"
