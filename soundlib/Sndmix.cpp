@@ -1000,7 +1000,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 		{
 			// Normal loop active
 			uint32 end = insEnv.Ticks[insEnv.nLoopEnd];
-			if(GetType() != MOD_TYPE_XM) end++;
+			if(!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))) end++;
 
 			// FT2 compatibility: If the sustain point is at the loop end and the sustain loop has been released, don't loop anymore.
 			// Test case: EnvLoops.xm
@@ -1011,7 +1011,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 				position = insEnv.Ticks[insEnv.nLoopStart];
 
 				if(envType == ENV_VOLUME && insEnv.nLoopStart == insEnv.nLoopEnd && insEnv.Values[insEnv.nLoopEnd] == 0
-					&& (!(GetType() & MOD_TYPE_XM) || (insEnv.nLoopEnd + 1u == insEnv.nNodes)))
+					&& (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) || (insEnv.nLoopEnd + 1u == insEnv.nNodes)))
 				{
 					// Stop channel if the envelope loop only covers the last silent envelope point.
 					// Can't see a point in this, and it breaks doommix3.xm if you allow loading one-point loops, so disabling it for now.
