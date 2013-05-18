@@ -388,10 +388,10 @@ CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 #pragma warning(disable : 4355) // "'this' : used in base member initializer list"
 #endif
 CSoundFile::CSoundFile() :
+	m_pTuningsTuneSpecific(nullptr),
+	m_pModSpecs(&ModSpecs::itEx),
 	Patterns(*this),
 	Order(*this),
-	m_pModSpecs(&ModSpecs::itEx),
-	m_pTuningsTuneSpecific(nullptr),
 #ifdef MODPLUG_TRACKER
 	m_MIDIMapper(*this),
 #endif
