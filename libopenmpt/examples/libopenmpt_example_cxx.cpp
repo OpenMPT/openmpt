@@ -19,7 +19,6 @@ int main( int argc, char * argv [] ) {
 	const std::int32_t samplerate = 48000;
 	std::vector<float> left( buffersize );
 	std::vector<float> right( buffersize );
-	float * buffers [2] = { left.data(), right.data() };
 	std::ifstream file( argv[1], std::ios::binary );
 	openmpt::module mod( file );
 	Pa_Initialize();
@@ -37,6 +36,7 @@ int main( int argc, char * argv [] ) {
 		if ( count == 0 ) {
 			break;
 		}
+		const float * const buffers [2] = { left.data(), right.data() };
 		Pa_WriteStream( stream, buffers, count );
 	}
 	Pa_StopStream( stream );
