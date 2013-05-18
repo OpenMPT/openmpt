@@ -386,7 +386,8 @@ static BOOL WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, flo
 					case XMPFILE_TYPE_NETSTREAM:
 					default:
 						{
-							openmpt::module mod( (xmplay_istream( file )) );
+							xmplay_istream stream( file );
+							openmpt::module mod( stream );
 							if ( length ) *length = static_cast<float>( mod.get_duration_seconds() );
 							write_xmplay_tags( tags, mod );
 						}
@@ -435,7 +436,10 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 					case XMPFILE_TYPE_NETFILE:
 					case XMPFILE_TYPE_NETSTREAM:
 					default:
-						self->mod = new openmpt::module( (xmplay_istream( file )) );
+						{
+							xmplay_istream stream( file );
+							self->mod = new openmpt::module( stream );
+						}
 						break;
 				}
 			#else
