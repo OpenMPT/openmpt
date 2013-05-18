@@ -149,7 +149,7 @@
       <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
       <ObjectFileName>.\Release/</ObjectFileName>
       <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -212,7 +212,7 @@
       <AssemblerListingLocation>.\ReleaseLTCG/</AssemblerListingLocation>
       <ObjectFileName>.\ReleaseLTCG/</ObjectFileName>
       <ProgramDataBaseFileName>.\ReleaseLTCG/</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <ExceptionHandling>Async</ExceptionHandling>
