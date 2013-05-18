@@ -122,8 +122,8 @@ static void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
 
 
 template<class TUNNUMTYPE, class STRSIZETYPE>
-static bool ReadTuningMap(istream& iStrm, map<uint16, string>& shortToTNameMap, const size_t maxNum = 500)
-//--------------------------------------------------------------------------------------------------------
+static bool ReadTuningMapTemplate(istream& iStrm, map<uint16, string>& shortToTNameMap, const size_t maxNum = 500)
+//----------------------------------------------------------------------------------------------------------------
 {
 	typedef map<uint16, string> MAP;
 	typedef MAP::iterator MAP_ITER;
@@ -155,7 +155,7 @@ static void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 	typedef map<WORD, string> MAP;
 	typedef MAP::iterator MAP_ITER;
 	MAP shortToTNameMap;
-	ReadTuningMap<uint16, uint8>(iStrm, shortToTNameMap);
+	ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap);
 
 	//Read & set tunings for instruments
 	std::list<string> notFoundTunings;
@@ -1854,14 +1854,14 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const
 //---------------------------------------------------------------------------------
 {
-	__int32 code=0;
+	uint32 code=0;
 
 /*	if(Instruments[1] == NULL) {
 		return;
 	}*/
 
 	code = 'MPTX';							// write extension header code
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 
 	if (nInstruments == 0)
 		return;
@@ -1920,11 +1920,11 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 	return;
 }
 
-void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code, __int16 size, FILE* f, UINT nInstruments) const
+void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 size, FILE* f, UINT nInstruments) const
 //---------------------------------------------------------------------------------------------------------------------
 {
-	fwrite(&code, 1, sizeof(__int32), f);		//write code
-	fwrite(&size, 1, sizeof(__int16), f);		//write size
+	fwrite(&code, 1, sizeof(uint32), f);		//write code
+	fwrite(&size, 1, sizeof(int16), f);		//write size
 	for(UINT nins=1; nins<=nInstruments; nins++)	//for all instruments...
 	{
 		char *pField;
@@ -1945,40 +1945,40 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 //--------------------------------------------------------
 {
 	//Extra song data - Yet Another Hack.
-	__int16 size;
-	__int32 code = 'MPTS';					//Extra song file data
-	fwrite(&code, 1, sizeof(__int32), f);
+	int16 size;
+	uint32 code = 'MPTS';					//Extra song file data
+	fwrite(&code, 1, sizeof(uint32), f);
 
 	code = 'DT..';							//write m_nDefaultTempo field code
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
 
 	code = 'RPB.';							//write m_nRowsPerBeat
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultRowsPerBeat);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nDefaultRowsPerBeat, 1, size, f);
 
 	code = 'RPM.';							//write m_nRowsPerMeasure
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultRowsPerMeasure);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nDefaultRowsPerMeasure, 1, size, f);
 
 	code = 'C...';							//write m_nChannels
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nChannels);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nChannels, 1, size, f);
 
 	if(TypeIsIT_MPT() && GetNumChannels() > 64)	//IT header has room only for 64 channels. Save the
 	{											//settings that do not fit to the header here as an extension.
 		code = 'ChnS';
-		fwrite(&code, 1, sizeof(__int32), f);
+		fwrite(&code, 1, sizeof(uint32), f);
 		size = (GetNumChannels() - 64) * 2;
-		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&size, 1, sizeof(int16), f);
 		for(CHANNELINDEX chn = 64; chn < GetNumChannels(); chn++)
 		{
 			uint8 panvol[2];
@@ -1991,51 +1991,51 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	}
 
 	code = 'TM..';							//write m_nTempoMode
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nTempoMode);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nTempoMode, 1, size, f);
 
 	code = 'PMM.';							//write m_nMixLevels
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nMixLevels);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nMixLevels, 1, size, f);
 
 	code = 'CWV.';							//write m_dwCreatedWithVersion
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_dwCreatedWithVersion);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_dwCreatedWithVersion, 1, size, f);
 
 	code = 'LSWV';							//write m_dwLastSavedWithVersion
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_dwLastSavedWithVersion);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_dwLastSavedWithVersion, 1, size, f);
 
 	code = 'SPA.';							//write m_nSamplePreAmp
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nSamplePreAmp);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nSamplePreAmp, 1, size, f);
 
 	code = 'VSTV';							//write m_nVSTiVolume
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nVSTiVolume);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nVSTiVolume, 1, size, f);
 
 	code = 'DGV.';							//write m_nDefaultGlobalVolume
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultGlobalVolume);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nDefaultGlobalVolume, 1, size, f);
 
 	code = 'RP..';							//write m_nRestartPos
-	fwrite(&code, 1, sizeof(__int32), f);
+	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nRestartPos);
-	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nRestartPos, 1, size, f);
 
 
@@ -2043,9 +2043,9 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	if(m_ModFlags)
 	{
 		code = 'MSF.';
-		fwrite(&code, 1, sizeof(__int32), f);
+		fwrite(&code, 1, sizeof(uint32), f);
 		size = sizeof(m_ModFlags);
-		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&size, 1, sizeof(int16), f);
 		fwrite(&m_ModFlags, 1, size, f);
 	}
 
@@ -2060,9 +2060,9 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		else
 		{
 			code = 'MIMA';
-			fwrite(&code, 1, sizeof(__int32), f);
+			fwrite(&code, 1, sizeof(uint32), f);
 			size = static_cast<int16>(objectsize);
-			fwrite(&size, 1, sizeof(__int16), f);
+			fwrite(&size, 1, sizeof(int16), f);
 			GetMIDIMapper().Serialize(f);
 		}
 	}
@@ -2090,7 +2090,7 @@ void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInter
 	{
 		uint32 code = file.ReadUint32LE();
 
-		if(code == 'MPTS')					//Reached song extensions, break out of this loop
+		if(code == MULTICHAR4_LE_MSVC('M','P','T','S'))					//Reached song extensions, break out of this loop
 		{
 			file.SkipBack(4);
 			return;
@@ -2147,23 +2147,23 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 
 		switch (code)					// interpret field code
 		{
-			CASE('DT..', m_nDefaultTempo);
-			CASE('RPB.', m_nDefaultRowsPerBeat);
-			CASE('RPM.', m_nDefaultRowsPerMeasure);
-			CASE_NOTXM('C...', m_nChannels);
-			CASE('TM..', m_nTempoMode);
-			CASE('PMM.', m_nMixLevels);
-			CASE('CWV.', m_dwCreatedWithVersion);
-			CASE('LSWV', m_dwLastSavedWithVersion);
-			CASE('SPA.', m_nSamplePreAmp);
-			CASE('VSTV', m_nVSTiVolume);
-			CASE('DGV.', m_nDefaultGlobalVolume);
-			CASE_NOTXM('RP..', m_nRestartPos);
-			CASE('MSF.', m_ModFlags);
+			CASE(MULTICHAR4_LE_MSVC('D','T','.','.'), m_nDefaultTempo);
+			CASE(MULTICHAR4_LE_MSVC('R','P','B','.'), m_nDefaultRowsPerBeat);
+			CASE(MULTICHAR4_LE_MSVC('R','P','M','.'), m_nDefaultRowsPerMeasure);
+			CASE_NOTXM(MULTICHAR4_LE_MSVC('C','.','.','.'), m_nChannels);
+			CASE(MULTICHAR4_LE_MSVC('T','M','.','.'), m_nTempoMode);
+			CASE(MULTICHAR4_LE_MSVC('P','M','M','.'), m_nMixLevels);
+			CASE(MULTICHAR4_LE_MSVC('C','W','V','.'), m_dwCreatedWithVersion);
+			CASE(MULTICHAR4_LE_MSVC('L','S','W','V'), m_dwLastSavedWithVersion);
+			CASE(MULTICHAR4_LE_MSVC('S','P','A','.'), m_nSamplePreAmp);
+			CASE(MULTICHAR4_LE_MSVC('V','S','T','V'), m_nVSTiVolume);
+			CASE(MULTICHAR4_LE_MSVC('D','G','V','.'), m_nDefaultGlobalVolume);
+			CASE_NOTXM(MULTICHAR4_LE_MSVC('R','P','.','.'), m_nRestartPos);
+			CASE(MULTICHAR4_LE_MSVC('M','S','F','.'), m_ModFlags);
 #ifdef MODPLUG_TRACKER
-			case 'MIMA': GetMIDIMapper().Deserialize(chunk.GetRawData(), size); break;
+			case MULTICHAR4_LE_MSVC('M','I','M','A'): GetMIDIMapper().Deserialize(chunk.GetRawData(), size); break;
 #endif
-			case 'ChnS':
+			case MULTICHAR4_LE_MSVC('C','h','n','S'):
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
 					STATIC_ASSERT(CountOf(ChnSettings) >= 64);
@@ -2288,7 +2288,7 @@ size_t CSoundFile::LoadModularInstrumentData(FileReader &file, ModInstrument &in
 
 		switch (chunkID)
 		{
-		case 'PLUG':
+		case MULTICHAR4_LE_MSVC('P','L','U','G'):
 			// Chunks don't tell us their length - stupid!
 			ins.nMixPlug = modularData.ReadUint8();
 			break;

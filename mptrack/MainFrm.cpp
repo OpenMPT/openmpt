@@ -14,7 +14,7 @@
 #include "../sounddev/SoundDevice.h"
 #include "moddoc.h"
 #include "childfrm.h"
-#include "dlsbank.h"
+#include "Dlsbank.h"
 #include "mpdlgs.h"
 #include "moptions.h"
 #include "vstplug.h"

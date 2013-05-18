@@ -35,7 +35,7 @@ typedef struct PACKED DSMSAMPLE
 {
 	DWORD id_INST;
 	DWORD inst_len;
-	CHAR filename[13];
+	char filename[13];
 	BYTE flags;
 	BYTE flags2;
 	BYTE volume;
@@ -45,7 +45,7 @@ typedef struct PACKED DSMSAMPLE
 	DWORD reserved1;
 	WORD c2spd;
 	WORD reserved2;
-	CHAR samplename[28];
+	char samplename[28];
 } DSMSAMPLE;
 
 STATIC_ASSERT(sizeof(DSMSAMPLE) == 72);
@@ -65,7 +65,7 @@ STATIC_ASSERT(sizeof(DSMFILEHEADER) == 20);
 
 typedef struct PACKED DSMSONG
 {
-	CHAR songname[28];
+	char songname[28];
 	WORD reserved1;
 	WORD flags;
 	DWORD reserved2;

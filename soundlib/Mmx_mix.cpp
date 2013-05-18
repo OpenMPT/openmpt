@@ -21,7 +21,7 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 
 
 DWORD CSoundFile::GetSysInfo()

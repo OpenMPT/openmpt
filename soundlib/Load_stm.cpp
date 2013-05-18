@@ -12,7 +12,9 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#ifdef _MSC_VER
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
+#endif
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -121,8 +123,8 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.Read(fileHeader)
 		|| fileHeader.filetype != 2
 		|| fileHeader.dosEof != 0x1A
-		|| (_strnicmp(fileHeader.trackername, "!SCREAM!", 8)
-			&& _strnicmp(fileHeader.trackername, "BMOD2STM", 8)))
+		|| (mpt_strnicmp(fileHeader.trackername, "!SCREAM!", 8)
+			&& mpt_strnicmp(fileHeader.trackername, "BMOD2STM", 8)))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)

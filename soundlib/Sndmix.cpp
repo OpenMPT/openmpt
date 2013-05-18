@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 
-#include "sndfile.h"
+#include "Sndfile.h"
 #include "MIDIEvents.h"
 #include "tuning.h"
 #include "Tables.h"

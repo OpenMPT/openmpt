@@ -161,10 +161,3 @@ private:
 	inline enum_t &operator &= (enum_t &a, enum_t b) { a = (a & b); return a; } \
 	inline enum_t &operator |= (enum_t &a, enum_t b) { a = (a | b); return a; } \
 	inline enum_t operator ~ (enum_t a) { return static_cast<enum_t>(~(+a)); }
-
-// Declaration of a typesafe flag set enum.
-// Usage: FLAGSET(enumName) { foo = 1, bar = 2, ... }
-#define FLAGSET(enum_t) \
-	enum enum_t; \
-	DECLARE_FLAGSET(enum_t) \
-	enum enum_t

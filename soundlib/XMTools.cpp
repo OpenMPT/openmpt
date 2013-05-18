@@ -49,8 +49,8 @@ void XMInstrument::ConvertEndianness()
 
 
 // Convert OpenMPT's internal envelope representation to XM envelope data.
-void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, uint16 (&envData)[24])
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, uint16 *envData)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	numPoints = static_cast<uint8>(std::min(12u, mptEnv.nNodes));
 

@@ -9,6 +9,8 @@
 
 #pragma once
 
+#ifdef MODPLUG_TRACKER
+
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #define NOMINMAX
@@ -49,3 +51,5 @@ public:
 };
 
 } // namespace Util
+
+#endif // MODPLUG_TRACKER

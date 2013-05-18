@@ -24,11 +24,12 @@ protected:
 	typedef std::vector<bool> VisitedRowsBaseType;
 	typedef std::vector<VisitedRowsBaseType> VisitedRowsType;
 
+	const CSoundFile &sndFile;
+
 	// Memory for every row in the module if it has been visited or not.
 	VisitedRowsType visitedRows;
 	// Memory of visited rows (including their order) to reset pattern loops.
 	std::vector<ROWINDEX> visitOrder;
-	const CSoundFile &sndFile;
 	ORDERINDEX currentOrder;
 
 public:

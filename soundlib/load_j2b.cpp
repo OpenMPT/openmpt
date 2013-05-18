@@ -14,10 +14,14 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
+#ifdef _MSC_VER
 #ifndef ZLIB_WINAPI
 #define ZLIB_WINAPI
 #endif // ZLIB_WINAPI
 #include <zlib/zlib.h>
+#else
+#include <zlib.h>
+#endif
 
 
 // First off, a nice vibrato translation LUT.
@@ -999,27 +1003,27 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Header is valid, now unpack the RIFF AM file using inflate
-	Bytef *amFile;
+	Bytef *amFileData;
 	uLongf destSize = fileHeader.unpackedLength;
 	try
 	{
-		amFile = new Bytef[destSize];
+		amFileData = new Bytef[destSize];
 	} catch(MPTMemoryException)
 	{
 		return false;
 	}
 
-	int retVal = uncompress(amFile, &destSize, reinterpret_cast<const Bytef *>(file.GetRawData()), fileHeader.packedLength);
+	int retVal = uncompress(amFileData, &destSize, reinterpret_cast<const Bytef *>(file.GetRawData()), fileHeader.packedLength);
 
 	bool result = false;
 
 	if(destSize == fileHeader.unpackedLength && retVal == Z_OK)
 	{
 		// Success, now load the RIFF AM(FF) module.
-		FileReader amFile(reinterpret_cast<const char *>(amFile), destSize);
+		FileReader amFile(reinterpret_cast<const char *>(amFileData), destSize);
 		result = ReadAM(amFile, loadFlags);
 	}
-	delete[] amFile;
+	delete[] amFileData;
 
 	return result;
 }

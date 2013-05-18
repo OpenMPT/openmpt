@@ -10,11 +10,14 @@
 
 #include "stdafx.h"
 #include "serialization_utils.h"
+#include "misc_util.h"
 #include <algorithm>
 #include <iterator> // for back_inserter
 
 namespace srlztn
 {
+
+static const uint8 HeaderId_FlagByte = 0;
 
 // Indexing starts from 0.
 inline bool Testbit(uint8 val, uint8 bitindex) {return ((val & (1 << bitindex)) != 0);}
@@ -145,7 +148,7 @@ void ReadAdaptive1248(InStream& iStrm, uint64& val)
 void WriteItemString(OutStream& oStrm, const char* const pStr, const size_t nSize)
 //--------------------------------------------------------------------------------
 {
-	uint32 id = (std::min)(nSize, (uint32_max >> 4)) << 4;
+	uint32 id = std::min<size_t>(nSize, (uint32_max >> 4)) << 4;
 	id |= 12; // 12 == 1100b
 	Binarywrite<uint32>(oStrm, id);
 	id >>= 4;
@@ -188,9 +191,7 @@ String IdToString(const void* const pvId, const size_t nLength)
 	{
 		int32 val = 0;
 		memcpy(&val, pId, nLength);
-		char buf[36];
-		_itoa(val, buf, 10);
-		str = buf;
+		str = Stringify(val);
 	}
 	return str;
 }
@@ -220,29 +221,29 @@ const TCHAR strReadNote[] = MPT_TEXT("Read note: ");
 
 
 #define SSB_INITIALIZATION_LIST					\
+	m_Status(SNT_NONE), \
+	m_nFixedEntrySize(0),						\
+	m_fpLogFunc(s_DefaultLogFunc),				\
 	m_Readlogmask(s_DefaultReadLogMask),		\
 	m_Writelogmask(s_DefaultWriteLogMask),		\
-	m_fpLogFunc(s_DefaultLogFunc),				\
+	m_posStart(0),								\
+	m_nReadVersion(0),							\
+	m_nMaxReadEntryCount(16000),				\
+	m_rposMapBegin(0),							\
+	m_posMapEnd(0),								\
+	m_posDataBegin(0),							\
+	m_rposEndofHdrData(0),						\
+	m_nReadEntrycount(0),						\
+	m_nIdbytes(IdSizeVariable),					\
 	m_nCounter(0),								\
 	m_nNextReadHint(0),							\
-	m_nReadVersion(0),							\
-	m_nFixedEntrySize(0),						\
-	m_nIdbytes(IdSizeVariable),					\
-	m_nReadEntrycount(0),						\
-	m_nMaxReadEntryCount(16000),				\
+	m_Flags(s_DefaultFlags),					\
 	m_pSubEntry(nullptr),						\
-	m_rposMapBegin(0),							\
-	m_posStart(0),								\
 	m_posSubEntryStart(0),						\
-	m_posDataBegin(0),							\
-	m_posMapStart(0),							\
-	m_rposEndofHdrData(0),						\
-	m_posMapEnd(0),								\
+	m_nMapReserveSize(0),						\
 	m_posEntrycount(0),							\
 	m_posMapPosField(0),						\
-	m_nMapReserveSize(0),						\
-	m_Flags(s_DefaultFlags),					\
-	m_Status(SNT_NONE)
+	m_posMapStart(0)							\
 
 
 Ssb::Ssb(InStream* pIstrm, OutStream* pOstrm) :
@@ -268,8 +269,8 @@ Ssb::Ssb(OutStream& oStrm) :
 
 
 Ssb::Ssb(InStream& iStrm) :
-		m_pIstrm(&iStrm),
 		m_pOstrm(nullptr),
+		m_pIstrm(&iStrm),
 		SSB_INITIALIZATION_LIST
 //------------------------------
 {}

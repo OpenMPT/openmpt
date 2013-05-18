@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 
 #ifdef ENABLE_X86
 

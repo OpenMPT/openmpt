@@ -23,8 +23,8 @@ typedef struct PACKED _MT2FILEHEADER
 	DWORD dwMT20;	// 0x3032544D "MT20"
 	DWORD dwSpecial;
 	WORD wVersion;
-	CHAR szTrackerName[32];	// "MadTracker 2.0"
-	CHAR szSongName[64];
+	char szTrackerName[32];	// "MadTracker 2.0"
+	char szSongName[64];
 	WORD nOrders;
 	WORD wRestart;
 	WORD wPatterns;
@@ -81,7 +81,7 @@ STATIC_ASSERT(sizeof(MT2AUTOMATION) == 12);
 
 typedef struct PACKED _MT2INSTRUMENT
 {
-	CHAR szName[32];
+	char szName[32];
 	DWORD dwDataLen;
 	WORD wSamples;
 	BYTE GroupsMapping[96];
@@ -126,7 +126,7 @@ STATIC_ASSERT(sizeof(MT2SYNTH) == 32);
 
 typedef struct PACKED _MT2SAMPLE
 {
-	CHAR szName[32];
+	char szName[32];
 	DWORD dwDataLen;
 	DWORD dwLength;
 	DWORD dwFrequency;

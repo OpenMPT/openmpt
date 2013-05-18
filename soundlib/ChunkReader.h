@@ -12,6 +12,8 @@
 
 #include "FileReader.h"
 
+#include <vector>
+
 
 //===================================
 class ChunkReader : public FileReader
@@ -55,7 +57,7 @@ public:
 		// Check if the list contains a given chunk.
 		bool ChunkExists(typename T::id_type id) const
 		{
-			for(const_iterator iter = begin(); iter != end(); iter++)
+			for(typename std::vector<ChunkListItem<T> >::const_iterator iter = this->begin(); iter != this->end(); iter++)
 			{
 				if(iter->GetHeader().GetID() == id)
 				{
@@ -68,7 +70,7 @@ public:
 		// Retrieve the first chunk with a given ID.
 		FileReader GetChunk(typename T::id_type id) const
 		{
-			for(const_iterator iter = begin(); iter != end(); iter++)
+			for(typename std::vector<ChunkListItem<T> >::const_iterator iter = this->begin(); iter != this->end(); iter++)
 			{
 				if(iter->GetHeader().GetID() == id)
 				{
@@ -82,7 +84,7 @@ public:
 		std::vector<FileReader> GetAllChunks(typename T::id_type id) const
 		{
 			std::vector<FileReader> result;
-			for(const_iterator iter = begin(); iter != end(); iter++)
+			for(typename std::vector<ChunkListItem<T> >::const_iterator iter = this->begin(); iter != this->end(); iter++)
 			{
 				if(iter->GetHeader().GetID() == id)
 				{

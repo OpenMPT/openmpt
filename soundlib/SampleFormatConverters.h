@@ -211,7 +211,7 @@ struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename Sampl
 	ReadBigIntToInt16PCMandNormalize() : maxCandidate(0)
 	{
 		static_assert(SampleConversion::hasState == false, "Implementation of this conversion functor is stateless");
-		static_assert(sizeof(SampleConversion::output_t) <= 4, "Implementation of this conversion functor is only suitable for 32-Bit integers or smaller");
+		static_assert(sizeof(typename SampleConversion::output_t) <= 4, "Implementation of this conversion functor is only suitable for 32-Bit integers or smaller");
 	}
 
 	inline void FindMax(const void *sourceBuffer)
@@ -312,10 +312,10 @@ template <typename SampleConversion>
 size_t CopySample(void *targetBuffer, size_t numSamples, size_t incTarget, const void *sourceBuffer, size_t sourceSize, size_t incSource)
 //---------------------------------------------------------------------------------------------------------------------------------------
 {
-	SampleConversion::output_t *outBuf = static_cast<SampleConversion::output_t *>(targetBuffer);
-	const SampleConversion::input_t *inBuf = static_cast<const SampleConversion::input_t *>(sourceBuffer);
+	typename SampleConversion::output_t *outBuf = static_cast<typename SampleConversion::output_t *>(targetBuffer);
+	const typename SampleConversion::input_t *inBuf = static_cast<const typename SampleConversion::input_t *>(sourceBuffer);
 
-	const size_t sampleSize = incSource * sizeof(SampleConversion::input_t);
+	const size_t sampleSize = incSource * sizeof(typename SampleConversion::input_t);
 	LimitMax(numSamples, sourceSize / sampleSize);
 
 	SampleConversion sampleConv;
@@ -336,7 +336,7 @@ size_t CopyMonoSample(ModSample &sample, const uint8 *sourceBuffer, size_t sourc
 //------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 1);
-	ASSERT(sample.GetElementarySampleSize() == sizeof(SampleConversion::output_t));
+	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	return CopySample<SampleConversion>(sample.pSample, sample.nLength, 1, sourceBuffer, sourceSize, 1);
 }
@@ -348,13 +348,13 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const uint8 *sourceBuffer,
 //-------------------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 2);
-	ASSERT(sample.GetElementarySampleSize() == sizeof(SampleConversion::output_t));
+	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	if(SampleConversion::hasState == conversionHasState)
 	{
 		// Functor has state: We have to load left and right channel independently
 		// or else the state of the two channels is mixed.
-		const size_t rightOffset = sizeof(SampleConversion::input_t);
+		const size_t rightOffset = sizeof(typename SampleConversion::input_t);
 		if(rightOffset > sourceSize)
 		{
 			// Can't even load one sample of the right channel...
@@ -364,7 +364,7 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const uint8 *sourceBuffer,
 		// Read left channel
 		CopySample<SampleConversion>(sample.pSample, sample.nLength, 2, sourceBuffer, sourceSize, 2);
 		// Read right channel
-		return CopySample<SampleConversion>(static_cast<SampleConversion::output_t *>(sample.pSample) + 1, sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 2);
+		return CopySample<SampleConversion>(static_cast<typename SampleConversion::output_t *>(sample.pSample) + 1, sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 2);
 	} else
 	{
 		// This is quicker (and smaller), but only possible if the functor doesn't care about what it actually processes:
@@ -380,12 +380,12 @@ size_t CopyStereoSplitSample(ModSample &sample, const uint8 *sourceBuffer, size_
 //-------------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 2);
-	ASSERT(sample.GetElementarySampleSize() == sizeof(SampleConversion::output_t));
+	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	// Read left channel
 	CopySample<SampleConversion>(sample.pSample, sample.nLength, 2, sourceBuffer, sourceSize, 1);
 
-	const size_t rightOffset = sample.nLength * sizeof(SampleConversion::input_t);
+	const size_t rightOffset = sample.nLength * sizeof(typename SampleConversion::input_t);
 	if(rightOffset > sourceSize)
 	{
 		// Can't even load one sample of the right channel...
@@ -393,7 +393,7 @@ size_t CopyStereoSplitSample(ModSample &sample, const uint8 *sourceBuffer, size_
 	} else
 	{
 		// Read right channel
-		return rightOffset + CopySample<SampleConversion>(static_cast<SampleConversion::output_t *>(sample.pSample) + 1, sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 1);
+		return rightOffset + CopySample<SampleConversion>(static_cast<typename SampleConversion::output_t *>(sample.pSample) + 1, sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 1);
 	}
 }
 
@@ -404,15 +404,15 @@ size_t CopyAndNormalizeSample(ModSample &sample, const uint8 *sourceBuffer, size
 //--------------------------------------------------------------------------------------------
 {
 	static_assert(SampleConversion::hasState == false, "Implementation of this conversion function is stateless");
-	const size_t inSize = sizeof(SampleConversion::input_t);
-	const size_t outSize = sizeof(SampleConversion::output_t);
+	const size_t inSize = sizeof(typename SampleConversion::input_t);
+	const size_t outSize = sizeof(typename SampleConversion::output_t);
 
 	ASSERT(sample.GetElementarySampleSize() == outSize);
 
 	size_t numSamples = sample.nLength * sample.GetNumChannels();
 	LimitMax(numSamples, sourceSize / inSize);
 
-	const SampleConversion::input_t *inBuf = reinterpret_cast<const SampleConversion::input_t *>(sourceBuffer);
+	const typename SampleConversion::input_t *inBuf = reinterpret_cast<const typename SampleConversion::input_t *>(sourceBuffer);
 
 	// Finding max value
 	SampleConversion sampleConv;
@@ -426,8 +426,8 @@ size_t CopyAndNormalizeSample(ModSample &sample, const uint8 *sourceBuffer, size
 	if(!sampleConv.IsSilent())
 	{
 		// Copying buffer.
-		SampleConversion::output_t *outBuf = static_cast<SampleConversion::output_t *>(sample.pSample);
-		inBuf = reinterpret_cast<const SampleConversion::input_t *>(sourceBuffer);
+		typename SampleConversion::output_t *outBuf = static_cast<typename SampleConversion::output_t *>(sample.pSample);
+		inBuf = reinterpret_cast<const typename SampleConversion::input_t *>(sourceBuffer);
 
 		for(size_t i = numSamples; i != 0; i--)
 		{

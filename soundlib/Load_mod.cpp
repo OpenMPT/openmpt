@@ -761,6 +761,22 @@ static bool IsValidName(const char *s, size_t length, char minChar)
 }
 
 
+// We'll have to do some heuristic checks to find out whether this is an old Ultimate Soundtracker module
+// or if it was made with the newer Soundtracker versions.
+// Thanks for Fraggie for this information! (http://www.un4seen.com/forum/?topic=14471.msg100829#msg100829)
+enum STVersions
+{
+	UST1_00,				// Ultimate Soundtracker 1.0-1.21 (K. Obarski)
+	UST1_80,				// Ultimate Soundtracker 1.8-2.0 (K. Obarski)
+	ST2_00_Exterminator,	// SoundTracker 2.0 (The Exterminator), D.O.C. Sountracker II (Unknown/D.O.C.)
+	ST_III,					// Defjam Soundtracker III (Il Scuro/Defjam), Alpha Flight SoundTracker IV (Alpha Flight), D.O.C. SoundTracker IV (Unknown/D.O.C.), D.O.C. SoundTracker VI (Unknown/D.O.C.)
+	ST_IX,					// D.O.C. SoundTracker IX (Unknown/D.O.C.)
+	MST1_00,				// Master Soundtracker 1.0 (Tip/The New Masters)
+	ST2_00,					// SoundTracker 2.0, 2.1, 2.2 (Unknown/D.O.C.)
+	ST2_00_with_Bxx,		// Bxx effect found, so definitely SoundTracker 2.0, 2.1, 2.2 (Unknown/D.O.C.)
+};
+
+
 bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
@@ -776,20 +792,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals();
 
-	// We'll have to do some heuristic checks to find out whether this is an old Ultimate Soundtracker module
-	// or if it was made with the newer Soundtracker versions.
-	// Thanks for Fraggie for this information! (http://www.un4seen.com/forum/?topic=14471.msg100829#msg100829)
-	enum STVersions
-	{
-		UST1_00,				// Ultimate Soundtracker 1.0-1.21 (K. Obarski)
-		UST1_80,				// Ultimate Soundtracker 1.8-2.0 (K. Obarski)
-		ST2_00_Exterminator,	// SoundTracker 2.0 (The Exterminator), D.O.C. Sountracker II (Unknown/D.O.C.)
-		ST_III,					// Defjam Soundtracker III (Il Scuro/Defjam), Alpha Flight SoundTracker IV (Alpha Flight), D.O.C. SoundTracker IV (Unknown/D.O.C.), D.O.C. SoundTracker VI (Unknown/D.O.C.)
-		ST_IX,					// D.O.C. SoundTracker IX (Unknown/D.O.C.)
-		MST1_00,				// Master Soundtracker 1.0 (Tip/The New Masters)
-		ST2_00,					// SoundTracker 2.0, 2.1, 2.2 (Unknown/D.O.C.)
-		ST2_00_with_Bxx,		// Bxx effect found, so definitely SoundTracker 2.0, 2.1, 2.2 (Unknown/D.O.C.)
-	} minVersion = UST1_00;
+	STVersions minVersion = UST1_00;
 
 	bool hasDiskNames = true;
 	size_t totalSampleLen = 0;

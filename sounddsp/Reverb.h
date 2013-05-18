@@ -100,7 +100,7 @@ typedef struct _ENVIRONMENTREVERB
 	LONG PreDiffusion;		// Reverb pre-diffusion amount (+/- 32K scale)
 	LONG TankDiffusion;		// Reverb tank diffusion (+/- 32K scale)
 	ULONG ReverbDelay;		// Reverb delay (in samples)
-	FLOAT flReverbDamping;	// HF tank gain [0.0, 1.0]
+	float flReverbDamping;	// HF tank gain [0.0, 1.0]
 	LONG ReverbDecaySamples;// Reverb decay time (in samples)
 	ENVIRONMENTREFLECTION Reflections[ENVIRONMENT_NUMREFLECTIONS];
 } ENVIRONMENTREVERB, *PENVIRONMENTREVERB;

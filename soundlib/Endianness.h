@@ -19,17 +19,14 @@
 // endian architecture or value x in format of current architecture to little endian 
 // format.
 
-#if defined(__GNUC__) && __GNUC__ >= 4 && (__GNUC__ > 4 || __GNUC_MINOR__ >= 3)
-// This only works with version 4.3 and greater.
-// GCC IS
+#ifdef __GNUC__
+#if GCC_VERSION >= 40300
 #define bswap32 __builtin_bswap32
-
+#endif
 #elif defined(_MSC_VER)
-// VC++ IS
 #include <intrin.h>
 #define bswap16 _byteswap_ushort
 #define bswap32 _byteswap_ulong
-
 #endif
 
 // No intrinsics available
@@ -56,27 +53,36 @@ inline uint16 BigEndianW(uint16 x)	{ return bswap16(x); }
 #endif
 //#pragma deprecated(BigEndian, BigEndianW, LittleEndian, LittleEndianW)
 
+typedef uint32 ALIGN(1) unaligned_uint32;
+typedef uint16 ALIGN(1) unaligned_uint16;
+typedef  int32 ALIGN(1) unaligned_int32;
+typedef  int16 ALIGN(1) unaligned_int16;
+
 #ifdef PLATFORM_BIG_ENDIAN
 // PPC
-inline uint32 SwapBytesBE(uint32 &value)	{ return value; }
-inline uint16 SwapBytesBE(uint16 &value)	{ return value; }
-inline uint32 SwapBytesLE(uint32 &value)	{ return value = bswap32(value); }
-inline uint16 SwapBytesLE(uint16 &value)	{ return value = bswap16(value); }
-inline int32 SwapBytesBE(int32 &value)		{ return value; }
-inline int16 SwapBytesBE(int16 &value)		{ return value; }
-inline int32 SwapBytesLE(int32 &value)		{ return value = bswap32(value); }
-inline int16 SwapBytesLE(int16 &value)		{ return value = bswap16(value); }
+inline uint32 SwapBytesBE_(unaligned_uint32 *value) { return *value; }
+inline uint16 SwapBytesBE_(unaligned_uint16 *value) { return *value; }
+inline uint32 SwapBytesLE_(unaligned_uint32 *value) { return *value = bswap32(*value); }
+inline uint16 SwapBytesLE_(unaligned_uint16 *value) { return *value = bswap16(*value); }
+inline int32 SwapBytesBE_(unaligned_int32 *value)  { return *value; }
+inline int16 SwapBytesBE_(unaligned_int16 *value)  { return *value; }
+inline int32 SwapBytesLE_(unaligned_int32 *value)  { return *value = bswap32(*value); }
+inline int16 SwapBytesLE_(unaligned_int16 *value)  { return *value = bswap16(*value); }
 #else
 // x86
-inline uint32 SwapBytesBE(uint32 &value)	{ return value = bswap32(value); }
-inline uint16 SwapBytesBE(uint16 &value)	{ return value = bswap16(value); }
-inline uint32 SwapBytesLE(uint32 &value)	{ return value; }
-inline uint16 SwapBytesLE(uint16 &value)	{ return value; }
-inline int32 SwapBytesBE(int32 &value)		{ return value = bswap32(value); }
-inline int16 SwapBytesBE(int16 &value)		{ return value = bswap16(value); }
-inline int32 SwapBytesLE(int32 &value)		{ return value; }
-inline int16 SwapBytesLE(int16 &value)		{ return value; }
+inline uint32 SwapBytesBE_(unaligned_uint32 *value) { return *value = bswap32(*value); }
+inline uint16 SwapBytesBE_(unaligned_uint16 *value) { return *value = bswap16(*value); }
+inline uint32 SwapBytesLE_(unaligned_uint32 *value) { return *value; }
+inline uint16 SwapBytesLE_(unaligned_uint16 *value) { return *value; }
+inline int32 SwapBytesBE_(unaligned_int32 *value)  { return *value = bswap32(*value); }
+inline int16 SwapBytesBE_(unaligned_int16 *value)  { return *value = bswap16(*value); }
+inline int32 SwapBytesLE_(unaligned_int32 *value)  { return *value; }
+inline int16 SwapBytesLE_(unaligned_int16 *value)  { return *value; }
 #endif
+// GCC will not bind references to members of packed structures, workaround it by using a raw pointer.
+// This is a temporary solution as this pointer might of course be unaligned which GCC seems to not care about in that case.
+#define SwapBytesBE(value) SwapBytesBE_(&(value))
+#define SwapBytesLE(value) SwapBytesLE_(&(value))
 
 #undef bswap16
 #undef bswap32

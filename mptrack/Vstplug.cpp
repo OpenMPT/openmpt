@@ -17,7 +17,7 @@
 #include "vstplug.h"
 #include "VstPresets.h"
 #include "moddoc.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 #include "AbstractVstEditor.h"		//rewbs.defaultPlugGUI
 #include "VstEditor.h"				//rewbs.defaultPlugGUI
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
@@ -505,7 +505,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			b1 = true;
 		}
-		if (!_strnicmp(p->szLibraryName, mixPlugin.GetLibraryName(), 64))
+		if (!mpt_strnicmp(p->szLibraryName, mixPlugin.GetLibraryName(), 64))
 		{
 			b2 = true;
 		}
@@ -1634,7 +1634,7 @@ bool CVstPlugin::SaveProgram()
 		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 	}
 
-	bool bank = !_strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
+	bool bank = !mpt_strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
 
 	std::fstream f;
 	f.open(files.first_file.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);

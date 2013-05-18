@@ -16,7 +16,7 @@
 #include "moddoc.h"
 #include "globals.h"
 #include "ctrl_smp.h"
-#include "dlsbank.h"
+#include "Dlsbank.h"
 #include "channelManagerDlg.h"
 #include "view_smp.h"
 #include "../soundlib/MIDIEvents.h"

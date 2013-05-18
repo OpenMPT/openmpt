@@ -9,7 +9,7 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 #include "ModSequence.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
@@ -39,18 +39,18 @@ ModSequence::ModSequence(CSoundFile &rSf,
 		m_pArray(pArray),
 		m_nSize(nSize),
 		m_nCapacity(nCapacity),
-		m_bDeletableArray(bDeletableArray),
 		m_nInvalidIndex(0xFF),
-		m_nIgnoreIndex(0xFE)
+		m_nIgnoreIndex(0xFE),
+		m_bDeletableArray(bDeletableArray)
 //-------------------------------------------------------
 {}
 
 
 ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) :
 	m_sndFile(rSf),
-	m_bDeletableArray(true),
 	m_nInvalidIndex(GetInvalidPatIndex(MOD_TYPE_MPT)),
-	m_nIgnoreIndex(GetIgnoreIndex(MOD_TYPE_MPT))
+	m_nIgnoreIndex(GetIgnoreIndex(MOD_TYPE_MPT)),
+	m_bDeletableArray(true)
 //-------------------------------------------------------------------
 {
 	m_nSize = nSize;
@@ -62,12 +62,12 @@ ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) :
 
 ModSequence::ModSequence(const ModSequence& seq) :
 	m_sndFile(seq.m_sndFile),
-	m_bDeletableArray(false),
-	m_nInvalidIndex(0xFF),
-	m_nIgnoreIndex(0xFE),
+	m_pArray(nullptr),
 	m_nSize(0),
 	m_nCapacity(0),
-	m_pArray(nullptr)
+	m_nInvalidIndex(0xFF),
+	m_nIgnoreIndex(0xFE),
+	m_bDeletableArray(false)
 //------------------------------------------
 {
 	*this = seq;
@@ -582,7 +582,7 @@ bool ModSequenceSet::MergeSequences()
 	if(GetNumSequences() <= 1)
 		return false;
 
-	CHAR s[256];
+	char s[256];
 	SetSequence(0);
 	resize(GetLengthTailTrimmed());
 	SEQUENCEINDEX removedSequences = 0; // sequence count
@@ -652,7 +652,8 @@ bool ModSequenceSet::MergeSequences()
 	}
 	// Remove order name + fill up with empty patterns.
 	m_sName = "";
-	const ORDERINDEX nMinLength = std::min(ModSequenceSet::s_nCacheSize, m_sndFile.GetModSpecifications().ordersMax);
+	const ORDERINDEX CacheSize = s_nCacheSize; // work-around reference to static const member problem
+	const ORDERINDEX nMinLength = std::min(CacheSize, m_sndFile.GetModSpecifications().ordersMax);
 	if(GetLength() < nMinLength)
 		resize(nMinLength);
 	return true;
@@ -749,6 +750,13 @@ bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntrie
 	}
 	file.Skip(howMany - readEntries);
 	return true;
+}
+
+
+MODTYPE ModSequence::GetSndFileType() const
+//-----------------------------------------
+{
+	return m_sndFile.GetType();
 }
 
 

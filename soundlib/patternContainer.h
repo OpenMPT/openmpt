@@ -12,6 +12,8 @@
 
 #include "pattern.h"
 
+#include <algorithm>
+
 class CSoundFile;
 typedef CPattern MODPATTERN;
 

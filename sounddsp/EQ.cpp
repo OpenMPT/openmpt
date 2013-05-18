@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "../soundlib/sndfile.h"
+#include "../soundlib/Sndfile.h"
 #include "../sounddsp/EQ.h"
 
 

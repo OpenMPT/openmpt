@@ -61,22 +61,22 @@ CReverb::CReverb()
 
 
 // Misc functions
-static LONG OnePoleLowPassCoef(LONG scale, FLOAT g, FLOAT F_c, FLOAT F_s);
+static LONG OnePoleLowPassCoef(LONG scale, float g, float F_c, float F_s);
 static LONG mBToLinear(LONG scale, LONG value_mB);
-static FLOAT mBToLinear(LONG value_mB);
+static float mBToLinear(LONG value_mB);
 
 struct SNDMIX_REVERB_PROPERTIES
 {
 	LONG  lRoom;                   // [-10000, 0]      default: -10000 mB
 	LONG  lRoomHF;                 // [-10000, 0]      default: 0 mB
-	FLOAT flDecayTime;             // [0.1, 20.0]      default: 1.0 s
-	FLOAT flDecayHFRatio;          // [0.1, 2.0]       default: 0.5
+	float flDecayTime;             // [0.1, 20.0]      default: 1.0 s
+	float flDecayHFRatio;          // [0.1, 2.0]       default: 0.5
 	LONG  lReflections;            // [-10000, 1000]   default: -10000 mB
-	FLOAT flReflectionsDelay;      // [0.0, 0.3]       default: 0.02 s
+	float flReflectionsDelay;      // [0.0, 0.3]       default: 0.02 s
 	LONG  lReverb;                 // [-10000, 2000]   default: -10000 mB
-	FLOAT flReverbDelay;           // [0.0, 0.1]       default: 0.04 s
-	FLOAT flDiffusion;             // [0.0, 100.0]     default: 100.0 %
-	FLOAT flDensity;               // [0.0, 100.0]     default: 100.0 %
+	float flReverbDelay;           // [0.0, 0.1]       default: 0.04 s
+	float flDiffusion;             // [0.0, 100.0]     default: 100.0 %
+	float flDensity;               // [0.0, 100.0]     default: 100.0 %
 };
 typedef SNDMIX_REVERB_PROPERTIES* PSNDMIX_REVERB_PROPERTIES;
 
@@ -159,14 +159,14 @@ inline long ftol(float f) { return ((long)(f)); }
 static VOID I3dl2_to_Generic(
 				const SNDMIX_REVERB_PROPERTIES *pReverb,
 				PENVIRONMENTREVERB pRvb,
-				FLOAT flOutputFreq,
+				float flOutputFreq,
 				LONG lMinRefDelay,
 				LONG lMaxRefDelay,
 				LONG lMinRvbDelay,
 				LONG lMaxRvbDelay,
 				LONG lTankLength)
 {
-	FLOAT flDelayFactor, flDelayFactorHF, flDecayTimeHF;
+	float flDelayFactor, flDelayFactorHF, flDecayTimeHF;
 	LONG lDensity, lTailDiffusion;
 
 	// Common parameters
@@ -193,7 +193,7 @@ static VOID I3dl2_to_Generic(
 	pRvb->TankDiffusion = lTailDiffusion;
 
 	// Verify reflections and reverb delay parameters
-	FLOAT flRefDelay = pReverb->flReflectionsDelay;
+	float flRefDelay = pReverb->flReflectionsDelay;
 	if (flRefDelay > 0.100f) flRefDelay = 0.100f;
 	LONG lReverbDelay = ftol(pReverb->flReverbDelay * flOutputFreq);
 	LONG lReflectionsDelay = ftol(flRefDelay * flOutputFreq);
@@ -234,12 +234,12 @@ static VOID I3dl2_to_Generic(
 
 	// Late reverb decay time
 	if (lTankLength < 10) lTankLength = 10;
-	flDelayFactor = (lReverbDecayTime <= lTankLength) ? 1.0f : ((FLOAT)lTankLength / (FLOAT)lReverbDecayTime);
+	flDelayFactor = (lReverbDecayTime <= lTankLength) ? 1.0f : ((float)lTankLength / (float)lReverbDecayTime);
 	pRvb->ReverbDecay = ftol(pow(0.001f, flDelayFactor) * 32768.0f);
 
 	// Late Reverb Decay HF
-	flDecayTimeHF = (FLOAT)lReverbDecayTime * pReverb->flDecayHFRatio;
-	flDelayFactorHF = (flDecayTimeHF <= (FLOAT)lTankLength) ? 1.0f : ((FLOAT)lTankLength / flDecayTimeHF);
+	flDecayTimeHF = (float)lReverbDecayTime * pReverb->flDecayHFRatio;
+	flDelayFactorHF = (flDecayTimeHF <= (float)lTankLength) ? 1.0f : ((float)lTankLength / flDecayTimeHF);
 	pRvb->flReverbDamping = pow(0.001f, flDelayFactorHF);
 }
 
@@ -280,7 +280,7 @@ void CReverb::Initialize(BOOL bReset, DWORD MixingFreq)
 	if ((pRvbPreset != spCurrentPreset) || (bReset))
 	{
 		// Reverb output frequency is half of the dry output rate
-		FLOAT flOutputFrequency = (FLOAT)MixingFreq;
+		float flOutputFrequency = (float)MixingFreq;
 		ENVIRONMENTREVERB rvb;
 
 		// Reset reverb parameters
@@ -357,7 +357,7 @@ void CReverb::Initialize(BOOL bReset, DWORD MixingFreq)
 		g_LateReverb.nDecayDC[3] = (SHORT)nReverbDecay;
 
 		// Late Reverb Decay HF
-		FLOAT fReverbDamping = rvb.flReverbDamping * rvb.flReverbDamping;
+		float fReverbDamping = rvb.flReverbDamping * rvb.flReverbDamping;
 		LONG nDampingLowPass;
 
 		nDampingLowPass = OnePoleLowPassCoef(32768, fReverbDamping, 5000, flOutputFrequency);
@@ -985,11 +985,11 @@ rvbloop:
 
 
 // (1-gcos(w)-sqrt(2g(1-cos w) - g2(1-(cos w)^2))) / (1-g)
-static LONG OnePoleLowPassCoef(LONG scale, FLOAT g, FLOAT F_c, FLOAT F_s)
+static LONG OnePoleLowPassCoef(LONG scale, float g, float F_c, float F_s)
 //----------------------------------------------------------------
 {
-	FLOAT cosw; // cos(2*PI*Fc/Fs)
-	FLOAT scale_over_1mg; // scale / (1.0f - g);
+	float cosw; // cos(2*PI*Fc/Fs)
+	float scale_over_1mg; // scale / (1.0f - g);
 	LONG result;
 
 	if (g > 0.999999f) return 0;
@@ -1066,7 +1066,7 @@ static LONG mBToLinear(LONG scale, LONG value_mB)
 }
 
 
-static FLOAT mBToLinear(LONG value_mB)
+static float mBToLinear(LONG value_mB)
 {
 	// factor = log2(10)/(100*20)
 	const float _factor = 3.321928094887362304f / (100.0f * 20.0f);

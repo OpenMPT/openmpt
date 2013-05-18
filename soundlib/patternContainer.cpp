@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "patternContainer.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mainfrm.h"
 #endif

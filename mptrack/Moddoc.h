@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "sndfile.h"
+#include "Sndfile.h"
 #include "../common/misc_util.h"
 #include "Undo.h"
 #include "Notification.h"

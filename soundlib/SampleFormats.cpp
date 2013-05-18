@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/Mainfrm.h"	// For ini settings
@@ -596,7 +596,7 @@ STATIC_ASSERT(sizeof(GF1PATCHFILEHEADER) == 129);
 typedef struct PACKED GF1INSTRUMENT
 {
 	WORD id;				// Instrument id: 0-65535
-	CHAR name[16];			// Name of instrument. Gravis doesn't seem to use it
+	char name[16];			// Name of instrument. Gravis doesn't seem to use it
 	DWORD size;				// Number of bytes for the instrument with header. (To skip to next instrument)
 	BYTE layers;			// Number of layers in instrument: 1-4
 	BYTE reserved[40];
@@ -607,7 +607,7 @@ STATIC_ASSERT(sizeof(GF1INSTRUMENT) == 63);
 
 typedef struct PACKED GF1SAMPLEHEADER
 {
-	CHAR name[7];			// null terminated string. name of the wave.
+	char name[7];			// null terminated string. name of the wave.
 	BYTE fractions;			// Start loop point fraction in 4 bits + End loop point fraction in the 4 other bits.
 	DWORD length;			// total size of wavesample. limited to 65535 now by the drivers, not the card.
 	DWORD loopstart;		// start loop position in the wavesample
@@ -683,6 +683,7 @@ LONG PatchFreqToNote(ULONG nFreq)
 	const float k_12 = 12;
 	LONG result;
 	if (nFreq < 1) return 0;
+#if defined(ENABLE_X86)
 	_asm {
 	fld k_12
 	fild nFreq
@@ -691,6 +692,10 @@ LONG PatchFreqToNote(ULONG nFreq)
 	fyl2x
 	fistp result
 	}
+#else // !ENABLE_X86
+	const float inv_log_2 = 1.44269504089f; // 1.0f/std::log(2.0f)
+	result = std::log(nFreq * k_base) * (k_12 * inv_log_2);
+#endif // ENABLE_X86
 	return result;
 }
 
@@ -886,7 +891,11 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 /////////////////////////////////////////////////////////////
 // S3I Samples
 
-typedef struct S3ISAMPLESTRUCT
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(push, 1)
+#endif
+
+typedef struct PACKED S3ISAMPLESTRUCT
 {
 	BYTE id;
 	char filename[12];
@@ -903,9 +912,15 @@ typedef struct S3ISAMPLESTRUCT
 	DWORD reserved3;
 	DWORD reserved4;
 	DWORD date;
-	CHAR name[28];
+	char name[28];
 	DWORD scrs;
 } S3ISAMPLESTRUCT;
+
+STATIC_ASSERT(sizeof(S3ISAMPLESTRUCT) == 80);
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
 //---------------------------------------------------------------------------------------------
@@ -1722,15 +1737,15 @@ void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const 
 	// get field's address in instrument's header
 	char *fadr = GetInstrumentHeaderFieldPointer(pIns, code, size);
 	 
-	if(fadr && code != 'K[..')	// copy field data in instrument's header
+	if(fadr && code != MULTICHAR4_LE_MSVC('K','[','.','.'))	// copy field data in instrument's header
 		memcpy(fadr, file.GetRawData(), size);  // (except for keyboard mapping)
-	if(fadr && code == 'n[..')
+	if(fadr && code == MULTICHAR4_LE_MSVC('n','[','.','.'))
 		StringFixer::SetNullTerminator(pIns->name);
-	if(fadr && code == 'fn[.')
+	if(fadr && code == MULTICHAR4_LE_MSVC('f','n','[','.'))
 		StringFixer::SetNullTerminator(pIns->filename);
 	file.Skip(size);
 
-	if(code == 'dF..' && fadr != nullptr) // 'dF..' field requires additional processing.
+	if(code == MULTICHAR4_LE_MSVC('d','F','.','.') && fadr != nullptr) // 'dF..' field requires additional processing.
 		ConvertReadExtendedFlags(pIns);
 }
 
@@ -2062,7 +2077,7 @@ struct FLACDecoder
 			{
 				const char *tag = reinterpret_cast<const char *>(metadata->data.vorbis_comment.comments[i].entry);
 				const FLAC__uint32 length = metadata->data.vorbis_comment.comments[i].length;
-				if(length > 6 && !_strnicmp(tag, "TITLE=", 6))
+				if(length > 6 && !mpt_strnicmp(tag, "TITLE=", 6))
 				{
 					StringFixer::ReadString<StringFixer::maybeNullTerminated>(client.sndFile.m_szNames[client.sample], tag + 6, length - 6);
 					break;

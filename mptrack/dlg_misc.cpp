@@ -13,7 +13,7 @@
 #include "moddoc.h"
 #include "mainfrm.h"
 #include "dlg_misc.h"
-#include "dlsbank.h"
+#include "Dlsbank.h"
 #include "ChildFrm.h"
 #include "vstplug.h"
 #include "ChannelManagerDlg.h"

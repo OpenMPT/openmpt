@@ -307,7 +307,7 @@ public:
 				interleaved_int_buffer.push_back( buffers[channel][frame] );
 			}
 		}
-		std::cout.write( (const char*)( interleaved_int_buffer.data() ), interleaved_int_buffer.size() * sizeof( std::int32_t ) );
+		std::cout.write( (const char*)( interleaved_int_buffer.data() ), interleaved_int_buffer.size() * sizeof( std::int16_t ) );
 	}
 };
 
@@ -677,6 +677,12 @@ static bool is_modplug123_binary_name( std::string name ) {
 		return true;
 	}
 	if ( equal_end( name, "modplug123.exe" ) ) {
+		return true;
+	}
+	if ( equal_end( name, "modplug12364" ) ) {
+		return true;
+	}
+	if ( equal_end( name, "modplug12364.exe" ) ) {
 		return true;
 	}
 	return false;

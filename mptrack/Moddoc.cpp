@@ -15,7 +15,7 @@
 #include "childfrm.h"
 #include "mpdlgs.h"
 #include "dlg_misc.h"
-#include "dlsbank.h"
+#include "Dlsbank.h"
 #include "mod2wave.h"
 #include "mod2midi.h"
 #include "vstplug.h"

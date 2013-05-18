@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 
 //#define MMCMP_LOG
 
@@ -563,7 +563,7 @@ BOOL XPK_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 	LPBYTE pBuffer;
 
 	if ((!pxfh) || (dwMemLength < 256)
-	 || (pxfh->dwXPKF != 'FKPX') || (pxfh->dwSQSH != 'HSQS')) return FALSE;
+	 || (pxfh->dwXPKF != MULTICHAR4_LE_MSVC('F','K','P','X')) || (pxfh->dwSQSH != MULTICHAR4_LE_MSVC('H','S','Q','S'))) return FALSE;
 	dwSrcLen = BigEndian(pxfh->dwSrcLen);
 	dwDstLen = BigEndian(pxfh->dwDstLen);
 	if ((dwSrcLen+8 > dwMemLength) || (dwSrcLen < 256) || (dwDstLen < 256)) return FALSE;
@@ -676,7 +676,7 @@ BOOL PP20_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 	DWORD dwDstLen;
 	LPBYTE pBuffer;
 
-	if ((!lpMemFile) || (dwMemLength < 256) || (*(DWORD *)lpMemFile != '02PP')) return FALSE;
+	if ((!lpMemFile) || (dwMemLength < 256) || (*(DWORD *)lpMemFile != MULTICHAR4_LE_MSVC('0','2','P','P'))) return FALSE;
 	dwDstLen = (lpMemFile[dwMemLength-4]<<16) | (lpMemFile[dwMemLength-3]<<8) | (lpMemFile[dwMemLength-2]);
 	//Log("PP20 detected: Packed length=%d, Unpacked length=%d\n", dwMemLength, dwDstLen);
 	if ((dwDstLen < 512) || (dwDstLen > 0x400000) || (dwDstLen > 16*dwMemLength)) return FALSE;

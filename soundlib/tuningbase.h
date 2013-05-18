@@ -37,7 +37,9 @@ using std::map;
 
 namespace srlztn {class Ssb;};
 
+#ifdef _MSC_VER
 #pragma warning(disable:4100) //"unreferenced formal parameter"
+#endif
 
 
 #ifdef BUILD_TUNINGBASE_AS_TEMPLATE
@@ -144,7 +146,7 @@ public:
 	virtual USTEPINDEXTYPE GetFineStepCount() const {return m_FineStepCount;}
 
 	//To return 'directed distance' between given notes.
-	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& from, const NOTEINDEXTYPE& to) const {return 0;}
+	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& /*from*/, const NOTEINDEXTYPE& /*to*/) const {return 0;}
 
 	//To return 'directed distance' between given steps.
 	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE&, const STEPINDEXTYPE&, const NOTEINDEXTYPE&, const STEPINDEXTYPE&) const {return 0;}
@@ -170,7 +172,7 @@ public:
 	bool CreateGeometric(const UNOTEINDEXTYPE& p, const RATIOTYPE& r) {return CreateGeometric(p,r,GetValidityRange());}
 	bool CreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR vr);
 
-	virtual SERIALIZATION_RETURN_TYPE Serialize(ostream& out) const {return false;}
+	virtual SERIALIZATION_RETURN_TYPE Serialize(ostream& /*out*/) const {return false;}
 
 	NOTESTR GetNoteName(const NOTEINDEXTYPE& x) const;
 
@@ -242,7 +244,7 @@ protected:
 	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE&) const;
 
 	//The two methods below return false if action was done, true otherwise.
-	virtual bool ProCreateGroupGeometric(const vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos) {return true;}
+	virtual bool ProCreateGroupGeometric(const vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE /*ratiostartpos*/) {return true;}
 	virtual bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&) {return true;}
 	
 	virtual VRPAIR ProSetValidityRange(const VRPAIR&) {return GetValidityRange();}
@@ -294,13 +296,13 @@ protected:
 protected:
 	CTuningBase(const string name = "Unnamed") :
 		m_TuningName(name),
+		m_EditMask(uint16_max), //All bits to true - allow all by default.
 		m_TuningType(TT_GENERAL), //Unspecific tuning by default.
-		m_FineStepCount(0),
-		m_EditMask(uint16_max) //All bits to true - allow all by default.
+		m_FineStepCount(0)
 		{}
 private:
 	CTuningBase(CTuningBase&) {}
-	CTuningBase& operator=(const CTuningBase&) {}
+	CTuningBase& operator=(const CTuningBase&) {return *this;}
 	static void ReadNotenamemapPair(istream& iStrm, TYPENAME NOTENAMEMAP::value_type& val, const size_t);
 	static void WriteNotenamemappair(ostream& oStrm, const TYPENAME NOTENAMEMAP::value_type& val, const size_t);
 
@@ -316,7 +318,9 @@ private:
 	static void DefaultMessageHandler(const char*, const char*) {}
 };
 
+#ifdef _MSC_VER
 #pragma warning(default:4100) //"unreferenced formal parameter"
+#endif
 
 #define NOTEINDEXTYPE_MIN (std::numeric_limits<NOTEINDEXTYPE>::min)()
 #define NOTEINDEXTYPE_MAX (std::numeric_limits<NOTEINDEXTYPE>::max)()

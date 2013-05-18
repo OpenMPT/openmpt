@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 #include "Tables.h"
 
 // AWE32: cutoff = reg[0-255] * 31.25 + 100 -> [100Hz-8060Hz]
