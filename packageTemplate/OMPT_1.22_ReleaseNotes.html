@@ -117,6 +117,8 @@
         <li>Added support for <strong>WASAPI output devices</strong>.</li>
         <li>Added a global <strong>VU meter with clip indicator</strong> in the main toolbar.</li>
         <li><strong>Elapsed time display</strong> in the status bar is a lot more accurate now (no more rounding errors that pile up over time).</li>
+        <li>S9F (reverse sample) next to a note also works with looped samples now.</li>
+        <li>Extra-smooth ramping is now also applied with no and linear interpolation.</li>
     </ul>
 
     <div class="screenshots">
@@ -128,6 +130,7 @@
         <li>The <strong>Clipboard Manager</strong> can be used to manage a virtually unlimited number of internal pattern clipboards to speed up copy and paste workflow.</li>
         <li>The Chord Editor features a <strong>relative base note mode</strong>, which enters chords that are relative to a previously entered base note instead of a fixed base note. Chord mode also works without having to select any record channel beforehand now.</li>
         <li>Higher <strong>live record precision</strong>.</li>
+        <li>When using Insert Rows, the selection is not cleared anymore, allowing the user to execute the same command several times in a row.</li>
     </ul>
     
     <h3>Tree view</h3>
@@ -156,6 +159,8 @@
         <li>Support for importing <strong>MP3 samples</strong> has been added. libmpeg123 is required for this to work, which is not shipped with MP3 due to the patent troubles involved with MP3 technology. The OpenMPT manual <a href="http://wiki.openmpt.org/Manual:_Frequently_Asked_Questions#I_can.27t_load_any_MP3_samples">explains</a> where to download and where to put libmpg123 to work with OpenMPT.</li>
         <li>Drastically improved support for 15-sample <strong>SoundTracker MODs</strong>!</li>
         <li>Experimental support for <strong>saving IT-compressed samples</strong> has been added. Compressed stereo samples won't load in older versions of OpenMPT, and compressed samples will cause trouble when reading extended song or instrument properties in old versions, so be careful if you want to be backwards-compatible.</li>
+        <li>Added support for <strong>DIGI</strong> (DigiBooster) modules.</li>
+        <li>Advanced <strong>tracker detection</strong>: OpenMPT tries to find out which tracker a file was made with and shows this information in the "Last saved with" field in the Song Properties.</li>
     </ul>
 
     <h3>There's more...</h3>
