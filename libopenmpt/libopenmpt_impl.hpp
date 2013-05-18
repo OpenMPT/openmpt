@@ -278,7 +278,6 @@ public:
 							case WFIR_KAISER4T: return module::INTERPOLATION_FIR_KAISER4T; break;
 						}
 					} break;
-					case NUM_SRC_MODES:
 					default:
 					break;
 				}
