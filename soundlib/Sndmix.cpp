@@ -390,16 +390,19 @@ MixDone:
 BOOL CSoundFile::ProcessRow()
 //---------------------------
 {
-	if (++m_nTickCount >= GetNumTicksOnCurrentRow())
+	while(++m_nTickCount >= GetNumTicksOnCurrentRow())
 	{
+		// When having an EEx effect on the same row as a Dxx jump, the target row is not played in ProTracker.
+		// Test case: DelayBreak.mod (based on condom_corruption by Travolta)
+		const bool ignoreRow = m_nPatternDelay != 0 && m_SongFlags[SONG_BREAKTOROW] && GetType() == MOD_TYPE_MOD;
+
 		HandlePatternTransitionEvents();
 		m_nPatternDelay = 0;
 		m_nFrameDelay = 0;
 		m_nTickCount = 0;
 		m_nRow = m_nNextRow;
 		// Reset Pattern Loop Effect
-		if(m_nCurrentOrder != m_nNextOrder) 
-			m_nCurrentOrder = m_nNextOrder;
+		m_nCurrentOrder = m_nNextOrder;
 
 #ifdef MODPLUG_TRACKER
 		// "Lock order" editing feature
@@ -482,8 +485,6 @@ BOOL CSoundFile::ProcessRow()
 								}
 							}
 						}
-
-
 					}
 
 					//Handle Repeat position
@@ -601,6 +602,12 @@ BOOL CSoundFile::ProcessRow()
 		// Now that we know which pattern we're on, we can update time signatures (global or pattern-specific)
 		UpdateTimeSignature();
 
+		if(ignoreRow)
+		{
+			m_nTickCount = m_nMusicSpeed;
+			continue;
+		}
+		break;
 	}
 	// Should we process tick0 effects?
 	if (!m_nMusicSpeed) m_nMusicSpeed = 1;
@@ -621,7 +628,7 @@ BOOL CSoundFile::ProcessRow()
 	if (m_nTickCount)
 	{
 		m_SongFlags.reset(SONG_FIRSTTICK);
-		if(!(GetType() & MOD_TYPE_XM) && m_nTickCount < GetNumTicksOnCurrentRow())
+		if(!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MOD)) && m_nTickCount < GetNumTicksOnCurrentRow())
 		{
 			// Emulate first tick behaviour if Row Delay is set.
 			// Test cases: PatternDelaysRetrig.it, PatternDelaysRetrig.s3m, PatternDelaysRetrig.xm
@@ -1898,7 +1905,7 @@ BOOL CSoundFile::ReadNote()
 				pChn->nCalcVolume = 0;
 			}
 
-			UINT ninc = Util::muldiv(freq, 0x10000, m_MixerSettings.gdwMixingFreq);
+			int32 ninc = Util::muldiv(freq, 0x10000, m_MixerSettings.gdwMixingFreq);
 			if ((ninc >= 0xFFB0) && (ninc <= 0x10090)) ninc = 0x10000;
 			if (m_nFreqFactor != 128) ninc = (ninc * m_nFreqFactor) >> 7;
 			if (ninc > 0xFF0000) ninc = 0xFF0000;
