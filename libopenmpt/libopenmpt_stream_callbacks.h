@@ -21,6 +21,9 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
+#ifdef _MSC_VER
+#include <wchar.h> // off_t
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,7 +65,13 @@ static int openmpt_stream_file_seek_func( void * stream, int64_t offset, int whe
 	if ( !f ) {
 		return -1;
 	}
-	return fseek( f, offset, whence ) ? -1 : 0;
+	#if defined(_MSC_VER)
+		return _fseeki64( f, offset, whence ) ? -1 : 0;
+	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
+		return fseeko( f, offset, whence ) ? -1 : 0;
+	#else
+		return fseek( f, offset, whence ) ? -1 : 0;
+	#endif
 }
 
 static int64_t openmpt_stream_file_tell_func( void * stream ) {
@@ -70,7 +79,13 @@ static int64_t openmpt_stream_file_tell_func( void * stream ) {
 	if ( !f ) {
 		return -1;
 	}
-	int64_t retval = ftell( f );
+	#if defined(_MSC_VER)
+		int64_t retval = _ftelli64( f );
+	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
+		int64_t retval = ftello( f );
+	#else
+		int64_t retval = ftell( f );
+	#endif
 	if ( retval < 0 ) {
 		return -1;
 	}
