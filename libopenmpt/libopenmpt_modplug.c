@@ -243,6 +243,7 @@ LIBOPENMPT_MODPLUG_API int ModPlug_Read(ModPlugFile* file, void* buffer, int siz
 		}else{
 			return 0;
 		}
+		in = file->buf;
 		if(file->mixerproc&&file->mixerbuf){
 			mixbuf=file->mixerbuf;
 			for(frame=0;frame<frames;frame++){
@@ -260,7 +261,6 @@ LIBOPENMPT_MODPLUG_API int ModPlug_Read(ModPlugFile* file, void* buffer, int siz
 				}
 			}
 		}
-		in = file->buf;
 		if(file->settings.mBits==8){
 			for(frame=0;frame<frames;frame++){
 				for(channel=0;channel<file->settings.mChannels;channel++){
