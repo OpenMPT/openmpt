@@ -25,6 +25,68 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.22.03.00 (18 May 2013, revision 2094)
+----------------------------------------
+Pattern Editor
+   [New] <js> Clipboard entries can now be renamed in the Pattern Clipboard Manager by double-clicking them (http://bugs.openmpt.org/view.php?id=374).
+   [Imp] <js> When using Insert Rows, the selection is not cleared anymore, allowing the user to execute the same command several times in a row.
+   [Fix] <js> Reverted playback cursor display behaviour to how it worked before OpenMPT 1.22 (the playback cursor no longer stays in the pattern after playback has stopped).
+   [Fix] <js> Pattern Step didn't update pattern VU meters properly.
+
+Sample Editor
+   [Fix] <js> Split stereo sample didn't update the instrument list in the pattern editor (http://bugs.openmpt.org/view?id=382).
+
+Mod Conversion
+   [Imp] <js> When converting to MOD or XM, --- and +++ order items are automatically removed and pattern jump commands are updated accordingly.
+
+VST / DMO Plugins
+   [Fix] <js> Changing MIDI input focus to a plugin editor only worked right after focussing the editor for the first time.
+
+Playback
+   [Mod] <js> Behaviour change: Allow S9F next to a note to work with looped samples.
+   [Fix] <js> Extra-smooth ramping is now also applied with no and linear interpolation (http://bugs.openmpt.org/view.php?id=291).
+   [Fix] <js> Per-instrument ramping settings were ignored during wave export in some cases.
+   [Fix] <jh> Fix volume ramping on samples played on the first row / tick of a song. Ramping is no longer disabled completely to fix pops due to global volume changes on the first row.
+
+IT::Saving
+   [Fix] <js> If an instrument referenced sample numbers >= 256, the sample mapping would break in IT and MPTM files (http://forum.openmpt.org/index.php?topic=5014.0).
+
+XM
+   [Fix] <js> Portamento didn't reset finetune in jam007.xm (http://bugs.openmpt.org/view.php?id=390).
+   [Fix] <js> Only instrument numbers should reset sample panning, not lone notes (http://bugs.openmpt.org/view.php?id=385).
+
+XM::Compatible Playback Mode
+   [Mod] <js> No longer apply global volume on tick 2, since this was only part of the truth (http://bugs.openmpt.org/view.php?id=388).
+   [Fix] <js> Fixed Rxy + note / instrument combination (http://forum.openmpt.org/index.php?topic=4999.0).
+   [Fix] <js> Note Off for an instrument with no volume envelope only should fade the sample out if there is a volume command in the volume column (http://bugs.openmpt.org/view.php?id=387).
+   [Fix] <js> Instrument number resets tremor count (http://bugs.openmpt.org/view.php?id=384).
+
+XM::Loading and Saving
+   [Mod] <js> +++ and --- entries are no longer exported to XM files. +++ are removed when reading old XM files made with ModPlug.
+
+MOD::Loading
+   [Imp] <js> Changed 8xx panning scheme detection heuristic to be less strict (fixes LOOKATME.MOD).
+
+Other formats
+   [New] <js> Can now import DIGI (Digi Booster) modules.
+   [Imp] <js> DMF: Offset without note should now work.
+   [Imp] <js> DMF: Volume 1 should be silent.
+   [Fix] <js> MT2: Linear frequency slides were not enabled.
+   [Fix] <js> MT2: Stereo samples were not loaded correctly.
+   [Fix] <js> MT2: Sample tuning is more precise now (but still not perfect in all occasions).
+   [Fix] <js> Reading song message in 669, AMS, DMF, FAR, ULT and MTM files could lead to crashes (since OpenMPT 1.22.02, http://forum.openmpt.org/index.php?topic=5002.0).
+   [Fix] <js> Reading ZIP files could lead to crashes (since OpenMPT 1.22.02).
+
+Module cleanup
+   [Fix] <js> Rearrange instruments was broken... again.
+
+Misc
+   [Imp] <js> Added "made with" tracker identification to most module formats. Can be viewed in Song Properties.
+   [Mod] <js> Warning log messages are no longer shown during auto save.
+   [Fix] <jh> Fixed another possible crash with ASIO devices (http://bugs.openmpt.org/view.php?id=379).
+   [Fix] <jh> Fixed crash in quad channel mode (crash occoured only since OpenMPT 1.22.02, but the source for it was there since probably forever).
+
+
 v1.22.02.00 (20 April 2013, revision 1917)
 ------------------------------------------
 Instrument tab
@@ -52,7 +114,7 @@ Other formats
    [Fix] <js> PSM16 loader: Master volume was not loaded properly.
 
 Misc
-   [New] <js> Added global, always active VU meter in the main toolbar.
+   [New] <js> Added global, always active VU meter with clip indicator in the main toolbar (http://bugs.openmpt.org/view.php?id=144).
    [Imp] <js> MIDI CC shortcuts should now work in pretty much all places.
    [Imp] <jh> Boosting of audio thread priority can now be disabled in the Sound Card settings. On Windows Vista and later, MMCSS is now used for boosting.
    [Imp] <js> When changing MIDI input devices, the change is applied instantly. Previously the old MIDI device was kept open.
@@ -150,7 +212,7 @@ IT::Compatible Playback Mode
    [Fix] <js> SCx shouldn't "click" anymore (just like normal note cuts).
    [Fix] <js> Various fixes regarding portamento between different samples, and especially portamento in multisample instruments.
 
-XM::Compatible Playbay Mode
+XM::Compatible Playback Mode
    [Fix] Reverted envelope handling changes made in OpenMPT 1.20.01.00 to fix gh-kott.xm.
 
 XM::Loading
