@@ -12,6 +12,8 @@
 
 #include <sstream>
 
+#include <cstdlib>
+
 #include "versionNumber.h"
 #include "svn_version.h"
 
@@ -20,6 +22,65 @@ namespace MptVersion {
 const VersionNum num = MPT_VERSION_NUMERIC;
 
 const char * const str = MPT_VERSION_STR;
+
+static int parse_svnversion_to_revision( std::string svnversion )
+{
+	if(svnversion.length() == 0)
+	{
+		return 0;
+	}
+	if(svnversion.find(":") != std::string::npos)
+	{
+		svnversion = svnversion.substr(svnversion.find(":") + 1);
+	}
+	if(svnversion.find("M") != std::string::npos)
+	{
+		svnversion = svnversion.substr(0, svnversion.find("M"));
+	}
+	if(svnversion.find("S") != std::string::npos)
+	{
+		svnversion = svnversion.substr(0, svnversion.find("S"));
+	}
+	if(svnversion.find("P") != std::string::npos)
+	{
+		svnversion = svnversion.substr(0, svnversion.find("P"));
+	}
+	return std::strtol(svnversion.c_str(), 0, 10);
+}
+
+static bool parse_svnversion_to_mixed_revisions( std::string svnversion )
+{
+	if(svnversion.length() == 0)
+	{
+		return false;
+	}
+	if(svnversion.find(":") != std::string::npos)
+	{
+		return true;
+	}
+	if(svnversion.find("S") != std::string::npos)
+	{
+		return true;
+	}
+	if(svnversion.find("P") != std::string::npos)
+	{
+		return true;
+	}
+	return false;
+}
+
+static bool parse_svnversion_to_modified( std::string svnversion )
+{
+	if(svnversion.length() == 0)
+	{
+		return false;
+	}
+	if(svnversion.find("M") != std::string::npos)
+	{
+		return true;
+	}
+	return false;
+}
 
 std::string GetOpenMPTVersionStr()
 {
@@ -73,32 +134,54 @@ bool IsDebugBuild()
 
 std::string GetUrl()
 {
-	return OPENMPT_VERSION_URL;
+	#ifdef OPENMPT_VERSION_URL
+		return OPENMPT_VERSION_URL;
+	#else
+		return "";
+	#endif
 }
 
 int GetRevision()
 {
-	return OPENMPT_VERSION_REVISION;
+	#if defined(OPENMPT_VERSION_REVISION)
+		return OPENMPT_VERSION_REVISION;
+	#elif defined(OPENMPT_VERSION_SVNVERSION)
+		return parse_svnversion_to_revision(OPENMPT_VERSION_SVNVERSION);
+	#else
+		return 0;
+	#endif
 }
 
 bool IsDirty()
 {
-	return OPENMPT_VERSION_DIRTY;
+	#if defined(OPENMPT_VERSION_DIRTY)
+		return OPENMPT_VERSION_DIRTY;
+	#elif defined(OPENMPT_VERSION_SVNVERSION)
+		return parse_svnversion_to_modified(OPENMPT_VERSION_SVNVERSION);
+	#else
+		return false;
+	#endif
 }
 
 bool HasMixedRevisions()
 {
-	return OPENMPT_VERSION_MIXEDREVISIONS;
+	#if defined(OPENMPT_VERSION_MIXEDREVISIONS)
+		return OPENMPT_VERSION_MIXEDREVISIONS;
+	#elif defined(OPENMPT_VERSION_SVNVERSION)
+		return parse_svnversion_to_mixed_revisions(OPENMPT_VERSION_SVNVERSION);
+	#else
+		return false;
+	#endif
 }
 
 std::string GetStateString()
 {
 	std::string retval;
-	if(OPENMPT_VERSION_MIXEDREVISIONS)
+	if(HasMixedRevisions())
 	{
 		retval += "+mixed";
 	}
-	if(OPENMPT_VERSION_DIRTY)
+	if(IsDirty())
 	{
 		retval += "+dirty";
 	}
@@ -137,17 +220,17 @@ std::string GetBuildFlagsString()
 
 std::string GetRevisionString()
 {
-	if(OPENMPT_VERSION_REVISION == 0)
+	if(GetRevision() == 0)
 	{
 		return "";
 	}
 	std::ostringstream str;
-	str << "-r" << OPENMPT_VERSION_REVISION;
-	if(OPENMPT_VERSION_MIXEDREVISIONS)
+	str << "-r" << GetRevision();
+	if(HasMixedRevisions())
 	{
 		str << "!";
 	}
-	if(OPENMPT_VERSION_DIRTY)
+	if(IsDirty())
 	{
 		str << "+";
 	}
@@ -167,18 +250,22 @@ std::string GetVersionStringExtended()
 
 std::string GetVersionUrlString()
 {
-	if(OPENMPT_VERSION_REVISION == 0)
+	if(GetRevision() == 0)
 	{
 		return "";
 	}
-	std::string url = OPENMPT_VERSION_URL;
+	#if defined(OPENMPT_VERSION_URL)
+		std::string url = OPENMPT_VERSION_URL;
+	#else
+		std::string url = "";
+	#endif
 	std::string baseurl = "https://svn.code.sf.net/p/modplug/code/";
 	if(url.substr(0, baseurl.length()) == baseurl)
 	{
 		url = url.substr(baseurl.length());
 	}
 	std::ostringstream str;
-	str << url << "@" << OPENMPT_VERSION_REVISION << GetStateString();
+	str << url << "@" << GetRevision() << GetStateString();
 	return str.str();
 }
 

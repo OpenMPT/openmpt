@@ -16,7 +16,8 @@
 //Creates version number from version parts that appears in version string.
 //For example MAKE_VERSION_NUMERIC(1,17,02,28) gives version number of 
 //version 1.17.02.28. 
-#define MAKE_VERSION_NUMERIC(v0,v1,v2,v3) ((0x##v0 << 24) | (0x##v1<<16) | (0x##v2<<8) | (0x##v3))
+#define MAKE_VERSION_NUMERIC_HELPER(prefix,v0,v1,v2,v3) ((prefix##v0 << 24) | (prefix##v1<<16) | (prefix##v2<<8) | (prefix##v3))
+#define MAKE_VERSION_NUMERIC(v0,v1,v2,v3) MAKE_VERSION_NUMERIC_HELPER(0x,v0,v1,v2,v3)
 
 
 namespace MptVersion

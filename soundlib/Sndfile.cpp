@@ -45,7 +45,7 @@ MODULAR (in/out) ModInstrument :
 - both following functions need to be updated when adding a new member in ModInstrument :
 
 void WriteInstrumentHeaderStruct(ModInstrument * input, FILE * file);
-BYTE * GetInstrumentHeaderFieldPointer(ModInstrument * input, __int32 fcode, __int16 fsize);
+BYTE * GetInstrumentHeaderFieldPointer(ModInstrument * input, uint32 fcode, int16 fsize);
 
 - see below for body declaration.
 
@@ -164,15 +164,17 @@ MPWD			MIDI Pitch Wheel Depth
 -----------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------*/
 
+#define MULTICHAR_STRING_TO_INT(str) MULTICHAR4_LE_MSVC((str)[0],(str)[1],(str)[2],(str)[3])
+
 // --------------------------------------------------------------------------------------------
 // Convenient macro to help WRITE_HEADER declaration for single type members ONLY (non-array)
 // --------------------------------------------------------------------------------------------
 #define WRITE_MPTHEADER_sized_member(name,type,code) \
 static_assert(sizeof(input->name) >= sizeof(type), "Instrument property does not fit into specified type!");\
-fcode = #@code;\
-fwrite(& fcode , 1 , sizeof( __int32 ) , file);\
+fcode = MULTICHAR_STRING_TO_INT(#code);\
+fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
 fsize = sizeof( type );\
-fwrite(& fsize , 1 , sizeof( __int16 ) , file);\
+fwrite(& fsize , 1 , sizeof( int16 ) , file);\
 fwrite(&input-> name , 1 , fsize , file);
 
 // --------------------------------------------------------------------------------------------
@@ -180,10 +182,10 @@ fwrite(&input-> name , 1 , fsize , file);
 // --------------------------------------------------------------------------------------------
 #define WRITE_MPTHEADER_array_member(name,type,code,arraysize) \
 ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
-fcode = #@code;\
-fwrite(& fcode , 1 , sizeof( __int32 ) , file);\
+fcode = MULTICHAR_STRING_TO_INT(#code);\
+fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
 fsize = sizeof( type ) * arraysize;\
-fwrite(& fsize , 1 , sizeof( __int16 ) , file);\
+fwrite(& fsize , 1 , sizeof( int16 ) , file);\
 fwrite(&input-> name , 1 , fsize , file);
 
 namespace {
@@ -214,14 +216,14 @@ DWORD CreateExtensionFlags(const ModInstrument& ins)
 // Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
 void WriteInstrumentHeaderStruct(ModInstrument * input, FILE * file)
 {
-__int32 fcode;
-__int16 fsize;
+uint32 fcode;
+int16 fsize;
 WRITE_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
 
 { // dwFlags needs to be constructed so write it manually.
 	//WRITE_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
 	const DWORD dwFlags = CreateExtensionFlags(*input);
-	fcode = 'dF..';
+	fcode = MULTICHAR_STRING_TO_INT("dF..");
 	fwrite(&fcode, 1, sizeof(int32), file);
 	fsize = sizeof(dwFlags);
 	fwrite(&fsize, 1, sizeof(int16), file);
@@ -290,17 +292,17 @@ WRITE_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 // Convenient macro to help GET_HEADER declaration for single type members ONLY (non-array)
 // --------------------------------------------------------------------------------------------
 #define GET_MPTHEADER_sized_member(name,type,code) \
-case( #@code ):\
+if(fcode == MULTICHAR_STRING_TO_INT(#code)) {\
 if( fsize <= sizeof( type ) ) pointer = (char *)(&input-> name);\
-break;
+} else
 
 // --------------------------------------------------------------------------------------------
 // Convenient macro to help GET_HEADER declaration for array members ONLY
 // --------------------------------------------------------------------------------------------
 #define GET_MPTHEADER_array_member(name,type,code,arraysize) \
-case( #@code ):\
+if(fcode == MULTICHAR_STRING_TO_INT(#code)) {\
 if( fsize <= sizeof( type ) * arraysize ) pointer = (char *)(&input-> name);\
-break;
+} else
 
 // Return a pointer on the wanted field in 'input' ModInstrument given field code & size
 char *GetInstrumentHeaderFieldPointer(const ModInstrument *input, uint32 fcode, uint16 fsize)
@@ -308,7 +310,6 @@ char *GetInstrumentHeaderFieldPointer(const ModInstrument *input, uint32 fcode, 
 if(input == nullptr) return nullptr;
 char *pointer = nullptr;
 
-switch(fcode){
 GET_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
 GET_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
 GET_MPTHEADER_sized_member(	nGlobalVol				, UINT			, GV..							)
@@ -367,7 +368,7 @@ GET_MPTHEADER_sized_member(	PitchEnv.dwFlags		, uint32		, PFLG							)
 GET_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint32		, AFLG							)
 GET_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, VFLG							)
 GET_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
-}
+{}
 
 return pointer;
 }
@@ -383,7 +384,9 @@ CTuningCollection* CSoundFile::s_pTuningsSharedBuiltIn(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 #endif
 
+#ifdef _MSC_VER
 #pragma warning(disable : 4355) // "'this' : used in base member initializer list"
+#endif
 CSoundFile::CSoundFile() :
 	Patterns(*this),
 	Order(*this),
@@ -394,7 +397,9 @@ CSoundFile::CSoundFile() :
 #endif
 	visitedSongRows(*this),
 	m_pCustomLog(nullptr)
+#ifdef _MSC_VER
 #pragma warning(default : 4355) // "'this' : used in base member initializer list"
+#endif
 //----------------------
 {
 	gdwSysInfo = GetSysInfo();
@@ -572,7 +577,10 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 // -! NEW_FEATURE#0023
 		 && !ReadIT(file, loadFlags)
 		 && !ReadS3M(file, loadFlags)
+#ifdef MODPLUG_TRACKER
+		// this makes little sense for a module player library
 		 && !ReadWav(file, loadFlags)
+#endif // MODPLUG_TRACKER
 		 && !ReadSTM(file, loadFlags)
 		 && !ReadMed(lpStream, dwMemLength, loadFlags)
 		 && !ReadMTM(file, loadFlags)
@@ -775,7 +783,8 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	if(GetType() != MOD_TYPE_NONE)
 	{
 		SetModSpecsPointer(m_pModSpecs, m_nType);
-		const ORDERINDEX nMinLength = (std::min)(ModSequenceSet::s_nCacheSize, GetModSpecifications().ordersMax);
+		const ORDERINDEX CacheSize = ModSequenceSet::s_nCacheSize; // workaround reference to static const member problem
+		const ORDERINDEX nMinLength = std::min(CacheSize, GetModSpecifications().ordersMax);
 		if (Order.GetLength() < nMinLength)
 			Order.resize(nMinLength);
 		return TRUE;

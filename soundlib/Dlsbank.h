@@ -86,7 +86,9 @@ typedef struct PACKED DLSSAMPLEEX
 
 STATIC_ASSERT(sizeof(DLSSAMPLEEX) == 38);
 
+#ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
+#endif
 
 
 #ifdef MODPLUG_TRACKER

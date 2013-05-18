@@ -19,10 +19,10 @@ typedef int32 VstInt32;
 typedef intptr_t VstIntPtr;
 #endif
 
-#include "Snd_defs.h"
-#include "../common/misc_util.h"
-#include "../soundlib/MIDIEvents.h"
-#include "../soundlib/Endianness.h"
+#include "../../soundlib/Snd_defs.h"
+#include "../../common/misc_util.h"
+#include "../../soundlib/MIDIEvents.h"
+#include "../../soundlib/Endianness.h"
 
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
@@ -119,8 +119,8 @@ struct PACKED SNDMIXPLUGININFO
 	uint8 reserved;
 	uint32 dwOutputRouting;			// 0 = send to master 0x80 + x = send to plugin x
 	uint32 dwReserved[4];			// Reserved for routing info
-	CHAR szName[32];				// User-chosen plugin name
-	CHAR szLibraryName[64];			// original DLL name
+	char szName[32];				// User-chosen plugin name
+	char szLibraryName[64];			// original DLL name
 
 	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()
 	void SetBypass(bool bypass = true) { if(bypass) routingFlags |= irBypass; else routingFlags &= ~irBypass; }
@@ -151,7 +151,7 @@ struct SNDMIXPLUGIN
 	IMixPlugin *pMixPlugin;
 	SNDMIXPLUGINSTATE *pMixState;
 	ULONG nPluginDataSize;
-	void *pPluginData;
+	char *pPluginData;
 	SNDMIXPLUGININFO Info;
 	float fDryRatio;
 	VstInt32 defaultProgram;

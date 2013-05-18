@@ -17,7 +17,7 @@
 #include "globals.h"
 #include "ctrl_ins.h"
 #include "view_ins.h"
-#include "dlsbank.h"
+#include "Dlsbank.h"
 #include "channelManagerDlg.h"
 #include "ScaleEnvPointsDlg.h"
 #include "view_ins.h"

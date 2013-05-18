@@ -60,9 +60,9 @@ public:
 	// Return PatternRow object which has operator[] defined so that ModCommand
 	// at (iRow, iChn) can be accessed with GetRow(iRow)[iChn].
 	PatternRow GetRow(const ROWINDEX row) { return GetpModCommand(row, 0); }
-	const PatternRow GetRow(const ROWINDEX row) const { return const_cast<ModCommand *>(GetpModCommand(row, 0)); }
+	PatternRow GetRow(const ROWINDEX row) const { return const_cast<ModCommand *>(GetpModCommand(row, 0)); }
 
-	inline CHANNELINDEX GetNumChannels() const;
+	CHANNELINDEX GetNumChannels() const;
 
 	// Add or remove rows from the pattern.
 	bool Resize(const ROWINDEX newRowCount);
@@ -130,7 +130,7 @@ public:
 	iterator End() { return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr; }
 	const_iterator End() const { return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr; }
 
-	CPattern(CPatternContainer& patCont) : m_ModCommands(0), m_Rows(64), m_rPatternContainer(patCont), m_RowsPerBeat(0), m_RowsPerMeasure(0) {};
+	CPattern(CPatternContainer& patCont) : m_ModCommands(0), m_Rows(64), m_RowsPerBeat(0), m_RowsPerMeasure(0), m_rPatternContainer(patCont) {};
 
 protected:
 	ModCommand& GetModCommand(size_t i) { return m_ModCommands[i]; }

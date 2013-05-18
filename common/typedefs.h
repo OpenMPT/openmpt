@@ -19,6 +19,10 @@
 #define MSVC_VER_VC10		1600
 #define MSVC_VER_2010		MSVC_VER_VC10
 
+#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+
+
+
 #if defined(_MSC_VER)
 #pragma warning(error : 4309) // Treat "truncation of constant value"-warning as error.
 #endif
@@ -31,8 +35,14 @@
 
 
 
-#if defined(_MSC_VER) && (_MSC_VER < MSVC_VER_2010)
+#if defined(_MSC_VER)
+#if (_MSC_VER < MSVC_VER_2010)
 	#define nullptr		0
+#endif
+#elif defined(__GNUC__)
+#if GCC_VERSION < 40600
+#define nullptr 0
+#endif
 #endif
 
 
@@ -50,7 +60,7 @@
 #define PACKED __declspec(align(1))
 #define NEEDS_PRAGMA_PACK
 #elif defined(__GNUC__)
-#define PACKED __attribute__((packed))) __attribute__((aligned(1))))
+#define PACKED __attribute__((packed)) __attribute__((aligned(1)))
 #endif
 
 
@@ -225,6 +235,7 @@ STATIC_ASSERT(sizeof(FloatInt32) == 4);
 // openmpt assumes these type have exact WIN32 semantics
 
 #define VOID void
+typedef std::int32_t  BOOL;
 typedef std::uint8_t  BYTE;
 typedef std::uint16_t WORD;
 typedef std::uint32_t DWORD;
@@ -233,20 +244,34 @@ typedef std::int8_t   CHAR;
 typedef std::int16_t  SHORT;
 typedef std::int32_t  INT;
 typedef std::int32_t  LONG;
+typedef std::int64_t  LONGLONG;
 typedef std::uint8_t  UCHAR;
 typedef std::uint16_t USHORT;
 typedef std::uint32_t UINT;
 typedef std::uint32_t ULONG;
+typedef std::uint64_t ULONGLONG;
 typedef VOID *        LPVOID;
 typedef VOID *        PVOID;
+typedef BYTE *        LPBYTE;
+typedef WORD *        LPWORD;
+typedef DWORD *       LPDWORD;
+typedef INT *         LPINT;
+typedef LONG *        LPLONG;
 
-typedef std::int8_t   CHAR;
 typedef char          TCHAR;
 typedef const char *  LPCSTR;
 typedef char *        LPSTR;
 typedef const char *  LPCTSTR;
 typedef char *        LPTSTR;
+
+// for BOOL
+#define TRUE (1)
+#define FALSE (0)
+
 #define MPT_TEXT(x) x
+
+// wsprintf is just sprintf, but defined in the WINDOWS API
+#define wsprintf sprintf
 
 #endif // _WIN32
 
@@ -264,6 +289,8 @@ int c99_vsnprintf(char *str, size_t size, const char *format, va_list args);
 int c99_snprintf(char *str, size_t size, const char *format, ...);
 #define snprintf c99_snprintf
 #endif
+
+#define MULTICHAR4_LE_MSVC(a,b,c,d) static_cast<uint32>( (static_cast<uint8>(a) << 24) | (static_cast<uint8>(b) << 16) | (static_cast<uint8>(c) << 8) | (static_cast<uint8>(d) << 0) )
 
 
 
@@ -305,3 +332,10 @@ class Logger { public: void operator () (const char *format, ...) {} };
 
 // just #undef Log in files, where this Log redefinition causes problems
 //#undef Log
+
+
+
+#ifndef UNREFERENCED_PARAMETER
+#define UNREFERENCED_PARAMETER(x) (void)(x)
+#endif
+

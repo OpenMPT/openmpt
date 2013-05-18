@@ -39,15 +39,15 @@ static VOID X86_MonoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFl
 
 
 #define PI	3.14159265358979323f
-static inline FLOAT Sgn(FLOAT x) { return (x >= 0) ? 1.0f : -1.0f; }
+static inline float Sgn(float x) { return (x >= 0) ? 1.0f : -1.0f; }
 static VOID ShelfEQ(LONG scale,
 			 LONG *outA1, LONG *outB0, LONG *outB1,
-			 LONG F_c, LONG F_s, FLOAT gainDC, FLOAT gainFT, FLOAT gainPI)
+			 LONG F_c, LONG F_s, float gainDC, float gainFT, float gainPI)
 {
-	FLOAT a1, b0, b1;
-	FLOAT gainFT2, gainDC2, gainPI2;
-	FLOAT alpha, beta0, beta1, rho;
-	FLOAT wT, quad;
+	float a1, b0, b1;
+	float gainFT2, gainDC2, gainPI2;
+	float alpha, beta0, beta1, rho;
+	float wT, quad;
         
 	_asm {
 	// wT = PI*Fc/Fs
@@ -75,13 +75,13 @@ static VOID ShelfEQ(LONG scale,
  
 	if (quad != 0)
 	{
-		FLOAT lambda = (gainPI2 - gainDC2) / quad;
-	alpha  = (FLOAT)(lambda - Sgn(lambda)*sqrt(lambda*lambda - 1.0f));
+		float lambda = (gainPI2 - gainDC2) / quad;
+	alpha  = (float)(lambda - Sgn(lambda)*sqrt(lambda*lambda - 1.0f));
 	}
  
 	beta0 = 0.5f * ((gainDC + gainPI) + (gainDC - gainPI) * alpha);
 	beta1 = 0.5f * ((gainDC - gainPI) + (gainDC + gainPI) * alpha);
-	rho   = (FLOAT)((sin((wT*0.5f) - (PI/4.0f))) / (sin((wT*0.5f) + (PI/4.0f))));
+	rho   = (float)((sin((wT*0.5f) - (PI/4.0f))) / (sin((wT*0.5f) + (PI/4.0f))));
  
 	quad  = 1.0f / (1.0f + rho*alpha);
     

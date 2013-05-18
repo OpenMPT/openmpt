@@ -763,7 +763,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
 					if(m_nCurrentParam < nParams)
 					{
-						FLOAT fValue = 0.01f * n;
+						float fValue = 0.01f * n;
 						wsprintf(s, "%d.%02d", n/100, n%100);
 						SetDlgItemText(IDC_EDIT14, s);
 						if ((nSBCode == SB_THUMBPOSITION) || (nSBCode == SB_ENDSCROLL))
@@ -1079,7 +1079,7 @@ void CViewGlobals::OnSetParameter()
 		GetDlgItemText(IDC_EDIT14, s, sizeof(s));
 		if ((m_nCurrentParam < nParams) && (s[0]))
 		{
-			FLOAT fValue = (FLOAT)atof(s);
+			float fValue = (float)atof(s);
 			pVstPlugin->SetParameter(m_nCurrentParam, fValue);
 			OnParamChanged();
 			if(pSndFile->GetModSpecifications().supportsPlugins)

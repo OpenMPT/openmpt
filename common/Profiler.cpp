@@ -8,7 +8,7 @@
  */
 
 
-#include "Stdafx.h"
+#include "stdafx.h"
 #include "Profiler.h"
 #include <stdlib.h>
 

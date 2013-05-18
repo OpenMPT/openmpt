@@ -34,7 +34,7 @@ public:
 	//If changing this, see whether serialization should be 
 	//modified as well.
 
-	typedef vector<CTuning* const> TUNINGVECTOR;
+	typedef vector<CTuning*> TUNINGVECTOR;
 	typedef TUNINGVECTOR::iterator TITER; //Tuning ITERator.
 	typedef TUNINGVECTOR::const_iterator CTITER;
 
@@ -97,7 +97,7 @@ public:
 	void SetSavefilePath(LPCTSTR psz) {m_SavefilePath = psz;}
 	const string& GetSaveFilePath() const {return m_SavefilePath;}
 
-	string GetVersionString() const {return Stringify(s_SerializationVersion);}
+	string GetVersionString() const {return Stringify(static_cast<int>(s_SerializationVersion));}
 
 	size_t GetNameLengthMax() const {return 256;}
 
@@ -141,7 +141,7 @@ private:
 	bool Remove(TITER removable, bool moveToTrashBin = true);
 
 	//Hiding default operators because default meaning might not work right.
-	CTuningCollection& operator=(const CTuningCollection&) {}
+	CTuningCollection& operator=(const CTuningCollection&) {return *this;}
 	CTuningCollection(const CTuningCollection&) {}
 
 	bool DeserializeOLD(istream&, bool& loadingSuccessful);

@@ -12,6 +12,8 @@
 #include "Sndfile.h"
 #include "ModSample.h"
 
+#include <cmath>
+
 
 // Translate sample properties between two given formats.
 void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
@@ -193,6 +195,7 @@ uint32 ModSample::TransposeToFrequency(int transpose, int finetune)
 	int result;
 	uint32 freq;
 
+#if defined(ENABLE_X86)
 	transpose = (transpose << 7) + finetune;
 	_asm
 	{
@@ -210,6 +213,10 @@ uint32 ModSample::TransposeToFrequency(int transpose, int finetune)
 		faddp st(1), st(0)
 		fistp freq
 	}
+#else // !ENABLE_X86
+	freq = static_cast<uint32>(std::pow(2.0f, transpose * 128 + finetune) * (_fbase * _factor));
+#endif // ENABLE_X86
+
 	uint32 derr = freq % 11025;
 	if(derr <= 8) freq -= derr;
 	if(derr >= 11015) freq += 11025 - derr;
@@ -242,6 +249,7 @@ int ModSample::FrequencyToTranspose(uint32 freq)
 		return 0;
 	}
 
+#if defined(ENABLE_X86)
 	_asm
 	{
 		fld _factor
@@ -251,6 +259,10 @@ int ModSample::FrequencyToTranspose(uint32 freq)
 		fyl2x
 		fistp result
 	}
+#else // !ENABLE_X86
+	const float inv_log_2 = 1.44269504089f; // 1.0f/std::log(2.0f)	
+	result = std::log(freq * _f1_8363) * (_factor * inv_log_2);
+#endif // ENABLE_X86
 	return result;
 }
 

@@ -10,11 +10,11 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
 #endif
-#include "dlsbank.h"
+#include "Dlsbank.h"
 #include "Wav.h"
 #include "../common/StringFixer.h"
 #include "../soundlib/FileReader.h"

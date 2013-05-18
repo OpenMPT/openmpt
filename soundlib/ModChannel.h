@@ -186,7 +186,7 @@ struct ALIGN(32) ModChannelSettings
 	uint16 nPan;					// Initial pan (0...256)
 	uint16 nVolume;					// Initial channel volume (0...64)
 	PLUGINDEX nMixPlugin;			// Assigned plugin
-	CHAR szName[MAX_CHANNELNAME];	// Channel name
+	char szName[MAX_CHANNELNAME];	// Channel name
 
 	ModChannelSettings()
 	{

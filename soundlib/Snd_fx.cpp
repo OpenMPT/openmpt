@@ -15,14 +15,16 @@
 
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
 #include "tuning.h"
 #include "Tables.h"
 
+#ifdef _MSC_VER
 #pragma warning(disable:4244)
+#endif
 
 
 ////////////////////////////////////////////////////////////
@@ -4013,7 +4015,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 					for(size_t pos = 0; pos < macroLen; pos += 3)
 					{
 						DWORD curData = 0;
-						memcpy(&curData, macro + pos, std::min(3u, macroLen - pos));
+						memcpy(&curData, macro + pos, std::min<size_t>(3, macroLen - pos));
 						pPlugin->MidiSend(curData);
 					}
 				}

@@ -12,7 +12,7 @@
 #include "mptrack.h"
 #include "PatternGotoDialog.h"
 #include ".\patterngotodialog.h"
-#include "sndfile.h"
+#include "Sndfile.h"
 
 
 // CPatternGotoDialog dialog

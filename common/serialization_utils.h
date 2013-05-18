@@ -21,6 +21,7 @@
 #include <type_traits>
 #endif
 #include <algorithm>
+#include <string.h>
 
 namespace srlztn //SeRiaLiZaTioN
 {
@@ -120,6 +121,113 @@ enum Rwf
 	RwfRwHasMap,			// Read/write. True if map exists.
 	RwfNumFlags
 };
+
+
+template<class T>
+inline void Binarywrite(OutStream& oStrm, const T& data)
+//------------------------------------------------------
+{
+	oStrm.write(reinterpret_cast<const char*>(&data), sizeof(data));
+}
+
+//Write only given number of bytes from the beginning.
+template<class T>
+inline void Binarywrite(OutStream& oStrm, const T& data, const Offtype bytecount)
+//--------------------------------------------------------------------------
+{
+	oStrm.write(reinterpret_cast<const char*>(&data), MIN(bytecount, sizeof(data)));
+}
+
+template <class T>
+inline void WriteItem(OutStream& oStrm, const T& data)
+//----------------------------------------------------
+{
+	#ifdef HAS_TYPE_TRAITS
+		static_assert(std::is_trivial<T>::value == true, "");
+	#endif
+	Binarywrite(oStrm, data);
+}
+
+void WriteItemString(OutStream& oStrm, const char* const pStr, const size_t nSize);
+
+template <>
+inline void WriteItem<std::string>(OutStream& oStrm, const std::string& str) {WriteItemString(oStrm, str.c_str(), str.length());}
+
+template <>
+inline void WriteItem<LPCSTR>(OutStream& oStrm, const LPCSTR& psz) {WriteItemString(oStrm, psz, strlen(psz));}
+
+
+template<class T>
+inline void Binaryread(InStream& iStrm, T& data)
+//----------------------------------------------
+{
+	iStrm.read(reinterpret_cast<char*>(&data), sizeof(T));
+}
+
+//Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
+template <class T>
+inline void Binaryread(InStream& iStrm, T& data, const Offtype bytecount)
+//-----------------------------------------------------------------------
+{
+	#ifdef HAS_TYPE_TRAITS
+		static_assert(std::is_trivial<T>::value == true, "");
+	#endif
+	memset(&data, 0, sizeof(data));
+	iStrm.read(reinterpret_cast<char*>(&data), (std::min)((size_t)bytecount, sizeof(data)));
+}
+
+
+template <class T>
+inline void ReadItem(InStream& iStrm, T& data, const DataSize nSize)
+//------------------------------------------------------------------
+{
+	#ifdef HAS_TYPE_TRAITS
+		static_assert(std::is_trivial<T>::value == true, "");
+	#endif
+	if (nSize == sizeof(T) || nSize == invalidDatasize)
+		Binaryread(iStrm, data);
+	else
+		Binaryread(iStrm, data, nSize);
+}
+
+// Read specialization for float. If data size is 8, read double and assign it to given float.
+template <>
+inline void ReadItem<float>(InStream& iStrm, float& f, const DataSize nSize)
+//--------------------------------------------------------------------------
+{
+	if (nSize == 8)
+	{
+		double d;
+		Binaryread(iStrm, d);
+		f = static_cast<float>(d);
+	}
+	else
+		Binaryread(iStrm, f);
+}
+
+// Read specialization for double. If data size is 4, read float and assign it to given double.
+template <>
+inline void ReadItem<double>(InStream& iStrm, double& d, const DataSize nSize)
+//----------------------------------------------------------------------------
+{
+	if (nSize == 4)
+	{
+		float f;
+		Binaryread(iStrm, f);
+		d = f;
+	}
+	else
+		Binaryread(iStrm, d);
+}
+
+void ReadItemString(InStream& iStrm, std::string& str, const DataSize); 
+
+template <>
+inline void ReadItem<std::string>(InStream& iStrm, std::string& str, const DataSize nSize)
+//----------------------------------------------------------------------------------------
+{
+	ReadItemString(iStrm, str, nSize);
+}
 
 
 class Ssb
@@ -236,10 +344,6 @@ public:
 	// Write given string to log if log func is defined.
 	void AddToLog(LPCTSTR psz) {if (m_fpLogFunc) m_fpLogFunc(psz);}
 
-	SsbStatus m_Status;
-	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
-	fpLogFunc_t m_fpLogFunc;			// Pointer to log function.
-
 private:
 	// Reads map to cache.
 	void CacheMap();
@@ -285,13 +389,22 @@ private:
 	void IncrementWriteCounter();
 
 private:
+
+	OutStream* m_pOstrm;				// Write: Pointer to write stream.
+	InStream* m_pIstrm;					// Read: Pointer to read stream.
+
+public:
+
+	SsbStatus m_Status;
+	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
+	fpLogFunc_t m_fpLogFunc;			// Pointer to log function.
+
+private:
+
 	SsbStatus m_Readlogmask;			// Read: Controls which read messages will be written to log.
 	SsbStatus m_Writelogmask;			// Write: Controls which write messages will be written to log.
 	
 	std::vector<char> m_Idarray;		// Read: Holds entry ids.
-	
-	InStream* m_pIstrm;					// Read: Pointer to read stream.
-	OutStream* m_pOstrm;				// Write: Pointer to write stream.
 
 	Postype m_posStart;					// Read/write: Stream position at the beginning of object.
 	std::vector<ReadEntry> mapData;		// Read: Contains map information.
@@ -316,8 +429,6 @@ private:
 	Postype m_posMapStart;				// Write: Pos of map start.
 	OstrStream m_MapStream;				// Write: Map stream.
 
-private:
-	static const uint8 HeaderId_FlagByte = 0;
 public:
 	static const uint8 s_DefaultFlagbyte = 0;
 	static int32 s_DefaultReadLogMask;
@@ -390,112 +501,6 @@ inline Ssb::ReadIterator Ssb::GetReadEnd()
 	if (GetFlag(RwfRMapCached) == false)
 		CacheMap();
 	return mapData.end();
-}
-
-
-template<class T>
-inline void Binarywrite(OutStream& oStrm, const T& data)
-//------------------------------------------------------
-{
-	oStrm.write(reinterpret_cast<const char*>(&data), sizeof(data));
-}
-
-//Write only given number of bytes from the beginning.
-template<class T>
-inline void Binarywrite(OutStream& oStrm, const T& data, const Offtype bytecount)
-//--------------------------------------------------------------------------
-{
-	oStrm.write(reinterpret_cast<const char*>(&data), MIN(bytecount, sizeof(data)));
-}
-
-template <class T>
-inline void WriteItem(OutStream& oStrm, const T& data)
-//----------------------------------------------------
-{
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
-	Binarywrite(oStrm, data);
-}
-
-void WriteItemString(OutStream& oStrm, const char* const pStr, const size_t nSize);
-
-template <>
-inline void WriteItem<std::string>(OutStream& oStrm, const std::string& str) {WriteItemString(oStrm, str.c_str(), str.length());}
-
-template <>
-inline void WriteItem<LPCSTR>(OutStream& oStrm, const LPCSTR& psz) {WriteItemString(oStrm, psz, strlen(psz));}
-
-template<class T>
-inline void Binaryread(InStream& iStrm, T& data)
-//----------------------------------------------
-{
-	iStrm.read(reinterpret_cast<char*>(&data), sizeof(T));
-}
-
-//Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
-template <class T>
-inline void Binaryread(InStream& iStrm, T& data, const Offtype bytecount)
-//-----------------------------------------------------------------------
-{
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
-	memset(&data, 0, sizeof(data));
-	iStrm.read(reinterpret_cast<char*>(&data), (std::min)((size_t)bytecount, sizeof(data)));
-}
-
-
-template <class T>
-inline void ReadItem(InStream& iStrm, T& data, const DataSize nSize)
-//------------------------------------------------------------------
-{
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
-	if (nSize == sizeof(T) || nSize == invalidDatasize)
-		Binaryread(iStrm, data);
-	else
-		Binaryread(iStrm, data, nSize);
-}
-
-// Read specialization for float. If data size is 8, read double and assign it to given float.
-template <>
-inline void ReadItem<float>(InStream& iStrm, float& f, const DataSize nSize)
-//--------------------------------------------------------------------------
-{
-	if (nSize == 8)
-	{
-		double d;
-		Binaryread(iStrm, d);
-		f = static_cast<float>(d);
-	}
-	else
-		Binaryread(iStrm, f);
-}
-
-// Read specialization for double. If data size is 4, read float and assign it to given double.
-template <>
-inline void ReadItem<double>(InStream& iStrm, double& d, const DataSize nSize)
-//----------------------------------------------------------------------------
-{
-	if (nSize == 4)
-	{
-		float f;
-		Binaryread(iStrm, f);
-		d = f;
-	}
-	else
-		Binaryread(iStrm, d);
-}
-
-void ReadItemString(InStream& iStrm, std::string& str, const DataSize); 
-
-template <>
-inline void ReadItem<std::string>(InStream& iStrm, std::string& str, const DataSize nSize)
-//----------------------------------------------------------------------------------------
-{
-	ReadItemString(iStrm, str, nSize);
 }
 
 

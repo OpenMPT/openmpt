@@ -236,7 +236,7 @@ void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile
 }
 
 
-FLAGSET(TrackerVersions)
+enum TrackerVersions
 {
 	verUnknown		= 0x00,		// Probably not made with MPT
 	verOldModPlug	= 0x01,		// Made with MPT Alpha / Beta
@@ -250,6 +250,7 @@ FLAGSET(TrackerVersions)
 	verFT2Clone		= 0x80,		// NOT FT2: itype changed between instruments, or \0 found in song title
 	verDigiTracker	= 0x100,	// Probably DigiTrakker
 };
+DECLARE_FLAGSET(TrackerVersions)
 
 
 bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
@@ -261,7 +262,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| fileHeader.channels == 0
 		|| fileHeader.channels > MAX_BASECHANNELS
-		|| _strnicmp(fileHeader.signature, "Extended Module: ", 17)
+		|| mpt_strnicmp(fileHeader.signature, "Extended Module: ", 17)
 		|| !file.CanRead(fileHeader.orders))
 	{
 		return false;

@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <string.h>
+
 namespace StringFixer
 {
 
@@ -63,18 +65,6 @@ namespace StringFixer
 
 
 	// Copy a string from srcBuffer to destBuffer using a given read mode.
-	// Used for reading strings from files.
-	// Preferrably use this version of the function, it is safer.
-	template <ReadWriteMode mode, size_t destSize, size_t srcSize>
-	void ReadString(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
-	//-----------------------------------------------------------------------------
-	{
-		STATIC_ASSERT(destSize > 0);
-		STATIC_ASSERT(srcSize > 0);
-		ReadString<mode, destSize>(destBuffer, srcBuffer, srcSize);
-	}
-
-
 	// Copy a string from srcBuffer to destBuffer using a given read mode.
 	// Used for reading strings from files.
 	// Only use this version of the function if the size of the source buffer is variable.
@@ -159,17 +149,17 @@ namespace StringFixer
 	}
 
 
-	// Copy a string from srcBuffer to destBuffer using a given write mode.
-	// Used for writing strings to files.
+	// Used for reading strings from files.
 	// Preferrably use this version of the function, it is safer.
 	template <ReadWriteMode mode, size_t destSize, size_t srcSize>
-	void WriteString(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
-	//------------------------------------------------------------------------------
+	void ReadString(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
+	//-----------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 		STATIC_ASSERT(srcSize > 0);
-		WriteString<mode, destSize>(destBuffer, srcBuffer, srcSize);
+		ReadString<mode, destSize>(destBuffer, srcBuffer, srcSize);
 	}
+
 
 	// Copy a string from srcBuffer to destBuffer using a given write mode.
 	// Used for writing strings to files.
@@ -215,14 +205,18 @@ namespace StringFixer
 		}
 	}
 
-
-	// Copy from one fixed size char array to another one.
-	template <size_t destSize, size_t srcSize>
-	void Copy(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
-	//-----------------------------------------------------------------------
+	// Copy a string from srcBuffer to destBuffer using a given write mode.
+	// Used for writing strings to files.
+	// Preferrably use this version of the function, it is safer.
+	template <ReadWriteMode mode, size_t destSize, size_t srcSize>
+	void WriteString(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
+	//------------------------------------------------------------------------------
 	{
-		CopyN(destBuffer, srcBuffer, srcSize);
+		STATIC_ASSERT(destSize > 0);
+		STATIC_ASSERT(srcSize > 0);
+		WriteString<mode, destSize>(destBuffer, srcBuffer, srcSize);
 	}
+
 
 	// Copy from a char array to a fixed size char array.
 	template <size_t destSize>
@@ -233,4 +227,14 @@ namespace StringFixer
 		strncpy(destBuffer, srcBuffer, copySize);
 		destBuffer[copySize] = '\0';
 	}
+
+	// Copy from one fixed size char array to another one.
+	template <size_t destSize, size_t srcSize>
+	void Copy(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
+	//-----------------------------------------------------------------------
+	{
+		CopyN(destBuffer, srcBuffer, srcSize);
+	}
+
 };
+

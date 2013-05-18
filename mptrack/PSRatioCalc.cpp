@@ -13,7 +13,7 @@
 #include "mainfrm.h"
 #include "PSRatioCalc.h"
 #include ".\psratiocalc.h"
-#include "sndfile.h"		//for tempo mode enum
+#include "Sndfile.h"		//for tempo mode enum
 
 // CPSRatioCalc dialog
 

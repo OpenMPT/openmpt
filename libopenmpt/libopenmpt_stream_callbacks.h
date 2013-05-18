@@ -32,7 +32,7 @@ extern "C" {
 /* This stuff has to be in a header file because of possibly different MSVC CRTs which cause problems for FILE * crossing CRT boundaries. */
 
 static int openmpt_stream_fd_read_func( void * stream, void * dst, int bytes ) {
-	int fd = (int)stream;
+	int fd = (int)(uintptr_t)stream;
 	if ( fd < 0 ) {
 		return 0;
 	}

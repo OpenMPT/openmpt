@@ -14,7 +14,7 @@
 #include "moddoc.h"
 #include "mainfrm.h"
 #include "view_tre.h"
-#include "dlsbank.h"
+#include "Dlsbank.h"
 #include "dlg_misc.h"
 #include "vstplug.h"
 #include "../soundlib/FileReader.h"

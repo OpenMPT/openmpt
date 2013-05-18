@@ -12,6 +12,8 @@
 
 #include "Snd_defs.h"
 
+#include <cstring>
+
 // Note definitions
 #define NOTE_NONE			(ModCommand::NOTE(0))
 #define NOTE_MIN			(ModCommand::NOTE(1))
@@ -45,7 +47,7 @@ public:
 	// Returns empty modcommand.
 	static ModCommand Empty() { ModCommand m = { 0, 0, 0, 0, 0, 0 }; return m; }
 
-	bool operator==(const ModCommand& mc) const { return (memcmp(this, &mc, sizeof(ModCommand)) == 0); }
+	bool operator==(const ModCommand& mc) const { return (std::memcmp(this, &mc, sizeof(ModCommand)) == 0); }
 	bool operator!=(const ModCommand& mc) const { return !(*this == mc); }
 
 	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) { note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol); }

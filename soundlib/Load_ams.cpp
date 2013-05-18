@@ -898,7 +898,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				c = textIn[readLen++];
 				uint32 count = textIn[readLen++];
-				for(size_t i = std::min(descriptionHeader.unpackedLen - writeLen, count); i != 0; i--)
+				for(size_t i = std::min<size_t>(descriptionHeader.unpackedLen - writeLen, count); i != 0; i--)
 				{
 					textOut[writeLen++] = c;
 				}

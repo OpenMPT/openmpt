@@ -72,7 +72,7 @@ const CHANNELINDEX MAX_CHANNELS			= 256;	//200 // Maximum number of mixing chann
 
 #define MAX_PLUGPRESETS		1000 //rewbs.plugPresets
 
-FLAGSET(MODTYPE)
+enum MODTYPE
 {
 	MOD_TYPE_NONE	= 0x00,
 	MOD_TYPE_MOD	= 0x01,
@@ -108,6 +108,7 @@ FLAGSET(MODTYPE)
 	MOD_TYPE_GDM	= 0x40000000,
 	MOD_TYPE_UMX	= 0x80000000,
 };
+DECLARE_FLAGSET(MODTYPE)
 
 
 // For compatibility mode
@@ -119,7 +120,7 @@ FLAGSET(MODTYPE)
 
 
 // Channel flags:
-FLAGSET(ChannelFlags)
+enum ChannelFlags
 {
 	// Bits 0-7:	Sample Flags
 	CHN_16BIT			= 0x01,			// 16-bit sample
@@ -152,6 +153,7 @@ FLAGSET(ChannelFlags)
 	CHN_NOFX			= 0x4000000,	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
 	CHN_SYNCMUTE		= 0x8000000,	// keep sample sync on mute
 };
+DECLARE_FLAGSET(ChannelFlags)
 
 
 #define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG)
@@ -159,7 +161,7 @@ FLAGSET(ChannelFlags)
 
 
 // Instrument envelope-specific flags
-FLAGSET(EnvelopeFlags)
+enum EnvelopeFlags
 {
 	ENV_ENABLED		= 0x01,	// env is enabled
 	ENV_LOOP		= 0x02,	// env loop
@@ -167,6 +169,7 @@ FLAGSET(EnvelopeFlags)
 	ENV_CARRY		= 0x08,	// env carry
 	ENV_FILTER		= 0x10,	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
 };
+DECLARE_FLAGSET(EnvelopeFlags)
 
 
 // Envelope value boundaries
@@ -196,11 +199,12 @@ FLAGSET(EnvelopeFlags)
 
 
 // Instrument-specific flags
-FLAGSET(InstrumentFlags)
+enum InstrumentFlags
 {
 	INS_SETPANNING	= 0x01,	// Panning enabled
 	INS_MUTE		= 0x02,	// Instrument is muted
 };
+DECLARE_FLAGSET(InstrumentFlags)
 
 
 // envelope types in instrument editor
@@ -245,7 +249,7 @@ enum enmEnvelopeTypes
 
 
 // Module flags
-FLAGSET(SongFlags)
+enum SongFlags
 {
 	SONG_EMBEDMIDICFG	= 0x0001,		// Embed macros in file
 	SONG_FASTVOLSLIDES	= 0x0002,		// Old Scream Tracker 3.0 volume slides
@@ -273,6 +277,7 @@ FLAGSET(SongFlags)
 	SONG_POSJUMP		= 0x100000,		// Position jump encountered (internal flag, do not touch)
 	SONG_PT1XMODE		= 0x200000,		// ProTracker 1.x playback mode
 };
+DECLARE_FLAGSET(SongFlags)
 
 #define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_ITPROJECT|SONG_ITPEMBEDIH|SONG_PT1XMODE)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)

@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "typedefs.h"
 #include <iostream>
+#include <cstring>
 
 
 #ifndef MODPLUG_TRACKER
@@ -118,7 +119,7 @@ static void DoLog(const char *file, int line, const char *function, const char *
 			}
 		#endif //LOG_TO_FILE
 	#else // !MODPLUG_TRACKER
-		std::size_t len = strlen(message);
+		std::size_t len = std::strlen(message);
 		// remove eol if already present
 		if(len > 0 && message[len-1] == '\n')
 		{

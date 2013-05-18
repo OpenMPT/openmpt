@@ -13,6 +13,7 @@
 
 #include "../common/typedefs.h"
 #include "../common/StringFixer.h"
+#include "../common/misc_util.h"
 #include "Endianness.h"
 #include <algorithm>
 #ifndef NO_FILEREADER_STD_ISTREAM
@@ -87,7 +88,7 @@ public:
 	{
 		return 0;
 	}
-	off_t Read(char *dst, off_t pos, off_t count) const
+	off_t Read(char * /*dst*/, off_t /*pos*/, off_t /*count*/) const
 	{
 		return 0;
 	}
@@ -148,7 +149,7 @@ private:
 	std::istream *stream;
 
 public:
-	FileDataContainerStdStream(std::istream *s) : stream(s), streamFullyCached(false) { }
+	FileDataContainerStdStream(std::istream *s) : streamFullyCached(false), stream(s) { }
 	virtual ~FileDataContainerStdStream() { }
 
 private:

@@ -11,6 +11,9 @@
 #pragma once
 
 #include <string>
+#ifdef __GNUC__
+#include <strings.h> // for strcasecmp
+#endif
 
 namespace mpt
 {
@@ -85,4 +88,14 @@ inline std::string string_replace(std::string str, const std::string &oldStr, co
 		pos += newStr.length();
 	}
 	return str;
+}
+
+
+static inline int mpt_strnicmp(const char *a, const char *b, size_t count)
+{
+	#ifdef _MSC_VER
+		return _strnicmp(a, b, count);
+	#else
+		return strncasecmp(a, b, count);
+	#endif
 }
