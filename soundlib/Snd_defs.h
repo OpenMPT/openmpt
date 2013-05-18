@@ -213,7 +213,6 @@ enum enmEnvelopeTypes
 	ENV_VOLUME = 0,
 	ENV_PANNING,
 	ENV_PITCH,
-	NUM_ENVELOPES,
 };
 
 // Filter Modes
@@ -328,7 +327,6 @@ enum ResamplingMode
 	SRCMODE_FIRFILTER, //rewbs.resamplerConf
 
 	SRCMODE_DEFAULT,
-	NUM_SRC_MODES
 };
 
 
