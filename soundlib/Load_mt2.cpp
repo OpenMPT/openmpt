@@ -368,6 +368,13 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 						}
 					#endif
 						ConvertMT2Command(this, &m[patpos], &cmd);
+						const ModCommand &orig = m[patpos];
+						const ROWINDEX fillRows = std::min(rptcount, nLines - (row + 1));
+						for(ROWINDEX r = 0; r < fillRows; r++)
+						{
+							patpos += GetNumChannels();
+							m[patpos] = orig;
+						}
 					}
 					row += rptcount+1;
 					while (row >= nLines) { row-=nLines; ch++; }
