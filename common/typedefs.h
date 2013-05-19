@@ -12,43 +12,42 @@
 
 
 
-// Definitions for MSVC versions to write more understandable conditional-compilation,
-// e.g. #if (_MSC_VER > MSVC_VER_2008) instead of #if (_MSC_VER > 1500) 
-#define MSVC_VER_VC9		1500
-#define MSVC_VER_2008		MSVC_VER_VC9
-#define MSVC_VER_VC10		1600
-#define MSVC_VER_2010		MSVC_VER_VC10
-
-#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-
-
-
-#if defined(_MSC_VER)
+#if MPT_COMPILER_MSVC
 #pragma warning(error : 4309) // Treat "truncation of constant value"-warning as error.
 #endif
 
 
 
-#if defined(_MSC_VER) && (_MSC_VER >= MSVC_VER_2010)
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
+#define MPT_COMPILER_HAS_RVALUE_REF
+#endif
+
+
+
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
 #define HAS_TYPE_TRAITS
 #endif
 
 
 
-#if defined(_MSC_VER)
-#if (_MSC_VER < MSVC_VER_2010)
-	#define nullptr		0
+#if MPT_COMPILER_MSVC
+
+#if MPT_MSVC_BEFORE(2010,0)
+#define nullptr		0
 #endif
-#elif defined(__GNUC__)
-#if GCC_VERSION < 40600
+
+#elif MPT_COMPILER_GCC
+
+#if MPT_GCC_BEFORE(4,6,0)
 #define nullptr 0
 #endif
+
 #endif
 
 
 
 //  CountOf macro computes the number of elements in a statically-allocated array.
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 	#define CountOf(x) _countof(x)
 #else
 	#define CountOf(x) (sizeof((x))/sizeof((x)[0]))
@@ -56,28 +55,28 @@
 
 
 
-#if defined(_MSC_VER)
+#if MPT_COMPILER_MSVC
 #define PACKED __declspec(align(1))
 #define NEEDS_PRAGMA_PACK
-#elif defined(__GNUC__)
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define PACKED __attribute__((packed)) __attribute__((aligned(1)))
 #endif
 
 
 
-#if defined(_MSC_VER)
+#if MPT_COMPILER_MSVC
 #define ALIGN(n) __declspec(align(n))
-#elif defined(__GNUC__)
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define ALIGN(n) __attribute__((aligned(n)))
 #endif
 
 
 
 // Advanced inline attributes
-#if defined(_MSC_VER)
+#if MPT_COMPILER_MSVC
 #define forceinline __forceinline
 #define noinline __declspec(noinline)
-#elif defined(__GNUC__)
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define forceinline __attribute__((always_inline)) inline
 #define noinline __attribute__((noinline))
 #else
@@ -89,9 +88,9 @@
 
 // Some functions might be deprecated although they are still in use.
 // Tag them with "DEPRECATED".
-#if defined(_MSC_VER)
+#if MPT_COMPILER_MSVC
 #define DEPRECATED __declspec(deprecated)
-#elif defined(__GNUC__)
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define DEPRECATED __attribute__((deprecated))
 #else
 #define DEPRECATED
@@ -110,7 +109,7 @@ typedef std::bad_alloc & MPTMemoryException;
 
 
 #include <memory>
-#if defined(_MSC_VER) && (_MSC_VER <= MSVC_VER_2008)
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 #define MPT_SHARED_PTR std::tr1::shared_ptr
 #else
 #define MPT_SHARED_PTR std::shared_ptr
@@ -137,7 +136,7 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 #endif
 
 // Compile time assert.
-#if defined(_MSC_VER) && (_MSC_VER < MSVC_VER_2010)
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
 #endif
 #define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
@@ -145,7 +144,7 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 
 
 #include <cstdarg>
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #ifndef va_copy
 #define va_copy(dst, src) do { (dst) = (src); } while (0)
 #endif
@@ -153,7 +152,7 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 
 
 
-#if defined(_MSC_VER) && (_MSC_VER <= MSVC_VER_2008)
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 
 typedef __int8 int8;
 typedef __int16 int16;
@@ -284,7 +283,7 @@ typedef char *        LPTSTR;
 
 #include <cstdio>
 #include <stdio.h>
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 int c99_vsnprintf(char *str, size_t size, const char *format, va_list args);
 int c99_snprintf(char *str, size_t size, const char *format, ...);
 #define snprintf c99_snprintf

@@ -12,7 +12,7 @@
 
 class CSoundFile;
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #pragma warning(disable:4324) //structure was padded due to __declspec(align())
 #endif
 
@@ -204,6 +204,6 @@ struct ALIGN(32) ModChannelSettings
 	}
 };
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #pragma warning(default:4324) //structure was padded due to __declspec(align())
 #endif

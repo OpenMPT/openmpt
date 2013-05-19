@@ -57,7 +57,7 @@ void AssertHandler(const char *file, int line, const char *function, const char 
 #endif
 
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 
 int c99_vsnprintf(char *str, size_t size, const char *format, va_list args)
 {

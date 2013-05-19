@@ -11,7 +11,7 @@
 #pragma once
 
 #include <string>
-#ifdef __GNUC__
+#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #include <strings.h> // for strcasecmp
 #endif
 
@@ -30,7 +30,7 @@ namespace mpt
 		String(const std::string& other) : BaseClass(other) {}
 
 		// Move constructors and move assignments.
-	#if (_MSC_VER >= MSVC_VER_2010)
+	#if defined(MPT_COMPILER_HAS_RVALUE_REF)
 		String(BaseClass&& str) : BaseClass(std::move(str)) {}
 		String(String&& other) : BaseClass(std::move(static_cast<BaseClass&>(other))) {}
 		String& operator=(BaseClass&& str) {BaseClass::operator=(std::move(str)); return *this;}
@@ -93,7 +93,7 @@ inline std::string string_replace(std::string str, const std::string &oldStr, co
 
 static inline int mpt_strnicmp(const char *a, const char *b, size_t count)
 {
-	#ifdef _MSC_VER
+	#if MPT_COMPILER_MSVC
 		return _strnicmp(a, b, count);
 	#else
 		return strncasecmp(a, b, count);

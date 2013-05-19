@@ -23,7 +23,7 @@ extern uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), 
 extern int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
 
 
-#if defined(__GNUC__)
+#if MPT_COMPILER_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch"
 #endif
@@ -397,7 +397,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	return bytesRead;
 }
 
-#if defined(__GNUC__)
+#if MPT_COMPILER_GCC
 #pragma GCC diagnostic pop
 #endif
 

@@ -319,6 +319,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
   <ItemGroup>
     <ClInclude Include="..\common\AudioCriticalSection.h" />
     <ClInclude Include="..\common\BuildSettings.h" />
+    <ClInclude Include="..\common\CompilerDetect.h" />
     <ClInclude Include="..\common\FlagSet.h" />
     <ClInclude Include="..\common\misc_util.h" />
     <ClInclude Include="..\common\mptString.h" />

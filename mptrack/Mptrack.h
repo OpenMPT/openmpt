@@ -98,7 +98,7 @@ public:
 	static MEMORYSTATUS gMemStatus;
 	static std::vector<CDLSBank *> gpDLSBanks;
 
-#if (_MSC_VER < MSVC_VER_2010)
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 	virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
 	{
 		CDocument* pDoc = CWinApp::OpenDocumentFile(lpszFileName);

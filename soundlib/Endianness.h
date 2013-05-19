@@ -19,11 +19,11 @@
 // endian architecture or value x in format of current architecture to little endian 
 // format.
 
-#ifdef __GNUC__
-#if GCC_VERSION >= 40300
+#if MPT_COMPILER_GCC
+#if MPT_GCC_AT_LEAST(4,3,0)
 #define bswap32 __builtin_bswap32
 #endif
-#elif defined(_MSC_VER)
+#elif MPT_COMPILER_MSVC
 #include <intrin.h>
 #define bswap16 _byteswap_ushort
 #define bswap32 _byteswap_ulong

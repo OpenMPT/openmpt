@@ -58,14 +58,14 @@ public:
 	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
 		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
 
-	#if (_MSC_VER < MSVC_VER_2010)
+	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 		virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL makeVisible = TRUE);
 	#else
 		virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
 	#endif
 };
 
-#if (_MSC_VER < MSVC_VER_2010)
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 	CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL makeVisible)
 #else
 	CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL addToMru, BOOL makeVisible)
@@ -87,7 +87,7 @@ public:
 		}
 	}
 
-	#if (_MSC_VER < MSVC_VER_2010)
+	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, makeVisible);
 	#else
 		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, addToMru, makeVisible);
@@ -617,7 +617,7 @@ END_MESSAGE_MAP()
 CTrackApp::CTrackApp()
 //--------------------
 {
-	#ifdef _MSC_VER
+	#if MPT_COMPILER_MSVC
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
 

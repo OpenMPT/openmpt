@@ -14,7 +14,7 @@
 #include "../sounddsp/DSP.h"
 #include <math.h>
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #pragma warning(disable: 4725) // instruction may be inaccurate on some Pentiums
 #endif
 
