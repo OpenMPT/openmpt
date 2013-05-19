@@ -1465,7 +1465,6 @@ UINT CSoundFile::CreateStereoMix(int count)
 	DWORD nchused, nchmixed;
 
 	if (!count) return 0;
-	BOOL bSurround;
 	bool ITPingPongMode = IsITPingPongMode();
 	if (m_MixerSettings.gnChannels > 2) InitMixBuffer(MixRearBuffer, count*2);
 	nchused = nchmixed = 0;
@@ -1556,7 +1555,6 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pOfsL = &m_Reverb.gnRvbLOfsVol;
 		}
 #endif
-		bSurround = (pbuffer == MixRearBuffer);
 		nchused++;
 		////////////////////////////////////////////////////
 	SampleLooping:
