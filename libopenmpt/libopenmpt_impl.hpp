@@ -174,6 +174,18 @@ private:
 			PushToCSoundFileLog( i->first, i->second );
 		}
 	}
+	std::size_t read_wrapper( void * buffer, std::size_t count ) {
+		std::size_t count_read = 0;
+		while ( count > 0 ) {
+			std::size_t count_chunk = m_sndFile.Read( buffer, static_cast<UINT>( std::min<std::size_t>( count, std::numeric_limits<UINT>::max() / 2 / 4 / 4 ) ) ); // safety margin / samplesize / channels
+			if ( count_chunk == 0 ) {
+				break;
+			}
+			count -= count_chunk;
+			count_read += count_chunk;
+		}
+		return count_read;
+	}
 public:
 	static double could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log ) {
 		CSoundFile sndFile;
@@ -367,7 +379,7 @@ public:
 		}
 		apply_mixer_settings( samplerate, 1, SampleFormatInt16 );
 		m_int16Buffer.resize( count * 1 );
-		count = m_sndFile.Read( &m_int16Buffer[0], count );
+		count = read_wrapper( &m_int16Buffer[0], count );
 		for ( std::size_t i = 0; i < count; ++i ) {
 			mono[i] = m_int16Buffer[i*1];
 		}
@@ -380,7 +392,7 @@ public:
 		}
 		apply_mixer_settings( samplerate, 2, SampleFormatInt16 );
 		m_int16Buffer.resize( count * 2 );
-		count = m_sndFile.Read( &m_int16Buffer[0], count );
+		count = read_wrapper( &m_int16Buffer[0], count );
 		for ( std::size_t i = 0; i < count; ++i ) {
 			left[i] = m_int16Buffer[i*2+0];
 			right[i] = m_int16Buffer[i*2+1];
@@ -394,7 +406,7 @@ public:
 		}
 		apply_mixer_settings( samplerate, 4, SampleFormatInt16 );
 		m_int16Buffer.resize( count * 4 );
-		count = m_sndFile.Read( &m_int16Buffer[0], count );
+		count = read_wrapper( &m_int16Buffer[0], count );
 		for ( std::size_t i = 0; i < count; ++i ) {
 			left[i] = m_int16Buffer[i*4+0];
 			right[i] = m_int16Buffer[i*4+1];
@@ -410,7 +422,7 @@ public:
 		}
 		apply_mixer_settings( samplerate, 1, SampleFormatFloat32 );
 		m_floatBuffer.resize( count * 1 );
-		count = m_sndFile.Read( &m_floatBuffer[0], count );
+		count = read_wrapper( &m_floatBuffer[0], count );
 		for ( std::size_t i = 0; i < count; ++i ) {
 			mono[i] = m_floatBuffer[i*1];
 		}
@@ -423,7 +435,7 @@ public:
 		}
 		apply_mixer_settings( samplerate, 2, SampleFormatFloat32 );
 		m_floatBuffer.resize( count * 2 );
-		count = m_sndFile.Read( &m_floatBuffer[0], count );
+		count = read_wrapper( &m_floatBuffer[0], count );
 		for ( std::size_t i = 0; i < count; ++i ) {
 			left[i] = m_floatBuffer[i*2+0];
 			right[i] = m_floatBuffer[i*2+1];
@@ -437,7 +449,7 @@ public:
 		}
 		apply_mixer_settings( samplerate, 4, SampleFormatFloat32 );
 		m_floatBuffer.resize( count * 4 );
-		count = m_sndFile.Read( &m_floatBuffer[0], count );
+		count = read_wrapper( &m_floatBuffer[0], count );
 		for ( std::size_t i = 0; i < count; ++i ) {
 			left[i] = m_floatBuffer[i*4+0];
 			right[i] = m_floatBuffer[i*4+1];
