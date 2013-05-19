@@ -26,7 +26,6 @@
 #define str_tooMuchPatternData	(GetStrI18N((MPT_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
 #define str_pattern				(GetStrI18N((MPT_TEXT("pattern"))))
 #define str_PatternSetTruncationNote (GetStrI18N((MPT_TEXT("The module contains %u patterns but only %u patterns can be loaded in this OpenMPT version."))))
-#define str_SequenceTruncationNote (GetStrI18N((MPT_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
 #define str_LoadingIncompatibleVersion	MPT_TEXT("The file informed that it is incompatible with this version of OpenMPT. Loading was terminated.")
 #define str_LoadingMoreRecentVersion	MPT_TEXT("The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly.")
 
@@ -466,15 +465,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		Order.ReadAsByte(file, fileHeader.ordnum);
 	} else
 	{
-		ORDERINDEX ordSize = fileHeader.ordnum;
-		if(fileHeader.ordnum > GetModSpecifications().ordersMax)
-		{
-			mpt::String str;
-			str.Format(str_SequenceTruncationNote, fileHeader.ordnum, GetModSpecifications().ordersMax);
-			AddToLog(str);
-			ordSize = GetModSpecifications().ordersMax;
-		}
-
 		if(fileHeader.cwtv > 0x88A && fileHeader.cwtv <= 0x88D)
 		{
 			Order.Deserialize(file);
