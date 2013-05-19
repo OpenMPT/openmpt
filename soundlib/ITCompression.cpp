@@ -213,6 +213,10 @@ void ITCompression::Verify(const void *data, void *sampleData, SmpLength offset)
 		}
 		delete[] newSampleData;
 	}
+#else // !MODPLUG_TRACKER
+	UNREFERENCED_PARAMETER(data);
+	UNREFERENCED_PARAMETER(sampleData);
+	UNREFERENCED_PARAMETER(offset);
 #endif // MODPLUG_TRACKER
 }
 
