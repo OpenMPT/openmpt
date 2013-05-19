@@ -574,7 +574,6 @@ public:
 	void ResetChannels();
 	UINT Read(LPVOID lpBuffer, UINT cbBuffer);
 	UINT CreateStereoMix(int count);
-	UINT GetResamplingFlag(const ModChannel *pChannel);
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
 	void ProcessPlugins(UINT nCount);

@@ -65,6 +65,4 @@ public:
 	~CResampler() {}
 	void InitializeTables(bool force=false);
 	bool IsHQ() const { return m_Settings.SrcMode >= SRCMODE_SPLINE && m_Settings.SrcMode < SRCMODE_DEFAULT; }
-	bool IsUltraHQ() const { return m_Settings.SrcMode >= SRCMODE_POLYPHASE && m_Settings.SrcMode < SRCMODE_DEFAULT; }
-	bool Is(ResamplingMode cmp) const { return m_Settings.SrcMode == cmp; }
 };
