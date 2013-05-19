@@ -230,7 +230,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 					m_PatternCuePoints.push_back(cue);
 				}
 #endif
-			} else 
+			} else
 			{
 #ifdef MODPLUG_TRACKER
 				if ((m_nMaxOrderPosition) && (m_nCurrentOrder >= m_nMaxOrderPosition))
@@ -1909,7 +1909,7 @@ BOOL CSoundFile::ReadNote()
 			int32 ninc = Util::muldiv(freq, 0x10000, m_MixerSettings.gdwMixingFreq);
 			if ((ninc >= 0xFFB0) && (ninc <= 0x10090)) ninc = 0x10000;
 			if (m_nFreqFactor != 128) ninc = (ninc * m_nFreqFactor) >> 7;
-			if (ninc > 0xFF0000) ninc = 0xFF0000;
+			Limit(ninc, 3, 0xFF0000);
 			pChn->nInc = (ninc + 1) & ~3;
 		} else
 		{

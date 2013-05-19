@@ -4691,9 +4691,23 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) 
 	} else if (GetType() == MOD_TYPE_XM)
 	{
 		if(m_SongFlags[SONG_LINEARSLIDES])
-			return XMLinearTable[period % 768] >> (period / 768);
-		else
+		{
+			uint32 octave = period / 768;
+			if(IsCompatibleMode(TRK_FASTTRACKER2))
+			{
+				// Under normal circumstances, this calculation returns the same values as the non-compatible one.
+				// However, once the 12 octaves are exceeded (through portamento slides), FT2 wraps the frequency around...
+				// Test case: FreqWraparound.xm
+				// 12 octaves * (12 * 64) LUT entries = 9216, add 767 for rounding
+				// Period is a 16 bit value in FT2, hence the "& 0xFFFF".
+				uint32 div = ((9216u + 767u - (period & 0xFFFF)) / 768);
+				octave = ((12 - div) & 0x1F) % 29u;
+			}
+			return XMLinearTable[period % 768] >> octave;
+		} else
+		{
 			return 8363 * 1712L / period;
+		}
 	} else
 	{
 		if(m_SongFlags[SONG_LINEARSLIDES])
