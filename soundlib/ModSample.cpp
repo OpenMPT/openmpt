@@ -192,10 +192,10 @@ uint32 ModSample::TransposeToFrequency(int transpose, int finetune)
 	// return (unsigned int) (8363.0 * pow(2, (transp * 128.0 + ftune) / 1536.0));
 	const float _fbase = 8363;
 	const float _factor = 1.0f / (12.0f * 128.0f);
-	int result;
 	uint32 freq;
 
 #if defined(ENABLE_X86)
+	int result;
 	transpose = (transpose << 7) + finetune;
 	_asm
 	{
