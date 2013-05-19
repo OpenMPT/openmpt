@@ -275,12 +275,14 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 		categoryFolders[categories[i].category] = AddTreeItem(categories[i].description, IMAGE_FOLDER, false);
 	}
 
-	HTREEITEM currentPlug = AddTreeItem("No plugin (empty slot)", IMAGE_NOPLUGIN, false);
+	HTREEITEM noPlug = AddTreeItem("No plugin (empty slot)", IMAGE_NOPLUGIN, false);
+	HTREEITEM currentPlug = noPlug;
 	bool foundCurrentPlug = false;
 
+	const bool nameFilterActive = !m_sNameFilter.IsEmpty();
 	if(pManager)
 	{
-		const bool nameFilterActive = !m_sNameFilter.IsEmpty();
+		bool first = true;
 
 		VSTPluginLib *p = pManager->GetFirstPlugin();
 		while(p)
@@ -303,6 +305,11 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 			{
 				// If filter is active, expand nodes.
 				m_treePlugins.EnsureVisible(h);
+				if(first)
+				{
+					first = false;
+					m_treePlugins.SelectItem(h);
+				}
 			}
 
 			if(m_pPlugin && !foundCurrentPlug)
@@ -357,7 +364,10 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 	m_treePlugins.SetRedraw(TRUE);
 	if(currentPlug)
 	{
-		m_treePlugins.SelectItem(currentPlug);
+		if(!nameFilterActive || currentPlug != noPlug)
+		{
+			m_treePlugins.SelectItem(currentPlug);
+		}
 		m_treePlugins.SetItemState(currentPlug, TVIS_BOLD, TVIS_BOLD);
 		m_treePlugins.EnsureVisible(currentPlug);
 	}
