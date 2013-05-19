@@ -195,6 +195,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		case SampleFormatInt24:     pCvt = Convert32To24;      break;
 		case SampleFormatInt32:     pCvt = Convert32To32;      break;
 		case SampleFormatFloat32:   pCvt = Convert32ToFloat32; break;
+		default: return 0; break;
 	}
 	lSampleSize *= m_MixerSettings.GetBitsPerSample()/8;
 
