@@ -1245,6 +1245,20 @@ END_RAMPMIX_STFLT_INTERFACE()
 #define MIXNDX_KAISERSRC	0x30
 #define MIXNDX_FIRFILTERSRC	0x40 // rewbs.resamplerConf
 
+static UINT ResamplingModeToMixFlags(uint8 resamplingMode)
+//--------------------------------------------------------
+{
+	switch(resamplingMode)
+	{
+	case SRCMODE_NEAREST:   return 0;
+	case SRCMODE_LINEAR:    return MIXNDX_LINEARSRC;
+	case SRCMODE_SPLINE:    return MIXNDX_HQSRC;
+	case SRCMODE_POLYPHASE: return MIXNDX_KAISERSRC;
+	case SRCMODE_FIRFILTER: return MIXNDX_FIRFILTERSRC;
+	}
+	return 0;
+}
+
 
 //const LPMIXINTERFACE gpMixFunctionTable[4*16] =
 const LPMIXINTERFACE gpMixFunctionTable[5*16] =    //rewbs.resamplerConf: increased to 5 to cope with FIR
@@ -1619,25 +1633,16 @@ UINT CSoundFile::GetResamplingFlag(const ModChannel *pChannel)
 //------------------------------------------------------------
 {
 	if (pChannel->pModInstrument) {
-		switch (pChannel->pModInstrument->nResampling) {
-			case SRCMODE_NEAREST:	return 0;
-			case SRCMODE_LINEAR:	return MIXNDX_LINEARSRC;
-			case SRCMODE_SPLINE:	return MIXNDX_HQSRC;
-			case SRCMODE_POLYPHASE: return MIXNDX_KAISERSRC;
-			case SRCMODE_FIRFILTER: return MIXNDX_FIRFILTERSRC;
-//			default: ;
+		if(IsKnownResamplingMode(pChannel->pModInstrument->nResampling))
+		{
+			return ResamplingModeToMixFlags(pChannel->pModInstrument->nResampling);
 		}
 	}
 
 	//didn't manage to get flag from instrument header, use channel flags.
 	if(pChannel->dwFlags[CHN_HQSRC])
 	{
-		switch(m_Resampler.m_Settings.SrcMode)
-		{
-			case SRCMODE_SPLINE:    return MIXNDX_HQSRC; break;
-			case SRCMODE_POLYPHASE: return MIXNDX_KAISERSRC; break;
-			case SRCMODE_FIRFILTER: return MIXNDX_FIRFILTERSRC; break;
-		}
+		return ResamplingModeToMixFlags(m_Resampler.m_Settings.SrcMode);
 	} else if(!pChannel->dwFlags[CHN_NOIDO])
 	{
 		return MIXNDX_LINEARSRC;
