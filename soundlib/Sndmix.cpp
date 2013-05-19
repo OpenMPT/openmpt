@@ -2019,22 +2019,7 @@ BOOL CSoundFile::ReadNote()
 				} else
 				if (m_Resampler.IsHQ())
 				{
-					if (!IsRenderingToDisc() && !m_Resampler.IsUltraHQ())
-					{
-						int fmax = 0x20000;
-						if ((pChn->newRightVol < 0x80) && (pChn->newLeftVol < 0x80)
-						 && (pChn->rightVol < 0x80) && (pChn->leftVol < 0x80))
-						{
-							if (pChn->nInc >= 0xFF00) pChn->dwFlags.set(CHN_NOIDO);
-						} else
-						{
-							pChn->dwFlags.set((pChn->nInc >= fmax) ? CHN_NOIDO : CHN_HQSRC);
-						}
-					} else
-					{
-						pChn->dwFlags.set(CHN_HQSRC);
-					}
-					
+					pChn->dwFlags.set(CHN_HQSRC);
 				} else
 				{
 					if ((pChn->nInc >= 0x14000) || ((pChn->nInc >= 0xFF00) && (pChn->nInc < 0x10100)))
