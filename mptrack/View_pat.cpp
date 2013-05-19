@@ -3570,9 +3570,13 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 		UpdateAllVUMeters(pnotify);
 	}
 
-	if(pnotify->type[Notification::Stop] && ((m_Status & (psFollowSong | psDragActive)) == psFollowSong))
+	if(pnotify->type[Notification::Stop])
 	{
-		SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID);
+		MemsetZero(ChnVUMeters);	// Also zero all non-visible VU meters
+		if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
+		{
+			SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID);
+		}
 	}
 
 	UpdateIndicator();
