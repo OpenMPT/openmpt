@@ -4,8 +4,8 @@ CXX = $(SILENT)g++
 LD  = $(SILENT)g++
 
 CPPFLAGS = -I../common -I.. 
-CXXFLAGS = -std=gnu++0x -O3 -fno-strict-aliasing -ffast-math -Wall -Wextra
-CFLAGS   = -std=gnu99   -O3 -fno-strict-aliasing -ffast-math -Wall -Wextra
+CXXFLAGS = -std=gnu++0x -O3 -fPIC -fvisibility=hidden -fno-strict-aliasing -ffast-math -Wall -Wextra -Wcast-align
+CFLAGS   = -std=gnu99   -O3 -fPIC -fvisibility=hidden -fno-strict-aliasing -ffast-math -Wall -Wextra -Wcast-align
 LDFLAGS  = 
 LDLIBS   = -lm
 
