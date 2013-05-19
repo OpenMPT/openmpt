@@ -1201,7 +1201,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlag
 
 #else // !MODPLUG_TRACKER
 
-bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
+bool CSoundFile::ReadMID(const BYTE * /*lpStream*/, DWORD /*dwMemLength*/, ModLoadingFlags /*loadFlags*/)
 {
 	return false;
 }

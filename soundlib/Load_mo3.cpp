@@ -20,8 +20,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
-	const void *stream = file.GetRawData();
-	int length = file.GetLength();
 
 	// No valid MO3 file (magic bytes: "MO3")
 	if(!file.CanRead(8) || !file.ReadMagic("MO3"))
@@ -45,6 +43,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	return false;
 
 #else
+
+	const void *stream = file.GetRawData();
+	int length = file.GetLength();
 
 	bool result = false;	// Result of trying to load the module, false == fail.
 
