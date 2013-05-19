@@ -25,6 +25,7 @@
 #include "ChunkReader.h"
 
 
+#ifndef NO_MP3_SAMPLES
 // Check for valid MPEG header
 static bool IsMPEG(const void *data)
 //----------------------------------
@@ -32,6 +33,7 @@ static bool IsMPEG(const void *data)
 	const uint8 *header = static_cast<const uint8  *>(data);
 	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0 && (header[1] & 0x18) != 0x08 && (header[1] & 0x06) != 0x00 && (header[2] & 0xF0) != 0xF0;
 }
+#endif // NO_MP3_SAMPLES
 
 
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
@@ -2135,6 +2137,9 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 		Samples[sample].Convert(MOD_TYPE_IT, GetType());
 		return true;
 	}
+#else
+	UNREFERENCED_PARAMETER(sample);
+	UNREFERENCED_PARAMETER(file);
 #endif // NO_FLAC
 	return false;
 }
@@ -2466,6 +2471,9 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 		Samples[sample].Convert(MOD_TYPE_IT, GetType());
 		return true;
 	}
+#else
+	UNREFERENCED_PARAMETER(sample);
+	UNREFERENCED_PARAMETER(file);
 #endif // NO_MP3_SAMPLES
 	return false;
 }
