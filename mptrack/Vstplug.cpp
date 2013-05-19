@@ -905,7 +905,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		return 1; //we replace.
 
 	case audioMasterGetCurrentProcessLevel:
-		if(pVstPlugin != nullptr && pVstPlugin->GetSoundFile().m_bIsRendering)
+		if(pVstPlugin != nullptr && pVstPlugin->GetSoundFile().IsRenderingToDisc())
 			return kVstProcessLevelOffline;
 		else
 			return kVstProcessLevelRealtime;
