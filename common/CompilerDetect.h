@@ -35,7 +35,7 @@
 #define MPT_GCC_AT_LEAST(major,minor,patch)          (MPT_COMPILER_GCC_VERSION >= MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 #define MPT_GCC_BEFORE(major,minor,patch)            (MPT_COMPILER_GCC_VERSION <  MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 
-#if MPT_CLANG_BEFORE(4,4,0)
+#if MPT_GCC_BEFORE(4,4,0)
 #pragma message "GCC version 4.4 required"
 #endif
 
@@ -67,10 +67,16 @@ char mpt_unsupported_compiler[-1];
 
 #ifndef MPT_COMPILER_CLANG
 #define MPT_COMPILER_CLANG 0
+#define MPT_CLANG_AT_LEAST(major,minor,patch) 0
+#define MPT_CLANG_BEFORE(major,minor,patch)   0
 #endif
 #ifndef MPT_COMPILER_GCC
 #define MPT_COMPILER_GCC   0
+#define MPT_GCC_AT_LEAST(major,minor,patch)   0
+#define MPT_GCC_BEFORE(major,minor,patch)     0
 #endif
 #ifndef MPT_COMPILER_MSVC
 #define MPT_COMPILER_MSVC  0
+#define MPT_MSVC_AT_LEAST(version,sp)         0
+#define MPT_MSVC_BEFORE(version,sp)           0
 #endif
