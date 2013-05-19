@@ -320,14 +320,20 @@ enum
 // Resampling modes
 enum ResamplingMode
 {
-	SRCMODE_NEAREST = 0,
-	SRCMODE_LINEAR,
-	SRCMODE_SPLINE,
-	SRCMODE_POLYPHASE,
-	SRCMODE_FIRFILTER, //rewbs.resamplerConf
-
-	SRCMODE_DEFAULT,
+	// ATTENTION: Do not change ANY of these values, as they get written out to files in per instrument interpolation settings
+	// and old files have these exact values in them which should not change meaning.
+	SRCMODE_NEAREST   = 0,
+	SRCMODE_LINEAR    = 1,
+	SRCMODE_SPLINE    = 2,
+	SRCMODE_POLYPHASE = 3,
+	SRCMODE_FIRFILTER = 4, //rewbs.resamplerConf
+	SRCMODE_DEFAULT   = 5,
 };
+
+static inline bool IsKnownResamplingMode(int mode)
+{
+	return (mode >= 0) && (mode < SRCMODE_DEFAULT);
+}
 
 
 // Release node defines
