@@ -22,7 +22,7 @@
 #include "tuning.h"
 #include "Tables.h"
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #pragma warning(disable:4244)
 #endif
 

@@ -15,7 +15,7 @@ extern void Log(const char *, ...);
 #undef USHRT_MAX
 #undef SHRT_MIN
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #pragma warning(disable: 4244) // conversion from 'type1' to 'type2', possible loss of data
 #endif
 

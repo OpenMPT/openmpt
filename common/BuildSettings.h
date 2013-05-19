@@ -12,6 +12,10 @@
 
 
 
+#include "CompilerDetect.h"
+
+
+
 // Do not use precompiled headers (prevents include of commonly used headers in stdafx.h)
 #ifdef MODPLUG_TRACKER
 //#define NO_PCH
@@ -25,7 +29,7 @@
 #define ENABLE_ASM
 
 // inline assembly requires MSVC compiler
-#if defined(ENABLE_ASM) && defined(_MSC_VER) && defined(_M_IX86)
+#if defined(ENABLE_ASM) && MPT_COMPILER_MSVC && defined(_M_IX86)
 
 // Generate general x86 inline assembly.
 #define ENABLE_X86
@@ -146,12 +150,12 @@
 
 
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
 
 #ifdef _WIN32
-#if defined(_MSC_VER) && (_MSC_VER >= 1600)
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
 #define _WIN32_WINNT        0x0501 // _WIN32_WINNT_WINXP
 #else
 #define _WIN32_WINNT        0x0500 // _WIN32_WINNT_WIN2000
@@ -191,7 +195,7 @@
 
 #endif
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #define _CRT_SECURE_NO_WARNINGS		// Define to disable the "This function or variable may be unsafe" warnings.
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES			1
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT	1

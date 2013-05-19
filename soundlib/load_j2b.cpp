@@ -14,7 +14,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #ifndef ZLIB_WINAPI
 #define ZLIB_WINAPI
 #endif // ZLIB_WINAPI

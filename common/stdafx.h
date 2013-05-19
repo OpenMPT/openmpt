@@ -27,13 +27,13 @@
 
 #include <windowsx.h>
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #pragma warning(disable:4201)
 #endif
 #include <mmsystem.h>
 #include <mmreg.h>
 #include <msacm.h>
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #pragma warning(default:4201)
 #endif
 

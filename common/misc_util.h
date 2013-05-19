@@ -53,7 +53,7 @@ inline T ConvertStrTo(const char *str)
 		return static_cast<T>(atof(str));
 }
 
-#ifdef _MSC_VER
+#if MPT_COMPILER_MSVC
 #define cxx11_strtoll  _strtoi64
 #define cxx11_strtoull _strtoui64
 #else

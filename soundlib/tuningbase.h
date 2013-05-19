@@ -37,10 +37,6 @@ using std::map;
 
 namespace srlztn {class Ssb;};
 
-#ifdef _MSC_VER
-#pragma warning(disable:4100) //"unreferenced formal parameter"
-#endif
-
 
 #ifdef BUILD_TUNINGBASE_AS_TEMPLATE
 	#define CLASSTEMPLATEDEC template<class TNOTEINDEXTYPE = int16, class TUNOTEINDEXTYPE = uint16, class TRATIOTYPE = float32, class TSTEPINDEXTYPE = int32, class TUSTEPINDEXTYPE = uint32> 
@@ -317,10 +313,6 @@ public:
 private:
 	static void DefaultMessageHandler(const char*, const char*) {}
 };
-
-#ifdef _MSC_VER
-#pragma warning(default:4100) //"unreferenced formal parameter"
-#endif
 
 #define NOTEINDEXTYPE_MIN (std::numeric_limits<NOTEINDEXTYPE>::min)()
 #define NOTEINDEXTYPE_MAX (std::numeric_limits<NOTEINDEXTYPE>::max)()

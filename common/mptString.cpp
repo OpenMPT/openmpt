@@ -19,7 +19,7 @@ namespace mpt {
 // Formats this string, like CString::Format.
 void String::Format(const CharT* pszFormat, ...)
 {
-	#ifdef _MSC_VER
+	#if MPT_COMPILER_MSVC
 		va_list argList;
 		va_start( argList, pszFormat );
 

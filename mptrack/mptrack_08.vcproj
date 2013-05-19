@@ -841,6 +841,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\CompilerDetect.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ChildFrm.h"
 				>
 			</File>
