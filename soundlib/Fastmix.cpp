@@ -1488,7 +1488,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 		if (pChannel->dwFlags[CHN_FILTER]) nFlags |= MIXNDX_FILTER;
 	#endif
 		//rewbs.resamplerConf
-		nFlags |= GetResamplingFlag(pChannel);
+		nFlags |= ResamplingModeToMixFlags(pChannel->resamplingMode);
 		//end rewbs.resamplerConf
 		if ((nFlags < 0x20) && (pChannel->rightVol == pChannel->leftVol)
 		 && ((!pChannel->nRampLength) || (pChannel->rightRamp == pChannel->leftRamp)))
@@ -1625,28 +1625,6 @@ UINT CSoundFile::CreateStereoMix(int count)
 		nchmixed += naddmix;
 	}
 	return nchused;
-}
-
-UINT CSoundFile::GetResamplingFlag(const ModChannel *pChannel)
-//------------------------------------------------------------
-{
-	if (pChannel->pModInstrument) {
-		if(IsKnownResamplingMode(pChannel->pModInstrument->nResampling))
-		{
-			return ResamplingModeToMixFlags(pChannel->pModInstrument->nResampling);
-		}
-	}
-
-	//didn't manage to get flag from instrument header, use channel flags.
-	if(pChannel->dwFlags[CHN_HQSRC])
-	{
-		return ResamplingModeToMixFlags(m_Resampler.m_Settings.SrcMode);
-	} else if(!pChannel->dwFlags[CHN_NOIDO])
-	{
-		return MIXNDX_LINEARSRC;
-	}
-
-	return 0;
 }
 
 

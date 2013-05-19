@@ -83,6 +83,7 @@ struct ALIGN(32) ModChannel
 	ROWINDEX nPatternLoop;
 	CHANNELINDEX nMasterChn;
 	// 8-bit members
+	uint8 resamplingMode;
 	uint8 nRestoreResonanceOnNewNote; //Like above
 	uint8 nRestoreCutoffOnNewNote; //Like above
 	uint8 nNote, nNNA;

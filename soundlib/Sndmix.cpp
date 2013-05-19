@@ -2005,27 +2005,28 @@ BOOL CSoundFile::ReadNote()
 			// Clipping volumes
 			//if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
 			//if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
-			// Check IDO
-			if (m_Resampler.Is(SRCMODE_NEAREST))
-			{
-				pChn->dwFlags.set(CHN_NOIDO);
-			} else
-			{
-				pChn->dwFlags.reset(CHN_NOIDO | CHN_HQSRC);
 
-				if (pChn->nInc == 0x10000)
+			ResamplingMode resamplingMode = m_Resampler.m_Settings.SrcMode; // default to global mixer settings
+			if(pChn->pModInstrument && IsKnownResamplingMode(pChn->pModInstrument->nResampling))
+			{
+				// for defined resampling modes, use per-instrument resampling modes if set
+				resamplingMode = (ResamplingMode)pChn->pModInstrument->nResampling;
+			}
+			// disable interpolation in certain cases
+			if(pChn->nInc == 0x10000)
+			{
+				// exact samplerate match, do not resample at all, regardless of selected resampler
+				resamplingMode = SRCMODE_NEAREST;
+			} else if(resamplingMode == SRCMODE_LINEAR)
+			{
+				if(((pChn->nInc >= 0xFF00) && (pChn->nInc < 0x10100)))
 				{
-					pChn->dwFlags.set(CHN_NOIDO);
-				} else
-				if (m_Resampler.IsHQ())
-				{
-					pChn->dwFlags.set(CHN_HQSRC);
-				} else
-				{
-					if ((pChn->nInc >= 0xFF00) && (pChn->nInc < 0x10100))
-						pChn->dwFlags.set(CHN_NOIDO);
+					// disable interpolation if rates are too close
+					resamplingMode = SRCMODE_NEAREST;
 				}
 			}
+			// store for the mixer
+			pChn->resamplingMode = (uint8)resamplingMode;
 
 			/*if (m_pConfig->getUseGlobalPreAmp())
 			{

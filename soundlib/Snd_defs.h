@@ -136,8 +136,8 @@ enum ChannelFlags
 	CHN_KEYOFF			= 0x200,		// exit sustain
 	CHN_NOTEFADE		= 0x400,		// fade note (instrument mode)
 	CHN_SURROUND		= 0x800,		// use surround channel
-	CHN_NOIDO			= 0x1000,		// (IDO = Interpolation Do?) Indicates if the channel is near enough to an exact multiple of the base frequency that any interpolation won't be noticeable - or if interpolation was switched off completely. --Storlek
-	CHN_HQSRC			= 0x2000,		// High quality sample rate conversion (i.e. apply interpolation)
+	// UNUSED			= 0x1000,
+	// UNUSED			= 0x2000,
 	CHN_FILTER			= 0x4000,		// Apply resonant filter on sample
 	CHN_VOLUMERAMP		= 0x8000,		// Apply volume ramping
 	CHN_VIBRATO			= 0x10000,		// Apply vibrato
