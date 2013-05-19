@@ -118,21 +118,21 @@ private:
 	static float fx16_to_float( std::int32_t x ) {
 		return static_cast<float>( x * (1.0f/(1<<16)) );
 	}
-	template < typename T > T scale_percent( T percent, T min, T max ) {
+	template < typename T > static T scale_percent( T percent, T min, T max ) {
 		return Clamp( min + ( percent * ( max - min ) ) / 100, min, max );
 	}
+	template < typename T > static T unscale_percent( T value, T min, T max ) {
+		return Clamp( ( value - min ) * 100 / ( max - min ), 0, 100 );
+	}
 private:
-	int32_t get_quality() const {
-		return ( m_sndFile.m_MixerSettings.m_nMaxMixChannels - 4 ) * 100 / MAX_CHANNELS;
+	std::int32_t get_quality() const {
+		return unscale_percent<int>( m_sndFile.m_Resampler.m_Settings.SrcMode, SRCMODE_NEAREST, SRCMODE_FIRFILTER );
 	}
 	void set_quality( std::int32_t value ) {
-		MixerSettings mixersettings = m_sndFile.m_MixerSettings;
-		mixersettings.m_nMaxMixChannels = scale_percent<int>( value, 4, MAX_CHANNELS );
 		CResamplerSettings resamplersettings = m_sndFile.m_Resampler.m_Settings;
 		resamplersettings.SrcMode = (ResamplingMode)scale_percent<int>( value, SRCMODE_NEAREST, SRCMODE_FIRFILTER );
 		resamplersettings.gdWFIRCutoff = CResamplerSettings().gdWFIRCutoff; // use default
 		resamplersettings.gbWFIRType = CResamplerSettings().gbWFIRType; // use default
-		m_sndFile.SetMixerSettings( mixersettings );
 		m_sndFile.SetResamplerSettings( resamplersettings );
 	}
 	void apply_mixer_settings( std::int32_t samplerate, int channels, SampleFormat format ) {
