@@ -23,6 +23,11 @@ extern uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), 
 extern int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
 
 
+#if defined(__GNUC__) && (GCC_VERSION >= 40600)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
+#endif
+
 // Read a sample from memory
 size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 //--------------------------------------------------------------------
@@ -391,6 +396,10 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	file.Seek(filePosition + bytesRead);
 	return bytesRead;
 }
+
+#if defined(__GNUC__) && (GCC_VERSION >= 40600)
+#pragma GCC diagnostic pop
+#endif
 
 
 #ifndef MODPLUG_NO_FILESAVE
