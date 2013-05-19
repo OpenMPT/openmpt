@@ -36,7 +36,8 @@
 
 struct show_help_exception {
 	std::string message;
-	show_help_exception( const std::string & msg = "" ) : message(msg) { }
+	bool longhelp;
+	show_help_exception( const std::string & msg = "", bool longhelp_ = true ) : message(msg), longhelp(longhelp_) { }
 };
 
 struct openmpt123_exception : public openmpt::exception {
@@ -340,6 +341,10 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 		std::clog << std::endl;
 		std::clog << " -h, --help       Show help" << std::endl;
 		std::clog << " -v, --version    Show version number and nothing else" << std::endl;
+		if ( !e.longhelp ) {
+			std::clog << std::endl;
+			return;
+		}
 		std::clog << " -l               Loop song [default: " << openmpt123_flags().repeatcount << "]" << std::endl;
 		std::clog << " -ao n            Set output device [default: " << openmpt123_flags().device << "]," << std::endl;
 		std::clog << "                  use -ao help to show available devices" << std::endl;
@@ -350,6 +355,10 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 		std::clog << " -q, --quiet      Suppress non-error screen output" << std::endl;
 		std::clog << " -v, --verbose    Show more screen output" << std::endl;
 		std::clog << " --version        Show version number and nothing else" << std::endl;
+		if ( !e.longhelp ) {
+			std::clog << std::endl;
+			return;
+		}
 		std::clog << " --[no-]message   Show song message [default: " << openmpt123_flags().show_message << "]" << std::endl;
 		std::clog << " --[no-]progress  Show playback progress [default: " << openmpt123_flags().show_progress << "]" << std::endl;
 		std::clog << " --device n       Set output device [default: " << get_device_string( openmpt123_flags().device ) << "]," << std::endl;
@@ -710,6 +719,10 @@ int main( int argc, char * argv [] ) {
 
 			flags = parse_openmpt123( args );
 
+		}
+		
+		if ( args.size() <= 1 ) {
+			throw show_help_exception( "", false );
 		}
 
 		flags.check_and_sanitize();
