@@ -2022,7 +2022,7 @@ BOOL CSoundFile::ReadNote()
 					pChn->dwFlags.set(CHN_HQSRC);
 				} else
 				{
-					if ((pChn->nInc >= 0x14000) || ((pChn->nInc >= 0xFF00) && (pChn->nInc < 0x10100)))
+					if ((pChn->nInc >= 0xFF00) && (pChn->nInc < 0x10100))
 						pChn->dwFlags.set(CHN_NOIDO);
 				}
 			}
