@@ -26,6 +26,9 @@ extern int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, ui
 #if MPT_COMPILER_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch"
+#elif MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
 
 // Read a sample from memory
@@ -399,6 +402,8 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 
 #if MPT_COMPILER_GCC
 #pragma GCC diagnostic pop
+#elif MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
 #endif
 
 
