@@ -39,9 +39,10 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------------
 {
 #ifndef MODPLUG_TRACKER
+	UNREFERENCED_PARAMETER(file);
+	UNREFERENCED_PARAMETER(loadFlags);
 	return false;
-#endif
-#ifdef MODPLUG_TRACKER
+#else // MODPLUG_TRACKER
 	
 	uint32 version;
 	FileReader::off_t size;
