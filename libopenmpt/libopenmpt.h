@@ -37,7 +37,7 @@ LIBOPENMPT_API const char * openmpt_get_supported_extensions(void);
 
 LIBOPENMPT_API int openmpt_is_extension_supported( const char * extension );
 
-typedef int (*openmpt_stream_read_func)( void * stream, void * dst, int bytes );
+typedef size_t (*openmpt_stream_read_func)( void * stream, void * dst, size_t bytes );
 typedef int (*openmpt_stream_seek_func)( void * stream, int64_t offset, int whence );
 typedef int64_t (*openmpt_stream_tell_func)( void * stream );
 

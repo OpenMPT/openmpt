@@ -15,6 +15,7 @@
 #ifdef _MSC_VER
 #include <io.h>
 #endif
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,16 +32,29 @@ extern "C" {
 
 /* This stuff has to be in a header file because of possibly different MSVC CRTs which cause problems for FILE * crossing CRT boundaries. */
 
-static int openmpt_stream_fd_read_func( void * stream, void * dst, int bytes ) {
+static size_t openmpt_stream_fd_read_func( void * stream, void * dst, size_t bytes ) {
 	int fd = (int)(uintptr_t)stream;
 	if ( fd < 0 ) {
 		return 0;
 	}
-	int retval = 0;
 	#if defined(_MSC_VER)
-		retval = _read( fd, dst, bytes );
+		size_t retval = 0;
+		while ( bytes > 0 ) {
+			int to_read = 0;
+			if ( bytes < (size_t)INT_MAX ) {
+				to_read = (int)bytes;
+			} else {
+				to_read = INT_MAX;
+			}
+			int ret_read = _read( fd, dst, to_read );
+			if ( ret_read <= 0 ) {
+				return retval;
+			}
+			bytes -= ret_read;
+			retval += ret_read;
+		}
 	#else
-		retval = read( fd, dst, bytes );
+		ssize_t retval = read( fd, dst, bytes );
 	#endif
 	if ( retval <= 0 ) {
 		return 0;
@@ -48,12 +62,12 @@ static int openmpt_stream_fd_read_func( void * stream, void * dst, int bytes ) {
 	return retval;
 }
 
-static int openmpt_stream_file_read_func( void * stream, void * dst, int bytes ) {
+static size_t openmpt_stream_file_read_func( void * stream, void * dst, size_t bytes ) {
 	FILE * f = (FILE*)stream;
 	if ( !f ) {
 		return 0;
 	}
-	int retval = fread( dst, 1, bytes, f );
+	size_t retval = fread( dst, 1, bytes, f );
 	if ( retval <= 0 ) {
 		return 0;
 	}
