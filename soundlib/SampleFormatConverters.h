@@ -405,9 +405,8 @@ size_t CopyAndNormalizeSample(ModSample &sample, const uint8 *sourceBuffer, size
 {
 	static_assert(SampleConversion::hasState == false, "Implementation of this conversion function is stateless");
 	const size_t inSize = sizeof(typename SampleConversion::input_t);
-	const size_t outSize = sizeof(typename SampleConversion::output_t);
 
-	ASSERT(sample.GetElementarySampleSize() == outSize);
+	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	size_t numSamples = sample.nLength * sample.GetNumChannels();
 	LimitMax(numSamples, sourceSize / inSize);
