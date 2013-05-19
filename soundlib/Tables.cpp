@@ -141,6 +141,8 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 			exts.push_back(otherFormatInfo[i].extension);
 		}
 	}
+#else
+	UNREFERENCED_PARAMETER(otherFormats);
 #endif
 	return exts;
 }
