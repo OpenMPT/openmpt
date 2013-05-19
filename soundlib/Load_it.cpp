@@ -48,6 +48,8 @@ MPTM version history for cwtv-field in "IT" header (only for MPTM files!):
 */
 
 
+#ifndef MODPLUG_NO_FILESAVE
+
 static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 //--------------------------------------------------
 {
@@ -60,7 +62,6 @@ static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 	return false;
 }
 
-static void ReadTuningCollection(istream& iStrm, CTuningCollection& tc, const size_t) {tc.Deserialize(iStrm);}
 static void WriteTuningCollection(ostream& oStrm, const CTuningCollection& tc) {tc.Serialize(oStrm);}
 
 static void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
@@ -120,6 +121,10 @@ static void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
 	}
 }
 
+#endif // MODPLUG_NO_FILESAVE
+
+
+static void ReadTuningCollection(istream& iStrm, CTuningCollection& tc, const size_t) {tc.Deserialize(iStrm);}
 
 template<class TUNNUMTYPE, class STRSIZETYPE>
 static bool ReadTuningMapTemplate(istream& iStrm, map<uint16, string>& shortToTNameMap, const size_t maxNum = 500)
