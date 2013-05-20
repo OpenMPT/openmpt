@@ -162,17 +162,28 @@ const char * CSoundFile::ModTypeToString(MODTYPE modtype)
 }
 
 
-const char * CSoundFile::ModTypeToTracker(MODTYPE modtype)
-//--------------------------------------------------------
+std::string CSoundFile::ModTypeToTracker(MODTYPE modtype)
+//-------------------------------------------------------
 {
+	std::set<std::string> retvals;
+	std::string retval;
 	for(size_t i = 0; i < CountOf(modFormatInfo); i++)
 	{
 		if(modFormatInfo[i].format & modtype)
 		{
-			return modFormatInfo[i].name;
+			std::string name = modFormatInfo[i].name;
+			if(retvals.find(name) == retvals.end())
+			{
+				retvals.insert(name);
+				if(!retval.empty())
+				{
+					retval += " / ";
+				}
+				retval += name;
+			}
 		}
 	}
-	return "";
+	return retval;
 }
 
 
