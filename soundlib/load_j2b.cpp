@@ -993,7 +993,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 		|| fileHeader.fileLength != file.GetLength()
 		|| fileHeader.packedLength != file.BytesLeft()
 		|| fileHeader.packedLength == 0
-		|| fileHeader.crc32 != crc32(0, reinterpret_cast<const Bytef *>(file.GetRawData()), file.BytesLeft())
+		|| fileHeader.crc32 != crc32(0, reinterpret_cast<const Bytef *>(file.GetRawData()), fileHeader.packedLength)
 		)
 	{
 		return false;
