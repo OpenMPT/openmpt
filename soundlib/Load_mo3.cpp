@@ -44,6 +44,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 #else
 
+	file.Rewind();
 	const void *stream = file.GetRawData();
 	int length = file.GetLength();
 
