@@ -2041,9 +2041,9 @@ void CViewSample::On8BitConvert()
 	BeginWaitCursor();
 	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModSample &sample = pSndFile->GetSample(m_nSample);
-		if ((sample.uFlags & CHN_16BIT) && (sample.pSample) && (sample.nLength))
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
+		if(sample.uFlags[CHN_16BIT] && sample.pSample != nullptr && sample.nLength != 0)
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 
@@ -2056,9 +2056,9 @@ void CViewSample::On8BitConvert()
 				p[i] = (signed char) ((*((short int *)(p+i*2))) / 256);
 			}
 			sample.uFlags.reset(CHN_16BIT);
-			for (UINT j=0; j<MAX_CHANNELS; j++) if (pSndFile->Chn[j].pSample == sample.pSample)
+			for (UINT j=0; j<MAX_CHANNELS; j++) if (sndFile.Chn[j].pSample == sample.pSample)
 			{
-				pSndFile->Chn[j].dwFlags.reset(CHN_16BIT);
+				sndFile.Chn[j].dwFlags.reset(CHN_16BIT);
 			}
 
 			cs.Leave();
@@ -2152,12 +2152,12 @@ void CViewSample::OnSampleTrim()
 	//nothing loaded or invalid sample slot.
 	if(!pModDoc || m_nSample > pModDoc->GetNumSamples()) return;
 
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	ModSample &sample = pSndFile->GetSample(m_nSample);
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
 
 	if(m_dwBeginSel == m_dwEndSel)
 	{
-		// Trim around loop points if there's no selection (http://forum.openmpt.org/index.php?topic=2258.0)
+		// Trim around loop points if there's no selection
 		m_dwBeginSel = sample.nLoopStart;
 		m_dwEndSel = sample.nLoopEnd;
 	}
@@ -2231,7 +2231,6 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 		}
 		else
 		{
-			CHAR s[64];
 			if (m_dwStatus & SMPSTATUS_KEYDOWN)
 				pModDoc->NoteOff(note, true);
 			else
@@ -2244,15 +2243,13 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 			pModDoc->PlayNote(note, 0, m_nSample, false, -1, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
 
 			m_dwStatus |= SMPSTATUS_KEYDOWN;
-			s[0] = 0;
-			if(ModCommand::IsNote((ModCommand::NOTE)note))
-			{
-				CSoundFile *pSndFile = pModDoc->GetSoundFile();
-				ModSample &sample = pSndFile->GetSample(m_nSample);
-				uint32 freq = pSndFile->GetFreqFromPeriod(pSndFile->GetPeriodFromNote(note + (pSndFile->GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
 
-				wsprintf(s, "%s (%d Hz)", szDefaultNoteNames[note - 1], freq);
-			}
+			CSoundFile &sndFile = pModDoc->GetrSoundFile();
+			ModSample &sample = sndFile.GetSample(m_nSample);
+			uint32 freq = sndFile.GetFreqFromPeriod(pSndFile->GetPeriodFromNote(note + (pSndFile->GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
+
+			CHAR s[32];
+			wsprintf(s, "%s (%d.%d Hz)", szDefaultNoteNames[note - 1], freq >> FREQ_FRACBITS, Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS));
 			pMainFrm->SetInfoText(s);
 		}
 	}

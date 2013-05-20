@@ -4681,13 +4681,14 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 }
 
 
+// Converts period value to sample frequency. Return value is fixed point, with FREQ_FRACBITS fractional bits.
 UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) const
 //-----------------------------------------------------------------------------------
 {
 	if (!period) return 0;
 	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_AMF0))
 	{
-		return (3546895L*4) / period;
+		return ((3546895L * 4) << FREQ_FRACBITS) / period;
 	} else if (GetType() == MOD_TYPE_XM)
 	{
 		if(m_SongFlags[SONG_LINEARSLIDES])
@@ -4703,20 +4704,20 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) 
 				uint32 div = ((9216u + 767u - (period & 0xFFFF)) / 768);
 				octave = ((12 - div) & 0x1F) % 29u;
 			}
-			return XMLinearTable[period % 768] >> octave;
+			return (XMLinearTable[period % 768] << FREQ_FRACBITS) >> octave;
 		} else
 		{
-			return 8363 * 1712L / period;
+			return ((8363 * 1712L) << FREQ_FRACBITS) / period;
 		}
 	} else
 	{
 		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
 			if (!nC5Speed) nC5Speed = 8363;
-			return Util::muldiv(nC5Speed, 1712L << 8, (period << 8)+nPeriodFrac);
+			return Util::muldiv(nC5Speed, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 		} else
 		{
-			return Util::muldiv(8363, 1712L << 8, (period << 8)+nPeriodFrac);
+			return Util::muldiv(8363, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 		}
 	}
 }
