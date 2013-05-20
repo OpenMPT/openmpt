@@ -20,7 +20,7 @@
 // External decompressors
 extern void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
 extern uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n);
-extern int DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
+extern uintptr_t DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
 
 
 #if MPT_COMPILER_GCC
