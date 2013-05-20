@@ -1761,7 +1761,7 @@ BOOL CSoundFile::ReadNote()
 			{
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
-					// In IT and FT2 compatible mode, envelope position indices are shifted by one for proper envelope pausing,
+					// In IT compatible mode, envelope position indices are shifted by one for proper envelope pausing,
 					// so we have to update the position before we actually process the envelopes.
 					// When using MPT behaviour, we get the envelope position for the next tick while we are still calculating the current tick,
 					// which then results in wrong position information when the envelope is paused on the next row.
@@ -1882,7 +1882,7 @@ BOOL CSoundFile::ReadNote()
 				// In this case: GetType() == MOD_TYPE_MPT and using custom tunings.
 				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_nTickCount == 0))
 				{
-					pChn->m_Freq = Util::Round<UINT>(pChn->nC5Speed * vibratoFactor * pIns->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps));
+					pChn->m_Freq = Util::Round<uint32>((pChn->nC5Speed << FREQ_FRACBITS) * vibratoFactor * pIns->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps));
 					if(!pChn->m_CalculateFreq)
 						pChn->m_ReCalculateFreqOnFirstTick = false;
 					else
@@ -1906,7 +1906,7 @@ BOOL CSoundFile::ReadNote()
 				pChn->nCalcVolume = 0;
 			}
 
-			int32 ninc = Util::muldiv(freq, 0x10000, m_MixerSettings.gdwMixingFreq);
+			int32 ninc = Util::muldiv(freq, 0x10000, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
 			if ((ninc >= 0xFFB0) && (ninc <= 0x10090)) ninc = 0x10000;
 			if (m_nFreqFactor != 128) ninc = (ninc * m_nFreqFactor) >> 7;
 			Limit(ninc, 3, 0xFF0000);
