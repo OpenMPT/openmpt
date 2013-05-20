@@ -709,7 +709,7 @@ void Ssb::BeginRead(const void* pId, const size_t nLength, const uint64& nVersio
 	{
 		uint16 size = 0;
 		ReadAdaptive12(iStrm, size);
-		iStrm.ignore(size * (GetFlag(RwfRTwoBytesDescChar)) ? 2 : 1);
+		iStrm.ignore(size * (GetFlag(RwfRTwoBytesDescChar) ? 2 : 1));
 	}
 
     if(Testbit(flagbyte, 3))
