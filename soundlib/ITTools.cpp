@@ -177,7 +177,7 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	mptIns.VolEnv.nNodes = 25;
 
 	// Volume Envelope Data
-	for(size_t i = 0; i < 25; i++)
+	for(uint32 i = 0; i < 25; i++)
 	{
 		if((mptIns.VolEnv.Ticks[i] = nodes[i * 2]) == 0xFF)
 		{

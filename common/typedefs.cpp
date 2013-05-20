@@ -57,36 +57,6 @@ void AssertHandler(const char *file, int line, const char *function, const char 
 #endif
 
 
-#if MPT_COMPILER_MSVC
-
-int c99_vsnprintf(char *str, size_t size, const char *format, va_list args)
-{
-	int ret;
-	va_list ap;
-	va_copy(ap, args);
-	ret = _vsnprintf(str, size, format, ap);
-	va_end(ap);
-	if ( ret < 0 ) {
-		str[size - 1] = '\0';
-		ret = size;
-	}
-	return ret;
-}
-
-
-int c99_snprintf(char *str, size_t size, const char *format, ...)
-{
-	int ret;
-	va_list ap;
-	va_start( ap, format );
-	ret = c99_vsnprintf(str, size, format, ap);
-	va_end( ap );
-	return ret;
-}
-
-#endif
-
-
 static const std::size_t LOGBUF_SIZE = 1024;
 
 static void DoLog(const char *file, int line, const char *function, const char *format, va_list args)
@@ -97,6 +67,7 @@ static void DoLog(const char *file, int line, const char *function, const char *
 	va_list va;
 	va_copy(va, args);
 	vsnprintf(message, LOGBUF_SIZE, format, va);
+	message[LOGBUF_SIZE - 1] = '\0';
 	va_end(va);
 	#if defined(MODPLUG_TRACKER)
 		char buf2[LOGBUF_SIZE];
@@ -104,6 +75,7 @@ static void DoLog(const char *file, int line, const char *function, const char *
 		if(file || function)
 		{
 			snprintf(buf2, LOGBUF_SIZE, "%s(%i): %s", file?file:"", line, message);
+			buf2[LOGBUF_SIZE - 1] = '\0';
 			verbose_message = buf2;
 		} else
 		{

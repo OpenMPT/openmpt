@@ -281,14 +281,6 @@ typedef char *        LPTSTR;
 //To mark string that should be translated in case of multilingual version.
 #define GetStrI18N(x)	(x)
 
-#include <cstdio>
-#include <stdio.h>
-#if MPT_COMPILER_MSVC
-int c99_vsnprintf(char *str, size_t size, const char *format, va_list args);
-int c99_snprintf(char *str, size_t size, const char *format, ...);
-#define snprintf c99_snprintf
-#endif
-
 #define MULTICHAR4_LE_MSVC(a,b,c,d) static_cast<uint32>( (static_cast<uint8>(a) << 24) | (static_cast<uint8>(b) << 16) | (static_cast<uint8>(c) << 8) | (static_cast<uint8>(d) << 0) )
 
 
