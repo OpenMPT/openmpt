@@ -348,7 +348,11 @@ public:	// for Editing
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
 	long m_lHighResRampingGlobalVolume;
 	bool IsGlobalVolumeUnset() const { return IsFirstTick(); }
-	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
+#ifndef MODPLUG_TRACKER
+	UINT m_nFreqFactor; // Pitch shift factor (128 = no pitch shifting). Interesting ModPlug Player relict, but unused in OpenMPT.
+	UINT m_nTempoFactor; // Tempo factor (128 = no tempo adjustment). Interesting ModPlug Player relict, but unused in OpenMPT.
+#endif
+	UINT m_nOldGlbVolSlide;
 	LONG m_nMinPeriod, m_nMaxPeriod;	// min period = highest possible frequency, max period = lowest possible frequency
 	LONG m_nRepeatCount;	// -1 means repeat infinitely.
 	DWORD m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples;

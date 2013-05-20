@@ -416,7 +416,9 @@ CSoundFile::CSoundFile() :
 	m_nMixChannels = 0;
 	m_nSamples = 0;
 	m_nInstruments = 0;
+#ifndef MODPLUG_TRACKER
 	m_nFreqFactor = m_nTempoFactor = 128;
+#endif
 	m_nMinPeriod = MIN_PERIOD;
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
@@ -525,7 +527,9 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 
 	m_nMixChannels = 0;
+#ifndef MODPLUG_TRACKER
 	m_nFreqFactor = m_nTempoFactor = 128;
+#endif
 	m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nOldGlbVolSlide = 0;
 
@@ -1690,7 +1694,11 @@ void CSoundFile::RecalculateSamplesPerTick()
 	{
 	case tempo_mode_classic:
 	default:
+#ifdef MODPLUG_TRACKER
+		m_nSamplesPerTick = (m_MixerSettings.gdwMixingFreq * 5) / (m_nMusicTempo << 1);
+#else // !MODPLUG_TRACKER
 		m_nSamplesPerTick = (m_MixerSettings.gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+#endif
 		break;
 
 	case tempo_mode_modern:
@@ -1712,7 +1720,11 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 	{
 	case tempo_mode_classic:
 	default:
+#ifdef MODPLUG_TRACKER
+		return (m_MixerSettings.gdwMixingFreq * 5) / (tempo << 1);
+#else // !MODPLUG_TRACKER
 		return (m_MixerSettings.gdwMixingFreq * 5 * m_nTempoFactor) / (tempo << 8);
+#endif
 
 	case tempo_mode_alternative:
 		return m_MixerSettings.gdwMixingFreq / tempo;
