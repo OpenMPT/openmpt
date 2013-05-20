@@ -243,7 +243,7 @@ void TestMisc()
 	VERIFY_EQUAL( Util::Round(1.5), 2.0 );
 	VERIFY_EQUAL( Util::Round(1.1), 1.0 );
 	VERIFY_EQUAL( Util::Round(-0.1), 0.0 );
-	VERIFY_EQUAL( Util::Round(-0.5), 0.0 );
+	VERIFY_EQUAL( Util::Round(-0.5), -1.0 );
 	VERIFY_EQUAL( Util::Round(-0.9), -1.0 );
 	VERIFY_EQUAL( Util::Round(-1.4), -1.0 );
 	VERIFY_EQUAL( Util::Round(-1.7), -2.0 );
