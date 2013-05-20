@@ -214,7 +214,7 @@ uint32 ModSample::TransposeToFrequency(int transpose, int finetune)
 		fistp freq
 	}
 #else // !ENABLE_X86
-	freq = static_cast<uint32>(std::pow(2.0f, transpose * 128 + finetune) * (_fbase * _factor));
+	freq = static_cast<uint32>(std::pow(2.0f, (transpose * 128 + finetune) * _factor) * _fbase);
 #endif // ENABLE_X86
 
 	uint32 derr = freq % 11025;
