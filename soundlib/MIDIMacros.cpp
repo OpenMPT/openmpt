@@ -73,6 +73,14 @@ fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
 }
 
 
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
+#elif MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wswitch-enum"
+#endif
+
 void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], parameteredMacroType macroType, int subType) const
 //-------------------------------------------------------------------------------------------------------------------------------------
 {
@@ -108,6 +116,20 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 	}
 }
 
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#elif MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
+
+
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
+#elif MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wswitch-enum"
+#endif
 
 // Create Zxx (Z80 - ZFF) from one out of five presets
 void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], fixedMacroType macroType) const
@@ -161,6 +183,12 @@ void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], f
 		}
 	}
 }
+
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#elif MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
 
 
 #ifdef MODPLUG_TRACKER
