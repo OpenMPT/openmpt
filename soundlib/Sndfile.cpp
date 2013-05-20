@@ -1694,11 +1694,7 @@ void CSoundFile::RecalculateSamplesPerTick()
 	{
 	case tempo_mode_classic:
 	default:
-#ifdef MODPLUG_TRACKER
 		m_nSamplesPerTick = (m_MixerSettings.gdwMixingFreq * 5) / (m_nMusicTempo << 1);
-#else // !MODPLUG_TRACKER
-		m_nSamplesPerTick = (m_MixerSettings.gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
-#endif
 		break;
 
 	case tempo_mode_modern:
@@ -1709,6 +1705,9 @@ void CSoundFile::RecalculateSamplesPerTick()
 		m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq / m_nMusicTempo;
 		break;
 	}
+#ifndef MODPLUG_TRACKER
+	m_nSamplesPerTick = Util::muldivr(m_nSamplesPerTick, m_nTempoFactor, 128);
+#endif // !MODPLUG_TRACKER
 }
 
 
@@ -1716,18 +1715,17 @@ void CSoundFile::RecalculateSamplesPerTick()
 UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 //----------------------------------------------------------------------------
 {
+	UINT retval = 0;
 	switch(m_nTempoMode)
 	{
 	case tempo_mode_classic:
 	default:
-#ifdef MODPLUG_TRACKER
-		return (m_MixerSettings.gdwMixingFreq * 5) / (tempo << 1);
-#else // !MODPLUG_TRACKER
-		return (m_MixerSettings.gdwMixingFreq * 5 * m_nTempoFactor) / (tempo << 8);
-#endif
+		retval = (m_MixerSettings.gdwMixingFreq * 5) / (tempo << 1);
+		break;
 
 	case tempo_mode_alternative:
-		return m_MixerSettings.gdwMixingFreq / tempo;
+		retval = m_MixerSettings.gdwMixingFreq / tempo;
+		break;
 
 	case tempo_mode_modern:
 		{
@@ -1746,9 +1744,15 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 				m_dBufferDiff++;
 			}
 			ASSERT(abs(m_dBufferDiff) < 1);
-			return bufferCount;
+			retval = bufferCount;
 		}
+		break;
 	}
+#ifndef MODPLUG_TRACKER
+	// when the user modifies the tempo, we do not really care about accurate tempo error accumulation
+	retval = Util::muldivr(retval, m_nTempoFactor, 128);
+#endif // !MODPLUG_TRACKER
+	return retval;
 }
 
 
