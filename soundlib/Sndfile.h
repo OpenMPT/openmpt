@@ -527,7 +527,7 @@ public:
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
 	static const char * ModTypeToString(MODTYPE modtype);
-	static const char * ModTypeToTracker(MODTYPE modtype);
+	static std::string ModTypeToTracker(MODTYPE modtype);
 
 	void UpgradeModFlags();
 	void UpgradeSong();

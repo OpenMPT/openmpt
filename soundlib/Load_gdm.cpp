@@ -158,7 +158,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals();
 	m_nType = gdmFormatOrigin[fileHeader.originalFormat];
-	madeWithTracker.Format("BWSB 2GDM %d.%d (converted from %s)", fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()));
+	madeWithTracker.Format("BWSB 2GDM %d.%d (converted from %s)", fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()).c_str());
 
 	// Song name
 	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songTitle);
