@@ -184,6 +184,10 @@ class CModDoc;
 #endif // MODPLUG_TRACKER
 
 
+#if MPT_COMPILER_MSVC
+#pragma warning(disable:4324) //structure was padded due to __declspec(align())
+#endif
+
 //==============
 class CSoundFile
 //==============
