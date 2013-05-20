@@ -36,7 +36,7 @@ public:
 	static RATIOTYPE DefaultBARFUNC(const NOTEINDEXTYPE&, const STEPINDEXTYPE&);
 	static const NOTEINDEXTYPE s_StepMinDefault = -64;
 	static const UNOTEINDEXTYPE s_RatioTableSizeDefault = 128;
-	static const STEPINDEXTYPE s_RatioTableFineSizeMaxDefault = 1000;
+	static const USTEPINDEXTYPE s_RatioTableFineSizeMaxDefault = 1000;
 	static const SERIALIZATION_VERSION s_SerializationVersion = 4;
 //END STATIC CONST MEMBERS
 

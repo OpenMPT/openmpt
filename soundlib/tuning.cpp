@@ -524,7 +524,7 @@ void ReadNoteMap(srlztn::InStream& iStrm, CTuningBase::NOTENAMEMAP& m, const siz
 {
 	uint64 val;
 	srlztn::ReadAdaptive1248(iStrm, val);
-	LimitMax(val, 256); // Read 256 at max.
+	LimitMax(val, 256u); // Read 256 at max.
 	for(size_t i = 0; i < val; i++)
 	{
 		int16 key;
