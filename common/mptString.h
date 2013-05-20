@@ -11,6 +11,8 @@
 #pragma once
 
 #include <string>
+#include <cstdio>
+#include <stdio.h>
 #if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #include <strings.h> // for strcasecmp
 #endif
@@ -99,3 +101,9 @@ static inline int mpt_strnicmp(const char *a, const char *b, size_t count)
 		return strncasecmp(a, b, count);
 	#endif
 }
+
+
+#if MPT_COMPILER_MSVC
+#define snprintf _snprintf
+#endif
+

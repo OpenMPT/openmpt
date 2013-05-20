@@ -29,6 +29,7 @@
 #define LIBOPENMPT_MODPLUG_API
 #endif
 
+#include <limits.h>
 #include <math.h>
 #include <memory.h>
 #include <stdio.h>
@@ -235,11 +236,11 @@ LIBOPENMPT_MODPLUG_API int ModPlug_Read(ModPlugFile* file, void* buffer, int siz
 			frames = BUFFER_COUNT;
 		}
 		if(file->settings.mChannels==1){
-			rendered = openmpt_module_read_mono(file->mod,file->settings.mFrequency,frames,&file->buf[frames*0]);
+			rendered = (int)openmpt_module_read_mono(file->mod,file->settings.mFrequency,frames,&file->buf[frames*0]);
 		}else if(file->settings.mChannels==2){
-			rendered = openmpt_module_read_stereo(file->mod,file->settings.mFrequency,frames,&file->buf[frames*0],&file->buf[frames*1]);
+			rendered = (int)openmpt_module_read_stereo(file->mod,file->settings.mFrequency,frames,&file->buf[frames*0],&file->buf[frames*1]);
 		}else if(file->settings.mChannels==4){
-			rendered = openmpt_module_read_quad(file->mod,file->settings.mFrequency,frames,&file->buf[frames*0],&file->buf[frames*1],&file->buf[frames*2],&file->buf[frames*3]);
+			rendered = (int)openmpt_module_read_quad(file->mod,file->settings.mFrequency,frames,&file->buf[frames*0],&file->buf[frames*1],&file->buf[frames*2],&file->buf[frames*3]);
 		}else{
 			return 0;
 		}
@@ -486,6 +487,7 @@ LIBOPENMPT_MODPLUG_API unsigned int ModPlug_SampleName(ModPlugFile* file, unsign
 {
 	const char* str;
 	unsigned int retval;
+	size_t tmpretval;
 	if(!file) return 0;
 	str = openmpt_module_get_sample_name(file->mod,qual-1);
 	if(!str){
@@ -494,10 +496,14 @@ LIBOPENMPT_MODPLUG_API unsigned int ModPlug_SampleName(ModPlugFile* file, unsign
 		}
 		return 0;
 	}
-	if(buff){
-		strcpy(buff,str);
+	tmpretval = strlen(str);
+	if(tmpretval>=INT_MAX){
+		tmpretval = INT_MAX-1;
 	}
-	retval = strlen(str);
+	retval = (int)tmpretval;
+	if(buff){
+		strncpy(buff,str,retval+1);
+	}
 	openmpt_free_string(str);
 	return retval;
 }
@@ -506,6 +512,7 @@ LIBOPENMPT_MODPLUG_API unsigned int ModPlug_InstrumentName(ModPlugFile* file, un
 {
 	const char* str;
 	unsigned int retval;
+	size_t tmpretval;
 	if(!file) return 0;
 	str = openmpt_module_get_instrument_name(file->mod,qual-1);
 	if(!str){
@@ -514,10 +521,14 @@ LIBOPENMPT_MODPLUG_API unsigned int ModPlug_InstrumentName(ModPlugFile* file, un
 		}
 		return 0;
 	}
-	if(buff){
-		strcpy(buff,str);
+	tmpretval = strlen(str);
+	if(tmpretval>=INT_MAX){
+		tmpretval = INT_MAX-1;
 	}
-	retval = strlen(str);
+	retval = (int)tmpretval;
+	if(buff){
+		strncpy(buff,str,retval+1);
+	}
 	openmpt_free_string(str);
 	return retval;
 }
