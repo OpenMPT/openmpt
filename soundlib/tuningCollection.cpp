@@ -310,9 +310,9 @@ bool CTuningCollection::AddTuning(CTuning* const pT)
 
 
 bool CTuningCollection::AddTuning(istream& inStrm, const bool ignoreEditmask)
-//-------------------------------------------------
+//---------------------------------------------------------------------------
 {
-	if(!ignoreEditmask && (m_EditMask & EM_ADD) == 0 || m_Tunings.size() >= s_nMaxTuningCount)
+	if((!ignoreEditmask && (m_EditMask & EM_ADD) == 0) || m_Tunings.size() >= s_nMaxTuningCount)
 		return true;
 
 	if(!inStrm.good()) return true;
