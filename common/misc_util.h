@@ -271,8 +271,14 @@ namespace Util
 	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
 
 	/// Returns value rounded to nearest integer.
-	inline double Round(const double& val) {return std::floor(val + 0.5);}
-	inline float Round(const float& val) {return std::floor(val + 0.5f);}
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2012,0)
+	// revisit this with vs2012
+	inline double Round(const double& val) {if(val >= 0.0) return std::floor(val + 0.5); else return std::ceil(val - 0.5);}
+	inline float Round(const float& val) {if(val >= 0.0f) return std::floor(val + 0.5f); else return std::ceil(val - 0.5f);}
+#else
+	inline double Round(const double& val) { return std::round(val); }
+	inline float Round(const float& val) { return std::round(val); }
+#endif
 
 	/// Rounds given double value to nearest integer value of type T.
 	template <class T> inline T Round(const double& val)
