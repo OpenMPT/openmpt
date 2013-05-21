@@ -1,5 +1,5 @@
 /*
- * libopenmpt_example_cpp.cpp
+ * libopenmpt_example_cxx.cpp
  * --------------------------
  * Purpose: libopenmpt C++ API simple example
  * Notes  : (currently none)
