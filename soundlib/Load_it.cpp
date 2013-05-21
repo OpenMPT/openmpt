@@ -980,7 +980,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 			break;
 		case 6:
-			madeWithTracker = mpt::String::Format("BeRoTracker %x.%x");
+			madeWithTracker = "BeRoTracker";
 			break;
 		case 7:
 			madeWithTracker = mpt::String::Format("ITMCK %d.%d.%d", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
