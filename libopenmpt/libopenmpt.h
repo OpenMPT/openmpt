@@ -101,10 +101,10 @@ LIBOPENMPT_API double openmpt_module_seek_seconds( openmpt_module * mod, double 
 
 LIBOPENMPT_API size_t openmpt_module_read_mono(   openmpt_module * mod, int32_t samplerate, size_t count, int16_t * mono );
 LIBOPENMPT_API size_t openmpt_module_read_stereo( openmpt_module * mod, int32_t samplerate, size_t count, int16_t * left, int16_t * right );
-LIBOPENMPT_API size_t openmpt_module_read_quad(   openmpt_module * mod, int32_t samplerate, size_t count, int16_t * left, int16_t * right, int16_t * back_left, int16_t * back_right );
+LIBOPENMPT_API size_t openmpt_module_read_quad(   openmpt_module * mod, int32_t samplerate, size_t count, int16_t * left, int16_t * right, int16_t * rear_left, int16_t * rear_right );
 LIBOPENMPT_API size_t openmpt_module_read_float_mono(   openmpt_module * mod, int32_t samplerate, size_t count, float * mono );
 LIBOPENMPT_API size_t openmpt_module_read_float_stereo( openmpt_module * mod, int32_t samplerate, size_t count, float * left, float * right );
-LIBOPENMPT_API size_t openmpt_module_read_float_quad(   openmpt_module * mod, int32_t samplerate, size_t count, float * left, float * right, float * back_left, float * back_right );
+LIBOPENMPT_API size_t openmpt_module_read_float_quad(   openmpt_module * mod, int32_t samplerate, size_t count, float * left, float * right, float * rear_left, float * rear_right );
 
 LIBOPENMPT_API double openmpt_module_get_current_position_seconds( openmpt_module * mod );
 
