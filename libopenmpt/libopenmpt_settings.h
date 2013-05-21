@@ -37,7 +37,7 @@ public:
 	bool with_outputformat;
 	int samplerate;
 	int channels;
-	int mastergain;
+	int mastergain_millibel;
 	int stereoseparation;
 	int repeatcount;
 	int maxmixchannels;
@@ -56,27 +56,27 @@ public:
 };
 
 inline void settings::load() {
-	read_setting( "samplerate", samplerate );
-	read_setting( "channels", channels );
-	read_setting( "mastergain", mastergain );
-	read_setting( "stereoseparation", stereoseparation );
-	read_setting( "repeatcount", repeatcount );
-	read_setting( "maxmixchannels", maxmixchannels );
-	read_setting( "interpolationmode", interpolationmode );
-	read_setting( "volrampin_microseconds", volrampinus );
-	read_setting( "volrampout_microseconds", volrampoutus );
+	read_setting( "Samplerate_Hz", samplerate );
+	read_setting( "Channels", channels );
+	read_setting( "MasterGain_milliBel", mastergain_millibel );
+	read_setting( "SeteroSeparation_Percent", stereoseparation );
+	read_setting( "RepeatCount", repeatcount );
+	read_setting( "MixerChannels", maxmixchannels );
+	read_setting( "InterpolationMode", interpolationmode );
+	read_setting( "VolumeRampingIn_microseconds", volrampinus );
+	read_setting( "VolumeRampingOut_microseconds", volrampoutus );
 }
 
 inline void settings::save() {
-	write_setting( "samplerate", samplerate );
-	write_setting( "channels", channels );
-	write_setting( "mastergain", mastergain );
-	write_setting( "stereoseparation", stereoseparation );
-	write_setting( "repeatcount", repeatcount );
-	write_setting( "maxmixchannels", maxmixchannels );
-	write_setting( "interpolationmode", interpolationmode );
-	write_setting( "volrampin_microseconds", volrampinus );
-	write_setting( "volrampout_microseconds", volrampoutus );
+	write_setting( "Samplerate_Hz", samplerate );
+	write_setting( "Channels", channels );
+	write_setting( "MasterGain_milliBel", mastergain_millibel );
+	write_setting( "SeteroSeparation_Percent", stereoseparation );
+	write_setting( "RepeatCount", repeatcount );
+	write_setting( "MixerChannels", maxmixchannels );
+	write_setting( "InterpolationMode", interpolationmode );
+	write_setting( "VolumeRampingIn_microseconds", volrampinus );
+	write_setting( "VolumeRampingOut_microseconds", volrampoutus );
 }
 
 inline void settings::edit( HWND parent, const char * title ) {
@@ -86,7 +86,7 @@ inline void settings::edit( HWND parent, const char * title ) {
 inline settings::settings( bool with_outputformat_ ) : with_outputformat(with_outputformat_) {
 	samplerate = 48000;
 	channels = 2;
-	mastergain = 0;
+	mastergain_millibel = 0;
 	stereoseparation = 100;
 	repeatcount = 0;
 	maxmixchannels = 256;

@@ -125,7 +125,7 @@ std::ostream & operator << ( std::ostream & s, const openmpt123_flags & flags ) 
 	s << "Buffer: " << flags.buffer << std::endl;
 	s << "Repeat count: " << flags.repeatcount << std::endl;
 	s << "Sample rate: " << flags.samplerate << std::endl;
-	s << "Gain: " << flags.gain << std::endl;
+	s << "Gain: " << flags.gain / 100.0 << std::endl;
 	s << "Quality: " << flags.quality << std::endl;
 	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
@@ -367,7 +367,7 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 		std::clog << " --[no]-float     Output 32bit floating point instead of 16bit integer [default: " << openmpt123_flags().use_float << "]" << std::endl;
 		std::clog << " --buffer n       Set output buffer size to n ms [default: " << openmpt123_flags().buffer << "]," << std::endl;
 		std::clog << " --samplerate n   Set samplerate to n Hz [default: " << openmpt123_flags().samplerate << "]" << std::endl;
-		std::clog << " --gain n         Set output gain to n dB [default: " << openmpt123_flags().gain << "]" << std::endl;
+		std::clog << " --gain n         Set output gain to n dB [default: " << openmpt123_flags().gain / 100.0 << "]" << std::endl;
 		std::clog << " --repeat n       Repeat song n times (-1 means forever) [default: " << openmpt123_flags().repeatcount << "]" << std::endl;
 		std::clog << " --quality n      Set rendering quality to n % [default: " << openmpt123_flags().quality << "]" << std::endl;
 		std::clog << " --seek n         Seek to n seconds on start [default: " << openmpt123_flags().seek_target << "]" << std::endl;
@@ -506,9 +506,9 @@ static void render_file( const openmpt123_flags & flags, const std::string & fil
 
 		mod.set_render_param( openmpt::module::RENDER_REPEATCOUNT, flags.repeatcount );
 		mod.set_render_param( openmpt::module::RENDER_QUALITY_PERCENT, flags.quality );
-		mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_DB, flags.gain );
-		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_IN_US, flags.rampinus );
-		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_OUT_US, flags.rampoutus );
+		mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
+		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_IN_MICROSECONDS, flags.rampinus );
+		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_OUT_MICROSECONDS, flags.rampoutus );
 
 		if ( flags.seek_target > 0.0 ) {
 			mod.seek_seconds( flags.seek_target );
@@ -643,7 +643,9 @@ static openmpt123_flags parse_openmpt123( const std::vector<std::string> & args 
 				++i;
 			} else if ( arg == "--gain" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
-				istr >> flags.gain;
+				double gain = 0.0;
+				istr >> gain;
+				flags.gain = static_cast<std::int32_t>( gain * 100.0 );
 				++i;
 			} else if ( arg == "--repeat" && nextarg != "" ) {
 				std::istringstream istr( nextarg );

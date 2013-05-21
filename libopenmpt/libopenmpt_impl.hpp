@@ -41,7 +41,8 @@ int get_version_compatbility( std::uint32_t api_version );
 
 } // namespace version
 
-class exception_message : public exception {
+// has to be exported for type_info lookup to work
+class LIBOPENMPT_CXX_API exception_message : public exception {
 public:
 	exception_message( const char * text_ ) throw() : text(text_) { }
 	virtual ~exception_message() throw() { }
@@ -256,8 +257,8 @@ public:
 public:
 	std::int32_t get_render_param( int command ) const {
 		switch ( command ) {
-			case module::RENDER_MASTERGAIN_DB: {
-				return static_cast<std::int32_t>( 10.0f * 2.0f * std::log10( fx16_to_float( m_sndFile.m_MixerSettings.m_FinalOutputGain ) ) );
+			case module::RENDER_MASTERGAIN_MILLIBEL: {
+				return static_cast<std::int32_t>( 1000.0f * 2.0f * std::log10( fx16_to_float( m_sndFile.m_MixerSettings.m_FinalOutputGain ) ) );
 			} break;
 			case module::RENDER_STEREOSEPARATION_PERCENT: {
 				return m_sndFile.m_MixerSettings.m_nStereoSeparation * 100 / 128;
@@ -295,10 +296,10 @@ public:
 				}
 				throw openmpt::exception_message("unknown interpolation mode set internally");
 			} break;
-			case module::RENDER_VOLUMERAMP_IN_US: {
+			case module::RENDER_VOLUMERAMP_IN_MICROSECONDS: {
 				return m_sndFile.m_MixerSettings.GetVolumeRampUpMicroseconds();
 			} break;
-			case module::RENDER_VOLUMERAMP_OUT_US: {
+			case module::RENDER_VOLUMERAMP_OUT_MICROSECONDS: {
 				return m_sndFile.m_MixerSettings.GetVolumeRampDownMicroseconds();
 			} break;
 			default: throw openmpt::exception_message("unknown command"); break;
@@ -307,8 +308,8 @@ public:
 	}
 	void set_render_param( int command, std::int32_t value ) {
 		switch ( command ) {
-			case module::RENDER_MASTERGAIN_DB: {
-				float gainFactor = static_cast<float>( std::pow( 10.0f, value * 0.1f * 0.5f ) );
+			case module::RENDER_MASTERGAIN_MILLIBEL: {
+				float gainFactor = static_cast<float>( std::pow( 10.0f, value * 0.001f * 0.5f ) );
 				if ( static_cast<std::int32_t>( m_sndFile.m_MixerSettings.m_FinalOutputGain ) != float_to_fx16( gainFactor ) ) {
 					MixerSettings settings = m_sndFile.m_MixerSettings;
 					settings.m_FinalOutputGain = float_to_fx16( gainFactor );
@@ -356,14 +357,14 @@ public:
 					m_sndFile.SetResamplerSettings( newsettings );
 				}
 			} break;
-			case module::RENDER_VOLUMERAMP_IN_US: {
+			case module::RENDER_VOLUMERAMP_IN_MICROSECONDS: {
 				MixerSettings newsettings = m_sndFile.m_MixerSettings;
 				newsettings.SetVolumeRampUpMicroseconds( value );
 				if ( m_sndFile.m_MixerSettings.glVolumeRampUpSamples != newsettings.glVolumeRampUpSamples ) {
 					m_sndFile.SetMixerSettings( newsettings );
 				}
 			} break;
-			case module::RENDER_VOLUMERAMP_OUT_US: {
+			case module::RENDER_VOLUMERAMP_OUT_MICROSECONDS: {
 				MixerSettings newsettings = m_sndFile.m_MixerSettings;
 				newsettings.SetVolumeRampDownMicroseconds( value );
 				if ( m_sndFile.m_MixerSettings.glVolumeRampDownSamples != newsettings.glVolumeRampDownSamples ) {

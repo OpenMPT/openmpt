@@ -47,7 +47,7 @@ namespace libopenmpt {
 			comboBoxSamplerate->Enabled = settings->with_outputformat;
 			comboBoxChannels->Enabled = settings->with_outputformat;
 
-			trackBarGain->Value = settings->mastergain;
+			trackBarGain->Value = settings->mastergain_millibel;
 
 			trackBarMaxPolyphony->Value = settings->maxmixchannels;
 
@@ -197,13 +197,15 @@ namespace libopenmpt {
 			// 
 			// trackBarGain
 			// 
-			this->trackBarGain->LargeChange = 3;
+			this->trackBarGain->LargeChange = 300;
 			this->trackBarGain->Location = System::Drawing::Point(106, 63);
-			this->trackBarGain->Maximum = 12;
-			this->trackBarGain->Minimum = -12;
+			this->trackBarGain->Maximum = 1200;
+			this->trackBarGain->Minimum = -1200;
 			this->trackBarGain->Name = L"trackBarGain";
 			this->trackBarGain->Size = System::Drawing::Size(121, 42);
+			this->trackBarGain->SmallChange = 100;
 			this->trackBarGain->TabIndex = 6;
+			this->trackBarGain->TickFrequency = 100;
 			this->trackBarGain->TickStyle = System::Windows::Forms::TickStyle::Both;
 			this->trackBarGain->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarGain_Scroll);
 			// 
@@ -399,7 +401,7 @@ private: System::Void comboBoxChannels_SelectedIndexChanged(System::Object^  sen
 					 settings->changed();
 				 }
 private: System::Void trackBarGain_Scroll(System::Object^  sender, System::EventArgs^  e) {
-					 settings->mastergain = (int)trackBarGain->Value;
+					 settings->mastergain_millibel = (int)trackBarGain->Value;
 					 settings->changed();
 				 }
 private: System::Void comboBoxInterpolation_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
