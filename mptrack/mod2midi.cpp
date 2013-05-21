@@ -394,13 +394,13 @@ BOOL CModToMidi::DoConvert()
 	f.Write(&mthd, sizeof(mthd));
 
 	// Add Song Name on track 0
-	const CHAR *modTitle = m_pSndFile->GetTitle();
+	const std::string modTitle = m_pSndFile->GetTitle();
 	if (modTitle[0])
 	{
 		tmp[0] = 0; tmp[1] = 0xff; tmp[2] = 0x01;
 		Tracks[0].Write(tmp, 3);
-		Tracks[0].WriteLen(strlen(modTitle));
-		Tracks[0].Write(modTitle, strlen(modTitle));
+		Tracks[0].WriteLen(modTitle.length());
+		Tracks[0].Write(modTitle.c_str(), modTitle.length());
 	}
 
 	// Add Song comments on track 0

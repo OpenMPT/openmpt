@@ -325,7 +325,7 @@ void CCtrlGeneral::OnTitleChanged()
 
 	CString title;
 	m_EditTitle.GetWindowText(title);
-	if(m_sndFile.SetTitle(title, title.GetLength()))
+	if(m_sndFile.SetTitle(title.GetString()))
 	{
 		m_EditTitle.SetModify(FALSE);
 		m_modDoc.SetModified();

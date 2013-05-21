@@ -192,9 +192,6 @@ class CModDoc;
 class CSoundFile
 //==============
 {
-public:
-	//Return true if title was changed.
-	bool SetTitle(const char*, size_t strSize);
 
 public: //Misc
 	void ChangeModTypeTo(const MODTYPE& newType);
@@ -464,7 +461,8 @@ public:
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(ORDERINDEX nOrder);
-	LPCSTR GetTitle() const { return m_szNames[0]; }
+	std::string GetTitle() const { return m_szNames[0]; }
+	bool SetTitle(const std::string &newTitle); // Return true if title was changed.
 	LPCTSTR GetSampleName(UINT nSample) const;
 	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
