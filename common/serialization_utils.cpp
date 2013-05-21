@@ -296,15 +296,13 @@ void Ssb::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 
 	if ((m_Readlogmask & SNT_PROGRESS) != 0 && m_fpLogFunc)
 	{
-		TCHAR buffer[256];
-		wsprintf(buffer,
+		m_fpLogFunc(
 				 tstrReadProgress,
 				 nNum,
 				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  IdToString(&m_Idarray[pRe->nIdpos], pRe->nIdLength).c_str() : "",
 				 (pRe) ? pRe->rposStart : 0,
 				 (pRe && pRe->nSize != invalidDatasize) ? Stringify(pRe->nSize).c_str() : "",
 				 "");
-		m_fpLogFunc(buffer);
 	}	
 }
 
@@ -318,9 +316,7 @@ void Ssb::AddWriteNote(const void* pId, const size_t nIdSize, const NumType nEnt
 	{
 		if (nIdSize < 30)
 		{
-			TCHAR buffer[256];
-			wsprintf(buffer, tstrWriteProgress, nEntryNum, IdToString(pId, nIdSize).c_str(), rposStart, nBytecount);
-			m_fpLogFunc(buffer);
+			m_fpLogFunc(tstrWriteProgress, nEntryNum, IdToString(pId, nIdSize).c_str(), rposStart, nBytecount);
 		}
 	}
 }
