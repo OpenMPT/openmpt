@@ -227,10 +227,10 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 
 	if(pfh->songname[0])
 	{
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh->songname);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pfh->songname);
 	} else
 	{
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh->songname2);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pfh->songname2);
 
 	}
 
@@ -274,10 +274,10 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 					break;
 				}
 
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, pih->name);
+				mpt::String::Read<mpt::String::maybeNullTerminated>(pIns->name, pih->name);
 				if (psmp)
 				{
-					StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[nsmp], pih->name);
+					mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[nsmp], pih->name);
 				}
 
 				pIns->nFadeOut = 1024;	// ???

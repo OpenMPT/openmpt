@@ -259,7 +259,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 		Order[iOrd] = (PATTERNINDEX)pfh->Orders[iOrd];
 	}
 
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh->szSongName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pfh->szSongName);
 
 	dwMemPos = sizeof(MT2FILEHEADER);
 	nDrumDataLen = *(WORD *)(lpStream + dwMemPos);
@@ -456,7 +456,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 			pIns = AllocateInstrument(iIns);
 			if(pIns != nullptr)
 			{
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, pmi->szName);
+				mpt::String::Read<mpt::String::maybeNullTerminated>(pIns->name, pmi->szName);
 			}
 		}
 	#ifdef MT2DEBUG
@@ -563,7 +563,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 	#endif
 		if (iSmp < MAX_SAMPLES)
 		{
-			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[iSmp], pms->szName);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[iSmp], pms->szName);
 		}
 		if (pms->dwDataLen > 0)
 		{

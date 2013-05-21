@@ -1446,12 +1446,12 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	
 			if (!pIns->name[0] && m_sndFile.GetModSpecifications().instrNameLengthMax > 0)
 			{
-				StringFixer::CopyN(pIns->name, szName, m_sndFile.GetModSpecifications().instrNameLengthMax);
+				mpt::String::CopyN(pIns->name, szName, m_sndFile.GetModSpecifications().instrNameLengthMax);
 			}
 			if (!pIns->filename[0] && m_sndFile.GetModSpecifications().instrFilenameLengthMax > 0)
 			{
 				strcat(szName, szExt);
-				StringFixer::CopyN(pIns->filename, szName, m_sndFile.GetModSpecifications().instrFilenameLengthMax);
+				mpt::String::CopyN(pIns->filename, szName, m_sndFile.GetModSpecifications().instrFilenameLengthMax);
 			}
 
 			SetCurrentInstrument(m_nInstrument);
@@ -1730,10 +1730,10 @@ void CCtrlInstruments::OnInstrumentSave()
 	if (!pIns) return;
 	if (pIns->filename[0])
 	{
-		StringFixer::Copy(szFileName, pIns->filename);
+		mpt::String::Copy(szFileName, pIns->filename);
 	} else
 	{
-		StringFixer::Copy(szFileName, pIns->name);
+		mpt::String::Copy(szFileName, pIns->name);
 	}
 	SanitizeFilename(szFileName);
 
@@ -1807,7 +1807,7 @@ void CCtrlInstruments::OnNameChanged()
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 		if ((pIns) && (strncmp(s, pIns->name, MAX_INSTRUMENTNAME)))
 		{
-			StringFixer::Copy(pIns->name, s);
+			mpt::String::Copy(pIns->name, s);
 			SetInstrumentModified(true);
 		}
 	}

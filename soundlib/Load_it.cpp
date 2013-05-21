@@ -278,7 +278,7 @@ static void CopyPatternName(CPattern &pattern, FileReader &file)
 //--------------------------------------------------------------
 {
 	char name[MAX_PATTERNNAME] = "";
-	file.ReadString<StringFixer::maybeNullTerminated>(name, MAX_PATTERNNAME);
+	file.ReadString<mpt::String::maybeNullTerminated>(name, MAX_PATTERNNAME);
 	pattern.SetName(name);
 }
 
@@ -438,7 +438,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_EMBEDMIDICFG, (fileHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig) || (fileHeader.special & ITFileHeader::embedMIDIConfiguration));
 	m_SongFlags.set(SONG_EXFILTERRANGE, (fileHeader.flags & ITFileHeader::extendedFilterRange) != 0);
 
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songname);
+	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], fileHeader.songname);
 
 	// Global Volume
 	m_nDefaultGlobalVolume = fileHeader.globalvol << 1;
@@ -599,7 +599,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 		for(CHANNELINDEX i = 0; i < readChns; i++)
 		{
-			chnNames.ReadString<StringFixer::maybeNullTerminated>(ChnSettings[i].szName, MAX_CHANNELNAME);
+			chnNames.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[i].szName, MAX_CHANNELNAME);
 		}
 	}
 
@@ -661,7 +661,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				size_t sampleOffset = sampleHeader.ConvertToMPT(Samples[i + 1]);
 
-				StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[i + 1], sampleHeader.name);
+				mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
 
 				if((loadFlags & loadSampleData) && file.Seek(sampleOffset))
 				{
@@ -1117,7 +1117,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	MemsetZero(itHeader);
 	dwChnNamLen = 0;
 	itHeader.id = ITFileHeader::itMagic;
-	StringFixer::WriteString<StringFixer::nullTerminated>(itHeader.songname, m_szNames[0]);
+	mpt::String::Write<mpt::String::nullTerminated>(itHeader.songname, m_szNames[0]);
 
 	itHeader.highlight_minor = (uint8)std::min(m_nDefaultRowsPerBeat, ROWINDEX(uint8_max));
 	itHeader.highlight_major = (uint8)std::min(m_nDefaultRowsPerMeasure, ROWINDEX(uint8_max));
@@ -1562,7 +1562,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		// Old MPT will only consider the IT2.15 compression flag if the header version also indicates IT2.15.
 		itss.ConvertToIT(Samples[nsmp], GetType(), compress, itHeader.cmwt >= 0x215);
 
-		StringFixer::WriteString<StringFixer::nullTerminated>(itss.name, m_szNames[nsmp]);
+		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[nsmp]);
 
 		itss.samplepointer = dwPos;
 		itss.ConvertEndianness();
@@ -1771,8 +1771,8 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 			{
 				// MPT's standard plugin data. Size not specified in file.. grrr..
 				chunk.ReadConvertEndianness(m_MixPlugins[plug].Info);
-				StringFixer::SetNullTerminator(m_MixPlugins[plug].Info.szName);
-				StringFixer::SetNullTerminator(m_MixPlugins[plug].Info.szLibraryName);
+				mpt::String::SetNullTerminator(m_MixPlugins[plug].Info.szName);
+				mpt::String::SetNullTerminator(m_MixPlugins[plug].Info.szLibraryName);
 
 				//data for VST setchunk? size lies just after standard plugin data.
 				FileReader pluginDataChunk = chunk.GetChunk(chunk.ReadUint32LE());

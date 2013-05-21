@@ -278,7 +278,7 @@ void XMInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 //-----------------------------------------------------------------------------------------
 {
 	numSamples = instrument.ConvertToXM(mptIns, compatibilityExport);
-	StringFixer::WriteString<StringFixer::spacePadded>(name, mptIns.name);
+	mpt::String::Write<mpt::String::spacePadded>(name, mptIns.name);
 
 	type = mptIns.nMidiProgram;	// If FT2 writes crap here, we can do so, too! (we probably shouldn't, though.)
 }
@@ -302,7 +302,7 @@ void XMInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 		}
 	}
 
-	StringFixer::ReadString<StringFixer::spacePadded>(mptIns.name, name);
+	mpt::String::Read<mpt::String::spacePadded>(mptIns.name, name);
 
 	mptIns.nMidiProgram = type;
 }
@@ -325,7 +325,7 @@ void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 	numSamples = instrument.ConvertToXM(mptIns, compatibilityExport);
 
 	memcpy(signature, "Extended Instrument: ", 21);
-	StringFixer::WriteString<StringFixer::spacePadded>(name, mptIns.name);
+	mpt::String::Write<mpt::String::spacePadded>(name, mptIns.name);
 	eof = 0x1A;
 
 	memcpy(trackerName, "Created by OpenMPT  ", 20);
@@ -349,7 +349,7 @@ void XIInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 		}
 	}
 
-	StringFixer::ReadString<StringFixer::spacePadded>(mptIns.name, name);
+	mpt::String::Read<mpt::String::spacePadded>(mptIns.name, name);
 }
 
 

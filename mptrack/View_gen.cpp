@@ -886,10 +886,10 @@ void CViewGlobals::OnPluginNameChanged()
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 
 		GetDlgItemText(IDC_EDIT13, s, 32);
-		StringFixer::SetNullTerminator(s);
+		mpt::String::SetNullTerminator(s);
 		if (strcmp(s, pSndFile->m_MixPlugins[m_nCurrentPlugin].GetName()))
 		{
-			StringFixer::Copy(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s);
+			mpt::String::Copy(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s);
 			if(pSndFile->GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));

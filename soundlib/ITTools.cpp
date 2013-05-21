@@ -134,8 +134,8 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 		return;
 	}
 
-	StringFixer::ReadString<StringFixer::spacePadded>(mptIns.name, name);
-	StringFixer::ReadString<StringFixer::nullTerminated>(mptIns.filename, filename);
+	mpt::String::Read<mpt::String::spacePadded>(mptIns.name, name);
+	mpt::String::Read<mpt::String::nullTerminated>(mptIns.filename, filename);
 
 	// Volume / Panning
 	mptIns.nFadeOut = fadeout << 6;
@@ -214,8 +214,8 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	id = ITInstrument::magic;
 	trkvers = 0x0214;
 
-	StringFixer::WriteString<StringFixer::nullTerminated>(filename, mptIns.filename);
-	StringFixer::WriteString<StringFixer::nullTerminated>(name, mptIns.name);
+	mpt::String::Write<mpt::String::nullTerminated>(filename, mptIns.filename);
+	mpt::String::Write<mpt::String::nullTerminated>(name, mptIns.name);
 
 	// Volume / Panning
 	fadeout = static_cast<uint16>(MIN(mptIns.nFadeOut >> 5, 256));
@@ -295,8 +295,8 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 		return 0;
 	}
 
-	StringFixer::ReadString<StringFixer::spacePadded>(mptIns.name, name);
-	StringFixer::ReadString<StringFixer::nullTerminated>(mptIns.filename, filename);
+	mpt::String::Read<mpt::String::spacePadded>(mptIns.name, name);
+	mpt::String::Read<mpt::String::nullTerminated>(mptIns.filename, filename);
 
 	// Volume / Panning
 	mptIns.nFadeOut = fadeout << 5;
@@ -476,8 +476,8 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	// Header
 	id = ITSample::magic;
 
-	StringFixer::WriteString<StringFixer::nullTerminated>(filename, mptSmp.filename);
-	//StringFixer::WriteString<StringFixer::nullTerminated>(name, m_szNames[nsmp]);
+	mpt::String::Write<mpt::String::nullTerminated>(filename, mptSmp.filename);
+	//mpt::String::Write<mpt::String::nullTerminated>(name, m_szNames[nsmp]);
 
 	// Volume / Panning
 	gvl = static_cast<uint8>(mptSmp.nGlobalVol);
@@ -552,7 +552,7 @@ size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
 	}
 
 	mptSmp.Initialize(MOD_TYPE_IT);
-	StringFixer::ReadString<StringFixer::nullTerminated>(mptSmp.filename, filename);
+	mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
 
 	// Volume / Panning
 	mptSmp.nVolume = vol * 4;

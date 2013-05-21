@@ -667,7 +667,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX nSmp = 0; nSmp < MAX_SAMPLES; nSmp++, pSmp++)
 	{
 		// Adjust song / sample names
-		StringFixer::SetNullTerminator(m_szNames[nSmp]);
+		mpt::String::SetNullTerminator(m_szNames[nSmp]);
 
 		if(pSmp->pSample)
 		{
@@ -1668,7 +1668,7 @@ bool CSoundFile::SetTitle(const std::string & newTitle)
 {
 	if(m_szNames[0] != newTitle)
 	{
-		StringFixer::CopyN(m_szNames[0], &newTitle[0], newTitle.length());
+		mpt::String::CopyN(m_szNames[0], &newTitle[0], newTitle.length());
 		return true;
 	}
 	return false;

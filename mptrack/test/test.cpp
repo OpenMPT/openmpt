@@ -1087,13 +1087,13 @@ void TestStringIO()
 	char dst2[3];	// Destination buffer, smaller than source buffer
 
 #define ReadTest(mode, dst, src, expectedResult) \
-	StringFixer::ReadString<StringFixer::##mode>(dst, src); \
+	mpt::String::Read<mpt::String::##mode>(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0); /* Ensure that the strings are identical */ \
 	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
 
 #define WriteTest(mode, dst, src, expectedResult) \
-	StringFixer::WriteString<StringFixer::##mode>(dst, src); \
+	mpt::String::Write<mpt::String::##mode>(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
 	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
@@ -1187,9 +1187,9 @@ void TestStringIO()
 	///////////////////////////////
 
 	// Test FixNullString()
-	StringFixer::FixNullString(src1);
-	StringFixer::FixNullString(src2);
-	StringFixer::FixNullString(src3);
+	mpt::String::FixNullString(src1);
+	mpt::String::FixNullString(src2);
+	mpt::String::FixNullString(src3);
 	VERIFY_EQUAL_NONCONT(strncmp(src1, "X ", CountOf(src1)), 0);
 	VERIFY_EQUAL_NONCONT(strncmp(src2, "XYZ", CountOf(src2)), 0);
 	VERIFY_EQUAL_NONCONT(strncmp(src3, "XYZ", CountOf(src3)), 0);

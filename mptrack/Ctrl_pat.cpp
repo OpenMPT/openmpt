@@ -1076,7 +1076,7 @@ void CCtrlPatterns::OnPatternNameChanged()
 
 		CHAR s[MAX_PATTERNNAME];
 		m_EditPatName.GetWindowText(s, CountOf(s));
-		StringFixer::SetNullTerminator(s);
+		mpt::String::SetNullTerminator(s);
 		
 		if(m_sndFile.Patterns[nPat].GetName() != s)
 		{

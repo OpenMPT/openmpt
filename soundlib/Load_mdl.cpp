@@ -338,7 +338,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 			Log("infoblock: %d bytes\n", blocklen);
 		#endif
 			pmib = (MDLInfoBlock *)(lpStream+dwMemPos);
-			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pmib->songname);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pmib->songname);
 
 			norders = pmib->norders;
 			if (norders > MAX_ORDERS) norders = MAX_ORDERS;
@@ -439,7 +439,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 					}
 
 					// I give up. better rewrite this crap (or take SchismTracker's MDL loader).
-					StringFixer::ReadString<StringFixer::maybeNullTerminated>(pIns->name, reinterpret_cast<const char *>(lpStream + dwPos + 2), 32);
+					mpt::String::Read<mpt::String::maybeNullTerminated>(pIns->name, reinterpret_cast<const char *>(lpStream + dwPos + 2), 32);
 
 					for (j=0; j<lpStream[dwPos+1]; j++)
 					{
@@ -531,8 +531,8 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 				}
 				ModSample &sample = Samples[info->sampleIndex];
 
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[info->sampleIndex], info->name);
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(sample.filename, info->filename);
+				mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[info->sampleIndex], info->name);
+				mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, info->filename);
 
 				if(pmsh->version > 0)
 				{

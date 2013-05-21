@@ -448,11 +448,11 @@ void CModTree::RefreshMidiLibrary()
 		{
 			_splitpath(lpMidiLib->MidiMap[iPerc|0x80], NULL, NULL, szName, szExt);
 			strncat(s, ": ", sizeof(s));
-			StringFixer::SetNullTerminator(s);
+			mpt::String::SetNullTerminator(s);
 			strncat(s, szName, sizeof(s));
-			StringFixer::SetNullTerminator(s);
+			mpt::String::SetNullTerminator(s);
 			strncat(s, szExt, sizeof(s));
-			StringFixer::SetNullTerminator(s);
+			mpt::String::SetNullTerminator(s);
 			if (szName[0]) dwImage = IMAGE_SAMPLES;
 		}
 		if (!m_tiPerc[iPerc])
@@ -1324,7 +1324,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 			{
 				// Preview sample / instrument in module
 				char szName[16];
-				StringFixer::CopyN(szName, GetItemText(hItem));
+				mpt::String::CopyN(szName, GetItemText(hItem));
 				const size_t n = ConvertStrTo<size_t>(szName);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if (pMainFrm && m_SongFile)
@@ -1621,7 +1621,7 @@ void CModTree::FillInstrumentLibrary()
 			ModInstrument *pIns = m_SongFile->Instruments[iIns];
 			if(pIns)
 			{
-				StringFixer::Copy(szPath, pIns->name);
+				mpt::String::Copy(szPath, pIns->name);
 				wsprintf(s, "%3d: %s", iIns, szPath);
 				ModTreeBuildTVIParam(tvis, s, IMAGE_INSTRUMENTS);
 				InsertItem(&tvis);
@@ -1998,7 +1998,7 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 		if (m_szSongName[0])
 		{
 			CHAR s[32];
-			StringFixer::CopyN(s, GetItemText(m_hItemDrag));
+			mpt::String::CopyN(s, GetItemText(m_hItemDrag));
 			UINT n = 0;
 			if (s[0] >= '0') n += (s[0] - '0');
 			if ((s[1] >= '0') && (s[1] <= '9')) n = n*10 + (s[1] - '0');
@@ -3616,7 +3616,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_SAMPLE:
 			if(modItemID <= sndFile.GetNumSamples() && strcmp(sndFile.m_szNames[modItemID], info->item.pszText))
 			{
-				StringFixer::CopyN(sndFile.m_szNames[modItemID], info->item.pszText, modSpecs.sampleNameLengthMax);
+				mpt::String::CopyN(sndFile.m_szNames[modItemID], info->item.pszText, modSpecs.sampleNameLengthMax);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_SMP) | HINT_SMPNAMES | HINT_SAMPLEDATA | HINT_SAMPLEINFO);
 			}
@@ -3625,7 +3625,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_INSTRUMENT:
 			if(modItemID <= sndFile.GetNumInstruments() && sndFile.Instruments[modItemID] != nullptr && strcmp(sndFile.Instruments[modItemID]->name, info->item.pszText))
 			{
-				StringFixer::CopyN(sndFile.Instruments[modItemID]->name, info->item.pszText, modSpecs.instrNameLengthMax);
+				mpt::String::CopyN(sndFile.Instruments[modItemID]->name, info->item.pszText, modSpecs.instrNameLengthMax);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_INS) | HINT_ENVELOPE | HINT_INSTRUMENT);
 			}

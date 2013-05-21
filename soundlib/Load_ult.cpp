@@ -63,7 +63,7 @@ struct PACKED UltSample
 	{
 		mptSmp.Initialize();
 
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptSmp.filename, filename);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
 
 		if(sizeEnd <= sizeStart)
 		{
@@ -393,7 +393,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
 
 	const char *versions[] = {"<1.4", "1.4", "1.5", "1.6"};
 	madeWithTracker = "UltraTracker ";
@@ -427,7 +427,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		sampleHeader.ConvertToMPT(Samples[smp]);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 	}
 
 	// ult just so happens to use 255 for its end mark, so there's no need to fiddle with this

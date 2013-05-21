@@ -975,7 +975,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songname);
+	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], fileHeader.songname);
 
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
@@ -1067,7 +1067,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		chunk.ReadString<StringFixer::spacePadded>(m_szNames[smp], chunk.ReadUint8());
+		chunk.ReadString<mpt::String::spacePadded>(m_szNames[smp], chunk.ReadUint8());
 		DMFSampleHeader sampleHeader;
 		ModSample &sample = Samples[smp];
 		chunk.ReadConvertEndianness(sampleHeader);
@@ -1076,7 +1076,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.version >= 8)
 		{
 			// Read library name in version 8 files
-			chunk.ReadString<StringFixer::spacePadded>(sample.filename, 8);
+			chunk.ReadString<mpt::String::spacePadded>(sample.filename, 8);
 		}
 
 		// We don't care for the checksum of the sample data...

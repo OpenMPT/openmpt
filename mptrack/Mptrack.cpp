@@ -157,7 +157,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 		CHAR s[_MAX_PATH], *pszCmd, *pszData;
 		int len;
 
-		StringFixer::CopyN(s, lpszCommand);
+		mpt::String::CopyN(s, lpszCommand);
 		len = strlen(s) - 1;
 		while ((len > 0) && (strchr("(){}[]\'\" ", s[len]))) s[len--] = 0;
 		pszCmd = s;
@@ -699,7 +699,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 {
 	if(GetModuleFileName(NULL, m_szExePath, CountOf(m_szExePath)))
 	{
-		StringFixer::SetNullTerminator(m_szExePath);
+		mpt::String::SetNullTerminator(m_szExePath);
 		TCHAR szDrive[_MAX_DRIVE] = "", szDir[_MAX_PATH] = "";
 		_splitpath(m_szExePath, szDrive, szDir, NULL, NULL);
 		strcpy(m_szExePath, szDrive);
@@ -2321,7 +2321,7 @@ void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
 	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
 	TCHAR szExePath[nLength], szTempPath[nLength];
 	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
-	StringFixer::SetNullTerminator(szExePath);
+	mpt::String::SetNullTerminator(szExePath);
 
 	if(!_tcsncicmp(szExePath, szPath, _tcslen(szExePath)))
 	{
@@ -2335,7 +2335,7 @@ void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
 		_tcsncpy(szTempPath, &szPath[2], nStrLength);	// "\Somepath"
 		_tcscpy(szPath, szTempPath);
 	}
-	StringFixer::SetNullTerminator(szPath);
+	mpt::String::SetNullTerminator(szPath);
 }
 
 
@@ -2355,7 +2355,7 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
 	TCHAR szExePath[nLength], szTempPath[nLength] = _T("");
 	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
-	StringFixer::SetNullTerminator(szExePath);
+	mpt::String::SetNullTerminator(szExePath);
 
 	if(!_tcsncicmp(szPath, _T("\\"), 1) && _tcsncicmp(szPath, _T("\\\\"), 2))
 	{
@@ -2373,7 +2373,7 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 		}
 		_tcscpy(szPath, szTempPath);
 	}
-	StringFixer::SetNullTerminator(szPath);
+	mpt::String::SetNullTerminator(szPath);
 }
 
 void CTrackApp::RemoveMruItem(const int nItem)

@@ -158,7 +158,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo = 80;
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
 
 	// Read channel settings
 	for(CHANNELINDEX chn = 0; chn < 16; chn++)
@@ -313,7 +313,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 
 		m_nSamples = smp + 1;
 		ModSample &sample = Samples[m_nSamples];
-		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[m_nSamples], sampleHeader.name);
+		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[m_nSamples], sampleHeader.name);
 		sampleHeader.ConvertToMPT(sample);
 		sampleHeader.GetSampleFormat().ReadSample(sample, file);
 	}

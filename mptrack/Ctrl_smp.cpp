@@ -658,10 +658,10 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		wsprintf(s, "%d-bit %s, len: %d", sample.GetElementarySampleSize() * 8, (sample.uFlags & CHN_STEREO) ? "stereo" : "mono", sample.nLength);
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
-		StringFixer::Copy(s, m_sndFile.m_szNames[m_nSample]);
+		mpt::String::Copy(s, m_sndFile.m_szNames[m_nSample]);
 		SetDlgItemText(IDC_SAMPLE_NAME, s);
 		// File Name
-		StringFixer::Copy(s, sample.filename);
+		mpt::String::Copy(s, sample.filename);
 		if (m_sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) s[0] = 0;
 		SetDlgItemText(IDC_SAMPLE_FILENAME, s);
 		// Volume
@@ -836,10 +836,10 @@ OpenError:
 			{
 				// S3M/IT
 				szFullFilename[31] = 0;
-				if (!m_sndFile.m_szNames[m_nSample][0]) StringFixer::Copy(m_sndFile.m_szNames[m_nSample], szFullFilename);
+				if (!m_sndFile.m_szNames[m_nSample][0]) mpt::String::Copy(m_sndFile.m_szNames[m_nSample], szFullFilename);
 				if (strlen(szFullFilename) < 9) strcat(szFullFilename, szExt);
 			}
-			StringFixer::Copy(sample.filename, szFullFilename);
+			mpt::String::Copy(sample.filename, szFullFilename);
 		}
 		if ((m_sndFile.GetType() & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
 		{
@@ -1011,11 +1011,11 @@ void CCtrlSamples::OnSampleSave()
 		}
 		if(m_sndFile.GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			StringFixer::Copy(szFileName, m_sndFile.GetSample(m_nSample).filename);
+			mpt::String::Copy(szFileName, m_sndFile.GetSample(m_nSample).filename);
 		}
 		if(!szFileName[0])
 		{
-			StringFixer::Copy(szFileName, m_sndFile.m_szNames[m_nSample]);
+			mpt::String::Copy(szFileName, m_sndFile.m_szNames[m_nSample]);
 		}
 		if(!szFileName[0]) strcpy(szFileName, "untitled");
 		if(strlen(szFileName) >= 5 && !_strcmpi(szFileName + strlen(szFileName) - 5, ".flac"))
@@ -1036,7 +1036,7 @@ void CCtrlSamples::OnSampleSave()
 		sPath += ".wav";
 		_splitpath(sPath, NULL, NULL, szFileName, NULL);
 	}
-	StringFixer::SetNullTerminator(szFileName);
+	mpt::String::SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
 	CString format = CMainFrame::GetPrivateProfileCString("Sample Editor", "DefaultFormat", defaultFLAC ? "flac" : "wav", theApp.GetConfigFileName());
@@ -2331,7 +2331,7 @@ void CCtrlSamples::OnNameChanged()
 	s[31] = 0;
 	if (strncmp(s, m_sndFile.m_szNames[m_nSample], MAX_SAMPLENAME))
 	{
-		StringFixer::Copy(m_sndFile.m_szNames[m_nSample], s);
+		mpt::String::Copy(m_sndFile.m_szNames[m_nSample], s);
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 		m_modDoc.UpdateAllViews(NULL, HINT_INSNAMES, this);
 		m_modDoc.SetModified();
@@ -2347,11 +2347,11 @@ void CCtrlSamples::OnFileNameChanged()
 	if(IsLocked()) return;
 	s[0] = 0;
 	m_EditFileName.GetWindowText(s, sizeof(s));
-	StringFixer::SetNullTerminator(s);
+	mpt::String::SetNullTerminator(s);
 
 	if (strncmp(s, m_sndFile.GetSample(m_nSample).filename, MAX_SAMPLEFILENAME))
 	{
-		StringFixer::Copy(m_sndFile.GetSample(m_nSample).filename, s);
+		mpt::String::Copy(m_sndFile.GetSample(m_nSample).filename, s);
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, this);
 		if (m_sndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) m_modDoc.SetModified();
 	}
