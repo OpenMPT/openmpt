@@ -547,7 +547,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	InitializeChannels();
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
-	madeWithTracker.Format("OctaMED (MMD%c)", version);
+	madeWithTracker = mpt::String::Format("OctaMED (MMD%c)", version);
 
 	m_nType = MOD_TYPE_MED;
 	m_nSamplePreAmp = 32;

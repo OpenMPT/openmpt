@@ -102,7 +102,7 @@ public:
 		return GetName(buffer, bufferSize);
 	}
 	bool GetName(char *buffer, size_t maxChars) const;
-	const mpt::String& GetName() const { return m_PatternName; };
+	mpt::string GetName() const { return m_PatternName; };
 
 	// Double number of rows
 	bool Expand();
@@ -146,7 +146,7 @@ protected:
 	ROWINDEX m_Rows;
 	ROWINDEX m_RowsPerBeat;		// patterns-specific time signature. if != 0, this is implicitely set.
 	ROWINDEX m_RowsPerMeasure;	// dito
-	mpt::String m_PatternName;
+	std::string m_PatternName;
 	CPatternContainer& m_rPatternContainer;
 //END: DATA
 };

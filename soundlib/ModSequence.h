@@ -124,7 +124,7 @@ protected:
 	const_iterator end() const {return m_pArray + m_nSize;}
 
 public:
-	mpt::String m_sName;				// Sequence name.
+	mpt::string m_sName;				// Sequence name.
 
 protected:
 	CSoundFile &m_sndFile;			// Pointer to associated CSoundFile.

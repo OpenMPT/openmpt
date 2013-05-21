@@ -87,30 +87,29 @@ std::string GetOpenMPTVersionStr()
 	return std::string("OpenMPT ") + std::string(MPT_VERSION_STR);
 }
 
-VersionNum ToNum(const char *const s)
+VersionNum ToNum(const std::string &s_)
 {
+	const char *s = s_.c_str();
 	int v1, v2, v3, v4; 
 	sscanf(s, "%x.%x.%x.%x", &v1, &v2, &v3, &v4);
 	return ((v1 << 24) |  (v2 << 16) | (v3 << 8) | v4);
 }
 
-mpt::String ToStr(const VersionNum v)
+std::string ToStr(const VersionNum v)
 {
-	mpt::String strVersion;
 	if(v == 0)
 	{
 		// Unknown version
-		strVersion = "Unknown";
+		return "Unknown";
 	} else if((v & 0xFFFF) == 0)
 	{
 		// Only parts of the version number are known (e.g. when reading the version from the IT or S3M file header)
-		strVersion.Format("%X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF);
+		return mpt::String::Format("%X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF);
 	} else
 	{
 		// Full version info available
-		strVersion.Format("%X.%02X.%02X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, (v) & 0xFF);
+		return mpt::String::Format("%X.%02X.%02X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, (v) & 0xFF);
 	}
-	return strVersion;
 }
 
 VersionNum RemoveBuildNumber(const VersionNum num)

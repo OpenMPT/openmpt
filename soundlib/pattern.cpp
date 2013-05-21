@@ -217,7 +217,7 @@ bool CPattern::SetName(const char *newName, size_t maxChars)
 	{
 		return false;
 	}
-	m_PatternName.SetString(newName, strnlen(newName, maxChars));
+	m_PatternName.assign(newName, strnlen(newName, maxChars));
 	return true;
 }
 
@@ -229,7 +229,7 @@ bool CPattern::GetName(char *buffer, size_t maxChars) const
 	{
 		return false;
 	}
-	strncpy(buffer, m_PatternName, maxChars - 1);
+	strncpy(buffer, m_PatternName.c_str(), maxChars - 1);
 	buffer[maxChars - 1] = '\0';
 	return true;
 }

@@ -3477,15 +3477,15 @@ AEffect *DmoToVst(VSTPluginLib *pLib)
 #endif // NO_VST
 
 
-mpt::String SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
+std::string SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
 //------------------------------------------------------------
 {
 	CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(pMixPlugin);
 	if(vstPlug != nullptr)
 	{
-		return vstPlug->GetParamName(index);
+		return vstPlug->GetParamName(index).GetString();
 	} else
 	{
-		return mpt::String();
+		return std::string();
 	}
 }

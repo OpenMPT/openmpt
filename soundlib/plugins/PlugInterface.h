@@ -160,7 +160,7 @@ struct SNDMIXPLUGIN
 		{ return Info.szName; }
 	const char *GetLibraryName() const
 		{ return Info.szLibraryName; }
-	mpt::String GetParamName(PlugParamIndex index) const;
+	std::string GetParamName(PlugParamIndex index) const;
 
 	// Check if a plugin is loaded into this slot (also returns true if the plugin in this slot has not been found)
 	bool IsValidPlugin() const { return (Info.dwPluginId1 | Info.dwPluginId2) != 0; };

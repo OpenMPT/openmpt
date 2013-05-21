@@ -261,7 +261,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 {
 	MptVersion::VersionNum vIniVersion;
 
-	vIniVersion = gcsPreviousVersion = MptVersion::ToNum(CMainFrame::GetPrivateProfileCString("Version", "Version", "", iniFile));
+	vIniVersion = gcsPreviousVersion = MptVersion::ToNum(CMainFrame::GetPrivateProfileCString("Version", "Version", "", iniFile).GetString());
 	if(vIniVersion == 0)
 		vIniVersion = MptVersion::num;
 
@@ -532,7 +532,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 
 	// Default mod type when using the "New" button
 	const MODTYPE oldDefault = defaultModType;
-	defaultModType = CModSpecifications::ExtensionToType(mpt::String(CMainFrame::GetPrivateProfileCString("Misc", "DefaultModType", CSoundFile::GetModSpecifications(defaultModType).fileExtension, iniFile)));
+	defaultModType = CModSpecifications::ExtensionToType(CMainFrame::GetPrivateProfileCString("Misc", "DefaultModType", CSoundFile::GetModSpecifications(defaultModType).fileExtension, iniFile).GetString());
 	if(defaultModType == MOD_TYPE_NONE)
 	{
 		defaultModType = oldDefault;

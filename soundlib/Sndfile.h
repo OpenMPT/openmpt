@@ -389,11 +389,11 @@ protected:
 public:
 	// Song message
 	SongMessage songMessage;
-	mpt::String madeWithTracker;
+	std::string madeWithTracker;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	mpt::String m_szInstrumentPath[MAX_INSTRUMENTS];
+	std::string m_szInstrumentPath[MAX_INSTRUMENTS];
 // -! NEW_FEATURE#0023
 
 	bool m_bIsRendering;
@@ -556,7 +556,7 @@ public:
 	void LoadExtendedSongProperties(const MODTYPE modtype, FileReader &file, bool* pInterpretMptMade = nullptr);
 	static size_t LoadModularInstrumentData(FileReader &file, ModInstrument &ins);
 
-	mpt::String GetSchismTrackerVersion(uint16 cwtv);
+	std::string GetSchismTrackerVersion(uint16 cwtv);
 
 	// Reads extended instrument properties(XM/IT/MPTM).
 	// If no errors occur and song extension tag is found, returns pointer to the beginning

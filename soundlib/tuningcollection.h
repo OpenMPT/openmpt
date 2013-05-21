@@ -94,7 +94,7 @@ public:
 
 	const string& GetName() const {return m_Name;}
 
-	void SetSavefilePath(LPCTSTR psz) {m_SavefilePath = psz;}
+	void SetSavefilePath(const std::string &psz) {m_SavefilePath = psz;}
 	const string& GetSaveFilePath() const {return m_SavefilePath;}
 
 	string GetVersionString() const {return Stringify(static_cast<int>(s_SerializationVersion));}
