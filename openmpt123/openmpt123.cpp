@@ -420,13 +420,13 @@ void render_loop( const openmpt123_flags & flags, openmpt::module & mod, double 
 
 	std::vector<Tsample> left( bufsize );
 	std::vector<Tsample> right( bufsize );
-	std::vector<Tsample> back_left( bufsize );
-	std::vector<Tsample> back_right( bufsize );
+	std::vector<Tsample> rear_left( bufsize );
+	std::vector<Tsample> rear_right( bufsize );
 	std::vector<Tsample*> buffers( 4 ) ;
 	buffers[0] = left.data();
 	buffers[1] = right.data();
-	buffers[2] = back_left.data();
-	buffers[3] = back_right.data();
+	buffers[2] = rear_left.data();
+	buffers[3] = rear_right.data();
 	buffers.resize( flags.channels );
 
 	while ( true ) {
@@ -436,7 +436,7 @@ void render_loop( const openmpt123_flags & flags, openmpt::module & mod, double 
 		switch ( flags.channels ) {
 			case 1: count = mod.read( flags.samplerate, bufsize, left.data() ); break;
 			case 2: count = mod.read( flags.samplerate, bufsize, left.data(), right.data() ); break;
-			case 4: count = mod.read( flags.samplerate, bufsize, left.data(), right.data(), back_left.data(), back_right.data() ); break;
+			case 4: count = mod.read( flags.samplerate, bufsize, left.data(), right.data(), rear_left.data(), rear_right.data() ); break;
 		}
 
 		if ( count == 0 ) {

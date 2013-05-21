@@ -142,10 +142,10 @@ public:
 
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * mono );
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right );
-	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * back_left, std::int16_t * back_right );
+	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * mono );
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right );
-	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * back_left, float * back_right );
+	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
 
 	double get_current_position_seconds() const;
 

@@ -400,8 +400,8 @@ public:
 		m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 		return count;
 	}
-	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * back_left, std::int16_t * back_right ) {
-		if ( !left || !right || !back_left || !back_right ) {
+	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right ) {
+		if ( !left || !right || !rear_left || !rear_right ) {
 			throw openmpt::exception_message("null pointer");
 		}
 		apply_mixer_settings( samplerate, 4, SampleFormatInt16 );
@@ -410,8 +410,8 @@ public:
 		for ( std::size_t i = 0; i < count; ++i ) {
 			left[i] = m_int16Buffer[i*4+0];
 			right[i] = m_int16Buffer[i*4+1];
-			back_left[i] = m_int16Buffer[i*4+2];
-			back_right[i] = m_int16Buffer[i*4+3];
+			rear_left[i] = m_int16Buffer[i*4+2];
+			rear_right[i] = m_int16Buffer[i*4+3];
 		}
 		m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 		return count;
@@ -443,8 +443,8 @@ public:
 		m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 		return count;
 	}
-	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * back_left, float * back_right ) {
-		if ( !left || !right || !back_left || !back_right ) {
+	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right ) {
+		if ( !left || !right || !rear_left || !rear_right ) {
 			throw openmpt::exception_message("null pointer");
 		}
 		apply_mixer_settings( samplerate, 4, SampleFormatFloat32 );
@@ -453,8 +453,8 @@ public:
 		for ( std::size_t i = 0; i < count; ++i ) {
 			left[i] = m_floatBuffer[i*4+0];
 			right[i] = m_floatBuffer[i*4+1];
-			back_left[i] = m_floatBuffer[i*4+2];
-			back_right[i] = m_floatBuffer[i*4+3];
+			rear_left[i] = m_floatBuffer[i*4+2];
+			rear_right[i] = m_floatBuffer[i*4+3];
 		}
 		m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 		return count;

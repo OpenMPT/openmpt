@@ -138,8 +138,8 @@ std::size_t module::read( std::int32_t samplerate, std::size_t count, std::int16
 std::size_t module::read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right ) {
 	return impl->read( samplerate, count, left, right );
 }
-std::size_t module::read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * back_left, std::int16_t * back_right ) {
-	return impl->read( samplerate, count, left, right, back_left, back_right );
+std::size_t module::read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right ) {
+	return impl->read( samplerate, count, left, right, rear_left, rear_right );
 }
 std::size_t module::read( std::int32_t samplerate, std::size_t count, float * mono ) {
 	return impl->read( samplerate, count, mono );
@@ -147,8 +147,8 @@ std::size_t module::read( std::int32_t samplerate, std::size_t count, float * mo
 std::size_t module::read( std::int32_t samplerate, std::size_t count, float * left, float * right ) {
 	return impl->read( samplerate, count, left, right );
 }
-std::size_t module::read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * back_left, float * back_right ) {
-	return impl->read( samplerate, count, left, right, back_left, back_right );
+std::size_t module::read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right ) {
+	return impl->read( samplerate, count, left, right, rear_left, rear_right );
 }
 
 double module::get_current_position_seconds() const {
