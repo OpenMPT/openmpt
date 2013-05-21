@@ -32,12 +32,12 @@ std::string Format(const char *format, ...)
 		return &(buf[0]);
 	#else
 		va_list argList;
-		va_start(argList, pszFormat);
-		int size = vsnprintf(NULL, 0, pszFormat, argList); // get required size, requires c99 compliant vsnprintf which msvc does not have
+		va_start(argList, format);
+		int size = vsnprintf(NULL, 0, format, argList); // get required size, requires c99 compliant vsnprintf which msvc does not have
 		va_end(argList);
 		std::vector<char> temp(size + 1);
-		va_start(argList, pszFormat);
-		vsnprintf(&(temp[0]), size + 1, pszFormat, argList);
+		va_start(argList, format);
+		vsnprintf(&(temp[0]), size + 1, format, argList);
 		va_end(argList);
 		return &(temp[0]);
 	#endif
