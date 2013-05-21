@@ -303,7 +303,7 @@ typedef char *        LPTSTR;
 
 
 #ifndef NO_LOGGING
-void Log(const char *format, ...);
+void MPT_PRINTF_FUNC(1,2) Log(const char *format, ...);
 class Logger
 {
 private:
@@ -312,12 +312,12 @@ private:
 	const char * const function;
 public:
 	Logger(const char *file_, int line_, const char *function_) : file(file_), line(line_), function(function_) {}
-	void operator () (const char *format, ...);
+	void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...);
 };
 #define Log Logger(__FILE__, __LINE__, __FUNCTION__)
 #else // !NO_LOGGING
-inline void Log(const char *format, ...) {}
-class Logger { public: void operator () (const char *format, ...) {} };
+inline void MPT_PRINTF_FUNC(1,2) Log(const char *format, ...) {}
+class Logger { public: void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...) {} };
 #define Log if(true) {} else Logger() // completely compile out arguments to Log() so that they do not even get evaluated
 #endif // NO_LOGGING
 
