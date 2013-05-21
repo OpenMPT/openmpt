@@ -17,6 +17,12 @@
 #include <strings.h> // for strcasecmp
 #endif
 
+#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#define MPT_PRINTF_FUNC(formatstringindex,varargsindex) __attribute__((format(printf, formatstringindex, varargsindex)))
+#else
+#define MPT_PRINTF_FUNC(formatstringindex,varargsindex)
+#endif
+
 namespace mpt
 {
 	// Quick and incomplete string class to be used as a replacement for
@@ -69,7 +75,7 @@ namespace mpt
 		}
 
 		// Formats this string, like CString::Format.
-		void Format(const CharT* pszFormat, ...);
+		void MPT_PRINTF_FUNC(2,3) Format(const CharT* pszFormat, ...);
 
 		// Remove whitespaces at start of string
 		void LTrim();
