@@ -1644,7 +1644,7 @@ void CViewPattern::UpdateIndicator()
 						if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
 						{
 							CHAR sztmp[128] = "";
-							StringFixer::CopyN(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol()));
+							StringFixer::CopyN(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol()).c_str());
 							if (sztmp[0]) wsprintf(s, "%d: %s", m->GetValueVolCol(), sztmp);
 						}
 					} else

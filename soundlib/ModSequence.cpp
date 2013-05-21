@@ -767,8 +767,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	srlztn::Binaryread<uint16>(iStrm, size);
 	if(size > ModSpecs::mptm.ordersMax)
 	{
-		mpt::String str; str.Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax);
-		seq.m_sndFile.AddToLog(str);
+		seq.m_sndFile.AddToLog(mpt::String::Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax));
 		size = ModSpecs::mptm.ordersMax;
 	}
 	seq.resize(MAX(size, MAX_ORDERS));
@@ -803,7 +802,7 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 {
 	srlztn::Ssb ssb(oStrm);
 	ssb.BeginWrite(FileIdSequence, MptVersion::num);
-	ssb.WriteItem((const char*)seq.m_sName, "n");
+	ssb.WriteItem(seq.m_sName.c_str(), "n");
 	const uint16 nLength = seq.GetLengthTailTrimmed();
 	ssb.WriteItem<uint16>(nLength, "l");
 	ssb.WriteItem(seq.m_pArray, "a", 1, srlztn::ArrayWriter<uint16>(nLength));

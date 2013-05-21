@@ -14,25 +14,22 @@
 #include <cstdarg>
 
 
-namespace mpt {
+namespace mpt { namespace String {
 
-// Formats this string, like CString::Format.
-void String::Format(const CharT* pszFormat, ...)
+
+std::string Format(const char *format, ...)
 {
 	#if MPT_COMPILER_MSVC
 		va_list argList;
-		va_start( argList, pszFormat );
+		va_start(argList, format);
 
 		// Count the needed array size.
-		const size_t nCount = _vscprintf(pszFormat, argList); // null character not included.
-		resize(nCount + 1); // + 1 is for null terminator.
+		const size_t nCount = _vscprintf(format, argList); // null character not included.
+		std::vector<char> buf(nCount + 1); // + 1 is for null terminator.
+		vsprintf_s(&(buf[0]), buf.size(), format, argList);
 
-		// Hack: directly modify the std::string's string.
-		// In C++11 std::string is guaranteed to be contiguous.
-		const int nCount2 = vsprintf_s(&*begin(), size(), pszFormat, argList);
-		resize(nCount2); // Removes the null character that vsprintf_s adds.
-
-		va_end( argList );
+		va_end(argList);
+		return &(buf[0]);
 	#else
 		va_list argList;
 		va_start(argList, pszFormat);
@@ -42,34 +39,9 @@ void String::Format(const CharT* pszFormat, ...)
 		va_start(argList, pszFormat);
 		vsnprintf(&(temp[0]), size + 1, pszFormat, argList);
 		va_end(argList);
-		assign(&(temp[0]));
+		return &(temp[0]);
 	#endif
 }
 
 
-// Remove whitespaces at start of string
-void String::LTrim()
-{
-	size_type pos = find_first_not_of(" \n\r\t");
-	if(pos != npos)
-		erase(begin(), begin() + pos);
-}
-
-
-// Remove whitespaces at end of string
-void String::RTrim()
-{
-	size_type pos = find_last_not_of(" \n\r\t");
-	if(pos != npos)
-		erase(begin() + pos + 1, end());
-}
-
-
-// Remove whitespaces at start and end of string
-void String::Trim()
-{
-	LTrim();
-	RTrim();
-}
-
-} // namespace mpt
+} } // namespace mpt::String

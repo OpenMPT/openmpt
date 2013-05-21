@@ -284,11 +284,11 @@ static void CopyPatternName(CPattern &pattern, FileReader &file)
 
 
 // Get version of Schism Tracker that was used to create an IT/S3M file.
-mpt::String CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
+std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 //----------------------------------------------------------
 {
 	cwtv &= 0xFFF;
-	mpt::String version;
+	std::string version;
 	if(cwtv > 0x050)
 	{
 		tm epoch, *verTime;
@@ -297,12 +297,12 @@ mpt::String CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 		time_t versionSec = ((cwtv - 0x050) * 86400) + mktime(&epoch);
 		if((verTime = localtime(&versionSec)) != nullptr)
 		{
-			version.Format("Schism Tracker %04d-%02d-%02d",
+			version = mpt::String::Format("Schism Tracker %04d-%02d-%02d",
 				verTime->tm_year + 1900, verTime->tm_mon + 1, verTime->tm_mday);
 		}
 	} else
 	{
-		version.Format("Schism Tracker 0.%x", cwtv & 0xFF);
+		version = mpt::String::Format("Schism Tracker 0.%x", cwtv & 0xFF);
 	}
 	return version;
 }
@@ -695,9 +695,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(numPats != patPos.size())
 	{
 		// Hack: Notify user here if file contains more patterns than what can be read.
-		mpt::String str;
-		str.Format(str_PatternSetTruncationNote, patPos.size(), numPats);
-		AddToLog(str);
+		AddToLog(mpt::String::Format(str_PatternSetTruncationNote, patPos.size(), numPats));
 	}
 
 	// Checking for number of used channels, which is not explicitely specified in the file.
@@ -770,9 +768,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Empty 64-row pattern
 			if(Patterns.Insert(pat, 64))
 			{
-				mpt::String s;
-				s.Format("Allocating patterns failed starting from pattern %u", pat);
-				AddToLog(s);
+				AddToLog(mpt::String::Format("Allocating patterns failed starting from pattern %u", pat));
 				break;
 			}
 			// Now (after the Insert() call), we can read the pattern name.
@@ -973,10 +969,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					// Patched update of IT 2.14 (0x0215 - 0x0217 == p1 - p3)
 					// p4 (as found on modland) adds the ITVSOUND driver, but doesn't seem to change
 					// anything as far as file saving is concerned.
-					madeWithTracker.Format("Impulse Tracker 2.14p%d", fileHeader.cwtv - 0x0214);
+					madeWithTracker = mpt::String::Format("Impulse Tracker 2.14p%d", fileHeader.cwtv - 0x0214);
 				} else
 				{
-					madeWithTracker.Format("Impulse Tracker %d.%02x", (fileHeader.cwtv & 0x0F00) >> 8, (fileHeader.cwtv & 0xFF));
+					madeWithTracker = mpt::String::Format("Impulse Tracker %d.%02x", (fileHeader.cwtv & 0x0F00) >> 8, (fileHeader.cwtv & 0xFF));
 				}
 			}
 			break;
@@ -984,10 +980,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 			break;
 		case 6:
-			madeWithTracker.Format("BeRoTracker %x.%x");
+			madeWithTracker = mpt::String::Format("BeRoTracker %x.%x");
 			break;
 		case 7:
-			madeWithTracker.Format("ITMCK %d.%d.%d", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+			madeWithTracker = mpt::String::Format("ITMCK %d.%d.%d", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		}
 	}
@@ -1539,9 +1535,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 			buf[len++] = 0;
 			if(patinfo[0] > uint16_max - len)
 			{
-				mpt::String str;
-				str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, pat);
-				AddToLog(str);
+				AddToLog(mpt::String::Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, pat));
 				break;
 			} else
 			{

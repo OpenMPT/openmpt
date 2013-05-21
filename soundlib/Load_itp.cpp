@@ -214,7 +214,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
-		if(m_szInstrumentPath[ins].empty() || !f.Open(m_szInstrumentPath[ins])) continue;
+		if(m_szInstrumentPath[ins].empty() || !f.Open(m_szInstrumentPath[ins].c_str())) continue;
 
 		size = f.GetLength();
 		LPBYTE lpFile = f.Lock(size);
@@ -388,7 +388,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	{
 		char path[_MAX_PATH];
 		MemsetZero(path);
-		strncpy(path, m_szInstrumentPath[i], _MAX_PATH);
+		strncpy(path, m_szInstrumentPath[i].c_str(), _MAX_PATH);
 		fwrite(path, 1, _MAX_PATH, f);
 	}
 

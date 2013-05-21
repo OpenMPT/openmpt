@@ -136,7 +136,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read STM header
 	InitializeGlobals();
-	madeWithTracker.Format("Scream Tracker %d.%02x", fileHeader.verMajor, fileHeader.verMinor);
+	madeWithTracker = mpt::String::Format("Scream Tracker %d.%02x", fileHeader.verMajor, fileHeader.verMinor);
 	m_nType = MOD_TYPE_STM;
 	m_nSamples = 31;
 	m_nChannels = 4;

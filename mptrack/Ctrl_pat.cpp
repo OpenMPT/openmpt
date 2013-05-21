@@ -1097,7 +1097,7 @@ void CCtrlPatterns::OnSequenceNameChanged()
 	GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, str);
 	if (str != m_sndFile.Order.m_sName)
 	{
-		m_sndFile.Order.m_sName = str;
+		m_sndFile.Order.m_sName = str.GetString();
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(NULL, (m_sndFile.Order.GetCurrentSequenceIndex() << HINT_SHIFT_SEQUENCE) | HINT_SEQNAMES, this);
 	}

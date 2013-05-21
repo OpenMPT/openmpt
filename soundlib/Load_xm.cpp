@@ -302,8 +302,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Something else!
 		madeWith = verUnknown |verConfirmed;
-		madeWithTracker.AppendChars(fileHeader.trackerName);
-		madeWithTracker.RTrim();
+
+		madeWithTracker.append(fileHeader.trackerName, CountOf(fileHeader.trackerName));
+		madeWithTracker = mpt::String::RTrim(madeWithTracker);
 	}
 
 	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
@@ -846,8 +847,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		// Reaching the limits of file format?
 		if(len > uint16_max)
 		{
-			mpt::String str; str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, pat);
-			AddToLog(str);
+			AddToLog(mpt::String::Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, pat));
 			len = uint16_max;
 		}
 

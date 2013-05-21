@@ -166,11 +166,11 @@ void TestVersion()
 			throw std::runtime_error("VerQueryValue() returned false");
 		}
 
-		CString version = szVer;	
+		std::string version = szVer;	
 		delete[] pVersionInfo;
 
 		//version string should be like: 1,17,2,38  Change ',' to '.' to get format 1.17.2.38
-		version.Replace(',', '.');
+		version = mpt::String::Replace(version, ",", ".");
 
 		VERIFY_EQUAL( version, MptVersion::str );
 		VERIFY_EQUAL( MptVersion::ToNum(version), MptVersion::num );

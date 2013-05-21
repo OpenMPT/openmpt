@@ -32,10 +32,10 @@ namespace MptVersion
 	std::string GetOpenMPTVersionStr(); // e.g. "OpenMPT 1.17.02.08"
 
 	// Returns numerical version value from given version string.
-	VersionNum ToNum(const char *const s);
+	VersionNum ToNum(const std::string &s);
 
 	// Returns version string from given numerical version value.
-	mpt::String ToStr(const VersionNum v);
+	std::string ToStr(const VersionNum v);
 
 	// Return a version without build number (the last number in the version).
 	// The current versioning scheme uses this number only for test builds, and it should be 00 for official builds,

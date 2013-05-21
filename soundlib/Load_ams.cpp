@@ -403,7 +403,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = fileHeader.numSamps;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
-	madeWithTracker.Format("Extreme's tracker %d.%d", fileHeader.versionHigh, fileHeader.versionLow);
+	madeWithTracker = mpt::String::Format("Extreme's tracker %d.%d", fileHeader.versionHigh, fileHeader.versionLow);
 
 	vector<bool> packSample(fileHeader.numSamps);
 
@@ -778,7 +778,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 32;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
-	madeWithTracker.Format("Velvet Studio %d.%d", fileHeader.format >> 4, fileHeader.format & 0x0F);
+	madeWithTracker = mpt::String::Format("Velvet Studio %d.%d", fileHeader.format >> 4, fileHeader.format & 0x0F);
 
 	// Instruments
 	vector<SAMPLEINDEX> firstSample;	// First sample of instrument

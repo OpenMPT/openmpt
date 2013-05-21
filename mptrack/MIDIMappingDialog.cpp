@@ -349,7 +349,7 @@ CString CMIDIMappingDialog::CreateListString(const CMIDIMappingDirective& s)
 		str.AppendChar('.');
 
 		//Param name
-		str.Insert(80, m_rSndFile.m_MixPlugins[plugindex-1].GetParamName(s.GetParamIndex()));
+		str.Insert(80, m_rSndFile.m_MixPlugins[plugindex-1].GetParamName(s.GetParamIndex()).c_str());
 	}
 	else
 		str.Insert(55, "No plugin");

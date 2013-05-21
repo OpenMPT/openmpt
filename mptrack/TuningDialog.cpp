@@ -769,7 +769,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			// a separate collection - no possibility to 
 			// directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
-			pNewTCol->SetSavefilePath(files.filenames[counter].c_str());
+			pNewTCol->SetSavefilePath(files.filenames[counter]);
 			if (pNewTCol->Deserialize())
 			{
 				delete pNewTCol; pNewTCol = 0;

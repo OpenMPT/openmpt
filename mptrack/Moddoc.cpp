@@ -428,7 +428,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	{
 		char s[256];
 		wsprintf(s, "Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%s. Current version: v%s.\r\n", 
-			(LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion),
+			MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion).c_str(),
 			MptVersion::str);
 		Reporting::Notification(s);
 	}
@@ -543,9 +543,9 @@ bool CModDoc::SaveInstrument(INSTRUMENTINDEX instr)
 			const bool xi  = !_stricmp(&m_SndFile.m_szInstrumentPath[instr][len - 2], "xi");
 
 			if(iti || (!xi  && m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
-				success = m_SndFile.SaveITIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr], false);
+				success = m_SndFile.SaveITIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr].c_str(), false);
 			else
-				success = m_SndFile.SaveXIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr]);
+				success = m_SndFile.SaveXIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr].c_str());
 
 			if(success)
 				m_bsInstrumentModified.reset(instr);

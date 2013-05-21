@@ -450,7 +450,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// ST3 ignored Zxx commands, so if we find that a file was made with ST3, we should erase all MIDI macros.
 	bool keepMidiMacros = false;
 
-	mpt::String trackerName;
+	const char *trackerFormatStr = nullptr;
 	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
 	{
 	case S3MFileHeader::trkScreamTracker:
@@ -458,43 +458,46 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// MPT 1.16 and older versions of OpenMPT - Simply keep default (filter) MIDI macros
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-			trackerName = "ModPlug Tracker / OpenMPT";
+			madeWithTracker = "ModPlug Tracker / OpenMPT";
 			keepMidiMacros = true;
 		} else if(fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && fileHeader.usePanningTable == 0)
 		{
-			trackerName = "Velvet Studio";
+			madeWithTracker = "Velvet Studio";
 		} else
 		{
-			trackerName = "Scream Tracker %d.%02x";
+			trackerFormatStr = "Scream Tracker %d.%02x";
 		}
 		break;
 	case S3MFileHeader::trkImagoOrpheus:
-		trackerName = "Imago Orpheus %d.%02x";
+		trackerFormatStr = "Imago Orpheus %d.%02x";
 		break;
 	case S3MFileHeader::trkImpulseTracker:
 		if(fileHeader.cwtv <= S3MFileHeader::trkIT2_14)
-			trackerName = "Impulse Tracker %d.%02x";
+			trackerFormatStr = "Impulse Tracker %d.%02x";
 		else
-			trackerName.Format("Impulse Tracker 2.14p%d", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
+			madeWithTracker = mpt::String::Format("Impulse Tracker 2.14p%d", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
 		break;
 	case S3MFileHeader::trkSchismTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
-			trackerName = "BeRoTracker";
+			madeWithTracker = "BeRoTracker";
 		else
-			trackerName = GetSchismTrackerVersion(fileHeader.cwtv);
+			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 		break;
 	case S3MFileHeader::trkOpenMPT:
-		trackerName = "OpenMPT %d.%02x";
+		trackerFormatStr = "OpenMPT %d.%02x";
 		m_dwLastSavedWithVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
-		trackerName = "BeRoTracker";
+		madeWithTracker = "BeRoTracker";
 		break;
 	case S3MFileHeader::trkCreamTracker:
-		trackerName = "CreamTracker";
+		madeWithTracker = "CreamTracker";
 		break;
 	}
-	madeWithTracker.Format(trackerName, (fileHeader.cwtv & 0xF00) >> 8, (fileHeader.cwtv & 0xFF));
+	if(trackerFormatStr)
+	{
+		madeWithTracker = mpt::String::Format(trackerFormatStr, (fileHeader.cwtv & 0xF00) >> 8, (fileHeader.cwtv & 0xFF));
+	}
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)
 	{
