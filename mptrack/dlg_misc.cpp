@@ -447,7 +447,7 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 		//strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
 		//	strTipText.GetLength() + 1);
 		// 80 chars max?!
-		StringFixer::CopyN(pTTTA->szText, strTipText);
+		mpt::String::CopyN(pTTTA->szText, strTipText);
 	} else
 	{
 		::MultiByteToWideChar(CP_ACP , 0, strTipText, strTipText.GetLength() + 1,

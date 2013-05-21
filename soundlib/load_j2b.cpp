@@ -252,7 +252,7 @@ struct PACKED AMFFInstrumentHeader
 	// Convert instrument data to OpenMPT's internal format.
 	void ConvertToMPT(ModInstrument &mptIns, SAMPLEINDEX baseSample)
 	{
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptIns.name, name);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(mptIns.name, name);
 
 		STATIC_ASSERT(CountOf(sampleMap) <= CountOf(mptIns.Keyboard));
 		for(size_t i = 0; i < CountOf(sampleMap); i++)
@@ -474,7 +474,7 @@ struct PACKED AMInstrumentHeader
 	// Convert instrument data to OpenMPT's internal format.
 	void ConvertToMPT(ModInstrument &mptIns, SAMPLEINDEX baseSample)
 	{
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptIns.name, name);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(mptIns.name, name);
 
 		STATIC_ASSERT(CountOf(sampleMap) <= CountOf(mptIns.Keyboard));
 		for(BYTE i = 0; i < CountOf(sampleMap); i++)
@@ -788,7 +788,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 
 	ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
 
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
 
 	// It seems like there's no way to differentiate between
 	// Muted and Surround channels (they're all 0xA0) - might
@@ -878,7 +878,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 					continue;
 				}
 
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+				mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 				sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
 				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
 			}
@@ -958,7 +958,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 				}
 
-				StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+				mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 
 				sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
 

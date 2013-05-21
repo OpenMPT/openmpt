@@ -382,7 +382,7 @@ static void ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSampl
 	file.ReadConvertEndianness(sampleHeader);
 	sampleHeader.ConvertToMPT(sample);
 
-	StringFixer::ReadString<StringFixer::spacePadded>(sampleName, sampleHeader.name);
+	mpt::String::Read<mpt::String::spacePadded>(sampleName, sampleHeader.name);
 	// Get rid of weird characters in sample names.
 	for(size_t i = 0; i < CountOf(sampleName); i++)
 	{
@@ -540,7 +540,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading song title
 	file.Seek(0);
-	file.ReadString<StringFixer::spacePadded>(m_szNames[0], 20);
+	file.ReadString<mpt::String::spacePadded>(m_szNames[0], 20);
 
 	// Load Samples
 	size_t totalSampleLen = 0;
@@ -895,7 +895,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
 	m_SongFlags.reset();
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], songname);
+	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], songname);
 
 	// Setup channel pan positions and volume
 	SetupMODPanning();
@@ -1106,7 +1106,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 	// Write song title
 	{
 		char name[20];
-		StringFixer::WriteString<StringFixer::maybeNullTerminated>(name, m_szNames[0]);
+		mpt::String::Write<mpt::String::maybeNullTerminated>(name, m_szNames[0]);
 		fwrite(name, 20, 1, f);
 	}
 
@@ -1139,7 +1139,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		StringFixer::WriteString<StringFixer::maybeNullTerminated>(sampleHeader.name, m_szNames[sampleSource[smp]]);
+		mpt::String::Write<mpt::String::maybeNullTerminated>(sampleHeader.name, m_szNames[sampleSource[smp]]);
 		sampleLength[smp] = sampleHeader.ConvertToMOD(sampleSource[smp] <= GetNumSamples() ? GetSample(sampleSource[smp]) : ModSample(MOD_TYPE_MOD));
 		sampleHeader.ConvertEndianness();
 		fwrite(&sampleHeader, sizeof(sampleHeader), 1, f);

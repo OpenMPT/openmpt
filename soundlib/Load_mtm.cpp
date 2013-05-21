@@ -119,7 +119,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
 	m_nType = MOD_TYPE_MTM;
 	m_nSamples = fileHeader.numSamples;
 	m_nChannels = fileHeader.numChannels;
@@ -131,7 +131,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 		MTMSampleHeader sampleHeader;
 		file.ReadConvertEndianness(sampleHeader);
 		sampleHeader.ConvertToMPT(Samples[smp]);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.samplename);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.samplename);
 	}
 
 	// Setting Channel Pan Position

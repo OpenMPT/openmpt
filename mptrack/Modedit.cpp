@@ -530,7 +530,7 @@ bool CModDoc::ConvertSamplesToInstruments()
 		}
 
 		InitializeInstrument(instrument);
-		StringFixer::Copy(instrument->name, m_SndFile.m_szNames[smp]);
+		mpt::String::Copy(instrument->name, m_SndFile.m_szNames[smp]);
 		MuteInstrument(smp, muted);
 	}
 

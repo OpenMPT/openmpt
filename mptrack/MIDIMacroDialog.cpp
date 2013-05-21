@@ -210,7 +210,7 @@ void CMidiMacroSetup::UpdateDialog()
 	{
 		ToggleBoxes(sfx_preset, sfx);
 		memcpy(s, m_MidiCfg.szMidiSFXExt[sfx], MACRO_LENGTH);
-		StringFixer::SetNullTerminator(s);
+		mpt::String::SetNullTerminator(s);
 		m_EditSFx.SetWindowText(s);
 	}
 
@@ -218,7 +218,7 @@ void CMidiMacroSetup::UpdateDialog()
 	if(zxx < 0x80)
 	{
 		memcpy(s, m_MidiCfg.szMidiZXXExt[zxx], MACRO_LENGTH);
-		StringFixer::SetNullTerminator(s);
+		mpt::String::SetNullTerminator(s);
 		m_EditZxx.SetWindowText(s);
 	}
 	UpdateMacroList();
@@ -322,7 +322,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 			char s[MACRO_LENGTH];
 			MemsetZero(s);
 			m_EditSFx.GetWindowText(s, MACRO_LENGTH);
-			StringFixer::SetNullTerminator(s);
+			mpt::String::SetNullTerminator(s);
 			memcpy(m_MidiCfg.szMidiSFXExt[sfx], s, MACRO_LENGTH);
 
 			int sfx_preset = m_MidiCfg.GetParameteredMacroType(sfx);
@@ -345,7 +345,7 @@ void CMidiMacroSetup::OnZxxEditChanged()
 			char s[MACRO_LENGTH];
 			MemsetZero(s);
 			m_EditZxx.GetWindowText(s, MACRO_LENGTH);
-			StringFixer::SetNullTerminator(s);
+			mpt::String::SetNullTerminator(s);
 			memcpy(m_MidiCfg.szMidiZXXExt[zxx], s, MACRO_LENGTH);
 			m_CbnZxxPreset.SetCurSel(m_MidiCfg.GetFixedMacroType());
 		}

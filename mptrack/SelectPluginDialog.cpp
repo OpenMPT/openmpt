@@ -148,8 +148,8 @@ void CSelectPluginDlg::OnOK()
 				break;
 			}
 
-			StringFixer::Copy(m_pPlugin->Info.szName, pFactory->szLibraryName);
-			StringFixer::Copy(m_pPlugin->Info.szLibraryName, pFactory->szLibraryName);
+			mpt::String::Copy(m_pPlugin->Info.szName, pFactory->szLibraryName);
+			mpt::String::Copy(m_pPlugin->Info.szLibraryName, pFactory->szLibraryName);
 
 			cs.Leave();
 
@@ -165,7 +165,7 @@ void CSelectPluginDlg::OnOK()
 					if ((p->GetDefaultEffectName(s)) && (s[0]))
 					{
 						s[31] = 0;
-						StringFixer::Copy(m_pPlugin->Info.szName, s);
+						mpt::String::Copy(m_pPlugin->Info.szName, s);
 					}
 				}
 			}

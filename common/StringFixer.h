@@ -13,7 +13,7 @@
 
 #include <string.h>
 
-namespace StringFixer
+namespace mpt { namespace String
 {
 
 	// Sets last character to null in given char array.
@@ -69,7 +69,7 @@ namespace StringFixer
 	// Used for reading strings from files.
 	// Only use this version of the function if the size of the source buffer is variable.
 	template <ReadWriteMode mode, size_t destSize>
-	void ReadString(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize)
+	void Read(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize)
 	//----------------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
@@ -152,12 +152,12 @@ namespace StringFixer
 	// Used for reading strings from files.
 	// Preferrably use this version of the function, it is safer.
 	template <ReadWriteMode mode, size_t destSize, size_t srcSize>
-	void ReadString(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
+	void Read(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
 	//-----------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 		STATIC_ASSERT(srcSize > 0);
-		ReadString<mode, destSize>(destBuffer, srcBuffer, srcSize);
+		Read<mode, destSize>(destBuffer, srcBuffer, srcSize);
 	}
 
 
@@ -165,7 +165,7 @@ namespace StringFixer
 	// Used for writing strings to files.
 	// Only use this version of the function if the size of the source buffer is variable.
 	template <ReadWriteMode mode, size_t destSize>
-	void WriteString(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize)
+	void Write(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize)
 	//-----------------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
@@ -209,12 +209,12 @@ namespace StringFixer
 	// Used for writing strings to files.
 	// Preferrably use this version of the function, it is safer.
 	template <ReadWriteMode mode, size_t destSize, size_t srcSize>
-	void WriteString(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
+	void Write(char (&destBuffer)[destSize], const char (&srcBuffer)[srcSize])
 	//------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 		STATIC_ASSERT(srcSize > 0);
-		WriteString<mode, destSize>(destBuffer, srcBuffer, srcSize);
+		Write<mode, destSize>(destBuffer, srcBuffer, srcSize);
 	}
 
 
@@ -236,5 +236,6 @@ namespace StringFixer
 		CopyN(destBuffer, srcBuffer, srcSize);
 	}
 
-};
+
+} } // namespace mpt::String
 

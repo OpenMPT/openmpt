@@ -130,11 +130,11 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 			return false;
 		}
 		sampleHeader.ConvertToMPT(Samples[smp]);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.filename);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.filename);
 	}
 
 	// Copy first song message line into song title
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songMessage, 36);
+	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], fileHeader.songMessage, 36);
 	// Song Message
 	songMessage.ReadFixedLineLength(fileHeader.songMessage, 108, 36, 0);
 

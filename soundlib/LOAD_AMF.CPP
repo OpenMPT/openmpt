@@ -138,7 +138,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 		AsylumSampleHeader sampleHeader;
 		file.ReadConvertEndianness(sampleHeader);
 		sampleHeader.ConvertToMPT(Samples[smp]);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 	}
 
 	file.Skip((64 - fileHeader.numSamples) * sizeof(AsylumSampleHeader));
@@ -385,7 +385,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = fileHeader.numSamples;
 
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.title);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.title);
 
 	if(fileHeader.version < 10)
 	{
@@ -463,8 +463,8 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		sample.Initialize();
 
 		uint8 type = file.ReadUint8();
-		file.ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], 32);
-		file.ReadString<StringFixer::nullTerminated>(sample.filename, 13);
+		file.ReadString<mpt::String::maybeNullTerminated>(m_szNames[smp], 32);
+		file.ReadString<mpt::String::nullTerminated>(sample.filename, 13);
 		samplePos[smp - 1] = file.ReadUint32LE();
 		if(fileHeader.version < 10)
 		{

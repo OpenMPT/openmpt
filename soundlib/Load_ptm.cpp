@@ -101,7 +101,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 		return true;
 	}
 
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], pfh.songname);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pfh.songname);
 
 	InitializeGlobals();
 	madeWithTracker = mpt::String::Format("PolyTracker %d.%d", pfh.version_hi, pfh.version_lo);
@@ -123,8 +123,8 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 		PTMSAMPLE *psmp = (PTMSAMPLE *)(lpStream+dwMemPos);
 
 		sample.Initialize();
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[ismp + 1], psmp->samplename);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(sample.filename, psmp->filename);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[ismp + 1], psmp->samplename);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, psmp->filename);
 
 		sample.nVolume = psmp->volume * 4;
 		sample.nC5Speed = LittleEndianW(psmp->nC4Spd) * 2;

@@ -410,15 +410,15 @@ void MIDIMacroConfig::Sanitize()
 {
 	for(size_t i = 0; i < CountOf(szMidiGlb); i++)
 	{
-		StringFixer::FixNullString(szMidiGlb[i]);
+		mpt::String::FixNullString(szMidiGlb[i]);
 	}
 	for(size_t i = 0; i < CountOf(szMidiSFXExt); i++)
 	{
-		StringFixer::FixNullString(szMidiSFXExt[i]);
+		mpt::String::FixNullString(szMidiSFXExt[i]);
 	}
 	for(size_t i = 0; i < CountOf(szMidiZXXExt); i++)
 	{
-		StringFixer::FixNullString(szMidiZXXExt[i]);
+		mpt::String::FixNullString(szMidiZXXExt[i]);
 	}
 }
 

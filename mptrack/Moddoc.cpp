@@ -284,7 +284,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 						pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
 						if ((dwKey >= 24) && (dwKey < 100))
 						{
-							StringFixer::CopyN(pIns->name, szMidiPercussionNames[dwKey - 24]);
+							mpt::String::CopyN(pIns->name, szMidiPercussionNames[dwKey - 24]);
 						}
 						bEmbedded = TRUE;
 					}
@@ -326,7 +326,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 							pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
 							if ((dwKey >= 24) && (dwKey < 24+61))
 							{
-								StringFixer::CopyN(pIns->name, szMidiPercussionNames[dwKey-24]);
+								mpt::String::CopyN(pIns->name, szMidiPercussionNames[dwKey-24]);
 							}
 						}
 					}
@@ -347,17 +347,17 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 							_splitpath(pszMidiMapName, NULL, NULL, szName, szExt);
 							strncat(szName, szExt, sizeof(szName));
 							pIns = m_SndFile.Instruments[nIns];
-							if (!pIns->filename[0]) StringFixer::Copy(pIns->filename, szName);
+							if (!pIns->filename[0]) mpt::String::Copy(pIns->filename, szName);
 							if (!pIns->name[0])
 							{
 								if (nMidiCode < 128)
 								{
-									StringFixer::CopyN(pIns->name, szMidiProgramNames[nMidiCode]);
+									mpt::String::CopyN(pIns->name, szMidiProgramNames[nMidiCode]);
 								} else
 								{
 									UINT nKey = nMidiCode & 0x7F;
 									if (nKey >= 24)
-										StringFixer::CopyN(pIns->name, szMidiPercussionNames[nKey - 24]);
+										mpt::String::CopyN(pIns->name, szMidiPercussionNames[nKey - 24]);
 								}
 							}
 						}
@@ -2874,13 +2874,13 @@ void CModDoc::FixNullStrings()
 //----------------------------
 {
 	// Song title
-	StringFixer::FixNullString(m_SndFile.m_szNames[0]);
+	mpt::String::FixNullString(m_SndFile.m_szNames[0]);
 
 	// Sample names + filenames
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)
 	{
-		StringFixer::FixNullString(m_SndFile.m_szNames[nSmp]);
-		StringFixer::FixNullString(m_SndFile.GetSample(nSmp).filename);
+		mpt::String::FixNullString(m_SndFile.m_szNames[nSmp]);
+		mpt::String::FixNullString(m_SndFile.GetSample(nSmp).filename);
 	}
 
 	// Instrument names
@@ -2888,15 +2888,15 @@ void CModDoc::FixNullStrings()
 	{
 		if(m_SndFile.Instruments[nIns] != nullptr)
 		{
-			StringFixer::FixNullString(m_SndFile.Instruments[nIns]->name);
-			StringFixer::FixNullString(m_SndFile.Instruments[nIns]->filename);
+			mpt::String::FixNullString(m_SndFile.Instruments[nIns]->name);
+			mpt::String::FixNullString(m_SndFile.Instruments[nIns]->filename);
 		}
 	}
 
 	// Channel names
 	for(CHANNELINDEX nChn = 0; nChn < m_SndFile.GetNumChannels(); nChn++)
 	{
-		StringFixer::FixNullString(m_SndFile.ChnSettings[nChn].szName);
+		mpt::String::FixNullString(m_SndFile.ChnSettings[nChn].szName);
 	}
 
 	// Macros

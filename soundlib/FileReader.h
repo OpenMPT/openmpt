@@ -758,12 +758,12 @@ public:
 
 	// Read a string of length srcSize into fixed-length char array destBuffer using a given read mode.
 	// The file cursor is advanced by "srcSize" bytes.
-	template<StringFixer::ReadWriteMode mode, off_t destSize>
+	template<mpt::String::ReadWriteMode mode, off_t destSize>
 	bool ReadString(char (&destBuffer)[destSize], const off_t srcSize)
 	{
 		if(CanRead(srcSize))
 		{
-			StringFixer::ReadString<mode, destSize>(destBuffer, DataContainer().GetPartialRawData(streamPos, srcSize), srcSize);
+			mpt::String::Read<mode, destSize>(destBuffer, DataContainer().GetPartialRawData(streamPos, srcSize), srcSize);
 			streamPos += srcSize;
 			return true;
 		} else

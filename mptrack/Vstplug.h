@@ -78,7 +78,7 @@ struct VSTPluginLib
 		category = catUnknown;
 		if(dllPath != nullptr)
 		{
-			StringFixer::CopyN(szDllPath, dllPath);
+			mpt::String::CopyN(szDllPath, dllPath);
 		}
 	}
 

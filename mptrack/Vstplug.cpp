@@ -51,7 +51,7 @@ UINT32 CalculateCRC32fromFilename(const char *s)
 //----------------------------------------------
 {
 	char fn[_MAX_PATH];
-	StringFixer::Copy(fn, s);
+	mpt::String::Copy(fn, s);
 	int f;
 	for(f = 0; fn[f] != 0; f++) fn[f] = toupper(fn[f]);
 	return LittleEndian(crc32(0, (BYTE *)fn, f));
@@ -162,11 +162,11 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 						p->dwPluginId1 = kDmoMagic;
 						p->dwPluginId2 = clsid.Data1;
 						p->category = VSTPluginLib::catDMO;
-						StringFixer::Copy(p->szLibraryName, s);
+						mpt::String::Copy(p->szLibraryName, s);
 
 						StringFromGUID2(clsid, w, 100);
 						WideCharToMultiByte(CP_ACP, 0, w, -1, p->szDllPath, sizeof(p->szDllPath), nullptr, nullptr);
-						StringFixer::SetNullTerminator(p->szDllPath);
+						mpt::String::SetNullTerminator(p->szDllPath);
 					#ifdef DMO_LOG
 						if (theApp.IsDebug()) Log("Found \"%s\" clsid=%s\n", p->szLibraryName, p->szDllPath);
 					#endif
@@ -304,7 +304,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 		{
 			// Get path from cache file
 			GetPrivateProfileString(cacheSection, IDs, "", szPath, CountOf(szPath), cacheFile);
-			StringFixer::SetNullTerminator(szPath);
+			mpt::String::SetNullTerminator(szPath);
 			theApp.RelativePathToAbsolute(szPath);
 
 			if ((szPath[0]) && (!lstrcmpi(szPath, pszDllPath)))
@@ -438,7 +438,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 		{
 			theApp.AbsolutePathToRelative(szPath);
 		}
-		StringFixer::SetNullTerminator(szPath);
+		mpt::String::SetNullTerminator(szPath);
 
 		WritePrivateProfileString(cacheSection, IDs, szPath, cacheFile);
 		CMainFrame::WritePrivateProfileCString(cacheSection, IDs, pszDllPath, cacheFile);
@@ -551,10 +551,10 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	{
 		// Try finding the plugin DLL in the plugin directory instead.
 		CHAR s[_MAX_PATH];
-		StringFixer::CopyN(s, TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS));
+		mpt::String::CopyN(s, TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS));
 		if(!s[0])
 		{
-			StringFixer::CopyN(s, theApp.GetAppDirPath());
+			mpt::String::CopyN(s, theApp.GetAppDirPath());
 		}
 		size_t len = strlen(s);
 		if((len > 0) && (s[len - 1] != '\\') && (s[len - 1] != '/'))
@@ -564,7 +564,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		strncat(s, mixPlugin.GetLibraryName(), CountOf(s));
 		strncat(s, ".dll", CountOf(s));
 
-		StringFixer::SetNullTerminator(s);
+		mpt::String::SetNullTerminator(s);
 
 		pFound = AddPlugin(s);
 		if (!pFound)
@@ -1185,7 +1185,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 			char szInitPath[_MAX_PATH] = { '\0' };
 			if(fileSel->initialPath)
 			{
-				StringFixer::CopyN(szInitPath, fileSel->initialPath);
+				mpt::String::CopyN(szInitPath, fileSel->initialPath);
 			}
 
 			char szBuffer[_MAX_PATH];
@@ -1622,7 +1622,7 @@ bool CVstPlugin::SaveProgram()
 	char rawname[MAX(kVstMaxProgNameLen + 1, 256)] = "";	// kVstMaxProgNameLen is 24...
 	Dispatch(effGetProgramName, 0, 0, rawname, 0);
 	SanitizeFilename(rawname);
-	StringFixer::SetNullTerminator(rawname);
+	mpt::String::SetNullTerminator(rawname);
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", rawname,
 		"VST Plugin Programs (*.fxp)|*.fxp|"
 		"VST Plugin Banks (*.fxb)|*.fxb||",
@@ -1767,7 +1767,7 @@ CString CVstPlugin::GetFormattedProgramName(VstInt32 index)
 			SetCurrentProgram(curProg);
 		}
 	}
-	StringFixer::SetNullTerminator(rawname);
+	mpt::String::SetNullTerminator(rawname);
 
 	// Let's start counting at 1 for the program name (as most MIDI hardware / software does)
 	index++;
@@ -1853,7 +1853,7 @@ CString CVstPlugin::GetParamPropertyString(VstInt32 param, VstInt32 opcode)
 	if(m_Effect.numParams > 0 && param < m_Effect.numParams)
 	{
 		Dispatch(opcode, param, 0, s, 0);
-		StringFixer::SetNullTerminator(s);
+		mpt::String::SetNullTerminator(s);
 	}
 	return CString(s);
 }
@@ -1868,7 +1868,7 @@ CString CVstPlugin::GetFormattedParamName(PlugParamIndex param)
 	MemsetZero(properties.label);
 	if(Dispatch(effGetParameterProperties, param, 0, &properties, 0.0f) == 1)
 	{
-		StringFixer::SetNullTerminator(properties.label);
+		mpt::String::SetNullTerminator(properties.label);
 		paramName = properties.label;
 	} else
 	{

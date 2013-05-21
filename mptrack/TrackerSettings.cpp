@@ -231,14 +231,14 @@ void TrackerSettings::LoadSettings()
 		CHAR snam[8];
 		wsprintf(snam, "SF%X", isfx);
 		GetPrivateProfileString("Zxx Macros", snam, macros.szMidiSFXExt[isfx], macros.szMidiSFXExt[isfx], CountOf(macros.szMidiSFXExt[isfx]), iniFile);
-		StringFixer::SetNullTerminator(macros.szMidiSFXExt[isfx]);
+		mpt::String::SetNullTerminator(macros.szMidiSFXExt[isfx]);
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
 		CHAR snam[8];
 		wsprintf(snam, "Z%02X", izxx | 0x80);
 		GetPrivateProfileString("Zxx Macros", snam, macros.szMidiZXXExt[izxx], macros.szMidiZXXExt[izxx], CountOf(macros.szMidiZXXExt[izxx]), iniFile);
-		StringFixer::SetNullTerminator(macros.szMidiZXXExt[izxx]);
+		mpt::String::SetNullTerminator(macros.szMidiZXXExt[izxx]);
 	}
 	// Fix old nasty broken (non-standard) MIDI configs in INI file.
 	if(storedVersion >= "1.17" && storedVersion < "1.20")
@@ -504,11 +504,11 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	GetPrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPreset), iniFile);
 	GetPrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPreset), iniFile);
 	GetPrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPreset), iniFile);
-	StringFixer::SetNullTerminator(m_EqSettings.szName);
-	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[0].szName);
-	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[1].szName);
-	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[2].szName);
-	StringFixer::SetNullTerminator(CEQSetupDlg::gUserPresets[3].szName);
+	mpt::String::SetNullTerminator(m_EqSettings.szName);
+	mpt::String::SetNullTerminator(CEQSetupDlg::gUserPresets[0].szName);
+	mpt::String::SetNullTerminator(CEQSetupDlg::gUserPresets[1].szName);
+	mpt::String::SetNullTerminator(CEQSetupDlg::gUserPresets[2].szName);
+	mpt::String::SetNullTerminator(CEQSetupDlg::gUserPresets[3].szName);
 #endif
 
 
@@ -556,7 +556,7 @@ void TrackerSettings::LoadRegistryEQ(HKEY key, LPCSTR pszName, EQPreset *pEqSett
 		if (pEqSettings->Gains[i] > 32) pEqSettings->Gains[i] = 16;
 		if ((pEqSettings->Freqs[i] < 100) || (pEqSettings->Freqs[i] > 10000)) pEqSettings->Freqs[i] = CEQSetupDlg::gEQPresets[0].Freqs[i];
 	}
-	StringFixer::SetNullTerminator(pEqSettings->szName);
+	mpt::String::SetNullTerminator(pEqSettings->szName);
 }
 
 

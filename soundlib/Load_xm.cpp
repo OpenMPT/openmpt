@@ -307,7 +307,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		madeWithTracker = mpt::String::RTrim(madeWithTracker);
 	}
 
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], fileHeader.songName);
 
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
@@ -455,7 +455,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 					sampleHeader.ConvertToMPT(Samples[mptSample]);
 					instrHeader.instrument.ApplyAutoVibratoToMPT(Samples[mptSample]);
 
-					StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[mptSample], sampleHeader.name);
+					mpt::String::Read<mpt::String::spacePadded>(m_szNames[mptSample], sampleHeader.name);
 
 					if((sampleHeader.flags & 3) == 3 && madeWith[verNewModPlug])
 					{
@@ -520,7 +520,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		for(PATTERNINDEX pat = 0; pat < namedPats; pat++)
 		{
 			char patName[MAX_PATTERNNAME];
-			file.ReadString<StringFixer::maybeNullTerminated>(patName, MAX_PATTERNNAME);
+			file.ReadString<mpt::String::maybeNullTerminated>(patName, MAX_PATTERNNAME);
 			Patterns[pat].SetName(patName);
 		}
 		madeWith |= verConfirmed;
@@ -532,7 +532,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		const CHANNELINDEX namedChans = std::min(static_cast<CHANNELINDEX>(file.ReadUint32LE() / MAX_CHANNELNAME), GetNumChannels());
 		for(CHANNELINDEX chn = 0; chn < namedChans; chn++)
 		{
-			file.ReadString<StringFixer::maybeNullTerminated>(ChnSettings[chn].szName, MAX_CHANNELNAME);
+			file.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, MAX_CHANNELNAME);
 		}
 		madeWith |= verConfirmed;
 	}
@@ -566,7 +566,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		// Hey, I know this tracker!
 		char mptVersion[13];
 		memcpy(mptVersion, fileHeader.trackerName + 8, 12);
-		StringFixer::SetNullTerminator(mptVersion);
+		mpt::String::SetNullTerminator(mptVersion);
 		m_dwLastSavedWithVersion = MptVersion::ToNum(mptVersion);
 		madeWith = verOpenMPT | verConfirmed;
 	}
@@ -651,10 +651,10 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	MemsetZero(fileHeader);
 
 	memcpy(fileHeader.signature, "Extended Module: ", 17);
-	StringFixer::WriteString<StringFixer::spacePadded>(fileHeader.songName, m_szNames[0]);
+	mpt::String::Write<mpt::String::spacePadded>(fileHeader.songName, m_szNames[0]);
 	fileHeader.eof = 0x1A;
 	std::string openMptTrackerName = MptVersion::GetOpenMPTVersionStr();
-	StringFixer::WriteString<StringFixer::spacePadded>(fileHeader.trackerName, openMptTrackerName.c_str(), openMptTrackerName.length());
+	mpt::String::Write<mpt::String::spacePadded>(fileHeader.trackerName, openMptTrackerName.c_str(), openMptTrackerName.length());
 
 	// Writing song header
 	fileHeader.version = 0x0104;					// XM Format v1.04
@@ -943,7 +943,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 			}
 			sampleFlags[smp] = xmSample.GetSampleFormat();
 
-			StringFixer::WriteString<StringFixer::spacePadded>(xmSample.name, m_szNames[samples[smp]]);
+			mpt::String::Write<mpt::String::spacePadded>(xmSample.name, m_szNames[samples[smp]]);
 
 			xmSample.ConvertEndianness();
 			fwrite(&xmSample, 1, sizeof(xmSample), f);

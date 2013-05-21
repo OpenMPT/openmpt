@@ -124,12 +124,12 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	FileReader textChunk = infoChunk.GetChunk(RIFFChunk::idINAM);
 	if(textChunk.IsValid())
 	{
-		textChunk.ReadString<StringFixer::nullTerminated>(sampleName, textChunk.GetLength());
+		textChunk.ReadString<mpt::String::nullTerminated>(sampleName, textChunk.GetLength());
 	}
 	if(isDLS)
 	{
 		// DLS sample -> sample filename
-		StringFixer::Copy(sample.filename, sampleName);
+		mpt::String::Copy(sample.filename, sampleName);
 	}
 
 	// Read software name
@@ -172,8 +172,8 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 		if(xtraChunk.CanRead(MAX_SAMPLENAME))
 		{
 			// Name present (clipboard only)
-			xtraChunk.ReadString<StringFixer::nullTerminated>(sampleName, MAX_SAMPLENAME);
-			xtraChunk.ReadString<StringFixer::nullTerminated>(sample.filename, xtraChunk.BytesLeft());
+			xtraChunk.ReadString<mpt::String::nullTerminated>(sampleName, MAX_SAMPLENAME);
+			xtraChunk.ReadString<mpt::String::nullTerminated>(sample.filename, xtraChunk.BytesLeft());
 		}
 	}
 }

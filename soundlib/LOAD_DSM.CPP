@@ -146,7 +146,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoa
 		}
 	}
 
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], psong->songname);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], psong->songname);
 
 	nPat = 0;
 	nSmp = 1;
@@ -244,8 +244,8 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoa
 			ModSample &sample = Samples[nSmp];
 			sample.Initialize();
 
-			StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[nSmp], pSmp->samplename);
-			StringFixer::ReadString<StringFixer::nullTerminated>(sample.filename, pSmp->filename);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[nSmp], pSmp->samplename);
+			mpt::String::Read<mpt::String::nullTerminated>(sample.filename, pSmp->filename);
 
 			sample.nC5Speed = pSmp->c2spd;
 			sample.uFlags.set(CHN_LOOP, (pSmp->flags & 1) != 0);

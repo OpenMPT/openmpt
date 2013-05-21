@@ -139,10 +139,10 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read song + sample names
-	file.ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], 32);
+	file.ReadString<mpt::String::maybeNullTerminated>(m_szNames[0], 32);
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
-		file.ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], 30);
+		file.ReadString<mpt::String::maybeNullTerminated>(m_szNames[smp], 30);
 	}
 
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPatIndex; pat++)

@@ -31,7 +31,7 @@ template<size_t destSize>
 bool ReadITPString(char (&destBuffer)[destSize], FileReader &file)
 //----------------------------------------------------------------
 {
-	return file.ReadString<StringFixer::maybeNullTerminated>(destBuffer, file.ReadUint32LE());
+	return file.ReadString<mpt::String::maybeNullTerminated>(destBuffer, file.ReadUint32LE());
 }
 
 
@@ -92,7 +92,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].nPan = static_cast<uint16>(file.ReadUint32LE());
 		ChnSettings[chn].dwFlags = static_cast<ChannelFlags>(file.ReadUint32LE());
 		ChnSettings[chn].nVolume = static_cast<uint16>(file.ReadUint32LE());
-		file.ReadString<StringFixer::maybeNullTerminated>(ChnSettings[chn].szName, size);
+		file.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, size);
 	}
 
 	// Song mix plugins
@@ -123,7 +123,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
 		char path[_MAX_PATH];
-		file.ReadString<StringFixer::maybeNullTerminated>(path, size);
+		file.ReadString<mpt::String::maybeNullTerminated>(path, size);
 		m_szInstrumentPath[ins] = path;
 	}
 
@@ -160,7 +160,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		if(pat < numNamedPats)
 		{
 			char patName[MAX_PATTERNNAME];
-			pattNames.ReadString<StringFixer::maybeNullTerminated>(patName, patNameLen);
+			pattNames.ReadString<mpt::String::maybeNullTerminated>(patName, patNameLen);
 			Patterns[pat].SetName(patName);
 		}
 
@@ -199,7 +199,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		if(realSample >= 1 && realSample < MAX_SAMPLES && sampleHeader.id == ITSample::magic)
 		{
 			sampleHeader.ConvertToMPT(Samples[realSample]);
-			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[realSample], sampleHeader.name);
+			mpt::String::Read<mpt::String::nullTerminated>(m_szNames[realSample], sampleHeader.name);
 
 			// Read sample data
 			sampleHeader.GetSampleFormat().ReadSample(Samples[realSample], file);
@@ -473,7 +473,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			ITSample itss;
 			itss.ConvertToIT(Samples[nsmp], GetType(), false, false);
 
-			StringFixer::WriteString<StringFixer::nullTerminated>(itss.name, m_szNames[nsmp]);
+			mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[nsmp]);
 
 			id = nsmp;
 			fwrite(&id, 1, sizeof(id), f);

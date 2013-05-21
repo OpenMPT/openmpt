@@ -712,7 +712,7 @@ void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream, DWORD
 	if(dwMemLength < sizeof(GF1SAMPLEHEADER)) return;
 	if(psh->name[0])
 	{
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(that->m_szNames[nSample], psh->name);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(that->m_szNames[nSample], psh->name);
 	}
 	sample.Initialize();
 	if(psh->flags & 4) sample.uFlags |= CHN_LOOP;
@@ -807,7 +807,7 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 	Instruments[nInstr] = pIns;
 	nSamples = plh->samples;
 	if (nSamples > 16) nSamples = 16;
-	StringFixer::Copy(pIns->name, pih->name);
+	mpt::String::Copy(pIns->name, pih->name);
 	pIns->nFadeOut = 2048;
 	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 	{
@@ -941,8 +941,8 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWOR
 	dwMemPos = pss->offset << 4;
 
 	sample.Initialize();
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(sample.filename, pss->filename);
-	StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[nSample], pss->name);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, pss->filename);
+	mpt::String::Read<mpt::String::nullTerminated>(m_szNames[nSample], pss->name);
 
 	sample.nLength = pss->length;
 	sample.nLoopStart = pss->loopstart;
@@ -1052,8 +1052,8 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			mptSample.uFlags &= ~CHN_PANNING;
 		}
 
-		StringFixer::ReadString<StringFixer::spacePadded>(mptSample.filename, sampleHeader.name);
-		StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[sampleMap[i]], sampleHeader.name);
+		mpt::String::Read<mpt::String::spacePadded>(mptSample.filename, sampleHeader.name);
+		mpt::String::Read<mpt::String::spacePadded>(m_szNames[sampleMap[i]], sampleHeader.name);
 
 		sampleFlags[i] = sampleHeader.GetSampleFormat();
 	}
@@ -1121,7 +1121,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileN
 		}
 		sampleFlags[i] = xmSample.GetSampleFormat();
 
-		StringFixer::WriteString<StringFixer::spacePadded>(xmSample.name, m_szNames[samples[i]]);
+		mpt::String::Write<mpt::String::spacePadded>(xmSample.name, m_szNames[samples[i]]);
 
 		xmSample.ConvertEndianness();
 		fwrite(&xmSample, 1, sizeof(xmSample), f);
@@ -1187,8 +1187,8 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 	fileHeader.instrument.ApplyAutoVibratoToMPT(mptSample);
 	mptSample.Convert(MOD_TYPE_XM, GetType());
 
-	StringFixer::ReadString<StringFixer::spacePadded>(mptSample.filename, sampleHeader.name);
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[nSample], sampleHeader.name);
+	mpt::String::Read<mpt::String::spacePadded>(mptSample.filename, sampleHeader.name);
+	mpt::String::Read<mpt::String::spacePadded>(m_szNames[nSample], sampleHeader.name);
 
 	// Read sample data
 	sampleHeader.GetSampleFormat().ReadSample(Samples[nSample], file);
@@ -1527,7 +1527,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 	FileReader nameChunk(chunks.GetChunk(AIFFChunk::idNAME));
 	if(nameChunk.IsValid())
 	{
-		nameChunk.ReadString<StringFixer::spacePadded>(m_szNames[nSample], nameChunk.GetLength());
+		nameChunk.ReadString<mpt::String::spacePadded>(m_szNames[nSample], nameChunk.GetLength());
 	} else
 	{
 		strcpy(m_szNames[nSample], "");
@@ -1559,7 +1559,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 	DestroySampleThreadsafe(nSample);
 
 	file.Seek(sampleHeader.ConvertToMPT(Samples[nSample]));
-	StringFixer::ReadString<StringFixer::spacePaddedNull>(m_szNames[nSample], sampleHeader.name);
+	mpt::String::Read<mpt::String::spacePaddedNull>(m_szNames[nSample], sampleHeader.name);
 	Samples[nSample].Convert(MOD_TYPE_IT, GetType());
 
 	sampleHeader.GetSampleFormat().ReadSample(Samples[nSample], file);
@@ -1707,7 +1707,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 		ITSample itss;
 		itss.ConvertToIT(Samples[*iter], GetType(), compress, compress);
 
-		StringFixer::WriteString<StringFixer::nullTerminated>(itss.name, m_szNames[*iter]);
+		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[*iter]);
 
 		itss.samplepointer = filePos;
 		itss.ConvertEndianness();
@@ -1742,9 +1742,9 @@ void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const 
 	if(fadr && code != MULTICHAR4_LE_MSVC('K','[','.','.'))	// copy field data in instrument's header
 		memcpy(fadr, file.GetRawData(), size);  // (except for keyboard mapping)
 	if(fadr && code == MULTICHAR4_LE_MSVC('n','[','.','.'))
-		StringFixer::SetNullTerminator(pIns->name);
+		mpt::String::SetNullTerminator(pIns->name);
 	if(fadr && code == MULTICHAR4_LE_MSVC('f','n','[','.'))
-		StringFixer::SetNullTerminator(pIns->filename);
+		mpt::String::SetNullTerminator(pIns->filename);
 	file.Skip(size);
 
 	if(code == MULTICHAR4_LE_MSVC('d','F','.','.') && fadr != nullptr) // 'dF..' field requires additional processing.
@@ -2081,7 +2081,7 @@ struct FLACDecoder
 				const FLAC__uint32 length = metadata->data.vorbis_comment.comments[i].length;
 				if(length > 6 && !mpt_strnicmp(tag, "TITLE=", 6))
 				{
-					StringFixer::ReadString<StringFixer::maybeNullTerminated>(client.sndFile.m_szNames[client.sample], tag + 6, length - 6);
+					mpt::String::Read<mpt::String::maybeNullTerminated>(client.sndFile.m_szNames[client.sample], tag + 6, length - 6);
 					break;
 				}
 			}

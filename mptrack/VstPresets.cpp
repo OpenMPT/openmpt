@@ -65,7 +65,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 		// Program
 		PlugParamIndex numParams = file.ReadUint32BE();
 		char prgName[28];
-		file.ReadString<StringFixer::maybeNullTerminated>(prgName, 28);
+		file.ReadString<mpt::String::maybeNullTerminated>(prgName, 28);
 		plugin.Dispatch(effSetProgramName, 0, 0, prgName, 0.0f);
 
 		if(header.fxMagic == fMagic)

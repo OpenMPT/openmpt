@@ -281,7 +281,7 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 
 	// Save old sample header
 	undo.OldSample = oldSample;
-	StringFixer::Copy(undo.oldName, sndFile.m_szNames[smp]);
+	mpt::String::Copy(undo.oldName, sndFile.m_szNames[smp]);
 	undo.changeType = changeType;
 
 	if(changeType == sundo_replace)

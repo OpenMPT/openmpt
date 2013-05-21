@@ -1599,7 +1599,7 @@ void CViewPattern::UpdateIndicator()
 							// display plugin name.
 							if(m->instr <= MAX_MIXPLUGINS)
 							{
-								StringFixer::CopyN(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetName());
+								mpt::String::CopyN(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetName());
 							}
 						} else
 						{
@@ -1609,7 +1609,7 @@ void CViewPattern::UpdateIndicator()
 								if ((m->instr <= pSndFile->GetNumInstruments()) && (pSndFile->Instruments[m->instr]))
 								{
 									ModInstrument *pIns = pSndFile->Instruments[m->instr];
-									StringFixer::Copy(sztmp, pIns->name);
+									mpt::String::Copy(sztmp, pIns->name);
 									if ((m->note) && (m->note <= NOTE_MAX))
 									{
 										const SAMPLEINDEX nsmp = pIns->Keyboard[m->note - 1];
@@ -1626,12 +1626,12 @@ void CViewPattern::UpdateIndicator()
 							{
 								if (m->instr <= pSndFile->GetNumSamples())
 								{
-									StringFixer::Copy(sztmp, pSndFile->m_szNames[m->instr]);
+									mpt::String::Copy(sztmp, pSndFile->m_szNames[m->instr]);
 								}
 							}
 
 						}
-						StringFixer::SetNullTerminator(sztmp);
+						mpt::String::SetNullTerminator(sztmp);
 						if (sztmp[0]) wsprintf(s, "%d: %s", m->instr, sztmp);
 					}
 					break;
@@ -1644,7 +1644,7 @@ void CViewPattern::UpdateIndicator()
 						if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
 						{
 							CHAR sztmp[128] = "";
-							StringFixer::CopyN(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol()).c_str());
+							mpt::String::CopyN(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol()).c_str());
 							if (sztmp[0]) wsprintf(s, "%d: %s", m->GetValueVolCol(), sztmp);
 						}
 					} else

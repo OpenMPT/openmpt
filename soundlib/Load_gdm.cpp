@@ -161,7 +161,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	madeWithTracker = mpt::String::Format("BWSB 2GDM %d.%d (converted from %s)", fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()).c_str());
 
 	// Song name
-	StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[0], fileHeader.songTitle);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.songTitle);
 
 	// Read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
@@ -209,8 +209,8 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		}
 
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(m_szNames[smp], gdmSample.name);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(Samples[smp].filename, gdmSample.fileName);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], gdmSample.name);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(Samples[smp].filename, gdmSample.fileName);
 
 		Samples[smp].nC5Speed = gdmSample.c4Hertz;
 		Samples[smp].nGlobalVol = 256;	// Not supported in this format

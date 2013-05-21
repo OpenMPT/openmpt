@@ -294,7 +294,7 @@ struct PACKED S3MSampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize(MOD_TYPE_S3M);
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptSmp.filename, filename);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
 
 		if((sampleType == typePCM || sampleType == typeNone) && magic == idSCRS)
 		{
@@ -332,7 +332,7 @@ struct PACKED S3MSampleHeader
 	SmpLength ConvertToS3M(const ModSample &mptSmp)
 	{
 		SmpLength smpLength = 0;
-		StringFixer::WriteString<StringFixer::maybeNullTerminated>(filename, mptSmp.filename);
+		mpt::String::Write<mpt::String::maybeNullTerminated>(filename, mptSmp.filename);
 
 		if(mptSmp.pSample != nullptr)
 		{
@@ -518,7 +518,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	m_nType = MOD_TYPE_S3M;
-	StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[0], fileHeader.name);
+	mpt::String::Read<mpt::String::nullTerminated>(m_szNames[0], fileHeader.name);
 
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
@@ -628,7 +628,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp + 1], sampleHeader.name);
+		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 1], sampleHeader.name);
 		sampleHeader.ConvertToMPT(Samples[smp + 1]);
 
 		if(sampleHeader.sampleType >= S3MSampleHeader::typeAdMel)
@@ -801,7 +801,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	S3MFileHeader fileHeader;
 	MemsetZero(fileHeader);
 
-	StringFixer::WriteString<StringFixer::nullTerminated>(fileHeader.name, m_szNames[0]);
+	mpt::String::Write<mpt::String::nullTerminated>(fileHeader.name, m_szNames[0]);
 	fileHeader.dosEof = S3MFileHeader::idEOF;
 	fileHeader.fileType = S3MFileHeader::idS3MType;
 
@@ -1111,7 +1111,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 
 		SmpLength smpLength = sampleHeader[smp].ConvertToS3M(Samples[realSmp]);
 
-		StringFixer::WriteString<StringFixer::nullTerminated>(sampleHeader[smp].name, m_szNames[realSmp]);
+		mpt::String::Write<mpt::String::nullTerminated>(sampleHeader[smp].name, m_szNames[realSmp]);
 
 		if(Samples[realSmp].pSample)
 		{

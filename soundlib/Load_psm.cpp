@@ -142,7 +142,7 @@ struct PACKED PSMOldSampleHeader
 	// Convert header data to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptSmp.filename, fileName);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, fileName);
 
 		mptSmp.nGlobalVol = 64;
 		mptSmp.nC5Speed = c5Freq;
@@ -201,7 +201,7 @@ struct PACKED PSMNewSampleHeader
 	// Convert header data to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
-		StringFixer::ReadString<StringFixer::maybeNullTerminated>(mptSmp.filename, fileName);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, fileName);
 
 		mptSmp.nGlobalVol = 64;
 		mptSmp.nC5Speed = c5Freq;
@@ -310,7 +310,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// "TITL" - Song Title
 	FileReader titleChunk = chunks.GetChunk(PSMChunk::idTITL);
-	titleChunk.ReadString<StringFixer::spacePadded>(m_szNames[0], titleChunk.GetLength());
+	titleChunk.ReadString<mpt::String::spacePadded>(m_szNames[0], titleChunk.GetLength());
 
 	// "SDFT" - Format info (song data starts here)
 	if(!chunks.GetChunk(PSMChunk::idSDFT).ReadMagic("MAINSONG"))
@@ -331,7 +331,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Pattern ID (something like "P0  " or "P13 ", or "PATT0   " in Sinaria) follows
 		char patternID[5];
-		if(!chunk.ReadString<StringFixer::spacePadded>(patternID, 4) || patternID[0] != 'P')
+		if(!chunk.ReadString<mpt::String::spacePadded>(patternID, 4) || patternID[0] != 'P')
 		{
 			continue;
 		}
@@ -339,7 +339,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// New format has four additional bytes - read patternID again.
 			newFormat = true;
-			chunk.ReadString<StringFixer::spacePadded>(patternID, 4);
+			chunk.ReadString<mpt::String::spacePadded>(patternID, 4);
 		}
 		patternIDs.push_back(atoi(&patternID[newFormat ? 0 : 1]));
 		// We're going to read the rest of the pattern data later.
@@ -373,7 +373,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 		PSMSubSong subsong;
 		subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
-		StringFixer::ReadString<StringFixer::nullTerminated>(subsong.songName, songHeader.songType); // subsong name
+		mpt::String::Read<mpt::String::nullTerminated>(subsong.songName, songHeader.songType); // subsong name
 
 		// Read "Sub sub chunks"
 		ChunkReader::ChunkList<PSMChunk> subChunks = chunk.ReadChunks<PSMChunk>(1);
@@ -389,7 +389,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				if(subChunkHead.length == 6)
 				{
 					char cversion[7];
-					subChunk.ReadString<StringFixer::maybeNullTerminated>(cversion, 6);
+					subChunk.ReadString<mpt::String::maybeNullTerminated>(cversion, 6);
 					int version = atoi(cversion);
 					// Sinaria song dates (just to go sure...)
 					if(version == 800211 || version == 940902 || version == 940903 ||
@@ -427,11 +427,11 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 								if(newFormat)
 								{
 									subChunk.Skip(4);
-									subChunk.ReadString<StringFixer::spacePadded>(patternID, 4);
+									subChunk.ReadString<mpt::String::spacePadded>(patternID, 4);
 								} else
 								{
 									subChunk.Skip(1);
-									subChunk.ReadString<StringFixer::spacePadded>(patternID, 3);
+									subChunk.ReadString<mpt::String::spacePadded>(patternID, 3);
 								}
 								uint32 pat = atoi(patternID);
 
@@ -612,7 +612,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				if(smp < MAX_SAMPLES)
 				{
 					m_nSamples = MAX(m_nSamples, smp);
-					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
+					mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
 					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
@@ -630,7 +630,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				if(smp < MAX_SAMPLES)
 				{
 					m_nSamples = MAX(m_nSamples, smp);
-					StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
+					mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
 					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
@@ -1066,7 +1066,7 @@ struct PACKED PSM16SampleHeader
 	// Convert sample header to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
-		StringFixer::ReadString<StringFixer::nullTerminated>(mptSmp.filename, filename);
+		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
 
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
@@ -1174,7 +1174,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultSpeed = fileHeader.songSpeed;
 	m_nDefaultTempo = fileHeader.songTempo;
 
-	StringFixer::ReadString<StringFixer::spacePadded>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], fileHeader.songName);
 
 	// Read orders
 	if(fileHeader.orderOffset > 4 && file.Seek(fileHeader.orderOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPORD)
@@ -1209,7 +1209,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 			SAMPLEINDEX smp = sampleHeader.sampleNumber;
 			m_nSamples = MAX(m_nSamples, smp);
 
-			StringFixer::ReadString<StringFixer::nullTerminated>(m_szNames[smp], sampleHeader.name);
+			mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
 			sampleHeader.ConvertToMPT(Samples[smp]);
 
 			file.Seek(sampleHeader.offset);
