@@ -1722,7 +1722,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UI
 		if ((key >= 24) && (key <= 84)) lstrcpy(s, szMidiPercussionNames[key-24]);
 		if (pDlsIns->szName[0])
 		{
-			wsprintf(&s[strlen(s)], " (%s", pDlsIns->szName);
+			sprintf(&s[strlen(s)], " (%s", pDlsIns->szName);
 			int n = strlen(s);
 			while ((n) && (s[n-1] == ' '))
 			{

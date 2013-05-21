@@ -269,9 +269,6 @@ typedef char *        LPTSTR;
 
 #define MPT_TEXT(x) x
 
-// wsprintf is just sprintf, but defined in the WINDOWS API
-#define wsprintf sprintf
-
 #endif // _WIN32
 
 

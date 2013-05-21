@@ -582,7 +582,6 @@ bool ModSequenceSet::MergeSequences()
 	if(GetNumSequences() <= 1)
 		return false;
 
-	char s[256];
 	SetSequence(0);
 	resize(GetLengthTailTrimmed());
 	SEQUENCEINDEX removedSequences = 0; // sequence count
@@ -602,8 +601,7 @@ bool ModSequenceSet::MergeSequences()
 		const ORDERINDEX nFirstOrder = GetLengthTailTrimmed() + 1; // +1 for separator item
 		if(nFirstOrder + GetSequence(1).GetLengthTailTrimmed() > m_sndFile.GetModSpecifications().ordersMax)
 		{
-			wsprintf(s, "WARNING: Cannot merge Sequence %d (too long!)", removedSequences);
-			m_sndFile.AddToLog(s);
+			m_sndFile.AddToLog(mpt::String::Format("WARNING: Cannot merge Sequence %d (too long!)", removedSequences));
 			RemoveSequence(1);
 			continue;
 		}
@@ -638,8 +636,7 @@ bool ModSequenceSet::MergeSequences()
 						} else
 						{
 							// cannot create new pattern: notify the user
-							wsprintf(s, "CONFLICT: Pattern break commands in Pattern %d might be broken since it has been used in several sequences!", nPat);
-							m_sndFile.AddToLog(s);
+							m_sndFile.AddToLog(mpt::String::Format("CONFLICT: Pattern break commands in Pattern %d might be broken since it has been used in several sequences!", nPat));
 						}
 					}
 					m->param  = static_cast<BYTE>(m->param + nFirstOrder);

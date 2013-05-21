@@ -647,9 +647,7 @@ bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile 
 				} else
 				{
 #ifdef DEBUG
-					CHAR s[64];
-					wsprintf(s, "J2B: Unknown command: 0x%X, param 0x%X", m.command, m.param);
-					Log(s);
+					Log("J2B: Unknown command: 0x%X, param 0x%X", m.command, m.param);
 #endif // DEBUG
 					m.command = CMD_NONE;
 				}
