@@ -37,7 +37,7 @@ CString CloseMainDialog::FormatTitle(const CModDoc *pModDoc, bool fullPath)
 //-------------------------------------------------------------------------
 {
 	const CString &path = (!fullPath || pModDoc->GetPathName().IsEmpty()) ? pModDoc->GetTitle() :  pModDoc->GetPathName();
-	return pModDoc->GetrSoundFile().GetTitle() + CString(" (") + path + CString(")");
+	return CString(pModDoc->GetrSoundFile().GetTitle().c_str()) + CString(" (") + path + CString(")");
 }
 
 

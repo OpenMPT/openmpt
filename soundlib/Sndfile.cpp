@@ -1663,12 +1663,12 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 }
 
 
-bool CSoundFile::SetTitle(const char *titleCandidate, size_t strSize)
-//-------------------------------------------------------------------
+bool CSoundFile::SetTitle(const std::string & newTitle)
+//-----------------------------------------------------
 {
-	if(strcmp(m_szNames[0], titleCandidate))
+	if(m_szNames[0] != newTitle)
 	{
-		StringFixer::CopyN(m_szNames[0], titleCandidate, strSize);
+		StringFixer::CopyN(m_szNames[0], &newTitle[0], newTitle.length());
 		return true;
 	}
 	return false;
