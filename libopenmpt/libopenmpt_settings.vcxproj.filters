@@ -18,18 +18,12 @@
     <ClCompile Include="libopenmpt_settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="libopenmpt_settings_dialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SettingsForm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libopenmpt_settings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="libopenmpt_settings_dialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SettingsForm.h">
