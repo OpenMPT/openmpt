@@ -94,6 +94,50 @@ inline T &MemCopy(T &destination, const T &source)
 }
 
 
+namespace mpt {
+
+// Saturate the value of src to the domain of Tdst
+template <typename Tdst, typename Tsrc>
+inline Tdst saturate_cast(Tsrc src)
+//-------------------------------------
+{
+	// This code tries not only to obviously avoid overflows but also to avoid signed/unsigned comparison warnings and type truncation warnings (which in fact would be safe here) by explicit casting.
+	STATIC_ASSERT(std::numeric_limits<Tdst>::is_integer);
+	STATIC_ASSERT(std::numeric_limits<Tsrc>::is_integer);
+	if(std::numeric_limits<Tdst>::is_signed && std::numeric_limits<Tsrc>::is_signed)
+	{
+		if(sizeof(Tdst) >= sizeof(Tsrc))
+		{
+			return static_cast<Tdst>(src);
+		}
+		return static_cast<Tdst>(std::max<Tsrc>(std::numeric_limits<Tdst>::min(), std::min<Tsrc>(src, std::numeric_limits<Tdst>::max())));
+	} else if(!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
+	{
+		if(sizeof(Tdst) >= sizeof(Tsrc))
+		{
+			return static_cast<Tdst>(src);
+		}
+		return static_cast<Tdst>(std::min<Tsrc>(src, std::numeric_limits<Tdst>::max()));
+	} else if(std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
+	{
+		if(sizeof(Tdst) >= sizeof(Tsrc))
+		{
+			return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+		}
+		return static_cast<Tdst>(std::max<Tsrc>(std::numeric_limits<Tdst>::min(), std::min<Tsrc>(src, std::numeric_limits<Tdst>::max())));
+	} else // Tdst unsigned, Tsrc signed
+	{
+		if(sizeof(Tdst) >= sizeof(Tsrc))
+		{
+			return static_cast<Tdst>(std::max<Tsrc>(0, src));
+		}
+		return static_cast<Tdst>(std::max<Tsrc>(0, std::min<Tsrc>(src, std::numeric_limits<Tdst>::max())));
+	}
+}
+
+} // namespace mpt
+
+
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
 // Similarly if 'val' is greater than 'upperLimit', 'val' is set to value 'upperLimit'.
 // If 'lowerLimit' > 'upperLimit', 'val' won't be modified.
@@ -133,7 +177,7 @@ inline void LimitMax(T& val, const C upperLimit)
 #define CLAMP(number, low, high) MIN(high, MAX(low, number))
 #endif
 
- 
+
 #ifdef MODPLUG_TRACKER
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
 std::string GetErrorMessage(DWORD nErrorCode);

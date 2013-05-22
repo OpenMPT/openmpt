@@ -521,11 +521,11 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	C5Speed = mptSmp.nC5Speed ? mptSmp.nC5Speed : 8363;
 
 	// Size and loops
-	length = std::min(mptSmp.nLength, (SmpLength)uint32_max);
-	loopbegin = std::min(mptSmp.nLoopStart, (SmpLength)uint32_max);
-	loopend = std::min(mptSmp.nLoopEnd, (SmpLength)uint32_max);
-	susloopbegin = std::min(mptSmp.nSustainStart, (SmpLength)uint32_max);
-	susloopend = std::min(mptSmp.nSustainEnd, (SmpLength)uint32_max);
+	length = mpt::saturate_cast<uint32>(mptSmp.nLength);
+	loopbegin = mpt::saturate_cast<uint32>(mptSmp.nLoopStart);
+	loopend = mpt::saturate_cast<uint32>(mptSmp.nLoopEnd);
+	susloopbegin = mpt::saturate_cast<uint32>(mptSmp.nSustainStart);
+	susloopend = mpt::saturate_cast<uint32>(mptSmp.nSustainEnd);
 
 	// Auto Vibrato settings
 	static const uint8 autovibxm2it[8] = { 0, 2, 4, 1, 3, 0, 0, 0 };	// OpenMPT VibratoType -> IT Vibrato
