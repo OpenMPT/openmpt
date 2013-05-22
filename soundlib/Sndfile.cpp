@@ -1685,6 +1685,9 @@ double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVa
 
 
 // Calculate the length of a tick, depending on the tempo mode.
+// This differs from GetTickDuration() by not accumulating errors
+// because this is not called once per tick but in unrelated
+// circumstances. So this should not update error accumulation.
 void CSoundFile::RecalculateSamplesPerTick()
 //------------------------------------------
 {
@@ -1710,6 +1713,8 @@ void CSoundFile::RecalculateSamplesPerTick()
 
 
 // Get length of a tick in sample, with tick-to-tick tempo correction in modern tempo mode.
+// This has to be called exactly once per tick because otherwise the error accumulation
+// goes wrong.
 UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 //----------------------------------------------------------------------------
 {
