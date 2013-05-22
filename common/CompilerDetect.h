@@ -25,7 +25,7 @@
 #define MPT_CLANG_BEFORE(major,minor,patch)          (MPT_COMPILER_CLANG_VERSION <  MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 
 #if MPT_CLANG_BEFORE(3,0,0)
-#pragma message "clang version 3.0 required"
+#error "clang version 3.0 required"
 #endif
 
 #elif defined(__GNUC__)
@@ -36,7 +36,7 @@
 #define MPT_GCC_BEFORE(major,minor,patch)            (MPT_COMPILER_GCC_VERSION <  MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 
 #if MPT_GCC_BEFORE(4,4,0)
-#pragma message "GCC version 4.4 required"
+#error "GCC version 4.4 required"
 #endif
 
 #elif defined(_MSC_VER)
@@ -58,8 +58,7 @@
 
 #else
 
-// unsupported compiler
-char mpt_unsupported_compiler[-1];
+#error "Your compiler is unknown to openmpt and thus not supported. You might want to edit CompilerDetect.h und typedefs.h."
 
 #endif
 
