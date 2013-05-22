@@ -1472,13 +1472,12 @@ UINT CSoundFile::CreateStereoMix(int count)
 	{
 		const LPMIXINTERFACE *pMixFuncTable;
 		ModChannel * const pChannel = &Chn[ChnMix[nChn]];
-		UINT nFlags, nMasterCh;
+		UINT nFlags;
 		LONG nSmpCount;
 		int nsamples;
 		int *pbuffer;
 
 		if (!pChannel->pCurrentSample) continue;
-		nMasterCh = (ChnMix[nChn] < m_nChannels) ? ChnMix[nChn]+1 : pChannel->nMasterChn;
 		pOfsR = &gnDryROfsVol;
 		pOfsL = &gnDryLOfsVol;
 		nFlags = 0;
@@ -1515,19 +1514,6 @@ UINT CSoundFile::CreateStereoMix(int count)
 		//Look for plugins associated with this implicit tracker channel.
 		PLUGINDEX nMixPlugin = GetBestPlugin(ChnMix[nChn], PrioritiseInstrument, RespectMutes);
 
-		//rewbs.instroVSTi
-/*		UINT nMixPlugin=0;
-		if (pChannel->pModInstrument && pChannel->pInstrument) {	// first try intrument VST
-			if (!(pChannel->pInstrument->uFlags & ENV_MUTE))
-				nMixPlugin = pChannel->pModInstrument->nMixPlug;
-		}
-		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) { 	// Then try Channel VST
-			if(!(pChannel->dwFlags & CHN_NOFX))
-				nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
-		}
-*/
-
-		//end rewbs.instroVSTi
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
 			SNDMIXPLUGINSTATE *pPlugin = m_MixPlugins[nMixPlugin - 1].pMixState;
