@@ -392,9 +392,9 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 	}
 
 	// Sample Length and Loops
-	length = std::min(mptSmp.nLength, (SmpLength)uint32_max);
-	loopStart = std::min(mptSmp.nLoopStart, (SmpLength)uint32_max);
-	loopLength = std::min(mptSmp.nLoopEnd - mptSmp.nLoopStart, (SmpLength)uint32_max);
+	length = mpt::saturate_cast<uint32>(mptSmp.nLength);
+	loopStart = mpt::saturate_cast<uint32>(mptSmp.nLoopStart);
+	loopLength = mpt::saturate_cast<uint32>(mptSmp.nLoopEnd - mptSmp.nLoopStart);
 
 	if(mptSmp.uFlags[CHN_16BIT])
 	{
