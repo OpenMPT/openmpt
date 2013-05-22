@@ -274,10 +274,18 @@ public:
 	}
 public:
 	void write( const std::vector<float*> buffers, std::size_t frames ) {
-		check_portaudio_error( Pa_WriteStream( stream, buffers.data(), frames ) );
+		while ( frames > 0 ) {
+			unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
+			check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
+			frames -= chunk_frames;
+		}
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
-		check_portaudio_error( Pa_WriteStream( stream, buffers.data(), frames ) );
+		while ( frames > 0 ) {
+			unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
+			check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
+			frames -= chunk_frames;
+		}
 	}
 };
 
