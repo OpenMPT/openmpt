@@ -92,12 +92,14 @@ void DoTests()
 {
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
-	DO_TEST(TestPCnoteSerialization);
 	DO_TEST(TestMisc);
-	DO_TEST(TestMIDIEvents);
-	DO_TEST(TestLoadSaveFile);
 	DO_TEST(TestStringIO);
+	DO_TEST(TestMIDIEvents);
 	DO_TEST(TestSampleConversion);
+
+	// slower tests, require opening a CModDoc
+	DO_TEST(TestPCnoteSerialization);
+	DO_TEST(TestLoadSaveFile);
 
 	Log(TEXT("Tests were run\n"));
 }
