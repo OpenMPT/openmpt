@@ -242,11 +242,13 @@ enum enmEnvelopeTypes
 #define DNA_NOTEFADE	2
 
 
+#ifdef ENABLE_ASM
 #define PROCSUPPORT_CPUID	0x01
 #define PROCSUPPORT_MMX		0x02 // Processor supports MMX instructions
 #define PROCSUPPORT_MMXEX	0x04 // Processor supports AMD MMX extensions
 #define PROCSUPPORT_3DNOW	0x08 // Processor supports AMD 3DNow! instructions
 #define PROCSUPPORT_SSE		0x10 // Processor supports SSE instructions
+#endif
 
 
 // Module flags
@@ -294,14 +296,19 @@ DECLARE_FLAGSET(SongFlags)
 #define SNDDSP_MEGABASS       0x02	// bass expansion
 #define SNDDSP_SURROUND       0x08	// surround mix
 #endif // NO_DSP
+#ifndef NO_REVERB
 #define SNDDSP_REVERB         0x20	// apply reverb
+#endif // NO_REVERB
 #ifndef NO_EQ
 #define SNDDSP_EQ             0x80	// apply EQ
 #endif // NO_EQ
 
 #define SNDMIX_SOFTPANNING    0x10	// soft panning mode (this is forced with mixmode RC3 and later)
+
 // Misc Flags (can safely be turned on or off)
+#ifdef ENABLE_ASM
 #define SNDMIX_ENABLEMMX      0x08		// use MMX-accelerated code
+#endif
 
 //#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)

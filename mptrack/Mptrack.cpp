@@ -867,6 +867,8 @@ BOOL CTrackApp::InitInstance()
 	AddDocTemplate(m_pModTemplate);
 
 	// Initialize Audio
+#ifdef ENABLE_ASM
+	// rough heuristic to select less cpu consuming defaults for old CPUs
 	DWORD sysinfo = CSoundFile::GetSysInfo();
 	if(sysinfo & PROCSUPPORT_MMX)
 	{
@@ -877,6 +879,10 @@ BOOL CTrackApp::InitInstance()
 	{
 		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_POLYPHASE;
 	}
+#else
+	// just use a sane default
+	TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_POLYPHASE;
+#endif
 	// Load Midi Library
 	if (m_szConfigFileName[0]) ImportMidiConfig(m_szConfigFileName);
 

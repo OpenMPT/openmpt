@@ -150,6 +150,14 @@
 
 
 
+// fixing stuff up
+
+#if !defined(ENABLE_MMX) && !defined(NO_REVERB)
+#define NO_REVERB // reverb requires mmx
+#endif
+
+
+
 #if MPT_COMPILER_MSVC
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif

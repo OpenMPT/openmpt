@@ -17,14 +17,22 @@
 #define EQ_BANDWIDTH	2.0
 #define EQ_ZERO			0.000001
 
+extern void C_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
+extern void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
+extern void C_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
+extern void C_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
+
+#ifdef ENABLE_X86
 extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
 extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
 extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
+#endif
 
 #ifdef ENABLE_SSE
 extern void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 #endif
+
 #ifdef ENABLE_3DNOW
 extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
@@ -325,19 +333,27 @@ static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
 
 
 void CEQ::ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSoundFilePlayConfig &config)
-//----------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
 {
+#ifdef ENABLE_X86
 	X86_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount, config.getIntToFloat());
+#else
+	C_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount, config.getIntToFloat());
+#endif
 	for (UINT b=0; b<MAX_EQ_BANDS; b++)
 	{
 		if ((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f)) EQFilter(&gEQ[b], MixFloatBuffer, nCount);
 	}
+#ifdef ENABLE_X86
 	X86_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount, config.getFloatToInt());
+#else
+	C_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount, config.getFloatToInt());
+#endif
 }
 
 
 void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSoundFilePlayConfig &config, DWORD SoundSetupFlags, DWORD SysInfoFlags)
-//-------------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------------
 {
 
 #ifdef ENABLE_SSE
@@ -388,7 +404,15 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSound
 #endif // ENABLE_3DNOW
 
 	{	
+
+		UNREFERENCED_PARAMETER(SoundSetupFlags);
+		UNREFERENCED_PARAMETER(SysInfoFlags);
+
+#ifdef ENABLE_X86
 		X86_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, config.getIntToFloat());
+#else
+		C_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, config.getIntToFloat());
+#endif
 		
 		for (UINT bl=0; bl<MAX_EQ_BANDS; bl++)
 		{
@@ -399,7 +423,12 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSound
 			if ((gEQ[br].bEnable) && (gEQ[br].Gain != 1.0f)) EQFilter(&gEQ[br], MixFloatBuffer+MIXBUFFERSIZE, nCount);
 		}
 
+#ifdef ENABLE_X86
 		X86_FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount, config.getFloatToInt());
+#else
+		C_FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount, config.getFloatToInt());
+#endif
+
 	}
 }
 
