@@ -24,6 +24,7 @@
 #include "Sndfile.h"
 
 
+#ifdef ENABLE_ASM
 DWORD CSoundFile::GetSysInfo()
 //----------------------------
 {
@@ -83,6 +84,7 @@ DWORD CSoundFile::GetSysInfo()
 	return 0;
 #endif
 }
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////////

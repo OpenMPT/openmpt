@@ -673,7 +673,9 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	int32 y0 = 0, xmax, poshi;
 	uint64 posincr, posfrac;
 
+#ifdef ENABLE_ASM
 	DWORD sysinfo = CSoundFile::GetSysInfo();
+#endif
 
 	if (len <= 0) return;
 	smplsize = (uFlags & CHN_16BIT) ? 2 : 1;

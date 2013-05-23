@@ -402,7 +402,11 @@ CSoundFile::CSoundFile() :
 #endif
 //----------------------
 {
+#ifdef ENABLE_ASM
 	gdwSysInfo = GetSysInfo();
+#else
+	gdwSysInfo = 0;
+#endif
 	MemsetZero(MixSoundBuffer);
 	MemsetZero(MixRearBuffer);
 #ifndef NO_REVERB
@@ -887,7 +891,9 @@ void CSoundFile::FreeSample(void *p)
 void CSoundFile::SetDspEffects(DWORD DSPMask)
 //-------------------------------------------
 {
+#ifdef ENABLE_ASM
 	if(!(GetSysInfo() & PROCSUPPORT_MMX)) DSPMask &= ~SNDDSP_REVERB;
+#endif
 	m_MixerSettings.DSPMask = DSPMask;
 	InitPlayer(FALSE);
 }

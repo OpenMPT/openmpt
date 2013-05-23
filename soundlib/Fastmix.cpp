@@ -1754,6 +1754,7 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
 //-----------------------------------------------------------------------------------------
 {
+#ifdef ENABLE_ASM
 	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_SSE
@@ -1771,17 +1772,19 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 		}
 #endif // ENABLE_3DNOW
 	}
+#endif // ENABLE_ASM
 #ifdef ENABLE_X86
 	X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
-#else
+#else // !ENABLE_X86
 	C_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
-#endif
+#endif // ENABLE_X86
 }
 
 
 VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
 //---------------------------------------------------------------------------------------------
 {
+#ifdef ENABLE_ASM
 	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
 	{
 #ifdef ENABLE_3DNOW
@@ -1792,11 +1795,12 @@ VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOu
 		}
 #endif // ENABLE_3DNOW
 	}
+#endif // ENABLE_ASM
 #ifdef ENABLE_X86
 	X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
-#else
+#else // !ENABLE_X86
 	C_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
-#endif
+#endif // ENABLE_X86
 }
 
 

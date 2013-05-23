@@ -125,10 +125,11 @@ BOOL COptionsSoundcard::OnInitDialog()
 
 	CPropertyPage::OnInitDialog();
 	if(TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
-	if(TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 	if(m_SoundDeviceFlags & SNDDEV_OPTIONS_EXCLUSIVE) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
 	if(m_SoundDeviceFlags & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
 	// Multimedia extensions
+#ifdef ENABLE_ASM
+	if(TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), (CSoundFile::GetSysInfo() & PROCSUPPORT_MMX) ? TRUE : FALSE);
 	if(CSoundFile::GetSysInfo() & PROCSUPPORT_SSE)
 	{
@@ -137,6 +138,9 @@ BOOL COptionsSoundcard::OnInitDialog()
 	{
 		SetDlgItemText(IDC_CHECK3, _T("Enable 3DNow! acceleration"));
 	}
+#else
+	::ShowWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), SW_HIDE);
+#endif
 
 	// Sampling Rate
 	UpdateSampleRates(m_nSoundDevice);
@@ -441,8 +445,10 @@ BOOL COptionsSoundcard::OnSetActive()
 void COptionsSoundcard::OnOK()
 //----------------------------
 {
-	if(IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_SOFTPANNING; else TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
+#ifdef ENABLE_ASM
 	if(IsDlgButtonChecked(IDC_CHECK3)) TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_ENABLEMMX; else TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_ENABLEMMX;
+#endif
+	if(IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_SOFTPANNING; else TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
 	m_SoundDeviceFlags = 0;
 	if(IsDlgButtonChecked(IDC_CHECK4)) m_SoundDeviceFlags |= SNDDEV_OPTIONS_EXCLUSIVE;
 	if(IsDlgButtonChecked(IDC_CHECK5)) m_SoundDeviceFlags |= SNDDEV_OPTIONS_BOOSTTHREADPRIORITY;
@@ -787,7 +793,9 @@ void COptionsPlayer::OnOK()
 	if (IsDlgButtonChecked(IDC_CHECK4)) dwQuality |= SNDDSP_SURROUND;
 	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= SNDDSP_NOISEREDUCTION;
 #endif
+#ifndef NO_REVERB
 	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= SNDDSP_REVERB;
+#endif
 	dwSrcMode = m_CbnResampling.GetCurSel();
 
 #ifndef NO_DSP
