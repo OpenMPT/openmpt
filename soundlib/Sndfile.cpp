@@ -892,7 +892,9 @@ void CSoundFile::SetDspEffects(DWORD DSPMask)
 //-------------------------------------------
 {
 #ifdef ENABLE_ASM
+#ifndef NO_REVERB
 	if(!(GetSysInfo() & PROCSUPPORT_MMX)) DSPMask &= ~SNDDSP_REVERB;
+#endif
 #endif
 	m_MixerSettings.DSPMask = DSPMask;
 	InitPlayer(FALSE);
