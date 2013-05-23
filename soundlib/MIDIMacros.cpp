@@ -74,7 +74,9 @@ fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
 
 
 #if MPT_COMPILER_GCC
+#if MPT_GCC_AT_LEAST(4,6,0)
 #pragma GCC diagnostic push
+#endif
 #pragma GCC diagnostic ignored "-Wswitch"
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
@@ -117,14 +119,18 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 }
 
 #if MPT_COMPILER_GCC
+#if MPT_GCC_AT_LEAST(4,6,0)
 #pragma GCC diagnostic pop
+#endif
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
 #endif
 
 
 #if MPT_COMPILER_GCC
+#if MPT_GCC_AT_LEAST(4,6,0)
 #pragma GCC diagnostic push
+#endif
 #pragma GCC diagnostic ignored "-Wswitch"
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
@@ -185,7 +191,9 @@ void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], f
 }
 
 #if MPT_COMPILER_GCC
+#if MPT_GCC_AT_LEAST(4,6,0)
 #pragma GCC diagnostic pop
+#endif
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
 #endif

@@ -24,7 +24,9 @@ extern uintptr_t DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufm
 
 
 #if MPT_COMPILER_GCC
+#if MPT_GCC_AT_LEAST(4,6,0)
 #pragma GCC diagnostic push
+#endif
 #pragma GCC diagnostic ignored "-Wswitch"
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
@@ -401,7 +403,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 }
 
 #if MPT_COMPILER_GCC
+#if MPT_GCC_AT_LEAST(4,6,0)
 #pragma GCC diagnostic pop
+#endif
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
 #endif
