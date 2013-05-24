@@ -1906,13 +1906,15 @@ BOOL CSoundFile::ReadNote()
 				pChn->nCalcVolume = 0;
 			}
 
-			int32 ninc = Util::muldiv(freq, 0x10000, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
-			if ((ninc >= 0xFFB0) && (ninc <= 0x10090)) ninc = 0x10000;
+			uint32 ninc = Util::muldivr(freq, 0x10000, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
 #ifndef MODPLUG_TRACKER
 			ninc = Util::muldivr(ninc, m_nFreqFactor, 128);
 #endif // !MODPLUG_TRACKER
-			Limit(ninc, 3, 0xFF0000);
-			pChn->nInc = (ninc + 1) & ~3;
+			if(ninc == 0)
+			{
+				ninc = 1;
+			}
+			pChn->nInc = ninc;
 		} else
 		{
 			// Avoid nasty noises...
@@ -2008,27 +2010,19 @@ BOOL CSoundFile::ReadNote()
 			//if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
 			//if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
 
-			ResamplingMode resamplingMode = m_Resampler.m_Settings.SrcMode; // default to global mixer settings
-			if(pChn->pModInstrument && IsKnownResamplingMode(pChn->pModInstrument->nResampling))
-			{
-				// for defined resampling modes, use per-instrument resampling modes if set
-				resamplingMode = (ResamplingMode)pChn->pModInstrument->nResampling;
-			}
-			// disable interpolation in certain cases
 			if(pChn->nInc == 0x10000)
 			{
 				// exact samplerate match, do not resample at all, regardless of selected resampler
-				resamplingMode = SRCMODE_NEAREST;
-			} else if(resamplingMode == SRCMODE_LINEAR)
+				pChn->resamplingMode = SRCMODE_NEAREST;
+			} else if(pChn->pModInstrument && IsKnownResamplingMode(pChn->pModInstrument->nResampling))
 			{
-				if(((pChn->nInc >= 0xFF00) && (pChn->nInc < 0x10100)))
-				{
-					// disable interpolation if rates are too close
-					resamplingMode = SRCMODE_NEAREST;
-				}
+				// for defined resampling modes, use per-instrument resampling mode if set
+				pChn->resamplingMode = (ResamplingMode)pChn->pModInstrument->nResampling;
+			} else
+			{
+				// default to global mixer settings
+				pChn->resamplingMode = m_Resampler.m_Settings.SrcMode;
 			}
-			// store for the mixer
-			pChn->resamplingMode = (uint8)resamplingMode;
 
 			/*if (m_pConfig->getUseGlobalPreAmp())
 			{

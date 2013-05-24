@@ -185,45 +185,10 @@ void ModSample::SanitizeLoops()
 /////////////////////////////////////////////////////////////
 // Transpose <-> Frequency conversions
 
-// returns 8363*2^((transp*128+ftune)/(12*128))
 uint32 ModSample::TransposeToFrequency(int transpose, int finetune)
 //-----------------------------------------------------------------
 {
-	// return (unsigned int) (8363.0 * pow(2, (transp * 128.0 + ftune) / 1536.0));
-	const float _fbase = 8363;
-	const float _factor = 1.0f / (12.0f * 128.0f);
-	uint32 freq;
-
-#if defined(ENABLE_X86)
-	int result;
-	transpose = (transpose << 7) + finetune;
-	_asm
-	{
-		fild transpose
-		fld _factor
-		fmulp st(1), st(0)
-		fist result
-		fisub result
-		f2xm1
-		fild result
-		fld _fbase
-		fscale
-		fstp st(1)
-		fmul st(1), st(0)
-		faddp st(1), st(0)
-		fistp freq
-	}
-#else // !ENABLE_X86
-	freq = static_cast<uint32>(std::pow(2.0f, (transpose * 128 + finetune) * _factor) * _fbase);
-#endif // ENABLE_X86
-
-	uint32 derr = freq % 11025;
-	if(derr <= 8) freq -= derr;
-	if(derr >= 11015) freq += 11025 - derr;
-	derr = freq % 1000;
-	if(derr <= 5) freq -= derr;
-	if(derr >= 995) freq += 1000 - derr;
-	return freq;
+	return Util::Round<uint32>(std::pow(2.0f, (transpose * 128.0f + finetune) * (1.0f / (12.0f * 128.0f))) * 8363.0f);
 }
 
 
@@ -234,36 +199,11 @@ void ModSample::TransposeToFrequency()
 }
 
 
-// returns 12*128*log2(freq/8363)
 int ModSample::FrequencyToTranspose(uint32 freq)
 //----------------------------------------------
 {
-	// return (int) (1536.0 * (log(freq / 8363.0) / log(2)));
-
-	const float _f1_8363 = 1.0f / 8363.0f;
-	const float _factor = 128 * 12;
-	int result;
-
-	if(!freq)
-	{
-		return 0;
-	}
-
-#if defined(ENABLE_X86)
-	_asm
-	{
-		fld _factor
-		fild freq
-		fld _f1_8363
-		fmulp st(1), st(0)
-		fyl2x
-		fistp result
-	}
-#else // !ENABLE_X86
 	const float inv_log_2 = 1.44269504089f; // 1.0f/std::log(2.0f)	
-	result = std::log(freq * _f1_8363) * (_factor * inv_log_2);
-#endif // ENABLE_X86
-	return result;
+	return Util::Round<int>(std::log(freq * (1.0f / 8363.0f)) * (12.0f * 128.0f * inv_log_2));
 }
 
 
