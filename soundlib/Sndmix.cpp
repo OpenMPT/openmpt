@@ -272,7 +272,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			m_nMixStat += CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
-			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount, gdwSysInfo);
+			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount, GetProcSupport());
 #endif // NO_REVERB
 
 			if (nMaxPlugins) ProcessPlugins(lCount);
@@ -287,7 +287,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 			m_nMixStat += CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
-			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount, gdwSysInfo);
+			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount, GetProcSupport());
 #endif // NO_REVERB
 
 			if (nMaxPlugins) ProcessPlugins(lCount);
@@ -309,7 +309,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		if (m_MixerSettings.DSPMask & SNDDSP_EQ)
 		{
 			if (m_MixerSettings.gnChannels >= 2)
-				m_EQ.ProcessStereo(MixSoundBuffer, MixFloatBuffer, lCount, m_PlayConfig, m_MixerSettings.MixerFlags, gdwSysInfo);
+				m_EQ.ProcessStereo(MixSoundBuffer, MixFloatBuffer, lCount, m_PlayConfig);
 			else
 				m_EQ.ProcessMono(MixSoundBuffer, MixFloatBuffer, lCount, m_PlayConfig);
 		}

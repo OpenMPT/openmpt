@@ -44,7 +44,7 @@ public:
 	~CEQ() {}
 public:
 	void Initialize(BOOL bReset, DWORD MixingFreq);
-	void ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSoundFilePlayConfig &config, DWORD SoundSetupFlags, DWORD SysInfoFlags);
+	void ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSoundFilePlayConfig &config);
 	void ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSoundFilePlayConfig &config);
 	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq);
 };

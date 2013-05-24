@@ -25,15 +25,14 @@
 
 
 #ifdef ENABLE_ASM
-DWORD CSoundFile::GetSysInfo()
-//----------------------------
+
+static uint32 gdwSysInfo = 0;
+
+void InitProcSupport()
+//--------------------
 {
 #ifdef ENABLE_X86
 	static unsigned int fProcessorExtensions = 0;
-	static bool bMMXChecked = false;
-
-	if (!bMMXChecked)
-	{
 		_asm 
 		{
 			pushfd                      // Store original EFLAGS on stack
@@ -77,13 +76,16 @@ DWORD CSoundFile::GetSysInfo()
 			or      fProcessorExtensions, PROCSUPPORT_MMXEX	// MMX extensions supported
 		Done:
 		}
-		bMMXChecked = true;
-    }
-    return fProcessorExtensions;
-#else
-	return 0;
+    gdwSysInfo = fProcessorExtensions;
 #endif
 }
+
+uint32 GetProcSupport()
+//---------------------
+{
+	return gdwSysInfo;
+}
+
 #endif
 
 
@@ -93,8 +95,8 @@ DWORD CSoundFile::GetSysInfo()
 #ifdef ENABLE_3DNOW
 
 // Convert integer mix to floating-point
-void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
-//----------------------------------------------------------------------------------------------------
+static void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
+//-----------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _i2fc
@@ -126,8 +128,8 @@ mainloop:
 	}
 }
 
-void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
-//--------------------------------------------------------------------------------------------------------
+static void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
+//---------------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _f2ic
@@ -161,8 +163,8 @@ mainloop:
 }
 
 
-void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
-//----------------------------------------------------------------------------------
+static void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
+//-----------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _f2ic
@@ -191,8 +193,8 @@ mainloop:
 }
 
 
-void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
-//-----------------------------------------------------------------------------------
+static void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
+//------------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _i2fc
@@ -227,8 +229,8 @@ mainloop:
 
 #ifdef ENABLE_SSE
 
-void SSE_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
-//----------------------------------------------------------------------------------------------------
+static void SSE_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
+//-----------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	movss xmm0, _i2fc
@@ -258,8 +260,8 @@ mainloop:
 }
 
 
-void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
-//-----------------------------------------------------------------------------------
+static void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
+//------------------------------------------------------------------------------------------
 {
 	_asm {
 	movss xmm0, _i2fc
@@ -284,17 +286,16 @@ mainloop:
 	}
 }
 
-#endif
+#endif // ENABLE_SSE
 
 
 
-
+#ifdef ENABLE_X86
 
 // Convert floating-point mix to integer
 
-#ifdef ENABLE_X86
-void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
-//--------------------------------------------------------------------------------------------------------
+static void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
+//---------------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov esi, pIn1
@@ -317,24 +318,12 @@ mainloop:
 	fstp st(0)
 	}
 }
-#endif
-
-void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
-//------------------------------------------------------------------------------------------------------
-{
-	for(UINT i=0; i<nCount; ++i)
-	{
-		*pOut++ = (int)(*pIn1++ * _f2ic);
-		*pOut++ = (int)(*pIn2++ * _f2ic);
-	}
-}
 
 
 // Convert integer mix to floating-point
 
-#ifdef ENABLE_X86
-void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
-//----------------------------------------------------------------------------------------------------
+static void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
+//-----------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov esi, pSrc
@@ -357,22 +346,10 @@ mainloop:
 	fstp st(0)
 	}
 }
-#endif
-
-void C_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
-//--------------------------------------------------------------------------------------------------
-{
-	for(UINT i=0; i<nCount; ++i)
-	{
-		*pOut1++ = *pSrc++ * _i2fc;
-		*pOut2++ = *pSrc++ * _i2fc;
-	}
-}
 
 
-#ifdef ENABLE_X86
-void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
-//----------------------------------------------------------------------------------
+static void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
+//-----------------------------------------------------------------------------------------
 {
 	_asm {
 	mov edx, pIn
@@ -391,21 +368,10 @@ R2I_Loop:
 	fstp st(0)
 	}
 }
-#endif
-
-void C_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
-//--------------------------------------------------------------------------------
-{
-	for(UINT i=0; i<nCount; ++i)
-	{
-		*pOut++ = (int)(*pIn++ * _f2ic);
-	}
-}
 
 
-#ifdef ENABLE_X86
-void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
-//-----------------------------------------------------------------------------------
+static void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
+//------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov edx, pOut
@@ -424,13 +390,144 @@ I2R_Loop:
 	fstp st(0)
 	}
 }
-#endif
 
-void C_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
-//---------------------------------------------------------------------------------
+#endif // ENABLE_X86
+
+
+
+static void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
+//-------------------------------------------------------------------------------------------------------------
+{
+	for(UINT i=0; i<nCount; ++i)
+	{
+		*pOut++ = (int)(*pIn1++ * _f2ic);
+		*pOut++ = (int)(*pIn2++ * _f2ic);
+	}
+}
+
+
+static void C_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
+//---------------------------------------------------------------------------------------------------------
+{
+	for(UINT i=0; i<nCount; ++i)
+	{
+		*pOut1++ = *pSrc++ * _i2fc;
+		*pOut2++ = *pSrc++ * _i2fc;
+	}
+}
+
+
+static void C_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
+//---------------------------------------------------------------------------------------
+{
+	for(UINT i=0; i<nCount; ++i)
+	{
+		*pOut++ = (int)(*pIn++ * _f2ic);
+	}
+}
+
+
+static void C_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
+//----------------------------------------------------------------------------------------
 {
 	for(UINT i=0; i<nCount; ++i)
 	{
 		*pOut++ = *pSrc++ * _i2fc;
 	}
 }
+
+
+
+void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
+{
+
+	#ifdef ENABLE_SSE
+		if(gdwSysInfo & PROCSUPPORT_SSE)
+		{
+			SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
+			return;
+		}
+	#endif // ENABLE_SSE
+	#ifdef ENABLE_3DNOW
+		if(gdwSysInfo & PROCSUPPORT_3DNOW)
+		{
+			AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
+			return;
+		}
+	#endif // ENABLE_3DNOW
+
+	#ifdef ENABLE_X86
+		X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
+	#else // !ENABLE_X86
+		C_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
+	#endif // ENABLE_X86
+
+}
+
+
+void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
+{
+
+	#ifdef ENABLE_3DNOW
+		if(gdwSysInfo & PROCSUPPORT_3DNOW)
+		{
+			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
+			return;
+		}
+	#endif // ENABLE_3DNOW
+
+	#ifdef ENABLE_X86
+		X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
+	#else // !ENABLE_X86
+		C_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
+	#endif // ENABLE_X86
+
+}
+
+
+void MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
+{
+
+	#ifdef ENABLE_SSE
+		if(gdwSysInfo & PROCSUPPORT_SSE)
+		{
+			SSE_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
+			return;
+		}
+	#endif // ENABLE_SSE
+	#ifdef ENABLE_3DNOW
+		if(gdwSysInfo & PROCSUPPORT_3DNOW)
+		{
+			AMD_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
+			return;
+		}
+	#endif // ENABLE_3DNOW
+
+	#ifdef ENABLE_X86
+		X86_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
+	#else // !ENABLE_X86
+		C_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
+	#endif // ENABLE_X86
+
+}
+
+
+void FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
+{
+
+	#ifdef ENABLE_3DNOW
+		if(gdwSysInfo & PROCSUPPORT_3DNOW)
+		{
+			AMD_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
+			return;
+		}
+	#endif // ENABLE_3DNOW
+
+	#ifdef ENABLE_X86
+		X86_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
+	#else // !ENABLE_X86
+		C_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
+	#endif // ENABLE_X86
+
+}
+

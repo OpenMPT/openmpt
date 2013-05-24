@@ -306,10 +306,6 @@ DECLARE_FLAGSET(SongFlags)
 #define SNDMIX_SOFTPANNING    0x10	// soft panning mode (this is forced with mixmode RC3 and later)
 
 // Misc Flags (can safely be turned on or off)
-#ifdef ENABLE_ASM
-#define SNDMIX_ENABLEMMX      0x08		// use MMX-accelerated code
-#endif
-
 //#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels

@@ -868,14 +868,13 @@ BOOL CTrackApp::InitInstance()
 
 	// Initialize Audio
 #ifdef ENABLE_ASM
+	InitProcSupport();
 	// rough heuristic to select less cpu consuming defaults for old CPUs
-	DWORD sysinfo = CSoundFile::GetSysInfo();
-	if(sysinfo & PROCSUPPORT_MMX)
+	if(GetProcSupport() & PROCSUPPORT_MMX)
 	{
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_ENABLEMMX;
 		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_SPLINE;
 	}
-	if(sysinfo & PROCSUPPORT_MMXEX)
+	if(GetProcSupport() & PROCSUPPORT_MMXEX)
 	{
 		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_POLYPHASE;
 	}

@@ -184,9 +184,22 @@ class CModDoc;
 #endif // MODPLUG_TRACKER
 
 
+#ifdef ENABLE_ASM
+void InitProcSupport();
+uint32 GetProcSupport();
+#endif
+
+
+void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
+void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
+void MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
+void FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
+
+
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4324) //structure was padded due to __declspec(align())
 #endif
+
 
 //==============
 class CSoundFile
@@ -269,9 +282,6 @@ private: //'Controllers'
 private: //Misc data
 	const CModSpecifications *m_pModSpecs;
 	FlagSet<ModSpecificFlag, uint16> m_ModFlags;
-
-private:
-	DWORD gdwSysInfo;
 
 private:
 	// Front Mix Buffer (Also room for interleaved rear mix)
@@ -594,17 +604,18 @@ public:
 	void InitPlayer(BOOL bReset=FALSE);
 	void SetDspEffects(DWORD DSPMask);
 	DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
-#ifdef ENABLE_ASM
-	static DWORD GetSysInfo();
-#endif
 #ifndef NO_EQ
 	void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
 	// Float <-> Int conversion routines
-	/*static */VOID StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
-	/*static */VOID FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
-	/*static */VOID MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
-	/*static */VOID FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+	forceinline void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
+	{
+		::StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
+	}
+	forceinline void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
+	{
+		::FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
+	}
 
 public:
 	BOOL ReadNote();

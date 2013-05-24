@@ -3415,7 +3415,7 @@ void CDmo2Vst::Process(float * const *inputs, float **outputs, int samples)
 
 #ifdef ENABLE_MMX
 #ifdef ENABLE_SSE
-	if(CSoundFile::GetSysInfo() & PROCSUPPORT_SSE)
+	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		SSEInterleaveFloatToInt16(inputs[0], inputs[1], samples);
 		m_pMediaProcess->Process(samples * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), m_DataTime, DMO_INPLACE_NORMAL);
