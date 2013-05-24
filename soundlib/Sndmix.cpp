@@ -2017,11 +2017,11 @@ BOOL CSoundFile::ReadNote()
 			} else if(pChn->pModInstrument && IsKnownResamplingMode(pChn->pModInstrument->nResampling))
 			{
 				// for defined resampling modes, use per-instrument resampling mode if set
-				pChn->resamplingMode = (ResamplingMode)pChn->pModInstrument->nResampling;
+				pChn->resamplingMode = static_cast<uint8>(pChn->pModInstrument->nResampling);
 			} else
 			{
 				// default to global mixer settings
-				pChn->resamplingMode = m_Resampler.m_Settings.SrcMode;
+				pChn->resamplingMode = static_cast<uint8>(m_Resampler.m_Settings.SrcMode);
 			}
 
 			/*if (m_pConfig->getUseGlobalPreAmp())
