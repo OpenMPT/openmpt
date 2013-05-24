@@ -1776,15 +1776,16 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 
 				//data for VST setchunk? size lies just after standard plugin data.
 				FileReader pluginDataChunk = chunk.GetChunk(chunk.ReadUint32LE());
+				uint32 pluginDataChunkSize = mpt::saturate_cast<uint32>(pluginDataChunk.BytesLeft());
 
 				if(pluginDataChunk.IsValid())
 				{
 					m_MixPlugins[plug].nPluginDataSize = 0;
-					m_MixPlugins[plug].pPluginData = new char [pluginDataChunk.BytesLeft()];
+					m_MixPlugins[plug].pPluginData = new char [pluginDataChunkSize];
 					if(m_MixPlugins[plug].pPluginData)
 					{
-						m_MixPlugins[plug].nPluginDataSize = pluginDataChunk.BytesLeft();
-						memcpy(m_MixPlugins[plug].pPluginData, pluginDataChunk.GetRawData(), pluginDataChunk.BytesLeft());
+						m_MixPlugins[plug].nPluginDataSize = pluginDataChunkSize;
+						memcpy(m_MixPlugins[plug].pPluginData, pluginDataChunk.GetRawData(), pluginDataChunkSize);
 					}
 				}
 
