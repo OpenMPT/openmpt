@@ -460,27 +460,10 @@ typedef VOID (* LPMIXINTERFACE)(ModChannel *, const CResampler *, int *, int *);
 
 /////////////////////////////////////////////////////
 //
-extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
-extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
-extern void C_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
-extern void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
 
 void InitMixBuffer(int *pBuffer, UINT nSamples);
 void EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples);
 void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
-
-
-#ifdef ENABLE_3DNOW
-extern void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
-extern void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
-extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
-extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
-#endif
-
-#ifdef ENABLE_SSE
-extern void SSE_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
-extern void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
-#endif
 
 
 /////////////////////////////////////////////////////
@@ -1502,9 +1485,9 @@ UINT CSoundFile::CreateStereoMix(int count)
 		pbuffer = MixSoundBuffer;
 #ifndef NO_REVERB
 #ifdef ENABLE_MMX
-		if((m_MixerSettings.DSPMask & SNDDSP_REVERB) && (gdwSysInfo & PROCSUPPORT_MMX) && !pChannel->dwFlags[CHN_NOREVERB])
+		if((m_MixerSettings.DSPMask & SNDDSP_REVERB) && (GetProcSupport() & PROCSUPPORT_MMX) && !pChannel->dwFlags[CHN_NOREVERB])
 			pbuffer = MixReverbBuffer;
-		if(pChannel->dwFlags[CHN_REVERB] && (gdwSysInfo & PROCSUPPORT_MMX))
+		if(pChannel->dwFlags[CHN_REVERB] && (GetProcSupport() & PROCSUPPORT_MMX))
 			pbuffer = MixReverbBuffer;
 #endif
 #endif
@@ -1745,63 +1728,8 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 	FloatToStereoMix(pMixL, pMixR, MixSoundBuffer, nCount);
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////
-//
-// Float <-> Int conversion
-//
-
-
-VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
-//-----------------------------------------------------------------------------------------
-{
-#ifdef ENABLE_ASM
-	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
-	{
-#ifdef ENABLE_SSE
-		if(gdwSysInfo & PROCSUPPORT_SSE)
-		{
-			SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
-			return;
-		}
-#endif // ENABLE_SSE
-#ifdef ENABLE_3DNOW
-		if(gdwSysInfo & PROCSUPPORT_3DNOW)
-		{
-			AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
-			return;
-		}
-#endif // ENABLE_3DNOW
-	}
-#endif // ENABLE_ASM
-#ifdef ENABLE_X86
-	X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
-#else // !ENABLE_X86
-	C_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
-#endif // ENABLE_X86
-}
-
-
-VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
-//---------------------------------------------------------------------------------------------
-{
-#ifdef ENABLE_ASM
-	if(m_MixerSettings.MixerFlags & SNDMIX_ENABLEMMX)
-	{
-#ifdef ENABLE_3DNOW
-		if(gdwSysInfo & PROCSUPPORT_3DNOW)
-		{
-			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
-			return;
-		}
-#endif // ENABLE_3DNOW
-	}
-#endif // ENABLE_ASM
-#ifdef ENABLE_X86
-	X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
-#else // !ENABLE_X86
-	C_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
-#endif // ENABLE_X86
-}
 
 
 #ifdef ENABLE_X86
