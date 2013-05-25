@@ -1120,7 +1120,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileN
 		}
 	}
 
-	int32 code = 'MPTX';
+	int32 code = MULTICHAR4_LE_MSVC('M','P','T','X');
 	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
 	WriteInstrumentHeaderStruct(pIns, f);	// Write full extended header.
 
@@ -1705,7 +1705,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 	}
 
 	fseek(f, 0, SEEK_END);
-	int32 code = 'MPTX';
+	int32 code = MULTICHAR4_LE_MSVC('M','P','T','X');
 	SwapBytesLE(code);
 	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
 	WriteInstrumentHeaderStruct(pIns, f);	// Write full extended header.
@@ -2284,6 +2284,8 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) 
 	FLAC__stream_encoder_delete(encoder);
 	return true;
 #else
+	UNREFERENCED_PARAMETER(nSample);
+	UNREFERENCED_PARAMETER(lpszFileName);
 	return false;
 #endif // NO_FLAC
 }
