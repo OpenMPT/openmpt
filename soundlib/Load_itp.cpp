@@ -276,6 +276,11 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 //-------------------------------------------------
 {
+#ifndef MODPLUG_TRACKER
+	UNREFERENCED_PARAMETER(lpszFileName);
+	return false;
+#else // MODPLUG_TRACKER
+
 	// Check song type
 
 	if(!m_SongFlags[SONG_ITPROJECT]) return false;
@@ -511,6 +516,9 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	// Close file
 	fclose(f);
 	return true;
+	
+#endif // MODPLUG_TRACKER
+
 }
 
 #endif
