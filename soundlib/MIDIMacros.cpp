@@ -141,7 +141,7 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], fixedMacroType macroType) const
 //------------------------------------------------------------------------------------------------------------
 {
-	for(size_t i = 0; i < 128; i++)
+	for(unsigned int i = 0; i < 128; i++)
 	{
 		switch(macroType)
 		{
