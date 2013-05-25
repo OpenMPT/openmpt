@@ -695,7 +695,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(numPats != patPos.size())
 	{
 		// Hack: Notify user here if file contains more patterns than what can be read.
-		AddToLog(mpt::String::Format(str_PatternSetTruncationNote, patPos.size(), numPats));
+		AddToLog(mpt::String::Format(str_PatternSetTruncationNote, (unsigned int)patPos.size(), numPats));
 	}
 
 	// Checking for number of used channels, which is not explicitely specified in the file.
