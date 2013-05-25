@@ -22,6 +22,9 @@
 #include "../common/version.h"
 #include "ITTools.h"
 #include <time.h>
+#if MPT_COMPILER_GCC
+#include <ext/stdio_sync_filebuf.h>
+#endif
 
 #define str_tooMuchPatternData	(GetStrI18N((MPT_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
 #define str_pattern				(GetStrI18N((MPT_TEXT("pattern"))))
@@ -1047,6 +1050,7 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	const size_t num = (pModDoc != nullptr) ? pModDoc->GetFileHistory().size() + 1 : 0;	// + 1 for this session
 #else
 	const size_t num = 0;
+	UNREFERENCED_PARAMETER(pSndFile);
 #endif // MODPLUG_TRACKER
 
 	uint16 fnum = (uint16)MIN(num, uint16_max);	// Number of entries that are actually going to be written
@@ -1599,7 +1603,17 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	//--------------------
 
 	fseek(f, 0, SEEK_END);
+	fflush(f);
+#if MPT_COMPILER_MSVC
 	std::ofstream fout(f);
+#elif MPT_COMPILER_GCC
+	__gnu_cxx::stdio_sync_filebuf<char> fout_buf(f);
+	std::ostream fout(&fout_buf);
+#else
+	fclose(f);
+	std::ofstream(lpszFileName, std::ios::binary | std::ios::ate);
+#endif
+
 	const uint32 MPTStartPos = (uint32)fout.tellp();
 
 	srlztn::Ssb ssb(fout);
@@ -1630,7 +1644,17 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		return false;
 	}
 	fout.write(reinterpret_cast<const char*>(&MPTStartPos), sizeof(MPTStartPos));
+
+	fout.flush();
+#if MPT_COMPILER_MSVC
 	fout.close();
+#elif MPT_COMPILER_GCC
+	fflush(f);
+	fclose(f);
+#else
+	fout.close();
+#endif
+
 	//END  : MPT SPECIFIC
 	//-------------------
 
@@ -1850,35 +1874,35 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 		return;
 	}*/
 
-	code = 'MPTX';							// write extension header code
+	code = MULTICHAR4_LE_MSVC('M','P','T','X');							// write extension header code
 	fwrite(&code, 1, sizeof(uint32), f);
 
 	if (nInstruments == 0)
 		return;
 
-	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(ModInstrument().nVolRampUp),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(ModInstrument().nMixPlug),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(ModInstrument().nMidiChannel),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(ModInstrument().nMidiProgram),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(ModInstrument().wMidiBank),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('P...', sizeof(ModInstrument().nPan),        f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(ModInstrument().nGlobalVol),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(ModInstrument().nFadeOut),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('R...', sizeof(ModInstrument().nResampling), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(ModInstrument().nCutSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(ModInstrument().nResSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(ModInstrument().nFilterMode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(ModInstrument().PitchEnv.nReleaseNode ), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(ModInstrument().PanEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(ModInstrument().VolEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(ModInstrument().wPitchToTempoLock),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','R','.','.'), sizeof(ModInstrument().nVolRampUp),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','i','P','.'), sizeof(ModInstrument().nMixPlug),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','C','.','.'), sizeof(ModInstrument().nMidiChannel),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','P','.','.'), sizeof(ModInstrument().nMidiProgram),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','B','.','.'), sizeof(ModInstrument().wMidiBank),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','.','.','.'), sizeof(ModInstrument().nPan),        f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('G','V','.','.'), sizeof(ModInstrument().nGlobalVol),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('F','O','.','.'), sizeof(ModInstrument().nFadeOut),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('R','.','.','.'), sizeof(ModInstrument().nResampling), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('C','S','.','.'), sizeof(ModInstrument().nCutSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('R','S','.','.'), sizeof(ModInstrument().nResSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('F','M','.','.'), sizeof(ModInstrument().nFilterMode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','E','R','N'), sizeof(ModInstrument().PitchEnv.nReleaseNode ), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('A','E','R','N'), sizeof(ModInstrument().PanEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','E','R','N'), sizeof(ModInstrument().VolEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','T','T','L'), sizeof(ModInstrument().wPitchToTempoLock),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','V','E','H'), sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','V','O','H'), sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
 
 	if(!(GetType() & MOD_TYPE_XM))
 	{
 		// XM instrument headers already have support for this
-		WriteInstrumentPropertyForAllInstruments('MPWD', sizeof(ModInstrument().midiPWD), f, nInstruments);
+		WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','P','W','D'), sizeof(ModInstrument().midiPWD), f, nInstruments);
 	}
 
 	if(GetType() & MOD_TYPE_MPT)
@@ -1893,17 +1917,17 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments('VE..', sizeof(ModInstrument().VolEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(ModInstrument().VolEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(ModInstrument().VolEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','E','.','.'), sizeof(ModInstrument().VolEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','P','[','.'), sizeof(ModInstrument().VolEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','E','[','.'), sizeof(ModInstrument().VolEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments('PE..', sizeof(ModInstrument().PanEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(ModInstrument().PanEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(ModInstrument().PanEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','E','.','.'), sizeof(ModInstrument().PanEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','P','[','.'), sizeof(ModInstrument().PanEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','E','[','.'), sizeof(ModInstrument().PanEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments('PiE.', sizeof(ModInstrument().PitchEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(ModInstrument().PitchEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(ModInstrument().PitchEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','i','E','.'), sizeof(ModInstrument().PitchEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','i','P','['), sizeof(ModInstrument().PitchEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','i','E','['), sizeof(ModInstrument().PitchEnv.Values), f, nInstruments);
 		}
 	}
 
@@ -1936,28 +1960,28 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 {
 	//Extra song data - Yet Another Hack.
 	int16 size;
-	uint32 code = 'MPTS';					//Extra song file data
+	uint32 code = MULTICHAR4_LE_MSVC('M','P','T','S');					//Extra song file data
 	fwrite(&code, 1, sizeof(uint32), f);
 
-	code = 'DT..';							//write m_nDefaultTempo field code
+	code = MULTICHAR4_LE_MSVC('D','T','.','.');							//write m_nDefaultTempo field code
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
 
-	code = 'RPB.';							//write m_nRowsPerBeat
+	code = MULTICHAR4_LE_MSVC('R','P','B','.');							//write m_nRowsPerBeat
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultRowsPerBeat);
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nDefaultRowsPerBeat, 1, size, f);
 
-	code = 'RPM.';							//write m_nRowsPerMeasure
+	code = MULTICHAR4_LE_MSVC('R','P','M','.');							//write m_nRowsPerMeasure
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultRowsPerMeasure);
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nDefaultRowsPerMeasure, 1, size, f);
 
-	code = 'C...';							//write m_nChannels
+	code = MULTICHAR4_LE_MSVC('C','.','.','.');							//write m_nChannels
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nChannels);
 	fwrite(&size, 1, sizeof(int16), f);
@@ -1965,7 +1989,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 
 	if(TypeIsIT_MPT() && GetNumChannels() > 64)	//IT header has room only for 64 channels. Save the
 	{											//settings that do not fit to the header here as an extension.
-		code = 'ChnS';
+		code = MULTICHAR4_LE_MSVC('C','h','n','S');
 		fwrite(&code, 1, sizeof(uint32), f);
 		size = (GetNumChannels() - 64) * 2;
 		fwrite(&size, 1, sizeof(int16), f);
@@ -1980,49 +2004,49 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		}
 	}
 
-	code = 'TM..';							//write m_nTempoMode
+	code = MULTICHAR4_LE_MSVC('T','M','.','.');							//write m_nTempoMode
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nTempoMode);
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nTempoMode, 1, size, f);
 
-	code = 'PMM.';							//write m_nMixLevels
+	code = MULTICHAR4_LE_MSVC('P','M','M','.');							//write m_nMixLevels
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nMixLevels);
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nMixLevels, 1, size, f);
 
-	code = 'CWV.';							//write m_dwCreatedWithVersion
+	code = MULTICHAR4_LE_MSVC('C','W','V','.');							//write m_dwCreatedWithVersion
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_dwCreatedWithVersion);
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_dwCreatedWithVersion, 1, size, f);
 
-	code = 'LSWV';							//write m_dwLastSavedWithVersion
+	code = MULTICHAR4_LE_MSVC('L','S','W','V');							//write m_dwLastSavedWithVersion
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_dwLastSavedWithVersion);
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_dwLastSavedWithVersion, 1, size, f);
 
-	code = 'SPA.';							//write m_nSamplePreAmp
+	code = MULTICHAR4_LE_MSVC('S','P','A','.');							//write m_nSamplePreAmp
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nSamplePreAmp);
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nSamplePreAmp, 1, size, f);
 
-	code = 'VSTV';							//write m_nVSTiVolume
+	code = MULTICHAR4_LE_MSVC('V','S','T','V');							//write m_nVSTiVolume
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nVSTiVolume);
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nVSTiVolume, 1, size, f);
 
-	code = 'DGV.';							//write m_nDefaultGlobalVolume
+	code = MULTICHAR4_LE_MSVC('D','G','V','.');							//write m_nDefaultGlobalVolume
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultGlobalVolume);
 	fwrite(&size, 1, sizeof(int16), f);
 	fwrite(&m_nDefaultGlobalVolume, 1, size, f);
 
-	code = 'RP..';							//write m_nRestartPos
+	code = MULTICHAR4_LE_MSVC('R','P','.','.');							//write m_nRestartPos
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nRestartPos);
 	fwrite(&size, 1, sizeof(int16), f);
@@ -2032,7 +2056,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	//Additional flags for XM/IT/MPTM
 	if(m_ModFlags)
 	{
-		code = 'MSF.';
+		code = MULTICHAR4_LE_MSVC('M','S','F','.');
 		fwrite(&code, 1, sizeof(uint32), f);
 		size = sizeof(m_ModFlags);
 		fwrite(&size, 1, sizeof(int16), f);
@@ -2050,7 +2074,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		}
 		else
 		{
-			code = 'MIMA';
+			code = MULTICHAR4_LE_MSVC('M','I','M','A');
 			fwrite(&code, 1, sizeof(uint32), f);
 			size = static_cast<int16>(objectsize);
 			fwrite(&size, 1, sizeof(int16), f);
@@ -2221,7 +2245,7 @@ size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns)
 	}
 
 	uint32 modularInstSize = 0;
-	uint32 id = 'INSM';
+	uint32 id = MULTICHAR4_LE_MSVC('I','N','S','M');
 	SwapBytesLE(id);
 	fwrite(&id, 1, sizeof(id), f);				// mark this as an instrument with modular extensions
 	long sizePos = ftell(f);									// we will want to write the modular data's total size here
@@ -2229,7 +2253,7 @@ size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns)
 
 	// Write chunks
 	{	//VST Slot chunk:
-		id = 'PLUG';
+		id = MULTICHAR4_LE_MSVC('P','L','U','G');
 		SwapBytesLE(id);
 		fwrite(&id, 1, sizeof(uint32), f);
 		fwrite(&(pIns->nMixPlug), 1, sizeof(uint8), f);
