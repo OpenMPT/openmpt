@@ -1184,7 +1184,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 		}
 	} else
 	{
-		sprintf(modMagic, "%luCHN", writeChannels);
+		sprintf(modMagic, "%uCHN", writeChannels);
 	}
 	fwrite(&modMagic, 4, 1, f);
 
