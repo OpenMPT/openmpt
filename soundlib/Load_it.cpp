@@ -2039,6 +2039,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		fwrite(&m_ModFlags, 1, size, f);
 	}
 
+#ifdef MODPLUG_TRACKER
 	//MIMA, MIDI mapping directives
 	if(GetMIDIMapper().GetCount() > 0)
 	{
@@ -2056,6 +2057,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 			GetMIDIMapper().Serialize(f);
 		}
 	}
+#endif
 
 
 	return;
