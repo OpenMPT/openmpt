@@ -85,9 +85,6 @@
     <ClCompile Include="..\soundlib\load_dbm.cpp">
       <Filter>Source Files\soundlib\Module Loaders</Filter>
     </ClCompile>
-    <ClCompile Include="test\test.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="ChannelManagerDlg.cpp">
       <Filter>Source Files\mptrack\Dialogs</Filter>
     </ClCompile>
@@ -511,6 +508,9 @@
     <ClCompile Include="..\unarchiver\unrar\UNPOLD.CPP">
       <Filter>Source Files\unarchiver\unrar</Filter>
     </ClCompile>
+    <ClCompile Include="..\test\test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -524,9 +524,6 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\tuningcollection.h">
       <Filter>Header Files\soundlib\Tuning</Filter>
-    </ClInclude>
-    <ClInclude Include="test\test.h">
-      <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="ChannelManagerDlg.h">
       <Filter>Header Files\mptrack\Dialogs</Filter>
@@ -917,6 +914,9 @@
     </ClInclude>
     <ClInclude Include="..\common\CompilerDetect.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test\test.h">
+      <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

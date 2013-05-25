@@ -15,16 +15,17 @@
 #ifdef ENABLE_TESTS
 
 
-#include "../mptrack.h"
-#include "../moddoc.h"
-#include "../MainFrm.h"
-#include "../../common/version.h"
-#include "../../soundlib/MIDIEvents.h"
-#include "../../soundlib/MIDIMacros.h"
-#include "../../common/misc_util.h"
-#include "../../common/StringFixer.h"
-#include "../../common/serialization_utils.h"
-#include "../../soundlib/SampleFormatConverters.h"
+#include "../common/version.h"
+#include "../common/misc_util.h"
+#include "../common/StringFixer.h"
+#include "../common/serialization_utils.h"
+#include "../soundlib/Sndfile.h"
+#include "../soundlib/MIDIEvents.h"
+#include "../soundlib/MIDIMacros.h"
+#include "../soundlib/SampleFormatConverters.h"
+#include "../mptrack/mptrack.h"
+#include "../mptrack/moddoc.h"
+#include "../mptrack/MainFrm.h"
 #include <limits>
 #include <istream>
 #include <ostream>
@@ -938,7 +939,7 @@ void TestLoadSaveFile()
 	if(theFile.Mid(theFile.GetLength() - 6, 5) != "Debug")
 		return;
 	theFile.Delete(theFile.GetLength() - 6, 6);
-	theFile.Append("test/test.");
+	theFile.Append("../test/test.");
 
 	// Test MPTM file loading
 	{

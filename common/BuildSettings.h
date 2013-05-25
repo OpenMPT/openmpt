@@ -60,6 +60,11 @@
 
 #elif defined(MODPLUG_TRACKER)
 
+// Enable built-in test suite.
+#ifdef _DEBUG
+#define ENABLE_TESTS
+#endif
+
 // Disable any file saving functionality (not really useful except for the player library)
 //#define MODPLUG_NO_FILESAVE
 
@@ -122,6 +127,7 @@
 
 #elif defined(LIBOPENMPT_BUILD)
 
+#define ENABLE_TESTS
 #define MODPLUG_NO_FILESAVE
 //#define NO_LOGGING
 #define NO_ARCHIVE_SUPPORT
