@@ -1301,11 +1301,11 @@
 			Name="test"
 			>
 			<File
-				RelativePath=".\test\test.cpp"
+				RelativePath="..\test\test.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\test\test.h"
+				RelativePath="..\test\test.h"
 				>
 			</File>
 		</Filter>

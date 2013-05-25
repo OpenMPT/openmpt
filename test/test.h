@@ -11,10 +11,6 @@
 
 #pragma once
 
-#ifdef _DEBUG
-	#define ENABLE_TESTS
-#endif
-
 namespace MptTest
 {
 	void DoTests();

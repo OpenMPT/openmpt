@@ -299,6 +299,7 @@
     <ClCompile Include="..\soundlib\WAVTools.cpp" />
     <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />
+    <ClCompile Include="..\test\test.cpp" />
     <ClCompile Include="..\unarchiver\unarchiver.cpp" />
     <ClCompile Include="..\unarchiver\ungzip.cpp" />
     <ClCompile Include="..\unarchiver\unlha.cpp" />
@@ -461,7 +462,6 @@
     <ClCompile Include="TrackerSettings.cpp" />
     <ClCompile Include="TuningDialog.cpp" />
     <ClCompile Include="tuningRatioMapWnd.cpp" />
-    <ClCompile Include="test\test.cpp" />
     <ClCompile Include="..\soundlib\Load_669.cpp" />
     <ClCompile Include="..\Soundlib\load_amf.cpp" />
     <ClCompile Include="..\soundlib\Load_ams.cpp" />
@@ -563,6 +563,7 @@
     <ClInclude Include="..\soundlib\WAVTools.h" />
     <ClInclude Include="..\soundlib\WindowedFIR.h" />
     <ClInclude Include="..\soundlib\XMTools.h" />
+    <ClInclude Include="..\test\test.h" />
     <ClInclude Include="..\unarchiver\unarchiver.h" />
     <ClInclude Include="..\unarchiver\ungzip.h" />
     <ClInclude Include="..\unarchiver\unlha.h" />
@@ -640,7 +641,6 @@
     <ClInclude Include="TrackerSettings.h" />
     <ClInclude Include="TuningDialog.h" />
     <ClInclude Include="tuningRatioMapWnd.h" />
-    <ClInclude Include="test\test.h" />
     <ClInclude Include="..\soundlib\Loaders.h" />
     <ClInclude Include="Undo.h" />
     <ClInclude Include="UpdateCheck.h" />

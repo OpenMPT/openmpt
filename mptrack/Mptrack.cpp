@@ -21,7 +21,7 @@
 #include "hyperEdit.h"
 #include "commctrl.h"
 #include "../common/version.h"
-#include "test/test.h"
+#include "../test/test.h"
 #include <afxadv.h>
 #include <shlwapi.h>
 #include "UpdateCheck.h"
