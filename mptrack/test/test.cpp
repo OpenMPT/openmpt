@@ -786,6 +786,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
 	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);
 
+#ifdef MODPLUG_TRACKER
 	// MIDI Mapping
 	VERIFY_EQUAL_NONCONT(sndFile.GetMIDIMapper().GetCount(), 1);
 	const CMIDIMappingDirective &mapping = sndFile.GetMIDIMapper().GetDirective(0);
@@ -798,6 +799,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(mapping.GetParamIndex(), 0);
 	VERIFY_EQUAL_NONCONT(mapping.GetEvent(), MIDIEvents::evControllerChange);
 	VERIFY_EQUAL_NONCONT(mapping.GetController(), MIDIEvents::MIDICC_ModulationWheel_Coarse);
+#endif
 
 }
 
