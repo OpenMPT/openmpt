@@ -20,61 +20,177 @@
 #include "../common/StringFixer.h"
 #include "../common/serialization_utils.h"
 #include "../soundlib/Sndfile.h"
+#include "../soundlib/FileReader.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/SampleFormatConverters.h"
+#ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/MainFrm.h"
+#endif // MODPLUG_TRACKER
+#ifndef MODPLUG_TRACKER
+#include <fstream>
+#endif // !MODPLUG_TRACKER
 #include <limits>
+#ifndef MODPLUG_TRACKER
+#include <memory>
+#include <iostream>
+#endif // !MODPLUG_TRACKER
 #include <istream>
 #include <ostream>
 #include <sstream>
 
 #ifdef _DEBUG
+#if MPT_COMPILER_MSVC && defined(_MFC_VER)
 	#define new DEBUG_NEW
+#endif
+#endif
+
+#ifndef _T
+#define _T MPT_TEXT
 #endif
 
 
 namespace MptTest
 {
 
+
+
+#ifdef THIS_FILE
+#undef THIS_FILE
+#endif
+#define THIS_FILE "test/test.cpp" // __FILE__
+
+
+
+#ifdef MODPLUG_TRACKER
+
+#define MULTI_TEST_TRY   try {
+#define MULTI_TEST_CATCH } catch ( std::exception & e) { \
+                          Reporting::Error((std::string() + "Test \"" + func_description + "\" threw an exception, message: " + e.what()).c_str(), (std::string() + "Test \"" + func_description + "\": Exception was thrown").c_str()); \
+                         } catch ( ... ) { \
+                          Reporting::Error((std::string() + "Test \"" + func_description + "\" threw an unknown exception.").c_str(), (std::string() + "Test \"" + func_description + "\": Exception was thrown").c_str()); \
+                         }
+#define TEST_TRY         {
+#define TEST_CATCH       }
+#define TEST_OK()        do{UNREFERENCED_PARAMETER(ok_description);}while(0)
+#define TEST_FAIL()      Reporting::Error(mpt::String::Format("File: %s\nLine: " STRINGIZE(__LINE__) "\n\n" "%s", THIS_FILE, fail_description).c_str(), "VERIFY_EQUAL failed")
+#define TEST_FAIL_STOP() throw std::runtime_error(mpt::String::Format("File: %s\nLine: " STRINGIZE(__LINE__) "\n\n %s", THIS_FILE, fail_description))
+
+#else // !MODPLUG_TRACKER
+
+static std::string remove_newlines(std::string str)
+{
+	return mpt::String::Replace(mpt::String::Replace(str, "\n", " "), "\r", " ");
+}
+
+static void show_fail(const char * const file, const int line, const char * const description, bool exception = false, const char * const exception_text = nullptr)
+{
+	if(!exception)
+	{
+		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << std::endl;
+	} else if(exception_text && std::string(exception_text).empty())
+	{
+		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << " EXCEPTION!" << std::endl;
+	} else
+	{
+		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << " EXCEPTION: " << exception << std::endl;
+	}
+}
+
+static void show_ok(const char * const file, const int line, const char * const description)
+{
+#if 1
+	std::cerr << "OK:   " << file << "(" << line << ") : " << remove_newlines(description) << std::endl;
+#else
+	UNREFERENCED_PARAMETER(file);
+	UNREFERENCED_PARAMETER(line);
+	UNREFERENCED_PARAMETER(description);
+#endif
+}
+
+#define MULTI_TEST_TRY   try {
+#define MULTI_TEST_CATCH } catch ( std::exception & e) { \
+                          show_fail(THIS_FILE, __LINE__, func_description, true, e.what()); \
+                         } catch ( ... ) { \
+                          show_fail(THIS_FILE, __LINE__, func_description, true); \
+                         }
+#define TEST_TRY         try {
+#define TEST_CATCH       } catch ( std::exception & e ) { \
+                          show_fail(THIS_FILE, __LINE__, fail_description, true, e.what()); \
+                          throw; \
+                         } catch ( ... ) { \
+                          show_fail(THIS_FILE, __LINE__, fail_description, true); \
+                          throw; \
+                         }
+#define TEST_OK()        show_ok(THIS_FILE, __LINE__, ok_description)
+#define TEST_FAIL()      show_fail(THIS_FILE, __LINE__, fail_description)
+#define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, fail_description); throw std::runtime_error("Test failed."); } while(0)
+
+#endif // MODPLUG_TRACKER
+
+
+
 //Verify that given parameters are 'equal'(show error message if not).
 //The exact meaning of equality is not specified; for now using operator!=.
 //The macro is active in both 'debug' and 'release' build.
 #define VERIFY_EQUAL(x,y)	\
+do{ \
+	const char * const ok_description = #x " == " #y ; \
+	const char * const fail_description = "VERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y ; \
+	TEST_TRY \
 	if((x) != (y))		\
 	{					\
-		CString str;	\
-		str.Format("File: " STRINGIZE(__FILE__) "\nLine: " STRINGIZE(__LINE__) "\n\nVERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y); \
-		Reporting::Error(str, "VERIFY_EQUAL failed");	\
-	}
+		TEST_FAIL(); \
+	} else \
+	{ \
+		TEST_OK(); \
+	} \
+	TEST_CATCH \
+}while(0)
+
 
 // Like VERIFY_EQUAL, but throws exception if comparison fails.
 #define VERIFY_EQUAL_NONCONT(x,y) \
+do{ \
+	const char * const ok_description = #x " == " #y ; \
+	const char * const fail_description = "VERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y ; \
+	TEST_TRY \
 	if((x) != (y))		\
 	{					\
-		CString str;	\
-		str.Format("File: " STRINGIZE(__FILE__) "\nLine: " STRINGIZE(__LINE__) "\n\nVERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y); \
-		std::string stdstr = str; \
-		throw std::runtime_error(stdstr); \
-	}
+		TEST_FAIL_STOP(); \
+	} else \
+	{ \
+		TEST_OK(); \
+	} \
+	TEST_CATCH \
+}while(0)
 
 
-#define DO_TEST(func)			\
-try								\
-{								\
-	func();						\
-}								\
-catch(const std::exception& e)	\
-{								\
-	Reporting::Error(CString("Test \"" STRINGIZE(func) "\" threw an exception, message: ") + e.what(), "Test \"" STRINGIZE(func) "\": Exception was thrown"); \
-}	\
-catch(...)  \
-{			\
-	Reporting::Error(CString("Test \"" STRINGIZE(func) "\" threw an unknown exception."), "Test \"" STRINGIZE(func) "\": Exception was thrown"); \
-}
-	
+// Like VERIFY_EQUAL_NONCONT, but do not show message if test succeeds
+#define VERIFY_EQUAL_QUIET_NONCONT(x,y) \
+do{ \
+	const char * const fail_description = "VERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y ; \
+	TEST_TRY \
+	if((x) != (y))		\
+	{					\
+		TEST_FAIL_STOP(); \
+	} \
+	TEST_CATCH \
+}while(0)
+
+
+#define DO_TEST(func) \
+do{ \
+	const char * func_description = #func ; \
+	MULTI_TEST_TRY \
+	func(); \
+	MULTI_TEST_CATCH \
+}while(0)
+
+
+
 
 void TestVersion();
 void TestTypes();
@@ -102,7 +218,6 @@ void DoTests()
 	DO_TEST(TestPCnoteSerialization);
 	DO_TEST(TestLoadSaveFile);
 
-	Log(TEXT("Tests were run\n"));
 }
 
 
@@ -134,6 +249,7 @@ void TestVersion()
 		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,03,00) >> 8 == 0x011703 );
 	}
 
+#ifdef MODPLUG_TRACKER
 	//Verify that the version obtained from the executable file is the same as 
 	//defined in MptVersion.
 	{
@@ -178,6 +294,7 @@ void TestVersion()
 		VERIFY_EQUAL( version, MptVersion::str );
 		VERIFY_EQUAL( MptVersion::ToNum(version), MptVersion::num );
 	}
+#endif
 }
 
 
@@ -353,10 +470,12 @@ void TestMIDIEvents()
 
 
 // Check if our test file was loaded correctly.
-void TestLoadXMFile(const CModDoc *pModDoc)
-//-----------------------------------------
+void TestLoadXMFile(const CSoundFile &sndFile)
+//--------------------------------------------
 {
-	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+#ifdef MODPLUG_TRACKER
+	const CModDoc *pModDoc = sndFile.GetpModDoc();
+#endif // MODPLUG_TRACKER
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[0], "Test Module"), 0);
@@ -396,9 +515,11 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[1], "Pulse Sample"), 0);
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[2], "Empty Sample"), 0);
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[3], "Unassigned Sample"), 0);
+#ifdef MODPLUG_TRACKER
 	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(1), 1);
 	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(2), 1);
 	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(3), INSTRUMENTINDEX_INVALID);
+#endif // MODPLUG_TRACKER
 	const ModSample &sample = sndFile.GetSample(1);
 	VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 	VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
@@ -548,10 +669,12 @@ void TestLoadXMFile(const CModDoc *pModDoc)
 
 
 // Check if our test file was loaded correctly.
-void TestLoadMPTMFile(const CModDoc *pModDoc)
-//-------------------------------------------
+void TestLoadMPTMFile(const CSoundFile &sndFile)
+//----------------------------------------------
 {
-	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+#ifdef MODPLUG_TRACKER
+	const CModDoc *pModDoc = sndFile.GetpModDoc();
+#endif // MODPLUG_TRACKER
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[0], "Test Module_____________X"), 0);
@@ -573,6 +696,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 1);
 	
+#ifdef MODPLUG_TRACKER
 	// Edit history
 	VERIFY_EQUAL_NONCONT(pModDoc->GetFileHistory().size() > 0, true);
 	const FileHistory &fh = pModDoc->GetFileHistory().at(0);
@@ -583,6 +707,7 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_min, 8);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_sec, 32);
 	VERIFY_EQUAL_NONCONT((uint32)((double)fh.openTime / HISTORY_TIMER_PRECISION), 31);
+#endif // MODPLUG_TRACKER
 
 	// Macros
 	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
@@ -806,10 +931,9 @@ void TestLoadMPTMFile(const CModDoc *pModDoc)
 
 
 // Check if our test file was loaded correctly.
-void TestLoadS3MFile(const CModDoc *pModDoc, bool resaved)
-//--------------------------------------------------------
+void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
+//-----------------------------------------------------------
 {
-	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[0], "S3M_Test__________________X"), 0);
@@ -930,79 +1054,196 @@ void TestLoadS3MFile(const CModDoc *pModDoc, bool resaved)
 }
 
 
+
+#ifdef MODPLUG_TRACKER
+
+static bool ShouldRunTests()
+{
+	CString theFile = theApp.GetAppDirPath();
+	// Only run the tests when we're in the project directory structure.
+	return theFile.Mid(theFile.GetLength() - 6, 5) == "Debug";
+}
+
+static std::string GetTestFilenameBase()
+{
+	CString theFile = theApp.GetAppDirPath();
+	theFile.Delete(theFile.GetLength() - 6, 6);
+	theFile.Append("../test/test.");
+	return theFile.GetString();
+}
+
+typedef CModDoc *TSoundFileContainer;
+
+static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
+{
+	return sndFile->GetrSoundFile();
+}
+
+static TSoundFileContainer CreateSoundFileContainer(const std::string filename)
+{
+	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename.c_str(), FALSE);
+	return pModDoc;
+}
+
+static void DestroySoundFileContainer(TSoundFileContainer &sndFile)
+{
+	sndFile->OnCloseDocument();
+}
+
+static void SaveIT(const TSoundFileContainer &sndFile, const std::string &filename)
+{
+	sndFile->DoSave(filename.c_str());
+	// Saving the file puts it in the MRU list...
+	theApp.RemoveMruItem(0);
+}
+
+static void SaveXM(const TSoundFileContainer &sndFile, const std::string &filename)
+{
+	sndFile->DoSave(filename.c_str());
+	// Saving the file puts it in the MRU list...
+	theApp.RemoveMruItem(0);
+}
+
+static void SaveS3M(const TSoundFileContainer &sndFile, const std::string &filename)
+{
+	sndFile->DoSave(filename.c_str());
+	// Saving the file puts it in the MRU list...
+	theApp.RemoveMruItem(0);
+}
+
+#else
+
+static bool ShouldRunTests()
+{
+	return true;
+}
+
+static std::string GetTestFilenameBase()
+{
+	return "../test/test.";
+}
+
+typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
+
+static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
+{
+	return *sndFile.get();
+}
+
+static TSoundFileContainer CreateSoundFileContainer(const std::string &filename)
+{
+	std::ifstream stream(filename, std::ios::binary);
+	FileReader file(&stream);
+	std::shared_ptr<CSoundFile> pSndFile(new CSoundFile());
+	pSndFile->Create(file, CSoundFile::loadCompleteModule);
+	return pSndFile;
+}
+
+static void DestroySoundFileContainer(TSoundFileContainer &sndFile)
+{
+	return;
+}
+
+static void SaveIT(const TSoundFileContainer &sndFile, const std::string &filename)
+{
+	sndFile->SaveIT(filename.c_str(), false);
+}
+
+static void SaveXM(const TSoundFileContainer &sndFile, const std::string &filename)
+{
+	sndFile->SaveXM(filename.c_str(), false);
+}
+
+static void SaveS3M(const TSoundFileContainer &sndFile, const std::string &filename)
+{
+	sndFile->SaveS3M(filename.c_str());
+}
+
+#endif
+
+
+
 // Test file loading and saving
 void TestLoadSaveFile()
 //---------------------
 {
-	CString theFile = theApp.GetAppDirPath();
-	// Only run the tests when we're in the project directory structure.
-	if(theFile.Mid(theFile.GetLength() - 6, 5) != "Debug")
+	if(!ShouldRunTests())
+	{
 		return;
-	theFile.Delete(theFile.GetLength() - 6, 6);
-	theFile.Append("../test/test.");
+	}
+	std::string filenameBase = GetTestFilenameBase();
 
 	// Test MPTM file loading
 	{
-		CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "mptm", FALSE);
-		TestLoadMPTMFile(pModDoc);
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "mptm");
+
+		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 
 		// Test file saving
-		pModDoc->DoSave(theFile + "saved.mptm");
-		pModDoc->OnCloseDocument();
+		SaveIT(sndFileContainer, filenameBase + "saved.mptm");
 
-		// Saving the file puts it in the MRU list...
-		theApp.RemoveMruItem(0);
+		DestroySoundFileContainer(sndFileContainer);
+	}
 
-		// Reload the saved file and test if everything is still working correctly.
-		pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.mptm", FALSE);
-		TestLoadMPTMFile(pModDoc);
-		pModDoc->OnCloseDocument();
+	// Reload the saved file and test if everything is still working correctly.
+	{
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.mptm");
 
+		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
+		
+		DestroySoundFileContainer(sndFileContainer);
 	}
 
 	// Test XM file loading
 	{
-		CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "xm", FALSE);
-		TestLoadXMFile(pModDoc);
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "xm");
+
+		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
 		// In OpenMPT 1.20 (up to revision 1459), there was a bug in the XM saver
 		// that would create broken XMs if the sample map contained samples that
 		// were only referenced below C-1 or above B-8 (such samples should not
 		// be written). Let's insert a sample there and check if re-loading the
 		// file still works.
-		pModDoc->GetSoundFile()->m_nSamples++;
-		pModDoc->GetSoundFile()->Instruments[1]->Keyboard[110] = pModDoc->GetSoundFile()->GetNumSamples();
+		GetrSoundFile(sndFileContainer).m_nSamples++;
+		GetrSoundFile(sndFileContainer).Instruments[1]->Keyboard[110] = GetrSoundFile(sndFileContainer).GetNumSamples();
 
 		// Test file saving
-		pModDoc->DoSave(theFile + "saved.xm");
-		pModDoc->OnCloseDocument();
+		SaveXM(sndFileContainer, filenameBase + "saved.xm");
 
-		// Saving the file puts it in the MRU list...
-		theApp.RemoveMruItem(0);
+		DestroySoundFileContainer(sndFileContainer);
+	}
 
-		// Reload the saved file and test if everything is still working correctly.
-		pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.xm", FALSE);
-		TestLoadXMFile(pModDoc);
-		pModDoc->OnCloseDocument();
+	// Reload the saved file and test if everything is still working correctly.
+	{
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.xm");
+
+		TestLoadXMFile(GetrSoundFile(sndFileContainer));
+
+		DestroySoundFileContainer(sndFileContainer);
 	}
 
 	// Test S3M file loading
 	{
-		CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "s3m", FALSE);
-		TestLoadS3MFile(pModDoc, false);
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "s3m");
+		
+		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
 
 		// Test file saving
-		pModDoc->DoSave(theFile + "saved.s3m");
-		pModDoc->OnCloseDocument();
+		SaveS3M(sndFileContainer, filenameBase + "saved.s3m");
 
-		// Saving the file puts it in the MRU list...
-		theApp.RemoveMruItem(0);
-
-		// Reload the saved file and test if everything is still working correctly.
-		pModDoc = (CModDoc *)theApp.OpenDocumentFile(theFile + "saved.s3m", FALSE);
-		TestLoadS3MFile(pModDoc, true);
-		pModDoc->OnCloseDocument();
+		DestroySoundFileContainer(sndFileContainer);
 	}
+
+	// Reload the saved file and test if everything is still working correctly.
+	{
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.s3m");
+
+		TestLoadS3MFile(GetrSoundFile(sndFileContainer), true);
+
+		DestroySoundFileContainer(sndFileContainer);
+	}
+
 }
 
 double Rand01() {return rand() / double(RAND_MAX);}
@@ -1041,6 +1282,7 @@ void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc
 void TestPCnoteSerialization()
 //----------------------------
 {
+#ifdef MODPLUG_TRACKER
 	theApp.OnFileNewMPT();
 	CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm == nullptr)
@@ -1050,9 +1292,18 @@ void TestPCnoteSerialization()
 		throw(std::runtime_error("pModdoc is nullptr"));
 
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+#else
+	FileReader file;
+	std::shared_ptr<CSoundFile> pSndFile(new CSoundFile());
+	CSoundFile &sndFile = *pSndFile.get();
+#endif
 
+#ifdef MODPLUG_TRACKER
 	// Set maximum number of channels.
 	pModDoc->ReArrangeChannels(std::vector<CHANNELINDEX>(ModSpecs::mptm.channelsMax , 0));
+#else
+	// todo: set number of channels
+#endif
 
 	sndFile.Patterns.Remove(0);
 	sndFile.Patterns.Insert(0, ModSpecs::mptm.patternRowsMin);
@@ -1108,8 +1359,11 @@ void TestPCnoteSerialization()
 		}
 		VERIFY_EQUAL( bPatternDataMatch, true);
 	}
-		
+
+#ifdef MODPLUG_TRACKER
 	pModDoc->OnCloseDocument();
+#endif
+
 }
 
 
@@ -1265,9 +1519,9 @@ void TestSampleConversion()
 		for(size_t i = 0; i < 256; i++)
 		{
 			delta += static_cast<int8>(i);
-			VERIFY_EQUAL_NONCONT(signed8[i], static_cast<int8>(i));
-			VERIFY_EQUAL_NONCONT(unsigned8[i], static_cast<uint8>(i + 0x80u));
-			VERIFY_EQUAL_NONCONT(delta8[i], static_cast<int8>(delta));
+			VERIFY_EQUAL_QUIET_NONCONT(signed8[i], static_cast<int8>(i));
+			VERIFY_EQUAL_QUIET_NONCONT(unsigned8[i], static_cast<uint8>(i + 0x80u));
+			VERIFY_EQUAL_QUIET_NONCONT(delta8[i], static_cast<int8>(delta));
 		}
 	}
 
@@ -1295,9 +1549,9 @@ void TestSampleConversion()
 		for(size_t i = 0; i < 65536; i++)
 		{
 			delta += static_cast<int16>(i);
-			VERIFY_EQUAL_NONCONT(signed16[i], static_cast<int16>(i));
-			VERIFY_EQUAL_NONCONT(unsigned16[i], static_cast<uint16>(i + 0x8000u));
-			VERIFY_EQUAL_NONCONT(delta16[i], static_cast<int16>(delta));
+			VERIFY_EQUAL_QUIET_NONCONT(signed16[i], static_cast<int16>(i));
+			VERIFY_EQUAL_QUIET_NONCONT(unsigned16[i], static_cast<uint16>(i + 0x8000u));
+			VERIFY_EQUAL_QUIET_NONCONT(delta16[i], static_cast<int16>(delta));
 		}
 
 		// Big Endian
@@ -1316,9 +1570,9 @@ void TestSampleConversion()
 		for(size_t i = 0; i < 65536; i++)
 		{
 			delta += static_cast<int16>(i);
-			VERIFY_EQUAL_NONCONT(signed16[i], static_cast<int16>(i));
-			VERIFY_EQUAL_NONCONT(unsigned16[i], static_cast<uint16>(i + 0x8000u));
-			VERIFY_EQUAL_NONCONT(delta16[i], static_cast<int16>(delta));
+			VERIFY_EQUAL_QUIET_NONCONT(signed16[i], static_cast<int16>(i));
+			VERIFY_EQUAL_QUIET_NONCONT(unsigned16[i], static_cast<uint16>(i + 0x8000u));
+			VERIFY_EQUAL_QUIET_NONCONT(delta16[i], static_cast<int16>(delta));
 		}
 
 	}
@@ -1347,9 +1601,9 @@ void TestSampleConversion()
 			int16 normValue = static_cast<const int16 *>(sample.pSample)[i];
 			if(abs(normValue - static_cast<int16>(i - 0x8000u)) > 1)
 			{
-				VERIFY_EQUAL_NONCONT(true, false);
+				VERIFY_EQUAL_QUIET_NONCONT(true, false);
 			}
-			VERIFY_EQUAL_NONCONT(truncated16[i], static_cast<int16>(i));
+			VERIFY_EQUAL_QUIET_NONCONT(truncated16[i], static_cast<int16>(i));
 		}
 	}
 
@@ -1381,11 +1635,11 @@ void TestSampleConversion()
 			int16 normValue = static_cast<const int16 *>(sample.pSample)[i];
 			if(abs(normValue - static_cast<int16>(i- 0x8000u)) > 1)
 			{
-				VERIFY_EQUAL_NONCONT(true, false);
+				VERIFY_EQUAL_QUIET_NONCONT(true, false);
 			}
 			if(abs(truncated16[i] - static_cast<int16>((i - 0x8000u) / 2)) > 1)
 			{
-				VERIFY_EQUAL_NONCONT(true, false);
+				VERIFY_EQUAL_QUIET_NONCONT(true, false);
 			}
 		}
 	}
@@ -1407,14 +1661,14 @@ void TestSampleConversion()
 }
 
 
-}; //Namespace MptTest
+} // namespace MptTest
 
 #else //Case: ENABLE_TESTS is not defined.
 
 namespace MptTest
 {
 	void DoTests() {}
-};
+}
 
 #endif
 

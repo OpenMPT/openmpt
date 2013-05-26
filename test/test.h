@@ -14,4 +14,4 @@
 namespace MptTest
 {
 	void DoTests();
-};
+} // namespace MptTest

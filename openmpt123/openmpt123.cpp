@@ -62,6 +62,7 @@ struct portaudio_exception : public openmpt123_exception {
 };
 
 struct openmpt123_flags {
+	bool run_tests;
 	bool modplug123;
 	int device;
 	std::int32_t channels;
@@ -81,6 +82,7 @@ struct openmpt123_flags {
 	bool use_stdout;
 	std::vector<std::string> filenames;
 	openmpt123_flags() {
+		run_tests = false;
 		modplug123 = false;
 		device = -1;
 		channels = 2;
@@ -676,6 +678,8 @@ static openmpt123_flags parse_openmpt123( const std::vector<std::string> & args 
 				std::istringstream istr( nextarg );
 				istr >> flags.rampoutus;
 				++i;
+			} else if ( arg == "--runtests" ) {
+				flags.run_tests = true;
 			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == "-" ) {
 				throw show_help_exception();
 			}
@@ -714,6 +718,10 @@ static void show_credits( std::ostream & s ) {
 	s << openmpt::string::get( openmpt::string::credits );
 }
 
+namespace openmpt {
+LIBOPENMPT_CXX_API void run_tests();
+} // namespace openmpt
+
 int main( int argc, char * argv [] ) {
 
 	openmpt123_flags flags;
@@ -730,6 +738,19 @@ int main( int argc, char * argv [] ) {
 
 			flags = parse_openmpt123( args );
 
+		}
+
+		if ( flags.run_tests ) {
+			try {
+				openmpt::run_tests();
+			} catch ( std::exception & e ) {
+				std::cerr << "FAIL: " << e.what() << std::endl;
+				return -1;
+			} catch ( ... ) {
+				std::cerr << "FAIL" << std::endl;
+				return -1;
+			}
+			return 0;
 		}
 		
 		if ( args.size() <= 1 ) {

@@ -368,6 +368,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClInclude Include="..\soundlib\WAVTools.h" />
     <ClInclude Include="..\soundlib\WindowedFIR.h" />
     <ClInclude Include="..\soundlib\XMTools.h" />
+    <ClInclude Include="..\test\test.h" />
     <ClInclude Include="libopenmpt.h" />
     <ClInclude Include="libopenmpt.hpp" />
     <ClInclude Include="libopenmpt_config.h" />
@@ -451,6 +452,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClCompile Include="..\soundlib\WAVTools.cpp" />
     <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />
+    <ClCompile Include="..\test\test.cpp" />
     <ClCompile Include="libopenmpt.cpp" />
     <ClCompile Include="libopenmpt_c.cpp" />
     <ClCompile Include="libopenmpt_cxx.cpp" />
