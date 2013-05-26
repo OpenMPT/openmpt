@@ -45,6 +45,7 @@ SOUNDLIB_SOURCES += \
 
 LIBOPENMPT_SOURCES += \
  $(SOUNDLIB_SOURCES) \
+ $(wildcard ../test/*.cpp) \
  ../libopenmpt/libopenmpt.cpp \
  ../libopenmpt/libopenmpt_c.cpp \
  ../libopenmpt/libopenmpt_cxx.cpp \

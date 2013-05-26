@@ -40,6 +40,7 @@
 #include <istream>
 #include <ostream>
 #include <sstream>
+#include <stdexcept>
 
 #ifdef _DEBUG
 #if MPT_COMPILER_MSVC && defined(_MFC_VER)
@@ -1139,7 +1140,7 @@ static TSoundFileContainer CreateSoundFileContainer(const std::string &filename)
 	return pSndFile;
 }
 
-static void DestroySoundFileContainer(TSoundFileContainer &sndFile)
+static void DestroySoundFileContainer(TSoundFileContainer & /* sndFile */ )
 {
 	return;
 }
@@ -1378,13 +1379,13 @@ void TestStringIO()
 	char dst2[3];	// Destination buffer, smaller than source buffer
 
 #define ReadTest(mode, dst, src, expectedResult) \
-	mpt::String::Read<mpt::String::##mode>(dst, src); \
+	mpt::String::Read<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0); /* Ensure that the strings are identical */ \
 	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
 
 #define WriteTest(mode, dst, src, expectedResult) \
-	mpt::String::Write<mpt::String::##mode>(dst, src); \
+	mpt::String::Write<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
 	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
@@ -1657,7 +1658,7 @@ void TestSampleConversion()
 	}
 
 	delete[] sourceBuf;
-	delete[] targetBuf;
+	delete[] static_cast<uint8*>(targetBuf);
 }
 
 
