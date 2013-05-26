@@ -1611,7 +1611,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	std::ostream fout(&fout_buf);
 #else
 	fclose(f);
-	std::ofstream(lpszFileName, std::ios::binary | std::ios::ate);
+	std::ofstream fout(lpszFileName, std::ios::binary | std::ios::ate);
 #endif
 
 	const uint32 MPTStartPos = (uint32)fout.tellp();
