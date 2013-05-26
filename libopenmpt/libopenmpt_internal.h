@@ -39,6 +39,12 @@
 #endif
 
 #ifdef __cplusplus
+namespace openmpt {
+LIBOPENMPT_CXX_API void run_tests();
+} // namespace openmpt
+#endif
+
+#ifdef __cplusplus
 namespace openmpt { namespace version {
 #ifndef NO_WINAMP
 extern char * in_openmpt_string;

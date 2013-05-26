@@ -169,6 +169,10 @@
 #define NO_REVERB // reverb requires mmx
 #endif
 
+#if defined(ENABLE_TESTS) && defined(MODPLUG_NO_FILESAVE)
+#undef MODPLUG_NO_FILESAVE // tests require file saving
+#endif
+
 
 
 #if MPT_COMPILER_MSVC

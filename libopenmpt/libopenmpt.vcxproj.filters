@@ -28,6 +28,12 @@
     <Filter Include="Header Files\settings">
       <UniqueIdentifier>{77dd8b6d-d0f5-4545-b820-f8989b6f841a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\test">
+      <UniqueIdentifier>{d7ef920e-4335-4ea9-96f3-e4721d61b5b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\test">
+      <UniqueIdentifier>{7e476eee-06d3-440e-89c1-29c78a21daa9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\AudioCriticalSection.h">
@@ -209,6 +215,9 @@
     </ClInclude>
     <ClInclude Include="..\common\CompilerDetect.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test\test.h">
+      <Filter>Header Files\test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -454,6 +463,9 @@
     </ClCompile>
     <ClCompile Include="..\soundlib\Load_digi.cpp">
       <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\test\test.cpp">
+      <Filter>Source Files\test</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

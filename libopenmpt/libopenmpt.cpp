@@ -13,6 +13,18 @@
 #include "libopenmpt.hpp"
 #include "libopenmpt.h"
 
+namespace MptTest {
+	void DoTests();
+} // namespace MptTest
+
+namespace openmpt {
+
+void run_tests() {
+	MptTest::DoTests();
+}
+
+} // namespace openmpt
+
 #if defined( LIBOPENMPT_BUILD_DLL ) 
 #if defined( _WIN32 )
 
