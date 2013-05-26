@@ -1611,10 +1611,20 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	std::ostream fout(&fout_buf);
 #else
 	fclose(f);
-	std::ofstream fout(lpszFileName, std::ios::binary | std::ios::ate);
+	f = nullptr;
+	// Using std::ofstream implies std::ios::out, which implies truncation when std::ios::app or std::ios::in is not also set. (At least, it does so for MSVC2010 and GNU libstdc++).
+	// std::ios::app is not suitable for us, because it is very well allowed for called functions to seek and write somewhere else than the end,
+	//  and std::ios::app implies writing goes always to the end, regardless of the output position.
+	// Using std::ios::in | std::ios::out | std::ios::ate prevents truncation and sets the file pointer to the end of the so-far saved file,
+	//  but it also allows reading, which does no harm but is not what we actually really want here.
+	// That's a very broken interface.
+	std::ofstream fout(lpszFileName, std::ios::binary | std::ios::ate | std::ios::in);
 #endif
 
 	const uint32 MPTStartPos = (uint32)fout.tellp();
+	
+	// catch standard library truncating files
+	ALWAYS_ASSERT(MPTStartPos > 0);
 
 	srlztn::Ssb ssb(fout);
 	ssb.BeginWrite("mptm", MptVersion::num);
@@ -1636,12 +1646,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		AddToLog("Error occured in writing MPTM extensions.");
 	}
 
+	bool success = true;
+
 	//Last 4 bytes should tell where the hack mpt things begin.
 	if(!fout.good())
 	{
 		fout.clear();
-		fout.write(reinterpret_cast<const char*>(&MPTStartPos), sizeof(MPTStartPos));
-		return false;
+		success = false;
 	}
 	fout.write(reinterpret_cast<const char*>(&MPTStartPos), sizeof(MPTStartPos));
 
@@ -1651,6 +1662,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 #elif MPT_COMPILER_GCC
 	fflush(f);
 	fclose(f);
+	f = nullptr;
 #else
 	fout.close();
 #endif
@@ -1660,7 +1672,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 
 	//NO WRITING HERE ANYMORE.
 
-	return true;
+	return success;
 }
 
 
