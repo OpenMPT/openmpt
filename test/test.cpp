@@ -1602,13 +1602,13 @@ void TestSampleConversion()
 		sample.nLength = 65536;
 		sample.uFlags |= CHN_16BIT;
 		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
-		CopyAndNormalizeSample<ReadBigIntToInt16PCMandNormalize<ReadInt24to32PCM<0, littleEndian24> > >(sample, reinterpret_cast<const uint8 *>(source24), sizeof(source24));
+		CopyAndNormalizeSample<ReadBigIntToInt16PCMandNormalize<ReadInt24to32PCM<0, littleEndian24> > >(sample, reinterpret_cast<const uint8 *>(source24), 3*65536);
 		CopySample<ReadBigIntTo16PCM<3, 1, 2> >(truncated16, 65536, 1, source24, 65536 * 3, 1);
 
 		for(size_t i = 0; i < 65536; i++)
 		{
 			int16 normValue = static_cast<const int16 *>(sample.pSample)[i];
-			if(abs(normValue - static_cast<int16>(i - 0x8000u)) > 1)
+			if(abs(normValue - static_cast<int16>(i)) > 1)
 			{
 				VERIFY_EQUAL_QUIET_NONCONT(true, false);
 			}
@@ -1636,7 +1636,7 @@ void TestSampleConversion()
 		sample.nLength = 65536;
 		sample.uFlags |= CHN_16BIT;
 		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
-		CopyAndNormalizeSample<ReadFloat32to16PCMandNormalize<bigEndian32> >(sample, reinterpret_cast<const uint8 *>(source32), sizeof(source32));
+		CopyAndNormalizeSample<ReadFloat32to16PCMandNormalize<bigEndian32> >(sample, reinterpret_cast<const uint8 *>(source32), 4*65536);
 		CopySample<ReadFloat32toInt16PCM<bigEndian32> >(truncated16, 65536, 1, source32, 65536 * 4, 1);
 
 		for(size_t i = 0; i < 65536; i++)
