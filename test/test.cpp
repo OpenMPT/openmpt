@@ -96,7 +96,7 @@ static void show_fail(const char * const file, const int line, const char * cons
 		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << " EXCEPTION!" << std::endl;
 	} else
 	{
-		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << " EXCEPTION: " << exception << std::endl;
+		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << " EXCEPTION: " << exception_text << std::endl;
 	}
 }
 
@@ -111,11 +111,19 @@ static void show_ok(const char * const file, const int line, const char * const 
 #endif
 }
 
-#define MULTI_TEST_TRY   try {
-#define MULTI_TEST_CATCH } catch ( std::exception & e) { \
+static int fail_count = 0;
+
+#define MULTI_TEST_TRY   try { \
+                          fail_count = 0;
+#define MULTI_TEST_CATCH  if(fail_count > 0) { \
+                           throw std::runtime_error("Test failed."); \
+                          } \
+                         } catch ( std::exception & e ) { \
                           show_fail(THIS_FILE, __LINE__, func_description, true, e.what()); \
+													throw; \
                          } catch ( ... ) { \
                           show_fail(THIS_FILE, __LINE__, func_description, true); \
+													throw; \
                          }
 #define TEST_TRY         try {
 #define TEST_CATCH       } catch ( std::exception & e ) { \
@@ -126,8 +134,8 @@ static void show_ok(const char * const file, const int line, const char * const 
                           throw; \
                          }
 #define TEST_OK()        show_ok(THIS_FILE, __LINE__, ok_description)
-#define TEST_FAIL()      show_fail(THIS_FILE, __LINE__, fail_description)
-#define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, fail_description); throw std::runtime_error("Test failed."); } while(0)
+#define TEST_FAIL()      do { show_fail(THIS_FILE, __LINE__, fail_description); fail_count++; } while(0)
+#define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, fail_description); fail_count++; throw std::runtime_error("Test failed."); } while(0)
 
 #endif // MODPLUG_TRACKER
 
