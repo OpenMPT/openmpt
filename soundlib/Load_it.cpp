@@ -1735,13 +1735,15 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 				//write ID for this xPlugData chunk:
 				memcpy(id, "DWRT", 4);
 				fwrite(id, 1, 4, f);
-				//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
+				// DWRT chunk does not include a size, so better make sure we always write 4 bytes here.
+				STATIC_ASSERT(sizeof(float) == 4);
 				fwrite(&(m_MixPlugins[i].fDryRatio), 1, sizeof(float), f);
 
 				memcpy(id, "PROG", 4);
 				fwrite(id, 1, 4, f);
-				//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
-				fwrite(&(m_MixPlugins[i].defaultProgram), 1, sizeof(long), f);
+				// PROG chunk does not include a size, so better make sure we always write 4 bytes here.
+				STATIC_ASSERT(sizeof(m_MixPlugins[i].defaultProgram) == sizeof(int32));
+				fwrite(&(m_MixPlugins[i].defaultProgram), 1, sizeof(int32), f);
 
 			}
 			nTotalSize += nPluginSize + 8;
