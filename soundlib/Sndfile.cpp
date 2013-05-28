@@ -44,8 +44,8 @@ MODULAR (in/out) ModInstrument :
 
 - both following functions need to be updated when adding a new member in ModInstrument :
 
-void WriteInstrumentHeaderStruct(ModInstrument * input, FILE * file);
-BYTE * GetInstrumentHeaderFieldPointer(ModInstrument * input, uint32 fcode, int16 fsize);
+void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code, int16 fixedsize);
+bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, int16 fsize, FileReader &file);
 
 - see below for body declaration.
 
@@ -170,23 +170,59 @@ MPWD			MIDI Pitch Wheel Depth
 // Convenient macro to help WRITE_HEADER declaration for single type members ONLY (non-array)
 // --------------------------------------------------------------------------------------------
 #define WRITE_MPTHEADER_sized_member(name,type,code) \
-static_assert(sizeof(input->name) >= sizeof(type), "Instrument property does not fit into specified type!");\
-fcode = MULTICHAR_STRING_TO_INT(#code);\
-fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
-fsize = sizeof( type );\
-fwrite(& fsize , 1 , sizeof( int16 ) , file);\
-fwrite(&input-> name , 1 , fsize , file);
+	static_assert(sizeof(input->name) >= sizeof(type), "Instrument property does not fit into specified type!");\
+	fcode = MULTICHAR_STRING_TO_INT(#code);\
+	fsize = sizeof( type );\
+	if(only_this_code == -1) \
+	{ \
+		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
+		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
+		fwrite(&input-> name , 1 , fsize , file); \
+	} else if(only_this_code == fcode)\
+	{ \
+		/* hackish workaround to resolve mismatched size values: */ \
+		/* nResampling was a long time declared as uint32 but these macro tables used uint16 and UINT. */ \
+		/* This worked fine on little-endian, on big-endian not so much. Thus support writing size-mismatched fields. */ \
+		ASSERT(fixedsize >= fsize); /* ASSERT(fixedsize == fsize); */ \
+		type tmp = input-> name; \
+		tmp = SwapBytesLE(tmp); \
+		fwrite(&tmp , 1 , fsize , file); \
+		if(fixedsize > fsize) \
+		{ \
+			for(int16 i = 0; i < fixedsize - fsize; ++i) \
+			{ \
+				uint8 fillbyte = ((tmp >= 0) ? 0 : -1); /* sign extend */ \
+				fwrite(&fillbyte, 1, 1, file); \
+			} \
+		} \
+	} \
+/**/
 
 // --------------------------------------------------------------------------------------------
 // Convenient macro to help WRITE_HEADER declaration for array members ONLY
 // --------------------------------------------------------------------------------------------
 #define WRITE_MPTHEADER_array_member(name,type,code,arraysize) \
-ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
-fcode = MULTICHAR_STRING_TO_INT(#code);\
-fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
-fsize = sizeof( type ) * arraysize;\
-fwrite(& fsize , 1 , sizeof( int16 ) , file);\
-fwrite(&input-> name , 1 , fsize , file);
+	ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
+	fcode = MULTICHAR_STRING_TO_INT(#code);\
+	fsize = sizeof( type ) * arraysize;\
+	if(only_this_code == -1) \
+	{ \
+		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
+		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
+		fwrite(&input-> name , 1 , fsize , file); \
+	} else if(only_this_code == fcode)\
+	{ \
+		/* ASSERT(fixedsize <= fsize); */ \
+		fsize = fixedsize; /* just trust the size we got passed */ \
+		for(std::size_t i = 0; i < fsize/sizeof(type); ++i) \
+		{ \
+			type tmp; \
+			tmp = input-> name [i]; \
+			tmp = SwapBytesLE(tmp); \
+			fwrite(&tmp, 1, sizeof(type), file); \
+		} \
+	} \
+/**/
 
 namespace {
 // Create 'dF..' entry.
@@ -214,19 +250,29 @@ DWORD CreateExtensionFlags(const ModInstrument& ins)
 } // unnamed namespace.
 
 // Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
-void WriteInstrumentHeaderStruct(ModInstrument * input, FILE * file)
+void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code, int16 fixedsize)
 {
 uint32 fcode;
 int16 fsize;
+
+if(only_this_code != -1)
+{
+	ASSERT(fixedsize > 0);
+}
+
 WRITE_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
 
-{ // dwFlags needs to be constructed so write it manually.
+if(only_this_code == -1 || only_this_code == MULTICHAR_STRING_TO_INT("dF..")){ // dwFlags needs to be constructed so write it manually.
 	//WRITE_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
-	const DWORD dwFlags = CreateExtensionFlags(*input);
+	uint32 dwFlags = CreateExtensionFlags(*input);
 	fcode = MULTICHAR_STRING_TO_INT("dF..");
-	fwrite(&fcode, 1, sizeof(int32), file);
 	fsize = sizeof(dwFlags);
-	fwrite(&fsize, 1, sizeof(int16), file);
+	if(!only_this_code)
+	{
+		fwrite(&fcode, 1, sizeof(int32), file);
+		fwrite(&fsize, 1, sizeof(int16), file);
+	}
+	dwFlags = SwapBytesLE(dwFlags);
 	fwrite(&dwFlags, 1, fsize, file);
 }
 
@@ -288,30 +334,52 @@ WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, VFLG							)
 WRITE_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 }
 
+
 // --------------------------------------------------------------------------------------------
 // Convenient macro to help GET_HEADER declaration for single type members ONLY (non-array)
 // --------------------------------------------------------------------------------------------
 #define GET_MPTHEADER_sized_member(name,type,code) \
-if(fcode == MULTICHAR_STRING_TO_INT(#code)) {\
-if( fsize <= sizeof( type ) ) pointer = (char *)(&input-> name);\
-} else
+	if(fcode == MULTICHAR_STRING_TO_INT(#code)) {\
+		if( fsize <= sizeof( type ) ) \
+		{ \
+			/* hackish workaround to resolve mismatched size values: */ \
+			/* nResampling was a long time declared as uint32 but these macro tables used uint16 and UINT. */ \
+			/* This worked fine on little-endian, on big-endian not so much. Thus support reading size-mismatched fields. */ \
+			type tmp; \
+			if(!file.CanRead(fsize)) return false; \
+			tmp = file.ReadTruncatedIntLE<type>(fsize); \
+			STATIC_ASSERT(sizeof(tmp) == sizeof(input-> name )); \
+			memcpy(&(input-> name ), &tmp, sizeof(type)); \
+			return true; \
+		} \
+	} else \
+/**/
 
 // --------------------------------------------------------------------------------------------
 // Convenient macro to help GET_HEADER declaration for array members ONLY
 // --------------------------------------------------------------------------------------------
 #define GET_MPTHEADER_array_member(name,type,code,arraysize) \
-if(fcode == MULTICHAR_STRING_TO_INT(#code)) {\
-if( fsize <= sizeof( type ) * arraysize ) pointer = (char *)(&input-> name);\
-} else
+	if(fcode == MULTICHAR_STRING_TO_INT(#code)) {\
+		if( fsize <= sizeof( type ) * arraysize ) \
+		{ \
+			if(!file.CanRead(sizeof(type)) * arraysize) return false; \
+			for(std::size_t i = 0; i < arraysize; ++i) \
+			{ \
+				input-> name [i] = file.ReadIntLE<type>(); \
+			} \
+			return true; \
+		} \
+	} else \
+/**/
+
 
 // Return a pointer on the wanted field in 'input' ModInstrument given field code & size
-char *GetInstrumentHeaderFieldPointer(const ModInstrument *input, uint32 fcode, uint16 fsize)
+bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize, FileReader &file)
 {
-if(input == nullptr) return nullptr;
-char *pointer = nullptr;
+if(input == nullptr) return false;
 
 GET_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
-GET_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
+GET_MPTHEADER_sized_member(	dwFlags					, uint32		, dF..							)
 GET_MPTHEADER_sized_member(	nGlobalVol				, UINT			, GV..							)
 GET_MPTHEADER_sized_member(	nPan					, UINT			, P...							)
 GET_MPTHEADER_sized_member(	VolEnv.nNodes			, UINT			, VE..							)
@@ -370,7 +438,8 @@ GET_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, VFLG							)
 GET_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 {}
 
-return pointer;
+return false;
+
 }
 
 // -! NEW_FEATURE#0027
