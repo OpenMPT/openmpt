@@ -40,11 +40,13 @@
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/EQ.h"
 
+
+class FileReader;
 // -----------------------------------------------------------------------------------------
 // MODULAR ModInstrument FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
 // -----------------------------------------------------------------------------------------
-extern void WriteInstrumentHeaderStruct(ModInstrument * input, FILE * file);
-extern char *GetInstrumentHeaderFieldPointer(const ModInstrument * input, uint32 fcode, uint16 fsize);
+extern void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code = -1 /* -1 for all */, int16 fixedsize = 0);
+extern bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint16 fsize, FileReader &file);
 // --------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------
 

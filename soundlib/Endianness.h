@@ -79,6 +79,16 @@ inline int16 SwapBytesBE_(unaligned_int16 *value)  { return *value = bswap16(*va
 inline int32 SwapBytesLE_(unaligned_int32 *value)  { return *value; }
 inline int16 SwapBytesLE_(unaligned_int16 *value)  { return *value; }
 #endif
+// Do NOT remove these overloads, even if they seem useless.
+// We do not want risking to extend 8bit integers to int and then endian-converting and casting back to int.
+// Thus these overloads.
+inline uint8 SwapBytesLE_(uint8 *value) { return *value; }
+inline int8 SwapBytesLE_(int8 *value) { return *value; }
+inline char SwapBytesLE_(char *value) { return *value; }
+inline uint8 SwapBytesBE_(uint8 *value) { return *value; }
+inline int8 SwapBytesBE_(int8 *value) { return *value; }
+inline char SwapBytesBE_(char *value) { return *value; }
+
 // GCC will not bind references to members of packed structures, workaround it by using a raw pointer.
 // This is a temporary solution as this pointer might of course be unaligned which GCC seems to not care about in that case.
 #define SwapBytesBE(value) SwapBytesBE_(&(value))

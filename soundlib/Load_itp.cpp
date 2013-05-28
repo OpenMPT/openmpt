@@ -504,7 +504,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 		// instruments' header
 		for(i=0; i<m_nInstruments; i++)
 		{
-			if(Instruments[i+1]) WriteInstrumentHeaderStruct(Instruments[i+1], f);
+			if(Instruments[i+1]) WriteInstrumentHeaderStructOrField(Instruments[i+1], f);
 			// write separator tag
 			code = 'SEP@';
 			fwrite(&code, 1, sizeof(uint32), f);

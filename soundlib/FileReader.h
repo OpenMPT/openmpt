@@ -566,7 +566,8 @@ public:
 		return true;
 	}
 
-protected:
+public:
+
 	// Read some kind of integer in little-endian format.
 	// If successful, the file cursor is advanced by the size of the integer.
 	template <typename T>
@@ -599,7 +600,42 @@ protected:
 		}
 	}
 
-public:
+	// Read a integer in little-endian format which has some of its higher bytes not stored in file.
+	// If successful, the file cursor is advanced by the given size.
+	template <typename T>
+	T ReadTruncatedIntLE(off_t size)
+	{
+		static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
+		ASSERT(sizeof(T) >= size);
+		if(!CanRead(size))
+		{
+			return 0;
+		}
+		uint8 buf[sizeof(T)];
+		for(std::size_t i = 0; i < size; ++i)
+		{
+			Read(buf[i]);
+		}
+		if(std::numeric_limits<T>::is_signed)
+		{
+			for(std::size_t i = size; i < sizeof(T); ++i)
+			{
+				// sign extend
+				buf[i] = (buf[size-1] & 0x80) ? 0xff : 0x00;
+			}
+		} else
+		{
+			for(std::size_t i = size; i < sizeof(T); ++i)
+			{
+				// zero extend
+				buf[i] = 0x00;
+			}
+		}
+		T target;
+		std::memcpy(&target, buf, sizeof(T));
+		return SwapBytesLE(target);
+	}
+
 	// Read unsigned 32-Bit integer in little-endian format.
 	// If successful, the file cursor is advanced by the size of the integer.
 	uint32 ReadUint32LE()
