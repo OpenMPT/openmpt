@@ -209,64 +209,61 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		}
 
+		ModSample &sample = Samples[smp];
+		sample.Initialize();
 		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], gdmSample.name);
-		mpt::String::Read<mpt::String::maybeNullTerminated>(Samples[smp].filename, gdmSample.fileName);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, gdmSample.fileName);
 
-		Samples[smp].nC5Speed = gdmSample.c4Hertz;
-		Samples[smp].nGlobalVol = 256;	// Not supported in this format
+		sample.nC5Speed = gdmSample.c4Hertz;
+		sample.nGlobalVol = 256;	// Not supported in this format
 
-		Samples[smp].nLength = gdmSample.length; // in bytes
+		sample.nLength = gdmSample.length; // in bytes
 
 		// Sample format
 		if(gdmSample.flags & GDMSampleHeader::smp16Bit)
 		{
-			Samples[smp].uFlags |= CHN_16BIT;
-			Samples[smp].nLength /= 2;
+			sample.uFlags |= CHN_16BIT;
+			sample.nLength /= 2;
 		}
 
-		Samples[smp].nLoopStart = MIN(gdmSample.loopBegin, Samples[smp].nLength);	// in samples
-		Samples[smp].nLoopEnd = MIN(gdmSample.loopEnd - 1, Samples[smp].nLength);	// dito
-		Samples[smp].FrequencyToTranspose();	// set transpose + finetune for mod files
+		sample.nLoopStart = std::min<SmpLength>(gdmSample.loopBegin, sample.nLength);	// in samples
+		sample.nLoopEnd = std::min<SmpLength>(gdmSample.loopEnd - 1, sample.nLength);	// dito
+		sample.FrequencyToTranspose();	// set transpose + finetune for mod files
 
 		// Fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
 		if(m_nType == MOD_TYPE_MOD)
 		{
-			while(Samples[smp].RelativeTone != 0)
+			if(sample.RelativeTone > 0)
 			{
-				if(Samples[smp].RelativeTone > 0)
-				{
-					Samples[smp].RelativeTone -= 1;
-					Samples[smp].nFineTune += 128;
-				}
-				else
-				{
-					Samples[smp].RelativeTone += 1;
-					Samples[smp].nFineTune -= 128;
-				}
+				sample.RelativeTone -= 1;
+				sample.nFineTune += 128;
+			} else if(sample.RelativeTone < 0)
+			{
+				sample.RelativeTone += 1;
+				sample.nFineTune -= 128;
 			}
 		}
 
-		Samples[smp].uFlags.reset();
-		if(gdmSample.flags & GDMSampleHeader::smpLoop) Samples[smp].uFlags |= CHN_LOOP; // Loop sample
+		if(gdmSample.flags & GDMSampleHeader::smpLoop) sample.uFlags.set(CHN_LOOP); // Loop sample
 
 		if(gdmSample.flags & GDMSampleHeader::smpVolume)
 		{
 			// Default volume is used... 0...64, 255 = no default volume
-			Samples[smp].nVolume = MIN(gdmSample.volume, 64) * 4;
+			sample.nVolume = MIN(gdmSample.volume, 64) * 4;
 		} else
 		{
-			Samples[smp].nVolume = 256;
+			sample.nVolume = 256;
 		}
 
 		if(gdmSample.flags & GDMSampleHeader::smpPanning)
 		{
 			// Default panning is used
-			Samples[smp].uFlags |= CHN_PANNING;
+			sample.uFlags.set(CHN_PANNING);
 			// 0...15, 16 = surround (not supported), 255 = no default panning
-			Samples[smp].nPan = (gdmSample.panning > 15) ? 128 : MIN((gdmSample.panning * 16) + 8, 256);
+			sample.nPan = (gdmSample.panning > 15) ? 128 : MIN((gdmSample.panning * 16) + 8, 256);
 		} else
 		{
-			Samples[smp].nPan = 128;
+			sample.nPan = 128;
 		}
 	}
 
@@ -345,7 +342,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 					if(noteByte)
 					{
 						noteByte = (noteByte & 0x7F) - 1; // This format doesn't have note cuts
-						if(noteByte < 0xF0) noteByte = (noteByte & 0x0F) + 12 * (noteByte >> 4) + 13;
+						if(noteByte < 0xF0) noteByte = (noteByte & 0x0F) + 12 * (noteByte >> 4) + 12 + NOTE_MIN;
 						m.note = noteByte;
 					}
 					m.instr = noteSample;
