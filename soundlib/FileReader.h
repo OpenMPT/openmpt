@@ -22,6 +22,7 @@
 #endif
 #include <limits>
 #include <vector>
+#include <cstring>
 
 
 // change to show warnings for functions which trigger pre-caching the whole file for unseekable streams
