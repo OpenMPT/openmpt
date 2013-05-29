@@ -362,7 +362,7 @@ WRITE_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 	if(fcode == MULTICHAR_STRING_TO_INT(#code)) {\
 		if( fsize <= sizeof( type ) * arraysize ) \
 		{ \
-			if(!file.CanRead(sizeof(type)) * arraysize) return false; \
+			if(!file.CanRead(sizeof(type) * arraysize)) return false; \
 			for(std::size_t i = 0; i < arraysize; ++i) \
 			{ \
 				input-> name [i] = file.ReadIntLE<type>(); \
