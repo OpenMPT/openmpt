@@ -203,10 +203,8 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Now we can be pretty sure that we're doing the right thing.
-	m_nType = MOD_TYPE_UMX;
-	m_nSamples = 0;
-	m_nInstruments = 0;
-
+	InitializeGlobals();
+	
 	for(uint32 i = 0; i < fileHeader.exportCount; i++)
 	{
 		int32 objClass, objOffset, objSize, objName;
@@ -307,13 +305,14 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_nSamples != 0)
 	{
+		InitializeChannels();
+		m_nType = MOD_TYPE_UMX;
 		m_nChannels = 4;
 		Patterns.Insert(0, 64);
 		Order[0] = 0;
 		return true;
 	} else
 	{
-		m_nType = MOD_TYPE_NONE;
 		return false;
 	}
 }
