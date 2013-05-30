@@ -19,15 +19,7 @@
 
 #include "libopenmpt.h"
 
-#ifdef _WIN32
-#ifdef LIBOPENMPT_BUILD_DLL
-#define LIBOPENMPT_MODPLUG_API __declspec(dllexport)
-#else
-#define LIBOPENMPT_MODPLUG_API
-#endif
-#else
-#define LIBOPENMPT_MODPLUG_API
-#endif
+#define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API
 
 #include <limits.h>
 #include <math.h>
@@ -82,7 +74,9 @@ LIBOPENMPT_MODPLUG_API char ModPlug_ExportIT(ModPlugFile* file, const char* file
 
 /* from libmodplug/sndfile.h */
 /* header is not c clean */
+
 #define MIXING_ATTENUATION 4
+
 #define MOD_TYPE_NONE		0x0
 #define MOD_TYPE_MOD		0x1
 #define MOD_TYPE_S3M		0x2
