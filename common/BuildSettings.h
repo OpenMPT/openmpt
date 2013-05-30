@@ -173,6 +173,18 @@
 #undef MODPLUG_NO_FILESAVE // tests require file saving
 #endif
 
+#if !defined(NO_WINAMP)
+#if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && !defined(LIBOPENMPT_BUILD_DLL))
+#define NO_WINAMP // winamp plugin requires libopenmpt dll build
+#endif
+#endif
+
+#if !defined(NO_XMPLAY)
+#if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && !defined(LIBOPENMPT_BUILD_DLL))
+#define NO_XMPLAY // xmplay plugin requires libopenmpt dll build
+#endif
+#endif
+
 
 
 #if MPT_COMPILER_MSVC
