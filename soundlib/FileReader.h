@@ -608,6 +608,10 @@ public:
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
 		ASSERT(sizeof(T) >= size);
+		if(size == 0)
+		{
+			return 0;
+		}
 		if(!CanRead(size))
 		{
 			return 0;

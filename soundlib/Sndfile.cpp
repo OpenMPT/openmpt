@@ -173,7 +173,7 @@ MPWD			MIDI Pitch Wheel Depth
 	static_assert(sizeof(input->name) >= sizeof(type), "Instrument property does not fit into specified type!");\
 	fcode = MULTICHAR_STRING_TO_INT(#code);\
 	fsize = sizeof( type );\
-	if(only_this_code == -1) \
+	if(only_this_code == uint32(~0u)) \
 	{ \
 		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
 		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
@@ -205,7 +205,7 @@ MPWD			MIDI Pitch Wheel Depth
 	ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
 	fcode = MULTICHAR_STRING_TO_INT(#code);\
 	fsize = sizeof( type ) * arraysize;\
-	if(only_this_code == -1) \
+	if(only_this_code == uint32(~0u)) \
 	{ \
 		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
 		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
@@ -255,14 +255,14 @@ void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint
 uint32 fcode;
 int16 fsize;
 
-if(only_this_code != -1)
+if(only_this_code != uint32(~0u))
 {
 	ASSERT(fixedsize > 0);
 }
 
 WRITE_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
 
-if(only_this_code == -1 || only_this_code == MULTICHAR_STRING_TO_INT("dF..")){ // dwFlags needs to be constructed so write it manually.
+if(only_this_code == ~0u || only_this_code == MULTICHAR_STRING_TO_INT("dF..")){ // dwFlags needs to be constructed so write it manually.
 	//WRITE_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
 	uint32 dwFlags = CreateExtensionFlags(*input);
 	fcode = MULTICHAR_STRING_TO_INT("dF..");
