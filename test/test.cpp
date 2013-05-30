@@ -415,7 +415,11 @@ void TestMisc()
 	VERIFY_EQUAL( mpt::saturate_cast<uint16>(std::numeric_limits<int16>::max() + 1), (uint16)std::numeric_limits<int16>::max() + 1 );
 	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::min() - int64(1)), std::numeric_limits<uint32>::min() );
 	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::max() + int64(1)), (uint32)std::numeric_limits<int32>::max() + 1 );
-	
+
+	VERIFY_EQUAL( mpt::String::LTrim(" "), "" );
+	VERIFY_EQUAL( mpt::String::RTrim(" "), "" );
+	VERIFY_EQUAL( mpt::String::Trim(" "), "" );
+
 	// These should fail to compile
 	//Util::Round<std::string>(1.0);
 	//Util::Round<int64>(1.0);
