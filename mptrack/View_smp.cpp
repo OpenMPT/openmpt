@@ -2226,8 +2226,7 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 		if (note >= NOTE_MIN_SPECIAL)
 		{
 			pModDoc->NoteOff(0, (note == NOTE_NOTECUT));
-		}
-		else
+		} else if(ModCommand::IsNote((ModCommand::NOTE)note))
 		{
 			if (m_dwStatus & SMPSTATUS_KEYDOWN)
 				pModDoc->NoteOff(note, true);

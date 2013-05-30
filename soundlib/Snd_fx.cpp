@@ -4713,6 +4713,7 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) 
 			return (XMLinearTable[period % 768] << FREQ_FRACBITS) >> octave;
 		} else
 		{
+			if(!period) period = 1;
 			return ((8363 * 1712L) << FREQ_FRACBITS) / period;
 		}
 	} else
