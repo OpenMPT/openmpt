@@ -166,6 +166,16 @@ MPWD			MIDI Pitch Wheel Depth
 
 #define MULTICHAR_STRING_TO_INT(str) MULTICHAR4_LE_MSVC((str)[0],(str)[1],(str)[2],(str)[3])
 
+template<typename T, bool is_signed> struct IsNegativeFunctor { bool operator()(T val) const { return val < 0; } };
+template<typename T> struct IsNegativeFunctor<T, true> { bool operator()(T val) const { return val < 0; } };
+template<typename T> struct IsNegativeFunctor<T, false> { bool operator()(T /*val*/) const { return false; } };
+
+template<typename T>
+bool IsNegative(const T &val)
+{
+	return IsNegativeFunctor<T, std::numeric_limits<T>::is_signed>()(val);
+}
+
 // --------------------------------------------------------------------------------------------
 // Convenient macro to help WRITE_HEADER declaration for single type members ONLY (non-array)
 // --------------------------------------------------------------------------------------------
@@ -191,7 +201,7 @@ MPWD			MIDI Pitch Wheel Depth
 		{ \
 			for(int16 i = 0; i < fixedsize - fsize; ++i) \
 			{ \
-				uint8 fillbyte = ((tmp >= 0) ? 0 : -1); /* sign extend */ \
+				uint8 fillbyte = !IsNegative(tmp) ? 0 : 0xff; /* sign extend */ \
 				fwrite(&fillbyte, 1, 1, file); \
 			} \
 		} \
