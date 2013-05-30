@@ -18,15 +18,7 @@
 #define LIBOPENMPT_USE_SETTINGS_DLL
 #include "libopenmpt_settings.h"
 
-#ifdef _WIN32
-#ifdef LIBOPENMPT_BUILD_DLL
-#define LIBOPENMPT_WINAMP_API __declspec(dllexport)
-#else
-#define LIBOPENMPT_WINAMP_API
-#endif
-#else
-#define LIBOPENMPT_WINAMP_API
-#endif
+#define LIBOPENMPT_WINAMP_API LIBOPENMPT_API
 
 #define NOMINMAX
 #include <windows.h>

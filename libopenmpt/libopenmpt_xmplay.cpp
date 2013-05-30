@@ -18,16 +18,6 @@
 #define LIBOPENMPT_USE_SETTINGS_DLL
 #include "libopenmpt_settings.h"
 
-#ifdef _WIN32
-#ifdef LIBOPENMPT_BUILD_DLL
-#define LIBOPENMPT_XMPLAY_API __declspec(dllexport)
-#else
-#define LIBOPENMPT_XMPLAY_API
-#endif
-#else
-#define LIBOPENMPT_XMPLAY_API
-#endif
-
 //#define CUSTOM_OUTPUT_SETTINGS
 
 //#define EXPERIMENTAL_VIS
