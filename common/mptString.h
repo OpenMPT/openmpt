@@ -60,6 +60,9 @@ static inline std::string LTrim(std::string str, const std::string &whitespace =
 	if(pos != std::string::npos)
 	{
 		str.erase(str.begin(), str.begin() + pos);
+	} else if(pos == std::string::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1)
+	{
+		return std::string();
 	}
 	return str;
 }
@@ -72,6 +75,9 @@ static inline std::string RTrim(std::string str, const std::string &whitespace =
 	if(pos != std::string::npos)
 	{
 		str.erase(str.begin() + pos + 1, str.end());
+	} else if(pos == std::string::npos && str.length() > 0 && str.find_first_of(whitespace) == 0)
+	{
+		return std::string();
 	}
 	return str;
 }
