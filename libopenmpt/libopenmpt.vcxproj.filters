@@ -458,9 +458,6 @@
     <ClCompile Include="libopenmpt_xmplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="libopenmpt_xmplay_c.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\Load_digi.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
