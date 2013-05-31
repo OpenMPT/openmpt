@@ -102,6 +102,55 @@ void ISoundDevice::Reset()
 CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(SoundDevice)
 //-----------------------------------------------------------------------------------
 {
+
+	OSVERSIONINFO versioninfo;
+	MemsetZero(versioninfo);
+	versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
+	GetVersionEx(&versioninfo);
+	m_HasXP = versioninfo.dwMajorVersion >= 6 || (versioninfo.dwMajorVersion == 5 && versioninfo.dwMinorVersion >= 1);
+	m_HasVista = versioninfo.dwMajorVersion >= 6;
+
+	m_hKernel32DLL = NULL;
+	m_hAvRtDLL = NULL;
+
+	pCreateWaitableTimer = nullptr;
+	pSetWaitableTimer = nullptr;
+	pCancelWaitableTimer = nullptr;
+	m_hKernel32DLL = LoadLibrary("kernel32.dll");
+	#if _WIN32_WINNT >= _WIN32_WINNT_WINXP
+		m_HasXP = true;
+		pCreateWaitableTimer = &CreateWaitableTimer;
+		pSetWaitableTimer = &SetWaitableTimer;
+		pCancelWaitableTimer = &CancelWaitableTimer;
+	#else
+		if(m_HasXP && m_hKernel32DLL)
+		{
+			pCreateWaitableTimer = (FCreateWaitableTimer)GetProcAddress(m_hKernel32DLL, "CreateWaitableTimerA");
+			pSetWaitableTimer = (FSetWaitableTimer)GetProcAddress(m_hKernel32DLL, "SetWaitableTimer");
+			pCancelWaitableTimer = (FCancelWaitableTimer)GetProcAddress(m_hKernel32DLL, "CancelWaitableTimer");
+			if(!pCreateWaitableTimer || !pSetWaitableTimer || !pCancelWaitableTimer)
+			{
+				m_HasXP = false;
+			}
+		}
+	#endif
+
+	pAvSetMmThreadCharacteristics = nullptr;
+	pAvRevertMmThreadCharacteristics = nullptr;
+	if(m_HasVista)
+	{
+		m_hAvRtDLL = LoadLibrary("avrt.dll");
+		if(m_hAvRtDLL)
+		{
+			pAvSetMmThreadCharacteristics = (FAvSetMmThreadCharacteristics)GetProcAddress(m_hAvRtDLL, "AvSetMmThreadCharacteristicsA");
+			pAvRevertMmThreadCharacteristics = (FAvRevertMmThreadCharacteristics)GetProcAddress(m_hAvRtDLL, "AvRevertMmThreadCharacteristics");
+		}
+		if(!pAvSetMmThreadCharacteristics || !pAvRevertMmThreadCharacteristics)
+		{
+			m_HasVista = false;
+		}
+	}
+
 	m_hPlayThread = NULL;
 	m_dwPlayThreadId = 0;
 	m_hAudioWakeUp = NULL;
@@ -140,7 +189,185 @@ CAudioThread::~CAudioThread()
 		CloseHandle(m_hAudioWakeUp);
 		m_hAudioWakeUp = NULL;
 	}
+
+	pAvRevertMmThreadCharacteristics = nullptr;
+	pAvSetMmThreadCharacteristics = nullptr;
+	pCreateWaitableTimer = nullptr;
+	pSetWaitableTimer = nullptr;
+	pCancelWaitableTimer = nullptr;
+
+	if(m_hAvRtDLL)
+	{
+		FreeLibrary(m_hAvRtDLL);
+		m_hAvRtDLL = NULL;
+	}
+
+	if(m_hKernel32DLL)
+	{
+		FreeLibrary(m_hKernel32DLL);
+		m_hKernel32DLL = NULL;
+	}
+
 }
+
+
+class CPriorityBooster
+{
+private:
+	CAudioThread &self;
+	bool m_BoostPriority;
+	DWORD task_idx;
+	HANDLE hTask;
+public:
+
+	CPriorityBooster(CAudioThread &self_, bool boostPriority) : self(self_), m_BoostPriority(boostPriority)
+	//-----------------------------------------------------------------------------------------------------
+	{
+		#ifdef _DEBUG
+			m_BoostPriority = false;
+		#endif
+
+		task_idx = 0;
+		hTask = NULL;
+
+		if(m_BoostPriority)
+		{
+			if(self.m_HasVista)
+			{
+				hTask = self.pAvSetMmThreadCharacteristics("Pro Audio", &task_idx);
+			} else
+			{
+				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+			}
+		}
+
+	}
+
+	CPriorityBooster::~CPriorityBooster()
+	//-----------------------------------
+	{
+
+		if(m_BoostPriority)
+		{
+			if(self.m_HasVista)
+			{
+				self.pAvRevertMmThreadCharacteristics(hTask);
+				hTask = NULL;
+				task_idx = 0;
+			} else
+			{
+				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+			}
+		}
+
+	}
+
+};
+
+
+class CPeriodicWaker
+{
+private:
+	CAudioThread &self;
+
+	double sleepSeconds;
+	long sleepMilliseconds;
+	int64 sleep100Nanoseconds;
+
+	bool period_noxp_set;
+	bool periodic_xp_timer;
+
+	HANDLE sleepEvent;
+
+public:
+
+	CPeriodicWaker(CAudioThread &self_, double sleepSeconds_) : self(self_), sleepSeconds(sleepSeconds_)
+	//--------------------------------------------------------------------------------------------------
+	{
+
+		sleepMilliseconds = static_cast<long>(sleepSeconds * 1000.0);
+		sleep100Nanoseconds = static_cast<int64>(sleepSeconds * 10000000.0);
+		if(sleepMilliseconds < 1) sleepMilliseconds = 1;
+		if(sleep100Nanoseconds < 1) sleep100Nanoseconds = 1;
+
+		period_noxp_set = false;
+		periodic_xp_timer = (sleep100Nanoseconds >= 10000); // can be represented as a millisecond period, otherwise use non-periodic timers which allow higher precision but might me slower because we have to set them again in each period
+
+		sleepEvent = NULL;
+
+		if(self.m_HasXP)
+		{
+			if(periodic_xp_timer)
+			{
+				sleepEvent = self.pCreateWaitableTimer(NULL, FALSE, NULL);
+				LARGE_INTEGER dueTime;
+				dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
+				self.pSetWaitableTimer(sleepEvent, &dueTime, sleepMilliseconds, NULL, NULL, FALSE);
+			} else
+			{
+				sleepEvent = self.pCreateWaitableTimer(NULL, TRUE, NULL);
+			}
+		} else
+		{
+			sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+			period_noxp_set = (timeBeginPeriod(1) == TIMERR_NOERROR); // increase resolution of multimedia timer
+		}
+
+	}
+
+	long GetSleepMilliseconds() const
+	//-------------------------------
+	{
+		return sleepMilliseconds;
+	}
+
+	HANDLE GetWakeupEvent() const
+	//---------------------------
+	{
+		return sleepEvent;
+	}
+
+	void Retrigger()
+	//--------------
+	{
+		if(self.m_HasXP)
+		{
+			if(!periodic_xp_timer)
+			{
+				LARGE_INTEGER dueTime;
+				dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
+				self.pSetWaitableTimer(sleepEvent, &dueTime, 0, NULL, NULL, FALSE);
+			}
+		} else
+		{
+			timeSetEvent(sleepMilliseconds, 1, (LPTIMECALLBACK)sleepEvent, NULL, TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
+		}
+	}
+
+	CPeriodicWaker::~CPeriodicWaker()
+	//-------------------------------
+	{
+		if(self.m_HasXP)
+		{
+			if(periodic_xp_timer)
+			{
+				self.pCancelWaitableTimer(sleepEvent);
+			}
+			CloseHandle(sleepEvent);
+			sleepEvent = NULL;
+		} else
+		{
+			if(period_noxp_set)
+			{
+				timeEndPeriod(1);
+				period_noxp_set = false;
+			}
+			CloseHandle(sleepEvent);
+			sleepEvent = NULL;
+		}
+	}
+
+};
 
 
 DWORD WINAPI CAudioThread::AudioThreadWrapper(LPVOID user)
@@ -150,19 +377,15 @@ DWORD WINAPI CAudioThread::AudioThreadWrapper(LPVOID user)
 DWORD CAudioThread::AudioThread()
 //-------------------------------
 {
-	HANDLE sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	HANDLE waithandles[3];
-	waithandles[0] = m_hAudioThreadTerminateRequest;
-	waithandles[1] = m_hAudioWakeUp;
-	waithandles[2] = sleepEvent;
 
-	bool idle = true;
 	bool terminate = false;
 	while(!terminate)
 	{
 
-		if(idle)
+		bool idle = true;
+		while(!terminate && idle)
 		{
+			HANDLE waithandles[2] = {m_hAudioThreadTerminateRequest, m_hAudioWakeUp};
 			SetEvent(m_hAudioThreadGoneIdle);
 			switch(WaitForMultipleObjects(2, waithandles, FALSE, INFINITE))
 			{
@@ -173,110 +396,43 @@ DWORD CAudioThread::AudioThread()
 				idle = false;
 				break;
 			}
-			continue;
 		}
 
-#ifdef NDEBUG
-		typedef HANDLE (WINAPI *FAvSetMmThreadCharacteristics)   (LPCTSTR,LPDWORD);
-		typedef BOOL   (WINAPI *FAvRevertMmThreadCharacteristics)(HANDLE);
-		FAvSetMmThreadCharacteristics    pAvSetMmThreadCharacteristics = NULL;
-		FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics = NULL;
-		HMODULE hAvrtDLL = NULL;
-		DWORD task_idx = 0;
-		HANDLE hTask = NULL;
-
-		OSVERSIONINFO versioninfo;
-		MemsetZero(versioninfo);
-		versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
-		GetVersionEx(&versioninfo);
-		
-		bool boostPriority = (m_SoundDevice.m_fulCfgOptions & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY) != 0;
-
-		if(boostPriority)
-		{
-			if(versioninfo.dwMajorVersion >= 6) // vista
-			{
-				hAvrtDLL = LoadLibrary("avrt.dll");
-				if(hAvrtDLL)
-				{
-					pAvSetMmThreadCharacteristics = (FAvSetMmThreadCharacteristics)GetProcAddress(hAvrtDLL, "AvSetMmThreadCharacteristicsA");
-					pAvRevertMmThreadCharacteristics = (FAvRevertMmThreadCharacteristics)GetProcAddress(hAvrtDLL, "AvRevertMmThreadCharacteristics");
-				}
-				if(pAvSetMmThreadCharacteristics && pAvRevertMmThreadCharacteristics)
-				{
-					hTask = pAvSetMmThreadCharacteristics("Pro Audio", &task_idx);
-				}
-			} else
-			{
-				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-			}
-		}
-#endif
-
-		// increase resolution of multimedia timer
-		bool period_set = (timeBeginPeriod(1) == TIMERR_NOERROR);
-
-		m_SoundDevice.StartFromSoundThread();
-
-		while(!idle && !terminate) 
+		if(!terminate)
 		{
 
-			UINT nSleep = 50;
+			CPriorityBooster priorityBooster(*this, (m_SoundDevice.m_fulCfgOptions & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY)?true:false);
+			CPeriodicWaker periodicWaker(*this, 0.001 * m_SoundDevice.GetRealUpdateIntervalMS());
 
+			m_SoundDevice.StartFromSoundThread();
+
+			while(!terminate && IsActive())
 			{
-				if(IsActive())
+
+				m_SoundDevice.FillAudioBufferLocked();
+
+				periodicWaker.Retrigger();
+
+				HANDLE waithandles[3] = {m_hAudioThreadTerminateRequest, m_hAudioWakeUp, periodicWaker.GetWakeupEvent()};
+				switch(WaitForMultipleObjects(3, waithandles, FALSE, periodicWaker.GetSleepMilliseconds()))
 				{
-					// we are playing, everything is fine
-					m_SoundDevice.FillAudioBufferLocked();
-					nSleep = static_cast<UINT>(m_SoundDevice.GetRealUpdateIntervalMS());
-					if(nSleep < 1) nSleep = 1;
-				} else
-				{
-					idle = true;
+				case WAIT_OBJECT_0:
+					terminate = true;
+					break;
 				}
+
 			}
 
-			if(!idle)
-			{
-				timeSetEvent(nSleep, 1, (LPTIMECALLBACK)sleepEvent, NULL, TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
-				if(WaitForMultipleObjects(3, waithandles, FALSE, nSleep) == WAIT_OBJECT_0) terminate = true;
-			}
+			m_SoundDevice.StopFromSoundThread();
 
 		}
-
-		m_SoundDevice.StopFromSoundThread();
-
-		if(period_set) timeEndPeriod(1);
-
-#ifdef NDEBUG
-		if(boostPriority)
-		{
-			if(versioninfo.dwMajorVersion >= 6) // vista
-			{
-				if(pAvSetMmThreadCharacteristics && pAvRevertMmThreadCharacteristics)
-				{
-					pAvRevertMmThreadCharacteristics(hTask);
-				}
-				if(hAvrtDLL)
-				{
-					pAvRevertMmThreadCharacteristics = NULL;
-					pAvSetMmThreadCharacteristics = NULL;
-					FreeLibrary(hAvrtDLL);
-					hAvrtDLL = NULL;
-				}
-			} else
-			{
-				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-			}
-		}
-#endif
 
 	}
 
 	SetEvent(m_hAudioThreadGoneIdle);
 
-	CloseHandle(sleepEvent);
 	return 0;
+
 }
 
 

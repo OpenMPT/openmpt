@@ -33,8 +33,26 @@ class CSoundDeviceWithThread;
 
 class CAudioThread
 {
+	friend class CPriorityBooster;
+	friend class CPeriodicWaker;
 private:
 	CSoundDeviceWithThread & m_SoundDevice;
+
+	bool m_HasXP;
+	bool m_HasVista;
+	HMODULE m_hKernel32DLL;
+	HMODULE m_hAvRtDLL;
+	typedef HANDLE (WINAPI *FCreateWaitableTimer)(LPSECURITY_ATTRIBUTES, BOOL, LPCTSTR);
+	typedef BOOL (WINAPI *FSetWaitableTimer)(HANDLE, const LARGE_INTEGER *, LONG, PTIMERAPCROUTINE, LPVOID, BOOL);
+	typedef BOOL (WINAPI *FCancelWaitableTimer)(HANDLE);
+	typedef HANDLE (WINAPI *FAvSetMmThreadCharacteristics)(LPCTSTR, LPDWORD);
+	typedef BOOL (WINAPI *FAvRevertMmThreadCharacteristics)(HANDLE);
+	FCreateWaitableTimer pCreateWaitableTimer;
+	FSetWaitableTimer pSetWaitableTimer;
+	FCancelWaitableTimer pCancelWaitableTimer;
+	FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics;
+	FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics;
+
 	HANDLE m_hAudioWakeUp;
 	HANDLE m_hPlayThread;
 	HANDLE m_hAudioThreadTerminateRequest;
