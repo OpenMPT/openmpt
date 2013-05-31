@@ -141,6 +141,8 @@ void module_impl::apply_libopenmpt_defaults() {
 	set_render_param( module::RENDER_QUALITY_PERCENT, 100 );
 }
 void module_impl::init() {
+	m_int16Buffer.resize( 4096 * 4 );
+	m_floatBuffer.resize( 4096 * 4 );
 	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
 	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
