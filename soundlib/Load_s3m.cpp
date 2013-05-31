@@ -89,7 +89,7 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 		if(toIT && !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD)))
 		{
 			if (param == 0xA4) { command = 'S'; param = 0x91; }	else
-			if (param <= 0x80) { param <<= 1; if (param > 255) param = 255; } else
+			if (param <= 0x80) { if((param << 1) > 255) param = 255; else param <<= 1; } else
 			command = 0;
 		} else if (!toIT && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD)))
 		{
