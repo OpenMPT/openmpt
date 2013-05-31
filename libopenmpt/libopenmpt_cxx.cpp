@@ -7,7 +7,7 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#include "common/stdafx.h"
+#include "BuildSettings.h"
 
 #include "libopenmpt_internal.h"
 #include "libopenmpt.hpp"
@@ -15,7 +15,6 @@
 #include "libopenmpt_impl.hpp"
 
 #include <algorithm>
-#include <iterator>
 #include <stdexcept>
 
 //#ifndef NO_LIBOPENMPT_CXX
@@ -51,17 +50,11 @@ std::string get( const std::string & key ) {
 } // namespace string
 
 std::vector<std::string> get_supported_extensions() {
-	std::vector<std::string> retval;
-	std::vector<const char *> extensions = CSoundFile::GetSupportedExtensions( false );
-	std::copy( extensions.begin(), extensions.end(), std::back_insert_iterator<std::vector<std::string> >( retval ) );
-	return retval;
+	return openmpt::module_impl::get_supported_extensions();
 }
 
 bool is_extension_supported( const std::string & extension ) {
-	std::vector<std::string> extensions = get_supported_extensions();
-	std::string lowercase_ext = extension;
-	std::transform( lowercase_ext.begin(), lowercase_ext.end(), lowercase_ext.begin(), tolower );
-	return std::find( extensions.begin(), extensions.end(), lowercase_ext ) != extensions.end();
+	return openmpt::module_impl::is_extension_supported( extension );
 }
 
 double could_open_propability( std::istream & stream, double effort, std::ostream & log, const detail::api_version_checker & ) {
