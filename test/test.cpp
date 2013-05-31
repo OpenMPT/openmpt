@@ -113,24 +113,33 @@ static void show_ok(const char * const file, const int line, const char * const 
 
 static int fail_count = 0;
 
+static void ReportException(const char * const file, const int line, const char * const description)
+{
+	try
+	{
+		throw; // get the exception
+	} catch(std::exception & e)
+	{
+		show_fail(THIS_FILE, __LINE__, description, true, e.what());
+		throw; // rethrow
+	} catch(...)
+	{
+		show_fail(THIS_FILE, __LINE__, description, true);
+		throw; // rethrow
+	}
+}
+
 #define MULTI_TEST_TRY   try { \
                           fail_count = 0;
 #define MULTI_TEST_CATCH  if(fail_count > 0) { \
                            throw std::runtime_error("Test failed."); \
                           } \
-                         } catch ( std::exception & e ) { \
-                          show_fail(THIS_FILE, __LINE__, func_description, true, e.what()); \
-													throw; \
                          } catch ( ... ) { \
-                          show_fail(THIS_FILE, __LINE__, func_description, true); \
-													throw; \
+                          ReportException(THIS_FILE, __LINE__, func_description); \
                          }
 #define TEST_TRY         try {
-#define TEST_CATCH       } catch ( std::exception & e ) { \
-                          show_fail(THIS_FILE, __LINE__, fail_description, true, e.what()); \
-                          throw; \
-                         } catch ( ... ) { \
-                          show_fail(THIS_FILE, __LINE__, fail_description, true); \
+#define TEST_CATCH       } catch ( ... ) { \
+                          ReportException(THIS_FILE, __LINE__, fail_description); \
                           throw; \
                          }
 #define TEST_OK()        show_ok(THIS_FILE, __LINE__, ok_description)
