@@ -464,5 +464,8 @@
     <ClCompile Include="..\test\test.cpp">
       <Filter>Source Files\test</Filter>
     </ClCompile>
+    <ClCompile Include="libopenmpt_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -49,6 +49,7 @@ LIBOPENMPT_SOURCES += \
  ../libopenmpt/libopenmpt.cpp \
  ../libopenmpt/libopenmpt_c.cpp \
  ../libopenmpt/libopenmpt_cxx.cpp \
+ ../libopenmpt/libopenmpt_impl.cpp \
  ../libopenmpt/libopenmpt_interactive.cpp \
  ../libopenmpt/libopenmpt_version.cpp \
 
@@ -70,8 +71,8 @@ all: bin/openmpt123 bin/modplug123
 bin/openmpt123: $(OPENMPT123_OBJECTS)
 	$(LD) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-bin/modplug123: $(OPENMPT123_OBJECTS)
-	$(LD) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+bin/modplug123: bin/openmpt123
+	cp $^ $@
 
 clean:
 	rm -f bin/openmpt123 bin/modplug123 $(OPENMPT123_OBJECTS)

@@ -452,6 +452,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClCompile Include="libopenmpt.cpp" />
     <ClCompile Include="libopenmpt_c.cpp" />
     <ClCompile Include="libopenmpt_cxx.cpp" />
+    <ClCompile Include="libopenmpt_impl.cpp" />
     <ClCompile Include="libopenmpt_interactive.cpp" />
     <ClCompile Include="libopenmpt_modplug.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">CompileAsC</CompileAs>
