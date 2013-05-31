@@ -7,7 +7,7 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#include "common/stdafx.h"
+#include "BuildSettings.h"
 
 #include "libopenmpt_internal.h"
 #include "libopenmpt.h"
@@ -15,6 +15,7 @@
 
 #include "libopenmpt_impl.hpp"
 
+#include <sstream>
 #include <stdexcept>
 
 #include <cmath>
@@ -130,7 +131,7 @@ static std::string format_exception( const char * const function ) {
 static void report_exception( const char * const function, openmpt_log_func const logfunc = nullptr, void * const user = 0, openmpt::module_impl * const impl = nullptr ) {
 	const std::string message = format_exception( function );
 	if ( impl ) {
-		impl->PushToCSoundFileLog( LogError, message );
+		impl->PushToCSoundFileLog( message );
 	} else if ( logfunc ) {
 		logfunc( message.c_str(), user );
 	} else {
@@ -234,7 +235,7 @@ const char * openmpt_get_supported_extensions(void) {
 	try {
 		std::string retval;
 		bool first = true;
-		std::vector<std::string> supported_extensions = openmpt::get_supported_extensions();
+		std::vector<std::string> supported_extensions = openmpt::module_impl::get_supported_extensions();
 		for ( std::vector<std::string>::iterator i = supported_extensions.begin(); i != supported_extensions.end(); ++i ) {
 			if ( first ) {
 				first = false;
@@ -253,7 +254,7 @@ int openmpt_is_extension_supported( const char * extension ) {
 		if ( !extension ) {
 			return 0;
 		}
-		return openmpt::is_extension_supported( extension ) ? 1 : 0;
+		return openmpt::module_impl::is_extension_supported( extension ) ? 1 : 0;
 	} OPENMPT_INTERFACE_CATCH;
 	return 0;
 }

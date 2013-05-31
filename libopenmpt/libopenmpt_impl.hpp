@@ -10,16 +10,16 @@
 #ifndef LIBOPENMPT_IMPL_HPP
 #define LIBOPENMPT_IMPL_HPP
 
-#include "common/stdafx.h"
-
 #include "libopenmpt_internal.h"
 #include "libopenmpt.hpp"
-#include "libopenmpt.h"
 
 #include <memory>
+#include <ostream>
 
-#include "soundlib/Sndfile.h"
-#include "soundlib/FileReader.h"
+// forward declarations
+enum LogLevel;
+class FileReader;
+class CSoundFile;
 
 namespace openmpt {
 
@@ -43,14 +43,12 @@ private:
 	const char * text;
 }; // class exception_message
 
-class log_interface : public ILog {
+class log_interface {
 protected:
 	log_interface();
 public:
 	virtual ~log_interface();
 	virtual void log( const std::string & message ) const = 0;
-private:
-	void AddToLog( LogLevel level, const std::string & text ) const;
 }; // class log_interface
 
 class std_ostream_log : public log_interface {
@@ -62,35 +60,32 @@ public:
 	virtual void log( const std::string & message ) const;
 }; // class CSoundFileLog_std_ostream
 
+class log_forwarder;
+
 class module_impl {
 protected:
-	std::shared_ptr<log_interface> m_LogForwarder;
+	std::shared_ptr<log_interface> m_Log;
+	std::unique_ptr<log_forwarder> m_LogForwarder;
 	std::vector<std::int16_t> m_int16Buffer;
 	std::vector<float> m_floatBuffer;
 	double m_currentPositionSeconds;
-protected:
-	mutable CSoundFile m_sndFile;
-	std::vector<std::pair<LogLevel,std::string> > m_loaderMessages;
-	class loader_log : public ILog {
-	private:
-		module_impl & self;
-	public:
-		loader_log( module_impl & s );
-	private:
-		void AddToLog( LogLevel level, const std::string & text ) const;
-	}; // class loader_log
+	std::unique_ptr<CSoundFile> m_sndFile;
+	std::vector<std::string> m_loaderMessages;
 public:
-	void PushToCSoundFileLog( LogLevel level, const std::string & text ) const;
+	void PushToCSoundFileLog( const std::string & text ) const;
+	void PushToCSoundFileLog( const LogLevel & level, const std::string & text ) const;
 private:
 	std::int32_t get_quality() const;
 	void set_quality( std::int32_t value );
-	void apply_mixer_settings( std::int32_t samplerate, int channels, SampleFormat format );
+	void apply_mixer_settings( std::int32_t samplerate, int channels, bool format_float );
 	void apply_libopenmpt_defaults();
 	void init();
-	static void load( CSoundFile & sndFile, FileReader file );
-	void load( FileReader file );
+	static void load( CSoundFile & sndFile, const FileReader & file );
+	void load( const FileReader & file );
 	std::size_t read_wrapper( void * buffer, std::size_t count );
 public:
+	static std::vector<std::string> get_supported_extensions();
+	static bool is_extension_supported( const std::string & extension );
 	static double could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log );
 	module_impl( std::istream & stream, std::shared_ptr<log_interface> log );
 	module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log );

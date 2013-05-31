@@ -1,5 +1,5 @@
 
-#include "stdafx.h"
+#include "BuildSettings.h"
 
 #include "libopenmpt_internal.h"
 #include "libopenmpt_interactive.hpp"
