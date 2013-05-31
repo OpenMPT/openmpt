@@ -38,22 +38,20 @@ void xmp_openmpt_on_dll_unload();
 #endif // NOXMPLAY
 
 BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
-	#ifndef NO_XMPLAY
-		switch ( fdwReason ) {
-		case DLL_PROCESS_ATTACH:
-			#ifndef NO_XMPLAY
-				xmp_openmpt_on_dll_load();
-			#endif // NOXMPLAY
-			break;
-		case DLL_PROCESS_DETACH:
-			#ifndef NO_XMPLAY
-				xmp_openmpt_on_dll_unload();
-			#endif // NOXMPLAY
-			break;
-		}
-	#endif // NOXMPLAY
+	switch ( fdwReason ) {
+	case DLL_PROCESS_ATTACH:
+		#ifndef NO_XMPLAY
+			xmp_openmpt_on_dll_load();
+		#endif // NOXMPLAY
+		break;
+	case DLL_PROCESS_DETACH:
+		#ifndef NO_XMPLAY
+			xmp_openmpt_on_dll_unload();
+		#endif // NOXMPLAY
+		break;
+	}
 	return TRUE;
 }
 
-#endif
-#endif
+#endif // _WIN32
+#endif // LIBOPENMPT_BUILD_DLL

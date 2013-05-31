@@ -107,7 +107,8 @@ const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING "." STR
 
 namespace detail {
 
-class version_mismatch : public openmpt::exception {
+// has to be exported for type_info lookup to work
+class LIBOPENMPT_CXX_API version_mismatch : public openmpt::exception {
 public:
 	version_mismatch() throw() { }
 	virtual ~version_mismatch() throw() { }

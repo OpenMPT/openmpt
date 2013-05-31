@@ -15,6 +15,7 @@
 #include "libopenmpt_impl.hpp"
 
 #include <algorithm>
+#include <iterator>
 #include <stdexcept>
 
 //#ifndef NO_LIBOPENMPT_CXX
