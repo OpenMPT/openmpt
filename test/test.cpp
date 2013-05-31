@@ -91,7 +91,7 @@ static void show_fail(const char * const file, const int line, const char * cons
 	if(!exception)
 	{
 		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << std::endl;
-	} else if(exception_text && std::string(exception_text).empty())
+	} else if(!exception_text || (exception_text && std::string(exception_text).empty()))
 	{
 		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << " EXCEPTION!" << std::endl;
 	} else
@@ -419,6 +419,8 @@ void TestMisc()
 	VERIFY_EQUAL( mpt::String::LTrim(" "), "" );
 	VERIFY_EQUAL( mpt::String::RTrim(" "), "" );
 	VERIFY_EQUAL( mpt::String::Trim(" "), "" );
+
+	VERIFY_EQUAL(1,2);
 
 	// These should fail to compile
 	//Util::Round<std::string>(1.0);
