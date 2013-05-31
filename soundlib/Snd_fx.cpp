@@ -1723,8 +1723,15 @@ BOOL CSoundFile::ProcessEffects()
 			}
 		}
 
+		if(nStartTick != 0 && pChn->rowCommand.note == NOTE_KEYOFF && pChn->rowCommand.volcmd == VOLCMD_PANNING && IsCompatibleMode(TRK_FASTTRACKER2))
+		{
+			// FT2 compatibility: If there's a delayed note off, panning commands are ignored. WTF!
+			// Test case: PanOff.xm
+			pChn->rowCommand.volcmd = VOLCMD_NONE;
+		}
+
 		bool triggerNote = (m_nTickCount == nStartTick);	// Can be delayed by a note delay effect
-		// IT Compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered. Scream Tracker 3 does the same.
+		// IT compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered. Scream Tracker 3 does the same.
 		// Test case: PatternDelay-NoteDelay.it
 		if((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) && nStartTick > 0 && (m_nTickCount % (m_nMusicSpeed + m_nFrameDelay)) == nStartTick)
 		{
