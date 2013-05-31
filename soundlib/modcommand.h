@@ -42,7 +42,7 @@ public:
 
 	// Defines the maximum value for column data when interpreted as 2-byte value
 	// (for example volcmd and vol). The valid value range is [0, maxColumnValue].
-	enum { maxColumnValue = 999 };
+	static const int maxColumnValue = 999;
 
 	// Returns empty modcommand.
 	static ModCommand Empty() { ModCommand m = { 0, 0, 0, 0, 0, 0 }; return m; }
