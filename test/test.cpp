@@ -420,8 +420,6 @@ void TestMisc()
 	VERIFY_EQUAL( mpt::String::RTrim(" "), "" );
 	VERIFY_EQUAL( mpt::String::Trim(" "), "" );
 
-	VERIFY_EQUAL(1,2);
-
 	// These should fail to compile
 	//Util::Round<std::string>(1.0);
 	//Util::Round<int64>(1.0);
