@@ -105,6 +105,39 @@ public:
 	}
 }; // class CSoundFileLog_log_func
 
+static std::string format_exception( const char * const function ) {
+	std::ostringstream err;
+	try {
+		throw;
+	} catch ( openmpt::exception & e ) {
+		err
+			<< function << ": "
+			<< "ERROR: "
+			<< e.what();
+	} catch ( std::exception & e ) {
+		err
+			<< function << ": "
+			<< "INTERNAL ERROR: "
+			<< e.what();
+	} catch ( ... ) {
+		err
+			<< function << ": "
+			<< "UNKOWN INTERNAL ERROR";
+	}
+	return err.str();
+}
+
+static void report_exception( const char * const function, openmpt_log_func const logfunc = nullptr, void * const user = 0, openmpt::module_impl * const impl = nullptr ) {
+	const std::string message = format_exception( function );
+	if ( impl ) {
+		impl->PushToCSoundFileLog( LogError, message );
+	} else if ( logfunc ) {
+		logfunc( message.c_str(), user );
+	} else {
+		openmpt_log_func_default( message.c_str(), NULL );
+	}
+}
+
 } // namespace openmpt
 
 extern "C" {
@@ -116,137 +149,29 @@ struct openmpt_module {
 };
 
 #define OPENMPT_INTERFACE_CATCH \
-	 catch ( openmpt::exception & e ) { \
-		std::cerr \
-			<< "openmpt: " \
-			<< __FUNCTION__ << ": " \
-			<< "ERROR: " \
-			<< e.what() \
-			<< std::endl; \
-	} catch ( std::exception & e ) { \
-		std::cerr \
-			<< "openmpt: " \
-			<< __FUNCTION__ << ": " \
-			<< "INTERNAL ERROR: " \
-			<< e.what() \
-			<< std::endl; \
-	} catch ( ... ) { \
-		std::cerr \
-			<< "openmpt: " \
-			<< __FUNCTION__ << ": " \
-			<< "UNKOWN INTERNAL ERROR" \
-			<< std::endl; \
+	 catch ( ... ) { \
+		openmpt::report_exception( __FUNCTION__ ); \
 	} \
 	do { } while (0) \
 /**/
 
 #define OPENMPT_INTERFACE_CATCH_TO_LOG_FUNC \
-	 catch ( openmpt::exception & e ) { \
-		std::ostringstream err; \
-		err \
-			<< __FUNCTION__ << ": " \
-			<< "ERROR: " \
-			<< e.what(); \
-		if ( logfunc ) { \
-			logfunc( err.str().c_str(), user ); \
-		} else { \
-			openmpt_log_func_default( err.str().c_str(), NULL ); \
-		} \
-	} catch ( std::exception & e ) { \
-		std::ostringstream err; \
-		err \
-			<< __FUNCTION__ << ": " \
-			<< "INTERNAL ERROR: " \
-			<< e.what(); \
-		if ( logfunc ) { \
-			logfunc( err.str().c_str(), user ); \
-		} else { \
-			openmpt_log_func_default( err.str().c_str(), NULL ); \
-		} \
-	} catch ( ... ) { \
-		std::ostringstream err; \
-		err \
-			<< __FUNCTION__ << ": " \
-			<< "UNKOWN INTERNAL ERROR"; \
-		if ( logfunc ) { \
-			logfunc( err.str().c_str(), user ); \
-		} else { \
-			openmpt_log_func_default( err.str().c_str(), NULL ); \
-		} \
+	 catch ( ... ) { \
+		openmpt::report_exception( __FUNCTION__, logfunc, user ); \
 	} \
 	do { } while (0) \
 /**/
 
 #define OPENMPT_INTERFACE_CATCH_TO_MOD_LOG_FUNC \
-	 catch ( openmpt::exception & e ) { \
-		std::ostringstream err; \
-		err \
-			<< __FUNCTION__ << ": " \
-			<< "ERROR: " \
-			<< e.what(); \
-		if ( mod->logfunc ) { \
-			mod->logfunc( err.str().c_str(), mod->user ); \
-		} else { \
-			openmpt_log_func_default( err.str().c_str(), NULL ); \
-		} \
-	} catch ( std::exception & e ) { \
-		std::ostringstream err; \
-		err \
-			<< __FUNCTION__ << ": " \
-			<< "INTERNAL ERROR: " \
-			<< e.what(); \
-		if ( mod->logfunc ) { \
-			mod->logfunc( err.str().c_str(), mod->user ); \
-		} else { \
-			openmpt_log_func_default( err.str().c_str(), NULL ); \
-		} \
-	} catch ( ... ) { \
-		std::ostringstream err; \
-		err \
-			<< __FUNCTION__ << ": " \
-			<< "UNKOWN INTERNAL ERROR"; \
-		if ( mod->logfunc ) { \
-			mod->logfunc( err.str().c_str(), mod->user ); \
-		} else { \
-			openmpt_log_func_default( err.str().c_str(), NULL ); \
-		} \
+	 catch ( ... ) { \
+		openmpt::report_exception( __FUNCTION__, mod->logfunc, mod->user ); \
 	} \
 	do { } while (0) \
 /**/
 
 #define OPENMPT_INTERFACE_CATCH_TO_LOG \
-	 catch ( openmpt::exception & e ) { \
-		std::ostringstream err; \
-		err \
-			<< __FUNCTION__ << ": " \
-			<< "ERROR: " \
-			<< e.what(); \
-		if ( mod && mod->impl ) { \
-			mod->impl->PushToCSoundFileLog( LogError, err.str() ); \
-		} else { \
-			openmpt_log_func_default( err.str().c_str(), NULL ); \
-		} \
-	} catch ( std::exception & e ) { \
-		std::ostringstream err; \
-		err \
-			<< __FUNCTION__ << ": " \
-			<< "INTERNAL ERROR: " \
-			<< e.what(); \
-		if ( mod && mod->impl ) { \
-			mod->impl->PushToCSoundFileLog( LogError, err.str() ); \
-		} else { \
-			openmpt_log_func_default( err.str().c_str(), NULL ); \
-		} \
-	} catch ( ... ) { \
-		std::ostringstream err; \
-		err \
-			<< __FUNCTION__ << ": " \
-			<< "UNKOWN INTERNAL ERROR"; \
-		if ( mod && mod->impl ) { \
-			mod->impl->PushToCSoundFileLog( LogError, err.str() ); \
-		} else { \
-			openmpt_log_func_default( err.str().c_str(), NULL ); \
-		} \
+	 catch ( ... ) { \
+		openmpt::report_exception( __FUNCTION__, mod->logfunc, mod->user, mod->impl ); \
 	} \
 	do { } while (0) \
 /**/
@@ -334,7 +259,7 @@ int openmpt_is_extension_supported( const char * extension ) {
 }
 
 void openmpt_log_func_default( const char * message, void * /*user*/ ) {
-	fprintf( stderr, "%s\n", message );
+	fprintf( stderr, "openmpt: %s\n", message );
 	fflush( stderr );
 }
 
