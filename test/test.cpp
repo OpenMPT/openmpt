@@ -120,11 +120,11 @@ static void ReportException(const char * const file, const int line, const char 
 		throw; // get the exception
 	} catch(std::exception & e)
 	{
-		show_fail(THIS_FILE, __LINE__, description, true, e.what());
+		show_fail(file, line, description, true, e.what());
 		throw; // rethrow
 	} catch(...)
 	{
-		show_fail(THIS_FILE, __LINE__, description, true);
+		show_fail(file, line, description, true);
 		throw; // rethrow
 	}
 }
