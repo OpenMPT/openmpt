@@ -735,6 +735,10 @@ static void getsinc(short int *psinc, double beta, double lowpass_factor)
 }
 
 
+#if 0
+
+// this code is currently unused
+
 static double GetSpline(double x, double c0, double c1, double c2, double c3)
 {
 	double Xo = c1;
@@ -763,6 +767,8 @@ static void getdownsample2x(short int *psinc)
 		psinc[i*8+0] = (short int)(GetSpline(x+0.5, 1, 0, 0, 0) * 8192);
 	}
 }
+
+#endif
 
 
 #ifdef MODPLUG_TRACKER
