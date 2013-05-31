@@ -60,7 +60,7 @@ class log_forwarder : public ILog {
 private:
 	std::shared_ptr<log_interface> destination;
 public:
-	log_forwarder( std::shared_ptr<log_interface> dest ) {
+	log_forwarder( std::shared_ptr<log_interface> dest ) : destination(dest) {
 		return;
 	}
 	virtual ~log_forwarder() {
@@ -104,8 +104,8 @@ void loader_log::AddToLog( LogLevel level, const std::string & text ) const {
 void module_impl::PushToCSoundFileLog( const std::string & text ) const {
 	m_sndFile->AddToLog( LogError, text );
 }
-void module_impl::PushToCSoundFileLog( const LogLevel & level, const std::string & text ) const {
-	m_sndFile->AddToLog( level, text );
+void module_impl::PushToCSoundFileLog( int loglevel, const std::string & text ) const {
+	m_sndFile->AddToLog( (LogLevel)loglevel, text );
 }
 
 std::int32_t module_impl::get_quality() const {
