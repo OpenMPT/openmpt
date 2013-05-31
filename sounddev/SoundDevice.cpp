@@ -1335,7 +1335,6 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 	DWORD pollingstart = GetTickCount();
 	while(InterlockedExchangeAdd(&m_RenderingSilence, 0) != (silence?1:0))
 	{
-		Sleep(1);
 		if(GetTickCount() - pollingstart > 1000)
 		{
 			if(silence)
@@ -1359,6 +1358,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 			}
 			break;
 		}
+		Sleep(1);
 	}
 }
 
@@ -1407,10 +1407,11 @@ BOOL CASIODevice::Close()
 {
 	if (IsOpen())
 	{
+		Stop();
 		if (m_bMixRunning)
 		{
 			m_bMixRunning = FALSE;
-			ALWAYS_ASSERT(g_asio_startcount==1 || g_asio_startcount==0);
+			ALWAYS_ASSERT(g_asio_startcount==0);
 			try
 			{
 				m_pAsioDrv->stop();
@@ -1419,6 +1420,7 @@ BOOL CASIODevice::Close()
 				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 			}
 		}
+		g_asio_startcount = 0;
 		SetRenderSilence(false);
 		try
 		{
@@ -1440,10 +1442,13 @@ BOOL CASIODevice::Close()
 void CASIODevice::InternalReset()
 //-------------------------------
 {
+	if(IsOpen())
+	{
+		Stop();
 		if(m_bMixRunning)
 		{
 			m_bMixRunning = FALSE;
-			ALWAYS_ASSERT(g_asio_startcount==1 || g_asio_startcount==0);
+			ALWAYS_ASSERT(g_asio_startcount==0);
 			try
 			{
 				m_pAsioDrv->stop();
@@ -1454,6 +1459,7 @@ void CASIODevice::InternalReset()
 			g_asio_startcount = 0;
 			SetRenderSilence(false);
 		}
+	}
 }
 
 
