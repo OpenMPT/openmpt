@@ -17,7 +17,6 @@
 #include <ostream>
 
 // forward declarations
-enum LogLevel;
 class FileReader;
 class CSoundFile;
 
@@ -73,7 +72,7 @@ protected:
 	std::vector<std::string> m_loaderMessages;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;
-	void PushToCSoundFileLog( const LogLevel & level, const std::string & text ) const;
+	void PushToCSoundFileLog( int loglevel, const std::string & text ) const;
 private:
 	std::int32_t get_quality() const;
 	void set_quality( std::int32_t value );

@@ -11,6 +11,7 @@
 #define LIBOPENMPT_H
 
 #include "libopenmpt_config.h"
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus

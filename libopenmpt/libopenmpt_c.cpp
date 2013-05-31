@@ -15,6 +15,7 @@
 
 #include "libopenmpt_impl.hpp"
 
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
