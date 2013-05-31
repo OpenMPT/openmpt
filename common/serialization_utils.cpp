@@ -553,10 +553,10 @@ void Ssb::OnWroteItem(const void* pId, const size_t nIdSize, const Postype& posB
 	if (nRawEntrySize > std::numeric_limits<DataSize>::max())
 		{ AddWriteNote(SNW_INSUFFICIENT_DATASIZETYPE); return; }	
 
-	DataSize nEntrySize = static_cast<DataSize>(nRawEntrySize);
-
-	if(GetFlag(RwfRMapHasSize) && nEntrySize > (uint64_max >> 2))
+	if(GetFlag(RwfRMapHasSize) && nRawEntrySize > (std::numeric_limits<DataSize>::max() >> 2))
 		{ AddWriteNote(SNW_DATASIZETYPE_OVERFLOW); return; }
+
+	DataSize nEntrySize = static_cast<DataSize>(nRawEntrySize);
 
 	// Handle fixed size entries:
 	if (m_nFixedEntrySize > 0)
