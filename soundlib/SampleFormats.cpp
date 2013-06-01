@@ -2072,7 +2072,7 @@ struct FLACDecoder
 			{
 				const char *tag = reinterpret_cast<const char *>(metadata->data.vorbis_comment.comments[i].entry);
 				const FLAC__uint32 length = metadata->data.vorbis_comment.comments[i].length;
-				if(length > 6 && !mpt_strnicmp(tag, "TITLE=", 6))
+				if(length > 6 && !mpt::strnicmp(tag, "TITLE=", 6))
 				{
 					mpt::String::Read<mpt::String::maybeNullTerminated>(client.sndFile.m_szNames[client.sample], tag + 6, length - 6);
 					break;

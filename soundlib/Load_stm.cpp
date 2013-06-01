@@ -123,8 +123,8 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.Read(fileHeader)
 		|| fileHeader.filetype != 2
 		|| fileHeader.dosEof != 0x1A
-		|| (mpt_strnicmp(fileHeader.trackername, "!SCREAM!", 8)
-			&& mpt_strnicmp(fileHeader.trackername, "BMOD2STM", 8)))
+		|| (mpt::strnicmp(fileHeader.trackername, "!SCREAM!", 8)
+			&& mpt::strnicmp(fileHeader.trackername, "BMOD2STM", 8)))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)

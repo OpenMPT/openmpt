@@ -742,7 +742,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlag
 								CHAR s[32];
 								memcpy(s, ptrk->ptracks, k);
 								s[k] = 0;
-								if ((!mpt_strnicmp(s, "Copyri", 6)) || (!s[0])) break;
+								if ((!mpt::strnicmp(s, "Copyri", 6)) || (!s[0])) break;
 								if (i == 0x03)
 								{
 									if (!m_szNames[0][0]) strcpy(m_szNames[0], s);

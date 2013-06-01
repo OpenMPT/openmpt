@@ -124,10 +124,7 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 }
 
 
-} // namespace mpt
-
-
-static inline int mpt_strnicmp(const char *a, const char *b, size_t count)
+static inline int strnicmp(const char *a, const char *b, size_t count)
 {
 	#if MPT_COMPILER_MSVC
 		return _strnicmp(a, b, count);
@@ -135,6 +132,9 @@ static inline int mpt_strnicmp(const char *a, const char *b, size_t count)
 		return strncasecmp(a, b, count);
 	#endif
 }
+
+
+} // namespace mpt
 
 
 #if MPT_COMPILER_MSVC

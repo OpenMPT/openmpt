@@ -505,7 +505,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			b1 = true;
 		}
-		if (!mpt_strnicmp(p->szLibraryName, mixPlugin.GetLibraryName(), 64))
+		if (!mpt::strnicmp(p->szLibraryName, mixPlugin.GetLibraryName(), 64))
 		{
 			b2 = true;
 		}
@@ -1634,7 +1634,7 @@ bool CVstPlugin::SaveProgram()
 		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 	}
 
-	bool bank = !mpt_strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
+	bool bank = !mpt::strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
 
 	std::fstream f;
 	f.open(files.first_file.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
