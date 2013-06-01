@@ -1014,7 +1014,7 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 
 		UINT susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
 		DWORD dwMemSize = GlobalSize(hCpy), dwPos = strlen(pszEnvHdr);
-		if ((dwMemSize > dwPos) && (!mpt_strnicmp(p, pszEnvHdr, dwPos - 2)))
+		if ((dwMemSize > dwPos) && (!mpt::strnicmp(p, pszEnvHdr, dwPos - 2)))
 		{
 			sscanf(p + dwPos, pszEnvFmt, &nPoints, &susBegin, &susEnd, &loopBegin, &loopEnd, &bSus, &bLoop, &bCarry);
 			while ((dwPos < dwMemSize) && (p[dwPos] != '\r') && (p[dwPos] != '\n')) dwPos++;
