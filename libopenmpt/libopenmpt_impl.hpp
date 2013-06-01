@@ -65,8 +65,6 @@ class module_impl {
 protected:
 	std::shared_ptr<log_interface> m_Log;
 	std::unique_ptr<log_forwarder> m_LogForwarder;
-	std::vector<std::int16_t> m_int16Buffer;
-	std::vector<float> m_floatBuffer;
 	double m_currentPositionSeconds;
 	std::unique_ptr<CSoundFile> m_sndFile;
 	std::vector<std::string> m_loaderMessages;
@@ -81,7 +79,8 @@ private:
 	void init();
 	static void load( CSoundFile & sndFile, const FileReader & file );
 	void load( const FileReader & file );
-	std::size_t read_wrapper( void * buffer, std::size_t count );
+	std::size_t read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
+	std::size_t read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );

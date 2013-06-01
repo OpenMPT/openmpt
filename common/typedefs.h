@@ -208,6 +208,33 @@ const uint64 uint64_max = UINT64_MAX;
 
 #endif
 
+struct int24
+{
+	uint8 bytes[3];
+	int24() { bytes[0] = bytes[1] = bytes[2] = 0; }
+	explicit int24(int other)
+	{
+		#ifdef PLATFORM_BIG_ENDIAN
+			bytes[0] = ((unsigned int)other>>16)&0xff;
+			bytes[1] = ((unsigned int)other>> 8)&0xff;
+			bytes[2] = ((unsigned int)other>> 0)&0xff;
+		#else
+			bytes[0] = ((unsigned int)other>> 0)&0xff;
+			bytes[1] = ((unsigned int)other>> 8)&0xff;
+			bytes[2] = ((unsigned int)other>>16)&0xff;
+		#endif
+	}
+	operator int() const
+	{
+		#ifdef PLATFORM_BIG_ENDIAN
+			return ((int8)bytes[0] * 65536) + (bytes[1] * 256) + bytes[2];
+		#else
+			return ((int8)bytes[2] * 65536) + (bytes[1] * 256) + bytes[0];
+		#endif
+	}
+};
+STATIC_ASSERT(sizeof(int24) == 3);
+
 typedef float float32;
 STATIC_ASSERT(sizeof(float32) == 4);
 

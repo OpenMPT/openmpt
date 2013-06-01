@@ -40,6 +40,28 @@ extern DWORD Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount);
+
+extern void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
+extern void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
+extern void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
+extern void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
+extern void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
+
+template<typename Tsample>
+void Convert32ToNonInterleaved(void * const *outputBuffers, std::size_t offset, const int *mixbuffer, std::size_t channels, std::size_t count)
+{
+	Tsample *buffers[4];
+	MemsetZero(buffers);
+	for(std::size_t channel = 0; channel < channels; ++channel)
+	{
+		buffers[channel] = reinterpret_cast<Tsample*>(outputBuffers[channel]);
+		buffers[channel] += offset; // skip to output position
+	}
+	Convert32ToNonInterleaved(buffers, mixbuffer, channels, count);
+}
+
+
+
 #ifdef ENABLE_X86
 extern VOID X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
 #endif
@@ -173,8 +195,8 @@ BOOL CSoundFile::GlobalFadeSong(UINT msec)
 }
 
 
-UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
-//----------------------------------------------------
+UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffers)
+//---------------------------------------------------------------------------------
 {
 	LPBYTE lpBuffer = (LPBYTE)lpDestBuffer;
 	LPCONVERTPROC pCvt = nullptr;
@@ -182,6 +204,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 	size_t lSampleSize;
 	UINT nStat = 0;
 	UINT nMaxPlugins;
+	std::size_t renderedCount = 0;
 
 	nMaxPlugins = MAX_MIXPLUGINS;
 	while ((nMaxPlugins > 0) && (!m_MixPlugins[nMaxPlugins-1].pMixPlugin)) nMaxPlugins--;
@@ -200,7 +223,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 	lSampleSize *= m_MixerSettings.GetBitsPerSample()/8;
 
 	lMax = count;
-	if ((!lMax) || (!lpBuffer) || (!m_nChannels)) return 0;
+	if((!lMax) || ((!lpBuffer) && (!outputBuffers)) || (!m_nChannels)) return 0;
 	samplecount_t lRead = lMax;
 	if(m_SongFlags[SONG_ENDREACHED])
 		goto MixDone;
@@ -357,6 +380,8 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 		}
 #endif
 
+		if(lpBuffer) // old style interleaved output buffer
+		{
 		#ifndef MODPLUG_TRACKER
 			LPBYTE buf_beg = lpBuffer;
 		#endif
@@ -372,8 +397,34 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 				ApplyFinalOutputGainFloat(reinterpret_cast<float*>(buf_beg), reinterpret_cast<float*>(buf_end));
 			}
 		#endif
+		}
+
+		if(outputBuffers) // non-interleaved one output buffer per channel
+		{
+			switch(m_MixerSettings.m_SampleFormat)
+			{
+				case SampleFormatUnsigned8: Convert32ToNonInterleaved<uint8>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
+				case SampleFormatInt16:     Convert32ToNonInterleaved<int16>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
+				case SampleFormatInt24:     Convert32ToNonInterleaved<int24>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
+				case SampleFormatInt32:     Convert32ToNonInterleaved<int32>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
+				case SampleFormatFloat32:   Convert32ToNonInterleaved<float>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
+				default:
+					break;
+			}
+			#ifndef MODPLUG_TRACKER
+				if(m_MixerSettings.IsFloatSampleFormat())
+				{
+					// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
+					for(std::size_t channel = 0; channel < m_MixerSettings.gnChannels; ++channel)
+					{
+						ApplyFinalOutputGainFloat(reinterpret_cast<float*>(outputBuffers[channel]) + renderedCount, reinterpret_cast<float*>(outputBuffers[channel]) + renderedCount + lCount);
+					}
+				}
+			#endif // !MODPLUG_TRACKER
+		}
 
 		// Buffer ready
+		renderedCount += lCount;
 		lRead -= lCount;
 		m_nBufferCount -= lCount;
 		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
@@ -381,7 +432,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count)
 MixDone:
 	if (lRead) memset(lpBuffer, (m_MixerSettings.m_SampleFormat == SampleFormatUnsigned8) ? 0x80 : 0, lRead * lSampleSize);
 	if (nStat) { m_nMixStat += nStat-1; m_nMixStat /= nStat; }
-	return lMax - lRead;
+	return renderedCount;
 }
 
 

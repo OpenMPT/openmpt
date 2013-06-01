@@ -1796,6 +1796,22 @@ DWORD Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 	#endif
 }
 
+void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
+//--------------------------------------------------------------------------------------------------------------------------
+{
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			int v = *mixbuffer;
+			if(v < MIXING_CLIPMIN) v = MIXING_CLIPMIN;
+			else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
+			buffers[channel][i] = (uint8)((v >> (24-MIXING_ATTENUATION))+0x80); // unsigned
+			mixbuffer++;
+		}
+	}
+}
+
 
 #ifdef ENABLE_X86
 static DWORD X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
@@ -1861,6 +1877,19 @@ DWORD Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 	#endif
 }
 
+void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
+//--------------------------------------------------------------------------------------------------------------------------
+{
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buffers[channel][i] = (int16)(Clamp(*mixbuffer, MIXING_CLIPMIN, MIXING_CLIPMAX) >> (16-MIXING_ATTENUATION));
+			mixbuffer++;
+		}
+	}
+}
+
 
 #ifdef ENABLE_X86
 static DWORD X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
@@ -1906,22 +1935,14 @@ done:
 static DWORD C_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 //-------------------------------------------------------------------------
 {
-	uint8 * p = (uint8*)lp16;
+	int24 * p = (int24*)lp16;
 	for(DWORD i=0; i<lSampleCount; i++)
 	{
 		int v = pBuffer[i];
 		if(v < MIXING_CLIPMIN) v = MIXING_CLIPMIN;
 		else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
 		v >>= (8-MIXING_ATTENUATION);
-#ifndef PLATFORM_BIG_ENDIAN
-		p[i*3+0] = ((unsigned)v>>0)&0xff;
-		p[i*3+1] = ((unsigned)v>>8)&0xff;
-		p[i*3+2] = ((unsigned)v>>16)&0xff;
-#else
-		p[i*3+0] = ((unsigned)v>>16)&0xff;
-		p[i*3+1] = ((unsigned)v>>8)&0xff;
-		p[i*3+2] = ((unsigned)v>>0)&0xff;
-#endif
+		p[i] = (int24)v;
 	}
 	return lSampleCount * 3;
 }
@@ -1936,6 +1957,18 @@ DWORD Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 	#endif
 }
 
+void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
+//--------------------------------------------------------------------------------------------------------------------------
+{
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buffers[channel][i] = (int24)(Clamp(*mixbuffer, MIXING_CLIPMIN, MIXING_CLIPMAX) >> (8-MIXING_ATTENUATION));
+			mixbuffer++;
+		}
+	}
+}
 
 
 #ifdef ENABLE_X86
@@ -2001,6 +2034,19 @@ DWORD Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 	#endif
 }
 
+void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
+//--------------------------------------------------------------------------------------------------------------------------
+{
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buffers[channel][i] = (int32)(Clamp(*mixbuffer, MIXING_CLIPMIN, MIXING_CLIPMAX) << MIXING_ATTENUATION);
+			mixbuffer++;
+		}
+	}
+}
+
 
 // convert to 32 bit floats and do NOT clip to [-1,1]
 DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount)
@@ -2013,6 +2059,20 @@ DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount)
 		out[i] = pBuffer[i] * factor;
 	}
 	return lSampleCount * 4;
+}
+
+void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
+//--------------------------------------------------------------------------------------------------------------------------
+{
+	const float factor = (1.0f/(float)MIXING_CLIPMAX);
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buffers[channel][i] = *mixbuffer * factor;
+			mixbuffer++;
+		}
+	}
 }
 
 
