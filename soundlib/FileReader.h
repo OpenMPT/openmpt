@@ -772,6 +772,22 @@ public:
 		}
 	}
 
+	// Read a string of length srcSize into a std::string dest using a given read mode.
+	// The file cursor is advanced by "srcSize" bytes.
+	template<mpt::String::ReadWriteMode mode>
+	bool ReadString(std::string &dest, const off_t srcSize)
+	{
+		if(CanRead(srcSize))
+		{
+			mpt::String::Read<mode>(dest, DataContainer().GetPartialRawData(streamPos, srcSize), srcSize);
+			streamPos += srcSize;
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
+
 	// Read an array.
 	// If successful, the file cursor is advanced by the size of the array.
 	// Otherwise, the target is zeroed.
