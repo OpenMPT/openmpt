@@ -1913,7 +1913,7 @@ static DWORD C_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 		if(v < MIXING_CLIPMIN) v = MIXING_CLIPMIN;
 		else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
 		v >>= (8-MIXING_ATTENUATION);
-#ifdef PLATFORM_BIG_ENDIAN
+#ifndef PLATFORM_BIG_ENDIAN
 		p[i*3+0] = ((unsigned)v>>0)&0xff;
 		p[i*3+1] = ((unsigned)v>>8)&0xff;
 		p[i*3+2] = ((unsigned)v>>16)&0xff;
