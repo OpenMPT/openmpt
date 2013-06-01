@@ -1955,17 +1955,15 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 siz
 	fwrite(&size, 1, sizeof(int16), f);		//write size
 	for(UINT nins=1; nins<=nInstruments; nins++)	//for all instruments...
 	{
-		char *pField;
 		if (Instruments[nins])
 		{
-			pField = GetInstrumentHeaderFieldPointer(Instruments[nins], code, size); //get ptr to field
+			WriteInstrumentHeaderStructOrField(Instruments[nins], f, code, size);
 		} else
 		{
 			ModInstrument *emptyInstrument = new ModInstrument();
-			pField = GetInstrumentHeaderFieldPointer(emptyInstrument, code, size); //get ptr to field
+			WriteInstrumentHeaderStructOrField(emptyInstrument, f, code, size);
 			delete emptyInstrument;
 		}
-		fwrite(pField, 1, size, f);				//write field data
 	}
 }
 
