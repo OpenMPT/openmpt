@@ -1122,7 +1122,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileN
 
 	int32 code = MULTICHAR4_LE_MSVC('M','P','T','X');
 	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
-	WriteInstrumentHeaderStruct(pIns, f);	// Write full extended header.
+	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
 
 	fclose(f);
 	return true;
@@ -1708,7 +1708,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 	int32 code = MULTICHAR4_LE_MSVC('M','P','T','X');
 	SwapBytesLE(code);
 	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
-	WriteInstrumentHeaderStruct(pIns, f);	// Write full extended header.
+	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
 
 	fclose(f);
 	return true;
@@ -1720,18 +1720,27 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const uint16 size, FileReader &file)
 //------------------------------------------------------------------------------------------------------------
 {
-	// get field's address in instrument's header
-	char *fadr = GetInstrumentHeaderFieldPointer(pIns, code, size);
-	 
-	if(fadr && code != MULTICHAR4_LE_MSVC('K','[','.','.'))	// copy field data in instrument's header
-		memcpy(fadr, file.GetRawData(), size);  // (except for keyboard mapping)
-	if(fadr && code == MULTICHAR4_LE_MSVC('n','[','.','.'))
-		mpt::String::SetNullTerminator(pIns->name);
-	if(fadr && code == MULTICHAR4_LE_MSVC('f','n','[','.'))
-		mpt::String::SetNullTerminator(pIns->filename);
-	file.Skip(size);
+	if(code == MULTICHAR4_LE_MSVC('K','[','.','.'))
+	{
+		// skip keyboard mapping
+		file.Skip(size);
+		return;
+	}
 
-	if(code == MULTICHAR4_LE_MSVC('d','F','.','.') && fadr != nullptr) // 'dF..' field requires additional processing.
+	bool success = ReadInstrumentHeaderField(pIns, code, size, file);
+
+	if(!success)
+	{
+		file.Skip(size);
+		return;
+	}
+
+	if(code == MULTICHAR4_LE_MSVC('n','[','.','.'))
+		mpt::String::SetNullTerminator(pIns->name);
+	if(code == MULTICHAR4_LE_MSVC('f','n','[','.'))
+		mpt::String::SetNullTerminator(pIns->filename);
+
+	if(code == MULTICHAR4_LE_MSVC('d','F','.','.')) // 'dF..' field requires additional processing.
 		ConvertReadExtendedFlags(pIns);
 }
 
