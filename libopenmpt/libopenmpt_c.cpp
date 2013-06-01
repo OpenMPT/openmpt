@@ -129,7 +129,7 @@ static std::string format_exception( const char * const function ) {
 	return err.str();
 }
 
-static void report_exception( const char * const function, openmpt_log_func const logfunc = nullptr, void * const user = 0, openmpt::module_impl * const impl = nullptr ) {
+static void report_exception( const char * const function, openmpt_log_func const logfunc = 0, void * const user = 0, openmpt::module_impl * const impl = 0 ) {
 	const std::string message = format_exception( function );
 	if ( impl ) {
 		impl->PushToCSoundFileLog( message );
