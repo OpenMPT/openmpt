@@ -184,6 +184,23 @@ std::string GetErrorMessage(DWORD nErrorCode);
 #endif // MODPLUG_TRACKER
 
 
+static inline char SanitizeFilenameChar(char c)
+//---------------------------------------------
+{
+	if(	c == '\\' ||
+		c == '\"' ||
+		c == '/'  ||
+		c == ':'  ||
+		c == '?'  ||
+		c == '<'  ||
+		c == '>'  ||
+		c == '*')
+	{
+		c = '_';
+	}
+	return c;
+}
+
 // Sanitize a filename (remove special chars)
 template <size_t size>
 void SanitizeFilename(char (&buffer)[size])
@@ -192,19 +209,26 @@ void SanitizeFilename(char (&buffer)[size])
 	STATIC_ASSERT(size > 0);
 	for(size_t i = 0; i < size; i++)
 	{
-		if(	buffer[i] == '\\' ||
-			buffer[i] == '\"' ||
-			buffer[i] == '/'  ||
-			buffer[i] == ':'  ||
-			buffer[i] == '?'  ||
-			buffer[i] == '<'  ||
-			buffer[i] == '>'  ||
-			buffer[i] == '*')
-		{
-			buffer[i] = '_';
-		}
+		buffer[i] = SanitizeFilenameChar(buffer[i]);
 	}
 }
+static inline void SanitizeFilename(std::string &str)
+//---------------------------------------------------
+{
+	for(size_t i = 0; i < str.length(); i++)
+	{
+		str[i] = SanitizeFilenameChar(str[i]);
+	}
+}
+#ifdef MODPLUG_TRACKER
+static inline void SanitizeFilename(CString &str)
+//-----------------------------------------------
+{
+	std::string tmp = str;
+	SanitizeFilename(tmp);
+	str = tmp.c_str();
+}
+#endif
 
 
 // Greatest Common Divisor.

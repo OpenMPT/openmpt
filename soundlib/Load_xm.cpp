@@ -654,7 +654,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	mpt::String::Write<mpt::String::spacePadded>(fileHeader.songName, m_szNames[0]);
 	fileHeader.eof = 0x1A;
 	std::string openMptTrackerName = MptVersion::GetOpenMPTVersionStr();
-	mpt::String::Write<mpt::String::spacePadded>(fileHeader.trackerName, openMptTrackerName.c_str(), openMptTrackerName.length());
+	mpt::String::Write<mpt::String::spacePadded>(fileHeader.trackerName, openMptTrackerName);
 
 	// Writing song header
 	fileHeader.version = 0x0104;					// XM Format v1.04

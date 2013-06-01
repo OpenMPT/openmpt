@@ -296,7 +296,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 					m_nSamples++;
 					if(static_cast<size_t>(objName) < names.size())
 					{
-						mpt::String::CopyN(m_szNames[GetNumSamples()], names[objName].c_str());
+						mpt::String::Copy(m_szNames[GetNumSamples()], names[objName]);
 					}
 				}
 			}

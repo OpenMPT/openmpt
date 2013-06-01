@@ -12,6 +12,7 @@
 
 #include <string>
 #include <cstdio>
+#include <cstring>
 #include <stdio.h>
 #if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #include <strings.h> // for strcasecmp
@@ -103,6 +104,24 @@ static inline std::string Replace(std::string str, const std::string &oldStr, co
 
 
 } // namespace String
+
+
+static inline std::size_t strnlen(const char *str, std::size_t n)
+//---------------------------------------------------------------
+{
+	if(n >= SIZE_MAX)
+	{
+		return std::strlen(str);
+	}
+	for(std::size_t i = 0; i < n; ++i)
+	{
+		if(str[i] == '\0')
+		{
+			return i;
+		}
+	}
+	return n;
+}
 
 
 } // namespace mpt
