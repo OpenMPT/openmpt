@@ -590,7 +590,7 @@ public:
 	void StopAllVsti();    //rewbs.VSTCompliance
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	UINT Read(LPVOID lpBuffer, UINT cbBuffer);
+	UINT Read(LPVOID lpBuffer, UINT cbBuffer, void * const *outputBuffers = nullptr);
 	UINT CreateStereoMix(int count);
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);

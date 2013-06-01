@@ -141,8 +141,6 @@ void module_impl::apply_libopenmpt_defaults() {
 	set_render_param( module::RENDER_QUALITY_PERCENT, 100 );
 }
 void module_impl::init() {
-	m_int16Buffer.resize( 4096 * 4 );
-	m_floatBuffer.resize( 4096 * 4 );
 	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
 	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
@@ -164,10 +162,32 @@ void module_impl::load( const FileReader & file ) {
 		m_loaderMessages.push_back( LogLevelToString( i->first ) + std::string(": ") + i->second );
 	}
 }
-std::size_t module_impl::read_wrapper( void * buffer, std::size_t count ) {
+std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right ) {
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
-		std::size_t count_chunk = m_sndFile->Read( buffer, static_cast<UINT>( std::min<std::size_t>( count, std::numeric_limits<UINT>::max() / 2 / 4 / 4 ) ) ); // safety margin / samplesize / channels
+		std::int16_t * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
+		std::size_t count_chunk = m_sndFile->Read(
+			0,
+			static_cast<UINT>( std::min<std::size_t>( count, std::numeric_limits<UINT>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			reinterpret_cast<void*const*>( buffers )
+			);
+		if ( count_chunk == 0 ) {
+			break;
+		}
+		count -= count_chunk;
+		count_read += count_chunk;
+	}
+	return count_read;
+}
+std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right ) {
+	std::size_t count_read = 0;
+	while ( count > 0 ) {
+		float * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
+		std::size_t count_chunk = m_sndFile->Read(
+			0,
+			static_cast<UINT>( std::min<std::size_t>( count, std::numeric_limits<UINT>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			reinterpret_cast<void*const*>( buffers )
+			);
 		if ( count_chunk == 0 ) {
 			break;
 		}
@@ -382,11 +402,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 		throw openmpt::exception_message("null pointer");
 	}
 	apply_mixer_settings( samplerate, 1, false );
-	m_int16Buffer.resize( count * 1 );
-	count = read_wrapper( &m_int16Buffer[0], count );
-	for ( std::size_t i = 0; i < count; ++i ) {
-		mono[i] = m_int16Buffer[i*1];
-	}
+	count = read_wrapper( count, mono, 0, 0, 0 );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }
@@ -395,12 +411,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 		throw openmpt::exception_message("null pointer");
 	}
 	apply_mixer_settings( samplerate, 2, false );
-	m_int16Buffer.resize( count * 2 );
-	count = read_wrapper( &m_int16Buffer[0], count );
-	for ( std::size_t i = 0; i < count; ++i ) {
-		left[i] = m_int16Buffer[i*2+0];
-		right[i] = m_int16Buffer[i*2+1];
-	}
+	count = read_wrapper( count, left, right, 0, 0 );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }
@@ -409,14 +420,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 		throw openmpt::exception_message("null pointer");
 	}
 	apply_mixer_settings( samplerate, 4, false );
-	m_int16Buffer.resize( count * 4 );
-	count = read_wrapper( &m_int16Buffer[0], count );
-	for ( std::size_t i = 0; i < count; ++i ) {
-		left[i] = m_int16Buffer[i*4+0];
-		right[i] = m_int16Buffer[i*4+1];
-		rear_left[i] = m_int16Buffer[i*4+2];
-		rear_right[i] = m_int16Buffer[i*4+3];
-	}
+	count = read_wrapper( count, left, right, rear_left, rear_right );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }
@@ -425,11 +429,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 		throw openmpt::exception_message("null pointer");
 	}
 	apply_mixer_settings( samplerate, 1, true );
-	m_floatBuffer.resize( count * 1 );
-	count = read_wrapper( &m_floatBuffer[0], count );
-	for ( std::size_t i = 0; i < count; ++i ) {
-		mono[i] = m_floatBuffer[i*1];
-	}
+	count = read_wrapper( count, mono, 0, 0, 0 );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }
@@ -438,12 +438,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 		throw openmpt::exception_message("null pointer");
 	}
 	apply_mixer_settings( samplerate, 2, true );
-	m_floatBuffer.resize( count * 2 );
-	count = read_wrapper( &m_floatBuffer[0], count );
-	for ( std::size_t i = 0; i < count; ++i ) {
-		left[i] = m_floatBuffer[i*2+0];
-		right[i] = m_floatBuffer[i*2+1];
-	}
+	count = read_wrapper( count, left, right, 0, 0 );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }
@@ -452,14 +447,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 		throw openmpt::exception_message("null pointer");
 	}
 	apply_mixer_settings( samplerate, 4, true );
-	m_floatBuffer.resize( count * 4 );
-	count = read_wrapper( &m_floatBuffer[0], count );
-	for ( std::size_t i = 0; i < count; ++i ) {
-		left[i] = m_floatBuffer[i*4+0];
-		right[i] = m_floatBuffer[i*4+1];
-		rear_left[i] = m_floatBuffer[i*4+2];
-		rear_right[i] = m_floatBuffer[i*4+3];
-	}
+	count = read_wrapper( count, left, right, rear_left, rear_right );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }
