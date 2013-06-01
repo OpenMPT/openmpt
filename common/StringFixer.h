@@ -95,7 +95,7 @@ namespace mpt { namespace String
 	void Read(std::string &dest, const char *srcBuffer, const size_t srcSize)
 	//-----------------------------------------------------------------------
 	{
-		//ASSERT(srcSize > 0);
+		ASSERT(srcSize > 0);
 
 		dest.clear();
 
@@ -163,7 +163,7 @@ namespace mpt { namespace String
 	//----------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
-		//ASSERT(srcSize > 0);
+		ASSERT(srcSize > 0);
 
 		const size_t maxSize = MIN(destSize, srcSize);
 		char *dst = destBuffer;
@@ -258,7 +258,6 @@ namespace mpt { namespace String
 	//----------------------------------------------------------------------------------------------
 	{
 		ASSERT(destSize > 0);
-		ASSERT(srcSize > 0);
 
 		const size_t maxSize = MIN(destSize, srcSize);
 		char *dst = destBuffer;
@@ -302,7 +301,6 @@ namespace mpt { namespace String
 	//------------------------------------------------------------------------------------
 	{
 		ASSERT(destBuffer.size() > 0);
-		ASSERT(srcSize > 0);
 		Write<mode>(destBuffer.data(), destBuffer.size(), srcBuffer, srcSize);
 	}
 
@@ -314,7 +312,6 @@ namespace mpt { namespace String
 	//-----------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
-		ASSERT(srcSize > 0);
 		Write<mode>(destBuffer, destSize, srcBuffer, srcSize);
 	}
 
