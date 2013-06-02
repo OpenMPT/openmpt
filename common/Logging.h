@@ -16,7 +16,7 @@ enum LogLevel
 	LogNotification = 2,
 	LogInformation  = 3,
 	LogWarning      = 4,
-	LogError        = 5,
+	LogError        = 5
 };
 
 

@@ -35,7 +35,7 @@ using std::istream;
 using std::ostream;
 using std::map;
 
-namespace srlztn {class Ssb;};
+namespace srlztn {class Ssb;}
 
 
 #ifdef BUILD_TUNINGBASE_AS_TEMPLATE

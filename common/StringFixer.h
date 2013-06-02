@@ -84,7 +84,7 @@ namespace mpt { namespace String
 		spacePadded,
 		// Reading: String may contain null characters anywhere. The last character is ignored (it is supposed to be 0).
 		// Writing: A space-padded string with a trailing null is written.
-		spacePaddedNull,
+		spacePaddedNull
 	};
 
 

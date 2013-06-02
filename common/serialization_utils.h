@@ -76,7 +76,7 @@ enum
 	SNW_DATASIZETYPE_OVERFLOW =							(0x13)	| SNT_FAILURE,
 	SNW_MAX_WRITE_COUNT_REACHED =						(0x14)	| SNT_FAILURE,
 	SNW_SUBENTRY_FAILURE =								(0x15)	| SNT_FAILURE,
-	SNW_INSUFFICIENT_DATASIZETYPE =						(0x16)	| SNT_FAILURE,
+	SNW_INSUFFICIENT_DATASIZETYPE =						(0x16)	| SNT_FAILURE
 };
 
 bool IsPrintableId(const void* pvId, const size_t nLength); // Return true if given id is printable, false otherwise. 

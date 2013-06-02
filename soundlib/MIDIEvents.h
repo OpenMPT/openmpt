@@ -286,4 +286,4 @@ namespace MIDIEvents
 	// Get second data byte from a MIDI event
 	uint8 GetDataByte2FromEvent(uint32 midiMsg);
 
-};
+}

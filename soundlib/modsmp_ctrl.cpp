@@ -348,7 +348,7 @@ namespace
 			*p = static_cast<T>(dVal);
 		}
 	}
-};
+}
 
 
 // Remove DC offset

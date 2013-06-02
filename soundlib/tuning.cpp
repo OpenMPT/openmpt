@@ -43,7 +43,7 @@ namespace CTuningS11n
 		uint16 m_nWriteCount;
 		static const uint16 s_nDefaultWriteCount = (uint16_max >> 2);
 	};
-};
+}
 
 using namespace CTuningS11n;
 
