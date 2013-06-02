@@ -247,6 +247,9 @@ public:
 	static void DeleteStaticdata();
 	static CTuningCollection& GetBuiltInTunings() {return *s_pTuningsSharedBuiltIn;}
 	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
+#else
+	void LoadBuiltInTunings();
+	CTuningCollection& GetBuiltInTunings() {return *m_pTuningsBuiltIn;}
 #endif
 	static CTuning *GetDefaultTuning() {return nullptr;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
@@ -257,6 +260,8 @@ private:
 #ifdef MODPLUG_TRACKER
 	static CTuningCollection* s_pTuningsSharedBuiltIn;
 	static CTuningCollection* s_pTuningsSharedLocal;
+#else
+	CTuningCollection* m_pTuningsBuiltIn;
 #endif
 	//<--Tuning
 

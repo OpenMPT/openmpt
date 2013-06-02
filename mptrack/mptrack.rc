@@ -2839,7 +2839,7 @@ IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
 // TUNING
 //
 
-IDR_BUILTIN_TUNINGS     TUNING                  "res\\built-inTunings.tc"
+IDR_BUILTIN_TUNINGS     TUNING                  "..\\soundlib\\Tunings\\built-inTunings.tc"
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 

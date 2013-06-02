@@ -189,6 +189,7 @@ static void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 			csf.Instruments[i]->pTuning = csf.GetLocalTunings().GetTuning(str);
 			if(csf.Instruments[i]->pTuning)
 				continue;
+#endif
 
 			csf.Instruments[i]->pTuning = csf.GetBuiltInTunings().GetTuning(str);
 			if(csf.Instruments[i]->pTuning)
@@ -196,7 +197,6 @@ static void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 
 			if(str == "TET12" && csf.GetBuiltInTunings().GetNumTunings() > 0)
 				csf.Instruments[i]->pTuning = &csf.GetBuiltInTunings().GetTuning(0);
-#endif
 
 			if(csf.Instruments[i]->pTuning)
 				continue;
