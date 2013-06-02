@@ -1,33 +1,81 @@
 
-CC  = $(SILENT)gcc 
-CXX = $(SILENT)g++
-LD  = $(SILENT)g++
+INFO       = @echo
+SILENT     = @
+VERYSILENT = @
+
+
+ifeq ($(VERBOSE),2)
+INFO       = @true
+SILENT     = 
+VERYSILENT = 
+endif
+
+ifeq ($(VERBOSE),1)
+INFO       = @true
+SILENT     = 
+VERYSILENT = @
+endif
+
+
+ifeq ($(QUIET),1)
+INFO       = @true
+SILENT     = @
+VERYSILENT = @
+endif
+
+
+CC  = gcc 
+CXX = g++
+LD  = g++
+AR  = ar
+
+DYNLINK = 1
+
 
 CPPFLAGS = -I../common -I.. 
-CXXFLAGS = -std=gnu++0x -O3 -fPIC -fvisibility=hidden -fno-strict-aliasing -ffast-math -Wall -Wextra -Wcast-align
-CFLAGS   = -std=gnu99   -O3 -fPIC -fvisibility=hidden -fno-strict-aliasing -ffast-math -Wall -Wextra -Wcast-align
+CXXFLAGS = -std=c++0x -O3 -fPIC -fvisibility=hidden -fno-strict-aliasing -ffast-math -Wall -Wextra -Wcast-align
+CFLAGS   = -std=c99   -O3 -fPIC -fvisibility=hidden -fno-strict-aliasing -ffast-math -Wall -Wextra -Wcast-align
 LDFLAGS  = 
 LDLIBS   = -lm
+ARFLAGS  = rcs
+
+ifeq ($(DYNLINK),1)
+LDFLAGS  += -Wl,-rpath,./bin -Wl,-rpath,../bin
+endif
 
 CXXFLAGS += -mtune=generic
 CFLAGS   += -mtune=generic
 
-#CPPFLAGS += $(shell pkg-config --cflags-only-I   zlib )
-#LDFLAGS  += $(shell pkg-config --libs-only-other zlib )
-#LDFLAGS  += $(shell pkg-config --libs-only-L     zlib )
-#LDLIBS   += $(shell pkg-config --libs-only-l     zlib )
-LDLIBS   += -lz
+CPPFLAGS += $(shell pkg-config --cflags-only-I   zlib )
+LDFLAGS  += $(shell pkg-config --libs-only-other zlib )
+LDFLAGS  += $(shell pkg-config --libs-only-L     zlib )
+LDLIBS   += $(shell pkg-config --libs-only-l     zlib )
+#LDLIBS   += -lz
 
 CPPFLAGS += $(shell pkg-config --cflags-only-I   portaudio-2.0 )
 LDFLAGS  += $(shell pkg-config --libs-only-other portaudio-2.0 )
 LDFLAGS  += $(shell pkg-config --libs-only-L     portaudio-2.0 )
 LDLIBS   += $(shell pkg-config --libs-only-l     portaudio-2.0 )
+#LDLIBS   += -lportaudio
 
 %: %.o
-	$(LD) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 %.o: %.CPP
-	$(COMPILE.cc) $(OUTPUT_OPTION) $<
+	$(INFO) [CXX] $<
+	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)@$(COMPILE.cc) $(OUTPUT_OPTION) $<
+
+%.o: %.cpp
+	$(INFO) [CXX] $<
+	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.cc) $(OUTPUT_OPTION) $<
+
+%.o: %.c
+	$(INFO) [CC ] $<
+	$(VERYSILENT)$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.c) $(OUTPUT_OPTION) $<
 
 
 BUILD_SVNVERSION = $(shell svnversion -n .. )
@@ -35,16 +83,22 @@ CPPFLAGS += -I../common/svn_version_svnversion -D BUILD_SVNVERSION=\"$(BUILD_SVN
 #CPPFLAGS += -I../common/svn_version_default
 
 
-COMMON_SOURCES += \
+CPPFLAGS += -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_DLL
+
+
+COMMON_CXX_SOURCES += \
  $(wildcard ../common/*.cpp) \
 
-SOUNDLIB_SOURCES += \
- $(COMMON_SOURCES) \
+SOUNDLIB_CXX_SOURCES += \
+ $(COMMON_CXX_SOURCES) \
  $(wildcard ../soundlib/*.cpp) \
- $(wildcard ../soundlib/*.CPP) \
+ 
+SOUNDLIB_CXX_SOURCES_UPPERCASE += $(wildcard ../soundlib/*.CPP)
+SOUNDLIB_CXX_SOURCES += $(SOUNDLIB_CXX_SOURCES_UPPERCASE:.CPP=.cpp)
 
-LIBOPENMPT_SOURCES += \
- $(SOUNDLIB_SOURCES) \
+
+LIBOPENMPT_CXX_SOURCES += \
+ $(SOUNDLIB_CXX_SOURCES) \
  $(wildcard ../test/*.cpp) \
  ../libopenmpt/libopenmpt.cpp \
  ../libopenmpt/libopenmpt_c.cpp \
@@ -53,27 +107,78 @@ LIBOPENMPT_SOURCES += \
  ../libopenmpt/libopenmpt_interactive.cpp \
  ../libopenmpt/libopenmpt_version.cpp \
 
-OPENMPT123_SOURCES += \
- $(LIBOPENMPT_SOURCES) \
+LIBOPENMPT_OBJECTS = $(LIBOPENMPT_CXX_SOURCES:.cpp=.o)
+LIBOPENMPT_DEPENDS = $(LIBOPENMPT_OBJECTS:.o=.d)
+ALL_OBJECTS += $(LIBOPENMPT_OBJECTS)
+ALL_DEPENDS += $(LIBOPENMPT_DEPENDS)
+
+
+LIBOPENMPT_MODPLUG_C_SOURCES += \
+ ../libopenmpt/libopenmpt_modplug.c \
+ 
+LIBOPENMPT_MODPLUG_OBJECTS = $(LIBOPENMPT_MODPLUG_C_SOURCES:.c=.o)
+LIBOPENMPT_MODPLUG_DEPENDS = $(LIBOPENMPT_MODPLUG_OBJECTS:.o=.d)
+ALL_OBJECTS += $(LIBOPENMPT_MODPLUG_OBJECTS)
+ALL_DEPENDS += $(LIBOPENMPT_MODPLUG_DEPENDS)
+
+
+ifeq ($(DYNLINK),1)
+OPENMPT123_CXX_SOURCES += \
  $(wildcard ../openmpt123/*.cpp) \
 
+else
+OPENMPT123_CXX_SOURCES += \
+ $(LIBOPENMPT_CXX_SOURCES) \
+ $(wildcard ../openmpt123/*.cpp) \
 
-CPPFLAGS += -DLIBOPENMPT_BUILD
+endif
 
-OPENMPT123_OBJECTS1 = $(OPENMPT123_SOURCES)
-OPENMPT123_OBJECTS2 = $(OPENMPT123_OBJECTS1:.cpp=.o)
-OPENMPT123_OBJECTS3 = $(OPENMPT123_OBJECTS2:.CPP=.o)
-OPENMPT123_OBJECTS = $(OPENMPT123_OBJECTS3)
+OPENMPT123_OBJECTS += $(OPENMPT123_CXX_SOURCES:.cpp=.o)
+OPENMPT123_DEPENDS = $(OPENMPT123_OBJECTS:.o=.d)
+ALL_OBJECTS += $(OPENMPT123_OBJECTS)
+ALL_DEPENDS += $(OPENMPT123_DEPENDS)
+
 
 .PHONY: all
-all: bin/openmpt123 bin/modplug123
+all:
 
+-include $(ALL_DEPENDS)
+
+OUTPUTS = bin/openmpt123 bin/modplug123 bin/libopenmpt.so bin/openmpt.a
+#OUTPUTS += lib/libopenmpt_modplug.so
+all: $(OUTPUTS)
+
+bin/libopenmpt.so: $(LIBOPENMPT_OBJECTS)
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) -shared $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+ifeq ($(DYNLINK),1)
+bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS)
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) -shared -Lbin $^ $(LOADLIBES) $(LDLIBS) -o $@
+else
+bin/libopenmpt_modplug.so: $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_MODPLUG_OBJECTS)
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) -shared $^ $(LOADLIBES) $(LDLIBS) -o $@
+endif
+
+bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
+	$(INFO) [AR ] $@
+	$(SILENT)$(AR) $(ARFLAGS) $@ $^
+
+ifeq ($(DYNLINK),1)
+bin/openmpt123: $(OPENMPT123_OBJECTS) bin/libopenmpt.so
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) -Lbin $(OPENMPT123_OBJECTS) $(LOADLIBES) $(LDLIBS) -lopenmpt -o $@
+else
 bin/openmpt123: $(OPENMPT123_OBJECTS)
-	$(LD) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) $(OPENMPT123_OBJECTS) $(LOADLIBES) $(LDLIBS) -o $@
+endif
 
 bin/modplug123: bin/openmpt123
 	cp $^ $@
 
 clean:
-	rm -f bin/openmpt123 bin/modplug123 $(OPENMPT123_OBJECTS)
+	rm -f $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS)
 
