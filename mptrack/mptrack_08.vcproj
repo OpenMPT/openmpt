@@ -471,6 +471,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MPTrackUtil.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\common\mptString.cpp"
 				>
 			</File>
@@ -1010,6 +1014,10 @@
 			</File>
 			<File
 				RelativePath=".\mptrack.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MPTrackUtil.h"
 				>
 			</File>
 			<File

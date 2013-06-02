@@ -511,6 +511,9 @@
     <ClCompile Include="..\test\test.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="MPTrackUtil.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -917,6 +920,9 @@
     </ClInclude>
     <ClInclude Include="..\test\test.h">
       <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="MPTrackUtil.h">
+      <Filter>Header Files\mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
