@@ -430,7 +430,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
 	}
 MixDone:
-	if (lRead) memset(lpBuffer, (m_MixerSettings.m_SampleFormat == SampleFormatUnsigned8) ? 0x80 : 0, lRead * lSampleSize);
+	if (lRead && lpBuffer) memset(lpBuffer, (m_MixerSettings.m_SampleFormat == SampleFormatUnsigned8) ? 0x80 : 0, lRead * lSampleSize); // clear remaining interleaved output buffer
 	if (nStat) { m_nMixStat += nStat-1; m_nMixStat /= nStat; }
 	return renderedCount;
 }
