@@ -123,7 +123,7 @@ static inline openmpt_stream_callbacks openmpt_stream_get_file_callbacks(void) {
 }
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* LIBOPENMPT_STREAM_CALLBACKS_H */

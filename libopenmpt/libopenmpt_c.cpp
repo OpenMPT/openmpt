@@ -656,6 +656,6 @@ LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_m
 #undef OPENMPT_INTERFACE_CATCH_TO_LOG_FUNC
 #undef OPENMPT_INTERFACE_CATCH
 
-}; // extern "C"
+} // extern "C"
 
 //#endif // NO_LIBOPENMPT_C
