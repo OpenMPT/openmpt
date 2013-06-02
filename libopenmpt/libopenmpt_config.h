@@ -15,7 +15,7 @@
 #define LIBOPENMPT_DLL_HELPER_EXPORT __declspec(dllexport)
 #define LIBOPENMPT_DLL_HELPER_IMPORT __declspec(dllimport)
 #define LIBOPENMPT_DLL_HELPER_LOCAL  
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__clang__)
 #define LIBOPENMPT_DLL_HELPER_EXPORT __attribute__((visibility("default")))
 #define LIBOPENMPT_DLL_HELPER_IMPORT __attribute__((visibility("default")))
 #define LIBOPENMPT_DLL_HELPER_LOCAL  __attribute__((visibility("hidden")))
