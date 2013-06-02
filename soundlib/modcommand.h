@@ -28,100 +28,6 @@
 #define NOTE_MIN_SPECIAL	NOTE_PCS
 
 
-//==============
-class ModCommand
-//==============
-{
-public:
-	typedef BYTE NOTE;
-	typedef BYTE INSTR;
-	typedef BYTE VOL;
-	typedef BYTE VOLCMD;
-	typedef BYTE COMMAND;
-	typedef BYTE PARAM;
-
-	// Defines the maximum value for column data when interpreted as 2-byte value
-	// (for example volcmd and vol). The valid value range is [0, maxColumnValue].
-	static const int maxColumnValue = 999;
-
-	// Returns empty modcommand.
-	static ModCommand Empty() { ModCommand m = { 0, 0, 0, 0, 0, 0 }; return m; }
-
-	bool operator==(const ModCommand& mc) const { return (std::memcmp(this, &mc, sizeof(ModCommand)) == 0); }
-	bool operator!=(const ModCommand& mc) const { return !(*this == mc); }
-
-	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) { note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol); }
-
-	uint16 GetValueVolCol() const { return GetValueVolCol(volcmd, vol); }
-	static uint16 GetValueVolCol(BYTE volcmd, BYTE vol) { return (volcmd << 8) + vol; }
-	void SetValueVolCol(const uint16 val) { volcmd = static_cast<BYTE>(val >> 8); vol = static_cast<BYTE>(val & 0xFF); }
-
-	uint16 GetValueEffectCol() const { return GetValueEffectCol(command, param); }
-	static uint16 GetValueEffectCol(BYTE command, BYTE param) { return (command << 8) + param; }
-	void SetValueEffectCol(const uint16 val) { command = static_cast<BYTE>(val >> 8); param = static_cast<BYTE>(val & 0xFF); }
-
-	// Clears modcommand.
-	void Clear() { memset(this, 0, sizeof(ModCommand)); }
-
-	// Returns true if modcommand is empty, false otherwise.
-	// If ignoreEffectValues is true (default), effect values are ignored if there is no effect command present.
-	bool IsEmpty(const bool ignoreEffectValues = true) const
-	{
-		if(ignoreEffectValues)
-			return *reinterpret_cast<const uint32 *>(this) == 0;	// First four bytes contain note, instr, volcmd and command
-			//return (this->note == 0 && this->instr == 0 && this->volcmd == VOLCMD_NONE && this->command == CMD_NONE);
-		else
-			return (*this == Empty());
-	}
-
-	// Returns true if instrument column represents plugin index.
-	bool IsInstrPlug() const { return IsPcNote(); }
-
-	// Returns true if and only if note is NOTE_PC or NOTE_PCS.
-	bool IsPcNote() const { return note == NOTE_PC || note == NOTE_PCS; }
-	static bool IsPcNote(const NOTE note_id) { return note_id == NOTE_PC || note_id == NOTE_PCS; }
-
-	// Returns true if and only if note is a valid musical note.
-	bool IsNote() const { return note >= NOTE_MIN && note <= NOTE_MAX; }
-	static bool IsNote(NOTE note) { return note >= NOTE_MIN && note <= NOTE_MAX; }
-	// Returns true if and only if note is a valid musical note or the note entry is empty.
-	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
-	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
-
-	// Convert a complete ModCommand item from one format to another
-	void Convert(MODTYPE fromType, MODTYPE toType);
-	// Convert MOD/XM Exx to S3M/IT Sxx
-	void ExtendedMODtoS3MEffect();
-	// Convert S3M/IT Sxx to MOD/XM Exx
-	void ExtendedS3MtoMODEffect();
-
-	// "Importance" of every FX command. Table is used for importing from formats with multiple effect columns
-	// and is approximately the same as in SchismTracker.
-	static size_t GetEffectWeight(COMMAND cmd);
-	// Try to convert a an effect into a volume column effect. Returns true on success.
-	static bool ConvertVolEffect(uint8 &effect, uint8 &param, bool force);
-	// Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
-	static bool CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2);
-
-	// Swap volume and effect column (doesn't do any conversion as it's mainly for importing formats with multiple effect columns, so beware!)
-	void SwapEffects()
-	{
-		std::swap(volcmd, command);
-		std::swap(vol, param);
-	}
-
-public:
-	BYTE note;
-	BYTE instr;
-	BYTE volcmd;
-	BYTE command;
-	BYTE vol;
-	BYTE param;
-};
-
-typedef ModCommand MODCOMMAND_ORIGINAL;
-
-
 // Volume Column commands
 enum VolumeCommands
 {
@@ -187,3 +93,96 @@ enum EffectCommands
 	CMD_NOTESLIDEDOWN		= 36, // IMF Hxy
 	MAX_EFFECTS				= 37
 };
+
+
+//==============
+class ModCommand
+//==============
+{
+public:
+	typedef BYTE NOTE;
+	typedef BYTE INSTR;
+	typedef BYTE VOL;
+	typedef BYTE VOLCMD;
+	typedef BYTE COMMAND;
+	typedef BYTE PARAM;
+
+	// Defines the maximum value for column data when interpreted as 2-byte value
+	// (for example volcmd and vol). The valid value range is [0, maxColumnValue].
+	static const int maxColumnValue = 999;
+
+	// Returns empty modcommand.
+	static ModCommand Empty() { ModCommand m = { 0, 0, 0, 0, 0, 0 }; return m; }
+
+	bool operator==(const ModCommand& mc) const { return (std::memcmp(this, &mc, sizeof(ModCommand)) == 0); }
+	bool operator!=(const ModCommand& mc) const { return !(*this == mc); }
+
+	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) { note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol); }
+
+	uint16 GetValueVolCol() const { return GetValueVolCol(volcmd, vol); }
+	static uint16 GetValueVolCol(BYTE volcmd, BYTE vol) { return (volcmd << 8) + vol; }
+	void SetValueVolCol(const uint16 val) { volcmd = static_cast<BYTE>(val >> 8); vol = static_cast<BYTE>(val & 0xFF); }
+
+	uint16 GetValueEffectCol() const { return GetValueEffectCol(command, param); }
+	static uint16 GetValueEffectCol(BYTE command, BYTE param) { return (command << 8) + param; }
+	void SetValueEffectCol(const uint16 val) { command = static_cast<BYTE>(val >> 8); param = static_cast<BYTE>(val & 0xFF); }
+
+	// Clears modcommand.
+	void Clear() { memset(this, 0, sizeof(ModCommand)); }
+
+	// Returns true if modcommand is empty, false otherwise.
+	// If ignoreEffectValues is true (default), effect values are ignored if there is no effect command present.
+	bool IsEmpty(const bool ignoreEffectValues = true) const
+	{
+		if(ignoreEffectValues)
+			return (note == 0 && instr == 0 && volcmd == VOLCMD_NONE && command == CMD_NONE);
+		else
+			return (*this == Empty());
+	}
+
+	// Returns true if instrument column represents plugin index.
+	bool IsInstrPlug() const { return IsPcNote(); }
+
+	// Returns true if and only if note is NOTE_PC or NOTE_PCS.
+	bool IsPcNote() const { return note == NOTE_PC || note == NOTE_PCS; }
+	static bool IsPcNote(const NOTE note_id) { return note_id == NOTE_PC || note_id == NOTE_PCS; }
+
+	// Returns true if and only if note is a valid musical note.
+	bool IsNote() const { return note >= NOTE_MIN && note <= NOTE_MAX; }
+	static bool IsNote(NOTE note) { return note >= NOTE_MIN && note <= NOTE_MAX; }
+	// Returns true if and only if note is a valid musical note or the note entry is empty.
+	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
+	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
+
+	// Convert a complete ModCommand item from one format to another
+	void Convert(MODTYPE fromType, MODTYPE toType);
+	// Convert MOD/XM Exx to S3M/IT Sxx
+	void ExtendedMODtoS3MEffect();
+	// Convert S3M/IT Sxx to MOD/XM Exx
+	void ExtendedS3MtoMODEffect();
+
+	// "Importance" of every FX command. Table is used for importing from formats with multiple effect columns
+	// and is approximately the same as in SchismTracker.
+	static size_t GetEffectWeight(COMMAND cmd);
+	// Try to convert a an effect into a volume column effect. Returns true on success.
+	static bool ConvertVolEffect(uint8 &effect, uint8 &param, bool force);
+	// Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
+	static bool CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2);
+
+	// Swap volume and effect column (doesn't do any conversion as it's mainly for importing formats with multiple effect columns, so beware!)
+	void SwapEffects()
+	{
+		std::swap(volcmd, command);
+		std::swap(vol, param);
+	}
+
+public:
+	BYTE note;
+	BYTE instr;
+	BYTE volcmd;
+	BYTE command;
+	BYTE vol;
+	BYTE param;
+};
+
+typedef ModCommand MODCOMMAND_ORIGINAL;
