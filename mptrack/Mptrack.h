@@ -13,6 +13,7 @@
 #include "resource.h"       // main symbols
 #include "ACMConvert.h"
 #include <windows.h>
+#include "../mptrack/MpTrackUtil.h"
 #include "../mptrack/Reporting.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/modcommand.h"

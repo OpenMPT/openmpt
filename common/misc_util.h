@@ -21,10 +21,6 @@
 
 #include "typedefs.h"
 
-#ifdef MODPLUG_TRACKER
-#include <io.h> // for _taccess
-#endif
-
 #if defined(HAS_TYPE_TRAITS)
 #include <type_traits>
 #endif
@@ -178,12 +174,6 @@ inline void LimitMax(T& val, const C upperLimit)
 #endif
 
 
-#ifdef MODPLUG_TRACKER
-LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
-std::string GetErrorMessage(DWORD nErrorCode);
-#endif // MODPLUG_TRACKER
-
-
 static inline char SanitizeFilenameChar(char c)
 //---------------------------------------------
 {
@@ -220,7 +210,7 @@ static inline void SanitizeFilename(std::string &str)
 		str[i] = SanitizeFilenameChar(str[i]);
 	}
 }
-#ifdef MODPLUG_TRACKER
+#ifdef _MFC_VER
 static inline void SanitizeFilename(CString &str)
 //-----------------------------------------------
 {
@@ -370,23 +360,6 @@ namespace Util
 	}
 	
 };
-
-#ifdef MODPLUG_TRACKER
-namespace Util { namespace sdTime
-{
-
-	time_t MakeGmTime(tm& timeUtc);
-
-}}; // namespace Util::sdTime
-
-namespace Util { namespace sdOs
-{
-	/// Checks whether file or folder exists and whether it has the given mode.
-	enum FileMode {FileModeExists = 0, FileModeRead = 4, FileModeWrite = 2, FileModeReadWrite = 6};
-	inline bool IsPathFileAvailable(LPCTSTR pszFilePath, FileMode fm) {return (_taccess(pszFilePath, fm) == 0);}
-
-} } // namespace Util::sdOs
-#endif // MODPLUG_TRACKER
 
 namespace Util {
 

@@ -439,6 +439,7 @@
     <ClCompile Include="Mpdlgs.cpp" />
     <ClCompile Include="MPTHacks.cpp" />
     <ClCompile Include="Mptrack.cpp" />
+    <ClCompile Include="MPTrackUtil.cpp" />
     <ClCompile Include="Mpt_midi.cpp" />
     <ClCompile Include="PatternClipboard.cpp" />
     <ClCompile Include="PatternEditorDialogs.cpp" />
@@ -613,6 +614,7 @@
     <ClInclude Include="ModConvert.h" />
     <ClInclude Include="Moddoc.h" />
     <ClInclude Include="Mptrack.h" />
+    <ClInclude Include="MPTrackUtil.h" />
     <ClInclude Include="Notification.h" />
     <ClInclude Include="PatternClipboard.h" />
     <ClInclude Include="PatternCursor.h" />
