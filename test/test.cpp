@@ -342,7 +342,7 @@ void TestMisc()
 //-------------
 {
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586);
-	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), int32_max);
+	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);
 
 	VERIFY_EQUAL(ConvertStrTo<int64>("-9223372036854775808"), int64_min);
@@ -350,7 +350,7 @@ void TestMisc()
 	VERIFY_EQUAL(ConvertStrTo<int64>("9223372036854775807"), int64_max);
 
 	VERIFY_EQUAL(ConvertStrTo<uint64>("85059"), 85059);
-	VERIFY_EQUAL(ConvertStrTo<uint64>("9223372036854775807"), int64_max);
+	VERIFY_EQUAL(ConvertStrTo<uint64>("9223372036854775807"), (uint64)int64_max);
 	VERIFY_EQUAL(ConvertStrTo<uint64>("18446744073709551615"), uint64_max);
 
 	VERIFY_EQUAL(ConvertStrTo<float>("-87.0"), -87.0);
