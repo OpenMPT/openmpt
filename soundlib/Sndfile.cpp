@@ -529,6 +529,10 @@ CSoundFile::CSoundFile() :
 	m_lTotalSampleCount = 0;
 	m_bPositionChanged = true;
 
+#ifndef MODPLUG_TRACKER
+	m_pTuningsBuiltIn = new CTuningCollection();
+	LoadBuiltInTunings();
+#endif
 	m_pTuningsTuneSpecific = new CTuningCollection("Tune specific tunings");
 }
 
@@ -536,8 +540,13 @@ CSoundFile::CSoundFile() :
 CSoundFile::~CSoundFile()
 //-----------------------
 {
-	delete m_pTuningsTuneSpecific;
 	Destroy();
+	delete m_pTuningsTuneSpecific;
+	m_pTuningsTuneSpecific = nullptr;
+#ifndef MODPLUG_TRACKER
+	delete m_pTuningsBuiltIn;
+	m_pTuningsBuiltIn = nullptr;
+#endif
 }
 
 
@@ -1663,6 +1672,15 @@ bool CSoundFile::LoadStaticTunings()
 	#endif
 
 	return false;
+}
+#else
+#include "Tunings/built-inTunings.h"
+void CSoundFile::LoadBuiltInTunings()
+//-----------------------------------
+{
+	std::string data(built_inTunings_tc_data, built_inTunings_tc_data + built_inTunings_tc_size);
+	std::istringstream iStrm(data);
+	m_pTuningsBuiltIn->Deserialize(iStrm);
 }
 #endif
 
