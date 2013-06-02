@@ -84,7 +84,7 @@ public:
 		RENDER_MAXMIXCHANNELS              = 5,
 		RENDER_INTERPOLATION_MODE          = 6,
 		RENDER_VOLUMERAMP_IN_MICROSECONDS  = 7,
-		RENDER_VOLUMERAMP_OUT_MICROSECONDS = 8,
+		RENDER_VOLUMERAMP_OUT_MICROSECONDS = 8
 	};
 
 	enum interpolation_mode {
@@ -99,7 +99,7 @@ public:
 		INTERPOLATION_FIR_BLACKMAN3T67  = 9,
 		INTERPOLATION_FIR_BLACKMAN4T92  = 10,
 		INTERPOLATION_FIR_BLACKMAN4T74  = 11,
-		INTERPOLATION_FIR_KAISER4T      = 12,
+		INTERPOLATION_FIR_KAISER4T      = 12
 	};
 
 	enum command_index {
@@ -108,7 +108,7 @@ public:
 		command_volumeffect = 2,
 		command_effect      = 3,
 		command_volume      = 4,
-		command_parameter   = 5,
+		command_parameter   = 5
 	};
 
 private:
