@@ -589,6 +589,7 @@ LIBOPENMPT_MODPLUG_API void ModPlug_UnloadMixerCallback(ModPlugFile* file)
 
 LIBOPENMPT_MODPLUG_API char ModPlug_ExportS3M(ModPlugFile* file, const char* filepath)
 {
+	(void)file;
 	/* not implemented */
 	fprintf(stderr,"libopenmpt-modplug: error: ModPlug_ExportS3M(%s) not implemented.\n",filepath);
 	return 0;
@@ -596,6 +597,7 @@ LIBOPENMPT_MODPLUG_API char ModPlug_ExportS3M(ModPlugFile* file, const char* fil
 
 LIBOPENMPT_MODPLUG_API char ModPlug_ExportXM(ModPlugFile* file, const char* filepath)
 {
+	(void)file;
 	/* not implemented */
 	fprintf(stderr,"libopenmpt-modplug: error: ModPlug_ExportXM(%s) not implemented.\n",filepath);
 	return 0;
@@ -603,6 +605,7 @@ LIBOPENMPT_MODPLUG_API char ModPlug_ExportXM(ModPlugFile* file, const char* file
 
 LIBOPENMPT_MODPLUG_API char ModPlug_ExportMOD(ModPlugFile* file, const char* filepath)
 {
+	(void)file;
 	/* not implemented */
 	fprintf(stderr,"libopenmpt-modplug: error: ModPlug_ExportMOD(%s) not implemented.\n",filepath);
 	return 0;
@@ -610,6 +613,7 @@ LIBOPENMPT_MODPLUG_API char ModPlug_ExportMOD(ModPlugFile* file, const char* fil
 
 LIBOPENMPT_MODPLUG_API char ModPlug_ExportIT(ModPlugFile* file, const char* filepath)
 {
+	(void)file;
 	/* not implemented */
 	fprintf(stderr,"libopenmpt-modplug: error: ModPlug_ExportIT(%s) not implemented.\n",filepath);
 	return 0;
