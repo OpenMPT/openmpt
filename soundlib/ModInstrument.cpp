@@ -70,7 +70,7 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 			}
 		}
 	}
-};
+}
 
 
 // Get envelope value at a given tick. Returns value in range [0.0, 1.0].
@@ -117,7 +117,7 @@ float InstrumentEnvelope::GetValueFromPosition(int position) const
 	}
 
 	return Clamp(value, 0.0f, 1.0f);
-};
+}
 
 
 ModInstrument::ModInstrument(SAMPLEINDEX sample)

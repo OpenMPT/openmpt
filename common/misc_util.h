@@ -359,7 +359,7 @@ namespace Util
 		return intval;
 	}
 	
-};
+}
 
 namespace Util {
 

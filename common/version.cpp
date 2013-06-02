@@ -90,7 +90,7 @@ std::string GetOpenMPTVersionStr()
 VersionNum ToNum(const std::string &s_)
 {
 	const char *s = s_.c_str();
-	int v1, v2, v3, v4; 
+	unsigned int v1, v2, v3, v4; 
 	sscanf(s, "%x.%x.%x.%x", &v1, &v2, &v3, &v4);
 	return ((v1 << 24) |  (v2 << 16) | (v3 << 8) | v4);
 }

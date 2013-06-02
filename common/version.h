@@ -84,4 +84,4 @@ namespace MptVersion
 	// Returns a multi-line string containing developer contact and community addresses
 	std::string GetContactString();
 
-}; //namespace MptVersion
+} //namespace MptVersion

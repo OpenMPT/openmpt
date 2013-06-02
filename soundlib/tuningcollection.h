@@ -19,7 +19,7 @@ class CTuningCollection;
 namespace CTuningS11n
 {
 	void ReadTuning(istream& iStrm, CTuningCollection& Tc, const size_t);
-};
+}
 
 
 //=====================
