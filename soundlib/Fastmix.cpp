@@ -1884,7 +1884,7 @@ void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuff
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			buffers[channel][i] = (int16)(Clamp(*mixbuffer, MIXING_CLIPMIN, MIXING_CLIPMAX) >> (16-MIXING_ATTENUATION));
+			buffers[channel][i] = (int16)(Clamp(*mixbuffer, (int)MIXING_CLIPMIN, (int)MIXING_CLIPMAX) >> (16-MIXING_ATTENUATION));
 			mixbuffer++;
 		}
 	}
@@ -1964,7 +1964,7 @@ void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuff
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			buffers[channel][i] = (int24)(Clamp(*mixbuffer, MIXING_CLIPMIN, MIXING_CLIPMAX) >> (8-MIXING_ATTENUATION));
+			buffers[channel][i] = (int24)(Clamp(*mixbuffer, (int)MIXING_CLIPMIN, (int)MIXING_CLIPMAX) >> (8-MIXING_ATTENUATION));
 			mixbuffer++;
 		}
 	}
@@ -2041,7 +2041,7 @@ void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuff
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			buffers[channel][i] = (int32)(Clamp(*mixbuffer, MIXING_CLIPMIN, MIXING_CLIPMAX) << MIXING_ATTENUATION);
+			buffers[channel][i] = (int32)(Clamp(*mixbuffer, (int)MIXING_CLIPMIN, (int)MIXING_CLIPMAX) << MIXING_ATTENUATION);
 			mixbuffer++;
 		}
 	}
