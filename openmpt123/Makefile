@@ -83,7 +83,7 @@ CPPFLAGS += -I../common/svn_version_svnversion -D BUILD_SVNVERSION=\"$(BUILD_SVN
 #CPPFLAGS += -I../common/svn_version_default
 
 
-CPPFLAGS += -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_DLL
+CPPFLAGS += -DLIBOPENMPT_BUILD
 
 
 COMMON_CXX_SOURCES += \

@@ -17,12 +17,12 @@
 
 #if defined(NO_LIBOPENMPT_C)
 #undef LIBOPENMPT_API
-#define LIBOPENMPT_API     LIBOPENMPT_DLL_HELPER_LOCAL
+#define LIBOPENMPT_API     LIBOPENMPT_API_HELPER_LOCAL
 #endif
 
 #if defined(NO_LIBOPENMPT_CXX)
 #undef LIBOPENMPT_CXX_API
-#define LIBOPENMPT_CXX_API LIBOPENMPT_DLL_HELPER_LOCAL
+#define LIBOPENMPT_CXX_API LIBOPENMPT_API_HELPER_LOCAL
 #endif
 
 #ifdef __cplusplus
@@ -33,7 +33,7 @@
 #pragma message( "libopenmpt C++ interface is disabled if libopenmpt is built as a DLL and the runtime is statically linked. This is not supported by microsoft and cannot possibly work. Ever." )
 #endif
 #undef LIBOPENMPT_CXX_API
-#define LIBOPENMPT_CXX_API LIBOPENMPT_DLL_HELPER_LOCAL
+#define LIBOPENMPT_CXX_API LIBOPENMPT_API_HELPER_LOCAL
 #endif
 #endif
 #endif
