@@ -173,6 +173,12 @@
 #undef MODPLUG_NO_FILESAVE // tests require file saving
 #endif
 
+#if !defined(NO_LIBMODPLUG)
+#if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && defined(_WIN32) && !defined(LIBOPENMPT_BUILD_DLL))
+#define NO_LIBMODPLUG // libmodplug interface emulation requires libopenmpt dll build on windows
+#endif
+#endif
+
 #if !defined(NO_WINAMP)
 #if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && !defined(LIBOPENMPT_BUILD_DLL))
 #define NO_WINAMP // winamp plugin requires libopenmpt dll build
