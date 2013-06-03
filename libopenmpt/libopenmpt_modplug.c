@@ -80,10 +80,10 @@ LIBOPENMPT_MODPLUG_API char ModPlug_ExportIT(ModPlugFile* file, const char* file
 #define MOD_TYPE_NONE		0x0
 #define MOD_TYPE_MOD		0x1
 #define MOD_TYPE_S3M		0x2
-#define MOD_TYPE_XM			0x4
+#define MOD_TYPE_XM		0x4
 #define MOD_TYPE_MED		0x8
 #define MOD_TYPE_MTM		0x10
-#define MOD_TYPE_IT			0x20
+#define MOD_TYPE_IT		0x20
 #define MOD_TYPE_669		0x40
 #define MOD_TYPE_ULT		0x80
 #define MOD_TYPE_STM		0x100
@@ -127,6 +127,8 @@ static ModPlug_Settings globalsettings = {
 	MODPLUG_RESAMPLE_LINEAR,
 	128,
 	256,
+	
+	0,
 	0,
 	0,
 	0,
