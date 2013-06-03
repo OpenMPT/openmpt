@@ -732,15 +732,17 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		uint8 patHead[9];
 		MemsetZero(patHead);
 		patHead[0] = 9;
-		patHead[5] = static_cast<uint8>(Patterns[pat].GetNumRows() & 0xFF);
-		patHead[6] = static_cast<uint8>(Patterns[pat].GetNumRows() >> 8);
 
 		if(!Patterns.IsValidPat(pat))
 		{
 			// There's nothing to write... chicken out.
+			patHead[5] = 64;
 			fwrite(patHead, 1, 9, f);
 			continue;
 		}
+
+		patHead[5] = static_cast<uint8>(Patterns[pat].GetNumRows() & 0xFF);
+		patHead[6] = static_cast<uint8>(Patterns[pat].GetNumRows() >> 8);
 
 		const ModCommand *p = Patterns[pat];
 		size_t len = 0;
