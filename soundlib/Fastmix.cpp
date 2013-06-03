@@ -1441,17 +1441,17 @@ static forceinline LONG GetSampleCount(ModChannel *pChn, LONG nSamples, bool bIT
 
 
 
-UINT CSoundFile::CreateStereoMix(int count)
+void CSoundFile::CreateStereoMix(int count)
 //-----------------------------------------
 {
 	LPLONG pOfsL, pOfsR;
-	DWORD nchused, nchmixed;
+	CHANNELINDEX nchused, nchmixed;
 
-	if (!count) return 0;
+	if (!count) return;
 	bool ITPingPongMode = IsITPingPongMode();
 	if (m_MixerSettings.gnChannels > 2) InitMixBuffer(MixRearBuffer, count*2);
 	nchused = nchmixed = 0;
-	for (UINT nChn=0; nChn<m_nMixChannels; nChn++)
+	for(CHANNELINDEX nChn=0; nChn<m_nMixChannels; nChn++)
 	{
 		const LPMIXINTERFACE *pMixFuncTable;
 		ModChannel * const pChannel = &Chn[ChnMix[nChn]];
@@ -1548,7 +1548,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 			continue;
 		}
 		// Should we mix this channel ?
-		UINT naddmix;
+		bool addmix;
 		if (((nchmixed >= m_MixerSettings.m_nMaxMixChannels) && !IsRenderingToDisc())
 		 || ((!pChannel->nRampLength) && (!(pChannel->rightVol|pChannel->leftVol))))
 		{
@@ -1557,7 +1557,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pChannel->nPos += (delta >> 16);
 			pChannel->nROfs = pChannel->nLOfs = 0;
 			pbuffer += nSmpCount*2;
-			naddmix = 0;
+			addmix = false;
 		} else
 		// Do mixing
 		{
@@ -1571,7 +1571,7 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pChannel->nROfs += *(pbufmax-2);
 			pChannel->nLOfs += *(pbufmax-1);
 			pbuffer = pbufmax;
-			naddmix = 1;
+			addmix = true;
 		}
 		nsamples -= nSmpCount;
 		if (pChannel->nRampLength)
@@ -1591,9 +1591,9 @@ UINT CSoundFile::CreateStereoMix(int count)
 			}
 		}
 		if (nsamples > 0) goto SampleLooping;
-		nchmixed += naddmix;
+		nchmixed += addmix?1:0;
 	}
-	return nchused;
+	m_nMixStat += nchused;
 }
 
 

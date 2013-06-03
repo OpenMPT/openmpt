@@ -336,7 +336,8 @@ public:	// for Editing
 	INSTRUMENTINDEX m_nInstruments;
 	UINT m_nDefaultSpeed, m_nDefaultTempo, m_nDefaultGlobalVolume;
 	FlagSet<SongFlags> m_SongFlags;
-	UINT m_nMixChannels, m_nMixStat;
+	CHANNELINDEX m_nMixChannels;
+	UINT m_nMixStat;
 	samplecount_t m_nBufferCount;
 	double m_dBufferDiff;
 	UINT m_nTickCount;
@@ -371,7 +372,7 @@ public:	// for Editing
 	LONG m_nRepeatCount;	// -1 means repeat infinitely.
 	DWORD m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples;
 	UINT m_nMaxOrderPosition;
-	UINT ChnMix[MAX_CHANNELS];							// Channels to be mixed
+	CHANNELINDEX ChnMix[MAX_CHANNELS];							// Channels to be mixed
 	ModChannel Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
 	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
 	CPatternContainer Patterns;							// Patterns
@@ -596,7 +597,7 @@ public:
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
 	UINT Read(LPVOID lpBuffer, UINT cbBuffer, void * const *outputBuffers = nullptr);
-	UINT CreateStereoMix(int count);
+	void CreateStereoMix(int count);
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
 	void ProcessPlugins(UINT nCount);
