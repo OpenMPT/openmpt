@@ -176,25 +176,50 @@ bool IsNegative(const T &val)
 	return IsNegativeFunctor<T, std::numeric_limits<T>::is_signed>()(val);
 }
 
-// --------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
 // Convenient macro to help WRITE_HEADER declaration for single type members ONLY (non-array)
-// --------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
 #define WRITE_MPTHEADER_sized_member(name,type,code) \
-	static_assert(sizeof(input->name) >= sizeof(type), "Instrument property does not fit into specified type!");\
+	static_assert(sizeof(input->name) == sizeof(type), "Instrument property does match specified type!");\
 	fcode = MULTICHAR_STRING_TO_INT(#code);\
 	fsize = sizeof( type );\
 	if(only_this_code == Util::MaxValueOfType(only_this_code)) \
 	{ \
 		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
 		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
-		fwrite(&input-> name , 1 , fsize , file); \
+	} else if(only_this_code == fcode)\
+	{ \
+		ASSERT(fixedsize == fsize); \
+	} \
+	if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
+	{ \
+		type tmp = input-> name; \
+		tmp = SwapBytesLE(tmp); \
+		fwrite(&tmp , 1 , fsize , file); \
+	} \
+/**/
+
+// -----------------------------------------------------------------------------------------------------
+// Convenient macro to help WRITE_HEADER declaration for single type members which are written truncated
+// -----------------------------------------------------------------------------------------------------
+#define WRITE_MPTHEADER_trunc_member(name,type,code) \
+	static_assert(sizeof(input->name) > sizeof(type), "Instrument property would not be truncated, use WRITE_MPTHEADER_sized_member instead!");\
+	fcode = MULTICHAR_STRING_TO_INT(#code);\
+	fsize = sizeof( type );\
+	if(only_this_code == Util::MaxValueOfType(only_this_code)) \
+	{ \
+		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
+		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
+		type tmp = (type)(input-> name ); \
+		tmp = SwapBytesLE(tmp); \
+		fwrite(&tmp , 1 , fsize , file); \
 	} else if(only_this_code == fcode)\
 	{ \
 		/* hackish workaround to resolve mismatched size values: */ \
 		/* nResampling was a long time declared as uint32 but these macro tables used uint16 and UINT. */ \
 		/* This worked fine on little-endian, on big-endian not so much. Thus support writing size-mismatched fields. */ \
-		ASSERT(fixedsize >= fsize); /* ASSERT(fixedsize == fsize); */ \
-		type tmp = input-> name; \
+		ASSERT(fixedsize >= fsize); \
+		type tmp = (type)(input-> name ); \
 		tmp = SwapBytesLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
 		if(fixedsize > fsize) \
@@ -208,10 +233,11 @@ bool IsNegative(const T &val)
 	} \
 /**/
 
-// --------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 // Convenient macro to help WRITE_HEADER declaration for array members ONLY
-// --------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 #define WRITE_MPTHEADER_array_member(name,type,code,arraysize) \
+	STATIC_ASSERT(sizeof(type) == sizeof(input-> name [0])); \
 	ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
 	fcode = MULTICHAR_STRING_TO_INT(#code);\
 	fsize = sizeof( type ) * arraysize;\
@@ -219,11 +245,13 @@ bool IsNegative(const T &val)
 	{ \
 		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
 		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
-		fwrite(&input-> name , 1 , fsize , file); \
 	} else if(only_this_code == fcode)\
 	{ \
 		/* ASSERT(fixedsize <= fsize); */ \
 		fsize = fixedsize; /* just trust the size we got passed */ \
+	} \
+	if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
+	{ \
 		for(std::size_t i = 0; i < fsize/sizeof(type); ++i) \
 		{ \
 			type tmp; \
@@ -328,7 +356,7 @@ WRITE_MPTHEADER_array_member(	name					, char			, n[..		, 32				)
 WRITE_MPTHEADER_array_member(	filename				, char			, fn[.		, 12				)
 WRITE_MPTHEADER_sized_member(	nMixPlug				, uint8			, MiP.							)
 WRITE_MPTHEADER_sized_member(	nVolRampUp				, uint16		, VR..							)
-WRITE_MPTHEADER_sized_member(	nResampling				, uint16		, R...							)
+WRITE_MPTHEADER_trunc_member(	nResampling				, uint16		, R...							)
 WRITE_MPTHEADER_sized_member(	nCutSwing				, uint8			, CS..							)
 WRITE_MPTHEADER_sized_member(	nResSwing				, uint8			, RS..							)
 WRITE_MPTHEADER_sized_member(	nFilterMode				, uint8			, FM..							)
