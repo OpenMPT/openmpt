@@ -2803,7 +2803,7 @@ void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow)
 }
 
 
-CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
+CString CModDoc::GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr,
 											  bool bEmptyInsteadOfNoName /* = false*/,
 											  bool bIncludeIndex /* = true*/) const
 //-----------------------------------------------------------------------------------
