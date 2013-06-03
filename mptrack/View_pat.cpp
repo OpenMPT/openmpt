@@ -6174,7 +6174,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 			bool addSeparator = false;
 			if (sndFile->GetNumInstruments())
 			{
-				for (UINT i = 1; i <= sndFile->GetNumInstruments() ; i++)
+				for(INSTRUMENTINDEX i = 1; i <= sndFile->GetNumInstruments() ; i++)
 				{
 					if (sndFile->Instruments[i] == NULL)
 						continue;

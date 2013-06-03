@@ -361,7 +361,7 @@ public:
 	// [in] bEmptyInsteadOfNoName: In case of unnamed instrument string, "(no name)" is returned unless this 
 	//                             parameter is true is case which an empty name is returned.
 	// [in] bIncludeIndex: True to include instrument index in front of the instrument name, false otherwise.
-	CString GetPatternViewInstrumentName(UINT nInstr, bool bEmptyInsteadOfNoName = false, bool bIncludeIndex = true) const;
+	CString GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr, bool bEmptyInsteadOfNoName = false, bool bIncludeIndex = true) const;
 
 	// Check if a given channel contains data.
 	bool IsChannelUnused(CHANNELINDEX nChn) const;

@@ -68,7 +68,7 @@ void CPatternGotoDialog::OnOK()
 	bool validated = true;
 	
 	// Does pattern exist?
-	if(validated && !m_pSndFile->Patterns.IsValidPat(m_nPattern))
+	if(validated && !m_pSndFile->Patterns.IsValidPat(static_cast<PATTERNINDEX>(m_nPattern)))
 	{
 		validated = false;
 	}
@@ -112,7 +112,7 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 	}
 		
 	UpdateData();
-	m_nOrder = m_pSndFile->Order.FindOrder(static_cast<PATTERNINDEX>(m_nPattern), m_nActiveOrder);
+	m_nOrder = m_pSndFile->Order.FindOrder(static_cast<PATTERNINDEX>(m_nPattern), static_cast<ORDERINDEX>(m_nActiveOrder));
 
 	if(m_nOrder == ORDERINDEX_INVALID)
 	{
