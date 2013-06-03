@@ -292,7 +292,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	gnPlugWindowY = GetPrivateProfileInt("Display", "PlugSelectWindowY", gnPlugWindowY, iniFile);
 	gnPlugWindowWidth = GetPrivateProfileInt("Display", "PlugSelectWindowWidth", gnPlugWindowWidth, iniFile);
 	gnPlugWindowHeight = GetPrivateProfileInt("Display", "PlugSelectWindowHeight", gnPlugWindowHeight, iniFile);
-	gnPlugWindowLast = CMainFrame::GetPrivateProfileDWord("Display", "PlugSelectWindowLast", gnPlugWindowLast, iniFile);
+	gnPlugWindowLast = CMainFrame::GetPrivateProfileLong("Display", "PlugSelectWindowLast", gnPlugWindowLast, iniFile);
 	gnMsgBoxVisiblityFlags = CMainFrame::GetPrivateProfileDWord("Display", "MsgBoxVisibilityFlags", gnMsgBoxVisiblityFlags, iniFile);
 	VuMeterUpdateInterval = CMainFrame::GetPrivateProfileDWord("Display", "VuMeterUpdateInterval", VuMeterUpdateInterval, iniFile);
 

@@ -501,7 +501,7 @@ BOOL CModToMidi::DoConvert()
 						tmp[len] = static_cast<BYTE>(0x90|pTrk->nMidiChannel);
 						tmp[len+1] = (pTrk->nMidiChannel==9) ? static_cast<BYTE>(pTrk->nMidiProgram) : static_cast<BYTE>(note);
 						UINT vol = 0x7f;
-						UINT nsmp = pTrk->nInstrument;
+						SAMPLEINDEX nsmp = static_cast<SAMPLEINDEX>(pTrk->nInstrument);
 						if (m_pSndFile->GetNumInstruments())
 						{
 							if ((nsmp <= m_pSndFile->GetNumInstruments()) && (m_pSndFile->Instruments[nsmp]))
