@@ -244,7 +244,7 @@ public:
 	int gnPlugWindowY;
 	int gnPlugWindowWidth;
 	int gnPlugWindowHeight;
-	DWORD gnPlugWindowLast;	// Last selected plugin ID
+	int32 gnPlugWindowLast;	// Last selected plugin ID
 
 public:
 
