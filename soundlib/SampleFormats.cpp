@@ -2013,6 +2013,7 @@ struct FLACDecoder
 		ASSERT((bps <= 8 && sample.GetElementarySampleSize() == 1) || (bps > 8 && sample.GetElementarySampleSize() == 2));
 		ASSERT(modChannels <= FLAC__stream_decoder_get_channels(decoder));
 		ASSERT(bps == FLAC__stream_decoder_get_bits_per_sample(decoder));
+		UNREFERENCED_PARAMETER(decoder); // decoder is unused if ASSERTs are compiled out
 
 		// Do the sample conversion
 		for(uint8 chn = 0; chn < modChannels; chn++)
