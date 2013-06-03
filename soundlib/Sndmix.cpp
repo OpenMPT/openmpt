@@ -202,13 +202,13 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 	LPCONVERTPROC pCvt = nullptr;
 	samplecount_t lMax, lCount, lSampleCount;
 	size_t lSampleSize;
-	UINT nStat = 0;
 	UINT nMaxPlugins;
 	std::size_t renderedCount = 0;
 
 	nMaxPlugins = MAX_MIXPLUGINS;
 	while ((nMaxPlugins > 0) && (!m_MixPlugins[nMaxPlugins-1].pMixPlugin)) nMaxPlugins--;
-	m_nMixStat = 0;
+	
+	UINT nMixStatCount = 0;
 
 	lSampleSize = m_MixerSettings.gnChannels;
 	switch(m_MixerSettings.m_SampleFormat)
@@ -279,20 +279,28 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 		if (!lCount) 
 			break;
 
+		ASSERT(lCount <= MIXBUFFERSIZE); // ensure MIXBUFFERSIZE really is our max buffer size
+
 		lSampleCount = lCount;
 
 #ifndef NO_REVERB
 		m_Reverb.gnReverbSend = 0;
 #endif // NO_REVERB
 
+		if(nMixStatCount == 0)
+		{
+			// reset mixer channel count before we are calling CreateStereoMix the first time this round, if we are not updating the mixer state, we do not reset statistics
+			m_nMixStat = 0;
+		}
+		nMixStatCount++;
+
 		// Resetting sound buffer
 		StereoFill(MixSoundBuffer, lCount, &gnDryROfsVol, &gnDryLOfsVol);
 		
-		ASSERT(lCount<=MIXBUFFERSIZE);		// ensure MIXBUFFERSIZE really is our max buffer size
 		if (m_MixerSettings.gnChannels >= 2)
 		{
 			lSampleCount *= 2;
-			m_nMixStat += CreateStereoMix(lCount);
+			CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
 			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount, GetProcSupport());
@@ -307,7 +315,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 			}
 		} else
 		{
-			m_nMixStat += CreateStereoMix(lCount);
+			CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
 			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount, GetProcSupport());
@@ -337,8 +345,6 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 				m_EQ.ProcessMono(MixSoundBuffer, MixFloatBuffer, lCount, m_PlayConfig);
 		}
 #endif // NO_EQ
-
-		nStat++;
 
 #ifndef MODPLUG_TRACKER
 		if(!m_MixerSettings.IsFloatSampleFormat())
@@ -431,7 +437,10 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 	}
 MixDone:
 	if (lRead && lpBuffer) memset(lpBuffer, (m_MixerSettings.m_SampleFormat == SampleFormatUnsigned8) ? 0x80 : 0, lRead * lSampleSize); // clear remaining interleaved output buffer
-	if (nStat) { m_nMixStat += nStat-1; m_nMixStat /= nStat; }
+	if(nMixStatCount > 0)
+	{
+		m_nMixStat = (m_nMixStat + nMixStatCount - 1) / nMixStatCount; // round up
+	}
 	return renderedCount;
 }
 
@@ -2113,12 +2122,12 @@ BOOL CSoundFile::ReadNote()
 	// Checking Max Mix Channels reached: ordering by volume
 	if ((m_nMixChannels >= m_MixerSettings.m_nMaxMixChannels) && !IsRenderingToDisc())
 	{
-		for (UINT i=0; i<m_nMixChannels; i++)
+		for(CHANNELINDEX i=0; i<m_nMixChannels; i++)
 		{
-			UINT j=i;
+			CHANNELINDEX j=i;
 			while ((j+1<m_nMixChannels) && (Chn[ChnMix[j]].nRealVolume < Chn[ChnMix[j+1]].nRealVolume))
 			{
-				UINT n = ChnMix[j];
+				CHANNELINDEX n = ChnMix[j];
 				ChnMix[j] = ChnMix[j+1];
 				ChnMix[j+1] = n;
 				j++;

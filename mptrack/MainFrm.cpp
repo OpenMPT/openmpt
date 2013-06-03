@@ -975,8 +975,6 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 		notifyType = m_pSndFile->m_pModDoc->GetNotificationType();
 		notifyItem = m_pSndFile->m_pModDoc->GetNotificationItem();
 	}
-	if(m_nMixChn < m_pSndFile->m_nMixStat) m_nMixChn++;
-	if(m_nMixChn > m_pSndFile->m_nMixStat) m_nMixChn--;
 	// Notify Client
 	//if(m_NotifyBuffer.read_size() > 0)
 	{
@@ -984,7 +982,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 	}
 	// Add an entry to the notification history
 
-	Notification notification(notifyType, notifyItem, notificationtimestamp, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern);
+	Notification notification(notifyType, notifyItem, notificationtimestamp, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern, m_pSndFile->m_nMixStat);
 
 	if(endOfStream) notification.type.set(Notification::EOS);
 
@@ -1322,8 +1320,6 @@ void CMainFrame::UnsetPlaybackSoundFile()
 	if(m_pSndFile)
 	{
 		m_pSndFile->SuspendPlugins();
-		m_nMixChn = 0;
-		m_nAvgMixChn = 0;
 		if(m_pSndFile->GetpModDoc())
 		{
 			m_wndTree.UpdatePlayPos(m_pSndFile->GetpModDoc(), nullptr);
@@ -1398,8 +1394,6 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 
 	gnLVuMeter = gnRVuMeter = 0;
 	gnClipLeft = gnClipRight = false;
-	m_nMixChn = 0;
-	m_nAvgMixChn = 0;
 
 	if(!StartPlayback())
 	{
@@ -2305,6 +2299,7 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 			if (GetFollowSong())
 				::SendMessage(GetFollowSong(), WM_MOD_UPDATEPOSITION, 0, lParam);
 		}
+		m_nMixChn = pnotify->mixedChannels;
 		m_wndToolBar.m_VuMeter.SetVuMeter(pnotify->masterVU[0], pnotify->masterVU[1], pnotify->type[Notification::Stop]);
 	}
 	return 0;
