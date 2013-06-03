@@ -144,7 +144,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -182,7 +182,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -237,7 +237,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -294,7 +294,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
