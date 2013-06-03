@@ -13,13 +13,11 @@
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
-#endif
+#endif /* _MSC_VER */
 
 #include "libopenmpt_internal.h"
 
 #include "libopenmpt.h"
-
-#define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API
 
 #include <limits.h>
 #include <math.h>
@@ -28,55 +26,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* from libmodplug/modplug.h */
-/* declared here, because otherwise msvc errors when seeing dllexport declarations later on */
-typedef void (*ModPlugMixerProc)(int*, unsigned long, unsigned long);
-struct _ModPlugFile;
-typedef struct _ModPlugFile ModPlugFile;
-struct _ModPlug_Settings;
-typedef struct _ModPlug_Settings ModPlug_Settings;
-struct _ModPlugNote;
-typedef struct _ModPlugNote ModPlugNote;
-LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size);
-LIBOPENMPT_MODPLUG_API void ModPlug_Unload(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API int  ModPlug_Read(ModPlugFile* file, void* buffer, int size);
-LIBOPENMPT_MODPLUG_API const char* ModPlug_GetName(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API int ModPlug_GetLength(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API void ModPlug_Seek(ModPlugFile* file, int millisecond);
-LIBOPENMPT_MODPLUG_API void ModPlug_GetSettings(ModPlug_Settings* settings);
-LIBOPENMPT_MODPLUG_API void ModPlug_SetSettings(const ModPlug_Settings* settings);
-LIBOPENMPT_MODPLUG_API unsigned int ModPlug_GetMasterVolume(ModPlugFile* file) ;
-LIBOPENMPT_MODPLUG_API void ModPlug_SetMasterVolume(ModPlugFile* file,unsigned int cvol);
-LIBOPENMPT_MODPLUG_API int ModPlug_GetCurrentSpeed(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API int ModPlug_GetCurrentTempo(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API int ModPlug_GetCurrentOrder(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API int ModPlug_GetCurrentPattern(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API int ModPlug_GetCurrentRow(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API int ModPlug_GetPlayingChannels(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API void ModPlug_SeekOrder(ModPlugFile* file,int order);
-LIBOPENMPT_MODPLUG_API int ModPlug_GetModuleType(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API char* ModPlug_GetMessage(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API unsigned int ModPlug_NumInstruments(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API unsigned int ModPlug_NumSamples(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API unsigned int ModPlug_NumPatterns(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API unsigned int ModPlug_NumChannels(ModPlugFile* file);
-LIBOPENMPT_MODPLUG_API unsigned int ModPlug_SampleName(ModPlugFile* file, unsigned int qual, char* buff);
-LIBOPENMPT_MODPLUG_API unsigned int ModPlug_InstrumentName(ModPlugFile* file, unsigned int qual, char* buff);
-LIBOPENMPT_MODPLUG_API ModPlugNote* ModPlug_GetPattern(ModPlugFile* file, int pattern, unsigned int* numrows);
-LIBOPENMPT_MODPLUG_API void ModPlug_InitMixerCallback(ModPlugFile* file,ModPlugMixerProc proc);
-LIBOPENMPT_MODPLUG_API void ModPlug_UnloadMixerCallback(ModPlugFile* file) ;
-LIBOPENMPT_MODPLUG_API char ModPlug_ExportS3M(ModPlugFile* file, const char* filepath);
-LIBOPENMPT_MODPLUG_API char ModPlug_ExportXM(ModPlugFile* file, const char* filepath);
-LIBOPENMPT_MODPLUG_API char ModPlug_ExportMOD(ModPlugFile* file, const char* filepath);
-LIBOPENMPT_MODPLUG_API char ModPlug_ExportIT(ModPlugFile* file, const char* filepath);
-
+#ifdef _MSC_VER
+/* msvc errors when seeing dllexport declarations after prototypes have been declared in modplug.h */
+#define LIBOPENMPT_MODPLUG_API
+#else /* !_MSC_VER */
+#define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API
+#endif /* _MSC_VER */
 #include "libmodplug/modplug.h"
 
 /* from libmodplug/sndfile.h */
 /* header is not c clean */
-
 #define MIXING_ATTENUATION 4
-
 #define MOD_TYPE_NONE		0x0
 #define MOD_TYPE_MOD		0x1
 #define MOD_TYPE_S3M		0x2
@@ -621,4 +581,39 @@ LIBOPENMPT_MODPLUG_API char ModPlug_ExportIT(ModPlugFile* file, const char* file
 	return 0;
 }
 
-#endif // NO_LIBMODPLUG
+#ifdef _MSC_VER
+#pragma comment(linker, "/EXPORT:ModPlug_Load=_ModPlug_Load")
+#pragma comment(linker, "/EXPORT:ModPlug_Unload=_ModPlug_Unload")
+#pragma comment(linker, "/EXPORT:ModPlug_Read=_ModPlug_Read")
+#pragma comment(linker, "/EXPORT:ModPlug_GetName=_ModPlug_GetName")
+#pragma comment(linker, "/EXPORT:ModPlug_GetLength=_ModPlug_GetLength")
+#pragma comment(linker, "/EXPORT:ModPlug_Seek=_ModPlug_Seek")
+#pragma comment(linker, "/EXPORT:ModPlug_GetSettings=_ModPlug_GetSettings")
+#pragma comment(linker, "/EXPORT:ModPlug_SetSettings=_ModPlug_SetSettings")
+#pragma comment(linker, "/EXPORT:ModPlug_GetMasterVolume=_ModPlug_GetMasterVolume")
+#pragma comment(linker, "/EXPORT:ModPlug_SetMasterVolume=_ModPlug_SetMasterVolume")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentSpeed=_ModPlug_GetCurrentSpeed")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentTempo=_ModPlug_GetCurrentTempo")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentOrder=_ModPlug_GetCurrentOrder")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentPattern=_ModPlug_GetCurrentPattern")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentRow=_ModPlug_GetCurrentRow")
+#pragma comment(linker, "/EXPORT:ModPlug_GetPlayingChannels=_ModPlug_GetPlayingChannels")
+#pragma comment(linker, "/EXPORT:ModPlug_SeekOrder=_ModPlug_SeekOrder")
+#pragma comment(linker, "/EXPORT:ModPlug_GetModuleType=_ModPlug_GetModuleType")
+#pragma comment(linker, "/EXPORT:ModPlug_GetMessage=_ModPlug_GetMessage")
+#pragma comment(linker, "/EXPORT:ModPlug_NumInstruments=_ModPlug_NumInstruments")
+#pragma comment(linker, "/EXPORT:ModPlug_NumSamples=_ModPlug_NumSamples")
+#pragma comment(linker, "/EXPORT:ModPlug_NumPatterns=_ModPlug_NumPatterns")
+#pragma comment(linker, "/EXPORT:ModPlug_NumChannels=_ModPlug_NumChannels")
+#pragma comment(linker, "/EXPORT:ModPlug_SampleName=_ModPlug_SampleName")
+#pragma comment(linker, "/EXPORT:ModPlug_InstrumentName=_ModPlug_InstrumentName")
+#pragma comment(linker, "/EXPORT:ModPlug_GetPattern=_ModPlug_GetPattern")
+#pragma comment(linker, "/EXPORT:ModPlug_InitMixerCallback=_ModPlug_InitMixerCallback")
+#pragma comment(linker, "/EXPORT:ModPlug_UnloadMixerCallback=_ModPlug_UnloadMixerCallback")
+#pragma comment(linker, "/EXPORT:ModPlug_ExportS3M=_ModPlug_ExportS3M")
+#pragma comment(linker, "/EXPORT:ModPlug_ExportXM=_ModPlug_ExportXM")
+#pragma comment(linker, "/EXPORT:ModPlug_ExportMOD=_ModPlug_ExportMOD")
+#pragma comment(linker, "/EXPORT:ModPlug_ExportIT=_ModPlug_ExportIT")
+#endif /* _MSC_VER */
+
+#endif /* NO_LIBMODPLUG */
