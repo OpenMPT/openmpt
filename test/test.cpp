@@ -68,6 +68,8 @@ namespace MptTest
 #ifdef MODPLUG_TRACKER
 
 #define MULTI_TEST_TRY   try {
+#define MULTI_TEST_START 
+#define MULTI_TEST_END   
 #define MULTI_TEST_CATCH } catch ( std::exception & e) { \
                           Reporting::Error((std::string() + "Test \"" + func_description + "\" threw an exception, message: " + e.what()).c_str(), (std::string() + "Test \"" + func_description + "\": Exception was thrown").c_str()); \
                          } catch ( ... ) { \
@@ -75,9 +77,10 @@ namespace MptTest
                          }
 #define TEST_TRY         {
 #define TEST_CATCH       }
-#define TEST_OK()        do{UNREFERENCED_PARAMETER(ok_description);}while(0)
+#define TEST_OK()        do{UNREFERENCED_PARAMETER(test_description);}while(0)
 #define TEST_FAIL()      Reporting::Error(mpt::String::Format("File: %s\nLine: " STRINGIZE(__LINE__) "\n\n" "%s", THIS_FILE, fail_description).c_str(), "VERIFY_EQUAL failed")
 #define TEST_FAIL_STOP() throw std::runtime_error(mpt::String::Format("File: %s\nLine: " STRINGIZE(__LINE__) "\n\n %s", THIS_FILE, fail_description))
+#define TEST_START()     do{}while(0)
 
 #else // !MODPLUG_TRACKER
 
@@ -86,29 +89,32 @@ static std::string remove_newlines(std::string str)
 	return mpt::String::Replace(mpt::String::Replace(str, "\n", " "), "\r", " ");
 }
 
-static void show_fail(const char * const file, const int line, const char * const description, bool exception = false, const char * const exception_text = nullptr)
+static void show_start(const char * const file, const int line, const char * const description)
 {
-	if(!exception)
-	{
-		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << std::endl;
-	} else if(!exception_text || (exception_text && std::string(exception_text).empty()))
-	{
-		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << " EXCEPTION!" << std::endl;
-	} else
-	{
-		std::cerr << "FAIL: " << file << "(" << line << ") : " << remove_newlines(description) << " EXCEPTION: " << exception_text << std::endl;
-	}
+	std::cout << "Test: " << file << "(" << line << "): " << remove_newlines(description) << ": ";
 }
 
 static void show_ok(const char * const file, const int line, const char * const description)
 {
-#if 1
-	std::cerr << "OK:   " << file << "(" << line << ") : " << remove_newlines(description) << std::endl;
-#else
 	UNREFERENCED_PARAMETER(file);
 	UNREFERENCED_PARAMETER(line);
 	UNREFERENCED_PARAMETER(description);
-#endif
+	std::cout << "PASS" << std::endl;
+}
+
+static void show_fail(const char * const file, const int line, const char * const description, bool exception = false, const char * const exception_text = nullptr)
+{
+	std::cout << "FAIL" << std::endl;
+	if(!exception)
+	{
+		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << std::endl;
+	} else if(!exception_text || (exception_text && std::string(exception_text).empty()))
+	{
+		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << " EXCEPTION!" << std::endl;
+	} else
+	{
+		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << " EXCEPTION: " << exception_text << std::endl;
+	}
 }
 
 static int fail_count = 0;
@@ -131,9 +137,12 @@ static void ReportException(const char * const file, const int line, const char 
 
 #define MULTI_TEST_TRY   try { \
                           fail_count = 0;
+#define MULTI_TEST_START show_start(THIS_FILE, __LINE__, func_description); std::cout << "..." << std::endl;
+#define MULTI_TEST_END   show_start(THIS_FILE, __LINE__, func_description);
 #define MULTI_TEST_CATCH  if(fail_count > 0) { \
                            throw std::runtime_error("Test failed."); \
                           } \
+                          show_ok(THIS_FILE, __LINE__, func_description); \
                          } catch ( ... ) { \
                           ReportException(THIS_FILE, __LINE__, func_description); \
                          }
@@ -142,7 +151,8 @@ static void ReportException(const char * const file, const int line, const char 
                           ReportException(THIS_FILE, __LINE__, fail_description); \
                           throw; \
                          }
-#define TEST_OK()        show_ok(THIS_FILE, __LINE__, ok_description)
+#define TEST_START()     show_start(THIS_FILE, __LINE__, test_description)
+#define TEST_OK()        show_ok(THIS_FILE, __LINE__, test_description)
 #define TEST_FAIL()      do { show_fail(THIS_FILE, __LINE__, fail_description); fail_count++; } while(0)
 #define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, fail_description); fail_count++; throw std::runtime_error("Test failed."); } while(0)
 
@@ -155,9 +165,10 @@ static void ReportException(const char * const file, const int line, const char 
 //The macro is active in both 'debug' and 'release' build.
 #define VERIFY_EQUAL(x,y)	\
 do{ \
-	const char * const ok_description = #x " == " #y ; \
+	const char * const test_description = #x " == " #y ; \
 	const char * const fail_description = "VERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y ; \
 	TEST_TRY \
+	TEST_START(); \
 	if((x) != (y))		\
 	{					\
 		TEST_FAIL(); \
@@ -172,9 +183,10 @@ do{ \
 // Like VERIFY_EQUAL, but throws exception if comparison fails.
 #define VERIFY_EQUAL_NONCONT(x,y) \
 do{ \
-	const char * const ok_description = #x " == " #y ; \
+	const char * const test_description = #x " == " #y ; \
 	const char * const fail_description = "VERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y ; \
 	TEST_TRY \
+	TEST_START(); \
 	if((x) != (y))		\
 	{					\
 		TEST_FAIL_STOP(); \
@@ -203,7 +215,9 @@ do{ \
 do{ \
 	const char * func_description = #func ; \
 	MULTI_TEST_TRY \
+	MULTI_TEST_START \
 	func(); \
+	MULTI_TEST_END \
 	MULTI_TEST_CATCH \
 }while(0)
 
@@ -1414,7 +1428,7 @@ void TestStringIO()
 #define WriteTest(mode, dst, src, expectedResult) \
 	mpt::String::Write<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
+	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
 
 	// Check reading of null-terminated string into larger buffer
@@ -1537,7 +1551,7 @@ void TestStringIO()
 #define WriteTest(mode, dst, src, expectedResult) \
 	mpt::String::Write<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = strlen(dst); i < CountOf(dst); i++) \
+	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
 
 		// Check reading of null-terminated string into std::string

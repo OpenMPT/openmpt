@@ -375,6 +375,7 @@ ModSequenceSet::ModSequenceSet(CSoundFile& sndFile)
 	  m_nCurrentSeq(0)
 //--------------------------------------------------------------
 {
+	std::fill(m_Cache, m_Cache + s_nCacheSize, GetInvalidPatIndex(MOD_TYPE_MPT));
 	m_Sequences.push_back(ModSequence(sndFile, s_nCacheSize));
 }
 
