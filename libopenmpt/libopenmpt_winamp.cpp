@@ -113,8 +113,8 @@ static void apply_options() {
 		self->mod->set_render_param( openmpt::module::RENDER_REPEATCOUNT, self->settings->repeatcount );
 		self->mod->set_render_param( openmpt::module::RENDER_MAXMIXCHANNELS, self->settings->maxmixchannels );
 		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATION_MODE, self->settings->interpolationmode );
-		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_IN_MICROSECONDS, self->settings->volrampinus );
-		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_OUT_MICROSECONDS, self->settings->volrampoutus );
+		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, self->settings->volrampinus );
+		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, self->settings->volrampoutus );
 	}
 	self->settings->save();
 }

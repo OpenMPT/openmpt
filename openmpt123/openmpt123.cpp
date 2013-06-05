@@ -9,6 +9,11 @@
 
 #define LIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
 
+#if defined(_MSC_VER)
+#define MPT_WITH_PORTAUDIO
+#define MPT_WITH_ZLIB
+#endif
+
 #define OPENMPT123_VERSION_STRING "0.1"
 
 #include <algorithm>
@@ -20,6 +25,7 @@
 #include <string>
 #include <vector>
 
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 
@@ -33,7 +39,19 @@
 
 #include <libopenmpt/libopenmpt.hpp>
 
+#ifdef MPT_WITH_FLAC
+#include <FLAC++/encoder.h>
+#include <FLAC/metadata.h>
+#include <FLAC/format.h>
+#endif
+
+#ifdef MPT_WITH_SNDFILE
+#include <sndfile.h>
+#endif
+
+#ifdef MPT_WITH_PORTAUDIO
 #include <portaudio.h>
+#endif
 
 struct show_help_exception {
 	std::string message;
@@ -57,22 +75,26 @@ struct show_version_number_exception : public std::exception {
 	show_version_number_exception() throw() { }
 };
 
+#ifdef MPT_WITH_PORTAUDIO
 struct portaudio_exception : public openmpt123_exception {
 	portaudio_exception( PaError code ) throw() : openmpt123_exception( Pa_GetErrorText( code ) ) { }
 };
+#endif
 
 struct openmpt123_flags {
 	bool run_tests;
 	bool modplug123;
+#ifdef MPT_WITH_PORTAUDIO
 	int device;
+#endif
 	std::int32_t channels;
 	std::int32_t buffer;
 	std::int32_t repeatcount;
 	std::int32_t samplerate;
 	std::int32_t gain;
 	std::int32_t quality;
-	std::int32_t rampinus;
-	std::int32_t rampoutus;
+	std::int32_t rampupus;
+	std::int32_t rampdownus;
 	bool quiet;
 	bool verbose;
 	bool show_message;
@@ -81,18 +103,24 @@ struct openmpt123_flags {
 	bool use_float;
 	bool use_stdout;
 	std::vector<std::string> filenames;
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+	std::string output_filename;
+	bool force_overwrite;
+#endif
 	openmpt123_flags() {
 		run_tests = false;
 		modplug123 = false;
+#ifdef MPT_WITH_PORTAUDIO
 		device = -1;
+#endif
 		channels = 2;
 		buffer = 250;
 		repeatcount = 0;
 		samplerate = 48000;
 		gain = 0;
 		quality = 100;
-		rampinus = ( 16 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
-		rampoutus = ( 42 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
+		rampupus = ( 16 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
+		rampdownus = ( 42 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
 		quiet = false;
 		verbose = false;
 		show_message = false;
@@ -100,11 +128,22 @@ struct openmpt123_flags {
 		seek_target = 0.0;
 		use_float = false;
 		use_stdout = false;
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+		force_overwrite = false;
+#endif
 	}
 	void check_and_sanitize() {
 		if ( filenames.size() == 0 ) {
 			throw show_help_exception();
 		}
+#if defined(MPT_WITH_PORTAUDIO) && ( defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE) )
+		if ( use_stdout && ( device != openmpt123_flags().device || !output_filename.empty() ) ) {
+			throw show_help_exception();
+		}
+		if ( !output_filename.empty() && ( device != openmpt123_flags().device || use_stdout ) ) {
+			throw show_help_exception();
+		}
+#endif
 		if ( quiet ) {
 			verbose = false;
 			show_progress = false;
@@ -123,7 +162,9 @@ std::ostream & operator << ( std::ostream & s, const openmpt123_flags & flags ) 
 	s << "Verbose: " << flags.verbose << std::endl;
 	s << "Show message: " << flags.show_message << std::endl;
 	s << "Show progress: " << flags.show_progress << std::endl;
+#ifdef MPT_WITH_PORTAUDIO
 	s << "Device: " << flags.device << std::endl;
+#endif
 	s << "Channels: " << flags.channels << std::endl;
 	s << "Buffer: " << flags.buffer << std::endl;
 	s << "Repeat count: " << flags.repeatcount << std::endl;
@@ -133,6 +174,10 @@ std::ostream & operator << ( std::ostream & s, const openmpt123_flags & flags ) 
 	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
 	s << "Standard output: " << flags.use_stdout << std::endl;
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+	s << "Output filename: " << flags.output_filename << std::endl;
+	s << "Force overwrite output file: " << flags.force_overwrite << std::endl;
+#endif
 	s << std::endl;
 	s << "Files: " << std::endl;
 	for ( std::vector<std::string>::const_iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
@@ -174,6 +219,32 @@ std::string bytes_to_string( T bytes ) {
 	}
 	return str.str();
 }
+
+static std::string append_software_tag( std::string software ) {
+	std::string openmpt123 = std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + ", libopenmpt " + openmpt::string::get( openmpt::string::library_version ) + ", OpenMPT " + openmpt::string::get( openmpt::string::core_version );
+	if ( software.empty() ) {
+		software = openmpt123;
+	} else {
+		software += " (" + openmpt123 + ")";
+	}
+	return software;
+}
+
+class write_buffers_interface {
+public:
+	virtual void write_metadata( const openmpt::module & mod ) {
+		(void)mod;
+		return;
+	}
+	virtual void write_updated_metadata( const openmpt::module & mod ) {
+		(void)mod;
+		return;
+	}
+	virtual void write( const std::vector<float*> buffers, std::size_t frames ) = 0;
+	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) = 0;
+};
+
+#ifdef MPT_WITH_PORTAUDIO
 
 typedef void (*PaUtilLogCallback ) (const char *log);
 #ifdef _MSC_VER
@@ -236,12 +307,6 @@ public:
 
 std::ostream * portaudio_raii::portaudio_log_stream = 0;
 
-class write_buffers_interface {
-public:
-	virtual void write( const std::vector<float*> buffers, std::size_t frames ) = 0;
-	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) = 0;
-};
-
 class portaudio_stream_raii : public portaudio_raii, public write_buffers_interface {
 private:
 	PaStream * stream;
@@ -292,6 +357,279 @@ public:
 	}
 };
 
+#endif
+
+static float mpt_round( float val ) {
+	if ( val >= 0.0f ) {
+		return std::floor( val + 0.5f );
+	} else {
+		return std::ceil( val - 0.5f );
+	}
+}
+
+static long mpt_lround( float val ) {
+	return static_cast< long >( mpt_round( val ) );
+}
+
+#ifdef MPT_WITH_FLAC
+
+class flac_stream_raii : public write_buffers_interface {
+private:
+	openmpt123_flags flags;
+	bool called_init;
+	std::vector< std::pair< std::string, std::string > > tags;
+	FLAC__StreamMetadata * metadata[1];
+	FLAC__StreamMetadata_VorbisComment_Entry entry;
+	FLAC::Encoder::File encoder;
+	std::vector<FLAC__int32> interleaved_buffer;
+	void add_vorbiscomment_field( FLAC__StreamMetadata * vorbiscomment, const std::string & field, const std::string & value ) {
+		if ( !value.empty() ) {
+			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair( &entry, field.c_str(), value.c_str() );
+			FLAC__metadata_object_vorbiscomment_append_comment( vorbiscomment, entry, true );
+		}
+	}
+public:
+	flac_stream_raii( const openmpt123_flags & flags_ ) : flags(flags_), called_init(false) {
+		metadata[0] = 0;
+		encoder.set_channels( flags.channels );
+		encoder.set_bits_per_sample( flags.use_float ? 24 : 16 );
+		encoder.set_sample_rate( flags.samplerate );
+		encoder.set_compression_level( 8 );
+	}
+	~flac_stream_raii() {
+		encoder.finish();
+		FLAC__metadata_object_delete( metadata[0] );
+	}
+	void write_metadata( const openmpt::module & mod ) {
+		if ( called_init ) {
+			return;
+		}
+		tags.clear();
+		tags.push_back( std::make_pair<std::string, std::string>( "TITLE", mod.get_metadata( "title" ) ) );
+		tags.push_back( std::make_pair<std::string, std::string>( "ARTIST", mod.get_metadata( "author" ) ) );
+		tags.push_back( std::make_pair<std::string, std::string>( "COMMENTS", mod.get_metadata( "message" ) ) );
+		tags.push_back( std::make_pair<std::string, std::string>( "ENCODING", append_software_tag( mod.get_metadata( "tracker" ) ) ) );
+		metadata[0] = FLAC__metadata_object_new( FLAC__METADATA_TYPE_VORBIS_COMMENT );
+		for ( std::vector< std::pair< std::string, std::string > >::iterator tag = tags.begin(); tag != tags.end(); ++tag ) {
+			add_vorbiscomment_field( metadata[0], tag->first, tag->second );
+		}
+		encoder.set_metadata( metadata, 1 );
+	}
+	void write( const std::vector<float*> buffers, std::size_t frames ) {
+		if ( !called_init ) {
+			encoder.init( flags.output_filename );
+			called_init = true;
+		}
+		interleaved_buffer.clear();
+		for ( std::size_t frame = 0; frame < frames; frame++ ) {
+			for ( std::size_t channel = 0; channel < buffers.size(); channel++ ) {
+				float in = buffers[channel][frame];
+				if ( in <= -1.0f ) {
+					in = -1.0f;
+				} else if ( in >= 1.0f ) {
+					in = 1.0f;
+				}
+				FLAC__int32 out = mpt_lround( in * (1<<23) );
+				out = std::max( 0 - (1<<23), out );
+				out = std::min( out, 0 + (1<<23) - 1 );
+				interleaved_buffer.push_back( out );
+			}
+		}
+		encoder.process_interleaved( interleaved_buffer.data(), frames );
+	}
+	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
+		if ( !called_init ) {
+			encoder.init( flags.output_filename );
+			called_init = true;
+		}
+		interleaved_buffer.clear();
+		for ( std::size_t frame = 0; frame < frames; frame++ ) {
+			for ( std::size_t channel = 0; channel < buffers.size(); channel++ ) {
+				interleaved_buffer.push_back( buffers[channel][frame] );
+			}
+		}
+		encoder.process_interleaved( interleaved_buffer.data(), frames );
+	}
+};
+
+#endif
+
+static std::string get_extension( std::string filename ) {
+	if ( filename.find_last_of( "." ) != std::string::npos ) {
+		return filename.substr( filename.find_last_of( "." ) + 1 );
+	}
+	return "";
+}
+
+#ifdef MPT_WITH_SNDFILE
+
+class sndfile_stream_raii : public write_buffers_interface {
+private:
+	openmpt123_flags flags;
+	std::ostream & log;
+	SNDFILE * sndfile;
+	std::vector<float> interleaved_float_buffer;
+	std::vector<std::int16_t> interleaved_int_buffer;
+private:
+	enum match_mode_enum {
+		match_print,
+		match_recurse,
+		match_exact,
+		match_better,
+		match_any
+	};
+	int matched_result( const SF_FORMAT_INFO & format_info, const SF_FORMAT_INFO & subformat_info ) {
+		if ( flags.verbose ) {
+			log << "sndfile: using format '"
+			    << format_info.name << " (" << format_info.extension << ")" << " / " << subformat_info.name
+			    << "'"
+			    << std::endl;
+		}
+		return ( format_info.format & SF_FORMAT_TYPEMASK ) | subformat_info.format;
+	}
+	int find_format( std::string extension, match_mode_enum match_mode ) {
+
+		if ( match_mode == match_recurse ) {
+			int result = 0;
+			result = find_format( extension, match_exact );
+			if ( result ) {
+				return result;
+			}
+			result = find_format( extension, match_better );
+			if ( result ) {
+				return result;
+			}
+			result = find_format( extension, match_any );
+			if ( result ) {
+				return result;
+			}
+			if ( result ) {
+				return result;
+			}
+			return 0;
+		}
+
+		int format = 0;
+		int major_count;
+		sf_command( 0, SFC_GET_FORMAT_MAJOR_COUNT, &major_count, sizeof( int ) );
+		for ( int m = 0; m < major_count; m++ ) {
+
+			SF_FORMAT_INFO format_info;
+			format_info.format = m;
+			sf_command( 0, SFC_GET_FORMAT_MAJOR, &format_info, sizeof( SF_FORMAT_INFO ) );
+			format = format_info.format;
+
+			int subtype_count;
+			sf_command( 0, SFC_GET_FORMAT_SUBTYPE_COUNT, &subtype_count, sizeof( int ) );
+			for ( int s = 0; s < subtype_count; s++ ) {
+
+				SF_FORMAT_INFO subformat_info;
+				subformat_info.format = s;
+				sf_command( 0, SFC_GET_FORMAT_SUBTYPE, &subformat_info, sizeof( SF_FORMAT_INFO ) );
+				format = ( format & SF_FORMAT_TYPEMASK ) | subformat_info.format;
+
+				SF_INFO sfinfo;
+				std::memset( &sfinfo, 0, sizeof( SF_INFO ) );
+				sfinfo.channels = flags.channels;
+				sfinfo.format = format;
+				if ( sf_format_check( &sfinfo ) ) {
+
+					switch ( match_mode ) {
+					case match_print:
+						log << "sndfile: "
+						    << ( format_info.name ? format_info.name : "" ) << " (" << ( format_info.extension ? format_info.extension : "" ) << ")"
+						    << " / "
+						    << ( subformat_info.name ? subformat_info.name : "" )
+						    << std::endl;
+						break;
+					case match_recurse:
+						break;
+					case match_exact:
+						if ( extension == format_info.extension ) {
+							if ( flags.use_float && ( format_info.format & SF_FORMAT_FLOAT ) ) {
+								return matched_result( format_info, subformat_info );
+							} else if ( !flags.use_float && ( format_info.format & SF_FORMAT_PCM_16 ) ) {
+								return matched_result( format_info, subformat_info );
+							}
+						}
+						break;
+					case match_better:
+						if ( extension == format_info.extension ) {
+							if ( flags.use_float && ( format_info.format & ( SF_FORMAT_FLOAT | SF_FORMAT_DOUBLE ) ) ) {
+								return matched_result( format_info, subformat_info );
+							} else if ( !flags.use_float && ( format_info.format & ( SF_FORMAT_PCM_16 | SF_FORMAT_PCM_24 | SF_FORMAT_PCM_32 ) ) ) {
+								return matched_result( format_info, subformat_info );
+							}
+						}
+						break;
+					case match_any:
+						if ( extension == format_info.extension ) {
+							return matched_result( format_info, subformat_info );
+						}
+						break;
+					}
+
+				}
+			}
+		}
+
+		return 0;
+
+	}
+	void write_metadata_field( int str_type, const std::string & str ) {
+		if ( !str.empty() ) {
+			sf_set_string( sndfile, str_type, str.c_str() );
+		}
+	}
+public:
+	sndfile_stream_raii( const openmpt123_flags & flags_, std::ostream & log_ = std::cerr ) : flags(flags_), log(log_),sndfile(0) {
+		if ( flags.verbose ) {
+			find_format( "", match_print );
+			log << std::endl;
+		}
+		int format = find_format( get_extension( flags.output_filename ), match_recurse );
+		if ( !format ) {
+			throw openmpt123_exception( "unknown file type" );
+		}
+		SF_INFO info;
+		std::memset( &info, 0, sizeof( SF_INFO ) );
+		info.samplerate = flags.samplerate;
+		info.channels = flags.channels;
+		info.format = format;
+		sndfile = sf_open( flags.output_filename.c_str(), SFM_WRITE, &info );
+	}
+	~sndfile_stream_raii() {
+		sf_close( sndfile );
+		sndfile = 0;
+	}
+	void write_metadata( const openmpt::module & mod ) {
+		write_metadata_field( SF_STR_TITLE, mod.get_metadata( "title" ) );
+		write_metadata_field( SF_STR_ARTIST, mod.get_metadata( "author" ) );
+		write_metadata_field( SF_STR_COMMENT, mod.get_metadata( "message" ) );
+		write_metadata_field( SF_STR_SOFTWARE, append_software_tag( mod.get_metadata( "tracker" ) ) );
+	}
+	void write( const std::vector<float*> buffers, std::size_t frames ) {
+		interleaved_float_buffer.clear();
+		for ( std::size_t frame = 0; frame < frames; frame++ ) {
+			for ( std::size_t channel = 0; channel < buffers.size(); channel++ ) {
+				interleaved_float_buffer.push_back( buffers[channel][frame] );
+			}
+		}
+		sf_writef_float( sndfile, interleaved_float_buffer.data(), frames );
+	}
+	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
+		interleaved_int_buffer.clear();
+		for ( std::size_t frame = 0; frame < frames; frame++ ) {
+			for ( std::size_t channel = 0; channel < buffers.size(); channel++ ) {
+				interleaved_int_buffer.push_back( buffers[channel][frame] );
+			}
+		}
+		sf_writef_short( sndfile, interleaved_int_buffer.data(), frames );
+	}
+};
+
+#endif
+
 class stdout_stream_raii : public write_buffers_interface {
 private:
 	std::vector<float> interleaved_float_buffer;
@@ -326,9 +664,19 @@ public:
 static void show_info( std::ostream & log, bool modplug123 = false ) {
 	log << ( modplug123 ? "modplug123 emulated by " : "" ) << "openmpt123" << " version " << OPENMPT123_VERSION_STRING << std::endl;
 	log << " Copyright (c) 2013 OpenMPT developers (http://openmpt.org/)" << std::endl;
-	log << " libopenmpt version " << openmpt::string::get( openmpt::string::library_version ) << " " << "(built " << openmpt::string::get( openmpt::string::build ) << ")" << std::endl;
-	log << " OpenMPT version " << openmpt::string::get( openmpt::string::core_version ) << std::endl;
+	log << " libopenmpt " << openmpt::string::get( openmpt::string::library_version ) << " " << "(built " << openmpt::string::get( openmpt::string::build ) << ")" << std::endl;
+	log << " OpenMPT " << openmpt::string::get( openmpt::string::core_version ) << std::endl;
+#ifdef MPT_WITH_PORTAUDIO
 	log << " " << Pa_GetVersionText() << " (http://portaudio.com/)" << std::endl;
+#endif
+#ifdef MPT_WITH_FLAC
+	log << " FLAC " << FLAC__VERSION_STRING << ", " << FLAC__VENDOR_STRING << ", API " << FLAC_API_VERSION_CURRENT << "." << FLAC_API_VERSION_REVISION << "." << FLAC_API_VERSION_AGE << " (https://xiph.org/flac/)" << std::endl;
+#endif
+#ifdef MPT_WITH_SNDFILE
+	char sndfile_info[128];
+	sf_command( 0, SFC_GET_LIB_VERSION, sndfile_info, sizeof( sndfile_info ) );
+	log << " libsndfile " << sndfile_info << " (http://mega-nerd.com/libsndfile/)" << std::endl;
+#endif
 	log << std::endl;
 }
 
@@ -357,7 +705,9 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 			return;
 		}
 		std::clog << " -l               Loop song [default: " << openmpt123_flags().repeatcount << "]" << std::endl;
+#ifdef MPT_WITH_PORTAUDIO
 		std::clog << " -ao n            Set output device [default: " << openmpt123_flags().device << "]," << std::endl;
+#endif
 		std::clog << "                  use -ao help to show available devices" << std::endl;
 	} else {
 		std::clog << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
@@ -372,8 +722,15 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 		}
 		std::clog << " --[no-]message   Show song message [default: " << openmpt123_flags().show_message << "]" << std::endl;
 		std::clog << " --[no-]progress  Show playback progress [default: " << openmpt123_flags().show_progress << "]" << std::endl;
+#ifdef MPT_WITH_PORTAUDIO
 		std::clog << " --device n       Set output device [default: " << get_device_string( openmpt123_flags().device ) << "]," << std::endl;
 		std::clog << "                  use --device help to show available devices" << std::endl;
+#endif
+		std::clog << " --stdout         Write raw audio data to stdout [default: " << openmpt123_flags().use_stdout << "]" << std::endl;
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+		std::clog << " -o, --output f   Write FLAC flac output instead of streaming to audio device [default: " << openmpt123_flags().output_filename << "]" << std::endl;
+		std::clog << " --force          Force overwriting of output file [default: " << openmpt123_flags().force_overwrite << "]" << std::endl;
+#endif
 		std::clog << " --channels n     use n [1,2,4] output channels [default: " << openmpt123_flags().channels << "]" << std::endl;
 		std::clog << " --[no]-float     Output 32bit floating point instead of 16bit integer [default: " << openmpt123_flags().use_float << "]" << std::endl;
 		std::clog << " --buffer n       Set output buffer size to n ms [default: " << openmpt123_flags().buffer << "]," << std::endl;
@@ -382,8 +739,8 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 		std::clog << " --repeat n       Repeat song n times (-1 means forever) [default: " << openmpt123_flags().repeatcount << "]" << std::endl;
 		std::clog << " --quality n      Set rendering quality to n % [default: " << openmpt123_flags().quality << "]" << std::endl;
 		std::clog << " --seek n         Seek to n seconds on start [default: " << openmpt123_flags().seek_target << "]" << std::endl;
-		std::clog << " --volrampin n    Use n microseconds volume ramping on sample begin [default: " << openmpt123_flags().rampinus << "]" << std::endl;
-		std::clog << " --volrampout n   Use n microseconds volume ramping on sample end [default: " << openmpt123_flags().rampoutus << "]" << std::endl;
+		std::clog << " --volrampup n    Use n microseconds volume ramping up [default: " << openmpt123_flags().rampupus << "]" << std::endl;
+		std::clog << " --volrampdown n  Use n microseconds volume ramping down [default: " << openmpt123_flags().rampdownus << "]" << std::endl;
 		std::clog << std::endl;
 		std::clog << " --               Interpret further arguments as filenames" << std::endl;
 		std::clog << std::endl;
@@ -410,6 +767,8 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 	}
 }
 
+#ifdef MPT_WITH_PORTAUDIO
+
 static void show_audio_devices() {
 	std::ostringstream devices;
 	devices << " Available devices:" << std::endl;
@@ -423,6 +782,8 @@ static void show_audio_devices() {
 	}
 	throw show_help_exception( devices.str() );
 }
+
+#endif
 
 template < typename Tsample >
 void render_loop( const openmpt123_flags & flags, openmpt::module & mod, double & duration, std::ostream & log, write_buffers_interface & audio_stream ) {
@@ -508,6 +869,12 @@ static void render_file( const openmpt123_flags & flags, const std::string & fil
 		log << "Patterns: " << mod.get_num_patterns() << std::endl;
 		log << "Instruments: " << mod.get_num_instruments() << std::endl;
 		log << "Samples: " << mod.get_num_samples() << std::endl;
+		
+		if ( flags.filenames.size() == 1 ) {
+			audio_stream.write_metadata( mod );
+		} else {
+			audio_stream.write_updated_metadata( mod );
+		}
 
 		if ( flags.show_message ) {
 			log << "Message: " << std::endl;
@@ -518,8 +885,8 @@ static void render_file( const openmpt123_flags & flags, const std::string & fil
 		mod.set_render_param( openmpt::module::RENDER_REPEATCOUNT, flags.repeatcount );
 		mod.set_render_param( openmpt::module::RENDER_QUALITY_PERCENT, flags.quality );
 		mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
-		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_IN_MICROSECONDS, flags.rampinus );
-		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_OUT_MICROSECONDS, flags.rampoutus );
+		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, flags.rampupus );
+		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, flags.rampdownus );
 
 		if ( flags.seek_target > 0.0 ) {
 			mod.seek_seconds( flags.seek_target );
@@ -571,15 +938,19 @@ static openmpt123_flags parse_modplug123( const std::vector<std::string> & args 
 		} else if ( arg == "-l" ) {
 			flags.repeatcount = -1;
 		} else if ( arg == "-ao" && nextarg != "" ) {
-			if ( nextarg == "help" ) {
-				show_audio_devices();
+			if ( false ) {
+				// nothing
 			} else if ( nextarg == "stdout" ) {
 				flags.use_stdout = true;
+#ifdef MPT_WITH_PORTAUDIO
+			} else if ( nextarg == "help" ) {
+				show_audio_devices();
 			} else if ( nextarg == "default" ) {
 				flags.device = -1;
 			} else {
 				std::istringstream istr( nextarg );
 				istr >> flags.device;
+#endif
 			}
 			++i;
 		}
@@ -625,17 +996,30 @@ static openmpt123_flags parse_openmpt123( const std::vector<std::string> & args 
 			} else if ( arg == "--no-progress" ) {
 				flags.show_progress = false;
 			} else if ( arg == "--device" && nextarg != "" ) {
-				if ( nextarg == "help" ) {
-					show_audio_devices();
+				if ( false ) {
+					// nothing
 				} else if ( nextarg == "stdout" ) {
 					flags.use_stdout = true;
+#ifdef MPT_WITH_PORTAUDIO
+				} else if ( nextarg == "help" ) {
+					show_audio_devices();
 				} else if ( nextarg == "default" ) {
 					flags.device = -1;
 				} else {
 					std::istringstream istr( nextarg );
 					istr >> flags.device;
+#endif
 				}
 				++i;
+			} else if ( arg == "--stdout" ) {
+				flags.use_stdout = true;
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+			} else if ( ( arg == "-o" || arg == "--output" ) && nextarg != "" ) {
+				flags.output_filename = nextarg;
+				++i;
+			} else if ( arg == "--force" ) {
+				flags.force_overwrite = true;
+#endif
 			} else if ( arg == "--channels" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.channels;
@@ -670,13 +1054,13 @@ static openmpt123_flags parse_openmpt123( const std::vector<std::string> & args 
 				std::istringstream istr( nextarg );
 				istr >> flags.seek_target;
 				++i;
-			} else if ( arg == "--volrampin" && nextarg != "" ) {
+			} else if ( arg == "--volrampup" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
-				istr >> flags.rampinus;
+				istr >> flags.rampupus;
 				++i;
-			} else if ( arg == "--volrampout" && nextarg != "" ) {
+			} else if ( arg == "--volrampdown" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
-				istr >> flags.rampoutus;
+				istr >> flags.rampdownus;
 				++i;
 			} else if ( arg == "--runtests" ) {
 				flags.run_tests = true;
@@ -791,6 +1175,35 @@ int main( int argc, char * argv [] ) {
 				render_file( flags, *filename, log, stdout_audio_stream );
 			}
 
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+		} else if ( !flags.output_filename.empty() ) {
+		
+			if ( !flags.force_overwrite ) {
+				std::ifstream testfile( flags.output_filename, std::ios::binary );
+				if ( testfile ) {
+					throw openmpt123_exception( "file already exists" );
+				}
+			}
+
+			if ( false ) {
+				// nothing
+#ifdef MPT_WITH_FLAC
+			} else if ( get_extension( flags.output_filename ) == "flac" ) {
+				flac_stream_raii flac_audio_stream( flags );
+				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+					render_file( flags, *filename, log, flac_audio_stream );
+				}
+#endif				
+#ifdef MPT_WITH_SNDFILE
+			} else {
+				sndfile_stream_raii sndfile_audio_stream( flags, log );
+				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+					render_file( flags, *filename, log, sndfile_audio_stream );
+				}
+#endif
+			}
+#endif		
+#ifdef MPT_WITH_PORTAUDIO
 		} else {
 
 			portaudio_stream_raii portaudio_stream( flags, log );
@@ -798,7 +1211,7 @@ int main( int argc, char * argv [] ) {
 			for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
 				render_file( flags, *filename, log, portaudio_stream );
 			}
-
+#endif
 		}
 
 	} catch ( show_help_exception & e ) {
@@ -810,8 +1223,10 @@ int main( int argc, char * argv [] ) {
 	} catch ( show_version_number_exception & ) {
 		show_version();
 		return 0;
+#ifdef MPT_WITH_PORTAUDIO
 	} catch ( portaudio_exception & e ) {
 		std::cerr << "PortAudio error: " << e.what() << std::endl;
+#endif
 	} catch ( silent_exit_exception & ) {
 		return 0;
 	} catch ( std::exception & e ) {
