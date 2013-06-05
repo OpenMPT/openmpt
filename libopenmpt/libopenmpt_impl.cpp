@@ -319,10 +319,10 @@ std::int32_t module_impl::get_render_param( int command ) const {
 			}
 			throw openmpt::exception_message("unknown interpolation mode set internally");
 		} break;
-		case module::RENDER_VOLUMERAMP_IN_MICROSECONDS: {
+		case module::RENDER_VOLUMERAMP_UP_MICROSECONDS: {
 			return m_sndFile->m_MixerSettings.GetVolumeRampUpMicroseconds();
 		} break;
-		case module::RENDER_VOLUMERAMP_OUT_MICROSECONDS: {
+		case module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS: {
 			return m_sndFile->m_MixerSettings.GetVolumeRampDownMicroseconds();
 		} break;
 		default: throw openmpt::exception_message("unknown command"); break;
@@ -380,14 +380,14 @@ void module_impl::set_render_param( int command, std::int32_t value ) {
 				m_sndFile->SetResamplerSettings( newsettings );
 			}
 		} break;
-		case module::RENDER_VOLUMERAMP_IN_MICROSECONDS: {
+		case module::RENDER_VOLUMERAMP_UP_MICROSECONDS: {
 			MixerSettings newsettings = m_sndFile->m_MixerSettings;
 			newsettings.SetVolumeRampUpMicroseconds( value );
 			if ( m_sndFile->m_MixerSettings.glVolumeRampUpSamples != newsettings.glVolumeRampUpSamples ) {
 				m_sndFile->SetMixerSettings( newsettings );
 			}
 		} break;
-		case module::RENDER_VOLUMERAMP_OUT_MICROSECONDS: {
+		case module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS: {
 			MixerSettings newsettings = m_sndFile->m_MixerSettings;
 			newsettings.SetVolumeRampDownMicroseconds( value );
 			if ( m_sndFile->m_MixerSettings.glVolumeRampDownSamples != newsettings.glVolumeRampDownSamples ) {

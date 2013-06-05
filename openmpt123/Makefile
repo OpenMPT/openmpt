@@ -57,17 +57,41 @@ endif
 #CXXFLAGS += -mtune=generic
 #CFLAGS   += -mtune=generic
 
+#LDLIBS   += -lz
+ifeq ($(shell pkg-config --exists zlib && echo yes),yes)
+CPPFLAGS += -DMPT_WITH_ZLIB
 CPPFLAGS += $(shell pkg-config --cflags-only-I   zlib )
 LDFLAGS  += $(shell pkg-config --libs-only-other zlib )
 LDFLAGS  += $(shell pkg-config --libs-only-L     zlib )
 LDLIBS   += $(shell pkg-config --libs-only-l     zlib )
-#LDLIBS   += -lz
+endif
 
+#LDLIBS   += -lportaudio
+ifeq ($(shell pkg-config --exists portaudio-2.0 && echo yes),yes)
+CPPFLAGS += -DMPT_WITH_PORTAUDIO
 CPPFLAGS += $(shell pkg-config --cflags-only-I   portaudio-2.0 )
 LDFLAGS  += $(shell pkg-config --libs-only-other portaudio-2.0 )
 LDFLAGS  += $(shell pkg-config --libs-only-L     portaudio-2.0 )
 LDLIBS   += $(shell pkg-config --libs-only-l     portaudio-2.0 )
-#LDLIBS   += -lportaudio
+endif
+
+#LDLIBS   += -lFLAC++ -lFLAC
+ifeq ($(shell pkg-config --exists flac++ flac && echo yes),yes)
+CPPFLAGS += -DMPT_WITH_FLAC
+CPPFLAGS += $(shell pkg-config --cflags-only-I   flac++ flac )
+LDFLAGS  += $(shell pkg-config --libs-only-other flac++ flac )
+LDFLAGS  += $(shell pkg-config --libs-only-L     flac++ flac )
+LDLIBS   += $(shell pkg-config --libs-only-l     flac++ flac )
+endif
+
+#LDLIBS   += -lsndfile
+ifeq ($(shell pkg-config --exists sndfile && echo yes),yes)
+CPPFLAGS += -DMPT_WITH_SNDFILE
+CPPFLAGS += $(shell pkg-config --cflags-only-I   sndfile )
+LDFLAGS  += $(shell pkg-config --libs-only-other sndfile )
+LDFLAGS  += $(shell pkg-config --libs-only-L     sndfile )
+LDLIBS   += $(shell pkg-config --libs-only-l     sndfile )
+endif
 
 %: %.o
 	$(INFO) [LD ] $@
