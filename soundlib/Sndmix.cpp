@@ -310,7 +310,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 			// Apply global volume
 			if (m_PlayConfig.getGlobalVolumeAppliesToMaster())
 			{
-				ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, lSampleCount);
+				ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, lCount);
 			}
 		} else
 		{
@@ -326,7 +326,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 			// Apply global volume
 			if (m_PlayConfig.getGlobalVolumeAppliesToMaster())
 			{
-				ApplyGlobalVolume(MixSoundBuffer, nullptr, lSampleCount);
+				ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, lCount);
 			}
 		}
 
@@ -2270,11 +2270,41 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 #endif // MODPLUG_TRACKER
 
 
-void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTotalSampleCount)
-//---------------------------------------------------------------------------------------------
+template<int channels>
+forceinline void ApplyGlobalVolumeWithRamping(int *SoundBuffer, int *RearBuffer, long lCount, UINT m_nGlobalVolume, long step, UINT &m_nSamplesToGlobalVolRampDest, long &m_lHighResRampingGlobalVolume)
 {
-	long step = 0;
+	const bool isStereo = (channels >= 2);
+	const bool hasRear = (channels >= 4);
+	for(int pos = 0; pos < lCount; ++pos)
+	{
+		if(m_nSamplesToGlobalVolRampDest > 0)
+		{
+			// Ramping required
+			m_lHighResRampingGlobalVolume += step;
+			             SoundBuffer[0] = Util::muldiv(SoundBuffer[0], m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME << VOLUMERAMPPRECISION);
+			if(isStereo) SoundBuffer[1] = Util::muldiv(SoundBuffer[1], m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME << VOLUMERAMPPRECISION);
+			if(hasRear)  RearBuffer[0]  = Util::muldiv(RearBuffer[0] , m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME << VOLUMERAMPPRECISION);
+			if(hasRear)  RearBuffer[1]  = Util::muldiv(RearBuffer[1] , m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME << VOLUMERAMPPRECISION);
+			m_nSamplesToGlobalVolRampDest--;
+		} else
+		{
+			             SoundBuffer[0] = Util::muldiv(SoundBuffer[0], m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+			if(isStereo) SoundBuffer[1] = Util::muldiv(SoundBuffer[1], m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+			if(hasRear)  RearBuffer[0]  = Util::muldiv(RearBuffer[0] , m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+			if(hasRear)  RearBuffer[1]  = Util::muldiv(RearBuffer[1] , m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+			m_lHighResRampingGlobalVolume = m_nGlobalVolume << VOLUMERAMPPRECISION;
+		}
+		SoundBuffer += isStereo ? 2 : 1;
+		if(hasRear) RearBuffer += 2;
+	}
+}
 
+
+void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCount)
+//--------------------------------------------------------------------------------
+{
+
+	// should we ramp?
 	if(IsGlobalVolumeUnset())
 	{
 		// do not ramp if no global volume was set before (which is the case at song start), to prevent audible glitches when default volume is > 0 and it is set to 0 in the first row
@@ -2284,13 +2314,20 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 	} else if(m_nGlobalVolumeDestination != m_nGlobalVolume)
 	{
 		// User has provided new global volume
-		const bool rampUp = m_nGlobalVolumeDestination > m_nGlobalVolume;
+
+		// m_nGlobalVolume: the last global volume which got set e.g. by a pattern command
+		// m_nGlobalVolumeDestination: the current target of the ramping algorithm
+		const bool rampUp = m_nGlobalVolume > m_nGlobalVolumeDestination;
+
 		m_nGlobalVolumeDestination = m_nGlobalVolume;
 		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? m_MixerSettings.glVolumeRampUpSamples : m_MixerSettings.glVolumeRampDownSamples;
 	} 
 
+	// calculate ramping step
+	long step = 0;
 	if (m_nSamplesToGlobalVolRampDest > 0)
 	{
+
 		// Still some ramping left to do.
 		long highResGlobalVolumeDestination = static_cast<long>(m_nGlobalVolumeDestination) << VOLUMERAMPPRECISION;
 
@@ -2307,32 +2344,18 @@ void CSoundFile::ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTo
 		}
 	}
 
-	const long highResVolume = m_lHighResRampingGlobalVolume;
-	const UINT samplesToRamp = m_nSamplesToGlobalVolRampDest;
-
-	// SoundBuffer has interleaved left/right channels for the front channels; RearBuffer has the rear left/right channels.
-	// So we process the pairs independently for ramping.
-	for (int pairs = MAX(m_MixerSettings.gnChannels / 2, 1); pairs > 0; pairs--)
+	// apply volume and ramping
+	if(m_MixerSettings.gnChannels == 1)
 	{
-		int *sample = (pairs == 1) ? SoundBuffer : RearBuffer;
-		m_lHighResRampingGlobalVolume = highResVolume;
-		m_nSamplesToGlobalVolRampDest = samplesToRamp;
-
-		for (int pos = lTotalSampleCount; pos > 0; pos--, sample++)
-		{
-			if (m_nSamplesToGlobalVolRampDest > 0)
-			{
-				// Ramping required
-				m_lHighResRampingGlobalVolume += step;
-				*sample = Util::muldiv(*sample, m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME << VOLUMERAMPPRECISION);
-				m_nSamplesToGlobalVolRampDest--;
-			} else
-			{
-				*sample = Util::muldiv(*sample, m_nGlobalVolume, MAX_GLOBAL_VOLUME);
-				m_lHighResRampingGlobalVolume = m_nGlobalVolume << VOLUMERAMPPRECISION;
-			}
-		}
+		ApplyGlobalVolumeWithRamping<1>(SoundBuffer, RearBuffer, lCount, m_nGlobalVolume, step, m_nSamplesToGlobalVolRampDest, m_lHighResRampingGlobalVolume);
+	} else if(m_MixerSettings.gnChannels == 2)
+	{
+		ApplyGlobalVolumeWithRamping<2>(SoundBuffer, RearBuffer, lCount, m_nGlobalVolume, step, m_nSamplesToGlobalVolRampDest, m_lHighResRampingGlobalVolume);
+	} else if(m_MixerSettings.gnChannels == 4)
+	{
+		ApplyGlobalVolumeWithRamping<4>(SoundBuffer, RearBuffer, lCount, m_nGlobalVolume, step, m_nSamplesToGlobalVolRampDest, m_lHighResRampingGlobalVolume);
 	}
+
 }
 
 
