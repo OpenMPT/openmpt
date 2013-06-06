@@ -396,15 +396,42 @@ bool CReverb::SetReverbParameters(UINT nDepth, UINT nType)
 }
 
 
+void CReverb::ProcessPrepare(int *MixReverbBuffer, UINT nSamples)
+//---------------------------------------------------------------
+{
+	gnReverbSend = 0; // no data sent yet
+	if(!gnReverbSamples)
+	{
+		// reverb had decayed completely, we will probably not process reverb, so no need to clear buffer
+		return;
+	}
+	StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
+}
+
+
+void CReverb::ProcessWillSend(int *MixReverbBuffer, UINT nSamples)
+//----------------------------------------------------------------
+{
+	if(!gnReverbSend && !gnReverbSamples)
+	{
+		// reverb had decayed completely before, and we did not clear the buffer yet, do it now because we get new data
+		StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
+	}
+	gnReverbSend = 1; // we will have to process reverb
+}
+
+
 // Reverb
-void CReverb::Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples, DWORD sysinfo)
-//--------------------------------------------------------------------------------------------
+void CReverb::Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples)
+//-----------------------------------------------------------------------------
 {
 	UINT nIn, nOut;
 
-	if ((!gnReverbSend) && (!gnReverbSamples)) return;
-	if (!gnReverbSend) StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
-	if (!(sysinfo & PROCSUPPORT_MMX)) return;
+	if((!gnReverbSend) && (!gnReverbSamples))
+	{ // no data is sent to reverb and reverb decayed completely
+		return;
+	}
+	if (!(GetProcSupport() & PROCSUPPORT_MMX)) return;
 	// Dynamically adjust reverb master gains
 	LONG lMasterGain;
 	lMasterGain = ((g_RefDelay.lMasterGain * m_Settings.m_nReverbDepth) >> 4);
@@ -460,11 +487,11 @@ void CReverb::Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples, 
 	// Upsample 2x
 	MMX_ReverbProcessPostFiltering1x(MixReverbBuffer, MixSoundBuffer, nSamples);
 	// Automatically shut down if needed
-	if (gnReverbSend) gnReverbSamples = gnReverbDecaySamples;
-	else if (gnReverbSamples > nSamples) gnReverbSamples -= nSamples;
-	else
+	if(gnReverbSend) gnReverbSamples = gnReverbDecaySamples; // reset decay counter
+	else if(gnReverbSamples > nSamples) gnReverbSamples -= nSamples; // decay
+	else // decayed
 	{
-		if (gnReverbSamples) Shutdown();
+		Shutdown();
 		gnReverbSamples = 0;
 	}
 }
