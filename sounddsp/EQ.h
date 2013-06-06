@@ -12,9 +12,6 @@
 #pragma once
 
 
-#include "../soundlib/SoundFilePlayConfig.h"
-
-
 #define MAX_EQ_BANDS	6
 
 typedef struct ALIGN(4) _EQBANDSTRUCT
@@ -41,11 +38,10 @@ private:
 	EQBANDSTRUCT gEQ[MAX_EQ_BANDS*2];
 public:
 	CEQ();
-	~CEQ() {}
 public:
 	void Initialize(BOOL bReset, DWORD MixingFreq);
-	void ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSoundFilePlayConfig &config);
-	void ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount, CSoundFilePlayConfig &config);
+	void ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount);
+	void ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount);
 	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq);
 };
 

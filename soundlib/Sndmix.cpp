@@ -339,9 +339,9 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 		if (m_MixerSettings.DSPMask & SNDDSP_EQ)
 		{
 			if (m_MixerSettings.gnChannels >= 2)
-				m_EQ.ProcessStereo(MixSoundBuffer, MixFloatBuffer, lCount, m_PlayConfig);
+				m_EQ.ProcessStereo(MixSoundBuffer, MixFloatBuffer, lCount);
 			else
-				m_EQ.ProcessMono(MixSoundBuffer, MixFloatBuffer, lCount, m_PlayConfig);
+				m_EQ.ProcessMono(MixSoundBuffer, MixFloatBuffer, lCount);
 		}
 #endif // NO_EQ
 
