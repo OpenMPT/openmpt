@@ -785,7 +785,7 @@ public:
 #ifdef MODPLUG_TRACKER
 	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif // MODPLUG_TRACKER
-	void ApplyGlobalVolume(int SoundBuffer[], int RearBuffer[], long lTotalSampleCount);
+	void ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCount);
 
 #ifndef MODPLUG_TRACKER
 	void ApplyFinalOutputGain(int SoundBuffer[], int RearBuffer[], long lCount); // lCount meaning the number of frames, totally independet from the numer of channels
