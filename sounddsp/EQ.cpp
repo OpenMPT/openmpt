@@ -513,3 +513,34 @@ void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL b
 	Initialize(bReset, MixingFreq);
 }
 
+
+
+void CQuadEQ::Initialize(BOOL bReset, DWORD MixingFreq)
+//-----------------------------------------------------
+{
+	front.Initialize(bReset, MixingFreq);
+	rear.Initialize(bReset, MixingFreq);
+}
+
+void CQuadEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq)
+//----------------------------------------------------------------------------------------------------------
+{
+	front.SetEQGains(pGains, nGains, pFreqs, bReset, MixingFreq);
+	rear.SetEQGains(pGains, nGains, pFreqs, bReset, MixingFreq);
+}
+
+void CQuadEQ::Process(int *frontBuffer, int *rearBuffer, float *tempFloatBuffer, UINT nCount, UINT nChannels)
+//-----------------------------------------------------------------------------------------------------------
+{
+	if(nChannels == 1)
+	{
+		front.ProcessMono(frontBuffer, tempFloatBuffer, nCount);
+	} else if(nChannels == 2)
+	{
+		front.ProcessStereo(frontBuffer, tempFloatBuffer, nCount);
+	} else if(nChannels == 4)
+	{
+		front.ProcessStereo(frontBuffer, tempFloatBuffer, nCount);
+		rear.ProcessStereo(rearBuffer, tempFloatBuffer, nCount);
+	}
+}

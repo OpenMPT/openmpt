@@ -311,7 +311,7 @@ public:
 	CDSP m_DSP;
 #endif
 #ifndef NO_EQ
-	CEQ m_EQ;
+	CQuadEQ m_EQ;
 #endif
 #ifndef NO_AGC
 	CAGC m_AGC;

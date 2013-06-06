@@ -45,3 +45,17 @@ public:
 	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq);
 };
 
+
+//===========
+class CQuadEQ
+//===========
+{
+private:
+	CEQ front;
+	CEQ rear;
+public:
+	void Initialize(BOOL bReset, DWORD MixingFreq);
+	void Process(int *frontBuffer, int *rearBuffer, float *tempFloatBuffer, UINT nCount, UINT nChannels);
+	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq);
+};
+

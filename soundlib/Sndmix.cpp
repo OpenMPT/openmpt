@@ -338,10 +338,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 		// Graphic Equalizer
 		if (m_MixerSettings.DSPMask & SNDDSP_EQ)
 		{
-			if (m_MixerSettings.gnChannels >= 2)
-				m_EQ.ProcessStereo(MixSoundBuffer, MixFloatBuffer, lCount);
-			else
-				m_EQ.ProcessMono(MixSoundBuffer, MixFloatBuffer, lCount);
+			m_EQ.Process(MixSoundBuffer, MixRearBuffer, MixFloatBuffer, lCount, m_MixerSettings.gnChannels);
 		}
 #endif // NO_EQ
 
