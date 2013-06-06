@@ -1515,11 +1515,8 @@ void CSoundFile::CreateStereoMix(int count)
 #ifndef NO_REVERB
 		if (pbuffer == MixReverbBuffer)
 		{
-			if (!m_Reverb.gnReverbSend)
-			{
-				StereoFill(MixReverbBuffer, count, &m_Reverb.gnRvbROfsVol, &m_Reverb.gnRvbLOfsVol);
-			}
-			m_Reverb.gnReverbSend += count;
+			// notify reverb that there will be data in the reverb buffer to be processed
+			m_Reverb.ProcessWillSend(MixReverbBuffer, count);
 			pOfsR = &m_Reverb.gnRvbROfsVol;
 			pOfsL = &m_Reverb.gnRvbLOfsVol;
 		}
