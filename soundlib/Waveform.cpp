@@ -53,9 +53,7 @@ normloop:
 
 #endif
 
-#ifdef ENABLE_X86
-extern void X86_Dither(int *pBuffer, UINT nSamples, UINT nBits);
-#endif
+extern void Dither(int *pBuffer, UINT nSamples, UINT nBits);
 extern DWORD Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
 extern DWORD Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
@@ -70,7 +68,7 @@ UINT CSoundFile::Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24,
 	{
 		int nbuf = (n > MIXBUFFERSIZE * 2) ? MIXBUFFERSIZE * 2 : n;
 		X86_Normalize24BitBuffer(pbuffer, nbuf, lmax24, tempbuf);
-		X86_Dither(tempbuf, nbuf, 8 * dwByteInc);
+		Dither(tempbuf, nbuf, 8 * dwByteInc);
 		switch(dwByteInc)
 		{
 		case 2:		Convert32To16(pbuffer, tempbuf, nbuf); break;

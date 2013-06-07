@@ -2089,6 +2089,7 @@ void InitMixBuffer(int *pBuffer, UINT nSamples)
 
 
 #ifdef ENABLE_X86
+
 void X86_Dither(int *pBuffer, UINT nSamples, UINT nBits)
 //------------------------------------------------------
 {
@@ -2116,18 +2117,6 @@ noiseloop:
 	mov edx, ebx
 	sar edx, cl
 	add eax, edx
-/*
-	int a = 0, b = 0;
-	for (UINT i=0; i<len; i++)
-	{
-		a = (a << 1) | (((DWORD)a) >> (BYTE)31);
-		a ^= 0x10204080;
-		a += 0x78649E7D + (b << 2);
-		b += ((a << 16) | (a >> 16)) * 5;
-		int c = a + b;
-		p[i] = ((signed char)c ) >> 1;
-	}
-*/
 	dec ebp
 	mov dword ptr [esi-4], eax
 	jnz noiseloop
@@ -2136,7 +2125,50 @@ noiseloop:
 	mov gDitherB, ebx
 	}
 }
-#endif
+
+#endif // ENABLE_X86
+
+
+static forceinline int32 dither_rand(uint32 &a, uint32 &b)
+//--------------------------------------------------------
+{
+	a = (a << 1) | (a >> 31);
+	a ^= 0x10204080u;
+	a += 0x78649E7Du + (b * 4);
+	b += ((a << 16 ) | (a >> 16)) * 5;
+	return (int32)b;
+}
+
+static void C_Dither(int *pBuffer, UINT nSamples, UINT nBits)
+//-----------------------------------------------------------
+{
+
+	static uint32 global_a = 0;
+	static uint32 global_b = 0;
+
+	uint32 a = global_a;
+	uint32 b = global_b;
+
+	while(nSamples--)
+	{
+		*pBuffer += dither_rand(a, b) >> (nBits + MIXING_ATTENUATION + 1);
+		pBuffer++;
+	}
+
+	global_a = a;
+	global_b = b;
+
+}
+
+void Dither(int *pBuffer, UINT nSamples, UINT nBits)
+//--------------------------------------------------
+{
+	#if defined(ENABLE_X86)
+		X86_Dither(pBuffer, nSamples, nBits);
+	#else
+		C_Dither(pBuffer, nSamples, nBits);
+	#endif
+}
 
 
 #ifdef ENABLE_X86
