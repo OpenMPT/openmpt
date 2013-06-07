@@ -242,15 +242,6 @@ enum enmEnvelopeTypes
 #define DNA_NOTEFADE	2
 
 
-#ifdef ENABLE_ASM
-#define PROCSUPPORT_CPUID	0x01
-#define PROCSUPPORT_MMX		0x02 // Processor supports MMX instructions
-#define PROCSUPPORT_MMXEX	0x04 // Processor supports AMD MMX extensions
-#define PROCSUPPORT_3DNOW	0x08 // Processor supports AMD 3DNow! instructions
-#define PROCSUPPORT_SSE		0x10 // Processor supports SSE instructions
-#endif
-
-
 // Module flags
 enum SongFlags
 {

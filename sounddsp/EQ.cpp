@@ -109,10 +109,11 @@ EQ_Loop:
 }
 
 
+#ifdef ENABLE_X86_AMD
+
 static void AMD_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, float32 *pbuffer, UINT nCount)
 //-------------------------------------------------------------------------------------------
 {
-#ifdef ENABLE_3DNOW
 	float tmp[16];
 
 	_asm {
@@ -189,14 +190,16 @@ mainloop:
 	movd [edx+EQBANDSTRUCT.y2], mm7
 	emms
 	}
-#endif
 }
 
+#endif // ENABLE_X86_AMD
+
+
+#ifdef ENABLE_SSE
 
 static void SSE_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, float32 *pbuffer, UINT nCount)
 //-------------------------------------------------------------------------------------------
 {
-#ifdef ENABLE_SSE
 	static const float gk1 = 1.0f;
 	_asm {
 	mov eax, pbl
@@ -284,8 +287,9 @@ mainloop:
 	movss [edx+EQBANDSTRUCT.y2], xmm1
 done:;
 	}
-#endif // ENABLE_SSE
 }
+
+#endif // ENABLE_SSE
 
 #pragma warning(default:4100)
 
@@ -326,7 +330,6 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 {
 
 #ifdef ENABLE_SSE
-#ifdef ENABLE_MMX
 
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
@@ -347,12 +350,11 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 
 	} else
 
-#endif // ENABLE_MMX
 #endif // ENABLE_SSE
 
-#ifdef ENABLE_3DNOW
+#ifdef ENABLE_X86_AMD
 
-	if(GetProcSupport() & PROCSUPPORT_3DNOW)
+	if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
 	{ 
 		MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, 1.0f/static_cast<float>(MIXING_CLIPMAX));
 
@@ -366,7 +368,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 		FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, static_cast<float>(MIXING_CLIPMAX));
 		
 	} else
-#endif // ENABLE_3DNOW
+#endif // ENABLE_X86_AMD
 
 	{	
 
@@ -390,10 +392,10 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 CEQ::CEQ()
 //--------
 {
-	#if defined(ENABLE_MMX) || defined(ENABLE_SSE)
+	#if defined(ENABLE_SSE) || defined(ENABLE_X86_AMD)
 		ALWAYS_ASSERT(((uintptr_t)&(gEQ[0])) % 4 == 0);
 		ALWAYS_ASSERT(((uintptr_t)&(gEQ[1])) % 4 == 0);
-	#endif
+	#endif // ENABLE_SSE || ENABLE_X86_AMD
 	memcpy(gEQ, gEQDefaults, sizeof(gEQ));
 }
 

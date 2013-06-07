@@ -874,7 +874,7 @@ BOOL CTrackApp::InitInstance()
 	{
 		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_SPLINE;
 	}
-	if(GetProcSupport() & PROCSUPPORT_MMXEX)
+	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_POLYPHASE;
 	}

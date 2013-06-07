@@ -3413,7 +3413,6 @@ void CDmo2Vst::Process(float * const *inputs, float **outputs, int samples)
 		return;
 	}
 
-#ifdef ENABLE_MMX
 #ifdef ENABLE_SSE
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
@@ -3422,7 +3421,6 @@ void CDmo2Vst::Process(float * const *inputs, float **outputs, int samples)
 		SSEDeinterleaveInt16ToFloat(outputs[0], outputs[1], samples);
 	} else
 #endif // ENABLE_SSE
-#endif // ENABLE_MMX
 	{
 		InterleaveFloatToInt16(inputs[0], inputs[1], samples);
 		m_pMediaProcess->Process(samples * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), m_DataTime, DMO_INPLACE_NORMAL);
