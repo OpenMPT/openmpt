@@ -333,7 +333,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 		// Graphic Equalizer
 		if (m_MixerSettings.DSPMask & SNDDSP_EQ)
 		{
-			m_EQ.Process(MixSoundBuffer, MixRearBuffer, MixFloatBuffer, lCount, m_MixerSettings.gnChannels);
+			m_EQ.Process(MixSoundBuffer, MixRearBuffer, lCount, m_MixerSettings.gnChannels);
 		}
 #endif // NO_EQ
 
