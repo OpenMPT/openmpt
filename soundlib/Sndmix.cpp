@@ -290,9 +290,6 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 
 		// Resetting sound buffer
 		StereoFill(MixSoundBuffer, lCount, &gnDryROfsVol, &gnDryLOfsVol);
-#ifndef NO_REVERB
-		m_Reverb.ProcessPrepare(MixReverbBuffer, lCount);
-#endif // NO_REVERB
 		
 		if (m_MixerSettings.gnChannels >= 2)
 		{
@@ -300,7 +297,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 			CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
-			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount);
+			m_Reverb.Process(MixSoundBuffer, lCount);
 #endif // NO_REVERB
 
 			if (nMaxPlugins) ProcessPlugins(lCount);
@@ -315,7 +312,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 			CreateStereoMix(lCount);
 
 #ifndef NO_REVERB
-			m_Reverb.Process(MixSoundBuffer, MixReverbBuffer, lCount);
+			m_Reverb.Process(MixSoundBuffer, lCount);
 #endif // NO_REVERB
 
 			if (nMaxPlugins) ProcessPlugins(lCount);

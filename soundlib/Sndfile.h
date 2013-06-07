@@ -288,9 +288,6 @@ private:
 	// Front Mix Buffer (Also room for interleaved rear mix)
 	int MixSoundBuffer[MIXBUFFERSIZE * 4];
 	int MixRearBuffer[MIXBUFFERSIZE * 2];
-#ifndef NO_REVERB
-	int MixReverbBuffer[MIXBUFFERSIZE * 2];
-#endif
 	float MixFloatBuffer[MIXBUFFERSIZE * 2];
 	LONG gnDryLOfsVol;
 	LONG gnDryROfsVol;
