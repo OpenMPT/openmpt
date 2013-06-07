@@ -24,75 +24,10 @@
 #include "Sndfile.h"
 
 
-#ifdef ENABLE_ASM
-
-static uint32 gdwSysInfo = 0;
-
-void InitProcSupport()
-//--------------------
-{
-#ifdef ENABLE_X86
-	static unsigned int fProcessorExtensions = 0;
-		_asm 
-		{
-			pushfd                      // Store original EFLAGS on stack
-			pop     eax                 // Get original EFLAGS in EAX
-			mov     ecx, eax            // Duplicate original EFLAGS in ECX for toggle check
-			xor     eax, 0x00200000L    // Flip ID bit in EFLAGS
-			push    eax                 // Save new EFLAGS value on stack
-			popfd                       // Replace current EFLAGS value
-			pushfd                      // Store new EFLAGS on stack
-			pop     eax                 // Get new EFLAGS in EAX
-			xor     eax, ecx            // Can we toggle ID bit?
-			jz      Done                // Jump if no, Processor is older than a Pentium so CPU_ID is not supported
-			mov		fProcessorExtensions, PROCSUPPORT_CPUID
-			mov     eax, 1              // Set EAX to tell the CPUID instruction what to return
-			push	ebx
-			cpuid                       // Get family/model/stepping/features
-			pop		ebx
-			test    edx, 0x00800000L    // Check if mmx technology available
-			jz      Done                // Jump if no
-			// Tests have passed, this machine supports the Intel MultiMedia Instruction Set!
-			or		fProcessorExtensions, PROCSUPPORT_MMX
-			// Check for SSE: PROCSUPPORT_SSE
-            test    edx, 0x02000000L    // check if SSE is present (bit 25)
-            jz      nosse               // done if no
-            // else set the correct bit in fProcessorExtensions
-            or      fProcessorExtensions, (PROCSUPPORT_MMXEX|PROCSUPPORT_SSE)
-			jmp     Done
-		nosse:
-			// Check for AMD 3DNow!
-			mov eax, 0x80000000
-			cpuid
-			cmp eax, 0x80000000
-			jbe Done
-			mov eax, 0x80000001
-			cpuid // CPU_ID
-			test edx, 0x80000000
-			jz Done
-			or      fProcessorExtensions, PROCSUPPORT_3DNOW	// 3DNow! supported
-			test edx, (1<<22) // Bit 22: AMD MMX extensions
-			jz Done
-			or      fProcessorExtensions, PROCSUPPORT_MMXEX	// MMX extensions supported
-		Done:
-		}
-    gdwSysInfo = fProcessorExtensions;
-#endif
-}
-
-uint32 GetProcSupport()
-//---------------------
-{
-	return gdwSysInfo;
-}
-
-#endif
-
-
 ////////////////////////////////////////////////////////////////////////////////////
 // 3DNow! optimizations
 
-#ifdef ENABLE_3DNOW
+#ifdef ENABLE_X86_AMD
 
 // Convert integer mix to floating-point
 static void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
@@ -222,7 +157,7 @@ mainloop:
 	}
 }
 
-#endif
+#endif // ENABLE_X86_AMD
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // SSE Optimizations
@@ -442,19 +377,19 @@ void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, 
 {
 
 	#ifdef ENABLE_SSE
-		if(gdwSysInfo & PROCSUPPORT_SSE)
+		if(GetProcSupport() & PROCSUPPORT_SSE)
 		{
 			SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
 			return;
 		}
 	#endif // ENABLE_SSE
-	#ifdef ENABLE_3DNOW
-		if(gdwSysInfo & PROCSUPPORT_3DNOW)
+	#ifdef ENABLE_X86_AMD
+		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
 		{
 			AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
 			return;
 		}
-	#endif // ENABLE_3DNOW
+	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
 		X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
@@ -468,13 +403,13 @@ void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, 
 void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
 {
 
-	#ifdef ENABLE_3DNOW
-		if(gdwSysInfo & PROCSUPPORT_3DNOW)
+	#ifdef ENABLE_X86_AMD
+		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
 		{
 			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
 			return;
 		}
-	#endif // ENABLE_3DNOW
+	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
 		X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
@@ -489,19 +424,19 @@ void MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc
 {
 
 	#ifdef ENABLE_SSE
-		if(gdwSysInfo & PROCSUPPORT_SSE)
+		if(GetProcSupport() & PROCSUPPORT_SSE)
 		{
 			SSE_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
 			return;
 		}
 	#endif // ENABLE_SSE
-	#ifdef ENABLE_3DNOW
-		if(gdwSysInfo & PROCSUPPORT_3DNOW)
+	#ifdef ENABLE_X86_AMD
+		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
 		{
 			AMD_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
 			return;
 		}
-	#endif // ENABLE_3DNOW
+	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
 		X86_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
@@ -515,13 +450,13 @@ void MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc
 void FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
 {
 
-	#ifdef ENABLE_3DNOW
-		if(gdwSysInfo & PROCSUPPORT_3DNOW)
+	#ifdef ENABLE_X86_AMD
+		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
 		{
 			AMD_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
 			return;
 		}
-	#endif // ENABLE_3DNOW
+	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
 		X86_FloatToMonoMix(pIn, pOut, nCount, _f2ic);

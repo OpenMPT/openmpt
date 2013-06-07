@@ -44,11 +44,11 @@
 // Generate inline assembly using MMX instructions (only used when the CPU supports it).
 #define ENABLE_MMX
 
-// Generate inline assembly using 3DNOW instructions (only used when the CPU supports it).
-#define ENABLE_3DNOW
-
 // Generate inline assembly using SSE instructions (only used when the CPU supports it).
 #define ENABLE_SSE
+
+// Generate inline assembly using AMD specific instruction set extensions (only used when the CPU supports it).
+#define ENABLE_X86_AMD
 
 #endif // ENABLE_ASM
 

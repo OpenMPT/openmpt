@@ -521,10 +521,10 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, in
 }
 
 
-#ifdef ENABLE_MMX
+#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
 
-static void mmxex_findminmax16(void *p, int scanlen, int smplsize, int *smin, int *smax)
-//--------------------------------------------------------------------------------------
+static void amdmmxext_or_sse_findminmax16(void *p, int scanlen, int smplsize, int *smin, int *smax)
+//-------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov ebx, p
@@ -585,8 +585,8 @@ done1x:
 }
 
 
-static void mmxex_findminmax8(void *p, int scanlen, int smplsize, int *smin, int *smax)
-//-------------------------------------------------------------------------------------
+static void amdmmxext_or_sse_findminmax8(void *p, int scanlen, int smplsize, int *smin, int *smax)
+//------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov ebx, p
@@ -715,10 +715,10 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			signed short *p = (signed short *)(psample + poshi*smplsize);
 			smin = 32767;
 			smax = -32768;
-#ifdef ENABLE_MMX
-			if(GetProcSupport() & PROCSUPPORT_MMXEX)
+#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
+			if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT|PROCSUPPORT_SSE))
 			{
-				mmxex_findminmax16(p, scanlen, smplsize, &smin, &smax);
+				amdmmxext_or_sse_findminmax16(p, scanlen, smplsize, &smin, &smax);
 			} else
 #endif
 			{
@@ -738,10 +738,10 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			signed char *p = psample + poshi * smplsize;
 			smin = 127;
 			smax = -128;
-#ifdef ENABLE_MMX
-			if(GetProcSupport() & PROCSUPPORT_MMXEX)
+#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
+			if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT|PROCSUPPORT_SSE))
 			{
-				mmxex_findminmax8(p, scanlen, smplsize, &smin, &smax);
+				amdmmxext_or_sse_findminmax8(p, scanlen, smplsize, &smin, &smax);
 			} else
 #endif
 			{

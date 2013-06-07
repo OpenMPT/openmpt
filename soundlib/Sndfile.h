@@ -186,12 +186,6 @@ class CModDoc;
 #endif // MODPLUG_TRACKER
 
 
-#ifdef ENABLE_ASM
-void InitProcSupport();
-uint32 GetProcSupport();
-#endif
-
-
 void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
 void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
 void MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
