@@ -126,6 +126,9 @@ public:
 	CReverbSettings m_Settings;
 
 	// Shared reverb state
+private:
+	int MixReverbBuffer[MIXBUFFERSIZE * 2];
+public:
 	LONG gnRvbROfsVol;
 	LONG gnRvbLOfsVol;
 
@@ -157,15 +160,11 @@ public:
 public:
 	void Initialize(BOOL bReset, DWORD MixingFreq);
 
-	// call once before calling Process
-	void ProcessPrepare(int *MixReverbBuffer, UINT nSamples);
-
-	// call after ProcessPrepare and before you are putting data into MixReverbBuffer,
 	// can be called multiple times or never (if no data is sent to reverb)
-	void ProcessWillSend(int *MixReverbBuffer, UINT nSamples);
+	int *GetReverbSendBuffer(UINT nSamples);
 
-	// call once after all data has been sent
-	void Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples);
+	// call once after all data has been sent.
+	void Process(int *MixSoundBuffer, UINT nSamples);
 
 	// [Reverb level 0(quiet)-100(loud)], [REVERBTYPE_XXXX]
 	bool SetReverbParameters(UINT nDepth, UINT nType);

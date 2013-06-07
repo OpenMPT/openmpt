@@ -35,11 +35,17 @@ CReverb::CReverb()
 {
 
 	// Shared reverb state
-	gnReverbSamples = 0;
-	gnReverbDecaySamples = 0;
-	gnReverbSend = 0;
+
+#ifndef NO_REVERB
+	MemsetZero(MixReverbBuffer);
+#endif
 	gnRvbROfsVol = 0;
 	gnRvbLOfsVol = 0;
+
+	gnReverbSend = 0;
+
+	gnReverbSamples = 0;
+	gnReverbDecaySamples = 0;
 
 	// Internal reverb state
 	g_bLastInPresent = 0;
@@ -247,6 +253,8 @@ static VOID I3dl2_to_Generic(
 void CReverb::Shutdown()
 //----------------------
 {
+	gnReverbSend = 0;
+
 	gnRvbLOfsVol = 0;
 	gnRvbROfsVol = 0;
 
@@ -396,42 +404,33 @@ bool CReverb::SetReverbParameters(UINT nDepth, UINT nType)
 }
 
 
-void CReverb::ProcessPrepare(int *MixReverbBuffer, UINT nSamples)
-//---------------------------------------------------------------
+int *CReverb::GetReverbSendBuffer(UINT nSamples)
+//----------------------------------------------
 {
-	gnReverbSend = 0; // no data sent yet
-	if(!gnReverbSamples)
-	{
-		// reverb had decayed completely, we will probably not process reverb, so no need to clear buffer
-		return;
-	}
-	StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
-}
-
-
-void CReverb::ProcessWillSend(int *MixReverbBuffer, UINT nSamples)
-//----------------------------------------------------------------
-{
-	if(!gnReverbSend && !gnReverbSamples)
-	{
-		// reverb had decayed completely before, and we did not clear the buffer yet, do it now because we get new data
+	if(!gnReverbSend)
+	{ // and we did not clear the buffer yet, do it now because we will get new data
 		StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
 	}
 	gnReverbSend = 1; // we will have to process reverb
+	return MixReverbBuffer;
 }
 
 
 // Reverb
-void CReverb::Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples)
-//-----------------------------------------------------------------------------
+void CReverb::Process(int *MixSoundBuffer, UINT nSamples)
+//-------------------------------------------------------
 {
-	UINT nIn, nOut;
-
+	if(!(GetProcSupport() & PROCSUPPORT_MMX)) return;
 	if((!gnReverbSend) && (!gnReverbSamples))
 	{ // no data is sent to reverb and reverb decayed completely
 		return;
 	}
-	if (!(GetProcSupport() & PROCSUPPORT_MMX)) return;
+	if(!gnReverbSend)
+	{ // no input data in MixReverbBuffer, so the buffer got not cleared in GetReverbSendBuffer(), do it now for decay
+		StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
+	}
+
+	UINT nIn, nOut;
 	// Dynamically adjust reverb master gains
 	LONG lMasterGain;
 	lMasterGain = ((g_RefDelay.lMasterGain * m_Settings.m_nReverbDepth) >> 4);
@@ -494,6 +493,7 @@ void CReverb::Process(int *MixSoundBuffer, int *MixReverbBuffer, UINT nSamples)
 		Shutdown();
 		gnReverbSamples = 0;
 	}
+	gnReverbSend = 0; // no input data in MixReverbBuffer
 }
 
 
