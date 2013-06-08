@@ -54,9 +54,6 @@ normloop:
 #endif
 
 extern void Dither(int *pBuffer, UINT nSamples, UINT nBits);
-extern void Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
-extern void Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
-extern void Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
 
 UINT CSoundFile::Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24, DWORD dwByteInc)
 //-----------------------------------------------------------------------------------------------
@@ -71,9 +68,9 @@ UINT CSoundFile::Normalize24BitBuffer(LPBYTE pbuffer, UINT dwSize, DWORD lmax24,
 		Dither(tempbuf, nbuf, 8 * dwByteInc);
 		switch(dwByteInc)
 		{
-		case 2:		Convert32To16(pbuffer, tempbuf, nbuf); break;
-		case 3:		Convert32To24(pbuffer, tempbuf, nbuf); break;
-		default:	Convert32To8(pbuffer, tempbuf, nbuf); break;
+		case 1: Convert32ToInterleaved((uint8*)pbuffer, tempbuf, nbuf); break;
+		case 2: Convert32ToInterleaved((int16*)pbuffer, tempbuf, nbuf); break;
+		case 3: Convert32ToInterleaved((int24*)pbuffer, tempbuf, nbuf); break;
 		}
 		n -= nbuf;
 		pbuffer += dwByteInc * nbuf;

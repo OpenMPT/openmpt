@@ -35,17 +35,11 @@ PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 
 typedef void (* LPCONVERTPROC)(LPVOID, int *, DWORD);
 
-extern void Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
-extern void Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
-extern void Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
-extern void Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
-extern void Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount);
-
-extern void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
-extern void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
-extern void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
-extern void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
-extern void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
+static void Convert32To8( LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((uint8*)lpBuffer, pBuffer, nSamples); }
+static void Convert32To16(LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((int16*)lpBuffer, pBuffer, nSamples); }
+static void Convert32To24(LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((int24*)lpBuffer, pBuffer, nSamples); }
+static void Convert32To32(LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((int32*)lpBuffer, pBuffer, nSamples); }
+static void Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((float*)lpBuffer, pBuffer, nSamples); }
 
 template<typename Tsample>
 void Convert32ToNonInterleaved(void * const *outputBuffers, std::size_t offset, const int *mixbuffer, std::size_t channels, std::size_t count)
