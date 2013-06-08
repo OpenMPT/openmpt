@@ -287,9 +287,6 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffe
 			m_nMixStat = 0;
 		}
 		nMixStatCount++;
-
-		// Resetting sound buffer
-		StereoFill(MixSoundBuffer, lCount, &gnDryROfsVol, &gnDryLOfsVol);
 		
 		if (m_MixerSettings.gnChannels >= 2)
 		{

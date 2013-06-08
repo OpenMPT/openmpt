@@ -1448,8 +1448,12 @@ void CSoundFile::CreateStereoMix(int count)
 	CHANNELINDEX nchused, nchmixed;
 
 	if (!count) return;
+
+	// Resetting sound buffer
+	StereoFill(MixSoundBuffer, count, &gnDryROfsVol, &gnDryLOfsVol);
+	if(m_MixerSettings.gnChannels > 2) InitMixBuffer(MixRearBuffer, count*2);
+
 	bool ITPingPongMode = IsITPingPongMode();
-	if (m_MixerSettings.gnChannels > 2) InitMixBuffer(MixRearBuffer, count*2);
 	nchused = nchmixed = 0;
 	for(CHANNELINDEX nChn=0; nChn<m_nMixChannels; nChn++)
 	{
