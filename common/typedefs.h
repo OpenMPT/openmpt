@@ -234,6 +234,8 @@ struct int24
 	}
 };
 STATIC_ASSERT(sizeof(int24) == 3);
+#define int24_min (0-0x00800000)
+#define int24_max (0+0x007fffff)
 
 typedef float float32;
 STATIC_ASSERT(sizeof(float32) == 4);
