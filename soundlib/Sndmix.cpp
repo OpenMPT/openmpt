@@ -1871,9 +1871,15 @@ BOOL CSoundFile::ReadNote()
 			// Test case: AmigaLimits.s3m, AmigaLimitsFinetune.mod
 			if(m_SongFlags[SONG_AMIGALIMITS | SONG_PT1XMODE])
 			{
-				ASSERT(pChn->nFineTune == 0 || GetType() != MOD_TYPE_S3M);
-				Limit(period, 113 * 4 - pChn->nFineTune, 856 * 4 - pChn->nFineTune);
-				Limit(pChn->nPeriod, 113 * 4 - pChn->nFineTune, 856 * 4 - pChn->nFineTune);
+				int limitLow = 113 * 4, limitHigh = 856 * 4;
+				if(m_SongFlags[SONG_PT1XMODE])
+				{
+					const int tableOffset = XM2MODFineTune(pChn->nFineTune) * 12;
+					limitLow = ProTrackerTunedPeriods[tableOffset +  11] / 2;
+					limitHigh = ProTrackerTunedPeriods[tableOffset] * 2;
+				}
+				Limit(period, limitLow, limitHigh);
+				Limit(pChn->nPeriod, limitLow, limitHigh);
 			}
 
 			ProcessPanbrello(pChn);
