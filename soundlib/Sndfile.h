@@ -185,6 +185,43 @@ class CTuningCollection;
 class CModDoc;
 #endif // MODPLUG_TRACKER
 
+struct DitherModPlugState
+{
+	uint32 rng_a;
+	uint32 rng_b;
+	DitherModPlugState()
+	{
+		rng_a = 0;
+		rng_b = 0;
+	}
+};
+
+struct DitherState
+{
+	DitherModPlugState modplug;
+};
+
+enum DitherMode
+{
+	DitherNone       = 0,
+	DitherModPlug    = 1
+};
+
+class Dither
+{
+private:
+	DitherState state;
+	DitherMode mode;
+public:
+	Dither();
+	void SetMode(DitherMode &mode);
+	DitherMode GetMode() const;
+	void Reset();
+	void Process(int *mixbuffer, std::size_t count, std::size_t channels, int bits);
+};
+
+DEPRECATED void DitherStateless(int *pBuffer, UINT nSamples, UINT nBits);
+
 
 void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
 void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
@@ -319,6 +356,7 @@ public:
 #ifndef NO_AGC
 	CAGC m_AGC;
 #endif
+	Dither m_Dither;
 
 #ifdef MODPLUG_TRACKER
 	static LPSNDMIXHOOKPROC gpSndMixHook;
