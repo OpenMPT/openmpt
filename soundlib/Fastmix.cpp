@@ -1730,10 +1730,9 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 
 
 #ifdef ENABLE_X86
-static DWORD X86_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//--------------------------------------------------------------------------
+static void X86_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//-------------------------------------------------------------------------
 {
-	DWORD result;
 	_asm {
 	mov ebx, lp16			// ebx = 8-bit buffer
 	mov edx, pBuffer		// edx = pBuffer
@@ -1761,15 +1760,12 @@ cliphigh:
 	mov eax, MIXING_CLIPMAX
 	jmp cliprecover
 done:
-	mov eax, lSampleCount
-	mov result, eax
 	}
-	return result;
 }
 #endif
 
-static DWORD C_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//------------------------------------------------------------------------
+static void C_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//-----------------------------------------------------------------------
 {
 	uint8 * p = (uint8*)lp16;
 	for(DWORD i=0; i<lSampleCount; i++)
@@ -1779,17 +1775,16 @@ static DWORD C_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 		else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
 		p[i] = (uint8)((v >> (24-MIXING_ATTENUATION))+0x80); // unsigned
 	}
-	return lSampleCount * 1;
 }
 
 // Clip and convert to 8 bit
-DWORD Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//---------------------------------------------------------------
+void Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//--------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
-		return X86_Convert32To8(lp16, pBuffer, lSampleCount);
+		X86_Convert32To8(lp16, pBuffer, lSampleCount);
 	#else
-		return C_Convert32To8(lp16, pBuffer, lSampleCount);
+		C_Convert32To8(lp16, pBuffer, lSampleCount);
 	#endif
 }
 
@@ -1811,10 +1806,9 @@ void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuff
 
 
 #ifdef ENABLE_X86
-static DWORD X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//---------------------------------------------------------------------------
+static void X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//--------------------------------------------------------------------------
 {
-	DWORD result;
 	_asm {
 	mov ebx, lp16				// ebx = 16-bit buffer
 	mov edx, pBuffer			// edx = pBuffer
@@ -1841,16 +1835,12 @@ cliphigh:
 	mov eax, MIXING_CLIPMAX
 	jmp cliprecover
 done:
-	mov eax, lSampleCount
-	add eax, eax
-	mov result, eax
 	}
-	return result;
 }
 #endif
 
-static DWORD C_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//-------------------------------------------------------------------------
+static void C_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//------------------------------------------------------------------------
 {
 	int16 * p = (int16*)lp16;
 	for(DWORD i=0; i<lSampleCount; i++)
@@ -1860,17 +1850,16 @@ static DWORD C_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 		else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
 		p[i] = (int16)(v >> (16-MIXING_ATTENUATION));
 	}
-	return lSampleCount * 2;
 }
 
 // Clip and convert to 16 bit
-DWORD Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//----------------------------------------------------------------
+void Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//---------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
-		return X86_Convert32To16(lp16, pBuffer, lSampleCount);
+		X86_Convert32To16(lp16, pBuffer, lSampleCount);
 	#else
-		return C_Convert32To16(lp16, pBuffer, lSampleCount);
+		C_Convert32To16(lp16, pBuffer, lSampleCount);
 	#endif
 }
 
@@ -1889,10 +1878,9 @@ void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuff
 
 
 #ifdef ENABLE_X86
-static DWORD X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//---------------------------------------------------------------------------
+static void X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//--------------------------------------------------------------------------
 {
-	DWORD result;
 	_asm {
 	mov ebx, lp16			// ebx = 8-bit buffer
 	mov edx, pBuffer		// edx = pBuffer
@@ -1921,16 +1909,12 @@ cliphigh:
 	mov eax, MIXING_CLIPMAX
 	jmp cliprecover
 done:
-	mov eax, lSampleCount
-	lea eax, [eax*2+eax]
-	mov result, eax
 	}
-	return result;
 }
 #endif
 
-static DWORD C_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//-------------------------------------------------------------------------
+static void C_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//------------------------------------------------------------------------
 {
 	int24 * p = (int24*)lp16;
 	for(DWORD i=0; i<lSampleCount; i++)
@@ -1941,16 +1925,16 @@ static DWORD C_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 		v >>= (8-MIXING_ATTENUATION);
 		p[i] = (int24)v;
 	}
-	return lSampleCount * 3;
 }
 
 // Clip and convert to 24 bit
-DWORD Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+void Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//---------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
-		return X86_Convert32To24(lp16, pBuffer, lSampleCount);
+		X86_Convert32To24(lp16, pBuffer, lSampleCount);
 	#else
-		return C_Convert32To24(lp16, pBuffer, lSampleCount);
+		C_Convert32To24(lp16, pBuffer, lSampleCount);
 	#endif
 }
 
@@ -1969,10 +1953,9 @@ void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuff
 
 
 #ifdef ENABLE_X86
-static DWORD X86_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//---------------------------------------------------------------------------
+static void X86_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//--------------------------------------------------------------------------
 {
-	DWORD result;
 	_asm {
 	mov ebx, lp16			// ebx = 32-bit buffer
 	mov edx, pBuffer		// edx = pBuffer
@@ -1998,16 +1981,12 @@ cliphigh:
 	mov eax, MIXING_CLIPMAX
 	jmp cliprecover
 done:
-	mov eax, lSampleCount
-	lea eax, [eax*4]
-	mov result, eax
 	}
-	return result;
 }
 #endif
 
-static DWORD C_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//-------------------------------------------------------------------------
+static void C_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//------------------------------------------------------------------------
 {
 	int32 * p = (int32*)lp16;
 	for(DWORD i=0; i<lSampleCount; i++)
@@ -2017,17 +1996,16 @@ static DWORD C_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
 		else if(v > MIXING_CLIPMAX) v = MIXING_CLIPMAX;
 		p[i] = v << MIXING_ATTENUATION;
 	}
-	return lSampleCount * 4;
 }
 
 // Clip and convert to 32 bit
-DWORD Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
-//----------------------------------------------------------------
+void Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount)
+//---------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
-		return X86_Convert32To32(lp16, pBuffer, lSampleCount);
+		X86_Convert32To32(lp16, pBuffer, lSampleCount);
 	#else
-		return C_Convert32To32(lp16, pBuffer, lSampleCount);
+		C_Convert32To32(lp16, pBuffer, lSampleCount);
 	#endif
 }
 
@@ -2046,8 +2024,8 @@ void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuff
 
 
 // convert to 32 bit floats and do NOT clip to [-1,1]
-DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount)
-//-------------------------------------------------------------------------
+void Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount)
+//------------------------------------------------------------------------
 {
 	const float factor = (1.0f/(float)MIXING_CLIPMAX);
 	float *out = (float*)lpBuffer;
@@ -2055,7 +2033,6 @@ DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount)
 	{
 		out[i] = pBuffer[i] * factor;
 	}
-	return lSampleCount * 4;
 }
 
 void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
