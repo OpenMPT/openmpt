@@ -26,38 +26,19 @@
 #define MIXING_LIMITMAX		(0x08100000)
 #define MIXING_LIMITMIN		(-MIXING_LIMITMAX)
 
-UINT X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC)
-//-------------------------------------------------------------
-{
-	UINT result;
-	_asm {
-	mov esi, pBuffer	// esi = pBuffer+i
-	mov ecx, nSamples	// ecx = i
-	mov edi, nAGC		// edi = AGC (0..256)
-agcloop:
-	mov eax, dword ptr [esi]
-	imul edi
-	shrd eax, edx, AGC_PRECISION
-	add esi, 4
-	cmp eax, MIXING_LIMITMIN
-	jl agcupdate
-	cmp eax, MIXING_LIMITMAX
-	jg agcupdate
-agcrecover:
-	dec ecx
-	mov dword ptr [esi-4], eax
-	jnz agcloop
-	jmp done
-agcupdate:
-	dec edi
-	jmp agcrecover
-done:
-	mov result, edi
-	}
-	return result;
-}
 
-#pragma warning (default:4100)
+static UINT AGC(int *pBuffer, UINT nSamples, UINT nAGC)
+//-----------------------------------------------------
+{
+	while(nSamples--)
+	{
+		int val = (int)(((int64)*pBuffer * (int32)nAGC) >> AGC_PRECISION);
+		if(val < MIXING_LIMITMIN || val > MIXING_LIMITMAX) nAGC--;
+		*pBuffer = val;
+		pBuffer++;
+	}
+	return nAGC;
+}
 
 
 CAGC::CAGC() 
@@ -71,7 +52,7 @@ void CAGC::Process(int * MixSoundBuffer, int count, DWORD MixingFreq, UINT nChan
 //-----------------------------------------------------------------------------------
 {
 	static DWORD gAGCRecoverCount = 0;
-	UINT agc = X86_AGC(MixSoundBuffer, count, m_nAGC);
+	UINT agc = AGC(MixSoundBuffer, count, m_nAGC);
 	// Some kind custom law, so that the AGC stays quite stable, but slowly
 	// goes back up if the sound level stays below a level inversely proportional
 	// to the AGC level. (J'me comprends)
