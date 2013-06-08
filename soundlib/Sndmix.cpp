@@ -33,13 +33,13 @@ LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 #endif
 
-typedef DWORD (* LPCONVERTPROC)(LPVOID, int *, DWORD);
+typedef void (* LPCONVERTPROC)(LPVOID, int *, DWORD);
 
-extern DWORD Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
-extern DWORD Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount);
+extern void Convert32To8(LPVOID lpBuffer, int *, DWORD nSamples);
+extern void Convert32To16(LPVOID lpBuffer, int *, DWORD nSamples);
+extern void Convert32To24(LPVOID lpBuffer, int *, DWORD nSamples);
+extern void Convert32To32(LPVOID lpBuffer, int *, DWORD nSamples);
+extern void Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD lSampleCount);
 
 extern void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
 extern void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
@@ -393,7 +393,8 @@ UINT CSoundFile::Read(UINT count, LPVOID lpDestBuffer, void * const *outputBuffe
 		#endif
 
 		// Convert to output sample format and optionally perform clipping if needed
-		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
+		pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
+		lpBuffer += lTotalSampleCount * (m_MixerSettings.GetBitsPerSample()/8);
 
 		#ifndef MODPLUG_TRACKER
 			LPBYTE buf_end = lpBuffer;
