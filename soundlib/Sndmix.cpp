@@ -56,7 +56,6 @@ void Convert32ToNonInterleaved(void * const *outputBuffers, std::size_t offset, 
 
 
 
-extern void Dither(int *pBuffer, UINT nSamples, UINT nBits);
 extern void InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames);
 extern void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 extern void MonoFromStereo(int *pMixBuf, UINT nSamples);
@@ -147,6 +146,7 @@ void CSoundFile::InitPlayer(BOOL bReset)
 #ifndef NO_AGC
 	if(bReset) m_AGC.Reset();
 #endif
+	m_Dither.Reset();
 }
 
 
@@ -365,11 +365,8 @@ UINT CSoundFile::Read(UINT count, LPVOID lpDestBuffer, void * const *outputBuffe
 		}
 
 		// Noise Shaping
-		if (m_MixerSettings.GetBitsPerSample() <= 16)
-		{
-			if(m_Resampler.IsHQ())
-				Dither(MixSoundBuffer, lTotalSampleCount, m_MixerSettings.GetBitsPerSample());
-		}
+		if(m_Resampler.IsHQ())
+			m_Dither.Process(MixSoundBuffer, lCount, m_MixerSettings.gnChannels, m_MixerSettings.GetBitsPerSample());
 
 #ifdef MODPLUG_TRACKER
 		// Hook Function

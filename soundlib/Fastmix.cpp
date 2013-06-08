@@ -2027,7 +2027,7 @@ void InitMixBuffer(int *pBuffer, UINT nSamples)
 
 
 //////////////////////////////////////////////////////////////////////////
-// Noise Shaping (Dither)
+// Noise Shaping (Dithering)
 
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4731) // ebp modified
@@ -2036,10 +2036,18 @@ void InitMixBuffer(int *pBuffer, UINT nSamples)
 
 #ifdef ENABLE_X86
 
-void X86_Dither(int *pBuffer, UINT nSamples, UINT nBits)
-//------------------------------------------------------
+void X86_Dither(int *pBuffer, UINT nSamples, UINT nBits, DitherModPlugState *state)
+//---------------------------------------------------------------------------------
 {
-	static int gDitherA, gDitherB;
+	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
+	{
+		return;
+	}
+
+	static int gDitherA_global, gDitherB_global;
+
+	int gDitherA = state ? state->rng_a : gDitherA_global;
+	int gDitherB = state ? state->rng_b : gDitherB_global;
 
 	_asm {
 	mov esi, pBuffer	// esi = pBuffer+i
@@ -2070,6 +2078,10 @@ noiseloop:
 	mov gDitherA, edi
 	mov gDitherB, ebx
 	}
+
+	if(state) state->rng_a = gDitherA; else gDitherA_global = gDitherA;
+	if(state) state->rng_b = gDitherB; else gDitherB_global = gDitherB;
+
 }
 
 #endif // ENABLE_X86
@@ -2085,15 +2097,19 @@ static forceinline int32 dither_rand(uint32 &a, uint32 &b)
 	return (int32)b;
 }
 
-static void C_Dither(int *pBuffer, UINT nSamples, UINT nBits)
-//-----------------------------------------------------------
+static void C_Dither(int *pBuffer, UINT nSamples, UINT nBits, DitherModPlugState *state)
+//--------------------------------------------------------------------------------------
 {
+	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
+	{
+		return;
+	}
 
 	static uint32 global_a = 0;
 	static uint32 global_b = 0;
 
-	uint32 a = global_a;
-	uint32 b = global_b;
+	uint32 a = state ? state->rng_a : global_a;
+	uint32 b = state ? state->rng_b : global_b;
 
 	while(nSamples--)
 	{
@@ -2101,18 +2117,63 @@ static void C_Dither(int *pBuffer, UINT nSamples, UINT nBits)
 		pBuffer++;
 	}
 
-	global_a = a;
-	global_b = b;
+	if(state) state->rng_a = a; else global_a = a;
+	if(state) state->rng_b = b; else global_b = b;
 
 }
 
-void Dither(int *pBuffer, UINT nSamples, UINT nBits)
-//--------------------------------------------------
+static void Dither_ModPlug(int *pBuffer, UINT nSamples, UINT nChannels, UINT nBits, DitherModPlugState &state)
+//------------------------------------------------------------------------------------------------------------
+{
+	#ifdef ENABLE_X86
+		X86_Dither(pBuffer, nSamples * nChannels, nBits, &state);
+	#else // !ENABLE_X86
+		C_Dither(pBuffer, nSamples * nChannels, nBits, &state);
+	#endif // ENABLE_X86
+}
+
+
+void Dither::Reset()
+{
+	state = DitherState();
+}
+
+Dither::Dither()
+{
+	mode = DitherModPlug;
+}
+
+void Dither::SetMode(DitherMode &mode_)
+{
+	mode = mode_;
+}
+
+DitherMode Dither::GetMode() const
+{
+	return mode;
+}
+
+void Dither::Process(int *mixbuffer, std::size_t count, std::size_t channels, int bits)
+{
+	switch(mode)
+	{
+		case DitherNone:
+			// nothing
+			break;
+		case DitherModPlug:
+			Dither_ModPlug(mixbuffer, count, channels, bits, state.modplug);
+			break;
+	}
+}
+
+
+void DitherStateless(int *pBuffer, UINT nSamples, UINT nBits)
+//-----------------------------------------------------------
 {
 	#if defined(ENABLE_X86)
-		X86_Dither(pBuffer, nSamples, nBits);
+		X86_Dither(pBuffer, nSamples, nBits, nullptr);
 	#else
-		C_Dither(pBuffer, nSamples, nBits);
+		C_Dither(pBuffer, nSamples, nBits, nullptr);
 	#endif
 }
 
