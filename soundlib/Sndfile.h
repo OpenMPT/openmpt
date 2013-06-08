@@ -587,8 +587,12 @@ public:
 	void StopAllVsti();    //rewbs.VSTCompliance
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	UINT Read(LPVOID lpBuffer, UINT cbBuffer, void * const *outputBuffers = nullptr);
+	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count);
+	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count);
+private:
+	UINT Read(UINT cbBuffer, LPVOID lpBuffer, void * const *outputBuffers = nullptr);
 	void CreateStereoMix(int count);
+public:
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
 	void ProcessPlugins(UINT nCount);
