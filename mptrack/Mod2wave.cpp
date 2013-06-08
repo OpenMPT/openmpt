@@ -778,7 +778,7 @@ void CDoWaveConvert::OnButton1()
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n = 0; ; n++)
 	{
-		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer)/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
+		UINT lRead = m_pSndFile->ReadInterleaved(buffer, sizeof(buffer)/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
 
 		// Process cue points (add base offset), if there are any to process.
 		vector<PatternCuePoint>::reverse_iterator iter;
@@ -1152,7 +1152,7 @@ void CDoAcmConvert::OnButton1()
 		UINT lRead = 0;
 		if (!bFinished)
 		{
-			lRead = m_pSndFile->Read(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
+			lRead = m_pSndFile->ReadInterleaved(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
 			if (!lRead) bFinished = true;
 		}
 		ullSamples += lRead;

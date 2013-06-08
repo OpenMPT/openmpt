@@ -784,7 +784,7 @@ ULONG CMainFrame::AudioRead(const ISoundDevice &, PVOID pvData, ULONG MaxSamples
 //-------------------------------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
-	return m_pSndFile->Read(pvData, MaxSamples);
+	return m_pSndFile->ReadInterleaved(pvData, MaxSamples);
 }
 
 

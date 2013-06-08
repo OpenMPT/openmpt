@@ -193,7 +193,21 @@ BOOL CSoundFile::GlobalFadeSong(UINT msec)
 }
 
 
-UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT count, void * const *outputBuffers)
+CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count)
+//--------------------------------------------------------------------------------------------
+{
+	return Read(count, outputBuffer, nullptr);
+}
+
+
+CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count)
+//--------------------------------------------------------------------------------------------------------
+{
+	return Read(count, nullptr, outputBuffers);
+}
+
+
+UINT CSoundFile::Read(UINT count, LPVOID lpDestBuffer, void * const *outputBuffers)
 //---------------------------------------------------------------------------------
 {
 	LPBYTE lpBuffer = (LPBYTE)lpDestBuffer;
