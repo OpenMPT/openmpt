@@ -97,18 +97,18 @@ static ModPlug_Settings globalsettings = {
 	0
 };
 
-static int32_t modplugresamplingmode_to_openmptinterpolationmode(int mode)
+static int32_t modplugresamplingmode_to_filterlength(int mode)
 {
 	if(mode<0){
-		return OPENMPT_MODULE_RENDER_INTERPOLATION_NEAREST;
+		return 1;
 	}
 	switch(mode){
-	case MODPLUG_RESAMPLE_NEAREST: return OPENMPT_MODULE_RENDER_INTERPOLATION_NEAREST; break;
-	case MODPLUG_RESAMPLE_LINEAR: return OPENMPT_MODULE_RENDER_INTERPOLATION_LINEAR; break;
-	case MODPLUG_RESAMPLE_SPLINE: return OPENMPT_MODULE_RENDER_INTERPOLATION_SPLINE; break;
-	case MODPLUG_RESAMPLE_FIR: return OPENMPT_MODULE_RENDER_INTERPOLATION_FIR_KAISER4T; break;
+	case MODPLUG_RESAMPLE_NEAREST: return 1; break;
+	case MODPLUG_RESAMPLE_LINEAR: return 2; break;
+	case MODPLUG_RESAMPLE_SPLINE: return 4; break;
+	case MODPLUG_RESAMPLE_FIR: return 8; break;
 	}
-	return OPENMPT_MODULE_RENDER_INTERPOLATION_FIR_KAISER4T;
+	return 8;
 }
 
 LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size)
@@ -132,7 +132,7 @@ LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size)
 	file->message = openmpt_module_get_metadata(file->mod,"message");
 	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT,file->settings.mStereoSeparation*100/128);
 	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_MAXMIXCHANNELS,file->settings.mMaxMixChannels);
-	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_INTERPOLATION_MODE,modplugresamplingmode_to_openmptinterpolationmode(file->settings.mResamplingMode));
+	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_INTERPOLATION_FILTER_LENGTH,modplugresamplingmode_to_filterlength(file->settings.mResamplingMode));
 	return file;
 }
 

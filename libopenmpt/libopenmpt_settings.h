@@ -41,7 +41,7 @@ public:
 	int stereoseparation;
 	int repeatcount;
 	int maxmixchannels;
-	int interpolationmode;
+	int interpolationfilterlength;
 	int volrampinus;
 	int volrampoutus;
 	void load();
@@ -62,7 +62,7 @@ inline void settings::load() {
 	read_setting( "SeteroSeparation_Percent", stereoseparation );
 	read_setting( "RepeatCount", repeatcount );
 	read_setting( "MixerChannels", maxmixchannels );
-	read_setting( "InterpolationMode", interpolationmode );
+	read_setting( "InterpolationFilterLength", interpolationfilterlength );
 	read_setting( "VolumeRampingIn_microseconds", volrampinus );
 	read_setting( "VolumeRampingOut_microseconds", volrampoutus );
 }
@@ -74,7 +74,7 @@ inline void settings::save() {
 	write_setting( "SeteroSeparation_Percent", stereoseparation );
 	write_setting( "RepeatCount", repeatcount );
 	write_setting( "MixerChannels", maxmixchannels );
-	write_setting( "InterpolationMode", interpolationmode );
+	write_setting( "InterpolationFilterLength", interpolationfilterlength );
 	write_setting( "VolumeRampingIn_microseconds", volrampinus );
 	write_setting( "VolumeRampingOut_microseconds", volrampoutus );
 }
@@ -90,7 +90,7 @@ inline settings::settings( bool with_outputformat_ ) : with_outputformat(with_ou
 	stereoseparation = 100;
 	repeatcount = 0;
 	maxmixchannels = 256;
-	interpolationmode = OPENMPT_MODULE_RENDER_INTERPOLATION_FIR_KAISER4T;
+	interpolationfilterlength = 8;
 	volrampinus = 363;
 	volrampoutus = 952;
 }

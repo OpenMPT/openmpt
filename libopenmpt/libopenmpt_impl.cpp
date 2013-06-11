@@ -108,12 +108,49 @@ void module_impl::PushToCSoundFileLog( int loglevel, const std::string & text ) 
 	m_sndFile->AddToLog( (LogLevel)loglevel, text );
 }
 
+static ResamplingMode filterlength_to_resamplingmode(std::int32_t length) {
+	if ( length == 0 ) {
+		return SRCMODE_POLYPHASE;
+	} else if ( length >= 8 ) {
+		return SRCMODE_POLYPHASE;
+	} else if ( length >= 3 ) {
+		return SRCMODE_SPLINE;
+	} else if ( length >= 2 ) {
+		return SRCMODE_LINEAR;
+	} else if ( length >= 1 ) {
+		return SRCMODE_NEAREST;
+	} else {
+		throw openmpt::exception_message("negative filter length");
+		return SRCMODE_POLYPHASE;
+	}
+}
+static std::int32_t resamplingmode_to_filterlength(ResamplingMode mode) {
+	switch ( mode ) {
+	case SRCMODE_NEAREST:
+		return 1;
+		break;
+	case SRCMODE_LINEAR:
+		return 2;
+		break;
+	case SRCMODE_SPLINE:
+		return 4;
+		break;
+	case SRCMODE_POLYPHASE:
+	case SRCMODE_FIRFILTER:
+	case SRCMODE_DEFAULT:
+		return 8;
+	default:
+		throw openmpt::exception_message("unknown interpolation filter length set internally");
+		break;
+	}
+}
+
 std::int32_t module_impl::get_quality() const {
-	return unscale_percent<int>( m_sndFile->m_Resampler.m_Settings.SrcMode, SRCMODE_NEAREST, SRCMODE_FIRFILTER );
+	return unscale_percent<int>( resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode ), 1, 8 );
 }
 void module_impl::set_quality( std::int32_t value ) {
 	CResamplerSettings resamplersettings = m_sndFile->m_Resampler.m_Settings;
-	resamplersettings.SrcMode = (ResamplingMode)scale_percent<int>( value, SRCMODE_NEAREST, SRCMODE_FIRFILTER );
+	resamplersettings.SrcMode = filterlength_to_resamplingmode( scale_percent<int>( value, 1, 8 ) );
 	resamplersettings.gdWFIRCutoff = CResamplerSettings().gdWFIRCutoff; // use default
 	resamplersettings.gbWFIRType = CResamplerSettings().gbWFIRType; // use default
 	m_sndFile->SetResamplerSettings( resamplersettings );
@@ -293,29 +330,8 @@ std::int32_t module_impl::get_render_param( int command ) const {
 		case module::RENDER_MAXMIXCHANNELS: {
 			return m_sndFile->m_MixerSettings.m_nMaxMixChannels;
 		} break;
-		case module::RENDER_INTERPOLATION_MODE: {
-			switch ( m_sndFile->m_Resampler.m_Settings.SrcMode ) {
-				case SRCMODE_NEAREST: return module::INTERPOLATION_NEAREST; break;
-				case SRCMODE_LINEAR: return module::INTERPOLATION_LINEAR; break;
-				case SRCMODE_SPLINE: return module::INTERPOLATION_SPLINE; break;
-				case SRCMODE_POLYPHASE: return module::INTERPOLATION_POLYPHASE; break;
-				case SRCMODE_DEFAULT:
-				case SRCMODE_FIRFILTER: {
-					switch ( m_sndFile->m_Resampler.m_Settings.gbWFIRType ) {
-						case WFIR_HANN: return module::INTERPOLATION_FIR_HANN; break;
-						case WFIR_HAMMING: return module::INTERPOLATION_FIR_HAMMING; break;
-						case WFIR_BLACKMANEXACT: return module::INTERPOLATION_FIR_BLACKMANEXACT; break;
-						case WFIR_BLACKMAN3T61: return module::INTERPOLATION_FIR_BLACKMAN3T61; break;
-						case WFIR_BLACKMAN3T67: return module::INTERPOLATION_FIR_BLACKMAN3T67; break;
-						case WFIR_BLACKMAN4T92: return module::INTERPOLATION_FIR_BLACKMAN4T92; break;
-						case WFIR_BLACKMAN4T74: return module::INTERPOLATION_FIR_BLACKMAN4T74; break;
-						case WFIR_KAISER4T: return module::INTERPOLATION_FIR_KAISER4T; break;
-					}
-				} break;
-				default:
-				break;
-			}
-			throw openmpt::exception_message("unknown interpolation mode set internally");
+		case module::RENDER_INTERPOLATION_FILTER_LENGTH: {
+			return resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode );
 		} break;
 		case module::RENDER_VOLUMERAMP_UP_MICROSECONDS: {
 			return m_sndFile->m_MixerSettings.GetVolumeRampUpMicroseconds();
@@ -358,22 +374,9 @@ void module_impl::set_render_param( int command, std::int32_t value ) {
 				m_sndFile->SetMixerSettings( settings );
 			}
 		} break;
-		case module::RENDER_INTERPOLATION_MODE: {
+		case module::RENDER_INTERPOLATION_FILTER_LENGTH: {
 			CResamplerSettings newsettings;
-			switch ( value ) {
-				case module::INTERPOLATION_NEAREST: newsettings.SrcMode = SRCMODE_NEAREST; break;
-				case module::INTERPOLATION_LINEAR: newsettings.SrcMode = SRCMODE_LINEAR; break;
-				case module::INTERPOLATION_SPLINE: newsettings.SrcMode = SRCMODE_SPLINE; break;
-				case module::INTERPOLATION_POLYPHASE: newsettings.SrcMode = SRCMODE_POLYPHASE; break;
-				case module::INTERPOLATION_FIR_HANN: newsettings.SrcMode = SRCMODE_FIRFILTER; newsettings.gbWFIRType = WFIR_HANN; break;
-				case module::INTERPOLATION_FIR_HAMMING: newsettings.SrcMode = SRCMODE_FIRFILTER; newsettings.gbWFIRType = WFIR_HAMMING; break;
-				case module::INTERPOLATION_FIR_BLACKMANEXACT: newsettings.SrcMode = SRCMODE_FIRFILTER; newsettings.gbWFIRType = WFIR_BLACKMANEXACT; break;
-				case module::INTERPOLATION_FIR_BLACKMAN3T61: newsettings.SrcMode = SRCMODE_FIRFILTER; newsettings.gbWFIRType = WFIR_BLACKMAN3T61; break;
-				case module::INTERPOLATION_FIR_BLACKMAN3T67: newsettings.SrcMode = SRCMODE_FIRFILTER; newsettings.gbWFIRType = WFIR_BLACKMAN3T67; break;
-				case module::INTERPOLATION_FIR_BLACKMAN4T92: newsettings.SrcMode = SRCMODE_FIRFILTER; newsettings.gbWFIRType = WFIR_BLACKMAN4T92; break;
-				case module::INTERPOLATION_FIR_BLACKMAN4T74: newsettings.SrcMode = SRCMODE_FIRFILTER; newsettings.gbWFIRType = WFIR_BLACKMAN4T74; break;
-				case module::INTERPOLATION_FIR_KAISER4T: newsettings.SrcMode = SRCMODE_FIRFILTER; newsettings.gbWFIRType = WFIR_KAISER4T; break;
-			}
+			newsettings.SrcMode = filterlength_to_resamplingmode( value );
 			if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
 				m_sndFile->SetResamplerSettings( newsettings );
 			}
