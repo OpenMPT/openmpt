@@ -42,7 +42,7 @@ namespace libopenmpt {
 			comboBoxChannels->Items->Add("quad");
 			if ( settings->channels == 1 ) comboBoxChannels->SelectedItem = "mono";
 			if ( settings->channels == 2 ) comboBoxChannels->SelectedItem = "stereo";
-			if ( settings->channels == 3 ) comboBoxChannels->SelectedItem = "quad";
+			if ( settings->channels == 4 ) comboBoxChannels->SelectedItem = "quad";
 
 			comboBoxSamplerate->Enabled = settings->with_outputformat;
 			comboBoxChannels->Enabled = settings->with_outputformat;
@@ -51,7 +51,17 @@ namespace libopenmpt {
 
 			trackBarMaxPolyphony->Value = settings->maxmixchannels;
 
-			comboBoxInterpolation->SelectedIndex = settings->interpolationmode - 1;
+			if ( settings->interpolationfilterlength == 0 ) {
+				comboBoxInterpolation->SelectedIndex = 3;
+			} else if ( settings->interpolationfilterlength >= 8 ) {
+				comboBoxInterpolation->SelectedIndex = 3;
+			} else if ( settings->interpolationfilterlength >= 4 ) {
+				comboBoxInterpolation->SelectedIndex = 2;
+			} else if ( settings->interpolationfilterlength >= 2 ) {
+				comboBoxInterpolation->SelectedIndex = 1;
+			} else if ( settings->interpolationfilterlength >= 1 ) {
+				comboBoxInterpolation->SelectedIndex = 0;
+			}
 
 			comboBoxRepeat->SelectedIndex = settings->repeatcount + 1;
 
@@ -245,9 +255,8 @@ namespace libopenmpt {
 			// 
 			this->comboBoxInterpolation->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBoxInterpolation->FormattingEnabled = true;
-			this->comboBoxInterpolation->Items->AddRange(gcnew cli::array< System::Object^  >(12) {L"nearest", L"linear", L"spline", L"polyphase", 
-				L"fir hann", L"fir hamming", L"fir blackman exact", L"fir blackman 3 tap 1", L"fir blackman 3 tap 2", L"fir blackman 4 tap 1", 
-				L"fir blackman 4 tap 2", L"fir kaiser 4 tap"});
+			this->comboBoxInterpolation->Items->AddRange(gcnew cli::array< System::Object^  >(4) {L"1 tap (nearest)", L"2 tap (linear)", 
+				L"4 tap (cubic)", L"8 tap (polyphase fir)"});
 			this->comboBoxInterpolation->Location = System::Drawing::Point(106, 159);
 			this->comboBoxInterpolation->Name = L"comboBoxInterpolation";
 			this->comboBoxInterpolation->Size = System::Drawing::Size(121, 21);
@@ -405,7 +414,21 @@ private: System::Void trackBarGain_Scroll(System::Object^  sender, System::Event
 					 settings->changed();
 				 }
 private: System::Void comboBoxInterpolation_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
-					 settings->interpolationmode = (int)comboBoxInterpolation->SelectedIndex + 1;
+					switch ( (int)comboBoxInterpolation->SelectedIndex )
+					{
+					case 0:
+						settings->interpolationfilterlength = 1;
+						break;
+					case 1:
+						settings->interpolationfilterlength = 2;
+						break;
+					case 2:
+						settings->interpolationfilterlength = 4;
+						break;
+					case 3:
+						settings->interpolationfilterlength = 8;
+						break;
+					}
 					 settings->changed();
 				 }
 private: System::Void trackBarMaxPolyphony_Scroll(System::Object^  sender, System::EventArgs^  e) {
