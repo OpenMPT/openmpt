@@ -61,26 +61,95 @@ namespace MptTest
 #ifdef THIS_FILE
 #undef THIS_FILE
 #endif
+#ifdef _MSC_VER
+#define THIS_FILE "..\\test\\test.cpp" // __FILE__
+#else
 #define THIS_FILE "test/test.cpp" // __FILE__
+#endif
 
 
 
 #ifdef MODPLUG_TRACKER
 
+static noinline void ReportError(const char * file, int line, const char * fail_description, bool abort)
+//------------------------------------------------------------------------------------------------------
+{
+	std::string pos = std::string() + file + "(" + Stringify(line) + "):\n";
+	std::string message = pos + "Test failed: '" + fail_description + "'";
+	if(IsDebuggerPresent())
+	{
+		message += "\n";
+		OutputDebugString(message.c_str());
+	} else
+	{
+		if(abort)
+		{
+			throw std::runtime_error(message);
+		} else
+		{
+			Reporting::Error(message.c_str(), "OpenMPT TestSuite");
+		}
+	}
+}
+
+static noinline void ReportExceptionError(const char * file, int line, const char * func_description, const char * exception_what)
+//--------------------------------------------------------------------------------------------------------------------------------
+{
+	std::string pos = std::string() + file + "(" + Stringify(line) + "):\n";
+	std::string message;
+	if(exception_what)
+	{
+		message = pos + "Test '" + func_description + "' threw an exception, message:\n" + exception_what;
+	} else
+	{
+		message = pos + "Test '" + func_description + "' threw an unknown exception.";
+	}
+	if(IsDebuggerPresent())
+	{
+		message += "\n";
+		OutputDebugString(message.c_str());
+	} else
+	{
+		Reporting::Error(message.c_str(), "OpenMPT TestSuite");
+	}
+}
+
+static noinline void ReportException(const char * const file, const int line, const char * const description, bool rethrow)
+//-------------------------------------------------------------------------------------------------------------------------
+{
+	try
+	{
+		throw; // get the exception
+	} catch(std::exception &e)
+	{
+		ReportExceptionError(file, line, description, e.what());
+		if(rethrow)
+		{
+			throw;
+		}
+	} catch(...)
+	{
+		ReportExceptionError(file, line, description, nullptr);
+		if(rethrow)
+		{
+			throw;
+		}
+	}
+}
+
+#define ReportExceptionAndBreak(file, line, func_description, rethrow) do { ReportException(file, line, func_description, rethrow); if(IsDebuggerPresent()) DebugBreak(); } while(0)
+#define ReportErrorAndBreak(file, line, fail_description, progress)    do { ReportError(file, line, fail_description, progress);    if(IsDebuggerPresent()) DebugBreak(); } while(0)
+
 #define MULTI_TEST_TRY   try {
 #define MULTI_TEST_START 
 #define MULTI_TEST_END   
-#define MULTI_TEST_CATCH } catch ( std::exception & e) { \
-                          Reporting::Error((std::string() + "Test \"" + func_description + "\" threw an exception, message: " + e.what()).c_str(), (std::string() + "Test \"" + func_description + "\": Exception was thrown").c_str()); \
-                         } catch ( ... ) { \
-                          Reporting::Error((std::string() + "Test \"" + func_description + "\" threw an unknown exception.").c_str(), (std::string() + "Test \"" + func_description + "\": Exception was thrown").c_str()); \
-                         }
-#define TEST_TRY         {
-#define TEST_CATCH       }
-#define TEST_OK()        do{UNREFERENCED_PARAMETER(test_description);}while(0)
-#define TEST_FAIL()      Reporting::Error(mpt::String::Format("File: %s\nLine: " STRINGIZE(__LINE__) "\n\n" "%s", THIS_FILE, fail_description).c_str(), "VERIFY_EQUAL failed")
-#define TEST_FAIL_STOP() throw std::runtime_error(mpt::String::Format("File: %s\nLine: " STRINGIZE(__LINE__) "\n\n %s", THIS_FILE, fail_description))
-#define TEST_START()     do{}while(0)
+#define MULTI_TEST_CATCH } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, func_description, false); }
+#define TEST_TRY         try {
+#define TEST_CATCH       } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, test_description, true); }
+#define TEST_START()     do { } while(0)
+#define TEST_OK()        do { UNREFERENCED_PARAMETER(test_description); } while(0)
+#define TEST_FAIL()      ReportErrorAndBreak(THIS_FILE, __LINE__, fail_description, false)
+#define TEST_FAIL_STOP() ReportErrorAndBreak(THIS_FILE, __LINE__, fail_description, true)
 
 #else // !MODPLUG_TRACKER
 
@@ -89,12 +158,12 @@ static std::string remove_newlines(std::string str)
 	return mpt::String::Replace(mpt::String::Replace(str, "\n", " "), "\r", " ");
 }
 
-static void show_start(const char * const file, const int line, const char * const description)
+static noinline void show_start(const char * const file, const int line, const char * const description)
 {
 	std::cout << "Test: " << file << "(" << line << "): " << remove_newlines(description) << ": ";
 }
 
-static void show_ok(const char * const file, const int line, const char * const description)
+static noinline void show_ok(const char * const file, const int line, const char * const description)
 {
 	UNREFERENCED_PARAMETER(file);
 	UNREFERENCED_PARAMETER(line);
@@ -102,7 +171,7 @@ static void show_ok(const char * const file, const int line, const char * const 
 	std::cout << "PASS" << std::endl;
 }
 
-static void show_fail(const char * const file, const int line, const char * const description, bool exception = false, const char * const exception_text = nullptr)
+static noinline void show_fail(const char * const file, const int line, const char * const description, bool exception = false, const char * const exception_text = nullptr)
 {
 	std::cout << "FAIL" << std::endl;
 	if(!exception)
@@ -119,7 +188,7 @@ static void show_fail(const char * const file, const int line, const char * cons
 
 static int fail_count = 0;
 
-static void ReportException(const char * const file, const int line, const char * const description)
+static noinline void ReportException(const char * const file, const int line, const char * const description)
 {
 	try
 	{
@@ -143,11 +212,12 @@ static void ReportException(const char * const file, const int line, const char 
                            throw std::runtime_error("Test failed."); \
                           } \
                           show_ok(THIS_FILE, __LINE__, func_description); \
-                         } catch ( ... ) { \
+                         } catch(...) { \
                           ReportException(THIS_FILE, __LINE__, func_description); \
                          }
 #define TEST_TRY         try {
-#define TEST_CATCH       } catch ( ... ) { \
+#define TEST_CATCH       } catch(...) { \
+                          fail_count++; \
                           ReportException(THIS_FILE, __LINE__, fail_description); \
                           throw; \
                          }
@@ -201,6 +271,7 @@ do{ \
 // Like VERIFY_EQUAL_NONCONT, but do not show message if test succeeds
 #define VERIFY_EQUAL_QUIET_NONCONT(x,y) \
 do{ \
+	const char * const test_description = #x " == " #y ; \
 	const char * const fail_description = "VERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y ; \
 	TEST_TRY \
 	if((x) != (y))		\
