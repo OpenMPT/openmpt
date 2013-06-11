@@ -17,7 +17,12 @@
 
 
 
-#if defined(__clang__)
+#if defined(MPT_COMPILER_GENERIC)
+
+#undef MPT_COMPILER_GENERIC
+#define MPT_COMPILER_GENERIC                         1
+
+#elif defined(__clang__)
 
 #define MPT_COMPILER_CLANG                           1
 #define MPT_COMPILER_CLANG_VERSION                   MPT_COMPILER_MAKE_VERSION3(__clang_major__,__clang_minor__,__clang_patchlevel__)
@@ -64,6 +69,9 @@
 
 
 
+#ifndef MPT_COMPILER_GENERIC
+#define MPT_COMPILER_GENERIC                  0
+#endif
 #ifndef MPT_COMPILER_CLANG
 #define MPT_COMPILER_CLANG 0
 #define MPT_CLANG_AT_LEAST(major,minor,patch) 0

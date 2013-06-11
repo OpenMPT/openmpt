@@ -7,7 +7,9 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+#ifndef LIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
 #define LIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
+#endif
 
 #if defined(_MSC_VER)
 #define MPT_WITH_PORTAUDIO

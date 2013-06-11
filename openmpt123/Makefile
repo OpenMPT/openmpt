@@ -52,7 +52,12 @@ CFLAGS   += -Wall -Wextra -Wcast-align
 
 ifeq ($(DYNLINK),1)
 LDFLAGS  += -Wl,-rpath,./bin -Wl,-rpath,../bin
+LDFLAGS_LIBOPENMPT += -Lbin
+LDLIBS_LIBOPENMPT  += -lopenmpt
 endif
+
+#CPPFLAGS += -DMPT_COMPILER_GENERIC
+CPPFLAGS += -DLIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
 
 #CXXFLAGS += -mtune=generic
 #CFLAGS   += -mtune=generic
@@ -147,6 +152,12 @@ LIBOPENMPT_DEPENDS = $(LIBOPENMPT_OBJECTS:.o=.d)
 ALL_OBJECTS += $(LIBOPENMPT_OBJECTS)
 ALL_DEPENDS += $(LIBOPENMPT_DEPENDS)
 
+ifeq ($(DYNLINK),1)
+OUTPUT_LIBOPENMPT += bin/libopenmpt.so
+else
+OBJECTS_LIBOPENMPT += $(LIBOPENMPT_OBJECTS)
+endif
+
 
 LIBOPENMPT_MODPLUG_C_SOURCES += \
  ../libopenmpt/libopenmpt_modplug.c \
@@ -179,11 +190,14 @@ all:
 
 -include $(ALL_DEPENDS)
 
-OUTPUTS += bin/libopenmpt.so
 OUTPUTS += bin/openmpt.a
+OUTPUTS += bin/libopenmpt.so
 OUTPUTS += bin/openmpt123
-#OUTPUTS += bin/libopenmpt_modplug.so
-#OUTPUTS += bin/modplug123
+OUTPUTS += bin/libopenmpt_example_c
+OUTPUTS += bin/libopenmpt_example_c_mem
+OUTPUTS += bin/libopenmpt_example_cxx
+OUTPUTS += bin/libopenmpt_modplug.so
+OUTPUTS += bin/modplug123
 
 all: $(OUTPUTS)
 
@@ -191,33 +205,33 @@ all: $(OUTPUTS)
 test: all
 	bin/openmpt123 --runtests
 
-bin/libopenmpt.so: $(LIBOPENMPT_OBJECTS)
-	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) -shared $^ $(LOADLIBES) $(LDLIBS) -o $@
-
-ifeq ($(DYNLINK),1)
-bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS)
-	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) -shared -Lbin $^ $(LOADLIBES) $(LDLIBS) -o $@
-else
-bin/libopenmpt_modplug.so: $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_MODPLUG_OBJECTS)
-	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) -shared $^ $(LOADLIBES) $(LDLIBS) -o $@
-endif
-
 bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR ] $@
 	$(SILENT)$(AR) $(ARFLAGS) $@ $^
 
-ifeq ($(DYNLINK),1)
-bin/openmpt123: $(OPENMPT123_OBJECTS) bin/libopenmpt.so
+bin/libopenmpt.so: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) -Lbin $(OPENMPT123_OBJECTS) $(LOADLIBES) $(LDLIBS) -lopenmpt -o $@
-else
-bin/openmpt123: $(OPENMPT123_OBJECTS)
+	$(SILENT)$(LINK.cc) -shared $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS) $(OBJECTS_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(OPENMPT123_OBJECTS) $(LOADLIBES) $(LDLIBS) -o $@
-endif
+	$(SILENT)$(LINK.cc) -shared $(LDFLAGS_LIBOPENMPT) $^ $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+
+bin/openmpt123: $(OPENMPT123_OBJECTS) $(OUTPUT_LIBOPENMPT)
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(OPENMPT123_OBJECTS) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+
+bin/libopenmpt_example_c: ../libopenmpt/examples/libopenmpt_example_c.o $(OUTPUT_LIBOPENMPT)
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_c.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+
+bin/libopenmpt_example_c_mem: ../libopenmpt/examples/libopenmpt_example_c_mem.o $(OUTPUT_LIBOPENMPT)
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_c_mem.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+
+bin/libopenmpt_example_cxx: ../libopenmpt/examples/libopenmpt_example_cxx.o $(OUTPUT_LIBOPENMPT)
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_cxx.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
 bin/modplug123: bin/openmpt123
 	cp $^ $@
