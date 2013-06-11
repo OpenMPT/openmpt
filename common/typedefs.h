@@ -60,6 +60,8 @@
 #define NEEDS_PRAGMA_PACK
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define PACKED __attribute__((packed)) __attribute__((aligned(1)))
+#else
+#define PACKED alignas(1)
 #endif
 
 
@@ -68,6 +70,8 @@
 #define ALIGN(n) __declspec(align(n))
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define ALIGN(n) __attribute__((aligned(n)))
+#else
+#define ALIGN(n) alignas(n)
 #endif
 
 

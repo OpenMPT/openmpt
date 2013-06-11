@@ -11,7 +11,9 @@
 #define LIBOPENMPT_INTERNAL_H
 
 /* disable alpha version warning in internal builds */
+#ifndef LIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
 #define LIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
+#endif
 
 #include "libopenmpt_config.h"
 

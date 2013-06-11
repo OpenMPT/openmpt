@@ -10,6 +10,8 @@
 #include <fstream>
 #include <vector>
 
+#include <cstring>
+
 #include <libopenmpt/libopenmpt.hpp>
 
 #include <portaudio.h>
