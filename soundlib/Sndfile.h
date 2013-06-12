@@ -640,12 +640,15 @@ public:
 	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count);
 	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count);
 private:
-	UINT Read(UINT cbBuffer, LPVOID lpBuffer, void * const *outputBuffers = nullptr);
+	samplecount_t Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers);
 	void CreateStereoMix(int count);
 public:
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
+private:
+	void ProcessDSP(std::size_t countChunk);
 	void ProcessPlugins(UINT nCount);
+public:
 	samplecount_t GetTotalSampleCount() const { return m_lTotalSampleCount; }
 	bool HasPositionChanged() { bool b = m_bPositionChanged; m_bPositionChanged = false; return b; }
 	bool IsRenderingToDisc() const { return m_bIsRendering; }
@@ -830,12 +833,14 @@ public:
 #ifdef MODPLUG_TRACKER
 	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif // MODPLUG_TRACKER
-	void ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCount);
+	void ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long countChunk);
 
 #ifndef MODPLUG_TRACKER
-	void ApplyFinalOutputGain(int SoundBuffer[], int RearBuffer[], long lCount); // lCount meaning the number of frames, totally independet from the numer of channels
-	void ApplyFinalOutputGainFloat(float *beg, float *end);
-#endif
+	void ApplyFinalOutputGain(int *soundBuffer, std::size_t countChunk);
+	void ApplyFinalOutputGainFloat(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk);
+#endif // !MODPLUG_TRACKER
+
+	void ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk);
 
 	// System-Dependant functions
 public:

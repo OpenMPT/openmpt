@@ -27,49 +27,87 @@
 #define MIXING_LIMITMIN		(-MIXING_LIMITMAX)
 
 
-static UINT AGC(int *pBuffer, UINT nSamples, UINT nAGC)
-//-----------------------------------------------------
+static UINT ProcessAGC(int *pBuffer, int *pRearBuffer, UINT nSamples, UINT nChannels, int nAGC)
+//---------------------------------------------------------------------------------------------
 {
-	while(nSamples--)
+	if(nChannels == 1)
 	{
-		int val = (int)(((int64)*pBuffer * (int32)nAGC) >> AGC_PRECISION);
-		if(val < MIXING_LIMITMIN || val > MIXING_LIMITMAX) nAGC--;
-		*pBuffer = val;
-		pBuffer++;
+		while(nSamples--)
+		{
+			int val = (int)(((int64)*pBuffer * (int32)nAGC) >> AGC_PRECISION);
+			if(val < MIXING_LIMITMIN || val > MIXING_LIMITMAX) nAGC--;
+			*pBuffer = val;
+			pBuffer++;
+		}
+	} else
+	{
+		if(nChannels == 2)
+		{
+			while(nSamples--)
+			{
+				int fl = (int)(((int64)pBuffer[0] * (int32)nAGC) >> AGC_PRECISION);
+				int fr = (int)(((int64)pBuffer[1] * (int32)nAGC) >> AGC_PRECISION);
+				bool dec = false;
+				dec = dec || (fl < MIXING_LIMITMIN || fl > MIXING_LIMITMAX);
+				dec = dec || (fr < MIXING_LIMITMIN || fr > MIXING_LIMITMAX);
+				if(dec) nAGC--;
+				pBuffer[0] = fl;
+				pBuffer[1] = fr;
+				pBuffer += 2;
+			}
+		} else if(nChannels == 4)
+		{
+			while(nSamples--)
+			{
+				int fl = (int)(((int64)pBuffer[0] * (int32)nAGC) >> AGC_PRECISION);
+				int fr = (int)(((int64)pBuffer[1] * (int32)nAGC) >> AGC_PRECISION);
+				int rl = (int)(((int64)pRearBuffer[0] * (int32)nAGC) >> AGC_PRECISION);
+				int rr = (int)(((int64)pRearBuffer[1] * (int32)nAGC) >> AGC_PRECISION);
+				bool dec = false;
+				dec = dec || (fl < MIXING_LIMITMIN || fl > MIXING_LIMITMAX);
+				dec = dec || (fr < MIXING_LIMITMIN || fr > MIXING_LIMITMAX);
+				dec = dec || (rl < MIXING_LIMITMIN || rl > MIXING_LIMITMAX);
+				dec = dec || (rr < MIXING_LIMITMIN || rr > MIXING_LIMITMAX);
+				if(dec) nAGC--;
+				pBuffer[0] = fl;
+				pBuffer[1] = fr;
+				pRearBuffer[0] = rl;
+				pRearBuffer[1] = rr;
+				pBuffer += 2;
+				pRearBuffer += 2;
+			}
+		}
 	}
 	return nAGC;
 }
 
 
-CAGC::CAGC() 
+CAGC::CAGC()
 //----------
 {
-	m_nAGC = AGC_UNITY;
+	Initialize(TRUE, 44100);
 }
 
 
-void CAGC::Process(int * MixSoundBuffer, int count, DWORD MixingFreq, UINT nChannels)
-//-----------------------------------------------------------------------------------
+void CAGC::Process(int *MixSoundBuffer, int *RearSoundBuffer, int count, UINT nChannels)
+//--------------------------------------------------------------------------------------
 {
-	static DWORD gAGCRecoverCount = 0;
-	UINT agc = AGC(MixSoundBuffer, count, m_nAGC);
+	UINT agc = ProcessAGC(MixSoundBuffer, RearSoundBuffer, count, nChannels, m_nAGC);
 	// Some kind custom law, so that the AGC stays quite stable, but slowly
 	// goes back up if the sound level stays below a level inversely proportional
 	// to the AGC level. (J'me comprends)
-	if ((agc >= m_nAGC) && (m_nAGC < AGC_UNITY))
+	if((agc >= m_nAGC) && (m_nAGC < AGC_UNITY))
 	{
-		gAGCRecoverCount += count;
-		UINT agctimeout = MixingFreq >> (AGC_PRECISION-8);
-		if (nChannels < 2) agctimeout >>= 1;
-		if (gAGCRecoverCount >= agctimeout)
+		m_nAGCRecoverCount += count;
+		if(m_nAGCRecoverCount >= m_Timeout)
 		{
-			gAGCRecoverCount = 0;
+			m_nAGCRecoverCount = 0;
 			m_nAGC++;
 		}
 	} else
 	{
 		m_nAGC = agc;
-		gAGCRecoverCount = 0;
+		m_nAGCRecoverCount = 0;
 	}
 }
 
@@ -82,10 +120,15 @@ void CAGC::Adjust(UINT oldVol, UINT newVol)
 }
 
 
-void CAGC::Reset()
-//----------------
+void CAGC::Initialize(BOOL bReset, DWORD MixingFreq)
+//--------------------------------------------------
 {
-	m_nAGC = AGC_UNITY;
+	if(bReset)
+	{
+		m_nAGC = AGC_UNITY;
+		m_nAGCRecoverCount = 0;
+	}
+	m_Timeout = (MixingFreq >> (AGC_PRECISION-8)) >> 1;
 }
 
 

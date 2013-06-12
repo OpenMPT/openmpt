@@ -780,11 +780,26 @@ void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
 }
 
 
-void CMainFrame::AudioRead(PVOID pvData, ULONG NumSamples)
-//--------------------------------------------------------
+void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
+//-------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
-	m_pSndFile->ReadInterleaved(pvData, NumSamples);
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->ReadInterleaved(pvData, NumFrames);
+	ASSERT(renderedFrames <= NumFrames);
+	CSoundFile::samplecount_t remainingFrames = NumFrames - renderedFrames;
+	if(remainingFrames > 0)
+	{
+		// The sound device interface expects the whole buffer to be filled, always.
+		// Clear remaining buffer if not enough samples got rendered.
+		std::size_t frameSize = m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.GetBitsPerSample()/8);
+		if(m_pSndFile->m_MixerSettings.IsUnsignedSampleFormat())
+		{
+			std::memset((char*)(pvData) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
+		} else
+		{
+			std::memset((char*)(pvData) + renderedFrames * frameSize, 0, remainingFrames * frameSize);
+		}
+	}
 }
 
 
@@ -931,10 +946,10 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 	int lmax = gnLVuMeter, rmax = gnRVuMeter;
 	if (nChannels > 1)
 	{
-		for (UINT i=0; i<nSamples; i+=nChannels)
+		for (UINT i=0; i<nSamples; i++)
 		{
-			int vl = p[i];
-			int vr = p[i+1];
+			int vl = p[i*nChannels];
+			int vr = p[i*nChannels+1];
 			if (vl < 0) vl = -vl;
 			if (vr < 0) vr = -vr;
 			if (vl > lmax) lmax = vl;
@@ -944,7 +959,7 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 	{
 		for (UINT i=0; i<nSamples; i++)
 		{
-			int vl = p[i];
+			int vl = p[i*nChannels];
 			if (vl < 0) vl = -vl;
 			if (vl > lmax) lmax = vl;
 		}

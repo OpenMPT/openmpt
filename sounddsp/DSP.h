@@ -77,7 +77,6 @@ private:
 
 public:
 	CDSP();
-	~CDSP() {}
 public:
 	void SetSettings(const CDSPSettings &settings) { m_Settings = settings; }
 	// [XBass level 0(quiet)-100(loud)], [cutoff in Hz 10-100]
@@ -85,7 +84,7 @@ public:
 	// [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-40ms]
 	BOOL SetSurroundParameters(UINT nDepth, UINT nDelay);
 	void Initialize(BOOL bReset, DWORD MixingFreq, DWORD DSPMask);
-	void Process(int * MixSoundBuffer, int * MixRearBuffer, int count, DWORD DSPMask, UINT nChannels);
+	void Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels, DWORD DSPMask);
 private:
 	void ProcessStereoSurround(int * MixSoundBuffer, int count);
 	void ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int count);

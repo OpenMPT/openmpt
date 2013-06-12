@@ -33,32 +33,11 @@ LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 #endif
 
-typedef void (* LPCONVERTPROC)(LPVOID, int *, DWORD);
 
-static void Convert32To8( LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((uint8*)lpBuffer, pBuffer, nSamples); }
-static void Convert32To16(LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((int16*)lpBuffer, pBuffer, nSamples); }
-static void Convert32To24(LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((int24*)lpBuffer, pBuffer, nSamples); }
-static void Convert32To32(LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((int32*)lpBuffer, pBuffer, nSamples); }
-static void Convert32ToFloat32(LPVOID lpBuffer, int *pBuffer, DWORD nSamples) { return Convert32ToInterleaved((float*)lpBuffer, pBuffer, nSamples); }
+void InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames);
+void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+void MonoFromStereo(int *pMixBuf, UINT nSamples);
 
-template<typename Tsample>
-void Convert32ToNonInterleaved(void * const *outputBuffers, std::size_t offset, const int *mixbuffer, std::size_t channels, std::size_t count)
-{
-	Tsample *buffers[4];
-	MemsetZero(buffers);
-	for(std::size_t channel = 0; channel < channels; ++channel)
-	{
-		buffers[channel] = reinterpret_cast<Tsample*>(outputBuffers[channel]);
-		buffers[channel] += offset; // skip to output position
-	}
-	Convert32ToNonInterleaved(buffers, mixbuffer, channels, count);
-}
-
-
-
-extern void InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames);
-extern void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
-extern void MonoFromStereo(int *pMixBuf, UINT nSamples);
 
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
@@ -144,7 +123,7 @@ void CSoundFile::InitPlayer(BOOL bReset)
 	m_EQ.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
 #ifndef NO_AGC
-	if(bReset) m_AGC.Reset();
+	m_AGC.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
 	m_Dither.Reset();
 }
@@ -171,7 +150,6 @@ BOOL CSoundFile::FadeSong(UINT msec)
 		pramp->nRampLength = nRampLength;
 		pramp->dwFlags.set(CHN_VOLUMERAMP);
 	}
-	m_SongFlags.set(SONG_FADINGSONG);
 	return TRUE;
 }
 
@@ -201,239 +179,246 @@ CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuf
 }
 
 
-UINT CSoundFile::Read(UINT count, LPVOID lpDestBuffer, void * const *outputBuffers)
-//---------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers)
+//--------------------------------------------------------------------------------------------------------------
 {
-	LPBYTE lpBuffer = (LPBYTE)lpDestBuffer;
-	LPCONVERTPROC pCvt = nullptr;
-	samplecount_t lMax, lCount, lSampleCount;
-	size_t lSampleSize;
-	UINT nMaxPlugins;
-	std::size_t renderedCount = 0;
+	ALWAYS_ASSERT(m_MixerSettings.IsValid());
 
-	nMaxPlugins = MAX_MIXPLUGINS;
-	while ((nMaxPlugins > 0) && (!m_MixPlugins[nMaxPlugins-1].pMixPlugin)) nMaxPlugins--;
-	
-	UINT nMixStatCount = 0;
+	int mixStatCount = 0;
 
-	lSampleSize = m_MixerSettings.gnChannels;
-	switch(m_MixerSettings.m_SampleFormat)
+	bool mixPlugins = false;
+	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; ++i)
 	{
-		case SampleFormatUnsigned8: pCvt = Convert32To8 ;      break;
-		case SampleFormatInt16:     pCvt = Convert32To16;      break;
-		case SampleFormatInt24:     pCvt = Convert32To24;      break;
-		case SampleFormatInt32:     pCvt = Convert32To32;      break;
-		case SampleFormatFloat32:   pCvt = Convert32ToFloat32; break;
-		default: return 0; break;
-	}
-	lSampleSize *= m_MixerSettings.GetBitsPerSample()/8;
-
-	lMax = count;
-	if((!lMax) || ((!lpBuffer) && (!outputBuffers)) || (!m_nChannels)) return 0;
-	samplecount_t lRead = lMax;
-	if(m_SongFlags[SONG_ENDREACHED])
-		goto MixDone;
-
-	while (lRead > 0)
-	{
-		// Update Channel Data
-		if (!m_nBufferCount)
+		if(m_MixPlugins[i].pMixPlugin)
 		{
+			mixPlugins = true;
+			break;
+		}
+	}
+
+	const samplecount_t countGoal = count;
+	samplecount_t countRendered = 0;
+	samplecount_t countToRender = countGoal;
+
+	while(!m_SongFlags[SONG_ENDREACHED] && countToRender > 0)
+	{
+
+		// Update Channel Data
+		if(!m_nBufferCount)
+		{ // last tick or fade completely processed, find out what to do next
 
 			if(m_SongFlags[SONG_FADINGSONG])
-			{
+			{ // song was faded out
 				m_SongFlags.set(SONG_ENDREACHED);
-				m_nBufferCount = lRead;
-			} else
-
-			if (ReadNote())
-			{
-#ifdef MODPLUG_TRACKER
-				// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
-				if(IsRenderingToDisc() && (m_PatternCuePoints.empty() || m_nCurrentOrder != m_PatternCuePoints.back().order))
-				{
-					PatternCuePoint cue;
-					cue.offset = lMax - lRead;
-					cue.order = m_nCurrentOrder;
-					cue.processed = false;	// We don't know the base offset in the file here. It has to be added in the main conversion loop.
-					m_PatternCuePoints.push_back(cue);
-				}
-#endif
-			} else
-			{
-#ifdef MODPLUG_TRACKER
-				if ((m_nMaxOrderPosition) && (m_nCurrentOrder >= m_nMaxOrderPosition))
-				{
-					m_SongFlags.set(SONG_ENDREACHED);
-					break;
-				}
-#endif // MODPLUG_TRACKER
-
-				if (!FadeSong(FADESONGDELAY) || IsRenderingToDisc())	//rewbs: disable song fade when rendering.
-				{
-					m_SongFlags.set(SONG_ENDREACHED);
-					if (lRead == lMax || IsRenderingToDisc())		//rewbs: don't complete buffer when rendering
-						goto MixDone;
-					m_nBufferCount = lRead;
-				}
-			}
-		}
-
-		lCount = m_nBufferCount;
-		if (lCount > MIXBUFFERSIZE) lCount = MIXBUFFERSIZE;
-		if (lCount > lRead) lCount = lRead;
-		if (!lCount) 
-			break;
-
-		ASSERT(lCount <= MIXBUFFERSIZE); // ensure MIXBUFFERSIZE really is our max buffer size
-
-		lSampleCount = lCount;
-
-		if(nMixStatCount == 0)
-		{
-			// reset mixer channel count before we are calling CreateStereoMix the first time this round, if we are not updating the mixer state, we do not reset statistics
-			m_nMixStat = 0;
-		}
-		nMixStatCount++;
-		
-		if (m_MixerSettings.gnChannels >= 2)
-		{
-			lSampleCount *= 2;
-			CreateStereoMix(lCount);
-
-#ifndef NO_REVERB
-			m_Reverb.Process(MixSoundBuffer, lCount);
-#endif // NO_REVERB
-
-			if (nMaxPlugins) ProcessPlugins(lCount);
-
-			// Apply global volume
-			if (m_PlayConfig.getGlobalVolumeAppliesToMaster())
-			{
-				ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, lCount);
-			}
-		} else
-		{
-			CreateStereoMix(lCount);
-
-#ifndef NO_REVERB
-			m_Reverb.Process(MixSoundBuffer, lCount);
-#endif // NO_REVERB
-
-			if (nMaxPlugins) ProcessPlugins(lCount);
-			MonoFromStereo(MixSoundBuffer, lCount);
-
-			// Apply global volume
-			if (m_PlayConfig.getGlobalVolumeAppliesToMaster())
-			{
-				ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, lCount);
-			}
-		}
-
-#ifndef NO_DSP
-		m_DSP.Process(MixSoundBuffer, MixRearBuffer, lCount, m_MixerSettings.DSPMask, m_MixerSettings.gnChannels);
-#endif
-
-#ifndef NO_EQ
-		// Graphic Equalizer
-		if (m_MixerSettings.DSPMask & SNDDSP_EQ)
-		{
-			m_EQ.Process(MixSoundBuffer, MixRearBuffer, lCount, m_MixerSettings.gnChannels);
-		}
-#endif // NO_EQ
-
-#ifndef MODPLUG_TRACKER
-		if(!m_MixerSettings.IsFloatSampleFormat())
-		{
-			// Apply final output gain for non floating point output
-			ApplyFinalOutputGain(MixSoundBuffer, MixRearBuffer, lCount);
-		}
-#endif
-
-#ifndef NO_AGC
-		// Automatic Gain Control
-		if (m_MixerSettings.DSPMask & SNDDSP_AGC) m_AGC.Process(MixSoundBuffer, lSampleCount, m_MixerSettings.gdwMixingFreq, m_MixerSettings.gnChannels);
-#endif // NO_AGC
-
-		UINT lTotalSampleCount = lSampleCount;	// Including rear channels
-
-		// Multichannel
-		if (m_MixerSettings.gnChannels > 2)
-		{
-			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, lCount);
-			lTotalSampleCount *= 2;
-		}
-
-		// Noise Shaping
-		if(m_Resampler.IsHQ())
-			m_Dither.Process(MixSoundBuffer, lCount, m_MixerSettings.gnChannels, m_MixerSettings.GetBitsPerSample());
-
-#ifdef MODPLUG_TRACKER
-		// Hook Function
-		if (gpSndMixHook)
-		{
-			//Currently only used for VU Meter, so it's OK to do it after global Vol.
-			gpSndMixHook(MixSoundBuffer, lTotalSampleCount, m_MixerSettings.gnChannels);
-		}
-#endif
-
-		if(lpBuffer) // old style interleaved output buffer
-		{
-		#ifndef MODPLUG_TRACKER
-			LPBYTE buf_beg = lpBuffer;
-		#endif
-
-		// Convert to output sample format and optionally perform clipping if needed
-		pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
-		lpBuffer += lTotalSampleCount * (m_MixerSettings.GetBitsPerSample()/8);
-
-		#ifndef MODPLUG_TRACKER
-			LPBYTE buf_end = lpBuffer;
-			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-			if(m_MixerSettings.IsFloatSampleFormat())
-			{
-				ApplyFinalOutputGainFloat(reinterpret_cast<float*>(buf_beg), reinterpret_cast<float*>(buf_end));
-			}
-		#endif
-		}
-
-		if(outputBuffers) // non-interleaved one output buffer per channel
-		{
-			switch(m_MixerSettings.m_SampleFormat)
-			{
-				case SampleFormatUnsigned8: Convert32ToNonInterleaved<uint8>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
-				case SampleFormatInt16:     Convert32ToNonInterleaved<int16>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
-				case SampleFormatInt24:     Convert32ToNonInterleaved<int24>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
-				case SampleFormatInt32:     Convert32ToNonInterleaved<int32>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
-				case SampleFormatFloat32:   Convert32ToNonInterleaved<float>(outputBuffers, renderedCount, MixSoundBuffer, m_MixerSettings.gnChannels, lCount); break;
-				default:
-					break;
-			}
-			#ifndef MODPLUG_TRACKER
-				if(m_MixerSettings.IsFloatSampleFormat())
-				{
-					// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-					for(std::size_t channel = 0; channel < m_MixerSettings.gnChannels; ++channel)
+			} else if(ReadNote())
+			{ // render next tick (normal progress)
+				ASSERT(m_nBufferCount > 0);
+				#ifdef MODPLUG_TRACKER
+					// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
+					if(IsRenderingToDisc() && (m_PatternCuePoints.empty() || m_nCurrentOrder != m_PatternCuePoints.back().order))
 					{
-						ApplyFinalOutputGainFloat(reinterpret_cast<float*>(outputBuffers[channel]) + renderedCount, reinterpret_cast<float*>(outputBuffers[channel]) + renderedCount + lCount);
+						PatternCuePoint cue;
+						cue.offset = countRendered;
+						cue.order = m_nCurrentOrder;
+						cue.processed = false;	// We don't know the base offset in the file here. It has to be added in the main conversion loop.
+						m_PatternCuePoints.push_back(cue);
+					}
+				#endif
+			} else
+			{ // no new pattern data
+				#ifdef MODPLUG_TRACKER
+					if((m_nMaxOrderPosition) && (m_nCurrentOrder >= m_nMaxOrderPosition))
+					{
+						m_SongFlags.set(SONG_ENDREACHED);
+					}
+				#endif // MODPLUG_TRACKER
+				if(IsRenderingToDisc())
+				{ // rewbs: disable song fade when rendering.
+					m_SongFlags.set(SONG_ENDREACHED);
+				} else
+				{ // end of song reached, fade it out
+					if(FadeSong(FADESONGDELAY)) // sets m_nBufferCount xor returns false
+					{ // FadeSong sets m_nBufferCount here
+						ASSERT(m_nBufferCount > 0);
+						m_SongFlags.set(SONG_FADINGSONG);
+					} else
+					{
+						m_SongFlags.set(SONG_ENDREACHED);
 					}
 				}
-			#endif // !MODPLUG_TRACKER
+			}
+
 		}
 
+		if(m_SongFlags[SONG_ENDREACHED])
+		{
+			break; // mix done
+		}
+
+		ASSERT(m_nBufferCount > 0); // assert that we have actually something to do
+
+		const samplecount_t countChunk = std::min<samplecount_t>(MIXBUFFERSIZE, std::min<samplecount_t>(m_nBufferCount, countToRender));
+
+		if(mixStatCount == 0)
+		{ // reset mixer channel count before we are calling CreateStereoMix the first time this round, if we are not updating the mixer state, we do not reset statistics
+			m_nMixStat = 0;
+		}
+		mixStatCount++;
+
+		CreateStereoMix(countChunk);
+
+		#ifndef NO_REVERB
+			m_Reverb.Process(MixSoundBuffer, countChunk);
+		#endif // NO_REVERB
+
+		if(mixPlugins)
+		{
+			ProcessPlugins(countChunk);
+		}
+
+		if(m_MixerSettings.gnChannels == 1)
+		{
+			MonoFromStereo(MixSoundBuffer, countChunk);
+		}
+
+		if(m_PlayConfig.getGlobalVolumeAppliesToMaster())
+		{
+			ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, countChunk);
+		}
+
+		if(m_MixerSettings.DSPMask)
+		{
+			ProcessDSP(countChunk);
+		}
+
+		if(m_MixerSettings.gnChannels == 4)
+		{
+			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, countChunk);
+		}
+
+		#ifdef MODPLUG_TRACKER
+			if(gpSndMixHook)
+			{ // Currently only used for VU Meter
+				gpSndMixHook(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			}
+		#endif // MODPLUG_TRACKER
+
+		// Convert to output sample format and optionally perform dithering and clipping if needed
+		ConvertMixBufferToOutput(outputBuffer, outputBuffers, countRendered, countChunk);
+
 		// Buffer ready
-		renderedCount += lCount;
-		lRead -= lCount;
-		m_nBufferCount -= lCount;
-		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
+		countRendered += countChunk;
+		countToRender -= countChunk;
+		m_nBufferCount -= countChunk;
+		m_lTotalSampleCount += countChunk;		// increase sample count for VSTTimeInfo.
+
 	}
-MixDone:
-	if (lRead && lpBuffer) memset(lpBuffer, (m_MixerSettings.m_SampleFormat == SampleFormatUnsigned8) ? 0x80 : 0, lRead * lSampleSize); // clear remaining interleaved output buffer
-	if(nMixStatCount > 0)
+
+	// mix done
+
+	if(mixStatCount > 0)
 	{
-		m_nMixStat = (m_nMixStat + nMixStatCount - 1) / nMixStatCount; // round up
+		m_nMixStat = (m_nMixStat + mixStatCount - 1) / mixStatCount; // round up
 	}
-	return renderedCount;
+
+	return countRendered;
+
+}
+
+
+void CSoundFile::ProcessDSP(std::size_t countChunk)
+//-------------------------------------------------
+{
+	#ifndef NO_DSP
+		if(m_MixerSettings.DSPMask & (SNDDSP_SURROUND|SNDDSP_MEGABASS|SNDDSP_NOISEREDUCTION))
+		{
+			m_DSP.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels, m_MixerSettings.DSPMask);
+		}
+	#endif // NO_DSP
+
+	#ifndef NO_EQ
+		if(m_MixerSettings.DSPMask & SNDDSP_EQ)
+		{
+			m_EQ.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels);
+		}
+	#endif // NO_EQ
+
+	#ifndef NO_AGC
+		if(m_MixerSettings.DSPMask & SNDDSP_AGC)
+		{
+			m_AGC.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels);
+		}
+	#endif // NO_AGC
+}
+
+
+template<typename Tsample>
+void ConvertToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, int *mixbuffer, std::size_t countChunk, std::size_t channels)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	if(outputBuffer)
+	{
+		Convert32ToInterleaved(reinterpret_cast<Tsample*>(outputBuffer) + (channels * countRendered), mixbuffer, channels * countChunk);
+	}
+	if(outputBuffers)
+	{
+		Tsample *buffers[4] = { nullptr, nullptr, nullptr, nullptr };
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buffers[channel] = reinterpret_cast<Tsample*>(outputBuffers[channel]) + countRendered;
+		}
+		Convert32ToNonInterleaved(buffers, mixbuffer, channels, countChunk);
+	}
+}
+
+
+void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk)
+//-------------------------------------------------------------------------------------------------------------------------------------------
+{
+	// Convert to output sample format and optionally perform dithering and clipping if needed
+
+	#ifndef MODPLUG_TRACKER
+		if(m_MixerSettings.IsIntSampleFormat())
+		{
+			// Apply final output gain for non floating point output
+			ApplyFinalOutputGain(MixSoundBuffer, countChunk);
+		}
+	#endif // !MODPLUG_TRACKER
+
+	if(m_MixerSettings.IsIntSampleFormat())
+	{
+		m_Dither.Process(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels, m_MixerSettings.GetBitsPerSample());
+	}
+
+	switch(m_MixerSettings.m_SampleFormat)
+	{
+		case SampleFormatUnsigned8:
+			ConvertToOutput<uint8>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			break;
+		case SampleFormatInt16:
+			ConvertToOutput<int16>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			break;
+		case SampleFormatInt24:
+			ConvertToOutput<int24>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			break;
+		case SampleFormatInt32:
+			ConvertToOutput<int32>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			break;
+		case SampleFormatFloat32:
+			ConvertToOutput<float>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			break;
+		case SampleFormatInvalid:
+			break;
+	}
+
+	#ifndef MODPLUG_TRACKER
+		if(m_MixerSettings.IsFloatSampleFormat())
+		{
+			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
+			ApplyFinalOutputGainFloat(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, m_MixerSettings.gnChannels, countChunk);
+		}
+	#endif // !MODPLUG_TRACKER
+
 }
 
 
@@ -1700,7 +1685,8 @@ BOOL CSoundFile::ReadNote()
 	////////////////////////////////////////////////////////////////////////////////////
 	if (!m_nMusicTempo) return FALSE;
 
-	m_nSamplesPerTick = m_nBufferCount = GetTickDuration(m_nMusicTempo, m_nMusicSpeed, m_nCurrentRowsPerBeat);
+	m_nSamplesPerTick = GetTickDuration(m_nMusicTempo, m_nMusicSpeed, m_nCurrentRowsPerBeat);
+	m_nBufferCount = m_nSamplesPerTick;
 
 	// Master Volume + Pre-Amplification / Attenuation setup
 	DWORD nMasterVol;
@@ -2362,7 +2348,10 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 
 
 #ifndef MODPLUG_TRACKER
-void CSoundFile::ApplyFinalOutputGain(int SoundBuffer[], int RearBuffer[], long lCount) {
+
+void CSoundFile::ApplyFinalOutputGain(int *soundBuffer, std::size_t countChunk)
+//-----------------------------------------------------------------------------
+{
 	if(m_MixerSettings.m_FinalOutputGain == (1<<16))
 	{
 		// nothing to do, gain == +/- 0dB
@@ -2370,45 +2359,51 @@ void CSoundFile::ApplyFinalOutputGain(int SoundBuffer[], int RearBuffer[], long 
 	}
 	// no clipping prevention is done here
 	int32 factor = m_MixerSettings.m_FinalOutputGain;
-	int * buf = SoundBuffer;
-	int * rbuf = RearBuffer;
-	if(m_MixerSettings.gnChannels == 1)
+	int * buf = soundBuffer;
+	for(std::size_t i=0; i<countChunk*m_MixerSettings.gnChannels; ++i)
 	{
-		for(int i=0; i<lCount; ++i)
-		{
-			*buf = Util::muldiv(*buf, factor, 1<<16);
-			buf++;
-		}
-	} else if(m_MixerSettings.gnChannels == 2)
-	{
-		for(int i=0; i<lCount*2; ++i)
-		{
-			*buf = Util::muldiv(*buf, factor, 1<<16);
-			buf++;
-		}
-	} else if(m_MixerSettings.gnChannels == 4)
-	{
-		for(int i=0; i<lCount*2; ++i)
-		{
-			*buf = Util::muldiv(*buf, factor, 1<<16);
-			*rbuf = Util::muldiv(*rbuf, factor, 1<<16);
-			buf++;
-			rbuf++;
-		}
+		*buf = Util::muldiv(*buf, factor, 1<<16);
+		buf++;
 	}
 }
-void CSoundFile::ApplyFinalOutputGainFloat(float *beg, float *end) {
-	if(m_MixerSettings.m_FinalOutputGain == (1<<16))
-	{
-		// nothing to do, gain == +/- 0dB
-		return; 
-	}
-	// no clipping prevention is done here
-	float factor = static_cast<float>(m_MixerSettings.m_FinalOutputGain) * (1.0f / static_cast<float>(1<<16));
+
+static void ApplyFinalOutputGainFloatBuffer(float *beg, float *end, float factor)
+//-------------------------------------------------------------------------------
+{
+	// no clipping is done here
 	for(float *i = beg; i != end; ++i)
 	{
 		*i *= factor;
 	}
 }
-#endif
+
+void CSoundFile::ApplyFinalOutputGainFloat(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	if(m_MixerSettings.m_FinalOutputGain == (1<<16))
+	{
+		// nothing to do, gain == +/- 0dB
+		return;
+	}
+	const float factor = static_cast<float>(m_MixerSettings.m_FinalOutputGain) * (1.0f / static_cast<float>(1<<16));
+	if(outputBuffer)
+	{
+		ApplyFinalOutputGainFloatBuffer(
+			outputBuffer + (channels * offset),
+			outputBuffer + (channels * (offset + countChunk)),
+			factor);
+	}
+	if(outputBuffers)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			ApplyFinalOutputGainFloatBuffer(
+				outputBuffers[channel] + offset,
+				outputBuffers[channel] + offset + countChunk,
+				factor);
+		}
+	}
+}
+
+#endif // !MODPLUG_TRACKER
 

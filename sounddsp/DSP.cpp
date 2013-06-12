@@ -281,7 +281,7 @@ void CDSP::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int co
 }
 
 
-void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, DWORD DSPMask, UINT nChannels)
+void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels, DWORD DSPMask)
 //-----------------------------------------------------------------------------------------------------
 {
 
@@ -296,14 +296,10 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, DWORD D
 		if (nChannels > 2) ProcessQuadSurround(MixSoundBuffer, MixRearBuffer, count); else
 		ProcessStereoSurround(MixSoundBuffer, count);
 	}
-	// DC Removal
-	if (DSPMask & SNDDSP_MEGABASS)
-	{
-		X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l, &nDCRFlt_Y1r, &nDCRFlt_X1r);
-	}
 	// Bass Expansion
 	if (DSPMask & SNDDSP_MEGABASS)
 	{
+		X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l, &nDCRFlt_Y1r, &nDCRFlt_X1r);
 		int *px = MixSoundBuffer;
 		int x1 = nXBassFlt_X1;
 		int y1 = nXBassFlt_Y1;
@@ -344,15 +340,11 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, DWORD D
 	} else
 	{
 
-	
-	// DC Removal
-	if (DSPMask & SNDDSP_MEGABASS)
-	{
-		X86_MonoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l);
-	}
+
 	// Bass Expansion
 	if (DSPMask & SNDDSP_MEGABASS)
 	{
+		X86_MonoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l);
 		int *px = MixSoundBuffer;
 		int x1 = nXBassFlt_X1;
 		int y1 = nXBassFlt_Y1;
