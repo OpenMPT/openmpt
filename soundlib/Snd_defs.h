@@ -310,6 +310,8 @@ enum
 	MIXING_CLIPMIN = -(MIXING_CLIPMAX),
 };
 
+const float MIXING_SCALEF = static_cast<float>(1 << (32 - MIXING_ATTENUATION - 1));
+
 
 #define MAX_GLOBAL_VOLUME 256u
 

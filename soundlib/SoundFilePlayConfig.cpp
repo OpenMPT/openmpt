@@ -66,8 +66,8 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 	
 		case mixLevels_117RC2:
 			setVSTiAttenuation(2.0f);
-			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
-			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
+			setIntToFloat(1.0f/MIXING_SCALEF);
+			setFloatToInt(MIXING_SCALEF);
 			setGlobalVolumeAppliesToMaster(true);
 			setUseGlobalPreAmp(true);
 			setForcePanningMode(dontForcePanningMode);
@@ -84,8 +84,8 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 		default:
 		case mixLevels_117RC3:
 			setVSTiAttenuation(1.0f);
-			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
-			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
+			setIntToFloat(1.0f/MIXING_SCALEF);
+			setFloatToInt(MIXING_SCALEF);
 			setGlobalVolumeAppliesToMaster(true);
 			setUseGlobalPreAmp(false);
 			setForcePanningMode(forceSoftPanning);
@@ -101,8 +101,8 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 		// Sample attenuation is the same as in Schism Tracker (more attenuation than with RC3, thus VSTi attenuation is also higher).
 		case mixLevels_compatible:
 			setVSTiAttenuation(0.75f);
-			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
-			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
+			setIntToFloat(1.0f/MIXING_SCALEF);
+			setFloatToInt(MIXING_SCALEF);
 			setGlobalVolumeAppliesToMaster(true);
 			setUseGlobalPreAmp(false);
 			setForcePanningMode(forceNoSoftPanning);

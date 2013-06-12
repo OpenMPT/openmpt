@@ -1997,7 +1997,7 @@ void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuff
 void Convert32ToInterleaved(float *dest, const int *mixbuffer, std::size_t count)
 //-------------------------------------------------------------------------------
 {
-	const float factor = (1.0f/(float)MIXING_CLIPMAX);
+	const float factor = (1.0f/MIXING_SCALEF);
 	for(std::size_t i=0; i<count; i++)
 	{
 		dest[i] = mixbuffer[i] * factor;
@@ -2007,7 +2007,7 @@ void Convert32ToInterleaved(float *dest, const int *mixbuffer, std::size_t count
 void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
 //--------------------------------------------------------------------------------------------------------------------------
 {
-	const float factor = (1.0f/(float)MIXING_CLIPMAX);
+	const float factor = (1.0f/MIXING_SCALEF);
 	for(std::size_t i = 0; i < count; ++i)
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
