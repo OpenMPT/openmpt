@@ -19,14 +19,14 @@ class CAGC
 {
 private:
 	UINT m_nAGC;
+	DWORD m_nAGCRecoverCount;
+	UINT m_Timeout;
 public:
 	CAGC();
-	~CAGC() {}
+	void Initialize(BOOL bReset, DWORD MixingFreq);
 public:
-	void Process(int * MixSoundBuffer, int count, DWORD MixingFreq, UINT nChannels);
+	void Process(int *MixSoundBuffer, int *RearSoundBuffer, int count, UINT nChannels);
 	void Adjust(UINT oldVol, UINT newVol);
-	void Reset();
-private:
 };
 
 #endif // NO_AGC

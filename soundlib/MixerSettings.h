@@ -45,13 +45,30 @@ struct MixerSettings
 	DWORD m_FinalOutputGain; // factor multiplied to the final mixer output just before clipping and dithering, fixed point 16.16
 #endif
 
+	bool IsValid() const
+	{
+		return true
+			&& (gnChannels == 1 || gnChannels == 2 || gnChannels == 4)
+			&& (m_SampleFormat != SampleFormatInvalid)
+			&& (gdwMixingFreq > 0)
+			&& (GetBitsPerSample() % 8 == 0)
+			&& (GetBitsPerSample() > 0)
+			;
+	}
 	bool IsUnsignedSampleFormat() const
 	{
+		if(m_SampleFormat == SampleFormatInvalid) return false;
 		return m_SampleFormat == SampleFormatUnsigned8;
 	}
 	bool IsFloatSampleFormat() const
 	{
+		if(m_SampleFormat == SampleFormatInvalid) return false;
 		return m_SampleFormat == SampleFormatFloat32;
+	}
+	bool IsIntSampleFormat() const
+	{
+		if(m_SampleFormat == SampleFormatInvalid) return false;
+		return m_SampleFormat != SampleFormatFloat32;
 	}
 	uint8 GetBitsPerSample() const
 	{
@@ -72,7 +89,9 @@ struct MixerSettings
 		case SampleFormatFloat32:
 			return 32;
 			break;
-		default: return 8; break;
+		default:
+			return 0;
+			break;
 		}
 	}
 
