@@ -316,12 +316,12 @@ static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
 void CEQ::ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 //---------------------------------------------------------------------
 {
-	MonoMixToFloat(pbuffer, MixFloatBuffer, nCount, 1.0f/static_cast<float>(MIXING_CLIPMAX));
+	MonoMixToFloat(pbuffer, MixFloatBuffer, nCount, 1.0f/MIXING_SCALEF);
 	for (UINT b=0; b<MAX_EQ_BANDS; b++)
 	{
 		if ((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f)) EQFilter(&gEQ[b], MixFloatBuffer, nCount);
 	}
-	FloatToMonoMix(MixFloatBuffer, pbuffer, nCount, static_cast<float>(MIXING_CLIPMAX));
+	FloatToMonoMix(MixFloatBuffer, pbuffer, nCount, MIXING_SCALEF);
 }
 
 
@@ -334,7 +334,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		int sse_state, sse_eqstate;
-		MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, 1.0f/static_cast<float>(MIXING_CLIPMAX));
+		MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, 1.0f/MIXING_SCALEF);
 
 		_asm stmxcsr sse_state;
 		sse_eqstate = sse_state | 0xFF80; // set flush-to-zero, denormals-are-zero, round-to-zero, mask all exception, leave flags alone
@@ -346,7 +346,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 		}
 		_asm ldmxcsr sse_state;
 
-		FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, static_cast<float>(MIXING_CLIPMAX));
+		FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, MIXING_SCALEF);
 
 	} else
 
@@ -356,7 +356,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 
 	if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
 	{ 
-		MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, 1.0f/static_cast<float>(MIXING_CLIPMAX));
+		MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, 1.0f/MIXING_SCALEF);
 
 		for (UINT b=0; b<MAX_EQ_BANDS; b++)
 		{
@@ -365,14 +365,14 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 				AMD_StereoEQ(&gEQ[b], &gEQ[b+MAX_EQ_BANDS], MixFloatBuffer, nCount);
 		}
 
-		FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, static_cast<float>(MIXING_CLIPMAX));
+		FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, MIXING_SCALEF);
 		
 	} else
 #endif // ENABLE_X86_AMD
 
 	{	
 
-		StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, 1.0f/static_cast<float>(MIXING_CLIPMAX));
+		StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, 1.0f/MIXING_SCALEF);
 		
 		for (UINT bl=0; bl<MAX_EQ_BANDS; bl++)
 		{
@@ -383,7 +383,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 			if ((gEQ[br].bEnable) && (gEQ[br].Gain != 1.0f)) EQFilter(&gEQ[br], MixFloatBuffer+MIXBUFFERSIZE, nCount);
 		}
 
-		FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount, static_cast<float>(MIXING_CLIPMAX));
+		FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount, MIXING_SCALEF);
 
 	}
 }
