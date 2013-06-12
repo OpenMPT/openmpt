@@ -39,10 +39,10 @@ class ISoundSource
 //================
 {
 public:
-	virtual void FillAudioBufferLocked(const ISoundDevice &device, IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual ULONG AudioRead(const ISoundDevice &device, PVOID pData, ULONG MaxSamples) = 0; // returns number of valid samples read, the remaining space has to be filled with zeroes by the callee,
-	                                                            // if return value != MaxSamples then end_of_stream = true
-	virtual void AudioDone(const ISoundDevice &device, ULONG SamplesWritten, ULONG SamplesLatency, bool end_of_stream) = 0; // all in samples
+	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
+	virtual void AudioRead(PVOID pData, ULONG NumSamples) = 0;
+	virtual void AudioDone(ULONG NumSamples, ULONG SamplesLatency) = 0; // all in samples
+	virtual void AudioDone(ULONG NumSamples) = 0; // all in samples
 };
 
 
@@ -89,9 +89,10 @@ enum // do not change old values, these get saved to the ini
 class ISoundDevice : protected IFillAudioBuffer
 //=============================================
 {
-protected:
+private:
 	ISoundSource *m_Source;
 
+protected:
 	ULONG m_LatencyMS;
 	ULONG m_UpdateIntervalMS;
 	ULONG m_fulCfgOptions;
@@ -104,6 +105,9 @@ protected:
 
 protected:
 	virtual void FillAudioBuffer() = 0;
+	void SourceFillAudioBufferLocked();
+	void SourceAudioRead(PVOID pData, ULONG NumSamples);
+	void SourceAudioDone(ULONG NumSamples, ULONG SamplesLatency);
 
 public:
 	ISoundDevice();

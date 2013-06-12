@@ -65,6 +65,35 @@ VOID ISoundDevice::Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, D
 }
 
 
+void ISoundDevice::SourceFillAudioBufferLocked()
+//----------------------------------------------
+{
+	if(m_Source)
+	{
+		m_Source->FillAudioBufferLocked(*this);
+	}
+}
+
+
+void ISoundDevice::SourceAudioRead(PVOID pData, ULONG NumSamples)
+//---------------------------------------------------------------
+{
+	m_Source->AudioRead(pData, NumSamples);
+}
+
+
+void ISoundDevice::SourceAudioDone(ULONG NumSamples, ULONG SamplesLatency)
+//------------------------------------------------------------------------
+{
+	if(HasGetStreamPosition())
+	{
+		m_Source->AudioDone(NumSamples);
+	} else
+	{
+		m_Source->AudioDone(NumSamples, SamplesLatency);
+	}
+}
+
 
 void ISoundDevice::Start()
 //------------------------
@@ -466,7 +495,7 @@ void CAudioThread::Deactivate()
 void CSoundDeviceWithThread::FillAudioBufferLocked()
 //--------------------------------------------------
 {
-	m_Source->FillAudioBufferLocked(*this, *this);
+	SourceFillAudioBufferLocked();
 }
 
 
@@ -622,7 +651,6 @@ void CWaveDevice::ResetFromOutsideSoundThread()
 void CWaveDevice::FillAudioBuffer()
 //---------------------------------
 {
-	ISoundSource *pSource = m_Source;
 	ULONG nBytesWritten;
 	ULONG nLatency;
 	LONG oldBuffersPending;
@@ -631,7 +659,6 @@ void CWaveDevice::FillAudioBuffer()
 	oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0); // read
 	nLatency = oldBuffersPending * m_nWaveBufferSize;
 
-	bool eos = false;
 	bool wasempty = false;
 	if(oldBuffersPending == 0) wasempty = true;
 	// When there were no pending buffers at all, pause the output, fill the buffers completely and then restart the output.
@@ -640,11 +667,7 @@ void CWaveDevice::FillAudioBuffer()
 
 	while((ULONG)oldBuffersPending < m_nPreparedHeaders)
 	{
-		ULONG len = m_BytesPerSample * pSource->AudioRead(*this, m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize/m_BytesPerSample);
-		if(len < m_nWaveBufferSize)
-		{
-			eos = true;
-		}
+		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize/m_BytesPerSample);
 		nLatency += m_nWaveBufferSize;
 		nBytesWritten += m_nWaveBufferSize;
 		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
@@ -653,7 +676,7 @@ void CWaveDevice::FillAudioBuffer()
 		waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR));
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
-		pSource->AudioDone(*this, m_nWaveBufferSize/m_BytesPerSample, nLatency/m_BytesPerSample, eos);
+		SourceAudioDone(m_nWaveBufferSize/m_BytesPerSample, nLatency/m_BytesPerSample);
 	}
 
 	if(wasempty) waveOutRestart(m_hWaveOut);
@@ -1002,25 +1025,17 @@ BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DW
 void CDSoundDevice::FillAudioBuffer()
 //-----------------------------------
 {
-	ISoundSource *pSource = m_Source;
 	LPVOID lpBuf1=NULL, lpBuf2=NULL;
 	DWORD dwSize1=0, dwSize2=0;
 	DWORD dwBytes;
 
-	bool eos = false;
 	if (!m_pMixBuffer) return;
 	dwBytes = LockBuffer(m_nDSoundBufferSize, &lpBuf1, &dwSize1, &lpBuf2, &dwSize2);
 	if (dwBytes)
 	{
-		DWORD nRead1=0, nRead2=0;
-
-		if ((lpBuf1) && (dwSize1)) nRead1 = m_BytesPerSample * pSource->AudioRead(*this, lpBuf1, dwSize1/m_BytesPerSample);
-		if ((lpBuf2) && (dwSize2)) nRead2 = m_BytesPerSample * pSource->AudioRead(*this, lpBuf2, dwSize2/m_BytesPerSample);
+		if ((lpBuf1) && (dwSize1)) SourceAudioRead(lpBuf1, dwSize1/m_BytesPerSample);
+		if ((lpBuf2) && (dwSize2)) SourceAudioRead(lpBuf2, dwSize2/m_BytesPerSample);
 		UnlockBuffer(lpBuf1, dwSize1, lpBuf2, dwSize2);
-		if(nRead1+nRead2 < dwSize1+dwSize2)
-		{
-			eos = true;
-		}
 		DWORD dwStatus = 0;
 		m_pMixBuffer->GetStatus(&dwStatus);
 		if(!m_bMixRunning || !(dwStatus & DSBSTATUS_PLAYING))
@@ -1046,7 +1061,7 @@ void CDSoundDevice::FillAudioBuffer()
 			}
 			m_bMixRunning = TRUE; 
 		}
-		pSource->AudioDone(*this, (dwSize1+dwSize2)/m_BytesPerSample, m_dwLatency/m_BytesPerSample, eos);
+		SourceAudioDone((dwSize1+dwSize2)/m_BytesPerSample, m_dwLatency/m_BytesPerSample);
 	}
 }
 
@@ -1504,7 +1519,6 @@ void CASIODevice::CloseDevice()
 void CASIODevice::FillAudioBuffer()
 //---------------------------------
 {
-	ISoundSource *pSource = m_Source;
 	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 
 	DWORD dwSampleSize = m_nChannels*(m_nBitsPerSample>>3);
@@ -1512,7 +1526,6 @@ void CASIODevice::FillAudioBuffer()
 	DWORD dwFrameLen = (ASIO_BLOCK_LEN*sizeof(int)) / dwSampleSize;
 	DWORD dwBufferOffset = 0;
 	
-	bool eos = false;
 	g_dwBuffer &= 1;
 	//Log("FillAudioBuffer(%d): dwSampleSize=%d dwSamplesLeft=%d dwFrameLen=%d\n", g_dwBuffer, dwSampleSize, dwSamplesLeft, dwFrameLen);
 	while ((LONG)dwSamplesLeft > 0)
@@ -1523,11 +1536,7 @@ void CASIODevice::FillAudioBuffer()
 			memset(m_FrameBuffer, 0, n*dwSampleSize);
 		} else
 		{
-			UINT readn = pSource->AudioRead(*this, m_FrameBuffer, n);
-			if(readn < n)
-			{
-				eos = true;
-			}
+			SourceAudioRead(m_FrameBuffer, n);
 		}
 		dwSamplesLeft -= n;
 		for (UINT ich=0; ich<m_nChannels; ich++)
@@ -1605,7 +1614,7 @@ void CASIODevice::FillAudioBuffer()
 	if (m_bPostOutput) m_pAsioDrv->outputReady();
 	if(!rendersilence)
 	{
-		pSource->AudioDone(*this, dwBufferOffset, m_nAsioBufferLen, eos);
+		SourceAudioDone(dwBufferOffset, m_nAsioBufferLen);
 	}
 	return;
 }
@@ -1620,9 +1629,9 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex)
 	if(rendersilence)
 	{
 		FillAudioBuffer();
-	} else if(m_Source)
+	} else
 	{
-		m_Source->FillAudioBufferLocked(*this, *this);
+		SourceFillAudioBufferLocked();
 	}
 }
 
@@ -2114,15 +2123,9 @@ void CPortaudioDevice::InternalStop()
 void CPortaudioDevice::FillAudioBuffer()
 //--------------------------------------
 {
-	ISoundSource *pSource = m_Source;
 	if(m_CurrentFrameCount == 0) return;
-	bool eos = false;
-	ULONG read = pSource->AudioRead(*this, m_CurrentFrameBuffer, m_CurrentFrameCount);
-	if(read < m_CurrentFrameCount)
-	{
-		eos = true;
-	}
-	pSource->AudioDone(*this, m_CurrentFrameCount, static_cast<ULONG>(m_CurrentRealLatencyMS * Pa_GetStreamInfo(m_Stream)->sampleRate / 1000.0f), eos);
+	SourceAudioRead(m_CurrentFrameBuffer, m_CurrentFrameCount);
+	SourceAudioDone(m_CurrentFrameCount, static_cast<ULONG>(m_CurrentRealLatencyMS * Pa_GetStreamInfo(m_Stream)->sampleRate / 1000.0f));
 }
 
 
@@ -2190,7 +2193,7 @@ int CPortaudioDevice::StreamCallback(
 	m_CurrentRealLatencyMS = static_cast<float>( timeInfo->outputBufferDacTime - timeInfo->currentTime ) * 1000.0f;
 	m_CurrentFrameBuffer = output;
 	m_CurrentFrameCount = frameCount;
-	m_Source->FillAudioBufferLocked(*this, *this);
+	SourceFillAudioBufferLocked();
 	m_CurrentFrameCount = 0;
 	m_CurrentFrameBuffer = 0;
 	return paContinue;
