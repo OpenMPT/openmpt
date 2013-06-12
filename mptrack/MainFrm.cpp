@@ -771,8 +771,8 @@ LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
 }
 
 
-void CMainFrame::FillAudioBufferLocked(const ISoundDevice &, IFillAudioBuffer &callback)
-//--------------------------------------------------------------------------------------
+void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
+//----------------------------------------------------------------
 {
 	CriticalSection cs;
 	ALWAYS_ASSERT(m_pSndFile != nullptr);
@@ -780,19 +780,27 @@ void CMainFrame::FillAudioBufferLocked(const ISoundDevice &, IFillAudioBuffer &c
 }
 
 
-ULONG CMainFrame::AudioRead(const ISoundDevice &, PVOID pvData, ULONG MaxSamples)
-//-------------------------------------------------------------------------------
+void CMainFrame::AudioRead(PVOID pvData, ULONG NumSamples)
+//--------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
-	return m_pSndFile->ReadInterleaved(pvData, MaxSamples);
+	m_pSndFile->ReadInterleaved(pvData, NumSamples);
 }
 
 
-void CMainFrame::AudioDone(const ISoundDevice &device, ULONG SamplesWritten, ULONG SamplesLatency, bool endOfStream)
-//------------------------------------------------------------------------------------------------------------------
+void CMainFrame::AudioDone(ULONG NumSamples, ULONG SamplesLatency)
+//----------------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
-	DoNotification(SamplesWritten, SamplesLatency, endOfStream, device.HasGetStreamPosition());
+	DoNotification(NumSamples, SamplesLatency, false);
+}
+
+
+void CMainFrame::AudioDone(ULONG NumSamples)
+//------------------------------------------
+{
+	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
+	DoNotification(NumSamples, 0, true);
 }
 
 
@@ -949,8 +957,8 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 }
 
 
-BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool endOfStream, bool hasSoundDeviceGetStreamPosition)
-//--------------------------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool hasSoundDeviceGetStreamPosition)
+//--------------------------------------------------------------------------------------------------------------
 {
 	if(dwSamplesRead == 0) return FALSE;
 	int64 notificationtimestamp = 0;
@@ -984,7 +992,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 
 	Notification notification(notifyType, notifyItem, notificationtimestamp, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern, m_pSndFile->m_nMixStat);
 
-	if(endOfStream) notification.type.set(Notification::EOS);
+	if(m_pSndFile->m_SongFlags[SONG_ENDREACHED]) notification.type.set(Notification::EOS);
 
 	if(notifyType[Notification::Sample])
 	{

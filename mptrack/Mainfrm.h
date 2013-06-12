@@ -323,16 +323,17 @@ public:
 	DWORD NotifyThread();
 
 	// from ISoundSource
-	void FillAudioBufferLocked(const ISoundDevice &device, IFillAudioBuffer &callback);
-	ULONG AudioRead(const ISoundDevice &device, PVOID pData, ULONG MaxSamples);
-	void AudioDone(const ISoundDevice &device, ULONG SamplesWritten, ULONG SamplesLatency, bool endOfStream);
+	void FillAudioBufferLocked(IFillAudioBuffer &callback);
+	void AudioRead(PVOID pData, ULONG NumSamples);
+	void AudioDone(ULONG NumSamples, ULONG SamplesLatency);
+	void AudioDone(ULONG NumSamples);
 	
 	bool audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
 	bool audioOpenDevice();
 	bool audioReopenDevice();
 	void audioCloseDevice();
 	bool IsAudioDeviceOpen() const;
-	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool endOfStream, bool hasSoundDeviceGetStreamPosition);
+	BOOL DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool hasSoundDeviceGetStreamPosition);
 
 // Midi Input Functions
 public:
