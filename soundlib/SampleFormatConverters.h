@@ -173,7 +173,7 @@ struct ReadBigIntTo16PCM : SampleConversionFunctor<char[inputTypeSize], int16, c
 template <size_t shift>
 struct ReadBigIntToInt16PCMNative : SampleConversionFunctor<int32, int16, conversionHasNoState>
 {
-	inline int16 operator() (const void *sourceBuffer)
+	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		return static_cast<int16>((*static_cast<const int32 *>(sourceBuffer)) >> shift);
 	}
