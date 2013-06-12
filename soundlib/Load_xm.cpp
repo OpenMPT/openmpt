@@ -315,8 +315,10 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nRestartPos = fileHeader.restartPos;
 	m_nChannels = fileHeader.channels;
 	m_nInstruments = std::min(fileHeader.instruments, uint16(MAX_INSTRUMENTS - 1));
-	m_nDefaultSpeed = Clamp(fileHeader.speed, uint16(1), uint16(31));
-	m_nDefaultTempo = Clamp(fileHeader.tempo, uint16(32), uint16(512));
+	if(fileHeader.speed)
+		m_nDefaultSpeed = fileHeader.speed;
+	if(fileHeader.tempo)
+		m_nDefaultTempo = Clamp(fileHeader.tempo, uint16(32), uint16(512));
 
 	m_SongFlags.reset();
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & XMFileHeader::linearSlides) != 0);
