@@ -52,7 +52,7 @@ struct SampleConversionFunctor
 template <int8 offset>
 struct ReadInt7to8PCM : SampleConversionFunctor<int8, int8, conversionHasNoState>
 {
-	inline int8 operator() (const void *sourceBuffer)
+	forceinline int8 operator() (const void *sourceBuffer)
 	{
 		return static_cast<int8>(Clamp(static_cast<int16>((*static_cast<const int8 *>(sourceBuffer)) - offset) * 2, -128, 127));
 	}
@@ -63,7 +63,7 @@ struct ReadInt7to8PCM : SampleConversionFunctor<int8, int8, conversionHasNoState
 template <int8 offset>
 struct ReadInt8PCM : SampleConversionFunctor<int8, int8, conversionHasNoState>
 {
-	inline int8 operator() (const void *sourceBuffer)
+	forceinline int8 operator() (const void *sourceBuffer)
 	{
 		return (*static_cast<const int8 *>(sourceBuffer)) - offset;
 	}
@@ -77,7 +77,7 @@ struct ReadInt8DeltaPCM : SampleConversionFunctor<int8, int8, conversionHasState
 
 	ReadInt8DeltaPCM() : delta(0) { }
 
-	inline int8 operator() (const void *sourceBuffer)
+	forceinline int8 operator() (const void *sourceBuffer)
 	{
 		delta += *static_cast<const int8 *>(sourceBuffer);
 		return static_cast<int8>(delta);
@@ -89,7 +89,7 @@ struct ReadInt8DeltaPCM : SampleConversionFunctor<int8, int8, conversionHasState
 template <int16 offset, size_t loByteIndex, size_t hiByteIndex>
 struct ReadInt16PCM : SampleConversionFunctor<int16, int16, conversionHasNoState>
 {
-	inline int16 operator() (const void *sourceBuffer)
+	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
 		return (inBuf[loByteIndex] | (inBuf[hiByteIndex] << 8)) - offset;
@@ -105,7 +105,7 @@ struct ReadInt16DeltaPCM : SampleConversionFunctor<int16, int16, conversionHasSt
 
 	ReadInt16DeltaPCM() : delta(0) { }
 
-	inline int16 operator() (const void *sourceBuffer)
+	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
 		delta += inBuf[loByteIndex] | (inBuf[hiByteIndex] << 8);
@@ -121,7 +121,7 @@ struct ReadInt8to16DeltaPCM : SampleConversionFunctor<int16, int16, conversionHa
 
 	ReadInt8to16DeltaPCM() : delta(0) { }
 
-	inline int16 operator() (const void *sourceBuffer)
+	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		const int8 *inBuf = static_cast<const int8 *>(sourceBuffer);
 		delta += inBuf[0];
@@ -137,7 +137,7 @@ struct ReadInt8to16DeltaPCM : SampleConversionFunctor<int16, int16, conversionHa
 template <int32 offset, size_t loByteIndex, size_t midByteIndex, size_t hiByteIndex>
 struct ReadInt24to32PCM : SampleConversionFunctor<char[3], int32, conversionHasNoState>
 {
-	inline int32 operator() (const void *sourceBuffer)
+	forceinline int32 operator() (const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
 		return ((inBuf[loByteIndex] << 8) | (inBuf[midByteIndex] << 16) | (inBuf[hiByteIndex] << 24)) - offset;
@@ -149,7 +149,7 @@ struct ReadInt24to32PCM : SampleConversionFunctor<char[3], int32, conversionHasN
 template <int32 offset, size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct ReadInt32PCM : SampleConversionFunctor<int32, int32, conversionHasNoState>
 {
-	inline int32 operator() (const void *sourceBuffer)
+	forceinline int32 operator() (const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
 		return (inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24)) - offset;
@@ -161,7 +161,7 @@ struct ReadInt32PCM : SampleConversionFunctor<int32, int32, conversionHasNoState
 template <size_t inputTypeSize, size_t loByteIndex, size_t hiByteIndex>
 struct ReadBigIntTo16PCM : SampleConversionFunctor<char[inputTypeSize], int16, conversionHasNoState>
 {
-	inline int16 operator() (const void *sourceBuffer)
+	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
 		return inBuf[loByteIndex] | (inBuf[hiByteIndex] << 8);
@@ -184,7 +184,7 @@ struct ReadBigIntToInt16PCMNative : SampleConversionFunctor<int32, int16, conver
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct ReadFloat32toInt16PCM : SampleConversionFunctor<float, int16, conversionHasNoState>
 {
-	inline int16 operator() (const void *sourceBuffer)
+	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
 		const uint32 in32 = inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24);
@@ -214,7 +214,7 @@ struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename Sampl
 		static_assert(sizeof(typename SampleConversion::output_t) <= 4, "Implementation of this conversion functor is only suitable for 32-Bit integers or smaller");
 	}
 
-	inline void FindMax(const void *sourceBuffer)
+	forceinline void FindMax(const void *sourceBuffer)
 	{
 		int32 val = sampleConv(sourceBuffer);
 
@@ -240,7 +240,7 @@ struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename Sampl
 		return (maxCandidate == 0);
 	}
 
-	inline int16 operator() (const void *sourceBuffer)
+	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		int32 val = sampleConv(sourceBuffer);
 		const double NC = (val < 0) ? 32768.0 : 32767.0;	// Normalization Constant
@@ -258,7 +258,7 @@ struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, co
 
 	ReadFloat32to16PCMandNormalize() { maxVal.i = 0; }
 
-	inline void FindMax(const void *sourceBuffer)
+	forceinline void FindMax(const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
 		uint32 val = inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24);
@@ -278,7 +278,7 @@ struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, co
 		return (maxVal.i == 0);
 	}
 
-	inline int16 operator() (const void *sourceBuffer)
+	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
 		const uint32 in32 = inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24);
