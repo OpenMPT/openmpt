@@ -24,9 +24,6 @@
 #endif
 #endif
 
-#include <map>
-#include <string>
-
 #include <windows.h>
 
 namespace openmpt {
@@ -47,8 +44,6 @@ public:
 	int interpolationfilterlength;
 	int volrampinus;
 	int volrampoutus;
-	std::map<std::string,int> save_map() const;
-	void load_map( const std::map<std::string,int> & map );
 	void load();
 	void save();
 	void edit( HWND parent, const char * title );
@@ -58,42 +53,7 @@ public:
 	virtual void read_setting( const char * key, int & val );
 	virtual void write_setting( const char * key, int val );
 	virtual void edit_settings( HWND parent, const char * title );
-	void import_xml( const std::string & xml );
-	std::string export_xml() const;
 };
-
-inline std::map<std::string,int> settings::save_map() const {
-	std::map<std::string,int> result;
-	result[ "Samplerate_Hz" ] = samplerate;
-	result[ "Channels" ] = channels;
-	result[ "MasterGain_milliBel" ] = mastergain_millibel;
-	result[ "SeteroSeparation_Percent" ] = stereoseparation;
-	result[ "RepeatCount" ] = repeatcount;
-	result[ "MixerChannels" ] = maxmixchannels;
-	result[ "InterpolationFilterLength" ] = interpolationfilterlength;
-	result[ "VolumeRampingIn_microseconds" ] = volrampinus;
-	result[ "VolumeRampingOut_microseconds" ] = volrampoutus;
-	return result;
-}
-
-static inline void load_map_setting( const std::map<std::string,int> & map, const std::string & key, int & val ) {
-	std::map<std::string,int>::const_iterator it = map.find( key );
-	if ( it != map.end() ) {
-		val = it->second;
-	}
-}
-
-inline void settings::load_map( const std::map<std::string,int> & map ) {
-	load_map_setting( map, "Samplerate_Hz", samplerate );
-	load_map_setting( map, "Channels", channels );
-	load_map_setting( map, "MasterGain_milliBel", mastergain_millibel );
-	load_map_setting( map, "SeteroSeparation_Percent", stereoseparation );
-	load_map_setting( map, "RepeatCount", repeatcount );
-	load_map_setting( map, "MixerChannels", maxmixchannels );
-	load_map_setting( map, "InterpolationFilterLength", interpolationfilterlength );
-	load_map_setting( map, "VolumeRampingIn_microseconds", volrampinus );
-	load_map_setting( map, "VolumeRampingOut_microseconds", volrampoutus );
-}
 
 inline void settings::load() {
 	read_setting( "Samplerate_Hz", samplerate );
