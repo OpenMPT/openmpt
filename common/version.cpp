@@ -346,6 +346,10 @@ std::string GetFullCreditsString()
 		"Pel K. Txnder for the scrolling credits control :)\n"
 		"http://tinyurl.com/4yze8\n"
 #endif
+#if defined(LIBOPENMPT_BUILD) && !defined(NO_XMPLAY)
+		"Arseny Kapoulkine for pugixml\n"
+		"http://pugixml.org/\n"
+#endif
 		"\n"
 		"The people at ModPlug forums for crucial contribution\n"
 		"in the form of ideas, testing and support; thanks\n"
