@@ -34,6 +34,12 @@
     <Filter Include="Source Files\test">
       <UniqueIdentifier>{7e476eee-06d3-440e-89c1-29c78a21daa9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\pugixml">
+      <UniqueIdentifier>{fa46e1ce-9949-456f-9c0a-6389d4fe8a52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pugixml">
+      <UniqueIdentifier>{b75aa7ba-8417-4e4c-81c4-e2ecfa29146c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\AudioCriticalSection.h">
@@ -221,6 +227,12 @@
     </ClInclude>
     <ClInclude Include="..\common\Logging.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pugixml\src\pugixml.hpp">
+      <Filter>Header Files\pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pugixml\src\pugiconfig.hpp">
+      <Filter>Header Files\pugixml</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -469,6 +481,12 @@
     </ClCompile>
     <ClCompile Include="libopenmpt_impl.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_settings_xml.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\pugixml\src\pugixml.cpp">
+      <Filter>Source Files\pugixml</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
