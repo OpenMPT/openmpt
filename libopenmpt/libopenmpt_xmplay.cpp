@@ -72,10 +72,7 @@ struct self_xmplay_t {
 	openmpt::settings * settings;
 	std::vector<float> buf;
 	openmpt::module * mod;
-	void create_settings() {
-		if ( settings ) {
-			return;
-		}
+	self_xmplay_t() : samplerate(48000), num_channels(2), settings(nullptr), mod(nullptr) {
 		if ( settings_dll ) {
 			settings = new xmplay_settings();
 		} else {
@@ -87,42 +84,13 @@ struct self_xmplay_t {
 			settings->with_outputformat = false;
 		#endif
 	}
-	void destroy_settings() {
-		if ( !settings ) {
-			return;
-		}
+	~self_xmplay_t() {
 		delete settings;
 		settings = nullptr;
-	}
-	self_xmplay_t() : samplerate(48000), num_channels(2), settings(nullptr), mod(nullptr) {
-		return;
-	}
-	~self_xmplay_t() {
-		return;
-	}
-};
-
-
-class settings_raii {
-private:
-	bool owner;
-public:
-	settings_raii() : owner(false) {
-		if ( !self->settings ) {
-			owner = true;
-			self->create_settings();
-		}
-	}
-	~settings_raii() {
-		if ( owner ) {
-			self->destroy_settings();
-			owner = false;
-		}
 	}
 };
 
 static void apply_options() {
-	settings_raii dummy;
 	if ( self->mod ) {
 		self->mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, self->settings->mastergain_millibel );
 		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings->stereoseparation );
@@ -133,24 +101,6 @@ static void apply_options() {
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, self->settings->volrampoutus );
 	}
 	self->settings->save();
-}
-
-// get config (return size of config data) (OPTIONAL)
-static DWORD WINAPI openmpt_GetConfig( void * config ) {
-	settings_raii dummy;
-	std::string xml = self->settings->export_xml();
-	if ( config ) {
-		std::memcpy( config, xml.c_str(), xml.length() + 1 );
-	}
-	return xml.length() + 1;
-}
-
-// apply config (OPTIONAL)
-static void WINAPI openmpt_SetConfig( void * config, DWORD size ) {
-	settings_raii dummy;
-	if ( config ) {
-		self->settings->import_xml( std::string( (char*)config, (char*)config + size ) );
-	}
 }
 
 #ifdef EXPERIMENTAL_VIS
@@ -219,7 +169,6 @@ static void WINAPI openmpt_About( HWND win ) {
 }
 
 static void WINAPI openmpt_Config( HWND win ) {
-	settings_raii dummy;
 	if ( settings_dll ) {
 		self->settings->edit( win, SHORT_TITLE );
 		apply_options();
@@ -461,7 +410,6 @@ static BOOL WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, flo
 // open a file for playback
 // return:  0=failed, 1=success, 2=success and XMPlay can close the file
 static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
-	self->create_settings();
 	self->settings->load();
 	try {
 		if ( self->mod ) {
@@ -516,7 +464,6 @@ static void WINAPI openmpt_Close() {
 		delete self->mod;
 		self->mod = nullptr;
 	}
-	self->destroy_settings();
 }
 
 // set the sample format (in=user chosen format, out=file format if different)
@@ -846,7 +793,7 @@ static XMPIN xmpin = {
 #else
 	XMPIN_FLAG_NOXMPFILE |
 #endif
-	XMPIN_FLAG_CONFIG, // XMPIN_FLAG_LOOP, the xmplay looping interface is not really compatible with libopenmpt looping interface, so dont support that for now
+	0, // XMPIN_FLAG_LOOP, the xmplay looping interface is not really compatible with libopenmpt looping interface, so dont support that for now
 	openmpt::version::xmp_openmpt_string,
 	NULL, // "libopenmpt\0mptm/mptmz",
 	openmpt_About,
@@ -884,8 +831,8 @@ static XMPIN xmpin = {
 #endif
 
 	NULL, // reserved2
-	openmpt_GetConfig, //NULL, // GetConfig
-	openmpt_SetConfig //NULL  // SetConfig
+	NULL, // GetConfig
+	NULL  // SetConfig
 };
 
 static const char * xmp_openmpt_default_exts = "OpenMPT\0mptm/mptmz";
