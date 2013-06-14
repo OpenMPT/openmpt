@@ -423,9 +423,38 @@ void TestTypes()
 }
 
 
+static float AsFloat(uint32 x)
+//----------------------------
+{
+	FloatInt32 conv;
+	conv.i = x;
+	return conv.f;
+}
+
+static uint32 AsInt(float x)
+//--------------------------
+{
+	FloatInt32 conv;
+	conv.f = x;
+	return conv.i;
+}
+
 void TestMisc()
 //-------------
 {
+
+	VERIFY_EQUAL(AsFloat(0x3f800000u),  1.0f);
+	VERIFY_EQUAL(AsFloat(0x00000000u),  0.0f);
+	VERIFY_EQUAL(AsFloat(0xbf800000u), -1.0f);
+	VERIFY_EQUAL(DecodeFloatNE(0x3f800000u), 1.0f);
+	VERIFY_EQUAL(DecodeFloatLE(uint8_4(0x00,0x00,0x80,0x3f)), 1.0f);
+	VERIFY_EQUAL(DecodeFloatBE(uint8_4(0x3f,0x80,0x00,0x00)), 1.0f);
+	VERIFY_EQUAL(EncodeFloatNE(1.0f), 0x3f800000u);
+	VERIFY_EQUAL(EncodeFloatBE(1.0f).GetBE(), 0x3f800000u);
+	VERIFY_EQUAL(EncodeFloatLE(1.0f).GetBE(), 0x0000803fu);
+	VERIFY_EQUAL(EncodeFloatLE(1.0f).GetLE(), 0x3f800000u);
+	VERIFY_EQUAL(EncodeFloatBE(1.0f).GetLE(), 0x0000803fu);
+
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);

@@ -728,11 +728,10 @@ public:
 	// If successful, the file cursor is advanced by the size of the float.
 	float ReadFloatLE()
 	{
-		FloatInt32 target;
+		uint8_4 target;
 		if(Read(target))
 		{
-			SwapBytesLE(target.i);
-			return target.f;
+			return DecodeFloatLE(target);
 		} else
 		{
 			return 0.0f;
@@ -743,11 +742,10 @@ public:
 	// If successful, the file cursor is advanced by the size of the float.
 	float ReadFloatBE()
 	{
-		FloatInt32 target;
+		uint8_4 target;
 		if(Read(target))
 		{
-			SwapBytesBE(target.i);
-			return target.f;
+			return DecodeFloatBE(target);
 		} else
 		{
 			return 0.0f;
