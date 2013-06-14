@@ -146,6 +146,14 @@
       <Project>{812a654d-99be-4d13-b97f-86332ad3e363}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="openmpt123.hpp" />
+    <ClInclude Include="openmpt123_config.hpp" />
+    <ClInclude Include="openmpt123_flac.hpp" />
+    <ClInclude Include="openmpt123_portaudio.hpp" />
+    <ClInclude Include="openmpt123_sndfile.hpp" />
+    <ClInclude Include="openmpt123_stdout.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
