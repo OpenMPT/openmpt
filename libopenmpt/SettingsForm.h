@@ -25,6 +25,9 @@ namespace libopenmpt {
 
 			Text = gcnew System::String( title );
 
+			if ( !settings->with_outputformat ) {
+				comboBoxSamplerate->Items->Add("default");
+			}
 			comboBoxSamplerate->Items->Add(6000);
 			comboBoxSamplerate->Items->Add(8000);
 			comboBoxSamplerate->Items->Add(11025);
@@ -35,17 +38,22 @@ namespace libopenmpt {
 			comboBoxSamplerate->Items->Add(48000);
 			comboBoxSamplerate->Items->Add(88200);
 			comboBoxSamplerate->Items->Add(96000);
-			comboBoxSamplerate->SelectedItem = settings->samplerate;
+			if ( settings->samplerate == 0 && !settings->with_outputformat ) {
+				comboBoxSamplerate->SelectedItem = "default";
+			} else {
+				comboBoxSamplerate->SelectedItem = settings->samplerate;
+			}
 
+			if ( !settings->with_outputformat ) {
+				comboBoxChannels->Items->Add("default");
+			}
 			comboBoxChannels->Items->Add("mono");
 			comboBoxChannels->Items->Add("stereo");
 			comboBoxChannels->Items->Add("quad");
 			if ( settings->channels == 1 ) comboBoxChannels->SelectedItem = "mono";
 			if ( settings->channels == 2 ) comboBoxChannels->SelectedItem = "stereo";
 			if ( settings->channels == 4 ) comboBoxChannels->SelectedItem = "quad";
-
-			comboBoxSamplerate->Enabled = settings->with_outputformat;
-			comboBoxChannels->Enabled = settings->with_outputformat;
+			if ( settings->channels == 0 && !settings->with_outputformat ) comboBoxChannels->SelectedItem = "default";
 
 			trackBarGain->Value = settings->mastergain_millibel;
 
@@ -195,6 +203,7 @@ namespace libopenmpt {
 			this->comboBoxChannels->Name = L"comboBoxChannels";
 			this->comboBoxChannels->Size = System::Drawing::Size(121, 21);
 			this->comboBoxChannels->TabIndex = 4;
+			this->comboBoxChannels->SelectedIndexChanged += gcnew System::EventHandler(this, &SettingsForm::comboBoxChannels_SelectedIndexChanged);
 			// 
 			// labelGain
 			// 
@@ -395,6 +404,15 @@ namespace libopenmpt {
 		}
 #pragma endregion
 	private: System::Void comboBoxSamplerate_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+						 try {
+							System::String ^ val = (System::String ^)comboBoxSamplerate->SelectedItem;
+							if ( val == "default" ) {
+								settings->samplerate = 0;
+								settings->changed();
+								return;
+							}
+						 } catch ( ... ) {
+						 }
 						 settings->samplerate = (int)comboBoxSamplerate->SelectedItem;
 						 settings->changed();
 					 }
@@ -407,6 +425,7 @@ private: System::Void comboBoxChannels_SelectedIndexChanged(System::Object^  sen
 					 if ( val == "mono" ) settings->channels = 1;
 					 if ( val == "stereo" ) settings->channels = 2;
 					 if ( val == "quad" ) settings->channels = 4;
+					 if ( val == "default" ) settings->channels = 0;
 					 settings->changed();
 				 }
 private: System::Void trackBarGain_Scroll(System::Object^  sender, System::EventArgs^  e) {
