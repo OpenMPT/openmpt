@@ -18,8 +18,6 @@
 #define LIBOPENMPT_USE_SETTINGS_DLL
 #include "libopenmpt_settings.h"
 
-//#define CUSTOM_OUTPUT_SETTINGS
-
 //#define EXPERIMENTAL_VIS
 
 #define FAST_CHECKFILE
@@ -70,11 +68,7 @@ struct self_xmplay_t {
 	std::vector<float> buf;
 	openmpt::module * mod;
 	self_xmplay_t() : samplerate(48000), num_channels(2), mod(nullptr) {
-		#ifdef CUSTOM_OUTPUT_SETTINGS
-			openmpt::settings::init( settings, true );
-		#else
-			openmpt::settings::init( settings, false );
-		#endif
+		openmpt::settings::init( settings, false );
 		settings.changed = apply_and_save_options;
 	}
 	~self_xmplay_t() {
@@ -561,16 +555,19 @@ static void WINAPI openmpt_SetFormat( XMPFORMAT * form ) {
 		form->res = 0;
 		return;
 	}
-	#ifdef CUSTOM_OUTPUT_SETTINGS
+	if ( self->settings.samplerate != 0 ) {
 		form->rate = self->samplerate;
-		form->chan = self->num_channels;
-	#else
+	} else {
 		if ( form->rate && form->rate > 0 ) {
 			self->samplerate = form->rate;
 		} else {
 			form->rate = 48000;
 			self->samplerate = 48000;
 		}
+	}
+	if ( self->settings.channels != 0 ) {
+		form->chan = self->num_channels;
+	} else {
 		if ( form->chan && form->chan > 0 ) {
 			if ( form->chan > 2 ) {
 				form->chan = 4;
@@ -582,9 +579,7 @@ static void WINAPI openmpt_SetFormat( XMPFORMAT * form ) {
 			form->chan = 2;
 			self->num_channels = 2;
 		}
-		self->settings.samplerate = self->samplerate;
-		self->settings.channels = self->num_channels;
-	#endif
+	}
 	form->res = 4; // float
 }
 
