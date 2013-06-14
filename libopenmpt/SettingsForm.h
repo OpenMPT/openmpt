@@ -17,9 +17,9 @@ namespace libopenmpt {
 	public ref class SettingsForm : public System::Windows::Forms::Form
 	{
 	private:
-		openmpt::settings * settings;
+		openmpt::settings::settings * settings;
 	public:
-		SettingsForm( const char * title, openmpt::settings * s ) : settings(s)
+		SettingsForm( const char * title, openmpt::settings::settings * s ) : settings(s)
 		{
 			InitializeComponent();
 
