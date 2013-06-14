@@ -43,19 +43,11 @@
 
 static void apply_options();
 
-class winamp_settings : public openmpt::registry_settings {
-public:
-	void changed() {
-		apply_options();
-	}
-	winamp_settings() : registry_settings( SHORT_TITLE ) {}
-};
-
 static HMODULE settings_dll = NULL;
 
 struct self_winamp_t {
 	std::vector<char> filetypes_string;
-	openmpt::settings * settings;
+	openmpt::settings::settings settings;
 	int samplerate;
 	int channels;
 	std::string cached_filename;
@@ -69,8 +61,10 @@ struct self_winamp_t {
 	bool paused;
 	std::vector<std::int16_t> buffer;
 	std::vector<std::int16_t> interleaved_buffer;
-	self_winamp_t() : settings(nullptr) {
+	self_winamp_t() {
 		filetypes_string.clear();
+		openmpt::settings::init( settings );
+		settings.changed = apply_options;
 		std::vector<std::string> extensions = openmpt::get_supported_extensions();
 		for ( std::vector<std::string>::iterator ext = extensions.begin(); ext != extensions.end(); ++ext ) {
 			std::copy( (*ext).begin(), (*ext).end(), std::back_inserter( filetypes_string ) );
@@ -79,13 +73,8 @@ struct self_winamp_t {
 			filetypes_string.push_back('\0');
 		}
 		filetypes_string.push_back('\0');
-		if ( settings_dll ) {
-			settings = new winamp_settings();
-		} else {
-			settings = new openmpt::settings();
-		}
-		samplerate = settings->samplerate;
-		channels = settings->channels;
+		samplerate = settings.samplerate;
+		channels = settings.channels;
 		cached_filename = "";
 		cached_title = "";
 		cached_length = 0;
@@ -99,8 +88,7 @@ struct self_winamp_t {
 		interleaved_buffer.resize( WINAMP_BUFFER_SIZE_FRAMES * channels * WINAMP_DSP_HEADROOM_FACTOR );
 	}
 	~self_winamp_t() {
-		delete settings;
-		settings = nullptr;
+		return;
 	}
 };
 
@@ -108,15 +96,17 @@ static self_winamp_t * self = 0;
 
 static void apply_options() {
 	if ( self->mod ) {
-		self->mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, self->settings->mastergain_millibel );
-		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings->stereoseparation );
-		self->mod->set_render_param( openmpt::module::RENDER_REPEATCOUNT, self->settings->repeatcount );
-		self->mod->set_render_param( openmpt::module::RENDER_MAXMIXCHANNELS, self->settings->maxmixchannels );
-		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, self->settings->interpolationfilterlength );
-		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, self->settings->volrampinus );
-		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, self->settings->volrampoutus );
+		self->mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, self->settings.mastergain_millibel );
+		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings.stereoseparation );
+		self->mod->set_render_param( openmpt::module::RENDER_REPEATCOUNT, self->settings.repeatcount );
+		self->mod->set_render_param( openmpt::module::RENDER_MAXMIXCHANNELS, self->settings.maxmixchannels );
+		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, self->settings.interpolationfilterlength );
+		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, self->settings.volrampinus );
+		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, self->settings.volrampoutus );
 	}
-	self->settings->save();
+	if ( settings_dll ) {
+		openmpt::settings::save( self->settings, SHORT_TITLE );
+	}
 }
 
 extern In_Module inmod;
@@ -136,7 +126,7 @@ static std::string generate_infotext( const std::string & filename, const openmp
 
 static void config( HWND hwndParent ) {
 	if ( settings_dll ) {
-		self->settings->edit( hwndParent, SHORT_TITLE );
+		openmpt::settings::edit( self->settings, hwndParent, SHORT_TITLE );
 		apply_options();
 	} else {
 		MessageBox( hwndParent, "libopenmpt_settings.dll failed to load. Please check if it is in the same folder as in_openmpt.dll and that .NET framework v4.0 is installed.", SHORT_TITLE, MB_ICONERROR );
@@ -198,8 +188,8 @@ static int play( char * fn ) {
 		self->cached_length = static_cast<int>( self->mod->get_duration_seconds() * 1000.0 );
 		self->cached_infotext = generate_infotext( self->cached_filename, *self->mod );
 		apply_options();
-		self->samplerate = self->settings->samplerate;
-		self->channels = self->settings->channels;
+		self->samplerate = self->settings.samplerate;
+		self->channels = self->settings.channels;
 		int maxlatency = inmod.outMod->Open( self->samplerate, self->channels, BPS, -1, -1 );
 		std::ostringstream str;
 		str << maxlatency;

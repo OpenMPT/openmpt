@@ -26,14 +26,11 @@
 
 #include <windows.h>
 
-namespace openmpt {
+namespace openmpt { namespace settings {
 
-#ifdef _MSC_VER
-#pragma warning ( disable : 4275 ) // warning C4275: non dll-interface class 'foo' used as base for dll-interface class 'bar'
-#endif
+typedef void (*changed_func)();
 
-class settings {
-public:
+struct settings {
 	bool with_outputformat;
 	int samplerate;
 	int channels;
@@ -44,92 +41,27 @@ public:
 	int interpolationfilterlength;
 	int volrampinus;
 	int volrampoutus;
-	void load();
-	void save();
-	void edit( HWND parent, const char * title );
-	settings( bool with_outputformat_ = true );
-	virtual ~settings();
-	virtual void changed();
-	virtual void read_setting( const char * key, int & val );
-	virtual void write_setting( const char * key, int val );
-	virtual void edit_settings( HWND parent, const char * title );
+	changed_func changed;
 };
 
-inline void settings::load() {
-	read_setting( "Samplerate_Hz", samplerate );
-	read_setting( "Channels", channels );
-	read_setting( "MasterGain_milliBel", mastergain_millibel );
-	read_setting( "SeteroSeparation_Percent", stereoseparation );
-	read_setting( "RepeatCount", repeatcount );
-	read_setting( "MixerChannels", maxmixchannels );
-	read_setting( "InterpolationFilterLength", interpolationfilterlength );
-	read_setting( "VolumeRampingIn_microseconds", volrampinus );
-	read_setting( "VolumeRampingOut_microseconds", volrampoutus );
+static void inline init( settings & s, bool with_outputformat = true ) {
+	s.with_outputformat = with_outputformat;
+	s.samplerate = 48000;
+	s.channels = 2;
+	s.mastergain_millibel = 0;
+	s.stereoseparation = 100;
+	s.repeatcount = 0;
+	s.maxmixchannels = 256;
+	s.interpolationfilterlength = 8;
+	s.volrampinus = 363;
+	s.volrampoutus = 952;
+	s.changed = 0;
 }
 
-inline void settings::save() {
-	write_setting( "Samplerate_Hz", samplerate );
-	write_setting( "Channels", channels );
-	write_setting( "MasterGain_milliBel", mastergain_millibel );
-	write_setting( "SeteroSeparation_Percent", stereoseparation );
-	write_setting( "RepeatCount", repeatcount );
-	write_setting( "MixerChannels", maxmixchannels );
-	write_setting( "InterpolationFilterLength", interpolationfilterlength );
-	write_setting( "VolumeRampingIn_microseconds", volrampinus );
-	write_setting( "VolumeRampingOut_microseconds", volrampoutus );
-}
+LIBOPENMPT_SETTINGS_API void load( settings & s, const char * subkey );
+LIBOPENMPT_SETTINGS_API void save( const settings & s, const char * subkey );
+LIBOPENMPT_SETTINGS_API void edit( settings & s, HWND parent, const char * title );
 
-inline void settings::edit( HWND parent, const char * title ) {
-	edit_settings( parent, title );
-}
-
-inline settings::settings( bool with_outputformat_ ) : with_outputformat(with_outputformat_) {
-	samplerate = 48000;
-	channels = 2;
-	mastergain_millibel = 0;
-	stereoseparation = 100;
-	repeatcount = 0;
-	maxmixchannels = 256;
-	interpolationfilterlength = 8;
-	volrampinus = 363;
-	volrampoutus = 952;
-}
-
-inline settings::~settings() {
-	return;
-}
-
-inline void settings::changed() {
-	return;
-}
-
-inline void settings::read_setting( const char * key, int & val ) {
-	return;
-}
-
-inline void settings::write_setting( const char * key, int val ) {
-	return;
-}
-
-inline void settings::edit_settings( HWND parent, const char * title ) {
-	return;
-}
-
-class LIBOPENMPT_SETTINGS_API registry_settings : public settings {
-private:
-	const char * subkey;
-public:
-	registry_settings( const char * subkey_ );
-	virtual ~registry_settings();
-	virtual void read_setting( const char * key, int & val );
-	virtual void write_setting( const char * key, int val );
-	virtual void edit_settings( HWND parent, const char * title );
-};
-
-#ifdef _MSC_VER
-#pragma warning ( default : 4275 ) // warning C4275: non dll-interface class 'foo' used as base for dll-interface class 'bar'
-#endif
-
-} // namespace openmpt
+} } // namespace openmpt::settings
 
 #endif // LIBOPENMPT_SETTINGS_H

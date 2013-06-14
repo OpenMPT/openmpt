@@ -37,9 +37,12 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <queue>
 #include <sstream>
 #include <string>
+
+#include <pugixml.hpp>
 
 #define SHORT_TITLE "xmp-openmpt"
 #define SHORTER_TITLE "openmpt"
@@ -56,51 +59,132 @@ struct self_xmplay_t;
 
 static self_xmplay_t * self = nullptr;
 
-static void apply_options();
+static void save_options();
 
-class xmplay_settings : public openmpt::registry_settings {
-public:
-	void changed() {
-		apply_options();
-	}
-	xmplay_settings() : registry_settings( SHORT_TITLE ) {}
-};
+static void apply_and_save_options();
 
 struct self_xmplay_t {
 	std::size_t samplerate;
 	std::size_t num_channels;
-	openmpt::settings * settings;
+	openmpt::settings::settings settings;
 	std::vector<float> buf;
 	openmpt::module * mod;
-	self_xmplay_t() : samplerate(48000), num_channels(2), settings(nullptr), mod(nullptr) {
-		if ( settings_dll ) {
-			settings = new xmplay_settings();
-		} else {
-			settings = new openmpt::settings();
-		}
+	self_xmplay_t() : samplerate(48000), num_channels(2), mod(nullptr) {
 		#ifdef CUSTOM_OUTPUT_SETTINGS
-			settings->with_outputformat = true;
+			openmpt::settings::init( settings, true );
 		#else
-			settings->with_outputformat = false;
+			openmpt::settings::init( settings, false );
 		#endif
+		settings.changed = apply_and_save_options;
 	}
 	~self_xmplay_t() {
-		delete settings;
-		settings = nullptr;
+		return;
 	}
 };
 
+static void save_settings_to_map( std::map<std::string,int> & result, const openmpt::settings::settings & s ) {
+	result.clear();
+	result[ "Samplerate_Hz" ] = s.samplerate;
+	result[ "Channels" ] = s.channels;
+	result[ "MasterGain_milliBel" ] = s.mastergain_millibel;
+	result[ "SeteroSeparation_Percent" ] = s.stereoseparation;
+	result[ "RepeatCount" ] = s.repeatcount;
+	result[ "MixerChannels" ] = s.maxmixchannels;
+	result[ "InterpolationFilterLength" ] = s.interpolationfilterlength;
+	result[ "VolumeRampingIn_microseconds" ] = s.volrampinus;
+	result[ "VolumeRampingOut_microseconds" ] = s.volrampoutus;
+}
+
+static inline void load_map_setting( const std::map<std::string,int> & map, const std::string & key, int & val ) {
+	std::map<std::string,int>::const_iterator it = map.find( key );
+	if ( it != map.end() ) {
+		val = it->second;
+	}
+}
+
+static void load_settings_from_map( openmpt::settings::settings & s, const std::map<std::string,int> & map ) {
+	load_map_setting( map, "Samplerate_Hz", s.samplerate );
+	load_map_setting( map, "Channels", s.channels );
+	load_map_setting( map, "MasterGain_milliBel", s.mastergain_millibel );
+	load_map_setting( map, "SeteroSeparation_Percent", s.stereoseparation );
+	load_map_setting( map, "RepeatCount", s.repeatcount );
+	load_map_setting( map, "MixerChannels", s.maxmixchannels );
+	load_map_setting( map, "InterpolationFilterLength", s.interpolationfilterlength );
+	load_map_setting( map, "VolumeRampingIn_microseconds", s.volrampinus );
+	load_map_setting( map, "VolumeRampingOut_microseconds", s.volrampoutus );
+}
+
+static void load_settings_from_xml( openmpt::settings::settings & s, const std::string & xml ) {
+	pugi::xml_document doc;
+	doc.load( xml.c_str() );
+	pugi::xml_node settings_node = doc.child( "settings" );
+	std::map<std::string,int> map;
+	for ( pugi::xml_attribute_iterator it = settings_node.attributes_begin(); it != settings_node.attributes_end(); ++it ) {
+		map[ it->name() ] = it->as_int();
+	}
+	load_settings_from_map( s, map );
+}
+
+static void save_settings_to_xml( std::string & xml, const openmpt::settings::settings & s ) {
+	std::map<std::string,int> map;
+	save_settings_to_map( map, s );
+	pugi::xml_document doc;
+	pugi::xml_node settings_node = doc.append_child( "settings" );
+	for ( std::map<std::string,int>::const_iterator it = map.begin(); it != map.end(); ++it ) {
+		settings_node.append_attribute( it->first.c_str() ).set_value( it->second );
+	}
+	std::ostringstream buf;
+	doc.save( buf );
+	xml = buf.str();
+}
+
 static void apply_options() {
 	if ( self->mod ) {
-		self->mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, self->settings->mastergain_millibel );
-		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings->stereoseparation );
-		self->mod->set_render_param( openmpt::module::RENDER_REPEATCOUNT, self->settings->repeatcount );
-		self->mod->set_render_param( openmpt::module::RENDER_MAXMIXCHANNELS, self->settings->maxmixchannels );
-		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, self->settings->interpolationfilterlength );
-		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, self->settings->volrampinus );
-		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, self->settings->volrampoutus );
+		self->mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, self->settings.mastergain_millibel );
+		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings.stereoseparation );
+		self->mod->set_render_param( openmpt::module::RENDER_REPEATCOUNT, self->settings.repeatcount );
+		self->mod->set_render_param( openmpt::module::RENDER_MAXMIXCHANNELS, self->settings.maxmixchannels );
+		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, self->settings.interpolationfilterlength );
+		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, self->settings.volrampinus );
+		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, self->settings.volrampoutus );
 	}
-	self->settings->save();
+}
+
+static void save_options() {
+	if ( settings_dll ) {
+		openmpt::settings::save( self->settings, SHORT_TITLE );
+	}
+}
+
+static void apply_and_save_options() {
+	apply_options();
+	save_options();
+}
+
+static void reset_options() {
+	openmpt::settings::init( self->settings, self->settings.with_outputformat );
+	self->settings.changed = apply_and_save_options;
+	if ( settings_dll ) {
+		openmpt::settings::load( self->settings, SHORT_TITLE );
+	}
+}
+
+// get config (return size of config data) (OPTIONAL)
+static DWORD WINAPI openmpt_GetConfig( void * config ) {
+	std::string xml;
+	save_settings_to_xml( xml, self->settings );
+	if ( config ) {
+		std::memcpy( config, xml.c_str(), xml.length() + 1 );
+	}
+	return xml.length() + 1;
+}
+
+// apply config (OPTIONAL)
+static void WINAPI openmpt_SetConfig( void * config, DWORD size ) {
+	reset_options();
+	if ( config ) {
+		load_settings_from_xml( self->settings, std::string( (char*)config, (char*)config + size ) );
+	}
 }
 
 #ifdef EXPERIMENTAL_VIS
@@ -170,8 +254,8 @@ static void WINAPI openmpt_About( HWND win ) {
 
 static void WINAPI openmpt_Config( HWND win ) {
 	if ( settings_dll ) {
-		self->settings->edit( win, SHORT_TITLE );
-		apply_options();
+		openmpt::settings::edit( self->settings, win, SHORT_TITLE );
+		apply_and_save_options();
 	} else {
 		MessageBox( win, "libopenmpt_settings.dll failed to load. Please check if it is in the same folder as xmp-openmpt.dll and that .NET framework v4.0 is installed.", SHORT_TITLE, MB_ICONERROR );
 	}
@@ -410,7 +494,7 @@ static BOOL WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, flo
 // open a file for playback
 // return:  0=failed, 1=success, 2=success and XMPlay can close the file
 static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
-	self->settings->load();
+	reset_options();
 	try {
 		if ( self->mod ) {
 			delete self->mod;
@@ -444,8 +528,8 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 		#endif
 		reset_timeinfos();
 		apply_options();
-		self->samplerate = self->settings->samplerate;
-		self->num_channels = self->settings->channels;
+		self->samplerate = self->settings.samplerate;
+		self->num_channels = self->settings.channels;
 		xmpfin->SetLength( static_cast<float>( self->mod->get_duration_seconds() ), TRUE );
 		return 2;
 	} catch ( ... ) {
@@ -498,8 +582,8 @@ static void WINAPI openmpt_SetFormat( XMPFORMAT * form ) {
 			form->chan = 2;
 			self->num_channels = 2;
 		}
-		self->settings->samplerate = self->samplerate;
-		self->settings->channels = self->num_channels;
+		self->settings.samplerate = self->samplerate;
+		self->settings.channels = self->num_channels;
 	#endif
 	form->res = 4; // float
 }
@@ -793,7 +877,7 @@ static XMPIN xmpin = {
 #else
 	XMPIN_FLAG_NOXMPFILE |
 #endif
-	0, // XMPIN_FLAG_LOOP, the xmplay looping interface is not really compatible with libopenmpt looping interface, so dont support that for now
+	XMPIN_FLAG_CONFIG,// 0, // XMPIN_FLAG_LOOP, the xmplay looping interface is not really compatible with libopenmpt looping interface, so dont support that for now
 	openmpt::version::xmp_openmpt_string,
 	NULL, // "libopenmpt\0mptm/mptmz",
 	openmpt_About,
@@ -831,8 +915,8 @@ static XMPIN xmpin = {
 #endif
 
 	NULL, // reserved2
-	NULL, // GetConfig
-	NULL  // SetConfig
+	openmpt_GetConfig,// NULL, // GetConfig
+	openmpt_SetConfig// NULL  // SetConfig
 };
 
 static const char * xmp_openmpt_default_exts = "OpenMPT\0mptm/mptmz";

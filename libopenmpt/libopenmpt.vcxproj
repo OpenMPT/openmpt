@@ -124,7 +124,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -144,7 +144,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -164,7 +164,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -182,7 +182,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -205,7 +205,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -237,7 +237,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -267,7 +267,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -294,7 +294,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../common/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -330,6 +330,8 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\common\version.h" />
     <ClInclude Include="..\common\versionNumber.h" />
+    <ClInclude Include="..\include\pugixml\src\pugiconfig.hpp" />
+    <ClInclude Include="..\include\pugixml\src\pugixml.hpp" />
     <ClInclude Include="..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\soundlib\Dlsbank.h" />
     <ClInclude Include="..\soundlib\Endianness.h" />
@@ -385,6 +387,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClCompile Include="..\common\stdafx.cpp" />
     <ClCompile Include="..\common\typedefs.cpp" />
     <ClCompile Include="..\common\version.cpp" />
+    <ClCompile Include="..\include\pugixml\src\pugixml.cpp" />
     <ClCompile Include="..\soundlib\Dlsbank.cpp" />
     <ClCompile Include="..\soundlib\Fastmix.cpp" />
     <ClCompile Include="..\soundlib\ITCompression.cpp" />
