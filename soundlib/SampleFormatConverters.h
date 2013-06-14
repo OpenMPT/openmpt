@@ -187,12 +187,12 @@ struct ReadFloat32toInt16PCM : SampleConversionFunctor<float, int16, conversionH
 	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		const uint32 in32 = inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24);
-		const bool negative = (in32 & 0x80000000) != 0;
-
-		float val = *reinterpret_cast<const float *>(&in32);
+		float val = DecodeFloatLE(uint8_4(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]));
 		Limit(val, -1.0f, 1.0f);
-		return static_cast<int16>(val * (negative ? -int16_min : int16_max));
+		val *= 32768.0f;
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		// return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5f)));
+		return mpt::saturate_cast<int16>(static_cast<int>(val * 2.0f + 1.0f) >> 1);
 	}
 };
 
@@ -200,15 +200,14 @@ struct ReadFloat32toInt16PCM : SampleConversionFunctor<float, int16, conversionH
 //////////////////////////////////////////////////////
 // Sample normalization + conversion functors
 
-// Signed integer PCM (up to 32-Bit) to 16-Big signed sample conversion with normalization. A second sample conversion functor is used for actual sample reading.
+// Signed integer PCM (up to 32-Bit) to 16-Bit signed sample conversion with normalization. A second sample conversion functor is used for actual sample reading.
 template <typename SampleConversion>
 struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename SampleConversion::input_t, int16, conversionHasNoState>
 {
-	uint32 maxCandidate;
-	double maxVal;
+	uint32 maxVal;
 	SampleConversion sampleConv;
 
-	ReadBigIntToInt16PCMandNormalize() : maxCandidate(0)
+	ReadBigIntToInt16PCMandNormalize() : maxVal(0)
 	{
 		static_assert(SampleConversion::hasState == false, "Implementation of this conversion functor is stateless");
 		static_assert(sizeof(typename SampleConversion::output_t) <= 4, "Implementation of this conversion functor is only suitable for 32-Bit integers or smaller");
@@ -222,30 +221,28 @@ struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename Sampl
 		{
 			if(val == int32_min)
 			{
-				maxCandidate = static_cast<uint32>(-int32_min);
+				maxVal = static_cast<uint32>(-int32_min);
 				return;
 			}
 			val = -val;
 		}
 
-		if(static_cast<uint32>(val) > maxCandidate)
+		if(static_cast<uint32>(val) > maxVal)
 		{
-			maxCandidate = static_cast<uint32>(val);
+			maxVal = static_cast<uint32>(val);
 		}
 	}
 
-	bool IsSilent()
+	bool IsSilent() const
 	{
-		maxVal = static_cast<double>(maxCandidate);
-		return (maxCandidate == 0);
+		return maxVal == 0;
 	}
 
 	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		int32 val = sampleConv(sourceBuffer);
-		const double NC = (val < 0) ? 32768.0 : 32767.0;	// Normalization Constant
-		const double roundBias = (val < 0) ? -0.5 : 0.5;
-		return static_cast<int16>((static_cast<double>(val) / maxVal * NC) + roundBias);
+		val = Util::muldivrfloor(val, 32768, maxVal);
+		return mpt::saturate_cast<int16>(val);
 	}
 };
 
@@ -254,9 +251,14 @@ struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename Sampl
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, conversionHasNoState>
 {
-	FloatInt32 maxVal;
+	uint32 intMaxVal;
+	float maxValInv;
 
-	ReadFloat32to16PCMandNormalize() { maxVal.i = 0; }
+	ReadFloat32to16PCMandNormalize()
+	{
+		intMaxVal = 0;
+		maxValInv = 0.0f;
+	}
 
 	forceinline void FindMax(const void *sourceBuffer)
 	{
@@ -266,27 +268,34 @@ struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, co
 
 		// IEEE float values are lexicographically ordered and can be compared when interpreted as integers.
 		// So we won't bother with loading the float into a floating point register here if we already have it in an integer register.
-		if(val > maxVal.i)
+		if(val > intMaxVal)
 		{
-			ASSERT(*reinterpret_cast<float *>(&val) > maxVal.f);
-			maxVal.i = val;
+			ASSERT(*reinterpret_cast<float *>(&val) > DecodeFloatLE(uint8_4().SetLE(intMaxVal)));
+			intMaxVal = val;
 		}
 	}
 
-	bool IsSilent() const
+	bool IsSilent()
 	{
-		return (maxVal.i == 0);
+		if(intMaxVal == 0)
+		{
+			return true;
+		} else
+		{
+			maxValInv = 1.0f / DecodeFloatLE(uint8_4().SetLE(intMaxVal));
+			return false;
+		}
 	}
 
 	forceinline int16 operator() (const void *sourceBuffer)
 	{
 		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		const uint32 in32 = inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24);
-		const bool negative = (in32 & 0x80000000) != 0;
-
-		const float val = (*reinterpret_cast<const float *>(&in32) / maxVal.f) * (negative ? 32768.0f : 32767.0f);
-		ASSERT(val >= -32768.0f && val <= 32767.0f);
-		return static_cast<int16>(val);
+		float val = DecodeFloatLE(uint8_4(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]));
+		val *= maxValInv;
+		val *= 32768.0f;
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		// return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5f)));
+		return mpt::saturate_cast<int16>(static_cast<int>(val * 2.0f + 1.0f) >> 1);
 	}
 };
 

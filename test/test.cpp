@@ -1855,11 +1855,7 @@ void TestSampleConversion()
 
 		for(size_t i = 0; i < 65536; i++)
 		{
-			int16 normValue = static_cast<const int16 *>(sample.pSample)[i];
-			if(abs(normValue - static_cast<int16>(i)) > 1)
-			{
-				VERIFY_EQUAL_QUIET_NONCONT(true, false);
-			}
+			VERIFY_EQUAL_QUIET_NONCONT(static_cast<const int16 *>(sample.pSample)[i], static_cast<int16>(i));
 			VERIFY_EQUAL_QUIET_NONCONT(truncated16[i], static_cast<int16>(i));
 		}
 	}
@@ -1869,13 +1865,11 @@ void TestSampleConversion()
 		uint8 *source32 = sourceBuf;
 		for(size_t i = 0; i < 65536; i++)
 		{
-			FloatInt32 val;
-
-			val.f = (static_cast<float>(i) / 65536.0f) - 0.5f;
-			source32[i * 4 + 0] = static_cast<uint8>(val.i >> 24);
-			source32[i * 4 + 1] = static_cast<uint8>(val.i >> 16);
-			source32[i * 4 + 2] = static_cast<uint8>(val.i >> 8);
-			source32[i * 4 + 3] = static_cast<uint8>(val.i >> 0);
+			uint8_4 floatbits = EncodeFloatBE((static_cast<float>(i) / 65536.0f) - 0.5f);
+			source32[i * 4 + 0] = floatbits.x[0];
+			source32[i * 4 + 1] = floatbits.x[1];
+			source32[i * 4 + 2] = floatbits.x[2];
+			source32[i * 4 + 3] = floatbits.x[3];
 		}
 
 		int16 *truncated16 = static_cast<int16 *>(targetBuf);
@@ -1889,11 +1883,7 @@ void TestSampleConversion()
 
 		for(size_t i = 0; i < 65536; i++)
 		{
-			int16 normValue = static_cast<const int16 *>(sample.pSample)[i];
-			if(abs(normValue - static_cast<int16>(i- 0x8000u)) > 1)
-			{
-				VERIFY_EQUAL_QUIET_NONCONT(true, false);
-			}
+			VERIFY_EQUAL_QUIET_NONCONT(static_cast<const int16 *>(sample.pSample)[i], static_cast<int16>(i - 0x8000u));
 			if(abs(truncated16[i] - static_cast<int16>((i - 0x8000u) / 2)) > 1)
 			{
 				VERIFY_EQUAL_QUIET_NONCONT(true, false);

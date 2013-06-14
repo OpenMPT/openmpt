@@ -373,6 +373,13 @@ namespace Util {
 		return static_cast<int32>( ( static_cast<int64>(a) * b + ( c / 2 ) ) / c );
 	}
 
+	inline int32 muldivrfloor(int64 a, uint32 b, uint32 c)
+	{
+		a *= b;
+		a += c/2;
+		return (a >= 0) ? (int32)(a / c) : (int32)((a - (c - 1)) / c);
+	}
+
 	template<typename T, std::size_t n>
 	class fixed_size_queue {
 	private:
