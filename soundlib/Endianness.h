@@ -96,3 +96,48 @@ inline char SwapBytesBE_(char *value) { return *value; }
 
 #undef bswap16
 #undef bswap32
+
+static forceinline float DecodeFloatNE(uint32 i)
+{
+	FloatInt32 conv;
+	conv.i = i;
+	return conv.f;
+}
+static forceinline uint32 EncodeFloatNE(float f)
+{
+	FloatInt32 conv;
+	conv.f = f;
+	return conv.i;
+}
+static forceinline float DecodeFloatBE(uint8_4 x)
+{
+	#if defined(MPT_PLATFORM_FLIPPED_FLOAT_ENDIAN)
+		return DecodeFloatNE(x.GetLE());
+	#else
+		return DecodeFloatNE(x.GetBE());
+	#endif
+}
+static forceinline uint8_4 EncodeFloatBE(float f)
+{
+	#if defined(MPT_PLATFORM_FLIPPED_FLOAT_ENDIAN)
+		return uint8_4().SetLE(EncodeFloatNE(f));
+	#else
+		return uint8_4().SetBE(EncodeFloatNE(f));
+	#endif
+}
+static forceinline float DecodeFloatLE(uint8_4 x)
+{
+	#if defined(MPT_PLATFORM_FLIPPED_FLOAT_ENDIAN)
+		return DecodeFloatNE(x.GetBE());
+	#else
+		return DecodeFloatNE(x.GetLE());
+	#endif
+}
+static forceinline uint8_4 EncodeFloatLE(float f)
+{
+	#if defined(MPT_PLATFORM_FLIPPED_FLOAT_ENDIAN)
+		return uint8_4().SetBE(EncodeFloatNE(f));
+	#else
+		return uint8_4().SetLE(EncodeFloatNE(f));
+	#endif
+}
