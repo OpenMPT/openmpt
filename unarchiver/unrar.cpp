@@ -60,6 +60,7 @@ BOOL CRarArchive::IsArchive()
 	SFXLen=ArcType=SolidType=LockedType=0;
 	ArcFormat=0;
 
+	tseek(0, SEEK_SET);
 	if (tread(MarkHead.Mark,SIZEOF_MARKHEAD)!=SIZEOF_MARKHEAD) return FALSE;
 	if (MarkHead.Mark[0]==0x52 && MarkHead.Mark[1]==0x45 &&
 		MarkHead.Mark[2]==0x7e && MarkHead.Mark[3]==0x5e)
