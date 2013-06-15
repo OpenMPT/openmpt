@@ -92,19 +92,19 @@
 // 8-taps polyphase
 #define SNDMIX_GETMONOVOL8KAISER\
 	int poshi = nPos >> 16;\
-	const short int *poslo = (const short int *)(sinc+(nPos&0xfff0));\
-	int vol = (poslo[0]*p[poshi-3] + poslo[1]*p[poshi-2]\
+	const SINC_TYPE *poslo = sinc + ((nPos >> (16-SINC_PHASES_BITS)) & SINC_MASK) * SINC_WIDTH;\
+	int vol = ((poslo[0]*p[poshi-3] + poslo[1]*p[poshi-2]\
 		 + poslo[2]*p[poshi-1] + poslo[3]*p[poshi]\
 		 + poslo[4]*p[poshi+1] + poslo[5]*p[poshi+2]\
-		 + poslo[6]*p[poshi+3] + poslo[7]*p[poshi+4]) >> 6;\
+		 + poslo[6]*p[poshi+3] + poslo[7]*p[poshi+4]) >> (SINC_QUANTSHIFT-8));\
 
 #define SNDMIX_GETMONOVOL16KAISER\
 	int poshi = nPos >> 16;\
-	const short int *poslo = (const short int *)(sinc+(nPos&0xfff0));\
-	int vol = (poslo[0]*p[poshi-3] + poslo[1]*p[poshi-2]\
+	const SINC_TYPE *poslo = sinc + ((nPos >> (16-SINC_PHASES_BITS)) & SINC_MASK) * SINC_WIDTH;\
+	int vol = ((poslo[0]*p[poshi-3] + poslo[1]*p[poshi-2]\
 		 + poslo[2]*p[poshi-1] + poslo[3]*p[poshi]\
 		 + poslo[4]*p[poshi+1] + poslo[5]*p[poshi+2]\
-		 + poslo[6]*p[poshi+3] + poslo[7]*p[poshi+4]) >> 14;\
+		 + poslo[6]*p[poshi+3] + poslo[7]*p[poshi+4]) >> SINC_QUANTSHIFT);\
 // rewbs.resamplerConf
 #define SNDMIX_GETMONOVOL8FIRFILTER \
 	int poshi  = nPos >> 16;\
@@ -137,7 +137,7 @@
 
 // end rewbs.resamplerConf
 #define SNDMIX_INITSINCTABLE\
-	const char * const sinc = (const char *)(((pChannel->nInc > 0x13000) || (pChannel->nInc < -0x13000)) ?\
+	const SINC_TYPE * const sinc = (((pChannel->nInc > 0x13000) || (pChannel->nInc < -0x13000)) ?\
 		(((pChannel->nInc > 0x18000) || (pChannel->nInc < -0x18000)) ? pResampler->gDownsample2x : pResampler->gDownsample13x) : pResampler->gKaiserSinc);
 
 #define SNDMIX_INITFIRTABLE\
@@ -195,27 +195,27 @@
 // 8-taps polyphase
 #define SNDMIX_GETSTEREOVOL8KAISER\
 	int poshi = nPos >> 16;\
-	const short int *poslo = (const short int *)(sinc+(nPos&0xfff0));\
-	int vol_l = (poslo[0]*p[poshi*2-6] + poslo[1]*p[poshi*2-4]\
+	const SINC_TYPE *poslo = sinc + ((nPos >> (16-SINC_PHASES_BITS)) & SINC_MASK) * SINC_WIDTH;\
+	int vol_l = ((poslo[0]*p[poshi*2-6] + poslo[1]*p[poshi*2-4]\
 		 + poslo[2]*p[poshi*2-2] + poslo[3]*p[poshi*2]\
 		 + poslo[4]*p[poshi*2+2] + poslo[5]*p[poshi*2+4]\
-		 + poslo[6]*p[poshi*2+6] + poslo[7]*p[poshi*2+8]) >> 6;\
-	int vol_r = (poslo[0]*p[poshi*2-5] + poslo[1]*p[poshi*2-3]\
+		 + poslo[6]*p[poshi*2+6] + poslo[7]*p[poshi*2+8]) >> (SINC_QUANTSHIFT-8));\
+	int vol_r = ((poslo[0]*p[poshi*2-5] + poslo[1]*p[poshi*2-3]\
 		 + poslo[2]*p[poshi*2-1] + poslo[3]*p[poshi*2+1]\
 		 + poslo[4]*p[poshi*2+3] + poslo[5]*p[poshi*2+5]\
-		 + poslo[6]*p[poshi*2+7] + poslo[7]*p[poshi*2+9]) >> 6;\
+		 + poslo[6]*p[poshi*2+7] + poslo[7]*p[poshi*2+9]) >> (SINC_QUANTSHIFT-8));\
 
 #define SNDMIX_GETSTEREOVOL16KAISER\
 	int poshi = nPos >> 16;\
-	const short int *poslo = (const short int *)(sinc+(nPos&0xfff0));\
-	int vol_l = (poslo[0]*p[poshi*2-6] + poslo[1]*p[poshi*2-4]\
+	const SINC_TYPE *poslo = sinc + ((nPos >> (16-SINC_PHASES_BITS)) & SINC_MASK) * SINC_WIDTH;\
+	int vol_l = ((poslo[0]*p[poshi*2-6] + poslo[1]*p[poshi*2-4]\
 		 + poslo[2]*p[poshi*2-2] + poslo[3]*p[poshi*2]\
 		 + poslo[4]*p[poshi*2+2] + poslo[5]*p[poshi*2+4]\
-		 + poslo[6]*p[poshi*2+6] + poslo[7]*p[poshi*2+8]) >> 14;\
-	int vol_r = (poslo[0]*p[poshi*2-5] + poslo[1]*p[poshi*2-3]\
+		 + poslo[6]*p[poshi*2+6] + poslo[7]*p[poshi*2+8]) >> SINC_QUANTSHIFT);\
+	int vol_r = ((poslo[0]*p[poshi*2-5] + poslo[1]*p[poshi*2-3]\
 		 + poslo[2]*p[poshi*2-1] + poslo[3]*p[poshi*2+1]\
 		 + poslo[4]*p[poshi*2+3] + poslo[5]*p[poshi*2+5]\
-		 + poslo[6]*p[poshi*2+7] + poslo[7]*p[poshi*2+9]) >> 14;\
+		 + poslo[6]*p[poshi*2+7] + poslo[7]*p[poshi*2+9]) >> SINC_QUANTSHIFT);\
 // rewbs.resamplerConf
 // fir interpolation
 #define SNDMIX_GETSTEREOVOL8FIRFILTER \
