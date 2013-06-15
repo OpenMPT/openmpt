@@ -69,6 +69,7 @@ struct commandlineflags {
 	std::int32_t samplerate;
 	std::int32_t gain;
 	std::int32_t quality;
+	std::int32_t filtertaps;
 	std::int32_t rampupus;
 	std::int32_t rampdownus;
 	bool quiet;
@@ -95,6 +96,7 @@ struct commandlineflags {
 		samplerate = 48000;
 		gain = 0;
 		quality = 100;
+		filtertaps = 8;
 		rampupus = ( 16 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
 		rampdownus = ( 42 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
 		quiet = false;
