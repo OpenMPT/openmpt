@@ -14,7 +14,16 @@
 #include "MixerSettings.h"
 
 
-#define SINC_PHASES		4096
+#define SINC_WIDTH       8
+
+#define SINC_PHASES_BITS 12
+#define SINC_PHASES      (1<<SINC_PHASES_BITS)
+
+#define SINC_TYPE       int16
+#define SINC_QUANTSHIFT 15
+
+#define SINC_MASK (SINC_PHASES-1)
+STATIC_ASSERT((SINC_MASK & 0xffff) == SINC_MASK); // exceeding fractional freq
 
 
 //======================
@@ -48,15 +57,15 @@ public:
 	CResamplerSettings m_Settings;
 	CWindowedFIR m_WindowedFIR;
 	static const int16 FastSincTable[256*4];
-	int16 gKaiserSinc[SINC_PHASES*8];		// Upsampling
+	SINC_TYPE gKaiserSinc[SINC_PHASES*8];		// Upsampling
 #ifdef MODPLUG_TRACKER
 	static bool StaticTablesInitialized;
-	static int16 gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-	static int16 gDownsample2x[SINC_PHASES*8];		// Downsample 2x
+	static SINC_TYPE gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
+	static SINC_TYPE gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 #else
 	// no global data which has to be initialized by hand in the library
-	int16 gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-	int16 gDownsample2x[SINC_PHASES*8];		// Downsample 2x
+	SINC_TYPE gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
+	SINC_TYPE gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 #endif
 private:
 	CResamplerSettings m_OldSettings;
