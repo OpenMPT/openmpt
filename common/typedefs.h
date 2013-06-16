@@ -130,6 +130,8 @@ void AssertHandler(const char *file, int line, const char *function, const char 
 #endif
 #endif
 
+#define ASSERT_WARN_MESSAGE(expr,msg) ASSERT(expr)
+
 #if defined(_DEBUG)
 #define ALWAYS_ASSERT(expr) ASSERT(expr)
 #define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) ASSERT(expr)
