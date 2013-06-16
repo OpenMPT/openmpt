@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -23,6 +24,7 @@
 #include <cstring>
 
 #if defined(_MSC_VER)
+#include <conio.h>
 #include <fcntl.h>
 #include <io.h>
 #include <stdio.h>
@@ -30,9 +32,6 @@
 #include <sys/types.h> 
 #endif
 
-#ifndef LIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
-#define LIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
-#endif
 #include <libopenmpt/libopenmpt.hpp>
 
 #include "openmpt123.hpp"
@@ -227,8 +226,8 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 	}
 }
 
-template < typename Tsample >
-void render_loop( const commandlineflags & flags, openmpt::module & mod, double & duration, std::ostream & log, write_buffers_interface & audio_stream ) {
+template < typename Tsample, typename Tmod >
+void render_loop( const commandlineflags & flags, const std::string & filename, Tmod & mod, double & duration, std::ostream & log, write_buffers_interface & audio_stream ) {
 
 	const std::size_t bufsize = 1024;
 
@@ -243,7 +242,32 @@ void render_loop( const commandlineflags & flags, openmpt::module & mod, double 
 	buffers[3] = rear_right.data();
 	buffers.resize( flags.channels );
 
+	bool file_stdin = ( filename == "-" );
+
 	while ( true ) {
+
+		if ( !file_stdin ) {
+
+#if defined( _MSC_VER )
+
+			while ( kbhit() ) {
+				int c = getch();
+				switch ( c ) {
+				case 'q': throw silent_exit_exception(); break;
+				case 'z': return; break;
+				case 'x': mod.seek_seconds( mod.get_current_position_seconds() - 10.0 ); break;
+				case 'c': mod.seek_seconds( mod.get_current_position_seconds() - 1.0 ); break;
+				case 'v': mod.seek_seconds( mod.get_current_position_seconds() - 0.1 ); break;
+				case 'b': mod.seek_seconds( mod.get_current_position_seconds() + 0.1 ); break;
+				case 'n': mod.seek_seconds( mod.get_current_position_seconds() + 1.0 ); break;
+				case 'm': mod.seek_seconds( mod.get_current_position_seconds() + 10.0 ); break;
+				case ',': return; break;
+				}
+			}
+
+#endif // _MSC_VER
+
+		}
 
 		std::size_t count = 0;
 
@@ -279,6 +303,60 @@ void render_loop( const commandlineflags & flags, openmpt::module & mod, double 
 
 }
 
+template < typename Tmod >
+std::map<std::string,std::string> get_metadata( const Tmod & mod ) {
+	std::map<std::string,std::string> result;
+	const std::vector<std::string> metadata_keys = mod.get_metadata_keys();
+	for ( std::vector<std::string>::const_iterator key = metadata_keys.begin(); key != metadata_keys.end(); ++key ) {
+		result[ *key ] = mod.get_metadata( *key );
+	}
+	return result;
+}
+
+template < typename Tmod >
+void render_mod_file( const commandlineflags & flags, const std::string & filename, Tmod & mod, std::ostream & log, write_buffers_interface & audio_stream ) {
+
+	double duration = mod.get_duration_seconds();
+	log << "File: " << filename << std::endl;
+	log << "Type: " << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")" << std::endl;
+	log << "Tracker: " << mod.get_metadata( "tracker" ) << std::endl;
+	log << "Title: " << mod.get_metadata( "title" ) << std::endl;
+	log << "Duration: " << seconds_to_string( duration ) << std::endl;
+	log << "Channels: " << mod.get_num_channels() << std::endl;
+	log << "Orders: " << mod.get_num_orders() << std::endl;
+	log << "Patterns: " << mod.get_num_patterns() << std::endl;
+	log << "Instruments: " << mod.get_num_instruments() << std::endl;
+	log << "Samples: " << mod.get_num_samples() << std::endl;
+
+	if ( flags.filenames.size() == 1 ) {
+		audio_stream.write_metadata( get_metadata( mod ) );
+	} else {
+		audio_stream.write_updated_metadata( get_metadata( mod ) );
+	}
+
+	if ( flags.show_message ) {
+		log << "Message: " << std::endl;
+		log << mod.get_metadata( "message" ) << std::endl;
+		log << std::endl;
+	}
+
+	if ( flags.seek_target > 0.0 ) {
+		mod.seek_seconds( flags.seek_target );
+	}
+
+	if ( flags.use_float ) {
+		render_loop<float>( flags, filename, mod, duration, log, audio_stream );
+	} else {
+		render_loop<std::int16_t>( flags, filename, mod, duration, log, audio_stream );
+	}
+
+	if ( flags.show_progress ) {
+		log << std::endl;
+	}
+
+}
+
+
 static void render_file( const commandlineflags & flags, const std::string & filename, std::ostream & log, write_buffers_interface & audio_stream ) {
 
 	try {
@@ -294,56 +372,20 @@ static void render_file( const commandlineflags & flags, const std::string & fil
 			throw exception( "file open error" );
 		}
 
-		openmpt::module mod( data_stream );
+		{
 
-		if ( !use_stdin ) {
-			file_stream.close();
-		}
+			openmpt::module mod( data_stream );
 
-		double duration = mod.get_duration_seconds();
-		log << "File: " << filename << std::endl;
-		log << "Type: " << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")" << std::endl;
-		log << "Tracker: " << mod.get_metadata( "tracker" ) << std::endl;
-		log << "Title: " << mod.get_metadata( "title" ) << std::endl;
-		log << "Duration: " << seconds_to_string( duration ) << std::endl;
-		log << "Channels: " << mod.get_num_channels() << std::endl;
-		log << "Orders: " << mod.get_num_orders() << std::endl;
-		log << "Patterns: " << mod.get_num_patterns() << std::endl;
-		log << "Instruments: " << mod.get_num_instruments() << std::endl;
-		log << "Samples: " << mod.get_num_samples() << std::endl;
-		
-		if ( flags.filenames.size() == 1 ) {
-			audio_stream.write_metadata( mod );
-		} else {
-			audio_stream.write_updated_metadata( mod );
-		}
+			mod.set_render_param( openmpt::module::RENDER_REPEATCOUNT, flags.repeatcount );
+			mod.set_render_param( openmpt::module::RENDER_QUALITY_PERCENT, flags.quality );
+			mod.set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, flags.filtertaps );
+			mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
+			mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, flags.rampupus );
+			mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, flags.rampdownus );
 
-		if ( flags.show_message ) {
-			log << "Message: " << std::endl;
-			log << mod.get_metadata( "message" ) << std::endl;
-			log << std::endl;
-		}
+			render_mod_file( flags, filename, mod, log, audio_stream );
 
-		mod.set_render_param( openmpt::module::RENDER_REPEATCOUNT, flags.repeatcount );
-		mod.set_render_param( openmpt::module::RENDER_QUALITY_PERCENT, flags.quality );
-		mod.set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, flags.filtertaps );
-		mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
-		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, flags.rampupus );
-		mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, flags.rampdownus );
-
-		if ( flags.seek_target > 0.0 ) {
-			mod.seek_seconds( flags.seek_target );
-		}
-
-		if ( flags.use_float ) {
-			render_loop<float>( flags, mod, duration, log, audio_stream );
-		} else {
-			render_loop<std::int16_t>( flags, mod, duration, log, audio_stream );
-		}
-
-		if ( flags.show_progress ) {
-			log << std::endl;
-		}
+		} 
 
 	} catch ( std::exception & e ) {
 		std::cerr << "error playing '" << filename << "': " << e.what() << std::endl;

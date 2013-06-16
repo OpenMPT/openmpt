@@ -11,9 +11,15 @@
 #define OPENMPT123_CONFIG_HPP
 
 #if defined(_MSC_VER)
+
+#pragma warning( disable : 4996 ) // 'foo': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _foo. See online help for details.
+
 #define MPT_WITH_PORTAUDIO
 #define MPT_WITH_ZLIB
-#endif
+
+#endif // _MSC_VER
+
+#define LIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
 
 #define OPENMPT123_VERSION_STRING "0.1"
 
