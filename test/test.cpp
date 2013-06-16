@@ -224,7 +224,7 @@ static noinline void ReportException(const char * const file, const int line, co
 #define TEST_START()     show_start(THIS_FILE, __LINE__, test_description)
 #define TEST_OK()        show_ok(THIS_FILE, __LINE__, test_description)
 #define TEST_FAIL()      do { show_fail(THIS_FILE, __LINE__, fail_description); fail_count++; } while(0)
-#define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, fail_description); fail_count++; throw std::runtime_error("Test failed."); } while(0)
+#define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, fail_description); fail_count++; throw std::runtime_error(std::string("Test failed: ") + test_description); } while(0)
 
 #endif // MODPLUG_TRACKER
 
@@ -443,6 +443,7 @@ void TestMisc()
 //-------------
 {
 
+	VERIFY_EQUAL(0x3f800000u, AsInt(1.0f));
 	VERIFY_EQUAL(AsFloat(0x3f800000u),  1.0f);
 	VERIFY_EQUAL(AsFloat(0x00000000u),  0.0f);
 	VERIFY_EQUAL(AsFloat(0xbf800000u), -1.0f);
