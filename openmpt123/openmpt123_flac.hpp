@@ -26,7 +26,7 @@ private:
 	commandlineflags flags;
 	bool called_init;
 	std::vector< std::pair< std::string, std::string > > tags;
-	FLAC__StreamMetadata * metadata[1];
+	FLAC__StreamMetadata * flac_metadata[1];
 	FLAC__StreamMetadata_VorbisComment_Entry entry;
 	FLAC::Encoder::File encoder;
 	std::vector<FLAC__int32> interleaved_buffer;
@@ -38,7 +38,7 @@ private:
 	}
 public:
 	flac_stream_raii( const commandlineflags & flags_ ) : flags(flags_), called_init(false) {
-		metadata[0] = 0;
+		flac_metadata[0] = 0;
 		encoder.set_channels( flags.channels );
 		encoder.set_bits_per_sample( flags.use_float ? 24 : 16 );
 		encoder.set_sample_rate( flags.samplerate );
@@ -46,22 +46,25 @@ public:
 	}
 	~flac_stream_raii() {
 		encoder.finish();
-		FLAC__metadata_object_delete( metadata[0] );
+		if ( flac_metadata[0] ) {
+			FLAC__metadata_object_delete( flac_metadata[0] );
+			flac_metadata[0] = 0;
+		}
 	}
-	void write_metadata( const openmpt::module & mod ) {
+	void write_metadata( std::map<std::string,std::string> metadata ) {
 		if ( called_init ) {
 			return;
 		}
 		tags.clear();
-		tags.push_back( std::make_pair<std::string, std::string>( "TITLE", mod.get_metadata( "title" ) ) );
-		tags.push_back( std::make_pair<std::string, std::string>( "ARTIST", mod.get_metadata( "author" ) ) );
-		tags.push_back( std::make_pair<std::string, std::string>( "COMMENTS", mod.get_metadata( "message" ) ) );
-		tags.push_back( std::make_pair<std::string, std::string>( "ENCODING", append_software_tag( mod.get_metadata( "tracker" ) ) ) );
-		metadata[0] = FLAC__metadata_object_new( FLAC__METADATA_TYPE_VORBIS_COMMENT );
+		tags.push_back( std::make_pair<std::string, std::string>( "TITLE", metadata[ "title" ] ) );
+		tags.push_back( std::make_pair<std::string, std::string>( "ARTIST", metadata[ "author" ] ) );
+		tags.push_back( std::make_pair<std::string, std::string>( "COMMENTS", metadata[ "message" ] ) );
+		tags.push_back( std::make_pair<std::string, std::string>( "ENCODING", append_software_tag( metadata[ "tracker" ] ) ) );
+		flac_metadata[0] = FLAC__metadata_object_new( FLAC__METADATA_TYPE_VORBIS_COMMENT );
 		for ( std::vector< std::pair< std::string, std::string > >::iterator tag = tags.begin(); tag != tags.end(); ++tag ) {
-			add_vorbiscomment_field( metadata[0], tag->first, tag->second );
+			add_vorbiscomment_field( flac_metadata[0], tag->first, tag->second );
 		}
-		encoder.set_metadata( metadata, 1 );
+		encoder.set_metadata( flac_metadata, 1 );
 	}
 	void write( const std::vector<float*> buffers, std::size_t frames ) {
 		if ( !called_init ) {

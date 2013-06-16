@@ -137,12 +137,12 @@ struct commandlineflags {
 
 class write_buffers_interface {
 public:
-	virtual void write_metadata( const openmpt::module & mod ) {
-		(void)mod;
+	virtual void write_metadata( std::map<std::string,std::string> metadata ) {
+		(void)metadata;
 		return;
 	}
-	virtual void write_updated_metadata( const openmpt::module & mod ) {
-		(void)mod;
+	virtual void write_updated_metadata( std::map<std::string,std::string> metadata ) {
+		(void)metadata;
 		return;
 	}
 	virtual void write( const std::vector<float*> buffers, std::size_t frames ) = 0;
