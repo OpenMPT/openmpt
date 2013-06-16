@@ -154,17 +154,6 @@ BOOL CSoundFile::FadeSong(UINT msec)
 }
 
 
-BOOL CSoundFile::GlobalFadeSong(UINT msec)
-//----------------------------------------
-{
-	if(m_SongFlags[SONG_GLOBALFADE]) return FALSE;
-	m_nGlobalFadeMaxSamples = Util::muldiv(msec, m_MixerSettings.gdwMixingFreq, 1000);
-	m_nGlobalFadeSamples = m_nGlobalFadeMaxSamples;
-	m_SongFlags.set(SONG_GLOBALFADE);
-	return TRUE;
-}
-
-
 CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count)
 //--------------------------------------------------------------------------------------------
 {
@@ -1710,11 +1699,6 @@ BOOL CSoundFile::ReadNote()
 			mastervol = m_nSamplePreAmp;
 		}
 
-		if(m_SongFlags[SONG_GLOBALFADE] && m_nGlobalFadeMaxSamples != 0)
-		{
-			mastervol = Util::muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
-		}
-
 		if (m_PlayConfig.getUseGlobalPreAmp())
 		{
 			UINT attenuation =
@@ -2117,18 +2101,6 @@ BOOL CSoundFile::ReadNote()
 				j++;
 			}
 		}
-	}
-	if(m_SongFlags[SONG_GLOBALFADE])
-	{
-		if (!m_nGlobalFadeSamples)
-		{
-			m_SongFlags.set(SONG_ENDREACHED);
-			return FALSE;
-		}
-		if (m_nGlobalFadeSamples > m_nBufferCount)
-			m_nGlobalFadeSamples -= m_nBufferCount;
-		else
-			m_nGlobalFadeSamples = 0;
 	}
 	return TRUE;
 }

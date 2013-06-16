@@ -1075,7 +1075,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 
 		visitedSongRows.Initialize(true);
 	}
-	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
+	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	for (nPattern = 0; nPattern < Order.size(); nPattern++)
 	{
 		UINT ord = Order[nPattern];
@@ -1172,7 +1172,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_nNextPatStartRow = 0;
 	}
 
-	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
+	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 }
 
 //rewbs.VSTCompliance
@@ -1259,7 +1259,7 @@ void CSoundFile::RecalculateGainForAllPlugs()
 void CSoundFile::ResetChannels()
 //------------------------------
 {
-	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED | SONG_GLOBALFADE);
+	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	m_nBufferCount = 0;
 	for (UINT i=0; i<MAX_CHANNELS; i++)
 	{
