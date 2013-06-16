@@ -255,7 +255,7 @@ enum SongFlags
 	SONG_PAUSED			= 0x0080,		// Song is paused
 	SONG_FADINGSONG		= 0x0100,		// Song is fading out
 	SONG_ENDREACHED		= 0x0200,		// Song is finished
-	SONG_GLOBALFADE		= 0x0400,		// Song is fading out
+	//SONG_GLOBALFADE		= 0x0400,		// Song is fading out
 	//SONG_CPUVERYHIGH	= 0x0800,		// High CPU usage
 	SONG_FIRSTTICK		= 0x1000,		// Is set when the current tick is the first tick of the row
 	SONG_MPTFILTERMODE	= 0x2000,		// Local filter mode (reset filter on each note)

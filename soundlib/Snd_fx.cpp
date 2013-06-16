@@ -4402,17 +4402,6 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 void CSoundFile::SetSpeed(UINT param)
 //-----------------------------------
 {
-	// ModPlug Tracker and Mod-Plugin don't do this check
-#ifdef MODPLUG_PLAYER
-	// Big Hack!!!
-	if ((!param) || (param >= 0x80) || ((GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM|MOD_TYPE_MT2)) && (param >= 0x1E)))
-	{
-		if ((!m_nRepeatCount) && (IsSongFinished(m_nCurrentOrder, m_nRow+1)))
-		{
-			GlobalFadeSong(1000);
-		}
-	}
-#endif // MODPLUG_PLAYER
 	// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
 	if ((param) && (param <= GetModSpecifications().speedMax || (GetType() & MOD_TYPE_MOD))) m_nMusicSpeed = param;
 }
@@ -4548,43 +4537,6 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 		Limit(nGlbSlide, 0, 256);
 		m_nGlobalVolume = nGlbSlide;
 	}
-}
-
-
-DWORD CSoundFile::IsSongFinished(UINT nStartOrder, UINT nStartRow) const
-//----------------------------------------------------------------------
-{
-	UINT nOrd;
-
-	for (nOrd=nStartOrder; nOrd<Order.size(); nOrd++)
-	{
-		UINT nPat = Order[nOrd];
-		if (nPat != Order.GetIgnoreIndex())
-		{
-			if (nPat >= Patterns.Size()) break;
-			const MODPATTERN& p = Patterns[nPat];
-			if (p)
-			{
-				UINT len = Patterns[nPat].GetNumRows() * m_nChannels;
-				UINT pos = (nOrd == nStartOrder) ? nStartRow : 0;
-				pos *= m_nChannels;
-				while (pos < len)
-				{
-					UINT cmd;
-					if ((p[pos].note) || (p[pos].volcmd)) return 0;
-					cmd = p[pos].command;
-					if (cmd == CMD_MODCMDEX)
-					{
-						UINT cmdex = p[pos].param & 0xF0;
-						if ((!cmdex) || (cmdex == 0x60) || (cmdex == 0xE0) || (cmdex == 0xF0)) cmd = 0;
-					}
-					if ((cmd) && (cmd != CMD_SPEED) && (cmd != CMD_TEMPO)) return 0;
-					pos++;
-				}
-			}
-		}
-	}
-	return (nOrd < Order.size()) ? nOrd : Order.size()-1;
 }
 
 

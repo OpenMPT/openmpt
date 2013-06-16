@@ -411,7 +411,6 @@ public:	// for Editing
 	UINT m_nOldGlbVolSlide;
 	LONG m_nMinPeriod, m_nMaxPeriod;	// min period = highest possible frequency, max period = lowest possible frequency
 	LONG m_nRepeatCount;	// -1 means repeat infinitely.
-	DWORD m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples;
 	UINT m_nMaxOrderPosition;
 	CHANNELINDEX ChnMix[MAX_CHANNELS];							// Channels to be mixed
 	ModChannel Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
@@ -644,7 +643,6 @@ private:
 	void CreateStereoMix(int count);
 public:
 	BOOL FadeSong(UINT msec);
-	BOOL GlobalFadeSong(UINT msec);
 private:
 	void ProcessDSP(std::size_t countChunk);
 	void ProcessPlugins(UINT nCount);
@@ -755,7 +753,6 @@ protected:
 	// Low-Level effect processing
 	void DoFreqSlide(ModChannel *pChn, LONG nFreqSlide);
 	void GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide);
-	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
 	void UpdateTimeSignature();
 
 	UINT GetNumTicksOnCurrentRow() const
