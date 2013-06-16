@@ -40,7 +40,7 @@ class ISoundSource
 {
 public:
 	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual void AudioRead(PVOID pData, ULONG NumSamples) = 0;
+	virtual void AudioRead(void* pData, ULONG NumSamples) = 0;
 	virtual void AudioDone(ULONG NumSamples, ULONG SamplesLatency) = 0; // all in samples
 	virtual void AudioDone(ULONG NumSamples) = 0; // all in samples
 };
@@ -106,7 +106,7 @@ protected:
 protected:
 	virtual void FillAudioBuffer() = 0;
 	void SourceFillAudioBufferLocked();
-	void SourceAudioRead(PVOID pData, ULONG NumSamples);
+	void SourceAudioRead(void* pData, ULONG NumSamples);
 	void SourceAudioDone(ULONG NumSamples, ULONG SamplesLatency);
 
 public:
@@ -116,7 +116,7 @@ public:
 	ISoundSource *GetSource() const { return m_Source; }
 
 public:
-	VOID Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions);
+	void Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions);
 	float GetRealLatencyMS() const  { return m_RealLatencyMS; }
 	float GetRealUpdateIntervalMS() const { return m_RealUpdateIntervalMS; }
 	bool IsPlaying() const { return m_IsPlaying; }
