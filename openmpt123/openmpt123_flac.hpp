@@ -56,10 +56,10 @@ public:
 			return;
 		}
 		tags.clear();
-		tags.push_back( std::make_pair<std::string, std::string>( "TITLE", metadata[ "title" ] ) );
-		tags.push_back( std::make_pair<std::string, std::string>( "ARTIST", metadata[ "author" ] ) );
-		tags.push_back( std::make_pair<std::string, std::string>( "COMMENTS", metadata[ "message" ] ) );
-		tags.push_back( std::make_pair<std::string, std::string>( "ENCODING", append_software_tag( metadata[ "tracker" ] ) ) );
+		tags.push_back( std::make_pair( "TITLE", metadata[ "title" ] ) );
+		tags.push_back( std::make_pair( "ARTIST", metadata[ "author" ] ) );
+		tags.push_back( std::make_pair( "COMMENTS", metadata[ "message" ] ) );
+		tags.push_back( std::make_pair( "ENCODING", append_software_tag( metadata[ "tracker" ] ) ) );
 		flac_metadata[0] = FLAC__metadata_object_new( FLAC__METADATA_TYPE_VORBIS_COMMENT );
 		for ( std::vector< std::pair< std::string, std::string > >::iterator tag = tags.begin(); tag != tags.end(); ++tag ) {
 			add_vorbiscomment_field( flac_metadata[0], tag->first, tag->second );
