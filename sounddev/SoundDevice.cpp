@@ -1350,25 +1350,25 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 	DWORD pollingstart = GetTickCount();
 	while(InterlockedExchangeAdd(&m_RenderingSilence, 0) != (silence?1:0))
 	{
-		if(GetTickCount() - pollingstart > 1000)
+		if(GetTickCount() - pollingstart > 250)
 		{
 			if(silence)
 			{
 				if(CriticalSection::IsLocked())
 				{
-					ALWAYS_ASSERT_WARN_MESSAGE(false, "AudioCriticalSection locked while stopping ASIO");
+					ASSERT_WARN_MESSAGE(false, "AudioCriticalSection locked while stopping ASIO");
 				} else
 				{
-					ALWAYS_ASSERT_WARN_MESSAGE(false, "waiting for asio failed in Stop()");
+					ASSERT_WARN_MESSAGE(false, "waiting for asio failed in Stop()");
 				}
 			} else
 			{
 				if(CriticalSection::IsLocked())
 				{
-					ALWAYS_ASSERT_WARN_MESSAGE(false, "AudioCriticalSection locked while starting ASIO");
+					ASSERT_WARN_MESSAGE(false, "AudioCriticalSection locked while starting ASIO");
 				} else
 				{
-					ALWAYS_ASSERT_WARN_MESSAGE(false, "waiting for asio failed in Start()");
+					ASSERT_WARN_MESSAGE(false, "waiting for asio failed in Start()");
 				}
 			}
 			break;
