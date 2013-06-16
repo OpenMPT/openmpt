@@ -132,7 +132,7 @@ public:
 	int64 GetStreamPositionSamples() const;
 
 public:
-	static VOID CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
+	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
 	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
 };
 

@@ -49,7 +49,7 @@ ISoundDevice::~ISoundDevice()
 }
 
 
-VOID ISoundDevice::Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions)
+void ISoundDevice::Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions)
 //-------------------------------------------------------------------------------------------------
 {
 	if(LatencyMS < SNDDEV_MINLATENCY_MS) LatencyMS = SNDDEV_MINLATENCY_MS;
@@ -75,7 +75,7 @@ void ISoundDevice::SourceFillAudioBufferLocked()
 }
 
 
-void ISoundDevice::SourceAudioRead(PVOID pData, ULONG NumSamples)
+void ISoundDevice::SourceAudioRead(void* pData, ULONG NumSamples)
 //---------------------------------------------------------------
 {
 	m_Source->AudioRead(pData, NumSamples);
@@ -702,7 +702,7 @@ int64 CWaveDevice::GetStreamPositionSamples() const
 }
 
 
-VOID CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR, DWORD_PTR)
+void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR, DWORD_PTR)
 //--------------------------------------------------------------------------------------------
 {
 	if ((uMsg == MM_WOM_DONE) && (dwUser))
@@ -1487,7 +1487,7 @@ void CASIODevice::OpenDevice(UINT nDevice)
 	}
 
 	CLSID clsid = gAsioDrivers[nDevice].clsid;
-	if (CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (VOID **)&m_pAsioDrv) == S_OK)
+	if (CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) == S_OK)
 	{
 		m_pAsioDrv->init((void *)m_hWnd);
 	} else

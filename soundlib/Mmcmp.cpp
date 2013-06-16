@@ -355,7 +355,7 @@ static int bfexts(const BYTE *p,int bo,int bc)
 }
 
 
-VOID XPK_DoUnpack(const BYTE *src, UINT, BYTE *dst, int len)
+void XPK_DoUnpack(const BYTE *src, UINT, BYTE *dst, int len)
 {
 	static BYTE xpk_table[] = { 2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,
         6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0 };
@@ -614,7 +614,7 @@ ULONG PPBITBUFFER::GetBits(UINT n)
 }
 
 
-VOID PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
+void PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
 {
 	PPBITBUFFER BitBuffer;
 	ULONG nBytesLeft;

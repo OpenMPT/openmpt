@@ -62,7 +62,7 @@ LPCSTR GetReverbPresetName(UINT nPreset);
 
 #endif
 
-typedef VOID (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
+typedef void (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
 #include "pattern.h"
 #include "patternContainer.h"
