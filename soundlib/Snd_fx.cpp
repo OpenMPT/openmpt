@@ -170,6 +170,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		nPattern = Order[nCurrentOrder];
 		bool positionJumpOnThisRow = false;
 		bool patternBreakOnThisRow = false;
+		bool patternLoopEndedOnThisRow = false;
 
 		while(nPattern >= Patterns.Size())
 		{
@@ -382,6 +383,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 					if (param & 0x0F)
 					{
 						memory.elapsedTime += (memory.elapsedTime - memory.chnSettings[nChn].patLoop) * (double)(param & 0x0F);
+						patternLoopEndedOnThisRow = true;
 					} else
 					{
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
@@ -534,9 +536,22 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 
 		const UINT tickDuration = GetTickDuration(memory.musicTempo, memory.musicSpeed, rowsPerBeat);
 		const UINT rowDuration = tickDuration * (memory.musicSpeed + tickDelay) * MAX(rowDelay, 1);
-
-		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
+		const double rowDurationDbl = static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
+		memory.elapsedTime += rowDurationDbl;
 		memory.renderedSamples += rowDuration;
+
+		if(GetType() == MOD_TYPE_IT && patternLoopEndedOnThisRow)
+		{
+			// IT pattern loop start row update - at the end of a pattern loop, set pattern loop start to next row (for upcoming pattern loops with missing SB0)
+			p = Patterns[nPattern].GetRow(nRow);
+			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++)
+			{
+				if(p->command == CMD_S3MCMDEX && p->param >= 0xB1 && p->param <= 0xBF)
+				{
+					memory.chnSettings[nChn].patLoop = memory.elapsedTime;
+				}
+			}
+		}
 	}
 
 	if(retval.targetReached || target.mode == GetLengthTarget::NoTarget)
@@ -3963,7 +3978,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
 			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS) && param < 0x80)
 			{
-				const float newRatio = 1.0 - (static_cast<float>(param & 0x7F) / 127.0f);
+				const float newRatio = 1.0f - (static_cast<float>(param & 0x7F) / 127.0f);
 				if(!isSmooth)
 				{
 					m_MixPlugins[nPlug - 1].fDryRatio = newRatio;

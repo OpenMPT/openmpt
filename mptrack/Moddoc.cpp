@@ -234,7 +234,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	std::ostringstream str;
 	str
 		<< "File: " << lpszPathName << std::endl
-		<< "Last saved with: " << MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion) << ", your version is " << MptVersion::str << std::endl
+		<< "Last saved with: " << m_SndFile.madeWithTracker << ", you are using OpenMPT " << MptVersion::str << std::endl
 		<< std::endl;
 	logcapturer.ShowLog(str.str());
 
@@ -1217,7 +1217,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 		if(!pChn->dwFlags[mask] && pChn->nLength && (note == pChn->nNewNote || !note))
 		{
 			m_SndFile.KeyOff(i);
-			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP);
+			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP);	// FIXME: If a sample with pingpong loop is playing backwards, stuff before the loop is played again!
 			if (fade) pChn->dwFlags.set(CHN_NOTEFADE);
 			if (note) break;
 		}
@@ -2263,9 +2263,16 @@ void CModDoc::OnInsertInstrument()
 void CModDoc::OnEstimateSongLength()
 //----------------------------------
 {
-	CHAR s[64];
-	DWORD dwSongLength = m_SndFile.GetSongTime();
-	wsprintf(s, "Approximate song length: %dmn%02ds", dwSongLength / 60, dwSongLength % 60);
+	CString s;
+	double songLength = m_SndFile.GetSongTime();
+	if(songLength != std::numeric_limits<double>::infinity())
+	{
+		songLength = Util::Round(songLength);
+		s.Format("Approximate song length: %.0fmn%02.0fs", songLength / 60.0, fmod(songLength, 60.0));
+	} else
+	{
+		s = "Song too long!";
+	}
 	Reporting::Information(s);
 }
 

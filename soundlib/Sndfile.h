@@ -535,7 +535,7 @@ public:
 
 public:
 	//Returns song length in seconds.
-	DWORD GetSongTime() { return static_cast<DWORD>(GetLength(eNoAdjust).duration + 0.5); }
+	double GetSongTime() { return GetLength(eNoAdjust).duration; }
 
 	void RecalculateSamplesPerTick();
 	double GetRowDuration(UINT tempo, UINT speed) const;
