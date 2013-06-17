@@ -342,13 +342,19 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 					if (param) pChn->nOldTempo = (BYTE)param; else param = pChn->nOldTempo;
 				}
 				if (param >= 0x20) memory.musicTempo = param; else
-				// Tempo Slide
-				if ((param & 0xF0) == 0x10)
 				{
-					memory.musicTempo += (param & 0x0F)  * (memory.musicSpeed - 1);  //rewbs.tempoSlideFix
-				} else
-				{
-					memory.musicTempo -= (param & 0x0F) * (memory.musicSpeed - 1); //rewbs.tempoSlideFix
+					// Tempo Slide
+					uint32 tempoDiff = (param & 0x0F)  * (memory.musicSpeed - 1);
+					if ((param & 0xF0) == 0x10)
+					{
+						memory.musicTempo += tempoDiff;
+					} else
+					{
+						if(tempoDiff < memory.musicTempo)
+							memory.musicTempo -= tempoDiff;
+						else
+							memory.musicTempo = 32;
+					}
 				}
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
@@ -382,12 +388,21 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 					// Pattern Loop
 					if (param & 0x0F)
 					{
-						memory.elapsedTime += (memory.elapsedTime - memory.chnSettings[nChn].patLoop) * (double)(param & 0x0F);
 						patternLoopEndedOnThisRow = true;
 					} else
 					{
-						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
-						memory.chnSettings[nChn].patLoopStart = nRow;
+						CHANNELINDEX firstChn = nChn, lastChn = nChn;
+						if(GetType() == MOD_TYPE_S3M)
+						{
+							// ST3 has only one global loop memory.
+							firstChn = 0;
+							lastChn = GetNumChannels() - 1;
+						}
+						for(CHANNELINDEX c = firstChn; c < lastChn; c++)
+						{
+							memory.chnSettings[c].patLoop = memory.elapsedTime;
+							memory.chnSettings[c].patLoopStart = nRow;
+						}
 					}
 				}
 				break;
@@ -402,8 +417,8 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 					// Pattern Loop
 					if (param & 0x0F)
 					{
-						memory.elapsedTime += (memory.elapsedTime - memory.chnSettings[nChn].patLoop) * (double)(param & 0x0F);
 						nNextPatStartRow = memory.chnSettings[nChn].patLoopStart; // FT2 E60 bug
+						patternLoopEndedOnThisRow = true;
 					} else
 					{
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
@@ -534,21 +549,32 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 			rowsPerBeat = Patterns[nPattern].GetRowsPerBeat();
 		}
 
-		const UINT tickDuration = GetTickDuration(memory.musicTempo, memory.musicSpeed, rowsPerBeat);
-		const UINT rowDuration = tickDuration * (memory.musicSpeed + tickDelay) * MAX(rowDelay, 1);
-		const double rowDurationDbl = static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
-		memory.elapsedTime += rowDurationDbl;
+		const uint32 tickDuration = GetTickDuration(memory.musicTempo, memory.musicSpeed, rowsPerBeat);
+		const uint32 rowDuration = tickDuration * (memory.musicSpeed + tickDelay) * MAX(rowDelay, 1);
+		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		memory.renderedSamples += rowDuration;
 
-		if(GetType() == MOD_TYPE_IT && patternLoopEndedOnThisRow)
+		if(patternLoopEndedOnThisRow)
 		{
-			// IT pattern loop start row update - at the end of a pattern loop, set pattern loop start to next row (for upcoming pattern loops with missing SB0)
 			p = Patterns[nPattern].GetRow(nRow);
-			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, nChn++)
 			{
-				if(p->command == CMD_S3MCMDEX && p->param >= 0xB1 && p->param <= 0xBF)
+				if((p->command == CMD_S3MCMDEX && p->param >= 0xB1 && p->param <= 0xBF)
+					|| (p->command == CMD_MODCMDEX && p->param >= 0x61 && p->param <= 0x6F))
 				{
-					memory.chnSettings[nChn].patLoop = memory.elapsedTime;
+					memory.elapsedTime += (memory.elapsedTime - memory.chnSettings[nChn].patLoop) * (double)(p->param & 0x0F);
+				}
+			}
+			if(GetType() == MOD_TYPE_IT)
+			{
+				// IT pattern loop start row update - at the end of a pattern loop, set pattern loop start to next row (for upcoming pattern loops with missing SB0)
+				p = Patterns[nPattern].GetRow(nRow);
+				for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, nChn++)
+				{
+					if((p->command == CMD_S3MCMDEX && p->param >= 0xB1 && p->param <= 0xBF))
+					{
+						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
+					}
 				}
 			}
 		}
