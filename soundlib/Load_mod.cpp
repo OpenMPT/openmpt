@@ -724,7 +724,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// In the pattern loader above, a second condition is used: Only tempo commands
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
 	// modules are checked.
-	const bool fixVBlank = isMdKd && hasTempoCommands && GetSongTime() >= 10 * 60;
+	const bool fixVBlank = isMdKd && hasTempoCommands && GetSongTime() >= 600.0;
 	const bool fix7BitPanning = leftPanning && !extendedPanning;
 	if(fixVBlank || fix7BitPanning)
 	{
@@ -1228,7 +1228,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 
 				uint16 period = 0;
 				// Convert note to period
-				if(m.IsNote() && m.note >= 36 + NOTE_MIN && m.note < CountOf(ProTrackerPeriodTable) + 36 + NOTE_MIN)
+				if(m.note >= 36 + NOTE_MIN && m.note < CountOf(ProTrackerPeriodTable) + 36 + NOTE_MIN)
 				{
 					period = ProTrackerPeriodTable[m.note - 36 - NOTE_MIN];
 				}

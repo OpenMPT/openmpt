@@ -68,7 +68,7 @@ static const char *id3v1GenreNames[] =
 // this converts a buffer of 32-bit integer sample data to 32 bit floating point
 static void M2W_32ToFloat(void *pBuffer, long nCount)
 {
-//	const float _ki2f = 1.0f / (float)(ULONG)(0x80000000); //olivier 
+//	const float _ki2f = 1.0f / (float)(ULONG)(0x80000000); //olivier
 	const float _ki2f = 1.0f / (float)(ULONG)(0x7fffffff); //ericus' 32bit fix
 //	const float _ki2f = 1.0f / (float)(ULONG)(0x7ffffff);  //robin
 	_asm {
@@ -672,8 +672,8 @@ void CDoWaveConvert::OnButton1()
 	BYTE buffer[WAVECONVERTBUFSIZE];
 	CHAR s[80];
 	HWND progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
-	UINT ok = IDOK, pos;
-	ULONGLONG ullSamples, ullMaxSamples;
+	UINT ok = IDOK, pos = 0;
+	uint64 ullSamples = 0, ullMaxSamples;
 	DWORD dwDataOffset;
 	LONG lMax = 256;
 
@@ -739,18 +739,17 @@ void CDoWaveConvert::OnButton1()
 	fwrite(m_pWaveFormat, 1, fmthdr.length, f);
 	fwrite(&datahdr, 1, sizeof(datahdr), f);
 	dwDataOffset = ftell(f);
-	pos = 0;
 	ullSamples = 0;
 	ullMaxSamples = m_dwFileLimit / (m_pWaveFormat->nChannels * m_pWaveFormat->wBitsPerSample / 8);
 	if (m_dwSongLimit)
 	{
-		ULONGLONG l = (ULONGLONG)m_dwSongLimit * m_pWaveFormat->nSamplesPerSec;
+		uint64 l = (uint64)m_dwSongLimit * m_pWaveFormat->nSamplesPerSec;
 		if (l < ullMaxSamples) ullMaxSamples = l;
 	}
 
 	// calculate maximum samples
-	ULONGLONG max = ullMaxSamples;
-	ULONGLONG l = ((ULONGLONG)m_pSndFile->GetSongTime()) * m_pWaveFormat->nSamplesPerSec * (ULONGLONG)std::max(1, 1 + m_pSndFile->GetRepeatCount());
+	uint64 max = ullMaxSamples;
+	uint64 l = static_cast<uint64>(m_pSndFile->GetSongTime() + 0.5) * m_pWaveFormat->nSamplesPerSec * std::max<uint64>(1, 1 + m_pSndFile->GetRepeatCount());
 	if (m_nMaxPatterns > 0)
 	{
 		DWORD dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();
@@ -792,20 +791,6 @@ void CDoWaveConvert::OnButton1()
 			iter->offset += ullSamples;
 			iter->processed = true;
 		}
-
-/*		if (m_bGivePlugsIdleTime) {
-			LARGE_INTEGER startTime, endTime, duration,Freq;
-			QueryPerformanceFrequency(&Freq);
-			long samplesprocessed = sizeof(buffer)/(m_pWaveFormat->nChannels * m_pWaveFormat->wBitsPerSample / 8);
-			duration.QuadPart = samplesprocessed / static_cast<double>(m_pWaveFormat->nSamplesPerSec) * Freq.QuadPart;
-			if (QueryPerformanceCounter(&startTime)) {
-				endTime.QuadPart=0;
-				while ((endTime.QuadPart-startTime.QuadPart)<duration.QuadPart*4) {
-					theApp.GetPluginManager()->OnIdle();
-					QueryPerformanceCounter(&endTime);
-				}
-			}
-	}*/
 
 		if (m_bGivePlugsIdleTime)
 		{
@@ -1106,7 +1091,7 @@ void CDoAcmConvert::OnButton1()
 	}
 	DWORD oldsndcfg = m_pSndFile->m_MixerSettings.MixerFlags;
 	oldrepeat = m_pSndFile->GetRepeatCount();
-	const DWORD dwSongTime = m_pSndFile->GetSongTime();
+	const uint64 dwSongTime = static_cast<uint64>(m_pSndFile->GetSongTime() + 0.5);
 	mixersettings.gdwMixingFreq = wfxSrc.nSamplesPerSec;
 	mixersettings.m_SampleFormat = SampleFormatInt16;
 	mixersettings.gnChannels = wfxSrc.nChannels;
