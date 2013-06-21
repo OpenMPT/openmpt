@@ -148,6 +148,16 @@ public:
 		return *this;
 	}
 
+	store_t GetRaw() const
+	{
+		return flags;
+	}
+
+	void SetRaw(store_t flags_)
+	{
+		flags = flags_;
+	}
+
 private:
 	store_t flags;
 
