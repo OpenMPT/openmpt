@@ -32,6 +32,30 @@
 
 #if MPT_COMPILER_MSVC
 
+#define PLATFORM_LITTLE_ENDIAN
+
+#elif MPT_COMPILER_GCC
+
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define PLATFORM_BIG_ENDIAN
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define PLATFORM_LITTLE_ENDIAN
+#endif
+
+#elif MPT_COMPILER_CLANG
+
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define PLATFORM_BIG_ENDIAN
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define PLATFORM_LITTLE_ENDIAN
+#endif
+
+#endif
+
+
+
+#if MPT_COMPILER_MSVC
+
 #if MPT_MSVC_BEFORE(2010,0)
 #define nullptr		0
 #endif
