@@ -2268,7 +2268,7 @@ void CModDoc::OnEstimateSongLength()
 	if(songLength != std::numeric_limits<double>::infinity())
 	{
 		songLength = Util::Round(songLength);
-		s.Format("Approximate song length: %.0fmn%02.0fs", songLength / 60.0, fmod(songLength, 60.0));
+		s.Format("Approximate song length: %.0fmn%02.0fs", std::floor(songLength / 60.0), fmod(songLength, 60.0));
 	} else
 	{
 		s = "Song too long!";
