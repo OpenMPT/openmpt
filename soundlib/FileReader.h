@@ -641,6 +641,31 @@ public:
 		return SwapBytesLE(target);
 	}
 
+	// Read a supplied-size little endian integer to a fixed size variable.
+	// The data is properly sign-extended when fewer bytes are stored.
+	// If more bytes are stored, higher order bytes are silently ignored.
+	// If successful, the file cursor is advanced by the given size.
+	template <typename T>
+	T ReadSizedIntLE(off_t size)
+	{
+		static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
+		if(size == 0)
+		{
+			return 0;
+		}
+		if(!CanRead(size))
+		{
+			return 0;
+		}
+		if(size < sizeof(T))
+		{
+			return ReadTruncatedIntLE<T>(size);
+		}
+		T retval = ReadIntLE<T>();
+		Skip(size - sizeof(T));
+		return retval;
+	}
+
 	// Read unsigned 32-Bit integer in little-endian format.
 	// If successful, the file cursor is advanced by the size of the integer.
 	uint32 ReadUint32LE()

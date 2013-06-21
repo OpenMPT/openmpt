@@ -426,8 +426,8 @@ public:
 	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
 
-	DWORD m_dwCreatedWithVersion;
-	DWORD m_dwLastSavedWithVersion;
+	uint32 m_dwCreatedWithVersion;
+	uint32 m_dwLastSavedWithVersion;
 
 #ifdef MODPLUG_TRACKER
 	std::vector<PatternCuePoint> m_PatternCuePoints;	// For WAV export (writing pattern positions to file)

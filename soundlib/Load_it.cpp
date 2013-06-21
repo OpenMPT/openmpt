@@ -2138,6 +2138,31 @@ void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInter
 }
 
 
+template<typename T>
+void ReadField(FileReader &chunk, std::size_t size, T &field)
+//-----------------------------------------------------------
+{
+	field = chunk.ReadSizedIntLE<T>(size);
+}
+
+
+template<typename Tenum, typename Tstore>
+void ReadFieldFlagSet(FileReader &chunk, std::size_t size, FlagSet<Tenum, Tstore> &field)
+//---------------------------------------------------------------------------------------
+{
+	field.SetRaw(chunk.ReadSizedIntLE<Tstore>(size));
+}
+
+
+template<typename T>
+void ReadFieldCast(FileReader &chunk, std::size_t size, T &field)
+//---------------------------------------------------------------
+{
+	STATIC_ASSERT(sizeof(T) <= sizeof(int));
+	field = static_cast<T>(chunk.ReadSizedIntLE<int>(size));
+}
+
+
 void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &file, bool *pInterpretMptMade)
 //-----------------------------------------------------------------------------------------------------------
 {
@@ -2153,12 +2178,6 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 	// HACK: Reset mod flags to default values here, as they are not always written.
 	m_ModFlags.reset();
 
-	// Case macros.
-	#define CASE(id, data)	\
-		case id: fadr = reinterpret_cast<char *>(&data); maxReadCount = std::min(size_t(size), sizeof(data)); break;
-	#define CASE_NOTXM(id, data) \
-		case id: if(modtype != MOD_TYPE_XM) { fadr = reinterpret_cast<char *>(&data); maxReadCount = std::min(size_t(size), sizeof(data));} break;
-
 	while(file.CanRead(7))
 	{
 		const uint32 code = file.ReadUint32LE();
@@ -2169,25 +2188,23 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			break;
 		}
 
-		size_t maxReadCount = 0;
-		char *fadr = nullptr;
 		FileReader chunk = file.GetChunk(size);
 
 		switch (code)					// interpret field code
 		{
-			CASE(MULTICHAR4_LE_MSVC('D','T','.','.'), m_nDefaultTempo);
-			CASE(MULTICHAR4_LE_MSVC('R','P','B','.'), m_nDefaultRowsPerBeat);
-			CASE(MULTICHAR4_LE_MSVC('R','P','M','.'), m_nDefaultRowsPerMeasure);
-			CASE_NOTXM(MULTICHAR4_LE_MSVC('C','.','.','.'), m_nChannels);
-			CASE(MULTICHAR4_LE_MSVC('T','M','.','.'), m_nTempoMode);
-			CASE(MULTICHAR4_LE_MSVC('P','M','M','.'), m_nMixLevels);
-			CASE(MULTICHAR4_LE_MSVC('C','W','V','.'), m_dwCreatedWithVersion);
-			CASE(MULTICHAR4_LE_MSVC('L','S','W','V'), m_dwLastSavedWithVersion);
-			CASE(MULTICHAR4_LE_MSVC('S','P','A','.'), m_nSamplePreAmp);
-			CASE(MULTICHAR4_LE_MSVC('V','S','T','V'), m_nVSTiVolume);
-			CASE(MULTICHAR4_LE_MSVC('D','G','V','.'), m_nDefaultGlobalVolume);
-			CASE_NOTXM(MULTICHAR4_LE_MSVC('R','P','.','.'), m_nRestartPos);
-			CASE(MULTICHAR4_LE_MSVC('M','S','F','.'), m_ModFlags);
+			case MULTICHAR4_LE_MSVC('D','T','.','.'): ReadField(chunk, size, m_nDefaultTempo); break;
+			case MULTICHAR4_LE_MSVC('R','P','B','.'): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
+			case MULTICHAR4_LE_MSVC('R','P','M','.'): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
+			case MULTICHAR4_LE_MSVC('C','.','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nChannels); break;
+			case MULTICHAR4_LE_MSVC('T','M','.','.'): ReadField(chunk, size, m_nTempoMode); break;
+			case MULTICHAR4_LE_MSVC('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
+			case MULTICHAR4_LE_MSVC('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
+			case MULTICHAR4_LE_MSVC('L','S','W','V'): ReadField(chunk, size, m_dwLastSavedWithVersion); break;
+			case MULTICHAR4_LE_MSVC('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
+			case MULTICHAR4_LE_MSVC('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
+			case MULTICHAR4_LE_MSVC('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
+			case MULTICHAR4_LE_MSVC('R','P','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nRestartPos); break;
+			case MULTICHAR4_LE_MSVC('M','S','F','.'): ReadFieldFlagSet(chunk, size, m_ModFlags); break;
 #ifdef MODPLUG_TRACKER
 			case MULTICHAR4_LE_MSVC('M','I','M','A'): GetMIDIMapper().Deserialize(chunk.GetRawData(), size); break;
 #endif
@@ -2216,11 +2233,6 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			break;
 		}
 
-		// Read field data
-		if(fadr != nullptr)
-		{
-			memcpy(fadr, chunk.GetRawData(), maxReadCount);
-		}
 	}
 
 	// Validate read values.
@@ -2238,9 +2250,6 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 	//m_nRestartPos
 	//m_ModFlags
 
-
-	#undef CASE
-	#undef CASE_NOTXM
 }
 
 
