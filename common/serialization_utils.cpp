@@ -30,10 +30,9 @@ inline void Setbit(uint8& val, uint8 bitindex, bool newval)
 }
 
 
-bool IsPrintableId(const void* pvId, const size_t nLength)
+bool IsPrintableId(const char* pId, const size_t nLength)
 //--------------------------------------------------------
 {
-	const char* pId = static_cast<const char*>(pvId);
 	for(size_t i = 0; i < nLength; i++)
 	{
 		if (pId[i] <= 0 || isprint(pId[i]) == 0)
@@ -63,7 +62,7 @@ uint8 GetByteReq1234(const uint32 num)
 }
 
 
-void WriteAdaptive12(OutStream& oStrm, const uint16 num)
+void WriteAdaptive12(std::ostream& oStrm, const uint16 num)
 //------------------------------------------------------
 {
 	if(num >> 7 == 0)
@@ -73,7 +72,7 @@ void WriteAdaptive12(OutStream& oStrm, const uint16 num)
 }
 
 
-void WriteAdaptive1234(OutStream& oStrm, const uint32 num)
+void WriteAdaptive1234(std::ostream& oStrm, const uint32 num)
 //--------------------------------------------------------
 {
 	const uint8 bc = GetByteReq1234(num);
@@ -83,7 +82,7 @@ void WriteAdaptive1234(OutStream& oStrm, const uint32 num)
 
 
 //Format: First bit tells whether the size indicator is 1 or 2 bytes.
-void WriteAdaptive12String(OutStream& oStrm, const std::string& str)
+void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
 //------------------------------------------------------------------
 {
 	uint16 s = static_cast<uint16>(str.size());
@@ -103,7 +102,7 @@ uint8 Log2(const uint8& val)
 	else return 3;
 }
 
-void WriteAdaptive1248(OutStream& oStrm, const uint64& num)
+void WriteAdaptive1248(std::ostream& oStrm, const uint64& num)
 //---------------------------------------------------------
 {
 	const uint8 bc = GetByteReq1248(num);
@@ -112,21 +111,34 @@ void WriteAdaptive1248(OutStream& oStrm, const uint64& num)
 }
 
 
-void ReadAdaptive12(InStream& iStrm, uint16& val)
+void ReadAdaptive12(std::istream& iStrm, uint16& val)
 //-----------------------------------------------
 {
 	Binaryread<uint16>(iStrm, val, 1);
-	if(val & 1) iStrm.read(reinterpret_cast<char*>(&val) + 1, 1);
+	if(val & 1)
+	{
+		uint8 hi = 0;
+		Binaryread(iStrm, hi);
+		val &= 0xff;
+		val |= hi << 8;
+	}
 	val >>= 1;
 }
 
 
-void ReadAdaptive1234(InStream& iStrm, uint32& val)
+void ReadAdaptive1234(std::istream& iStrm, uint32& val)
 //-------------------------------------------------
 {
 	Binaryread<uint32>(iStrm, val, 1);
 	const uint8 bc = 1 + static_cast<uint8>(val & 3);
-	if(bc > 1) iStrm.read(reinterpret_cast<char*>(&val)+1, bc-1);
+	uint8 v2 = 0;
+	uint8 v3 = 0;
+	uint8 v4 = 0;
+	if(bc >= 2) Binaryread(iStrm, v2);
+	if(bc >= 3) Binaryread(iStrm, v3);
+	if(bc >= 4) Binaryread(iStrm, v4);
+	val &= 0xff;
+	val |= (v2 << 8) | (v3 << 16) | (v4 << 24);
 	val >>= 2;
 }
 
@@ -135,17 +147,29 @@ const uint8 pow2xTable[] = {1, 2, 4, 8, 16, 32, 64, 128};
 // Returns 2^n. n must be within {0,...,7}.
 inline uint8 Pow2xSmall(const uint8& exp) {ASSERT(exp <= 7); return pow2xTable[exp];}
 
-void ReadAdaptive1248(InStream& iStrm, uint64& val)
+void ReadAdaptive1248(std::istream& iStrm, uint64& val)
 //-------------------------------------------------
 {
 	Binaryread<uint64>(iStrm, val, 1);
-	const uint8 bc = Pow2xSmall(static_cast<uint8>(val & 3));
-	if(bc > 1) iStrm.read(reinterpret_cast<char*>(&val)+1, bc-1);
+	uint8 bc = Pow2xSmall(static_cast<uint8>(val & 3));
+	int byte = 1;
+	val &= 0xff;
+	while(bc > 1)
+	{
+		uint8 v = 0;
+		Binaryread(iStrm, v);
+		if(byte < 8)
+		{
+			val |= uint64(v) << (byte*8);
+		}
+		byte++;
+		bc--;
+	}
 	val >>= 2;
 }
 
 
-void WriteItemString(OutStream& oStrm, const char* const pStr, const size_t nSize)
+void WriteItemString(std::ostream& oStrm, const char* const pStr, const size_t nSize)
 //--------------------------------------------------------------------------------
 {
 	uint32 id = std::min<size_t>(nSize, (uint32_max >> 4)) << 4;
@@ -157,7 +181,7 @@ void WriteItemString(OutStream& oStrm, const char* const pStr, const size_t nSiz
 }
 
 
-void ReadItemString(InStream& iStrm, std::string& str, const DataSize)
+void ReadItemString(std::istream& iStrm, std::string& str, const DataSize)
 //--------------------------------------------------------------------
 {
 	// bits 0,1: Bytes per char type: 1,2,3,4.
@@ -166,7 +190,17 @@ void ReadItemString(InStream& iStrm, std::string& str, const DataSize)
 	Binaryread(iStrm, id, 1);
 	const uint8 nSizeBytes = (id & 12) >> 2; // 12 == 1100b
 	if (nSizeBytes > 0)
-		iStrm.read(reinterpret_cast<char*>(&id) + 1, MIN(3, nSizeBytes));
+	{
+		uint8 bytes = MIN(3, nSizeBytes);
+		uint8 v2 = 0;
+		uint8 v3 = 0;
+		uint8 v4 = 0;
+		if(bytes >= 1) Binaryread(iStrm, v2);
+		if(bytes >= 2) Binaryread(iStrm, v3);
+		if(bytes >= 3) Binaryread(iStrm, v4);
+		id &= 0xff;
+		id |= (v2 << 8) | (v3 << 16) | (v4 << 24);
+	}
 	// Limit to 1 MB.
 	str.resize(MIN(id >> 4, 1000000));
 	for(size_t i = 0; i < str.size(); i++)
@@ -178,15 +212,15 @@ void ReadItemString(InStream& iStrm, std::string& str, const DataSize)
 }
 
 
-String IdToString(const void* const pvId, const size_t nLength)
+std::string IdToString(const char* const pvId, const size_t nLength)
 //-------------------------------------------------------------
 {
 	const char* pId = static_cast<const char*>(pvId);
 	if (nLength == 0)
 		return "";
-	String str;
+	std::string str;
 	if (IsPrintableId(pId, nLength))
-		std::copy(pId, pId + nLength, std::back_inserter<String>(str));
+		std::copy(pId, pId + nLength, std::back_inserter<std::string>(str));
 	else if (nLength <= 4) // Interpret ID as integer value.
 	{
 		int32 val = 0;
@@ -246,21 +280,21 @@ const TCHAR strReadNote[] = MPT_TEXT("Read note: ");
 	m_posMapStart(0)							\
 
 
-Ssb::Ssb(InStream* pIstrm, OutStream* pOstrm) :
+Ssb::Ssb(std::istream* pIstrm, std::ostream* pOstrm) :
 		m_pOstrm(pOstrm),
 		m_pIstrm(pIstrm),
 		SSB_INITIALIZATION_LIST
 //-----------------------------------------------
 {}
 
-Ssb::Ssb(IoStream& ioStrm) :
+Ssb::Ssb(std::iostream& ioStrm) :
 		m_pOstrm(&ioStrm),
 		m_pIstrm(&ioStrm),
 		SSB_INITIALIZATION_LIST
 //------------------------------
 {}
 
-Ssb::Ssb(OutStream& oStrm) :
+Ssb::Ssb(std::ostream& oStrm) :
 		m_pOstrm(&oStrm),
 		m_pIstrm(nullptr),
 		SSB_INITIALIZATION_LIST
@@ -268,7 +302,7 @@ Ssb::Ssb(OutStream& oStrm) :
 {}
 
 
-Ssb::Ssb(InStream& iStrm) :
+Ssb::Ssb(std::istream& iStrm) :
 		m_pOstrm(nullptr),
 		m_pIstrm(&iStrm),
 		SSB_INITIALIZATION_LIST
@@ -308,7 +342,7 @@ void Ssb::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 
 
 // Called after writing an entry.
-void Ssb::AddWriteNote(const void* pId, const size_t nIdSize, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
+void Ssb::AddWriteNote(const char* pId, const size_t nIdSize, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
 //----------------------------------------------------------------------------
 {
 	m_Status |= SNT_PROGRESS;
@@ -331,7 +365,7 @@ void Ssb::ResetReadstatus()
 }
 
 
-void Ssb::WriteMapItem( const void* pId, 
+void Ssb::WriteMapItem( const char* pId, 
 						const size_t nIdSize,
 						const RposType& rposDataStart,
 						const DataSize& nDatasize,
@@ -353,7 +387,7 @@ void Ssb::WriteMapItem( const void* pId,
 			WriteAdaptive12(m_MapStream, static_cast<uint16>(nIdSize));
 
 		if(nIdSize > 0)
-			m_MapStream.write(reinterpret_cast<const char*>(pId), static_cast<Streamsize>(nIdSize));
+			m_MapStream.write(pId, nIdSize);
 	}
 
 	if (GetFlag(RwfWMapStartPosEntry)) //Startpos
@@ -361,14 +395,14 @@ void Ssb::WriteMapItem( const void* pId,
 	if (GetFlag(RwfWMapSizeEntry)) //Entrysize
 		WriteAdaptive1248(m_MapStream, nDatasize);
 	if (GetFlag(RwfWMapDescEntry)) //Entry descriptions
-		WriteAdaptive12String(m_MapStream, String(pszDesc));
+		WriteAdaptive12String(m_MapStream, std::string(pszDesc));
 }
 
 
 void Ssb::ReserveMapSize(uint32 nSize)
 //------------------------------------
 {
-	OutStream& oStrm = *m_pOstrm;
+	std::ostream& oStrm = *m_pOstrm;
 	m_nMapReserveSize = nSize;
 	if (nSize > 0)
 	{
@@ -399,7 +433,7 @@ void Ssb::CreateWriteSubEntry()
 }
 
 
-Ssb* Ssb::CreateReadSubEntry(const void* pId, const size_t nLength)
+Ssb* Ssb::CreateReadSubEntry(const char* pId, const size_t nLength)
 //-----------------------------------------------------------------
 {
 	const ReadEntry* pE = Find(pId, nLength);
@@ -431,7 +465,7 @@ void Ssb::IncrementWriteCounter()
 }
 
 
-void Ssb::ReleaseWriteSubEntry(const void* pId, const size_t nIdLength)
+void Ssb::ReleaseWriteSubEntry(const char* pId, const size_t nIdLength)
 //---------------------------------------------------------------------
 {
 	if ((m_pSubEntry->m_Status & SNT_FAILURE) != 0)
@@ -443,10 +477,10 @@ void Ssb::ReleaseWriteSubEntry(const void* pId, const size_t nIdLength)
 }
 
 
-void Ssb::BeginWrite(const void* pId, const size_t nIdSize, const uint64& nVersion)
+void Ssb::BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion)
 //---------------------------------------------------------------------------------
 {
-	OutStream& oStrm = *m_pOstrm;
+	std::ostream& oStrm = *m_pOstrm;
 
 	if (m_fpLogFunc)
 		m_fpLogFunc(tstrWriteHeader, IdToString(pId, nIdSize).c_str());
@@ -465,7 +499,7 @@ void Ssb::BeginWrite(const void* pId, const size_t nIdSize, const uint64& nVersi
 	{
 		uint8 idsize = static_cast<uint8>(nIdSize);
 		Binarywrite<uint8>(oStrm, idsize);
-		if(idsize > 0) oStrm.write(reinterpret_cast<const char*>(pId), nIdSize);
+		if(idsize > 0) oStrm.write(pId, nIdSize);
 	}
 
 	// Form header.
@@ -522,7 +556,7 @@ void Ssb::BeginWrite(const void* pId, const size_t nIdSize, const uint64& nVersi
 }
 
 
-Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const void* pId, const size_t nIdSize, const Postype& posReadBegin)
+Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin)
 //-------------------------------------------------------------------------------------------------------------------
 {
 	if (pE != nullptr)
@@ -545,7 +579,7 @@ Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const void* pId, const size_t 
 }
 
 
-void Ssb::OnWroteItem(const void* pId, const size_t nIdSize, const Postype& posBeforeWrite)
+void Ssb::OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite)
 //-----------------------------------------------------------------------------------------
 {
 	const Offtype nRawEntrySize = m_pOstrm->tellp() - posBeforeWrite;
@@ -579,7 +613,7 @@ void Ssb::OnWroteItem(const void* pId, const size_t nIdSize, const Postype& posB
 }
 
 
-void Ssb::CompareId(InStream& iStrm, const void* pId, const size_t nIdlength)
+void Ssb::CompareId(std::istream& iStrm, const char* pId, const size_t nIdlength)
 //---------------------------------------------------------------------------
 {
 	uint8 tempU8 = 0;
@@ -598,10 +632,10 @@ void Ssb::CompareId(InStream& iStrm, const void* pId, const size_t nIdlength)
 }
 
 
-void Ssb::BeginRead(const void* pId, const size_t nLength, const uint64& nVersion)
+void Ssb::BeginRead(const char* pId, const size_t nLength, const uint64& nVersion)
 //---------------------------------------------------------------------------------
 {
-	InStream& iStrm = *m_pIstrm;
+	std::istream& iStrm = *m_pIstrm;
 
 	if (m_fpLogFunc)
 		m_fpLogFunc(tstrReadingHeader, IdToString(pId, nLength).c_str());
@@ -616,7 +650,7 @@ void Ssb::BeginRead(const void* pId, const size_t nLength, const uint64& nVersio
 	// Start bytes.
 	{
 		char temp[sizeof(s_EntryID)];
-		Binaryread<char[sizeof(s_EntryID)]>(iStrm, temp);
+		ArrayReader<char>(sizeof(s_EntryID))(iStrm, temp, sizeof(s_EntryID));
 		if (memcmp(temp, s_EntryID, sizeof(s_EntryID)))
 		{
 			AddReadNote(SNR_STARTBYTE_MISMATCH);
@@ -746,7 +780,7 @@ void Ssb::BeginRead(const void* pId, const size_t nLength, const uint64& nVersio
 void Ssb::CacheMap()
 //------------------
 {
-	InStream& iStrm = *m_pIstrm;
+	std::istream& iStrm = *m_pIstrm;
 	if(GetFlag(RwfRwHasMap) || m_nFixedEntrySize > 0)
 	{
 		iStrm.seekg(m_posStart + m_rposMapBegin);
@@ -837,7 +871,7 @@ void Ssb::CacheMap()
 }
 
 
-const ReadEntry* Ssb::Find(const void* pId, const size_t nIdLength)
+const ReadEntry* Ssb::Find(const char* pId, const size_t nIdLength)
 //-----------------------------------------------------------------
 {
 	m_pIstrm->clear();
@@ -870,7 +904,7 @@ const ReadEntry* Ssb::Find(const void* pId, const size_t nIdLength)
 void Ssb::FinishWrite()
 //---------------------
 {
-	OutStream& oStrm = *m_pOstrm;
+	std::ostream& oStrm = *m_pOstrm;
 	const Postype posDataEnd = oStrm.tellp();
 	std::string mapStreamStr = m_MapStream.str();
 	if (m_posMapStart != Postype(0) && ((uint32)mapStreamStr.length() > m_nMapReserveSize))

@@ -27,19 +27,19 @@ const string CTuningRTI::s_DerivedclassID = "RTI";
 
 namespace CTuningS11n
 {
-	void ReadStr(srlztn::InStream& iStrm, std::string& str, const size_t);
-	void ReadNoteMap(srlztn::InStream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
-	void ReadRatioTable(srlztn::InStream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t);
+	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
+	void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
+	void ReadRatioTable(std::istream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t);
 
-	void WriteNoteMap(srlztn::OutStream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m);
-	void WriteStr(srlztn::OutStream& oStrm, const std::string& str);
+	void WriteNoteMap(std::ostream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m);
+	void WriteStr(std::ostream& oStrm, const std::string& str);
 
 	struct RatioWriter
 	//================
 	{
 		RatioWriter(uint16 nWriteCount = s_nDefaultWriteCount) : m_nWriteCount(nWriteCount) {}
 
-		void operator()(srlztn::OutStream& oStrm, const std::vector<float>& v);
+		void operator()(std::ostream& oStrm, const std::vector<float>& v);
 		uint16 m_nWriteCount;
 		static const uint16 s_nDefaultWriteCount = (uint16_max >> 2);
 	};
@@ -509,7 +509,7 @@ CTUNINGBASE::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(ostream& outStrm) c
 namespace CTuningS11n
 {
 
-void RatioWriter::operator()(srlztn::OutStream& oStrm, const std::vector<float>& v)
+void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
 //---------------------------------------------------------------------------------
 {
 	const size_t nWriteCount = MIN(v.size(), m_nWriteCount);
@@ -519,7 +519,7 @@ void RatioWriter::operator()(srlztn::OutStream& oStrm, const std::vector<float>&
 }
 
 
-void ReadNoteMap(srlztn::InStream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t)
+void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t)
 //----------------------------------------------------------------------------------
 {
 	uint64 val;
@@ -530,13 +530,13 @@ void ReadNoteMap(srlztn::InStream& iStrm, CTuningBase::NOTENAMEMAP& m, const siz
 		int16 key;
 		srlztn::Binaryread<int16>(iStrm, key);
 		std::string str;
-		StringFromBinaryStream<uint8>(iStrm, str);
+		srlztn::StringFromBinaryStream<uint8>(iStrm, str);
 		m[key] = str;
 	}
 }
 
 
-void ReadRatioTable(srlztn::InStream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t)
+void ReadRatioTable(std::istream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t)
 //------------------------------------------------------------------------------------------
 {
 	uint64 val;
@@ -547,7 +547,7 @@ void ReadRatioTable(srlztn::InStream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, c
 }
 
 
-void ReadStr(srlztn::InStream& iStrm, std::string& str, const size_t)
+void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 //-------------------------------------------------------------------
 {
 	uint64 val;
@@ -559,7 +559,7 @@ void ReadStr(srlztn::InStream& iStrm, std::string& str, const size_t)
 }
 
 
-void WriteNoteMap(srlztn::OutStream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m)
+void WriteNoteMap(std::ostream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m)
 //---------------------------------------------------------------------------
 {
 	srlztn::WriteAdaptive1248(oStrm, m.size());
@@ -568,12 +568,12 @@ void WriteNoteMap(srlztn::OutStream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m)
 	for(; iter != end; iter++)
 	{
 		srlztn::Binarywrite<int16>(oStrm, iter->first);
-		StringToBinaryStream<uint8>(oStrm, iter->second);
+		srlztn::StringToBinaryStream<uint8>(oStrm, iter->second);
 	}
 }
 
 
-void WriteStr(srlztn::OutStream& oStrm, const std::string& str)
+void WriteStr(std::ostream& oStrm, const std::string& str)
 //-----------------------------------------------------------------
 {
 	srlztn::WriteAdaptive1248(oStrm, str.size());

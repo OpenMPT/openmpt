@@ -838,9 +838,9 @@ void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 	for(uint8 i = 0; i < nSeqs; i++)
 	{
 		if (i == seq.GetCurrentSequenceIndex())
-			ssb.WriteItem(seq, &i, sizeof(i), &WriteModSequence);
+			ssb.WriteItem(seq, srlztn::IdLE<uint8>(i).GetChars(), sizeof(i), &WriteModSequence);
 		else
-			ssb.WriteItem(seq.m_Sequences[i], &i, sizeof(i), &WriteModSequence);
+			ssb.WriteItem(seq.m_Sequences[i], srlztn::IdLE<uint8>(i).GetChars(), sizeof(i), &WriteModSequence);
 	}
 	ssb.FinishWrite();
 }
@@ -864,7 +864,9 @@ void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 		seq.m_Sequences.resize(nSeqs, ModSequence(seq.m_sndFile, seq.s_nCacheSize));
 
 	for(uint8 i = 0; i < nSeqs; i++)
-		ssb.ReadItem(seq.m_Sequences[i], &i, sizeof(i), &ReadModSequence);
+	{
+		ssb.ReadItem(seq.m_Sequences[i], srlztn::IdLE<uint8>(i).GetChars(), sizeof(i), &ReadModSequence);
+	}
 	seq.m_nCurrentSeq = (nCurrent < seq.GetNumSequences()) ? nCurrent : 0;
 	seq.CopyStorageToCache();
 }

@@ -201,7 +201,7 @@ void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)
 	uint16 nCount = 0;
 	for(uint16 i = 0; i < nPatterns; i++) if (patc[i])
 	{
-		ssb.WriteItem(patc[i], &i, sizeof(i), &WriteModPattern);
+		ssb.WriteItem(patc[i], srlztn::IdLE<uint16>(i).GetChars(), sizeof(i), &WriteModPattern);
 		nCount = i + 1;
 	}
 	ssb.WriteItem<uint16>(nCount, "num"); // Index of last pattern + 1.
@@ -225,7 +225,7 @@ void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t)
 		patc.ResizeArray(nPatterns);	
 	for(uint16 i = 0; i < nPatterns; i++)
 	{
-		ssb.ReadItem(patc[i], &i, sizeof(i), &ReadModPattern);
+		ssb.ReadItem(patc[i], srlztn::IdLE<uint16>(i).GetChars(), sizeof(i), &ReadModPattern);
 	}
 }
 

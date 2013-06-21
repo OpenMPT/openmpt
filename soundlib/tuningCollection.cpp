@@ -33,15 +33,15 @@ const TCHAR CTuningCollection::s_FileExtension[4] = MPT_TEXT(".tc");
 
 namespace CTuningS11n
 {
-	void WriteNoteMap(srlztn::OutStream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m);
-	void ReadStr(srlztn::InStream& iStrm, std::string& str, const size_t);
+	void WriteNoteMap(std::ostream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m);
+	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
 
-	void ReadNoteMap(srlztn::InStream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
-	void ReadRatioTable(srlztn::InStream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t);
-	void WriteStr(srlztn::OutStream& oStrm, const std::string& str);
+	void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
+	void ReadRatioTable(std::istream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t);
+	void WriteStr(std::ostream& oStrm, const std::string& str);
 
 	void ReadTuning(istream& iStrm, CTuningCollection& Tc, const size_t) {Tc.AddTuning(iStrm, true);}
-	void WriteTuning(srlztn::OutStream& oStrm, const CTuning& t) {t.Serialize(oStrm);}
+	void WriteTuning(std::ostream& oStrm, const CTuning& t) {t.Serialize(oStrm);}
 } // namespace CTuningS11n
 
 using namespace CTuningS11n;
@@ -215,12 +215,12 @@ bool CTuningCollection::DeserializeOLD(istream& inStrm, bool& loadingSuccessful)
 	//3. Name
 	if(version < 2)
 	{
-		if(StringFromBinaryStream<uint32>(inStrm, m_Name, 256))
+		if(srlztn::StringFromBinaryStream<uint32>(inStrm, m_Name, 256))
 			return false;
 	}
 	else
 	{
-        if(StringFromBinaryStream<uint8>(inStrm, m_Name))
+        if(srlztn::StringFromBinaryStream<uint8>(inStrm, m_Name))
 			return false;
 	}
 
