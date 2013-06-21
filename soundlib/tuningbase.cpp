@@ -438,7 +438,7 @@ bool CTUNINGBASE::DeserializeOLD(istream& inStrm)
 	if(version != 4) return SERIALIZATION_FAILURE;
 
 	//Tuning name
-	if(StringFromBinaryStream<uint8>(inStrm, m_TuningName))
+	if(srlztn::StringFromBinaryStream<uint8>(inStrm, m_TuningName))
 		return SERIALIZATION_FAILURE;
 
 	//Const mask
@@ -459,7 +459,7 @@ bool CTUNINGBASE::DeserializeOLD(istream& inStrm)
 		NOTEINDEXTYPE n;
 		string str;
 		inStrm.read(reinterpret_cast<char*>(&n), sizeof(n));
-		if(StringFromBinaryStream<uint8>(inStrm, str))
+		if(srlztn::StringFromBinaryStream<uint8>(inStrm, str))
 			return SERIALIZATION_FAILURE;
 		m_NoteNameMap[n] = str;
 	}
