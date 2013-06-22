@@ -2148,15 +2148,25 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_FINEVOLUP:
-					// IT Compatibility: Volume column volume slides have their own memory
-					// Test case: VolColMemory.it
-					FineVolumeUp(pChn, vol, IsCompatibleMode(TRK_IMPULSETRACKER));
+					// IT Compatibility: Fine volume slides in the volume column are only executed on the first tick, not on multiples of the first tick in case of pattern delay
+					// Test case: FineVolColSlide.it
+					if(m_nTickCount == 0 || !IsCompatibleMode(TRK_IMPULSETRACKER))
+					{
+						// IT Compatibility: Volume column volume slides have their own memory
+						// Test case: VolColMemory.it
+						FineVolumeUp(pChn, vol, IsCompatibleMode(TRK_IMPULSETRACKER));
+					}
 					break;
 
 				case VOLCMD_FINEVOLDOWN:
-					// IT Compatibility: Volume column volume slides have their own memory
-					// Test case: VolColMemory.it
-					FineVolumeDown(pChn, vol, IsCompatibleMode(TRK_IMPULSETRACKER));
+					// IT Compatibility: Fine volume slides in the volume column are only executed on the first tick, not on multiples of the first tick in case of pattern delay
+					// Test case: FineVolColSlide.it
+					if(m_nTickCount == 0 || !IsCompatibleMode(TRK_IMPULSETRACKER))
+					{
+						// IT Compatibility: Volume column volume slides have their own memory
+						// Test case: VolColMemory.it
+						FineVolumeDown(pChn, vol, IsCompatibleMode(TRK_IMPULSETRACKER));
+					}
 					break;
 
 				case VOLCMD_VIBRATOSPEED:
