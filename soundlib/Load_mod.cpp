@@ -791,6 +791,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
+	m_nChannels = 4;
 
 	STVersions minVersion = UST1_00;
 
@@ -858,7 +859,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	PATTERNINDEX numPatterns = GetNumPatterns(file, Order, fileHeader.numOrders, totalSampleLen, m_nChannels, false);
 
 	// Let's see if the file is too small (including some overhead for broken files like sll7.mod)
-	if(file.BytesLeft() + 4096 < numPatterns * 64u * 4u + totalSampleLen)
+	if(file.BytesLeft() + 32767 < numPatterns * 64u * 4u + totalSampleLen)
 	{
 		return false;
 	}
@@ -870,12 +871,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Now we can be pretty sure that this is a valid Soundtracker file. Set up default song settings.
 	m_nType = MOD_TYPE_MOD;
-	m_nChannels = 4;
-	m_nInstruments = 0;
-	m_nDefaultSpeed = 6;
 	// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
 	m_nDefaultTempo = fileHeader.restartPos * 25 / 24;
-	m_nRestartPos = 0;
 	if(fileHeader.restartPos != 0x78)
 	{
 		// Convert to CIA timing
