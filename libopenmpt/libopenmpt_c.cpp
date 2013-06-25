@@ -38,7 +38,7 @@ static const char * strdup( const char * src ) {
 
 class callbacks_streambuf : public std::streambuf {
 public:
-	callbacks_streambuf( openmpt_stream_callbacks callbacks_, void * stream_ ) : callbacks(callbacks_), stream(stream_) {
+	callbacks_streambuf( openmpt_stream_callbacks callbacks_, void * stream_ ) : callbacks(callbacks_), stream(stream_), put_back(4096), buf_size(65536) {
 		return;
 	}
 private:
@@ -68,8 +68,8 @@ private:
 private:
 	openmpt_stream_callbacks callbacks;
 	void * stream;
-	static const std::size_t put_back = 4096;
-	static const std::size_t buf_size = 65536;
+	const std::size_t put_back;
+	const std::size_t buf_size;
 	std::vector<char> buffer;
 }; // class callbacks_streambuf
 
