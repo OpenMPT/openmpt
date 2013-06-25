@@ -19,7 +19,7 @@ ext(extensions),
 inFile(file),
 zipArchive(inFile, ext),
 rarArchive((LPBYTE)inFile.GetRawData(), inFile.GetLength()),
-lhaArchive((LPBYTE)inFile.GetRawData(), inFile.GetLength()),
+lhaArchive(inFile),
 gzipArchive(inFile)
 //---------------------------------------------------------------------------------
 {
@@ -77,7 +77,7 @@ bool CUnarchiver::ExtractFile()
 	if(lhaArchive.IsArchive())
 	{
 		if(!lhaArchive.ExtractFile()) return false;
-		outFile = FileReader(lhaArchive.GetOutputFile(), lhaArchive.GetOutputFileLength());
+		outFile = lhaArchive.GetOutputFile();
 		return outFile.GetRawData()?true:false;
 	}
 #endif
