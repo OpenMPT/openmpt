@@ -285,8 +285,9 @@ std::streambuf::int_type xmplay_streambuf::underflow() {
 	char * base = &buffer.front();
 	char * start = base;
 	if ( eback() == base ) {
-		std::memmove( base, egptr() - put_back, put_back );
-		start += put_back;
+		std::size_t put_back_count = std::min<std::size_t>( put_back, egptr() - base );
+		std::memmove( base, egptr() - put_back_count, put_back_count );
+		start += put_back_count;
 	}
 	std::size_t n = xmpffile->Read( file, start, buffer.size() - ( start - base ) );
 	if ( n == 0 ) {
