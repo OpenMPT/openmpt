@@ -1,0 +1,116 @@
+.TH lha 1
+.SH NAME
+lha \- compression tool for .lzh archive files.
+.SH SYNOPSIS
+.B lha [-]{lvtxe[q{num}][finv]}[w=<dir>] archive_file [file...]
+.SH DESCRIPTION
+.PP
+.B lha
+is a tool for extracting .lzh archive files. It also supports variants
+of the .lzh archive, such as .lzs and .pma.
+.PP
+This version of the lha tool is part of Lhasa, a free implementation
+of the .lzh format.
+.PP
+.SH COMMAND SYNTAX
+The lha tool has an unusual command syntax, compared to most other
+Unix commands. The first parameter to the program specifies the command
+to perform and all additional options. The second parameter specifies
+the path to the archive file to operate on. Following this is a list
+of wildcard patterns to match against the filenames of the archived
+files.
+.PP
+The first character of the command parameter specifies the command to
+perform, which is one of the following:
+.TP
+\fB-l\fR
+List contents of the specified archive.
+.TP
+\fB-v\fR
+Verbosely list contents of the specified archive.
+.TP
+\fB-t\fR
+Test the integrity of the specified archive: decompress its contents and
+check the CRC.
+.TP
+\fB-e\fR or \fB-x\fR
+Extract archive. Files are extracted to the current working directory
+unless the 'w' option is specified.
+.PP
+.SH OPTIONS
+The remainder of the command parameter is used to specify additional
+options:
+.TP
+\fBq[012]\fR
+Quiet mode. Higher numbers suppress more output. Level 0 is normal
+operation. If no number is specified, full suppression (level 2)
+is used. The quiet option also turns on the force overwrite option
+('f').
+.TP
+\fBf\fR
+Force overwrite of existing files: do not prompt.
+.TP
+\fBi\fR
+Ignore paths of archived files: extract all archived files to the
+same directory, ignoring subdirectories.
+.TP
+\fBn\fR
+Do not perform any actual operations: instead, perform a dry run of
+the requested operation and describe what would have been done on
+standard output.
+.TP
+\fBv\fR
+Verbose mode: causes extra information to be written to standard
+output.
+.TP
+\fBw=dir\fR
+Specify destination directory for extracting files. This must be
+the last option of the first parameter.
+.SH SEE ALSO
+\fBunzip\fR(1),
+\fBtar\fR(1),
+\fBgzip\fR(1),
+\fBbzip2\fR(1)
+.SH HISTORY
+The .lzh format originated with Kazuhiko Miki's MS\-DOS archive tool,
+LArc, using the LZSS algorithm developed by Haruhiko Okumura, and
+the .lzs filename extension. The container format was reused for
+LHarc, by Haruyasu Yoshizaki (Yoshi), which used a new algorithm
+named LZHUF and the .lzh extension. In later versions, LHarc was
+renamed to LHA and extended with more effective compression algorithms.
+.PP
+Versions of the LHA tool were later ported to various different
+operating systems, including the Amiga, Atari, MacOS, OS/2 and Unix.
+A tool for MSX\-DOS named PMarc reused the container format with a new
+compression algorithm (.pma extension).
+.PP
+The Unix version of the tool was developed by Masaru Oki, Nobutaka
+Watazaki and Tsugio Okamoto, but was released under a software
+license that does not conform to the Free Software or Open Source
+Definitions. Lhasa was developed as a drop\-in replacement that is
+Free Software and Open Source.
+.SH BUGS
+The current version does not allow the creation of new archive files.
+.PP
+Some obscure compression algorithms are not currently supported
+(\-lh2\-, \-lh3\-, \-lx1\-, \-lhx\-).
+.SH AUTHOR
+Lhasa was written and is maintained by Simon Howard.
+.SH COPYRIGHT
+Copyright \(co 2011, 2012 Simon Howard.
+.PP
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted, provided
+that the above copyright notice and this permission notice appear
+in all copies.
+.PP
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+

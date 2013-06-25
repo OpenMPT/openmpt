@@ -1,223 +1,157 @@
 
 #include "stdafx.h"
 
-#include "windows.h"
-#include "windowsx.h"
 #include "unlha.h"
 
-#ifdef _DEBUG
-#define LHADEBUG
-#undef Log
-extern void Log(const char *, ...);
-#endif
+#include "lhasa.h"
 
-#undef UCHAR_MAX
-#undef USHRT_MAX
-#undef SHRT_MIN
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable: 4244) // conversion from 'type1' to 'type2', possible loss of data
-#endif
-
-#include "unlha/lharc.h"
-#include "unlha/slidehuf.h"
-#include "unlha/header.cpp"
-#include "unlha/lhext.cpp"
-#include "unlha/extract.cpp"
-#include "unlha/slide.cpp"
-#include "unlha/maketbl.cpp"
-#include "unlha/dhuf.cpp"
-#include "unlha/huf.cpp"
-#include "unlha/shuf.cpp"
-#include "unlha/larc.cpp"
-
-CLhaArchive::CLhaArchive(LPBYTE lpStream, DWORD dwMemLength)
-//----------------------------------------------------------
+static int LHAreadFileReader(void *handle, void *buf, size_t buf_len)
 {
-	// File Read
-	m_lpStream = lpStream;
-	m_dwStreamLen = dwMemLength;
-	m_dwStreamPos = 0;
-	// File Write
-	m_lpOutputFile = 0;
-	m_dwOutputLen = 0;
-	m_pDecoderData = NULL;
+	FileReader *f = reinterpret_cast<FileReader*>(handle);
+	int result = f->ReadRaw((char*)buf, buf_len);
+	if(result == 0)
+	{
+		return -1;
+	}
+	return result;
+}
 
-	gpHufData = NULL;
+static int LHAskipFileReader(void *handle, size_t bytes)
+{
+	FileReader *f = reinterpret_cast<FileReader*>(handle);
+	if(f->CanRead(bytes))
+	{
+		f->Skip(bytes);
+		return 1;
+	}
+	return 0;
+}
+
+static void LHAcloseFileReader(void * /*handle*/ )
+{
+	//FileReader *f = reinterpret_cast<FileReader*>(handle);
+}
+
+static LHAInputStreamType vtable = {
+	LHAreadFileReader,
+	LHAskipFileReader,
+	LHAcloseFileReader
+};
+
+static inline std::string get_extension( std::string filename ) {
+	if ( filename.find_last_of( "." ) != std::string::npos ) {
+		return filename.substr( filename.find_last_of( "." ) + 1 );
+	}
+	return "";
+}
+
+
+CLhaArchive::CLhaArchive(FileReader file_ ) : file(file_), inputstream(nullptr), reader(nullptr), firstfile(nullptr)
+//------------------------------------------------------------------------------------------------------------------
+{
+	inputstream = lha_input_stream_new(&vtable, &file);
+	if(inputstream)
+	{
+		reader = lha_reader_new(inputstream);
+	}
+	if(reader)
+	{
+		lha_reader_set_dir_policy(reader, LHA_READER_DIR_END_OF_DIR);
+		firstfile = lha_reader_next_file(reader);
+	}
 }
 
 
 CLhaArchive::~CLhaArchive()
 //-------------------------
 {
-	if (m_lpOutputFile)
+	if(reader)
 	{
-		GlobalFreePtr(m_lpOutputFile);
-		m_lpOutputFile = NULL;
+		lha_reader_free(reader);
+		reader = nullptr;
 	}
-	if (m_pDecoderData)
+	if(inputstream)
 	{
-		delete[] m_pDecoderData;
-		m_pDecoderData = NULL;
+		lha_input_stream_free(inputstream);
+		inputstream = nullptr;
 	}
 }
 
 
-BOOL CLhaArchive::IsArchive()
+bool CLhaArchive::IsArchive()
 //---------------------------
 {
-	LzHeader hdr;
-	DWORD pos = 0;
-
-	if (!get_header(pos, &hdr)) return FALSE;
-#ifdef LHADEBUG
-	Log("LHA Archive\n");
-#endif
-	return TRUE;
+	return firstfile != nullptr;
 }
 
 
-BOOL CLhaArchive::ExtractFile()
+bool CLhaArchive::ExtractFile()
 //-----------------------------
 {
-	LzHeader hdr;
-
-	if (!m_lpStream) return FALSE;
-
-	if (!m_pDecoderData)
+	const std::size_t bufSize = 4096;
+	for(LHAFileHeader *fileheader = firstfile; fileheader; fileheader = lha_reader_next_file(reader))
 	{
-		m_pDecoderData = new BYTE[65536]; // 64K of data - should be enough
-		if (!m_pDecoderData) return FALSE;
-	}
-
-	// Init misc tables
-	InitDecodeTables();
-	InitHufTables();
-	make_crctable();
-
-	// extract each files
-	while (get_header(m_dwStreamPos, &hdr))
-	{
-	#ifdef LHADEBUG
-		Log("%d bytes packed in %s\n", hdr.packed_size, hdr.name);
-	#endif
-		blocksize = 0;
-		long pos = m_dwStreamPos;
-		extract_one(m_dwStreamPos, &hdr);
-		m_dwStreamPos = pos + hdr.packed_size;
-	}
-
-#ifdef LHADEBUG
-	if (m_lpOutputFile)
-	{
-		Log("%d bytes extracted\n", m_dwOutputLen);
-	}
-#endif
-
-	return (m_lpOutputFile) ? TRUE : FALSE;
-}
-
-
-int CLhaArchive::lharead(void *p, int sz1, int sz2, DWORD &fp)
-//------------------------------------------------------------
-{
-	int sz = sz1 * sz2;
-	int bytesavailable = m_dwStreamLen - fp;
-	if (sz > bytesavailable) sz = bytesavailable;
-	if ((sz <= 0) || (!p) || (!m_lpStream)) return 0;
-	memcpy(p, m_lpStream + fp, sz);
-	fp += sz;
-	return sz;
-}
-
-
-#define CRCPOLY  0xA001  // CRC-16
-#define UPDATE_CRC(c) \
-	crc = crctable[(crc ^ (c)) & 0xFF] ^ (crc >> CHAR_BIT)
-
-void CLhaArchive::make_crctable()
-//-------------------------------
-{
-	for (unsigned int i = 0; i < 256; i++)
-	{
-		unsigned int r = i;
-		for (unsigned int j = 0; j < CHAR_BIT; j++)
-			if (r & 1)
-				r = (r >> 1) ^ CRCPOLY;
-			else
-				r >>= 1;
-		crctable[i] = r;
-	}
-}
-
-
-unsigned short CLhaArchive::calccrc(unsigned char *p , int n)
-//-----------------------------------------------------------
-{
-	while (n-- > 0) UPDATE_CRC(*p++);
-	return crc;
-}
-
-
-
-void CLhaArchive::fwrite_crc(unsigned char *p, int n, LPBYTE &fp)
-//---------------------------------------------------------------
-{
-#ifdef LHADEBUG
-	Log("Writing %d bytes", n);
-#endif
-	calccrc(p, n);
-	if (fp)
-    {
-		int len = m_dwOutputLen - (int)(fp - m_lpOutputFile);
-		if (n > len) n = len;
-		for (int i=0; i<n; i++)
+		// get the biggest file
+		if(fileheader->length >= data.size())
 		{
-			*fp++ = p[i];
+			data.clear();
+			std::size_t countRead = 0;
+			do
+			{
+				data.resize(data.size() + bufSize);
+				countRead = lha_reader_read(reader, &data[data.size() - bufSize], bufSize);
+				if(countRead < bufSize)
+				{
+					data.resize(data.size() - (bufSize - countRead));
+				}
+			} while(countRead > 0);
 		}
-    }
-#ifdef LHADEBUG
-	Log("...\n");
-#endif
-}
-
-
-// Shift bitbuf n bits left, read n bits
-void CLhaArchive::fillbuf(unsigned char n)
-//----------------------------------------
-{
-	while (n > bitcount)
-	{
-		n -= bitcount;
-		bitbuf = (bitbuf << bitcount) + (subbitbuf >> (CHAR_BIT - bitcount));
-		subbitbuf = 0;
-		if (compsize != 0)
-		{
-			compsize--;
-			if (LzInterface.infile < m_dwStreamLen) subbitbuf = (unsigned char)m_lpStream[LzInterface.infile++];
-		}
-		bitcount = CHAR_BIT;
 	}
-	bitcount -= n;
-	bitbuf = (bitbuf << n) + (subbitbuf >> (CHAR_BIT - n));
-	subbitbuf <<= n;
+	return data.size() > 0;
 }
 
 
-void CLhaArchive::init_getbits()
-//------------------------------
+bool CLhaArchive::ExtractFile(const std::vector<const char *> &extensions)
+//------------------------------------------------------------------------
 {
-	bitbuf = 0;  subbitbuf = 0;  bitcount = 0;
-	fillbuf(2 * CHAR_BIT);
+	const std::size_t bufSize = 4096;
+	for(LHAFileHeader *fileheader = firstfile; fileheader; fileheader = lha_reader_next_file(reader))
+	{
+		if(fileheader->filename)
+		{
+			std::string ext = get_extension(fileheader->filename);
+			if(!ext.empty())
+			{
+				std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
+				if(std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
+				{
+					data.clear();
+					std::size_t countRead = 0;
+					do
+					{
+						data.resize(data.size() + bufSize);
+						countRead = lha_reader_read(reader, &data[data.size() - bufSize], bufSize);
+						if(countRead < bufSize)
+						{
+							data.resize(data.size() - (bufSize - countRead));
+						}
+					} while(countRead > 0);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 
-unsigned short CLhaArchive::getbits(unsigned int n)
-//-------------------------------------------------
+FileReader CLhaArchive::GetOutputFile() const
+//-------------------------------------------
 {
-	unsigned short x;
-	n &= 0xff;
-	x = bitbuf >> (2 * CHAR_BIT - n);  fillbuf(n);
-	return x;
+	if(data.size() == 0)
+	{
+		return FileReader();
+	}
+	return FileReader(&data[0], data.size());
 }
-

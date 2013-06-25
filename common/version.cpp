@@ -325,8 +325,14 @@ std::string GetFullCreditsString()
 #endif
 		"Ben \"GreaseMonkey\" Russell for IT sample compression code\n"
 		"https://github.com/iamgreaser/it2everything/\n"
+		"Alexander Chemeris for msinttypes\n"
+		"https://code.google.com/p/msinttypes/\n"
 		"Jean-loup Gailly and Mark Adler for zlib\n"
 		"http://zlib.net/\n"
+#ifndef NO_ARCHIVE_SUPPORT
+		"Simon Howard for lhasa\n"
+		"http://fragglet.github.io/lhasa/\n"
+#endif
 #ifndef NO_PORTAUDIO
 		"PortAudio contributors\n"
 		"http://www.portaudio.com/\n"

@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libFLAC_static", "..\includ
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\include\portaudio\build\msvc\portaudio_openmpt_vs2010.vcxproj", "{0A18A071-125E-442F-AFF7-A3F68ABECF99}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lhasa", "..\include\lhasa\lhasa.vcxproj", "{353B4237-DC36-41FF-A196-CD0341FAF35A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -58,6 +60,12 @@ Global
 		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.Release|Win32.Build.0 = Release|Win32
 		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseNoLTCG|Win32.ActiveCfg = Release|Win32
 		{0A18A071-125E-442F-AFF7-A3F68ABECF99}.ReleaseNoLTCG|Win32.Build.0 = Release|Win32
+		{353B4237-DC36-41FF-A196-CD0341FAF35A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{353B4237-DC36-41FF-A196-CD0341FAF35A}.Debug|Win32.Build.0 = Debug|Win32
+		{353B4237-DC36-41FF-A196-CD0341FAF35A}.Release|Win32.ActiveCfg = Release|Win32
+		{353B4237-DC36-41FF-A196-CD0341FAF35A}.Release|Win32.Build.0 = Release|Win32
+		{353B4237-DC36-41FF-A196-CD0341FAF35A}.ReleaseNoLTCG|Win32.ActiveCfg = Release|Win32
+		{353B4237-DC36-41FF-A196-CD0341FAF35A}.ReleaseNoLTCG|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

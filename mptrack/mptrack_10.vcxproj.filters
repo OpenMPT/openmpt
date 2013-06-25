@@ -454,33 +454,6 @@
     <ClCompile Include="..\unarchiver\unzip.cpp">
       <Filter>Source Files\unarchiver</Filter>
     </ClCompile>
-    <ClCompile Include="..\unarchiver\unlha\DHUF.CPP">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unlha\EXTRACT.CPP">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unlha\Header.cpp">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unlha\HUF.CPP">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unlha\LARC.CPP">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unlha\LHEXT.CPP">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unlha\MAKETBL.CPP">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unlha\SHUF.CPP">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unlha\SLIDE.CPP">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClCompile>
     <ClCompile Include="..\unarchiver\unrar\BLOCK.CPP">
       <Filter>Source Files\unarchiver\unrar</Filter>
     </ClCompile>
@@ -903,12 +876,6 @@
     <ClInclude Include="..\unarchiver\unzip.h">
       <Filter>Header Files\unarchiver</Filter>
     </ClInclude>
-    <ClInclude Include="..\unarchiver\unlha\LHARC.H">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClInclude>
-    <ClInclude Include="..\unarchiver\unlha\SLIDEHUF.H">
-      <Filter>Source Files\unarchiver\unlha</Filter>
-    </ClInclude>
     <ClInclude Include="..\unarchiver\unrar\CONST.H">
       <Filter>Source Files\unarchiver\unrar</Filter>
     </ClInclude>
@@ -1080,9 +1047,6 @@
     </Filter>
     <Filter Include="Source Files\unarchiver\unrar">
       <UniqueIdentifier>{ffd114ee-74f6-4d3e-87af-44e29e79b71f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\unarchiver\unlha">
-      <UniqueIdentifier>{b35a6890-84c2-43ed-8e0f-b28d5afcbb6a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

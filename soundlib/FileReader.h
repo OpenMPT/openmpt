@@ -553,6 +553,13 @@ public:
 		return DataContainer().GetRawData() + streamPos;
 	}
 
+	std::size_t ReadRaw(char *dst, std::size_t count)
+	{
+		std::size_t result = static_cast<std::size_t>(DataContainer().Read(dst, streamPos, count));
+		streamPos += result;
+		return result;
+	}
+
 	// Read a "T" object from the stream.
 	// If not enough bytes can be read, false is returned.
 	// If successful, the file cursor is advanced by the size of "T".
