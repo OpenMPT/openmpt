@@ -746,11 +746,11 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 		return;
 	}
 	std::ostringstream str;
+	add_names( str, "instrument", self->mod->get_instrument_names() );
+	add_names( str, "sample", self->mod->get_sample_names() );
 	add_names( str, "channel", self->mod->get_channel_names() );
 	add_names( str, "order", self->mod->get_order_names() );
 	add_names( str, "pattern", self->mod->get_pattern_names() );
-	add_names( str, "instrument", self->mod->get_instrument_names() );
-	add_names( str, "sample", self->mod->get_sample_names() );
 	write_xmplay_string( buf, str.str() );
 }
 
