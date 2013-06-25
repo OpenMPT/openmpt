@@ -212,29 +212,17 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 
-typedef signed __int8 int8;
-typedef signed __int16 int16;
-typedef signed __int32 int32;
-typedef signed __int64 int64;
-typedef unsigned __int8 uint8;
-typedef unsigned __int16 uint16;
-typedef unsigned __int32 uint32;
-typedef unsigned __int64 uint64;
+#define __STDC_LIMIT_MACROS
+#include "stdint.h"
 
-const int8 int8_min	    = -127-1;
-const int16 int16_min   = -32767-1;
-const int32 int32_min   = -2147483647-1;
-const int64 int64_min   = -9223372036854775807-1;
-
-const int8 int8_max     = 127;
-const int16 int16_max   = 32767;
-const int32 int32_max   = 2147483647;
-const int64 int64_max   = 9223372036854775807;
-
-const uint8 uint8_max   = 255;
-const uint16 uint16_max = 65535;
-const uint32 uint32_max = 4294967295;
-const uint64 uint64_max = 18446744073709551615;
+typedef int8_t   int8;
+typedef int16_t  int16;
+typedef int32_t  int32;
+typedef int64_t  int64;
+typedef uint8_t  uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
 
 #else
 
@@ -248,6 +236,8 @@ typedef std::uint8_t  uint8;
 typedef std::uint16_t uint16;
 typedef std::uint32_t uint32;
 typedef std::uint64_t uint64;
+
+#endif
 
 const int8 int8_min     = INT8_MIN;
 const int16 int16_min   = INT16_MIN;
@@ -263,8 +253,6 @@ const uint8 uint8_max   = UINT8_MAX;
 const uint16 uint16_max = UINT16_MAX;
 const uint32 uint32_max = UINT32_MAX;
 const uint64 uint64_max = UINT64_MAX;
-
-#endif
 
 struct int24
 {
