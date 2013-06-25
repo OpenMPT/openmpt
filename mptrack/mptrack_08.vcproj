@@ -49,7 +49,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\zlib;..\;..\common\svn_version;..\common\svn_version_default"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;..\common\svn_version;..\common\svn_version_default"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -158,7 +158,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\zlib;..\;..\common\svn_version;..\common\svn_version_default"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;..\common\svn_version;..\common\svn_version_default"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -845,10 +845,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\CompilerDetect.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ChildFrm.h"
 				>
 			</File>
@@ -862,6 +858,10 @@
 			</File>
 			<File
 				RelativePath=".\CommandSet.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\CompilerDetect.h"
 				>
 			</File>
 			<File
@@ -1520,230 +1520,6 @@
 				RelativePath="..\unarchiver\unzip.h"
 				>
 			</File>
-			<Filter
-				Name="unlha"
-				>
-				<File
-					RelativePath="..\unarchiver\unlha\DHUF.CPP"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\EXTRACT.CPP"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\Header.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\HUF.CPP"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\LARC.CPP"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\LHARC.H"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\LHEXT.CPP"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\MAKETBL.CPP"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\SHUF.CPP"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\SLIDE.CPP"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\unarchiver\unlha\SLIDEHUF.H"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-				</File>
-			</Filter>
 			<Filter
 				Name="unrar"
 				>
