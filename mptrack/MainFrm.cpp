@@ -1576,6 +1576,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 						// so it's safe to replace the sample / instrument now.
 						cs.Leave();
 						ok = m_WaveFile.ReadInstrumentFromFile(1, p, dwLen);
+						cs.Enter();
 						if(!ok)
 						{
 							// Try reading as sample if reading as instrument fails
@@ -1930,8 +1931,6 @@ void CMainFrame::OnSongProperties()
 }
 
 
-// -> CODE#0002
-// -> DESC="list box to choose VST plugin presets (programs)"
 void CMainFrame::OnPluginManager()
 //--------------------------------
 {
@@ -1965,7 +1964,6 @@ void CMainFrame::OnPluginManager()
 	}
 #endif // NO_VST
 }
-// -! NEW_FEATURE#0002
 
 
 void CMainFrame::OnChannelManager()

@@ -1140,7 +1140,7 @@ void CTrackApp::OnFileOpen()
 #ifndef NO_MO3
 		";*.mo3"
 #endif
-		")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.gz"
+		")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz"
 #ifndef NO_MO3
 		";*.mo3"
 #endif
