@@ -4147,9 +4147,15 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: TogglePendingMute(GetCurrentChannel()); return wParam;
 		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
-		case kcChannelRecordSelect:			pModDoc->Record1Channel(m_Cursor.GetChannel()); InvalidateChannelsHeaders(); return wParam;
-		case kcChannelSplitRecordSelect:	pModDoc->Record2Channel(m_Cursor.GetChannel()); InvalidateChannelsHeaders(); return wParam;
-		case kcChannelReset:				ResetChannel(m_Cursor.GetChannel()); return wParam;
+		case kcChannelRecordSelect:			for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+												pModDoc->Record1Channel(c);
+											InvalidateChannelsHeaders(); return wParam;
+		case kcChannelSplitRecordSelect:	for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+												pModDoc->Record2Channel(c);
+											InvalidateChannelsHeaders(); return wParam;
+		case kcChannelReset:				for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+												ResetChannel(m_Cursor.GetChannel());
+											return wParam;
 		case kcTimeAtRow:					OnShowTimeAtRow(); return wParam;
 		case kcSoloChnOnPatTransition:		PendingSoloChn(GetCurrentChannel()); return wParam;
 		case kcTransposeUp:					OnTransposeUp(); return wParam;
@@ -4192,14 +4198,14 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPatternSnapDownh2:		CursorJump(GetRowsPerBeat(), false, true);  return wParam;
 
 		case kcNavigateDownSelect:
-		case kcNavigateDown:	SetCurrentRow(GetCurrentRow() + 1, TRUE); return wParam;
+		case kcNavigateDown:	SetCurrentRow(GetCurrentRow() + 1, true); return wParam;
 		case kcNavigateUpSelect:
-		case kcNavigateUp:		SetCurrentRow(GetCurrentRow() - 1, TRUE); return wParam;
+		case kcNavigateUp:		SetCurrentRow(GetCurrentRow() - 1, true); return wParam;
 
 		case kcNavigateDownBySpacingSelect:
-		case kcNavigateDownBySpacing:	SetCurrentRow(GetCurrentRow() + m_nSpacing, TRUE); return wParam;
+		case kcNavigateDownBySpacing:	SetCurrentRow(GetCurrentRow() + m_nSpacing, true); return wParam;
 		case kcNavigateUpBySpacingSelect:
-		case kcNavigateUpBySpacing:		SetCurrentRow(GetCurrentRow() - m_nSpacing, TRUE); return wParam;
+		case kcNavigateUpBySpacing:		SetCurrentRow(GetCurrentRow() - m_nSpacing, true); return wParam;
 
 		case kcNavigateLeftSelect:
 		case kcNavigateLeft:
