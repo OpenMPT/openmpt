@@ -1871,7 +1871,7 @@ void CModDoc::OnFileMP3Convert()
 	strcat_s(sFName, CountOf(sFName), ".mp3");
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mp3", sFName,
-		"MPEG Layer III Files (*.mp3)|*.mp3|Layer3 Wave Files (*.wav)|*.wav||",
+		"MPEG Layer III Files (*.mp3)|*.mp3||",
 		TrackerSettings::Instance().GetWorkingDirectory(DIR_EXPORT),
 		false,
 		&nFilterIndex);
