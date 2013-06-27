@@ -63,21 +63,21 @@ public:
 	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& noteFrom, const STEPINDEXTYPE& stepDistFrom, const NOTEINDEXTYPE& noteTo, const STEPINDEXTYPE& stepDistTo) const
 		{return GetStepDistance(noteFrom, noteTo) + stepDistTo - stepDistFrom;}
 	
-	static CTuningBase* Deserialize(istream& inStrm);
+	static CTuningBase* Deserialize(std::istream& inStrm);
 
 	static uint32 GetVersion() {return s_SerializationVersion;}
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
-	static CTuningRTI* DeserializeOLD(istream&) {return 0;}
+	static CTuningRTI* DeserializeOLD(std::istream&) {return 0;}
 
-	SERIALIZATION_RETURN_TYPE Serialize(ostream& out) const;
+	SERIALIZATION_RETURN_TYPE Serialize(std::ostream& out) const;
 	
 
 public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
-	CTuningRTI(const vector<RATIOTYPE>& ratios,
+	CTuningRTI(const std::vector<RATIOTYPE>& ratios,
 				const NOTEINDEXTYPE& stepMin = s_StepMinDefault,
-				const string& name = "")
+				const std::string& name = "")
 				: CTuning(name)
 	{
 		SetDummyValues();
@@ -90,9 +90,9 @@ public:
 	
 	CTuningRTI() {SetDummyValues();}
 
-	CTuningRTI(const string& name) : CTuning(name) {SetDummyValues();}
+	CTuningRTI(const std::string& name) : CTuning(name) {SetDummyValues();}
 	
-	CTuningRTI(const NOTEINDEXTYPE& stepMin, const string& name) : CTuning(name)
+	CTuningRTI(const NOTEINDEXTYPE& stepMin, const std::string& name) : CTuning(name)
 	{
 		SetDummyValues();
 		m_StepMin = stepMin;
@@ -103,7 +103,7 @@ public:
 //BEGIN PROTECTED VIRTUALS:
 protected:
 	bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&);
-	bool ProCreateGroupGeometric(const vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos);
+	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos);
 	bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
 	void ProSetFineStepCount(const USTEPINDEXTYPE&);
 
@@ -126,7 +126,7 @@ protected:
 protected:
 //BEGIN PROTECTED CLASS SPECIFIC METHODS:
 	//GroupGeometric.
-	bool CreateRatioTableGG(const vector<RATIOTYPE>&, const RATIOTYPE, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos);
+	bool CreateRatioTableGG(const std::vector<RATIOTYPE>&, const RATIOTYPE, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos);
 
 	//Note: Stepdiff should be in range [1, finestepcount]
 	virtual RATIOTYPE GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE stepDiff) const;
@@ -136,7 +136,7 @@ protected:
 	//For example GetRefNote(-1) is to return note :'groupsize-1'.
 	NOTEINDEXTYPE GetRefNote(NOTEINDEXTYPE note) const;
 
-	virtual const string& GetDerivedClassID() const {return s_DerivedclassID;}
+	virtual const std::string& GetDerivedClassID() const {return s_DerivedclassID;}
 
 private:
 	//PRIVATE METHODS:
@@ -157,10 +157,10 @@ private:
 	//NOTE: Update SetDummyValues when adding members.
 
 	//Noteratios
-	vector<RATIOTYPE> m_RatioTable;
+	std::vector<RATIOTYPE> m_RatioTable;
 	
 	//'Fineratios'
-	vector<RATIOTYPE> m_RatioTableFine;
+	std::vector<RATIOTYPE> m_RatioTableFine;
 	
 	//The lowest index of note in the table
 	NOTEINDEXTYPE m_StepMin;
@@ -179,7 +179,7 @@ private:
 
 	mutable UNOTEINDEXTYPE m_SerHelperRatiotableSize;
 
-	static const string s_DerivedclassID;
+	static const std::string s_DerivedclassID;
 	
 
 }; //End: CTuningRTI declaration.

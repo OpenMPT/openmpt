@@ -37,7 +37,7 @@ namespace CTuningS11n
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
 
 	void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
-	void ReadRatioTable(std::istream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t);
+	void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
 
 	void ReadTuning(istream& iStrm, CTuningCollection& Tc, const size_t) {Tc.AddTuning(iStrm, true);}
@@ -47,7 +47,7 @@ namespace CTuningS11n
 using namespace CTuningS11n;
 
 
-CTuningCollection::CTuningCollection(const string& name) : m_Name(name), m_EditMask(EM_ALLOWALL)
+CTuningCollection::CTuningCollection(const std::string& name) : m_Name(name), m_EditMask(EM_ALLOWALL)
 //------------------------------------
 {
 	if(m_Name.size() > GetNameLengthMax()) m_Name.resize(GetNameLengthMax());
@@ -70,7 +70,7 @@ CTuningCollection::~CTuningCollection()
 	m_DeletedTunings.clear();
 }
 
-CTuning* CTuningCollection::FindTuning(const string& name) const
+CTuning* CTuningCollection::FindTuning(const std::string& name) const
 //------------------------------------------------------
 {
 	for(size_t i = 0; i<m_Tunings.size(); i++)
@@ -88,13 +88,13 @@ size_t CTuningCollection::FindTuning(const CTuning* const pT) const
 }
 
 
-CTuning* CTuningCollection::GetTuning(const string& name)
+CTuning* CTuningCollection::GetTuning(const std::string& name)
 //----------------------------------------------
 {
 	return FindTuning(name);
 }
 
-const CTuning* CTuningCollection::GetTuning(const string& name) const
+const CTuning* CTuningCollection::GetTuning(const std::string& name) const
 //-------------------------------------------------------------------
 {
 	return FindTuning(name);
@@ -353,7 +353,7 @@ bool CTuningCollection::TransferTuning(CTuningCollection* pTCsrc, CTuningCollect
 
 }
 
-string CTuningCollection::GetEditMaskString() const
+std::string CTuningCollection::GetEditMaskString() const
 //-------------------------------------------------
 {
 	std::bitset<16> mask(m_EditMask);

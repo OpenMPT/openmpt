@@ -21,15 +21,15 @@ typedef CTuningRTI::RATIOTYPE RATIOTYPE;
 typedef CTuningRTI::NOTEINDEXTYPE NOTEINDEXTYPE;
 typedef CTuningRTI::UNOTEINDEXTYPE UNOTEINDEXTYPE;
 typedef CTuningRTI::STEPINDEXTYPE STEPINDEXTYPE;
-typedef  CTuningRTI::USTEPINDEXTYPE USTEPINDEXTYPE;
+typedef CTuningRTI::USTEPINDEXTYPE USTEPINDEXTYPE;
 
-const string CTuningRTI::s_DerivedclassID = "RTI";
+const std::string CTuningRTI::s_DerivedclassID = "RTI";
 
 namespace CTuningS11n
 {
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
 	void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
-	void ReadRatioTable(std::istream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t);
+	void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t);
 
 	void WriteNoteMap(std::ostream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
@@ -90,7 +90,7 @@ void CTuningRTI::SetDummyValues()
 }
 
 
-bool CTuningRTI::CreateRatioTableGG(const vector<RATIOTYPE>& v, const RATIOTYPE r, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos)
+bool CTuningRTI::CreateRatioTableGG(const std::vector<RATIOTYPE>& v, const RATIOTYPE r, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos)
 //-------------------------------------------------------------------------------------------------
 {
 	if(v.size() == 0 || r <= 0) return true;
@@ -116,7 +116,7 @@ bool CTuningRTI::CreateRatioTableGG(const vector<RATIOTYPE>& v, const RATIOTYPE 
 }
 
 
-bool CTuningRTI::ProCreateGroupGeometric(const vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos)
+bool CTuningRTI::ProCreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos)
 //---------------------------------------------------------------------
 {
 	//Note: Setting finestep is handled by base class when CreateGroupGeometric is called.
@@ -156,7 +156,7 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x) const
 	{
 		const NOTEINDEXTYPE pos = ((x % m_GroupSize) + m_GroupSize) % m_GroupSize;
 		const NOTEINDEXTYPE middlePeriodNumber = 5;
-		string rValue;
+		std::string rValue;
 		NNM_CITER nmi = m_NoteNameMap.find(pos);
 		if(nmi != m_NoteNameMap.end())
 		{
@@ -371,7 +371,7 @@ CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 }
 
 
-CTuningBase* CTuningRTI::Deserialize(istream& iStrm)
+CTuningBase* CTuningRTI::Deserialize(std::istream& iStrm)
 //--------------------------------------------------
 {
 	if(iStrm.fail())
@@ -467,7 +467,7 @@ bool VectorFromBinaryStream(std::istream& inStrm, std::vector<T>& v, const SIZET
 }
 
 
-CTUNINGBASE::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(ostream& outStrm) const
+CTUNINGBASE::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) const
 //----------------------------------------------------------------------------------
 {
 	srlztn::Ssb ssb(outStrm);
@@ -536,7 +536,7 @@ void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t)
 }
 
 
-void ReadRatioTable(std::istream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t)
+void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t)
 //------------------------------------------------------------------------------------------
 {
 	uint64 val;

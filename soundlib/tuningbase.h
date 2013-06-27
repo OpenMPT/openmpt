@@ -29,11 +29,6 @@
 #include <limits>
 #include "../common/misc_util.h"
 #include "../common/typedefs.h"
-using std::string;
-using std::vector;
-using std::istream;
-using std::ostream;
-using std::map;
 
 namespace srlztn {class Ssb;}
 
@@ -158,7 +153,7 @@ public:
 	virtual bool Multiply(const RATIOTYPE&);
 
 	//Create GroupGeometric tuning of *this using virtual ProCreateGroupGeometric.
-	bool CreateGroupGeometric(const vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos);
+	bool CreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos);
 
 	//Create GroupGeometric of *this using ratios from 'itself' and ratios starting from 
 	//position given as third argument.
@@ -168,15 +163,15 @@ public:
 	bool CreateGeometric(const UNOTEINDEXTYPE& p, const RATIOTYPE& r) {return CreateGeometric(p,r,GetValidityRange());}
 	bool CreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR vr);
 
-	virtual SERIALIZATION_RETURN_TYPE Serialize(ostream& /*out*/) const {return false;}
+	virtual SERIALIZATION_RETURN_TYPE Serialize(std::ostream& /*out*/) const {return false;}
 
 	NOTESTR GetNoteName(const NOTEINDEXTYPE& x) const;
 
-	void SetName(const string& s);
+	void SetName(const std::string& s);
 	
-	string GetName() const {return m_TuningName;}
+	std::string GetName() const {return m_TuningName;}
 
-	bool SetNoteName(const NOTEINDEXTYPE&, const string&);
+	bool SetNoteName(const NOTEINDEXTYPE&, const std::string&);
 
 	bool ClearNoteName(const NOTEINDEXTYPE& n, const bool clearAll = false);
 
@@ -184,7 +179,7 @@ public:
 
 	TUNINGTYPE GetTuningType() const {return m_TuningType;}
 
-	static string GetTuningTypeStr(const TUNINGTYPE& tt);
+	static std::string GetTuningTypeStr(const TUNINGTYPE& tt);
 	static TUNINGTYPE GetTuningType(const char* str);
 
 	bool IsOfType(const TUNINGTYPE& type) const;
@@ -225,7 +220,7 @@ public:
 
 	EDITMASK GetEditMask() const {return m_EditMask;}
 
-	bool DeserializeOLD(istream&);
+	bool DeserializeOLD(std::istream&);
 
 	virtual ~CTuningBase() {};
 
@@ -240,7 +235,7 @@ protected:
 	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE&) const;
 
 	//The two methods below return false if action was done, true otherwise.
-	virtual bool ProCreateGroupGeometric(const vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE /*ratiostartpos*/) {return true;}
+	virtual bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE /*ratiostartpos*/) {return true;}
 	virtual bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&) {return true;}
 	
 	virtual VRPAIR ProSetValidityRange(const VRPAIR&) {return GetValidityRange();}
@@ -263,7 +258,7 @@ protected:
 	TUNINGTYPE GetType() const {return m_TuningType;}
 
 	//This is appended to baseclassID in serialization with which objects are identified when loading.
-	virtual const string& GetDerivedClassID() const = 0;
+	virtual const std::string& GetDerivedClassID() const = 0;
 
 	//Return true if data loading failed, false otherwise.
 	virtual bool ProProcessUnserializationdata() = 0;
@@ -280,7 +275,7 @@ private:
 
 //BEGIN: DATA MEMBERS
 protected:
-	string m_TuningName;
+	std::string m_TuningName;
 	EDITMASK m_EditMask; //Behavior: true <~> allow modification
 	TUNINGTYPE m_TuningType;
 	NOTENAMEMAP m_NoteNameMap;
@@ -290,7 +285,7 @@ protected:
 //END DATA MEMBERS
 
 protected:
-	CTuningBase(const string name = "Unnamed") :
+	CTuningBase(const std::string name = "Unnamed") :
 		m_TuningName(name),
 		m_EditMask(uint16_max), //All bits to true - allow all by default.
 		m_TuningType(TT_GENERAL), //Unspecific tuning by default.
@@ -299,8 +294,8 @@ protected:
 private:
 	CTuningBase(CTuningBase&) {}
 	CTuningBase& operator=(const CTuningBase&) {return *this;}
-	static void ReadNotenamemapPair(istream& iStrm, TYPENAME NOTENAMEMAP::value_type& val, const size_t);
-	static void WriteNotenamemappair(ostream& oStrm, const TYPENAME NOTENAMEMAP::value_type& val, const size_t);
+	static void ReadNotenamemapPair(std::istream& iStrm, TYPENAME NOTENAMEMAP::value_type& val, const size_t);
+	static void WriteNotenamemappair(std::ostream& oStrm, const TYPENAME NOTENAMEMAP::value_type& val, const size_t);
 
 public:
 	static const char* s_TuningDescriptionGeneral;
@@ -330,7 +325,7 @@ inline const char* CTUNINGBASE::GetTuningTypeDescription() const
 }
 
 TEMPLATEDEC
-inline void CTUNINGBASE::SetName(const string& s)
+inline void CTUNINGBASE::SetName(const std::string& s)
 //-----------------------------------------------
 {
 	if(MayEdit(EM_NAME)) m_TuningName = s;
