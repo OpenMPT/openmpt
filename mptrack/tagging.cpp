@@ -9,10 +9,9 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
 #include "tagging.h"
+#include "../soundlib/Endianness.h"
 #include "../common/version.h"
-#include "Sndfile.h"
 
 ///////////////////////////////////////////////////
 // CFileTagging - helper class for writing tags
@@ -119,82 +118,4 @@ void CFileTagging::WriteID3v2Frame(char cFrameID[4], std::string sFramecontent, 
 	fwrite(sFramecontent.c_str(), 1, sFramecontent.size(), f);
 
 	totalID3v2Size += (sizeof(tFrame) + sFramecontent.size());
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// RIFF (WAVE) Tags
-
-// Write RIFF tags
-void CFileTagging::WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE *f)
-//---------------------------------------------------------------------------------
-{
-	if(!f || !wdh || !wfh) return;
-	
-	WAVEFILEHEADER list;
-	WAVEDATAHEADER chunk;
-	off_t info_ofs, end_ofs;
-	const uint8 zero = 0;
-
-	struct
-	{
-		uint32 id;
-		std::string *data;
-	} chunks[] =
-	{
-		{ IFFID_ICMT, &comments },
-		{ IFFID_INAM, &title },
-		{ IFFID_IART, &artist },
-		{ IFFID_IPRD, &album },
-		{ IFFID_ICOP, &url },
-		{ IFFID_IGNR, &genre },
-		{ IFFID_ISFT, &encoder },
-		{ IFFID_ICRD, &year },
-	};
-
-	info_ofs = ftell(f);
-	if (info_ofs & 1)
-	{
-		wdh->length++;
-		fwrite(&zero, 1, 1, f);
-		info_ofs++;
-	}
-	list.id_RIFF = IFFID_LIST;
-	list.id_WAVE = IFFID_INFO;
-	list.filesize = 4;
-	fwrite(&list, 1, sizeof(list), f);
-
-	for(size_t iCmt = 0; iCmt < CountOf(chunks); iCmt++)
-	{
-		if(chunks[iCmt].data->empty())
-		{
-			continue;
-		}
-
-		std::string data = *chunks[iCmt].data;
-		// Special case: Expand year to full date
-		if(chunks[iCmt].id == IFFID_ICRD)
-		{
-			data += "-01-01";
-		}
-
-		chunk.id_data = chunks[iCmt].id;
-		chunk.length = data.length() + 1;
-
-		fwrite(&chunk, 1, sizeof(chunk), f);
-		fwrite(data.c_str(), 1, chunk.length, f);
-		list.filesize += chunk.length + sizeof(chunk);
-
-		// Chunks must be even-sized
-		if(chunk.length & 1)
-		{
-			fwrite(&zero, 1, 1, f);
-			list.filesize++;
-		}
-	}
-	// Update INFO size
-	end_ofs = ftell(f);
-	fseek(f, info_ofs, SEEK_SET);
-	fwrite(&list, 1, sizeof(list), f);
-	fseek(f, end_ofs, SEEK_SET);
-	wfh->filesize += list.filesize + 8;
 }
