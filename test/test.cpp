@@ -24,6 +24,7 @@
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/SampleFormatConverters.h"
+#include "../soundlib/ITCompression.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
 #include "../mptrack/moddoc.h"
@@ -303,6 +304,7 @@ void TestMisc();
 void TestMIDIEvents();
 void TestStringIO();
 void TestSampleConversion();
+void TestITCompression();
 
 
 
@@ -316,6 +318,7 @@ void DoTests()
 	DO_TEST(TestStringIO);
 	DO_TEST(TestMIDIEvents);
 	DO_TEST(TestSampleConversion);
+	DO_TEST(TestITCompression);
 
 	// slower tests, require opening a CModDoc
 	DO_TEST(TestPCnoteSerialization);
@@ -1385,8 +1388,70 @@ void TestLoadSaveFile()
 
 		DestroySoundFileContainer(sndFileContainer);
 	}
-
 }
+
+
+void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215)
+//------------------------------------------------------------------------------------------------
+{
+	std::string filename = GetTestFilenameBase() + "raw";
+
+	ModSample smp;
+	smp.uFlags = smpFormat;
+	smp.pSample = const_cast<int8 *>(&sampleData[0]);
+	smp.nLength = sampleData.size() / smp.GetBytesPerSample();
+
+	{
+		FILE *f = fopen(filename.c_str(), "wb");
+		ITCompression compression(smp, it215, f);
+		fclose(f);
+	}
+
+	{
+		FILE *f = fopen(filename.c_str(), "rb");
+		fseek(f, 0, SEEK_END);
+		std::vector<int8> fileData(ftell(f), 0);
+		fseek(f, 0, SEEK_SET);
+		fread(&fileData[0], 1, fileData.size(), f);
+		FileReader file(&fileData[0], fileData.size());
+
+		std::vector<int8> sampleDataNew(sampleData.size(), 0);
+		smp.pSample = &sampleDataNew[0];
+
+		ITDecompression decompression(file, smp, it215);
+		for(size_t i = 0; i < sampleData.size(); i++)
+		{
+			VERIFY_EQUAL(sampleData[i], sampleDataNew[i]);
+		}
+		fclose(f);
+	}
+	remove(filename.c_str());
+}
+
+
+void TestITCompression()
+//----------------------
+{
+	return;
+	// Test loading / saving of IT-compressed samples
+	const int sampleDataSize = 65536;
+	std::vector<int8> sampleData(sampleDataSize, 0);
+	std::srand(0);
+	for(int i = 0; i < sampleDataSize; i++)
+	{
+		sampleData[i] = (int8)std::rand();
+	}
+
+	// Run each compression test with IT215 compression and without.
+	for(int i = 0; i < 2; i++)
+	{
+		RunITCompressionTest(sampleData, ChannelFlags(0), i == 0);
+		RunITCompressionTest(sampleData, CHN_16BIT, i == 0);
+		RunITCompressionTest(sampleData, CHN_STEREO, i == 0);
+		RunITCompressionTest(sampleData, CHN_16BIT | CHN_STEREO, i == 0);
+	}
+}
+
 
 double Rand01() {return rand() / double(RAND_MAX);}
 
@@ -1424,30 +1489,13 @@ void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc
 void TestPCnoteSerialization()
 //----------------------------
 {
-#ifdef MODPLUG_TRACKER
-	theApp.OnFileNewMPT();
-	CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm == nullptr)
-		throw(std::runtime_error("pMainFrm is nullptr"));
-	CModDoc* pModDoc = pMainFrm->GetActiveDoc();
-	if(pModDoc == nullptr)
-		throw(std::runtime_error("pModdoc is nullptr"));
-
-	CSoundFile &sndFile = pModDoc->GetrSoundFile();
-#else
 	FileReader file;
-	std::shared_ptr<CSoundFile> pSndFile(new CSoundFile());
+	MPT_SHARED_PTR<CSoundFile> pSndFile(new CSoundFile());
 	CSoundFile &sndFile = *pSndFile.get();
-#endif
+	sndFile.ChangeModTypeTo(MOD_TYPE_MPT);
+	sndFile.Patterns.DestroyPatterns();
+	sndFile.m_nChannels = ModSpecs::mptm.channelsMax;
 
-#ifdef MODPLUG_TRACKER
-	// Set maximum number of channels.
-	pModDoc->ReArrangeChannels(std::vector<CHANNELINDEX>(ModSpecs::mptm.channelsMax , 0));
-#else
-	// todo: set number of channels
-#endif
-
-	sndFile.Patterns.Remove(0);
 	sndFile.Patterns.Insert(0, ModSpecs::mptm.patternRowsMin);
 	sndFile.Patterns.Insert(1, 64);
 	GenerateCommands(sndFile.Patterns[1], 0.3, 0.3);
@@ -1501,11 +1549,6 @@ void TestPCnoteSerialization()
 		}
 		VERIFY_EQUAL( bPatternDataMatch, true);
 	}
-
-#ifdef MODPLUG_TRACKER
-	pModDoc->OnCloseDocument();
-#endif
-
 }
 
 

@@ -52,7 +52,6 @@ protected:
 
 	template<typename Properties>
 	void Compress(const void *data, SmpLength offset, SmpLength actualLength);
-	void Verify(const void *data, void *sampleData, SmpLength offset);
 
 	static int GetWidthChangeSize(int w, bool is16);
 
