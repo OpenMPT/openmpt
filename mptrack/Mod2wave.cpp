@@ -1104,14 +1104,6 @@ void CDoAcmConvert::OnButton1()
 
 	// Success
 
-	if((wdh.length % 2u) != 0)
-	{
-		// Write padding byte if sample size is odd.
-		int8 padding = 0;
-		fwrite(&padding, 1, 1, f);
-		wfh.filesize++;
-	}
-
 	fclose(f);
 	if (!m_bAbort) retval = IDOK;
 OnError:
