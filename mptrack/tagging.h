@@ -11,7 +11,6 @@
 #pragma once
 
 #include <string>
-#include "Wav.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ID3v2.4 Tags
@@ -68,7 +67,6 @@ class CFileTagging
 public:
 	// Write Tags
 	void WriteID3v2Tags(FILE *f);
-	void WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE *f);
 
 	// Tag data
 	std::string title, artist, album, year, comments, genre, url, encoder, bpm;
