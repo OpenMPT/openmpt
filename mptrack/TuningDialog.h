@@ -311,7 +311,7 @@ private:
 	//m_CommandItemDest is used when the command really need only 
 	//one argument.
 
-	typedef map<const CTuningCollection* const, bool> MODIFIED_MAP;
+	typedef std::map<const CTuningCollection* const, bool> MODIFIED_MAP;
 	MODIFIED_MAP m_ModifiedTCs;
 	//If tuning collection seems to have been modified, its address
 	//is added to this map.

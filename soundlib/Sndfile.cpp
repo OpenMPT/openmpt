@@ -828,7 +828,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	}
 
 	// plugin loader
-	string notFoundText;
+	std::string notFoundText;
 	std::vector<PLUGINDEX> notFoundIDs;
 
 #ifndef NO_VST
@@ -1710,8 +1710,8 @@ void CSoundFile::LoadBuiltInTunings()
 #endif
 
 
-string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const INSTRUMENTINDEX inst) const
-//--------------------------------------------------------------------------------------------------
+std::string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const INSTRUMENTINDEX inst) const
+//-------------------------------------------------------------------------------------------------------
 {
 	if((inst >= MAX_INSTRUMENTS && inst != INSTRUMENTINDEX_INVALID) || note < NOTE_MIN || note > NOTE_MAX) return "BUG";
 
