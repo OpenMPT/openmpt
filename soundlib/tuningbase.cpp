@@ -94,7 +94,7 @@ void CTUNINGBASE::TuningCopy(CTuningBase& to, const CTuningBase& from, const boo
 	if(allowExactnamecopy)
 		to.m_TuningName = from.m_TuningName;
 	else
-		to.m_TuningName = string("Copy of ") + from.m_TuningName;
+		to.m_TuningName = std::string("Copy of ") + from.m_TuningName;
 
 	to.m_NoteNameMap = from.m_NoteNameMap;
 	to.m_EditMask = from.m_EditMask;
@@ -165,7 +165,7 @@ TYPENAME CTUNINGBASE::TUNINGTYPE CTUNINGBASE::GetTuningType(const char* str)
 }
 
 TEMPLATEDEC
-string CTUNINGBASE::GetTuningTypeStr(const TUNINGTYPE& tt)
+std::string CTUNINGBASE::GetTuningTypeStr(const TUNINGTYPE& tt)
 //----------------------------------------------------------------
 {
 	if(tt == TT_GENERAL)
@@ -220,7 +220,7 @@ bool CTUNINGBASE::IsOfType(const TUNINGTYPE& type) const
 }
 
 TEMPLATEDEC
-bool CTUNINGBASE::SetNoteName(const NOTEINDEXTYPE& n, const string& str)
+bool CTUNINGBASE::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 //-----------------------------------------------------------------------
 {
 	if(MayEdit(EM_NOTENAME))
@@ -283,7 +283,7 @@ bool CTUNINGBASE::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& 
 	if(s < 1 || r <= 0 || startindex < GetValidityRange().first)
 		return true;
 
-	vector<RATIOTYPE> v;
+	std::vector<RATIOTYPE> v;
 	v.reserve(s);
 	for(NOTEINDEXTYPE i = startindex; i<startindex+s; i++)
 		v.push_back(GetRatio(i));
@@ -291,7 +291,7 @@ bool CTUNINGBASE::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& 
 }
 
 TEMPLATEDEC
-bool CTUNINGBASE::CreateGroupGeometric(const vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos)
+bool CTUNINGBASE::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos)
 //------------------------------------------------------------------------------------------
 {
 	if(MayEdit(EM_RATIOS) &&
@@ -425,7 +425,7 @@ bool CTUNINGBASE::SetType(const TUNINGTYPE& tt)
 
 
 TEMPLATEDEC
-bool CTUNINGBASE::DeserializeOLD(istream& inStrm)
+bool CTUNINGBASE::DeserializeOLD(std::istream& inStrm)
 //------------------------------------------------
 {
 	char begin[8];
@@ -457,7 +457,7 @@ bool CTUNINGBASE::DeserializeOLD(istream& inStrm)
 	for(size_t i = 0; i<size; i++)
 	{
 		NOTEINDEXTYPE n;
-		string str;
+		std::string str;
 		inStrm.read(reinterpret_cast<char*>(&n), sizeof(n));
 		if(srlztn::StringFromBinaryStream<uint8>(inStrm, str))
 			return SERIALIZATION_FAILURE;
