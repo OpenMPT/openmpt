@@ -88,12 +88,12 @@ uint16 XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibility
 	ConvertEnvelopeToXM(mptIns.PanEnv, panPoints, panFlags, panSustain, panLoopStart, panLoopEnd, panEnv);
 
 	// Create sample assignment table
-	vector<SAMPLEINDEX> sampleList = GetSampleList(mptIns, compatibilityExport);
+	std::vector<SAMPLEINDEX> sampleList = GetSampleList(mptIns, compatibilityExport);
 	for(size_t i = 0; i < CountOf(sampleMap); i++)
 	{
 		if(mptIns.Keyboard[i + 12] > 0)
 		{
-			vector<SAMPLEINDEX>::iterator sample = std::find(sampleList.begin(), sampleList.end(), mptIns.Keyboard[i + 12]);
+			std::vector<SAMPLEINDEX>::iterator sample = std::find(sampleList.begin(), sampleList.end(), mptIns.Keyboard[i + 12]);
 			if(sample != sampleList.end())
 			{
 				// Yep, we want to export this sample.
@@ -115,11 +115,11 @@ uint16 XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibility
 
 
 // Get a list of samples that should be written to the file.
-vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns, bool compatibilityExport) const
-//----------------------------------------------------------------------------------------------------------
+std::vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns, bool compatibilityExport) const
+//---------------------------------------------------------------------------------------------------------------
 {
-	vector<SAMPLEINDEX> sampleList;		// List of samples associated with this instrument
-	vector<bool> addedToList;			// Which samples did we already add to the sample list?
+	std::vector<SAMPLEINDEX> sampleList;		// List of samples associated with this instrument
+	std::vector<bool> addedToList;			// Which samples did we already add to the sample list?
 
 	uint8 numSamples = 0;
 	for(size_t i = 0; i < CountOf(sampleMap); i++)

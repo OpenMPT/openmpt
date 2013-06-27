@@ -1455,7 +1455,7 @@ void TestPCnoteSerialization()
 	GenerateCommands(sndFile.Patterns[2], 0.5, 0.5);
 
 	//
-	vector<ModCommand> pat[3];
+	std::vector<ModCommand> pat[3];
 	const size_t numCommands[] = {	sndFile.GetNumChannels() * sndFile.Patterns[0].GetNumRows(),
 									sndFile.GetNumChannels() * sndFile.Patterns[1].GetNumRows(),
 									sndFile.GetNumChannels() * sndFile.Patterns[2].GetNumRows()

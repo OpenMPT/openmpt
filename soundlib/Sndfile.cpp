@@ -1499,8 +1499,8 @@ bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr) const
 
 // Detect samples that are referenced by an instrument, but actually not used in a song.
 // Only works in instrument mode. Unused samples are marked as false in the vector.
-SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
-//-------------------------------------------------------------------------
+SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
+//------------------------------------------------------------------------------
 {
 	sampleUsed.assign(GetNumSamples() + 1, false);
 
@@ -1556,8 +1556,8 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(vector<bool> &sampleUsed) const
 
 
 // Destroy samples where keepSamples index is false. First sample is keepSamples[1]!
-SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const vector<bool> &keepSamples)
-//----------------------------------------------------------------------------
+SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const std::vector<bool> &keepSamples)
+//---------------------------------------------------------------------------------
 {
 	if(keepSamples.empty())
 	{

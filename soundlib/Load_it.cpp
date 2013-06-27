@@ -481,7 +481,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading instrument, sample and pattern offsets
-	vector<uint32> insPos, smpPos, patPos;
+	std::vector<uint32> insPos, smpPos, patPos;
 	file.ReadVector(insPos, fileHeader.insnum);
 	file.ReadVector(smpPos, fileHeader.smpnum);
 	file.ReadVector(patPos, fileHeader.patnum);
@@ -717,7 +717,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 		FileReader patternData = file.GetChunk(len);
 		ROWINDEX row = 0;
-		vector<uint8> chnMask(GetNumChannels());
+		std::vector<uint8> chnMask(GetNumChannels());
 
 		while(row < numRows && patternData.AreBytesLeft())
 		{
@@ -793,8 +793,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		// Now (after the Insert() call), we can read the pattern name.
 		CopyPatternName(Patterns[pat], patNames);
 
-		vector<uint8> chnMask(GetNumChannels());
-		vector<ModCommand> lastValue(GetNumChannels(), ModCommand::Empty());
+		std::vector<uint8> chnMask(GetNumChannels());
+		std::vector<ModCommand> lastValue(GetNumChannels(), ModCommand::Empty());
 
 		ModCommand *m = Patterns[pat];
 		ROWINDEX row = 0;
@@ -1146,9 +1146,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	itHeader.patnum = std::min(Patterns.GetNumPatterns(), specs.patternsMax);
 
 	// Parapointers
-	vector<uint32> patpos(itHeader.patnum, 0);
-	vector<uint32> smppos(itHeader.smpnum, 0);
-	vector<uint32> inspos(itHeader.insnum, 0);
+	std::vector<uint32> patpos(itHeader.patnum, 0);
+	std::vector<uint32> smppos(itHeader.smpnum, 0);
+	std::vector<uint32> inspos(itHeader.insnum, 0);
 
 	//VERSION
 	if(GetType() == MOD_TYPE_MPT)
@@ -1398,8 +1398,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		dwPos += 8;
 
 		const CHANNELINDEX maxChannels = MIN(specs.channelsMax, GetNumChannels());
-		vector<BYTE> chnmask(maxChannels, 0xFF);
-		vector<ModCommand> lastvalue(maxChannels, ModCommand::Empty());
+		std::vector<BYTE> chnmask(maxChannels, 0xFF);
+		std::vector<ModCommand> lastvalue(maxChannels, ModCommand::Empty());
 
 		for(ROWINDEX row = 0; row < writeRows; row++)
 		{

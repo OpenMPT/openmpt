@@ -405,7 +405,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	SetupMODPanning(true);
 	madeWithTracker = mpt::String::Format("Extreme's tracker %d.%d", fileHeader.versionHigh, fileHeader.versionLow);
 
-	vector<bool> packSample(fileHeader.numSamps);
+	std::vector<bool> packSample(fileHeader.numSamps);
 
 	STATIC_ASSERT(MAX_SAMPLES > 255);
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -448,11 +448,11 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	const uint16 packedLength = file.ReadUint16LE();
 	if(packedLength)
 	{
-		vector<uint8> textIn, textOut;
+		std::vector<uint8> textIn, textOut;
 		file.ReadVector(textIn, packedLength);
 		textOut.reserve(packedLength);
 
-		for(vector<uint8>::iterator c = textIn.begin(); c != textIn.end(); c++)
+		for(std::vector<uint8>::iterator c = textIn.begin(); c != textIn.end(); c++)
 		{
 			if(*c & 0x80)
 			{
@@ -468,7 +468,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read Order List
-	vector<uint16> orders;
+	std::vector<uint16> orders;
 	if(file.ReadVector(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);
@@ -781,8 +781,8 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	madeWithTracker = mpt::String::Format("Velvet Studio %d.%d", fileHeader.format >> 4, fileHeader.format & 0x0F);
 
 	// Instruments
-	vector<SAMPLEINDEX> firstSample;	// First sample of instrument
-	vector<uint16> sampleSettings;		// Shadow sample map... Lo byte = Instrument, Hi byte, lo nibble = Sample index in instrument, Hi byte, hi nibble = Sample pack status
+	std::vector<SAMPLEINDEX> firstSample;	// First sample of instrument
+	std::vector<uint16> sampleSettings;		// Shadow sample map... Lo byte = Instrument, Hi byte, lo nibble = Sample index in instrument, Hi byte, hi nibble = Sample pack status
 	enum
 	{
 		instrIndexMask		= 0xFF,		// Shadow instrument
@@ -887,7 +887,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	if(descriptionHeader.packedLen)
 	{
 		const size_t textLength = descriptionHeader.packedLen - sizeof(descriptionHeader);
-		vector<uint8> textIn, textOut(descriptionHeader.unpackedLen);
+		std::vector<uint8> textIn, textOut(descriptionHeader.unpackedLen);
 		file.ReadVector(textIn, textLength);
 
 		size_t readLen = 0, writeLen = 0;
@@ -912,7 +912,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read Order List
-	vector<uint16> orders;
+	std::vector<uint16> orders;
 	if(file.ReadVector(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);

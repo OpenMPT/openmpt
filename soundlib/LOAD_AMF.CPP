@@ -439,7 +439,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Setup Order List
 	Order.resize(fileHeader.numOrders);
-	vector<ROWINDEX> patternLength(fileHeader.numOrders, 64);
+	std::vector<ROWINDEX> patternLength(fileHeader.numOrders, 64);
 	const FileReader::off_t trackStartPos = file.GetPosition() + (fileHeader.version >= 14 ? 2 : 0);
 
 	for(ORDERINDEX ord = 0; ord < fileHeader.numOrders; ord++)
@@ -454,7 +454,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read Sample Headers
-	vector<uint32> samplePos(GetNumSamples(), 0);
+	std::vector<uint32> samplePos(GetNumSamples(), 0);
 	uint32 maxSamplePos = 0;
 
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -512,16 +512,16 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	
 	// Read Track Mapping Table
-	vector<uint16> trackMap;
+	std::vector<uint16> trackMap;
 	file.ReadVector(trackMap, fileHeader.numTracks);
 	uint16 trackCount = 0;
-	for(vector<uint16>::const_iterator i = trackMap.begin(); i != trackMap.end(); i++)
+	for(std::vector<uint16>::const_iterator i = trackMap.begin(); i != trackMap.end(); i++)
 	{
 		trackCount = std::max(trackCount, *i);
 	}
 
 	// Store Tracks Positions
-	vector<FileReader> trackData(trackCount);
+	std::vector<FileReader> trackData(trackCount);
 	for(uint16 i = 0; i < trackCount; i++)
 	{
 		// Track size is a 24-Bit value describing the number of byte triplets in this track.
@@ -572,7 +572,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Get table with per-channel track assignments
 		file.Seek(trackStartPos + pat * (GetNumChannels() * 2 + (fileHeader.version >= 14 ? 2 : 0)));
-		vector<uint16> tracks;
+		std::vector<uint16> tracks;
 		file.ReadVector(tracks, GetNumChannels());
 
 		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)

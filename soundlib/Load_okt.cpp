@@ -71,8 +71,8 @@ STATIC_ASSERT(sizeof(OktSample) == 32);
 #endif
 
 // Parse the sample header block
-void ReadOKTSamples(FileReader &chunk, vector<bool> &sample7bit, CSoundFile *pSndFile)
-//------------------------------------------------------------------------------------
+void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSoundFile *pSndFile)
+//-----------------------------------------------------------------------------------------
 {
 	pSndFile->m_nSamples = MIN((SAMPLEINDEX)(chunk.BytesLeft() / sizeof(OktSample)), MAX_SAMPLES - 1);	// typically 36
 	sample7bit.resize(pSndFile->GetNumSamples());
@@ -289,9 +289,9 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// prepare some arrays to store offsets etc.
-	vector<FileReader> patternChunks;
-	vector<FileReader> sampleChunks;
-	vector<bool> sample7bit;	// 7-/8-bit sample
+	std::vector<FileReader> patternChunks;
+	std::vector<FileReader> sampleChunks;
+	std::vector<bool> sample7bit;	// 7-/8-bit sample
 	ORDERINDEX nOrders = 0;
 
 	InitializeGlobals();

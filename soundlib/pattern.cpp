@@ -533,7 +533,7 @@ void WriteData(std::ostream& oStrm, const CPattern& pat)
 
 	const ROWINDEX rows = pat.GetNumRows();
 	const CHANNELINDEX chns = pat.GetNumChannels();
-	vector<ModCommand> lastChnMC(chns);
+	std::vector<ModCommand> lastChnMC(chns);
 
 	for(ROWINDEX r = 0; r<rows; r++)
 	{
@@ -588,7 +588,7 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 	const CHANNELINDEX chns = pat.GetNumChannels();
 	const ROWINDEX rows = pat.GetNumRows();
 
-	vector<ModCommand> lastChnMC(chns);
+	std::vector<ModCommand> lastChnMC(chns);
 
 	ROWINDEX row = 0;
 	while(row < rows && iStrm.good())

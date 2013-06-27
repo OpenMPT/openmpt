@@ -301,7 +301,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	BYTE inspanenv[MAX_INSTRUMENTS];
 	LPCBYTE pvolenv, ppanenv, ppitchenv;
 	UINT nvolenv, npanenv, npitchenv;
-	vector<ROWINDEX> patternLength;
+	std::vector<ROWINDEX> patternLength;
 
 	if ((!lpStream) || (dwMemLength < 1024)) return false;
 	if ((pmsh->id != 0x4C444D44) || ((pmsh->version & 0xF0) > 0x10)) return false;
