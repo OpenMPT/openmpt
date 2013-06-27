@@ -343,18 +343,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\HyperEdit.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\HyperEdit2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\HyperEdit3.cpp"
-				>
-			</File>
-			<File
 				RelativePath="InputHandler.cpp"
 				>
 			</File>

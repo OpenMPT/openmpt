@@ -374,9 +374,6 @@
     <ClCompile Include="EffectVis.cpp" />
     <ClCompile Include="ExceptionHandler.cpp" />
     <ClCompile Include="Globals.cpp" />
-    <ClCompile Include="HyperEdit.cpp" />
-    <ClCompile Include="HyperEdit2.cpp" />
-    <ClCompile Include="HyperEdit3.cpp" />
     <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="KeyConfigDlg.cpp" />
     <ClCompile Include="Mainbar.cpp" />
@@ -548,7 +545,6 @@
     <ClInclude Include="EffectInfo.h" />
     <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="Globals.h" />
-    <ClInclude Include="HyperEdit.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Mainbar.h" />
     <ClInclude Include="Mainfrm.h" />
@@ -602,6 +598,7 @@
     <ClInclude Include="VstPresets.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\soundlib\Tunings\built-inTunings.tc" />
     <None Include="res\bitmap1.bmp" />
     <None Include="res\colors.bmp" />
     <None Include="res\dragging.cur" />
@@ -622,7 +619,6 @@
     <None Include="res\visnode1.bmp" />
     <None Include="res\vispcnode.bmp" />
     <None Include="res\vumeters.bmp" />
-    <None Include="res\built-inTunings.tc" />
     <None Include="res\defaultKeybindings.mkb" />
     <None Include="mptrack.reg" />
     <None Include="VTune\mptrack.vpj" />
