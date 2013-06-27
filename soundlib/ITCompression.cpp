@@ -174,50 +174,6 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 	WriteByte(byteVal);
 	packedData[0] = uint8((packedLength - 2) & 0xFF);
 	packedData[1] = uint8((packedLength - 2) >> 8);
-
-	Verify(data, sampleData, offset);
-}
-
-
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Mptrack.h"	// For config filename
-#endif // MODPLUG_TRACKER
-
-// Check integrity of compressed data
-void ITCompression::Verify(const void *data, void *sampleData, SmpLength offset)
-//------------------------------------------------------------------------------
-{
-#ifdef MODPLUG_TRACKER
-	if(::GetPrivateProfileInt("Misc", "ITCompressionVerification", 0, theApp.GetConfigFileName()) != 0)
-	{
-		int8 *newSampleData = new (std::nothrow) int8[baseLength * mptSample.GetElementarySampleSize()];
-		// Load original sample data for this block again
-		if(mptSample.GetElementarySampleSize() > 1)
-		{
-			CopySample<int16>(sampleData, data, offset, baseLength, mptSample.GetNumChannels());
-		} else
-		{
-			CopySample<int8>(sampleData, data, offset, baseLength, mptSample.GetNumChannels());
-		}
-
-		FileReader data(&packedData[0], packedLength);
-		ModSample sample = mptSample;
-		sample.uFlags.reset(CHN_STEREO);
-		sample.pSample = newSampleData;
-		sample.nLength = baseLength;
-		ITDecompression(data, sample, is215);
-
-		if(memcmp(sampleData, newSampleData, baseLength * mptSample.GetElementarySampleSize()))
-		{
-			Reporting::Error("CRITICAL ERROR! Sample compression failed for some sample!\nDisable IT compression NOW, find out which sample got broken and send the original sample to the OpenMPT devs!");
-		}
-		delete[] newSampleData;
-	}
-#else // !MODPLUG_TRACKER
-	UNREFERENCED_PARAMETER(data);
-	UNREFERENCED_PARAMETER(sampleData);
-	UNREFERENCED_PARAMETER(offset);
-#endif // MODPLUG_TRACKER
 }
 
 
