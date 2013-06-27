@@ -65,41 +65,6 @@ static const char *id3v1GenreNames[] =
 	"Thrash Metal",         "Anime",            "JPop",             "Synthpop"
 };
 
-// this converts a buffer of 32-bit integer sample data to 32 bit floating point
-static void M2W_32ToFloat(void *pBuffer, long nCount)
-{
-//	const float _ki2f = 1.0f / (float)(ULONG)(0x80000000); //olivier
-	const float _ki2f = 1.0f / (float)(ULONG)(0x7fffffff); //ericus' 32bit fix
-//	const float _ki2f = 1.0f / (float)(ULONG)(0x7ffffff);  //robin
-	_asm {
-	mov esi, pBuffer
-	mov ecx, nCount
-	fld _ki2f
-	test ecx, 1
-	jz evencount
-	fild dword ptr [esi]
-	fmul st(0), st(1)
-	fstp dword ptr [esi]
-	add esi, 4
-evencount:
-	shr ecx, 1
-	or ecx, ecx
-	jz loopdone
-cvtloop:
-	fild dword ptr [esi]
-	fild dword ptr [esi+4]
-	fmul st(0), st(2)
-	fstp dword ptr [esi+4]
-	fmul st(0), st(1)
-	fstp dword ptr [esi]
-	add esi, 8
-	dec ecx
-	jnz cvtloop
-loopdone:
-	fstp st(0)
-	}
-}
-
 ///////////////////////////////////////////////////
 // CWaveConvert - setup for converting a wave file
 
@@ -170,11 +135,8 @@ BOOL CWaveConvert::OnInitDialog()
 	CheckDlgButton(IDC_CHECK3, MF_CHECKED);		// HQ resampling
 	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// rewbs.NoNormalize
 
-// -> CODE#0024
-// -> DESC="wav export update"
 	CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
-// -! NEW_FEATURE#0024
 
 	SetDlgItemInt(IDC_EDIT3, m_nMinOrder);
 	m_SpinMinOrder.SetRange(0, m_nNumOrders);
@@ -192,28 +154,14 @@ BOOL CWaveConvert::OnInitDialog()
 		m_CbnSampleRate.SetItemData(m_CbnSampleRate.AddString(s), n);
 		if (n == WaveFormat.Format.nSamplesPerSec) m_CbnSampleRate.SetCurSel(i);
 	}
-// -> CODE#0024
-// -> DESC="wav export update"
-//	for (UINT j=0; j<3*3; j++)
 	for (UINT j=0; j<3*4; j++)
-// -! NEW_FEATURE#0024
 	{
-// -> CODE#0024
-// -> DESC="wav export update"
-//		UINT n = 3*3-1-j;
-//		UINT nBits = 8 << (n % 3);
-//		UINT nChannels = 1 << (n/3);
 		UINT n = 3*4-1-j;
 		UINT nBits = 8 * (1 + n % 4);
 		UINT nChannels = 1 << (n/4);
-// -! NEW_FEATURE#0024
 		if ((nBits >= 16) || (nChannels <= 2))
 		{
-// -> CODE#0024
-// -> DESC="wav export update"
-//			wsprintf(s, "%s, %d Bit", gszChnCfgNames[j/3], nBits);
 			wsprintf(s, "%s, %d-Bit", gszChnCfgNames[n/4], nBits);
-// -! NEW_FEATURE#0024
 			UINT ndx = m_CbnSampleFormat.AddString(s);
 			m_CbnSampleFormat.SetItemData(ndx, (nChannels<<8)|nBits);
 			if ((nBits == WaveFormat.Format.wBitsPerSample) && (nChannels == WaveFormat.Format.nChannels))
@@ -233,11 +181,7 @@ void CWaveConvert::OnFormatChanged()
 {
 	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 	UINT nBits = dwFormat & 0xFF;
-// -> CODE#0024
-// -> DESC="wav export update"
-//	::EnableWindow( ::GetDlgItem(m_hWnd, IDC_CHECK5), (nBits <= 16) ? TRUE : FALSE );
 	::EnableWindow( ::GetDlgItem(m_hWnd, IDC_CHECK5), (nBits <= 24) ? TRUE : FALSE );
-// -! NEW_FEATURE#0024
 }
 
 
@@ -271,14 +215,14 @@ void CWaveConvert::OnCheck1()
 	UpdateDialog();
 }
 
-//rewbs.resamplerConf
+
 void CWaveConvert::OnPlayerOptions()
 //----------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = 2;
 	CMainFrame::GetMainFrame()->OnViewOptions();
 }
-//end rewbs.resamplerConf
+
 
 void CWaveConvert::OnCheck2()
 //---------------------------
@@ -335,10 +279,7 @@ void CWaveConvert::OnOK()
 		}
 	}
 
-// -> CODE#0024
-// -> DESC="wav export update"
 	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED;
-// -! NEW_FEATURE#0024
 	m_bInstrumentMode= IsDlgButtonChecked(IDC_CHECK6) != BST_UNCHECKED;
 
 	// WaveFormatEx
@@ -351,11 +292,7 @@ void CWaveConvert::OnOK()
 	if ((WaveFormat.Format.nChannels != 1) && (WaveFormat.Format.nChannels != 4)) WaveFormat.Format.nChannels = 2;
 	WaveFormat.Format.wBitsPerSample = (WORD)(dwFormat & 0xFF);
 
-// -> CODE#0024
-// -> DESC="wav export update"
-//	if ((WaveFormat.Format.wBitsPerSample != 8) && (WaveFormat.Format.wBitsPerSample != 32)) WaveFormat.Format.wBitsPerSample = 16;
 	if ((WaveFormat.Format.wBitsPerSample != 8) && (WaveFormat.Format.wBitsPerSample != 24) && (WaveFormat.Format.wBitsPerSample != 32)) WaveFormat.Format.wBitsPerSample = 16;
-// -! NEW_FEATURE#0024
 
 	WaveFormat.Format.nBlockAlign = (WaveFormat.Format.wBitsPerSample * WaveFormat.Format.nChannels) / 8;
 	WaveFormat.Format.nAvgBytesPerSec = WaveFormat.Format.nSamplesPerSec * WaveFormat.Format.nBlockAlign;
@@ -542,10 +479,6 @@ BOOL CLayer3Convert::FormatEnumCB(HACMDRIVERID hdid, LPACMFORMATDETAILS pafd, DW
 	 && (pafd->pwfx->wFormatTag == WAVE_FORMAT_MPEGLAYER3)
 	 && (pafd->pwfx->cbSize == sizeof(MPEGLAYER3WAVEFORMAT)-sizeof(WAVEFORMATEX))
 	 && (pafd->pwfx->nSamplesPerSec >= 11025)
-// -> CODE#0024
-// -> DESC="wav export update"
-//	 && (pafd->pwfx->nSamplesPerSec <= 48000)
-// -! NEW_FEATURE#0024
 	 && (pafd->pwfx->nChannels >= 1)
 	 && (pafd->pwfx->nChannels <= 2)
 	 && (m_nNumFormats < MAX_FORMATS))
@@ -655,11 +588,8 @@ BOOL CDoWaveConvert::OnInitDialog()
 	return TRUE;
 }
 
-// -> CODE#0024
-// -> DESC="wav export update"
-//#define WAVECONVERTBUFSIZE	2048
+
 #define WAVECONVERTBUFSIZE	MIXBUFFERSIZE //Going over MIXBUFFERSIZE can kill VSTPlugs 
-// -! NEW_FEATURE#0024
 
 
 void CDoWaveConvert::OnButton1()
@@ -695,14 +625,10 @@ void CDoWaveConvert::OnButton1()
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	mixersettings.gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
-	mixersettings.m_SampleFormat = (SampleFormat)m_pWaveFormat->wBitsPerSample;
+	mixersettings.m_SampleFormat = (m_pWaveFormat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) ? SampleFormatFloat32 : (SampleFormat)m_pWaveFormat->wBitsPerSample;
 	mixersettings.gnChannels = m_pWaveFormat->nChannels;
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
-// -> CODE#0024
-// -> DESC="wav export update"
-//	if ((m_bNormalize) && (m_pWaveFormat->wBitsPerSample <= 16))
 	if ((m_bNormalize) && (m_pWaveFormat->wBitsPerSample <= 24))
-// -! NEW_FEATURE#0024
 	{
 		mixersettings.m_SampleFormat = SampleFormatInt24;
 #ifndef NO_AGC
@@ -810,10 +736,6 @@ void CDoWaveConvert::OnButton1()
 				if (l > lMax) lMax = l;
 				if (-l > lMax) lMax = -l;
 			}
-		} else
-		if (m_pWaveFormat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT)
-		{
-			M2W_32ToFloat(buffer, lRead*(nBytesPerSample>>2));
 		}
 
 		UINT lWrite = fwrite(buffer, 1, lRead*nBytesPerSample, f);
@@ -1001,10 +923,9 @@ BOOL CDoAcmConvert::OnInitDialog()
 void CDoAcmConvert::OnButton1()
 //-----------------------------
 {
-	bool bSaveWave = false;
 	CHAR s[80], fext[_MAX_EXT];
 	WAVEFILEHEADER wfh;
-	WAVEDATAHEADER wdh, chunk;
+	WAVEDATAHEADER wdh;
 	ACMSTREAMHEADER ash;
 	WAVEFORMATEX wfxSrc;
 	HACMDRIVER hADriver = nullptr;
@@ -1024,8 +945,6 @@ void CDoAcmConvert::OnButton1()
 	progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	if ((!m_pSndFile) || (!m_lpszFileName) || (!m_pwfx) || (!m_hadid)) goto OnError;
 	_splitpath(m_lpszFileName, NULL, NULL, NULL, fext);
-	if (((m_bSaveInfoField) && (m_pwfx->wFormatTag != WAVE_FORMAT_MPEGLAYER3))
-	 || (!lstrcmpi(fext, ".wav"))) bSaveWave = true;
 	MemsetZero(wfxSrc);
 	wfxSrc.wFormatTag = WAVE_FORMAT_PCM;
 	wfxSrc.nSamplesPerSec = m_pwfx->nSamplesPerSec;
@@ -1071,23 +990,10 @@ void CDoAcmConvert::OnButton1()
 	wdh.id_data = IFFID_data;
 	wdh.length = 0;
 	data_ofs = 0;
-	if(bSaveWave)
-	{
-		fwrite(&wfh, 1, sizeof(wfh), f);
-		chunk.id_data = IFFID_fmt;
-		chunk.length = sizeof(WAVEFORMATEX) + m_pwfx->cbSize;
-		fwrite(&chunk, 1, sizeof(chunk), f);
-		fwrite(m_pwfx, 1, chunk.length, f);
-		wfh.filesize += sizeof(chunk) + chunk.length + 4;
-		data_ofs = ftell(f);
-		fwrite(&wdh, 1, sizeof(wdh), f);
-		wfh.filesize += sizeof(wdh);
-	} else
-	if(!bSaveWave && m_bSaveInfoField)
+	if(m_bSaveInfoField)
 	{
 		// Write ID3v2.4 Tags
 		m_FileTags.WriteID3v2Tags(f);
-
 	}
 	DWORD oldsndcfg = m_pSndFile->m_MixerSettings.MixerFlags;
 	oldrepeat = m_pSndFile->GetRepeatCount();
@@ -1206,21 +1112,6 @@ void CDoAcmConvert::OnButton1()
 		wfh.filesize++;
 	}
 
-	if (bSaveWave)
-	{
-		if (m_bSaveInfoField)
-		{
-			m_FileTags.WriteWaveTags(&wdh, &wfh, f);
-		}
-		wfh.filesize += wdh.length;
-		fseek(f, 0, SEEK_SET);
-		fwrite(&wfh, 1, sizeof(wfh), f);
-		if (data_ofs > 0)
-		{
-			fseek(f, data_ofs, SEEK_SET);
-			fwrite(&wdh, 1, sizeof(wdh), f);
-		}
-	}
 	fclose(f);
 	if (!m_bAbort) retval = IDOK;
 OnError:

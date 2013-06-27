@@ -30,11 +30,8 @@ public:
 	CComboBox m_CbnSampleRate, m_CbnSampleFormat;
 	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder;
 
-// -> CODE#0024
-// -> DESC="wav export update"
 	bool m_bChannelMode;		// Render by channel
-// -! NEW_FEATURE#0024
-	 bool m_bInstrumentMode;	// Render by instrument
+	bool m_bInstrumentMode;	// Render by instrument
 
 public:
 	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders);
