@@ -12,12 +12,7 @@
 
 #include "tuningbase.h"
 
-#ifdef BUILD_TUNINGBASE_AS_TEMPLATE
-	typedef CTuningBase<int16, uint16, float32, int32, uint32> CTuning;
-	//If changing RATIOTYPE, serialization methods may need modifications.
-#else
-	typedef CTuningBase CTuning;
-#endif
+typedef CTuningBase CTuning;
 
 
 
@@ -63,7 +58,7 @@ public:
 	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& noteFrom, const STEPINDEXTYPE& stepDistFrom, const NOTEINDEXTYPE& noteTo, const STEPINDEXTYPE& stepDistTo) const
 		{return GetStepDistance(noteFrom, noteTo) + stepDistTo - stepDistFrom;}
 	
-	static CTuningBase* Deserialize(std::istream& inStrm);
+	static CTuning* Deserialize(std::istream& inStrm);
 
 	static uint32 GetVersion() {return s_SerializationVersion;}
 

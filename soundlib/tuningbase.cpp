@@ -9,33 +9,30 @@
 
 
 #include "stdafx.h"
-#define TUNINGBASE_CPP
 #include "tuningbase.h"
 #include "../common/serialization_utils.h"
 
-#ifdef TUNINGBASE_H
 
 
-TEMPLATEDEC
-const char* CTUNINGBASE::s_TuningDescriptionGeneral = "No ratio restrictions";
+const char* CTuningBase::s_TuningDescriptionGeneral = "No ratio restrictions";
 
-TEMPLATEDEC
-const char* CTUNINGBASE::s_TuningDescriptionGroupGeometric = "Ratio of ratios with distance of 'groupsize' is constant.";
 
-TEMPLATEDEC
-const char* CTUNINGBASE::s_TuningDescriptionGeometric = "Ratio of successive ratios is constant.";
+const char* CTuningBase::s_TuningDescriptionGroupGeometric = "Ratio of ratios with distance of 'groupsize' is constant.";
 
-TEMPLATEDEC
-const char* CTUNINGBASE::s_TuningTypeStrGeneral = "\"General\"";
 
-TEMPLATEDEC
-const char* CTUNINGBASE::s_TuningTypeStrGroupGeometric = "\"GroupGeometric\"";
+const char* CTuningBase::s_TuningDescriptionGeometric = "Ratio of successive ratios is constant.";
 
-TEMPLATEDEC
-const char* CTUNINGBASE::s_TuningTypeStrGeometric = "\"Geometric\"";
 
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::SERIALIZATION_VERSION CTUNINGBASE::s_SerializationVersion(5);
+const char* CTuningBase::s_TuningTypeStrGeneral = "\"General\"";
+
+
+const char* CTuningBase::s_TuningTypeStrGroupGeometric = "\"GroupGeometric\"";
+
+
+const char* CTuningBase::s_TuningTypeStrGeometric = "\"Geometric\"";
+
+
+const CTuningBase::SERIALIZATION_VERSION CTuningBase::s_SerializationVersion(5);
 /*
 Version history:
 	4->5: Lots of changes, finestep interpretation revamp, fileformat revamp.
@@ -44,48 +41,48 @@ Version history:
 */
 
 
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::SERIALIZATION_RETURN_TYPE CTUNINGBASE::SERIALIZATION_SUCCESS = false;
 
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::SERIALIZATION_RETURN_TYPE CTUNINGBASE::SERIALIZATION_FAILURE = true;
-
-TEMPLATEDEC
-const TCHAR CTUNINGBASE::s_FileExtension[5] = MPT_TEXT(".tun");
-
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_RATIOS = 1; //1b
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_NOTENAME = 1 << 1; //10b
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_TYPE = 1 << 2; //100b
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_NAME = 1 << 3; //1000b
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_FINETUNE = 1 << 4; //10000b
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_VALIDITYRANGE = 1 << 5; //100000b
-
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_ALLOWALL = 0xFFFF; //All editing allowed.
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_EDITMASK = 0x8000; //Whether to allow modifications to editmask.
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_CONST = 0x8000;  //All editing except changing const status disable.
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_CONST_STRICT = 0; //All bits are zero - even the const status can't be changed.
+const CTuningBase::SERIALIZATION_RETURN_TYPE CTuningBase::SERIALIZATION_SUCCESS = false;
 
 
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::TUNINGTYPE CTUNINGBASE::TT_GENERAL = 0; //0...00b
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::TUNINGTYPE CTUNINGBASE::TT_GROUPGEOMETRIC = 1; //0...10b
-TEMPLATEDEC
-const TYPENAME CTUNINGBASE::TUNINGTYPE CTUNINGBASE::TT_GEOMETRIC = 3; //0...11b
+const CTuningBase::SERIALIZATION_RETURN_TYPE CTuningBase::SERIALIZATION_FAILURE = true;
 
 
-TEMPLATEDEC
-void CTUNINGBASE::TuningCopy(CTuningBase& to, const CTuningBase& from, const bool allowExactnamecopy)
+const TCHAR CTuningBase::s_FileExtension[5] = MPT_TEXT(".tun");
+
+
+const CTuningBase::EDITMASK CTuningBase::EM_RATIOS = 1; //1b
+
+const CTuningBase::EDITMASK CTuningBase::EM_NOTENAME = 1 << 1; //10b
+
+const CTuningBase::EDITMASK CTuningBase::EM_TYPE = 1 << 2; //100b
+
+const CTuningBase::EDITMASK CTuningBase::EM_NAME = 1 << 3; //1000b
+
+const CTuningBase::EDITMASK CTuningBase::EM_FINETUNE = 1 << 4; //10000b
+
+const CTuningBase::EDITMASK CTuningBase::EM_VALIDITYRANGE = 1 << 5; //100000b
+
+
+const CTuningBase::EDITMASK CTuningBase::EM_ALLOWALL = 0xFFFF; //All editing allowed.
+
+const CTuningBase::EDITMASK CTuningBase::EM_EDITMASK = 0x8000; //Whether to allow modifications to editmask.
+
+const CTuningBase::EDITMASK CTuningBase::EM_CONST = 0x8000;  //All editing except changing const status disable.
+
+const CTuningBase::EDITMASK CTuningBase::EM_CONST_STRICT = 0; //All bits are zero - even the const status can't be changed.
+
+
+
+const CTuningBase::TUNINGTYPE CTuningBase::TT_GENERAL = 0; //0...00b
+
+const CTuningBase::TUNINGTYPE CTuningBase::TT_GROUPGEOMETRIC = 1; //0...10b
+
+const CTuningBase::TUNINGTYPE CTuningBase::TT_GEOMETRIC = 3; //0...11b
+
+
+
+void CTuningBase::TuningCopy(CTuningBase& to, const CTuningBase& from, const bool allowExactnamecopy)
 //------------------------------------------------------------------------------------
 {
 	if(!to.MayEdit(EM_ALLOWALL))
@@ -116,8 +113,8 @@ void CTUNINGBASE::TuningCopy(CTuningBase& to, const CTuningBase& from, const boo
 }
 
 
-TEMPLATEDEC
-bool CTUNINGBASE::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
+
+bool CTuningBase::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 //-----------------------------------------------------------------
 {
 	if(MayEdit(EM_RATIOS))
@@ -133,8 +130,8 @@ bool CTUNINGBASE::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 
 }
 
-TEMPLATEDEC
-TYPENAME CTUNINGBASE::USTEPINDEXTYPE CTUNINGBASE::SetFineStepCount(const USTEPINDEXTYPE& fs)
+
+CTuningBase::USTEPINDEXTYPE CTuningBase::SetFineStepCount(const USTEPINDEXTYPE& fs)
 //-------------------------------------------------------
 {
 	VRPAIR vrp = GetValidityRange();
@@ -152,8 +149,8 @@ TYPENAME CTUNINGBASE::USTEPINDEXTYPE CTUNINGBASE::SetFineStepCount(const USTEPIN
 	}
 }
 
-TEMPLATEDEC
-TYPENAME CTUNINGBASE::TUNINGTYPE CTUNINGBASE::GetTuningType(const char* str)
+
+CTuningBase::TUNINGTYPE CTuningBase::GetTuningType(const char* str)
 //--------------------------------------------------------------------------
 {
 	if(!strcmp(str, s_TuningTypeStrGroupGeometric))
@@ -164,8 +161,8 @@ TYPENAME CTUNINGBASE::TUNINGTYPE CTUNINGBASE::GetTuningType(const char* str)
 	return TT_GENERAL;
 }
 
-TEMPLATEDEC
-std::string CTUNINGBASE::GetTuningTypeStr(const TUNINGTYPE& tt)
+
+std::string CTuningBase::GetTuningTypeStr(const TUNINGTYPE& tt)
 //----------------------------------------------------------------
 {
 	if(tt == TT_GENERAL)
@@ -179,16 +176,16 @@ std::string CTUNINGBASE::GetTuningTypeStr(const TUNINGTYPE& tt)
 
 
 
-TEMPLATEDEC
-TYPENAME CTUNINGBASE::NOTESTR CTUNINGBASE::GetNoteName(const NOTEINDEXTYPE& x) const
+
+CTuningBase::NOTESTR CTuningBase::GetNoteName(const NOTEINDEXTYPE& x) const
 //-----------------------------------------------------------------------
 {
 	if(!IsValidNote(x)) return "";
 	else return ProGetNoteName(x);
 }
 
-TEMPLATEDEC
-TYPENAME CTUNINGBASE::NOTESTR CTUNINGBASE::ProGetNoteName(const NOTEINDEXTYPE& x) const
+
+CTuningBase::NOTESTR CTuningBase::ProGetNoteName(const NOTEINDEXTYPE& x) const
 //-------------------------------------------------------------------------------------
 {
 	NNM_CITER i = m_NoteNameMap.find(x);
@@ -199,8 +196,8 @@ TYPENAME CTUNINGBASE::NOTESTR CTUNINGBASE::ProGetNoteName(const NOTEINDEXTYPE& x
 }
 
 
-TEMPLATEDEC
-bool CTUNINGBASE::IsOfType(const TUNINGTYPE& type) const
+
+bool CTuningBase::IsOfType(const TUNINGTYPE& type) const
 //----------------------------------------------------
 {
 	if(type == TT_GENERAL)
@@ -219,8 +216,8 @@ bool CTUNINGBASE::IsOfType(const TUNINGTYPE& type) const
 		return false;
 }
 
-TEMPLATEDEC
-bool CTUNINGBASE::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
+
+bool CTuningBase::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 //-----------------------------------------------------------------------
 {
 	if(MayEdit(EM_NOTENAME))
@@ -233,8 +230,8 @@ bool CTUNINGBASE::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 
 
 
-TEMPLATEDEC
-bool CTUNINGBASE::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
+
+bool CTuningBase::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
 //-------------------------------------------------------
 {
 	if(MayEdit(EM_NOTENAME))
@@ -258,8 +255,8 @@ bool CTUNINGBASE::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
 }
 
 
-TEMPLATEDEC
-bool CTUNINGBASE::Multiply(const RATIOTYPE& r)
+
+bool CTuningBase::Multiply(const RATIOTYPE& r)
 //---------------------------------------------------
 {
 	if(r <= 0 || !MayEdit(EM_RATIOS))
@@ -276,8 +273,8 @@ bool CTUNINGBASE::Multiply(const RATIOTYPE& r)
 	return false;
 }
 
-TEMPLATEDEC
-bool CTUNINGBASE::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& r, const NOTEINDEXTYPE& startindex)
+
+bool CTuningBase::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& r, const NOTEINDEXTYPE& startindex)
 //-------------------------------------------------------------
 {
 	if(s < 1 || r <= 0 || startindex < GetValidityRange().first)
@@ -290,8 +287,8 @@ bool CTUNINGBASE::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& 
 	return CreateGroupGeometric(v, r, GetValidityRange(), startindex);
 }
 
-TEMPLATEDEC
-bool CTUNINGBASE::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos)
+
+bool CTuningBase::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos)
 //------------------------------------------------------------------------------------------
 {
 	if(MayEdit(EM_RATIOS) &&
@@ -315,8 +312,8 @@ bool CTUNINGBASE::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RA
 }
 
 
-TEMPLATEDEC
-bool CTUNINGBASE::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR vr)
+
+bool CTuningBase::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR vr)
 //-------------------------------------------------------------------
 {
 	if(MayEdit(EM_RATIOS) &&
@@ -339,8 +336,8 @@ bool CTUNINGBASE::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, c
 
 
 
-TEMPLATEDEC
-bool CTUNINGBASE::ChangeGroupsize(const NOTEINDEXTYPE& s)
+
+bool CTuningBase::ChangeGroupsize(const NOTEINDEXTYPE& s)
 //---------------------------------------------------
 {
 	if(!MayEdit(EM_RATIOS) || s < 1)
@@ -356,8 +353,8 @@ bool CTUNINGBASE::ChangeGroupsize(const NOTEINDEXTYPE& s)
 }
 
 
-TEMPLATEDEC
-bool CTUNINGBASE::ChangeGroupRatio(const RATIOTYPE& r)
+
+bool CTuningBase::ChangeGroupRatio(const RATIOTYPE& r)
 //---------------------------------------------------
 {
 	if(!MayEdit(EM_RATIOS) || r <= 0)
@@ -373,8 +370,8 @@ bool CTUNINGBASE::ChangeGroupRatio(const RATIOTYPE& r)
 }
 
 
-TEMPLATEDEC
-const char* CTUNINGBASE::GetTuningTypeDescription(const TUNINGTYPE& type)
+
+const char* CTuningBase::GetTuningTypeDescription(const TUNINGTYPE& type)
 //---------------------------------------------------------------------------------------
 {
 	if(type == TT_GENERAL)
@@ -386,8 +383,8 @@ const char* CTUNINGBASE::GetTuningTypeDescription(const TUNINGTYPE& type)
 	return "Unknown";
 }
 
-TEMPLATEDEC
-TYPENAME CTUNINGBASE::VRPAIR CTUNINGBASE::SetValidityRange(const VRPAIR& vrp)
+
+CTuningBase::VRPAIR CTuningBase::SetValidityRange(const VRPAIR& vrp)
 //----------------------------------------------------------------------------------------
 {
 	if(vrp.second < vrp.first) return GetValidityRange();
@@ -401,8 +398,8 @@ TYPENAME CTUNINGBASE::VRPAIR CTUNINGBASE::SetValidityRange(const VRPAIR& vrp)
 }
 
 
-TEMPLATEDEC
-bool CTUNINGBASE::SetType(const TUNINGTYPE& tt)
+
+bool CTuningBase::SetType(const TUNINGTYPE& tt)
 //----------------------------------------------
 {
 	//Note: This doesn't check whether the tuning ratios
@@ -424,8 +421,8 @@ bool CTUNINGBASE::SetType(const TUNINGTYPE& tt)
 }
 
 
-TEMPLATEDEC
-bool CTUNINGBASE::DeserializeOLD(std::istream& inStrm)
+
+bool CTuningBase::DeserializeOLD(std::istream& inStrm)
 //------------------------------------------------
 {
 	char begin[8];
@@ -471,7 +468,4 @@ bool CTUNINGBASE::DeserializeOLD(std::istream& inStrm)
 
 	return SERIALIZATION_SUCCESS;
 }
-
-
-#endif
 

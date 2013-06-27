@@ -10,15 +10,6 @@
 
 #pragma once
 
-//#define BUILD_TUNINGBASE_AS_TEMPLATE
-
-#if defined(TUNINGBASE_CPP) && defined(BUILD_TUNINGBASE_AS_TEMPLATE)
-	//Not including this file for tuningbase.cpp when building as template.
-#else
-
-#ifndef TUNINGBASE_H
-#define TUNINGBASE_H
-
 
 #include <string>
 #include <vector>
@@ -33,30 +24,7 @@
 namespace srlztn {class Ssb;}
 
 
-#ifdef BUILD_TUNINGBASE_AS_TEMPLATE
-	#define CLASSTEMPLATEDEC template<class TNOTEINDEXTYPE = int16, class TUNOTEINDEXTYPE = uint16, class TRATIOTYPE = float32, class TSTEPINDEXTYPE = int32, class TUSTEPINDEXTYPE = uint32> 
-	#define TEMPLATEDEC template<class A, class B, class C, class D, class E>
-	#define TYPENAME typename
-	#define CTUNINGBASE CTuningBase<A, B, C, D, E>
-#else
-	#define CLASSTEMPLATEDEC
-	typedef int16 TNOTEINDEXTYPE;
-	typedef uint16 TUNOTEINDEXTYPE;
-	typedef float32 TRATIOTYPE;
-	typedef int32 TSTEPINDEXTYPE;
-	typedef uint32 TUSTEPINDEXTYPE;
-	#define TYPENAME
-	#define TEMPLATEDEC
-	#define CTUNINGBASE CTuningBase
-#endif
-
-#ifndef BYTE
-	typedef unsigned char BYTE;
-#endif
-
-
 //Tuning baseclass; basic functionality is to map note to ratio.
-CLASSTEMPLATEDEC
 class CTuningBase
 //===============
 {
@@ -70,11 +38,11 @@ class CTuningBase
 
 public:
 //BEGIN TYPEDEFS:
-	typedef TNOTEINDEXTYPE NOTEINDEXTYPE;
-	typedef TUNOTEINDEXTYPE UNOTEINDEXTYPE;
-	typedef TRATIOTYPE RATIOTYPE;
-	typedef TSTEPINDEXTYPE STEPINDEXTYPE;
-	typedef TUSTEPINDEXTYPE USTEPINDEXTYPE;
+	typedef int16 NOTEINDEXTYPE;
+	typedef uint16 UNOTEINDEXTYPE;
+	typedef float32 RATIOTYPE; //If changing RATIOTYPE, serialization methods may need modifications.
+	typedef int32 STEPINDEXTYPE;
+	typedef uint32 USTEPINDEXTYPE;
 	typedef void (*MESSAGEHANDLER)(const char*, const char*);
 
 	typedef int16 SERIALIZATION_VERSION;
@@ -89,8 +57,8 @@ public:
 
 	typedef std::string NOTESTR;
 	typedef std::map<NOTEINDEXTYPE, NOTESTR> NOTENAMEMAP;
-	typedef TYPENAME NOTENAMEMAP::iterator NNM_ITER;
-	typedef TYPENAME NOTENAMEMAP::const_iterator NNM_CITER;
+	typedef NOTENAMEMAP::iterator NNM_ITER;
+	typedef NOTENAMEMAP::const_iterator NNM_CITER;
 
 //END TYPEDEFS
 
@@ -294,8 +262,8 @@ protected:
 private:
 	CTuningBase(CTuningBase&) {}
 	CTuningBase& operator=(const CTuningBase&) {return *this;}
-	static void ReadNotenamemapPair(std::istream& iStrm, TYPENAME NOTENAMEMAP::value_type& val, const size_t);
-	static void WriteNotenamemappair(std::ostream& oStrm, const TYPENAME NOTENAMEMAP::value_type& val, const size_t);
+	static void ReadNotenamemapPair(std::istream& iStrm, NOTENAMEMAP::value_type& val, const size_t);
+	static void WriteNotenamemappair(std::ostream& oStrm, const NOTENAMEMAP::value_type& val, const size_t);
 
 public:
 	static const char* s_TuningDescriptionGeneral;
@@ -317,22 +285,22 @@ private:
 #define USTEPINDEXTYPE_MAX (std::numeric_limits<USTEPINDEXTYPE>::max)()
 
 
-TEMPLATEDEC
-inline const char* CTUNINGBASE::GetTuningTypeDescription() const
+
+inline const char* CTuningBase::GetTuningTypeDescription() const
 //----------------------------------------------------------------------
 {
 	return GetTuningTypeDescription(GetType());
 }
 
-TEMPLATEDEC
-inline void CTUNINGBASE::SetName(const std::string& s)
+
+inline void CTuningBase::SetName(const std::string& s)
 //-----------------------------------------------
 {
 	if(MayEdit(EM_NAME)) m_TuningName = s;
 }
 
-TEMPLATEDEC
-inline bool CTUNINGBASE::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp)
+
+inline bool CTuningBase::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp)
 //------------------------------------------------------------------
 {
 	if(vrp.first == STEPINDEXTYPE_MIN && vrp.second == STEPINDEXTYPE_MAX) return true;
@@ -340,8 +308,8 @@ inline bool CTUNINGBASE::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vr
 	else return true;
 }
 
-TEMPLATEDEC
-inline bool CTUNINGBASE::SetEditMask(const EDITMASK& em)
+
+inline bool CTuningBase::SetEditMask(const EDITMASK& em)
 //------------------------------------------------------
 {
 	if(MayEdit(EM_EDITMASK))
@@ -349,13 +317,4 @@ inline bool CTUNINGBASE::SetEditMask(const EDITMASK& em)
 	else
 		return true;
 }
-
-
-
-#if defined(BUILD_TUNINGBASE_AS_TEMPLATE)
-	#include "tuningbase.cpp"
-#endif
-
-#endif
-#endif
 
