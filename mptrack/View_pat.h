@@ -191,7 +191,7 @@ protected:
 
 	QuickChannelProperties quickChannelProperties;
 
-	vector<ModCommand::NOTE> octaveKeyMemory;
+	std::vector<ModCommand::NOTE> octaveKeyMemory;
 
 	// Chord preview
 	CHANNELINDEX chordPatternChannels[MPTChord::notesPerChord];
@@ -466,7 +466,7 @@ private:
 	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 
 	// Returns an ordered list of all channels in which a given column type is selected.
-	CHANNELINDEX ListChansWhereColSelected(PatternCursor::Columns colType, vector<CHANNELINDEX> &chans) const;
+	CHANNELINDEX ListChansWhereColSelected(PatternCursor::Columns colType, std::vector<CHANNELINDEX> &chans) const;
 	// Check if a column type is selected on any channel in the current selection.
 	bool IsColumnSelected(PatternCursor::Columns colType) const;
 

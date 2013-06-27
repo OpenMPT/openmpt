@@ -91,8 +91,8 @@ void CFileTagging::WriteID3v2Tags(FILE *f)
 }
 
 // Write a ID3v2 frame
-void CFileTagging::WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE *f)
-//---------------------------------------------------------------------------------
+void CFileTagging::WriteID3v2Frame(char cFrameID[4], std::string sFramecontent, FILE *f)
+//--------------------------------------------------------------------------------------
 {
 	if(!cFrameID[0] || sFramecontent.empty() || !f) return;
 
@@ -138,7 +138,7 @@ void CFileTagging::WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE 
 	struct
 	{
 		uint32 id;
-		string *data;
+		std::string *data;
 	} chunks[] =
 	{
 		{ IFFID_ICMT, &comments },
@@ -170,7 +170,7 @@ void CFileTagging::WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE 
 			continue;
 		}
 
-		string data = *chunks[iCmt].data;
+		std::string data = *chunks[iCmt].data;
 		// Special case: Expand year to full date
 		if(chunks[iCmt].id == IFFID_ICRD)
 		{

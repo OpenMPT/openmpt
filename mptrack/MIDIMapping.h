@@ -12,7 +12,6 @@
 
 #include <vector>
 #include <algorithm>
-using std::vector;
 
 
 //=========================
@@ -82,7 +81,7 @@ class CMIDIMapper
 //===============
 {
 public:
-	typedef vector<CMIDIMappingDirective>::const_iterator const_iterator;
+	typedef std::vector<CMIDIMappingDirective>::const_iterator const_iterator;
 	CMIDIMapper(CSoundFile& sndfile) : m_rSndFile(sndfile) {}
 
 	//If mapping found:
@@ -121,5 +120,5 @@ private:
 
 private:
 	CSoundFile& m_rSndFile;
-	vector<CMIDIMappingDirective> m_Directives;
+	std::vector<CMIDIMappingDirective> m_Directives;
 };

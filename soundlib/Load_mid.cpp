@@ -473,7 +473,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlag
 	const MIDITRACKHEADER *pmth;
 	MODCHANNELSTATE chnstate[MAX_BASECHANNELS];
 	MIDICHANNELSTATE midichstate[16];
-	vector<MIDITRACK> miditracks;
+	std::vector<MIDITRACK> miditracks;
 	DWORD dwMemPos, dwGlobalFlags, tracks, tempo;
 	UINT row, pat, midimastervol;
 	short int division;

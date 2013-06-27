@@ -780,7 +780,7 @@ void CDoWaveConvert::OnButton1()
 		UINT lRead = m_pSndFile->ReadInterleaved(buffer, sizeof(buffer)/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
 
 		// Process cue points (add base offset), if there are any to process.
-		vector<PatternCuePoint>::reverse_iterator iter;
+		std::vector<PatternCuePoint>::reverse_iterator iter;
 		for(iter = m_pSndFile->m_PatternCuePoints.rbegin(); iter != m_pSndFile->m_PatternCuePoints.rend(); ++iter)
 		{
 			if(iter->processed)
@@ -922,7 +922,7 @@ void CDoWaveConvert::OnButton1()
 		fwrite(&cuehdr, 1, sizeof(WavCueHeader), f);
 
 		// Write all cue points
-		vector<PatternCuePoint>::const_iterator iter;
+		std::vector<PatternCuePoint>::const_iterator iter;
 		DWORD num = 0;
 		for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); ++iter, num++)
 		{

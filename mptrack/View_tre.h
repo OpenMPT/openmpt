@@ -17,9 +17,6 @@ class CModTree;
 #include <vector>
 #include <bitset>
 
-using std::vector;
-using std::bitset;
-
 #define TREESTATUS_RDRAG			0x01
 #define TREESTATUS_LDRAG			0x02
 #define TREESTATUS_SINGLEEXPAND		0x04
@@ -29,8 +26,8 @@ struct ModTreeDocInfo
 {
 	CModDoc *pModDoc;
 	// Tree state variables
-	vector<vector<HTREEITEM> > tiOrders;
-	vector<HTREEITEM> tiSequences, tiPatterns;
+	std::vector<std::vector<HTREEITEM> > tiOrders;
+	std::vector<HTREEITEM> tiSequences, tiPatterns;
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
 	HTREEITEM tiSamples[MAX_SAMPLES];
 	HTREEITEM tiInstruments[MAX_INSTRUMENTS];
@@ -40,8 +37,8 @@ struct ModTreeDocInfo
 	ORDERINDEX nOrdSel;
 	SEQUENCEINDEX nSeqSel;
 
-	bitset<MAX_SAMPLES> samplesPlaying;
-	bitset<MAX_INSTRUMENTS> instrumentsPlaying;
+	std::bitset<MAX_SAMPLES> samplesPlaying;
+	std::bitset<MAX_INSTRUMENTS> instrumentsPlaying;
 	
 	ModTreeDocInfo(const CSoundFile &sndFile)
 	{
@@ -125,8 +122,8 @@ protected:
 	HTREEITEM m_tiMidiGrp[17];
 	HTREEITEM m_tiMidi[128];
 	HTREEITEM m_tiPerc[128];
-	vector<HTREEITEM> m_tiDLS;
-	vector<ModTreeDocInfo *> DocInfo;
+	std::vector<HTREEITEM> m_tiDLS;
+	std::vector<ModTreeDocInfo *> DocInfo;
 	// Instrument library
 	bool m_bShowAllFiles, doLabelEdit;
 	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];

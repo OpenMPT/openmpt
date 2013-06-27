@@ -253,7 +253,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		foundHacks = true;
 		if(autofix)
 		{
-			vector<bool> usedChannels;
+			std::vector<bool> usedChannels;
 			CheckUsedChannels(usedChannels);
 			RemoveChannels(usedChannels);
 			// REQUIRES (INTELLIGENT) AUTOFIX

@@ -262,8 +262,8 @@ public:
 	CSampleUndo &GetSampleUndo() { return m_SampleUndo; }
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
 
-	vector<FileHistory> &GetFileHistory() { return m_FileHistory; }
-	const vector<FileHistory> &GetFileHistory() const { return m_FileHistory; }
+	std::vector<FileHistory> &GetFileHistory() { return m_FileHistory; }
+	const std::vector<FileHistory> &GetFileHistory() const { return m_FileHistory; }
 	time_t GetCreationTime() const { return m_creationTime; }
 	
 // operations
@@ -271,17 +271,17 @@ public:
 	bool ChangeModType(MODTYPE wType);
 
 	bool ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancelInRemoveDlg = true);
-	bool RemoveChannels(const vector<bool> &keepMask);
-	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX> &fromToArray, const bool createUndoPoint = true);
-	void CheckUsedChannels(vector<bool> &usedMask, CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
+	bool RemoveChannels(const std::vector<bool> &keepMask);
+	CHANNELINDEX ReArrangeChannels(const std::vector<CHANNELINDEX> &fromToArray, const bool createUndoPoint = true);
+	void CheckUsedChannels(std::vector<bool> &usedMask, CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
 
-	SAMPLEINDEX ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder);
+	SAMPLEINDEX ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder);
 
-	INSTRUMENTINDEX ReArrangeInstruments(const vector<INSTRUMENTINDEX> &newOrder, deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples);
+	INSTRUMENTINDEX ReArrangeInstruments(const std::vector<INSTRUMENTINDEX> &newOrder, deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples);
 
 	bool ConvertInstrumentsToSamples();
 	bool ConvertSamplesToInstruments();
-	UINT RemovePlugs(const vector<bool> &keepMask);
+	UINT RemovePlugs(const std::vector<bool> &keepMask);
 
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
 	SAMPLEINDEX InsertSample(bool bLimit = false);

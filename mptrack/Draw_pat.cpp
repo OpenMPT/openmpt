@@ -23,8 +23,6 @@
 #include "EffectInfo.h"
 #include <string>
 
-using std::string;
-
 // Headers
 #define ROWHDR_WIDTH		32	// Row header
 #define COLHDR_HEIGHT		16	// Column header
@@ -405,7 +403,7 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 	{
 		if(pTuning)
 		{   // Drawing custom note names
-			string noteStr = pTuning->GetNoteName(static_cast<CTuningBase::NOTEINDEXTYPE>(note-NOTE_MIDDLEC));
+			std::string noteStr = pTuning->GetNoteName(static_cast<CTuningBase::NOTEINDEXTYPE>(note-NOTE_MIDDLEC));
 			if(noteStr.size() < 3)
 				noteStr.resize(3, ' ');
 			

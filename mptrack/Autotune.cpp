@@ -164,7 +164,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	const SmpLength processLength = sampleLength - maxShift;
 
 	// Histogram for all notes.
-	vector<uint64> autocorrHistogram(historyBins, 0);
+	std::vector<uint64> autocorrHistogram(historyBins, 0);
 
 	// Do autocorrelation and save results in a note histogram (restriced to one octave).
 	for(int note = autocorrStartNote, noteBin = note; note < autocorrEndNote; note++, noteBin++)
@@ -190,7 +190,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	}
 
 	// Interpolate the histogram...
-	vector<uint64> interpolatedHistogram(historyBins, 0);
+	std::vector<uint64> interpolatedHistogram(historyBins, 0);
 	for(int i = 0; i < historyBins; i++)
 	{
 		interpolatedHistogram[i] = autocorrHistogram[i];

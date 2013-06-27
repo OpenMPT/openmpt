@@ -27,8 +27,6 @@ TODOS:
 -Handle const-status better(e.g. status check in unserialization)
 */
 
-using namespace std;
-
 const TCHAR CTuningCollection::s_FileExtension[4] = MPT_TEXT(".tc");
 
 namespace CTuningS11n
@@ -40,7 +38,7 @@ namespace CTuningS11n
 	void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
 
-	void ReadTuning(istream& iStrm, CTuningCollection& Tc, const size_t) {Tc.AddTuning(iStrm, true);}
+	void ReadTuning(std::istream& iStrm, CTuningCollection& Tc, const size_t) {Tc.AddTuning(iStrm, true);}
 	void WriteTuning(std::ostream& oStrm, const CTuning& t) {t.Serialize(oStrm);}
 } // namespace CTuningS11n
 
@@ -101,7 +99,7 @@ const CTuning* CTuningCollection::GetTuning(const std::string& name) const
 }
 
 
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(ostream& oStrm) const
+CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::ostream& oStrm) const
 //--------------------------------------------------------------
 {
 	srlztn::Ssb ssb(oStrm);
@@ -126,7 +124,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() cons
 {
 	if(m_SavefilePath.length() < 1)
 		return SERIALIZATION_FAILURE;
-	ofstream fout(m_SavefilePath.c_str(), ios::binary);
+	std::ofstream fout(m_SavefilePath.c_str(), std::ios::binary);
 	if(!fout.good())
 		return SERIALIZATION_FAILURE;
 
@@ -141,7 +139,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize()
 {
 	if(m_SavefilePath.length() < 1)
 		return SERIALIZATION_FAILURE;
-	ifstream fin(m_SavefilePath.c_str(), ios::binary);
+	std::ifstream fin(m_SavefilePath.c_str(), std::ios::binary);
 	if(!fin.good())
 		return SERIALIZATION_FAILURE;
 
@@ -152,10 +150,10 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize()
 }
 
 
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(istream& iStrm)
+CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std::istream& iStrm)
 //---------------------------------------------------------
 {
-	istream::pos_type startpos = iStrm.tellg();
+	std::istream::pos_type startpos = iStrm.tellg();
 	bool oldLoadingSuccess = false;
 
 	if(DeserializeOLD(iStrm, oldLoadingSuccess))
@@ -193,7 +191,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(istr
 
 //Returns false if stream content was recognised to be right kind of file(by beginmarker),
 //else true, and sets bool parameter to true if loading was successful
-bool CTuningCollection::DeserializeOLD(istream& inStrm, bool& loadingSuccessful)
+bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSuccessful)
 //------------------------------------------------------------------------------
 {
 	//s_SerializationBeginMarker = 0x54435348;  //ascii of TCSH
@@ -309,7 +307,7 @@ bool CTuningCollection::AddTuning(CTuning* const pT)
 }
 
 
-bool CTuningCollection::AddTuning(istream& inStrm, const bool ignoreEditmask)
+bool CTuningCollection::AddTuning(std::istream& inStrm, const bool ignoreEditmask)
 //---------------------------------------------------------------------------
 {
 	if((!ignoreEditmask && (m_EditMask & EM_ADD) == 0) || m_Tunings.size() >= s_nMaxTuningCount)
@@ -357,5 +355,5 @@ std::string CTuningCollection::GetEditMaskString() const
 //-------------------------------------------------
 {
 	std::bitset<16> mask(m_EditMask);
-	return mask.to_string<char, char_traits<char>, allocator<char> >();
+	return mask.to_string<char, std::char_traits<char>, std::allocator<char> >();
 }

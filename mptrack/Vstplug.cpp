@@ -877,7 +877,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterGetPreviousPlug:
 		if(pVstPlugin != nullptr)
 		{
-			vector<CVstPlugin *> list;
+			std::vector<CVstPlugin *> list;
 			if(pVstPlugin->GetInputPlugList(list) != 0)
 			{
 				// We don't assign plugins to pins...
@@ -890,7 +890,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterGetNextPlug:
 		if(pVstPlugin != nullptr)
 		{
-			vector<CVstPlugin *> list;
+			std::vector<CVstPlugin *> list;
 			if(pVstPlugin->GetOutputPlugList(list) != 0)
 			{
 				// We don't assign plugins to pins...
@@ -2854,8 +2854,8 @@ bool CVstPlugin::CanRecieveMidiEvents()
 
 
 // Get list of plugins to which output is sent. A nullptr indicates master output.
-size_t CVstPlugin::GetOutputPlugList(vector<CVstPlugin *> &list)
-//--------------------------------------------------------------
+size_t CVstPlugin::GetOutputPlugList(std::vector<CVstPlugin *> &list)
+//-------------------------------------------------------------------
 {
 	// At the moment we know there will only be 1 output.
 	// Returning nullptr means plugin outputs directly to master.

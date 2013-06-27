@@ -224,8 +224,8 @@ void CTrackApp::OnFileCloseAll()
 		}
 	}
 
-	vector<CModDoc *> documents = theApp.GetOpenDocuments();
-	for(vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
+	std::vector<CModDoc *> documents = theApp.GetOpenDocuments();
+	for(std::vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
 	{
 		(*doc)->SafeFileClose();
 	}
@@ -240,10 +240,10 @@ int CTrackApp::GetOpenDocumentCount() const
 
 
 // Retrieve a list of all open modules.
-vector<CModDoc *> CTrackApp::GetOpenDocuments() const
-//---------------------------------------------------
+std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
+//--------------------------------------------------------
 {
-	vector<CModDoc *> documents;
+	std::vector<CModDoc *> documents;
 
 	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
 	if(pDocTmpl)
@@ -430,7 +430,7 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 // DLS Banks support
 
 #define MPTRACK_REG_DLS		"Software\\Olivier Lapicque\\ModPlug Tracker\\DLS Banks"
-vector<CDLSBank *> CTrackApp::gpDLSBanks;
+std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
 
 
 BOOL CTrackApp::LoadDefaultDLSBanks()
@@ -2257,7 +2257,7 @@ FileDlgResult CTrackApp::ShowOpenSaveFileDialog(const bool load, const std::stri
 	if(filterIndex != nullptr)
 		dlg.m_ofn.nFilterIndex = (DWORD)(*filterIndex);
 
-	vector<TCHAR> filenameBuffer;
+	std::vector<TCHAR> filenameBuffer;
 	if(multiSelect)
 	{
 		const size_t bufferSize = 2048; // Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).

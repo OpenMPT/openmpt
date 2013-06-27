@@ -140,7 +140,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 		if(undo.channelInfo->oldNumChannels != sndFile.GetNumChannels())
 		{
 			// Add or remove channels
-			vector<CHANNELINDEX> channels(undo.channelInfo->oldNumChannels, CHANNELINDEX_INVALID);
+			std::vector<CHANNELINDEX> channels(undo.channelInfo->oldNumChannels, CHANNELINDEX_INVALID);
 			const CHANNELINDEX copyCount = std::min(sndFile.GetNumChannels(), undo.channelInfo->oldNumChannels);
 			for(CHANNELINDEX i = 0; i < copyCount; i++)
 			{

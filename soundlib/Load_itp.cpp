@@ -451,7 +451,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	id = m_nSamples;
 	fwrite(&id, 1, sizeof(id), f);
 
-	vector<bool> sampleUsed(GetNumSamples() + 1, false);
+	std::vector<bool> sampleUsed(GetNumSamples() + 1, false);
 
 	// Mark samples used in instruments
 	for(i = 0; i < m_nInstruments; i++)

@@ -72,7 +72,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 	{
 		// Increasing number of channels
 		BeginWaitCursor();
-		vector<CHANNELINDEX> channels(nNewChannels, CHANNELINDEX_INVALID);
+		std::vector<CHANNELINDEX> channels(nNewChannels, CHANNELINDEX_INVALID);
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 		{
 			channels[nChn] = nChn;
@@ -91,8 +91,8 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 
 // To remove all channels whose index corresponds to false in the keepMask vector.
 // Return true on success.
-bool CModDoc::RemoveChannels(const vector<bool> &keepMask)
-//--------------------------------------------------------
+bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask)
+//-------------------------------------------------------------
 {
 	CHANNELINDEX nRemainingChannels = 0;
 	//First calculating how many channels are to be left
@@ -113,7 +113,7 @@ bool CModDoc::RemoveChannels(const vector<bool> &keepMask)
 
 	BeginWaitCursor();
 	// Create new channel order, with only channels from m_bChnMask left.
-	vector<CHANNELINDEX> channels(nRemainingChannels, 0);
+	std::vector<CHANNELINDEX> channels(nRemainingChannels, 0);
 	CHANNELINDEX i = 0;
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 	{
@@ -136,8 +136,8 @@ bool CModDoc::RemoveChannels(const vector<bool> &keepMask)
 
 // Base code for adding, removing, moving and duplicating channels. Returns new number of channels on success, CHANNELINDEX_INVALID otherwise.
 // The new channel vector can contain CHANNELINDEX_INVALID for adding new (empty) channels.
-CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, const bool createUndoPoint)
-//-------------------------------------------------------------------------------------------------------
+CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrder, const bool createUndoPoint)
+//------------------------------------------------------------------------------------------------------------
 {
 	//newOrder[i] tells which current channel should be placed to i:th position in
 	//the new order, or if i is not an index of current channels, then new channel is
@@ -197,8 +197,8 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 
 	ModChannel chns[MAX_BASECHANNELS];
 	ModChannelSettings settings[MAX_BASECHANNELS];
-	vector<BYTE> recordStates(GetNumChannels(), 0);
-	vector<bool> chnMutePendings(GetNumChannels(), false);
+	std::vector<BYTE> recordStates(GetNumChannels(), 0);
+	std::vector<bool> chnMutePendings(GetNumChannels(), false);
 
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 	{
@@ -244,7 +244,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const vector<CHANNELINDEX> &newOrder, co
 struct RewriteInstrumentReferencesInPatterns
 //==========================================
 {
-	RewriteInstrumentReferencesInPatterns(const vector<ModCommand::INSTR> &indices) : instrumentIndices(indices)
+	RewriteInstrumentReferencesInPatterns(const std::vector<ModCommand::INSTR> &indices) : instrumentIndices(indices)
 	{
 	}
 
@@ -256,15 +256,15 @@ struct RewriteInstrumentReferencesInPatterns
 		}
 	}
 
-	const vector<ModCommand::INSTR> &instrumentIndices;
+	const std::vector<ModCommand::INSTR> &instrumentIndices;
 };
 
 
 // Base code for adding, removing, moving and duplicating samples. Returns new number of samples on success, SAMPLEINDEX_INVALID otherwise.
 // The new sample vector can contain SAMPLEINDEX_INVALID for adding new (empty) samples.
 // newOrder indices are zero-based, i.e. newOrder[0] will define the contents of the first sample slot.
-SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
-//------------------------------------------------------------------------
+SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
+//-----------------------------------------------------------------------------
 {
 	if(newOrder.size() > m_SndFile.GetModSpecifications().samplesMax)
 	{
@@ -283,10 +283,10 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 		}
 	}
 
-	vector<int> sampleCount(oldNumSamples + 1, 0);
-	vector<ModSample> sampleHeaders(oldNumSamples + 1);
-	vector<SAMPLEINDEX> newIndex(oldNumSamples + 1, 0);	// One of the new indexes for the old sample
-	vector<std::string> sampleNames(oldNumSamples + 1);
+	std::vector<int> sampleCount(oldNumSamples + 1, 0);
+	std::vector<ModSample> sampleHeaders(oldNumSamples + 1);
+	std::vector<SAMPLEINDEX> newIndex(oldNumSamples + 1, 0);	// One of the new indexes for the old sample
+	std::vector<std::string> sampleNames(oldNumSamples + 1);
 
 	for(size_t i = 0; i < newOrder.size(); i++)
 	{
@@ -368,7 +368,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 	{
 		PrepareUndoForAllPatterns();
 
-		vector<ModCommand::INSTR> indices(newIndex.size(), 0);
+		std::vector<ModCommand::INSTR> indices(newIndex.size(), 0);
 		for(size_t i = 0; i < newIndex.size(); i++)
 		{
 			indices[i] = newIndex[i];
@@ -383,8 +383,8 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const vector<SAMPLEINDEX> &newOrder)
 // Base code for adding, removing, moving and duplicating instruments. Returns new number of instruments on success, INSTRUMENTINDEX_INVALID otherwise.
 // The new instrument vector can contain INSTRUMENTINDEX_INVALID for adding new (empty) instruments.
 // newOrder indices are zero-based, i.e. newOrder[0] will define the contents of the first instrument slot.
-INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const vector<INSTRUMENTINDEX> &newOrder, deleteInstrumentSamples removeSamples)
-//---------------------------------------------------------------------------------------------------------------------------
+INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX> &newOrder, deleteInstrumentSamples removeSamples)
+//--------------------------------------------------------------------------------------------------------------------------------
 {
 	if(newOrder.size() > m_SndFile.GetModSpecifications().instrumentsMax || GetNumInstruments() == 0)
 	{
@@ -395,8 +395,8 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const vector<INSTRUMENTINDEX> &new
 
 	const INSTRUMENTINDEX oldNumInstruments = m_SndFile.GetNumInstruments(), newNumInstruments = static_cast<INSTRUMENTINDEX>(newOrder.size());
 
-	vector<ModInstrument> instrumentHeaders(oldNumInstruments + 1);
-	vector<INSTRUMENTINDEX> newIndex(oldNumInstruments + 1, 0);	// One of the new indexes for the old instrument
+	std::vector<ModInstrument> instrumentHeaders(oldNumInstruments + 1);
+	std::vector<INSTRUMENTINDEX> newIndex(oldNumInstruments + 1, 0);	// One of the new indexes for the old instrument
 	for(size_t i = 0; i < newNumInstruments; i++)
 	{
 		const INSTRUMENTINDEX origSlot = newOrder[i];
@@ -444,7 +444,7 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const vector<INSTRUMENTINDEX> &new
 
 	PrepareUndoForAllPatterns();
 
-	vector<ModCommand::INSTR> indices(newIndex.size(), 0);
+	std::vector<ModCommand::INSTR> indices(newIndex.size(), 0);
 	for(size_t i = 0; i < newIndex.size(); i++)
 	{
 		indices[i] = newIndex[i];
@@ -541,8 +541,8 @@ bool CModDoc::ConvertSamplesToInstruments()
 }
 
 
-UINT CModDoc::RemovePlugs(const vector<bool> &keepMask)
-//-----------------------------------------------------
+UINT CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
+//----------------------------------------------------------
 {
 	//Remove all plugins whose keepMask[plugindex] is false.
 	UINT nRemoved = 0;
@@ -1076,8 +1076,8 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 
 
 // Check which channels contain note data. maxRemoveCount specified how many empty channels are reported at max.
-void CModDoc::CheckUsedChannels(vector<bool> &usedMask, CHANNELINDEX maxRemoveCount) const
-//----------------------------------------------------------------------------------------
+void CModDoc::CheckUsedChannels(std::vector<bool> &usedMask, CHANNELINDEX maxRemoveCount) const
+//---------------------------------------------------------------------------------------------
 {
 	// Checking for unused channels
 	const int nChannels = GetNumChannels();

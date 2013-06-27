@@ -1689,10 +1689,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 	int nRenderPasses = 1;
 	// Channel mode
-	vector<bool> usedChannels;
-	vector<ChannelFlags> channelFlags;
+	std::vector<bool> usedChannels;
+	std::vector<ChannelFlags> channelFlags;
 	// Instrument mode
-	vector<bool> instrMuteState;
+	std::vector<bool> instrMuteState;
 
 	// Channel mode: save song in multiple wav files (one for each enabled channels)
 	if(wsdlg.m_bChannelMode)
