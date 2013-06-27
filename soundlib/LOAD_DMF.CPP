@@ -230,7 +230,7 @@ struct DMFPatternSettings
 		}
 	};
 
-	vector<ChannelState> channels;			// Memory for each channel's state
+	std::vector<ChannelState> channels;			// Memory for each channel's state
 	bool realBPMmode;						// true = BPM mode
 	uint8 beat;								// Rows per beat
 	uint8 tempoTicks;						// Tick mode param
@@ -423,7 +423,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 	uint8 writeDelay = 0;
 
 	// Counters for channel packing (including global track)
-	vector<uint8> channelCounter(numChannels + 1, 0);
+	std::vector<uint8> channelCounter(numChannels + 1, 0);
 
 	for(ROWINDEX row = 0; row < numRows; row++)
 	{
@@ -1018,7 +1018,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		chunk.ReadConvertEndianness(patHeader);
 		m_nChannels = Clamp(patHeader.numTracks, uint8(1), uint8(32)) + 1;	// + 1 for global track (used for tempo stuff)
 
-		vector<FileReader> patternChunks;
+		std::vector<FileReader> patternChunks;
 		patternChunks.reserve(patHeader.numPatterns);
 
 		// First, find out where all of our patterns are...

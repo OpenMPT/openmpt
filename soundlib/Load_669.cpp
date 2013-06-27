@@ -159,7 +159,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		vector<uint8> effect(8, 0xFF);
+		std::vector<uint8> effect(8, 0xFF);
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			PatternRow m = Patterns[pat].GetRow(row);

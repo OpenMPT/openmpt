@@ -186,7 +186,7 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 		return false;
 	}
 
-	vector<bool> keepSamples(GetNumSamples() + 1, true);
+	std::vector<bool> keepSamples(GetNumSamples() + 1, true);
 
 	// Check which samples are used by the instrument we are going to nuke.
 	std::set<SAMPLEINDEX> referencedSamples = Instruments[nInstr]->GetSamples();
@@ -237,8 +237,8 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	Instruments[targetInstr] = pIns;
 	*pIns = *srcSong.Instruments[sourceInstr];
 
-	vector<SAMPLEINDEX> sourceSample;	// Sample index in source song
-	vector<SAMPLEINDEX> targetSample;	// Sample index in target song
+	std::vector<SAMPLEINDEX> sourceSample;	// Sample index in source song
+	std::vector<SAMPLEINDEX> targetSample;	// Sample index in target song
 	SAMPLEINDEX targetIndex = 0;		// Next index for inserting sample
 
 	for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
@@ -246,7 +246,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 		const SAMPLEINDEX sourceIndex = pIns->Keyboard[i];
 		if(sourceIndex > 0 && sourceIndex <= srcSong.GetNumSamples())
 		{
-			const vector<SAMPLEINDEX>::const_iterator entry = std::find(sourceSample.begin(), sourceSample.end(), sourceIndex);
+			const std::vector<SAMPLEINDEX>::const_iterator entry = std::find(sourceSample.begin(), sourceSample.end(), sourceIndex);
 			if(entry == sourceSample.end())
 			{
 				// Didn't consider this sample yet, so add it to our map.
@@ -987,7 +987,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	fileHeader.ConvertToMPT(*pIns);
 
 	// Translate sample map and find available sample slots
-	vector<SAMPLEINDEX> sampleMap(fileHeader.numSamples);
+	std::vector<SAMPLEINDEX> sampleMap(fileHeader.numSamples);
 	SAMPLEINDEX maxSmp = 0;
 
 	for(size_t i = 0 + 12; i < 96 + 12; i++)
@@ -1014,7 +1014,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		m_nSamples = maxSmp;
 	}
 
-	vector<SampleIO> sampleFlags(fileHeader.numSamples);
+	std::vector<SampleIO> sampleFlags(fileHeader.numSamples);
 
 	// Read sample headers
 	for(SAMPLEINDEX i = 0; i < fileHeader.numSamples; i++)
@@ -1080,7 +1080,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileN
 	XIInstrumentHeader header;
 	header.ConvertToXM(*pIns, false);
 
-	const vector<SAMPLEINDEX> samples = header.instrument.GetSampleList(*pIns, false);
+	const std::vector<SAMPLEINDEX> samples = header.instrument.GetSampleList(*pIns, false);
 	if(samples.size() > 0 && samples[0] <= GetNumSamples())
 	{
 		// Copy over auto-vibrato settings of first sample
@@ -1090,7 +1090,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileN
 	header.ConvertEndianness();
 	fwrite(&header, 1, sizeof(XIInstrumentHeader), f);
 
-	vector<SampleIO> sampleFlags(samples.size());
+	std::vector<SampleIO> sampleFlags(samples.size());
 
 	// XI Sample Headers
 	for(SAMPLEINDEX i = 0; i < samples.size(); i++)
@@ -1460,7 +1460,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 	{
 		size_t numMarkers = markerChunk.ReadUint16BE();
 
-		vector<AIFFMarker> markers;
+		std::vector<AIFFMarker> markers;
 		for(size_t i = 0; i < numMarkers; i++)
 		{
 			AIFFMarker marker;
@@ -1485,7 +1485,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		}
 
 		// Read markers
-		for(vector<AIFFMarker>::iterator iter = markers.begin(); iter != markers.end(); iter++)
+		for(std::vector<AIFFMarker>::iterator iter = markers.begin(); iter != markers.end(); iter++)
 		{
 			if(iter->id == instrHeader.sustainLoop.beginLoop)
 			{
@@ -1609,7 +1609,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	FileReader::off_t extraOffset = file.GetPosition();
 
 	// Reading Samples
-	vector<SAMPLEINDEX> samplemap(nsamples, 0);
+	std::vector<SAMPLEINDEX> samplemap(nsamples, 0);
 	for(SAMPLEINDEX i = 0; i < nsamples; i++)
 	{
 		smp = GetNextFreeSample(nInstr, smp + 1);
@@ -1657,8 +1657,8 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 	size_t instSize = iti.ConvertToIT(*pIns, false, *this);
 
 	// Create sample assignment table
-	vector<SAMPLEINDEX> smptable;
-	vector<SAMPLEINDEX> smpmap(GetNumSamples(), 0);
+	std::vector<SAMPLEINDEX> smptable;
+	std::vector<SAMPLEINDEX> smpmap(GetNumSamples(), 0);
 	for(size_t i = 0; i < NOTE_MAX; i++)
 	{
 		const SAMPLEINDEX smp = pIns->Keyboard[i];
@@ -1685,8 +1685,8 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 	filePos += smptable.size() * sizeof(ITSample);
 
 	// Writing sample headers + data
-	vector<SampleIO> sampleFlags;
-	for(vector<SAMPLEINDEX>::iterator iter = smptable.begin(); iter != smptable.end(); iter++)
+	std::vector<SampleIO> sampleFlags;
+	for(std::vector<SAMPLEINDEX>::iterator iter = smptable.begin(); iter != smptable.end(); iter++)
 	{
 		ITSample itss;
 		itss.ConvertToIT(Samples[*iter], GetType(), compress, compress);

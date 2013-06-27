@@ -588,14 +588,14 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	Order.ReadAsByte(file, fileHeader.ordNum);
 
 	// Read sample header offsets
-	vector<uint16> sampleOffsets(fileHeader.smpNum);
+	std::vector<uint16> sampleOffsets(fileHeader.smpNum);
 	for(size_t i = 0; i < fileHeader.smpNum; i++)
 	{
 		sampleOffsets[i] = file.ReadUint16LE();
 	}
 
 	// Read pattern offsets
-	vector<uint16> patternOffsets(fileHeader.patNum);
+	std::vector<uint16> patternOffsets(fileHeader.patNum);
 	for(size_t i = 0; i < fileHeader.patNum; i++)
 	{
 		patternOffsets[i] = file.ReadUint16LE();
@@ -903,7 +903,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	// ...which must be a multiple of 16, because parapointers omit the lowest 4 bits.
 	sampleHeaderOffset = (sampleHeaderOffset + 15) & ~15;
 
-	vector<uint16> sampleOffsets(writeSamples);
+	std::vector<uint16> sampleOffsets(writeSamples);
 	for(SAMPLEINDEX smp = 0; smp < writeSamples; smp++)
 	{
 		STATIC_ASSERT((sizeof(S3MSampleHeader) % 16) == 0);
@@ -918,7 +918,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 
 	size_t patternPointerOffset = ftell(f);
 	size_t firstPatternOffset = sampleHeaderOffset + writeSamples * sizeof(S3MSampleHeader);
-	vector<uint16> patternOffsets(writePatterns);
+	std::vector<uint16> patternOffsets(writePatterns);
 
 	// Need to calculate the real offsets later.
 	if(writePatterns != 0)
@@ -964,7 +964,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 		patternOffsets[pat] = static_cast<uint16>(ftell(f) / 16);
 		SwapBytesLE(patternOffsets[pat]);
 
-		vector<uint8> buffer;
+		std::vector<uint8> buffer;
 		buffer.reserve(5 * 1024);
 		// Reserve space for length bytes
 		buffer.resize(2, 0);
@@ -1086,7 +1086,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	size_t sampleDataOffset = ftell(f);
 
 	// Write samples
-	vector<S3MSampleHeader> sampleHeader(writeSamples);
+	std::vector<S3MSampleHeader> sampleHeader(writeSamples);
 
 	for(SAMPLEINDEX smp = 0; smp < writeSamples; smp++)
 	{

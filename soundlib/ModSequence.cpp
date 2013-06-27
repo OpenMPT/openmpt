@@ -586,7 +586,7 @@ bool ModSequenceSet::MergeSequences()
 	SetSequence(0);
 	resize(GetLengthTailTrimmed());
 	SEQUENCEINDEX removedSequences = 0; // sequence count
-	vector <SEQUENCEINDEX> patternsFixed; // pattern fixed by other sequence already?
+	std::vector <SEQUENCEINDEX> patternsFixed; // pattern fixed by other sequence already?
 	patternsFixed.resize(m_sndFile.Patterns.Size(), SEQUENCEINDEX_INVALID);
 	// Set up vector
 	for(ORDERINDEX nOrd = 0; nOrd < GetLengthTailTrimmed(); nOrd++)

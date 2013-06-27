@@ -99,7 +99,7 @@ public:
 	CSoundFile::samplecount_t renderedSamples;
 	UINT musicSpeed, musicTempo;
 	LONG glbVol;
-	vector<ChnSettings> chnSettings;
+	std::vector<ChnSettings> chnSettings;
 
 protected:
 	const CSoundFile &sndFile;

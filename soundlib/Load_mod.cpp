@@ -657,8 +657,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			// For detecting PT1x mode
-			vector<ModCommand::INSTR> lastInstrument(GetNumChannels(), 0);
-			vector<int> instrWithoutNoteCount(GetNumChannels(), 0);
+			std::vector<ModCommand::INSTR> lastInstrument(GetNumChannels(), 0);
+			std::vector<int> instrWithoutNoteCount(GetNumChannels(), 0);
 
 			for(ROWINDEX row = 0; row < 64; row++)
 			{
@@ -1107,8 +1107,8 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 		fwrite(name, 20, 1, f);
 	}
 
-	vector<SmpLength> sampleLength(32, 0);
-	vector<SAMPLEINDEX> sampleSource(32, 0);
+	std::vector<SmpLength> sampleLength(32, 0);
+	std::vector<SAMPLEINDEX> sampleSource(32, 0);
 
 	if(GetNumInstruments())
 	{
@@ -1186,7 +1186,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 	fwrite(&modMagic, 4, 1, f);
 
 	// Write patterns
-	vector<uint8> events;
+	std::vector<uint8> events;
 	for(PATTERNINDEX pat = 0; pat < writePatterns; pat++)
 	{
 		if(!Patterns.IsValidPat(pat))

@@ -235,8 +235,8 @@ STATIC_ASSERT(sizeof(PSMNewSampleHeader) == 96);
 
 struct PSMSubSong // For internal use (pattern conversion)
 {
-	vector<uint8> channelPanning, channelVolume;
-	vector<bool> channelSurround;
+	std::vector<uint8> channelPanning, channelVolume;
+	std::vector<bool> channelSurround;
 	uint8 defaultTempo, defaultSpeed;
 	char  songName[10];
 	ORDERINDEX startOrder, endOrder, restartPos;
@@ -297,12 +297,12 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// pattern offset and identifier
 	PATTERNINDEX numPatterns = 0;		// used for setting up the orderlist - final pattern count
-	vector<FileReader> patternChunks;	// pattern offsets (sorted as they occour in the file)
-	vector<uint32> patternIDs;			// pattern IDs (sorted as they occour in the file)
-	vector<FileReader *> orderOffsets;	// combine the upper two vectors to get the offsets for each order item
+	std::vector<FileReader> patternChunks;	// pattern offsets (sorted as they occour in the file)
+	std::vector<uint32> patternIDs;			// pattern IDs (sorted as they occour in the file)
+	std::vector<FileReader *> orderOffsets;	// combine the upper two vectors to get the offsets for each order item
 	Order.clear();
 	// subsong setup
-	vector<PSMSubSong> subsongs;
+	std::vector<PSMSubSong> subsongs;
 	bool subsongPanningDiffers = false; // do we have subsongs with different panning positions?
 
 	ChunkReader chunkFile(file);
@@ -319,8 +319,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// "PBOD" - Pattern data of a single pattern
-	vector<FileReader> pattChunks = chunks.GetAllChunks(PSMChunk::idPBOD);
-	for(vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
+	std::vector<FileReader> pattChunks = chunks.GetAllChunks(PSMChunk::idPBOD);
+	for(std::vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
 	{
 		ChunkReader chunk(*patternIter);
 		if(chunk.GetLength() != chunk.ReadUint32LE()	// Same value twice
@@ -349,13 +349,13 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// "SONG" - Subsong information (channel count etc)
-	vector<FileReader> songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
+	std::vector<FileReader> songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
 	if(songChunks.empty())
 	{
 		return false;
 	}
 
-	for(vector<FileReader>::iterator subsongIter = songChunks.begin(); subsongIter != songChunks.end(); subsongIter++)
+	for(std::vector<FileReader>::iterator subsongIter = songChunks.begin(); subsongIter != songChunks.end(); subsongIter++)
 	{
 		ChunkReader chunk(*subsongIter);
 		PSMSongHeader songHeader;
@@ -595,8 +595,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	// DSMP - Samples
 	if(loadFlags & loadSampleData)
 	{
-		vector<FileReader> sampleChunks = chunks.GetAllChunks(PSMChunk::idDSMP);
-		for(vector<FileReader>::iterator sampleIter = sampleChunks.begin(); sampleIter != sampleChunks.end(); sampleIter++)
+		std::vector<FileReader> sampleChunks = chunks.GetAllChunks(PSMChunk::idDSMP);
+		for(std::vector<FileReader>::iterator sampleIter = sampleChunks.begin(); sampleIter != sampleChunks.end(); sampleIter++)
 		{
 			FileReader chunk(*sampleIter);
 			if(!newFormat)

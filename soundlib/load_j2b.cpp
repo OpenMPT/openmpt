@@ -824,8 +824,8 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	// "PATT" - Pattern data for one pattern
 	if(loadFlags & loadPatternData)
 	{
-		vector<FileReader> pattChunks = chunks.GetAllChunks(AMFFRiffChunk::idPATT);
-		for(vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
+		std::vector<FileReader> pattChunks = chunks.GetAllChunks(AMFFRiffChunk::idPATT);
+		for(std::vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
 		{
 			FileReader chunk(*patternIter);
 			PATTERNINDEX pat = chunk.ReadUint8();
@@ -837,8 +837,8 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	if(!isAM)
 	{
 		// "INST" - Instrument (only in RIFF AMFF)
-		vector<FileReader> instChunks = chunks.GetAllChunks(AMFFRiffChunk::idINST);
-		for(vector<FileReader>::iterator instIter = instChunks.begin(); instIter != instChunks.end(); instIter++)
+		std::vector<FileReader> instChunks = chunks.GetAllChunks(AMFFRiffChunk::idINST);
+		for(std::vector<FileReader>::iterator instIter = instChunks.begin(); instIter != instChunks.end(); instIter++)
 		{
 			FileReader chunk(*instIter);
 			AMFFInstrumentHeader instrHeader;
@@ -886,8 +886,8 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	} else
 	{
 		// "RIFF" - Instrument (only in RIFF AM)
-		vector<FileReader> instChunks = chunks.GetAllChunks(AMFFRiffChunk::idRIFF);
-		for(vector<FileReader>::iterator instIter = instChunks.begin(); instIter != instChunks.end(); instIter++)
+		std::vector<FileReader> instChunks = chunks.GetAllChunks(AMFFRiffChunk::idRIFF);
+		for(std::vector<FileReader>::iterator instIter = instChunks.begin(); instIter != instChunks.end(); instIter++)
 		{
 			ChunkReader chunk(*instIter);
 			if(chunk.ReadUint32LE() != AMFFRiffChunk::idAI__)
@@ -923,10 +923,10 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 
 			// Read sample sub-chunks (RIFF nesting ftw)
 			ChunkReader::ChunkList<AMFFRiffChunk> sampleChunkFile = chunk.ReadChunks<AMFFRiffChunk>(2);
-			vector<FileReader> sampleChunks = sampleChunkFile.GetAllChunks(AMFFRiffChunk::idRIFF);
+			std::vector<FileReader> sampleChunks = sampleChunkFile.GetAllChunks(AMFFRiffChunk::idRIFF);
 			ASSERT(sampleChunks.size() == instrHeader.numSamples);
 
-			for(vector<FileReader>::iterator smpIter = sampleChunks.begin(); smpIter != sampleChunks.end(); smpIter++)
+			for(std::vector<FileReader>::iterator smpIter = sampleChunks.begin(); smpIter != sampleChunks.end(); smpIter++)
 			{
 				ChunkReader sampleChunk(*smpIter);
 

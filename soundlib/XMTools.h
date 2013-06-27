@@ -100,7 +100,7 @@ struct PACKED XMInstrument
 	void ApplyAutoVibratoToMPT(ModSample &mptSmp) const;
 
 	// Get a list of samples that should be written to the file.
-	vector<SAMPLEINDEX> GetSampleList(const ModInstrument &mptIns, bool compatibilityExport) const;
+	std::vector<SAMPLEINDEX> GetSampleList(const ModInstrument &mptIns, bool compatibilityExport) const;
 };
 
 STATIC_ASSERT(sizeof(XMInstrument) == 230);

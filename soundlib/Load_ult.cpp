@@ -368,7 +368,7 @@ struct PostFixUltCommands
 		curChannel = (curChannel + 1) % numChannels;
 	}
 
-	vector<bool> isPortaActive;
+	std::vector<bool> isPortaActive;
 	bool writeT125;
 	CHANNELINDEX numChannels, curChannel;
 };
