@@ -1432,7 +1432,6 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 void TestITCompression()
 //----------------------
 {
-	return;
 	// Test loading / saving of IT-compressed samples
 	const int sampleDataSize = 65536;
 	std::vector<int8> sampleData(sampleDataSize, 0);
