@@ -310,7 +310,7 @@ void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 
 	CFileFind finder;
 	BOOL bResult = finder.FindFile(searchPattern);
-	vector<CString> foundfiles;
+	std::vector<CString> foundfiles;
 	
 	while(bResult)
 	{

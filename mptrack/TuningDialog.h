@@ -18,9 +18,6 @@
 #include "afxwin.h"
 #include "resource.h"
 
-using std::vector;
-using std::string;
-
 //==========================
 template<class T1, class T2>
 class CBijectiveMap
@@ -52,7 +49,7 @@ public:
 
 	void RemoveValue_1(const T1& a)
 	{
-		typename vector<T1>::iterator iter = find(m_T1.begin(), m_T1.end(), a);
+		typename std::vector<T1>::iterator iter = find(m_T1.begin(), m_T1.end(), a);
 		if(iter != m_T1.end())
 		{
 			m_T2.erase(m_T2.begin() + (iter-m_T1.begin()));
@@ -62,7 +59,7 @@ public:
 
 	void RemoveValue_2(const T2& b)
 	{
-		typename vector<T2>::iterator iter = find(m_T2.begin(), m_T2.end(), b);
+		typename std::vector<T2>::iterator iter = find(m_T2.begin(), m_T2.end(), b);
 		if(iter != m_T2.end())
 		{
 			m_T1.erase(m_T1.begin() + (iter-m_T2.begin()));
@@ -72,7 +69,7 @@ public:
 
 	T2 GetMapping_12(const T1& a) const
 	{
-		typename vector<T1>::const_iterator iter = find(m_T1.begin(), m_T1.end(), a);
+		typename std::vector<T1>::const_iterator iter = find(m_T1.begin(), m_T1.end(), a);
 		if(iter != m_T1.end())
 		{
 			return m_T2[iter-m_T1.begin()];
@@ -83,7 +80,7 @@ public:
 
 	T1 GetMapping_21(const T2& b) const
 	{
-		typename vector<T2>::const_iterator iter = find(m_T2.begin(), m_T2.end(), b);
+		typename std::vector<T2>::const_iterator iter = find(m_T2.begin(), m_T2.end(), b);
 		if(iter != m_T2.end())
 		{
 			return m_T1[iter-m_T2.begin()];
@@ -95,8 +92,8 @@ public:
 private:
 	//Elements are collected to two arrays so that elements with the 
 	//same index are mapped to each other.
-	vector<T1> m_T1;
-	vector<T2> m_T2;
+	std::vector<T1> m_T1;
+	std::vector<T2> m_T2;
 
 	T1 m_NotFoundT1;
 	T2 m_NotFoundT2;
@@ -211,7 +208,7 @@ class CTuningDialog : public CDialog
 	};
 
 public:
-	typedef vector<CTuningCollection*> TUNINGVECTOR;
+	typedef std::vector<CTuningCollection*> TUNINGVECTOR;
 
 public:
 	CTuningDialog(CWnd* pParent = NULL, const TUNINGVECTOR& = TUNINGVECTOR(), CTuning* pTun = NULL);   // standard constructor
@@ -231,7 +228,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 private:
-	CTuning::TUNINGTYPE GetTuningTypeFromStr(const string& str) const;
+	CTuning::TUNINGTYPE GetTuningTypeFromStr(const std::string& str) const;
 
 	void UpdateTuningDescription();
 
@@ -265,7 +262,7 @@ private:
 private:
 	CTuningRatioMapWnd m_RatioMapWnd;
 	TUNINGVECTOR m_TuningCollections;
-	vector<CTuningCollection*> m_DeletableTuningCollections;
+	std::vector<CTuningCollection*> m_DeletableTuningCollections;
 
 	CTuning* m_pActiveTuning;
 	CTuningCollection* m_pActiveTuningCollection;

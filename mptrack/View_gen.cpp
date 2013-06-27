@@ -1262,7 +1262,7 @@ void CViewGlobals::OnMovePlugToSlot()
 		}
 	}
 
-	vector<PLUGINDEX> emptySlots;
+	std::vector<PLUGINDEX> emptySlots;
 	BuildEmptySlotList(emptySlots);
 	dlg.SetupMove(m_nCurrentPlugin, emptySlots, defaultIndex);
 
@@ -1371,8 +1371,8 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 }
 
 
-void CViewGlobals::BuildEmptySlotList(vector<PLUGINDEX> &emptySlots) 
-//------------------------------------------------------------------
+void CViewGlobals::BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots) 
+//-----------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();

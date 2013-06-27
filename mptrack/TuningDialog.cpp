@@ -31,8 +31,6 @@ typedef CTuning::RATIOTYPE RATIOTYPE;
 #define NOTEINDEXTYPE CTuning::NOTEINDEXTYPE
 #define EM_ALLOWALL CTuning::EM_ALLOWALL
 
-using namespace std;
-
 
 /*
 TODOS:
@@ -444,7 +442,7 @@ void CTuningDialog::UpdateTuningType()
 }
 
 
-TUNINGTYPE CTuningDialog::GetTuningTypeFromStr(const string& str) const
+TUNINGTYPE CTuningDialog::GetTuningTypeFromStr(const std::string& str) const
 //--------------------------------------------------------------------------------
 {
 	return CTuning::GetTuningType(str.c_str());
@@ -459,7 +457,7 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 		const size_t BS = 20;
 		char buffer[BS];
 		m_CombobTuningType.GetWindowText(buffer, BS);
-		const string strNewType = buffer;
+		const std::string strNewType = buffer;
 		TUNINGTYPE newType = GetTuningTypeFromStr(strNewType);
 		if(!m_pActiveTuning->IsOfType(newType))
 		{
@@ -535,7 +533,7 @@ void CTuningDialog::OnEnChangeEditNotename()
 	const size_t BS = 5;
 	char buffer[BS];
 	m_EditNotename.GetWindowText(buffer, BS);
-	string str = string(buffer);
+	std::string str = std::string(buffer);
 	if(str.length() > 0)
 	{
 		if(str.size() > 3)
@@ -568,7 +566,7 @@ void CTuningDialog::OnEnChangeEditRatiovalue()
 	const size_t BS = 12;
 	char buffer[BS];
 	m_EditRatio.GetWindowText(buffer, BS);
-	string str = buffer;
+	std::string str = buffer;
 	if(str.length() > 0)
 	{
 		m_pActiveTuning->SetRatio(currentNote, ConvertStrTo<RATIOTYPE>(buffer));
@@ -628,9 +626,9 @@ void CTuningDialog::OnBnClickedButtonExport()
 		
 	std::string filter;
 	if(pT != NULL)
-		filter = string("Tuning files (*") + CTuning::s_FileExtension + string(")|*") + CTuning::s_FileExtension + string("|");
+		filter = std::string("Tuning files (*") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
 	if(pTC != NULL)
-		filter += string("Tuning collection files (") + CTuningCollection::s_FileExtension + string(")|*") + CTuningCollection::s_FileExtension + string("|");
+		filter += std::string("Tuning collection files (") + CTuningCollection::s_FileExtension + std::string(")|*") + CTuningCollection::s_FileExtension + std::string("|");
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, CTuning::s_FileExtension, "",
 		filter,
@@ -641,8 +639,8 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	bool failure = true;
 	
-	ofstream fout(files.first_file.c_str(), ios::binary);
-	const string ext = "." + files.extension;
+	std::ofstream fout(files.first_file.c_str(), std::ios::binary);
+	const std::string ext = "." + files.extension;
 
 	if(ext == CTuning::s_FileExtension)
 	{
@@ -701,7 +699,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 			if (bIsTun)
 			{
-				std::ifstream fin(files.filenames[counter].c_str(), ios::binary);
+				std::ifstream fin(files.filenames[counter].c_str(), std::ios::binary);
 				pT = CTuningRTI::DeserializeOLD(fin);
 				if(pT == 0)
 					{fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
@@ -1075,7 +1073,7 @@ void CTuningDialog::OnNMRclickTreeTuning(NMHDR *, LRESULT *pResult)
 bool CTuningDialog::IsDeletable(const CTuningCollection* const pTC) const
 //--------------------------------------------------------------------------------
 {
-	vector<CTuningCollection*>::const_iterator iter = find(m_DeletableTuningCollections.begin(), m_DeletableTuningCollections.end(), pTC);
+	std::vector<CTuningCollection*>::const_iterator iter = find(m_DeletableTuningCollections.begin(), m_DeletableTuningCollections.end(), pTC);
 	if(iter != m_DeletableTuningCollections.end())
 		return true;
 	else 
@@ -1218,7 +1216,7 @@ void CTuningDialog::OnRemoveTuning()
 		CTuningCollection* pTC = GetpTuningCollection(pT);
 		if(pTC)
 		{
-			string str = string("Remove tuning '") + pT->GetName() + string("' from ' ") + pTC->GetName() + string("'?");
+			std::string str = std::string("Remove tuning '") + pT->GetName() + std::string("' from ' ") + pTC->GetName() + std::string("'?");
 			if(Reporting::Confirm(str.c_str()) == cnfYes)
 			{
 				if(!pTC->Remove(pT))

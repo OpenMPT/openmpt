@@ -135,7 +135,7 @@ CModTree::CModTree(CModTree *pDataTree)
 CModTree::~CModTree()
 //-------------------
 {
-	vector<ModTreeDocInfo *>::iterator iter;
+	std::vector<ModTreeDocInfo *>::iterator iter;
 	for(iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		delete (*iter);
@@ -309,7 +309,7 @@ void CModTree::AddDocument(CModDoc *pModDoc)
 //------------------------------------------
 {
 	// Check if document is already in the list
-	vector<ModTreeDocInfo *>::iterator iter;
+	std::vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		if ((*iter)->pModDoc == pModDoc)
@@ -340,7 +340,7 @@ void CModTree::AddDocument(CModDoc *pModDoc)
 void CModTree::RemoveDocument(CModDoc *pModDoc)
 //---------------------------------------------
 {
-	vector<ModTreeDocInfo *>::iterator iter;
+	std::vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		if((*iter)->pModDoc == pModDoc)
@@ -366,7 +366,7 @@ CModDoc *CModTree::GetDocumentFromItem(HTREEITEM hItem)
 	}
 	if (hItem != NULL)
 	{
-		vector<ModTreeDocInfo *>::iterator iter;
+		std::vector<ModTreeDocInfo *>::iterator iter;
 		for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 		{
 			if (hItem == (*iter)->hSong) return (*iter)->pModDoc;
@@ -380,7 +380,7 @@ CModDoc *CModTree::GetDocumentFromItem(HTREEITEM hItem)
 ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc *pModDoc)
 //-------------------------------------------------------------------
 {
-	vector<ModTreeDocInfo *>::iterator iter;
+	std::vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		if ((*iter)->pModDoc == pModDoc)
@@ -2154,7 +2154,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 			{
 				const SAMPLEINDEX from = static_cast<SAMPLEINDEX>(modItemDragID - 1), to = static_cast<SAMPLEINDEX>(modItemDropID - 1);
 
-				vector<SAMPLEINDEX> newOrder(pModDoc->GetNumSamples());
+				std::vector<SAMPLEINDEX> newOrder(pModDoc->GetNumSamples());
 				for(SAMPLEINDEX smp = 0; smp < pModDoc->GetNumSamples(); smp++)
 				{
 					newOrder[smp] = smp + 1;
@@ -2181,7 +2181,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 			{
 				const INSTRUMENTINDEX from = static_cast<INSTRUMENTINDEX>(modItemDragID - 1), to = static_cast<INSTRUMENTINDEX>(modItemDropID - 1);
 
-				vector<INSTRUMENTINDEX> newOrder(pModDoc->GetNumInstruments());
+				std::vector<INSTRUMENTINDEX> newOrder(pModDoc->GetNumInstruments());
 				for(INSTRUMENTINDEX ins = 0; ins < pModDoc->GetNumInstruments(); ins++)
 				{
 					newOrder[ins] = ins + 1;
@@ -2300,7 +2300,7 @@ void CModTree::OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint)
 	dwHint &= (HINT_PATNAMES|HINT_SMPNAMES|HINT_INSNAMES|HINT_MODTYPE|HINT_MODGENERAL|HINT_MODSEQUENCE|HINT_MIXPLUGINS|HINT_MPTOPTIONS|HINT_MASK_ITEM|HINT_SEQNAMES);
 	if ((pHint != this) && (dwHint & HINT_MASK_FLAGS))
 	{
-		vector<ModTreeDocInfo *>::iterator iter;
+		std::vector<ModTreeDocInfo *>::iterator iter;
 		for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 		{
 			if (((*iter)->pModDoc == pModDoc) || (!pModDoc))
@@ -2879,7 +2879,7 @@ void CModTree::OnRefreshTree()
 //----------------------------
 {
 	BeginWaitCursor();
-	vector<ModTreeDocInfo *>::iterator iter;
+	std::vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
 		UpdateView((*iter), HINT_MODTYPE);
@@ -3025,10 +3025,10 @@ void CModTree::OnUnmuteAllTreeItem()
 
 // Helper function for generating an insert vector for samples/instruments
 template<typename T>
-vector<T> GenerateInsertVector(size_t howMany, size_t insertPos, T insertId)
-//--------------------------------------------------------------------------
+std::vector<T> GenerateInsertVector(size_t howMany, size_t insertPos, T insertId)
+//-------------------------------------------------------------------------------
 {
-	vector<T> newOrder(howMany);
+	std::vector<T> newOrder(howMany);
 	for(T i = 0; i < howMany; i++)
 	{
 		newOrder[i] = i + 1;
@@ -3063,7 +3063,7 @@ void CModTree::OnDuplicateTreeItem()
 		} else if(modItemType == MODITEM_SAMPLE)
 		{
 			// Duplicate sample
-			vector<SAMPLEINDEX> newOrder = GenerateInsertVector<SAMPLEINDEX>(pSndFile->GetNumSamples(), modItemID, static_cast<SAMPLEINDEX>(modItemID));
+			std::vector<SAMPLEINDEX> newOrder = GenerateInsertVector<SAMPLEINDEX>(pSndFile->GetNumSamples(), modItemID, static_cast<SAMPLEINDEX>(modItemID));
 			if(pModDoc->ReArrangeSamples(newOrder) != SAMPLEINDEX_INVALID)
 			{
 				pModDoc->SetModified();
@@ -3075,7 +3075,7 @@ void CModTree::OnDuplicateTreeItem()
 		} else if(modItemType == MODITEM_INSTRUMENT)
 		{
 			// Duplicate instrument
-			vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, static_cast<INSTRUMENTINDEX>(modItemID));
+			std::vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, static_cast<INSTRUMENTINDEX>(modItemID));
 			if(pModDoc->ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
 			{
 				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_PATTERNDATA);
@@ -3113,7 +3113,7 @@ void CModTree::OnInsertTreeItem()
 		} else if(modItemType == MODITEM_SAMPLE)
 		{
 			// Insert sample
-			vector<SAMPLEINDEX> newOrder = GenerateInsertVector<SAMPLEINDEX>(pSndFile->GetNumSamples(), modItemID, 0);
+			std::vector<SAMPLEINDEX> newOrder = GenerateInsertVector<SAMPLEINDEX>(pSndFile->GetNumSamples(), modItemID, 0);
 			if(pModDoc->ReArrangeSamples(newOrder) != SAMPLEINDEX_INVALID)
 			{
 				pModDoc->SetModified();
@@ -3125,7 +3125,7 @@ void CModTree::OnInsertTreeItem()
 		} else if(modItemType == MODITEM_INSTRUMENT)
 		{
 			// Insert instrument
-			vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, 0);
+			std::vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(pSndFile->GetNumInstruments(), modItemID, 0);
 			if(pModDoc->ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
 			{
 				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES| HINT_INSTRUMENT | HINT_ENVELOPE | HINT_PATTERNDATA);

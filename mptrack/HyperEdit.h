@@ -35,8 +35,6 @@
 
 #include <vector>  
 
-using namespace std;
-
 //
 // This structure holds the starting offset and length for each token
 // located inside the buffer for the control. We use this data inside
@@ -46,7 +44,7 @@ using namespace std;
 struct _TOKEN_OFFSET{
 	WORD iStart;   //
 	WORD iLength;
-}; typedef vector<_TOKEN_OFFSET> OFFSETS;
+}; typedef std::vector<_TOKEN_OFFSET> OFFSETS;
 
 // CHyperEdit control interface
 

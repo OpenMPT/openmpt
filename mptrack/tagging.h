@@ -13,8 +13,6 @@
 #include <string>
 #include "Wav.h"
 
-using std::string;
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ID3v2.4 Tags
 
@@ -73,7 +71,7 @@ public:
 	void WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE *f);
 
 	// Tag data
-	string title, artist, album, year, comments, genre, url, encoder, bpm;
+	std::string title, artist, album, year, comments, genre, url, encoder, bpm;
 
 	CFileTagging();
 
@@ -82,7 +80,7 @@ private:
 	// Convert Integer to Synchsafe Integer (see ID3v2.4 specs)
 	uint32 intToSynchsafe(uint32 in);
 	// Write a frame
-	void WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE *f);
+	void WriteID3v2Frame(char cFrameID[4], std::string sFramecontent, FILE *f);
 	// Size of our tag
 	uint32 totalID3v2Size;
 };

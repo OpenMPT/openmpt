@@ -51,8 +51,8 @@ BOOL CloseMainDialog::OnInitDialog()
 
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 
-	vector<CModDoc *> documents = theApp.GetOpenDocuments();
-	for(vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
+	std::vector<CModDoc *> documents = theApp.GetOpenDocuments();
+	for(std::vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
 	{
 		CModDoc *pModDoc = *doc;
 		if(pModDoc->IsModified())

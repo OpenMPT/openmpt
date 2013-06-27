@@ -198,7 +198,7 @@ void CChannelManagerDlg::OnApply()
 	CriticalSection cs;
 
 	//Creating new order-vector for ReArrangeChannels.
-	vector<CHANNELINDEX> newChnOrder;
+	std::vector<CHANNELINDEX> newChnOrder;
 	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
 	{
 		newChnOrder.push_back(newpat[nChn]);

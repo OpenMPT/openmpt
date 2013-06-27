@@ -363,7 +363,7 @@ BOOL CModToMidi::DoConvert()
 	RMIDDATACHUNK rmid;
 	MTHDCHUNK mthd;
 	MTRKCHUNK mtrk;
-	vector<DYNMIDITRACK> Tracks(m_pSndFile->GetNumChannels());
+	std::vector<DYNMIDITRACK> Tracks(m_pSndFile->GetNumChannels());
 	UINT nMidiChCurPrg[16];
 	BYTE tmp[256];
 	CHAR s[256];

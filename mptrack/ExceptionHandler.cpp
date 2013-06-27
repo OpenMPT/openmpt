@@ -86,8 +86,8 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 
 	// Rescue modified files...
 	int numFiles = 0;
-	vector<CModDoc *> documents = theApp.GetOpenDocuments();
-	for(vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
+	std::vector<CModDoc *> documents = theApp.GetOpenDocuments();
+	for(std::vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
 	{
 		CModDoc *pModDoc = *doc;
 		if(pModDoc->IsModified() && pModDoc->GetSoundFile() != nullptr)

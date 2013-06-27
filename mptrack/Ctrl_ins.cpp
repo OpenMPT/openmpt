@@ -192,7 +192,7 @@ void CNoteMapWnd::OnPaint()
 			// Note
 			s[0] = 0;
 
-			string temp = sndFile.GetNoteName(nPos+1, m_nInstrument);
+			std::string temp = sndFile.GetNoteName(nPos+1, m_nInstrument);
 			temp.resize(4);
 			if ((nPos >= 0) && (nPos < NOTE_MAX)) wsprintf(s, "%s", temp.c_str());
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
@@ -207,7 +207,7 @@ void CNoteMapWnd::OnPaint()
 				UINT n = pIns->NoteMap[nPos];
 				if(ModCommand::IsNote(n))
 				{
-					string temp = sndFile.GetNoteName(n, m_nInstrument);
+					std::string temp = sndFile.GetNoteName(n, m_nInstrument);
 					temp.resize(4);
 					wsprintf(s, "%s", temp.c_str());
 				} else
@@ -1530,7 +1530,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			// Pitch/Tempo lock
 			{
 				const CModSpecifications& specs = m_sndFile.GetModSpecifications();
-				string str = string("Tempo range: ") + Stringify(specs.tempoMin) + string(" - ") + Stringify(specs.tempoMax);
+				std::string str = std::string("Tempo range: ") + Stringify(specs.tempoMin) + std::string(" - ") + Stringify(specs.tempoMax);
 				if(str.size() >= 250) str.resize(250);
 				strcpy(pszText, str.c_str());
 				return TRUE;
@@ -2570,7 +2570,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 
 	//Case: Chosen tuning editor to be displayed.
 	//Creating vector for the CTuningDialog.
-	vector<CTuningCollection*> v;
+	std::vector<CTuningCollection*> v;
 	v.push_back(&m_sndFile.GetBuiltInTunings());
 	v.push_back(&m_sndFile.GetLocalTunings());
 	v.push_back(&m_sndFile.GetTuneSpecificTunings());

@@ -75,7 +75,7 @@ class CRemoveChannelsDlg: public CDialog
 {
 public:
 	CSoundFile &sndFile;
-	vector<bool> m_bKeepMask;
+	std::vector<bool> m_bKeepMask;
 	CHANNELINDEX m_nChannels, m_nRemove;
 	CListBox m_RemChansList;		//rewbs.removeChansDlgCleanup
 	bool m_ShowCancel;

@@ -577,7 +577,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 
 	CString name;
 
-	vector<CVstPlugin *> inputPlugs;
+	std::vector<CVstPlugin *> inputPlugs;
 	m_VstPlugin.GetInputPlugList(inputPlugs);
 	for(size_t nPlug=0; nPlug < inputPlugs.size(); nPlug++)
 	{
@@ -585,7 +585,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 		m_InputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + inputPlugs[nPlug]->m_nSlot, name);
 	}
 
-	vector<CHANNELINDEX> inputChannels;
+	std::vector<CHANNELINDEX> inputChannels;
 	m_VstPlugin.GetInputChannelList(inputChannels);
 	for(size_t nChn=0; nChn<inputChannels.size(); nChn++)
 	{
@@ -597,7 +597,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 		m_InputMenu.AppendMenu(MF_STRING, NULL, name);
 	}
 
-	vector<INSTRUMENTINDEX> inputInstruments;
+	std::vector<INSTRUMENTINDEX> inputInstruments;
 	m_VstPlugin.GetInputInstrumentList(inputInstruments);
 	for(size_t nIns = 0; nIns<inputInstruments.size(); nIns++)
 	{

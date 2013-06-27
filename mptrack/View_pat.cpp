@@ -1299,7 +1299,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 
 			const bool duplicate = (nFlags & MK_SHIFT) != 0;
 			const CHANNELINDEX newChannels = pModDoc->GetNumChannels() + (duplicate ? 1 : 0);
-			vector<CHANNELINDEX> channels(newChannels, 0);
+			std::vector<CHANNELINDEX> channels(newChannels, 0);
 			CHANNELINDEX i = 0;
 			bool modified = duplicate;
 
@@ -2613,12 +2613,12 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 	}
 
 	bool changed = false;
-	vector<CHANNELINDEX> validChans;
+	std::vector<CHANNELINDEX> validChans;
 
 	if(type == PatternCursor::effectColumn || type == PatternCursor::paramColumn)
 	{
-		vector<CHANNELINDEX> effectChans;
-		vector<CHANNELINDEX> paramChans;
+		std::vector<CHANNELINDEX> effectChans;
+		std::vector<CHANNELINDEX> paramChans;
 		ListChansWhereColSelected(PatternCursor::effectColumn, effectChans);
 		ListChansWhereColSelected(PatternCursor::paramColumn, paramChans);
 
@@ -2677,7 +2677,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 	const ROWINDEX row0 = m_Selection.GetStartRow(), row1 = m_Selection.GetEndRow();
 	
 	//for all channels where type is selected
-	for(vector<CHANNELINDEX>::iterator iter = validChans.begin(); iter != validChans.end(); iter++)
+	for(std::vector<CHANNELINDEX>::iterator iter = validChans.begin(); iter != validChans.end(); iter++)
 	{
 		CHANNELINDEX nchn = *iter;
 		
@@ -3151,7 +3151,7 @@ void CViewPattern::OnRemoveChannel()
 	str.Format("Remove channel %d? This channel still contains note data!", nChn + 1);
 	if(isEmpty || Reporting::Confirm(str , "Remove channel") == cnfYes)
 	{
-		vector<bool> keepMask(pModDoc->GetNumChannels(), true);
+		std::vector<bool> keepMask(pModDoc->GetNumChannels(), true);
 		keepMask[nChn] = false;
 		pModDoc->RemoveChannels(keepMask);
 		SetCurrentPattern(m_nPattern); //Updating the screen.
@@ -3167,7 +3167,7 @@ void CViewPattern::AddChannelBefore(CHANNELINDEX nBefore)
 
 	BeginWaitCursor();
 	// Create new channel order, with channel nBefore being an invalid (and thus empty) channel.
-	vector<CHANNELINDEX> channels(pModDoc->GetNumChannels() + 1, CHANNELINDEX_INVALID);
+	std::vector<CHANNELINDEX> channels(pModDoc->GetNumChannels() + 1, CHANNELINDEX_INVALID);
 	CHANNELINDEX i = 0;
 	for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() + 1; nChn++)
 	{
@@ -3203,7 +3203,7 @@ void CViewPattern::OnDuplicateChannel()
 
 	BeginWaitCursor();
 	// Create new channel order, with channel nDupChn duplicated.
-	vector<CHANNELINDEX> channels(pModDoc->GetNumChannels() + 1, 0);
+	std::vector<CHANNELINDEX> channels(pModDoc->GetNumChannels() + 1, 0);
 	CHANNELINDEX i = 0;
 	for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() + 1; nChn++)
 	{
@@ -3355,7 +3355,7 @@ void CViewPattern::OnPatternAmplify()
 		}
 
 		// Volume memory for each channel.
-		vector<uint8> chvol(lastChannel + 1, 64);
+		std::vector<uint8> chvol(lastChannel + 1, 64);
 
 		for(ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
 		{
@@ -6093,7 +6093,7 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const
 {
 	HMENU transMenu = CreatePopupMenu();
 
-	vector<CHANNELINDEX> validChans;
+	std::vector<CHANNELINDEX> validChans;
 	DWORD greyed = IsColumnSelected(PatternCursor::noteColumn) ? FALSE : MF_GRAYED;
 
 	if(!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
@@ -6112,7 +6112,7 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const
 bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //--------------------------------------------------------------------------
 {
-	vector<CHANNELINDEX> validChans;
+	std::vector<CHANNELINDEX> validChans;
 	DWORD greyed = IsColumnSelected(PatternCursor::volumeColumn) ? 0 : MF_GRAYED;
 
 	if(!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
@@ -6157,7 +6157,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	}
 
 
-	vector<CHANNELINDEX> validChans;
+	std::vector<CHANNELINDEX> validChans;
 	DWORD greyed = IsColumnSelected(PatternCursor::instrColumn) ? 0 : MF_GRAYED;
 
 	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
@@ -6275,8 +6275,8 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 
 // Returns an ordered list of all channels in which a given column type is selected.
-CHANNELINDEX CViewPattern::ListChansWhereColSelected(PatternCursor::Columns colType, vector<CHANNELINDEX> &chans) const
-//---------------------------------------------------------------------------------------------------------------------
+CHANNELINDEX CViewPattern::ListChansWhereColSelected(PatternCursor::Columns colType, std::vector<CHANNELINDEX> &chans) const
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	CHANNELINDEX startChan = m_Selection.GetStartChannel();
 	CHANNELINDEX endChan   = m_Selection.GetEndChannel();
@@ -6310,12 +6310,12 @@ bool CViewPattern::IsColumnSelected(PatternCursor::Columns colType) const
 bool CViewPattern::IsInterpolationPossible(PatternCursor::Columns colType) const
 //------------------------------------------------------------------------------
 {
-	vector<CHANNELINDEX> validChans;
+	std::vector<CHANNELINDEX> validChans;
 	ListChansWhereColSelected(colType, validChans);
 
 	ROWINDEX startRow = m_Selection.GetStartRow();
 	ROWINDEX endRow   = m_Selection.GetEndRow();
-	for(vector<CHANNELINDEX>::iterator iter = validChans.begin(); iter != validChans.end(); iter++)
+	for(std::vector<CHANNELINDEX>::iterator iter = validChans.begin(); iter != validChans.end(); iter++)
 	{
 		if(IsInterpolationPossible(startRow, endRow, *iter, colType))
 		{

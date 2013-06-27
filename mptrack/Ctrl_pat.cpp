@@ -826,7 +826,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 		return;
 	bool success = false;
 	// Has this pattern been duplicated already? (for multiselect)
-	vector<PATTERNINDEX> patReplaceIndex(sndFile.Patterns.Size(), PATTERNINDEX_INVALID);
+	std::vector<PATTERNINDEX> patReplaceIndex(sndFile.Patterns.Size(), PATTERNINDEX_INVALID);
 
 	for(ORDERINDEX i = 0; i <= insertCount; i++)
 	{
