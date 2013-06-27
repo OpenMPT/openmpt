@@ -64,10 +64,10 @@ static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 	return false;
 }
 
-static void WriteTuningCollection(ostream& oStrm, const CTuningCollection& tc) {tc.Serialize(oStrm);}
+static void WriteTuningCollection(std::ostream& oStrm, const CTuningCollection& tc) {tc.Serialize(oStrm);}
 
-static void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
-//--------------------------------------------------------------
+static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
+//-------------------------------------------------------------------
 {
 	if(sf.GetNumInstruments() > 0)
 	{
@@ -80,7 +80,7 @@ static void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
 		//T1 1 T2 2 1 1 1 2 2 2
 
 		//Creating the tuning address <-> tuning id number map.
-		typedef map<CTuning*, uint16> TNTS_MAP;
+		typedef std::map<CTuning*, uint16> TNTS_MAP;
 		typedef TNTS_MAP::iterator TNTS_MAP_ITER;
 		TNTS_MAP tNameToShort_Map;
 
@@ -126,13 +126,13 @@ static void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
 #endif // MODPLUG_NO_FILESAVE
 
 
-static void ReadTuningCollection(istream& iStrm, CTuningCollection& tc, const size_t) {tc.Deserialize(iStrm);}
+static void ReadTuningCollection(std::istream& iStrm, CTuningCollection& tc, const size_t) {tc.Deserialize(iStrm);}
 
 template<class TUNNUMTYPE, class STRSIZETYPE>
-static bool ReadTuningMapTemplate(istream& iStrm, map<uint16, string>& shortToTNameMap, const size_t maxNum = 500)
-//----------------------------------------------------------------------------------------------------------------
+static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::string>& shortToTNameMap, const size_t maxNum = 500)
+//-------------------------------------------------------------------------------------------------------------------------------
 {
-	typedef map<uint16, string> MAP;
+	typedef std::map<uint16, std::string> MAP;
 	typedef MAP::iterator MAP_ITER;
 	TUNNUMTYPE numTuning = 0;
 	iStrm.read(reinterpret_cast<char*>(&numTuning), sizeof(numTuning));
@@ -141,7 +141,7 @@ static bool ReadTuningMapTemplate(istream& iStrm, map<uint16, string>& shortToTN
 
 	for(size_t i = 0; i<numTuning; i++)
 	{
-		string temp;
+		std::string temp;
 		uint16 ui;
 		if(srlztn::StringFromBinaryStream<STRSIZETYPE>(iStrm, temp, 255))
 			return true;
@@ -156,16 +156,16 @@ static bool ReadTuningMapTemplate(istream& iStrm, map<uint16, string>& shortToTN
 }
 
 
-static void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
-//--------------------------------------------------------------------------
+static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0)
+//-------------------------------------------------------------------------------
 {
-	typedef map<WORD, string> MAP;
+	typedef std::map<WORD, std::string> MAP;
 	typedef MAP::iterator MAP_ITER;
 	MAP shortToTNameMap;
 	ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap);
 
 	//Read & set tunings for instruments
-	std::list<string> notFoundTunings;
+	std::list<std::string> notFoundTunings;
 	for(UINT i = 1; i<=csf.GetNumInstruments(); i++)
 	{
 		uint16 ui;
@@ -173,9 +173,9 @@ static void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 		MAP_ITER iter = shortToTNameMap.find(ui);
 		if(csf.Instruments[i] && iter != shortToTNameMap.end())
 		{
-			const string str = iter->second;
+			const std::string str = iter->second;
 
-			if(str == string("->MPT_ORIGINAL_IT<-"))
+			if(str == std::string("->MPT_ORIGINAL_IT<-"))
 			{
 				csf.Instruments[i]->pTuning = nullptr;
 				continue;
