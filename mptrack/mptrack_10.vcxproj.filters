@@ -337,15 +337,6 @@
     <ClCompile Include="Globals.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
-    <ClCompile Include="HyperEdit.cpp">
-      <Filter>Source Files\mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="HyperEdit2.cpp">
-      <Filter>Source Files\mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="HyperEdit3.cpp">
-      <Filter>Source Files\mptrack</Filter>
-    </ClCompile>
     <ClCompile Include="InputHandler.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
@@ -768,9 +759,6 @@
     <ClInclude Include="Globals.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="HyperEdit.h">
-      <Filter>Header Files\mptrack</Filter>
-    </ClInclude>
     <ClInclude Include="InputHandler.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
@@ -899,9 +887,6 @@
     <None Include="res\vumeters.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\built-inTunings.tc">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\colors.bmp">
       <Filter>Resource Files</Filter>
     </None>
@@ -965,6 +950,7 @@
     <None Include="res\vispcnode.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\soundlib\Tunings\built-inTunings.tc" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

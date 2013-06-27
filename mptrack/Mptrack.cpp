@@ -18,7 +18,6 @@
 #include "../sounddev/SoundDevice.h"
 #include "vstplug.h"
 #include "CreditStatic.h"
-#include "hyperEdit.h"
 #include "commctrl.h"
 #include "../common/version.h"
 #include "../test/test.h"
@@ -1468,7 +1467,6 @@ class CAboutDlg: public CDialog
 protected:
 	CPaletteBitmap m_bmp;
 	CCreditStatic m_static;
-	CHyperEdit m_heContact;
 
 public:
 	CAboutDlg() {}
@@ -1496,7 +1494,6 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CModTypeDlg)
-	DDX_Control(pDX, IDC_EDIT1,			m_heContact);
 	//}}AFX_DATA_MAP
 }
 
@@ -1525,9 +1522,8 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	SetDlgItemText(IDC_EDIT2, CString("Build Date: ") + MptVersion::GetBuildDateString().c_str());
 	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::GetVersionStringExtended().c_str());
-	m_heContact.SetWindowText(mpt::String::Replace(MptVersion::GetContactString(), "\n", "\r\n" ).c_str());
 	m_static.SubclassDlgItem(IDC_CREDITS,this);
-	m_static.SetCredits((mpt::String::Replace(MptVersion::GetFullCreditsString(), "\n", "|") + "||||||").c_str());
+	m_static.SetCredits((mpt::String::Replace(MptVersion::GetFullCreditsString(), "\n", "|") + "|" + mpt::String::Replace(MptVersion::GetContactString(), "\n", "|" ) + "||||||").c_str());
 	m_static.SetSpeed(DISPLAY_SLOW);
 	m_static.SetColor(BACKGROUND_COLOR, RGB(138, 165, 219)); // Background Colour
 	m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent
