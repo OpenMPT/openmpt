@@ -28,10 +28,10 @@ const std::string CTuningRTI::s_DerivedclassID = "RTI";
 namespace CTuningS11n
 {
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
-	void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
+	void ReadNoteMap(std::istream& iStrm, CTuning::NOTENAMEMAP& m, const size_t);
 	void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t);
 
-	void WriteNoteMap(std::ostream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m);
+	void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
 
 	struct RatioWriter
@@ -371,7 +371,7 @@ CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 }
 
 
-CTuningBase* CTuningRTI::Deserialize(std::istream& iStrm)
+CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 //--------------------------------------------------
 {
 	if(iStrm.fail())
@@ -380,7 +380,7 @@ CTuningBase* CTuningRTI::Deserialize(std::istream& iStrm)
 	CTuningRTI* pTuning = new CTuningRTI;
 
 	srlztn::Ssb ssb(iStrm);
-	ssb.BeginRead("CTB244RTI", (CTuningBase::GetVersion() << 24) + GetVersion());
+	ssb.BeginRead("CTB244RTI", (CTuning::GetVersion() << 24) + GetVersion());
 	ssb.ReadItem(pTuning->m_TuningName, "0", 1, ReadStr);
 	ssb.ReadItem(pTuning->m_EditMask, "1");
 	ssb.ReadItem(pTuning->m_TuningType, "2");
@@ -467,7 +467,7 @@ bool VectorFromBinaryStream(std::istream& inStrm, std::vector<T>& v, const SIZET
 }
 
 
-CTUNINGBASE::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) const
+CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) const
 //----------------------------------------------------------------------------------
 {
 	srlztn::Ssb ssb(outStrm);
@@ -519,7 +519,7 @@ void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
 }
 
 
-void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t)
+void ReadNoteMap(std::istream& iStrm, CTuning::NOTENAMEMAP& m, const size_t)
 //----------------------------------------------------------------------------------
 {
 	uint64 val;
@@ -559,12 +559,12 @@ void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 }
 
 
-void WriteNoteMap(std::ostream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m)
+void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m)
 //---------------------------------------------------------------------------
 {
 	srlztn::WriteAdaptive1248(oStrm, m.size());
-	CTUNINGBASE::NNM_CITER iter = m.begin();
-	CTUNINGBASE::NNM_CITER end = m.end();
+	CTuning::NNM_CITER iter = m.begin();
+	CTuning::NNM_CITER end = m.end();
 	for(; iter != end; iter++)
 	{
 		srlztn::Binarywrite<int16>(oStrm, iter->first);

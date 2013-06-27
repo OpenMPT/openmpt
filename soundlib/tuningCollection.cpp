@@ -31,10 +31,10 @@ const TCHAR CTuningCollection::s_FileExtension[4] = MPT_TEXT(".tc");
 
 namespace CTuningS11n
 {
-	void WriteNoteMap(std::ostream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m);
+	void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m);
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
 
-	void ReadNoteMap(std::istream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
+	void ReadNoteMap(std::istream& iStrm, CTuning::NOTENAMEMAP& m, const size_t);
 	void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t);
 	void WriteStr(std::ostream& oStrm, const std::string& str);
 
