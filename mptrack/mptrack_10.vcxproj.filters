@@ -950,7 +950,9 @@
     <None Include="res\vispcnode.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\soundlib\Tunings\built-inTunings.tc" />
+    <None Include="..\soundlib\Tunings\built-inTunings.tc">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
