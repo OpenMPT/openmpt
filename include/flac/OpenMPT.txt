@@ -14,3 +14,7 @@ The FLAC package has been left pretty much untouched, except for a few changes:
     and release configurations: FLAC__HAS_OGG;FLAC__CPU_IA32;FLAC__HAS_NASM
   - Debug configurations have been changed to use a multi-threaded debug DLL
     runtime library (/MDd)
+  - x64 project configurations have been added for VS2010.
+    These are based on the modified x86 ones, which output filesnames and
+    directories suffixed by '64'. FLAC__USE_3DNOW is removed for x64.
+  - A c implementation for local_swap32_block_ if !_M_IX86 has been added.
