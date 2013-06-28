@@ -32,12 +32,12 @@ AR  = ar
 DYNLINK = 1
 
 
-CPPFLAGS = -I../common -I.. -I../include/modplug/include
-CXXFLAGS = -std=c++0x -fPIC -fvisibility=hidden
-CFLAGS   = -std=c99   -fPIC -fvisibility=hidden
-LDFLAGS  = 
-LDLIBS   = -lm
-ARFLAGS  = rcs
+CPPFLAGS := -I../common -I.. -I../include/modplug/include
+CXXFLAGS := -std=c++0x -fPIC -fvisibility=hidden
+CFLAGS   := -std=c99   -fPIC -fvisibility=hidden
+LDFLAGS  := 
+LDLIBS   := -lm
+ARFLAGS  := rcs
 
 ifeq ($(DEBUG),1)
 CXXFLAGS += -O0 -g
@@ -81,12 +81,12 @@ LDLIBS   += $(shell pkg-config --libs-only-l     portaudio-2.0 )
 endif
 
 #LDLIBS   += -lFLAC++ -lFLAC
-ifeq ($(shell pkg-config --exists flac++ flac && echo yes),yes)
+ifeq ($(shell pkg-config --exists flac && echo yes),yes)
 CPPFLAGS += -DMPT_WITH_FLAC
-CPPFLAGS += $(shell pkg-config --cflags-only-I   flac++ flac )
-LDFLAGS  += $(shell pkg-config --libs-only-other flac++ flac )
-LDFLAGS  += $(shell pkg-config --libs-only-L     flac++ flac )
-LDLIBS   += $(shell pkg-config --libs-only-l     flac++ flac )
+CPPFLAGS += $(shell pkg-config --cflags-only-I   flac )
+LDFLAGS  += $(shell pkg-config --libs-only-other flac )
+LDFLAGS  += $(shell pkg-config --libs-only-L     flac )
+LDLIBS   += $(shell pkg-config --libs-only-l     flac )
 endif
 
 #LDLIBS   += -lsndfile
