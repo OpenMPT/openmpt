@@ -513,7 +513,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	
 	// Read Track Mapping Table
 	std::vector<uint16> trackMap;
-	file.ReadVector(trackMap, fileHeader.numTracks);
+	file.ReadVectorLE(trackMap, fileHeader.numTracks);
 	uint16 trackCount = 0;
 	for(std::vector<uint16>::const_iterator i = trackMap.begin(); i != trackMap.end(); i++)
 	{
@@ -573,7 +573,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		// Get table with per-channel track assignments
 		file.Seek(trackStartPos + pat * (GetNumChannels() * 2 + (fileHeader.version >= 14 ? 2 : 0)));
 		std::vector<uint16> tracks;
-		file.ReadVector(tracks, GetNumChannels());
+		file.ReadVectorLE(tracks, GetNumChannels());
 
 		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 		{

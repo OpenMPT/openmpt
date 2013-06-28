@@ -859,12 +859,13 @@ public:
 		}
 	}
 
-	// Read an array.
+	// Read an array of byte-sized values.
 	// If successful, the file cursor is advanced by the size of the array.
 	// Otherwise, the target is zeroed.
 	template<typename T, off_t destSize>
 	bool ReadArray(T (&destArray)[destSize])
 	{
+		//STATIC_ASSERT(sizeof(T) == 1);
 		if(CanRead(sizeof(destArray)))
 		{
 			for(std::size_t i = 0; i < destSize; ++i)
@@ -879,12 +880,33 @@ public:
 		}
 	}
 
-	// Read destSize elements of type T into a vector.
+	// Read an array.
+	// If successful, the file cursor is advanced by the size of the array.
+	// Otherwise, the target is zeroed.
+	template<typename T, off_t destSize>
+	bool ReadArrayLE(T (&destArray)[destSize])
+	{
+		if(CanRead(sizeof(destArray)))
+		{
+			for(std::size_t i = 0; i < destSize; ++i)
+			{
+				destArray[i] = ReadIntLE<T>();
+			}
+			return true;
+		} else
+		{
+			MemsetZero(destArray);
+			return false;
+		}
+	}
+
+	// Read destSize elements of byte-sized type T into a vector.
 	// If successful, the file cursor is advanced by the size of the vector.
 	// Otherwise, the vector is resized to destSize, but possibly existing contents are not cleared.
 	template<typename T>
 	bool ReadVector(std::vector<T> &destVector, size_t destSize)
 	{
+		STATIC_ASSERT(sizeof(T) == 1);
 		const off_t readSize = sizeof(T) * destSize;
 		destVector.resize(destSize);
 		if(CanRead(readSize))
@@ -892,6 +914,27 @@ public:
 			for(std::size_t i = 0; i < destSize; ++i)
 			{
 				Read(destVector[i]);
+			}
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
+
+	// Read destSize elements of type T into a vector.
+	// If successful, the file cursor is advanced by the size of the vector.
+	// Otherwise, the vector is resized to destSize, but possibly existing contents are not cleared.
+	template<typename T>
+	bool ReadVectorLE(std::vector<T> &destVector, size_t destSize)
+	{
+		const off_t readSize = sizeof(T) * destSize;
+		destVector.resize(destSize);
+		if(CanRead(readSize))
+		{
+			for(std::size_t i = 0; i < destSize; ++i)
+			{
+				destVector[i] = ReadIntLE<T>();
 			}
 			return true;
 		} else
