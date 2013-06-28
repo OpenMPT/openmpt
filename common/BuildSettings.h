@@ -128,7 +128,7 @@
 #elif defined(LIBOPENMPT_BUILD)
 
 #define ENABLE_TESTS
-#define MODPLUG_NO_FILESAVE
+//#define MODPLUG_NO_FILESAVE
 //#define NO_LOGGING
 #define NO_ARCHIVE_SUPPORT
 //#define NO_FILEREADER_STD_ISTREAM
@@ -170,7 +170,11 @@
 #endif
 
 #if defined(ENABLE_TESTS) && defined(MODPLUG_NO_FILESAVE)
-#undef MODPLUG_NO_FILESAVE // tests require file saving
+#undef MODPLUG_NO_FILESAVE // tests recommend file saving
+#endif
+
+#if defined(PLATFORM_BIG_ENDIAN) && !defined(MODPLUG_NO_FILESAVE)
+#define MODPLUG_NO_FILESAVE // file saving is broken on big endian
 #endif
 
 #if !defined(NO_LIBMODPLUG)
