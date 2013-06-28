@@ -1421,7 +1421,7 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 		ITDecompression decompression(file, smp, it215);
 		for(size_t i = 0; i < sampleData.size(); i++)
 		{
-			VERIFY_EQUAL(sampleData[i], sampleDataNew[i]);
+			VERIFY_EQUAL_QUIET_NONCONT(sampleData[i], sampleDataNew[i]);
 		}
 		fclose(f);
 	}
