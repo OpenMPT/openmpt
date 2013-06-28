@@ -15,9 +15,9 @@
 
 #if defined(MPT_WITH_FLAC)
 
-#include <FLAC++/encoder.h>
 #include <FLAC/metadata.h>
 #include <FLAC/format.h>
+#include <FLAC/stream_encoder.h>
 
 namespace openmpt123 {
 	
@@ -28,7 +28,7 @@ private:
 	std::vector< std::pair< std::string, std::string > > tags;
 	FLAC__StreamMetadata * flac_metadata[1];
 	FLAC__StreamMetadata_VorbisComment_Entry entry;
-	FLAC::Encoder::File encoder;
+	FLAC__StreamEncoder * encoder;
 	std::vector<FLAC__int32> interleaved_buffer;
 	void add_vorbiscomment_field( FLAC__StreamMetadata * vorbiscomment, const std::string & field, const std::string & value ) {
 		if ( !value.empty() ) {
@@ -37,15 +37,23 @@ private:
 		}
 	}
 public:
-	flac_stream_raii( const commandlineflags & flags_ ) : flags(flags_), called_init(false) {
+	flac_stream_raii( const commandlineflags & flags_ ) : flags(flags_), called_init(false), encoder(0) {
 		flac_metadata[0] = 0;
-		encoder.set_channels( flags.channels );
-		encoder.set_bits_per_sample( flags.use_float ? 24 : 16 );
-		encoder.set_sample_rate( flags.samplerate );
-		encoder.set_compression_level( 8 );
+		encoder = FLAC__stream_encoder_new();
+		if ( !encoder ) {
+			throw exception( "error creating flac encoder" );
+		}
+		FLAC__stream_encoder_set_channels( encoder, flags.channels );
+		FLAC__stream_encoder_set_bits_per_sample( encoder, flags.use_float ? 24 : 16 );
+		FLAC__stream_encoder_set_sample_rate( encoder, flags.samplerate );
+		FLAC__stream_encoder_set_compression_level( encoder, 8 );
 	}
 	~flac_stream_raii() {
-		encoder.finish();
+		if ( encoder ) {
+			 FLAC__stream_encoder_finish( encoder );
+			 FLAC__stream_encoder_delete( encoder );
+			 encoder = 0;
+		}
 		if ( flac_metadata[0] ) {
 			FLAC__metadata_object_delete( flac_metadata[0] );
 			flac_metadata[0] = 0;
@@ -64,11 +72,11 @@ public:
 		for ( std::vector< std::pair< std::string, std::string > >::iterator tag = tags.begin(); tag != tags.end(); ++tag ) {
 			add_vorbiscomment_field( flac_metadata[0], tag->first, tag->second );
 		}
-		encoder.set_metadata( flac_metadata, 1 );
+		FLAC__stream_encoder_set_metadata( encoder, flac_metadata, 1 );
 	}
 	void write( const std::vector<float*> buffers, std::size_t frames ) {
 		if ( !called_init ) {
-			encoder.init( flags.output_filename );
+			FLAC__stream_encoder_init_file( encoder, flags.output_filename.c_str(), NULL, 0 );
 			called_init = true;
 		}
 		interleaved_buffer.clear();
@@ -86,11 +94,11 @@ public:
 				interleaved_buffer.push_back( out );
 			}
 		}
-		encoder.process_interleaved( interleaved_buffer.data(), frames );
+		FLAC__stream_encoder_process_interleaved( encoder, interleaved_buffer.data(), frames );
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		if ( !called_init ) {
-			encoder.init( flags.output_filename );
+			FLAC__stream_encoder_init_file( encoder, flags.output_filename.c_str(), NULL, 0 );
 			called_init = true;
 		}
 		interleaved_buffer.clear();
@@ -99,7 +107,7 @@ public:
 				interleaved_buffer.push_back( buffers[channel][frame] );
 			}
 		}
-		encoder.process_interleaved( interleaved_buffer.data(), frames );
+		FLAC__stream_encoder_process_interleaved( encoder, interleaved_buffer.data(), frames );
 	}
 };
 
