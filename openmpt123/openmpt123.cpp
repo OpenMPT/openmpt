@@ -37,6 +37,7 @@
 #include "openmpt123.hpp"
 
 #include "openmpt123_flac.hpp"
+#include "openmpt123_mmio.hpp"
 #include "openmpt123_sndfile.hpp"
 #include "openmpt123_stdout.hpp"
 #include "openmpt123_portaudio.hpp"
@@ -73,7 +74,7 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
 	s << "Standard output: " << flags.use_stdout << std::endl;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 	s << "Output filename: " << flags.output_filename << std::endl;
 	s << "Force overwrite output file: " << flags.force_overwrite << std::endl;
 #endif
@@ -185,8 +186,8 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 		std::clog << "                  use --device help to show available devices" << std::endl;
 #endif
 		std::clog << " --stdout         Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
-		std::clog << " -o, --output f   Write FLAC flac output instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
+		std::clog << " -o, --output f   Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
 		std::clog << " --force          Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
 #endif
 		std::clog << " --channels n     use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
@@ -498,7 +499,7 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				++i;
 			} else if ( arg == "--stdout" ) {
 				flags.use_stdout = true;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 			} else if ( ( arg == "-o" || arg == "--output" ) && nextarg != "" ) {
 				flags.output_filename = nextarg;
 				++i;
@@ -660,7 +661,7 @@ static int main( int argc, char * argv [] ) {
 				render_file( flags, *filename, log, stdout_audio_stream );
 			}
 
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 		} else if ( !flags.output_filename.empty() ) {
 		
 			if ( !flags.force_overwrite ) {
@@ -672,6 +673,13 @@ static int main( int argc, char * argv [] ) {
 
 			if ( false ) {
 				// nothing
+#ifdef MPT_WITH_MMIO
+			} else if ( get_extension( flags.output_filename ) == "wav" ) {
+				mmio_stream_raii mmio_audio_stream( flags );
+				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+					render_file( flags, *filename, log, mmio_audio_stream );
+				}
+#endif				
 #ifdef MPT_WITH_FLAC
 			} else if ( get_extension( flags.output_filename ) == "flac" ) {
 				flac_stream_raii flac_audio_stream( flags );
