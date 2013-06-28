@@ -1425,7 +1425,13 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 		}
 		fclose(f);
 	}
-	remove(filename.c_str());
+	while(remove(filename.c_str()) == EACCES)
+	{
+		// wait for windows virus scanners
+		#ifdef WIN32
+			Sleep(1);
+		#endif
+	}
 }
 
 
