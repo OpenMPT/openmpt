@@ -15,6 +15,7 @@
 #pragma warning( disable : 4996 ) // 'foo': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _foo. See online help for details.
 
 #define MPT_WITH_FLAC
+#define MPT_WITH_MMIO
 #define MPT_WITH_PORTAUDIO
 #define MPT_WITH_ZLIB
 

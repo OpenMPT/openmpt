@@ -80,7 +80,7 @@ struct commandlineflags {
 	bool use_float;
 	bool use_stdout;
 	std::vector<std::string> filenames;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 	std::string output_filename;
 	bool force_overwrite;
 #endif
@@ -106,7 +106,7 @@ struct commandlineflags {
 		seek_target = 0.0;
 		use_float = false;
 		use_stdout = false;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE)
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 		force_overwrite = false;
 #endif
 	}
@@ -114,7 +114,7 @@ struct commandlineflags {
 		if ( filenames.size() == 0 ) {
 			throw show_help_exception();
 		}
-#if defined(MPT_WITH_PORTAUDIO) && ( defined(MPT_WITH_FLAC) || defined(MPT_WITH_SNDFILE) )
+#if defined(MPT_WITH_PORTAUDIO) && ( defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE) )
 		if ( use_stdout && ( device != commandlineflags().device || !output_filename.empty() ) ) {
 			throw show_help_exception();
 		}
