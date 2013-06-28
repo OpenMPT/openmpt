@@ -72,7 +72,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../include/portaudio/include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../include/flac/include;../include/portaudio/include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -84,7 +84,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../include/portaudio/include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../include/flac/include;../include/portaudio/include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -99,7 +99,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalIncludeDirectories>..;../common;../include/portaudio/include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../include/flac/include;../include/portaudio/include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -119,7 +119,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalIncludeDirectories>..;../common;../include/portaudio/include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../include/flac/include;../include/portaudio/include;../common/svn_version;../common/svn_version_default</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -136,6 +136,9 @@
     <ClCompile Include="openmpt123.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\include\flac\src\libFLAC\libFLAC_static_10.vcxproj">
+      <Project>{4cefbc84-c215-11db-8314-0800200c9a66}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\include\portaudio\build\msvc\portaudio_openmpt_vs2010.vcxproj">
       <Project>{0a18a071-125e-442f-aff7-a3f68abecf99}</Project>
     </ProjectReference>
