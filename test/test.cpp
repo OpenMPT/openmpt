@@ -1289,6 +1289,8 @@ static void DestroySoundFileContainer(TSoundFileContainer & /* sndFile */ )
 	return;
 }
 
+#ifndef MODPLUG_NO_FILESAVE
+
 static void SaveIT(const TSoundFileContainer &sndFile, const std::string &filename)
 {
 	sndFile->SaveIT(filename.c_str(), false);
@@ -1303,6 +1305,8 @@ static void SaveS3M(const TSoundFileContainer &sndFile, const std::string &filen
 {
 	sndFile->SaveS3M(filename.c_str());
 }
+
+#endif
 
 #endif
 
@@ -1324,13 +1328,16 @@ void TestLoadSaveFile()
 
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 
-		// Test file saving
-		SaveIT(sndFileContainer, filenameBase + "saved.mptm");
+		#ifndef MODPLUG_NO_FILESAVE
+			// Test file saving
+			SaveIT(sndFileContainer, filenameBase + "saved.mptm");
+		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
 	}
 
 	// Reload the saved file and test if everything is still working correctly.
+	#ifndef MODPLUG_NO_FILESAVE
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.mptm");
 
@@ -1338,6 +1345,7 @@ void TestLoadSaveFile()
 		
 		DestroySoundFileContainer(sndFileContainer);
 	}
+	#endif
 
 	// Test XM file loading
 	{
@@ -1353,13 +1361,16 @@ void TestLoadSaveFile()
 		GetrSoundFile(sndFileContainer).m_nSamples++;
 		GetrSoundFile(sndFileContainer).Instruments[1]->Keyboard[110] = GetrSoundFile(sndFileContainer).GetNumSamples();
 
-		// Test file saving
-		SaveXM(sndFileContainer, filenameBase + "saved.xm");
+		#ifndef MODPLUG_NO_FILESAVE
+			// Test file saving
+			SaveXM(sndFileContainer, filenameBase + "saved.xm");
+		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
 	}
 
 	// Reload the saved file and test if everything is still working correctly.
+	#ifndef MODPLUG_NO_FILESAVE
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.xm");
 
@@ -1367,6 +1378,7 @@ void TestLoadSaveFile()
 
 		DestroySoundFileContainer(sndFileContainer);
 	}
+	#endif
 
 	// Test S3M file loading
 	{
@@ -1374,13 +1386,16 @@ void TestLoadSaveFile()
 		
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
 
-		// Test file saving
-		SaveS3M(sndFileContainer, filenameBase + "saved.s3m");
+		#ifndef MODPLUG_NO_FILESAVE
+			// Test file saving
+			SaveS3M(sndFileContainer, filenameBase + "saved.s3m");
+		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
 	}
 
 	// Reload the saved file and test if everything is still working correctly.
+	#ifndef MODPLUG_NO_FILESAVE
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.s3m");
 
@@ -1388,6 +1403,7 @@ void TestLoadSaveFile()
 
 		DestroySoundFileContainer(sndFileContainer);
 	}
+	#endif
 }
 
 
