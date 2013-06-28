@@ -469,12 +469,12 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read Order List
 	std::vector<uint16> orders;
-	if(file.ReadVector(orders, fileHeader.numOrds))
+	if(file.ReadVectorLE(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);
 		for(size_t i = 0; i < fileHeader.numOrds; i++)
 		{
-			Order[i] = SwapBytesLE(orders[i]);
+			Order[i] = orders[i];
 		}
 	}
 
@@ -913,12 +913,12 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read Order List
 	std::vector<uint16> orders;
-	if(file.ReadVector(orders, fileHeader.numOrds))
+	if(file.ReadVectorLE(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);
 		for(size_t i = 0; i < fileHeader.numOrds; i++)
 		{
-			Order[i] = SwapBytesLE(orders[i]);
+			Order[i] = orders[i];
 		}
 	}
 

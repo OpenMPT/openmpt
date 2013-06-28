@@ -482,9 +482,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading instrument, sample and pattern offsets
 	std::vector<uint32> insPos, smpPos, patPos;
-	file.ReadVector(insPos, fileHeader.insnum);
-	file.ReadVector(smpPos, fileHeader.smpnum);
-	file.ReadVector(patPos, fileHeader.patnum);
+	file.ReadVectorLE(insPos, fileHeader.insnum);
+	file.ReadVectorLE(smpPos, fileHeader.smpnum);
+	file.ReadVectorLE(patPos, fileHeader.patnum);
 
 	// Find the first parapointer.
 	// This is used for finding out whether the edit history is actually stored in the file or not,
