@@ -283,7 +283,6 @@ void CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 					f.Unlock();
 				}
 			}
-			f.Close();
 		}
 	}
 	strcpy(m_szSongName, pszSongName);

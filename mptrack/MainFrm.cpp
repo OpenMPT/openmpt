@@ -1583,10 +1583,8 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 							ok = m_WaveFile.ReadSampleFromFile(1, p, dwLen);
 							m_WaveFile.AllocateInstrument(1, 1);
 						}
-						f.Unlock();
 					}
 				}
-				f.Close();
 			}
 		}
 		if(ok)

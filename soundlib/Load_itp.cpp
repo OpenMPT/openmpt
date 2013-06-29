@@ -221,7 +221,6 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		if(!lpFile) { f.Close(); continue; }
 
 		ReadInstrumentFromFile(ins + 1, lpFile, size);
-		f.Unlock();
 		f.Close();
 	}
 

@@ -225,7 +225,6 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 					f.Unlock();
 				}
 			}
-			f.Close();
 		}
 	}
 	#endif
