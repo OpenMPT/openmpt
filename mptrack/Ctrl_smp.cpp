@@ -811,9 +811,7 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
 		}
 	}
-	f.Unlock();
 OpenError:
-	f.Close();
 	EndWaitCursor();
 	if (bOk)
 	{

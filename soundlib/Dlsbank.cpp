@@ -1159,7 +1159,6 @@ BOOL CDLSBank::Open(LPCSTR lpszFileName)
 	if (dwMemLength >= 256) lpMemFile = MapFile.Lock();
 	if (!lpMemFile)
 	{
-		MapFile.Close();
 		return FALSE;
 	}
 
@@ -1382,8 +1381,6 @@ BOOL CDLSBank::Open(LPCSTR lpszFileName)
 	{
 		ConvertSF2ToDLS(&sf2info);
 	}
-	MapFile.Unlock();
-	MapFile.Close();
 #ifdef DLSBANK_LOG
 	Log("DLS bank closed\n");
 #endif

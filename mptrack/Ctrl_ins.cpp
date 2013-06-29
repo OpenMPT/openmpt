@@ -1429,11 +1429,8 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 			// -! NEW_FEATURE#0023
 			bOk = TRUE;
 		}
-
-		f.Unlock();
 	}
 
-	f.Close();
 	EndWaitCursor();
 	if (bOk)
 	{

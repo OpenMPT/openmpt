@@ -1682,7 +1682,6 @@ bool CVstPlugin::LoadProgram()
 		FileReader file(f.Lock(len), len);
 
 		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));
-		f.Close();
 	} else
 	{
 		errorStr = "Can't open file.";

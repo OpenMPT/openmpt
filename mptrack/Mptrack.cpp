@@ -1970,6 +1970,7 @@ CMappedFile::CMappedFile()
 CMappedFile::~CMappedFile()
 //-------------------------
 {
+	Close();
 }
 
 
