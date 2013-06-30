@@ -33,8 +33,8 @@ bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelInd
 		return false;
 	}
 
-	const uint8 *inBuf = reinterpret_cast<const uint8 *>(file.GetRawData());
-	CopySample<SampleConverter>(sample.pSample, sample.nLength, 1, inBuf + offset, file.BytesLeft() - offset, numChannels);
+	const char *inBuf = file.GetRawData();
+	CopySample<SampleConverter>(reinterpret_cast<typename SampleConverter::output_t*>(sample.pSample), sample.nLength, 1, inBuf + offset, file.BytesLeft() - offset, numChannels);
 	CSoundFile::AdjustSampleLoop(sample);
 	return true;
 }
@@ -155,21 +155,21 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
 		{
-			CopyWavChannel<ReadFloat32toInt16PCM<littleEndian32> >(sample, sampleChunk, channel, wavFile.GetNumChannels());
+			CopyWavChannel<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<littleEndian32> > >(sample, sampleChunk, channel, wavFile.GetNumChannels());
 		} else
 		{
 			if(wavFile.GetBitsPerSample() <= 8)
 			{
-				CopyWavChannel<ReadInt8PCM<0x80u> >(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::DecodeUint8>(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			} else if(wavFile.GetBitsPerSample() <= 16)
 			{
-				CopyWavChannel<ReadInt16PCM<0, littleEndian16> >(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::DecodeInt16<0, littleEndian16> >(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			} else if(wavFile.GetBitsPerSample() <= 24)
 			{
-				CopyWavChannel<ReadBigIntTo16PCM<3, 1, 2> >(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			} else if(wavFile.GetBitsPerSample() <= 32)
 			{
-				CopyWavChannel<ReadBigIntTo16PCM<4, 2, 3> >(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			}
 		}
 
