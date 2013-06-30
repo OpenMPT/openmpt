@@ -4,7 +4,6 @@
  * Purpose: PTM (PolyTracker) module loader
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
- *          Adam Goode (endian and char fixes for PPC)
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -13,87 +12,139 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-#endif
-
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
 
-typedef struct PACKED PTMFILEHEADER
+struct PACKED PTMFileHeader
 {
-	char songname[28];		// name of song, asciiz string
-	CHAR eof;				// 26
-	BYTE version_lo;		// 03 version of file, currently 0203h
-	BYTE version_hi;		// 02
-	BYTE reserved1;			// reserved, set to 0
-	WORD norders;			// number of orders (0..256)
-	WORD nsamples;			// number of instruments (1..255)
-	WORD npatterns;			// number of patterns (1..128)
-	WORD nchannels;			// number of channels (voices) used (1..32)
-	WORD fileflags;			// set to 0
-	WORD reserved2;			// reserved, set to 0
-	DWORD ptmf_id;			// song identification, 'PTMF' or 0x464d5450
-	BYTE reserved3[16];		// reserved, set to 0
-	BYTE chnpan[32];		// channel panning settings, 0..15, 0 = left, 7 = middle, 15 = right
-	BYTE orders[256];		// order list, valid entries 0..nOrders-1
-	WORD patseg[128];		// pattern offsets (*16)
-} PTMFILEHEADER, *LPPTMFILEHEADER;
+	char   songname[28];	// Name of song, asciiz string
+	uint8  dosEOF;			// 26
+	uint8  versionLo;		// 03 version of file, currently 0203h
+	uint8  versionHi;		// 02
+	uint8  reserved1;		// Reserved, set to 0
+	uint16 numOrders;		// Number of orders (0..256)
+	uint16 numSamples;		// Number of instruments (1..255)
+	uint16 numPatterns;		// Number of patterns (1..128)
+	uint16 numChannels;		// Number of channels (voices) used (1..32)
+	uint8  flags[2];		// Set to 0
+	uint8  reserved2[2];	// Reserved, set to 0
+	char   magic[4];		// Song identification, 'PTMF'
+	uint8  reserved3[16];	// Reserved, set to 0
+	uint8  chnPan[32];		// Channel panning settings, 0..15, 0 = left, 7 = middle, 15 = right
+	uint8  orders[256];		// Order list, valid entries 0..nOrders-1
+	uint16 patOffsets[128];	// Pattern offsets (*16)
 
-STATIC_ASSERT(sizeof(PTMFILEHEADER) == 608);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(numOrders);
+		SwapBytesLE(numSamples);
+		SwapBytesLE(numPatterns);
+		SwapBytesLE(numChannels);
+		for(int i = 0; i < CountOf(patOffsets); i++)
+		{
+			SwapBytesLE(patOffsets[i]);
+		}
+	}
+};
 
-typedef struct PACKED PTMSAMPLE
+STATIC_ASSERT(sizeof(PTMFileHeader) == 608);
+
+struct PACKED PTMSampleHeader
 {
-	BYTE sampletype;		// sample type (bit array)
-	char filename[12];		// name of external sample file
-	BYTE volume;			// default volume
-	WORD nC4Spd;			// C4 speed
-	WORD sampleseg;			// sample segment (used internally)
-	WORD fileofs[2];		// offset of sample data
-	WORD length[2];			// sample size (in bytes)
-	WORD loopbeg[2];		// start of loop
-	WORD loopend[2];		// end of loop
-	WORD gusdata[7];
-	char samplename[28];	// name of sample, asciiz
-	DWORD ptms_id;			// sample identification, 'PTMS' or 0x534d5450
-} PTMSAMPLE;
+	enum SampleFlags
+	{
+		smpTypeMask	= 0x03,
+		smpPCM		= 0x01,
 
-STATIC_ASSERT(sizeof(PTMSAMPLE) == 80);
+		smpLoop		= 0x04,
+		smpPingPong	= 0x08,
+		smp16Bit	= 0x10,
+	};
+
+	uint8  flags;			// Sample type (see SampleFlags)
+	char   filename[12];	// Name of external sample file
+	uint8  volume;			// Default volume
+	uint16 c4speed;			// C-4 speed (yep, not C-5)
+	uint8  smpSegment[2];	// Sample segment (used internally)
+	uint32 dataOffset;		// Offset of sample data
+	uint32 length;			// Sample size (in bytes)
+	uint32 loopStart;		// Start of loop
+	uint32 loopEnd;			// End of loop
+	uint8  gusdata[14];
+	char   samplename[28];	// Name of sample, ASCIIZ
+	char   magic[4];		// Sample identification, 'PTMS'
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(c4speed);
+		SwapBytesLE(dataOffset);
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+	}
+
+	// Convert an PTM sample header to OpenMPT's internal sample header.
+	SampleIO ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.Initialize(MOD_TYPE_S3M);
+		mptSmp.nVolume = std::min(volume, uint8(64)) * 4;
+		mptSmp.nC5Speed = c4speed * 2;
+
+		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
+
+		SampleIO sampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::deltaPCM);
+
+		if((flags & smpTypeMask) == smpPCM)
+		{
+			mptSmp.nLength = length;
+			mptSmp.nLoopStart = loopStart;
+			mptSmp.nLoopEnd = loopEnd;
+
+			if(flags & smpLoop) mptSmp.uFlags.set(CHN_LOOP);
+			if(flags & smpPingPong) mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+			if(flags & smp16Bit)
+			{
+				sampleIO |= SampleIO::_16bit;
+				sampleIO |= SampleIO::PTM8Dto16;
+
+				mptSmp.nLength /= 2;
+				mptSmp.nLoopStart /= 2;
+				mptSmp.nLoopEnd /= 2;
+			}
+		}
+
+		return sampleIO;
+	}
+};
+
+STATIC_ASSERT(sizeof(PTMSampleHeader) == 80);
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
 
 
-bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
-	if(lpStream == nullptr || dwMemLength < sizeof(PTMFILEHEADER))
-		return false;
+	file.Rewind();
 
-	PTMFILEHEADER pfh = *(LPPTMFILEHEADER)lpStream;
-	DWORD dwMemPos;
-	UINT nOrders;
-
-	pfh.norders = LittleEndianW(pfh.norders);
-	pfh.nsamples = LittleEndianW(pfh.nsamples);
-	pfh.npatterns = LittleEndianW(pfh.npatterns);
-	pfh.nchannels = LittleEndianW(pfh.nchannels);
-	pfh.fileflags = LittleEndianW(pfh.fileflags);
-	pfh.reserved2 = LittleEndianW(pfh.reserved2);
-	pfh.ptmf_id = LittleEndian(pfh.ptmf_id);
-	for (size_t j = 0; j < CountOf(pfh.patseg); j++)
-	{
-		pfh.patseg[j] = LittleEndianW(pfh.patseg[j]);
-	}
-
-	if ((pfh.ptmf_id != 0x464d5450) || (!pfh.nchannels)
-	 || (pfh.nchannels > 32)
-	 || (pfh.norders > 256) || (!pfh.norders)
-	 || (!pfh.nsamples) || (pfh.nsamples > 255)
-	 || (!pfh.npatterns) || (pfh.npatterns > 128)
-	 || (sizeof(PTMFILEHEADER) + pfh.nsamples * sizeof(PTMSAMPLE) >= dwMemLength))
+	PTMFileHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| memcmp(fileHeader.magic, "PTMF", 4)
+		|| !fileHeader.numChannels
+		|| fileHeader.numChannels > 32
+		|| !fileHeader.numOrders || fileHeader.numOrders > 256
+		|| !fileHeader.numSamples || fileHeader.numSamples > 255
+		|| !fileHeader.numPatterns || fileHeader.numPatterns > 128
+		|| !file.CanRead(fileHeader.numSamples * sizeof(PTMSampleHeader)))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -101,139 +152,119 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 		return true;
 	}
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pfh.songname);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.songname);
 
 	InitializeGlobals();
-	madeWithTracker = mpt::String::Format("PolyTracker %d.%d", pfh.version_hi, pfh.version_lo);
+	madeWithTracker = mpt::String::Format("PolyTracker %d.%02x", fileHeader.versionHi, fileHeader.versionLo);
 	m_nType = MOD_TYPE_PTM;
-	m_nChannels = pfh.nchannels;
-	m_nSamples = MIN(pfh.nsamples, MAX_SAMPLES - 1);
-	dwMemPos = sizeof(PTMFILEHEADER);
-	nOrders = (pfh.norders < MAX_ORDERS) ? pfh.norders : MAX_ORDERS-1;
-	Order.ReadFromArray(pfh.orders, nOrders);
+	m_nChannels = fileHeader.numChannels;
+	m_nSamples = std::min<SAMPLEINDEX>(fileHeader.numSamples, MAX_SAMPLES - 1);
+	Order.ReadFromArray(fileHeader.orders, fileHeader.numOrders);
 
-	for (CHANNELINDEX ipan = 0; ipan < m_nChannels; ipan++)
+	// Reading channel panning
+	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		ChnSettings[ipan].Reset();
-		ChnSettings[ipan].nPan = ((pfh.chnpan[ipan] & 0x0F) << 4) + 4;
+		ChnSettings[chn].Reset();
+		ChnSettings[chn].nPan = ((fileHeader.chnPan[chn] & 0x0F) << 4) + 4;
 	}
-	for (SAMPLEINDEX ismp = 0; ismp < m_nSamples; ismp++, dwMemPos += sizeof(PTMSAMPLE))
+
+	// Reading samples
+	FileReader sampleHeaderChunk = file.GetChunk(fileHeader.numSamples * sizeof(PTMSampleHeader));
+	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
-		ModSample &sample = Samples[ismp + 1];
-		PTMSAMPLE *psmp = (PTMSAMPLE *)(lpStream+dwMemPos);
+		PTMSampleHeader sampleHeader;
+		sampleHeaderChunk.ReadConvertEndianness(sampleHeader);
 
-		sample.Initialize();
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[ismp + 1], psmp->samplename);
-		mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, psmp->filename);
+		ModSample &sample = Samples[smp + 1];
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp + 1], sampleHeader.samplename);
+		SampleIO sampleIO = sampleHeader.ConvertToMPT(sample);
 
-		sample.nVolume = psmp->volume * 4;
-		sample.nC5Speed = LittleEndianW(psmp->nC4Spd) * 2;
-
-		if((psmp->sampletype & 3) == 1)
+		if((loadFlags & loadSampleData) && sample.nLength && sampleHeader.dataOffset && file.Seek(sampleHeader.dataOffset))
 		{
-			SampleIO sampleIO(
-				SampleIO::_8bit,
-				SampleIO::mono,
-				SampleIO::littleEndian,
-				SampleIO::deltaPCM);
-
-			DWORD samplepos;
-			sample.nLength = LittleEndian(*(LPDWORD)(psmp->length));
-			sample.nLoopStart = LittleEndian(*(LPDWORD)(psmp->loopbeg));
-			sample.nLoopEnd = LittleEndian(*(LPDWORD)(psmp->loopend));
-			samplepos = LittleEndian(*(LPDWORD)(&psmp->fileofs));
-			if (psmp->sampletype & 4) sample.uFlags |= CHN_LOOP;
-			if (psmp->sampletype & 8) sample.uFlags |= CHN_PINGPONGLOOP;
-			if (psmp->sampletype & 16)
-			{
-				sampleIO |= SampleIO::_16bit;
-				sampleIO |= SampleIO::PTM8Dto16;
-
-				sample.nLength /= 2;
-				sample.nLoopStart /= 2;
-				sample.nLoopEnd /= 2;
-			}
-			if(sample.nLength && samplepos && samplepos < dwMemLength && (loadFlags & loadSampleData))
-			{
-				FileReader chunk(lpStream + samplepos, dwMemLength - samplepos);
-				sampleIO.ReadSample(sample, chunk);
-			}
+			sampleIO.ReadSample(sample, file);
 		}
 	}
+
 	// Reading Patterns
 	if(!(loadFlags && loadPatternData))
 	{
 		return true;
 	}
-	for (UINT ipat=0; ipat<pfh.npatterns; ipat++)
+
+	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
-		dwMemPos = ((UINT)pfh.patseg[ipat]) << 4;
-		if ((!dwMemPos) || (dwMemPos >= dwMemLength)) continue;
-		if(Patterns.Insert(ipat, 64))
-			break;
-		//
-		ModCommand *m = Patterns[ipat];
-		for (UINT row=0; ((row < 64) && (dwMemPos < dwMemLength)); )
+		if(Patterns.Insert(pat, 64)
+			|| fileHeader.patOffsets[pat] == 0
+			|| !file.Seek(fileHeader.patOffsets[pat] << 4))
 		{
-			UINT b = lpStream[dwMemPos++];
+			continue;
+		}
 
-			if (dwMemPos >= dwMemLength) break;
-			if (b)
-			{
-				UINT nChn = b & 0x1F;
+		ModCommand *rowBase = Patterns[pat];
+		ROWINDEX row = 0;
+		while(row < 64 && file.AreBytesLeft())
+		{
+			uint8 b = file.ReadUint8();
 
-				if (b & 0x20)
-				{
-					if (dwMemPos + 2 > dwMemLength) break;
-					m[nChn].note = lpStream[dwMemPos++];
-					m[nChn].instr = lpStream[dwMemPos++];
-				}
-				if (b & 0x40)
-				{
-					if (dwMemPos + 2 > dwMemLength) break;
-					m[nChn].command = lpStream[dwMemPos++];
-					m[nChn].param = lpStream[dwMemPos++];
-					if (m[nChn].command < 0x10)
-					{
-						ConvertModCommand(m[nChn]);
-						m[nChn].ExtendedMODtoS3MEffect();
-						// Note cut does just mute the sample, not cut it. We have to fix that, if possible.
-						if(m[nChn].command == CMD_S3MCMDEX && (m[nChn].param & 0xF0) == 0xC0 && m[nChn].volcmd == VOLCMD_NONE)
-						{
-							// SCx => v00 + SDx
-							// This is a pretty dumb solution because many (?) PTM files make usage of the volume column + note cut at the same time.
-							m[nChn].param = 0xD0 | (m[nChn].param & 0x0F);
-							m[nChn].volcmd = VOLCMD_VOLUME;
-							m[nChn].vol = 0;
-						}
-					} else
-					{
-						switch(m[nChn].command)
-						{
-						case 16:
-							m[nChn].command = CMD_GLOBALVOLUME;
-							break;
-						case 17:
-							m[nChn].command = CMD_RETRIG;
-							break;
-						case 18:
-							m[nChn].command = CMD_FINEVIBRATO;
-							break;
-						default:
-							m[nChn].command = 0;
-						}
-					}
-				}
-				if (b & 0x80)
-				{
-					if (dwMemPos >= dwMemLength) break;
-					m[nChn].volcmd = VOLCMD_VOLUME;
-					m[nChn].vol = lpStream[dwMemPos++];
-				}
-			} else
+			if(b == 0)
 			{
 				row++;
-				m += m_nChannels;
+				rowBase += m_nChannels;
+				continue;
+			}
+			CHANNELINDEX chn = (b & 0x1F);
+			ModCommand dummy;
+			ModCommand &m = chn < GetNumChannels() ? rowBase[chn] : dummy;
+
+			if(b & 0x20)
+			{
+				m.note = file.ReadUint8();
+				m.instr = file.ReadUint8();
+				if(m.note == 254)
+					m.note = NOTE_NOTECUT;
+				else if(!m.note || m.note > 120)
+					m.note = NOTE_NONE;
+			}
+			if(b & 0x40)
+			{
+				m.command = file.ReadUint8();
+				m.param = file.ReadUint8();
+				if(m.command < 0x10)
+				{
+					// Beware: Effect letters are as in MOD, but portamento and volume slides behave like in S3M (i.e. fine slides share the same effect letters)
+					ConvertModCommand(m);
+				} else
+				{
+					switch(m.command)
+					{
+					case 0x10:
+						m.command = CMD_GLOBALVOLUME;
+						break;
+					case 0x11:
+						m.command = CMD_RETRIG;
+						break;
+					case 0x12:
+						m.command = CMD_FINEVIBRATO;
+						break;
+					case 0x17:
+						// Reverse sample + offset (start with offset 256 * xx bytes) -- is this an offset from the sample end...?
+						if(m.param)
+						{
+							m.volcmd = VOLCMD_OFFSET;
+							m.vol = m.param >> 3;
+						}
+						m.command = CMD_S3MCMDEX;
+						m.param = 0x9F;
+						break;
+					default:
+						m.command = CMD_NONE;
+					}
+				}
+			}
+			if(b & 0x80)
+			{
+				m.volcmd = VOLCMD_VOLUME;
+				m.vol = file.ReadUint8();
 			}
 		}
 	}

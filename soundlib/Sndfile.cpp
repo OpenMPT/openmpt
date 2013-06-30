@@ -590,7 +590,7 @@ void CSoundFile::AddToLog(LogLevel level, const std::string &text) const
 
 // Global variable initializer for loader functions
 void CSoundFile::InitializeGlobals()
-//---------------------------
+//----------------------------------
 {
 	// Do not add or change any of these values! And if you do, review each and every loader to check if they require these defaults!
 	m_nType = MOD_TYPE_NONE;
@@ -707,7 +707,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		 && !ReadAMS(file, loadFlags)
 		 && !ReadAMS2(file, loadFlags)
 		 && !ReadOKT(file, loadFlags)
-		 && !ReadPTM(lpStream, dwMemLength, loadFlags)
+		 && !ReadPTM(file, loadFlags)
 		 && !ReadUlt(file, loadFlags)
 		 && !ReadDMF(file, loadFlags)
 		 && !ReadDSM(lpStream, dwMemLength, loadFlags)
@@ -1295,12 +1295,12 @@ void CSoundFile::PatternTransitionChnUnmuteAll()
 void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 //------------------------------------------------------------
 {
-	if ((nPat < 0) || (nPat >= Patterns.Size()) || (!Patterns[nPat]))
+	if(!Patterns.IsValidPat(nPat))
 	{
 		m_SongFlags.reset(SONG_PATTERNLOOP);
 	} else
 	{
-		if ((nRow < 0) || (nRow >= (int)Patterns[nPat].GetNumRows())) nRow = 0;
+		if(nRow >= Patterns[nPat].GetNumRows()) nRow = 0;
 		m_nPattern = nPat;
 		m_nRow = m_nNextRow = nRow;
 		m_nTickCount = m_nMusicSpeed;
@@ -1309,7 +1309,6 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 		m_nBufferCount = 0;
 		m_nNextPatStartRow = 0;
 		m_SongFlags.set(SONG_PATTERNLOOP);
-	//	m_nSeqOverride = 0;
 	}
 }
 
@@ -1318,8 +1317,8 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 //----------------------------------------------------------------
 {
-	if ((nPat < 0) || (nPat >= Patterns.Size()) || (!Patterns[nPat])) nPat = 0;
-	if ((nRow < 0) || (nRow >= (int)Patterns[nPat].GetNumRows())) nRow = 0;
+	if(!Patterns.IsValidPat(nPat)) nPat = 0;
+	if(nRow >= Patterns[nPat].GetNumRows()) nRow = 0;
 	m_nPattern = nPat;
 	m_nRow = m_nNextRow = nRow;
 	m_nTickCount = m_nMusicSpeed;
@@ -1328,7 +1327,6 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	m_nBufferCount = 0;
 	m_nNextPatStartRow = 0;
 	m_SongFlags.reset(SONG_PATTERNLOOP);
-	//m_nSeqOverride = 0;
 }
 //end rewbs.playSongFromCursor
 
