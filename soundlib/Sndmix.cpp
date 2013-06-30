@@ -338,6 +338,9 @@ void CSoundFile::ProcessDSP(std::size_t countChunk)
 			m_AGC.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels);
 		}
 	#endif // NO_AGC
+	#if defined(NO_DSP) && defined(NO_EQ) && defined(NO_AGC)
+		UNREFERENCED_PARAMETER(countChunk);
+	#endif
 }
 
 
