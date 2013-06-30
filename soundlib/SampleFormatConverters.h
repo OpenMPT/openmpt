@@ -35,6 +35,7 @@ namespace SC { // SC = _S_ample_C_onversion
 
 
 
+// decodes signed 7bit values stored as signed int8
 struct DecodeInt7
 {
 	typedef char input_t;
@@ -176,6 +177,7 @@ struct ReadSample
 
 
 
+// Shift input_t down by shift and saturate to output_t.
 template <typename Tdst, typename Tsrc, int shift>
 struct ConvertShift
 {
@@ -190,6 +192,7 @@ struct ConvertShift
 
 
 
+// straight forward type conversions, clamping when converting from floating point.
 template <typename Tdst, typename Tsrc>
 struct Convert;
 
