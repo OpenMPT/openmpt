@@ -783,7 +783,7 @@ public:
 	static void AdjustSampleLoop(ModSample &sample);
 
 	// Samples file I/O
-	bool ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader *wsmpChunk = nullptr);
 	bool ReadPATSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
@@ -805,7 +805,7 @@ public:
 	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 #ifndef MODPLUG_NO_FILESAVE
 	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const;
 	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName, bool compress) const;

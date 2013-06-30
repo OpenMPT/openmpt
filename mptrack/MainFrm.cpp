@@ -1580,7 +1580,8 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 						if(!ok)
 						{
 							// Try reading as sample if reading as instrument fails
-							ok = m_WaveFile.ReadSampleFromFile(1, p, dwLen);
+							FileReader file(p, dwLen);
+							ok = m_WaveFile.ReadSampleFromFile(1, file);
 							m_WaveFile.AllocateInstrument(1, 1);
 						}
 					}

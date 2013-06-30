@@ -27,28 +27,52 @@
 
 #ifndef NO_MP3_SAMPLES
 // Check for valid MPEG header
-static bool IsMPEG(const void *data)
-//----------------------------------
+static bool IsMPEG(const uint8 (&header)[3])
+//------------------------------------------
 {
-	const uint8 *header = static_cast<const uint8  *>(data);
 	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0 && (header[1] & 0x18) != 0x08 && (header[1] & 0x06) != 0x00 && (header[2] & 0xF0) != 0xF0;
+}
+static bool IsMPEG(FileReader file)
+//---------------------------------
+{
+	uint8 header[3];
+	if(!file.CanRead(3))
+		return false;
+	file.ReadArrayLE(header);
+	file.SkipBack(3);
+	return IsMPEG(header);
+}
+
+static bool IsID3(FileReader file)
+//--------------------------------
+{
+	char header[3];
+	if(!file.CanRead(3))
+		return false;
+	file.ReadArrayLE(header);
+	file.SkipBack(3);
+	return header[0] == 'I' && header[1] == 'D' && header[2] == '3';
 }
 #endif // NO_MP3_SAMPLES
 
 
-bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
-//--------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file)
+//------------------------------------------------------------------------
 {
-	FileReader file(lpMemFile, dwFileLength);
+	file.Rewind();
+
+	const BYTE * const lpMemFile = reinterpret_cast<const BYTE*>(file.GetRawData());
+	const DWORD dwFileLength = file.GetLength();
+
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
 	if(!ReadWAVSample(nSample, file)
 		&& !ReadXISample(nSample, file)
 		&& !ReadITISample(nSample, file)
 		&& !ReadAIFFSample(nSample, file)
 		&& !ReadITSSample(nSample, file)
-		&& !ReadPATSample(nSample, lpMemFile, dwFileLength)
-		&& !Read8SVXSample(nSample, lpMemFile, dwFileLength)
-		&& !ReadS3ISample(nSample, lpMemFile, dwFileLength)
+		&& !ReadPATSample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
+		&& !Read8SVXSample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
+		&& !ReadS3ISample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
 		&& !ReadFLACSample(nSample, file)
 		&& !ReadMP3Sample(nSample, file))
 	{
@@ -72,18 +96,23 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 	 && (!ReadPATInstrument(nInstr, lpMemFile, dwFileLength))
 	 && (!ReadITIInstrument(nInstr, file))
 	// Generic read
-	 && (!ReadSampleAsInstrument(nInstr, lpMemFile, dwFileLength))) return false;
+	 && (!ReadSampleAsInstrument(nInstr, file))) return false;
 
 	if(nInstr > GetNumInstruments()) m_nInstruments = nInstr;
 	return true;
 }
 
 
-bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
+//-------------------------------------------------------------------------------
 {
-	const uint32 *psig = reinterpret_cast<const uint32 *>(lpMemFile);
-	if((!lpMemFile) || (dwFileLength < 80)) return false;
+	file.Rewind();
+
+	if(!file.CanRead(80))
+		return false;
+	uint32 psig[20];
+	file.ReadArrayLE(psig);
+	file.SkipBack(80);
 	if((psig[0] == LittleEndian(0x46464952) && psig[2] == LittleEndian(0x45564157))		// RIFF....WAVE signature
 	 || (psig[0] == LittleEndian(0x5453494C) && psig[2] == LittleEndian(0x65766177))	// LIST....wave
 	 || psig[76/4] == LittleEndian(0x53524353)											// S3I signature
@@ -95,8 +124,8 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 	 || psig[0] == LittleEndian('CaLf')													// FLAC signature
 #endif // NO_FLAC
 #ifndef NO_MP3_SAMPLES
-	 || IsMPEG(lpMemFile)																// MPEG signature
-	 || (lpMemFile[0] == 'I' && lpMemFile[1] == 'D' && lpMemFile[2] == '3')				// MP3 signature
+	 || IsMPEG(file)																// MPEG signature
+	 || IsID3(file)				// MP3 signature
 #endif // NO_MP3_SAMPLES
 	)
 	{
@@ -122,7 +151,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 		DestroyInstrument(nInstr, deleteAssociatedSamples);
 		Instruments[nInstr] = pIns;
 
-		ReadSampleFromFile(nSample, lpMemFile, dwFileLength);
+		ReadSampleFromFile(nSample, file);
 		return true;
 	}
 	return false;
