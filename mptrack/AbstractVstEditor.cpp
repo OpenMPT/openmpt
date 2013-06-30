@@ -235,7 +235,9 @@ void CAbstractVstEditor::UpdatePresetField()
 			m_Menu.AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, TEXT(""));
 		}
 
-		m_Menu.ModifyMenu(8, MF_BYPOSITION, 0, m_VstPlugin.GetFormattedProgramName(m_VstPlugin.GetCurrentProgram()));
+		CString programName = m_VstPlugin.GetFormattedProgramName(m_VstPlugin.GetCurrentProgram());
+		programName.Replace("&", "&&");
+		m_Menu.ModifyMenu(8, MF_BYPOSITION, 0, programName);
 	}
 
 	DrawMenuBar();
@@ -494,6 +496,7 @@ void CAbstractVstEditor::FillPresetMenu()
 	for(VstInt32 p = 0; p < numProgs; p++)
 	{
 		CString programName = m_VstPlugin.GetFormattedProgramName(p);
+		programName.Replace("&", "&&");
 		UINT splitMenuFlag = 0;
 
 		if(entryInThisMenu++ == PRESETS_PER_GROUP)
