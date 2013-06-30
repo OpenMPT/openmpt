@@ -14,6 +14,9 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
+
+#ifndef NO_ZLIB
+
 #if MPT_COMPILER_MSVC
 #ifndef ZLIB_WINAPI
 #define ZLIB_WINAPI
@@ -22,6 +25,8 @@
 #else
 #include <zlib.h>
 #endif
+
+#endif // ZLIB
 
 
 // First off, a nice vibrato translation LUT.
@@ -978,6 +983,13 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
+
+#ifdef NO_ZLIB
+
+	return false;
+
+#else
+
 	file.Rewind();
 	J2BFileHeader fileHeader;
 	if(!file.ReadConvertEndianness(fileHeader))
@@ -1024,4 +1036,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 	delete[] amFileData;
 
 	return result;
+
+#endif
+
 }
