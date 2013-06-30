@@ -72,11 +72,11 @@ namespace MptTest
 
 #ifdef MODPLUG_TRACKER
 
-static noinline void ReportError(const char * file, int line, const char * fail_description, bool abort)
-//------------------------------------------------------------------------------------------------------
+static noinline void ReportError(const char * file, int line, const char * description, bool abort)
+//-------------------------------------------------------------------------------------------------
 {
 	std::string pos = std::string() + file + "(" + Stringify(line) + "):\n";
-	std::string message = pos + "Test failed: '" + fail_description + "'";
+	std::string message = pos + "Test failed: '" + description + "'";
 	if(IsDebuggerPresent())
 	{
 		message += "\n";
@@ -93,17 +93,17 @@ static noinline void ReportError(const char * file, int line, const char * fail_
 	}
 }
 
-static noinline void ReportExceptionError(const char * file, int line, const char * func_description, const char * exception_what)
-//--------------------------------------------------------------------------------------------------------------------------------
+static noinline void ReportExceptionError(const char * file, int line, const char * description, const char * exception_what)
+//---------------------------------------------------------------------------------------------------------------------------
 {
 	std::string pos = std::string() + file + "(" + Stringify(line) + "):\n";
 	std::string message;
 	if(exception_what)
 	{
-		message = pos + "Test '" + func_description + "' threw an exception, message:\n" + exception_what;
+		message = pos + "Test '" + description + "' threw an exception, message:\n" + exception_what;
 	} else
 	{
-		message = pos + "Test '" + func_description + "' threw an unknown exception.";
+		message = pos + "Test '" + description + "' threw an unknown exception.";
 	}
 	if(IsDebuggerPresent())
 	{
@@ -138,19 +138,26 @@ static noinline void ReportException(const char * const file, const int line, co
 	}
 }
 
-#define ReportExceptionAndBreak(file, line, func_description, rethrow) do { ReportException(file, line, func_description, rethrow); if(IsDebuggerPresent()) DebugBreak(); } while(0)
-#define ReportErrorAndBreak(file, line, fail_description, progress)    do { ReportError(file, line, fail_description, progress);    if(IsDebuggerPresent()) DebugBreak(); } while(0)
+#if defined(_MSC_VER) && defined(_M_IX86)
+// on x86, break directly using asm break interrupt instead of calling DebugBreak which breaks one stackframe deeper than we want
+#define MyDebugBreak() do { __asm { int 3 }; } while(0)
+#else
+#define MyDebugBreak() DebugBreak()
+#endif
+
+#define ReportExceptionAndBreak(file, line, description, rethrow) do { ReportException(file, line, description, rethrow); if(IsDebuggerPresent()) MyDebugBreak(); } while(0)
+#define ReportErrorAndBreak(file, line, description, progress)    do { ReportError(file, line, description, progress);    if(IsDebuggerPresent()) MyDebugBreak(); } while(0)
 
 #define MULTI_TEST_TRY   try {
 #define MULTI_TEST_START 
 #define MULTI_TEST_END   
-#define MULTI_TEST_CATCH } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, func_description, false); }
+#define MULTI_TEST_CATCH } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, description, false); }
 #define TEST_TRY         try {
-#define TEST_CATCH       } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, test_description, true); }
+#define TEST_CATCH       } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, description, true); }
 #define TEST_START()     do { } while(0)
-#define TEST_OK()        do { UNREFERENCED_PARAMETER(test_description); } while(0)
-#define TEST_FAIL()      ReportErrorAndBreak(THIS_FILE, __LINE__, fail_description, false)
-#define TEST_FAIL_STOP() ReportErrorAndBreak(THIS_FILE, __LINE__, fail_description, true)
+#define TEST_OK()        do { UNREFERENCED_PARAMETER(description); } while(0)
+#define TEST_FAIL()      ReportErrorAndBreak(THIS_FILE, __LINE__, description, false)
+#define TEST_FAIL_STOP() ReportErrorAndBreak(THIS_FILE, __LINE__, description, true)
 
 #else // !MODPLUG_TRACKER
 
@@ -207,25 +214,25 @@ static noinline void ReportException(const char * const file, const int line, co
 
 #define MULTI_TEST_TRY   try { \
                           fail_count = 0;
-#define MULTI_TEST_START show_start(THIS_FILE, __LINE__, func_description); std::cout << "..." << std::endl;
-#define MULTI_TEST_END   show_start(THIS_FILE, __LINE__, func_description);
+#define MULTI_TEST_START show_start(THIS_FILE, __LINE__, description); std::cout << "..." << std::endl;
+#define MULTI_TEST_END   show_start(THIS_FILE, __LINE__, description);
 #define MULTI_TEST_CATCH  if(fail_count > 0) { \
                            throw std::runtime_error("Test failed."); \
                           } \
-                          show_ok(THIS_FILE, __LINE__, func_description); \
+                          show_ok(THIS_FILE, __LINE__, description); \
                          } catch(...) { \
-                          ReportException(THIS_FILE, __LINE__, func_description); \
+                          ReportException(THIS_FILE, __LINE__, description); \
                          }
 #define TEST_TRY         try {
 #define TEST_CATCH       } catch(...) { \
                           fail_count++; \
-                          ReportException(THIS_FILE, __LINE__, fail_description); \
+                          ReportException(THIS_FILE, __LINE__, description); \
                           throw; \
                          }
-#define TEST_START()     show_start(THIS_FILE, __LINE__, test_description)
-#define TEST_OK()        show_ok(THIS_FILE, __LINE__, test_description)
-#define TEST_FAIL()      do { show_fail(THIS_FILE, __LINE__, fail_description); fail_count++; } while(0)
-#define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, fail_description); fail_count++; throw std::runtime_error(std::string("Test failed: ") + test_description); } while(0)
+#define TEST_START()     show_start(THIS_FILE, __LINE__, description)
+#define TEST_OK()        show_ok(THIS_FILE, __LINE__, description)
+#define TEST_FAIL()      do { show_fail(THIS_FILE, __LINE__, description); fail_count++; } while(0)
+#define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, description); fail_count++; throw std::runtime_error(std::string("Test failed: ") + description); } while(0)
 
 #endif // MODPLUG_TRACKER
 
@@ -236,8 +243,7 @@ static noinline void ReportException(const char * const file, const int line, co
 //The macro is active in both 'debug' and 'release' build.
 #define VERIFY_EQUAL(x,y)	\
 do{ \
-	const char * const test_description = #x " == " #y ; \
-	const char * const fail_description = "VERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y ; \
+	const char * const description = #x " == " #y ; \
 	TEST_TRY \
 	TEST_START(); \
 	if((x) != (y))		\
@@ -254,8 +260,7 @@ do{ \
 // Like VERIFY_EQUAL, but throws exception if comparison fails.
 #define VERIFY_EQUAL_NONCONT(x,y) \
 do{ \
-	const char * const test_description = #x " == " #y ; \
-	const char * const fail_description = "VERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y ; \
+	const char * const description = #x " == " #y ; \
 	TEST_TRY \
 	TEST_START(); \
 	if((x) != (y))		\
@@ -272,8 +277,7 @@ do{ \
 // Like VERIFY_EQUAL_NONCONT, but do not show message if test succeeds
 #define VERIFY_EQUAL_QUIET_NONCONT(x,y) \
 do{ \
-	const char * const test_description = #x " == " #y ; \
-	const char * const fail_description = "VERIFY_EQUAL failed when comparing\n" #x "\nand\n" #y ; \
+	const char * const description = #x " == " #y ; \
 	TEST_TRY \
 	if((x) != (y))		\
 	{					\
@@ -285,7 +289,7 @@ do{ \
 
 #define DO_TEST(func) \
 do{ \
-	const char * func_description = #func ; \
+	const char * description = #func ; \
 	MULTI_TEST_TRY \
 	MULTI_TEST_START \
 	func(); \
@@ -1435,10 +1439,7 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 		smp.pSample = &sampleDataNew[0];
 
 		ITDecompression decompression(file, smp, it215);
-		for(size_t i = 0; i < sampleData.size(); i++)
-		{
-			VERIFY_EQUAL_QUIET_NONCONT(sampleData[i], sampleDataNew[i]);
-		}
+		VERIFY_EQUAL_NONCONT(memcmp(&sampleData[0], &sampleDataNew[0], sampleData.size()), 0);
 		fclose(f);
 	}
 	while(remove(filename.c_str()) == EACCES)
