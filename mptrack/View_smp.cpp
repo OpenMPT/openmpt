@@ -23,6 +23,7 @@
 #include "SampleEditorDialogs.h"
 #include "modsmp_ctrl.h"
 #include "Wav.h"
+#include "../soundlib/FileReader.h"
 
 #define new DEBUG_NEW
 
@@ -2000,7 +2001,8 @@ void CViewSample::OnEditPaste()
 
 			memcpy(s, pSndFile->m_szNames[m_nSample], 32);
 			memcpy(s2, sample.filename, 22);
-			pSndFile->ReadSampleFromFile(m_nSample, p, dwMemSize);
+			FileReader file(p, dwMemSize);
+			pSndFile->ReadSampleFromFile(m_nSample, file);
 			if (!pSndFile->m_szNames[m_nSample][0])
 {
 				memcpy(pSndFile->m_szNames[m_nSample], s, 32);

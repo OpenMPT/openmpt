@@ -753,7 +753,8 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	
 	{
 		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
-		bOk = m_sndFile.ReadSampleFromFile(m_nSample, lpFile, len);
+		FileReader file(lpFile, len);
+		bOk = m_sndFile.ReadSampleFromFile(m_nSample, file);
 	}
 
 	if (!bOk)
