@@ -840,9 +840,6 @@
     <ClInclude Include="Reporting.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\svn_version\svn_version.template.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\svn_version_default\svn_version.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -884,6 +881,9 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\S3MTools.h">
       <Filter>Source Files\soundlib\Module Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\svn_version_subwcrev\svn_version.template.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
