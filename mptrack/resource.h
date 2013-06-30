@@ -820,6 +820,7 @@
 #define IDC_CHECKCAPTURE                2324
 #define IDC_CHK_OLDPITCH                2324
 #define IDC_SPINMOVEMAPPING             2325
+#define IDC_CHK_FT2VOLRAMP              2325
 #define IDC_BUTTON_HALF                 2326
 #define IDC_BUTTON_DOUBLE               2327
 #define IDC_GROUPBOX_PITCH_TIME         2328
