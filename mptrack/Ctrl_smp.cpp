@@ -358,7 +358,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 		int nIns = m_parent.GetInstrumentChange();
 		if (m_sndFile.GetNumInstruments())
 		{
-			if ((nIns > 0) && (!m_modDoc.IsChildSample(nIns, m_nSample)))
+			if ((nIns > 0) && (!m_modDoc.IsChildSample((INSTRUMENTINDEX)nIns, m_nSample)))
 			{
 				UINT k = m_modDoc.FindInstrumentChild(nIns);
 				if (k > 0) lParam = k;
@@ -372,7 +372,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 	{
 		if (m_sndFile.GetNumInstruments())
 		{
-			INSTRUMENTINDEX k = m_parent.GetInstrumentChange();
+			INSTRUMENTINDEX k = (INSTRUMENTINDEX)m_parent.GetInstrumentChange();
 			if (!m_modDoc.IsChildSample(k, (SAMPLEINDEX)lParam))
 			{
 				INSTRUMENTINDEX nins = m_modDoc.FindSampleParent((SAMPLEINDEX)lParam);
