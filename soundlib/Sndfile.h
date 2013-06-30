@@ -574,7 +574,7 @@ public:
 	bool ReadMDL(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadOKT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadPTM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadPTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDBM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
@@ -738,7 +738,7 @@ protected:
 	void Panbrello(ModChannel *pChn, UINT param);
 	void RetrigNote(CHANNELINDEX nChn, int param, UINT offset=0);  //rewbs.volOffset: added last param
 	void SampleOffset(CHANNELINDEX nChn, UINT param);
-	void NoteCut(CHANNELINDEX nChn, UINT nTick);
+	void NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample);
 	ROWINDEX PatternLoop(ModChannel *, UINT param);
 	void ExtendedMODCommands(CHANNELINDEX nChn, UINT param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, UINT param);

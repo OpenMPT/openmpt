@@ -1676,7 +1676,7 @@ BOOL CSoundFile::ProcessEffects()
 			//:xy --> note delay until tick x, note cut at tick x+y
 			nStartTick = (param & 0xF0) >> 4;
 			const UINT cutAtTick = nStartTick + (param & 0x0F);
-			NoteCut(nChn, cutAtTick);
+			NoteCut(nChn, cutAtTick, IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER));
 		} else if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
 			if ((!param) && (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) param = pChn->nOldCmdEx; else pChn->nOldCmdEx = param;
@@ -3457,7 +3457,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
 	// EBx: Fine Volume Down
 	case 0xB0:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeDown(pChn, param, false); break;
 	// ECx: Note Cut
-	case 0xC0:	NoteCut(nChn, param); break;
+	case 0xC0:	NoteCut(nChn, param, false); break;
 	// EDx: Note Delay
 	// EEx: Pattern Delay
 	case 0xF0:
@@ -3631,7 +3631,9 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 			else if(GetType() == MOD_TYPE_S3M)
 				return;
 		}
-		NoteCut(nChn, param);
+		// S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
+		// Test case: scx.it
+		NoteCut(nChn, param, IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER));
 		break;
 	// SDx: Note Delay
 	// SEx: Pattern Delay for x rows
@@ -4354,16 +4356,14 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide)
 }
 
 
-void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick)
-//-----------------------------------------------------
+void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample)
+//---------------------------------------------------------------------
 {
 	if (m_nTickCount == nTick)
 	{
 		ModChannel *pChn = &Chn[nChn];
 		pChn->nVolume = 0;
-		// S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
-		// Test case: scx.it
-		if(IsCompatibleMode(TRK_IMPULSETRACKER|TRK_SCREAMTRACKER))
+		if(cutSample)
 		{
 			pChn->nFadeOutVol = 0;
 			pChn->dwFlags.set(CHN_NOTEFADE);
@@ -4949,7 +4949,7 @@ void CSoundFile::PortamentoFineMPT(ModChannel* pChn, int param)
 	if(m_nTickCount == 0)
 		pChn->nOldFinePortaUpDown = 0;
 
-	const int tickParam = (m_nTickCount + 1.0) * param / m_nMusicSpeed;
+	const int tickParam = static_cast<int>((m_nTickCount + 1.0) * param / m_nMusicSpeed);
 	pChn->m_PortamentoFineSteps += (param >= 0) ? tickParam - pChn->nOldFinePortaUpDown : tickParam + pChn->nOldFinePortaUpDown;
 	if(m_nTickCount + 1 == m_nMusicSpeed)
 		pChn->nOldFinePortaUpDown = abs(param);
