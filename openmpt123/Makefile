@@ -62,6 +62,9 @@ CPPFLAGS += -DLIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
 #CXXFLAGS += -mtune=generic
 #CFLAGS   += -mtune=generic
 
+ifeq ($(NO_ZLIB),1)
+CPPFLAGS += -DNO_ZLIB
+else
 #LDLIBS   += -lz
 ifeq ($(shell pkg-config --exists zlib && echo yes),yes)
 CPPFLAGS += -DMPT_WITH_ZLIB
@@ -70,7 +73,10 @@ LDFLAGS  += $(shell pkg-config --libs-only-other zlib )
 LDFLAGS  += $(shell pkg-config --libs-only-L     zlib )
 LDLIBS   += $(shell pkg-config --libs-only-l     zlib )
 endif
+endif
 
+ifeq ($(NO_PORTAUDIO),1)
+else
 #LDLIBS   += -lportaudio
 ifeq ($(shell pkg-config --exists portaudio-2.0 && echo yes),yes)
 CPPFLAGS += -DMPT_WITH_PORTAUDIO
@@ -79,8 +85,11 @@ LDFLAGS  += $(shell pkg-config --libs-only-other portaudio-2.0 )
 LDFLAGS  += $(shell pkg-config --libs-only-L     portaudio-2.0 )
 LDLIBS   += $(shell pkg-config --libs-only-l     portaudio-2.0 )
 endif
+endif
 
-#LDLIBS   += -lFLAC++ -lFLAC
+ifeq ($(NO_FLAC),1)
+else
+#LDLIBS   += -lFLAC
 ifeq ($(shell pkg-config --exists flac && echo yes),yes)
 CPPFLAGS += -DMPT_WITH_FLAC
 CPPFLAGS += $(shell pkg-config --cflags-only-I   flac )
@@ -88,7 +97,10 @@ LDFLAGS  += $(shell pkg-config --libs-only-other flac )
 LDFLAGS  += $(shell pkg-config --libs-only-L     flac )
 LDLIBS   += $(shell pkg-config --libs-only-l     flac )
 endif
+endif
 
+ifeq ($(NO_SNDFILE),1)
+else
 #LDLIBS   += -lsndfile
 ifeq ($(shell pkg-config --exists sndfile && echo yes),yes)
 CPPFLAGS += -DMPT_WITH_SNDFILE
@@ -96,6 +108,7 @@ CPPFLAGS += $(shell pkg-config --cflags-only-I   sndfile )
 LDFLAGS  += $(shell pkg-config --libs-only-other sndfile )
 LDFLAGS  += $(shell pkg-config --libs-only-L     sndfile )
 LDLIBS   += $(shell pkg-config --libs-only-l     sndfile )
+endif
 endif
 
 %: %.o
@@ -193,11 +206,14 @@ all:
 OUTPUTS += bin/openmpt.a
 OUTPUTS += bin/libopenmpt.so
 OUTPUTS += bin/openmpt123
+OUTPUTS += bin/libopenmpt_modplug.so
+OUTPUTS += bin/modplug123
+ifeq ($(NO_PORTAUDIO),1)
+else
 OUTPUTS += bin/libopenmpt_example_c
 OUTPUTS += bin/libopenmpt_example_c_mem
 OUTPUTS += bin/libopenmpt_example_cxx
-OUTPUTS += bin/libopenmpt_modplug.so
-OUTPUTS += bin/modplug123
+endif
 
 all: $(OUTPUTS)
 
