@@ -107,6 +107,9 @@
 // Define to build without FLAC support
 //#define NO_FLAC
 
+// Define to build without zlib support
+//#define NO_ZLIB
+
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
@@ -144,6 +147,7 @@
 #endif
 #define NO_DSOUND
 #define NO_FLAC
+//#define NO_ZLIB
 #define NO_MP3_SAMPLES
 //#define NO_LIBMODPLUG
 #if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86))
