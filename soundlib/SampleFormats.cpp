@@ -20,6 +20,7 @@
 #include "Wav.h"
 #include "ITTools.h"
 #include "XMTools.h"
+#include "S3MTools.h"
 #include "WAVTools.h"
 #include "../common/version.h"
 #include "ChunkReader.h"
@@ -72,7 +73,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file)
 		&& !ReadITSSample(nSample, file)
 		&& !ReadPATSample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
 		&& !Read8SVXSample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
-		&& !ReadS3ISample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
+		&& !ReadS3ISample(nSample, file)
 		&& !ReadFLACSample(nSample, file)
 		&& !ReadMP3Sample(nSample, file))
 	{
@@ -113,21 +114,22 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 	uint32 psig[20];
 	file.ReadArrayLE(psig);
 	file.SkipBack(80);
-	if((psig[0] == LittleEndian(0x46464952) && psig[2] == LittleEndian(0x45564157))		// RIFF....WAVE signature
-	 || (psig[0] == LittleEndian(0x5453494C) && psig[2] == LittleEndian(0x65766177))	// LIST....wave
-	 || psig[76/4] == LittleEndian(0x53524353)											// S3I signature
-	 || (psig[0] == BigEndian(0x464F524D) && psig[2] == LittleEndian(0x46464941))		// AIFF signature
-	 || (psig[0] == BigEndian(0x464F524D) && psig[2] == LittleEndian(0x43464941))		// AIFF-C signature
-	 || (psig[0] == BigEndian(0x464F524D) && psig[2] == LittleEndian(0x58565338))		// 8SVX signature
-	 || psig[0] == LittleEndian(ITSample::magic)										// ITS signature
+	if(    (!memcmp(&psig[0], "RIFF", 4) && !memcmp(&psig[2], "WAVE", 4))	// RIFF....WAVE signature
+		|| (!memcmp(&psig[0], "LIST", 4) && !memcmp(&psig[2], "wave", 4))	// LIST....wave
+		||  !memcmp(&psig[76 / 4], "SCRS", 4)								// S3I signature
+		|| (!memcmp(&psig[0], "FORM", 4) &&
+			  (!memcmp(&psig[2], "AIFF", 4)									// AIFF signature
+			|| !memcmp(&psig[2], "AIFC", 4)									// AIFF-C signature
+			|| !memcmp(&psig[2], "8SVX", 4)))								// 8SVX signature
+		|| psig[0] == LittleEndian(ITSample::magic)							// ITS signature
 #ifndef NO_FLAC
-	 || psig[0] == LittleEndian('CaLf')													// FLAC signature
+		|| !memcmp(&psig[0], "fLaC", 4)										// FLAC signature
 #endif // NO_FLAC
 #ifndef NO_MP3_SAMPLES
-	 || IsMPEG(file)																// MPEG signature
-	 || IsID3(file)				// MP3 signature
+		|| IsMPEG(file)														// MPEG signature
+		|| IsID3(file)				// MP3 signature
 #endif // NO_MP3_SAMPLES
-	)
+		)
 	{
 		// Scanning free sample
 		SAMPLEINDEX nSample = GetNextFreeSample(nInstr);
@@ -906,74 +908,28 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 /////////////////////////////////////////////////////////////
 // S3I Samples
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
 
-typedef struct PACKED S3ISAMPLESTRUCT
+bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
+//-------------------------------------------------------------------
 {
-	BYTE id;
-	char filename[12];
-	BYTE reserved1;
-	WORD offset;
-	DWORD length;
-	DWORD loopstart;
-	DWORD loopend;
-	BYTE volume;
-	BYTE reserved2;
-	BYTE pack;
-	BYTE flags;
-	DWORD nC5Speed;
-	DWORD reserved3;
-	DWORD reserved4;
-	DWORD date;
-	char name[28];
-	DWORD scrs;
-} S3ISAMPLESTRUCT;
+	file.Rewind();
 
-STATIC_ASSERT(sizeof(S3ISAMPLESTRUCT) == 80);
-
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
-
-bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------------------
-{
-	// TODO: Rewrite using already existing structs from Load_s3m.cpp
-	S3ISAMPLESTRUCT *pss = (S3ISAMPLESTRUCT *)lpMemFile;
-	ModSample &sample = Samples[nSample];
-	DWORD dwMemPos;
-	SampleIO flags;
-
-	if ((!lpMemFile) || (dwFileLength < sizeof(S3ISAMPLESTRUCT))
-	 || (pss->id != 0x01) || (((DWORD)pss->offset << 4) >= dwFileLength)
-	 || (pss->scrs != 0x53524353)) return false;
+	S3MSampleHeader sampleHeader;
+	if(!file.ReadConvertEndianness(sampleHeader)
+		|| sampleHeader.sampleType != S3MSampleHeader::typePCM
+		|| sampleHeader.magic != S3MSampleHeader::idSCRS
+		|| !file.Seek((sampleHeader.dataPointer[1] << 4) | (sampleHeader.dataPointer[2] << 12) | (sampleHeader.dataPointer[0] << 20)))
+	{
+		return false;
+	}
 
 	DestroySampleThreadsafe(nSample);
-	dwMemPos = pss->offset << 4;
 
-	sample.Initialize();
-	mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, pss->filename);
-	mpt::String::Read<mpt::String::nullTerminated>(m_szNames[nSample], pss->name);
-
-	sample.nLength = pss->length;
-	sample.nLoopStart = pss->loopstart;
-	sample.nLoopEnd = pss->loopend;
-	sample.nVolume = pss->volume << 2;
-	sample.nC5Speed = pss->nC5Speed;
-	if(pss->flags & 0x01) sample.uFlags |= CHN_LOOP;
-
+	ModSample &sample = Samples[nSample];
+	sampleHeader.ConvertToMPT(sample);
+	mpt::String::Read<mpt::String::nullTerminated>(m_szNames[nSample], sampleHeader.name);
+	sampleHeader.GetSampleFormat(false).ReadSample(sample, file);
 	sample.Convert(MOD_TYPE_S3M, GetType());
-
-	FileReader chunk(lpMemFile + dwMemPos, dwFileLength - dwMemPos);
-	SampleIO(
-		(pss->flags & 0x04) ? SampleIO::_16bit : SampleIO::_8bit,
-		(pss->flags & 0x02) ? SampleIO::stereoSplit : SampleIO::mono,
-		SampleIO::littleEndian,
-		SampleIO::unsignedPCM)
-		.ReadSample(sample, chunk);
-
 	return true;
 }
 

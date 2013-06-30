@@ -478,6 +478,9 @@
     <ClCompile Include="MPTrackUtil.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\S3MTools.cpp">
+      <Filter>Source Files\soundlib\Module Loaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -878,6 +881,9 @@
     </ClInclude>
     <ClInclude Include="MPTrackUtil.h">
       <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\S3MTools.h">
+      <Filter>Source Files\soundlib\Module Loaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

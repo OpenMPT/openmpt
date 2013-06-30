@@ -1449,6 +1449,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\S3MTools.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\S3MTools.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\WAVTools.cpp"
 				>
 			</File>

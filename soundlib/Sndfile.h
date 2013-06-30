@@ -786,7 +786,7 @@ public:
 	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader *wsmpChunk = nullptr);
 	bool ReadPATSample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
-	bool ReadS3ISample(SAMPLEINDEX nSample, const LPBYTE lpMemFile, DWORD dwFileLength);
+	bool ReadS3ISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadXISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewind = true);
