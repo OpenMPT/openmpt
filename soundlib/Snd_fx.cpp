@@ -995,7 +995,7 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	// save the note that's actually used, as it's necessary to properly calculate PPS and stuff
 	const int realnote = note;
 
-	if((pIns) && (note - NOTE_MIN < CountOf(pIns->Keyboard)))
+	if((pIns) && (note - NOTE_MIN < (int)CountOf(pIns->Keyboard)))
 	{
 		UINT n = pIns->Keyboard[note - NOTE_MIN];
 		if((n) && (n < MAX_SAMPLES))
