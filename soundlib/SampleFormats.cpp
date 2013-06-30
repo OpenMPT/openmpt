@@ -1254,9 +1254,9 @@ struct PACKED AIFFCommonChunk
 	// Convert sample rate to integer
 	uint32 GetSampleRate() const
 	{
-		uint32 mantissa = *reinterpret_cast<const uint32 *>(&sampleRate[2]), last = 0;
+		uint32 mantissa = (sampleRate[2] << 24) | (sampleRate[3] << 16) | (sampleRate[4] << 8) | (sampleRate[5] << 0);
+		uint32 last = 0;
 		uint8 exp = 30 - sampleRate[1];
-		SwapBytesBE(mantissa);
 
 		while(exp--)
 		{
