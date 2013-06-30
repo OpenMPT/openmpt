@@ -137,6 +137,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	CheckDlgButton(IDC_CHK_MIDICCBUG, sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION));
 	CheckDlgButton(IDC_CHK_OLDRANDOM, sndFile.GetModFlag(MSF_OLDVOLSWING));
 	CheckDlgButton(IDC_CHK_OLDPITCH, sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS));
+	CheckDlgButton(IDC_CHK_FT2VOLRAMP, sndFile.GetModFlag(MSF_VOLRAMP));
 
 	// Time signature information
 
@@ -230,6 +231,7 @@ void CModTypeDlg::UpdateDialog()
 
 	const bool XMorITorMPT = (type & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
 	const bool ITorMPT = (type & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
+	const bool XM = (type & (MOD_TYPE_XM)) != 0;
 
 	// Misc Flags
 	if(ITorMPT)
@@ -242,8 +244,9 @@ void CModTypeDlg::UpdateDialog()
 
 	GetDlgItem(IDC_CHK_COMPATPLAY)->ShowWindow(XMorITorMPT);
 	GetDlgItem(IDC_CHK_MIDICCBUG)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_CHK_OLDRANDOM)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_CHK_OLDRANDOM)->ShowWindow(ITorMPT);
 	GetDlgItem(IDC_CHK_OLDPITCH)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_CHK_FT2VOLRAMP)->ShowWindow(XM);
 
 	// Deprecated flags are greyed out if they are not being used.
 	GetDlgItem(IDC_CHK_MIDICCBUG)->EnableWindow(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION) ? TRUE : FALSE);
@@ -373,6 +376,7 @@ void CModTypeDlg::OnOK()
 		if(IsDlgButtonChecked(IDC_CHK_MIDICCBUG)) sndFile.SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 		if(IsDlgButtonChecked(IDC_CHK_OLDRANDOM)) sndFile.SetModFlag(MSF_OLDVOLSWING, true);
 		if(IsDlgButtonChecked(IDC_CHK_OLDPITCH)) sndFile.SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
+		if(IsDlgButtonChecked(IDC_CHK_FT2VOLRAMP)) sndFile.SetModFlag(MSF_VOLRAMP, true);
 	}
 
 	sndFile.m_nDefaultRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
@@ -439,6 +443,9 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 		break;
 	case IDC_CHK_OLDPITCH:
 		strTipText = "Use old (imprecise) portamento logic for instrument plugins (not recommended)";
+		break;
+	case IDC_CHK_FT2VOLRAMP:
+		strTipText = "Use Fasttracker 2 style super soft volume ramping (recommended for true compatible playback)";
 		break;
 	}
 

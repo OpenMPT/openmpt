@@ -33,6 +33,7 @@ enum enmWarnings
 	wReleaseNode,
 	wEditHistory,
 	wMixmode,
+	wVolRamp,
 	wCompatibilityMode,
 	wPitchToTempoLock,
 	wGlobalVolumeNotSupported,

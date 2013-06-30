@@ -1605,6 +1605,12 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 		int32 rampLength, globalRampLength, instrRampLength = 0;
 		rampLength = globalRampLength = (rampUp ? m_MixerSettings.glVolumeRampUpSamples : m_MixerSettings.glVolumeRampDownSamples);
 		//XXXih: add real support for bidi ramping here
+
+		if(GetModFlag(MSF_VOLRAMP) && (GetType() & MOD_TYPE_XM))
+		{
+			// apply FT2-style super-soft volume ramping (5ms), overriding openmpt settings
+			rampLength = globalRampLength = Util::muldivr(5, m_MixerSettings.gdwMixingFreq, 1000);
+		}
 		
 		if(pChn->pModInstrument != nullptr && rampUp)
 		{

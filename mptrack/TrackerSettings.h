@@ -246,6 +246,8 @@ public:
 	int gnPlugWindowHeight;
 	int32 gnPlugWindowLast;	// Last selected plugin ID
 
+	bool autoApplySmoothFT2Ramping;
+
 public:
 
 	TrackerSettings();

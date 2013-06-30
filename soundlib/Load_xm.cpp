@@ -16,6 +16,9 @@
 #include "../common/misc_util.h"
 #include "XMTools.h"
 #include <algorithm>
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/TrackerSettings.h"	// For super smooth ramping option
+#endif // MODPLUG_TRACKER
 
 
 // Allocate samples for an instrument
@@ -279,7 +282,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(!memcmp(fileHeader.trackerName, "FastTracker ", 12))
 	{
-		if(fileHeader.size && !memcmp(fileHeader.trackerName + 12, "v2.00   ", 8))
+		if(fileHeader.size == 276 && !memcmp(fileHeader.trackerName + 12, "v2.00   ", 8))
 		{
 			if(fileHeader.version < 0x0104)
 				madeWith = verFT2Generic | verConfirmed;
@@ -382,7 +385,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 				madeWith.set(verConfirmed);
 			else if(instrHeader.size != 29 && madeWith[verDigiTracker])
 				madeWith.reset(verDigiTracker);
-			else if(madeWith[verFT2Clone |verFT2Generic] && instrHeader.size != 33)
+			else if(madeWith[verFT2Clone | verFT2Generic] && instrHeader.size != 33)
 			{
 				// Sure isn't FT2.
 				// Note: FT2 NORMALLY writes shdr=40 for all samples, but sometimes it
@@ -577,6 +580,16 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_nMixLevels = mixLevels_original;
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
+	}
+
+	if(madeWith[verFT2Generic]
+#ifdef MODPLUG_TRACKER
+		&& TrackerSettings::Instance().autoApplySmoothFT2Ramping
+#endif // MODPLUG_TRACKER
+		)
+	{
+		// apply FT2-style super-soft volume ramping
+		SetModFlag(MSF_VOLRAMP, true);
 	}
 
 	if(madeWithTracker.empty())
