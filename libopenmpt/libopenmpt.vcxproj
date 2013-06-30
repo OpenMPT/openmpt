@@ -354,6 +354,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClInclude Include="..\soundlib\patternContainer.h" />
     <ClInclude Include="..\soundlib\Resampler.h" />
     <ClInclude Include="..\soundlib\RowVisitor.h" />
+    <ClInclude Include="..\soundlib\S3MTools.h" />
     <ClInclude Include="..\soundlib\SampleFormatConverters.h" />
     <ClInclude Include="..\soundlib\SampleIO.h" />
     <ClInclude Include="..\soundlib\Sndfile.h" />
@@ -437,6 +438,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClCompile Include="..\soundlib\pattern.cpp" />
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
     <ClCompile Include="..\soundlib\RowVisitor.cpp" />
+    <ClCompile Include="..\soundlib\S3MTools.cpp" />
     <ClCompile Include="..\soundlib\SampleFormats.cpp" />
     <ClCompile Include="..\soundlib\SampleIO.cpp" />
     <ClCompile Include="..\soundlib\Sndfile.cpp" />

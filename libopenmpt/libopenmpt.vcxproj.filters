@@ -234,6 +234,9 @@
     <ClInclude Include="..\include\pugixml\src\pugixml.hpp">
       <Filter>Header Files\pugixml</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\S3MTools.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp">
@@ -484,6 +487,9 @@
     </ClCompile>
     <ClCompile Include="..\include\pugixml\src\pugixml.cpp">
       <Filter>Source Files\pugixml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\S3MTools.cpp">
+      <Filter>Source Files\soundlib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
