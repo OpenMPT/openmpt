@@ -1428,7 +1428,7 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 		fseek(f, 0, SEEK_END);
 		std::vector<int8> fileData(ftell(f), 0);
 		fseek(f, 0, SEEK_SET);
-		fread(&fileData[0], 1, fileData.size(), f);
+		VERIFY_EQUAL(fread(&fileData[0], fileData.size(), 1, f), 1);
 		FileReader file(&fileData[0], fileData.size());
 
 		std::vector<int8> sampleDataNew(sampleData.size(), 0);
