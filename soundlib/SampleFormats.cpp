@@ -2020,16 +2020,16 @@ struct FLACDecoder
 		{
 			if(bps <= 8)
 			{
-				CopySample<ReadInt8PCM<0> >(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 4);
+				CopySample<SC::ConvertShift<int8, int32, 0> >(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 16)
 			{
-				CopySample<ReadBigIntToInt16PCMNative<0> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConvertShift<int16, int32, 0> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 24)
 			{
-				CopySample<ReadBigIntToInt16PCMNative<8> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConvertShift<int16, int32, 8> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 32)
 			{
-				CopySample<ReadBigIntToInt16PCMNative<16> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConvertShift<int16, int32, 16> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			}
 		}
 

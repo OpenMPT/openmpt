@@ -1836,9 +1836,9 @@ void TestSampleConversion()
 		uint8 *unsigned8 = static_cast<uint8 *>(targetBuf) + 256;
 		int8 *delta8 = static_cast<int8 *>(targetBuf) + 512;
 		int8 delta = 0;
-		CopySample<ReadInt8PCM<0> >(signed8, 256, 1, source8, 256, 1);
-		CopySample<ReadInt8PCM<0x80u> >(unsigned8, 256, 1, source8, 256, 1);
-		CopySample<ReadInt8DeltaPCM>(delta8, 256, 1, source8, 256, 1);
+		CopySample<SC::DecodeInt8>(signed8, 256, 1, reinterpret_cast<const char *>(source8), 256, 1);
+		CopySample<SC::DecodeUint8>(reinterpret_cast<int8 *>(unsigned8), 256, 1, reinterpret_cast<const char *>(source8), 256, 1);
+		CopySample<SC::DecodeInt8Delta>(delta8, 256, 1, reinterpret_cast<const char *>(source8), 256, 1);
 
 		for(size_t i = 0; i < 256; i++)
 		{
@@ -1866,9 +1866,9 @@ void TestSampleConversion()
 		uint16 *unsigned16 = static_cast<uint16 *>(targetBuf) + 65536;
 		int16 *delta16 = static_cast<int16 *>(targetBuf) + 65536 * 2;
 		int16 delta = 0;
-		CopySample<ReadInt16PCM<0, littleEndian16> >(signed16, 65536, 1, source16, 65536 * 2, 1);
-		CopySample<ReadInt16PCM<0x8000u, littleEndian16> >(unsigned16, 65536, 1, source16, 65536 * 2, 1);
-		CopySample<ReadInt16DeltaPCM<littleEndian16> >(delta16, 65536, 1, source16, 65536 * 2, 1);
+		CopySample<SC::DecodeInt16<0, littleEndian16> >(signed16, 65536, 1, reinterpret_cast<const char *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16<0x8000u, littleEndian16> >(reinterpret_cast<int16*>(unsigned16), 65536, 1, reinterpret_cast<const char *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16Delta<littleEndian16> >(delta16, 65536, 1, reinterpret_cast<const char *>(source16), 65536 * 2, 1);
 
 		for(size_t i = 0; i < 65536; i++)
 		{
@@ -1886,9 +1886,9 @@ void TestSampleConversion()
 			source16[i * 2 + 1] = static_cast<uint8>(i & 0xFF);
 		}
 
-		CopySample<ReadInt16PCM<0, bigEndian16> >(signed16, 65536, 1, source16, 65536 * 2, 1);
-		CopySample<ReadInt16PCM<0x8000u, bigEndian16> >(unsigned16, 65536, 1, source16, 65536 * 2, 1);
-		CopySample<ReadInt16DeltaPCM<bigEndian16> >(delta16, 65536, 1, source16, 65536 * 2, 1);
+		CopySample<SC::DecodeInt16<0, bigEndian16> >(signed16, 65536, 1, reinterpret_cast<const char *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16<0x8000u, bigEndian16> >(reinterpret_cast<int16*>(unsigned16), 65536, 1, reinterpret_cast<const char *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16Delta<bigEndian16> >(delta16, 65536, 1, reinterpret_cast<const char *>(source16), 65536 * 2, 1);
 
 		delta = 0;
 		for(size_t i = 0; i < 65536; i++)
@@ -1917,8 +1917,8 @@ void TestSampleConversion()
 		sample.nLength = 65536;
 		sample.uFlags |= CHN_16BIT;
 		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
-		CopyAndNormalizeSample<ReadBigIntToInt16PCMandNormalize<ReadInt24to32PCM<0, littleEndian24> > >(sample, reinterpret_cast<const uint8 *>(source24), 3*65536);
-		CopySample<ReadBigIntTo16PCM<3, 1, 2> >(truncated16, 65536, 1, source24, 65536 * 3, 1);
+		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, reinterpret_cast<const char *>(source24), 3*65536);
+		CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeInt24<0, littleEndian24> > >(truncated16, 65536, 1, reinterpret_cast<const char *>(source24), 65536 * 3, 1);
 
 		for(size_t i = 0; i < 65536; i++)
 		{
@@ -1945,8 +1945,8 @@ void TestSampleConversion()
 		sample.nLength = 65536;
 		sample.uFlags |= CHN_16BIT;
 		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
-		CopyAndNormalizeSample<ReadFloat32to16PCMandNormalize<bigEndian32> >(sample, reinterpret_cast<const uint8 *>(source32), 4*65536);
-		CopySample<ReadFloat32toInt16PCM<bigEndian32> >(truncated16, 65536, 1, source32, 65536 * 4, 1);
+		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, reinterpret_cast<const char *>(source32), 4*65536);
+		CopySample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(truncated16, 65536, 1, reinterpret_cast<const char *>(source32), 65536 * 4, 1);
 
 		for(size_t i = 0; i < 65536; i++)
 		{
@@ -1961,9 +1961,9 @@ void TestSampleConversion()
 	// Range checks
 	{
 		int8 oneSample = 1;
-		int8 *signed8 = static_cast<int8 *>(targetBuf);
+		char *signed8 = reinterpret_cast<char *>(targetBuf);
 		memset(signed8, 0, 4);
-		CopySample<ReadInt8PCM<0> >(targetBuf, 4, 1, &oneSample, sizeof(oneSample), 1);
+		CopySample<SC::DecodeInt8>(reinterpret_cast<int8*>(targetBuf), 4, 1, reinterpret_cast<const char*>(&oneSample), sizeof(oneSample), 1);
 		VERIFY_EQUAL_NONCONT(signed8[0], 1);
 		VERIFY_EQUAL_NONCONT(signed8[1], 0);
 		VERIFY_EQUAL_NONCONT(signed8[2], 0);

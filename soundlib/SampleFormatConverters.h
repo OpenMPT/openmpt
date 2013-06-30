@@ -20,174 +20,265 @@
 #define bigEndian16 1, 0
 
 
-//////////////////////////////////////////////////////
-// Sample conversion functors
 
-enum SampleConversionState { conversionHasNoState, conversionHasState };
+namespace SC { // SC = _S_ample_C_onversion
 
-// Sample conversion functor base class, which contains all the basic properties of the conversion.
-template <typename TIn, typename TOut, SampleConversionState state>
-struct SampleConversionFunctor
+
+
+// Every sample conversion functor has to typedef its input_t and output_t
+// and has to provide a static const input_inc member
+// which describes by how many input_t elements inBuf has to be incremented between invocations.
+// input_inc is normally 1 except when decoding e.g. bigger sample values
+// from multiple char values.
+// Another possible use for input_inc could be reading only one channel of
+// an interleaved multi-channel sample (although there is currently no functor to do this).
+
+
+
+struct DecodeInt7
 {
-	// The sample data type that is accepted as input by the functor
-	typedef TIn input_t;
-	// The sample data type that is output by the functor
-	typedef TOut output_t;
-
-	// Declares whether the sample conversion functor has a state, i.e. if there are
-	// dependencies between two functor calls (e.g. when loading delta-encoded samples).
-	// Sometimes there might be quicker ways to load a sample if it is known that there is
-	// no state, for example in the case CopyStereoInterleavedSample: If there are no
-	// dependencies between functor calls, we can load the whole interleaved stream in one
-	// go, else we will have to load the left and right channel independently (example:
-	// for delta-encoded samples, the delta value is usally a per-channel property)
-	static const SampleConversionState hasState = state;
-
-	// Now it's your job to add this to child classes :)
-	// inline output_t operator() (const void *sourceBuffer) { ... }
-};
-
-
-// 7-Bit sample with unused high bit conversion
-template <int8 offset>
-struct ReadInt7to8PCM : SampleConversionFunctor<int8, int8, conversionHasNoState>
-{
-	forceinline int8 operator() (const void *sourceBuffer)
+	typedef char input_t;
+	typedef int8 output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		return static_cast<int8>(Clamp(static_cast<int16>((*static_cast<const int8 *>(sourceBuffer)) - offset) * 2, -128, 127));
+		return Clamp(int8(*inBuf), int8(-64), int8(63)) * 2;
 	}
 };
 
-
-// 8-Bit sample conversion
-template <int8 offset>
-struct ReadInt8PCM : SampleConversionFunctor<int8, int8, conversionHasNoState>
+struct DecodeInt8
 {
-	forceinline int8 operator() (const void *sourceBuffer)
+	typedef char input_t;
+	typedef int8 output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		return (*static_cast<const int8 *>(sourceBuffer)) - offset;
+		return int8(*inBuf);
 	}
 };
 
-
-// 8-Bit delta sample conversion
-struct ReadInt8DeltaPCM : SampleConversionFunctor<int8, int8, conversionHasState>
+struct DecodeUint8
 {
-	int8 delta;
-
-	ReadInt8DeltaPCM() : delta(0) { }
-
-	forceinline int8 operator() (const void *sourceBuffer)
+	typedef char input_t;
+	typedef int8 output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		delta += *static_cast<const int8 *>(sourceBuffer);
-		return static_cast<int8>(delta);
+		return int8(int(uint8(*inBuf)) - 128);
 	}
 };
 
+struct DecodeInt8Delta
+{
+	typedef char input_t;
+	typedef int8 output_t;
+	static const int input_inc = 1;
+	uint8 delta;
+	DecodeInt8Delta() : delta(0) { }
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		delta += uint8(*inBuf);
+		return int8(delta);
+	}
+};
 
-// 16-Bit sample conversion (for both little and big endian, depending on template parameters)
 template <int16 offset, size_t loByteIndex, size_t hiByteIndex>
-struct ReadInt16PCM : SampleConversionFunctor<int16, int16, conversionHasNoState>
+struct DecodeInt16
 {
-	forceinline int16 operator() (const void *sourceBuffer)
+	typedef char input_t;
+	typedef int16 output_t;
+	static const int input_inc = 2;
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		return (inBuf[loByteIndex] | (inBuf[hiByteIndex] << 8)) - offset;
+		return (uint8(inBuf[loByteIndex]) | (uint8(inBuf[hiByteIndex]) << 8)) - offset;
 	}
 };
 
-
-// 16-Bit delta sample conversion (for both little and big endian, depending on template parameters)
 template <size_t loByteIndex, size_t hiByteIndex>
-struct ReadInt16DeltaPCM : SampleConversionFunctor<int16, int16, conversionHasState>
+struct DecodeInt16Delta
 {
-	int16 delta;
-
-	ReadInt16DeltaPCM() : delta(0) { }
-
-	forceinline int16 operator() (const void *sourceBuffer)
+	typedef char input_t;
+	typedef int16 output_t;
+	static const int input_inc = 2;
+	uint16 delta;
+	DecodeInt16Delta() : delta(0) { }
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		delta += inBuf[loByteIndex] | (inBuf[hiByteIndex] << 8);
-		return static_cast<int16>(delta);
+		delta += uint8(inBuf[loByteIndex]) | (uint8(inBuf[hiByteIndex]) << 8);
+		return int16(delta);
 	}
 };
 
-
-// 8-Bit delta to 16-Bit sample conversion (PTM samples)
-struct ReadInt8to16DeltaPCM : SampleConversionFunctor<int16, int16, conversionHasState>
+struct DecodeInt16Delta8
 {
-	int16 delta;
-
-	ReadInt8to16DeltaPCM() : delta(0) { }
-
-	forceinline int16 operator() (const void *sourceBuffer)
+	typedef char input_t;
+	typedef int16 output_t;
+	static const int input_inc = 2;
+	uint16 delta;
+	DecodeInt16Delta8() : delta(0) { }
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		const int8 *inBuf = static_cast<const int8 *>(sourceBuffer);
-		delta += inBuf[0];
+		delta += uint8(inBuf[0]);
 		int16 result = delta & 0xFF;
-		delta += inBuf[1];
+		delta += uint8(inBuf[1]);
 		result |= (delta << 8);
 		return result;
 	}
 };
 
-
-// 24-Bit sample conversion (for both little and big endian, depending on template parameters): Extend to 32-Bit
 template <int32 offset, size_t loByteIndex, size_t midByteIndex, size_t hiByteIndex>
-struct ReadInt24to32PCM : SampleConversionFunctor<char[3], int32, conversionHasNoState>
+struct DecodeInt24
 {
-	forceinline int32 operator() (const void *sourceBuffer)
+	typedef char input_t;
+	typedef int32 output_t;
+	static const int input_inc = 3;
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		return ((inBuf[loByteIndex] << 8) | (inBuf[midByteIndex] << 16) | (inBuf[hiByteIndex] << 24)) - offset;
+		return ((uint8(inBuf[loByteIndex]) << 8) | (uint8(inBuf[midByteIndex]) << 16) | (uint8(inBuf[hiByteIndex]) << 24)) - offset;
 	}
 };
 
-
-// 32-Bit sample conversion (for both little and big endian, depending on template parameters)
 template <int32 offset, size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
-struct ReadInt32PCM : SampleConversionFunctor<int32, int32, conversionHasNoState>
+struct DecodeInt32
 {
-	forceinline int32 operator() (const void *sourceBuffer)
+	typedef char input_t;
+	typedef int32 output_t;
+	static const int input_inc = 4;
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		return (inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24)) - offset;
+		return (uint8(inBuf[loLoByteIndex]) | (uint8(inBuf[loHiByteIndex]) << 8) | (uint8(inBuf[hiLoByteIndex]) << 16) | (uint8(inBuf[hiHiByteIndex]) << 24)) - offset;
 	}
 };
 
-
-// Signed integer PCM (e.g. 24-Bit, 32-Bit) to 16-Bit signed sample conversion with truncation (for both little and big endian, depending on template parameters)
-template <size_t inputTypeSize, size_t loByteIndex, size_t hiByteIndex>
-struct ReadBigIntTo16PCM : SampleConversionFunctor<char[inputTypeSize], int16, conversionHasNoState>
-{
-	forceinline int16 operator() (const void *sourceBuffer)
-	{
-		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		return inBuf[loByteIndex] | (inBuf[hiByteIndex] << 8);
-	}
-};
-
-
-// 32-Bit signed integer PCM with padding to 16-Bit signed sample conversion with truncation (assuming sample data has same endianness as host)
-template <size_t shift>
-struct ReadBigIntToInt16PCMNative : SampleConversionFunctor<int32, int16, conversionHasNoState>
-{
-	forceinline int16 operator() (const void *sourceBuffer)
-	{
-		return static_cast<int16>((*static_cast<const int32 *>(sourceBuffer)) >> shift);
-	}
-};
-
-
-// 32-Bit floating point to 16-Bit signed PCM sample conversion with clipping (for both little and big endian, depending on template parameters)
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
-struct ReadFloat32toInt16PCM : SampleConversionFunctor<float, int16, conversionHasNoState>
+struct DecodeFloat32
 {
-	forceinline int16 operator() (const void *sourceBuffer)
+	typedef char input_t;
+	typedef float32 output_t;
+	static const int input_inc = 4;
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		float val = DecodeFloatLE(uint8_4(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]));
+		return DecodeFloatLE(uint8_4(uint8(inBuf[loLoByteIndex]), uint8(inBuf[loHiByteIndex]), uint8(inBuf[hiLoByteIndex]), uint8(inBuf[hiHiByteIndex])));
+	}
+};
+
+template <typename Tsample>
+struct ReadSample
+{
+	typedef Tsample input_t;
+	typedef Tsample output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t * inBuf)
+	{
+		return *inBuf;
+	}
+};
+
+
+
+template <typename Tdst, typename Tsrc, int shift>
+struct ConvertShift
+{
+	typedef Tsrc input_t;
+	typedef Tdst output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t * inBuf)
+	{
+		return mpt::saturate_cast<output_t>(*inBuf >> shift);
+	}
+};
+
+
+
+template <typename Tdst, typename Tsrc>
+struct Convert;
+
+template <typename Tid>
+struct Convert<Tid, Tid>
+{
+	typedef Tid input_t;
+	typedef Tid output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t * inBuf)
+	{
+		return *inBuf;
+	}
+};
+
+template <>
+struct Convert<int8, int16>
+{
+	typedef int16 input_t;
+	typedef int8 output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		return int8(*inBuf >> 8);
+	}
+};
+
+template <>
+struct Convert<int8, int32>
+{
+	typedef int32 input_t;
+	typedef int8 output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		return int8(*inBuf >> 24);
+	}
+};
+
+template <>
+struct Convert<int8, float32>
+{
+	typedef float32 input_t;
+	typedef int8 output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		float val = *inBuf;
+		Limit(val, -1.0f, 1.0f);
+		val *= 128.0f;
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		// return mpt::saturate_cast<int8>(static_cast<int>(std::floor(val + 0.5f)));
+		return mpt::saturate_cast<int8>(static_cast<int>(val * 2.0f + 1.0f) >> 1);
+	}
+};
+
+template <>
+struct Convert<int16, int8>
+{
+	typedef int8 input_t;
+	typedef int16 output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		return int16(*inBuf << 8);
+	}
+};
+
+template <>
+struct Convert<int16, int32>
+{
+	typedef int32 input_t;
+	typedef int16 output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		return int16(*inBuf >> 16);
+	}
+};
+
+template <>
+struct Convert<int16, float32>
+{
+	typedef float32 input_t;
+	typedef int16 output_t;
+	static const int input_inc = 1;
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		float val = *inBuf;
 		Limit(val, -1.0f, 1.0f);
 		val *= 32768.0f;
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -197,73 +288,76 @@ struct ReadFloat32toInt16PCM : SampleConversionFunctor<float, int16, conversionH
 };
 
 
-//////////////////////////////////////////////////////
-// Sample normalization + conversion functors
 
-// Signed integer PCM (up to 32-Bit) to 16-Bit signed sample conversion with normalization. A second sample conversion functor is used for actual sample reading.
-template <typename SampleConversion>
-struct ReadBigIntToInt16PCMandNormalize : SampleConversionFunctor<typename SampleConversion::input_t, int16, conversionHasNoState>
+// Reads sample data with Func and passes it directly to Func2.
+// Func1::output_t and Func2::input_t must be identical
+template <typename Func2, typename Func1>
+struct ConversionChain
 {
-	uint32 maxVal;
-	SampleConversion sampleConv;
-
-	ReadBigIntToInt16PCMandNormalize() : maxVal(0)
+	typedef typename Func1::input_t input_t;
+	typedef typename Func2::output_t output_t;
+	static const int input_inc = Func1::input_inc;
+	Func1 func1;
+	Func2 func2;
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		static_assert(SampleConversion::hasState == false, "Implementation of this conversion functor is stateless");
-		static_assert(sizeof(typename SampleConversion::output_t) <= 4, "Implementation of this conversion functor is only suitable for 32-Bit integers or smaller");
+		typename Func1::output_t tmp = func1(inBuf);
+		return func2(&tmp);
 	}
+};
 
-	forceinline void FindMax(const void *sourceBuffer)
+
+
+template <typename Tsample>
+struct Normalize;
+
+template <>
+struct Normalize<int32>
+{
+	typedef int32 input_t;
+	typedef int32 output_t;
+	static const int input_inc = 1;
+	uint32 maxVal;
+	Normalize() : maxVal(0) { }
+	forceinline void FindMax(const input_t *inBuf)
 	{
-		int32 val = sampleConv(sourceBuffer);
-
+		int32 val = *inBuf;
 		if(val < 0)
 		{
 			if(val == int32_min)
 			{
-				maxVal = static_cast<uint32>(-int32_min);
+				maxVal = static_cast<uint32>(-static_cast<int64>(int32_min));
 				return;
 			}
 			val = -val;
 		}
-
 		if(static_cast<uint32>(val) > maxVal)
 		{
 			maxVal = static_cast<uint32>(val);
 		}
 	}
-
 	bool IsSilent() const
 	{
 		return maxVal == 0;
 	}
-
-	forceinline int16 operator() (const void *sourceBuffer)
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		int32 val = sampleConv(sourceBuffer);
-		val = Util::muldivrfloor(val, 32768, maxVal);
-		return mpt::saturate_cast<int16>(val);
+		return Util::muldivrfloor(*inBuf, (uint32)1 << 31, maxVal);
 	}
 };
 
-
-// 32-Bit floating point to 16-Bit signed PCM sample conversion with normalization (for both little and big endian, depending on template parameters)
-template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
-struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, conversionHasNoState>
+template <>
+struct Normalize<float32>
 {
+	typedef float32 input_t;
+	typedef float32 output_t;
+	static const int input_inc = 1;
 	uint32 intMaxVal;
 	float maxValInv;
-
-	ReadFloat32to16PCMandNormalize()
+	Normalize() : intMaxVal(0), maxValInv(1.0f) { }
+	forceinline void FindMax(const input_t *inBuf)
 	{
-		intMaxVal = 0;
-		maxValInv = 0.0f;
-	}
-
-	forceinline void FindMax(const void *sourceBuffer)
-	{
-		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		uint32 val = inBuf[loLoByteIndex] | (inBuf[loHiByteIndex] << 8) | (inBuf[hiLoByteIndex] << 16) | (inBuf[hiHiByteIndex] << 24);
+		uint32 val = EncodeFloatNE(*inBuf);
 		val &= ~0x80000000;	// Remove sign for absolute value
 
 		// IEEE float values are lexicographically ordered and can be compared when interpreted as integers.
@@ -274,7 +368,6 @@ struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, co
 			intMaxVal = val;
 		}
 	}
-
 	bool IsSilent()
 	{
 		if(intMaxVal == 0)
@@ -282,27 +375,56 @@ struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, co
 			return true;
 		} else
 		{
-			maxValInv = 1.0f / DecodeFloatLE(uint8_4().SetLE(intMaxVal));
+			maxValInv = 1.0f / DecodeFloatNE(intMaxVal);
 			return false;
 		}
 	}
-
-	forceinline int16 operator() (const void *sourceBuffer)
+	forceinline output_t operator() (const input_t *inBuf)
 	{
-		const uint8 *inBuf = static_cast<const uint8 *>(sourceBuffer);
-		float val = DecodeFloatLE(uint8_4(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]));
-		val *= maxValInv;
-		val *= 32768.0f;
-		// MSVC with x87 floating point math calls floor for the more intuitive version
-		// return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5f)));
-		return mpt::saturate_cast<int16>(static_cast<int>(val * 2.0f + 1.0f) >> 1);
+		return *inBuf * maxValInv;
 	}
 };
 
 
+
+// Reads sample data with Func1, then normalizes the sample data, and then converts it with Func2.
+// Func1::output_t and Func2::input_t must be identical.
+// Func1 or Func2 can also be the identity transform (ReadSample<T>).
+template <typename Func2, typename Func1>
+struct NormalizationChain
+{
+	typedef typename Func1::input_t input_t;
+	typedef typename Func2::output_t output_t;
+	static const int input_inc = Func1::input_inc;
+	Func1 func1;
+	Normalize<typename Func1::output_t> normalize;
+	Func2 func2;
+	forceinline void FindMax(const input_t *inBuf)
+	{
+		typename Func1::output_t tmp = func1(inBuf);
+		normalize.FindMax(&tmp);
+	}
+	bool IsSilent()
+	{
+		return normalize.IsSilent();
+	}
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		typename Func1::output_t tmp1 = func1(inBuf);
+		typename Func1::output_t norm = normalize(&tmp1);
+		typename Func2::output_t tmp2 = func2(&norm);
+		return tmp2;
+	}
+};
+
+
+
+} // namespace SC
+
+
+
 //////////////////////////////////////////////////////
 // Actual sample conversion functions
-
 
 // Copy a sample data buffer.
 // targetBuffer: Buffer in which the sample should be copied into.
@@ -314,105 +436,112 @@ struct ReadFloat32to16PCMandNormalize : SampleConversionFunctor<float, int16, co
 //
 // Template arguments:
 // SampleConversion: Functor of type SampleConversionFunctor to apply sample conversion (see above for existing functors).
-//
-// Returns:
-// Number of bytes read (including skipped bytes caused by "incSource").
 template <typename SampleConversion>
-size_t CopySample(void *targetBuffer, size_t numSamples, size_t incTarget, const void *sourceBuffer, size_t sourceSize, size_t incSource)
+size_t CopySample(typename SampleConversion::output_t *outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t *inBuf, size_t sourceSize, size_t incSource)
 //---------------------------------------------------------------------------------------------------------------------------------------
 {
-	typename SampleConversion::output_t *outBuf = static_cast<typename SampleConversion::output_t *>(targetBuffer);
-	const typename SampleConversion::input_t *inBuf = static_cast<const typename SampleConversion::input_t *>(sourceBuffer);
-
-	const size_t sampleSize = incSource * sizeof(typename SampleConversion::input_t);
+	const size_t sampleSize = incSource * SampleConversion::input_inc;
 	LimitMax(numSamples, sourceSize / sampleSize);
+	const size_t copySize = numSamples * sampleSize;
 
 	SampleConversion sampleConv;
-	for(size_t i = numSamples; i != 0; i--)
+	while(numSamples--)
 	{
 		*outBuf = sampleConv(inBuf);
 		outBuf += incTarget;
-		inBuf += incSource;
+		inBuf += incSource * SampleConversion::input_inc;
 	}
 
-	return numSamples * sampleSize;
+	return copySize;
 }
 
 
 // Copy a mono sample data buffer.
 template <typename SampleConversion>
-size_t CopyMonoSample(ModSample &sample, const uint8 *sourceBuffer, size_t sourceSize)
+size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
 //------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 1);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
-	return CopySample<SampleConversion>(sample.pSample, sample.nLength, 1, sourceBuffer, sourceSize, 1);
+	const size_t frameSize =  SampleConversion::input_inc;
+	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
+	size_t numFrames = countFrames;
+	SampleConversion sampleConv;
+	const char * inBuf = sourceBuffer;
+	typename SampleConversion::output_t * outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	while(numFrames--)
+	{
+		*outBuf = sampleConv(inBuf);
+		inBuf += SampleConversion::input_inc;
+		outBuf++;
+	}
+	return frameSize * countFrames;
 }
 
 
 // Copy a stereo interleaved sample data buffer.
 template <typename SampleConversion>
-size_t CopyStereoInterleavedSample(ModSample &sample, const uint8 *sourceBuffer, size_t sourceSize)
+size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
 //-------------------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 2);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
-	if(SampleConversion::hasState == conversionHasState)
+	const size_t frameSize = 2 * SampleConversion::input_inc;
+	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
+	size_t numFrames = countFrames;
+	SampleConversion sampleConvLeft;
+	SampleConversion sampleConvRight;
+	const char * inBuf = sourceBuffer;
+	typename SampleConversion::output_t * outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	while(numFrames--)
 	{
-		// Functor has state: We have to load left and right channel independently
-		// or else the state of the two channels is mixed.
-		const size_t rightOffset = sizeof(typename SampleConversion::input_t);
-		if(rightOffset > sourceSize)
-		{
-			// Can't even load one sample of the right channel...
-			return 0;
-		}
-
-		// Read left channel
-		CopySample<SampleConversion>(sample.pSample, sample.nLength, 2, sourceBuffer, sourceSize, 2);
-		// Read right channel
-		return CopySample<SampleConversion>(static_cast<typename SampleConversion::output_t *>(sample.pSample) + 1, sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 2);
-	} else
-	{
-		// This is quicker (and smaller), but only possible if the functor doesn't care about what it actually processes:
-		// Read both interleaved channels at once.
-		return CopySample<SampleConversion>(sample.pSample, sample.nLength * 2, 1, sourceBuffer, sourceSize, 1);
+		*outBuf = sampleConvLeft(inBuf);
+		inBuf += SampleConversion::input_inc;
+		outBuf++;
+		*outBuf = sampleConvRight(inBuf);
+		inBuf += SampleConversion::input_inc;
+		outBuf++;
 	}
+	return frameSize * countFrames;
 }
 
 
 // Copy a stereo split sample data buffer.
 template <typename SampleConversion>
-size_t CopyStereoSplitSample(ModSample &sample, const uint8 *sourceBuffer, size_t sourceSize)
+size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
 //-------------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 2);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
-	// Read left channel
-	CopySample<SampleConversion>(sample.pSample, sample.nLength, 2, sourceBuffer, sourceSize, 1);
-
-	const size_t rightOffset = sample.nLength * sizeof(typename SampleConversion::input_t);
-	if(rightOffset > sourceSize)
+	const size_t frameSize = 2 * SampleConversion::input_inc;
+	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
+	size_t numFrames = countFrames;
+	SampleConversion sampleConvLeft;
+	SampleConversion sampleConvRight;
+	const char * inBufLeft = sourceBuffer;
+	const char * inBufRight = sourceBuffer + sample.nLength * SampleConversion::input_inc;
+	typename SampleConversion::output_t * outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	while(numFrames--)
 	{
-		// Can't even load one sample of the right channel...
-		return sourceSize;
-	} else
-	{
-		// Read right channel
-		return rightOffset + CopySample<SampleConversion>(static_cast<typename SampleConversion::output_t *>(sample.pSample) + 1, sample.nLength, 2, sourceBuffer + rightOffset, sourceSize - rightOffset, 1);
+		*outBuf = sampleConvLeft(inBufLeft);
+		inBufLeft += SampleConversion::input_inc;
+		outBuf++;
+		*outBuf = sampleConvRight(inBufRight);
+		inBufRight += SampleConversion::input_inc;
+		outBuf++;
 	}
+	return frameSize * countFrames;
 }
 
 
 // Copy a sample data buffer and normalize it. Requires slightly advanced sample conversion functor.
 template<typename SampleConversion>
-size_t CopyAndNormalizeSample(ModSample &sample, const uint8 *sourceBuffer, size_t sourceSize)
+size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
 //--------------------------------------------------------------------------------------------
 {
-	static_assert(SampleConversion::hasState == false, "Implementation of this conversion function is stateless");
 	const size_t inSize = sizeof(typename SampleConversion::input_t);
 
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -420,28 +549,27 @@ size_t CopyAndNormalizeSample(ModSample &sample, const uint8 *sourceBuffer, size
 	size_t numSamples = sample.nLength * sample.GetNumChannels();
 	LimitMax(numSamples, sourceSize / inSize);
 
-	const typename SampleConversion::input_t *inBuf = reinterpret_cast<const typename SampleConversion::input_t *>(sourceBuffer);
-
+	const char * inBuf = sourceBuffer;
 	// Finding max value
 	SampleConversion sampleConv;
 	for(size_t i = numSamples; i != 0; i--)
 	{
 		sampleConv.FindMax(inBuf);
-		inBuf++;
+		inBuf += SampleConversion::input_inc;
 	}
 
 	// If buffer is silent (maximum is 0), don't bother normalizing the sample - just keep the already silent buffer.
 	if(!sampleConv.IsSilent())
 	{
+		const char * inBuf = sourceBuffer;
 		// Copying buffer.
 		typename SampleConversion::output_t *outBuf = static_cast<typename SampleConversion::output_t *>(sample.pSample);
-		inBuf = reinterpret_cast<const typename SampleConversion::input_t *>(sourceBuffer);
 
 		for(size_t i = numSamples; i != 0; i--)
 		{
 			*outBuf = sampleConv(inBuf);
 			outBuf++;
-			inBuf++;
+			inBuf += SampleConversion::input_inc;
 		}
 	}
 
