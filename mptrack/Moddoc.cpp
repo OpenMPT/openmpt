@@ -1180,7 +1180,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 	CriticalSection cs;
 
 	//rewbs.vstiLive
-	if(ins != INSTRUMENTINDEX_INVALID && ins <= m_SndFile.GetNumInstruments() && ModCommand::IsNote(note))
+	if(ins != INSTRUMENTINDEX_INVALID && ins <= m_SndFile.GetNumInstruments() && ModCommand::IsNote(ModCommand::NOTE(note)))
 	{
 
 		ModInstrument *pIns = m_SndFile.Instruments[ins];
