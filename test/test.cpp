@@ -1407,10 +1407,10 @@ void TestLoadSaveFile()
 }
 
 
-void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215)
-//------------------------------------------------------------------------------------------------
+void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
+//---------------------------------------------------------------------------------------------------------------
 {
-	std::string filename = GetTestFilenameBase() + "raw";
+	std::string filename = GetTestFilenameBase() + "itcomp" + Stringify(testcount) + ".raw";
 
 	ModSample smp;
 	smp.uFlags = smpFormat;
@@ -1463,13 +1463,15 @@ void TestITCompression()
 		sampleData[i] = (int8)std::rand();
 	}
 
+	int testcount = 0;
+
 	// Run each compression test with IT215 compression and without.
 	for(int i = 0; i < 2; i++)
 	{
-		RunITCompressionTest(sampleData, ChannelFlags(0), i == 0);
-		RunITCompressionTest(sampleData, CHN_16BIT, i == 0);
-		RunITCompressionTest(sampleData, CHN_STEREO, i == 0);
-		RunITCompressionTest(sampleData, CHN_16BIT | CHN_STEREO, i == 0);
+		RunITCompressionTest(sampleData, ChannelFlags(0), i == 0, testcount++);
+		RunITCompressionTest(sampleData, CHN_16BIT, i == 0, testcount++);
+		RunITCompressionTest(sampleData, CHN_STEREO, i == 0, testcount++);
+		RunITCompressionTest(sampleData, CHN_16BIT | CHN_STEREO, i == 0, testcount++);
 	}
 }
 
