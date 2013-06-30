@@ -319,7 +319,7 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 ////////////////////////////////////////////////////////////////////////////////
 // WAV Open
 
-extern bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, const void *source, size_t sourceSize, uint16 blockAlign);
+extern bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign);
 
 bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader *wsmpChunk)
 //------------------------------------------------------------------------------------------
@@ -356,7 +356,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 		{
 			return false;
 		}
-		IMAADPCMUnpack16((int16 *)sample.pSample, sample.nLength, sampleChunk.GetRawData(), sampleChunk.BytesLeft(), wavFile.GetBlockAlign());
+		IMAADPCMUnpack16((int16 *)sample.pSample, sample.nLength, FileReader(sampleChunk.GetRawData(), sampleChunk.BytesLeft()), wavFile.GetBlockAlign());
 		AdjustSampleLoop(sample);
 	} else if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtMP3)
 	{

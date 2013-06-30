@@ -184,8 +184,8 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 
 
 // Note: Only works for mono samples.
-bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, const void *source, size_t sourceSize, uint16 blockAlign)
-//-----------------------------------------------------------------------------------------------------------------
+bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign)
+//-------------------------------------------------------------------------------------------
 {
 	static const int32 IMAIndexTab[8] =  { -1, -1, -1, -1, 2, 4, 6, 8 };
 	static const int32 IMAUnpackTable[90] =
@@ -204,29 +204,27 @@ bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, const void *source, si
 		32767, 0
 	};
 
-	if ((sampleLen < 4) || (!target) || (!source)
-		|| (blockAlign < 5) || (blockAlign > sourceSize)) return false;
-	SmpLength nPos = 0;
+	if((sampleLen < 4) || (!target) || (blockAlign < 5) || (blockAlign > file.GetLength()))
+		return false;
 
-	const uint8 *psrc = static_cast<const uint8 *>(source);
-	while((nPos < sampleLen) && (sourceSize > 4))
+	SmpLength nPos = 0;
+	while((nPos < sampleLen) && file.CanRead(5))
 	{
-		int32 nIndex;
-		int32 value = *((int16 *)psrc);
-		nIndex = psrc[2];
-		psrc += 4;
-		sourceSize -= 4;
+		int32 value = file.ReadIntLE<int16>();
+		int32 nIndex = file.ReadIntLE<uint8>();
+		nIndex = Clamp(nIndex, 0, 89);
+		file.Skip(1);
 		target[nPos++] = (int16)value;
-		for(uint32 i = 0; (i < (blockAlign - 4u) * 2u) && (nPos < sampleLen) && sourceSize > 0; i++)
+		for(uint32 i = 0; (i < (blockAlign - 4u) * 2u) && (nPos < sampleLen) && file.AreBytesLeft(); i++)
 		{
 			uint8 delta;
 			if(i & 1)
 			{
-				delta = ((*(psrc++)) >> 4) & 0x0F;
-				sourceSize--;
+				delta = (file.ReadIntLE<uint8>() >> 4) & 0x0F;
 			} else
 			{
-				delta = (*psrc) & 0x0F;
+				delta = file.ReadIntLE<uint8>() & 0x0F;
+				file.SkipBack(1);
 			}
 			int32 v = IMAUnpackTable[nIndex] >> 3;
 			if (delta & 1) v += IMAUnpackTable[nIndex] >> 2;
@@ -234,8 +232,7 @@ bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, const void *source, si
 			if (delta & 4) v += IMAUnpackTable[nIndex];
 			if (delta & 8) value -= v; else value += v;
 			nIndex += IMAIndexTab[delta & 7];
-			if (nIndex < 0) nIndex = 0; else
-			if (nIndex > 88) nIndex = 88;
+			nIndex = Clamp(nIndex, 0, 88);
 			target[nPos++] = static_cast<int16>(Clamp(value, -32768, 32767));
 		}
 	}
