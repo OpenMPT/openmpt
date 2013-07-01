@@ -78,12 +78,6 @@ static std::int32_t float_to_fx16( float x ) {
 static float fx16_to_float( std::int32_t x ) {
 	return static_cast<float>( x * (1.0f/(1<<16)) );
 }
-template < typename T > static T scale_percent( T percent, T min, T max ) {
-	return Clamp( min + ( percent * ( max - min ) ) / 100, min, max );
-}
-template < typename T > static T unscale_percent( T value, T min, T max ) {
-	return Clamp( ( value - min ) * 100 / ( max - min ), 0, 100 );
-}
 
 class loader_log : public ILog {
 private:
@@ -145,16 +139,6 @@ static std::int32_t resamplingmode_to_filterlength(ResamplingMode mode) {
 	}
 }
 
-std::int32_t module_impl::get_quality() const {
-	return unscale_percent<int>( resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode ), 1, 8 );
-}
-void module_impl::set_quality( std::int32_t value ) {
-	CResamplerSettings resamplersettings = m_sndFile->m_Resampler.m_Settings;
-	resamplersettings.SrcMode = filterlength_to_resamplingmode( scale_percent<int>( value, 1, 8 ) );
-	resamplersettings.gdWFIRCutoff = CResamplerSettings().gdWFIRCutoff; // use default
-	resamplersettings.gbWFIRType = CResamplerSettings().gbWFIRType; // use default
-	m_sndFile->SetResamplerSettings( resamplersettings );
-}
 void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels, bool format_float ) {
 	SampleFormat format = ( format_float ? SampleFormatFloat32 : SampleFormatInt16 );
 	if (
@@ -175,7 +159,6 @@ void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels, b
 }
 void module_impl::apply_libopenmpt_defaults() {
 	set_render_param( module::RENDER_STEREOSEPARATION_PERCENT, 100 );
-	set_render_param( module::RENDER_QUALITY_PERCENT, 100 );
 }
 void module_impl::init() {
 	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
@@ -313,8 +296,8 @@ module_impl::~module_impl() {
 	m_sndFile->Destroy();
 }
 
-std::int32_t module_impl::get_render_param( int command ) const {
-	switch ( command ) {
+std::int32_t module_impl::get_render_param( int param ) const {
+	switch ( param ) {
 		case module::RENDER_MASTERGAIN_MILLIBEL: {
 			return static_cast<std::int32_t>( 1000.0f * 2.0f * std::log10( fx16_to_float( m_sndFile->m_MixerSettings.m_FinalOutputGain ) ) );
 		} break;
@@ -323,12 +306,6 @@ std::int32_t module_impl::get_render_param( int command ) const {
 		} break;
 		case module::RENDER_REPEATCOUNT: {
 			return m_sndFile->m_nRepeatCount;
-		} break;
-		case module::RENDER_QUALITY_PERCENT: {
-			return get_quality();
-		} break;
-		case module::RENDER_MAXMIXCHANNELS: {
-			return m_sndFile->m_MixerSettings.m_nMaxMixChannels;
 		} break;
 		case module::RENDER_INTERPOLATION_FILTER_LENGTH: {
 			return resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode );
@@ -339,12 +316,12 @@ std::int32_t module_impl::get_render_param( int command ) const {
 		case module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS: {
 			return m_sndFile->m_MixerSettings.GetVolumeRampDownMicroseconds();
 		} break;
-		default: throw openmpt::exception_message("unknown command"); break;
+		default: throw openmpt::exception_message("unknown render param"); break;
 	}
 	return 0;
 }
-void module_impl::set_render_param( int command, std::int32_t value ) {
-	switch ( command ) {
+void module_impl::set_render_param( int param, std::int32_t value ) {
+	switch ( param ) {
 		case module::RENDER_MASTERGAIN_MILLIBEL: {
 			float gainFactor = static_cast<float>( std::pow( 10.0f, value * 0.001f * 0.5f ) );
 			if ( static_cast<std::int32_t>( m_sndFile->m_MixerSettings.m_FinalOutputGain ) != float_to_fx16( gainFactor ) ) {
@@ -363,16 +340,6 @@ void module_impl::set_render_param( int command, std::int32_t value ) {
 		} break;
 		case module::RENDER_REPEATCOUNT: {
 			m_sndFile->SetRepeatCount( value );
-		} break;
-		case module::RENDER_QUALITY_PERCENT: {
-			set_quality( value );
-		} break;
-		case module::RENDER_MAXMIXCHANNELS: {
-			if ( value != static_cast<std::int32_t>( m_sndFile->m_MixerSettings.m_nMaxMixChannels ) ) {
-				MixerSettings settings = m_sndFile->m_MixerSettings;
-				settings.m_nMaxMixChannels = value;
-				m_sndFile->SetMixerSettings( settings );
-			}
 		} break;
 		case module::RENDER_INTERPOLATION_FILTER_LENGTH: {
 			CResamplerSettings newsettings;
@@ -395,9 +362,10 @@ void module_impl::set_render_param( int command, std::int32_t value ) {
 				m_sndFile->SetMixerSettings( newsettings );
 			}
 		} break;
-		default: throw openmpt::exception_message("unknown command"); break;
+		default: throw openmpt::exception_message("unknown render param"); break;
 	}
 }
+
 std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::int16_t * mono ) {
 	if ( !mono ) {
 		throw openmpt::exception_message("null pointer");
@@ -670,6 +638,47 @@ std::uint8_t module_impl::get_pattern_row_channel_command( std::int32_t p, std::
 		case module::command_parameter: return m_sndFile->Patterns[p][r*numchannels+c].param; break;
 	}
 	return 0;
+}
+
+std::vector<std::string> module_impl::get_ctls() const {
+	std::vector<std::string> retval;
+	return retval;
+}
+std::string module_impl::ctl_get_string( const std::string & ctl ) const {
+	if ( ctl == "" ) {
+		throw openmpt::exception_message("unknown ctl");
+	}
+	throw openmpt::exception_message("unknown ctl");
+}
+double module_impl::ctl_get_double( const std::string & ctl ) const {
+	if ( ctl == "" ) {
+		throw openmpt::exception_message("unknown ctl");
+	}
+	throw openmpt::exception_message("unknown ctl");
+}
+std::int64_t module_impl::ctl_get_int64( const std::string & ctl ) const {
+	if ( ctl == "" ) {
+		throw openmpt::exception_message("unknown ctl");
+	}
+	throw openmpt::exception_message("unknown ctl");
+}
+void module_impl::ctl_set( const std::string & ctl, const std::string & value ) {
+	if ( ctl == "" ) {
+		throw openmpt::exception_message("unknown ctl");
+	}
+	throw openmpt::exception_message("unknown ctl");
+}
+void module_impl::ctl_set( const std::string & ctl, double value ) {
+	if ( ctl == "" ) {
+		throw openmpt::exception_message("unknown ctl");
+	}
+	throw openmpt::exception_message("unknown ctl");
+}
+void module_impl::ctl_set( const std::string & ctl, std::int64_t value ) {
+	if ( ctl == "" ) {
+		throw openmpt::exception_message("unknown ctl");
+	}
+	throw openmpt::exception_message("unknown ctl");
 }
 
 } // namespace openmpt

@@ -83,7 +83,6 @@ static void save_settings_to_map( std::map<std::string,int> & result, const open
 	result[ "MasterGain_milliBel" ] = s.mastergain_millibel;
 	result[ "SeteroSeparation_Percent" ] = s.stereoseparation;
 	result[ "RepeatCount" ] = s.repeatcount;
-	result[ "MixerChannels" ] = s.maxmixchannels;
 	result[ "InterpolationFilterLength" ] = s.interpolationfilterlength;
 	result[ "VolumeRampingIn_microseconds" ] = s.volrampinus;
 	result[ "VolumeRampingOut_microseconds" ] = s.volrampoutus;
@@ -102,7 +101,6 @@ static void load_settings_from_map( openmpt::settings::settings & s, const std::
 	load_map_setting( map, "MasterGain_milliBel", s.mastergain_millibel );
 	load_map_setting( map, "SeteroSeparation_Percent", s.stereoseparation );
 	load_map_setting( map, "RepeatCount", s.repeatcount );
-	load_map_setting( map, "MixerChannels", s.maxmixchannels );
 	load_map_setting( map, "InterpolationFilterLength", s.interpolationfilterlength );
 	load_map_setting( map, "VolumeRampingIn_microseconds", s.volrampinus );
 	load_map_setting( map, "VolumeRampingOut_microseconds", s.volrampoutus );
@@ -137,7 +135,6 @@ static void apply_options() {
 		self->mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, self->settings.mastergain_millibel );
 		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings.stereoseparation );
 		self->mod->set_render_param( openmpt::module::RENDER_REPEATCOUNT, self->settings.repeatcount );
-		self->mod->set_render_param( openmpt::module::RENDER_MAXMIXCHANNELS, self->settings.maxmixchannels );
 		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, self->settings.interpolationfilterlength );
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, self->settings.volrampinus );
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, self->settings.volrampoutus );

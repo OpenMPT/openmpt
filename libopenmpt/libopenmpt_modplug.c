@@ -131,7 +131,6 @@ LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size)
 	file->name = openmpt_module_get_metadata(file->mod,"title");
 	file->message = openmpt_module_get_metadata(file->mod,"message");
 	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT,file->settings.mStereoSeparation*100/128);
-	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_MAXMIXCHANNELS,file->settings.mMaxMixChannels);
 	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_INTERPOLATION_FILTER_LENGTH,modplugresamplingmode_to_filterlength(file->settings.mResamplingMode));
 	return file;
 }
@@ -582,6 +581,7 @@ LIBOPENMPT_MODPLUG_API char ModPlug_ExportIT(ModPlugFile* file, const char* file
 }
 
 #ifdef _MSC_VER
+#ifdef _M_IX86
 #pragma comment(linker, "/EXPORT:ModPlug_Load=_ModPlug_Load")
 #pragma comment(linker, "/EXPORT:ModPlug_Unload=_ModPlug_Unload")
 #pragma comment(linker, "/EXPORT:ModPlug_Read=_ModPlug_Read")
@@ -614,6 +614,40 @@ LIBOPENMPT_MODPLUG_API char ModPlug_ExportIT(ModPlugFile* file, const char* file
 #pragma comment(linker, "/EXPORT:ModPlug_ExportXM=_ModPlug_ExportXM")
 #pragma comment(linker, "/EXPORT:ModPlug_ExportMOD=_ModPlug_ExportMOD")
 #pragma comment(linker, "/EXPORT:ModPlug_ExportIT=_ModPlug_ExportIT")
+#else /* !_M_IX86 */
+#pragma comment(linker, "/EXPORT:ModPlug_Load")
+#pragma comment(linker, "/EXPORT:ModPlug_Unload")
+#pragma comment(linker, "/EXPORT:ModPlug_Read")
+#pragma comment(linker, "/EXPORT:ModPlug_GetName")
+#pragma comment(linker, "/EXPORT:ModPlug_GetLength")
+#pragma comment(linker, "/EXPORT:ModPlug_Seek")
+#pragma comment(linker, "/EXPORT:ModPlug_GetSettings")
+#pragma comment(linker, "/EXPORT:ModPlug_SetSettings")
+#pragma comment(linker, "/EXPORT:ModPlug_GetMasterVolume")
+#pragma comment(linker, "/EXPORT:ModPlug_SetMasterVolume")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentSpeed")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentTempo")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentOrder")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentPattern")
+#pragma comment(linker, "/EXPORT:ModPlug_GetCurrentRow")
+#pragma comment(linker, "/EXPORT:ModPlug_GetPlayingChannels")
+#pragma comment(linker, "/EXPORT:ModPlug_SeekOrder")
+#pragma comment(linker, "/EXPORT:ModPlug_GetModuleType")
+#pragma comment(linker, "/EXPORT:ModPlug_GetMessage")
+#pragma comment(linker, "/EXPORT:ModPlug_NumInstruments")
+#pragma comment(linker, "/EXPORT:ModPlug_NumSamples")
+#pragma comment(linker, "/EXPORT:ModPlug_NumPatterns")
+#pragma comment(linker, "/EXPORT:ModPlug_NumChannels")
+#pragma comment(linker, "/EXPORT:ModPlug_SampleName")
+#pragma comment(linker, "/EXPORT:ModPlug_InstrumentName")
+#pragma comment(linker, "/EXPORT:ModPlug_GetPattern")
+#pragma comment(linker, "/EXPORT:ModPlug_InitMixerCallback")
+#pragma comment(linker, "/EXPORT:ModPlug_UnloadMixerCallback")
+#pragma comment(linker, "/EXPORT:ModPlug_ExportS3M")
+#pragma comment(linker, "/EXPORT:ModPlug_ExportXM")
+#pragma comment(linker, "/EXPORT:ModPlug_ExportMOD")
+#pragma comment(linker, "/EXPORT:ModPlug_ExportIT")
+#endif /* _M_IX86 */
 #endif /* _MSC_VER */
 
 #endif /* NO_LIBMODPLUG */

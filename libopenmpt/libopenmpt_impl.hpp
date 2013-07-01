@@ -72,8 +72,6 @@ public:
 	void PushToCSoundFileLog( const std::string & text ) const;
 	void PushToCSoundFileLog( int loglevel, const std::string & text ) const;
 private:
-	std::int32_t get_quality() const;
-	void set_quality( std::int32_t value );
 	void apply_mixer_settings( std::int32_t samplerate, int channels, bool format_float );
 	void apply_libopenmpt_defaults();
 	void init();
@@ -93,8 +91,8 @@ public:
 	module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log );
 	~module_impl();
 public:
-	std::int32_t get_render_param( int command ) const;
-	void set_render_param( int command, std::int32_t value );
+	std::int32_t get_render_param( int param ) const;
+	void set_render_param( int param, std::int32_t value );
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * mono );
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right );
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
@@ -128,6 +126,13 @@ public:
 	std::int32_t get_order_pattern( std::int32_t o ) const;
 	std::int32_t get_pattern_num_rows( std::int32_t p ) const;
 	std::uint8_t get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
+	std::vector<std::string> get_ctls() const;
+	std::string ctl_get_string( const std::string & ctl ) const;
+	double ctl_get_double( const std::string & ctl ) const;
+	std::int64_t ctl_get_int64( const std::string & ctl ) const;
+	void ctl_set( const std::string & ctl, const std::string & value );
+	void ctl_set( const std::string & ctl, double value );
+	void ctl_set( const std::string & ctl, std::int64_t value );
 }; // class module_impl
 
 } // namespace openmpt

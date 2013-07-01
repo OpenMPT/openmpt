@@ -77,14 +77,12 @@ class LIBOPENMPT_CXX_API module {
 public:
 
 	enum render_param {
-		RENDER_MASTERGAIN_MILLIBEL          = 1,
-		RENDER_STEREOSEPARATION_PERCENT     = 2,
-		RENDER_REPEATCOUNT                  = 3,
-		RENDER_QUALITY_PERCENT              = 4,
-		RENDER_MAXMIXCHANNELS               = 5,
-		RENDER_INTERPOLATION_FILTER_LENGTH  = 6,
-		RENDER_VOLUMERAMP_UP_MICROSECONDS   = 7,
-		RENDER_VOLUMERAMP_DOWN_MICROSECONDS = 8
+		RENDER_REPEATCOUNT                  = 1,
+		RENDER_MASTERGAIN_MILLIBEL          = 2,
+		RENDER_STEREOSEPARATION_PERCENT     = 3,
+		RENDER_INTERPOLATION_FILTER_LENGTH  = 4,
+		RENDER_VOLUMERAMP_UP_MICROSECONDS   = 5,
+		RENDER_VOLUMERAMP_DOWN_MICROSECONDS = 6
 	};
 
 	enum command_index {
@@ -118,8 +116,8 @@ public:
 	virtual ~module();
 public:
 
-	std::int32_t get_render_param( int command ) const;
-	void set_render_param( int command, std::int32_t value );
+	std::int32_t get_render_param( int param ) const;
+	void set_render_param( int param, std::int32_t value );
 
 	void select_subsong( std::int32_t subsong );
  
@@ -165,6 +163,16 @@ public:
 	std::int32_t get_pattern_num_rows( std::int32_t pattern ) const;
 
 	std::uint8_t get_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const;
+
+	std::vector<std::string> get_ctls() const;
+
+	std::string ctl_get_string( const std::string & ctl ) const;
+	double ctl_get_double( const std::string & ctl ) const;
+	std::int64_t ctl_get_int64( const std::string & ctl ) const;
+
+	void ctl_set( const std::string & ctl, const std::string & value );
+	void ctl_set( const std::string & ctl, double value );
+	void ctl_set( const std::string & ctl, std::int64_t value );
 
 	// remember to add new functions to both C and C++ interfaces and to increase OPENMPT_API_VERSION_MINOR
 

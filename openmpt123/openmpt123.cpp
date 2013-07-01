@@ -69,7 +69,6 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Repeat count: " << flags.repeatcount << std::endl;
 	s << "Sample rate: " << flags.samplerate << std::endl;
 	s << "Gain: " << flags.gain / 100.0 << std::endl;
-	s << "Quality: " << flags.quality << std::endl;
 	s << "Filter taps: " << flags.filtertaps << std::endl;
 	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
@@ -196,7 +195,6 @@ static void show_help( show_help_exception & e, bool modplug123 ) {
 		std::clog << " --samplerate n   Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
 		std::clog << " --gain n         Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
 		std::clog << " --repeat n       Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
-		std::clog << " --quality n      Set rendering quality to n % [default: " << commandlineflags().quality << "]" << std::endl;
 		std::clog << " --filtertaps n   Set interpolation filter taps to n % [default: " << commandlineflags().filtertaps << "]" << std::endl;
 		std::clog << " --seek n         Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
 		std::clog << " --volrampup n    Use n microseconds volume ramping up [default: " << commandlineflags().rampupus << "]" << std::endl;
@@ -378,7 +376,6 @@ static void render_file( const commandlineflags & flags, const std::string & fil
 			openmpt::module mod( data_stream );
 
 			mod.set_render_param( openmpt::module::RENDER_REPEATCOUNT, flags.repeatcount );
-			mod.set_render_param( openmpt::module::RENDER_QUALITY_PERCENT, flags.quality );
 			mod.set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, flags.filtertaps );
 			mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
 			mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, flags.rampupus );
@@ -531,10 +528,6 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 			} else if ( arg == "--repeat" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.repeatcount;
-				++i;
-			} else if ( arg == "--quality" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.quality;
 				++i;
 			} else if ( arg == "--filtertaps" && nextarg != "" ) {
 				std::istringstream istr( nextarg );

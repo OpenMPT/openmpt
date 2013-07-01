@@ -57,8 +57,6 @@ namespace libopenmpt {
 
 			trackBarGain->Value = settings->mastergain_millibel;
 
-			trackBarMaxPolyphony->Value = settings->maxmixchannels;
-
 			if ( settings->interpolationfilterlength == 0 ) {
 				comboBoxInterpolation->SelectedIndex = 3;
 			} else if ( settings->interpolationfilterlength >= 8 ) {
@@ -102,8 +100,8 @@ namespace libopenmpt {
 	private: System::Windows::Forms::ComboBox^  comboBoxChannels;
 	private: System::Windows::Forms::Label^  labelGain;
 	private: System::Windows::Forms::TrackBar^  trackBarGain;
-	private: System::Windows::Forms::Label^  labelMaxPolyphony;
-	private: System::Windows::Forms::TrackBar^  trackBarMaxPolyphony;
+
+
 	private: System::Windows::Forms::Label^  labelInterpolation;
 	private: System::Windows::Forms::ComboBox^  comboBoxInterpolation;
 	private: System::Windows::Forms::Label^  labelRepeat;
@@ -138,8 +136,6 @@ namespace libopenmpt {
 			this->comboBoxChannels = (gcnew System::Windows::Forms::ComboBox());
 			this->labelGain = (gcnew System::Windows::Forms::Label());
 			this->trackBarGain = (gcnew System::Windows::Forms::TrackBar());
-			this->labelMaxPolyphony = (gcnew System::Windows::Forms::Label());
-			this->trackBarMaxPolyphony = (gcnew System::Windows::Forms::TrackBar());
 			this->labelInterpolation = (gcnew System::Windows::Forms::Label());
 			this->comboBoxInterpolation = (gcnew System::Windows::Forms::ComboBox());
 			this->labelRepeat = (gcnew System::Windows::Forms::Label());
@@ -151,7 +147,6 @@ namespace libopenmpt {
 			this->trackBarVolrampin = (gcnew System::Windows::Forms::TrackBar());
 			this->trackBarVolrampout = (gcnew System::Windows::Forms::TrackBar());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarGain))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarMaxPolyphony))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarStereoSeparation))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolrampin))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolrampout))->BeginInit();
@@ -178,7 +173,7 @@ namespace libopenmpt {
 			// 
 			// buttonOK
 			// 
-			this->buttonOK->Location = System::Drawing::Point(15, 357);
+			this->buttonOK->Location = System::Drawing::Point(15, 309);
 			this->buttonOK->Name = L"buttonOK";
 			this->buttonOK->Size = System::Drawing::Size(212, 23);
 			this->buttonOK->TabIndex = 2;
@@ -228,33 +223,10 @@ namespace libopenmpt {
 			this->trackBarGain->TickStyle = System::Windows::Forms::TickStyle::Both;
 			this->trackBarGain->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarGain_Scroll);
 			// 
-			// labelMaxPolyphony
-			// 
-			this->labelMaxPolyphony->AutoSize = true;
-			this->labelMaxPolyphony->Location = System::Drawing::Point(12, 124);
-			this->labelMaxPolyphony->Name = L"labelMaxPolyphony";
-			this->labelMaxPolyphony->Size = System::Drawing::Size(77, 13);
-			this->labelMaxPolyphony->TabIndex = 7;
-			this->labelMaxPolyphony->Text = L"max polyphony";
-			// 
-			// trackBarMaxPolyphony
-			// 
-			this->trackBarMaxPolyphony->LargeChange = 16;
-			this->trackBarMaxPolyphony->Location = System::Drawing::Point(106, 111);
-			this->trackBarMaxPolyphony->Maximum = 256;
-			this->trackBarMaxPolyphony->Minimum = 16;
-			this->trackBarMaxPolyphony->Name = L"trackBarMaxPolyphony";
-			this->trackBarMaxPolyphony->Size = System::Drawing::Size(121, 42);
-			this->trackBarMaxPolyphony->TabIndex = 8;
-			this->trackBarMaxPolyphony->TickFrequency = 16;
-			this->trackBarMaxPolyphony->TickStyle = System::Windows::Forms::TickStyle::Both;
-			this->trackBarMaxPolyphony->Value = 256;
-			this->trackBarMaxPolyphony->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarMaxPolyphony_Scroll);
-			// 
 			// labelInterpolation
 			// 
 			this->labelInterpolation->AutoSize = true;
-			this->labelInterpolation->Location = System::Drawing::Point(12, 162);
+			this->labelInterpolation->Location = System::Drawing::Point(12, 114);
 			this->labelInterpolation->Name = L"labelInterpolation";
 			this->labelInterpolation->Size = System::Drawing::Size(64, 13);
 			this->labelInterpolation->TabIndex = 9;
@@ -266,7 +238,7 @@ namespace libopenmpt {
 			this->comboBoxInterpolation->FormattingEnabled = true;
 			this->comboBoxInterpolation->Items->AddRange(gcnew cli::array< System::Object^  >(4) {L"1 tap (nearest)", L"2 tap (linear)", 
 				L"4 tap (cubic)", L"8 tap (polyphase fir)"});
-			this->comboBoxInterpolation->Location = System::Drawing::Point(106, 159);
+			this->comboBoxInterpolation->Location = System::Drawing::Point(106, 111);
 			this->comboBoxInterpolation->Name = L"comboBoxInterpolation";
 			this->comboBoxInterpolation->Size = System::Drawing::Size(121, 21);
 			this->comboBoxInterpolation->TabIndex = 10;
@@ -275,7 +247,7 @@ namespace libopenmpt {
 			// labelRepeat
 			// 
 			this->labelRepeat->AutoSize = true;
-			this->labelRepeat->Location = System::Drawing::Point(12, 189);
+			this->labelRepeat->Location = System::Drawing::Point(12, 141);
 			this->labelRepeat->Name = L"labelRepeat";
 			this->labelRepeat->Size = System::Drawing::Size(37, 13);
 			this->labelRepeat->TabIndex = 11;
@@ -286,7 +258,7 @@ namespace libopenmpt {
 			this->comboBoxRepeat->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBoxRepeat->FormattingEnabled = true;
 			this->comboBoxRepeat->Items->AddRange(gcnew cli::array< System::Object^  >(3) {L"forever", L"never", L"once"});
-			this->comboBoxRepeat->Location = System::Drawing::Point(106, 186);
+			this->comboBoxRepeat->Location = System::Drawing::Point(106, 138);
 			this->comboBoxRepeat->Name = L"comboBoxRepeat";
 			this->comboBoxRepeat->Size = System::Drawing::Size(121, 21);
 			this->comboBoxRepeat->TabIndex = 12;
@@ -295,7 +267,7 @@ namespace libopenmpt {
 			// labelStereoSeparation
 			// 
 			this->labelStereoSeparation->AutoSize = true;
-			this->labelStereoSeparation->Location = System::Drawing::Point(12, 226);
+			this->labelStereoSeparation->Location = System::Drawing::Point(12, 178);
 			this->labelStereoSeparation->Name = L"labelStereoSeparation";
 			this->labelStereoSeparation->Size = System::Drawing::Size(88, 13);
 			this->labelStereoSeparation->TabIndex = 13;
@@ -304,7 +276,7 @@ namespace libopenmpt {
 			// trackBarStereoSeparation
 			// 
 			this->trackBarStereoSeparation->LargeChange = 100;
-			this->trackBarStereoSeparation->Location = System::Drawing::Point(106, 213);
+			this->trackBarStereoSeparation->Location = System::Drawing::Point(106, 165);
 			this->trackBarStereoSeparation->Maximum = 400;
 			this->trackBarStereoSeparation->Name = L"trackBarStereoSeparation";
 			this->trackBarStereoSeparation->Size = System::Drawing::Size(121, 42);
@@ -318,7 +290,7 @@ namespace libopenmpt {
 			// labelVolrampin
 			// 
 			this->labelVolrampin->AutoSize = true;
-			this->labelVolrampin->Location = System::Drawing::Point(12, 274);
+			this->labelVolrampin->Location = System::Drawing::Point(12, 226);
 			this->labelVolrampin->Name = L"labelVolrampin";
 			this->labelVolrampin->Size = System::Drawing::Size(78, 13);
 			this->labelVolrampin->TabIndex = 15;
@@ -327,7 +299,7 @@ namespace libopenmpt {
 			// labelVolrampout
 			// 
 			this->labelVolrampout->AutoSize = true;
-			this->labelVolrampout->Location = System::Drawing::Point(12, 321);
+			this->labelVolrampout->Location = System::Drawing::Point(12, 273);
 			this->labelVolrampout->Name = L"labelVolrampout";
 			this->labelVolrampout->Size = System::Drawing::Size(85, 13);
 			this->labelVolrampout->TabIndex = 16;
@@ -336,7 +308,7 @@ namespace libopenmpt {
 			// trackBarVolrampin
 			// 
 			this->trackBarVolrampin->LargeChange = 1000;
-			this->trackBarVolrampin->Location = System::Drawing::Point(106, 261);
+			this->trackBarVolrampin->Location = System::Drawing::Point(106, 213);
 			this->trackBarVolrampin->Maximum = 10000;
 			this->trackBarVolrampin->Name = L"trackBarVolrampin";
 			this->trackBarVolrampin->Size = System::Drawing::Size(121, 42);
@@ -349,7 +321,7 @@ namespace libopenmpt {
 			// trackBarVolrampout
 			// 
 			this->trackBarVolrampout->LargeChange = 1000;
-			this->trackBarVolrampout->Location = System::Drawing::Point(106, 309);
+			this->trackBarVolrampout->Location = System::Drawing::Point(106, 261);
 			this->trackBarVolrampout->Maximum = 10000;
 			this->trackBarVolrampout->Name = L"trackBarVolrampout";
 			this->trackBarVolrampout->Size = System::Drawing::Size(121, 42);
@@ -376,8 +348,6 @@ namespace libopenmpt {
 			this->Controls->Add(this->labelRepeat);
 			this->Controls->Add(this->comboBoxInterpolation);
 			this->Controls->Add(this->labelInterpolation);
-			this->Controls->Add(this->trackBarMaxPolyphony);
-			this->Controls->Add(this->labelMaxPolyphony);
 			this->Controls->Add(this->trackBarGain);
 			this->Controls->Add(this->labelGain);
 			this->Controls->Add(this->comboBoxChannels);
@@ -394,7 +364,6 @@ namespace libopenmpt {
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterParent;
 			this->Text = L"SettingsForm";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarGain))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarMaxPolyphony))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarStereoSeparation))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolrampin))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolrampout))->EndInit();
@@ -448,10 +417,6 @@ private: System::Void comboBoxInterpolation_SelectedIndexChanged(System::Object^
 						settings->interpolationfilterlength = 8;
 						break;
 					}
-					 settings->changed();
-				 }
-private: System::Void trackBarMaxPolyphony_Scroll(System::Object^  sender, System::EventArgs^  e) {
-					 settings->maxmixchannels = (int)trackBarMaxPolyphony->Value;
 					 settings->changed();
 				 }
 private: System::Void comboBoxRepeat_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
