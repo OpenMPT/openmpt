@@ -2615,13 +2615,14 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			break;
 
-		// IMF Commands
+		// IMF / PTM Note Slides
 		case CMD_NOTESLIDEUP:
-			NoteSlide(pChn, param, true);
-			break;
-
 		case CMD_NOTESLIDEDOWN:
-			NoteSlide(pChn, param, false);
+		case CMD_NOTESLIDEUPRETRIG:
+		case CMD_NOTESLIDEDOWNRETRIG:
+			// Note that this command seems to be a bit buggy in Polytracker... Luckily, no tune seems to seriously use this
+			// (Vic uses it e.g. in Spaceman or Perfect Reason to slide effect samples, noone will notice the difference :)
+			NoteSlide(pChn, param, cmd == CMD_NOTESLIDEUP || cmd == CMD_NOTESLIDEUPRETRIG, cmd == CMD_NOTESLIDEUPRETRIG || cmd == CMD_NOTESLIDEDOWNRETRIG);
 			break;
 
 		// PTM Reverse sample + offset (executed on every tick)
@@ -2631,7 +2632,7 @@ BOOL CSoundFile::ProcessEffects()
 				pChn->dwFlags.set(CHN_PINGPONGFLAG);
 				pChn->dwFlags.reset(CHN_LOOP);
 				pChn->nLength = pChn->pModSample->nLength;	// If there was a loop, extend sample to whole length.
-				pChn->nPos = (pChn->nLength - 1) - std::min<SmpLength>(SmpLength(pChn->rowCommand.param) << 8, pChn->nLength - 1);
+				pChn->nPos = (pChn->nLength - 1) - std::min<SmpLength>(SmpLength(param) << 8, pChn->nLength - 1);
 				pChn->nPosLo = 0;
 			}
 			break;
@@ -3007,8 +3008,8 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
 
 // Implemented for IMF compatibility, can't actually save this in any formats
 // sign should be 1 (up) or -1 (down)
-void CSoundFile::NoteSlide(ModChannel *pChn, UINT param, bool slideUp)
-//--------------------------------------------------------------------
+void CSoundFile::NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig)
+//---------------------------------------------------------------------------------
 {
 	uint8 x, y;
 	if(m_SongFlags[SONG_FIRSTTICK])
@@ -3028,6 +3029,11 @@ void CSoundFile::NoteSlide(ModChannel *pChn, UINT param, bool slideUp)
 			// update it
 			pChn->nPeriod = GetPeriodFromNote
 				((slideUp ? 1 : -1)  * pChn->nNoteSlideStep + GetNoteFromPeriod(pChn->nPeriod), 8363, 0);
+
+			if(retrig)
+			{
+				pChn->nPos = pChn->nPosLo = 0;
+			}
 		}
 	}
 }
