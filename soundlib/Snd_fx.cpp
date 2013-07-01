@@ -2630,7 +2630,8 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				pChn->dwFlags.set(CHN_PINGPONGFLAG);
 				pChn->dwFlags.reset(CHN_LOOP);
-				pChn->nPos = (pChn->pModSample->nLength - 1) - std::min<SmpLength>(SmpLength(pChn->rowCommand.param) << 8, pChn->pModSample->nLength);
+				pChn->nLength = pChn->pModSample->nLength;	// If there was a loop, extend sample to whole length.
+				pChn->nPos = (pChn->nLength - 1) - std::min<SmpLength>(SmpLength(pChn->rowCommand.param) << 8, pChn->nLength - 1);
 				pChn->nPosLo = 0;
 			}
 			break;
