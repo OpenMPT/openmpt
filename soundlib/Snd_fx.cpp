@@ -2623,6 +2623,17 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_NOTESLIDEDOWN:
 			NoteSlide(pChn, param, false);
 			break;
+
+		// PTM Reverse sample + offset (executed on every tick)
+		case CMD_REVERSEOFFSET:
+			if(pChn->pModSample != nullptr)
+			{
+				pChn->dwFlags.set(CHN_PINGPONGFLAG);
+				pChn->dwFlags.reset(CHN_LOOP);
+				pChn->nPos = (pChn->pModSample->nLength - 1) - std::min<SmpLength>(SmpLength(pChn->rowCommand.param) << 8, pChn->pModSample->nLength);
+				pChn->nPosLo = 0;
+			}
+			break;
 		}
 
 		if(GetType() == MOD_TYPE_S3M && param != 0)

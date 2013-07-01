@@ -229,36 +229,18 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				m.command = file.ReadUint8();
 				m.param = file.ReadUint8();
+
+				const ModCommand::COMMAND effTrans[] = { CMD_GLOBALVOLUME, CMD_RETRIG, CMD_FINEVIBRATO, CMD_NONE, CMD_NONE, CMD_NONE, CMD_NONE, CMD_REVERSEOFFSET };
 				if(m.command < 0x10)
 				{
 					// Beware: Effect letters are as in MOD, but portamento and volume slides behave like in S3M (i.e. fine slides share the same effect letters)
 					ConvertModCommand(m);
+				} else if(m.command < 0x10 + CountOf(effTrans))
+				{
+					m.command = effTrans[m.command - 0x10];
 				} else
 				{
-					switch(m.command)
-					{
-					case 0x10:
-						m.command = CMD_GLOBALVOLUME;
-						break;
-					case 0x11:
-						m.command = CMD_RETRIG;
-						break;
-					case 0x12:
-						m.command = CMD_FINEVIBRATO;
-						break;
-					case 0x17:
-						// Reverse sample + offset (start with offset 256 * xx bytes) -- is this an offset from the sample end...?
-						if(m.param)
-						{
-							m.volcmd = VOLCMD_OFFSET;
-							m.vol = m.param >> 3;
-						}
-						m.command = CMD_S3MCMDEX;
-						m.param = 0x9F;
-						break;
-					default:
-						m.command = CMD_NONE;
-					}
+					m.command = CMD_NONE;
 				}
 			}
 			if(b & 0x80)

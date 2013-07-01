@@ -91,7 +91,8 @@ enum EffectCommands
 	CMD_XPARAM				= 34, // -> CODE#0010 -> DESC="add extended parameter mechanism to pattern effects" -! NEW_FEATURE#0010
 	CMD_NOTESLIDEUP			= 35, // IMF Gxy
 	CMD_NOTESLIDEDOWN		= 36, // IMF Hxy
-	MAX_EFFECTS				= 37
+	CMD_REVERSEOFFSET		= 37, // PTM Revert sample + offset
+	MAX_EFFECTS				= 38
 };
 
 
