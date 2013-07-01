@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-//#ifndef NO_LIBOPENMPT_CXX
+#ifndef NO_LIBOPENMPT_CXX
 
 namespace openmpt {
 
@@ -110,12 +110,12 @@ module::~module() {
 	impl = 0;
 }
 
-std::int32_t module::get_render_param( int command ) const {
-	return impl->get_render_param( command );
+std::int32_t module::get_render_param( int param ) const {
+	return impl->get_render_param( param );
 }
 
-void module::set_render_param( int command, std::int32_t value ) {
-	impl->set_render_param( command, value );
+void module::set_render_param( int param, std::int32_t value ) {
+	impl->set_render_param( param, value );
 }
 
 void module::select_subsong( std::int32_t subsong ) {
@@ -228,6 +228,28 @@ std::uint8_t module::get_pattern_row_channel_command( std::int32_t pattern, std:
 	return impl->get_pattern_row_channel_command( pattern, row, channel, command );
 }
 
+std::vector<std::string> module::get_ctls() const {
+	return impl->get_ctls();
+}
+std::string module::ctl_get_string( const std::string & ctl ) const {
+	return impl->ctl_get_string( ctl );
+}
+double module::ctl_get_double( const std::string & ctl ) const {
+	return impl->ctl_get_double( ctl );
+}
+std::int64_t module::ctl_get_int64( const std::string & ctl ) const {
+	return impl->ctl_get_int64( ctl );
+}
+void module::ctl_set( const std::string & ctl, const std::string & value ) {
+	impl->ctl_set( ctl, value );
+}
+void module::ctl_set( const std::string & ctl, double value ) {
+	impl->ctl_set( ctl, value );
+}
+void module::ctl_set( const std::string & ctl, std::int64_t value ) {
+	impl->ctl_set( ctl, value );
+}
+
 } // namespace openmpt
 
-//#endif // NO_LIBOPENMPT_CXX
+#endif // NO_LIBOPENMPT_CXX

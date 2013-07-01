@@ -41,7 +41,6 @@ void load( settings & s, const char * subkey ) {
 	read_setting( subkey, "MasterGain_milliBel", s.mastergain_millibel );
 	read_setting( subkey, "SeteroSeparation_Percent", s.stereoseparation );
 	read_setting( subkey, "RepeatCount", s.repeatcount );
-	read_setting( subkey, "MixerChannels", s.maxmixchannels );
 	read_setting( subkey, "InterpolationFilterLength", s.interpolationfilterlength );
 	read_setting( subkey, "VolumeRampingIn_microseconds", s.volrampinus );
 	read_setting( subkey, "VolumeRampingOut_microseconds", s.volrampoutus );
@@ -53,7 +52,6 @@ void save( const settings & s, const char * subkey ) {
 	write_setting( subkey, "MasterGain_milliBel", s.mastergain_millibel );
 	write_setting( subkey, "SeteroSeparation_Percent", s.stereoseparation );
 	write_setting( subkey, "RepeatCount", s.repeatcount );
-	write_setting( subkey, "MixerChannels", s.maxmixchannels );
 	write_setting( subkey, "InterpolationFilterLength", s.interpolationfilterlength );
 	write_setting( subkey, "VolumeRampingIn_microseconds", s.volrampinus );
 	write_setting( subkey, "VolumeRampingOut_microseconds", s.volrampoutus );

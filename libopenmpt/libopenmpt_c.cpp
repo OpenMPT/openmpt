@@ -23,7 +23,7 @@
 #include <cstdlib>
 #include <cstring>
 
-//#ifndef NO_LIBOPENMPT_C
+#ifndef NO_LIBOPENMPT_C
 
 namespace openmpt {
 
@@ -333,20 +333,20 @@ void openmpt_module_destroy( openmpt_module * mod ) {
 	return;
 }
 
-int openmpt_module_get_render_param( openmpt_module * mod, int command, int32_t * value ) {
+int openmpt_module_get_render_param( openmpt_module * mod, int param, int32_t * value ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		OPENMPT_INTERFACE_CHECK_POINTER( value );
-		*value = mod->impl->get_render_param( (openmpt::module::render_param)command );
+		*value = mod->impl->get_render_param( (openmpt::module::render_param)param );
 		return 1;
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0;
 }
 
-int openmpt_module_set_render_param( openmpt_module * mod, int command, int32_t value ) {
+int openmpt_module_set_render_param( openmpt_module * mod, int param, int32_t value ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		mod->impl->set_render_param( (openmpt::module::render_param)command, value );
+		mod->impl->set_render_param( (openmpt::module::render_param)param, value );
 		return 1;
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0;
@@ -650,6 +650,83 @@ LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_m
 	return 0;
 }
 
+const char * openmpt_module_get_ctls( openmpt_module * mod ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		std::string retval;
+		bool first = true;
+		std::vector<std::string> ctls = mod->impl->get_ctls();
+		for ( std::vector<std::string>::iterator i = ctls.begin(); i != ctls.end(); ++i ) {
+			if ( first ) {
+				first = false;
+			} else {
+				retval += ";";
+			}
+			retval += *i;
+		}
+		return openmpt::strdup( retval.c_str() );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return NULL;
+}
+
+const char * openmpt_module_ctl_get_string( openmpt_module * mod, const char * ctl ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
+		return openmpt::strdup( mod->impl->ctl_get_string( ctl ).c_str() );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return NULL;
+}
+
+int openmpt_module_ctl_get_double( openmpt_module * mod, const char * ctl, double * value ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
+		OPENMPT_INTERFACE_CHECK_POINTER( value );
+		*value = mod->impl->ctl_get_double( ctl );
+		return 1;
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+int openmpt_module_ctl_get_int64( openmpt_module * mod, const char * ctl, int64_t * value ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
+		OPENMPT_INTERFACE_CHECK_POINTER( value );
+		*value = mod->impl->ctl_get_int64( ctl );
+		return 1;
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+int openmpt_module_ctl_set_string( openmpt_module * mod, const char * ctl, const char * value ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
+		OPENMPT_INTERFACE_CHECK_POINTER( value );
+		mod->impl->ctl_set( ctl, value );
+		return 1;
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+int openmpt_module_ctl_set_double( openmpt_module * mod, const char * ctl, double value ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
+		mod->impl->ctl_set( ctl, value );
+		return 1;
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+int openmpt_module_ctl_set_int64( openmpt_module * mod, const char * ctl, int64_t value ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
+		mod->impl->ctl_set( ctl, value );
+		return 1;
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+
 #undef OPENMPT_INTERFACE_CHECK_POINTER
 #undef OPENMPT_INTERFACE_CHECK_SOUNDFILE
 #undef OPENMPT_INTERFACE_CATCH_TO_LOG
@@ -659,4 +736,4 @@ LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_m
 
 } // extern "C"
 
-//#endif // NO_LIBOPENMPT_C
+#endif // NO_LIBOPENMPT_C

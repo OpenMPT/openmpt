@@ -37,7 +37,6 @@ struct settings {
 	int mastergain_millibel;
 	int stereoseparation;
 	int repeatcount;
-	int maxmixchannels;
 	int interpolationfilterlength;
 	int volrampinus;
 	int volrampoutus;
@@ -51,7 +50,6 @@ static void inline init( settings & s, bool with_outputformat = true ) {
 	s.mastergain_millibel = 0;
 	s.stereoseparation = 100;
 	s.repeatcount = 0;
-	s.maxmixchannels = 256;
 	s.interpolationfilterlength = 8;
 	s.volrampinus = 363;
 	s.volrampoutus = 952;

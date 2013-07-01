@@ -64,14 +64,12 @@ LIBOPENMPT_API openmpt_module * openmpt_module_create_from_memory( const void * 
 
 LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
 
-#define OPENMPT_MODULE_RENDER_MASTERGAIN_MILLIBEL          1
-#define OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT     2
-#define OPENMPT_MODULE_RENDER_REPEATCOUNT                  3
-#define OPENMPT_MODULE_RENDER_QUALITY_PERCENT              4
-#define OPENMPT_MODULE_RENDER_MAXMIXCHANNELS               5
-#define OPENMPT_MODULE_RENDER_INTERPOLATION_FILTER_LENGTH  6
-#define OPENMPT_MODULE_RENDER_VOLUMERAMP_UP_MICROSECONDS   7
-#define OPENMPT_MODULE_RENDER_VOLUMERAMP_DOWN_MICROSECONDS 8
+#define OPENMPT_MODULE_RENDER_REPEATCOUNT                  1
+#define OPENMPT_MODULE_RENDER_MASTERGAIN_MILLIBEL          2
+#define OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT     3
+#define OPENMPT_MODULE_RENDER_INTERPOLATION_FILTER_LENGTH  4
+#define OPENMPT_MODULE_RENDER_VOLUMERAMP_UP_MICROSECONDS   5
+#define OPENMPT_MODULE_RENDER_VOLUMERAMP_DOWN_MICROSECONDS 6
 
 #define OPENMPT_MODULE_COMMAND_NOTE         0
 #define OPENMPT_MODULE_COMMAND_INSTRUMENT   1
@@ -80,8 +78,8 @@ LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
 #define OPENMPT_MODULE_COMMAND_VOLUME       4
 #define OPENMPT_MODULE_COMMAND_PARAMETER    5
 
-LIBOPENMPT_API int openmpt_module_get_render_param( openmpt_module * mod, int command, int32_t * value );
-LIBOPENMPT_API int openmpt_module_set_render_param( openmpt_module * mod, int command, int32_t value );
+LIBOPENMPT_API int openmpt_module_get_render_param( openmpt_module * mod, int param, int32_t * value );
+LIBOPENMPT_API int openmpt_module_set_render_param( openmpt_module * mod, int param, int32_t value );
 
 LIBOPENMPT_API int openmpt_module_select_subsong( openmpt_module * mod, int32_t subsong );
 
@@ -126,6 +124,14 @@ LIBOPENMPT_API int32_t openmpt_module_get_order_pattern( openmpt_module * mod, i
 LIBOPENMPT_API int32_t openmpt_module_get_pattern_num_rows( openmpt_module * mod, int32_t pattern );
 
 LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command );
+
+LIBOPENMPT_API const char * openmpt_module_get_ctls( openmpt_module * mod );
+LIBOPENMPT_API const char * openmpt_module_ctl_get_string( openmpt_module * mod, const char * ctl );
+LIBOPENMPT_API int openmpt_module_ctl_get_double( openmpt_module * mod, const char * ctl, double * value );
+LIBOPENMPT_API int openmpt_module_ctl_get_int64( openmpt_module * mod, const char * ctl, int64_t * value );
+LIBOPENMPT_API int openmpt_module_ctl_set_string( openmpt_module * mod, const char * ctl, const char * value );
+LIBOPENMPT_API int openmpt_module_ctl_set_double( openmpt_module * mod, const char * ctl, double value );
+LIBOPENMPT_API int openmpt_module_ctl_set_int64( openmpt_module * mod, const char * ctl, int64_t value );
 
 /* remember to add new functions to both C and C++ interfaces and to increase OPENMPT_API_VERSION_MINOR */
 
