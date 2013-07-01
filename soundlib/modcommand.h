@@ -89,10 +89,12 @@ enum EffectCommands
 	CMD_SMOOTHMIDI			= 32, //rewbs.smoothVST
 	CMD_DELAYCUT			= 33,
 	CMD_XPARAM				= 34, // -> CODE#0010 -> DESC="add extended parameter mechanism to pattern effects" -! NEW_FEATURE#0010
-	CMD_NOTESLIDEUP			= 35, // IMF Gxy
-	CMD_NOTESLIDEDOWN		= 36, // IMF Hxy
-	CMD_REVERSEOFFSET		= 37, // PTM Revert sample + offset
-	MAX_EFFECTS				= 38
+	CMD_NOTESLIDEUP			= 35, // IMF Gxy / PTM Jxy (Slide y notes up every ticks)
+	CMD_NOTESLIDEDOWN		= 36, // IMF Hxy / PTM Kxy (Slide y notes down every ticks)
+	CMD_NOTESLIDEUPRETRIG	= 37, // PTM Lxy (Slide y notes up every ticks + retrigger note)
+	CMD_NOTESLIDEDOWNRETRIG	= 38, // PTM Mxy (Slide y notes down every ticks + retrigger note)
+	CMD_REVERSEOFFSET		= 39, // PTM Nxx Revert sample + offset
+	MAX_EFFECTS				= 40
 };
 
 

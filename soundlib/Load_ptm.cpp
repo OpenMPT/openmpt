@@ -179,7 +179,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp + 1], sampleHeader.samplename);
 		SampleIO sampleIO = sampleHeader.ConvertToMPT(sample);
 
-		if((loadFlags & loadSampleData) && sample.nLength && sampleHeader.dataOffset && file.Seek(sampleHeader.dataOffset))
+		if((loadFlags & loadSampleData) && sample.nLength && file.Seek(sampleHeader.dataOffset))
 		{
 			sampleIO.ReadSample(sample, file);
 		}
@@ -230,7 +230,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 				m.command = file.ReadUint8();
 				m.param = file.ReadUint8();
 
-				const ModCommand::COMMAND effTrans[] = { CMD_GLOBALVOLUME, CMD_RETRIG, CMD_FINEVIBRATO, CMD_NONE, CMD_NONE, CMD_NONE, CMD_NONE, CMD_REVERSEOFFSET };
+				const ModCommand::COMMAND effTrans[] = { CMD_GLOBALVOLUME, CMD_RETRIG, CMD_FINEVIBRATO, CMD_NOTESLIDEUP, CMD_NOTESLIDEDOWN, CMD_NOTESLIDEUPRETRIG, CMD_NOTESLIDEDOWNRETRIG, CMD_REVERSEOFFSET };
 				if(m.command < 0x10)
 				{
 					// Beware: Effect letters are as in MOD, but portamento and volume slides behave like in S3M (i.e. fine slides share the same effect letters)

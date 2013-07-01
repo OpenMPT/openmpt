@@ -725,7 +725,7 @@ protected:
 	void FinePortamentoDown(ModChannel *pChn, UINT param);
 	void ExtraFinePortamentoUp(ModChannel *pChn, UINT param);
 	void ExtraFinePortamentoDown(ModChannel *pChn, UINT param);
-	void NoteSlide(ModChannel *pChn, UINT param, bool slideUp);
+	void NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig);
 	void TonePortamento(ModChannel *pChn, UINT param);
 	void Vibrato(ModChannel *pChn, UINT param);
 	void FineVibrato(ModChannel *pChn, UINT param);

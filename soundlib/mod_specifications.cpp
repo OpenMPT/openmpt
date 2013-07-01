@@ -52,7 +52,7 @@ const CModSpecifications mptm =
 	true,										// Has song comments
 	MAX_ENVPOINTS,								// Envelope point count
 	true,										// Has envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#???",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#?????",	// Supported Effects
 	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
 	true,										// Has "---" pattern
@@ -97,7 +97,7 @@ const CModSpecifications mod =
 	false,										// No song comments
 	0,											// No instrument envelopes
 	false,										// No envelope release node
-	" 0123456789ABCD?FF?E??????????????????",	// Supported Effects
+	" 0123456789ABCD?FF?E????????????????????",	// Supported Effects
 	" ???????????????",							// Supported Volume Column commands
 	false,										// Doesn't have "+++" pattern
 	false,										// Doesn't have "---" pattern
@@ -140,7 +140,7 @@ const CModSpecifications xm =
 	false,										// No song comments
 	12,											// Envelope point count
 	false,										// No envelope release node
-	" 0123456789ABCDRFFTE???GHK??XPL???????",	// Supported Effects
+	" 0123456789ABCDRFFTE???GHK??XPL?????????",	// Supported Effects
 	" vpcdabuhlrg????",							// Supported Volume Column commands
 	false,										// Doesn't have "+++" pattern
 	false,										// Doesn't have "---" pattern
@@ -183,7 +183,7 @@ const CModSpecifications xmEx =
 	true,										// Has song comments
 	12,											// Envelope point count
 	false,										// No envelope release node
-	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#???",	// Supported Effects
+	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#?????",	// Supported Effects
 	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
 	false,										// Doesn't have "+++" pattern
 	false,										// Doesn't have "---" pattern
@@ -225,7 +225,7 @@ const CModSpecifications s3m =
 	false,										// No song comments
 	0,											// No instrument envelopes
 	false,										// No envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?U???????????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?U?????????????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
 	true,										// Has "---" pattern
@@ -268,7 +268,7 @@ const CModSpecifications s3mEx =
 	false,										// No song comments
 	0,											// No instrument envelopes
 	false,										// No envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z??????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
 	true,										// Has "---" pattern
@@ -310,7 +310,7 @@ const CModSpecifications it =
 	true,										// Has song comments
 	25,											// Envelope point count
 	false,										// No envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z??????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
 	true,										// Has "--" pattern
@@ -352,7 +352,7 @@ const CModSpecifications itEx =
 	true,										// Has song comments
 	25,											// Envelope point count
 	false,										// No envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#???",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#?????",	// Supported Effects
 	" vpcdab?h??gfe?o",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
 	true,										// Has "---" pattern

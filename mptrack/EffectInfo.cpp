@@ -114,9 +114,11 @@ const MPTEFFECTINFO gFXInfo[] =
 	// -> DESC="add extended parameter mechanism to pattern effects"
 	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMITMPT,	"Parameter Extension"},
 	// -! NEW_FEATURE#0010
-	{CMD_NOTESLIDEUP,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Up"}, // .IMF effect
-	{CMD_NOTESLIDEDOWN,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Down"}, // .IMF effect
-	{CMD_REVERSEOFFSET,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Revert Sample + Offset"}, // .PTM effect
+	{CMD_NOTESLIDEUP,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Up"}, // IMF / PTM effect
+	{CMD_NOTESLIDEDOWN,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Down"}, // IMF / PTM effect
+	{CMD_NOTESLIDEUPRETRIG,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Up + Retrigger Note"}, // PTM effect
+	{CMD_NOTESLIDEDOWNRETRIG,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Down+ Retrigger Note"}, // PTM effect
+	{CMD_REVERSEOFFSET,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Revert Sample + Offset"}, // PTM effect
 };
 
 
