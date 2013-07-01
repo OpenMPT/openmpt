@@ -184,7 +184,7 @@ void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk
 							}
 							break;
 						}
-					} else if(effect - 0x10 < CountOf(effTrans))
+					} else if(effect - 0x10 < (int)CountOf(effTrans))
 					{
 						// Extended commands
 						m.command = effTrans[effect - 0x10];
