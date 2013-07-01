@@ -232,7 +232,7 @@ STATIC_ASSERT(sizeof(MMD1BLOCKINFO) == 36);
 // Each offset points to the play sequence itself.
 typedef struct PACKED tagMMD2PLAYSEQ
 {
-	CHAR name[32];
+	char name[32];
 	DWORD command_offs;	// filepos of command table
 	DWORD reserved;
 	WORD length;
