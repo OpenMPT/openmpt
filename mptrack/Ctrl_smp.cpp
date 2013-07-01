@@ -23,7 +23,7 @@
 #include "soundtouch/SoundTouch.h"
 #include "soundtouch/TDStretch.h"
 #include "soundtouch/SoundTouchDLL.h"
-#include "xsoundlib/smbPitchShift.h"
+#include "smbPitchShift/smbPitchShift.h"
 #include "modsmp_ctrl.h"
 #include "Autotune.h"
 #include "../common/StringFixer.h"
