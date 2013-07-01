@@ -747,13 +747,15 @@ void COptionsPlayer::OnResamplerChanged()
 void COptionsPlayer::OnDefaultResampling()
 //----------------------------------------
 {
-	m_CbnResampling.SetCurSel(SRCMODE_FIRFILTER);
+	CResamplerSettings resamplerDefaults;
+	m_CbnResampling.SetCurSel(resamplerDefaults.SrcMode);
 	OnResamplerChanged();
-	m_CbnWFIRType.SetCurSel(7 /*WFIR_KAISER4T*/);
-	m_CEditWFIRCutoff.SetWindowText("97");
-	m_CEditRampUp.SetWindowText("16");
-	m_CEditRampDown.SetWindowText("42");
-
+	m_CbnWFIRType.SetCurSel(resamplerDefaults.gbWFIRType);
+	m_CEditWFIRCutoff.SetWindowText(Stringify(static_cast<int>(resamplerDefaults.gdWFIRCutoff * 100)).c_str());
+	MixerSettings mixerDefaults;
+	m_CEditRampUp.SetWindowText(Stringify(mixerDefaults.glVolumeRampUpSamples).c_str());
+	m_CEditRampDown.SetWindowText(Stringify(mixerDefaults.glVolumeRampDownSamples).c_str());
+	OnSettingsChanged();
 }
 
 
