@@ -42,7 +42,7 @@ struct PACKED PTMFileHeader
 		SwapBytesLE(numSamples);
 		SwapBytesLE(numPatterns);
 		SwapBytesLE(numChannels);
-		for(int i = 0; i < CountOf(patOffsets); i++)
+		for(std::size_t i = 0; i < CountOf(patOffsets); i++)
 		{
 			SwapBytesLE(patOffsets[i]);
 		}
