@@ -642,7 +642,7 @@
       <Project>{cf3c2ca5-5d45-4635-bba4-c1f435e10896}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\xsoundlib\xsoundlib_10.vcxproj">
+    <ProjectReference Include="..\include\smbPitchShift\xsoundlib_10.vcxproj">
       <Project>{dcc2bb2f-6778-4fd3-9c00-d6cd8dc917b8}</Project>
     </ProjectReference>
   </ItemGroup>

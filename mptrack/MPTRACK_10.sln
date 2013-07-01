@@ -5,7 +5,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mptrack", "mptrack_10.vcxpr
 		{4CEFBC84-C215-11DB-8314-0800200C9A66} = {4CEFBC84-C215-11DB-8314-0800200C9A66}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xsoundlib", "..\xsoundlib\xsoundlib_10.vcxproj", "{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xsoundlib", "..\include\smbPitchShift\xsoundlib_10.vcxproj", "{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoundTouch", "..\soundtouch\soundtouch_10.vcxproj", "{CF3C2CA5-5D45-4635-BBA4-C1F435E10896}"
 EndProject
