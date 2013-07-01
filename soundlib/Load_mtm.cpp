@@ -119,7 +119,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songName);
 	m_nType = MOD_TYPE_MTM;
 	m_nSamples = fileHeader.numSamples;
 	m_nChannels = fileHeader.numChannels;

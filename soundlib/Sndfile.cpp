@@ -1789,9 +1789,9 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 bool CSoundFile::SetTitle(const std::string & newTitle)
 //-----------------------------------------------------
 {
-	if(m_szNames[0] != newTitle)
+	if(songName != newTitle)
 	{
-		mpt::String::CopyN(m_szNames[0], &newTitle[0], newTitle.length());
+		mpt::String::Copy(songName, newTitle);
 		return true;
 	}
 	return false;

@@ -259,7 +259,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 		Order[iOrd] = (PATTERNINDEX)pfh->Orders[iOrd];
 	}
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pfh->szSongName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pfh->szSongName);
 
 	dwMemPos = sizeof(MT2FILEHEADER);
 	nDrumDataLen = *(WORD *)(lpStream + dwMemPos);
@@ -267,7 +267,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 	if (nDrumDataLen >= 2) pdd = (MT2DRUMSDATA *)(lpStream+dwDrumDataPos);
 	dwMemPos += 2 + nDrumDataLen;
 #ifdef MT2DEBUG
-	Log("MT2 v%03X: \"%s\" (flags=%04X)\n", pfh->wVersion, m_szNames[0], pfh->fulFlags);
+	Log("MT2 v%03X: \"%s\" (flags=%04X)\n", pfh->wVersion, songName.c_str(), pfh->fulFlags);
 	Log("%d Channels, %d Patterns, %d Instruments, %d Samples\n", pfh->wChannels, pfh->wPatterns, pfh->wInstruments, pfh->wSamples);
 	Log("Drum Data: %d bytes @%04X\n", nDrumDataLen, dwDrumDataPos);
 #endif
