@@ -310,7 +310,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		madeWithTracker = mpt::String::RTrim(madeWithTracker);
 	}
 
-	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
 
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
@@ -666,7 +666,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	MemsetZero(fileHeader);
 
 	memcpy(fileHeader.signature, "Extended Module: ", 17);
-	mpt::String::Write<mpt::String::spacePadded>(fileHeader.songName, m_szNames[0]);
+	mpt::String::Write<mpt::String::spacePadded>(fileHeader.songName, songName);
 	fileHeader.eof = 0x1A;
 	std::string openMptTrackerName = MptVersion::GetOpenMPTVersionStr();
 	mpt::String::Write<mpt::String::spacePadded>(fileHeader.trackerName, openMptTrackerName);

@@ -128,7 +128,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_nRestartPos = fileHeader.restartPos;
 	}
-	m_szNames[0][0] = '\0';
+	songName = "";
 
 	Order.ReadAsByte(file, 256, fileHeader.numOrders);
 
@@ -385,7 +385,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = fileHeader.numSamples;
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.title);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.title);
 
 	if(fileHeader.version < 10)
 	{

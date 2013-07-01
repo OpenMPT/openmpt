@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
+#include "../common/StringFixer.h"
 
 //#define MED_LOG
 
@@ -704,7 +705,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 			if ((pseq) && (pseq < dwMemLength - sizeof(MMD2PLAYSEQ)))
 			{
 				MMD2PLAYSEQ *pmps = (MMD2PLAYSEQ *)(lpStream + pseq);
-				if (!m_szNames[0][0]) memcpy(m_szNames[0], pmps->name, 31);
+				if(songName.empty()) mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pmps->name);
 				uint16 n = BigEndianW(pmps->length);
 				if (pseq+n <= dwMemLength)
 				{
@@ -746,7 +747,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 		UINT songnamelen = BigEndian(pmex->songnamelen);
 		if ((songname) && (songnamelen) && (songname <= dwMemLength) && (songnamelen <= dwMemLength-songname))
 		{
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], reinterpret_cast<const char *>(lpStream + songname), songnamelen);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(songName, reinterpret_cast<const char *>(lpStream + songname), songnamelen);
 		}
 		// Sample Names
 		DWORD smpinfoex = BigEndian(pmex->iinfo);

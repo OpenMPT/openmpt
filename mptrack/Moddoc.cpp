@@ -717,7 +717,7 @@ BOOL CModDoc::InitializeMod()
 		}
 
 		MemsetZero(m_SndFile.m_szNames);
-		//strcpy(m_SndFile.m_szNames[0], "untitled");
+		//m_SndFile.SetTitle("untitled");
 
 		m_SndFile.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
 		m_SndFile.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
@@ -1893,7 +1893,7 @@ void CModDoc::OnFileMP3Convert()
 		strcat(s, fext);
 	}
 	CLayer3Convert wsdlg(&m_SndFile, pMainFrm);
-	if (m_SndFile.m_szNames[0][0]) wsdlg.m_bSaveInfoField = TRUE;
+	if(!m_SndFile.GetTitle().empty()) wsdlg.m_bSaveInfoField = TRUE;
 	if (wsdlg.DoModal() != IDOK) return;
 	wsdlg.GetFormat(&wfx, &hadid);
 	// Saving as mpeg file
@@ -2880,7 +2880,7 @@ void CModDoc::FixNullStrings()
 //----------------------------
 {
 	// Song title
-	mpt::String::FixNullString(m_SndFile.m_szNames[0]);
+	mpt::String::FixNullString(m_SndFile.songName);
 
 	// Sample names + filenames
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)

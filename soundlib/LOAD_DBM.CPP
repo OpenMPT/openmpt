@@ -227,10 +227,10 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 
 	if(pfh->songname[0])
 	{
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pfh->songname);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pfh->songname);
 	} else
 	{
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pfh->songname2);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pfh->songname2);
 
 	}
 

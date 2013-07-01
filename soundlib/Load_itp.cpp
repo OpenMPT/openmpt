@@ -35,6 +35,14 @@ bool ReadITPString(char (&destBuffer)[destSize], FileReader &file)
 }
 
 
+// Read variable-length ITP string.
+static inline bool ReadITPString(std::string &dest, FileReader &file)
+//-------------------------------------------------------------------
+{
+	return file.ReadString<mpt::String::maybeNullTerminated>(dest, file.ReadUint32LE());
+}
+
+
 bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------------
 {
@@ -53,7 +61,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.CanRead(12 + 4 + 24 + 4)
 		|| file.ReadUint32LE() != ITP_FILE_ID				// Magic bytes
 		|| (version = file.ReadUint32LE()) > ITP_VERSION	// Format version
-		|| !ReadITPString(m_szNames[0], file))				// Song name
+		|| !ReadITPString(songName, file))				// Song name
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -304,13 +312,13 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// Song name
-
+	std::vector<char> tempSongName(songName.length() + 1);
 	// name string length
-	id = 27;
+	id = tempSongName.size();
 	fwrite(&id, 1, sizeof(id), f);
-
 	// song name
-	fwrite(&m_szNames[0], 1, 27, f);
+	mpt::String::Write<mpt::String::maybeNullTerminated>(tempSongName, songName);
+	fwrite(&tempSongName[0], 1, tempSongName.size(), f);
 
 	// Song comments
 

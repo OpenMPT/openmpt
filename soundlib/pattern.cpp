@@ -210,6 +210,14 @@ bool CPattern::Shrink()
 }
 
 
+bool CPattern::SetName(const std::string &newName)
+//------------------------------------------------
+{
+	m_PatternName.assign(newName);
+	return true;
+}
+
+
 bool CPattern::SetName(const char *newName, size_t maxChars)
 //----------------------------------------------------------
 {

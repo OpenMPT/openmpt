@@ -146,7 +146,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoa
 		}
 	}
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], psong->songname);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, psong->songname);
 
 	nPat = 0;
 	nSmp = 1;

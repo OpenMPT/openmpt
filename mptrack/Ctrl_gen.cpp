@@ -174,7 +174,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 	{
 		if (!m_bEditsLocked)
 		{
-			m_EditTitle.SetWindowText(m_sndFile.m_szNames[0]);
+			m_EditTitle.SetWindowText(m_sndFile.GetTitle().c_str());
 			wsprintf(s, "%d", m_sndFile.m_nDefaultTempo);
 			m_EditTempo.SetWindowText(s);
 			wsprintf(s, "%d", m_sndFile.m_nDefaultSpeed);

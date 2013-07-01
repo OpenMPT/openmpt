@@ -295,7 +295,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	ORDERINDEX nOrders = 0;
 
 	InitializeGlobals();
-	m_szNames[0][0] = '\0';
+	songName = "";
 
 	// Go through IFF chunks...
 	while(file.AreBytesLeft())

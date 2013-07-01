@@ -139,7 +139,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read song + sample names
-	file.ReadString<mpt::String::maybeNullTerminated>(m_szNames[0], 32);
+	file.ReadString<mpt::String::maybeNullTerminated>(songName, 32);
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		file.ReadString<mpt::String::maybeNullTerminated>(m_szNames[smp], 30);

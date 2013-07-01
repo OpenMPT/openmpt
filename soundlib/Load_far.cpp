@@ -158,7 +158,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo = 80;
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songName);
 
 	// Read channel settings
 	for(CHANNELINDEX chn = 0; chn < 16; chn++)
