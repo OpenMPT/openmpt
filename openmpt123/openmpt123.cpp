@@ -29,7 +29,9 @@
 #include <io.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <sys/types.h> 
+#include <sys/types.h>
+#else
+#include <unistd.h>
 #endif
 
 #include <libopenmpt/libopenmpt.hpp>
