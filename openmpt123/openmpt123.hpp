@@ -102,7 +102,11 @@ struct commandlineflags {
 		quiet = false;
 		verbose = false;
 		show_message = false;
+#if defined(_MSC_VER)
 		show_progress = false;
+#else
+		show_progress = isatty( STDERR_FILENO ) ? true : false;
+#endif
 		seek_target = 0.0;
 		use_float = false;
 		use_stdout = false;
