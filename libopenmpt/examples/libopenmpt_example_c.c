@@ -32,6 +32,7 @@ int main(int argc,char* argv[]){
 	PaStream* stream = 0;
 	PaStreamParameters streamparameters;
 	memset(&streamparameters,0,sizeof(PaStreamParameters));
+	(void)argc;
 	file = fopen(argv[1],"rb");
 	mod = openmpt_module_create(openmpt_stream_get_file_callbacks(),file,NULL,NULL);
 	fclose(file);
