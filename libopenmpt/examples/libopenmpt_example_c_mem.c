@@ -33,12 +33,13 @@ int main(int argc,char* argv[]){
 	PaStream* stream = 0;
 	PaStreamParameters streamparameters;
 	memset(&streamparameters,0,sizeof(PaStreamParameters));
+	(void)argc;
 	file = fopen(argv[1],"rb");
 	fseek(file,0,SEEK_END);
 	size = ftell(file);
 	fseek(file,0,SEEK_SET);
 	data = malloc(size);
-	fread(data,1,size,file);
+	size = fread(data,1,size,file);
 	fclose(file);
 	mod = openmpt_module_create_from_memory(data,size,NULL,NULL);
 	free(data);

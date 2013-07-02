@@ -16,7 +16,7 @@
 
 #include <portaudio.h>
 
-int main( int argc, char * argv [] ) {
+int main( int /*argc*/, char * argv [] ) {
 	const std::size_t buffersize = 1024;
 	const std::int32_t samplerate = 48000;
 	std::vector<float> left( buffersize );
