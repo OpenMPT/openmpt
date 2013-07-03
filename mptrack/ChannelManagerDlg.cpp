@@ -57,14 +57,10 @@ CChannelManagerDlg * CChannelManagerDlg::sharedInstance(BOOL autoCreate)
 
 void CChannelManagerDlg::SetDocument(void * parent)
 {
-	if(parent && parentCtrl != parent){
-
-		EnterCriticalSection(&applying);
-
+	if(parent && parentCtrl != parent)
+	{
 		parentCtrl = parent;
 		nChannelsOld = 0;
-
-		LeaveCriticalSection(&applying);
 		InvalidateRect(NULL, FALSE);
 	}
 }
@@ -83,16 +79,15 @@ void CChannelManagerDlg::Update(void)
 {
 	if(!m_hWnd || show == false) return;
 
-	EnterCriticalSection(&applying);
 	nChannelsOld = 0;
-	LeaveCriticalSection(&applying);
 
 	InvalidateRect(NULL, FALSE);
 }
 
 BOOL CChannelManagerDlg::Show(void)
 {
-	if(this->m_hWnd != NULL && show == false){
+	if(this->m_hWnd != NULL && show == false)
+	{
 		ShowWindow(SW_SHOW);
 		show = true;
 	}
@@ -102,7 +97,8 @@ BOOL CChannelManagerDlg::Show(void)
 
 BOOL CChannelManagerDlg::Hide(void)
 {
-	if(this->m_hWnd != NULL && show == true){
+	if(this->m_hWnd != NULL && show == true)
+	{
 		ResetState(true, true, true, true, true);
 		ShowWindow(SW_HIDE);
 		show = false;
@@ -113,7 +109,6 @@ BOOL CChannelManagerDlg::Hide(void)
 
 CChannelManagerDlg::CChannelManagerDlg(void)
 {
-	InitializeCriticalSection(&applying);
 	mouseTracking = false;
 	rightButton = false;
 	leftButton = false;
@@ -130,7 +125,6 @@ CChannelManagerDlg::CChannelManagerDlg(void)
 CChannelManagerDlg::~CChannelManagerDlg(void)
 {
 	if(this == CChannelManagerDlg::sharedInstance_) CChannelManagerDlg::sharedInstance_ = NULL;
-	DeleteCriticalSection(&applying);
 	if(bkgnd) DeleteObject(bkgnd);
 }
 
@@ -140,20 +134,21 @@ BOOL CChannelManagerDlg::OnInitDialog()
 
 	HWND menu = ::GetDlgItem(m_hWnd,IDC_TAB1);
 
-    TCITEM tie; 
-    tie.mask = TCIF_TEXT | TCIF_IMAGE; 
-    tie.iImage = -1; 
-    tie.pszText = "Solo/Mute"; 
-    TabCtrl_InsertItem(menu, 0, &tie); 
-    tie.pszText = "Record select"; 
-    TabCtrl_InsertItem(menu, 1, &tie); 
-    tie.pszText = "Fx plugins"; 
-    TabCtrl_InsertItem(menu, 2, &tie); 
-    tie.pszText = "Reorder/Remove"; 
-    TabCtrl_InsertItem(menu, 3, &tie); 
+	TCITEM tie;
+	tie.mask = TCIF_TEXT | TCIF_IMAGE; 
+	tie.iImage = -1; 
+	tie.pszText = "Solo/Mute"; 
+	TabCtrl_InsertItem(menu, 0, &tie); 
+	tie.pszText = "Record select"; 
+	TabCtrl_InsertItem(menu, 1, &tie); 
+	tie.pszText = "Fx plugins"; 
+	TabCtrl_InsertItem(menu, 2, &tie); 
+	tie.pszText = "Reorder/Remove"; 
+	TabCtrl_InsertItem(menu, 3, &tie); 
 	currentTab = 0;
 
-	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++){
+	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
+	{
 		pattern[nChn] = nChn;
 		removed[nChn] = false;
 		select[nChn] = false;
@@ -173,17 +168,16 @@ void CChannelManagerDlg::OnApply()
 {
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
-	if(!m_pSndFile || !pModDoc) return;
+	if(!pModDoc) return;
 
-	EnterCriticalSection(&applying);
+	CriticalSection cs;
 
 	CHANNELINDEX nChannels, newpat[MAX_BASECHANNELS], newMemory[4][MAX_BASECHANNELS];
 
 	// Count new number of channels , copy pattern pointers & manager internal store memory
 	nChannels = 0;
-	for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+	for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 	{
 		if(!removed[pattern[nChn]])
 		{
@@ -195,14 +189,9 @@ void CChannelManagerDlg::OnApply()
 	}
 
 	BeginWaitCursor();
-	CriticalSection cs;
 
 	//Creating new order-vector for ReArrangeChannels.
-	std::vector<CHANNELINDEX> newChnOrder;
-	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
-	{
-		newChnOrder.push_back(newpat[nChn]);
-	}
+	std::vector<CHANNELINDEX> newChnOrder(newpat, newpat + nChannels);
 	if(pModDoc->ReArrangeChannels(newChnOrder) != nChannels)
 	{
 		cs.Leave();
@@ -210,7 +199,6 @@ void CChannelManagerDlg::OnApply()
 		Reporting::Error("Rearranging channels failed");
 
 		ResetState(true, true, true, true, true);
-		LeaveCriticalSection(&applying);
 
 		return;
 	}
@@ -233,7 +221,6 @@ void CChannelManagerDlg::OnApply()
 	EndWaitCursor();
 
 	ResetState(true, true, true, true, true);
-	LeaveCriticalSection(&applying);
 
 	// Update document & player
 	pModDoc->SetModified();
@@ -245,67 +232,52 @@ void CChannelManagerDlg::OnApply()
 
 void CChannelManagerDlg::OnClose()
 {
-	EnterCriticalSection(&applying);
-
 	if(bkgnd) DeleteObject((HBITMAP)bkgnd);
 	ResetState(true, true, true, true, true);
 	bkgnd = NULL;
 	show = false;
-
-	LeaveCriticalSection(&applying);
 
 	CDialog::OnCancel();
 }
 
 void CChannelManagerDlg::OnSelectAll()
 {
-	EnterCriticalSection(&applying);
-
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
-	if(m_pSndFile)
-		for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+	if(pModDoc)
+		for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 			select[nChn] = true;
 
-	LeaveCriticalSection(&applying);
 	InvalidateRect(NULL, FALSE);
 }
 
 void CChannelManagerDlg::OnInvert()
 {
-	EnterCriticalSection(&applying);
-
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
-	if(m_pSndFile)
-		for(CHANNELINDEX nChn = 0 ; nChn < m_pSndFile->m_nChannels ; nChn++)
+	if(pModDoc)
+		for(CHANNELINDEX nChn = 0 ; nChn < pModDoc->GetNumChannels() ; nChn++)
 			select[nChn] = !select[nChn];
-
-	LeaveCriticalSection(&applying);
 	InvalidateRect(NULL, FALSE);
 }
 
 void CChannelManagerDlg::OnAction1()
 {
-	EnterCriticalSection(&applying);
+	CriticalSection cs;
 
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
-	if(pModDoc && m_pSndFile)
+	if(pModDoc)
 	{
-		
 		int nbOk = 0, nbSelect = 0;
 		
 		switch(currentTab)
 		{
 			case 0:
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn])
@@ -314,7 +286,7 @@ void CChannelManagerDlg::OnAction1()
 						if(select[nThisChn] && pModDoc->IsChannelSolo(nThisChn)) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(select[nThisChn] && !removed[nThisChn]){
@@ -326,7 +298,7 @@ void CChannelManagerDlg::OnAction1()
 				}
 				break;
 			case 1:
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn])
@@ -336,7 +308,7 @@ void CChannelManagerDlg::OnAction1()
 						if(select[nThisChn] && rec == 1) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn] && select[nThisChn])
@@ -347,14 +319,14 @@ void CChannelManagerDlg::OnAction1()
 				}
 				break;
 			case 2:
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(select[nThisChn] && !removed[nThisChn]) pModDoc->NoFxChannel(nThisChn, false);
 				}
 				break;
 			case 3:
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(select[nThisChn]) removed[nThisChn] = !removed[nThisChn];
@@ -366,30 +338,27 @@ void CChannelManagerDlg::OnAction1()
 
 
 		ResetState();
-		LeaveCriticalSection(&applying);
 
 		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
 		InvalidateRect(NULL,FALSE);
 	}
-	else LeaveCriticalSection(&applying);
 }
 
 void CChannelManagerDlg::OnAction2()
 {
-	EnterCriticalSection(&applying);
+	CriticalSection cs;
 
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
-	if(pModDoc && m_pSndFile)
+	if(pModDoc)
 	{
 		
 		int nbOk = 0, nbSelect = 0;
 		
 		switch(currentTab){
 			case 0:
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn])
@@ -398,7 +367,7 @@ void CChannelManagerDlg::OnAction2()
 						if(select[nThisChn] && pModDoc->IsChannelMuted(nThisChn)) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(select[nThisChn] && !removed[nThisChn])
@@ -410,7 +379,7 @@ void CChannelManagerDlg::OnAction2()
 				}
 				break;
 			case 1:
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn])
@@ -420,7 +389,7 @@ void CChannelManagerDlg::OnAction2()
 						if(select[nThisChn] && rec == 2) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(!removed[nThisChn] && select[nThisChn])
@@ -431,7 +400,7 @@ void CChannelManagerDlg::OnAction2()
 				}
 				break;
 			case 2:
-				for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				{
 					CHANNELINDEX nThisChn = pattern[nChn];
 					if(select[nThisChn] && !removed[nThisChn]) pModDoc->NoFxChannel(nThisChn, true);
@@ -445,12 +414,10 @@ void CChannelManagerDlg::OnAction2()
 		}
 
 		if(currentTab != 3) ResetState();
-		LeaveCriticalSection(&applying);
 
 		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
 		InvalidateRect(NULL,FALSE);
 	}
-	else LeaveCriticalSection(&applying);
 }
 
 void CChannelManagerDlg::OnStore(void)
@@ -458,13 +425,16 @@ void CChannelManagerDlg::OnStore(void)
 	if(!show) return;
 
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
+	if(pModDoc == nullptr)
+	{
+		return;
+	}
 
 	switch(currentTab)
 	{
 		case 0:
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 			{
 				CHANNELINDEX nThisChn = pattern[nChn];
 				memory[0][nThisChn] = 0;
@@ -473,15 +443,15 @@ void CChannelManagerDlg::OnStore(void)
 			}
 			break;
 		case 1:
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				memory[1][nChn] = pModDoc->IsChannelRecord(pattern[nChn]);
 			break;
 		case 2:
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				memory[2][nChn] = pModDoc->IsChannelNoFx(pattern[nChn]);
 			break;
 		case 3:
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				memory[3][nChn] = pattern[nChn];
 			break;
 		default:
@@ -494,15 +464,18 @@ void CChannelManagerDlg::OnRestore(void)
 	if(!show) return;
 
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
+	if(pModDoc == nullptr)
+	{
+		return;
+	}
 
-	EnterCriticalSection(&applying);
+	CriticalSection cs;
 
 	switch(currentTab)
 	{
 		case 0:
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 			{
 				CHANNELINDEX nThisChn = pattern[nChn];
 				pModDoc->MuteChannel(nThisChn, (memory[0][nChn] & 1) != 0);
@@ -511,18 +484,18 @@ void CChannelManagerDlg::OnRestore(void)
 			break;
 		case 1:
 			pModDoc->ReinitRecordState(true);
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 			{
 				if(memory[1][nChn] != 2) pModDoc->Record1Channel(pattern[nChn], memory[1][nChn] == 1);
 				if(memory[1][nChn] != 1) pModDoc->Record2Channel(pattern[nChn], memory[1][nChn] == 2);
 			}
 			break;
 		case 2:
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				pModDoc->NoFxChannel(pattern[nChn], memory[2][nChn] != 0);
 			break;
 		case 3:
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 				pattern[nChn] = memory[3][nChn];
 			ResetState(false, false, false, false, true);
 			break;
@@ -531,7 +504,6 @@ void CChannelManagerDlg::OnRestore(void)
 	}
 
 	if(currentTab != 3) ResetState();
-	LeaveCriticalSection(&applying);
 
 	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
 	InvalidateRect(NULL,FALSE);
@@ -686,11 +658,10 @@ void CChannelManagerDlg::OnActivate(UINT nState,CWnd* pWndOther,BOOL bMinimized)
 {
 	CDialog::OnActivate(nState,pWndOther,bMinimized);
 
-	if(show && !bMinimized){
+	if(show && !bMinimized)
+	{
 		ResetState(true, true, true, true, false);
-		EnterCriticalSection(&applying);
 		nChannelsOld = 0;
-		LeaveCriticalSection(&applying);
 		InvalidateRect(NULL,TRUE);
 	}
 }
@@ -705,25 +676,22 @@ void CChannelManagerDlg::OnPaint()
 {
 	if(!m_hWnd || show == false) return;
 
-	EnterCriticalSection(&applying);
+	CriticalSection cs;
+
+	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
+
+	if(pModDoc == nullptr)
+	{
+		return;
+	}
 
 	PAINTSTRUCT pDC;
 	::BeginPaint(m_hWnd,&pDC);
 
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
-
-	if(!pModDoc || !m_pSndFile)
-	{
-		::EndPaint(m_hWnd,&pDC);
-		LeaveCriticalSection(&applying);
-		return;
-	}
-
 	CHAR s[256];
 	UINT c=0,l=0;
-	CHANNELINDEX nChannels = m_pSndFile->m_nChannels;
+	CHANNELINDEX nChannels = pModDoc->GetNumChannels();
 	UINT nLines = nChannels / CM_NB_COLS + (nChannels % CM_NB_COLS ? 1 : 0);
 	CRect client,btn;
 
@@ -738,14 +706,15 @@ void CChannelManagerDlg::OnPaint()
 	{
 		// Window height is not sufficient => resize window
 		::EndPaint(m_hWnd,&pDC);
-		LeaveCriticalSection(&applying);
+		cs.Leave();
 		CWnd::SetWindowPos(NULL, 0, 0, btn.Width(), btn.Height() + (CM_BT_HEIGHT - chnSizeY) * nLines, SWP_NOMOVE | SWP_NOZORDER);
 		return;
 	}
 
 	chnSizeY = CM_BT_HEIGHT;
 
-	if(currentTab == 3 && moveRect && bkgnd){
+	if(currentTab == 3 && moveRect && bkgnd)
+	{
 
 		HDC bdc = ::CreateCompatibleDC(pDC.hdc);
 		::SelectObject(bdc,bkgnd);
@@ -785,7 +754,6 @@ void CChannelManagerDlg::OnPaint()
 		}
 
 		::EndPaint(m_hWnd,&pDC);
-		LeaveCriticalSection(&applying);
 		return;
 	}
 
@@ -807,12 +775,13 @@ void CChannelManagerDlg::OnPaint()
 	HBRUSH red = CreateSolidBrush(RGB(192,96,96));
 	HBRUSH green = CreateSolidBrush(RGB(96,192,96));
 
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
 	{
 		CHANNELINDEX nThisChn = pattern[nChn];
 
-		if(m_pSndFile->ChnSettings[nThisChn].szName[0] != '\0')
-	        wsprintf(s, "%d: %s", (nThisChn + 1), m_pSndFile->ChnSettings[nThisChn].szName);
+		if(sndFile.ChnSettings[nThisChn].szName[0] != '\0')
+			wsprintf(s, "%d: %s", (nThisChn + 1), sndFile.ChnSettings[nThisChn].szName);
 		else
 			wsprintf(s, "Channel %d", nThisChn + 1);
 
@@ -831,8 +800,8 @@ void CChannelManagerDlg::OnPaint()
 		switch(currentTab)
 		{
 			case 0:
-				if(m_pSndFile->ChnSettings[nThisChn].dwFlags[CHN_MUTE]) FillRect(pDC.hdc,&btn,red);
-				else if(m_pSndFile->ChnSettings[nThisChn].dwFlags[CHN_SOLO]) FillRect(pDC.hdc,&btn,green);
+				if(sndFile.ChnSettings[nThisChn].dwFlags[CHN_MUTE]) FillRect(pDC.hdc,&btn,red);
+				else if(sndFile.ChnSettings[nThisChn].dwFlags[CHN_SOLO]) FillRect(pDC.hdc,&btn,green);
 				else FillRect(pDC.hdc,&btn,CMainFrame::brushHighLight);
 				break;
 			case 1:
@@ -844,7 +813,7 @@ void CChannelManagerDlg::OnPaint()
 				else FillRect(pDC.hdc,&btn,CMainFrame::brushHighLight);
 				break;
 			case 2:
-				if(m_pSndFile->ChnSettings[nThisChn].dwFlags[CHN_NOFX]) FillRect(pDC.hdc,&btn,red);
+				if(sndFile.ChnSettings[nThisChn].dwFlags[CHN_NOFX]) FillRect(pDC.hdc,&btn,red);
 				else FillRect(pDC.hdc,&btn,green);
 				break;
 			case 3:
@@ -870,7 +839,6 @@ void CChannelManagerDlg::OnPaint()
 	DeleteObject((HBRUSH)red);
 
 	::EndPaint(m_hWnd,&pDC);
-	LeaveCriticalSection(&applying);
 }
 
 void CChannelManagerDlg::OnMove(int x, int y)
@@ -888,12 +856,11 @@ bool CChannelManagerDlg::ButtonHit( CPoint point, CHANNELINDEX * id, CRect * inv
 	if(!PtInRect(client,point)) return false;
 
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
-	if(pModDoc && m_pSndFile)
+	if(pModDoc)
 	{
-		//UINT nChannels = m_pSndFile->m_nChannels;
+		//UINT nChannels = pModDoc->GetNumChannels();
 		UINT nColns = CM_NB_COLS;
 		//UINT nLines = nChannels / nColns + (nChannels % nColns ? 1 : 0);
 
@@ -906,7 +873,7 @@ bool CChannelManagerDlg::ButtonHit( CPoint point, CHANNELINDEX * id, CRect * inv
 		x = x / dx;
 		y = y / dy;
 		CHANNELINDEX n = static_cast<CHANNELINDEX>(y * nColns + x);
-		if(n >= 0 && n < (int)m_pSndFile->m_nChannels)
+		if(n >= 0 && n < (int)pModDoc->GetNumChannels())
 		{
 			if(id) *id = n;
 			if(invalidate)
@@ -921,6 +888,7 @@ bool CChannelManagerDlg::ButtonHit( CPoint point, CHANNELINDEX * id, CRect * inv
 	}
 	return false;
 }
+
 
 void CChannelManagerDlg::ResetState(bool bSelection, bool bMove, bool bButton, bool bInternal, bool bOrder)
 {
@@ -950,10 +918,8 @@ LRESULT CChannelManagerDlg::OnMouseLeave(WPARAM /*wparam*/, LPARAM /*lparam*/)
 {
 	if(!m_hWnd || show == false) return 0;
 
-	EnterCriticalSection(&applying);
 	mouseTracking = false;
 	ResetState(false, true, false, true);
-	LeaveCriticalSection(&applying);
 
 	return 0;
 }
@@ -962,9 +928,7 @@ LRESULT CChannelManagerDlg::OnMouseHover(WPARAM /*wparam*/, LPARAM /*lparam*/)
 {
 	if(!m_hWnd || show == false) return 0;
 
-	EnterCriticalSection(&applying);
 	mouseTracking = false;
-	LeaveCriticalSection(&applying);
 
 	return 0;
 }
@@ -972,8 +936,6 @@ LRESULT CChannelManagerDlg::OnMouseHover(WPARAM /*wparam*/, LPARAM /*lparam*/)
 void CChannelManagerDlg::OnMouseMove(UINT nFlags,CPoint point)
 {
 	if(!m_hWnd || show == false) return;
-
-	EnterCriticalSection(&applying);
 
 	if(!mouseTracking)
 	{
@@ -989,64 +951,65 @@ void CChannelManagerDlg::OnMouseMove(UINT nFlags,CPoint point)
 	{
 		mx = point.x;
 		my = point.y;
-		LeaveCriticalSection(&applying);
 		return;
 	}
 	MouseEvent(nFlags,point,moveRect ? 0 : (leftButton ? CM_BT_LEFT : CM_BT_RIGHT));
-
-	LeaveCriticalSection(&applying);
 }
 
 void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 {
 	if(!m_hWnd || show == false) return;
 
-	EnterCriticalSection(&applying);
+	CriticalSection cs;
 
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
-	if(moveRect && m_pSndFile)
+	if(moveRect && pModDoc)
 	{
 		CHANNELINDEX n, i, k;
 		CHANNELINDEX newpat[MAX_BASECHANNELS];
 
 		k = CHANNELINDEX_INVALID;
 		bool hit = ButtonHit(point,&n,NULL);
-		for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+		for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 			if(k == CHANNELINDEX_INVALID && select[pattern[nChn]]) k = nChn;
 
-		if(hit && m_pSndFile && k != CHANNELINDEX_INVALID){
+		if(hit && k != CHANNELINDEX_INVALID){
 			i = 0;
 			k = 0;
-			while(i < n){
+			while(i < n)
+			{
 				while(i < n && select[pattern[i]]) i++;
-				if(i < n && !select[pattern[i]]){
+				if(i < n && !select[pattern[i]])
+				{
 					newpat[k] = pattern[i];
 					pattern[i] = CHANNELINDEX_INVALID;
 					k++;
 					i++;
 				}
 			}
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels ; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() ; nChn++)
 			{
-				if(pattern[nChn] != CHANNELINDEX_INVALID && select[pattern[nChn]]){
+				if(pattern[nChn] != CHANNELINDEX_INVALID && select[pattern[nChn]])
+				{
 					newpat[k] = pattern[nChn];
 					pattern[nChn] = CHANNELINDEX_INVALID;
 					k++;
 				}
 			}
 			i = 0;
-			while(i < m_pSndFile->m_nChannels){
-				while(i < m_pSndFile->m_nChannels && pattern[i] == CHANNELINDEX_INVALID) i++;
-				if(i < m_pSndFile->m_nChannels && pattern[i] != CHANNELINDEX_INVALID){
+			while(i < pModDoc->GetNumChannels())
+			{
+				while(i < pModDoc->GetNumChannels() && pattern[i] == CHANNELINDEX_INVALID) i++;
+				if(i < pModDoc->GetNumChannels() && pattern[i] != CHANNELINDEX_INVALID)
+				{
 					newpat[k] = pattern[i];
 					k++;
 					i++;
 				}
 			}
-			for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++)
 			{
 				pattern[nChn] = newpat[nChn];
 				select[nChn] = false;
@@ -1064,15 +1027,11 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 		state[pattern[nChn]] = false;
 
 	if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
-
-	LeaveCriticalSection(&applying);
 }
 
 void CChannelManagerDlg::OnLButtonDown(UINT nFlags,CPoint point)
 {
 	if(!m_hWnd || show == false) return;
-
-	EnterCriticalSection(&applying);
 
 	if(!ButtonHit(point,NULL,NULL)) ResetState(true,  false, false, false);
 
@@ -1080,15 +1039,11 @@ void CChannelManagerDlg::OnLButtonDown(UINT nFlags,CPoint point)
 	MouseEvent(nFlags,point,CM_BT_LEFT);
 	omx = point.x;
 	omy = point.y;
-
-	LeaveCriticalSection(&applying);
 }
 
 void CChannelManagerDlg::OnRButtonUp(UINT /*nFlags*/,CPoint /*point*/)
 {
 	if(!m_hWnd || show == false) return;
-
-	EnterCriticalSection(&applying);
 
 	ResetState(false, false, true, false);
 
@@ -1096,15 +1051,11 @@ void CChannelManagerDlg::OnRButtonUp(UINT /*nFlags*/,CPoint /*point*/)
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm->GetActiveDoc();
 	if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
-
-	LeaveCriticalSection(&applying);
 }
 
 void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
 {
 	if(!m_hWnd || show == false) return;
-
-	EnterCriticalSection(&applying);
 
 	rightButton = true;
 	if(moveRect)
@@ -1118,8 +1069,6 @@ void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
 		omx = point.x;
 		omy = point.y;
 	}
-
-	LeaveCriticalSection(&applying);
 }
 
 void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
@@ -1134,28 +1083,33 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
-	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
-	if(!pModDoc || !m_pSndFile) return;
+	if(!pModDoc) return;
 
-	if(hit && !state[n] && button){
-		if(nFlags & MK_CONTROL){
-			if(button == CM_BT_LEFT){
+	if(hit && !state[n] && button)
+	{
+		if(nFlags & MK_CONTROL)
+		{
+			if(button == CM_BT_LEFT)
+			{
 				if(!select[n] && !removed[n]) move[n] = invalidate;
 				select[n] = true;
 			}
 			else if(button == CM_BT_RIGHT) select[n] = false;
 		}
-		else if(!removed[n] || currentTab == 3){
-			switch(currentTab){
+		else if(!removed[n] || currentTab == 3)
+		{
+			switch(currentTab)
+			{
 				case 0:
 					if(button == CM_BT_LEFT)
 					{
-						if(!pModDoc->IsChannelSolo(n) || pModDoc->IsChannelMuted(n)){
+						if(!pModDoc->IsChannelSolo(n) || pModDoc->IsChannelMuted(n))
+						{
 							GetClientRect(&client);
 							pModDoc->MuteChannel(n, false);
 							pModDoc->SoloChannel(n, true);
-							for(CHANNELINDEX nChn = 0; nChn < m_pSndFile->m_nChannels; nChn++) if(nChn != n) pModDoc->MuteChannel(nChn, true);
+							for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++) if(nChn != n) pModDoc->MuteChannel(nChn, true);
 							client.SetRect(client.left + 10,client.top + 38,client.right - 8,client.bottom - 30);
 							invalidate = client;
 						}
@@ -1171,7 +1125,8 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 				case 1:
 					BYTE rec;
 					rec = pModDoc->IsChannelRecord(n);
-					if(!rec || rec != (button == CM_BT_LEFT ? 1 : 2)){
+					if(!rec || rec != (button == CM_BT_LEFT ? 1 : 2))
+					{
 						if(button == CM_BT_LEFT) pModDoc->Record1Channel(n);
 						else pModDoc->Record2Channel(n);
 					} else
@@ -1219,27 +1174,23 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 
 		state[n] = false;
 		InvalidateRect(&invalidate, FALSE);
-	}
-	else{
+	} else
+	{
 		GetClientRect(&client);
 		client.SetRect(client.left + 10,client.top + 38,client.right - 8,client.bottom - 30);
 		InvalidateRect(&client, FALSE);
 	}
 }
 
-// -! NEW_FEATURE#0015
-
 
 void CChannelManagerDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
 	OnLButtonDown(nFlags, point);
 	CDialog::OnLButtonDblClk(nFlags, point);
 }
 
 void CChannelManagerDlg::OnRButtonDblClk(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
 	OnRButtonDown(nFlags, point);
 	CDialog::OnRButtonDblClk(nFlags, point);
 }
