@@ -379,42 +379,8 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_MPT:
 		bModified = FALSE;
 		break;
-	case MOD_TYPE_AMF0:
-	case MOD_TYPE_DIGI:
-		m_SndFile.ChangeModTypeTo(MOD_TYPE_MOD);
-		break;
-	case MOD_TYPE_MED:
-		m_SndFile.ChangeModTypeTo(MOD_TYPE_XM);
-		if ((m_SndFile.m_nDefaultTempo == 125) && (m_SndFile.m_nDefaultSpeed == 6) && (!m_SndFile.m_nInstruments))
-		{
-			m_SndFile.m_nType = MOD_TYPE_MOD;
-			for (UINT i=0; i<m_SndFile.Patterns.Size(); i++)
-				if ((m_SndFile.Patterns[i]) && (m_SndFile.Patterns[i].GetNumRows() != 64))
-					m_SndFile.m_nType = MOD_TYPE_XM;
-		}
-		break;
-	case MOD_TYPE_669:
-	case MOD_TYPE_FAR:
-	case MOD_TYPE_PTM:
-	case MOD_TYPE_STM:
-	case MOD_TYPE_DSM:
-	case MOD_TYPE_AMF:
-	case MOD_TYPE_MTM:
-		m_SndFile.ChangeModTypeTo(MOD_TYPE_S3M);
-		break;
-	case MOD_TYPE_AMS:
-	case MOD_TYPE_AMS2:
-	case MOD_TYPE_DMF:
-	case MOD_TYPE_DBM:
-	case MOD_TYPE_IMF:
-	case MOD_TYPE_PSM:
-	case MOD_TYPE_J2B:
-	case MOD_TYPE_ULT:
-	case MOD_TYPE_OKT:
-	case MOD_TYPE_MT2:
-	case MOD_TYPE_MDL:
 	default:
-		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
+		m_SndFile.ChangeModTypeTo(m_SndFile.GetBestSaveFormat());
 	}
 
 // -> CODE#0015
@@ -2286,16 +2252,16 @@ void CModDoc::OnApproximateBPM()
 
 	switch(m_SndFile.m_nTempoMode)
 	{
-		case tempo_mode_alternative: 
+		case tempo_mode_alternative:
 			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
 			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nCurrentRowsPerBeat, bpm); 
 			break;
 
-		case tempo_mode_modern: 
+		case tempo_mode_modern:
 			Message.Format("Using modern tempo interpretation.\n\nThe tempo is: %.8g BPM", bpm); 
 			break;
 
-		case tempo_mode_classic: 
+		case tempo_mode_classic:
 		default:
 			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
 			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nCurrentRowsPerBeat, bpm); 

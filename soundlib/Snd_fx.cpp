@@ -27,6 +27,10 @@
 #endif
 
 
+// Formats which have 7-bit (0...128) instead of 6-bit (0...64) global volume commands, or which are imported to this range (mostly formats which are converted to IT internally)
+#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2 | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM | MOD_TYPE_PTM)
+
+
 ////////////////////////////////////////////////////////////
 // Length
 
@@ -466,7 +470,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 // 					break;
 // 				}
 
-				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2 | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
+				if(!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 				// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
 				if(param <= 128)
 				{
@@ -486,25 +490,25 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 				{
 					param >>= 4;
-					if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
+					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 					memory.glbVol += param << 1;
 				} else
 				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
 					param = (param & 0x0F) << 1;
-					if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
+					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 					memory.glbVol -= param;
 				} else
 				if (param & 0xF0)
 				{
 					param >>= 4;
 					param <<= 1;
-					if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
+					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 					memory.glbVol += param * memory.musicSpeed;
 				} else
 				{
 					param = (param & 0x0F) << 1;
-					if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param <<= 1;
+					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 					memory.glbVol -= param * memory.musicSpeed;
 				}
 				memory.glbVol = CLAMP(memory.glbVol, 0, 256);
@@ -2388,7 +2392,7 @@ BOOL CSoundFile::ProcessEffects()
 // 				break;
 // 			}
 
-			if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2 | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) param *= 2;
+			if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param *= 2;
 
 			// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values.
 			// Test case: globalvol-invalid.it
@@ -2419,7 +2423,7 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				pChn->dwFlags.reset(CHN_SURROUND);
 			}
-			if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_PTM | MOD_TYPE_DSM | MOD_TYPE_AMF | MOD_TYPE_MTM)))
+			if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_DSM | MOD_TYPE_AMF | MOD_TYPE_MTM)))
 			{
 				// Real 8-bit panning
 				pChn->nPan = param;
