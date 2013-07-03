@@ -12,6 +12,8 @@
 
 #include "tagging.h"
 
+class ACMConvert;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Direct To Disk Recording
 
@@ -98,9 +100,10 @@ protected:
 	MPEGLAYER3WAVEFORMAT Formats[MAX_FORMATS];
 	HACMDRIVERID Drivers[MAX_DRIVERS];
 	BOOL m_bInitialFound, m_bDriversEnumerated;
+	ACMConvert &acmConvert;
 
 public:
-	CLayer3Convert(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_LAYER3CONVERT, parent)
+	CLayer3Convert(CSoundFile *pSndFile, CWnd *parent, ACMConvert &acmConvert_):CDialog(IDD_LAYER3CONVERT, parent), acmConvert(acmConvert_)
 		{ m_dwFileLimit = m_dwSongLimit = m_nFormatIndex = m_nDriverIndex = 0; m_bSaveInfoField = FALSE; m_pSndFile = pSndFile; }
 	void GetFormat(PMPEGLAYER3WAVEFORMAT pwfx, HACMDRIVERID *phadid);
 
@@ -134,9 +137,10 @@ public:
 	PWAVEFORMATEX m_pwfx;
 	HACMDRIVERID m_hadid;
 	CFileTagging m_FileTags;
+	ACMConvert &acmConvert;
 
 public:
-	CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, HACMDRIVERID hadid, CFileTagging *pInfo, CWnd *parent=NULL);
+	CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, HACMDRIVERID hadid, CFileTagging *pInfo, ACMConvert &acmConvert_, CWnd *parent=NULL);
 	BOOL OnInitDialog();
 	void OnCancel() { m_bAbort = TRUE; }
 	afx_msg void OnButton1();

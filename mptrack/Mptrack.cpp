@@ -269,13 +269,13 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	bool m_bNoAcm, m_bNoDls, m_bNoMp3, m_bSafeMode, m_bWavEx, m_bNoPlugins, m_bDebug,
+	bool m_bNoAcm, m_bNoDls, m_bSafeMode, m_bWavEx, m_bNoPlugins, m_bDebug,
 		 m_bPortable, m_bNoSettingsOnNewVersion;
 
 public:
 	CMPTCommandLineInfo()
 	{
-		m_bNoAcm = m_bNoDls = m_bNoMp3 = m_bSafeMode = m_bWavEx =
+		m_bNoAcm = m_bNoDls = m_bSafeMode = m_bWavEx =
 		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = m_bPortable = false;
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
@@ -290,7 +290,6 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 		if (!lstrcmpi(lpszParam, "nologo")) { m_bShowSplash = FALSE; return; } else
 		if (!lstrcmpi(lpszParam, "nodls")) { m_bNoDls = true; return; } else
 		if (!lstrcmpi(lpszParam, "noacm")) { m_bNoAcm = true; return; } else
-		if (!lstrcmpi(lpszParam, "nomp3")) { m_bNoMp3 = true; return; } else
 		if (!lstrcmpi(lpszParam, "wavex")) { m_bWavEx = true; return; } else
 		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; return; } else
 		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = true; return; } else
@@ -841,7 +840,7 @@ BOOL CTrackApp::InitInstance()
 	CMPTCommandLineInfo cmdInfo;
 	if (GetDSoundVersion() >= 0x0700) cmdInfo.m_bWavEx = true;
 	ParseCommandLine(cmdInfo);
-
+	TrackerSettings::Instance().noACM = cmdInfo.m_bNoAcm;
 
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
@@ -910,10 +909,6 @@ BOOL CTrackApp::InitInstance()
 
 	// Load DLS Banks
 	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();
-
-	// Initialize ACM Support
-	if (GetProfileInt("Settings", "DisableACM", 0)) cmdInfo.m_bNoAcm = true;
-	if (!cmdInfo.m_bNoMp3) GetACMConvert().InitializeACM(cmdInfo.m_bNoAcm);
 
 	// Initialize Plugins
 	if (!cmdInfo.m_bNoPlugins) InitializeDXPlugins();
@@ -990,9 +985,6 @@ int CTrackApp::ExitInstance()
 
 	// Uninitialize Plugins
 	UninitializeDXPlugins();
-
-	// Uninitialize ACM
-	GetACMConvert().UninitializeACM();
 
 	return CWinApp::ExitInstance();
 }

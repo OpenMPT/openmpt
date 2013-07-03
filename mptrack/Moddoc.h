@@ -432,7 +432,6 @@ public:
 	afx_msg void OnUpdateXMITMPTOnly(CCmdUI *p);
 	afx_msg void OnUpdateITMPTOnly(CCmdUI *p);
 	afx_msg void OnUpdateHasMIDIMappings(CCmdUI *p);
-	afx_msg void OnUpdateMP3Encode(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateCompatExportableOnly(CCmdUI *p);
 	afx_msg void OnPatternRestart() { OnPatternRestart(true); } //rewbs.customKeys
 	afx_msg void OnPatternRestart(bool loop); //rewbs.customKeys

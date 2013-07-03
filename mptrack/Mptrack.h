@@ -11,7 +11,6 @@
 #pragma once
 
 #include "resource.h"       // main symbols
-#include "ACMConvert.h"
 #include <windows.h>
 #include "../mptrack/MpTrackUtil.h"
 #include "../mptrack/Reporting.h"
@@ -124,7 +123,6 @@ protected:
 	TCHAR m_szPluginCacheFileName[_MAX_PATH];
 	TCHAR m_szStringsFileName[_MAX_PATH];
 	bool m_bPortableMode;
-	ACMConvert acmConvert;
 
 public:
 	CTrackApp();
@@ -162,7 +160,6 @@ public:
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
-	BOOL CanEncodeLayer3() const { return acmConvert.IsLayer3Present(); }
 	BOOL IsWaveExEnabled() const { return m_bExWaveSupport; }
 	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCTSTR GetConfigFileName() const { return m_szConfigFileName; }
@@ -180,8 +177,6 @@ public:
 
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const int nItem);
-
-	ACMConvert &GetACMConvert() { return acmConvert; };
 
 // Splash Screen
 protected:

@@ -41,6 +41,8 @@ const TCHAR *TrackerSettings::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Song
 TrackerSettings::TrackerSettings()
 //--------------------------------
 {
+	noACM = false;
+
 	m_ShowSplashScreen = true;
 	gnPatternSpacing = 0;
 	gbPatternRecord = TRUE;
@@ -276,6 +278,9 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		gcsInstallGUID.Format("%s", (LPTSTR)Str);
 		RpcStringFree(&Str);
 	}
+
+	// also via command line switch
+	noACM = noACM || CMainFrame::GetPrivateProfileLong("Settings", "DisableACM", 0, iniFile);
 
 	// GUI Stuff
 	m_ShowSplashScreen = CMainFrame::GetPrivateProfileBool("Display", "ShowSplashScreen", m_ShowSplashScreen, iniFile);

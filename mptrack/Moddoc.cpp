@@ -16,6 +16,7 @@
 #include "mpdlgs.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
+#include "ACMConvert.h"
 #include "mod2wave.h"
 #include "mod2midi.h"
 #include "vstplug.h"
@@ -94,7 +95,6 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		OnUpdateXMITMPTOnly)
 	//ON_UPDATE_COMMAND_UI(ID_VIEW_COMMENTS,			OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
-	ON_UPDATE_COMMAND_UI(ID_FILE_SAVEASMP3,			OnUpdateMP3Encode)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_EDITHISTORY,		OnUpdateITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVECOMPAT,		OnUpdateCompatExportableOnly)
 	//}}AFX_MSG_MAP
@@ -1861,6 +1861,15 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 void CModDoc::OnFileMP3Convert()
 //------------------------------
 {
+
+	// Initialize ACM Support
+	ACMConvert acmConvert(TrackerSettings::Instance().noACM);
+	if(!acmConvert.IsLayer3Present())
+	{
+		Reporting::Error("No MP3 codec found. Please install an MP3 ACM codec or put lame_enc.dll in OpenMPT's root directory.", "OpenMPT - MP3 Export");
+		return;
+	}
+
 	int nFilterIndex = 0;
 	TCHAR sFName[_MAX_FNAME] = "";
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -1892,7 +1901,7 @@ void CModDoc::OnFileMP3Convert()
 		strcpy(fext, (nFilterIndex == 2) ? ".wav" : ".mp3");
 		strcat(s, fext);
 	}
-	CLayer3Convert wsdlg(&m_SndFile, pMainFrm);
+	CLayer3Convert wsdlg(&m_SndFile, pMainFrm, acmConvert);
 	if (m_SndFile.m_szNames[0][0]) wsdlg.m_bSaveInfoField = TRUE;
 	if (wsdlg.DoModal() != IDOK) return;
 	wsdlg.GetFormat(&wfx, &hadid);
@@ -1907,7 +1916,7 @@ void CModDoc::OnFileMP3Convert()
 
 	// Saving file
 	CFileTagging *pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_FileTags : NULL;
-	CDoAcmConvert dwcdlg(&m_SndFile, s, &wfx.wfx, hadid, pTag, pMainFrm);
+	CDoAcmConvert dwcdlg(&m_SndFile, s, &wfx.wfx, hadid, pTag, acmConvert, pMainFrm);
 	dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
 	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 	dwcdlg.DoModal();
@@ -2205,14 +2214,6 @@ void CModDoc::OnUpdateITMPTOnly(CCmdUI *p)
 {
 	if (p)
 		p->Enable((m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? TRUE : FALSE);
-}
-
-
-// Enable menu item if MP3 encoder is present
-void CModDoc::OnUpdateMP3Encode(CCmdUI *p)
-//----------------------------------------
-{
-	if (p) p->Enable(theApp.CanEncodeLayer3());
 }
 
 
