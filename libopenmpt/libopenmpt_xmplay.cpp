@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <map>
@@ -731,7 +732,7 @@ static void add_names( std::ostream & str, const std::string & title, const std:
 		}
 		str << title << " names:" << "\r";
 		for ( std::size_t i = 0; i < names.size(); i++ ) {
-			str << i << "\t" << names[i] << "\r";
+			str << std::setfill('0') << std::setw(2) << i << std::setw(0) << "\t" << names[i] << "\r";
 		}
 		str << "\r";
 	}
