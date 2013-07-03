@@ -361,6 +361,22 @@ int openmpt_module_select_subsong( openmpt_module * mod, int32_t subsong ) {
 	return 0;
 }
 
+int openmpt_module_set_repeat_count( openmpt_module * mod, int32_t repeat_count ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		mod->impl->set_repeat_count( repeat_count );
+		return 1;
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+int32_t openmpt_module_get_repeat_count( openmpt_module * mod ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->get_repeat_count();
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+
 double openmpt_module_seek_seconds( openmpt_module * mod, double seconds ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );

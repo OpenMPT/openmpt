@@ -133,9 +133,9 @@ static void save_settings_to_xml( std::string & xml, const openmpt::settings::se
 
 static void apply_options() {
 	if ( self->mod ) {
+		self->mod->set_repeat_count( self->settings.repeatcount );
 		self->mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, self->settings.mastergain_millibel );
 		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings.stereoseparation );
-		self->mod->set_render_param( openmpt::module::RENDER_REPEATCOUNT, self->settings.repeatcount );
 		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, self->settings.interpolationfilterlength );
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, self->settings.volrampinus );
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, self->settings.volrampoutus );
