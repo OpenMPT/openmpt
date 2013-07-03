@@ -91,6 +91,8 @@ public:
 	double get_duration_seconds() const;
 	double get_current_position_seconds() const;
 	void select_subsong( std::int32_t subsong );
+	void set_repeat_count( std::int32_t repeat_count );
+	std::int32_t get_repeat_count() const;
 	double seek_seconds( double seconds );
 	std::vector<std::string> get_metadata_keys() const;
 	std::string get_metadata( const std::string & key ) const;

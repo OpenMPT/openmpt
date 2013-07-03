@@ -64,12 +64,11 @@ LIBOPENMPT_API openmpt_module * openmpt_module_create_from_memory( const void * 
 
 LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
 
-#define OPENMPT_MODULE_RENDER_REPEATCOUNT                  1
-#define OPENMPT_MODULE_RENDER_MASTERGAIN_MILLIBEL          2
-#define OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT     3
-#define OPENMPT_MODULE_RENDER_INTERPOLATION_FILTER_LENGTH  4
-#define OPENMPT_MODULE_RENDER_VOLUMERAMP_UP_MICROSECONDS   5
-#define OPENMPT_MODULE_RENDER_VOLUMERAMP_DOWN_MICROSECONDS 6
+#define OPENMPT_MODULE_RENDER_MASTERGAIN_MILLIBEL          1
+#define OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT     2
+#define OPENMPT_MODULE_RENDER_INTERPOLATION_FILTER_LENGTH  3
+#define OPENMPT_MODULE_RENDER_VOLUMERAMP_UP_MICROSECONDS   4
+#define OPENMPT_MODULE_RENDER_VOLUMERAMP_DOWN_MICROSECONDS 5
 
 #define OPENMPT_MODULE_COMMAND_NOTE         0
 #define OPENMPT_MODULE_COMMAND_INSTRUMENT   1
@@ -82,6 +81,8 @@ LIBOPENMPT_API int openmpt_module_get_render_param( openmpt_module * mod, int pa
 LIBOPENMPT_API int openmpt_module_set_render_param( openmpt_module * mod, int param, int32_t value );
 
 LIBOPENMPT_API int openmpt_module_select_subsong( openmpt_module * mod, int32_t subsong );
+LIBOPENMPT_API int openmpt_module_set_repeat_count( openmpt_module * mod, int32_t repeat_count );
+LIBOPENMPT_API int32_t openmpt_module_get_repeat_count( openmpt_module * mod );
 
 LIBOPENMPT_API double openmpt_module_seek_seconds( openmpt_module * mod, double seconds );
 

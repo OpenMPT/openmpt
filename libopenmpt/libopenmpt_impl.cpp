@@ -294,9 +294,6 @@ std::int32_t module_impl::get_render_param( int param ) const {
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
 			return m_sndFile->m_MixerSettings.m_nStereoSeparation * 100 / 128;
 		} break;
-		case module::RENDER_REPEATCOUNT: {
-			return m_sndFile->m_nRepeatCount;
-		} break;
 		case module::RENDER_INTERPOLATION_FILTER_LENGTH: {
 			return resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode );
 		} break;
@@ -327,9 +324,6 @@ void module_impl::set_render_param( int param, std::int32_t value ) {
 				settings.gdwMixingFreq = newvalue;
 				m_sndFile->SetMixerSettings( settings );
 			}
-		} break;
-		case module::RENDER_REPEATCOUNT: {
-			m_sndFile->SetRepeatCount( value );
 		} break;
 		case module::RENDER_INTERPOLATION_FILTER_LENGTH: {
 			CResamplerSettings newsettings;
@@ -426,6 +420,12 @@ void module_impl::select_subsong( std::int32_t subsong ) {
 		return;
 	}
 	m_sndFile->Order.SetSequence( subsong );
+}
+void module_impl::set_repeat_count( std::int32_t repeat_count ) {
+	m_sndFile->SetRepeatCount( repeat_count );
+}
+std::int32_t module_impl::get_repeat_count() const {
+	return m_sndFile->GetRepeatCount();
 }
 double module_impl::seek_seconds( double seconds ) {
 	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ) );

@@ -114,6 +114,13 @@ void module::select_subsong( std::int32_t subsong ) {
 	impl->select_subsong( subsong );
 }
 
+void module::set_repeat_count( std::int32_t repeat_count ) {
+	impl->set_repeat_count( repeat_count );
+}
+std::int32_t module::get_repeat_count() const {
+	return impl->get_repeat_count();
+}
+
 double module::seek_seconds( double seconds ) {
 	return impl->seek_seconds( seconds );
 }

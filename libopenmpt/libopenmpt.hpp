@@ -74,12 +74,11 @@ class LIBOPENMPT_CXX_API module {
 public:
 
 	enum render_param {
-		RENDER_REPEATCOUNT                  = 1,
-		RENDER_MASTERGAIN_MILLIBEL          = 2,
-		RENDER_STEREOSEPARATION_PERCENT     = 3,
-		RENDER_INTERPOLATION_FILTER_LENGTH  = 4,
-		RENDER_VOLUMERAMP_UP_MICROSECONDS   = 5,
-		RENDER_VOLUMERAMP_DOWN_MICROSECONDS = 6
+		RENDER_MASTERGAIN_MILLIBEL          = 1,
+		RENDER_STEREOSEPARATION_PERCENT     = 2,
+		RENDER_INTERPOLATION_FILTER_LENGTH  = 3,
+		RENDER_VOLUMERAMP_UP_MICROSECONDS   = 4,
+		RENDER_VOLUMERAMP_DOWN_MICROSECONDS = 5
 	};
 
 	enum command_index {
@@ -117,6 +116,8 @@ public:
 	void set_render_param( int param, std::int32_t value );
 
 	void select_subsong( std::int32_t subsong );
+	void set_repeat_count( std::int32_t repeat_count );
+	std::int32_t get_repeat_count() const;
  
 	double seek_seconds( double seconds );
 

@@ -128,6 +128,7 @@ LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size)
 		free(file);
 		return NULL;
 	}
+	openmpt_module_set_repeat_count(file->mod,file->settings.mLoopCount);
 	file->name = openmpt_module_get_metadata(file->mod,"title");
 	file->message = openmpt_module_get_metadata(file->mod,"message");
 	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT,file->settings.mStereoSeparation*100/128);

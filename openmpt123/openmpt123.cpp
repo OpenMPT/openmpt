@@ -377,7 +377,8 @@ static void render_file( const commandlineflags & flags, const std::string & fil
 
 			openmpt::module mod( data_stream );
 
-			mod.set_render_param( openmpt::module::RENDER_REPEATCOUNT, flags.repeatcount );
+			mod.set_repeat_count( flags.repeatcount );
+
 			mod.set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, flags.filtertaps );
 			mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
 			mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, flags.rampupus );
