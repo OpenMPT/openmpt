@@ -21,12 +21,10 @@
 #include "view_smp.h"
 #include "../soundlib/MIDIEvents.h"
 #include "SampleEditorDialogs.h"
-#include "modsmp_ctrl.h"
-#include "Wav.h"
+#include "../soundlib/WAVTools.h"
 #include "../soundlib/FileReader.h"
 
 #define new DEBUG_NEW
-
 
 
 // Non-client toolbar
@@ -1862,117 +1860,86 @@ void CViewSample::OnEditCopy()
 //----------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	DWORD dwMemSize, dwSmpLen, dwSmpOffset;
-	HGLOBAL hCpy;
-	BOOL bExtra = TRUE;
+	if(pMainFrm == nullptr || GetDocument() == nullptr)
+	{
+		return;
+	}
 
-	if ((!pMainFrm) || (!pModDoc)) return;
-	pSndFile = pModDoc->GetSoundFile();
-	const ModSample &sample = pSndFile->GetSample(m_nSample);
-	if ((!sample.nLength) || (!sample.pSample)) return;
-	dwMemSize = sample.nLength;
-	dwSmpOffset = 0;
-	if (m_dwEndSel > sample.nLength) m_dwEndSel = sample.nLength;
-	if (m_dwEndSel > m_dwBeginSel) { dwMemSize = m_dwEndSel - m_dwBeginSel; dwSmpOffset = m_dwBeginSel; bExtra = FALSE; }
-	if (sample.uFlags & CHN_16BIT) { dwMemSize <<= 1; dwSmpOffset <<= 1; }
-	if (sample.uFlags & CHN_STEREO) { dwMemSize <<= 1; dwSmpOffset <<= 1; }
-	dwSmpLen = dwMemSize;
-	dwMemSize += sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER) + sizeof(WAVEDATAHEADER)
-			 + sizeof(WAVEEXTRAHEADER) + sizeof(WAVESAMPLERINFO);
-	// For name + fname
-	dwMemSize += 32 * 2;
+	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	const ModSample &sample = sndFile.GetSample(m_nSample);
+
+	bool addLoopInfo = true;
+	size_t smpSize = sample.nLength;
+	size_t smpOffset = 0;
+
+	// First things first: Calculate sample size, taking partial selections into account.
+	LimitMax(m_dwEndSel, sample.nLength);
+	if(m_dwEndSel > m_dwBeginSel)
+	{
+		smpSize = m_dwEndSel - m_dwBeginSel;
+		smpOffset = m_dwBeginSel;
+		addLoopInfo = false;
+	}
+
+	smpSize *= sample.GetBytesPerSample();
+	smpOffset *= sample.GetBytesPerSample();
+
+	// Ok, now calculate size of the resulting WAV file.
+	size_t memSize = sizeof(RIFFHeader)									// RIFF Header
+		+ sizeof(RIFFChunk) + sizeof(WAVFormatChunk)					// Sample format
+		+ sizeof(RIFFChunk) + ((smpSize + 1) & ~1)						// Sample data
+		+ sizeof(RIFFChunk) + sizeof(WAVExtraChunk)						// Sample metadata
+		+ MAX_SAMPLENAME + MAX_SAMPLEFILENAME;							// Sample name
+	STATIC_ASSERT((sizeof(WAVExtraChunk) % 2u) == 0);
+	STATIC_ASSERT((MAX_SAMPLENAME % 2u) == 0);
+	STATIC_ASSERT((MAX_SAMPLEFILENAME % 2u) == 0);
+
+	if(addLoopInfo)
+	{
+		// We want to store some loop metadata as well.
+		memSize += sizeof(RIFFChunk) + sizeof(WAVSampleInfoChunk) + 2 * sizeof(WAVSampleLoop);
+	}
+
+	ASSERT((memSize % 2u) == 0);
+
 	BeginWaitCursor();
-	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
+	HGLOBAL hCpy;
+	if(pMainFrm->OpenClipboard() && (hCpy = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, memSize)) != nullptr)
 	{
 		EmptyClipboard();
-		LPBYTE p = (LPBYTE)GlobalLock(hCpy);
-		WAVEFILEHEADER *phdr = (WAVEFILEHEADER *)p;
-		WAVEFORMATHEADER *pfmt = (WAVEFORMATHEADER *)(p + sizeof(WAVEFILEHEADER));
-		WAVEDATAHEADER *pdata = (WAVEDATAHEADER *)(p + sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER));
-		phdr->id_RIFF = IFFID_RIFF;
-		phdr->filesize = sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER) + sizeof(WAVEDATAHEADER) - 8;
-		phdr->id_WAVE = IFFID_WAVE;
-		pfmt->id_fmt = IFFID_fmt;
-		pfmt->hdrlen = 16;
-		pfmt->format = 1;
-		pfmt->freqHz = sample.nC5Speed;
-		if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-		{
-			pfmt->freqHz = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
-	}
-		pfmt->channels = (sample.uFlags & CHN_STEREO) ? (WORD)2 : (WORD)1;
-		pfmt->bitspersample = (sample.uFlags & CHN_16BIT) ? (WORD)16 : (WORD)8;
-		pfmt->samplesize = pfmt->channels * pfmt->bitspersample / 8;
-		pfmt->bytessec = pfmt->freqHz*pfmt->samplesize;
-		pdata->id_data = IFFID_data;
-		pdata->length = dwSmpLen;
-		phdr->filesize += pdata->length;
-		LPBYTE psamples = p + sizeof(WAVEFILEHEADER) + sizeof(WAVEFORMATHEADER) + sizeof(WAVEDATAHEADER);
-		memcpy(psamples, static_cast<const char *>(sample.pSample) + dwSmpOffset, dwSmpLen);
-		if (pfmt->bitspersample == 8)
-	{
-			for (UINT i = 0; i < dwSmpLen; i++) psamples[i] += 0x80;
-	}
-		if (bExtra)
-		{
-			WAVESMPLHEADER *psh = (WAVESMPLHEADER *)(psamples+dwSmpLen);
-			MemsetZero(*psh);
-			psh->smpl_id = 0x6C706D73;
-			psh->smpl_len = sizeof(WAVESMPLHEADER) - 8;
-			psh->dwSamplePeriod = 22675;
-			if (sample.nC5Speed > 256) psh->dwSamplePeriod = 1000000000 / sample.nC5Speed;
-			psh->dwBaseNote = 60;
 
-			// Write loops
-			WAVESAMPLERINFO *psmpl = (WAVESAMPLERINFO *)psh;
-			MemsetZero(psmpl->wsiLoops);
-			if((sample.uFlags & CHN_SUSTAINLOOP) != 0)
-	{
-				psmpl->wsiLoops[psmpl->wsiHdr.dwSampleLoops++].SetLoop(sample.nSustainStart, sample.nSustainEnd, (sample.uFlags & CHN_PINGPONGSUSTAIN) != 0);
-				psmpl->wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
-			}
-			if((sample.uFlags & CHN_LOOP) != 0)
-			{
-				psmpl->wsiLoops[psmpl->wsiHdr.dwSampleLoops++].SetLoop(sample.nLoopStart, sample.nLoopEnd, (sample.uFlags & CHN_PINGPONGLOOP) != 0);
-				psmpl->wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
-			}
+		void *p = GlobalLock(hCpy);
+		WAVWriter file(p, memSize);
 
-			WAVEEXTRAHEADER *pxh = (WAVEEXTRAHEADER *)(psamples+dwSmpLen+psh->smpl_len+8);
-			pxh->xtra_id = IFFID_xtra;
-			pxh->xtra_len = sizeof(WAVEEXTRAHEADER)-8;
+		// Write sample format
+		file.WriteFormat(sample.GetSampleRate(sndFile.GetType()), sample.GetElementarySampleSize() * 8, sample.GetNumChannels(), WAVFormatChunk::fmtPCM);
 
-			pxh->dwFlags = sample.uFlags;
-			pxh->wPan = sample.nPan;
-			pxh->wVolume = sample.nVolume;
-			pxh->wGlobalVol = sample.nGlobalVol;
-
-			pxh->nVibType = sample.nVibType;
-			pxh->nVibSweep = sample.nVibSweep;
-			pxh->nVibDepth = sample.nVibDepth;
-			pxh->nVibRate = sample.nVibRate;
-			if((pSndFile->GetType() & MOD_TYPE_XM) && (pxh->nVibDepth | pxh->nVibRate))
-			{
-				// XM vibrato is upside down
-				pxh->nVibSweep = 255 - pxh->nVibSweep;
-			}
+		// Write sample data
+		file.StartChunk(RIFFChunk::iddata);
 		
-			if ((pSndFile->m_szNames[m_nSample][0]) || (sample.filename[0]))
+		uint8 *sampleData = static_cast<uint8 *>(p) + file.GetPosition();
+		memcpy(sampleData, static_cast<const char *>(sample.pSample) + smpOffset, smpSize);
+		if(sample.GetElementarySampleSize() == 1)
 		{
-				LPSTR pszText = (LPSTR)(pxh+1);
-				memcpy(pszText, pSndFile->m_szNames[m_nSample], MAX_SAMPLENAME);
-				pxh->xtra_len += MAX_SAMPLENAME;
-				if (sample.filename[0])
+			// 8-Bit samples have to be unsigned.
+			for(size_t i = smpSize; i != 0; i--)
 			{
-					memcpy(pszText + MAX_SAMPLENAME, sample.filename, MAX_SAMPLEFILENAME);
-					pxh->xtra_len += MAX_SAMPLEFILENAME;
+				*(sampleData++) += 0x80u;
 			}
 		}
-			phdr->filesize += (psh->smpl_len + 8) + (pxh->xtra_len + 8);
+		
+		file.Skip(smpSize);
+
+		if(addLoopInfo)
+		{
+			file.WriteLoopInformation(sample);
 		}
+		file.WriteExtraInformation(sample, sndFile.GetType(), sndFile.GetSampleName(m_nSample));
+
+		file.Finalize();
+
 		GlobalUnlock(hCpy);
-		SetClipboardData (CF_WAVE, (HANDLE) hCpy);
+		SetClipboardData (CF_WAVE, (HANDLE)hCpy);
 		CloseClipboard();
 	}
 	EndWaitCursor();

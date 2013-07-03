@@ -17,6 +17,8 @@
 #include "vstplug.h"
 #include "mod2wave.h"
 #include "Wav.h"
+#include "WAVTools.h"
+#include "../common/version.h"
 #include "ACMConvert.h"
 
 extern UINT nMixingRates[NUMMIXRATE];
@@ -596,16 +598,12 @@ BOOL CDoWaveConvert::OnInitDialog()
 void CDoWaveConvert::OnButton1()
 //------------------------------
 {
-	FILE *f;
-	WAVEFILEHEADER header;
-	WAVEDATAHEADER datahdr, fmthdr;
 	MSG msg;
 	BYTE buffer[WAVECONVERTBUFSIZE];
 	CHAR s[80];
 	HWND progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	UINT ok = IDOK, pos = 0;
 	uint64 ullSamples = 0, ullMaxSamples;
-	DWORD dwDataOffset;
 	LONG lMax = 256;
 
 	if (!m_pSndFile || !m_lpszFileName)
@@ -614,13 +612,15 @@ void CDoWaveConvert::OnButton1()
 		return;
 	}
 	
-	while((f = fopen(m_lpszFileName, "w+b")) == NULL)
+	WAVWriter file(m_lpszFileName);
+	while(!file.IsValid())
 	{
 		if(Reporting::RetryCancel("Could not open file for writing. Is it open in another application?") == rtyCancel)
 		{
 			EndDialog(IDCANCEL);
 			return;
 		}
+		file.Open(m_lpszFileName);
 	}
 
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
@@ -647,26 +647,11 @@ void CDoWaveConvert::OnButton1()
 	m_pSndFile->InitPlayer(TRUE);
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 2047*1024)) m_dwFileLimit = 2047*1024; // 2GB
 	m_dwFileLimit <<= 10;
-	// File Header
-	header.id_RIFF = IFFID_RIFF;
-	header.filesize = sizeof(WAVEFILEHEADER) - 8;
-	header.id_WAVE = IFFID_WAVE;
-	// Wave Format Header
-	fmthdr.id_data = IFFID_fmt;
-	fmthdr.length = 16;
-	if (m_pWaveFormat->cbSize) fmthdr.length += 2 + m_pWaveFormat->cbSize;
-	header.filesize += sizeof(fmthdr) + fmthdr.length;
-	// Data header
-	datahdr.id_data = IFFID_data;
-	datahdr.length = 0;
-	header.filesize += sizeof(datahdr);
-	// Writing Headers
-	fwrite(&header, 1, sizeof(header), f);
-	fwrite(&fmthdr, 1, sizeof(fmthdr), f);
-	fwrite(m_pWaveFormat, 1, fmthdr.length, f);
-	fwrite(&datahdr, 1, sizeof(datahdr), f);
-	dwDataOffset = ftell(f);
-	ullSamples = 0;
+
+	file.WriteFormat(m_pWaveFormat->nSamplesPerSec, m_pWaveFormat->wBitsPerSample, m_pWaveFormat->nChannels, m_pWaveFormat->wBitsPerSample == 32 ? WAVFormatChunk::fmtFloat : WAVFormatChunk::fmtPCM);
+
+	file.StartChunk(RIFFChunk::iddata);
+
 	ullMaxSamples = m_dwFileLimit / (m_pWaveFormat->nChannels * m_pWaveFormat->wBitsPerSample / 8);
 	if (m_dwSongLimit)
 	{
@@ -701,6 +686,10 @@ void CDoWaveConvert::OnButton1()
 	// For giving away some processing time every now and then
 	DWORD dwSleepTime = dwStartTime;
 
+	size_t bytesWritten = 0;
+
+	CMainFrame::GetMainFrame()->PauseMod();
+	m_pSndFile->m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n = 0; ; n++)
 	{
@@ -739,18 +728,19 @@ void CDoWaveConvert::OnButton1()
 			}
 		}
 
-		UINT lWrite = fwrite(buffer, 1, lRead*nBytesPerSample, f);
+		UINT lWrite = fwrite(buffer, 1, lRead * nBytesPerSample, file.GetFile());
 		if (!lWrite) 
 			break;
-		datahdr.length += lWrite;
+		bytesWritten += lWrite;
+
 		if (m_bNormalize)
 		{
-			ULONGLONG d = ((ULONGLONG)datahdr.length * m_pWaveFormat->wBitsPerSample) / 24;
+			ULONGLONG d = ((ULONGLONG)bytesWritten * m_pWaveFormat->wBitsPerSample) / 24;
 			if (d >= m_dwFileLimit) 
 				break;
 		} else
 		{
-			if (datahdr.length >= m_dwFileLimit) 
+			if (bytesWritten >= m_dwFileLimit) 
 				break;
 		}
 		if (ullSamples >= ullMaxSamples) 
@@ -766,7 +756,7 @@ void CDoWaveConvert::OnButton1()
 				timeRemaining = static_cast<DWORD>(((dwCurrentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
 			}
 
-			wsprintf(s, "Writing file... (%uKB, %umn%02us, %umn%02us remaining)", datahdr.length >> 10, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
+			wsprintf(s, "Writing file... (%uKB, %umn%02us, %umn%02us remaining)", bytesWritten >> 10, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
 			SetDlgItemText(IDC_TEXT1, s);
 
 			// Give windows some time to redraw the window, if necessary (else, the infamous "OpenMPT does not respond" will pop up)
@@ -798,25 +788,25 @@ void CDoWaveConvert::OnButton1()
 
 	if (m_bNormalize)
 	{
-		DWORD dwLength = datahdr.length;
+		DWORD dwLength = bytesWritten;
 		DWORD percent = 0xFF, dwPos, dwSize, dwCount;
 		DWORD dwBitSize, dwOutPos;
 
-		dwPos = dwOutPos = dwDataOffset;
+		dwPos = dwOutPos = file.GetPosition();
 		dwBitSize = m_pWaveFormat->wBitsPerSample / 8;
-		datahdr.length = 0;
+		bytesWritten = 0;
 		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
 		dwCount = dwLength;
 		while (dwCount >= 3)
 		{
 			dwSize = (sizeof(buffer) / 3) * 3;
 			if (dwSize > dwCount) dwSize = dwCount;
-			fseek(f, dwPos, SEEK_SET);
-			if (fread(buffer, 1, dwSize, f) != dwSize) break;
+			fseek(file.GetFile(), dwPos, SEEK_SET);
+			if (fread(buffer, 1, dwSize, file.GetFile()) != dwSize) break;
 			m_pSndFile->Normalize24BitBuffer(buffer, dwSize, lMax, dwBitSize);
-			fseek(f, dwOutPos, SEEK_SET);
-			datahdr.length += (dwSize/3)*dwBitSize;
-			fwrite(buffer, 1, (dwSize/3)*dwBitSize, f);
+			fseek(file.GetFile(), dwOutPos, SEEK_SET);
+			bytesWritten += (dwSize / 3) * dwBitSize;
+			fwrite(buffer, 1, (dwSize / 3) * dwBitSize, file.GetFile());
 			dwCount -= dwSize;
 			dwPos += dwSize;
 			dwOutPos += (dwSize * m_pWaveFormat->wBitsPerSample) / 24;
@@ -831,43 +821,43 @@ void CDoWaveConvert::OnButton1()
 		}
 	}
 
+	file.Skip(bytesWritten);
+	file.Truncate();
+
 	// Write cue points
-	DWORD cuePointLength = 0;
 	if(m_pSndFile->m_PatternCuePoints.size() > 0)
 	{
 		// Cue point header
-		WavCueHeader cuehdr;
-		cuehdr.id = IFFID_cue;
-		cuehdr.numPoints = m_pSndFile->m_PatternCuePoints.size();
-		cuehdr.length = 4 + cuehdr.numPoints * sizeof(WavCuePoint);
-		cuePointLength = 8 + cuehdr.length;
-		cuehdr.ConvertEndianness();
-		fwrite(&cuehdr, 1, sizeof(WavCueHeader), f);
+		file.StartChunk(RIFFChunk::idcue_);
+		uint32 numPoints = m_pSndFile->m_PatternCuePoints.size();
+		SwapBytesLE(numPoints);
+		file.Write(numPoints);
 
 		// Write all cue points
 		std::vector<PatternCuePoint>::const_iterator iter;
-		DWORD num = 0;
-		for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); ++iter, num++)
+		uint32 index = 0;
+		for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); iter++)
 		{
-			WavCuePoint cuepoint;
-			cuepoint.id = num;
-			cuepoint.pos = (uint32)iter->offset;
-			cuepoint.chunkID = IFFID_data;
-			cuepoint.chunkStart = 0;		// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
-			cuepoint.blockStart = 0;		// dito
-			cuepoint.offset = (uint32)iter->offset;
-			cuepoint.ConvertEndianness();
-			fwrite(&cuepoint, 1, sizeof(WavCuePoint), f);
+			WAVCuePoint cuePoint;
+			cuePoint.id = index++;
+			cuePoint.position = static_cast<uint32>(iter->offset);
+			cuePoint.riffChunkID = static_cast<uint32>(RIFFChunk::iddata);
+			cuePoint.chunkStart = 0;	// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
+			cuePoint.blockStart = 0;	// dito
+			cuePoint.offset = cuePoint.position;
+			cuePoint.ConvertEndianness();
+			file.Write(cuePoint);
 		}
 		m_pSndFile->m_PatternCuePoints.clear();
 	}
 
-	header.filesize = (sizeof(WAVEFILEHEADER) - 8) + (8 + fmthdr.length) + (8 + datahdr.length) + (cuePointLength);
-	fseek(f, 0, SEEK_SET);
-	fwrite(&header, sizeof(header), 1, f);
-	fseek(f, dwDataOffset-sizeof(datahdr), SEEK_SET);
-	fwrite(&datahdr, sizeof(datahdr), 1, f);
-	fclose(f);
+	WAVWriter::Metatags tags;
+	tags.push_back(WAVWriter::Metatag(RIFFChunk::idINAM, m_pSndFile->GetTitle()));
+	tags.push_back(WAVWriter::Metatag(RIFFChunk::idISFT, MptVersion::GetOpenMPTVersionStr()));
+	file.WriteMetatags(tags);
+
+	size_t fileSize = file.Finalize();
+
 	m_pSndFile->m_nMaxOrderPosition = 0;
 	if (m_bNormalize)
 	{
@@ -875,7 +865,7 @@ void CDoWaveConvert::OnButton1()
 		CFile fw;
 		if (fw.Open(m_lpszFileName, CFile::modeReadWrite | CFile::modeNoTruncate))
 		{
-			fw.SetLength(header.filesize+8);
+			fw.SetLength(fileSize);
 			fw.Close();
 		}
 	}

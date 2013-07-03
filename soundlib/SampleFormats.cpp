@@ -430,144 +430,33 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
 //----------------------------------------------------------------------------------
 {
-	std::string softwareIdString = MptVersion::GetOpenMPTVersionStr();
-	const char *softwareId = softwareIdString.c_str();
-	size_t softwareIdLength = strlen(softwareId) + 1;
+	WAVWriter file(lpszFileName);
 
-	WAVEFILEHEADER header;
-	WAVEFORMATHEADER format;
-	WAVEDATAHEADER data;
-	WAVESAMPLERINFO smpl;
-	WAVELISTHEADER list;
-	WAVEEXTRAHEADER extra;
+	if(!file.IsValid())
+	{
+		return false;
+	}
+
 	const ModSample &sample = Samples[nSample];
-	FILE *f;
+	file.WriteFormat(sample.GetSampleRate(GetType()), sample.GetElementarySampleSize() * 8, sample.GetNumChannels(), WAVFormatChunk::fmtPCM);
 
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
-	MemsetZero(extra);
-	MemsetZero(smpl);
-	header.id_RIFF = LittleEndian(IFFID_RIFF);
-	header.filesize = sizeof(header) - 8 + sizeof(format) + sizeof(data) + sizeof(extra)
-		+ sizeof(list) + 8 + softwareIdLength + 8 + 32; // LIST(INAM, ISFT)
-	header.id_WAVE = LittleEndian(IFFID_WAVE);
-	format.id_fmt = LittleEndian(IFFID_fmt);
-	format.hdrlen = LittleEndian(16);
-	format.format = LittleEndianW(1);
-	if(!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
-		format.freqHz = LittleEndian(sample.nC5Speed);
-	else
-		format.freqHz = LittleEndian(ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune));
-	format.channels = LittleEndianW(sample.GetNumChannels());
-	format.bitspersample = LittleEndianW(sample.GetElementarySampleSize() * 8);
-	format.samplesize = LittleEndianW(sample.GetBytesPerSample());
-	format.bytessec = LittleEndian(format.freqHz * format.samplesize);
-
-	data.id_data = LittleEndian(IFFID_data);
-	data.length = sample.GetSampleSizeInBytes();
-
-	header.filesize += data.length;
-	if((data.length % 2u) != 0)
-	{
-		// Write padding byte if sample size is odd.
-		header.filesize++;
-	}
-	if((softwareIdLength % 2u) != 0)
-	{
-		header.filesize++;
-	}
-
-	// "smpl" field
-	smpl.wsiHdr.smpl_id = LittleEndian(IFFID_smpl);
-	smpl.wsiHdr.smpl_len = sizeof(WAVESMPLHEADER) - 8;
-	if (sample.nC5Speed >= 256)
-		smpl.wsiHdr.dwSamplePeriod = LittleEndian(1000000000 / sample.nC5Speed);
-	else
-		smpl.wsiHdr.dwSamplePeriod = LittleEndian(22675);	// 44100 Hz
-
-	smpl.wsiHdr.dwBaseNote = LittleEndian(NOTE_MIDDLEC - NOTE_MIN);
-
-	// Write loops
-	if((sample.uFlags & CHN_SUSTAINLOOP) != 0)
-	{
-		smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++].SetLoop(sample.nSustainStart, sample.nSustainEnd, (sample.uFlags & CHN_PINGPONGSUSTAIN) != 0);
-		smpl.wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
-	}
-	if((sample.uFlags & CHN_LOOP) != 0)
-	{
-		smpl.wsiLoops[smpl.wsiHdr.dwSampleLoops++].SetLoop(sample.nLoopStart, sample.nLoopEnd, (sample.uFlags & CHN_PINGPONGLOOP) != 0);
-		smpl.wsiHdr.smpl_len += sizeof(SAMPLELOOPSTRUCT);
-	}
-
-	// Update file length in header
-	header.filesize += smpl.wsiHdr.smpl_len + 8;
-
-	header.filesize = LittleEndian(header.filesize);
-	data.length = LittleEndian(data.length);
-	smpl.wsiHdr.smpl_len = LittleEndian(smpl.wsiHdr.smpl_len);
-	fwrite(&header, 1, sizeof(header), f);
-	fwrite(&format, 1, sizeof(format), f);
-	fwrite(&data, 1, sizeof(data), f);
-
-	SampleIO(
-		(sample.uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
-		(sample.uFlags & CHN_STEREO) ? SampleIO::stereoInterleaved : SampleIO::mono,
+	// Write sample data
+	file.StartChunk(RIFFChunk::iddata);
+	file.Skip(SampleIO(
+		sample.uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
+		sample.uFlags[CHN_STEREO] ? SampleIO::stereoInterleaved : SampleIO::mono,
 		SampleIO::littleEndian,
-		(sample.uFlags & CHN_16BIT) ? SampleIO::signedPCM : SampleIO::unsignedPCM)
-		.WriteSample(f, sample);
+		sample.uFlags[CHN_16BIT] ? SampleIO::signedPCM : SampleIO::unsignedPCM)
+		.WriteSample(file.GetFile(), sample));
 
-	if((data.length % 2u) != 0)
-	{
-		// Write padding byte if sample size is odd.
-		int8 padding = 0;
-		fwrite(&padding, 1, 1, f);
-	}
-	fwrite(&smpl, 1, smpl.wsiHdr.smpl_len + 8, f);
+	file.WriteLoopInformation(sample);
+	file.WriteExtraInformation(sample, GetType());
 	
-	// "LIST" field
-	list.list_id = LittleEndian(IFFID_LIST);
-	list.list_len = LittleEndian(sizeof(list) - 8	// LIST
-					+ 8 + 32						// "INAM".dwLen.szSampleName
-					+ 8 + softwareIdLength);		// "ISFT".dwLen.softwareId.0
-	list.info = LittleEndian(IFFID_INFO);
-	fwrite(&list, 1, sizeof(list), f);
-
-	list.list_id = LittleEndian(IFFID_INAM);		// "INAM"
-	list.list_len = LittleEndian(32);
-	fwrite(&list, 1, 8, f);
-	fwrite(m_szNames[nSample], 1, 32, f);
-
-	list.list_id = LittleEndian(IFFID_ISFT);		// "ISFT"
-	list.list_len = LittleEndian(softwareIdLength);
-	fwrite(&list, 1, 8, f);
-	fwrite(softwareId, 1, list.list_len, f);
-	if((softwareIdLength % 2u) != 0)
-	{
-		int8 padding = 0;
-		fwrite(&padding, 1, 1, f);
-	}
-
-	// "xtra" field
-	extra.xtra_id = LittleEndian(IFFID_xtra);
-	extra.xtra_len = LittleEndian(sizeof(extra) - 8);
-
-	extra.dwFlags = LittleEndian(sample.uFlags);
-	extra.wPan = LittleEndianW(sample.nPan);
-	extra.wVolume = LittleEndianW(sample.nVolume);
-	extra.wGlobalVol = LittleEndianW(sample.nGlobalVol);
-	extra.wReserved = 0;
-
-	extra.nVibType = sample.nVibType;
-	extra.nVibSweep = sample.nVibSweep;
-	extra.nVibDepth = sample.nVibDepth;
-	extra.nVibRate = sample.nVibRate;
-	if((GetType() & MOD_TYPE_XM) && (extra.nVibDepth | extra.nVibRate))
-	{
-		// XM vibrato is upside down
-		extra.nVibSweep = 255 - extra.nVibSweep;
-	}
-
-	fwrite(&extra, 1, sizeof(extra), f);
-	fclose(f);
+	WAVWriter::Metatags tags;
+	tags.push_back(WAVWriter::Metatag(RIFFChunk::idINAM, m_szNames[nSample]));
+	tags.push_back(WAVWriter::Metatag(RIFFChunk::idISFT, MptVersion::GetOpenMPTVersionStr()));
+	file.WriteMetatags(tags);
+	
 	return true;
 }
 
@@ -609,8 +498,7 @@ bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 
 typedef struct PACKED GF1PATCHFILEHEADER
 {
-	DWORD gf1p;				// "GF1P"
-	DWORD atch;				// "ATCH"
+	char  magic[8];			// "GF1PATCH"
 	CHAR version[4];		// "100", or "110"
 	CHAR id[10];			// "ID#000002"
 	CHAR copyright[60];		// Copyright
@@ -776,7 +664,7 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMem
 	GF1INSTRUMENT *pinshdr = (GF1INSTRUMENT *)(lpStream+sizeof(GF1PATCHFILEHEADER));
 
 	if ((!lpStream) || (dwMemLength < 512)
-	 || (phdr->gf1p != 0x50314647) || (phdr->atch != 0x48435441)
+	 || memcmp(phdr->magic, "GF1PATCH", 8)
 	 || (phdr->version[3] != 0) || (phdr->id[9] != 0) || (phdr->instrum < 1)
 	 || (!phdr->samples) || (!pinshdr->layers)) return false;
 	
@@ -803,7 +691,7 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWOR
 	UINT nSamples;
 
 	if ((!lpStream) || (dwMemLength < 512)
-	 || (phdr->gf1p != 0x50314647) || (phdr->atch != 0x48435441)
+	 || memcmp(phdr->magic, "GF1PATCH", 8)
 	 || (phdr->version[3] != 0) || (phdr->id[9] != 0)
 	 || (phdr->instrum < 1) || (!phdr->samples)
 	 || (!pih->layers) || (!plh->samples)) return false;
@@ -1928,8 +1816,7 @@ struct FLACDecoder
 		{
 			FileReader::off_t readBytes = *bytes;
 			LimitMax(readBytes, file.BytesLeft());
-			memcpy(buffer, file.GetRawData(), readBytes);
-			file.Skip(readBytes);
+			file.ReadRaw(reinterpret_cast<char *>(buffer), readBytes);
 			*bytes = readBytes;
 			if(*bytes == 0)
 				return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
@@ -2080,7 +1967,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 {
 #ifndef NO_FLAC
 	// Check if we're dealing with FLAC in an OGG container.
-	// We won't check for the "fLaC" signature but let libFLAC decide whether a file is valid or not, as some FLAC files might have e.g. leading ID3v2 data.
+	// <del>We won't check for the "fLaC" signature but let libFLAC decide whether a file is valid or not, as some FLAC files might have e.g. leading ID3v2 data.</del> Apparently we do that now.
 	file.Rewind();
 	if(!file.ReadMagic("fLaC"))
 	{
@@ -2312,8 +2199,7 @@ namespace mpg123
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
 		size_t readBytes = std::min(count, static_cast<size_t>(file.BytesLeft()));
-		memcpy(buf, file.GetRawData(), readBytes);
-		file.Skip(readBytes);
+		file.ReadRaw(static_cast<char *>(buf), readBytes);
 		return readBytes;
 	}
 

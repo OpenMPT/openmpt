@@ -539,7 +539,8 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	else if((GetBitDepth() == 8 || (GetBitDepth() == 16 && GetEndianness() == littleEndian)) && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM)
 	{
 		//	Stereo signed interleaved
-		if(f) fwrite(pSample, 1, sample.GetSampleSizeInBytes(), f);
+		len = sample.GetSampleSizeInBytes();
+		if(f) fwrite(pSample, 1, len, f);
 	}
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoInterleaved && GetEncoding() == unsignedPCM)
