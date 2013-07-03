@@ -31,17 +31,6 @@ int get_version_compatbility( std::uint32_t api_version );
 
 } // namespace version
 
-// has to be exported for type_info lookup to work
-class LIBOPENMPT_CXX_API exception_message : public exception {
-public:
-	exception_message( const char * text_ ) throw();
-	virtual ~exception_message() throw();
-public:
-	virtual const char * what() const throw();
-private:
-	const char * text;
-}; // class exception_message
-
 class log_interface {
 protected:
 	log_interface();

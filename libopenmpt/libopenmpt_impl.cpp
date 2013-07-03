@@ -27,16 +27,6 @@
 
 namespace openmpt {
 
-exception_message::exception_message( const char * text_ ) throw() : text(text_) {
-	return;
-}
-exception_message::~exception_message() throw() {
-	return;
-}
-const char * exception_message::what() const throw() {
-	return text;
-}
-
 log_interface::log_interface() {
 	return;
 }
@@ -114,7 +104,7 @@ static ResamplingMode filterlength_to_resamplingmode(std::int32_t length) {
 	} else if ( length >= 1 ) {
 		return SRCMODE_NEAREST;
 	} else {
-		throw openmpt::exception_message("negative filter length");
+		throw openmpt::exception("negative filter length");
 		return SRCMODE_POLYPHASE;
 	}
 }
@@ -134,7 +124,7 @@ static std::int32_t resamplingmode_to_filterlength(ResamplingMode mode) {
 	case SRCMODE_DEFAULT:
 		return 8;
 	default:
-		throw openmpt::exception_message("unknown interpolation filter length set internally");
+		throw openmpt::exception("unknown interpolation filter length set internally");
 		break;
 	}
 }
@@ -168,7 +158,7 @@ void module_impl::init() {
 }
 void module_impl::load( CSoundFile & sndFile, const FileReader & file ) {
 	if ( !sndFile.Create( file, CSoundFile::loadCompleteModule ) ) {
-		throw openmpt::exception_message("error loading file");
+		throw openmpt::exception("error loading file");
 	}
 }
 void module_impl::load( const FileReader & file ) {
@@ -316,7 +306,7 @@ std::int32_t module_impl::get_render_param( int param ) const {
 		case module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS: {
 			return m_sndFile->m_MixerSettings.GetVolumeRampDownMicroseconds();
 		} break;
-		default: throw openmpt::exception_message("unknown render param"); break;
+		default: throw openmpt::exception("unknown render param"); break;
 	}
 	return 0;
 }
@@ -362,13 +352,13 @@ void module_impl::set_render_param( int param, std::int32_t value ) {
 				m_sndFile->SetMixerSettings( newsettings );
 			}
 		} break;
-		default: throw openmpt::exception_message("unknown render param"); break;
+		default: throw openmpt::exception("unknown render param"); break;
 	}
 }
 
 std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::int16_t * mono ) {
 	if ( !mono ) {
-		throw openmpt::exception_message("null pointer");
+		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 1, false );
 	count = read_wrapper( count, mono, 0, 0, 0 );
@@ -377,7 +367,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 }
 std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right ) {
 	if ( !left || !right ) {
-		throw openmpt::exception_message("null pointer");
+		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 2, false );
 	count = read_wrapper( count, left, right, 0, 0 );
@@ -386,7 +376,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 }
 std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right ) {
 	if ( !left || !right || !rear_left || !rear_right ) {
-		throw openmpt::exception_message("null pointer");
+		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 4, false );
 	count = read_wrapper( count, left, right, rear_left, rear_right );
@@ -395,7 +385,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 }
 std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float * mono ) {
 	if ( !mono ) {
-		throw openmpt::exception_message("null pointer");
+		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 1, true );
 	count = read_wrapper( count, mono, 0, 0, 0 );
@@ -404,7 +394,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 }
 std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float * left, float * right ) {
 	if ( !left || !right ) {
-		throw openmpt::exception_message("null pointer");
+		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 2, true );
 	count = read_wrapper( count, left, right, 0, 0 );
@@ -413,7 +403,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 }
 std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right ) {
 	if ( !left || !right || !rear_left || !rear_right ) {
-		throw openmpt::exception_message("null pointer");
+		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 4, true );
 	count = read_wrapper( count, left, right, rear_left, rear_right );
@@ -646,39 +636,45 @@ std::vector<std::string> module_impl::get_ctls() const {
 }
 std::string module_impl::ctl_get_string( const std::string & ctl ) const {
 	if ( ctl == "" ) {
-		throw openmpt::exception_message("unknown ctl");
+		throw openmpt::exception("unknown ctl");
 	}
-	throw openmpt::exception_message("unknown ctl");
+	throw openmpt::exception("unknown ctl");
 }
 double module_impl::ctl_get_double( const std::string & ctl ) const {
 	if ( ctl == "" ) {
-		throw openmpt::exception_message("unknown ctl");
+		throw openmpt::exception("unknown ctl");
 	}
-	throw openmpt::exception_message("unknown ctl");
+	throw openmpt::exception("unknown ctl");
 }
 std::int64_t module_impl::ctl_get_int64( const std::string & ctl ) const {
 	if ( ctl == "" ) {
-		throw openmpt::exception_message("unknown ctl");
+		throw openmpt::exception("unknown ctl");
 	}
-	throw openmpt::exception_message("unknown ctl");
+	throw openmpt::exception("unknown ctl");
 }
 void module_impl::ctl_set( const std::string & ctl, const std::string & value ) {
 	if ( ctl == "" ) {
-		throw openmpt::exception_message("unknown ctl");
+		throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
 	}
-	throw openmpt::exception_message("unknown ctl");
+	throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
 }
 void module_impl::ctl_set( const std::string & ctl, double value ) {
+	std::ostringstream str;
+	str << value;
+	std::string strval = str.str();
 	if ( ctl == "" ) {
-		throw openmpt::exception_message("unknown ctl");
+		throw openmpt::exception("unknown ctl: " + ctl + " := " + strval);
 	}
-	throw openmpt::exception_message("unknown ctl");
+	throw openmpt::exception("unknown ctl: " + ctl + " := " + strval);
 }
 void module_impl::ctl_set( const std::string & ctl, std::int64_t value ) {
+	std::ostringstream str;
+	str << value;
+	std::string strval = str.str();
 	if ( ctl == "" ) {
-		throw openmpt::exception_message("unknown ctl");
+		throw openmpt::exception("unknown ctl: " + ctl + " := " + strval);
 	}
-	throw openmpt::exception_message("unknown ctl");
+	throw openmpt::exception("unknown ctl: " + ctl + " := " + strval);
 }
 
 } // namespace openmpt
