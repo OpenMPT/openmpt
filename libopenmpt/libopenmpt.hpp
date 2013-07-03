@@ -12,10 +12,10 @@
 
 #include "libopenmpt_config.h"
 
-#include <exception>
 #include <iostream>
 #include <istream>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -23,12 +23,9 @@
 
 namespace openmpt {
 
-class LIBOPENMPT_CXX_API exception : public std::exception {
+class LIBOPENMPT_CXX_API exception : public std::runtime_error {
 public:
-	exception() throw();
-	virtual ~exception() throw();
-public:
-	virtual const char * what() const throw();
+	exception( const std::string & text );
 }; // class exception
 
 LIBOPENMPT_CXX_API std::uint32_t get_library_version();

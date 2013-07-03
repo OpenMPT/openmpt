@@ -110,11 +110,7 @@ namespace detail {
 // has to be exported for type_info lookup to work
 class LIBOPENMPT_CXX_API version_mismatch : public openmpt::exception {
 public:
-	version_mismatch() throw() { }
-	virtual ~version_mismatch() throw() { }
-	virtual const char * what() const throw() {
-		return "API and header version mismatch";
-	}
+	version_mismatch() : openmpt::exception("API and header version mismatch") { }
 }; // class version_mismatch
 
 void version_compatible_or_throw( std::int32_t api_version ) {

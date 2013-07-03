@@ -15,11 +15,7 @@
 namespace openmpt123 {
 
 struct exception : public openmpt::exception {
-	exception( const char * text_ ) throw() : text(text_) { }
-	virtual const char * what() const throw() {
-		return text;
-	}
-	const char * text;
+	exception( const char * text ) : openmpt::exception(text) { }
 };
 
 struct show_help_exception {
