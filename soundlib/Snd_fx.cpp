@@ -1129,6 +1129,8 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 			pChn->nLength = pSmp->nLength;
 			pChn->nLoopEnd = pSmp->nLength;
 			pChn->nLoopStart = 0;
+			pChn->nPos = 0;
+			pChn->nPosLo = 0;
 			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (static_cast<ChannelFlags>(pSmp->uFlags) & CHN_SAMPLEFLAGS);
 			if(pChn->dwFlags[CHN_SUSTAINLOOP])
 			{
@@ -1143,8 +1145,13 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 				pChn->nLoopEnd = pSmp->nLoopEnd;
 				if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
 			}
-			pChn->nPos = 0;
-			pChn->nPosLo = 0;
+
+			if(pChn->dwFlags[CHN_REVRSE])
+			{
+				pChn->dwFlags.set(CHN_PINGPONGFLAG);
+				pChn->nPos = pChn->nLength - 1;
+			}
+
 			// Handle "retrigger" waveform type
 			if(pChn->nVibratoType < 4)
 			{

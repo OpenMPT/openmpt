@@ -647,6 +647,7 @@ struct PACKED AMS2SampleHeader
 		smp16Bit	= 0x04,
 		smpLoop		= 0x08,
 		smpBidiLoop	= 0x10,
+		smpReverse	= 0x40,
 	};
 
 	uint32 length;
@@ -696,14 +697,18 @@ struct PACKED AMS2SampleHeader
 
 		if(flags & smp16Bit)
 		{
-			mptSmp.uFlags |= CHN_16BIT;
+			mptSmp.uFlags.set(CHN_16BIT);
 		}
 		if((flags & smpLoop) && mptSmp.nLoopStart < mptSmp.nLoopEnd)
 		{
-			mptSmp.uFlags |= CHN_LOOP;
+			mptSmp.uFlags.set(CHN_LOOP);
 			if(flags & smpBidiLoop)
 			{
-				mptSmp.uFlags |= CHN_PINGPONGLOOP;
+				mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+			}
+			if(flags & smpReverse)
+			{
+				mptSmp.uFlags.set(CHN_REVRSE);
 			}
 		}
 	}
@@ -778,7 +783,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 32;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Format("Velvet Studio %d.%d", fileHeader.format >> 4, fileHeader.format & 0x0F);
+	madeWithTracker = mpt::String::Format("Velvet Studio %d.%02x", fileHeader.format & 0x0F, fileHeader.format >> 4);
 
 	// Instruments
 	std::vector<SAMPLEINDEX> firstSample;	// First sample of instrument
