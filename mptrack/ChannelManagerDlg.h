@@ -39,7 +39,6 @@ protected:
 	CChannelManagerDlg(void);
 	~CChannelManagerDlg(void);
 
-	CRITICAL_SECTION applying;
 	CHANNELINDEX memory[4][MAX_BASECHANNELS];
 	CHANNELINDEX pattern[MAX_BASECHANNELS];
 	bool removed[MAX_BASECHANNELS];
