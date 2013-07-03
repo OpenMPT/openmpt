@@ -1340,7 +1340,15 @@ static forceinline LONG GetSampleCount(ModChannel *pChn, LONG nSamples, bool bIT
 			}
 			nInc = -nInc;
 			pChn->nInc = nInc;
-			pChn->dwFlags.reset(CHN_PINGPONGFLAG); // go forward
+			if(pChn->dwFlags[CHN_PINGPONGLOOP])
+			{
+				pChn->dwFlags.reset(CHN_PINGPONGFLAG); // go forward
+			} else
+			{
+				pChn->dwFlags.set(CHN_PINGPONGFLAG);
+				pChn->nPos = pChn->nLength - 1;
+				pChn->nInc = -nInc;
+			}
 			if(!pChn->dwFlags[CHN_LOOP] || pChn->nPos >= pChn->nLength)
 			{
 				pChn->nPos = pChn->nLength;

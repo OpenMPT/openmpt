@@ -124,7 +124,7 @@ DECLARE_FLAGSET(MODTYPE)
 // Channel flags:
 enum ChannelFlags
 {
-	// Bits 0-7:	Sample Flags
+	// Sample Flags
 	CHN_16BIT			= 0x01,			// 16-bit sample
 	CHN_LOOP			= 0x02,			// looped sample
 	CHN_PINGPONGLOOP	= 0x04,			// bidi-looped sample
@@ -132,8 +132,9 @@ enum ChannelFlags
 	CHN_PINGPONGSUSTAIN	= 0x10,			// sample with bidi sustain loop
 	CHN_PANNING			= 0x20,			// sample with forced panning
 	CHN_STEREO			= 0x40,			// stereo sample
+	CHN_REVRSE			= 0x80,			// start sample playback from sample / loop end (Velvet Studio feature) - this is intentionally the same flag as CHN_PINGPONGFLAG.
+	// Channel Flags
 	CHN_PINGPONGFLAG	= 0x80,			// when flag is on, sample is processed backwards
-	// Bits 8-31:	Channel Flags
 	CHN_MUTE			= 0x100,		// muted channel
 	CHN_KEYOFF			= 0x200,		// exit sustain
 	CHN_NOTEFADE		= 0x400,		// fade note (instrument mode)
@@ -158,7 +159,7 @@ enum ChannelFlags
 DECLARE_FLAGSET(ChannelFlags)
 
 
-#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG)
+#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVRSE)
 #define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS)
 
 
