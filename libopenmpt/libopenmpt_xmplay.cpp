@@ -66,7 +66,6 @@ struct self_xmplay_t {
 	std::size_t samplerate;
 	std::size_t num_channels;
 	openmpt::settings::settings settings;
-	std::vector<float> buf;
 	openmpt::module * mod;
 	self_xmplay_t() : samplerate(48000), num_channels(2), mod(nullptr) {
 		openmpt::settings::init( settings, false );
@@ -685,22 +684,21 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 		return 0;
 	}
 	std::size_t frames = count / self->num_channels;
-	self->buf.resize( frames * self->num_channels );
 	std::size_t frames_rendered = 0;
 	switch ( self->num_channels ) {
 	case 1:
 		{
-			frames_rendered = self->mod->read( self->samplerate, frames, &(self->buf[0*frames]) );
+			frames_rendered = self->mod->read( self->samplerate, frames, dstbuf );
 		}
 		break;
 	case 2:
 		{
-			frames_rendered = self->mod->read( self->samplerate, frames, &(self->buf[0*frames]), &(self->buf[1*frames]) );
+			frames_rendered = self->mod->read_interleaved_stereo( self->samplerate, frames, dstbuf );
 		}
 		break;
 	case 4:
 		{
-			frames_rendered = self->mod->read( self->samplerate, frames, &(self->buf[0*frames]), &(self->buf[1*frames]), &(self->buf[2*frames]), &(self->buf[3*frames]) );
+			frames_rendered = self->mod->read_interleaved_quad( self->samplerate, frames, dstbuf );
 		}
 		break;
 	default:
@@ -709,12 +707,6 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 	update_timeinfos( self->samplerate, frames );
 	if ( frames_rendered == 0 ) {
 		return 0;
-	}
-	for ( std::size_t frame = 0; frame < frames_rendered; frame++ ) {
-		for ( std::size_t channel = 0; channel < self->num_channels; channel++ ) {
-			*dstbuf = self->buf[channel*frames+frame];
-			dstbuf++;
-		}
 	}
 	return frames_rendered * self->num_channels;
 }

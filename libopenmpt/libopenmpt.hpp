@@ -127,6 +127,10 @@ public:
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * mono );
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right );
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
+	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_stereo );
+	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_quad );
+	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, float * interleaved_stereo );
+	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, float * interleaved_quad );
 
 	double get_current_position_seconds() const;
 

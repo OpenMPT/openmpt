@@ -68,6 +68,8 @@ private:
 	void load( const FileReader & file );
 	std::size_t read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
 	std::size_t read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
+	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, std::int16_t * interleaved );
+	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved );
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );
@@ -88,6 +90,10 @@ public:
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * mono );
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right );
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
+	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_stereo );
+	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_quad );
+	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, float * interleaved_stereo );
+	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, float * interleaved_quad );
 	double get_duration_seconds() const;
 	double get_current_position_seconds() const;
 	void select_subsong( std::int32_t subsong );
