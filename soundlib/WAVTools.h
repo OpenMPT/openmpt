@@ -360,3 +360,101 @@ public:
 	// Apply sample settings from file (loop points, MPT extra settings, ...) to a sample.
 	void ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SAMPLENAME]);
 };
+
+
+//=============
+class WAVWriter
+//=============
+{
+protected:
+	// When writing to file: File handle
+	FILE *f;
+	// When writing to memory: Memory address + length
+	uint8 *memory;
+	size_t memSize;
+
+	// Cursor position
+	size_t position;
+	// Total number of bytes written to file / memory
+	size_t totalSize;
+
+	// Currently written chunk
+	size_t chunkStartPos;
+	RIFFChunk chunkHeader;
+
+public:
+
+	//============
+	struct Metatag
+	//============
+	{
+		Metatag(RIFFChunk::id_type tagID, std::string tagText) : id(tagID), text(tagText) { }
+
+		RIFFChunk::id_type id;
+		std::string text;
+	};
+
+	typedef std::vector<Metatag> Metatags;
+
+public:
+	// Output to file: Initialize with filename.
+	WAVWriter(const char *filename);
+	// Output to clipboard: Initialize with pointer to memory and size of reserved memory.
+	WAVWriter(void *mem, size_t size);
+
+	~WAVWriter();
+
+	// Open a file for writing.
+	void Open(const char *filename);
+
+	// Check if anything can be written to the file.
+	bool IsValid() const { return f != nullptr || memory != nullptr; }
+
+	// Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
+	size_t Finalize();
+	// Begin writing a new chunk to the file.
+	void StartChunk(RIFFChunk::id_type id);
+
+	// Skip some bytes... For example after writing sample data.
+	void Skip(size_t numBytes) { Seek(position + numBytes); }
+	// Get file handle
+	FILE *GetFile() { return f; }
+	// Get position in file (not counting any changes done to the file from outside this class, i.e. through GetFile())
+	size_t GetPosition() const { return position; }
+
+	// Shrink file size to current position.
+	void Truncate() { totalSize = position; }
+
+	// Write some data to the file.
+	template<typename T>
+	void Write(const T &data)
+	{
+		Write(&data, sizeof(T));
+	}
+
+	// Write an array to the file.
+	template<typename T, size_t size>
+	void WriteArray(const T (&data)[size])
+	{
+		Write(data, sizeof(T) * size);
+	}
+
+	// Write the WAV format to the file.
+	void WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChannels, WAVFormatChunk::SampleFormats encoding);
+	// Write text tags to the file.
+	void WriteMetatags(const Metatags &tags);
+	// Write a sample loop information chunk to the file.
+	void WriteLoopInformation(const ModSample &sample);
+	// Write MPT's sample information chunk to the file.
+	void WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName = nullptr);
+
+protected:
+	void Init();
+	// Seek to a position in file.
+	void Seek(size_t pos);
+	// End current chunk by updating the chunk header and writing a padding byte if necessary.
+	void FinalizeChunk();
+
+	// Write some data to the file.
+	void Write(const void *data, size_t numBytes);
+};
