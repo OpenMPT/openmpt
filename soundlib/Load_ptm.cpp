@@ -106,6 +106,8 @@ struct PACKED PTMSampleHeader
 			mptSmp.nLength = length;
 			mptSmp.nLoopStart = loopStart;
 			mptSmp.nLoopEnd = loopEnd;
+			if(mptSmp.nLoopEnd > mptSmp.nLoopStart)
+				mptSmp.nLoopEnd--;
 
 			if(flags & smpLoop) mptSmp.uFlags.set(CHN_LOOP);
 			if(flags & smpPingPong) mptSmp.uFlags.set(CHN_PINGPONGLOOP);
@@ -157,6 +159,8 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	madeWithTracker = mpt::String::Format("PolyTracker %d.%02x", fileHeader.versionHi, fileHeader.versionLo);
 	m_nType = MOD_TYPE_PTM;
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
+	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = std::min<SAMPLEINDEX>(fileHeader.numSamples, MAX_SAMPLES - 1);
 	Order.ReadFromArray(fileHeader.orders, fileHeader.numOrders);
@@ -241,6 +245,26 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 				} else
 				{
 					m.command = CMD_NONE;
+				}
+				switch(m.command)
+				{
+				case CMD_PANNING8:
+					// My observations of this weird command...
+					// 800...80F and 880...88F are panned dead centre.
+					// 810...87F and 890...8FF pan from hard left to hard right.
+					// A default center panning or using 800 is a bit louder than using 848, for whatever reason.
+					m.param &= 0x7F;
+					if(m.param < 0x10)
+					{
+						m.param = 0x80;
+					} else
+					{
+						m.param = (m.param - 0x10) * 0xFF / 0x6F;
+					}
+					break;
+				case CMD_GLOBALVOLUME:
+					m.param = std::min(m.param, uint8(0x40)) * 2u;
+					break;
 				}
 			}
 			if(b & 0x80)

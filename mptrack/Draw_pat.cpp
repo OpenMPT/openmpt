@@ -1648,7 +1648,7 @@ void CViewPattern::UpdateIndicator()
 					} else
 					{
 						// "normal" volume command
-						if (!effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), s)) s[0] = 0;
+						effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), s);
 					}
 					break;
 
@@ -1657,7 +1657,7 @@ void CViewPattern::UpdateIndicator()
 					// display effect command
 					if(!m->IsPcNote())
 					{
-						if (!effectInfo.GetEffectName(s, m->command, m->param, false, nChn)) s[0] = 0;
+						effectInfo.GetEffectName(s, m->command, m->param, false, nChn);
 					}
 					break;
 				}

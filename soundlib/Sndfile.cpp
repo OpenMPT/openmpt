@@ -1334,16 +1334,50 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 MODTYPE CSoundFile::GetBestSaveFormat() const
 //-------------------------------------------
 {
-	if ((!m_nSamples) || (!m_nChannels) || GetType() == MOD_TYPE_NONE) return MOD_TYPE_NONE;
-	if (GetType() & (MOD_TYPE_MOD|MOD_TYPE_DIGI))
+	switch(GetType())
+	{
+	case MOD_TYPE_MOD:
+	case MOD_TYPE_S3M:
+	case MOD_TYPE_XM:
+	case MOD_TYPE_IT:
+	case MOD_TYPE_MPT:
+		return GetType();
+	case MOD_TYPE_AMF0:
+	case MOD_TYPE_DIGI:
 		return MOD_TYPE_MOD;
-	if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_ULT|MOD_TYPE_FAR|MOD_TYPE_PTM|MOD_TYPE_MTM))
-		return MOD_TYPE_S3M;
-	if (GetType() & (MOD_TYPE_XM|MOD_TYPE_MED/*|MOD_TYPE_MT2*/))
+	case MOD_TYPE_MED:
+		if(m_nDefaultTempo == 125 && m_nDefaultSpeed == 6 && !m_nInstruments)
+		{
+			for(PATTERNINDEX i = 0; i < Patterns.Size(); i++)
+			{
+				if(Patterns.IsValidPat(i) && Patterns[i].GetNumRows() != 64)
+					return MOD_TYPE_XM;
+			}
+			return MOD_TYPE_MOD;
+		}
 		return MOD_TYPE_XM;
-	if(GetType() & MOD_TYPE_MPT)
-		return MOD_TYPE_MPT;
-	return MOD_TYPE_IT;
+	case MOD_TYPE_669:
+	case MOD_TYPE_FAR:
+	case MOD_TYPE_STM:
+	case MOD_TYPE_DSM:
+	case MOD_TYPE_AMF:
+	case MOD_TYPE_MTM:
+		return MOD_TYPE_S3M;
+	case MOD_TYPE_AMS:
+	case MOD_TYPE_AMS2:
+	case MOD_TYPE_DMF:
+	case MOD_TYPE_DBM:
+	case MOD_TYPE_IMF:
+	case MOD_TYPE_PSM:
+	case MOD_TYPE_J2B:
+	case MOD_TYPE_ULT:
+	case MOD_TYPE_OKT:
+	case MOD_TYPE_MT2:
+	case MOD_TYPE_MDL:
+	case MOD_TYPE_PTM:
+	default:
+		return MOD_TYPE_IT;
+	}
 }
 
 
