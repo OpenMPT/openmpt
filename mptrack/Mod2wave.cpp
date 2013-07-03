@@ -17,6 +17,7 @@
 #include "vstplug.h"
 #include "mod2wave.h"
 #include "Wav.h"
+#include "ACMConvert.h"
 
 extern UINT nMixingRates[NUMMIXRATE];
 extern LPCSTR gszChnCfgNames[3];
@@ -374,7 +375,7 @@ BOOL CLayer3Convert::OnInitDialog()
 	pwfx->wBitsPerSample = 16;
 	pwfx->nBlockAlign = (pwfx->nChannels * pwfx->wBitsPerSample) / 8;
 	pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
-	theApp.GetACMConvert().AcmFormatEnum(NULL, &afd, AcmFormatEnumCB, (DWORD)this, ACM_FORMATENUMF_CONVERT);
+	acmConvert.AcmFormatEnum(NULL, &afd, AcmFormatEnumCB, (DWORD)this, ACM_FORMATENUMF_CONVERT);
 	m_bDriversEnumerated = TRUE;
 	m_CbnDriver.SetCurSel(m_nDriverIndex);
 	if (m_bSaveInfoField) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
@@ -416,7 +417,7 @@ VOID CLayer3Convert::UpdateDialog()
 	pwfx->wBitsPerSample = 16;
 	pwfx->nBlockAlign = pwfx->nChannels * pwfx->wBitsPerSample / 8;
 	pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
-	theApp.GetACMConvert().AcmFormatEnum(NULL, &afd, AcmFormatEnumCB, (DWORD)this, ACM_FORMATENUMF_CONVERT);
+	acmConvert.AcmFormatEnum(NULL, &afd, AcmFormatEnumCB, (DWORD)this, ACM_FORMATENUMF_CONVERT);
 	m_CbnFormat.SetCurSel(m_nFormatIndex);
 }
 
@@ -457,7 +458,7 @@ BOOL CLayer3Convert::DriverEnumCB(HACMDRIVERID hdid, LPACMFORMATDETAILS pafd, DW
 		}
 		MemsetZero(add);
 		add.cbStruct = sizeof(add);
-		if (theApp.GetACMConvert().AcmDriverDetails(hdid, &add, 0L) == MMSYSERR_NOERROR)
+		if (acmConvert.AcmDriverDetails(hdid, &add, 0L) == MMSYSERR_NOERROR)
 		{
 			Drivers[m_nNumDrivers] = hdid;
 			CHAR *pszName = ((add.szLongName[0]) && (strlen(add.szLongName) < 40)) ? add.szLongName : add.szShortName;
@@ -891,9 +892,10 @@ BEGIN_MESSAGE_MAP(CDoAcmConvert, CDialog)
 END_MESSAGE_MAP()
 
 
-CDoAcmConvert::CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, HACMDRIVERID hadid, CFileTagging *pTag, CWnd *parent):
-	CDialog(IDD_PROGRESS, parent)
-//--------------------------------------------------------------------------------------------------------------------------------------
+CDoAcmConvert::CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, HACMDRIVERID hadid, CFileTagging *pTag, ACMConvert &acmConvert_, CWnd *parent):
+	CDialog(IDD_PROGRESS, parent),
+	acmConvert(acmConvert_)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	m_pSndFile = sndfile;
 	m_lpszFileName = fname;
@@ -956,12 +958,12 @@ void CDoAcmConvert::OnButton1()
 	wfxSrc.cbSize = 0;
 	dwDstBufSize = WAVECONVERTBUFSIZE;
 	// Open the ACM Driver
-	if (theApp.GetACMConvert().AcmDriverOpen(&hADriver, m_hadid, 0L) != MMSYSERR_NOERROR) goto OnError;
-	if (theApp.GetACMConvert().AcmStreamOpen(&hAStream, hADriver, &wfxSrc, m_pwfx, NULL, 0L, 0L, ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR) goto OnError;
+	if (acmConvert.AcmDriverOpen(&hADriver, m_hadid, 0L) != MMSYSERR_NOERROR) goto OnError;
+	if (acmConvert.AcmStreamOpen(&hAStream, hADriver, &wfxSrc, m_pwfx, NULL, 0L, 0L, ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR) goto OnError;
 	// This call is useless for BLADEenc/LAMEenc, but required for ACM codecs!
-	if (theApp.GetACMConvert().AcmStreamSize(hAStream, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_SOURCE) != MMSYSERR_NOERROR) goto OnError;
+	if (acmConvert.AcmStreamSize(hAStream, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_SOURCE) != MMSYSERR_NOERROR) goto OnError;
 	// This call is useless for ACM, but required for BLADEenc/LAMEenc codecs!
-	if (theApp.GetACMConvert().AcmStreamSize(hAStream, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_DESTINATION) != MMSYSERR_NOERROR) goto OnError;
+	if (acmConvert.AcmStreamSize(hAStream, WAVECONVERTBUFSIZE, &dwDstBufSize, ACM_STREAMSIZEF_DESTINATION) != MMSYSERR_NOERROR) goto OnError;
 	//if (dwDstBufSize > 0x10000) dwDstBufSize = 0x10000;
 	pcmBuffer = new BYTE[WAVECONVERTBUFSIZE];
 	dstBuffer = new BYTE[dwDstBufSize];
@@ -974,7 +976,7 @@ void CDoAcmConvert::OnButton1()
 	ash.cbSrcLength = WAVECONVERTBUFSIZE;
 	ash.pbDst = dstBuffer;
 	ash.cbDstLength = dwDstBufSize;
-	if (theApp.GetACMConvert().AcmStreamPrepareHeader(hAStream, &ash, 0L) != MMSYSERR_NOERROR) goto OnError;
+	if (acmConvert.AcmStreamPrepareHeader(hAStream, &ash, 0L) != MMSYSERR_NOERROR) goto OnError;
 	bPrepared = true;
 	// Creating the output file
 	while ((f = fopen(m_lpszFileName, "wb")) == NULL)
@@ -1049,7 +1051,7 @@ void CDoAcmConvert::OnButton1()
 		ullSamples += lRead;
 		ash.cbSrcLength = lRead * wfxSrc.nBlockAlign + WAVECONVERTBUFSIZE - pcmBufSize;
 		ash.cbDstLengthUsed = 0;
-		if (theApp.GetACMConvert().AcmStreamConvert(hAStream, &ash, (lRead) ? ACM_STREAMCONVERTF_BLOCKALIGN : ACM_STREAMCONVERTF_END) != MMSYSERR_NOERROR) break;
+		if (acmConvert.AcmStreamConvert(hAStream, &ash, (lRead) ? ACM_STREAMCONVERTF_BLOCKALIGN : ACM_STREAMCONVERTF_END) != MMSYSERR_NOERROR) break;
 		do
 		{
 			if (::PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE))
@@ -1107,9 +1109,9 @@ void CDoAcmConvert::OnButton1()
 	fclose(f);
 	if (!m_bAbort) retval = IDOK;
 OnError:
-	if (bPrepared) theApp.GetACMConvert().AcmStreamUnprepareHeader(hAStream, &ash, 0L);
-	if (hAStream != NULL) theApp.GetACMConvert().AcmStreamClose(hAStream, 0L);
-	if (hADriver != NULL) theApp.GetACMConvert().AcmDriverClose(hADriver, 0L);
+	if (bPrepared) acmConvert.AcmStreamUnprepareHeader(hAStream, &ash, 0L);
+	if (hAStream != NULL) acmConvert.AcmStreamClose(hAStream, 0L);
+	if (hADriver != NULL) acmConvert.AcmDriverClose(hADriver, 0L);
 	if (pcmBuffer) delete[] pcmBuffer;
 	if (dstBuffer) delete[] dstBuffer;
 	EndDialog(retval);

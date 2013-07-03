@@ -31,17 +31,6 @@ static PBLADEENCSTREAMINFO gpbeLameCfg = NULL;
 BOOL ACMConvert::layer3Present = FALSE;
 
 
-#define TRAP_ACM_FAULTS
-
-#ifdef TRAP_ACM_FAULTS
-void ACMConvert::AcmExceptionHandler()
-//------------------------------------
-{
-	theApp.GetACMConvert().m_hACMInst = NULL;
-	theApp.WriteProfileInt("Settings", "DisableACM", 1);
-}
-#endif
-
 BOOL ACMConvert::InitializeACM(BOOL bNoAcm)
 //-----------------------------------------
 {
@@ -57,13 +46,12 @@ BOOL ACMConvert::InitializeACM(BOOL bNoAcm)
 	} catch(...) {}
 	if (!bNoAcm)
 	{
-#ifdef TRAP_ACM_FAULTS
 		try {
-#endif
 			m_hACMInst = LoadLibrary(TEXT("MSACM32.DLL"));
-#ifdef TRAP_ACM_FAULTS
-		} catch(...) {}
-#endif
+		} catch(...)
+		{
+			m_hACMInst = NULL;
+		}
 	}
 	SetErrorMode(fuErrorMode);
 	if (m_hBladeEnc != NULL)
@@ -97,9 +85,7 @@ BOOL ACMConvert::InitializeACM(BOOL bNoAcm)
 		m_hACMInst = NULL;
 		return bOk;
 	}
-#ifdef TRAP_ACM_FAULTS
 	try {
-#endif
 		*(FARPROC *)&pfnAcmGetVersion = GetProcAddress(m_hACMInst, "acmGetVersion");
 		dwVersion = 0;
 		if (pfnAcmGetVersion) dwVersion = pfnAcmGetVersion();
@@ -131,11 +117,13 @@ BOOL ACMConvert::InitializeACM(BOOL bNoAcm)
 			pwfx->nBlockAlign = (WORD)((pwfx->nChannels * pwfx->wBitsPerSample) / 8);
 			pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
 			m_pfnAcmFormatEnum(NULL, &afd, AcmFormatEnumCB, NULL, ACM_FORMATENUMF_CONVERT);
+			bOk = TRUE;
 		}
-#ifdef TRAP_ACM_FAULTS
-	} catch(...){}
-#endif
-	return TRUE;
+	} catch(...)
+	{
+		// nothing
+	}
+	return bOk;
 }
 
 
@@ -157,6 +145,7 @@ BOOL ACMConvert::UninitializeACM()
 		FreeLibrary(m_hBladeEnc);
 		m_hBladeEnc = NULL;
 	}
+	layer3Present = FALSE;
 	return TRUE;
 }
 

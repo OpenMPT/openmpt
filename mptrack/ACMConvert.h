@@ -35,10 +35,10 @@ protected:
 	PFNACMFORMATENUM m_pfnAcmFormatEnum;
 	static BOOL layer3Present;
 
-public:
+private:
 	BOOL InitializeACM(BOOL bNoAcm = FALSE);
 	BOOL UninitializeACM();
-	static void AcmExceptionHandler();
+public:
 	MMRESULT AcmFormatEnum(HACMDRIVER had, LPACMFORMATDETAILSA pafd, ACMFORMATENUMCBA fnCallback, DWORD dwInstance, DWORD fdwEnum);
 	MMRESULT AcmDriverOpen(LPHACMDRIVER, HACMDRIVERID, DWORD);
 	MMRESULT AcmDriverDetails(HACMDRIVERID hadid, LPACMDRIVERDETAILS padd, DWORD fdwDetails);
@@ -51,11 +51,18 @@ public:
 	MMRESULT AcmStreamConvert(HACMSTREAM has, LPACMSTREAMHEADER pash, DWORD fdwConvert);
 	BOOL IsLayer3Present() const { return layer3Present; };
 
-	ACMConvert()
+	ACMConvert(bool noACM)
 	{
+		layer3Present = FALSE;
 		m_hBladeEnc = NULL;
 		m_hLameEnc = NULL;
 		m_hACMInst = NULL;
+		m_pfnAcmFormatEnum = NULL;
+		InitializeACM(noACM);
+	}
+	~ACMConvert()
+	{
+		UninitializeACM();
 	}
 
 protected:

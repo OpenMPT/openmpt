@@ -156,6 +156,9 @@ class TrackerSettings
 
 public:
 
+	// CommandLine switches
+	bool noACM;
+
 	// MIDI recording
 	enum RecordAftertouchOptions
 	{
