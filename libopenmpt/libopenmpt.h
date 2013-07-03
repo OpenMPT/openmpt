@@ -92,6 +92,10 @@ LIBOPENMPT_API size_t openmpt_module_read_quad(   openmpt_module * mod, int32_t 
 LIBOPENMPT_API size_t openmpt_module_read_float_mono(   openmpt_module * mod, int32_t samplerate, size_t count, float * mono );
 LIBOPENMPT_API size_t openmpt_module_read_float_stereo( openmpt_module * mod, int32_t samplerate, size_t count, float * left, float * right );
 LIBOPENMPT_API size_t openmpt_module_read_float_quad(   openmpt_module * mod, int32_t samplerate, size_t count, float * left, float * right, float * rear_left, float * rear_right );
+LIBOPENMPT_API size_t openmpt_module_read_interleaved_stereo( openmpt_module * mod, int32_t samplerate, size_t count, int16_t * interleaved_stereo );
+LIBOPENMPT_API size_t openmpt_module_read_interleaved_quad(   openmpt_module * mod, int32_t samplerate, size_t count, int16_t * interleaved_quad   );
+LIBOPENMPT_API size_t openmpt_module_read_interleaved_float_stereo( openmpt_module * mod, int32_t samplerate, size_t count, float * interleaved_stereo );
+LIBOPENMPT_API size_t openmpt_module_read_interleaved_float_quad(   openmpt_module * mod, int32_t samplerate, size_t count, float * interleaved_quad   );
 
 LIBOPENMPT_API double openmpt_module_get_current_position_seconds( openmpt_module * mod );
 

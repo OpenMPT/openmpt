@@ -427,6 +427,34 @@ size_t openmpt_module_read_float_quad( openmpt_module * mod, int32_t samplerate,
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0;
 }
+size_t openmpt_module_read_interleaved_stereo( openmpt_module * mod, int32_t samplerate, size_t count, int16_t * interleaved_stereo ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->read_interleaved_stereo( samplerate, count, interleaved_stereo );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+size_t openmpt_module_read_interleaved_quad( openmpt_module * mod, int32_t samplerate, size_t count, int16_t * interleaved_quad ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->read_interleaved_quad( samplerate, count, interleaved_quad );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+size_t openmpt_module_read_interleaved_float_stereo( openmpt_module * mod, int32_t samplerate, size_t count, float * interleaved_stereo ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->read_interleaved_stereo( samplerate, count, interleaved_stereo );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+size_t openmpt_module_read_interleaved_float_quad( openmpt_module * mod, int32_t samplerate, size_t count, float * interleaved_quad ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->read_interleaved_quad( samplerate, count, interleaved_quad );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
 
 double openmpt_module_get_current_position_seconds( openmpt_module * mod ) {
 	try {

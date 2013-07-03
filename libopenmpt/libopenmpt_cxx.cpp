@@ -143,6 +143,18 @@ std::size_t module::read( std::int32_t samplerate, std::size_t count, float * le
 std::size_t module::read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right ) {
 	return impl->read( samplerate, count, left, right, rear_left, rear_right );
 }
+std::size_t module::read_interleaved_stereo( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_stereo ) {
+	return impl->read_interleaved_stereo( samplerate, count, interleaved_stereo );
+}
+std::size_t module::read_interleaved_quad( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_quad ) {
+	return impl->read_interleaved_quad( samplerate, count, interleaved_quad );
+}
+std::size_t module::read_interleaved_stereo( std::int32_t samplerate, std::size_t count, float * interleaved_stereo ) {
+	return impl->read_interleaved_stereo( samplerate, count, interleaved_stereo );
+}
+std::size_t module::read_interleaved_quad( std::int32_t samplerate, std::size_t count, float * interleaved_quad ) {
+	return impl->read_interleaved_quad( samplerate, count, interleaved_quad );
+}
 
 double module::get_current_position_seconds() const {
 	return impl->get_current_position_seconds();
