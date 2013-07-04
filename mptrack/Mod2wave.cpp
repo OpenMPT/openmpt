@@ -26,6 +26,9 @@
 extern UINT nMixingRates[NUMMIXRATE];
 extern LPCSTR gszChnCfgNames[3];
 
+static const GUID guid_MEDIASUBTYPE_PCM        = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
+static const GUID guid_MEDIASUBTYPE_IEEE_FLOAT = {0x00000003, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ID3v1 Genres
 
@@ -185,8 +188,7 @@ void CWaveConvert::OnFormatChanged()
 //----------------------------------
 {
 	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
-	UINT nBits = dwFormat & 0xFF;
-	::EnableWindow( ::GetDlgItem(m_hWnd, IDC_CHECK5), (nBits <= 24) ? TRUE : FALSE );
+	(void)dwFormat;
 }
 
 
@@ -310,7 +312,6 @@ void CWaveConvert::OnOK()
 	// MultiChannel configuration
 	if ((WaveFormat.Format.wBitsPerSample == 32) || (WaveFormat.Format.nChannels > 2))
 	{
-		const GUID guid_MEDIASUBTYPE_PCM = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x0, 0xAA, 0x0, 0x38, 0x9B, 0x71};
 		WaveFormat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
 		WaveFormat.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
 		WaveFormat.Samples.wValidBitsPerSample = WaveFormat.Format.wBitsPerSample;
@@ -601,12 +602,13 @@ void CDoWaveConvert::OnButton1()
 //------------------------------
 {
 	static char buffer[MIXBUFFERSIZE * 4 * 4]; // channels * sizeof(biggestsample)
+	static float floatbuffer[MIXBUFFERSIZE * 4]; // channels
+	static int mixbuffer[MIXBUFFERSIZE * 4]; // channels
 	MSG msg;
 	CHAR s[80];
 	HWND progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	UINT ok = IDOK, pos = 0;
 	uint64 ullSamples = 0, ullMaxSamples;
-	LONG lMax = 256;
 
 	if (!m_pSndFile || !m_lpszFileName)
 	{
@@ -614,6 +616,7 @@ void CDoWaveConvert::OnButton1()
 		return;
 	}
 	
+	float normalizePeak = 0.0f;
 	std::string normalizeFileName = _tempnam("", "OpenMPT_mod2wave");
 	std::fstream normalizeFile;
 	if(m_bNormalize)
@@ -638,16 +641,13 @@ void CDoWaveConvert::OnButton1()
 	mixersettings.m_SampleFormat = (m_pWaveFormat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) ? SampleFormatFloat32 : (SampleFormat)m_pWaveFormat->wBitsPerSample;
 	mixersettings.gnChannels = m_pWaveFormat->nChannels;
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
-	if ((m_bNormalize) && (m_pWaveFormat->wBitsPerSample <= 24))
+	if(m_bNormalize)
 	{
-		mixersettings.m_SampleFormat = SampleFormatInt24;
+		mixersettings.m_SampleFormat = SampleFormatFloat32;
 #ifndef NO_AGC
 		mixersettings.DSPMask &= ~SNDDSP_AGC;
 #endif
 		if(mixersettings.m_nPreAmp > 128) mixersettings.m_nPreAmp = 128;
-	} else
-	{
-		m_bNormalize = false;
 	}
 
 	m_pSndFile->ResetChannels();
@@ -689,7 +689,7 @@ void CDoWaveConvert::OnButton1()
 	m_pSndFile->m_PatternCuePoints.reserve(m_pSndFile->Order.GetLength());
 
 	// Process the conversion
-	UINT nBytesPerSample = (m_pSndFile->m_MixerSettings.GetBitsPerSample() * m_pSndFile->m_MixerSettings.gnChannels) / 8;
+
 	// For calculating the remaining time
 	DWORD dwStartTime = timeGetTime();
 	// For giving away some processing time every now and then
@@ -702,7 +702,14 @@ void CDoWaveConvert::OnButton1()
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n = 0; ; n++)
 	{
-		UINT lRead = m_pSndFile->ReadInterleaved(buffer, MIXBUFFERSIZE);
+		UINT lRead = 0;
+		if(m_bNormalize)
+		{
+			lRead = m_pSndFile->ReadInterleaved(floatbuffer, MIXBUFFERSIZE);
+		} else
+		{
+			lRead = m_pSndFile->ReadInterleaved(buffer, MIXBUFFERSIZE);
+		}
 
 		// Process cue points (add base offset), if there are any to process.
 		std::vector<PatternCuePoint>::reverse_iterator iter;
@@ -729,23 +736,24 @@ void CDoWaveConvert::OnButton1()
 		if (m_bNormalize)
 		{
 
-			UINT imax = lRead*3*m_pSndFile->m_MixerSettings.gnChannels;
-			for (UINT i=0; i<imax; i+=3)
+			std::size_t countSamples = lRead * m_pSndFile->m_MixerSettings.gnChannels;
+			const float *src = floatbuffer;
+			while(countSamples--)
 			{
-				LONG l = ((((buffer[i+2] << 8) + buffer[i+1]) << 8) + buffer[i]) << 8;
-				l /= 256;
-				if (l > lMax) lMax = l;
-				if (-l > lMax) lMax = -l;
+				const float val = *src;
+				if(val > normalizePeak) normalizePeak = val;
+				else if(0.0f - val >= normalizePeak) normalizePeak = 0.0f - val;
+				src++;
 			}
 
-			normalizeFile.write(buffer, lRead * nBytesPerSample);
-			if(normalizeFile.gcount() != lRead * nBytesPerSample)
+			normalizeFile.write(reinterpret_cast<const char*>(floatbuffer), lRead * sizeof(float));
+			if(!normalizeFile)
 				break;
 
 		} else
 		{
 
-			UINT lWrite = fwrite(buffer, 1, lRead * nBytesPerSample, file.GetFile());
+			UINT lWrite = fwrite(buffer, 1, lRead * m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.GetBitsPerSample()/8), file.GetFile());
 			if (!lWrite) 
 				break;
 			bytesWritten += lWrite;
@@ -806,6 +814,9 @@ void CDoWaveConvert::OnButton1()
 	{
 		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
 
+		const float normalizeFactor = (normalizePeak != 0.0f) ? (1.0f / normalizePeak) : 1.0f;
+		Dither dither;
+
 		const DWORD dwBitSize = m_pWaveFormat->wBitsPerSample / 8;
 		const uint64 framesTotal = ullSamples;
 		int lastPercent = -1;
@@ -816,16 +827,43 @@ void CDoWaveConvert::OnButton1()
 		uint64 framesToProcess = framesTotal;
 		while(framesToProcess)
 		{
-			const uint64 framesChunk = std::min<uint64>(framesToProcess, MIXBUFFERSIZE);
+			const std::size_t framesChunk = std::min<std::size_t>(mpt::saturate_cast<std::size_t>(framesToProcess), MIXBUFFERSIZE);
+			const std::size_t samplesChunk = framesChunk * m_pWaveFormat->nChannels;
 			
-			normalizeFile.read(buffer, framesChunk * nBytesPerSample);
-			if(normalizeFile.gcount() != framesChunk * nBytesPerSample)
+			normalizeFile.read(reinterpret_cast<char*>(floatbuffer), framesChunk * sizeof(float));
+			if(normalizeFile.gcount() != framesChunk * sizeof(float))
 				break;
 
-			m_pSndFile->Normalize24BitBuffer((LPBYTE)buffer, framesChunk * nBytesPerSample, lMax, dwBitSize);
+			for(std::size_t i = 0; i < samplesChunk; ++i)
+			{
+				floatbuffer[i] *= normalizeFactor;
+			}
+			if(
+				m_pWaveFormat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT
+				|| (m_pWaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE && reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(m_pWaveFormat)->SubFormat == guid_MEDIASUBTYPE_IEEE_FLOAT)
+				)
+			{
+				// Do not dither for 32bit float output.
+				ASSERT(sizeof(float) == dwBitSize);
+				std::memcpy(buffer, floatbuffer, samplesChunk * sizeof(float));
+			} else
+			{
+				// Convert float buffer to mixbuffer format so we can apply dither.
+				// This can probably be changed in the future when dither supports floating point input directly.
+				FloatToMonoMix(floatbuffer, mixbuffer, samplesChunk, MIXING_SCALEF);
+				dither.Process(mixbuffer, framesChunk, m_pWaveFormat->nChannels, m_pWaveFormat->wBitsPerSample);
+				switch(dwBitSize)
+				{
+					case 1: Convert32ToInterleaved(reinterpret_cast<uint8*>(buffer), mixbuffer, samplesChunk); break;
+					case 2: Convert32ToInterleaved(reinterpret_cast<int16*>(buffer), mixbuffer, samplesChunk); break;
+					case 3: Convert32ToInterleaved(reinterpret_cast<int24*>(buffer), mixbuffer, samplesChunk); break;
+					case 4: Convert32ToInterleaved(reinterpret_cast<int32*>(buffer), mixbuffer, samplesChunk); break;
+					default: ASSERT(false); break;
+				}
+			}
 
-			fwrite(buffer, 1, framesChunk * dwBitSize * m_pWaveFormat->nChannels, file.GetFile());
-			bytesWritten += framesChunk * dwBitSize * m_pWaveFormat->nChannels;
+			fwrite(buffer, 1, samplesChunk * dwBitSize, file.GetFile());
+			bytesWritten += samplesChunk * dwBitSize;
 
 			{
 				int percent = static_cast<int>(100 * framesProcessed / framesTotal);

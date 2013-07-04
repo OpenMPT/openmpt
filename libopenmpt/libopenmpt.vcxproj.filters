@@ -439,9 +439,6 @@
     <ClCompile Include="..\soundlib\tuningCollection.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\Waveform.cpp">
-      <Filter>Source Files\soundlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\WAVTools.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>

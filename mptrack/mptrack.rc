@@ -463,7 +463,7 @@ BEGIN
     CONTROL         "&Channel mode (one file per channel)",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,54,168,12
     CONTROL         "&Instrument mode (one file per instrument)",IDC_CHECK6,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,66,168,12
-    CONTROL         "&Normalize Output (experimental)",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,84,168,12
+    CONTROL         "&Normalize Output",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,84,168,12
     CONTROL         "Slow &render (for Kontakt+DFD)",IDC_GIVEPLUGSIDLETIME,
                     "Button",BS_AUTOCHECKBOX | BS_LEFT | BS_MULTILINE | WS_TABSTOP,18,97,168,12
     CONTROL         "Limit file &size to: (KBytes)",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,138,111,11

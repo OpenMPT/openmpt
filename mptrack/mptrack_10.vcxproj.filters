@@ -253,9 +253,6 @@
     <ClCompile Include="..\soundlib\Tables.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\Waveform.cpp">
-      <Filter>Source Files\soundlib</Filter>
-    </ClCompile>
     <ClCompile Include="TuningDialog.cpp">
       <Filter>Source Files\mptrack\Tuning</Filter>
     </ClCompile>

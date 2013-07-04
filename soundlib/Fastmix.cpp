@@ -2175,17 +2175,6 @@ void Dither::Process(int *mixbuffer, std::size_t count, std::size_t channels, in
 }
 
 
-void DitherStateless(int *pBuffer, UINT nSamples, UINT nBits)
-//-----------------------------------------------------------
-{
-	#if defined(ENABLE_X86)
-		X86_Dither(pBuffer, nSamples, nBits, nullptr);
-	#else
-		C_Dither(pBuffer, nSamples, nBits, nullptr);
-	#endif
-}
-
-
 #ifdef ENABLE_X86
 static void X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames)
 //-------------------------------------------------------------------------------

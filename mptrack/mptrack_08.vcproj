@@ -615,10 +615,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\Waveform.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\WindowedFIR.cpp"
 				>
 			</File>
