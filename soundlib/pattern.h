@@ -89,6 +89,7 @@ public:
 	void RemoveSignature() { m_RowsPerBeat = m_RowsPerMeasure = 0; }
 
 	// Pattern name functions - bool functions return true on success.
+	bool SetName(const std::string &newName);
 	bool SetName(const char *newName, size_t maxChars = MAX_PATTERNNAME);
 	template<size_t bufferSize>
 	bool SetName(const char (&buffer)[bufferSize])

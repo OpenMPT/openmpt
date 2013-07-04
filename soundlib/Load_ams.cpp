@@ -46,6 +46,14 @@ bool ReadAMSString(char (&destBuffer)[destSize], FileReader &file)
 	return file.ReadString<mpt::String::spacePadded>(destBuffer, length);
 }
 
+// Read variable-length AMS string (we ignore the maximum text length specified by the AMS specs and accept any length).
+bool ReadAMSString(std::string &dest, FileReader &file)
+//-----------------------------------------------------
+{
+	const size_t length = file.ReadUint8();
+	return file.ReadString<mpt::String::spacePadded>(dest, length);
+}
+
 
 // Read AMS or AMS2 (newVersion = true) pattern. At least this part of the format is more or less identical between the two trackers...
 void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk, CSoundFile &sndFile)
@@ -417,7 +425,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Texts
-	ReadAMSString(m_szNames[0], file);
+	ReadAMSString(songName, file);
 
 	// Read sample names
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -749,7 +757,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 	AMS2FileHeader fileHeader;
 	if(!file.ReadMagic("AMShdr\x1A")
-		|| !ReadAMSString(m_szNames[0], file)
+		|| !ReadAMSString(songName, file)
 		|| !file.ReadConvertEndianness(fileHeader))
 	{
 		return false;

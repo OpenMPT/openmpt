@@ -793,7 +793,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 
 	ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], mainChunk.songname);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, mainChunk.songname);
 
 	// It seems like there's no way to differentiate between
 	// Muted and Surround channels (they're all 0xA0) - might

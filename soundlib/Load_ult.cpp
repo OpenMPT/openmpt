@@ -393,7 +393,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songName);
 
 	const char *versions[] = {"<1.4", "1.4", "1.5", "1.6"};
 	madeWithTracker = "UltraTracker ";

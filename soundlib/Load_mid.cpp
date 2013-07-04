@@ -530,7 +530,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlag
 	m_nType = MOD_TYPE_MID;
 	m_nChannels = 32;
 	m_SongFlags = SONG_LINEARSLIDES;
-	m_szNames[0][0] = 0;
+	songName = "";
 
 	// MIDI->MOD Tempo Conversion
 	division = BigEndianW(pmfh->wDivision);
@@ -714,10 +714,9 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlag
 						// FF.01 [text]: Song Information
 						case 0x01:
 							if (!len) break;
-							if ((len < 32) && (!m_szNames[0][0]))
+							if ((len < 32) && songName.empty())
 							{
-								memcpy(m_szNames[0], ptrk->ptracks, len);
-								m_szNames[0][len] = 0;
+								mpt::String::Read<mpt::String::maybeNullTerminated>(songName, reinterpret_cast<const char*>(ptrk->ptracks), len);
 							} else
 							if (songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F))
 							{
@@ -738,14 +737,12 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlag
 						case 0x06:
 							if ((len > 1) && (!trk))
 							{
-								UINT k = (len < 32) ? len : 31;
-								CHAR s[32];
-								memcpy(s, ptrk->ptracks, k);
-								s[k] = 0;
-								if ((!mpt::strnicmp(s, "Copyri", 6)) || (!s[0])) break;
+								std::string s;
+								mpt::String::Read<mpt::String::maybeNullTerminated>(s, reinterpret_cast<const char*>(ptrk->ptracks), len);
+								if ((!mpt::strnicmp(s.c_str(), "Copyri", 6)) || s.empty()) break;
 								if (i == 0x03)
 								{
-									if (!m_szNames[0][0]) strcpy(m_szNames[0], s);
+									if(songName.empty()) mpt::String::Copy(songName, s);
 								} else
 								if (!trk)
 								{

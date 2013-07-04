@@ -310,7 +310,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// "TITL" - Song Title
 	FileReader titleChunk = chunks.GetChunk(PSMChunk::idTITL);
-	titleChunk.ReadString<mpt::String::spacePadded>(m_szNames[0], titleChunk.GetLength());
+	titleChunk.ReadString<mpt::String::spacePadded>(songName, titleChunk.GetLength());
 
 	// "SDFT" - Format info (song data starts here)
 	if(!chunks.GetChunk(PSMChunk::idSDFT).ReadMagic("MAINSONG"))
@@ -1174,7 +1174,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultSpeed = fileHeader.songSpeed;
 	m_nDefaultTempo = fileHeader.songTempo;
 
-	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], fileHeader.songName);
+	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
 
 	// Read orders
 	if(fileHeader.orderOffset > 4 && file.Seek(fileHeader.orderOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPORD)

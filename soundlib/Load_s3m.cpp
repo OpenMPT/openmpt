@@ -272,7 +272,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	m_nType = MOD_TYPE_S3M;
-	mpt::String::Read<mpt::String::nullTerminated>(m_szNames[0], fileHeader.name);
+	mpt::String::Read<mpt::String::nullTerminated>(songName, fileHeader.name);
 
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
@@ -555,7 +555,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 	S3MFileHeader fileHeader;
 	MemsetZero(fileHeader);
 
-	mpt::String::Write<mpt::String::nullTerminated>(fileHeader.name, m_szNames[0]);
+	mpt::String::Write<mpt::String::nullTerminated>(fileHeader.name, songName);
 	fileHeader.dosEof = S3MFileHeader::idEOF;
 	fileHeader.fileType = S3MFileHeader::idS3MType;
 

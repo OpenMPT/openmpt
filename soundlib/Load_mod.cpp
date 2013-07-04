@@ -540,7 +540,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading song title
 	file.Seek(0);
-	file.ReadString<mpt::String::spacePadded>(m_szNames[0], 20);
+	file.ReadString<mpt::String::spacePadded>(songName, 20);
 
 	// Load Samples
 	size_t totalSampleLen = 0;
@@ -892,7 +892,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
 	m_SongFlags.reset();
-	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], songname);
+	mpt::String::Read<mpt::String::spacePadded>(songName, songname);
 
 	// Setup channel pan positions and volume
 	SetupMODPanning();
@@ -1103,7 +1103,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 	// Write song title
 	{
 		char name[20];
-		mpt::String::Write<mpt::String::maybeNullTerminated>(name, m_szNames[0]);
+		mpt::String::Write<mpt::String::maybeNullTerminated>(name, songName);
 		fwrite(name, 20, 1, f);
 	}
 

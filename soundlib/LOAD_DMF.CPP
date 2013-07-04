@@ -975,7 +975,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	mpt::String::Read<mpt::String::spacePadded>(m_szNames[0], fileHeader.songname);
+	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songname);
 
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
