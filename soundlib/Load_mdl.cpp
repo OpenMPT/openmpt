@@ -338,7 +338,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 			Log("infoblock: %d bytes\n", blocklen);
 		#endif
 			pmib = (MDLInfoBlock *)(lpStream+dwMemPos);
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[0], pmib->songname);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pmib->songname);
 
 			norders = pmib->norders;
 			if (norders > MAX_ORDERS) norders = MAX_ORDERS;

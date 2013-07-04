@@ -443,6 +443,9 @@ protected:
 	RowVisitor visitedSongRows;
 
 public:
+
+	std::string songName;
+
 	// Song message
 	SongMessage songMessage;
 	std::string madeWithTracker;
@@ -520,7 +523,7 @@ public:
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(ORDERINDEX nOrder);
-	std::string GetTitle() const { return m_szNames[0]; }
+	std::string GetTitle() const { return songName; }
 	bool SetTitle(const std::string &newTitle); // Return true if title was changed.
 	LPCTSTR GetSampleName(UINT nSample) const;
 	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;
