@@ -131,6 +131,36 @@ inline Tdst saturate_cast(Tsrc src)
 	}
 }
 
+template <typename Tdst>
+inline Tdst saturate_cast(double src)
+//-----------------------------------
+{
+	if(src >= std::numeric_limits<Tdst>::max())
+	{
+		return std::numeric_limits<Tdst>::max();
+	}
+	if(src <= std::numeric_limits<Tdst>::min())
+	{
+		return std::numeric_limits<Tdst>::min();
+	}
+	return static_cast<Tdst>(src);
+}
+
+template <typename Tdst>
+inline Tdst saturate_cast(float src)
+//----------------------------------
+{
+	if(src >= std::numeric_limits<Tdst>::max())
+	{
+		return std::numeric_limits<Tdst>::max();
+	}
+	if(src <= std::numeric_limits<Tdst>::min())
+	{
+		return std::numeric_limits<Tdst>::min();
+	}
+	return static_cast<Tdst>(src);
+}
+
 } // namespace mpt
 
 

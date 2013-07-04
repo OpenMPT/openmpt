@@ -547,6 +547,8 @@ void TestMisc()
 	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::min() - int64(1)), std::numeric_limits<uint32>::min() );
 	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::max() + int64(1)), (uint32)std::numeric_limits<int32>::max() + 1 );
 
+	VERIFY_EQUAL( mpt::saturate_cast<uint32>(static_cast<double>(std::numeric_limits<int64>::max())), std::numeric_limits<uint32>::max() );
+
 	VERIFY_EQUAL( mpt::String::LTrim(" "), "" );
 	VERIFY_EQUAL( mpt::String::RTrim(" "), "" );
 	VERIFY_EQUAL( mpt::String::Trim(" "), "" );
