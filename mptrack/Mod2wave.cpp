@@ -746,7 +746,7 @@ void CDoWaveConvert::OnButton1()
 				src++;
 			}
 
-			normalizeFile.write(reinterpret_cast<const char*>(floatbuffer), lRead * sizeof(float));
+			normalizeFile.write(reinterpret_cast<const char*>(floatbuffer), lRead * m_pSndFile->m_MixerSettings.gnChannels * sizeof(float));
 			if(!normalizeFile)
 				break;
 
@@ -830,8 +830,8 @@ void CDoWaveConvert::OnButton1()
 			const std::size_t framesChunk = std::min<std::size_t>(mpt::saturate_cast<std::size_t>(framesToProcess), MIXBUFFERSIZE);
 			const std::size_t samplesChunk = framesChunk * m_pWaveFormat->nChannels;
 			
-			normalizeFile.read(reinterpret_cast<char*>(floatbuffer), framesChunk * sizeof(float));
-			if(normalizeFile.gcount() != framesChunk * sizeof(float))
+			normalizeFile.read(reinterpret_cast<char*>(floatbuffer), samplesChunk * sizeof(float));
+			if(normalizeFile.gcount() != samplesChunk * sizeof(float))
 				break;
 
 			for(std::size_t i = 0; i < samplesChunk; ++i)
