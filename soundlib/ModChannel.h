@@ -79,7 +79,6 @@ struct ALIGN(32) ModChannel
 	uint32 nOldGlobalVolSlide;
 	uint32 nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
 	int32 nRetrigCount, nRetrigParam;
-	uint32 nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;
 	ROWINDEX nPatternLoop;
 	CHANNELINDEX nMasterChn;
 	// 8-bit members
@@ -103,6 +102,7 @@ struct ALIGN(32) ModChannel
 	uint8 nLeftVU, nRightVU;
 	uint8 nActiveMacro, nFilterMode;
 	uint8 nEFxSpeed, nEFxDelay;		// memory for Invert Loop (EFx, .MOD only)
+	uint8 nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;	// IMF / PTM Note Slide
 
 	ModCommand rowCommand;
 

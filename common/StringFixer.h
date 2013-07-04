@@ -163,7 +163,7 @@ namespace mpt { namespace String
 	//----------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
-		ASSERT(srcSize > 0);
+		//ASSERT(srcSize > 0);
 
 		const size_t maxSize = MIN(destSize, srcSize);
 		char *dst = destBuffer;
