@@ -1498,6 +1498,7 @@ void CViewPattern::InvalidatePattern(bool invalidateHeader)
 		rect.top += m_szHeader.cy;
 	}
 	InvalidateRect(&rect, FALSE);
+	SanitizeCursor();
 }
 
 

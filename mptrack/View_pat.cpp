@@ -3704,7 +3704,7 @@ ModCommand &CViewPattern::GetModCommand(PatternCursor cursor)
 //-----------------------------------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(GetCurrentPattern()))
+	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(GetCurrentPattern() && pSndFile->Patterns[GetCurrentPattern()].IsValidRow(cursor.GetRow())))
 	{
 		return *pSndFile->Patterns[GetCurrentPattern()].GetpModCommand(cursor.GetRow(), cursor.GetChannel());
 	}
@@ -3713,6 +3713,17 @@ ModCommand &CViewPattern::GetModCommand(PatternCursor cursor)
 	return dummy;
 }
 
+
+// Sanitize cursor so that it can't point to an invalid position in the current pattern.
+void CViewPattern::SanitizeCursor()
+//---------------------------------
+{
+	CSoundFile *pSndFile = GetSoundFile();
+	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(GetCurrentPattern()))
+	{
+		m_Cursor.Sanitize(GetSoundFile()->Patterns[m_nPattern].GetNumRows(), GetSoundFile()->Patterns[m_nPattern].GetNumChannels());
+	}
+};
 
 
 // Returns pointer to modcommand at given position.

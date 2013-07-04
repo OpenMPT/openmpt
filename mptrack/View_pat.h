@@ -234,6 +234,7 @@ public:
 	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER)); }
 	// Get ModCommand at the pattern cursor position.
 	ModCommand &GetCursorCommand() { return GetModCommand(m_Cursor); };
+	void SanitizeCursor();
 
 	UINT GetColumnOffset(PatternCursor::Columns column) const;
 	POINT GetPointFromPosition(PatternCursor cursor);
