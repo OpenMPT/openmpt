@@ -221,8 +221,6 @@ public:
 	void Process(int *mixbuffer, std::size_t count, std::size_t channels, int bits);
 };
 
-DEPRECATED void DitherStateless(int *pBuffer, UINT nSamples, UINT nBits);
-
 
 void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
 void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
@@ -849,9 +847,6 @@ public:
 	static void FreeSample(void *p);
 
 	ModInstrument *AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX assignedSample = 0);
-
-	// WAV export
-	UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
 
 private:
 	PLUGINDEX GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;

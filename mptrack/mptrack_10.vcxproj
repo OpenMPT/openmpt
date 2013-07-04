@@ -296,7 +296,6 @@
     <ClCompile Include="..\soundlib\Snd_fx.cpp" />
     <ClCompile Include="..\soundlib\SoundFilePlayConfig.cpp" />
     <ClCompile Include="..\soundlib\Tables.cpp" />
-    <ClCompile Include="..\soundlib\Waveform.cpp" />
     <ClCompile Include="..\soundlib\WAVTools.cpp" />
     <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />

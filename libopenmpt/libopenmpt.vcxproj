@@ -450,7 +450,6 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClCompile Include="..\soundlib\tuning.cpp" />
     <ClCompile Include="..\soundlib\tuningbase.cpp" />
     <ClCompile Include="..\soundlib\tuningCollection.cpp" />
-    <ClCompile Include="..\soundlib\Waveform.cpp" />
     <ClCompile Include="..\soundlib\WAVTools.cpp" />
     <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />
