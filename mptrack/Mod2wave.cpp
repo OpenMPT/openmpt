@@ -21,6 +21,8 @@
 #include "../common/version.h"
 #include "ACMConvert.h"
 
+#include <fstream>
+
 extern UINT nMixingRates[NUMMIXRATE];
 extern LPCSTR gszChnCfgNames[3];
 
@@ -598,8 +600,8 @@ BOOL CDoWaveConvert::OnInitDialog()
 void CDoWaveConvert::OnButton1()
 //------------------------------
 {
+	static char buffer[MIXBUFFERSIZE * 4 * 4]; // channels * sizeof(biggestsample)
 	MSG msg;
-	BYTE buffer[WAVECONVERTBUFSIZE];
 	CHAR s[80];
 	HWND progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	UINT ok = IDOK, pos = 0;
@@ -612,6 +614,13 @@ void CDoWaveConvert::OnButton1()
 		return;
 	}
 	
+	std::string normalizeFileName = _tempnam("", "OpenMPT_mod2wave");
+	std::fstream normalizeFile;
+	if(m_bNormalize)
+	{
+		normalizeFile.open(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
+	}
+
 	WAVWriter file(m_lpszFileName);
 	while(!file.IsValid())
 	{
@@ -693,7 +702,7 @@ void CDoWaveConvert::OnButton1()
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n = 0; ; n++)
 	{
-		UINT lRead = m_pSndFile->ReadInterleaved(buffer, sizeof(buffer)/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
+		UINT lRead = m_pSndFile->ReadInterleaved(buffer, MIXBUFFERSIZE);
 
 		// Process cue points (add base offset), if there are any to process.
 		std::vector<PatternCuePoint>::reverse_iterator iter;
@@ -716,8 +725,10 @@ void CDoWaveConvert::OnButton1()
 		if (!lRead) 
 			break;
 		ullSamples += lRead;
+
 		if (m_bNormalize)
 		{
+
 			UINT imax = lRead*3*m_pSndFile->m_MixerSettings.gnChannels;
 			for (UINT i=0; i<imax; i+=3)
 			{
@@ -726,22 +737,21 @@ void CDoWaveConvert::OnButton1()
 				if (l > lMax) lMax = l;
 				if (-l > lMax) lMax = -l;
 			}
-		}
 
-		UINT lWrite = fwrite(buffer, 1, lRead * nBytesPerSample, file.GetFile());
-		if (!lWrite) 
-			break;
-		bytesWritten += lWrite;
-
-		if (m_bNormalize)
-		{
-			ULONGLONG d = ((ULONGLONG)bytesWritten * m_pWaveFormat->wBitsPerSample) / 24;
-			if (d >= m_dwFileLimit) 
+			normalizeFile.write(buffer, lRead * nBytesPerSample);
+			if(normalizeFile.gcount() != lRead * nBytesPerSample)
 				break;
+
 		} else
 		{
+
+			UINT lWrite = fwrite(buffer, 1, lRead * nBytesPerSample, file.GetFile());
+			if (!lWrite) 
+				break;
+			bytesWritten += lWrite;
 			if (bytesWritten >= m_dwFileLimit) 
 				break;
+
 		}
 		if (ullSamples >= ullMaxSamples) 
 			break;
@@ -756,7 +766,13 @@ void CDoWaveConvert::OnButton1()
 				timeRemaining = static_cast<DWORD>(((dwCurrentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
 			}
 
-			wsprintf(s, "Writing file... (%uKB, %umn%02us, %umn%02us remaining)", bytesWritten >> 10, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
+			if(m_bNormalize)
+			{
+				wsprintf(s, "Rendering file... (%umn%02us, %umn%02us remaining)", l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
+			} else
+			{
+				wsprintf(s, "Writing file... (%uKB, %umn%02us, %umn%02us remaining)", bytesWritten >> 10, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
+			}
 			SetDlgItemText(IDC_TEXT1, s);
 
 			// Give windows some time to redraw the window, if necessary (else, the infamous "OpenMPT does not respond" will pop up)
@@ -788,36 +804,42 @@ void CDoWaveConvert::OnButton1()
 
 	if (m_bNormalize)
 	{
-		DWORD dwLength = bytesWritten;
-		DWORD percent = 0xFF, dwPos, dwSize, dwCount;
-		DWORD dwBitSize, dwOutPos;
-
-		dwPos = dwOutPos = file.GetPosition();
-		dwBitSize = m_pWaveFormat->wBitsPerSample / 8;
-		bytesWritten = 0;
 		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
-		dwCount = dwLength;
-		while (dwCount >= 3)
+
+		const DWORD dwBitSize = m_pWaveFormat->wBitsPerSample / 8;
+		const uint64 framesTotal = ullSamples;
+		int lastPercent = -1;
+
+		normalizeFile.seekp(0);
+
+		uint64 framesProcessed = 0;
+		uint64 framesToProcess = framesTotal;
+		while(framesToProcess)
 		{
-			dwSize = (sizeof(buffer) / 3) * 3;
-			if (dwSize > dwCount) dwSize = dwCount;
-			fseek(file.GetFile(), dwPos, SEEK_SET);
-			if (fread(buffer, 1, dwSize, file.GetFile()) != dwSize) break;
-			m_pSndFile->Normalize24BitBuffer(buffer, dwSize, lMax, dwBitSize);
-			fseek(file.GetFile(), dwOutPos, SEEK_SET);
-			bytesWritten += (dwSize / 3) * dwBitSize;
-			fwrite(buffer, 1, (dwSize / 3) * dwBitSize, file.GetFile());
-			dwCount -= dwSize;
-			dwPos += dwSize;
-			dwOutPos += (dwSize * m_pWaveFormat->wBitsPerSample) / 24;
-			UINT k = (UINT)( ((ULONGLONG)(dwLength - dwCount) * 100) / dwLength );
-			if (k != percent)
+			const uint64 framesChunk = std::min<uint64>(framesToProcess, MIXBUFFERSIZE);
+			
+			normalizeFile.read(buffer, framesChunk * nBytesPerSample);
+			if(normalizeFile.gcount() != framesChunk * nBytesPerSample)
+				break;
+
+			m_pSndFile->Normalize24BitBuffer((LPBYTE)buffer, framesChunk * nBytesPerSample, lMax, dwBitSize);
+
+			fwrite(buffer, 1, framesChunk * dwBitSize * m_pWaveFormat->nChannels, file.GetFile());
+			bytesWritten += framesChunk * dwBitSize * m_pWaveFormat->nChannels;
+
 			{
-				percent = k;
-				wsprintf(s, "Normalizing... (%d%%)", percent);
-				SetDlgItemText(IDC_TEXT1, s);
-				::SendMessage(progress, PBM_SETPOS, percent, 0);
+				int percent = static_cast<int>(100 * framesProcessed / framesTotal);
+				if(percent != lastPercent)
+				{
+					wsprintf(s, "Normalizing... (%d%%)", percent);
+					SetDlgItemText(IDC_TEXT1, s);
+					::SendMessage(progress, PBM_SETPOS, percent, 0);
+					lastPercent = percent;
+				}
 			}
+
+			framesProcessed += framesChunk;
+			framesToProcess -= framesChunk;
 		}
 	}
 
@@ -869,6 +891,15 @@ void CDoWaveConvert::OnButton1()
 			fw.Close();
 		}
 	}
+
+	if(m_bNormalize)
+	{
+		normalizeFile.close();
+		for(int retry=0; retry<10; retry++)
+			if(remove(normalizeFileName.c_str()) != EACCES)
+				break;
+	}
+
 	CMainFrame::UpdateAudioParameters(*m_pSndFile, TRUE);
 	EndDialog(ok);
 }
