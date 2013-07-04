@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <deque>
 #include "Snd_defs.h"
 #include "PatternCursor.h"
 
@@ -61,7 +60,7 @@ protected:
 	// Active internal clipboard index
 	clipindex_t activeClipboard;
 	// Internal clipboard collection
-	std::deque<PatternClipboardElement> clipboards;
+	std::vector<PatternClipboardElement> clipboards;
 
 public:
 
@@ -114,9 +113,22 @@ protected:
 	// The one and only pattern clipboard dialog object
 	static PatternClipboardDialog instance;
 
+	// Edit class for clipboard name editing
+	class CInlineEdit : public CEdit
+	{
+	protected:
+		PatternClipboardDialog &parent;
+	public:
+		CInlineEdit(PatternClipboardDialog &dlg);
+
+		DECLARE_MESSAGE_MAP();
+
+		afx_msg void OnKillFocus(CWnd *newWnd);
+	};
+
 	CSpinButtonCtrl numClipboardsSpin;
 	CListBox clipList;
-	CEdit editNameBox;
+	CInlineEdit editNameBox;
 	int posX, posY;
 	bool isLocked, isCreated;
 

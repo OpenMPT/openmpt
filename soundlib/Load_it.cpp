@@ -1971,40 +1971,46 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 //--------------------------------------------------------
 {
 	//Extra song data - Yet Another Hack.
-	int16 size;
+	uint16 size;
 	uint32 code = MULTICHAR4_LE_MSVC('M','P','T','S');					//Extra song file data
 	fwrite(&code, 1, sizeof(uint32), f);
 
-	code = MULTICHAR4_LE_MSVC('D','T','.','.');							//write m_nDefaultTempo field code
-	fwrite(&code, 1, sizeof(uint32), f);
-	size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
-	fwrite(&size, 1, sizeof(int16), f);
-	fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
+	if(m_nDefaultTempo > 255)
+	{
+		code = MULTICHAR4_LE_MSVC('D','T','.','.');						//write m_nDefaultTempo field code
+		fwrite(&code, 1, sizeof(uint32), f);
+		size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
+		fwrite(&size, 1, sizeof(uint16), f);
+		fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
+	}
 
 	code = MULTICHAR4_LE_MSVC('R','P','B','.');							//write m_nRowsPerBeat
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultRowsPerBeat);
-	fwrite(&size, 1, sizeof(int16), f);
+	fwrite(&size, 1, sizeof(uint16), f);
 	fwrite(&m_nDefaultRowsPerBeat, 1, size, f);
 
 	code = MULTICHAR4_LE_MSVC('R','P','M','.');							//write m_nRowsPerMeasure
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nDefaultRowsPerMeasure);
-	fwrite(&size, 1, sizeof(int16), f);
+	fwrite(&size, 1, sizeof(uint16), f);
 	fwrite(&m_nDefaultRowsPerMeasure, 1, size, f);
 
-	code = MULTICHAR4_LE_MSVC('C','.','.','.');							//write m_nChannels
-	fwrite(&code, 1, sizeof(uint32), f);
-	size = sizeof(m_nChannels);
-	fwrite(&size, 1, sizeof(int16), f);
-	fwrite(&m_nChannels, 1, size, f);
+	if(GetType() != MOD_TYPE_XM)
+	{
+		code = MULTICHAR4_LE_MSVC('C','.','.','.');						//write m_nChannels
+		fwrite(&code, 1, sizeof(uint32), f);
+		size = sizeof(m_nChannels);
+		fwrite(&size, 1, sizeof(uint16), f);
+		fwrite(&m_nChannels, 1, size, f);
+	}
 
 	if(TypeIsIT_MPT() && GetNumChannels() > 64)	//IT header has room only for 64 channels. Save the
 	{											//settings that do not fit to the header here as an extension.
 		code = MULTICHAR4_LE_MSVC('C','h','n','S');
 		fwrite(&code, 1, sizeof(uint32), f);
 		size = (GetNumChannels() - 64) * 2;
-		fwrite(&size, 1, sizeof(int16), f);
+		fwrite(&size, 1, sizeof(uint16), f);
 		for(CHANNELINDEX chn = 64; chn < GetNumChannels(); chn++)
 		{
 			uint8 panvol[2];
@@ -2019,51 +2025,59 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	code = MULTICHAR4_LE_MSVC('T','M','.','.');							//write m_nTempoMode
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nTempoMode);
-	fwrite(&size, 1, sizeof(int16), f);
+	fwrite(&size, 1, sizeof(uint16), f);
 	fwrite(&m_nTempoMode, 1, size, f);
 
 	code = MULTICHAR4_LE_MSVC('P','M','M','.');							//write m_nMixLevels
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nMixLevels);
-	fwrite(&size, 1, sizeof(int16), f);
+	fwrite(&size, 1, sizeof(uint16), f);
 	fwrite(&m_nMixLevels, 1, size, f);
 
-	code = MULTICHAR4_LE_MSVC('C','W','V','.');							//write m_dwCreatedWithVersion
-	fwrite(&code, 1, sizeof(uint32), f);
-	size = sizeof(m_dwCreatedWithVersion);
-	fwrite(&size, 1, sizeof(int16), f);
-	fwrite(&m_dwCreatedWithVersion, 1, size, f);
+	if(m_dwCreatedWithVersion)
+	{
+		code = MULTICHAR4_LE_MSVC('C','W','V','.');						//write m_dwCreatedWithVersion
+		fwrite(&code, 1, sizeof(uint32), f);
+		size = sizeof(m_dwCreatedWithVersion);
+		fwrite(&size, 1, sizeof(uint16), f);
+		fwrite(&m_dwCreatedWithVersion, 1, size, f);
+	}
 
 	code = MULTICHAR4_LE_MSVC('L','S','W','V');							//write m_dwLastSavedWithVersion
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_dwLastSavedWithVersion);
-	fwrite(&size, 1, sizeof(int16), f);
+	fwrite(&size, 1, sizeof(uint16), f);
 	fwrite(&m_dwLastSavedWithVersion, 1, size, f);
 
 	code = MULTICHAR4_LE_MSVC('S','P','A','.');							//write m_nSamplePreAmp
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nSamplePreAmp);
-	fwrite(&size, 1, sizeof(int16), f);
+	fwrite(&size, 1, sizeof(uint16), f);
 	fwrite(&m_nSamplePreAmp, 1, size, f);
 
 	code = MULTICHAR4_LE_MSVC('V','S','T','V');							//write m_nVSTiVolume
 	fwrite(&code, 1, sizeof(uint32), f);
 	size = sizeof(m_nVSTiVolume);
-	fwrite(&size, 1, sizeof(int16), f);
+	fwrite(&size, 1, sizeof(uint16), f);
 	fwrite(&m_nVSTiVolume, 1, size, f);
 
-	code = MULTICHAR4_LE_MSVC('D','G','V','.');							//write m_nDefaultGlobalVolume
-	fwrite(&code, 1, sizeof(uint32), f);
-	size = sizeof(m_nDefaultGlobalVolume);
-	fwrite(&size, 1, sizeof(int16), f);
-	fwrite(&m_nDefaultGlobalVolume, 1, size, f);
+	if(GetType() == MOD_TYPE_XM && m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME)
+	{
+		code = MULTICHAR4_LE_MSVC('D','G','V','.');						//write m_nDefaultGlobalVolume
+		fwrite(&code, 1, sizeof(uint32), f);
+		size = sizeof(m_nDefaultGlobalVolume);
+		fwrite(&size, 1, sizeof(uint16), f);
+		fwrite(&m_nDefaultGlobalVolume, 1, size, f);
+	}
 
-	code = MULTICHAR4_LE_MSVC('R','P','.','.');							//write m_nRestartPos
-	fwrite(&code, 1, sizeof(uint32), f);
-	size = sizeof(m_nRestartPos);
-	fwrite(&size, 1, sizeof(int16), f);
-	fwrite(&m_nRestartPos, 1, size, f);
-
+	if(GetType() != MOD_TYPE_XM && m_nRestartPos != 0)
+	{
+		code = MULTICHAR4_LE_MSVC('R','P','.','.');						//write m_nRestartPos
+		fwrite(&code, 1, sizeof(uint32), f);
+		size = sizeof(m_nRestartPos);
+		fwrite(&size, 1, sizeof(uint16), f);
+		fwrite(&m_nRestartPos, 1, size, f);
+	}
 
 	//Additional flags for XM/IT/MPTM
 	if(m_ModFlags)
@@ -2071,7 +2085,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		code = MULTICHAR4_LE_MSVC('M','S','F','.');
 		fwrite(&code, 1, sizeof(uint32), f);
 		size = sizeof(m_ModFlags);
-		fwrite(&size, 1, sizeof(int16), f);
+		fwrite(&size, 1, sizeof(uint16), f);
 		fwrite(&m_ModFlags, 1, size, f);
 	}
 
@@ -2089,7 +2103,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 			code = MULTICHAR4_LE_MSVC('M','I','M','A');
 			fwrite(&code, 1, sizeof(uint32), f);
 			size = static_cast<int16>(objectsize);
-			fwrite(&size, 1, sizeof(int16), f);
+			fwrite(&size, 1, sizeof(uint16), f);
 			GetMIDIMapper().Serialize(f);
 		}
 	}
@@ -2239,7 +2253,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 	Limit(m_nDefaultTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
 	//m_nRowsPerBeat
 	//m_nRowsPerMeasure
-	LimitMax(m_nChannels, GetModSpecifications().channelsMax);
+	Limit(m_nChannels, CHANNELINDEX(1), GetModSpecifications().channelsMax);
 	//m_nTempoMode
 	//m_nMixLevels
 	//m_dwCreatedWithVersion

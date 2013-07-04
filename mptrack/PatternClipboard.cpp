@@ -908,7 +908,7 @@ END_MESSAGE_MAP()
 
 PatternClipboardDialog PatternClipboardDialog::instance;
 
-void PatternClipboardDialog::DoDataExchange(CDataExchange* pDX)
+void PatternClipboardDialog::DoDataExchange(CDataExchange *pDX)
 //-------------------------------------------------------------
 {
 	DDX_Control(pDX, IDC_SPIN1,	numClipboardsSpin);
@@ -916,8 +916,8 @@ void PatternClipboardDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 
-PatternClipboardDialog::PatternClipboardDialog() : isLocked(true), isCreated(false), posX(-1)
-//-------------------------------------------------------------------------------------------
+PatternClipboardDialog::PatternClipboardDialog() : isLocked(true), isCreated(false), posX(-1), editNameBox(*this)
+//---------------------------------------------------------------------------------------------------------------
 {
 }
 
@@ -962,7 +962,7 @@ void PatternClipboardDialog::UpdateList()
 	}
 	instance.clipList.ResetContent();
 	PatternClipboard::clipindex_t i = 0;
-	for(std::deque<PatternClipboardElement>::const_iterator clip = PatternClipboard::instance.clipboards.begin(); clip != PatternClipboard::instance.clipboards.end(); clip++, i++)
+	for(std::vector<PatternClipboardElement>::const_iterator clip = PatternClipboard::instance.clipboards.begin(); clip != PatternClipboard::instance.clipboards.end(); clip++, i++)
 	{
 		const int item = instance.clipList.AddString(clip->description);
 		instance.clipList.SetItemDataPtr(item, reinterpret_cast<void *>(i));
@@ -1082,4 +1082,24 @@ void PatternClipboardDialog::OnEndEdit(bool apply)
 	editNameBox.DestroyWindow();
 
 	UpdateList();
+}
+
+
+BEGIN_MESSAGE_MAP(PatternClipboardDialog::CInlineEdit, CEdit)
+	ON_WM_KILLFOCUS()
+END_MESSAGE_MAP()
+
+
+PatternClipboardDialog::CInlineEdit::CInlineEdit(PatternClipboardDialog &dlg) : parent(dlg)
+//-----------------------------------------------------------------------------------------
+{
+	CEdit::CEdit();
+}
+
+
+void PatternClipboardDialog::CInlineEdit::OnKillFocus(CWnd *newWnd)
+//-----------------------------------------------------------------
+{
+	parent.OnEndEdit(true);
+	CEdit::OnKillFocus(newWnd);
 }

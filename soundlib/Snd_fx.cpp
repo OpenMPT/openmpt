@@ -402,7 +402,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 							firstChn = 0;
 							lastChn = GetNumChannels() - 1;
 						}
-						for(CHANNELINDEX c = firstChn; c < lastChn; c++)
+						for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
 						{
 							memory.chnSettings[c].patLoop = memory.elapsedTime;
 							memory.chnSettings[c].patLoopStart = nRow;
