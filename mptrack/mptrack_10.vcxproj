@@ -637,7 +637,7 @@
     <ProjectReference Include="..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
       <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\soundtouch\soundtouch_10.vcxproj">
+    <ProjectReference Include="..\include\soundtouch\soundtouch_10.vcxproj">
       <Project>{cf3c2ca5-5d45-4635-bba4-c1f435e10896}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
