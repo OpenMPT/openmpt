@@ -621,7 +621,7 @@ void CDoWaveConvert::OnButton1()
 	std::fstream normalizeFile;
 	if(m_bNormalize)
 	{
-		normalizeFile.open(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
+		normalizeFile.open(normalizeFileName.c_str(), std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
 
 	WAVWriter file(m_lpszFileName);
