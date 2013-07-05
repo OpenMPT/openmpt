@@ -115,11 +115,6 @@ endif
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-%.o: %.CPP
-	$(INFO) [CXX] $<
-	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
-	$(SILENT)@$(COMPILE.cc) $(OUTPUT_OPTION) $<
-
 %.o: %.cpp
 	$(INFO) [CXX] $<
 	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
@@ -141,13 +136,11 @@ CPPFLAGS += -DLIBOPENMPT_BUILD
 
 COMMON_CXX_SOURCES += \
  $(wildcard ../common/*.cpp) \
-
+ 
 SOUNDLIB_CXX_SOURCES += \
  $(COMMON_CXX_SOURCES) \
  $(wildcard ../soundlib/*.cpp) \
  
-SOUNDLIB_CXX_SOURCES_UPPERCASE += $(wildcard ../soundlib/*.CPP)
-SOUNDLIB_CXX_SOURCES += $(SOUNDLIB_CXX_SOURCES_UPPERCASE:.CPP=.cpp)
 
 
 LIBOPENMPT_CXX_SOURCES += \
