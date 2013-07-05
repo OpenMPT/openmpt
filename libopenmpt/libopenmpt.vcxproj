@@ -394,12 +394,12 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClCompile Include="..\soundlib\ITCompression.cpp" />
     <ClCompile Include="..\soundlib\ITTools.cpp" />
     <ClCompile Include="..\soundlib\Load_669.cpp" />
-    <ClCompile Include="..\soundlib\LOAD_AMF.CPP" />
+    <ClCompile Include="..\soundlib\Load_amf.cpp" />
     <ClCompile Include="..\soundlib\Load_ams.cpp" />
-    <ClCompile Include="..\soundlib\LOAD_DBM.CPP" />
+    <ClCompile Include="..\soundlib\Load_dbm.cpp" />
     <ClCompile Include="..\soundlib\Load_digi.cpp" />
-    <ClCompile Include="..\soundlib\LOAD_DMF.CPP" />
-    <ClCompile Include="..\soundlib\LOAD_DSM.CPP" />
+    <ClCompile Include="..\soundlib\Load_dmf.cpp" />
+    <ClCompile Include="..\soundlib\Load_dsm.cpp" />
     <ClCompile Include="..\soundlib\Load_far.cpp" />
     <ClCompile Include="..\soundlib\Load_gdm.cpp" />
     <ClCompile Include="..\soundlib\Load_imf.cpp" />

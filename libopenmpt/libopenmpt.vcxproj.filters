@@ -277,19 +277,19 @@
     <ClCompile Include="..\soundlib\XMTools.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\LOAD_AMF.CPP">
+    <ClCompile Include="..\soundlib\Load_amf.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Load_ams.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\LOAD_DBM.CPP">
+    <ClCompile Include="..\soundlib\Load_dbm.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\LOAD_DMF.CPP">
+    <ClCompile Include="..\soundlib\Load_dmf.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\LOAD_DSM.CPP">
+    <ClCompile Include="..\soundlib\Load_dsm.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Load_far.cpp">
