@@ -346,8 +346,8 @@ public:
 };
 #define Log Logger(__FILE__, __LINE__, __FUNCTION__)
 #else // !NO_LOGGING
-inline void MPT_PRINTF_FUNC(1,2) Log(const char *format, ...) {}
-class Logger { public: void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...) {} };
+static inline void MPT_PRINTF_FUNC(1,2) Log(const char * /*format*/, ...) {}
+class Logger { public: void MPT_PRINTF_FUNC(2,3) operator () (const char * /*format*/, ...) {} };
 #define Log if(true) {} else Logger() // completely compile out arguments to Log() so that they do not even get evaluated
 #endif // NO_LOGGING
 

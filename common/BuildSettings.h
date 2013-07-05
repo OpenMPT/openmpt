@@ -69,7 +69,9 @@
 //#define MODPLUG_NO_FILESAVE
 
 // Disable any debug logging
-//#define NO_LOGGING
+#ifndef _DEBUG
+#define NO_LOGGING
+#endif
 
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
