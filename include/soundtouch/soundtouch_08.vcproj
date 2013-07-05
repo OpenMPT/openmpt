@@ -142,7 +142,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/PDBPATH:none"
-				OutputFile="..\mptrack\bin\OpenMPT_SoundTouch_i16.dll"
+				OutputFile="..\..\mptrack\bin\OpenMPT_SoundTouch_i16.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
