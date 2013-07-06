@@ -73,8 +73,7 @@ namespace libopenmpt {
 
 			trackBarStereoSeparation->Value = settings->stereoseparation;
 
-			trackBarVolrampin->Value = settings->volrampinus;
-			trackBarVolrampout->Value = settings->volrampoutus;
+			trackBarVolramping->Value = settings->ramping;
 
 			//
 			//TODO: Add the constructor code here
@@ -108,10 +107,12 @@ namespace libopenmpt {
 	private: System::Windows::Forms::ComboBox^  comboBoxRepeat;
 	private: System::Windows::Forms::Label^  labelStereoSeparation;
 	private: System::Windows::Forms::TrackBar^  trackBarStereoSeparation;
-	private: System::Windows::Forms::Label^  labelVolrampin;
-	private: System::Windows::Forms::Label^  labelVolrampout;
-	private: System::Windows::Forms::TrackBar^  trackBarVolrampin;
-	private: System::Windows::Forms::TrackBar^  trackBarVolrampout;
+	private: System::Windows::Forms::Label^  labelVolramping;
+
+
+	private: System::Windows::Forms::TrackBar^  trackBarVolramping;
+
+
 
 
 	protected: 
@@ -142,14 +143,11 @@ namespace libopenmpt {
 			this->comboBoxRepeat = (gcnew System::Windows::Forms::ComboBox());
 			this->labelStereoSeparation = (gcnew System::Windows::Forms::Label());
 			this->trackBarStereoSeparation = (gcnew System::Windows::Forms::TrackBar());
-			this->labelVolrampin = (gcnew System::Windows::Forms::Label());
-			this->labelVolrampout = (gcnew System::Windows::Forms::Label());
-			this->trackBarVolrampin = (gcnew System::Windows::Forms::TrackBar());
-			this->trackBarVolrampout = (gcnew System::Windows::Forms::TrackBar());
+			this->labelVolramping = (gcnew System::Windows::Forms::Label());
+			this->trackBarVolramping = (gcnew System::Windows::Forms::TrackBar());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarGain))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarStereoSeparation))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolrampin))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolrampout))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolramping))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// comboBoxSamplerate
@@ -173,7 +171,7 @@ namespace libopenmpt {
 			// 
 			// buttonOK
 			// 
-			this->buttonOK->Location = System::Drawing::Point(15, 309);
+			this->buttonOK->Location = System::Drawing::Point(15, 261);
 			this->buttonOK->Name = L"buttonOK";
 			this->buttonOK->Size = System::Drawing::Size(212, 23);
 			this->buttonOK->TabIndex = 2;
@@ -287,49 +285,25 @@ namespace libopenmpt {
 			this->trackBarStereoSeparation->Value = 100;
 			this->trackBarStereoSeparation->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarStereoSeparation_Scroll);
 			// 
-			// labelVolrampin
+			// labelVolramping
 			// 
-			this->labelVolrampin->AutoSize = true;
-			this->labelVolrampin->Location = System::Drawing::Point(12, 226);
-			this->labelVolrampin->Name = L"labelVolrampin";
-			this->labelVolrampin->Size = System::Drawing::Size(78, 13);
-			this->labelVolrampin->TabIndex = 15;
-			this->labelVolrampin->Text = L"volume ramp in";
+			this->labelVolramping->AutoSize = true;
+			this->labelVolramping->Location = System::Drawing::Point(12, 226);
+			this->labelVolramping->Name = L"labelVolramping";
+			this->labelVolramping->Size = System::Drawing::Size(81, 13);
+			this->labelVolramping->TabIndex = 15;
+			this->labelVolramping->Text = L"volume ramping";
 			// 
-			// labelVolrampout
+			// trackBarVolramping
 			// 
-			this->labelVolrampout->AutoSize = true;
-			this->labelVolrampout->Location = System::Drawing::Point(12, 273);
-			this->labelVolrampout->Name = L"labelVolrampout";
-			this->labelVolrampout->Size = System::Drawing::Size(85, 13);
-			this->labelVolrampout->TabIndex = 16;
-			this->labelVolrampout->Text = L"volume ramp out";
-			// 
-			// trackBarVolrampin
-			// 
-			this->trackBarVolrampin->LargeChange = 1000;
-			this->trackBarVolrampin->Location = System::Drawing::Point(106, 213);
-			this->trackBarVolrampin->Maximum = 10000;
-			this->trackBarVolrampin->Name = L"trackBarVolrampin";
-			this->trackBarVolrampin->Size = System::Drawing::Size(121, 42);
-			this->trackBarVolrampin->TabIndex = 17;
-			this->trackBarVolrampin->TickFrequency = 1000;
-			this->trackBarVolrampin->TickStyle = System::Windows::Forms::TickStyle::Both;
-			this->trackBarVolrampin->Value = 363;
-			this->trackBarVolrampin->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarVolrampin_Scroll);
-			// 
-			// trackBarVolrampout
-			// 
-			this->trackBarVolrampout->LargeChange = 1000;
-			this->trackBarVolrampout->Location = System::Drawing::Point(106, 261);
-			this->trackBarVolrampout->Maximum = 10000;
-			this->trackBarVolrampout->Name = L"trackBarVolrampout";
-			this->trackBarVolrampout->Size = System::Drawing::Size(121, 42);
-			this->trackBarVolrampout->TabIndex = 18;
-			this->trackBarVolrampout->TickFrequency = 1000;
-			this->trackBarVolrampout->TickStyle = System::Windows::Forms::TickStyle::Both;
-			this->trackBarVolrampout->Value = 952;
-			this->trackBarVolrampout->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarVolrampout_Scroll);
+			this->trackBarVolramping->LargeChange = 1;
+			this->trackBarVolramping->Location = System::Drawing::Point(106, 213);
+			this->trackBarVolramping->Name = L"trackBarVolramping";
+			this->trackBarVolramping->Size = System::Drawing::Size(121, 42);
+			this->trackBarVolramping->TabIndex = 17;
+			this->trackBarVolramping->TickStyle = System::Windows::Forms::TickStyle::Both;
+			this->trackBarVolramping->Value = 1;
+			this->trackBarVolramping->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarVolramping_Scroll);
 			// 
 			// SettingsForm
 			// 
@@ -338,10 +312,8 @@ namespace libopenmpt {
 			this->AutoSize = true;
 			this->AutoSizeMode = System::Windows::Forms::AutoSizeMode::GrowAndShrink;
 			this->ClientSize = System::Drawing::Size(436, 477);
-			this->Controls->Add(this->trackBarVolrampout);
-			this->Controls->Add(this->trackBarVolrampin);
-			this->Controls->Add(this->labelVolrampout);
-			this->Controls->Add(this->labelVolrampin);
+			this->Controls->Add(this->trackBarVolramping);
+			this->Controls->Add(this->labelVolramping);
 			this->Controls->Add(this->trackBarStereoSeparation);
 			this->Controls->Add(this->labelStereoSeparation);
 			this->Controls->Add(this->comboBoxRepeat);
@@ -365,8 +337,7 @@ namespace libopenmpt {
 			this->Text = L"SettingsForm";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarGain))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarStereoSeparation))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolrampin))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolrampout))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolramping))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -427,12 +398,8 @@ private: System::Void trackBarStereoSeparation_Scroll(System::Object^  sender, S
 					settings->stereoseparation = (int)trackBarStereoSeparation->Value;
 					settings->changed();
 				}
-private: System::Void trackBarVolrampin_Scroll(System::Object^  sender, System::EventArgs^  e) {
-					 settings->volrampinus = (int)trackBarVolrampin->Value;
-					 settings->changed();
-				 }
-private: System::Void trackBarVolrampout_Scroll(System::Object^  sender, System::EventArgs^  e) {
-					 settings->volrampoutus = (int)trackBarVolrampout->Value;
+private: System::Void trackBarVolramping_Scroll(System::Object^  sender, System::EventArgs^  e) {
+					 settings->ramping = (int)trackBarVolramping->Value;
 					 settings->changed();
 				 }
 };

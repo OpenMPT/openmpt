@@ -62,16 +62,15 @@ struct commandlineflags {
 	bool modplug123;
 #ifdef MPT_WITH_PORTAUDIO
 	int device;
+	std::int32_t buffer;
 #endif
 	std::int32_t channels;
-	std::int32_t buffer;
 	std::int32_t repeatcount;
 	std::int32_t samplerate;
 	std::int32_t gain;
 	std::int32_t quality;
 	std::int32_t filtertaps;
-	std::int32_t rampupus;
-	std::int32_t rampdownus;
+	int ramping; // ramping strength : -1:default 0:off 1 2 3 4 5 // roughly milliseconds
 	bool quiet;
 	bool verbose;
 	bool use_ui;
@@ -91,16 +90,15 @@ struct commandlineflags {
 		modplug123 = false;
 #ifdef MPT_WITH_PORTAUDIO
 		device = -1;
+		buffer = 250;
 #endif
 		channels = 2;
-		buffer = 250;
 		repeatcount = 0;
 		samplerate = 48000;
 		gain = 0;
 		quality = 100;
 		filtertaps = 8;
-		rampupus = ( 16 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
-		rampdownus = ( 42 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
+		ramping = -1;
 		quiet = false;
 		verbose = false;
 		show_info = true;

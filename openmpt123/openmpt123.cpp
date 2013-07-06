@@ -93,13 +93,14 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Show progress: " << flags.show_progress << std::endl;
 #ifdef MPT_WITH_PORTAUDIO
 	s << "Device: " << flags.device << std::endl;
+	s << "Buffer: " << flags.buffer << std::endl;
 #endif
 	s << "Channels: " << flags.channels << std::endl;
-	s << "Buffer: " << flags.buffer << std::endl;
 	s << "Repeat count: " << flags.repeatcount << std::endl;
 	s << "Sample rate: " << flags.samplerate << std::endl;
 	s << "Gain: " << flags.gain / 100.0 << std::endl;
 	s << "Filter taps: " << flags.filtertaps << std::endl;
+	s << "Volume ramping strength: " << flags.ramping << std::endl;
 	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
 	s << "Standard output: " << flags.use_stdout << std::endl;
@@ -218,6 +219,7 @@ static void show_help( show_help_exception & e, bool verbose, bool modplug123 ) 
 #ifdef MPT_WITH_PORTAUDIO
 		std::clog << " --device n       Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
 		std::clog << "                  use --device help to show available devices" << std::endl;
+		std::clog << " --buffer n       Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
 #endif
 		std::clog << " --stdout         Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
@@ -226,14 +228,12 @@ static void show_help( show_help_exception & e, bool verbose, bool modplug123 ) 
 #endif
 		std::clog << " --channels n     use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
 		std::clog << " --[no]-float     Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
-		std::clog << " --buffer n       Set output buffer size to n ms [default: " << commandlineflags().buffer << "]," << std::endl;
 		std::clog << " --samplerate n   Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
 		std::clog << " --gain n         Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
 		std::clog << " --repeat n       Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		std::clog << " --filtertaps n   Set interpolation filter taps to n % [default: " << commandlineflags().filtertaps << "]" << std::endl;
 		std::clog << " --seek n         Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
-		std::clog << " --volrampup n    Use n microseconds volume ramping up [default: " << commandlineflags().rampupus << "]" << std::endl;
-		std::clog << " --volrampdown n  Use n microseconds volume ramping down [default: " << commandlineflags().rampdownus << "]" << std::endl;
+		std::clog << " --ramping n      Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
 		std::clog << std::endl;
 		std::clog << " --               Interpret further arguments as filenames" << std::endl;
 		std::clog << std::endl;
@@ -475,8 +475,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 			mod.set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, flags.filtertaps );
 			mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
-			mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_UP_MICROSECONDS, flags.rampupus );
-			mod.set_render_param( openmpt::module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS, flags.rampdownus );
+			mod.set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, flags.ramping );
 
 			render_mod_file( flags, filename, mod, log, audio_stream );
 
@@ -599,6 +598,12 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 #endif
 				}
 				++i;
+#ifdef MPT_WITH_PORTAUDIO
+			} else if ( arg == "--buffer" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.buffer;
+				++i;
+#endif
 			} else if ( arg == "--stdout" ) {
 				flags.use_stdout = true;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
@@ -616,10 +621,6 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.use_float = true;
 			} else if ( arg == "--no-float" ) {
 				flags.use_float = false;
-			} else if ( arg == "--buffer" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.buffer;
-				++i;
 			} else if ( arg == "--samplerate" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.samplerate;
@@ -642,13 +643,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				std::istringstream istr( nextarg );
 				istr >> flags.seek_target;
 				++i;
-			} else if ( arg == "--volrampup" && nextarg != "" ) {
+			} else if ( arg == "--ramping" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
-				istr >> flags.rampupus;
-				++i;
-			} else if ( arg == "--volrampdown" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.rampdownus;
+				istr >> flags.ramping;
 				++i;
 			} else if ( arg == "--runtests" ) {
 				flags.run_tests = true;
