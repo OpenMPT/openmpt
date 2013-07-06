@@ -1441,7 +1441,6 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	ModTreeDocInfo *pInfo = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 	CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : nullptr;
-	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 	switch(modItem.type)
 	{
 	case MODITEM_SEQUENCE:
@@ -1449,14 +1448,14 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 		{
 			wsprintf(s, _T("Remove sequence %d?"), modItemID);
 			if(Reporting::Confirm(s, false, true) == cnfNo) break;
-			pSndFile->Order.RemoveSequence((SEQUENCEINDEX)(modItemID));
+			pModDoc->GetrSoundFile().Order.RemoveSequence((SEQUENCEINDEX)(modItemID));
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 		}
 		break;
 
 	case MODITEM_ORDER:
 		// might be slightly annoying to ask for confirmation here, and it's rather easy to restore the orderlist anyway.
-		if ((pModDoc) && (pModDoc->RemoveOrder((SEQUENCEINDEX)(modItemID >> 16), (ORDERINDEX)(modItemID & 0xFFFF))))
+		if ((pModDoc) && (pModDoc->RemoveOrder((SEQUENCEINDEX)(modItem.val2), (ORDERINDEX)(modItem.val1))))
 		{
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 		}
@@ -3520,7 +3519,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 				{
 					valid = (pat < sndFile.Patterns.GetNumPatterns());
 				}
-				PATTERNINDEX &target = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1 >> 16)).At(static_cast<ORDERINDEX>(modItem.val1 & 0xFFFF));
+				PATTERNINDEX &target = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val2)).At(static_cast<ORDERINDEX>(modItem.val1));
 				if(valid && pat != target)
 				{
 					target = pat;
