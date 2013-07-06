@@ -484,5 +484,8 @@
     <ClCompile Include="..\soundlib\S3MTools.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="libopenmpt_test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
