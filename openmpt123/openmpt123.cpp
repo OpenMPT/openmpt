@@ -46,10 +46,6 @@
 #include "openmpt123_stdout.hpp"
 #include "openmpt123_portaudio.hpp"
 
-namespace openmpt {
-LIBOPENMPT_CXX_API void run_tests();
-} // namespace openmpt
-
 namespace openmpt123 {
 
 struct silent_exit_exception : public std::exception {
@@ -647,8 +643,6 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				std::istringstream istr( nextarg );
 				istr >> flags.ramping;
 				++i;
-			} else if ( arg == "--runtests" ) {
-				flags.run_tests = true;
 			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == "-" ) {
 				throw show_help_exception();
 			}
@@ -705,19 +699,6 @@ static int main( int argc, char * argv [] ) {
 
 		}
 
-		if ( flags.run_tests ) {
-			try {
-				openmpt::run_tests();
-			} catch ( std::exception & e ) {
-				std::cerr << "FAIL: " << e.what() << std::endl;
-				return -1;
-			} catch ( ... ) {
-				std::cerr << "FAIL" << std::endl;
-				return -1;
-			}
-			return 0;
-		}
-		
 		if ( args.size() <= 1 ) {
 			throw show_help_exception( "", false );
 		}

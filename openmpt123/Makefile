@@ -47,6 +47,10 @@ CXXFLAGS += -O3 -fno-strict-aliasing -ffast-math
 CFLAGS   += -O3 -fno-strict-aliasing -ffast-math
 endif
 
+ifeq ($(TEST),1)
+CPPFLAGS += -DLIBOPENMPT_BUILD_TEST
+endif
+
 CXXFLAGS += -Wall -Wextra -Wcast-align
 CFLAGS   += -Wall -Wextra -Wcast-align
 
@@ -190,6 +194,24 @@ OPENMPT123_DEPENDS = $(OPENMPT123_OBJECTS:.o=.d)
 ALL_OBJECTS += $(OPENMPT123_OBJECTS)
 ALL_DEPENDS += $(OPENMPT123_DEPENDS)
 
+
+ifeq ($(DYNLINK),1)
+LIBOPENMPTTEST_CXX_SOURCES += \
+ ../libopenmpt/libopenmpt_test.cpp \
+
+else
+LIBOPENMPTTEST_CXX_SOURCES += \
+ $(LIBOPENMPT_CXX_SOURCES) \
+ ../libopenmpt/libopenmpt_test.cpp \
+
+endif
+
+LIBOPENMPTTEST_OBJECTS += $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.o)
+LIBOPENMPTTEST_DEPENDS = $(LIBOPENMPTEST_OBJECTS:.o=.d)
+ALL_OBJECTS += $(LIBOPENMPTTEST_OBJECTS)
+ALL_DEPENDS += $(LIBOPENMPTTEST_DEPENDS)
+
+
 EXAMPLES_CXX_SOURCES += $(wildcard ../libopenmpt/examples/*.cpp)
 EXAMPLES_C_SOURCES += $(wildcard ../libopenmpt/examples/*.c)
 
@@ -216,12 +238,19 @@ OUTPUTS += bin/libopenmpt_example_c
 OUTPUTS += bin/libopenmpt_example_c_mem
 OUTPUTS += bin/libopenmpt_example_cxx
 endif
+ifeq ($(TEST),1)
+OUTPUTS += bin/libopenmpt_test
+endif
 
 all: $(OUTPUTS)
 
 .PHONY: test
-test: all
-	bin/openmpt123 --runtests
+test: bin/libopenmpt_test
+	bin/libopenmpt_test
+
+bin/libopenmpt_test: $(LIBOPENMPTTEST_OBJECTS) $(OUTPUT_LIBOPENMPT)
+	$(INFO) [LD ] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPTTEST_OBJECTS) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
 bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR ] $@

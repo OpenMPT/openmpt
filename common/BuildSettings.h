@@ -132,7 +132,7 @@
 
 #elif defined(LIBOPENMPT_BUILD)
 
-#if !defined(_MSC_VER) || defined(LIBOPENMPT_BUILD_TEST)
+#if defined(LIBOPENMPT_BUILD_TEST)
 #define ENABLE_TESTS
 #else
 #define MODPLUG_NO_FILESAVE

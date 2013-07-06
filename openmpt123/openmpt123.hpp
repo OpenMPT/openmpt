@@ -58,7 +58,6 @@ static inline std::string get_extension( std::string filename ) {
 }
 
 struct commandlineflags {
-	bool run_tests;
 	bool modplug123;
 #ifdef MPT_WITH_PORTAUDIO
 	int device;
@@ -86,7 +85,6 @@ struct commandlineflags {
 	bool force_overwrite;
 #endif
 	commandlineflags() {
-		run_tests = false;
 		modplug123 = false;
 #ifdef MPT_WITH_PORTAUDIO
 		device = -1;
