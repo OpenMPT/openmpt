@@ -132,8 +132,11 @@
 
 #elif defined(LIBOPENMPT_BUILD)
 
+#if !defined(_MSC_VER) || defined(LIBOPENMPT_BUILD_TEST)
 #define ENABLE_TESTS
-//#define MODPLUG_NO_FILESAVE
+#else
+#define MODPLUG_NO_FILESAVE
+#endif
 //#define NO_LOGGING
 #define NO_ARCHIVE_SUPPORT
 //#define NO_FILEREADER_STD_ISTREAM
