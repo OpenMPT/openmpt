@@ -66,6 +66,7 @@ public:
 		if ( verbose ) {
 			*portaudio_log_stream << std::endl;
 		}
+		log << std::endl;
 	}
 	~portaudio_raii() {
 		if ( portaudio_initialized ) {
