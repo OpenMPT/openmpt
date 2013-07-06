@@ -110,12 +110,21 @@ protected:
 		MODITEM_SEQUENCE,
 	};
 
+	struct ModItem
+	{
+		uint32 val1;
+		uint16 type;	// see ModItemType
+		uint16 val2;
+
+		ModItem(ModItemType t = MODITEM_NULL, uint32 v1 = 0, uint16 v2 = 0) : type(uint16(t)), val1(v1), val2(v2) { }
+	};
+
 	static CSoundFile *m_SongFile;	// For browsing samples and instruments inside modules on disk
 	CModTreeDropTarget m_DropTarget;
 	CModTree *m_pDataTree;	// Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
 	DWORD m_dwStatus;
 	HWND m_hDropWnd;
-	uint64 m_qwItemDrag;
+	ModItem m_itemDrag;
 	UINT m_nDocNdx, m_nDragDocNdx;
 	HTREEITEM m_hItemDrag, m_hItemDrop;
 	HTREEITEM m_hInsLib, m_hMidiLib;
@@ -142,9 +151,7 @@ public:
 	void RefreshInstrumentLibrary();
 	void EmptyInstrumentLibrary();
 	void FillInstrumentLibrary();
-	uint64 GetModItem(HTREEITEM hItem);
-	ModItemType GetModItemType(const uint64 modItem) {return static_cast<ModItemType>(modItem & 0xFFFF);};	// return "item type" part of mod item variable ( & 0xFFFF )
-	uint32 GetModItemID(const uint64 modItem) {return static_cast<uint32>(modItem >> 16);};		// return "item ID" part of mod item variable ( >> 16 )
+	ModItem GetModItem(HTREEITEM hItem);
 	BOOL SetMidiInstrument(UINT nIns, LPCTSTR lpszFileName);
 	BOOL SetMidiPercussion(UINT nPerc, LPCTSTR lpszFileName);
 	BOOL ExecuteItem(HTREEITEM hItem);
@@ -183,6 +190,8 @@ protected:
 	CModDoc *GetDocumentFromItem(HTREEITEM hItem);
 	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc *pModDoc);
 
+	void InsertOrDupItem(bool insert);
+
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CModTree)
@@ -207,8 +216,8 @@ protected:
 	afx_msg void OnMuteTreeItem();
 	afx_msg void OnSoloTreeItem();
 	afx_msg void OnUnmuteAllTreeItem();
-	afx_msg void OnDuplicateTreeItem();
-	afx_msg void OnInsertTreeItem();
+	afx_msg void OnDuplicateTreeItem() { InsertOrDupItem(false); }
+	afx_msg void OnInsertTreeItem() { InsertOrDupItem(true); }
 	afx_msg void OnSwitchToTreeItem();	// hack for sequence items to avoid double-click action
 	afx_msg void OnCloseItem();
 	afx_msg void OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result);
