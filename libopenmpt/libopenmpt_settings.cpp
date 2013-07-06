@@ -15,7 +15,7 @@
 
 namespace openmpt { namespace settings {
 
-	
+
 static void read_setting( const char * subkey, const char * key, int & val ) {
 	System::String ^ net_root = "HKEY_CURRENT_USER\\Software\\libopenmpt\\";
 	System::String ^ net_path = gcnew System::String( subkey );
@@ -42,8 +42,7 @@ void load( settings & s, const char * subkey ) {
 	read_setting( subkey, "SeteroSeparation_Percent", s.stereoseparation );
 	read_setting( subkey, "RepeatCount", s.repeatcount );
 	read_setting( subkey, "InterpolationFilterLength", s.interpolationfilterlength );
-	read_setting( subkey, "VolumeRampingIn_microseconds", s.volrampinus );
-	read_setting( subkey, "VolumeRampingOut_microseconds", s.volrampoutus );
+	read_setting( subkey, "VolumeRampingStrength", s.ramping );
 }
 
 void save( const settings & s, const char * subkey ) {
@@ -53,8 +52,7 @@ void save( const settings & s, const char * subkey ) {
 	write_setting( subkey, "SeteroSeparation_Percent", s.stereoseparation );
 	write_setting( subkey, "RepeatCount", s.repeatcount );
 	write_setting( subkey, "InterpolationFilterLength", s.interpolationfilterlength );
-	write_setting( subkey, "VolumeRampingIn_microseconds", s.volrampinus );
-	write_setting( subkey, "VolumeRampingOut_microseconds", s.volrampoutus );
+	write_setting( subkey, "VolumeRampingStrength", s.ramping );
 }
 
 void edit( settings & s, HWND parent, const char * title ) {
@@ -62,5 +60,6 @@ void edit( settings & s, HWND parent, const char * title ) {
 	System::Windows::Forms::IWin32Window ^w = System::Windows::Forms::Control::FromHandle((System::IntPtr)parent);
 	form->Show(w);
 }
+
 
 } } // namespace openmpt::settings

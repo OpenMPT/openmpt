@@ -38,8 +38,7 @@ struct settings {
 	int stereoseparation;
 	int repeatcount;
 	int interpolationfilterlength;
-	int volrampinus;
-	int volrampoutus;
+	int ramping;
 	changed_func changed;
 };
 
@@ -51,8 +50,7 @@ static void inline init( settings & s, bool with_outputformat = true ) {
 	s.stereoseparation = 100;
 	s.repeatcount = 0;
 	s.interpolationfilterlength = 8;
-	s.volrampinus = 363;
-	s.volrampoutus = 952;
+	s.ramping = 1;
 	s.changed = 0;
 }
 

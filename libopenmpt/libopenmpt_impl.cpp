@@ -129,6 +129,32 @@ static std::int32_t resamplingmode_to_filterlength(ResamplingMode mode) {
 	}
 }
 
+static void ramping_to_mixersettings( MixerSettings & settings, int ramping ) {
+	if ( ramping == -1 ) {
+		settings.SetVolumeRampUpMicroseconds( MixerSettings().GetVolumeRampUpMicroseconds() );
+		settings.SetVolumeRampDownMicroseconds( MixerSettings().GetVolumeRampDownMicroseconds() );
+	} else if ( ramping <= 0 ) {
+		settings.SetVolumeRampUpMicroseconds( 0 );
+		settings.SetVolumeRampDownMicroseconds( 0 );
+	} else {
+		settings.SetVolumeRampUpMicroseconds( ramping * 1000 );
+		settings.SetVolumeRampDownMicroseconds( ramping * 1000 );
+	}
+}
+static void mixersettings_to_ramping( int & ramping, const MixerSettings & settings ) {
+	std::int32_t ramp_us = std::max<std::int32_t>( settings.GetVolumeRampUpMicroseconds(), settings.GetVolumeRampDownMicroseconds() );
+	if ( true
+	     && settings.GetVolumeRampUpMicroseconds() == MixerSettings().GetVolumeRampUpMicroseconds()
+	     && settings.GetVolumeRampDownMicroseconds() == MixerSettings().GetVolumeRampDownMicroseconds()
+	   ) {
+		ramping = -1;
+	} else if ( ramp_us <= 0 ) {
+		ramping = 0;
+	} else {
+		ramping = ( ramp_us + 500 ) / 1000;
+	}
+}
+
 void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels, bool format_float ) {
 	SampleFormat format = ( format_float ? SampleFormatFloat32 : SampleFormatInt16 );
 	if (
@@ -327,11 +353,10 @@ std::int32_t module_impl::get_render_param( int param ) const {
 		case module::RENDER_INTERPOLATION_FILTER_LENGTH: {
 			return resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode );
 		} break;
-		case module::RENDER_VOLUMERAMP_UP_MICROSECONDS: {
-			return m_sndFile->m_MixerSettings.GetVolumeRampUpMicroseconds();
-		} break;
-		case module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS: {
-			return m_sndFile->m_MixerSettings.GetVolumeRampDownMicroseconds();
+		case module::RENDER_VOLUMERAMPING_STRENGTH: {
+			int ramping = 0;
+			mixersettings_to_ramping( ramping, m_sndFile->m_MixerSettings );
+			return ramping;
 		} break;
 		default: throw openmpt::exception("unknown render param"); break;
 	}
@@ -362,17 +387,10 @@ void module_impl::set_render_param( int param, std::int32_t value ) {
 				m_sndFile->SetResamplerSettings( newsettings );
 			}
 		} break;
-		case module::RENDER_VOLUMERAMP_UP_MICROSECONDS: {
+		case module::RENDER_VOLUMERAMPING_STRENGTH: {
 			MixerSettings newsettings = m_sndFile->m_MixerSettings;
-			newsettings.SetVolumeRampUpMicroseconds( value );
-			if ( m_sndFile->m_MixerSettings.glVolumeRampUpSamples != newsettings.glVolumeRampUpSamples ) {
-				m_sndFile->SetMixerSettings( newsettings );
-			}
-		} break;
-		case module::RENDER_VOLUMERAMP_DOWN_MICROSECONDS: {
-			MixerSettings newsettings = m_sndFile->m_MixerSettings;
-			newsettings.SetVolumeRampDownMicroseconds( value );
-			if ( m_sndFile->m_MixerSettings.glVolumeRampDownSamples != newsettings.glVolumeRampDownSamples ) {
+			ramping_to_mixersettings( newsettings, value );
+			if ( m_sndFile->m_MixerSettings.glVolumeRampUpSamples != newsettings.glVolumeRampUpSamples || m_sndFile->m_MixerSettings.glVolumeRampDownSamples != newsettings.glVolumeRampDownSamples ) {
 				m_sndFile->SetMixerSettings( newsettings );
 			}
 		} break;
