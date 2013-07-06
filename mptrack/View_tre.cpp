@@ -1444,7 +1444,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 	switch(modItem.type)
 	{
 	case MODITEM_SEQUENCE:
-		if (pModDoc && pSndFile)
+		if (pModDoc)
 		{
 			wsprintf(s, _T("Remove sequence %d?"), modItemID);
 			if(Reporting::Confirm(s, false, true) == cnfNo) break;
