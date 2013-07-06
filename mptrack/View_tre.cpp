@@ -193,6 +193,13 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 			return TRUE;
 		} else if (pMsg->wParam == VK_RETURN)
 		{
+			if(doLabelEdit)
+			{
+				// End editing by making edit box lose focus.
+				SetFocus();
+				return TRUE;
+			}
+
 			if (!(pMsg->lParam & 0x40000000))
 			{
 				HTREEITEM hItem = GetSelectedItem();
@@ -783,10 +790,10 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 
 		SEQUENCEINDEX nSeqMin = 0, nSeqMax = sndFile.Order.GetNumSequences() - 1;
 		SEQUENCEINDEX nHintParam = lHint >> HINT_SHIFT_SEQUENCE;
-		if ((hintFlagPart == HINT_SEQNAMES) && (nHintParam <= nSeqMax)) nSeqMin = nSeqMax = nHintParam;
+		if ((hintFlagPart & HINT_SEQNAMES) && (nHintParam <= nSeqMax)) nSeqMin = nSeqMax = nHintParam;
 
 		// Adjust caption of the "Sequence" node (if only one sequence exists, it should be labeled with the sequence name)
-		if(((hintFlagPart == HINT_SEQNAMES) && sndFile.Order.GetNumSequences() == 1) || adjustParentNode)
+		if(((hintFlagPart & HINT_SEQNAMES) && sndFile.Order.GetNumSequences() == 1) || adjustParentNode)
 		{
 			CString sSeqName = sndFile.Order.GetSequence(0).m_sName;
 			if(sSeqName.IsEmpty() || sndFile.Order.GetNumSequences() > 1)
@@ -3025,7 +3032,6 @@ void CModTree::InsertOrDupItem(bool insert)
 	const uint32 modItemID = modItem.val1;
 
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
-	CSoundFile *pSndFile = (pModDoc != nullptr) ? pModDoc->GetSoundFile() : nullptr;
 
 	if(pModDoc)
 	{
@@ -3404,63 +3410,72 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 	if(editCtrl != nullptr && modDoc != nullptr)
 	{
-		const CSoundFile *sndFile = modDoc->GetSoundFile();
-		const CModSpecifications &modSpecs = sndFile->GetModSpecifications();
-		char const *text = nullptr;
-		CString tempText;
+		const CSoundFile &sndFile = modDoc->GetrSoundFile();
+		const CModSpecifications &modSpecs = sndFile.GetModSpecifications();
+		std::string text;
+		doLabelEdit = false;
 
 		switch(modItem.type)
 		{
 		case MODITEM_ORDER:
 			{
-				PATTERNINDEX pat = sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val2)).At(static_cast<ORDERINDEX>(modItem.val1));
-				if(pat == sndFile->Order.GetInvalidPatIndex())
-					tempText = "---";
-				else if(pat == sndFile->Order.GetIgnoreIndex())
-					tempText = "+++";
+				PATTERNINDEX pat = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val2)).At(static_cast<ORDERINDEX>(modItem.val1));
+				if(pat == sndFile.Order.GetInvalidPatIndex())
+					text = "---";
+				else if(pat == sndFile.Order.GetIgnoreIndex())
+					text = "+++";
 				else
-					tempText.Format("%u", pat);
-				text = tempText;
+					text = Stringify(pat);
+				doLabelEdit = true;
 			}
 			break;
 
-		case MODITEM_SEQUENCE:
-			if(modItem.val1 < sndFile->Order.GetNumSequences())
+		case MODITEM_HDR_ORDERS:
+			if(sndFile.Order.GetNumSequences() != 1 || sndFile.GetType() != MOD_TYPE_MPT)
 			{
-				text = sndFile->Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).m_sName;
+				break;
+			}
+			// Intentional fall-through
+		case MODITEM_SEQUENCE:
+			if(modItem.val1 < sndFile.Order.GetNumSequences())
+			{
+				text = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).m_sName;
+				doLabelEdit = true;
 			}
 			break;
 
 		case MODITEM_PATTERN:
-			if(modItem.val1 < sndFile->Patterns.GetNumPatterns() && modSpecs.hasPatternNames)
+			if(modItem.val1 < sndFile.Patterns.GetNumPatterns() && modSpecs.hasPatternNames)
 			{
-				text = sndFile->Patterns[modItem.val1].GetName();
+				text = sndFile.Patterns[modItem.val1].GetName();
 				editCtrl->SetLimitText(MAX_PATTERNNAME - 1);
+				doLabelEdit = true;
 			}
 			break;
 
 		case MODITEM_SAMPLE:
-			if(modItem.val1 <= sndFile->GetNumSamples())
+			if(modItem.val1 <= sndFile.GetNumSamples())
 			{
-				text = sndFile->m_szNames[modItem.val1];
+				text = sndFile.m_szNames[modItem.val1];
 				editCtrl->SetLimitText(modSpecs.sampleNameLengthMax);
+				doLabelEdit = true;
 			}
 			break;
 
 		case MODITEM_INSTRUMENT:
-			if(modItem.val1 <= sndFile->GetNumInstruments() && sndFile->Instruments[modItem.val1] != nullptr)
+			if(modItem.val1 <= sndFile.GetNumInstruments() && sndFile.Instruments[modItem.val1] != nullptr)
 			{
-				text = sndFile->Instruments[modItem.val1]->name;
+				text = sndFile.Instruments[modItem.val1]->name;
 				editCtrl->SetLimitText(modSpecs.instrNameLengthMax);
+				doLabelEdit = true;
 			}
 			break;
 		}
 
-		if(text)
+		if(doLabelEdit)
 		{
-			doLabelEdit = true;
 			CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(true);
-			editCtrl->SetWindowText(text);
+			editCtrl->SetWindowText(text.c_str());
 			*result = FALSE;
 			return;
 		}
@@ -3478,7 +3493,6 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);
 	const ModItem modItem = GetModItem(info->item.hItem);
-	const uint32 modItemID = modItem.val1;
 	CModDoc *modDoc = GetDocumentFromItem(info->item.hItem);
 
 	if(info->item.pszText != nullptr && modDoc != nullptr)
@@ -3506,7 +3520,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 				{
 					valid = (pat < sndFile.Patterns.GetNumPatterns());
 				}
-				PATTERNINDEX &target = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID >> 16)).At(static_cast<ORDERINDEX>(modItemID & 0xFFFF));
+				PATTERNINDEX &target = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1 >> 16)).At(static_cast<ORDERINDEX>(modItem.val1 & 0xFFFF));
 				if(valid && pat != target)
 				{
 					target = pat;
@@ -3516,39 +3530,40 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			}
 			break;
 
+		case MODITEM_HDR_ORDERS:
 		case MODITEM_SEQUENCE:
-			if(modItemID < sndFile.Order.GetNumSequences() && sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID)).m_sName != info->item.pszText)
+			if(modItem.val1 < sndFile.Order.GetNumSequences() && sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).m_sName != info->item.pszText)
 			{
-				sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItemID)).m_sName = info->item.pszText;
+				sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).m_sName = info->item.pszText;
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+				modDoc->UpdateAllViews(NULL, HINT_SEQNAMES | HINT_MODSEQUENCE, NULL);
 			}
 			break;
 
 		case MODITEM_PATTERN:
-			if(modItemID < sndFile.Patterns.GetNumPatterns() && modSpecs.hasPatternNames && sndFile.Patterns[modItemID].GetName() != info->item.pszText)
+			if(modItem.val1 < sndFile.Patterns.GetNumPatterns() && modSpecs.hasPatternNames && sndFile.Patterns[modItem.val1].GetName() != info->item.pszText)
 			{
-				sndFile.Patterns[modItemID].SetName(info->item.pszText);
+				sndFile.Patterns[modItem.val1].SetName(info->item.pszText);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_PAT) | HINT_PATTERNDATA | HINT_PATNAMES);
+				modDoc->UpdateAllViews(NULL, (UINT(modItem.val1) << HINT_SHIFT_PAT) | HINT_PATTERNDATA | HINT_PATNAMES);
 			}
 			break;
 
 		case MODITEM_SAMPLE:
-			if(modItemID <= sndFile.GetNumSamples() && strcmp(sndFile.m_szNames[modItemID], info->item.pszText))
+			if(modItem.val1 <= sndFile.GetNumSamples() && strcmp(sndFile.m_szNames[modItem.val1], info->item.pszText))
 			{
-				mpt::String::CopyN(sndFile.m_szNames[modItemID], info->item.pszText, modSpecs.sampleNameLengthMax);
+				mpt::String::CopyN(sndFile.m_szNames[modItem.val1], info->item.pszText, modSpecs.sampleNameLengthMax);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_SMP) | HINT_SMPNAMES | HINT_SAMPLEDATA | HINT_SAMPLEINFO);
+				modDoc->UpdateAllViews(NULL, (UINT(modItem.val1) << HINT_SHIFT_SMP) | HINT_SMPNAMES | HINT_SAMPLEDATA | HINT_SAMPLEINFO);
 			}
 			break;
 
 		case MODITEM_INSTRUMENT:
-			if(modItemID <= sndFile.GetNumInstruments() && sndFile.Instruments[modItemID] != nullptr && strcmp(sndFile.Instruments[modItemID]->name, info->item.pszText))
+			if(modItem.val1 <= sndFile.GetNumInstruments() && sndFile.Instruments[modItem.val1] != nullptr && strcmp(sndFile.Instruments[modItem.val1]->name, info->item.pszText))
 			{
-				mpt::String::CopyN(sndFile.Instruments[modItemID]->name, info->item.pszText, modSpecs.instrNameLengthMax);
+				mpt::String::CopyN(sndFile.Instruments[modItem.val1]->name, info->item.pszText, modSpecs.instrNameLengthMax);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_INS) | HINT_ENVELOPE | HINT_INSTRUMENT);
+				modDoc->UpdateAllViews(NULL, (UINT(modItem.val1) << HINT_SHIFT_INS) | HINT_INSNAMES | HINT_INSTRUMENT);
 			}
 			break;
 		}
