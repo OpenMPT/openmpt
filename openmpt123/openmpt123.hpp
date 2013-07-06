@@ -74,6 +74,8 @@ struct commandlineflags {
 	std::int32_t rampdownus;
 	bool quiet;
 	bool verbose;
+	bool use_ui;
+	bool show_info;
 	bool show_message;
 	bool show_progress;
 	double seek_target;
@@ -101,7 +103,13 @@ struct commandlineflags {
 		rampdownus = ( 42 * 1000000 + ( 44100 / 2 ) ) / 44100; // openmpt defaults at 44KHz, rounded
 		quiet = false;
 		verbose = false;
+		show_info = true;
 		show_message = false;
+#if defined(_MSC_VER)
+		use_ui = true;
+#else
+		use_ui = isatty( STDIN_FILENO ) ? true : false;
+#endif
 #if defined(_MSC_VER)
 		show_progress = false;
 #else
@@ -126,9 +134,23 @@ struct commandlineflags {
 			throw show_help_exception();
 		}
 #endif
+		for ( std::vector<std::string>::iterator i = filenames.begin(); i != filenames.end(); ++i ) {
+			if ( *i == "-" ) {
+				use_ui = false;
+			}
+		}
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
+		if ( !output_filename.empty() ) {
+			use_ui = false;
+		}
+#endif
 		if ( quiet ) {
 			verbose = false;
+			show_info = false;
 			show_progress = false;
+		}
+		if ( verbose ) {
+			show_info = true;
 		}
 		if ( channels != 1 && channels != 2 && channels != 4 ) {
 			channels = commandlineflags().channels;
