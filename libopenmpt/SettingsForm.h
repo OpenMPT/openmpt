@@ -73,7 +73,21 @@ namespace libopenmpt {
 
 			trackBarStereoSeparation->Value = settings->stereoseparation;
 
-			trackBarVolramping->Value = settings->ramping;
+			if( settings->ramping < 0 ) {
+				comboBoxVolramping->SelectedIndex = 0;
+			} else if ( settings->ramping == 0 ) {
+				comboBoxVolramping->SelectedIndex = 1;
+			} else if ( settings->ramping == 1 ) {
+				comboBoxVolramping->SelectedIndex = 2;
+			} else if ( settings->ramping == 2 ) {
+				comboBoxVolramping->SelectedIndex = 3;
+			} else if ( settings->ramping < 5 ) {
+				comboBoxVolramping->SelectedIndex = 4;
+			} else if ( settings->ramping < 10 ) {
+				comboBoxVolramping->SelectedIndex = 5;
+			} else {
+				comboBoxVolramping->SelectedIndex = 6;
+			}
 
 			//
 			//TODO: Add the constructor code here
@@ -108,9 +122,10 @@ namespace libopenmpt {
 	private: System::Windows::Forms::Label^  labelStereoSeparation;
 	private: System::Windows::Forms::TrackBar^  trackBarStereoSeparation;
 	private: System::Windows::Forms::Label^  labelVolramping;
+	private: System::Windows::Forms::ComboBox^  comboBoxVolramping;
 
 
-	private: System::Windows::Forms::TrackBar^  trackBarVolramping;
+
 
 
 
@@ -144,10 +159,9 @@ namespace libopenmpt {
 			this->labelStereoSeparation = (gcnew System::Windows::Forms::Label());
 			this->trackBarStereoSeparation = (gcnew System::Windows::Forms::TrackBar());
 			this->labelVolramping = (gcnew System::Windows::Forms::Label());
-			this->trackBarVolramping = (gcnew System::Windows::Forms::TrackBar());
+			this->comboBoxVolramping = (gcnew System::Windows::Forms::ComboBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarGain))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarStereoSeparation))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolramping))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// comboBoxSamplerate
@@ -171,7 +185,7 @@ namespace libopenmpt {
 			// 
 			// buttonOK
 			// 
-			this->buttonOK->Location = System::Drawing::Point(15, 261);
+			this->buttonOK->Location = System::Drawing::Point(15, 240);
 			this->buttonOK->Name = L"buttonOK";
 			this->buttonOK->Size = System::Drawing::Size(212, 23);
 			this->buttonOK->TabIndex = 2;
@@ -288,22 +302,23 @@ namespace libopenmpt {
 			// labelVolramping
 			// 
 			this->labelVolramping->AutoSize = true;
-			this->labelVolramping->Location = System::Drawing::Point(12, 226);
+			this->labelVolramping->Location = System::Drawing::Point(12, 216);
 			this->labelVolramping->Name = L"labelVolramping";
 			this->labelVolramping->Size = System::Drawing::Size(81, 13);
 			this->labelVolramping->TabIndex = 15;
 			this->labelVolramping->Text = L"volume ramping";
 			// 
-			// trackBarVolramping
+			// comboBoxVolramping
 			// 
-			this->trackBarVolramping->LargeChange = 1;
-			this->trackBarVolramping->Location = System::Drawing::Point(106, 213);
-			this->trackBarVolramping->Name = L"trackBarVolramping";
-			this->trackBarVolramping->Size = System::Drawing::Size(121, 42);
-			this->trackBarVolramping->TabIndex = 17;
-			this->trackBarVolramping->TickStyle = System::Windows::Forms::TickStyle::Both;
-			this->trackBarVolramping->Value = 1;
-			this->trackBarVolramping->Scroll += gcnew System::EventHandler(this, &SettingsForm::trackBarVolramping_Scroll);
+			this->comboBoxVolramping->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->comboBoxVolramping->FormattingEnabled = true;
+			this->comboBoxVolramping->Items->AddRange(gcnew cli::array< System::Object^  >(7) {L"default", L"off", L"1 ms", L"2 ms", 
+				L"3 ms", L"5 ms", L"10 ms"});
+			this->comboBoxVolramping->Location = System::Drawing::Point(106, 213);
+			this->comboBoxVolramping->Name = L"comboBoxVolramping";
+			this->comboBoxVolramping->Size = System::Drawing::Size(121, 21);
+			this->comboBoxVolramping->TabIndex = 16;
+			this->comboBoxVolramping->SelectedIndexChanged += gcnew System::EventHandler(this, &SettingsForm::comboBoxVolramping_SelectedIndexChanged);
 			// 
 			// SettingsForm
 			// 
@@ -312,7 +327,7 @@ namespace libopenmpt {
 			this->AutoSize = true;
 			this->AutoSizeMode = System::Windows::Forms::AutoSizeMode::GrowAndShrink;
 			this->ClientSize = System::Drawing::Size(436, 477);
-			this->Controls->Add(this->trackBarVolramping);
+			this->Controls->Add(this->comboBoxVolramping);
 			this->Controls->Add(this->labelVolramping);
 			this->Controls->Add(this->trackBarStereoSeparation);
 			this->Controls->Add(this->labelStereoSeparation);
@@ -337,7 +352,6 @@ namespace libopenmpt {
 			this->Text = L"SettingsForm";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarGain))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarStereoSeparation))->EndInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->trackBarVolramping))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -398,9 +412,33 @@ private: System::Void trackBarStereoSeparation_Scroll(System::Object^  sender, S
 					settings->stereoseparation = (int)trackBarStereoSeparation->Value;
 					settings->changed();
 				}
-private: System::Void trackBarVolramping_Scroll(System::Object^  sender, System::EventArgs^  e) {
-					 settings->ramping = (int)trackBarVolramping->Value;
+private: System::Void comboBoxVolramping_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+					 switch ( (int)comboBoxVolramping->SelectedIndex )
+					 {
+					 case 0:
+						 settings->ramping = -1;
+						 break;
+					 case 1:
+						 settings->ramping = 0;
+						 break;
+					 case 2:
+						 settings->ramping = 1;
+						 break;
+					 case 3:
+						 settings->ramping = 2;
+						 break;
+					 case 4:
+						 settings->ramping = 3;
+						 break;
+					 case 5:
+						 settings->ramping = 5;
+						 break;
+					 case 6:
+						 settings->ramping = 10;
+						 break;
+					 }
 					 settings->changed();
 				 }
+
 };
 }
