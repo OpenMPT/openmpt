@@ -17,14 +17,6 @@ namespace MptTest {
 	void DoTests();
 } // namespace MptTest
 
-namespace openmpt {
-
-void run_tests() {
-	MptTest::DoTests();
-}
-
-} // namespace openmpt
-
 #if defined( LIBOPENMPT_BUILD_TEST ) && ( defined( _MSC_VER ) || defined( LIBOPENMPT_TEST_MAIN ) )
 
 int main( int argc, char * argv [] ) {
