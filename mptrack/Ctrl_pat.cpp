@@ -564,7 +564,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 	}
 	m_parent.InstrumentChanged(-1);
 
-	if (!(lParam & 0x8000))
+	if (!(lParam & 0x80000000))
 	{
 		// Pattern item
 		PATTERNINDEX nPat = (PATTERNINDEX)(lParam & 0x7FFF);
@@ -585,11 +585,11 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		}
 		SetCurrentPattern(nPat);
 	} 
-	else if ((lParam & 0x8000))
+	else if ((lParam & 0x80000000))
 	{
 		// Order item
-		ORDERINDEX nOrd = (ORDERINDEX)(lParam & 0x7FFF);
-		SEQUENCEINDEX nSeq = (SEQUENCEINDEX)(lParam >> 16);
+		ORDERINDEX nOrd = (ORDERINDEX)(lParam & 0xFFFF);
+		SEQUENCEINDEX nSeq = (SEQUENCEINDEX)((lParam >> 16) & 0x7FFF);
 		if(nSeq < m_sndFile.Order.GetNumSequences())
 		{
 			m_OrderList.SelectSequence(nSeq);
