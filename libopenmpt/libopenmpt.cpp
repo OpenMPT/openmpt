@@ -25,6 +25,23 @@ void run_tests() {
 
 } // namespace openmpt
 
+#if defined( LIBOPENMPT_BUILD_TEST ) 
+
+int main( int argc, char * argv [] ) {
+	try {
+		MptTest::DoTests();
+	} catch ( const std::exception & e ) {
+		std::cerr << "TEST ERROR: exception: " << ( e.what() ? e.what() : "" ) << std::endl;
+		return 1;
+	} catch ( ... ) {
+		std::cerr << "TEST ERROR: unknown exception" << std::endl;
+		return 1;
+	}
+	return 0;
+}
+
+#endif // LIBOPENMPT_BUILD_TEST
+
 #if defined( LIBOPENMPT_BUILD_DLL ) 
 #if defined( _WIN32 )
 
