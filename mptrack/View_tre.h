@@ -119,20 +119,29 @@ protected:
 		MIDILIB_SHIFT	= 16,
 		MIDILIB_MASK	= (1 << MIDILIB_SHIFT) - 1,
 
-		DLS_TYPEMASK	= 0xC0000000,
-		DLS_TYPEPERC	= 0x80000000,
+		// Must be consistent with CCtrlPatterns::OnActivatePage
+		SEQU_SHIFT		= 16,
+		SEQU_MASK		= (1 << SEQU_SHIFT) - 1,
+		SEQU_INDICATOR	= 0x80000000,
+
+		// Soundbank instrument identification
 		DLS_TYPEINST	= 0x40000000,
+		DLS_TYPEPERC	= 0x80000000,
+		DLS_TYPEMASK	= DLS_TYPEINST | DLS_TYPEPERC,
 		DLS_INSTRMASK	= 0x00007FFF,
 		DLS_REGIONMASK	= 0x007F0000,
 		DLS_REGIONSHIFT	= 16,
 	};
+	static_assert((ORDERINDEX_INVALID & SEQU_MASK) == ORDERINDEX_INVALID, "ORDERINDEX doesn't fit in GetItemData() parameter");
+	static_assert((ORDERINDEX_MAX & SEQU_MASK) == ORDERINDEX_MAX, "ORDERINDEX doesn't fit in GetItemData() parameter");
+	static_assert((((SEQUENCEINDEX_INVALID << SEQU_SHIFT) & ~SEQU_INDICATOR) >> SEQU_SHIFT) == SEQUENCEINDEX_INVALID, "SEQUENCEINDEX doesn't fit in GetItemData() parameter");
 
 	static CSoundFile *m_SongFile;	// For browsing samples and instruments inside modules on disk
 	CModTreeDropTarget m_DropTarget;
 	CModTree *m_pDataTree;	// Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
-	DWORD m_dwStatus;
 	HWND m_hDropWnd;
 	ModItem m_itemDrag;
+	DWORD m_dwStatus;
 	UINT m_nDocNdx, m_nDragDocNdx;
 	HTREEITEM m_hItemDrag, m_hItemDrop;
 	HTREEITEM m_hInsLib, m_hMidiLib;
