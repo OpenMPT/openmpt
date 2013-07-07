@@ -170,7 +170,7 @@ void CModTree::Init()
 		m_hMidiLib = InsertItem("MIDI Library", IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
 		for (UINT iMidGrp=0; iMidGrp<17; iMidGrp++)
 		{
-			m_tiMidiGrp[iMidGrp] = InsertItem(szMidiGroupNames[iMidGrp], IMAGE_FOLDER, IMAGE_FOLDER, m_hMidiLib, TVI_LAST);
+			m_tiMidiGrp[iMidGrp] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, szMidiGroupNames[iMidGrp], IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (MODITEM_HDR_MIDIGROUP << MIDILIB_SHIFT) | iMidGrp, m_hMidiLib, TVI_LAST);
 		}
 	}
 	m_hInsLib = InsertItem("Instrument Library", IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
@@ -367,18 +367,15 @@ CModDoc *CModTree::GetDocumentFromItem(HTREEITEM hItem)
 	for (int ilimit=0; ilimit<10; ilimit++)
 	{
 		HTREEITEM h = GetParentItem(hItem);
-		if (h == NULL) break;
+		if (h == nullptr) break;
 		hItem = h;
 	}
-	if (hItem != NULL)
+	if (hItem != nullptr)
 	{
-		std::vector<ModTreeDocInfo *>::iterator iter;
-		for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
-		{
-			if (hItem == (*iter)->hSong) return (*iter)->pModDoc;
-		}
+		// Root item has moddoc pointer
+		return (CModDoc *)GetItemData(hItem);
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -428,11 +425,11 @@ void CModTree::RefreshMidiLibrary()
 		}
 		if (!m_tiMidi[iMidi])
 		{
-			m_tiMidi[iMidi] = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
-							s, dwImage, dwImage, 0, 0, 0, m_tiMidiGrp[iMidi/8], TVI_LAST);
+			m_tiMidi[iMidi] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
+							s, dwImage, dwImage, 0, 0, (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi, m_tiMidiGrp[iMidi/8], TVI_LAST);
 		} else
 		{
-			tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
+			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
 			tvi.hItem = m_tiMidi[iMidi];
 			tvi.pszText = stmp;
 			tvi.cchTextMax = sizeof(stmp);
@@ -440,8 +437,8 @@ void CModTree::RefreshMidiLibrary()
 			GetItem(&tvi);
 			if ((strcmp(s, stmp)) || (tvi.iImage != (int)dwImage))
 			{
-				SetItem(m_tiMidi[iMidi], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
-								s, dwImage, dwImage, 0, 0, 0);
+				SetItem(m_tiMidi[iMidi], TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
+								s, dwImage, dwImage, 0, 0, (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi);
 			}
 		}
 	}
@@ -463,11 +460,11 @@ void CModTree::RefreshMidiLibrary()
 		}
 		if (!m_tiPerc[iPerc])
 		{
-			m_tiPerc[iPerc] = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
-							s, dwImage, dwImage, 0, 0, 0, m_tiMidiGrp[16], TVI_LAST);
+			m_tiPerc[iPerc] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
+							s, dwImage, dwImage, 0, 0, (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc, m_tiMidiGrp[16], TVI_LAST);
 		} else
 		{
-			tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
+			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
 			tvi.hItem = m_tiPerc[iPerc];
 			tvi.pszText = stmp;
 			tvi.cchTextMax = sizeof(stmp);
@@ -476,7 +473,7 @@ void CModTree::RefreshMidiLibrary()
 			if ((strcmp(s, stmp)) || (tvi.iImage != (int)dwImage))
 			{
 				SetItem(m_tiPerc[iPerc], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
-							s, dwImage, dwImage, 0, 0, 0);
+							s, dwImage, dwImage, 0, 0, (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc);
 			}
 		}
 	}
@@ -508,9 +505,8 @@ void CModTree::RefreshDlsBanks()
 				// Add DLS file folder
 				_splitpath(pDlsBank->GetFileName(), NULL, NULL, szName, szExt);
 				strcat(szName, szExt);
-				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE,
-								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0, TVI_ROOT, hDlsRoot);
-				SetItemData(m_tiDLS[iDls], iDls);
+				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
+								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
 				// Memorize Banks
 				WORD wBanks[16];
 				HTREEITEM hBanks[16];
@@ -557,7 +553,7 @@ void CModTree::RefreshDlsBanks()
 										szNoteNames[keymax % 12], keymax / 12,
 										regionName);
 								}
-								LPARAM lParam = 0x80000000|(iRgn<<16)|iIns;
+								LPARAM lParam = DLS_TYPEPERC | (iRgn << DLS_REGIONSHIFT) | iIns;
 								InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
 										szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_LAST);
 							}
@@ -596,7 +592,7 @@ void CModTree::RefreshDlsBanks()
 								hBanks[j] = hbank;
 								nBanks++;
 							}
-							LPARAM lParam = 0x40000000|((pDlsIns->ulInstrument & 0x7F)<<16)|(iIns);
+							LPARAM lParam = DLS_TYPEINST | ((pDlsIns->ulInstrument & 0x7F) << DLS_REGIONSHIFT) | (iIns);
 							InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
 								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hbank, TVI_LAST);
 						}
@@ -623,13 +619,8 @@ void CModTree::RefreshDlsBanks()
 		{
 			if (m_tiDLS[iDls])
 			{
-				HTREEITEM h;
-				while ((h = GetChildItem(m_tiDLS[iDls])) != NULL)
-				{
-					DeleteItem(h);
-				}
 				DeleteItem(m_tiDLS[iDls]);
-				m_tiDLS[iDls] = NULL;
+				m_tiDLS[iDls] = nullptr;
 			}
 		}
 	}
@@ -654,14 +645,15 @@ void CModTree::RefreshInstrumentLibrary()
 void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 //----------------------------------------------------------
 {
-	CModDoc *pDoc;
 	CHAR s[256], stmp[256];
 	TV_ITEM tvi;
 	const DWORD hintFlagPart = HintFlagPart(lHint);
 	if ((pInfo == nullptr) || (pInfo->pModDoc == nullptr) || (!m_pDataTree)) return;
 	if (!hintFlagPart) return;
-	pDoc = pInfo->pModDoc;
-	CSoundFile &sndFile = pDoc->GetrSoundFile();
+
+	const CModDoc *pDoc = pInfo->pModDoc;
+	const CSoundFile &sndFile = pDoc->GetrSoundFile();
+
 	// Create headers
 	s[0] = 0;
 	if ((hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE)) || (!pInfo->hSong))
@@ -687,20 +679,22 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		GetItem(&tvi);
 		if ((strcmp(s, stmp)) || (tvi.iImage != IMAGE_FOLDER))
 		{
-			tvi.mask |= TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
+			tvi.mask |= TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
 			tvi.hItem = pInfo->hSong;
 			tvi.pszText = s;
 			tvi.iImage = tvi.iSelectedImage = IMAGE_FOLDER;
+			tvi.lParam = (LPARAM)pInfo->pModDoc;
 			SetItem(&tvi);
 		}
 	}
-	if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_XM|MOD_TYPE_MPT))
+	if (sndFile.GetModSpecifications().instrumentsMax > 0)
 	{
 		if (!pInfo->hInstruments) pInfo->hInstruments = InsertItem("Instruments", IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
 	} else
 	{
 		if (pInfo->hInstruments)
 		{
+			//DeleteChildren(pInfo->hInstruments);
 			for (UINT iRem=MAX_INSTRUMENTS-1; iRem; iRem--) if (pInfo->tiInstruments[iRem])
 			{
 				DeleteItem(pInfo->tiInstruments[iRem]);
@@ -715,15 +709,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 	if (hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE|HINT_MODCHANNELS|HINT_MIXPLUGINS))
 	{
 		UINT nFx = 0;
-		for (UINT iRem=0; iRem<MAX_MIXPLUGINS; iRem++)
-		{
-			UINT n = MAX_MIXPLUGINS-1-iRem;
-			if (pInfo->tiEffects[n])
-			{
-				DeleteItem(pInfo->tiEffects[n]);
-				pInfo->tiEffects[n] = NULL;
-			}
-		}
+		DeleteChildren(pInfo->hEffects);
 		for (UINT iFx=0; iFx<MAX_MIXPLUGINS; iFx++)
 		{
 			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[iFx];
@@ -736,7 +722,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				wsprintf(s, "FX%d: %s", iFx + 1, plugin.GetName());
 				int nImage = IMAGE_NOPLUGIN;
 				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->isInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
-				pInfo->tiEffects[iFx] = InsertItem(s, nImage, nImage, pInfo->hEffects, TVI_LAST);
+				InsertItem(TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, iFx, pInfo->hEffects, TVI_LAST);
 				nFx++;
 			}
 		}
@@ -902,7 +888,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		pInfo->tiPatterns.resize(sndFile.Patterns.Size(), NULL);
 		PATTERNINDEX imin = 0, imax = sndFile.Patterns.Size()-1;
 		if ((hintFlagPart == HINT_PATNAMES) && (nPat < sndFile.Patterns.Size())) imin = imax = nPat;
-		BOOL bDelPat = FALSE;
+		bool bDelPat = false;
 
 		ASSERT(pInfo->tiPatterns.size() == sndFile.Patterns.Size());
 		for(PATTERNINDEX iPat = imin; iPat <= imax; iPat++)
@@ -935,13 +921,14 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				{
 					pInfo->tiPatterns[iPat] = InsertItem(s, IMAGE_PATTERNS, IMAGE_PATTERNS, pInfo->hPatterns, TVI_LAST);
 				}
+				SetItemData(pInfo->tiPatterns[iPat], iPat);
 			} else
 			{
 				if (pInfo->tiPatterns[iPat])
 				{
 					DeleteItem(pInfo->tiPatterns[iPat]);
 					pInfo->tiPatterns[iPat] = NULL;
-					bDelPat = TRUE;
+					bDelPat = true;
 				}
 			}
 		}
@@ -978,6 +965,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 						SetItem(pInfo->tiSamples[nSmp], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
 					}
 				}
+				SetItemData(pInfo->tiSamples[nSmp], nSmp);
 			} else
 			{
 				if (pInfo->tiSamples[nSmp])
@@ -1043,6 +1031,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					if ((strcmp(s, stmp)) || (tvi.iImage != nImage))
 						SetItem(pInfo->tiInstruments[nIns], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
 				}
+				SetItemData(pInfo->tiInstruments[nIns], nIns);
 			} else
 			{
 				if (pInfo->tiInstruments[nIns])
@@ -1061,16 +1050,17 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 {
 	HTREEITEM hItemParent, hItemParentParent, hRootParent;
 
-	if (!hItem) return MODITEM_NULL;
+	if (!hItem) return ModItem(MODITEM_NULL);
 	// First, test root items
-	if (hItem == m_hInsLib) return MODITEM_HDR_INSTRUMENTLIB;
-	if (hItem == m_hMidiLib) return MODITEM_HDR_MIDILIB;
+	if (hItem == m_hInsLib) return ModItem(MODITEM_HDR_INSTRUMENTLIB);
+	if (hItem == m_hMidiLib) return ModItem(MODITEM_HDR_MIDILIB);
 
 	hItemParent = GetParentItem(hItem);
 	hItemParentParent = GetParentItem(hItemParent);
 	hRootParent = hItemParent;
+	DWORD_PTR itemData = GetItemData(hItem);
+
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
-	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
 	if ((hRootParent != NULL) && (m_pDataTree))
 	{
 		HTREEITEM h;
@@ -1084,15 +1074,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	// Midi Library
 	if ((hRootParent == m_hMidiLib) && (m_pDataTree))
 	{
-		for (UINT iGrp=0; iGrp<17; iGrp++)
-		{
-			if (hItem == m_tiMidiGrp[iGrp]) return ModItem(MODITEM_HDR_MIDIGROUP, iGrp);
-		}
-		for (UINT iMidi=0; iMidi<128; iMidi++)
-		{
-			if (hItem == m_tiMidi[iMidi]) return ModItem(MODITEM_MIDIINSTRUMENT, iMidi);
-			if (hItem == m_tiPerc[iMidi]) return ModItem(MODITEM_MIDIPERCUSSION, iMidi);
-		}
+		return ModItem(static_cast<ModItemType>(itemData >> MIDILIB_SHIFT), static_cast<uint32>(itemData & MIDILIB_MASK));
 	}
 	// Instrument Library
 	if ((hRootParent == m_hInsLib) || ((!m_pDataTree) && (hItem != m_hInsLib)))
@@ -1144,46 +1126,32 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 					}
 				}
 			}
-			// Pattern ?
-			if (hItemParent == pInfo->hPatterns && pSndFile)
+
+			ModItem modItem(MODITEM_NULL, (uint32)itemData);
+			if (hItemParent == pInfo->hPatterns)
 			{
-				ASSERT(pInfo->tiPatterns.size() == pSndFile->Patterns.Size());
-				for (UINT i=0; i<pInfo->tiPatterns.size(); i++)
-				{
-					if (hItem == pInfo->tiPatterns[i]) return ModItem(MODITEM_PATTERN, i);
-				}
-			}
-			// Sample ?
-			if (hItemParent == pInfo->hSamples)
+				// Pattern
+				ASSERT(pInfo->tiPatterns.size() == pModDoc->GetrSoundFile().Patterns.Size());
+				modItem.type = MODITEM_PATTERN;
+			} else if (hItemParent == pInfo->hSamples)
 			{
-				for (UINT i=0; i<MAX_SAMPLES; i++)
-				{
-					if (hItem == pInfo->tiSamples[i]) return ModItem(MODITEM_SAMPLE, i);
-				}
-			}
-			// Instrument ?
-			if (hItemParent == pInfo->hInstruments)
+				// Sample
+				modItem.type = MODITEM_SAMPLE;
+			} else if (hItemParent == pInfo->hInstruments)
 			{
-				for (UINT i=0; i<MAX_INSTRUMENTS; i++)
-				{
-					if (hItem == pInfo->tiInstruments[i]) return ModItem(MODITEM_INSTRUMENT, i);
-				}
-			}
-			// Effect ?
-			if (hItemParent == pInfo->hEffects)
+				// Instrument
+				modItem.type = MODITEM_INSTRUMENT;
+			} else if (hItemParent == pInfo->hEffects)
 			{
-				for (UINT i=0; i<MAX_MIXPLUGINS; i++)
-				{
-					if (hItem == pInfo->tiEffects[i]) return ModItem(MODITEM_EFFECT, i);
-				}
+				// Effect
+				modItem.type = MODITEM_EFFECT;
 			}
-			return ModItem(MODITEM_NULL);
+			return modItem;
 		}
 	}
 
 	// DLS banks
-	DWORD_PTR itemData = GetItemData(hItem);
-	if(itemData < m_tiDLS.size() && hItem == m_tiDLS[itemData])
+	if(hItem == m_tiDLS[itemData] && itemData < m_tiDLS.size())
 		return ModItem(MODITEM_DLSBANK_FOLDER, (uint32)itemData);
 
 	// DLS Instruments
@@ -1195,8 +1163,8 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 			if (hItem == m_tiDLS[dlsItem])
 				return ModItem(MODITEM_DLSBANK_FOLDER, (uint32)dlsItem);
 
-			if ((itemData & 0xC0000000) == 0x80000000
-				|| (itemData & 0xC0000000) == 0x40000000)
+			if ((itemData & DLS_TYPEMASK) == DLS_TYPEPERC
+				|| (itemData & DLS_TYPEMASK) == DLS_TYPEINST)
 			{
 				return ModItem(MODITEM_DLSBANK_INSTRUMENT, itemData, (uint16)dlsItem);
 			}
@@ -1374,14 +1342,14 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 				if ((bank < CTrackApp::gpDLSBanks.size()) && (CTrackApp::gpDLSBanks[bank]) && (pMainFrm))
 				{
 					CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[bank];
-					UINT rgn = 0, instr = (modItem.val1 & 0x00007FFF);
+					UINT rgn = 0, instr = (modItem.val1 & DLS_INSTRMASK);
 					// Drum
-					if (modItem.val1 & 0x80000000)
+					if (modItem.val1 & DLS_TYPEPERC)
 					{
-						rgn = (modItem.val1 & 0x007F0000) >> 16;
+						rgn = (modItem.val1 & DLS_REGIONMASK) >> DLS_REGIONSHIFT;
 					} else
 					// Melodic
-					if (modItem.val1 & 0x40000000)
+					if (modItem.val1 & DLS_TYPEINST)
 					{
 						rgn = pDLSBank->GetRegionFromKey(instr, nParam - NOTE_MIN);
 					}
@@ -2041,13 +2009,13 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 		break;
 
 	case MODITEM_DLSBANK_INSTRUMENT:
-		ASSERT((m_itemDrag.val1 & 0xC0000000) != 0);
+		ASSERT((m_itemDrag.val1 & DLS_TYPEMASK) != 0);
 		pdropinfo->dwDropType = DRAGONDROP_DLS;
 		// dwDropItem = DLS Bank #
 		pdropinfo->dwDropItem = m_itemDrag.val2;	// bank #
 		// Melodic: (Instrument)
 		// Drums:	(0x80000000) | (Region << 16) | (Instrument)
-		pdropinfo->lDropParam = (LPARAM)((m_itemDrag.val1 & 0x80FF7FFF));
+		pdropinfo->lDropParam = (LPARAM)((m_itemDrag.val1 & (DLS_TYPEPERC | DLS_REGIONMASK | DLS_INSTRMASK)));
 		break;
 	}
 	return (pdropinfo->dwDropType != DRAGONDROP_NOTHING);
@@ -2065,12 +2033,13 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	const ModTreeDocInfo *pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 	CModDoc *pModDoc = (pInfoDrop) ? pInfoDrop->pModDoc : nullptr;
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+	const bool sameModDoc = (pModDoc == pInfoDrag->pModDoc);
 
 	switch(modItemDrop.type)
 	{
 	case MODITEM_ORDER:
 	case MODITEM_SEQUENCE:
-		if ((m_itemDrag.type == MODITEM_ORDER) && (pModDoc) && (pSndFile) && (m_nDocNdx == m_nDragDocNdx))
+		if ((m_itemDrag.type == MODITEM_ORDER) && (pModDoc) && sameModDoc)
 		{
 			// drop an order somewhere
 			if (bDoDrop)
@@ -2099,7 +2068,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	case MODITEM_HDR_ORDERS:
 		// Drop your sequences here.
 		// At the moment, only dropping sequences into another module is possible.
-		if((m_itemDrag.type == MODITEM_SEQUENCE || m_itemDrag.type == MODITEM_HDR_ORDERS) && pSndFile && pInfoDrag && pModDoc != pInfoDrag->pModDoc)
+		if((m_itemDrag.type == MODITEM_SEQUENCE || m_itemDrag.type == MODITEM_HDR_ORDERS) && pSndFile && pInfoDrag && !sameModDoc)
 		{
 			if(bDoDrop && pInfoDrag != nullptr)
 			{
@@ -2146,7 +2115,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 
 	case MODITEM_SAMPLE:
 		// Reorder samples in a module
-		if(m_itemDrag.type == MODITEM_SAMPLE && pInfoDrag != nullptr && pModDoc == pInfoDrag->pModDoc)
+		if(m_itemDrag.type == MODITEM_SAMPLE && pInfoDrag != nullptr && sameModDoc)
 		{
 			if(bDoDrop)
 			{
@@ -2173,7 +2142,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 
 	case MODITEM_INSTRUMENT:
 		// Reorder instruments in a module
-		if(m_itemDrag.type == MODITEM_INSTRUMENT && pInfoDrag != nullptr && pModDoc == pInfoDrag->pModDoc)
+		if(m_itemDrag.type == MODITEM_INSTRUMENT && pInfoDrag != nullptr && sameModDoc)
 		{
 			if(bDoDrop)
 			{
@@ -2355,9 +2324,8 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 		case MODITEM_HDR_ORDERS:
 			// can we drag an order header? (only in MPTM format and if there's only one sequence)
 			{
-				CModDoc *pModDoc = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx]->pModDoc : nullptr);
-				CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
-				if(pSndFile && pSndFile->Order.GetNumSequences() == 1)
+				const CModDoc *pModDoc = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx]->pModDoc : nullptr);
+				if(pModDoc && pModDoc->GetrSoundFile().Order.GetNumSequences() == 1)
 					bDrag = true;
 			}
 			break;
@@ -3395,6 +3363,24 @@ void CModTree::OnCloseItem()
 	if(pos == NULL) return;
 	CView* pView = pModDoc->GetNextView(pos);
 	if (pView) pView->PostMessage(WM_COMMAND, ID_FILE_CLOSE);
+}
+
+
+// Delete all children of a tree item
+void CModTree::DeleteChildren(HTREEITEM hItem)
+//--------------------------------------------
+{
+	if(hItem != nullptr && ItemHasChildren(hItem))
+	{
+		HTREEITEM hNextItem;
+		HTREEITEM hChildItem = GetChildItem(hItem);
+		while(hChildItem != nullptr)
+		{
+			hNextItem = GetNextSiblingItem(hChildItem);
+			DeleteItem(hChildItem);
+			hChildItem = hNextItem;
+		}
+	}
 }
 
 

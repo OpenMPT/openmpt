@@ -24,14 +24,13 @@ class CModTree;
 
 struct ModTreeDocInfo
 {
-	CModDoc *pModDoc;
 	// Tree state variables
 	std::vector<std::vector<HTREEITEM> > tiOrders;
 	std::vector<HTREEITEM> tiSequences, tiPatterns;
+	CModDoc *pModDoc;
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
 	HTREEITEM tiSamples[MAX_SAMPLES];
 	HTREEITEM tiInstruments[MAX_INSTRUMENTS];
-	HTREEITEM tiEffects[MAX_MIXPLUGINS];
 
 	// Module information
 	ORDERINDEX nOrdSel;
@@ -51,7 +50,6 @@ struct ModTreeDocInfo
 		tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
 		MemsetZero(tiSamples);
 		MemsetZero(tiInstruments);
-		MemsetZero(tiEffects);
 		samplesPlaying.reset();
 		instrumentsPlaying.reset();
 	}
@@ -119,6 +117,20 @@ protected:
 		ModItem(ModItemType t = MODITEM_NULL, uint32 v1 = 0, uint16 v2 = 0) : type(uint16(t)), val1(v1), val2(v2) { }
 	};
 
+	// Bit mask magic
+	enum
+	{
+		MIDILIB_SHIFT	= 16,
+		MIDILIB_MASK	= (1 << MIDILIB_SHIFT) - 1,
+
+		DLS_TYPEMASK	= 0xC0000000,
+		DLS_TYPEPERC	= 0x80000000,
+		DLS_TYPEINST	= 0x40000000,
+		DLS_INSTRMASK	= 0x00007FFF,
+		DLS_REGIONMASK	= 0x007F0000,
+		DLS_REGIONSHIFT	= 16,
+	};
+
 	static CSoundFile *m_SongFile;	// For browsing samples and instruments inside modules on disk
 	CModTreeDropTarget m_DropTarget;
 	CModTree *m_pDataTree;	// Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
@@ -169,6 +181,7 @@ public:
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
 	void UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
 	bool IsItemExpanded(HTREEITEM hItem);
+	void DeleteChildren(HTREEITEM hItem);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
