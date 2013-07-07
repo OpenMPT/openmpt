@@ -411,7 +411,8 @@ void CModTree::RefreshMidiLibrary()
 	for (UINT iMidi=0; iMidi<128; iMidi++)
 	{
 		DWORD dwImage = IMAGE_NOINSTRUMENT;
-		wsprintf(s, "%d: %s", iMidi, szMidiProgramNames[iMidi]);
+		wsprintf(s, "%u: %s", iMidi, szMidiProgramNames[iMidi]);
+		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if ((lpMidiLib) && (lpMidiLib->MidiMap[iMidi]) && (lpMidiLib->MidiMap[iMidi][0]))
 		{
 			_splitpath(lpMidiLib->MidiMap[iMidi], NULL, NULL, szName, szExt);
@@ -426,7 +427,7 @@ void CModTree::RefreshMidiLibrary()
 		if (!m_tiMidi[iMidi])
 		{
 			m_tiMidi[iMidi] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-							s, dwImage, dwImage, 0, 0, (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi, m_tiMidiGrp[iMidi/8], TVI_LAST);
+							s, dwImage, dwImage, 0, 0, param, m_tiMidiGrp[iMidi/8], TVI_LAST);
 		} else
 		{
 			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
@@ -438,7 +439,7 @@ void CModTree::RefreshMidiLibrary()
 			if ((strcmp(s, stmp)) || (tvi.iImage != (int)dwImage))
 			{
 				SetItem(m_tiMidi[iMidi], TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-								s, dwImage, dwImage, 0, 0, (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi);
+								s, dwImage, dwImage, 0, 0, param);
 			}
 		}
 	}
@@ -447,6 +448,7 @@ void CModTree::RefreshMidiLibrary()
 	{
 		DWORD dwImage = IMAGE_NOSAMPLE;
 		wsprintf(s, "%s: %s", szDefaultNoteNames[iPerc], szMidiPercussionNames[iPerc-24]);
+		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
 		if ((lpMidiLib) && (lpMidiLib->MidiMap[iPerc|0x80]) && (lpMidiLib->MidiMap[iPerc|0x80][0]))
 		{
 			_splitpath(lpMidiLib->MidiMap[iPerc|0x80], NULL, NULL, szName, szExt);
@@ -461,7 +463,7 @@ void CModTree::RefreshMidiLibrary()
 		if (!m_tiPerc[iPerc])
 		{
 			m_tiPerc[iPerc] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-							s, dwImage, dwImage, 0, 0, (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc, m_tiMidiGrp[16], TVI_LAST);
+							s, dwImage, dwImage, 0, 0, param, m_tiMidiGrp[16], TVI_LAST);
 		} else
 		{
 			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
@@ -473,7 +475,7 @@ void CModTree::RefreshMidiLibrary()
 			if ((strcmp(s, stmp)) || (tvi.iImage != (int)dwImage))
 			{
 				SetItem(m_tiPerc[iPerc], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
-							s, dwImage, dwImage, 0, 0, (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc);
+							s, dwImage, dwImage, 0, 0, param);
 			}
 		}
 	}
@@ -523,7 +525,7 @@ void CModTree::RefreshDlsBanks()
 					DLSINSTRUMENT *pDlsIns = pDlsBank->GetInstrument(iIns);
 					if (pDlsIns)
 					{
-						wsprintf(szName, "%d: %s", pDlsIns->ulInstrument & 0x7F, pDlsIns->szName);
+						wsprintf(szName, "%u: %s", pDlsIns->ulInstrument & 0x7F, pDlsIns->szName);
 						// Drum Kit
 						if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 						{
@@ -545,10 +547,10 @@ void CModTree::RefreshDlsBanks()
 
 								if (keymin >= keymax)
 								{
-									wsprintf(szName, "%s%d: %s", szNoteNames[keymin % 12], keymin / 12, regionName);
+									wsprintf(szName, "%s%u: %s", szNoteNames[keymin % 12], keymin / 12, regionName);
 								} else
 								{
-									wsprintf(szName, "%s%d-%s%d: %s",
+									wsprintf(szName, "%s%u-%s%u: %s",
 										szNoteNames[keymin % 12], keymin / 12,
 										szNoteNames[keymax % 12], keymax / 12,
 										regionName);
@@ -714,7 +716,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				{
 					pInfo->hEffects = InsertItem("Plugins", IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
 				}
-				wsprintf(s, "FX%d: %s", iFx + 1, plugin.GetName());
+				wsprintf(s, "FX%u: %s", iFx + 1, plugin.GetName());
 				int nImage = IMAGE_NOPLUGIN;
 				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->isInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
 				InsertItem(TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, iFx, pInfo->hEffects, TVI_LAST);
@@ -792,9 +794,9 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				// more than one sequence -> add folder
 				CString sSeqName;
 				if(sndFile.Order.GetSequence(nSeq).m_sName.empty())
-					sSeqName.Format("Sequence %d", nSeq);
+					sSeqName.Format("Sequence %u", nSeq);
 				else
-					sSeqName.Format("%d: %s", nSeq, (LPCTSTR)sndFile.Order.GetSequence(nSeq).m_sName);
+					sSeqName.Format("%u: %s", nSeq, (LPCTSTR)sndFile.Order.GetSequence(nSeq).m_sName);
 
 				UINT state = (nSeq == sndFile.Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;
 
@@ -804,15 +806,16 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				}
 				// Update bold item
 				strcpy(stmp, sSeqName);
-				tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
+				tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE | TVIF_PARAM;
 				tvi.state = 0;
 				tvi.stateMask = TVIS_BOLD;
 				tvi.hItem = pInfo->tiSequences[nSeq];
 				tvi.pszText = stmp;
 				tvi.cchTextMax = sizeof(stmp);
+				LPARAM param = (nSeq << SEQU_SHIFT) | ORDERINDEX_INVALID;
 				GetItem(&tvi);
-				if(tvi.state != state || tvi.pszText != sSeqName)
-					SetItem(pInfo->tiSequences[nSeq], TVIF_TEXT | TVIF_STATE, sSeqName, 0, 0, state, TVIS_BOLD, 0);
+				if(tvi.state != state || tvi.pszText != sSeqName || tvi.lParam != param)
+					SetItem(pInfo->tiSequences[nSeq], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, sSeqName, 0, 0, state, TVIS_BOLD, param);
 
 				hAncestorNode = pInfo->tiSequences[nSeq];
 			}
@@ -823,7 +826,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				DeleteItem(pInfo->tiOrders[nSeq][nOrd]); pInfo->tiOrders[nSeq][nOrd] = NULL;
 			}
 			if (pInfo->tiOrders[nSeq].size() < sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed()) // Resize tiOrders if needed.
-				pInfo->tiOrders[nSeq].resize(sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed(), NULL);
+				pInfo->tiOrders[nSeq].resize(sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed(), nullptr);
 			const bool patNamesOnly = (hintFlagPart == HINT_PATNAMES);
 
 			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < sndFile.Order.size())) imin = imax = dwHintParam;
@@ -838,11 +841,11 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					sndFile.Patterns[sndFile.Order.GetSequence(nSeq)[iOrd]].GetName(stmp);
 					if (stmp[0])
 					{
-						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %d: %s" : "[%02d] %d: %s",
+						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %u: %s" : "[%02u] %u: %s",
 							iOrd, sndFile.Order.GetSequence(nSeq)[iOrd], stmp);
 					} else
 					{
-						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] Pattern %d" : "[%02d] Pattern %d",
+						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] Pattern %u" : "[%02u] Pattern %u",
 							iOrd, sndFile.Order.GetSequence(nSeq)[iOrd]);
 					}
 				} else
@@ -850,14 +853,15 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					if(sndFile.Order.GetSequence(nSeq)[iOrd] == sndFile.Order.GetIgnoreIndex())
 					{
 						// +++ Item
-						wsprintf(s, "[%02d] Skip", iOrd);
+						wsprintf(s, "[%02u] Skip", iOrd);
 					} else
 					{
 						// --- Item
-						wsprintf(s, "[%02d] Stop", iOrd);
+						wsprintf(s, "[%02u] Stop", iOrd);
 					}
 				}
 
+				LPARAM param = (nSeq << SEQU_SHIFT) | iOrd;
 				if (pInfo->tiOrders[nSeq][iOrd])
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
@@ -868,10 +872,10 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					tvi.cchTextMax = sizeof(stmp);
 					GetItem(&tvi);
 					if ((strcmp(s, stmp)) || (tvi.state != state))
-						SetItem(pInfo->tiOrders[nSeq][iOrd], TVIF_TEXT | TVIF_STATE, s, 0, 0, state, TVIS_BOLD, 0);
+						SetItem(pInfo->tiOrders[nSeq][iOrd], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, s, 0, 0, state, TVIS_BOLD, param);
 				} else
 				{
-					pInfo->tiOrders[nSeq][iOrd] = InsertItem(s, IMAGE_PARTITION, IMAGE_PARTITION, hAncestorNode, TVI_LAST);
+					pInfo->tiOrders[nSeq][iOrd] = InsertItem(TVIF_HANDLE | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, IMAGE_PARTITION, IMAGE_PARTITION, 0, 0, param, hAncestorNode, TVI_LAST);
 				}
 			}
 		}
@@ -899,10 +903,10 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				sndFile.Patterns[iPat].GetName(stmp);
 				if (stmp[0])
 				{
-					wsprintf(s, "%d: %s", iPat, stmp);
+					wsprintf(s, "%u: %s", iPat, stmp);
 				} else
 				{
-					wsprintf(s, "%d", iPat);
+					wsprintf(s, "%u", iPat);
 				}
 				if (pInfo->tiPatterns[iPat])
 				{
@@ -996,10 +1000,10 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					// path info for ITP instruments
 					const bool pathOk = !sndFile.m_szInstrumentPath[nIns - 1].empty();
 					const bool instMod = pDoc->m_bsInstrumentModified.test(nIns - 1);
-					wsprintf(s, pathOk ? (instMod ? "%3d: * %s" : "%3d: %s") : "%3d: ? %s", nIns, sndFile.GetInstrumentName(nIns));
+					wsprintf(s, pathOk ? (instMod ? "%3u: * %s" : "%3u: %s") : "%3u: ? %s", nIns, sndFile.GetInstrumentName(nIns));
 				} else
 				{
-					wsprintf(s, "%3d: %s", nIns, sndFile.GetInstrumentName(nIns));
+					wsprintf(s, "%3u: %s", nIns, sndFile.GetInstrumentName(nIns));
 				}
 
 				int nImage = IMAGE_INSTRUMENTS;
@@ -1068,13 +1072,9 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	// Instrument Library
 	if ((hRootParent == m_hInsLib) || ((!m_pDataTree) && (hItem != m_hInsLib)))
 	{
-		CHAR s[256];
 		TV_ITEM tvi;
-
-		tvi.mask = TVIF_TEXT|TVIF_IMAGE|TVIF_HANDLE;
+		tvi.mask = TVIF_IMAGE|TVIF_HANDLE;
 		tvi.hItem = hItem;
-		tvi.pszText = s;
-		tvi.cchTextMax = sizeof(s);
 		tvi.iImage = 0;
 		if (GetItem(&tvi))
 		{
@@ -1105,14 +1105,14 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 			// Order List or Sequence item?
 			if ((hItemParent == pInfo->hOrders) || (hItemParentParent == pInfo->hOrders))
 			{
-				// find sequence this item belongs to
-				for(SEQUENCEINDEX nSeq = 0; nSeq < pInfo->tiOrders.size(); nSeq++)
+				const ORDERINDEX ord = (ORDERINDEX)(itemData & SEQU_MASK);
+				const SEQUENCEINDEX seq = (SEQUENCEINDEX)(itemData >> SEQU_SHIFT);
+				if(ord == ORDERINDEX_INVALID)
 				{
-					if(hItem == pInfo->tiSequences[nSeq]) return ModItem(MODITEM_SEQUENCE, nSeq);
-					for(ORDERINDEX nOrd = 0; nOrd < pInfo->tiOrders[nSeq].size(); nOrd++)
-					{
-						if (hItem == pInfo->tiOrders[nSeq][nOrd]) return ModItem(MODITEM_ORDER, nOrd, nSeq);
-					}
+					return ModItem(MODITEM_SEQUENCE, seq);
+				} else
+				{
+					return ModItem(MODITEM_ORDER, ord, seq);
 				}
 			}
 
@@ -1179,11 +1179,11 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 			return TRUE;
 
 		/*case MODITEM_SEQUENCE:
-			if (pModDoc) pModDoc->ActivateView(IDD_CONTROL_PATTERNS, (dwItem << 16) | 0x80000000);
+			if (pModDoc) pModDoc->ActivateView(IDD_CONTROL_PATTERNS, (dwItem << SEQU_SHIFT) | SEQU_INDICATOR);
 			return TRUE;*/
 
 		case MODITEM_ORDER:
-			if (pModDoc) pModDoc->ActivateView(IDD_CONTROL_PATTERNS, modItemID | (uint32(modItem.val2) << 16) | 0x80000000);
+			if (pModDoc) pModDoc->ActivateView(IDD_CONTROL_PATTERNS, modItemID | (uint32(modItem.val2) << SEQU_SHIFT) | SEQU_INDICATOR);
 			return TRUE;
 
 		case MODITEM_PATTERN:
@@ -1403,7 +1403,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 	case MODITEM_SEQUENCE:
 		if (pModDoc)
 		{
-			wsprintf(s, _T("Remove sequence %d?"), modItemID);
+			wsprintf(s, _T("Remove sequence %u?"), modItemID);
 			if(Reporting::Confirm(s, false, true) == cnfNo) break;
 			pModDoc->GetrSoundFile().Order.RemoveSequence((SEQUENCEINDEX)(modItemID));
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
@@ -1419,7 +1419,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 		break;
 
 	case MODITEM_PATTERN:
-		wsprintf(s, _T("Remove pattern %d?"), modItemID);
+		wsprintf(s, _T("Remove pattern %u?"), modItemID);
 		if (pModDoc == nullptr || Reporting::Confirm(s, false, true) == cnfNo) break;
 		if (pModDoc->RemovePattern((PATTERNINDEX)modItemID))
 		{
@@ -1428,7 +1428,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 		break;
 
 	case MODITEM_SAMPLE:
-		wsprintf(s, _T("Remove sample %d?"), modItemID);
+		wsprintf(s, _T("Remove sample %u?"), modItemID);
 		if (pModDoc == nullptr || Reporting::Confirm(s, false, true) == cnfNo) break;
 		pModDoc->GetSampleUndo().PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace);
 		if (pModDoc->RemoveSample((SAMPLEINDEX)modItemID))
@@ -1438,7 +1438,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 		break;
 
 	case MODITEM_INSTRUMENT:
-		wsprintf(s, _T("Remove instrument %d?"), modItemID);
+		wsprintf(s, _T("Remove instrument %u?"), modItemID);
 		if (pModDoc == nullptr || Reporting::Confirm(s, false, true) == cnfNo) break;
 		if (pModDoc->RemoveInstrument((INSTRUMENTINDEX)modItemID))
 		{
@@ -2022,7 +2022,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	const ModTreeDocInfo *pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx] : nullptr);
 	CModDoc *pModDoc = (pInfoDrop) ? pInfoDrop->pModDoc : nullptr;
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
-	const bool sameModDoc = (pModDoc == pInfoDrag->pModDoc);
+	const bool sameModDoc = pInfoDrag && (pModDoc == pInfoDrag->pModDoc);
 
 	switch(modItemDrop.type)
 	{
@@ -3047,7 +3047,7 @@ void CModTree::OnSwitchToTreeItem()
 
 	if (pModDoc && (modItem.type == MODITEM_SEQUENCE))
 	{
-		pModDoc->ActivateView(IDD_CONTROL_PATTERNS, uint32(modItem.val1 << 16) | 0x80000000);
+		pModDoc->ActivateView(IDD_CONTROL_PATTERNS, uint32(modItem.val1 << SEQU_SHIFT) | SEQU_INDICATOR);
 	}
 }
 
