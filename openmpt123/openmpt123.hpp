@@ -57,26 +57,30 @@ static inline std::string get_extension( std::string filename ) {
 	return "";
 }
 
+bool IsTerminal( int fd );
+
 struct commandlineflags {
 	bool modplug123;
 #ifdef MPT_WITH_PORTAUDIO
 	int device;
 	std::int32_t buffer;
 #endif
-	std::int32_t channels;
-	std::int32_t repeatcount;
 	std::int32_t samplerate;
+	std::int32_t channels;
 	std::int32_t gain;
-	std::int32_t quality;
+	std::int32_t separation;
 	std::int32_t filtertaps;
-	int ramping; // ramping strength : -1:default 0:off 1 2 3 4 5 // roughly milliseconds
+	std::int32_t ramping; // ramping strength : -1:default 0:off 1 2 3 4 5 // roughly milliseconds
+	std::int32_t repeatcount;
+	double seek_target;
 	bool quiet;
 	bool verbose;
-	bool use_ui;
 	bool show_info;
 	bool show_message;
+	bool use_ui;
+	bool show_ui;
 	bool show_progress;
-	double seek_target;
+	bool show_meters;
 	bool use_float;
 	bool use_stdout;
 	std::vector<std::string> filenames;
@@ -90,29 +94,35 @@ struct commandlineflags {
 		device = -1;
 		buffer = 250;
 #endif
-		channels = 2;
-		repeatcount = 0;
 		samplerate = 48000;
+		channels = 2;
+		use_float = true;
 		gain = 0;
-		quality = 100;
+		separation = 100;
 		filtertaps = 8;
 		ramping = -1;
+		repeatcount = 0;
+		seek_target = 0.0;
 		quiet = false;
 		verbose = false;
 		show_info = true;
 		show_message = false;
 #if defined(_MSC_VER)
-		use_ui = true;
+		use_ui = IsTerminal( 0 ) ? true : false;
 #else
 		use_ui = isatty( STDIN_FILENO ) ? true : false;
 #endif
+		show_ui = use_ui;
 #if defined(_MSC_VER)
-		show_progress = false;
+		show_progress = IsTerminal( 2 ) ? true : false;
 #else
 		show_progress = isatty( STDERR_FILENO ) ? true : false;
 #endif
-		seek_target = 0.0;
-		use_float = false;
+#if defined(_MSC_VER)
+		show_meters = false;
+#else
+		show_meters = use_ui && show_progress;
+#endif
 		use_stdout = false;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 		force_overwrite = false;
@@ -140,8 +150,13 @@ struct commandlineflags {
 			use_ui = false;
 		}
 #endif
+		show_ui = use_ui;
+		if ( !use_ui ) {
+			show_meters = false;
+		}
 		if ( quiet ) {
 			verbose = false;
+			show_ui = false;
 			show_info = false;
 			show_progress = false;
 		}

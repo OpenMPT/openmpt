@@ -22,6 +22,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <ctime>
 
 #if defined(_MSC_VER)
 #include <conio.h>
@@ -56,6 +57,17 @@ struct show_version_number_exception : public std::exception {
 	show_version_number_exception() throw() { }
 };
 
+bool IsTerminal( int fd ) {
+#if defined( _MSC_VER )
+	return true
+		&& ( _isatty( fd ) ? true : false )
+		&& GetConsoleWindow() != NULL
+		;
+#else
+	return isatty( fd ) ? true : false;
+#endif
+}
+
 #if !defined( _MSC_VER )
 
 static termios saved_attributes;
@@ -84,21 +96,23 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Quiet: " << flags.quiet << std::endl;
 	s << "Verbose: " << flags.verbose << std::endl;
 	s << "User interface: " << flags.use_ui << std::endl;
+	s << "Show progress: " << flags.show_progress << std::endl;
+	s << "Show peak meters: " << flags.show_meters << std::endl;
 	s << "Show info: " << flags.show_info << std::endl;
 	s << "Show message: " << flags.show_message << std::endl;
-	s << "Show progress: " << flags.show_progress << std::endl;
 #ifdef MPT_WITH_PORTAUDIO
 	s << "Device: " << flags.device << std::endl;
 	s << "Buffer: " << flags.buffer << std::endl;
 #endif
+	s << "Samplerate: " << flags.samplerate << std::endl;
 	s << "Channels: " << flags.channels << std::endl;
-	s << "Repeat count: " << flags.repeatcount << std::endl;
-	s << "Sample rate: " << flags.samplerate << std::endl;
-	s << "Gain: " << flags.gain / 100.0 << std::endl;
-	s << "Filter taps: " << flags.filtertaps << std::endl;
-	s << "Volume ramping strength: " << flags.ramping << std::endl;
-	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
+	s << "Gain: " << flags.gain / 100.0 << std::endl;
+	s << "Stereo separation: " << flags.separation << std::endl;
+	s << "Interpolation filter taps: " << flags.filtertaps << std::endl;
+	s << "Volume ramping strength: " << flags.ramping << std::endl;
+	s << "Repeat count: " << flags.repeatcount << std::endl;
+	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Standard output: " << flags.use_stdout << std::endl;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 	s << "Output filename: " << flags.output_filename << std::endl;
@@ -111,6 +125,53 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	}
 	s << std::endl;
 	return s;
+}
+
+static std::string replace( std::string str, const std::string & oldstr, const std::string & newstr ) {
+	std::size_t pos = 0;
+	while ( ( pos = str.find( oldstr, pos ) ) != std::string::npos ) {
+		str.replace( pos, oldstr.length(), newstr );
+		pos += newstr.length();
+	}
+	return str;
+}
+
+#if defined( _MSC_VER )
+static const char path_sep = '\\';
+#else
+static const char path_sep = '/';
+#endif
+
+static std::string get_filename( const std::string & filepath ) {
+	if ( filepath.find_last_of( std::string(1,path_sep) ) == std::string::npos ) {
+		return filepath;
+	}
+	return filepath.substr( filepath.find_last_of( std::string(1,path_sep) ) + 1 );
+}
+
+static std::string prepend_lines( std::string str, const std::string & prefix ) {
+	if ( str.empty() ) {
+		return str;
+	}
+	if ( str.substr( str.length() - 1, 1 ) == std::string("\n") ) {
+		str = str.substr( 0, str.length() - 1 );
+	}
+	return replace( str, std::string("\n"), std::string("\n") + prefix );
+}
+
+static std::string bytes_to_string( std::uint64_t bytes ) {
+	static const char * const suffixes[] = { "B", "KiB", "MiB", "GiB", "TiB", "PiB" };
+	int offset = 0;
+	while ( bytes > 9999 ) {
+		bytes /= 1024;
+		offset += 1;
+		if ( offset == 5 ) {
+			break;
+		}
+	}
+	std::ostringstream result;
+	result << bytes << suffixes[offset];
+	return result.str();
 }
 
 static std::string seconds_to_string( double time ) {
@@ -200,38 +261,46 @@ static void show_help( show_help_exception & e, bool verbose, bool modplug123 ) 
 	} else {
 		std::clog << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
 		std::clog << std::endl;
-		std::clog << " -h, --help       Show help" << std::endl;
-		std::clog << " -q, --quiet      Suppress non-error screen output" << std::endl;
-		std::clog << " -v, --verbose    Show more screen output" << std::endl;
-		std::clog << " --version        Show version number and nothing else" << std::endl;
+		std::clog << " -h, --help           Show help" << std::endl;
+		std::clog << " -q, --quiet          Suppress non-error screen output" << std::endl;
+		std::clog << " -v, --verbose        Show more screen output" << std::endl;
+		std::clog << "     --version        Show version number and nothing else" << std::endl;
 		if ( !e.longhelp ) {
 			std::clog << std::endl;
 			return;
 		}
-		std::clog << " --ui|--batch     Enable/disable keyboard interface [default: " << commandlineflags().use_ui << "]" << std::endl;
-		std::clog << " --[no-]info      Show song info [default: " << commandlineflags().show_info << "]" << std::endl;
-		std::clog << " --[no-]message   Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
-		std::clog << " --[no-]progress  Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
-#ifdef MPT_WITH_PORTAUDIO
-		std::clog << " --device n       Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
-		std::clog << "                  use --device help to show available devices" << std::endl;
-		std::clog << " --buffer n       Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
-#endif
-		std::clog << " --stdout         Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
-		std::clog << " -o, --output f   Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
-		std::clog << " --force          Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
-#endif
-		std::clog << " --channels n     use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
-		std::clog << " --[no]-float     Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
-		std::clog << " --samplerate n   Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
-		std::clog << " --gain n         Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
-		std::clog << " --repeat n       Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
-		std::clog << " --filtertaps n   Set interpolation filter taps to n % [default: " << commandlineflags().filtertaps << "]" << std::endl;
-		std::clog << " --seek n         Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
-		std::clog << " --ramping n      Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
 		std::clog << std::endl;
-		std::clog << " --               Interpret further arguments as filenames" << std::endl;
+		std::clog << "     --ui|--batch     Enable/disable keyboard interface [default: " << commandlineflags().use_ui << "]" << std::endl;
+		std::clog << "     --[no-]progress  Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
+		std::clog << "     --[no-]meters    Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
+		std::clog << std::endl;
+		std::clog << "     --[no-]info      Show song info [default: " << commandlineflags().show_info << "]" << std::endl;
+		std::clog << "     --[no-]message   Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
+		std::clog << std::endl;
+#ifdef MPT_WITH_PORTAUDIO
+		std::clog << "     --device n       Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
+		std::clog << "                      use --device help to show available devices" << std::endl;
+		std::clog << "     --buffer n       Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
+#endif
+		std::clog << "     --stdout         Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
+		std::clog << " -o, --output f       Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
+		std::clog << "     --force          Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
+#endif
+		std::clog << std::endl;
+		std::clog << "     --samplerate n   Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
+		std::clog << "     --channels n     use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
+		std::clog << "     --[no]-float     Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
+		std::clog << std::endl;
+		std::clog << "     --gain n         Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
+		std::clog << "     --stereo n       Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
+		std::clog << "     --filter n       Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
+		std::clog << "     --ramping n      Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
+		std::clog << std::endl;
+		std::clog << "     --repeat n       Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
+		std::clog << "     --seek n         Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
+		std::clog << std::endl;
+		std::clog << "     --               Interpret further arguments as filenames" << std::endl;
 		std::clog << std::endl;
 		std::clog << " Supported file formats: " << std::endl;
 		std::clog << "    ";
@@ -257,9 +326,14 @@ static void show_help( show_help_exception & e, bool verbose, bool modplug123 ) 
 }
 
 template < typename Tmod >
-static void apply_mod_settings( const commandlineflags & flags, Tmod & mod ) {
-	mod.set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, flags.filtertaps );
+static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
+	flags.separation = std::max( flags.separation,  0 );
+	flags.filtertaps = std::max( flags.filtertaps,  1 );
+	flags.ramping    = std::max( flags.ramping,    -1 );
 	mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
+	mod.set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, flags.separation );
+	mod.set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, flags.filtertaps );
+	mod.set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, flags.ramping );
 }
 
 template < typename Tmod >
@@ -272,12 +346,102 @@ static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod ) {
 		case 'k': mod.seek_seconds( mod.get_current_position_seconds() + 1.0 ); break;
 		case 'l': mod.seek_seconds( mod.get_current_position_seconds() + 10.0 ); break;
 		case 'm': return false; break;
-		case '2': flags.gain -= 10; apply_mod_settings( flags, mod ); break;
-		case '3': flags.gain += 10; apply_mod_settings( flags, mod ); break;
-		case '7': flags.filtertaps -= 1; flags.filtertaps = std::max( flags.filtertaps, 0 ); apply_mod_settings( flags, mod ); break;
-		case '8': flags.filtertaps += 1; apply_mod_settings( flags, mod ); break;
+		case '3': flags.gain       -= 10; apply_mod_settings( flags, mod ); break;
+		case '4': flags.gain       += 10; apply_mod_settings( flags, mod ); break;
+		case '5': flags.separation -=  5; apply_mod_settings( flags, mod ); break;
+		case '6': flags.separation +=  5; apply_mod_settings( flags, mod ); break;
+		case '7': flags.filtertaps -=  1; apply_mod_settings( flags, mod ); break;
+		case '8': flags.filtertaps +=  1; apply_mod_settings( flags, mod ); break;
+		case '9': flags.ramping    -=  1; apply_mod_settings( flags, mod ); break;
+		case '0': flags.ramping    +=  1; apply_mod_settings( flags, mod ); break;
 	}
 	return true;
+}
+
+struct meter_channel {
+	float peak;
+	float clip;
+	meter_channel()
+		: peak(0.0f)
+		, clip(0.0f)
+	{
+		return;
+	}
+};
+
+struct meter_type {
+	meter_channel channels[4];
+};
+
+static void update_meter( meter_type & meter, const commandlineflags & flags, std::size_t count, const std::int16_t * const * buffers ) {
+	for ( int channel = 0; channel < flags.channels; ++channel ) {
+		meter.channels[channel].peak = 0.0f;
+		for ( std::size_t frame = 0; frame < count; ++frame ) {
+			if ( meter.channels[channel].clip != 0.0f ) {
+				meter.channels[channel].clip -= 1.0f / static_cast<float>( flags.samplerate );
+				if ( meter.channels[channel].clip <= 0.0f ) {
+					meter.channels[channel].clip = 0.0f;
+				}
+			}
+			float val = std::fabs( buffers[channel][frame] / 32768.0f );
+			if ( val >= 1.0f ) {
+				meter.channels[channel].clip = 1.0f;
+			}
+			if ( val > meter.channels[channel].peak ) {
+				meter.channels[channel].peak = val;
+			}
+		}
+	}
+}
+
+static void update_meter( meter_type & meter, const commandlineflags & flags, std::size_t count, const float * const * buffers ) {
+	for ( int channel = 0; channel < flags.channels; ++channel ) {
+		if ( !count ) {
+			meter = meter_type();
+		}
+		meter.channels[channel].peak = 0.0f;
+		for ( std::size_t frame = 0; frame < count; ++frame ) {
+			if ( meter.channels[channel].clip != 0.0f ) {
+				meter.channels[channel].clip -= 1.0f / static_cast<float>( flags.samplerate );
+				if ( meter.channels[channel].clip <= 0.0f ) {
+					meter.channels[channel].clip = 0.0f;
+				}
+			}
+			float val = std::fabs( buffers[channel][frame] );
+			if ( val >= 1.0f ) {
+				meter.channels[channel].clip = 1.0f;
+			}
+			if ( val > meter.channels[channel].peak ) {
+				meter.channels[channel].peak = val;
+			}
+		}
+	}
+}
+
+static const char * const channel_tags[4][4] = {
+	{ " C", "  ", "  ", "  " },
+	{ " L", " R", "  ", "  " },
+	{ "FL", "FR", "RC", "  " },
+	{ "FL", "FR", "RL", "RR" },
+};
+
+static std::string channel_to_string( int channels, int channel, const meter_channel & meter ) {
+	std::string result;
+	float db = 20.0f * std::log10( meter.peak );
+	int val = static_cast<int>( db + 48.0f );
+	if ( val < 0 ) {
+		val = 0;
+	}
+	if ( val > 48 ) {
+		val = 48;
+	}
+	return std::string("        ") + std::string(channel_tags[channels-1][channel]) + std::string(" : ") + std::string(val,'>') + std::string(48-val,' ') + ( ( meter.clip != 0.0f ) ? "|###" : "|   " );	
+}
+
+static void draw_meters( std::ostream & log, const meter_type & meter, const commandlineflags & flags ) {
+	for ( int channel = 0; channel < flags.channels; ++channel ) {
+		log << channel_to_string( flags.channels, channel, meter.channels[channel] ) << std::endl;
+	}
 }
 
 template < typename Tsample, typename Tmod >
@@ -295,6 +459,58 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 	buffers[2] = rear_left.data();
 	buffers[3] = rear_right.data();
 	buffers.resize( flags.channels );
+	
+	meter_type meter;
+	
+	const bool multiline = flags.show_meters && flags.show_ui;
+	
+	int lines = 0;
+	
+	if ( multiline ) {
+		lines += 1;
+		if ( flags.show_ui ) {
+			lines += 4;
+		}
+		if ( flags.show_meters ) {
+			lines += 1;
+			for ( int channel = 0; channel < flags.channels; ++channel ) {
+				lines += 1;
+			}
+		}
+		if ( flags.show_info ) {
+			lines += 1;
+			if ( flags.show_progress ) {
+				lines += 1;
+			}
+		}
+		if ( flags.show_progress ) {
+			lines += 1;
+		}
+	} else if ( flags.show_ui || flags.show_info || flags.show_progress ) {
+		log << std::endl;
+	}
+	for ( int line = 0; line < lines; ++line ) {
+		log << std::endl;
+	}
+
+#if defined( _MSC_VER )
+	HANDLE hStdErr = NULL;
+	COORD coord_cursor = COORD();
+	if( multiline ) {
+		log.flush();
+		hStdErr = GetStdHandle( STD_ERROR_HANDLE );
+		if ( hStdErr ) {
+			CONSOLE_SCREEN_BUFFER_INFO csbi;
+			ZeroMemory( &csbi, sizeof( CONSOLE_SCREEN_BUFFER_INFO ) );
+			GetConsoleScreenBufferInfo( hStdErr, &csbi );
+			coord_cursor = csbi.dwCursorPosition;
+			coord_cursor.X = 1;
+			coord_cursor.Y -= lines;
+		}
+	}
+#endif
+
+	double cpu_smooth = 0.0;
 
 	while ( true ) {
 
@@ -331,6 +547,12 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 #endif
 
 		}
+		
+		std::clock_t cpu_beg = 0;
+		std::clock_t cpu_end = 0;
+		if ( flags.show_info ) {
+			cpu_beg = std::clock();
+		}
 
 		std::size_t count = 0;
 
@@ -339,44 +561,114 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 			case 2: count = mod.read( flags.samplerate, bufsize, left.data(), right.data() ); break;
 			case 4: count = mod.read( flags.samplerate, bufsize, left.data(), right.data(), rear_left.data(), rear_right.data() ); break;
 		}
+		
+		char cpu_str[64] = "";
+		if ( flags.show_info ) {
+			cpu_end = std::clock();
+			if ( count > 0 ) {
+				double cpu = 1.0;
+				cpu *= ( (double)cpu_end - (double)cpu_beg ) / (double)CLOCKS_PER_SEC;
+				cpu /= ( (double)count ) / (double)flags.samplerate;
+				double mix = ( (double)count ) / (double)flags.samplerate;
+				cpu_smooth = ( 1.0 - mix ) * cpu_smooth + mix * cpu;
+				sprintf( cpu_str, "%.2f%%", cpu_smooth * 100.0 );
+			}
+		}
+
+		if ( flags.show_meters ) {
+			update_meter( meter, flags, count, buffers.data() );
+		}
+
+		if ( count > 0 ) {
+			audio_stream.write( buffers, count );
+		}
+
+		if ( multiline ) {
+#if defined( _MSC_VER )
+			log.flush();
+			if ( hStdErr ) {
+				SetConsoleCursorPosition( hStdErr, coord_cursor );
+			}
+#else
+			for ( int line = 0; line < lines; ++line ) {
+				log << "\x1b[1A";
+			}
+#endif
+			log << std::endl;
+			if ( flags.show_ui ) {
+				log << "                      <3>|<4>   " << "\r";
+				log << "Gain.......: " << flags.gain * 0.01f << " dB" << std::endl;
+				log << "                      <5>|<6>   " << "\r";
+				log << "Stereo.....: " << flags.separation << " %" << std::endl;
+				log << "                      <7>|<8>   " << "\r";
+				log << "Filter.....: " << flags.filtertaps << " taps" << std::endl;
+				log << "                      <9>|<0>   " << "\r";
+				log << "Ramping....: " << flags.ramping << std::endl;
+			}
+			if ( flags.show_meters ) {
+				log << std::endl;
+				draw_meters( log, meter, flags );
+			}
+			if ( flags.show_info ) {
+				log << "Mixer......: " << "CPU:" << cpu_str << "   " << "Chn:" << mod.get_current_playing_channels() << "   " << std::endl;
+				if ( flags.show_progress ) {
+					log << "Player.....: ";
+					log << "Ord:" << mod.get_current_order() << "/" << mod.get_num_orders() << " Pat:" << mod.get_current_pattern() << " Row:" << mod.get_current_row();
+					log << "   ";
+					log << "Spd:" << mod.get_current_speed() << " Tmp:" << mod.get_current_tempo();
+					log << "   ";
+					log << std::endl;
+				}
+			}
+			if ( flags.show_progress ) {
+				log << "Position...: " << seconds_to_string( mod.get_current_position_seconds() ) << " / " << seconds_to_string( duration ) << "   " << std::endl;
+			}
+		} else {
+			if ( flags.show_ui ) {
+				log << " ";
+				log << flags.gain * 0.01f << "dB";
+				log << "|";
+				log << flags.separation << "%";
+				log << "|";
+				log << flags.filtertaps << "taps";
+				log << "|";
+				log << flags.ramping;
+			}
+			if ( flags.show_info && flags.use_ui ) {
+				log << " ";
+				log << "CPU:" << cpu_str;
+				log << "|";
+				log << "Chn:" << mod.get_current_playing_channels();
+			}
+			if ( flags.show_info && !flags.use_ui ) {
+				if ( flags.show_progress ) {
+					log << " ";
+					log << "Ord:" << mod.get_current_order() << "/" << mod.get_num_orders();
+					log << "|";
+					log << "Pat:" << mod.get_current_pattern();
+					log << "|";
+					log << "Row:" << mod.get_current_row();
+					log << " ";
+					log << "Spd:" << mod.get_current_speed();
+					log << "|";
+					log << "Tmp:" << mod.get_current_tempo();
+				}
+			}
+			if ( flags.show_progress ) {
+				log << " ";
+				log << seconds_to_string( mod.get_current_position_seconds() );
+				log << "/";
+				log << seconds_to_string( duration );
+			}
+			if ( flags.show_ui || flags.show_info || flags.show_progress ) {
+				log << "   " << "\r";
+			}
+		}
 
 		if ( count == 0 ) {
 			break;
 		}
-
-		audio_stream.write( buffers, count );
-
-		if ( flags.show_progress ) {
-			log << "   ";
-			log << seconds_to_string( mod.get_current_position_seconds() );
-			log << " / ";
-			log << seconds_to_string( duration );
-			if ( flags.show_info ) {
-				log << " [h],[j],[k],[l]";
-			}
-			if ( flags.use_ui ) {
-				log << "   ";
-				log << "gain: " << flags.gain * 0.01f << "dB";
-				if ( flags.show_info ) {
-					log << " [2],[3]";
-				}
-				log << "   ";
-				log << "filter: " << flags.filtertaps << "taps";
-				if ( flags.show_info ) {
-					log << " [7],[8]";
-				}
-			}
-			if ( flags.show_info ) {
-				log << "   ";
-				log << "Ord:" << mod.get_current_order() << "/" << mod.get_num_orders() << " Pat:" << mod.get_current_pattern() << " Row:" << mod.get_current_row();
-				log << "   ";
-				log << "Spd:" << mod.get_current_speed() << " Tmp:" << mod.get_current_tempo();
-				log << "  ";
-				log << "Chn:" << mod.get_current_playing_channels();
-			}
-			log << "  " << "\r";
-		}
-
+		
 	}
 
 }
@@ -392,22 +684,28 @@ std::map<std::string,std::string> get_metadata( const Tmod & mod ) {
 }
 
 template < typename Tmod >
-void render_mod_file( commandlineflags & flags, const std::string & filename, Tmod & mod, std::ostream & log, write_buffers_interface & audio_stream ) {
+void render_mod_file( commandlineflags & flags, const std::string & filename, std::uint64_t filesize, Tmod & mod, std::ostream & log, write_buffers_interface & audio_stream ) {
 
 	double duration = mod.get_duration_seconds();
-	if ( flags.show_info ) {
-		log << "File: " << filename << std::endl;
-		log << "Type: " << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")" << std::endl;
-		log << "Tracker: " << mod.get_metadata( "tracker" ) << std::endl;
+	if ( flags.verbose ) {
+		log << "Path.......: " << filename << std::endl;
 	}
-	log << "Title: " << mod.get_metadata( "title" ) << std::endl;
-	log << "Duration: " << seconds_to_string( duration ) << std::endl;
 	if ( flags.show_info ) {
-		log << "Channels: " << mod.get_num_channels() << std::endl;
-		log << "Orders: " << mod.get_num_orders() << std::endl;
-		log << "Patterns: " << mod.get_num_patterns() << std::endl;
+		log << "Filename...: " << get_filename( filename ) << std::endl;
+		log << "Size.......: " << bytes_to_string( filesize ) << std::endl;
+		log << "Type.......: " << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")" << std::endl;
+		log << "Tracker....: " << mod.get_metadata( "tracker" ) << std::endl;
+	}
+	{
+		log << "Title......: " << mod.get_metadata( "title" ) << std::endl;
+		log << "Duration...: " << seconds_to_string( duration ) << std::endl;
+	}
+	if ( flags.show_info ) {
+		log << "Channels...: " << mod.get_num_channels() << std::endl;
+		log << "Orders.....: " << mod.get_num_orders() << std::endl;
+		log << "Patterns...: " << mod.get_num_patterns() << std::endl;
 		log << "Instruments: " << mod.get_num_instruments() << std::endl;
-		log << "Samples: " << mod.get_num_samples() << std::endl;
+		log << "Samples....: " << mod.get_num_samples() << std::endl;
 	}
 
 	if ( flags.filenames.size() == 1 ) {
@@ -417,9 +715,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, Tm
 	}
 
 	if ( flags.show_message ) {
-		log << "Message: " << std::endl;
-		log << mod.get_metadata( "message" ) << std::endl;
-		log << std::endl;
+		log << "Message....: " << prepend_lines( mod.get_metadata( "message" ), "           : " ) << std::endl;
 	}
 
 	if ( flags.seek_target > 0.0 ) {
@@ -427,9 +723,6 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, Tm
 	}
 
 	try {
-		if ( flags.show_progress ) {
-			log << std::endl;
-		}
 		if ( flags.use_float ) {
 			render_loop<float>( flags, mod, duration, log, audio_stream );
 		} else {
@@ -454,9 +747,13 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 		std::ifstream file_stream;
 		std::istream & stdin_stream = std::cin;
+		std::uint64_t filesize = 0;
 		bool use_stdin = ( filename == "-" );
 		if ( !use_stdin ) {
 			file_stream.open( filename, std::ios::binary );
+			file_stream.seekg( 0, std::ios::end );
+			filesize = file_stream.tellg();
+			file_stream.seekg( 0, std::ios::beg );
 		}
 		std::istream & data_stream = use_stdin ? stdin_stream : file_stream;
 		if ( data_stream.fail() ) {
@@ -469,14 +766,14 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 			mod.set_repeat_count( flags.repeatcount );
 
-			mod.set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, flags.filtertaps );
-			mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
-			mod.set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, flags.ramping );
+			apply_mod_settings( flags, mod );
 
-			render_mod_file( flags, filename, mod, log, audio_stream );
+			render_mod_file( flags, filename, filesize, mod, log, audio_stream );
 
 		} 
 
+	} catch ( silent_exit_exception & ) {
+		throw;
 	} catch ( std::exception & e ) {
 		std::cerr << "error playing '" << filename << "': " << e.what() << std::endl;
 	} catch ( ... ) {
@@ -566,6 +863,14 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.use_ui = true;
 			} else if ( arg == "--batch" ) {
 				flags.use_ui = false;
+			} else if ( arg == "--progress" ) {
+				flags.show_progress = true;
+			} else if ( arg == "--no-progress" ) {
+				flags.show_progress = false;
+			} else if ( arg == "--meters" ) {
+				flags.show_meters = true;
+			} else if ( arg == "--no-meters" ) {
+				flags.show_meters = false;
 			} else if ( arg == "--info" ) {
 				flags.show_info = true;
 			} else if ( arg == "--no-info" ) {
@@ -574,10 +879,6 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.show_message = true;
 			} else if ( arg == "--no-message" ) {
 				flags.show_message = false;
-			} else if ( arg == "--progress" ) {
-				flags.show_progress = true;
-			} else if ( arg == "--no-progress" ) {
-				flags.show_progress = false;
 			} else if ( arg == "--device" && nextarg != "" ) {
 				if ( false ) {
 					// nothing
@@ -609,6 +910,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 			} else if ( arg == "--force" ) {
 				flags.force_overwrite = true;
 #endif
+			} else if ( arg == "--samplerate" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.samplerate;
+				++i;
 			} else if ( arg == "--channels" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.channels;
@@ -617,31 +922,31 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.use_float = true;
 			} else if ( arg == "--no-float" ) {
 				flags.use_float = false;
-			} else if ( arg == "--samplerate" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.samplerate;
-				++i;
 			} else if ( arg == "--gain" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				double gain = 0.0;
 				istr >> gain;
 				flags.gain = static_cast<std::int32_t>( gain * 100.0 );
 				++i;
-			} else if ( arg == "--repeat" && nextarg != "" ) {
+			} else if ( arg == "--stereo" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
-				istr >> flags.repeatcount;
+				istr >> flags.separation;
 				++i;
-			} else if ( arg == "--filtertaps" && nextarg != "" ) {
+			} else if ( arg == "--filter" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.filtertaps;
-				++i;
-			} else if ( arg == "--seek" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.seek_target;
 				++i;
 			} else if ( arg == "--ramping" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.ramping;
+				++i;
+			} else if ( arg == "--repeat" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.repeatcount;
+				++i;
+			} else if ( arg == "--seek" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.seek_target;
 				++i;
 			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == "-" ) {
 				throw show_help_exception();

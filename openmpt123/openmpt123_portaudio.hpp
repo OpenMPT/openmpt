@@ -66,7 +66,6 @@ public:
 		if ( verbose ) {
 			*portaudio_log_stream << std::endl;
 		}
-		log << std::endl;
 	}
 	~portaudio_raii() {
 		if ( portaudio_initialized ) {
@@ -96,6 +95,7 @@ public:
 		streamparameters.channelCount = flags.channels;
 		streamparameters.sampleFormat = ( flags.use_float ? paFloat32 : paInt16 ) | paNonInterleaved;
 		streamparameters.suggestedLatency = flags.buffer * 0.001;
+		//check_portaudio_error( Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, flags.use_ui ? 20 * flags.samplerate / 1000 : paFramesPerBufferUnspecified, 0, NULL, NULL ) );
 		check_portaudio_error( Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, paFramesPerBufferUnspecified, 0, NULL, NULL ) );
 		check_portaudio_error( Pa_StartStream( stream ) );
 		if ( flags.verbose ) {
