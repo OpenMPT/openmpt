@@ -376,7 +376,7 @@ void module_impl::set_render_param( int param, std::int32_t value ) {
 			std::int32_t newvalue = value * 128 / 100;
 			if ( newvalue != static_cast<std::int32_t>( m_sndFile->m_MixerSettings.m_nStereoSeparation ) ) {
 				MixerSettings settings = m_sndFile->m_MixerSettings;
-				settings.gdwMixingFreq = newvalue;
+				settings.m_nStereoSeparation = newvalue;
 				m_sndFile->SetMixerSettings( settings );
 			}
 		} break;
