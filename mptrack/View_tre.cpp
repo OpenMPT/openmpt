@@ -695,11 +695,6 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		if (pInfo->hInstruments)
 		{
 			//DeleteChildren(pInfo->hInstruments);
-			for (UINT iRem=MAX_INSTRUMENTS-1; iRem; iRem--) if (pInfo->tiInstruments[iRem])
-			{
-				DeleteItem(pInfo->tiInstruments[iRem]);
-				pInfo->tiInstruments[iRem] = NULL;
-			}
 			DeleteItem(pInfo->hInstruments);
 			pInfo->hInstruments = NULL;
 		}
@@ -938,10 +933,15 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 	{
 		const SAMPLEINDEX nSmp = (SAMPLEINDEX)(lHint >> HINT_SHIFT_SMP);
 		SAMPLEINDEX smin = 1, smax = MAX_SAMPLES - 1;
-		if ((hintFlagPart == HINT_SMPNAMES) && (nSmp) && (nSmp < MAX_SAMPLES)) { smin = smax = nSmp; }
+		if ((hintFlagPart == HINT_SMPNAMES) && (nSmp) && (nSmp < MAX_SAMPLES))
+		{
+			smin = smax = nSmp;
+		}
+		HTREEITEM hChild = GetNthChildItem(pInfo->hSamples, smin - 1);
 		for(SAMPLEINDEX nSmp = smin; nSmp <= smax; nSmp++)
 		{
-			if (nSmp <= sndFile.m_nSamples)
+			HTREEITEM hNextChild = GetNextSiblingItem(hChild);
+			if (nSmp <= sndFile.GetNumSamples())
 			{
 				const bool sampleExists = (sndFile.GetSample(nSmp).pSample != nullptr);
 				int nImage = (sampleExists) ? IMAGE_SAMPLES : IMAGE_NOSAMPLE;
@@ -949,31 +949,31 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				if(pInfo->pModDoc->IsSampleMuted(nSmp)) nImage = IMAGE_SAMPLEMUTE;
 
 				wsprintf(s, "%3d: %s", nSmp, sndFile.m_szNames[nSmp]);
-				if (!pInfo->tiSamples[nSmp])
+				if (!hChild)
 				{
-					pInfo->tiSamples[nSmp] = InsertItem(s, nImage, nImage, pInfo->hSamples, TVI_LAST);
+					hChild = InsertItem(s, nImage, nImage, pInfo->hSamples, TVI_LAST);
 				} else
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
-					tvi.hItem = pInfo->tiSamples[nSmp];
+					tvi.hItem = hChild;
 					tvi.pszText = stmp;
 					tvi.cchTextMax = sizeof(stmp);
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
 					if ((strcmp(s, stmp)) || (tvi.iImage != nImage))
 					{
-						SetItem(pInfo->tiSamples[nSmp], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
+						SetItem(hChild, TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
 					}
 				}
-				SetItemData(pInfo->tiSamples[nSmp], nSmp);
+				SetItemData(hChild, nSmp);
+			} else if(hChild != nullptr)
+			{
+				DeleteItem(hChild);
 			} else
 			{
-				if (pInfo->tiSamples[nSmp])
-				{
-					DeleteItem(pInfo->tiSamples[nSmp]);
-					pInfo->tiSamples[nSmp] = NULL;
-				}
+				break;
 			}
+			hChild = hNextChild;
 		}
 	}
 	// Add Instruments
@@ -984,23 +984,12 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		if ((hintFlagPart == HINT_INSNAMES) && (nIns) && (nIns < MAX_INSTRUMENTS))
 		{
 			smin = smax = nIns;
-			if (((sndFile.Instruments[smin]) && (pInfo->tiInstruments[smin] == NULL))
-			 || ((!sndFile.Instruments[smin]) && (pInfo->tiInstruments[smin] != NULL)))
-			{
-				smax = MAX_INSTRUMENTS-1;
-				for (INSTRUMENTINDEX iRem=smin; iRem<smax; iRem++)
-				{
-					if (pInfo->tiInstruments[iRem])
-					{
-						DeleteItem(pInfo->tiInstruments[iRem]);
-						pInfo->tiInstruments[iRem] = NULL;
-					}
-				}
-			}
 		}
+		HTREEITEM hChild = GetNthChildItem(pInfo->hInstruments, smin - 1);
 		for (INSTRUMENTINDEX nIns = smin; nIns <= smax; nIns++)
 		{
-			if ((nIns <= sndFile.GetNumInstruments()) && (sndFile.Instruments[nIns]))
+			HTREEITEM hNextChild = GetNextSiblingItem(hChild);
+			if (nIns <= sndFile.GetNumInstruments())
 			{
 				if(sndFile.m_SongFlags[SONG_ITPROJECT])
 				{
@@ -1015,31 +1004,31 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 
 				int nImage = IMAGE_INSTRUMENTS;
 				if(pInfo->instrumentsPlaying[nIns]) nImage = IMAGE_INSTRACTIVE;
-				if(pInfo->pModDoc->IsInstrumentMuted(nIns)) nImage = IMAGE_INSTRMUTE;
+				if(!sndFile.Instruments[nIns] || pInfo->pModDoc->IsInstrumentMuted(nIns)) nImage = IMAGE_INSTRMUTE;
 
-				if (!pInfo->tiInstruments[nIns])
+				if (!hChild)
 				{
-					pInfo->tiInstruments[nIns] = InsertItem(s, nImage, nImage, pInfo->hInstruments, TVI_LAST);
+					hChild = InsertItem(s, nImage, nImage, pInfo->hInstruments, TVI_LAST);
 				} else
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
-					tvi.hItem = pInfo->tiInstruments[nIns];
+					tvi.hItem = hChild;
 					tvi.pszText = stmp;
 					tvi.cchTextMax = sizeof(stmp);
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
 					if ((strcmp(s, stmp)) || (tvi.iImage != nImage))
-						SetItem(pInfo->tiInstruments[nIns], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
+						SetItem(hChild, TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
 				}
-				SetItemData(pInfo->tiInstruments[nIns], nIns);
+				SetItemData(hChild, nIns);
+			} else if(hChild != nullptr)
+			{
+				DeleteItem(hChild);
 			} else
 			{
-				if (pInfo->tiInstruments[nIns])
-				{
-					DeleteItem(pInfo->tiInstruments[nIns]);
-					pInfo->tiInstruments[nIns] = NULL;
-				}
+				break;
 			}
+			hChild = hNextChild;
 		}
 	}
 }
@@ -3372,15 +3361,31 @@ void CModTree::DeleteChildren(HTREEITEM hItem)
 {
 	if(hItem != nullptr && ItemHasChildren(hItem))
 	{
-		HTREEITEM hNextItem;
 		HTREEITEM hChildItem = GetChildItem(hItem);
 		while(hChildItem != nullptr)
 		{
-			hNextItem = GetNextSiblingItem(hChildItem);
+			HTREEITEM hNextItem = GetNextSiblingItem(hChildItem);
 			DeleteItem(hChildItem);
 			hChildItem = hNextItem;
 		}
 	}
+}
+
+
+// Get the n-th child of a tree node
+HTREEITEM CModTree::GetNthChildItem(HTREEITEM hItem, int index)
+//-------------------------------------------------------------
+{
+	HTREEITEM hChildItem = nullptr;
+	if(hItem != nullptr && ItemHasChildren(hItem))
+	{
+		hChildItem = GetChildItem(hItem);
+		while(index-- > 0)
+		{
+			hChildItem = GetNextSiblingItem(hChildItem);
+		}
+	}
+	return hChildItem;
 }
 
 

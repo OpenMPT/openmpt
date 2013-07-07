@@ -29,8 +29,6 @@ struct ModTreeDocInfo
 	std::vector<HTREEITEM> tiSequences, tiPatterns;
 	CModDoc *pModDoc;
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
-	HTREEITEM tiSamples[MAX_SAMPLES];
-	HTREEITEM tiInstruments[MAX_INSTRUMENTS];
 
 	// Module information
 	ORDERINDEX nOrdSel;
@@ -48,8 +46,6 @@ struct ModTreeDocInfo
 		tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
 		tiOrders.resize(sndFile.Order.GetNumSequences());
 		tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
-		MemsetZero(tiSamples);
-		MemsetZero(tiInstruments);
 		samplesPlaying.reset();
 		instrumentsPlaying.reset();
 	}
@@ -182,6 +178,7 @@ public:
 	void UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
 	bool IsItemExpanded(HTREEITEM hItem);
 	void DeleteChildren(HTREEITEM hItem);
+	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
