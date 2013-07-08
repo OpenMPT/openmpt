@@ -26,7 +26,7 @@ bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelInd
 	ASSERT(sample.GetNumChannels() == 1);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConverter::output_t));
 
-	const size_t offset = channelIndex * sizeof(typename SampleConverter::input_t);
+	const size_t offset = channelIndex * sizeof(typename SampleConverter::input_t) * SampleConverter::input_inc;
 
 	if(sample.AllocateSample() == 0 || !file.CanRead(offset))
 	{
