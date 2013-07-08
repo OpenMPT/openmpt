@@ -407,7 +407,7 @@ namespace Util {
 	{
 		a *= b;
 		a += c/2;
-		return (a >= 0) ? (int32)(a / c) : (int32)((a - (c - 1)) / c);
+		return (a >= 0) ? mpt::saturate_cast<int32>(a / c) : mpt::saturate_cast<int32>((a - (c - 1)) / c);
 	}
 
 	template<typename T, std::size_t n>
