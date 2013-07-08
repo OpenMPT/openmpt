@@ -133,7 +133,7 @@ static void apply_options() {
 		self->mod->set_repeat_count( self->settings.repeatcount );
 		self->mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, self->settings.mastergain_millibel );
 		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings.stereoseparation );
-		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATION_FILTER_LENGTH, self->settings.interpolationfilterlength );
+		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, self->settings.interpolationfilterlength );
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, self->settings.ramping );
 	}
 }
