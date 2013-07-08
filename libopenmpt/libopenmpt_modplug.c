@@ -132,7 +132,7 @@ LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size)
 	file->name = openmpt_module_get_metadata(file->mod,"title");
 	file->message = openmpt_module_get_metadata(file->mod,"message");
 	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT,file->settings.mStereoSeparation*100/128);
-	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_INTERPOLATION_FILTER_LENGTH,modplugresamplingmode_to_filterlength(file->settings.mResamplingMode));
+	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_INTERPOLATIONFILTER_LENGTH,modplugresamplingmode_to_filterlength(file->settings.mResamplingMode));
 	return file;
 }
 

@@ -350,7 +350,7 @@ std::int32_t module_impl::get_render_param( int param ) const {
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
 			return m_sndFile->m_MixerSettings.m_nStereoSeparation * 100 / 128;
 		} break;
-		case module::RENDER_INTERPOLATION_FILTER_LENGTH: {
+		case module::RENDER_INTERPOLATIONFILTER_LENGTH: {
 			return resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode );
 		} break;
 		case module::RENDER_VOLUMERAMPING_STRENGTH: {
@@ -380,7 +380,7 @@ void module_impl::set_render_param( int param, std::int32_t value ) {
 				m_sndFile->SetMixerSettings( settings );
 			}
 		} break;
-		case module::RENDER_INTERPOLATION_FILTER_LENGTH: {
+		case module::RENDER_INTERPOLATIONFILTER_LENGTH: {
 			CResamplerSettings newsettings;
 			newsettings.SrcMode = filterlength_to_resamplingmode( value );
 			if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
