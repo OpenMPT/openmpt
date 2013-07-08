@@ -441,7 +441,7 @@ struct NormalizationChain
 // SampleConversion: Functor of type SampleConversionFunctor to apply sample conversion (see above for existing functors).
 template <typename SampleConversion>
 size_t CopySample(typename SampleConversion::output_t *outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t *inBuf, size_t sourceSize, size_t incSource)
-//---------------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const size_t sampleSize = incSource * SampleConversion::input_inc;
 	LimitMax(numSamples, sourceSize / sampleSize);
@@ -462,7 +462,7 @@ size_t CopySample(typename SampleConversion::output_t *outBuf, size_t numSamples
 // Copy a mono sample data buffer.
 template <typename SampleConversion>
 size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
-//------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 1);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -486,7 +486,7 @@ size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t source
 // Copy a stereo interleaved sample data buffer.
 template <typename SampleConversion>
 size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 2);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -514,7 +514,7 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, 
 // Copy a stereo split sample data buffer.
 template <typename SampleConversion>
 size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
-//-------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 2);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -543,7 +543,7 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 // Copy a sample data buffer and normalize it. Requires slightly advanced sample conversion functor.
 template<typename SampleConversion>
 size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
-//--------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 {
 	const size_t inSize = sizeof(typename SampleConversion::input_t);
 
