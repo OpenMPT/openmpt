@@ -403,10 +403,10 @@ static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod ) {
 		case 'q': throw silent_exit_exception(); break;
 		case 'N': throw prev_file(10); break;
 		case 'n': throw prev_file(1); break;
-		case 'h': mod.seek_seconds( mod.get_current_position_seconds() - 10.0 ); break;
-		case 'j': mod.seek_seconds( mod.get_current_position_seconds() - 1.0 ); break;
-		case 'k': mod.seek_seconds( mod.get_current_position_seconds() + 1.0 ); break;
-		case 'l': mod.seek_seconds( mod.get_current_position_seconds() + 10.0 ); break;
+		case 'h': mod.set_position_seconds( mod.get_position_seconds() - 10.0 ); break;
+		case 'j': mod.set_position_seconds( mod.get_position_seconds() - 1.0 ); break;
+		case 'k': mod.set_position_seconds( mod.get_position_seconds() + 1.0 ); break;
+		case 'l': mod.set_position_seconds( mod.get_position_seconds() + 10.0 ); break;
 		case 'm': throw next_file(1); break;
 		case 'M': throw next_file(10); break;
 		case '3': flags.gain       -=100; apply_mod_settings( flags, mod ); break;
@@ -774,7 +774,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 				}
 			}
 			if ( flags.show_progress ) {
-				log << "Position...: " << seconds_to_string( mod.get_current_position_seconds() ) << " / " << seconds_to_string( duration ) << "   " << std::endl;
+				log << "Position...: " << seconds_to_string( mod.get_position_seconds() ) << " / " << seconds_to_string( duration ) << "   " << std::endl;
 			}
 		} else {
 			if ( flags.show_ui ) {
@@ -813,7 +813,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 			}
 			if ( flags.show_progress ) {
 				log << " ";
-				log << seconds_to_string( mod.get_current_position_seconds() );
+				log << seconds_to_string( mod.get_position_seconds() );
 				log << "/";
 				log << seconds_to_string( duration );
 			}
@@ -885,7 +885,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 	}
 
 	if ( flags.seek_target > 0.0 ) {
-		mod.seek_seconds( flags.seek_target );
+		mod.set_position_seconds( flags.seek_target );
 	}
 
 	try {
