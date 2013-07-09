@@ -21,8 +21,16 @@
 
 namespace openmpt {
 
-exception::exception( const std::string & text ) : std::runtime_error( text ) {
+exception::exception( const std::string & text_ ) : std::exception() {
+	text = text_;
+}
+
+exception::~exception() {
 	return;
+}
+
+const char * exception::what() const {
+	return text.c_str();
 }
 
 std::uint32_t get_library_version() {
