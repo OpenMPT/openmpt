@@ -12,10 +12,10 @@
 
 #include "libopenmpt_config.h"
 
+#include <exception>
 #include <iostream>
 #include <istream>
 #include <ostream>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -23,9 +23,13 @@
 
 namespace openmpt {
 
-class LIBOPENMPT_CXX_API exception : public std::runtime_error {
+class LIBOPENMPT_CXX_API exception : public std::exception {
+private:
+	std::string text;
 public:
 	exception( const std::string & text );
+	virtual ~exception();
+	virtual const char * what() const;
 }; // class exception
 
 LIBOPENMPT_CXX_API std::uint32_t get_library_version();
@@ -77,7 +81,7 @@ public:
 		RENDER_MASTERGAIN_MILLIBEL        = 1,
 		RENDER_STEREOSEPARATION_PERCENT   = 2,
 		RENDER_INTERPOLATIONFILTER_LENGTH = 3,
-		RENDER_VOLUMERAMPING_STRENGTH     = 4,
+		RENDER_VOLUMERAMPING_STRENGTH     = 4
 	};
 
 	enum command_index {
