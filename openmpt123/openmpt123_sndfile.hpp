@@ -19,7 +19,7 @@
 
 namespace openmpt123 {
 	
-class sndfile_stream_raii : public write_buffers_interface {
+class sndfile_stream_raii : public file_audio_stream_base {
 private:
 	commandlineflags flags;
 	std::ostream & log;
@@ -34,16 +34,27 @@ private:
 		match_better,
 		match_any
 	};
-	int matched_result( const SF_FORMAT_INFO & format_info, const SF_FORMAT_INFO & subformat_info ) {
+	std::string match_mode_to_string( match_mode_enum match_mode ) {
+		switch ( match_mode ) {
+			case match_print  : return "print"  ; break;
+			case match_recurse: return "recurse"; break;
+			case match_exact  : return "exact"  ; break;
+			case match_better : return "better" ; break;
+			case match_any    : return "any"    ; break;
+		}
+		return "";
+	}
+	int matched_result( const SF_FORMAT_INFO & format_info, const SF_FORMAT_INFO & subformat_info, match_mode_enum match_mode ) {
 		if ( flags.verbose ) {
 			log << "sndfile: using format '"
 			    << format_info.name << " (" << format_info.extension << ")" << " / " << subformat_info.name
-			    << "'"
+			    << "', "
+			    << "match: " << match_mode_to_string( match_mode )
 			    << std::endl;
 		}
 		return ( format_info.format & SF_FORMAT_TYPEMASK ) | subformat_info.format;
 	}
-	int find_format( std::string extension, match_mode_enum match_mode ) {
+	int find_format( const std::string & extension, match_mode_enum match_mode ) {
 
 		if ( match_mode == match_recurse ) {
 			int result = 0;
@@ -96,31 +107,36 @@ private:
 						    << ( format_info.name ? format_info.name : "" ) << " (" << ( format_info.extension ? format_info.extension : "" ) << ")"
 						    << " / "
 						    << ( subformat_info.name ? subformat_info.name : "" )
+						    << " ["
+						    << std::setbase(16) << std::setw(8) << std::setfill('0') << format_info.format
+						    << "|"
+						    << std::setbase(16) << std::setw(8) << std::setfill('0') << subformat_info.format
+						    << "]"
 						    << std::endl;
 						break;
 					case match_recurse:
 						break;
 					case match_exact:
 						if ( extension == format_info.extension ) {
-							if ( flags.use_float && ( format_info.format & SF_FORMAT_FLOAT ) ) {
-								return matched_result( format_info, subformat_info );
-							} else if ( !flags.use_float && ( format_info.format & SF_FORMAT_PCM_16 ) ) {
-								return matched_result( format_info, subformat_info );
+							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT ) ) {
+								return matched_result( format_info, subformat_info, match_mode );
+							} else if ( !flags.use_float && ( subformat_info.format == SF_FORMAT_PCM_16 ) ) {
+								return matched_result( format_info, subformat_info, match_mode );
 							}
 						}
 						break;
 					case match_better:
 						if ( extension == format_info.extension ) {
-							if ( flags.use_float && ( format_info.format & ( SF_FORMAT_FLOAT | SF_FORMAT_DOUBLE ) ) ) {
-								return matched_result( format_info, subformat_info );
-							} else if ( !flags.use_float && ( format_info.format & ( SF_FORMAT_PCM_16 | SF_FORMAT_PCM_24 | SF_FORMAT_PCM_32 ) ) ) {
-								return matched_result( format_info, subformat_info );
+							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT || subformat_info.format == SF_FORMAT_DOUBLE ) ) {
+								return matched_result( format_info, subformat_info, match_mode );
+							} else if ( !flags.use_float && ( subformat_info.format & ( subformat_info.format == SF_FORMAT_PCM_16 || subformat_info.format == SF_FORMAT_PCM_24 || subformat_info.format == SF_FORMAT_PCM_32 ) ) ) {
+								return matched_result( format_info, subformat_info, match_mode );
 							}
 						}
 						break;
 					case match_any:
 						if ( extension == format_info.extension ) {
-							return matched_result( format_info, subformat_info );
+							return matched_result( format_info, subformat_info, match_mode );
 						}
 						break;
 					}
@@ -138,12 +154,12 @@ private:
 		}
 	}
 public:
-	sndfile_stream_raii( const commandlineflags & flags_, std::ostream & log_ = std::cerr ) : flags(flags_), log(log_),sndfile(0) {
+	sndfile_stream_raii( const std::string & filename, const std::string & format_extension, const commandlineflags & flags_, std::ostream & log_ = std::cerr ) : flags(flags_), log(log_), sndfile(0) {
 		if ( flags.verbose ) {
 			find_format( "", match_print );
 			log << std::endl;
 		}
-		int format = find_format( get_extension( flags.output_filename ), match_recurse );
+		int format = find_format( format_extension, match_recurse );
 		if ( !format ) {
 			throw exception( "unknown file type" );
 		}
@@ -152,7 +168,7 @@ public:
 		info.samplerate = flags.samplerate;
 		info.channels = flags.channels;
 		info.format = format;
-		sndfile = sf_open( flags.output_filename.c_str(), SFM_WRITE, &info );
+		sndfile = sf_open( filename.c_str(), SFM_WRITE, &info );
 	}
 	~sndfile_stream_raii() {
 		sf_close( sndfile );

@@ -29,7 +29,7 @@ namespace openmpt123 {
 	} \
 } while(0)
 
-class mmio_stream_raii : public write_buffers_interface {
+class mmio_stream_raii : public file_audio_stream_base {
 private:
 	commandlineflags flags;
 	WAVEFORMATEX waveformatex;
@@ -39,7 +39,7 @@ private:
 	MMCKINFO data_chunk;
 	MMIOINFO data_info;
 public:
-	mmio_stream_raii( const commandlineflags & flags_ ) : flags(flags_), mmio(NULL) {
+	mmio_stream_raii( const std::string & filename, const commandlineflags & flags_ ) : flags(flags_), mmio(NULL) {
 
 		ZeroMemory( &waveformatex, sizeof( WAVEFORMATEX ) );
 		waveformatex.cbSize = 0;
@@ -50,7 +50,7 @@ public:
 		waveformatex.nBlockAlign = flags.channels * ( waveformatex.wBitsPerSample / 8 );
 		waveformatex.nAvgBytesPerSec = waveformatex.nSamplesPerSec * waveformatex.nBlockAlign;
 
-		char * tmp = strdup( flags.output_filename.c_str() );
+		char * tmp = strdup( filename.c_str() );
 		mmio = mmioOpen( tmp, NULL, MMIO_ALLOCBUF | MMIO_READWRITE | MMIO_CREATE );
 		free( tmp );
 		tmp = 0;

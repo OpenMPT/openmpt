@@ -92,13 +92,65 @@ static void set_input_mode() {
 
 #endif
 
+class file_audio_stream_raii : public file_audio_stream_base {
+private:
+	file_audio_stream_base * impl;
+public:
+	file_audio_stream_raii( const commandlineflags & flags, const std::string & filename, std::ostream & log )
+		: impl(0)
+	{
+		if ( !flags.force_overwrite ) {
+			std::ifstream testfile( filename, std::ios::binary );
+			if ( testfile ) {
+				throw exception( "file already exists" );
+			}
+		}
+		if ( false ) {
+			// nothing
+#ifdef MPT_WITH_MMIO
+		} else if ( flags.output_extension == "wav" ) {
+			impl = new mmio_stream_raii( filename, flags );
+#endif				
+#ifdef MPT_WITH_FLAC
+		} else if ( flags.output_extension == "flac" ) {
+			impl = new flac_stream_raii( filename, flags );
+#endif				
+#ifdef MPT_WITH_SNDFILE
+		} else {
+			impl = new sndfile_stream_raii( filename, flags.output_extension, flags, log );
+#endif
+		}
+		if ( !impl ) {
+			throw show_help_exception();
+		}
+	}
+	virtual ~file_audio_stream_raii() {
+		if ( impl ) {
+			delete impl;
+			impl = 0;
+		}
+	}
+	virtual void write_metadata( std::map<std::string,std::string> metadata ) {
+		impl->write_metadata( metadata );
+	}
+	virtual void write_updated_metadata( std::map<std::string,std::string> metadata ) {
+		impl->write_updated_metadata( metadata );
+	}
+	virtual void write( const std::vector<float*> buffers, std::size_t frames ) {
+		impl->write( buffers, frames );
+	}
+	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
+		impl->write( buffers, frames );
+	}
+};                                                                                                                
+
 std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) {
 	s << "Quiet: " << flags.quiet << std::endl;
 	s << "Verbose: " << flags.verbose << std::endl;
-	s << "User interface: " << flags.use_ui << std::endl;
+	s << "Mode : " << mode_to_string( flags.mode ) << std::endl;
 	s << "Show progress: " << flags.show_progress << std::endl;
 	s << "Show peak meters: " << flags.show_meters << std::endl;
-	s << "Show info: " << flags.show_info << std::endl;
+	s << "Show details: " << flags.show_details << std::endl;
 	s << "Show message: " << flags.show_message << std::endl;
 #ifdef MPT_WITH_PORTAUDIO
 	s << "Device: " << flags.device << std::endl;
@@ -265,28 +317,22 @@ static void show_help( show_help_exception & e, bool verbose, bool modplug123 ) 
 		std::clog << " -q, --quiet          Suppress non-error screen output" << std::endl;
 		std::clog << " -v, --verbose        Show more screen output" << std::endl;
 		std::clog << "     --version        Show version number and nothing else" << std::endl;
+		std::clog << std::endl;
+		std::clog << " Mode:" << std::endl;
+		std::clog << "     --info           Display information about each file" << std::endl;
+		std::clog << "     --ui             Interactively play each file" << std::endl;
+		std::clog << "     --batch          Play each file" << std::endl;
+		std::clog << "     --render         Render each file to PCM data" << std::endl;
 		if ( !e.longhelp ) {
 			std::clog << std::endl;
 			return;
 		}
 		std::clog << std::endl;
-		std::clog << "     --ui|--batch     Enable/disable keyboard interface [default: " << commandlineflags().use_ui << "]" << std::endl;
 		std::clog << "     --[no-]progress  Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
 		std::clog << "     --[no-]meters    Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
 		std::clog << std::endl;
-		std::clog << "     --[no-]info      Show song info [default: " << commandlineflags().show_info << "]" << std::endl;
+		std::clog << "     --[no-]details   Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
 		std::clog << "     --[no-]message   Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
-		std::clog << std::endl;
-#ifdef MPT_WITH_PORTAUDIO
-		std::clog << "     --device n       Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
-		std::clog << "                      use --device help to show available devices" << std::endl;
-		std::clog << "     --buffer n       Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
-#endif
-		std::clog << "     --stdout         Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
-		std::clog << " -o, --output f       Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
-		std::clog << "     --force          Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
-#endif
 		std::clog << std::endl;
 		std::clog << "     --samplerate n   Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
 		std::clog << "     --channels n     use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
@@ -299,6 +345,18 @@ static void show_help( show_help_exception & e, bool verbose, bool modplug123 ) 
 		std::clog << std::endl;
 		std::clog << "     --repeat n       Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		std::clog << "     --seek n         Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
+		std::clog << std::endl;
+#ifdef MPT_WITH_PORTAUDIO
+		std::clog << "     --device n       Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
+		std::clog << "                      use --device help to show available devices" << std::endl;
+		std::clog << "     --buffer n       Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
+#endif
+		std::clog << "     --stdout         Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
+		std::clog << "     --output-type t  Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
+		std::clog << " -o, --output f       Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
+		std::clog << "     --force          Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
+#endif
 		std::clog << std::endl;
 		std::clog << "     --               Interpret further arguments as filenames" << std::endl;
 		std::clog << std::endl;
@@ -336,18 +394,23 @@ static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
 	mod.set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, flags.ramping );
 }
 
+struct prev_file { int count; prev_file( int c ) : count(c) { } };
+struct next_file { int count; next_file( int c ) : count(c) { } };
+
 template < typename Tmod >
 static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod ) {
 	switch ( c ) {
 		case 'q': throw silent_exit_exception(); break;
-		case 'n': return false; break;
+		case 'N': throw prev_file(10); break;
+		case 'n': throw prev_file(1); break;
 		case 'h': mod.seek_seconds( mod.get_current_position_seconds() - 10.0 ); break;
 		case 'j': mod.seek_seconds( mod.get_current_position_seconds() - 1.0 ); break;
 		case 'k': mod.seek_seconds( mod.get_current_position_seconds() + 1.0 ); break;
 		case 'l': mod.seek_seconds( mod.get_current_position_seconds() + 10.0 ); break;
-		case 'm': return false; break;
-		case '3': flags.gain       -= 10; apply_mod_settings( flags, mod ); break;
-		case '4': flags.gain       += 10; apply_mod_settings( flags, mod ); break;
+		case 'm': throw next_file(1); break;
+		case 'M': throw next_file(10); break;
+		case '3': flags.gain       -=100; apply_mod_settings( flags, mod ); break;
+		case '4': flags.gain       +=100; apply_mod_settings( flags, mod ); break;
 		case '5': flags.separation -=  5; apply_mod_settings( flags, mod ); break;
 		case '6': flags.separation +=  5; apply_mod_settings( flags, mod ); break;
 		case '7': flags.filtertaps -=  1; apply_mod_settings( flags, mod ); break;
@@ -361,9 +424,13 @@ static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod ) {
 struct meter_channel {
 	float peak;
 	float clip;
+	float hold;
+	float hold_age;
 	meter_channel()
 		: peak(0.0f)
 		, clip(0.0f)
+		, hold(0.0f)
+		, hold_age(0.0f)
 	{
 		return;
 	}
@@ -373,12 +440,15 @@ struct meter_type {
 	meter_channel channels[4];
 };
 
+static const float falloff_rate = 20.0f / 1.7f;
+
 static void update_meter( meter_type & meter, const commandlineflags & flags, std::size_t count, const std::int16_t * const * buffers ) {
+	float falloff_factor = std::pow( 10.0f, -falloff_rate / flags.samplerate / 20.0f );
 	for ( int channel = 0; channel < flags.channels; ++channel ) {
 		meter.channels[channel].peak = 0.0f;
 		for ( std::size_t frame = 0; frame < count; ++frame ) {
 			if ( meter.channels[channel].clip != 0.0f ) {
-				meter.channels[channel].clip -= 1.0f / static_cast<float>( flags.samplerate );
+				meter.channels[channel].clip -= ( 1.0f / 2.0f ) * 1.0f / static_cast<float>( flags.samplerate );
 				if ( meter.channels[channel].clip <= 0.0f ) {
 					meter.channels[channel].clip = 0.0f;
 				}
@@ -390,11 +460,19 @@ static void update_meter( meter_type & meter, const commandlineflags & flags, st
 			if ( val > meter.channels[channel].peak ) {
 				meter.channels[channel].peak = val;
 			}
+			meter.channels[channel].hold *= falloff_factor;
+			if ( val > meter.channels[channel].hold ) {
+				meter.channels[channel].hold = val;
+				meter.channels[channel].hold_age = 0.0f;
+			} else {
+				meter.channels[channel].hold_age += 1.0f / static_cast<float>( flags.samplerate );
+			}
 		}
 	}
 }
 
 static void update_meter( meter_type & meter, const commandlineflags & flags, std::size_t count, const float * const * buffers ) {
+	float falloff_factor = std::pow( 10.0f, -falloff_rate / flags.samplerate / 20.0f );
 	for ( int channel = 0; channel < flags.channels; ++channel ) {
 		if ( !count ) {
 			meter = meter_type();
@@ -402,7 +480,7 @@ static void update_meter( meter_type & meter, const commandlineflags & flags, st
 		meter.channels[channel].peak = 0.0f;
 		for ( std::size_t frame = 0; frame < count; ++frame ) {
 			if ( meter.channels[channel].clip != 0.0f ) {
-				meter.channels[channel].clip -= 1.0f / static_cast<float>( flags.samplerate );
+				meter.channels[channel].clip -= ( 1.0f / 2.0f ) * 1.0f / static_cast<float>( flags.samplerate );
 				if ( meter.channels[channel].clip <= 0.0f ) {
 					meter.channels[channel].clip = 0.0f;
 				}
@@ -413,6 +491,13 @@ static void update_meter( meter_type & meter, const commandlineflags & flags, st
 			}
 			if ( val > meter.channels[channel].peak ) {
 				meter.channels[channel].peak = val;
+			}
+			meter.channels[channel].hold *= falloff_factor;
+			if ( val > meter.channels[channel].hold ) {
+				meter.channels[channel].hold = val;
+				meter.channels[channel].hold_age = 0.0f;
+			} else {
+				meter.channels[channel].hold_age += 1.0f / static_cast<float>( flags.samplerate );
 			}
 		}
 	}
@@ -426,16 +511,49 @@ static const char * const channel_tags[4][4] = {
 };
 
 static std::string channel_to_string( int channels, int channel, const meter_channel & meter ) {
-	std::string result;
+	std::ostringstream res1;
+	std::ostringstream res2;
 	float db = 20.0f * std::log10( meter.peak );
+	float db_hold = 20.0f * std::log10( meter.hold );
 	int val = static_cast<int>( db + 48.0f );
+	int hold_pos = static_cast<int>( db_hold + 48.0f );
 	if ( val < 0 ) {
 		val = 0;
 	}
+	int headroom = val;
 	if ( val > 48 ) {
 		val = 48;
 	}
-	return std::string("        ") + std::string(channel_tags[channels-1][channel]) + std::string(" : ") + std::string(val,'>') + std::string(48-val,' ') + ( ( meter.clip != 0.0f ) ? "|###" : "|   " );	
+	headroom -= val;
+	if ( headroom < 0 ) {
+		headroom = 0;
+	}
+	if ( headroom > 12 ) {
+		headroom = 12;
+	}
+	headroom -= 1; // clip indicator
+	if ( headroom < 0 ) {
+		headroom = 0;
+	}
+	res1
+		<< "        "
+		<< channel_tags[channels-1][channel]
+		<< " : "
+		;
+	res2 
+		<< std::string(val,'>') << std::string(48-val,' ')
+		<< ( ( meter.clip != 0.0f ) ? "#" : ":" )
+		<< std::string(headroom,'>') << std::string(12-headroom,' ')
+		;
+	std::string tmp = res2.str();
+	if ( 0 <= hold_pos && hold_pos <= 60 ) {
+		if ( hold_pos == 48 ) {
+			tmp[hold_pos] = '#';
+		} else {
+			tmp[hold_pos] = ':';
+		}
+	}
+	return res1.str() + tmp;
 }
 
 static void draw_meters( std::ostream & log, const meter_type & meter, const commandlineflags & flags ) {
@@ -477,7 +595,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 				lines += 1;
 			}
 		}
-		if ( flags.show_info ) {
+		if ( flags.show_details ) {
 			lines += 1;
 			if ( flags.show_progress ) {
 				lines += 1;
@@ -486,7 +604,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 		if ( flags.show_progress ) {
 			lines += 1;
 		}
-	} else if ( flags.show_ui || flags.show_info || flags.show_progress ) {
+	} else if ( flags.show_ui || flags.show_details || flags.show_progress ) {
 		log << std::endl;
 	}
 	for ( int line = 0; line < lines; ++line ) {
@@ -514,7 +632,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 
 	while ( true ) {
 
-		if ( flags.use_ui ) {
+		if ( flags.mode == ModeUI ) {
 
 #if defined( _MSC_VER )
 
@@ -550,7 +668,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 		
 		std::clock_t cpu_beg = 0;
 		std::clock_t cpu_end = 0;
-		if ( flags.show_info ) {
+		if ( flags.show_details ) {
 			cpu_beg = std::clock();
 		}
 
@@ -563,7 +681,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 		}
 		
 		char cpu_str[64] = "";
-		if ( flags.show_info ) {
+		if ( flags.show_details ) {
 			cpu_end = std::clock();
 			if ( count > 0 ) {
 				double cpu = 1.0;
@@ -609,13 +727,24 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 				log << std::endl;
 				draw_meters( log, meter, flags );
 			}
-			if ( flags.show_info ) {
-				log << "Mixer......: " << "CPU:" << cpu_str << "   " << "Chn:" << mod.get_current_playing_channels() << "   " << std::endl;
+			if ( flags.show_details ) {
+				log << "Mixer......: ";
+				log << "CPU:" << std::setw(3) << std::setfill(':') << cpu_str;
+				log << "   ";
+				log << "Chn:" << std::setw(3) << std::setfill(':') << mod.get_current_playing_channels();
+				log << "   ";
+				log << std::endl;
 				if ( flags.show_progress ) {
 					log << "Player.....: ";
-					log << "Ord:" << mod.get_current_order() << "/" << mod.get_num_orders() << " Pat:" << mod.get_current_pattern() << " Row:" << mod.get_current_row();
+					log << "Ord:" << std::setw(3) << std::setfill(':') << mod.get_current_order() << "/" << std::setw(3) << std::setfill(':') << mod.get_num_orders();
+					log << " ";
+					log << "Pat:" << std::setw(3) << std::setfill(':') << mod.get_current_pattern();
+					log << " ";
+					log << "Row:" << std::setw(3) << std::setfill(':') << mod.get_current_row();
 					log << "   ";
-					log << "Spd:" << mod.get_current_speed() << " Tmp:" << mod.get_current_tempo();
+					log << "Spd:" << std::setw(2) << std::setfill(':') << mod.get_current_speed();
+					log << " ";
+					log << "Tmp:" << std::setw(3) << std::setfill(':') << mod.get_current_tempo();
 					log << "   ";
 					log << std::endl;
 				}
@@ -626,32 +755,32 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 		} else {
 			if ( flags.show_ui ) {
 				log << " ";
-				log << flags.gain * 0.01f << "dB";
+				log << std::setw(5) << std::setfill(':') << flags.gain * 0.01f << "dB";
 				log << "|";
-				log << flags.separation << "%";
+				log << std::setw(3) << std::setfill(':') << flags.separation << "%";
 				log << "|";
-				log << flags.filtertaps << "taps";
+				log << std::setw(2) << std::setfill(':') << flags.filtertaps << "taps";
 				log << "|";
-				log << flags.ramping;
+				log << std::setw(3) << std::setfill(':') << flags.ramping;
 			}
-			if ( flags.show_info && flags.use_ui ) {
+			if ( flags.show_details && flags.show_ui ) {
 				log << " ";
-				log << "CPU:" << cpu_str;
+				log << "CPU:" << std::setw(3) << std::setfill(':') << cpu_str;
 				log << "|";
-				log << "Chn:" << mod.get_current_playing_channels();
+				log << "Chn:" << std::setw(3) << std::setfill(':') << mod.get_current_playing_channels();
 			}
-			if ( flags.show_info && !flags.use_ui ) {
+			if ( flags.show_details && !flags.show_ui ) {
 				if ( flags.show_progress ) {
 					log << " ";
-					log << "Ord:" << mod.get_current_order() << "/" << mod.get_num_orders();
+					log << "Ord:" << std::setw(3) << std::setfill(':') << mod.get_current_order() << "/" << std::setw(3) << std::setfill(':') << mod.get_num_orders();
 					log << "|";
-					log << "Pat:" << mod.get_current_pattern();
+					log << "Pat:" << std::setw(3) << std::setfill(':') << mod.get_current_pattern();
 					log << "|";
-					log << "Row:" << mod.get_current_row();
+					log << "Row:" << std::setw(3) << std::setfill(':') << mod.get_current_row();
 					log << " ";
-					log << "Spd:" << mod.get_current_speed();
+					log << "Spd:" << std::setw(2) << std::setfill(':') << mod.get_current_speed();
 					log << "|";
-					log << "Tmp:" << mod.get_current_tempo();
+					log << "Tmp:" << std::setw(3) << std::setfill(':') << mod.get_current_tempo();
 				}
 			}
 			if ( flags.show_progress ) {
@@ -660,7 +789,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 				log << "/";
 				log << seconds_to_string( duration );
 			}
-			if ( flags.show_ui || flags.show_info || flags.show_progress ) {
+			if ( flags.show_ui || flags.show_details || flags.show_progress ) {
 				log << "   " << "\r";
 			}
 		}
@@ -686,21 +815,26 @@ std::map<std::string,std::string> get_metadata( const Tmod & mod ) {
 template < typename Tmod >
 void render_mod_file( commandlineflags & flags, const std::string & filename, std::uint64_t filesize, Tmod & mod, std::ostream & log, write_buffers_interface & audio_stream ) {
 
+	if ( flags.mode != ModeInfo ) {
+		mod.set_repeat_count( flags.repeatcount );
+		apply_mod_settings( flags, mod );
+	}
+	
 	double duration = mod.get_duration_seconds();
 	if ( flags.verbose ) {
 		log << "Path.......: " << filename << std::endl;
 	}
-	if ( flags.show_info ) {
+	if ( flags.show_details ) {
 		log << "Filename...: " << get_filename( filename ) << std::endl;
 		log << "Size.......: " << bytes_to_string( filesize ) << std::endl;
 		log << "Type.......: " << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")" << std::endl;
 		log << "Tracker....: " << mod.get_metadata( "tracker" ) << std::endl;
 	}
-	{
+	if ( true ) {
 		log << "Title......: " << mod.get_metadata( "title" ) << std::endl;
 		log << "Duration...: " << seconds_to_string( duration ) << std::endl;
 	}
-	if ( flags.show_info ) {
+	if ( flags.show_details ) {
 		log << "Channels...: " << mod.get_num_channels() << std::endl;
 		log << "Orders.....: " << mod.get_num_orders() << std::endl;
 		log << "Patterns...: " << mod.get_num_patterns() << std::endl;
@@ -708,7 +842,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		log << "Samples....: " << mod.get_num_samples() << std::endl;
 	}
 
-	if ( flags.filenames.size() == 1 ) {
+	if ( flags.filenames.size() == 1 || flags.mode == ModeRender ) {
 		audio_stream.write_metadata( get_metadata( mod ) );
 	} else {
 		audio_stream.write_updated_metadata( get_metadata( mod ) );
@@ -716,6 +850,10 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 
 	if ( flags.show_message ) {
 		log << "Message....: " << prepend_lines( mod.get_metadata( "message" ), "           : " ) << std::endl;
+	}
+	
+	if ( flags.mode == ModeInfo ) {
+		return;
 	}
 
 	if ( flags.seek_target > 0.0 ) {
@@ -740,7 +878,6 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 
 }
 
-
 static void render_file( commandlineflags & flags, const std::string & filename, std::ostream & log, write_buffers_interface & audio_stream ) {
 
 	try {
@@ -761,17 +898,14 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 		}
 
 		{
-
 			openmpt::module mod( data_stream );
-
-			mod.set_repeat_count( flags.repeatcount );
-
-			apply_mod_settings( flags, mod );
-
 			render_mod_file( flags, filename, filesize, mod, log, audio_stream );
-
 		} 
 
+	} catch ( prev_file & ) {
+		throw;
+	} catch ( next_file & ) {
+		throw;
 	} catch ( silent_exit_exception & ) {
 		throw;
 	} catch ( std::exception & e ) {
@@ -783,6 +917,39 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 	log << std::endl;
 
 }
+
+
+static void render_files( commandlineflags & flags, std::ostream & log, write_buffers_interface & audio_stream ) {
+	std::vector<std::string>::iterator filename = flags.filenames.begin();
+	while ( true ) {
+		if ( filename == flags.filenames.end() ) {
+			break;
+		}
+		if ( filename == flags.filenames.begin() - 1 ) {
+			filename++;
+		}
+		try {
+			render_file( flags, *filename, log, audio_stream );
+			filename++;
+			continue;
+		} catch ( prev_file & e ) {
+			while ( filename != flags.filenames.begin() && e.count ) {
+				e.count--;
+				--filename;
+			}
+			continue;
+		} catch ( next_file & e ) {
+			while ( filename != flags.filenames.end() && e.count ) {
+				e.count--;
+				++filename++;
+			}
+			continue;
+		} catch ( ... ) {
+			throw;
+		}
+	}
+}
+
 
 static commandlineflags parse_modplug123( const std::vector<std::string> & args ) {
 
@@ -859,10 +1026,14 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.verbose = true;
 			} else if ( arg == "--version" ) {
 				throw show_version_number_exception();
+			} else if ( arg == "--info" ) {
+				flags.mode = ModeInfo;
 			} else if ( arg == "--ui" ) {
-				flags.use_ui = true;
+				flags.mode = ModeUI;
 			} else if ( arg == "--batch" ) {
-				flags.use_ui = false;
+				flags.mode = ModeBatch;
+			} else if ( arg == "--render" ) {
+				flags.mode = ModeRender;
 			} else if ( arg == "--progress" ) {
 				flags.show_progress = true;
 			} else if ( arg == "--no-progress" ) {
@@ -871,10 +1042,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.show_meters = true;
 			} else if ( arg == "--no-meters" ) {
 				flags.show_meters = false;
-			} else if ( arg == "--info" ) {
-				flags.show_info = true;
-			} else if ( arg == "--no-info" ) {
-				flags.show_info = false;
+			} else if ( arg == "--details" ) {
+				flags.show_details = true;
+			} else if ( arg == "--no-details" ) {
+				flags.show_details = false;
 			} else if ( arg == "--message" ) {
 				flags.show_message = true;
 			} else if ( arg == "--no-message" ) {
@@ -909,6 +1080,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				++i;
 			} else if ( arg == "--force" ) {
 				flags.force_overwrite = true;
+			} else if ( arg == "--output-type" && nextarg != "" ) {
+				flags.output_extension = nextarg;
+				++i;
 #endif
 			} else if ( arg == "--samplerate" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
@@ -1036,65 +1210,44 @@ static int main( int argc, char * argv [] ) {
 
 		#if !defined(_MSC_VER)
 
-			if ( flags.use_ui ) {
+			if ( flags.mode == ModeUI ) {
 				set_input_mode();
 
 			}
 
 		#endif
-
-		if ( flags.use_stdout ) {
-
-			stdout_stream_raii stdout_audio_stream;
-
-			for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-				render_file( flags, *filename, log, stdout_audio_stream );
-			}
-
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
-		} else if ( !flags.output_filename.empty() ) {
 		
-			if ( !flags.force_overwrite ) {
-				std::ifstream testfile( flags.output_filename, std::ios::binary );
-				if ( testfile ) {
-					throw exception( "file already exists" );
-				}
-			}
-
-			if ( false ) {
-				// nothing
-#ifdef MPT_WITH_MMIO
-			} else if ( get_extension( flags.output_filename ) == "wav" ) {
-				mmio_stream_raii mmio_audio_stream( flags );
-				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-					render_file( flags, *filename, log, mmio_audio_stream );
-				}
-#endif				
-#ifdef MPT_WITH_FLAC
-			} else if ( get_extension( flags.output_filename ) == "flac" ) {
-				flac_stream_raii flac_audio_stream( flags );
-				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-					render_file( flags, *filename, log, flac_audio_stream );
-				}
-#endif				
-#ifdef MPT_WITH_SNDFILE
-			} else {
-				sndfile_stream_raii sndfile_audio_stream( flags, log );
-				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-					render_file( flags, *filename, log, sndfile_audio_stream );
-				}
+		switch ( flags.mode ) {
+			case ModeInfo: {
+				void_audio_stream dummy;
+				render_files( flags, log, dummy );
+			} break;
+			case ModeUI:
+			case ModeBatch: {
+				if ( flags.use_stdout ) {
+					stdout_stream_raii stdout_audio_stream;
+					render_files( flags, log, stdout_audio_stream );
+#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
+				} else if ( !flags.output_filename.empty() ) {
+					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
+					render_files( flags, log, file_audio_stream );
 #endif
-			}
-#endif		
 #ifdef MPT_WITH_PORTAUDIO
-		} else {
-
-			portaudio_stream_raii portaudio_stream( flags, log );
-
-			for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-				render_file( flags, *filename, log, portaudio_stream );
-			}
+				} else {
+					portaudio_stream_raii portaudio_stream( flags, log );
+					render_files( flags, log, portaudio_stream );
 #endif
+				}
+			} break;
+			case ModeRender: {
+				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+					file_audio_stream_raii file_audio_stream( flags, *filename + std::string(".") + flags.output_extension, log );
+					render_file( flags, *filename, log, file_audio_stream );
+				}
+			} break;
+			case ModeNone:
+				throw show_help_exception();
+			break;
 		}
 
 	} catch ( show_help_exception & e ) {
