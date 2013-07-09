@@ -139,11 +139,7 @@ struct commandlineflags {
 #endif
 		show_ui = canUI;
 		show_progress = canProgress;
-#if defined(_MSC_VER)
-		show_meters = false;
-#else
 		show_meters = canUI && canProgress;
-#endif
 		use_stdout = false;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 		output_extension = "wav";
