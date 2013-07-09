@@ -493,9 +493,6 @@ std::size_t module_impl::read_interleaved_quad( std::int32_t samplerate, std::si
 double module_impl::get_duration_seconds() const {
 	return m_sndFile->GetLength( eNoAdjust ).duration;
 }
-double module_impl::get_current_position_seconds() const {
-	return m_currentPositionSeconds;
-}
 void module_impl::select_subsong( std::int32_t subsong ) {
 	if ( subsong < -1 || subsong >= m_sndFile->Order.GetNumSequences() ) {
 		return;
@@ -513,7 +510,10 @@ void module_impl::set_repeat_count( std::int32_t repeat_count ) {
 std::int32_t module_impl::get_repeat_count() const {
 	return m_sndFile->GetRepeatCount();
 }
-double module_impl::seek_seconds( double seconds ) {
+double module_impl::get_position_seconds() const {
+	return m_currentPositionSeconds;
+}
+double module_impl::set_position_seconds( double seconds ) {
 	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ) );
 	m_sndFile->InitializeVisitedRows();
 	m_sndFile->m_nCurrentOrder = t.lastOrder;

@@ -82,6 +82,12 @@ public:
 	module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log );
 	~module_impl();
 public:
+	void select_subsong( std::int32_t subsong );
+	void set_repeat_count( std::int32_t repeat_count );
+	std::int32_t get_repeat_count() const;
+	double get_duration_seconds() const;
+	double set_position_seconds( double seconds );
+	double get_position_seconds() const;
 	std::int32_t get_render_param( int param ) const;
 	void set_render_param( int param, std::int32_t value );
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * mono );
@@ -94,12 +100,6 @@ public:
 	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_quad );
 	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, float * interleaved_stereo );
 	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, float * interleaved_quad );
-	double get_duration_seconds() const;
-	double get_current_position_seconds() const;
-	void select_subsong( std::int32_t subsong );
-	void set_repeat_count( std::int32_t repeat_count );
-	std::int32_t get_repeat_count() const;
-	double seek_seconds( double seconds );
 	std::vector<std::string> get_metadata_keys() const;
 	std::string get_metadata( const std::string & key ) const;
 	std::int32_t get_current_speed() const;

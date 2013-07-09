@@ -102,14 +102,6 @@ module::~module() {
 	impl = 0;
 }
 
-std::int32_t module::get_render_param( int param ) const {
-	return impl->get_render_param( param );
-}
-
-void module::set_render_param( int param, std::int32_t value ) {
-	impl->set_render_param( param, value );
-}
-
 void module::select_subsong( std::int32_t subsong ) {
 	impl->select_subsong( subsong );
 }
@@ -121,8 +113,22 @@ std::int32_t module::get_repeat_count() const {
 	return impl->get_repeat_count();
 }
 
-double module::seek_seconds( double seconds ) {
-	return impl->seek_seconds( seconds );
+double module::get_duration_seconds() const {
+	return impl->get_duration_seconds();
+}
+
+double module::set_position_seconds( double seconds ) {
+	return impl->set_position_seconds( seconds );
+}
+double module::get_position_seconds() const {
+	return impl->get_position_seconds();
+}
+
+std::int32_t module::get_render_param( int param ) const {
+	return impl->get_render_param( param );
+}
+void module::set_render_param( int param, std::int32_t value ) {
+	impl->set_render_param( param, value );
 }
 
 std::size_t module::read( std::int32_t samplerate, std::size_t count, std::int16_t * mono ) {
@@ -154,14 +160,6 @@ std::size_t module::read_interleaved_stereo( std::int32_t samplerate, std::size_
 }
 std::size_t module::read_interleaved_quad( std::int32_t samplerate, std::size_t count, float * interleaved_quad ) {
 	return impl->read_interleaved_quad( samplerate, count, interleaved_quad );
-}
-
-double module::get_current_position_seconds() const {
-	return impl->get_current_position_seconds();
-}
-
-double module::get_duration_seconds() const {
-	return impl->get_duration_seconds();
 }
 
 std::vector<std::string> module::get_metadata_keys() const {
