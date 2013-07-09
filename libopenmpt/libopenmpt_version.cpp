@@ -32,11 +32,7 @@ std::uint32_t get_core_version() {
 static std::string get_library_version_string() {
 	std::ostringstream str;
 	std::uint32_t version = get_library_version();
-	if ( version == 0 ) {
-		str << "unknown";
-	} else if ( ( version & 0xffffff ) == 0 ) {
-		str << ((version>>24) & 0xff);
-	} else if ( ( version & 0xffff ) == 0 ) {
+	if ( ( version & 0xffff ) == 0 ) {
 		str << ((version>>24) & 0xff) << "." << ((version>>16) & 0xff);
 	} else {
 		str << ((version>>24) & 0xff) << "." << ((version>>16) & 0xff) << "." << ((version>>0) & 0xffff);
