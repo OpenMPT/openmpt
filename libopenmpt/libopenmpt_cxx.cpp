@@ -15,22 +15,37 @@
 #include "libopenmpt_impl.hpp"
 
 #include <algorithm>
-#include <stdexcept>
+
+#include <cstdlib>
+#include <cstring>
 
 #ifndef NO_LIBOPENMPT_CXX
 
 namespace openmpt {
 
-exception::exception( const std::string & text_ ) : std::exception() {
-	text = text_;
+exception::exception( const std::string & text_ ) throw()
+	: std::exception()
+	, text(0)
+{
+	text = (char*)std::malloc( text_.length() + 1 );
+	if ( text ) {
+		std::memcpy( text, text_.c_str(), text_.length() + 1 );
+	}
 }
 
-exception::~exception() {
-	return;
+exception::~exception() throw() {
+	if ( text ) {
+		std::free( text );
+		text = 0;
+	}
 }
 
-const char * exception::what() const {
-	return text.c_str();
+const char * exception::what() const throw() {
+	if ( text ) {
+		return text;
+	} else {
+		return "unknown openmpt exception";
+	}
 }
 
 std::uint32_t get_library_version() {
@@ -62,11 +77,11 @@ double could_open_propability( std::istream & stream, double effort, std::ostrea
 }
 
 module::module( const module & ) {
-	throw std::runtime_error("openmpt::module is non-copyable");
+	throw exception("openmpt::module is non-copyable");
 }
 
 void module::operator = ( const module & ) {
-	throw std::runtime_error("openmpt::module is non-copyable");
+	throw exception("openmpt::module is non-copyable");
 }
 
 module::module() : impl(0) {

@@ -25,11 +25,11 @@ namespace openmpt {
 
 class LIBOPENMPT_CXX_API exception : public std::exception {
 private:
-	std::string text;
+	char * text;
 public:
-	exception( const std::string & text );
-	virtual ~exception();
-	virtual const char * what() const;
+	exception( const std::string & text ) throw();
+	virtual ~exception() throw();
+	virtual const char * what() const throw();
 }; // class exception
 
 LIBOPENMPT_CXX_API std::uint32_t get_library_version();
