@@ -551,7 +551,7 @@ static std::string channel_to_string( int channels, int channel, const meter_cha
 		res1
 			<< "        "
 			<< channel_tags[channels-1][channel]
-		<< " : "
+			<< " : "
 			;
 		res2 
 			<< std::string(val,'>') << std::string(48-val,' ')
