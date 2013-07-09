@@ -510,9 +510,7 @@ static const char * const channel_tags[4][4] = {
 	{ "FL", "FR", "RL", "RR" },
 };
 
-static std::string channel_to_string( int channels, int channel, const meter_channel & meter ) {
-	std::ostringstream res1;
-	std::ostringstream res2;
+static std::string channel_to_string( int channels, int channel, const meter_channel & meter, bool tiny = false ) {
 	float db = 20.0f * std::log10( meter.peak );
 	float db_hold = 20.0f * std::log10( meter.hold );
 	int val = static_cast<int>( db + 48.0f );
@@ -535,30 +533,52 @@ static std::string channel_to_string( int channels, int channel, const meter_cha
 	if ( headroom < 0 ) {
 		headroom = 0;
 	}
-	res1
-		<< "        "
-		<< channel_tags[channels-1][channel]
-		<< " : "
-		;
-	res2 
-		<< std::string(val,'>') << std::string(48-val,' ')
-		<< ( ( meter.clip != 0.0f ) ? "#" : ":" )
-		<< std::string(headroom,'>') << std::string(12-headroom,' ')
-		;
-	std::string tmp = res2.str();
-	if ( 0 <= hold_pos && hold_pos <= 60 ) {
-		if ( hold_pos == 48 ) {
-			tmp[hold_pos] = '#';
+	if ( tiny ) {
+		if ( meter.clip != 0.0f || db >= 0.0f ) {
+			return "#";
+		} else if ( db > -6.0f ) {
+			return "O";
+		} else if ( db > -12.0f ) {
+			return "o";
+		} else if ( db > -18.0f ) {
+			return ".";
 		} else {
-			tmp[hold_pos] = ':';
+			return " ";
 		}
+	} else {
+		std::ostringstream res1;
+		std::ostringstream res2;
+		res1
+			<< "        "
+			<< channel_tags[channels-1][channel]
+		<< " : "
+			;
+		res2 
+			<< std::string(val,'>') << std::string(48-val,' ')
+			<< ( ( meter.clip != 0.0f ) ? "#" : ":" )
+			<< std::string(headroom,'>') << std::string(12-headroom,' ')
+			;
+		std::string tmp = res2.str();
+		if ( 0 <= hold_pos && hold_pos <= 60 ) {
+			if ( hold_pos == 48 ) {
+				tmp[hold_pos] = '#';
+			} else {
+				tmp[hold_pos] = ':';
+			}
+		}
+		return res1.str() + tmp;
 	}
-	return res1.str() + tmp;
 }
 
 static void draw_meters( std::ostream & log, const meter_type & meter, const commandlineflags & flags ) {
 	for ( int channel = 0; channel < flags.channels; ++channel ) {
 		log << channel_to_string( flags.channels, channel, meter.channels[channel] ) << std::endl;
+	}
+}
+
+static void draw_meters_tiny( std::ostream & log, const meter_type & meter, const commandlineflags & flags ) {
+	for ( int channel = 0; channel < flags.channels; ++channel ) {
+		log << channel_to_string( flags.channels, channel, meter.channels[channel], true );
 	}
 }
 
@@ -580,7 +600,11 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 	
 	meter_type meter;
 	
-	const bool multiline = flags.show_meters && flags.show_ui;
+#ifdef _MSC_VER
+	const bool multiline = false;
+#else
+	const bool multiline = flags.show_ui;
+#endif
 	
 	int lines = 0;
 	
@@ -755,13 +779,17 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 		} else {
 			if ( flags.show_ui ) {
 				log << " ";
-				log << std::setw(5) << std::setfill(':') << flags.gain * 0.01f << "dB";
+				log << std::setw(3) << std::setfill(':') << flags.gain * 0.01f << "dB";
 				log << "|";
 				log << std::setw(3) << std::setfill(':') << flags.separation << "%";
 				log << "|";
 				log << std::setw(2) << std::setfill(':') << flags.filtertaps << "taps";
 				log << "|";
 				log << std::setw(3) << std::setfill(':') << flags.ramping;
+			}
+			if ( flags.show_meters ) {
+				log << " ";
+				draw_meters_tiny( log, meter, flags );
 			}
 			if ( flags.show_details && flags.show_ui ) {
 				log << " ";
