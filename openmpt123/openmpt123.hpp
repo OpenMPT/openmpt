@@ -59,8 +59,30 @@ static inline std::string get_extension( std::string filename ) {
 
 bool IsTerminal( int fd );
 
+enum Mode {
+	ModeNone,
+	ModeInfo,
+	ModeUI,
+	ModeBatch,
+	ModeRender
+};
+
+static inline std::string mode_to_string( Mode mode ) {
+	switch ( mode ) {
+		case ModeNone:   return "none"; break;
+		case ModeInfo:   return "info"; break;
+		case ModeUI:     return "ui"; break;
+		case ModeBatch:  return "batch"; break;
+		case ModeRender: return "render"; break;
+	}
+	return "";
+}
+
 struct commandlineflags {
 	bool modplug123;
+	Mode mode;
+	bool canUI;
+	bool canProgress;
 #ifdef MPT_WITH_PORTAUDIO
 	int device;
 	std::int32_t buffer;
@@ -75,9 +97,8 @@ struct commandlineflags {
 	double seek_target;
 	bool quiet;
 	bool verbose;
-	bool show_info;
+	bool show_details;
 	bool show_message;
-	bool use_ui;
 	bool show_ui;
 	bool show_progress;
 	bool show_meters;
@@ -86,10 +107,12 @@ struct commandlineflags {
 	std::vector<std::string> filenames;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 	std::string output_filename;
+	std::string output_extension;
 	bool force_overwrite;
 #endif
 	commandlineflags() {
 		modplug123 = false;
+		mode = ModeUI;
 #ifdef MPT_WITH_PORTAUDIO
 		device = -1;
 		buffer = 250;
@@ -105,26 +128,25 @@ struct commandlineflags {
 		seek_target = 0.0;
 		quiet = false;
 		verbose = false;
-		show_info = true;
+		show_details = true;
 		show_message = false;
 #if defined(_MSC_VER)
-		use_ui = IsTerminal( 0 ) ? true : false;
+		canUI = IsTerminal( 0 ) ? true : false;
+		canProgress = IsTerminal( 2 ) ? true : false;
 #else
-		use_ui = isatty( STDIN_FILENO ) ? true : false;
+		canUI = isatty( STDIN_FILENO ) ? true : false;
+		canProgress = isatty( STDERR_FILENO ) ? true : false;
 #endif
-		show_ui = use_ui;
-#if defined(_MSC_VER)
-		show_progress = IsTerminal( 2 ) ? true : false;
-#else
-		show_progress = isatty( STDERR_FILENO ) ? true : false;
-#endif
+		show_ui = canUI;
+		show_progress = canProgress;
 #if defined(_MSC_VER)
 		show_meters = false;
 #else
-		show_meters = use_ui && show_progress;
+		show_meters = canUI && canProgress;
 #endif
 		use_stdout = false;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
+		output_extension = "wav";
 		force_overwrite = false;
 #endif
 	}
@@ -142,32 +164,61 @@ struct commandlineflags {
 #endif
 		for ( std::vector<std::string>::iterator i = filenames.begin(); i != filenames.end(); ++i ) {
 			if ( *i == "-" ) {
-				use_ui = false;
+				canUI = false;
 			}
 		}
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
-		if ( !output_filename.empty() ) {
-			use_ui = false;
+		show_ui = canUI;
+		if ( mode == ModeNone ) {
+			if ( canUI ) {
+				mode = ModeUI;
+			} else {
+				mode = ModeBatch;
+			}
 		}
-#endif
-		show_ui = use_ui;
-		if ( !use_ui ) {
-			show_meters = false;
+		if ( mode == ModeUI && !canUI ) {
+			throw show_help_exception();
+		}
+		if ( show_progress && !canProgress ) {
+			throw show_help_exception();
+		}
+		switch ( mode ) {
+			case ModeNone:
+				throw show_help_exception();
+			break;
+			case ModeInfo:
+				show_ui = false;
+				show_progress = false;
+			break;
+			case ModeUI:
+			break;
+			case ModeBatch:
+				show_meters = false;
+			break;
+			case ModeRender:
+				show_meters = false;
+				show_ui = false;
+			break;
 		}
 		if ( quiet ) {
 			verbose = false;
 			show_ui = false;
-			show_info = false;
+			show_details = false;
 			show_progress = false;
 		}
 		if ( verbose ) {
-			show_info = true;
+			show_details = true;
 		}
 		if ( channels != 1 && channels != 2 && channels != 4 ) {
 			channels = commandlineflags().channels;
 		}
 		if ( samplerate < 0 ) {
 			samplerate = commandlineflags().samplerate;
+		}
+		if ( !output_filename.empty() ) {
+			output_extension = get_extension( output_filename );
+		}
+		if ( mode == ModeRender && output_extension.empty() ) {
+			throw show_help_exception();
 		}
 	}
 };
@@ -184,6 +235,44 @@ public:
 	}
 	virtual void write( const std::vector<float*> buffers, std::size_t frames ) = 0;
 	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) = 0;
+	virtual bool is_dummy() const {
+		return false;
+	}
+};
+
+class void_audio_stream : public write_buffers_interface {
+	virtual void write( const std::vector<float*> buffers, std::size_t frames ) {
+		(void)buffers;
+		(void)frames;
+	}
+	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
+		(void)buffers;
+		(void)frames;
+	}
+	virtual bool is_dummy() const {
+		return true;
+	}
+};
+
+class file_audio_stream_base : public write_buffers_interface {
+protected:
+	file_audio_stream_base() {
+		return;
+	}
+public:
+	virtual void write_metadata( std::map<std::string,std::string> metadata ) {
+		(void)metadata;
+		return;
+	}
+	virtual void write_updated_metadata( std::map<std::string,std::string> metadata ) {
+		(void)metadata;
+		return;
+	}
+	virtual void write( const std::vector<float*> buffers, std::size_t frames ) = 0;
+	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) = 0;
+	virtual ~file_audio_stream_base() {
+		return;
+	}
 };
 
 } // namespace openmpt123
