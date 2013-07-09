@@ -86,7 +86,7 @@ public:
 		return true;
 	}
 	void decode_seek(double p_seconds,abort_callback & p_abort) {
-		mod->seek_seconds( p_seconds );
+		mod->set_position_seconds( p_seconds );
 	}
 	bool decode_can_seek() {
 		return true;
