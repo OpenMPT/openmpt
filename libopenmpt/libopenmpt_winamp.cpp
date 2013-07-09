@@ -307,7 +307,7 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 			if ( msg.message == WM_QUIT ) {
 				quit = true;
 			} else if ( msg.message == WM_OPENMPT_SEEK ) {
-				double pos_seconds = self->mod->seek_seconds( msg.lParam * 0.001 );
+				double pos_seconds = self->mod->set_position_seconds( msg.lParam * 0.001 );
 				self->decode_position_frames = (std::int64_t)( pos_seconds * (double)self->samplerate);
 				eof = false;
 				inmod.outMod->Flush( (int)( pos_seconds * 1000.0 ) );

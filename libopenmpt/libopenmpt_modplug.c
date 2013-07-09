@@ -265,7 +265,7 @@ LIBOPENMPT_MODPLUG_API int ModPlug_GetLength(ModPlugFile* file)
 LIBOPENMPT_MODPLUG_API void ModPlug_Seek(ModPlugFile* file, int millisecond)
 {
 	if(!file) return;
-	openmpt_module_seek_seconds(file->mod,(double)millisecond*0.001);
+	openmpt_module_set_position_seconds(file->mod,(double)millisecond*0.001);
 }
 
 LIBOPENMPT_MODPLUG_API void ModPlug_GetSettings(ModPlug_Settings* settings)
@@ -335,7 +335,7 @@ LIBOPENMPT_MODPLUG_API void ModPlug_SeekOrder(ModPlugFile* file,int order)
 {
 	if(!file) return;
 	// todo: seek exactly to order
-	openmpt_module_seek_seconds(file->mod,openmpt_module_get_duration_seconds(file->mod)*order/openmpt_module_get_num_orders(file->mod));
+	openmpt_module_set_position_seconds(file->mod,openmpt_module_get_duration_seconds(file->mod)*order/openmpt_module_get_num_orders(file->mod));
 }
 
 LIBOPENMPT_MODPLUG_API int ModPlug_GetModuleType(ModPlugFile* file)

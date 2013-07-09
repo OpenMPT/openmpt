@@ -76,14 +76,17 @@ LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
 #define OPENMPT_MODULE_COMMAND_VOLUME       4
 #define OPENMPT_MODULE_COMMAND_PARAMETER    5
 
-LIBOPENMPT_API int openmpt_module_get_render_param( openmpt_module * mod, int param, int32_t * value );
-LIBOPENMPT_API int openmpt_module_set_render_param( openmpt_module * mod, int param, int32_t value );
-
 LIBOPENMPT_API int openmpt_module_select_subsong( openmpt_module * mod, int32_t subsong );
 LIBOPENMPT_API int openmpt_module_set_repeat_count( openmpt_module * mod, int32_t repeat_count );
 LIBOPENMPT_API int32_t openmpt_module_get_repeat_count( openmpt_module * mod );
 
-LIBOPENMPT_API double openmpt_module_seek_seconds( openmpt_module * mod, double seconds );
+LIBOPENMPT_API double openmpt_module_get_duration_seconds( openmpt_module * mod );
+
+LIBOPENMPT_API double openmpt_module_set_position_seconds( openmpt_module * mod, double seconds );
+LIBOPENMPT_API double openmpt_module_get_position_seconds( openmpt_module * mod );
+
+LIBOPENMPT_API int openmpt_module_get_render_param( openmpt_module * mod, int param, int32_t * value );
+LIBOPENMPT_API int openmpt_module_set_render_param( openmpt_module * mod, int param, int32_t value );
 
 LIBOPENMPT_API size_t openmpt_module_read_mono(   openmpt_module * mod, int32_t samplerate, size_t count, int16_t * mono );
 LIBOPENMPT_API size_t openmpt_module_read_stereo( openmpt_module * mod, int32_t samplerate, size_t count, int16_t * left, int16_t * right );
@@ -95,10 +98,6 @@ LIBOPENMPT_API size_t openmpt_module_read_interleaved_stereo( openmpt_module * m
 LIBOPENMPT_API size_t openmpt_module_read_interleaved_quad(   openmpt_module * mod, int32_t samplerate, size_t count, int16_t * interleaved_quad   );
 LIBOPENMPT_API size_t openmpt_module_read_interleaved_float_stereo( openmpt_module * mod, int32_t samplerate, size_t count, float * interleaved_stereo );
 LIBOPENMPT_API size_t openmpt_module_read_interleaved_float_quad(   openmpt_module * mod, int32_t samplerate, size_t count, float * interleaved_quad   );
-
-LIBOPENMPT_API double openmpt_module_get_current_position_seconds( openmpt_module * mod );
-
-LIBOPENMPT_API double openmpt_module_get_duration_seconds( openmpt_module * mod );
 
 LIBOPENMPT_API const char * openmpt_module_get_metadata_keys( openmpt_module * mod );
 LIBOPENMPT_API const char * openmpt_module_get_metadata( openmpt_module * mod, const char * key );

@@ -333,25 +333,6 @@ void openmpt_module_destroy( openmpt_module * mod ) {
 	return;
 }
 
-int openmpt_module_get_render_param( openmpt_module * mod, int param, int32_t * value ) {
-	try {
-		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		OPENMPT_INTERFACE_CHECK_POINTER( value );
-		*value = mod->impl->get_render_param( (openmpt::module::render_param)param );
-		return 1;
-	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0;
-}
-
-int openmpt_module_set_render_param( openmpt_module * mod, int param, int32_t value ) {
-	try {
-		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		mod->impl->set_render_param( (openmpt::module::render_param)param, value );
-		return 1;
-	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0;
-}
-
 int openmpt_module_select_subsong( openmpt_module * mod, int32_t subsong ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
@@ -377,10 +358,43 @@ int32_t openmpt_module_get_repeat_count( openmpt_module * mod ) {
 	return 0;
 }
 
-double openmpt_module_seek_seconds( openmpt_module * mod, double seconds ) {
+double openmpt_module_get_duration_seconds( openmpt_module * mod ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		return mod->impl->seek_seconds( seconds );
+		return mod->impl->get_duration_seconds();
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
+
+double openmpt_module_set_position_seconds( openmpt_module * mod, double seconds ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->set_position_seconds( seconds );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+double openmpt_module_get_position_seconds( openmpt_module * mod ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->get_position_seconds();
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
+
+int openmpt_module_get_render_param( openmpt_module * mod, int param, int32_t * value ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		OPENMPT_INTERFACE_CHECK_POINTER( value );
+		*value = mod->impl->get_render_param( (openmpt::module::render_param)param );
+		return 1;
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+int openmpt_module_set_render_param( openmpt_module * mod, int param, int32_t value ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		mod->impl->set_render_param( (openmpt::module::render_param)param, value );
+		return 1;
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0;
 }
@@ -454,22 +468,6 @@ size_t openmpt_module_read_interleaved_float_quad( openmpt_module * mod, int32_t
 		return mod->impl->read_interleaved_quad( samplerate, count, interleaved_quad );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0;
-}
-
-double openmpt_module_get_current_position_seconds( openmpt_module * mod ) {
-	try {
-		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		return mod->impl->get_duration_seconds();
-	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0.0;
-}
-
-double openmpt_module_get_duration_seconds( openmpt_module * mod ) {
-	try {
-		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		return mod->impl->get_duration_seconds();
-	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0.0;
 }
 
 const char * openmpt_module_get_metadata_keys( openmpt_module * mod ) {

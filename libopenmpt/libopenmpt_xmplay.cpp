@@ -662,7 +662,7 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 	if ( !self->mod ) {
 		return -1.0;
 	}
-	double new_position = self->mod->seek_seconds( static_cast<double>( pos ) * 0.001 );
+	double new_position = self->mod->set_position_seconds( static_cast<double>( pos ) * 0.001 );
 	reset_timeinfos( new_position );
 	return new_position;
 }
