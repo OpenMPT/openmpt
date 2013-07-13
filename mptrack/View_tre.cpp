@@ -555,7 +555,7 @@ void CModTree::RefreshDlsBanks()
 										szNoteNames[keymax % 12], keymax / 12,
 										regionName);
 								}
-								LPARAM lParam = DlsItem::EncodeValuePerc((uint8)(iRgn), (uint8)iIns);
+								LPARAM lParam = DlsItem::EncodeValuePerc((uint8)(iRgn), (uint16)iIns);
 								InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
 										szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_LAST);
 							}
@@ -594,7 +594,7 @@ void CModTree::RefreshDlsBanks()
 								hBanks[j] = hbank;
 								nBanks++;
 							}
-							LPARAM lParam = DlsItem::EncodeValueInstr((pDlsIns->ulInstrument & 0x7F), (uint8)iIns);
+							LPARAM lParam = DlsItem::EncodeValueInstr((pDlsIns->ulInstrument & 0x7F), (uint16)iIns);
 							InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
 								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hbank, TVI_LAST);
 						}
