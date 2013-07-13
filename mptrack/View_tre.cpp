@@ -555,7 +555,7 @@ void CModTree::RefreshDlsBanks()
 										szNoteNames[keymax % 12], keymax / 12,
 										regionName);
 								}
-								LPARAM lParam = DLS_TYPEPERC | (iRgn << DLS_REGIONSHIFT) | iIns;
+								LPARAM lParam = DlsItem::EncodeValuePerc((uint8)(iRgn), (uint8)iIns);
 								InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
 										szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_LAST);
 							}
@@ -594,7 +594,7 @@ void CModTree::RefreshDlsBanks()
 								hBanks[j] = hbank;
 								nBanks++;
 							}
-							LPARAM lParam = DLS_TYPEINST | ((pDlsIns->ulInstrument & 0x7F) << DLS_REGIONSHIFT) | (iIns);
+							LPARAM lParam = DlsItem::EncodeValueInstr((pDlsIns->ulInstrument & 0x7F), (uint8)iIns);
 							InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
 								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hbank, TVI_LAST);
 						}
@@ -1155,7 +1155,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 			if ((itemData & DLS_TYPEMASK) == DLS_TYPEPERC
 				|| (itemData & DLS_TYPEMASK) == DLS_TYPEINST)
 			{
-				return ModItem(MODITEM_DLSBANK_INSTRUMENT, itemData, (uint16)dlsItem);
+				return DlsItem(dlsItem, itemData);
 			}
 		}
 	}
@@ -1326,19 +1326,20 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 		default:
 			if (modItem.type == MODITEM_DLSBANK_INSTRUMENT)
 			{
+				const DlsItem &item = *static_cast<const DlsItem *>(&modItem);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				uint16 bank = modItem.val2;
+				size_t bank = item.GetBankIndex();
 				if ((bank < CTrackApp::gpDLSBanks.size()) && (CTrackApp::gpDLSBanks[bank]) && (pMainFrm))
 				{
 					CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[bank];
-					UINT rgn = 0, instr = (modItem.val1 & DLS_INSTRMASK);
+					UINT rgn = 0, instr = item.GetInstr();
 					// Drum
-					if (modItem.val1 & DLS_TYPEPERC)
+					if (item.IsPercussion())
 					{
-						rgn = (modItem.val1 & DLS_REGIONMASK) >> DLS_REGIONSHIFT;
+						rgn = item.GetRegion();
 					} else
 					// Melodic
-					if (modItem.val1 & DLS_TYPEINST)
+					if (item.IsInstr())
 					{
 						rgn = pDLSBank->GetRegionFromKey(instr, nParam - NOTE_MIN);
 					}
@@ -1998,13 +1999,16 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 		break;
 
 	case MODITEM_DLSBANK_INSTRUMENT:
-		ASSERT((m_itemDrag.val1 & DLS_TYPEMASK) != 0);
-		pdropinfo->dwDropType = DRAGONDROP_DLS;
-		// dwDropItem = DLS Bank #
-		pdropinfo->dwDropItem = m_itemDrag.val2;	// bank #
-		// Melodic: (Instrument)
-		// Drums:	(0x80000000) | (Region << 16) | (Instrument)
-		pdropinfo->lDropParam = (LPARAM)((m_itemDrag.val1 & (DLS_TYPEPERC | DLS_REGIONMASK | DLS_INSTRMASK)));
+		{
+			const DlsItem &item = *static_cast<const DlsItem *>(&m_itemDrag);
+			ASSERT(item.IsInstr() || item.IsPercussion());
+			pdropinfo->dwDropType = DRAGONDROP_DLS;
+			// dwDropItem = DLS Bank #
+			pdropinfo->dwDropItem = item.GetBankIndex();	// bank #
+			// Melodic: (Instrument)
+			// Drums:	(0x80000000) | (Region << 16) | (Instrument)
+			pdropinfo->lDropParam = (LPARAM)((m_itemDrag.val1 & (DLS_TYPEPERC | DLS_REGIONMASK | DLS_INSTRMASK)));
+		}
 		break;
 	}
 	return (pdropinfo->dwDropType != DRAGONDROP_NOTHING);
