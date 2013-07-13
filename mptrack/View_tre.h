@@ -104,15 +104,6 @@ protected:
 		MODITEM_SEQUENCE,
 	};
 
-	struct ModItem
-	{
-		uint32 val1;
-		uint16 type;	// see ModItemType
-		uint16 val2;
-
-		ModItem(ModItemType t = MODITEM_NULL, uint32 v1 = 0, uint16 v2 = 0) : type(uint16(t)), val1(v1), val2(v2) { }
-	};
-
 	// Bit mask magic
 	enum
 	{
@@ -131,10 +122,35 @@ protected:
 		DLS_INSTRMASK	= 0x00007FFF,
 		DLS_REGIONMASK	= 0x007F0000,
 		DLS_REGIONSHIFT	= 16,
+		DLS_HIBANKMASK	= 0x3F000000,
+		DLS_HIBANKSHIFT	= 24,
 	};
 	static_assert((ORDERINDEX_INVALID & SEQU_MASK) == ORDERINDEX_INVALID, "ORDERINDEX doesn't fit in GetItemData() parameter");
 	static_assert((ORDERINDEX_MAX & SEQU_MASK) == ORDERINDEX_MAX, "ORDERINDEX doesn't fit in GetItemData() parameter");
 	static_assert((((SEQUENCEINDEX_INVALID << SEQU_SHIFT) & ~SEQU_INDICATOR) >> SEQU_SHIFT) == SEQUENCEINDEX_INVALID, "SEQUENCEINDEX doesn't fit in GetItemData() parameter");
+
+	struct ModItem
+	{
+		uint32 val1;
+		uint16 type;	// see ModItemType
+		uint16 val2;
+
+		ModItem(ModItemType t = MODITEM_NULL, uint32 v1 = 0, uint16 v2 = 0) : type(uint16(t)), val1(v1), val2(v2) { }
+	};
+
+	struct DlsItem : public ModItem
+	{
+		DlsItem(uint32 bank, uint32 itemData) : ModItem(MODITEM_DLSBANK_INSTRUMENT, itemData | ((bank << (DLS_HIBANKSHIFT - 16)) & DLS_HIBANKMASK), (uint16)bank) { }
+
+		uint32 GetBankIndex() const { return val2 | ((val1 & DLS_HIBANKMASK) >> (DLS_HIBANKSHIFT - 16)); }
+		uint8 GetRegion() const { return static_cast<uint8>((val1 & DLS_REGIONMASK) >> DLS_REGIONSHIFT); }
+		uint8 GetInstr() const { return static_cast<uint8>((val1 & DLS_INSTRMASK)); }
+		bool IsPercussion() const { return ((val1 & DLS_TYPEMASK) == DLS_TYPEPERC); }
+		bool IsInstr() const { return ((val1 & DLS_TYPEMASK) == DLS_TYPEINST); }
+
+		static uint32 EncodeValuePerc(uint8 region, uint8 instr) { return DLS_TYPEPERC | (region << DLS_REGIONSHIFT) | instr; }
+		static uint32 EncodeValueInstr(uint8 region, uint8 instr) { return DLS_TYPEINST | (region << DLS_REGIONSHIFT) | instr; }
+	};
 
 	static CSoundFile *m_SongFile;	// For browsing samples and instruments inside modules on disk
 	CModTreeDropTarget m_DropTarget;
