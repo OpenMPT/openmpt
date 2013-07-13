@@ -1575,13 +1575,13 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 						// Avoid hanging audio while reading file - we have removed all sample and instrument references before,
 						// so it's safe to replace the sample / instrument now.
 						cs.Leave();
-						ok = m_WaveFile.ReadInstrumentFromFile(1, p, dwLen);
+						ok = m_WaveFile.ReadInstrumentFromFile(1, p, dwLen, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 						cs.Enter();
 						if(!ok)
 						{
 							// Try reading as sample if reading as instrument fails
 							FileReader file(p, dwLen);
-							ok = m_WaveFile.ReadSampleFromFile(1, file);
+							ok = m_WaveFile.ReadSampleFromFile(1, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 							m_WaveFile.AllocateInstrument(1, 1);
 						}
 					}

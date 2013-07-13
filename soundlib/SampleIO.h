@@ -66,19 +66,23 @@ public:
 	// Sample encoding
 	enum Encoding
 	{
-		signedPCM = 0,	// Integer PCM, signed
-		unsignedPCM,	// Integer PCM, unsigned
-		deltaPCM,		// Integer PCM, delta-encoded
-		floatPCM,		// Floating point PCM
-		IT214,			// Impulse Tracker 2.14 compressed
-		IT215,			// Impulse Tracker 2.15 compressed
-		AMS,			// AMS / Velvet Studio packed
-		DMF,			// DMF Huffman compression
-		MDL,			// MDL Huffman compression
-		PTM8Dto16,		// PTM 8-Bit delta value -> 16-Bit sample
-		PCM7to8,		// 8-Bit sample data with unused high bit
-		ADPCM,			// 4-Bit ADPCM-packed
-		MT2,			// MadTracker 2 stereo delta encoding
+		signedPCM = 0,      // Integer PCM, signed
+		unsignedPCM,        // Integer PCM, unsigned
+		deltaPCM,           // Integer PCM, delta-encoded
+		floatPCM,           // Floating point PCM
+		IT214,              // Impulse Tracker 2.14 compressed
+		IT215,              // Impulse Tracker 2.15 compressed
+		AMS,                // AMS / Velvet Studio packed
+		DMF,                // DMF Huffman compression
+		MDL,                // MDL Huffman compression
+		PTM8Dto16,          // PTM 8-Bit delta value -> 16-Bit sample
+		PCM7to8,            // 8-Bit sample data with unused high bit
+		ADPCM,              // 4-Bit ADPCM-packed
+		MT2,                // MadTracker 2 stereo delta encoding
+		floatPCM15,         // Floating point PCM with 2^15 full scale
+		floatPCM23,         // Floating point PCM with 2^23 full scale
+		floatPCMnormalize,  // Floating point PCM and data will be normalized while reading
+		signedPCMnormalize, // Integer PCM and data will be normalized while reading
 	};
 
 	SampleIO(Bitdepth bits = _8bit, Channels channels = mono, Endianness endianness = littleEndian, Encoding encoding = signedPCM)
@@ -115,6 +119,20 @@ public:
 	void operator|= (Encoding encoding)
 	{
 		format = (format & ~encodingMask) | (encoding << encodingOffset);
+	}
+
+	void MayNormalize()
+	{
+		if(GetBitDepth() == 24 || GetBitDepth() == 32)
+		{
+			if(GetEncoding() == SampleIO::signedPCM)
+			{
+				(*this) |= SampleIO::signedPCMnormalize;
+			} else if(GetEncoding() == SampleIO::floatPCM)
+			{
+				(*this) |= SampleIO::floatPCMnormalize;
+			}
+		}
 	}
 
 	// Get bits per sample

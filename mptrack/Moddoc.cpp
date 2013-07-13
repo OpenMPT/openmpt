@@ -342,7 +342,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 						if ((len) && ((lpFile = (LPBYTE)GlobalAllocPtr(GHND, len)) != NULL))
 						{
 							f.Read(lpFile, len);
-							m_SndFile.ReadInstrumentFromFile(nIns, lpFile, len);
+							m_SndFile.ReadInstrumentFromFile(nIns, lpFile, len, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 							_splitpath(pszMidiMapName, NULL, NULL, szName, szExt);
 							strncat(szName, szExt, sizeof(szName));
 							pIns = m_SndFile.Instruments[nIns];

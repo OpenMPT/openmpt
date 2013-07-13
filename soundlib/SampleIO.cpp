@@ -230,50 +230,224 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	}
 
 	//////////////////////////////////////////////////////
-	// 24-Bit / Signed / Mono, Stereo Interleaved / PCM
-	else if(GetBitDepth() == 24 && (GetChannelFormat() == mono || GetChannelFormat() == stereoInterleaved) && GetEncoding() == signedPCM)
+	// 24-Bit / Signed / Mono / PCM
+	else if(GetBitDepth() == 24 && GetChannelFormat() == mono && GetEncoding() == signedPCM)
 	{
-		// Normalize to 16-Bit
 		if(GetEndianness() == littleEndian)
 		{
-			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, sourceBuf, fileSize);
-			//bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, sourceBuf, fileSize);
+			bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, sourceBuf, fileSize);
 		} else
 		{
-			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, bigEndian24> > >(sample, sourceBuf, fileSize);
-			//bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, bigEndian24> > >(sample, sourceBuf, fileSize);
+			bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, bigEndian24> > >(sample, sourceBuf, fileSize);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 24-Bit / Signed / Stereo Interleaved / PCM
+	else if(GetBitDepth() == 24 && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, sourceBuf, fileSize);
+		} else
+		{
+			bytesRead = CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, bigEndian24> > >(sample, sourceBuf, fileSize);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 32-Bit / Signed / Mono / PCM
+	else if(GetBitDepth() == 32 && GetChannelFormat() == mono && GetEncoding() == signedPCM)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(sample, sourceBuf, fileSize);
+		} else
+		{
+			bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, bigEndian32> > >(sample, sourceBuf, fileSize);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 32-Bit / Signed / Stereo Interleaved / PCM
+	else if(GetBitDepth() == 32 && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(sample, sourceBuf, fileSize);
+		} else
+		{
+			bytesRead = CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, bigEndian32> > >(sample, sourceBuf, fileSize);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 32-Bit / Float / Mono / PCM
+	else if(GetBitDepth() == 32 && GetChannelFormat() == mono && GetEncoding() == floatPCM)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<littleEndian32> > >(sample, sourceBuf, fileSize);
+		} else
+		{
+			bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, sourceBuf, fileSize);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 32-Bit / Float / Stereo Interleaved / PCM
+	else if(GetBitDepth() == 32 && GetChannelFormat() == stereoInterleaved && GetEncoding() == floatPCM)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<littleEndian32> > >(sample, sourceBuf, fileSize);
+		} else
+		{
+			bytesRead = CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, sourceBuf, fileSize);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 24-Bit / Signed / Mono, Stereo Interleaved / PCM
+	else if(GetBitDepth() == 24 && (GetChannelFormat() == mono || GetChannelFormat() == stereoInterleaved) && GetEncoding() == signedPCMnormalize)
+	{
+		// Normalize to 16-Bit
+		uint32 srcPeak = uint32(1)<<31;
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, sourceBuf, fileSize, &srcPeak);
+		} else
+		{
+			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, bigEndian24> > >(sample, sourceBuf, fileSize, &srcPeak);
+		}
+		if(bytesRead)
+		{
+			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
+			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(0), uint32(64)));
 		}
 	}
 
 	//////////////////////////////////////////////////////
 	// 32-Bit / Signed / Mono, Stereo Interleaved / PCM
-	else if(GetBitDepth() == 32 && (GetChannelFormat() == mono || GetChannelFormat() == stereoInterleaved) && GetEncoding() == signedPCM)
+	else if(GetBitDepth() == 32 && (GetChannelFormat() == mono || GetChannelFormat() == stereoInterleaved) && GetEncoding() == signedPCMnormalize)
 	{
 		// Normalize to 16-Bit
+		uint32 srcPeak = uint32(1)<<31;
 		if(GetEndianness() == littleEndian)
 		{
-			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(sample, sourceBuf, fileSize);
-			//bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(sample, sourceBuf, fileSize);
+			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(sample, sourceBuf, fileSize, &srcPeak);
 		} else
 		{
-			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, bigEndian32> > >(sample, sourceBuf, fileSize);
-			//bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, bigEndian32> > >(sample, sourceBuf, fileSize);
+			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, bigEndian32> > >(sample, sourceBuf, fileSize, &srcPeak);
+		}
+		if(bytesRead)
+		{
+			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
+			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(0), uint32(64)));
 		}
 	}
 
 	//////////////////////////////////////////////////////
 	// 32-Bit / Float / Mono, Stereo Interleaved / PCM
-	else if(GetBitDepth() == 32 && (GetChannelFormat() == mono || GetChannelFormat() == stereoInterleaved) && GetEncoding() == floatPCM)
+	else if(GetBitDepth() == 32 && (GetChannelFormat() == mono || GetChannelFormat() == stereoInterleaved) && GetEncoding() == floatPCMnormalize)
 	{
 		// Normalize to 16-Bit
+		float32 srcPeak = 1.0f;
 		if(GetEndianness() == littleEndian)
 		{
-			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<littleEndian32> > >(sample, sourceBuf, fileSize);
-			//bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<littleEndian32> > >(sample, sourceBuf, fileSize);
+			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<littleEndian32> > >(sample, sourceBuf, fileSize, &srcPeak);
 		} else
 		{
-			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, sourceBuf, fileSize);
-			//bytesRead = CopyMonoSample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, sourceBuf, fileSize);
+			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, sourceBuf, fileSize, &srcPeak);
+		}
+		if(bytesRead)
+		{
+			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
+			sample.nGlobalVol = Util::Round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 0.0f, 64.0f));
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 32-Bit / Float / Mono / PCM / full scale 2^15
+	else if(GetBitDepth() == 32 && GetChannelFormat() == mono && GetEncoding() == floatPCM15)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyMonoSample
+				(sample, sourceBuf, fileSize,
+				SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeScaledFloat32<littleEndian32> >
+				(SC::Convert<int16, float32>(), SC::DecodeScaledFloat32<littleEndian32>(1.0f / static_cast<float>(1<<15)))
+				);
+		} else
+		{
+			bytesRead = CopyMonoSample
+				(sample, sourceBuf, fileSize,
+				SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeScaledFloat32<bigEndian32> >
+				(SC::Convert<int16, float32>(), SC::DecodeScaledFloat32<bigEndian32>(1.0f / static_cast<float>(1<<15)))
+				);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 32-Bit / Float / Stereo Interleaved / PCM / full scale 2^15
+	else if(GetBitDepth() == 32 && GetChannelFormat() == stereoInterleaved && GetEncoding() == floatPCM15)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyStereoInterleavedSample
+				(sample, sourceBuf, fileSize,
+				SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeScaledFloat32<littleEndian32> >
+				(SC::Convert<int16, float32>(), SC::DecodeScaledFloat32<littleEndian32>(1.0f / static_cast<float>(1<<15)))
+				);
+		} else
+		{
+			bytesRead = CopyStereoInterleavedSample
+				(sample, sourceBuf, fileSize,
+				SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeScaledFloat32<bigEndian32> >
+				(SC::Convert<int16, float32>(), SC::DecodeScaledFloat32<bigEndian32>(1.0f / static_cast<float>(1<<15)))
+				);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 32-Bit / Float / Stereo Interleaved / PCM / full scale 2^23
+	else if(GetBitDepth() == 32 && GetChannelFormat() == mono && GetEncoding() == floatPCM23)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyMonoSample
+				(sample, sourceBuf, fileSize,
+				SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeScaledFloat32<littleEndian32> >
+				(SC::Convert<int16, float32>(), SC::DecodeScaledFloat32<littleEndian32>(1.0f / static_cast<float>(1<<23)))
+				);
+		} else
+		{
+			bytesRead = CopyMonoSample
+				(sample, sourceBuf, fileSize,
+				SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeScaledFloat32<bigEndian32> >
+				(SC::Convert<int16, float32>(), SC::DecodeScaledFloat32<bigEndian32>(1.0f / static_cast<float>(1<<23)))
+				);
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// 32-Bit / Float / Stereo Interleaved / PCM / full scale 2^23
+	else if(GetBitDepth() == 32 && GetChannelFormat() == stereoInterleaved && GetEncoding() == floatPCM23)
+	{
+		if(GetEndianness() == littleEndian)
+		{
+			bytesRead = CopyStereoInterleavedSample
+				(sample, sourceBuf, fileSize,
+				SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeScaledFloat32<littleEndian32> >
+				(SC::Convert<int16, float32>(), SC::DecodeScaledFloat32<littleEndian32>(1.0f / static_cast<float>(1<<23)))
+				);
+		} else
+		{
+			bytesRead = CopyStereoInterleavedSample
+				(sample, sourceBuf, fileSize,
+				SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeScaledFloat32<bigEndian32> >
+				(SC::Convert<int16, float32>(), SC::DecodeScaledFloat32<bigEndian32>(1.0f / static_cast<float>(1<<23)))
+				);
 		}
 	}
 

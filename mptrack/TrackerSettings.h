@@ -211,6 +211,7 @@ public:
 
 	// Sample Editor Setup
 	UINT m_nSampleUndoMaxBuffer;
+	bool m_MayNormalizeSamplesOnLoad;
 
 	// key config
 	TCHAR m_szKbdFile[_MAX_PATH];

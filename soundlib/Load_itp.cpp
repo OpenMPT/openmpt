@@ -16,6 +16,7 @@
 #include "stdafx.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
+#include "../mptrack/TrackerSettings.h"
 #endif
 #include "../common/version.h"
 #include "Loaders.h"
@@ -228,7 +229,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		LPBYTE lpFile = f.Lock(size);
 		if(!lpFile) { f.Close(); continue; }
 
-		ReadInstrumentFromFile(ins + 1, lpFile, size);
+		ReadInstrumentFromFile(ins + 1, lpFile, size, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 		f.Close();
 	}
 

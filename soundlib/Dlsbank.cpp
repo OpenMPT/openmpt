@@ -1565,7 +1565,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 	} else
 	{
 		FileReader file(pWaveForm, dwLen);
-		bWaveForm = sndFile.ReadWAVSample(nSample, file, &wsmpChunk);
+		bWaveForm = sndFile.ReadWAVSample(nSample, file, false, &wsmpChunk);
 	}
 	if (bWaveForm)
 	{

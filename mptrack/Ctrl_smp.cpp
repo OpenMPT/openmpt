@@ -754,7 +754,7 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	{
 		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 		FileReader file(lpFile, len);
-		bOk = m_sndFile.ReadSampleFromFile(m_nSample, file);
+		bOk = m_sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 	}
 
 	if (!bOk)
@@ -778,6 +778,11 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			sample.nLength = len;
 
 			SampleIO sampleIO = dlg.GetSampleFormat();
+
+			if(TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad)
+			{
+				sampleIO.MayNormalize();
+			}
 
 			if(sampleIO.GetBitDepth() != 8)
 			{

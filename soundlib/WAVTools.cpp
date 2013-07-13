@@ -24,6 +24,8 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 	RIFFHeader fileHeader;
 	isDLS = false;
+	extFormat = 0;
+	mayBeCoolEdit16_8 = false;
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| (fileHeader.magic != RIFFHeader::idRIFF && fileHeader.magic != RIFFHeader::idLIST)
 		|| (fileHeader.type != RIFFHeader::idWAVE && fileHeader.type != RIFFHeader::idwave))
@@ -62,14 +64,24 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 	{
 		return;
 	}
-	if(formatInfo.format == WAVFormatChunk::fmtExtensible)
+	if(formatInfo.format == WAVFormatChunk::fmtPCM && formatChunk.BytesLeft() == 4)
+	{
+		uint16 size = formatChunk.ReadIntLE<uint16>();
+		uint16 value = formatChunk.ReadIntLE<uint16>();
+		if(size == 2 && value == 1)
+		{
+			// May be Cool Edit 16.8 format.
+			// See SampleFormats.cpp for details.
+			mayBeCoolEdit16_8 = true;
+		}
+	} else if(formatInfo.format == WAVFormatChunk::fmtExtensible)
 	{
 		WAVFormatChunkExtension extFormat;
 		if(!formatChunk.ReadConvertEndianness(extFormat))
 		{
 			return;
 		}
-		formatInfo.format = extFormat.subFormat;
+		this->extFormat = extFormat.subFormat;
 	}
 
 	// Read sample data
@@ -87,8 +99,17 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 	if((formatInfo.format != WAVFormatChunk::fmtIMA_ADPCM || sampleLength == 0) && GetSampleSize() != 0)
 	{
-		// Some samples have an incorrect blockAlign / sample size set (e.g. it's 8 in SQUARE.WAV while it should be 1), so let's better not trust this value.
-		sampleLength = sampleData.GetLength() / GetSampleSize();
+		if((GetBlockAlign() == 0) || (GetBlockAlign() / GetNumChannels() >= 2 * GetSampleSize()))
+		{
+			// Some samples have an incorrect blockAlign / sample size set (e.g. it's 8 in SQUARE.WAV while it should be 1), so let's better not always trust this value.
+			// The idea here is, if block align is off by twice or more, it is unlikely to be describing sample padding inside the block.
+			// Ignore it in this case and calculate the length based on the single sample size and number of channels instead.
+			sampleLength = sampleData.GetLength() / GetSampleSize();
+		} else
+		{
+			// Correct case (so that 20bit WAVEFORMATEX files work).
+			sampleLength = sampleData.GetLength() / GetBlockAlign();
+		}
 	}
 
 	// Check for loop points, texts, etc...
