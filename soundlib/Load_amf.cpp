@@ -390,7 +390,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.version < 10)
 	{
 		// Old format revisions are fixed to 4 channels
-		fileHeader.numChannels = 4;
+		m_nChannels = 4;
 		file.SkipBack(1);
 		SetupMODPanning(true);
 	}
