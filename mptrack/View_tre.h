@@ -120,9 +120,9 @@ protected:
 		DLS_TYPEPERC	= 0x80000000,
 		DLS_TYPEMASK	= DLS_TYPEINST | DLS_TYPEPERC,
 		DLS_INSTRMASK	= 0x00007FFF,
-		DLS_REGIONMASK	= 0x007F0000,
+		DLS_REGIONMASK	= 0x007F0000,	// DLS region
 		DLS_REGIONSHIFT	= 16,
-		DLS_HIBANKMASK	= 0x3F000000,
+		DLS_HIBANKMASK	= 0x3F000000,	// High bits of bank index
 		DLS_HIBANKSHIFT	= 24,
 	};
 	static_assert((ORDERINDEX_INVALID & SEQU_MASK) == ORDERINDEX_INVALID, "ORDERINDEX doesn't fit in GetItemData() parameter");
@@ -148,8 +148,8 @@ protected:
 		bool IsPercussion() const { return ((val1 & DLS_TYPEMASK) == DLS_TYPEPERC); }
 		bool IsInstr() const { return ((val1 & DLS_TYPEMASK) == DLS_TYPEINST); }
 
-		static uint32 EncodeValuePerc(uint8 region, uint8 instr) { return DLS_TYPEPERC | (region << DLS_REGIONSHIFT) | instr; }
-		static uint32 EncodeValueInstr(uint8 region, uint8 instr) { return DLS_TYPEINST | (region << DLS_REGIONSHIFT) | instr; }
+		static uint32 EncodeValuePerc(uint8 region, uint16 instr) { return DLS_TYPEPERC | (region << DLS_REGIONSHIFT) | instr; }
+		static uint32 EncodeValueInstr(uint8 region, uint16 instr) { return DLS_TYPEINST | (region << DLS_REGIONSHIFT) | instr; }
 	};
 
 	static CSoundFile *m_SongFile;	// For browsing samples and instruments inside modules on disk
