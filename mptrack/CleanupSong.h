@@ -49,7 +49,8 @@ private:
 
 	// Actual cleanup implementations:
 	// Patterns
-	bool RemoveUnusedPatterns(bool bRemove = true); // Remove unused patterns / rearrange patterns
+	bool RemoveUnusedPatterns(); // Remove unused patterns
+	bool RearrangePatterns(); // Rearrange patterns
 	bool RemoveAllPatterns();
 	// Orders
 	bool MergeSequences();
