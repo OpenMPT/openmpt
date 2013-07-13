@@ -135,7 +135,7 @@ void CModCleanupDlg::OnOK()
 	// Patterns
 	if(m_bCheckBoxes[CU_REMOVE_PATTERNS]) bModified |= RemoveAllPatterns();
 	if(m_bCheckBoxes[CU_CLEANUP_PATTERNS]) bModified |= RemoveUnusedPatterns();
-	if(m_bCheckBoxes[CU_REARRANGE_PATTERNS]) bModified |= RemoveUnusedPatterns(false);
+	if(m_bCheckBoxes[CU_REARRANGE_PATTERNS]) bModified |= RearrangePatterns();
 
 	// Instruments
 	if(modDoc.GetSoundFile()->m_nInstruments > 0)
@@ -343,173 +343,138 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 ///////////////////////////////////////////////////////////////////////
 // Actual cleanup implementations
 
+// Remove unused patterns
+bool CModCleanupDlg::RemoveUnusedPatterns()
+//-----------------------------------------
+{
+	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	const SEQUENCEINDEX numSequences = sndFile.Order.GetNumSequences();
+	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
+	std::vector<bool> patternUsed(numPatterns, false);
+
+	BeginWaitCursor();
+	// First, find all used patterns in all sequences.
+	for(SEQUENCEINDEX seq = 0; seq < numSequences; seq++)
+	{
+		for(ORDERINDEX ord = 0; ord < sndFile.Order.GetSequence(seq).GetLength(); ord++)
+		{
+			PATTERNINDEX pat = sndFile.Order.GetSequence(seq)[ord];
+			if(pat < numPatterns)
+			{
+				patternUsed[pat] = true;
+			}
+		}
+	}
+
+	// Remove all other patterns.
+	CriticalSection cs;
+	PATTERNINDEX numRemovedPatterns = 0;
+	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
+	{
+		if(!patternUsed[pat] && sndFile.Patterns.IsValidPat(pat))
+		{
+			numRemovedPatterns++;
+			modDoc.GetPatternUndo().PrepareUndo(pat, 0, 0, sndFile.GetNumChannels(), sndFile.Patterns[pat].GetNumRows(), numRemovedPatterns != 0, false);
+			sndFile.Patterns.Remove(pat);
+		}
+	}
+	EndWaitCursor();
+
+	if(numRemovedPatterns)
+	{
+		modDoc.AddToLog(mpt::String::Format("%u pattern%s removed.", numRemovedPatterns, numRemovedPatterns == 1 ? "" : "s"));
+		return true;
+	}
+	return false;
+}
+
+
 struct OrigPatSettings
 {
 	// This stuff is needed for copying the old pattern properties to the new pattern number
-	CString name;				// original pattern name
+	std::string name;			// original pattern name
 	ModCommand *data;			// original pattern data
 	ROWINDEX numRows;			// original pattern sizes
 	ROWINDEX rowsPerBeat;		// original pattern highlight
 	ROWINDEX rowsPerMeasure;	// original pattern highlight
 
 	PATTERNINDEX newIndex;		// map old pattern index <-> new pattern index
-	bool isPatUsed;				// Is pattern used in sequence?
 };
 
-const OrigPatSettings defaultSettings = { "", nullptr, 0, 0, 0, 0, false };
+const OrigPatSettings defaultSettings = { "", nullptr, 0, 0, 0, PATTERNINDEX_INVALID };
 
-// Remove unused patterns / rearrange patterns
-// If argument bRemove is true, unused patterns are removed. Else, patterns are only rearranged.
-bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
-//-----------------------------------------------------
+
+// Rearrange patterns (first pattern in order list = 0, etc...)
+bool CModCleanupDlg::RearrangePatterns()
+//--------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
-	const SEQUENCEINDEX maxSeqIndex = sndFile.Order.GetNumSequences();
-	const PATTERNINDEX maxPatIndex = sndFile.Patterns.Size();
-	std::vector<OrigPatSettings> patternSettings(maxPatIndex, defaultSettings);
+	const SEQUENCEINDEX numSequences = sndFile.Order.GetNumSequences();
+	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
+	std::vector<OrigPatSettings> patternSettings(numPatterns, defaultSettings);
 
-	CHAR s[512];
-	bool bReordered = false;
-	size_t nPatRemoved = 0;
-	PATTERNINDEX nMinToRemove = 0;
+	bool modified = false;
 
 	BeginWaitCursor();
-	// First, find all used patterns in all sequences.
-	PATTERNINDEX maxpat = 0;
-	for(SEQUENCEINDEX nSeq = 0; nSeq < maxSeqIndex; nSeq++)
-	{
-		for (ORDERINDEX nOrd = 0; nOrd < sndFile.Order.GetSequence(nSeq).GetLength(); nOrd++)
-		{
-			PATTERNINDEX n = sndFile.Order.GetSequence(nSeq)[nOrd];
-			if (n < maxPatIndex)
-			{
-				if (n >= maxpat) maxpat = n + 1;
-				patternSettings[n].isPatUsed = true;
-			}
-		}
-	}
-
-	// Find first index to be removed
-	if (!bRemove)
-	{
-		PATTERNINDEX imax = maxPatIndex;
-		while (imax > 0)
-		{
-			imax--;
-			if ((sndFile.Patterns[imax]) && (patternSettings[imax].isPatUsed)) break;
-		}
-		nMinToRemove = imax + 1;
-	}
-
-	// Remove all completely empty patterns above last used pattern (those are safe to remove)
 	CriticalSection cs;
-	for (PATTERNINDEX nPat = maxpat; nPat < maxPatIndex; nPat++) if ((sndFile.Patterns[nPat]) && (nPat >= nMinToRemove))
+
+	// First, find all used patterns in all sequences.
+	PATTERNINDEX patOrder = 0;
+	for(SEQUENCEINDEX seq = 0; seq < numSequences; seq++)
 	{
-		if(sndFile.Patterns.IsPatternEmpty(nPat))
+		for(ORDERINDEX ord = 0; ord < sndFile.Order.GetSequence(seq).GetLength(); ord++)
 		{
-			sndFile.Patterns.Remove(nPat);
-			nPatRemoved++;
-		}
-	}
-
-	// Number of unused patterns
-	size_t nWaste = 0;
-	for (UINT ichk=0; ichk < maxPatIndex; ichk++)
-	{
-		if ((sndFile.Patterns[ichk]) && (!patternSettings[ichk].isPatUsed)) nWaste++;
-	}
-
-	if ((bRemove) && (nWaste))
-	{
-		cs.Leave();
-		EndWaitCursor();
-		wsprintf(s, "%d pattern%s present in file, but not used in the song\nDo you want to reorder the sequence list and remove these patterns?", nWaste, (nWaste == 1) ? "" : "s");
-		if (Reporting::Confirm(s, "Pattern Cleanup", false, false, this) != cnfYes) return false;
-		BeginWaitCursor();
-		cs.Enter();
-	}
-
-	for(PATTERNINDEX i = 0; i < maxPatIndex; i++)
-		patternSettings[i].newIndex = PATTERNINDEX_INVALID;
-
-	SEQUENCEINDEX oldSequence = sndFile.Order.GetCurrentSequenceIndex();	// workaround, as GetSequence doesn't allow writing to sequences ATM
-
-	// Re-order pattern numbers based on sequence
-	PATTERNINDEX nPats = 0;	// last used index
-	for(SEQUENCEINDEX nSeq = 0; nSeq < maxSeqIndex; nSeq++)
-	{
-		sndFile.Order.SetSequence(nSeq);
-		ORDERINDEX imap = 0;
-		for (imap = 0; imap < sndFile.Order.GetSequence(nSeq).GetLength(); imap++)
-		{
-			PATTERNINDEX n = sndFile.Order.GetSequence(nSeq)[imap];
-			if (n < maxPatIndex)
+			PATTERNINDEX pat = sndFile.Order.GetSequence(seq)[ord];
+			if(pat < numPatterns)
 			{
-				if (patternSettings[n].newIndex == PATTERNINDEX_INVALID) patternSettings[n].newIndex = nPats++;
-				sndFile.Order[imap] = patternSettings[n].newIndex;
+				if(patternSettings[pat].newIndex == PATTERNINDEX_INVALID)
+				{
+					patternSettings[pat].newIndex = patOrder++;
+				}
+				sndFile.Order.GetSequence(seq)[ord] = patternSettings[pat].newIndex;
 			}
 		}
-		// Add unused patterns at the end
-		if ((!bRemove) || (!nWaste))
-		{
-			for(PATTERNINDEX iadd = 0; iadd < maxPatIndex; iadd++)
-			{
-				if((sndFile.Patterns[iadd]) && (patternSettings[iadd].newIndex >= maxPatIndex))
-				{
-					patternSettings[iadd].newIndex = nPats++;
-				}
-			}
-		}
-		while (imap < sndFile.Order.GetSequence(nSeq).GetLength())
-		{
-			sndFile.Order[imap++] = sndFile.Order.GetInvalidPatIndex();
-		}
 	}
-
-	sndFile.Order.SetSequence(oldSequence);
-
-	// Reorder patterns & Delete unused patterns
+	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		for (PATTERNINDEX i = 0; i < maxPatIndex; i++)
+		PATTERNINDEX newIndex = patternSettings[pat].newIndex;
+
+		// All unused patterns are moved to the end of the pattern list.
+		if(newIndex == PATTERNINDEX_INVALID && sndFile.Patterns.IsValidPat(pat))
 		{
-			PATTERNINDEX k = patternSettings[i].newIndex;
-			if (k < maxPatIndex)
-			{
-				if (i != k) bReordered = true;
-				patternSettings[k].numRows = sndFile.Patterns[i].GetNumRows();
-				patternSettings[k].data = sndFile.Patterns[i];
-				if(sndFile.Patterns[i].GetOverrideSignature())
-				{
-					patternSettings[k].rowsPerBeat = sndFile.Patterns[i].GetRowsPerBeat();
-					patternSettings[k].rowsPerMeasure = sndFile.Patterns[i].GetRowsPerMeasure();
-				}
-				patternSettings[k].name = sndFile.Patterns[i].GetName();
-			} else
-				if (sndFile.Patterns[i])
-				{
-					sndFile.Patterns.Remove(i);
-					nPatRemoved++;
-				}
+			newIndex = patOrder++;
 		}
-		for (PATTERNINDEX nPat = 0; nPat < maxPatIndex; nPat++)
+
+		// Create old <-> new pattern ID data mapping.
+		if(newIndex != PATTERNINDEX_INVALID)
 		{
-			sndFile.Patterns[nPat].SetData(patternSettings[nPat].data, patternSettings[nPat].numRows);
-			sndFile.Patterns[nPat].SetSignature(patternSettings[nPat].rowsPerBeat, patternSettings[nPat].rowsPerMeasure);
-			sndFile.Patterns[nPat].SetName(patternSettings[nPat].name);
+			if(pat != newIndex) modified = true;
+
+			patternSettings[newIndex].numRows = sndFile.Patterns[pat].GetNumRows();
+			patternSettings[newIndex].data = sndFile.Patterns[pat];
+			if(sndFile.Patterns[pat].GetOverrideSignature())
+			{
+				patternSettings[newIndex].rowsPerBeat = sndFile.Patterns[pat].GetRowsPerBeat();
+				patternSettings[newIndex].rowsPerMeasure = sndFile.Patterns[pat].GetRowsPerMeasure();
+			}
+			patternSettings[newIndex].name = sndFile.Patterns[pat].GetName();
 		}
 	}
 
-	cs.Leave();
+	// Copy old data to new pattern location.
+	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
+	{
+		sndFile.Patterns[pat].SetData(patternSettings[pat].data, patternSettings[pat].numRows);
+		sndFile.Patterns[pat].SetSignature(patternSettings[pat].rowsPerBeat, patternSettings[pat].rowsPerMeasure);
+		sndFile.Patterns[pat].SetName(patternSettings[pat].name);
+	}
+
 	EndWaitCursor();
-	if ((nPatRemoved) || (bReordered))
+
+	if(modified)
 	{
 		modDoc.GetPatternUndo().ClearUndo();
-		if (nPatRemoved)
-		{
-			wsprintf(s, "%d pattern%s removed.", nPatRemoved, (nPatRemoved == 1) ? "" : "s");
-			modDoc.AddToLog(s);
-		}
 		return true;
 	}
 	return false;
