@@ -1419,7 +1419,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 			m_modDoc.SetModified();
 		}
 		if (!m_nInstrument) m_nInstrument = 1;
-		if (m_sndFile.ReadInstrumentFromFile(m_nInstrument, lpFile, len))
+		if (m_sndFile.ReadInstrumentFromFile(m_nInstrument, lpFile, len, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad))
 		{
 			m_modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 			// -> CODE#0023

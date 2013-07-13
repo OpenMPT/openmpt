@@ -1969,7 +1969,7 @@ void CViewSample::OnEditPaste()
 			memcpy(s, pSndFile->m_szNames[m_nSample], 32);
 			memcpy(s2, sample.filename, 22);
 			FileReader file(p, dwMemSize);
-			pSndFile->ReadSampleFromFile(m_nSample, file);
+			pSndFile->ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 			if (!pSndFile->m_szNames[m_nSample][0])
 {
 				memcpy(pSndFile->m_szNames[m_nSample], s, 32);

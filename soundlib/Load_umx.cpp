@@ -291,7 +291,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(isSound && GetNumSamples() < MAX_SAMPLES - 1)
 			{
 				// Read as sample
-				if(ReadSampleFromFile(GetNumSamples() + 1, fileChunk))
+				if(ReadSampleFromFile(GetNumSamples() + 1, fileChunk, true))
 				{
 					m_nSamples++;
 					if(static_cast<size_t>(objName) < names.size())

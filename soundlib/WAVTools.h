@@ -334,6 +334,8 @@ protected:
 	FileReader::off_t sampleLength;
 	bool isDLS;
 	WAVFormatChunk formatInfo;
+	uint16 extFormat;
+	bool mayBeCoolEdit16_8;
 
 public:
 	WAVReader(FileReader &inputFile);
@@ -343,13 +345,15 @@ public:
 	void FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks);
 
 	// Self-explanatory getters.
-	WAVFormatChunk::SampleFormats GetSampleFormat() const { return static_cast<WAVFormatChunk::SampleFormats>(formatInfo.format); }
+	WAVFormatChunk::SampleFormats GetSampleFormat() const { return IsExtensibleFormat() ? static_cast<WAVFormatChunk::SampleFormats>(extFormat) : static_cast<WAVFormatChunk::SampleFormats>(formatInfo.format); }
 	uint16 GetNumChannels() const { return formatInfo.numChannels; }
 	uint16 GetBitsPerSample() const { return formatInfo.bitsPerSample; }
 	uint32 GetSampleRate() const { return formatInfo.sampleRate; }
 	uint16 GetBlockAlign() const { return formatInfo.blockAlign; }
 	FileReader GetSampleData() const { return sampleData; }
 	FileReader GetWsmpChunk() const { return wsmpChunk; }
+	bool IsExtensibleFormat() const { return formatInfo.format == WAVFormatChunk::fmtExtensible; }
+	bool MayBeCoolEdit16_8() const { return mayBeCoolEdit16_8; }
 
 	// Get size of a single sample point, in bytes.
 	uint16 GetSampleSize() const { return ((GetNumChannels() * GetBitsPerSample()) + 7) / 8; }

@@ -57,8 +57,8 @@ static bool IsID3(FileReader file)
 #endif // NO_MP3_SAMPLES
 
 
-bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file)
-//------------------------------------------------------------------------
+bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
+//-------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -66,10 +66,10 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file)
 	const DWORD dwFileLength = file.GetLength();
 
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
-	if(!ReadWAVSample(nSample, file)
+	if(!ReadWAVSample(nSample, file, mayNormalize)
 		&& !ReadXISample(nSample, file)
 		&& !ReadITISample(nSample, file)
-		&& !ReadAIFFSample(nSample, file)
+		&& !ReadAIFFSample(nSample, file, mayNormalize)
 		&& !ReadITSSample(nSample, file)
 		&& !ReadPATSample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
 		&& !Read8SVXSample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
@@ -88,8 +88,8 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file)
 }
 
 
-bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength, bool mayNormalize)
+//----------------------------------------------------------------------------------------------------------------------------
 {
 	FileReader file(lpMemFile, dwFileLength);
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
@@ -97,15 +97,15 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpM
 	 && (!ReadPATInstrument(nInstr, lpMemFile, dwFileLength))
 	 && (!ReadITIInstrument(nInstr, file))
 	// Generic read
-	 && (!ReadSampleAsInstrument(nInstr, file))) return false;
+	 && (!ReadSampleAsInstrument(nInstr, file, mayNormalize))) return false;
 
 	if(nInstr > GetNumInstruments()) m_nInstruments = nInstr;
 	return true;
 }
 
 
-bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
-//-------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize)
+//--------------------------------------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -153,7 +153,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 		DestroyInstrument(nInstr, deleteAssociatedSamples);
 		Instruments[nInstr] = pIns;
 
-		ReadSampleFromFile(nSample, file);
+		ReadSampleFromFile(nSample, file, mayNormalize);
 		return true;
 	}
 	return false;
@@ -352,8 +352,8 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 
 extern bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign);
 
-bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader *wsmpChunk)
-//------------------------------------------------------------------------------------------
+bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, FileReader *wsmpChunk)
+//-------------------------------------------------------------------------------------------------------------
 {
 	WAVReader wavFile(file);
 
@@ -393,6 +393,31 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 	{
 		// MP3 in WAV
 		return ReadMP3Sample(nSample, sampleChunk);
+	} else if(!wavFile.IsExtensibleFormat() && wavFile.MayBeCoolEdit16_8() && wavFile.GetSampleFormat() == WAVFormatChunk::fmtPCM && wavFile.GetBitsPerSample() == 32 && wavFile.GetBlockAlign() == wavFile.GetNumChannels() * 4)
+	{
+		// Syntrillium Cool Edit hack to store IEEE 32bit floating point
+		// Format is described as 32bit integer PCM contained in 32bit blocks and an WAVEFORMATEX extension size of 2 which contains a single 16 bit little endian value of 1.
+		//  (This is parsed in WAVTools.cpp and returned via MayBeCoolEdit16_8()).
+		// The data actually stored in this case is little endian 32bit floating point PCM with 2**15 full scale.
+		// Cool Edit calls this format "16.8 float".
+		SampleIO sampleIO(
+			SampleIO::_32bit,
+			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::floatPCM15);
+		sampleIO.ReadSample(sample, sampleChunk);
+	} else if(!wavFile.IsExtensibleFormat() && wavFile.GetSampleFormat() == WAVFormatChunk::fmtPCM && wavFile.GetBitsPerSample() == 24 && wavFile.GetBlockAlign() == wavFile.GetNumChannels() * 4)
+	{
+		// Syntrillium Cool Edit hack to store IEEE 32bit floating point
+		// Format is described as 24bit integer PCM contained in 32bit blocks.
+		// The data actually stored in this case is little endian 32bit floating point PCM with 2**23 full scale.
+		// Cool Edit calls this format "24.0 float".
+		SampleIO sampleIO(
+			SampleIO::_32bit,
+			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::floatPCM23);
+		sampleIO.ReadSample(sample, sampleChunk);
 	} else
 	{
 		// PCM / Float
@@ -407,6 +432,11 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, FileReader
 		if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
 		{
 			sampleIO |= SampleIO::floatPCM;
+		}
+
+		if(mayNormalize)
+		{
+			sampleIO.MayNormalize();
 		}
 
 		sampleIO.ReadSample(sample, sampleChunk);
@@ -1247,8 +1277,8 @@ STATIC_ASSERT(sizeof(AIFFInstrumentChunk) == 20);
 #endif
 
 
-bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
-//--------------------------------------------------------------------
+bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
+//---------------------------------------------------------------------------------------
 {
 	file.Rewind();
 	ChunkReader chunkFile(file);
@@ -1314,6 +1344,11 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file)
 	if(!memcmp(compression, "fl32", 4) || !memcmp(compression, "FL32", 4))
 	{
 		sampleIO |= SampleIO::floatPCM;
+	}
+
+	if(mayNormalize)
+	{
+		sampleIO.MayNormalize();
 	}
 
 	soundChunk.Skip(sampleHeader.offset);

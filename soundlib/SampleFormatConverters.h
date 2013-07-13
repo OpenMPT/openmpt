@@ -163,6 +163,24 @@ struct DecodeFloat32
 	}
 };
 
+template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
+struct DecodeScaledFloat32
+{
+	typedef char input_t;
+	typedef float32 output_t;
+	static const int input_inc = 4;
+	float factor;
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		return factor * DecodeFloatLE(uint8_4(uint8(inBuf[loLoByteIndex]), uint8(inBuf[loHiByteIndex]), uint8(inBuf[hiLoByteIndex]), uint8(inBuf[hiHiByteIndex])));
+	}
+	forceinline DecodeScaledFloat32(float scaleFactor)
+		: factor(scaleFactor)
+	{
+		return;
+	}
+};
+
 template <typename Tsample>
 struct ReadSample
 {
@@ -307,6 +325,12 @@ struct ConversionChain
 		typename Func1::output_t tmp = func1(inBuf);
 		return func2(&tmp);
 	}
+	forceinline ConversionChain(Func2 f2 = Func2(), Func1 f1 = Func1())
+		: func1(f1)
+		, func2(f2)
+	{
+		return;
+	}
 };
 
 
@@ -319,6 +343,7 @@ struct Normalize<int32>
 {
 	typedef int32 input_t;
 	typedef int32 output_t;
+	typedef uint32 peak_t;
 	static const int input_inc = 1;
 	uint32 maxVal;
 	Normalize() : maxVal(0) { }
@@ -347,6 +372,10 @@ struct Normalize<int32>
 	{
 		return Util::muldivrfloor(*inBuf, (uint32)1 << 31, maxVal);
 	}
+	forceinline peak_t GetSrcPeak() const
+	{
+		return maxVal;
+	}
 };
 
 template <>
@@ -354,6 +383,7 @@ struct Normalize<float32>
 {
 	typedef float32 input_t;
 	typedef float32 output_t;
+	typedef float32 peak_t;
 	static const int input_inc = 1;
 	uint32 intMaxVal;
 	float maxValInv;
@@ -386,6 +416,10 @@ struct Normalize<float32>
 	{
 		return *inBuf * maxValInv;
 	}
+	forceinline peak_t GetSrcPeak() const
+	{
+		return DecodeFloatNE(intMaxVal);
+	}
 };
 
 
@@ -397,10 +431,12 @@ template <typename Func2, typename Func1>
 struct NormalizationChain
 {
 	typedef typename Func1::input_t input_t;
+	typedef typename Func1::output_t normalize_t;
+	typedef typename Normalize<normalize_t>::peak_t peak_t;
 	typedef typename Func2::output_t output_t;
 	static const int input_inc = Func1::input_inc;
 	Func1 func1;
-	Normalize<typename Func1::output_t> normalize;
+	Normalize<normalize_t> normalize;
 	Func2 func2;
 	forceinline void FindMax(const input_t *inBuf)
 	{
@@ -414,9 +450,19 @@ struct NormalizationChain
 	forceinline output_t operator() (const input_t *inBuf)
 	{
 		typename Func1::output_t tmp1 = func1(inBuf);
-		typename Func1::output_t norm = normalize(&tmp1);
+		normalize_t norm = normalize(&tmp1);
 		typename Func2::output_t tmp2 = func2(&norm);
 		return tmp2;
+	}
+	forceinline peak_t GetSrcPeak() const
+	{
+		return normalize.GetSrcPeak();
+	}
+	forceinline NormalizationChain(Func2 f2 = Func2(), Func1 f1 = Func1())
+		: func1(f1)
+		, func2(f2)
+	{
+		return;
 	}
 };
 
@@ -440,14 +486,14 @@ struct NormalizationChain
 // Template arguments:
 // SampleConversion: Functor of type SampleConversionFunctor to apply sample conversion (see above for existing functors).
 template <typename SampleConversion>
-size_t CopySample(typename SampleConversion::output_t *outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t *inBuf, size_t sourceSize, size_t incSource)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+size_t CopySample(typename SampleConversion::output_t *outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t *inBuf, size_t sourceSize, size_t incSource, SampleConversion conv = SampleConversion())
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const size_t sampleSize = incSource * SampleConversion::input_inc;
 	LimitMax(numSamples, sourceSize / sampleSize);
 	const size_t copySize = numSamples * sampleSize;
 
-	SampleConversion sampleConv;
+	SampleConversion sampleConv(conv);
 	while(numSamples--)
 	{
 		*outBuf = sampleConv(inBuf);
@@ -461,8 +507,8 @@ size_t CopySample(typename SampleConversion::output_t *outBuf, size_t numSamples
 
 // Copy a mono sample data buffer.
 template <typename SampleConversion>
-size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
-//-----------------------------------------------------------------------------------
+size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
+//-------------------------------------------------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 1);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -470,7 +516,7 @@ size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t source
 	const size_t frameSize =  SampleConversion::input_inc;
 	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
 	size_t numFrames = countFrames;
-	SampleConversion sampleConv;
+	SampleConversion sampleConv(conv);
 	const char * inBuf = sourceBuffer;
 	typename SampleConversion::output_t * outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numFrames--)
@@ -485,8 +531,8 @@ size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t source
 
 // Copy a stereo interleaved sample data buffer.
 template <typename SampleConversion>
-size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
-//------------------------------------------------------------------------------------------------
+size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
+//--------------------------------------------------------------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 2);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -494,8 +540,8 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, 
 	const size_t frameSize = 2 * SampleConversion::input_inc;
 	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
 	size_t numFrames = countFrames;
-	SampleConversion sampleConvLeft;
-	SampleConversion sampleConvRight;
+	SampleConversion sampleConvLeft(conv);
+	SampleConversion sampleConvRight(conv);
 	const char * inBuf = sourceBuffer;
 	typename SampleConversion::output_t * outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numFrames--)
@@ -513,8 +559,8 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, 
 
 // Copy a stereo split sample data buffer.
 template <typename SampleConversion>
-size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
-//------------------------------------------------------------------------------------------
+size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
+//--------------------------------------------------------------------------------------------------------------------------------------
 {
 	ASSERT(sample.GetNumChannels() == 2);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -522,8 +568,8 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 	const size_t frameSize = 2 * SampleConversion::input_inc;
 	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
 	size_t numFrames = countFrames;
-	SampleConversion sampleConvLeft;
-	SampleConversion sampleConvRight;
+	SampleConversion sampleConvLeft(conv);
+	SampleConversion sampleConvRight(conv);
 	const char * inBufLeft = sourceBuffer;
 	const char * inBufRight = sourceBuffer + sample.nLength * SampleConversion::input_inc;
 	typename SampleConversion::output_t * outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
@@ -542,8 +588,8 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 
 // Copy a sample data buffer and normalize it. Requires slightly advanced sample conversion functor.
 template<typename SampleConversion>
-size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize)
-//-------------------------------------------------------------------------------------------
+size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, typename SampleConversion::peak_t *srcPeak = nullptr, SampleConversion conv = SampleConversion())
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const size_t inSize = sizeof(typename SampleConversion::input_t);
 
@@ -554,7 +600,7 @@ size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_
 
 	const char * inBuf = sourceBuffer;
 	// Finding max value
-	SampleConversion sampleConv;
+	SampleConversion sampleConv(conv);
 	for(size_t i = numSamples; i != 0; i--)
 	{
 		sampleConv.FindMax(inBuf);
@@ -574,6 +620,11 @@ size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_
 			outBuf++;
 			inBuf += SampleConversion::input_inc;
 		}
+	}
+
+	if(srcPeak)
+	{
+		*srcPeak = sampleConv.GetSrcPeak();
 	}
 
 	return numSamples * inSize;

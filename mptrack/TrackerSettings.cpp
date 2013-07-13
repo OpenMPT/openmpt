@@ -106,6 +106,7 @@ TrackerSettings::TrackerSettings()
 
 	// Sample Editor
 	m_nSampleUndoMaxBuffer = 0;	// Real sample buffer undo size will be set later.
+	m_MayNormalizeSamplesOnLoad = true;
 
 	GetDefaultColourScheme(rgbCustomColors);
 
@@ -469,6 +470,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 
 	m_nSampleUndoMaxBuffer = CMainFrame::GetPrivateProfileLong("Sample Editor" , "UndoBufferSize", m_nSampleUndoMaxBuffer >> 20, iniFile);
 	m_nSampleUndoMaxBuffer = MAX(1, m_nSampleUndoMaxBuffer) << 20;
+	m_MayNormalizeSamplesOnLoad = CMainFrame::GetPrivateProfileBool("Sample Editor" , "MayNormalizeSamplesOnLoad", m_MayNormalizeSamplesOnLoad, iniFile);
 
 	PatternClipboard::SetClipboardSize(GetPrivateProfileInt("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize(), iniFile));
 	
@@ -870,6 +872,8 @@ void TrackerSettings::SaveSettings()
 
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize(), iniFile);
 
+	CMainFrame::WritePrivateProfileBool("Sample Editor", "MayNormalizeSamplesOnLoad", m_MayNormalizeSamplesOnLoad, iniFile);
+	
 	// Write default paths
 	const bool bConvertPaths = theApp.IsPortableMode();
 	TCHAR szPath[_MAX_PATH] = "";

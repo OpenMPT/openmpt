@@ -403,6 +403,16 @@ namespace Util {
 		return static_cast<int32>( ( static_cast<int64>(a) * b + ( c / 2 ) ) / c );
 	}
 
+	// Do not use overloading because catching unsigned version by accident results in slower X86 code.
+	inline uint32 muldiv_unsigned(uint32 a, uint32 b, uint32 c)
+	{
+		return static_cast<uint32>( ( static_cast<uint64>(a) * b ) / c );
+	}
+	inline uint32 muldivr_unsigned(uint32 a, uint32 b, uint32 c)
+	{
+		return static_cast<uint32>( ( static_cast<uint64>(a) * b + ( c / 2 ) ) / c );
+	}
+
 	inline int32 muldivrfloor(int64 a, uint32 b, uint32 c)
 	{
 		a *= b;
