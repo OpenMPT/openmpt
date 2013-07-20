@@ -278,7 +278,7 @@ double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks
 	return 0.0;
 }
 
-openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user ) {
+openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls ) {
 	try {
 		openmpt_module * mod = (openmpt_module*)std::malloc( sizeof( openmpt_module ) );
 		if ( !mod ) {
@@ -288,8 +288,18 @@ openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callback
 		mod->user = user;
 		mod->impl = 0;
 		try {
+			std::map< std::string, std::string > ctls_map;
+			if ( ctls ) {
+				for ( const openmpt_module_initial_ctl * it = ctls; it->ctl; ++it ) {
+					if ( it->value ) {
+						ctls_map[ it->ctl ] = it->value;
+					} else {
+						ctls_map.erase( it->ctl );
+					}
+				}
+			}
 			openmpt::callbacks_istream istream( stream_callbacks, stream );
-			mod->impl = new openmpt::module_impl( istream, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->user ) );
+			mod->impl = new openmpt::module_impl( istream, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->user ), ctls_map );
 			return mod;
 		} OPENMPT_INTERFACE_CATCH_TO_MOD_LOG_FUNC;
 		delete mod->impl;
@@ -300,7 +310,7 @@ openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callback
 	return NULL;
 }
 
-openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * user ) {
+openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls ) {
 	try {
 		openmpt_module * mod = (openmpt_module*)std::malloc( sizeof( openmpt_module ) );
 		if ( !mod ) {
@@ -310,7 +320,17 @@ openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_
 		mod->user = user;
 		mod->impl = 0;
 		try {
-			mod->impl = new openmpt::module_impl( filedata, filesize, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->user ) );
+			std::map< std::string, std::string > ctls_map;
+			if ( ctls ) {
+				for ( const openmpt_module_initial_ctl * it = ctls; it->ctl; ++it ) {
+					if ( it->value ) {
+						ctls_map[ it->ctl ] = it->value;
+					} else {
+						ctls_map.erase( it->ctl );
+					}
+				}
+			}
+			mod->impl = new openmpt::module_impl( filedata, filesize, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->user ), ctls_map );
 			return mod;
 		} OPENMPT_INTERFACE_CATCH_TO_MOD_LOG_FUNC;
 		delete mod->impl;
@@ -711,58 +731,20 @@ const char * openmpt_module_get_ctls( openmpt_module * mod ) {
 	return NULL;
 }
 
-const char * openmpt_module_ctl_get_string( openmpt_module * mod, const char * ctl ) {
+const char * openmpt_module_ctl_get( openmpt_module * mod, const char * ctl ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
-		return openmpt::strdup( mod->impl->ctl_get_string( ctl ).c_str() );
+		return openmpt::strdup( mod->impl->ctl_get( ctl ).c_str() );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return NULL;
 }
 
-int openmpt_module_ctl_get_double( openmpt_module * mod, const char * ctl, double * value ) {
+int openmpt_module_ctl_set( openmpt_module * mod, const char * ctl, const char * value ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
 		OPENMPT_INTERFACE_CHECK_POINTER( value );
-		*value = mod->impl->ctl_get_double( ctl );
-		return 1;
-	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0;
-}
-int openmpt_module_ctl_get_int64( openmpt_module * mod, const char * ctl, int64_t * value ) {
-	try {
-		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
-		OPENMPT_INTERFACE_CHECK_POINTER( value );
-		*value = mod->impl->ctl_get_int64( ctl );
-		return 1;
-	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0;
-}
-int openmpt_module_ctl_set_string( openmpt_module * mod, const char * ctl, const char * value ) {
-	try {
-		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
-		OPENMPT_INTERFACE_CHECK_POINTER( value );
-		mod->impl->ctl_set( ctl, value );
-		return 1;
-	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0;
-}
-int openmpt_module_ctl_set_double( openmpt_module * mod, const char * ctl, double value ) {
-	try {
-		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
-		mod->impl->ctl_set( ctl, value );
-		return 1;
-	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0;
-}
-int openmpt_module_ctl_set_int64( openmpt_module * mod, const char * ctl, int64_t value ) {
-	try {
-		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		OPENMPT_INTERFACE_CHECK_POINTER( ctl );
 		mod->impl->ctl_set( ctl, value );
 		return 1;
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;

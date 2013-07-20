@@ -92,32 +92,32 @@ void module::set_impl( module_impl * i ) {
 	impl = i;
 }
 
-module::module( std::istream & stream, std::ostream & log, const detail::api_version_checker & ) : impl(0) {
-	impl = new module_impl( stream, std::make_shared<std_ostream_log>( log ) );
+module::module( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : impl(0) {
+	impl = new module_impl( stream, std::make_shared<std_ostream_log>( log ), ctls );
 }
 
-module::module( const std::vector<std::uint8_t> & data, std::ostream & log, const detail::api_version_checker & ) : impl(0) {
-	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ) );
+module::module( const std::vector<std::uint8_t> & data, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : impl(0) {
+	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
 }
 
-module::module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log, const detail::api_version_checker & ) : impl(0) {
-	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ) );
+module::module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : impl(0) {
+	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ), ctls );
 }
 
-module::module( const std::vector<char> & data, std::ostream & log, const detail::api_version_checker & ) : impl(0) {
-	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ) );
+module::module( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : impl(0) {
+	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
 }
 
-module::module( const char * beg, const char * end, std::ostream & log, const detail::api_version_checker & ) : impl(0) {
-	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ) );
+module::module( const char * beg, const char * end, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : impl(0) {
+	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ), ctls );
 }
 
-module::module( const char * data, std::size_t size, std::ostream & log, const detail::api_version_checker & ) : impl(0) {
-	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ) );
+module::module( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : impl(0) {
+	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
 }
 
-module::module( const void * data, std::size_t size, std::ostream & log, const detail::api_version_checker & ) : impl(0) {
-	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ) );
+module::module( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : impl(0) {
+	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
 }
 
 module::~module() {
@@ -263,22 +263,10 @@ std::uint8_t module::get_pattern_row_channel_command( std::int32_t pattern, std:
 std::vector<std::string> module::get_ctls() const {
 	return impl->get_ctls();
 }
-std::string module::ctl_get_string( const std::string & ctl ) const {
-	return impl->ctl_get_string( ctl );
-}
-double module::ctl_get_double( const std::string & ctl ) const {
-	return impl->ctl_get_double( ctl );
-}
-std::int64_t module::ctl_get_int64( const std::string & ctl ) const {
-	return impl->ctl_get_int64( ctl );
+std::string module::ctl_get( const std::string & ctl ) const {
+	return impl->ctl_get( ctl );
 }
 void module::ctl_set( const std::string & ctl, const std::string & value ) {
-	impl->ctl_set( ctl, value );
-}
-void module::ctl_set( const std::string & ctl, double value ) {
-	impl->ctl_set( ctl, value );
-}
-void module::ctl_set( const std::string & ctl, std::int64_t value ) {
 	impl->ctl_set( ctl, value );
 }
 

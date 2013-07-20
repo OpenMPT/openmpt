@@ -58,9 +58,14 @@ LIBOPENMPT_API double openmpt_could_open_propability( openmpt_stream_callbacks s
 
 typedef struct openmpt_module openmpt_module;
 
-LIBOPENMPT_API openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user );
+typedef struct openmpt_module_initial_ctl {
+	const char * ctl;
+	const char * value;
+} openmpt_module_initial_ctl;
 
-LIBOPENMPT_API openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * user );
+LIBOPENMPT_API openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls );
+
+LIBOPENMPT_API openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls );
 
 LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
 
@@ -129,12 +134,8 @@ LIBOPENMPT_API int32_t openmpt_module_get_pattern_num_rows( openmpt_module * mod
 LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command );
 
 LIBOPENMPT_API const char * openmpt_module_get_ctls( openmpt_module * mod );
-LIBOPENMPT_API const char * openmpt_module_ctl_get_string( openmpt_module * mod, const char * ctl );
-LIBOPENMPT_API int openmpt_module_ctl_get_double( openmpt_module * mod, const char * ctl, double * value );
-LIBOPENMPT_API int openmpt_module_ctl_get_int64( openmpt_module * mod, const char * ctl, int64_t * value );
-LIBOPENMPT_API int openmpt_module_ctl_set_string( openmpt_module * mod, const char * ctl, const char * value );
-LIBOPENMPT_API int openmpt_module_ctl_set_double( openmpt_module * mod, const char * ctl, double value );
-LIBOPENMPT_API int openmpt_module_ctl_set_int64( openmpt_module * mod, const char * ctl, int64_t value );
+LIBOPENMPT_API const char * openmpt_module_ctl_get( openmpt_module * mod, const char * ctl );
+LIBOPENMPT_API int openmpt_module_ctl_set( openmpt_module * mod, const char * ctl, const char * value );
 
 /* remember to add new functions to both C and C++ interfaces and to increase OPENMPT_API_VERSION_MINOR */
 

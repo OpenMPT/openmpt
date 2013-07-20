@@ -176,11 +176,14 @@ void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels, b
 void module_impl::apply_libopenmpt_defaults() {
 	set_render_param( module::RENDER_STEREOSEPARATION_PERCENT, 100 );
 }
-void module_impl::init() {
+void module_impl::init( const std::map< std::string, std::string > & ctls ) {
 	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
 	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_currentPositionSeconds = 0.0;
+	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
+		ctl_set( i->first, i->second );
+	}
 }
 void module_impl::load( CSoundFile & sndFile, const FileReader & file ) {
 	if ( !sndFile.Create( file, CSoundFile::loadCompleteModule ) ) {
@@ -308,33 +311,33 @@ double module_impl::could_open_propability( std::istream & stream, double effort
 
 }
 
-module_impl::module_impl( std::istream & stream, std::shared_ptr<log_interface> log ) : m_Log(log) {
-	init();
+module_impl::module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+	init( ctls );
 	load( FileReader( &stream ) );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log ) : m_Log(log) {
-	init();
+module_impl::module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+	init( ctls );
 	load( FileReader( data.data(), data.size() ) );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log ) : m_Log(log) {
-	init();
+module_impl::module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+	init( ctls );
 	load( FileReader( data.data(), data.size() ) );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log ) : m_Log(log) {
-	init();
+module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+	init( ctls );
 	load( FileReader( data, size ) );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log ) : m_Log(log) {
-	init();
+module_impl::module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+	init( ctls );
 	load( FileReader( data, size ) );
 	apply_libopenmpt_defaults();
 }
-module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log ) : m_Log(log) {
-	init();
+module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+	init( ctls );
 	load( FileReader( data, size ) );
 	apply_libopenmpt_defaults();
 }
@@ -720,19 +723,7 @@ std::vector<std::string> module_impl::get_ctls() const {
 	std::vector<std::string> retval;
 	return retval;
 }
-std::string module_impl::ctl_get_string( const std::string & ctl ) const {
-	if ( ctl == "" ) {
-		throw openmpt::exception("unknown ctl");
-	}
-	throw openmpt::exception("unknown ctl");
-}
-double module_impl::ctl_get_double( const std::string & ctl ) const {
-	if ( ctl == "" ) {
-		throw openmpt::exception("unknown ctl");
-	}
-	throw openmpt::exception("unknown ctl");
-}
-std::int64_t module_impl::ctl_get_int64( const std::string & ctl ) const {
+std::string module_impl::ctl_get( const std::string & ctl ) const {
 	if ( ctl == "" ) {
 		throw openmpt::exception("unknown ctl");
 	}
@@ -743,24 +734,6 @@ void module_impl::ctl_set( const std::string & ctl, const std::string & value ) 
 		throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
 	}
 	throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
-}
-void module_impl::ctl_set( const std::string & ctl, double value ) {
-	std::ostringstream str;
-	str << value;
-	std::string strval = str.str();
-	if ( ctl == "" ) {
-		throw openmpt::exception("unknown ctl: " + ctl + " := " + strval);
-	}
-	throw openmpt::exception("unknown ctl: " + ctl + " := " + strval);
-}
-void module_impl::ctl_set( const std::string & ctl, std::int64_t value ) {
-	std::ostringstream str;
-	str << value;
-	std::string strval = str.str();
-	if ( ctl == "" ) {
-		throw openmpt::exception("unknown ctl: " + ctl + " := " + strval);
-	}
-	throw openmpt::exception("unknown ctl: " + ctl + " := " + strval);
 }
 
 } // namespace openmpt

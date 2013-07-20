@@ -34,7 +34,7 @@ int main(int argc,char* argv[]){
 	memset(&streamparameters,0,sizeof(PaStreamParameters));
 	(void)argc;
 	file = fopen(argv[1],"rb");
-	mod = openmpt_module_create(openmpt_stream_get_file_callbacks(),file,NULL,NULL);
+	mod = openmpt_module_create(openmpt_stream_get_file_callbacks(),file,NULL,NULL,NULL);
 	fclose(file);
 	Pa_Initialize();
 	streamparameters.device = Pa_GetDefaultOutputDevice();

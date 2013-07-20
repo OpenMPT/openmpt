@@ -63,7 +63,7 @@ public:
 private:
 	void apply_mixer_settings( std::int32_t samplerate, int channels, bool format_float );
 	void apply_libopenmpt_defaults();
-	void init();
+	void init( const std::map< std::string, std::string > & ctls );
 	static void load( CSoundFile & sndFile, const FileReader & file );
 	void load( const FileReader & file );
 	std::size_t read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
@@ -74,12 +74,12 @@ public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );
 	static double could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log );
-	module_impl( std::istream & stream, std::shared_ptr<log_interface> log );
-	module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log );
-	module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log );
-	module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log );
-	module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log );
-	module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log );
+	module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+	module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
 	~module_impl();
 public:
 	void select_subsong( std::int32_t subsong );
@@ -124,12 +124,8 @@ public:
 	std::int32_t get_pattern_num_rows( std::int32_t p ) const;
 	std::uint8_t get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
 	std::vector<std::string> get_ctls() const;
-	std::string ctl_get_string( const std::string & ctl ) const;
-	double ctl_get_double( const std::string & ctl ) const;
-	std::int64_t ctl_get_int64( const std::string & ctl ) const;
+	std::string ctl_get( const std::string & ctl ) const;
 	void ctl_set( const std::string & ctl, const std::string & value );
-	void ctl_set( const std::string & ctl, double value );
-	void ctl_set( const std::string & ctl, std::int64_t value );
 }; // class module_impl
 
 } // namespace openmpt
