@@ -425,6 +425,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_MixerSettings.glVolumeRampUpSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampUpSamples", m_MixerSettings.glVolumeRampUpSamples, iniFile);
 	m_MixerSettings.glVolumeRampDownSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampDownSamples", m_MixerSettings.glVolumeRampDownSamples, iniFile);
 
+	// MIDI Setup
 	m_dwMidiSetup = CMainFrame::GetPrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
 	m_nMidiDevice = CMainFrame::GetPrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);
 	aftertouchBehaviour = static_cast<RecordAftertouchOptions>(CMainFrame::GetPrivateProfileDWord("MIDI Settings", "AftertouchBehaviour", aftertouchBehaviour, iniFile));
@@ -437,6 +438,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		midiVelocityAmp = 200;
 		m_dwMidiSetup &= ~0x40;
 	}
+	ParseIgnoredCCs(CMainFrame::GetPrivateProfileCString("MIDI Settings", "IgnoredCCs", "", iniFile));
 
 	m_dwPatternSetup = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "PatternSetup", m_dwPatternSetup, iniFile);
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 17, 02, 50))
@@ -852,12 +854,14 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampUpSamples", m_MixerSettings.glVolumeRampUpSamples, iniFile);
 	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampDownSamples", m_MixerSettings.glVolumeRampDownSamples, iniFile);
 
+	// MIDI Settings
 	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
 	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);
 	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "AftertouchBehaviour", aftertouchBehaviour, iniFile);
 	CMainFrame::WritePrivateProfileLong("MIDI Settings", "MidiVelocityAmp", midiVelocityAmp, iniFile);
 	CMainFrame::WritePrivateProfileLong("MIDI Settings", "MidiImportSpeed", midiImportSpeed, iniFile);
 	CMainFrame::WritePrivateProfileLong("MIDI Settings", "MidiImportPatLen", midiImportPatternLen, iniFile);
+	WritePrivateProfileString("MIDI Settings", "IgnoredCCs", IgnoredCCsToString().c_str(), iniFile);
 
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "PatternSetup", m_dwPatternSetup, iniFile);
 	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "RowSpacing", m_nRowHighlightMeasures, iniFile);
@@ -986,6 +990,43 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 		wsprintf(s, "%d", (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18));
 		if (!WritePrivateProfileString("Chords", szDefaultNoteNames[i], s, theApp.GetConfigFileName())) break;
 	}
+}
+
+
+std::string TrackerSettings::IgnoredCCsToString() const
+//-----------------------------------------------------
+{
+	std::string cc;
+	bool first = true;
+	for(int i = 0; i < 128; i++)
+	{
+		if(midiIgnoreCCs[i])
+		{
+			if(!first)
+			{
+				cc += ",";
+			}
+			cc += Stringify(i);
+			first = false;
+		}
+	}
+	return cc;
+}
+
+
+void TrackerSettings::ParseIgnoredCCs(CString cc)
+//-----------------------------------------------
+{
+	midiIgnoreCCs.reset();
+	int curPos = 0;
+	CString ccToken= cc.Tokenize(_T(", "), curPos);
+	while(ccToken != _T(""))
+	{
+		int ccNumber = ConvertStrTo<int>(ccToken);
+		if(ccNumber >= 0 && ccNumber <= 127)
+			midiIgnoreCCs.set(ccNumber);
+		ccToken = cc.Tokenize(_T(", "), curPos);
+	};
 }
 
 

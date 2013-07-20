@@ -35,6 +35,9 @@ inline std::string Stringify(const T& x)
 	else return o.str();
 }
 
+template<> inline std::string Stringify(const signed char& x) { return Stringify((signed int)x); }
+template<> inline std::string Stringify(const unsigned char& x) { return Stringify((unsigned int)x); }
+
 //Convert string to number.
 template<class T>
 inline T ConvertStrTo(const char *str)
@@ -95,7 +98,7 @@ namespace mpt {
 // Saturate the value of src to the domain of Tdst
 template <typename Tdst, typename Tsrc>
 inline Tdst saturate_cast(Tsrc src)
-//-------------------------------------
+//---------------------------------
 {
 	// This code tries not only to obviously avoid overflows but also to avoid signed/unsigned comparison warnings and type truncation warnings (which in fact would be safe here) by explicit casting.
 	STATIC_ASSERT(std::numeric_limits<Tdst>::is_integer);

@@ -16,6 +16,7 @@
 #include "../sounddsp/EQ.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/Reverb.h"
+#include <bitset>
 
 /////////////////////////////////////////////////////////////////////////
 // Default directories
@@ -198,6 +199,7 @@ public:
 	DWORD m_dwMidiSetup;
 	RecordAftertouchOptions aftertouchBehaviour;
 	uint16 midiVelocityAmp;
+	std::bitset<128> midiIgnoreCCs;
 
 	// Pattern Setup
 	UINT gnPatternSpacing;
@@ -269,6 +271,9 @@ public:
 
 	// Get settings object singleton
 	static TrackerSettings &Instance() { return settings; }
+
+	std::string IgnoredCCsToString() const;
+	void ParseIgnoredCCs(CString cc);
 
 protected:
 

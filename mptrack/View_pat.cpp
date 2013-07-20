@@ -1361,6 +1361,7 @@ void CViewPattern::OnPatternProperties()
 		{
 			UpdateScrollSize();
 			InvalidatePattern(true);
+			SanitizeCursor();
 		}
 	}
 }
@@ -3288,6 +3289,7 @@ void CViewPattern::OnEditUndo()
 			{
 				InvalidatePattern(true);
 			}
+			SanitizeCursor();
 		}
 	}
 }
@@ -3855,7 +3857,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 			// Checking whether to record MIDI controller change as MIDI macro change.
 			// Don't write this if command was already written by MIDI mapping.
-			if((paramValue == uint8_max || sndFile.GetType() != MOD_TYPE_MPT) && IsEditingEnabled() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL))
+			if((paramValue == uint8_max || sndFile.GetType() != MOD_TYPE_MPT)
+				&& IsEditingEnabled()
+				&& (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL)
+				&& !TrackerSettings::Instance().midiIgnoreCCs[nByte1 & 0x7F])
 			{
 				const bool liveRecord = IsLiveRecord();
 
