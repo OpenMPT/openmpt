@@ -1153,6 +1153,7 @@ BEGIN_MESSAGE_MAP(CMidiSetupDlg, CPropertyPage)
 	ON_COMMAND(IDC_MIDIPLAYCONTROL,			OnSettingsChanged)
 	ON_COMMAND(IDC_MIDIPLAYPATTERNONMIDIIN,	OnSettingsChanged)
 	ON_EN_CHANGE(IDC_EDIT3,					OnSettingsChanged)
+	ON_EN_CHANGE(IDC_EDIT4,					OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -1226,6 +1227,8 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT3, TrackerSettings::Instance().midiVelocityAmp);
 	m_SpinAmp.SetRange(1, 10000);
 
+	SetDlgItemText(IDC_EDIT4, TrackerSettings::Instance().IgnoredCCsToString().c_str());
+
 	// Midi Import settings
 	SetDlgItemInt(IDC_EDIT1, TrackerSettings::Instance().midiImportSpeed);
 	SetDlgItemInt(IDC_EDIT2, TrackerSettings::Instance().midiImportPatternLen);
@@ -1262,6 +1265,11 @@ void CMidiSetupDlg::OnOK()
 	TrackerSettings::Instance().midiImportSpeed = GetDlgItemInt(IDC_EDIT1);
 	TrackerSettings::Instance().midiImportPatternLen = GetDlgItemInt(IDC_EDIT2);
 	TrackerSettings::Instance().midiVelocityAmp = static_cast<uint16>(Clamp(GetDlgItemInt(IDC_EDIT3), 1u, 10000u));
+
+	CString cc;
+	GetDlgItemText(IDC_EDIT4, cc);
+	TrackerSettings::Instance().ParseIgnoredCCs(cc);
+
 	if (pMainFrm) pMainFrm->SetupMidi(m_dwMidiSetup, m_nMidiDevice);
 	CPropertyPage::OnOK();
 }
