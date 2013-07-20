@@ -52,11 +52,11 @@ public:
 
 namespace string {
 
-static const char * const library_version = "library_version";
-static const char * const core_version    = "core_version";
-static const char * const build           = "build";
-static const char * const credits         = "credits";
-static const char * const contact         = "contact";
+static const char library_version[] = "library_version";
+static const char core_version   [] = "core_version";
+static const char build          [] = "build";
+static const char credits        [] = "credits";
+static const char contact        [] = "contact";
 
 LIBOPENMPT_CXX_API std::string get( const std::string & key );
 
@@ -77,7 +77,6 @@ namespace detail {
 typedef std::map< std::string, std::string > initial_ctls_map;
 
 } // namespace detail
-
 
 class LIBOPENMPT_CXX_API module {
 
