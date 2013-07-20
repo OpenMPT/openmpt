@@ -15,6 +15,7 @@
 #include <exception>
 #include <iostream>
 #include <istream>
+#include <map>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -104,14 +105,14 @@ private:
 	module();
 	void set_impl( module_impl * i );
 public:
-	module( std::istream & stream, std::ostream & log = std::clog, const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::vector<char> & data, std::ostream & log = std::clog, const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const char * beg, const char * end, std::ostream & log = std::clog, const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const char * data, std::size_t size, std::ostream & log = std::clog, const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const void * data, std::size_t size, std::ostream & log = std::clog, const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const char * beg, const char * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
 	virtual ~module();
 public:
 
@@ -170,13 +171,8 @@ public:
 
 	std::vector<std::string> get_ctls() const;
 
-	std::string ctl_get_string( const std::string & ctl ) const;
-	double ctl_get_double( const std::string & ctl ) const;
-	std::int64_t ctl_get_int64( const std::string & ctl ) const;
-
+	std::string ctl_get( const std::string & ctl ) const;
 	void ctl_set( const std::string & ctl, const std::string & value );
-	void ctl_set( const std::string & ctl, double value );
-	void ctl_set( const std::string & ctl, std::int64_t value );
 
 	// remember to add new functions to both C and C++ interfaces and to increase OPENMPT_API_VERSION_MINOR
 

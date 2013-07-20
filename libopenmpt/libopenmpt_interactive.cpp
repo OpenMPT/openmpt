@@ -11,16 +11,16 @@ namespace openmpt {
 
 class interactive_module_impl : public module_impl {
 public:
-	interactive_module_impl( std::istream & stream, std::ostream & log = std::clog ) : module_impl( stream, std::make_shared<std_ostream_log>( log ) ) {
+	interactive_module_impl( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( stream, std::make_shared<std_ostream_log>( log ), ctls ) {
 		init();
 	}
-	interactive_module_impl( const std::vector<char> & data, std::ostream & log = std::clog ) : module_impl( data, std::make_shared<std_ostream_log>( log ) ) {
+	interactive_module_impl( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, std::make_shared<std_ostream_log>( log ), ctls ) {
 		init();
 	}
-	interactive_module_impl( const char * data, std::size_t size, std::ostream & log = std::clog ) : module_impl( data, size, std::make_shared<std_ostream_log>( log ) ) {
+	interactive_module_impl( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls ) {
 		init();
 	}
-	interactive_module_impl( const void * data, std::size_t size, std::ostream & log = std::clog ) : module_impl( data, size, std::make_shared<std_ostream_log>( log ) ) {
+	interactive_module_impl( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls ) {
 		init();
 	}
 
@@ -77,20 +77,20 @@ public:
 
 
 
-interactive_module::interactive_module( std::istream & stream, std::ostream & log, const detail::api_version_checker & ) : interactive_impl(0) {
-	interactive_impl = new interactive_module_impl( stream, log );
+interactive_module::interactive_module( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : interactive_impl(0) {
+	interactive_impl = new interactive_module_impl( stream, log, ctls );
 	set_impl( interactive_impl );
 }
-interactive_module::interactive_module( const std::vector<char> & data, std::ostream & log, const detail::api_version_checker & ) : interactive_impl(0) {
-	interactive_impl = new interactive_module_impl( data, log );
+interactive_module::interactive_module( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : interactive_impl(0) {
+	interactive_impl = new interactive_module_impl( data, log, ctls );
 	set_impl( interactive_impl );
 }
-interactive_module::interactive_module( const char * data, std::size_t size, std::ostream & log, const detail::api_version_checker & ) : interactive_impl(0) {
-	interactive_impl = new interactive_module_impl( data, size, log );
+interactive_module::interactive_module( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : interactive_impl(0) {
+	interactive_impl = new interactive_module_impl( data, size, log, ctls );
 	set_impl( interactive_impl );
 }
-interactive_module::interactive_module( const void * data, std::size_t size, std::ostream & log, const detail::api_version_checker & ) : interactive_impl(0) {
-	interactive_impl = new interactive_module_impl( data, size , log );
+interactive_module::interactive_module( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : interactive_impl(0) {
+	interactive_impl = new interactive_module_impl( data, size, log, ctls );
 	set_impl( interactive_impl );
 }
 interactive_module::~interactive_module() {

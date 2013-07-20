@@ -41,7 +41,7 @@ int main(int argc,char* argv[]){
 	data = malloc(size);
 	size = fread(data,1,size,file);
 	fclose(file);
-	mod = openmpt_module_create_from_memory(data,size,NULL,NULL);
+	mod = openmpt_module_create_from_memory(data,size,NULL,NULL,NULL);
 	free(data);
 	Pa_Initialize();
 	streamparameters.device = Pa_GetDefaultOutputDevice();

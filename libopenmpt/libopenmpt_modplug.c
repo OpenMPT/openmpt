@@ -117,7 +117,7 @@ LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size)
 	if(!file) return NULL;
 	memset(file,0,sizeof(ModPlugFile));
 	memcpy(&file->settings,&globalsettings,sizeof(ModPlug_Settings));
-	file->mod = openmpt_module_create_from_memory(data,size,NULL,NULL);
+	file->mod = openmpt_module_create_from_memory(data,size,NULL,NULL,NULL);
 	if(!file->mod){
 		free(file);
 		return NULL;
