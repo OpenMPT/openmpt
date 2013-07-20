@@ -28,13 +28,13 @@ private:
 	bool called_init;
 	std::vector< std::pair< std::string, std::string > > tags;
 	FLAC__StreamMetadata * flac_metadata[1];
-	FLAC__StreamMetadata_VorbisComment_Entry entry;
 	FLAC__StreamEncoder * encoder;
 	std::vector<FLAC__int32> interleaved_buffer;
 	void add_vorbiscomment_field( FLAC__StreamMetadata * vorbiscomment, const std::string & field, const std::string & value ) {
 		if ( !value.empty() ) {
+			FLAC__StreamMetadata_VorbisComment_Entry entry;
 			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair( &entry, field.c_str(), value.c_str() );
-			FLAC__metadata_object_vorbiscomment_append_comment( vorbiscomment, entry, true );
+			FLAC__metadata_object_vorbiscomment_append_comment( vorbiscomment, entry, false );
 		}
 	}
 public:
