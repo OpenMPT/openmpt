@@ -72,6 +72,13 @@ class module_impl;
 
 class interactive_module;
 
+namespace detail {
+
+typedef std::map< std::string, std::string > initial_ctls_map;
+
+} // namespace detail
+
+
 class LIBOPENMPT_CXX_API module {
 
 	friend class interactive_module;
@@ -105,14 +112,14 @@ private:
 	module();
 	void set_impl( module_impl * i );
 public:
-	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const char * beg, const char * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = std::map< std::string, std::string >(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const char * beg, const char * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
 	virtual ~module();
 public:
 
