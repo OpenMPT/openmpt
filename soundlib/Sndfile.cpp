@@ -2236,7 +2236,7 @@ struct UpgradePatternData
 				// Previously the values were just added up, so let's fix this!
 				m.volcmd = VOLCMD_NONE;
 				const uint16 param = static_cast<uint16>(m.param) + static_cast<uint16>(m.vol << 4);
-				m.param = static_cast<uint8>(std::min(param, uint16(0xFF)));
+				m.param = mpt::saturate_cast<uint8>(param);
 			}
 		}
 
@@ -2303,14 +2303,33 @@ void CSoundFile::UpgradeSong()
 	{
 		bool instrPlugs = false;
 		// Old pitch wheel commands were closest to sample pitch bend commands if the PWD is 13.
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr && Instruments[i]->nMidiChannel != MidiNoChannel)
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
-			Instruments[i]->midiPWD = 13;
-			instrPlugs = true;
+			if(Instruments[i] != nullptr && Instruments[i]->nMidiChannel != MidiNoChannel)
+			{
+				Instruments[i]->midiPWD = 13;
+				instrPlugs = true;
+			}
 		}
 		if(instrPlugs)
 		{
 			SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
+		}
+	}
+
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 03, 12)
+		&& m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00)
+		&& (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
+		&& (IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING)))
+	{
+		// The "correct" pan swing implementation did nothing if the instrument also had a pan envelope.
+		// If there's a pan envelope, disable pan swing for such modules.
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+		{
+			if(Instruments[i] != nullptr && Instruments[i]->nPanSwing != 0 && Instruments[i]->PanEnv.dwFlags[ENV_ENABLED])
+			{
+				Instruments[i]->nPanSwing = 0;
+			}
 		}
 	}
 
