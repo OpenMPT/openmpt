@@ -939,7 +939,7 @@ void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn)
 		// Get values in [-32, 32]
 		const int envval = Util::Round<int>((pIns->PanEnv.GetValueFromPosition(envpos) - 0.5f) * 64.0f);
 
-		int pan = pChn->nPan;
+		int pan = pChn->nRealPan;
 		if(pan >= 128)
 		{
 			pan += (envval * (256 - pan)) / 32;
@@ -1160,7 +1160,7 @@ void CSoundFile::ProcessPitchPanSeparation(ModChannel *pChn)
 {
 	const ModInstrument *pIns = pChn->pModInstrument;
 
-	if ((pIns->nPPS) && (pChn->nRealPan) && (pChn->nNote))
+	if ((pIns->nPPS) && (pChn->nNote != NOTE_NONE))
 	{
 		// PPS value is 1/512, i.e. PPS=1 will adjust by 8/512 = 1/64 for each 8 semitones
 		// with PPS = 32 / PPC = C-5, E-6 will pan hard right (and D#6 will not)
