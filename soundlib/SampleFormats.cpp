@@ -374,7 +374,6 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 	sample.nLength = wavFile.GetSampleLength();
 	sample.nC5Speed = wavFile.GetSampleRate();
 	wavFile.ApplySampleSettings(sample, m_szNames[nSample]);
-	sample.Convert(MOD_TYPE_IT, GetType());
 
 	FileReader sampleChunk = wavFile.GetSampleData();
 
@@ -447,6 +446,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		// DLS WSMP chunk
 		*wsmpChunk = wavFile.GetWsmpChunk();
 	}
+
+	sample.Convert(MOD_TYPE_IT, GetType());
 
 	return true;
 }

@@ -1267,25 +1267,29 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 				{
 					switch(tick % 3)
 					{
-					case 1:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio >> 4)); break;
-					case 2:	period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F)); break;
+					case 1: period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio >> 4)); break;
+					case 2: period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F)); break;
 					}
 				}
 			}
 			// FastTracker 2: Swedish tracker logic (TM) arpeggio
 			else if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
-				BYTE note = pChn->nNote;
+				uint8 note = pChn->nNote;
 				int arpPos = 0;
 
 				if(!m_SongFlags[SONG_FIRSTTICK])
 				{
-					arpPos = ((int)m_nMusicSpeed - (int)m_nTickCount) % 3;
-					if((m_nMusicSpeed > 18) && (m_nMusicSpeed - m_nTickCount > 16)) arpPos = 2; // swedish tracker logic, I love it
+					arpPos = m_nMusicSpeed - (m_nTickCount % m_nMusicSpeed);
+					// The fact that arpeggio behaves in a totally fucked up way at 16 ticks/row or more is that the arpeggio offset LUT only has 16 entries in FT2.
+					// At more than 16 ticks/row, FT2 reads into the vibrato table, which is placed right after the arpeggio table.
+					if(arpPos > 16) arpPos = 2;
+					else if(arpPos == 16) arpPos = 0;
+					else arpPos %= 3;
 					switch(arpPos)
 					{
-					case 1:	note += (pChn->nArpeggio >> 4); break;
-					case 2:	note += (pChn->nArpeggio & 0x0F); break;
+					case 1: note += (pChn->nArpeggio >> 4); break;
+					case 2: note += (pChn->nArpeggio & 0x0F); break;
 					}
 				}
 
