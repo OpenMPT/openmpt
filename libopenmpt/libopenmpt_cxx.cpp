@@ -211,6 +211,13 @@ std::int32_t module::get_current_playing_channels() const {
 	return impl->get_current_playing_channels();
 }
 
+float module::get_current_channel_vu_left( std::int32_t channel ) const {
+	return impl->get_current_channel_vu_left( channel );
+}
+float module::get_current_channel_vu_right( std::int32_t channel ) const {
+	return impl->get_current_channel_vu_right( channel );
+}
+
 std::int32_t module::get_num_subsongs() const {
 	return impl->get_num_subsongs();
 }
@@ -258,6 +265,13 @@ std::int32_t module::get_pattern_num_rows( std::int32_t pattern ) const {
 
 std::uint8_t module::get_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const {
 	return impl->get_pattern_row_channel_command( pattern, row, channel, command );
+}
+
+std::string module::format_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width, bool pad ) const {
+	return impl->format_pattern_row_channel( pattern, row, channel, width, pad );
+}
+std::string module::highlight_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width, bool pad ) const {
+	return impl->highlight_pattern_row_channel( pattern, row, channel, width, pad );
 }
 
 std::vector<std::string> module::get_ctls() const {

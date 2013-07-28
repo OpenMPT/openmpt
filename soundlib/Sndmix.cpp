@@ -19,10 +19,6 @@
 #include "../mptrack/TrackerSettings.h"
 #endif
 
-#ifdef MODPLUG_TRACKER
-#define ENABLE_STEREOVU
-#endif
-
 // VU-Meter
 #define VUMETER_DECAY		4
 
@@ -1757,12 +1753,7 @@ BOOL CSoundFile::ReadNote()
 				// Process MIDI macros on channels that are currently muted.
 				ProcessMacroOnChannel(nChn);
 			}
-
-			pChn->nVUMeter = 0;
-#ifdef ENABLE_STEREOVU
 			pChn->nLeftVU = pChn->nRightVU = 0;
-#endif
-
 			continue;
 		}
 		// Reset channel data
@@ -1982,10 +1973,8 @@ BOOL CSoundFile::ReadNote()
 		// Volume ramping
 		pChn->dwFlags.set(CHN_VOLUMERAMP, (pChn->nRealVolume | pChn->rightVol | pChn->leftVol) != 0);
 
-#ifdef ENABLE_STEREOVU
 		if (pChn->nLeftVU > VUMETER_DECAY) pChn->nLeftVU -= VUMETER_DECAY; else pChn->nLeftVU = 0;
 		if (pChn->nRightVU > VUMETER_DECAY) pChn->nRightVU -= VUMETER_DECAY; else pChn->nRightVU = 0;
-#endif
 
 		// Check for too big nInc
 		if (((pChn->nInc >> 16) + 1) >= (LONG)(pChn->nLoopEnd - pChn->nLoopStart)) pChn->dwFlags.reset(CHN_LOOP);
@@ -1994,7 +1983,6 @@ BOOL CSoundFile::ReadNote()
 		if (pChn->pCurrentSample)
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)
-#ifdef ENABLE_STEREOVU
 			UINT vul = (pChn->nRealVolume * pChn->nRealPan) >> 14;
 			if (vul > 127) vul = 127;
 			if (pChn->nLeftVU > 127) pChn->nLeftVU = (BYTE)vul;
@@ -2005,7 +1993,6 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->nRightVU > 127) pChn->nRightVU = (BYTE)vur;
 			vur >>= 1;
 			if (pChn->nRightVU < vur) pChn->nRightVU = (BYTE)vur;
-#endif
 
 #ifdef MODPLUG_TRACKER
 			const UINT kChnMasterVol = pChn->dwFlags[CHN_EXTRALOUD] ? (UINT)m_PlayConfig.getNormalSamplePreAmp() : nMasterVol;
@@ -2095,12 +2082,10 @@ BOOL CSoundFile::ReadNote()
 			ChnMix[m_nMixChannels++] = nChn;
 		} else
 		{
-#ifdef ENABLE_STEREOVU
 			// Note change but no sample
 			if (pChn->nLeftVU > 128) pChn->nLeftVU = 0;
 			if (pChn->nRightVU > 128) pChn->nRightVU = 0;
-#endif // ENABLE_STEREOVU
-			if (pChn->nVUMeter > 0xFF) pChn->nVUMeter = 0;
+
 			pChn->rightVol = pChn->leftVol = 0;
 			pChn->nLength = 0;
 		}

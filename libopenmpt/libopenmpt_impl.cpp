@@ -590,6 +590,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 	}
 	return "";
 }
+
 std::int32_t module_impl::get_current_speed() const {
 	return m_sndFile->m_nMusicSpeed;
 }
@@ -608,6 +609,19 @@ std::int32_t module_impl::get_current_row() const {
 std::int32_t module_impl::get_current_playing_channels() const {
 	return m_sndFile->m_nMixChannels;
 }
+float module_impl::get_current_channel_vu_left( std::int32_t channel ) const {
+	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
+		return 0.0f;
+	}
+	return m_sndFile->Chn[channel].nLeftVU * (1.0f/128.0f);
+}
+float module_impl::get_current_channel_vu_right( std::int32_t channel ) const {
+	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
+		return 0.0f;
+	}
+	return m_sndFile->Chn[channel].nRightVU * (1.0f/128.0f);
+}
+
 std::int32_t module_impl::get_num_subsongs() const {
 	return m_sndFile->Order.GetNumSequences();
 }
@@ -717,6 +731,65 @@ std::uint8_t module_impl::get_pattern_row_channel_command( std::int32_t p, std::
 		case module::command_parameter: return m_sndFile->Patterns[p][r*numchannels+c].param; break;
 	}
 	return 0;
+}
+
+std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const {
+	std::string text = pad ? std::string( width, ' ' ) : std::string();
+	std::string high = pad ? std::string( width, ' ' ) : std::string();
+	const CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
+	if ( p < 0 || p >= m_sndFile->Patterns.Size() ) {
+		return std::make_pair( text, high );
+	}
+	if ( r < 0 || r >= (std::int32_t)m_sndFile->Patterns[p].GetNumRows() ) {
+		return std::make_pair( text, high );
+	}
+	if ( c < 0 || c >= numchannels ) {
+		return std::make_pair( text, high );
+	}
+	if ( width == 0 ) {
+		return std::make_pair( text, high );
+	}
+	//  0000000001111
+	//  1234567890123
+	// "NNN IIvVV EFF"
+	const ModCommand cell = m_sndFile->Patterns[p][r*numchannels+c];
+	text.clear();
+	high.clear();
+	text += cell.IsNote() ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...");
+	high += cell.IsNote() ? std::string("nnn") : std::string("...");
+	if ( width >= 6 ) {
+		text += std::string(" ");
+		high += std::string(" ");
+		text += cell.instr ? mpt::String::Format( "%02X", cell.instr ) : std::string("..");
+		high += cell.instr ? std::string("ii") : std::string("..");
+	}
+	if ( width >= 9 ) {
+		text += cell.IsPcNote() ? mpt::String::Format( " %02X", cell.GetValueVolCol() & 0xff ) : cell.volcmd != VOLCMD_NONE ? mpt::String::Format( "%1c%02X", m_sndFile->GetModSpecifications().GetVolEffectLetter( cell.volcmd ), cell.vol ) : std::string(" ..");
+		high += cell.IsPcNote() ? std::string(" vv") : cell.volcmd != VOLCMD_NONE ? std::string("wvv") : std::string(" ..");
+	}
+	if ( width >= 13 ) {
+		text += std::string(" ");
+		high += std::string(" ");
+		text += cell.IsPcNote() ? mpt::String::Format( "%03X", cell.GetValueEffectCol() & 0x0fff ) : cell.command != CMD_NONE ? mpt::String::Format( "%1c%02X", m_sndFile->GetModSpecifications().GetEffectLetter( cell.command ), cell.param ) : std::string("...");
+		high += cell.IsPcNote() ? std::string("eff") : cell.command != CMD_NONE ? std::string("eff") : std::string("...");
+	}
+	if ( text.length() > width ) {
+		text = text.substr( 0, width );
+	} else if ( pad ) {
+		text += std::string( width - text.length(), ' ' );
+	}
+	if ( high.length() > width ) {
+		high = high.substr( 0, width );
+	} else if ( pad ) {
+		high += std::string( width - high.length(), ' ' );
+	}
+	return std::make_pair( text, high );
+}
+std::string module_impl::format_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const {
+	return format_and_highlight_pattern_row_channel( p, r, c, width, pad ).first;
+}
+std::string module_impl::highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const {
+	return format_and_highlight_pattern_row_channel( p, r, c, width, pad ).second;
 }
 
 std::vector<std::string> module_impl::get_ctls() const {

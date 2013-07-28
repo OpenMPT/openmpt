@@ -67,7 +67,6 @@ struct ALIGN(32) ModChannel
 	int32 nPeriod, nC5Speed, nPortamentoDest;
 	int32 nCalcVolume;								// Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
 	EnvInfo VolEnv, PanEnv, PitchEnv;				// Envelope playback info
-	uint32 nVUMeter;
 	int32 nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
 	int32 nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
 	int32 nFineTune, nTranspose;

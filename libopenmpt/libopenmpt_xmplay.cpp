@@ -193,8 +193,8 @@ static void update_timeinfos( std::int32_t samplerate, std::int32_t count ) {
 	timeinfo_position += (double)count / (double)samplerate;
 	timeinfo info;
 	info.seconds = timeinfo_position;
-	info.pattern = mod->get_current_pattern();
-	info.row = mod->get_current_row();
+	info.pattern = self->mod->get_current_pattern();
+	info.row = self->mod->get_current_row();
 	timeinfos.push( info );
 }
 
@@ -204,13 +204,11 @@ static timeinfo lookup_timeinfo( double seconds ) {
 	timeinfo info = current_timeinfo;
 #if 0
 	info.seconds = timeinfo_position;
-	info.pattern = mod->get_current_pattern();
-	info.row = mod->get_current_row();
+	info.pattern = self->mod->get_current_pattern();
+	info.row = self->mod->get_current_row();
 #endif
 	while ( timeinfos.size() > 0 && timeinfos.front().seconds < seconds ) {
-		info.seconds = timeinfos.front().seconds;
-		info.pattern = timeinfos.front().pattern;
-		info.row = timeinfos.front().row;
+		info = timeinfos.front();
 		timeinfos.pop();
 	}
 	current_timeinfo = info;
@@ -743,7 +741,7 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 
 #ifdef EXPERIMENTAL_VIS
 
-std::vector< std::vector< std::vector < std::uint8_t > > > patterns;
+std::vector< std::vector< std::string > > patterns_rows;
 DWORD viscolors[3];
 HPEN vispens[3];
 HBRUSH visbrushs[3];
@@ -765,16 +763,18 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	visbrushs[0] = CreateSolidBrush( viscolors[0] );
 	visbrushs[1] = CreateSolidBrush( viscolors[1] );
 	visbrushs[2] = CreateSolidBrush( viscolors[2] );
-	if ( !mod ) {
+	if ( !self->mod ) {
 		return FALSE;
 	}
-	patterns.resize( mod->get_num_patterns() );
-	for ( std::size_t pattern = 0; pattern < mod->get_num_patterns(); pattern++ ) {
-		patterns[pattern].resize( mod->get_pattern_num_rows( pattern ) );
-		for ( std::size_t row = 0; row < mod->get_pattern_num_rows( pattern ); row++ ) {
-			patterns[pattern][row].resize( mod->get_num_channels() );
-			for ( std::size_t channel = 0; channel < mod->get_num_channels(); channel++ ) {
-				patterns[pattern][row][channel] = mod->get_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_note );
+	patterns_rows.resize( self->mod->get_num_patterns() );
+	for ( std::size_t pattern = 0; pattern < (std::size_t)self->mod->get_num_patterns(); pattern++ ) {
+		patterns_rows[pattern].resize( self->mod->get_pattern_num_rows( pattern ) );
+		for ( std::size_t row = 0; row < (std::size_t)self->mod->get_pattern_num_rows( pattern ); row++ ) {
+			for ( std::size_t channel = 0; channel < (std::size_t)self->mod->get_num_channels(); channel++ ) {
+				if ( channel > 0 ) {
+					patterns_rows[pattern][row] += "|";
+				}
+				patterns_rows[pattern][row] += self->mod->format_pattern_row_channel( pattern, row, channel, 3 );
 			}
 		}
 	}
@@ -806,29 +806,20 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 
 	int top = 0;
 
-	int channels = mod->get_num_channels();
+	int channels = self->mod->get_num_channels();
 
 #if 0
-	int pattern = mod->get_current_pattern();
-	int current_row = mod->get_current_row();
+	int pattern = self->mod->get_current_pattern();
+	int current_row = self->mod->get_current_row();
 #else
-	timeinfo info = lookup_timeinfo( timeinfo_position - ( (double)xmpfstatus->GetLatency() / (double)samplerate ) );
+	timeinfo info = lookup_timeinfo( timeinfo_position - ( (double)xmpfstatus->GetLatency() / (double)self->num_channels / (double)self->samplerate ) );
 	int pattern = info.pattern;
 	int current_row = info.row;
 #endif
 
-	int rows = mod->get_pattern_num_rows( pattern );
+	std::size_t rows = self->mod->get_pattern_num_rows( pattern );
 
-	static char buf[1<<16];
-	char * dst;
-	dst = buf;
 	for ( std::size_t row = 0; row < rows; row++ ) {
-		dst = buf;
-		for ( std::size_t channel = 0; channel < channels; channel++ ) {
-			*dst++ = nibble_to_char( ( patterns[pattern][row][channel] >> 4 ) &0xf );
-			*dst++ = nibble_to_char( ( patterns[pattern][row][channel] >> 0 ) &0xf );
-		}
-		*dst++ = '\0';
 		if ( row == current_row ) {
 			//SelectObject( dc, vispens[2] );
 			SetTextColor( dc, viscolors[2] );
@@ -838,7 +829,7 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		rect.left = 0;
 		rect.right = size.cx;
 		rect.bottom = size.cy;
-		DrawText( dc, buf, strlen( buf ), &rect, DT_LEFT );
+		DrawText( dc, patterns_rows[pattern][row].c_str(), patterns_rows[pattern][row].length(), &rect, DT_LEFT );
 		top += tm.tmHeight;
 		if ( row == current_row ) {
 			//SelectObject( dc, vispens[1] );
