@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <ctime>
 
@@ -150,6 +151,7 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Mode : " << mode_to_string( flags.mode ) << std::endl;
 	s << "Show progress: " << flags.show_progress << std::endl;
 	s << "Show peak meters: " << flags.show_meters << std::endl;
+	s << "Show channel peak meters: " << flags.show_channel_meters << std::endl;
 	s << "Show details: " << flags.show_details << std::endl;
 	s << "Show message: " << flags.show_message << std::endl;
 #ifdef MPT_WITH_PORTAUDIO
@@ -328,8 +330,11 @@ static void show_help( show_help_exception & e, bool verbose, bool modplug123 ) 
 			return;
 		}
 		std::clog << std::endl;
+		std::clog << "     --terminal-width n Assume terminal is n characters wide [default: " << commandlineflags().terminal_width << "]" << std::endl;
+		std::clog << std::endl;
 		std::clog << "     --[no-]progress  Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
 		std::clog << "     --[no-]meters    Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
+		std::clog << "     --[no-]channel-meters Show channel peak meters [default: " << commandlineflags().show_channel_meters << "]" << std::endl;
 		std::clog << std::endl;
 		std::clog << "     --[no-]details   Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
 		std::clog << "     --[no-]message   Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
@@ -570,6 +575,57 @@ static std::string channel_to_string( int channels, int channel, const meter_cha
 	}
 }
 
+static char peak_to_char( float peak ) {
+	if ( peak >= 1.0f ) {
+		return '#';
+	} else if ( peak >= 0.5f ) {
+		return 'O';
+	} else if ( peak >= 0.25f ) {
+		return 'o';
+	} else if ( peak >= 0.125f ) {
+		return '.';
+	} else {
+		return ' ';
+	}
+}
+
+static std::string peak_to_string_left( float peak, int width ) {
+	std::string result;
+	float thresh = 1.0f;
+	while ( width-- ) {
+		if ( peak >= thresh ) {
+			if ( thresh == 1.0f ) {
+				result.push_back( '#' );
+			} else {
+				result.push_back( '<' );
+			}
+		} else {
+			result.push_back( ' ' );
+		}
+		thresh *= 0.5f;
+	}
+	return result;
+}
+
+static std::string peak_to_string_right( float peak, int width ) {
+	std::string result;
+	float thresh = 1.0f;
+	while ( width-- ) {
+		if ( peak >= thresh ) {
+			if ( thresh == 1.0f ) {
+				result.push_back( '#' );
+			} else {
+				result.push_back( '>' );
+			}
+		} else {
+			result.push_back( ' ' );
+		}
+		thresh *= 0.5f;
+	}
+	std::reverse( result.begin(), result.end() );
+	return result;
+}
+
 static void draw_meters( std::ostream & log, const meter_type & meter, const commandlineflags & flags ) {
 	for ( int channel = 0; channel < flags.channels; ++channel ) {
 		log << channel_to_string( flags.channels, channel, meter.channels[channel] ) << std::endl;
@@ -580,6 +636,21 @@ static void draw_meters_tiny( std::ostream & log, const meter_type & meter, cons
 	for ( int channel = 0; channel < flags.channels; ++channel ) {
 		log << channel_to_string( flags.channels, channel, meter.channels[channel], true );
 	}
+}
+
+static void draw_channel_meters_tiny( std::ostream & log, float peak ) {
+	log << peak_to_char( peak );
+}
+
+static void draw_channel_meters_tiny( std::ostream & log, float peak_left, float peak_right ) {
+	log << peak_to_char( peak_left ) << peak_to_char( peak_right );
+}
+
+static void draw_channel_meters( std::ostream & log, float peak_left, float peak_right, int width ) {
+	if ( width >= 8 + 1 + 8 ) {
+		width = 8 + 1 + 8;
+	}
+	log << peak_to_string_left( peak_left, width / 2 ) << ( width % 1 == 1 ? "|" : "" ) << peak_to_string_right( peak_right, width / 2 );
 }
 
 template < typename Tsample, typename Tmod >
@@ -776,6 +847,27 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 			if ( flags.show_progress ) {
 				log << "Position...: " << seconds_to_string( mod.get_position_seconds() ) << " / " << seconds_to_string( duration ) << "   " << std::endl;
 			}
+		} else if ( flags.show_channel_meters ) {
+			if ( flags.show_ui || flags.show_details || flags.show_progress ) {
+				int width = flags.terminal_width / mod.get_num_channels();
+				log << " ";
+				for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
+					if ( width >= 3 ) {
+						log << "|";
+					}
+					if ( width == 1 ) {
+						draw_channel_meters_tiny( log, ( mod.get_current_channel_vu_left( channel ) + mod.get_current_channel_vu_right( channel ) ) * (1.0f/std::sqrt(2.0f)) );
+					} else if ( width == 2 || width == 3 ) {
+						draw_channel_meters_tiny( log, mod.get_current_channel_vu_left( channel ), mod.get_current_channel_vu_right( channel ) );
+					} else {
+						draw_channel_meters( log, mod.get_current_channel_vu_left( channel ), mod.get_current_channel_vu_right( channel ), width - 1 );
+					}
+				}
+				if ( width >= 3 ) {
+					log << "|";
+				}
+			}
+			log << "   " << "\r";
 		} else {
 			if ( flags.show_ui ) {
 				log << " ";
@@ -1062,6 +1154,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.mode = ModeBatch;
 			} else if ( arg == "--render" ) {
 				flags.mode = ModeRender;
+			} else if ( arg == "--terminal-width" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.terminal_width;
+				++i;
 			} else if ( arg == "--progress" ) {
 				flags.show_progress = true;
 			} else if ( arg == "--no-progress" ) {
@@ -1070,6 +1166,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.show_meters = true;
 			} else if ( arg == "--no-meters" ) {
 				flags.show_meters = false;
+			} else if ( arg == "--channel-meters" ) {
+				flags.show_channel_meters = true;
+			} else if ( arg == "--no-channel-meters" ) {
+				flags.show_channel_meters = false;
 			} else if ( arg == "--details" ) {
 				flags.show_details = true;
 			} else if ( arg == "--no-details" ) {

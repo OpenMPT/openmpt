@@ -1176,7 +1176,6 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	// Enable Ramping
 	if(!bPorta)
 	{
-		pChn->nVUMeter = 0x100;
 		pChn->nLeftVU = pChn->nRightVU = 0xFF;
 		pChn->dwFlags.reset(CHN_FILTER);
 		pChn->dwFlags.set(CHN_FASTVOLRAMP);

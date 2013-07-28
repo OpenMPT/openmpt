@@ -97,11 +97,13 @@ struct commandlineflags {
 	double seek_target;
 	bool quiet;
 	bool verbose;
+	int terminal_width;
 	bool show_details;
 	bool show_message;
 	bool show_ui;
 	bool show_progress;
 	bool show_meters;
+	bool show_channel_meters;
 	bool use_float;
 	bool use_stdout;
 	std::vector<std::string> filenames;
@@ -128,6 +130,19 @@ struct commandlineflags {
 		seek_target = 0.0;
 		quiet = false;
 		verbose = false;
+		terminal_width = 72;
+#if !defined(_MSC_VER)
+		if ( isatty( STDERR_FILENO ) ) {
+			if ( std::getenv( "COLUMNS" ) ) {
+				std::istringstream istr( std::getenv( "COLUMNS" ) );
+				int tmp = 0;
+				istr >> tmp;
+				if ( tmp > 0 ) {
+					terminal_width = tmp;
+				}
+			}
+		}
+#endif
 		show_details = true;
 		show_message = false;
 #if defined(_MSC_VER)
@@ -140,6 +155,7 @@ struct commandlineflags {
 		show_ui = canUI;
 		show_progress = canProgress;
 		show_meters = canUI && canProgress;
+		show_channel_meters = false;
 		use_stdout = false;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 		output_extension = "wav";
@@ -184,14 +200,18 @@ struct commandlineflags {
 			case ModeInfo:
 				show_ui = false;
 				show_progress = false;
+				show_meters = false;
+				show_channel_meters = false;
 			break;
 			case ModeUI:
 			break;
 			case ModeBatch:
 				show_meters = false;
+				show_channel_meters = false;
 			break;
 			case ModeRender:
 				show_meters = false;
+				show_channel_meters = false;
 				show_ui = false;
 			break;
 		}
@@ -200,6 +220,7 @@ struct commandlineflags {
 			show_ui = false;
 			show_details = false;
 			show_progress = false;
+			show_channel_meters = false;
 		}
 		if ( verbose ) {
 			show_details = true;

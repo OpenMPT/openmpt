@@ -70,6 +70,7 @@ private:
 	std::size_t read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, std::int16_t * interleaved );
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved );
+	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );
@@ -108,6 +109,8 @@ public:
 	std::int32_t get_current_pattern() const;
 	std::int32_t get_current_row() const;
 	std::int32_t get_current_playing_channels() const;
+	float get_current_channel_vu_left( std::int32_t channel ) const;
+	float get_current_channel_vu_right( std::int32_t channel ) const;
 	std::int32_t get_num_subsongs() const;
 	std::int32_t get_num_channels() const;
 	std::int32_t get_num_orders() const;
@@ -123,6 +126,8 @@ public:
 	std::int32_t get_order_pattern( std::int32_t o ) const;
 	std::int32_t get_pattern_num_rows( std::int32_t p ) const;
 	std::uint8_t get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
+	std::string format_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
+	std::string highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
 	std::vector<std::string> get_ctls() const;
 	std::string ctl_get( const std::string & ctl ) const;
 	void ctl_set( const std::string & ctl, const std::string & value );

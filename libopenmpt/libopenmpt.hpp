@@ -155,6 +155,9 @@ public:
 	std::int32_t get_current_row() const;
 	std::int32_t get_current_playing_channels() const;
 
+	float get_current_channel_vu_left( std::int32_t channel ) const;
+	float get_current_channel_vu_right( std::int32_t channel ) const;
+
 	std::int32_t get_num_subsongs() const;
 	std::int32_t get_num_channels() const;
 	std::int32_t get_num_orders() const;
@@ -174,6 +177,9 @@ public:
 	std::int32_t get_pattern_num_rows( std::int32_t pattern ) const;
 
 	std::uint8_t get_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const;
+
+	std::string format_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width = 0, bool pad = true ) const;
+	std::string highlight_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width = 0, bool pad = true ) const;
 
 	std::vector<std::string> get_ctls() const;
 

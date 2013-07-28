@@ -114,6 +114,9 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_pattern( openmpt_module * mod 
 LIBOPENMPT_API int32_t openmpt_module_get_current_row( openmpt_module * mod );
 LIBOPENMPT_API int32_t openmpt_module_get_current_playing_channels( openmpt_module * mod );
 
+LIBOPENMPT_API float openmpt_module_get_current_channel_vu_left( openmpt_module * mod, int32_t channel );
+LIBOPENMPT_API float openmpt_module_get_current_channel_vu_right( openmpt_module * mod, int32_t channel );
+
 LIBOPENMPT_API int32_t openmpt_module_get_num_subsongs( openmpt_module * mod );
 LIBOPENMPT_API int32_t openmpt_module_get_num_channels( openmpt_module * mod );
 LIBOPENMPT_API int32_t openmpt_module_get_num_orders( openmpt_module * mod );
@@ -132,6 +135,9 @@ LIBOPENMPT_API int32_t openmpt_module_get_order_pattern( openmpt_module * mod, i
 LIBOPENMPT_API int32_t openmpt_module_get_pattern_num_rows( openmpt_module * mod, int32_t pattern );
 
 LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command );
+
+LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, size_t width, int pad );
+LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, size_t width, int pad );
 
 LIBOPENMPT_API const char * openmpt_module_get_ctls( openmpt_module * mod );
 LIBOPENMPT_API const char * openmpt_module_ctl_get( openmpt_module * mod, const char * ctl );
