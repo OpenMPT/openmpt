@@ -35,39 +35,6 @@
 // Length
 
 
-/*
-void CSoundFile::GenerateSamplePosMap() {
-
-
-
-
-
-	double accurateBufferCount =
-
-	long lSample = 0;
-	nPattern
-
-	//for each order
-		//get pattern for this order
-		//if pattern if duff: break, we're done.
-		//for each row in this pattern
-			//get ticks for this row
-			//get ticks per row and tempo for this row
-			//for each tick
-
-			//Recalc if ticks per row or tempo has changed
-
-		samplesPerTick = (double)gdwMixingFreq * (60.0/(double)m_nMusicTempo / ((double)m_nMusicSpeed * (double)m_nRowsPerBeat));
-		lSample += samplesPerTick;
-
-
-		nPattern = ++nOrder;
-	}
-
-}
-*/
-
-
 // Memory class for GetLength() code
 class GetLengthMemory
 {
@@ -782,7 +749,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		}
 
 		// Default sample panning
-		if(pSmp->uFlags[CHN_PANNING] && (bUpdVol || GetType() != MOD_TYPE_XM))
+		if(pSmp->uFlags[CHN_PANNING] && (bUpdVol || !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
 		{
 			// FT2 compatibility: Only reset panning on instrument numbers, not notes (bUpdVol condition)
 			// Test case: PanMemory.xm
@@ -1597,9 +1564,15 @@ BOOL CSoundFile::ProcessEffects()
 //-------------------------------
 {
 	ModChannel *pChn = Chn;
-	ROWINDEX nBreakRow = ROWINDEX_INVALID;		// Is changed if a break to row command is encountere.d
+	ROWINDEX nBreakRow = ROWINDEX_INVALID;		// Is changed if a break to row command is encountered
 	ROWINDEX nPatLoopRow = ROWINDEX_INVALID;	// Is changed if a pattern loop jump-back is executed
 	ORDERINDEX nPosJump = ORDERINDEX_INVALID;
+
+	// ScreamTracker 2 only updates effects on every 16th tick.
+	if((m_nTickCount & 0x0F) != 0 && GetType() == MOD_TYPE_STM)
+	{
+		return TRUE;
+	}
 
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
@@ -2719,7 +2692,7 @@ BOOL CSoundFile::ProcessEffects()
 // Channels effects
 
 
-// Update the effect memory of all S3M effects that use the last non-zero effect parameter ot show up (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy, Sxy)
+// Update the effect memory of all S3M effects that use the last non-zero effect parameter as memory (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy, Sxy)
 // Test case: ParamMemory.s3m
 void CSoundFile::UpdateS3MEffectMemory(ModChannel *pChn, UINT param) const
 //------------------------------------------------------------------------

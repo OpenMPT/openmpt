@@ -1283,6 +1283,7 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 					arpPos = m_nMusicSpeed - (m_nTickCount % m_nMusicSpeed);
 					// The fact that arpeggio behaves in a totally fucked up way at 16 ticks/row or more is that the arpeggio offset LUT only has 16 entries in FT2.
 					// At more than 16 ticks/row, FT2 reads into the vibrato table, which is placed right after the arpeggio table.
+					// Test case: Arpeggio.xm
 					if(arpPos > 16) arpPos = 2;
 					else if(arpPos == 16) arpPos = 0;
 					else arpPos %= 3;
@@ -1302,13 +1303,19 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 			// Other trackers
 			else
 			{
+				uint32 tick = m_nTickCount;
+				// ScreamTracker 2 only updates effects on every 16th tick.
+				if(GetType() == MOD_TYPE_STM)
+				{
+					tick >>= 4;
+				}
 				int note = pChn->nNote;
-				switch(m_nTickCount % 3)
+				switch(tick % 3)
 				{
 				case 1: note += (pChn->nArpeggio >> 4); break;
 				case 2: note += (pChn->nArpeggio & 0x0F); break;
 				}
-				if(note != pChn->nNote)
+				if(note != pChn->nNote || GetType() == MOD_TYPE_STM)
 				{
 					if(m_SongFlags[SONG_PT1XMODE] && note >= NOTE_MIDDLEC + 24)
 					{
@@ -1317,6 +1324,13 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 						note -= 37;
 					}
 					period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
+
+					// The arpeggio note offset remains effective after the end of the current row in ScreamTracker 2.
+					// This fixes the flute lead in MORPH.STM by Skaven, pattern 27.
+					if(GetType() == MOD_TYPE_STM)
+					{
+						pChn->nPeriod = period;
+					}
 				}
 			}
 		}
