@@ -650,7 +650,7 @@ static void draw_channel_meters( std::ostream & log, float peak_left, float peak
 	if ( width >= 8 + 1 + 8 ) {
 		width = 8 + 1 + 8;
 	}
-	log << peak_to_string_left( peak_left, width / 2 ) << ( width % 1 == 1 ? "|" : "" ) << peak_to_string_right( peak_right, width / 2 );
+	log << peak_to_string_left( peak_left, width / 2 ) << ( width % 2 == 1 ? ":" : "" ) << peak_to_string_right( peak_right, width / 2 );
 }
 
 template < typename Tsample, typename Tmod >
@@ -689,6 +689,9 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 			for ( int channel = 0; channel < flags.channels; ++channel ) {
 				lines += 1;
 			}
+		}
+		if ( flags.show_channel_meters ) {
+			lines += 1;
 		}
 		if ( flags.show_details ) {
 			lines += 1;
@@ -822,6 +825,26 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 				log << std::endl;
 				draw_meters( log, meter, flags );
 			}
+			if ( flags.show_channel_meters ) {
+				int width = flags.terminal_width / mod.get_num_channels();
+				log << " ";
+				for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
+					if ( width >= 3 ) {
+						log << "|";
+					}
+					if ( width == 1 ) {
+						draw_channel_meters_tiny( log, ( mod.get_current_channel_vu_left( channel ) + mod.get_current_channel_vu_right( channel ) ) * (1.0f/std::sqrt(2.0f)) );
+					} else if ( width <= 4 ) {
+						draw_channel_meters_tiny( log, mod.get_current_channel_vu_left( channel ), mod.get_current_channel_vu_right( channel ) );
+					} else {
+						draw_channel_meters( log, mod.get_current_channel_vu_left( channel ), mod.get_current_channel_vu_right( channel ), width - 1 );
+					}
+				}
+				if ( width >= 3 ) {
+					log << "|";
+				}
+				log << std::endl;
+			}
 			if ( flags.show_details ) {
 				log << "Mixer......: ";
 				log << "CPU:" << std::setw(3) << std::setfill(':') << cpu_str;
@@ -857,7 +880,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 					}
 					if ( width == 1 ) {
 						draw_channel_meters_tiny( log, ( mod.get_current_channel_vu_left( channel ) + mod.get_current_channel_vu_right( channel ) ) * (1.0f/std::sqrt(2.0f)) );
-					} else if ( width == 2 || width == 3 ) {
+					} else if ( width <= 4 ) {
 						draw_channel_meters_tiny( log, mod.get_current_channel_vu_left( channel ), mod.get_current_channel_vu_right( channel ) );
 					} else {
 						draw_channel_meters( log, mod.get_current_channel_vu_left( channel ), mod.get_current_channel_vu_right( channel ), width - 1 );
