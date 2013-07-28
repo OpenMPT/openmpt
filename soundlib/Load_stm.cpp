@@ -142,11 +142,15 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 4;
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 0x7FFF;
-	m_nDefaultSpeed = fileHeader.initTempo >> 4;
-	if(m_nDefaultSpeed < 1) m_nDefaultSpeed = 1;
+#ifdef MODPLUG_TRACKER
 	m_nDefaultTempo = 125;
-	m_nDefaultGlobalVolume = fileHeader.globalVolume * 4;
-	LimitMax(m_nDefaultGlobalVolume, MAX_GLOBAL_VOLUME);
+	m_nDefaultSpeed = fileHeader.initTempo >> 4;
+#else
+	m_nDefaultTempo = 125 * 16;
+	m_nDefaultSpeed = fileHeader.initTempo;
+#endif // MODPLUG_TRACKER
+	if(m_nDefaultSpeed < 1) m_nDefaultSpeed = 1;
+	m_nDefaultGlobalVolume = std::min<uint8>(fileHeader.globalVolume, 64) * 4;
 
 	// Setting up channels
 	for(CHANNELINDEX chn = 0; chn < 4; chn++)
@@ -226,13 +230,15 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 			switch(m->command)
 			{
+#ifdef MODPLUG_TRACKER
 			case CMD_SPEED:
 				// ST2 assumes that the tempo is 125 * 16 BPM, and effects are updated
-				// on every 16th tick of a row. This is pretty hard to handle, so we just
-				// assume the tempo is 125 and divide the speed by 16 instead.
+				// on every 16th tick of a row. This is pretty hard to handle in the tracker,
+				// so we just assume the tempo is 125 and divide the speed by 16 instead.
 				// Parameters below 10 might behave weird.
 				m->param >>= 4;
 				break;
+#endif // MODPLUG_TRACKER
 
 			case CMD_PATTERNBREAK:
 				m->param = (m->param & 0xF0) * 10 + (m->param & 0x0F);
