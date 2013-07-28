@@ -1303,14 +1303,8 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 			// Other trackers
 			else
 			{
-				uint32 tick = m_nTickCount;
-				// ScreamTracker 2 only updates effects on every 16th tick.
-				if(GetType() == MOD_TYPE_STM)
-				{
-					tick >>= 4;
-				}
 				int note = pChn->nNote;
-				switch(tick % 3)
+				switch(m_nTickCount % 3)
 				{
 				case 1: note += (pChn->nArpeggio >> 4); break;
 				case 2: note += (pChn->nArpeggio & 0x0F); break;
