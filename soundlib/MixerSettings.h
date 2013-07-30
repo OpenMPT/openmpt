@@ -10,7 +10,7 @@
 #pragma once
 
 
-enum SampleFormat
+enum SampleFormatEnum
 {
 	SampleFormatUnsigned8 =  8,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatInt16     = 16,       // do not change value (for compatibility with old configuration settings)
@@ -18,6 +18,72 @@ enum SampleFormat
 	SampleFormatInt32     = 32,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatFloat32   = 32 + 128, // Only supported as mixer output and NOT supported by Mod2Wave or ISoundDevice or settings dialog yet. Keep in mind to update all 3 cases at once.
 	SampleFormatInvalid   =  0
+};
+
+struct SampleFormat
+{
+	SampleFormatEnum value;
+	SampleFormat(SampleFormatEnum v = SampleFormatInvalid) : value(v) { }
+	bool operator == (SampleFormat other) const { return value == other.value; }
+	bool operator != (SampleFormat other) const { return value != other.value; }
+	operator SampleFormatEnum () const
+	{
+		return value;
+	}
+	bool IsValid() const
+	{
+		return value != SampleFormatInvalid;
+	}
+	bool IsUnsigned() const
+	{
+		if(!IsValid()) return false;
+		return value == SampleFormatUnsigned8;
+	}
+	bool IsFloat() const
+	{
+		if(!IsValid()) return false;
+		return value == SampleFormatFloat32;
+	}
+	bool IsInt() const
+	{
+		if(!IsValid()) return false;
+		return value != SampleFormatFloat32;
+	}
+	uint8 GetBitsPerSample() const
+	{
+		if(!IsValid()) return 0;
+		switch(value)
+		{
+		case SampleFormatUnsigned8:
+			return 8;
+			break;
+		case SampleFormatInt16:
+			return 16;
+			break;
+		case SampleFormatInt24:
+			return 24;
+			break;
+		case SampleFormatInt32:
+			return 32;
+			break;
+		case SampleFormatFloat32:
+			return 32;
+			break;
+		default:
+			return 0;
+			break;
+		}
+	}
+
+	// backward compatibility, conversion to/from integers
+	operator int () const { return value; }
+	SampleFormat(int v) : value(SampleFormatEnum(v)) { }
+	operator long () const { return value; }
+	SampleFormat(long v) : value(SampleFormatEnum(v)) { }
+	operator unsigned int () const { return value; }
+	SampleFormat(unsigned int v) : value(SampleFormatEnum(v)) { }
+	operator unsigned long () const { return value; }
+	SampleFormat(unsigned long v) : value(SampleFormatEnum(v)) { }
 };
 
 struct MixerSettings
@@ -49,52 +115,11 @@ struct MixerSettings
 	{
 		return true
 			&& (gnChannels == 1 || gnChannels == 2 || gnChannels == 4)
-			&& (m_SampleFormat != SampleFormatInvalid)
 			&& (gdwMixingFreq > 0)
-			&& (GetBitsPerSample() % 8 == 0)
-			&& (GetBitsPerSample() > 0)
+			&& (m_SampleFormat.IsValid())
 			;
 	}
-	bool IsUnsignedSampleFormat() const
-	{
-		if(m_SampleFormat == SampleFormatInvalid) return false;
-		return m_SampleFormat == SampleFormatUnsigned8;
-	}
-	bool IsFloatSampleFormat() const
-	{
-		if(m_SampleFormat == SampleFormatInvalid) return false;
-		return m_SampleFormat == SampleFormatFloat32;
-	}
-	bool IsIntSampleFormat() const
-	{
-		if(m_SampleFormat == SampleFormatInvalid) return false;
-		return m_SampleFormat != SampleFormatFloat32;
-	}
-	uint8 GetBitsPerSample() const
-	{
-		switch(m_SampleFormat)
-		{
-		case SampleFormatUnsigned8:
-			return 8;
-			break;
-		case SampleFormatInt16:
-			return 16;
-			break;
-		case SampleFormatInt24:
-			return 24;
-			break;
-		case SampleFormatInt32:
-			return 32;
-			break;
-		case SampleFormatFloat32:
-			return 32;
-			break;
-		default:
-			return 0;
-			break;
-		}
-	}
-
+	
 	MixerSettings();
 
 };

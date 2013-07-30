@@ -753,7 +753,7 @@ void CDoWaveConvert::OnButton1()
 		} else
 		{
 
-			UINT lWrite = fwrite(buffer, 1, lRead * m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.GetBitsPerSample()/8), file.GetFile());
+			UINT lWrite = fwrite(buffer, 1, lRead * m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.m_SampleFormat.GetBitsPerSample()/8), file.GetFile());
 			if (!lWrite) 
 				break;
 			bytesWritten += lWrite;
@@ -1104,7 +1104,7 @@ void CDoAcmConvert::OnButton1()
 		UINT lRead = 0;
 		if (!bFinished)
 		{
-			lRead = m_pSndFile->ReadInterleaved(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
+			lRead = m_pSndFile->ReadInterleaved(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.m_SampleFormat.GetBitsPerSample()/8));
 			if (!lRead) bFinished = true;
 		}
 		ullSamples += lRead;

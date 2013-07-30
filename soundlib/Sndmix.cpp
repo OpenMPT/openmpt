@@ -366,19 +366,19 @@ void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outp
 	// Convert to output sample format and optionally perform dithering and clipping if needed
 
 	#ifndef MODPLUG_TRACKER
-		if(m_MixerSettings.IsIntSampleFormat())
+		if(m_MixerSettings.m_SampleFormat.IsInt())
 		{
 			// Apply final output gain for non floating point output
 			ApplyFinalOutputGain(MixSoundBuffer, countChunk);
 		}
 	#endif // !MODPLUG_TRACKER
 
-	if(m_MixerSettings.IsIntSampleFormat())
+	if(m_MixerSettings.m_SampleFormat.IsInt())
 	{
-		m_Dither.Process(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels, m_MixerSettings.GetBitsPerSample());
+		m_Dither.Process(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels, m_MixerSettings.m_SampleFormat.GetBitsPerSample());
 	}
 
-	switch(m_MixerSettings.m_SampleFormat)
+	switch(m_MixerSettings.m_SampleFormat.value)
 	{
 		case SampleFormatUnsigned8:
 			ConvertToOutput<uint8>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
@@ -400,7 +400,7 @@ void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outp
 	}
 
 	#ifndef MODPLUG_TRACKER
-		if(m_MixerSettings.IsFloatSampleFormat())
+		if(m_MixerSettings.m_SampleFormat.IsFloat())
 		{
 			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
 			ApplyFinalOutputGainFloat(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, m_MixerSettings.gnChannels, countChunk);

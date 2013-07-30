@@ -791,8 +791,8 @@ void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
 	{
 		// The sound device interface expects the whole buffer to be filled, always.
 		// Clear remaining buffer if not enough samples got rendered.
-		std::size_t frameSize = m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.GetBitsPerSample()/8);
-		if(m_pSndFile->m_MixerSettings.IsUnsignedSampleFormat())
+		std::size_t frameSize = m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.m_SampleFormat.GetBitsPerSample()/8);
+		if(m_pSndFile->m_MixerSettings.m_SampleFormat.IsUnsigned())
 		{
 			std::memset((char*)(pvData) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
 		} else
@@ -886,16 +886,16 @@ bool CMainFrame::audioOpenDevice()
 	if(!err)
 	{
 		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-								TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
+								TrackerSettings::Instance().m_MixerSettings.m_SampleFormat.GetBitsPerSample(),
 								TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
 		SampleFormat fixedBitsPerSample = SampleFormatInvalid;
 		{
 			Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-			fixedBitsPerSample = (gpSoundDevice) ? static_cast<SampleFormat>(gpSoundDevice->HasFixedBitsPerSample()) : SampleFormatInvalid;
+			fixedBitsPerSample = (gpSoundDevice) ? SampleFormat(gpSoundDevice->HasFixedBitsPerSample()) : SampleFormatInvalid;
 		}
-		if(err && (fixedBitsPerSample && (fixedBitsPerSample != TrackerSettings::Instance().m_MixerSettings.m_SampleFormat)))
+		if(err && (fixedBitsPerSample.IsValid() && (fixedBitsPerSample != TrackerSettings::Instance().m_MixerSettings.m_SampleFormat)))
 		{
-			if(fixedBitsPerSample) TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = fixedBitsPerSample;
+			TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = fixedBitsPerSample;
 			err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
 									TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
 									TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
