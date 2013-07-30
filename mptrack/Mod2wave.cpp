@@ -635,15 +635,15 @@ void CDoWaveConvert::OnButton1()
 		file.Open(m_lpszFileName);
 	}
 
+	SampleFormat sampleFormat = (m_pWaveFormat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) ? SampleFormatFloat32 : (SampleFormat)m_pWaveFormat->wBitsPerSample;
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	mixersettings.gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
-	mixersettings.m_SampleFormat = (m_pWaveFormat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) ? SampleFormatFloat32 : (SampleFormat)m_pWaveFormat->wBitsPerSample;
 	mixersettings.gnChannels = m_pWaveFormat->nChannels;
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 	if(m_bNormalize)
 	{
-		mixersettings.m_SampleFormat = SampleFormatFloat32;
+		sampleFormat = SampleFormatFloat32;
 #ifndef NO_AGC
 		mixersettings.DSPMask &= ~SNDDSP_AGC;
 #endif
@@ -705,10 +705,10 @@ void CDoWaveConvert::OnButton1()
 		UINT lRead = 0;
 		if(m_bNormalize)
 		{
-			lRead = m_pSndFile->ReadInterleaved(floatbuffer, MIXBUFFERSIZE);
+			lRead = m_pSndFile->ReadInterleaved(floatbuffer, MIXBUFFERSIZE, sampleFormat);
 		} else
 		{
-			lRead = m_pSndFile->ReadInterleaved(buffer, MIXBUFFERSIZE);
+			lRead = m_pSndFile->ReadInterleaved(buffer, MIXBUFFERSIZE, sampleFormat);
 		}
 
 		// Process cue points (add base offset), if there are any to process.
@@ -753,7 +753,7 @@ void CDoWaveConvert::OnButton1()
 		} else
 		{
 
-			UINT lWrite = fwrite(buffer, 1, lRead * m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.m_SampleFormat.GetBitsPerSample()/8), file.GetFile());
+			UINT lWrite = fwrite(buffer, 1, lRead * m_pSndFile->m_MixerSettings.gnChannels * (sampleFormat.GetBitsPerSample()/8), file.GetFile());
 			if (!lWrite) 
 				break;
 			bytesWritten += lWrite;
@@ -1002,6 +1002,7 @@ void CDoAcmConvert::OnButton1()
 	FILE *f;
 
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
+	SampleFormat sampleFormat = SampleFormatInvalid;
 
 	progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	if ((!m_pSndFile) || (!m_lpszFileName) || (!m_pwfx) || (!m_hadid)) goto OnError;
@@ -1056,11 +1057,11 @@ void CDoAcmConvert::OnButton1()
 		// Write ID3v2.4 Tags
 		m_FileTags.WriteID3v2Tags(f);
 	}
+	sampleFormat = SampleFormatInt16;
 	DWORD oldsndcfg = m_pSndFile->m_MixerSettings.MixerFlags;
 	oldrepeat = m_pSndFile->GetRepeatCount();
 	const uint64 dwSongTime = static_cast<uint64>(m_pSndFile->GetSongTime() + 0.5);
 	mixersettings.gdwMixingFreq = wfxSrc.nSamplesPerSec;
-	mixersettings.m_SampleFormat = SampleFormatInt16;
 	mixersettings.gnChannels = wfxSrc.nChannels;
 	m_pSndFile->SetRepeatCount(0);
 	m_pSndFile->ResetChannels();
@@ -1104,7 +1105,7 @@ void CDoAcmConvert::OnButton1()
 		UINT lRead = 0;
 		if (!bFinished)
 		{
-			lRead = m_pSndFile->ReadInterleaved(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.m_SampleFormat.GetBitsPerSample()/8));
+			lRead = m_pSndFile->ReadInterleaved(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*sampleFormat.GetBitsPerSample()/8), sampleFormat);
 			if (!lRead) bFinished = true;
 		}
 		ullSamples += lRead;
