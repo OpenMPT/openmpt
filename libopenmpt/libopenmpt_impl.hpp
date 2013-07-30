@@ -61,7 +61,7 @@ public:
 	void PushToCSoundFileLog( const std::string & text ) const;
 	void PushToCSoundFileLog( int loglevel, const std::string & text ) const;
 private:
-	void apply_mixer_settings( std::int32_t samplerate, int channels, bool format_float );
+	void apply_mixer_settings( std::int32_t samplerate, int channels );
 	void apply_libopenmpt_defaults();
 	void init( const std::map< std::string, std::string > & ctls );
 	static void load( CSoundFile & sndFile, const FileReader & file );

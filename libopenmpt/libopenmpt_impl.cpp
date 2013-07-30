@@ -155,19 +155,16 @@ static void mixersettings_to_ramping( int & ramping, const MixerSettings & setti
 	}
 }
 
-void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels, bool format_float ) {
-	SampleFormat format = ( format_float ? SampleFormatFloat32 : SampleFormatInt16 );
+void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) {
 	if (
 		static_cast<std::int32_t>( m_sndFile->m_MixerSettings.gdwMixingFreq ) != samplerate ||
-		static_cast<int>( m_sndFile->m_MixerSettings.gnChannels ) != channels ||
-		m_sndFile->m_MixerSettings.m_SampleFormat != format
+		static_cast<int>( m_sndFile->m_MixerSettings.gnChannels ) != channels
 		) {
 		MixerSettings mixersettings = m_sndFile->m_MixerSettings;
 		std::int32_t volrampin_us = mixersettings.GetVolumeRampUpMicroseconds();
 		std::int32_t volrampout_us = mixersettings.GetVolumeRampDownMicroseconds();
 		mixersettings.gdwMixingFreq = samplerate;
 		mixersettings.gnChannels = channels;
-		mixersettings.m_SampleFormat = format;
 		mixersettings.SetVolumeRampUpMicroseconds( volrampin_us );
 		mixersettings.SetVolumeRampDownMicroseconds( volrampout_us );
 		m_sndFile->SetMixerSettings( mixersettings );
@@ -207,7 +204,8 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 		std::int16_t * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
 		std::size_t count_chunk = m_sndFile->ReadNonInterleaved(
 			reinterpret_cast<void*const*>( buffers ),
-			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) // safety margin / samplesize / channels
+			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			SampleFormatInt16
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -223,7 +221,8 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 		float * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
 		std::size_t count_chunk = m_sndFile->ReadNonInterleaved(
 			reinterpret_cast<void*const*>( buffers ),
-			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) // safety margin / samplesize / channels
+			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			SampleFormatFloat32
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -238,7 +237,8 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->ReadInterleaved(
 			reinterpret_cast<void*>( interleaved + count_read * channels ),
-			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) // safety margin / samplesize / channels
+			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			SampleFormatInt16
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -253,7 +253,8 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->ReadInterleaved(
 			reinterpret_cast<void*>( interleaved + count_read * channels ),
-			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) // safety margin / samplesize / channels
+			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			SampleFormatFloat32
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -405,7 +406,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 	if ( !mono ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 1, false );
+	apply_mixer_settings( samplerate, 1 );
 	count = read_wrapper( count, mono, 0, 0, 0 );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
@@ -414,7 +415,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 	if ( !left || !right ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 2, false );
+	apply_mixer_settings( samplerate, 2 );
 	count = read_wrapper( count, left, right, 0, 0 );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
@@ -423,7 +424,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 	if ( !left || !right || !rear_left || !rear_right ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 4, false );
+	apply_mixer_settings( samplerate, 4 );
 	count = read_wrapper( count, left, right, rear_left, rear_right );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
@@ -432,7 +433,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 	if ( !mono ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 1, true );
+	apply_mixer_settings( samplerate, 1 );
 	count = read_wrapper( count, mono, 0, 0, 0 );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
@@ -441,7 +442,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 	if ( !left || !right ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 2, true );
+	apply_mixer_settings( samplerate, 2 );
 	count = read_wrapper( count, left, right, 0, 0 );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
@@ -450,7 +451,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 	if ( !left || !right || !rear_left || !rear_right ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 4, true );
+	apply_mixer_settings( samplerate, 4 );
 	count = read_wrapper( count, left, right, rear_left, rear_right );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
@@ -459,7 +460,7 @@ std::size_t module_impl::read_interleaved_stereo( std::int32_t samplerate, std::
 	if ( !interleaved_stereo ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 2, false );
+	apply_mixer_settings( samplerate, 2 );
 	count = read_interleaved_wrapper( count, 2, interleaved_stereo );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
@@ -468,7 +469,7 @@ std::size_t module_impl::read_interleaved_quad( std::int32_t samplerate, std::si
 	if ( !interleaved_quad ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 4, false );
+	apply_mixer_settings( samplerate, 4 );
 	count = read_interleaved_wrapper( count, 4, interleaved_quad );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
@@ -477,7 +478,7 @@ std::size_t module_impl::read_interleaved_stereo( std::int32_t samplerate, std::
 	if ( !interleaved_stereo ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 2, true );
+	apply_mixer_settings( samplerate, 2 );
 	count = read_interleaved_wrapper( count, 2, interleaved_stereo );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
@@ -486,7 +487,7 @@ std::size_t module_impl::read_interleaved_quad( std::int32_t samplerate, std::si
 	if ( !interleaved_quad ) {
 		throw openmpt::exception("null pointer");
 	}
-	apply_mixer_settings( samplerate, 4, true );
+	apply_mixer_settings( samplerate, 4 );
 	count = read_interleaved_wrapper( count, 4, interleaved_quad );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;

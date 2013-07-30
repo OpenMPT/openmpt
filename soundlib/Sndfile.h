@@ -604,10 +604,10 @@ public:
 	void StopAllVsti();    //rewbs.VSTCompliance
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count);
-	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count);
+	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat);
+	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat);
 private:
-	samplecount_t Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers);
+	samplecount_t Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers, SampleFormat sampleFormat);
 	void CreateStereoMix(int count);
 public:
 	BOOL FadeSong(UINT msec);
@@ -805,7 +805,7 @@ public:
 	void ApplyFinalOutputGainFloat(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk);
 #endif // !MODPLUG_TRACKER
 
-	void ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk);
+	void ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk, SampleFormat sampleFormat);
 
 	// System-Dependant functions
 public:

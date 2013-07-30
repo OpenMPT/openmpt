@@ -81,8 +81,6 @@ void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 	if(
 		(mixersettings.gdwMixingFreq != m_MixerSettings.gdwMixingFreq)
 		||
-		(mixersettings.m_SampleFormat != m_MixerSettings.m_SampleFormat)
-		||
 		(mixersettings.gnChannels != m_MixerSettings.gnChannels)
 		||
 		(mixersettings.MixerFlags != m_MixerSettings.MixerFlags))
@@ -150,24 +148,25 @@ BOOL CSoundFile::FadeSong(UINT msec)
 }
 
 
-CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count)
-//--------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat)
+//-----------------------------------------------------------------------------------------------------------------------
 {
-	return Read(count, outputBuffer, nullptr);
+	return Read(count, outputBuffer, nullptr, sampleFormat);
 }
 
 
-CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count)
-//--------------------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat)
+//-----------------------------------------------------------------------------------------------------------------------------------
 {
-	return Read(count, nullptr, outputBuffers);
+	return Read(count, nullptr, outputBuffers, sampleFormat);
 }
 
 
-CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers)
-//--------------------------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers, SampleFormat sampleFormat)
+//-----------------------------------------------------------------------------------------------------------------------------------------
 {
 	ALWAYS_ASSERT(m_MixerSettings.IsValid());
+	ALWAYS_ASSERT(sampleFormat.IsValid());
 
 	int mixStatCount = 0;
 
@@ -289,7 +288,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, void *outputBuff
 		#endif // MODPLUG_TRACKER
 
 		// Convert to output sample format and optionally perform dithering and clipping if needed
-		ConvertMixBufferToOutput(outputBuffer, outputBuffers, countRendered, countChunk);
+		ConvertMixBufferToOutput(outputBuffer, outputBuffers, countRendered, countChunk, sampleFormat);
 
 		// Buffer ready
 		countRendered += countChunk;
@@ -360,25 +359,25 @@ void ConvertToOutput(void *outputBuffer, void * const *outputBuffers, std::size_
 }
 
 
-void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk)
-//-------------------------------------------------------------------------------------------------------------------------------------------
+void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk, SampleFormat sampleFormat)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	// Convert to output sample format and optionally perform dithering and clipping if needed
 
 	#ifndef MODPLUG_TRACKER
-		if(m_MixerSettings.m_SampleFormat.IsInt())
+		if(sampleFormat.IsInt())
 		{
 			// Apply final output gain for non floating point output
 			ApplyFinalOutputGain(MixSoundBuffer, countChunk);
 		}
 	#endif // !MODPLUG_TRACKER
 
-	if(m_MixerSettings.m_SampleFormat.IsInt())
+	if(sampleFormat.IsInt())
 	{
-		m_Dither.Process(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels, m_MixerSettings.m_SampleFormat.GetBitsPerSample());
+		m_Dither.Process(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels, sampleFormat.GetBitsPerSample());
 	}
 
-	switch(m_MixerSettings.m_SampleFormat.value)
+	switch(sampleFormat.value)
 	{
 		case SampleFormatUnsigned8:
 			ConvertToOutput<uint8>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
@@ -400,7 +399,7 @@ void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outp
 	}
 
 	#ifndef MODPLUG_TRACKER
-		if(m_MixerSettings.m_SampleFormat.IsFloat())
+		if(sampleFormat.IsFloat())
 		{
 			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
 			ApplyFinalOutputGainFloat(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, m_MixerSettings.gnChannels, countChunk);

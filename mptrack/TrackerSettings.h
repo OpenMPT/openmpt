@@ -220,6 +220,7 @@ public:
 	COLORREF rgbCustomColors[MAX_MODCOLORS];
 
 	MixerSettings m_MixerSettings;
+	SampleFormat m_SampleFormat;
 	CResamplerSettings m_ResamplerSettings;
 #ifndef NO_REVERB
 	CReverbSettings m_ReverbSettings;

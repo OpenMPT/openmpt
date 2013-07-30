@@ -94,7 +94,6 @@ struct MixerSettings
 	DWORD DSPMask;
 	DWORD MixerFlags;
 	DWORD gdwMixingFreq;
-	SampleFormat m_SampleFormat;
 	DWORD gnChannels;
 	DWORD m_nPreAmp;
 
@@ -116,7 +115,6 @@ struct MixerSettings
 		return true
 			&& (gnChannels == 1 || gnChannels == 2 || gnChannels == 4)
 			&& (gdwMixingFreq > 0)
-			&& (m_SampleFormat.IsValid())
 			;
 	}
 	

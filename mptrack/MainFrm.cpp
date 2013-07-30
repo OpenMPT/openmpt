@@ -784,15 +784,15 @@ void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
 //-------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->ReadInterleaved(pvData, NumFrames);
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->ReadInterleaved(pvData, NumFrames, TrackerSettings::Instance().m_SampleFormat);
 	ASSERT(renderedFrames <= NumFrames);
 	CSoundFile::samplecount_t remainingFrames = NumFrames - renderedFrames;
 	if(remainingFrames > 0)
 	{
 		// The sound device interface expects the whole buffer to be filled, always.
 		// Clear remaining buffer if not enough samples got rendered.
-		std::size_t frameSize = m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.m_SampleFormat.GetBitsPerSample()/8);
-		if(m_pSndFile->m_MixerSettings.m_SampleFormat.IsUnsigned())
+		std::size_t frameSize = m_pSndFile->m_MixerSettings.gnChannels * (TrackerSettings::Instance().m_SampleFormat.GetBitsPerSample()/8);
+		if(TrackerSettings::Instance().m_SampleFormat.IsUnsigned())
 		{
 			std::memset((char*)(pvData) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
 		} else
@@ -886,18 +886,18 @@ bool CMainFrame::audioOpenDevice()
 	if(!err)
 	{
 		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-								TrackerSettings::Instance().m_MixerSettings.m_SampleFormat.GetBitsPerSample(),
+								TrackerSettings::Instance().m_SampleFormat.GetBitsPerSample(),
 								TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
 		SampleFormat fixedBitsPerSample = SampleFormatInvalid;
 		{
 			Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
 			fixedBitsPerSample = (gpSoundDevice) ? SampleFormat(gpSoundDevice->HasFixedBitsPerSample()) : SampleFormatInvalid;
 		}
-		if(err && (fixedBitsPerSample.IsValid() && (fixedBitsPerSample != TrackerSettings::Instance().m_MixerSettings.m_SampleFormat)))
+		if(err && (fixedBitsPerSample.IsValid() && (fixedBitsPerSample != TrackerSettings::Instance().m_SampleFormat)))
 		{
-			TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = fixedBitsPerSample;
+			TrackerSettings::Instance().m_SampleFormat = fixedBitsPerSample;
 			err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-									TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
+									TrackerSettings::Instance().m_SampleFormat,
 									TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
 		}
 	}
@@ -1701,7 +1701,7 @@ HWND CMainFrame::GetFollowSong() const
 
 
 BOOL CMainFrame::SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat sampleformat, UINT nChns, UINT latency_ms, UINT updateinterval_ms, LONG wd)
-//---------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const bool isPlaying = IsPlaying();
 	if ((TrackerSettings::Instance().GetSoundDeviceFlags() != deviceflags)
@@ -1709,7 +1709,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat samp
 	 || (TrackerSettings::Instance().m_nWaveDevice != wd)
 	 || (TrackerSettings::Instance().m_LatencyMS != latency_ms)
 	 || (TrackerSettings::Instance().m_UpdateIntervalMS != updateinterval_ms)
-	 || (TrackerSettings::Instance().m_MixerSettings.m_SampleFormat != sampleformat)
+	 || (TrackerSettings::Instance().m_SampleFormat != sampleformat)
 	 || (TrackerSettings::Instance().m_MixerSettings.gnChannels != nChns))
 	{
 		CModDoc *pActiveMod = NULL;
@@ -1723,7 +1723,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat samp
 		TrackerSettings::Instance().SetSoundDeviceFlags(deviceflags);
 		TrackerSettings::Instance().m_LatencyMS = latency_ms;
 		TrackerSettings::Instance().m_UpdateIntervalMS = updateinterval_ms;
-		TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = sampleformat;
+		TrackerSettings::Instance().m_SampleFormat = sampleformat;
 		TrackerSettings::Instance().m_MixerSettings.gnChannels = nChns;
 		{
 			CriticalSection cs;
@@ -1892,7 +1892,7 @@ void CMainFrame::OnViewOptions()
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().GetSoundDeviceFlags(), TrackerSettings::Instance().m_MixerSettings.m_SampleFormat, TrackerSettings::Instance().m_MixerSettings.gnChannels, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().m_nWaveDevice);
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().GetSoundDeviceFlags(), TrackerSettings::Instance().m_SampleFormat, TrackerSettings::Instance().m_MixerSettings.gnChannels, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().m_nWaveDevice);
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;
