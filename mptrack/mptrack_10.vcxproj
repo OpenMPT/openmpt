@@ -265,6 +265,7 @@
     <ClCompile Include="..\sounddsp\DSP.cpp" />
     <ClCompile Include="..\sounddsp\EQ.cpp" />
     <ClCompile Include="..\sounddsp\Reverb.cpp" />
+    <ClCompile Include="..\soundlib\Dither.cpp" />
     <ClCompile Include="..\soundlib\Dlsbank.cpp" />
     <ClCompile Include="..\soundlib\Fastmix.cpp" />
     <ClCompile Include="..\soundlib\ITCompression.cpp" />
@@ -482,6 +483,7 @@
     <ClInclude Include="..\sounddsp\EQ.h" />
     <ClInclude Include="..\sounddsp\Reverb.h" />
     <ClInclude Include="..\soundlib\ChunkReader.h" />
+    <ClInclude Include="..\soundlib\Dither.h" />
     <ClInclude Include="..\soundlib\Dlsbank.h" />
     <ClInclude Include="..\soundlib\Endianness.h" />
     <ClInclude Include="..\soundlib\FileReader.h" />

@@ -311,6 +311,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\Dither.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\dlsbank.cpp"
 				>
 			</File>
@@ -874,6 +878,10 @@
 			</File>
 			<File
 				RelativePath=".\DefaultVstEditor.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\Dither.h"
 				>
 			</File>
 			<File
