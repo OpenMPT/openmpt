@@ -1791,50 +1791,11 @@ forceinline void C_Convert32ToNonInterleaved(Tsample * const * const buffers, co
 }
 
 
-#ifdef ENABLE_X86
-static void X86_Convert32To8(uint8 *lp8, const int *pBuffer, DWORD lSampleCount)
-//------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, lp8			// ebx = 8-bit buffer
-	mov edx, pBuffer		// edx = pBuffer
-	mov edi, lSampleCount	// edi = lSampleCount
-cliploop:
-	mov eax, dword ptr [edx]
-	inc ebx
-	add eax, (1<<(23-MIXING_ATTENUATION))
-	add edx, 4
-	cmp eax, MIXING_CLIPMIN
-	jl cliplow
-	cmp eax, MIXING_CLIPMAX
-	jg cliphigh
-cliprecover:
-	sar eax, (24-MIXING_ATTENUATION)
-	xor eax, 0x80
-	dec edi
-	mov byte ptr [ebx-1], al
-	jnz cliploop
-	jmp done
-cliplow:
-	mov eax, MIXING_CLIPMIN
-	jmp cliprecover
-cliphigh:
-	mov eax, MIXING_CLIPMAX
-	jmp cliprecover
-done:
-	}
-}
-#endif
-
 // Clip and convert to 8 bit
 void Convert32ToInterleaved(uint8 *dest, const int *mixbuffer, std::size_t count)
 //-------------------------------------------------------------------------------
 {
-	#ifdef ENABLE_X86
-		X86_Convert32To8(dest, mixbuffer, count);
-	#else
-		C_Convert32ToInterleaved(dest, mixbuffer, count);
-	#endif
+	C_Convert32ToInterleaved(dest, mixbuffer, count);
 }
 
 void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
@@ -1844,49 +1805,11 @@ void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuff
 }
 
 
-#ifdef ENABLE_X86
-static void X86_Convert32To16(int16 *lp16, const int *pBuffer, DWORD lSampleCount)
-//--------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, lp16				// ebx = 16-bit buffer
-	mov edx, pBuffer			// edx = pBuffer
-	mov edi, lSampleCount		// edi = lSampleCount
-cliploop:
-	mov eax, dword ptr [edx]
-	add ebx, 2
-	add eax, (1<<(15-MIXING_ATTENUATION))
-	add edx, 4
-	cmp eax, MIXING_CLIPMIN
-	jl cliplow
-	cmp eax, MIXING_CLIPMAX
-	jg cliphigh
-cliprecover:
-	sar eax, 16-MIXING_ATTENUATION
-	dec edi
-	mov word ptr [ebx-2], ax
-	jnz cliploop
-	jmp done
-cliplow:
-	mov eax, MIXING_CLIPMIN
-	jmp cliprecover
-cliphigh:
-	mov eax, MIXING_CLIPMAX
-	jmp cliprecover
-done:
-	}
-}
-#endif
-
 // Clip and convert to 16 bit
 void Convert32ToInterleaved(int16 *dest, const int *mixbuffer, std::size_t count)
 //-------------------------------------------------------------------------------
 {
-	#ifdef ENABLE_X86
-		X86_Convert32To16(dest, mixbuffer, count);
-	#else
-		C_Convert32ToInterleaved(dest, mixbuffer, count);
-	#endif
+	C_Convert32ToInterleaved(dest, mixbuffer, count);
 }
 
 void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
@@ -1896,51 +1819,11 @@ void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuff
 }
 
 
-#ifdef ENABLE_X86
-static void X86_Convert32To24(int24 *lp24, const int *pBuffer, DWORD lSampleCount)
-//--------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, lp24			// ebx = 24-bit buffer
-	mov edx, pBuffer		// edx = pBuffer
-	mov edi, lSampleCount	// edi = lSampleCount
-cliploop:
-	mov eax, dword ptr [edx]
-	add ebx, 3
-	add eax, (1<<(7-MIXING_ATTENUATION))
-	add edx, 4
-	cmp eax, MIXING_CLIPMIN
-	jl cliplow
-	cmp eax, MIXING_CLIPMAX
-	jg cliphigh
-cliprecover:
-	sar eax, (8-MIXING_ATTENUATION)
-	mov word ptr [ebx-3], ax
-	shr eax, 16
-	dec edi
-	mov byte ptr [ebx-1], al
-	jnz cliploop
-	jmp done
-cliplow:
-	mov eax, MIXING_CLIPMIN
-	jmp cliprecover
-cliphigh:
-	mov eax, MIXING_CLIPMAX
-	jmp cliprecover
-done:
-	}
-}
-#endif
-
 // Clip and convert to 24 bit
 void Convert32ToInterleaved(int24 *dest, const int *mixbuffer, std::size_t count)
 //-------------------------------------------------------------------------------
 {
-	#ifdef ENABLE_X86
-		X86_Convert32To24(dest, mixbuffer, count);
-	#else
-		C_Convert32ToInterleaved(dest, mixbuffer, count);
-	#endif
+	C_Convert32ToInterleaved(dest, mixbuffer, count);
 }
 
 void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
@@ -1950,48 +1833,11 @@ void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuff
 }
 
 
-#ifdef ENABLE_X86
-static void X86_Convert32To32(int32 *lp32, const int *pBuffer, DWORD lSampleCount)
-//--------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, lp32			// ebx = 32-bit buffer
-	mov edx, pBuffer		// edx = pBuffer
-	mov edi, lSampleCount	// edi = lSampleCount
-cliploop:
-	mov eax, dword ptr [edx]
-	add ebx, 4
-	add edx, 4
-	cmp eax, MIXING_CLIPMIN
-	jl cliplow
-	cmp eax, MIXING_CLIPMAX
-	jg cliphigh
-cliprecover:
-	shl eax, MIXING_ATTENUATION
-	dec edi
-	mov dword ptr [ebx-4], eax
-	jnz cliploop
-	jmp done
-cliplow:
-	mov eax, MIXING_CLIPMIN
-	jmp cliprecover
-cliphigh:
-	mov eax, MIXING_CLIPMAX
-	jmp cliprecover
-done:
-	}
-}
-#endif
-
 // Clip and convert to 32 bit
 void Convert32ToInterleaved(int32 *dest, const int *mixbuffer, std::size_t count)
 //-------------------------------------------------------------------------------
 {
-	#ifdef ENABLE_X86
-		X86_Convert32To32(dest, mixbuffer, count);
-	#else
-		C_Convert32ToInterleaved(dest, mixbuffer, count);
-	#endif
+	C_Convert32ToInterleaved(dest, mixbuffer, count);
 }
 
 void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
