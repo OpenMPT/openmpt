@@ -39,6 +39,7 @@
 #include "../sounddsp/AGC.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/EQ.h"
+#include "Dither.h"
 
 
 class FileReader;
@@ -185,41 +186,6 @@ class CTuningCollection;
 #ifdef MODPLUG_TRACKER
 class CModDoc;
 #endif // MODPLUG_TRACKER
-
-struct DitherModPlugState
-{
-	uint32 rng_a;
-	uint32 rng_b;
-	DitherModPlugState()
-	{
-		rng_a = 0;
-		rng_b = 0;
-	}
-};
-
-struct DitherState
-{
-	DitherModPlugState modplug;
-};
-
-enum DitherMode
-{
-	DitherNone       = 0,
-	DitherModPlug    = 1
-};
-
-class Dither
-{
-private:
-	DitherState state;
-	DitherMode mode;
-public:
-	Dither();
-	void SetMode(DitherMode &mode);
-	DitherMode GetMode() const;
-	void Reset();
-	void Process(int *mixbuffer, std::size_t count, std::size_t channels, int bits);
-};
 
 
 void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);

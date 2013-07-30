@@ -478,6 +478,9 @@
     <ClCompile Include="..\soundlib\S3MTools.cpp">
       <Filter>Source Files\soundlib\Module Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\Dither.cpp">
+      <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -881,6 +884,9 @@
     </ClInclude>
     <ClInclude Include="..\common\svn_version_subwcrev\svn_version.template.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\Dither.h">
+      <Filter>Header Files\soundlib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
