@@ -784,15 +784,16 @@ void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
 //-------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->ReadInterleaved(pvData, NumFrames, TrackerSettings::Instance().m_SampleFormat);
+	const SampleFormat sampleFormat = TrackerSettings::Instance().m_SampleFormat;
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->ReadInterleaved(pvData, NumFrames, sampleFormat);
 	ASSERT(renderedFrames <= NumFrames);
 	CSoundFile::samplecount_t remainingFrames = NumFrames - renderedFrames;
 	if(remainingFrames > 0)
 	{
 		// The sound device interface expects the whole buffer to be filled, always.
 		// Clear remaining buffer if not enough samples got rendered.
-		std::size_t frameSize = m_pSndFile->m_MixerSettings.gnChannels * (TrackerSettings::Instance().m_SampleFormat.GetBitsPerSample()/8);
-		if(TrackerSettings::Instance().m_SampleFormat.IsUnsigned())
+		std::size_t frameSize = m_pSndFile->m_MixerSettings.gnChannels * (sampleFormat.GetBitsPerSample()/8);
+		if(sampleFormat.IsUnsigned())
 		{
 			std::memset((char*)(pvData) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
 		} else
