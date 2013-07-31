@@ -208,6 +208,33 @@ void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuff
 void Convert32ToNonInterleaved(int28q4 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
 
 
+class ISoundFileAudioSink
+{
+public:
+	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
+};
+
+
+//========================
+class SoundFileDefaultSink
+//========================
+	: public ISoundFileAudioSink
+{
+private:
+	SampleFormat sampleFormat;
+	Dither &dither;
+	uint32 gain;
+	std::size_t countRendered;
+	void *outputBuffer;
+	void * const *outputBuffers;
+public:
+	SoundFileDefaultSink(SampleFormat sf, Dither &dither_, void *buffer, void * const *buffers, uint32 gain_ = 1<<16);
+	virtual ~SoundFileDefaultSink();
+public:
+	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk);
+};
+
+
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4324) //structure was padded due to __declspec(align())
 #endif
@@ -606,10 +633,10 @@ public:
 	void StopAllVsti();    //rewbs.VSTCompliance
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat);
-	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat);
+	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, uint32 gain = 1<<16);
+	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, uint32 gain = 1<<16);
 private:
-	samplecount_t Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers, SampleFormat sampleFormat);
+	samplecount_t Read(samplecount_t count, ISoundFileAudioSink &sink);
 	void CreateStereoMix(int count);
 public:
 	BOOL FadeSong(UINT msec);
@@ -803,11 +830,9 @@ public:
 	void ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long countChunk);
 
 #ifndef MODPLUG_TRACKER
-	void ApplyFinalOutputGain(int *soundBuffer, std::size_t countChunk);
-	void ApplyFinalOutputGainFloat(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk);
+	static void ApplyFinalOutputGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, uint32 gain);
+	static void ApplyFinalOutputGainFloat(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, uint32 gain);
 #endif // !MODPLUG_TRACKER
-
-	void ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk, SampleFormat sampleFormat);
 
 	// System-Dependant functions
 public:

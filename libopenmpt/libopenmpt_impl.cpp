@@ -178,6 +178,7 @@ void module_impl::init( const std::map< std::string, std::string > & ctls ) {
 	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_currentPositionSeconds = 0.0;
+	m_Gain = (1<<16);
 	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
 		ctl_set( i->first, i->second );
 	}
@@ -205,7 +206,8 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 		std::size_t count_chunk = m_sndFile->ReadNonInterleaved(
 			reinterpret_cast<void*const*>( buffers ),
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
-			SampleFormatInt16
+			SampleFormatInt16,
+			m_Gain
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -222,7 +224,8 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 		std::size_t count_chunk = m_sndFile->ReadNonInterleaved(
 			reinterpret_cast<void*const*>( buffers ),
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
-			SampleFormatFloat32
+			SampleFormatFloat32,
+			m_Gain
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -238,7 +241,8 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 		std::size_t count_chunk = m_sndFile->ReadInterleaved(
 			reinterpret_cast<void*>( interleaved + count_read * channels ),
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
-			SampleFormatInt16
+			SampleFormatInt16,
+			m_Gain
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -254,7 +258,8 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 		std::size_t count_chunk = m_sndFile->ReadInterleaved(
 			reinterpret_cast<void*>( interleaved + count_read * channels ),
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
-			SampleFormatFloat32
+			SampleFormatFloat32,
+			m_Gain
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -349,7 +354,7 @@ module_impl::~module_impl() {
 std::int32_t module_impl::get_render_param( int param ) const {
 	switch ( param ) {
 		case module::RENDER_MASTERGAIN_MILLIBEL: {
-			return static_cast<std::int32_t>( 1000.0f * 2.0f * std::log10( fx16_to_float( m_sndFile->m_MixerSettings.m_FinalOutputGain ) ) );
+			return static_cast<std::int32_t>( 1000.0f * 2.0f * std::log10( fx16_to_float( m_Gain ) ) );
 		} break;
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
 			return m_sndFile->m_MixerSettings.m_nStereoSeparation * 100 / 128;
@@ -369,12 +374,7 @@ std::int32_t module_impl::get_render_param( int param ) const {
 void module_impl::set_render_param( int param, std::int32_t value ) {
 	switch ( param ) {
 		case module::RENDER_MASTERGAIN_MILLIBEL: {
-			float gainFactor = static_cast<float>( std::pow( 10.0f, value * 0.001f * 0.5f ) );
-			if ( static_cast<std::int32_t>( m_sndFile->m_MixerSettings.m_FinalOutputGain ) != float_to_fx16( gainFactor ) ) {
-				MixerSettings settings = m_sndFile->m_MixerSettings;
-				settings.m_FinalOutputGain = float_to_fx16( gainFactor );
-				m_sndFile->SetMixerSettings( settings );
-			}
+			m_Gain = float_to_fx16( static_cast<float>( std::pow( 10.0f, value * 0.001f * 0.5f ) ) );
 		} break;
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
 			std::int32_t newvalue = value * 128 / 100;
