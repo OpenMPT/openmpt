@@ -20,6 +20,7 @@
 #include "WAVTools.h"
 #include "../common/version.h"
 #include "ACMConvert.h"
+#include "../soundlib/Dither.h"
 
 #include <fstream>
 
@@ -635,6 +636,8 @@ void CDoWaveConvert::OnButton1()
 		file.Open(m_lpszFileName);
 	}
 
+	Dither dither;
+
 	SampleFormat sampleFormat = (m_pWaveFormat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) ? SampleFormatFloat32 : (SampleFormat)m_pWaveFormat->wBitsPerSample;
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
@@ -705,10 +708,10 @@ void CDoWaveConvert::OnButton1()
 		UINT lRead = 0;
 		if(m_bNormalize)
 		{
-			lRead = m_pSndFile->ReadInterleaved(floatbuffer, MIXBUFFERSIZE, sampleFormat);
+			lRead = m_pSndFile->ReadInterleaved(floatbuffer, MIXBUFFERSIZE, sampleFormat, dither);
 		} else
 		{
-			lRead = m_pSndFile->ReadInterleaved(buffer, MIXBUFFERSIZE, sampleFormat);
+			lRead = m_pSndFile->ReadInterleaved(buffer, MIXBUFFERSIZE, sampleFormat, dither);
 		}
 
 		// Process cue points (add base offset), if there are any to process.
@@ -815,7 +818,6 @@ void CDoWaveConvert::OnButton1()
 		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
 
 		const float normalizeFactor = (normalizePeak != 0.0f) ? (1.0f / normalizePeak) : 1.0f;
-		Dither dither;
 
 		const DWORD dwBitSize = m_pWaveFormat->wBitsPerSample / 8;
 		const uint64 framesTotal = ullSamples;
@@ -1003,6 +1005,7 @@ void CDoAcmConvert::OnButton1()
 
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	SampleFormat sampleFormat = SampleFormatInvalid;
+	Dither dither;
 
 	progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	if ((!m_pSndFile) || (!m_lpszFileName) || (!m_pwfx) || (!m_hadid)) goto OnError;
@@ -1105,7 +1108,7 @@ void CDoAcmConvert::OnButton1()
 		UINT lRead = 0;
 		if (!bFinished)
 		{
-			lRead = m_pSndFile->ReadInterleaved(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*sampleFormat.GetBitsPerSample()/8), sampleFormat);
+			lRead = m_pSndFile->ReadInterleaved(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*sampleFormat.GetBitsPerSample()/8), sampleFormat, dither);
 			if (!lRead) bFinished = true;
 		}
 		ullSamples += lRead;

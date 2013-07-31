@@ -19,6 +19,7 @@
 // forward declarations
 class FileReader;
 class CSoundFile;
+class Dither;
 
 namespace openmpt {
 
@@ -56,6 +57,7 @@ protected:
 	std::unique_ptr<log_forwarder> m_LogForwarder;
 	double m_currentPositionSeconds;
 	std::unique_ptr<CSoundFile> m_sndFile;
+	std::unique_ptr<Dither> m_Dither;
 	std::uint32_t m_Gain;
 	std::vector<std::string> m_loaderMessages;
 public:
