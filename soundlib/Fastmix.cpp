@@ -1873,6 +1873,29 @@ void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuff
 }
 
 
+void Convert32ToInterleaved(int28q4 *dest, const int *mixbuffer, std::size_t count)
+//---------------------------------------------------------------------------------
+{
+	for(std::size_t i=0; i<count; i++)
+	{
+		dest[i] = int28q4::Raw(mixbuffer[i]);
+	}
+}
+
+void Convert32ToNonInterleaved(int28q4 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
+//----------------------------------------------------------------------------------------------------------------------------
+{
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buffers[channel][i] = int28q4::Raw(*mixbuffer);
+			mixbuffer++;
+		}
+	}
+}
+
+
 void InitMixBuffer(int *pBuffer, UINT nSamples)
 //---------------------------------------------
 {

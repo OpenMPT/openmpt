@@ -17,6 +17,7 @@ enum SampleFormatEnum
 	SampleFormatInt24     = 24,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatInt32     = 32,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatFloat32   = 32 + 128, // Only supported as mixer output and NOT supported by Mod2Wave or ISoundDevice or settings dialog yet. Keep in mind to update all 3 cases at once.
+	SampleFormatInt28q4   = 255,      // mixbuffer format
 	SampleFormatInvalid   =  0
 };
 
@@ -49,6 +50,11 @@ struct SampleFormat
 		if(!IsValid()) return false;
 		return value != SampleFormatFloat32;
 	}
+	bool IsMixBuffer() const
+	{
+		if(!IsValid()) return false;
+		return value == SampleFormatInt28q4;
+	}
 	uint8 GetBitsPerSample() const
 	{
 		if(!IsValid()) return 0;
@@ -67,6 +73,9 @@ struct SampleFormat
 			return 32;
 			break;
 		case SampleFormatFloat32:
+			return 32;
+			break;
+		case SampleFormatInt28q4:
 			return 32;
 			break;
 		default:

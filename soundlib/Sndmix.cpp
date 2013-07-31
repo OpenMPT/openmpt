@@ -394,6 +394,9 @@ void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outp
 		case SampleFormatFloat32:
 			ConvertToOutput<float>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
 			break;
+		case SampleFormatInt28q4:
+			ConvertToOutput<int28q4>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			break;
 		case SampleFormatInvalid:
 			break;
 	}

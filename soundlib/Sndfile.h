@@ -198,12 +198,14 @@ void Convert32ToInterleaved(int16 *dest, const int *mixbuffer, std::size_t count
 void Convert32ToInterleaved(int24 *dest, const int *mixbuffer, std::size_t count);
 void Convert32ToInterleaved(int32 *dest, const int *mixbuffer, std::size_t count);
 void Convert32ToInterleaved(float *dest, const int *mixbuffer, std::size_t count);
+void Convert32ToInterleaved(int28q4 *dest, const int *mixbuffer, std::size_t count);
 
 void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
 void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
 void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
 void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
 void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
+void Convert32ToNonInterleaved(int28q4 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
 
 
 #if MPT_COMPILER_MSVC
