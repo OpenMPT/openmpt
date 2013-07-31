@@ -785,7 +785,7 @@ void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	const SampleFormat sampleFormat = TrackerSettings::Instance().m_SampleFormat;
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->ReadInterleaved(pvData, NumFrames, sampleFormat);
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->ReadInterleaved(pvData, NumFrames, sampleFormat, m_Dither);
 	ASSERT(renderedFrames <= NumFrames);
 	CSoundFile::samplecount_t remainingFrames = NumFrames - renderedFrames;
 	if(remainingFrames > 0)

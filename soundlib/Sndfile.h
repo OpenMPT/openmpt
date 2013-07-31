@@ -39,7 +39,7 @@
 #include "../sounddsp/AGC.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/EQ.h"
-#include "Dither.h"
+class Dither;
 
 
 class FileReader;
@@ -350,7 +350,6 @@ public:
 #ifndef NO_AGC
 	CAGC m_AGC;
 #endif
-	Dither m_Dither;
 
 #ifdef MODPLUG_TRACKER
 	static LPSNDMIXHOOKPROC gpSndMixHook;
@@ -633,8 +632,8 @@ public:
 	void StopAllVsti();    //rewbs.VSTCompliance
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, uint32 gain = 1<<16);
-	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, uint32 gain = 1<<16);
+	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain = 1<<16);
+	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain = 1<<16);
 private:
 	samplecount_t Read(samplecount_t count, ISoundFileAudioSink &sink);
 	void CreateStereoMix(int count);

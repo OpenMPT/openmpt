@@ -23,6 +23,7 @@
 #include <cstring>
 
 #include "soundlib/Sndfile.h"
+#include "soundlib/Dither.h"
 #include "soundlib/FileReader.h"
 
 namespace openmpt {
@@ -175,6 +176,7 @@ void module_impl::apply_libopenmpt_defaults() {
 }
 void module_impl::init( const std::map< std::string, std::string > & ctls ) {
 	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
+	m_Dither = std::unique_ptr<Dither>(new Dither());
 	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_currentPositionSeconds = 0.0;
@@ -207,6 +209,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 			reinterpret_cast<void*const*>( buffers ),
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			SampleFormatInt16,
+			*m_Dither,
 			m_Gain
 			);
 		if ( count_chunk == 0 ) {
@@ -225,6 +228,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 			reinterpret_cast<void*const*>( buffers ),
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			SampleFormatFloat32,
+			*m_Dither,
 			m_Gain
 			);
 		if ( count_chunk == 0 ) {
@@ -242,6 +246,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 			reinterpret_cast<void*>( interleaved + count_read * channels ),
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			SampleFormatInt16,
+			*m_Dither,
 			m_Gain
 			);
 		if ( count_chunk == 0 ) {
@@ -259,6 +264,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 			reinterpret_cast<void*>( interleaved + count_read * channels ),
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			SampleFormatFloat32,
+			*m_Dither,
 			m_Gain
 			);
 		if ( count_chunk == 0 ) {

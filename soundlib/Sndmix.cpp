@@ -15,6 +15,7 @@
 #include "MIDIEvents.h"
 #include "tuning.h"
 #include "Tables.h"
+#include "Dither.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
 #endif
@@ -119,7 +120,6 @@ void CSoundFile::InitPlayer(BOOL bReset)
 #ifndef NO_AGC
 	m_AGC.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
-	m_Dither.Reset();
 }
 
 
@@ -148,20 +148,20 @@ BOOL CSoundFile::FadeSong(UINT msec)
 }
 
 
-CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, uint32 gain)
-//------------------------------------------------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain)
+//----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	ALWAYS_ASSERT(sampleFormat.IsValid());
-	SoundFileDefaultSink sink(sampleFormat, m_Dither, outputBuffer, nullptr, gain);
+	SoundFileDefaultSink sink(sampleFormat, dither, outputBuffer, nullptr, gain);
 	return Read(count, sink);
 }
 
 
-CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, uint32 gain)
-//------------------------------------------------------------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	ALWAYS_ASSERT(sampleFormat.IsValid());
-	SoundFileDefaultSink sink(sampleFormat, m_Dither, nullptr, outputBuffers, gain);
+	SoundFileDefaultSink sink(sampleFormat, dither, nullptr, outputBuffers, gain);
 	return Read(count, sink);
 }
 
