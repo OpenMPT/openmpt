@@ -1769,8 +1769,9 @@ forceinline int32 ConvertSample(int val)
 }
 
 template<typename Tsample>
-forceinline void C_Convert32ToInterleaved(Tsample *p, const int *mixbuffer, std::size_t count)
+forceinline void C_Convert32ToInterleaved(Tsample *p, const int *mixbuffer, std::size_t channels, std::size_t count)
 {
+	count *= channels;
 	for(std::size_t i = 0; i < count; ++i)
 	{
 		p[i] = ConvertSample<Tsample>(mixbuffer[i]);
@@ -1792,10 +1793,10 @@ forceinline void C_Convert32ToNonInterleaved(Tsample * const * const buffers, co
 
 
 // Clip and convert to 8 bit
-void Convert32ToInterleaved(uint8 *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
+void Convert32ToInterleaved(uint8 *dest, const int *mixbuffer, std::size_t channels, std::size_t count)
+//-----------------------------------------------------------------------------------------------------
 {
-	C_Convert32ToInterleaved(dest, mixbuffer, count);
+	C_Convert32ToInterleaved(dest, mixbuffer, channels, count);
 }
 
 void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
@@ -1806,10 +1807,10 @@ void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuff
 
 
 // Clip and convert to 16 bit
-void Convert32ToInterleaved(int16 *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
+void Convert32ToInterleaved(int16 *dest, const int *mixbuffer, std::size_t channels, std::size_t count)
+//-----------------------------------------------------------------------------------------------------
 {
-	C_Convert32ToInterleaved(dest, mixbuffer, count);
+	C_Convert32ToInterleaved(dest, mixbuffer, channels, count);
 }
 
 void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
@@ -1820,10 +1821,10 @@ void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuff
 
 
 // Clip and convert to 24 bit
-void Convert32ToInterleaved(int24 *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
+void Convert32ToInterleaved(int24 *dest, const int *mixbuffer, std::size_t channels, std::size_t count)
+//-----------------------------------------------------------------------------------------------------
 {
-	C_Convert32ToInterleaved(dest, mixbuffer, count);
+	C_Convert32ToInterleaved(dest, mixbuffer, channels, count);
 }
 
 void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
@@ -1834,10 +1835,10 @@ void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuff
 
 
 // Clip and convert to 32 bit
-void Convert32ToInterleaved(int32 *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
+void Convert32ToInterleaved(int32 *dest, const int *mixbuffer, std::size_t channels, std::size_t count)
+//-----------------------------------------------------------------------------------------------------
 {
-	C_Convert32ToInterleaved(dest, mixbuffer, count);
+	C_Convert32ToInterleaved(dest, mixbuffer, channels, count);
 }
 
 void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
@@ -1848,9 +1849,10 @@ void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuff
 
 
 // convert to 32 bit floats and do NOT clip to [-1,1]
-void Convert32ToInterleaved(float *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
+void Convert32ToInterleaved(float *dest, const int *mixbuffer, std::size_t channels, std::size_t count)
+//-----------------------------------------------------------------------------------------------------
 {
+	count *= channels;
 	const float factor = (1.0f/MIXING_SCALEF);
 	for(std::size_t i=0; i<count; i++)
 	{
@@ -1873,9 +1875,10 @@ void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuff
 }
 
 
-void Convert32ToInterleaved(int28q4 *dest, const int *mixbuffer, std::size_t count)
-//---------------------------------------------------------------------------------
+void Convert32ToInterleaved(int28q4 *dest, const int *mixbuffer, std::size_t channels, std::size_t count)
+//-------------------------------------------------------------------------------------------------------
 {
+	count *= channels;
 	for(std::size_t i=0; i<count; i++)
 	{
 		dest[i] = int28q4::Raw(mixbuffer[i]);
