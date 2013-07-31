@@ -351,9 +351,6 @@ public:
 	CAGC m_AGC;
 #endif
 
-#ifdef MODPLUG_TRACKER
-	static LPSNDMIXHOOKPROC gpSndMixHook;
-#endif
 #ifndef NO_VST
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 #endif

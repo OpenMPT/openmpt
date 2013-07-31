@@ -242,8 +242,6 @@ VOID CMainFrame::Initialize()
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
 
-	CSoundFile::gpSndMixHook = CalcStereoVuMeters;
-
 	// Check for valid sound device
 	if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice), SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), nullptr, 0))
 	{
@@ -371,8 +369,6 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 BOOL CMainFrame::DestroyWindow()
 //------------------------------
 {
-	CSoundFile::gpSndMixHook = nullptr;
-
 	// Uninstall Keyboard Hook
 	if (ghKbdHook)
 	{
@@ -780,12 +776,29 @@ void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
 }
 
 
+CMainFrame::StereoVuMeterSinkWrapper::StereoVuMeterSinkWrapper(SampleFormat sampleFormat, Dither &dither, void *buffer)
+//---------------------------------------------------------------------------------------------------------------------
+	: SoundFileDefaultSink(sampleFormat, dither, buffer, nullptr)
+{
+	return;
+}
+
+
+void CMainFrame::StereoVuMeterSinkWrapper::DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+//------------------------------------------------------------------------------------------------------------------------
+{
+	CMainFrame::CalcStereoVuMeters(MixSoundBuffer, countChunk, channels);
+	SoundFileDefaultSink::DataCallback(MixSoundBuffer, channels, countChunk);
+}
+
+
 void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
 //-------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	const SampleFormat sampleFormat = TrackerSettings::Instance().m_SampleFormat;
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->ReadInterleaved(pvData, NumFrames, sampleFormat, m_Dither);
+	StereoVuMeterSinkWrapper sink(sampleFormat, m_Dither, pvData);
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(NumFrames, sink);
 	ASSERT(renderedFrames <= NumFrames);
 	CSoundFile::samplecount_t remainingFrames = NumFrames - renderedFrames;
 	if(remainingFrames > 0)

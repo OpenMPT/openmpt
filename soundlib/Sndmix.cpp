@@ -23,9 +23,6 @@
 // VU-Meter
 #define VUMETER_DECAY		4
 
-#ifdef MODPLUG_TRACKER
-LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
-#endif
 #ifndef NO_VST
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 #endif
@@ -280,13 +277,6 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, ISoundFileAudioS
 		{
 			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, countChunk);
 		}
-
-		#ifdef MODPLUG_TRACKER
-			if(gpSndMixHook)
-			{ // Currently only used for VU Meter
-				gpSndMixHook(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
-			}
-		#endif // MODPLUG_TRACKER
 
 		sink.DataCallback(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk);
 
