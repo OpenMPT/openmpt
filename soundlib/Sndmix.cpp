@@ -345,7 +345,7 @@ void ConvertToOutput(void *outputBuffer, void * const *outputBuffers, std::size_
 {
 	if(outputBuffer)
 	{
-		Convert32ToInterleaved(reinterpret_cast<Tsample*>(outputBuffer) + (channels * countRendered), mixbuffer, channels * countChunk);
+		Convert32ToInterleaved(reinterpret_cast<Tsample*>(outputBuffer) + (channels * countRendered), mixbuffer, channels, countChunk);
 	}
 	if(outputBuffers)
 	{
