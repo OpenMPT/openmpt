@@ -634,8 +634,8 @@ public:
 	void ResetChannels();
 	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain = 1<<16);
 	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain = 1<<16);
-private:
 	samplecount_t Read(samplecount_t count, ISoundFileAudioSink &sink);
+private:
 	void CreateStereoMix(int count);
 public:
 	BOOL FadeSong(UINT msec);

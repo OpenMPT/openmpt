@@ -151,7 +151,6 @@ BOOL CSoundFile::FadeSong(UINT msec)
 CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain)
 //----------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	ALWAYS_ASSERT(sampleFormat.IsValid());
 	SoundFileDefaultSink sink(sampleFormat, dither, outputBuffer, nullptr, gain);
 	return Read(count, sink);
 }
@@ -160,7 +159,6 @@ CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, sample
 CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	ALWAYS_ASSERT(sampleFormat.IsValid());
 	SoundFileDefaultSink sink(sampleFormat, dither, nullptr, outputBuffers, gain);
 	return Read(count, sink);
 }
@@ -370,7 +368,7 @@ SoundFileDefaultSink::SoundFileDefaultSink(SampleFormat sf, Dither &dither_, voi
 	, outputBuffer(buffer)
 	, outputBuffers(buffers)
 {
-	return;
+	ALWAYS_ASSERT(sampleFormat.IsValid());
 }
 
 
