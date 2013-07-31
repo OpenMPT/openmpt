@@ -56,6 +56,7 @@ protected:
 	std::unique_ptr<log_forwarder> m_LogForwarder;
 	double m_currentPositionSeconds;
 	std::unique_ptr<CSoundFile> m_sndFile;
+	std::uint32_t m_Gain;
 	std::vector<std::string> m_loaderMessages;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;

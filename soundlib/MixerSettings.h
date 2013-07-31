@@ -115,10 +115,6 @@ struct MixerSettings
 	void SetVolumeRampUpMicroseconds(int32 rampUpMicroseconds);
 	void SetVolumeRampDownMicroseconds(int32 rampDownMicroseconds);
 
-#ifndef MODPLUG_TRACKER
-	DWORD m_FinalOutputGain; // factor multiplied to the final mixer output just before clipping and dithering, fixed point 16.16
-#endif
-
 	bool IsValid() const
 	{
 		return true

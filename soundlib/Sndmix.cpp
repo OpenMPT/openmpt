@@ -148,25 +148,28 @@ BOOL CSoundFile::FadeSong(UINT msec)
 }
 
 
-CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat)
-//-----------------------------------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, uint32 gain)
+//------------------------------------------------------------------------------------------------------------------------------------
 {
-	return Read(count, outputBuffer, nullptr, sampleFormat);
+	ALWAYS_ASSERT(sampleFormat.IsValid());
+	SoundFileDefaultSink sink(sampleFormat, m_Dither, outputBuffer, nullptr, gain);
+	return Read(count, sink);
 }
 
 
-CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat)
-//-----------------------------------------------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, uint32 gain)
+//------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	return Read(count, nullptr, outputBuffers, sampleFormat);
+	ALWAYS_ASSERT(sampleFormat.IsValid());
+	SoundFileDefaultSink sink(sampleFormat, m_Dither, nullptr, outputBuffers, gain);
+	return Read(count, sink);
 }
 
 
-CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers, SampleFormat sampleFormat)
-//-----------------------------------------------------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, ISoundFileAudioSink &sink)
+//----------------------------------------------------------------------------------------
 {
 	ALWAYS_ASSERT(m_MixerSettings.IsValid());
-	ALWAYS_ASSERT(sampleFormat.IsValid());
 
 	int mixStatCount = 0;
 
@@ -287,8 +290,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, void *outputBuff
 			}
 		#endif // MODPLUG_TRACKER
 
-		// Convert to output sample format and optionally perform dithering and clipping if needed
-		ConvertMixBufferToOutput(outputBuffer, outputBuffers, countRendered, countChunk, sampleFormat);
+		sink.DataCallback(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk);
 
 		// Buffer ready
 		countRendered += countChunk;
@@ -359,8 +361,28 @@ void ConvertToOutput(void *outputBuffer, void * const *outputBuffers, std::size_
 }
 
 
-void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk, SampleFormat sampleFormat)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SoundFileDefaultSink::SoundFileDefaultSink(SampleFormat sf, Dither &dither_, void *buffer, void * const *buffers, uint32 gain_)
+//-----------------------------------------------------------------------------------------------------------------------------
+	: sampleFormat(sf)
+	, dither(dither_)
+	, gain(gain_)
+	, countRendered(0)
+	, outputBuffer(buffer)
+	, outputBuffers(buffers)
+{
+	return;
+}
+
+
+SoundFileDefaultSink::~SoundFileDefaultSink()
+//-------------------------------------------
+{
+	return;
+}
+
+
+void SoundFileDefaultSink::DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+//--------------------------------------------------------------------------------------------------------
 {
 	// Convert to output sample format and optionally perform dithering and clipping if needed
 
@@ -368,34 +390,34 @@ void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outp
 		if(sampleFormat.IsInt())
 		{
 			// Apply final output gain for non floating point output
-			ApplyFinalOutputGain(MixSoundBuffer, countChunk);
+			CSoundFile::ApplyFinalOutputGain(MixSoundBuffer, channels, countChunk, gain);
 		}
 	#endif // !MODPLUG_TRACKER
 
 	if(sampleFormat.IsInt())
 	{
-		m_Dither.Process(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels, sampleFormat.GetBitsPerSample());
+		dither.Process(MixSoundBuffer, countChunk, channels, sampleFormat.GetBitsPerSample());
 	}
 
 	switch(sampleFormat.value)
 	{
 		case SampleFormatUnsigned8:
-			ConvertToOutput<uint8>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			ConvertToOutput<uint8>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
 			break;
 		case SampleFormatInt16:
-			ConvertToOutput<int16>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			ConvertToOutput<int16>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
 			break;
 		case SampleFormatInt24:
-			ConvertToOutput<int24>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			ConvertToOutput<int24>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
 			break;
 		case SampleFormatInt32:
-			ConvertToOutput<int32>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			ConvertToOutput<int32>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
 			break;
 		case SampleFormatFloat32:
-			ConvertToOutput<float>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			ConvertToOutput<float>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
 			break;
 		case SampleFormatInt28q4:
-			ConvertToOutput<int28q4>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
+			ConvertToOutput<int28q4>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
 			break;
 		case SampleFormatInvalid:
 			break;
@@ -405,9 +427,11 @@ void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outp
 		if(sampleFormat.IsFloat())
 		{
 			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-			ApplyFinalOutputGainFloat(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, m_MixerSettings.gnChannels, countChunk);
+			CSoundFile::ApplyFinalOutputGainFloat(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, channels, countChunk, gain);
 		}
 	#endif // !MODPLUG_TRACKER
+
+	countRendered += countChunk;
 
 }
 
@@ -2329,18 +2353,18 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 
 #ifndef MODPLUG_TRACKER
 
-void CSoundFile::ApplyFinalOutputGain(int *soundBuffer, std::size_t countChunk)
-//-----------------------------------------------------------------------------
+void CSoundFile::ApplyFinalOutputGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, uint32 gain)
+//----------------------------------------------------------------------------------------------------------------
 {
-	if(m_MixerSettings.m_FinalOutputGain == (1<<16))
+	if(gain == (1<<16))
 	{
 		// nothing to do, gain == +/- 0dB
 		return; 
 	}
 	// no clipping prevention is done here
-	int32 factor = m_MixerSettings.m_FinalOutputGain;
+	int32 factor = gain;
 	int * buf = soundBuffer;
-	for(std::size_t i=0; i<countChunk*m_MixerSettings.gnChannels; ++i)
+	for(std::size_t i=0; i<countChunk*channels; ++i)
 	{
 		*buf = Util::muldiv(*buf, factor, 1<<16);
 		buf++;
@@ -2357,15 +2381,15 @@ static void ApplyFinalOutputGainFloatBuffer(float *beg, float *end, float factor
 	}
 }
 
-void CSoundFile::ApplyFinalOutputGainFloat(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk)
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CSoundFile::ApplyFinalOutputGainFloat(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, uint32 gain)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(m_MixerSettings.m_FinalOutputGain == (1<<16))
+	if(gain == (1<<16))
 	{
 		// nothing to do, gain == +/- 0dB
 		return;
 	}
-	const float factor = static_cast<float>(m_MixerSettings.m_FinalOutputGain) * (1.0f / static_cast<float>(1<<16));
+	const float factor = static_cast<float>(gain) * (1.0f / static_cast<float>(1<<16));
 	if(outputBuffer)
 	{
 		ApplyFinalOutputGainFloatBuffer(
