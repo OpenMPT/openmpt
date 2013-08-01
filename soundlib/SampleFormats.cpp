@@ -1928,16 +1928,16 @@ struct FLACDecoder
 		{
 			if(bps <= 8)
 			{
-				CopySample<SC::ConvertShift<int8, int32, 0> >(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConversionChain<SC::ConvertShift< int8, int32,  0>, SC::DecodeIdentity<int32> > >(sampleData8  + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 16)
 			{
-				CopySample<SC::ConvertShift<int16, int32, 0> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32,  0>, SC::DecodeIdentity<int32> > >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 24)
 			{
-				CopySample<SC::ConvertShift<int16, int32, 8> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32,  8>, SC::DecodeIdentity<int32> > >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 32)
 			{
-				CopySample<SC::ConvertShift<int16, int32, 16> >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeIdentity<int32> > >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			}
 		}
 
