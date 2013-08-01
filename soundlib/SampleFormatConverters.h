@@ -298,6 +298,109 @@ struct Convert<int16, float32>
 	}
 };
 
+template <typename Tdst, typename Tsrc, int fractionalBits>
+struct ConvertFixedPoint;
+
+template <int fractionalBits>
+struct ConvertFixedPoint<uint8, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef uint8 output_t;
+	static const int shiftBits = (sizeof(input_t) - sizeof(output_t)) * 8 - fractionalBits;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
+		STATIC_ASSERT(shiftBits >= 1);
+		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
+		if(val < int8_min) val = int8_min;
+		if(val > int8_max) val = int8_max;
+		return (uint8)(val+0x80); // unsigned
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<int16, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef int16 output_t;
+	static const int shiftBits = (sizeof(input_t) - sizeof(output_t)) * 8 - fractionalBits;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
+		STATIC_ASSERT(shiftBits >= 1);
+		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
+		if(val < int16_min) val = int16_min;
+		if(val > int16_max) val = int16_max;
+		return (int16)val;
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<int24, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef int24 output_t;
+	static const int shiftBits = (sizeof(input_t) - sizeof(output_t)) * 8 - fractionalBits;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
+		STATIC_ASSERT(shiftBits >= 1);
+		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
+		if(val < int24_min) val = int24_min;
+		if(val > int24_max) val = int24_max;
+		return (int24)val;
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<int32, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef int32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
+		return (int32)(Clamp(val, (int)-((1<<(32-fractionalBits-1))-1), (int)((1<<(32-fractionalBits-1))-1)) << fractionalBits);
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<float32, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef float32 output_t;
+	const float factor;
+	forceinline ConvertFixedPoint()
+		: factor( static_cast<float>(1 << (sizeof(input_t) * 8 - fractionalBits - 1)) )
+	{
+		return;
+	}
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
+		return val * factor;
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<int28q4, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef int28q4 output_t;
+	const float factor;
+	forceinline ConvertFixedPoint()
+		: factor( static_cast<float>(1 << (sizeof(input_t) * 8 - fractionalBits - 1)) )
+	{
+		return;
+	}
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits == 4 && sizeof(input_t)*8 == 32);
+		return int28q4::Raw(val);
+	}
+};
+
+
 
 
 // Reads sample data with Func and passes it directly to Func2.

@@ -18,6 +18,8 @@
 #include "Resampler.h"
 #include "WindowedFIR.h"
 
+#include "SampleFormatConverters.h"
+
 
 // 4x256 taps polyphase FIR resampling filter
 #define gFastSinc CResampler::FastSincTable
@@ -1736,56 +1738,26 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename Tsample> forceinline Tsample ConvertSample(int val);
-
-template<>
-forceinline uint8 ConvertSample(int val)
-{
-	val = (val + (1<<(23-MIXING_ATTENUATION))) >> (24-MIXING_ATTENUATION);
-	if(val < int8_min) val = int8_min;
-	if(val > int8_max) val = int8_max;
-	return (uint8)(val+0x80); // unsigned
-}
-template<>
-forceinline int16 ConvertSample(int val)
-{
-	val = (val + (1<<(15-MIXING_ATTENUATION))) >> (16-MIXING_ATTENUATION);
-	if(val < int16_min) val = int16_min;
-	if(val > int16_max) val = int16_max;
-	return (int16)val;
-}
-template<>
-forceinline int24 ConvertSample(int val)
-{
-	val = (val + (1<<(7-MIXING_ATTENUATION))) >> (8-MIXING_ATTENUATION);
-	if(val < int24_min) val = int24_min;
-	if(val > int24_max) val = int24_max;
-	return (int24)val;
-}
-template<>
-forceinline int32 ConvertSample(int val)
-{
-	return (int32)(Clamp(val, (int)MIXING_CLIPMIN, (int)MIXING_CLIPMAX) << MIXING_ATTENUATION);
-}
-
 template<typename Tsample>
 forceinline void C_Convert32ToInterleaved(Tsample *p, const int *mixbuffer, std::size_t channels, std::size_t count)
 {
+	SC::ConvertFixedPoint<Tsample, int, MIXING_ATTENUATION> conv;
 	count *= channels;
 	for(std::size_t i = 0; i < count; ++i)
 	{
-		p[i] = ConvertSample<Tsample>(mixbuffer[i]);
+		p[i] = conv(mixbuffer[i]);
 	}
 }
 
 template<typename Tsample>
 forceinline void C_Convert32ToNonInterleaved(Tsample * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
 {
+	SC::ConvertFixedPoint<Tsample, int, MIXING_ATTENUATION> conv;
 	for(std::size_t i = 0; i < count; ++i)
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			buffers[channel][i] = ConvertSample<Tsample>(*mixbuffer);
+			buffers[channel][i] = conv(*mixbuffer);
 			mixbuffer++;
 		}
 	}
@@ -1852,50 +1824,26 @@ void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuff
 void Convert32ToInterleaved(float *dest, const int *mixbuffer, std::size_t channels, std::size_t count)
 //-----------------------------------------------------------------------------------------------------
 {
-	count *= channels;
-	const float factor = (1.0f/MIXING_SCALEF);
-	for(std::size_t i=0; i<count; i++)
-	{
-		dest[i] = mixbuffer[i] * factor;
-	}
+	C_Convert32ToInterleaved(dest, mixbuffer, channels, count);
 }
 
 void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
 //--------------------------------------------------------------------------------------------------------------------------
 {
-	const float factor = (1.0f/MIXING_SCALEF);
-	for(std::size_t i = 0; i < count; ++i)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			buffers[channel][i] = *mixbuffer * factor;
-			mixbuffer++;
-		}
-	}
+	C_Convert32ToNonInterleaved(buffers, mixbuffer, channels, count);
 }
 
 
 void Convert32ToInterleaved(int28q4 *dest, const int *mixbuffer, std::size_t channels, std::size_t count)
 //-------------------------------------------------------------------------------------------------------
 {
-	count *= channels;
-	for(std::size_t i=0; i<count; i++)
-	{
-		dest[i] = int28q4::Raw(mixbuffer[i]);
-	}
+	C_Convert32ToInterleaved(dest, mixbuffer, channels, count);
 }
 
 void Convert32ToNonInterleaved(int28q4 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
 //----------------------------------------------------------------------------------------------------------------------------
 {
-	for(std::size_t i = 0; i < count; ++i)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			buffers[channel][i] = int28q4::Raw(*mixbuffer);
-			mixbuffer++;
-		}
-	}
+	C_Convert32ToNonInterleaved(buffers, mixbuffer, channels, count);
 }
 
 
