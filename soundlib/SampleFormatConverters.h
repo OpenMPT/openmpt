@@ -182,12 +182,12 @@ struct DecodeScaledFloat32
 };
 
 template <typename Tsample>
-struct ReadSample
+struct DecodeIdentity
 {
 	typedef Tsample input_t;
 	typedef Tsample output_t;
 	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t * inBuf)
+	forceinline output_t operator() (const input_t *inBuf)
 	{
 		return *inBuf;
 	}
@@ -201,10 +201,9 @@ struct ConvertShift
 {
 	typedef Tsrc input_t;
 	typedef Tdst output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t * inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return mpt::saturate_cast<output_t>(*inBuf >> shift);
+		return mpt::saturate_cast<output_t>(val >> shift);
 	}
 };
 
@@ -219,10 +218,9 @@ struct Convert<Tid, Tid>
 {
 	typedef Tid input_t;
 	typedef Tid output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t * inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return *inBuf;
+		return val;
 	}
 };
 
@@ -231,10 +229,9 @@ struct Convert<int8, int16>
 {
 	typedef int16 input_t;
 	typedef int8 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return int8(*inBuf >> 8);
+		return int8(val >> 8);
 	}
 };
 
@@ -243,10 +240,9 @@ struct Convert<int8, int32>
 {
 	typedef int32 input_t;
 	typedef int8 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return int8(*inBuf >> 24);
+		return int8(val >> 24);
 	}
 };
 
@@ -255,10 +251,8 @@ struct Convert<int8, float32>
 {
 	typedef float32 input_t;
 	typedef int8 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		float val = *inBuf;
 		Limit(val, -1.0f, 1.0f);
 		val *= 128.0f;
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -272,10 +266,9 @@ struct Convert<int16, int8>
 {
 	typedef int8 input_t;
 	typedef int16 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return int16(*inBuf << 8);
+		return int16(val << 8);
 	}
 };
 
@@ -284,10 +277,9 @@ struct Convert<int16, int32>
 {
 	typedef int32 input_t;
 	typedef int16 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return int16(*inBuf >> 16);
+		return int16(val >> 16);
 	}
 };
 
@@ -296,10 +288,8 @@ struct Convert<int16, float32>
 {
 	typedef float32 input_t;
 	typedef int16 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		float val = *inBuf;
 		Limit(val, -1.0f, 1.0f);
 		val *= 32768.0f;
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -322,8 +312,7 @@ struct ConversionChain
 	Func2 func2;
 	forceinline output_t operator() (const input_t *inBuf)
 	{
-		typename Func1::output_t tmp = func1(inBuf);
-		return func2(&tmp);
+		return func2(func1(inBuf));
 	}
 	forceinline ConversionChain(Func2 f2 = Func2(), Func1 f1 = Func1())
 		: func1(f1)
@@ -344,12 +333,10 @@ struct Normalize<int32>
 	typedef int32 input_t;
 	typedef int32 output_t;
 	typedef uint32 peak_t;
-	static const int input_inc = 1;
 	uint32 maxVal;
 	Normalize() : maxVal(0) { }
-	forceinline void FindMax(const input_t *inBuf)
+	forceinline void FindMax(input_t val)
 	{
-		int32 val = *inBuf;
 		if(val < 0)
 		{
 			if(val == int32_min)
@@ -364,13 +351,13 @@ struct Normalize<int32>
 			maxVal = static_cast<uint32>(val);
 		}
 	}
-	bool IsSilent() const
+	forceinline bool IsSilent() const
 	{
 		return maxVal == 0;
 	}
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return Util::muldivrfloor(*inBuf, (uint32)1 << 31, maxVal);
+		return Util::muldivrfloor(val, (uint32)1 << 31, maxVal);
 	}
 	forceinline peak_t GetSrcPeak() const
 	{
@@ -384,24 +371,23 @@ struct Normalize<float32>
 	typedef float32 input_t;
 	typedef float32 output_t;
 	typedef float32 peak_t;
-	static const int input_inc = 1;
 	uint32 intMaxVal;
 	float maxValInv;
 	Normalize() : intMaxVal(0), maxValInv(1.0f) { }
-	forceinline void FindMax(const input_t *inBuf)
+	forceinline void FindMax(input_t val)
 	{
-		uint32 val = EncodeFloatNE(*inBuf);
-		val &= ~0x80000000;	// Remove sign for absolute value
+		uint32 ival = EncodeFloatNE(val);
+		ival &= ~0x80000000;	// Remove sign for absolute value
 
 		// IEEE float values are lexicographically ordered and can be compared when interpreted as integers.
 		// So we won't bother with loading the float into a floating point register here if we already have it in an integer register.
-		if(val > intMaxVal)
+		if(ival > intMaxVal)
 		{
-			ASSERT(*reinterpret_cast<float *>(&val) > DecodeFloatLE(uint8_4().SetLE(intMaxVal)));
-			intMaxVal = val;
+			ASSERT(*reinterpret_cast<float *>(&ival) > DecodeFloatLE(uint8_4().SetLE(intMaxVal)));
+			intMaxVal = ival;
 		}
 	}
-	bool IsSilent()
+	forceinline bool IsSilent()
 	{
 		if(intMaxVal == 0)
 		{
@@ -412,9 +398,9 @@ struct Normalize<float32>
 			return false;
 		}
 	}
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return *inBuf * maxValInv;
+		return val * maxValInv;
 	}
 	forceinline peak_t GetSrcPeak() const
 	{
@@ -426,7 +412,8 @@ struct Normalize<float32>
 
 // Reads sample data with Func1, then normalizes the sample data, and then converts it with Func2.
 // Func1::output_t and Func2::input_t must be identical.
-// Func1 or Func2 can also be the identity transform (ReadSample<T>).
+// Func1 can also be the identity decode (DecodeIdentity<T>).
+// Func2 can also be the identity conversion (Convert<T,T>).
 template <typename Func2, typename Func1>
 struct NormalizationChain
 {
@@ -440,19 +427,15 @@ struct NormalizationChain
 	Func2 func2;
 	forceinline void FindMax(const input_t *inBuf)
 	{
-		typename Func1::output_t tmp = func1(inBuf);
-		normalize.FindMax(&tmp);
+		normalize.FindMax(func1(inBuf));
 	}
-	bool IsSilent()
+	forceinline bool IsSilent()
 	{
 		return normalize.IsSilent();
 	}
 	forceinline output_t operator() (const input_t *inBuf)
 	{
-		typename Func1::output_t tmp1 = func1(inBuf);
-		normalize_t norm = normalize(&tmp1);
-		typename Func2::output_t tmp2 = func2(&norm);
-		return tmp2;
+		return func2(normalize(func1(inBuf)));
 	}
 	forceinline peak_t GetSrcPeak() const
 	{
