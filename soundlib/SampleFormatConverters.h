@@ -25,14 +25,12 @@ namespace SC { // SC = _S_ample_C_onversion
 
 
 
-// Every sample conversion functor has to typedef its input_t and output_t
+
+// Every sample decoding functor has to typedef its input_t and output_t
 // and has to provide a static const input_inc member
 // which describes by how many input_t elements inBuf has to be incremented between invocations.
 // input_inc is normally 1 except when decoding e.g. bigger sample values
 // from multiple char values.
-// Another possible use for input_inc could be reading only one channel of
-// an interleaved multi-channel sample (although there is currently no functor to do this).
-
 
 
 // decodes signed 7bit values stored as signed int8
@@ -207,6 +205,11 @@ struct ConvertShift
 	}
 };
 
+
+
+
+// Every sample conversion functor has to typedef its input_t and output_t.
+// The input_t argument is taken by value because we only deal with per-single-sample conversions here.
 
 
 // straight forward type conversions, clamping when converting from floating point.
@@ -427,6 +430,7 @@ struct ConversionChain
 
 
 
+
 template <typename Tsample>
 struct Normalize;
 
@@ -512,7 +516,6 @@ struct Normalize<float32>
 };
 
 
-
 // Reads sample data with Func1, then normalizes the sample data, and then converts it with Func2.
 // Func1::output_t and Func2::input_t must be identical.
 // Func1 can also be the identity decode (DecodeIdentity<T>).
@@ -551,6 +554,7 @@ struct NormalizationChain
 		return;
 	}
 };
+
 
 
 
