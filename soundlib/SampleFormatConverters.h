@@ -719,3 +719,31 @@ size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_
 
 	return numSamples * inSize;
 }
+
+
+template<int fractionalBits, typename Tsample, typename Tfixed>
+void ConvertInterleavedFixedPointToInterleaved(Tsample *p, const Tfixed *mixbuffer, std::size_t channels, std::size_t count)
+//--------------------------------------------------------------------------------------------------------------------------
+{
+	SC::ConvertFixedPoint<Tsample, int, fractionalBits> conv;
+	count *= channels;
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		p[i] = conv(mixbuffer[i]);
+	}
+}
+
+template<int fractionalBits, typename Tsample, typename Tfixed>
+void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const buffers, const Tfixed *mixbuffer, std::size_t channels, std::size_t count)
+//--------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	SC::ConvertFixedPoint<Tsample, int, fractionalBits> conv;
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buffers[channel][i] = conv(*mixbuffer);
+			mixbuffer++;
+		}
+	}
+}

@@ -16,6 +16,7 @@
 #include "tuning.h"
 #include "Tables.h"
 #include "Dither.h"
+#include "SampleFormatConverters.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
 #endif
@@ -335,7 +336,7 @@ void ConvertToOutput(void *outputBuffer, void * const *outputBuffers, std::size_
 {
 	if(outputBuffer)
 	{
-		Convert32ToInterleaved(reinterpret_cast<Tsample*>(outputBuffer) + (channels * countRendered), mixbuffer, channels, countChunk);
+		ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<Tsample*>(outputBuffer) + (channels * countRendered), mixbuffer, channels, countChunk);
 	}
 	if(outputBuffers)
 	{
@@ -344,7 +345,7 @@ void ConvertToOutput(void *outputBuffer, void * const *outputBuffers, std::size_
 		{
 			buffers[channel] = reinterpret_cast<Tsample*>(outputBuffers[channel]) + countRendered;
 		}
-		Convert32ToNonInterleaved(buffers, mixbuffer, channels, countChunk);
+		ConvertInterleavedFixedPointToNonInterleaved<MIXING_ATTENUATION>(buffers, mixbuffer, channels, countChunk);
 	}
 }
 
