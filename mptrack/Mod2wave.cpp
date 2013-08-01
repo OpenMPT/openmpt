@@ -21,6 +21,7 @@
 #include "../common/version.h"
 #include "ACMConvert.h"
 #include "../soundlib/Dither.h"
+#include "../soundlib/SampleFormatConverters.h"
 
 #include <fstream>
 
@@ -856,10 +857,10 @@ void CDoWaveConvert::OnButton1()
 				dither.Process(mixbuffer, framesChunk, m_pWaveFormat->nChannels, m_pWaveFormat->wBitsPerSample);
 				switch(dwBitSize)
 				{
-					case 1: Convert32ToInterleaved(reinterpret_cast<uint8*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
-					case 2: Convert32ToInterleaved(reinterpret_cast<int16*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
-					case 3: Convert32ToInterleaved(reinterpret_cast<int24*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
-					case 4: Convert32ToInterleaved(reinterpret_cast<int32*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 1: ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<uint8*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 2: ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<int16*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 3: ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<int24*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 4: ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<int32*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
 					default: ASSERT(false); break;
 				}
 			}
