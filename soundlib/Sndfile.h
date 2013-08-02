@@ -223,7 +223,7 @@ public:
 		, outputBuffer(buffer)
 		, outputBuffers(buffers)
 	{
-		ALWAYS_ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
+		ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
 	}
 	virtual ~AudioStreamSinkToBuffer() { }
 	std::size_t GetRenderedCount() const { return countRendered; }

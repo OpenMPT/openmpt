@@ -147,7 +147,7 @@ BOOL CSoundFile::FadeSong(UINT msec)
 
 
 CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioStreamSink &sink)
-//----------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------
 {
 	ALWAYS_ASSERT(m_MixerSettings.IsValid());
 
