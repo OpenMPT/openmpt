@@ -836,48 +836,31 @@ void CMainFrame::AudioDone(ULONG NumSamples)
 bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec)
 //----------------------------------------------------------------------------------
 {
-	WAVEFORMATEXTENSIBLE WaveFormat;
-
-	UINT bytespersample = (bits/8) * channels;
-	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
-	WaveFormat.Format.nChannels = (unsigned short) channels;
-	WaveFormat.Format.nSamplesPerSec = samplespersec;
-	WaveFormat.Format.nAvgBytesPerSec = samplespersec * bytespersample;
-	WaveFormat.Format.nBlockAlign = (unsigned short)bytespersample;
-	WaveFormat.Format.wBitsPerSample = (unsigned short)bits;
-	WaveFormat.Format.cbSize = 0;
-	// MultiChannel configuration
-	if ((WaveFormat.Format.wBitsPerSample == 32) || (WaveFormat.Format.nChannels > 2))
+	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+	const UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
+	if(gpSoundDevice && (gpSoundDevice->GetDeviceType() != nDevType))
 	{
-		const GUID guid_MEDIASUBTYPE_PCM = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x0, 0xAA, 0x0, 0x38, 0x9B, 0x71};
-		WaveFormat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
-		WaveFormat.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
-		WaveFormat.Samples.wValidBitsPerSample = WaveFormat.Format.wBitsPerSample;
-		switch(WaveFormat.Format.nChannels)
-		{
-		case 1:		WaveFormat.dwChannelMask = 0x0004; break; // FRONT_CENTER
-		case 2:		WaveFormat.dwChannelMask = 0x0003; break; // FRONT_LEFT | FRONT_RIGHT
-		case 3:		WaveFormat.dwChannelMask = 0x0103; break; // FRONT_LEFT|FRONT_RIGHT|BACK_CENTER
-		case 4:		WaveFormat.dwChannelMask = 0x0033; break; // FRONT_LEFT|FRONT_RIGHT|BACK_LEFT|BACK_RIGHT
-		default:	WaveFormat.dwChannelMask = 0; return false; break;
-		}
-		WaveFormat.SubFormat = guid_MEDIASUBTYPE_PCM;
+		delete gpSoundDevice;
+		gpSoundDevice = NULL;
 	}
+	if(!gpSoundDevice)
 	{
-		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-		UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
-		if(gpSoundDevice && (gpSoundDevice->GetDeviceType() != nDevType))
-		{
-			delete gpSoundDevice;
-			gpSoundDevice = NULL;
-		}
-		if(!gpSoundDevice) gpSoundDevice = CreateSoundDevice(nDevType);
-		if(!gpSoundDevice) return false;
-		gpSoundDevice->SetSource(this);
-		gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().GetSoundDeviceFlags());
-		if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
+		gpSoundDevice = CreateSoundDevice(nDevType);
 	}
-	return true;
+	if(!gpSoundDevice)
+	{
+		return false;
+	}
+	gpSoundDevice->SetSource(this);
+	SoundDeviceSettings settings;
+	settings.hWnd = m_hWnd;
+	settings.LatencyMS = TrackerSettings::Instance().m_LatencyMS;
+	settings.UpdateIntervalMS = TrackerSettings::Instance().m_UpdateIntervalMS;
+	settings.fulCfgOptions = TrackerSettings::Instance().GetSoundDeviceFlags();
+	settings.Samplerate = samplespersec;
+	settings.Channels = (uint8)channels;
+	settings.BitsPerSample = (uint8)bits;
+	return gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), settings);
 }
 
 

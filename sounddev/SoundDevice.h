@@ -85,6 +85,29 @@ enum // do not change old values, these get saved to the ini
 #define SNDDEV_OPTIONS_BOOSTTHREADPRIORITY 0x02 // Boost thread priority for glitch-free audio rendering
 
 
+struct SoundDeviceSettings
+{
+	HWND hWnd;
+	ULONG LatencyMS;
+	ULONG UpdateIntervalMS;
+	ULONG fulCfgOptions;
+	uint32 Samplerate;
+	uint8 Channels;
+	uint8 BitsPerSample;
+	SoundDeviceSettings()
+		: hWnd(NULL)
+		, LatencyMS(SNDDEV_DEFAULT_LATENCY_MS)
+		, UpdateIntervalMS(SNDDEV_DEFAULT_UPDATEINTERVAL_MS)
+		, fulCfgOptions(0)
+		, Samplerate(48000)
+		, Channels(2)
+		, BitsPerSample(16)
+	{
+		return;
+	}
+};
+
+
 //=============================================
 class ISoundDevice : protected IFillAudioBuffer
 //=============================================
@@ -93,10 +116,8 @@ private:
 	ISoundSource *m_Source;
 
 protected:
-	ULONG m_LatencyMS;
-	ULONG m_UpdateIntervalMS;
-	ULONG m_fulCfgOptions;
-	HWND m_hWnd;
+
+	SoundDeviceSettings m_Setttings;
 
 	float m_RealLatencyMS;
 	float m_RealUpdateIntervalMS;
@@ -116,20 +137,24 @@ public:
 	ISoundSource *GetSource() const { return m_Source; }
 
 public:
-	void Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions);
 	float GetRealLatencyMS() const  { return m_RealLatencyMS; }
 	float GetRealUpdateIntervalMS() const { return m_RealUpdateIntervalMS; }
 	bool IsPlaying() const { return m_IsPlaying; }
 
 protected:
+	bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat);
+
+protected:
+	virtual bool InternalOpen(UINT nDevice) = 0;
 	virtual void InternalStart() = 0;
 	virtual void InternalStop() = 0;
 	virtual void InternalReset() = 0;
+	virtual bool InternalClose() = 0;
 
 public:
 	virtual UINT GetDeviceType() = 0;
-	virtual BOOL Open(UINT nDevice, LPWAVEFORMATEX pwfx) = 0;	// Open a device
-	virtual BOOL Close() = 0;				// Close the currently open device
+	bool Open(UINT nDevice, const SoundDeviceSettings &settings);	// Open a device
+	bool Close();				// Close the currently open device
 	void Start();
 	void Stop();
 	void Reset();
