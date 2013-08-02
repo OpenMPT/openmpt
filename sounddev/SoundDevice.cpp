@@ -52,14 +52,15 @@ bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 {
 	MemsetZero(WaveFormat);
 	UINT bytespersample = (m_Setttings.BitsPerSample/8) * m_Setttings.Channels;
-	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
+	if(m_Setttings.FloatingPoint && m_Setttings.BitsPerSample != 32) return false;
+	WaveFormat.Format.wFormatTag = m_Setttings.FloatingPoint ? WAVE_FORMAT_IEEE_FLOAT : WAVE_FORMAT_PCM;
 	WaveFormat.Format.nChannels = (WORD)m_Setttings.Channels;
 	WaveFormat.Format.nSamplesPerSec = m_Setttings.Samplerate;
 	WaveFormat.Format.nAvgBytesPerSec = m_Setttings.Samplerate * bytespersample;
 	WaveFormat.Format.nBlockAlign = (WORD)bytespersample;
 	WaveFormat.Format.wBitsPerSample = (WORD)m_Setttings.BitsPerSample;
 	WaveFormat.Format.cbSize = 0;
-	if((WaveFormat.Format.wBitsPerSample > 16) || (WaveFormat.Format.nChannels > 2))
+	if((WaveFormat.Format.wBitsPerSample > 16 && !m_Setttings.FloatingPoint) || (WaveFormat.Format.nChannels > 2))
 	{
 		WaveFormat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
 		WaveFormat.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
@@ -73,7 +74,8 @@ bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 		default: WaveFormat.dwChannelMask = 0; return false; break;
 		}
 		const GUID guid_MEDIASUBTYPE_PCM = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x0, 0xAA, 0x0, 0x38, 0x9B, 0x71};
-		WaveFormat.SubFormat = guid_MEDIASUBTYPE_PCM;
+		const GUID guid_MEDIASUBTYPE_IEEE_FLOAT = {0x00000003, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
+		WaveFormat.SubFormat = m_Setttings.FloatingPoint ? guid_MEDIASUBTYPE_IEEE_FLOAT : guid_MEDIASUBTYPE_PCM;
 	}
 	return true;
 }
@@ -1235,9 +1237,11 @@ bool CASIODevice::InternalOpen(UINT nDevice)
 {
 	bool bOk = false;
 
+	if(m_Setttings.FloatingPoint) return false; // for now
+
 	if (IsOpen()) Close();
 	if (!gbAsioEnumerated) EnumerateDevices(nDevice, NULL, 0);
-	if (nDevice >= gnNumAsioDrivers) return FALSE;
+	if (nDevice >= gnNumAsioDrivers) return false;
 	if (nDevice != m_nCurrentDevice)
 	{
 		m_nCurrentDevice = nDevice;
@@ -2090,13 +2094,20 @@ bool CPortaudioDevice::InternalOpen(UINT nDevice)
 	m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(nDevice, m_HostApi);
 	if(m_StreamParameters.device == -1) return false;
 	m_StreamParameters.channelCount = m_Setttings.Channels;
-	switch(m_Setttings.BitsPerSample)
+	if(m_Setttings.FloatingPoint)
 	{
+		if(m_Setttings.BitsPerSample != 32) return false;
+		m_StreamParameters.sampleFormat = paFloat32;
+	} else
+	{
+		switch(m_Setttings.BitsPerSample)
+		{
 		case 8: m_StreamParameters.sampleFormat = paUInt8; break;
 		case 16: m_StreamParameters.sampleFormat = paInt16; break;
 		case 24: m_StreamParameters.sampleFormat = paInt24; break;
 		case 32: m_StreamParameters.sampleFormat = paInt32; break;
 		default: return false; break;
+		}
 	}
 	m_StreamParameters.suggestedLatency = m_Setttings.LatencyMS / 1000.0;
 	m_StreamParameters.hostApiSpecificStreamInfo = NULL;

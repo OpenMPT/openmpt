@@ -833,8 +833,8 @@ void CMainFrame::AudioDone(ULONG NumSamples)
 }
 
 
-bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec)
-//----------------------------------------------------------------------------------
+bool CMainFrame::audioTryOpeningDevice(UINT channels, SampleFormat sampleFormat, UINT samplespersec)
+//--------------------------------------------------------------------------------------------------
 {
 	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
 	const UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
@@ -859,7 +859,8 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 	settings.fulCfgOptions = TrackerSettings::Instance().GetSoundDeviceFlags();
 	settings.Samplerate = samplespersec;
 	settings.Channels = (uint8)channels;
-	settings.BitsPerSample = (uint8)bits;
+	settings.BitsPerSample = (uint8)sampleFormat.GetBitsPerSample();
+	settings.FloatingPoint = sampleFormat.IsFloat();
 	return gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), settings);
 }
 
@@ -883,7 +884,7 @@ bool CMainFrame::audioOpenDevice()
 	if(!err)
 	{
 		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-								TrackerSettings::Instance().m_SampleFormat.GetBitsPerSample(),
+								TrackerSettings::Instance().m_SampleFormat,
 								TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
 		SampleFormat fixedBitsPerSample = SampleFormatInvalid;
 		{
