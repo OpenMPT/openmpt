@@ -668,7 +668,6 @@ public:
 	void StopAllVsti();    //rewbs.VSTCompliance
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	DEPRECATED samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain = 1<<16);
 	samplecount_t Read(samplecount_t count, IAudioStreamSink &sink);
 private:
 	void CreateStereoMix(int count);

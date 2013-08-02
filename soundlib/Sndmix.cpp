@@ -314,61 +314,6 @@ void CSoundFile::ProcessDSP(std::size_t countChunk)
 }
 
 
-CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain)
-//----------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	switch(sampleFormat.value)
-	{
-	case SampleFormatUnsigned8:
-		{
-			typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
-			return Read(count, sink);
-		}
-		break;
-	case SampleFormatInt16:
-		{
-			typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
-			return Read(count, sink);
-		}
-		break;
-	case SampleFormatInt24:
-		{
-			typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
-			return Read(count, sink);
-		}
-		break;
-	case SampleFormatInt32:
-		{
-			typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
-			return Read(count, sink);
-		}
-		break;
-	case SampleFormatFloat32:
-		{
-			typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
-			return Read(count, sink);
-		}
-		break;
-	case SampleFormatInt28q4:
-		{
-			typedef SampleFormatToType<SampleFormatInt28q4>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
-			return Read(count, sink);
-		}
-		break;
-	case SampleFormatInvalid:
-		return 0;
-		break;
-	}
-	return 0;
-}
-
-
 /////////////////////////////////////////////////////////////////////////////
 // Handles navigation/effects
 

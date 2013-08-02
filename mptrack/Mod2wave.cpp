@@ -28,6 +28,59 @@
 extern UINT nMixingRates[NUMMIXRATE];
 extern LPCSTR gszChnCfgNames[3];
 
+
+static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outputBuffer, CSoundFile::samplecount_t count, SampleFormat sampleFormat, Dither &dither)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	switch(sampleFormat.value)
+	{
+	case SampleFormatUnsigned8:
+		{
+			typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, sink);
+		}
+		break;
+	case SampleFormatInt16:
+		{
+			typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, sink);
+		}
+		break;
+	case SampleFormatInt24:
+		{
+			typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, sink);
+		}
+		break;
+	case SampleFormatInt32:
+		{
+			typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, sink);
+		}
+		break;
+	case SampleFormatFloat32:
+		{
+			typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, sink);
+		}
+		break;
+	case SampleFormatInt28q4:
+		{
+			typedef SampleFormatToType<SampleFormatInt28q4>::type Tsample;
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, sink);
+		}
+		break;
+	}
+	return 0;
+}
+
+
 static const GUID guid_MEDIASUBTYPE_PCM        = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
 static const GUID guid_MEDIASUBTYPE_IEEE_FLOAT = {0x00000003, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
 
@@ -709,10 +762,10 @@ void CDoWaveConvert::OnButton1()
 		UINT lRead = 0;
 		if(m_bNormalize)
 		{
-			lRead = m_pSndFile->ReadInterleaved(floatbuffer, MIXBUFFERSIZE, sampleFormat, dither);
+			lRead = ReadInterleaved(*m_pSndFile, floatbuffer, MIXBUFFERSIZE, sampleFormat, dither);
 		} else
 		{
-			lRead = m_pSndFile->ReadInterleaved(buffer, MIXBUFFERSIZE, sampleFormat, dither);
+			lRead = ReadInterleaved(*m_pSndFile, buffer, MIXBUFFERSIZE, sampleFormat, dither);
 		}
 
 		// Process cue points (add base offset), if there are any to process.
@@ -1109,7 +1162,7 @@ void CDoAcmConvert::OnButton1()
 		UINT lRead = 0;
 		if (!bFinished)
 		{
-			lRead = m_pSndFile->ReadInterleaved(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*sampleFormat.GetBitsPerSample()/8), sampleFormat, dither);
+			lRead = ReadInterleaved(*m_pSndFile, pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*sampleFormat.GetBitsPerSample()/8), sampleFormat, dither);
 			if (!lRead) bFinished = true;
 		}
 		ullSamples += lRead;
