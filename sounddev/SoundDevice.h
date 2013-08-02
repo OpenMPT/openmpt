@@ -119,7 +119,7 @@ private:
 
 protected:
 
-	SoundDeviceSettings m_Setttings;
+	SoundDeviceSettings m_Settings;
 
 	float m_RealLatencyMS;
 	float m_RealUpdateIntervalMS;
