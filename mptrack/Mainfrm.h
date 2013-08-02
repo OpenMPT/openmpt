@@ -321,13 +321,6 @@ public:
 	static void UpdateDspEffects(CSoundFile &sndFile, bool reset=false);
 	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
-	class StereoVuMeterSinkWrapper
-		: public SoundFileDefaultSink
-	{
-	public:
-		StereoVuMeterSinkWrapper(SampleFormat sampleFormat, Dither &dither, void *buffer);
-		virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk);
-	};
 	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
 	DWORD NotifyThread();
 

@@ -12,6 +12,7 @@
 #include "mptrack.h"
 #include "MainFrm.h"
 #include "../sounddev/SoundDevice.h"
+#include "../soundlib/SampleFormatConverters.h"
 #include "moddoc.h"
 #include "childfrm.h"
 #include "Dlsbank.h"
@@ -776,20 +777,75 @@ void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
 }
 
 
-CMainFrame::StereoVuMeterSinkWrapper::StereoVuMeterSinkWrapper(SampleFormat sampleFormat, Dither &dither, void *buffer)
-//---------------------------------------------------------------------------------------------------------------------
-	: SoundFileDefaultSink(sampleFormat, dither, buffer, nullptr)
+//============================
+class StereoVuMeterSinkWrapper
+//============================
+	: public ISoundFileAudioSink
 {
-	return;
-}
-
-
-void CMainFrame::StereoVuMeterSinkWrapper::DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
-//------------------------------------------------------------------------------------------------------------------------
-{
-	CMainFrame::CalcStereoVuMeters(MixSoundBuffer, countChunk, channels);
-	SoundFileDefaultSink::DataCallback(MixSoundBuffer, channels, countChunk);
-}
+private:
+	const SampleFormat sampleFormat;
+	Dither &dither;
+	void *buffer;
+public:
+	StereoVuMeterSinkWrapper(SampleFormat sampleFormat_, Dither &dither_, void *buffer_)
+		: sampleFormat(sampleFormat_)
+		, dither(dither_)
+		, buffer(buffer_)
+	{
+		return;
+	}
+	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	{
+		CMainFrame::CalcStereoVuMeters(MixSoundBuffer, countChunk, channels);
+		switch(sampleFormat.value)
+		{
+			case SampleFormatUnsigned8:
+				{
+					typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
+					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt16:
+				{
+					typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
+					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt24:
+				{
+					typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
+					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt32:
+				{
+					typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
+					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatFloat32:
+				{
+					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt28q4:
+				{
+					typedef SampleFormatToType<SampleFormatInt28q4>::type Tsample;
+					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+		}
+		// increment output buffer for potentially next callback
+		buffer = (char*)buffer + (sampleFormat.GetBitsPerSample()/8) * channels * countChunk;
+	}
+};
 
 
 void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
