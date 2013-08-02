@@ -94,6 +94,7 @@ struct SoundDeviceSettings
 	uint32 Samplerate;
 	uint8 Channels;
 	uint8 BitsPerSample;
+	bool FloatingPoint;
 	SoundDeviceSettings()
 		: hWnd(NULL)
 		, LatencyMS(SNDDEV_DEFAULT_LATENCY_MS)
@@ -102,6 +103,7 @@ struct SoundDeviceSettings
 		, Samplerate(48000)
 		, Channels(2)
 		, BitsPerSample(16)
+		, FloatingPoint(false)
 	{
 		return;
 	}

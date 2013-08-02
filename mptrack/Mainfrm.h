@@ -337,7 +337,7 @@ public:
 	void AudioDone(ULONG NumSamples, ULONG SamplesLatency);
 	void AudioDone(ULONG NumSamples);
 	
-	bool audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec);
+	bool audioTryOpeningDevice(UINT channels, SampleFormat sampleFormat, UINT samplespersec);
 	bool audioOpenDevice();
 	bool audioReopenDevice();
 	void audioCloseDevice();
