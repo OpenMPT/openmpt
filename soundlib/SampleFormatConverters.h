@@ -374,7 +374,7 @@ struct ConvertFixedPoint<float32, int32, fractionalBits>
 	typedef float32 output_t;
 	const float factor;
 	forceinline ConvertFixedPoint()
-		: factor( static_cast<float>(1 << (sizeof(input_t) * 8 - fractionalBits - 1)) )
+		: factor( 1.0f / static_cast<float>(1 << (sizeof(input_t) * 8 - fractionalBits - 1)) )
 	{
 		return;
 	}
@@ -390,12 +390,6 @@ struct ConvertFixedPoint<int28q4, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int28q4 output_t;
-	const float factor;
-	forceinline ConvertFixedPoint()
-		: factor( static_cast<float>(1 << (sizeof(input_t) * 8 - fractionalBits - 1)) )
-	{
-		return;
-	}
 	forceinline output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits == 4 && sizeof(input_t)*8 == 32);
