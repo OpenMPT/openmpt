@@ -780,7 +780,7 @@ void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
 //============================
 class StereoVuMeterSinkWrapper
 //============================
-	: public ISoundFileAudioSink
+	: public IAudioStreamSink
 {
 private:
 	const SampleFormat sampleFormat;
@@ -802,42 +802,42 @@ public:
 			case SampleFormatUnsigned8:
 				{
 					typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
-					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					sink.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatInt16:
 				{
 					typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
-					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					sink.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatInt24:
 				{
 					typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
-					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					sink.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatInt32:
 				{
 					typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
-					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					sink.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatFloat32:
 				{
 					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					sink.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatInt28q4:
 				{
 					typedef SampleFormatToType<SampleFormatInt28q4>::type Tsample;
-					SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					sink.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;

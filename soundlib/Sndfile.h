@@ -199,7 +199,7 @@ void ApplyGain(float *outputBuffer, float * const *outputBuffers, std::size_t of
 #endif // !MODPLUG_TRACKER
 
 
-class ISoundFileAudioSink
+class IAudioStreamSink
 {
 public:
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
@@ -207,8 +207,8 @@ public:
 
 
 template<typename Tsample>
-class SoundFileDefaultSink
-	: public ISoundFileAudioSink
+class AudioStreamSinkToBuffer
+	: public IAudioStreamSink
 {
 private:
 	Dither &dither;
@@ -217,7 +217,7 @@ private:
 	Tsample *outputBuffer;
 	Tsample * const *outputBuffers;
 public:
-	SoundFileDefaultSink(Dither &dither_, Tsample *buffer, Tsample * const *buffers, uint32 gain_ = 1<<16)
+	AudioStreamSinkToBuffer(Dither &dither_, Tsample *buffer, Tsample * const *buffers, uint32 gain_ = 1<<16)
 		: dither(dither_)
 		, gain(gain_)
 		, countRendered(0)
@@ -226,7 +226,7 @@ public:
 	{
 		ALWAYS_ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
 	}
-	virtual ~SoundFileDefaultSink() { }
+	virtual ~AudioStreamSinkToBuffer() { }
 public:
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
 	{
@@ -669,7 +669,7 @@ public:
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
 	DEPRECATED samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain = 1<<16);
-	samplecount_t Read(samplecount_t count, ISoundFileAudioSink &sink);
+	samplecount_t Read(samplecount_t count, IAudioStreamSink &sink);
 private:
 	void CreateStereoMix(int count);
 public:
