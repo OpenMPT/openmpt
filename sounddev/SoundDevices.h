@@ -234,7 +234,7 @@ public:
 	bool IsOpen() const { return (m_pAsioDrv != NULL); }
 	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }
 	UINT GetNumBuffers() { return 2; }
-	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Setttings.Samplerate; }
+	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate; }
 
 	bool CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result);
 	UINT GetCurrentSampleRate(UINT nDevice);
