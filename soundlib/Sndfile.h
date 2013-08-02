@@ -194,7 +194,7 @@ void MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc
 void FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 
 #ifndef MODPLUG_TRACKER
-void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, uint32 gainFactor16_16);
+void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16);
 void ApplyGain(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor);
 #endif // !MODPLUG_TRACKER
 
@@ -211,15 +211,14 @@ class AudioStreamSinkToBuffer
 	: public IAudioStreamSink
 {
 private:
-	Dither &dither;
-	uint32 gain;
 	std::size_t countRendered;
+	Dither &dither;
+protected:
 	Tsample *outputBuffer;
 	Tsample * const *outputBuffers;
 public:
-	AudioStreamSinkToBuffer(Dither &dither_, Tsample *buffer, Tsample * const *buffers, uint32 gain_ = 1<<16)
+	AudioStreamSinkToBuffer(Dither &dither_, Tsample *buffer, Tsample * const *buffers)
 		: dither(dither_)
-		, gain(gain_)
 		, countRendered(0)
 		, outputBuffer(buffer)
 		, outputBuffers(buffers)
@@ -227,20 +226,13 @@ public:
 		ALWAYS_ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
 	}
 	virtual ~AudioStreamSinkToBuffer() { }
+	std::size_t GetRenderedCount() const { return countRendered; }
 public:
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
 	{
 		// Convert to output sample format and optionally perform dithering and clipping if needed
 
 		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat;
-
-		#ifndef MODPLUG_TRACKER
-			if(sampleFormat.IsInt() && (gain != 1<<16))
-			{
-				// Apply final output gain for non floating point output
-				ApplyGain(MixSoundBuffer, channels, countChunk, gain);
-			}
-		#endif // !MODPLUG_TRACKER
 
 		if(sampleFormat.IsInt())
 		{
@@ -261,17 +253,51 @@ public:
 			ConvertInterleavedFixedPointToNonInterleaved<MIXING_ATTENUATION>(buffers, MixSoundBuffer, channels, countChunk);
 		}
 
-		#ifndef MODPLUG_TRACKER
-			if(sampleFormat.IsFloat() && (gain != 1<<16))
-			{
-				// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-				ApplyGain(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, channels, countChunk, static_cast<float>(gain) * (1.0f / static_cast<float>(1<<16)));
-			}
-		#endif // !MODPLUG_TRACKER
-
 		countRendered += countChunk;
 	}
 };
+
+
+#ifndef MODPLUG_TRACKER
+
+template<typename Tsample>
+class AudioStreamGainSinkToBuffer
+	: public AudioStreamSinkToBuffer<Tsample>
+{
+private:
+	const float gainFactor;
+public:
+	AudioStreamGainSinkToBuffer(Dither &dither, Tsample *buffer, Tsample * const *buffers, float gainFactor_)
+		: AudioStreamSinkToBuffer(dither, buffer, buffers)
+		, gainFactor(gainFactor_)
+	{
+		return;
+	}
+	virtual ~AudioStreamGainSinkToBuffer() { }
+public:
+	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	{
+		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat;
+		const std::size_t countRendered = GetRenderedCount();
+
+		if(sampleFormat.IsInt())
+		{
+			// Apply final output gain for non floating point output
+			ApplyGain(MixSoundBuffer, channels, countChunk, Util::Round<int32>(gainFactor * (1<<16)));
+		}
+
+		AudioStreamSinkToBuffer::DataCallback(MixSoundBuffer, channels, countChunk);
+
+		if(sampleFormat.IsFloat())
+		{
+			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
+			ApplyGain(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, channels, countChunk, gainFactor);
+		}
+
+	}
+};
+
+#endif // !MODPLUG_TRACKER
 
 
 #if MPT_COMPILER_MSVC

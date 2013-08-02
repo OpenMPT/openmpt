@@ -2040,8 +2040,8 @@ void EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
 
 #ifndef MODPLUG_TRACKER
 
-void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, uint32 gainFactor16_16)
-//----------------------------------------------------------------------------------------------------
+void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16)
+//---------------------------------------------------------------------------------------------------
 {
 	if(gainFactor16_16 == (1<<16))
 	{
