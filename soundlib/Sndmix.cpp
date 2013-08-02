@@ -146,7 +146,7 @@ BOOL CSoundFile::FadeSong(UINT msec)
 }
 
 
-CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, ISoundFileAudioSink &sink)
+CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioStreamSink &sink)
 //----------------------------------------------------------------------------------------
 {
 	ALWAYS_ASSERT(m_MixerSettings.IsValid());
@@ -322,42 +322,42 @@ CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, sample
 	case SampleFormatUnsigned8:
 		{
 			typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
-			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
 			return Read(count, sink);
 		}
 		break;
 	case SampleFormatInt16:
 		{
 			typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
-			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
 			return Read(count, sink);
 		}
 		break;
 	case SampleFormatInt24:
 		{
 			typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
-			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
 			return Read(count, sink);
 		}
 		break;
 	case SampleFormatInt32:
 		{
 			typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
-			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
 			return Read(count, sink);
 		}
 		break;
 	case SampleFormatFloat32:
 		{
 			typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
 			return Read(count, sink);
 		}
 		break;
 	case SampleFormatInt28q4:
 		{
 			typedef SampleFormatToType<SampleFormatInt28q4>::type Tsample;
-			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
 			return Read(count, sink);
 		}
 		break;
