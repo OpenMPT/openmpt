@@ -206,23 +206,71 @@ public:
 };
 
 
-//========================
+template<typename Tsample>
 class SoundFileDefaultSink
-//========================
 	: public ISoundFileAudioSink
 {
 private:
-	SampleFormat sampleFormat;
 	Dither &dither;
 	uint32 gain;
 	std::size_t countRendered;
-	void *outputBuffer;
-	void * const *outputBuffers;
+	Tsample *outputBuffer;
+	Tsample * const *outputBuffers;
 public:
-	SoundFileDefaultSink(SampleFormat sf, Dither &dither_, void *buffer, void * const *buffers, uint32 gain_ = 1<<16);
-	virtual ~SoundFileDefaultSink();
+	SoundFileDefaultSink(Dither &dither_, Tsample *buffer, Tsample * const *buffers, uint32 gain_ = 1<<16)
+		: dither(dither_)
+		, gain(gain_)
+		, countRendered(0)
+		, outputBuffer(buffer)
+		, outputBuffers(buffers)
+	{
+		ALWAYS_ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
+	}
+	virtual ~SoundFileDefaultSink() { }
 public:
-	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk);
+	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	{
+		// Convert to output sample format and optionally perform dithering and clipping if needed
+
+		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat;
+
+		#ifndef MODPLUG_TRACKER
+			if(sampleFormat.IsInt() && (gain != 1<<16))
+			{
+				// Apply final output gain for non floating point output
+				ApplyGain(MixSoundBuffer, channels, countChunk, gain);
+			}
+		#endif // !MODPLUG_TRACKER
+
+		if(sampleFormat.IsInt())
+		{
+			dither.Process(MixSoundBuffer, countChunk, channels, sampleFormat.GetBitsPerSample());
+		}
+
+		if(outputBuffer)
+		{
+			ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(outputBuffer + (channels * countRendered), MixSoundBuffer, channels, countChunk);
+		}
+		if(outputBuffers)
+		{
+			Tsample *buffers[4] = { nullptr, nullptr, nullptr, nullptr };
+			for(std::size_t channel = 0; channel < channels; ++channel)
+			{
+				buffers[channel] = outputBuffers[channel] + countRendered;
+			}
+			ConvertInterleavedFixedPointToNonInterleaved<MIXING_ATTENUATION>(buffers, MixSoundBuffer, channels, countChunk);
+		}
+
+		#ifndef MODPLUG_TRACKER
+			if(sampleFormat.IsFloat() && (gain != 1<<16))
+			{
+				// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
+				ApplyGain(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, channels, countChunk, static_cast<float>(gain) * (1.0f / static_cast<float>(1<<16)));
+			}
+		#endif // !MODPLUG_TRACKER
+
+		countRendered += countChunk;
+	}
 };
 
 
@@ -620,8 +668,7 @@ public:
 	void StopAllVsti();    //rewbs.VSTCompliance
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain = 1<<16);
-	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain = 1<<16);
+	DEPRECATED samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain = 1<<16);
 	samplecount_t Read(samplecount_t count, ISoundFileAudioSink &sink);
 private:
 	void CreateStereoMix(int count);

@@ -146,22 +146,6 @@ BOOL CSoundFile::FadeSong(UINT msec)
 }
 
 
-CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain)
-//----------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	SoundFileDefaultSink sink(sampleFormat, dither, outputBuffer, nullptr, gain);
-	return Read(count, sink);
-}
-
-
-CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	SoundFileDefaultSink sink(sampleFormat, dither, nullptr, outputBuffers, gain);
-	return Read(count, sink);
-}
-
-
 CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, ISoundFileAudioSink &sink)
 //----------------------------------------------------------------------------------------
 {
@@ -330,98 +314,58 @@ void CSoundFile::ProcessDSP(std::size_t countChunk)
 }
 
 
-template<typename Tsample>
-void ConvertToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, int *mixbuffer, std::size_t countChunk, std::size_t channels)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count, SampleFormat sampleFormat, Dither &dither, uint32 gain)
+//----------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(outputBuffer)
-	{
-		ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<Tsample*>(outputBuffer) + (channels * countRendered), mixbuffer, channels, countChunk);
-	}
-	if(outputBuffers)
-	{
-		Tsample *buffers[4] = { nullptr, nullptr, nullptr, nullptr };
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			buffers[channel] = reinterpret_cast<Tsample*>(outputBuffers[channel]) + countRendered;
-		}
-		ConvertInterleavedFixedPointToNonInterleaved<MIXING_ATTENUATION>(buffers, mixbuffer, channels, countChunk);
-	}
-}
-
-
-SoundFileDefaultSink::SoundFileDefaultSink(SampleFormat sf, Dither &dither_, void *buffer, void * const *buffers, uint32 gain_)
-//-----------------------------------------------------------------------------------------------------------------------------
-	: sampleFormat(sf)
-	, dither(dither_)
-	, gain(gain_)
-	, countRendered(0)
-	, outputBuffer(buffer)
-	, outputBuffers(buffers)
-{
-	ALWAYS_ASSERT(sampleFormat.IsValid());
-}
-
-
-SoundFileDefaultSink::~SoundFileDefaultSink()
-//-------------------------------------------
-{
-	return;
-}
-
-
-void SoundFileDefaultSink::DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
-//--------------------------------------------------------------------------------------------------------
-{
-	// Convert to output sample format and optionally perform dithering and clipping if needed
-
-	#ifndef MODPLUG_TRACKER
-		if(sampleFormat.IsInt() && (gain != 1<<16))
-		{
-			// Apply final output gain for non floating point output
-			ApplyGain(MixSoundBuffer, channels, countChunk, gain);
-		}
-	#endif // !MODPLUG_TRACKER
-
-	if(sampleFormat.IsInt())
-	{
-		dither.Process(MixSoundBuffer, countChunk, channels, sampleFormat.GetBitsPerSample());
-	}
-
 	switch(sampleFormat.value)
 	{
-		case SampleFormatUnsigned8:
-			ConvertToOutput<uint8>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
-			break;
-		case SampleFormatInt16:
-			ConvertToOutput<int16>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
-			break;
-		case SampleFormatInt24:
-			ConvertToOutput<int24>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
-			break;
-		case SampleFormatInt32:
-			ConvertToOutput<int32>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
-			break;
-		case SampleFormatFloat32:
-			ConvertToOutput<float>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
-			break;
-		case SampleFormatInt28q4:
-			ConvertToOutput<int28q4>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, channels);
-			break;
-		case SampleFormatInvalid:
-			break;
-	}
-
-	#ifndef MODPLUG_TRACKER
-		if(sampleFormat.IsFloat() && (gain != 1<<16))
+	case SampleFormatUnsigned8:
 		{
-			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-			ApplyGain(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, channels, countChunk, static_cast<float>(gain) * (1.0f / static_cast<float>(1<<16)));
+			typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
+			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			return Read(count, sink);
 		}
-	#endif // !MODPLUG_TRACKER
-
-	countRendered += countChunk;
-
+		break;
+	case SampleFormatInt16:
+		{
+			typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
+			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			return Read(count, sink);
+		}
+		break;
+	case SampleFormatInt24:
+		{
+			typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
+			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			return Read(count, sink);
+		}
+		break;
+	case SampleFormatInt32:
+		{
+			typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
+			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			return Read(count, sink);
+		}
+		break;
+	case SampleFormatFloat32:
+		{
+			typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			return Read(count, sink);
+		}
+		break;
+	case SampleFormatInt28q4:
+		{
+			typedef SampleFormatToType<SampleFormatInt28q4>::type Tsample;
+			SoundFileDefaultSink<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr, gain);
+			return Read(count, sink);
+		}
+		break;
+	case SampleFormatInvalid:
+		return 0;
+		break;
+	}
+	return 0;
 }
 
 
