@@ -32,12 +32,9 @@ ISoundDevice::ISoundDevice()
 //--------------------------
 {
 	m_Source = nullptr;
-	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
-	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
-	m_fulCfgOptions = 0;
 
-	m_RealLatencyMS = static_cast<float>(m_LatencyMS);
-	m_RealUpdateIntervalMS = static_cast<float>(m_UpdateIntervalMS);
+	m_RealLatencyMS = static_cast<float>(m_Setttings.LatencyMS);
+	m_RealUpdateIntervalMS = static_cast<float>(m_Setttings.UpdateIntervalMS);
 
 	m_IsPlaying = false;
 }
@@ -46,22 +43,60 @@ ISoundDevice::ISoundDevice()
 ISoundDevice::~ISoundDevice()
 //---------------------------
 {
+	return;
 }
 
 
-void ISoundDevice::Configure(HWND hwnd, UINT LatencyMS, UINT UpdateIntervalMS, DWORD fdwCfgOptions)
-//-------------------------------------------------------------------------------------------------
+bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
+//---------------------------------------------------------------------------
 {
-	if(LatencyMS < SNDDEV_MINLATENCY_MS) LatencyMS = SNDDEV_MINLATENCY_MS;
-	if(LatencyMS > SNDDEV_MAXLATENCY_MS) LatencyMS = SNDDEV_MAXLATENCY_MS;
-	if(UpdateIntervalMS < SNDDEV_MINUPDATEINTERVAL_MS) UpdateIntervalMS = SNDDEV_MINUPDATEINTERVAL_MS;
-	if(UpdateIntervalMS > SNDDEV_MAXUPDATEINTERVAL_MS) UpdateIntervalMS = SNDDEV_MAXUPDATEINTERVAL_MS;
-	m_LatencyMS = LatencyMS;
-	m_UpdateIntervalMS = UpdateIntervalMS;
-	m_fulCfgOptions = fdwCfgOptions;
-	m_hWnd = hwnd;
-	m_RealLatencyMS = static_cast<float>(m_LatencyMS);
-	m_RealUpdateIntervalMS = static_cast<float>(m_UpdateIntervalMS);
+	MemsetZero(WaveFormat);
+	UINT bytespersample = (m_Setttings.BitsPerSample/8) * m_Setttings.Channels;
+	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
+	WaveFormat.Format.nChannels = (WORD)m_Setttings.Channels;
+	WaveFormat.Format.nSamplesPerSec = m_Setttings.Samplerate;
+	WaveFormat.Format.nAvgBytesPerSec = m_Setttings.Samplerate * bytespersample;
+	WaveFormat.Format.nBlockAlign = (WORD)bytespersample;
+	WaveFormat.Format.wBitsPerSample = (WORD)m_Setttings.BitsPerSample;
+	WaveFormat.Format.cbSize = 0;
+	if((WaveFormat.Format.wBitsPerSample > 16) || (WaveFormat.Format.nChannels > 2))
+	{
+		WaveFormat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+		WaveFormat.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
+		WaveFormat.Samples.wValidBitsPerSample = WaveFormat.Format.wBitsPerSample;
+		switch(WaveFormat.Format.nChannels)
+		{
+		case 1:  WaveFormat.dwChannelMask = SPEAKER_FRONT_CENTER; break;
+		case 2:  WaveFormat.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT; break;
+		case 3:  WaveFormat.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_BACK_CENTER; break;
+		case 4:  WaveFormat.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; break;
+		default: WaveFormat.dwChannelMask = 0; return false; break;
+		}
+		const GUID guid_MEDIASUBTYPE_PCM = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x0, 0xAA, 0x0, 0x38, 0x9B, 0x71};
+		WaveFormat.SubFormat = guid_MEDIASUBTYPE_PCM;
+	}
+	return true;
+}
+
+
+bool ISoundDevice::Open(UINT device, const SoundDeviceSettings &settings)
+//-----------------------------------------------------------------------
+{
+	m_Setttings = settings;
+	if(m_Setttings.LatencyMS < SNDDEV_MINLATENCY_MS) m_Setttings.LatencyMS = SNDDEV_MINLATENCY_MS;
+	if(m_Setttings.LatencyMS > SNDDEV_MAXLATENCY_MS) m_Setttings.LatencyMS = SNDDEV_MAXLATENCY_MS;
+	if(m_Setttings.UpdateIntervalMS < SNDDEV_MINUPDATEINTERVAL_MS) m_Setttings.UpdateIntervalMS = SNDDEV_MINUPDATEINTERVAL_MS;
+	if(m_Setttings.UpdateIntervalMS > SNDDEV_MAXUPDATEINTERVAL_MS) m_Setttings.UpdateIntervalMS = SNDDEV_MAXUPDATEINTERVAL_MS;
+	m_RealLatencyMS = static_cast<float>(m_Setttings.LatencyMS);
+	m_RealUpdateIntervalMS = static_cast<float>(m_Setttings.UpdateIntervalMS);
+	return InternalOpen(device);
+}
+
+
+bool ISoundDevice::Close()
+//------------------------
+{
+	return InternalClose();
 }
 
 
@@ -430,7 +465,7 @@ DWORD CAudioThread::AudioThread()
 		if(!terminate)
 		{
 
-			CPriorityBooster priorityBooster(*this, (m_SoundDevice.m_fulCfgOptions & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY)?true:false);
+			CPriorityBooster priorityBooster(*this, (m_SoundDevice.m_Setttings.fulCfgOptions & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY)?true:false);
 			CPeriodicWaker periodicWaker(*this, 0.001 * m_SoundDevice.GetRealUpdateIntervalMS());
 
 			m_SoundDevice.StartFromSoundThread();
@@ -546,9 +581,13 @@ CWaveDevice::~CWaveDevice()
 }
 
 
-BOOL CWaveDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
-//-------------------------------------------------------
+bool CWaveDevice::InternalOpen(UINT nDevice)
+//------------------------------------------
 {
+	WAVEFORMATEXTENSIBLE wfext;
+	if(!FillWaveFormatExtensible(wfext)) return false;
+	WAVEFORMATEX *pwfx = &wfext.Format;
+
 	LONG nWaveDev;
 
 	if (m_hWaveOut) Close();
@@ -557,15 +596,15 @@ BOOL CWaveDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	{
 		sndPlaySound(NULL, 0);
 		LONG err = waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION);
-		if (err) return FALSE;
+		if (err) return false;
 	}
 	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
 	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
-	m_nWaveBufferSize = (m_UpdateIntervalMS * pwfx->nAvgBytesPerSec) / 1000;
+	m_nWaveBufferSize = (m_Setttings.UpdateIntervalMS * pwfx->nAvgBytesPerSec) / 1000;
 	m_nWaveBufferSize = (m_nWaveBufferSize + 7) & ~7;
 	if (m_nWaveBufferSize < WAVEOUT_MINBUFFERSIZE) m_nWaveBufferSize = WAVEOUT_MINBUFFERSIZE;
 	if (m_nWaveBufferSize > WAVEOUT_MAXBUFFERSIZE) m_nWaveBufferSize = WAVEOUT_MAXBUFFERSIZE;
-	ULONG NumBuffers = m_LatencyMS * pwfx->nAvgBytesPerSec / ( m_nWaveBufferSize * 1000 );
+	ULONG NumBuffers = m_Setttings.LatencyMS * pwfx->nAvgBytesPerSec / ( m_nWaveBufferSize * 1000 );
 	NumBuffers = CLAMP(NumBuffers, 3, WAVEOUT_MAXBUFFERS);
 	m_nPreparedHeaders = 0;
 	m_WaveBuffers.resize(NumBuffers);
@@ -586,17 +625,17 @@ BOOL CWaveDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	if (!m_nPreparedHeaders)
 	{
 		Close();
-		return FALSE;
+		return false;
 	}
 	m_RealLatencyMS = m_nWaveBufferSize * m_nPreparedHeaders * 1000.0f / m_nBytesPerSec;
 	m_RealUpdateIntervalMS = m_nWaveBufferSize * 1000.0f / m_nBytesPerSec;
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
-	return TRUE;
+	return true;
 }
 
-BOOL CWaveDevice::Close()
-//-----------------------
+bool CWaveDevice::InternalClose()
+//-------------------------------
 {
 	Reset();
 	if (m_hWaveOut)
@@ -612,7 +651,7 @@ BOOL CWaveDevice::Close()
 		m_hWaveOut = NULL;
 		Sleep(1); // Linux WINE-friendly
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -815,28 +854,32 @@ CDSoundDevice::~CDSoundDevice()
 }
 
 
-BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
-//---------------------------------------------------------
+bool CDSoundDevice::InternalOpen(UINT nDevice)
+//--------------------------------------------
 {
+	WAVEFORMATEXTENSIBLE wfext;
+	if(!FillWaveFormatExtensible(wfext)) return false;
+	WAVEFORMATEX *pwfx = &wfext.Format;
+
 	DSBUFFERDESC dsbd;
 	DSBCAPS dsc;
-	UINT nPriorityLevel = (m_fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
+	UINT nPriorityLevel = (m_Setttings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
 
-	if (m_piDS) return TRUE;
-	if (!gpDSoundEnumerate) return FALSE;
+	if (m_piDS) return true;
+	if (!gpDSoundEnumerate) return false;
 	if (!gbDSoundEnumerated) gpDSoundEnumerate((LPDSENUMCALLBACK)DSEnumCallback, NULL);
-	if ((nDevice >= gnDSoundDevices) || (!gpDSoundCreate)) return FALSE;
-	if (gpDSoundCreate(glpDSoundGUID[nDevice], &m_piDS, NULL) != DS_OK) return FALSE;
-	if (!m_piDS) return FALSE;
-	m_piDS->SetCooperativeLevel(m_hWnd, nPriorityLevel);
+	if ((nDevice >= gnDSoundDevices) || (!gpDSoundCreate)) return false;
+	if (gpDSoundCreate(glpDSoundGUID[nDevice], &m_piDS, NULL) != DS_OK) return false;
+	if (!m_piDS) return false;
+	m_piDS->SetCooperativeLevel(m_Setttings.hWnd, nPriorityLevel);
 	m_bMixRunning = FALSE;
-	m_nDSoundBufferSize = (m_LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
+	m_nDSoundBufferSize = (m_Setttings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
 	m_nDSoundBufferSize = (m_nDSoundBufferSize + 15) & ~15;
 	if(m_nDSoundBufferSize < DSOUND_MINBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MINBUFFERSIZE;
 	if(m_nDSoundBufferSize > DSOUND_MAXBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MAXBUFFERSIZE;
 	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
 	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
-	if(!(m_fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
+	if(!(m_Setttings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
 	{
 		// Set the format of the primary buffer
 		dsbd.dwSize = sizeof(dsbd);
@@ -847,7 +890,7 @@ BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		if (m_piDS->CreateSoundBuffer(&dsbd, &m_pPrimary, NULL) != DS_OK)
 		{
 			Close();
-			return FALSE;
+			return false;
 		}
 		m_pPrimary->SetFormat(pwfx);
 		///////////////////////////////////////////////////
@@ -860,7 +903,7 @@ BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		if (m_piDS->CreateSoundBuffer(&dsbd, &m_pMixBuffer, NULL) != DS_OK)
 		{
 			Close();
-			return FALSE;
+			return false;
 		}
 	} else
 	{
@@ -872,18 +915,18 @@ BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		if (m_piDS->CreateSoundBuffer(&dsbd, &m_pPrimary, NULL) != DS_OK)
 		{
 			Close();
-			return FALSE;
+			return false;
 		}
 		if (m_pPrimary->SetFormat(pwfx) != DS_OK)
 		{
 			Close();
-			return FALSE;
+			return false;
 		}
 		dsc.dwSize = sizeof(dsc);
 		if (m_pPrimary->GetCaps(&dsc) != DS_OK)
 		{
 			Close();
-			return FALSE;
+			return false;
 		}
 		m_nDSoundBufferSize = dsc.dwBufferBytes;
 		m_pMixBuffer = m_pPrimary;
@@ -904,14 +947,14 @@ BOOL CDSoundDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		if (dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
 	}
 	m_RealLatencyMS = m_nDSoundBufferSize * 1000.0f / m_nBytesPerSec;
-	m_RealUpdateIntervalMS = CLAMP(static_cast<float>(m_UpdateIntervalMS), 1.0f, m_nDSoundBufferSize * 1000.0f / ( 2.0f * m_nBytesPerSec ) );
+	m_RealUpdateIntervalMS = CLAMP(static_cast<float>(m_Setttings.UpdateIntervalMS), 1.0f, m_nDSoundBufferSize * 1000.0f / ( 2.0f * m_nBytesPerSec ) );
 	m_dwWritePos = 0xFFFFFFFF;
-	return TRUE;
+	return true;
 }
 
 
-BOOL CDSoundDevice::Close()
-//-------------------------
+bool CDSoundDevice::InternalClose()
+//---------------------------------
 {
 	if (m_pMixBuffer)
 	{
@@ -929,7 +972,7 @@ BOOL CDSoundDevice::Close()
 		m_piDS = NULL;
 	}
 	m_bMixRunning = FALSE;
-	return TRUE;
+	return true;
 }
 
 
@@ -1173,7 +1216,6 @@ CASIODevice::CASIODevice()
 	m_Callbacks.bufferSwitchTimeInfo = BufferSwitchTimeInfo;
 	m_nBitsPerSample = 0; // Unknown
 	m_nCurrentDevice = (ULONG)-1;
-	m_nSamplesPerSec = 0;
 	m_bMixRunning = FALSE;
 	InterlockedExchange(&m_RenderSilence, 0);
 	InterlockedExchange(&m_RenderingSilence, 0);
@@ -1188,10 +1230,10 @@ CASIODevice::~CASIODevice()
 }
 
 
-BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
-//-------------------------------------------------------
+bool CASIODevice::InternalOpen(UINT nDevice)
+//------------------------------------------
 {
-	BOOL bOk = FALSE;
+	bool bOk = false;
 
 	if (IsOpen()) Close();
 	if (!gbAsioEnumerated) EnumerateDevices(nDevice, NULL, 0);
@@ -1203,7 +1245,7 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	}
 #ifdef ASIO_LOG
 	Log("CASIODevice::Open(%d:\"%s\"): %d-bit, %d channels, %dHz\n",
-		nDevice, gAsioDrivers[nDevice].name, pwfx->wBitsPerSample, pwfx->nChannels, pwfx->nSamplesPerSec);
+		nDevice, gAsioDrivers[nDevice].name, m_Setttings.BitsPerSample, m_Setttings.Channels, m_Setttings.Samplerate);
 #endif
 	OpenDevice(nDevice);
 
@@ -1212,23 +1254,23 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		long nInputChannels = 0, nOutputChannels = 0;
 		long minSize = 0, maxSize = 0, preferredSize = 0, granularity = 0;
 
-		if ((pwfx->nChannels > ASIO_MAX_CHANNELS)
-		 || ((pwfx->wBitsPerSample != 16) && (pwfx->wBitsPerSample != 32))) goto abort;
-		m_nChannels = pwfx->nChannels;
+		if ((m_Setttings.Channels > ASIO_MAX_CHANNELS)
+		 || ((m_Setttings.BitsPerSample != 16) && (m_Setttings.BitsPerSample != 32))) goto abort;
+		m_nChannels = m_Setttings.Channels;
 		m_pAsioDrv->getChannels(&nInputChannels, &nOutputChannels);
 	#ifdef ASIO_LOG
 		Log("  getChannels: %d inputs, %d outputs\n", nInputChannels, nOutputChannels);
 	#endif
-		if (pwfx->nChannels > nOutputChannels) goto abort;
-		if (m_pAsioDrv->setSampleRate(pwfx->nSamplesPerSec) != ASE_OK)
+		if (m_Setttings.Channels > nOutputChannels) goto abort;
+		if (m_pAsioDrv->setSampleRate(m_Setttings.Samplerate) != ASE_OK)
 		{
 		#ifdef ASIO_LOG
-			Log("  setSampleRate(%d) failed (sample rate not supported)!\n", pwfx->nSamplesPerSec);
+			Log("  setSampleRate(%d) failed (sample rate not supported)!\n", m_Setttings.Samplerate);
 		#endif
 			goto abort;
 		}
-		m_nBitsPerSample = pwfx->wBitsPerSample;
-		for (UINT ich=0; ich<pwfx->nChannels; ich++)
+		m_nBitsPerSample = m_Setttings.BitsPerSample;
+		for (UINT ich=0; ich<m_Setttings.Channels; ich++)
 		{
 			m_ChannelInfo[ich].channel = ich;
 			m_ChannelInfo[ich].isInput = ASIOFalse;
@@ -1269,7 +1311,7 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		Log("  getBufferSize(): minSize=%d maxSize=%d preferredSize=%d granularity=%d\n",
 				minSize, maxSize, preferredSize, granularity);
 	#endif
-		m_nAsioBufferLen = ((m_LatencyMS * pwfx->nSamplesPerSec) / 2000);
+		m_nAsioBufferLen = ((m_Setttings.LatencyMS * m_Setttings.Samplerate) / 2000);
 		if (m_nAsioBufferLen < (UINT)minSize) m_nAsioBufferLen = minSize; else
 		if (m_nAsioBufferLen > (UINT)maxSize) m_nAsioBufferLen = maxSize; else
 		if (granularity < 0)
@@ -1297,9 +1339,8 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 			}
 			m_nAsioBufferLen = n;
 		}
-		m_nSamplesPerSec = pwfx->nSamplesPerSec;
-		m_RealLatencyMS = m_nAsioBufferLen * 2 * 1000.0f / m_nSamplesPerSec;
-		m_RealUpdateIntervalMS = m_nAsioBufferLen * 1000.0f / m_nSamplesPerSec;
+		m_RealLatencyMS = m_nAsioBufferLen * 2 * 1000.0f / m_Setttings.Samplerate;
+		m_RealUpdateIntervalMS = m_nAsioBufferLen * 1000.0f / m_Setttings.Samplerate;
 	#ifdef ASIO_LOG
 		Log("  Using buffersize=%d samples\n", m_nAsioBufferLen);
 	#endif
@@ -1317,7 +1358,7 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 				}
 			}
 			m_bPostOutput = (m_pAsioDrv->outputReady() == ASE_OK) ? TRUE : FALSE;
-			bOk = TRUE;
+			bOk = true;
 		}
 	#ifdef ASIO_LOG
 		else Log("  createBuffers failed!\n");
@@ -1417,8 +1458,8 @@ void CASIODevice::InternalStop()
 }
 
 
-BOOL CASIODevice::Close()
-//-----------------------
+bool CASIODevice::InternalClose()
+//-------------------------------
 {
 	if (IsOpen())
 	{
@@ -1450,7 +1491,7 @@ BOOL CASIODevice::Close()
 	{
 		gpCurrentAsio = NULL;
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -1489,7 +1530,7 @@ void CASIODevice::OpenDevice(UINT nDevice)
 	CLSID clsid = gAsioDrivers[nDevice].clsid;
 	if (CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) == S_OK)
 	{
-		m_pAsioDrv->init((void *)m_hWnd);
+		m_pAsioDrv->init((void *)m_Setttings.hWnd);
 	} else
 	{
 #ifdef ASIO_LOG
@@ -2039,8 +2080,8 @@ CPortaudioDevice::~CPortaudioDevice()
 }
 
 
-BOOL CPortaudioDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
-//------------------------------------------------------------
+bool CPortaudioDevice::InternalOpen(UINT nDevice)
+//-----------------------------------------------
 {
 	MemsetZero(m_StreamParameters);
 	m_Stream = 0;
@@ -2048,8 +2089,8 @@ BOOL CPortaudioDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	m_CurrentFrameCount = 0;
 	m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(nDevice, m_HostApi);
 	if(m_StreamParameters.device == -1) return false;
-	m_StreamParameters.channelCount = pwfx->nChannels;
-	switch(pwfx->wBitsPerSample)
+	m_StreamParameters.channelCount = m_Setttings.Channels;
+	switch(m_Setttings.BitsPerSample)
 	{
 		case 8: m_StreamParameters.sampleFormat = paUInt8; break;
 		case 16: m_StreamParameters.sampleFormat = paInt16; break;
@@ -2057,9 +2098,9 @@ BOOL CPortaudioDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		case 32: m_StreamParameters.sampleFormat = paInt32; break;
 		default: return false; break;
 	}
-	m_StreamParameters.suggestedLatency = m_LatencyMS / 1000.0;
+	m_StreamParameters.suggestedLatency = m_Setttings.LatencyMS / 1000.0;
 	m_StreamParameters.hostApiSpecificStreamInfo = NULL;
-	if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && (m_fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
+	if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && (m_Setttings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
 	{
 		MemsetZero(m_WasapiStreamInfo);
 		m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
@@ -2068,8 +2109,8 @@ BOOL CPortaudioDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		m_WasapiStreamInfo.flags = paWinWasapiExclusive;
 		m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 	}
-	if(Pa_IsFormatSupported(NULL, &m_StreamParameters, pwfx->nSamplesPerSec) != paFormatIsSupported) return false;
-	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, pwfx->nSamplesPerSec, /*static_cast<long>(m_UpdateIntervalMS * pwfx->nSamplesPerSec / 1000.0f)*/ paFramesPerBufferUnspecified, paNoFlag, StreamCallbackWrapper, (void*)this) != paNoError) return false;
+	if(Pa_IsFormatSupported(NULL, &m_StreamParameters, m_Setttings.Samplerate) != paFormatIsSupported) return false;
+	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, m_Setttings.Samplerate, /*static_cast<long>(m_UpdateIntervalMS * pwfx->nSamplesPerSec / 1000.0f)*/ paFramesPerBufferUnspecified, paNoFlag, StreamCallbackWrapper, (void*)this) != paNoError) return false;
 	if(!Pa_GetStreamInfo(m_Stream))
 	{
 		Pa_CloseStream(m_Stream);
@@ -2077,13 +2118,13 @@ BOOL CPortaudioDevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		return false;
 	}
 	m_RealLatencyMS = static_cast<float>(Pa_GetStreamInfo(m_Stream)->outputLatency) * 1000.0f;
-	m_RealUpdateIntervalMS = static_cast<float>(m_UpdateIntervalMS);
+	m_RealUpdateIntervalMS = static_cast<float>(m_Setttings.UpdateIntervalMS);
 	return true;
 }
 
 
-BOOL CPortaudioDevice::Close()
-//----------------------------
+bool CPortaudioDevice::InternalClose()
+//------------------------------------
 {
 	if(m_Stream)
 	{
@@ -2164,7 +2205,7 @@ bool CPortaudioDevice::CanSampleRate(UINT nDevice, std::vector<UINT> &samplerate
 		StreamParameters.sampleFormat = paInt16;
 		StreamParameters.suggestedLatency = 0.0;
 		StreamParameters.hostApiSpecificStreamInfo = NULL;
-		if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && (m_fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
+		if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && (m_Setttings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
 		{
 			MemsetZero(m_WasapiStreamInfo);
 			m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
