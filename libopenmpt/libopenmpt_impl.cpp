@@ -64,13 +64,6 @@ private:
 	}
 }; // class log_forwarder
 
-static std::int32_t float_to_fx16( float x ) {
-	return static_cast<std::int32_t>( x * (1<<16) );
-}
-static float fx16_to_float( std::int32_t x ) {
-	return static_cast<float>( x * (1.0f/(1<<16)) );
-}
-
 class loader_log : public ILog {
 private:
 	mutable std::vector<std::pair<LogLevel,std::string> > m_Messages;
@@ -181,7 +174,7 @@ void module_impl::init( const std::map< std::string, std::string > & ctls ) {
 	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_currentPositionSeconds = 0.0;
-	m_Gain = (1<<16);
+	m_Gain = 1.0f;
 	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
 		ctl_set( i->first, i->second );
 	}
@@ -206,7 +199,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		std::int16_t * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
-		AudioStreamSinkToBuffer<std::int16_t> sink(*m_Dither, 0, buffers, m_Gain);
+		AudioStreamGainSinkToBuffer<std::int16_t> sink(*m_Dither, 0, buffers, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			sink
@@ -223,7 +216,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		float * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
-		AudioStreamSinkToBuffer<float> sink(*m_Dither, 0, buffers, m_Gain);
+		AudioStreamGainSinkToBuffer<float> sink(*m_Dither, 0, buffers, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			sink
@@ -239,7 +232,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_t channels, std::int16_t * interleaved ) {
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
-		AudioStreamSinkToBuffer<std::int16_t> sink(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
+		AudioStreamGainSinkToBuffer<std::int16_t> sink(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			sink
@@ -255,7 +248,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved ) {
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
-		AudioStreamSinkToBuffer<float> sink(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
+		AudioStreamGainSinkToBuffer<float> sink(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			sink
@@ -353,7 +346,7 @@ module_impl::~module_impl() {
 std::int32_t module_impl::get_render_param( int param ) const {
 	switch ( param ) {
 		case module::RENDER_MASTERGAIN_MILLIBEL: {
-			return static_cast<std::int32_t>( 1000.0f * 2.0f * std::log10( fx16_to_float( m_Gain ) ) );
+			return static_cast<std::int32_t>( 1000.0f * 2.0f * std::log10( m_Gain ) );
 		} break;
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
 			return m_sndFile->m_MixerSettings.m_nStereoSeparation * 100 / 128;
@@ -373,7 +366,7 @@ std::int32_t module_impl::get_render_param( int param ) const {
 void module_impl::set_render_param( int param, std::int32_t value ) {
 	switch ( param ) {
 		case module::RENDER_MASTERGAIN_MILLIBEL: {
-			m_Gain = float_to_fx16( static_cast<float>( std::pow( 10.0f, value * 0.001f * 0.5f ) ) );
+			m_Gain = static_cast<float>( std::pow( 10.0f, value * 0.001f * 0.5f ) );
 		} break;
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
 			std::int32_t newvalue = value * 128 / 100;

@@ -58,7 +58,7 @@ protected:
 	double m_currentPositionSeconds;
 	std::unique_ptr<CSoundFile> m_sndFile;
 	std::unique_ptr<Dither> m_Dither;
-	std::uint32_t m_Gain;
+	float m_Gain;
 	std::vector<std::string> m_loaderMessages;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;
