@@ -792,7 +792,7 @@ public:
 		, dither(dither_)
 		, buffer(buffer_)
 	{
-		return;
+		ALWAYS_ASSERT(sampleFormat.IsValid());
 	}
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
 	{
