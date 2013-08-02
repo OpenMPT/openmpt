@@ -2035,3 +2035,62 @@ void EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
 		C_EndChannelOfs(pChannel, pBuffer, nSamples);
 	#endif
 }
+
+
+
+#ifndef MODPLUG_TRACKER
+
+void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, uint32 gainFactor16_16)
+//----------------------------------------------------------------------------------------------------
+{
+	if(gainFactor16_16 == (1<<16))
+	{
+		// nothing to do, gain == +/- 0dB
+		return; 
+	}
+	// no clipping prevention is done here
+	int * buf = soundBuffer;
+	for(std::size_t i=0; i<countChunk*channels; ++i)
+	{
+		*buf = Util::muldiv(*buf, gainFactor16_16, 1<<16);
+		buf++;
+	}
+}
+
+static void ApplyGain(float *beg, float *end, float factor)
+//---------------------------------------------------------
+{
+	for(float *it = beg; it != end; ++it)
+	{
+		*it *= factor;
+	}
+}
+
+void ApplyGain(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor)
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	if(gainFactor == 1.0f)
+	{
+		// nothing to do, gain == +/- 0dB
+		return;
+	}
+	if(outputBuffer)
+	{
+		ApplyGain(
+			outputBuffer + (channels * offset),
+			outputBuffer + (channels * (offset + countChunk)),
+			gainFactor);
+	}
+	if(outputBuffers)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			ApplyGain(
+				outputBuffers[channel] + offset,
+				outputBuffers[channel] + offset + countChunk,
+				gainFactor);
+		}
+	}
+}
+
+#endif // !MODPLUG_TRACKER

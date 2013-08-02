@@ -193,6 +193,11 @@ void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCou
 void MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 void FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 
+#ifndef MODPLUG_TRACKER
+void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, uint32 gainFactor16_16);
+void ApplyGain(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor);
+#endif // !MODPLUG_TRACKER
+
 
 class ISoundFileAudioSink
 {
@@ -810,11 +815,6 @@ public:
 	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif // MODPLUG_TRACKER
 	void ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long countChunk);
-
-#ifndef MODPLUG_TRACKER
-	static void ApplyFinalOutputGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, uint32 gain);
-	static void ApplyFinalOutputGainFloat(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, uint32 gain);
-#endif // !MODPLUG_TRACKER
 
 	// System-Dependant functions
 public:

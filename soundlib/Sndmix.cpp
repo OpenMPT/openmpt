@@ -376,10 +376,10 @@ void SoundFileDefaultSink::DataCallback(int *MixSoundBuffer, std::size_t channel
 	// Convert to output sample format and optionally perform dithering and clipping if needed
 
 	#ifndef MODPLUG_TRACKER
-		if(sampleFormat.IsInt())
+		if(sampleFormat.IsInt() && (gain != 1<<16))
 		{
 			// Apply final output gain for non floating point output
-			CSoundFile::ApplyFinalOutputGain(MixSoundBuffer, channels, countChunk, gain);
+			ApplyGain(MixSoundBuffer, channels, countChunk, gain);
 		}
 	#endif // !MODPLUG_TRACKER
 
@@ -413,10 +413,10 @@ void SoundFileDefaultSink::DataCallback(int *MixSoundBuffer, std::size_t channel
 	}
 
 	#ifndef MODPLUG_TRACKER
-		if(sampleFormat.IsFloat())
+		if(sampleFormat.IsFloat() && (gain != 1<<16))
 		{
 			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-			CSoundFile::ApplyFinalOutputGainFloat(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, channels, countChunk, gain);
+			ApplyGain(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, channels, countChunk, static_cast<float>(gain) * (1.0f / static_cast<float>(1<<16)));
 		}
 	#endif // !MODPLUG_TRACKER
 
@@ -2338,65 +2338,3 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 	}
 
 }
-
-
-#ifndef MODPLUG_TRACKER
-
-void CSoundFile::ApplyFinalOutputGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, uint32 gain)
-//----------------------------------------------------------------------------------------------------------------
-{
-	if(gain == (1<<16))
-	{
-		// nothing to do, gain == +/- 0dB
-		return; 
-	}
-	// no clipping prevention is done here
-	int32 factor = gain;
-	int * buf = soundBuffer;
-	for(std::size_t i=0; i<countChunk*channels; ++i)
-	{
-		*buf = Util::muldiv(*buf, factor, 1<<16);
-		buf++;
-	}
-}
-
-static void ApplyFinalOutputGainFloatBuffer(float *beg, float *end, float factor)
-//-------------------------------------------------------------------------------
-{
-	// no clipping is done here
-	for(float *i = beg; i != end; ++i)
-	{
-		*i *= factor;
-	}
-}
-
-void CSoundFile::ApplyFinalOutputGainFloat(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, uint32 gain)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	if(gain == (1<<16))
-	{
-		// nothing to do, gain == +/- 0dB
-		return;
-	}
-	const float factor = static_cast<float>(gain) * (1.0f / static_cast<float>(1<<16));
-	if(outputBuffer)
-	{
-		ApplyFinalOutputGainFloatBuffer(
-			outputBuffer + (channels * offset),
-			outputBuffer + (channels * (offset + countChunk)),
-			factor);
-	}
-	if(outputBuffers)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			ApplyFinalOutputGainFloatBuffer(
-				outputBuffers[channel] + offset,
-				outputBuffers[channel] + offset + countChunk,
-				factor);
-		}
-	}
-}
-
-#endif // !MODPLUG_TRACKER
-
