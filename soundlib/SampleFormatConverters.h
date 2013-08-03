@@ -309,10 +309,10 @@ struct ConvertFixedPoint<uint8, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef uint8 output_t;
-	static const int shiftBits = (sizeof(input_t) - sizeof(output_t)) * 8 - fractionalBits;
+	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	forceinline output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
 		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
 		if(val < int8_min) val = int8_min;
@@ -326,10 +326,10 @@ struct ConvertFixedPoint<int16, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int16 output_t;
-	static const int shiftBits = (sizeof(input_t) - sizeof(output_t)) * 8 - fractionalBits;
+	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	forceinline output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
 		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
 		if(val < int16_min) val = int16_min;
@@ -343,10 +343,10 @@ struct ConvertFixedPoint<int24, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int24 output_t;
-	static const int shiftBits = (sizeof(input_t) - sizeof(output_t)) * 8 - fractionalBits;
+	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	forceinline output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		STATIC_ASSERT(shiftBits >= 1);
 		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
 		if(val < int24_min) val = int24_min;
@@ -362,8 +362,8 @@ struct ConvertFixedPoint<int32, int32, fractionalBits>
 	typedef int32 output_t;
 	forceinline output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
-		return (int32)(Clamp(val, (int)-((1<<(32-fractionalBits-1))-1), (int)((1<<(32-fractionalBits-1))-1)) << fractionalBits);
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		return (int32)(Clamp(val, (int)-((1<<fractionalBits)-1), (int)(1<<fractionalBits)-1)) << (sizeof(input_t)*8-1-fractionalBits);
 	}
 };
 
@@ -374,26 +374,26 @@ struct ConvertFixedPoint<float32, int32, fractionalBits>
 	typedef float32 output_t;
 	const float factor;
 	forceinline ConvertFixedPoint()
-		: factor( 1.0f / static_cast<float>(1 << (sizeof(input_t) * 8 - fractionalBits - 1)) )
+		: factor( 1.0f / static_cast<float>(1 << fractionalBits) )
 	{
 		return;
 	}
 	forceinline output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-2);
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		return val * factor;
 	}
 };
 
 template <int fractionalBits>
-struct ConvertFixedPoint<int28q4, int32, fractionalBits>
+struct ConvertFixedPoint<fixed5p27, int32, fractionalBits>
 {
 	typedef int32 input_t;
-	typedef int28q4 output_t;
+	typedef fixed5p27 output_t;
 	forceinline output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits == 4 && sizeof(input_t)*8 == 32);
-		return int28q4::Raw(val);
+		STATIC_ASSERT(fractionalBits == 27 && sizeof(input_t)*8 == 32);
+		return fixed5p27::Raw(val);
 	}
 };
 
