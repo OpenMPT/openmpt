@@ -834,9 +834,9 @@ public:
 					sink.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
-			case SampleFormatInt28q4:
+			case SampleFormatFixed5p27:
 				{
-					typedef SampleFormatToType<SampleFormatInt28q4>::type Tsample;
+					typedef SampleFormatToType<SampleFormatFixed5p27>::type Tsample;
 					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					sink.DataCallback(MixSoundBuffer, channels, countChunk);
 				}

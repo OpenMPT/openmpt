@@ -69,9 +69,9 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 			return sndFile.Read(count, sink);
 		}
 		break;
-	case SampleFormatInt28q4:
+	case SampleFormatFixed5p27:
 		{
-			typedef SampleFormatToType<SampleFormatInt28q4>::type Tsample;
+			typedef SampleFormatToType<SampleFormatFixed5p27>::type Tsample;
 			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
 			return sndFile.Read(count, sink);
 		}
@@ -910,10 +910,10 @@ void CDoWaveConvert::OnButton1()
 				dither.Process(mixbuffer, framesChunk, m_pWaveFormat->nChannels, m_pWaveFormat->wBitsPerSample);
 				switch(dwBitSize)
 				{
-					case 1: ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<uint8*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
-					case 2: ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<int16*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
-					case 3: ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<int24*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
-					case 4: ConvertInterleavedFixedPointToInterleaved<MIXING_ATTENUATION>(reinterpret_cast<int32*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 1: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<uint8*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 2: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int16*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 3: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int24*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 4: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int32*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
 					default: ASSERT(false); break;
 				}
 			}
