@@ -39,7 +39,8 @@
 #include "../sounddsp/AGC.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/EQ.h"
-class Dither;
+#include "Dither.h"
+#include "SampleFormatConverters.h"
 
 
 class FileReader;
@@ -218,8 +219,8 @@ protected:
 	Tsample * const *outputBuffers;
 public:
 	AudioStreamSinkToBuffer(Dither &dither_, Tsample *buffer, Tsample * const *buffers)
-		: dither(dither_)
-		, countRendered(0)
+		: countRendered(0)
+		, dither(dither_)
 		, outputBuffer(buffer)
 		, outputBuffers(buffers)
 	{
@@ -265,10 +266,12 @@ class AudioStreamGainSinkToBuffer
 	: public AudioStreamSinkToBuffer<Tsample>
 {
 private:
+	typedef AudioStreamSinkToBuffer<Tsample> Tparent;
+private:
 	const float gainFactor;
 public:
 	AudioStreamGainSinkToBuffer(Dither &dither, Tsample *buffer, Tsample * const *buffers, float gainFactor_)
-		: AudioStreamSinkToBuffer(dither, buffer, buffers)
+		: Tparent(dither, buffer, buffers)
 		, gainFactor(gainFactor_)
 	{
 		return;
@@ -278,7 +281,7 @@ public:
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
 	{
 		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat;
-		const std::size_t countRendered = GetRenderedCount();
+		const std::size_t countRendered = Tparent::GetRenderedCount();
 
 		if(sampleFormat.IsInt())
 		{
@@ -286,12 +289,12 @@ public:
 			ApplyGain(MixSoundBuffer, channels, countChunk, Util::Round<int32>(gainFactor * (1<<16)));
 		}
 
-		AudioStreamSinkToBuffer::DataCallback(MixSoundBuffer, channels, countChunk);
+		Tparent::DataCallback(MixSoundBuffer, channels, countChunk);
 
 		if(sampleFormat.IsFloat())
 		{
 			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-			ApplyGain(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, channels, countChunk, gainFactor);
+			ApplyGain(reinterpret_cast<float*>(Tparent::outputBuffer), reinterpret_cast<float*const*>(Tparent::outputBuffers), countRendered, channels, countChunk, gainFactor);
 		}
 
 	}
