@@ -25,7 +25,7 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.22.04.00 (5 August 2013, revision 2564)
+v1.22.04.00 (6 August 2013, revision 2581)
 ------------------------------------------
 Pattern Editor
    [Imp] <js> If more than one channel is selected, channel record select and channel reset shortcuts are now applied to all selected channels (tx coda).
