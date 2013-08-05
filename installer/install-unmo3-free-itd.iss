@@ -6,8 +6,8 @@
 ; This file is provided for creating an install package without the proprietary unmo3.dll (for example for the SourceForge package).
 ; Instead of including the file in the setup package, the user instead has the possibility to automatically download unmo3.dll from
 ; our servers.
-; The download code requires the InnoIDE with its downloader extension which currently only works in ANSI version!
-; To download and install InnoIDE, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp (don't use the unicode pack!)
+; The download code requires the InnoTools Downloader available at
+; http://www.sherlocksoftware.org/page.php?id=50
 ; it_download.iss and it_download.dll have to be placed in same directory as the file you are currently viewing.
 
 #define DOWNLOAD_MO3

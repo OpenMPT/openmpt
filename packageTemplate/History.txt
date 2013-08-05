@@ -25,6 +25,92 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.22.04.00 (5 August 2013, revision 2564)
+------------------------------------------
+Pattern Editor
+   [Imp] <js> If more than one channel is selected, channel record select and channel reset shortcuts are now applied to all selected channels (tx coda).
+   [Imp] <js> Also show name of unsupported commands in status text. Only really useful when importing files that contain effects not compatible with the current edit format.
+   [Fix] <js> When removing channels or rows from a pattern, a crash could occour when the cursor was previously placed in a now inaccesible part of the pattern.
+   [Fix] <js> After stopping playback, scrolling to previously invisible channels would reveal their last visible VU meter state (broke in OpenMPT 1.22).
+
+Sample Editor
+   [New] <jh> Support for floating point .wav files written with old versions of Syntrillium CoolEdit.
+   [Mod] <jh> Normalization of 24-/32-bit samples on load is now optional. Disable it by setting MayNormalizeSamplesOnLoad=0 in the [Sample Editor] section of mptrack.ini.
+   [Mod] <jh> When normalizing of 24-/32-bit samples on load, the sample's global volume is now adjusted to reflect the volume change if possible.
+   [Fix] <js> Fixed crash when trying to trigger a note > B-9.
+   [Fix] <jh> Reduce quantization noise by correcting the rounding and scaling in floating point conversion and float or 24-/32-Bit normalization when loading such WAV samples.
+
+Tree view
+   [Imp] <js> Can now load more than 64 soundfonts.
+   [Fix] <js> Fixed a rare crash when switching between previewed files in tree view (probably present since OpenMPT 1.22.01).
+   [Fix] <js> Fixed various issues with editing sequence / instrument / pattern names.
+
+VST / DMO Plugins
+   [Imp] <js> Plugin Selection Dialog: When using the name filter, highlight matching plugin by default instead of the "no plugin" entry (tx coda).
+   [Fix] <js> Preset names with ampersand characters in them weren't drawn properly in the plugin editor.
+
+Playback
+   [Imp] <js> Improved internal sample frequency precision.
+   [Imp] <jh> Improved precision of polyphase 8-tap resampling filter tables by 1 bit.
+   [Mod] <js> Disabled some questionable "optimisations" with cubic spline and linear interpolation that would disable interpolation depending on volume levels and sample frequency.
+   [Fix] <js> In IT compatible and "old random variation" mode, panning variation was not applied if the same instrument also had a panning envelope.
+   [Fix] <js> Pitch / Pan separation wasn't applied if the channel was panned way to the left.
+   [Fix] <jh> Dithering is also applied when using 24-Bit output.
+   [Fix] <jh> When applying global volume, ramping up and down lengths were mixed up. For stereo or quad output, the global volume ramping length was also only half the configured length.
+   [Fix] <jh> In quad channel output mode, also apply equalizer to rear channels.
+   [Fix] <jh> Avoid tiny rounding errors when converting between integer and floating point samples in the mixer.
+   [Fix] <jh> Apply AGC volume changes to all channels at once instead of potentially decrementing volume in between processing different output channels. Also, limit ramp down speed to 1 step per sample (as it was for mono output).
+
+MPTM::Loading
+   [Mod] <js> Removed order truncation note for old MPTM files with long order lists (the order list was not actually truncated).
+
+IT::Compatible Playback Mode
+   [Fix] <js> Fine volume slides in the volume column are only executed on the first tick, and not on multiples of the first tick in case of a pattern delay.
+
+XM
+   [New] <js & jh> Added extra smooth ramping option in Song Properties to emulate Fasttracker 2's ramping algorithm (kills most percussion sounds). Set SmoothFT2Ramping=1 in the [Misc] section of mptrack.ini to automatically detect if an XM file was made with Fasttracker 2 to enable this settings automatically.
+
+XM::Loading and Saving
+   [Fix] <js> A default speed / tempo of 0 should be ignored in XM headers (fixes transwave by jazz & motion).
+   [Fix] <js> Saving XM files with non-existing patterns past the highest existing pattern number in the order list does no longer crash.
+
+XM::Compatible Playback Mode
+   [Fix] <js> Emulate FT2's very weird frequency wraparound behaviour with 2xx effects (http://bugs.openmpt.org/view.php?id=386).
+   [Fix] <js> Note-Off + Note Delay + Panning ignores the panning effect.
+   [Fix] <js> Arpeggio emulation is now finally 100% accurate with speeds greater than 16.
+
+MOD
+   [Fix] <js> EEx + Dxx on the same row causes the target row of Dxx to be skipped in ProTracker (fixes condom_corruption by Travolta).
+   [Fix] <js> When using EEx, there should be only one "first tick" event. Ticks that are multiples of the song speed are longer treated as first ticks.
+   [Fix] <js> Frequency limiting was not always correct in PT 1.x mode (Fixes black_queen.mod).
+   [Fix] <js> SoundTracker modules with "hidden" patterns in their order list didn't play properly anymore (probably since v1.22.03, affected e.g. Bad Dudes soundtrack).
+
+Other formats
+   [Imp] <js> AMS: Added support for reversed sample loops (starting at sample end).
+   [Imp] <js> PTM: Note Cut and some other commands should work better, added support for effects Jxx - Mxx (note slides) and Nxx (reverse sample + offset). Some effects show up as "?" in patterns now, this does not affect playback.
+   [Mod] <jh> Replaced LHA unpacker by lhasa. Should be more reliable and support more LHA variants, including PMA and LZS.
+   [Fix] <js> RAR support broke in OpenMPT 1.22.02.
+   [Fix] <js> MT2: Repeated pattern events are now loaded correctly.
+   [Fix] <js> MT2: Convert effects from XM to IT on loading, this fixes e.g. global volume commands.
+   [Fix] <js> DSMI AMF: Version 8 / 9 files didn't load correctly.
+
+Module cleanup
+   [Mod] <js> "Remove unused patterns" no longer automatically executes "rearrange patterns".
+
+Misc
+   [New] <js> Added option in the MIDI configuration to ignore certain MIDI CCs when recording to pattern.
+   [Imp] <jh> WAV export: Normalizing is now also available for 32-Bit output.
+   [Mod] <jh> Always enable "Export as MP3" menu entry and display a useful message box when no MP3 codec is found.
+   [Mod] <jh> Removed /nomp3 command line switch as MP3 support is now initialized on demand instead of when launching OpenMPT.
+   [Mod] <jh> 24-/32-bit samples in DLS files are no longer normalized on load.
+   [Fix] <jh> WAV export: Rendered output is not clamped before normalizing anymore. WAV output is now dithered properly.
+   [Fix] <js> Song Length Estimation handles some pattern loops more correctly now (http://bugs.openmpt.org/view.php?id=416).
+   [Fix] <js> Song Length Estimation doesn't break with some tempo slide down commands anymore (http://bugs.openmpt.org/view.php?id=416). 
+   [Reg] <jh> Enable MMX / 3DNow! / SSE acceleration is gone. This option is now always enabled when available.
+   [Reg] <jh> Remove possibility to export MP3 encapsulated in .wav files. It's not 1999 anymore.
+   [Reg] <js> Removed hidden setting ITCompressionVerification (algorithmn has been proved to be stable and verification is now part of the internal test suite).
+
+
 v1.22.03.00 (18 May 2013, revision 2094)
 ----------------------------------------
 Pattern Editor
@@ -91,7 +177,10 @@ v1.22.02.00 (20 April 2013, revision 1917)
 ------------------------------------------
 Instrument tab
    [Mod] <js> When importing DLS drum samples into an XM instrument, pick the center of the sample's assigned note range as a transpose amount instead of the lowest note of the note range (http://bugs.openmpt.org/view.php?id=376).
-   
+
+Tree view
+   [Mod] <js> Instrument previews in the tree view are now played at 0dB.
+
 VST / DMO Plugins
    [Imp] <js> If a plugin editor is focussed, MIDI is now always routed to that plugin.
    [Mod] <js> effBeginSetProgram and effEndSetProgram opcodes are sent when performing a program change.
@@ -120,7 +209,6 @@ Misc
    [Imp] <js> When changing MIDI input devices, the change is applied instantly. Previously the old MIDI device was kept open.
    [Imp] <jh> Support for exclusive device access has been added for WASAPI devices.
    [Mod] <jh> Renamed "Use secondary buffers" option to the negated form "Use primary buffer".
-   [Mod] <js> Instrument previews in the tree view are now played at 0dB.
    [Fix] <jh> Fixed a possible crash when stopping a Wave Out device and possible freezes with ASIO / WASAPI devices.
    [Fix] <js> Time display was not updated anymore in OpenMPT 1.22.01.00 when jumping around in the order list without actually playing the module.
    [Fix] <js> Options dialog: Pre-amp warning was also shown when changing stereo separation.
@@ -2295,7 +2383,7 @@ v1.17.02.30
 
 v1.17.02.29
 -----------
-   [Fix] <rf> Fixed 3 digit instrument numbers when there are less  than 100 instruments. (http://www.modplug.com/forum/viewtopic.php?p=42006)
+   [Fix] <rf> Fixed 3 digit instrument numbers when there are less than 100 instruments. (http://www.modplug.com/forum/viewtopic.php?p=42006)
    [Fix] <rf> Fixed crash in plugin DNA/NNA check we transitionning between existing and non existing instruments. (http://www.modplug.com/forum/viewtopic.php?p=42006)
 
 
