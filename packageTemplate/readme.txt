@@ -170,3 +170,8 @@ libmpg123
 OpenMPT makes use of libmpg123, which is released under the LGPL license.
 A copy of the LGPL license can be found in SoundTouch\COPYING.TXT
 Visit http://mpg123.de/ for more information.
+
+lhasa
+-----
+OpenMPT makes use of lhasa, which is released under the ISC license.
+Visit https://github.com/fragglet/lhasa for more information.

@@ -2739,13 +2739,13 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 			if ((param & 0xF0) == 0xF0)
 			{
 				FinePortamentoUp(pChn, param & 0x0F);
-			} else
-			if ((param & 0xF0) == 0xE0)
+				return;
+			} else if ((param & 0xF0) == 0xE0 && GetType() != MOD_TYPE_DBM)
 			{
 				ExtraFinePortamentoUp(pChn, param & 0x0F);
+				return;
 			}
 		}
-		return;
 	}
 	// Regular Slide
 	if(!m_SongFlags[SONG_FIRSTTICK])
@@ -2787,13 +2787,13 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 			if ((param & 0xF0) == 0xF0)
 			{
 				FinePortamentoDown(pChn, param & 0x0F);
-			} else
-			if ((param & 0xF0) == 0xE0)
+				return;
+			} else if ((param & 0xF0) == 0xE0 && GetType() != MOD_TYPE_DBM)
 			{
 				ExtraFinePortamentoDown(pChn, param & 0x0F);
+				return;
 			}
 		}
-		return;
 	}
 
 	if(!m_SongFlags[SONG_FIRSTTICK])
