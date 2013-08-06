@@ -72,6 +72,7 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO3, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5, OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO6, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO2, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
 END_MESSAGE_MAP()
@@ -108,7 +109,8 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_UPDATEINTERVAL, m_CbnUpdateIntervalMS);
 	DDX_Control(pDX, IDC_COMBO3,		m_CbnMixingFreq);
 	DDX_Control(pDX, IDC_COMBO4,		m_CbnPolyphony);
-	DDX_Control(pDX, IDC_COMBO5,		m_CbnQuality);
+	DDX_Control(pDX, IDC_COMBO5,		m_CbnChannels);
+	DDX_Control(pDX, IDC_COMBO6,		m_CbnSampleFormat);
 	DDX_Control(pDX, IDC_SLIDER1,		m_SliderStereoSep);
 	DDX_Control(pDX, IDC_SLIDER_PREAMP,	m_SliderPreAmp);
 	DDX_Control(pDX, IDC_EDIT_STATISTICS,	m_EditStatistics);
@@ -250,52 +252,74 @@ BOOL COptionsSoundcard::OnInitDialog()
 		UpdateControls(m_nSoundDevice);
 	}
 
-	UpdateChannelsFormat(m_nSoundDevice);
+	UpdateChannels(m_nSoundDevice);
+	UpdateSampleFormat(m_nSoundDevice);
 	
 	return TRUE;
 }
 
 
-void COptionsSoundcard::UpdateChannelsFormat(int dev)
-//---------------------------------------------------
+void COptionsSoundcard::UpdateChannels(int dev)
+//---------------------------------------------
 {
-	// Sample Format
+	UNREFERENCED_PARAMETER(dev);
 	CHAR s[128];
 	UINT n = 0;
-	m_CbnQuality.ResetContent();
+	m_CbnChannels.ResetContent();
 	for(UINT channels = 4; channels >= 1; channels /= 2)
 	{
-		for(UINT bits = 32; bits >= 8; bits -= 8)
+		if(channels > 2 && !theApp.IsWaveExEnabled())
 		{
-			if(channels > 2 && bits > 16 && !theApp.IsWaveExEnabled())
-			{
-				continue;
-			}
-			if(bits != 16 && bits !=32 && SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO)
-			{
-				// CASIODevice only supports 16bit or 32bit input for now
-				continue;
-			}
-			if(bits == 32 && SNDDEV_GET_TYPE(dev) != SNDDEV_ASIO)
-			{
-				wsprintf(s, "%s, %d Bits, Float", gszChnCfgNames[(channels+2)/2-1], bits);
-				UINT ndx = m_CbnQuality.AddString(s);
-				m_CbnQuality.SetItemData(ndx, (channels << 8) | (32+128));
-				if((SampleFormat)(32+128) == m_SampleFormat && channels == m_nChannels)
-				{
-					n = ndx;
-				}
-			}
-			wsprintf(s, "%s, %d Bit", gszChnCfgNames[(channels+2)/2-1], bits);
-			UINT ndx = m_CbnQuality.AddString(s);
-			m_CbnQuality.SetItemData(ndx, (channels << 8) | bits);
-			if((SampleFormat)bits == m_SampleFormat && channels == m_nChannels)
+			continue;
+		}
+		wsprintf(s, "%s", gszChnCfgNames[(channels+2)/2-1]);
+		UINT ndx = m_CbnChannels.AddString(s);
+		m_CbnChannels.SetItemData(ndx, channels);
+		if(channels == m_nChannels)
+		{
+			n = ndx;
+		}
+	}
+	m_CbnChannels.SetCurSel(n);
+}
+
+
+void COptionsSoundcard::UpdateSampleFormat(int dev)
+//-------------------------------------------------
+{
+	CHAR s[128];
+	UINT n = 0;
+	m_CbnSampleFormat.ResetContent();
+	for(UINT bits = 32; bits >= 8; bits -= 8)
+	{
+		if(bits > 16 && !theApp.IsWaveExEnabled() && SNDDEV_GET_TYPE(dev) != SNDDEV_ASIO)
+		{
+			continue;
+		}
+		if(bits != 16 && bits != 32 && SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO)
+		{
+			// CASIODevice only supports 16bit or 32bit input for now
+			continue;
+		}
+		if(bits == 32 && SNDDEV_GET_TYPE(dev) != SNDDEV_ASIO)
+		{
+			wsprintf(s, "Floating Point");
+			UINT ndx = m_CbnSampleFormat.AddString(s);
+			m_CbnSampleFormat.SetItemData(ndx, (32+128));
+			if(SampleFormatFloat32 == m_SampleFormat)
 			{
 				n = ndx;
 			}
 		}
+		wsprintf(s, "%d Bit", bits);
+		UINT ndx = m_CbnSampleFormat.AddString(s);
+		m_CbnSampleFormat.SetItemData(ndx, bits);
+		if((SampleFormat)bits == m_SampleFormat)
+		{
+			n = ndx;
+		}
 	}
-	m_CbnQuality.SetCurSel(n);
+	m_CbnSampleFormat.SetCurSel(n);
 }
 
 
@@ -365,7 +389,8 @@ void COptionsSoundcard::OnDeviceChanged()
 		int dev = m_CbnDevice.GetItemData(n);
 		UpdateControls(dev);
 		UpdateSampleRates(dev);
-		UpdateChannelsFormat(dev);
+		UpdateChannels(dev);
+		UpdateSampleFormat(dev);
 		OnSettingsChanged();
 	}
 }
@@ -467,12 +492,16 @@ void COptionsSoundcard::OnOK()
 	{
 		m_dwRate = m_CbnMixingFreq.GetItemData(m_CbnMixingFreq.GetCurSel());
 	}
-	// Quality
+	// Channels
 	{
-		UINT n = m_CbnQuality.GetItemData( m_CbnQuality.GetCurSel() );
-		m_nChannels = n >> 8;
+		UINT n = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+		m_nChannels = n;
+		if((m_nChannels != 1) && (m_nChannels != 4))m_nChannels = 2;
+	}
+	// SampleFormat
+	{
+		UINT n = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 		m_SampleFormat = (SampleFormat)(n & 0xFF);
-		if ((m_nChannels != 1) && (m_nChannels != 4)) m_nChannels = 2;
 	}
 	// Polyphony
 	{
