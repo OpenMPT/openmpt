@@ -15,6 +15,8 @@
 #include "MIDIEvents.h"
 #include "tuning.h"
 #include "Tables.h"
+#include "Dither.h"
+#include "SampleFormatConverters.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
 #endif
@@ -22,9 +24,6 @@
 // VU-Meter
 #define VUMETER_DECAY		4
 
-#ifdef MODPLUG_TRACKER
-LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
-#endif
 #ifndef NO_VST
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 #endif
@@ -81,8 +80,6 @@ void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 	if(
 		(mixersettings.gdwMixingFreq != m_MixerSettings.gdwMixingFreq)
 		||
-		(mixersettings.m_SampleFormat != m_MixerSettings.m_SampleFormat)
-		||
 		(mixersettings.gnChannels != m_MixerSettings.gnChannels)
 		||
 		(mixersettings.MixerFlags != m_MixerSettings.MixerFlags))
@@ -121,7 +118,6 @@ void CSoundFile::InitPlayer(BOOL bReset)
 #ifndef NO_AGC
 	m_AGC.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
-	m_Dither.Reset();
 }
 
 
@@ -150,22 +146,8 @@ BOOL CSoundFile::FadeSong(UINT msec)
 }
 
 
-CSoundFile::samplecount_t CSoundFile::ReadInterleaved(void *outputBuffer, samplecount_t count)
-//--------------------------------------------------------------------------------------------
-{
-	return Read(count, outputBuffer, nullptr);
-}
-
-
-CSoundFile::samplecount_t CSoundFile::ReadNonInterleaved(void * const *outputBuffers, samplecount_t count)
-//--------------------------------------------------------------------------------------------------------
-{
-	return Read(count, nullptr, outputBuffers);
-}
-
-
-CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers)
-//--------------------------------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget &target)
+//---------------------------------------------------------------------------------------
 {
 	ALWAYS_ASSERT(m_MixerSettings.IsValid());
 
@@ -281,15 +263,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, void *outputBuff
 			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, countChunk);
 		}
 
-		#ifdef MODPLUG_TRACKER
-			if(gpSndMixHook)
-			{ // Currently only used for VU Meter
-				gpSndMixHook(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
-			}
-		#endif // MODPLUG_TRACKER
-
-		// Convert to output sample format and optionally perform dithering and clipping if needed
-		ConvertMixBufferToOutput(outputBuffer, outputBuffers, countRendered, countChunk);
+		target.DataCallback(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk);
 
 		// Buffer ready
 		countRendered += countChunk;
@@ -337,76 +311,6 @@ void CSoundFile::ProcessDSP(std::size_t countChunk)
 	#if defined(NO_DSP) && defined(NO_EQ) && defined(NO_AGC)
 		UNREFERENCED_PARAMETER(countChunk);
 	#endif
-}
-
-
-template<typename Tsample>
-void ConvertToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, int *mixbuffer, std::size_t countChunk, std::size_t channels)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	if(outputBuffer)
-	{
-		Convert32ToInterleaved(reinterpret_cast<Tsample*>(outputBuffer) + (channels * countRendered), mixbuffer, channels * countChunk);
-	}
-	if(outputBuffers)
-	{
-		Tsample *buffers[4] = { nullptr, nullptr, nullptr, nullptr };
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			buffers[channel] = reinterpret_cast<Tsample*>(outputBuffers[channel]) + countRendered;
-		}
-		Convert32ToNonInterleaved(buffers, mixbuffer, channels, countChunk);
-	}
-}
-
-
-void CSoundFile::ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk)
-//-------------------------------------------------------------------------------------------------------------------------------------------
-{
-	// Convert to output sample format and optionally perform dithering and clipping if needed
-
-	#ifndef MODPLUG_TRACKER
-		if(m_MixerSettings.IsIntSampleFormat())
-		{
-			// Apply final output gain for non floating point output
-			ApplyFinalOutputGain(MixSoundBuffer, countChunk);
-		}
-	#endif // !MODPLUG_TRACKER
-
-	if(m_MixerSettings.IsIntSampleFormat())
-	{
-		m_Dither.Process(MixSoundBuffer, countChunk, m_MixerSettings.gnChannels, m_MixerSettings.GetBitsPerSample());
-	}
-
-	switch(m_MixerSettings.m_SampleFormat)
-	{
-		case SampleFormatUnsigned8:
-			ConvertToOutput<uint8>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
-			break;
-		case SampleFormatInt16:
-			ConvertToOutput<int16>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
-			break;
-		case SampleFormatInt24:
-			ConvertToOutput<int24>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
-			break;
-		case SampleFormatInt32:
-			ConvertToOutput<int32>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
-			break;
-		case SampleFormatFloat32:
-			ConvertToOutput<float>(outputBuffer, outputBuffers, countRendered, MixSoundBuffer, countChunk, m_MixerSettings.gnChannels);
-			break;
-		case SampleFormatInvalid:
-			break;
-	}
-
-	#ifndef MODPLUG_TRACKER
-		if(m_MixerSettings.IsFloatSampleFormat())
-		{
-			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-			ApplyFinalOutputGainFloat(reinterpret_cast<float*>(outputBuffer), reinterpret_cast<float*const*>(outputBuffers), countRendered, m_MixerSettings.gnChannels, countChunk);
-		}
-	#endif // !MODPLUG_TRACKER
-
 }
 
 
@@ -2323,65 +2227,3 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 	}
 
 }
-
-
-#ifndef MODPLUG_TRACKER
-
-void CSoundFile::ApplyFinalOutputGain(int *soundBuffer, std::size_t countChunk)
-//-----------------------------------------------------------------------------
-{
-	if(m_MixerSettings.m_FinalOutputGain == (1<<16))
-	{
-		// nothing to do, gain == +/- 0dB
-		return; 
-	}
-	// no clipping prevention is done here
-	int32 factor = m_MixerSettings.m_FinalOutputGain;
-	int * buf = soundBuffer;
-	for(std::size_t i=0; i<countChunk*m_MixerSettings.gnChannels; ++i)
-	{
-		*buf = Util::muldiv(*buf, factor, 1<<16);
-		buf++;
-	}
-}
-
-static void ApplyFinalOutputGainFloatBuffer(float *beg, float *end, float factor)
-//-------------------------------------------------------------------------------
-{
-	// no clipping is done here
-	for(float *i = beg; i != end; ++i)
-	{
-		*i *= factor;
-	}
-}
-
-void CSoundFile::ApplyFinalOutputGainFloat(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk)
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	if(m_MixerSettings.m_FinalOutputGain == (1<<16))
-	{
-		// nothing to do, gain == +/- 0dB
-		return;
-	}
-	const float factor = static_cast<float>(m_MixerSettings.m_FinalOutputGain) * (1.0f / static_cast<float>(1<<16));
-	if(outputBuffer)
-	{
-		ApplyFinalOutputGainFloatBuffer(
-			outputBuffer + (channels * offset),
-			outputBuffer + (channels * (offset + countChunk)),
-			factor);
-	}
-	if(outputBuffers)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			ApplyFinalOutputGainFloatBuffer(
-				outputBuffers[channel] + offset,
-				outputBuffers[channel] + offset + countChunk,
-				factor);
-		}
-	}
-}
-
-#endif // !MODPLUG_TRACKER
-

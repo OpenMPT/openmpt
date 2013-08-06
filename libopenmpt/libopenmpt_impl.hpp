@@ -19,6 +19,7 @@
 // forward declarations
 class FileReader;
 class CSoundFile;
+class Dither;
 
 namespace openmpt {
 
@@ -56,12 +57,14 @@ protected:
 	std::unique_ptr<log_forwarder> m_LogForwarder;
 	double m_currentPositionSeconds;
 	std::unique_ptr<CSoundFile> m_sndFile;
+	std::unique_ptr<Dither> m_Dither;
+	float m_Gain;
 	std::vector<std::string> m_loaderMessages;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;
 	void PushToCSoundFileLog( int loglevel, const std::string & text ) const;
 private:
-	void apply_mixer_settings( std::int32_t samplerate, int channels, bool format_float );
+	void apply_mixer_settings( std::int32_t samplerate, int channels );
 	void apply_libopenmpt_defaults();
 	void init( const std::map< std::string, std::string > & ctls );
 	static void load( CSoundFile & sndFile, const FileReader & file );

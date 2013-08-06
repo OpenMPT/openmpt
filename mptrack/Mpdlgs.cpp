@@ -249,26 +249,53 @@ BOOL COptionsSoundcard::OnInitDialog()
 		}
 		UpdateControls(m_nSoundDevice);
 	}
+
+	UpdateChannelsFormat(m_nSoundDevice);
+	
+	return TRUE;
+}
+
+
+void COptionsSoundcard::UpdateChannelsFormat(int dev)
+//---------------------------------------------------
+{
 	// Sample Format
+	CHAR s[128];
+	UINT n = 0;
+	m_CbnQuality.ResetContent();
+	for(UINT channels = 4; channels >= 1; channels /= 2)
 	{
-		UINT n = 0;
-		for (UINT i=0; i<3*3; i++)
+		for(UINT bits = 32; bits >= 8; bits -= 8)
 		{
-			UINT j = 3*3-1-i;
-			UINT nBits = 8 << (j % 3);
-			UINT nChannels = 1 << (j/3);
-			if ((((nChannels <= 2) && (nBits <= 16)) || (theApp.IsWaveExEnabled()) || (bAsio))
-			 && ((nBits >= 16) || (nChannels <= 2)))
+			if(channels > 2 && bits > 16 && !theApp.IsWaveExEnabled())
 			{
-				wsprintf(s, "%s, %d Bit", gszChnCfgNames[j/3], nBits);
+				continue;
+			}
+			if(bits != 16 && bits !=32 && SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO)
+			{
+				// CASIODevice only supports 16bit or 32bit input for now
+				continue;
+			}
+			if(bits == 32 && SNDDEV_GET_TYPE(dev) != SNDDEV_ASIO)
+			{
+				wsprintf(s, "%s, %d Bits, Float", gszChnCfgNames[(channels+2)/2-1], bits);
 				UINT ndx = m_CbnQuality.AddString(s);
-				m_CbnQuality.SetItemData( ndx, (nChannels << 8) | nBits );
-				if (((SampleFormat)nBits == m_SampleFormat) && (nChannels == m_nChannels)) n = ndx;
+				m_CbnQuality.SetItemData(ndx, (channels << 8) | (32+128));
+				if((SampleFormat)(32+128) == m_SampleFormat && channels == m_nChannels)
+				{
+					n = ndx;
+				}
+			}
+			wsprintf(s, "%s, %d Bit", gszChnCfgNames[(channels+2)/2-1], bits);
+			UINT ndx = m_CbnQuality.AddString(s);
+			m_CbnQuality.SetItemData(ndx, (channels << 8) | bits);
+			if((SampleFormat)bits == m_SampleFormat && channels == m_nChannels)
+			{
+				n = ndx;
 			}
 		}
-		m_CbnQuality.SetCurSel(n);
 	}
-	return TRUE;
+	m_CbnQuality.SetCurSel(n);
 }
 
 
@@ -338,6 +365,7 @@ void COptionsSoundcard::OnDeviceChanged()
 		int dev = m_CbnDevice.GetItemData(n);
 		UpdateControls(dev);
 		UpdateSampleRates(dev);
+		UpdateChannelsFormat(dev);
 		OnSettingsChanged();
 	}
 }

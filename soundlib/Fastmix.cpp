@@ -18,6 +18,8 @@
 #include "Resampler.h"
 #include "WindowedFIR.h"
 
+#include "SampleFormatConverters.h"
+
 
 // 4x256 taps polyphase FIR resampling filter
 #define gFastSinc CResampler::FastSincTable
@@ -1736,151 +1738,12 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename Tsample> forceinline Tsample ConvertSample(int val);
-
-template<>
-forceinline uint8 ConvertSample(int val)
-{
-	val = (val + (1<<(23-MIXING_ATTENUATION))) >> (24-MIXING_ATTENUATION);
-	if(val < int8_min) val = int8_min;
-	if(val > int8_max) val = int8_max;
-	return (uint8)(val+0x80); // unsigned
-}
-template<>
-forceinline int16 ConvertSample(int val)
-{
-	val = (val + (1<<(15-MIXING_ATTENUATION))) >> (16-MIXING_ATTENUATION);
-	if(val < int16_min) val = int16_min;
-	if(val > int16_max) val = int16_max;
-	return (int16)val;
-}
-template<>
-forceinline int24 ConvertSample(int val)
-{
-	val = (val + (1<<(7-MIXING_ATTENUATION))) >> (8-MIXING_ATTENUATION);
-	if(val < int24_min) val = int24_min;
-	if(val > int24_max) val = int24_max;
-	return (int24)val;
-}
-template<>
-forceinline int32 ConvertSample(int val)
-{
-	return (int32)(Clamp(val, (int)MIXING_CLIPMIN, (int)MIXING_CLIPMAX) << MIXING_ATTENUATION);
-}
-
-template<typename Tsample>
-forceinline void C_Convert32ToInterleaved(Tsample *p, const int *mixbuffer, std::size_t count)
-{
-	for(std::size_t i = 0; i < count; ++i)
-	{
-		p[i] = ConvertSample<Tsample>(mixbuffer[i]);
-	}
-}
-
-template<typename Tsample>
-forceinline void C_Convert32ToNonInterleaved(Tsample * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
-{
-	for(std::size_t i = 0; i < count; ++i)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			buffers[channel][i] = ConvertSample<Tsample>(*mixbuffer);
-			mixbuffer++;
-		}
-	}
-}
-
-
-// Clip and convert to 8 bit
-void Convert32ToInterleaved(uint8 *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
-{
-	C_Convert32ToInterleaved(dest, mixbuffer, count);
-}
-
-void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
-//--------------------------------------------------------------------------------------------------------------------------
-{
-	C_Convert32ToNonInterleaved(buffers, mixbuffer, channels, count);
-}
-
-
-// Clip and convert to 16 bit
-void Convert32ToInterleaved(int16 *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
-{
-	C_Convert32ToInterleaved(dest, mixbuffer, count);
-}
-
-void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
-//--------------------------------------------------------------------------------------------------------------------------
-{
-	C_Convert32ToNonInterleaved(buffers, mixbuffer, channels, count);
-}
-
-
-// Clip and convert to 24 bit
-void Convert32ToInterleaved(int24 *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
-{
-	C_Convert32ToInterleaved(dest, mixbuffer, count);
-}
-
-void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
-//--------------------------------------------------------------------------------------------------------------------------
-{
-	C_Convert32ToNonInterleaved(buffers, mixbuffer, channels, count);
-}
-
-
-// Clip and convert to 32 bit
-void Convert32ToInterleaved(int32 *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
-{
-	C_Convert32ToInterleaved(dest, mixbuffer, count);
-}
-
-void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
-//--------------------------------------------------------------------------------------------------------------------------
-{
-	C_Convert32ToNonInterleaved(buffers, mixbuffer, channels, count);
-}
-
-
-// convert to 32 bit floats and do NOT clip to [-1,1]
-void Convert32ToInterleaved(float *dest, const int *mixbuffer, std::size_t count)
-//-------------------------------------------------------------------------------
-{
-	const float factor = (1.0f/MIXING_SCALEF);
-	for(std::size_t i=0; i<count; i++)
-	{
-		dest[i] = mixbuffer[i] * factor;
-	}
-}
-
-void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count)
-//--------------------------------------------------------------------------------------------------------------------------
-{
-	const float factor = (1.0f/MIXING_SCALEF);
-	for(std::size_t i = 0; i < count; ++i)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			buffers[channel][i] = *mixbuffer * factor;
-			mixbuffer++;
-		}
-	}
-}
-
 
 void InitMixBuffer(int *pBuffer, UINT nSamples)
 //---------------------------------------------
 {
 	memset(pBuffer, 0, nSamples * sizeof(int));
 }
-
-
-//////////////////////////////////////////////////////////////////////////
 
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4731) // ebp modified
@@ -2172,3 +2035,62 @@ void EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
 		C_EndChannelOfs(pChannel, pBuffer, nSamples);
 	#endif
 }
+
+
+
+#ifndef MODPLUG_TRACKER
+
+void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16)
+//---------------------------------------------------------------------------------------------------
+{
+	if(gainFactor16_16 == (1<<16))
+	{
+		// nothing to do, gain == +/- 0dB
+		return; 
+	}
+	// no clipping prevention is done here
+	int * buf = soundBuffer;
+	for(std::size_t i=0; i<countChunk*channels; ++i)
+	{
+		*buf = Util::muldiv(*buf, gainFactor16_16, 1<<16);
+		buf++;
+	}
+}
+
+static void ApplyGain(float *beg, float *end, float factor)
+//---------------------------------------------------------
+{
+	for(float *it = beg; it != end; ++it)
+	{
+		*it *= factor;
+	}
+}
+
+void ApplyGain(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor)
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	if(gainFactor == 1.0f)
+	{
+		// nothing to do, gain == +/- 0dB
+		return;
+	}
+	if(outputBuffer)
+	{
+		ApplyGain(
+			outputBuffer + (channels * offset),
+			outputBuffer + (channels * (offset + countChunk)),
+			gainFactor);
+	}
+	if(outputBuffers)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			ApplyGain(
+				outputBuffers[channel] + offset,
+				outputBuffers[channel] + offset + countChunk,
+				gainFactor);
+		}
+	}
+}
+
+#endif // !MODPLUG_TRACKER

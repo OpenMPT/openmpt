@@ -20,11 +20,66 @@
 #include "WAVTools.h"
 #include "../common/version.h"
 #include "ACMConvert.h"
+#include "../soundlib/Dither.h"
+#include "../soundlib/SampleFormatConverters.h"
 
 #include <fstream>
 
 extern UINT nMixingRates[NUMMIXRATE];
 extern LPCSTR gszChnCfgNames[3];
+
+
+static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outputBuffer, CSoundFile::samplecount_t count, SampleFormat sampleFormat, Dither &dither)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	switch(sampleFormat.value)
+	{
+	case SampleFormatUnsigned8:
+		{
+			typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
+		}
+		break;
+	case SampleFormatInt16:
+		{
+			typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
+		}
+		break;
+	case SampleFormatInt24:
+		{
+			typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
+		}
+		break;
+	case SampleFormatInt32:
+		{
+			typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
+		}
+		break;
+	case SampleFormatFloat32:
+		{
+			typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
+		}
+		break;
+	case SampleFormatFixed5p27:
+		{
+			typedef SampleFormatToType<SampleFormatFixed5p27>::type Tsample;
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
+		}
+		break;
+	}
+	return 0;
+}
+
 
 static const GUID guid_MEDIASUBTYPE_PCM        = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
 static const GUID guid_MEDIASUBTYPE_IEEE_FLOAT = {0x00000003, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
@@ -635,15 +690,17 @@ void CDoWaveConvert::OnButton1()
 		file.Open(m_lpszFileName);
 	}
 
+	Dither dither;
+
+	SampleFormat sampleFormat = (m_pWaveFormat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) ? SampleFormatFloat32 : (SampleFormat)m_pWaveFormat->wBitsPerSample;
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	mixersettings.gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
-	mixersettings.m_SampleFormat = (m_pWaveFormat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) ? SampleFormatFloat32 : (SampleFormat)m_pWaveFormat->wBitsPerSample;
 	mixersettings.gnChannels = m_pWaveFormat->nChannels;
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 	if(m_bNormalize)
 	{
-		mixersettings.m_SampleFormat = SampleFormatFloat32;
+		sampleFormat = SampleFormatFloat32;
 #ifndef NO_AGC
 		mixersettings.DSPMask &= ~SNDDSP_AGC;
 #endif
@@ -705,10 +762,10 @@ void CDoWaveConvert::OnButton1()
 		UINT lRead = 0;
 		if(m_bNormalize)
 		{
-			lRead = m_pSndFile->ReadInterleaved(floatbuffer, MIXBUFFERSIZE);
+			lRead = ReadInterleaved(*m_pSndFile, floatbuffer, MIXBUFFERSIZE, sampleFormat, dither);
 		} else
 		{
-			lRead = m_pSndFile->ReadInterleaved(buffer, MIXBUFFERSIZE);
+			lRead = ReadInterleaved(*m_pSndFile, buffer, MIXBUFFERSIZE, sampleFormat, dither);
 		}
 
 		// Process cue points (add base offset), if there are any to process.
@@ -753,7 +810,7 @@ void CDoWaveConvert::OnButton1()
 		} else
 		{
 
-			UINT lWrite = fwrite(buffer, 1, lRead * m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.GetBitsPerSample()/8), file.GetFile());
+			UINT lWrite = fwrite(buffer, 1, lRead * m_pSndFile->m_MixerSettings.gnChannels * (sampleFormat.GetBitsPerSample()/8), file.GetFile());
 			if (!lWrite) 
 				break;
 			bytesWritten += lWrite;
@@ -815,7 +872,6 @@ void CDoWaveConvert::OnButton1()
 		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
 
 		const float normalizeFactor = (normalizePeak != 0.0f) ? (1.0f / normalizePeak) : 1.0f;
-		Dither dither;
 
 		const DWORD dwBitSize = m_pWaveFormat->wBitsPerSample / 8;
 		const uint64 framesTotal = ullSamples;
@@ -854,10 +910,10 @@ void CDoWaveConvert::OnButton1()
 				dither.Process(mixbuffer, framesChunk, m_pWaveFormat->nChannels, m_pWaveFormat->wBitsPerSample);
 				switch(dwBitSize)
 				{
-					case 1: Convert32ToInterleaved(reinterpret_cast<uint8*>(buffer), mixbuffer, samplesChunk); break;
-					case 2: Convert32ToInterleaved(reinterpret_cast<int16*>(buffer), mixbuffer, samplesChunk); break;
-					case 3: Convert32ToInterleaved(reinterpret_cast<int24*>(buffer), mixbuffer, samplesChunk); break;
-					case 4: Convert32ToInterleaved(reinterpret_cast<int32*>(buffer), mixbuffer, samplesChunk); break;
+					case 1: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<uint8*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 2: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int16*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 3: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int24*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
+					case 4: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int32*>(buffer), mixbuffer, m_pWaveFormat->nChannels, framesChunk); break;
 					default: ASSERT(false); break;
 				}
 			}
@@ -1002,6 +1058,8 @@ void CDoAcmConvert::OnButton1()
 	FILE *f;
 
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
+	SampleFormat sampleFormat = SampleFormatInvalid;
+	Dither dither;
 
 	progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	if ((!m_pSndFile) || (!m_lpszFileName) || (!m_pwfx) || (!m_hadid)) goto OnError;
@@ -1056,11 +1114,11 @@ void CDoAcmConvert::OnButton1()
 		// Write ID3v2.4 Tags
 		m_FileTags.WriteID3v2Tags(f);
 	}
+	sampleFormat = SampleFormatInt16;
 	DWORD oldsndcfg = m_pSndFile->m_MixerSettings.MixerFlags;
 	oldrepeat = m_pSndFile->GetRepeatCount();
 	const uint64 dwSongTime = static_cast<uint64>(m_pSndFile->GetSongTime() + 0.5);
 	mixersettings.gdwMixingFreq = wfxSrc.nSamplesPerSec;
-	mixersettings.m_SampleFormat = SampleFormatInt16;
 	mixersettings.gnChannels = wfxSrc.nChannels;
 	m_pSndFile->SetRepeatCount(0);
 	m_pSndFile->ResetChannels();
@@ -1104,7 +1162,7 @@ void CDoAcmConvert::OnButton1()
 		UINT lRead = 0;
 		if (!bFinished)
 		{
-			lRead = m_pSndFile->ReadInterleaved(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*m_pSndFile->m_MixerSettings.GetBitsPerSample()/8));
+			lRead = ReadInterleaved(*m_pSndFile, pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize/(m_pSndFile->m_MixerSettings.gnChannels*sampleFormat.GetBitsPerSample()/8), sampleFormat, dither);
 			if (!lRead) bFinished = true;
 		}
 		ullSamples += lRead;
