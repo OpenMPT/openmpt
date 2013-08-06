@@ -21,7 +21,7 @@ class COptionsSoundcard: public CPropertyPage
 {
 protected:
 	CComboBoxEx m_CbnDevice;
-	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnPolyphony, m_CbnQuality;
+	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnPolyphony, m_CbnChannels, m_CbnSampleFormat;
 	CSliderCtrl m_SliderStereoSep, m_SliderPreAmp;
 	CEdit m_EditStatistics;
 	DWORD m_dwRate, m_SoundDeviceFlags;
@@ -41,7 +41,8 @@ public:
 
 private:
 	void UpdateSampleRates(int dev);
-	void UpdateChannelsFormat(int dev);
+	void UpdateChannels(int dev);
+	void UpdateSampleFormat(int dev);
 	void UpdateControls(int dev);
 	void SetPreAmpSliderPosition();
 
