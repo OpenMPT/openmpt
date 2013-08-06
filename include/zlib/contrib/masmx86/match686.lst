@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 9.00.30729.01	    04/30/10 23:43:24
+Microsoft (R) Macro Assembler Version 10.00.40219.01	    08/06/13 00:13:37
 match686.asm						     Page 1 - 1
 
 
@@ -213,6 +213,7 @@ match686.asm						     Page 1 - 1
 				    ELSE
  00000000			    _longest_match      proc near
 				    ENDIF
+ 00000000			.FPO (9, 4, 0, 0, 1, 0)
 
 				;;; Save registers that the compiler may be using, and adjust esp to
 				;;; make room for our stack frame.
@@ -508,7 +509,7 @@ match686.asm						     Page 1 - 1
 
  000001E9			_TEXT   ends
 				end
-Microsoft (R) Macro Assembler Version 9.00.30729.01	    04/30/10 23:43:24
+Microsoft (R) Macro Assembler Version 10.00.40219.01	    08/06/13 00:13:37
 match686.asm						     Symbols 2 - 1
 
 
@@ -519,8 +520,8 @@ Segments and Groups:
                 N a m e                 Size     Length   Align   Combine Class
 
 FLAT . . . . . . . . . . . . . .	GROUP
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 DWord	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001E9 DWord	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001E9 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
