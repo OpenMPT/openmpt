@@ -3008,7 +3008,7 @@ void CModTree::InsertOrDupItem(bool insert)
 				sndFile.Order.AddSequence(true);
 			}
 			pModDoc->SetModified();
-			UpdateView(GetDocumentInfoFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE);
+			UpdateView(GetDocumentInfoFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE | (DWORD)(MAX_SEQUENCES << HINT_SHIFT_SEQUENCE));
 			pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
 		} else if(modItem.type == MODITEM_SAMPLE)
 		{
@@ -3530,7 +3530,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).m_sName = info->item.pszText;
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, HINT_SEQNAMES | HINT_MODSEQUENCE, NULL);
+				modDoc->UpdateAllViews(NULL, HINT_SEQNAMES | HINT_MODSEQUENCE | ((modItem.val1) << HINT_SHIFT_SEQUENCE), NULL);
 			}
 			break;
 
