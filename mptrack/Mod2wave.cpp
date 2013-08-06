@@ -37,43 +37,43 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 	case SampleFormatUnsigned8:
 		{
 			typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, sink);
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
 		}
 		break;
 	case SampleFormatInt16:
 		{
 			typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, sink);
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
 		}
 		break;
 	case SampleFormatInt24:
 		{
 			typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, sink);
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
 		}
 		break;
 	case SampleFormatInt32:
 		{
 			typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, sink);
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
 		}
 		break;
 	case SampleFormatFloat32:
 		{
 			typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, sink);
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
 		}
 		break;
 	case SampleFormatFixed5p27:
 		{
 			typedef SampleFormatToType<SampleFormatFixed5p27>::type Tsample;
-			AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, sink);
+			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
+			return sndFile.Read(count, target);
 		}
 		break;
 	}

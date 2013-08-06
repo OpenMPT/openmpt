@@ -146,8 +146,8 @@ BOOL CSoundFile::FadeSong(UINT msec)
 }
 
 
-CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioStreamSink &sink)
-//-------------------------------------------------------------------------------------
+CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget &target)
+//---------------------------------------------------------------------------------------
 {
 	ALWAYS_ASSERT(m_MixerSettings.IsValid());
 
@@ -263,7 +263,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioStreamSink
 			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, countChunk);
 		}
 
-		sink.DataCallback(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk);
+		target.DataCallback(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk);
 
 		// Buffer ready
 		countRendered += countChunk;

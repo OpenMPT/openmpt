@@ -199,10 +199,10 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		std::int16_t * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
-		AudioStreamGainSinkToBuffer<std::int16_t> sink(*m_Dither, 0, buffers, m_Gain);
+		AudioReadTargetGainBuffer<std::int16_t> target(*m_Dither, 0, buffers, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
-			sink
+			target
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -216,10 +216,10 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		float * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
-		AudioStreamGainSinkToBuffer<float> sink(*m_Dither, 0, buffers, m_Gain);
+		AudioReadTargetGainBuffer<float> target(*m_Dither, 0, buffers, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
-			sink
+			target
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -232,10 +232,10 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_t channels, std::int16_t * interleaved ) {
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
-		AudioStreamGainSinkToBuffer<std::int16_t> sink(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
+		AudioReadTargetGainBuffer<std::int16_t> target(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
-			sink
+			target
 			);
 		if ( count_chunk == 0 ) {
 			break;
@@ -248,10 +248,10 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved ) {
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
-		AudioStreamGainSinkToBuffer<float> sink(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
+		AudioReadTargetGainBuffer<float> target(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
-			sink
+			target
 			);
 		if ( count_chunk == 0 ) {
 			break;
