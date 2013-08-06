@@ -777,17 +777,17 @@ void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
 }
 
 
-//============================
-class StereoVuMeterSinkWrapper
-//============================
-	: public IAudioStreamSink
+//==============================
+class StereoVuMeterTargetWrapper
+//==============================
+	: public IAudioReadTarget
 {
 private:
 	const SampleFormat sampleFormat;
 	Dither &dither;
 	void *buffer;
 public:
-	StereoVuMeterSinkWrapper(SampleFormat sampleFormat_, Dither &dither_, void *buffer_)
+	StereoVuMeterTargetWrapper(SampleFormat sampleFormat_, Dither &dither_, void *buffer_)
 		: sampleFormat(sampleFormat_)
 		, dither(dither_)
 		, buffer(buffer_)
@@ -802,43 +802,43 @@ public:
 			case SampleFormatUnsigned8:
 				{
 					typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
-					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatInt16:
 				{
 					typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
-					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatInt24:
 				{
 					typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
-					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatInt32:
 				{
 					typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
-					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatFloat32:
 				{
 					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 			case SampleFormatFixed5p27:
 				{
 					typedef SampleFormatToType<SampleFormatFixed5p27>::type Tsample;
-					AudioStreamSinkToBuffer<Tsample> sink(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					sink.DataCallback(MixSoundBuffer, channels, countChunk);
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
 		}
@@ -853,8 +853,8 @@ void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	const SampleFormat sampleFormat = TrackerSettings::Instance().m_SampleFormat;
-	StereoVuMeterSinkWrapper sink(sampleFormat, m_Dither, pvData);
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(NumFrames, sink);
+	StereoVuMeterTargetWrapper target(sampleFormat, m_Dither, pvData);
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(NumFrames, target);
 	ASSERT(renderedFrames <= NumFrames);
 	CSoundFile::samplecount_t remainingFrames = NumFrames - renderedFrames;
 	if(remainingFrames > 0)
