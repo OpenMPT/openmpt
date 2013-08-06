@@ -231,6 +231,22 @@ STATIC_ASSERT(sizeof(int24) == 3);
 #define int24_min (0-0x00800000)
 #define int24_max (0+0x007fffff)
 
+struct fixed5p27
+{
+	// 5 integer bits (including sign)
+	// 27 fractional bits
+	int32 raw;
+
+	static fixed5p27 Raw(int32 x) { return fixed5p27().SetRaw(x); }
+
+	fixed5p27& SetRaw(int32 x) { raw = x; return *this; }
+	int32 GetRaw() const { return raw; }
+
+};
+STATIC_ASSERT(sizeof(fixed5p27) == 4);
+#define fixed5p27_min fixed5p27::Raw(int32_min)
+#define fixed5p27_max fixed5p27::Raw(int32_max)
+
 struct uint8_4
 {
 	uint8 x[4];

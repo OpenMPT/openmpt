@@ -25,16 +25,11 @@ MixerSettings::MixerSettings()
 	// Mixing Configuration
 	gnChannels = 2;
 	gdwMixingFreq = 44100;
-	m_SampleFormat = SampleFormatInt16;
 
 	m_nPreAmp = 128;
 
 	glVolumeRampUpSamples = 16;
 	glVolumeRampDownSamples = 42;
-
-#ifndef MODPLUG_TRACKER
-	m_FinalOutputGain = 1 << 16; // +/- 0dB
-#endif
 
 }
 

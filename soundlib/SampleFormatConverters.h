@@ -25,14 +25,12 @@ namespace SC { // SC = _S_ample_C_onversion
 
 
 
-// Every sample conversion functor has to typedef its input_t and output_t
+
+// Every sample decoding functor has to typedef its input_t and output_t
 // and has to provide a static const input_inc member
 // which describes by how many input_t elements inBuf has to be incremented between invocations.
 // input_inc is normally 1 except when decoding e.g. bigger sample values
 // from multiple char values.
-// Another possible use for input_inc could be reading only one channel of
-// an interleaved multi-channel sample (although there is currently no functor to do this).
-
 
 
 // decodes signed 7bit values stored as signed int8
@@ -182,12 +180,12 @@ struct DecodeScaledFloat32
 };
 
 template <typename Tsample>
-struct ReadSample
+struct DecodeIdentity
 {
 	typedef Tsample input_t;
 	typedef Tsample output_t;
 	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t * inBuf)
+	forceinline output_t operator() (const input_t *inBuf)
 	{
 		return *inBuf;
 	}
@@ -201,13 +199,17 @@ struct ConvertShift
 {
 	typedef Tsrc input_t;
 	typedef Tdst output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t * inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return mpt::saturate_cast<output_t>(*inBuf >> shift);
+		return mpt::saturate_cast<output_t>(val >> shift);
 	}
 };
 
+
+
+
+// Every sample conversion functor has to typedef its input_t and output_t.
+// The input_t argument is taken by value because we only deal with per-single-sample conversions here.
 
 
 // straight forward type conversions, clamping when converting from floating point.
@@ -219,10 +221,9 @@ struct Convert<Tid, Tid>
 {
 	typedef Tid input_t;
 	typedef Tid output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t * inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return *inBuf;
+		return val;
 	}
 };
 
@@ -231,10 +232,9 @@ struct Convert<int8, int16>
 {
 	typedef int16 input_t;
 	typedef int8 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return int8(*inBuf >> 8);
+		return int8(val >> 8);
 	}
 };
 
@@ -243,10 +243,9 @@ struct Convert<int8, int32>
 {
 	typedef int32 input_t;
 	typedef int8 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return int8(*inBuf >> 24);
+		return int8(val >> 24);
 	}
 };
 
@@ -255,10 +254,8 @@ struct Convert<int8, float32>
 {
 	typedef float32 input_t;
 	typedef int8 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		float val = *inBuf;
 		Limit(val, -1.0f, 1.0f);
 		val *= 128.0f;
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -272,10 +269,9 @@ struct Convert<int16, int8>
 {
 	typedef int8 input_t;
 	typedef int16 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return int16(*inBuf << 8);
+		return int16(val << 8);
 	}
 };
 
@@ -284,10 +280,9 @@ struct Convert<int16, int32>
 {
 	typedef int32 input_t;
 	typedef int16 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return int16(*inBuf >> 16);
+		return int16(val >> 16);
 	}
 };
 
@@ -296,10 +291,8 @@ struct Convert<int16, float32>
 {
 	typedef float32 input_t;
 	typedef int16 output_t;
-	static const int input_inc = 1;
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		float val = *inBuf;
 		Limit(val, -1.0f, 1.0f);
 		val *= 32768.0f;
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -307,6 +300,103 @@ struct Convert<int16, float32>
 		return mpt::saturate_cast<int16>(static_cast<int>(val * 2.0f + 1.0f) >> 1);
 	}
 };
+
+template <typename Tdst, typename Tsrc, int fractionalBits>
+struct ConvertFixedPoint;
+
+template <int fractionalBits>
+struct ConvertFixedPoint<uint8, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef uint8 output_t;
+	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		STATIC_ASSERT(shiftBits >= 1);
+		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
+		if(val < int8_min) val = int8_min;
+		if(val > int8_max) val = int8_max;
+		return (uint8)(val+0x80); // unsigned
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<int16, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef int16 output_t;
+	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		STATIC_ASSERT(shiftBits >= 1);
+		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
+		if(val < int16_min) val = int16_min;
+		if(val > int16_max) val = int16_max;
+		return (int16)val;
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<int24, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef int24 output_t;
+	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		STATIC_ASSERT(shiftBits >= 1);
+		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
+		if(val < int24_min) val = int24_min;
+		if(val > int24_max) val = int24_max;
+		return (int24)val;
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<int32, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef int32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		return (int32)(Clamp(val, (int)-((1<<fractionalBits)-1), (int)(1<<fractionalBits)-1)) << (sizeof(input_t)*8-1-fractionalBits);
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<float32, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef float32 output_t;
+	const float factor;
+	forceinline ConvertFixedPoint()
+		: factor( 1.0f / static_cast<float>(1 << fractionalBits) )
+	{
+		return;
+	}
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		return val * factor;
+	}
+};
+
+template <int fractionalBits>
+struct ConvertFixedPoint<fixed5p27, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef fixed5p27 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits == 27 && sizeof(input_t)*8 == 32);
+		return fixed5p27::Raw(val);
+	}
+};
+
 
 
 
@@ -322,8 +412,7 @@ struct ConversionChain
 	Func2 func2;
 	forceinline output_t operator() (const input_t *inBuf)
 	{
-		typename Func1::output_t tmp = func1(inBuf);
-		return func2(&tmp);
+		return func2(func1(inBuf));
 	}
 	forceinline ConversionChain(Func2 f2 = Func2(), Func1 f1 = Func1())
 		: func1(f1)
@@ -332,6 +421,7 @@ struct ConversionChain
 		return;
 	}
 };
+
 
 
 
@@ -344,12 +434,10 @@ struct Normalize<int32>
 	typedef int32 input_t;
 	typedef int32 output_t;
 	typedef uint32 peak_t;
-	static const int input_inc = 1;
 	uint32 maxVal;
 	Normalize() : maxVal(0) { }
-	forceinline void FindMax(const input_t *inBuf)
+	forceinline void FindMax(input_t val)
 	{
-		int32 val = *inBuf;
 		if(val < 0)
 		{
 			if(val == int32_min)
@@ -364,13 +452,13 @@ struct Normalize<int32>
 			maxVal = static_cast<uint32>(val);
 		}
 	}
-	bool IsSilent() const
+	forceinline bool IsSilent() const
 	{
 		return maxVal == 0;
 	}
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return Util::muldivrfloor(*inBuf, (uint32)1 << 31, maxVal);
+		return Util::muldivrfloor(val, (uint32)1 << 31, maxVal);
 	}
 	forceinline peak_t GetSrcPeak() const
 	{
@@ -384,24 +472,23 @@ struct Normalize<float32>
 	typedef float32 input_t;
 	typedef float32 output_t;
 	typedef float32 peak_t;
-	static const int input_inc = 1;
 	uint32 intMaxVal;
 	float maxValInv;
 	Normalize() : intMaxVal(0), maxValInv(1.0f) { }
-	forceinline void FindMax(const input_t *inBuf)
+	forceinline void FindMax(input_t val)
 	{
-		uint32 val = EncodeFloatNE(*inBuf);
-		val &= ~0x80000000;	// Remove sign for absolute value
+		uint32 ival = EncodeFloatNE(val);
+		ival &= ~0x80000000;	// Remove sign for absolute value
 
 		// IEEE float values are lexicographically ordered and can be compared when interpreted as integers.
 		// So we won't bother with loading the float into a floating point register here if we already have it in an integer register.
-		if(val > intMaxVal)
+		if(ival > intMaxVal)
 		{
-			ASSERT(*reinterpret_cast<float *>(&val) > DecodeFloatLE(uint8_4().SetLE(intMaxVal)));
-			intMaxVal = val;
+			ASSERT(*reinterpret_cast<float *>(&ival) > DecodeFloatLE(uint8_4().SetLE(intMaxVal)));
+			intMaxVal = ival;
 		}
 	}
-	bool IsSilent()
+	forceinline bool IsSilent()
 	{
 		if(intMaxVal == 0)
 		{
@@ -412,9 +499,9 @@ struct Normalize<float32>
 			return false;
 		}
 	}
-	forceinline output_t operator() (const input_t *inBuf)
+	forceinline output_t operator() (input_t val)
 	{
-		return *inBuf * maxValInv;
+		return val * maxValInv;
 	}
 	forceinline peak_t GetSrcPeak() const
 	{
@@ -423,10 +510,10 @@ struct Normalize<float32>
 };
 
 
-
 // Reads sample data with Func1, then normalizes the sample data, and then converts it with Func2.
 // Func1::output_t and Func2::input_t must be identical.
-// Func1 or Func2 can also be the identity transform (ReadSample<T>).
+// Func1 can also be the identity decode (DecodeIdentity<T>).
+// Func2 can also be the identity conversion (Convert<T,T>).
 template <typename Func2, typename Func1>
 struct NormalizationChain
 {
@@ -440,19 +527,15 @@ struct NormalizationChain
 	Func2 func2;
 	forceinline void FindMax(const input_t *inBuf)
 	{
-		typename Func1::output_t tmp = func1(inBuf);
-		normalize.FindMax(&tmp);
+		normalize.FindMax(func1(inBuf));
 	}
-	bool IsSilent()
+	forceinline bool IsSilent()
 	{
 		return normalize.IsSilent();
 	}
 	forceinline output_t operator() (const input_t *inBuf)
 	{
-		typename Func1::output_t tmp1 = func1(inBuf);
-		normalize_t norm = normalize(&tmp1);
-		typename Func2::output_t tmp2 = func2(&norm);
-		return tmp2;
+		return func2(normalize(func1(inBuf)));
 	}
 	forceinline peak_t GetSrcPeak() const
 	{
@@ -465,6 +548,7 @@ struct NormalizationChain
 		return;
 	}
 };
+
 
 
 
@@ -628,4 +712,32 @@ size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_
 	}
 
 	return numSamples * inSize;
+}
+
+
+template<int fractionalBits, typename Tsample, typename Tfixed>
+void ConvertInterleavedFixedPointToInterleaved(Tsample *p, const Tfixed *mixbuffer, std::size_t channels, std::size_t count)
+//--------------------------------------------------------------------------------------------------------------------------
+{
+	SC::ConvertFixedPoint<Tsample, int, fractionalBits> conv;
+	count *= channels;
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		p[i] = conv(mixbuffer[i]);
+	}
+}
+
+template<int fractionalBits, typename Tsample, typename Tfixed>
+void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const buffers, const Tfixed *mixbuffer, std::size_t channels, std::size_t count)
+//--------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	SC::ConvertFixedPoint<Tsample, int, fractionalBits> conv;
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buffers[channel][i] = conv(*mixbuffer);
+			mixbuffer++;
+		}
+	}
 }

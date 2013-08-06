@@ -12,6 +12,7 @@
 #include "mptrack.h"
 #include "MainFrm.h"
 #include "../sounddev/SoundDevice.h"
+#include "../soundlib/SampleFormatConverters.h"
 #include "moddoc.h"
 #include "childfrm.h"
 #include "Dlsbank.h"
@@ -242,8 +243,6 @@ VOID CMainFrame::Initialize()
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
 
-	CSoundFile::gpSndMixHook = CalcStereoVuMeters;
-
 	// Check for valid sound device
 	if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice), SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), nullptr, 0))
 	{
@@ -371,8 +370,6 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 BOOL CMainFrame::DestroyWindow()
 //------------------------------
 {
-	CSoundFile::gpSndMixHook = nullptr;
-
 	// Uninstall Keyboard Hook
 	if (ghKbdHook)
 	{
@@ -780,19 +777,92 @@ void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
 }
 
 
+//==============================
+class StereoVuMeterTargetWrapper
+//==============================
+	: public IAudioReadTarget
+{
+private:
+	const SampleFormat sampleFormat;
+	Dither &dither;
+	void *buffer;
+public:
+	StereoVuMeterTargetWrapper(SampleFormat sampleFormat_, Dither &dither_, void *buffer_)
+		: sampleFormat(sampleFormat_)
+		, dither(dither_)
+		, buffer(buffer_)
+	{
+		ALWAYS_ASSERT(sampleFormat.IsValid());
+	}
+	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	{
+		CMainFrame::CalcStereoVuMeters(MixSoundBuffer, countChunk, channels);
+		switch(sampleFormat.value)
+		{
+			case SampleFormatUnsigned8:
+				{
+					typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt16:
+				{
+					typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt24:
+				{
+					typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt32:
+				{
+					typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatFloat32:
+				{
+					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatFixed5p27:
+				{
+					typedef SampleFormatToType<SampleFormatFixed5p27>::type Tsample;
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+		}
+		// increment output buffer for potentially next callback
+		buffer = (char*)buffer + (sampleFormat.GetBitsPerSample()/8) * channels * countChunk;
+	}
+};
+
+
 void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
 //-------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->ReadInterleaved(pvData, NumFrames);
+	const SampleFormat sampleFormat = TrackerSettings::Instance().m_SampleFormat;
+	StereoVuMeterTargetWrapper target(sampleFormat, m_Dither, pvData);
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(NumFrames, target);
 	ASSERT(renderedFrames <= NumFrames);
 	CSoundFile::samplecount_t remainingFrames = NumFrames - renderedFrames;
 	if(remainingFrames > 0)
 	{
 		// The sound device interface expects the whole buffer to be filled, always.
 		// Clear remaining buffer if not enough samples got rendered.
-		std::size_t frameSize = m_pSndFile->m_MixerSettings.gnChannels * (m_pSndFile->m_MixerSettings.GetBitsPerSample()/8);
-		if(m_pSndFile->m_MixerSettings.IsUnsignedSampleFormat())
+		std::size_t frameSize = m_pSndFile->m_MixerSettings.gnChannels * (sampleFormat.GetBitsPerSample()/8);
+		if(sampleFormat.IsUnsigned())
 		{
 			std::memset((char*)(pvData) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
 		} else
@@ -819,51 +889,35 @@ void CMainFrame::AudioDone(ULONG NumSamples)
 }
 
 
-bool CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplespersec)
-//----------------------------------------------------------------------------------
+bool CMainFrame::audioTryOpeningDevice(UINT channels, SampleFormat sampleFormat, UINT samplespersec)
+//--------------------------------------------------------------------------------------------------
 {
-	WAVEFORMATEXTENSIBLE WaveFormat;
-
-	UINT bytespersample = (bits/8) * channels;
-	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
-	WaveFormat.Format.nChannels = (unsigned short) channels;
-	WaveFormat.Format.nSamplesPerSec = samplespersec;
-	WaveFormat.Format.nAvgBytesPerSec = samplespersec * bytespersample;
-	WaveFormat.Format.nBlockAlign = (unsigned short)bytespersample;
-	WaveFormat.Format.wBitsPerSample = (unsigned short)bits;
-	WaveFormat.Format.cbSize = 0;
-	// MultiChannel configuration
-	if ((WaveFormat.Format.wBitsPerSample == 32) || (WaveFormat.Format.nChannels > 2))
+	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+	const UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
+	if(gpSoundDevice && (gpSoundDevice->GetDeviceType() != nDevType))
 	{
-		const GUID guid_MEDIASUBTYPE_PCM = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x0, 0xAA, 0x0, 0x38, 0x9B, 0x71};
-		WaveFormat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
-		WaveFormat.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
-		WaveFormat.Samples.wValidBitsPerSample = WaveFormat.Format.wBitsPerSample;
-		switch(WaveFormat.Format.nChannels)
-		{
-		case 1:		WaveFormat.dwChannelMask = 0x0004; break; // FRONT_CENTER
-		case 2:		WaveFormat.dwChannelMask = 0x0003; break; // FRONT_LEFT | FRONT_RIGHT
-		case 3:		WaveFormat.dwChannelMask = 0x0103; break; // FRONT_LEFT|FRONT_RIGHT|BACK_CENTER
-		case 4:		WaveFormat.dwChannelMask = 0x0033; break; // FRONT_LEFT|FRONT_RIGHT|BACK_LEFT|BACK_RIGHT
-		default:	WaveFormat.dwChannelMask = 0; return false; break;
-		}
-		WaveFormat.SubFormat = guid_MEDIASUBTYPE_PCM;
+		delete gpSoundDevice;
+		gpSoundDevice = NULL;
 	}
+	if(!gpSoundDevice)
 	{
-		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-		UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
-		if(gpSoundDevice && (gpSoundDevice->GetDeviceType() != nDevType))
-		{
-			delete gpSoundDevice;
-			gpSoundDevice = NULL;
-		}
-		if(!gpSoundDevice) gpSoundDevice = CreateSoundDevice(nDevType);
-		if(!gpSoundDevice) return false;
-		gpSoundDevice->SetSource(this);
-		gpSoundDevice->Configure(m_hWnd, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().GetSoundDeviceFlags());
-		if (!gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), &WaveFormat.Format)) return false;
+		gpSoundDevice = CreateSoundDevice(nDevType);
 	}
-	return true;
+	if(!gpSoundDevice)
+	{
+		return false;
+	}
+	gpSoundDevice->SetSource(this);
+	SoundDeviceSettings settings;
+	settings.hWnd = m_hWnd;
+	settings.LatencyMS = TrackerSettings::Instance().m_LatencyMS;
+	settings.UpdateIntervalMS = TrackerSettings::Instance().m_UpdateIntervalMS;
+	settings.fulCfgOptions = TrackerSettings::Instance().GetSoundDeviceFlags();
+	settings.Samplerate = samplespersec;
+	settings.Channels = (uint8)channels;
+	settings.BitsPerSample = (uint8)sampleFormat.GetBitsPerSample();
+	settings.FloatingPoint = sampleFormat.IsFloat();
+	return gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), settings);
 }
 
 
@@ -886,18 +940,18 @@ bool CMainFrame::audioOpenDevice()
 	if(!err)
 	{
 		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-								TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
+								TrackerSettings::Instance().m_SampleFormat,
 								TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
 		SampleFormat fixedBitsPerSample = SampleFormatInvalid;
 		{
 			Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-			fixedBitsPerSample = (gpSoundDevice) ? static_cast<SampleFormat>(gpSoundDevice->HasFixedBitsPerSample()) : SampleFormatInvalid;
+			fixedBitsPerSample = (gpSoundDevice) ? SampleFormat(gpSoundDevice->HasFixedBitsPerSample()) : SampleFormatInvalid;
 		}
-		if(err && (fixedBitsPerSample && (fixedBitsPerSample != TrackerSettings::Instance().m_MixerSettings.m_SampleFormat)))
+		if(err && (fixedBitsPerSample.IsValid() && (fixedBitsPerSample != TrackerSettings::Instance().m_SampleFormat)))
 		{
-			if(fixedBitsPerSample) TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = fixedBitsPerSample;
+			TrackerSettings::Instance().m_SampleFormat = fixedBitsPerSample;
 			err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-									TrackerSettings::Instance().m_MixerSettings.m_SampleFormat,
+									TrackerSettings::Instance().m_SampleFormat,
 									TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
 		}
 	}
@@ -1701,7 +1755,7 @@ HWND CMainFrame::GetFollowSong() const
 
 
 BOOL CMainFrame::SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat sampleformat, UINT nChns, UINT latency_ms, UINT updateinterval_ms, LONG wd)
-//---------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const bool isPlaying = IsPlaying();
 	if ((TrackerSettings::Instance().GetSoundDeviceFlags() != deviceflags)
@@ -1709,7 +1763,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat samp
 	 || (TrackerSettings::Instance().m_nWaveDevice != wd)
 	 || (TrackerSettings::Instance().m_LatencyMS != latency_ms)
 	 || (TrackerSettings::Instance().m_UpdateIntervalMS != updateinterval_ms)
-	 || (TrackerSettings::Instance().m_MixerSettings.m_SampleFormat != sampleformat)
+	 || (TrackerSettings::Instance().m_SampleFormat != sampleformat)
 	 || (TrackerSettings::Instance().m_MixerSettings.gnChannels != nChns))
 	{
 		CModDoc *pActiveMod = NULL;
@@ -1723,7 +1777,7 @@ BOOL CMainFrame::SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat samp
 		TrackerSettings::Instance().SetSoundDeviceFlags(deviceflags);
 		TrackerSettings::Instance().m_LatencyMS = latency_ms;
 		TrackerSettings::Instance().m_UpdateIntervalMS = updateinterval_ms;
-		TrackerSettings::Instance().m_MixerSettings.m_SampleFormat = sampleformat;
+		TrackerSettings::Instance().m_SampleFormat = sampleformat;
 		TrackerSettings::Instance().m_MixerSettings.gnChannels = nChns;
 		{
 			CriticalSection cs;
@@ -1892,7 +1946,7 @@ void CMainFrame::OnViewOptions()
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().GetSoundDeviceFlags(), TrackerSettings::Instance().m_MixerSettings.m_SampleFormat, TrackerSettings::Instance().m_MixerSettings.gnChannels, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().m_nWaveDevice);
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq, TrackerSettings::Instance().GetSoundDeviceFlags(), TrackerSettings::Instance().m_SampleFormat, TrackerSettings::Instance().m_MixerSettings.gnChannels, TrackerSettings::Instance().m_LatencyMS, TrackerSettings::Instance().m_UpdateIntervalMS, TrackerSettings::Instance().m_nWaveDevice);
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;

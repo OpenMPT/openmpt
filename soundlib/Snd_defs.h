@@ -303,15 +303,16 @@ DECLARE_FLAGSET(SongFlags)
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
 
 
-enum { MIXING_ATTENUATION = 4, };
+enum { MIXING_ATTENUATION = 4 };
+enum { MIXING_FRACTIONAL_BITS = 32 - 1 - MIXING_ATTENUATION };
 
 enum
 {
-	MIXING_CLIPMAX = ((1<<(32-MIXING_ATTENUATION-1))-1),
+	MIXING_CLIPMAX = ((1<<MIXING_FRACTIONAL_BITS)-1),
 	MIXING_CLIPMIN = -(MIXING_CLIPMAX),
 };
 
-const float MIXING_SCALEF = static_cast<float>(1 << (32 - MIXING_ATTENUATION - 1));
+const float MIXING_SCALEF = static_cast<float>(1 << MIXING_FRACTIONAL_BITS);
 
 
 #define MAX_GLOBAL_VOLUME 256u

@@ -40,6 +40,7 @@
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/EQ.h"
 #include "Dither.h"
+#include "SampleFormatConverters.h"
 
 
 class FileReader;
@@ -193,17 +194,113 @@ void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCou
 void MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 void FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 
-void Convert32ToInterleaved(uint8 *dest, const int *mixbuffer, std::size_t count);
-void Convert32ToInterleaved(int16 *dest, const int *mixbuffer, std::size_t count);
-void Convert32ToInterleaved(int24 *dest, const int *mixbuffer, std::size_t count);
-void Convert32ToInterleaved(int32 *dest, const int *mixbuffer, std::size_t count);
-void Convert32ToInterleaved(float *dest, const int *mixbuffer, std::size_t count);
+#ifndef MODPLUG_TRACKER
+void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16);
+void ApplyGain(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor);
+#endif // !MODPLUG_TRACKER
 
-void Convert32ToNonInterleaved(uint8 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
-void Convert32ToNonInterleaved(int16 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
-void Convert32ToNonInterleaved(int24 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
-void Convert32ToNonInterleaved(int32 * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
-void Convert32ToNonInterleaved(float * const * const buffers, const int *mixbuffer, std::size_t channels, std::size_t count);
+
+class IAudioReadTarget
+{
+public:
+	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
+};
+
+
+template<typename Tsample>
+class AudioReadTargetBuffer
+	: public IAudioReadTarget
+{
+private:
+	std::size_t countRendered;
+	Dither &dither;
+protected:
+	Tsample *outputBuffer;
+	Tsample * const *outputBuffers;
+public:
+	AudioReadTargetBuffer(Dither &dither_, Tsample *buffer, Tsample * const *buffers)
+		: countRendered(0)
+		, dither(dither_)
+		, outputBuffer(buffer)
+		, outputBuffers(buffers)
+	{
+		ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
+	}
+	virtual ~AudioReadTargetBuffer() { }
+	std::size_t GetRenderedCount() const { return countRendered; }
+public:
+	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	{
+		// Convert to output sample format and optionally perform dithering and clipping if needed
+
+		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat;
+
+		if(sampleFormat.IsInt())
+		{
+			dither.Process(MixSoundBuffer, countChunk, channels, sampleFormat.GetBitsPerSample());
+		}
+
+		if(outputBuffer)
+		{
+			ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(outputBuffer + (channels * countRendered), MixSoundBuffer, channels, countChunk);
+		}
+		if(outputBuffers)
+		{
+			Tsample *buffers[4] = { nullptr, nullptr, nullptr, nullptr };
+			for(std::size_t channel = 0; channel < channels; ++channel)
+			{
+				buffers[channel] = outputBuffers[channel] + countRendered;
+			}
+			ConvertInterleavedFixedPointToNonInterleaved<MIXING_FRACTIONAL_BITS>(buffers, MixSoundBuffer, channels, countChunk);
+		}
+
+		countRendered += countChunk;
+	}
+};
+
+
+#ifndef MODPLUG_TRACKER
+
+template<typename Tsample>
+class AudioReadTargetGainBuffer
+	: public AudioReadTargetBuffer<Tsample>
+{
+private:
+	typedef AudioReadTargetBuffer<Tsample> Tbase;
+private:
+	const float gainFactor;
+public:
+	AudioReadTargetGainBuffer(Dither &dither, Tsample *buffer, Tsample * const *buffers, float gainFactor_)
+		: Tbase(dither, buffer, buffers)
+		, gainFactor(gainFactor_)
+	{
+		return;
+	}
+	virtual ~AudioReadTargetGainBuffer() { }
+public:
+	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	{
+		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat;
+		const std::size_t countRendered = Tbase::GetRenderedCount();
+
+		if(sampleFormat.IsInt())
+		{
+			// Apply final output gain for non floating point output
+			ApplyGain(MixSoundBuffer, channels, countChunk, Util::Round<int32>(gainFactor * (1<<16)));
+		}
+
+		Tbase::DataCallback(MixSoundBuffer, channels, countChunk);
+
+		if(sampleFormat.IsFloat())
+		{
+			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
+			ApplyGain(reinterpret_cast<float*>(Tbase::outputBuffer), reinterpret_cast<float*const*>(Tbase::outputBuffers), countRendered, channels, countChunk, gainFactor);
+		}
+
+	}
+};
+
+#endif // !MODPLUG_TRACKER
 
 
 #if MPT_COMPILER_MSVC
@@ -321,11 +418,7 @@ public:
 #ifndef NO_AGC
 	CAGC m_AGC;
 #endif
-	Dither m_Dither;
 
-#ifdef MODPLUG_TRACKER
-	static LPSNDMIXHOOKPROC gpSndMixHook;
-#endif
 #ifndef NO_VST
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 #endif
@@ -604,10 +697,8 @@ public:
 	void StopAllVsti();    //rewbs.VSTCompliance
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	samplecount_t ReadInterleaved(void *outputBuffer, samplecount_t count);
-	samplecount_t ReadNonInterleaved(void * const *outputBuffers, samplecount_t count);
+	samplecount_t Read(samplecount_t count, IAudioReadTarget &target);
 private:
-	samplecount_t Read(samplecount_t count, void *outputBuffer, void * const *outputBuffers);
 	void CreateStereoMix(int count);
 public:
 	BOOL FadeSong(UINT msec);
@@ -799,13 +890,6 @@ public:
 	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif // MODPLUG_TRACKER
 	void ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long countChunk);
-
-#ifndef MODPLUG_TRACKER
-	void ApplyFinalOutputGain(int *soundBuffer, std::size_t countChunk);
-	void ApplyFinalOutputGainFloat(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk);
-#endif // !MODPLUG_TRACKER
-
-	void ConvertMixBufferToOutput(void *outputBuffer, void * const *outputBuffers, std::size_t countRendered, std::size_t countChunk);
 
 	// System-Dependant functions
 public:
