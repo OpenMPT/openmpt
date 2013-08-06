@@ -18,8 +18,6 @@
 #include "Resampler.h"
 #include "WindowedFIR.h"
 
-#include "SampleFormatConverters.h"
-
 
 // 4x256 taps polyphase FIR resampling filter
 #define gFastSinc CResampler::FastSincTable
