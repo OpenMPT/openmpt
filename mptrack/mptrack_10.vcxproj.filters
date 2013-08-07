@@ -888,6 +888,9 @@
     <ClInclude Include="..\soundlib\Dither.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\AudioReadTarget.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">

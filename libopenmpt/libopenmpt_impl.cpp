@@ -23,8 +23,7 @@
 #include <cstring>
 
 #include "soundlib/Sndfile.h"
-#include "soundlib/Dither.h"
-#include "soundlib/SampleFormatConverters.h"
+#include "soundlib/AudioReadTarget.h"
 #include "soundlib/FileReader.h"
 
 namespace openmpt {

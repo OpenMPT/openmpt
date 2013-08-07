@@ -422,6 +422,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClInclude Include="..\common\versionNumber.h" />
     <ClInclude Include="..\include\pugixml\src\pugiconfig.hpp" />
     <ClInclude Include="..\include\pugixml\src\pugixml.hpp" />
+    <ClInclude Include="..\soundlib\AudioReadTarget.h" />
     <ClInclude Include="..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\soundlib\Dither.h" />
     <ClInclude Include="..\soundlib\Dlsbank.h" />
