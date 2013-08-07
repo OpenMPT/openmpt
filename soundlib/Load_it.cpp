@@ -235,12 +235,15 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 //////////////////////////////////////////////////////////
 // Impulse Tracker IT file support
 
+#ifndef MODPLUG_NO_FILESAVE
 
 static uint8 ConvertVolParam(const ModCommand *m)
 //-----------------------------------------------
 {
 	return MIN(m->vol, 9);
 }
+
+#endif // MODPLUG_NO_FILESAVE
 
 
 size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers)
