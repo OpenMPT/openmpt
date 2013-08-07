@@ -21,7 +21,7 @@
 #include "../common/version.h"
 #include "ACMConvert.h"
 #include "../soundlib/Dither.h"
-#include "../soundlib/SampleFormatConverters.h"
+#include "../soundlib/AudioReadTarget.h"
 
 #include <fstream>
 

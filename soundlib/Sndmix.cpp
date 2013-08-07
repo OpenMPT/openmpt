@@ -15,8 +15,6 @@
 #include "MIDIEvents.h"
 #include "tuning.h"
 #include "Tables.h"
-#include "Dither.h"
-#include "SampleFormatConverters.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
 #endif

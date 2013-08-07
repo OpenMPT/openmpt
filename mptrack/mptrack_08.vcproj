@@ -821,6 +821,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\AudioReadTarget.h"
+				>
+			</File>
+			<File
 				RelativePath=".\AutoSaver.h"
 				>
 			</File>

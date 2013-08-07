@@ -482,6 +482,7 @@
     <ClInclude Include="..\sounddsp\DSP.h" />
     <ClInclude Include="..\sounddsp\EQ.h" />
     <ClInclude Include="..\sounddsp\Reverb.h" />
+    <ClInclude Include="..\soundlib\AudioReadTarget.h" />
     <ClInclude Include="..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\soundlib\Dither.h" />
     <ClInclude Include="..\soundlib\Dlsbank.h" />
