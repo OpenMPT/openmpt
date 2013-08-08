@@ -274,9 +274,9 @@
     <ClCompile Include="..\soundlib\Message.cpp" />
     <ClCompile Include="..\soundlib\MIDIEvents.cpp" />
     <ClCompile Include="..\soundlib\MIDIMacros.cpp" />
+    <ClCompile Include="..\soundlib\MixerLoops.cpp" />
     <ClCompile Include="..\soundlib\MixerSettings.cpp" />
     <ClCompile Include="..\soundlib\Mmcmp.cpp" />
-    <ClCompile Include="..\soundlib\Mmx_mix.cpp" />
     <ClCompile Include="..\soundlib\ModChannel.cpp" />
     <ClCompile Include="..\soundlib\modcommand.cpp" />
     <ClCompile Include="..\soundlib\ModInstrument.cpp" />
@@ -493,6 +493,7 @@
     <ClInclude Include="..\soundlib\Message.h" />
     <ClInclude Include="..\soundlib\MIDIEvents.h" />
     <ClInclude Include="..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\soundlib\MixerLoops.h" />
     <ClInclude Include="..\soundlib\MixerSettings.h" />
     <ClInclude Include="..\soundlib\ModChannel.h" />
     <ClInclude Include="..\soundlib\modcommand.h" />

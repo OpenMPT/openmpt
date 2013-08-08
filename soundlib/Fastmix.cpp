@@ -15,6 +15,7 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 
+#include "MixerLoops.h"
 #include "Resampler.h"
 #include "WindowedFIR.h"
 
@@ -456,14 +457,6 @@ typedef void (* LPMIXINTERFACE)(ModChannel *, const CResampler *, int *, int *);
 		pChannel->rampRightVol = rampRightVol;\
 		pChannel->rightVol = rampRightVol >> VOLUMERAMPPRECISION;\
 	}
-
-
-/////////////////////////////////////////////////////
-//
-
-void InitMixBuffer(int *pBuffer, UINT nSamples);
-void EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples);
-void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 
 
 /////////////////////////////////////////////////////
@@ -1605,6 +1598,8 @@ void CSoundFile::CreateStereoMix(int count)
 void CSoundFile::ProcessPlugins(UINT nCount)
 //------------------------------------------
 {
+	const float IntToFloat = m_PlayConfig.getIntToFloat();
+	const float FloatToInt = m_PlayConfig.getFloatToInt();
 	// Setup float inputs
 	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
@@ -1629,12 +1624,12 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			// Setup float input
 			if (pState->dwFlags & SNDMIXPLUGINSTATE::psfMixReady)
 			{
-				StereoMixToFloat(pState->pMixBuffer, pState->pOutBufferL, pState->pOutBufferR, nCount);
+				StereoMixToFloat(pState->pMixBuffer, pState->pOutBufferL, pState->pOutBufferR, nCount, IntToFloat);
 			} else
 			if (pState->nVolDecayR|pState->nVolDecayL)
 			{
 				StereoFill(pState->pMixBuffer, nCount, &pState->nVolDecayR, &pState->nVolDecayL);
-				StereoMixToFloat(pState->pMixBuffer, pState->pOutBufferL, pState->pOutBufferR, nCount);
+				StereoMixToFloat(pState->pMixBuffer, pState->pOutBufferL, pState->pOutBufferR, nCount, IntToFloat);
 			} else
 			{
 				memset(pState->pOutBufferL, 0, nCount * sizeof(float));
@@ -1644,7 +1639,7 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 		}
 	}
 	// Convert mix buffer
-	StereoMixToFloat(MixSoundBuffer, MixFloatBuffer, MixFloatBuffer + MIXBUFFERSIZE, nCount);
+	StereoMixToFloat(MixSoundBuffer, MixFloatBuffer, MixFloatBuffer + MIXBUFFERSIZE, nCount, IntToFloat);
 	float *pMixL = MixFloatBuffer;
 	float *pMixR = MixFloatBuffer + MIXBUFFERSIZE;
 
@@ -1730,365 +1725,6 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			}
 		}
 	}
-	FloatToStereoMix(pMixL, pMixR, MixSoundBuffer, nCount);
+	FloatToStereoMix(pMixL, pMixR, MixSoundBuffer, nCount, FloatToInt);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-void InitMixBuffer(int *pBuffer, UINT nSamples)
-//---------------------------------------------
-{
-	memset(pBuffer, 0, nSamples * sizeof(int));
-}
-
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4731) // ebp modified
-#endif
-
-#ifdef ENABLE_X86
-static void X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames)
-//-------------------------------------------------------------------------------
-{
-	_asm {
-	mov ecx, nFrames	// ecx = framecount
-	mov esi, pFrontBuf	// esi = front buffer
-	mov edi, pRearBuf	// edi = rear buffer
-	lea esi, [esi+ecx*8]	// esi = &front[N*2]
-	lea edi, [edi+ecx*8]	// edi = &rear[N*2]
-	lea ebx, [esi+ecx*8]	// ebx = &front[N*4]
-	push ebp
-interleaveloop:
-	mov eax, dword ptr [esi-8]
-	mov edx, dword ptr [esi-4]
-	sub ebx, 16
-	mov ebp, dword ptr [edi-8]
-	mov dword ptr [ebx], eax
-	mov dword ptr [ebx+4], edx
-	mov eax, dword ptr [edi-4]
-	sub esi, 8
-	sub edi, 8
-	dec ecx
-	mov dword ptr [ebx+8], ebp
-	mov dword ptr [ebx+12], eax
-	jnz interleaveloop
-	pop ebp
-	}
-}
-#endif
-
-static void C_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames)
-//-----------------------------------------------------------------------------
-{
-	// copy backwards as we are writing back into FrontBuf
-	for(int i=nFrames-1; i>=0; i--)
-	{
-		pFrontBuf[i*4+3] = pRearBuf[i*2+1];
-		pFrontBuf[i*4+2] = pRearBuf[i*2+0];
-		pFrontBuf[i*4+1] = pFrontBuf[i*2+1];
-		pFrontBuf[i*4+0] = pFrontBuf[i*2+0];
-	}
-}
-
-void InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames)
-//--------------------------------------------------------------------
-{
-	#ifdef ENABLE_X86
-		X86_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
-	#else
-		C_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
-	#endif
-}
-
-
-#ifdef ENABLE_X86
-static void X86_MonoFromStereo(int *pMixBuf, UINT nSamples)
-//---------------------------------------------------------
-{
-	_asm {
-	mov ecx, nSamples
-	mov esi, pMixBuf
-	mov edi, esi
-stloop:
-	mov eax, dword ptr [esi]
-	mov edx, dword ptr [esi+4]
-	add edi, 4
-	add esi, 8
-	add eax, edx
-	sar eax, 1
-	dec ecx
-	mov dword ptr [edi-4], eax
-	jnz stloop
-	}
-}
-#endif
-
-static void C_MonoFromStereo(int *pMixBuf, UINT nSamples)
-//-------------------------------------------------------
-{
-	for(UINT i=0; i<nSamples; ++i)
-	{
-		pMixBuf[i] = (pMixBuf[i*2] + pMixBuf[i*2+1]) / 2;
-	}
-}
-
-void MonoFromStereo(int *pMixBuf, UINT nSamples)
-//----------------------------------------------
-{
-	#ifdef ENABLE_X86
-		X86_MonoFromStereo(pMixBuf, nSamples);
-	#else
-		C_MonoFromStereo(pMixBuf, nSamples);
-	#endif
-}
-
-
-#define OFSDECAYSHIFT	8
-#define OFSDECAYMASK	0xFF
-
-
-#ifdef ENABLE_X86
-static void X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
-//-----------------------------------------------------------------------------------
-{
-	_asm {
-	mov edi, pBuffer
-	mov ecx, nSamples
-	mov eax, lpROfs
-	mov edx, lpLOfs
-	mov eax, [eax]
-	mov edx, [edx]
-	or ecx, ecx
-	jz fill_loop
-	mov ebx, eax
-	or ebx, edx
-	jz fill_loop
-ofsloop:
-	mov ebx, eax
-	mov esi, edx
-	neg ebx
-	neg esi
-	sar ebx, 31
-	sar esi, 31
-	and ebx, OFSDECAYMASK
-	and esi, OFSDECAYMASK
-	add ebx, eax
-	add esi, edx
-	sar ebx, OFSDECAYSHIFT
-	sar esi, OFSDECAYSHIFT
-	sub eax, ebx
-	sub edx, esi
-	mov ebx, eax
-	or ebx, edx
-	jz fill_loop
-	add edi, 8
-	dec ecx
-	mov [edi-8], eax
-	mov [edi-4], edx
-	jnz ofsloop
-fill_loop:
-	mov ebx, ecx
-	and ebx, 3
-	jz fill4x
-fill1x:
-	mov [edi], eax
-	mov [edi+4], edx
-	add edi, 8
-	dec ebx
-	jnz fill1x
-fill4x:
-	shr ecx, 2
-	or ecx, ecx
-	jz done
-fill4xloop:
-	mov [edi], eax
-	mov [edi+4], edx
-	mov [edi+8], eax
-	mov [edi+12], edx
-	add edi, 8*4
-	dec ecx
-	mov [edi-16], eax
-	mov [edi-12], edx
-	mov [edi-8], eax
-	mov [edi-4], edx
-	jnz fill4xloop
-done:
-	mov esi, lpROfs
-	mov edi, lpLOfs
-	mov [esi], eax
-	mov [edi], edx
-	}
-}
-#endif
-
-// c implementation taken from libmodplug
-static void C_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
-//---------------------------------------------------------------------------------
-{
-	int rofs = *lpROfs;
-	int lofs = *lpLOfs;
-
-	if ((!rofs) && (!lofs))
-	{
-		InitMixBuffer(pBuffer, nSamples*2);
-		return;
-	}
-	for (UINT i=0; i<nSamples; i++)
-	{
-		int x_r = (rofs + (((-rofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
-		int x_l = (lofs + (((-lofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
-		rofs -= x_r;
-		lofs -= x_l;
-		pBuffer[i*2] = x_r;
-		pBuffer[i*2+1] = x_l;
-	}
-	*lpROfs = rofs;
-	*lpLOfs = lofs;
-}
-
-void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
-//------------------------------------------------------------------------
-{
-	#ifdef ENABLE_X86
-		X86_StereoFill(pBuffer, nSamples, lpROfs, lpLOfs);
-	#else
-		C_StereoFill(pBuffer, nSamples, lpROfs, lpLOfs);
-	#endif
-}
-
-
-#ifdef ENABLE_X86
-typedef ModChannel ModChannel_;
-static void X86_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
-//------------------------------------------------------------------------------
-{
-	_asm {
-	mov esi, pChannel
-	mov edi, pBuffer
-	mov ecx, nSamples
-	mov eax, dword ptr [esi+ModChannel_.nROfs]
-	mov edx, dword ptr [esi+ModChannel_.nLOfs]
-	or ecx, ecx
-	jz brkloop
-ofsloop:
-	mov ebx, eax
-	mov esi, edx
-	neg ebx
-	neg esi
-	sar ebx, 31
-	sar esi, 31
-	and ebx, OFSDECAYMASK
-	and esi, OFSDECAYMASK
-	add ebx, eax
-	add esi, edx
-	sar ebx, OFSDECAYSHIFT
-	sar esi, OFSDECAYSHIFT
-	sub eax, ebx
-	sub edx, esi
-	mov ebx, eax
-	add dword ptr [edi], eax
-	add dword ptr [edi+4], edx
-	or ebx, edx
-	jz brkloop
-	add edi, 8
-	dec ecx
-	jnz ofsloop
-brkloop:
-	mov esi, pChannel
-	mov dword ptr [esi+ModChannel_.nROfs], eax
-	mov dword ptr [esi+ModChannel_.nLOfs], edx
-	}
-}
-#endif
-
-// c implementation taken from libmodplug
-static void C_EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
-//----------------------------------------------------------------------------
-{
-
-	int rofs = pChannel->nROfs;
-	int lofs = pChannel->nLOfs;
-
-	if ((!rofs) && (!lofs)) return;
-	for (UINT i=0; i<nSamples; i++)
-	{
-		int x_r = (rofs + (((-rofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
-		int x_l = (lofs + (((-lofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
-		rofs -= x_r;
-		lofs -= x_l;
-		pBuffer[i*2] += x_r;
-		pBuffer[i*2+1] += x_l;
-	}
-	pChannel->nROfs = rofs;
-	pChannel->nLOfs = lofs;
-}
-
-void EndChannelOfs(ModChannel *pChannel, int *pBuffer, UINT nSamples)
-//-------------------------------------------------------------------
-{
-	#ifdef ENABLE_X86
-		X86_EndChannelOfs(pChannel, pBuffer, nSamples);
-	#else
-		C_EndChannelOfs(pChannel, pBuffer, nSamples);
-	#endif
-}
-
-
-
-#ifndef MODPLUG_TRACKER
-
-void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16)
-//---------------------------------------------------------------------------------------------------
-{
-	if(gainFactor16_16 == (1<<16))
-	{
-		// nothing to do, gain == +/- 0dB
-		return; 
-	}
-	// no clipping prevention is done here
-	int * buf = soundBuffer;
-	for(std::size_t i=0; i<countChunk*channels; ++i)
-	{
-		*buf = Util::muldiv(*buf, gainFactor16_16, 1<<16);
-		buf++;
-	}
-}
-
-static void ApplyGain(float *beg, float *end, float factor)
-//---------------------------------------------------------
-{
-	for(float *it = beg; it != end; ++it)
-	{
-		*it *= factor;
-	}
-}
-
-void ApplyGain(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor)
-//----------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	if(gainFactor == 1.0f)
-	{
-		// nothing to do, gain == +/- 0dB
-		return;
-	}
-	if(outputBuffer)
-	{
-		ApplyGain(
-			outputBuffer + (channels * offset),
-			outputBuffer + (channels * (offset + countChunk)),
-			gainFactor);
-	}
-	if(outputBuffers)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			ApplyGain(
-				outputBuffers[channel] + offset,
-				outputBuffers[channel] + offset + countChunk,
-				gainFactor);
-		}
-	}
-}
-
-#endif // !MODPLUG_TRACKER

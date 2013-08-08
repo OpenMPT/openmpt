@@ -199,9 +199,6 @@
     <ClCompile Include="..\soundlib\Mmcmp.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\Mmx_mix.cpp">
-      <Filter>Source Files\soundlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\mod_specifications.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
@@ -479,6 +476,9 @@
       <Filter>Source Files\soundlib\Module Loaders</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Dither.cpp">
+      <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\MixerLoops.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
   </ItemGroup>
@@ -889,6 +889,9 @@
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\AudioReadTarget.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\MixerLoops.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
   </ItemGroup>
