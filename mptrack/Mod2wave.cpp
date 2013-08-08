@@ -20,6 +20,7 @@
 #include "WAVTools.h"
 #include "../common/version.h"
 #include "ACMConvert.h"
+#include "../soundlib/MixerLoops.h"
 #include "../soundlib/Dither.h"
 #include "../soundlib/AudioReadTarget.h"
 

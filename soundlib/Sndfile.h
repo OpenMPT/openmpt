@@ -187,17 +187,6 @@ class CModDoc;
 #endif // MODPLUG_TRACKER
 
 
-void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
-void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
-void MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
-void FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
-
-#ifndef MODPLUG_TRACKER
-void ApplyGain(int *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16);
-void ApplyGain(float *outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor);
-#endif // !MODPLUG_TRACKER
-
-
 class IAudioReadTarget
 {
 public:
@@ -622,16 +611,6 @@ public:
 #ifndef NO_EQ
 	void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
-	// Float <-> Int conversion routines
-	forceinline void StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
-	{
-		::StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_PlayConfig.getIntToFloat());
-	}
-	forceinline void FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
-	{
-		::FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_PlayConfig.getFloatToInt());
-	}
-
 public:
 	BOOL ReadNote();
 	BOOL ProcessRow();

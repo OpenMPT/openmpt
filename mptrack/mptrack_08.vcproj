@@ -395,7 +395,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\Mmx_mix.cpp"
+				RelativePath="..\soundlib\MixerLoops.cpp"
 				>
 			</File>
 			<File
@@ -958,6 +958,10 @@
 			</File>
 			<File
 				RelativePath="..\common\misc_util.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\MixerLoops.h"
 				>
 			</File>
 			<File

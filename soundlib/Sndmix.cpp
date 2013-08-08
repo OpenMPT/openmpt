@@ -12,6 +12,7 @@
 #include "stdafx.h"
 
 #include "Sndfile.h"
+#include "MixerLoops.h"
 #include "MIDIEvents.h"
 #include "tuning.h"
 #include "Tables.h"
@@ -25,11 +26,6 @@
 #ifndef NO_VST
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 #endif
-
-
-void InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nFrames);
-void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
-void MonoFromStereo(int *pMixBuf, UINT nSamples);
 
 
 // Log tables for pre-amp
