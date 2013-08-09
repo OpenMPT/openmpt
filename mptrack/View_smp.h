@@ -87,7 +87,7 @@ protected:
 	UINT ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
 	UINT ScrollPosToSamplePos(UINT nZoom) const {return (nZoom > 0) ? (m_nScrollPos << (nZoom - 1)) : 0;}
 
-	void AdjustLoopPoints(UINT &loopStart, UINT &loopEnd, UINT length) const;
+	void AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, SmpLength length) const;
 
 	void OnMonoConvert(ctrlSmp::StereoToMonoMode convert);
 

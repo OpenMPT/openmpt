@@ -478,7 +478,7 @@ VOID CLayer3Convert::UpdateDialog()
 	pwfx->wBitsPerSample = 16;
 	pwfx->nBlockAlign = pwfx->nChannels * pwfx->wBitsPerSample / 8;
 	pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
-	acmConvert.AcmFormatEnum(NULL, &afd, AcmFormatEnumCB, (DWORD)this, ACM_FORMATENUMF_CONVERT);
+	acmConvert.AcmFormatEnum(NULL, &afd, AcmFormatEnumCB, (DWORD_PTR)this, ACM_FORMATENUMF_CONVERT);
 	m_CbnFormat.SetCurSel(m_nFormatIndex);
 }
 
@@ -491,8 +491,8 @@ void CLayer3Convert::GetFormat(PMPEGLAYER3WAVEFORMAT pwfx, HACMDRIVERID *phadid)
 }
 
 
-BOOL CLayer3Convert::AcmFormatEnumCB(HACMDRIVERID hdid, LPACMFORMATDETAILS pafd, DWORD dwInstance, DWORD fdwSupport)
-//------------------------------------------------------------------------------------------------------------------
+BOOL CLayer3Convert::AcmFormatEnumCB(HACMDRIVERID hdid, LPACMFORMATDETAILS pafd, DWORD_PTR dwInstance, DWORD fdwSupport)
+//----------------------------------------------------------------------------------------------------------------------
 {
 	if (dwInstance)
 	{

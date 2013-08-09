@@ -200,7 +200,6 @@ void ITInstrument::ConvertEndianness()
 	SwapBytesLE(fadeout);
 	SwapBytesLE(trkvers);
 	SwapBytesLE(mbank);
-	SwapBytesLE(dummy);
 }
 
 
@@ -422,7 +421,7 @@ size_t ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExpor
 	if(usedExtension)
 	{
 		// If we actually had to extend the sample map, update the magic bytes and instrument size.
-		iti.dummy = ITInstrumentEx::mptx;
+		memcpy(iti.dummy, "MPTX", 4);
 		instSize = sizeof(ITInstrumentEx);
 	}
 
@@ -437,7 +436,7 @@ size_t ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 	size_t insSize = iti.ConvertToMPT(mptIns, fromType);
 
 	// Is this actually an extended instrument?
-	if(insSize == 0 || iti.dummy != ITInstrumentEx::mptx)
+	if(insSize == 0 || memcmp(iti.dummy, "MPTX", 4))
 	{
 		return insSize;
 	}

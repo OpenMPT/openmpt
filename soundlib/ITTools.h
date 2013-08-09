@@ -200,7 +200,7 @@ struct PACKED ITInstrument
 	ITEnvelope volenv;		// Volume Envelope
 	ITEnvelope panenv;		// Pan Envelope
 	ITEnvelope pitchenv;	// Pitch / Filter Envelope
-	uint32 dummy;			// IT saves some additional padding bytes to match the size of the old instrument format for simplified loading. We use them for some hacks.
+	char   dummy[4];		// IT saves some additional padding bytes to match the size of the old instrument format for simplified loading. We use them for some hacks.
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness();

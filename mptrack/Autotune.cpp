@@ -295,7 +295,7 @@ void CAutotuneDlg::OnOK()
 {
 	CDialog::OnOK();
 
-	targetNote = m_CbnNoteBox.GetItemData(m_CbnNoteBox.GetCurSel());
+	targetNote = (int)m_CbnNoteBox.GetItemData(m_CbnNoteBox.GetCurSel());
 	pitchReference = GetDlgItemInt(IDC_EDIT1);
 }
 

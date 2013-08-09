@@ -150,8 +150,8 @@ BOOL ACMConvert::UninitializeACM()
 }
 
 
-MMRESULT ACMConvert::AcmFormatEnum(HACMDRIVER had, LPACMFORMATDETAILSA pafd, ACMFORMATENUMCBA fnCallback, DWORD dwInstance, DWORD fdwEnum)
-//----------------------------------------------------------------------------------------------------------------------------------------
+MMRESULT ACMConvert::AcmFormatEnum(HACMDRIVER had, LPACMFORMATDETAILSA pafd, ACMFORMATENUMCBA fnCallback, DWORD_PTR dwInstance, DWORD fdwEnum)
+//--------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MMRESULT err = MMSYSERR_INVALPARAM;
 	if ((m_hBladeEnc) || (m_hLameEnc))
@@ -218,8 +218,8 @@ MMRESULT ACMConvert::AcmFormatEnum(HACMDRIVER had, LPACMFORMATDETAILSA pafd, ACM
 }
 
 
-BOOL ACMConvert::AcmFormatEnumCB(HACMDRIVERID, LPACMFORMATDETAILS pafd, DWORD, DWORD fdwSupport)
-//----------------------------------------------------------------------------------------------
+BOOL ACMConvert::AcmFormatEnumCB(HACMDRIVERID, LPACMFORMATDETAILS pafd, DWORD_PTR, DWORD fdwSupport)
+//--------------------------------------------------------------------------------------------------
 {
 	if ((pafd) && (fdwSupport & ACMDRIVERDETAILS_SUPPORTF_CODEC))
 	{
@@ -311,8 +311,8 @@ MMRESULT ACMConvert::AcmStreamOpen(
 	LPWAVEFORMATEX          pwfxSrc,    // source format to convert
 	LPWAVEFORMATEX          pwfxDst,    // required destination format
 	LPWAVEFILTER            pwfltr,     // optional filter
-	DWORD                   dwCallback, // callback
-	DWORD                   dwInstance, // callback instance data
+	DWORD_PTR               dwCallback, // callback
+	DWORD_PTR               dwInstance, // callback instance data
 	DWORD                   fdwOpen)    // ACM_STREAMOPENF_* and CALLBACK_*
 //--------------------------------------------------------------------------
 {

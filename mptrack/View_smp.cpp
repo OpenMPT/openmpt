@@ -1750,8 +1750,8 @@ void CViewSample::OnEditSelectAll()
 
 
 // Update loop points after deleting a sample selection
-void CViewSample::AdjustLoopPoints(UINT &loopStart, UINT &loopEnd, UINT length) const
-//-----------------------------------------------------------------------------------
+void CViewSample::AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, SmpLength length) const
+//--------------------------------------------------------------------------------------------------
 {
 	if(m_dwBeginSel < loopStart  && m_dwEndSel < loopStart)
 	{
