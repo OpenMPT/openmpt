@@ -1102,7 +1102,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
 				const ModChannel &chn = m_pSndFile->Chn[k];
-				uint32 pos = Notification::PosInvalid;
+				SmpLength pos = Notification::PosInvalid;
 
 				if(chn.pModInstrument == m_pSndFile->Instruments[ins]				// Correct instrument is set up on this channel
 					&& (chn.nLength || chn.pModInstrument->HasValidMIDIChannel())	// And it's playing something (sample or instrument plugin)
@@ -2082,8 +2082,8 @@ void CMainFrame::OnImportMidiLib()
 }
 
 
-void CMainFrame::OnTimer(UINT)
-//----------------------------
+void CMainFrame::OnTimer(UINT_PTR)
+//--------------------------------
 {
 	// Display Time in status bar
 	CSoundFile::samplecount_t time = 0;

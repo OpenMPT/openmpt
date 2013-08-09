@@ -111,8 +111,7 @@ static int LinearToDLSMidiVolume(int nVolume)
 //-------------------------------------------
 {
 	const float kLin2Mid = 127.0f * 127.0f / 65536.0f;
-	//return static_cast<int>(sqrtf(static_cast<float>(nVolume) * kLin2Mid));
-
+#ifdef ENABLE_X86
 	int result;
 	
 	_asm {
@@ -123,6 +122,9 @@ static int LinearToDLSMidiVolume(int nVolume)
 	fistp result
 	}
 	return result;
+#else
+	return static_cast<int>(sqrtf(static_cast<float>(nVolume) * kLin2Mid));
+#endif // ENABLE_X86
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

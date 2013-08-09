@@ -1495,6 +1495,7 @@ BOOL CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen
 static int DlsFreqToTranspose(ULONG freq, int nMidiFTune)
 //-------------------------------------------------------
 {
+#ifdef ENABLE_X86
 	const float _f1_8363 = 1.0f / 8363.0f;
 	const float _factor = 128 * 12;
 	const float _fct_100 = 128.0f / 100.0f;
@@ -1514,6 +1515,9 @@ static int DlsFreqToTranspose(ULONG freq, int nMidiFTune)
 	fistp result
 	}
 	return result;
+#else
+	return Util::Round<int>((12 * 128) * log(freq * (1.0f / 8363.0f) + nMidiFTune * (1.0f / 100.0f)));
+#endif // ENABLE_X86
 }
 
 

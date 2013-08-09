@@ -350,9 +350,9 @@ int MIDIMacroConfig::MacroToMidiCC(size_t macroIndex) const
 int MIDIMacroConfig::FindMacroForParam(PlugParamIndex param) const
 //----------------------------------------------------------------
 {
-	for(size_t macroIndex = 0; macroIndex < NUM_MACROS; macroIndex++)
+	for(int macroIndex = 0; macroIndex < NUM_MACROS; macroIndex++)
 	{
-		if (GetParameteredMacroType(macroIndex) == sfx_plug && MacroToPlugParam(macroIndex) == param)
+		if(GetParameteredMacroType(macroIndex) == sfx_plug && MacroToPlugParam(macroIndex) == param)
 		{
 			return macroIndex;
 		}

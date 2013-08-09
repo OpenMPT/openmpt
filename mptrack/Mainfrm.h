@@ -485,7 +485,7 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnClose();
-	afx_msg void OnTimer(UINT);
+	afx_msg void OnTimer(UINT_PTR);
 	afx_msg void OnSongProperties();
 
 // -> CODE#0002

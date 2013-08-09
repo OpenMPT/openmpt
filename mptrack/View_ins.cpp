@@ -126,7 +126,7 @@ CViewInstrument::CViewInstrument()
 	m_nBtnMouseOver = 0xFFFF;
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		m_dwNotifyPos[i] = Notification::PosInvalid;
+		m_dwNotifyPos[i] = (uint32)Notification::PosInvalid;
 	}
 	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
@@ -1159,9 +1159,9 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 		bool invalidate = false;
 		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			if(m_dwNotifyPos[i] != Notification::PosInvalid)
+			if(m_dwNotifyPos[i] != (uint32)Notification::PosInvalid)
 			{
-				m_dwNotifyPos[i] = Notification::PosInvalid;
+				m_dwNotifyPos[i] = (uint32)Notification::PosInvalid;
 				invalidate = true;
 			}
 		}
@@ -1175,7 +1175,7 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 		BOOL bUpdate = FALSE;
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			uint32 newpos = pnotify->pos[i];
+			uint32 newpos = (uint32)pnotify->pos[i];
 			if (m_dwNotifyPos[i] != newpos)
 			{
 				bUpdate = TRUE;
@@ -1189,7 +1189,7 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 			{
 				//DWORD newpos = (pSndFile->m_SongFlags[SONG_PAUSED]) ? pnotify->dwPos[j] : 0;
-				DWORD newpos = pnotify->pos[j];
+				uint32 newpos = (uint32)pnotify->pos[j];
 				m_dwNotifyPos[j] = newpos;
 			}
 			DrawPositionMarks(hdc);

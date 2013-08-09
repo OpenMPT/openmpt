@@ -246,7 +246,7 @@ BOOL CCreditStatic::OnEraseBkgnd(CDC* pDC)
 //      Invalidate and UpdateWindow to invoke the OnPaint which will paint 
 //      the contents of the newly updated work string.
 //************************************************************************
-void CCreditStatic::OnTimer(UINT nIDEvent) 
+void CCreditStatic::OnTimer(UINT_PTR nIDEvent)
 {
 	if (nIDEvent != DISPLAY_TIMER_ID)
 	{

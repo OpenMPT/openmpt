@@ -114,10 +114,10 @@ BOOL CModControlDlg::PostViewMessage(UINT uMsg, LPARAM lParam) const
 }
 
 
-int CModControlDlg::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
-//------------------------------------------------------------------
+INT_PTR CModControlDlg::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+//----------------------------------------------------------------------
 {
-	int nHit = CDialog::OnToolHitTest(point, pTI);
+	INT_PTR nHit = CDialog::OnToolHitTest(point, pTI);
 	if ((nHit >= 0) && (pTI))
 	{
 		if ((pTI->lpszText == LPSTR_TEXTCALLBACK) && (pTI->hwnd == m_hWnd))

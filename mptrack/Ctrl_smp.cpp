@@ -3081,8 +3081,8 @@ void CCtrlSamples::SetSelectionPoints(UINT nStart, UINT nEnd)
 {
 	const ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	Limit(nStart, 0u, sample.nLength);
-	Limit(nEnd, 0u, sample.nLength);
+	Limit(nStart, SmpLength(0), sample.nLength);
+	Limit(nEnd, SmpLength(0), sample.nLength);
 
 	SAMPLEVIEWSTATE viewstate;
 	MemsetZero(viewstate);
