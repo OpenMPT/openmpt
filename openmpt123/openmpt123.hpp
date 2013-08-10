@@ -141,6 +141,17 @@ struct commandlineflags {
 					terminal_width = tmp;
 				}
 			}
+			#if TIOCGSIZE
+				struct ttysize ts;
+				if ( ioctl( STDERR_FILENO, TIOCGSIZE, &ts ) >= 0 ) {
+					terminal_width = ts.ts_cols;
+				}
+			#elif defined(TIOCGWINSZ)
+				struct winsize ts;
+				if ( ioctl( STDERR_FILENO, TIOCGWINSZ, &ts ) >= 0 ) {
+					terminal_width = ts.ws_col;
+				}
+			#endif
 		}
 #endif
 		show_details = true;
