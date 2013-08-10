@@ -1140,7 +1140,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	}
 
 	// DLS banks
-	if(hItem == m_tiDLS[itemData] && itemData < m_tiDLS.size())
+	if(itemData < m_tiDLS.size() && hItem == m_tiDLS[itemData])
 		return ModItem(MODITEM_DLSBANK_FOLDER, (uint32)itemData);
 
 	// DLS Instruments
