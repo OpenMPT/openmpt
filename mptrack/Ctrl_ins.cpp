@@ -1682,7 +1682,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 	static int nLastIndex = 0;
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"All Instruments|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff|"
+		"All Instruments|*.xi;*.pat;*.iti;*.flac;*.wav;*.aif;*.aiff|"
 		"FastTracker II Instruments (*.xi)|*.xi|"
 		"GF1 Patches (*.pat)|*.pat|"
 		"Impulse Tracker Instruments (*.iti)|*.iti|"
