@@ -18,6 +18,8 @@
 #include "../mptrack/Reporting.h"
 #endif
 #include "../common/StringFixer.h"
+struct ModSample;
+#include "../soundlib/SampleFormatConverters.h"
 
 // DEBUG:
 #include "../common/AudioCriticalSection.h"
@@ -1212,11 +1214,14 @@ CASIODevice::CASIODevice()
 //------------------------
 {
 	m_pAsioDrv = NULL;
+	m_nChannels = 0;
+	m_nAsioBufferLen = 0;
+	m_nAsioSampleSize = 0;
+	m_Float = false;
 	m_Callbacks.bufferSwitch = BufferSwitch;
 	m_Callbacks.sampleRateDidChange = SampleRateDidChange;
 	m_Callbacks.asioMessage = AsioMessage;
 	m_Callbacks.bufferSwitchTimeInfo = BufferSwitchTimeInfo;
-	m_nBitsPerSample = 0; // Unknown
 	m_nCurrentDevice = (ULONG)-1;
 	m_bMixRunning = FALSE;
 	InterlockedExchange(&m_RenderSilence, 0);
@@ -1245,7 +1250,6 @@ bool CASIODevice::InternalOpen(UINT nDevice)
 	if (nDevice != m_nCurrentDevice)
 	{
 		m_nCurrentDevice = nDevice;
-		m_nBitsPerSample = 0;
 	}
 #ifdef ASIO_LOG
 	Log("CASIODevice::Open(%d:\"%s\"): %d-bit, %d channels, %dHz\n",
@@ -1273,7 +1277,6 @@ bool CASIODevice::InternalOpen(UINT nDevice)
 		#endif
 			goto abort;
 		}
-		m_nBitsPerSample = m_Settings.BitsPerSample;
 		for (UINT ich=0; ich<m_Settings.Channels; ich++)
 		{
 			m_ChannelInfo[ich].channel = ich;
@@ -1287,27 +1290,49 @@ bool CASIODevice::InternalOpen(UINT nDevice)
 			m_BufferInfo[ich].channelNum = ich + CASIODevice::baseChannel;		// map MPT channel i to ASIO channel i
 			m_BufferInfo[ich].buffers[0] = NULL;
 			m_BufferInfo[ich].buffers[1] = NULL;
-			if ((m_ChannelInfo[ich].type & 0x0f) == ASIOSTInt16MSB)
+			if(m_Settings.BitsPerSample != 32 && m_Settings.BitsPerSample != 32+128)
 			{
-				if (m_nBitsPerSample < 16)
-				{
-					m_nBitsPerSample = 16;
-					goto abort;
-				}
-			} else
-			{
-				if (m_nBitsPerSample != 32)
-				{
-					m_nBitsPerSample = 32;
-					goto abort;
-				}
+				goto abort;
 			}
-			switch(m_ChannelInfo[ich].type & 0x0f)
+			m_Float = false;
+			switch(m_ChannelInfo[ich].type)
 			{
-			case ASIOSTInt16MSB:	m_nAsioSampleSize = 2; break;
-			case ASIOSTInt24MSB:	m_nAsioSampleSize = 3; break;
-			case ASIOSTFloat64MSB:	m_nAsioSampleSize = 8; break;
-			default:				m_nAsioSampleSize = 4;
+				case ASIOSTInt16MSB:
+				case ASIOSTInt16LSB:
+					m_nAsioSampleSize = 2;
+					break;
+				case ASIOSTInt24MSB:
+				case ASIOSTInt24LSB:
+					m_nAsioSampleSize = 3;
+					break;
+				case ASIOSTInt32MSB:
+				case ASIOSTInt32LSB:
+					m_nAsioSampleSize = 4;
+					break;
+				case ASIOSTInt32MSB16:
+				case ASIOSTInt32MSB18:
+				case ASIOSTInt32MSB20:
+				case ASIOSTInt32MSB24:
+				case ASIOSTInt32LSB16:
+				case ASIOSTInt32LSB18:
+				case ASIOSTInt32LSB20:
+				case ASIOSTInt32LSB24:
+					m_nAsioSampleSize = 4;
+					break;
+				case ASIOSTFloat32MSB:
+				case ASIOSTFloat32LSB:
+					m_Float = true;
+					m_nAsioSampleSize = 4;
+					break;
+				case ASIOSTFloat64MSB:
+				case ASIOSTFloat64LSB:
+					m_Float = true;
+					m_nAsioSampleSize = 8;
+					break;
+				default:
+					m_nAsioSampleSize = 0;
+					goto abort;
+					break;
 			}
 		}
 		m_pAsioDrv->getBufferSize(&minSize, &maxSize, &preferredSize, &granularity);
@@ -1561,105 +1586,126 @@ void CASIODevice::CloseDevice()
 	}
 }
 
+
+static void SwapEndian(uint8 *buf, std::size_t itemCount, std::size_t itemSize)
+//-----------------------------------------------------------------------------
+{
+	for(std::size_t i = 0; i < itemCount; ++i)
+	{
+		std::reverse(buf, buf + itemSize);
+		buf += itemSize;
+	}
+}
+
+
 void CASIODevice::FillAudioBuffer()
 //---------------------------------
 {
 	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 
-	DWORD dwSampleSize = m_nChannels*(m_nBitsPerSample>>3);
-	DWORD dwSamplesLeft = m_nAsioBufferLen;
-	DWORD dwFrameLen = (ASIO_BLOCK_LEN*sizeof(int)) / dwSampleSize;
-	DWORD dwBufferOffset = 0;
+	std::size_t sampleFrameSize = m_nChannels * sizeof(int32);
+	const std::size_t sampleFramesGoal = m_nAsioBufferLen;
+	std::size_t sampleFramesToRender = sampleFramesGoal;
+	std::size_t sampleFramesRendered = 0;
+	const std::size_t countChunkMax = (ASIO_BLOCK_LEN * sizeof(int32)) / sampleFrameSize;
 	
 	g_dwBuffer &= 1;
-	//Log("FillAudioBuffer(%d): dwSampleSize=%d dwSamplesLeft=%d dwFrameLen=%d\n", g_dwBuffer, dwSampleSize, dwSamplesLeft, dwFrameLen);
-	while ((LONG)dwSamplesLeft > 0)
+	//Log("FillAudioBuffer(%d): dwSampleSize=%d dwSamplesLeft=%d dwFrameLen=%d\n", g_dwBuffer, sampleFrameSize, dwSamplesLeft, dwFrameLen);
+	while(sampleFramesToRender > 0)
 	{
-		UINT n = (dwSamplesLeft < dwFrameLen) ? dwSamplesLeft : dwFrameLen;
+		const std::size_t countChunk = std::min(sampleFramesToRender, countChunkMax);
 		if(rendersilence)
 		{
-			memset(m_FrameBuffer, 0, n*dwSampleSize);
+			memset(m_FrameBuffer, 0, countChunk * sampleFrameSize);
 		} else
 		{
-			SourceAudioRead(m_FrameBuffer, n);
+			SourceAudioRead(m_FrameBuffer, countChunk);
 		}
-		dwSamplesLeft -= n;
-		for (UINT ich=0; ich<m_nChannels; ich++)
+		for(int channel = 0; channel < (int)m_nChannels; ++channel)
 		{
-			char *psrc = (char *)m_FrameBuffer;
-			char *pbuffer = (char *)m_BufferInfo[ich].buffers[g_dwBuffer];
-			switch(m_ChannelInfo[ich].type)
+			const int32 *src = m_FrameBuffer;
+			const float *srcFloat = reinterpret_cast<const float*>(m_FrameBuffer);
+			void *dst = (char*)m_BufferInfo[channel].buffers[g_dwBuffer] + m_nAsioSampleSize * sampleFramesRendered;
+			if(m_Float) switch(m_ChannelInfo[channel].type)
 			{
-			case ASIOSTInt16MSB:
-				if (m_nBitsPerSample == 32)
-					Cvt32To16msb(pbuffer+dwBufferOffset*2, psrc+ich*4, m_nChannels*4, n);
-				else
-					Cvt16To16msb(pbuffer+dwBufferOffset*2, psrc+ich*2, m_nChannels*2, n);
-				break;
-			case ASIOSTInt16LSB:
-				if (m_nBitsPerSample == 32)
-					Cvt32To16(pbuffer+dwBufferOffset*2, psrc+ich*4, m_nChannels*4, n);
-				else
-					Cvt16To16(pbuffer+dwBufferOffset*2, psrc+ich*2, m_nChannels*2, n);
-				break;
-			case ASIOSTInt24MSB:
-				Cvt32To24msb(pbuffer+dwBufferOffset*3, psrc+ich*4, m_nChannels*4, n);
-				break;
-			case ASIOSTInt24LSB:
-				Cvt32To24(pbuffer+dwBufferOffset*3, psrc+ich*4, m_nChannels*4, n);
-				break;
-			case ASIOSTInt32MSB:
-				Cvt32To32msb(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 0);
-				break;
-			case ASIOSTInt32LSB:
-				Cvt32To32(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 0);
-				break;
-			case ASIOSTFloat32MSB:
-				Cvt32To32f(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n);
-				EndianSwap32(pbuffer+dwBufferOffset*4, n);
-				break;
-			case ASIOSTFloat32LSB:
-				Cvt32To32f(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n);
-				break;
-			case ASIOSTFloat64MSB:
-				Cvt32To64f(pbuffer+dwBufferOffset*8, psrc+ich*4, m_nChannels*4, n);
-				EndianSwap64(pbuffer+dwBufferOffset*4, n);
-				break;
-			case ASIOSTFloat64LSB:
-				Cvt32To64f(pbuffer+dwBufferOffset*8, psrc+ich*4, m_nChannels*4, n);
-				break;
-			case ASIOSTInt32MSB16:
-				Cvt32To32msb(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 16);
-				break;
-			case ASIOSTInt32LSB16:
-				Cvt32To32(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 16);
-				break;
-			case ASIOSTInt32MSB18:
-				Cvt32To32msb(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 14);
-				break;
-			case ASIOSTInt32LSB18:
-				Cvt32To32(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 14);
-				break;
-			case ASIOSTInt32MSB20:
-				Cvt32To32msb(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 12);
-				break;
-			case ASIOSTInt32LSB20:
-				Cvt32To32(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 12);
-				break;
-			case ASIOSTInt32MSB24:
-				Cvt32To32msb(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 8);
-				break;
-			case ASIOSTInt32LSB24:
-				Cvt32To32(pbuffer+dwBufferOffset*4, psrc+ich*4, m_nChannels*4, n, 8);
-				break;
+				case ASIOSTFloat32MSB:
+				case ASIOSTFloat32LSB:
+					CopyInterleavedToChannel<SC::Convert<float, float> >(reinterpret_cast<float*>(dst), srcFloat, m_nChannels, countChunk, channel);
+					break;
+				case ASIOSTFloat64MSB:
+				case ASIOSTFloat64LSB:
+					CopyInterleavedToChannel<SC::Convert<double, float> >(reinterpret_cast<double*>(dst), srcFloat, m_nChannels, countChunk, channel);
+					break;
+				default:
+					ASSERT(false);
+					break;
+			} else switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTInt16MSB:
+				case ASIOSTInt16LSB:
+					CopyInterleavedToChannel<SC::Convert<int16, int32> >(reinterpret_cast<int16*>(dst), src, m_nChannels, countChunk, channel);
+					break;
+				case ASIOSTInt24MSB:
+				case ASIOSTInt24LSB:
+					CopyInterleavedToChannel<SC::Convert<int24, int32> >(reinterpret_cast<int24*>(dst), src, m_nChannels, countChunk, channel);
+					break;
+				case ASIOSTInt32MSB:
+				case ASIOSTInt32LSB:
+					CopyInterleavedToChannel<SC::Convert<int32, int32> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					break;
+				case ASIOSTFloat32MSB:
+				case ASIOSTFloat32LSB:
+					CopyInterleavedToChannel<SC::Convert<float, int32> >(reinterpret_cast<float*>(dst), src, m_nChannels, countChunk, channel);
+					break;
+				case ASIOSTFloat64MSB:
+				case ASIOSTFloat64LSB:
+					CopyInterleavedToChannel<SC::Convert<double, int32> >(reinterpret_cast<double*>(dst), src, m_nChannels, countChunk, channel);
+					break;
+				case ASIOSTInt32MSB16:
+				case ASIOSTInt32LSB16:
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 16> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					break;
+				case ASIOSTInt32MSB18:
+				case ASIOSTInt32LSB18:
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 14> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					break;
+				case ASIOSTInt32MSB20:
+				case ASIOSTInt32LSB20:
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 12> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					break;
+				case ASIOSTInt32MSB24:
+				case ASIOSTInt32LSB24:
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					break;
+				default:
+					ASSERT(false);
+					break;
+			}
+			switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTInt16MSB:
+				case ASIOSTInt24MSB:
+				case ASIOSTInt32MSB:
+				case ASIOSTFloat32MSB:
+				case ASIOSTFloat64MSB:
+				case ASIOSTInt32MSB16:
+				case ASIOSTInt32MSB18:
+				case ASIOSTInt32MSB20:
+				case ASIOSTInt32MSB24:
+					SwapEndian(reinterpret_cast<uint8*>(dst), countChunk, m_nAsioSampleSize);
+					break;
 			}
 		}
-		dwBufferOffset += n;
+		sampleFramesToRender -= countChunk;
+		sampleFramesRendered += countChunk;
 	}
-	if (m_bPostOutput) m_pAsioDrv->outputReady();
+	if(m_bPostOutput)
+	{
+		m_pAsioDrv->outputReady();
+	}
 	if(!rendersilence)
 	{
-		SourceAudioDone(dwBufferOffset, m_nAsioBufferLen);
+		SourceAudioDone(sampleFramesRendered, m_nAsioBufferLen);
 	}
 	return;
 }
@@ -1726,258 +1772,6 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 	return params;
 }
 
-
-void CASIODevice::EndianSwap64(void *pbuffer, UINT nSamples)
-//----------------------------------------------------------
-{
-	_asm {
-	mov edx, pbuffer
-	mov ecx, nSamples
-swaploop:
-	mov eax, dword ptr [edx]
-	mov ebx, dword ptr [edx+4]
-	add edx, 8
-	bswap eax
-	bswap ebx
-	dec ecx
-	mov dword ptr [edx-8], ebx
-	mov dword ptr [edx-4], eax
-	jnz swaploop
-	}
-}
-
-
-void CASIODevice::EndianSwap32(void *pbuffer, UINT nSamples)
-//----------------------------------------------------------
-{
-	_asm {
-	mov edx, pbuffer
-	mov ecx, nSamples
-swaploop:
-	mov eax, dword ptr [edx]
-	add edx, 4
-	bswap eax
-	dec ecx
-	mov dword ptr [edx-4], eax
-	jnz swaploop
-	}
-}
-
-
-void CASIODevice::Cvt16To16(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples)
-//----------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov ecx, nSamples
-cvtloop:
-	movsx eax, word ptr [ebx]
-	add ebx, esi
-	add edi, 2
-	dec ecx
-	mov word ptr [edi-2], ax
-	jnz cvtloop
-	}
-}
-
-
-void CASIODevice::Cvt16To16msb(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples)
-//-------------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov ecx, nSamples
-cvtloop:
-	movsx eax, word ptr [ebx]
-	add ebx, esi
-	add edi, 2
-	dec ecx
-	mov byte ptr [edi-2], ah
-	mov byte ptr [edi-1], al
-	jnz cvtloop
-	}
-}
-
-
-void CASIODevice::Cvt32To24(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples)
-//----------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov ecx, nSamples
-cvtloop:
-	mov eax, dword ptr [ebx]
-	add ebx, esi
-	add edi, 3
-	mov edx, eax
-	shr eax, 8
-	shr edx, 24
-	dec ecx
-	mov byte ptr [edi-3], al
-	mov byte ptr [edi-2], ah
-	mov byte ptr [edi-1], dl
-	jnz cvtloop
-	}
-}
-
-
-void CASIODevice::Cvt32To24msb(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples)
-//-------------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov ecx, nSamples
-cvtloop:
-	mov eax, dword ptr [ebx]
-	add ebx, esi
-	add edi, 3
-	mov edx, eax
-	shr eax, 8
-	shr edx, 24
-	dec ecx
-	mov byte ptr [edi-3], dl
-	mov byte ptr [edi-2], ah
-	mov byte ptr [edi-1], al
-	jnz cvtloop
-	}
-}
-
-
-void CASIODevice::Cvt32To32(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples, UINT nShift)
-//-----------------------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov edx, nSamples
-	mov ecx, nShift
-cvtloop:
-	mov eax, dword ptr [ebx]
-	add ebx, esi
-	add edi, 4
-	sar eax, cl
-	dec edx
-	mov dword ptr [edi-4], eax
-	jnz cvtloop
-	}
-}
-
-
-void CASIODevice::Cvt32To32msb(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples, UINT nShift)
-//--------------------------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov edx, nSamples
-	mov ecx, nShift
-cvtloop:
-	mov eax, dword ptr [ebx]
-	add ebx, esi
-	add edi, 4
-	sar eax, cl
-	bswap eax
-	dec edx
-	mov dword ptr [edi-4], eax
-	jnz cvtloop
-	}
-}
-
-
-const float _pow2_31 = 1.0f / 2147483648.0f;
-
-void CASIODevice::Cvt32To32f(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples)
-//-----------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov edx, nSamples
-	fld _pow2_31
-cvtloop:
-	fild dword ptr [ebx]
-	add ebx, esi
-	add edi, 4
-	fmul st(0), st(1)
-	dec edx
-	fstp dword ptr [edi-4]
-	jnz cvtloop
-	fstp st(1)
-	}
-}
-
-
-void CASIODevice::Cvt32To64f(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples)
-//-----------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov edx, nSamples
-	fld _pow2_31
-cvtloop:
-	fild dword ptr [ebx]
-	add ebx, esi
-	add edi, 8
-	fmul st(0), st(1)
-	dec edx
-	fstp qword ptr [edi-8]
-	jnz cvtloop
-	fstp st(1)
-	}
-}
-
-
-void CASIODevice::Cvt32To16(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples)
-//----------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov ecx, nSamples
-cvtloop:
-	mov eax, dword ptr [ebx]
-	add ebx, esi
-	add edi, 2
-	sar eax, 16
-	dec ecx
-	mov word ptr [edi-2], ax
-	jnz cvtloop
-	}
-}
-
-
-void CASIODevice::Cvt32To16msb(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples)
-//-------------------------------------------------------------------------------------
-{
-	_asm {
-	mov ebx, psrc
-	mov edi, pdst
-	mov esi, nSampleSize
-	mov ecx, nSamples
-cvtloop:
-	mov eax, dword ptr [ebx]
-	add ebx, esi
-	add edi, 2
-	bswap eax
-	dec ecx
-	mov word ptr [edi-2], ax
-	jnz cvtloop
-	}
-}
 
 BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
 //------------------------------------------------------

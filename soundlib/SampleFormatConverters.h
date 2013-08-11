@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include "../soundlib/Endianness.h"
+
+
 // Byte offsets, from lowest significant to highest significant byte (for various functor template parameters)
 #define littleEndian32 0, 1, 2, 3
 #define littleEndian24 0, 1, 2
@@ -239,6 +242,17 @@ struct Convert<int8, int16>
 };
 
 template <>
+struct Convert<int8, int24>
+{
+	typedef int24 input_t;
+	typedef int8 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return int8(val >> 16);
+	}
+};
+
+template <>
 struct Convert<int8, int32>
 {
 	typedef int32 input_t;
@@ -276,6 +290,17 @@ struct Convert<int16, int8>
 };
 
 template <>
+struct Convert<int16, int24>
+{
+	typedef int24 input_t;
+	typedef int16 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return int16(val >> 8);
+	}
+};
+
+template <>
 struct Convert<int16, int32>
 {
 	typedef int32 input_t;
@@ -300,6 +325,84 @@ struct Convert<int16, float32>
 		return mpt::saturate_cast<int16>(static_cast<int>(val * 2.0f + 1.0f) >> 1);
 	}
 };
+
+template <>
+struct Convert<int24, int8>
+{
+	typedef int8 input_t;
+	typedef int24 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return int24(val << 8);
+	}
+};
+
+template <>
+struct Convert<int24, int16>
+{
+	typedef int16 input_t;
+	typedef int24 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return int24(val << 8);
+	}
+};
+
+template <>
+struct Convert<int24, int32>
+{
+	typedef int32 input_t;
+	typedef int24 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return int24(val >> 8);
+	}
+};
+
+template <>
+struct Convert<float32, int32>
+{
+	typedef int32 input_t;
+	typedef float32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return val * (1.0f / static_cast<float>((unsigned int)1<<31));
+	}
+};
+
+template <>
+struct Convert<double, int32>
+{
+	typedef int32 input_t;
+	typedef double output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return val * (1.0 / static_cast<double>((unsigned int)1<<31));
+	}
+};
+
+template <>
+struct Convert<double, float>
+{
+	typedef float input_t;
+	typedef double output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return val;
+	}
+};
+
+template <>
+struct Convert<float, double>
+{
+	typedef double input_t;
+	typedef float output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return static_cast<float>(val);
+	}
+};
+
 
 template <typename Tdst, typename Tsrc, int fractionalBits>
 struct ConvertFixedPoint;
@@ -739,5 +842,21 @@ void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const buffer
 			buffers[channel][i] = conv(*mixbuffer);
 			mixbuffer++;
 		}
+	}
+}
+
+
+// Copy from an interleaed buffer of #channels.
+template <typename SampleConversion>
+void CopyInterleavedToChannel(typename SampleConversion::output_t *dst, const typename SampleConversion::input_t *src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	SampleConversion sampleConv(conv);
+	src += channel;
+	for(std::size_t i = 0; i < countChunk; ++i)
+	{
+		*dst = sampleConv(*src);
+		src += channels;
+		dst++;
 	}
 }

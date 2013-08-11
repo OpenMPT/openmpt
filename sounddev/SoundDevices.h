@@ -202,7 +202,8 @@ class CASIODevice: public ISoundDevice
 	enum { ASIO_BLOCK_LEN=1024 };
 protected:
 	IASIO *m_pAsioDrv;
-	UINT m_nChannels, m_nBitsPerSample, m_nAsioBufferLen, m_nAsioSampleSize;
+	UINT m_nChannels, m_nAsioBufferLen, m_nAsioSampleSize;
+	bool m_Float;
 	BOOL m_bMixRunning;
 	BOOL m_bPostOutput;
 	UINT m_nCurrentDevice;
@@ -211,7 +212,7 @@ protected:
 	ASIOCallbacks m_Callbacks;
 	ASIOChannelInfo m_ChannelInfo[ASIO_MAX_CHANNELS];
 	ASIOBufferInfo m_BufferInfo[ASIO_MAX_CHANNELS];
-	int m_FrameBuffer[ASIO_BLOCK_LEN];
+	int32 m_FrameBuffer[ASIO_BLOCK_LEN];
 
 private:
 	void SetRenderSilence(bool silence, bool wait=false);
@@ -232,7 +233,7 @@ public:
 	void InternalStart();
 	void InternalStop();
 	bool IsOpen() const { return (m_pAsioDrv != NULL); }
-	UINT HasFixedBitsPerSample() { return m_nBitsPerSample; }
+	int HasFixedSampleFormat() { return m_Float ? 32+128 : 32; }
 	UINT GetNumBuffers() { return 2; }
 	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate; }
 
@@ -255,18 +256,6 @@ protected:
 	static void SampleRateDidChange(ASIOSampleRate sRate);
 	static long AsioMessage(long selector, long value, void* message, double* opt);
 	static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
-	static void EndianSwap64(void *pbuffer, UINT nSamples);
-	static void EndianSwap32(void *pbuffer, UINT nSamples);
-	static void Cvt16To16(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
-	static void Cvt16To16msb(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
-	static void Cvt32To16(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
-	static void Cvt32To16msb(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
-	static void Cvt32To24(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
-	static void Cvt32To24msb(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
-	static void Cvt32To32(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples, UINT nShift);
-	static void Cvt32To32msb(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples, UINT nShift);
-	static void Cvt32To32f(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
-	static void Cvt32To64f(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
 	static BOOL ReportASIOException(LPCSTR format,...);
 };
 
