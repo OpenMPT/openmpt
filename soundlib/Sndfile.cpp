@@ -961,8 +961,8 @@ BOOL CSoundFile::Destroy()
 // Memory Allocation
 
 // Allocate sample memory. On sucess, a pointer to the silenced sample buffer is returned. On failure, nullptr is returned.
-void *CSoundFile::AllocateSample(UINT nbytes)
-//-------------------------------------------
+void *CSoundFile::AllocateSample(size_t nbytes)
+//---------------------------------------------
 {
 	if(nbytes > SIZE_MAX - 0x29u)
 		return nullptr;
@@ -1261,9 +1261,10 @@ void CSoundFile::ResetChannels()
 {
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	m_nBufferCount = 0;
-	for (UINT i=0; i<MAX_CHANNELS; i++)
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		Chn[i].nROfs = Chn[i].nLOfs = Chn[i].nLength = 0;
+		Chn[i].nROfs = Chn[i].nLOfs = 0;
+		Chn[i].nLength = 0;
 	}
 }
 
@@ -1640,7 +1641,8 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 	{
 		if(Chn[i].pSample == sample.pSample)
 		{
-			Chn[i].nPos = Chn[i].nLength = 0;
+			Chn[i].nPos = 0;
+			Chn[i].nLength = 0;
 			Chn[i].pSample = Chn[i].pCurrentSample = nullptr;
 		}
 	}

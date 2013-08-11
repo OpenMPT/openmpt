@@ -58,7 +58,7 @@ protected:
 	void ApplyAmplify(LONG nAmp, bool bFadeIn = false, bool bFadeOut = false);
 
 	SampleSelectionPoints GetSelectionPoints();
-	void SetSelectionPoints(UINT nStart, UINT nEnd);
+	void SetSelectionPoints(SmpLength nStart, SmpLength nEnd);
 
 	void PropagateAutoVibratoChanges() const;
 

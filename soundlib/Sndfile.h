@@ -774,7 +774,7 @@ public:
 
 	// System-Dependant functions
 public:
-	static void *AllocateSample(UINT nbytes);
+	static void *AllocateSample(size_t nbytes);
 	static void FreeSample(void *p);
 
 	ModInstrument *AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX assignedSample = 0);

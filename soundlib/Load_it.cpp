@@ -1045,8 +1045,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 #ifndef MODPLUG_NO_FILESAVE
 
 // Save edit history. Pass a null pointer for *f to retrieve the number of bytes that would be written.
-DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
-//----------------------------------------------------------
+uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
+//-----------------------------------------------------------
 {
 #ifdef MODPLUG_TRACKER
 	CModDoc *pModDoc = pSndFile->GetpModDoc();
@@ -1056,8 +1056,8 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	UNREFERENCED_PARAMETER(pSndFile);
 #endif // MODPLUG_TRACKER
 
-	uint16 fnum = (uint16)MIN(num, uint16_max);	// Number of entries that are actually going to be written
-	const size_t bytes_written = 2 + fnum * 8;	// Number of bytes that are actually going to be written
+	uint16 fnum = std::min<uint16>(num, uint16_max);	// Number of entries that are actually going to be written
+	const uint32 bytes_written = 2 + fnum * 8;			// Number of bytes that are actually going to be written
 
 	if(f == nullptr)
 		return bytes_written;
@@ -1333,7 +1333,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 	for(UINT nins = 1; nins <= itHeader.insnum; nins++)
 	{
 		ITInstrumentEx iti;
-		size_t instSize;
+		uint32 instSize;
 
 		if(Instruments[nins])
 		{

@@ -151,7 +151,7 @@ void CViewSample::OnInitialUpdate()
 
 
 void CViewSample::UpdateScrollSize(const UINT nZoomOld)
-//----------------------------------
+//-----------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -161,7 +161,7 @@ void CViewSample::UpdateScrollSize(const UINT nZoomOld)
 		CPoint pt;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		SIZE sizePage, sizeLine;
-		DWORD dwLen = 0;
+		SmpLength dwLen = 0;
 
 		if ((m_nSample > 0) && (m_nSample <= pSndFile->GetNumSamples()))
 		{
@@ -348,7 +348,7 @@ LONG CViewSample::SampleToScreen(LONG n) const
 	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		UINT nLen = pSndFile->GetSample(m_nSample).nLength;
+		SmpLength nLen = pSndFile->GetSample(m_nSample).nLength;
 		if (!nLen) return 0;
 		if (m_nZoom)
 		{
@@ -371,7 +371,7 @@ DWORD CViewSample::ScreenToSample(LONG x) const
 	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		UINT nLen = pSndFile->GetSample(m_nSample).nLength;
+		SmpLength nLen = pSndFile->GetSample(m_nSample).nLength;
 		if (!nLen) return 0;
 		if (m_nZoom)
 		{

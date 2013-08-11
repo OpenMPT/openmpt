@@ -65,7 +65,7 @@ protected:
 	UINT        m_Gradient;
 	BOOL		m_bTransparent;
 	int			n_MaxWidth;
-	UINT        TimerOn;
+	UINT_PTR	TimerOn;
 // Construction
 public:
 	CCreditStatic();

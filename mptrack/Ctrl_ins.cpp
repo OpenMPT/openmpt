@@ -1819,11 +1819,10 @@ void CCtrlInstruments::OnFileNameChanged()
 		CHAR s[64];
 		s[0] = 0;
 		m_EditFileName.GetWindowText(s, sizeof(s));
-		for (UINT i=strlen(s); i<=12; i++) s[i] = 0;
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 		if ((pIns) && (strncmp(s, pIns->filename, 12)))
 		{
-			memcpy(pIns->filename, s, 12);
+			mpt::String::Copy(pIns->filename, s);
 			SetInstrumentModified(true);
 		}
 	}
@@ -2608,7 +2607,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	{
 		if(pIns->pTuning == &CSoundFile::GetBuiltInTunings().GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i+1);
+			m_ComboTuning.SetCurSel((int)(i + 1));
 			return;
 		}
 	}
@@ -2617,7 +2616,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	{
 		if(pIns->pTuning == &CSoundFile::GetLocalTunings().GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i+CSoundFile::GetBuiltInTunings().GetNumTunings()+1);
+			m_ComboTuning.SetCurSel((int)(i + CSoundFile::GetBuiltInTunings().GetNumTunings() + 1));
 			return;
 		}
 	}
@@ -2626,7 +2625,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	{
 		if(pIns->pTuning == &m_sndFile.GetTuneSpecificTunings().GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i+CSoundFile::GetBuiltInTunings().GetNumTunings() + CSoundFile::GetLocalTunings().GetNumTunings()+1);
+			m_ComboTuning.SetCurSel((int)(i + CSoundFile::GetBuiltInTunings().GetNumTunings() + CSoundFile::GetLocalTunings().GetNumTunings() + 1));
 			return;
 		}
 	}

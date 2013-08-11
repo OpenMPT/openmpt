@@ -102,7 +102,7 @@ public:
 	VstInt32 Finalise()
 	{
 		Util::lock_guard<Util::mutex> lock(criticalSection);
-		numEvents = std::min(eventQueue.size(), N);
+		numEvents = std::min<VstInt32>(eventQueue.size(), N);
 		for(VstInt32 i = 0; i < numEvents; i++)
 		{
 			events[i] = reinterpret_cast<VstEvent *>(&eventQueue[i]);

@@ -206,9 +206,9 @@ struct PACKED ITInstrument
 	void ConvertEndianness();
 
 	// Convert OpenMPT's internal instrument representation to an ITInstrument. Returns amount of bytes that need to be written.
-	size_t ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile);
+	uint32 ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile);
 	// Convert an ITInstrument to OpenMPT's internal instrument representation. Returns size of the instrument data that has been read.
-	size_t ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) const;
+	uint32 ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) const;
 };
 
 STATIC_ASSERT(sizeof(ITInstrument) == 554);
@@ -229,9 +229,9 @@ struct PACKED ITInstrumentEx
 	void ConvertEndianness();
 
 	// Convert OpenMPT's internal instrument representation to an ITInstrumentEx. Returns amount of bytes that need to be written.
-	size_t ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile);
+	uint32 ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile);
 	// Convert an ITInstrumentEx to OpenMPT's internal instrument representation. Returns size of the instrument data that has been read.
-	size_t ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) const;
+	uint32 ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) const;
 };
 
 STATIC_ASSERT(sizeof(ITInstrumentEx) == sizeof(ITInstrument) + 120);
@@ -294,7 +294,7 @@ struct PACKED ITSample
 	// Convert OpenMPT's internal sample representation to an ITSample.
 	void ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compress, bool compressIT215);
 	// Convert an ITSample to OpenMPT's internal sample representation.
-	size_t ConvertToMPT(ModSample &mptSmp) const;
+	uint32 ConvertToMPT(ModSample &mptSmp) const;
 	// Retrieve the internal sample format flags for this instrument.
 	SampleIO GetSampleFormat(uint16 cwtv = 0x214) const;
 };
