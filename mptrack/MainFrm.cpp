@@ -945,9 +945,9 @@ bool CMainFrame::audioOpenDevice()
 		SampleFormat fixedBitsPerSample = SampleFormatInvalid;
 		{
 			Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-			fixedBitsPerSample = (gpSoundDevice) ? SampleFormat(gpSoundDevice->HasFixedBitsPerSample()) : SampleFormatInvalid;
+			fixedBitsPerSample = (gpSoundDevice) ? SampleFormat(gpSoundDevice->HasFixedSampleFormat()) : SampleFormatInvalid;
 		}
-		if(err && (fixedBitsPerSample.IsValid() && (fixedBitsPerSample != TrackerSettings::Instance().m_SampleFormat)))
+		if(fixedBitsPerSample.IsValid() && (fixedBitsPerSample != TrackerSettings::Instance().m_SampleFormat))
 		{
 			TrackerSettings::Instance().m_SampleFormat = fixedBitsPerSample;
 			err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,

@@ -287,36 +287,42 @@ void COptionsSoundcard::UpdateChannels(int dev)
 void COptionsSoundcard::UpdateSampleFormat(int dev)
 //-------------------------------------------------
 {
-	CHAR s[128];
 	UINT n = 0;
 	m_CbnSampleFormat.ResetContent();
-	for(UINT bits = 32; bits >= 8; bits -= 8)
+	const bool asio = SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO;
+	if(asio)
 	{
-		if(bits > 16 && !theApp.IsWaveExEnabled() && SNDDEV_GET_TYPE(dev) != SNDDEV_ASIO)
+		m_SampleFormat = TrackerSettings::Instance().m_SampleFormat;
+	}
+	m_CbnSampleFormat.EnableWindow(asio ? FALSE : TRUE);
+	for(UINT bits = 40; bits >= 8; bits -= 8)
+	{
+		if(bits > 16 && !theApp.IsWaveExEnabled() && !asio)
 		{
 			continue;
 		}
-		if(bits != 16 && bits != 32 && SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO)
+		if(bits == 40)
 		{
-			// CASIODevice only supports 16bit or 32bit input for now
-			continue;
-		}
-		if(bits == 32 && SNDDEV_GET_TYPE(dev) != SNDDEV_ASIO)
-		{
-			wsprintf(s, "Floating Point");
-			UINT ndx = m_CbnSampleFormat.AddString(s);
-			m_CbnSampleFormat.SetItemData(ndx, (32+128));
-			if(SampleFormatFloat32 == m_SampleFormat)
+			if(!asio || (asio && SampleFormatFloat32 == m_SampleFormat))
 			{
-				n = ndx;
+				UINT ndx = m_CbnSampleFormat.AddString("Floating Point");
+				m_CbnSampleFormat.SetItemData(ndx, (32+128));
+				if(SampleFormatFloat32 == m_SampleFormat)
+				{
+					n = ndx;
+				}
 			}
-		}
-		wsprintf(s, "%d Bit", bits);
-		UINT ndx = m_CbnSampleFormat.AddString(s);
-		m_CbnSampleFormat.SetItemData(ndx, bits);
-		if((SampleFormat)bits == m_SampleFormat)
+		} else
 		{
-			n = ndx;
+			if(!asio || (asio && (SampleFormat)bits == m_SampleFormat))
+			{
+				UINT ndx = m_CbnSampleFormat.AddString(mpt::String::Format("%d Bit", bits).c_str());
+				m_CbnSampleFormat.SetItemData(ndx, bits);
+				if((SampleFormat)bits == m_SampleFormat)
+				{
+					n = ndx;
+				}
+			}
 		}
 	}
 	m_CbnSampleFormat.SetCurSel(n);
@@ -538,6 +544,7 @@ void COptionsSoundcard::OnOK()
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 	}
 	CMainFrame::GetMainFrame()->SetupSoundCard(m_SoundDeviceFlags, m_dwRate, m_SampleFormat, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
+	UpdateSampleFormat(m_nSoundDevice);
 	UpdateStatistics();
 	CPropertyPage::OnOK();
 }

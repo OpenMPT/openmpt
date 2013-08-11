@@ -160,7 +160,7 @@ public:
 	void Start();
 	void Stop();
 	void Reset();
-	virtual UINT HasFixedBitsPerSample() { return 0; }
+	virtual int HasFixedSampleFormat() { return 0; }
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }
 	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }
