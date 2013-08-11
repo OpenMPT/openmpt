@@ -195,8 +195,8 @@ void CCtrlComments::OnCommentsChanged()
 			}
 			strcat(p, s);
 		}
-		UINT len = strlen(p);
-		while ((len > 0) && ((p[len-1] == ' ') || (p[len-1] == SongMessage::InternalLineEnding)))
+		size_t len = strlen(p);
+		while ((len > 0) && ((p[len-1] == ' ') || (p[len - 1] == SongMessage::InternalLineEnding)))
 		{
 			len--;
 			p[len] = 0;

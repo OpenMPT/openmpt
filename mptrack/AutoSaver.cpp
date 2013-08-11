@@ -171,7 +171,7 @@ void CAutoSaver::SetHistoryDepth(int history)
 
 
 int CAutoSaver::GetHistoryDepth()
-//_------------------------------
+//-------------------------------
 {
 	return m_nBackupHistory;
 }

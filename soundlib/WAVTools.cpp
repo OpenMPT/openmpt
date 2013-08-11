@@ -231,14 +231,14 @@ void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
 {
 	identifier = 0;
 	loopType = bidi ? loopBidi : loopForward;
-	loopStart = start;
+	loopStart = mpt::saturate_cast<uint32>(start);
 	// Loop ends are *inclusive* in the RIFF standard, while they're *exclusive* in OpenMPT.
 	if(end > start)
 	{
-		loopEnd = end - 1;
+		loopEnd = mpt::saturate_cast<uint32>(end - 1);
 	} else
 	{
-		loopEnd = start;
+		loopEnd = loopStart;
 	}
 	fraction = 0;
 	playCount = 0;

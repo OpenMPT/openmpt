@@ -490,7 +490,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			uint32 sourceSize = file.ReadUint32LE();
 			int8 packCharacter = file.ReadUint8();
 
-			LimitMax(sourceSize, file.BytesLeft());
+			LimitMax(sourceSize, mpt::saturate_cast<uint32>(file.BytesLeft()));
 			bytesRead = 9 + sourceSize;
 
 			AMSUnpack(reinterpret_cast<const int8 *>(sourceBuf) + 9, sourceSize, sample.pSample, sample.GetSampleSizeInBytes(), packCharacter);

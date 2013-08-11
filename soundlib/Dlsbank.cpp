@@ -1724,7 +1724,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UI
 		if (pDlsIns->szName[0])
 		{
 			sprintf(&s[strlen(s)], " (%s", pDlsIns->szName);
-			int n = strlen(s);
+			size_t n = strlen(s);
 			while ((n) && (s[n-1] == ' '))
 			{
 				n--;

@@ -146,7 +146,7 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 		if(writeChunk)
 		{
 			char *chunk = nullptr;
-			uint32 chunkSize = plugin.Dispatch(effGetChunk, 0, 0, &chunk, 0);
+			uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.Dispatch(effGetChunk, 0, 0, &chunk, 0));
 			if(chunkSize && chunk)
 			{
 				WriteBE(chunkSize, f);
@@ -204,7 +204,7 @@ void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 	if(writeChunk)
 	{
 		char *chunk = nullptr;
-		uint32 chunkSize = plugin.Dispatch(effGetChunk, 1, 0, &chunk, 0);
+		uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.Dispatch(effGetChunk, 1, 0, &chunk, 0));
 		if(chunkSize && chunk)
 		{
 			WriteBE(chunkSize, f);

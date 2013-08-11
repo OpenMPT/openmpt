@@ -1036,7 +1036,8 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		ModChannel *pChn = &m_SndFile.Chn[nChn];
 		
 		// reset channel properties; in theory the chan is completely unused anyway.
-		pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
+		pChn->nPos = pChn->nPosLo = 0;
+		pChn->nLength = 0;
 		pChn->dwFlags &= CHN_SAMPLEFLAGS;
 		pChn->dwFlags.reset(CHN_MUTE);
 		pChn->nGlobalVol = 64;
@@ -1065,7 +1066,8 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			pChn->pSample = sample.pSample;
 			pChn->nFineTune = sample.nFineTune;
 			pChn->nC5Speed = sample.nC5Speed;
-			pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
+			pChn->nPos = pChn->nPosLo = 0;
+			pChn->nLength = 0;
 			pChn->nLoopStart = sample.nLoopStart;
 			pChn->nLoopEnd = sample.nLoopEnd;
 			pChn->dwFlags = static_cast<ChannelFlags>(sample.uFlags) & (CHN_SAMPLEFLAGS & ~CHN_MUTE);

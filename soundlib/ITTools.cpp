@@ -204,7 +204,7 @@ void ITInstrument::ConvertEndianness()
 
 
 // Convert OpenMPT's internal instrument representation to an ITInstrument.
-size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile)
+uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile)
 //---------------------------------------------------------------------------------------------------------
 {
 	MemsetZero(*this);
@@ -255,7 +255,7 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	// Sample Map
 	nos = 0;
 	std::vector<bool> smpCount(sndFile.GetNumSamples(), false);
-	for(size_t i = 0; i < 120; i++)
+	for(int i = 0; i < 120; i++)
 	{
 		keyboard[i * 2] = (mptIns.NoteMap[i] >= NOTE_MIN && mptIns.NoteMap[i] <= NOTE_MAX) ? (mptIns.NoteMap[i] - NOTE_MIN) : static_cast<uint8>(i);
 
@@ -286,7 +286,7 @@ size_t ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 
 
 // Convert an ITInstrument to OpenMPT's internal instrument representation. Returns size of the instrument data that has been read.
-size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) const
+uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) const
 //-------------------------------------------------------------------------------
 {
 	if(id != ITInstrument::magic)
@@ -351,7 +351,7 @@ size_t ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	mptIns.PitchEnv.dwFlags.set(ENV_FILTER, (pitchenv.flags & ITEnvelope::envFilter) != 0);
 
 	// Sample Map
-	for(size_t i = 0; i < 120; i++)
+	for(int i = 0; i < 120; i++)
 	{
 		uint8 note = keyboard[i * 2];
 		SAMPLEINDEX ins = keyboard[i * 2 + 1];
@@ -381,10 +381,10 @@ void ITInstrumentEx::ConvertEndianness()
 
 
 // Convert OpenMPT's internal instrument representation to an ITInstrumentEx. Returns amount of bytes that need to be written to file.
-size_t ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile)
+uint32 ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile)
 //-----------------------------------------------------------------------------------------------------------
 {
-	size_t instSize = iti.ConvertToIT(mptIns, compatExport, sndFile);
+	uint32 instSize = iti.ConvertToIT(mptIns, compatExport, sndFile);
 
 	if(compatExport)
 	{
@@ -395,7 +395,7 @@ size_t ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExpor
 	bool usedExtension = false;
 	iti.nos = 0;
 	std::vector<bool> smpCount(sndFile.GetNumSamples(), false);
-	for(size_t i = 0; i < 120; i++)
+	for(int i = 0; i < 120; i++)
 	{
 		const SAMPLEINDEX smp = mptIns.Keyboard[i];
 		keyboardhi[i] = 0;
@@ -430,10 +430,10 @@ size_t ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExpor
 
 
 // Convert an ITInstrumentEx to OpenMPT's internal instrument representation. Returns size of the instrument data that has been read.
-size_t ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) const
+uint32 ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) const
 //--------------------------------------------------------------------------------
 {
-	size_t insSize = iti.ConvertToMPT(mptIns, fromType);
+	uint32 insSize = iti.ConvertToMPT(mptIns, fromType);
 
 	// Is this actually an extended instrument?
 	if(insSize == 0 || memcmp(iti.dummy, "MPTX", 4))
@@ -442,7 +442,7 @@ size_t ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 	}
 
 	// Olivier's MPT Instrument Extension
-	for(size_t i = 0; i < 120; i++)
+	for(int i = 0; i < 120; i++)
 	{
 		mptIns.Keyboard[i] |= ((SAMPLEINDEX)keyboardhi[i] << 8);
 	}
@@ -542,7 +542,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 
 
 // Convert an ITSample to OpenMPT's internal sample representation.
-size_t ITSample::ConvertToMPT(ModSample &mptSmp) const
+uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
 //----------------------------------------------------
 {
 	if(id != ITSample::magic)

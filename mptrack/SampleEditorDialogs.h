@@ -144,7 +144,7 @@ protected:
 	CSpinButtonCtrl m_SpinSamples;
 
 public:
-	CSampleXFadeDlg(CWnd *parent, UINT nSamples, UINT nMaxSamples) : CDialog(IDD_SAMPLE_XFADE, parent) { m_nSamples = nSamples; m_nMaxSamples = nMaxSamples; };
+	CSampleXFadeDlg(CWnd *parent, SmpLength nSamples, UINT nMaxSamples) : CDialog(IDD_SAMPLE_XFADE, parent), m_nSamples(nSamples), m_nMaxSamples(nMaxSamples) { };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);

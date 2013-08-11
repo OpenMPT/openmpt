@@ -147,7 +147,7 @@ void AdjustEndOfSampleImpl(ModSample &smp)
 //----------------------------------------
 {
 	ModSample* const pSmp = &smp;
-	const UINT len = pSmp->nLength;
+	const SmpLength len = pSmp->nLength;
 	T *p = static_cast<T *>(pSmp->pSample);
 	if (pSmp->uFlags & CHN_STEREO)
 	{

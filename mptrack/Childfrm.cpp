@@ -361,12 +361,12 @@ BOOL CChildFrame::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 
 	ASSERT(pNMHDR->code == TTN_NEEDTEXTA || pNMHDR->code == TTN_NEEDTEXTW);
 	szFullText[0] = 0;
-	UINT nID = pNMHDR->idFrom;
+	UINT_PTR nID = pNMHDR->idFrom;
 	if (pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
 		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
 	{
 		// idFrom is actually the HWND of the tool
-		nID = (UINT)::GetDlgCtrlID((HWND)nID);
+		nID = (UINT_PTR)::GetDlgCtrlID((HWND)nID);
 	}
 
 	if ((nID >= 1000) && (nID < 10000) && (m_hWndCtrl) && (::SendMessage(m_hWndCtrl, WM_MOD_GETTOOLTIPTEXT, nID, (LPARAM)szFullText)))

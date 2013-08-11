@@ -204,7 +204,7 @@ void CDefaultVstEditor::CreateControls()
 	rect.DeflateRect(edSpacing, edSpacing);
 	rect.bottom = edTotalHeight;
 
-	for(size_t i = 0; i < NUM_PLUGINEDITOR_PARAMETERS; i++)
+	for(int i = 0; i < NUM_PLUGINEDITOR_PARAMETERS; i++)
 	{
 		try
 		{

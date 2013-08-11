@@ -1591,7 +1591,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 	iti.ConvertEndianness();
 	fwrite(&iti, 1, instSize, f);
 
-	filePos += smptable.size() * sizeof(ITSample);
+	filePos += mpt::saturate_cast<uint32>(smptable.size() * sizeof(ITSample));
 
 	// Writing sample headers + data
 	std::vector<SampleIO> sampleFlags;
@@ -1609,7 +1609,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFile
 		// Write sample
 		off_t curPos = ftell(f);
 		fseek(f, filePos, SEEK_SET);
-		filePos += itss.GetSampleFormat(0x0214).WriteSample(f, Samples[*iter]);
+		filePos += mpt::saturate_cast<uint32>(itss.GetSampleFormat(0x0214).WriteSample(f, Samples[*iter]));
 		fseek(f, curPos, SEEK_SET);
 	}
 

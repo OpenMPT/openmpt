@@ -379,7 +379,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		return m_OrderList.GetCurrentPattern();
 
 	case CTRLMSG_PATTERNCHANGED:
-		UpdateView((lParam << HINT_SHIFT_PAT) | HINT_PATNAMES, NULL);
+		UpdateView((DWORD)(lParam << HINT_SHIFT_PAT) | HINT_PATNAMES, NULL);
 		break;
 
 	case CTRLMSG_PAT_PREVINSTRUMENT:
@@ -1228,7 +1228,7 @@ BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 //---------------------------------------------------------------------
 {
     TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
-    UINT nID =pNMHDR->idFrom;
+    UINT_PTR nID = pNMHDR->idFrom;
     if (pTTT->uFlags & TTF_IDISHWND)
     {
         // idFrom is actually the HWND of the tool

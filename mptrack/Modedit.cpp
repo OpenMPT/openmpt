@@ -288,7 +288,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	std::vector<SAMPLEINDEX> newIndex(oldNumSamples + 1, 0);	// One of the new indexes for the old sample
 	std::vector<std::string> sampleNames(oldNumSamples + 1);
 
-	for(size_t i = 0; i < newOrder.size(); i++)
+	for(SAMPLEINDEX i = 0; i < newNumSamples; i++)
 	{
 		const SAMPLEINDEX origSlot = newOrder[i];
 		if(origSlot > 0 && origSlot <= oldNumSamples)
@@ -397,7 +397,7 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 
 	std::vector<ModInstrument> instrumentHeaders(oldNumInstruments + 1);
 	std::vector<INSTRUMENTINDEX> newIndex(oldNumInstruments + 1, 0);	// One of the new indexes for the old instrument
-	for(size_t i = 0; i < newNumInstruments; i++)
+	for(INSTRUMENTINDEX i = 0; i < newNumInstruments; i++)
 	{
 		const INSTRUMENTINDEX origSlot = newOrder[i];
 		if(origSlot > 0 && origSlot <= oldNumInstruments)
@@ -550,7 +550,7 @@ UINT CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 
 	for (PLUGINDEX nPlug = 0; nPlug < maxPlug; nPlug++)
 	{
-		SNDMIXPLUGIN* pPlug = &m_SndFile.m_MixPlugins[nPlug];		
+		SNDMIXPLUGIN* pPlug = &m_SndFile.m_MixPlugins[nPlug];
 		if (keepMask[nPlug] || !pPlug)
 		{
 			continue;

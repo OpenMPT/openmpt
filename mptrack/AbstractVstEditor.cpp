@@ -104,7 +104,7 @@ LRESULT CAbstractVstEditor::OnMidiMsg(WPARAM midiData, LPARAM)
 	{
 		if(!CheckInstrument(m_nInstrument))
 			m_nInstrument = GetBestInstrumentCandidate();
-		modDoc->ProcessMIDI(midiData, m_nInstrument, &m_VstPlugin, kCtxVSTGUI);
+		modDoc->ProcessMIDI((uint32)midiData, m_nInstrument, &m_VstPlugin, kCtxVSTGUI);
 		return 1;
 	}
 	return 0;
@@ -308,7 +308,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 			CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
 			//Translate message manually
-			UINT nChar = pMsg->wParam;
+			UINT nChar = (UINT)pMsg->wParam;
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
