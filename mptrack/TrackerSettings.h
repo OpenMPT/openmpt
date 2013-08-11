@@ -13,6 +13,7 @@
 
 #include "../soundlib/MixerSettings.h"
 #include "../soundlib/Resampler.h"
+#include "../soundlib/SampleFormat.h"
 #include "../sounddsp/EQ.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/Reverb.h"

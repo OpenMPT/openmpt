@@ -53,16 +53,16 @@ bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 //---------------------------------------------------------------------------
 {
 	MemsetZero(WaveFormat);
-	UINT bytespersample = (m_Settings.BitsPerSample/8) * m_Settings.Channels;
-	if(m_Settings.FloatingPoint && m_Settings.BitsPerSample != 32) return false;
-	WaveFormat.Format.wFormatTag = m_Settings.FloatingPoint ? WAVE_FORMAT_IEEE_FLOAT : WAVE_FORMAT_PCM;
+	if(!m_Settings.sampleFormat.IsValid()) return false;
+	UINT bytespersample = (m_Settings.sampleFormat.GetBitsPerSample()/8) * m_Settings.Channels;
+	WaveFormat.Format.wFormatTag = m_Settings.sampleFormat.IsFloat() ? WAVE_FORMAT_IEEE_FLOAT : WAVE_FORMAT_PCM;
 	WaveFormat.Format.nChannels = (WORD)m_Settings.Channels;
 	WaveFormat.Format.nSamplesPerSec = m_Settings.Samplerate;
 	WaveFormat.Format.nAvgBytesPerSec = m_Settings.Samplerate * bytespersample;
 	WaveFormat.Format.nBlockAlign = (WORD)bytespersample;
-	WaveFormat.Format.wBitsPerSample = (WORD)m_Settings.BitsPerSample;
+	WaveFormat.Format.wBitsPerSample = (WORD)m_Settings.sampleFormat.GetBitsPerSample();
 	WaveFormat.Format.cbSize = 0;
-	if((WaveFormat.Format.wBitsPerSample > 16 && !m_Settings.FloatingPoint) || (WaveFormat.Format.nChannels > 2))
+	if((WaveFormat.Format.wBitsPerSample > 16 && m_Settings.sampleFormat.IsInt()) || (WaveFormat.Format.nChannels > 2))
 	{
 		WaveFormat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
 		WaveFormat.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
@@ -77,7 +77,7 @@ bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 		}
 		const GUID guid_MEDIASUBTYPE_PCM = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x0, 0xAA, 0x0, 0x38, 0x9B, 0x71};
 		const GUID guid_MEDIASUBTYPE_IEEE_FLOAT = {0x00000003, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
-		WaveFormat.SubFormat = m_Settings.FloatingPoint ? guid_MEDIASUBTYPE_IEEE_FLOAT : guid_MEDIASUBTYPE_PCM;
+		WaveFormat.SubFormat = m_Settings.sampleFormat.IsFloat() ? guid_MEDIASUBTYPE_IEEE_FLOAT : guid_MEDIASUBTYPE_PCM;
 	}
 	return true;
 }
@@ -1242,8 +1242,6 @@ bool CASIODevice::InternalOpen(UINT nDevice)
 {
 	bool bOk = false;
 
-	if(m_Settings.FloatingPoint) return false; // for now
-
 	if (IsOpen()) Close();
 	if (!gbAsioEnumerated) EnumerateDevices(nDevice, NULL, 0);
 	if (nDevice >= gnNumAsioDrivers) return false;
@@ -1253,7 +1251,7 @@ bool CASIODevice::InternalOpen(UINT nDevice)
 	}
 #ifdef ASIO_LOG
 	Log("CASIODevice::Open(%d:\"%s\"): %d-bit, %d channels, %dHz\n",
-		nDevice, gAsioDrivers[nDevice].name, m_Settings.BitsPerSample, m_Settings.Channels, m_Settings.Samplerate);
+		nDevice, gAsioDrivers[nDevice].name, (int)m_Settings.sampleFormat.GetBitsPerSample(), m_Settings.Channels, m_Settings.Samplerate);
 #endif
 	OpenDevice(nDevice);
 
@@ -1262,8 +1260,14 @@ bool CASIODevice::InternalOpen(UINT nDevice)
 		long nInputChannels = 0, nOutputChannels = 0;
 		long minSize = 0, maxSize = 0, preferredSize = 0, granularity = 0;
 
-		if ((m_Settings.Channels > ASIO_MAX_CHANNELS)
-		 || ((m_Settings.BitsPerSample != 16) && (m_Settings.BitsPerSample != 32))) goto abort;
+		if(m_Settings.Channels > ASIO_MAX_CHANNELS)
+		{
+			goto abort;
+		}
+		if((m_Settings.sampleFormat != SampleFormatInt32) && (m_Settings.sampleFormat != SampleFormatFloat32))
+		{
+			goto abort;
+		}
 		m_nChannels = m_Settings.Channels;
 		m_pAsioDrv->getChannels(&nInputChannels, &nOutputChannels);
 	#ifdef ASIO_LOG
@@ -1290,10 +1294,6 @@ bool CASIODevice::InternalOpen(UINT nDevice)
 			m_BufferInfo[ich].channelNum = ich + CASIODevice::baseChannel;		// map MPT channel i to ASIO channel i
 			m_BufferInfo[ich].buffers[0] = NULL;
 			m_BufferInfo[ich].buffers[1] = NULL;
-			if(m_Settings.BitsPerSample != 32 && m_Settings.BitsPerSample != 32+128)
-			{
-				goto abort;
-			}
 			m_Float = false;
 			switch(m_ChannelInfo[ich].type)
 			{
@@ -1888,13 +1888,13 @@ bool CPortaudioDevice::InternalOpen(UINT nDevice)
 	m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(nDevice, m_HostApi);
 	if(m_StreamParameters.device == -1) return false;
 	m_StreamParameters.channelCount = m_Settings.Channels;
-	if(m_Settings.FloatingPoint)
+	if(m_Settings.sampleFormat.IsFloat())
 	{
-		if(m_Settings.BitsPerSample != 32) return false;
+		if(m_Settings.sampleFormat.GetBitsPerSample() != 32) return false;
 		m_StreamParameters.sampleFormat = paFloat32;
 	} else
 	{
-		switch(m_Settings.BitsPerSample)
+		switch(m_Settings.sampleFormat.GetBitsPerSample())
 		{
 		case 8: m_StreamParameters.sampleFormat = paUInt8; break;
 		case 16: m_StreamParameters.sampleFormat = paInt16; break;

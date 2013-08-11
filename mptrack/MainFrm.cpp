@@ -915,8 +915,7 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, SampleFormat sampleFormat,
 	settings.fulCfgOptions = TrackerSettings::Instance().GetSoundDeviceFlags();
 	settings.Samplerate = samplespersec;
 	settings.Channels = (uint8)channels;
-	settings.BitsPerSample = (uint8)sampleFormat.GetBitsPerSample();
-	settings.FloatingPoint = sampleFormat.IsFloat();
+	settings.sampleFormat = sampleFormat;
 	return gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), settings);
 }
 

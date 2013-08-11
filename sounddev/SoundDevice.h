@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "../soundlib/SampleFormat.h"
+
 #include <vector>
 
 
@@ -93,8 +95,7 @@ struct SoundDeviceSettings
 	ULONG fulCfgOptions;
 	uint32 Samplerate;
 	uint8 Channels;
-	uint8 BitsPerSample;
-	bool FloatingPoint;
+	SampleFormat sampleFormat;
 	SoundDeviceSettings()
 		: hWnd(NULL)
 		, LatencyMS(SNDDEV_DEFAULT_LATENCY_MS)
@@ -102,8 +103,7 @@ struct SoundDeviceSettings
 		, fulCfgOptions(0)
 		, Samplerate(48000)
 		, Channels(2)
-		, BitsPerSample(16)
-		, FloatingPoint(false)
+		, sampleFormat(SampleFormatInt16)
 	{
 		return;
 	}
@@ -160,7 +160,7 @@ public:
 	void Start();
 	void Stop();
 	void Reset();
-	virtual int HasFixedSampleFormat() { return 0; }
+	virtual SampleFormat HasFixedSampleFormat() { return SampleFormatInvalid; }
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }
 	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }

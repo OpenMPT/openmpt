@@ -1085,6 +1085,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\SampleFormat.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\SampleFormatConverters.h"
 				>
 			</File>
