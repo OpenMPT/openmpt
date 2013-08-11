@@ -735,9 +735,6 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 //------------------------------------------------
 {
 	CMappedFile f;
-	CHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
-	LPBYTE lpFile;
-	DWORD len;
 	bool bOk = false;
 
 	BeginWaitCursor();
@@ -746,9 +743,8 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 		EndWaitCursor();
 		return false;
 	}
-	len = f.GetLength();
-	if (len > CTrackApp::gMemStatus.dwTotalPhys) len = CTrackApp::gMemStatus.dwTotalPhys;
-	lpFile = f.Lock(len);
+	const size_t len = f.GetLength();
+	const void *lpFile = f.Lock(len);
 	if (!lpFile) goto OpenError;
 	
 	{
@@ -825,30 +821,18 @@ OpenError:
 		TrackerSettings::Instance().SetWorkingDirectory(lpszFileName, DIR_SAMPLES, true);
 		if (!sample.filename[0])
 		{
-			CHAR szFullFilename[_MAX_PATH];
+			CHAR szName[_MAX_PATH], szExt[_MAX_EXT];
 			_splitpath(lpszFileName, 0, 0, szName, szExt);
 
-			memset(szFullFilename, 0, 32);
-			strcpy(szFullFilename, szName);
-			if (m_sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))
-			{
-				// MOD/XM
-				strcat(szFullFilename, szExt);
-				szFullFilename[31] = 0;
-				memcpy(m_sndFile.m_szNames[m_nSample], szFullFilename, MAX_SAMPLENAME);
-			} else
-			{
-				// S3M/IT
-				szFullFilename[31] = 0;
-				if (!m_sndFile.m_szNames[m_nSample][0]) mpt::String::Copy(m_sndFile.m_szNames[m_nSample], szFullFilename);
-				if (strlen(szFullFilename) < 9) strcat(szFullFilename, szExt);
-			}
-			mpt::String::Copy(sample.filename, szFullFilename);
+			if(!m_sndFile.m_szNames[m_nSample][0]) mpt::String::Copy(m_sndFile.m_szNames[m_nSample], szName);
+
+			if (strlen(szName) < 9) strcat(szName, szExt);
+			mpt::String::Copy(sample.filename, szName);
 		}
-		if ((m_sndFile.GetType() & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
+		if ((m_sndFile.GetType() & MOD_TYPE_XM) && !sample.uFlags[CHN_PANNING])
 		{
 			sample.nPan = 128;
-			sample.uFlags |= CHN_PANNING;
+			sample.uFlags.set(CHN_PANNING);
 		}
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
 		m_modDoc.SetModified();
@@ -1520,7 +1504,7 @@ void CCtrlSamples::OnUpsample()
 		if (sample.nSustainEnd >= dwEnd) sample.nSustainEnd += (dwEnd-dwStart); else
 		if (sample.nSustainEnd > dwStart) sample.nSustainEnd += (sample.nSustainEnd - dwStart);
 		
-		sample.uFlags |= CHN_16BIT;
+		sample.uFlags.set(CHN_16BIT);
 		ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, dwNewLen, m_sndFile);
 		if(!selection.selectionActive)
 		{
