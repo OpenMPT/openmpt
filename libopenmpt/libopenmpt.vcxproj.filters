@@ -242,6 +242,9 @@
     <ClInclude Include="..\soundlib\MixerLoops.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\SampleFormat.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp">

@@ -11,6 +11,7 @@
 #include "Sndfile.h"
 #include "Dither.h"
 #include "SampleFormatConverters.h"
+#include "SampleFormat.h"
 #include "MixerLoops.h"
 
 

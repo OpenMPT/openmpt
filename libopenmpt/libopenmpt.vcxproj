@@ -448,6 +448,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClInclude Include="..\soundlib\Resampler.h" />
     <ClInclude Include="..\soundlib\RowVisitor.h" />
     <ClInclude Include="..\soundlib\S3MTools.h" />
+    <ClInclude Include="..\soundlib\SampleFormat.h" />
     <ClInclude Include="..\soundlib\SampleFormatConverters.h" />
     <ClInclude Include="..\soundlib\SampleIO.h" />
     <ClInclude Include="..\soundlib\Sndfile.h" />
