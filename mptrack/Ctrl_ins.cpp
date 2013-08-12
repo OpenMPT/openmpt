@@ -22,6 +22,7 @@
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 #include "SelectPluginDialog.h"
+#include "MemoryMappedFile.h"
 
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
@@ -1395,8 +1396,6 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 {
 	CMappedFile f;
 	BOOL bFirst, bOk;
-	DWORD len;
-	LPBYTE lpFile;
 	
 	BeginWaitCursor();
 	if ((!lpszFileName) || (!f.Open(lpszFileName)))
@@ -1405,11 +1404,11 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 		return FALSE;
 	}
 	bFirst = FALSE;
-	len = f.GetLength();
-	if (len > CTrackApp::gMemStatus.dwTotalPhys) len = CTrackApp::gMemStatus.dwTotalPhys;
-	lpFile = f.Lock(len);
+
+	FileReader file = f.GetFile();
+
 	bOk = FALSE;
-	if (lpFile)
+	if (file.IsValid())
 	{
 		if (!m_sndFile.GetNumInstruments())
 		{
@@ -1419,7 +1418,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 			m_modDoc.SetModified();
 		}
 		if (!m_nInstrument) m_nInstrument = 1;
-		if (m_sndFile.ReadInstrumentFromFile(m_nInstrument, lpFile, len, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad))
+		if (m_sndFile.ReadInstrumentFromFile(m_nInstrument, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad))
 		{
 			m_modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 			// -> CODE#0023

@@ -24,8 +24,12 @@
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
-#include "soundlib/FileReader.h"
+#ifdef NO_FILEREADER_STD_ISTREAM
+#include "MemoryMappedFile.h"
+#else
 #include <fstream>
+#endif
+#include "soundlib/FileReader.h"
 #include <shlwapi.h>
 
 #ifdef _DEBUG
@@ -215,15 +219,10 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		CMappedFile f;
 		if (f.Open(lpszPathName))
 		{
-			DWORD dwLen = f.GetLength();
-			if (dwLen)
+			FileReader file = f.GetFile();
+			if(file.IsValid())
 			{
-				LPBYTE lpStream = f.Lock();
-				if (lpStream)
-				{
-					m_SndFile.Create(FileReader(lpStream, dwLen), CSoundFile::loadCompleteModule, this);
-					f.Unlock();
-				}
+				m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
 			}
 		}
 	}
@@ -333,16 +332,14 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				{
 					// Load from Instrument or Sample file
 					CHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
-					CFile f;
+					CMappedFile f;
 
-					if (f.Open(pszMidiMapName, CFile::modeRead))
+					if(f.Open(pszMidiMapName))
 					{
-						DWORD len = static_cast<DWORD>(f.GetLength());
-						LPBYTE lpFile;
-						if ((len) && ((lpFile = (LPBYTE)GlobalAllocPtr(GHND, len)) != NULL))
+						FileReader file = f.GetFile();
+						if(file.IsValid())
 						{
-							f.Read(lpFile, len);
-							m_SndFile.ReadInstrumentFromFile(nIns, lpFile, len, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
+							m_SndFile.ReadInstrumentFromFile(nIns, file, false);
 							_splitpath(pszMidiMapName, NULL, NULL, szName, szExt);
 							strncat(szName, szExt, sizeof(szName));
 							pIns = m_SndFile.Instruments[nIns];
@@ -360,7 +357,6 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 								}
 							}
 						}
-						f.Close();
 					}
 				}
 			}

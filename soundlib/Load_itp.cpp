@@ -17,6 +17,7 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
 #include "../mptrack/TrackerSettings.h"
+#include "../mptrack/MemoryMappedFile.h"
 #endif
 #include "../common/version.h"
 #include "Loaders.h"
@@ -220,16 +221,13 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Load instruments
 	CMappedFile f;
-
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
 		if(m_szInstrumentPath[ins].empty() || !f.Open(m_szInstrumentPath[ins].c_str())) continue;
 
-		size = f.GetLength();
-		LPBYTE lpFile = f.Lock(size);
-		if(!lpFile) { f.Close(); continue; }
-
-		ReadInstrumentFromFile(ins + 1, lpFile, size, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
+		FileReader file = f.GetFile();
+		if(file.IsValid())
+			ReadInstrumentFromFile(ins + 1, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 		f.Close();
 	}
 
