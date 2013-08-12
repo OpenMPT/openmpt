@@ -17,6 +17,7 @@
 #include "Dlsbank.h"
 #include "dlg_misc.h"
 #include "vstplug.h"
+#include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
 
 
@@ -267,28 +268,24 @@ void CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 		SetCurrentDirectory(m_szInstrLibPath);
 		if (f.Open(pszSongName))
 		{
-			DWORD dwLen = f.GetLength();
-			if (dwLen)
+			FileReader file = f.GetFile();
+			if (file.IsValid())
 			{
-				LPBYTE lpStream = f.Lock();
-				if (lpStream)
+				if(m_SongFile != nullptr)
 				{
-					if(m_SongFile != nullptr)
-					{
-						m_SongFile->Destroy();
-					} else
-					{
-						m_SongFile = new (std::nothrow) CSoundFile;
-					}
-					if(m_SongFile != nullptr)
-					{
-						m_SongFile->Create(FileReader(lpStream, dwLen), CSoundFile::loadNoPatternData, nullptr);
-						// Destroy some stuff that we're not going to use anyway.
-						m_SongFile->Patterns.DestroyPatterns();
-						m_SongFile->songMessage.clear();
-					}
-					f.Unlock();
+					m_SongFile->Destroy();
+				} else
+				{
+					m_SongFile = new (std::nothrow) CSoundFile;
 				}
+				if(m_SongFile != nullptr)
+				{
+					m_SongFile->Create(file, CSoundFile::loadNoPatternData, nullptr);
+					// Destroy some stuff that we're not going to use anyway.
+					m_SongFile->Patterns.DestroyPatterns();
+					m_SongFile->songMessage.clear();
+				}
+				f.Unlock();
 			}
 		}
 	}

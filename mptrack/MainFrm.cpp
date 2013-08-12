@@ -36,6 +36,7 @@
 #include "SelectPluginDialog.h"
 #include "ExceptionHandler.h"
 #include "PatternClipboard.h"
+#include "MemoryMappedFile.h"
 #include "soundlib/FileReader.h"
 #include "../common/Profiler.h"
 
@@ -1617,26 +1618,21 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 
 			if(f.Open(lpszFileName))
 			{
-				DWORD dwLen = f.GetLength();
-				if(dwLen)
+				FileReader file = f.GetFile();
+				if(file.IsValid())
 				{
-					LPBYTE p = f.Lock();
-					if(p)
+					InitPreview();
+					m_WaveFile.m_SongFlags.set(SONG_PAUSED);
+					// Avoid hanging audio while reading file - we have removed all sample and instrument references before,
+					// so it's safe to replace the sample / instrument now.
+					cs.Leave();
+					ok = m_WaveFile.ReadInstrumentFromFile(1, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
+					cs.Enter();
+					if(!ok)
 					{
-						InitPreview();
-						m_WaveFile.m_SongFlags.set(SONG_PAUSED);
-						// Avoid hanging audio while reading file - we have removed all sample and instrument references before,
-						// so it's safe to replace the sample / instrument now.
-						cs.Leave();
-						ok = m_WaveFile.ReadInstrumentFromFile(1, p, dwLen, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
-						cs.Enter();
-						if(!ok)
-						{
-							// Try reading as sample if reading as instrument fails
-							FileReader file(p, dwLen);
-							ok = m_WaveFile.ReadSampleFromFile(1, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
-							m_WaveFile.AllocateInstrument(1, 1);
-						}
+						// Try reading as sample if reading as instrument fails
+						ok = m_WaveFile.ReadSampleFromFile(1, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
+						m_WaveFile.AllocateInstrument(1, 1);
 					}
 				}
 			}

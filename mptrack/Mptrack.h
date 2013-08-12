@@ -239,31 +239,6 @@ extern CTrackApp theApp;
 
 
 //////////////////////////////////////////////////////////////////
-// File Mapping Class
-
-//===============
-class CMappedFile
-//===============
-{
-protected:
-	CFile m_File;
-	HANDLE m_hFMap;
-	LPVOID m_lpData;
-
-public:
-	CMappedFile();
-	virtual ~CMappedFile();
-
-public:
-	BOOL Open(LPCSTR lpszFileName);
-	void Close();
-	DWORD GetLength();
-	LPBYTE Lock(DWORD dwMaxLen=0);
-	BOOL Unlock();
-};
-
-
-//////////////////////////////////////////////////////////////////
 // More Bitmap Helpers
 
 //#define FASTBMP_XSHIFT		12	// 4K pixels

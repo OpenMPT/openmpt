@@ -13,6 +13,7 @@
 #include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
+#include "../mptrack/MemoryMappedFile.h"
 #endif
 #include "Dlsbank.h"
 #include "Wav.h"
@@ -25,10 +26,7 @@
 //#define DLSBANK_LOG
 //#define DLSINSTR_LOG
 
-//#define ASM_DLSUNITCONVERSION
-#ifndef ASM_DLSUNITCONVERSION
 #include <math.h>
-#endif
 
 #define F_RGN_OPTION_SELFNONEXCLUSIVE	0x0001
 
@@ -1156,7 +1154,7 @@ BOOL CDLSBank::Open(LPCSTR lpszFileName)
 	CMappedFile MapFile;
 	if (!MapFile.Open(lpszFileName)) return FALSE;
 	dwMemLength = MapFile.GetLength();
-	if (dwMemLength >= 256) lpMemFile = MapFile.Lock();
+	if (dwMemLength >= 256) lpMemFile = (const BYTE *)MapFile.Lock();
 	if (!lpMemFile)
 	{
 		return FALSE;

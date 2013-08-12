@@ -379,6 +379,7 @@
     <ClCompile Include="KeyConfigDlg.cpp" />
     <ClCompile Include="Mainbar.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MemoryMappedFile.cpp" />
     <ClCompile Include="MIDIMacroDialog.cpp" />
     <ClCompile Include="MIDIMapping.cpp" />
     <ClCompile Include="MIDIMappingDialog.cpp" />
@@ -554,6 +555,7 @@
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Mainbar.h" />
     <ClInclude Include="Mainfrm.h" />
+    <ClInclude Include="MemoryMappedFile.h" />
     <ClInclude Include="MIDIMacroDialog.h" />
     <ClInclude Include="MIDIMapping.h" />
     <ClInclude Include="mod2midi.h" />

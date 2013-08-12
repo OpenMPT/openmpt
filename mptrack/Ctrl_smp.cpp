@@ -27,6 +27,7 @@
 #include "modsmp_ctrl.h"
 #include "Autotune.h"
 #include "../common/StringFixer.h"
+#include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
 #include <Shlwapi.h>
 
@@ -743,13 +744,12 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 		EndWaitCursor();
 		return false;
 	}
-	const size_t len = f.GetLength();
-	const void *lpFile = f.Lock(len);
-	if (!lpFile) goto OpenError;
+
+	FileReader file = f.GetFile();
+	if(file.IsValid()) goto OpenError;
 	
 	{
 		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
-		FileReader file(lpFile, len);
 		bOk = m_sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 	}
 
@@ -771,7 +771,7 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			ModSample &sample = m_sndFile.GetSample(m_nSample);
 			
 			m_sndFile.DestroySampleThreadsafe(m_nSample);
-			sample.nLength = len;
+			sample.nLength = file.GetLength();
 
 			SampleIO sampleIO = dlg.GetSampleFormat();
 
@@ -791,8 +791,8 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 				sample.nLength /= 2;
 			}
 
-			FileReader chunk(lpFile, len);
-			if(sampleIO.ReadSample(sample, chunk))
+			file.Rewind();
+			if(sampleIO.ReadSample(sample, file))
 			{
 				bOk = true;
 

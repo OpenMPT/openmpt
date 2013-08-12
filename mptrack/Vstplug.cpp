@@ -25,6 +25,7 @@
 #include "../common/version.h"
 #include "midimappingdialog.h"
 #include "../common/StringFixer.h"
+#include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
 #include "../soundlib/plugins/JBridge.h"
 #include <fstream>
@@ -1678,9 +1679,7 @@ bool CVstPlugin::LoadProgram()
 	const char *errorStr = nullptr;
 	if(f.Open(files.first_file.c_str()))
 	{
-		size_t len = f.GetLength();
-		FileReader file(f.Lock(len), len);
-
+		FileReader file = f.GetFile();
 		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));
 	} else
 	{

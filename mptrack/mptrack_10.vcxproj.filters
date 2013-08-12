@@ -481,6 +481,9 @@
     <ClCompile Include="..\soundlib\MixerLoops.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="MemoryMappedFile.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -896,6 +899,9 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\SampleFormat.h">
       <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryMappedFile.h">
+      <Filter>Header Files\mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

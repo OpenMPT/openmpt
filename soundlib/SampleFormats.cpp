@@ -88,16 +88,16 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 }
 
 
-bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength, bool mayNormalize)
-//----------------------------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize)
+//--------------------------------------------------------------------------------------------------
 {
-	FileReader file(lpMemFile, dwFileLength);
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
-	if ((!ReadXIInstrument(nInstr, file))
-	 && (!ReadPATInstrument(nInstr, lpMemFile, dwFileLength))
-	 && (!ReadITIInstrument(nInstr, file))
-	// Generic read
-	 && (!ReadSampleAsInstrument(nInstr, file, mayNormalize))) return false;
+	file.Rewind();
+	if(!ReadPATInstrument(nInstr, (const LPBYTE)file.GetRawData(), file.GetLength())
+		&& !ReadXIInstrument(nInstr, file)
+		&& !ReadITIInstrument(nInstr, file)
+		// Generic read
+		&& !ReadSampleAsInstrument(nInstr, file, mayNormalize)) return false;
 
 	if(nInstr > GetNumInstruments()) m_nInstruments = nInstr;
 	return true;
@@ -711,8 +711,8 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMem
 
 
 // PAT Instrument
-bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWORD dwMemLength)
-//--------------------------------------------------------------------------------------------
+bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpStream, DWORD dwMemLength)
+//--------------------------------------------------------------------------------------------------
 {
 	GF1PATCHFILEHEADER *phdr = (GF1PATCHFILEHEADER *)lpStream;
 	GF1INSTRUMENT *pih = (GF1INSTRUMENT *)(lpStream+sizeof(GF1PATCHFILEHEADER));

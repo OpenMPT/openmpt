@@ -367,6 +367,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MemoryMappedFile.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\Message.cpp"
 				>
 			</File>
@@ -942,6 +946,10 @@
 			</File>
 			<File
 				RelativePath=".\MainFrm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MemoryMappedFile.h"
 				>
 			</File>
 			<File
