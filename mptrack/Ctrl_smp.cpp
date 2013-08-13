@@ -736,8 +736,6 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 //------------------------------------------------
 {
 	CMappedFile f;
-	bool bOk = false;
-
 	BeginWaitCursor();
 	if ((!lpszFileName) || (!f.Open(lpszFileName)))
 	{
@@ -746,12 +744,14 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	}
 
 	FileReader file = f.GetFile();
-	if(file.IsValid()) goto OpenError;
-	
+	if(!file.IsValid())
 	{
-		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
-		bOk = m_sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
+		EndWaitCursor();
+		return false;
 	}
+	
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+	bool bOk = m_sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 
 	if (!bOk)
 	{
@@ -813,7 +813,7 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
 		}
 	}
-OpenError:
+
 	EndWaitCursor();
 	if (bOk)
 	{
