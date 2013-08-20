@@ -27,8 +27,8 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{6B11F6A8-B131-4D2B-80EF-5731A9016436}</ProjectGuid>
-		<RootNamespace>lhasa</RootNamespace>
+		<ProjectGuid>{89AF16DD-32CC-4A7E-B219-5F117D761F9F}</ProjectGuid>
+		<RootNamespace>smbPitchShift</RootNamespace>
 		<Keyword>Win32Proj</Keyword>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -92,27 +92,26 @@
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">..\bin\DebugLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">obj\x32\DebugLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">lhasa</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">smbPitchShift</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">..\bin\DebugLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">obj\x64\DebugLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">lhasa64</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">smbPitchShift64</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">..\bin\NormalLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">obj\x32\NormalLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">lhasa</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">smbPitchShift</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">..\bin\NormalLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">obj\x64\NormalLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">lhasa64</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">smbPitchShift64</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">..\bin\ReleaseLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">obj\x32\ReleaseLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">lhasa</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">smbPitchShift</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">..\bin\ReleaseLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">obj\x64\ReleaseLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">lhasa64</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">smbPitchShift64</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -121,25 +120,22 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -148,26 +144,23 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<DebugInformationFormat>OldStyle</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -177,28 +170,25 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -208,28 +198,25 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -239,28 +226,25 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -270,79 +254,26 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>
-		<ClInclude Include="lib\crc16.h" />
-		<ClInclude Include="lib\ext_header.h" />
-		<ClInclude Include="lib\lha_arch.h" />
-		<ClInclude Include="lib\lha_basic_reader.h" />
-		<ClInclude Include="lib\lha_decoder.h" />
-		<ClInclude Include="lib\lha_endian.h" />
-		<ClInclude Include="lib\lha_file_header.h" />
-		<ClInclude Include="lib\lha_input_stream.h" />
-		<ClInclude Include="lib\macbinary.h" />
-		<ClInclude Include="lib\public\lha_decoder.h" />
-		<ClInclude Include="lib\public\lha_file_header.h" />
-		<ClInclude Include="lib\public\lha_input_stream.h" />
-		<ClInclude Include="lib\public\lha_reader.h" />
-		<ClInclude Include="lib\public\lhasa.h" />
+		<ClInclude Include="smbPitchShift.h" />
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="lib\crc16.c">
-		</ClCompile>
-		<ClCompile Include="lib\ext_header.c">
-		</ClCompile>
-		<ClCompile Include="lib\lh1_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lh5_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lh6_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lh7_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_arch_unix.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_arch_win32.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_basic_reader.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_endian.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_file_header.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_input_stream.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_reader.c">
-		</ClCompile>
-		<ClCompile Include="lib\lz5_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lzs_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\macbinary.c">
-		</ClCompile>
-		<ClCompile Include="lib\null_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\pm1_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\pm2_decoder.c">
+		<ClCompile Include="smbPitchShift.cpp">
 		</ClCompile>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

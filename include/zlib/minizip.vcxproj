@@ -27,8 +27,8 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{6B11F6A8-B131-4D2B-80EF-5731A9016436}</ProjectGuid>
-		<RootNamespace>lhasa</RootNamespace>
+		<ProjectGuid>{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}</ProjectGuid>
+		<RootNamespace>minizip</RootNamespace>
 		<Keyword>Win32Proj</Keyword>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -91,28 +91,28 @@
 	<PropertyGroup>
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">..\bin\DebugLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">obj\x32\DebugLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">lhasa</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">obj\x32\DebugLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">minizip</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">..\bin\DebugLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">obj\x64\DebugLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">lhasa64</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">obj\x64\DebugLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">minizip64</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">..\bin\NormalLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">obj\x32\NormalLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">lhasa</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">obj\x32\NormalLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">minizip</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">..\bin\NormalLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">obj\x64\NormalLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">lhasa64</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">obj\x64\NormalLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">minizip64</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">..\bin\ReleaseLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">obj\x32\ReleaseLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">lhasa</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">obj\x32\ReleaseLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">minizip</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">..\bin\ReleaseLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">obj\x64\ReleaseLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">lhasa64</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">obj\x64\ReleaseLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">minizip64</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -125,21 +125,21 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -152,22 +152,22 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -181,24 +181,24 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -212,24 +212,24 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -243,24 +243,24 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -274,75 +274,37 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>
-		<ClInclude Include="lib\crc16.h" />
-		<ClInclude Include="lib\ext_header.h" />
-		<ClInclude Include="lib\lha_arch.h" />
-		<ClInclude Include="lib\lha_basic_reader.h" />
-		<ClInclude Include="lib\lha_decoder.h" />
-		<ClInclude Include="lib\lha_endian.h" />
-		<ClInclude Include="lib\lha_file_header.h" />
-		<ClInclude Include="lib\lha_input_stream.h" />
-		<ClInclude Include="lib\macbinary.h" />
-		<ClInclude Include="lib\public\lha_decoder.h" />
-		<ClInclude Include="lib\public\lha_file_header.h" />
-		<ClInclude Include="lib\public\lha_input_stream.h" />
-		<ClInclude Include="lib\public\lha_reader.h" />
-		<ClInclude Include="lib\public\lhasa.h" />
+		<ClInclude Include="contrib\minizip\crypt.h" />
+		<ClInclude Include="contrib\minizip\ioapi.h" />
+		<ClInclude Include="contrib\minizip\iowin32.h" />
+		<ClInclude Include="contrib\minizip\mztools.h" />
+		<ClInclude Include="contrib\minizip\unzip.h" />
+		<ClInclude Include="contrib\minizip\zip.h" />
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="lib\crc16.c">
+		<ClCompile Include="contrib\minizip\ioapi.c">
 		</ClCompile>
-		<ClCompile Include="lib\ext_header.c">
+		<ClCompile Include="contrib\minizip\iowin32.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh1_decoder.c">
+		<ClCompile Include="contrib\minizip\mztools.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh5_decoder.c">
+		<ClCompile Include="contrib\minizip\unzip.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh6_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lh7_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_arch_unix.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_arch_win32.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_basic_reader.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_endian.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_file_header.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_input_stream.c">
-		</ClCompile>
-		<ClCompile Include="lib\lha_reader.c">
-		</ClCompile>
-		<ClCompile Include="lib\lz5_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lzs_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\macbinary.c">
-		</ClCompile>
-		<ClCompile Include="lib\null_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\pm1_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\pm2_decoder.c">
+		<ClCompile Include="contrib\minizip\zip.c">
 		</ClCompile>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

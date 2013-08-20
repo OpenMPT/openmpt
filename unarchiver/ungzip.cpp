@@ -12,9 +12,6 @@
 #include "../soundlib/FileReader.h"
 #include "ungzip.h"
 
-#ifndef ZLIB_WINAPI
-#define ZLIB_WINAPI
-#endif // ZLIB_WINAPI
 #include <zlib/zlib.h>
 
 

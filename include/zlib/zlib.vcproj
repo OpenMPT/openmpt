@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="lhasa"
-	ProjectGUID="{6B11F6A8-B131-4D2B-80EF-5731A9016436}"
-	RootNamespace="lhasa"
+	Name="zlib"
+	ProjectGUID="{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
+	RootNamespace="zlib"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -21,7 +21,7 @@
 		<Configuration
 			Name="DebugLib|Win32"
 			OutputDirectory="..\bin\DebugLib"
-			IntermediateDirectory="obj\x32\DebugLib"
+			IntermediateDirectory="obj\x32\DebugLib\zlib"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -51,7 +51,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
 				DebugInformationFormat="4"
 				CompileAs="1"
 			/>
@@ -61,14 +61,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\zlib.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -98,7 +98,7 @@
 		<Configuration
 			Name="DebugLib|x64"
 			OutputDirectory="..\bin\DebugLib"
-			IntermediateDirectory="obj\x64\DebugLib"
+			IntermediateDirectory="obj\x64\DebugLib\zlib"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -121,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -129,7 +129,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa64.pdb"
+				ProgramDataBaseFileName="$(OutDir)\zlib64.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -139,14 +139,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa64.lib"
+				OutputFile="$(OutDir)\zlib64.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -176,7 +176,7 @@
 		<Configuration
 			Name="NormalLib|Win32"
 			OutputDirectory="..\bin\NormalLib"
-			IntermediateDirectory="obj\x32\NormalLib"
+			IntermediateDirectory="obj\x32\NormalLib\zlib"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -199,7 +199,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -207,7 +207,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -217,14 +217,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\zlib.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -254,7 +254,7 @@
 		<Configuration
 			Name="NormalLib|x64"
 			OutputDirectory="..\bin\NormalLib"
-			IntermediateDirectory="obj\x64\NormalLib"
+			IntermediateDirectory="obj\x64\NormalLib\zlib"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -278,7 +278,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -286,7 +286,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa64.pdb"
+				ProgramDataBaseFileName="$(OutDir)\zlib64.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -296,14 +296,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa64.lib"
+				OutputFile="$(OutDir)\zlib64.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -333,7 +333,7 @@
 		<Configuration
 			Name="ReleaseLib|Win32"
 			OutputDirectory="..\bin\ReleaseLib"
-			IntermediateDirectory="obj\x32\ReleaseLib"
+			IntermediateDirectory="obj\x32\ReleaseLib\zlib"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -356,7 +356,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -364,7 +364,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -374,14 +374,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\zlib.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -411,7 +411,7 @@
 		<Configuration
 			Name="ReleaseLib|x64"
 			OutputDirectory="..\bin\ReleaseLib"
-			IntermediateDirectory="obj\x64\ReleaseLib"
+			IntermediateDirectory="obj\x64\ReleaseLib\zlib"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -435,7 +435,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -443,7 +443,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa64.pdb"
+				ProgramDataBaseFileName="$(OutDir)\zlib64.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -453,14 +453,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				AdditionalIncludeDirectories="."
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa64.lib"
+				OutputFile="$(OutDir)\zlib64.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -491,152 +491,110 @@
 	<References>
 	</References>
 	<Files>
-		<Filter
-			Name="lib"
-			Filter=""
+		<File
+			RelativePath="adler32.c"
 			>
-			<Filter
-				Name="public"
-				Filter=""
-				>
-				<File
-					RelativePath="lib\public\lha_decoder.h"
-					>
-				</File>
-				<File
-					RelativePath="lib\public\lha_file_header.h"
-					>
-				</File>
-				<File
-					RelativePath="lib\public\lha_input_stream.h"
-					>
-				</File>
-				<File
-					RelativePath="lib\public\lha_reader.h"
-					>
-				</File>
-				<File
-					RelativePath="lib\public\lhasa.h"
-					>
-				</File>
-			</Filter>
-			<File
-				RelativePath="lib\crc16.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\ext_header.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lh1_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lh5_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lh6_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lh7_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_arch_unix.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_arch_win32.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_basic_reader.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_endian.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_file_header.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_input_stream.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_reader.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lz5_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lzs_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\macbinary.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\null_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\pm1_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\pm2_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\crc16.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\ext_header.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_arch.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_basic_reader.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_decoder.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_endian.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_file_header.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_input_stream.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\macbinary.h"
-				>
-			</File>
-		</Filter>
+		</File>
+		<File
+			RelativePath="compress.c"
+			>
+		</File>
+		<File
+			RelativePath="crc32.c"
+			>
+		</File>
+		<File
+			RelativePath="deflate.c"
+			>
+		</File>
+		<File
+			RelativePath="gzclose.c"
+			>
+		</File>
+		<File
+			RelativePath="gzlib.c"
+			>
+		</File>
+		<File
+			RelativePath="gzread.c"
+			>
+		</File>
+		<File
+			RelativePath="gzwrite.c"
+			>
+		</File>
+		<File
+			RelativePath="infback.c"
+			>
+		</File>
+		<File
+			RelativePath="inffast.c"
+			>
+		</File>
+		<File
+			RelativePath="inflate.c"
+			>
+		</File>
+		<File
+			RelativePath="inftrees.c"
+			>
+		</File>
+		<File
+			RelativePath="trees.c"
+			>
+		</File>
+		<File
+			RelativePath="uncompr.c"
+			>
+		</File>
+		<File
+			RelativePath="zutil.c"
+			>
+		</File>
+		<File
+			RelativePath="crc32.h"
+			>
+		</File>
+		<File
+			RelativePath="deflate.h"
+			>
+		</File>
+		<File
+			RelativePath="gzguts.h"
+			>
+		</File>
+		<File
+			RelativePath="inffast.h"
+			>
+		</File>
+		<File
+			RelativePath="inffixed.h"
+			>
+		</File>
+		<File
+			RelativePath="inflate.h"
+			>
+		</File>
+		<File
+			RelativePath="inftrees.h"
+			>
+		</File>
+		<File
+			RelativePath="trees.h"
+			>
+		</File>
+		<File
+			RelativePath="zconf.h"
+			>
+		</File>
+		<File
+			RelativePath="zlib.h"
+			>
+		</File>
+		<File
+			RelativePath="zutil.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

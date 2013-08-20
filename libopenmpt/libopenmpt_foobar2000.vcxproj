@@ -88,9 +88,6 @@
     <ProjectReference Include="..\include\foobar2000sdk\pfc\pfc.vcxproj">
       <Project>{ebfffb4e-261d-44d3-b89c-957b31a0bf9c}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
-      <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
-    </ProjectReference>
     <ProjectReference Include="libopenmpt.vcxproj">
       <Project>{812a654d-99be-4d13-b97f-86332ad3e363}</Project>
     </ProjectReference>

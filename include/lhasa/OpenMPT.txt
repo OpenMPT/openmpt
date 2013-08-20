@@ -1,2 +1,4 @@
 lhasa LHA decompression library from https://github.com/fragglet/lhasa commit 13b44ac7859aad2f2b4fa76600c186f9f7f98c63 as of 2013-06-16.
 No local changes made.
+For building, premake4 is used to generate Visual Studio project files.
+See ../premake4.lua for details.

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="src">
+			<UniqueIdentifier>{E4F2B5F2-9D52-3D41-93E9-7CA32895FDDC}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="src\common">
+			<UniqueIdentifier>{FBAF15AC-76C7-5949-951C-45ADA590A1EE}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="src\os">
+			<UniqueIdentifier>{B0C52306-B86B-D44A-9C3D-DDF918E2DF4C}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="src\os\win">
+			<UniqueIdentifier>{7C9416C4-AEBE-DA44-9989-BB06779A07D3}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include">
+			<UniqueIdentifier>{8BAFEA97-1C36-9742-B2AF-563B5078F704}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="src\hostapi">
+			<UniqueIdentifier>{C1344C66-9A4D-EB49-B60F-268A96F71BAC}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="src\hostapi\skeleton">
+			<UniqueIdentifier>{C2D851D3-0D90-5340-B5CE-0C592DDD0859}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="src\hostapi\wasapi">
+			<UniqueIdentifier>{E148BD30-2CA5-4949-9C79-CE6A18B252C0}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="src\hostapi\wmme">
+			<UniqueIdentifier>{59673599-0F9E-A34E-A22D-C7C499029E6D}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="src\common\pa_allocation.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_converters.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_cpuload.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_debugprint.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_dither.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_endianness.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_hostapi.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_memorybarrier.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_process.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_ringbuffer.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_stream.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_trace.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_types.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\common\pa_util.h">
+			<Filter>src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="src\os\win\pa_win_coinitialize.h">
+			<Filter>src\os\win</Filter>
+		</ClInclude>
+		<ClInclude Include="src\os\win\pa_win_wdmks_utils.h">
+			<Filter>src\os\win</Filter>
+		</ClInclude>
+		<ClInclude Include="src\os\win\pa_x86_plain_converters.h">
+			<Filter>src\os\win</Filter>
+		</ClInclude>
+		<ClInclude Include="include\pa_asio.h">
+			<Filter>include</Filter>
+		</ClInclude>
+		<ClInclude Include="include\pa_jack.h">
+			<Filter>include</Filter>
+		</ClInclude>
+		<ClInclude Include="include\pa_linux_alsa.h">
+			<Filter>include</Filter>
+		</ClInclude>
+		<ClInclude Include="include\pa_mac_core.h">
+			<Filter>include</Filter>
+		</ClInclude>
+		<ClInclude Include="include\pa_win_ds.h">
+			<Filter>include</Filter>
+		</ClInclude>
+		<ClInclude Include="include\pa_win_wasapi.h">
+			<Filter>include</Filter>
+		</ClInclude>
+		<ClInclude Include="include\pa_win_waveformat.h">
+			<Filter>include</Filter>
+		</ClInclude>
+		<ClInclude Include="include\pa_win_wmme.h">
+			<Filter>include</Filter>
+		</ClInclude>
+		<ClInclude Include="include\portaudio.h">
+			<Filter>include</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="src\common\pa_allocation.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\common\pa_converters.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\common\pa_cpuload.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\common\pa_debugprint.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\common\pa_dither.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\common\pa_front.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\common\pa_process.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\common\pa_ringbuffer.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\common\pa_stream.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\common\pa_trace.c">
+			<Filter>src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="src\hostapi\skeleton\pa_hostapi_skeleton.c">
+			<Filter>src\hostapi\skeleton</Filter>
+		</ClCompile>
+		<ClCompile Include="src\hostapi\wasapi\pa_win_wasapi.c">
+			<Filter>src\hostapi\wasapi</Filter>
+		</ClCompile>
+		<ClCompile Include="src\hostapi\wmme\pa_win_wmme.c">
+			<Filter>src\hostapi\wmme</Filter>
+		</ClCompile>
+		<ClCompile Include="src\os\win\pa_win_coinitialize.c">
+			<Filter>src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="src\os\win\pa_win_hostapis.c">
+			<Filter>src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="src\os\win\pa_win_util.c">
+			<Filter>src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="src\os\win\pa_win_waveformat.c">
+			<Filter>src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="src\os\win\pa_win_wdmks_utils.c">
+			<Filter>src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="src\os\win\pa_x86_plain_converters.c">
+			<Filter>src\os\win</Filter>
+		</ClCompile>
+	</ItemGroup>
+</Project>
