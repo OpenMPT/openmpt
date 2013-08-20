@@ -191,7 +191,7 @@ solution "include"
    "flac/include/FLAC/stream_decoder.h",
    "flac/include/FLAC/stream_encoder.h",
   }
-  defines { "VERSION=\"1.2.1\"" }
+  defines { "VERSION=\\\"1.2.1\\\"" }
   configuration "*Lib"
    defines { "FLAC__NO_DLL" }
   dofile "premake4-defaults.lua"
