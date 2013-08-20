@@ -27,8 +27,8 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{6B11F6A8-B131-4D2B-80EF-5731A9016436}</ProjectGuid>
-		<RootNamespace>lhasa</RootNamespace>
+		<ProjectGuid>{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}</ProjectGuid>
+		<RootNamespace>zlib</RootNamespace>
 		<Keyword>Win32Proj</Keyword>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -91,28 +91,28 @@
 	<PropertyGroup>
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">..\bin\DebugLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">obj\x32\DebugLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">lhasa</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">obj\x32\DebugLib\zlib\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">zlib</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">..\bin\DebugLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">obj\x64\DebugLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">lhasa64</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">obj\x64\DebugLib\zlib\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">zlib64</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">..\bin\NormalLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">obj\x32\NormalLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">lhasa</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">obj\x32\NormalLib\zlib\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">zlib</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">..\bin\NormalLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">obj\x64\NormalLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">lhasa64</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">obj\x64\NormalLib\zlib\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">zlib64</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">..\bin\ReleaseLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">obj\x32\ReleaseLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">lhasa</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">obj\x32\ReleaseLib\zlib\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">zlib</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">..\bin\ReleaseLib\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">obj\x64\ReleaseLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">lhasa64</TargetName>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">obj\x64\ReleaseLib\zlib\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">zlib64</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -125,21 +125,21 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -152,22 +152,22 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -181,24 +181,24 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -212,24 +212,24 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -243,24 +243,24 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -274,75 +274,62 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>
-		<ClInclude Include="lib\crc16.h" />
-		<ClInclude Include="lib\ext_header.h" />
-		<ClInclude Include="lib\lha_arch.h" />
-		<ClInclude Include="lib\lha_basic_reader.h" />
-		<ClInclude Include="lib\lha_decoder.h" />
-		<ClInclude Include="lib\lha_endian.h" />
-		<ClInclude Include="lib\lha_file_header.h" />
-		<ClInclude Include="lib\lha_input_stream.h" />
-		<ClInclude Include="lib\macbinary.h" />
-		<ClInclude Include="lib\public\lha_decoder.h" />
-		<ClInclude Include="lib\public\lha_file_header.h" />
-		<ClInclude Include="lib\public\lha_input_stream.h" />
-		<ClInclude Include="lib\public\lha_reader.h" />
-		<ClInclude Include="lib\public\lhasa.h" />
+		<ClInclude Include="crc32.h" />
+		<ClInclude Include="deflate.h" />
+		<ClInclude Include="gzguts.h" />
+		<ClInclude Include="inffast.h" />
+		<ClInclude Include="inffixed.h" />
+		<ClInclude Include="inflate.h" />
+		<ClInclude Include="inftrees.h" />
+		<ClInclude Include="trees.h" />
+		<ClInclude Include="zconf.h" />
+		<ClInclude Include="zlib.h" />
+		<ClInclude Include="zutil.h" />
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="lib\crc16.c">
+		<ClCompile Include="adler32.c">
 		</ClCompile>
-		<ClCompile Include="lib\ext_header.c">
+		<ClCompile Include="compress.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh1_decoder.c">
+		<ClCompile Include="crc32.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh5_decoder.c">
+		<ClCompile Include="deflate.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh6_decoder.c">
+		<ClCompile Include="gzclose.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh7_decoder.c">
+		<ClCompile Include="gzlib.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_arch_unix.c">
+		<ClCompile Include="gzread.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_arch_win32.c">
+		<ClCompile Include="gzwrite.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_basic_reader.c">
+		<ClCompile Include="infback.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_decoder.c">
+		<ClCompile Include="inffast.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_endian.c">
+		<ClCompile Include="inflate.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_file_header.c">
+		<ClCompile Include="inftrees.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_input_stream.c">
+		<ClCompile Include="trees.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_reader.c">
+		<ClCompile Include="uncompr.c">
 		</ClCompile>
-		<ClCompile Include="lib\lz5_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\lzs_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\macbinary.c">
-		</ClCompile>
-		<ClCompile Include="lib\null_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\pm1_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\pm2_decoder.c">
+		<ClCompile Include="zutil.c">
 		</ClCompile>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

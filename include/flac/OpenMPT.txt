@@ -1,20 +1,5 @@
 The FLAC package has been left pretty much untouched, except for a few changes:
 - Obviously, unnecessary folders and files (documentation, makefiles, etc.) have
   been removed.
-- The existing libFLAC_static project files have been upgraded to VS2008 and
-  VS2010. The following changes have been made:
-  - Output directory for the library has been changed to ..\..\lib\
-  - Output filename has been changed to ..\..\lib\libFLAC_staticd.lib (debug)
-    and ..\..\lib\libFLAC_static.lib (release). 
-  - ASM files and nasm.h have been excluded from the project to be able to
-    compile without NASM.
-  - *ogg*.c/h files have been excluded from the project to be able to compile
-    without libvorbis.
-  - The following preprocessor directives have been removed from both debug
-    and release configurations: FLAC__HAS_OGG;FLAC__CPU_IA32;FLAC__HAS_NASM
-  - Debug configurations have been changed to use a multi-threaded debug DLL
-    runtime library (/MDd)
-  - x64 project configurations have been added for VS2010.
-    These are based on the modified x86 ones, which output filesnames and
-    directories suffixed by '64'. FLAC__USE_3DNOW is removed for x64.
-  - A c implementation for local_swap32_block_ if !_M_IX86 has been added.
+- For building, premake4 is used to generate Visual Studio project files.
+  See ../premake4.lua for details.

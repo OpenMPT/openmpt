@@ -632,24 +632,26 @@
     <None Include="VTune\mptrack.vpj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\include\flac\src\libFLAC\libFLAC_static_10.vcxproj">
-      <Project>{4cefbc84-c215-11db-8314-0800200c9a66}</Project>
+    <ProjectReference Include="..\include\flac\flac.vcxproj">
+      <Project>{e599f5aa-f9a3-46cc-8db0-c8defceb90c5}</Project>
     </ProjectReference>
     <ProjectReference Include="..\include\lhasa\lhasa.vcxproj">
-      <Project>{353b4237-dc36-41ff-a196-cd0341faf35a}</Project>
+      <Project>{6b11f6a8-b131-4d2b-80ef-5731a9016436}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\portaudio\build\msvc\portaudio_openmpt_vs2010.vcxproj">
-      <Project>{0a18a071-125e-442f-aff7-a3f68abecf99}</Project>
+    <ProjectReference Include="..\include\portaudio\portaudio.vcxproj">
+      <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
-      <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
+    <ProjectReference Include="..\include\smbPitchShift\smbPitchShift.vcxproj">
+      <Project>{89af16dd-32cc-4a7e-b219-5f117d761f9f}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\soundtouch\soundtouch_10.vcxproj">
-      <Project>{cf3c2ca5-5d45-4635-bba4-c1f435e10896}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    <ProjectReference Include="..\include\soundtouch\soundtouch.vcxproj">
+      <Project>{f5f8f6de-84cf-4e9d-91ea-d9b5e2aa36cd}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\smbPitchShift\xsoundlib_10.vcxproj">
-      <Project>{dcc2bb2f-6778-4fd3-9c00-d6cd8dc917b8}</Project>
+    <ProjectReference Include="..\include\zlib\minizip.vcxproj">
+      <Project>{63af9025-a6ce-4147-a05d-6e2ccfd3a0d7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\include\zlib\zlib.vcxproj">
+      <Project>{1654fb18-fde6-406f-9d84-ba12bfbd67b2}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

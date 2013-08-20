@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="lhasa"
-	ProjectGUID="{6B11F6A8-B131-4D2B-80EF-5731A9016436}"
-	RootNamespace="lhasa"
+	Name="portaudio"
+	ProjectGUID="{189B867F-FF4B-45A1-B741-A97492EE69AF}"
+	RootNamespace="portaudio"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -43,15 +43,15 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
-				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portaudio.pdb"
 				DebugInformationFormat="4"
 				CompileAs="1"
 			/>
@@ -60,15 +60,15 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -121,15 +121,15 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
-				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa64.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portaudio64.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -138,15 +138,15 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa64.lib"
+				OutputFile="$(OutDir)\portaudio64.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -199,15 +199,15 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portaudio.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -216,15 +216,15 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -278,15 +278,15 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa64.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portaudio64.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -295,15 +295,15 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa64.lib"
+				OutputFile="$(OutDir)\portaudio64.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -356,15 +356,15 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portaudio.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -373,15 +373,15 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -435,15 +435,15 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa64.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portaudio64.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -452,15 +452,15 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\msinttypes\inttypes;..\msinttypes\stdint"
+				PreprocessorDefinitions="PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;src\common;src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa64.lib"
+				OutputFile="$(OutDir)\portaudio64.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -492,148 +492,227 @@
 	</References>
 	<Files>
 		<Filter
-			Name="lib"
+			Name="src"
 			Filter=""
 			>
 			<Filter
-				Name="public"
+				Name="common"
 				Filter=""
 				>
 				<File
-					RelativePath="lib\public\lha_decoder.h"
+					RelativePath="src\common\pa_allocation.c"
 					>
 				</File>
 				<File
-					RelativePath="lib\public\lha_file_header.h"
+					RelativePath="src\common\pa_allocation.h"
 					>
 				</File>
 				<File
-					RelativePath="lib\public\lha_input_stream.h"
+					RelativePath="src\common\pa_converters.c"
 					>
 				</File>
 				<File
-					RelativePath="lib\public\lha_reader.h"
+					RelativePath="src\common\pa_converters.h"
 					>
 				</File>
 				<File
-					RelativePath="lib\public\lhasa.h"
+					RelativePath="src\common\pa_cpuload.c"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_cpuload.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_debugprint.c"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_debugprint.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_dither.c"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_dither.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_endianness.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_front.c"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_hostapi.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_memorybarrier.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_process.c"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_process.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_ringbuffer.c"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_ringbuffer.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_stream.c"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_stream.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_trace.c"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_trace.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_types.h"
+					>
+				</File>
+				<File
+					RelativePath="src\common\pa_util.h"
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="hostapi"
+				Filter=""
+				>
+				<Filter
+					Name="skeleton"
+					Filter=""
+					>
+					<File
+						RelativePath="src\hostapi\skeleton\pa_hostapi_skeleton.c"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="wasapi"
+					Filter=""
+					>
+					<File
+						RelativePath="src\hostapi\wasapi\pa_win_wasapi.c"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="wmme"
+					Filter=""
+					>
+					<File
+						RelativePath="src\hostapi\wmme\pa_win_wmme.c"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="os"
+				Filter=""
+				>
+				<Filter
+					Name="win"
+					Filter=""
+					>
+					<File
+						RelativePath="src\os\win\pa_win_coinitialize.c"
+						>
+					</File>
+					<File
+						RelativePath="src\os\win\pa_win_coinitialize.h"
+						>
+					</File>
+					<File
+						RelativePath="src\os\win\pa_win_hostapis.c"
+						>
+					</File>
+					<File
+						RelativePath="src\os\win\pa_win_util.c"
+						>
+					</File>
+					<File
+						RelativePath="src\os\win\pa_win_waveformat.c"
+						>
+					</File>
+					<File
+						RelativePath="src\os\win\pa_win_wdmks_utils.c"
+						>
+					</File>
+					<File
+						RelativePath="src\os\win\pa_win_wdmks_utils.h"
+						>
+					</File>
+					<File
+						RelativePath="src\os\win\pa_x86_plain_converters.c"
+						>
+					</File>
+					<File
+						RelativePath="src\os\win\pa_x86_plain_converters.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="include"
+			Filter=""
+			>
 			<File
-				RelativePath="lib\crc16.c"
+				RelativePath="include\pa_asio.h"
 				>
 			</File>
 			<File
-				RelativePath="lib\ext_header.c"
+				RelativePath="include\pa_jack.h"
 				>
 			</File>
 			<File
-				RelativePath="lib\lh1_decoder.c"
+				RelativePath="include\pa_linux_alsa.h"
 				>
 			</File>
 			<File
-				RelativePath="lib\lh5_decoder.c"
+				RelativePath="include\pa_mac_core.h"
 				>
 			</File>
 			<File
-				RelativePath="lib\lh6_decoder.c"
+				RelativePath="include\pa_win_ds.h"
 				>
 			</File>
 			<File
-				RelativePath="lib\lh7_decoder.c"
+				RelativePath="include\pa_win_wasapi.h"
 				>
 			</File>
 			<File
-				RelativePath="lib\lha_arch_unix.c"
+				RelativePath="include\pa_win_waveformat.h"
 				>
 			</File>
 			<File
-				RelativePath="lib\lha_arch_win32.c"
+				RelativePath="include\pa_win_wmme.h"
 				>
 			</File>
 			<File
-				RelativePath="lib\lha_basic_reader.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_endian.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_file_header.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_input_stream.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_reader.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lz5_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\lzs_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\macbinary.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\null_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\pm1_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\pm2_decoder.c"
-				>
-			</File>
-			<File
-				RelativePath="lib\crc16.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\ext_header.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_arch.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_basic_reader.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_decoder.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_endian.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_file_header.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\lha_input_stream.h"
-				>
-			</File>
-			<File
-				RelativePath="lib\macbinary.h"
+				RelativePath="include\portaudio.h"
 				>
 			</File>
 		</Filter>

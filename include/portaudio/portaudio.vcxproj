@@ -27,8 +27,8 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{6B11F6A8-B131-4D2B-80EF-5731A9016436}</ProjectGuid>
-		<RootNamespace>lhasa</RootNamespace>
+		<ProjectGuid>{189B867F-FF4B-45A1-B741-A97492EE69AF}</ProjectGuid>
+		<RootNamespace>portaudio</RootNamespace>
 		<Keyword>Win32Proj</Keyword>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -92,28 +92,28 @@
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">..\bin\DebugLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">obj\x32\DebugLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">lhasa</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">portaudio</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">..\bin\DebugLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">obj\x64\DebugLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">lhasa64</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">portaudio64</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">..\bin\NormalLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">obj\x32\NormalLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">lhasa</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">portaudio</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">..\bin\NormalLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">obj\x64\NormalLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">lhasa64</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">portaudio64</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">..\bin\ReleaseLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">obj\x32\ReleaseLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">lhasa</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">portaudio</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">..\bin\ReleaseLib\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">obj\x64\ReleaseLib\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">lhasa64</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">portaudio64</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
 			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -124,23 +124,23 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)portaudio.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)portaudio.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
 			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -151,24 +151,24 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)portaudio64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)portaudio64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -180,26 +180,26 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)portaudio.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)portaudio.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -211,26 +211,26 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)portaudio64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)portaudio64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -242,26 +242,26 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa.lib</OutputFile>
+		<OutputFile>$(OutDir)portaudio.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)portaudio.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -273,76 +273,86 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\msinttypes\inttypes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>PA_ENABLE_DEBUG_OUTPUT;PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=0;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>include;src\common;src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)lhasa64.lib</OutputFile>
+		<OutputFile>$(OutDir)portaudio64.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)lhasa64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)portaudio64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>
-		<ClInclude Include="lib\crc16.h" />
-		<ClInclude Include="lib\ext_header.h" />
-		<ClInclude Include="lib\lha_arch.h" />
-		<ClInclude Include="lib\lha_basic_reader.h" />
-		<ClInclude Include="lib\lha_decoder.h" />
-		<ClInclude Include="lib\lha_endian.h" />
-		<ClInclude Include="lib\lha_file_header.h" />
-		<ClInclude Include="lib\lha_input_stream.h" />
-		<ClInclude Include="lib\macbinary.h" />
-		<ClInclude Include="lib\public\lha_decoder.h" />
-		<ClInclude Include="lib\public\lha_file_header.h" />
-		<ClInclude Include="lib\public\lha_input_stream.h" />
-		<ClInclude Include="lib\public\lha_reader.h" />
-		<ClInclude Include="lib\public\lhasa.h" />
+		<ClInclude Include="src\common\pa_allocation.h" />
+		<ClInclude Include="src\common\pa_converters.h" />
+		<ClInclude Include="src\common\pa_cpuload.h" />
+		<ClInclude Include="src\common\pa_debugprint.h" />
+		<ClInclude Include="src\common\pa_dither.h" />
+		<ClInclude Include="src\common\pa_endianness.h" />
+		<ClInclude Include="src\common\pa_hostapi.h" />
+		<ClInclude Include="src\common\pa_memorybarrier.h" />
+		<ClInclude Include="src\common\pa_process.h" />
+		<ClInclude Include="src\common\pa_ringbuffer.h" />
+		<ClInclude Include="src\common\pa_stream.h" />
+		<ClInclude Include="src\common\pa_trace.h" />
+		<ClInclude Include="src\common\pa_types.h" />
+		<ClInclude Include="src\common\pa_util.h" />
+		<ClInclude Include="src\os\win\pa_win_coinitialize.h" />
+		<ClInclude Include="src\os\win\pa_win_wdmks_utils.h" />
+		<ClInclude Include="src\os\win\pa_x86_plain_converters.h" />
+		<ClInclude Include="include\pa_asio.h" />
+		<ClInclude Include="include\pa_jack.h" />
+		<ClInclude Include="include\pa_linux_alsa.h" />
+		<ClInclude Include="include\pa_mac_core.h" />
+		<ClInclude Include="include\pa_win_ds.h" />
+		<ClInclude Include="include\pa_win_wasapi.h" />
+		<ClInclude Include="include\pa_win_waveformat.h" />
+		<ClInclude Include="include\pa_win_wmme.h" />
+		<ClInclude Include="include\portaudio.h" />
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="lib\crc16.c">
+		<ClCompile Include="src\common\pa_allocation.c">
 		</ClCompile>
-		<ClCompile Include="lib\ext_header.c">
+		<ClCompile Include="src\common\pa_converters.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh1_decoder.c">
+		<ClCompile Include="src\common\pa_cpuload.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh5_decoder.c">
+		<ClCompile Include="src\common\pa_debugprint.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh6_decoder.c">
+		<ClCompile Include="src\common\pa_dither.c">
 		</ClCompile>
-		<ClCompile Include="lib\lh7_decoder.c">
+		<ClCompile Include="src\common\pa_front.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_arch_unix.c">
+		<ClCompile Include="src\common\pa_process.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_arch_win32.c">
+		<ClCompile Include="src\common\pa_ringbuffer.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_basic_reader.c">
+		<ClCompile Include="src\common\pa_stream.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_decoder.c">
+		<ClCompile Include="src\common\pa_trace.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_endian.c">
+		<ClCompile Include="src\hostapi\skeleton\pa_hostapi_skeleton.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_file_header.c">
+		<ClCompile Include="src\hostapi\wasapi\pa_win_wasapi.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_input_stream.c">
+		<ClCompile Include="src\hostapi\wmme\pa_win_wmme.c">
 		</ClCompile>
-		<ClCompile Include="lib\lha_reader.c">
+		<ClCompile Include="src\os\win\pa_win_coinitialize.c">
 		</ClCompile>
-		<ClCompile Include="lib\lz5_decoder.c">
+		<ClCompile Include="src\os\win\pa_win_hostapis.c">
 		</ClCompile>
-		<ClCompile Include="lib\lzs_decoder.c">
+		<ClCompile Include="src\os\win\pa_win_util.c">
 		</ClCompile>
-		<ClCompile Include="lib\macbinary.c">
+		<ClCompile Include="src\os\win\pa_win_waveformat.c">
 		</ClCompile>
-		<ClCompile Include="lib\null_decoder.c">
+		<ClCompile Include="src\os\win\pa_win_wdmks_utils.c">
 		</ClCompile>
-		<ClCompile Include="lib\pm1_decoder.c">
-		</ClCompile>
-		<ClCompile Include="lib\pm2_decoder.c">
+		<ClCompile Include="src\os\win\pa_x86_plain_converters.c">
 		</ClCompile>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
