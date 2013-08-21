@@ -191,9 +191,12 @@ solution "include"
    "flac/include/FLAC/stream_decoder.h",
    "flac/include/FLAC/stream_encoder.h",
   }
-  defines { "VERSION=\\\"1.2.1\\\"" }
   configuration "*Lib"
    defines { "FLAC__NO_DLL" }
+  configuration "vs2010"
+   defines { "VERSION=\"1.2.1\"" }
+  configuration "vs2008"
+   defines { "VERSION=\\\"1.2.1\\\"" }
   dofile "premake4-defaults.lua"
 
   
