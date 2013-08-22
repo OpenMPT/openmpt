@@ -538,7 +538,7 @@ struct Normalize<int32>
 	typedef int32 output_t;
 	typedef uint32 peak_t;
 	uint32 maxVal;
-	Normalize() : maxVal(0) { }
+	forceinline Normalize() : maxVal(0) { }
 	forceinline void FindMax(input_t val)
 	{
 		if(val < 0)
@@ -575,30 +575,26 @@ struct Normalize<float32>
 	typedef float32 input_t;
 	typedef float32 output_t;
 	typedef float32 peak_t;
-	uint32 intMaxVal;
+	float maxVal;
 	float maxValInv;
-	Normalize() : intMaxVal(0), maxValInv(1.0f) { }
+	forceinline Normalize() : maxVal(0.0f), maxValInv(1.0f) { }
 	forceinline void FindMax(input_t val)
 	{
-		uint32 ival = EncodeFloatNE(val);
-		ival &= ~0x80000000;	// Remove sign for absolute value
-
-		// IEEE float values are lexicographically ordered and can be compared when interpreted as integers.
-		// So we won't bother with loading the float into a floating point register here if we already have it in an integer register.
-		if(ival > intMaxVal)
+		float absval = std::fabs(val);
+		if(absval > maxVal)
 		{
-			ASSERT(*reinterpret_cast<float *>(&ival) > DecodeFloatLE(uint8_4().SetLE(intMaxVal)));
-			intMaxVal = ival;
+			maxVal = absval;
 		}
 	}
 	forceinline bool IsSilent()
 	{
-		if(intMaxVal == 0)
+		if(maxVal == 0.0f)
 		{
+			maxValInv = 1.0f;
 			return true;
 		} else
 		{
-			maxValInv = 1.0f / DecodeFloatNE(intMaxVal);
+			maxValInv = 1.0f / maxVal;
 			return false;
 		}
 	}
@@ -608,7 +604,7 @@ struct Normalize<float32>
 	}
 	forceinline peak_t GetSrcPeak() const
 	{
-		return DecodeFloatNE(intMaxVal);
+		return maxVal;
 	}
 };
 
