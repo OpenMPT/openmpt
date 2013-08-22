@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <windows.h>
 #else
 #include <sys/ioctl.h>
 #include <sys/poll.h>
@@ -318,55 +319,57 @@ static void show_help( show_help_exception & e, bool verbose, bool modplug123 ) 
 	} else {
 		std::clog << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
 		std::clog << std::endl;
-		std::clog << " -h, --help           Show help" << std::endl;
-		std::clog << " -q, --quiet          Suppress non-error screen output" << std::endl;
-		std::clog << " -v, --verbose        Show more screen output" << std::endl;
-		std::clog << "     --version        Show version number and nothing else" << std::endl;
+		std::clog << " -h, --help                Show help" << std::endl;
+		std::clog << " -q, --quiet               Suppress non-error screen output" << std::endl;
+		std::clog << " -v, --verbose             Show more screen output" << std::endl;
+		std::clog << "     --version             Show version number and nothing else" << std::endl;
 		std::clog << std::endl;
 		std::clog << " Mode:" << std::endl;
-		std::clog << "     --info           Display information about each file" << std::endl;
-		std::clog << "     --ui             Interactively play each file" << std::endl;
-		std::clog << "     --batch          Play each file" << std::endl;
-		std::clog << "     --render         Render each file to PCM data" << std::endl;
+		std::clog << "     --info                Display information about each file" << std::endl;
+		std::clog << "     --ui                  Interactively play each file" << std::endl;
+		std::clog << "     --batch               Play each file" << std::endl;
+		std::clog << "     --render              Render each file to PCM data" << std::endl;
 		if ( !e.longhelp ) {
 			std::clog << std::endl;
 			return;
 		}
 		std::clog << std::endl;
-		std::clog << "     --terminal-width n Assume terminal is n characters wide [default: " << commandlineflags().terminal_width << "]" << std::endl;
+		std::clog << "     --terminal-width n    Assume terminal is n characters wide [default: " << commandlineflags().terminal_width << "]" << std::endl;
+		std::clog << "     --terminal-height n   Assume terminal is n characters high [default: " << commandlineflags().terminal_height << "]" << std::endl;
 		std::clog << std::endl;
-		std::clog << "     --[no-]progress  Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
-		std::clog << "     --[no-]meters    Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
+		std::clog << "     --[no-]progress       Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
+		std::clog << "     --[no-]meters         Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
 		std::clog << "     --[no-]channel-meters Show channel peak meters [default: " << commandlineflags().show_channel_meters << "]" << std::endl;
+		std::clog << "     --[no-]pattern        Show pattern [default: " << commandlineflags().show_pattern << "]" << std::endl;
 		std::clog << std::endl;
-		std::clog << "     --[no-]details   Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
-		std::clog << "     --[no-]message   Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
+		std::clog << "     --[no-]details        Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
+		std::clog << "     --[no-]message        Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
 		std::clog << std::endl;
-		std::clog << "     --samplerate n   Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
-		std::clog << "     --channels n     use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
-		std::clog << "     --[no]-float     Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
+		std::clog << "     --samplerate n        Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
+		std::clog << "     --channels n          use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
+		std::clog << "     --[no]-float          Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
 		std::clog << std::endl;
-		std::clog << "     --gain n         Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
-		std::clog << "     --stereo n       Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
-		std::clog << "     --filter n       Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
-		std::clog << "     --ramping n      Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
+		std::clog << "     --gain n              Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
+		std::clog << "     --stereo n            Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
+		std::clog << "     --filter n            Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
+		std::clog << "     --ramping n           Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
 		std::clog << std::endl;
-		std::clog << "     --repeat n       Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
-		std::clog << "     --seek n         Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
+		std::clog << "     --repeat n            Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
+		std::clog << "     --seek n              Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
 		std::clog << std::endl;
 #ifdef MPT_WITH_PORTAUDIO
-		std::clog << "     --device n       Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
-		std::clog << "                      use --device help to show available devices" << std::endl;
-		std::clog << "     --buffer n       Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
+		std::clog << "     --device n            Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
+		std::clog << "                           use --device help to show available devices" << std::endl;
+		std::clog << "     --buffer n            Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
 #endif
-		std::clog << "     --stdout         Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
+		std::clog << "     --stdout              Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
-		std::clog << "     --output-type t  Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
-		std::clog << " -o, --output f       Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
-		std::clog << "     --force          Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
+		std::clog << "     --output-type t       Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
+		std::clog << " -o, --output f            Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
+		std::clog << "     --force               Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
 #endif
 		std::clog << std::endl;
-		std::clog << "     --               Interpret further arguments as filenames" << std::endl;
+		std::clog << "     --                    Interpret further arguments as filenames" << std::endl;
 		std::clog << std::endl;
 		std::clog << " Supported file formats: " << std::endl;
 		std::clog << "    ";
@@ -681,6 +684,8 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 #endif
 	
 	int lines = 0;
+
+	int pattern_lines = 0;
 	
 	if ( multiline ) {
 		lines += 1;
@@ -704,6 +709,10 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 		}
 		if ( flags.show_progress ) {
 			lines += 1;
+		}
+		if ( flags.show_pattern ) {
+			pattern_lines = flags.terminal_height - lines - 1;
+			lines = flags.terminal_height - 1;
 		}
 	} else if ( flags.show_ui || flags.show_details || flags.show_progress ) {
 		log << std::endl;
@@ -847,6 +856,33 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, std::
 					log << "|";
 				}
 				log << std::endl;
+			}
+			if ( flags.show_pattern ) {
+				int width = flags.terminal_width / mod.get_num_channels();
+				for ( std::int32_t line = 0; line < pattern_lines; ++line ) {
+					std::int32_t row = mod.get_current_row() - ( pattern_lines / 2 ) + line;
+					if ( row == mod.get_current_row() ) {
+						log << ">";
+					} else {
+						log << " ";
+					}
+					if ( row < 0 || row >= mod.get_pattern_num_rows( mod.get_current_pattern() ) ) {
+						for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
+							if ( width >= 3 ) {
+								log << "|";
+							}
+							log << std::string( width >= 3 ? width - 1 : width, ' ' );
+						}
+					} else {
+						for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
+							if ( width >= 3 ) {
+								log << "|";
+							}
+							log << mod.format_pattern_row_channel( mod.get_current_pattern(), row, channel, width >= 3 ? width - 1 : width );
+						}
+					}
+					log << std::endl;
+				}
 			}
 			if ( flags.show_details ) {
 				log << "Mixer......: ";
@@ -1184,6 +1220,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				std::istringstream istr( nextarg );
 				istr >> flags.terminal_width;
 				++i;
+			} else if ( arg == "--terminal-height" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.terminal_height;
+				++i;
 			} else if ( arg == "--progress" ) {
 				flags.show_progress = true;
 			} else if ( arg == "--no-progress" ) {
@@ -1196,6 +1236,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.show_channel_meters = true;
 			} else if ( arg == "--no-channel-meters" ) {
 				flags.show_channel_meters = false;
+			} else if ( arg == "--pattern" ) {
+				flags.show_pattern = true;
+			} else if ( arg == "--no-pattern" ) {
+				flags.show_pattern = false;
 			} else if ( arg == "--details" ) {
 				flags.show_details = true;
 			} else if ( arg == "--no-details" ) {
