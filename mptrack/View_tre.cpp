@@ -3397,7 +3397,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);
 	CEdit *editCtrl = GetEditControl();
 	const ModItem modItem = GetModItem(info->item.hItem);
-	const CModDoc *modDoc = GetDocumentFromItem(info->item.hItem);
+	const CModDoc *modDoc = modItem.IsSongItem() ? GetDocumentFromItem(info->item.hItem) : nullptr;
 
 	if(editCtrl != nullptr && modDoc != nullptr)
 	{
@@ -3484,7 +3484,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);
 	const ModItem modItem = GetModItem(info->item.hItem);
-	CModDoc *modDoc = GetDocumentFromItem(info->item.hItem);
+	CModDoc *modDoc = modItem.IsSongItem() ? GetDocumentFromItem(info->item.hItem) : nullptr;
 
 	if(info->item.pszText != nullptr && modDoc != nullptr)
 	{
