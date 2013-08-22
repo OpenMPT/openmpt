@@ -98,12 +98,14 @@ struct commandlineflags {
 	bool quiet;
 	bool verbose;
 	int terminal_width;
+	int terminal_height;
 	bool show_details;
 	bool show_message;
 	bool show_ui;
 	bool show_progress;
 	bool show_meters;
 	bool show_channel_meters;
+	bool show_pattern;
 	bool use_float;
 	bool use_stdout;
 	std::vector<std::string> filenames;
@@ -131,7 +133,14 @@ struct commandlineflags {
 		quiet = false;
 		verbose = false;
 		terminal_width = 72;
-#if !defined(_MSC_VER)
+		terminal_height = 23;
+#if defined(_MSC_VER)
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		ZeroMemory( &csbi, sizeof( CONSOLE_SCREEN_BUFFER_INFO ) );
+		GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
+		terminal_width = csbi.dwSize.X - 1;
+		terminal_height = csbi.dwSize.Y - 1;
+#else // !_MSC_VER
 		if ( isatty( STDERR_FILENO ) ) {
 			if ( std::getenv( "COLUMNS" ) ) {
 				std::istringstream istr( std::getenv( "COLUMNS" ) );
@@ -141,15 +150,25 @@ struct commandlineflags {
 					terminal_width = tmp;
 				}
 			}
+			if ( std::getenv( "ROWS" ) ) {
+				std::istringstream istr( std::getenv( "ROWS" ) );
+				int tmp = 0;
+				istr >> tmp;
+				if ( tmp > 0 ) {
+					terminal_height = tmp;
+				}
+			}
 			#if TIOCGSIZE
 				struct ttysize ts;
 				if ( ioctl( STDERR_FILENO, TIOCGSIZE, &ts ) >= 0 ) {
 					terminal_width = ts.ts_cols;
+					terminal_height = ts.ts_rows;
 				}
 			#elif defined(TIOCGWINSZ)
 				struct winsize ts;
 				if ( ioctl( STDERR_FILENO, TIOCGWINSZ, &ts ) >= 0 ) {
 					terminal_width = ts.ws_col;
+					terminal_height = ts.ws_row;
 				}
 			#endif
 		}
@@ -167,6 +186,7 @@ struct commandlineflags {
 		show_progress = canProgress;
 		show_meters = canUI && canProgress;
 		show_channel_meters = false;
+		show_pattern = false;
 		use_stdout = false;
 #if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 		output_extension = "wav";
@@ -213,16 +233,19 @@ struct commandlineflags {
 				show_progress = false;
 				show_meters = false;
 				show_channel_meters = false;
+				show_pattern = false;
 			break;
 			case ModeUI:
 			break;
 			case ModeBatch:
 				show_meters = false;
 				show_channel_meters = false;
+				show_pattern = false;
 			break;
 			case ModeRender:
 				show_meters = false;
 				show_channel_meters = false;
+				show_pattern = false;
 				show_ui = false;
 			break;
 		}
