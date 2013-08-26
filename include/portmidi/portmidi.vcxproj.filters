@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="porttime">
+			<UniqueIdentifier>{F06818CF-7722-8E45-B2BD-9B3984EB3412}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="pm_common">
+			<UniqueIdentifier>{B7911BCA-4CCF-0D46-B849-76F62EAF72FB}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="pm_win">
+			<UniqueIdentifier>{9C8C0E93-99E6-E44D-A2A0-507443729E9F}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="porttime\porttime.h">
+			<Filter>porttime</Filter>
+		</ClInclude>
+		<ClInclude Include="pm_common\pminternal.h">
+			<Filter>pm_common</Filter>
+		</ClInclude>
+		<ClInclude Include="pm_common\pmutil.h">
+			<Filter>pm_common</Filter>
+		</ClInclude>
+		<ClInclude Include="pm_common\portmidi.h">
+			<Filter>pm_common</Filter>
+		</ClInclude>
+		<ClInclude Include="pm_win\pmwinmm.h">
+			<Filter>pm_win</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="porttime\porttime.c">
+			<Filter>porttime</Filter>
+		</ClCompile>
+		<ClCompile Include="porttime\ptwinmm.c">
+			<Filter>porttime</Filter>
+		</ClCompile>
+		<ClCompile Include="pm_common\pmutil.c">
+			<Filter>pm_common</Filter>
+		</ClCompile>
+		<ClCompile Include="pm_common\portmidi.c">
+			<Filter>pm_common</Filter>
+		</ClCompile>
+		<ClCompile Include="pm_win\pmwin.c">
+			<Filter>pm_win</Filter>
+		</ClCompile>
+		<ClCompile Include="pm_win\pmwinmm.c">
+			<Filter>pm_win</Filter>
+		</ClCompile>
+	</ItemGroup>
+</Project>

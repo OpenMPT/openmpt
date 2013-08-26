@@ -10,6 +10,7 @@
 
 #pragma once
 
+#define MODPLUG_TRACKER
 #include "../common/mutex.h"
 #include <vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.h>
 #include <portmidi/pm_common/portmidi.h>
