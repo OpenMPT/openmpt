@@ -174,6 +174,11 @@
 
 // fixing stuff up
 
+#if !defined(MODPLUG_TRACKER) && defined(NO_MO3)
+// For library builds, windows.h is only required for LoadLibrary,
+#define NO_WINDOWS_H
+#endif
+
 #if !defined(ENABLE_MMX) && !defined(NO_REVERB)
 #define NO_REVERB // reverb requires mmx
 #endif
