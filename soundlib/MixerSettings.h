@@ -21,9 +21,8 @@ struct MixerSettings
 	DWORD gnChannels;
 	DWORD m_nPreAmp;
 
-	//rewbs.resamplerConf
-	long glVolumeRampUpSamples, glVolumeRampDownSamples;
-	//end rewbs.resamplerConf
+	long glVolumeRampUpSamples;
+	long glVolumeRampDownSamples;
 	
 	int32 GetVolumeRampUpMicroseconds() const;
 	int32 GetVolumeRampDownMicroseconds() const;
@@ -32,10 +31,7 @@ struct MixerSettings
 
 	bool IsValid() const
 	{
-		return true
-			&& (gnChannels == 1 || gnChannels == 2 || gnChannels == 4)
-			&& (gdwMixingFreq > 0)
-			;
+		return (gdwMixingFreq > 0) && (gnChannels == 1 || gnChannels == 2 || gnChannels == 4);
 	}
 	
 	MixerSettings();
