@@ -268,6 +268,30 @@ solution "include"
   
 
   
+ project "portmidi"
+  uuid "2512E2CA-578A-4F10-9363-4BFC9A5EF960"
+  language "C"
+  location "portmidi"
+  includedirs { "portmidi/porttime", "portmidi/pm_common", "portmidi/pm_win" }
+  files {
+   "portmidi/porttime/porttime.c",
+   "portmidi/porttime/ptwinmm.c",
+   "portmidi/pm_common/pmutil.c",
+   "portmidi/pm_common/portmidi.c",
+   "portmidi/pm_win/pmwin.c",
+   "portmidi/pm_win/pmwinmm.c",
+  }
+  files {
+   "portmidi/porttime/porttime.h",
+   "portmidi/pm_common/pminternal.h",
+   "portmidi/pm_common/pmutil.h",
+   "portmidi/pm_common/portmidi.h",
+   "portmidi/pm_win/pmwinmm.h",
+  }
+  dofile "premake4-defaults.lua"
+  
+
+
   
   
 solution "includeDLL"

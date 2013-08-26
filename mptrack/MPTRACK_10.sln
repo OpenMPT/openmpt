@@ -16,6 +16,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\include\zlib\zli
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "minizip", "..\include\zlib\minizip.vcxproj", "{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MIDI Input Output", "..\plugins\MidiInOut\MidiInOut.vcxproj", "{59248302-52E0-4CC0-9BBE-E475BA4A9B41}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portmidi", "..\include\portmidi\portmidi.vcxproj", "{2512E2CA-578A-4F10-9363-4BFC9A5EF960}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -71,6 +75,18 @@ Global
 		{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}.Release|Win32.Build.0 = ReleaseLib|Win32
 		{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}.ReleaseNoLTCG|Win32.ActiveCfg = NormalLib|Win32
 		{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}.ReleaseNoLTCG|Win32.Build.0 = NormalLib|Win32
+		{59248302-52E0-4CC0-9BBE-E475BA4A9B41}.Debug|Win32.ActiveCfg = Debug|Win32
+		{59248302-52E0-4CC0-9BBE-E475BA4A9B41}.Debug|Win32.Build.0 = Debug|Win32
+		{59248302-52E0-4CC0-9BBE-E475BA4A9B41}.Release|Win32.ActiveCfg = Release|Win32
+		{59248302-52E0-4CC0-9BBE-E475BA4A9B41}.Release|Win32.Build.0 = Release|Win32
+		{59248302-52E0-4CC0-9BBE-E475BA4A9B41}.ReleaseNoLTCG|Win32.ActiveCfg = Release|Win32
+		{59248302-52E0-4CC0-9BBE-E475BA4A9B41}.ReleaseNoLTCG|Win32.Build.0 = Release|Win32
+		{2512E2CA-578A-4F10-9363-4BFC9A5EF960}.Debug|Win32.ActiveCfg = DebugLib|Win32
+		{2512E2CA-578A-4F10-9363-4BFC9A5EF960}.Debug|Win32.Build.0 = DebugLib|Win32
+		{2512E2CA-578A-4F10-9363-4BFC9A5EF960}.Release|Win32.ActiveCfg = ReleaseLib|Win32
+		{2512E2CA-578A-4F10-9363-4BFC9A5EF960}.Release|Win32.Build.0 = ReleaseLib|Win32
+		{2512E2CA-578A-4F10-9363-4BFC9A5EF960}.ReleaseNoLTCG|Win32.ActiveCfg = NormalLib|Win32
+		{2512E2CA-578A-4F10-9363-4BFC9A5EF960}.ReleaseNoLTCG|Win32.Build.0 = NormalLib|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
