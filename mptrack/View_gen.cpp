@@ -766,7 +766,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 						float fValue = 0.01f * n;
 						wsprintf(s, "%d.%02d", n/100, n%100);
 						SetDlgItemText(IDC_EDIT14, s);
-						if ((nSBCode == SB_THUMBPOSITION) || (nSBCode == SB_ENDSCROLL))
+						if (nSBCode == SB_THUMBPOSITION || nSBCode == SB_THUMBTRACK || nSBCode == SB_ENDSCROLL)
 						{
 							pVstPlugin->SetParameter(m_nCurrentParam, fValue);
 							OnParamChanged();
@@ -1243,7 +1243,7 @@ LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM /*lParam*/)
 	}
 }
 
-void CViewGlobals::OnMovePlugToSlot() 
+void CViewGlobals::OnMovePlugToSlot()
 //-----------------------------------
 {
 	CMoveFXSlotDialog dlg((CWnd*)this);

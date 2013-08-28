@@ -318,7 +318,9 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &srcSong, SAMPLEINDEX sourceSample)
 //----------------------------------------------------------------------------------------------------------------
 {
-	if(!sourceSample || sourceSample > srcSong.GetNumSamples() || targetSample >= GetModSpecifications().samplesMax)
+	if(!sourceSample
+		|| sourceSample > srcSong.GetNumSamples()
+		|| (targetSample >= GetModSpecifications().samplesMax && targetSample > GetNumSamples()))
 	{
 		return false;
 	}
