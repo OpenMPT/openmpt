@@ -2746,6 +2746,10 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 				return;
 			}
 		}
+		if(GetType() != MOD_TYPE_DBM)
+		{
+			return;
+		}
 	}
 	// Regular Slide
 	if(!m_SongFlags[SONG_FIRSTTICK])
@@ -2793,6 +2797,10 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 				ExtraFinePortamentoDown(pChn, param & 0x0F);
 				return;
 			}
+		}
+		if(GetType() != MOD_TYPE_DBM)
+		{
+			return;
 		}
 	}
 
@@ -2990,7 +2998,7 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
 }
 
 // Implemented for IMF compatibility, can't actually save this in any formats
-// sign should be 1 (up) or -1 (down)
+// Slide up / down every x ticks by y semitones
 void CSoundFile::NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig)
 //---------------------------------------------------------------------------------
 {

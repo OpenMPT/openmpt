@@ -1255,11 +1255,11 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 			{
 				if (nParam & 0x80)
 				{
-					pModDoc->NoteOff(nParam, true);
+					pModDoc->NoteOff(nParam & 0x7F, true);
 				} else
 				{
 					pModDoc->NoteOff(0, true);
-					pModDoc->PlayNote(nParam, static_cast<INSTRUMENTINDEX>(modItemID), 0, false);
+					pModDoc->PlayNote(nParam & 0x7F, static_cast<INSTRUMENTINDEX>(modItemID), 0, false);
 				}
 			}
 			return TRUE;
@@ -2104,24 +2104,33 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 		break;
 
 	case MODITEM_SAMPLE:
-		// Reorder samples in a module
-		if(m_itemDrag.type == MODITEM_SAMPLE && pInfoDrag != nullptr && sameModDoc)
+		if(m_itemDrag.type == MODITEM_SAMPLE && pInfoDrag != nullptr)
 		{
 			if(bDoDrop)
 			{
-				const SAMPLEINDEX from = static_cast<SAMPLEINDEX>(modItemDragID - 1), to = static_cast<SAMPLEINDEX>(modItemDropID - 1);
-
-				std::vector<SAMPLEINDEX> newOrder(pModDoc->GetNumSamples());
-				for(SAMPLEINDEX smp = 0; smp < pModDoc->GetNumSamples(); smp++)
+				if(sameModDoc)
 				{
-					newOrder[smp] = smp + 1;
+					// Reorder samples in a module
+					const SAMPLEINDEX from = static_cast<SAMPLEINDEX>(modItemDragID - 1), to = static_cast<SAMPLEINDEX>(modItemDropID - 1);
+
+					std::vector<SAMPLEINDEX> newOrder(pModDoc->GetNumSamples());
+					for(SAMPLEINDEX smp = 0; smp < pModDoc->GetNumSamples(); smp++)
+					{
+						newOrder[smp] = smp + 1;
+					}
+
+					newOrder.erase(newOrder.begin() + from);
+					newOrder.insert(newOrder.begin() + to, from + 1);
+
+					pModDoc->ReArrangeSamples(newOrder);
+				} else if(pInfoDrag->pModDoc != nullptr)
+				{
+					// Load sample into other module
+					pSndFile->ReadSampleFromSong(static_cast<SAMPLEINDEX>(modItemDropID), pInfoDrag->pModDoc->GetrSoundFile(), static_cast<SAMPLEINDEX>(modItemDragID));
+				} else
+				{
+					return true;
 				}
-
-				newOrder.erase(newOrder.begin() + from);
-				newOrder.insert(newOrder.begin() + to, from + 1);
-
-				pModDoc->ReArrangeSamples(newOrder);
-
 				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_PATTERNDATA, NULL);
 				pModDoc->SetModified();
 				SelectItem(hItem);
@@ -2131,24 +2140,33 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 		break;
 
 	case MODITEM_INSTRUMENT:
-		// Reorder instruments in a module
-		if(m_itemDrag.type == MODITEM_INSTRUMENT && pInfoDrag != nullptr && sameModDoc)
+		if(m_itemDrag.type == MODITEM_INSTRUMENT && pInfoDrag != nullptr)
 		{
 			if(bDoDrop)
 			{
-				const INSTRUMENTINDEX from = static_cast<INSTRUMENTINDEX>(modItemDragID - 1), to = static_cast<INSTRUMENTINDEX>(modItemDropID - 1);
-
-				std::vector<INSTRUMENTINDEX> newOrder(pModDoc->GetNumInstruments());
-				for(INSTRUMENTINDEX ins = 0; ins < pModDoc->GetNumInstruments(); ins++)
+				if(sameModDoc)
 				{
-					newOrder[ins] = ins + 1;
+					// Reorder instruments in a module
+					const INSTRUMENTINDEX from = static_cast<INSTRUMENTINDEX>(modItemDragID - 1), to = static_cast<INSTRUMENTINDEX>(modItemDropID - 1);
+
+					std::vector<INSTRUMENTINDEX> newOrder(pModDoc->GetNumInstruments());
+					for(INSTRUMENTINDEX ins = 0; ins < pModDoc->GetNumInstruments(); ins++)
+					{
+						newOrder[ins] = ins + 1;
+					}
+
+					newOrder.erase(newOrder.begin() + from);
+					newOrder.insert(newOrder.begin() + to, from + 1);
+
+					pModDoc->ReArrangeInstruments(newOrder);
+				} else if(pInfoDrag->pModDoc != nullptr)
+				{
+					// Load instrument into other module
+					pSndFile->ReadInstrumentFromSong(static_cast<INSTRUMENTINDEX>(modItemDropID), pInfoDrag->pModDoc->GetrSoundFile(), static_cast<INSTRUMENTINDEX>(modItemDragID));
+				} else
+				{
+					return true;
 				}
-
-				newOrder.erase(newOrder.begin() + from);
-				newOrder.insert(newOrder.begin() + to, from + 1);
-
-				pModDoc->ReArrangeInstruments(newOrder);
-
 				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_PATTERNDATA, NULL);
 				pModDoc->SetModified();
 				SelectItem(hItem);
@@ -3294,16 +3312,17 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
-	if(wParam >= kcTreeViewStartNotes && wParam <= kcTreeViewEndNotes)
+	const bool start = wParam >= kcTreeViewStartNotes && wParam <= kcTreeViewEndNotes,
+		stop = wParam >= kcTreeViewStartNoteStops && wParam <= kcTreeViewEndNoteStops;
+	if(start || stop)
 	{
-		if(PlayItem(GetSelectedItem(), static_cast<ModCommand::NOTE>(wParam - kcTreeViewStartNotes + 1 + pMainFrm->GetBaseOctave() * 12)))
+		ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops) + 1 + pMainFrm->GetBaseOctave() * 12);
+		if(stop) note |= 0x80;
+
+		if(PlayItem(GetSelectedItem(), note))
 			return wParam;
 		else
 			return NULL;
-	}
-	if(wParam >= kcTreeViewStartNoteStops && wParam <= kcTreeViewEndNoteStops)
-	{
-		return wParam;
 	}
 
 	return NULL;
