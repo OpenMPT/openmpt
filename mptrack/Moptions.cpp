@@ -585,17 +585,11 @@ void COptionsGeneral::DoDataExchange(CDataExchange* pDX)
 BOOL COptionsGeneral::OnInitDialog()
 //----------------------------------
 {
-	CHAR sname[32], s[256];
 
 	CPropertyPage::OnInitDialog();
 	for(size_t i = 0; i < CountOf(generalOptionsList); i++)
 	{
-		wsprintf(sname, "Setup.Gen.Opt%d.Name", i + 1);
-		if ((theApp.GetLocalizedString(sname, s, sizeof(s))) && (s[0]))
-			m_CheckList.AddString(s);
-		else
-			m_CheckList.AddString(generalOptionsList[i].name);
-
+		m_CheckList.AddString(generalOptionsList[i].name);
 		const int check = (TrackerSettings::Instance().m_dwPatternSetup & generalOptionsList[i].flag) != 0 ? BST_CHECKED : BST_UNCHECKED;
 		m_CheckList.SetCheck(i, check);
 	}
@@ -676,14 +670,11 @@ void COptionsGeneral::BrowseForFolder(UINT nID)
 void COptionsGeneral::OnOptionSelChanged()
 //----------------------------------------
 {
-	CHAR sname[32], s[256];
 	LPCSTR pszDesc = NULL;
 	const int sel = m_CheckList.GetCurSel();
 	if ((sel >= 0) && (sel < CountOf(generalOptionsList)))
 	{
 		pszDesc = generalOptionsList[sel].description;
-		wsprintf(sname, "Setup.Gen.Opt%d.Desc", sel+1);
-		if ((theApp.GetLocalizedString(sname, s, sizeof(s))) && (s[0])) pszDesc = s;
 	}
 	SetDlgItemText(IDC_TEXT1, (pszDesc) ? pszDesc : "");
 }
