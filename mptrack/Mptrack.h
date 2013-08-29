@@ -113,14 +113,12 @@ protected:
 	CVstPluginManager *m_pPluginManager;
 	BOOL m_bInitialized, m_bExWaveSupport, m_bDebugMode;
 	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
-	HANDLE m_hAlternateResourceHandle;
 	// Default macro configuration
 	MIDIMacroConfig m_MidiCfg;
 	static TCHAR m_szExePath[_MAX_PATH];
 	TCHAR m_szConfigDirectory[_MAX_PATH];
 	TCHAR m_szConfigFileName[_MAX_PATH];
 	TCHAR m_szPluginCacheFileName[_MAX_PATH];
-	TCHAR m_szStringsFileName[_MAX_PATH];
 	bool m_bPortableMode;
 
 public:
@@ -181,11 +179,6 @@ public:
 protected:
 	void StartSplashScreen();
 	void StopSplashScreen();
-
-// Localized strings
-public:
-	void ImportLocalizedStrings();
-	BOOL GetLocalizedString(LPCSTR pszName, LPSTR pszStr, UINT cbSize);
 
 // Overrides
 public:

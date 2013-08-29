@@ -626,7 +626,6 @@ CTrackApp::CTrackApp()
 	m_bInitialized = FALSE;
 	m_bExWaveSupport = FALSE;
 	m_bDebugMode = FALSE;
-	m_hAlternateResourceHandle = NULL;
 	m_szConfigFileName[0] = 0;
 }
 
@@ -740,7 +739,6 @@ void CTrackApp::SetupPaths(bool overridePortable)
 		// Move the config files if they're still in the old place.
 		MoveConfigFile("mptrack.ini");
 		MoveConfigFile("plugin.cache");
-		MoveConfigFile("mpt_intl.ini");
 		#endif	// WIN32 Legacy Stuff
 	} else
 	{
@@ -788,9 +786,6 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	strcpy(m_szConfigFileName, m_szConfigDirectory); // config file
 	strcat(m_szConfigFileName, "mptrack.ini");
 
-	strcpy(m_szStringsFileName, m_szConfigDirectory); // I18N file
-	strcat(m_szStringsFileName, "mpt_intl.ini");
-
 	strcpy(m_szPluginCacheFileName, m_szConfigDirectory); // plugin cache
 	strcat(m_szPluginCacheFileName, "plugin.cache");
 
@@ -814,8 +809,6 @@ BOOL CTrackApp::InitInstance()
 	//SetRegistryKey(_T("Olivier Lapicque"));
 	// Start loading
 	BeginWaitCursor();
-
-	//m_hAlternateResourceHandle = LoadLibrary("mpt_intl.dll");
 
 	MEMORYSTATUS gMemStatus;
 	MemsetZero(gMemStatus);
@@ -911,9 +904,6 @@ BOOL CTrackApp::InitInstance()
 
 	// Initialize Plugins
 	if (!cmdInfo.m_bNoPlugins) InitializeDXPlugins();
-
-	// Initialize localized strings
-	ImportLocalizedStrings();
 
 	// Initialize CMainFrame
 	pMainFrame->Initialize();
@@ -2072,38 +2062,6 @@ bool CTrackApp::OpenURL(const LPCSTR lpszURL)
 		}
 	}
 	return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-// Localized strings
-
-VOID CTrackApp::ImportLocalizedStrings()
-//--------------------------------------
-{
-	//DWORD dwLangId = ((DWORD)GetUserDefaultLangID()) & 0xfff;
-	// TODO: look up [Strings.lcid], [Strings.(lcid&0xff)] & [Strings] in mpt_intl.ini
-}
-
-
-BOOL CTrackApp::GetLocalizedString(LPCSTR pszName, LPSTR pszStr, UINT cbSize)
-//---------------------------------------------------------------------------
-{
-	CHAR s[32];
-	DWORD dwLangId = ((DWORD)GetUserDefaultLangID()) & 0xffff;
-
-	pszStr[0] = 0;
-	if (!m_szStringsFileName[0]) return FALSE;
-	wsprintf(s, "Strings.%04X", dwLangId);
-	GetPrivateProfileString(s, pszName, "", pszStr, cbSize, m_szStringsFileName);
-	if (pszStr[0]) return TRUE;
-	wsprintf(s, "Strings.%04X", dwLangId&0xff);
-	GetPrivateProfileString(s, pszName, "", pszStr, cbSize, m_szStringsFileName);
-	if (pszStr[0]) return TRUE;
-	wsprintf(s, "Strings", dwLangId&0xff);
-	GetPrivateProfileString(s, pszName, "", pszStr, cbSize, m_szStringsFileName);
-	if (pszStr[0]) return TRUE;
-	return FALSE;
 }
 
 
