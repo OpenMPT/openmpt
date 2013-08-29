@@ -580,7 +580,6 @@ BOOL CTrackApp::AddDLSBank(LPCSTR lpszFileName)
 // CTrackApp
 
 MODTYPE CTrackApp::m_nDefaultDocType = MOD_TYPE_IT;
-MEMORYSTATUS CTrackApp::gMemStatus;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -818,6 +817,7 @@ BOOL CTrackApp::InitInstance()
 
 	//m_hAlternateResourceHandle = LoadLibrary("mpt_intl.dll");
 
+	MEMORYSTATUS gMemStatus;
 	MemsetZero(gMemStatus);
 	GlobalMemoryStatus(&gMemStatus);
 #if 0
@@ -827,7 +827,6 @@ BOOL CTrackApp::InitInstance()
 #endif
 	// Allow allocations of at least 16MB
 	if (gMemStatus.dwTotalPhys < 16*1024*1024) gMemStatus.dwTotalPhys = 16*1024*1024;
-
 	TrackerSettings::Instance().m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
 	if(TrackerSettings::Instance().m_nSampleUndoMaxBuffer < (1 << 20)) TrackerSettings::Instance().m_nSampleUndoMaxBuffer = (1 << 20);
 
