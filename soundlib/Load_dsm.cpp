@@ -63,6 +63,19 @@ typedef struct PACKED DSMFILEHEADER
 STATIC_ASSERT(sizeof(DSMFILEHEADER) == 20);
 
 
+typedef struct PACKED DSMFILEHEADERNORIFF
+{
+	DWORD id_DSMF;	// "DSMF"
+	DWORD unknown1;
+	DWORD data_len;
+	DWORD unknown2;
+	DWORD id_SONG;	// "SONG"
+	DWORD song_len;
+} DSMFILEHEADERNORIFF;
+
+STATIC_ASSERT(sizeof(DSMFILEHEADERNORIFF) == 24);
+
+
 typedef struct PACKED DSMSONG
 {
 	char songname[28];
@@ -103,24 +116,45 @@ STATIC_ASSERT(sizeof(DSMPATT) == 10);
 bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
 //--------------------------------------------------------------------------------------------------
 {
-	DSMFILEHEADER *pfh = (DSMFILEHEADER *)lpStream;
 	DSMSONG *psong;
 	DWORD dwMemPos;
 	UINT nSmp;
 	PATTERNINDEX nPat;
 
-	if ((!lpStream) || (dwMemLength < 1024) || (pfh->id_RIFF != DSMID_RIFF)
-	 || (pfh->riff_len + 8 > dwMemLength) || (pfh->riff_len < 1024)
-	 || (pfh->id_DSMF != DSMID_DSMF) || (pfh->id_SONG != DSMID_SONG)
-	 || (pfh->song_len > dwMemLength))
+	if(!lpStream || (dwMemLength < 1024))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
-	{
-		return true;
 	}
-	psong = (DSMSONG *)(lpStream + sizeof(DSMFILEHEADER));
-	dwMemPos = sizeof(DSMFILEHEADER) + pfh->song_len;
+
+	DSMFILEHEADER *pfh = (DSMFILEHEADER *)lpStream;
+	if(pfh->id_RIFF == DSMID_RIFF)
+	{
+		if((pfh->riff_len + 8 > dwMemLength) || (pfh->riff_len < 1024)
+			|| (pfh->id_DSMF != DSMID_DSMF) || (pfh->id_SONG != DSMID_SONG)
+			|| (pfh->song_len > dwMemLength))
+		{
+			return false;
+		} else if(loadFlags == onlyVerifyHeader)
+		{
+			return true;
+		}
+		psong = (DSMSONG *)(lpStream + sizeof(DSMFILEHEADER));
+		dwMemPos = sizeof(DSMFILEHEADER) + pfh->song_len;
+	} else
+	{
+		// without "RIFF"
+		DSMFILEHEADERNORIFF *pfh2 = (DSMFILEHEADERNORIFF *)lpStream;
+		if((pfh2->id_DSMF != DSMID_DSMF) || (pfh2->id_SONG != DSMID_SONG)
+			|| (pfh2->song_len > dwMemLength))
+		{
+			return false;
+		} else if(loadFlags == onlyVerifyHeader)
+		{
+			return true;
+		}
+		psong = (DSMSONG *)(lpStream + sizeof(DSMFILEHEADERNORIFF));
+		dwMemPos = sizeof(DSMFILEHEADERNORIFF) + pfh2->song_len;
+	}
 
 	InitializeGlobals();
 	m_nType = MOD_TYPE_DSM;
@@ -133,7 +167,13 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoa
 	m_nDefaultTempo = psong->bpm;
 	m_nDefaultGlobalVolume = psong->globalvol << 2;
 	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME)) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_nSamplePreAmp = psong->mastervol & 0x7F;
+	if(psong->mastervol == 0x80)
+	{
+		m_nSamplePreAmp = 256 / m_nChannels;
+	} else
+	{
+		m_nSamplePreAmp = psong->mastervol & 0x7F;
+	}
 	Order.ReadFromArray(psong->orders, psong->numord);
 
 	for (UINT iPan=0; iPan<16; iPan++)
