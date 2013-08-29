@@ -95,7 +95,6 @@ protected:
 	static BOOL m_nProject;
 
 public:
-	static MEMORYSTATUS gMemStatus;
 	static std::vector<CDLSBank *> gpDLSBanks;
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
