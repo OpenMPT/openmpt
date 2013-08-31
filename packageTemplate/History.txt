@@ -25,6 +25,36 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.22.05.00 (31 August 2013, revision 2622)
+-------------------------------------------
+General Tab
+   [Imp] <js> Effect parameters are now also updated while dragging the corresponding slider (tx madbrain).
+
+Sample Editor
+   [Imp] <js> Don't limit size of loaded sample file to the size of physical memory (old code relict).
+
+Instrument Editor
+   [Imp] <js> Also show FLAC files when loading instruments in instrument view.
+
+Tree view
+   [New] <js> Can now drag and drop samples / instruments between modules (tx madbrain).
+   [Imp] <js> Releasing note keys now also stops sample / instrument previews (tx madbrain).
+   [Fix] <js> Previewing sound font instruments in the treeview broke in OpenMPT 1.22.04.00.
+   [Fix] <js> Trying to rename items that are not part of a song folder crashed the application.
+   [Fix] <js> Adding and renaming sequences didn't update the tree view properly.
+
+Playback
+   [Fix] <js> Fine / extra fine portamento slides in IT / S3M with a parameter of 0 were broken in OpenMPT 1.22.04.00.
+
+Other formats
+   [Fix] <jh> DSM: Support files that start with a slightly different header than usual DSM files (http://forum.openmpt.org/index.php?topic=5091).
+
+Misc
+   [New] <jh> Added 32-bit floating point output for drivers that support it.
+   [Mod] <js> Updated zlib (1.2.8).
+   [Reg] <jh> Remove mpt_intl.ini and mpt_intl.dll support code which was solely usable to translate the options list in the general options tab.
+
+
 v1.22.04.00 (6 August 2013, revision 2581)
 ------------------------------------------
 Pattern Editor
