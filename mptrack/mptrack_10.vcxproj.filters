@@ -484,6 +484,18 @@
     <ClCompile Include="MemoryMappedFile.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\sounddev\SoundDeviceASIO.cpp">
+      <Filter>Source Files\sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sounddev\SoundDeviceDirectSound.cpp">
+      <Filter>Source Files\sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sounddev\SoundDevicePortAudio.cpp">
+      <Filter>Source Files\sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sounddev\SoundDeviceWaveout.cpp">
+      <Filter>Source Files\sounddev</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -902,6 +914,18 @@
     </ClInclude>
     <ClInclude Include="MemoryMappedFile.h">
       <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddev\SoundDeviceASIO.h">
+      <Filter>Header Files\sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddev\SoundDeviceDirectSound.h">
+      <Filter>Header Files\sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddev\SoundDevicePortAudio.h">
+      <Filter>Header Files\sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddev\SoundDeviceWaveout.h">
+      <Filter>Header Files\sounddev</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

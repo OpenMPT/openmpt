@@ -535,6 +535,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddev\SoundDeviceASIO.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDeviceDirectSound.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDevicePortAudio.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDeviceWaveout.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\SoundFilePlayConfig.cpp"
 				>
 			</File>
@@ -1126,6 +1142,22 @@
 			</File>
 			<File
 				RelativePath="..\sounddev\SoundDevices.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDeviceASIO.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDeviceDirectSound.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDevicePortAudio.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDeviceWaveout.h"
 				>
 			</File>
 			<File
