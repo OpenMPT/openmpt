@@ -264,6 +264,7 @@ solution "include"
    "portaudio/include/pa_win_wmme.h",
    "portaudio/include/portaudio.h",
   }
+  buildoptions { "/wd4018" }
   dofile "premake4-defaults.lua"
   
 
