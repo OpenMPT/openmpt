@@ -12,6 +12,8 @@
 
 #include "../soundlib/Endianness.h"
 
+struct ModSample;
+
 
 // Byte offsets, from lowest significant to highest significant byte (for various functor template parameters)
 #define littleEndian32 0, 1, 2, 3
