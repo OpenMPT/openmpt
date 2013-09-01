@@ -447,6 +447,9 @@ public:
 	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
 	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
 
+	// rough heuristic, could be improved
+	std::pair<MOD_CHARSET_CERTAINTY, std::string> GetCharset() const { return GetCharsetFromModType(GetType()); }
+
 	void SetPreAmp(UINT vol);
 	UINT GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
 
@@ -542,6 +545,7 @@ public:
 	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
+	static std::pair<MOD_CHARSET_CERTAINTY, std::string> GetCharsetFromModType(MODTYPE modtype);
 	static const char * ModTypeToString(MODTYPE modtype);
 	static std::string ModTypeToTracker(MODTYPE modtype);
 
