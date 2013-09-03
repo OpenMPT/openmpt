@@ -702,8 +702,8 @@ BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
 }
 
 
-bool CASIODevice::CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result)
-//------------------------------------------------------------------------------------------------------
+bool CASIODevice::CanSampleRate(UINT nDevice, std::vector<uint32> &samplerates, std::vector<bool> &result)
+//-------------------------------------------------------------------------------------------------------
 {
 	const bool wasOpen = (m_pAsioDrv != NULL);
 	if(!wasOpen)

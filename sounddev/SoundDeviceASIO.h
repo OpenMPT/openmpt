@@ -68,7 +68,7 @@ public:
 	UINT GetNumBuffers() { return 2; }
 	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate; }
 
-	bool CanSampleRate(UINT nDevice, std::vector<UINT> &samplerates, std::vector<bool> &result);
+	bool CanSampleRate(UINT nDevice, std::vector<uint32> &samplerates, std::vector<bool> &result);
 	UINT GetCurrentSampleRate(UINT nDevice);
 
 public:
