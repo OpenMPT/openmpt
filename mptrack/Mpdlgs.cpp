@@ -410,7 +410,7 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 	m_CbnMixingFreq.ResetContent();
 
 	std::vector<bool> supportedRates;
-	std::vector<UINT> samplerates;
+	std::vector<uint32> samplerates;
 	for(size_t i = 0; i < CountOf(nMixingRates); i++)
 	{
 		samplerates.push_back(nMixingRates[i]);
