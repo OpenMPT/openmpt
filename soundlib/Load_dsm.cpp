@@ -2,9 +2,8 @@
  * Load_dsm.cpp
  * ------------
  * Purpose: Digisound Interface Kit (DSIK) Internal Format (DSM) module loader
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Notes  : There is also another fundamentally different DSIK "DSM" module format, not handled here.
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -16,96 +15,108 @@
 #pragma pack(push, 1)
 #endif
 
-#define DSMID_RIFF	0x46464952	// "RIFF"
-#define DSMID_DSMF	0x464d5344	// "DSMF"
-#define DSMID_SONG	0x474e4f53	// "SONG"
-#define DSMID_INST	0x54534e49	// "INST"
-#define DSMID_PATT	0x54544150	// "PATT"
-
-
-typedef struct PACKED DSMNOTE
+struct PACKED DSMChunk
 {
-	BYTE note,ins,vol,cmd,inf;
-} DSMNOTE;
+	char   magic[4];
+	uint32 size;
 
-STATIC_ASSERT(sizeof(DSMNOTE) == 5);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(size);
+	}
+};
+
+STATIC_ASSERT(sizeof(DSMChunk) == 8);
 
 
-typedef struct PACKED DSMSAMPLE
+struct PACKED DSMSongHeader
 {
-	DWORD id_INST;
-	DWORD inst_len;
-	char filename[13];
-	BYTE flags;
-	BYTE flags2;
-	BYTE volume;
-	DWORD length;
-	DWORD loopstart;
-	DWORD loopend;
-	DWORD reserved1;
-	WORD c2spd;
-	WORD reserved2;
-	char samplename[28];
-} DSMSAMPLE;
+	char   songName[28];
+	char   reserved1[2];
+	uint16 flags;
+	char   reserved2[4];
+	uint16 numOrders;
+	uint16 numSamples;
+	uint16 numPatterns;
+	uint16 numChannels;
+	uint8  globalVol;
+	uint8  mastervol;
+	uint8  speed;
+	uint8  bpm;
+	uint8  panPos[16];
+	uint8  orders[128];
 
-STATIC_ASSERT(sizeof(DSMSAMPLE) == 72);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(flags);
+		SwapBytesLE(numOrders);
+		SwapBytesLE(numSamples);
+		SwapBytesLE(numPatterns);
+		SwapBytesLE(numChannels);
+	}
+};
+
+STATIC_ASSERT(sizeof(DSMSongHeader) == 192);
 
 
-typedef struct PACKED DSMFILEHEADER
+struct PACKED DSMSampleHeader
 {
-	DWORD id_RIFF;	// "RIFF"
-	DWORD riff_len;
-	DWORD id_DSMF;	// "DSMF"
-	DWORD id_SONG;	// "SONG"
-	DWORD song_len;
-} DSMFILEHEADER;
+	char   filename[13];
+	uint8  flags;
+	char   reserved1;
+	uint8  volume;
+	uint32 length;
+	uint32 loopStart;
+	uint32 loopEnd;
+	char   reserved2[4];
+	uint32 sampleRate;
+	char   sampleName[28];
 
-STATIC_ASSERT(sizeof(DSMFILEHEADER) == 20);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopEnd);
+		SwapBytesLE(sampleRate);
+	}
 
+	// Convert a DSM sample header to OpenMPT's internal sample header.
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.Initialize();
+		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
 
-typedef struct PACKED DSMFILEHEADERNORIFF
-{
-	DWORD id_DSMF;	// "DSMF"
-	DWORD unknown1;
-	DWORD data_len;
-	DWORD unknown2;
-	DWORD id_SONG;	// "SONG"
-	DWORD song_len;
-} DSMFILEHEADERNORIFF;
+		mptSmp.nC5Speed = sampleRate;
+		mptSmp.uFlags.set(CHN_LOOP, (flags & 1) != 0);
+		mptSmp.nLength = length;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;
+		mptSmp.nVolume = std::min(volume, uint8(64)) * 4;
+	}
 
-STATIC_ASSERT(sizeof(DSMFILEHEADERNORIFF) == 24);
+	// Retrieve the internal sample format flags for this sample.
+	SampleIO GetSampleFormat() const
+	{
+		SampleIO sampleIO(
+			SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			SampleIO::unsignedPCM);
+		if(flags & 0x40)
+		{
+			sampleIO |= SampleIO::deltaPCM;	// fairlight.dsm by Comrade J
+		} else if(flags & 0x02)
+		{
+			sampleIO |= SampleIO::signedPCM;
+		}
+		return sampleIO;
+	}
+};
 
-
-typedef struct PACKED DSMSONG
-{
-	char songname[28];
-	WORD reserved1;
-	WORD flags;
-	DWORD reserved2;
-	WORD numord;
-	WORD numsmp;
-	WORD numpat;
-	WORD numtrk;
-	BYTE globalvol;
-	BYTE mastervol;
-	BYTE speed;
-	BYTE bpm;
-	BYTE panpos[16];
-	BYTE orders[128];
-} DSMSONG;
-
-STATIC_ASSERT(sizeof(DSMSONG) == 192);
-
-
-typedef struct PACKED DSMPATT
-{
-	DWORD id_PATT;
-	DWORD patt_len;
-	BYTE dummy1;
-	BYTE dummy2;
-} DSMPATT;
-
-STATIC_ASSERT(sizeof(DSMPATT) == 10);
+STATIC_ASSERT(sizeof(DSMSampleHeader) == 64);
 
 
 #ifdef NEEDS_PRAGMA_PACK
@@ -113,204 +124,182 @@ STATIC_ASSERT(sizeof(DSMPATT) == 10);
 #endif
 
 
-bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
-//--------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
-	DSMSONG *psong;
-	DWORD dwMemPos;
-	UINT nSmp;
-	PATTERNINDEX nPat;
+	file.Rewind();
 
-	if(!lpStream || (dwMemLength < 1024))
+	char fileMagic[3][4];
+	file.ReadArray(fileMagic);
+	if(!memcmp(fileMagic[0], "RIFF", 4)
+		&& !memcmp(fileMagic[2], "DSMF", 4))
+	{
+		// "Normal" DSM files with RIFF header
+		// <RIFF> <file size> <DSMF>
+	} else if(!memcmp(fileMagic[0], "DSMF", 4))
+	{
+		// DSM files with alternative header
+		// <DSMF> <4 bytes, usually 4x NUL or RIFF> <file size> <4 bytes, usually DSMF but not always>
+		file.Skip(4);
+	} else
 	{
 		return false;
 	}
 
-	DSMFILEHEADER *pfh = (DSMFILEHEADER *)lpStream;
-	if(pfh->id_RIFF == DSMID_RIFF)
+	DSMChunk chunkHeader;
+
+	file.ReadConvertEndianness(chunkHeader);
+	// Technically, the song chunk could be anywhere in the file, but we're going to simplify
+	// things by not using a chunk header here and just expect it to be right at the beginning.
+	if(memcmp(chunkHeader.magic, "SONG", 4))
 	{
-		if((pfh->riff_len + 8 > dwMemLength) || (pfh->riff_len < 1024)
-			|| (pfh->id_DSMF != DSMID_DSMF) || (pfh->id_SONG != DSMID_SONG)
-			|| (pfh->song_len > dwMemLength))
-		{
-			return false;
-		} else if(loadFlags == onlyVerifyHeader)
-		{
-			return true;
-		}
-		psong = (DSMSONG *)(lpStream + sizeof(DSMFILEHEADER));
-		dwMemPos = sizeof(DSMFILEHEADER) + pfh->song_len;
-	} else
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
 	{
-		// without "RIFF"
-		DSMFILEHEADERNORIFF *pfh2 = (DSMFILEHEADERNORIFF *)lpStream;
-		if((pfh2->id_DSMF != DSMID_DSMF) || (pfh2->id_SONG != DSMID_SONG)
-			|| (pfh2->song_len > dwMemLength))
-		{
-			return false;
-		} else if(loadFlags == onlyVerifyHeader)
-		{
-			return true;
-		}
-		psong = (DSMSONG *)(lpStream + sizeof(DSMFILEHEADERNORIFF));
-		dwMemPos = sizeof(DSMFILEHEADERNORIFF) + pfh2->song_len;
+		return true;
 	}
 
+	DSMSongHeader songHeader;
+	file.ReadStructPartial(songHeader, chunkHeader.size);
+	songHeader.ConvertEndianness();
+
 	InitializeGlobals();
+	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, songHeader.songName);
 	m_nType = MOD_TYPE_DSM;
-	m_nChannels = psong->numtrk;
-	if (m_nChannels < 1) m_nChannels = 1;
-	if (m_nChannels > 16) m_nChannels = 16;
-	m_nSamples = psong->numsmp;
-	if (m_nSamples >= MAX_SAMPLES) m_nSamples = MAX_SAMPLES - 1;
-	m_nDefaultSpeed = psong->speed;
-	m_nDefaultTempo = psong->bpm;
-	m_nDefaultGlobalVolume = psong->globalvol << 2;
-	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME)) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	if(psong->mastervol == 0x80)
+	m_nChannels = Clamp(songHeader.numChannels, uint16(1), uint16(16));
+	m_nDefaultSpeed = songHeader.speed;
+	m_nDefaultTempo = songHeader.bpm;
+	m_nDefaultGlobalVolume = std::min(songHeader.globalVol, uint8(64)) * 4u;
+	if(!m_nDefaultGlobalVolume) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+	if(songHeader.mastervol == 0x80)
 	{
 		m_nSamplePreAmp = 256 / m_nChannels;
 	} else
 	{
-		m_nSamplePreAmp = psong->mastervol & 0x7F;
+		m_nSamplePreAmp = songHeader.mastervol & 0x7F;
 	}
-	Order.ReadFromArray(psong->orders, psong->numord);
 
-	for (UINT iPan=0; iPan<16; iPan++)
+	// Read channel panning
+	for(CHANNELINDEX chn = 0; chn < 16; chn++)
 	{
-		ChnSettings[iPan].Reset();
-		ChnSettings[iPan].nPan = 0x80;
-		if (psong->panpos[iPan] <= 0x80)
+		ChnSettings[chn].Reset();
+		if(songHeader.panPos[chn] <= 0x80)
 		{
-			ChnSettings[iPan].nPan = psong->panpos[iPan] << 1;
+			ChnSettings[chn].nPan = songHeader.panPos[chn] * 2;
 		}
 	}
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, psong->songname);
+	Order.ReadFromArray(songHeader.orders, songHeader.numOrders);
 
-	nPat = 0;
-	nSmp = 1;
-	while (dwMemPos < dwMemLength - 8)
+	// Read pattern and sample chunks
+	PATTERNINDEX patNum = 0;
+	while(file.ReadConvertEndianness(chunkHeader))
 	{
-		DSMPATT *ppatt = (DSMPATT *)(lpStream + dwMemPos);
-		DSMSAMPLE *pSmp = (DSMSAMPLE *)(lpStream+dwMemPos);
-		// Reading Patterns
-		if (ppatt->id_PATT == DSMID_PATT && (loadFlags & loadPatternData))
-		{
-			dwMemPos += 8;
-			if (dwMemPos + ppatt->patt_len >= dwMemLength) break;
-			DWORD dwPos = dwMemPos;
-			dwMemPos += ppatt->patt_len;
-			if(Patterns.Insert(nPat, 64))
-				break;
+		FileReader chunk = file.GetChunk(chunkHeader.size);
 
-			ModCommand *m = Patterns[nPat];
-			UINT row = 0;
-			while ((row < 64) && (dwPos + 2 <= dwMemPos))
+		if(!memcmp(chunkHeader.magic, "PATT", 4) && (loadFlags & loadPatternData))
+		{
+			// Read pattern
+			if(Patterns.Insert(patNum, 64))
 			{
-				UINT flag = lpStream[dwPos++];
-				if (flag)
+				continue;
+			}
+			chunk.Skip(2);
+
+			ROWINDEX row = 0;
+			PatternRow rowBase = Patterns[patNum];
+			while(chunk.AreBytesLeft() && row < 64)
+			{
+				uint8 flag = chunk.ReadUint8();
+				if(!flag)
 				{
-					UINT ch = (flag & 0x0F) % m_nChannels;
-					if (flag & 0x80)
-					{
-						UINT note = lpStream[dwPos++];
-						if (note)
-						{
-							if (note <= 12*9) note += 12;
-							m[ch].note = (BYTE)note;
-						}
-					}
-					if (flag & 0x40)
-					{
-						m[ch].instr = lpStream[dwPos++];
-					}
-					if (flag & 0x20)
-					{
-						m[ch].volcmd = VOLCMD_VOLUME;
-						m[ch].vol = lpStream[dwPos++];
-					}
-					if (flag & 0x10)
-					{
-						UINT command = lpStream[dwPos++];
-						UINT param = lpStream[dwPos++];
-						switch(command)
-						{
-						// 4-bit Panning
-						case 0x08:
-							switch(param & 0xF0)
-							{
-							case 0x00: param <<= 4; break;
-							case 0x10: command = 0x0A; param = (param & 0x0F) << 4; break;
-							case 0x20: command = 0x0E; param = (param & 0x0F) | 0xA0; break;
-							case 0x30: command = 0x0E; param = (param & 0x0F) | 0x10; break;
-							case 0x40: command = 0x0E; param = (param & 0x0F) | 0x20; break;
-							default: command = 0;
-							}
-							break;
-						// Portamentos
-						case 0x11:
-						case 0x12:
-							command &= 0x0F;
-							break;
-						// 3D Sound (?)
-						case 0x13:
-							command = 'X' - 55;
-							param = 0x91;
-							break;
-						default:
-							// Volume + Offset (?)
-							command = ((command & 0xF0) == 0x20) ? 0x09 : 0;
-						}
-						m[ch].command = (BYTE)command;
-						m[ch].param = (BYTE)param;
-						if (command) ConvertModCommand(m[ch]);
-					}
-				} else
-				{
-					m += m_nChannels;
 					row++;
+					rowBase = Patterns[patNum].GetRow(row);
+					continue;
+				}
+
+				CHANNELINDEX chn = (flag & 0x0F);
+				ModCommand dummy;
+				ModCommand &m = (chn < GetNumChannels() ? rowBase[chn] : dummy);
+
+				if(flag & 0x80)
+				{
+					uint8 note = chunk.ReadUint8();
+					if(note)
+					{
+						if(note <= 12 * 9) note += 11 + NOTE_MIN;
+						m.note = note;
+					}
+				}
+				if(flag & 0x40)
+				{
+					m.instr = chunk.ReadUint8();
+				}
+				if (flag & 0x20)
+				{
+					m.volcmd = VOLCMD_VOLUME;
+					m.vol = std::min(chunk.ReadUint8(), uint8(64));
+				}
+				if(flag & 0x10)
+				{
+					uint8 command = chunk.ReadUint8();
+					uint8 param = chunk.ReadUint8();
+					switch(command)
+					{
+						// 4-bit Panning
+					case 0x08:
+						switch(param & 0xF0)
+						{
+						case 0x00: param <<= 4; break;
+						case 0x10: command = 0x0A; param = (param & 0x0F) << 4; break;
+						case 0x20: command = 0x0E; param = (param & 0x0F) | 0xA0; break;
+						case 0x30: command = 0x0E; param = (param & 0x0F) | 0x10; break;
+						case 0x40: command = 0x0E; param = (param & 0x0F) | 0x20; break;
+						default: command = 0;
+						}
+						break;
+						// Portamentos
+					case 0x11:
+					case 0x12:
+						command &= 0x0F;
+						break;
+						// 3D Sound (?)
+					case 0x13:
+						command = 'X' - 55;
+						param = 0x91;
+						break;
+					default:
+						// Volume + Offset (?)
+						if(command > 0x10)
+							command = ((command & 0xF0) == 0x20) ? 0x09 : 0;
+					}
+					if(command)
+					{
+						m.command = command;
+						m.param = param;
+						ConvertModCommand(m);
+					}
 				}
 			}
-			nPat++;
-		} else
-		// Reading Samples
-		if ((nSmp <= m_nSamples) && (pSmp->id_INST == DSMID_INST))
+			patNum++;
+		} else if(!memcmp(chunkHeader.magic, "INST", 4) && GetNumSamples() < SAMPLEINDEX(MAX_SAMPLES - 1))
 		{
-			if (dwMemPos + pSmp->inst_len >= dwMemLength - 8) break;
-			DWORD dwPos = dwMemPos + sizeof(DSMSAMPLE);
-			dwMemPos += 8 + pSmp->inst_len;
+			// Read sample
+			m_nSamples++;
+			ModSample &sample = Samples[m_nSamples];
 
-			ModSample &sample = Samples[nSmp];
-			sample.Initialize();
+			DSMSampleHeader sampleHeader;
+			chunk.ReadConvertEndianness(sampleHeader);
+			sampleHeader.ConvertToMPT(sample);
 
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[nSmp], pSmp->samplename);
-			mpt::String::Read<mpt::String::nullTerminated>(sample.filename, pSmp->filename);
-
-			sample.nC5Speed = pSmp->c2spd;
-			sample.uFlags.set(CHN_LOOP, (pSmp->flags & 1) != 0);
-			sample.nLength = pSmp->length;
-			sample.nLoopStart = pSmp->loopstart;
-			sample.nLoopEnd = pSmp->loopend;
-			sample.nVolume = (WORD)(pSmp->volume << 2);
-			if (sample.nVolume > 256) sample.nVolume = 256;
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[m_nSamples], sampleHeader.sampleName);
 
 			if(loadFlags & loadSampleData)
 			{
-				FileReader chunk(lpStream + dwPos, dwMemLength - dwPos);
-				SampleIO(
-					SampleIO::_8bit,
-					SampleIO::mono,
-					SampleIO::littleEndian,
-					(pSmp->flags & 2) ? SampleIO::signedPCM : SampleIO::unsignedPCM)
-					.ReadSample(sample, chunk);
+				sampleHeader.GetSampleFormat().ReadSample(sample, chunk);
 			}
-
-			nSmp++;
-		} else
-		{
-			break;
 		}
 	}
+
 	return true;
 }
