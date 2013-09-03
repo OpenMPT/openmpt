@@ -130,12 +130,12 @@ struct ModCharsetInfo {
 static const ModCharsetInfo ModCharsetInfos[] =
 {
 	// Amiga
-	{ MOD_TYPE_OKT , MOD_CHARSET_IS     , "Amiga-1251"  },
-	{ MOD_TYPE_DBM , MOD_CHARSET_IS     , "Amiga-1251"  },
-	{ MOD_TYPE_DIGI, MOD_CHARSET_IS     , "Amiga-1251"  },
+	{ MOD_TYPE_OKT , MOD_CHARSET_IS     , "ISO-8859-1"  },
+	{ MOD_TYPE_DBM , MOD_CHARSET_IS     , "ISO-8859-1"  },
+	{ MOD_TYPE_DIGI, MOD_CHARSET_IS     , "ISO-8859-1"  },
 	// Amiga // DOS
-	{ MOD_TYPE_MOD , MOD_CHARSET_MAYBE  , "Amiga-1251"  },
-	{ MOD_TYPE_MED , MOD_CHARSET_MAYBE  , "Amiga-1251"  },
+	{ MOD_TYPE_MOD , MOD_CHARSET_MAYBE  , "ISO-8859-1"  },
+	{ MOD_TYPE_MED , MOD_CHARSET_MAYBE  , "ISO-8859-1"  },
 	// DOS
 	{ MOD_TYPE_S3M , MOD_CHARSET_IS     , "cp437"       },
 	{ MOD_TYPE_XM  , MOD_CHARSET_IS     , "cp437"       },
