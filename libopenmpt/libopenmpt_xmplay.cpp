@@ -76,6 +76,42 @@ struct self_xmplay_t {
 	}
 };
 
+static std::string convert_to_native( const std::string & str, std::string encoding ) {
+	std::transform( encoding.begin(), encoding.end(), encoding.begin(), tolower );
+	UINT codepage = 0;
+	if ( encoding == "" ) {
+		codepage = 20127; // us ascii fallback
+	} else if ( encoding == "windows-1252" ) {
+		codepage = 1252;
+	} else if ( encoding == "iso-8859-1" ) {
+		codepage = 28591;
+	} else if ( encoding == "utf-8" ) {
+		codepage = 65001;
+	} else if ( encoding == "us-ascii" ) {
+		codepage = 20127;
+	} else if ( encoding == "cp437" ) {
+		codepage = 437;
+	} else {
+		codepage = 20127; // us ascii fallback
+	}
+	std::vector<WCHAR> unicode_string( ( ( str.length() + 1 ) * 8 ) ); // sufficiently large enough;
+	int mbtowc_result = MultiByteToWideChar( codepage, 0, str.data(), -1, unicode_string.data(), unicode_string.size() );
+	if ( mbtowc_result > 0 ) {
+		unicode_string.resize( mbtowc_result );
+	} else {
+		unicode_string.clear();
+		unicode_string.push_back( L' ' );
+		unicode_string.push_back( L'\0' );
+	}
+	char * native_string = xmpftext->Unicode( unicode_string.data(), -1 );
+	std::string result = native_string ? native_string : "";
+	if ( native_string ) {
+		xmpfmisc->Free( native_string );
+		native_string = nullptr;
+	}
+	return result;
+}
+
 static void save_settings_to_map( std::map<std::string,int> & result, const openmpt::settings::settings & s ) {
 	result.clear();
 	result[ "Samplerate_Hz" ] = s.samplerate;
@@ -368,14 +404,15 @@ static void write_xmplay_tag( char * * tag, const std::string & value ) {
 }
 
 static void write_xmplay_tags( char * tags[8], const openmpt::module & mod ) {
-	write_xmplay_tag( &tags[0], mod.get_metadata("title") );
-	write_xmplay_tag( &tags[1], mod.get_metadata("author") );
-	write_xmplay_tag( &tags[2], mod.get_metadata("xmplay-album") ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[3], mod.get_metadata("xmplay-date") ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[4], mod.get_metadata("xmplay-tracknumber") ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[5], mod.get_metadata("xmplay-genre") ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[6], mod.get_metadata("message") );
-	write_xmplay_tag( &tags[7], mod.get_metadata("type") );
+	std::string charset = mod.ctl_get("charset");
+	write_xmplay_tag( &tags[0], convert_to_native( mod.get_metadata("title"), charset ) );
+	write_xmplay_tag( &tags[1], convert_to_native( mod.get_metadata("author"), charset ) );
+	write_xmplay_tag( &tags[2], convert_to_native( mod.get_metadata("xmplay-album"), charset ) ); // todo, libopenmpt does not support that
+	write_xmplay_tag( &tags[3], convert_to_native( mod.get_metadata("xmplay-date"), charset ) ); // todo, libopenmpt does not support that
+	write_xmplay_tag( &tags[4], convert_to_native( mod.get_metadata("xmplay-tracknumber"), charset ) ); // todo, libopenmpt does not support that
+	write_xmplay_tag( &tags[5], convert_to_native( mod.get_metadata("xmplay-genre"), charset ) ); // todo, libopenmpt does not support that
+	write_xmplay_tag( &tags[6], convert_to_native( mod.get_metadata("message"), charset ) );
+	write_xmplay_tag( &tags[7], convert_to_native( mod.get_metadata("type"), charset ) );
 }
 
 static void clear_xmlpay_tags( char * tags[8] ) {
@@ -651,7 +688,7 @@ static void WINAPI openmpt_GetMessage( char * buf ) {
 		clear_xmplay_string( buf );
 		return;
 	}
-	write_xmplay_string( buf, string_replace( self->mod->get_metadata("message"), "\n", "\r" ) );
+	write_xmplay_string( buf, convert_to_native( string_replace( self->mod->get_metadata("message"), "\n", "\r" ), self->mod->ctl_get("charset") ) );
 }
 
 // Seek to a position (in granularity units)
@@ -708,6 +745,7 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 
 static void add_names( std::ostream & str, const std::string & title, const std::vector<std::string> & names ) {
 	if ( names.size() > 0 ) {
+		std::string charset = self->mod->ctl_get("charset");
 		bool valid = false;
 		for ( std::size_t i = 0; i < names.size(); i++ ) {
 			if ( names[i] != "" ) {
@@ -719,7 +757,7 @@ static void add_names( std::ostream & str, const std::string & title, const std:
 		}
 		str << title << " names:" << "\r";
 		for ( std::size_t i = 0; i < names.size(); i++ ) {
-			str << std::setfill('0') << std::setw(2) << i << std::setw(0) << "\t" << names[i] << "\r";
+			str << std::setfill('0') << std::setw(2) << i << std::setw(0) << "\t" << convert_to_native( names[i], charset ) << "\r";
 		}
 		str << "\r";
 	}
