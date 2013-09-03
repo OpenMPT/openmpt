@@ -889,7 +889,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags.reset();
+	m_SongFlags = SONG_PT1XMODE;
 	mpt::String::Read<mpt::String::spacePadded>(songName, songname);
 
 	// Setup channel pan positions and volume

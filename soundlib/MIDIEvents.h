@@ -108,7 +108,7 @@ namespace MIDIEvents
 		MIDICC_GeneralPurposeButton3_OnOff = 82,
 		MIDICC_GeneralPurposeButton4_OnOff = 83,
 		MIDICC_EffectsLevel = 91,
-		MIDICC_TremuloLevel = 92,
+		MIDICC_TremoloLevel = 92,
 		MIDICC_ChorusLevel = 93,
 		MIDICC_CelesteLevel = 94,
 		MIDICC_PhaserLevel = 95,
@@ -224,7 +224,7 @@ namespace MIDIEvents
 		"",								//89
 		"",								//90
 		"EffectsLevel",					//91
-		"TremuloLevel",					//92
+		"TremoloLevel",					//92
 		"ChorusLevel",					//93
 		"CelesteLevel",					//94
 		"PhaserLevel",					//95

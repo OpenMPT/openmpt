@@ -396,13 +396,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				madeWithTracker = "ModPlug tracker b3.3 - 1.09";
 				interpretModPlugMade = true;
 			}
-			else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
-			{
-				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
-				madeWithTracker = "ModPlug tracker 1.00a5";
-				interpretModPlugMade = true;
-			}
 		} else // case: type == MOD_TYPE_MPT
 		{
 			if (fileHeader.cwtv >= verMptFileVerLoadLimit)
@@ -959,6 +952,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && fileHeader.reserved == 0)
 			{
 				madeWithTracker = "OpenSPC conversion";
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
+			{
+				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
+				madeWithTracker = "ModPlug tracker 1.00a5";
+				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.reserved == ITFileHeader::chibiMagic)
 			{
 				madeWithTracker = "ChibiTracker";
@@ -1401,7 +1400,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 		dwPos += 8;
 
 		const CHANNELINDEX maxChannels = MIN(specs.channelsMax, GetNumChannels());
-		std::vector<BYTE> chnmask(maxChannels, 0xFF);
+		std::vector<uint8> chnmask(maxChannels, 0xFF);
 		std::vector<ModCommand> lastvalue(maxChannels, ModCommand::Empty());
 
 		for(ROWINDEX row = 0; row < writeRows; row++)
@@ -1566,7 +1565,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
 #else
 		bool compress = false;
 #endif // MODPLUG_TRACKER
-		// Old MPT will only consider the IT2.15 compression flag if the header version also indicates IT2.15.
+		// Old MPT, DUMB and probably other libraries will only consider the IT2.15 compression flag if the header version also indicates IT2.15.
+		// Old MilkyTracker will only assume IT2.15 compression with cmwt == 0x215, ignoring the delta flag completely.
 		itss.ConvertToIT(Samples[nsmp], GetType(), compress, itHeader.cmwt >= 0x215);
 
 		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[nsmp]);
@@ -1816,13 +1816,13 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 				mpt::String::SetNullTerminator(m_MixPlugins[plug].Info.szLibraryName);
 
 				//data for VST setchunk? size lies just after standard plugin data.
-				FileReader pluginDataChunk = chunk.GetChunk(chunk.ReadUint32LE());
-				uint32 pluginDataChunkSize = mpt::saturate_cast<uint32>(pluginDataChunk.BytesLeft());
+				const uint32 pluginDataChunkSize = chunk.ReadUint32LE();
+				FileReader pluginDataChunk = chunk.GetChunk(pluginDataChunkSize);
 
 				if(pluginDataChunk.IsValid())
 				{
 					m_MixPlugins[plug].nPluginDataSize = 0;
-					m_MixPlugins[plug].pPluginData = new char [pluginDataChunkSize];
+					m_MixPlugins[plug].pPluginData = new (std::nothrow) char[pluginDataChunkSize];
 					if(m_MixPlugins[plug].pPluginData)
 					{
 						m_MixPlugins[plug].nPluginDataSize = pluginDataChunkSize;
