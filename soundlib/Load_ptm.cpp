@@ -27,7 +27,7 @@ struct PACKED PTMFileHeader
 	uint16 numSamples;		// Number of instruments (1..255)
 	uint16 numPatterns;		// Number of patterns (1..128)
 	uint16 numChannels;		// Number of channels (voices) used (1..32)
-	uint8  flags[2];		// Set to 0
+	uint16 flags;			// Set to 0
 	uint8  reserved2[2];	// Reserved, set to 0
 	char   magic[4];		// Song identification, 'PTMF'
 	uint8  reserved3[16];	// Reserved, set to 0
@@ -42,6 +42,7 @@ struct PACKED PTMFileHeader
 		SwapBytesLE(numSamples);
 		SwapBytesLE(numPatterns);
 		SwapBytesLE(numChannels);
+		SwapBytesLE(flags);
 		for(std::size_t i = 0; i < CountOf(patOffsets); i++)
 		{
 			SwapBytesLE(patOffsets[i]);
@@ -141,6 +142,9 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	PTMFileHeader fileHeader;
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| memcmp(fileHeader.magic, "PTMF", 4)
+		|| fileHeader.dosEOF != 26
+		|| fileHeader.versionHi > 2
+		|| fileHeader.flags != 0
 		|| !fileHeader.numChannels
 		|| fileHeader.numChannels > 32
 		|| !fileHeader.numOrders || fileHeader.numOrders > 256

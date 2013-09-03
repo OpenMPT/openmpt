@@ -583,6 +583,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	if(madeWith[verFT2Generic]
+		&& fileHeader.version < 0x0104	// Old versions of FT2 didn't have (smooth) ramping. Disable it for those versions where we can be sure that there should be no ramping.
 #ifdef MODPLUG_TRACKER
 		&& TrackerSettings::Instance().autoApplySmoothFT2Ramping
 #endif // MODPLUG_TRACKER
@@ -719,7 +720,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 	fileHeader.flags = fileHeader.flags;
 
 	// Fasttracker 2 will happily accept any tempo faster than 255 BPM. XMPlay does also support this, great!
-	fileHeader.tempo = static_cast<uint16>(Clamp(m_nDefaultTempo, 32u, 512u));
+	fileHeader.tempo = static_cast<uint16>(m_nDefaultTempo);
 	fileHeader.speed = static_cast<uint16>(Clamp(m_nDefaultSpeed, 1u, 31u));
 
 	fileHeader.ConvertEndianness();

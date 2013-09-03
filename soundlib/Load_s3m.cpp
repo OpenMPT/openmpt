@@ -18,7 +18,7 @@
 
 
 void CSoundFile::S3MConvert(ModCommand &m, bool fromIT) const
-//--------------------------------------------------------
+//-----------------------------------------------------------
 {
 	switch(m.command | 0x40)
 	{
@@ -876,9 +876,9 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
 
 			size_t writtenLength = sampleHeader[smp].GetSampleFormat(false).WriteSample(f, Samples[realSmp], smpLength);
 			sampleDataOffset += writtenLength;
-			if((writtenLength % 16) != 0)
+			if((writtenLength % 16u) != 0)
 			{
-				size_t fillSize = 16 - (writtenLength % 16);
+				size_t fillSize = 16 - (writtenLength % 16u);
 				fwrite(filler, fillSize, 1, f);
 				sampleDataOffset += fillSize;
 			}

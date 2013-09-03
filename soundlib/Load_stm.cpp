@@ -27,7 +27,7 @@ struct PACKED STMSampleHeader
 	char   filename[12];	// Can't have long comments - just filename comments :)
 	uint8  zero;
 	uint8  disk;			// A blast from the past
-	uint16 offset;			// ISA in memory when in ST 2
+	uint8  offset[2];		// ISA in memory when in ST 2
 	uint16 length;			// Sample length
 	uint16 loopStart;		// Loop start point
 	uint16 loopEnd;			// Loop end point
@@ -43,7 +43,7 @@ struct PACKED STMSampleHeader
 		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
 
 		mptSmp.nC5Speed = sampleRate;
-		mptSmp.nVolume = std::min(volume * 4u, 256u);
+		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
@@ -230,16 +230,6 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 			switch(m->command)
 			{
-#ifdef MODPLUG_TRACKER
-			case CMD_SPEED:
-				// ST2 assumes that the tempo is 125 * 16 BPM, and effects are updated
-				// on every 16th tick of a row. This is pretty hard to handle in the tracker,
-				// so we just assume the tempo is 125 and divide the speed by 16 instead.
-				// Parameters below 10 might behave weird.
-				m->param >>= 4;
-				break;
-#endif // MODPLUG_TRACKER
-
 			case CMD_PATTERNBREAK:
 				m->param = (m->param & 0xF0) * 10 + (m->param & 0x0F);
 				if(breakRow > m->param)
@@ -267,12 +257,23 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				// broken... oh well. not a big loss.
 				break;
 
+#ifdef MODPLUG_TRACKER
+			case CMD_SPEED:
+				// ST2 assumes that the tempo is 125 * 16 BPM (or in other words: ticks are
+				// 16 times as precise as in ProTracker), and effects are updated on every
+				// 16th tick of a row. This is pretty hard to handle in the tracker when not
+				// natively supporting STM editing, so we just assume the tempo is 125 and
+				// divide the speed by 16 instead. Parameters below 10 might behave weird.
+				m->param >>= 4;
+#endif // MODPLUG_TRACKER
+
+				// Intentonal fall-through
 			default:
 				// Anything not listed above is a no-op if there's no value.
 				// (ST2 doesn't have effect memory)
 				if(!m->param)
 				{
-					m->command= CMD_NONE;
+					m->command = CMD_NONE;
 				}
 				break;
 			}
