@@ -1059,7 +1059,9 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 	}
 	// Add an entry to the notification history
 
-	Notification notification(notifyType, notifyItem, notificationtimestamp, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern, m_pSndFile->m_nMixStat);
+	Notification notification(notifyType, notifyItem, notificationtimestamp, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern, m_pSndFile->GetMixStat());
+
+	m_pSndFile->ResetMixStat();
 
 	if(m_pSndFile->m_SongFlags[SONG_ENDREACHED]) notification.type.set(Notification::EOS);
 

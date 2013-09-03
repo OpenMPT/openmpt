@@ -195,6 +195,7 @@ void module_impl::load( const FileReader & file ) {
 	}
 }
 std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right ) {
+	m_sndFile->ResetMixStat();
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		std::int16_t * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
@@ -212,6 +213,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	return count_read;
 }
 std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right ) {
+	m_sndFile->ResetMixStat();
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		float * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
@@ -229,6 +231,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	return count_read;
 }
 std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_t channels, std::int16_t * interleaved ) {
+	m_sndFile->ResetMixStat();
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		AudioReadTargetGainBuffer<std::int16_t> target(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
@@ -245,6 +248,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	return count_read;
 }
 std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved ) {
+	m_sndFile->ResetMixStat();
 	std::size_t count_read = 0;
 	while ( count > 0 ) {
 		AudioReadTargetGainBuffer<float> target(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
@@ -599,7 +603,7 @@ std::int32_t module_impl::get_current_row() const {
 	return m_sndFile->m_nRow;
 }
 std::int32_t module_impl::get_current_playing_channels() const {
-	return m_sndFile->m_nMixChannels;
+	return m_sndFile->GetMixStat();
 }
 float module_impl::get_current_channel_vu_left( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {

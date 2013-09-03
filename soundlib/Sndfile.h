@@ -327,7 +327,9 @@ public:	// for Editing
 	UINT m_nDefaultSpeed, m_nDefaultTempo, m_nDefaultGlobalVolume;
 	FlagSet<SongFlags> m_SongFlags;
 	CHANNELINDEX m_nMixChannels;
-	UINT m_nMixStat;
+private:
+	CHANNELINDEX m_nMixStat;
+public:
 	samplecount_t m_nBufferCount;
 	double m_dBufferDiff;
 	UINT m_nTickCount;
@@ -472,6 +474,8 @@ public:
 	void PatternTransitionChnUnmuteAll();
 	double GetCurrentBPM() const;
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
+	CHANNELINDEX GetMixStat() const { return m_nMixStat; }
+	void ResetMixStat() { m_nMixStat = 0; }
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(ORDERINDEX nOrder);
 	std::string GetTitle() const { return songName; }

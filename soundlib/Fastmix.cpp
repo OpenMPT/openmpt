@@ -1591,7 +1591,7 @@ void CSoundFile::CreateStereoMix(int count)
 		if (nsamples > 0) goto SampleLooping;
 		nchmixed += addmix?1:0;
 	}
-	m_nMixStat += nchused;
+	m_nMixStat = std::max<CHANNELINDEX>(m_nMixStat, nchused);
 }
 
 

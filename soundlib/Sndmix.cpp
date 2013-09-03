@@ -96,6 +96,7 @@ void CSoundFile::InitPlayer(BOOL bReset)
 {
 	if(bReset)
 	{
+		ResetMixStat();
 		gnDryLOfsVol = 0;
 		gnDryROfsVol = 0;
 	}
@@ -144,8 +145,6 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 //---------------------------------------------------------------------------------------
 {
 	ALWAYS_ASSERT(m_MixerSettings.IsValid());
-
-	int mixStatCount = 0;
 
 	bool mixPlugins = false;
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; ++i)
@@ -220,12 +219,6 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 
 		const samplecount_t countChunk = std::min<samplecount_t>(MIXBUFFERSIZE, std::min<samplecount_t>(m_nBufferCount, countToRender));
 
-		if(mixStatCount == 0)
-		{ // reset mixer channel count before we are calling CreateStereoMix the first time this round, if we are not updating the mixer state, we do not reset statistics
-			m_nMixStat = 0;
-		}
-		mixStatCount++;
-
 		CreateStereoMix(countChunk);
 
 		#ifndef NO_REVERB
@@ -268,11 +261,6 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 	}
 
 	// mix done
-
-	if(mixStatCount > 0)
-	{
-		m_nMixStat = (m_nMixStat + mixStatCount - 1) / mixStatCount; // round up
-	}
 
 	return countRendered;
 
