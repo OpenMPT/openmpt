@@ -49,7 +49,7 @@ public:
 		return;
 	}
 public:
-	virtual void write( const std::string & text ) {
+	virtual void write( const std::string & /* text */ ) {
 		return;
 	}
 };
@@ -76,6 +76,8 @@ public:
 	}
 };
 
+#if defined(_MSC_VER)
+
 class textout_console : public textout {
 private:
 	HANDLE handle;
@@ -93,6 +95,8 @@ public:
 		WriteConsole( handle, text.data(), text.size(), NULL, NULL );
 	}
 };
+
+#endif // _MSC_VER
 
 static inline float mpt_round( float val ) {
 	if ( val >= 0.0f ) {

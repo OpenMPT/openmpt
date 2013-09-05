@@ -190,12 +190,13 @@ std::string module_impl::mod_string_to_utf8( const std::string & encoded ) const
 	#else
 		iconv_t conv = iconv_t();
 		conv = iconv_open( "UTF-8", charset.c_str() );
-		std::vector<char> utf8_string( ( encoded.length() + 1 ) * 8 ); // large enough
-		const char * inbuf = encoded.c_str();
-		size_t inbytesleft = encoded.length() + 1;
+		std::vector<char> encoded_string( encoded.c_str(), encoded.c_str() + encoded.length() + 1 );
+		std::vector<char> utf8_string( encoded_string.size() * 8 ); // large enough
+		char * inbuf = &encoded_string[0];
+		size_t inbytesleft = encoded_string.size();
 		char * outbuf = &utf8_string[0];
 		size_t outbytesleft = utf8_string.size();
-		if ( iconv( conv, encoded.c_str(), &inbuf, &inbytesleft, &outbuf, &outbytesleft ) < 0 ) {
+		if ( iconv( conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft ) == (size_t)-1 ) {
 			iconv_close( conv );
 			conv = iconv_t();
 			return std::string();
@@ -203,6 +204,7 @@ std::string module_impl::mod_string_to_utf8( const std::string & encoded ) const
 		std::string result = &utf8_string[0];
 		iconv_close( conv );
 		conv = iconv_t();
+		return result;
 	#endif
 }
 void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) {
