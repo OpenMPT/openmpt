@@ -1083,7 +1083,11 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 		std::uint64_t filesize = 0;
 		bool use_stdin = ( filename == "-" );
 		if ( !use_stdin ) {
-			file_stream.open( filename, std::ios::binary );
+			#if defined(_MSC_VER) && defined(UNICODE)
+				file_stream.open( utf8_to_wstring( filename ), std::ios::binary );
+			#else
+				file_stream.open( filename, std::ios::binary );
+			#endif
 			file_stream.seekg( 0, std::ios::end );
 			filesize = file_stream.tellg();
 			file_stream.seekg( 0, std::ios::beg );
@@ -1374,7 +1378,11 @@ static void show_credits( std::ostream & s ) {
 	s << openmpt::string::get( openmpt::string::credits );
 }
 
+#if defined(_MSC_VER) && defined(UNICODE)
+static int wmain( int wargc, wchar_t * wargv [] ) {
+#else
 static int main( int argc, char * argv [] ) {
+#endif
 
 	#if defined(_MSC_VER)
 
@@ -1395,7 +1403,15 @@ static int main( int argc, char * argv [] ) {
 
 	try {
 
-		std::vector<std::string> args( argv, argv + argc );
+		std::vector<std::string> args;
+		
+		#if defined(_MSC_VER) && defined(UNICODE)
+			for ( int arg = 0; arg < wargc; ++arg ) {
+				args.push_back( wstring_to_utf8( wargv[arg] ) );
+			}
+		#else
+			args = std::vector<std::string>( argv, argv + argc );
+		#endif
 
 		if ( args.size() > 0 && is_modplug123_binary_name( args[0] ) ) {
 
@@ -1508,6 +1524,12 @@ static int main( int argc, char * argv [] ) {
 
 } // namespace openmpt123
 
+#if defined(_MSC_VER) && defined(UNICODE)
+int wmain( int wargc, wchar_t * wargv [] ) {
+	return openmpt123::wmain( wargc, wargv );
+}
+#else
 int main( int argc, char * argv [] ) {
 	return openmpt123::main( argc, argv );
 }
+#endif

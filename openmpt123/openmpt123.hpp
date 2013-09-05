@@ -24,6 +24,30 @@ struct show_help_exception {
 	show_help_exception( const std::string & msg = "", bool longhelp_ = true ) : message(msg), longhelp(longhelp_) { }
 };
 
+#if defined(_MSC_VER)
+
+std::string wstring_to_utf8( const std::wstring & unicode_string ) {
+	int required_size = WideCharToMultiByte( CP_UTF8, 0, unicode_string.c_str(), -1, NULL, 0, NULL, NULL );
+	if ( required_size <= 0 ) {
+		return std::string();
+	}
+	std::vector<char> utf8_buf( required_size );
+	WideCharToMultiByte( CP_UTF8, 0, unicode_string.c_str(), -1, &utf8_buf[0], utf8_buf.size(), NULL, NULL );
+	return &utf8_buf[0];
+}
+
+std::wstring utf8_to_wstring( const std::string & utf8_string ) {
+	int required_size = MultiByteToWideChar( CP_UTF8, 0, utf8_string.c_str(), -1, NULL, 0 );
+	if ( required_size <= 0 ) {
+		return std::wstring();
+	}
+	std::vector<wchar_t> unicode_buf( required_size );
+	MultiByteToWideChar( CP_UTF8, 0, utf8_string.data(), -1, &unicode_buf[0], unicode_buf.size() );
+	return &unicode_buf[0];
+}
+
+#endif // _MSC_CER
+
 class textout : public std::ostringstream {
 public:
 	textout() {
@@ -92,7 +116,12 @@ public:
 	}
 public:
 	virtual void write( const std::string & text ) {
-		WriteConsole( handle, text.data(), text.size(), NULL, NULL );
+		#if defined(UNICODE)
+			std::wstring wtext = utf8_to_wstring( text );
+			WriteConsole( handle, wtext.data(), wtext.size(), NULL, NULL );
+		#else
+			WriteConsole( handle, text.data(), text.size(), NULL, NULL );
+		#endif
 	}
 };
 
