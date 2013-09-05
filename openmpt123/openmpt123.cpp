@@ -1376,6 +1376,13 @@ static void show_credits( std::ostream & s ) {
 
 static int main( int argc, char * argv [] ) {
 
+	#if defined(_MSC_VER)
+
+		SetConsoleCP( 65001 ); // UTF-8
+		SetConsoleOutputCP( 65001 ); // UTF-8
+
+	#endif
+
 	textout_dummy dummy_log;
 
 	#if defined(_MSC_VER)
@@ -1433,7 +1440,6 @@ static int main( int argc, char * argv [] ) {
 
 			if ( flags.mode == ModeUI ) {
 				set_input_mode();
-
 			}
 
 		#endif
