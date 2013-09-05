@@ -848,25 +848,17 @@ std::string module_impl::highlight_pattern_row_channel( std::int32_t p, std::int
 
 std::vector<std::string> module_impl::get_ctls() const {
 	std::vector<std::string> retval;
-	retval.push_back( "charset" );
 	return retval;
 }
 std::string module_impl::ctl_get( const std::string & ctl ) const {
 	if ( ctl == "" ) {
 		throw openmpt::exception("unknown ctl");
-	} else if ( ctl == "charset" ) {
-		/*
-		return m_sndFile->GetCharset().second;
-		*/
-		return "UTF-8";
 	}
 	throw openmpt::exception("unknown ctl");
 }
 void module_impl::ctl_set( const std::string & ctl, const std::string & value ) {
 	if ( ctl == "" ) {
 		throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
-	} else if ( ctl == "charset" ) {
-		throw openmpt::exception("ctl is read-only: " + ctl);
 	}
 	throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
 }
