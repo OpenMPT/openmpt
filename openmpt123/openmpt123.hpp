@@ -24,6 +24,76 @@ struct show_help_exception {
 	show_help_exception( const std::string & msg = "", bool longhelp_ = true ) : message(msg), longhelp(longhelp_) { }
 };
 
+class textout : public std::ostringstream {
+public:
+	textout() {
+		return;
+	}
+	virtual ~textout() {
+		return;
+	}
+public:
+	virtual void write( const std::string & text ) = 0;
+	virtual void writeout() {
+		write( str() );
+		str("");
+	}
+};
+
+class textout_dummy : public textout {
+public:
+	textout_dummy() {
+		return;
+	}
+	virtual ~textout_dummy() {
+		return;
+	}
+public:
+	virtual void write( const std::string & text ) {
+		return;
+	}
+};
+
+class textout_ostream : public textout {
+private:
+	std::ostream & s;
+public:
+	textout_ostream( std::ostream & s_ )
+		: s(s_)
+	{
+		return;
+	}
+	virtual ~textout_ostream() {
+		writeout();
+	}
+public:
+	virtual void write( const std::string & text ) {
+		s << text;
+	}
+	virtual void writeout() {
+		textout::writeout();
+		s.flush();
+	}
+};
+
+class textout_console : public textout {
+private:
+	HANDLE handle;
+public:
+	textout_console( HANDLE handle_ )
+		: handle(handle_)
+	{
+		return;
+	}
+	virtual ~textout_console() {
+		writeout();
+	}
+public:
+	virtual void write( const std::string & text ) {
+		WriteConsole( handle, text.data(), text.size(), NULL, NULL );
+	}
+};
+
 static inline float mpt_round( float val ) {
 	if ( val >= 0.0f ) {
 		return std::floor( val + 0.5f );
@@ -139,7 +209,7 @@ struct commandlineflags {
 		ZeroMemory( &csbi, sizeof( CONSOLE_SCREEN_BUFFER_INFO ) );
 		GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
 		terminal_width = csbi.dwSize.X - 1;
-		terminal_height = csbi.dwSize.Y - 1;
+		terminal_height = 23; //csbi.dwSize.Y - 1;
 #else // !_MSC_VER
 		if ( isatty( STDERR_FILENO ) ) {
 			if ( std::getenv( "COLUMNS" ) ) {
