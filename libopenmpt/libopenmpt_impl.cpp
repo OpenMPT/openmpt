@@ -22,6 +22,10 @@
 #include <cstdlib>
 #include <cstring>
 
+#if !defined(WIN32)
+#include <iconv.h>
+#endif // !WIN32
+
 #include "soundlib/Sndfile.h"
 #include "soundlib/AudioReadTarget.h"
 #include "soundlib/FileReader.h"
@@ -149,6 +153,58 @@ static void mixersettings_to_ramping( int & ramping, const MixerSettings & setti
 	}
 }
 
+std::string module_impl::mod_string_to_utf8( const std::string & encoded ) const {
+	std::string charset = m_sndFile->GetCharset().second;
+	#if defined(WIN32)
+		std::transform( charset.begin(), charset.end(), charset.begin(), tolower );
+		UINT codepage = 0;
+		if ( charset == "" ) {
+			codepage = 20127; // us ascii fallback
+		} else if ( charset == "windows-1252" ) {
+			codepage = 1252;
+		} else if ( charset == "iso-8859-1" ) {
+			codepage = 28591;
+		} else if ( charset == "utf-8" ) {
+			codepage = 65001;
+		} else if ( charset == "us-ascii" ) {
+			codepage = 20127;
+		} else if ( charset == "cp437" ) {
+			codepage = 437;
+		} else {
+			codepage = 20127; // us ascii fallback
+		}
+		int required_size = 0;
+		required_size = MultiByteToWideChar( codepage, 0, encoded.c_str(), -1, NULL, 0 );
+		if ( required_size <= 0 ) {
+			return std::string();
+		}
+		std::vector<WCHAR> unicode_string( required_size );
+		MultiByteToWideChar( codepage, 0, encoded.data(), -1, &unicode_string[0], unicode_string.size() );
+		required_size = WideCharToMultiByte( CP_UTF8, 0, &unicode_string[0], -1, NULL, 0, NULL, NULL );
+		if ( required_size <= 0 ) {
+			return std::string();
+		}
+		std::vector<CHAR> utf8_string( required_size );
+		WideCharToMultiByte( CP_UTF8, 0, &unicode_string[0], -1, &utf8_string[0], utf8_string.size(), NULL, NULL );
+		return &utf8_string[0];
+	#else
+		iconv_t conv = iconv_t();
+		conv = iconv_open( "UTF-8", charset.c_str() );
+		std::vector<char> utf8_string( ( encoded.length() + 1 ) * 8 ); // large enough
+		const char * inbuf = encoded.c_str();
+		size_t inbytesleft = encoded.length() + 1;
+		char * outbuf = &utf8_string[0];
+		size_t outbytesleft = utf8_string.size();
+		if ( iconv( conv, encoded.c_str(), &inbuf, &inbytesleft, &outbuf, &outbytesleft ) < 0 ) {
+			iconv_close( conv );
+			conv = iconv_t();
+			return std::string();
+		}
+		std::string result = &utf8_string[0];
+		iconv_close( conv );
+		conv = iconv_t();
+	#endif
+}
 void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) {
 	if (
 		static_cast<std::int32_t>( m_sndFile->m_MixerSettings.gdwMixingFreq ) != samplerate ||
@@ -540,7 +596,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 	} else if ( key == std::string("tracker") ) {
 		return m_sndFile->madeWithTracker;
 	} else if ( key == std::string("title") ) {
-		return m_sndFile->GetTitle();
+		return mod_string_to_utf8( m_sndFile->GetTitle() );
 	} else if ( key == std::string("message") ) {
 		std::string retval = m_sndFile->songMessage.GetFormatted( SongMessage::leLF );
 		if ( retval.empty() ) {
@@ -571,7 +627,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 				retval = tmp.str();
 			}
 		}
-		return retval;
+		return mod_string_to_utf8( retval );
 	} else if ( key == std::string("warnings") ) {
 		std::ostringstream retval;
 		bool first = true;
@@ -640,14 +696,14 @@ std::int32_t module_impl::get_num_samples() const {
 std::vector<std::string> module_impl::get_subsong_names() const {
 	std::vector<std::string> retval;
 	for ( SEQUENCEINDEX i = 0; i < m_sndFile->Order.GetNumSequences(); ++i ) {
-		retval.push_back( m_sndFile->Order.GetSequence( i ).m_sName );
+		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( i ).m_sName ) );
 	}
 	return retval;
 }
 std::vector<std::string> module_impl::get_channel_names() const {
 	std::vector<std::string> retval;
 	for ( CHANNELINDEX i = 0; i < m_sndFile->GetNumChannels(); ++i ) {
-		retval.push_back( m_sndFile->ChnSettings[i].szName );
+		retval.push_back( mod_string_to_utf8( m_sndFile->ChnSettings[i].szName ) );
 	}
 	return retval;
 }
@@ -656,7 +712,7 @@ std::vector<std::string> module_impl::get_order_names() const {
 	for ( ORDERINDEX i = 0; i < m_sndFile->Order.GetLengthTailTrimmed(); ++i ) {
 		PATTERNINDEX pat = m_sndFile->Order[i];
 		if ( m_sndFile->Patterns.IsValidIndex( pat ) ) {
-			retval.push_back( m_sndFile->Patterns[ m_sndFile->Order[i] ].GetName() );
+			retval.push_back( mod_string_to_utf8( m_sndFile->Patterns[ m_sndFile->Order[i] ].GetName() ) );
 		} else {
 			if ( pat == m_sndFile->Order.GetIgnoreIndex() ) {
 				retval.push_back( "+++ skip" );
@@ -672,21 +728,21 @@ std::vector<std::string> module_impl::get_order_names() const {
 std::vector<std::string> module_impl::get_pattern_names() const {
 	std::vector<std::string> retval;
 	for ( PATTERNINDEX i = 0; i < m_sndFile->Patterns.GetNumPatterns(); ++i ) {
-		retval.push_back( m_sndFile->Patterns[i].GetName() );
+		retval.push_back( mod_string_to_utf8( m_sndFile->Patterns[i].GetName() ) );
 	}
 	return retval;
 }
 std::vector<std::string> module_impl::get_instrument_names() const {
 	std::vector<std::string> retval;
 	for ( INSTRUMENTINDEX i = 1; i <= m_sndFile->GetNumInstruments(); ++i ) {
-		retval.push_back( m_sndFile->GetInstrumentName( i ) );
+		retval.push_back( mod_string_to_utf8( m_sndFile->GetInstrumentName( i ) ) );
 	}
 	return retval;
 }
 std::vector<std::string> module_impl::get_sample_names() const {
 	std::vector<std::string> retval;
 	for ( SAMPLEINDEX i = 1; i <= m_sndFile->GetNumSamples(); ++i ) {
-		retval.push_back( m_sndFile->GetSampleName( i ) );
+		retval.push_back( mod_string_to_utf8( m_sndFile->GetSampleName( i ) ) );
 	}
 	return retval;
 }
@@ -797,7 +853,10 @@ std::string module_impl::ctl_get( const std::string & ctl ) const {
 	if ( ctl == "" ) {
 		throw openmpt::exception("unknown ctl");
 	} else if ( ctl == "charset" ) {
+		/*
 		return m_sndFile->GetCharset().second;
+		*/
+		return "UTF-8";
 	}
 	throw openmpt::exception("unknown ctl");
 }

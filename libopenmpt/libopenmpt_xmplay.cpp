@@ -77,33 +77,7 @@ struct self_xmplay_t {
 };
 
 static std::string convert_to_native( const std::string & str, std::string encoding ) {
-	std::transform( encoding.begin(), encoding.end(), encoding.begin(), tolower );
-	UINT codepage = 0;
-	if ( encoding == "" ) {
-		codepage = 20127; // us ascii fallback
-	} else if ( encoding == "windows-1252" ) {
-		codepage = 1252;
-	} else if ( encoding == "iso-8859-1" ) {
-		codepage = 28591;
-	} else if ( encoding == "utf-8" ) {
-		codepage = 65001;
-	} else if ( encoding == "us-ascii" ) {
-		codepage = 20127;
-	} else if ( encoding == "cp437" ) {
-		codepage = 437;
-	} else {
-		codepage = 20127; // us ascii fallback
-	}
-	std::vector<WCHAR> unicode_string( ( ( str.length() + 1 ) * 8 ) ); // sufficiently large enough;
-	int mbtowc_result = MultiByteToWideChar( codepage, 0, str.data(), -1, unicode_string.data(), unicode_string.size() );
-	if ( mbtowc_result > 0 ) {
-		unicode_string.resize( mbtowc_result );
-	} else {
-		unicode_string.clear();
-		unicode_string.push_back( L' ' );
-		unicode_string.push_back( L'\0' );
-	}
-	char * native_string = xmpftext->Unicode( unicode_string.data(), -1 );
+	char * native_string = xmpftext->Utf8( str.c_str(), -1 );
 	std::string result = native_string ? native_string : "";
 	if ( native_string ) {
 		xmpfmisc->Free( native_string );
