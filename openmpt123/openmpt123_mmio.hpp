@@ -50,10 +50,17 @@ public:
 		waveformatex.nBlockAlign = flags.channels * ( waveformatex.wBitsPerSample / 8 );
 		waveformatex.nAvgBytesPerSec = waveformatex.nSamplesPerSec * waveformatex.nBlockAlign;
 
-		char * tmp = strdup( filename.c_str() );
-		mmio = mmioOpen( tmp, NULL, MMIO_ALLOCBUF | MMIO_READWRITE | MMIO_CREATE );
-		free( tmp );
-		tmp = 0;
+		#if defined(_MSC_VER) && defined(UNICODE)
+			wchar_t * tmp = wcsdup( utf8_to_wstring( filename ).c_str() );
+			mmio = mmioOpen( tmp, NULL, MMIO_ALLOCBUF | MMIO_READWRITE | MMIO_CREATE );
+			free( tmp );
+			tmp = 0;
+		#else
+			char * tmp = strdup( filename.c_str() );
+			mmio = mmioOpen( tmp, NULL, MMIO_ALLOCBUF | MMIO_READWRITE | MMIO_CREATE );
+			free( tmp );
+			tmp = 0;
+		#endif
 		
 		ZeroMemory( &WAVE_chunk, sizeof( MMCKINFO ) );
 		WAVE_chunk.fccType = mmioFOURCC('W', 'A', 'V', 'E');
