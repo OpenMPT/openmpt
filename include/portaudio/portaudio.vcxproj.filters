@@ -2,31 +2,34 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="src">
-			<UniqueIdentifier>{E4F2B5F2-9D52-3D41-93E9-7CA32895FDDC}</UniqueIdentifier>
+			<UniqueIdentifier>{31590FFD-6069-2444-B1DD-1A3174BA5E09}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\common">
-			<UniqueIdentifier>{FBAF15AC-76C7-5949-951C-45ADA590A1EE}</UniqueIdentifier>
+			<UniqueIdentifier>{A2CF1912-05FB-A84D-9563-10AA371460EE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\os">
-			<UniqueIdentifier>{B0C52306-B86B-D44A-9C3D-DDF918E2DF4C}</UniqueIdentifier>
+			<UniqueIdentifier>{8CFA8032-F6BA-3E41-A5F7-9832E3B7CC64}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\os\win">
-			<UniqueIdentifier>{7C9416C4-AEBE-DA44-9989-BB06779A07D3}</UniqueIdentifier>
+			<UniqueIdentifier>{4F9D1EA5-02AB-0B4E-92DD-B29250843AED}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include">
-			<UniqueIdentifier>{8BAFEA97-1C36-9742-B2AF-563B5078F704}</UniqueIdentifier>
+			<UniqueIdentifier>{C0A38AB9-990E-0D47-A8C0-C5B8D0A82D4B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi">
-			<UniqueIdentifier>{C1344C66-9A4D-EB49-B60F-268A96F71BAC}</UniqueIdentifier>
+			<UniqueIdentifier>{108DCE49-4917-7D44-A5FB-1F82643315AC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\skeleton">
-			<UniqueIdentifier>{C2D851D3-0D90-5340-B5CE-0C592DDD0859}</UniqueIdentifier>
+			<UniqueIdentifier>{39879D9A-CC57-A34E-AFC4-F83458F26F90}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\wasapi">
-			<UniqueIdentifier>{E148BD30-2CA5-4949-9C79-CE6A18B252C0}</UniqueIdentifier>
+			<UniqueIdentifier>{4B4B2241-1E33-1945-AD6B-863F25BB9921}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="src\hostapi\wdmks">
+			<UniqueIdentifier>{180F4AAD-30CA-2345-94C1-29E309997D2D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\wmme">
-			<UniqueIdentifier>{59673599-0F9E-A34E-A22D-C7C499029E6D}</UniqueIdentifier>
+			<UniqueIdentifier>{6D1CC05F-BA9E-C345-B0EA-3FEAE27EB4B9}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
@@ -145,6 +148,9 @@
 		</ClCompile>
 		<ClCompile Include="src\hostapi\wasapi\pa_win_wasapi.c">
 			<Filter>src\hostapi\wasapi</Filter>
+		</ClCompile>
+		<ClCompile Include="src\hostapi\wdmks\pa_win_wdmks.c">
+			<Filter>src\hostapi\wdmks</Filter>
 		</ClCompile>
 		<ClCompile Include="src\hostapi\wmme\pa_win_wmme.c">
 			<Filter>src\hostapi\wmme</Filter>

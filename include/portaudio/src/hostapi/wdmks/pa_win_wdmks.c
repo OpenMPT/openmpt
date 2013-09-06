@@ -124,6 +124,8 @@
 #define EXIT_THREAD ExitThread(0)
 #endif
 
+#if 0
+
 #ifdef _MSC_VER
     #define NOMMIDS
     #define DYNAMIC_GUID(data) {data}
@@ -132,6 +134,18 @@
     #define DEFINE_GUID(n,data) EXTERN_C const GUID n = {data}
     #define DEFINE_GUID_THUNK(n,data) DEFINE_GUID(n,data)
     #define DEFINE_GUIDEX(n) DEFINE_GUID_THUNK(n, STATIC_##n)
+#endif
+
+#else
+// OpenMPT:
+// We link against strmiids.lib.
+// This defines all those GUID symbols that portaudio needs.
+// So there is no need to play games with headers and macros, just use the headers as they are und use the GUIDS from the library.
+
+#ifdef _MSC_VER
+#define DYNAMIC_GUID(data) {data}
+#endif
+
 #endif
 
 #include <mmreg.h>

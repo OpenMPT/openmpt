@@ -203,7 +203,15 @@ int CPortaudioDevice::StreamCallback(
 	UNREFERENCED_PARAMETER(input);
 	UNREFERENCED_PARAMETER(statusFlags);
 	if(!output) return paAbort;
-	m_CurrentRealLatencyMS = static_cast<float>( timeInfo->outputBufferDacTime - timeInfo->currentTime ) * 1000.0f;
+	if(Pa_GetHostApiInfo(m_HostApi)->type == paWDMKS)
+	{
+		// For WDM-KS, timeInfo->outputBufferDacTime seems to contain bogus values.
+		// Work-around it by using the slightly less accurate per-stream latency estimation.
+		m_CurrentRealLatencyMS = static_cast<float>( Pa_GetStreamInfo(m_Stream)->outputLatency * 1000.0 );
+	} else
+	{
+		m_CurrentRealLatencyMS = static_cast<float>( timeInfo->outputBufferDacTime - timeInfo->currentTime ) * 1000.0f;
+	}
 	m_CurrentFrameBuffer = output;
 	m_CurrentFrameCount = frameCount;
 	SourceFillAudioBufferLocked();
