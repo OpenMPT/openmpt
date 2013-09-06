@@ -26,7 +26,6 @@
 
 #include <fstream>
 
-extern UINT nMixingRates[NUMMIXRATE];
 extern LPCSTR gszChnCfgNames[3];
 
 
@@ -210,10 +209,10 @@ BOOL CWaveConvert::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT5, loopCount, FALSE);
 	m_SpinLoopCount.SetRange(1, int16_max);
 
-
-	for (size_t i = 0; i < CountOf(nMixingRates); i++)
+	const std::vector<uint32> samplerates = TrackerSettings::Instance().GetSampleRates();
+	for(size_t i = 0; i < samplerates.size(); i++)
 	{
-		UINT n = nMixingRates[i];
+		UINT n = samplerates[i];
 		wsprintf(s, "%d Hz", n);
 		m_CbnSampleRate.SetItemData(m_CbnSampleRate.AddString(s), n);
 		if (n == WaveFormat.Format.nSamplesPerSec) m_CbnSampleRate.SetCurSel(i);

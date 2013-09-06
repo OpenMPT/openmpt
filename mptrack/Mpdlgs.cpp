@@ -78,27 +78,6 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 END_MESSAGE_MAP()
 
 
-UINT nMixingRates[NUMMIXRATE] =
-{
-	16000,
-	19800,
-	20000,
-	22050,
-	24000,
-	32000,
-	33075,
-	37800,
-	40000,
-	44100,
-	48000,
-	64000,
-	88200,
-	96000,
-	176400,
-	192000,
-};
-
-
 void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 //--------------------------------------------------------
 {
@@ -402,11 +381,7 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 	m_CbnMixingFreq.ResetContent();
 
 	std::vector<bool> supportedRates;
-	std::vector<uint32> samplerates;
-	for(size_t i = 0; i < CountOf(nMixingRates); i++)
-	{
-		samplerates.push_back(nMixingRates[i]);
-	}
+	const std::vector<uint32> samplerates = TrackerSettings::Instance().GetSampleRates();
 
 	bool knowRates = false;
 	{
@@ -441,14 +416,14 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 		supportedRates.assign(samplerates.size(), true);
 	}
 	int n = 1;
-	for(size_t i = 0; i < CountOf(nMixingRates); i++)
+	for(size_t i = 0; i < samplerates.size(); i++)
 	{
 		if(supportedRates[i])
 		{
-			wsprintf(s, "%u Hz", nMixingRates[i]);
+			wsprintf(s, "%i Hz", samplerates[i]);
 			int pos = m_CbnMixingFreq.AddString(s);
-			m_CbnMixingFreq.SetItemData(pos, nMixingRates[i]);
-			if(m_dwRate == nMixingRates[i]) n = pos;
+			m_CbnMixingFreq.SetItemData(pos, samplerates[i]);
+			if(m_dwRate == samplerates[i]) n = pos;
 		}
 	}
 	m_CbnMixingFreq.SetCurSel(n);
