@@ -213,7 +213,7 @@ solution "include"
    "PA_USE_DS=0",
    "PA_USE_WMME=1",
    "PA_USE_WASAPI=1",
-   "PA_USE_WDMKS=0",
+   "PA_USE_WDMKS=1",
   }
   files {
    "portaudio/src/common/pa_allocation.c",
@@ -242,6 +242,7 @@ solution "include"
    "portaudio/src/common/pa_util.h",
    "portaudio/src/hostapi/skeleton/pa_hostapi_skeleton.c",
    "portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
+   "portaudio/src/hostapi/wdmks/pa_win_wdmks.c",
    "portaudio/src/hostapi/wmme/pa_win_wmme.c",
    "portaudio/src/os/win/pa_win_coinitialize.c",
    "portaudio/src/os/win/pa_win_coinitialize.h",
