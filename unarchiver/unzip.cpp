@@ -15,9 +15,6 @@
 #include "../common/misc_util.h"
 #include <algorithm>
 
-#ifndef ZLIB_WINAPI
-#define ZLIB_WINAPI
-#endif // ZLIB_WINAPI
 #include <contrib/minizip/unzip.h>
 
 

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="DebugLib|Win32">
+			<Configuration>DebugLib</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="DebugLib|x64">
+			<Configuration>DebugLib</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="NormalLib|Win32">
+			<Configuration>NormalLib</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="NormalLib|x64">
+			<Configuration>NormalLib</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="ReleaseLib|Win32">
+			<Configuration>ReleaseLib</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="ReleaseLib|x64">
+			<Configuration>ReleaseLib</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}</ProjectGuid>
+		<RootNamespace>minizip</RootNamespace>
+		<Keyword>Win32Proj</Keyword>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="ExtensionSettings">
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<PropertyGroup Label="UserMacros" />
+	<PropertyGroup>
+		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">..\bin\DebugLib\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">obj\x32\DebugLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">..\bin\DebugLib\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">obj\x64\DebugLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">minizip64</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">..\bin\NormalLib\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">obj\x32\NormalLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">..\bin\NormalLib\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">obj\x64\NormalLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">minizip64</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">..\bin\ReleaseLib\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">obj\x32\ReleaseLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">..\bin\ReleaseLib\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">obj\x64\ReleaseLib\minizip\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">minizip64</TargetName>
+	</PropertyGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
+		<ClCompile>
+			<Optimization>Disabled</Optimization>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>true</MinimalRebuild>
+			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
+		<ClCompile>
+			<Optimization>Disabled</Optimization>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>true</MinimalRebuild>
+			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<DebugInformationFormat>OldStyle</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)minizip64.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<ProgramDataBaseFileName>$(OutDir)minizip64.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|Win32'">
+		<ClCompile>
+			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalLib|x64'">
+		<ClCompile>
+			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)minizip64.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)minizip64.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
+		<ClCompile>
+			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
+		<ClCompile>
+			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>.;contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)minizip64.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)minizip64.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemGroup>
+		<ClInclude Include="contrib\minizip\crypt.h" />
+		<ClInclude Include="contrib\minizip\ioapi.h" />
+		<ClInclude Include="contrib\minizip\iowin32.h" />
+		<ClInclude Include="contrib\minizip\mztools.h" />
+		<ClInclude Include="contrib\minizip\unzip.h" />
+		<ClInclude Include="contrib\minizip\zip.h" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="contrib\minizip\ioapi.c">
+		</ClCompile>
+		<ClCompile Include="contrib\minizip\iowin32.c">
+		</ClCompile>
+		<ClCompile Include="contrib\minizip\mztools.c">
+		</ClCompile>
+		<ClCompile Include="contrib\minizip\unzip.c">
+		</ClCompile>
+		<ClCompile Include="contrib\minizip\zip.c">
+		</ClCompile>
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets">
+	</ImportGroup>
+</Project>

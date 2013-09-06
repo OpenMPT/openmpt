@@ -18,9 +18,6 @@
 #ifndef NO_ZLIB
 
 #if MPT_COMPILER_MSVC
-#ifndef ZLIB_WINAPI
-#define ZLIB_WINAPI
-#endif // ZLIB_WINAPI
 #include <zlib/zlib.h>
 #else
 #include <zlib.h>

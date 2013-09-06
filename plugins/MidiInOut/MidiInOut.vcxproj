@@ -83,7 +83,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;AGAIN_EXPORTS;_CRT_SECURE_NO_DEPRECATE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -99,7 +99,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>kernel32.lib;user32.lib;shell32.lib;../../include/portmidi/Debug/portmidi_s.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;shell32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(ProjectDir)..\bin\build\$(Configuration)\$(MSBuildProjectName).log</Path>
@@ -115,7 +115,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;AGAIN_EXPORTS;VST_64BIT_PLATFORM=1;_CRT_SECURE_NO_DEPRECATE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -156,7 +156,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>kernel32.lib;user32.lib;shell32.lib;../../include/portmidi/Release/portmidi_s.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;shell32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <BuildLog>
@@ -204,6 +204,11 @@
     <ClInclude Include="..\common\Window.h" />
     <ClInclude Include="MidiInOut.h" />
     <ClInclude Include="MidiInOutEditor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\include\portmidi\portmidi.vcxproj">
+      <Project>{2512e2ca-578a-4f10-9363-4bfc9a5ef960}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
