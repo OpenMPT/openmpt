@@ -271,7 +271,7 @@ STATIC_ASSERT(sizeof(FloatInt32) == 4);
 
 
 
-#if !defined(NO_WINDOWS_H)
+#if defined(_WIN32) && !defined(NO_WINDOWS_H)
 
 #ifndef NOMINMAX
 #define NOMINMAX
