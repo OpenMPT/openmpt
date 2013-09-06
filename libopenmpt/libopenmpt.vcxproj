@@ -285,6 +285,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <OptimizeReferences>true</OptimizeReferences>
       <DelayLoadDLLs>libopenmpt_settings.dll</DelayLoadDLLs>
       <SubSystem>Console</SubSystem>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
@@ -344,6 +345,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <OptimizeReferences>true</OptimizeReferences>
       <DelayLoadDLLs>libopenmpt_settings.dll</DelayLoadDLLs>
       <SubSystem>Console</SubSystem>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
