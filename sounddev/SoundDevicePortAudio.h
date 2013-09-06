@@ -39,8 +39,6 @@ protected:
 	float m_CurrentRealLatencyMS;
 
 public:
-
-public:
 	CPortaudioDevice(PaHostApiIndex hostapi);
 	~CPortaudioDevice();
 
