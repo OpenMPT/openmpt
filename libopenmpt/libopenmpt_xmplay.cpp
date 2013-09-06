@@ -76,7 +76,7 @@ struct self_xmplay_t {
 	}
 };
 
-static std::string convert_to_native( const std::string & str, std::string encoding ) {
+static std::string convert_to_native( const std::string & str ) {
 	char * native_string = xmpftext->Utf8( str.c_str(), -1 );
 	std::string result = native_string ? native_string : "";
 	if ( native_string ) {
@@ -378,15 +378,14 @@ static void write_xmplay_tag( char * * tag, const std::string & value ) {
 }
 
 static void write_xmplay_tags( char * tags[8], const openmpt::module & mod ) {
-	std::string charset = mod.ctl_get("charset");
-	write_xmplay_tag( &tags[0], convert_to_native( mod.get_metadata("title"), charset ) );
-	write_xmplay_tag( &tags[1], convert_to_native( mod.get_metadata("author"), charset ) );
-	write_xmplay_tag( &tags[2], convert_to_native( mod.get_metadata("xmplay-album"), charset ) ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[3], convert_to_native( mod.get_metadata("xmplay-date"), charset ) ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[4], convert_to_native( mod.get_metadata("xmplay-tracknumber"), charset ) ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[5], convert_to_native( mod.get_metadata("xmplay-genre"), charset ) ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[6], convert_to_native( mod.get_metadata("message"), charset ) );
-	write_xmplay_tag( &tags[7], convert_to_native( mod.get_metadata("type"), charset ) );
+	write_xmplay_tag( &tags[0], convert_to_native( mod.get_metadata("title") ) );
+	write_xmplay_tag( &tags[1], convert_to_native( mod.get_metadata("author") ) );
+	write_xmplay_tag( &tags[2], convert_to_native( mod.get_metadata("xmplay-album") ) ); // todo, libopenmpt does not support that
+	write_xmplay_tag( &tags[3], convert_to_native( mod.get_metadata("xmplay-date") ) ); // todo, libopenmpt does not support that
+	write_xmplay_tag( &tags[4], convert_to_native( mod.get_metadata("xmplay-tracknumber") ) ); // todo, libopenmpt does not support that
+	write_xmplay_tag( &tags[5], convert_to_native( mod.get_metadata("xmplay-genre") ) ); // todo, libopenmpt does not support that
+	write_xmplay_tag( &tags[6], convert_to_native( mod.get_metadata("message") ) );
+	write_xmplay_tag( &tags[7], convert_to_native( mod.get_metadata("type") ) );
 }
 
 static void clear_xmlpay_tags( char * tags[8] ) {
@@ -662,7 +661,7 @@ static void WINAPI openmpt_GetMessage( char * buf ) {
 		clear_xmplay_string( buf );
 		return;
 	}
-	write_xmplay_string( buf, convert_to_native( string_replace( self->mod->get_metadata("message"), "\n", "\r" ), self->mod->ctl_get("charset") ) );
+	write_xmplay_string( buf, convert_to_native( string_replace( self->mod->get_metadata("message"), "\n", "\r" ) ) );
 }
 
 // Seek to a position (in granularity units)
@@ -719,7 +718,6 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 
 static void add_names( std::ostream & str, const std::string & title, const std::vector<std::string> & names ) {
 	if ( names.size() > 0 ) {
-		std::string charset = self->mod->ctl_get("charset");
 		bool valid = false;
 		for ( std::size_t i = 0; i < names.size(); i++ ) {
 			if ( names[i] != "" ) {
@@ -731,7 +729,7 @@ static void add_names( std::ostream & str, const std::string & title, const std:
 		}
 		str << title << " names:" << "\r";
 		for ( std::size_t i = 0; i < names.size(); i++ ) {
-			str << std::setfill('0') << std::setw(2) << i << std::setw(0) << "\t" << convert_to_native( names[i], charset ) << "\r";
+			str << std::setfill('0') << std::setw(2) << i << std::setw(0) << "\t" << convert_to_native( names[i] ) << "\r";
 		}
 		str << "\r";
 	}
