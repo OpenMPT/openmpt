@@ -268,10 +268,6 @@ void COptionsSoundcard::UpdateChannels(int dev)
 	m_CbnChannels.ResetContent();
 	for(UINT channels = 4; channels >= 1; channels /= 2)
 	{
-		if(channels > 2 && !theApp.IsWaveExEnabled())
-		{
-			continue;
-		}
 		wsprintf(s, "%s", gszChnCfgNames[(channels+2)/2-1]);
 		UINT ndx = m_CbnChannels.AddString(s);
 		m_CbnChannels.SetItemData(ndx, channels);
@@ -297,10 +293,6 @@ void COptionsSoundcard::UpdateSampleFormat(int dev)
 	m_CbnSampleFormat.EnableWindow(asio ? FALSE : TRUE);
 	for(UINT bits = 40; bits >= 8; bits -= 8)
 	{
-		if(bits > 16 && !theApp.IsWaveExEnabled() && !asio)
-		{
-			continue;
-		}
 		if(bits == 40)
 		{
 			if(!asio || (asio && SampleFormatFloat32 == m_SampleFormat))

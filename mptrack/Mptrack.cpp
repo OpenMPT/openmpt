@@ -269,13 +269,13 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	bool m_bNoAcm, m_bNoDls, m_bSafeMode, m_bWavEx, m_bNoPlugins, m_bDebug,
+	bool m_bNoAcm, m_bNoDls, m_bSafeMode, m_bNoPlugins, m_bDebug,
 		 m_bPortable, m_bNoSettingsOnNewVersion;
 
 public:
 	CMPTCommandLineInfo()
 	{
-		m_bNoAcm = m_bNoDls = m_bSafeMode = m_bWavEx =
+		m_bNoAcm = m_bNoDls = m_bSafeMode =
 		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = m_bPortable = false;
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
@@ -290,7 +290,6 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 		if (!lstrcmpi(lpszParam, "nologo")) { m_bShowSplash = FALSE; return; } else
 		if (!lstrcmpi(lpszParam, "nodls")) { m_bNoDls = true; return; } else
 		if (!lstrcmpi(lpszParam, "noacm")) { m_bNoAcm = true; return; } else
-		if (!lstrcmpi(lpszParam, "wavex")) { m_bWavEx = true; return; } else
 		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; return; } else
 		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = true; return; } else
 		if (!lstrcmpi(lpszParam, "portable")) { m_bPortable = true; return; } else
@@ -624,34 +623,8 @@ CTrackApp::CTrackApp()
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
 	m_bInitialized = FALSE;
-	m_bExWaveSupport = FALSE;
 	m_bDebugMode = FALSE;
 	m_szConfigFileName[0] = 0;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// GetDSoundVersion
-
-static DWORD GetDSoundVersion()
-//-----------------------------
-{
-	DWORD dwVersion = 0x600;
-	HKEY key = NULL;
-	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\DirectX", 0, KEY_READ, &key) == ERROR_SUCCESS)
-	{
-		CHAR szVersion[32] = "";
-		DWORD dwSize = sizeof(szVersion);
-		DWORD dwType = REG_SZ;
-		if (RegQueryValueEx(key, "Version", NULL, &dwType, (LPBYTE)szVersion, &dwSize) == ERROR_SUCCESS)
-		{
-			// "4.06.03.xxxx"
-			dwVersion = ((szVersion[3] - '0') << 8) | ((szVersion[5] - '0') << 4) | ((szVersion[6] - '0'));
-			if (dwVersion < 0x600) dwVersion = 0x600;
-			if (dwVersion > 0x800) dwVersion = 0x800;
-		}
-		RegCloseKey(key);
-	}
-	return dwVersion;
 }
 
 
@@ -830,7 +803,6 @@ BOOL CTrackApp::InitInstance()
 
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
-	if (GetDSoundVersion() >= 0x0700) cmdInfo.m_bWavEx = true;
 	ParseCommandLine(cmdInfo);
 	TrackerSettings::Instance().noACM = cmdInfo.m_bNoAcm;
 
@@ -895,8 +867,7 @@ BOOL CTrackApp::InitInstance()
 	// Register MOD extensions
 	//RegisterExtensions();
 
-	// Load DirectSound (if available)
-	m_bExWaveSupport = cmdInfo.m_bWavEx;
+	// Load sound APIs
 	SndDevInitialize();
 
 	// Load DLS Banks
