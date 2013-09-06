@@ -159,8 +159,8 @@ float CPortaudioDevice::GetCurrentRealLatencyMS()
 }
 
 
-bool CPortaudioDevice::CanSampleRate(UINT nDevice, std::vector<uint32> &samplerates, std::vector<bool> &result)
-//------------------------------------------------------------------------------------------------------------
+bool CPortaudioDevice::CanSampleRate(UINT nDevice, const std::vector<uint32> &samplerates, std::vector<bool> &result)
+//-------------------------------------------------------------------------------------------------------------------
 {
 	result.clear();
 	for(UINT n=0; n<samplerates.size(); n++)

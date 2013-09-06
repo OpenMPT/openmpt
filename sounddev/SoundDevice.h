@@ -168,7 +168,7 @@ public:
 	virtual int64 GetStreamPositionSamples() const { return 0; }
 	virtual UINT GetCurrentSampleRate(UINT nDevice) { UNREFERENCED_PARAMETER(nDevice); return 0; }
 	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO.
-	virtual bool CanSampleRate(UINT nDevice, std::vector<uint32> &samplerates, std::vector<bool> &result) { UNREFERENCED_PARAMETER(nDevice); result.assign(samplerates.size(), true); return true; } ;
+	virtual bool CanSampleRate(UINT nDevice, const std::vector<uint32> &samplerates, std::vector<bool> &result) { UNREFERENCED_PARAMETER(nDevice); result.assign(samplerates.size(), true); return true; } ;
 };
 
 

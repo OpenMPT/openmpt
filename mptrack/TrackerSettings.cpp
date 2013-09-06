@@ -959,6 +959,31 @@ void TrackerSettings::SaveSettings()
 }
 
 
+std::vector<uint32> TrackerSettings::GetSampleRates()
+//---------------------------------------------------
+{
+	static const uint32 samplerates [] = {
+		192000,
+		176400,
+		96000,
+		88200,
+		64000,
+		48000,
+		44100,
+		40000,
+		37800,
+		33075,
+		32000,
+		24000,
+		22050,
+		20000,
+		19800,
+		16000
+	};
+	return std::vector<uint32>(samplerates, samplerates + CountOf(samplerates));
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // Chords
 
