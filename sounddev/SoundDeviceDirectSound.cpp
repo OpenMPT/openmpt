@@ -32,12 +32,6 @@
 
 #define MAX_DSOUND_DEVICES		16
 
-typedef BOOL (WINAPI * LPDSOUNDENUMERATE)(LPDSENUMCALLBACK lpDSEnumCallback, LPVOID lpContext);
-typedef HRESULT (WINAPI * LPDSOUNDCREATE)(GUID * lpGuid, LPDIRECTSOUND * ppDS, IUnknown * pUnkOuter);
-
-static HINSTANCE ghDSoundDLL = NULL;
-static LPDSOUNDENUMERATE gpDSoundEnumerate = NULL;
-static LPDSOUNDCREATE gpDSoundCreate = NULL;
 static BOOL gbDSoundEnumerated = FALSE;
 static UINT gnDSoundDevices = 0;
 static GUID *glpDSoundGUID[MAX_DSOUND_DEVICES];
@@ -67,10 +61,9 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCSTR lpstrDescription, LPCSTR
 BOOL CDSoundDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize)
 //----------------------------------------------------------------------------------
 {
-	if (!gpDSoundEnumerate) return FALSE;
-	if (!gbDSoundEnumerated)
+	if(!gbDSoundEnumerated)
 	{
-		gpDSoundEnumerate((LPDSENUMCALLBACK)DSEnumCallback, NULL);
+		DirectSoundEnumerate(DSEnumCallback, NULL);
 	}
 	if (nIndex >= gnDSoundDevices) return FALSE;
 	lstrcpyn(pszDescription, gszDSoundDrvNames[nIndex], cbSize);
@@ -109,12 +102,11 @@ bool CDSoundDevice::InternalOpen(UINT nDevice)
 	DSBCAPS dsc;
 	UINT nPriorityLevel = (m_Settings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
 
-	if (m_piDS) return true;
-	if (!gpDSoundEnumerate) return false;
-	if (!gbDSoundEnumerated) gpDSoundEnumerate((LPDSENUMCALLBACK)DSEnumCallback, NULL);
-	if ((nDevice >= gnDSoundDevices) || (!gpDSoundCreate)) return false;
-	if (gpDSoundCreate(glpDSoundGUID[nDevice], &m_piDS, NULL) != DS_OK) return false;
-	if (!m_piDS) return false;
+	if(m_piDS) return true;
+	if(!gbDSoundEnumerated) DirectSoundEnumerate(DSEnumCallback, NULL);
+	if(nDevice >= gnDSoundDevices) return false;
+	if(DirectSoundCreate(glpDSoundGUID[nDevice], &m_piDS, NULL) != DS_OK) return false;
+	if(!m_piDS) return false;
 	m_piDS->SetCooperativeLevel(m_Settings.hWnd, nPriorityLevel);
 	m_bMixRunning = FALSE;
 	m_nDSoundBufferSize = (m_Settings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
@@ -356,11 +348,6 @@ void CDSoundDevice::FillAudioBuffer()
 BOOL SndDevDSoundInitialize()
 //---------------------------
 {
-	if (ghDSoundDLL) return TRUE;
-	if ((ghDSoundDLL = LoadLibrary("dsound.dll")) == NULL) return FALSE;
-	static_assert(sizeof(TCHAR) == 1, "Check DirectSoundEnumerateA below");
-	if ((gpDSoundEnumerate = (LPDSOUNDENUMERATE)GetProcAddress(ghDSoundDLL, "DirectSoundEnumerateA")) == NULL) return FALSE;
-	if ((gpDSoundCreate = (LPDSOUNDCREATE)GetProcAddress(ghDSoundDLL, "DirectSoundCreate")) == NULL) return FALSE;
 	MemsetZero(glpDSoundGUID);
 	return TRUE;
 }
@@ -369,13 +356,6 @@ BOOL SndDevDSoundInitialize()
 BOOL SndDevDSoundUninitialize()
 //-----------------------------
 {
-	gpDSoundEnumerate = NULL;
-	gpDSoundCreate = NULL;
-	if (ghDSoundDLL)
-	{
-		FreeLibrary(ghDSoundDLL);
-		ghDSoundDLL = NULL;
-	}
 	for (UINT i=0; i<MAX_DSOUND_DEVICES; i++)
 	{
 		if (glpDSoundGUID[i])
