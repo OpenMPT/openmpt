@@ -251,6 +251,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <DelayLoadDLLs>libopenmpt_settings.dll</DelayLoadDLLs>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
@@ -311,6 +312,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <DelayLoadDLLs>libopenmpt_settings.dll</DelayLoadDLLs>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
@@ -572,8 +574,8 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClCompile Include="libopenmpt_xmplay.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
-      <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
+    <ProjectReference Include="..\include\zlib\zlib.vcxproj">
+      <Project>{1654fb18-fde6-406f-9d84-ba12bfbd67b2}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

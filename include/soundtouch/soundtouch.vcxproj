@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="DebugDLL|Win32">
+			<Configuration>DebugDLL</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="DebugDLL|x64">
+			<Configuration>DebugDLL</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="NormalDLL|Win32">
+			<Configuration>NormalDLL</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="NormalDLL|x64">
+			<Configuration>NormalDLL</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="ReleaseDLL|Win32">
+			<Configuration>ReleaseDLL</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="ReleaseDLL|x64">
+			<Configuration>ReleaseDLL</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD}</ProjectGuid>
+		<RootNamespace>soundtouch</RootNamespace>
+		<Keyword>Win32Proj</Keyword>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="ExtensionSettings">
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<PropertyGroup Label="UserMacros" />
+	<PropertyGroup>
+		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">..\..\mptrack\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">obj\x32\DebugDLL\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">OpenMPT_SoundTouch_i16</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">true</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">..\..\mptrack\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">obj\x64\DebugDLL\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">OpenMPT_SoundTouch_i1664</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">true</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">..\..\mptrack\bin\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">obj\x32\NormalDLL\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">OpenMPT_SoundTouch_i16</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">false</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">..\..\mptrack\bin\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">obj\x64\NormalDLL\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">OpenMPT_SoundTouch_i1664</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">false</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">..\..\mptrack\bin\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">obj\x32\ReleaseDLL\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">OpenMPT_SoundTouch_i16</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">false</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">..\..\mptrack\bin\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">obj\x64\ReleaseDLL\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">OpenMPT_SoundTouch_i1664</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">false</LinkIncremental>
+	</PropertyGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
+		<ClCompile>
+			<Optimization>Disabled</Optimization>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>true</MinimalRebuild>
+			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ResourceCompile>
+		<Link>
+			<OutputFile>$(OutDir)OpenMPT_SoundTouch_i16.dll</OutputFile>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<ProgramDataBaseFileName>$(OutDir)OpenMPT_SoundTouch_i16.pdb</ProgramDataBaseFileName>
+			<ImportLibrary>..\..\mptrack\Debug\OpenMPT_SoundTouch_i16.lib</ImportLibrary>
+			<TargetMachine>MachineX86</TargetMachine>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
+		<ClCompile>
+			<Optimization>Disabled</Optimization>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>true</MinimalRebuild>
+			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<DebugInformationFormat>OldStyle</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ResourceCompile>
+		<Link>
+			<OutputFile>$(OutDir)OpenMPT_SoundTouch_i1664.dll</OutputFile>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<ProgramDataBaseFileName>$(OutDir)OpenMPT_SoundTouch_i1664.pdb</ProgramDataBaseFileName>
+			<ImportLibrary>..\..\mptrack\Debug\OpenMPT_SoundTouch_i1664.lib</ImportLibrary>
+			<TargetMachine>MachineX64</TargetMachine>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">
+		<ClCompile>
+			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ResourceCompile>
+		<Link>
+			<OutputFile>$(OutDir)OpenMPT_SoundTouch_i16.dll</OutputFile>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)OpenMPT_SoundTouch_i16.pdb</ProgramDataBaseFileName>
+			<ImportLibrary>..\..\mptrack\bin\OpenMPT_SoundTouch_i16.lib</ImportLibrary>
+			<TargetMachine>MachineX86</TargetMachine>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">
+		<ClCompile>
+			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ResourceCompile>
+		<Link>
+			<OutputFile>$(OutDir)OpenMPT_SoundTouch_i1664.dll</OutputFile>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)OpenMPT_SoundTouch_i1664.pdb</ProgramDataBaseFileName>
+			<ImportLibrary>..\..\mptrack\bin\OpenMPT_SoundTouch_i1664.lib</ImportLibrary>
+			<TargetMachine>MachineX64</TargetMachine>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
+		<ClCompile>
+			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ResourceCompile>
+		<Link>
+			<OutputFile>$(OutDir)OpenMPT_SoundTouch_i16.dll</OutputFile>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)OpenMPT_SoundTouch_i16.pdb</ProgramDataBaseFileName>
+			<ImportLibrary>..\..\mptrack\bin\OpenMPT_SoundTouch_i16.lib</ImportLibrary>
+			<TargetMachine>MachineX86</TargetMachine>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
+		<ClCompile>
+			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ResourceCompile>
+		<Link>
+			<OutputFile>$(OutDir)OpenMPT_SoundTouch_i1664.dll</OutputFile>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)OpenMPT_SoundTouch_i1664.pdb</ProgramDataBaseFileName>
+			<ImportLibrary>..\..\mptrack\bin\OpenMPT_SoundTouch_i1664.lib</ImportLibrary>
+			<TargetMachine>MachineX64</TargetMachine>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemGroup>
+		<ClInclude Include="AAFilter.h" />
+		<ClInclude Include="BPMDetect.h" />
+		<ClInclude Include="cpu_detect.h" />
+		<ClInclude Include="FIFOSampleBuffer.h" />
+		<ClInclude Include="FIFOSamplePipe.h" />
+		<ClInclude Include="FIRFilter.h" />
+		<ClInclude Include="PeakFinder.h" />
+		<ClInclude Include="RateTransposer.h" />
+		<ClInclude Include="SoundTouch.h" />
+		<ClInclude Include="SoundTouchDLL.h" />
+		<ClInclude Include="STTypes.h" />
+		<ClInclude Include="TDStretch.h" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="AAFilter.cpp">
+		</ClCompile>
+		<ClCompile Include="BPMDetect.cpp">
+		</ClCompile>
+		<ClCompile Include="cpu_detect_x86_win.cpp">
+		</ClCompile>
+		<ClCompile Include="FIFOSampleBuffer.cpp">
+		</ClCompile>
+		<ClCompile Include="FIRFilter.cpp">
+		</ClCompile>
+		<ClCompile Include="mmx_optimized.cpp">
+		</ClCompile>
+		<ClCompile Include="PeakFinder.cpp">
+		</ClCompile>
+		<ClCompile Include="RateTransposer.cpp">
+		</ClCompile>
+		<ClCompile Include="SoundTouch.cpp">
+		</ClCompile>
+		<ClCompile Include="SoundTouchDLL.cpp">
+		</ClCompile>
+		<ClCompile Include="sse_optimized.cpp">
+		</ClCompile>
+		<ClCompile Include="TDStretch.cpp">
+		</ClCompile>
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets">
+	</ImportGroup>
+</Project>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<ClInclude Include="AAFilter.h" />
+		<ClInclude Include="BPMDetect.h" />
+		<ClInclude Include="cpu_detect.h" />
+		<ClInclude Include="FIFOSampleBuffer.h" />
+		<ClInclude Include="FIFOSamplePipe.h" />
+		<ClInclude Include="FIRFilter.h" />
+		<ClInclude Include="PeakFinder.h" />
+		<ClInclude Include="RateTransposer.h" />
+		<ClInclude Include="SoundTouch.h" />
+		<ClInclude Include="SoundTouchDLL.h" />
+		<ClInclude Include="STTypes.h" />
+		<ClInclude Include="TDStretch.h" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="AAFilter.cpp" />
+		<ClCompile Include="BPMDetect.cpp" />
+		<ClCompile Include="cpu_detect_x86_win.cpp" />
+		<ClCompile Include="FIFOSampleBuffer.cpp" />
+		<ClCompile Include="FIRFilter.cpp" />
+		<ClCompile Include="mmx_optimized.cpp" />
+		<ClCompile Include="PeakFinder.cpp" />
+		<ClCompile Include="RateTransposer.cpp" />
+		<ClCompile Include="SoundTouch.cpp" />
+		<ClCompile Include="SoundTouchDLL.cpp" />
+		<ClCompile Include="sse_optimized.cpp" />
+		<ClCompile Include="TDStretch.cpp" />
+	</ItemGroup>
+</Project>

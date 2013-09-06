@@ -107,6 +107,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>copy /y bin\openmpt123.exe bin\modplug123.exe</Command>
@@ -127,6 +128,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>copy /y bin\openmpt12364.exe bin\modplug12364.exe</Command>
@@ -136,14 +138,11 @@
     <ClCompile Include="openmpt123.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\include\flac\src\libFLAC\libFLAC_static_10.vcxproj">
-      <Project>{4cefbc84-c215-11db-8314-0800200c9a66}</Project>
+    <ProjectReference Include="..\include\flac\flac.vcxproj">
+      <Project>{e599f5aa-f9a3-46cc-8db0-c8defceb90c5}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\portaudio\build\msvc\portaudio_openmpt_vs2010.vcxproj">
-      <Project>{0a18a071-125e-442f-aff7-a3f68abecf99}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj">
-      <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
+    <ProjectReference Include="..\include\portaudio\portaudio.vcxproj">
+      <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
     </ProjectReference>
     <ProjectReference Include="..\libopenmpt\libopenmpt.vcxproj">
       <Project>{812a654d-99be-4d13-b97f-86332ad3e363}</Project>

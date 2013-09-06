@@ -6,9 +6,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vc
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC} = {B2B6EE07-F662-496D-980C-FCA7CA144DBC}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibstat", "..\include\zlib\contrib\vstudio\vc10\zlibstat.vcxproj", "{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_settings", "libopenmpt_settings.vcxproj", "{B2B6EE07-F662-496D-980C-FCA7CA144DBC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\include\zlib\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,18 +32,6 @@ Global
 		{812A654D-99BE-4D13-B97F-86332AD3E363}.Test|Win32.Build.0 = Test|Win32
 		{812A654D-99BE-4D13-B97F-86332AD3E363}.Test|x64.ActiveCfg = Test|x64
 		{812A654D-99BE-4D13-B97F-86332AD3E363}.Test|x64.Build.0 = Test|x64
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Debug|Win32.ActiveCfg = Debug|Win32
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Debug|Win32.Build.0 = Debug|Win32
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Debug|x64.ActiveCfg = Debug|x64
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Debug|x64.Build.0 = Debug|x64
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Release|Win32.ActiveCfg = ReleaseWithoutAsm|Win32
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Release|Win32.Build.0 = ReleaseWithoutAsm|Win32
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Release|x64.ActiveCfg = ReleaseWithoutAsm|x64
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Release|x64.Build.0 = ReleaseWithoutAsm|x64
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Test|Win32.ActiveCfg = ReleaseWithoutAsm|Win32
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Test|Win32.Build.0 = ReleaseWithoutAsm|Win32
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Test|x64.ActiveCfg = ReleaseWithoutAsm|x64
-		{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}.Test|x64.Build.0 = ReleaseWithoutAsm|x64
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Debug|Win32.Build.0 = Debug|Win32
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Debug|x64.ActiveCfg = Debug|Win32
@@ -53,6 +41,18 @@ Global
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Test|Win32.ActiveCfg = Release|Win32
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Test|Win32.Build.0 = Release|Win32
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Test|x64.ActiveCfg = Release|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.ActiveCfg = DebugLib|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.Build.0 = DebugLib|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|x64.ActiveCfg = DebugLib|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|x64.Build.0 = DebugLib|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.ActiveCfg = ReleaseLib|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.Build.0 = ReleaseLib|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|x64.ActiveCfg = ReleaseLib|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|x64.Build.0 = ReleaseLib|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Test|Win32.ActiveCfg = NormalLib|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Test|Win32.Build.0 = NormalLib|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Test|x64.ActiveCfg = NormalLib|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Test|x64.Build.0 = NormalLib|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
