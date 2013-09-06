@@ -111,7 +111,7 @@ public:
 protected:
 	CMultiDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
-	BOOL m_bInitialized, m_bDebugMode;
+	BOOL m_bInitialized;
 	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
 	// Default macro configuration
 	MIDIMacroConfig m_MidiCfg;
@@ -157,7 +157,6 @@ public:
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
-	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCTSTR GetConfigFileName() const { return m_szConfigFileName; }
 	bool IsPortableMode() { return m_bPortableMode; }
 	LPCTSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }

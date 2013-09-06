@@ -169,7 +169,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 						WideCharToMultiByte(CP_ACP, 0, w, -1, p->szDllPath, sizeof(p->szDllPath), nullptr, nullptr);
 						mpt::String::SetNullTerminator(p->szDllPath);
 					#ifdef DMO_LOG
-						if (theApp.IsDebug()) Log("Found \"%s\" clsid=%s\n", p->szLibraryName, p->szDllPath);
+						Log("Found \"%s\" clsid=%s\n", p->szLibraryName, p->szDllPath);
 					#endif
 						if (m_pVstHead) m_pVstHead->pPrev = p;
 						m_pVstHead = p;

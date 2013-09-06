@@ -269,14 +269,14 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	bool m_bNoAcm, m_bNoDls, m_bSafeMode, m_bNoPlugins, m_bDebug,
+	bool m_bNoAcm, m_bNoDls, m_bSafeMode, m_bNoPlugins,
 		 m_bPortable, m_bNoSettingsOnNewVersion;
 
 public:
 	CMPTCommandLineInfo()
 	{
 		m_bNoAcm = m_bNoDls = m_bSafeMode =
-		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = m_bPortable = false;
+		m_bNoPlugins = m_bNoSettingsOnNewVersion = m_bPortable = false;
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
 };
@@ -291,7 +291,6 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 		if (!lstrcmpi(lpszParam, "nodls")) { m_bNoDls = true; return; } else
 		if (!lstrcmpi(lpszParam, "noacm")) { m_bNoAcm = true; return; } else
 		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; return; } else
-		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = true; return; } else
 		if (!lstrcmpi(lpszParam, "portable")) { m_bPortable = true; return; } else
 		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = true; return; }
 	}
@@ -623,7 +622,6 @@ CTrackApp::CTrackApp()
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
 	m_bInitialized = FALSE;
-	m_bDebugMode = FALSE;
 	m_szConfigFileName[0] = 0;
 }
 
@@ -856,8 +854,6 @@ BOOL CTrackApp::InitInstance()
 	{
 		StartSplashScreen();
 	}
-	m_bDebugMode = cmdInfo.m_bDebug;
-
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
 
