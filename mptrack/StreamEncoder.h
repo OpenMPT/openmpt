@@ -19,11 +19,29 @@
 
 
 
+static const int opus_bitrates [] = {
+	8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 192, 224, 256, 320, 384, 448,      512
+};
+static const int vorbis_bitrates [] = {
+	           32,     48,     64, 80, 96, 112, 128,      160, 192, 224, 256, 320,           500
+};
 static const int layer3_bitrates [] = {
 	8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 192, 224, 256, 320
 };
 static const int mpeg1layer3_bitrates [] = {
 	           32, 40, 48, 56, 64, 80, 96, 112, 128,      160, 192, 224, 256, 320
+};
+static const uint32 opus_samplerates [] = {
+	48000,
+	24000,           16000,
+	12000,            8000
+};
+static const uint32 vorbis_samplerates [] = {
+	192000, 176400, 128000,
+	 96000,  88200,  64000,
+	 48000,  44100,  32000,
+	 24000,  22050,  16000,
+	 12000,  11025,   8000
 };
 static const uint32 layer3_samplerates [] = {
 	 48000,  44100,  32000,

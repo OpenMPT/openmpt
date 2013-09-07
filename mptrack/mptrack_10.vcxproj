@@ -420,6 +420,8 @@
     <ClCompile Include="StreamEncoder.cpp" />
     <ClCompile Include="StreamEncoderFLAC.cpp" />
     <ClCompile Include="StreamEncoderMP3.cpp" />
+    <ClCompile Include="StreamEncoderOpus.cpp" />
+    <ClCompile Include="StreamEncoderVorbis.cpp" />
     <ClCompile Include="StreamEncoderWAV.cpp" />
     <ClCompile Include="TrackerSettings.cpp" />
     <ClCompile Include="TuningDialog.cpp" />
@@ -602,6 +604,8 @@
     <ClInclude Include="StreamEncoder.h" />
     <ClInclude Include="StreamEncoderFLAC.h" />
     <ClInclude Include="StreamEncoderMP3.h" />
+    <ClInclude Include="StreamEncoderOpus.h" />
+    <ClInclude Include="StreamEncoderVorbis.h" />
     <ClInclude Include="StreamEncoderWAV.h" />
     <ClInclude Include="TrackerSettings.h" />
     <ClInclude Include="TuningDialog.h" />

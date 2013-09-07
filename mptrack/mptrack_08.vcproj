@@ -583,6 +583,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StreamEncoderOpus.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderVorbis.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\StreamEncoderWAV.cpp"
 				>
 			</File>
@@ -1186,6 +1194,14 @@
 			</File>
 			<File
 				RelativePath=".\StreamEncoderMP3.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderOpus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderVorbis.h"
 				>
 			</File>
 			<File

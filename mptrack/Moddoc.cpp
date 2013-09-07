@@ -19,6 +19,8 @@
 #include "mod2wave.h"
 #include "StreamEncoderFLAC.h"
 #include "StreamEncoderMP3.h"
+#include "StreamEncoderOpus.h"
+#include "StreamEncoderVorbis.h"
 #include "StreamEncoderWAV.h"
 #include "mod2midi.h"
 #include "vstplug.h"
@@ -1852,20 +1854,26 @@ void CModDoc::OnFileMP3Convert()
 	MP3Encoder mp3lame(MP3EncoderLame);
 	MP3Encoder mp3blade(MP3EncoderBlade);
 	MP3Encoder mp3acm(MP3EncoderACM);
+	VorbisEncoder vorbisencoder;
+	OggOpusEncoder opusencoder;
 	FLACEncoder flacencoder;
 	WAVEncoder wavencoder;
 	std::vector<EncoderFactoryBase*> encoders;
 	if(mp3lame.IsAvailable())       encoders.push_back(&mp3lame);
 	if(mp3blade.IsAvailable())      encoders.push_back(&mp3blade);
 	if(mp3acm.IsAvailable())        encoders.push_back(&mp3acm);
+	if(vorbisencoder.IsAvailable()) encoders.push_back(&vorbisencoder);
+	if(opusencoder.IsAvailable())   encoders.push_back(&opusencoder);
 	if(flacencoder.IsAvailable())   encoders.push_back(&flacencoder);
 	if(wavencoder.IsAvailable())    encoders.push_back(&wavencoder);
 	if(encoders.empty())
 	{
 		Reporting::Error(
-			"No MP3 codec found.\n"
+			"No MP3/Vorbis/Opus codec found.\n"
 			"Please copy\n"
 			" - libmp3lame.dll or Lame_Enc.dll\n"
+			" - Ogg Vorbis libraries\n"
+			" - Xipg.Org Opus libraries\n"
 			"into OpenMPT's root directory.\n"
 			"Alternatively, you can install a MP3 ACM codec.",
 			"OpenMPT - Export");
