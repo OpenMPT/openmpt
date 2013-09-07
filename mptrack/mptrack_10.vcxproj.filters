@@ -496,6 +496,12 @@
     <ClCompile Include="StreamEncoder.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="StreamEncoderVorbis.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamEncoderOpus.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="StreamEncoderMP3.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
@@ -934,6 +940,12 @@
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
     <ClInclude Include="StreamEncoder.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamEncoderVorbis.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamEncoderOpus.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
     <ClInclude Include="StreamEncoderMP3.h">
