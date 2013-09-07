@@ -676,6 +676,7 @@ void CDoWaveConvert::OnButton1()
 
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
+	mixersettings.m_nMaxMixChannels = MAX_CHANNELS; // always use max mixing channels when rendering
 	mixersettings.gdwMixingFreq = m_Settings.SampleRate;
 	mixersettings.gnChannels = m_Settings.Channels;
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
