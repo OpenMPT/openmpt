@@ -22,10 +22,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#if !defined(WIN32)
-#include <iconv.h>
-#endif // !WIN32
-
 #include "soundlib/Sndfile.h"
 #include "soundlib/AudioReadTarget.h"
 #include "soundlib/FileReader.h"
@@ -154,58 +150,19 @@ static void mixersettings_to_ramping( int & ramping, const MixerSettings & setti
 }
 
 std::string module_impl::mod_string_to_utf8( const std::string & encoded ) const {
-	std::string charset = m_sndFile->GetCharset().second;
-	#if defined(WIN32)
-		std::transform( charset.begin(), charset.end(), charset.begin(), tolower );
-		UINT codepage = 0;
-		if ( charset == "" ) {
-			codepage = 20127; // us ascii fallback
-		} else if ( charset == "windows-1252" ) {
-			codepage = 1252;
-		} else if ( charset == "iso-8859-1" ) {
-			codepage = 28591;
-		} else if ( charset == "utf-8" ) {
-			codepage = 65001;
-		} else if ( charset == "us-ascii" ) {
-			codepage = 20127;
-		} else if ( charset == "cp437" ) {
-			codepage = 437;
-		} else {
-			codepage = 20127; // us ascii fallback
-		}
-		int required_size = 0;
-		required_size = MultiByteToWideChar( codepage, 0, encoded.c_str(), -1, NULL, 0 );
-		if ( required_size <= 0 ) {
-			return std::string();
-		}
-		std::vector<WCHAR> unicode_string( required_size );
-		MultiByteToWideChar( codepage, 0, encoded.data(), -1, &unicode_string[0], unicode_string.size() );
-		required_size = WideCharToMultiByte( CP_UTF8, 0, &unicode_string[0], -1, NULL, 0, NULL, NULL );
-		if ( required_size <= 0 ) {
-			return std::string();
-		}
-		std::vector<CHAR> utf8_string( required_size );
-		WideCharToMultiByte( CP_UTF8, 0, &unicode_string[0], -1, &utf8_string[0], utf8_string.size(), NULL, NULL );
-		return &utf8_string[0];
-	#else
-		iconv_t conv = iconv_t();
-		conv = iconv_open( "UTF-8", charset.c_str() );
-		std::vector<char> encoded_string( encoded.c_str(), encoded.c_str() + encoded.length() + 1 );
-		std::vector<char> utf8_string( encoded_string.size() * 8 ); // large enough
-		char * inbuf = &encoded_string[0];
-		size_t inbytesleft = encoded_string.size();
-		char * outbuf = &utf8_string[0];
-		size_t outbytesleft = utf8_string.size();
-		if ( iconv( conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft ) == (size_t)-1 ) {
-			iconv_close( conv );
-			conv = iconv_t();
-			return std::string();
-		}
-		std::string result = &utf8_string[0];
-		iconv_close( conv );
-		conv = iconv_t();
-		return result;
-	#endif
+	std::string encoding = m_sndFile->GetCharset().second;
+	std::transform( encoding.begin(), encoding.end(), encoding.begin(), tolower );
+	mpt::Charset charset = mpt::CharsetUS_ASCII;
+	if      ( encoding == ""             ) { charset = mpt::CharsetUS_ASCII;    } // fallback
+	else if ( encoding == "utf-8"        ) { charset = mpt::CharsetUTF8;        }
+	else if ( encoding == "ascii"        ) { charset = mpt::CharsetUS_ASCII;    }
+	else if ( encoding == "us-ascii"     ) { charset = mpt::CharsetUS_ASCII;    }
+	else if ( encoding == "iso-8859-1"   ) { charset = mpt::CharsetISO8859_1;   }
+	else if ( encoding == "iso-8859-15"  ) { charset = mpt::CharsetISO8859_15;  }
+	else if ( encoding == "cp437"        ) { charset = mpt::CharsetCP437;       }
+	else if ( encoding == "windows-1252" ) { charset = mpt::CharsetWindows1252; }
+	else                                   { charset = mpt::CharsetUS_ASCII;    } // fallback
+	return mpt::String::Convert( encoded, charset, mpt::CharsetUTF8 );
 }
 void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) {
 	if (
