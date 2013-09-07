@@ -206,7 +206,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 					CMD_ARPEGGIO,		CMD_SPEED,			CMD_PANNINGSLIDE,	CMD_RETRIG,
 				};
 
-				if((effect[chn] >> 4) < CountOf(effTrans))
+				if(static_cast<uint8>(effect[chn] >> 4) < CountOf(effTrans))
 				{
 					m->command = effTrans[effect[chn] >> 4];
 				} else
