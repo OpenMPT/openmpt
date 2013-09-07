@@ -134,6 +134,32 @@ static inline int strnicmp(const char *a, const char *b, size_t count)
 }
 
 
+enum Charset {
+	CharsetLocale,
+
+	CharsetUTF8,
+
+	CharsetUS_ASCII,
+
+	CharsetISO8859_1,
+	CharsetISO8859_15,
+
+	CharsetCP437,
+
+	CharsetWindows1252,
+};
+
+
+namespace String {
+
+std::string Encode(const std::wstring &src, Charset charset);
+std::wstring Decode(const std::string &src, Charset charset);
+
+std::string Convert(const std::string &src, Charset from, Charset to);
+
+} // namespace String
+
+
 } // namespace mpt
 
 
