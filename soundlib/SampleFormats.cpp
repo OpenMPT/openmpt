@@ -487,8 +487,8 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 	file.WriteExtraInformation(sample, GetType());
 	
 	FileTags tags;
-	tags.title = m_szNames[nSample];
-	tags.encoder = MptVersion::GetOpenMPTVersionStr();
+	tags.title = mpt::String::Decode(m_szNames[nSample], mpt::CharsetLocale);
+	tags.encoder = mpt::String::Decode(MptVersion::GetOpenMPTVersionStr(), mpt::CharsetLocale);
 	file.WriteMetatags(tags);
 	
 	return true;

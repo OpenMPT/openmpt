@@ -287,11 +287,11 @@ private:
 		std::memcpy(&buf[0], og.body, og.body_len);
 		WriteBuffer();
 	}
-	void AddCommentField(const std::string &field, const std::string &data)
+	void AddCommentField(const std::string &field, const std::wstring &data)
 	{
 		if(!field.empty() && !data.empty())
 		{
-			vorbis.vorbis_comment_add_tag(&vc, field.c_str(), data.c_str());
+			vorbis.vorbis_comment_add_tag(&vc, field.c_str(), mpt::String::Encode(data, mpt::CharsetUTF8).c_str());
 		}
 	}
 public:
@@ -343,7 +343,7 @@ public:
 		AddCommentField("ENCODER", tags.encoder);
 		if(vorbis_tags)
 		{
-			AddCommentField("SOURCEMEDIA", "tracked music file");
+			AddCommentField("SOURCEMEDIA",L"tracked music file");
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );

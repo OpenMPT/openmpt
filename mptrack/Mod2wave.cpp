@@ -539,33 +539,33 @@ void CWaveConvert::OnOK()
 			CString tmp;
 
 			m_EditTitle.GetWindowText(tmp);
-			m_Settings.Tags.title = tmp.GetString();
+			m_Settings.Tags.title = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
 
 			m_EditAuthor.GetWindowText(tmp);
-			m_Settings.Tags.artist = tmp.GetString();
+			m_Settings.Tags.artist = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
 
 			m_EditAlbum.GetWindowText(tmp);
-			m_Settings.Tags.album = tmp.GetString();
+			m_Settings.Tags.album = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
 
 			m_EditURL.GetWindowText(tmp);
-			m_Settings.Tags.url = tmp.GetString();
+			m_Settings.Tags.url = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
 
 			m_CbnGenre.GetWindowText(tmp);
-			m_Settings.Tags.genre = tmp.GetString();
+			m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
 
 			m_EditYear.GetWindowText(tmp);
-			m_Settings.Tags.year = tmp.GetString();
-			if(m_Settings.Tags.year == "0")
+			m_Settings.Tags.year = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+			if(m_Settings.Tags.year == L"0")
 			{
-				m_Settings.Tags.year = "";
+				m_Settings.Tags.year = std::wstring();
 			}
 
 			if(!m_pSndFile->songMessage.empty())
 			{
-				m_Settings.Tags.comments = m_pSndFile->songMessage;
+				m_Settings.Tags.comments = mpt::String::Decode(m_pSndFile->songMessage, mpt::CharsetLocale);
 			}
 
-			m_Settings.Tags.bpm = mpt::String::Format("%d", (int)m_pSndFile->GetCurrentBPM());
+			m_Settings.Tags.bpm = mpt::String::Decode(mpt::String::Format("%d", (int)m_pSndFile->GetCurrentBPM()), mpt::CharsetLocale);
 
 		}
 

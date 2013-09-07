@@ -109,12 +109,12 @@ private:
 		}
 		ASSERT(!inited && !started);
 	}
-	void AddCommentField(const std::string &field, const std::string &data)
+	void AddCommentField(const std::string &field, const std::wstring &data)
 	{
 		if(!field.empty() && !data.empty())
 		{
 			FLAC__StreamMetadata_VorbisComment_Entry entry;
-			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, field.c_str(), data.c_str());
+			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, field.c_str(), mpt::String::Encode(data, mpt::CharsetUTF8).c_str());
 			FLAC__metadata_object_vorbiscomment_append_comment(flac_metadata[0], entry, false);
 		}
 	}
@@ -175,7 +175,7 @@ public:
 		AddCommentField("ENCODER", tags.encoder);
 		if(writeTags)
 		{
-			AddCommentField("SOURCEMEDIA", "tracked music file");
+			AddCommentField("SOURCEMEDIA",L"tracked music file");
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );
