@@ -325,11 +325,11 @@ private:
 		std::memcpy(&buf[0], og.body, og.body_len);
 		WriteBuffer();
 	}
-	void AddCommentField(const std::string &field, const std::string &data)
+	void AddCommentField(const std::string &field, const std::wstring &data)
 	{
 		if(!field.empty() && !data.empty())
 		{
-			opus_comments.push_back(field + "=" + data);
+			opus_comments.push_back(field + "=" + mpt::String::Encode(data, mpt::CharsetUTF8));
 		}
 	}
 public:
@@ -485,7 +485,7 @@ public:
 		AddCommentField("ENCODER", tags.encoder);
 		if(opus_tags)
 		{
-			AddCommentField("SOURCEMEDIA", "tracked music file");
+			AddCommentField("SOURCEMEDIA",L"tracked music file");
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );
