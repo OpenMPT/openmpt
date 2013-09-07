@@ -245,6 +245,8 @@ void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
 }
 
 
+#ifndef MODPLUG_NO_FILESAVE
+
 ///////////////////////////////////////////////////////////
 // WAV Writing
 
@@ -550,3 +552,5 @@ void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, 
 		WriteArray(filename);
 	}
 }
+
+#endif // MODPLUG_NO_FILESAVE

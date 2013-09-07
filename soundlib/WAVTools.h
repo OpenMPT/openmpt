@@ -366,6 +366,8 @@ public:
 };
 
 
+#ifndef MODPLUG_NO_FILESAVE
+
 //=============
 class WAVWriter
 //=============
@@ -462,3 +464,5 @@ protected:
 	// Write some data to the file.
 	void Write(const void *data, size_t numBytes);
 };
+
+#endif // MODPLUG_NO_FILESAVE
