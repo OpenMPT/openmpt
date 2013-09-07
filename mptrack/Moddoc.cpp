@@ -16,8 +16,10 @@
 #include "mpdlgs.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
-#include "ACMConvert.h"
 #include "mod2wave.h"
+#include "StreamEncoderFLAC.h"
+#include "StreamEncoderMP3.h"
+#include "StreamEncoderWAV.h"
 #include "mod2midi.h"
 #include "vstplug.h"
 #include "../common/version.h"
@@ -1625,18 +1627,40 @@ void CModDoc::OnFileWaveConvert()
 void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 //-------------------------------------------------------------------------
 {
-	TCHAR fname[_MAX_FNAME] = _T("");
+	WAVEncoder wavencoder;
+	FLACEncoder flacencoder;
+	std::vector<EncoderFactoryBase*> encFactories;
+	encFactories.push_back(&wavencoder);
+	encFactories.push_back(&flacencoder);
+	OnFileWaveConvert(nMinOrder, nMaxOrder, encFactories);
+}
+
+void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, const std::vector<EncoderFactoryBase*> &encFactories)
+//-------------------------------------------------------------------------------------------------------------------------------
+{
+	ASSERT(!encFactories.empty());
+
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
-	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
-	_splitpath(GetPathName(), NULL, NULL, fname, NULL);
-	strcat_s(fname, CountOf(fname), ".wav");
+	if ((!pMainFrm) || (!m_SndFile.GetType()) || encFactories.empty()) return;
 
-	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1);
+	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1, &m_SndFile, 0, encFactories);
 	if (wsdlg.DoModal() != IDOK) return;
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", fname,
-		"Wave Files (*.wav)|*.wav||",
+	EncoderFactoryBase *encFactory = wsdlg.m_Settings.GetEncoderFactory();
+
+	std::string extension = encFactory->GetTraits().fileExtension;
+
+	TCHAR fname[_MAX_FNAME] = _T("");
+	_splitpath(GetPathName(), NULL, NULL, fname, NULL);
+	strcat_s(fname, CountOf(fname), ".");
+	strcat_s(fname, CountOf(fname), extension.c_str());
+
+	std::string filter = encFactory->GetTraits().fileDescription + " (*." + extension + ")|*." + extension + "||";
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false,
+		extension.c_str(),
+		fname,
+		filter.c_str(),
 		TrackerSettings::Instance().GetWorkingDirectory(DIR_EXPORT));
 	if(files.abort) return;
 
@@ -1781,7 +1805,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 			m_SndFile.SetRepeatCount(std::max(0, wsdlg.loopCount - 1));
 		}
 
-		CDoWaveConvert dwcdlg(&m_SndFile, thisName, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
+		CDoWaveConvert dwcdlg(&m_SndFile, thisName, wsdlg.m_Settings, pMainFrm);
 		dwcdlg.m_dwFileLimit = static_cast<DWORD>(wsdlg.m_dwFileLimit);
 		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
@@ -1825,67 +1849,29 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 void CModDoc::OnFileMP3Convert()
 //------------------------------
 {
-
-	// Initialize ACM Support
-	ACMConvert acmConvert(TrackerSettings::Instance().noACM);
-	if(!acmConvert.IsLayer3Present())
+	MP3Encoder mp3lame(MP3EncoderLame);
+	MP3Encoder mp3blade(MP3EncoderBlade);
+	MP3Encoder mp3acm(MP3EncoderACM);
+	FLACEncoder flacencoder;
+	WAVEncoder wavencoder;
+	std::vector<EncoderFactoryBase*> encoders;
+	if(mp3lame.IsAvailable())       encoders.push_back(&mp3lame);
+	if(mp3blade.IsAvailable())      encoders.push_back(&mp3blade);
+	if(mp3acm.IsAvailable())        encoders.push_back(&mp3acm);
+	if(flacencoder.IsAvailable())   encoders.push_back(&flacencoder);
+	if(wavencoder.IsAvailable())    encoders.push_back(&wavencoder);
+	if(encoders.empty())
 	{
-		Reporting::Error("No MP3 codec found. Please install an MP3 ACM codec or put lame_enc.dll in OpenMPT's root directory.", "OpenMPT - MP3 Export");
+		Reporting::Error(
+			"No MP3 codec found.\n"
+			"Please copy\n"
+			" - libmp3lame.dll or Lame_Enc.dll\n"
+			"into OpenMPT's root directory.\n"
+			"Alternatively, you can install a MP3 ACM codec.",
+			"OpenMPT - Export");
 		return;
 	}
-
-	int nFilterIndex = 0;
-	TCHAR sFName[_MAX_FNAME] = "";
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-
-	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
-	_splitpath(GetPathName(), NULL, NULL, sFName, NULL);
-	strcat_s(sFName, CountOf(sFName), ".mp3");
-
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mp3", sFName,
-		"MPEG Layer III Files (*.mp3)|*.mp3||",
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_EXPORT),
-		false,
-		&nFilterIndex);
-	if(files.abort) return;
-
-	MPEGLAYER3WAVEFORMAT wfx;
-	HACMDRIVERID hadid;
-
-	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	TrackerSettings::Instance().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
-
-	TCHAR s[_MAX_PATH], fext[_MAX_EXT];
-	strcpy(s, files.first_file.c_str());
-	_splitpath(s, NULL, NULL, NULL, fext);
-	if (strlen(fext) <= 1)
-	{
-		int l = strlen(s) - 1;
-		if ((l >= 0) && (s[l] == '.')) s[l] = 0;
-		strcpy(fext, (nFilterIndex == 2) ? ".wav" : ".mp3");
-		strcat(s, fext);
-	}
-	CLayer3Convert wsdlg(&m_SndFile, pMainFrm, acmConvert);
-	if(!m_SndFile.GetTitle().empty()) wsdlg.m_bSaveInfoField = TRUE;
-	if (wsdlg.DoModal() != IDOK) return;
-	wsdlg.GetFormat(&wfx, &hadid);
-	// Saving as mpeg file
-	BOOL bplaying = FALSE;
-	UINT pos = m_SndFile.GetCurrentPos();
-	bplaying = TRUE;
-	pMainFrm->PauseMod();
-	m_SndFile.SetCurrentPos(0);
-
-	m_SndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
-
-	// Saving file
-	CFileTagging *pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_FileTags : NULL;
-	CDoAcmConvert dwcdlg(&m_SndFile, s, &wfx.wfx, hadid, pTag, acmConvert, pMainFrm);
-	dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
-	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
-	dwcdlg.DoModal();
-	m_SndFile.SetCurrentPos(pos);
-	CMainFrame::UpdateAudioParameters(m_SndFile, TRUE);
+	OnFileWaveConvert(ORDERINDEX_INVALID, ORDERINDEX_INVALID, encoders);
 }
 
 

@@ -252,16 +252,37 @@ void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
 
 
 // Output to file: Initialize with filename.
-WAVWriter::WAVWriter(const char *filename) : f(nullptr), memory(nullptr), memSize(0)
-//----------------------------------------------------------------------------------
+WAVWriter::WAVWriter(const char *filename) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
+//----------------------------------------------------------------------------------------------------------------
 {
-	Open(filename);
+	f = fopen(filename, "w+b");
+	fileOwned = true;
+	Init();
+}
+
+
+// Output to file: Initialize with FILE*.
+WAVWriter::WAVWriter(FILE *file) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
+//------------------------------------------------------------------------------------------------------
+{
+	f = file;
+	fileOwned = false;
+	Init();
+}
+
+
+// Output to stream: Initialize with std::ostream*.
+WAVWriter::WAVWriter(std::ostream *stream) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
+//----------------------------------------------------------------------------------------------------------------
+{
+	s = stream;
+	Init();
 }
 
 
 // Output to clipboard: Initialize with pointer to memory and size of reserved memory.
-WAVWriter::WAVWriter(void *mem, size_t size) : f(nullptr), memory(static_cast<uint8 *>(mem)), memSize(size)
-//---------------------------------------------------------------------------------------------------------
+WAVWriter::WAVWriter(void *mem, size_t size) : f(nullptr), fileOwned(false), s(nullptr), memory(static_cast<uint8 *>(mem)), memSize(size)
+//---------------------------------------------------------------------------------------------------------------------------------------
 {
 	Init();
 }
@@ -271,15 +292,6 @@ WAVWriter::~WAVWriter()
 //---------------------
 {
 	Finalize();
-}
-
-
-// Open a file for writing.
-void WAVWriter::Open(const char *filename)
-//----------------------------------------
-{
-	f = fopen(filename, "w+b");
-	Init();
 }
 
 
@@ -318,10 +330,15 @@ size_t WAVWriter::Finalize()
 		size_t realSize = static_cast<size_t>(ftell(f));
 		ASSERT(totalSize == realSize);
 #endif
-		fclose(f);
+		if(fileOwned)
+		{
+			fclose(f);
+			fileOwned = false;
+		}
 	}
 
 	f = nullptr;
+	s = nullptr;
 	memory = nullptr;
 
 	return totalSize;
@@ -377,6 +394,9 @@ void WAVWriter::Seek(size_t pos)
 	if(f != nullptr)
 	{
 		fseek(f, position, SEEK_SET);
+	} else if(s != nullptr)
+	{
+		s->seekp(position);
 	}
 }
 
@@ -388,6 +408,9 @@ void WAVWriter::Write(const void *data, size_t numBytes)
 	if(f != nullptr)
 	{
 		fwrite(data, numBytes, 1, f);
+	} else if(s != nullptr)
+	{
+		s->write(static_cast<const char*>(data), numBytes);
 	} else if(memory != nullptr)
 	{
 		if(position <= memSize && numBytes <= memSize - position)
@@ -457,27 +480,40 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 
 
 // Write text tags to the file.
-void WAVWriter::WriteMetatags(const Metatags &tags)
+void WAVWriter::WriteMetatags(const FileTags &tags)
 //-------------------------------------------------
 {
 	StartChunk(RIFFChunk::idLIST);
 	const char info[] = { 'I', 'N', 'F', 'O' };
 	WriteArray(info);
 
-	for(Metatags::const_iterator iter = tags.begin(); iter != tags.end(); iter++)
+	WriteTag(RIFFChunk::idINAM, tags.title);
+	WriteTag(RIFFChunk::idIART, tags.artist);
+	WriteTag(RIFFChunk::idIPRD, tags.album);
+	WriteTag(RIFFChunk::idICRD, tags.year);
+	WriteTag(RIFFChunk::idICMT, tags.comments);
+	WriteTag(RIFFChunk::idIGNR, tags.genre);
+	WriteTag(RIFFChunk::idTURL, tags.url);
+	WriteTag(RIFFChunk::idISFT, tags.encoder);
+	//WriteTag(RIFFChunk::      , tags.bpm);
+	WriteTag(RIFFChunk::idTRCK, tags.trackno);
+}
+
+
+// Write a single tag into a open idLIST chunk
+void WAVWriter::WriteTag(RIFFChunk::id_type id, const std::string &text)
+//----------------------------------------------------------------------
+{
+	if(!text.empty())
 	{
-		const size_t length = iter->text.length() + 1;
-		if(length == 1)
-		{
-			continue;
-		}
+		const size_t length = text.length() + 1;
 
 		RIFFChunk chunk;
-		chunk.id = static_cast<uint32>(iter->id);
+		chunk.id = static_cast<uint32>(id);
 		chunk.length = length;
 		chunk.ConvertEndianness();
 		Write(chunk);
-		Write(iter->text.c_str(), length);
+		Write(text.c_str(), length);
 
 		if((length % 2u) != 0)
 		{
