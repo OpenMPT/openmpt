@@ -54,11 +54,11 @@ static std::string get_build_string() {
 }
 
 static std::string get_credits_string() {
-	return MptVersion::GetFullCreditsString();
+	return mpt::String::Convert(MptVersion::GetFullCreditsString(), mpt::CharsetISO8859_1, mpt::CharsetUTF8);
 }
 
 static std::string get_contact_string() {
-	return MptVersion::GetContactString();
+	return mpt::String::Convert(MptVersion::GetContactString(), mpt::CharsetISO8859_1, mpt::CharsetUTF8);
 }
 
 std::string get_string( const std::string & key ) {
