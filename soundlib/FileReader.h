@@ -804,10 +804,14 @@ public:
 	template <typename T>
 	bool ReadStructPartial(T &target, off_t partialSize = sizeof(T))
 	{
-		const off_t copyBytes = DataContainer().Read(reinterpret_cast<char *>(&target), streamPos, partialSize);
+		off_t copyBytes = std::min(partialSize, sizeof(T));
+		if(!CanRead(copyBytes))
+		{
+			copyBytes = BytesLeft();
+		}
+		DataContainer().Read(reinterpret_cast<char *>(&target), streamPos, copyBytes);
 		memset(reinterpret_cast<char *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
 		Skip(partialSize);
-
 		return true;
 	}
 
