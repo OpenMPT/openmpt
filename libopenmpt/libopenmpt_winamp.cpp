@@ -43,6 +43,30 @@
 
 static void apply_options();
 
+static std::string StringEncode( const std::wstring &src, UINT codepage )
+{
+	int required_size = WideCharToMultiByte( codepage, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr );
+	if(required_size <= 0)
+	{
+		return std::string();
+	}
+	std::vector<CHAR> encoded_string( required_size );
+	WideCharToMultiByte( codepage, 0, src.c_str(), -1, &encoded_string[0], encoded_string.size(), nullptr, nullptr );
+	return &encoded_string[0];
+}
+
+static std::wstring StringDecode( const std::string & src, UINT codepage )
+{
+	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, nullptr, 0 );
+	if(required_size <= 0)
+	{
+		return std::wstring();
+	}
+	std::vector<WCHAR> decoded_string( required_size );
+	MultiByteToWideChar( codepage, 0, src.c_str(), -1, &decoded_string[0], decoded_string.size() );
+	return &decoded_string[0];
+}
+
 static HMODULE settings_dll = NULL;
 
 struct self_winamp_t {
@@ -140,12 +164,12 @@ static void about( HWND hwndParent ) {
 	about << openmpt::string::get( openmpt::string::contact ) << std::endl;
 	about << std::endl;
 	about << "Show full credits?" << std::endl;
-	if ( MessageBox( hwndParent, about.str().c_str(), SHORT_TITLE, MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
+	if ( MessageBox( hwndParent, StringEncode( StringDecode( about.str(), CP_UTF8 ), CP_ACP ).c_str(), SHORT_TITLE, MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
 		return;
 	}
 	std::ostringstream credits;
 	credits << openmpt::string::get( openmpt::string::credits );
-	MessageBox( hwndParent, credits.str().c_str(), SHORT_TITLE, MB_ICONINFORMATION );
+	MessageBox( hwndParent, StringEncode( StringDecode( credits.str(), CP_UTF8 ), CP_ACP ).c_str(), SHORT_TITLE, MB_ICONINFORMATION );
 }
 
 static void init() {
