@@ -221,7 +221,7 @@ void CWaveConvert::FillInfo()
 	info += encTraits->fileDescription;
 	info += "\r\n";
 	info += "Encoder: ";
-	info += encTraits->name;
+	info += encTraits->encoderName;
 	info += "\r\n";
 	info += mpt::String::Replace(encTraits->description, "\n", "\r\n");
 	SetDlgItemText(IDC_EDIT10, info.c_str());

@@ -433,8 +433,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcFileClose, 1348, _T("File/Close"));
 	DefineKeyCommand(kcFileSave, 1349, _T("File/Save"));
 	DefineKeyCommand(kcFileSaveAs, 1350, _T("File/Save As"));
-	DefineKeyCommand(kcFileSaveAsWave, 1351, _T("File/Export as lossless"));
-	DefineKeyCommand(kcFileSaveAsMP3, 1352, _T("File/Export as lossy"));
+	DefineKeyCommand(kcFileSaveAsWave, 1351, _T("File/Export as lossless (Wave, FLAC)"));
+	DefineKeyCommand(kcFileSaveAsMP3, 1352, _T("File/Export as lossy (Opus, Vorbis, MP3"));
 	DefineKeyCommand(kcFileSaveMidi, 1353, _T("File/Export as MIDI"));
 	DefineKeyCommand(kcFileImportMidiLib, 1354, _T("File/Import MIDI Library"));
 	DefineKeyCommand(kcFileAddSoundBank, 1355, _T("File/Add Sound Bank"));

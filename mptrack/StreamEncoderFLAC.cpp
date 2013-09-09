@@ -263,7 +263,7 @@ FLACEncoder::FLACEncoder()
 	traits.fileExtension = "flac";
 	traits.fileShortDescription = "FLAC";
 	traits.fileDescription = "FLAC";
-	traits.name = "FLAC";
+	traits.encoderName = "libFLAC";
 	std::ostringstream description;
 	description << "Free Lossless Audio Codec" << std::endl;
 	description << "Vendor: " << FLAC__VENDOR_STRING << std::endl;

@@ -422,7 +422,7 @@ struct LameDynBind
 		traits.fileExtension = "mp3";
 		traits.fileShortDescription = "MP3";
 		traits.fileDescription = "MPEG-1/2 Layer 3";
-		traits.name = "LAME";
+		traits.encoderName = "libMP3Lame";
 		traits.description += "Version: ";
 		traits.description += (get_lame_version()?get_lame_version():"");
 		traits.description += "\n";
@@ -699,7 +699,7 @@ struct BladeDynBind
 		traits.fileExtension = "mp3";
 		traits.fileShortDescription = "MP3";
 		traits.fileDescription = "MPEG-1 Layer 3";
-		traits.name = lame ? "Lame_enc.dll" : "BladeEnc.dll";
+		traits.encoderName = lame ? "Lame_enc.dll" : "BladeEnc.dll";
 		std::ostringstream description;
 		BE_VERSION ver;
 		MemsetZero(ver);
@@ -1070,7 +1070,7 @@ struct AcmDynBind
 		{
 			name << "Microsoft Windows ACM " << ((ver>>24)&0xff) << "." << ((ver>>16)&0xff);
 		}
-		traits.name = name.str();
+		traits.encoderName = name.str();
 		for(std::set<std::string>::const_iterator i = drivers.begin(); i != drivers.end(); ++i)
 		{
 			traits.description += (*i);
