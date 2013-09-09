@@ -63,6 +63,7 @@ private:
 	void FillSamplerates();
 	void FillChannels();
 	void FillFormats();
+	void FillTags();
 
 public:
 	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile *sndfile, std::size_t defaultEncoder, const std::vector<EncoderFactoryBase*> &encFactories);
