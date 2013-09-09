@@ -1382,8 +1382,8 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 }
 
 
-LPCTSTR CSoundFile::GetSampleName(UINT nSample) const
-//---------------------------------------------------
+const char *CSoundFile::GetSampleName(UINT nSample) const
+//-------------------------------------------------------
 {
 	ASSERT(nSample <= GetNumSamples());
 	if (nSample < MAX_SAMPLES)
@@ -1400,7 +1400,7 @@ const char *CSoundFile::GetInstrumentName(INSTRUMENTINDEX nInstr) const
 //---------------------------------------------------------------------
 {
 	if((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))
-		return MPT_TEXT("");
+		return "";
 
 	ASSERT(nInstr <= GetNumInstruments());
 	return Instruments[nInstr]->name;

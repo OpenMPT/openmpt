@@ -26,11 +26,11 @@
 #include <ext/stdio_sync_filebuf.h>
 #endif
 
-#define str_tooMuchPatternData	(GetStrI18N((MPT_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
-#define str_pattern				(GetStrI18N((MPT_TEXT("pattern"))))
-#define str_PatternSetTruncationNote (GetStrI18N((MPT_TEXT("The module contains %u patterns but only %u patterns can be loaded in this OpenMPT version."))))
-#define str_LoadingIncompatibleVersion	MPT_TEXT("The file informed that it is incompatible with this version of OpenMPT. Loading was terminated.")
-#define str_LoadingMoreRecentVersion	MPT_TEXT("The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly.")
+#define str_tooMuchPatternData	(GetStrI18N(("Warning: File format limit was reached. Some pattern data may not get written to file.")))
+#define str_pattern				(GetStrI18N(("pattern")))
+#define str_PatternSetTruncationNote (GetStrI18N(("The module contains %u patterns but only %u patterns can be loaded in this OpenMPT version.")))
+#define str_LoadingIncompatibleVersion	"The file informed that it is incompatible with this version of OpenMPT. Loading was terminated."
+#define str_LoadingMoreRecentVersion	"The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly."
 
 const uint16 verMptFileVer = 0x891;
 const uint16 verMptFileVerLoadLimit = 0x1000; // If cwtv-field is greater or equal to this value,

@@ -39,7 +39,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	AddToLog(GetStrI18N(MPT_TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
+	AddToLog(GetStrI18N("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files."));
 	return false;
 
 #else
@@ -61,7 +61,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 	if(unmo3 == nullptr) // Didn't succeed.
 	{
-		AddToLog(GetStrI18N(MPT_TEXT("Loading MO3 file failed because unmo3.dll could not be loaded.")));
+		AddToLog(GetStrI18N("Loading MO3 file failed because unmo3.dll could not be loaded."));
 	}
 	else // case: dll loaded succesfully.
 	{

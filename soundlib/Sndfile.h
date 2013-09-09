@@ -480,7 +480,7 @@ public:
 	void SetCurrentOrder(ORDERINDEX nOrder);
 	std::string GetTitle() const { return songName; }
 	bool SetTitle(const std::string &newTitle); // Return true if title was changed.
-	LPCTSTR GetSampleName(UINT nSample) const;
+	const char *GetSampleName(UINT nSample) const;
 	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
@@ -806,7 +806,7 @@ public:
 
 
 extern const LPCSTR szNoteNames[12];
-extern const LPCTSTR szDefaultNoteNames[NOTE_MAX];
+extern const LPCSTR szDefaultNoteNames[NOTE_MAX];
 
 
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
