@@ -27,7 +27,7 @@ TODOS:
 -Handle const-status better(e.g. status check in unserialization)
 */
 
-const TCHAR CTuningCollection::s_FileExtension[4] = MPT_TEXT(".tc");
+const CHAR CTuningCollection::s_FileExtension[4] = ".tc";
 
 namespace CTuningS11n
 {
