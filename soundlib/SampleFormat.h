@@ -16,7 +16,7 @@ enum SampleFormatEnum
 	SampleFormatInt16     = 16,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatInt24     = 24,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatInt32     = 32,       // do not change value (for compatibility with old configuration settings)
-	SampleFormatFloat32   = 32 + 128, // Only supported as mixer output and ISoundDevice format, NOT supported by Mod2Wave settings dialog yet. Keep in mind to update all 3 cases at once.
+	SampleFormatFloat32   = 32 + 128, // do not change value (for compatibility with old configuration settings)
 	SampleFormatFixed5p27 =      255, // mixbuffer format
 	SampleFormatInvalid   =  0
 };

@@ -1980,7 +1980,7 @@ BOOL CSoundFile::ReadNote()
 	}
 
 	// Checking Max Mix Channels reached: ordering by volume
-	if ((m_nMixChannels >= m_MixerSettings.m_nMaxMixChannels) && !IsRenderingToDisc())
+	if(m_nMixChannels >= m_MixerSettings.m_nMaxMixChannels)
 	{
 		for(CHANNELINDEX i=0; i<m_nMixChannels; i++)
 		{

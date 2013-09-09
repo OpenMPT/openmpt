@@ -274,9 +274,6 @@
     <ClCompile Include="VstPresets.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
-    <ClCompile Include="ACMConvert.cpp">
-      <Filter>Source Files\mptrack</Filter>
-    </ClCompile>
     <ClCompile Include="AutoSaver.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
@@ -371,9 +368,6 @@
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
     <ClCompile Include="SelectPluginDialog.cpp">
-      <Filter>Source Files\mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="tagging.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
     <ClCompile Include="TrackerSettings.cpp">
@@ -495,6 +489,27 @@
     </ClCompile>
     <ClCompile Include="..\sounddev\SoundDeviceWaveout.cpp">
       <Filter>Source Files\sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Tagging.cpp">
+      <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamEncoder.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamEncoderVorbis.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamEncoderOpus.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamEncoderMP3.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamEncoderWAV.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamEncoderFLAC.cpp">
+      <Filter>Source Files\mptrack</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -726,9 +741,6 @@
     <ClInclude Include="VstPresets.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="ACMConvert.h">
-      <Filter>Header Files\mptrack</Filter>
-    </ClInclude>
     <ClInclude Include="AutoSaver.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
@@ -811,9 +823,6 @@
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
     <ClInclude Include="PatternCursor.h">
-      <Filter>Header Files\mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="tagging.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
     <ClInclude Include="TrackerSettings.h">
@@ -926,6 +935,27 @@
     </ClInclude>
     <ClInclude Include="..\sounddev\SoundDeviceWaveout.h">
       <Filter>Header Files\sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\Tagging.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamEncoder.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamEncoderVorbis.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamEncoderOpus.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamEncoderMP3.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamEncoderWAV.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamEncoderFLAC.h">
+      <Filter>Header Files\mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

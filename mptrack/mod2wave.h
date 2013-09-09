@@ -10,33 +10,63 @@
 
 #pragma once
 
-#include "tagging.h"
-
-class ACMConvert;
+#include "StreamEncoder.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Direct To Disk Recording
+
+
+struct CWaveConvertSettings
+{
+	std::vector<EncoderFactoryBase*> EncoderFactories;
+	std::size_t EncoderIndex;
+	bool Normalize;
+	uint32 SampleRate;
+	uint16 Channels;
+	SampleFormat FinalSampleFormat;
+	Encoder::Settings EncoderSettings;
+	FileTags Tags;
+	void SelectEncoder(std::size_t index);
+	EncoderFactoryBase *GetEncoderFactory() const;
+	const Encoder::Traits *GetTraits() const;
+	CWaveConvertSettings(std::size_t defaultEncoder, const std::vector<EncoderFactoryBase*> &encFactories);
+};
 
 //================================
 class CWaveConvert: public CDialog
 //================================
 {
 public:
-	WAVEFORMATEXTENSIBLE WaveFormat;
+	CWaveConvertSettings m_Settings;
+	const Encoder::Traits *encTraits;
+	CSoundFile *m_pSndFile;
 	ULONGLONG m_dwFileLimit;
 	DWORD m_dwSongLimit;
-	bool m_bSelectPlay, m_bNormalize, m_bHighQuality, m_bGivePlugsIdleTime;
+	bool m_bSelectPlay, m_bHighQuality, m_bGivePlugsIdleTime;
 	ORDERINDEX m_nMinOrder, m_nMaxOrder, m_nNumOrders;
 	int loopCount;
 
-	CComboBox m_CbnSampleRate, m_CbnSampleFormat;
+	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnSampleFormat;
 	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder;
 
 	bool m_bChannelMode;		// Render by channel
 	bool m_bInstrumentMode;	// Render by instrument
 
+	CEdit m_EditTitle, m_EditAuthor, m_EditURL, m_EditAlbum, m_EditYear;
+	CComboBox m_CbnGenre;
+
+	CEdit m_EditInfo;
+
+private:
+	void FillInfo();
+	void FillFileTypes();
+	void FillSamplerates();
+	void FillChannels();
+	void FillFormats();
+	void FillTags();
+
 public:
-	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders);
+	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile *sndfile, std::size_t defaultEncoder, const std::vector<EncoderFactoryBase*> &encFactories);
 
 public:
 	void UpdateDialog();
@@ -47,6 +77,9 @@ public:
 	afx_msg void OnCheck2();
 	afx_msg void OnCheckChannelMode();
 	afx_msg void OnCheckInstrMode();
+	afx_msg void OnFileTypeChanged();
+	afx_msg void OnSamplerateChanged();
+	afx_msg void OnChannelsChanged();
 	afx_msg void OnFormatChanged();
 	afx_msg void OnPlayerOptions(); //rewbs.resamplerConf
 	DECLARE_MESSAGE_MAP()
@@ -58,20 +91,20 @@ class CDoWaveConvert: public CDialog
 //==================================
 {
 public:
-	PWAVEFORMATEX m_pWaveFormat;
+	CWaveConvertSettings m_Settings;
 	CSoundFile *m_pSndFile;
 	LPCSTR m_lpszFileName;
 	DWORD m_dwFileLimit, m_dwSongLimit;
 	UINT m_nMaxPatterns;
-	bool m_bAbort, m_bNormalize, m_bGivePlugsIdleTime;
+	bool m_bAbort, m_bGivePlugsIdleTime;
 
 public:
-	CDoWaveConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, bool bNorm, CWnd *parent = NULL):CDialog(IDD_PROGRESS, parent)
+	CDoWaveConvert(CSoundFile *sndfile, LPCSTR fname, CWaveConvertSettings settings, CWnd *parent = NULL)
+		: CDialog(IDD_PROGRESS, parent)
+		, m_Settings(settings)
 		{ m_pSndFile = sndfile; 
 		  m_lpszFileName = fname; 
-		  m_pWaveFormat = pwfx; 
 		  m_bAbort = false; 
-		  m_bNormalize = bNorm; 
 		  m_dwFileLimit = m_dwSongLimit = 0; 
 		  m_nMaxPatterns = 0; }
 	BOOL OnInitDialog();
@@ -81,69 +114,3 @@ public:
 };
 
 
-//==================================
-class CLayer3Convert: public CDialog
-//==================================
-{
-public:
-	enum { MAX_FORMATS=32 };
-	enum { MAX_DRIVERS=32 };
-	DWORD m_dwFileLimit, m_dwSongLimit;
-	BOOL m_bSaveInfoField;
-	CFileTagging m_FileTags;
-
-protected:
-	CSoundFile *m_pSndFile;
-	CComboBox m_CbnFormat, m_CbnDriver, m_CbnGenre;
-	CEdit m_EditAuthor, m_EditURL, m_EditAlbum, m_EditYear;
-	UINT m_nFormatIndex, m_nDriverIndex, m_nNumFormats, m_nNumDrivers;
-	MPEGLAYER3WAVEFORMAT Formats[MAX_FORMATS];
-	HACMDRIVERID Drivers[MAX_DRIVERS];
-	BOOL m_bInitialFound, m_bDriversEnumerated;
-	ACMConvert &acmConvert;
-
-public:
-	CLayer3Convert(CSoundFile *pSndFile, CWnd *parent, ACMConvert &acmConvert_):CDialog(IDD_LAYER3CONVERT, parent), acmConvert(acmConvert_)
-		{ m_dwFileLimit = m_dwSongLimit = m_nFormatIndex = m_nDriverIndex = 0; m_bSaveInfoField = FALSE; m_pSndFile = pSndFile; }
-	void GetFormat(PMPEGLAYER3WAVEFORMAT pwfx, HACMDRIVERID *phadid);
-
-protected:
-	BOOL FormatEnumCB(HACMDRIVERID hdid, LPACMFORMATDETAILS pafd, DWORD fdwSupport);
-	BOOL DriverEnumCB(HACMDRIVERID hdid, LPACMFORMATDETAILS pafd, DWORD fdwSupport);
-	VOID UpdateDialog();
-
-public:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	afx_msg void OnCheck1();
-	afx_msg void OnCheck2();
-	DECLARE_MESSAGE_MAP()
-
-protected:
-	static BOOL CALLBACK AcmFormatEnumCB(HACMDRIVERID, LPACMFORMATDETAILS, DWORD_PTR, DWORD);
-};
-
-
-//=================================
-class CDoAcmConvert: public CDialog
-//=================================
-{
-public:
-	CSoundFile *m_pSndFile;
-	LPCSTR m_lpszFileName;
-	DWORD m_dwFileLimit, m_dwSongLimit;
-	BOOL m_bAbort, m_bSaveInfoField;
-	PWAVEFORMATEX m_pwfx;
-	HACMDRIVERID m_hadid;
-	CFileTagging m_FileTags;
-	ACMConvert &acmConvert;
-
-public:
-	CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, HACMDRIVERID hadid, CFileTagging *pInfo, ACMConvert &acmConvert_, CWnd *parent=NULL);
-	BOOL OnInitDialog();
-	void OnCancel() { m_bAbort = TRUE; }
-	afx_msg void OnButton1();
-	DECLARE_MESSAGE_MAP()
-
-};
