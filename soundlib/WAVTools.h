@@ -11,6 +11,7 @@
 #pragma once
 
 #include "ChunkReader.h"
+#include "Tagging.h"
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -62,8 +63,20 @@ struct PACKED RIFFChunk
 		id____	= 0x00000000,	// Found when loading buggy MPT samples
 
 		// Identifiers in "LIST" chunk
-		idINAM	= 0x4D414E49,	// "INAM"
-		idISFT	= 0x54465349,	// "ISFT"
+		idINAM	= 0x4D414E49, // title
+		idISFT	= 0x54465349, // software
+		idICOP	= 0x504F4349, // copyright
+		idIART	= 0x54524149, // artist
+		idIPRD	= 0x44525049, // product (album)
+		idICMT	= 0x544D4349, // comment
+		idIENG	= 0x474E4549, // engineer
+		idISBJ	= 0x4A425349, // subject
+		idIGNR	= 0x524E4749, // genre
+		idICRD	= 0x44524349, // date created
+
+		idYEAR  = 0x52414559, // year
+		idTRCK  = 0x4B435254, // track number
+		idTURL  = 0x4C535554, // url
 	};
 
 	typedef ChunkIdentifiers id_type;
@@ -375,6 +388,9 @@ class WAVWriter
 protected:
 	// When writing to file: File handle
 	FILE *f;
+	bool fileOwned;
+	// When writing to a stream: Stream pointer
+	std::ostream *s;
 	// When writing to memory: Memory address + length
 	uint8 *memory;
 	size_t memSize;
@@ -389,32 +405,19 @@ protected:
 	RIFFChunk chunkHeader;
 
 public:
-
-	//============
-	struct Metatag
-	//============
-	{
-		Metatag(RIFFChunk::id_type tagID, std::string tagText) : id(tagID), text(tagText) { }
-
-		RIFFChunk::id_type id;
-		std::string text;
-	};
-
-	typedef std::vector<Metatag> Metatags;
-
-public:
-	// Output to file: Initialize with filename.
+	// Output to file: Initialize with filename. The created FILE* is owned by this instance.
 	WAVWriter(const char *filename);
+	// Output to file: Initialize with FILE*.
+	WAVWriter(FILE *file);
+	// Output to stream: Initialize with std::ostream*.
+	WAVWriter(std::ostream *stream);
 	// Output to clipboard: Initialize with pointer to memory and size of reserved memory.
 	WAVWriter(void *mem, size_t size);
 
 	~WAVWriter();
 
-	// Open a file for writing.
-	void Open(const char *filename);
-
 	// Check if anything can be written to the file.
-	bool IsValid() const { return f != nullptr || memory != nullptr; }
+	bool IsValid() const { return f != nullptr || s != nullptr || memory != nullptr; }
 
 	// Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
 	size_t Finalize();
@@ -438,6 +441,12 @@ public:
 		Write(&data, sizeof(T));
 	}
 
+	// Write a buffer to the file.
+	void WriteBuffer(const char *data, size_t size)
+	{
+		Write(data, size);
+	}
+
 	// Write an array to the file.
 	template<typename T, size_t size>
 	void WriteArray(const T (&data)[size])
@@ -448,7 +457,7 @@ public:
 	// Write the WAV format to the file.
 	void WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChannels, WAVFormatChunk::SampleFormats encoding);
 	// Write text tags to the file.
-	void WriteMetatags(const Metatags &tags);
+	void WriteMetatags(const FileTags &tags);
 	// Write a sample loop information chunk to the file.
 	void WriteLoopInformation(const ModSample &sample);
 	// Write MPT's sample information chunk to the file.
@@ -463,6 +472,9 @@ protected:
 
 	// Write some data to the file.
 	void Write(const void *data, size_t numBytes);
+
+	// Write a single tag into a open idLIST chunk
+	void WriteTag(RIFFChunk::id_type id, const std::wstring &wideText);
 };
 
 #endif // MODPLUG_NO_FILESAVE

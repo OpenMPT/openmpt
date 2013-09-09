@@ -101,7 +101,6 @@
 #define IDD_MIDIMACRO                   404
 #define IDD_WAVECOMPRESSION             405
 #define IDD_CHORDEDIT                   406
-#define IDD_LAYER3CONVERT               407
 #define IDD_SPLASHSCREEN                408
 #define IDD_TREEVIEW                    409
 #define IDD_MOD2MIDI                    420

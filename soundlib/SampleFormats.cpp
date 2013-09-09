@@ -18,6 +18,7 @@
 #endif //MODPLUG_TRACKER
 #include "../common/AudioCriticalSection.h"
 #include "Wav.h"
+#include "Tagging.h"
 #include "ITTools.h"
 #include "XMTools.h"
 #include "S3MTools.h"
@@ -485,9 +486,9 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 	file.WriteLoopInformation(sample);
 	file.WriteExtraInformation(sample, GetType());
 	
-	WAVWriter::Metatags tags;
-	tags.push_back(WAVWriter::Metatag(RIFFChunk::idINAM, m_szNames[nSample]));
-	tags.push_back(WAVWriter::Metatag(RIFFChunk::idISFT, MptVersion::GetOpenMPTVersionStr()));
+	FileTags tags;
+	tags.title = mpt::String::Decode(m_szNames[nSample], mpt::CharsetLocale);
+	tags.encoder = mpt::String::Decode(MptVersion::GetOpenMPTVersionStr(), mpt::CharsetLocale);
 	file.WriteMetatags(tags);
 	
 	return true;

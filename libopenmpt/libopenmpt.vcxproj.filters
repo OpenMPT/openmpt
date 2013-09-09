@@ -245,6 +245,9 @@
     <ClInclude Include="..\soundlib\SampleFormat.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\Tagging.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp">
@@ -500,6 +503,9 @@
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\MixerLoops.cpp">
+      <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\Tagging.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
   </ItemGroup>

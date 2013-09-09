@@ -84,7 +84,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib dsound.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib dsound.lib msacm32.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="2"
@@ -191,7 +191,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib dsound.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib dsound.lib msacm32.lib"
 				OutputFile=".\Bin/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -240,10 +240,6 @@
 			>
 			<File
 				RelativePath=".\AbstractVstEditor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ACMConvert.cpp"
 				>
 			</File>
 			<File
@@ -575,11 +571,35 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\StreamEncoder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderFLAC.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderMP3.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderOpus.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderVorbis.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderWAV.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\Tables.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\tagging.cpp"
+				RelativePath="..\soundlib\Tagging.cpp"
 				>
 			</File>
 			<File
@@ -826,10 +846,6 @@
 			>
 			<File
 				RelativePath=".\AbstractVstEditor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ACMConvert.h"
 				>
 			</File>
 			<File
@@ -1169,6 +1185,30 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StreamEncoder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderFLAC.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderMP3.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderOpus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderVorbis.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StreamEncoderWAV.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\StringFixer.h"
 				>
 			</File>
@@ -1185,7 +1225,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\tagging.h"
+				RelativePath="..\soundlib\Tagging.h"
 				>
 			</File>
 			<File

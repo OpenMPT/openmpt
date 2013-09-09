@@ -269,13 +269,13 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	bool m_bNoAcm, m_bNoDls, m_bSafeMode, m_bNoPlugins,
+	bool m_bNoDls, m_bSafeMode, m_bNoPlugins,
 		 m_bPortable, m_bNoSettingsOnNewVersion;
 
 public:
 	CMPTCommandLineInfo()
 	{
-		m_bNoAcm = m_bNoDls = m_bSafeMode =
+		m_bNoDls = m_bSafeMode =
 		m_bNoPlugins = m_bNoSettingsOnNewVersion = m_bPortable = false;
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
@@ -289,7 +289,6 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 	{
 		if (!lstrcmpi(lpszParam, "nologo")) { m_bShowSplash = FALSE; return; } else
 		if (!lstrcmpi(lpszParam, "nodls")) { m_bNoDls = true; return; } else
-		if (!lstrcmpi(lpszParam, "noacm")) { m_bNoAcm = true; return; } else
 		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; return; } else
 		if (!lstrcmpi(lpszParam, "portable")) { m_bPortable = true; return; } else
 		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = true; return; }
@@ -802,7 +801,6 @@ BOOL CTrackApp::InitInstance()
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
-	TrackerSettings::Instance().noACM = cmdInfo.m_bNoAcm;
 
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
