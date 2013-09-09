@@ -87,8 +87,8 @@ static forceinline int32 dither_rand(uint32 &a, uint32 &b)
 	return (int32)b;
 }
 
-static void C_Dither(int *pBuffer, UINT nSamples, UINT nBits, DitherModPlugState *state)
-//--------------------------------------------------------------------------------------
+static void C_Dither(int *pBuffer, std::size_t count, UINT nBits, DitherModPlugState *state)
+//------------------------------------------------------------------------------------------
 {
 	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
 	{
@@ -101,7 +101,7 @@ static void C_Dither(int *pBuffer, UINT nSamples, UINT nBits, DitherModPlugState
 	uint32 a = state ? state->rng_a : global_a;
 	uint32 b = state ? state->rng_b : global_b;
 
-	while(nSamples--)
+	while(count--)
 	{
 		*pBuffer += dither_rand(a, b) >> (nBits + MIXING_ATTENUATION + 1);
 		pBuffer++;
@@ -112,13 +112,13 @@ static void C_Dither(int *pBuffer, UINT nSamples, UINT nBits, DitherModPlugState
 
 }
 
-static void Dither_ModPlug(int *pBuffer, UINT nSamples, UINT nChannels, UINT nBits, DitherModPlugState &state)
-//------------------------------------------------------------------------------------------------------------
+static void Dither_ModPlug(int *pBuffer, std::size_t count, std::size_t channels, UINT nBits, DitherModPlugState &state)
+//----------------------------------------------------------------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
-		X86_Dither(pBuffer, nSamples * nChannels, nBits, &state);
+		X86_Dither(pBuffer, count * channels, nBits, &state);
 	#else // !ENABLE_X86
-		C_Dither(pBuffer, nSamples * nChannels, nBits, &state);
+		C_Dither(pBuffer, count * channels, nBits, &state);
 	#endif // ENABLE_X86
 }
 
