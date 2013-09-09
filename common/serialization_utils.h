@@ -266,7 +266,7 @@ class Ssb
 //=======
 {
 public:
-	typedef void (*fpLogFunc_t)(const TCHAR*, ...);
+	typedef void (*fpLogFunc_t)(const char*, ...);
 
 	enum ReadRv // Read return value.
 	{
@@ -374,7 +374,7 @@ public:
 	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
 
 	// Write given string to log if log func is defined.
-	void AddToLog(LPCTSTR psz) {if (m_fpLogFunc) m_fpLogFunc(psz);}
+	void AddToLog(const char *psz) {if (m_fpLogFunc) m_fpLogFunc(psz);}
 
 private:
 	// Reads map to cache.
@@ -394,7 +394,7 @@ private:
 	// Called after writing an item.
 	void OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite);
 	
-	void AddNote(const SsbStatus s, const SsbStatus mask, const TCHAR* sz);
+	void AddNote(const SsbStatus s, const SsbStatus mask, const char* sz);
 
 	void AddReadNote(const SsbStatus s);
 
@@ -413,7 +413,7 @@ private:
 				  const size_t nIdSize,
 				  const RposType& rposDataStart,
 				  const DataSize& nDatasize,
-				  const TCHAR* pszDesc);
+				  const char* pszDesc);
 
 	void ResetReadstatus();
 	void ResetWritestatus() {m_Status = SNT_NONE;}
