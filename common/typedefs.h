@@ -306,11 +306,8 @@ typedef DWORD *       LPDWORD;
 typedef INT *         LPINT;
 typedef LONG *        LPLONG;
 
-typedef char          TCHAR;
 typedef const char *  LPCSTR;
 typedef char *        LPSTR;
-typedef const char *  LPCTSTR;
-typedef char *        LPTSTR;
 
 // for BOOL
 #define TRUE (1)
