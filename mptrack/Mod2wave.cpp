@@ -173,25 +173,12 @@ BOOL CWaveConvert::OnInitDialog()
 	FillChannels();
 	FillFormats();
 
-	// tags
-	if(m_Settings.EncoderSettings.Tags)
-	{
-		CheckDlgButton(IDC_CHECK7, MF_CHECKED);
-	} else
-	{
-		CheckDlgButton(IDC_CHECK7, MF_UNCHECKED);
-	}
 	SetDlgItemText(IDC_EDIT11, m_pSndFile->GetTitle().c_str());
-	if(encTraits)
-	{
-		for(std::vector<std::string>::const_iterator genre = encTraits->genres.begin(); genre != encTraits->genres.end(); ++genre)
-		{
-			m_CbnGenre.AddString((*genre).c_str());
-		}
-	}
 	m_EditYear.SetLimitText(4);
 	CTime tTime = CTime::GetCurrentTime();
 	m_EditYear.SetWindowText(tTime.Format("%Y"));
+
+	FillTags();
 
 	FillInfo();
 
@@ -200,7 +187,7 @@ BOOL CWaveConvert::OnInitDialog()
 }
 
 
-void CWaveConvert::FillInfo()
+void CWaveConvert::FillTags()
 //---------------------------
 {
 	const bool canTags = encTraits->canTags;
@@ -213,6 +200,21 @@ void CWaveConvert::FillInfo()
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), canTags?TRUE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT8), canTags?TRUE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9), canTags?TRUE:FALSE);
+
+	m_CbnGenre.ResetContent();
+	if(!encTraits->genres.empty())
+	{
+		for(std::vector<std::string>::const_iterator genre = encTraits->genres.begin(); genre != encTraits->genres.end(); ++genre)
+		{
+			m_CbnGenre.AddString((*genre).c_str());
+		}
+	}
+}
+
+
+void CWaveConvert::FillInfo()
+//---------------------------
+{
 
 	std::string info;
 	info += "Format: ";
@@ -375,6 +377,7 @@ void CWaveConvert::OnFileTypeChanged()
 	FillSamplerates();
 	FillChannels();
 	FillFormats();
+	FillTags();
 	FillInfo();
 }
 
