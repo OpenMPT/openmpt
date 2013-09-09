@@ -91,7 +91,7 @@ std::string Encode(const std::wstring &src, Charset charset)
 			return std::string();
 		}
 		std::vector<CHAR> encoded_string(required_size);
-		WideCharToMultiByte(codepage, 0, src.c_str(), -1, &encoded_string[0], encoded_string.size(), nullptr, nullptr);
+		WideCharToMultiByte(codepage, 0, src.c_str(), -1, &encoded_string[0], required_size, nullptr, nullptr);
 		return &encoded_string[0];
 	#else // !WIN32
 		iconv_t conv = iconv_t();
@@ -125,7 +125,7 @@ std::wstring Decode(const std::string &src, Charset charset)
 			return std::wstring();
 		}
 		std::vector<WCHAR> decoded_string(required_size);
-		MultiByteToWideChar(codepage, 0, src.c_str(), -1, &decoded_string[0], decoded_string.size());
+		MultiByteToWideChar(codepage, 0, src.c_str(), -1, &decoded_string[0], required_size);
 		return &decoded_string[0];
 	#else // !WIN32
 		iconv_t conv = iconv_t();
