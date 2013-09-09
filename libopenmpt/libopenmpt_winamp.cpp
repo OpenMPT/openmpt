@@ -75,9 +75,9 @@ struct self_winamp_t {
 	int samplerate;
 	int channels;
 	std::string cached_filename;
-	std::string cached_title;
+	std::wstring cached_title;
 	int cached_length;
-	std::string cached_infotext;
+	std::wstring cached_infotext;
 	std::int64_t decode_position_frames;
 	openmpt::module * mod;
 	HANDLE PlayThread;
@@ -100,9 +100,9 @@ struct self_winamp_t {
 		samplerate = settings.samplerate;
 		channels = settings.channels;
 		cached_filename = "";
-		cached_title = "";
+		cached_title = std::wstring();
 		cached_length = 0;
-		cached_infotext = "";
+		cached_infotext = std::wstring();
 		decode_position_frames = 0;
 		mod = 0;
 		PlayThread = 0;
@@ -135,13 +135,13 @@ extern In_Module inmod;
 
 static DWORD WINAPI DecodeThread( LPVOID );
 
-static std::string generate_infotext( const std::string & filename, const openmpt::module & mod ) {
-	std::ostringstream str;
-	str << "filename: " << filename << std::endl;
-	str << "duration: " << mod.get_duration_seconds() << "seconds" << std::endl;
+static std::wstring generate_infotext( const std::string & filename, const openmpt::module & mod ) {
+	std::wostringstream str;
+	str << L"filename: " << StringDecode( filename, CP_ACP ) << std::endl;
+	str << L"duration: " << mod.get_duration_seconds() << L"seconds" << std::endl;
 	std::vector<std::string> metadatakeys = mod.get_metadata_keys();
 	for ( std::vector<std::string>::iterator key = metadatakeys.begin(); key != metadatakeys.end(); ++key ) {
-		str << *key << ": " << mod.get_metadata(*key) << std::endl;
+		str << StringDecode( *key, CP_UTF8 ) << L": " << StringDecode( mod.get_metadata(*key), CP_UTF8 ) << std::endl;
 	}
 	return str.str();
 }
@@ -151,7 +151,7 @@ static void config( HWND hwndParent ) {
 		openmpt::settings::edit( self->settings, hwndParent, SHORT_TITLE );
 		apply_options();
 	} else {
-		MessageBox( hwndParent, "libopenmpt_settings.dll failed to load. Please check if it is in the same folder as in_openmpt.dll and that .NET framework v4.0 is installed.", SHORT_TITLE, MB_ICONERROR );
+		MessageBox( hwndParent, TEXT("libopenmpt_settings.dll failed to load. Please check if it is in the same folder as in_openmpt.dll and that .NET framework v4.0 is installed."), TEXT(SHORT_TITLE), MB_ICONERROR );
 	}
 }
 
@@ -164,17 +164,17 @@ static void about( HWND hwndParent ) {
 	about << openmpt::string::get( openmpt::string::contact ) << std::endl;
 	about << std::endl;
 	about << "Show full credits?" << std::endl;
-	if ( MessageBox( hwndParent, StringEncode( StringDecode( about.str(), CP_UTF8 ), CP_ACP ).c_str(), SHORT_TITLE, MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
+	if ( MessageBox( hwndParent, StringDecode( about.str(), CP_UTF8 ).c_str(), TEXT(SHORT_TITLE), MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
 		return;
 	}
 	std::ostringstream credits;
 	credits << openmpt::string::get( openmpt::string::credits );
-	MessageBox( hwndParent, StringEncode( StringDecode( credits.str(), CP_UTF8 ), CP_ACP ).c_str(), SHORT_TITLE, MB_ICONINFORMATION );
+	MessageBox( hwndParent, StringDecode( credits.str(), CP_UTF8 ).c_str(), TEXT(SHORT_TITLE), MB_ICONINFORMATION );
 }
 
 static void init() {
 	if ( !settings_dll ) {
-		settings_dll = LoadLibrary( "libopenmpt_settings.dll" );
+		settings_dll = LoadLibrary( TEXT("libopenmpt_settings.dll") );
 	}
 	if ( !self ) {
 		self = new self_winamp_t();
@@ -206,7 +206,7 @@ static int play( char * fn ) {
 		std::ifstream s( fn, std::ios::binary );
 		self->mod = new openmpt::module( s );
 		self->cached_filename = fn;
-		self->cached_title = self->mod->get_metadata( "title" );
+		self->cached_title = StringDecode( self->mod->get_metadata( "title" ), CP_UTF8 );
 		self->cached_length = static_cast<int>( self->mod->get_duration_seconds() * 1000.0 );
 		self->cached_infotext = generate_infotext( self->cached_filename, *self->mod );
 		apply_options();
@@ -285,11 +285,11 @@ static int infobox( char * fn, HWND hWndParent ) {
 		try {
 			std::ifstream s( fn, std::ios::binary );
 			openmpt::module mod( s );
-			MessageBox( hWndParent, generate_infotext( fn, mod ).c_str(), SHORT_TITLE, 0 );
+			MessageBox( hWndParent, generate_infotext( fn, mod ).c_str(), TEXT(SHORT_TITLE), 0 );
 		} catch ( ... ) {
 		}
 	} else {
-		MessageBox( hWndParent, self->cached_infotext.c_str(), SHORT_TITLE, 0 );
+		MessageBox( hWndParent, self->cached_infotext.c_str(), TEXT(SHORT_TITLE), 0 );
 	}
 	return 0;
 }
@@ -300,7 +300,7 @@ static void getfileinfo( char * filename, char * title, int * length_in_ms ) {
 			*length_in_ms = self->cached_length;
 		}
 		if ( title ) {
-			strcpy( title, self->cached_title.c_str() );
+			strcpy( title, StringEncode( self->cached_title, CP_ACP ).c_str() );
 		}
 	} else {
 		try {
@@ -310,7 +310,7 @@ static void getfileinfo( char * filename, char * title, int * length_in_ms ) {
 				*length_in_ms = static_cast<int>( mod.get_duration_seconds() * 1000.0 );
 			}
 			if ( title ) {
-				strcpy( title, mod.get_metadata("title").c_str() );
+				strcpy( title, StringEncode( StringDecode( mod.get_metadata("title"), CP_UTF8 ), CP_ACP ).c_str() );
 			}
 		} catch ( ... ) {
 		}

@@ -264,12 +264,12 @@ static void WINAPI openmpt_About( HWND win ) {
 	about << openmpt::string::get( openmpt::string::contact ) << std::endl;
 	about << std::endl;
 	about << "Show full credits?" << std::endl;
-	if ( MessageBox( win, StringEncode( StringDecode( about.str(), CP_UTF8 ), CP_ACP ).c_str(), SHORT_TITLE, MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
+	if ( MessageBox( win, StringDecode( about.str(), CP_UTF8 ).c_str(), TEXT(SHORT_TITLE), MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
 		return;
 	}
 	std::ostringstream credits;
 	credits << openmpt::string::get( openmpt::string::credits );
-	MessageBox( win, StringEncode( StringDecode( credits.str(), CP_UTF8 ), CP_ACP ).c_str(), SHORT_TITLE, MB_ICONINFORMATION );
+	MessageBox( win, StringDecode( credits.str(), CP_UTF8 ).c_str(), TEXT(SHORT_TITLE), MB_ICONINFORMATION );
 }
 
 static void WINAPI openmpt_Config( HWND win ) {
@@ -277,7 +277,7 @@ static void WINAPI openmpt_Config( HWND win ) {
 		openmpt::settings::edit( self->settings, win, SHORT_TITLE );
 		apply_and_save_options();
 	} else {
-		MessageBox( win, "libopenmpt_settings.dll failed to load. Please check if it is in the same folder as xmp-openmpt.dll and that .NET framework v4.0 is installed.", SHORT_TITLE, MB_ICONERROR );
+		MessageBox( win, TEXT("libopenmpt_settings.dll failed to load. Please check if it is in the same folder as xmp-openmpt.dll and that .NET framework v4.0 is installed."), TEXT(SHORT_TITLE), MB_ICONERROR );
 	}
 }
 
@@ -955,7 +955,7 @@ void xmp_openmpt_on_dll_load() {
 	} else {
 		xmpin.exts = xmp_openmpt_default_exts;
 	}
-	settings_dll = LoadLibrary( "libopenmpt_settings.dll" );
+	settings_dll = LoadLibrary( TEXT("libopenmpt_settings.dll") );
 	self = new self_xmplay_t();
 }
 
