@@ -1925,8 +1925,8 @@ BEGIN
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
         MENUITEM "Save as Template...",         ID_FILE_SAVEASTEMPLATE
         MENUITEM "Export &unraped...",          ID_FILE_SAVECOMPAT
-        MENUITEM "Export as lossless (.&wav, .flac)...", ID_FILE_SAVEASWAVE
-        MENUITEM "Export as lossy (.opus, .vorbis, .m&p3)...", ID_FILE_SAVEASMP3
+        MENUITEM "Export as lossless (&Wave, FLAC)...", ID_FILE_SAVEASWAVE
+        MENUITEM "Export as lossy (Opus, Vorbis, M&P3)...", ID_FILE_SAVEASMP3
         MENUITEM "Export as M&IDI...",          ID_FILE_SAVEMIDI
         MENUITEM SEPARATOR
         MENUITEM "Import &MIDI Library...",     ID_IMPORT_MIDILIB

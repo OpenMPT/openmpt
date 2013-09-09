@@ -167,7 +167,7 @@ WAVEncoder::WAVEncoder()
 	traits.fileExtension = "wav";
 	traits.fileShortDescription = "Wave";
 	traits.fileDescription = "Wave";
-	traits.name = "WAV";
+	traits.encoderName = "OpenMPT";
 	traits.description = "Microsoft RIFF WAVE";
 	traits.canTags = true;
 	traits.maxChannels = 4;

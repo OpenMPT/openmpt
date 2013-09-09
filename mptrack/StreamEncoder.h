@@ -81,7 +81,7 @@ namespace Encoder
 		std::string fileExtension;
 		std::string fileDescription;
 		std::string fileShortDescription;
-		std::string name;
+		std::string encoderName;
 		std::string description;
 
 		bool canTags;
