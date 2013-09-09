@@ -38,7 +38,7 @@ static const char * strdup( const char * src ) {
 
 class callbacks_streambuf : public std::streambuf {
 public:
-	callbacks_streambuf( openmpt_stream_callbacks callbacks_, void * stream_ ) : callbacks(callbacks_), stream(stream_), put_back(4096), buf_size(65536) {
+	callbacks_streambuf( openmpt_stream_callbacks callbacks_, void * stream_ ) : callbacks(callbacks_), stream(stream_), put_back(4096), buf_size(65536), buffer(buf_size) {
 		return;
 	}
 private:
