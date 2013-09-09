@@ -70,6 +70,30 @@ public:
 #ifndef MODPLUG_TRACKER
 
 template<typename Tsample>
+void ApplyGainBeforeConversionIfAppropriate(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk, float gainFactor)
+{
+	// Apply final output gain for non floating point output
+	ApplyGain(MixSoundBuffer, channels, countChunk, Util::Round<int32>(gainFactor * (1<<16)));
+}
+template<>
+void ApplyGainBeforeConversionIfAppropriate<float>(int * /*MixSoundBuffer*/, std::size_t /*channels*/, std::size_t /*countChunk*/, float /*gainFactor*/)
+{
+	// nothing
+}
+
+template<typename Tsample>
+void ApplyGainAfterConversionIfAppropriate(Tsample * /*buffer*/, Tsample * const * /*buffers*/, std::size_t /*countRendered*/, std::size_t /*channels*/, std::size_t /*countChunk*/, float /*gainFactor*/)
+{
+	// nothing
+}
+template<>
+void ApplyGainAfterConversionIfAppropriate<float>(float *buffer, float * const *buffers, std::size_t countRendered, std::size_t channels, std::size_t countChunk, float gainFactor)
+{
+	// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
+	ApplyGain(buffer, buffers, countRendered, channels, countChunk, gainFactor);
+}
+
+template<typename Tsample>
 class AudioReadTargetGainBuffer
 	: public AudioReadTargetBuffer<Tsample>
 {
@@ -88,22 +112,13 @@ public:
 public:
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
 	{
-		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat;
 		const std::size_t countRendered = Tbase::GetRenderedCount();
 
-		if(sampleFormat.IsInt())
-		{
-			// Apply final output gain for non floating point output
-			ApplyGain(MixSoundBuffer, channels, countChunk, Util::Round<int32>(gainFactor * (1<<16)));
-		}
+		ApplyGainBeforeConversionIfAppropriate<Tsample>(MixSoundBuffer, channels, countChunk, gainFactor);
 
 		Tbase::DataCallback(MixSoundBuffer, channels, countChunk);
 
-		if(sampleFormat.IsFloat())
-		{
-			// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-			ApplyGain(reinterpret_cast<float*>(Tbase::outputBuffer), reinterpret_cast<float*const*>(Tbase::outputBuffers), countRendered, channels, countChunk, gainFactor);
-		}
+		ApplyGainAfterConversionIfAppropriate<Tsample>(Tbase::outputBuffer, Tbase::outputBuffers, countRendered, channels, countChunk, gainFactor);
 
 	}
 };
