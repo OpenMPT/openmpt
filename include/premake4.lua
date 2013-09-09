@@ -191,6 +191,7 @@ solution "include"
    "flac/include/FLAC/stream_decoder.h",
    "flac/include/FLAC/stream_encoder.h",
   }
+  buildoptions { "/wd4267", "/wd4334" }
   configuration "*Lib"
    defines { "FLAC__NO_DLL" }
   configuration "vs2010"
@@ -265,7 +266,7 @@ solution "include"
    "portaudio/include/pa_win_wmme.h",
    "portaudio/include/portaudio.h",
   }
-  buildoptions { "/wd4018" }
+  buildoptions { "/wd4018", "/wd4267" }
   dofile "premake4-defaults.lua"
   
 
