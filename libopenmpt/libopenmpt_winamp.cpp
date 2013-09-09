@@ -15,8 +15,7 @@
 
 #include "libopenmpt.hpp"
 
-#define LIBOPENMPT_USE_SETTINGS_DLL
-#include "libopenmpt_settings.h"
+#include "libopenmpt_settings.hpp"
 
 #define LIBOPENMPT_WINAMP_API LIBOPENMPT_API
 
@@ -85,10 +84,10 @@ struct self_winamp_t {
 	bool paused;
 	std::vector<std::int16_t> buffer;
 	std::vector<std::int16_t> interleaved_buffer;
-	self_winamp_t() {
+	self_winamp_t() : settings(TEXT(SHORT_TITLE), true) {
 		filetypes_string.clear();
-		openmpt::settings::init( settings );
 		settings.changed = apply_options;
+		settings.load();
 		std::vector<std::string> extensions = openmpt::get_supported_extensions();
 		for ( std::vector<std::string>::iterator ext = extensions.begin(); ext != extensions.end(); ++ext ) {
 			std::copy( (*ext).begin(), (*ext).end(), std::back_inserter( filetypes_string ) );
@@ -126,9 +125,7 @@ static void apply_options() {
 		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, self->settings.interpolationfilterlength );
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, self->settings.ramping );
 	}
-	if ( settings_dll ) {
-		openmpt::settings::save( self->settings, SHORT_TITLE );
-	}
+	self->settings.save();
 }
 
 extern In_Module inmod;
@@ -148,7 +145,9 @@ static std::wstring generate_infotext( const std::string & filename, const openm
 
 static void config( HWND hwndParent ) {
 	if ( settings_dll ) {
-		openmpt::settings::edit( self->settings, hwndParent, SHORT_TITLE );
+		if ( (libopenmpt_settings_edit_func)GetProcAddress( settings_dll, "libopenmpt_settings_edit" ) )  {
+			((libopenmpt_settings_edit_func)GetProcAddress( settings_dll, "libopenmpt_settings_edit" ))( &self->settings, hwndParent, SHORT_TITLE );
+		}
 		apply_options();
 	} else {
 		MessageBox( hwndParent, TEXT("libopenmpt_settings.dll failed to load. Please check if it is in the same folder as in_openmpt.dll and that .NET framework v4.0 is installed."), TEXT(SHORT_TITLE), MB_ICONERROR );
