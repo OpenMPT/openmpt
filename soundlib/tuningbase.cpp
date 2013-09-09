@@ -48,7 +48,7 @@ const CTuningBase::SERIALIZATION_RETURN_TYPE CTuningBase::SERIALIZATION_SUCCESS 
 const CTuningBase::SERIALIZATION_RETURN_TYPE CTuningBase::SERIALIZATION_FAILURE = true;
 
 
-const TCHAR CTuningBase::s_FileExtension[5] = MPT_TEXT(".tun");
+const CHAR CTuningBase::s_FileExtension[5] = ".tun";
 
 
 const CTuningBase::EDITMASK CTuningBase::EM_RATIOS = 1; //1b

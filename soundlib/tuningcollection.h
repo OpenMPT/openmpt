@@ -59,7 +59,7 @@ public:
 		SERIALIZATION_FAILURE = true
 	};
 
-	static const TCHAR s_FileExtension[4];
+	static const CHAR s_FileExtension[4];
 	static const size_t s_nMaxTuningCount = 255;
 
 //END PUBLIC STATIC CONSTS
