@@ -20,7 +20,7 @@
 #include "FileReader.h"
 #include <functional>
 
-#define str_SequenceTruncationNote (GetStrI18N((MPT_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
+#define str_SequenceTruncationNote (GetStrI18N("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))
 
 #if defined(MODPLUG_TRACKER)
 #ifdef _DEBUG

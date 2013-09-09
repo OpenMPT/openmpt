@@ -73,7 +73,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 			memcpy(pNewSmp, smp.pSample, nOldBytes);
 		}
 		else
-			sndFile.AddToLog(LogNotification, MPT_TEXT("Unsupported start position in InsertSilence."));
+			sndFile.AddToLog(LogNotification, "Unsupported start position in InsertSilence.");
 	}
 
 	// Set loop points automatically

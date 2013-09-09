@@ -29,17 +29,17 @@ const LPCSTR szNoteNames[12] =
 	"F#", "G-", "G#", "A-", "A#", "B-"
 };
 
-const LPCTSTR szDefaultNoteNames[NOTE_MAX] = {
-	MPT_TEXT("C-0"), MPT_TEXT("C#0"), MPT_TEXT("D-0"), MPT_TEXT("D#0"), MPT_TEXT("E-0"), MPT_TEXT("F-0"), MPT_TEXT("F#0"), MPT_TEXT("G-0"), MPT_TEXT("G#0"), MPT_TEXT("A-0"), MPT_TEXT("A#0"), MPT_TEXT("B-0"),
-	MPT_TEXT("C-1"), MPT_TEXT("C#1"), MPT_TEXT("D-1"), MPT_TEXT("D#1"), MPT_TEXT("E-1"), MPT_TEXT("F-1"), MPT_TEXT("F#1"), MPT_TEXT("G-1"), MPT_TEXT("G#1"), MPT_TEXT("A-1"), MPT_TEXT("A#1"), MPT_TEXT("B-1"),
-	MPT_TEXT("C-2"), MPT_TEXT("C#2"), MPT_TEXT("D-2"), MPT_TEXT("D#2"), MPT_TEXT("E-2"), MPT_TEXT("F-2"), MPT_TEXT("F#2"), MPT_TEXT("G-2"), MPT_TEXT("G#2"), MPT_TEXT("A-2"), MPT_TEXT("A#2"), MPT_TEXT("B-2"),
-	MPT_TEXT("C-3"), MPT_TEXT("C#3"), MPT_TEXT("D-3"), MPT_TEXT("D#3"), MPT_TEXT("E-3"), MPT_TEXT("F-3"), MPT_TEXT("F#3"), MPT_TEXT("G-3"), MPT_TEXT("G#3"), MPT_TEXT("A-3"), MPT_TEXT("A#3"), MPT_TEXT("B-3"),
-	MPT_TEXT("C-4"), MPT_TEXT("C#4"), MPT_TEXT("D-4"), MPT_TEXT("D#4"), MPT_TEXT("E-4"), MPT_TEXT("F-4"), MPT_TEXT("F#4"), MPT_TEXT("G-4"), MPT_TEXT("G#4"), MPT_TEXT("A-4"), MPT_TEXT("A#4"), MPT_TEXT("B-4"),
-	MPT_TEXT("C-5"), MPT_TEXT("C#5"), MPT_TEXT("D-5"), MPT_TEXT("D#5"), MPT_TEXT("E-5"), MPT_TEXT("F-5"), MPT_TEXT("F#5"), MPT_TEXT("G-5"), MPT_TEXT("G#5"), MPT_TEXT("A-5"), MPT_TEXT("A#5"), MPT_TEXT("B-5"),
-	MPT_TEXT("C-6"), MPT_TEXT("C#6"), MPT_TEXT("D-6"), MPT_TEXT("D#6"), MPT_TEXT("E-6"), MPT_TEXT("F-6"), MPT_TEXT("F#6"), MPT_TEXT("G-6"), MPT_TEXT("G#6"), MPT_TEXT("A-6"), MPT_TEXT("A#6"), MPT_TEXT("B-6"),
-	MPT_TEXT("C-7"), MPT_TEXT("C#7"), MPT_TEXT("D-7"), MPT_TEXT("D#7"), MPT_TEXT("E-7"), MPT_TEXT("F-7"), MPT_TEXT("F#7"), MPT_TEXT("G-7"), MPT_TEXT("G#7"), MPT_TEXT("A-7"), MPT_TEXT("A#7"), MPT_TEXT("B-7"),
-	MPT_TEXT("C-8"), MPT_TEXT("C#8"), MPT_TEXT("D-8"), MPT_TEXT("D#8"), MPT_TEXT("E-8"), MPT_TEXT("F-8"), MPT_TEXT("F#8"), MPT_TEXT("G-8"), MPT_TEXT("G#8"), MPT_TEXT("A-8"), MPT_TEXT("A#8"), MPT_TEXT("B-8"),
-	MPT_TEXT("C-9"), MPT_TEXT("C#9"), MPT_TEXT("D-9"), MPT_TEXT("D#9"), MPT_TEXT("E-9"), MPT_TEXT("F-9"), MPT_TEXT("F#9"), MPT_TEXT("G-9"), MPT_TEXT("G#9"), MPT_TEXT("A-9"), MPT_TEXT("A#9"), MPT_TEXT("B-9"),
+const LPCSTR szDefaultNoteNames[NOTE_MAX] = {
+	"C-0", "C#0", "D-0", "D#0", "E-0", "F-0", "F#0", "G-0", "G#0", "A-0", "A#0", "B-0",
+	"C-1", "C#1", "D-1", "D#1", "E-1", "F-1", "F#1", "G-1", "G#1", "A-1", "A#1", "B-1",
+	"C-2", "C#2", "D-2", "D#2", "E-2", "F-2", "F#2", "G-2", "G#2", "A-2", "A#2", "B-2",
+	"C-3", "C#3", "D-3", "D#3", "E-3", "F-3", "F#3", "G-3", "G#3", "A-3", "A#3", "B-3",
+	"C-4", "C#4", "D-4", "D#4", "E-4", "F-4", "F#4", "G-4", "G#4", "A-4", "A#4", "B-4",
+	"C-5", "C#5", "D-5", "D#5", "E-5", "F-5", "F#5", "G-5", "G#5", "A-5", "A#5", "B-5",
+	"C-6", "C#6", "D-6", "D#6", "E-6", "F-6", "F#6", "G-6", "G#6", "A-6", "A#6", "B-6",
+	"C-7", "C#7", "D-7", "D#7", "E-7", "F-7", "F#7", "G-7", "G#7", "A-7", "A#7", "B-7",
+	"C-8", "C#8", "D-8", "D#8", "E-8", "F-8", "F#8", "G-8", "G#8", "A-8", "A#8", "B-8",
+	"C-9", "C#9", "D-9", "D#9", "E-9", "F-9", "F#9", "G-9", "G#9", "A-9", "A#9", "B-9",
 };
 
 
