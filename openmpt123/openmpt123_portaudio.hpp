@@ -143,7 +143,25 @@ static void show_audio_devices() {
 	devices << "    " << "default" << ": " << "default" << std::endl;
 	for ( PaDeviceIndex i = 0; i < Pa_GetDeviceCount(); ++i ) {
 		if ( Pa_GetDeviceInfo( i ) && Pa_GetDeviceInfo( i )->maxOutputChannels > 0 ) {
-			devices << "    " << i << ": " << Pa_GetDeviceInfo( i )->name << std::endl;
+			devices << "    " << i << ": ";
+			bool first = true;
+			if ( Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi ) && Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi )->name ) {
+				if ( first ) {
+					first = false;
+				} else {
+					devices << " - ";
+				}
+				devices << Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi )->name;
+			}
+			if ( Pa_GetDeviceInfo( i )->name ) {
+				if ( first ) {
+					first = false;
+				} else {
+					devices << " - ";
+				}
+				devices << Pa_GetDeviceInfo( i )->name;
+			}
+			devices << std::endl;
 		}
 	}
 	throw show_help_exception( devices.str() );
