@@ -104,7 +104,7 @@ public:
 				interleaved_buffer.push_back( out );
 			}
 		}
-		FLAC__stream_encoder_process_interleaved( encoder, interleaved_buffer.data(), frames );
+		FLAC__stream_encoder_process_interleaved( encoder, interleaved_buffer.data(), static_cast<unsigned int>( frames ) );
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		if ( !called_init ) {
@@ -117,7 +117,7 @@ public:
 				interleaved_buffer.push_back( buffers[channel][frame] );
 			}
 		}
-		FLAC__stream_encoder_process_interleaved( encoder, interleaved_buffer.data(), frames );
+		FLAC__stream_encoder_process_interleaved( encoder, interleaved_buffer.data(), static_cast<unsigned int>( frames ) );
 	}
 };
 

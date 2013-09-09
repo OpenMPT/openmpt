@@ -32,7 +32,7 @@ std::string wstring_to_utf8( const std::wstring & unicode_string ) {
 		return std::string();
 	}
 	std::vector<char> utf8_buf( required_size );
-	WideCharToMultiByte( CP_UTF8, 0, unicode_string.c_str(), -1, &utf8_buf[0], utf8_buf.size(), NULL, NULL );
+	WideCharToMultiByte( CP_UTF8, 0, unicode_string.c_str(), -1, &utf8_buf[0], required_size, NULL, NULL );
 	return &utf8_buf[0];
 }
 
@@ -42,7 +42,7 @@ std::wstring utf8_to_wstring( const std::string & utf8_string ) {
 		return std::wstring();
 	}
 	std::vector<wchar_t> unicode_buf( required_size );
-	MultiByteToWideChar( CP_UTF8, 0, utf8_string.data(), -1, &unicode_buf[0], unicode_buf.size() );
+	MultiByteToWideChar( CP_UTF8, 0, utf8_string.data(), -1, &unicode_buf[0], required_size );
 	return &unicode_buf[0];
 }
 
@@ -118,9 +118,9 @@ public:
 	virtual void write( const std::string & text ) {
 		#if defined(UNICODE)
 			std::wstring wtext = utf8_to_wstring( text );
-			WriteConsole( handle, wtext.data(), wtext.size(), NULL, NULL );
-		#else
-			WriteConsole( handle, text.data(), text.size(), NULL, NULL );
+			WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), NULL, NULL );
+#else
+			WriteConsole( handle, text.data(), static_cast<DWORD>( text.size() ), NULL, NULL );
 		#endif
 	}
 };
