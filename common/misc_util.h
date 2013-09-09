@@ -224,10 +224,37 @@ static inline char SanitizeFilenameChar(char c)
 	return c;
 }
 
+static inline wchar_t SanitizeFilenameChar(wchar_t c)
+//---------------------------------------------------
+{
+	if(	c == L'\\' ||
+		c == L'\"' ||
+		c == L'/'  ||
+		c == L':'  ||
+		c == L'?'  ||
+		c == L'<'  ||
+		c == L'>'  ||
+		c == L'*')
+	{
+		c = L'_';
+	}
+	return c;
+}
+
 // Sanitize a filename (remove special chars)
 template <size_t size>
 void SanitizeFilename(char (&buffer)[size])
 //-----------------------------------------
+{
+	STATIC_ASSERT(size > 0);
+	for(size_t i = 0; i < size; i++)
+	{
+		buffer[i] = SanitizeFilenameChar(buffer[i]);
+	}
+}
+template <size_t size>
+void SanitizeFilename(wchar_t (&buffer)[size])
+//--------------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	for(size_t i = 0; i < size; i++)
@@ -243,11 +270,19 @@ static inline void SanitizeFilename(std::string &str)
 		str[i] = SanitizeFilenameChar(str[i]);
 	}
 }
+static inline void SanitizeFilename(std::wstring &str)
+//----------------------------------------------------
+{
+	for(size_t i = 0; i < str.length(); i++)
+	{
+		str[i] = SanitizeFilenameChar(str[i]);
+	}
+}
 #ifdef _MFC_VER
 static inline void SanitizeFilename(CString &str)
 //-----------------------------------------------
 {
-	std::string tmp = str;
+	std::basic_string<TCHAR> tmp = str;
 	SanitizeFilename(tmp);
 	str = tmp.c_str();
 }
