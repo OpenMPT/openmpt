@@ -15,8 +15,7 @@
 
 #include "libopenmpt.hpp"
 
-#define LIBOPENMPT_USE_SETTINGS_DLL
-#include "libopenmpt_settings.h"
+#include "libopenmpt_settings.hpp"
 
 //#define EXPERIMENTAL_VIS
 
@@ -67,9 +66,9 @@ struct self_xmplay_t {
 	std::size_t num_channels;
 	openmpt::settings::settings settings;
 	openmpt::module * mod;
-	self_xmplay_t() : samplerate(48000), num_channels(2), mod(nullptr) {
-		openmpt::settings::init( settings, false );
+	self_xmplay_t() : samplerate(48000), num_channels(2), settings(TEXT(SHORT_TITLE), false), mod(nullptr) {
 		settings.changed = apply_and_save_options;
+		settings.load();
 	}
 	~self_xmplay_t() {
 		return;
@@ -173,9 +172,7 @@ static void apply_options() {
 }
 
 static void save_options() {
-	if ( settings_dll ) {
-		openmpt::settings::save( self->settings, SHORT_TITLE );
-	}
+	self->settings.save();
 }
 
 static void apply_and_save_options() {
@@ -184,11 +181,9 @@ static void apply_and_save_options() {
 }
 
 static void reset_options() {
-	openmpt::settings::init( self->settings, self->settings.with_outputformat );
+	self->settings = openmpt::settings::settings( TEXT(SHORT_TITLE), self->settings.with_outputformat );
 	self->settings.changed = apply_and_save_options;
-	if ( settings_dll ) {
-		openmpt::settings::load( self->settings, SHORT_TITLE );
-	}
+	self->settings.load();
 }
 
 // get config (return size of config data) (OPTIONAL)
@@ -274,7 +269,9 @@ static void WINAPI openmpt_About( HWND win ) {
 
 static void WINAPI openmpt_Config( HWND win ) {
 	if ( settings_dll ) {
-		openmpt::settings::edit( self->settings, win, SHORT_TITLE );
+		if ( (libopenmpt_settings_edit_func)GetProcAddress( settings_dll, "libopenmpt_settings_edit" ) )  {
+			((libopenmpt_settings_edit_func)GetProcAddress( settings_dll, "libopenmpt_settings_edit" ))( &self->settings, win, SHORT_TITLE );
+		}
 		apply_and_save_options();
 	} else {
 		MessageBox( win, TEXT("libopenmpt_settings.dll failed to load. Please check if it is in the same folder as xmp-openmpt.dll and that .NET framework v4.0 is installed."), TEXT(SHORT_TITLE), MB_ICONERROR );

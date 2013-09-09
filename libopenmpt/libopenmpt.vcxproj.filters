@@ -248,6 +248,9 @@
     <ClInclude Include="..\soundlib\Tagging.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="libopenmpt_settings.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp">
