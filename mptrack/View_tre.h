@@ -210,6 +210,8 @@ public:
 	void DeleteChildren(HTREEITEM hItem);
 	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index);
 
+	bool IsSampleBrowser() const { return m_pDataTree == nullptr; }
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CModTree)
