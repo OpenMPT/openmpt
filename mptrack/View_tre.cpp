@@ -151,7 +151,7 @@ void CModTree::Init()
 	DWORD dwRemove = TVS_SINGLEEXPAND;
 	DWORD dwAdd = TVS_EDITLABELS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS;
 
-	if (!m_pDataTree)
+	if (IsSampleBrowser())
 	{
 		dwRemove |= (TVS_HASLINES|TVS_LINESATROOT|TVS_HASBUTTONS|TVS_SHOWSELALWAYS);
 		dwAdd &= ~(TVS_HASLINES|TVS_LINESATROOT|TVS_HASBUTTONS|TVS_SHOWSELALWAYS);
@@ -165,7 +165,7 @@ void CModTree::Init()
 	ModifyStyle(dwRemove, dwAdd);
 	strcpy(m_szInstrLibPath, TrackerSettings::Instance().GetDefaultDirectory(DIR_SAMPLES));
 	SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
-	if (m_pDataTree)
+	if (!IsSampleBrowser())
 	{
 		// Create Midi Library
 		m_hMidiLib = InsertItem("MIDI Library", IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
@@ -403,7 +403,7 @@ void CModTree::RefreshMidiLibrary()
 	CHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
 	LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
 
-	if (!m_pDataTree) return;
+	if (IsSampleBrowser()) return;
 	// Midi Programs
 	for (UINT iMidi=0; iMidi<128; iMidi++)
 	{
@@ -485,7 +485,7 @@ void CModTree::RefreshDlsBanks()
 	CHAR s[256];
 	HTREEITEM hDlsRoot = m_hMidiLib;
 
-	if (!m_pDataTree) return;
+	if (IsSampleBrowser()) return;
 
 	if(m_tiDLS.size() < CTrackApp::gpDLSBanks.size())
 	{
@@ -647,7 +647,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 	CHAR s[256], stmp[256];
 	TV_ITEM tvi;
 	const DWORD hintFlagPart = HintFlagPart(lHint);
-	if ((pInfo == nullptr) || (pInfo->pModDoc == nullptr) || (!m_pDataTree)) return;
+	if ((pInfo == nullptr) || (pInfo->pModDoc == nullptr) || IsSampleBrowser()) return;
 	if (!hintFlagPart) return;
 
 	const CModDoc *pDoc = pInfo->pModDoc;
@@ -1051,7 +1051,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	DWORD_PTR itemData = GetItemData(hItem);
 
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
-	if ((hRootParent != NULL) && (m_pDataTree))
+	if ((hRootParent != NULL) && !IsSampleBrowser())
 	{
 		HTREEITEM h;
 		for (;;)
@@ -1062,12 +1062,12 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 		}
 	}
 	// Midi Library
-	if ((hRootParent == m_hMidiLib) && (m_pDataTree))
+	if ((hRootParent == m_hMidiLib) && !IsSampleBrowser())
 	{
 		return ModItem(static_cast<ModItemType>(itemData >> MIDILIB_SHIFT), static_cast<uint32>(itemData & MIDILIB_MASK));
 	}
 	// Instrument Library
-	if ((hRootParent == m_hInsLib) || ((!m_pDataTree) && (hItem != m_hInsLib)))
+	if ((hRootParent == m_hInsLib) || (IsSampleBrowser() && (hItem != m_hInsLib)))
 	{
 		TV_ITEM tvi;
 		tvi.mask = TVIF_IMAGE|TVIF_HANDLE;
@@ -1085,7 +1085,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 		}
 		return ModItem(MODITEM_NULL);
 	}
-	if (!m_pDataTree) return ModItem(MODITEM_NULL);
+	if (IsSampleBrowser()) return ModItem(MODITEM_NULL);
 	// Songs
 	for (size_t i = 0; i < DocInfo.size(); i++)
 	{
@@ -1531,7 +1531,7 @@ void CModTree::EmptyInstrumentLibrary()
 {
 	HTREEITEM h;
 	if (!m_hInsLib) return;
-	if (m_pDataTree)
+	if (!IsSampleBrowser())
 	{
 		while ((h = GetChildItem(m_hInsLib)) != NULL)
 		{
@@ -1568,7 +1568,7 @@ void CModTree::FillInstrumentLibrary()
 
 	if (!m_hInsLib) return;
 	SetRedraw(FALSE);
-	if(m_szSongName[0] && !m_pDataTree && m_SongFile)
+	if(m_szSongName[0] && IsSampleBrowser() && m_SongFile)
 	{
 		wsprintf(s, "%s", m_szSongName);
 		SetItemText(m_hInsLib, s);
@@ -1605,7 +1605,7 @@ void CModTree::FillInstrumentLibrary()
 			strcpy(szPath, m_szInstrLibPath);
 		else
 			GetCurrentDirectory(sizeof(szPath), szPath);
-		if (m_pDataTree)
+		if (!IsSampleBrowser())
 		{
 			wsprintf(s, "Instrument Library (%s)", szPath);
 			strcpy(&s[80], "..."); // Limit text
@@ -1618,7 +1618,7 @@ void CModTree::FillInstrumentLibrary()
 			SetItemImage(m_hInsLib, IMAGE_FOLDER, IMAGE_FOLDER);
 		}
 		// Enumerating Drives...
-		if (m_pDataTree)
+		if (!IsSampleBrowser())
 		{
 			strcpy(s, "?:\\");
 			for (UINT iDrive='A'; iDrive<='Z'; iDrive++)
@@ -1661,7 +1661,7 @@ void CModTree::FillInstrumentLibrary()
 				// Up Directory
 				if (!strcmp(wfd.cFileName, ".."))
 				{
-					if (m_pDataTree)
+					if (!IsSampleBrowser())
 					{
 						ModTreeBuildTVIParam(tvis, wfd.cFileName, IMAGE_FOLDERPARENT);
 						InsertItem(&tvis);
@@ -1679,7 +1679,7 @@ void CModTree::FillInstrumentLibrary()
 				// Directory
 				if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if ((strcmp(wfd.cFileName, ".")) && (m_pDataTree))
+					if ((strcmp(wfd.cFileName, ".")) && !IsSampleBrowser())
 					{
 						ModTreeBuildTVIParam(tvis, wfd.cFileName, IMAGE_FOLDER);
 						InsertItem(&tvis);
@@ -1705,7 +1705,7 @@ void CModTree::FillInstrumentLibrary()
 					 || (!strcmp(s, "iti"))
 					 || (!strcmp(s, "pat")) )
 					{
-						if (!m_pDataTree)
+						if (IsSampleBrowser())
 						{
 							ModTreeBuildTVIParam(tvis, wfd.cFileName, IMAGE_INSTRUMENTS);
 							InsertItem(&tvis);
@@ -1713,7 +1713,7 @@ void CModTree::FillInstrumentLibrary()
 					} else if(std::find_if(modExts.begin(), modExts.end(), find_str(s)) != modExts.end())
 					{
 						// Songs
-						if (m_pDataTree)
+						if (!IsSampleBrowser())
 						{
 							ModTreeBuildTVIParam(tvis, wfd.cFileName, IMAGE_FOLDERSONG);
 							InsertItem(&tvis);
@@ -1753,7 +1753,7 @@ void CModTree::FillInstrumentLibrary()
 							&& strcmp(s, "mol"))
 						)
 					{
-						if (!m_pDataTree)
+						if (IsSampleBrowser())
 						{
 							ModTreeBuildTVIParam(tvis, wfd.cFileName, IMAGE_SAMPLES);
 							InsertItem(&tvis);
@@ -1766,7 +1766,7 @@ void CModTree::FillInstrumentLibrary()
 	}
 	// Sort items
 	TV_SORTCB tvs;
-	tvs.hParent = (m_pDataTree) ? m_hInsLib : TVI_ROOT;
+	tvs.hParent = (!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT;
 	tvs.lpfnCompare = ModTreeInsLibCompareProc;
 	tvs.lParam = (LPARAM)this;
 	SortChildren(tvs.hParent);
@@ -1796,7 +1796,7 @@ void CModTree::ModTreeBuildTVIParam(TV_INSERTSTRUCT &tvis, LPCSTR lpszName, int 
 		dwId = 4;
 		break;
 	}
-	tvis.hParent = (m_pDataTree) ? m_hInsLib : TVI_ROOT;
+	tvis.hParent = (!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT;
 	tvis.hInsertAfter = TVI_LAST;
 	tvis.item.mask = TVIF_IMAGE | TVIF_PARAM | TVIF_SELECTEDIMAGE | TVIF_TEXT;
 	tvis.item.hItem = 0;
@@ -3238,7 +3238,7 @@ void CModTree::OnRefreshInstrLib()
 
 	BeginWaitCursor();
 	RefreshInstrumentLibrary();
-	if (m_pDataTree)
+	if (!IsSampleBrowser())
 	{
 		hActive = NULL;
 		if ((m_szOldPath[0]) || (m_szSongName[0]))
@@ -3313,7 +3313,7 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	const bool start = wParam >= kcTreeViewStartNotes && wParam <= kcTreeViewEndNotes,
-		stop = wParam >= kcTreeViewStartNoteStops && wParam <= kcTreeViewEndNoteStops;
+		stop = (wParam >= kcTreeViewStartNoteStops && wParam <= kcTreeViewEndNoteStops) && !IsSampleBrowser();
 	if(start || stop)
 	{
 		ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops) + 1 + pMainFrm->GetBaseOctave() * 12);
