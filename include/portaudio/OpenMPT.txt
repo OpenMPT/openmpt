@@ -1,2 +1,3 @@
+Portaudio version svn-r1910 as of 2013-09-07.
 For building, premake4 is used to generate Visual Studio project files.
 See ../premake4.lua for details.

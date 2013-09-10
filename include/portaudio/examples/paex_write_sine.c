@@ -5,7 +5,7 @@
     @author Phil Burk <philburk@softsynth.com>
 */
 /*
- * $Id: paex_write_sine.c 1752 2011-09-08 03:21:55Z philburk $
+ * $Id: paex_write_sine.c 1865 2012-09-01 21:16:25Z philburk $
  *
  * This program uses the PortAudio Portable Audio Library.
  * For more information see: http://www.portaudio.com/
@@ -71,7 +71,6 @@ int main(void)
     int right_inc = 3; /* higher pitch so we can distinguish left and right. */
     int i, j, k;
     int bufferCount;
-
     
     printf("PortAudio Test: output sine wave. SR = %d, BufSize = %d\n", SAMPLE_RATE, FRAMES_PER_BUFFER);
     
@@ -92,7 +91,7 @@ int main(void)
     }
     outputParameters.channelCount = 2;       /* stereo output */
     outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
-    outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
+    outputParameters.suggestedLatency = 0.050; // Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = NULL;
 
     err = Pa_OpenStream(
@@ -150,10 +149,18 @@ int main(void)
     printf("Test finished.\n");
     
     return err;
+
 error:
-    Pa_Terminate();
     fprintf( stderr, "An error occured while using the portaudio stream\n" );
     fprintf( stderr, "Error number: %d\n", err );
     fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );
+	// Print more information about the error.
+	if( err == paUnanticipatedHostError )
+	{
+		const PaHostErrorInfo *hostErrorInfo = Pa_GetLastHostErrorInfo();
+		fprintf( stderr, "Host API error = #%ld, hostApiType = %d\n", hostErrorInfo->errorCode, hostErrorInfo->hostApiType );
+		fprintf( stderr, "Host API error = %s\n", hostErrorInfo->errorText );
+	}
+    Pa_Terminate();
     return err;
 }

@@ -7,7 +7,7 @@
         ASIO support.
 */
 /*
- * $Id: pa_devs.c 1752 2011-09-08 03:21:55Z philburk $
+ * $Id: pa_devs.c 1891 2013-05-05 14:00:02Z rbencina $
  *
  * This program uses the PortAudio Portable Audio Library.
  * For more information see: http://www.portaudio.com
@@ -49,6 +49,8 @@
 #include "portaudio.h"
 
 #ifdef WIN32
+#include <windows.h>
+
 #if PA_USE_ASIO
 #include "pa_asio.h"
 #endif
@@ -105,7 +107,12 @@ int main(void)
     PaError err;
 
     
-    Pa_Initialize();
+    err = Pa_Initialize();
+    if( err != paNoError )
+    {
+        printf( "ERROR: Pa_Initialize returned 0x%x\n", err );
+        goto error;
+    }
 
     printf( "PortAudio version number = %d\nPortAudio version text = '%s'\n",
             Pa_GetVersion(), Pa_GetVersionText() );
@@ -157,7 +164,15 @@ int main(void)
             printf( " ]\n" );
 
     /* print device info fields */
+#ifdef WIN32
+        {   /* Use wide char on windows, so we can show UTF-8 encoded device names */
+            wchar_t wideName[MAX_PATH];
+            MultiByteToWideChar(CP_UTF8, 0, deviceInfo->name, -1, wideName, MAX_PATH-1);
+            wprintf( L"Name                        = %s\n", wideName );
+        }
+#else
         printf( "Name                        = %s\n", deviceInfo->name );
+#endif
         printf( "Host API                    = %s\n",  Pa_GetHostApiInfo( deviceInfo->hostApi )->name );
         printf( "Max inputs = %d", deviceInfo->maxInputChannels  );
         printf( ", Max outputs = %d\n", deviceInfo->maxOutputChannels  );
@@ -232,7 +247,6 @@ int main(void)
 
 error:
     Pa_Terminate();
-    fprintf( stderr, "An error occured while using the portaudio stream\n" );
     fprintf( stderr, "Error number: %d\n", err );
     fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );
     return err;
