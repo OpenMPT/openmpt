@@ -2,34 +2,34 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="src">
-			<UniqueIdentifier>{31590FFD-6069-2444-B1DD-1A3174BA5E09}</UniqueIdentifier>
+			<UniqueIdentifier>{89AF7C91-A5D1-2A4E-942C-FFAB8AF95B13}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\common">
-			<UniqueIdentifier>{A2CF1912-05FB-A84D-9563-10AA371460EE}</UniqueIdentifier>
+			<UniqueIdentifier>{4A501462-4267-E948-B690-BE4ACEA6E35E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\os">
-			<UniqueIdentifier>{8CFA8032-F6BA-3E41-A5F7-9832E3B7CC64}</UniqueIdentifier>
+			<UniqueIdentifier>{9880B775-7302-4946-B386-5D9F6D2C6164}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\os\win">
-			<UniqueIdentifier>{4F9D1EA5-02AB-0B4E-92DD-B29250843AED}</UniqueIdentifier>
+			<UniqueIdentifier>{9169CC4A-0027-234C-8955-7837FA67DE3A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include">
-			<UniqueIdentifier>{C0A38AB9-990E-0D47-A8C0-C5B8D0A82D4B}</UniqueIdentifier>
+			<UniqueIdentifier>{23EF15D3-E62C-E44B-85E7-112A9FC19214}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi">
-			<UniqueIdentifier>{108DCE49-4917-7D44-A5FB-1F82643315AC}</UniqueIdentifier>
+			<UniqueIdentifier>{CEEEE102-882E-4F43-9600-01664B2C87AF}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\skeleton">
-			<UniqueIdentifier>{39879D9A-CC57-A34E-AFC4-F83458F26F90}</UniqueIdentifier>
+			<UniqueIdentifier>{C756382A-FB24-0040-B6FC-667EB21537D0}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\wasapi">
-			<UniqueIdentifier>{4B4B2241-1E33-1945-AD6B-863F25BB9921}</UniqueIdentifier>
+			<UniqueIdentifier>{CA573667-BA06-354A-B42A-441026B9CA83}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\wdmks">
-			<UniqueIdentifier>{180F4AAD-30CA-2345-94C1-29E309997D2D}</UniqueIdentifier>
+			<UniqueIdentifier>{7D195F48-9D17-6245-8106-32AE23076E95}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\wmme">
-			<UniqueIdentifier>{6D1CC05F-BA9E-C345-B0EA-3FEAE27EB4B9}</UniqueIdentifier>
+			<UniqueIdentifier>{F115BC14-4305-284D-9091-8F61E4B0EA3D}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
@@ -103,6 +103,9 @@
 			<Filter>include</Filter>
 		</ClInclude>
 		<ClInclude Include="include\pa_win_waveformat.h">
+			<Filter>include</Filter>
+		</ClInclude>
+		<ClInclude Include="include\pa_win_wdmks.h">
 			<Filter>include</Filter>
 		</ClInclude>
 		<ClInclude Include="include\pa_win_wmme.h">
