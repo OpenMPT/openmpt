@@ -35,7 +35,7 @@ typedef void (*libopenmpt_settings_edit_func)( libopenmpt_settings * s, HWND par
 void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char * title );
 
 #ifdef __cplusplus
-}; // extern "C"
+}
 #endif // __cplusplus
 
 #endif // LIBOPENMPT_SETTINGS_H
