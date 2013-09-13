@@ -146,7 +146,7 @@ LIBOPENMPT_API int openmpt_module_ctl_set( openmpt_module * mod, const char * ct
 /* remember to add new functions to both C and C++ interfaces and to increase OPENMPT_API_VERSION_MINOR */
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* LIBOPENMPT_H */

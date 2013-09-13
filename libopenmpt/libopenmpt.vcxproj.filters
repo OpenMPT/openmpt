@@ -21,9 +21,6 @@
     <Filter Include="Source Files\common">
       <UniqueIdentifier>{308f7ed3-af26-4d69-8925-7203894ef468}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\settings">
-      <UniqueIdentifier>{77dd8b6d-d0f5-4545-b820-f8989b6f841a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\test">
       <UniqueIdentifier>{d7ef920e-4335-4ea9-96f3-e4721d61b5b5}</UniqueIdentifier>
     </Filter>
@@ -203,9 +200,6 @@
     <ClInclude Include="libopenmpt_interactive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="libopenmpt_settings.h">
-      <Filter>Header Files\settings</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\versionNumber.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -249,6 +243,9 @@
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
     <ClInclude Include="libopenmpt_settings.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libopenmpt_settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
