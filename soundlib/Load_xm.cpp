@@ -583,7 +583,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	if(madeWith[verFT2Generic]
-		&& fileHeader.version < 0x0104	// Old versions of FT2 didn't have (smooth) ramping. Disable it for those versions where we can be sure that there should be no ramping.
+		&& fileHeader.version >= 0x0104	// Old versions of FT2 didn't have (smooth) ramping. Disable it for those versions where we can be sure that there should be no ramping.
 #ifdef MODPLUG_TRACKER
 		&& TrackerSettings::Instance().autoApplySmoothFT2Ramping
 #endif // MODPLUG_TRACKER
