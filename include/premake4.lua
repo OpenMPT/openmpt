@@ -263,6 +263,7 @@ solution "include"
    "portaudio/include/pa_win_ds.h",
    "portaudio/include/pa_win_wasapi.h",
    "portaudio/include/pa_win_waveformat.h",
+   "portaudio/include/pa_win_wdmks.h",
    "portaudio/include/pa_win_wmme.h",
    "portaudio/include/portaudio.h",
   }

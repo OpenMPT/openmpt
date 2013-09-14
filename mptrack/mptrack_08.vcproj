@@ -84,7 +84,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib dsound.lib msacm32.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib dsound.lib msacm32.lib ksguid.lib ksuser.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="2"
@@ -191,7 +191,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib dsound.lib msacm32.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib dsound.lib msacm32.lib ksguid.lib ksuser.lib"
 				OutputFile=".\Bin/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -1157,10 +1157,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\sounddev\SoundDevices.h"
-				>
-			</File>
-			<File
 				RelativePath="..\sounddev\SoundDeviceASIO.h"
 				>
 			</File>
@@ -1170,6 +1166,10 @@
 			</File>
 			<File
 				RelativePath="..\sounddev\SoundDevicePortAudio.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDevices.h"
 				>
 			</File>
 			<File

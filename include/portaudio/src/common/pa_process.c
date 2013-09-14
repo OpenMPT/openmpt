@@ -1,5 +1,5 @@
 /*
- * $Id: pa_process.c 1706 2011-07-21 18:44:58Z philburk $
+ * $Id: pa_process.c 1896 2013-08-06 08:26:55Z rbencina $
  * Portable Audio I/O Library
  * streamCallback <-> host buffer processing adapter
  *
@@ -238,7 +238,7 @@ PaError PaUtil_InitializeBufferProcessor( PaUtilBufferProcessor* bp,
         bp->inputConverter =
             PaUtil_SelectConverter( hostInputSampleFormat, userInputSampleFormat, tempInputStreamFlags );
 
-        bp->inputZeroer = PaUtil_SelectZeroer( hostInputSampleFormat );
+        bp->inputZeroer = PaUtil_SelectZeroer( userInputSampleFormat );
             
         bp->userInputIsInterleaved = (userInputSampleFormat & paNonInterleaved)?0:1;
 		
