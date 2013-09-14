@@ -305,8 +305,8 @@ BOOL CPortaudioDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT 
 	if(!Pa_GetDeviceInfo(dev))
 		return false;
 	_snprintf(pszDescription, cbSize, "%s - %s%s (portaudio)",
-		Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name,
-		Pa_GetDeviceInfo(dev)->name,
+		mpt::String::Convert(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name, mpt::CharsetUTF8, mpt::CharsetLocale).c_str(),
+		mpt::String::Convert(Pa_GetDeviceInfo(dev)->name, mpt::CharsetUTF8, mpt::CharsetLocale).c_str(),
 		Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev ? " (Default)" : ""
 		);
 	return true;
