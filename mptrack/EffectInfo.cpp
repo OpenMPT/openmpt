@@ -335,7 +335,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DW
 		case CMD_GLOBALVOLSLIDE:
 		case CMD_CHANNELVOLSLIDE:
 		case CMD_PANNINGSLIDE:
-			nmax = (sndFile.GetType() & MOD_TYPE_S3MITMPT) ? 58 : 30;
+			nmax = (sndFile.GetType() & MOD_TYPE_S3MITMPT) ? 59 : 30;
 			break;
 		case CMD_PANNING8:
 			if (sndFile.GetType() & (MOD_TYPE_S3M)) nmax = 0x81;
@@ -391,13 +391,13 @@ UINT EffectInfo::MapValueToPos(UINT ndx, UINT param) const
 			if (!param)
 				pos = 29;
 			else if (((param & 0x0F) == 0x0F) && (param & 0xF0))
-				pos = 29 + (param >> 4);
+				pos = 29 + (param >> 4);	// Fine Up
 			else if (((param & 0xF0) == 0xF0) && (param & 0x0F))
-				pos = 29 - (param & 0x0F);
+				pos = 29 - (param & 0x0F);	// Fine Down
 			else if (param & 0x0F)
-				pos = 15 - (param & 0x0F);
+				pos = 15 - (param & 0x0F);	// Down
 			else
-				pos = (param >> 4) + 44;
+				pos = (param >> 4) + 44;	// Up
 		} else
 		{
 			if (param & 0x0F)
@@ -443,10 +443,10 @@ UINT EffectInfo::MapPosToValue(UINT ndx, UINT pos) const
 				param = (29 - pos) | 0xF0;
 			else if (pos == 29)
 				param = 0;
-			else if (pos < 44)
+			else if (pos <= 44)
 				param = ((pos - 29) << 4) | 0x0F;
 			else
-				if (pos < 59) param = (pos - 43) << 4;
+				if (pos <= 59) param = (pos - 44) << 4;
 		} else
 		{
 			if (pos < 15)
