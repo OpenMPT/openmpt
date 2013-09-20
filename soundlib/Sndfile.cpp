@@ -2117,6 +2117,11 @@ struct UpgradePatternData
 
 	void operator()(ModCommand& m)
 	{
+		if(m.IsPcNote())
+		{
+			return;
+		}
+
 		if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
 			(!sndFile.IsCompatibleMode(TRK_ALLTRACKERS) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 		{
