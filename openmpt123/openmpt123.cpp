@@ -1378,6 +1378,28 @@ static void show_credits( std::ostream & s ) {
 	s << openmpt::string::get( openmpt::string::credits );
 }
 
+#if defined(_MSC_VER)
+
+class ConsoleCP_utf8_raii {
+private:
+	const UINT oldCP;
+	const UINT oldOutputCP;
+public:
+	ConsoleCP_utf8_raii()
+		: oldCP(GetConsoleCP())
+		, oldOutputCP(GetConsoleOutputCP())
+	{
+		SetConsoleCP( 65001 ); // UTF-8
+		SetConsoleOutputCP( 65001 ); // UTF-8
+	}
+	~ConsoleCP_utf8_raii() {
+		SetConsoleCP( oldCP );
+		SetConsoleOutputCP( oldOutputCP );
+	}
+};
+
+#endif
+
 #if defined(_MSC_VER) && defined(UNICODE)
 static int wmain( int wargc, wchar_t * wargv [] ) {
 #else
@@ -1386,8 +1408,7 @@ static int main( int argc, char * argv [] ) {
 
 	#if defined(_MSC_VER)
 
-		SetConsoleCP( 65001 ); // UTF-8
-		SetConsoleOutputCP( 65001 ); // UTF-8
+		ConsoleCP_utf8_raii console_cp;
 
 	#endif
 
