@@ -126,7 +126,7 @@ inline void Binarywrite(std::ostream& oStrm, const T& data)
 	STATIC_ASSERT(sizeof(conv) == sizeof(T));
 	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
 	conv.t = data;
-	#ifdef PLATFORM_BIG_ENDIAN
+	#ifdef MPT_PLATFORM_BIG_ENDIAN
 		std::reverse(conv.b, conv.b+sizeof(T));
 	#endif
 	oStrm.write(conv.b, sizeof(data));
@@ -144,7 +144,7 @@ inline void Binarywrite(std::ostream& oStrm, const T& data, const Offtype byteco
 	STATIC_ASSERT(sizeof(conv) == sizeof(T));
 	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
 	conv.t = data;
-	#ifdef PLATFORM_BIG_ENDIAN
+	#ifdef MPT_PLATFORM_BIG_ENDIAN
 		std::reverse(conv.b, conv.b+sizeof(T));
 	#endif
 	oStrm.write(conv.b, MIN(bytecount, sizeof(data)));
@@ -180,7 +180,7 @@ inline void Binaryread(std::istream& iStrm, T& data)
 	STATIC_ASSERT(sizeof(conv) == sizeof(T));
 	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
 	iStrm.read(conv.b, sizeof(T));
-	#ifdef PLATFORM_BIG_ENDIAN
+	#ifdef MPT_PLATFORM_BIG_ENDIAN
 		std::reverse(conv.b, conv.b+sizeof(T));
 	#endif
 	data = conv.t;
@@ -202,7 +202,7 @@ inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
 	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
 	memset(conv.b, 0, sizeof(T));
 	iStrm.read(conv.b, (std::min)((size_t)bytecount, sizeof(data)));
-	#ifdef PLATFORM_BIG_ENDIAN
+	#ifdef MPT_PLATFORM_BIG_ENDIAN
 		std::reverse(conv.b, conv.b+sizeof(T));
 	#endif
 	data = conv.t;
@@ -482,7 +482,7 @@ struct IdLE
 	IdLE(T val)
 	{
 		conv.t = val;
-		#ifdef PLATFORM_BIG_ENDIAN
+		#ifdef MPT_PLATFORM_BIG_ENDIAN
 			std::reverse(conv.b, conv.b+sizeof(T));
 		#endif
 	}

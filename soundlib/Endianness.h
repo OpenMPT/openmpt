@@ -38,7 +38,7 @@
 #endif
 
 // Deprecated. Use "SwapBytesXX" versions below.
-#ifdef PLATFORM_BIG_ENDIAN
+#ifdef MPT_PLATFORM_BIG_ENDIAN
 // PPC
 inline uint32 LittleEndian(uint32 x)	{ return bswap32(x); }
 inline uint16 LittleEndianW(uint16 x)	{ return bswap16(x); }
@@ -58,7 +58,7 @@ typedef uint16 ALIGN(1) unaligned_uint16;
 typedef  int32 ALIGN(1) unaligned_int32;
 typedef  int16 ALIGN(1) unaligned_int16;
 
-#ifdef PLATFORM_BIG_ENDIAN
+#ifdef MPT_PLATFORM_BIG_ENDIAN
 // PPC
 inline uint32 SwapBytesBE_(unaligned_uint32 *value) { return *value; }
 inline uint16 SwapBytesBE_(unaligned_uint16 *value) { return *value; }

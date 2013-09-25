@@ -187,7 +187,7 @@
 #undef MODPLUG_NO_FILESAVE // tests recommend file saving
 #endif
 
-#if defined(PLATFORM_BIG_ENDIAN) && !defined(MODPLUG_NO_FILESAVE)
+#if defined(MPT_PLATFORM_BIG_ENDIAN) && !defined(MODPLUG_NO_FILESAVE)
 #define MODPLUG_NO_FILESAVE // file saving is broken on big endian
 #endif
 
