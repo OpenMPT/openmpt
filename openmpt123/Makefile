@@ -103,6 +103,18 @@ LDLIBS   += $(shell pkg-config --libs-only-l     flac )
 endif
 endif
 
+ifeq ($(NO_WAVPACK),1)
+else
+#LDLIBS   += -lwavpack
+ifeq ($(shell pkg-config --exists wavpack && echo yes),yes)
+CPPFLAGS += -DMPT_WITH_WAVPACK
+CPPFLAGS += $(shell pkg-config --cflags-only-I   wavpack )
+LDFLAGS  += $(shell pkg-config --libs-only-other wavpack )
+LDFLAGS  += $(shell pkg-config --libs-only-L     wavpack )
+LDLIBS   += $(shell pkg-config --libs-only-l     wavpack )
+endif
+endif
+
 ifeq ($(NO_SNDFILE),1)
 else
 #LDLIBS   += -lsndfile

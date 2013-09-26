@@ -51,6 +51,7 @@
 #include "openmpt123_sndfile.hpp"
 #include "openmpt123_stdout.hpp"
 #include "openmpt123_portaudio.hpp"
+#include "openmpt123_wavpack.hpp"
 
 namespace openmpt123 {
 
@@ -120,6 +121,10 @@ public:
 		} else if ( flags.output_extension == "flac" ) {
 			impl = new flac_stream_raii( filename, flags );
 #endif				
+#ifdef MPT_WITH_WAVPACK
+		} else if ( flags.output_extension == "wv" ) {
+			impl = new wavpack_stream_raii( filename, flags );
+#endif
 #ifdef MPT_WITH_SNDFILE
 		} else {
 			impl = new sndfile_stream_raii( filename, flags.output_extension, flags, log );
