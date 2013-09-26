@@ -482,7 +482,8 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClInclude Include="libopenmpt_internal.h" />
     <ClInclude Include="libopenmpt_settings.h" />
     <ClInclude Include="libopenmpt_settings.hpp" />
-    <ClInclude Include="libopenmpt_stream_callbacks.h" />
+    <ClInclude Include="libopenmpt_stream_callbacks_fd.h" />
+    <ClInclude Include="libopenmpt_stream_callbacks_file.h" />
     <ClInclude Include="libopenmpt_version.h" />
   </ItemGroup>
   <ItemGroup>

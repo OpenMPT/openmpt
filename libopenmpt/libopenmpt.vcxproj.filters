@@ -203,9 +203,6 @@
     <ClInclude Include="..\common\versionNumber.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="libopenmpt_stream_callbacks.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\CompilerDetect.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -246,6 +243,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="libopenmpt_settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libopenmpt_stream_callbacks_fd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libopenmpt_stream_callbacks_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

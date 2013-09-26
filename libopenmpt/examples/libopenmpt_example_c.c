@@ -14,7 +14,7 @@
 #include <string.h>
 
 #include <libopenmpt/libopenmpt.h>
-#include <libopenmpt/libopenmpt_stream_callbacks.h>
+#include <libopenmpt/libopenmpt_stream_callbacks_file.h>
 
 #include <portaudio.h>
 
