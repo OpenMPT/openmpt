@@ -243,7 +243,6 @@ OUTPUTS += bin/openmpt.a
 OUTPUTS += bin/libopenmpt.so
 OUTPUTS += bin/openmpt123
 OUTPUTS += bin/libopenmpt_modplug.so
-OUTPUTS += bin/modplug123
 ifeq ($(NO_PORTAUDIO),1)
 else
 OUTPUTS += bin/libopenmpt_example_c
@@ -291,9 +290,6 @@ bin/libopenmpt_example_c_mem: ../libopenmpt/examples/libopenmpt_example_c_mem.o 
 bin/libopenmpt_example_cxx: ../libopenmpt/examples/libopenmpt_example_cxx.o $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_cxx.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
-
-bin/modplug123: bin/openmpt123
-	cp $^ $@
 
 clean:
 	rm -f $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS)
