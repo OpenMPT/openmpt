@@ -24,4 +24,4 @@ void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char 
 
 #pragma comment(linker, "/EXPORT:libopenmpt_settings_edit=_libopenmpt_settings_edit")
 
-}; // extern "C"
+} // extern "C"
