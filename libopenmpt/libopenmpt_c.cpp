@@ -195,13 +195,6 @@ struct openmpt_module {
 	} while(0) \
 /**/
 
-int openmpt_is_compatible_version( uint32_t api_version ) {
-	try {
-		return openmpt::version::get_version_compatbility( api_version );
-	} OPENMPT_INTERFACE_CATCH;
-	return 0;
-}
-
 uint32_t openmpt_get_library_version(void) {
 	try {
 		return openmpt::get_library_version();

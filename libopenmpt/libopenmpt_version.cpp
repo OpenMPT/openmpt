@@ -54,11 +54,11 @@ static std::string get_build_string() {
 }
 
 static std::string get_credits_string() {
-	return mpt::String::Convert(MptVersion::GetFullCreditsString(), mpt::CharsetISO8859_1, mpt::CharsetUTF8);
+	return mpt::String::Convert( MptVersion::GetFullCreditsString(), mpt::CharsetISO8859_1, mpt::CharsetUTF8 );
 }
 
 static std::string get_contact_string() {
-	return mpt::String::Convert(MptVersion::GetContactString(), mpt::CharsetISO8859_1, mpt::CharsetUTF8);
+	return mpt::String::Convert( MptVersion::GetContactString(), mpt::CharsetISO8859_1, mpt::CharsetUTF8 );
 }
 
 std::string get_string( const std::string & key ) {
@@ -79,16 +79,6 @@ std::string get_string( const std::string & key ) {
 	}
 }
 
-int get_version_compatbility( std::uint32_t api_version ) {
-	if ( ( api_version & 0xff000000 ) != ( openmpt::get_library_version() & 0xff000000 ) ) {
-		return 0;
-	}
-	if ( api_version > openmpt::get_library_version() ) {
-		return 1;
-	}
-	return 2;
-}
-
 #define OPENMPT_API_VERSION_STRING STRINGIZE(OPENMPT_API_VERSION_MAJOR)"."STRINGIZE(OPENMPT_API_VERSION_MINOR)
 
 #ifndef NO_WINAMP
@@ -99,22 +89,4 @@ char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING "." STRINGIZ
 const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING "." STRINGIZE(OPENMPT_VERSION_REVISION) ")";
 #endif // NO_XMPLAY
 
-} // namespace version
-
-namespace detail {
-
-// has to be exported for type_info lookup to work
-class LIBOPENMPT_CXX_API version_mismatch : public openmpt::exception {
-public:
-	version_mismatch() : openmpt::exception("API and header version mismatch") { }
-}; // class version_mismatch
-
-void version_compatible_or_throw( std::int32_t api_version ) {
-	if ( version::get_version_compatbility( api_version ) <  2 ) {
-		throw version_mismatch();
-	}
-}
-
-} // namespace detail
-
-} // namespace openmpt
+} } // namespace openmpt::version

@@ -37,19 +37,6 @@ LIBOPENMPT_CXX_API std::uint32_t get_library_version();
 
 LIBOPENMPT_CXX_API std::uint32_t get_core_version();
 
-namespace detail {
-
-LIBOPENMPT_CXX_API void version_compatible_or_throw( std::int32_t api_version );
-
-class api_version_checker {
-public:
-	inline api_version_checker( std::int32_t api_version = OPENMPT_API_VERSION ) {
-		version_compatible_or_throw( api_version );
-	}
-}; // class api_version_checker
-
-} // namespace detail
-
 namespace string {
 
 static const char library_version[] = "library_version";
@@ -66,7 +53,7 @@ LIBOPENMPT_CXX_API std::vector<std::string> get_supported_extensions();
 
 LIBOPENMPT_CXX_API bool is_extension_supported( const std::string & extension );
 
-LIBOPENMPT_CXX_API double could_open_propability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog, const detail::api_version_checker & apicheck = detail::api_version_checker() );
+LIBOPENMPT_CXX_API double could_open_propability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog );
 
 class module_impl;
 
@@ -111,14 +98,14 @@ private:
 	module();
 	void set_impl( module_impl * i );
 public:
-	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const char * beg, const char * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	module( const char * beg, const char * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	virtual ~module();
 public:
 
