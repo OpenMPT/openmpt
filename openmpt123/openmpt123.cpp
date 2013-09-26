@@ -405,9 +405,9 @@ static void show_help_keyboard( textout & log ) {
 	log << std::endl;
 	log << " [q]     quit" << std::endl;
 	log << " [N]     skip 10 files backward" << std::endl;
-	log << " [n]     previous file" << std::endl;
+	log << " [n]     prev file" << std::endl;
 	log << " [m]     next file" << std::endl;
-	log << " [M]     skip 10 file forward" << std::endl;
+	log << " [M]     skip 10 files forward" << std::endl;
 	log << " [h]     seek 10 seconds backward" << std::endl;
 	log << " [j]     seek 1 seconds backward" << std::endl;
 	log << " [k]     seek 1 seconds forward" << std::endl;
