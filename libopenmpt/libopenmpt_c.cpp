@@ -11,7 +11,6 @@
 
 #include "libopenmpt_internal.h"
 #include "libopenmpt.h"
-#include "libopenmpt_stream_callbacks.h"
 
 #include "libopenmpt_impl.hpp"
 
