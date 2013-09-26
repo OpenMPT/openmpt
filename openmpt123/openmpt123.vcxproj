@@ -156,6 +156,7 @@
     <ClInclude Include="openmpt123_portaudio.hpp" />
     <ClInclude Include="openmpt123_sndfile.hpp" />
     <ClInclude Include="openmpt123_stdout.hpp" />
+    <ClInclude Include="openmpt123_wavpack.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
