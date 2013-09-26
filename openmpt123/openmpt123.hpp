@@ -24,6 +24,8 @@ struct show_help_exception {
 	show_help_exception( const std::string & msg = "", bool longhelp_ = true ) : message(msg), longhelp(longhelp_) { }
 };
 
+struct show_help_keyboard_exception { };
+
 #if defined(_MSC_VER)
 
 std::string wstring_to_utf8( const std::wstring & unicode_string ) {
