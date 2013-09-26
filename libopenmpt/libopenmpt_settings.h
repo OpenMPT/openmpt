@@ -14,7 +14,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif // __cplusplus
+#endif /* __cplusplus */
 
 typedef void (*changed_func)(void);
 
@@ -36,6 +36,6 @@ void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char 
 
 #ifdef __cplusplus
 }
-#endif // __cplusplus
+#endif /* __cplusplus */
 
-#endif // LIBOPENMPT_SETTINGS_H
+#endif /* LIBOPENMPT_SETTINGS_H */
