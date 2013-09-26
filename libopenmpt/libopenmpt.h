@@ -18,8 +18,6 @@
 extern "C" {
 #endif
 
-LIBOPENMPT_API int openmpt_is_compatible_version( uint32_t api_version );
-
 LIBOPENMPT_API uint32_t openmpt_get_library_version(void);
 
 LIBOPENMPT_API uint32_t openmpt_get_core_version(void);

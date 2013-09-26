@@ -26,10 +26,10 @@ private:
 	interactive_module( const interactive_module & );
 	void operator = ( const interactive_module & );
 public:
-	interactive_module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	interactive_module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	interactive_module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
-	interactive_module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map(), const detail::api_version_checker & apicheck = detail::api_version_checker() );
+	interactive_module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	interactive_module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	interactive_module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	interactive_module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	virtual ~interactive_module();
 
 public:

@@ -28,7 +28,6 @@ namespace version {
 std::uint32_t get_library_version();
 std::uint32_t get_core_version();
 std::string get_string( const std::string & key );
-int get_version_compatbility( std::uint32_t api_version );
 
 } // namespace version
 

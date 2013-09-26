@@ -77,19 +77,19 @@ public:
 
 
 
-interactive_module::interactive_module( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : interactive_impl(0) {
+interactive_module::interactive_module( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : interactive_impl(0) {
 	interactive_impl = new interactive_module_impl( stream, log, ctls );
 	set_impl( interactive_impl );
 }
-interactive_module::interactive_module( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : interactive_impl(0) {
+interactive_module::interactive_module( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : interactive_impl(0) {
 	interactive_impl = new interactive_module_impl( data, log, ctls );
 	set_impl( interactive_impl );
 }
-interactive_module::interactive_module( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : interactive_impl(0) {
+interactive_module::interactive_module( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : interactive_impl(0) {
 	interactive_impl = new interactive_module_impl( data, size, log, ctls );
 	set_impl( interactive_impl );
 }
-interactive_module::interactive_module( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls, const detail::api_version_checker & ) : interactive_impl(0) {
+interactive_module::interactive_module( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : interactive_impl(0) {
 	interactive_impl = new interactive_module_impl( data, size, log, ctls );
 	set_impl( interactive_impl );
 }
