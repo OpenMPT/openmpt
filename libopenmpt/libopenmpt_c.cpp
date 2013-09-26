@@ -86,7 +86,7 @@ public:
 	~callbacks_istream() {
 		return;
 	}
-}; // class xmplay_istream
+}; // class callbacks_istream
 
 class logfunc_logger : public log_interface {
 private:
@@ -106,7 +106,7 @@ public:
 			openmpt_log_func_default( message.c_str(), m_user );
 		}
 	}
-}; // class CSoundFileLog_log_func
+}; // class logfunc_logger
 
 static std::string format_exception( const char * const function ) {
 	std::ostringstream err;
