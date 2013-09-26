@@ -322,6 +322,7 @@ static void show_help( textout & log, show_help_exception & e, bool verbose, boo
 		log << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
 		log << std::endl;
 		log << " -h, --help                Show help" << std::endl;
+		log << "     --help-keyboard       Show keyboard hotkeys in ui mode" << std::endl;
 		log << " -q, --quiet               Suppress non-error screen output" << std::endl;
 		log << " -v, --verbose             Show more screen output" << std::endl;
 		log << "     --version             Show version number and nothing else" << std::endl;
@@ -350,7 +351,7 @@ static void show_help( textout & log, show_help_exception & e, bool verbose, boo
 		log << std::endl;
 		log << "     --samplerate n        Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
 		log << "     --channels n          use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
-		log << "     --[no]-float          Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
+		log << "     --[no-]float          Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
 		log << std::endl;
 		log << "     --gain n              Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
 		log << "     --stereo n            Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
@@ -395,6 +396,27 @@ static void show_help( textout & log, show_help_exception & e, bool verbose, boo
 		log << e.message;
 		log << std::endl;
 	}
+	log.writeout();
+}
+
+static void show_help_keyboard( textout & log ) {
+	show_info( log, false, false );
+	log << "Keyboard hotkeys (use 'openmpt --ui'):" << std::endl;
+	log << std::endl;
+	log << " [q]     quit" << std::endl;
+	log << " [N]     skip 10 files backward" << std::endl;
+	log << " [n]     previous file" << std::endl;
+	log << " [m]     next file" << std::endl;
+	log << " [M]     skip 10 file forward" << std::endl;
+	log << " [h]     seek 10 seconds backward" << std::endl;
+	log << " [j]     seek 1 seconds backward" << std::endl;
+	log << " [k]     seek 1 seconds forward" << std::endl;
+	log << " [l]     seek 10 seconds forward" << std::endl;
+	log << " [3]|[4] +/- gain" << std::endl;
+	log << " [5]|[6] +/- stereo separation" << std::endl;
+	log << " [7]|[8] +/- filter taps" << std::endl;
+	log << " [9]|[0] +/- volume ramping" << std::endl;
+	log << std::endl;
 	log.writeout();
 }
 
@@ -828,14 +850,10 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 #endif
 			log << std::endl;
 			if ( flags.show_ui ) {
-				log << "                      <3>|<4>   " << "\r";
-				log << "Gain.......: " << flags.gain * 0.01f << " dB" << std::endl;
-				log << "                      <5>|<6>   " << "\r";
-				log << "Stereo.....: " << flags.separation << " %" << std::endl;
-				log << "                      <7>|<8>   " << "\r";
-				log << "Filter.....: " << flags.filtertaps << " taps" << std::endl;
-				log << "                      <9>|<0>   " << "\r";
-				log << "Ramping....: " << flags.ramping << std::endl;
+				log << "Gain.......: " << flags.gain * 0.01f << " dB   " << std::endl;
+				log << "Stereo.....: " << flags.separation << " %   " << std::endl;
+				log << "Filter.....: " << flags.filtertaps << " taps   " << std::endl;
+				log << "Ramping....: " << flags.ramping << "   " << std::endl;
 			}
 			if ( flags.show_meters ) {
 				log << std::endl;
@@ -1222,6 +1240,8 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				files_only = true;
 			} else if ( arg == "-h" || arg == "--help" ) {
 				throw show_help_exception();
+			} else if ( arg == "--help-keyboard" ) {
+				throw show_help_keyboard_exception();
 			} else if ( arg == "-q" || arg == "--quiet" ) {
 				flags.quiet = true;
 			} else if ( arg == "-v" || arg == "--verbose" ) {
@@ -1519,6 +1539,9 @@ static int main( int argc, char * argv [] ) {
 		if ( flags.verbose ) {
 			show_credits( std_log );
 		}
+		return 1;
+	} catch ( show_help_keyboard_exception & ) {
+		show_help_keyboard( std_log );
 		return 1;
 	} catch ( show_version_number_exception & ) {
 		show_version( std_log );
