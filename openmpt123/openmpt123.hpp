@@ -184,7 +184,6 @@ static inline std::string mode_to_string( Mode mode ) {
 }
 
 struct commandlineflags {
-	bool modplug123;
 	Mode mode;
 	bool canUI;
 	bool canProgress;
@@ -220,7 +219,6 @@ struct commandlineflags {
 	bool force_overwrite;
 #endif
 	commandlineflags() {
-		modplug123 = false;
 		mode = ModeUI;
 #ifdef MPT_WITH_PORTAUDIO
 		device = -1;

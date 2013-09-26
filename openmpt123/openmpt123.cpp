@@ -270,8 +270,8 @@ std::string bytes_to_string( T bytes ) {
 	return str.str();
 }
 
-static void show_info( std::ostream & log, bool verbose, bool modplug123 = false ) {
-	log << ( modplug123 ? "modplug123 emulated by " : "" ) << "openmpt123" << " version " << OPENMPT123_VERSION_STRING << ", Copyright (c) 2013 OpenMPT developers (http://openmpt.org/)" << std::endl;
+static void show_info( std::ostream & log, bool verbose ) {
+	log << "openmpt123" << " version " << OPENMPT123_VERSION_STRING << ", Copyright (c) 2013 OpenMPT developers (http://openmpt.org/)" << std::endl;
 	log << " libopenmpt " << openmpt::string::get( openmpt::string::library_version ) << " (" << "OpenMPT " << openmpt::string::get( openmpt::string::core_version ) << ")" << std::endl;
 	if ( !verbose ) {
 		log << std::endl;
@@ -306,24 +306,9 @@ static std::string get_device_string( int device ) {
 	return str.str();
 }
 
-static void show_help( textout & log, show_help_exception & e, bool verbose, bool modplug123 ) {
-	show_info( log, verbose, modplug123 );
-	if ( modplug123 ) {
-		log << "Usage: modplug123 [options] file1 [file2] ..." << std::endl;
-		log << std::endl;
-		log << " -h, --help       Show help" << std::endl;
-		log << " -v, --version    Show version number and nothing else" << std::endl;
-		if ( !e.longhelp ) {
-			log << std::endl;
-			log.writeout();
-			return;
-		}
-		log << " -l               Loop song [default: " << commandlineflags().repeatcount << "]" << std::endl;
-#ifdef MPT_WITH_PORTAUDIO
-		log << " -ao n            Set output device [default: " << commandlineflags().device << "]," << std::endl;
-#endif
-		log << "                  use -ao help to show available devices" << std::endl;
-	} else {
+static void show_help( textout & log, show_help_exception & e, bool verbose ) {
+	show_info( log, verbose );
+	{
 		log << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
 		log << std::endl;
 		log << " -h, --help                Show help" << std::endl;
@@ -405,7 +390,7 @@ static void show_help( textout & log, show_help_exception & e, bool verbose, boo
 }
 
 static void show_help_keyboard( textout & log ) {
-	show_info( log, false, false );
+	show_info( log, false );
 	log << "Keyboard hotkeys (use 'openmpt --ui'):" << std::endl;
 	log << std::endl;
 	log << " [q]     quit" << std::endl;
@@ -1176,54 +1161,6 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 }
 
 
-static commandlineflags parse_modplug123( const std::vector<std::string> & args ) {
-
-	commandlineflags flags;
-
-	flags.modplug123 = true;
-
-	bool files_only = false;
-	for ( std::vector<std::string>::const_iterator i = args.begin(); i != args.end(); ++i ) {
-		if ( i == args.begin() ) {
-			// skip program name
-			continue;
-		}
-		std::string arg = *i;
-		std::string nextarg = ( i+1 != args.end() ) ? *(i+1) : "";
-		if ( files_only ) {
-			flags.filenames.push_back( arg );
-		} else if ( arg.substr( 0, 1 ) != "-" ) {
-			flags.filenames.push_back( arg );
-		} else if ( arg == "-h" || arg == "--help" ) {
-			throw show_help_exception();
-		} else if ( arg == "-v" || arg == "--version" ) {
-			show_info( std::clog, true, true );
-			throw silent_exit_exception();
-		} else if ( arg == "-l" ) {
-			flags.repeatcount = -1;
-		} else if ( arg == "-ao" && nextarg != "" ) {
-			if ( false ) {
-				// nothing
-			} else if ( nextarg == "stdout" ) {
-				flags.use_stdout = true;
-#ifdef MPT_WITH_PORTAUDIO
-			} else if ( nextarg == "help" ) {
-				show_audio_devices();
-			} else if ( nextarg == "default" ) {
-				flags.device = -1;
-			} else {
-				std::istringstream istr( nextarg );
-				istr >> flags.device;
-#endif
-			}
-			++i;
-		}
-	}
-
-	return flags;
-
-}
-
 static commandlineflags parse_openmpt123( const std::vector<std::string> & args ) {
 
 	commandlineflags flags;
@@ -1380,23 +1317,6 @@ static bool equal_end( const std::string & str1, const std::string & str2 ) {
 	return str1.substr( str1.length() - minlength ) == str2.substr( str2.length() - minlength );
 }
 
-static bool is_modplug123_binary_name( std::string name ) {
-	std::transform( name.begin(), name.end(), name.begin(), tolower );
-	if ( equal_end( name, "modplug123" ) ) {
-		return true;
-	}
-	if ( equal_end( name, "modplug123.exe" ) ) {
-		return true;
-	}
-	if ( equal_end( name, "modplug12364" ) ) {
-		return true;
-	}
-	if ( equal_end( name, "modplug12364.exe" ) ) {
-		return true;
-	}
-	return false;
-}
-
 static void show_credits( std::ostream & s ) {
 	s << openmpt::string::get( openmpt::string::contact ) << std::endl;
 	s << std::endl;
@@ -1459,15 +1379,7 @@ static int main( int argc, char * argv [] ) {
 			args = std::vector<std::string>( argv, argv + argc );
 		#endif
 
-		if ( args.size() > 0 && is_modplug123_binary_name( args[0] ) ) {
-
-			flags = parse_modplug123( args );
-
-		} else {
-
-			flags = parse_openmpt123( args );
-
-		}
+		flags = parse_openmpt123( args );
 
 		if ( args.size() <= 1 ) {
 			throw show_help_exception( "", false );
@@ -1477,7 +1389,7 @@ static int main( int argc, char * argv [] ) {
 
 		textout & log = flags.quiet ? *static_cast<textout*>(&dummy_log) : *static_cast<textout*>(&std_log);
 
-		show_info( log, flags.verbose, flags.modplug123 );
+		show_info( log, flags.verbose );
 
 		if ( flags.verbose ) {
 
@@ -1540,7 +1452,7 @@ static int main( int argc, char * argv [] ) {
 		}
 
 	} catch ( show_help_exception & e ) {
-		show_help( std_log, e, flags.verbose, flags.modplug123 );
+		show_help( std_log, e, flags.verbose );
 		if ( flags.verbose ) {
 			show_credits( std_log );
 		}
