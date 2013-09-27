@@ -18,10 +18,10 @@ If you don't use #define NO_ASIO, you will need to put the ASIO SDK in the
 Please visit http://www.steinberg.net/en/company/developer.html
 to download the SDK.
 
-Winamp2 SDK
+Winamp5 SDK
 ===========
-To build libopenmpt as a winamp2 input plugin, copy the winamp2 SDK headers to
-include/winamp/.
+To build libopenmpt as a winamp input plugin, copy the headers in Winamp/
+from WA5.55_SDK.exe to include/winamp/.
 Use #define NO_WINAMP in common/BuildSettings.h to disable.
 
 xmplay input SDK
