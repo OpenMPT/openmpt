@@ -17,6 +17,9 @@
 
 #include "libopenmpt_settings.hpp"
 
+#include "svn_version.h"
+static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING "." OPENMPT_API_VERSION_STRINGIZE(OPENMPT_VERSION_REVISION) ")";
+
 //#define EXPERIMENTAL_VIS
 
 #define FAST_CHECKFILE
@@ -883,7 +886,7 @@ static XMPIN xmpin = {
 	XMPIN_FLAG_NOXMPFILE |
 #endif
 	XMPIN_FLAG_CONFIG,// 0, // XMPIN_FLAG_LOOP, the xmplay looping interface is not really compatible with libopenmpt looping interface, so dont support that for now
-	openmpt::version::xmp_openmpt_string,
+	xmp_openmpt_string,
 	NULL, // "libopenmpt\0mptm/mptmz",
 	openmpt_About,
 	openmpt_Config,
