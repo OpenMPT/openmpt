@@ -19,8 +19,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#ifndef NO_LIBOPENMPT_CXX
-
 namespace openmpt {
 
 exception::exception( const std::string & text_ ) throw()
@@ -63,6 +61,12 @@ std::string get( const std::string & key ) {
 }
 
 } // namespace string
+
+} // namespace openmpt
+
+#ifndef NO_LIBOPENMPT_CXX
+
+namespace openmpt {
 
 std::vector<std::string> get_supported_extensions() {
 	return openmpt::module_impl::get_supported_extensions();

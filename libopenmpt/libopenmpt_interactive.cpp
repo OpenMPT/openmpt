@@ -7,6 +7,8 @@
 
 #include <stdexcept>
 
+#ifndef NO_LIBOPENMPT_CXX
+
 namespace openmpt {
 
 class interactive_module_impl : public module_impl {
@@ -106,3 +108,5 @@ void interactive_module::operator = ( const interactive_module & ) {
 }
 
 } // namespace openmpt
+
+#endif // NO_LIBOPENMPT_CXX
