@@ -17,6 +17,9 @@
 
 #include "libopenmpt_settings.hpp"
 
+#include "svn_version.h"
+static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING "." OPENMPT_API_VERSION_STRINGIZE(OPENMPT_VERSION_REVISION);
+
 #define LIBOPENMPT_WINAMP_API LIBOPENMPT_API
 
 #define NOMINMAX
@@ -399,7 +402,7 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 
 In_Module inmod = {
 	IN_VER,
-	openmpt::version::in_openmpt_string, // SHORT_TITLE,
+	in_openmpt_string, // SHORT_TITLE,
 	0, // hMainWindow
 	0, // hDllInstance
 	NULL, // filled later in Init() "mptm\0ModPlug Tracker Module (*.mptm)\0",
