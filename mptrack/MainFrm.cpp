@@ -205,7 +205,6 @@ CMainFrame::CMainFrame()
 	m_szInfoText[0] = 0;
 	m_szXInfoText[0]= 0;	//rewbs.xinfo
 
-	m_TotalSamplesRendered = 0;
 	m_PendingNotificationSempahore = NULL;
 
 	MemsetZero(gcolrefVuMeter);
@@ -721,23 +720,16 @@ LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
 	Notification PendingNotification;
 	bool found = false;
 	int64 currenttotalsamples = 0;
-	bool currenttotalsamplesValid = false;
 	{
 		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-		if(gpSoundDevice && gpSoundDevice->HasGetStreamPosition())
+		if(gpSoundDevice)
 		{
 			currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
-			currenttotalsamplesValid = true;
 		}
 	}
 	{
 		// advance to the newest notification, drop the obsolete ones
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-		if(!currenttotalsamplesValid)
-		{
-			currenttotalsamples = m_TotalSamplesRendered; 
-			currenttotalsamplesValid = true;
-		}
 		const Notification * pnotify = nullptr;
 		const Notification * p = m_NotifyBuffer.peek_p();
 		if(p && currenttotalsamples >= p->timestampSamples)
@@ -874,19 +866,11 @@ void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
 }
 
 
-void CMainFrame::AudioDone(ULONG NumSamples, ULONG SamplesLatency)
+void CMainFrame::AudioDone(ULONG NumSamples, int64 streamPosition)
 //----------------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
-	DoNotification(NumSamples, SamplesLatency, false);
-}
-
-
-void CMainFrame::AudioDone(ULONG NumSamples)
-//------------------------------------------
-{
-	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
-	DoNotification(NumSamples, 0, true);
+	DoNotification(NumSamples, streamPosition);
 }
 
 
@@ -988,7 +972,6 @@ void CMainFrame::audioCloseDevice()
 	{
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
 		m_NotifyBuffer.clear();
-		m_TotalSamplesRendered = 0;
 	}
 }
 
@@ -1026,23 +1009,10 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 }
 
 
-BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool hasSoundDeviceGetStreamPosition)
-//--------------------------------------------------------------------------------------------------------------
+bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
+//------------------------------------------------------------------------
 {
-	if(dwSamplesRead == 0) return FALSE;
-	int64 notificationtimestamp = 0;
-	{
-		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex); // protect m_TotalSamplesRendered
-		m_TotalSamplesRendered += dwSamplesRead;
-		if(hasSoundDeviceGetStreamPosition)
-		{
-			notificationtimestamp = m_TotalSamplesRendered;
-		} else
-		{
-			notificationtimestamp = m_TotalSamplesRendered + SamplesLatency;
-		}
-	}
-	if(!m_pSndFile) return FALSE;
+	if(!m_pSndFile) return false;
 
 	FlagSet<Notification::Type> notifyType(Notification::Default);
 	Notification::Item notifyItem = 0;
@@ -1052,14 +1022,13 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 		notifyType = m_pSndFile->m_pModDoc->GetNotificationType();
 		notifyItem = m_pSndFile->m_pModDoc->GetNotificationItem();
 	}
+
 	// Notify Client
-	//if(m_NotifyBuffer.read_size() > 0)
-	{
-		SetEvent(m_hNotifyWakeUp);
-	}
+	SetEvent(m_hNotifyWakeUp);
+
 	// Add an entry to the notification history
 
-	Notification notification(notifyType, notifyItem, notificationtimestamp, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern, m_pSndFile->GetMixStat());
+	Notification notification(notifyType, notifyItem, streamPosition, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern, m_pSndFile->GetMixStat());
 
 	m_pSndFile->ResetMixStat();
 
@@ -1166,8 +1135,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD SamplesLatency, bool 
 
 	SetEvent(m_hNotifyWakeUp);
 
-	return TRUE;
-
+	return true;
 }
 
 
