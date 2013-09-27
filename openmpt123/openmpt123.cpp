@@ -1312,11 +1312,6 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 
 }
 
-static bool equal_end( const std::string & str1, const std::string & str2 ) {
-	std::size_t minlength = std::min( str1.length(), str2.length() );
-	return str1.substr( str1.length() - minlength ) == str2.substr( str2.length() - minlength );
-}
-
 static void show_credits( std::ostream & s ) {
 	s << openmpt::string::get( openmpt::string::contact ) << std::endl;
 	s << std::endl;
