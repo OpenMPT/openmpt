@@ -18,12 +18,6 @@ If you don't use #define NO_ASIO, you will need to put the ASIO SDK in the
 Please visit http://www.steinberg.net/en/company/developer.html
 to download the SDK.
 
-LibModplug
-===========
-To build libopenmpt with a libmodplug compatible interface, copy the libmodplug
-header files from xmms-modplug into libmodplug directory.
-Use #define NO_LIBMODPLUG in common/BuildSettings.h to disable.
-
 Winamp2 SDK
 ===========
 To build libopenmpt as a winamp2 input plugin, copy the winamp2 SDK headers to
