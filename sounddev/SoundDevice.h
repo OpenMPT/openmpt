@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "../common/mutex.h"
 #include "../soundlib/SampleFormat.h"
 
 #include <vector>
@@ -43,8 +44,7 @@ class ISoundSource
 public:
 	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
 	virtual void AudioRead(void* pData, ULONG NumSamples) = 0;
-	virtual void AudioDone(ULONG NumSamples, ULONG SamplesLatency) = 0; // all in samples
-	virtual void AudioDone(ULONG NumSamples) = 0; // all in samples
+	virtual void AudioDone(ULONG NumSamples, int64 streamPosition) = 0; // in samples
 };
 
 
@@ -126,6 +126,9 @@ protected:
 
 	bool m_IsPlaying;
 
+	mutable Util::mutex m_SamplesRenderedMutex;
+	int64 m_SamplesRendered;
+
 protected:
 	virtual void FillAudioBuffer() = 0;
 	void SourceFillAudioBufferLocked();
@@ -152,6 +155,8 @@ protected:
 	virtual void InternalStop() = 0;
 	virtual void InternalReset() = 0;
 	virtual bool InternalClose() = 0;
+	virtual bool InternalHasGetStreamPosition() const { return false; }
+	virtual int64 InternalGetStreamPositionSamples() const { return 0; }
 
 public:
 	virtual UINT GetDeviceType() = 0;
@@ -160,12 +165,11 @@ public:
 	void Start();
 	void Stop();
 	void Reset();
+	int64 GetStreamPositionSamples() const;
 	virtual SampleFormat HasFixedSampleFormat() { return SampleFormatInvalid; }
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }
 	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }
-	virtual bool HasGetStreamPosition() const { return false; }
-	virtual int64 GetStreamPositionSamples() const { return 0; }
 	virtual UINT GetCurrentSampleRate(UINT nDevice) { UNREFERENCED_PARAMETER(nDevice); return 0; }
 	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO.
 	virtual bool CanSampleRate(UINT nDevice, const std::vector<uint32> &samplerates, std::vector<bool> &result) { UNREFERENCED_PARAMETER(nDevice); result.assign(samplerates.size(), true); return true; } ;

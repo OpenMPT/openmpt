@@ -54,8 +54,8 @@ public:
 	bool IsOpen() const { return (m_hWaveOut != NULL); }
 	UINT GetNumBuffers() { return m_nPreparedHeaders; }
 	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_nBytesPerSec; }
-	bool HasGetStreamPosition() const { return true; }
-	int64 GetStreamPositionSamples() const;
+	bool InternalHasGetStreamPosition() const { return true; }
+	int64 InternalGetStreamPositionSamples() const;
 
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);

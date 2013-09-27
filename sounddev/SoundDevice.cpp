@@ -37,6 +37,7 @@ ISoundDevice::ISoundDevice()
 	m_RealUpdateIntervalMS = static_cast<float>(m_Settings.UpdateIntervalMS);
 
 	m_IsPlaying = false;
+	m_SamplesRendered = 0;
 }
 
 
@@ -115,6 +116,10 @@ void ISoundDevice::SourceFillAudioBufferLocked()
 void ISoundDevice::SourceAudioRead(void* pData, ULONG NumSamples)
 //---------------------------------------------------------------
 {
+	if(NumSamples <= 0)
+	{
+		return;
+	}
 	m_Source->AudioRead(pData, NumSamples);
 }
 
@@ -122,12 +127,22 @@ void ISoundDevice::SourceAudioRead(void* pData, ULONG NumSamples)
 void ISoundDevice::SourceAudioDone(ULONG NumSamples, ULONG SamplesLatency)
 //------------------------------------------------------------------------
 {
-	if(HasGetStreamPosition())
+	if(NumSamples <= 0)
 	{
-		m_Source->AudioDone(NumSamples);
+		return;
+	}
+	int64 samplesRendered = 0;
+	{
+		Util::lock_guard<Util::mutex> lock(m_SamplesRenderedMutex);
+		m_SamplesRendered += NumSamples;
+		samplesRendered = m_SamplesRendered;
+	}
+	if(InternalHasGetStreamPosition())
+	{
+		m_Source->AudioDone(NumSamples, samplesRendered);
 	} else
 	{
-		m_Source->AudioDone(NumSamples, SamplesLatency);
+		m_Source->AudioDone(NumSamples, samplesRendered + SamplesLatency);
 	}
 }
 
@@ -138,6 +153,10 @@ void ISoundDevice::Start()
 	if(!IsOpen()) return; 
 	if(!IsPlaying())
 	{
+		{
+			Util::lock_guard<Util::mutex> lock(m_SamplesRenderedMutex);
+			m_SamplesRendered = 0;
+		}
 		InternalStart();
 		m_IsPlaying = true;
 	}
@@ -152,6 +171,10 @@ void ISoundDevice::Stop()
 	{
 		InternalStop();
 		m_IsPlaying = false;
+		{
+			Util::lock_guard<Util::mutex> lock(m_SamplesRenderedMutex);
+			m_SamplesRendered = 0;
+		}
 	}
 }
 
@@ -162,6 +185,20 @@ void ISoundDevice::Reset()
 	if(!IsOpen()) return;
 	Stop();
 	InternalReset();
+}
+
+
+int64 ISoundDevice::GetStreamPositionSamples() const
+//--------------------------------------------------
+{
+	if(InternalHasGetStreamPosition())
+	{
+		return InternalGetStreamPositionSamples();
+	} else
+	{
+		Util::lock_guard<Util::mutex> lock(m_SamplesRenderedMutex);
+		return m_SamplesRendered;
+	}
 }
 
 

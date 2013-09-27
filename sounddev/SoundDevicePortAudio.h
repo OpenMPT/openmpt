@@ -53,8 +53,8 @@ public:
 	bool IsOpen() const { return m_Stream ? true : false; }
 	UINT GetNumBuffers() { return 1; }
 	float GetCurrentRealLatencyMS();
-	bool HasGetStreamPosition() const { return false; }
-	int64 GetStreamPositionSamples() const;
+	bool InternalHasGetStreamPosition() const { return false; }
+	int64 InternalGetStreamPositionSamples() const;
 	bool CanSampleRate(UINT nDevice, const std::vector<uint32> &samplerates, std::vector<bool> &result);
 
 	int StreamCallback(
