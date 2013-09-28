@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "../common/mutex.h"
 #include "../soundlib/SampleFormat.h"
 
 #include <vector>
@@ -42,9 +43,8 @@ class ISoundSource
 {
 public:
 	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual void AudioRead(void* pData, ULONG NumSamples) = 0;
-	virtual void AudioDone(ULONG NumSamples, ULONG SamplesLatency) = 0; // all in samples
-	virtual void AudioDone(ULONG NumSamples) = 0; // all in samples
+	virtual void AudioRead(void* pData, ULONG NumSamples, SampleFormat sampleFormat) = 0;
+	virtual void AudioDone(ULONG NumSamples, int64 streamPosition) = 0; // in samples
 };
 
 
@@ -110,14 +110,22 @@ struct SoundDeviceSettings
 };
 
 
+class SoundDevicesManager;
+
+
 //=============================================
 class ISoundDevice : protected IFillAudioBuffer
 //=============================================
 {
+	friend class SoundDevicesManager;
+
 private:
 	ISoundSource *m_Source;
 
 protected:
+
+	UINT m_Index;
+	std::wstring m_InternalID;
 
 	SoundDeviceSettings m_Settings;
 
@@ -125,6 +133,9 @@ protected:
 	float m_RealUpdateIntervalMS;
 
 	bool m_IsPlaying;
+
+	mutable Util::mutex m_SamplesRenderedMutex;
+	int64 m_SamplesRendered;
 
 protected:
 	virtual void FillAudioBuffer() = 0;
@@ -137,6 +148,13 @@ public:
 	virtual ~ISoundDevice();
 	void SetSource(ISoundSource *source) { m_Source = source; }
 	ISoundSource *GetSource() const { return m_Source; }
+protected:
+	void SetDevice(UINT index, const std::wstring &internalID);
+public:
+	UINT GetDeviceIndex() const { return m_Index; }
+	UINT GetDeviceID() const { return SNDDEV_BUILD_ID(GetDeviceIndex(), GetDeviceType()); }
+
+	std::wstring GetDeviceInternalID() const { return m_InternalID; }
 
 public:
 	float GetRealLatencyMS() const  { return m_RealLatencyMS; }
@@ -147,42 +165,78 @@ protected:
 	bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat);
 
 protected:
-	virtual bool InternalOpen(UINT nDevice) = 0;
+	virtual bool InternalOpen() = 0;
 	virtual void InternalStart() = 0;
 	virtual void InternalStop() = 0;
 	virtual void InternalReset() = 0;
 	virtual bool InternalClose() = 0;
+	virtual bool InternalHasGetStreamPosition() const { return false; }
+	virtual int64 InternalGetStreamPositionSamples() const { return 0; }
 
 public:
-	virtual UINT GetDeviceType() = 0;
-	bool Open(UINT nDevice, const SoundDeviceSettings &settings);	// Open a device
+	virtual UINT GetDeviceType() const = 0;
+	bool Open(const SoundDeviceSettings &settings);	// Open a device
 	bool Close();				// Close the currently open device
 	void Start();
 	void Stop();
 	void Reset();
-	virtual SampleFormat HasFixedSampleFormat() { return SampleFormatInvalid; }
+	int64 GetStreamPositionSamples() const;
+	SampleFormat GetActualSampleFormat() { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }
 	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }
-	virtual bool HasGetStreamPosition() const { return false; }
-	virtual int64 GetStreamPositionSamples() const { return 0; }
-	virtual UINT GetCurrentSampleRate(UINT nDevice) { UNREFERENCED_PARAMETER(nDevice); return 0; }
-	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO.
-	virtual bool CanSampleRate(UINT nDevice, const std::vector<uint32> &samplerates, std::vector<bool> &result) { UNREFERENCED_PARAMETER(nDevice); result.assign(samplerates.size(), true); return true; } ;
+	virtual UINT GetCurrentSampleRate() { return 0; }
+	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO and PortAudio.
+	virtual std::vector<uint32> GetSampleRates(const std::vector<uint32> &samplerates) { return samplerates; }
 };
 
 
-////////////////////////////////////////////////////////////////////////////////////
-//
-// Global Functions
-//
+struct SoundDeviceInfo
+{
+	UINT type;
+	UINT index;
+	std::wstring name;
+	std::wstring internalID;
+	SoundDeviceInfo()
+		: type(0)
+		, index(0)
+	{
+		return;
+	}
+	SoundDeviceInfo(UINT type, UINT index, const std::wstring &name, const std::wstring &id = std::wstring())
+		: type(type)
+		, index(index)
+		, name(name)
+		, internalID(id)
+	{
+		return;
+	}
+};
 
-// Initialization
-BOOL SndDevInitialize();
-BOOL SndDevUninitialize();
 
-// Enumerate devices for a specific type
-BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDescription, UINT cbSize);
-ISoundDevice *CreateSoundDevice(UINT nType);
+//=======================
+class SoundDevicesManager
+//=======================
+{
+private:
+	std::vector<SoundDeviceInfo> m_SoundDevices;
 
-////////////////////////////////////////////////////////////////////////////////////
+public:
+	SoundDevicesManager();
+	~SoundDevicesManager();
+
+public:
+
+	void ReEnumerate();
+
+	std::vector<SoundDeviceInfo>::const_iterator begin() const { return m_SoundDevices.begin(); }
+	std::vector<SoundDeviceInfo>::const_iterator end() const { return m_SoundDevices.end(); }
+	const std::vector<SoundDeviceInfo> & GetDeviceInfos() const { return m_SoundDevices; }
+
+	const SoundDeviceInfo * FindDeviceInfo(UINT type, UINT index) const;
+	const SoundDeviceInfo * FindDeviceInfo(UINT id) const { return FindDeviceInfo(SNDDEV_GET_TYPE(id), SNDDEV_GET_NUMBER(id)); }
+
+	ISoundDevice * CreateSoundDevice(UINT type, UINT index);
+	ISoundDevice * CreateSoundDevice(UINT id) { return CreateSoundDevice(SNDDEV_GET_TYPE(id), SNDDEV_GET_NUMBER(id)); }
+
+};

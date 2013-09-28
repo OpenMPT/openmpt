@@ -334,11 +334,6 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_MorePortaudio = CMainFrame::GetPrivateProfileBool("Sound Settings", "MorePortaudio", m_MorePortaudio, iniFile);
 	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT); // first WaveOut device
 #ifndef NO_ASIO
-	// If there's an ASIO device available, prefer it over DirectSound
-	if(EnumerateSoundDevices(SNDDEV_ASIO, 0, nullptr, 0))
-	{
-		defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_ASIO);
-	}
 	CASIODevice::baseChannel = GetPrivateProfileInt("Sound Settings", "ASIOBaseChannel", CASIODevice::baseChannel, iniFile);
 #endif // NO_ASIO
 	m_nWaveDevice = CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
@@ -388,22 +383,6 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	{
 		m_LatencyMS = LatencyMS;
 		m_UpdateIntervalMS = UpdateIntervalMS;
-	}
-	if(m_MixerSettings.gdwMixingFreq == 0)
-	{
-		m_MixerSettings.gdwMixingFreq = 44100;
-#ifndef NO_ASIO
-		// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
-		if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
-		{
-			ISoundDevice *dummy = CreateSoundDevice(SNDDEV_ASIO);
-			if(dummy)
-			{
-				m_MixerSettings.gdwMixingFreq = dummy->GetCurrentSampleRate(SNDDEV_GET_NUMBER(m_nWaveDevice));
-				delete dummy;
-			}
-		}
-#endif // NO_ASIO
 	}
 
 	m_MixerSettings.m_nPreAmp = CMainFrame::GetPrivateProfileDWord("Sound Settings", "PreAmp", m_MixerSettings.m_nPreAmp, iniFile);

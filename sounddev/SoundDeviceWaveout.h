@@ -44,8 +44,8 @@ public:
 	~CWaveDevice();
 
 public:
-	UINT GetDeviceType() { return SNDDEV_WAVEOUT; }
-	bool InternalOpen(UINT nDevice);
+	UINT GetDeviceType() const { return SNDDEV_WAVEOUT; }
+	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();
 	void ResetFromOutsideSoundThread();
@@ -54,10 +54,10 @@ public:
 	bool IsOpen() const { return (m_hWaveOut != NULL); }
 	UINT GetNumBuffers() { return m_nPreparedHeaders; }
 	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_nBytesPerSec; }
-	bool HasGetStreamPosition() const { return true; }
-	int64 GetStreamPositionSamples() const;
+	bool InternalHasGetStreamPosition() const { return true; }
+	int64 InternalGetStreamPositionSamples() const;
 
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
-	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
+	static std::vector<SoundDeviceInfo> EnumerateDevices();
 };
