@@ -24,7 +24,6 @@
 // MMSYSTEM WaveOut Device
 //
 
-static UINT gnNumWaveDevs = 0;
 
 CWaveDevice::CWaveDevice()
 //------------------------
@@ -45,8 +44,8 @@ CWaveDevice::~CWaveDevice()
 }
 
 
-bool CWaveDevice::InternalOpen(UINT nDevice)
-//------------------------------------------
+bool CWaveDevice::InternalOpen()
+//------------------------------
 {
 	WAVEFORMATEXTENSIBLE wfext;
 	if(!FillWaveFormatExtensible(wfext)) return false;
@@ -55,7 +54,8 @@ bool CWaveDevice::InternalOpen(UINT nDevice)
 	LONG nWaveDev;
 
 	if (m_hWaveOut) Close();
-	nWaveDev = (nDevice) ? nDevice-1 : WAVE_MAPPER;
+	nWaveDev = GetDeviceIndex();
+	nWaveDev = (nWaveDev) ? nWaveDev-1 : WAVE_MAPPER;
 	if (waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION))
 	{
 		sndPlaySound(NULL, 0);
@@ -216,24 +216,27 @@ void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_P
 }
 
 
-BOOL CWaveDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize)
-//--------------------------------------------------------------------------------
+std::vector<SoundDeviceInfo> CWaveDevice::EnumerateDevices()
+//----------------------------------------------------------
 {
-	WAVEOUTCAPS woc;
-
-	if (!gnNumWaveDevs)
+	std::vector<SoundDeviceInfo> devices;
+	UINT numDevs = waveOutGetNumDevs();
+	for(UINT index = 0; index <= numDevs; ++index)
 	{
-		gnNumWaveDevs = waveOutGetNumDevs();
+		SoundDeviceInfo info;
+		info.type = SNDDEV_WAVEOUT;
+		info.index = index;
+		if(index == 0)
+		{
+			info.name = L"Auto (Wave Mapper)";
+		} else
+		{
+			WAVEOUTCAPSW woc;
+			MemsetZero(woc);
+			waveOutGetDevCapsW(index-1, &woc, sizeof(woc));
+			info.name = woc.szPname;
+		}
+		devices.push_back(info);
 	}
-	if (nIndex > gnNumWaveDevs) return FALSE;
-	if (nIndex)
-	{
-		MemsetZero(woc);
-		waveOutGetDevCaps(nIndex-1, &woc, sizeof(woc));
-		if (pszDescription) lstrcpyn(pszDescription, woc.szPname, cbSize);
-	} else
-	{
-		if (pszDescription) lstrcpyn(pszDescription, "Auto (Wave Mapper)", cbSize);
-	}
-	return TRUE;
+	return devices;
 }

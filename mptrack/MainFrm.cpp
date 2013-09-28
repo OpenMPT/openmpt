@@ -244,7 +244,7 @@ VOID CMainFrame::Initialize()
 	OnUpdateFrameTitle(false);
 
 	// Check for valid sound device
-	if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice), SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), nullptr, 0))
+	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().m_nWaveDevice))
 	{
 		// Fall back to default WaveOut device
 		TrackerSettings::Instance().m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);
@@ -256,10 +256,10 @@ VOID CMainFrame::Initialize()
 			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
 			if(SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice) == SNDDEV_ASIO)
 			{
-				ISoundDevice *dummy = CreateSoundDevice(SNDDEV_ASIO);
+				ISoundDevice *dummy = theApp.GetSoundDevicesManager()->CreateSoundDevice(TrackerSettings::Instance().m_nWaveDevice);
 				if(dummy)
 				{
-					TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = dummy->GetCurrentSampleRate(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice));
+					TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = dummy->GetCurrentSampleRate();
 					delete dummy;
 				}
 			}
@@ -891,15 +891,15 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, SampleFormat sampleFormat,
 //--------------------------------------------------------------------------------------------------
 {
 	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-	const UINT nDevType = SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice);
-	if(gpSoundDevice && (gpSoundDevice->GetDeviceType() != nDevType))
+	const UINT nDevID = TrackerSettings::Instance().m_nWaveDevice;
+	if(gpSoundDevice && (gpSoundDevice->GetDeviceID() != nDevID))
 	{
 		delete gpSoundDevice;
-		gpSoundDevice = NULL;
+		gpSoundDevice = nullptr;
 	}
 	if(!gpSoundDevice)
 	{
-		gpSoundDevice = CreateSoundDevice(nDevType);
+		gpSoundDevice = theApp.GetSoundDevicesManager()->CreateSoundDevice(nDevID);
 	}
 	if(!gpSoundDevice)
 	{
@@ -914,7 +914,7 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, SampleFormat sampleFormat,
 	settings.Samplerate = samplespersec;
 	settings.Channels = (uint8)channels;
 	settings.sampleFormat = sampleFormat;
-	return gpSoundDevice->Open(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice), settings);
+	return gpSoundDevice->Open(settings);
 }
 
 

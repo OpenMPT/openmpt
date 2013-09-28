@@ -45,8 +45,8 @@ public:
 	~CDSoundDevice();
 
 public:
-	UINT GetDeviceType() { return SNDDEV_DSOUND; }
-	bool InternalOpen(UINT nDevice);
+	UINT GetDeviceType() const { return SNDDEV_DSOUND; }
+	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();
 	void ResetFromOutsideSoundThread();
@@ -61,12 +61,8 @@ protected:
 	BOOL UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DWORD dwSize2);
 
 public:
-	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
+	static std::vector<SoundDeviceInfo> EnumerateDevices();
 };
-
-BOOL SndDevDSoundInitialize();
-
-BOOL SndDevDSoundUninitialize();
 
 #endif // NO_DIRECTSOUND
 

@@ -620,6 +620,7 @@ CTrackApp::CTrackApp()
 	m_bPortableMode = false;
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
+	m_pSoundDevicesManager = nullptr;
 	m_bInitialized = FALSE;
 	m_szConfigFileName[0] = 0;
 }
@@ -862,7 +863,7 @@ BOOL CTrackApp::InitInstance()
 	//RegisterExtensions();
 
 	// Load sound APIs
-	SndDevInitialize();
+	m_pSoundDevicesManager = new SoundDevicesManager();
 
 	// Load DLS Banks
 	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();
@@ -916,7 +917,8 @@ BOOL CTrackApp::InitInstance()
 int CTrackApp::ExitInstance()
 //---------------------------
 {
-	SndDevUninitialize();
+	delete m_pSoundDevicesManager;
+	m_pSoundDevicesManager = nullptr;
 	if (glpMidiLibrary)
 	{
 		if (m_szConfigFileName[0]) ExportMidiConfig(m_szConfigFileName);

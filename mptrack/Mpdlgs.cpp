@@ -18,6 +18,7 @@
 #include "moddoc.h"
 #include "../sounddev/SoundDevice.h"
 #include ".\mpdlgs.h"
+#include "../common/StringFixer.h"
 
 #define str_preampChangeNote GetStrI18N(_TEXT("Note: The Pre-Amp setting affects sample volume only. Changing it may cause undesired effects on volume balance between sample based instruments and plugin instruments.\nIn other words: Don't touch this slider unless you know what you are doing."))
 
@@ -185,25 +186,25 @@ BOOL COptionsSoundcard::OnInitDialog()
 		COMBOBOXEXITEM cbi;
 		UINT iItem = 0;
 
-		for (UINT nDevType = 0; nDevType < SNDDEV_NUM_DEVTYPES; nDevType++)
+		for(std::vector<SoundDeviceInfo>::const_iterator it = theApp.GetSoundDevicesManager()->begin(); it != theApp.GetSoundDevicesManager()->end(); ++it)
 		{
+
 			if(!TrackerSettings::Instance().m_MorePortaudio)
 			{
-				if(nDevType == SNDDEV_PORTAUDIO_ASIO || nDevType == SNDDEV_PORTAUDIO_DS || nDevType == SNDDEV_PORTAUDIO_WMME)
+				if(it->type == SNDDEV_PORTAUDIO_ASIO || it->type == SNDDEV_PORTAUDIO_DS || it->type == SNDDEV_PORTAUDIO_WMME)
 				{
 					// skip those portaudio apis that are already implemented via our own ISoundDevice class
 					// can be overwritten via [Sound Settings]MorePortaudio=1
 					continue;
 				}
 			}
-			UINT nDev = 0;
 
-			while (EnumerateSoundDevices(nDevType, nDev, s, CountOf(s)))
 			{
+				mpt::String::Copy(s, mpt::String::Encode(it->name, mpt::CharsetLocale));
 				cbi.mask = CBEIF_IMAGE | CBEIF_LPARAM | CBEIF_TEXT | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 				cbi.iItem = iItem;
 				cbi.cchTextMax = 0;
-				switch(nDevType)
+				switch(it->type)
 				{
 				case SNDDEV_DSOUND:
 				case SNDDEV_PORTAUDIO_DS:
@@ -220,12 +221,11 @@ BOOL COptionsSoundcard::OnInitDialog()
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
 				cbi.iIndent = 0;
-				cbi.lParam = SNDDEV_BUILD_ID(nDev, nDevType);
+				cbi.lParam = SNDDEV_BUILD_ID(it->index, it->type);
 				cbi.pszText = s;
 				int pos = m_CbnDevice.InsertItem(&cbi);
 				if (cbi.lParam == (LONG)m_nSoundDevice) m_CbnDevice.SetCurSel(pos);
 				iItem++;
-				nDev++;
 			}
 		}
 		UpdateControls(m_nSoundDevice);
@@ -396,13 +396,13 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 	if(dummy == nullptr)
 	{
 		justCreated = true;
-		dummy = CreateSoundDevice(SNDDEV_GET_TYPE(dev));
+		dummy = theApp.GetSoundDevicesManager()->CreateSoundDevice(dev);
 	}
 
 	if(dummy != nullptr)
 	{
 		// Now we can query the supported sample rates.
-		knowRates = dummy->CanSampleRate(SNDDEV_GET_NUMBER(dev), samplerates, supportedRates);
+		knowRates = dummy->CanSampleRate(samplerates, supportedRates);
 		if(justCreated)
 		{
 			delete dummy;

@@ -22,6 +22,9 @@
 #include "SoundDevicePortAudio.h"
 #include "SoundDeviceWaveout.h"
 
+#include <algorithm>
+#include <iterator>
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //
@@ -32,6 +35,8 @@ ISoundDevice::ISoundDevice()
 //--------------------------
 {
 	m_Source = nullptr;
+
+	m_Index = 0;
 
 	m_RealLatencyMS = static_cast<float>(m_Settings.LatencyMS);
 	m_RealUpdateIntervalMS = static_cast<float>(m_Settings.UpdateIntervalMS);
@@ -45,6 +50,14 @@ ISoundDevice::~ISoundDevice()
 //---------------------------
 {
 	return;
+}
+
+
+void ISoundDevice::SetDevice(UINT index, const std::wstring &internalID)
+//----------------------------------------------------------------------
+{
+	m_Index = index;
+	m_InternalID = internalID;
 }
 
 
@@ -82,8 +95,8 @@ bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 }
 
 
-bool ISoundDevice::Open(UINT device, const SoundDeviceSettings &settings)
-//-----------------------------------------------------------------------
+bool ISoundDevice::Open(const SoundDeviceSettings &settings)
+//----------------------------------------------------------
 {
 	m_Settings = settings;
 	if(m_Settings.LatencyMS < SNDDEV_MINLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MINLATENCY_MS;
@@ -92,7 +105,7 @@ bool ISoundDevice::Open(UINT device, const SoundDeviceSettings &settings)
 	if(m_Settings.UpdateIntervalMS > SNDDEV_MAXUPDATEINTERVAL_MS) m_Settings.UpdateIntervalMS = SNDDEV_MAXUPDATEINTERVAL_MS;
 	m_RealLatencyMS = static_cast<float>(m_Settings.LatencyMS);
 	m_RealUpdateIntervalMS = static_cast<float>(m_Settings.UpdateIntervalMS);
-	return InternalOpen(device);
+	return InternalOpen();
 }
 
 
@@ -601,79 +614,112 @@ void CSoundDeviceWithThread::InternalReset()
 //
 
 
-BOOL EnumerateSoundDevices(UINT nType, UINT nIndex, LPSTR pszDesc, UINT cbSize)
-//-----------------------------------------------------------------------------
+void SoundDevicesManager::ReEnumerate()
+//-------------------------------------
 {
-	switch(nType)
+	m_SoundDevices.clear();
+	for(int type = 0; type < SNDDEV_NUM_DEVTYPES; ++type)
 	{
-	case SNDDEV_WAVEOUT:	return CWaveDevice::EnumerateDevices(nIndex, pszDesc, cbSize);
+		std::vector<SoundDeviceInfo> infos;
+		switch(type)
+		{
+
+		case SNDDEV_WAVEOUT:
+			infos = CWaveDevice::EnumerateDevices();
+			break;
+
 #ifndef NO_DSOUND
-	case SNDDEV_DSOUND:		return CDSoundDevice::EnumerateDevices(nIndex, pszDesc, cbSize);
-#endif // NO_DIRECTSOUND
+		case SNDDEV_DSOUND:
+			infos = CDSoundDevice::EnumerateDevices();
+			break;
+#endif // NO_DSOUND
+
 #ifndef NO_ASIO
-	case SNDDEV_ASIO:		return CASIODevice::EnumerateDevices(nIndex, pszDesc, cbSize);
+		case SNDDEV_ASIO:
+			infos = CASIODevice::EnumerateDevices();
+			break;
 #endif // NO_ASIO
+
 #ifndef NO_PORTAUDIO
-	case SNDDEV_PORTAUDIO_WASAPI:
-	case SNDDEV_PORTAUDIO_WDMKS:
-	case SNDDEV_PORTAUDIO_WMME:
-	case SNDDEV_PORTAUDIO_DS:
-	case SNDDEV_PORTAUDIO_ASIO:
-		return SndDevPortaudioIsInitialized() ? CPortaudioDevice::EnumerateDevices(nIndex, pszDesc, cbSize, CPortaudioDevice::SndDevTypeToHostApi(nType)) : FALSE;
-		break;
-#endif
+		case SNDDEV_PORTAUDIO_WASAPI:
+		case SNDDEV_PORTAUDIO_WDMKS:
+		case SNDDEV_PORTAUDIO_WMME:
+		case SNDDEV_PORTAUDIO_DS:
+		case SNDDEV_PORTAUDIO_ASIO:
+			infos = CPortaudioDevice::EnumerateDevices(type);
+			break;
+#endif // NO_PORTAUDIO
+
+		}
+		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
-	return FALSE;
 }
 
 
-ISoundDevice *CreateSoundDevice(UINT nType)
-//-----------------------------------------
+const SoundDeviceInfo * SoundDevicesManager::FindDeviceInfo(UINT type, UINT index) const
+//--------------------------------------------------------------------------------------
 {
-	switch(nType)
+	for(std::vector<SoundDeviceInfo>::const_iterator it = begin(); it != end(); ++it)
 	{
-	case SNDDEV_WAVEOUT:	return new CWaveDevice(); break;
-#ifndef NO_DSOUND
-	case SNDDEV_DSOUND:		return new CDSoundDevice(); break;
-#endif // NO_DIRECTSOUND
-#ifndef NO_ASIO
-	case SNDDEV_ASIO:		return new CASIODevice(); break;
-#endif // NO_ASIO
-#ifndef NO_PORTAUDIO
-	case SNDDEV_PORTAUDIO_WASAPI:
-	case SNDDEV_PORTAUDIO_WDMKS:
-	case SNDDEV_PORTAUDIO_WMME:
-	case SNDDEV_PORTAUDIO_DS:
-	case SNDDEV_PORTAUDIO_ASIO:
-		return SndDevPortaudioIsInitialized() ? new CPortaudioDevice(CPortaudioDevice::SndDevTypeToHostApi(nType)) : nullptr;
-		break;
-#endif
+		if(it->type == type && it->index == index)
+		{
+			return &(*it);
+		}
 	}
 	return nullptr;
 }
 
 
-BOOL SndDevInitialize()
-//---------------------
+ISoundDevice * SoundDevicesManager::CreateSoundDevice(UINT type, UINT index)
+//--------------------------------------------------------------------------
 {
+	const SoundDeviceInfo *info = FindDeviceInfo(type, index);
+	if(!info)
+	{
+		return nullptr;
+	}
+	ISoundDevice *result = nullptr;
+	switch(type)
+	{
+	case SNDDEV_WAVEOUT: result = new CWaveDevice(); break;
 #ifndef NO_DSOUND
-	SndDevDSoundInitialize();
+	case SNDDEV_DSOUND: result = new CDSoundDevice(); break;
 #endif // NO_DSOUND
+#ifndef NO_ASIO
+	case SNDDEV_ASIO: result = new CASIODevice(); break;
+#endif // NO_ASIO
 #ifndef NO_PORTAUDIO
-	SndDevPortaudioInitialize();
+	case SNDDEV_PORTAUDIO_WASAPI:
+	case SNDDEV_PORTAUDIO_WDMKS:
+	case SNDDEV_PORTAUDIO_WMME:
+	case SNDDEV_PORTAUDIO_DS:
+	case SNDDEV_PORTAUDIO_ASIO:
+		result = SndDevPortaudioIsInitialized() ? new CPortaudioDevice(CPortaudioDevice::SndDevTypeToHostApi(type)) : nullptr;
+		break;
 #endif // NO_PORTAUDIO
-	return TRUE;
+	}
+	if(result)
+	{
+		result->SetDevice(index, info->internalID);
+	}
+	return result;
 }
 
 
-BOOL SndDevUninitialize()
-//-----------------------
+SoundDevicesManager::SoundDevicesManager()
+//----------------------------------------
+{
+#ifndef NO_PORTAUDIO
+	SndDevPortaudioInitialize();
+#endif // NO_PORTAUDIO
+	ReEnumerate();
+}
+
+
+SoundDevicesManager::~SoundDevicesManager()
+//-----------------------------------------
 {
 #ifndef NO_PORTAUDIO
 	SndDevPortaudioUnnitialize();
 #endif // NO_PORTAUDIO
-#ifndef NO_DSOUND
-	SndDevDSoundUninitialize();
-#endif // NO_DSOUND
-	return TRUE;
 }
