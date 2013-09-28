@@ -887,8 +887,8 @@ void CMainFrame::AudioDone(ULONG NumSamples, int64 streamPosition)
 }
 
 
-bool CMainFrame::audioTryOpeningDevice(UINT channels, SampleFormat sampleFormat, UINT samplespersec)
-//--------------------------------------------------------------------------------------------------
+bool CMainFrame::audioTryOpeningDevice()
+//--------------------------------------
 {
 	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
 	const UINT nDevID = TrackerSettings::Instance().m_nWaveDevice;
@@ -911,9 +911,9 @@ bool CMainFrame::audioTryOpeningDevice(UINT channels, SampleFormat sampleFormat,
 	settings.LatencyMS = TrackerSettings::Instance().m_LatencyMS;
 	settings.UpdateIntervalMS = TrackerSettings::Instance().m_UpdateIntervalMS;
 	settings.fulCfgOptions = TrackerSettings::Instance().GetSoundDeviceFlags();
-	settings.Samplerate = samplespersec;
-	settings.Channels = (uint8)channels;
-	settings.sampleFormat = sampleFormat;
+	settings.Samplerate = TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq;
+	settings.Channels = (uint8)TrackerSettings::Instance().m_MixerSettings.gnChannels;
+	settings.sampleFormat = TrackerSettings::Instance().m_SampleFormat;
 	return gpSoundDevice->Open(settings);
 }
 
@@ -929,37 +929,30 @@ bool CMainFrame::IsAudioDeviceOpen() const
 bool CMainFrame::audioOpenDevice()
 //--------------------------------
 {
-	if(IsAudioDeviceOpen()) return true;
-	bool err = false;
-
-	if (!TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq) err = true;
-	if ((TrackerSettings::Instance().m_MixerSettings.gnChannels != 1) && (TrackerSettings::Instance().m_MixerSettings.gnChannels != 2) && (TrackerSettings::Instance().m_MixerSettings.gnChannels != 4)) err = true;
-	if(!err)
+	if(IsAudioDeviceOpen())
 	{
-		err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-								TrackerSettings::Instance().m_SampleFormat,
-								TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
-		SampleFormat fixedBitsPerSample = SampleFormatInvalid;
+		return true;
+	}
+	if(TrackerSettings::Instance().m_MixerSettings.IsValid())
+	{
+		if(audioTryOpeningDevice())
 		{
-			Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-			fixedBitsPerSample = (gpSoundDevice) ? SampleFormat(gpSoundDevice->HasFixedSampleFormat()) : SampleFormatInvalid;
-		}
-		if(fixedBitsPerSample.IsValid() && (fixedBitsPerSample != TrackerSettings::Instance().m_SampleFormat))
-		{
-			TrackerSettings::Instance().m_SampleFormat = fixedBitsPerSample;
-			err = !audioTryOpeningDevice(TrackerSettings::Instance().m_MixerSettings.gnChannels,
-									TrackerSettings::Instance().m_SampleFormat,
-									TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq);
+			SampleFormat actualSampleFormat = SampleFormatInvalid;
+			{
+				Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
+				actualSampleFormat = gpSoundDevice->GetActualSampleFormat();
+			}
+			if(actualSampleFormat.IsValid())
+			{
+				TrackerSettings::Instance().m_SampleFormat = actualSampleFormat;
+				// Device is ready
+				return true;
+			}
 		}
 	}
 	// Display error message box
-	if(err)
-	{
-		Reporting::Error("Unable to open sound device!");
-		return false;
-	}
-	// Device is ready
-	return true;
+	Reporting::Error("Unable to open sound device!");
+	return false;
 }
 
 

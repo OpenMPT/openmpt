@@ -328,7 +328,7 @@ public:
 	void AudioRead(PVOID pData, ULONG NumSamples);
 	void AudioDone(ULONG NumSamples, int64 streamPosition);
 	
-	bool audioTryOpeningDevice(UINT channels, SampleFormat sampleFormat, UINT samplespersec);
+	bool audioTryOpeningDevice();
 	bool audioOpenDevice();
 	bool audioReopenDevice();
 	void audioCloseDevice();
