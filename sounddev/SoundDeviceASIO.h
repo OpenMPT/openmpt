@@ -33,7 +33,8 @@ class CASIODevice: public ISoundDevice
 	enum { ASIO_BLOCK_LEN=1024 };
 protected:
 	IASIO *m_pAsioDrv;
-	UINT m_nChannels, m_nAsioBufferLen, m_nAsioSampleSize;
+	UINT m_nAsioBufferLen;
+	UINT m_nAsioSampleSize;
 	bool m_Float;
 	BOOL m_bMixRunning;
 	BOOL m_bPostOutput;

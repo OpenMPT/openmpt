@@ -158,7 +158,6 @@ CASIODevice::CASIODevice()
 //------------------------
 {
 	m_pAsioDrv = NULL;
-	m_nChannels = 0;
 	m_nAsioBufferLen = 0;
 	m_nAsioSampleSize = 0;
 	m_Float = false;
@@ -206,7 +205,6 @@ bool CASIODevice::InternalOpen()
 		{
 			goto abort;
 		}
-		m_nChannels = m_Settings.Channels;
 		m_pAsioDrv->getChannels(&nInputChannels, &nOutputChannels);
 	#ifdef ASIO_LOG
 		Log("  getChannels: %d inputs, %d outputs\n", nInputChannels, nOutputChannels);
@@ -311,9 +309,9 @@ bool CASIODevice::InternalOpen()
 	#ifdef ASIO_LOG
 		Log("  Using buffersize=%d samples\n", m_nAsioBufferLen);
 	#endif
-		if (m_pAsioDrv->createBuffers(m_BufferInfo, m_nChannels, m_nAsioBufferLen, &m_Callbacks) == ASE_OK)
+		if (m_pAsioDrv->createBuffers(m_BufferInfo, m_Settings.Channels, m_nAsioBufferLen, &m_Callbacks) == ASE_OK)
 		{
-			for (UINT iInit=0; iInit<m_nChannels; iInit++)
+			for (UINT iInit=0; iInit<m_Settings.Channels; iInit++)
 			{
 				if (m_BufferInfo[iInit].buffers[0])
 				{
@@ -541,7 +539,8 @@ void CASIODevice::FillAudioBuffer()
 {
 	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 
-	std::size_t sampleFrameSize = m_nChannels * sizeof(int32);
+	const int channels = m_Settings.Channels;
+	std::size_t sampleFrameSize = channels * sizeof(int32);
 	const std::size_t sampleFramesGoal = m_nAsioBufferLen;
 	std::size_t sampleFramesToRender = sampleFramesGoal;
 	std::size_t sampleFramesRendered = 0;
@@ -559,7 +558,7 @@ void CASIODevice::FillAudioBuffer()
 		{
 			SourceAudioRead(m_FrameBuffer, countChunk);
 		}
-		for(int channel = 0; channel < (int)m_nChannels; ++channel)
+		for(int channel = 0; channel < channels; ++channel)
 		{
 			const int32 *src = m_FrameBuffer;
 			const float *srcFloat = reinterpret_cast<const float*>(m_FrameBuffer);
@@ -568,11 +567,11 @@ void CASIODevice::FillAudioBuffer()
 			{
 				case ASIOSTFloat32MSB:
 				case ASIOSTFloat32LSB:
-					CopyInterleavedToChannel<SC::Convert<float, float> >(reinterpret_cast<float*>(dst), srcFloat, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<float, float> >(reinterpret_cast<float*>(dst), srcFloat, channels, countChunk, channel);
 					break;
 				case ASIOSTFloat64MSB:
 				case ASIOSTFloat64LSB:
-					CopyInterleavedToChannel<SC::Convert<double, float> >(reinterpret_cast<double*>(dst), srcFloat, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<double, float> >(reinterpret_cast<double*>(dst), srcFloat, channels, countChunk, channel);
 					break;
 				default:
 					ASSERT(false);
@@ -581,39 +580,39 @@ void CASIODevice::FillAudioBuffer()
 			{
 				case ASIOSTInt16MSB:
 				case ASIOSTInt16LSB:
-					CopyInterleavedToChannel<SC::Convert<int16, int32> >(reinterpret_cast<int16*>(dst), src, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int16, int32> >(reinterpret_cast<int16*>(dst), src, channels, countChunk, channel);
 					break;
 				case ASIOSTInt24MSB:
 				case ASIOSTInt24LSB:
-					CopyInterleavedToChannel<SC::Convert<int24, int32> >(reinterpret_cast<int24*>(dst), src, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int24, int32> >(reinterpret_cast<int24*>(dst), src, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB:
 				case ASIOSTInt32LSB:
-					CopyInterleavedToChannel<SC::Convert<int32, int32> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int32, int32> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
 					break;
 				case ASIOSTFloat32MSB:
 				case ASIOSTFloat32LSB:
-					CopyInterleavedToChannel<SC::Convert<float, int32> >(reinterpret_cast<float*>(dst), src, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<float, int32> >(reinterpret_cast<float*>(dst), src, channels, countChunk, channel);
 					break;
 				case ASIOSTFloat64MSB:
 				case ASIOSTFloat64LSB:
-					CopyInterleavedToChannel<SC::Convert<double, int32> >(reinterpret_cast<double*>(dst), src, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<double, int32> >(reinterpret_cast<double*>(dst), src, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB16:
 				case ASIOSTInt32LSB16:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 16> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 16> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB18:
 				case ASIOSTInt32LSB18:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 14> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 14> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB20:
 				case ASIOSTInt32LSB20:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 12> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 12> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB24:
 				case ASIOSTInt32LSB24:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), src, m_nChannels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
 					break;
 				default:
 					ASSERT(false);
