@@ -249,6 +249,22 @@ VOID CMainFrame::Initialize()
 		// Fall back to default WaveOut device
 		TrackerSettings::Instance().m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);
 	}
+	if(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq == 0)
+	{
+		TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = MixerSettings().gdwMixingFreq;
+		#ifndef NO_ASIO
+			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
+			if(SNDDEV_GET_TYPE(TrackerSettings::Instance().m_nWaveDevice) == SNDDEV_ASIO)
+			{
+				ISoundDevice *dummy = CreateSoundDevice(SNDDEV_ASIO);
+				if(dummy)
+				{
+					TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = dummy->GetCurrentSampleRate(SNDDEV_GET_NUMBER(TrackerSettings::Instance().m_nWaveDevice));
+					delete dummy;
+				}
+			}
+		#endif // NO_ASIO
+	}
 
 	// Create Notify Thread
 	m_PendingNotificationSempahore = CreateSemaphore(NULL, 0, 1, NULL);
