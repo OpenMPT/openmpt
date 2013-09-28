@@ -33,11 +33,11 @@ class CASIODevice: public ISoundDevice
 	enum { ASIO_BLOCK_LEN=1024 };
 protected:
 	IASIO *m_pAsioDrv;
-	UINT m_nChannels, m_nAsioBufferLen, m_nAsioSampleSize;
+	UINT m_nAsioBufferLen;
+	UINT m_nAsioSampleSize;
 	bool m_Float;
 	BOOL m_bMixRunning;
 	BOOL m_bPostOutput;
-	UINT m_nCurrentDevice;
 	LONG m_RenderSilence;
 	LONG m_RenderingSilence;
 	ASIOCallbacks m_Callbacks;
@@ -56,26 +56,25 @@ public:
 	~CASIODevice();
 
 public:
-	UINT GetDeviceType() { return SNDDEV_ASIO; }
-	bool InternalOpen(UINT nDevice);
+	UINT GetDeviceType() const { return SNDDEV_ASIO; }
+	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();
 	void InternalReset();
 	void InternalStart();
 	void InternalStop();
 	bool IsOpen() const { return (m_pAsioDrv != NULL); }
-	SampleFormat HasFixedSampleFormat() { return m_Float ? SampleFormatFloat32 : SampleFormatInt32; }
 	UINT GetNumBuffers() { return 2; }
 	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate; }
 
-	bool CanSampleRate(UINT nDevice, const std::vector<uint32> &samplerates, std::vector<bool> &result);
-	UINT GetCurrentSampleRate(UINT nDevice);
+	std::vector<uint32> GetSampleRates(const std::vector<uint32> &samplerates);
+	UINT GetCurrentSampleRate();
 
 public:
-	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
+	static std::vector<SoundDeviceInfo> EnumerateDevices();
 
 protected:
-	void OpenDevice(UINT nDevice);
+	void OpenDevice();
 	void CloseDevice();
 
 protected:

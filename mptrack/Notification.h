@@ -33,13 +33,6 @@ struct Notification
 	static const SmpLength PosInvalid = SmpLength(-1);	// pos[i] is not valid (if it contains sample or envelope position)
 	static const uint32 ClipVU = 0x80000000;			// Master VU clip indicator bit (sound output has previously clipped)
 
-	/*
-		timestampSamples is kind of confusing at the moment:
-		If gpSoundDevice->HasGetStreamPosition(),
-			then it contains the sample timestamp as when it was generated and the output stream is later queried when this exact timestamp has actually reached the speakers.
-		 If !gpSoundDevice->HasGetStreamPosition(),
-			then it contains a sample timestamp in the future, incremented by the current latency estimation of the sound buffers. It is later checked against the total number of rendered samples at that time.
-	*/
 	int64 timestampSamples;
 	FlagSet<Type, uint16> type;
 	Item item;						// Sample or instrument number, depending on type

@@ -17,6 +17,7 @@
 #include "SoundDeviceDirectSound.h"
 
 #include "../common/misc_util.h"
+#include "../common/StringFixer.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -26,48 +27,60 @@
 
 #ifndef NO_DSOUND
 
-#ifndef DSBCAPS_GLOBALFOCUS
-#define DSBCAPS_GLOBALFOCUS		0x8000
-#endif
 
-#define MAX_DSOUND_DEVICES		16
-
-static BOOL gbDSoundEnumerated = FALSE;
-static UINT gnDSoundDevices = 0;
-static GUID *glpDSoundGUID[MAX_DSOUND_DEVICES];
-static CHAR gszDSoundDrvNames[MAX_DSOUND_DEVICES][64];
-
-
-static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCSTR lpstrDescription, LPCSTR, LPVOID)
-//---------------------------------------------------------------------------------------
+static std::wstring GuidToString(GUID guid)
+//-----------------------------------------
 {
-	if (gnDSoundDevices >= MAX_DSOUND_DEVICES) return FALSE;
-	if ((lpstrDescription))
+	std::wstring str;
+	LPOLESTR tmp = nullptr;
+	StringFromIID(guid, &tmp);
+	if(tmp)
 	{
-		if (lpGuid)
-		{
-			//if ((gnDSoundDevices) && (!glpDSoundGUID[gnDSoundDevices-1])) gnDSoundDevices--;
-			glpDSoundGUID[gnDSoundDevices] = new GUID;
-			*glpDSoundGUID[gnDSoundDevices] = *lpGuid;
-		} else glpDSoundGUID[gnDSoundDevices] = NULL;
-		lstrcpyn(gszDSoundDrvNames[gnDSoundDevices], lpstrDescription, 64);
-		gnDSoundDevices++;
-		gbDSoundEnumerated = TRUE;
+		str = tmp;
+		CoTaskMemFree(tmp);
+		tmp = nullptr;
 	}
+	return str;
+}
+
+
+static GUID StringToGuid(const std::wstring &str)
+//-----------------------------------------------
+{
+	GUID guid = GUID();
+	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	IIDFromString(&tmp[0], &guid);
+	return guid;
+}
+
+
+static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR, LPVOID lpContext)
+//----------------------------------------------------------------------------------------------------
+{
+	std::vector<SoundDeviceInfo> &devices = *(std::vector<SoundDeviceInfo>*)lpContext;
+	if(!lpstrDescription)
+	{
+		return TRUE;
+	}
+	SoundDeviceInfo info;
+	info.type = SNDDEV_DSOUND;
+	info.index = devices.size();
+	info.name = lpstrDescription;
+	if(lpGuid)
+	{
+		info.internalID = GuidToString(*lpGuid);
+	}
+	devices.push_back(info);
 	return TRUE;
 }
 
 
-BOOL CDSoundDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize)
-//----------------------------------------------------------------------------------
+std::vector<SoundDeviceInfo> CDSoundDevice::EnumerateDevices()
+//------------------------------------------------------------
 {
-	if(!gbDSoundEnumerated)
-	{
-		DirectSoundEnumerate(DSEnumCallback, NULL);
-	}
-	if (nIndex >= gnDSoundDevices) return FALSE;
-	lstrcpyn(pszDescription, gszDSoundDrvNames[nIndex], cbSize);
-	return TRUE;
+	std::vector<SoundDeviceInfo> devices;
+	DirectSoundEnumerateW(DSEnumCallbackW, &devices);
+	return devices;
 }
 
 
@@ -91,8 +104,8 @@ CDSoundDevice::~CDSoundDevice()
 }
 
 
-bool CDSoundDevice::InternalOpen(UINT nDevice)
-//--------------------------------------------
+bool CDSoundDevice::InternalOpen()
+//--------------------------------
 {
 	WAVEFORMATEXTENSIBLE wfext;
 	if(!FillWaveFormatExtensible(wfext)) return false;
@@ -103,9 +116,9 @@ bool CDSoundDevice::InternalOpen(UINT nDevice)
 	UINT nPriorityLevel = (m_Settings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
 
 	if(m_piDS) return true;
-	if(!gbDSoundEnumerated) DirectSoundEnumerate(DSEnumCallback, NULL);
-	if(nDevice >= gnDSoundDevices) return false;
-	if(DirectSoundCreate(glpDSoundGUID[nDevice], &m_piDS, NULL) != DS_OK) return false;
+	const std::wstring internalID = GetDeviceInternalID();
+	GUID guid = internalID.empty() ? GUID() : StringToGuid(internalID);
+	if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
 	m_piDS->SetCooperativeLevel(m_Settings.hWnd, nPriorityLevel);
 	m_bMixRunning = FALSE;
@@ -342,31 +355,6 @@ void CDSoundDevice::FillAudioBuffer()
 		}
 		SourceAudioDone((dwSize1+dwSize2)/m_BytesPerSample, m_dwLatency/m_BytesPerSample);
 	}
-}
-
-
-BOOL SndDevDSoundInitialize()
-//---------------------------
-{
-	MemsetZero(glpDSoundGUID);
-	return TRUE;
-}
-
-
-BOOL SndDevDSoundUninitialize()
-//-----------------------------
-{
-	for (UINT i=0; i<MAX_DSOUND_DEVICES; i++)
-	{
-		if (glpDSoundGUID[i])
-		{
-			delete glpDSoundGUID[i];
-			glpDSoundGUID[i] = NULL;
-		}
-	}
-	gbDSoundEnumerated = FALSE;
-	gnDSoundDevices = 0;
-	return TRUE;
 }
 
 
