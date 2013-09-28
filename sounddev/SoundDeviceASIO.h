@@ -64,7 +64,6 @@ public:
 	void InternalStart();
 	void InternalStop();
 	bool IsOpen() const { return (m_pAsioDrv != NULL); }
-	SampleFormat HasFixedSampleFormat() { return m_Float ? SampleFormatFloat32 : SampleFormatInt32; }
 	UINT GetNumBuffers() { return 2; }
 	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate; }
 

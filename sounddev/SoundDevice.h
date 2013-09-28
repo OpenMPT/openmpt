@@ -181,7 +181,7 @@ public:
 	void Stop();
 	void Reset();
 	int64 GetStreamPositionSamples() const;
-	virtual SampleFormat HasFixedSampleFormat() { return SampleFormatInvalid; }
+	SampleFormat GetActualSampleFormat() { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }
 	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }

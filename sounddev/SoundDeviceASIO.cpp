@@ -201,10 +201,6 @@ bool CASIODevice::InternalOpen()
 		{
 			goto abort;
 		}
-		if((m_Settings.sampleFormat != SampleFormatInt32) && (m_Settings.sampleFormat != SampleFormatFloat32))
-		{
-			goto abort;
-		}
 		m_pAsioDrv->getChannels(&nInputChannels, &nOutputChannels);
 	#ifdef ASIO_LOG
 		Log("  getChannels: %d inputs, %d outputs\n", nInputChannels, nOutputChannels);
@@ -271,6 +267,7 @@ bool CASIODevice::InternalOpen()
 					break;
 			}
 		}
+		m_Settings.sampleFormat = m_Float ? SampleFormatFloat32 : SampleFormatInt32;
 		m_pAsioDrv->getBufferSize(&minSize, &maxSize, &preferredSize, &granularity);
 	#ifdef ASIO_LOG
 		Log("  getBufferSize(): minSize=%d maxSize=%d preferredSize=%d granularity=%d\n",
