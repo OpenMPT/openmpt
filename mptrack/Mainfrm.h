@@ -325,7 +325,7 @@ public:
 
 	// from ISoundSource
 	void FillAudioBufferLocked(IFillAudioBuffer &callback);
-	void AudioRead(PVOID pData, ULONG NumSamples);
+	void AudioRead(PVOID pData, ULONG NumSamples, SampleFormat sampleFormat);
 	void AudioDone(ULONG NumSamples, int64 streamPosition);
 	
 	bool audioTryOpeningDevice();

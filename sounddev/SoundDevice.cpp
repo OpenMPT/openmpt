@@ -133,7 +133,7 @@ void ISoundDevice::SourceAudioRead(void* pData, ULONG NumSamples)
 	{
 		return;
 	}
-	m_Source->AudioRead(pData, NumSamples);
+	m_Source->AudioRead(pData, NumSamples, m_Settings.sampleFormat);
 }
 
 
