@@ -854,11 +854,10 @@ public:
 };
 
 
-void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames)
-//-------------------------------------------------------
+void CMainFrame::AudioRead(PVOID pvData, ULONG NumFrames, SampleFormat sampleFormat)
+//----------------------------------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
-	const SampleFormat sampleFormat = TrackerSettings::Instance().m_SampleFormat;
 	StereoVuMeterTargetWrapper target(sampleFormat, m_Dither, pvData);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(NumFrames, target);
 	ASSERT(renderedFrames <= NumFrames);

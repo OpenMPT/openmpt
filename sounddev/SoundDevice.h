@@ -43,7 +43,7 @@ class ISoundSource
 {
 public:
 	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual void AudioRead(void* pData, ULONG NumSamples) = 0;
+	virtual void AudioRead(void* pData, ULONG NumSamples, SampleFormat sampleFormat) = 0;
 	virtual void AudioDone(ULONG NumSamples, int64 streamPosition) = 0; // in samples
 };
 
