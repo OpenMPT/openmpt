@@ -43,8 +43,8 @@ public:
 	~CPortaudioDevice();
 
 public:
-	UINT GetDeviceType() { return HostApiToSndDevType(m_HostApi); }
-	bool InternalOpen(UINT nDevice);
+	UINT GetDeviceType() const { return HostApiToSndDevType(m_HostApi); }
+	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();
 	void InternalReset();
@@ -55,7 +55,7 @@ public:
 	float GetCurrentRealLatencyMS();
 	bool InternalHasGetStreamPosition() const { return false; }
 	int64 InternalGetStreamPositionSamples() const;
-	bool CanSampleRate(UINT nDevice, const std::vector<uint32> &samplerates, std::vector<bool> &result);
+	bool CanSampleRate(const std::vector<uint32> &samplerates, std::vector<bool> &result);
 
 	int StreamCallback(
 		const void *input, void *output,
@@ -77,7 +77,10 @@ public:
 	static int HostApiToSndDevType(PaHostApiIndex hostapi);
 	static PaHostApiIndex SndDevTypeToHostApi(int snddevtype);
 
-	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize, PaHostApiIndex hostapi);
+	static std::vector<SoundDeviceInfo> EnumerateDevices(UINT type);
+
+private:
+	static bool EnumerateDevices(SoundDeviceInfo &result, UINT nIndex, PaHostApiIndex hostapi);
 
 };
 

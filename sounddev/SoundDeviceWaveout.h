@@ -44,8 +44,8 @@ public:
 	~CWaveDevice();
 
 public:
-	UINT GetDeviceType() { return SNDDEV_WAVEOUT; }
-	bool InternalOpen(UINT nDevice);
+	UINT GetDeviceType() const { return SNDDEV_WAVEOUT; }
+	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();
 	void ResetFromOutsideSoundThread();
@@ -59,5 +59,5 @@ public:
 
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
-	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
+	static std::vector<SoundDeviceInfo> EnumerateDevices();
 };

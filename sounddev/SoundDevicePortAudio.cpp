@@ -45,14 +45,14 @@ CPortaudioDevice::~CPortaudioDevice()
 }
 
 
-bool CPortaudioDevice::InternalOpen(UINT nDevice)
-//-----------------------------------------------
+bool CPortaudioDevice::InternalOpen()
+//-----------------------------------
 {
 	MemsetZero(m_StreamParameters);
 	m_Stream = 0;
 	m_CurrentFrameBuffer = 0;
 	m_CurrentFrameCount = 0;
-	m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(nDevice, m_HostApi);
+	m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi);
 	if(m_StreamParameters.device == -1) return false;
 	m_StreamParameters.channelCount = m_Settings.Channels;
 	if(m_Settings.sampleFormat.IsFloat())
@@ -159,9 +159,10 @@ float CPortaudioDevice::GetCurrentRealLatencyMS()
 }
 
 
-bool CPortaudioDevice::CanSampleRate(UINT nDevice, const std::vector<uint32> &samplerates, std::vector<bool> &result)
-//-------------------------------------------------------------------------------------------------------------------
+bool CPortaudioDevice::CanSampleRate(const std::vector<uint32> &samplerates, std::vector<bool> &result)
+//-----------------------------------------------------------------------------------------------------
 {
+	UINT nDevice = GetDeviceIndex();
 	result.clear();
 	for(UINT n=0; n<samplerates.size(); n++)
 	{
@@ -295,21 +296,46 @@ PaHostApiIndex CPortaudioDevice::SndDevTypeToHostApi(int snddevtype)
 }
 
 
-BOOL CPortaudioDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize, PaHostApiIndex hostapi)
-//-------------------------------------------------------------------------------------------------------------
+bool CPortaudioDevice::EnumerateDevices(SoundDeviceInfo &result, UINT nIndex, PaHostApiIndex hostapi)
+//---------------------------------------------------------------------------------------------------
 {
-	memset(pszDescription, 0, cbSize);
+	result = SoundDeviceInfo();
 	PaDeviceIndex dev = HostApiOutputIndexToGlobalDeviceIndex(nIndex, hostapi);
 	if(dev == -1)
 		return false;
 	if(!Pa_GetDeviceInfo(dev))
 		return false;
-	_snprintf(pszDescription, cbSize, "%s - %s%s (portaudio)",
-		mpt::String::Convert(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name, mpt::CharsetUTF8, mpt::CharsetLocale).c_str(),
-		mpt::String::Convert(Pa_GetDeviceInfo(dev)->name, mpt::CharsetUTF8, mpt::CharsetLocale).c_str(),
-		Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev ? " (Default)" : ""
-		);
+	result.type = HostApiToSndDevType(hostapi);
+	result.index = nIndex;
+	result.name = mpt::String::Decode(
+		mpt::String::Format("%s - %s%s (portaudio)",
+			Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name,
+			Pa_GetDeviceInfo(dev)->name,
+			Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev ? " (Default)" : ""
+		),
+		mpt::CharsetUTF8);
 	return true;
+}
+
+
+std::vector<SoundDeviceInfo> CPortaudioDevice::EnumerateDevices(UINT type)
+//------------------------------------------------------------------------
+{
+	std::vector<SoundDeviceInfo> devices;
+	if(!SndDevPortaudioIsInitialized())
+	{
+		return devices;
+	}
+	for(UINT index = 0; ; ++index)
+	{
+		SoundDeviceInfo info;
+		if(!EnumerateDevices(info, index, CPortaudioDevice::SndDevTypeToHostApi(type)))
+		{
+			break;
+		}
+		devices.push_back(info);
+	}
+	return devices;
 }
 
 
@@ -340,5 +366,4 @@ bool SndDevPortaudioIsInitialized()
 }
 
 
-#endif
-
+#endif // NO_PORTAUDIO

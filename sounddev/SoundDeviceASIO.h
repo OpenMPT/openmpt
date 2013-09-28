@@ -37,7 +37,6 @@ protected:
 	bool m_Float;
 	BOOL m_bMixRunning;
 	BOOL m_bPostOutput;
-	UINT m_nCurrentDevice;
 	LONG m_RenderSilence;
 	LONG m_RenderingSilence;
 	ASIOCallbacks m_Callbacks;
@@ -56,8 +55,8 @@ public:
 	~CASIODevice();
 
 public:
-	UINT GetDeviceType() { return SNDDEV_ASIO; }
-	bool InternalOpen(UINT nDevice);
+	UINT GetDeviceType() const { return SNDDEV_ASIO; }
+	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();
 	void InternalReset();
@@ -68,14 +67,14 @@ public:
 	UINT GetNumBuffers() { return 2; }
 	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate; }
 
-	bool CanSampleRate(UINT nDevice, const std::vector<uint32> &samplerates, std::vector<bool> &result);
-	UINT GetCurrentSampleRate(UINT nDevice);
+	bool CanSampleRate(const std::vector<uint32> &samplerates, std::vector<bool> &result);
+	UINT GetCurrentSampleRate();
 
 public:
-	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
+	static std::vector<SoundDeviceInfo> EnumerateDevices();
 
 protected:
-	void OpenDevice(UINT nDevice);
+	void OpenDevice();
 	void CloseDevice();
 
 protected:
