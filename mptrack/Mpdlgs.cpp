@@ -377,54 +377,50 @@ void COptionsSoundcard::OnDeviceChanged()
 void COptionsSoundcard::UpdateSampleRates(int dev)
 //------------------------------------------------
 {
-	CHAR s[16];
 	m_CbnMixingFreq.ResetContent();
 
-	std::vector<bool> supportedRates;
-	const std::vector<uint32> samplerates = TrackerSettings::Instance().GetSampleRates();
+	std::vector<uint32> samplerates = TrackerSettings::Instance().GetSampleRates();
 
-	bool knowRates = false;
 	{
-	Util::lock_guard<Util::mutex> lock(CMainFrame::GetMainFrame()->m_SoundDeviceMutex);
-	ISoundDevice *dummy = nullptr;
-	bool justCreated = false;
-	if(TrackerSettings::Instance().m_nWaveDevice == dev)
-	{
-		// If this is the currently active sound device, it might already be playing something, so we shouldn't create yet another instance of it.
-		dummy = CMainFrame::GetMainFrame()->gpSoundDevice;
-	}
-	if(dummy == nullptr)
-	{
-		justCreated = true;
-		dummy = theApp.GetSoundDevicesManager()->CreateSoundDevice(dev);
-	}
-
-	if(dummy != nullptr)
-	{
-		// Now we can query the supported sample rates.
-		knowRates = dummy->CanSampleRate(samplerates, supportedRates);
-		if(justCreated)
+		Util::lock_guard<Util::mutex> lock(CMainFrame::GetMainFrame()->m_SoundDeviceMutex);
+		ISoundDevice *dummy = nullptr;
+		bool justCreated = false;
+		if(TrackerSettings::Instance().m_nWaveDevice == dev)
 		{
-			delete dummy;
+			// If this is the currently active sound device, it might already be playing something, so we shouldn't create yet another instance of it.
+			dummy = CMainFrame::GetMainFrame()->gpSoundDevice;
+		}
+		if(dummy == nullptr)
+		{
+			justCreated = true;
+			dummy = theApp.GetSoundDevicesManager()->CreateSoundDevice(dev);
+		}
+
+		if(dummy != nullptr)
+		{
+			// Now we can query the supported sample rates.
+			samplerates = dummy->GetSampleRates(samplerates);
+			if(justCreated)
+			{
+				delete dummy;
+			}
 		}
 	}
-	}
 
-	if(!knowRates)
+	if(samplerates.empty())
 	{
 		// We have no valid list of supported playback rates! Assume all rates supported by OpenMPT are possible...
-		supportedRates.assign(samplerates.size(), true);
+		samplerates = TrackerSettings::Instance().GetSampleRates();
 	}
-	int n = 1;
+
+	int n = 0;
 	for(size_t i = 0; i < samplerates.size(); i++)
 	{
-		if(supportedRates[i])
-		{
-			wsprintf(s, "%i Hz", samplerates[i]);
-			int pos = m_CbnMixingFreq.AddString(s);
-			m_CbnMixingFreq.SetItemData(pos, samplerates[i]);
-			if(m_dwRate == samplerates[i]) n = pos;
-		}
+		CHAR s[16];
+		wsprintf(s, "%i Hz", samplerates[i]);
+		int pos = m_CbnMixingFreq.AddString(s);
+		m_CbnMixingFreq.SetItemData(pos, samplerates[i]);
+		if(m_dwRate == samplerates[i]) n = pos;
 	}
 	m_CbnMixingFreq.SetCurSel(n);
 }

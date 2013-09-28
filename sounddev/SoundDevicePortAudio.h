@@ -55,7 +55,7 @@ public:
 	float GetCurrentRealLatencyMS();
 	bool InternalHasGetStreamPosition() const { return false; }
 	int64 InternalGetStreamPositionSamples() const;
-	bool CanSampleRate(const std::vector<uint32> &samplerates, std::vector<bool> &result);
+	std::vector<uint32> GetSampleRates(const std::vector<uint32> &samplerates);
 
 	int StreamCallback(
 		const void *input, void *output,

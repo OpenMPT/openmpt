@@ -186,8 +186,8 @@ public:
 	virtual UINT GetNumBuffers() { return 0; }
 	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }
 	virtual UINT GetCurrentSampleRate() { return 0; }
-	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO.
-	virtual bool CanSampleRate(const std::vector<uint32> &samplerates, std::vector<bool> &result) { result.assign(samplerates.size(), true); return true; } ;
+	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO and PortAudio.
+	virtual std::vector<uint32> GetSampleRates(const std::vector<uint32> &samplerates) { return samplerates; }
 };
 
 
