@@ -159,21 +159,20 @@ float CPortaudioDevice::GetCurrentRealLatencyMS()
 }
 
 
-bool CPortaudioDevice::CanSampleRate(const std::vector<uint32> &samplerates, std::vector<bool> &result)
-//-----------------------------------------------------------------------------------------------------
+std::vector<uint32> CPortaudioDevice::GetSampleRates(const std::vector<uint32> &samplerates)
+//------------------------------------------------------------------------------------------
 {
-	UINT nDevice = GetDeviceIndex();
-	result.clear();
+	std::vector<uint32> results;
+	PaDeviceIndex device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi);
+	if(device == -1)
+	{
+		return results;
+	}
 	for(UINT n=0; n<samplerates.size(); n++)
 	{
 		PaStreamParameters StreamParameters;
 		MemsetZero(StreamParameters);
-		StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(nDevice, m_HostApi);
-		if(StreamParameters.device == -1)
-		{
-			result.assign(samplerates.size(), false);
-			return false;
-		}
+		StreamParameters.device = device;
 		StreamParameters.channelCount = 2;
 		StreamParameters.sampleFormat = paInt16;
 		StreamParameters.suggestedLatency = 0.0;
@@ -187,9 +186,12 @@ bool CPortaudioDevice::CanSampleRate(const std::vector<uint32> &samplerates, std
 			m_WasapiStreamInfo.flags = paWinWasapiExclusive;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 		}
-		result.push_back(Pa_IsFormatSupported(NULL, &StreamParameters, samplerates[n]) == paFormatIsSupported);
+		if(Pa_IsFormatSupported(NULL, &StreamParameters, samplerates[n]) == paFormatIsSupported)
+		{
+			results.push_back(samplerates[n]);
+		}
 	}
-	return true;
+	return results;
 }
 
 

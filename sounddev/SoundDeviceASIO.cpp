@@ -725,27 +725,25 @@ BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
 }
 
 
-bool CASIODevice::CanSampleRate(const std::vector<uint32> &samplerates, std::vector<bool> &result)
-//------------------------------------------------------------------------------------------------
+std::vector<uint32> CASIODevice::GetSampleRates(const std::vector<uint32> &samplerates)
+//-------------------------------------------------------------------------------------
 {
+	std::vector<uint32> results;
 	const bool wasOpen = (m_pAsioDrv != NULL);
 	if(!wasOpen)
 	{
 		OpenDevice();
 		if(m_pAsioDrv == NULL)
 		{
-			return false;
+			return results;
 		}
 	}
 
-	bool foundSomething = false;	// is at least one sample rate supported by the device?
-	result.clear();
 	for(size_t i = 0; i < samplerates.size(); i++)
 	{
-		result.push_back((m_pAsioDrv->canSampleRate((ASIOSampleRate)samplerates[i]) == ASE_OK));
-		if(result.back())
+		if(m_pAsioDrv->canSampleRate((ASIOSampleRate)samplerates[i]) == ASE_OK)
 		{
-			foundSomething = true;
+			results.push_back(samplerates[i]);
 		}
 	}
 
@@ -754,7 +752,7 @@ bool CASIODevice::CanSampleRate(const std::vector<uint32> &samplerates, std::vec
 		CloseDevice();
 	}
 
-	return foundSomething;
+	return results;
 }
 
 
