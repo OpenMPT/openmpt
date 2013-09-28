@@ -334,11 +334,6 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_MorePortaudio = CMainFrame::GetPrivateProfileBool("Sound Settings", "MorePortaudio", m_MorePortaudio, iniFile);
 	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT); // first WaveOut device
 #ifndef NO_ASIO
-	// If there's an ASIO device available, prefer it over DirectSound
-	if(EnumerateSoundDevices(SNDDEV_ASIO, 0, nullptr, 0))
-	{
-		defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_ASIO);
-	}
 	CASIODevice::baseChannel = GetPrivateProfileInt("Sound Settings", "ASIOBaseChannel", CASIODevice::baseChannel, iniFile);
 #endif // NO_ASIO
 	m_nWaveDevice = CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
