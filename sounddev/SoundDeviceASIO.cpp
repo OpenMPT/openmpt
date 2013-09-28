@@ -67,7 +67,8 @@ static CLSID StringToCLSID(const std::wstring &str)
 //-------------------------------------------------
 {
 	CLSID clsid = CLSID();
-	CLSIDFromString(str.c_str(), &clsid);
+	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	CLSIDFromString(&tmp[0], &clsid);
 	return clsid;
 }
 
@@ -75,7 +76,8 @@ static CLSID StringToCLSID(const std::wstring &str)
 static bool IsCLSID(const std::wstring &str)
 {
 	CLSID clsid = CLSID();
-	return CLSIDFromString(str.c_str(), &clsid) == S_OK;
+	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	return CLSIDFromString(&tmp[0], &clsid) == S_OK;
 }
 
 
