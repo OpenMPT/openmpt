@@ -48,7 +48,8 @@ static GUID StringToGuid(const std::wstring &str)
 //-----------------------------------------------
 {
 	GUID guid = GUID();
-	IIDFromString(str.c_str(), &guid);
+	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	IIDFromString(&tmp[0], &guid);
 	return guid;
 }
 
