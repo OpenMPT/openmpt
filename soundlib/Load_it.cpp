@@ -675,20 +675,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 8;
 	m_nMaxPeriod = 0xF000;
 
-	// Compute extra instruments settings position
-	if(lastSampleOffset > 0)
-	{
-		file.Seek(lastSampleOffset);
-	}
-
-	// Load instrument and song extensions.
-	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
-	if(interpretModPlugMade)
-	{
-		m_nMixLevels = mixLevels_original;
-	}
-	LoadExtendedSongProperties(GetType(), file, &interpretModPlugMade);
-
 	const PATTERNINDEX numPats = std::min(static_cast<PATTERNINDEX>(patPos.size()), GetModSpecifications().patternsMax);
 
 	if(numPats != patPos.size())
@@ -924,6 +910,20 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
+
+	// Compute extra instruments settings position
+	if(lastSampleOffset > 0)
+	{
+		file.Seek(lastSampleOffset);
+	}
+
+	// Load instrument and song extensions.
+	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
+	if(interpretModPlugMade)
+	{
+		m_nMixLevels = mixLevels_original;
+	}
+	LoadExtendedSongProperties(GetType(), file, &interpretModPlugMade);
 
 	UpgradeModFlags();
 
