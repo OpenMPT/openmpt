@@ -89,12 +89,12 @@ std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
 	LONG cr;
 
 	HKEY hkEnum = NULL;
-	cr = RegOpenKey(HKEY_LOCAL_MACHINE, "software\\asio", &hkEnum);
+	cr = RegOpenKey(HKEY_LOCAL_MACHINE, TEXT("software\\asio"), &hkEnum);
 
 	for(DWORD index = 0; ; ++index)
 	{
 
-		CHAR keyname[ASIO_MAXDRVNAMELEN];
+		TCHAR keyname[ASIO_MAXDRVNAMELEN];
 		if((cr = RegEnumKey(hkEnum, index, keyname, ASIO_MAXDRVNAMELEN)) != ERROR_SUCCESS)
 		{
 			break;
@@ -112,7 +112,7 @@ std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
 		CHAR description[ASIO_MAXDRVNAMELEN];
 		DWORD datatype = REG_SZ;
 		DWORD datasize = sizeof(description);
-		if(ERROR_SUCCESS == RegQueryValueEx(hksub, "description", 0, &datatype, (LPBYTE)description, &datasize))
+		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("description"), 0, &datatype, (LPBYTE)description, &datasize))
 		{
 		#ifdef ASIO_LOG
 			Log("  description =\"%s\":\n", description);
@@ -125,7 +125,7 @@ std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
 		CHAR s[256];
 		datatype = REG_SZ;
 		datasize = sizeof(s);
-		if(ERROR_SUCCESS == RegQueryValueEx(hksub, "clsid", 0, &datatype, (LPBYTE)s, &datasize))
+		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("clsid"), 0, &datatype, (LPBYTE)s, &datasize))
 		{
 			const std::wstring internalID = mpt::String::Decode(s, mpt::CharsetLocale);
 			if(IsCLSID(internalID))
@@ -708,18 +708,11 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 }
 
 
-BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
-//------------------------------------------------------
+void CASIODevice::ReportASIOException(const std::string &str)
+//-----------------------------------------------------------
 {
-	CHAR cBuf[1024];
-	va_list va;
-	va_start(va, format);
-	wvsprintf(cBuf, format, va);
-	Reporting::Notification(cBuf);
-	Log(cBuf);
-	va_end(va);
-	
-	return TRUE;
+	Reporting::Notification(str.c_str());
+	Log("%s", str.c_str());
 }
 
 
