@@ -33,13 +33,13 @@ CGzipArchive::~CGzipArchive()
 bool CGzipArchive::IsArchive() const
 //----------------------------------
 {
-	if(inFile.GetLength() <= (sizeof(GZheader) + sizeof(GZtrailer)))
+	// Check header data + file size
+	if(header.magic1 != GZ_HMAGIC1 || header.magic2 != GZ_HMAGIC2 || header.method != GZ_HMDEFLATE || (header.flags & GZ_FRESERVED) != 0
+		|| inFile.GetLength() <= sizeof(GZheader) + sizeof(GZtrailer))
 	{
 		return false;
 	}
-
-	// Check header data
-	return (header.magic1 == GZ_HMAGIC1 && header.magic2 == GZ_HMAGIC2 && header.method == GZ_HMDEFLATE && (header.flags & GZ_FRESERVED) == 0);
+	return true;
 }
 
 

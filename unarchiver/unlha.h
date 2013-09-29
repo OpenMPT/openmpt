@@ -1,6 +1,13 @@
+/*
+ * unlha.h
+ * -------
+ * Purpose: Header file for .lha loader
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
-#ifndef UNLHA32_LIB_H
-#define UNLHA32_LIB_H
+#pragma once
 
 #include "../soundlib/FileReader.h"
 
@@ -27,5 +34,3 @@ public:
 	bool ExtractFile();
 	bool ExtractFile(const std::vector<const char *> &extensions);
 };
-
-#endif // UNLHA32_LIB_H
