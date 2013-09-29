@@ -118,10 +118,10 @@ bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib)
 	VSTPluginLib *p = m_pVstHead;
 	while (p)
 	{
-		if (p == pLib) return TRUE;
+		if (p == pLib) return true;
 		p = p->pNext;
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -201,7 +201,7 @@ void CVstPluginManager::LoadPlugin(const char *pluginPath, AEffect *&effect, HIN
 			if(error != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
 			{
 				TCHAR szBuf[256];
-				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", error, GetErrorMessage(error).c_str());
+				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %x: %s", error, GetErrorMessage(error).c_str());
 				Reporting::Error(szBuf, "DEBUG: Error when loading plugin dll");
 			}
 #endif //_DEBUG
@@ -2082,7 +2082,6 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 			Bypass();
 			CString processMethod = (m_Effect.flags & effFlagsCanReplacing) ? "processReplacing" : "process";
 			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->GetName(), processMethod);
-			vstEvents.Clear();
 		}
 
 		ASSERT(outputBuffers != nullptr);
@@ -2255,15 +2254,15 @@ void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples)
 }
 
 
-bool CVstPlugin::MidiSend(DWORD dwMidiCode)
-//-----------------------------------------
+bool CVstPlugin::MidiSend(uint32 dwMidiCode)
+//------------------------------------------
 {
 	// Note-Offs go at the start of the queue.
 	bool insertAtFront = (MIDIEvents::GetTypeFromEvent(dwMidiCode) == MIDIEvents::evNoteOff);
 
 	VstMidiEvent event;
 	event.type = kVstMidiType;
-	event.byteSize = sizeof(VstMidiEvent);
+	event.byteSize = sizeof(event);
 	event.deltaFrames = 0;
 	event.flags = 0;
 	event.noteLength = 0;
@@ -2272,13 +2271,30 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 	event.noteOffVelocity = 0;
 	event.reserved1 = 0;
 	event.reserved2 = 0;
-	*(DWORD *)event.midiData = dwMidiCode;
+	memcpy(event.midiData, &dwMidiCode, 4);
 
 	#ifdef VST_LOG
 		Log("Sending Midi %02X.%02X.%02X\n", event.midiData[0]&0xff, event.midiData[1]&0xff, event.midiData[2]&0xff);
 	#endif
 
 	return vstEvents.Enqueue(reinterpret_cast<VstEvent *>(&event), insertAtFront);
+}
+
+
+bool CVstPlugin::MidiSysexSend(const char *message, uint32 length)
+//----------------------------------------------------------------
+{
+	VstMidiSysexEvent event;
+	event.type = kVstSysExType;
+	event.byteSize = sizeof(event);
+	event.deltaFrames = 0;
+	event.flags = 0;
+	event.dumpBytes = length;
+	event.resvd1 = 0;
+	event.sysexDump = const_cast<char *>(message);	// We will make our own copy in VstEventQueue::Enqueue
+	event.resvd2 = 0;
+
+	return vstEvents.Enqueue(reinterpret_cast<VstEvent *>(&event));
 }
 
 
@@ -2504,7 +2520,7 @@ void CVstPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, u
 		note -= NOTE_MIN;
 
 		// Reset pitch bend on each new note, tracker style.
-		// This is done if the pitch wheel has been moved or there was a vibrato on the previous row (in which case the highest bit of the pitch bend memory is set)
+		// This is done if the pitch wheel has been moved or there was a vibrato on the previous row (in which case the "vstVibratoFlag" bit of the pitch bend memory is set)
 		if(m_MidiCh[nMidiCh].midiPitchBendPos != EncodePitchBendParam(MIDIEvents::pitchBendCentre))
 		{
 			MidiPitchBend(nMidiCh, EncodePitchBendParam(MIDIEvents::pitchBendCentre));

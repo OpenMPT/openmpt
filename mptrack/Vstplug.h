@@ -240,7 +240,8 @@ public:
 	void RestoreAllParameters(long nProg=-1); //rewbs.plugDefaultProgram - added param
 	void RecalculateGain();
 	void Process(float *pOutL, float *pOutR, size_t nSamples);
-	bool MidiSend(DWORD dwMidiCode);
+	bool MidiSend(uint32 dwMidiCode);
+	bool MidiSysexSend(const char *message, uint32 length);
 	void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel);
 	void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd);
 	void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd);

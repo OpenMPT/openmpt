@@ -3976,7 +3976,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 					pChn->nCutOff = param;
 				} else
 				{
-					pChn->nCutOff = (BYTE)CalculateSmoothParamChange((float)pChn->nCutOff, (float)param);
+					pChn->nCutOff = (uint8)CalculateSmoothParamChange((float)pChn->nCutOff, (float)param);
 				}
 				pChn->nRestoreCutoffOnNewNote = 0;
 			}
@@ -4000,7 +4000,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 					pChn->nResonance = param;
 				} else
 				{
-					pChn->nResonance = (BYTE)CalculateSmoothParamChange((float)pChn->nResonance, (float)param);
+					pChn->nResonance = (uint8)CalculateSmoothParamChange((float)pChn->nResonance, (float)param);
 				}
 			}
 
@@ -4080,12 +4080,17 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
 				if ((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState))
 				{
-					// currently, we don't support sending long MIDI messages in one go... split it up
-					for(size_t pos = 0; pos < macroLen; pos += 3)
+					if(macro[0] == 0xF0)
 					{
-						DWORD curData = 0;
-						memcpy(&curData, macro + pos, std::min<size_t>(3, macroLen - pos));
-						pPlugin->MidiSend(curData);
+						pPlugin->MidiSysexSend(reinterpret_cast<const char *>(macro), macroLen);
+					} else
+					{
+						for(size_t pos = 0; pos < macroLen; pos += 3)
+						{
+							uint32 curData = 0;
+							memcpy(&curData, macro + pos, std::min<size_t>(3, macroLen - pos));
+							pPlugin->MidiSend(curData);
+						}
 					}
 				}
 			}

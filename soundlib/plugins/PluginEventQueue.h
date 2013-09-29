@@ -87,6 +87,18 @@ public:
 		BiggestVstEvent copyEvent;
 		memcpy(&copyEvent, event, std::min(size_t(event->byteSize), sizeof(copyEvent)));
 
+		if(copyEvent.type == kVstSysExType)
+		{
+			// SysEx messages need to be copied, as the space used for the dump might be freed in the meantime.
+			VstMidiSysexEvent *e = reinterpret_cast<VstMidiSysexEvent *>(&copyEvent);
+			e->sysexDump = new (std::nothrow) char[e->dumpBytes];
+			if(e->sysexDump == nullptr)
+			{
+				return false;
+			}
+			memcpy(e->sysexDump, reinterpret_cast<const VstMidiSysexEvent *>(event)->sysexDump, e->dumpBytes);
+		}
+
 		Util::lock_guard<Util::mutex> lock(criticalSection);
 		if(insertFront)
 		{
@@ -116,6 +128,14 @@ public:
 		Util::lock_guard<Util::mutex> lock(criticalSection);
 		if(numEvents)
 		{
+			// Release temporarily allocated buffer for SysEx messages
+			for(VstInt32 i = 0; i < numEvents; i++)
+			{
+				if(events[i]->type == kVstSysExType)
+				{
+					delete[] reinterpret_cast<VstMidiSysexEvent *>(events[i])->sysexDump;
+				}
+			}
 			eventQueue.erase(eventQueue.begin(), eventQueue.begin() + numEvents);
 			numEvents = 0;
 		}
