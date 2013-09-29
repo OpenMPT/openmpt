@@ -232,7 +232,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 	pCreateWaitableTimer = nullptr;
 	pSetWaitableTimer = nullptr;
 	pCancelWaitableTimer = nullptr;
-	m_hKernel32DLL = LoadLibrary("kernel32.dll");
+	m_hKernel32DLL = LoadLibrary(TEXT("kernel32.dll"));
 	#if _WIN32_WINNT >= _WIN32_WINNT_WINXP
 		m_HasXP = true;
 		pCreateWaitableTimer = &CreateWaitableTimer;
@@ -255,7 +255,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 	pAvRevertMmThreadCharacteristics = nullptr;
 	if(m_HasVista)
 	{
-		m_hAvRtDLL = LoadLibrary("avrt.dll");
+		m_hAvRtDLL = LoadLibrary(TEXT("avrt.dll"));
 		if(m_hAvRtDLL)
 		{
 			pAvSetMmThreadCharacteristics = (FAvSetMmThreadCharacteristics)GetProcAddress(m_hAvRtDLL, "AvSetMmThreadCharacteristicsA");
@@ -350,7 +350,7 @@ public:
 		{
 			if(self.m_HasVista)
 			{
-				hTask = self.pAvSetMmThreadCharacteristics("Pro Audio", &task_idx);
+				hTask = self.pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &task_idx);
 			} else
 			{
 				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);

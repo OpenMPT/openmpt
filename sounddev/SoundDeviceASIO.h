@@ -86,7 +86,7 @@ protected:
 	static void SampleRateDidChange(ASIOSampleRate sRate);
 	static long AsioMessage(long selector, long value, void* message, double* opt);
 	static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
-	static BOOL ReportASIOException(LPCSTR format,...);
+	static void ReportASIOException(const std::string &str);
 };
 
 #endif // NO_ASIO
