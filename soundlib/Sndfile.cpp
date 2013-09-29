@@ -194,7 +194,7 @@ bool IsNegative(const T &val)
 	if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
 	{ \
 		type tmp = input-> name; \
-		tmp = SwapBytesLE(tmp); \
+		tmp = SwapBytesReturnLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
 	} \
 /**/
@@ -211,7 +211,7 @@ bool IsNegative(const T &val)
 		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
 		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
 		type tmp = (type)(input-> name ); \
-		tmp = SwapBytesLE(tmp); \
+		tmp = SwapBytesReturnLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
 	} else if(only_this_code == fcode)\
 	{ \
@@ -220,7 +220,7 @@ bool IsNegative(const T &val)
 		/* This worked fine on little-endian, on big-endian not so much. Thus support writing size-mismatched fields. */ \
 		ASSERT(fixedsize >= fsize); \
 		type tmp = (type)(input-> name ); \
-		tmp = SwapBytesLE(tmp); \
+		tmp = SwapBytesReturnLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
 		if(fixedsize > fsize) \
 		{ \
@@ -256,7 +256,7 @@ bool IsNegative(const T &val)
 		{ \
 			type tmp; \
 			tmp = input-> name [i]; \
-			tmp = SwapBytesLE(tmp); \
+			tmp = SwapBytesReturnLE(tmp); \
 			fwrite(&tmp, 1, sizeof(type), file); \
 		} \
 	} \
@@ -310,7 +310,7 @@ if(only_this_code == Util::MaxValueOfType(only_this_code) || only_this_code == M
 		fwrite(&fcode, 1, sizeof(int32), file);
 		fwrite(&fsize, 1, sizeof(int16), file);
 	}
-	dwFlags = SwapBytesLE(dwFlags);
+	dwFlags = SwapBytesReturnLE(dwFlags);
 	fwrite(&dwFlags, 1, fsize, file);
 }
 

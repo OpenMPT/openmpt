@@ -97,14 +97,12 @@ struct PACKED AMFFRiffChunk
 
 	size_t GetLength() const
 	{
-		uint32 l = length;
-		return SwapBytesLE(l);
+		return SwapBytesReturnLE(length);
 	}
 
 	id_type GetID() const
 	{
-		uint32 i = id;
-		return static_cast<id_type>(SwapBytesLE(i));
+		return static_cast<id_type>(SwapBytesReturnLE(id));
 	}
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.

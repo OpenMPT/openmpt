@@ -1143,14 +1143,12 @@ struct PACKED AIFFChunk
 
 	size_t GetLength() const
 	{
-		uint32 l = length;
-		return SwapBytesBE(l);
+		return SwapBytesReturnBE(length);
 	}
 
 	id_type GetID() const
 	{
-		uint32 i = id;
-		return static_cast<id_type>(SwapBytesBE(i));
+		return static_cast<id_type>(SwapBytesReturnBE(id));
 	}
 };
 
