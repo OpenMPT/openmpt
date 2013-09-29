@@ -924,42 +924,49 @@ struct AcmDynBind
 					MemsetZero(add);
 					add.cbStruct = sizeof(add);
 					formatName = pafd->szFormat;
-					if(acmDriverDetailsA(driver, &add, 0) == MMSYSERR_NOERROR)
+					if(acmDriverDetailsA(driver, &add, 0) != MMSYSERR_NOERROR)
 					{
-						if(add.szLongName[0])
+						// No driver details? Skip it.
+						continue;
+					}
+					if(add.szLongName[0])
+					{
+						mpt::String::Copy(driverNameLong, add.szLongName);
+					}
+					if(add.szShortName[0])
+					{
+						mpt::String::Copy(driverNameShort, add.szShortName);
+					}
+					if(driverNameShort.empty())
+					{
+						if(driverNameLong.empty())
 						{
-							mpt::String::Copy(driverNameLong, add.szLongName);
-						}
-						if(add.szShortName[0])
-						{
-							mpt::String::Copy(driverNameShort, add.szShortName);
-						}
-						if(driverNameShort.empty())
-						{
-							if(driverNameLong.empty())
-							{
-								driverNameCombined = "";
-							} else
-							{
-								driverNameCombined = driverNameLong;
-							}
+							driverNameCombined = "";
 						} else
 						{
-							if(driverNameLong.empty())
-							{
-								driverNameCombined = driverNameShort;
-							} else
-							{
-								//driverNameCombined = driverNameShort + " (" + driverNameLong + ")";
-								driverNameCombined = driverNameLong;
-							}
+							driverNameCombined = driverNameLong;
 						}
-						if(!driverNameCombined.empty())
+					} else
+					{
+						if(driverNameLong.empty())
 						{
-							formatName += " (";
-							formatName += driverNameCombined;
-							formatName += ")";
+							driverNameCombined = driverNameShort;
+						} else
+						{
+							driverNameCombined = driverNameLong;
 						}
+					}
+					if(!driverNameCombined.empty())
+					{
+						formatName += " (";
+						formatName += driverNameCombined;
+						formatName += ")";
+					}
+
+					// Blacklist Wine MP3 Decoder because it can only decode.
+					if(driverNameShort == "WINE-MPEG3" && driverNameLong == "Wine MPEG3 decoder")
+					{
+						continue;
 					}
 
 					samplerates[i] = layer3_samplerates[i];
@@ -976,7 +983,7 @@ struct AcmDynBind
 						std::memcpy(&wfex[0], pafd->pwfx, wfex.size());
 						formats_waveformats.push_back(wfex);
 					}
-					
+
 					AppendField(driverDescription, "Driver", add.szShortName);
 					AppendField(driverDescription, "Description", add.szLongName);
 					AppendField(driverDescription, "Copyright", add.szCopyright);
