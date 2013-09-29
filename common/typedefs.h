@@ -91,13 +91,13 @@
 
 
 // Some functions might be deprecated although they are still in use.
-// Tag them with "DEPRECATED".
+// Tag them with "MPT_DEPRECATED".
 #if MPT_COMPILER_MSVC
-#define DEPRECATED __declspec(deprecated)
+#define MPT_DEPRECATED __declspec(deprecated)
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#define DEPRECATED __attribute__((deprecated))
+#define MPT_DEPRECATED __attribute__((deprecated))
 #else
-#define DEPRECATED
+#define MPT_DEPRECATED
 #endif
 
 
