@@ -1200,6 +1200,10 @@ public:
 	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{
+		if(!acmStream)
+		{
+			return;
+		}
 		if(acmChannels == 1)
 		{
 			for(std::size_t i = 0; i < count; ++i)
