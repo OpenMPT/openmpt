@@ -130,7 +130,6 @@ std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
 			const std::wstring internalID = mpt::String::Decode(s, mpt::CharsetLocale);
 			if(IsCLSID(internalID))
 			{
-				CLSID clsid = StringToCLSID(internalID);
 				#ifdef ASIO_LOG
 					Log("  clsid=\"%s\"\n", s);
 				#endif
