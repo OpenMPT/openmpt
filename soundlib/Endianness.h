@@ -39,61 +39,67 @@
 
 // Deprecated. Use "SwapBytesXX" versions below.
 #ifdef MPT_PLATFORM_BIG_ENDIAN
-// PPC
 inline uint32 LittleEndian(uint32 x)	{ return bswap32(x); }
 inline uint16 LittleEndianW(uint16 x)	{ return bswap16(x); }
 #define BigEndian(x)					(x)
 #define BigEndianW(x)					(x)
 #else
-// x86
 inline uint32 BigEndian(uint32 x)	{ return bswap32(x); }
 inline uint16 BigEndianW(uint16 x)	{ return bswap16(x); }
 #define LittleEndian(x)				(x)
 #define LittleEndianW(x)			(x)
 #endif
-//#pragma deprecated(BigEndian, BigEndianW, LittleEndian, LittleEndianW)
 
-typedef uint32 ALIGN(1) unaligned_uint32;
-typedef uint16 ALIGN(1) unaligned_uint16;
-typedef  int32 ALIGN(1) unaligned_int32;
-typedef  int16 ALIGN(1) unaligned_int16;
-
-#ifdef MPT_PLATFORM_BIG_ENDIAN
-// PPC
-inline uint32 SwapBytesBE_(unaligned_uint32 *value) { return *value; }
-inline uint16 SwapBytesBE_(unaligned_uint16 *value) { return *value; }
-inline uint32 SwapBytesLE_(unaligned_uint32 *value) { return *value = bswap32(*value); }
-inline uint16 SwapBytesLE_(unaligned_uint16 *value) { return *value = bswap16(*value); }
-inline int32 SwapBytesBE_(unaligned_int32 *value)  { return *value; }
-inline int16 SwapBytesBE_(unaligned_int16 *value)  { return *value; }
-inline int32 SwapBytesLE_(unaligned_int32 *value)  { return *value = bswap32(*value); }
-inline int16 SwapBytesLE_(unaligned_int16 *value)  { return *value = bswap16(*value); }
-#else
-// x86
-inline uint32 SwapBytesBE_(unaligned_uint32 *value) { return *value = bswap32(*value); }
-inline uint16 SwapBytesBE_(unaligned_uint16 *value) { return *value = bswap16(*value); }
-inline uint32 SwapBytesLE_(unaligned_uint32 *value) { return *value; }
-inline uint16 SwapBytesLE_(unaligned_uint16 *value) { return *value; }
-inline int32 SwapBytesBE_(unaligned_int32 *value)  { return *value = bswap32(*value); }
-inline int16 SwapBytesBE_(unaligned_int16 *value)  { return *value = bswap16(*value); }
-inline int32 SwapBytesLE_(unaligned_int32 *value)  { return *value; }
-inline int16 SwapBytesLE_(unaligned_int16 *value)  { return *value; }
+#if defined(MPT_PLATFORM_BIG_ENDIAN)
+#define bswap32le(x) bswap32(x)
+#define bswap16le(x) bswap16(x)
+#define bswap32be(x) (x)
+#define bswap16be(x) (x)
+#elif defined(MPT_PLATFORM_LITTLE_ENDIAN)
+#define bswap32be(x) bswap32(x)
+#define bswap16be(x) bswap16(x)
+#define bswap32le(x) (x)
+#define bswap16le(x) (x)
 #endif
+
+inline uint32 SwapBytesBE_(uint32 value) { return bswap32be(value); }
+inline uint16 SwapBytesBE_(uint16 value) { return bswap16be(value); }
+inline uint32 SwapBytesLE_(uint32 value) { return bswap32le(value); }
+inline uint16 SwapBytesLE_(uint16 value) { return bswap16le(value); }
+inline int32  SwapBytesBE_(int32  value) { return bswap32be(value); }
+inline int16  SwapBytesBE_(int16  value) { return bswap16be(value); }
+inline int32  SwapBytesLE_(int32  value) { return bswap32le(value); }
+inline int16  SwapBytesLE_(int16  value) { return bswap16le(value); }
+
 // Do NOT remove these overloads, even if they seem useless.
-// We do not want risking to extend 8bit integers to int and then endian-converting and casting back to int.
+// We do not want risking to extend 8bit integers to int and then
+// endian-converting and casting back to int.
 // Thus these overloads.
-inline uint8 SwapBytesLE_(uint8 *value) { return *value; }
-inline int8 SwapBytesLE_(int8 *value) { return *value; }
-inline char SwapBytesLE_(char *value) { return *value; }
-inline uint8 SwapBytesBE_(uint8 *value) { return *value; }
-inline int8 SwapBytesBE_(int8 *value) { return *value; }
-inline char SwapBytesBE_(char *value) { return *value; }
+inline uint8  SwapBytesLE_(uint8  value) { return value; }
+inline int8   SwapBytesLE_(int8   value) { return value; }
+inline char   SwapBytesLE_(char   value) { return value; }
+inline uint8  SwapBytesBE_(uint8  value) { return value; }
+inline int8   SwapBytesBE_(int8   value) { return value; }
+inline char   SwapBytesBE_(char   value) { return value; }
 
-// GCC will not bind references to members of packed structures, workaround it by using a raw pointer.
-// This is a temporary solution as this pointer might of course be unaligned which GCC seems to not care about in that case.
-#define SwapBytesBE(value) SwapBytesBE_(&(value))
-#define SwapBytesLE(value) SwapBytesLE_(&(value))
+// SwapBytesLE/SwapBytesBE is mostly used throughout the code with in-place
+// argument-modifying semantics.
+// As GCC will not bind references to members of packed structures,
+// we implement reference semantics by explicitly assigning to a macro
+// argument.
 
+// In-place modifying version:
+#define SwapBytesBE(value) do { (value) = SwapBytesBE_((value)); } while(0)
+#define SwapBytesLE(value) do { (value) = SwapBytesLE_((value)); } while(0)
+
+// Alternative, function-style syntax:
+#define SwapBytesReturnBE(value) SwapBytesBE_((value))
+#define SwapBytesReturnLE(value) SwapBytesLE_((value))
+
+#undef bswap16le
+#undef bswap32le
+#undef bswap16be
+#undef bswap32be
 #undef bswap16
 #undef bswap32
 

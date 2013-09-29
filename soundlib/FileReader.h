@@ -585,7 +585,7 @@ public:
 		T target;
 		if(Read(target))
 		{
-			return SwapBytesLE(target);
+			return SwapBytesReturnLE(target);
 		} else
 		{
 			return 0;
@@ -601,7 +601,7 @@ public:
 		T target;
 		if(Read(target))
 		{
-			return SwapBytesBE(target);
+			return SwapBytesReturnBE(target);
 		} else
 		{
 			return 0;
@@ -645,7 +645,7 @@ public:
 		}
 		T target;
 		std::memcpy(&target, buf, sizeof(T));
-		return SwapBytesLE(target);
+		return SwapBytesReturnLE(target);
 	}
 
 	// Read a supplied-size little endian integer to a fixed size variable.
