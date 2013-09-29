@@ -1,8 +1,14 @@
+/*
+ * unlha.cpp
+ * ---------
+ * Purpose: Implementation file for extracting modules from .lha archives, making use of lhasa
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
 #include "stdafx.h"
-
 #include "unlha.h"
-
 #include "lhasa.h"
 
 
@@ -28,19 +34,21 @@ static int LHAskipFileReader(void *handle, size_t bytes)
 	return 0;
 }
 
-static void LHAcloseFileReader(void * /*handle*/ )
+static void LHAcloseFileReader(void * /*handle*/)
 {
-	//FileReader *f = reinterpret_cast<FileReader*>(handle);
 }
 
-static LHAInputStreamType vtable = {
+static LHAInputStreamType vtable =
+{
 	LHAreadFileReader,
 	LHAskipFileReader,
 	LHAcloseFileReader
 };
 
-static inline std::string get_extension( std::string filename ) {
-	if ( filename.find_last_of( "." ) != std::string::npos ) {
+static inline std::string get_extension( std::string filename )
+{
+	if ( filename.find_last_of( "." ) != std::string::npos )
+	{
 		return filename.substr( filename.find_last_of( "." ) + 1 );
 	}
 	return "";
