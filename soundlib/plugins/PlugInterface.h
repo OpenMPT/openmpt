@@ -40,7 +40,8 @@ public:
 	virtual void SaveAllParameters() = 0;
 	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
 	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
-	virtual bool MidiSend(DWORD dwMidiCode) = 0;
+	virtual bool MidiSend(uint32 dwMidiCode) = 0;
+	virtual bool MidiSysexSend(const char *message, uint32 length) = 0;
 	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
 	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) = 0;
 	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) = 0;
@@ -150,7 +151,7 @@ struct SNDMIXPLUGIN
 {
 	IMixPlugin *pMixPlugin;
 	SNDMIXPLUGINSTATE *pMixState;
-	ULONG nPluginDataSize;
+	uint32 nPluginDataSize;
 	char *pPluginData;
 	SNDMIXPLUGININFO Info;
 	float fDryRatio;
