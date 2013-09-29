@@ -744,6 +744,23 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(chnMask[ch] & 8) patternData.Skip(2);
 		}
 	}
+
+	// Compute extra instruments settings position
+	if(lastSampleOffset > 0)
+	{
+		file.Seek(lastSampleOffset);
+	}
+
+	// Load instrument and song extensions.
+	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
+	if(interpretModPlugMade)
+	{
+		m_nMixLevels = mixLevels_original;
+	}
+	// We need to do this here, because if there no samples (so lastSampleOffset = 0), we need to look after the last pattern (sample data normally follows pattern data).
+	// And we need to do this before reading the patterns because m_nChannels might be modified by LoadExtendedSongProperties. *sigh*
+	LoadExtendedSongProperties(GetType(), file, &interpretModPlugMade);
+
 	// Reading Patterns
 	Patterns.ResizeArray(std::max(MAX_PATTERNS, numPats));
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
@@ -910,20 +927,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
-
-	// Compute extra instruments settings position
-	if(lastSampleOffset > 0)
-	{
-		file.Seek(lastSampleOffset);
-	}
-
-	// Load instrument and song extensions.
-	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
-	if(interpretModPlugMade)
-	{
-		m_nMixLevels = mixLevels_original;
-	}
-	LoadExtendedSongProperties(GetType(), file, &interpretModPlugMade);
 
 	UpgradeModFlags();
 
