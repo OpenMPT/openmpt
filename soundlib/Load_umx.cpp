@@ -225,7 +225,11 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 			isMusic = !strcmp(objClassName, "music");
 			isSound = !strcmp(objClassName, "sound");
 		}
-		if(!isMusic && !isSound)
+		if(!isMusic
+#ifdef MODPLUG_TRACKER
+			&& !isSound
+#endif // MODPLUG_TRACKER
+			)
 		{
 			continue;
 		} else if(loadFlags == onlyVerifyHeader)
@@ -289,6 +293,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					return true;
 				}
+#ifdef MODPLUG_TRACKER
 			} else if(isSound && GetNumSamples() < MAX_SAMPLES - 1)
 			{
 				// Read as sample
@@ -300,10 +305,12 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 						mpt::String::Copy(m_szNames[GetNumSamples()], names[objName]);
 					}
 				}
+#endif // MODPLUG_TRACKER
 			}
 		}
 	}
 
+#ifdef MODPLUG_TRACKER
 	if(m_nSamples != 0)
 	{
 		InitializeChannels();
@@ -313,6 +320,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 		Order[0] = 0;
 		return true;
 	} else
+#endif // MODPLUG_TRACKER
 	{
 		return false;
 	}
