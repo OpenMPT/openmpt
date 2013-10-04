@@ -154,6 +154,8 @@ CModDoc::CModDoc() : m_LogMode(LogModeInstantReporting), m_PatternUndo(*this), m
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
 	m_ShowSavedialog = false;
+
+	CMainFrame::UpdateAudioParameters(m_SndFile, true);
 }
 
 
