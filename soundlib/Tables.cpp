@@ -90,14 +90,6 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_IMF,		"Imago Orpheus",			"imf" },
 	{ MOD_TYPE_J2B,		"Galaxy Sound System",		"j2b" },
 
-	// Container formats
-	{ MOD_TYPE_GDM,		"General Digital Music",	"gdm" },
-	{ MOD_TYPE_UMX,		"Unreal Music",				"umx" },
-	{ MOD_TYPE_UMX,		"Unreal Sounds",			"uax" },
-#ifndef NO_MO3
-	{ MOD_TYPE_MO3,		"MO3",						"mo3" },
-#endif // NO_MO3
-
 #ifndef NO_ARCHIVE_SUPPORT
 	// Compressed modules
 	{ MOD_TYPE_MOD,		"ProTracker",				"mdz" },
@@ -109,11 +101,32 @@ static const ModFormatInfo modFormatInfo[] =
 #endif
 };
 
+
+struct ModContainerInfo
+{
+	MODCONTAINERTYPE format; // MOD_CONTAINERTYPE_XXXX
+	const char *name;        // "Unreal Music"
+	const char *extension;   // "umx"
+};
+
+// remember to also update libopenmpt/libopenmpt_foobar2000.cpp (all other plugins read these dynamically)
+static const ModContainerInfo modContainerInfo[] =
+{
+	// Container formats
+	{ MOD_CONTAINERTYPE_GDM, "General Digital Music", "gdm" },
+	{ MOD_CONTAINERTYPE_UMX, "Unreal Music",          "umx" },
+#ifndef NO_MO3
+	{ MOD_CONTAINERTYPE_MO3, "Un4seen MO3",           "mo3" },
+#endif // NO_MO3
+};
+
+
 #ifdef MODPLUG_TRACKER
 static const ModFormatInfo otherFormatInfo[] =
 {
 	// Other stuff
-	{ MOD_TYPE_WAV,		"Wave",						"wav" },
+	{ MOD_TYPE_WAV,		"Wave",						"wav" }, // PCM as module
+	{ MOD_TYPE_UAX,		"Unreal Sounds",			"uax" }, // sampleset as module
 	{ MOD_TYPE_MID,		"MIDI",						"mid" },
 	{ MOD_TYPE_MID,		"MIDI",						"rmi" },
 	{ MOD_TYPE_MID,		"MIDI",						"smf" },
@@ -196,6 +209,14 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 			exts.push_back(modFormatInfo[i].extension);
 		}
 	}
+	for(size_t i = 0; i < CountOf(modContainerInfo); i++)
+	{
+		// Avoid dupes in list
+		if(i == 0 || strcmp(modContainerInfo[i].extension, modContainerInfo[i - 1].extension))
+		{
+			exts.push_back(modContainerInfo[i].extension);
+		}
+	}
 #ifdef MODPLUG_TRACKER
 	if(otherFormats)
 	{
@@ -225,6 +246,20 @@ const char * CSoundFile::ModTypeToString(MODTYPE modtype)
 }
 
 
+std::string CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype)
+//------------------------------------------------------------------------------
+{
+	for(size_t i = 0; i < CountOf(modContainerInfo); i++)
+	{
+		if(modContainerInfo[i].format == containertype)
+		{
+			return modContainerInfo[i].extension;
+		}
+	}
+	return "";
+}
+
+
 std::string CSoundFile::ModTypeToTracker(MODTYPE modtype)
 //-------------------------------------------------------
 {
@@ -248,6 +283,32 @@ std::string CSoundFile::ModTypeToTracker(MODTYPE modtype)
 	}
 	return retval;
 }
+
+
+std::string CSoundFile::ModContainerTypeToTracker(MODCONTAINERTYPE containertype)
+//-------------------------------------------------------------------------------
+{
+	std::set<std::string> retvals;
+	std::string retval;
+	for(size_t i = 0; i < CountOf(modContainerInfo); i++)
+	{
+		if(modContainerInfo[i].format == containertype)
+		{
+			std::string name = modContainerInfo[i].name;
+			if(retvals.find(name) == retvals.end())
+			{
+				retvals.insert(name);
+				if(!retval.empty())
+				{
+					retval += " / ";
+				}
+				retval += name;
+			}
+		}
+	}
+	return retval;
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////

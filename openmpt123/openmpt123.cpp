@@ -1027,6 +1027,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 	if ( flags.show_details ) {
 		log << "Filename...: " << get_filename( filename ) << std::endl;
 		log << "Size.......: " << bytes_to_string( filesize ) << std::endl;
+		log << "Container..: " << ( mod.get_metadata( "container" ).empty() ? std::string("none") : ( mod.get_metadata( "container" ) + " (" + mod.get_metadata( "container_long" ) + ")" ) ) << std::endl;
 		log << "Type.......: " << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")" << std::endl;
 		log << "Tracker....: " << mod.get_metadata( "tracker" ) << std::endl;
 	}

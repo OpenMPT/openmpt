@@ -158,6 +158,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals();
 	m_nType = gdmFormatOrigin[fileHeader.originalFormat];
+	m_ContainerType = MOD_CONTAINERTYPE_GDM;
 	madeWithTracker = mpt::String::Format("BWSB 2GDM %d.%d (converted from %s)", fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()).c_str());
 
 	// Song name

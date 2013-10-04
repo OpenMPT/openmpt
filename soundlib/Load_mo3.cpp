@@ -90,6 +90,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						|| ReadMTM(unpackedFile, loadFlags)
 						|| ReadMod(unpackedFile, loadFlags)
 						|| ReadM15(unpackedFile, loadFlags);
+					if(result)
+					{
+						m_ContainerType = MOD_CONTAINERTYPE_MO3;
+					}
 				}
 
 				UNMO3_Free(stream);
