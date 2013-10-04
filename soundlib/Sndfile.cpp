@@ -515,6 +515,7 @@ CSoundFile::CSoundFile() :
 	gnDryLOfsVol = 0;
 	gnDryROfsVol = 0;
 	m_nType = MOD_TYPE_NONE;
+	m_ContainerType = MOD_CONTAINERTYPE_NONE;
 	m_nChannels = 0;
 	m_nMixChannels = 0;
 	m_nSamples = 0;
@@ -594,6 +595,7 @@ void CSoundFile::InitializeGlobals()
 {
 	// Do not add or change any of these values! And if you do, review each and every loader to check if they require these defaults!
 	m_nType = MOD_TYPE_NONE;
+	m_ContainerType = MOD_CONTAINERTYPE_NONE;
 	m_nChannels = 0;
 	m_nInstruments = 0;
 	m_nSamples = 0;
@@ -730,6 +732,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		 && !ReadM15(file, loadFlags))
 		{
 			m_nType = MOD_TYPE_NONE;
+			m_ContainerType = MOD_CONTAINERTYPE_NONE;
 		}
 
 		if(madeWithTracker.empty())
@@ -952,6 +955,7 @@ BOOL CSoundFile::Destroy()
 	}
 
 	m_nType = MOD_TYPE_NONE;
+	m_ContainerType = MOD_CONTAINERTYPE_NONE;
 	m_nChannels = m_nSamples = m_nInstruments = 0;
 	return TRUE;
 }

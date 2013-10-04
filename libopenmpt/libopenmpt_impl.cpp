@@ -540,6 +540,8 @@ std::vector<std::string> module_impl::get_metadata_keys() const {
 	std::vector<std::string> retval;
 	retval.push_back("type");
 	retval.push_back("type_long");
+	retval.push_back("container");
+	retval.push_back("container_long");
 	retval.push_back("tracker");
 	retval.push_back("author");
 	retval.push_back("title");
@@ -552,6 +554,10 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		return CSoundFile::ModTypeToString( m_sndFile->GetType() );
 	} else if ( key == std::string("type_long") ) {
 		return CSoundFile::ModTypeToTracker( m_sndFile->GetType() );
+	} else if ( key == std::string("container") ) {
+		return CSoundFile::ModContainerTypeToString( m_sndFile->GetContainerType() );
+	} else if ( key == std::string("container_long") ) {
+		return CSoundFile::ModContainerTypeToTracker( m_sndFile->GetContainerType() );
 	} else if ( key == std::string("tracker") ) {
 		return m_sndFile->madeWithTracker;
 	} else if ( key == std::string("title") ) {

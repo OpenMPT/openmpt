@@ -321,6 +321,9 @@ public:	// for Editing
 	CModDoc *m_pModDoc;		// Can be a null pointer for example when previewing samples from the treeview.
 #endif // MODPLUG_TRACKER
 	FlagSet<MODTYPE> m_nType;
+private:
+	MODCONTAINERTYPE m_ContainerType;
+public:
 	CHANNELINDEX m_nChannels;
 	SAMPLEINDEX m_nSamples;
 	INSTRUMENTINDEX m_nInstruments;
@@ -449,6 +452,8 @@ public:
 	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
 	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
 
+	MODCONTAINERTYPE GetContainerType() const { return m_ContainerType; }
+
 	// rough heuristic, could be improved
 	std::pair<MOD_CHARSET_CERTAINTY, std::string> GetCharset() const { return GetCharsetFromModType(GetType()); }
 
@@ -551,7 +556,9 @@ public:
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
 	static std::pair<MOD_CHARSET_CERTAINTY, std::string> GetCharsetFromModType(MODTYPE modtype);
 	static const char * ModTypeToString(MODTYPE modtype);
+	static std::string CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype);
 	static std::string ModTypeToTracker(MODTYPE modtype);
+	static std::string CSoundFile::ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
 
 	void UpgradeModFlags();
 	void UpgradeSong();

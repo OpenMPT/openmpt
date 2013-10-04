@@ -291,6 +291,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 					|| ReadMod(fileChunk, loadFlags)
 					|| ReadM15(fileChunk, loadFlags))
 				{
+					m_ContainerType = MOD_CONTAINERTYPE_UMX;
 					return true;
 				}
 #ifdef MODPLUG_TRACKER
@@ -314,7 +315,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 	if(m_nSamples != 0)
 	{
 		InitializeChannels();
-		m_nType = MOD_TYPE_UMX;
+		m_nType = MOD_TYPE_UAX;
 		m_nChannels = 4;
 		Patterns.Insert(0, 64);
 		Order[0] = 0;

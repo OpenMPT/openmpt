@@ -660,7 +660,11 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 	std::ostringstream str;
 	str
 		<< "\r"
-		<< "Format" << "\t" << self->mod->get_metadata("type") << " (" << self->mod->get_metadata("type_long") << ")" << "\r"
+		<< "Format" << "\t" << self->mod->get_metadata("type") << " (" << self->mod->get_metadata("type_long") << ")" << "\r";
+	if ( !self->mod->get_metadata("container").empty() ) {
+		str << "Container" << "\t"  << self->mod->get_metadata("container") << " (" << self->mod->get_metadata("container_long") << ")" << "\r";
+	}
+	str
 		<< "Channels" << "\t" << self->mod->get_num_channels() << "\r"
 		<< "Orders" << "\t" << self->mod->get_num_orders() << "\r"
 		<< "Patterns" << "\t" << self->mod->get_num_patterns() << "\r"
