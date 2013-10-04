@@ -556,9 +556,9 @@ public:
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
 	static std::pair<MOD_CHARSET_CERTAINTY, std::string> GetCharsetFromModType(MODTYPE modtype);
 	static const char * ModTypeToString(MODTYPE modtype);
-	static std::string CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype);
+	static std::string ModContainerTypeToString(MODCONTAINERTYPE containertype);
 	static std::string ModTypeToTracker(MODTYPE modtype);
-	static std::string CSoundFile::ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
+	static std::string ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
 
 	void UpgradeModFlags();
 	void UpgradeSong();
