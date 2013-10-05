@@ -21,13 +21,13 @@
 
 namespace openmpt {
 
-exception::exception( const std::string & text_ ) throw()
+exception::exception( const std::string & text ) throw()
 	: std::exception()
 	, text(0)
 {
-	text = (char*)std::malloc( text_.length() + 1 );
-	if ( text ) {
-		std::memcpy( text, text_.c_str(), text_.length() + 1 );
+	this->text = (char*)std::malloc( text.length() + 1 );
+	if ( this->text ) {
+		std::memcpy( this->text, text.c_str(), text.length() + 1 );
 	}
 }
 
