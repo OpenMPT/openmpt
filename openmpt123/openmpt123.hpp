@@ -213,11 +213,9 @@ struct commandlineflags {
 	bool use_float;
 	bool use_stdout;
 	std::vector<std::string> filenames;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 	std::string output_filename;
 	std::string output_extension;
 	bool force_overwrite;
-#endif
 	commandlineflags() {
 		mode = ModeUI;
 #ifdef MPT_WITH_PORTAUDIO
@@ -291,23 +289,19 @@ struct commandlineflags {
 		show_channel_meters = false;
 		show_pattern = false;
 		use_stdout = false;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 		output_extension = "wav";
 		force_overwrite = false;
-#endif
 	}
 	void check_and_sanitize() {
 		if ( filenames.size() == 0 ) {
 			throw show_help_exception();
 		}
-#if defined(MPT_WITH_PORTAUDIO) && ( defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE) )
 		if ( use_stdout && ( device != commandlineflags().device || !output_filename.empty() ) ) {
 			throw show_help_exception();
 		}
 		if ( !output_filename.empty() && ( device != commandlineflags().device || use_stdout ) ) {
 			throw show_help_exception();
 		}
-#endif
 		for ( std::vector<std::string>::iterator i = filenames.begin(); i != filenames.end(); ++i ) {
 			if ( *i == "-" ) {
 				canUI = false;

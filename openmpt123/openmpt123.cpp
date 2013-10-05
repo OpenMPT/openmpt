@@ -177,10 +177,8 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Repeat count: " << flags.repeatcount << std::endl;
 	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Standard output: " << flags.use_stdout << std::endl;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 	s << "Output filename: " << flags.output_filename << std::endl;
 	s << "Force overwrite output file: " << flags.force_overwrite << std::endl;
-#endif
 	s << std::endl;
 	s << "Files: " << std::endl;
 	for ( std::vector<std::string>::const_iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
@@ -357,11 +355,9 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 		log << "     --buffer n            Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
 #endif
 		log << "     --stdout              Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 		log << "     --output-type t       Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
 		log << " -o, --output f            Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
 		log << "     --force               Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
-#endif
 		log << std::endl;
 		log << "     --                    Interpret further arguments as filenames" << std::endl;
 		log << std::endl;
@@ -1255,7 +1251,6 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 #endif
 			} else if ( arg == "--stdout" ) {
 				flags.use_stdout = true;
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 			} else if ( ( arg == "-o" || arg == "--output" ) && nextarg != "" ) {
 				flags.output_filename = nextarg;
 				++i;
@@ -1264,7 +1259,6 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 			} else if ( arg == "--output-type" && nextarg != "" ) {
 				flags.output_extension = nextarg;
 				++i;
-#endif
 			} else if ( arg == "--samplerate" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.samplerate;
@@ -1424,11 +1418,9 @@ static int main( int argc, char * argv [] ) {
 				if ( flags.use_stdout ) {
 					stdout_stream_raii stdout_audio_stream;
 					render_files( flags, log, stdout_audio_stream );
-#if defined(MPT_WITH_FLAC) || defined(MPT_WITH_MMIO) || defined(MPT_WITH_SNDFILE)
 				} else if ( !flags.output_filename.empty() ) {
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream );
-#endif
 #ifdef MPT_WITH_PORTAUDIO
 				} else {
 					portaudio_stream_raii portaudio_stream( flags, log );
