@@ -20,7 +20,7 @@
 #include "svn_version.h"
 static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING "." OPENMPT_API_VERSION_STRINGIZE(OPENMPT_VERSION_REVISION) ")";
 
-//#define EXPERIMENTAL_VIS
+#define EXPERIMENTAL_VIS
 
 #define FAST_CHECKFILE
 
@@ -713,31 +713,39 @@ static double WINAPI openmpt_GetGranularity() {
 // return number of floats written. if it's less than requested, playback is ended...
 // so wait for more if there is more to come (use CheckCancel function to check if user wants to cancel)
 static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
-	if ( !self->mod ) {
+	if ( !self->mod || self->num_channels == 0 ) {
 		return 0;
 	}
 	std::size_t frames = count / self->num_channels;
+	std::size_t frames_to_render = frames;
 	std::size_t frames_rendered = 0;
-	switch ( self->num_channels ) {
-	case 1:
-		{
-			frames_rendered = self->mod->read( self->samplerate, frames, dstbuf );
+	while ( frames_to_render > 0 ) {
+		std::size_t frames_chunk = std::min<std::size_t>( frames_to_render, self->samplerate / 100 ); // 100 Hz timing info update interval
+		switch ( self->num_channels ) {
+		case 1:
+			{
+				frames_chunk = self->mod->read( self->samplerate, frames_chunk, dstbuf );
+			}
+			break;
+		case 2:
+			{
+				frames_chunk = self->mod->read_interleaved_stereo( self->samplerate, frames_chunk, dstbuf );
+			}
+			break;
+		case 4:
+			{
+				frames_chunk = self->mod->read_interleaved_quad( self->samplerate, frames_chunk, dstbuf );
+			}
+			break;
 		}
-		break;
-	case 2:
-		{
-			frames_rendered = self->mod->read_interleaved_stereo( self->samplerate, frames, dstbuf );
+		dstbuf += frames_chunk * self->num_channels;
+		if ( frames_chunk == 0 ) {
+			break;
 		}
-		break;
-	case 4:
-		{
-			frames_rendered = self->mod->read_interleaved_quad( self->samplerate, frames, dstbuf );
-		}
-		break;
-	default:
-		return 0;
+		update_timeinfos( self->samplerate, frames_chunk );
+		frames_to_render -= frames_chunk;
+		frames_rendered += frames_chunk;
 	}
-	update_timeinfos( self->samplerate, frames );
 	if ( frames_rendered == 0 ) {
 		return 0;
 	}
@@ -779,10 +787,11 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 
 #ifdef EXPERIMENTAL_VIS
 
-std::vector< std::vector< std::string > > patterns_rows;
 DWORD viscolors[3];
 HPEN vispens[3];
 HBRUSH visbrushs[3];
+static int last_pattern = -1;
+static int last_row = -1;
 
 static char nibble_to_char( std::uint8_t nibble ) {
 	if ( nibble < 10 ) {
@@ -803,18 +812,6 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	visbrushs[2] = CreateSolidBrush( viscolors[2] );
 	if ( !self->mod ) {
 		return FALSE;
-	}
-	patterns_rows.resize( self->mod->get_num_patterns() );
-	for ( std::size_t pattern = 0; pattern < (std::size_t)self->mod->get_num_patterns(); pattern++ ) {
-		patterns_rows[pattern].resize( self->mod->get_pattern_num_rows( pattern ) );
-		for ( std::size_t row = 0; row < (std::size_t)self->mod->get_pattern_num_rows( pattern ); row++ ) {
-			for ( std::size_t channel = 0; channel < (std::size_t)self->mod->get_num_channels(); channel++ ) {
-				if ( channel > 0 ) {
-					patterns_rows[pattern][row] += "|";
-				}
-				patterns_rows[pattern][row] += self->mod->format_pattern_row_channel( pattern, row, channel, 3 );
-			}
-		}
 	}
 	return TRUE;
 }
@@ -844,8 +841,6 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 
 	int top = 0;
 
-	int channels = self->mod->get_num_channels();
-
 #if 0
 	int pattern = self->mod->get_current_pattern();
 	int current_row = self->mod->get_current_row();
@@ -855,7 +850,53 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	int current_row = info.row;
 #endif
 
-	std::size_t rows = self->mod->get_pattern_num_rows( pattern );
+	if(flags & XMPIN_VIS_INIT)
+	{
+		last_pattern = -1;
+		last_row = -1;
+	}
+
+	if(!(flags & XMPIN_VIS_INIT))
+	{
+		if(pattern == last_pattern && current_row == last_row)
+		{
+			return FALSE;
+		}
+	}
+
+	RECT bgrect;
+	bgrect.top = 0;
+	bgrect.left = 0;
+	bgrect.right = size.cx;
+	bgrect.bottom = size.cy;
+	FillRect(dc, &bgrect, visbrushs[0]);
+
+	const std::size_t channels = self->mod->get_num_channels();
+	const std::size_t rows = self->mod->get_pattern_num_rows( pattern );
+
+	std::size_t num_cols = size.cx / tm.tmAveCharWidth;
+	std::size_t num_rows = size.cy / tm.tmHeight;
+
+	std::size_t cols_per_channel = num_cols / channels;
+	if (cols_per_channel <= 1 ) {
+		cols_per_channel = 1;
+	} else {
+		cols_per_channel -= 1;
+	}
+	if ( cols_per_channel >= 13 ) {
+		cols_per_channel = 13;
+	}
+
+	std::size_t cols_to_write = cols_per_channel * channels + channels - 1;
+	std::size_t rows_to_write = rows;
+
+	POINT offset;
+	offset.x = ( num_cols - cols_to_write ) / 2 * tm.tmAveCharWidth;
+	//offset.y = ( rows_to_write - num_rows ) / 2 * tm.tmHeight;
+	//offset.y -= current_row * tm.tmHeight;
+
+	offset.y = num_rows / 2 * tm.tmHeight;
+	offset.y -= current_row * tm.tmHeight;
 
 	for ( std::size_t row = 0; row < rows; row++ ) {
 		if ( row == current_row ) {
@@ -863,17 +904,31 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 			SetTextColor( dc, viscolors[2] );
 		}
 		RECT rect;
-		rect.top = top;
-		rect.left = 0;
+		rect.top = top + offset.y;
+		rect.left = 0 + offset.x;
 		rect.right = size.cx;
 		rect.bottom = size.cy;
-		DrawText( dc, patterns_rows[pattern][row].c_str(), patterns_rows[pattern][row].length(), &rect, DT_LEFT );
+
+		std::wstring rowstring;
+		for ( std::size_t channel = 0; channel < channels; ++channel ) {
+			if ( channel > 0 ) {
+				rowstring += L"|";
+			}
+			rowstring += StringDecode( self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel ), CP_UTF8 );
+		}
+
+		TextOut( dc, rect.left, rect.top, rowstring.c_str(), rowstring.length() );
+		//DrawText( dc, rowstring.c_str(), rowstring.length(), &rect, DT_LEFT );
+
 		top += tm.tmHeight;
 		if ( row == current_row ) {
 			//SelectObject( dc, vispens[1] );
 			SetTextColor( dc, viscolors[1] );
 		}
 	}
+
+	last_pattern = pattern;
+	last_row = current_row;
 
 	return TRUE;
 }
