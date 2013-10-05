@@ -2,7 +2,6 @@
 #include "foobar2000/SDK/foobar2000.h"
 #include "foobar2000/helpers/helpers.h"
 
-#define LIBOPENMPT_ALPHA_WARNING_SEEN_AND_I_KNOW_WHAT_I_AM_DOING
 #include "libopenmpt.hpp"
 
 #include <algorithm>
