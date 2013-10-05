@@ -868,8 +868,6 @@ public:
 
 struct AcmDynBind
 {
-	HMODULE hAcm;
-
 	bool found_codec;
 	int samplerates[CountOf(layer3_samplerates)];
 
@@ -880,7 +878,6 @@ struct AcmDynBind
 
 	void Reset()
 	{
-		hAcm = NULL;
 		found_codec = false;
 		MemsetZero(samplerates);
 		formats.clear();
@@ -890,7 +887,7 @@ struct AcmDynBind
 	AcmDynBind()
 	{
 		Reset();
-		if(!hAcm) TryLoad("Msacm32.dll");
+		TryLoad();
 	}
 	static BOOL CALLBACK AcmFormatEnumCallback(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD_PTR inst, DWORD fdwSupport)
 	{
@@ -1019,43 +1016,36 @@ struct AcmDynBind
 		pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
 		acmFormatEnumA(NULL, &afd, AcmFormatEnumCallback, reinterpret_cast<DWORD_PTR>(this), ACM_FORMATENUMF_CONVERT);
 	}
-	void TryLoad(std::string filename)
+	void TryLoad()
 	{
-		hAcm = LoadLibrary(filename.c_str());
-		if(!hAcm)
-		{
-			return;
-		}
 		if(acmGetVersion() <= 0x03320000)
 		{
-			FreeLibrary(hAcm);
 			Reset();
 			return;
 		}
 		try
 		{
-			EnumFormats(48000, 2);
-			EnumFormats(44100, 2);
-			EnumFormats(48000, 1);
-			EnumFormats(44100, 1);
+			for(std::size_t i = 0; i < CountOf(mpeg1layer3_samplerates); ++i)
+			{
+				EnumFormats(mpeg1layer3_samplerates[i], 2);
+			}
+			for(std::size_t i = 0; i < CountOf(mpeg1layer3_samplerates); ++i)
+			{
+				EnumFormats(mpeg1layer3_samplerates[i], 1);
+			}
 		} catch(...)
 		{
 			found_codec = false;
 		}
 		if(!found_codec)
 		{
-			FreeLibrary(hAcm);
 			Reset();
 			return;
 		}
 	}
-	operator bool () const { return hAcm ? true : false; }
+	operator bool () const { return found_codec ? true : false; }
 	~AcmDynBind()
 	{
-		if(hAcm)
-		{
-			FreeLibrary(hAcm);
-		}
 		Reset();
 	}
 	Encoder::Traits BuildTraits()
