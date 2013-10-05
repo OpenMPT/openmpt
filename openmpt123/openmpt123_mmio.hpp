@@ -15,11 +15,6 @@
 
 #if defined(MPT_WITH_MMIO)
 
-#define NOMINMAX
-#include <windows.h>
-#include <mmsystem.h>
-#include <mmreg.h>
-
 namespace openmpt123 {
 
 #define CHECKED(x) do { \

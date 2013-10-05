@@ -26,7 +26,7 @@ struct show_help_exception {
 
 struct show_help_keyboard_exception { };
 
-#if defined(_MSC_VER)
+#if defined(WIN32)
 
 std::string wstring_to_utf8( const std::wstring & unicode_string ) {
 	int required_size = WideCharToMultiByte( CP_UTF8, 0, unicode_string.c_str(), -1, NULL, 0, NULL, NULL );
@@ -102,7 +102,7 @@ public:
 	}
 };
 
-#if defined(_MSC_VER)
+#if defined(WIN32)
 
 class textout_console : public textout {
 private:
@@ -127,7 +127,7 @@ public:
 	}
 };
 
-#endif // _MSC_VER
+#endif // WIN32
 
 static inline float mpt_round( float val ) {
 	if ( val >= 0.0f ) {
@@ -231,13 +231,13 @@ struct commandlineflags {
 		verbose = false;
 		terminal_width = 72;
 		terminal_height = 23;
-#if defined(_MSC_VER)
+#if defined(WIN32)
 		CONSOLE_SCREEN_BUFFER_INFO csbi;
 		ZeroMemory( &csbi, sizeof( CONSOLE_SCREEN_BUFFER_INFO ) );
 		GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &csbi );
 		terminal_width = csbi.dwSize.X - 1;
 		terminal_height = 23; //csbi.dwSize.Y - 1;
-#else // !_MSC_VER
+#else // WIN32
 		if ( isatty( STDERR_FILENO ) ) {
 			if ( std::getenv( "COLUMNS" ) ) {
 				std::istringstream istr( std::getenv( "COLUMNS" ) );
@@ -272,13 +272,13 @@ struct commandlineflags {
 #endif
 		show_details = true;
 		show_message = false;
-#if defined(_MSC_VER)
+#if defined(WIN32)
 		canUI = IsTerminal( 0 ) ? true : false;
 		canProgress = IsTerminal( 2 ) ? true : false;
-#else
+#else // !WIN32
 		canUI = isatty( STDIN_FILENO ) ? true : false;
 		canProgress = isatty( STDERR_FILENO ) ? true : false;
-#endif
+#endif // WIN32
 		show_ui = canUI;
 		show_progress = canProgress;
 		show_meters = canUI && canProgress;
