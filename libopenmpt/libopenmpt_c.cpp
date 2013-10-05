@@ -19,6 +19,7 @@
 #include <stdexcept>
 
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
