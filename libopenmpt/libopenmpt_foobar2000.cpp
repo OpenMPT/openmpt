@@ -133,7 +133,7 @@ static input_singletrack_factory_t<input_openmpt> g_input_openmpt_factory;
 // copied table from soundlib/Tables.cpp
 // the foobar2000 interface is stupid demanding to declare those statically
 
-DECLARE_FILE_TYPE("OpenMPT compatibel module files",
+DECLARE_FILE_TYPE("OpenMPT compatible module files",
 	"*.mod" ";"
 	"*.s3m" ";"
 	"*.xm" ";"
@@ -166,5 +166,4 @@ DECLARE_FILE_TYPE("OpenMPT compatibel module files",
 	"*.j2b" ";"
 	"*.gdm" ";"
 	"*.umx" ";"
-	"*.uax" ";"
 	"*.mo3" );
