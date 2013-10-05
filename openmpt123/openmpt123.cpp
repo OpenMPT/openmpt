@@ -25,7 +25,7 @@
 #include <cstring>
 #include <ctime>
 
-#if defined(_MSC_VER)
+#if defined(WIN32)
 #include <conio.h>
 #include <fcntl.h>
 #include <io.h>
@@ -33,6 +33,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <windows.h>
+#include <mmsystem.h>
+#include <mmreg.h>
 #else
 #include <sys/ioctl.h>
 #include <sys/poll.h>
@@ -64,7 +66,7 @@ struct show_version_number_exception : public std::exception {
 };
 
 bool IsTerminal( int fd ) {
-#if defined( _MSC_VER )
+#if defined( WIN32 )
 	return true
 		&& ( _isatty( fd ) ? true : false )
 		&& GetConsoleWindow() != NULL
@@ -74,7 +76,7 @@ bool IsTerminal( int fd ) {
 #endif
 }
 
-#if !defined( _MSC_VER )
+#if !defined( WIN32 )
 
 static termios saved_attributes;
 
@@ -195,7 +197,7 @@ static std::string replace( std::string str, const std::string & oldstr, const s
 	return str;
 }
 
-#if defined( _MSC_VER )
+#if defined( WIN32 )
 static const char path_sep = '\\';
 #else
 static const char path_sep = '/';
@@ -729,7 +731,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 	log.writeout();
 
-#if defined( _MSC_VER )
+#if defined( WIN32 )
 	HANDLE hStdErr = NULL;
 	COORD coord_cursor = COORD();
 	if( multiline ) {
@@ -752,7 +754,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 		if ( flags.mode == ModeUI ) {
 
-#if defined( _MSC_VER )
+#if defined( WIN32 )
 
 			while ( kbhit() ) {
 				int c = getch();
@@ -820,7 +822,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 		}
 
 		if ( multiline ) {
-#if defined( _MSC_VER )
+#if defined( WIN32 )
 			log.flush();
 			if ( hStdErr ) {
 				SetConsoleCursorPosition( hStdErr, coord_cursor );
@@ -1084,7 +1086,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 		std::uint64_t filesize = 0;
 		bool use_stdin = ( filename == "-" );
 		if ( !use_stdin ) {
-			#if defined(_MSC_VER) && defined(UNICODE)
+			#if defined(WIN32) && defined(UNICODE)
 				file_stream.open( utf8_to_wstring( filename ), std::ios::binary );
 			#else
 				file_stream.open( filename, std::ios::binary );
@@ -1307,7 +1309,7 @@ static void show_credits( std::ostream & s ) {
 	s << openmpt::string::get( openmpt::string::credits );
 }
 
-#if defined(_MSC_VER)
+#if defined(WIN32)
 
 class ConsoleCP_utf8_raii {
 private:
@@ -1329,13 +1331,13 @@ public:
 
 #endif
 
-#if defined(_MSC_VER) && defined(UNICODE)
+#if defined(WIN32) && defined(UNICODE)
 static int wmain( int wargc, wchar_t * wargv [] ) {
 #else
 static int main( int argc, char * argv [] ) {
 #endif
 
-	#if defined(_MSC_VER)
+	#if defined(WIN32)
 
 		ConsoleCP_utf8_raii console_cp;
 
@@ -1343,7 +1345,7 @@ static int main( int argc, char * argv [] ) {
 
 	textout_dummy dummy_log;
 
-	#if defined(_MSC_VER)
+	#if defined(WIN32)
 		textout_console std_log( GetStdHandle( STD_ERROR_HANDLE ) );
 	#else
 		textout_ostream std_log( std::clog );
@@ -1355,7 +1357,7 @@ static int main( int argc, char * argv [] ) {
 
 		std::vector<std::string> args;
 		
-		#if defined(_MSC_VER) && defined(UNICODE)
+		#if defined(WIN32) && defined(UNICODE)
 			for ( int arg = 0; arg < wargc; ++arg ) {
 				args.push_back( wstring_to_utf8( wargv[arg] ) );
 			}
@@ -1383,7 +1385,7 @@ static int main( int argc, char * argv [] ) {
 
 		}
 
-		#if defined(_MSC_VER)
+		#if defined(WIN32)
 
 			for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
 				if ( *filename == "-" ) {
@@ -1394,7 +1396,7 @@ static int main( int argc, char * argv [] ) {
 
 		#endif
 
-		#if !defined(_MSC_VER)
+		#if !defined(WIN32)
 
 			if ( flags.mode == ModeUI ) {
 				set_input_mode();
@@ -1467,7 +1469,7 @@ static int main( int argc, char * argv [] ) {
 
 } // namespace openmpt123
 
-#if defined(_MSC_VER) && defined(UNICODE)
+#if defined(WIN32) && defined(UNICODE)
 int wmain( int wargc, wchar_t * wargv [] ) {
 	return openmpt123::wmain( wargc, wargv );
 }

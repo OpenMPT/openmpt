@@ -10,14 +10,33 @@
 #ifndef OPENMPT123_CONFIG_HPP
 #define OPENMPT123_CONFIG_HPP
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
+#ifndef WIN32
+#define WIN32
+#endif
+#endif // _WIN32
 
+#if defined(WIN32)
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
+#ifndef UNICODE
+#define UNICODE
+#endif
+#ifndef _UNICODE
+#define _UNICODE
+#endif
+#endif // WIN32
+
+#if defined(WIN32)
+#define MPT_WITH_MMIO
+#endif // WIN32
+
+#if defined(_MSC_VER)
 
 #pragma warning( disable : 4996 ) // 'foo': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _foo. See online help for details.
 
 #define MPT_WITH_FLAC
-#define MPT_WITH_MMIO
 #define MPT_WITH_PORTAUDIO
 #define MPT_WITH_ZLIB
 
