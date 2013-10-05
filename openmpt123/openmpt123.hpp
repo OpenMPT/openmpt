@@ -187,10 +187,8 @@ struct commandlineflags {
 	Mode mode;
 	bool canUI;
 	bool canProgress;
-#ifdef MPT_WITH_PORTAUDIO
 	int device;
 	std::int32_t buffer;
-#endif
 	std::int32_t samplerate;
 	std::int32_t channels;
 	std::int32_t gain;
@@ -218,10 +216,8 @@ struct commandlineflags {
 	bool force_overwrite;
 	commandlineflags() {
 		mode = ModeUI;
-#ifdef MPT_WITH_PORTAUDIO
 		device = -1;
 		buffer = 250;
-#endif
 		samplerate = 48000;
 		channels = 2;
 		use_float = true;

@@ -163,10 +163,8 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Show channel peak meters: " << flags.show_channel_meters << std::endl;
 	s << "Show details: " << flags.show_details << std::endl;
 	s << "Show message: " << flags.show_message << std::endl;
-#ifdef MPT_WITH_PORTAUDIO
 	s << "Device: " << flags.device << std::endl;
 	s << "Buffer: " << flags.buffer << std::endl;
-#endif
 	s << "Samplerate: " << flags.samplerate << std::endl;
 	s << "Channels: " << flags.channels << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
@@ -349,11 +347,9 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 		log << "     --repeat n            Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		log << "     --seek n              Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
 		log << std::endl;
-#ifdef MPT_WITH_PORTAUDIO
 		log << "     --device n            Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
 		log << "                           use --device help to show available devices" << std::endl;
 		log << "     --buffer n            Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
-#endif
 		log << "     --stdout              Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
 		log << "     --output-type t       Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
 		log << " -o, --output f            Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
@@ -1232,23 +1228,21 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 					// nothing
 				} else if ( nextarg == "stdout" ) {
 					flags.use_stdout = true;
-#ifdef MPT_WITH_PORTAUDIO
 				} else if ( nextarg == "help" ) {
+#ifdef MPT_WITH_PORTAUDIO
 					show_audio_devices();
+#endif
 				} else if ( nextarg == "default" ) {
 					flags.device = -1;
 				} else {
 					std::istringstream istr( nextarg );
 					istr >> flags.device;
-#endif
 				}
 				++i;
-#ifdef MPT_WITH_PORTAUDIO
 			} else if ( arg == "--buffer" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.buffer;
 				++i;
-#endif
 			} else if ( arg == "--stdout" ) {
 				flags.use_stdout = true;
 			} else if ( ( arg == "-o" || arg == "--output" ) && nextarg != "" ) {
