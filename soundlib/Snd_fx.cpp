@@ -668,6 +668,13 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 
 	bool returnAfterVolumeAdjust = false;
 
+	// IT compatibility: No sample change (also within multi-sample instruments) during portamento when using Compatible Gxx.
+	// Test case: PortaInsNumCompat.it, PortaSampleCompat.it
+	if(bPorta && pChn->pModSample != nullptr && pChn->pModSample != pSmp && IsCompatibleMode(TRK_IMPULSETRACKER) && m_SongFlags[SONG_ITCOMPATGXX])
+	{
+		pSmp = pChn->pModSample;
+	}
+
 	// instrumentChanged is used for IT carry-on env option
 	bool instrumentChanged = (pIns != pChn->pModInstrument);
 	const bool sampleChanged = (pChn->pModSample != nullptr) && (pSmp != pChn->pModSample);
@@ -1140,7 +1147,8 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		bPorta = false;
 	}
 
-	if (!bPorta || (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+	if (!bPorta
+		|| (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 		|| (pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol)
 		|| (m_SongFlags[SONG_ITCOMPATGXX] && pChn->rowCommand.instr != 0))
 	{
