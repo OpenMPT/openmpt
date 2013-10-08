@@ -658,7 +658,9 @@ void CDoWaveConvert::OnButton1()
 	}
 	
 	float normalizePeak = 0.0f;
-	std::string normalizeFileName = _tempnam("", "OpenMPT_mod2wave");
+	char *tempPath = _tempnam("", "OpenMPT_mod2wave");
+	const std::string normalizeFileName = tempPath;
+	free(tempPath);
 	std::fstream normalizeFile;
 	if(m_Settings.Normalize)
 	{
