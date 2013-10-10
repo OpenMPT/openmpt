@@ -20,12 +20,14 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#if defined(_MSC_VER)
 #ifndef UNICODE
 #define UNICODE
 #endif
 #ifndef _UNICODE
 #define _UNICODE
 #endif
+#endif // _MSC_VER
 #endif // WIN32
 
 #if defined(WIN32)

@@ -39,6 +39,8 @@ ARFLAGS  := $(ARFLAGS)
 
 # compiler setup
 
+ifeq ($(CONFIG)x,x)
+
 CC  = gcc 
 CXX = g++
 LD  = g++
@@ -51,6 +53,14 @@ CFLAGS   += -std=c99   -fPIC
 LDFLAGS  += 
 LDLIBS   += -lm
 ARFLAGS  := rcs
+
+EXESUFFIX=
+
+else
+
+include Makefile.config.$(CONFIG)
+
+endif
 
 
 # build setup
@@ -261,25 +271,25 @@ all:
 
 OUTPUTS += bin/openmpt.a
 OUTPUTS += bin/libopenmpt.so
-OUTPUTS += bin/openmpt123
+OUTPUTS += bin/openmpt123$(EXESUFFIX)
 OUTPUTS += bin/libopenmpt_modplug.so
 ifeq ($(NO_PORTAUDIO),1)
 else
-OUTPUTS += bin/libopenmpt_example_c
-OUTPUTS += bin/libopenmpt_example_c_mem
-OUTPUTS += bin/libopenmpt_example_cxx
+OUTPUTS += bin/libopenmpt_example_c$(EXESUFFIX)
+OUTPUTS += bin/libopenmpt_example_c_mem$(EXESUFFIX)
+OUTPUTS += bin/libopenmpt_example_cxx$(EXESUFFIX)
 endif
 ifeq ($(TEST),1)
-OUTPUTS += bin/libopenmpt_test
+OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 endif
 
 all: $(OUTPUTS)
 
 .PHONY: test
-test: bin/libopenmpt_test
-	bin/libopenmpt_test
+test: bin/libopenmpt_test$(EXESUFFIX)
+	bin/libopenmpt_test$(EXESUFFIX)
 
-bin/libopenmpt_test: $(LIBOPENMPTTEST_OBJECTS) $(OUTPUT_LIBOPENMPT)
+bin/libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPTTEST_OBJECTS) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
@@ -295,19 +305,19 @@ bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) -shared $(LDFLAGS_LIBOPENMPT) $^ $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
-bin/openmpt123: $(OPENMPT123_OBJECTS) $(OUTPUT_LIBOPENMPT)
+bin/openmpt123$(EXESUFFIX): $(OPENMPT123_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(OPENMPT123_OBJECTS) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
-bin/libopenmpt_example_c: ../libopenmpt/examples/libopenmpt_example_c.o $(OUTPUT_LIBOPENMPT)
+bin/libopenmpt_example_c$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_example_c.o $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_c.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
-bin/libopenmpt_example_c_mem: ../libopenmpt/examples/libopenmpt_example_c_mem.o $(OUTPUT_LIBOPENMPT)
+bin/libopenmpt_example_c_mem$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_example_c_mem.o $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_c_mem.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
-bin/libopenmpt_example_cxx: ../libopenmpt/examples/libopenmpt_example_cxx.o $(OUTPUT_LIBOPENMPT)
+bin/libopenmpt_example_cxx$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_example_cxx.o $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_cxx.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
