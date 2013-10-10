@@ -24,20 +24,43 @@ VERYSILENT = @
 endif
 
 
+DYNLINK = 1
+
+
+# get commandline or defaults
+
+CPPFLAGS := $(CPPFLAGS)
+CXXFLAGS := $(CXXFLAGS)
+CFLAGS   := $(CFLAGS)
+LDFLAGS  := $(LDFLAGS)
+LDLIBS   := $(LDLIBS)
+ARFLAGS  := $(ARFLAGS)
+
+
+# compiler setup
+
 CC  = gcc 
 CXX = g++
 LD  = g++
 AR  = ar
 
-DYNLINK = 1
-
-
-CPPFLAGS := -I../common -I.. -I../include/modplug/include
-CXXFLAGS := -std=c++0x -fPIC -fvisibility=hidden
-CFLAGS   := -std=c99   -fPIC -fvisibility=hidden
-LDFLAGS  := 
-LDLIBS   := -lm
+#CPPFLAGS += -DMPT_COMPILER_GENERIC
+CPPFLAGS += 
+CXXFLAGS += -std=c++0x -fPIC 
+CFLAGS   += -std=c99   -fPIC 
+LDFLAGS  += 
+LDLIBS   += -lm
 ARFLAGS  := rcs
+
+
+# build setup
+
+CPPFLAGS += -I../common -I.. -I../include/modplug/include
+CXXFLAGS += -fvisibility=hidden
+CFLAGS   += -fvisibility=hidden
+LDFLAGS  += 
+LDLIBS   += -lm
+ARFLAGS  += 
 
 ifeq ($(DEBUG),1)
 CXXFLAGS += -O0 -g
@@ -59,8 +82,6 @@ LDFLAGS  += -Wl,-rpath,./bin -Wl,-rpath,../bin
 LDFLAGS_LIBOPENMPT += -Lbin
 LDLIBS_LIBOPENMPT  += -lopenmpt
 endif
-
-#CPPFLAGS += -DMPT_COMPILER_GENERIC
 
 #CXXFLAGS += -mtune=generic
 #CFLAGS   += -mtune=generic
