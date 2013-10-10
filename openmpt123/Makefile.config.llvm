@@ -1,0 +1,15 @@
+
+CC  = clang 
+CXX = clang++
+LD  = clang++
+AR  = ar 
+
+#CPPFLAGS += -DMPT_COMPILER_GENERIC
+CPPFLAGS +=
+CXXFLAGS += -std=c++0x -fPIC 
+CFLAGS   += -std=c99   -fPIC
+LDFLAGS  += 
+LDLIBS   += -lm
+ARFLAGS  := rcs
+
+EXESUFFIX=

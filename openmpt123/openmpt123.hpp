@@ -48,7 +48,7 @@ std::wstring utf8_to_wstring( const std::string & utf8_string ) {
 	return &unicode_buf[0];
 }
 
-#endif // _MSC_CER
+#endif // WIN32
 
 class textout : public std::ostringstream {
 public:
