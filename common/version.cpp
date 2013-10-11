@@ -327,8 +327,14 @@ std::string GetFullCreditsString()
 		"https://github.com/iamgreaser/it2everything/\n"
 		"Alexander Chemeris for msinttypes\n"
 		"https://code.google.com/p/msinttypes/\n"
+#ifndef NO_ZLIB
 		"Jean-loup Gailly and Mark Adler for zlib\n"
 		"http://zlib.net/\n"
+#endif
+#ifndef NO_MINIZ
+		"Rich Geldreich for miniz\n"
+		"http://code.google.com/p/miniz/\n"
+#endif
 #ifndef NO_ARCHIVE_SUPPORT
 		"Simon Howard for lhasa\n"
 		"http://fragglet.github.io/lhasa/\n"
