@@ -841,14 +841,9 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 
 	int top = 0;
 
-#if 0
-	int pattern = self->mod->get_current_pattern();
-	int current_row = self->mod->get_current_row();
-#else
 	timeinfo info = lookup_timeinfo( timeinfo_position - ( (double)xmpfstatus->GetLatency() / (double)self->num_channels / (double)self->samplerate ) );
 	int pattern = info.pattern;
 	int current_row = info.row;
-#endif
 
 	if(flags & XMPIN_VIS_INIT)
 	{
@@ -860,7 +855,8 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	{
 		if(pattern == last_pattern && current_row == last_row)
 		{
-			return FALSE;
+			// causes jitter
+			//return TRUE;
 		}
 	}
 
@@ -892,8 +888,6 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 
 	POINT offset;
 	offset.x = ( num_cols - cols_to_write ) / 2 * tm.tmAveCharWidth;
-	//offset.y = ( rows_to_write - num_rows ) / 2 * tm.tmHeight;
-	//offset.y -= current_row * tm.tmHeight;
 
 	offset.y = num_rows / 2 * tm.tmHeight;
 	offset.y -= current_row * tm.tmHeight;
@@ -903,11 +897,10 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 			//SelectObject( dc, vispens[2] );
 			SetTextColor( dc, viscolors[2] );
 		}
-		RECT rect;
-		rect.top = top + offset.y;
-		rect.left = 0 + offset.x;
-		rect.right = size.cx;
-		rect.bottom = size.cy;
+
+		POINT pos;
+		pos.y = top + offset.y;
+		pos.x = 0 + offset.x;
 
 		std::wstring rowstring;
 		for ( std::size_t channel = 0; channel < channels; ++channel ) {
@@ -917,8 +910,7 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 			rowstring += StringDecode( self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel ), CP_UTF8 );
 		}
 
-		TextOut( dc, rect.left, rect.top, rowstring.c_str(), rowstring.length() );
-		//DrawText( dc, rowstring.c_str(), rowstring.length(), &rect, DT_LEFT );
+		TextOut( dc, pos.x, pos.y, rowstring.c_str(), rowstring.length() );
 
 		top += tm.tmHeight;
 		if ( row == current_row ) {
@@ -970,7 +962,7 @@ static XMPIN xmpin = {
 	NULL, // GetDownloaded
 
 #ifdef EXPERIMENTAL_VIS
-	"openmpt pattern",
+	"OpenMPT Pattern",
 	VisOpen,
 	VisClose,
 	/*VisSize,*/NULL,
