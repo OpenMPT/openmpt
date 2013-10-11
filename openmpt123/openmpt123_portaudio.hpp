@@ -135,7 +135,7 @@ public:
 	}
 };
 
-static void show_audio_devices() {
+static void show_portaudio_devices() {
 	std::ostringstream devices;
 	devices << " Available devices:" << std::endl;
 	portaudio_raii portaudio( false );
