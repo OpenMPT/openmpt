@@ -45,7 +45,7 @@ public:
 		waveformatex.nBlockAlign = flags.channels * ( waveformatex.wBitsPerSample / 8 );
 		waveformatex.nAvgBytesPerSec = waveformatex.nSamplesPerSec * waveformatex.nBlockAlign;
 
-		#if defined(_MSC_VER) && defined(UNICODE)
+		#if defined(WIN32) && defined(UNICODE)
 			wchar_t * tmp = wcsdup( utf8_to_wstring( filename ).c_str() );
 			mmio = mmioOpen( tmp, NULL, MMIO_ALLOCBUF | MMIO_READWRITE | MMIO_CREATE );
 			free( tmp );
