@@ -291,7 +291,7 @@ void CSoundFile::ProcessDSP(std::size_t countChunk)
 		}
 	#endif // NO_AGC
 	#if defined(NO_DSP) && defined(NO_EQ) && defined(NO_AGC)
-		UNREFERENCED_PARAMETER(countChunk);
+		MPT_UNREFERENCED_PARAMETER(countChunk);
 	#endif
 }
 

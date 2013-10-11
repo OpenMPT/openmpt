@@ -50,23 +50,23 @@ private:
 	}
 	FLAC__StreamEncoderWriteStatus WriteCallback(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame)
 	{
-		UNREFERENCED_PARAMETER(encoder);
-		UNREFERENCED_PARAMETER(samples);
-		UNREFERENCED_PARAMETER(current_frame);
+		MPT_UNREFERENCED_PARAMETER(encoder);
+		MPT_UNREFERENCED_PARAMETER(samples);
+		MPT_UNREFERENCED_PARAMETER(current_frame);
 		f.write(reinterpret_cast<const char*>(buffer), bytes);
 		if(!f) return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
 		return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 	}
 	FLAC__StreamEncoderSeekStatus SeekCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 absolute_byte_offset)
 	{
-		UNREFERENCED_PARAMETER(encoder);
+		MPT_UNREFERENCED_PARAMETER(encoder);
 		f.seekp(absolute_byte_offset);
 		if(!f) return FLAC__STREAM_ENCODER_SEEK_STATUS_ERROR;
 		return FLAC__STREAM_ENCODER_SEEK_STATUS_OK;
 	}
 	FLAC__StreamEncoderTellStatus TellCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset)
 	{
-		UNREFERENCED_PARAMETER(encoder);
+		MPT_UNREFERENCED_PARAMETER(encoder);
 		if(absolute_byte_offset)
 		{
 			*absolute_byte_offset = f.tellp();
@@ -138,8 +138,8 @@ public:
 	}
 	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
 	{
-		UNREFERENCED_PARAMETER(samplerate);
-		UNREFERENCED_PARAMETER(channels);
+		MPT_UNREFERENCED_PARAMETER(samplerate);
+		MPT_UNREFERENCED_PARAMETER(channels);
 
 		FinishStream();
 

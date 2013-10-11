@@ -1049,7 +1049,7 @@ void COrderList::OnLButtonDblClk(UINT, CPoint)
 void COrderList::OnMButtonDown(UINT nFlags, CPoint pt)
 //----------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(nFlags);
+	MPT_UNREFERENCED_PARAMETER(nFlags);
 	QueuePattern(pt);
 }
 

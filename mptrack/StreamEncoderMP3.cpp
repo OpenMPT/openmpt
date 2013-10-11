@@ -405,7 +405,7 @@ struct LameDynBind
 	}
 	static void GenreEnumCallback(int num, const char *name, void *cookie)
 	{
-		UNREFERENCED_PARAMETER(num);
+		MPT_UNREFERENCED_PARAMETER(num);
 		Encoder::Traits &traits = *reinterpret_cast<Encoder::Traits*>(cookie);
 		if(name)
 		{

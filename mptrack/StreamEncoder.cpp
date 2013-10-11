@@ -34,22 +34,22 @@ StreamWriterBase::~StreamWriterBase()
 void StreamWriterBase::WriteMetatags(const FileTags &tags)
 //--------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(tags);
+	MPT_UNREFERENCED_PARAMETER(tags);
 }
 
 
 void StreamWriterBase::WriteInterleavedConverted(size_t frameCount, const char *data)
 //-----------------------------------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(frameCount);
-	UNREFERENCED_PARAMETER(data);
+	MPT_UNREFERENCED_PARAMETER(frameCount);
+	MPT_UNREFERENCED_PARAMETER(data);
 }
 
 
 void StreamWriterBase::WriteCues(const std::vector<uint64> &cues)
 //---------------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(cues);
+	MPT_UNREFERENCED_PARAMETER(cues);
 }
 
 

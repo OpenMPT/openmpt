@@ -155,7 +155,7 @@ static noinline void ReportException(const char * const file, const int line, co
 #define TEST_TRY         try {
 #define TEST_CATCH       } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, description, true); }
 #define TEST_START()     do { } while(0)
-#define TEST_OK()        do { UNREFERENCED_PARAMETER(description); } while(0)
+#define TEST_OK()        do { MPT_UNREFERENCED_PARAMETER(description); } while(0)
 #define TEST_FAIL()      ReportErrorAndBreak(THIS_FILE, __LINE__, description, false)
 #define TEST_FAIL_STOP() ReportErrorAndBreak(THIS_FILE, __LINE__, description, true)
 
@@ -173,9 +173,9 @@ static noinline void show_start(const char * const file, const int line, const c
 
 static noinline void show_ok(const char * const file, const int line, const char * const description)
 {
-	UNREFERENCED_PARAMETER(file);
-	UNREFERENCED_PARAMETER(line);
-	UNREFERENCED_PARAMETER(description);
+	MPT_UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(line);
+	MPT_UNREFERENCED_PARAMETER(description);
 	std::cout << "PASS" << std::endl;
 }
 

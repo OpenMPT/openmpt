@@ -981,8 +981,8 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifdef NO_ZLIB
 
-	UNREFERENCED_PARAMETER(file);
-	UNREFERENCED_PARAMETER(loadFlags);
+	MPT_UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(loadFlags);
 	return false;
 
 #else

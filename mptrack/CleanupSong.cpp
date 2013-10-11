@@ -257,8 +257,8 @@ void CModCleanupDlg::OnPresetCompoCleanup()
 BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 //----------------------------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(id);
-	UNREFERENCED_PARAMETER(pResult);
+	MPT_UNREFERENCED_PARAMETER(id);
+	MPT_UNREFERENCED_PARAMETER(pResult);
 
 	// need to handle both ANSI and UNICODE versions of the message
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;

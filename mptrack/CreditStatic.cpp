@@ -232,7 +232,7 @@ void CCreditStatic::OnPaint()
 
 BOOL CCreditStatic::OnEraseBkgnd(CDC* pDC) 
 {
-	UNREFERENCED_PARAMETER(pDC);
+	MPT_UNREFERENCED_PARAMETER(pDC);
 	return TRUE;
 	
 //	return CStatic::OnEraseBkgnd(pDC);

@@ -380,7 +380,7 @@ typedef void (* LPMIXINTERFACE)(ModChannel *, const CResampler *, int *, int *);
 #define BEGIN_MIX_INTERFACE(func)\
 	void func(ModChannel *pChannel, const CResampler *pResampler, int *pbuffer, int *pbufmax)\
 	{\
-		UNREFERENCED_PARAMETER(pResampler);\
+		MPT_UNREFERENCED_PARAMETER(pResampler);\
 		LONG nPos;
 
 #define END_MIX_INTERFACE()\

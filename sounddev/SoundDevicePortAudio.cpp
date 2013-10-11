@@ -203,8 +203,8 @@ int CPortaudioDevice::StreamCallback(
 	)
 //-----------------------------------------
 {
-	UNREFERENCED_PARAMETER(input);
-	UNREFERENCED_PARAMETER(statusFlags);
+	MPT_UNREFERENCED_PARAMETER(input);
+	MPT_UNREFERENCED_PARAMETER(statusFlags);
 	if(!output) return paAbort;
 	if(Pa_GetHostApiInfo(m_HostApi)->type == paWDMKS)
 	{

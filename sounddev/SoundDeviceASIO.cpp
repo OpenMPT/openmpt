@@ -665,7 +665,7 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex)
 void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 //----------------------------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(directProcess);
+	MPT_UNREFERENCED_PARAMETER(directProcess);
 	if(gpCurrentAsio)
 	{
 		gpCurrentAsio->BufferSwitch(doubleBufferIndex);
@@ -679,16 +679,16 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
 //---------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(sRate);
+	MPT_UNREFERENCED_PARAMETER(sRate);
 }
 
 
 long CASIODevice::AsioMessage(long selector, long value, void* message, double* opt)
 //----------------------------------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(value);
-	UNREFERENCED_PARAMETER(message);
-	UNREFERENCED_PARAMETER(opt);
+	MPT_UNREFERENCED_PARAMETER(value);
+	MPT_UNREFERENCED_PARAMETER(message);
+	MPT_UNREFERENCED_PARAMETER(opt);
 #ifdef ASIO_LOG
 	// Log("AsioMessage(%d, %d)\n", selector, value);
 #endif

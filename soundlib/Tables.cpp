@@ -226,7 +226,7 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 		}
 	}
 #else
-	UNREFERENCED_PARAMETER(otherFormats);
+	MPT_UNREFERENCED_PARAMETER(otherFormats);
 #endif
 	return exts;
 }

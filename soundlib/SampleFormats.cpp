@@ -1922,7 +1922,7 @@ struct FLACDecoder
 		ASSERT((bps <= 8 && sample.GetElementarySampleSize() == 1) || (bps > 8 && sample.GetElementarySampleSize() == 2));
 		ASSERT(modChannels <= FLAC__stream_decoder_get_channels(decoder));
 		ASSERT(bps == FLAC__stream_decoder_get_bits_per_sample(decoder));
-		UNREFERENCED_PARAMETER(decoder); // decoder is unused if ASSERTs are compiled out
+		MPT_UNREFERENCED_PARAMETER(decoder); // decoder is unused if ASSERTs are compiled out
 
 		// Do the sample conversion
 		for(uint8 chn = 0; chn < modChannels; chn++)
@@ -2041,8 +2041,8 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 		return true;
 	}
 #else
-	UNREFERENCED_PARAMETER(sample);
-	UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(sample);
+	MPT_UNREFERENCED_PARAMETER(file);
 #endif // NO_FLAC
 	return false;
 }
@@ -2203,8 +2203,8 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) 
 	FLAC__stream_encoder_delete(encoder);
 	return true;
 #else
-	UNREFERENCED_PARAMETER(nSample);
-	UNREFERENCED_PARAMETER(lpszFileName);
+	MPT_UNREFERENCED_PARAMETER(nSample);
+	MPT_UNREFERENCED_PARAMETER(lpszFileName);
 	return false;
 #endif // NO_FLAC
 }
@@ -2376,8 +2376,8 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 		return true;
 	}
 #else
-	UNREFERENCED_PARAMETER(sample);
-	UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(sample);
+	MPT_UNREFERENCED_PARAMETER(file);
 #endif // NO_MP3_SAMPLES
 	return false;
 }

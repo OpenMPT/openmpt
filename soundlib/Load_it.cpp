@@ -1055,7 +1055,7 @@ uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	const size_t num = (pModDoc != nullptr) ? pModDoc->GetFileHistory().size() + 1 : 0;	// + 1 for this session
 #else
 	const size_t num = 0;
-	UNREFERENCED_PARAMETER(pSndFile);
+	MPT_UNREFERENCED_PARAMETER(pSndFile);
 #endif // MODPLUG_TRACKER
 
 	uint16 fnum = (uint16)MIN(num, uint16_max);		// Number of entries that are actually going to be written
