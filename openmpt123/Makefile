@@ -198,6 +198,7 @@ LIBOPENMPT_CXX_SOURCES += \
  ../libopenmpt/libopenmpt_impl.cpp \
  ../libopenmpt/libopenmpt_interactive.cpp \
  ../libopenmpt/libopenmpt_version.cpp \
+ 
 ifeq ($(NO_ZLIB),1)
 LIBOPENMPT_CXX_SOURCES += ../miniz/miniz.c
 endif
