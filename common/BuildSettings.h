@@ -156,7 +156,9 @@
 #define NO_DSOUND
 #define NO_FLAC
 #if !defined(MPT_WITH_ZLIB)
+#ifndef NO_ZLIB
 #define NO_ZLIB
+#endif
 #endif
 //#define NO_MINIZ
 #define NO_MP3_SAMPLES
