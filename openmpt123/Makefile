@@ -65,7 +65,7 @@ endif
 
 # build setup
 
-CPPFLAGS += -I../common -I.. -I../include/modplug/include
+CPPFLAGS += -I../common -I.. -I../include/modplug/include -I../include
 CXXFLAGS += -fvisibility=hidden
 CFLAGS   += -fvisibility=hidden
 LDFLAGS  += 
@@ -198,6 +198,9 @@ LIBOPENMPT_CXX_SOURCES += \
  ../libopenmpt/libopenmpt_impl.cpp \
  ../libopenmpt/libopenmpt_interactive.cpp \
  ../libopenmpt/libopenmpt_version.cpp \
+ifeq ($(NO_ZLIB),1)
+LIBOPENMPT_CXX_SOURCES += ../miniz/miniz.c
+endif
 
 LIBOPENMPT_OBJECTS = $(LIBOPENMPT_CXX_SOURCES:.cpp=.o)
 LIBOPENMPT_DEPENDS = $(LIBOPENMPT_OBJECTS:.o=.d)

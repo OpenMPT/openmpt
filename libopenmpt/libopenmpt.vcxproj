@@ -254,7 +254,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
@@ -289,7 +288,6 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <DelayLoadDLLs>
       </DelayLoadDLLs>
       <SubSystem>Console</SubSystem>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
@@ -318,7 +316,6 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <OptimizeReferences>true</OptimizeReferences>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
@@ -351,7 +348,6 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <DelayLoadDLLs>
       </DelayLoadDLLs>
       <SubSystem>Console</SubSystem>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
@@ -495,6 +491,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClCompile Include="..\common\stdafx.cpp" />
     <ClCompile Include="..\common\typedefs.cpp" />
     <ClCompile Include="..\common\version.cpp" />
+    <ClCompile Include="..\include\miniz\miniz.c" />
     <ClCompile Include="..\include\pugixml\src\pugixml.cpp" />
     <ClCompile Include="..\soundlib\Dither.cpp" />
     <ClCompile Include="..\soundlib\Dlsbank.cpp" />
@@ -584,11 +581,6 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClCompile Include="libopenmpt_version.cpp" />
     <ClCompile Include="libopenmpt_winamp.cpp" />
     <ClCompile Include="libopenmpt_xmplay.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\include\zlib\zlib.vcxproj">
-      <Project>{1654fb18-fde6-406f-9d84-ba12bfbd67b2}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

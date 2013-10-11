@@ -33,6 +33,9 @@
     <Filter Include="Source Files\pugixml">
       <UniqueIdentifier>{c229b22b-065f-42fd-81ee-498a859a7c8d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\miniz">
+      <UniqueIdentifier>{3800b9bf-c28e-489f-8792-64b1b5a58b40}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\AudioCriticalSection.h">
@@ -510,6 +513,9 @@
     </ClCompile>
     <ClCompile Include="..\soundlib\Tagging.cpp">
       <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\miniz\miniz.c">
+      <Filter>Source Files\miniz</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
