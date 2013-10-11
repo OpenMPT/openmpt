@@ -369,7 +369,9 @@ class Logger { public: void MPT_PRINTF_FUNC(2,3) operator () (const char * /*for
 
 
 
-#ifndef UNREFERENCED_PARAMETER
-#define UNREFERENCED_PARAMETER(x) (void)(x)
+#if MPT_COMPILER_MSVC && defined(UNREFERENCED_PARAMETER)
+#define MPT_UNREFERENCED_PARAMETER(x) UNREFERENCED_PARAMETER(x)
+#else
+#define MPT_UNREFERENCED_PARAMETER(x) (void)(x)
 #endif
 

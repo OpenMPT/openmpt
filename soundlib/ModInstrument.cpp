@@ -170,7 +170,7 @@ ModInstrument::ModInstrument(SAMPLEINDEX sample)
 void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 //-----------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(fromType);
+	MPT_UNREFERENCED_PARAMETER(fromType);
 
 	if(toType & MOD_TYPE_XM)
 	{

@@ -339,7 +339,7 @@ void CEffectVis::SetPlayCursor(UINT nPat, UINT nRow)
 //-----------------------------------------------------------------------------------------
 void CEffectVis::ShowVis(CDC * pDC, CRect rectBorder)
 {
-	UNREFERENCED_PARAMETER(rectBorder);
+	MPT_UNREFERENCED_PARAMETER(rectBorder);
 	if (m_boolForceRedraw)
 	{
 		m_boolForceRedraw = FALSE ;
@@ -530,9 +530,9 @@ VOID CEffectVis::DoClose()
 
 void CEffectVis::OnSize(UINT nType, int cx, int cy)
 {
-	UNREFERENCED_PARAMETER(nType);
-	UNREFERENCED_PARAMETER(cx);
-	UNREFERENCED_PARAMETER(cy);
+	MPT_UNREFERENCED_PARAMETER(nType);
+	MPT_UNREFERENCED_PARAMETER(cx);
+	MPT_UNREFERENCED_PARAMETER(cy);
 	GetClientRect(&m_rcFullWin);
 	m_rcDraw.SetRect( m_rcFullWin.left  + LEFTBORDER,  m_rcFullWin.top    + TOPBORDER,
 				      m_rcFullWin.right - RIGHTBORDER, m_rcFullWin.bottom - BOTTOMBORDER);

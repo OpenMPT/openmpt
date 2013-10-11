@@ -76,8 +76,8 @@ public:
 	}
 	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
 	{
-		UNREFERENCED_PARAMETER(samplerate);
-		UNREFERENCED_PARAMETER(channels);
+		MPT_UNREFERENCED_PARAMETER(samplerate);
+		MPT_UNREFERENCED_PARAMETER(channels);
 
 		FinishStream();
 

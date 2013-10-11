@@ -241,7 +241,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 void COptionsSoundcard::UpdateChannels(int dev)
 //---------------------------------------------
 {
-	UNREFERENCED_PARAMETER(dev);
+	MPT_UNREFERENCED_PARAMETER(dev);
 	CHAR s[128];
 	UINT n = 0;
 	m_CbnChannels.ResetContent();

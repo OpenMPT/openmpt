@@ -375,8 +375,8 @@ void CDefaultVstEditor::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 BOOL CDefaultVstEditor::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 //------------------------------------------------------------------------
 {
-	UNREFERENCED_PARAMETER(nFlags);
-	UNREFERENCED_PARAMETER(pt);
+	MPT_UNREFERENCED_PARAMETER(nFlags);
+	MPT_UNREFERENCED_PARAMETER(pt);
 
 	// Mouse wheel - scroll parameter list
 	int minpos, maxpos;

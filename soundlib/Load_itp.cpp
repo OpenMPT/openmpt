@@ -49,8 +49,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------------
 {
 #ifndef MODPLUG_TRACKER
-	UNREFERENCED_PARAMETER(file);
-	UNREFERENCED_PARAMETER(loadFlags);
+	MPT_UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(loadFlags);
 	return false;
 #else // MODPLUG_TRACKER
 	
@@ -283,7 +283,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 //-------------------------------------------------
 {
 #ifndef MODPLUG_TRACKER
-	UNREFERENCED_PARAMETER(lpszFileName);
+	MPT_UNREFERENCED_PARAMETER(lpszFileName);
 	return false;
 #else // MODPLUG_TRACKER
 
