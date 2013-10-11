@@ -10,6 +10,7 @@
 #include "openmpt123_config.hpp"
 
 #include <algorithm>
+#include <deque>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -53,6 +54,7 @@
 #include "openmpt123_sndfile.hpp"
 #include "openmpt123_stdout.hpp"
 #include "openmpt123_portaudio.hpp"
+#include "openmpt123_waveout.hpp"
 #include "openmpt123_wavpack.hpp"
 
 namespace openmpt123 {
@@ -1231,8 +1233,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				} else if ( nextarg == "stdout" ) {
 					flags.use_stdout = true;
 				} else if ( nextarg == "help" ) {
-#ifdef MPT_WITH_PORTAUDIO
-					show_audio_devices();
+#if defined( MPT_WITH_PORTAUDIO )
+					show_portaudio_devices();
+#elif defined( WIN32 )
+					show_waveout_devices();
 #endif
 				} else if ( nextarg == "default" ) {
 					flags.device = -1;
@@ -1417,10 +1421,14 @@ static int main( int argc, char * argv [] ) {
 				} else if ( !flags.output_filename.empty() ) {
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream );
-#ifdef MPT_WITH_PORTAUDIO
+#if defined( MPT_WITH_PORTAUDIO )
 				} else {
 					portaudio_stream_raii portaudio_stream( flags, log );
 					render_files( flags, log, portaudio_stream );
+#elif defined( WIN32 )
+				} else {
+					waveout_stream_raii waveout_stream( flags, log );
+					render_files( flags, log, waveout_stream );
 #endif
 				}
 			} break;
