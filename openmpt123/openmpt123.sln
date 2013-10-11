@@ -7,8 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "..\libopenmpt
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flac", "..\include\flac\flac.vcxproj", "{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\include\zlib\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\include\portaudio\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
 EndProject
 Global
@@ -43,14 +41,6 @@ Global
 		{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}.Release|Win32.Build.0 = ReleaseLib|Win32
 		{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}.Release|x64.ActiveCfg = ReleaseLib|x64
 		{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}.Release|x64.Build.0 = ReleaseLib|x64
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.ActiveCfg = DebugLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.Build.0 = DebugLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|x64.ActiveCfg = DebugLib|x64
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|x64.Build.0 = DebugLib|x64
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.ActiveCfg = ReleaseLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.Build.0 = ReleaseLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|x64.ActiveCfg = ReleaseLib|x64
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|x64.Build.0 = ReleaseLib|x64
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Debug|Win32.ActiveCfg = DebugLib|Win32
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Debug|Win32.Build.0 = DebugLib|Win32
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Debug|x64.ActiveCfg = DebugLib|x64

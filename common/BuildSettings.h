@@ -112,6 +112,9 @@
 // Define to build without zlib support
 //#define NO_ZLIB
 
+// Define to build without miniz support
+#define NO_MINIZ
+
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
@@ -152,7 +155,10 @@
 #endif
 #define NO_DSOUND
 #define NO_FLAC
-//#define NO_ZLIB
+#if !defined(MPT_WITH_ZLIB)
+#define NO_ZLIB
+#endif
+//#define NO_MINIZ
 #define NO_MP3_SAMPLES
 //#define NO_LIBMODPLUG
 #if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86))
@@ -185,6 +191,11 @@
 
 #if defined(ENABLE_TESTS) && defined(MODPLUG_NO_FILESAVE)
 #undef MODPLUG_NO_FILESAVE // tests recommend file saving
+#endif
+
+#if !defined(NO_ZLIB) && !defined(NO_MINIZ)
+// Only one deflate implementation should be used. Prefer zlib.
+#define NO_MINIZ
 #endif
 
 #if defined(MPT_PLATFORM_BIG_ENDIAN) && !defined(MODPLUG_NO_FILESAVE)

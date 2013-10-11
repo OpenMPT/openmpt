@@ -13,8 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pfc", "..\include\foobar200
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{812A654D-99BE-4D13-B97F-86332AD3E363}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\include\zlib\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -45,10 +43,6 @@ Global
 		{812A654D-99BE-4D13-B97F-86332AD3E363}.Debug|Win32.Build.0 = DebugStatic|Win32
 		{812A654D-99BE-4D13-B97F-86332AD3E363}.Release|Win32.ActiveCfg = ReleaseStatic|Win32
 		{812A654D-99BE-4D13-B97F-86332AD3E363}.Release|Win32.Build.0 = ReleaseStatic|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.ActiveCfg = DebugLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.Build.0 = DebugLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.ActiveCfg = ReleaseLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.Build.0 = ReleaseLib|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

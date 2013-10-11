@@ -8,8 +8,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_settings", "libopenmpt_settings.vcxproj", "{B2B6EE07-F662-496D-980C-FCA7CA144DBC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\include\zlib\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -41,18 +39,6 @@ Global
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Test|Win32.ActiveCfg = Release|Win32
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Test|Win32.Build.0 = Release|Win32
 		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Test|x64.ActiveCfg = Release|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.ActiveCfg = DebugLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.Build.0 = DebugLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|x64.ActiveCfg = DebugLib|x64
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|x64.Build.0 = DebugLib|x64
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.ActiveCfg = ReleaseLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.Build.0 = ReleaseLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|x64.ActiveCfg = ReleaseLib|x64
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|x64.Build.0 = ReleaseLib|x64
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Test|Win32.ActiveCfg = ReleaseLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Test|Win32.Build.0 = ReleaseLib|Win32
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Test|x64.ActiveCfg = ReleaseLib|x64
-		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Test|x64.Build.0 = ReleaseLib|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
