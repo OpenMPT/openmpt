@@ -1083,21 +1083,44 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 	try {
 
+#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
+		std::istringstream file_stream;
+#else
 		std::ifstream file_stream;
-		std::istream & stdin_stream = std::cin;
+#endif
 		std::uint64_t filesize = 0;
 		bool use_stdin = ( filename == "-" );
 		if ( !use_stdin ) {
-			#if defined(WIN32) && defined(UNICODE)
+			#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
+				// Only MSVC has std::ifstream::ifstream(std::wstring).
+				// Fake it for other compilers using _wfopen().
+				std::string data;
+				FILE * f = _wfopen( utf8_to_wstring( filename ).c_str(), L"rb" );
+				if ( f ) {
+					while ( !feof( f ) ) {
+						static const std::size_t BUFFER_SIZE = 4096;
+						char buffer[BUFFER_SIZE];
+						size_t data_read = fread( buffer, 1, BUFFER_SIZE, f );
+						std::copy( buffer, buffer + data_read, std::back_inserter( data ) );
+					}
+					fclose( f );
+					f = NULL;
+				}
+				file_stream.str( data );
+				filesize = data.length();
+			#elif defined(_MSC_VER) && defined(UNICODE)
 				file_stream.open( utf8_to_wstring( filename ), std::ios::binary );
+				file_stream.seekg( 0, std::ios::end );
+				filesize = file_stream.tellg();
+				file_stream.seekg( 0, std::ios::beg );
 			#else
 				file_stream.open( filename, std::ios::binary );
+				file_stream.seekg( 0, std::ios::end );
+				filesize = file_stream.tellg();
+				file_stream.seekg( 0, std::ios::beg );
 			#endif
-			file_stream.seekg( 0, std::ios::end );
-			filesize = file_stream.tellg();
-			file_stream.seekg( 0, std::ios::beg );
 		}
-		std::istream & data_stream = use_stdin ? stdin_stream : file_stream;
+		std::istream & data_stream = use_stdin ? std::cin : file_stream;
 		if ( data_stream.fail() ) {
 			throw exception( "file open error" );
 		}
@@ -1478,6 +1501,10 @@ static int main( int argc, char * argv [] ) {
 } // namespace openmpt123
 
 #if defined(WIN32) && defined(UNICODE)
+#if defined(__GNUC__)
+// mingw64 does only default to special C linkage for "main", but not for "wmain".
+extern "C"
+#endif
 int wmain( int wargc, wchar_t * wargv [] ) {
 	return openmpt123::wmain( wargc, wargv );
 }
