@@ -218,12 +218,17 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Look up object class name (we only want music and sounds).
 		objClass = -objClass - 1;
-		bool isMusic = false, isSound = false;
+		bool isMusic = false;
+#ifdef MODPLUG_TRACKER
+		bool isSound = false;
+#endif // MODPLUG_TRACKER
 		if(static_cast<size_t>(objClass) < classes.size())
 		{
 			const char *objClassName = names[classes[objClass]].c_str();
 			isMusic = !strcmp(objClassName, "music");
+#ifdef MODPLUG_TRACKER
 			isSound = !strcmp(objClassName, "sound");
+#endif // MODPLUG_TRACKER
 		}
 		if(!isMusic
 #ifdef MODPLUG_TRACKER
