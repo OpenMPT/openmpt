@@ -86,7 +86,7 @@ struct DecodeInt8Delta
 	}
 };
 
-template <int16 offset, size_t loByteIndex, size_t hiByteIndex>
+template <uint16 offset, size_t loByteIndex, size_t hiByteIndex>
 struct DecodeInt16
 {
 	typedef char input_t;
@@ -130,7 +130,7 @@ struct DecodeInt16Delta8
 	}
 };
 
-template <int32 offset, size_t loByteIndex, size_t midByteIndex, size_t hiByteIndex>
+template <uint32 offset, size_t loByteIndex, size_t midByteIndex, size_t hiByteIndex>
 struct DecodeInt24
 {
 	typedef char input_t;
@@ -142,7 +142,7 @@ struct DecodeInt24
 	}
 };
 
-template <int32 offset, size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
+template <uint32 offset, size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct DecodeInt32
 {
 	typedef char input_t;
