@@ -83,8 +83,8 @@ public:
 	void write( const std::vector<float*> buffers, std::size_t frames ) {
 		for ( std::size_t frame = 0; frame < frames; frame++ ) {
 			for ( std::size_t channel = 0; channel < buffers.size(); channel++ ) {
-				if ( data_info.pchEndWrite - data_info.pchNext < sizeof( float ) ) {
-					data_info.dwFlags	|= MMIO_DIRTY;
+				if ( data_info.pchEndWrite - data_info.pchNext < static_cast<long>( sizeof( float ) ) ) {
+					data_info.dwFlags |= MMIO_DIRTY;
 					CHECKED(mmioAdvance( mmio, &data_info, MMIO_WRITE ));
 				}
 				std::memcpy( data_info.pchNext, &( buffers[channel][frame] ), sizeof( float ) );
@@ -96,8 +96,8 @@ public:
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		for ( std::size_t frame = 0; frame < frames; frame++ ) {
 			for ( std::size_t channel = 0; channel < buffers.size(); channel++ ) {
-				if ( data_info.pchEndWrite - data_info.pchNext < sizeof( std::int16_t ) ) {
-					data_info.dwFlags	|= MMIO_DIRTY;
+				if ( data_info.pchEndWrite - data_info.pchNext < static_cast<long>( sizeof( std::int16_t ) ) ) {
+					data_info.dwFlags |= MMIO_DIRTY;
 					CHECKED(mmioAdvance( mmio, &data_info, MMIO_WRITE ));
 				}
 				std::memcpy( data_info.pchNext, &( buffers[channel][frame] ), sizeof( std::int16_t ) );

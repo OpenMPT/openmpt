@@ -154,12 +154,12 @@ private:
 		}
 	}
 public:
-	sndfile_stream_raii( const std::string & filename, const std::string & format_extension, const commandlineflags & flags_, std::ostream & log_ = std::cerr ) : flags(flags_), log(log_), sndfile(0) {
+	sndfile_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & log_ = std::cerr ) : flags(flags_), log(log_), sndfile(0) {
 		if ( flags.verbose ) {
 			find_format( "", match_print );
 			log << std::endl;
 		}
-		int format = find_format( format_extension, match_recurse );
+		int format = find_format( flags.output_extension, match_recurse );
 		if ( !format ) {
 			throw exception( "unknown file type" );
 		}

@@ -131,7 +131,7 @@ public:
 #endif
 #ifdef MPT_WITH_SNDFILE
 		} else {
-			impl = new sndfile_stream_raii( filename, flags.output_extension, flags, log );
+			impl = new sndfile_stream_raii( filename, flags, log );
 #endif
 		}
 		if ( !impl ) {
@@ -1450,7 +1450,7 @@ static int main( int argc, char * argv [] ) {
 					render_files( flags, log, portaudio_stream );
 #elif defined( WIN32 )
 				} else {
-					waveout_stream_raii waveout_stream( flags, log );
+					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream );
 #endif
 				}
