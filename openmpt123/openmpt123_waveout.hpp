@@ -27,16 +27,17 @@ private:
 	std::size_t num_channels;
 	std::size_t num_chunks;
 	std::size_t frames_per_chunk;
+	std::size_t bytes_per_chunk;
 	std::vector<WAVEHDR> waveheaders;
 	std::vector<std::vector<char> > wavebuffers;
-	std::deque<std::int16_t> sample_queue_int;
-	std::deque<float> sample_queue_float;
+	std::deque<char> byte_queue;
 public:
 	waveout_stream_raii( const commandlineflags & flags )
 		: waveout(NULL)
 		, num_channels(0)
 		, num_chunks(0)
 		, frames_per_chunk(0)
+		, bytes_per_chunk(0)
 	{
 		WAVEFORMATEX wfx;
 		ZeroMemory( &wfx, sizeof( wfx ) );
@@ -55,10 +56,11 @@ public:
 			num_chunks = 2;
 		}
 		frames_per_chunk = ( frames_per_buffer + num_chunks - 1 ) / num_chunks;
+		bytes_per_chunk = wfx.nBlockAlign * frames_per_chunk;
 		waveheaders.resize( num_chunks );
 		wavebuffers.resize( num_chunks );
 		for ( std::size_t i = 0; i < num_chunks; ++i ) {
-			wavebuffers[i].resize( wfx.nBlockAlign * frames_per_chunk );
+			wavebuffers[i].resize( bytes_per_chunk );
 			waveheaders[i] = WAVEHDR();
 			waveheaders[i].lpData = wavebuffers[i].data();
 			waveheaders[i].dwBufferLength = wavebuffers[i].size();
@@ -68,6 +70,8 @@ public:
 	}
 	~waveout_stream_raii() {
 		if ( waveout ) {
+			write_or_wait( true );
+			drain();
 			waveOutReset( waveout );
 			for ( std::size_t i = 0; i < num_chunks; ++i ) {
 				waveheaders[i].dwBufferLength = wavebuffers[i].size();
@@ -81,64 +85,69 @@ public:
 			waveout = NULL;
 		}
 	}
-public:
-	void write( const std::vector<float*> buffers, std::size_t frames ) {
-		for ( std::size_t frame = 0; frame < frames; ++frame ) {
-			for ( std::size_t channel = 0; channel < buffers.size(); ++channel ) {
-				sample_queue_float.push_back( buffers[channel][frame] );
-			}
-		}
-		while ( sample_queue_float.size() / num_channels >= frames_per_chunk ) {
-			bool chunk_found = false;
-			std::size_t this_chunk = 0;
+private:
+	void drain() {
+		std::size_t empty_chunks = 0;
+		while ( empty_chunks != num_chunks ) {
+			empty_chunks = 0;
 			for ( std::size_t chunk = 0; chunk < num_chunks; ++chunk ) {
 				DWORD flags = waveheaders[chunk].dwFlags;
 				if ( !(flags & WHDR_INQUEUE) || (flags & WHDR_DONE) ) {
-					this_chunk = chunk;
-					chunk_found = true;
-					break;
+					empty_chunks++;
 				}
 			}
-			if ( !chunk_found ) {
+			if ( empty_chunks != num_chunks ) {
 				Sleep( 1 );
-			} else {
-				for ( std::size_t sample = 0; sample < frames_per_chunk * num_channels; ++ sample ) {
-					float val = sample_queue_float.front();
-					sample_queue_float.pop_front();
-					std::memcpy( wavebuffers[this_chunk].data() + ( sample * sizeof( float ) ), &val, sizeof( float ) );
-				}
-				waveOutWrite( waveout, &waveheaders[this_chunk], sizeof( WAVEHDR ) );
 			}
 		}
 	}
-	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
-		for ( std::size_t frame = 0; frame < frames; ++frame ) {
-			for ( std::size_t channel = 0; channel < buffers.size(); ++channel ) {
-				sample_queue_int.push_back( buffers[channel][frame] );
-			}
-		}
-		while ( sample_queue_float.size() / num_channels >= frames_per_chunk ) {
-			bool chunk_found = false;
-			std::size_t this_chunk = 0;
+	std::size_t wait_for_empty_chunk() {
+		while ( true ) {
 			for ( std::size_t chunk = 0; chunk < num_chunks; ++chunk ) {
 				DWORD flags = waveheaders[chunk].dwFlags;
 				if ( !(flags & WHDR_INQUEUE) || (flags & WHDR_DONE) ) {
-					this_chunk = chunk;
-					chunk_found = true;
-					break;
+					return chunk;
 				}
 			}
-			if ( !chunk_found ) {
-				Sleep( 1 );
-			} else {
-				for ( std::size_t sample = 0; sample < frames_per_chunk * num_channels; ++ sample ) {
-					std::int16_t val = sample_queue_int.front();
-					sample_queue_int.pop_front();
-					std::memcpy( wavebuffers[this_chunk].data() + ( sample * sizeof( std::int16_t ) ), &val, sizeof( std::int16_t ) );
-				}
-				waveOutWrite( waveout, &waveheaders[this_chunk], sizeof( WAVEHDR ) );
+			Sleep( 1 );
+		}
+	}
+	void write_chunk() {
+		std::size_t chunk = wait_for_empty_chunk();
+		std::size_t chunk_bytes = std::min( byte_queue.size(), bytes_per_chunk );
+		waveheaders[chunk].dwBufferLength = chunk_bytes;
+		for ( std::size_t byte = 0; byte < chunk_bytes; ++byte ) {
+			wavebuffers[chunk][byte] = byte_queue.front();
+			byte_queue.pop_front();
+		}
+		waveOutWrite( waveout, &waveheaders[chunk], sizeof( WAVEHDR ) );
+	}
+	void write_or_wait( bool flush = false ) {
+		while ( byte_queue.size() >= bytes_per_chunk ) {
+			write_chunk();
+		}
+		if ( flush && !byte_queue.empty() ) {
+			write_chunk();
+		}
+	}
+	template < typename Tsample >
+	void write_buffers( const std::vector<Tsample*> buffers, std::size_t frames ) {
+		for ( std::size_t frame = 0; frame < frames; ++frame ) {
+			for ( std::size_t channel = 0; channel < buffers.size(); ++channel ) {
+				Tsample val = buffers[channel][frame];
+				char buf[ sizeof( Tsample ) ];
+				std::memcpy( buf, &val, sizeof( Tsample ) );
+				std::copy( buf, buf + sizeof( Tsample ), std::back_inserter( byte_queue ) );
 			}
 		}
+		write_or_wait();
+	}
+public:
+	void write( const std::vector<float*> buffers, std::size_t frames ) {
+		write_buffers( buffers, frames );
+	}
+	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
+		write_buffers( buffers, frames );
 	}
 };
 
