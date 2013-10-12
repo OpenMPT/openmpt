@@ -32,7 +32,7 @@ private:
 	std::deque<std::int16_t> sample_queue_int;
 	std::deque<float> sample_queue_float;
 public:
-	waveout_stream_raii( const commandlineflags & flags, std::ostream & log = std::cerr )
+	waveout_stream_raii( const commandlineflags & flags )
 		: waveout(NULL)
 		, num_channels(0)
 		, num_chunks(0)
@@ -47,8 +47,7 @@ public:
 		wfx.nBlockAlign = ( wfx.wBitsPerSample / 8 ) * wfx.nChannels;
 		wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 		wfx.cbSize = 0;
-		waveOutOpen( &waveout, flags.device == -1 ? WAVE_MAPPER : flags.device, &wfx, NULL, NULL, CALLBACK_NULL );
-		
+		waveOutOpen( &waveout, flags.device == -1 ? WAVE_MAPPER : flags.device, &wfx, 0, 0, CALLBACK_NULL );
 		num_channels = flags.channels;
 		std::size_t frames_per_buffer = flags.samplerate * flags.buffer / 1000;
 		num_chunks = ( flags.buffer + 9 ) / 10;
