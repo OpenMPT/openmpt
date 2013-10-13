@@ -28,6 +28,9 @@ class ISoundSource;
 //
 
 
+struct SoundDeviceSettings;
+
+
 //====================
 class IFillAudioBuffer
 //====================
@@ -43,8 +46,8 @@ class ISoundSource
 {
 public:
 	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual void AudioRead(void* pData, ULONG NumSamples, SampleFormat sampleFormat) = 0;
-	virtual void AudioDone(ULONG NumSamples, int64 streamPosition) = 0; // in samples
+	virtual void AudioRead(const SoundDeviceSettings &settings, std::size_t numFrames, void *buffer) = 0;
+	virtual void AudioDone(const SoundDeviceSettings &settings, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
 };
 
 
@@ -195,14 +198,14 @@ protected:
 
 	bool m_IsPlaying;
 
-	mutable Util::mutex m_SamplesRenderedMutex;
-	int64 m_SamplesRendered;
+	mutable Util::mutex m_FramesRenderedMutex;
+	int64 m_FramesRendered;
 
 protected:
 	virtual void FillAudioBuffer() = 0;
 	void SourceFillAudioBufferLocked();
-	void SourceAudioRead(void* pData, ULONG NumSamples);
-	void SourceAudioDone(ULONG NumSamples, ULONG SamplesLatency);
+	void SourceAudioRead(void *buffer, std::size_t numFrames);
+	void SourceAudioDone(std::size_t numFrames, int32 framesLatency);
 
 public:
 	ISoundDevice(SoundDeviceID id, const std::wstring &internalID);
