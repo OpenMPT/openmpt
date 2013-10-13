@@ -42,7 +42,7 @@ ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 	m_RealUpdateIntervalMS = static_cast<float>(m_Settings.UpdateIntervalMS);
 
 	m_IsPlaying = false;
-	m_SamplesRendered = 0;
+	m_FramesRendered = 0;
 }
 
 
@@ -118,36 +118,36 @@ void ISoundDevice::SourceFillAudioBufferLocked()
 }
 
 
-void ISoundDevice::SourceAudioRead(void* pData, ULONG NumSamples)
-//---------------------------------------------------------------
+void ISoundDevice::SourceAudioRead(void *buffer, std::size_t numFrames)
+//---------------------------------------------------------------------
 {
-	if(NumSamples <= 0)
+	if(numFrames <= 0)
 	{
 		return;
 	}
-	m_Source->AudioRead(pData, NumSamples, m_Settings.sampleFormat);
+	m_Source->AudioRead(m_Settings, numFrames, buffer);
 }
 
 
-void ISoundDevice::SourceAudioDone(ULONG NumSamples, ULONG SamplesLatency)
-//------------------------------------------------------------------------
+void ISoundDevice::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
+//----------------------------------------------------------------------------
 {
-	if(NumSamples <= 0)
+	if(numFrames <= 0)
 	{
 		return;
 	}
-	int64 samplesRendered = 0;
+	int64 framesRendered = 0;
 	{
-		Util::lock_guard<Util::mutex> lock(m_SamplesRenderedMutex);
-		m_SamplesRendered += NumSamples;
-		samplesRendered = m_SamplesRendered;
+		Util::lock_guard<Util::mutex> lock(m_FramesRenderedMutex);
+		m_FramesRendered += numFrames;
+		framesRendered = m_FramesRendered;
 	}
 	if(InternalHasGetStreamPosition())
 	{
-		m_Source->AudioDone(NumSamples, samplesRendered);
+		m_Source->AudioDone(m_Settings, numFrames, framesRendered);
 	} else
 	{
-		m_Source->AudioDone(NumSamples, samplesRendered + SamplesLatency);
+		m_Source->AudioDone(m_Settings, numFrames, framesRendered + framesLatency);
 	}
 }
 
@@ -159,8 +159,8 @@ void ISoundDevice::Start()
 	if(!IsPlaying())
 	{
 		{
-			Util::lock_guard<Util::mutex> lock(m_SamplesRenderedMutex);
-			m_SamplesRendered = 0;
+			Util::lock_guard<Util::mutex> lock(m_FramesRenderedMutex);
+			m_FramesRendered = 0;
 		}
 		InternalStart();
 		m_IsPlaying = true;
@@ -177,8 +177,8 @@ void ISoundDevice::Stop()
 		InternalStop();
 		m_IsPlaying = false;
 		{
-			Util::lock_guard<Util::mutex> lock(m_SamplesRenderedMutex);
-			m_SamplesRendered = 0;
+			Util::lock_guard<Util::mutex> lock(m_FramesRenderedMutex);
+			m_FramesRendered = 0;
 		}
 	}
 }
@@ -201,14 +201,14 @@ int64 ISoundDevice::GetStreamPositionSamples() const
 		return InternalGetStreamPositionSamples();
 	} else
 	{
-		Util::lock_guard<Util::mutex> lock(m_SamplesRenderedMutex);
-		return m_SamplesRendered;
+		Util::lock_guard<Util::mutex> lock(m_FramesRenderedMutex);
+		return m_FramesRendered;
 	}
 }
 
 
 CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(SoundDevice)
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 {
 
 	OSVERSIONINFO versioninfo;
