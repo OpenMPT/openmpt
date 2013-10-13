@@ -25,8 +25,9 @@
 //
 
 
-CWaveDevice::CWaveDevice()
-//------------------------
+CWaveDevice::CWaveDevice(SoundDeviceID id, const std::wstring &internalID)
+//------------------------------------------------------------------------
+	: CSoundDeviceWithThread(id, internalID)
 {
 	m_hWaveOut = NULL;
 	m_nWaveBufferSize = 0;
@@ -223,9 +224,12 @@ std::vector<SoundDeviceInfo> CWaveDevice::EnumerateDevices()
 	UINT numDevs = waveOutGetNumDevs();
 	for(UINT index = 0; index <= numDevs; ++index)
 	{
+		if(!SoundDeviceIndexIsValid(index))
+		{
+			break;
+		}
 		SoundDeviceInfo info;
-		info.type = SNDDEV_WAVEOUT;
-		info.index = index;
+		info.id = SoundDeviceID(SNDDEV_WAVEOUT, static_cast<SoundDeviceIndex>(index));
 		if(index == 0)
 		{
 			info.name = L"Auto (Wave Mapper)";

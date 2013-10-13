@@ -63,7 +63,7 @@ protected:
 private:
 	void FillAudioBufferLocked();
 public:
-	CSoundDeviceWithThread() : m_AudioThread(*this) {}
+	CSoundDeviceWithThread(SoundDeviceID id, const std::wstring &internalID) : ISoundDevice(id, internalID), m_AudioThread(*this) {}
 	virtual ~CSoundDeviceWithThread() {}
 	void InternalStart();
 	void InternalStop();

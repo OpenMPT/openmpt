@@ -440,7 +440,7 @@ public:
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
 
-	BOOL SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat sampleformat, UINT chns, UINT latency_ms, UINT updateinterval_ms, LONG wd);
+	BOOL SetupSoundCard(DWORD deviceflags, DWORD rate, SampleFormat sampleformat, UINT chns, UINT latency_ms, UINT updateinterval_ms, SoundDeviceID deviceID);
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer();
 

@@ -134,8 +134,11 @@ std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
 					Log("  clsid=\"%s\"\n", s);
 				#endif
 
-				// everything ok
-				devices.push_back(SoundDeviceInfo(SNDDEV_ASIO, devices.size(), mpt::String::Decode(description, mpt::CharsetLocale), internalID));
+				if(SoundDeviceIndexIsValid(devices.size()))
+				{
+					// everything ok
+					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), mpt::String::Decode(description, mpt::CharsetLocale), internalID));
+				}
 
 			}
 		}
@@ -155,8 +158,9 @@ std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
 }
 
 
-CASIODevice::CASIODevice()
-//------------------------
+CASIODevice::CASIODevice(SoundDeviceID id, const std::wstring &internalID)
+//------------------------------------------------------------------------
+	: ISoundDevice(id, internalID)
 {
 	m_pAsioDrv = NULL;
 	m_nAsioBufferLen = 0;

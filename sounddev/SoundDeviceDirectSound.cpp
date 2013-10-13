@@ -62,9 +62,12 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 	{
 		return TRUE;
 	}
+	if(!SoundDeviceIndexIsValid(devices.size()))
+	{
+		return FALSE;
+	}
 	SoundDeviceInfo info;
-	info.type = SNDDEV_DSOUND;
-	info.index = devices.size();
+	info.id = SoundDeviceID(SNDDEV_DSOUND, static_cast<SoundDeviceIndex>(devices.size()));
 	info.name = lpstrDescription;
 	if(lpGuid)
 	{
@@ -84,8 +87,9 @@ std::vector<SoundDeviceInfo> CDSoundDevice::EnumerateDevices()
 }
 
 
-CDSoundDevice::CDSoundDevice()
-//----------------------------
+CDSoundDevice::CDSoundDevice(SoundDeviceID id, const std::wstring &internalID)
+//----------------------------------------------------------------------------
+	: CSoundDeviceWithThread(id, internalID)
 {
 	m_piDS = NULL;
 	m_pPrimary = NULL;

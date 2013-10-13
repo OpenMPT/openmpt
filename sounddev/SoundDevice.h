@@ -53,9 +53,10 @@ public:
 // ISoundDevice Interface
 //
 
-// Sound Device Types
-enum // do not change old values, these get saved to the ini
+enum SoundDeviceType
 {
+	// do not change old values, these get saved to the ini
+	SNDDEV_INVALID          =-1,
 	SNDDEV_WAVEOUT          = 0,
 	SNDDEV_DSOUND           = 1,
 	SNDDEV_ASIO             = 2,
@@ -67,11 +68,53 @@ enum // do not change old values, these get saved to the ini
 	SNDDEV_NUM_DEVTYPES
 };
 
-#define SNDDEV_DEVICE_MASK				0xFF	// Mask for getting the device number
-#define SNDDEV_DEVICE_SHIFT				8		// Shift amount for getting the device type
-#define SNDDEV_GET_NUMBER(x)			(x & SNDDEV_DEVICE_MASK)	// Use this for getting the device number
-#define SNDDEV_GET_TYPE(x)				(x >> SNDDEV_DEVICE_SHIFT)	// ...and this for getting the device type
-#define SNDDEV_BUILD_ID(number, type)	((number & SNDDEV_DEVICE_MASK) | (type << SNDDEV_DEVICE_SHIFT)) // Build a sound device ID from device number and device type.
+typedef uint8 SoundDeviceIndex;
+
+template<typename T>
+bool SoundDeviceIndexIsValid(const T & x)
+{
+	return 0 <= x && x <= std::numeric_limits<SoundDeviceIndex>::max();
+}
+
+//=================
+class SoundDeviceID
+//=================
+{
+private:
+	SoundDeviceType type;
+	SoundDeviceIndex index;
+public:
+	SoundDeviceID() : type(SNDDEV_WAVEOUT), index(0) {}
+	SoundDeviceID(SoundDeviceType type, SoundDeviceIndex index)
+		: type(type)
+		, index(index)
+	{
+		return;
+	}
+	SoundDeviceType GetType() const { return type; }
+	SoundDeviceIndex GetIndex() const { return index; }
+	bool operator == (const SoundDeviceID &cmp) const
+	{
+		return (type == cmp.type) && (index == cmp.index);
+	}
+
+	bool operator != (const SoundDeviceID &cmp) const
+	{
+		return (type != cmp.type) || (index != cmp.index);
+	}
+public:
+	// Do not change these. These functions are used to manipulate the value that gets stored in the settings.
+	template<typename T>
+	static SoundDeviceID FromIdRaw(T id_)
+	{
+		uint16 id = static_cast<uint16>(id_);
+		return SoundDeviceID((SoundDeviceType)((id>>8)&0xff), (id>>0)&0xff);
+	}
+	uint16 GetIdRaw() const
+	{
+		return static_cast<uint16>(((int)type<<8) | (index<<0));
+	}
+};
 
 #define SNDDEV_DEFAULT_LATENCY_MS        100
 #define SNDDEV_DEFAULT_UPDATEINTERVAL_MS   5
@@ -120,11 +163,13 @@ class ISoundDevice : protected IFillAudioBuffer
 	friend class SoundDevicesManager;
 
 private:
+
 	ISoundSource *m_Source;
+
+	const SoundDeviceID m_ID;
 
 protected:
 
-	UINT m_Index;
 	std::wstring m_InternalID;
 
 	SoundDeviceSettings m_Settings;
@@ -144,16 +189,14 @@ protected:
 	void SourceAudioDone(ULONG NumSamples, ULONG SamplesLatency);
 
 public:
-	ISoundDevice();
+	ISoundDevice(SoundDeviceID id, const std::wstring &internalID);
 	virtual ~ISoundDevice();
 	void SetSource(ISoundSource *source) { m_Source = source; }
 	ISoundSource *GetSource() const { return m_Source; }
-protected:
-	void SetDevice(UINT index, const std::wstring &internalID);
 public:
-	UINT GetDeviceIndex() const { return m_Index; }
-	UINT GetDeviceID() const { return SNDDEV_BUILD_ID(GetDeviceIndex(), GetDeviceType()); }
-
+	SoundDeviceID GetDeviceID() const { return m_ID; }
+	SoundDeviceType GetDeviceType() const { return m_ID.GetType(); }
+	SoundDeviceIndex GetDeviceIndex() const { return m_ID.GetIndex(); }
 	std::wstring GetDeviceInternalID() const { return m_InternalID; }
 
 public:
@@ -174,7 +217,6 @@ protected:
 	virtual int64 InternalGetStreamPositionSamples() const { return 0; }
 
 public:
-	virtual UINT GetDeviceType() const = 0;
 	bool Open(const SoundDeviceSettings &settings);	// Open a device
 	bool Close();				// Close the currently open device
 	void Start();
@@ -193,21 +235,14 @@ public:
 
 struct SoundDeviceInfo
 {
-	UINT type;
-	UINT index;
+	SoundDeviceID id;
 	std::wstring name;
 	std::wstring internalID;
-	SoundDeviceInfo()
-		: type(0)
-		, index(0)
-	{
-		return;
-	}
-	SoundDeviceInfo(UINT type, UINT index, const std::wstring &name, const std::wstring &id = std::wstring())
-		: type(type)
-		, index(index)
+	SoundDeviceInfo() { }
+	SoundDeviceInfo(SoundDeviceID id, const std::wstring &name, const std::wstring &internalID = std::wstring())
+		: id(id)
 		, name(name)
-		, internalID(id)
+		, internalID(internalID)
 	{
 		return;
 	}
@@ -233,10 +268,8 @@ public:
 	std::vector<SoundDeviceInfo>::const_iterator end() const { return m_SoundDevices.end(); }
 	const std::vector<SoundDeviceInfo> & GetDeviceInfos() const { return m_SoundDevices; }
 
-	const SoundDeviceInfo * FindDeviceInfo(UINT type, UINT index) const;
-	const SoundDeviceInfo * FindDeviceInfo(UINT id) const { return FindDeviceInfo(SNDDEV_GET_TYPE(id), SNDDEV_GET_NUMBER(id)); }
+	const SoundDeviceInfo * FindDeviceInfo(SoundDeviceID id) const;
 
-	ISoundDevice * CreateSoundDevice(UINT type, UINT index);
-	ISoundDevice * CreateSoundDevice(UINT id) { return CreateSoundDevice(SNDDEV_GET_TYPE(id), SNDDEV_GET_NUMBER(id)); }
+	ISoundDevice * CreateSoundDevice(SoundDeviceID id);
 
 };

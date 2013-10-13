@@ -191,7 +191,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 
 			if(!TrackerSettings::Instance().m_MorePortaudio)
 			{
-				if(it->type == SNDDEV_PORTAUDIO_ASIO || it->type == SNDDEV_PORTAUDIO_DS || it->type == SNDDEV_PORTAUDIO_WMME)
+				if(it->id.GetType() == SNDDEV_PORTAUDIO_ASIO || it->id.GetType() == SNDDEV_PORTAUDIO_DS || it->id.GetType() == SNDDEV_PORTAUDIO_WMME)
 				{
 					// skip those portaudio apis that are already implemented via our own ISoundDevice class
 					// can be overwritten via [Sound Settings]MorePortaudio=1
@@ -204,7 +204,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 				cbi.mask = CBEIF_IMAGE | CBEIF_LPARAM | CBEIF_TEXT | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 				cbi.iItem = iItem;
 				cbi.cchTextMax = 0;
-				switch(it->type)
+				switch(it->id.GetType())
 				{
 				case SNDDEV_DSOUND:
 				case SNDDEV_PORTAUDIO_DS:
@@ -221,10 +221,13 @@ BOOL COptionsSoundcard::OnInitDialog()
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
 				cbi.iIndent = 0;
-				cbi.lParam = SNDDEV_BUILD_ID(it->index, it->type);
+				cbi.lParam = it->id.GetIdRaw();
 				cbi.pszText = s;
 				int pos = m_CbnDevice.InsertItem(&cbi);
-				if (cbi.lParam == (LONG)m_nSoundDevice) m_CbnDevice.SetCurSel(pos);
+				if(cbi.lParam == m_nSoundDevice.GetIdRaw())
+				{
+					m_CbnDevice.SetCurSel(pos);
+				}
 				iItem++;
 			}
 		}
@@ -238,8 +241,8 @@ BOOL COptionsSoundcard::OnInitDialog()
 }
 
 
-void COptionsSoundcard::UpdateChannels(int dev)
-//---------------------------------------------
+void COptionsSoundcard::UpdateChannels(SoundDeviceID dev)
+//-------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(dev);
 	CHAR s[128];
@@ -259,12 +262,12 @@ void COptionsSoundcard::UpdateChannels(int dev)
 }
 
 
-void COptionsSoundcard::UpdateSampleFormat(int dev)
-//-------------------------------------------------
+void COptionsSoundcard::UpdateSampleFormat(SoundDeviceID dev)
+//-----------------------------------------------------------
 {
 	UINT n = 0;
 	m_CbnSampleFormat.ResetContent();
-	const bool asio = SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO;
+	const bool asio = dev.GetType() == SNDDEV_ASIO;
 	if(asio)
 	{
 		m_SampleFormat = TrackerSettings::Instance().m_SampleFormat;
@@ -363,7 +366,7 @@ void COptionsSoundcard::OnDeviceChanged()
 	int n = m_CbnDevice.GetCurSel();
 	if (n >= 0)
 	{
-		int dev = m_CbnDevice.GetItemData(n);
+		SoundDeviceID dev = SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(n));
 		UpdateControls(dev);
 		UpdateSampleRates(dev);
 		UpdateChannels(dev);
@@ -374,8 +377,8 @@ void COptionsSoundcard::OnDeviceChanged()
 
 
 // Fill the dropdown box with a list of valid sample rates, depending on the selected sound device.
-void COptionsSoundcard::UpdateSampleRates(int dev)
-//------------------------------------------------
+void COptionsSoundcard::UpdateSampleRates(SoundDeviceID dev)
+//----------------------------------------------------------
 {
 	m_CbnMixingFreq.ResetContent();
 
@@ -426,13 +429,13 @@ void COptionsSoundcard::UpdateSampleRates(int dev)
 }
 
 
-void COptionsSoundcard::UpdateControls(int dev)
-//---------------------------------------------
+void COptionsSoundcard::UpdateControls(SoundDeviceID dev)
+//-------------------------------------------------------
 {
-	GetDlgItem(IDC_CHECK4)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_DSOUND || SNDDEV_GET_TYPE(dev) == SNDDEV_PORTAUDIO_WASAPI) ? TRUE : FALSE);
-	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO) ? FALSE : TRUE);
-	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow((SNDDEV_GET_TYPE(dev) == SNDDEV_ASIO) ? FALSE : TRUE);
-	if(SNDDEV_GET_TYPE(dev) == SNDDEV_DSOUND)
+	GetDlgItem(IDC_CHECK4)->EnableWindow((dev.GetType() == SNDDEV_DSOUND || dev.GetType() == SNDDEV_PORTAUDIO_WASAPI) ? TRUE : FALSE);
+	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow((dev.GetType() == SNDDEV_ASIO) ? FALSE : TRUE);
+	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow((dev.GetType() == SNDDEV_ASIO) ? FALSE : TRUE);
+	if(dev.GetType() == SNDDEV_DSOUND)
 	{
 		GetDlgItem(IDC_CHECK4)->SetWindowText("Use primary buffer");
 	} else
@@ -484,7 +487,10 @@ void COptionsSoundcard::OnOK()
 	// Sound Device
 	{
 		int n = m_CbnDevice.GetCurSel();
-		if (n >= 0) m_nSoundDevice = m_CbnDevice.GetItemData(n);
+		if(n >= 0)
+		{
+			m_nSoundDevice = SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(n));
+		}
 	}
 	// Latency
 	{

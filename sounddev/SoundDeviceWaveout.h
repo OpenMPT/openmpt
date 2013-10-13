@@ -40,11 +40,10 @@ protected:
 	std::vector<std::vector<char> > m_WaveBuffersData;
 
 public:
-	CWaveDevice();
+	CWaveDevice(SoundDeviceID id, const std::wstring &internalID);
 	~CWaveDevice();
 
 public:
-	UINT GetDeviceType() const { return SNDDEV_WAVEOUT; }
 	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();

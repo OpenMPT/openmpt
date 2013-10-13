@@ -70,7 +70,7 @@ TrackerSettings::TrackerSettings()
 	// Audio device
 	gbLoopSong = TRUE;
 	m_MorePortaudio = false;
-	m_nWaveDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT);	// Default value will be overridden
+	m_nWaveDevice = SoundDeviceID();	// Default value will be overridden
 	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
 	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
 	m_SoundDeviceExclusiveMode = false;
@@ -332,11 +332,10 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	}
 
 	m_MorePortaudio = CMainFrame::GetPrivateProfileBool("Sound Settings", "MorePortaudio", m_MorePortaudio, iniFile);
-	DWORD defaultDevice = SNDDEV_BUILD_ID(0, SNDDEV_WAVEOUT); // first WaveOut device
 #ifndef NO_ASIO
 	CASIODevice::baseChannel = GetPrivateProfileInt("Sound Settings", "ASIOBaseChannel", CASIODevice::baseChannel, iniFile);
 #endif // NO_ASIO
-	m_nWaveDevice = CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
+	m_nWaveDevice = SoundDeviceID::FromIdRaw(CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", SoundDeviceID().GetIdRaw(), iniFile));
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 03)) m_MixerSettings.MixerFlags |= OLD_SOUNDSETUP_SECONDARY;
 	m_MixerSettings.MixerFlags = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.MixerFlags, iniFile);
 	m_SoundDeviceExclusiveMode = CMainFrame::GetPrivateProfileBool("Sound Settings", "ExclusiveMode", m_SoundDeviceExclusiveMode, iniFile);
@@ -364,7 +363,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 		{
 			if(BufferLengthMS < OLD_SNDDEV_MINBUFFERLEN) BufferLengthMS = OLD_SNDDEV_MINBUFFERLEN;
 			if(BufferLengthMS > OLD_SNDDEV_MAXBUFFERLEN) BufferLengthMS = OLD_SNDDEV_MAXBUFFERLEN;
-			if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
+			if(m_nWaveDevice.GetType() == SNDDEV_ASIO)
 			{
 				m_LatencyMS = BufferLengthMS;
 				m_UpdateIntervalMS = BufferLengthMS / 8;
@@ -612,7 +611,7 @@ bool TrackerSettings::LoadRegistrySettings()
 		if(BufferLengthMS != 0)
 		{
 			if((BufferLengthMS < OLD_SNDDEV_MINBUFFERLEN) || (BufferLengthMS > OLD_SNDDEV_MAXBUFFERLEN)) BufferLengthMS = 100;
-			if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
+			if(m_nWaveDevice.GetType() == SNDDEV_ASIO)
 			{
 				m_LatencyMS = BufferLengthMS;
 				m_UpdateIntervalMS = BufferLengthMS / 8;
@@ -810,7 +809,7 @@ void TrackerSettings::SaveSettings()
 		CMainFrame::WritePrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
 	}
 
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "WaveDevice", m_nWaveDevice, iniFile);
+	CMainFrame::WritePrivateProfileLong("Sound Settings", "WaveDevice", m_nWaveDevice.GetIdRaw(), iniFile);
 	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.MixerFlags, iniFile);
 	CMainFrame::WritePrivateProfileBool("Sound Settings", "ExclusiveMode", m_SoundDeviceExclusiveMode, iniFile);
 	CMainFrame::WritePrivateProfileBool("Sound Settings", "BoostThreadPriority", m_SoundDeviceBoostThreadPriority, iniFile);
