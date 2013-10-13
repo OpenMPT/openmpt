@@ -509,7 +509,7 @@ DWORD CAudioThread::AudioThread()
 		if(!terminate)
 		{
 
-			CPriorityBooster priorityBooster(*this, (m_SoundDevice.m_Settings.fulCfgOptions & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY)?true:false);
+			CPriorityBooster priorityBooster(*this, m_SoundDevice.m_Settings.BoostThreadPriority);
 			CPeriodicWaker periodicWaker(*this, 0.001 * m_SoundDevice.GetRealUpdateIntervalMS());
 
 			m_SoundDevice.StartFromSoundThread();

@@ -126,29 +126,45 @@ public:
 #define SNDDEV_MINUPDATEINTERVAL_MS 1
 #define SNDDEV_MAXUPDATEINTERVAL_MS 200
 
-#define SNDDEV_OPTIONS_EXCLUSIVE           0x01 // Use hardware buffers directly
-#define SNDDEV_OPTIONS_BOOSTTHREADPRIORITY 0x02 // Boost thread priority for glitch-free audio rendering
-
 
 struct SoundDeviceSettings
 {
 	HWND hWnd;
-	ULONG LatencyMS;
-	ULONG UpdateIntervalMS;
-	ULONG fulCfgOptions;
+	uint32 LatencyMS;
+	uint32 UpdateIntervalMS;
 	uint32 Samplerate;
 	uint8 Channels;
 	SampleFormat sampleFormat;
+	bool ExclusiveMode; // Use hardware buffers directly
+	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
 	SoundDeviceSettings()
 		: hWnd(NULL)
 		, LatencyMS(SNDDEV_DEFAULT_LATENCY_MS)
 		, UpdateIntervalMS(SNDDEV_DEFAULT_UPDATEINTERVAL_MS)
-		, fulCfgOptions(0)
 		, Samplerate(48000)
 		, Channels(2)
 		, sampleFormat(SampleFormatInt16)
+		, ExclusiveMode(false)
+		, BoostThreadPriority(false)
 	{
 		return;
+	}
+	bool operator == (const SoundDeviceSettings &cmp) const
+	{
+		return true
+			&& hWnd == cmp.hWnd
+			&& LatencyMS == cmp.LatencyMS
+			&& UpdateIntervalMS == cmp.UpdateIntervalMS
+			&& Samplerate == cmp.Samplerate
+			&& Channels == cmp.Channels
+			&& sampleFormat == cmp.sampleFormat
+			&& ExclusiveMode == cmp.ExclusiveMode
+			&& BoostThreadPriority == cmp.BoostThreadPriority
+			;
+	}
+	bool operator != (const SoundDeviceSettings &cmp) const
+	{
+		return !(*this == cmp);
 	}
 };
 

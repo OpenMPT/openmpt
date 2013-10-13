@@ -73,7 +73,7 @@ bool CPortaudioDevice::InternalOpen()
 	}
 	m_StreamParameters.suggestedLatency = m_Settings.LatencyMS / 1000.0;
 	m_StreamParameters.hostApiSpecificStreamInfo = NULL;
-	if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && (m_Settings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
+	if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && m_Settings.ExclusiveMode)
 	{
 		MemsetZero(m_WasapiStreamInfo);
 		m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
@@ -178,7 +178,7 @@ std::vector<uint32> CPortaudioDevice::GetSampleRates(const std::vector<uint32> &
 		StreamParameters.sampleFormat = paInt16;
 		StreamParameters.suggestedLatency = 0.0;
 		StreamParameters.hostApiSpecificStreamInfo = NULL;
-		if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && (m_Settings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
+		if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && m_Settings.ExclusiveMode)
 		{
 			MemsetZero(m_WasapiStreamInfo);
 			m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);

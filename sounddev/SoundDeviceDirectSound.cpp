@@ -117,7 +117,7 @@ bool CDSoundDevice::InternalOpen()
 
 	DSBUFFERDESC dsbd;
 	DSBCAPS dsc;
-	UINT nPriorityLevel = (m_Settings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
+	UINT nPriorityLevel = (m_Settings.ExclusiveMode) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
 
 	if(m_piDS) return true;
 	const std::wstring internalID = GetDeviceInternalID();
@@ -132,7 +132,7 @@ bool CDSoundDevice::InternalOpen()
 	if(m_nDSoundBufferSize > DSOUND_MAXBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MAXBUFFERSIZE;
 	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
 	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
-	if(!(m_Settings.fulCfgOptions & SNDDEV_OPTIONS_EXCLUSIVE))
+	if(!m_Settings.ExclusiveMode)
 	{
 		// Set the format of the primary buffer
 		dsbd.dwSize = sizeof(dsbd);

@@ -186,8 +186,8 @@ public:
 	DWORD m_UpdateIntervalMS;
 	bool m_SoundDeviceExclusiveMode;
 	bool m_SoundDeviceBoostThreadPriority;
-	DWORD GetSoundDeviceFlags() const;
-	void SetSoundDeviceFlags(DWORD flags);
+	SoundDeviceSettings GetSoundDeviceSettings() const;
+	void SetSoundDeviceSettings(const SoundDeviceSettings &settings);
 
 #ifndef NO_EQ
 	EQPreset m_EqSettings;
