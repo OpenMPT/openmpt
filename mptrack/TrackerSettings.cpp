@@ -174,6 +174,7 @@ SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings() const
 
 
 void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceSettings &settings)
+//-------------------------------------------------------------------------------
 {
 	m_LatencyMS = settings.LatencyMS;
 	m_UpdateIntervalMS = settings.UpdateIntervalMS;
