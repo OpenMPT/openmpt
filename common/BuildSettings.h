@@ -162,11 +162,13 @@
 #endif
 //#define NO_MINIZ
 #define NO_MP3_SAMPLES
-//#define NO_LIBMODPLUG
-#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86))
+#if defined(LIBOPENMPT_BUILD_TEST)
+#define NO_LIBMODPLUG
+#endif
+#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86)) || defined(LIBOPENMPT_BUILD_TEST)
 #define NO_WINAMP
 #endif
-#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86))
+#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86)) || defined(LIBOPENMPT_BUILD_TEST)
 #define NO_XMPLAY
 #endif
 //#define NO_LIBOPENMPT_C
