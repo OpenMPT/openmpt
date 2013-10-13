@@ -41,11 +41,10 @@ protected:
 	DWORD m_dwWritePos, m_dwLatency;
 
 public:
-	CDSoundDevice();
+	CDSoundDevice(SoundDeviceID id, const std::wstring &internalID);
 	~CDSoundDevice();
 
 public:
-	UINT GetDeviceType() const { return SNDDEV_DSOUND; }
 	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();

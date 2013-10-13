@@ -52,11 +52,10 @@ public:
 	static int baseChannel;
 
 public:
-	CASIODevice();
+	CASIODevice(SoundDeviceID id, const std::wstring &internalID);
 	~CASIODevice();
 
 public:
-	UINT GetDeviceType() const { return SNDDEV_ASIO; }
 	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();

@@ -17,6 +17,7 @@
 #include "../sounddsp/EQ.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/Reverb.h"
+#include "../sounddev/SoundDevice.h"
 #include <bitset>
 
 /////////////////////////////////////////////////////////////////////////
@@ -180,7 +181,7 @@ public:
 	// Audio Setup
 	DWORD gbLoopSong;
 	bool m_MorePortaudio;
-	LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
+	SoundDeviceID m_nWaveDevice;
 	DWORD m_LatencyMS;
 	DWORD m_UpdateIntervalMS;
 	bool m_SoundDeviceExclusiveMode;

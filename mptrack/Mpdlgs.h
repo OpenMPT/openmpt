@@ -29,21 +29,21 @@ protected:
 	DWORD m_nChannels;
 	DWORD m_LatencyMS;
 	DWORD m_UpdateIntervalMS;
-	DWORD m_nSoundDevice;
+	SoundDeviceID m_nSoundDevice;
 	bool m_PreAmpNoteShowed;
 
 public:
-	COptionsSoundcard(DWORD rate, DWORD flags, SampleFormat sampleformat, DWORD chns, DWORD latency_ms, DWORD updateinterval_ms, DWORD sd):CPropertyPage(IDD_OPTIONS_SOUNDCARD)
+	COptionsSoundcard(DWORD rate, DWORD flags, SampleFormat sampleformat, DWORD chns, DWORD latency_ms, DWORD updateinterval_ms, SoundDeviceID sd):CPropertyPage(IDD_OPTIONS_SOUNDCARD)
 		{ m_dwRate = rate; m_SoundDeviceFlags = flags; m_SampleFormat = sampleformat; m_nChannels = chns;
 		  m_LatencyMS = latency_ms; m_UpdateIntervalMS = updateinterval_ms; m_nSoundDevice = sd; m_PreAmpNoteShowed = false; }
 
 	void UpdateStatistics();
 
 private:
-	void UpdateSampleRates(int dev);
-	void UpdateChannels(int dev);
-	void UpdateSampleFormat(int dev);
-	void UpdateControls(int dev);
+	void UpdateSampleRates(SoundDeviceID dev);
+	void UpdateChannels(SoundDeviceID dev);
+	void UpdateSampleFormat(SoundDeviceID dev);
+	void UpdateControls(SoundDeviceID dev);
 	void SetPreAmpSliderPosition();
 
 protected:

@@ -39,11 +39,10 @@ protected:
 	float m_CurrentRealLatencyMS;
 
 public:
-	CPortaudioDevice(PaHostApiIndex hostapi);
+	CPortaudioDevice(SoundDeviceID id, const std::wstring &internalID);
 	~CPortaudioDevice();
 
 public:
-	UINT GetDeviceType() const { return HostApiToSndDevType(m_HostApi); }
 	bool InternalOpen();
 	bool InternalClose();
 	void FillAudioBuffer();
@@ -74,13 +73,13 @@ public:
 		);
 
 	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi);
-	static int HostApiToSndDevType(PaHostApiIndex hostapi);
-	static PaHostApiIndex SndDevTypeToHostApi(int snddevtype);
+	static SoundDeviceType HostApiToSndDevType(PaHostApiIndex hostapi);
+	static PaHostApiIndex SndDevTypeToHostApi(SoundDeviceType snddevtype);
 
-	static std::vector<SoundDeviceInfo> EnumerateDevices(UINT type);
+	static std::vector<SoundDeviceInfo> EnumerateDevices(SoundDeviceType type);
 
 private:
-	static bool EnumerateDevices(SoundDeviceInfo &result, UINT nIndex, PaHostApiIndex hostapi);
+	static bool EnumerateDevices(SoundDeviceInfo &result, SoundDeviceIndex index, PaHostApiIndex hostapi);
 
 };
 
