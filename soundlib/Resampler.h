@@ -37,7 +37,7 @@ public:
 public:
 	CResamplerSettings()
 	{
-		SrcMode = SRCMODE_FIRFILTER;
+		SrcMode = SRCMODE_POLYPHASE;
 		gdWFIRCutoff = 0.97;
 		gbWFIRType = WFIR_KAISER4T;
 	}
