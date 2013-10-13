@@ -157,18 +157,31 @@ TrackerSettings::TrackerSettings()
 }
 
 
-DWORD TrackerSettings::GetSoundDeviceFlags() const
-//------------------------------------------------
+SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings() const
+//-----------------------------------------------------------------
 {
-	return (m_SoundDeviceExclusiveMode ? SNDDEV_OPTIONS_EXCLUSIVE : 0) | (m_SoundDeviceBoostThreadPriority ? SNDDEV_OPTIONS_BOOSTTHREADPRIORITY : 0);
+	SoundDeviceSettings settings;
+	settings.hWnd = CMainFrame::GetMainFrame()->m_hWnd;
+	settings.LatencyMS = m_LatencyMS;
+	settings.UpdateIntervalMS = m_UpdateIntervalMS;
+	settings.Samplerate = m_MixerSettings.gdwMixingFreq;
+	settings.Channels = (uint8)m_MixerSettings.gnChannels;
+	settings.sampleFormat = m_SampleFormat;
+	settings.ExclusiveMode = m_SoundDeviceExclusiveMode;
+	settings.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
+	return settings;
 }
 
 
-void TrackerSettings::SetSoundDeviceFlags(DWORD flags)
-//----------------------------------------------------
+void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceSettings &settings)
 {
-	m_SoundDeviceExclusiveMode = (flags & SNDDEV_OPTIONS_EXCLUSIVE) ? true : false;
-	m_SoundDeviceBoostThreadPriority = (flags & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY) ? true : false;
+	m_LatencyMS = settings.LatencyMS;
+	m_UpdateIntervalMS = settings.UpdateIntervalMS;
+	m_MixerSettings.gdwMixingFreq = settings.Samplerate;
+	m_MixerSettings.gnChannels = settings.Channels;
+	m_SampleFormat = settings.sampleFormat;
+	m_SoundDeviceExclusiveMode = settings.ExclusiveMode;
+	m_SoundDeviceBoostThreadPriority = settings.BoostThreadPriority;
 }
 
 

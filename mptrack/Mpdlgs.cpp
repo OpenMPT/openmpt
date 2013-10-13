@@ -107,8 +107,8 @@ BOOL COptionsSoundcard::OnInitDialog()
 
 	CPropertyPage::OnInitDialog();
 	if(TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
-	if(m_SoundDeviceFlags & SNDDEV_OPTIONS_EXCLUSIVE) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
-	if(m_SoundDeviceFlags & SNDDEV_OPTIONS_BOOSTTHREADPRIORITY) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
+	if(m_Settings.ExclusiveMode) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
+	if(m_Settings.BoostThreadPriority) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
 
 	// Sampling Rate
 	UpdateSampleRates(m_nSoundDevice);
@@ -124,7 +124,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 	}
 	// latency
 	{
-		wsprintf(s, "%d ms", m_LatencyMS);
+		wsprintf(s, "%d ms", m_Settings.LatencyMS);
 		m_CbnLatencyMS.SetWindowText(s);
 		m_CbnLatencyMS.AddString("1 ms");
 		m_CbnLatencyMS.AddString("2 ms");
@@ -146,7 +146,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 	}
 	// update interval
 	{
-		wsprintf(s, "%d ms", m_UpdateIntervalMS);
+		wsprintf(s, "%d ms", m_Settings.UpdateIntervalMS);
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 		m_CbnUpdateIntervalMS.AddString("1 ms");
 		m_CbnUpdateIntervalMS.AddString("2 ms");
@@ -253,7 +253,7 @@ void COptionsSoundcard::UpdateChannels(SoundDeviceID dev)
 		wsprintf(s, "%s", gszChnCfgNames[(channels+2)/2-1]);
 		UINT ndx = m_CbnChannels.AddString(s);
 		m_CbnChannels.SetItemData(ndx, channels);
-		if(channels == m_nChannels)
+		if(channels == m_Settings.Channels)
 		{
 			n = ndx;
 		}
@@ -270,29 +270,29 @@ void COptionsSoundcard::UpdateSampleFormat(SoundDeviceID dev)
 	const bool asio = dev.GetType() == SNDDEV_ASIO;
 	if(asio)
 	{
-		m_SampleFormat = TrackerSettings::Instance().m_SampleFormat;
+		m_Settings.sampleFormat = TrackerSettings::Instance().m_SampleFormat;
 	}
 	m_CbnSampleFormat.EnableWindow(asio ? FALSE : TRUE);
 	for(UINT bits = 40; bits >= 8; bits -= 8)
 	{
 		if(bits == 40)
 		{
-			if(!asio || (asio && SampleFormatFloat32 == m_SampleFormat))
+			if(!asio || (asio && SampleFormatFloat32 == m_Settings.sampleFormat))
 			{
 				UINT ndx = m_CbnSampleFormat.AddString("Floating Point");
 				m_CbnSampleFormat.SetItemData(ndx, (32+128));
-				if(SampleFormatFloat32 == m_SampleFormat)
+				if(SampleFormatFloat32 == m_Settings.sampleFormat)
 				{
 					n = ndx;
 				}
 			}
 		} else
 		{
-			if(!asio || (asio && (SampleFormat)bits == m_SampleFormat))
+			if(!asio || (asio && (SampleFormat)bits == m_Settings.sampleFormat))
 			{
 				UINT ndx = m_CbnSampleFormat.AddString(mpt::String::Format("%d Bit", bits).c_str());
 				m_CbnSampleFormat.SetItemData(ndx, bits);
-				if((SampleFormat)bits == m_SampleFormat)
+				if((SampleFormat)bits == m_Settings.sampleFormat)
 				{
 					n = ndx;
 				}
@@ -423,7 +423,10 @@ void COptionsSoundcard::UpdateSampleRates(SoundDeviceID dev)
 		wsprintf(s, "%i Hz", samplerates[i]);
 		int pos = m_CbnMixingFreq.AddString(s);
 		m_CbnMixingFreq.SetItemData(pos, samplerates[i]);
-		if(m_dwRate == samplerates[i]) n = pos;
+		if(m_Settings.Samplerate == samplerates[i])
+		{
+			n = pos;
+		}
 	}
 	m_CbnMixingFreq.SetCurSel(n);
 }
@@ -457,23 +460,25 @@ void COptionsSoundcard::OnOK()
 //----------------------------
 {
 	if(IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_SOFTPANNING; else TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
-	m_SoundDeviceFlags = 0;
-	if(IsDlgButtonChecked(IDC_CHECK4)) m_SoundDeviceFlags |= SNDDEV_OPTIONS_EXCLUSIVE;
-	if(IsDlgButtonChecked(IDC_CHECK5)) m_SoundDeviceFlags |= SNDDEV_OPTIONS_BOOSTTHREADPRIORITY;
+	m_Settings.ExclusiveMode = IsDlgButtonChecked(IDC_CHECK4) ? true : false;
+	m_Settings.BoostThreadPriority = IsDlgButtonChecked(IDC_CHECK5) ? true : false;
 	// Mixing Freq
 	{
-		m_dwRate = m_CbnMixingFreq.GetItemData(m_CbnMixingFreq.GetCurSel());
+		m_Settings.Samplerate = m_CbnMixingFreq.GetItemData(m_CbnMixingFreq.GetCurSel());
 	}
 	// Channels
 	{
 		UINT n = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
-		m_nChannels = n;
-		if((m_nChannels != 1) && (m_nChannels != 4))m_nChannels = 2;
+		m_Settings.Channels = static_cast<uint8>(n);
+		if((m_Settings.Channels != 1) && (m_Settings.Channels != 4))
+		{
+			m_Settings.Channels = 2;
+		}
 	}
 	// SampleFormat
 	{
 		UINT n = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
-		m_SampleFormat = (SampleFormat)(n & 0xFF);
+		m_Settings.sampleFormat = (SampleFormat)(n & 0xFF);
 	}
 	// Polyphony
 	{
@@ -496,23 +501,23 @@ void COptionsSoundcard::OnOK()
 	{
 		CHAR s[32];
 		m_CbnLatencyMS.GetWindowText(s, sizeof(s));
-		m_LatencyMS = atoi(s);
+		m_Settings.LatencyMS = atoi(s);
 		//Check given value.
-		m_LatencyMS = CLAMP(m_LatencyMS, SNDDEV_MINLATENCY_MS, SNDDEV_MAXLATENCY_MS);
-		wsprintf(s, "%d ms", m_LatencyMS);
+		m_Settings.LatencyMS = CLAMP(m_Settings.LatencyMS, SNDDEV_MINLATENCY_MS, SNDDEV_MAXLATENCY_MS);
+		wsprintf(s, "%d ms", m_Settings.LatencyMS);
 		m_CbnLatencyMS.SetWindowText(s);
 	}
 	// Update Interval
 	{
 		CHAR s[32];
 		m_CbnUpdateIntervalMS.GetWindowText(s, sizeof(s));
-		m_UpdateIntervalMS = atoi(s);
+		m_Settings.UpdateIntervalMS = atoi(s);
 		//Check given value.
-		m_UpdateIntervalMS = CLAMP(m_UpdateIntervalMS, SNDDEV_MINUPDATEINTERVAL_MS, SNDDEV_MAXUPDATEINTERVAL_MS);
-		wsprintf(s, "%d ms", m_UpdateIntervalMS);
+		m_Settings.UpdateIntervalMS = CLAMP(m_Settings.UpdateIntervalMS, SNDDEV_MINUPDATEINTERVAL_MS, SNDDEV_MAXUPDATEINTERVAL_MS);
+		wsprintf(s, "%d ms", m_Settings.UpdateIntervalMS);
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 	}
-	CMainFrame::GetMainFrame()->SetupSoundCard(m_SoundDeviceFlags, m_dwRate, m_SampleFormat, m_nChannels, m_LatencyMS, m_UpdateIntervalMS, m_nSoundDevice);
+	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_nSoundDevice);
 	UpdateSampleFormat(m_nSoundDevice);
 	UpdateStatistics();
 	CPropertyPage::OnOK();
