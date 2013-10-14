@@ -59,6 +59,10 @@
 #define PACKED __declspec(align(1))
 #define NEEDS_PRAGMA_PACK
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#if MPT_COMPILER_GCC && defined(WIN32)
+// Some versions of mingw64 need this when windows-hosted. Strange.
+#define NEEDS_PRAGMA_PACK
+#endif
 #define PACKED __attribute__((packed)) __attribute__((aligned(1)))
 #else
 #define PACKED alignas(1)
