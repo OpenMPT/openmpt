@@ -15,7 +15,15 @@
 
 #if defined( LIBOPENMPT_BUILD_TEST )
 
+#if defined(WIN32) && defined(UNICODE)
+#if defined(__GNUC__)
+// mingw64 does only default to special C linkage for "main", but not for "wmain".
+extern "C"
+#endif
+int wmain( int /*wargc*/, wchar_t * /*wargv*/ [] ) {
+#else
 int main( int /*argc*/, char * /*argv*/ [] ) {
+#endif
 	try {
 		openmpt::run_tests();
 	} catch ( const std::exception & e ) {
