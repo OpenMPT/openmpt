@@ -279,10 +279,12 @@ all:
 
 -include $(ALL_DEPENDS)
 
+ifeq ($(DYNLINK),1)
 OUTPUTS += bin/openmpt.a
 OUTPUTS += bin/libopenmpt.so
-OUTPUTS += bin/openmpt123$(EXESUFFIX)
 OUTPUTS += bin/libopenmpt_modplug.so
+endif
+OUTPUTS += bin/openmpt123$(EXESUFFIX)
 ifeq ($(NO_PORTAUDIO),1)
 else
 OUTPUTS += bin/libopenmpt_example_c$(EXESUFFIX)
