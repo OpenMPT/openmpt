@@ -16,7 +16,14 @@
 #define LIBOPENMPT_CXX_API
 #undef LIBOPENMPT_CXX_API
 
-#if defined(_MSC_VER)
+#if defined(__DOXYGEN__)
+
+#define LIBOPENMPT_API_HELPER_EXPORT
+#define LIBOPENMPT_API_HELPER_IMPORT
+#define LIBOPENMPT_API_HELPER_PUBLIC
+#define LIBOPENMPT_API_HELPER_LOCAL
+
+#elif defined(_MSC_VER)
 
 #define LIBOPENMPT_API_HELPER_EXPORT __declspec(dllexport)
 #define LIBOPENMPT_API_HELPER_IMPORT __declspec(dllimport)
