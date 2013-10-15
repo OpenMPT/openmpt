@@ -246,9 +246,9 @@ enum
 #include "TrackerSettings.h"
 struct MODPLUGDIB;
 
-//========================================================
-class CMainFrame: public CMDIFrameWnd, public ISoundSource
-//========================================================
+//======================================================================================
+class CMainFrame: public CMDIFrameWnd, public ISoundSource, public ISoundMessageReceiver
+//======================================================================================
 {
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
@@ -328,6 +328,9 @@ public:
 	void AudioRead(const SoundDeviceSettings &settings, std::size_t numFrames, void *buffer);
 	void AudioDone(const SoundDeviceSettings &settings, std::size_t numFrames, int64 streamPosition);
 	
+	// from ISoundMessageReceiver
+	void AudioMessage(const std::string &str);
+
 	bool audioTryOpeningDevice();
 	bool audioOpenDevice();
 	bool audioReopenDevice();

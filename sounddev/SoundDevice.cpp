@@ -34,6 +34,7 @@
 ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 //--------------------------------------------------------------------------
 	: m_Source(nullptr)
+	, m_MessageReceiver(nullptr)
 	, m_ID(id)
 	, m_InternalID(internalID)
 {
@@ -148,6 +149,16 @@ void ISoundDevice::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 	} else
 	{
 		m_Source->AudioDone(m_Settings, numFrames, framesRendered + framesLatency);
+	}
+}
+
+
+void ISoundDevice::AudioSendMessage(const std::string &str)
+//---------------------------------------------------------
+{
+	if(m_MessageReceiver)
+	{
+		m_MessageReceiver->AudioMessage(str);
 	}
 }
 

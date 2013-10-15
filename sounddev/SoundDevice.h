@@ -40,6 +40,15 @@ public:
 };
 
 
+//=========================
+class ISoundMessageReceiver
+//=========================
+{
+public:
+	virtual void AudioMessage(const std::string &str) = 0;
+};
+
+
 //================
 class ISoundSource
 //================
@@ -184,6 +193,7 @@ class ISoundDevice : protected IFillAudioBuffer
 private:
 
 	ISoundSource *m_Source;
+	ISoundMessageReceiver *m_MessageReceiver;
 
 	const SoundDeviceID m_ID;
 
@@ -206,12 +216,15 @@ protected:
 	void SourceFillAudioBufferLocked();
 	void SourceAudioRead(void *buffer, std::size_t numFrames);
 	void SourceAudioDone(std::size_t numFrames, int32 framesLatency);
+	void AudioSendMessage(const std::string &str);
 
 public:
 	ISoundDevice(SoundDeviceID id, const std::wstring &internalID);
 	virtual ~ISoundDevice();
 	void SetSource(ISoundSource *source) { m_Source = source; }
 	ISoundSource *GetSource() const { return m_Source; }
+	void SetMessageReceiver(ISoundMessageReceiver *receiver) { m_MessageReceiver = receiver; }
+	ISoundMessageReceiver *GetMessageReceiver() const { return m_MessageReceiver; }
 public:
 	SoundDeviceID GetDeviceID() const { return m_ID; }
 	SoundDeviceType GetDeviceType() const { return m_ID.GetType(); }

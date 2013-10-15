@@ -17,9 +17,6 @@
 #include "SoundDeviceASIO.h"
 
 #include "../common/misc_util.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Reporting.h"
-#endif
 #include "../common/StringFixer.h"
 #include "../soundlib/SampleFormatConverters.h"
 
@@ -715,7 +712,7 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 void CASIODevice::ReportASIOException(const std::string &str)
 //-----------------------------------------------------------
 {
-	Reporting::Notification(str.c_str());
+	AudioSendMessage(str);
 	Log("%s", str.c_str());
 }
 
