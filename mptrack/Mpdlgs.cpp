@@ -397,6 +397,10 @@ void COptionsSoundcard::UpdateSampleRates(SoundDeviceID dev)
 		{
 			justCreated = true;
 			dummy = theApp.GetSoundDevicesManager()->CreateSoundDevice(dev);
+			if(dummy)
+			{
+				dummy->SetMessageReceiver(CMainFrame::GetMainFrame());
+			}
 		}
 
 		if(dummy != nullptr)
