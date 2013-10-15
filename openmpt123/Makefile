@@ -63,6 +63,20 @@ include Makefile.config.$(CONFIG)
 endif
 
 
+# host setup
+
+ifeq ($(HOST),windows)
+
+RM = del /q /f
+
+else
+
+RM = rm -f
+
+endif
+
+
+
 # build setup
 
 CPPFLAGS += -I../common -I.. -I../include/modplug/include -I../include
@@ -333,6 +347,12 @@ bin/libopenmpt_example_cxx$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_exampl
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_cxx.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
+ifeq ($(HOST),windows)
 clean:
-	rm -f $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS)
-
+	$(INFO) clean ...
+	$(SILENT)$(RM) $(subst /,\,$(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS) )
+else
+clean:
+	$(INFO) clean ...
+	$(SILENT)$(RM) $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS)
+endif
