@@ -838,6 +838,12 @@ static double izero(double y)
 
 static void getsinc(SINC_TYPE *psinc, double beta, double lowpass_factor)
 {
+	if(lowpass_factor >= 0.999)
+	{
+		// Avoid mixer overflows.
+		// 1.0 itself does not make much sense.
+		lowpass_factor = 0.999;
+	}
 	const double izero_beta = izero(beta);
 	const double kPi = 4.0*atan(1.0)*lowpass_factor;
 	for (int isrc=0; isrc<8*SINC_PHASES; isrc++)

@@ -404,6 +404,7 @@ void TrackerSettings::LoadINISettings(const CString &iniFile)
 	m_ResamplerSettings.gbWFIRType = static_cast<BYTE>(CMainFrame::GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_ResamplerSettings.gbWFIRType, iniFile));
 	//gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", gdWFIRCutoff * 100.0, iniFile)) / 100.0;
 	m_ResamplerSettings.gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", Util::Round<long>(m_ResamplerSettings.gdWFIRCutoff * 100.0), iniFile)) / 100.0;
+	Limit(m_ResamplerSettings.gdWFIRCutoff, 0.0, 1.0);
 	
 	// Ramping... first try to read the old setting, then the new ones
 	const long volRamp = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampSamples", -1, iniFile);
@@ -701,7 +702,10 @@ bool TrackerSettings::LoadRegistrySettings()
 		dwDWORDSize = sizeof(m_ResamplerSettings.gbWFIRType);
 		RegQueryValueEx(key, "XMMSModplugResamplerWFIRType", NULL, &dwREG_DWORD, (LPBYTE)&m_ResamplerSettings.gbWFIRType, &dwDWORDSize);
 		dwDWORDSize = sizeof(m_ResamplerSettings.gdWFIRCutoff);
-		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&m_ResamplerSettings.gdWFIRCutoff, &dwDWORDSize);
+		DWORD tmpWFIRCutoff = Util::Round<DWORD>(100.0 * m_ResamplerSettings.gdWFIRCutoff);
+		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&tmpWFIRCutoff, &dwDWORDSize);
+		m_ResamplerSettings.gdWFIRCutoff = tmpWFIRCutoff / 100.0;
+		Limit(m_ResamplerSettings.gdWFIRCutoff, 0.0, 1.0);
 		dwDWORDSize = sizeof(m_MixerSettings.glVolumeRampUpSamples);
 		RegQueryValueEx(key, "VolumeRampSamples", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.glVolumeRampUpSamples, &dwDWORDSize);
 		m_MixerSettings.glVolumeRampDownSamples = m_MixerSettings.glVolumeRampUpSamples;
