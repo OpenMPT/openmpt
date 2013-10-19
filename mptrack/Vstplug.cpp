@@ -3031,7 +3031,7 @@ CDmo2Vst::CDmo2Vst(IMediaObject *pMO, IMediaObjectInPlace *pMOIP, DWORD uid)
 		m_Effect.numParams = dwParamCount;
 	}
 	if (FAILED(m_pMediaObject->QueryInterface(IID_IMediaParams, (void **)&m_pMediaParams))) m_pMediaParams = nullptr;
-	m_pMixBuffer = (int16 *)((((int)m_MixBuffer) + 15) & ~15);
+	m_pMixBuffer = (int16 *)((((intptr_t)m_MixBuffer) + 15) & ~15);
 	// Callbacks
 	m_Effect.dispatcher = DmoDispatcher;
 	m_Effect.setParameter = DmoSetParameter;
