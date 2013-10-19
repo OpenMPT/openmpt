@@ -108,6 +108,58 @@ CDSoundDevice::~CDSoundDevice()
 }
 
 
+std::vector<uint32> CDSoundDevice::GetSampleRates(const std::vector<uint32> &samplerates)
+//---------------------------------------------------------------------------------------
+{
+	std::vector<uint32> result;
+	IDirectSound *dummy = nullptr;
+	IDirectSound *ds = nullptr;
+	if(IsOpen())
+	{
+		ds = m_piDS;
+	} else
+	{
+		const std::wstring internalID = GetDeviceInternalID();
+		GUID guid = internalID.empty() ? GUID() : StringToGuid(internalID);
+		if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &dummy, NULL) != DS_OK)
+		{
+			return result;
+		}
+		if(!dummy)
+		{
+			return result;
+		}
+		ds = dummy;
+	}
+	DSCAPS caps;
+	MemsetZero(caps);
+	caps.dwSize = sizeof(caps);
+	if(DS_OK != ds->GetCaps(&caps))
+	{
+		result = samplerates;
+	} else if(caps.dwMaxSecondarySampleRate == 0)
+	{
+		result = samplerates;
+	} else
+	{
+		for(std::size_t i = 0; i < samplerates.size(); ++i)
+		{
+			if(caps.dwMinSecondarySampleRate <= samplerates[i] && samplerates[i] <= caps.dwMaxSecondarySampleRate)
+			{
+				result.push_back(samplerates[i]);
+			}
+		}
+	}
+	if(dummy)
+	{
+		dummy->Release();
+		dummy = nullptr;
+	}
+	ds = nullptr;
+	return result;
+}
+
+
 bool CDSoundDevice::InternalOpen()
 //--------------------------------
 {

@@ -54,6 +54,7 @@ public:
 	bool IsOpen() const { return (m_pMixBuffer != NULL); }
 	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
 	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_nBytesPerSec; }
+	std::vector<uint32> GetSampleRates(const std::vector<uint32> &samplerates);
 
 protected:
 	DWORD LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2);
