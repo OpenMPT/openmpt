@@ -10,8 +10,6 @@
 
 #pragma once
 
-#define NUMMIXRATE	16
-
 class CSoundFile;
 class CMainFrame;
 
