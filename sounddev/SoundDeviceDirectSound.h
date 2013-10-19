@@ -24,9 +24,6 @@
 
 #ifndef NO_DSOUND
 
-#define DSOUND_MINBUFFERSIZE 1024
-#define DSOUND_MAXBUFFERSIZE SNDDEV_MAXBUFFERSIZE
-
 //================================================
 class CDSoundDevice: public CSoundDeviceWithThread
 //================================================
@@ -54,6 +51,7 @@ public:
 	bool IsOpen() const { return (m_pMixBuffer != NULL); }
 	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
 	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_nBytesPerSec; }
+	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 
 protected:
 	DWORD LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2);

@@ -66,8 +66,7 @@ public:
 	UINT GetNumBuffers() { return 2; }
 	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate; }
 
-	std::vector<uint32> GetSampleRates(const std::vector<uint32> &samplerates);
-	UINT GetCurrentSampleRate();
+	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 
 public:
 	static std::vector<SoundDeviceInfo> EnumerateDevices();

@@ -160,16 +160,16 @@ float CPortaudioDevice::GetCurrentRealLatencyMS()
 }
 
 
-std::vector<uint32> CPortaudioDevice::GetSampleRates(const std::vector<uint32> &samplerates)
-//------------------------------------------------------------------------------------------
+SoundDeviceCaps CPortaudioDevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
+//-----------------------------------------------------------------------------------------
 {
-	std::vector<uint32> results;
+	SoundDeviceCaps caps;
 	PaDeviceIndex device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi);
 	if(device == -1)
 	{
-		return results;
+		return caps;
 	}
-	for(UINT n=0; n<samplerates.size(); n++)
+	for(UINT n=0; n<baseSampleRates.size(); n++)
 	{
 		PaStreamParameters StreamParameters;
 		MemsetZero(StreamParameters);
@@ -187,12 +187,12 @@ std::vector<uint32> CPortaudioDevice::GetSampleRates(const std::vector<uint32> &
 			m_WasapiStreamInfo.flags = paWinWasapiExclusive;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 		}
-		if(Pa_IsFormatSupported(NULL, &StreamParameters, samplerates[n]) == paFormatIsSupported)
+		if(Pa_IsFormatSupported(NULL, &StreamParameters, baseSampleRates[n]) == paFormatIsSupported)
 		{
-			results.push_back(samplerates[n]);
+			caps.supportedSampleRates.push_back(baseSampleRates[n]);
 		}
 	}
-	return results;
+	return caps;
 }
 
 
@@ -299,6 +299,18 @@ PaHostApiIndex CPortaudioDevice::SndDevTypeToHostApi(SoundDeviceType snddevtype)
 }
 
 
+std::string CPortaudioDevice::HostApiToString(PaHostApiIndex hostapi)
+//-------------------------------------------------------------------
+{
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) return "WASAPI";
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS)) return "WDM-KS";
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paMME)) return "MME";
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound)) return "DS";
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paASIO)) return "ASIO";
+	return "PortAudio";
+}
+
+
 bool CPortaudioDevice::EnumerateDevices(SoundDeviceInfo &result, SoundDeviceIndex index, PaHostApiIndex hostapi)
 //--------------------------------------------------------------------------------------------------------------
 {
@@ -310,8 +322,8 @@ bool CPortaudioDevice::EnumerateDevices(SoundDeviceInfo &result, SoundDeviceInde
 		return false;
 	result.id = SoundDeviceID(HostApiToSndDevType(hostapi), index);
 	result.name = mpt::String::Decode(
-		mpt::String::Format("%s - %s%s (portaudio)",
-			Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name,
+		mpt::String::Format("%s - %s%s",
+			HostApiToString(Pa_GetDeviceInfo(dev)->hostApi).c_str(),
 			Pa_GetDeviceInfo(dev)->name,
 			Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev ? " (Default)" : ""
 		),

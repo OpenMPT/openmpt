@@ -54,6 +54,15 @@ ISoundDevice::~ISoundDevice()
 }
 
 
+SoundDeviceCaps ISoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
+//-------------------------------------------------------------------------------------
+{
+	SoundDeviceCaps result;
+	result.supportedSampleRates = baseSampleRates;
+	return result;
+}
+
+
 bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 //---------------------------------------------------------------------------
 {
@@ -620,7 +629,12 @@ void CSoundDeviceWithThread::InternalReset()
 void SoundDevicesManager::ReEnumerate()
 //-------------------------------------
 {
+#ifndef NO_PORTAUDIO
+	SndDevPortaudioUnnitialize();
+	SndDevPortaudioInitialize();
+#endif // NO_PORTAUDIO
 	m_SoundDevices.clear();
+	m_DeviceCaps.clear();
 	for(int type = 0; type < SNDDEV_NUM_DEVTYPES; ++type)
 	{
 		std::vector<SoundDeviceInfo> infos;
@@ -673,6 +687,29 @@ const SoundDeviceInfo * SoundDevicesManager::FindDeviceInfo(SoundDeviceID id) co
 }
 
 
+SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	if(m_DeviceCaps.find(id) == m_DeviceCaps.end())
+	{
+		if(currentSoundDevice && FindDeviceInfo(id) && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id)->internalID))
+		{
+			m_DeviceCaps[id] = currentSoundDevice->GetDeviceCaps(baseSampleRates);
+		} else
+		{
+			ISoundDevice *dummy = CreateSoundDevice(id);
+			if(dummy)
+			{
+				dummy->SetMessageReceiver(messageReceiver);
+				m_DeviceCaps[id] = dummy->GetDeviceCaps(baseSampleRates);
+			}
+			delete dummy;
+		}
+	}
+	return m_DeviceCaps[id];
+}
+
+
 ISoundDevice * SoundDevicesManager::CreateSoundDevice(SoundDeviceID id)
 //---------------------------------------------------------------------
 {
@@ -708,9 +745,6 @@ ISoundDevice * SoundDevicesManager::CreateSoundDevice(SoundDeviceID id)
 SoundDevicesManager::SoundDevicesManager()
 //----------------------------------------
 {
-#ifndef NO_PORTAUDIO
-	SndDevPortaudioInitialize();
-#endif // NO_PORTAUDIO
 	ReEnumerate();
 }
 

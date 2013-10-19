@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO6, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO2, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
+	ON_COMMAND(IDC_BUTTON1,	OnSoundCardRescan)
 END_MESSAGE_MAP()
 
 
@@ -98,23 +99,45 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 }
 
 
+void COptionsSoundcard::OnSoundCardRescan()
+//-----------------------------------------
+{
+	{
+		// Close sound device because IDs might change when re-enumerating which could cause all kinds of havoc.
+		CMainFrame::GetMainFrame()->audioCloseDevice();
+		delete CMainFrame::GetMainFrame()->gpSoundDevice;
+		CMainFrame::GetMainFrame()->gpSoundDevice = nullptr;
+	}
+	theApp.GetSoundDevicesManager()->ReEnumerate();
+	UpdateEverything();
+}
+
+
 BOOL COptionsSoundcard::OnInitDialog()
 //------------------------------------
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	BOOL bAsio = FALSE;
+	CPropertyPage::OnInitDialog();
+	UpdateEverything();
+	return TRUE;
+}
+
+
+void COptionsSoundcard::UpdateEverything()
+//----------------------------------------
+{
+	
 	CHAR s[128];
 
-	CPropertyPage::OnInitDialog();
-	if(TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
-	if(m_Settings.ExclusiveMode) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
-	if(m_Settings.BoostThreadPriority) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
+	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING) ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK4, m_Settings.ExclusiveMode ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK5, m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
 
 	// Sampling Rate
 	UpdateSampleRates(m_nSoundDevice);
 
 	// Max Mixing Channels
 	{
+		m_CbnPolyphony.ResetContent();
 		for (UINT n = 0; n < CountOf(nCPUMix); n++)
 		{
 			wsprintf(s, "%d (%s)", nCPUMix[n], szCPUNames[n]);
@@ -124,6 +147,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 	}
 	// latency
 	{
+		m_CbnLatencyMS.ResetContent();
 		wsprintf(s, "%d ms", m_Settings.LatencyMS);
 		m_CbnLatencyMS.SetWindowText(s);
 		m_CbnLatencyMS.AddString("1 ms");
@@ -146,6 +170,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 	}
 	// update interval
 	{
+		m_CbnUpdateIntervalMS.ResetContent();
 		wsprintf(s, "%d ms", m_Settings.UpdateIntervalMS);
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 		m_CbnUpdateIntervalMS.AddString("1 ms");
@@ -179,10 +204,9 @@ BOOL COptionsSoundcard::OnInitDialog()
 	}
 	// Sound Device
 	{
-		if (pMainFrm)
-		{
-			m_CbnDevice.SetImageList(pMainFrm->GetImageList());
-		}
+		m_CbnDevice.ResetContent();
+		m_CbnDevice.SetImageList(CMainFrame::GetMainFrame()->GetImageList());
+
 		COMBOBOXEXITEM cbi;
 		UINT iItem = 0;
 
@@ -212,7 +236,6 @@ BOOL COptionsSoundcard::OnInitDialog()
 					break;
 				case SNDDEV_ASIO:
 				case SNDDEV_PORTAUDIO_ASIO:
-					bAsio = TRUE;
 					cbi.iImage = IMAGE_ASIO;
 					break;
 				default:
@@ -237,7 +260,6 @@ BOOL COptionsSoundcard::OnInitDialog()
 	UpdateChannels(m_nSoundDevice);
 	UpdateSampleFormat(m_nSoundDevice);
 	
-	return TRUE;
 }
 
 
@@ -382,36 +404,11 @@ void COptionsSoundcard::UpdateSampleRates(SoundDeviceID dev)
 {
 	m_CbnMixingFreq.ResetContent();
 
-	std::vector<uint32> samplerates = TrackerSettings::Instance().GetSampleRates();
+	std::vector<uint32> samplerates;
 
 	{
 		Util::lock_guard<Util::mutex> lock(CMainFrame::GetMainFrame()->m_SoundDeviceMutex);
-		ISoundDevice *dummy = nullptr;
-		bool justCreated = false;
-		if(TrackerSettings::Instance().m_nWaveDevice == dev)
-		{
-			// If this is the currently active sound device, it might already be playing something, so we shouldn't create yet another instance of it.
-			dummy = CMainFrame::GetMainFrame()->gpSoundDevice;
-		}
-		if(dummy == nullptr)
-		{
-			justCreated = true;
-			dummy = theApp.GetSoundDevicesManager()->CreateSoundDevice(dev);
-			if(dummy)
-			{
-				dummy->SetMessageReceiver(CMainFrame::GetMainFrame());
-			}
-		}
-
-		if(dummy != nullptr)
-		{
-			// Now we can query the supported sample rates.
-			samplerates = dummy->GetSampleRates(samplerates);
-			if(justCreated)
-			{
-				delete dummy;
-			}
-		}
+		samplerates = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).supportedSampleRates;
 	}
 
 	if(samplerates.empty())
