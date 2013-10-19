@@ -22,6 +22,7 @@ protected:
 	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnPolyphony, m_CbnChannels, m_CbnSampleFormat;
 	CSliderCtrl m_SliderStereoSep, m_SliderPreAmp;
 	CEdit m_EditStatistics;
+	CButton m_BtnRescan;
 	SoundDeviceSettings m_Settings;
 	SoundDeviceID m_nSoundDevice;
 	bool m_PreAmpNoteShowed;
@@ -33,6 +34,7 @@ public:
 	void UpdateStatistics();
 
 private:
+	void UpdateEverything();
 	void UpdateSampleRates(SoundDeviceID dev);
 	void UpdateChannels(SoundDeviceID dev);
 	void UpdateSampleFormat(SoundDeviceID dev);
@@ -49,6 +51,7 @@ protected:
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
+	afx_msg void OnSoundCardRescan();
 	DECLARE_MESSAGE_MAP()
 };
 

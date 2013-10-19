@@ -256,13 +256,7 @@ VOID CMainFrame::Initialize()
 			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
 			if(TrackerSettings::Instance().m_nWaveDevice.GetType() == SNDDEV_ASIO)
 			{
-				ISoundDevice *dummy = theApp.GetSoundDevicesManager()->CreateSoundDevice(TrackerSettings::Instance().m_nWaveDevice);
-				if(dummy)
-				{
-					dummy->SetMessageReceiver(CMainFrame::GetMainFrame());
-					TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = dummy->GetCurrentSampleRate();
-					delete dummy;
-				}
+				TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = theApp.GetSoundDevicesManager()->GetDeviceCaps(TrackerSettings::Instance().m_nWaveDevice, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
 			}
 		#endif // NO_ASIO
 	}
