@@ -24,9 +24,6 @@
 
 #ifndef NO_DSOUND
 
-#define DSOUND_MINBUFFERSIZE 1024
-#define DSOUND_MAXBUFFERSIZE SNDDEV_MAXBUFFERSIZE
-
 //================================================
 class CDSoundDevice: public CSoundDeviceWithThread
 //================================================

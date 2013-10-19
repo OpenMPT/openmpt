@@ -25,6 +25,11 @@
 //
 
 
+#define WAVEOUT_MAXBUFFERS           256
+#define WAVEOUT_MINBUFFERSIZE        1024
+#define WAVEOUT_MAXBUFFERSIZE        65536
+
+
 CWaveDevice::CWaveDevice(SoundDeviceID id, const std::wstring &internalID)
 //------------------------------------------------------------------------
 	: CSoundDeviceWithThread(id, internalID)
