@@ -15,7 +15,15 @@
 #include "../common/misc_util.h"
 #include <algorithm>
 
+#if !defined(NO_ZLIB)
 #include <contrib/minizip/unzip.h>
+#elif !defined(NO_MINIZ)
+#define MINIZ_HEADER_FILE_ONLY
+#include <miniz/miniz.c>
+#endif
+
+
+#if !defined(NO_ZLIB)
 
 
 // Low-level file abstractions for in-memory file handling
@@ -204,19 +212,16 @@ bool CZipArchive::ExtractFile()
 }
 
 
-const char *CZipArchive::GetComments(bool get)
-//--------------------------------------------
+std::string CZipArchive::GetComments()
+//------------------------------------
 {
 	unz_global_info info;
 	if(zipFile == nullptr || unzGetGlobalInfo(zipFile, &info) != UNZ_OK)
 	{
-		return nullptr;
+		return "";
 	}
 
-	if(!get)
-	{
-		return reinterpret_cast<char *>((info.size_comment > 0) ? 1 : 0);
-	} else if(info.size_comment > 0)
+	if(info.size_comment > 0)
 	{
 		if(info.size_comment < Util::MaxValueOfType(info.size_comment))
 		{
@@ -226,11 +231,151 @@ const char *CZipArchive::GetComments(bool get)
 		if(comment != nullptr && unzGetGlobalComment(zipFile, comment, info.size_comment) >= 0)
 		{
 			comment[info.size_comment - 1] = '\0';
-			return comment;
+			std::string result = comment;
+			delete[] comment;
+			return result;
 		} else
 		{
 			delete[] comment;
 		}
 	}
-	return nullptr;
+	return "";
 }
+
+
+#elif !defined(NO_MINIZ)
+
+
+CZipArchive::CZipArchive(FileReader &file, const std::vector<const char *> &ext) : inFile(file), extensions(ext)
+//--------------------------------------------------------------------------------------------------------------
+{
+	zipFile = new mz_zip_archive();
+	
+	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
+	
+	MemsetZero(*zip);
+	if(!mz_zip_reader_init_mem(zip, file.GetRawData(), file.GetLength(), 0))
+	{
+		delete zip;
+		zipFile = nullptr;
+	}
+
+}
+
+
+CZipArchive::~CZipArchive()
+//-------------------------
+{
+	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
+
+	if(zip)
+	{
+		mz_zip_reader_end(zip);
+
+		delete zip;
+		zipFile = nullptr;
+	}
+
+	delete[] outFile.GetRawData();
+}
+
+
+bool CZipArchive::IsArchive() const
+//---------------------------------
+{
+	return (zipFile != nullptr);
+}
+
+
+static inline std::string GetExtension(const std::string &filename)
+//-----------------------------------------------------------------
+{
+	if(filename.find_last_of(".") != std::string::npos)
+	{
+		return filename.substr(filename.find_last_of(".") + 1);
+	}
+	return std::string();
+}
+
+
+bool CZipArchive::ExtractFile()
+//-----------------------------
+{
+	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
+
+	if(!zip)
+	{
+		return false;
+	}
+
+	mz_uint bestFile = (mz_uint)-1;
+	mz_uint64 biggestFile = 0;
+	for(mz_uint i = 0; i < mz_zip_reader_get_num_files(zip); ++i)
+	{
+		mz_zip_archive_file_stat stat;
+		MemsetZero(stat);
+		if(!mz_zip_reader_file_stat(zip, i, &stat))
+		{
+			continue;
+		}
+		if(mz_zip_reader_is_file_a_directory(zip, i))
+		{
+			continue;
+		}
+		if(mz_zip_reader_is_file_encrypted(zip, i))
+		{
+			continue;
+		}
+		std::string ext = GetExtension(stat.m_filename);
+		if(std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
+		{
+			// File has a preferred extension: use it.
+			bestFile = i;
+			break;
+		}
+		if(ext != "diz" && ext != "nfo" && ext != "txt" && stat.m_uncomp_size >= biggestFile)
+		{
+			// If this isn't some kind of info file, we should maybe pick it.
+			bestFile = i;
+			biggestFile = stat.m_uncomp_size;
+		}
+	}
+	if(bestFile == (mz_uint)-1)
+	{
+		return false;
+	}
+	delete [] outFile.GetRawData();
+	mz_zip_archive_file_stat stat;
+	MemsetZero(stat);
+	mz_zip_reader_file_stat(zip, bestFile, &stat);
+	char *data = new (std::nothrow) char[stat.m_uncomp_size];
+	if(data != nullptr)
+	{
+		if(!mz_zip_reader_extract_to_mem(zip, bestFile, data, stat.m_uncomp_size, 0))
+		{
+			delete [] data;
+			return false;
+		}
+		outFile = FileReader(data, stat.m_uncomp_size);
+		comment = std::string(stat.m_comment, stat.m_comment + stat.m_comment_size);
+	}
+
+	return true;
+}
+
+
+std::string CZipArchive::GetComments()
+//------------------------------------
+{
+	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
+
+	if(!zip)
+	{
+		return "";
+	}
+	
+	return comment;
+}
+
+
+#endif // NO_ZLIB || NO_MINIZ

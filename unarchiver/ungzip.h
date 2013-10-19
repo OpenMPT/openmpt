@@ -35,12 +35,12 @@ protected:
 
 	struct PACKED GZtrailer
 	{
-		uint32 crc32;	// CRC32 of decompressed data
+		uint32 crc32_;	// CRC32 of decompressed data
 		uint32 isize;	// Size of decompressed data
 
 		void ConvertEndianness()
 		{
-			SwapBytesLE(crc32);
+			SwapBytesLE(crc32_);
 			SwapBytesLE(isize);
 		}
 	};
