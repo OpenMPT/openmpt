@@ -742,7 +742,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 #ifndef NO_ARCHIVE_SUPPORT
 		// Read archive comment if there is no song comment
-		if(!songMessage.empty() && unarchiver.GetComments(false))
+		if(songMessage.empty() && unarchiver.GetComments(false))
 		{
 			songMessage.assign(unarchiver.GetComments(true));
 		}
