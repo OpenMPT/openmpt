@@ -288,8 +288,8 @@ struct SoundDeviceInfo
 
 struct SoundDeviceCaps
 {
-	std::uint32_t currentSampleRate;
-	std::vector<std::uint32_t> supportedSampleRates;
+	uint32 currentSampleRate;
+	std::vector<uint32> supportedSampleRates;
 	SoundDeviceCaps()
 		: currentSampleRate(0)
 	{
@@ -320,7 +320,7 @@ public:
 
 	const SoundDeviceInfo * FindDeviceInfo(SoundDeviceID id) const;
 
-	SoundDeviceCaps GetDeviceCaps(SoundDeviceID id, const std::vector<std::uint32_t> &baseSampleRates, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
+	SoundDeviceCaps GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
 
 	ISoundDevice * CreateSoundDevice(SoundDeviceID id);
 

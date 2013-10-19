@@ -678,8 +678,8 @@ const SoundDeviceInfo * SoundDevicesManager::FindDeviceInfo(SoundDeviceID id) co
 }
 
 
-SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, const std::vector<std::uint32_t> &baseSampleRates, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(m_DeviceCaps.find(id) == m_DeviceCaps.end())
 	{
