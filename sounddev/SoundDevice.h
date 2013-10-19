@@ -14,6 +14,7 @@
 #include "../common/mutex.h"
 #include "../soundlib/SampleFormat.h"
 
+#include <map>
 #include <vector>
 
 
@@ -114,6 +115,10 @@ public:
 	{
 		return (type != cmp.type) || (index != cmp.index);
 	}
+	bool operator < (const SoundDeviceID &cmp) const
+	{
+		return (type < cmp.type) || (type == cmp.type && index < cmp.index);
+	}
 public:
 	// Do not change these. These functions are used to manipulate the value that gets stored in the settings.
 	template<typename T>
@@ -181,6 +186,18 @@ struct SoundDeviceSettings
 };
 
 
+struct SoundDeviceCaps
+{
+	uint32 currentSampleRate;
+	std::vector<uint32> supportedSampleRates;	// Which samplerates are actually supported by the device. Currently only implemented properly for ASIO, DirectSound and PortAudio.
+	SoundDeviceCaps()
+		: currentSampleRate(0)
+	{
+		return;
+	}
+};
+
+
 class SoundDevicesManager;
 
 
@@ -231,6 +248,8 @@ public:
 	SoundDeviceIndex GetDeviceIndex() const { return m_ID.GetIndex(); }
 	std::wstring GetDeviceInternalID() const { return m_InternalID; }
 
+	virtual SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
+
 public:
 	float GetRealLatencyMS() const  { return m_RealLatencyMS; }
 	float GetRealUpdateIntervalMS() const { return m_RealUpdateIntervalMS; }
@@ -259,9 +278,6 @@ public:
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }
 	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }
-	virtual UINT GetCurrentSampleRate() { return 0; }
-	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO and PortAudio.
-	virtual std::vector<uint32> GetSampleRates(const std::vector<uint32> &samplerates) { return samplerates; }
 };
 
 
@@ -287,6 +303,7 @@ class SoundDevicesManager
 {
 private:
 	std::vector<SoundDeviceInfo> m_SoundDevices;
+	std::map<SoundDeviceID, SoundDeviceCaps> m_DeviceCaps;
 
 public:
 	SoundDevicesManager();
@@ -301,6 +318,8 @@ public:
 	const std::vector<SoundDeviceInfo> & GetDeviceInfos() const { return m_SoundDevices; }
 
 	const SoundDeviceInfo * FindDeviceInfo(SoundDeviceID id) const;
+
+	SoundDeviceCaps GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
 
 	ISoundDevice * CreateSoundDevice(SoundDeviceID id);
 

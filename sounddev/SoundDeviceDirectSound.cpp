@@ -28,6 +28,10 @@
 #ifndef NO_DSOUND
 
 
+#define DSOUND_MINBUFFERSIZE 1024
+#define DSOUND_MAXBUFFERSIZE SNDDEV_MAXBUFFERSIZE
+
+
 static std::wstring GuidToString(GUID guid)
 //-----------------------------------------
 {
@@ -105,6 +109,58 @@ CDSoundDevice::~CDSoundDevice()
 {
 	Reset();
 	Close();
+}
+
+
+SoundDeviceCaps CDSoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
+//--------------------------------------------------------------------------------------
+{
+	SoundDeviceCaps caps;
+	IDirectSound *dummy = nullptr;
+	IDirectSound *ds = nullptr;
+	if(IsOpen())
+	{
+		ds = m_piDS;
+	} else
+	{
+		const std::wstring internalID = GetDeviceInternalID();
+		GUID guid = internalID.empty() ? GUID() : StringToGuid(internalID);
+		if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &dummy, NULL) != DS_OK)
+		{
+			return caps;
+		}
+		if(!dummy)
+		{
+			return caps;
+		}
+		ds = dummy;
+	}
+	DSCAPS dscaps;
+	MemsetZero(dscaps);
+	dscaps.dwSize = sizeof(dscaps);
+	if(DS_OK != ds->GetCaps(&dscaps))
+	{
+		// nothing known about supported sample rates
+	} else if(dscaps.dwMaxSecondarySampleRate == 0)
+	{
+		// nothing known about supported sample rates
+	} else
+	{
+		for(std::size_t i = 0; i < baseSampleRates.size(); ++i)
+		{
+			if(dscaps.dwMinSecondarySampleRate <= baseSampleRates[i] && baseSampleRates[i] <= dscaps.dwMaxSecondarySampleRate)
+			{
+				caps.supportedSampleRates.push_back(baseSampleRates[i]);
+			}
+		}
+	}
+	if(dummy)
+	{
+		dummy->Release();
+		dummy = nullptr;
+	}
+	ds = nullptr;
+	return caps;
 }
 
 

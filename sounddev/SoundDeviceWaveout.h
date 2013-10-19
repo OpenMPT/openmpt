@@ -20,10 +20,6 @@
 // MMSYSTEM WaveOut device
 //
 
-#define WAVEOUT_MAXBUFFERS           256
-#define WAVEOUT_MINBUFFERSIZE        1024
-#define WAVEOUT_MAXBUFFERSIZE        65536
-
 //==============================================
 class CWaveDevice: public CSoundDeviceWithThread
 //==============================================
