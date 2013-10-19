@@ -47,13 +47,13 @@ float CWindowedFIR::coef( int _PCnr, float _POfs, float _PCut, int _PWidth, int 
 		case WFIR_BLACKMAN3T67:
 			_LWc = 0.42323 - 0.49755 * cos(_LPIdl*_LPosU) + 0.07922 * cos(2.0*_LPIdl*_LPosU);
 			break;
-		case WFIR_BLACKMAN4T92:
+		case WFIR_BLACKMAN4T92: // blackman harris
 			_LWc = 0.35875 - 0.48829 * cos(_LPIdl*_LPosU) + 0.14128 * cos(2.0*_LPIdl*_LPosU) - 0.01168 * cos(3.0*_LPIdl*_LPosU);
 			break;
 		case WFIR_BLACKMAN4T74:
 			_LWc = 0.40217 - 0.49703 * cos(_LPIdl*_LPosU) + 0.09392 * cos(2.0*_LPIdl*_LPosU) - 0.00183 * cos(3.0*_LPIdl*_LPosU);
 			break;
-		case WFIR_KAISER4T:
+		case WFIR_KAISER4T: // kaiser-bessel, alpha~7.5
 			_LWc = 0.40243 - 0.49804 * cos(_LPIdl*_LPosU) + 0.09831 * cos(2.0*_LPIdl*_LPosU) - 0.00122 * cos(3.0*_LPIdl*_LPosU);
 			break;
 		default:
