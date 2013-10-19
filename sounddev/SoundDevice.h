@@ -186,6 +186,18 @@ struct SoundDeviceSettings
 };
 
 
+struct SoundDeviceCaps
+{
+	uint32 currentSampleRate;
+	std::vector<uint32> supportedSampleRates;	// Which samplerates are actually supported by the device. Currently only implemented properly for ASIO, DirectSound and PortAudio.
+	SoundDeviceCaps()
+		: currentSampleRate(0)
+	{
+		return;
+	}
+};
+
+
 class SoundDevicesManager;
 
 
@@ -236,6 +248,8 @@ public:
 	SoundDeviceIndex GetDeviceIndex() const { return m_ID.GetIndex(); }
 	std::wstring GetDeviceInternalID() const { return m_InternalID; }
 
+	virtual SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
+
 public:
 	float GetRealLatencyMS() const  { return m_RealLatencyMS; }
 	float GetRealUpdateIntervalMS() const { return m_RealUpdateIntervalMS; }
@@ -264,9 +278,6 @@ public:
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }
 	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }
-	virtual UINT GetCurrentSampleRate() { return 0; }
-	// Return which samplerates are actually supported by the device. Currently only implemented properly for ASIO and PortAudio.
-	virtual std::vector<uint32> GetSampleRates(const std::vector<uint32> &samplerates) { return samplerates; }
 };
 
 
@@ -280,18 +291,6 @@ struct SoundDeviceInfo
 		: id(id)
 		, name(name)
 		, internalID(internalID)
-	{
-		return;
-	}
-};
-
-
-struct SoundDeviceCaps
-{
-	uint32 currentSampleRate;
-	std::vector<uint32> supportedSampleRates;
-	SoundDeviceCaps()
-		: currentSampleRate(0)
 	{
 		return;
 	}
