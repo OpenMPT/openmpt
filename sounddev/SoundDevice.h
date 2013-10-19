@@ -14,6 +14,7 @@
 #include "../common/mutex.h"
 #include "../soundlib/SampleFormat.h"
 
+#include <map>
 #include <vector>
 
 
@@ -113,6 +114,10 @@ public:
 	bool operator != (const SoundDeviceID &cmp) const
 	{
 		return (type != cmp.type) || (index != cmp.index);
+	}
+	bool operator < (const SoundDeviceID &cmp) const
+	{
+		return (type < cmp.type) || (type == cmp.type && index < cmp.index);
 	}
 public:
 	// Do not change these. These functions are used to manipulate the value that gets stored in the settings.
@@ -281,12 +286,25 @@ struct SoundDeviceInfo
 };
 
 
+struct SoundDeviceCaps
+{
+	std::uint32_t currentSampleRate;
+	std::vector<std::uint32_t> supportedSampleRates;
+	SoundDeviceCaps()
+		: currentSampleRate(0)
+	{
+		return;
+	}
+};
+
+
 //=======================
 class SoundDevicesManager
 //=======================
 {
 private:
 	std::vector<SoundDeviceInfo> m_SoundDevices;
+	std::map<SoundDeviceID, SoundDeviceCaps> m_DeviceCaps;
 
 public:
 	SoundDevicesManager();
@@ -301,6 +319,8 @@ public:
 	const std::vector<SoundDeviceInfo> & GetDeviceInfos() const { return m_SoundDevices; }
 
 	const SoundDeviceInfo * FindDeviceInfo(SoundDeviceID id) const;
+
+	SoundDeviceCaps GetDeviceCaps(SoundDeviceID id, const std::vector<std::uint32_t> &baseSampleRates, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
 
 	ISoundDevice * CreateSoundDevice(SoundDeviceID id);
 
