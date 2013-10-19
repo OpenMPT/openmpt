@@ -299,6 +299,18 @@ PaHostApiIndex CPortaudioDevice::SndDevTypeToHostApi(SoundDeviceType snddevtype)
 }
 
 
+std::string CPortaudioDevice::HostApiToString(PaHostApiIndex hostapi)
+//-------------------------------------------------------------------
+{
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) return "WASAPI";
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS)) return "WDM-KS";
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paMME)) return "MME";
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound)) return "DS";
+	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paASIO)) return "ASIO";
+	return "PortAudio";
+}
+
+
 bool CPortaudioDevice::EnumerateDevices(SoundDeviceInfo &result, SoundDeviceIndex index, PaHostApiIndex hostapi)
 //--------------------------------------------------------------------------------------------------------------
 {
@@ -310,8 +322,8 @@ bool CPortaudioDevice::EnumerateDevices(SoundDeviceInfo &result, SoundDeviceInde
 		return false;
 	result.id = SoundDeviceID(HostApiToSndDevType(hostapi), index);
 	result.name = mpt::String::Decode(
-		mpt::String::Format("%s - %s%s (portaudio)",
-			Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name,
+		mpt::String::Format("%s - %s%s",
+			HostApiToString(Pa_GetDeviceInfo(dev)->hostApi).c_str(),
 			Pa_GetDeviceInfo(dev)->name,
 			Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev ? " (Default)" : ""
 		),
