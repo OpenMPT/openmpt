@@ -208,7 +208,6 @@ solution "include"
   location "portaudio"
   includedirs { "portaudio/include", "portaudio/src/common", "portaudio/src/os/win" }
   defines {
-   "PA_ENABLE_DEBUG_OUTPUT",
    "PAWIN_USE_WDMKS_DEVICE_INFO",
    "PA_USE_ASIO=0",
    "PA_USE_DS=0",
@@ -268,6 +267,8 @@ solution "include"
    "portaudio/include/portaudio.h",
   }
   buildoptions { "/wd4018", "/wd4267" }
+  configuration "Debug*"
+   defines { "PA_ENABLE_DEBUG_OUTPUT" }
   dofile "premake4-defaults.lua"
   
 
