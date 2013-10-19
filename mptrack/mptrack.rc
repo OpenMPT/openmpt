@@ -422,7 +422,7 @@ BEGIN
     CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,33,96,62,15
     LTEXT           "Low",IDC_STATIC,17,100,14,8
     LTEXT           "High",IDC_STATIC,95,100,16,8
-    CTEXT           "Reverb Preset:",IDC_STATIC,149,90,62,8
+    CTEXT           "Reverb Preset:",IDC_STATIC,150,84,62,8
     COMBOBOX        IDC_COMBO2,135,97,100,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Pro-Logic Surround",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,116,99,10
     CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,33,129,62,15
