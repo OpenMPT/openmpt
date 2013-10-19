@@ -93,12 +93,14 @@ bool CUnarchiver::ExtractFile()
 }
 
 
-const char *CUnarchiver::GetComments(bool get)
+std::string CUnarchiver::GetComments()
+//------------------------------------
 {
 #ifdef ZIPPED_MOD_SUPPORT
-	if(!zipArchive.IsArchive()) return nullptr;
-	return zipArchive.GetComments(get);
-#else
-	return nullptr;
+	if(zipArchive.IsArchive())
+	{
+		return zipArchive.GetComments();
+	}
 #endif
+	return "";
 }

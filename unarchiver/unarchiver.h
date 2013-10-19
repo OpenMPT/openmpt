@@ -51,7 +51,7 @@ public:
 	FileReader GetOutputFile() const { return outFile; }
 	bool IsArchive() const;
 	bool ExtractFile();
-	const char *GetComments(bool get);
+	std::string GetComments();
 
 	CUnarchiver(FileReader &file, const std::vector<const char *> &extensions);
 	~CUnarchiver();
