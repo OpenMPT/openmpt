@@ -717,48 +717,18 @@ void CASIODevice::ReportASIOException(const std::string &str)
 }
 
 
-std::vector<uint32> CASIODevice::GetSampleRates(const std::vector<uint32> &samplerates)
-//-------------------------------------------------------------------------------------
+SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
+//------------------------------------------------------------------------------------
 {
-	std::vector<uint32> results;
+	SoundDeviceCaps caps;
+
 	const bool wasOpen = (m_pAsioDrv != NULL);
 	if(!wasOpen)
 	{
 		OpenDevice();
 		if(m_pAsioDrv == NULL)
 		{
-			return results;
-		}
-	}
-
-	for(size_t i = 0; i < samplerates.size(); i++)
-	{
-		if(m_pAsioDrv->canSampleRate((ASIOSampleRate)samplerates[i]) == ASE_OK)
-		{
-			results.push_back(samplerates[i]);
-		}
-	}
-
-	if(!wasOpen)
-	{
-		CloseDevice();
-	}
-
-	return results;
-}
-
-
-// If the device is open, this returns the current sample rate. If it's not open, it returns some sample rate supported by the device.
-UINT CASIODevice::GetCurrentSampleRate()
-//--------------------------------------
-{
-	const bool wasOpen = (m_pAsioDrv != NULL);
-	if(!wasOpen)
-	{
-		OpenDevice();
-		if(m_pAsioDrv == NULL)
-		{
-			return 0;
+			return caps;
 		}
 	}
 
@@ -767,13 +737,23 @@ UINT CASIODevice::GetCurrentSampleRate()
 	{
 		samplerate = 0;
 	}
+	caps.currentSampleRate = Util::Round<uint32>(samplerate);
+
+	for(size_t i = 0; i < baseSampleRates.size(); i++)
+	{
+		if(m_pAsioDrv->canSampleRate((ASIOSampleRate)baseSampleRates[i]) == ASE_OK)
+		{
+			caps.supportedSampleRates.push_back(baseSampleRates[i]);
+		}
+	}
 
 	if(!wasOpen)
 	{
 		CloseDevice();
 	}
 
-	return (UINT)samplerate;
+	return caps;
 }
+
 
 #endif // NO_ASIO

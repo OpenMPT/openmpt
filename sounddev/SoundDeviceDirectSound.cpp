@@ -112,10 +112,10 @@ CDSoundDevice::~CDSoundDevice()
 }
 
 
-std::vector<uint32> CDSoundDevice::GetSampleRates(const std::vector<uint32> &samplerates)
-//---------------------------------------------------------------------------------------
+SoundDeviceCaps CDSoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
+//--------------------------------------------------------------------------------------
 {
-	std::vector<uint32> result;
+	SoundDeviceCaps caps;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(IsOpen())
@@ -127,30 +127,30 @@ std::vector<uint32> CDSoundDevice::GetSampleRates(const std::vector<uint32> &sam
 		GUID guid = internalID.empty() ? GUID() : StringToGuid(internalID);
 		if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &dummy, NULL) != DS_OK)
 		{
-			return result;
+			return caps;
 		}
 		if(!dummy)
 		{
-			return result;
+			return caps;
 		}
 		ds = dummy;
 	}
-	DSCAPS caps;
-	MemsetZero(caps);
-	caps.dwSize = sizeof(caps);
-	if(DS_OK != ds->GetCaps(&caps))
+	DSCAPS dscaps;
+	MemsetZero(dscaps);
+	dscaps.dwSize = sizeof(dscaps);
+	if(DS_OK != ds->GetCaps(&dscaps))
 	{
-		result = samplerates;
-	} else if(caps.dwMaxSecondarySampleRate == 0)
+		// nothing known about supported sample rates
+	} else if(dscaps.dwMaxSecondarySampleRate == 0)
 	{
-		result = samplerates;
+		// nothing known about supported sample rates
 	} else
 	{
-		for(std::size_t i = 0; i < samplerates.size(); ++i)
+		for(std::size_t i = 0; i < baseSampleRates.size(); ++i)
 		{
-			if(caps.dwMinSecondarySampleRate <= samplerates[i] && samplerates[i] <= caps.dwMaxSecondarySampleRate)
+			if(dscaps.dwMinSecondarySampleRate <= baseSampleRates[i] && baseSampleRates[i] <= dscaps.dwMaxSecondarySampleRate)
 			{
-				result.push_back(samplerates[i]);
+				caps.supportedSampleRates.push_back(baseSampleRates[i]);
 			}
 		}
 	}
@@ -160,7 +160,7 @@ std::vector<uint32> CDSoundDevice::GetSampleRates(const std::vector<uint32> &sam
 		dummy = nullptr;
 	}
 	ds = nullptr;
-	return result;
+	return caps;
 }
 
 

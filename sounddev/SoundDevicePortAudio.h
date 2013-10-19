@@ -54,7 +54,7 @@ public:
 	float GetCurrentRealLatencyMS();
 	bool InternalHasGetStreamPosition() const { return false; }
 	int64 InternalGetStreamPositionSamples() const;
-	std::vector<uint32> GetSampleRates(const std::vector<uint32> &samplerates);
+	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 
 	int StreamCallback(
 		const void *input, void *output,

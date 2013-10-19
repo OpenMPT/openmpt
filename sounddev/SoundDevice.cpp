@@ -54,6 +54,15 @@ ISoundDevice::~ISoundDevice()
 }
 
 
+SoundDeviceCaps ISoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
+//-------------------------------------------------------------------------------------
+{
+	SoundDeviceCaps result;
+	result.supportedSampleRates = baseSampleRates;
+	return result;
+}
+
+
 bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 //---------------------------------------------------------------------------
 {
@@ -685,17 +694,14 @@ SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, const std::
 	{
 		if(currentSoundDevice && FindDeviceInfo(id) && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id)->internalID))
 		{
-			m_DeviceCaps[id].currentSampleRate = currentSoundDevice->GetCurrentSampleRate();
-			m_DeviceCaps[id].supportedSampleRates = currentSoundDevice->GetSampleRates(baseSampleRates);
-
+			m_DeviceCaps[id] = currentSoundDevice->GetDeviceCaps(baseSampleRates);
 		} else
 		{
 			ISoundDevice *dummy = CreateSoundDevice(id);
 			if(dummy)
 			{
 				dummy->SetMessageReceiver(messageReceiver);
-				m_DeviceCaps[id].currentSampleRate = dummy->GetCurrentSampleRate();
-				m_DeviceCaps[id].supportedSampleRates = dummy->GetSampleRates(baseSampleRates);
+				m_DeviceCaps[id] = dummy->GetDeviceCaps(baseSampleRates);
 			}
 			delete dummy;
 		}
