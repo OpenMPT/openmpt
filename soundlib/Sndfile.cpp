@@ -901,7 +901,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 	if(GetType() != MOD_TYPE_NONE)
 	{
-		SetModSpecsPointer(m_pModSpecs, m_nType);
+		SetModSpecsPointer(m_pModSpecs, GetBestSaveFormat());
 		const ORDERINDEX CacheSize = ModSequenceSet::s_nCacheSize; // workaround reference to static const member problem
 		const ORDERINDEX nMinLength = std::min(CacheSize, GetModSpecifications().ordersMax);
 		if (Order.GetLength() < nMinLength)
