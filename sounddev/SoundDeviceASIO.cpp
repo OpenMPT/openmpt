@@ -134,7 +134,7 @@ std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
 				if(SoundDeviceIndexIsValid(devices.size()))
 				{
 					// everything ok
-					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), mpt::String::Decode(description, mpt::CharsetLocale), internalID));
+					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), mpt::String::Decode(description, mpt::CharsetLocale), L"ASIO", internalID));
 				}
 
 			}

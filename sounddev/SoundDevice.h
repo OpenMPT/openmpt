@@ -285,11 +285,13 @@ struct SoundDeviceInfo
 {
 	SoundDeviceID id;
 	std::wstring name;
+	std::wstring apiName;
 	std::wstring internalID;
 	SoundDeviceInfo() { }
-	SoundDeviceInfo(SoundDeviceID id, const std::wstring &name, const std::wstring &internalID = std::wstring())
+	SoundDeviceInfo(SoundDeviceID id, const std::wstring &name, const std::wstring &apiName, const std::wstring &internalID = std::wstring())
 		: id(id)
 		, name(name)
+		, apiName(apiName)
 		, internalID(internalID)
 	{
 		return;

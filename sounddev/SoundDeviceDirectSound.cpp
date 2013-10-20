@@ -73,6 +73,7 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 	SoundDeviceInfo info;
 	info.id = SoundDeviceID(SNDDEV_DSOUND, static_cast<SoundDeviceIndex>(devices.size()));
 	info.name = lpstrDescription;
+	info.apiName = L"DirectSound";
 	if(lpGuid)
 	{
 		info.internalID = GuidToString(*lpGuid);
