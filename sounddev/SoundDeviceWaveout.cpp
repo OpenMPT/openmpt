@@ -235,6 +235,7 @@ std::vector<SoundDeviceInfo> CWaveDevice::EnumerateDevices()
 		}
 		SoundDeviceInfo info;
 		info.id = SoundDeviceID(SNDDEV_WAVEOUT, static_cast<SoundDeviceIndex>(index));
+		info.apiName = L"WaveOut";
 		if(index == 0)
 		{
 			info.name = L"Auto (Wave Mapper)";

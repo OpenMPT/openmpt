@@ -224,12 +224,16 @@ void COptionsSoundcard::UpdateEverything()
 			}
 
 			{
-				mpt::String::Copy(s, mpt::String::Encode(it->name, mpt::CharsetLocale));
+				std::string name = mpt::String::Encode(it->name, mpt::CharsetLocale);
 				cbi.mask = CBEIF_IMAGE | CBEIF_LPARAM | CBEIF_TEXT | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 				cbi.iItem = iItem;
 				cbi.cchTextMax = 0;
 				switch(it->id.GetType())
 				{
+				case SNDDEV_WAVEOUT:
+				case SNDDEV_PORTAUDIO_WMME:
+					cbi.iImage = IMAGE_WAVEOUT;
+					break;
 				case SNDDEV_DSOUND:
 				case SNDDEV_PORTAUDIO_DS:
 					cbi.iImage = IMAGE_DIRECTX;
@@ -238,13 +242,22 @@ void COptionsSoundcard::UpdateEverything()
 				case SNDDEV_PORTAUDIO_ASIO:
 					cbi.iImage = IMAGE_ASIO;
 					break;
+				case SNDDEV_PORTAUDIO_WASAPI:
+				case SNDDEV_PORTAUDIO_WDMKS:
+					cbi.iImage = IMAGE_WAVEOUT;
+					// No image available for now,
+					// prepend API name to name.
+					name = mpt::String::Encode(it->apiName, mpt::CharsetLocale) + " - " + name;
+					break;
 				default:
 					cbi.iImage = IMAGE_WAVEOUT;
+					break;
 				}
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
 				cbi.iIndent = 0;
 				cbi.lParam = it->id.GetIdRaw();
+				mpt::String::Copy(s, name);
 				cbi.pszText = s;
 				int pos = m_CbnDevice.InsertItem(&cbi);
 				if(cbi.lParam == m_nSoundDevice.GetIdRaw())
