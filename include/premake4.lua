@@ -72,6 +72,17 @@ solution "include"
    
    
    
+ project "miniz"
+  uuid "B5E0C06B-8121-426A-8FFB-4293ECAAE29C"
+  language "C"
+  location "miniz"
+  files {
+   "miniz/miniz.c",
+  }
+  dofile "premake4-defaults.lua"
+
+
+
  project "smbPitchShift"
   uuid "89AF16DD-32CC-4A7E-B219-5F117D761F9F"
   language "C++"
