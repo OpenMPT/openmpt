@@ -855,7 +855,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 		const float amp = 512.0f;
 #else
 		const int range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
-		const int amp = GetType() == MOD_TYPE_AMS2 ? 64.0f : 512.0f;
+		const float amp = GetType() == MOD_TYPE_AMS2 ? 64.0f : 512.0f;
 #endif
 		const int envval = Util::Round<int>((pIns->PitchEnv.GetValueFromPosition(envpos, range) - 0.5f) * amp);
 
