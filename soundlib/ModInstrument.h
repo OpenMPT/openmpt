@@ -42,7 +42,7 @@ struct InstrumentEnvelope
 	void Convert(MODTYPE fromType, MODTYPE toType);
 
 	// Get envelope value at a given tick. Returns value in range [0.0, 1.0].
-	float GetValueFromPosition(int position) const;
+	float GetValueFromPosition(int position, int range = ENVELOPE_MAX) const;
 
 };
 

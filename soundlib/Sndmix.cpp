@@ -850,7 +850,14 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 
 		const int envpos = pChn->PitchEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 		// Get values in [-256, 256]
-		const int envval = Util::Round<int>((pIns->PitchEnv.GetValueFromPosition(envpos) - 0.5f) * 512.0f);
+#ifdef MODPLUG_TRACKER
+		const int range = ENVELOPE_MAX;
+		const float amp = 512.0f;
+#else
+		const int range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
+		const int amp = GetType() == MOD_TYPE_AMS2 ? 64.0f : 512.0f;
+#endif
+		const int envval = Util::Round<int>((pIns->PitchEnv.GetValueFromPosition(envpos, range) - 0.5f) * amp);
 
 		if(pChn->PitchEnv.flags[ENV_FILTER])
 		{
@@ -1176,7 +1183,8 @@ void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEIND
 					}
 				}
 
-				if (note > 108 + NOTE_MIN && arpPos != 0)
+				// Test case: ArpeggioClamp.xm
+				if(note > 108 + NOTE_MIN && arpPos != 0)
 					note = 108 + NOTE_MIN; // FT2's note limit
 
 				period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
