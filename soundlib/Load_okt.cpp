@@ -240,6 +240,7 @@ void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &sndFile)
 						break;
 					}
 					// 0x40 is set volume -- fall through
+					MPT_FALLTHROUGH;
 				case 0: case 1: case 2: case 3:
 					m->volcmd = VOLCMD_VOLUME;
 					m->vol = m->param;
