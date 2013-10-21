@@ -51,7 +51,7 @@ public:
 		waveOutOpen( &waveout, flags.device == -1 ? WAVE_MAPPER : flags.device, &wfx, 0, 0, CALLBACK_NULL );
 		num_channels = flags.channels;
 		std::size_t frames_per_buffer = flags.samplerate * flags.buffer / 1000;
-		num_chunks = ( flags.buffer + 9 ) / 10;
+		num_chunks = ( flags.buffer + flags.ui_redraw_interval - 1 ) / flags.ui_redraw_interval;
 		if ( num_chunks < 2 ) {
 			num_chunks = 2;
 		}

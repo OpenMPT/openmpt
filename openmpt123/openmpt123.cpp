@@ -677,8 +677,8 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 	log.writeout();
 
-	const std::size_t bufsize = 1024;
-
+	const std::size_t bufsize = ( flags.mode == ModeUI ) ? ( flags.ui_redraw_interval * flags.samplerate / 1000 ) : 1024;
+	
 	std::vector<Tsample> left( bufsize );
 	std::vector<Tsample> right( bufsize );
 	std::vector<Tsample> rear_left( bufsize );
