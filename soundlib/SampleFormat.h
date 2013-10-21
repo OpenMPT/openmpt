@@ -17,7 +17,6 @@ enum SampleFormatEnum
 	SampleFormatInt24     = 24,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatInt32     = 32,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatFloat32   = 32 + 128, // do not change value (for compatibility with old configuration settings)
-	SampleFormatFixed5p27 =      255, // mixbuffer format
 	SampleFormatInvalid   =  0
 };
 
@@ -27,7 +26,6 @@ template<> struct SampleFormatTraits<int16>     { static const SampleFormatEnum 
 template<> struct SampleFormatTraits<int24>     { static const SampleFormatEnum sampleFormat = SampleFormatInt24;     };
 template<> struct SampleFormatTraits<int32>     { static const SampleFormatEnum sampleFormat = SampleFormatInt32;     };
 template<> struct SampleFormatTraits<float>     { static const SampleFormatEnum sampleFormat = SampleFormatFloat32;   };
-template<> struct SampleFormatTraits<fixed5p27> { static const SampleFormatEnum sampleFormat = SampleFormatFixed5p27; };
 
 template<SampleFormatEnum sampleFormat> struct SampleFormatToType;
 template<> struct SampleFormatToType<SampleFormatUnsigned8> { typedef uint8     type; };
@@ -35,7 +33,6 @@ template<> struct SampleFormatToType<SampleFormatInt16>     { typedef int16     
 template<> struct SampleFormatToType<SampleFormatInt24>     { typedef int24     type; };
 template<> struct SampleFormatToType<SampleFormatInt32>     { typedef int32     type; };
 template<> struct SampleFormatToType<SampleFormatFloat32>   { typedef float     type; };
-template<> struct SampleFormatToType<SampleFormatFixed5p27> { typedef fixed5p27 type; };
 
 
 struct SampleFormat
@@ -69,11 +66,6 @@ struct SampleFormat
 		if(!IsValid()) return false;
 		return value != SampleFormatFloat32;
 	}
-	bool IsMixBuffer() const
-	{
-		if(!IsValid()) return false;
-		return value == SampleFormatFixed5p27;
-	}
 	uint8 GetBitsPerSample() const
 	{
 		if(!IsValid()) return 0;
@@ -92,9 +84,6 @@ struct SampleFormat
 			return 32;
 			break;
 		case SampleFormatFloat32:
-			return 32;
-			break;
-		case SampleFormatFixed5p27:
 			return 32;
 			break;
 		default:

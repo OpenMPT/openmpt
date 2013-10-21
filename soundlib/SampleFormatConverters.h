@@ -490,18 +490,6 @@ struct ConvertFixedPoint<float32, int32, fractionalBits>
 	}
 };
 
-template <int fractionalBits>
-struct ConvertFixedPoint<fixed5p27, int32, fractionalBits>
-{
-	typedef int32 input_t;
-	typedef fixed5p27 output_t;
-	forceinline output_t operator() (input_t val)
-	{
-		STATIC_ASSERT(fractionalBits == 27 && sizeof(input_t)*8 == 32);
-		return fixed5p27::Raw(val);
-	}
-};
-
 
 
 

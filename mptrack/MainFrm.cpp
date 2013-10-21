@@ -842,13 +842,6 @@ public:
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
-			case SampleFormatFixed5p27:
-				{
-					typedef SampleFormatToType<SampleFormatFixed5p27>::type Tsample;
-					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
 		}
 		// increment output buffer for potentially next callback
 		buffer = (char*)buffer + (sampleFormat.GetBitsPerSample()/8) * channels * countChunk;

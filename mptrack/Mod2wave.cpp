@@ -68,13 +68,6 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 			return sndFile.Read(count, target);
 		}
 		break;
-	case SampleFormatFixed5p27:
-		{
-			typedef SampleFormatToType<SampleFormatFixed5p27>::type Tsample;
-			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, target);
-		}
-		break;
 	}
 	return 0;
 }
