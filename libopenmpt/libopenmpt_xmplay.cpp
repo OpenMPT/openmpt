@@ -423,6 +423,40 @@ static void clear_xmplay_string( char * str ) {
 	str[0] = '\0';
 }
 
+static std::string sanitize_xmplay_info_string( const std::string & str ) {
+	std::string result;
+	for ( std::size_t i = 0; i < str.length(); ++i ) {
+		const char c = str[i];
+		switch ( c ) {
+			case '\0':
+			case '\t':
+			case '\r':
+			case '\n':
+				break;
+			default:
+				result.push_back( c );
+				break;
+		}
+	}
+	return result;
+}
+
+static std::string sanitize_xmplay_multiline_string( const std::string & str ) {
+	std::string result;
+	for ( std::size_t i = 0; i < str.length(); ++i ) {
+		const char c = str[i];
+		switch ( c ) {
+			case '\0':
+			case '\t':
+				break;
+			default:
+				result.push_back( c );
+				break;
+		}
+	}
+	return result;
+}
+
 // check if a file is playable by this plugin
 // more thorough checks can be saved for the GetFileInfo and Open functions
 static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
@@ -637,7 +671,7 @@ static void WINAPI openmpt_GetInfoText( char * format, char * length ) {
 			<< " - "
 			<< "(via " << SHORTER_TITLE << ")"
 			;
-		write_xmplay_string( format, str.str() );
+		write_xmplay_string( format, sanitize_xmplay_info_string( str.str() ) );
 	}
 	if ( length ) {
 		std::ostringstream str;
@@ -646,7 +680,7 @@ static void WINAPI openmpt_GetInfoText( char * format, char * length ) {
 			<< " - "
 			<< self->mod->get_num_orders() << " orders"
 			;
-		write_xmplay_string( length, str.str() );
+		write_xmplay_string( length, sanitize_xmplay_info_string( str.str() ) );
 	}
 }
 
@@ -660,9 +694,9 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 	std::ostringstream str;
 	str
 		<< "\r"
-		<< "Format" << "\t" << self->mod->get_metadata("type") << " (" << self->mod->get_metadata("type_long") << ")" << "\r";
+		<< "Format" << "\t" << sanitize_xmplay_info_string( self->mod->get_metadata("type") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("type_long") ) << ")" << "\r";
 	if ( !self->mod->get_metadata("container").empty() ) {
-		str << "Container" << "\t"  << self->mod->get_metadata("container") << " (" << self->mod->get_metadata("container_long") << ")" << "\r";
+		str << "Container" << "\t"  << sanitize_xmplay_info_string( self->mod->get_metadata("container") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("container_long") ) << ")" << "\r";
 	}
 	str
 		<< "Channels" << "\t" << self->mod->get_num_channels() << "\r"
@@ -671,12 +705,12 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 		<< "Instruments" << "\t" << self->mod->get_num_instruments() << "\r"
 		<< "Samples" << "\t" << self->mod->get_num_samples() << "\r"
 		<< "\r"
-		<< "Tracker" << "\t" << self->mod->get_metadata("tracker") << "\r"
+		<< "Tracker" << "\t" << sanitize_xmplay_info_string( self->mod->get_metadata("tracker") ) << "\r"
 		<< "Player" << "\t" << "xmp-openmpt" << " version " << openmpt::string::get( openmpt::string::library_version ) << "\r"
 		;
 	std::string warnings = self->mod->get_metadata("warnings");
 	if ( !warnings.empty() ) {
-		str << "Warnings" << "\t" << string_replace( warnings, "\n", "\r\t" ) << "\r";
+		str << "Warnings" << "\t" << sanitize_xmplay_info_string( string_replace( warnings, "\n", "\r\t" ) ) << "\r";
 	}
 	str << "\r";
 	write_xmplay_string( buf, str.str() );
@@ -689,7 +723,7 @@ static void WINAPI openmpt_GetMessage( char * buf ) {
 		clear_xmplay_string( buf );
 		return;
 	}
-	write_xmplay_string( buf, convert_to_native( string_replace( self->mod->get_metadata("message"), "\n", "\r" ) ) );
+	write_xmplay_string( buf, convert_to_native( sanitize_xmplay_multiline_string( string_replace( self->mod->get_metadata("message"), "\n", "\r" ) ) ) );
 }
 
 // Seek to a position (in granularity units)
