@@ -129,13 +129,13 @@ public:
 	CDLSBank();
 	virtual ~CDLSBank();
 	void Destroy();
-	static BOOL IsDLSBank(LPCSTR lpszFileName);
+	static BOOL IsDLSBank(const char *lpszFileName);
 	static DWORD MakeMelodicCode(UINT bank, UINT instr) { return ((bank << 16) | (instr));}
 	static DWORD MakeDrumCode(UINT rgn, UINT instr) { return (0x80000000 | (rgn << 16) | (instr));}
 
 public:
-	BOOL Open(LPCSTR lpszFileName);
-	LPCSTR GetFileName() const { return m_szFileName; }
+	BOOL Open(const char *lpszFileName);
+	const char *GetFileName() const { return m_szFileName; }
 	UINT GetBankType() const { return m_nType; }
 	UINT GetBankInfo(SOUNDBANKINFO *pBankInfo=NULL) const { if (pBankInfo) *pBankInfo = m_BankInfo; return m_nType; }
 

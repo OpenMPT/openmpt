@@ -19,8 +19,8 @@ CMappedFile::~CMappedFile()
 }
 
 
-bool CMappedFile::Open(LPCSTR lpszFileName)
-//-----------------------------------------
+bool CMappedFile::Open(const char * lpszFileName)
+//-----------------------------------------------
 {
 	return m_File.Open(lpszFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite) != FALSE;
 }

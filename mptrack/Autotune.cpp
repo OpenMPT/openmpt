@@ -256,8 +256,6 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 int CAutotuneDlg::pitchReference = 440;	// Pitch reference in Hz
 int CAutotuneDlg::targetNote = 0;		// Target note (C = 0, C# = 1, etc...)
 
-extern const LPCSTR szNoteNames[12];
-
 void CAutotuneDlg::DoDataExchange(CDataExchange* pDX)
 //---------------------------------------------------
 {

@@ -976,7 +976,7 @@ void *CSoundFile::AllocateSample(size_t nbytes)
 
 	try
 	{
-		LPSTR p = (LPSTR)new char[allocSize];
+		char *p = new char[allocSize];
 		memset(p, 0, allocSize);
 		return (p + 16);
 	} catch(MPTMemoryException)

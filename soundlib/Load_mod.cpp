@@ -1090,8 +1090,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 #include "../mptrack/moddoc.h"
 #endif	// MODPLUG_TRACKER
 
-bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
-//-------------------------------------------------
+bool CSoundFile::SaveMod(const char *lpszFileName) const
+//------------------------------------------------------
 {
 	FILE *f;
 

@@ -1393,7 +1393,7 @@ static forceinline LONG GetSampleCount(ModChannel *pChn, LONG nSamples, bool bIT
 		if ((nPos < 0) || (nInc < 0)) return 0;
 	}
 	if ((nPos < 0) || (nPos >= (LONG)pChn->nLength)) return 0;
-	LONG nPosLo = (USHORT)pChn->nPosLo, nSmpCount = nSamples;
+	LONG nPosLo = (uint16)pChn->nPosLo, nSmpCount = nSamples;
 	if (nInc < 0)
 	{
 		LONG nInv = -nInc;
@@ -1405,7 +1405,7 @@ static forceinline LONG GetSampleCount(ModChannel *pChn, LONG nSamples, bool bIT
 		LONG nPosDest = nPos - nDeltaHi + ((nPosLo - nDeltaLo) >> 16);
 		if (nPosDest < nLoopStart)
 		{
-			nSmpCount = (ULONG)(((((LONGLONG)nPos - nLoopStart) << 16) + nPosLo - 1) / nInv) + 1;
+			nSmpCount = (ULONG)(((((int64)nPos - nLoopStart) << 16) + nPosLo - 1) / nInv) + 1;
 		}
 	} else
 	{
@@ -1417,7 +1417,7 @@ static forceinline LONG GetSampleCount(ModChannel *pChn, LONG nSamples, bool bIT
 		LONG nPosDest = nPos + nDeltaHi + ((nPosLo + nDeltaLo)>>16);
 		if (nPosDest >= (LONG)pChn->nLength)
 		{
-			nSmpCount = (ULONG)(((((LONGLONG)pChn->nLength - nPos) << 16) - nPosLo - 1) / nInc) + 1;
+			nSmpCount = (ULONG)(((((int64)pChn->nLength - nPos) << 16) - nPosLo - 1) / nInc) + 1;
 		}
 	}
 #ifdef _DEBUG

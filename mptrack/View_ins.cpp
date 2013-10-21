@@ -162,9 +162,9 @@ void CViewInstrument::UpdateScrollSize()
 		SIZE sizeTotal, sizePage, sizeLine;
 		UINT ntickmax = EnvGetTick(EnvGetLastPoint());
 
-		sizeTotal.cx = (INT)((ntickmax + 2) * m_fZoom);
+		sizeTotal.cx = (int)((ntickmax + 2) * m_fZoom);
 		sizeTotal.cy = 1;
-		sizeLine.cx = (INT)m_fZoom;
+		sizeLine.cx = (int)m_fZoom;
 		sizeLine.cy = 2;
 		sizePage.cx = sizeLine.cx * 4;
 		sizePage.cy = sizeLine.cy;

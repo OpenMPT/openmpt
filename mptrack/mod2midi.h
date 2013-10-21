@@ -31,7 +31,7 @@ protected:
 	MOD2MIDIINSTR m_InstrMap[MAX_SAMPLES];
 
 public:
-	CModToMidi(LPCSTR pszFileName, CSoundFile *pSndFile, CWnd *pWndParent=NULL);
+	CModToMidi(const char *pszFileName, CSoundFile *pSndFile, CWnd *pWndParent=NULL);
 	~CModToMidi() {}
 	BOOL DoConvert();
 

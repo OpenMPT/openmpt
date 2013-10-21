@@ -500,8 +500,8 @@ void CDLSBank::Destroy()
 }
 
 
-BOOL CDLSBank::IsDLSBank(LPCSTR lpszFileName)
-//-------------------------------------------
+BOOL CDLSBank::IsDLSBank(const char *lpszFileName)
+//------------------------------------------------
 {
 	RIFFCHUNKID riff;
 	FILE *f;
@@ -783,7 +783,7 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, LPVOID pvchunk
 		case IFFID_INAM:
 			{
 				UINT len = (pchunk->len < 32) ? pchunk->len : 31;
-				if (len) memcpy(pDlsIns->szName, ((LPCSTR)pchunk)+8, len);
+				if (len) memcpy(pDlsIns->szName, ((const char *)pchunk)+8, len);
 				pDlsIns->szName[31] = 0;
 				//Log("%s\n", (DWORD)pDlsIns->szName);
 			}
@@ -1138,8 +1138,8 @@ BOOL CDLSBank::ConvertSF2ToDLS(LPVOID pvsf2info)
 ///////////////////////////////////////////////////////////////
 // Open: opens a DLS bank
 
-BOOL CDLSBank::Open(LPCSTR lpszFileName)
-//--------------------------------------
+BOOL CDLSBank::Open(const char *lpszFileName)
+//-------------------------------------------
 {
 	SF2LOADERINFO sf2info;
 	const BYTE *lpMemFile;	// Pointer to memory-mapped file
@@ -1304,7 +1304,7 @@ BOOL CDLSBank::Open(LPCSTR lpszFileName)
 					if ((plist->listid == IFFID_INFO) && (psublist->len))
 					{
 						UINT len = (psublist->len < 255) ? psublist->len : 255;
-						LPCSTR pszInfo = (LPCSTR)(lpMemFile+dwPos+8);
+						const char *pszInfo = (const char *)(lpMemFile+dwPos+8);
 						switch(psublist->id)
 						{
 						case IFFID_INAM:

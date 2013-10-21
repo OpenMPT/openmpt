@@ -29,7 +29,7 @@ public:
 	~CMappedFile();
 
 public:
-	bool Open(LPCSTR lpszFileName);
+	bool Open(const char *lpszFileName);
 	void Close();
 	size_t GetLength();
 	const void *Lock();

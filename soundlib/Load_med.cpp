@@ -759,7 +759,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 
 			if ((iinfoptr) && (ientrysz < 256) && (ientries*ientrysz < dwMemLength) && (iinfoptr < dwMemLength - ientries*ientrysz))
 			{
-				LPCSTR psznames = (LPCSTR)(lpStream + iinfoptr);
+				const char *psznames = (const char *)(lpStream + iinfoptr);
 				for (UINT i=0; i<ientries; i++) if (i < m_nSamples)
 				{
 					mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[i + 1], reinterpret_cast<const char *>(psznames + i * ientrysz), ientrysz);
@@ -811,7 +811,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	#endif
 		if(dwPos + len + 6 > dwMemLength) len = 0;
 		UINT stype = BigEndianW(psdh->type);
-		LPSTR psdata = (LPSTR)(lpStream + dwPos + 6);
+		char *psdata = (char *)(lpStream + dwPos + 6);
 
 		SampleIO sampleIO(
 			SampleIO::_8bit,

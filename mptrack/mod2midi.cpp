@@ -76,7 +76,7 @@ void DYNMIDITRACK::Write(const void *pBuffer, unsigned long nBytes)
 	{
 		UINT nGrow = 4096;
 		if (nBytes >= nGrow) nGrow = nBytes * 2;
-		PUCHAR p = new UCHAR[nAllocatedMem+nGrow];
+		uint8 *p = new uint8[nAllocatedMem+nGrow];
 		if (!p) return;
 		memcpy(p, pTrackData, nTrackSize);
 		delete[] pTrackData;
@@ -150,8 +150,8 @@ void CModToMidi::DoDataExchange(CDataExchange *pDX)
 }
 
 
-CModToMidi::CModToMidi(LPCSTR pszPathName, CSoundFile *pSndFile, CWnd *pWndParent):CDialog(IDD_MOD2MIDI, pWndParent)
-//------------------------------------------------------------------------------------------------------------------
+CModToMidi::CModToMidi(const char * pszPathName, CSoundFile *pSndFile, CWnd *pWndParent):CDialog(IDD_MOD2MIDI, pWndParent)
+//------------------------------------------------------------------------------------------------------------------------
 {
 	CHAR fext[_MAX_EXT];
 	

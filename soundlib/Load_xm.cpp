@@ -651,8 +651,8 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 #define str_pattern				(GetStrI18N((MPT_TEXT("pattern"))))
 
 
-bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
-//--------------------------------------------------------------------
+bool CSoundFile::SaveXM(const char *lpszFileName, bool compatibilityExport)
+//-------------------------------------------------------------------------
 {
 	FILE *f;
 	if(lpszFileName == nullptr || (f = fopen(lpszFileName, "wb")) == nullptr)

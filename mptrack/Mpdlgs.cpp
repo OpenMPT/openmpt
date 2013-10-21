@@ -50,7 +50,7 @@ UINT nCPUMix[] =
 };
 
 
-LPCSTR gszChnCfgNames[3] =
+const char *gszChnCfgNames[3] =
 {
 	"Mono",
 	"Stereo",
