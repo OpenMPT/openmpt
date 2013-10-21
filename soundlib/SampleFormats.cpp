@@ -2308,15 +2308,13 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 		}
 	}
 
-	if(!mp3lib)
-	{
 #ifdef MODPLUG_TRACKER
-		const CString path = CString(theApp.GetAppDirPath()) + "libmpg123-0.dll";
-		mp3lib = LoadLibrary(path);
+	if(!mp3lib) mp3lib = LoadLibrary(CString(theApp.GetAppDirPath()) + "libmpg123-0.dll");
+	if(!mp3lib) mp3lib = LoadLibrary(CString(theApp.GetAppDirPath()) + "libmpg123.dll");
 #else
-		mp3lib = LoadLibrary(MPT_TEXT("libmpg123-0.dll"));
+	if(!mp3lib) mp3lib = LoadLibrary(MPT_TEXT("libmpg123-0.dll"));
+	if(!mp3lib) mp3lib = LoadLibrary(MPT_TEXT("libmpg123.dll"));
 #endif // MODPLUG_TRACKER
-	}
 	if(!mp3lib) return false;
 
 	#define MP3_DYNAMICBIND(f) mpg123::pfn_ ## f mpg123_ ## f = (mpg123::pfn_ ## f)GetProcAddress(mp3lib, "mpg123_" #f); if(!mpg123_ ## f) return false
