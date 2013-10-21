@@ -541,9 +541,9 @@ static char ConvertAMS2TextChars(char c)
 	};
 	const char highChars[] = { 'ä', ' ', 'å', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'Ä', 'Å', ' ', ' ', ' ', ' ', 'ö', ' ', ' ', ' ', ' ', 'Ö' };
 
-	if(c < CountOf(controlChars))
+	if((unsigned char)c < CountOf(controlChars))
 	{
-		return controlChars[c];
+		return controlChars[(unsigned char)c];
 	} else if((unsigned char)c >= 0x84 && (unsigned char)c < 0x84 + CountOf(highChars))
 	{
 		return highChars[(unsigned char)c - 0x84];
