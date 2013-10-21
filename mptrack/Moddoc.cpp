@@ -260,7 +260,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		// Scan Instruments
 		if (lpMidiLib) for (INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
 		{
-			LPCSTR pszMidiMapName;
+			const char *pszMidiMapName;
 			ModInstrument *pIns = m_SndFile.Instruments[nIns];
 			UINT nMidiCode;
 			BOOL bEmbedded = FALSE;

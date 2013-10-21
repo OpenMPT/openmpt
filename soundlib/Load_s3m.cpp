@@ -539,8 +539,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveS3M(LPCSTR lpszFileName) const
-//-------------------------------------------------
+bool CSoundFile::SaveS3M(const char *lpszFileName) const
+//------------------------------------------------------
 {
 	static const uint8 filler[16] =
 	{

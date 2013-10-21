@@ -26,7 +26,7 @@
 
 #include <fstream>
 
-extern LPCSTR gszChnCfgNames[3];
+extern const char *gszChnCfgNames[3];
 
 static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outputBuffer, CSoundFile::samplecount_t count, SampleFormat sampleFormat, Dither &dither)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -283,7 +283,7 @@ void CWaveConvert::FillFormats()
 	m_CbnSampleFormat.CComboBox::ResetContent();
 	int sel = 0;
 	DWORD dwSamplerate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
-	INT nChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+	int nChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
 	if(encTraits->modes & Encoder::ModeQuality)
 	{
 		for(int quality = 100; quality >= 0; quality -= 10)

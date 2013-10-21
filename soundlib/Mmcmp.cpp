@@ -162,11 +162,11 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 		if (pblk->flags & MMCMP_16BIT)
 		{
 			MMCMPBITBUFFER bb;
-			LPWORD pDest = (LPWORD)(pBuffer + psubblk->unpk_pos);
-			DWORD dwSize = psubblk->unpk_size >> 1;
-			DWORD dwPos = 0;
-			UINT numbits = pblk->num_bits;
-			UINT subblk = 0, oldval = 0;
+			uint16 *pDest = (uint16 *)(pBuffer + psubblk->unpk_pos);
+			uint32 dwSize = psubblk->unpk_size >> 1;
+			uint32 dwPos = 0;
+			uint32 numbits = pblk->num_bits;
+			uint32 subblk = 0, oldval = 0;
 
 #ifdef MMCMP_LOG
 			Log("  16-bit block: pos=%d size=%d ", psubblk->unpk_pos, psubblk->unpk_size);
@@ -180,13 +180,13 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 			bb.pEnd = lpMemFile+dwMemPos+pblk->pk_size;
 			while (subblk < pblk->sub_blk)
 			{
-				UINT newval = 0x10000;
-				DWORD d = bb.GetBits(numbits+1);
+				uint32 newval = 0x10000;
+				uint32 d = bb.GetBits(numbits+1);
 
 				if (d >= MMCMP16BitCommands[numbits])
 				{
-					UINT nFetch = MMCMP16BitFetch[numbits];
-					UINT newbits = bb.GetBits(nFetch) + ((d - MMCMP16BitCommands[numbits]) << nFetch);
+					uint32 nFetch = MMCMP16BitFetch[numbits];
+					uint32 newbits = bb.GetBits(nFetch) + ((d - MMCMP16BitCommands[numbits]) << nFetch);
 					if (newbits != numbits)
 					{
 						numbits = newbits & 0x0F;
@@ -207,7 +207,7 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 				}
 				if (newval < 0x10000)
 				{
-					newval = (newval & 1) ? (UINT)(-(LONG)((newval+1) >> 1)) : (UINT)(newval >> 1);
+					newval = (newval & 1) ? (uint32)(-(int32)((newval+1) >> 1)) : (uint32)(newval >> 1);
 					if (pblk->flags & MMCMP_DELTA)
 					{
 						newval += oldval;
@@ -217,14 +217,14 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 					{
 						newval ^= 0x8000;
 					}
-					pDest[dwPos++] = (WORD)newval;
+					pDest[dwPos++] = (uint16)newval;
 				}
 				if (dwPos >= dwSize)
 				{
 					subblk++;
 					dwPos = 0;
 					dwSize = psubblk[subblk].unpk_size >> 1;
-					pDest = (LPWORD)(pBuffer + psubblk[subblk].unpk_pos);
+					pDest = (uint16 *)(pBuffer + psubblk[subblk].unpk_pos);
 				}
 			}
 		} else
@@ -232,10 +232,10 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 		{
 			MMCMPBITBUFFER bb;
 			LPBYTE pDest = pBuffer + psubblk->unpk_pos;
-			DWORD dwSize = psubblk->unpk_size;
-			DWORD dwPos = 0;
-			UINT numbits = pblk->num_bits;
-			UINT subblk = 0, oldval = 0;
+			uint32 dwSize = psubblk->unpk_size;
+			uint32 dwPos = 0;
+			uint32 numbits = pblk->num_bits;
+			uint32 subblk = 0, oldval = 0;
 			LPCBYTE ptable = lpMemFile+dwMemPos;
 
 			bb.bitcount = 0;
@@ -244,13 +244,13 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 			bb.pEnd = lpMemFile+dwMemPos+pblk->pk_size;
 			while (subblk < pblk->sub_blk)
 			{
-				UINT newval = 0x100;
-				DWORD d = bb.GetBits(numbits+1);
+				uint32 newval = 0x100;
+				uint32 d = bb.GetBits(numbits+1);
 
 				if (d >= MMCMP8BitCommands[numbits])
 				{
-					UINT nFetch = MMCMP8BitFetch[numbits];
-					UINT newbits = bb.GetBits(nFetch) + ((d - MMCMP8BitCommands[numbits]) << nFetch);
+					uint32 nFetch = MMCMP8BitFetch[numbits];
+					uint32 newbits = bb.GetBits(nFetch) + ((d - MMCMP8BitCommands[numbits]) << nFetch);
 					if (newbits != numbits)
 					{
 						numbits = newbits & 0x07;
@@ -277,7 +277,7 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 						n += oldval;
 						oldval = n;
 					}
-					pDest[dwPos++] = (BYTE)n;
+					pDest[dwPos++] = (uint8)n;
 				}
 				if (dwPos >= dwSize)
 				{

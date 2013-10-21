@@ -58,7 +58,7 @@ extern bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint1
 
 #define NUM_REVERBTYPES			29
 
-LPCSTR GetReverbPresetName(UINT nPreset);
+const char *GetReverbPresetName(UINT nPreset);
 
 #endif
 
@@ -565,11 +565,11 @@ public:
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
-	bool SaveXM(LPCSTR lpszFileName, bool compatibilityExport = false);
-	bool SaveS3M(LPCSTR lpszFileName) const;
-	bool SaveMod(LPCSTR lpszFileName) const;
-	bool SaveIT(LPCSTR lpszFileName, bool compatibilityExport = false);
-	bool SaveITProject(LPCSTR lpszFileName); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
+	bool SaveXM(const char *lpszFileName, bool compatibilityExport = false);
+	bool SaveS3M(const char *lpszFileName) const;
+	bool SaveMod(const char *lpszFileName) const;
+	bool SaveIT(const char *lpszFileName, bool compatibilityExport = false);
+	bool SaveITProject(const char *lpszFileName); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
 	void WriteInstrumentPropertyForAllInstruments(uint32 code,  int16 size, FILE* f, UINT nInstruments) const;
 	void SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const;
@@ -749,9 +749,9 @@ public:
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file);
 #ifndef MODPLUG_NO_FILESAVE
-	bool SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
-	bool SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
-	bool SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const;
+	bool SaveWAVSample(SAMPLEINDEX nSample, const char *lpszFileName) const;
+	bool SaveRAWSample(SAMPLEINDEX nSample, const char *lpszFileName) const;
+	bool SaveFLACSample(SAMPLEINDEX nSample, const char *lpszFileName) const;
 #endif
 
 	// Instrument file I/O
@@ -761,8 +761,8 @@ public:
 	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpMemFile, DWORD dwFileLength);
 	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize=false);
 #ifndef MODPLUG_NO_FILESAVE
-	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const;
-	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName, bool compress) const;
+	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const char *lpszFileName) const;
+	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const char *lpszFileName, bool compress) const;
 #endif
 
 	// I/O from another sound file
@@ -812,17 +812,17 @@ public:
 #endif
 
 
-extern const LPCSTR szNoteNames[12];
-extern const LPCSTR szDefaultNoteNames[NOTE_MAX];
+extern const char *szNoteNames[12];
+extern const char *szDefaultNoteNames[NOTE_MAX];
 
 
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 //-----------------------------------------------------------------------
 {
 	if(instr > 0 && instr < MAX_INSTRUMENTS && Instruments[instr] && Instruments[instr]->nMixPlug && Instruments[instr]->nMixPlug <= MAX_MIXPLUGINS)
-		return m_MixPlugins[Instruments[instr]->nMixPlug-1].pMixPlugin;
+		return m_MixPlugins[Instruments[instr]->nMixPlug - 1].pMixPlugin;
 	else
-		return NULL;
+		return nullptr;
 }
 
 

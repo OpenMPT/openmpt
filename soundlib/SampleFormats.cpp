@@ -461,8 +461,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 
 #ifndef MODPLUG_NO_FILESAVE
-bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
-//----------------------------------------------------------------------------------
+bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const char *lpszFileName) const
+//---------------------------------------------------------------------------------
 {
 	WAVWriter file(lpszFileName);
 
@@ -502,8 +502,8 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) c
 ///////////////////////////////////////////////////////////////
 // Save RAW
 
-bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
-//----------------------------------------------------------------------------------
+bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const char *lpszFileName) const
+//---------------------------------------------------------------------------------
 {
 	FILE *f;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
@@ -968,8 +968,8 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName) const
-//----------------------------------------------------------------------------------------
+bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const char *lpszFileName) const
+//---------------------------------------------------------------------------------------
 {
 	ModInstrument *pIns = Instruments[nInstr];
 	if(pIns == nullptr || lpszFileName == nullptr)
@@ -1554,8 +1554,8 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const LPCSTR lpszFileName, bool compress) const
-//--------------------------------------------------------------------------------------------------------
+bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const char *lpszFileName, bool compress) const
+//-------------------------------------------------------------------------------------------------------
 {
 	ITInstrumentEx iti;
 	ModInstrument *pIns = Instruments[nInstr];
@@ -2063,8 +2063,8 @@ inline static void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength n
 
 
 #ifndef MODPLUG_NO_FILESAVE
-bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const LPCSTR lpszFileName) const
-//-----------------------------------------------------------------------------------
+bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const char *lpszFileName) const
+//----------------------------------------------------------------------------------
 {
 #ifndef NO_FLAC
 	FLAC__StreamEncoder *encoder = FLAC__stream_encoder_new();

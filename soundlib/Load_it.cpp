@@ -1110,8 +1110,8 @@ uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 #include "../mptrack/Mptrack.h"	// For config filename
 #endif // MODPLUG_TRACKER
 
-bool CSoundFile::SaveIT(LPCSTR lpszFileName, bool compatibilityExport)
-//--------------------------------------------------------------------
+bool CSoundFile::SaveIT(const char *lpszFileName, bool compatibilityExport)
+//-------------------------------------------------------------------------
 {
 	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatibilityExport ? ModSpecs::it : ModSpecs::itEx));
 

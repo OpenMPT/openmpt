@@ -320,9 +320,9 @@ STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNames));
 const LPCSTR szHexChar = "0123456789ABCDEF";
 
 // Defined in load_mid.cpp
-extern const LPCSTR szMidiProgramNames[128];
-extern const LPCSTR szMidiPercussionNames[61]; // notes 25..85
-extern const LPCSTR szMidiGroupNames[17];		// 16 groups + Percussions
+extern const char *szMidiProgramNames[128];
+extern const char *szMidiPercussionNames[61];	// notes 25..85
+extern const char *szMidiGroupNames[17];		// 16 groups + Percussions
 
 /////////////////////////////////////////////////////////////////////////////
 

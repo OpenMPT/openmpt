@@ -89,7 +89,7 @@ typedef SNDMIX_REVERB_PROPERTIES* PSNDMIX_REVERB_PROPERTIES;
 typedef struct _SNDMIX_RVBPRESET
 {
 	SNDMIX_REVERB_PROPERTIES Preset;
-	LPCSTR lpszName;
+	const char *lpszName;
 } SNDMIX_RVBPRESET, *PSNDMIX_RVBPRESET;
 
 
@@ -126,7 +126,7 @@ static SNDMIX_RVBPRESET gRvbPresets[NUM_REVERBTYPES] =
 	{{ SNDMIX_REVERB_PRESET_UNDERWATER },		"Underwater"},
 };
 
-LPCSTR GetReverbPresetName(UINT nPreset)
+const char *GetReverbPresetName(UINT nPreset)
 {
 	return (nPreset < NUM_REVERBTYPES) ? gRvbPresets[nPreset].lpszName : NULL;
 }

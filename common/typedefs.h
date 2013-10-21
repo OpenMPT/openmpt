@@ -272,6 +272,8 @@ const uint16 uint16_max = UINT16_MAX;
 const uint32 uint32_max = UINT32_MAX;
 const uint64 uint64_max = UINT64_MAX;
 
+
+// 24-bit integer wrapper (for 24-bit PCM)
 struct int24
 {
 	uint8 bytes[3];
@@ -301,6 +303,8 @@ STATIC_ASSERT(sizeof(int24) == 3);
 #define int24_min (0-0x00800000)
 #define int24_max (0+0x007fffff)
 
+
+// 32-bit wrapper for encoding 32-bit floats
 struct uint8_4
 {
 	uint8 x[4];
@@ -312,6 +316,7 @@ struct uint8_4
 	uint8_4 & SetLE(uint32 y) { x[0] = (y >>  0)&0xff; x[1] = (y >>  8)&0xff; x[2] = (y >> 16)&0xff; x[3] = (y >> 24)&0xff; return *this; }
 };
 STATIC_ASSERT(sizeof(uint8_4) == 4);
+
 
 typedef float float32;
 STATIC_ASSERT(sizeof(float32) == 4);
@@ -342,26 +347,15 @@ typedef std::int32_t  BOOL;
 typedef std::uint8_t  BYTE;
 typedef std::uint16_t WORD;
 typedef std::uint32_t DWORD;
-typedef std::uint64_t QWORD;
 typedef std::int8_t   CHAR;
 typedef std::int16_t  SHORT;
-typedef std::int32_t  INT;
 typedef std::int32_t  LONG;
-typedef std::int64_t  LONGLONG;
-typedef std::uint8_t  UCHAR;
-typedef std::uint16_t USHORT;
 typedef std::uint32_t UINT;
 typedef std::uint32_t ULONG;
-typedef std::uint64_t ULONGLONG;
 typedef void *        LPVOID;
 typedef BYTE *        LPBYTE;
-typedef WORD *        LPWORD;
 typedef DWORD *       LPDWORD;
-typedef INT *         LPINT;
 typedef LONG *        LPLONG;
-
-typedef const char *  LPCSTR;
-typedef char *        LPSTR;
 
 // for BOOL
 #define TRUE (1)

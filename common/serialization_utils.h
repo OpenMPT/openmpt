@@ -117,7 +117,7 @@ enum Rwf
 
 template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data)
-//------------------------------------------------------
+//---------------------------------------------------------
 {
 	union {
 		T t;
@@ -135,7 +135,7 @@ inline void Binarywrite(std::ostream& oStrm, const T& data)
 //Write only given number of bytes from the beginning.
 template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data, const Offtype bytecount)
-//--------------------------------------------------------------------------
+//----------------------------------------------------------------------------------
 {
 	union {
 		T t;
@@ -152,7 +152,7 @@ inline void Binarywrite(std::ostream& oStrm, const T& data, const Offtype byteco
 
 template <class T>
 inline void WriteItem(std::ostream& oStrm, const T& data)
-//----------------------------------------------------
+//-------------------------------------------------------
 {
 	#ifdef HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
@@ -166,12 +166,12 @@ template <>
 inline void WriteItem<std::string>(std::ostream& oStrm, const std::string& str) {WriteItemString(oStrm, str.c_str(), str.length());}
 
 template <>
-inline void WriteItem<LPCSTR>(std::ostream& oStrm, const LPCSTR& psz) {WriteItemString(oStrm, psz, strlen(psz));}
+inline void WriteItem<const char *>(std::ostream& oStrm, const char * const & psz) { WriteItemString(oStrm, psz, strlen(psz));}
 
 
 template<class T>
 inline void Binaryread(std::istream& iStrm, T& data)
-//----------------------------------------------
+//--------------------------------------------------
 {
 	union {
 		T t;
@@ -189,7 +189,7 @@ inline void Binaryread(std::istream& iStrm, T& data)
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
 template <class T>
 inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
-//-----------------------------------------------------------------------
+//---------------------------------------------------------------------------
 {
 	#ifdef HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
@@ -211,7 +211,7 @@ inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
 
 template <class T>
 inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
-//------------------------------------------------------------------
+//----------------------------------------------------------------------
 {
 	#ifdef HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
@@ -225,7 +225,7 @@ inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
 // Read specialization for float. If data size is 8, read double and assign it to given float.
 template <>
 inline void ReadItem<float>(std::istream& iStrm, float& f, const DataSize nSize)
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 {
 	if (nSize == 8)
 	{
@@ -240,7 +240,7 @@ inline void ReadItem<float>(std::istream& iStrm, float& f, const DataSize nSize)
 // Read specialization for double. If data size is 4, read float and assign it to given double.
 template <>
 inline void ReadItem<double>(std::istream& iStrm, double& d, const DataSize nSize)
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 {
 	if (nSize == 4)
 	{
@@ -252,11 +252,11 @@ inline void ReadItem<double>(std::istream& iStrm, double& d, const DataSize nSiz
 		Binaryread(iStrm, d);
 }
 
-void ReadItemString(std::istream& iStrm, std::string& str, const DataSize); 
+void ReadItemString(std::istream& iStrm, std::string& str, const DataSize);
 
 template <>
 inline void ReadItem<std::string>(std::istream& iStrm, std::string& str, const DataSize nSize)
-//----------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
 {
 	ReadItemString(iStrm, str, nSize);
 }
@@ -323,7 +323,7 @@ public:
 
 	// Returns read iterator to the beginning of entries.
 	// The behaviour of read iterators is undefined if map doesn't
-    // contain entry ids or data begin positions.
+	// contain entry ids or data begin positions.
 	ReadIterator GetReadBegin();
 
 	// Returns read iterator to the end(one past last) of entries.

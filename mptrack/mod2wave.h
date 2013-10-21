@@ -40,7 +40,7 @@ public:
 	CWaveConvertSettings m_Settings;
 	const Encoder::Traits *encTraits;
 	CSoundFile *m_pSndFile;
-	ULONGLONG m_dwFileLimit;
+	uint64 m_dwFileLimit;
 	DWORD m_dwSongLimit;
 	bool m_bSelectPlay, m_bHighQuality, m_bGivePlugsIdleTime;
 	ORDERINDEX m_nMinOrder, m_nMaxOrder, m_nNumOrders;
@@ -93,13 +93,13 @@ class CDoWaveConvert: public CDialog
 public:
 	CWaveConvertSettings m_Settings;
 	CSoundFile *m_pSndFile;
-	LPCSTR m_lpszFileName;
+	const char *m_lpszFileName;
 	DWORD m_dwFileLimit, m_dwSongLimit;
 	UINT m_nMaxPatterns;
 	bool m_bAbort, m_bGivePlugsIdleTime;
 
 public:
-	CDoWaveConvert(CSoundFile *sndfile, LPCSTR fname, CWaveConvertSettings settings, CWnd *parent = NULL)
+	CDoWaveConvert(CSoundFile *sndfile, const char *fname, CWaveConvertSettings settings, CWnd *parent = NULL)
 		: CDialog(IDD_PROGRESS, parent)
 		, m_Settings(settings)
 		{ m_pSndFile = sndfile; 
