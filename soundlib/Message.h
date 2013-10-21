@@ -20,7 +20,7 @@ class SongMessage : public std::string
 {
 public:
 
-	typedef void (*ConverterFunc)(char &);
+	typedef char (*ConverterFunc)(char);
 
 	// Line ending types (for reading song messages from module files)
 	enum LineEnding

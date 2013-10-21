@@ -95,8 +95,6 @@ namespace mpt { namespace String
 	void Read(std::string &dest, const char *srcBuffer, const size_t srcSize)
 	//-----------------------------------------------------------------------
 	{
-		ASSERT(srcSize > 0);
-
 		dest.clear();
 
 		if(mode == nullTerminated || mode == maybeNullTerminated)
@@ -163,7 +161,6 @@ namespace mpt { namespace String
 	//----------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
-		//ASSERT(srcSize > 0);
 
 		const size_t maxSize = MIN(destSize, srcSize);
 		char *dst = destBuffer;
@@ -389,7 +386,7 @@ namespace mpt { namespace String
 	// Copy from a fixed size char array to a std::string.
 	template <size_t srcSize>
 	void Copy(std::string &dest, const char (&srcBuffer)[srcSize])
-	//----------------------------------------------------------------------------
+	//------------------------------------------------------------
 	{
 		CopyN(dest, srcBuffer, srcSize);
 	}

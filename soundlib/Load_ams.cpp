@@ -8,6 +8,8 @@
  *          While the two programs look rather similiar, the structure of both
  *          programs' "AMS" format is significantly different in some places -
  *          Velvet Studio is a rather advanced tracker in comparison to Extreme's Tracker.
+ *          The source code of Velvet Studio has been released into the
+ *          public domain in 2013: https://github.com/Patosc/VelvetStudio/commits/master
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -21,34 +23,35 @@
 // Common code for both AMS formats
 
 // Callback function for reading text
-void ConvertAMSTextChars(char &c)
-//-------------------------------
+static char ConvertAMSTextChars(char c)
+//-------------------------------------
 {
 	switch((unsigned char)c)
 	{
-	case 0x00: c = ' '; break;
-	case 0x14: c = 'ö'; break;
-	case 0x19: c = 'Ö'; break;
-	case 0x04: c = 'ä'; break;
-	case 0x0E: c = 'Ä'; break;
-	case 0x06: c = 'å'; break;
-	case 0x0F: c = 'Å'; break;
+	case 0x00: return ' ';
+	case 0x04: return 'ä';	// Lower-case ae
+	case 0x06: return 'å';	// Lower-case a-ring
+	case 0x0E: return 'Ä';	// Upper-case AE
+	case 0x0F: return 'Å';	// Upper-case A-ring
+	case 0x14: return 'ö';	// Lower-case oe
+	case 0x19: return 'Ö';	// Upper-case OE
 	}
+	return c;
 }
 
 
 // Read variable-length AMS string (we ignore the maximum text length specified by the AMS specs and accept any length).
 template<size_t destSize>
-bool ReadAMSString(char (&destBuffer)[destSize], FileReader &file)
-//----------------------------------------------------------------
+static bool ReadAMSString(char (&destBuffer)[destSize], FileReader &file)
+//-----------------------------------------------------------------------
 {
 	const size_t length = file.ReadUint8();
 	return file.ReadString<mpt::String::spacePadded>(destBuffer, length);
 }
 
 // Read variable-length AMS string (we ignore the maximum text length specified by the AMS specs and accept any length).
-bool ReadAMSString(std::string &dest, FileReader &file)
-//-----------------------------------------------------
+static bool ReadAMSString(std::string &dest, FileReader &file)
+//------------------------------------------------------------
 {
 	const size_t length = file.ReadUint8();
 	return file.ReadString<mpt::String::spacePadded>(dest, length);
@@ -56,8 +59,8 @@ bool ReadAMSString(std::string &dest, FileReader &file)
 
 
 // Read AMS or AMS2 (newVersion = true) pattern. At least this part of the format is more or less identical between the two trackers...
-void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk, CSoundFile &sndFile)
-//----------------------------------------------------------------------------------------------------
+static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk, CSoundFile &sndFile)
+//-----------------------------------------------------------------------------------------------------------
 {
 	enum
 	{
@@ -324,7 +327,8 @@ struct PACKED AMSSampleHeader
 {
 	enum SampleFlags
 	{
-		smp16Bit	= 0x80,
+		smp16BitOld	= 0x04,	// AMS 1.0 (at least according to docs, I yet have to find such a file)
+		smp16Bit	= 0x80,	// AMS 1.1+
 		smpPacked	= 0x03,
 	};
 
@@ -372,7 +376,12 @@ struct PACKED AMSSampleHeader
 
 		if(mptSmp.nLoopStart < mptSmp.nLoopEnd)
 		{
-			mptSmp.uFlags |= CHN_LOOP;
+			mptSmp.uFlags.set(CHN_LOOP);
+		}
+
+		if((flags & smp16Bit) || (flags & smp16BitOld))
+		{
+			mptSmp.uFlags.set(CHN_16BIT);
 		}
 	}
 };
@@ -504,7 +513,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 		{
 			SampleIO(
-				(Samples[smp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+				Samples[smp].uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
 				SampleIO::mono,
 				SampleIO::littleEndian,
 				packSample[smp - 1] ? SampleIO::AMS : SampleIO::signedPCM)
@@ -517,7 +526,30 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 
 
 /////////////////////////////////////////////////////////////////////
-// AMS (Velvet Studio) 2.1 / 2.2 loader
+// AMS (Velvet Studio) 2.0 - 2.02 loader
+
+
+// Callback function for reading text - looking at Velvet Studio's bitmap font (TPIC32.PCX), these appear to be the only supported non-ASCII chars.
+static char ConvertAMS2TextChars(char c)
+//--------------------------------------
+{
+	const char controlChars[] =
+	{ 
+		' ', '©', 'v' /* actually supposed to be a root/check sign */, '·',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',	// Small GUI letters
+		' ', '§'
+	};
+	const char highChars[] = { 'ä', ' ', 'å', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'Ä', 'Å', ' ', ' ', ' ', ' ', 'ö', ' ', ' ', ' ', ' ', 'Ö' };
+
+	if(c < CountOf(controlChars))
+	{
+		return controlChars[c];
+	} else if((unsigned char)c >= 0x84 && (unsigned char)c < 0x84 + CountOf(highChars))
+	{
+		return highChars[(unsigned char)c - 0x84];
+	}
+	return c;
+}
 
 
 #ifdef NEEDS_PRAGMA_PACK
@@ -532,7 +564,7 @@ struct PACKED AMS2FileHeader
 		linearSlides	= 0x40,
 	};
 
-	uint8  versionLow;		// Version of format (Hi = MainVer, Low = SubVer e.g. 0202 = 2.2)
+	uint8  versionLow;		// Version of format (Hi = MainVer, Low = SubVer e.g. 0202 = 2.02)
 	uint8  versionHigh;		// ditto
 	uint8  numIns;			// Nr of Instruments (0-255)
 	uint16 numPats;			// Nr of Patterns (1-1024)
@@ -553,7 +585,7 @@ STATIC_ASSERT(sizeof(AMS2FileHeader) == 7);
 // AMS2 Instument Envelope 
 struct PACKED AMS2Envelope
 {
-	uint8 speed;		// Envelope speed
+	uint8 speed;		// Envelope speed (currently not supported, always the same as current BPM)
 	uint8 sustainPoint;	// Envelope sustain point
 	uint8 loopStart;	// Envelope loop Start
 	uint8 loopEnd;		// Envelope loop End
@@ -889,7 +921,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	uint8 composerLength = file.ReadUint8();
 	if(composerLength)
 	{
-		songMessage.Read(file, composerLength, SongMessage::leAutodetect, ConvertAMSTextChars);
+		songMessage.Read(file, composerLength, SongMessage::leAutodetect, ConvertAMS2TextChars);
 	}
 
 	// Channel names
@@ -929,7 +961,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 		// Packed text doesn't include any line breaks!
-		songMessage.ReadFixedLineLength(&textOut[0], descriptionHeader.unpackedLen, 74, 0, ConvertAMSTextChars);
+		songMessage.ReadFixedLineLength(&textOut[0], descriptionHeader.unpackedLen, 74, 0, ConvertAMS2TextChars);
 	}
 
 	// Read Order List

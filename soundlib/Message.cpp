@@ -43,7 +43,7 @@ bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, C
 		{
 			char c = str[i];
 			if(pTextConverter != nullptr)
-				pTextConverter(c);
+				c = pTextConverter(c);
 
 			if(c == '\r') nCR++;
 			else if(c == '\n') nLF++;
@@ -68,7 +68,7 @@ bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, C
 	{
 		char c = str[i];
 		if(pTextConverter != nullptr)
-			pTextConverter(c);
+			c = pTextConverter(c);
 
 		if(c != '\n' || lineEnding != leCRLF)
 			finalLength++;
@@ -81,7 +81,7 @@ bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, C
 	{
 		char c = str[i];
 		if(pTextConverter != nullptr)
-			pTextConverter(c);
+			c = pTextConverter(c);
 
 		switch(c)
 		{
@@ -149,7 +149,7 @@ bool SongMessage::ReadFixedLineLength(const void *data, const size_t length, con
 		for(size_t lpos = 0; lpos < lineLength; lpos++)
 		{
 			// Pre-process text
-			if(pTextConverter != nullptr) pTextConverter(at(cpos + lpos));
+			if(pTextConverter != nullptr) at(cpos + lpos) = pTextConverter(at(cpos + lpos));
 
 			switch(at(cpos + lpos))
 			{
@@ -215,7 +215,7 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding, ConverterFunc
 		{
 			char c = at(i);
 			// Pre-process text
-			if(pTextConverter != nullptr) pTextConverter(c);
+			if(pTextConverter != nullptr) c = pTextConverter(c);
 			comments.at(writePos++) = c;
 		}
 	}
