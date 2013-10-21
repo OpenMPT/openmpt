@@ -186,6 +186,7 @@ static inline std::string mode_to_string( Mode mode ) {
 struct commandlineflags {
 	Mode mode;
 	bool canUI;
+	std::int32_t ui_redraw_interval;
 	bool canProgress;
 	int device;
 	std::int32_t buffer;
@@ -216,6 +217,7 @@ struct commandlineflags {
 	bool force_overwrite;
 	commandlineflags() {
 		mode = ModeUI;
+		ui_redraw_interval = 50;
 		device = -1;
 		buffer = 250;
 		samplerate = 48000;
