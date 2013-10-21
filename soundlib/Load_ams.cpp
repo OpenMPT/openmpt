@@ -411,7 +411,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = fileHeader.numSamps;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Format("Extreme's tracker %d.%d", fileHeader.versionHigh, fileHeader.versionLow);
+	madeWithTracker = mpt::String::Format("Extreme's Tracker %d.%d", fileHeader.versionHigh, fileHeader.versionLow);
 
 	std::vector<bool> packSample(fileHeader.numSamps);
 
@@ -532,7 +532,8 @@ struct PACKED AMS2FileHeader
 		linearSlides	= 0x40,
 	};
 
-	uint16 format;			// Version of format (Hi = MainVer, Low = SubVer e.g. 0202 = 2.2)
+	uint8  versionLow;		// Version of format (Hi = MainVer, Low = SubVer e.g. 0202 = 2.2)
+	uint8  versionHigh;		// ditto
 	uint8  numIns;			// Nr of Instruments (0-255)
 	uint16 numPats;			// Nr of Patterns (1-1024)
 	uint16 numOrds;			// Nr of Positions (1-65535)
@@ -541,7 +542,6 @@ struct PACKED AMS2FileHeader
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
-		SwapBytesLE(format);
 		SwapBytesLE(numPats);
 		SwapBytesLE(numOrds);
 	};
@@ -758,7 +758,8 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	AMS2FileHeader fileHeader;
 	if(!file.ReadMagic("AMShdr\x1A")
 		|| !ReadAMSString(songName, file)
-		|| !file.ReadConvertEndianness(fileHeader))
+		|| !file.ReadConvertEndianness(fileHeader)
+		|| fileHeader.versionHigh != 2 || fileHeader.versionLow > 2)
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -766,32 +767,30 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 	
+	InitializeGlobals();
+
+	m_nType = MOD_TYPE_AMS2;
+	m_nInstruments = fileHeader.numIns;
+	m_nChannels = 32;
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
+	SetupMODPanning(true);
+	madeWithTracker = mpt::String::Format("Velvet Studio %d.%02d", fileHeader.versionHigh, fileHeader.versionLow);
+
 	uint16 headerFlags;
-	if(fileHeader.format == 0x202)
+	if(fileHeader.versionLow >= 2)
 	{
 		m_nDefaultTempo = std::max(uint8(32), static_cast<uint8>(file.ReadUint16LE() >> 8));	// 16.16 Tempo
 		m_nDefaultSpeed = std::max(uint8(1), file.ReadUint8());
 		file.Skip(3);	// Default values for pattern editor
 		headerFlags = file.ReadUint16LE();
-	} else if(fileHeader.format == 0x201)
+	} else
 	{
 		m_nDefaultTempo = std::max(uint8(32), file.ReadUint8());
 		m_nDefaultSpeed = std::max(uint8(1), file.ReadUint8());
 		headerFlags = file.ReadUint8();
-	} else
-	{
-		return false;
 	}
 
-	InitializeGlobals();
-
-	m_nType = MOD_TYPE_AMS2;
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS | ((headerFlags & AMS2FileHeader::linearSlides) ? SONG_LINEARSLIDES : SongFlags(0));
-	m_nInstruments = fileHeader.numIns;
-	m_nChannels = 32;
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
-	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Format("Velvet Studio %d.%02x", fileHeader.format & 0x0F, fileHeader.format >> 4);
 
 	// Instruments
 	std::vector<SAMPLEINDEX> firstSample;	// First sample of instrument
@@ -816,9 +815,11 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 		uint8 numSamples = file.ReadUint8();
 		uint8 sampleAssignment[120];
+		MemsetZero(sampleAssignment);	// Only really needed for v2.0, where the lowest and highest octave aren't cleared.
 
 		if(numSamples == 0
-			|| !file.ReadArray(sampleAssignment))
+			|| (fileHeader.versionLow > 0 && !file.ReadArray(sampleAssignment))	// v2.01+: 120 Notes
+			|| (fileHeader.versionLow == 0 && !file.ReadArray(reinterpret_cast<uint8 (&) [96]>(sampleAssignment[12]))))	// v2.0: 96 Notes
 		{
 			continue;
 		}
@@ -836,8 +837,8 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 		AMS2Instrument instrHeader;
 		file.ReadConvertEndianness(instrHeader);
-		instrument->nFadeOut = (instrHeader.vibampFadeout & AMS2Instrument::fadeOutMask) * 2;
-		const uint8 vibAmp = 1 + ((instrHeader.vibampFadeout & AMS2Instrument::vibAmpMask) >> AMS2Instrument::vibAmpShift);		// "Close enough"
+		instrument->nFadeOut = (instrHeader.vibampFadeout & AMS2Instrument::fadeOutMask);
+		const int16 vibAmp = 1 << ((instrHeader.vibampFadeout & AMS2Instrument::vibAmpMask) >> AMS2Instrument::vibAmpShift);
 
 		instrHeader.ApplyFlags(instrument->VolEnv, AMS2Instrument::volEnvShift);
 		instrHeader.ApplyFlags(instrument->PanEnv, AMS2Instrument::panEnvShift);
@@ -848,7 +849,12 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			instrument->VolEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->VolEnv.Values[i] * ENVELOPE_MAX + 64u) / 127u));
 			instrument->PanEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->PanEnv.Values[i] * ENVELOPE_MAX + 128u) / 255u));
-			instrument->PitchEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>(32 + (static_cast<int8>(instrument->PitchEnv.Values[i] - 128) * vibAmp) / 255));
+#ifdef MODPLUG_TRACKER
+			instrument->PitchEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>(32 + Util::muldivrfloor(static_cast<int8>(instrument->PitchEnv.Values[i] - 128), vibAmp, 255)));
+#else
+			// Try to keep as much precision as possible... divide by 8 since that's the highest possible vibAmp factor.
+			instrument->PitchEnv.Values[i] = static_cast<uint8>(128 + Util::muldivrfloor(static_cast<int8>(instrument->PitchEnv.Values[i] - 128), vibAmp, 8));
+#endif
 		}
 
 		// Sample headers - we will have to read them even for shadow samples, and we will have to load them several times,
@@ -867,7 +873,9 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 			file.ReadConvertEndianness(sampleHeader);
 			sampleHeader.ConvertToMPT(Samples[firstSmp + smp]);
 
-			uint16 settings = (instrHeader.shadowInstr & instrIndexMask) | ((smp << sampleIndexShift) & sampleIndexMask) | ((sampleHeader.flags & AMS2SampleHeader::smpPacked) ? packStatusMask : 0);
+			uint16 settings = (instrHeader.shadowInstr & instrIndexMask)
+				| ((smp << sampleIndexShift) & sampleIndexMask)
+				| ((sampleHeader.flags & AMS2SampleHeader::smpPacked) ? packStatusMask : 0);
 			sampleSettings.push_back(settings);
 		}
 
