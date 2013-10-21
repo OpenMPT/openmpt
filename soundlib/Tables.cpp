@@ -29,7 +29,8 @@ const LPCSTR szNoteNames[12] =
 	"F#", "G-", "G#", "A-", "A#", "B-"
 };
 
-const LPCSTR szDefaultNoteNames[NOTE_MAX] = {
+const LPCSTR szDefaultNoteNames[NOTE_MAX] =
+{
 	"C-0", "C#0", "D-0", "D#0", "E-0", "F-0", "F#0", "G-0", "G#0", "A-0", "A#0", "B-0",
 	"C-1", "C#1", "D-1", "D#1", "E-1", "F-1", "F#1", "G-1", "G#1", "A-1", "A#1", "B-1",
 	"C-2", "C#2", "D-2", "D#2", "E-2", "F-2", "F#2", "G-2", "G#2", "A-2", "A#2", "B-2",
@@ -48,8 +49,8 @@ const LPCSTR szDefaultNoteNames[NOTE_MAX] = {
 
 struct ModFormatInfo
 {
-	MODTYPE format;		// MOD_TYPE_XXXX
-	const char *name;			// "ProTracker"
+	MODTYPE format;			// MOD_TYPE_XXXX
+	const char *name;		// "ProTracker"
 	const char *extension;	// "mod"
 };
 
@@ -134,7 +135,8 @@ static const ModFormatInfo otherFormatInfo[] =
 #endif
 
 
-struct ModCharsetInfo {
+struct ModCharsetInfo
+{
 	MODTYPE type;
 	MOD_CHARSET_CERTAINTY certainty;
 	const char *charset;
@@ -166,8 +168,8 @@ static const ModCharsetInfo ModCharsetInfos[] =
 	{ MOD_TYPE_J2B , MOD_CHARSET_IS     , "cp437"       },
 	{ MOD_TYPE_IMF , MOD_CHARSET_IS     , "cp437"       },
 	{ MOD_TYPE_ULT , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_AMS , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_AMS2, MOD_CHARSET_IS     , "cp437"       },
+	{ MOD_TYPE_AMS , MOD_CHARSET_IS     , "Windows-1252"},	// We convert the custom AMS special character set to our own set.
+	{ MOD_TYPE_AMS2, MOD_CHARSET_IS     , "Windows-1252"},	// ditto
 	{ MOD_TYPE_DSM , MOD_CHARSET_IS     , "cp437"       },
 	// Windows
 	{ MOD_TYPE_MT2 , MOD_CHARSET_MAYBE  , "Windows-1252"},
