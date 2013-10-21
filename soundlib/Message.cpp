@@ -206,7 +206,7 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding, ConverterFunc
 				break;
 			case leCRLF:
 				comments.at(writePos++) = '\r';
-				// Intentional fall-through
+				MPT_FALLTHROUGH;
 			case leLF:
 				comments.at(writePos++) = '\n';
 				break;

@@ -728,6 +728,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 					case 0x0B:	strcpy(s, "7B: Pitch Env Off"); break;
 					case 0x0C:	strcpy(s, "7C: Pitch Env On"); break;
 						// intentional fall-through for non-MPT modules follows
+						MPT_FALLTHROUGH;
 					case 0x0D:	if(sndFile.GetType() == MOD_TYPE_MPT) { strcpy(s, "7D: Force Pitch Env"); break; }
 					case 0x0E:	if(sndFile.GetType() == MOD_TYPE_MPT) { strcpy(s, "7E: Force Filter Env"); break; }
 					default:	wsprintf(s, "%02X: undefined", param); break;

@@ -211,6 +211,13 @@ noinline void AssertHandler(const char *file, int line, const char *function, co
 #define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
 
 
+// Macro for marking intentional fall-throughs in switch statements - can be used for static analysis if supported.
+#if MPT_COMPILER_MSVC
+#define MPT_FALLTHROUGH __fallthrough
+#else
+#define MPT_FALLTHROUGH do { } while(0)
+#endif
+
 
 #include <cstdarg>
 #if MPT_COMPILER_MSVC

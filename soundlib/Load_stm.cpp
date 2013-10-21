@@ -265,9 +265,9 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				// natively supporting STM editing, so we just assume the tempo is 125 and
 				// divide the speed by 16 instead. Parameters below 10 might behave weird.
 				m->param >>= 4;
+				MPT_FALLTHROUGH;
 #endif // MODPLUG_TRACKER
 
-				// Intentonal fall-through
 			default:
 				// Anything not listed above is a no-op if there's no value.
 				// (ST2 doesn't have effect memory)

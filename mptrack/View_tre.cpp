@@ -3445,7 +3445,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				break;
 			}
-			// Intentional fall-through
+			MPT_FALLTHROUGH;
 		case MODITEM_SEQUENCE:
 			if(modItem.val1 < sndFile.Order.GetNumSequences())
 			{

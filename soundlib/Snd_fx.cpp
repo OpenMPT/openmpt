@@ -2107,7 +2107,7 @@ BOOL CSoundFile::ProcessEffects()
 						{
 							pChn->nPan = 0;
 						}
-						// Intentional fall-through
+						MPT_FALLTHROUGH;
 					default:
 						// no memory here.
 						volcmd = VOLCMD_NONE;
