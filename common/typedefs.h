@@ -185,7 +185,7 @@ typedef std::bad_alloc & MPTMemoryException;
 #if (MPT_ASSERT_IS_ACTIVE == 1)
 
 #define ALWAYS_ASSERT(expr) ASSERT(expr)
-#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) ASSERT_WARN_MESSAGE(expr.msg)
+#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) ASSERT_WARN_MESSAGE(expr,msg)
 
 #else // (MPT_ASSERT_IS_ACTIVE != 1)
 
