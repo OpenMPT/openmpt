@@ -1918,8 +1918,8 @@ void TestSampleConversion()
 		ModSample sample;
 		sample.Initialize();
 		sample.nLength = 65536;
-		sample.uFlags |= CHN_16BIT;
-		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
+		sample.uFlags.set(CHN_16BIT);
+		sample.pSample = (static_cast<int16 *>(targetBuf) + 65536);
 		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, reinterpret_cast<const char *>(source24), 3*65536);
 		CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeInt24<0, littleEndian24> > >(truncated16, 65536, 1, reinterpret_cast<const char *>(source24), 65536 * 3, 1);
 
@@ -1946,8 +1946,8 @@ void TestSampleConversion()
 		ModSample sample;
 		sample.Initialize();
 		sample.nLength = 65536;
-		sample.uFlags |= CHN_16BIT;
-		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
+		sample.uFlags.set(CHN_16BIT);
+		sample.pSample = static_cast<int16 *>(targetBuf) + 65536;
 		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, reinterpret_cast<const char *>(source32), 4*65536);
 		CopySample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(truncated16, 65536, 1, reinterpret_cast<const char *>(source32), 65536 * 4, 1);
 
