@@ -306,8 +306,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		// Something else!
 		madeWith = verUnknown |verConfirmed;
 
-		madeWithTracker.append(fileHeader.trackerName, CountOf(fileHeader.trackerName));
-		madeWithTracker = mpt::String::RTrim(madeWithTracker);
+		mpt::String::Read<mpt::String::spacePadded>(madeWithTracker, fileHeader.trackerName);
 	}
 
 	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
