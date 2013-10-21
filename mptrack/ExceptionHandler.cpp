@@ -162,10 +162,10 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 }
 
 
-#ifndef _DEBUG
+#if defined(MPT_ASSERT_HANDLER_NEEDED)
 
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
-//-----------------------------------------------------------------------------------------------------------
+noinline void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+//--------------------------------------------------------------------------------------------------------------
 {
 	if(IsDebuggerPresent())
 	{
@@ -189,5 +189,5 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 	}
 }
 
-#endif
+#endif MPT_ASSERT_HANDLER_NEEDED
 

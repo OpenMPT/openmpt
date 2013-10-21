@@ -14,47 +14,21 @@
 #include <cstring>
 
 
-#ifndef MODPLUG_TRACKER
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
-//-----------------------------------------------------------------------------------------------------------
+#if !defined(MODPLUG_TRACKER) && defined(MPT_ASSERT_HANDLER_NEEDED)
+
+noinline void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+//--------------------------------------------------------------------------------------------------------------
 {
 	if(msg)
 	{
-		std::cerr
-			<< "openmpt: ASSERTION FAILED: "
-			<< file << "(" << line << ")" << ": "
-			<< msg
-			<< " (" << std::string(expr) << ") "
-			<< " [" << function << "]"
-			<< std::endl
-			;
+		Logger(file, line, function)("ASSERTION FAILED: %s (%s)", msg, expr);
 	} else
 	{
-		std::cerr
-			<< "openmpt: ASSERTION FAILED: "
-			<< file << "(" << line << ")" << ": "
-			<< std::string(expr)
-			<< " [" << function << "]"
-			<< std::endl
-			;
+		Logger(file, line, function)("ASSERTION FAILED: %s", expr);
 	}
 }
-#endif
 
-
-#if !defined(_MFC_VER)
-void AssertHandler(const char *file, int line, const char *function, const char *expr)
-//------------------------------------------------------------------------------------
-{
-	std::cerr
-		<< "openmpt: ASSERTION FAILED: "
-		<< file << "(" << line << ")" << ": "
-		<< std::string(expr)
-		<< " [" << function << "]"
-		<< std::endl
-		;
-}
-#endif
+#endif // !MODPLUG_TRACKER &&  MPT_ASSERT_HANDLER_NEEDED
 
 
 //#define LOG_TO_FILE
@@ -109,8 +83,8 @@ static std::string TimeDiffAsString(uint64 ms)
 #endif // MODPLUG_TRACKER
 
 
-static void DoLog(const char *file, int line, const char *function, const char *format, va_list args)
-//---------------------------------------------------------------------------------------------------
+static noinline void DoLog(const char *file, int line, const char *function, const char *format, va_list args)
+//------------------------------------------------------------------------------------------------------------
 {
 #if !defined(MODPLUG_TRACKER) || (defined(MODPLUG_TRACKER) && defined(_DEBUG))
 	char message[LOGBUF_SIZE];
@@ -163,7 +137,7 @@ static void DoLog(const char *file, int line, const char *function, const char *
 		}
 	#else // !MODPLUG_TRACKER
 		std::clog
-			<< "openmpt: DEBUG: "
+			<< "openmpt: "
 			<< file << "(" << line << ")" << ": "
 			<< std::string(message)
 			<< " [" << function << "]"
@@ -201,4 +175,5 @@ void Log(const char * format, ...)
 	va_end(va);
 }
 
-#endif
+#endif // !NO_LOGGING
+

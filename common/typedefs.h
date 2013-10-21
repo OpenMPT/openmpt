@@ -125,25 +125,84 @@ typedef std::bad_alloc & MPTMemoryException;
 
 
 
-#if !defined(_MFC_VER)
-void AssertHandler(const char *file, int line, const char *function, const char *expr);
-#if defined(_DEBUG)
-#define ASSERT(expr) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#else
-#define ASSERT(expr) do { } while(0)
-#endif
-#endif
+#if defined(_MFC_VER)
 
+#if !defined(ASSERT)
+#error "MFC is expected to #define ASSERT"
+#endif // !defined(ASERRT)
+#define MPT_ASSERT_IS_DEFINED
+
+#if defined(_DEBUG)
+ #define MPT_ASSERT_IS_ACTIVE 1
+#else // !_DEBUG
+ #define MPT_ASSERT_IS_ACTIVE 0
+#endif // _DEBUG
+
+#else // !_MFC_VER
+
+#if defined(ASSERT)
+#error "ASSERT(expr) is expected to NOT be defined by any other header"
+#endif // !defined(ASERRT)
+
+#endif // _MFC_VER
+
+
+#if defined(MPT_ASSERT_IS_DEFINED)
+
+//#define ASSERT // already defined
 #define ASSERT_WARN_MESSAGE(expr,msg) ASSERT(expr)
 
-#if defined(_DEBUG)
-#define ALWAYS_ASSERT(expr) ASSERT(expr)
-#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) ASSERT(expr)
-#else
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg=nullptr);
-#define ALWAYS_ASSERT(expr) do { if(!(expr)) { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) do { if(!(expr)) { AlwaysAssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#elif defined(NO_ASSERTS)
+
+#define MPT_ASSERT_IS_DEFINED
+#define MPT_ASSERT_IS_ACTIVE 0
+#define ASSERT(expr) do { } while(0)
+#define ASSERT_WARN_MESSAGE(expr,msg) do { } while(0)
+
+#else // !NO_ASSERTS
+
+#define MPT_ASSERT_IS_DEFINED
+#define MPT_ASSERT_IS_ACTIVE 1
+#define ASSERT(expr) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#define ASSERT_WARN_MESSAGE(expr,msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#ifndef MPT_ASSERT_HANDLER_NEEDED
+#define MPT_ASSERT_HANDLER_NEEDED
 #endif
+
+#endif // NO_ASSERTS
+
+// error checking
+#if !defined(MPT_ASSERT_IS_DEFINED)
+#error "ASSERT(expr) has to be defined"
+#endif // !MPT_ASSERT_IS_DEFINED
+#if MPT_ASSERT_IS_ACTIVE && defined(NO_ASSERTS)
+#error "ASSERT is active but NO_ASSERT is defined"
+#elif !MPT_ASSERT_IS_ACTIVE && !defined(NO_ASSERTS)
+#error "NO_ASSERT is not defined but ASSERTs are not active"
+#endif
+
+
+#if (MPT_ASSERT_IS_ACTIVE == 1)
+
+#define ALWAYS_ASSERT(expr) ASSERT(expr)
+#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) ASSERT_WARN_MESSAGE(expr.msg)
+
+#else // (MPT_ASSERT_IS_ACTIVE != 1)
+
+#define ALWAYS_ASSERT(expr) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#ifndef MPT_ASSERT_HANDLER_NEEDED
+#define MPT_ASSERT_HANDLER_NEEDED
+#endif
+
+#endif // MPT_ASSERT_IS_ACTIVE
+
+
+#if defined(MPT_ASSERT_HANDLER_NEEDED)
+// custom assert handler needed
+noinline void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg=nullptr);
+#endif // MPT_ASSERT_HANDLER_NEEDED
+
 
 // Compile time assert.
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
