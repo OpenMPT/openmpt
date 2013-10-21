@@ -162,8 +162,3 @@ std::string Convert(const std::string &src, Charset from, Charset to);
 
 } // namespace mpt
 
-
-#if MPT_COMPILER_MSVC
-#define snprintf _snprintf
-#endif
-

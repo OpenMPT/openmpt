@@ -147,25 +147,19 @@ static void DoLog(const char *file, int line, const char *function, const char *
 		#ifdef LOG_TO_FILE
 		{
 			static FILE * s_logfile = nullptr;
-			char verbose_message[LOGBUF_SIZE];
-			snprintf(verbose_message, LOGBUF_SIZE, "%s+%s %s(%i): %s [%s]\n", TimeAsAsString(cur).c_str(), TimeDiffAsString(diff).c_str(), file, line, message, function);
-			verbose_message[LOGBUF_SIZE - 1] = '\0';
 			if(!s_logfile)
 			{
 				s_logfile = fopen("mptrack.log", "a");
 			}
 			if(s_logfile)
 			{
-				fprintf(s_logfile, "%s", verbose_message);
+				fprintf(s_logfile, "%s+%s %s(%i): %s [%s]\n", TimeAsAsString(cur).c_str(), TimeDiffAsString(diff).c_str(), file, line, message, function);
 				fflush(s_logfile);
 			}
 		}
 		#endif // LOG_TO_FILE
 		{
-			char verbose_message[LOGBUF_SIZE];
-			snprintf(verbose_message, LOGBUF_SIZE, "%s(%i): +%s %s [%s]\n", file, line, TimeDiffAsString(diff).c_str(), message, function);
-			verbose_message[LOGBUF_SIZE - 1] = '\0';
-			OutputDebugString(verbose_message);
+			OutputDebugString(mpt::String::Format("%s(%i): +%s %s [%s]\n", file, line, TimeDiffAsString(diff).c_str(), message, function).c_str());
 		}
 	#else // !MODPLUG_TRACKER
 		std::clog
