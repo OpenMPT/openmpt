@@ -324,7 +324,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	InitializeChannels();
 	m_nType = MOD_TYPE_DBM;
-	m_nChannels = Clamp(infoData.channels, uint16(1), uint16(MAX_BASECHANNELS));	// note: MAX_BASECHANNELS is currently 127, but DBM supports up to 128 channels.
+	m_nChannels = Clamp(infoData.channels, uint16(1), uint16(MAX_BASECHANNELS));	// note: MAX_BASECHANNELS is currently 127, but DBPro 2 supports up to 128 channels, DBPro 3 apparently up to 254.
 	m_nInstruments = std::min<INSTRUMENTINDEX>(infoData.instruments + 1, MAX_INSTRUMENTS - 1);
 	m_nSamples = std::min<SAMPLEINDEX>(infoData.samples, MAX_SAMPLES - 1);
 	madeWithTracker = mpt::String::Format("DigiBooster Pro %x.%x", fileHeader.trkVerHi, fileHeader.trkVerLo);
@@ -333,13 +333,11 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	FileReader nameChunk = chunks.GetChunk(DBMChunk::idNAME);
 	nameChunk.ReadString<mpt::String::maybeNullTerminated>(songName, nameChunk.GetLength());
 
-	// Song chunks
-	std::vector<FileReader> songChunks = chunks.GetAllChunks(DBMChunk::idSONG);
+	// Song chunk
+	FileReader songChunk = chunks.GetChunk(DBMChunk::idSONG);
 	Order.clear();
-	for(size_t i = 0; i < songChunks.size(); i++)
+	for(size_t i = 0; i < infoData.songs; i++)
 	{
-		FileReader &songChunk = songChunks[i];
-
 		char name[44];
 		songChunk.ReadString<mpt::String::maybeNullTerminated>(name, 44);
 		if(songName.empty())
