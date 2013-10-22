@@ -869,7 +869,7 @@ public:
 	template<typename T, off_t destSize>
 	bool ReadArray(T (&destArray)[destSize])
 	{
-		//STATIC_ASSERT(sizeof(T) == 1);
+		STATIC_ASSERT(sizeof(T) == 1);
 		if(CanRead(sizeof(destArray)))
 		{
 			for(std::size_t i = 0; i < destSize; ++i)

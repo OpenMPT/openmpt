@@ -109,6 +109,18 @@ struct PACKED STMPatternEntry
 STATIC_ASSERT(sizeof(STMPatternEntry) == 4);
 
 
+struct PACKED STMPatternData
+{
+	STMPatternEntry entry[64 * 4];
+	void ConvertEndianness()
+	{
+		// nothing
+	}
+};
+
+STATIC_ASSERT(sizeof(STMPatternData) == 4*64*4);
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
@@ -179,9 +191,9 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
-		STMPatternEntry patternData[64 * 4];
+		STMPatternData patternData;
 
-		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64) || !file.ReadArray(patternData))
+		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64) || !file.ReadConvertEndianness(patternData))
 		{
 			file.Skip(sizeof(patternData));
 			continue;
@@ -193,7 +205,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	
 		for(size_t n = 0; n < 64 * 4; n++, m++)
 		{
-			const STMPatternEntry &entry = patternData[n];
+			const STMPatternEntry &entry = patternData.entry[n];
 
 			if(entry.note == 0xFE || entry.note == 0xFC)
 			{
