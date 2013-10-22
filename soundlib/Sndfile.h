@@ -538,7 +538,7 @@ public:
 	bool ReadOKT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadPTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadDBM(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDBM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadMT2(const LPCBYTE lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);

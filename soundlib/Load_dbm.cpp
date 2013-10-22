@@ -2,27 +2,15 @@
  * Load_dbm.cpp
  * ------------
  * Purpose: DigiBooster Pro module Loader (DBM)
- * Notes  : This loader doesn't handle multiple songs.
- * Authors: Olivier Lapicque
- *          Adam Goode (endian and char fixes for PPC)
- *          OpenMPT Devs
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
 #include "stdafx.h"
 #include "Loaders.h"
-
-#define DBM_FILE_MAGIC	0x304d4244
-#define DBM_ID_NAME		0x454d414e
-#define DBM_NAMELEN		0x2c000000
-#define DBM_ID_INFO		0x4f464e49
-#define DBM_INFOLEN		0x0a000000
-#define DBM_ID_SONG		0x474e4f53
-#define DBM_ID_INST		0x54534e49
-#define DBM_ID_VENV		0x564e4556
-#define DBM_ID_PATT		0x54544150
-#define DBM_ID_SMPL		0x4c504d53
+#include "ChunkReader.h"
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -30,81 +18,145 @@
 
 struct PACKED DBMFileHeader
 {
-	uint32 dbm_id;		// "DBM0" = 0x304d4244
-	uint8  trkVerHi;	// Tracker version: 02.15
-	uint8  trkVerLo;
-	uint16 reserved;
-	uint32 name_id;		// "NAME" = 0x454d414e
-	uint32 name_len;		// name length: always 44
-	char   songname[44];
-	uint32 info_id;		// "INFO" = 0x4f464e49
-	uint32 info_len;		// 0x0a000000
+	char  dbm0[4];
+	uint8 trkVerHi;
+	uint8 trkVerLo;
+	char  reserved[2];
+};
+
+
+// RIFF-style Chunk
+struct PACKED DBMChunk
+{
+	// 32-Bit chunk identifiers
+	enum ChunkIdentifiers
+	{
+		idNAME	= 0x454D414E,
+		idINFO	= 0x4F464E49,
+		idSONG	= 0x474E4F53,
+		idINST	= 0x54534E49,
+		idVENV	= 0x564E4556,
+		idPENV	= 0x564E4550,
+		idPATT	= 0x54544150,
+		idPNAM	= 0x4D414E50,
+		idSMPL	= 0x4c504d53,
+		idMPEG	= 0x4745504D,
+	};
+
+	typedef ChunkIdentifiers id_type;
+
+	uint32 id;
+	uint32 length;
+
+	size_t GetLength() const
+	{
+		return SwapBytesReturnBE(length);
+	}
+
+	id_type GetID() const
+	{
+		return static_cast<id_type>(SwapBytesReturnLE(id));
+	}
+};
+
+STATIC_ASSERT(sizeof(DBMChunk) == 8);
+
+
+struct PACKED DBMInfoChunk
+{
 	uint16 instruments;
 	uint16 samples;
 	uint16 songs;
 	uint16 patterns;
 	uint16 channels;
-	uint32 song_id;		// "SONG" = 0x474e4f53
-	uint32 song_len;
-	char   songname2[44];
-	uint16 orders;
-//	uint16 orderlist[0];	// orderlist[orders] in words
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(instruments);
+		SwapBytesBE(samples);
+		SwapBytesBE(songs);
+		SwapBytesBE(patterns);
+		SwapBytesBE(channels);
+	}
 };
 
-STATIC_ASSERT(sizeof(DBMFileHeader) == 132);
+STATIC_ASSERT(sizeof(DBMInfoChunk) == 10);
 
+
+// Instrument header
 struct PACKED DBMInstrument
 {
+	enum DBMInstrFlags
+	{
+		smpLoop			= 0x01,
+		smpPingPongLoop	= 0x02,
+	};
+
 	char   name[30];
-	uint16 sampleno;
-	uint16 volume;
-	uint32 finetune;
-	uint32 loopstart;
-	uint32 looplen;
-	uint16 panning;
-	uint16 flags;
+	uint16 sample;		// Sample reference
+	uint16 volume;		// 0...64
+	uint32 sampleRate;
+	uint32 loopStart;
+	uint32 loopLength;
+	int16  panning;		// -128...128
+	uint16 flags;		// See DBMInstrFlags
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(sample);
+		SwapBytesBE(volume);
+		SwapBytesBE(sampleRate);
+		SwapBytesBE(loopStart);
+		SwapBytesBE(loopLength);
+		SwapBytesBE(panning);
+		SwapBytesBE(flags);
+	}
 };
 
 STATIC_ASSERT(sizeof(DBMInstrument) == 50);
 
+
+// Volume or panning envelope
 struct PACKED DBMEnvelope
 {
+	enum DBMEnvelopeFlags
+	{
+		envEnabled	= 0x01,
+		envSustain	= 0x02,
+		envLoop		= 0x04,
+	};
+
 	uint16 instrument;
-	uint8  flags;
-	uint8  numpoints;
+	uint8  flags;		// See DBMEnvelopeFlags
+	uint8  numSegments;	// Number of envelope points - 1
 	uint8  sustain1;
-	uint8  loopbegin;
-	uint8  loopend;
-	uint8  sustain2;
-	uint16 volenv[2 * 32];
+	uint8  loopBegin;
+	uint8  loopEnd;
+	uint8  sustain2;	// Second sustain point
+	uint16 data[2 * 32];
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(instrument);
+		for(int i = 0; i < CountOf(data); i++)
+		{
+			SwapBytesBE(data[i]);
+		}
+	}
 };
 
 STATIC_ASSERT(sizeof(DBMEnvelope) == 136);
 
-struct PACKED DBMPattern
-{
-	uint16 rows;
-	uint32 packedsize;
-	uint8  patterndata[2];	// [packedsize]
-};
-
-STATIC_ASSERT(sizeof(DBMPattern) == 8);
-
-struct PACKED DBMSample
-{
-	uint32 flags;
-	uint32 samplesize;
-	uint8  sampledata[2];		// [samplesize]
-};
-
-STATIC_ASSERT(sizeof(DBMSample) == 10);
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
 
 
-static const ModCommand::COMMAND dbmEffects[23] =
+static const ModCommand::COMMAND dbmEffects[] =
 {
 	CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
 	CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
@@ -115,8 +167,8 @@ static const ModCommand::COMMAND dbmEffects[23] =
 };
 
 
-void ConvertDBMEffect(uint8 &command, uint8 &param)
-//-------------------------------------------------
+static void ConvertDBMEffect(uint8 &command, uint8 &param)
+//--------------------------------------------------------
 {
 	if(command < CountOf(dbmEffects))
 		command = dbmEffects[command];
@@ -197,310 +249,335 @@ void ConvertDBMEffect(uint8 &command, uint8 &param)
 }
 
 
-bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------------
+// Read a chunk of volume or panning envelopes
+static void ReadDBMEnvelopeChunk(FileReader chunk, enmEnvelopeTypes envType, CSoundFile &sndFile, bool scaleEnv)
+//--------------------------------------------------------------------------------------------------------------
 {
-	const DBMFileHeader *pfh = (DBMFileHeader *)lpStream;
-	DWORD dwMemPos;
-	uint16 nOrders, nSamples, nInstruments, nPatterns;
-
-	if ((!lpStream) || (dwMemLength <= sizeof(DBMFileHeader)) || (!pfh->channels)
-	 || (pfh->dbm_id != DBM_FILE_MAGIC) || (!pfh->songs) || (pfh->song_id != DBM_ID_SONG)
-	 || (pfh->name_id != DBM_ID_NAME) || (pfh->name_len != DBM_NAMELEN)
-	 || (pfh->info_id != DBM_ID_INFO) || (pfh->info_len != DBM_INFOLEN)) return false;
-	dwMemPos = sizeof(DBMFileHeader);
-	nOrders = BigEndianW(pfh->orders);
-	if (dwMemPos + 2 * nOrders + 8*3 >= dwMemLength)
-		return false;
-	else if(loadFlags == onlyVerifyHeader)
-		return true;
-
-	InitializeGlobals();
-	InitializeChannels();
-
-	nInstruments = BigEndianW(pfh->instruments);
-	nSamples = BigEndianW(pfh->samples);
-	nPatterns = BigEndianW(pfh->patterns);
-	m_nType = MOD_TYPE_DBM;
-	m_nChannels = CLAMP(BigEndianW(pfh->channels), 1, MAX_BASECHANNELS);	// note: MAX_BASECHANNELS is currently 127, but DBM supports up to 128 channels.
-	madeWithTracker = mpt::String::Format("Digi Booster %x.%x", pfh->trkVerHi, pfh->trkVerLo);
-
-	if(pfh->songname[0])
+	uint16 numEnvs = chunk.ReadUint16BE();
+	for(uint16 i = 0; i < numEnvs; i++)
 	{
-		mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pfh->songname);
-	} else
-	{
-		mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pfh->songname2);
+		DBMEnvelope dbmEnv;
+		chunk.ReadConvertEndianness(dbmEnv);
 
-	}
-
-	Order.resize(nOrders, Order.GetInvalidPatIndex());
-	for (UINT iOrd=0; iOrd < nOrders; iOrd++)
-	{
-		if (iOrd >= MAX_ORDERS) break;
-		Order[iOrd] = (PATTERNINDEX)BigEndianW(*((WORD *)(lpStream + dwMemPos + iOrd * 2)));
-	}
-	dwMemPos += 2 * nOrders;
-	while (dwMemPos + 10 < dwMemLength)
-	{
-		uint32 chunk_id = LittleEndian(((uint32 *)(lpStream + dwMemPos))[0]);
-		uint32 chunk_size = BigEndian(((uint32 *)(lpStream + dwMemPos))[1]);
-		uint32 chunk_pos;
-
-		dwMemPos += 8;
-		chunk_pos = dwMemPos;
-		if ((dwMemPos + chunk_size > dwMemLength) || (chunk_size > dwMemLength)) break;
-		dwMemPos += chunk_size;
-		// Instruments
-		if (chunk_id == DBM_ID_INST)
+		ModInstrument *mptIns;
+		if(dbmEnv.instrument && dbmEnv.instrument < MAX_INSTRUMENTS && (mptIns = sndFile.Instruments[dbmEnv.instrument]) != nullptr)
 		{
-			if (nInstruments >= MAX_INSTRUMENTS) nInstruments = MAX_INSTRUMENTS-1;
-			for(INSTRUMENTINDEX iIns = 0; iIns < nInstruments; iIns++)
+			InstrumentEnvelope &mptEnv = mptIns->GetEnvelope(envType);
+
+			if(dbmEnv.numSegments)
 			{
-				ModSample *psmp;
-				ModInstrument *pIns;
-				DBMInstrument *pih;
-				uint16 nsmp;
-
-				if (chunk_pos + sizeof(DBMInstrument) > dwMemPos) break;
-
-				pih = (DBMInstrument *)(lpStream + chunk_pos);
-				nsmp = BigEndianW(pih->sampleno);
-				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Samples[nsmp] : nullptr;
-
-				pIns = AllocateInstrument(iIns + 1, nsmp);
-				if(pIns == nullptr)
-				{
-					break;
-				}
-
-				mpt::String::Read<mpt::String::maybeNullTerminated>(pIns->name, pih->name);
-				if (psmp)
-				{
-					mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[nsmp], pih->name);
-				}
-
-				pIns->nFadeOut = 1024;	// ???
-				pIns->nPan = BigEndianW(pih->panning);
-				if ((pIns->nPan) && (pIns->nPan < 256))
-					pIns->dwFlags = INS_SETPANNING;
-				else
-					pIns->nPan = 128;
-
-				// Sample Info
-				if(psmp)
-				{
-					uint16 sflags = BigEndianW(pih->flags);
-					psmp->nVolume = BigEndianW(pih->volume) * 4;
-					if(/*!psmp->nVolume ||*/ psmp->nVolume > 256) psmp->nVolume = 256;	// XXX First condition looks like a typical "modplug-ism"
-					psmp->nGlobalVol = 64;
-					psmp->nC5Speed = BigEndian(pih->finetune);
-
-					if(pih->looplen && (sflags & 3))
-					{
-						psmp->nLoopStart = BigEndian(pih->loopstart);
-						psmp->nLoopEnd = psmp->nLoopStart + BigEndian(pih->looplen);
-						psmp->uFlags |= CHN_LOOP;
-						psmp->uFlags &= ~CHN_PINGPONGLOOP;
-						if(sflags & 2) psmp->uFlags |= CHN_PINGPONGLOOP;
-					}
-				}
-				chunk_pos += sizeof(DBMInstrument);
-				m_nInstruments = iIns + 1;
+				if(dbmEnv.flags & DBMEnvelope::envEnabled) mptEnv.dwFlags.set(ENV_ENABLED);
+				if(dbmEnv.flags & DBMEnvelope::envSustain) mptEnv.dwFlags.set(ENV_SUSTAIN);
+				if(dbmEnv.flags & DBMEnvelope::envLoop) mptEnv.dwFlags.set(ENV_LOOP);
 			}
-		} else
-		// Volume Envelopes
-		if (chunk_id == DBM_ID_VENV)
-		{
-			UINT nEnvelopes = lpStream[chunk_pos+1];
 
-			chunk_pos += 2;
-			for (UINT iEnv=0; iEnv<nEnvelopes; iEnv++)
+			mptEnv.nNodes = std::min<uint32>(dbmEnv.numSegments + 1, MAX_ENVPOINTS);
+
+			mptEnv.nLoopStart = dbmEnv.loopBegin;
+			mptEnv.nLoopEnd = dbmEnv.loopEnd;
+			mptEnv.nSustainStart = mptEnv.nSustainEnd = dbmEnv.sustain1;
+
+			for(uint32 i = 0; i < mptEnv.nNodes; i++)
 			{
-				DBMEnvelope *peh;
-				UINT nins;
-
-				if (chunk_pos + sizeof(DBMEnvelope) > dwMemPos) break;
-				peh = (DBMEnvelope *)(lpStream+chunk_pos);
-				nins = BigEndianW(peh->instrument);
-				if ((nins) && (nins < MAX_INSTRUMENTS) && (Instruments[nins]) && (peh->numpoints))
+				mptEnv.Ticks[i] = dbmEnv.data[i * 2];
+				uint16 val = dbmEnv.data[i * 2 + 1];
+				if(scaleEnv)
 				{
-					ModInstrument *pIns = Instruments[nins];
-
-					pIns->VolEnv.dwFlags.set(ENV_ENABLED, (peh->flags & 1) != 0);
-					pIns->VolEnv.dwFlags.set(ENV_SUSTAIN, (peh->flags & 2) != 0);
-					pIns->VolEnv.dwFlags.set(ENV_LOOP, (peh->flags & 4) != 0);
-					pIns->VolEnv.nNodes = peh->numpoints + 1;
-					if (pIns->VolEnv.nNodes > MAX_ENVPOINTS) pIns->VolEnv.nNodes = MAX_ENVPOINTS;
-					pIns->VolEnv.nLoopStart = peh->loopbegin;
-					pIns->VolEnv.nLoopEnd = peh->loopend;
-					pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = peh->sustain1;
-					for(uint32  i=0; i<pIns->VolEnv.nNodes; i++)
-					{
-						pIns->VolEnv.Ticks[i] = BigEndianW(peh->volenv[i * 2]);
-						pIns->VolEnv.Values[i] = (BYTE)BigEndianW(peh->volenv[i * 2 + 1]);
-					}
+					// Panning envelopes are -128...128 in DigiBooster Pro 3.x
+					val = (val + 128) / 4;
 				}
-				chunk_pos += sizeof(DBMEnvelope);
-			}
-		} else
-		// Packed Pattern Data
-		if (chunk_id == DBM_ID_PATT && (loadFlags & loadPatternData))
-		{
-			if (nPatterns > MAX_PATTERNS) nPatterns = MAX_PATTERNS;
-			for(PATTERNINDEX iPat = 0; iPat < nPatterns; iPat++)
-			{
-				DBMPattern *pph;
-				DWORD pksize;
-				UINT nRows;
-
-				if (chunk_pos + sizeof(DBMPattern) > dwMemPos) break;
-				pph = (DBMPattern *)(lpStream+chunk_pos);
-				pksize = BigEndian(pph->packedsize);
-				if ((chunk_pos + pksize + 6 > dwMemPos) || (pksize > dwMemPos)) break;
-				nRows = BigEndianW(pph->rows);
-				if ((nRows >= 4) && (nRows <= 256))
-				{
-					Patterns.Insert(iPat, nRows);
-					ModCommand *m = Patterns[iPat];
-					if (m)
-					{
-						LPBYTE pkdata = (LPBYTE)&pph->patterndata;
-						UINT row = 0;
-						UINT i = 0;
-
-						while ((i+3<pksize) && (row < nRows))
-						{
-							UINT ch = pkdata[i++];
-
-							if (ch)
-							{
-								BYTE b = pkdata[i++];
-								ch--;
-								if (ch < m_nChannels)
-								{
-									if (b & 0x01)
-									{
-										uint8 note = pkdata[i++];
-
-										if (note == 0x1F) note = NOTE_KEYOFF; else
-										if ((note) && (note < 0xFE))
-										{
-											note = ((note >> 4) * 12) + (note & 0x0F) + 13;
-										}
-										m[ch].note = note;
-									}
-									if (b & 0x02) m[ch].instr = pkdata[i++];
-									if (b & 0x3C)
-									{
-										uint8 cmd1 = CMD_NONE, cmd2 = CMD_NONE;
-										uint8 param1 = 0, param2 = 0;
-										if (b & 0x04) cmd2 = pkdata[i++];
-										if (b & 0x08) param2 = pkdata[i++];
-										if (b & 0x10) cmd1 = pkdata[i++];
-										if (b & 0x20) param1 = pkdata[i++];
-										ConvertDBMEffect(cmd1, param1);
-										ConvertDBMEffect(cmd2, param2);
-
-										// this is the same conversion algorithm as in the ULT loader. maybe this should be merged at some point...
-										if (cmd2 == CMD_VOLUME || (cmd2 == CMD_NONE && cmd1 != CMD_VOLUME))
-										{
-											std::swap(cmd1, cmd2);
-											std::swap(param1, param2);
-										}
-
-										int n;
-										for (n = 0; n < 4; n++)
-										{
-											if(ModCommand::ConvertVolEffect(cmd1, param1, (n >> 1) != 0))
-											{
-												n = 5;
-												break;
-											}
-											std::swap(cmd1, cmd2);
-											std::swap(param1, param2);
-										}
-										if (n < 5)
-										{
-											if (ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd1) > ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd2))
-											{
-												std::swap(cmd1, cmd2);
-												std::swap(param1, param2);
-											}
-											cmd1 = CMD_NONE;
-										}
-										if (!cmd1)
-											param1 = 0;
-										if (!cmd2)
-											param2 = 0;
-
-										m[ch].volcmd = cmd1;
-										m[ch].vol = param1;
-										m[ch].command = cmd2;
-										m[ch].param = param2;
-										m[ch].ExtendedMODtoS3MEffect();
-									}
-								} else
-								{
-									if (b & 0x01) i++;
-									if (b & 0x02) i++;
-									if (b & 0x04) i++;
-									if (b & 0x08) i++;
-									if (b & 0x10) i++;
-									if (b & 0x20) i++;
-								}
-							} else
-							{
-								row++;
-								m += m_nChannels;
-							}
-						}
-					}
-				}
-				chunk_pos += 6 + pksize;
-			}
-		} else
-		// Reading Sample Data
-		if (chunk_id == DBM_ID_SMPL && (loadFlags & loadSampleData))
-		{
-			if (nSamples >= MAX_SAMPLES) nSamples = MAX_SAMPLES-1;
-			m_nSamples = nSamples;
-			for (UINT iSmp=1; iSmp<=nSamples; iSmp++)
-			{
-				DBMSample *psh;
-				DWORD samplesize;
-				DWORD sampleflags;
-
-				if (chunk_pos + sizeof(DBMSample) >= dwMemPos) break;
-				psh = (DBMSample *)(lpStream+chunk_pos);
-				chunk_pos += 8;
-				samplesize = BigEndian(psh->samplesize);
-				sampleflags = BigEndian(psh->flags);
-
-				ModSample &sample = Samples[iSmp];
-				sample.nLength = samplesize;
-				if(sampleflags & 2)
-				{
-					samplesize *= 2;
-				}
-				if(chunk_pos + samplesize > dwMemPos || samplesize > dwMemLength)
-				{
-					break;
-				}
-
-				if(sampleflags & 3)
-				{
-					FileReader chunk(psh->sampledata, samplesize);
-					SampleIO(
-						(sampleflags & 2) ? SampleIO::_16bit : SampleIO::_8bit,
-						SampleIO::mono,
-						SampleIO::bigEndian,
-						SampleIO::signedPCM)
-						.ReadSample(sample, chunk);
-				}
-				chunk_pos += samplesize;
+				LimitMax(val, uint16(64));
+				mptEnv.Values[i] = static_cast<uint8>(val);
 			}
 		}
 	}
+}
+
+
+bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
+{
+	DBMFileHeader fileHeader;
+
+	file.Rewind();
+	if(!file.Read(fileHeader)
+		|| memcmp(fileHeader.dbm0, "DBM0", 4)
+		|| fileHeader.trkVerHi > 3)
+	{
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
+
+	ChunkReader chunkFile(file);
+	ChunkReader::ChunkList<DBMChunk> chunks = chunkFile.ReadChunks<DBMChunk>(1);
+
+	// Globals
+	FileReader infoChunk = chunks.GetChunk(DBMChunk::idINFO);
+	DBMInfoChunk infoData;
+	if(!infoChunk.ReadConvertEndianness(infoData))
+	{
+		return false;
+	}
+
+	InitializeGlobals();
+	InitializeChannels();
+	m_nType = MOD_TYPE_DBM;
+	m_nChannels = Clamp(infoData.channels, uint16(1), uint16(MAX_BASECHANNELS));	// note: MAX_BASECHANNELS is currently 127, but DBM supports up to 128 channels.
+	m_nInstruments = std::min<INSTRUMENTINDEX>(infoData.instruments + 1, MAX_INSTRUMENTS - 1);
+	m_nSamples = std::min<SAMPLEINDEX>(infoData.samples, MAX_SAMPLES - 1);
+	madeWithTracker = mpt::String::Format("DigiBooster Pro %x.%x", fileHeader.trkVerHi, fileHeader.trkVerLo);
+
+	// Name chunk
+	FileReader nameChunk = chunks.GetChunk(DBMChunk::idNAME);
+	nameChunk.ReadString<mpt::String::maybeNullTerminated>(songName, nameChunk.GetLength());
+
+	// Song chunks
+	std::vector<FileReader> songChunks = chunks.GetAllChunks(DBMChunk::idSONG);
+	Order.clear();
+	for(size_t i = 0; i < songChunks.size(); i++)
+	{
+		FileReader &songChunk = songChunks[i];
+
+		char name[44];
+		songChunk.ReadString<mpt::String::maybeNullTerminated>(name, 44);
+		if(songName.empty())
+		{
+			songName = name;
+		}
+#ifdef DBM_USE_REAL_SUBSONGS
+		if(i > 0) Order.AddSequence(false);
+		Order.SetSequence(i);
+		Order.m_sName = name;
+#endif // DBM_USE_REAL_SUBSONGS
+
+		const uint16 numOrders = songChunk.ReadUint16BE();
+		const ORDERINDEX startIndex = Order.GetLength();
+		Order.resize(startIndex + numOrders + 1, Order.GetInvalidPatIndex());
+
+		for(uint16 ord = 0; ord < numOrders; ord++)
+		{
+			Order[startIndex + ord] = static_cast<PATTERNINDEX>(songChunk.ReadUint16BE());
+		}
+	}
+#ifdef DBM_USE_REAL_SUBSONGS
+	Order.SetSequence(0);
+#endif // DBM_USE_REAL_SUBSONGS
+
+	// Read instruments
+	FileReader instChunk = chunks.GetChunk(DBMChunk::idINST);
+	if(instChunk.IsValid())
+	{
+		for(INSTRUMENTINDEX i = 1; i < GetNumInstruments(); i++)
+		{
+			DBMInstrument instrHeader;
+			instChunk.ReadConvertEndianness(instrHeader);
+
+			ModInstrument *mptIns = AllocateInstrument(i, instrHeader.sample);
+			if(mptIns == nullptr || instrHeader.sample >= MAX_SAMPLES)
+			{
+				continue;
+			}
+			ModSample &mptSmp = Samples[instrHeader.sample];
+
+			mpt::String::Read<mpt::String::maybeNullTerminated>(mptIns->name, instrHeader.name);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[instrHeader.sample], instrHeader.name);
+
+			mptIns->nFadeOut = 1024;	// ???
+			mptIns->nPan = static_cast<uint16>(instrHeader.panning + 128);
+			LimitMax(mptIns->nPan, uint32(256));
+			mptIns->dwFlags.set(INS_SETPANNING);
+
+			// Sample Info
+			mptSmp.Initialize();
+			mptSmp.nVolume = std::min(instrHeader.volume, uint16(64)) * 4u;
+			mptSmp.nC5Speed = instrHeader.sampleRate;
+
+			if(instrHeader.loopLength && (instrHeader.flags & (DBMInstrument::smpLoop | DBMInstrument::smpPingPongLoop)))
+			{
+				mptSmp.nLoopStart = instrHeader.loopStart;
+				mptSmp.nLoopEnd = mptSmp.nLoopStart + instrHeader.loopLength;
+				mptSmp.uFlags.set(CHN_LOOP);
+				if(instrHeader.flags & DBMInstrument::smpPingPongLoop) mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+			}
+		}
+	}
+
+	// Read envelopes
+	ReadDBMEnvelopeChunk(chunks.GetChunk(DBMChunk::idVENV), ENV_VOLUME, *this, false);
+	ReadDBMEnvelopeChunk(chunks.GetChunk(DBMChunk::idPENV), ENV_PANNING, *this, fileHeader.trkVerHi > 2);
+
+	// Patterns
+	FileReader patternChunk = chunks.GetChunk(DBMChunk::idPATT);
+	if(patternChunk.IsValid() && (loadFlags & loadPatternData))
+	{
+		FileReader patternNameChunk = chunks.GetChunk(DBMChunk::idPNAM);
+		patternNameChunk.Skip(1);	// Encoding, should be UTF-8 or ASCII
+
+		for(PATTERNINDEX pat = 0; pat < infoData.patterns; pat++)
+		{
+			uint16 numRows = patternChunk.ReadUint16BE();
+			uint32 packedSize = patternChunk.ReadUint32BE();
+			FileReader chunk = patternChunk.GetChunk(packedSize);
+
+			if(Patterns.Insert(pat, numRows))
+			{
+				continue;
+			}
+
+			std::string patName;
+			patternNameChunk.ReadString<mpt::String::maybeNullTerminated>(patName, patternNameChunk.ReadUint8());
+			Patterns[pat].SetName(patName);
+
+			PatternRow patRow = Patterns[pat].GetRow(0);
+			ROWINDEX row = 0;
+			while(chunk.AreBytesLeft() && row < numRows)
+			{
+				const uint8 ch = chunk.ReadUint8();
+
+				if(!ch)
+				{
+					row++;
+					patRow = Patterns[pat].GetRow(row);
+					continue;
+				}
+
+				ModCommand dummy;
+				ModCommand &m = ch <= GetNumChannels() ? patRow[ch - 1] : dummy;
+
+				const uint8 b = chunk.ReadUint8();
+
+				if(b & 0x01)
+				{
+					uint8 note = chunk.ReadUint8();
+
+					if(note == 0x1F)
+						note = NOTE_KEYOFF;
+					else if(note > 0 && note < 0xFE)
+					{
+						note = ((note >> 4) * 12) + (note & 0x0F) + 13;
+					}
+					m.note = note;
+				}
+				if(b & 0x02)
+				{
+					m.instr = chunk.ReadUint8();
+				}
+				if(b & 0x3C)
+				{
+					uint8 cmd1 = CMD_NONE, cmd2 = CMD_NONE;
+					uint8 param1 = 0, param2 = 0;
+					if(b & 0x04) cmd2 = chunk.ReadUint8();
+					if(b & 0x08) param2 = chunk.ReadUint8();
+					if(b & 0x10) cmd1 = chunk.ReadUint8();
+					if(b & 0x20) param1 = chunk.ReadUint8();
+					ConvertDBMEffect(cmd1, param1);
+					ConvertDBMEffect(cmd2, param2);
+
+					// this is the same conversion algorithm as in the ULT loader. maybe this should be merged at some point...
+					if (cmd2 == CMD_VOLUME || (cmd2 == CMD_NONE && cmd1 != CMD_VOLUME))
+					{
+						std::swap(cmd1, cmd2);
+						std::swap(param1, param2);
+					}
+
+					int n;
+					for(n = 0; n < 4; n++)
+					{
+						if(ModCommand::ConvertVolEffect(cmd1, param1, (n >> 1) != 0))
+						{
+							n = 5;
+							break;
+						}
+						std::swap(cmd1, cmd2);
+						std::swap(param1, param2);
+					}
+					if(n < 5)
+					{
+						if (ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd1) > ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd2))
+						{
+							std::swap(cmd1, cmd2);
+							std::swap(param1, param2);
+						}
+						cmd1 = CMD_NONE;
+					}
+					if(cmd1 == CMD_NONE)
+						param1 = 0;
+					if(cmd2 == CMD_NONE)
+						param2 = 0;
+
+					m.volcmd = cmd1;
+					m.vol = param1;
+					m.command = cmd2;
+					m.param = param2;
+					m.ExtendedMODtoS3MEffect();
+				}
+			}
+		}
+	}
+
+	// Samples
+	FileReader sampleChunk = chunks.GetChunk(DBMChunk::idSMPL);
+	if(sampleChunk.IsValid() && (loadFlags & loadSampleData))
+	{
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			uint32 sampleFlags = sampleChunk.ReadUint32BE();
+			uint32 sampleLength = sampleChunk.ReadUint32BE();
+
+			ModSample &sample = Samples[smp];
+			sample.nLength = sampleLength;
+
+			if(sampleFlags & 7)
+			{
+				SampleIO(
+					(sampleFlags & 4) ? SampleIO::_32bit : ((sampleFlags & 2) ? SampleIO::_16bit : SampleIO::_8bit),
+					SampleIO::mono,
+					SampleIO::bigEndian,
+					SampleIO::signedPCM)
+					.ReadSample(sample, sampleChunk);
+			}
+		}
+	}
+
+#if !defined(NO_MP3_SAMPLES) && 0
+	// Compressed samples - this does not quite work yet...
+	FileReader mpegChunk = chunks.GetChunk(DBMChunk::idMPEG);
+	if(mpegChunk.IsValid() && (loadFlags & loadSampleData))
+	{
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			Samples[smp].nLength = mpegChunk.ReadUint32BE();
+		}
+		mpegChunk.Skip(2);	// 0x00 0x40
+
+		// Read whole MPEG stream into one sample and then split it up.
+		FileReader chunk = mpegChunk.GetChunk(mpegChunk.BytesLeft());
+		if(ReadMP3Sample(0, chunk))
+		{
+			ModSample &srcSample = Samples[0];
+			const uint8 *smpData = static_cast<uint8 *>(srcSample.pSample);
+
+			for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+			{
+				ModSample &sample = Samples[smp];
+				sample.uFlags.set(srcSample.uFlags);
+				sample.nLength *= 2;
+				LimitMax(sample.nLength, srcSample.nLength);
+				if(sample.nLength)
+				{
+					sample.AllocateSample();
+					memcpy(sample.pSample, smpData, sample.GetSampleSizeInBytes());
+					CSoundFile::AdjustSampleLoop(sample);
+					smpData += sample.GetSampleSizeInBytes();
+					srcSample.nLength -= sample.nLength;
+				}
+			}
+			srcSample.FreeSample();
+		}
+	}
+#endif // NO_MP3_SAMPLES
+	
 	return true;
 }
