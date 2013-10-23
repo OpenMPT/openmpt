@@ -175,6 +175,18 @@ BOOL CWaveConvert::OnInitDialog()
 
 	FillInfo();
 
+	GetDlgItem(IDC_GIVEPLUGSIDLETIME)->EnableWindow(FALSE);
+	GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(FALSE);
+	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+	{
+		if(m_pSndFile->m_MixPlugins[i].pMixPlugin != nullptr)
+		{
+			GetDlgItem(IDC_GIVEPLUGSIDLETIME)->EnableWindow(TRUE);
+			GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(TRUE);
+			break;
+		}
+	}
+
 	UpdateDialog();
 	return TRUE;
 }
@@ -480,6 +492,7 @@ void CWaveConvert::OnOK()
 	loopCount = static_cast<uint16>(GetDlgItemInt(IDC_EDIT5, NULL, FALSE));
 	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = false;
 	m_Settings.Normalize = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
+	m_Settings.SilencePlugBuffers = IsDlgButtonChecked(IDC_RENDERSILENCE) != BST_UNCHECKED;
 	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) != BST_UNCHECKED;
 	if (m_bGivePlugsIdleTime)
 	{
@@ -604,11 +617,12 @@ CWaveConvertSettings::CWaveConvertSettings(std::size_t defaultEncoder, const std
 //--------------------------------------------------------------------------------------------------------------------------
 	: EncoderFactories(encFactories)
 	, EncoderIndex(defaultEncoder)
-	, Normalize(false)
 	, SampleRate(44100)
 	, Channels(2)
 	, FinalSampleFormat(SampleFormatInt16)
 	, EncoderSettings(true, Encoder::ModeCBR, 256, 0.8f, -1)
+	, Normalize(false)
+	, SilencePlugBuffers(false)
 {
 	SelectEncoder(EncoderIndex);
 }
@@ -672,6 +686,26 @@ void CDoWaveConvert::OnButton1()
 	ASSERT(m_Settings.GetEncoderFactory() && m_Settings.GetEncoderFactory()->IsAvailable());
 	IAudioStreamEncoder *fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream);
 
+	// Silence mix buffer of plugins, for plugins that don't clear their reverb buffers and similar stuff when they are reset
+	if(m_Settings.SilencePlugBuffers)
+	{
+		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		{
+			if(m_pSndFile->m_MixPlugins[i].pMixPlugin != nullptr)
+			{
+				// Render up to 20 seconds per plugin
+				for(int j = 0; j < 20; j++)
+				{
+					const float maxVal = m_pSndFile->m_MixPlugins[i].pMixPlugin->RenderSilence(m_Settings.SampleRate);
+					if(maxVal <= FLT_EPSILON)
+					{
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	mixersettings.m_nMaxMixChannels = MAX_CHANNELS; // always use max mixing channels when rendering
@@ -715,7 +749,7 @@ void CDoWaveConvert::OnButton1()
 	uint64 l = static_cast<uint64>(m_pSndFile->GetSongTime() + 0.5) * m_Settings.SampleRate * std::max<uint64>(1, 1 + m_pSndFile->GetRepeatCount());
 	if (m_nMaxPatterns > 0)
 	{
-		DWORD dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();
+		ORDERINDEX dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();
 		if ((m_nMaxPatterns < dwOrds) && (dwOrds > 0)) l = (l*m_nMaxPatterns) / dwOrds;
 	}
 
