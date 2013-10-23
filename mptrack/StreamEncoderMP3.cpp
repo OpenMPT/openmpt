@@ -420,7 +420,7 @@ struct LameDynBind
 			return traits;
 		}
 		traits.fileExtension = "mp3";
-		traits.fileShortDescription = "MP3";
+		traits.fileShortDescription = "MP3 (Lame)";
 		traits.fileDescription = "MPEG-1/2 Layer 3";
 		traits.encoderName = "libMP3Lame";
 		traits.description += "Version: ";
@@ -697,7 +697,7 @@ struct BladeDynBind
 			return traits;
 		}
 		traits.fileExtension = "mp3";
-		traits.fileShortDescription = "MP3";
+		traits.fileShortDescription = std::string("MP3 ") + (lame ? "(Lame_enc)" : "(BladeEnc)");
 		traits.fileDescription = "MPEG-1 Layer 3";
 		traits.encoderName = lame ? "Lame_enc.dll" : "BladeEnc.dll";
 		std::ostringstream description;
@@ -1056,7 +1056,7 @@ struct AcmDynBind
 			return traits;
 		}
 		traits.fileExtension = "mp3";
-		traits.fileShortDescription = "MP3";
+		traits.fileShortDescription = "MP3 (ACM)";
 		traits.fileDescription = "MPEG Layer 3";
 		std::ostringstream name;
 		DWORD ver = acmGetVersion();
