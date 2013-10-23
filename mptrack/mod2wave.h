@@ -57,10 +57,8 @@ public:
 	CEdit m_EditTitle, m_EditAuthor, m_EditURL, m_EditAlbum, m_EditYear;
 	CComboBox m_CbnGenre;
 
-	CEdit m_EditInfo;
-
 private:
-	void FillInfo();
+	void OnShowEncoderInfo();
 	void FillFileTypes();
 	void FillSamplerates();
 	void FillChannels();
