@@ -194,6 +194,9 @@ BOOL CWaveConvert::OnInitDialog()
 void CWaveConvert::FillTags()
 //---------------------------
 {
+	CheckDlgButton(IDC_CHECK3, encTraits->canCues?m_Settings.EncoderSettings.Cues?TRUE:FALSE:FALSE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), encTraits->canCues?TRUE:FALSE);
+
 	const bool canTags = encTraits->canTags;
 
 	CheckDlgButton(IDC_CHECK7, canTags?m_Settings.EncoderSettings.Tags?TRUE:FALSE:FALSE);
@@ -617,7 +620,7 @@ CWaveConvertSettings::CWaveConvertSettings(std::size_t defaultEncoder, const std
 	, SampleRate(44100)
 	, Channels(2)
 	, FinalSampleFormat(SampleFormatInt16)
-	, EncoderSettings(true, Encoder::ModeCBR, 256, 0.8f, -1)
+	, EncoderSettings(true, true, Encoder::ModeCBR, 256, 0.8f, -1)
 	, Normalize(false)
 	, SilencePlugBuffers(false)
 {
@@ -979,13 +982,16 @@ void CDoWaveConvert::OnButton1()
 
 	if(m_pSndFile->m_PatternCuePoints.size() > 0)
 	{
-		std::vector<PatternCuePoint>::const_iterator iter;
-		std::vector<uint64> cues;
-		for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); iter++)
+		if(m_Settings.EncoderSettings.Cues)
 		{
-			cues.push_back(static_cast<uint32>(iter->offset));
+			std::vector<PatternCuePoint>::const_iterator iter;
+			std::vector<uint64> cues;
+			for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); iter++)
+			{
+				cues.push_back(static_cast<uint32>(iter->offset));
+			}
+			fileEnc->WriteCues(cues);
 		}
-		fileEnc->WriteCues(cues);
 		m_pSndFile->m_PatternCuePoints.clear();
 	}
 

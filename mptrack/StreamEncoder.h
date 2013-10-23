@@ -87,6 +87,8 @@ namespace Encoder
 		bool canTags;
 		std::vector<std::string> genres;
 		
+		bool canCues;
+
 		int maxChannels;
 		std::vector<uint32> samplerates;
 		
@@ -101,6 +103,7 @@ namespace Encoder
 
 		Traits()
 			: canTags(false)
+			, canCues(false)
 			, maxChannels(0)
 			, modes(Encoder::ModeInvalid)
 			, defaultMode(Encoder::ModeInvalid)
@@ -116,14 +119,16 @@ namespace Encoder
 	struct Settings
 	{
 		
+		bool Cues;
 		bool Tags;
 		Encoder::Mode Mode;
 		int Bitrate;
 		float Quality;
 		int Format;
 		
-		Settings(bool tags, Encoder::Mode mode, int bitrate, float quality, int format)
-			: Tags(tags)
+		Settings(bool cues, bool tags, Encoder::Mode mode, int bitrate, float quality, int format)
+			: Cues(cues)
+			, Tags(tags)
 			, Mode(mode)
 			, Bitrate(bitrate)
 			, Quality(quality)

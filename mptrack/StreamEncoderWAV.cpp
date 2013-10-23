@@ -170,6 +170,7 @@ WAVEncoder::WAVEncoder()
 	traits.encoderName = "OpenMPT";
 	traits.description = "Microsoft RIFF WAVE";
 	traits.canTags = true;
+	traits.canCues = true;
 	traits.maxChannels = 4;
 	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
 	traits.modes = Encoder::ModeEnumerated;
