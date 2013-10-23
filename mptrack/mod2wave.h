@@ -20,12 +20,14 @@ struct CWaveConvertSettings
 {
 	std::vector<EncoderFactoryBase*> EncoderFactories;
 	std::size_t EncoderIndex;
-	bool Normalize;
 	uint32 SampleRate;
 	uint16 Channels;
 	SampleFormat FinalSampleFormat;
 	Encoder::Settings EncoderSettings;
 	FileTags Tags;
+	bool Normalize;
+	bool SilencePlugBuffers;
+
 	void SelectEncoder(std::size_t index);
 	EncoderFactoryBase *GetEncoderFactory() const;
 	const Encoder::Traits *GetTraits() const;

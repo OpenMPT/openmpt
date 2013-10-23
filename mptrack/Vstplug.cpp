@@ -2049,6 +2049,46 @@ void CVstPlugin::SetDryRatio(UINT param)
 }
 
 
+// Render some silence and return maximum level returned by the plugin.
+float CVstPlugin::RenderSilence(size_t numSamples)
+//------------------------------------------------
+{
+	// The JUCE framework doesn't like processing while being suspended.
+	const bool wasSuspended = !IsResumed();
+	if(wasSuspended)
+	{
+		Resume();
+	}
+
+	float out[2][MIXBUFFERSIZE]; // scratch buffers
+	float maxVal = 0.0f;
+
+	while(numSamples > 0)
+	{
+		size_t renderSamples = numSamples;
+		LimitMax(renderSamples, CountOf(out[0]));
+		MemsetZero(out);
+
+		mixBuffer.ClearInputBuffers(renderSamples);
+		Process(out[0], out[1], renderSamples);
+		for(size_t i = 0; i < renderSamples; i++)
+		{
+			maxVal = std::max(maxVal, fabs(out[0][i]));
+			maxVal = std::max(maxVal, fabs(out[1][i]));
+		}
+
+		numSamples -= renderSamples;
+	}
+
+	if(wasSuspended)
+	{
+		Suspend();
+	}
+
+	return maxVal;
+}
+
+
 void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 //-------------------------------------------------------------------
 {
@@ -2301,7 +2341,7 @@ bool CVstPlugin::MidiSysexSend(const char *message, uint32 length)
 void CVstPlugin::HardAllNotesOff()
 //--------------------------------
 {
-	float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
+	float out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
 
 	// The JUCE framework doesn't like processing while being suspended.
 	const bool wasSuspended = !IsResumed();
@@ -2334,14 +2374,13 @@ void CVstPlugin::HardAllNotesOff()
 	// let plug process events
 	while(vstEvents.GetNumQueuedEvents() > 0)
 	{
-		Process((float*)in, (float*)out, SCRATCH_BUFFER_SIZE);
+		Process(out[0], out[1], SCRATCH_BUFFER_SIZE);
 	}
 
 	if(wasSuspended)
 	{
 		Suspend();
 	}
-
 }
 
 

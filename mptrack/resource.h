@@ -735,6 +735,7 @@
 #define IDC_SECONDARYHILITE             2227
 #define IDC_GIVEPLUGSIDLETIME           2228
 #define IDC_ROWSPERBEAT                 2229
+#define IDC_RENDERSILENCE               2229
 #define IDC_ROWSPERMEASURE              2230
 #define IDC_GOTO_ROW                    2231
 #define IDC_GOTO_CHAN                   2232
