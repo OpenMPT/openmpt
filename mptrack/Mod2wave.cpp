@@ -537,6 +537,8 @@ void CWaveConvert::OnOK()
 		m_Settings.EncoderSettings.Format = -1;
 	}
 	
+	m_Settings.EncoderSettings.Cues = IsDlgButtonChecked(IDC_CHECK3) ? true : false;
+
 	{
 
 		m_Settings.EncoderSettings.Tags = IsDlgButtonChecked(IDC_CHECK7) ? true : false;
