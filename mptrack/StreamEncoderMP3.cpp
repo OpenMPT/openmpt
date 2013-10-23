@@ -1299,6 +1299,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 #ifdef MPT_MP3ENCODER_ACM
 	, m_Acm(nullptr)
 #endif // MPT_MP3ENCODER_ACM
+	, m_Type(MP3EncoderDefault)
 {
 #ifdef MPT_MP3ENCODER_LAME
 	if(type == MP3EncoderDefault || type == MP3EncoderLame)
@@ -1306,6 +1307,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 		m_Lame = new LameDynBind();
 		if(*m_Lame)
 		{
+			m_Type = MP3EncoderLame;
 			SetTraits(m_Lame->BuildTraits());
 			return;
 		}
@@ -1317,6 +1319,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 		m_Blade = new BladeDynBind();
 		if(*m_Blade)
 		{
+			m_Type = MP3EncoderBlade;
 			SetTraits(m_Blade->BuildTraits());
 			return;
 		}
@@ -1328,6 +1331,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 		m_Acm = new AcmDynBind();
 		if(*m_Acm)
 		{
+			m_Type = MP3EncoderACM;
 			SetTraits(m_Acm->BuildTraits());
 			return;
 		}
@@ -1388,23 +1392,20 @@ IAudioStreamEncoder *MP3Encoder::ConstructStreamEncoder(std::ostream &file) cons
 	{
 		// nothing
 #ifdef MPT_MP3ENCODER_LAME
-	} else if(m_Lame && *m_Lame)
+	} else if(m_Type == MP3EncoderLame)
 	{
 		result = new MP3LameStreamWriter(*m_Lame, file);
 #endif // MPT_MP3ENCODER_LAME
 #ifdef MPT_MP3ENCODER_BLADE
-	} else if(m_Blade && *m_Blade)
+	} else if(m_Type == MP3EncoderBlade)
 	{
 		result = new MP3BladeStreamWriter(*m_Blade, file);
 #endif // MPT_MP3ENCODER_BLADE
 #ifdef MPT_MP3ENCODER_ACM
-	} else if(m_Acm && *m_Acm)
+	} else if(m_Type == MP3EncoderACM)
 	{
 		result = new MP3AcmStreamWriter(*m_Acm, file);
 #endif // MPT_MP3ENCODER_ACM
-	} else
-	{
-		return nullptr;
 	}
 	return result;
 }
@@ -1413,13 +1414,32 @@ IAudioStreamEncoder *MP3Encoder::ConstructStreamEncoder(std::ostream &file) cons
 std::string MP3Encoder::DescribeQuality(float quality) const
 //----------------------------------------------------------
 {
-	int q = static_cast<int>((1.0f - quality) * 10.0f);
-	if(q < 0) q = 0;
-	if(q >= 10)
+#ifdef MPT_MP3ENCODER_LAME
+	if(m_Type == MP3EncoderLame)
 	{
-		return "VBR -V9.999";
-	} else
-	{
-		return mpt::String::Format("VBR -V%i", static_cast<int>((1.0f - quality) * 10.0f));
+		int q = static_cast<int>((1.0f - quality) * 10.0f);
+		if(q < 0) q = 0;
+		if(q >= 10)
+		{
+			return "VBR -V9.999";
+		} else
+		{
+			return mpt::String::Format("VBR -V%i", static_cast<int>((1.0f - quality) * 10.0f));
+		}
 	}
+#endif // MPT_MP3ENCODER_LAME
+	return EncoderFactoryBase::DescribeQuality(quality);
 }
+
+std::string MP3Encoder::DescribeBitrateABR(int bitrate) const
+//-----------------------------------------------------------
+{
+#ifdef MPT_MP3ENCODER_BLADE
+	if(m_Type == MP3EncoderBlade)
+	{
+		return mpt::String::Format("%i kbit", bitrate);
+	}
+#endif // MPT_MP3ENCODER_BLADE
+	return EncoderFactoryBase::DescribeBitrateABR(bitrate);
+}
+

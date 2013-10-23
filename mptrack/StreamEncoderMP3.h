@@ -51,10 +51,13 @@ private:
 	AcmDynBind *m_Acm;
 #endif
 
+	MP3EncoderType m_Type;
+
 public:
 
 	IAudioStreamEncoder *ConstructStreamEncoder(std::ostream &file) const;
 	std::string DescribeQuality(float quality) const;
+	std::string DescribeBitrateABR(int bitrate) const;
 	bool IsAvailable() const;
 
 public:

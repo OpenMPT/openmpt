@@ -81,3 +81,22 @@ std::string EncoderFactoryBase::DescribeQuality(float quality) const
 {
 	return mpt::String::Format("VBR %i%%", static_cast<int>(quality * 100.0f));
 }
+
+std::string EncoderFactoryBase::DescribeBitrateVBR(int bitrate) const
+//-------------------------------------------------------------------
+{
+	return mpt::String::Format("VBR %i kbit", bitrate);
+}
+
+std::string EncoderFactoryBase::DescribeBitrateABR(int bitrate) const
+//-------------------------------------------------------------------
+{
+	return mpt::String::Format("ABR %i kbit", bitrate);
+}
+
+std::string EncoderFactoryBase::DescribeBitrateCBR(int bitrate) const
+//-------------------------------------------------------------------
+{
+	return mpt::String::Format("CBR %i kbit", bitrate);
+}
+
