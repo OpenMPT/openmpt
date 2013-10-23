@@ -82,7 +82,8 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 	ON_COMMAND(IDC_CHECK6,			OnCheckInstrMode)
 	ON_COMMAND(IDC_RADIO1,			UpdateDialog)
 	ON_COMMAND(IDC_RADIO2,			UpdateDialog)
-	ON_COMMAND(IDC_PLAYEROPTIONS,   OnPlayerOptions) //rewbs.resamplerConf
+	ON_COMMAND(IDC_PLAYEROPTIONS,	OnPlayerOptions)
+	ON_COMMAND(IDC_BUTTON1,			OnShowEncoderInfo)
 	ON_CBN_SELCHANGE(IDC_COMBO5,	OnFileTypeChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnSamplerateChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4,	OnChannelsChanged)
@@ -131,14 +132,12 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_SPIN4,		m_SpinMaxOrder);
 	DDX_Control(pDX, IDC_SPIN5,		m_SpinLoopCount);
 
-	DDX_Control(pDX, IDC_COMBO3,  m_CbnGenre);
-	DDX_Control(pDX, IDC_EDIT11,  m_EditTitle);
-	DDX_Control(pDX, IDC_EDIT6,   m_EditAuthor);
-	DDX_Control(pDX, IDC_EDIT7,   m_EditAlbum);
-	DDX_Control(pDX, IDC_EDIT8,   m_EditURL);
-	DDX_Control(pDX, IDC_EDIT9,   m_EditYear);
-
-	DDX_Control(pDX, IDC_EDIT10,  m_EditInfo);
+	DDX_Control(pDX, IDC_COMBO3,	m_CbnGenre);
+	DDX_Control(pDX, IDC_EDIT11,	m_EditTitle);
+	DDX_Control(pDX, IDC_EDIT6,		m_EditAuthor);
+	DDX_Control(pDX, IDC_EDIT7,		m_EditAlbum);
+	DDX_Control(pDX, IDC_EDIT8,		m_EditURL);
+	DDX_Control(pDX, IDC_EDIT9,		m_EditYear);
 }
 
 
@@ -148,7 +147,8 @@ BOOL CWaveConvert::OnInitDialog()
 	CDialog::OnInitDialog();
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, m_bSelectPlay ? IDC_RADIO2 : IDC_RADIO1);
 
-	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// rewbs.NoNormalize
+	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// Normalize
+	CheckDlgButton(IDC_CHECK3, MF_CHECKED);	// Cue points
 
 	CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
@@ -173,8 +173,7 @@ BOOL CWaveConvert::OnInitDialog()
 
 	FillTags();
 
-	FillInfo();
-
+	// Plugin quirk options are only available if there are any plugins loaded.
 	GetDlgItem(IDC_GIVEPLUGSIDLETIME)->EnableWindow(FALSE);
 	GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(FALSE);
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
@@ -217,10 +216,9 @@ void CWaveConvert::FillTags()
 }
 
 
-void CWaveConvert::FillInfo()
-//---------------------------
+void CWaveConvert::OnShowEncoderInfo()
+//------------------------------------
 {
-
 	std::string info;
 	info += "Format: ";
 	info += encTraits->fileDescription;
@@ -229,7 +227,7 @@ void CWaveConvert::FillInfo()
 	info += encTraits->encoderName;
 	info += "\r\n";
 	info += mpt::String::Replace(encTraits->description, "\n", "\r\n");
-	SetDlgItemText(IDC_EDIT10, info.c_str());
+	Reporting::Information(info.c_str(), "Encoder Information");
 }
 
 
@@ -383,7 +381,6 @@ void CWaveConvert::OnFileTypeChanged()
 	FillChannels();
 	FillFormats();
 	FillTags();
-	FillInfo();
 }
 
 
