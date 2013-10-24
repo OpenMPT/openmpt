@@ -15,7 +15,8 @@ class ExceptionHandler
 //====================
 {
 public:
-	
+	static bool fullMemDump;
+
 	// Call this to activate unhandled exception filtering.
 	static void Register() { ::SetUnhandledExceptionFilter(UnhandledExceptionFilter); };
 
