@@ -56,6 +56,7 @@ public:
 
 	CEdit m_EditTitle, m_EditAuthor, m_EditURL, m_EditAlbum, m_EditYear;
 	CComboBox m_CbnGenre;
+	CEdit m_EditGenre;
 
 private:
 	void OnShowEncoderInfo();
