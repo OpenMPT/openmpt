@@ -275,7 +275,7 @@ void CWaveConvert::FillSamplerates()
 		uint32 samplerate = *it;
 		int ndx = m_CbnSampleRate.AddString(mpt::String::Format("%d Hz", samplerate).c_str());
 		m_CbnSampleRate.SetItemData(ndx, samplerate);
-		if(samplerate == m_Settings.SampleRate)
+		if(samplerate == m_Settings.EncoderSettings.Samplerate)
 		{
 			sel = ndx;
 		}
@@ -297,7 +297,7 @@ void CWaveConvert::FillChannels()
 		}
 		int ndx = m_CbnChannels.AddString(gszChnCfgNames[(channels+2)/2-1]);
 		m_CbnChannels.SetItemData(ndx, channels);
-		if(channels == m_Settings.Channels)
+		if(channels == m_Settings.EncoderSettings.Channels)
 		{
 			sel = ndx;
 		}
@@ -524,8 +524,8 @@ void CWaveConvert::OnOK()
 	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED;
 	m_bInstrumentMode= IsDlgButtonChecked(IDC_CHECK6) != BST_UNCHECKED;
 
-	m_Settings.SampleRate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
-	m_Settings.Channels = (uint16)m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+	m_Settings.EncoderSettings.Samplerate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
+	m_Settings.EncoderSettings.Channels = (uint16)m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
 	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 
 	if(encTraits->modes & Encoder::ModeEnumerated)
@@ -643,10 +643,8 @@ CWaveConvertSettings::CWaveConvertSettings(std::size_t defaultEncoder, const std
 //--------------------------------------------------------------------------------------------------------------------------
 	: EncoderFactories(encFactories)
 	, EncoderIndex(defaultEncoder)
-	, SampleRate(44100)
-	, Channels(2)
 	, FinalSampleFormat(SampleFormatInt16)
-	, EncoderSettings(true, true, Encoder::ModeCBR, 256, 0.8f, -1)
+	, EncoderSettings(true, true, 44100, 2, Encoder::ModeCBR, 256, 0.8f, -1)
 	, Normalize(false)
 	, SilencePlugBuffers(false)
 {
@@ -709,6 +707,9 @@ void CDoWaveConvert::OnButton1()
 		return;
 	}
 
+	const uint32 samplerate = m_Settings.EncoderSettings.Samplerate;
+	const uint16 channels = m_Settings.EncoderSettings.Channels;
+
 	ASSERT(m_Settings.GetEncoderFactory() && m_Settings.GetEncoderFactory()->IsAvailable());
 	IAudioStreamEncoder *fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream);
 
@@ -722,7 +723,7 @@ void CDoWaveConvert::OnButton1()
 				// Render up to 20 seconds per plugin
 				for(int j = 0; j < 20; j++)
 				{
-					const float maxVal = m_pSndFile->m_MixPlugins[i].pMixPlugin->RenderSilence(m_Settings.SampleRate);
+					const float maxVal = m_pSndFile->m_MixPlugins[i].pMixPlugin->RenderSilence(samplerate);
 					if(maxVal <= FLT_EPSILON)
 					{
 						break;
@@ -735,8 +736,8 @@ void CDoWaveConvert::OnButton1()
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
 	mixersettings.m_nMaxMixChannels = MAX_CHANNELS; // always use max mixing channels when rendering
-	mixersettings.gdwMixingFreq = m_Settings.SampleRate;
-	mixersettings.gnChannels = m_Settings.Channels;
+	mixersettings.gdwMixingFreq = samplerate;
+	mixersettings.gnChannels = channels;
 	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 	if(m_Settings.Normalize)
 	{
@@ -754,7 +755,7 @@ void CDoWaveConvert::OnButton1()
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 2047*1024)) m_dwFileLimit = 2047*1024; // 2GB
 	m_dwFileLimit <<= 10;
 
-	fileEnc->SetFormat(m_Settings.SampleRate, m_Settings.Channels, m_Settings.EncoderSettings);
+	fileEnc->SetFormat(m_Settings.EncoderSettings);
 	if(m_Settings.EncoderSettings.Tags)
 	{
 		// Tags must be written before audio data,
@@ -763,16 +764,16 @@ void CDoWaveConvert::OnButton1()
 		fileEnc->WriteMetatags(m_Settings.Tags);
 	}
 
-	ullMaxSamples = m_dwFileLimit / (m_Settings.Channels * ((m_Settings.FinalSampleFormat.GetBitsPerSample()+7) / 8));
+	ullMaxSamples = m_dwFileLimit / (channels * ((m_Settings.FinalSampleFormat.GetBitsPerSample()+7) / 8));
 	if (m_dwSongLimit)
 	{
-		uint64 l = (uint64)m_dwSongLimit * m_Settings.SampleRate;
+		uint64 l = (uint64)m_dwSongLimit * samplerate;
 		if (l < ullMaxSamples) ullMaxSamples = l;
 	}
 
 	// calculate maximum samples
 	uint64 max = ullMaxSamples;
-	uint64 l = static_cast<uint64>(m_pSndFile->GetSongTime() + 0.5) * m_Settings.SampleRate * std::max<uint64>(1, 1 + m_pSndFile->GetRepeatCount());
+	uint64 l = static_cast<uint64>(m_pSndFile->GetSongTime() + 0.5) * samplerate * std::max<uint64>(1, 1 + m_pSndFile->GetRepeatCount());
 	if (m_nMaxPatterns > 0)
 	{
 		ORDERINDEX dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();
@@ -943,7 +944,7 @@ void CDoWaveConvert::OnButton1()
 		while(framesToProcess)
 		{
 			const std::size_t framesChunk = std::min<std::size_t>(mpt::saturate_cast<std::size_t>(framesToProcess), MIXBUFFERSIZE);
-			const std::size_t samplesChunk = framesChunk * m_Settings.Channels;
+			const std::size_t samplesChunk = framesChunk * channels;
 			
 			normalizeFile.read(reinterpret_cast<char*>(floatbuffer), samplesChunk * sizeof(float));
 			if(normalizeFile.gcount() != samplesChunk * sizeof(float))
@@ -963,13 +964,13 @@ void CDoWaveConvert::OnButton1()
 				// Convert float buffer to mixbuffer format so we can apply dither.
 				// This can probably be changed in the future when dither supports floating point input directly.
 				FloatToMonoMix(floatbuffer, mixbuffer, samplesChunk, MIXING_SCALEF);
-				dither.Process(mixbuffer, framesChunk, m_Settings.Channels, m_Settings.FinalSampleFormat.GetBitsPerSample());
+				dither.Process(mixbuffer, framesChunk, channels, m_Settings.FinalSampleFormat.GetBitsPerSample());
 				switch(m_Settings.FinalSampleFormat.value)
 				{
-					case SampleFormatUnsigned8: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<uint8*>(buffer), mixbuffer, m_Settings.Channels, framesChunk); break;
-					case SampleFormatInt16:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int16*>(buffer), mixbuffer, m_Settings.Channels, framesChunk); break;
-					case SampleFormatInt24:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int24*>(buffer), mixbuffer, m_Settings.Channels, framesChunk); break;
-					case SampleFormatInt32:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int32*>(buffer), mixbuffer, m_Settings.Channels, framesChunk); break;
+					case SampleFormatUnsigned8: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<uint8*>(buffer), mixbuffer, channels, framesChunk); break;
+					case SampleFormatInt16:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int16*>(buffer), mixbuffer, channels, framesChunk); break;
+					case SampleFormatInt24:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int24*>(buffer), mixbuffer, channels, framesChunk); break;
+					case SampleFormatInt32:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int32*>(buffer), mixbuffer, channels, framesChunk); break;
 					default: ASSERT(false); break;
 				}
 				fileEnc->WriteInterleavedConverted(framesChunk, buffer);

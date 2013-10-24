@@ -20,11 +20,11 @@ struct CWaveConvertSettings
 {
 	std::vector<EncoderFactoryBase*> EncoderFactories;
 	std::size_t EncoderIndex;
-	uint32 SampleRate;
-	uint16 Channels;
+
 	SampleFormat FinalSampleFormat;
 	Encoder::Settings EncoderSettings;
 	FileTags Tags;
+
 	bool Normalize;
 	bool SilencePlugBuffers;
 
@@ -92,7 +92,7 @@ class CDoWaveConvert: public CDialog
 //==================================
 {
 public:
-	CWaveConvertSettings m_Settings;
+	const CWaveConvertSettings &m_Settings;
 	CSoundFile *m_pSndFile;
 	const char *m_lpszFileName;
 	DWORD m_dwFileLimit, m_dwSongLimit;
@@ -100,7 +100,7 @@ public:
 	bool m_bAbort, m_bGivePlugsIdleTime;
 
 public:
-	CDoWaveConvert(CSoundFile *sndfile, const char *fname, CWaveConvertSettings settings, CWnd *parent = NULL)
+	CDoWaveConvert(CSoundFile *sndfile, const char *fname, const CWaveConvertSettings &settings, CWnd *parent = NULL)
 		: CDialog(IDD_PROGRESS, parent)
 		, m_Settings(settings)
 		{ m_pSndFile = sndfile; 

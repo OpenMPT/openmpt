@@ -197,6 +197,8 @@ struct VorbisDynBind
 		traits.samplerates = std::vector<uint32>(vorbis_samplerates, vorbis_samplerates + CountOf(vorbis_samplerates));
 		traits.modes = Encoder::ModeVBR | Encoder::ModeQuality;
 		traits.bitrates = std::vector<int>(vorbis_bitrates, vorbis_bitrates + CountOf(vorbis_bitrates));
+		traits.defaultSamplerate = 48000;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeQuality;
 		traits.defaultBitrate = 160;
 		traits.defaultQuality = 0.5;
@@ -309,12 +311,15 @@ public:
 		FinishStream();
 		ASSERT(!inited && !started);
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
 
 		FinishStream();
 
 		ASSERT(!inited && !started);
+
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
 
 		vorbis_channels = channels;
 		vorbis_tags = settings.Tags;

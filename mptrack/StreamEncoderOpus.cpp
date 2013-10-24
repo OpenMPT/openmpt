@@ -169,6 +169,8 @@ struct OpusDynBind
 		traits.samplerates = std::vector<uint32>(opus_samplerates, opus_samplerates + CountOf(opus_samplerates));
 		traits.modes = Encoder::ModeCBR | Encoder::ModeVBR;
 		traits.bitrates = std::vector<int>(opus_bitrates, opus_bitrates + CountOf(opus_bitrates));
+		traits.defaultSamplerate = 48000;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeVBR;
 		traits.defaultBitrate = 128;
 		return traits;
@@ -349,12 +351,15 @@ public:
 		FinishStream();
 		ASSERT(!inited && !started);
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
 
 		FinishStream();
 
 		ASSERT(!inited && !started);
+
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
 
 		opus_bitrate = settings.Bitrate * 1000;
 		opus_samplerate = samplerate;
