@@ -755,7 +755,6 @@ LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
 			PendingNotification = *pnotify; // copy notification so that we can free the buffer
 			found = true;
 			{
-				Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
 				m_NotifyBuffer.pop();
 			}
 		}
