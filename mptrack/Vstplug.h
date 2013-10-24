@@ -219,7 +219,6 @@ public:
 	void ToggleEditor();
 	void GetPluginType(LPSTR pszType);
 	BOOL GetDefaultEffectName(LPSTR pszName);
-	BOOL GetCommandName(UINT index, LPSTR pszName);
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
 
 	void Bypass(bool bypass = true);
