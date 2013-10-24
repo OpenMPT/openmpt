@@ -86,6 +86,7 @@ namespace Encoder
 
 		bool canTags;
 		std::vector<std::string> genres;
+		int modesWithFixedGenres;
 		
 		bool canCues;
 
@@ -102,8 +103,9 @@ namespace Encoder
 		int defaultFormat;
 
 		Traits()
-			: canTags(false)
-			, canCues(false)
+			: canCues(false)
+			, canTags(false)
+			, modesWithFixedGenres(0)
 			, maxChannels(0)
 			, modes(Encoder::ModeInvalid)
 			, defaultMode(Encoder::ModeInvalid)
