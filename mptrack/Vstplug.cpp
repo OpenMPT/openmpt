@@ -2062,6 +2062,7 @@ float CVstPlugin::RenderSilence(size_t numSamples)
 
 	float out[2][MIXBUFFERSIZE]; // scratch buffers
 	float maxVal = 0.0f;
+	mixBuffer.ClearInputBuffers(MIXBUFFERSIZE);
 
 	while(numSamples > 0)
 	{
@@ -2069,7 +2070,6 @@ float CVstPlugin::RenderSilence(size_t numSamples)
 		LimitMax(renderSamples, CountOf(out[0]));
 		MemsetZero(out);
 
-		mixBuffer.ClearInputBuffers(renderSamples);
 		Process(out[0], out[1], renderSamples);
 		for(size_t i = 0; i < renderSamples; i++)
 		{
@@ -2820,13 +2820,6 @@ void CVstPlugin::ToggleEditor()
 	{
 		CVstPluginManager::ReportPlugException("Exception in ToggleEditor() (Plugin=%s)\n", m_Factory.szLibraryName);
 	}
-}
-
-
-BOOL CVstPlugin::GetCommandName(UINT nIndex, LPSTR pszName)
-//---------------------------------------------------------
-{
-	return Dispatch(effGetParamName, nIndex, 0, pszName, 0.0f);
 }
 
 

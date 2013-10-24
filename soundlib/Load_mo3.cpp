@@ -46,7 +46,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 	file.Rewind();
 	const void *stream = file.GetRawData();
-	int length = file.GetLength();
+	uint32 length = mpt::saturate_cast<uint32>(file.GetLength());
 
 	bool result = false;	// Result of trying to load the module, false == fail.
 
@@ -68,7 +68,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		// Decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
 		// IN: data/len = MO3 data/len
 		// OUT: data/len = decoded data/len (if successful)
-		typedef int (WINAPI * UNMO3_DECODE)(const void **data, int *len);
+		typedef int (WINAPI * UNMO3_DECODE)(const void **data, uint32 *len);
 		// Free the data returned by UNMO3_Decode
 		typedef void (WINAPI * UNMO3_FREE)(const void *data);
 
