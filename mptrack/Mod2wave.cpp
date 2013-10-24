@@ -133,6 +133,7 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_SPIN5,		m_SpinLoopCount);
 
 	DDX_Control(pDX, IDC_COMBO3,	m_CbnGenre);
+	DDX_Control(pDX, IDC_EDIT10,	m_EditGenre);
 	DDX_Control(pDX, IDC_EDIT11,	m_EditTitle);
 	DDX_Control(pDX, IDC_EDIT6,		m_EditAuthor);
 	DDX_Control(pDX, IDC_EDIT7,		m_EditAlbum);
@@ -212,14 +213,25 @@ void CWaveConvert::FillTags()
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT8), canTags?TRUE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9), canTags?TRUE:FALSE);
 
-	m_CbnGenre.ResetContent();
 	if((encTraits->modesWithFixedGenres & mode) && !encTraits->genres.empty())
 	{
+		m_EditGenre.ShowWindow(SW_HIDE);
+		m_CbnGenre.ShowWindow(SW_SHOW);
+		m_EditGenre.Clear();
+		m_CbnGenre.ResetContent();
+		m_CbnGenre.AddString("");
 		for(std::vector<std::string>::const_iterator genre = encTraits->genres.begin(); genre != encTraits->genres.end(); ++genre)
 		{
 			m_CbnGenre.AddString((*genre).c_str());
 		}
+	} else
+	{
+		m_CbnGenre.ShowWindow(SW_HIDE);
+		m_EditGenre.ShowWindow(SW_SHOW);
+		m_CbnGenre.ResetContent();
+		m_EditGenre.Clear();
 	}
+
 }
 
 
@@ -566,8 +578,15 @@ void CWaveConvert::OnOK()
 			m_EditURL.GetWindowText(tmp);
 			m_Settings.Tags.url = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
 
-			m_CbnGenre.GetWindowText(tmp);
-			m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+			if((encTraits->modesWithFixedGenres & m_Settings.EncoderSettings.Mode) && !encTraits->genres.empty())
+			{
+				m_CbnGenre.GetWindowText(tmp);
+				m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+			} else
+			{
+				m_EditGenre.GetWindowText(tmp);
+				m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+			}
 
 			m_EditYear.GetWindowText(tmp);
 			m_Settings.Tags.year = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
