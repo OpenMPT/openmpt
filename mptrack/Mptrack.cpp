@@ -292,6 +292,7 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; return; } else
 		if (!lstrcmpi(lpszParam, "portable")) { m_bPortable = true; return; } else
 		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = true; return; }
+		if (!lstrcmpi(lpszParam, "fullMemDump")) { ExceptionHandler::fullMemDump = true; return; }
 	}
 	CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
 }

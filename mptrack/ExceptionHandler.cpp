@@ -18,6 +18,9 @@
 #include "../common/version.h"
 
 
+bool ExceptionHandler::fullMemDump = false;
+
+
 typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
 	CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
 	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
@@ -75,7 +78,9 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 					ExInfo.ClientPointers = NULL;
 				}
 
-				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
+				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile,
+					ExceptionHandler::fullMemDump ? (MINIDUMP_TYPE)(MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithThreadInfo | MiniDumpWithProcessThreadData | MiniDumpWithFullMemoryInfo |  MiniDumpIgnoreInaccessibleMemory | MiniDumpWithTokenInformation) : MiniDumpNormal,
+					pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
 				::CloseHandle(hFile);
 
 				errorMessage.AppendFormat("\n\nDebug information has been saved to\n%s", baseRescuePath);
