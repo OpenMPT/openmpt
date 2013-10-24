@@ -241,6 +241,8 @@ enum
 #define MAX_UPDATE_HISTORY		256 // same as SNDDEV_MAXBUFFERS
 #include "Notification.h"
 
+#define TIMERID_GUI 1
+#define TIMERID_NOTIFY 2
 
 #include "mainbar.h"
 #include "TrackerSettings.h"
@@ -273,10 +275,9 @@ public:
 	// Low-Level Audio
 	mutable Util::mutex m_SoundDeviceMutex;
 	ISoundDevice *gpSoundDevice;
+	UINT_PTR m_NotifyTimer;
 	Dither m_Dither;
-	HANDLE m_hNotifyWakeUp;
-	HANDLE m_hNotifyThread;
-	DWORD m_dwNotifyThreadId;
+
 	static LONG gnLVuMeter, gnRVuMeter;
 	static bool gnClipLeft, gnClipRight;
 
@@ -303,7 +304,6 @@ protected:
 	// Notification Buffer
 	Util::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
 	Util::fixed_size_queue<Notification,MAX_UPDATE_HISTORY> m_NotifyBuffer;
-	HANDLE m_PendingNotificationSempahore; // protects the one notification that is in flight from the notification thread to the gui thread from being freed while the gui thread still uses it
 
 	// Instrument preview in tree view
 	CSoundFile m_WaveFile;
@@ -320,8 +320,6 @@ public:
 	static void UpdateDspEffects(CSoundFile &sndFile, bool reset=false);
 	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
-	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
-	DWORD NotifyThread();
 
 	// from ISoundSource
 	void FillAudioBufferLocked(IFillAudioBuffer &callback);
@@ -476,6 +474,9 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
+	void OnTimerGUI();
+	void OnTimerNotify();
+
 // Message map functions
 	//{{AFX_MSG(CMainFrame)
 public:
@@ -513,7 +514,6 @@ protected:
 	afx_msg void OnPanic();
 	afx_msg void OnReportBug();	//rewbs.customKeys
 	afx_msg BOOL OnInternetLink(UINT nID);
-	afx_msg LRESULT OnNotification(WPARAM, LPARAM lParam);
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM lParam);
 	afx_msg void OnExampleSong(UINT nId);
 	afx_msg void OnOpenTemplateModule(UINT nId);

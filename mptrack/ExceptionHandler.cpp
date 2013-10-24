@@ -147,6 +147,11 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 				pMainFrame->gpSoundDevice->Reset();
 				pMainFrame->gpSoundDevice->Close();
 			}
+			if(pMainFrame->m_NotifyTimer)
+			{
+				pMainFrame->KillTimer(pMainFrame->m_NotifyTimer);
+				pMainFrame->m_NotifyTimer =  0;
+			}
 		} catch(...)
 		{
 		}
