@@ -417,12 +417,7 @@ void COptionsSoundcard::UpdateSampleRates(SoundDeviceID dev)
 {
 	m_CbnMixingFreq.ResetContent();
 
-	std::vector<uint32> samplerates;
-
-	{
-		Util::lock_guard<Util::mutex> lock(CMainFrame::GetMainFrame()->m_SoundDeviceMutex);
-		samplerates = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).supportedSampleRates;
-	}
+	std::vector<uint32> samplerates = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).supportedSampleRates;
 
 	if(samplerates.empty())
 	{
@@ -542,22 +537,19 @@ void COptionsSoundcard::UpdateStatistics()
 {
 	if (!m_EditStatistics) return;
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if(pMainFrm->gpSoundDevice && pMainFrm->IsPlaying())
 	{
-		Util::lock_guard<Util::mutex> lock(pMainFrm->m_SoundDeviceMutex);
-		if(pMainFrm->gpSoundDevice && pMainFrm->IsPlaying())
-		{
-			CHAR s[256];
-			_snprintf(s, 255, "Buffers: %d\r\nUpdate interval: %4.1f ms\r\nLatency: %4.1f ms\r\nCurrent Latency: %4.1f ms",
-				pMainFrm->gpSoundDevice->GetNumBuffers(),
-				(float)pMainFrm->gpSoundDevice->GetRealUpdateIntervalMS(),
-				(float)pMainFrm->gpSoundDevice->GetRealLatencyMS(),
-				(float)pMainFrm->gpSoundDevice->GetCurrentRealLatencyMS()
-				);
-			m_EditStatistics.SetWindowText(s);
-		}	else
-		{
-			m_EditStatistics.SetWindowText("");
-		}
+		CHAR s[256];
+		_snprintf(s, 255, "Buffers: %d\r\nUpdate interval: %4.1f ms\r\nLatency: %4.1f ms\r\nCurrent Latency: %4.1f ms",
+			pMainFrm->gpSoundDevice->GetNumBuffers(),
+			(float)pMainFrm->gpSoundDevice->GetRealUpdateIntervalMS(),
+			(float)pMainFrm->gpSoundDevice->GetRealLatencyMS(),
+			(float)pMainFrm->gpSoundDevice->GetCurrentRealLatencyMS()
+			);
+		m_EditStatistics.SetWindowText(s);
+	}	else
+	{
+		m_EditStatistics.SetWindowText("");
 	}
 }
 

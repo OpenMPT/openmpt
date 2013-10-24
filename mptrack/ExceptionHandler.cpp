@@ -141,7 +141,6 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 	{
 		try
 		{
-			// do not take m_SoundDeviceMutex here, just try closing it, no matter what
 			if(pMainFrame->gpSoundDevice)
 			{
 				pMainFrame->gpSoundDevice->Reset();
