@@ -250,7 +250,6 @@ const char tstrReadingMap[] = "Reading map from rpos: %u\n";
 const char tstrEndOfMap[] = "End of map(rpos): %u\n";
 const char tstrReadProgress[] = "Read entry: {num, id, rpos, size, desc} = {%u, %s, %u, %s, %s}\n";
 const char tstrNoEntryFound[] = "No entry with id %s found.\n";
-const char tstrCantFindSubEntry[] = "Unable to find subentry with id=%s\n";
 const char strReadNote[] = "Read note: ";
 
 
@@ -272,8 +271,6 @@ const char strReadNote[] = "Read note: ";
 	m_nCounter(0),								\
 	m_nNextReadHint(0),							\
 	m_Flags(s_DefaultFlags),					\
-	m_pSubEntry(nullptr),						\
-	m_posSubEntryStart(0),						\
 	m_nMapReserveSize(0),						\
 	m_posEntrycount(0),							\
 	m_posMapPosField(0),						\
@@ -423,36 +420,6 @@ void Ssb::SetIdSize(uint16 nSize)
 }
 
 
-void Ssb::CreateWriteSubEntry()
-//-----------------------------
-{
-	m_posSubEntryStart = m_pOstrm->tellp();
-	delete m_pSubEntry;
-	m_pSubEntry = new Ssb(*m_pOstrm);
-	m_pSubEntry->m_fpLogFunc = m_fpLogFunc;
-}
-
-
-Ssb* Ssb::CreateReadSubEntry(const char* pId, const size_t nLength)
-//-----------------------------------------------------------------
-{
-	const ReadEntry* pE = Find(pId, nLength);
-	if (pE && pE->rposStart != 0)
-	{
-		m_nCounter++;
-		delete m_pSubEntry;
-		m_pSubEntry = new Ssb(*m_pIstrm);
-		m_pSubEntry->m_fpLogFunc = m_fpLogFunc;
-		m_pIstrm->seekg(m_posStart + Postype(pE->rposStart));
-		return m_pSubEntry;
-	}
-	else if (m_fpLogFunc)
-		m_fpLogFunc(tstrCantFindSubEntry, IdToString(pId, nLength).c_str());
-
-	return nullptr;
-}
-
-
 void Ssb::IncrementWriteCounter()
 //-------------------------------
 {
@@ -462,18 +429,6 @@ void Ssb::IncrementWriteCounter()
 		FinishWrite();
 		AddWriteNote(SNW_MAX_WRITE_COUNT_REACHED);
 	}
-}
-
-
-void Ssb::ReleaseWriteSubEntry(const char* pId, const size_t nIdLength)
-//---------------------------------------------------------------------
-{
-	if ((m_pSubEntry->m_Status & SNT_FAILURE) != 0)
-		m_Status |= SNW_SUBENTRY_FAILURE;
-
-	delete m_pSubEntry; m_pSubEntry = nullptr;
-	WriteMapItem(pId, nIdLength, static_cast<RposType>(m_posSubEntryStart - m_posStart), static_cast<DataSize>(m_pOstrm->tellp() - m_posSubEntryStart), "");
-	IncrementWriteCounter();
 }
 
 
