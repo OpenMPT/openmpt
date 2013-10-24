@@ -67,7 +67,6 @@ enum
 	SNW_INSUFFICIENT_MAPSIZE =							(0x12)	| SNT_FAILURE,
 	SNW_DATASIZETYPE_OVERFLOW =							(0x13)	| SNT_FAILURE,
 	SNW_MAX_WRITE_COUNT_REACHED =						(0x14)	| SNT_FAILURE,
-	SNW_SUBENTRY_FAILURE =								(0x15)	| SNT_FAILURE,
 	SNW_INSUFFICIENT_DATASIZETYPE =						(0x16)	| SNT_FAILURE
 };
 
@@ -284,7 +283,7 @@ public:
 	Ssb(std::ostream& oStrm);
 	Ssb(std::istream& iStrm);
 
-	~Ssb() {delete m_pSubEntry;}
+	~Ssb() {}
 
 	// Sets map ID size in writing.
 	void SetIdSize(uint16 idSize);
@@ -299,24 +298,6 @@ public:
 
 	// Reserves space for map to current position. Call after BeginWrite and before writing any entries.
 	void ReserveMapSize(uint32 nSize);
-
-	// Creates subentry for writing. Use SubEntry() to access the subentry and 
-	// when done, call ReleaseSubEntry. Don't call WriteItem() for 'this' while 
-	// subentry is active.
-	void CreateWriteSubEntry();
-
-	// Returns current write/read subentry. CreateWriteSubEntry/CreateReadSubEntry
-	// must be called before calling this.
-	Ssb& SubEntry() {return *m_pSubEntry;}
-
-	// Releases write subentry and writes corresponding map information.
-	void ReleaseWriteSubEntry(const char* pId, const size_t nIdLength);
-	void ReleaseWriteSubEntry(const char* pszId) {ReleaseWriteSubEntry(pszId, strlen(pszId));}
-
-	// If ID was found, returns pointer to Ssb object, nullptr if not found.
-	// Note: All reading on subentry must be done before calling ReadItem with 'this'.
-	Ssb* CreateReadSubEntry(const char* pId, const size_t nLength);
-	Ssb* CreateReadSubEntry(const char* pszId) {return CreateReadSubEntry(pszId, strlen(pszId));}
 
 	// After calling BeginRead(), this returns number of entries in the file.
 	NumType GetNumEntries() const {return m_nReadEntrycount;}
@@ -453,8 +434,6 @@ private:
 	NumType m_nNextReadHint;			// Read: Hint where to start looking for the next read entry.
 	std::bitset<RwfNumFlags> m_Flags;	// Read/write: Various flags.
 
-	Ssb* m_pSubEntry;					// Read/Write: Pointer to SubEntry.
-	Postype m_posSubEntryStart;			// Write: Holds data position where SubEntry started.
 	uint32 m_nMapReserveSize;			// Write: Number of bytes to reserve for map if writing it before data.			
 	Postype m_posEntrycount;			// Write: Pos of entrycount field. 
 	Postype m_posMapPosField;			// Write: Pos of map position field.
