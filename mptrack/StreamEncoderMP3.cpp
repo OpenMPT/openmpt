@@ -435,6 +435,9 @@ struct LameDynBind
 		traits.canTags = true;
 		traits.genres.clear();
 		id3tag_genre_list(&GenreEnumCallback, &traits);
+#ifdef MPT_FORCE_ID3V1_TAGS_IN_CBR_MODE
+		traits.modesWithFixedGenres = Encoder::ModeCBR;
+#endif
 		traits.maxChannels = 2;
 		traits.samplerates = std::vector<uint32>(layer3_samplerates, layer3_samplerates + CountOf(layer3_samplerates));
 		traits.modes = Encoder::ModeCBR | Encoder::ModeQuality;

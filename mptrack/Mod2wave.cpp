@@ -194,10 +194,14 @@ BOOL CWaveConvert::OnInitDialog()
 void CWaveConvert::FillTags()
 //---------------------------
 {
-	CheckDlgButton(IDC_CHECK3, encTraits->canCues?m_Settings.EncoderSettings.Cues?TRUE:FALSE:FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), encTraits->canCues?TRUE:FALSE);
 
 	const bool canTags = encTraits->canTags;
+
+	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
+	Encoder::Mode mode = (Encoder::Mode)((dwFormat >> 24) & 0xff);
+
+	CheckDlgButton(IDC_CHECK3, encTraits->canCues?m_Settings.EncoderSettings.Cues?TRUE:FALSE:FALSE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), encTraits->canCues?TRUE:FALSE);
 
 	CheckDlgButton(IDC_CHECK7, canTags?m_Settings.EncoderSettings.Tags?TRUE:FALSE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK7), canTags?TRUE:FALSE);
@@ -209,7 +213,7 @@ void CWaveConvert::FillTags()
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9), canTags?TRUE:FALSE);
 
 	m_CbnGenre.ResetContent();
-	if(!encTraits->genres.empty())
+	if((encTraits->modesWithFixedGenres & mode) && !encTraits->genres.empty())
 	{
 		for(std::vector<std::string>::const_iterator genre = encTraits->genres.begin(); genre != encTraits->genres.end(); ++genre)
 		{
@@ -407,6 +411,7 @@ void CWaveConvert::OnFormatChanged()
 //----------------------------------
 {
 	//DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
+	FillTags();
 }
 
 
