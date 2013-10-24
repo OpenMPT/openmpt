@@ -442,6 +442,8 @@ struct LameDynBind
 		traits.samplerates = std::vector<uint32>(layer3_samplerates, layer3_samplerates + CountOf(layer3_samplerates));
 		traits.modes = Encoder::ModeCBR | Encoder::ModeQuality;
 		traits.bitrates = std::vector<int>(layer3_bitrates, layer3_bitrates + CountOf(layer3_bitrates));
+		traits.defaultSamplerate = 44100;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeQuality;
 		traits.defaultBitrate = 256;
 		traits.defaultQuality = 0.8f;
@@ -469,12 +471,15 @@ public:
 	{
 		Finalize();
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
 		if(!gfp)
 		{
 			gfp = lame.lame_init();
 		}
+
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
 
 		lame.lame_set_in_samplerate(gfp, samplerate);
 		lame.lame_set_num_channels(gfp, channels);
@@ -719,6 +724,8 @@ struct BladeDynBind
 		traits.samplerates = std::vector<uint32>(mpeg1layer3_samplerates, mpeg1layer3_samplerates + CountOf(mpeg1layer3_samplerates));;
 		traits.modes = Encoder::ModeABR;
 		traits.bitrates = std::vector<int>(mpeg1layer3_bitrates, mpeg1layer3_bitrates + CountOf(mpeg1layer3_bitrates));
+		traits.defaultSamplerate = 44100;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeABR;
 		traits.defaultBitrate = 256;
 		return traits;
@@ -752,8 +759,11 @@ public:
 	{
 		Finalize();
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
+
 		if(samplerate <= 32000)
 		{
 			samplerate = 32000;
@@ -1087,6 +1097,8 @@ struct AcmDynBind
 		}
 		traits.modes = Encoder::ModeEnumerated;
 		traits.formats = formats;
+		traits.defaultSamplerate = 44100;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeEnumerated;
 		traits.defaultFormat = 0;
 		traits.defaultBitrate = 256;
@@ -1123,9 +1135,13 @@ public:
 	{
 		Finalize();
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
-		const int format = Clamp(settings.Format, 0, (int)acm.formats.size());
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
+
+		int format = settings.Format;
+		format = Clamp(format, 0, (int)acm.formats.size());
 
 		if(acmDriverOpen(&acmDriver, acm.formats_driverids[format], 0) != MMSYSERR_NOERROR)
 		{

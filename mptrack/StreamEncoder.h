@@ -97,6 +97,9 @@ namespace Encoder
 		std::vector<int> bitrates;
 		std::vector<Encoder::Format> formats;
 		
+		uint32 defaultSamplerate;
+		uint16 defaultChannels;
+
 		Encoder::Mode defaultMode;
 		int defaultBitrate;
 		float defaultQuality;
@@ -108,6 +111,8 @@ namespace Encoder
 			, modesWithFixedGenres(0)
 			, maxChannels(0)
 			, modes(Encoder::ModeInvalid)
+			, defaultSamplerate(44100)
+			, defaultChannels(2)
 			, defaultMode(Encoder::ModeInvalid)
 			, defaultBitrate(0)
 			, defaultQuality(0.0f)
@@ -123,14 +128,20 @@ namespace Encoder
 		
 		bool Cues;
 		bool Tags;
+
+		uint32 Samplerate;
+		uint16 Channels;
+
 		Encoder::Mode Mode;
 		int Bitrate;
 		float Quality;
 		int Format;
 		
-		Settings(bool cues, bool tags, Encoder::Mode mode, int bitrate, float quality, int format)
+		Settings(bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format)
 			: Cues(cues)
 			, Tags(tags)
+			, Samplerate(samplerate)
+			, Channels(channels)
 			, Mode(mode)
 			, Bitrate(bitrate)
 			, Quality(quality)
@@ -154,7 +165,7 @@ public:
 	virtual ~IAudioStreamEncoder() { }
 public:
 	// Call the following functions exactly in this order.
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings) = 0;
+	virtual void SetFormat(const Encoder::Settings &settings) = 0;
 	virtual void WriteMetatags(const FileTags &tags) = 0; // optional
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data) = 0;
@@ -176,7 +187,7 @@ public:
 	StreamWriterBase(std::ostream &stream);
 	virtual ~StreamWriterBase();
 public:
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings) = 0;
+	virtual void SetFormat(const Encoder::Settings &settings) = 0;
 	virtual void WriteMetatags(const FileTags &tags);
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data);

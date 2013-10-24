@@ -74,10 +74,8 @@ public:
 		FinishStream();
 		ASSERT(!inited && !started);
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
-		MPT_UNREFERENCED_PARAMETER(samplerate);
-		MPT_UNREFERENCED_PARAMETER(channels);
 
 		FinishStream();
 
@@ -198,6 +196,8 @@ WAVEncoder::WAVEncoder()
 			}
 		}
 	}
+	traits.defaultSamplerate = 44100;
+	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeEnumerated;
 	traits.defaultFormat = 0;
 	SetTraits(traits);
