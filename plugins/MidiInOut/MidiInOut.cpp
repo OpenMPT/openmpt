@@ -83,11 +83,11 @@ void MidiInOut::getProgramName(char *name)
 VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
 //----------------------------------------------------------
 {
-	const VstInt32 programNameLen = strlen(programName);
-	VstInt32 byteSize = 8 * sizeof(VstInt32)
+	const VstInt32 programNameLen = static_cast<VstInt32>(strlen(programName));
+	VstInt32 byteSize = static_cast<VstInt32>(8 * sizeof(VstInt32)
 		+ programNameLen
 		+ inputDevice.name.size()
-		+ outputDevice.name.size();
+		+ outputDevice.name.size());
 
 	delete[] chunk;
 	(*data) = chunk = new (std::nothrow) char[byteSize];
@@ -98,9 +98,9 @@ VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
 		header[1] = 1;	// Number of programs
 		header[2] = programNameLen;
 		header[3] = inputDevice.index;
-		header[4] = inputDevice.name.size();
+		header[4] = static_cast<VstInt32>(inputDevice.name.size());
 		header[5] = outputDevice.index;
-		header[6] = outputDevice.name.size();
+		header[6] = static_cast<VstInt32>(outputDevice.name.size());
 		header[7] = 0;	// Reserved
 		strncpy(chunk + 8 * sizeof(VstInt32), programName, programNameLen);
 		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen, inputDevice.name.c_str(), header[4]);

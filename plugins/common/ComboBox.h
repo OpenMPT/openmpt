@@ -107,7 +107,7 @@ public:
 					result,
 					reinterpret_cast<LPARAM>(data)
 					);
-				return result;
+				return static_cast<int>(result);
 			}
 		}
 		return -1;
@@ -119,10 +119,10 @@ public:
 	{
 		if(combo != nullptr)
 		{
-			return SendMessage(combo,
+			return static_cast<int>(SendMessage(combo,
 				CB_GETCOUNT,
 				0,
-				0);
+				0));
 		}
 		return 0;
 	}
@@ -158,7 +158,7 @@ public:
 	// Get the data associated with the selected item.
 	void *GetSelectionData() const
 	{
-		return GetItemData(GetSelection());
+		return GetItemData(static_cast<int>(GetSelection()));
 	}
 
 
