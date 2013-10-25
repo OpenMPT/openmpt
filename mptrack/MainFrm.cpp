@@ -873,7 +873,6 @@ void CMainFrame::audioCloseDevice()
 {
 	if(gpSoundDevice)
 	{
-		gpSoundDevice->Reset();
 		gpSoundDevice->Close();
 	}
 

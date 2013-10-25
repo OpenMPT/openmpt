@@ -262,17 +262,15 @@ protected:
 	virtual bool InternalOpen() = 0;
 	virtual void InternalStart() = 0;
 	virtual void InternalStop() = 0;
-	virtual void InternalReset() = 0;
 	virtual bool InternalClose() = 0;
 	virtual bool InternalHasGetStreamPosition() const { return false; }
 	virtual int64 InternalGetStreamPositionSamples() const { return 0; }
 
 public:
-	bool Open(const SoundDeviceSettings &settings);	// Open a device
-	bool Close();				// Close the currently open device
+	bool Open(const SoundDeviceSettings &settings);
+	bool Close();
 	void Start();
 	void Stop();
-	void Reset();
 	int64 GetStreamPositionSamples() const;
 	SampleFormat GetActualSampleFormat() { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
 	virtual bool IsOpen() const = 0;
