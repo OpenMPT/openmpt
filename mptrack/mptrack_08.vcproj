@@ -1573,6 +1573,10 @@
 			Name="unarchiver"
 			>
 			<File
+				RelativePath="..\unarchiver\archive.h"
+				>
+			</File>
+			<File
 				RelativePath="..\unarchiver\unarchiver.cpp"
 				>
 			</File>

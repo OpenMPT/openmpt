@@ -9,28 +9,25 @@
 
 #pragma once
 
-#include "../soundlib/FileReader.h"
+#include "archive.h"
 
 typedef struct _LHAInputStream LHAInputStream;
 typedef struct _LHAReader LHAReader;
 typedef struct _LHAFileHeader LHAFileHeader;
 
-//===============
-class CLhaArchive
-//===============
+//====================================
+class CLhaArchive : public ArchiveBase
+//====================================
 {
 private:
-	FileReader file;
 	LHAInputStream *inputstream;
 	LHAReader *reader;
 	LHAFileHeader *firstfile;
-	std::vector<char> data;
+	void OpenArchive();
+	void CloseArchive();
 public:
-	CLhaArchive(FileReader file_);
-	~CLhaArchive();
+	CLhaArchive(FileReader &file);
+	virtual ~CLhaArchive();
 public:
-	bool IsArchive();
-	FileReader GetOutputFile() const;
-	bool ExtractFile();
-	bool ExtractFile(const std::vector<const char *> &extensions);
+	virtual bool ExtractFile(std::size_t index);
 };
