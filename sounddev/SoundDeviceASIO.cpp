@@ -36,7 +36,7 @@
 #define ASIO_MAXDRVNAMELEN	1024
 
 CASIODevice *CASIODevice::gpCurrentAsio = NULL;
-LONG CASIODevice::gnFillBuffers = 0;
+
 int CASIODevice::baseChannel = 0;
 
 static DWORD g_dwBuffer = 0;
@@ -331,7 +331,6 @@ abort:
 	if (bOk)
 	{
 		gpCurrentAsio = this;
-		gnFillBuffers = 2;
 	} else
 	{
 	#ifdef ASIO_LOG
