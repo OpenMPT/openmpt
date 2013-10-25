@@ -99,7 +99,10 @@ bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 //----------------------------------------------------------
 {
-	if(IsOpen()) return false;
+	if(IsOpen())
+	{
+		Close();
+	}
 	m_Settings = settings;
 	if(m_Settings.LatencyMS < SNDDEV_MINLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MINLATENCY_MS;
 	if(m_Settings.LatencyMS > SNDDEV_MAXLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MAXLATENCY_MS;
@@ -209,6 +212,7 @@ void ISoundDevice::Stop()
 int64 ISoundDevice::GetStreamPositionSamples() const
 //--------------------------------------------------
 {
+	if(!IsOpen()) return 0;
 	if(InternalHasGetStreamPosition())
 	{
 		return InternalGetStreamPositionSamples();

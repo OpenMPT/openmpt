@@ -138,7 +138,6 @@ void CPortaudioDevice::FillAudioBuffer()
 int64 CPortaudioDevice::InternalGetStreamPositionSamples() const
 //--------------------------------------------------------------
 {
-	if(!IsOpen()) return 0;
 	if(Pa_IsStreamActive(m_Stream) != 1) return 0;
 	return static_cast<int64>(Pa_GetStreamTime(m_Stream) * Pa_GetStreamInfo(m_Stream)->sampleRate);
 }
@@ -147,7 +146,6 @@ int64 CPortaudioDevice::InternalGetStreamPositionSamples() const
 float CPortaudioDevice::GetCurrentRealLatencyMS()
 //-----------------------------------------------
 {
-	if(!IsOpen()) return 0.0f;
 	return m_CurrentRealLatencyMS;
 }
 

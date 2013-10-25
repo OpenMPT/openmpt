@@ -35,7 +35,7 @@
 
 #define ASIO_MAXDRVNAMELEN	1024
 
-CASIODevice *CASIODevice::gpCurrentAsio = NULL;
+CASIODevice *CASIODevice::gpCurrentAsio = nullptr;
 
 int CASIODevice::baseChannel = 0;
 
@@ -186,14 +186,13 @@ bool CASIODevice::InternalOpen()
 
 	bool bOk = false;
 
-	if (IsOpen()) Close();
 #ifdef ASIO_LOG
 	Log("CASIODevice::Open(%d:\"%s\"): %d-bit, %d channels, %dHz\n",
 		GetDeviceIndex(), mpt::String::Encode(GetDeviceInternalID(), mpt::CharsetLocale).c_str(), (int)m_Settings.sampleFormat.GetBitsPerSample(), m_Settings.Channels, m_Settings.Samplerate);
 #endif
 	OpenDevice();
 
-	if (IsOpen())
+	if(IsDeviceOpen())
 	{
 		long nInputChannels = 0, nOutputChannels = 0;
 		long minSize = 0, maxSize = 0, preferredSize = 0, granularity = 0;
@@ -423,34 +422,31 @@ void CASIODevice::InternalStop()
 bool CASIODevice::InternalClose()
 //-------------------------------
 {
-	if(IsOpen())
+	if (m_bMixRunning)
 	{
-		if (m_bMixRunning)
-		{
-			m_bMixRunning = FALSE;
-			ALWAYS_ASSERT(g_asio_startcount==0);
-			try
-			{
-				m_pAsioDrv->stop();
-			} catch(...)
-			{
-				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
-			}
-		}
-		g_asio_startcount = 0;
-		SetRenderSilence(false);
+		m_bMixRunning = FALSE;
+		ALWAYS_ASSERT(g_asio_startcount==0);
 		try
 		{
-			m_pAsioDrv->disposeBuffers();
+			m_pAsioDrv->stop();
 		} catch(...)
 		{
-			CASIODevice::ReportASIOException("ASIO crash in disposeBuffers()\n");
+			CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 		}
-		CloseDevice();
 	}
-	if (gpCurrentAsio == this)
+	g_asio_startcount = 0;
+	SetRenderSilence(false);
+	try
 	{
-		gpCurrentAsio = NULL;
+		m_pAsioDrv->disposeBuffers();
+	} catch(...)
+	{
+		CASIODevice::ReportASIOException("ASIO crash in disposeBuffers()\n");
+	}
+	CloseDevice();
+	if(gpCurrentAsio == this)
+	{
+		gpCurrentAsio = nullptr;
 	}
 	return true;
 }
@@ -459,7 +455,7 @@ bool CASIODevice::InternalClose()
 void CASIODevice::OpenDevice()
 //----------------------------
 {
-	if (IsOpen())
+	if(IsDeviceOpen())
 	{
 		return;
 	}
@@ -481,7 +477,7 @@ void CASIODevice::OpenDevice()
 void CASIODevice::CloseDevice()
 //-----------------------------
 {
-	if (IsOpen())
+	if(IsDeviceOpen())
 	{
 		try
 		{
