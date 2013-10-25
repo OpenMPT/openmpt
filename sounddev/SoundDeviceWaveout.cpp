@@ -36,6 +36,7 @@ CWaveDevice::CWaveDevice(SoundDeviceID id, const std::wstring &internalID)
 {
 	m_hWaveOut = NULL;
 	m_nWaveBufferSize = 0;
+	m_JustStarted = false;
 	m_nPreparedHeaders = 0;
 	m_nBytesPerSec = 0;
 	m_BytesPerSample = 0;
@@ -119,7 +120,6 @@ bool CWaveDevice::InternalClose()
 		MMRESULT err = waveOutClose(m_hWaveOut);
 		ALWAYS_ASSERT(err == MMSYSERR_NOERROR);
 		m_hWaveOut = NULL;
-		Sleep(1); // Linux WINE-friendly
 	}
 	return true;
 }
@@ -130,7 +130,8 @@ void CWaveDevice::StartFromSoundThread()
 {
 	if(m_hWaveOut)
 	{
-		waveOutRestart(m_hWaveOut);
+		m_JustStarted = true;
+		// Actual starting is done in FillAudioBuffer to avoid crackling with tiny buffers.
 	}
 }
 
@@ -141,6 +142,7 @@ void CWaveDevice::StopFromSoundThread()
 	if(m_hWaveOut)
 	{
 		waveOutPause(m_hWaveOut);
+		m_JustStarted = false;
 	}
 }
 
@@ -151,6 +153,7 @@ void CWaveDevice::ResetFromOutsideSoundThread()
 	if(m_hWaveOut)
 	{
 		waveOutReset(m_hWaveOut);
+		m_JustStarted = false;
 	}
 	InterlockedExchange(&m_nBuffersPending, 0);
 	m_nWriteBuffer = 0;
@@ -160,21 +163,16 @@ void CWaveDevice::ResetFromOutsideSoundThread()
 void CWaveDevice::FillAudioBuffer()
 //---------------------------------
 {
-	ULONG nBytesWritten;
-	ULONG nLatency;
-	LONG oldBuffersPending;
-	if (!m_hWaveOut) return;
-	nBytesWritten = 0;
-	oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0); // read
-	nLatency = oldBuffersPending * m_nWaveBufferSize;
+	if(!m_hWaveOut)
+	{
+		return;
+	}
+	
+	ULONG oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0); // read
+	ULONG nLatency = oldBuffersPending * m_nWaveBufferSize;
 
-	bool wasempty = false;
-	if(oldBuffersPending == 0) wasempty = true;
-	// When there were no pending buffers at all, pause the output, fill the buffers completely and then restart the output.
-	// This avoids buffer underruns which result in audible crackling on stream start with small buffers.
-	if(wasempty) waveOutPause(m_hWaveOut);
-
-	while((ULONG)oldBuffersPending < m_nPreparedHeaders)
+	ULONG nBytesWritten = 0;
+	while(oldBuffersPending < m_nPreparedHeaders)
 	{
 		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize/m_BytesPerSample);
 		nLatency += m_nWaveBufferSize;
@@ -188,7 +186,13 @@ void CWaveDevice::FillAudioBuffer()
 		SourceAudioDone(m_nWaveBufferSize/m_BytesPerSample, nLatency/m_BytesPerSample);
 	}
 
-	if(wasempty) waveOutRestart(m_hWaveOut);
+	if(m_JustStarted)
+	{
+		// Fill the buffers completely before starting the stream.
+		// This avoids buffer underruns which result in audible crackling with small buffers.
+		m_JustStarted = false;
+		waveOutRestart(m_hWaveOut);
+	}
 
 }
 

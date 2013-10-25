@@ -27,6 +27,7 @@ class CWaveDevice: public CSoundDeviceWithThread
 protected:
 	HWAVEOUT m_hWaveOut;
 	ULONG m_nWaveBufferSize;
+	bool m_JustStarted;
 	ULONG m_nPreparedHeaders;
 	ULONG m_nWriteBuffer;
 	LONG m_nBuffersPending;
