@@ -43,7 +43,8 @@ ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 	m_RealUpdateIntervalMS = static_cast<float>(m_Settings.UpdateIntervalMS);
 
 	m_IsPlaying = false;
-	m_FramesRendered = 0;
+	m_FramesStreamRenderPosition = 0;
+	m_FramesStreamOutputPosition = 0;
 }
 
 
@@ -153,17 +154,12 @@ void ISoundDevice::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 	}
 	int64 framesRendered = 0;
 	{
-		Util::lock_guard<Util::mutex> lock(m_FramesRenderedMutex);
-		m_FramesRendered += numFrames;
-		framesRendered = m_FramesRendered;
+		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+		m_FramesStreamRenderPosition += numFrames;
+		m_FramesStreamOutputPosition = m_FramesStreamRenderPosition - framesLatency;
+		framesRendered = m_FramesStreamRenderPosition;
 	}
-	if(InternalHasGetStreamPosition())
-	{
-		m_Source->AudioDone(m_Settings, numFrames, framesRendered);
-	} else
-	{
-		m_Source->AudioDone(m_Settings, numFrames, framesRendered + framesLatency);
-	}
+	m_Source->AudioDone(m_Settings, numFrames, framesRendered);
 }
 
 
@@ -184,8 +180,9 @@ void ISoundDevice::Start()
 	if(!IsPlaying())
 	{
 		{
-			Util::lock_guard<Util::mutex> lock(m_FramesRenderedMutex);
-			m_FramesRendered = 0;
+			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+			m_FramesStreamRenderPosition = 0;
+			m_FramesStreamOutputPosition = 0;
 		}
 		InternalStart();
 		m_IsPlaying = true;
@@ -202,8 +199,9 @@ void ISoundDevice::Stop()
 		InternalStop();
 		m_IsPlaying = false;
 		{
-			Util::lock_guard<Util::mutex> lock(m_FramesRenderedMutex);
-			m_FramesRendered = 0;
+			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+			m_FramesStreamRenderPosition = 0;
+			m_FramesStreamOutputPosition = 0;
 		}
 	}
 }
@@ -218,8 +216,8 @@ int64 ISoundDevice::GetStreamPositionSamples() const
 		return InternalGetStreamPositionSamples();
 	} else
 	{
-		Util::lock_guard<Util::mutex> lock(m_FramesRenderedMutex);
-		return m_FramesRendered;
+		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+		return m_FramesStreamOutputPosition;
 	}
 }
 
