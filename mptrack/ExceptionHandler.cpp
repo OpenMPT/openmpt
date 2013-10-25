@@ -79,7 +79,14 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 				}
 
 				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile,
-					ExceptionHandler::fullMemDump ? (MINIDUMP_TYPE)(MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithThreadInfo | MiniDumpWithProcessThreadData | MiniDumpWithFullMemoryInfo |  MiniDumpIgnoreInaccessibleMemory | MiniDumpWithTokenInformation) : MiniDumpNormal,
+					ExceptionHandler::fullMemDump ?
+						(MINIDUMP_TYPE)(MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithThreadInfo | MiniDumpWithProcessThreadData | MiniDumpWithFullMemoryInfo
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
+						| MiniDumpIgnoreInaccessibleMemory | MiniDumpWithTokenInformation
+#endif
+						)
+					:
+						MiniDumpNormal,
 					pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
 				::CloseHandle(hFile);
 
