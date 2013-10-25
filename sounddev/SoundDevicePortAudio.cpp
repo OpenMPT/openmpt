@@ -41,7 +41,6 @@ CPortaudioDevice::CPortaudioDevice(SoundDeviceID id, const std::wstring &interna
 CPortaudioDevice::~CPortaudioDevice()
 //-----------------------------------
 {
-	Reset();
 	Close();
 }
 
@@ -110,13 +109,6 @@ bool CPortaudioDevice::InternalClose()
 		m_CurrentFrameBuffer = 0;
 	}
 	return true;
-}
-
-
-void CPortaudioDevice::InternalReset()
-//------------------------------------
-{
-	Pa_AbortStream(m_Stream);
 }
 
 

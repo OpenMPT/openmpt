@@ -176,7 +176,6 @@ CASIODevice::CASIODevice(SoundDeviceID id, const std::wstring &internalID)
 CASIODevice::~CASIODevice()
 //-------------------------
 {
-	Reset();
 	Close();
 }
 
@@ -456,30 +455,6 @@ bool CASIODevice::InternalClose()
 		gpCurrentAsio = NULL;
 	}
 	return true;
-}
-
-
-void CASIODevice::InternalReset()
-//-------------------------------
-{
-	if(IsOpen())
-	{
-		Stop();
-		if(m_bMixRunning)
-		{
-			m_bMixRunning = FALSE;
-			ALWAYS_ASSERT(g_asio_startcount==0);
-			try
-			{
-				m_pAsioDrv->stop();
-			} catch(...)
-			{
-				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
-			}
-			g_asio_startcount = 0;
-			SetRenderSilence(false);
-		}
-	}
 }
 
 

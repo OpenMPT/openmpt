@@ -108,7 +108,6 @@ CDSoundDevice::CDSoundDevice(SoundDeviceID id, const std::wstring &internalID)
 CDSoundDevice::~CDSoundDevice()
 //-----------------------------
 {
-	Reset();
 	Close();
 }
 
@@ -296,17 +295,6 @@ void CDSoundDevice::StartFromSoundThread()
 
 void CDSoundDevice::StopFromSoundThread()
 //---------------------------------------
-{
-	if(m_pMixBuffer)
-	{
-		m_pMixBuffer->Stop();
-	}
-	m_bMixRunning = FALSE;
-}
-
-
-void CDSoundDevice::ResetFromOutsideSoundThread()
-//-----------------------------------------------
 {
 	if(m_pMixBuffer)
 	{

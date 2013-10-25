@@ -67,9 +67,7 @@ public:
 	virtual ~CSoundDeviceWithThread() {}
 	void InternalStart();
 	void InternalStop();
-	void InternalReset();
 	virtual void StartFromSoundThread() = 0;
 	virtual void StopFromSoundThread() = 0;
-	virtual void ResetFromOutsideSoundThread() = 0;
 };
 

@@ -46,7 +46,6 @@ CWaveDevice::CWaveDevice(SoundDeviceID id, const std::wstring &internalID)
 CWaveDevice::~CWaveDevice()
 //-------------------------
 {
-	Reset();
 	Close();
 }
 
@@ -108,10 +107,12 @@ bool CWaveDevice::InternalOpen()
 bool CWaveDevice::InternalClose()
 //-------------------------------
 {
-	Reset();
-	if (m_hWaveOut)
+	if(m_hWaveOut)
 	{
-		ResetFromOutsideSoundThread(); // always reset so that waveOutClose does not fail if we did only P->Stop() (meaning waveOutPause()) before
+		waveOutReset(m_hWaveOut);
+		m_JustStarted = false;
+		InterlockedExchange(&m_nBuffersPending, 0);
+		m_nWriteBuffer = 0;
 		while (m_nPreparedHeaders > 0)
 		{
 			m_nPreparedHeaders--;
@@ -144,19 +145,6 @@ void CWaveDevice::StopFromSoundThread()
 		waveOutPause(m_hWaveOut);
 		m_JustStarted = false;
 	}
-}
-
-
-void CWaveDevice::ResetFromOutsideSoundThread()
-//---------------------------------------------
-{
-	if(m_hWaveOut)
-	{
-		waveOutReset(m_hWaveOut);
-		m_JustStarted = false;
-	}
-	InterlockedExchange(&m_nBuffersPending, 0);
-	m_nWriteBuffer = 0;
 }
 
 

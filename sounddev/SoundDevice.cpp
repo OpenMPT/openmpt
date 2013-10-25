@@ -100,6 +100,7 @@ bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 //----------------------------------------------------------
 {
+	if(IsOpen()) return false;
 	m_Settings = settings;
 	if(m_Settings.LatencyMS < SNDDEV_MINLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MINLATENCY_MS;
 	if(m_Settings.LatencyMS > SNDDEV_MAXLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MAXLATENCY_MS;
@@ -114,6 +115,8 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 bool ISoundDevice::Close()
 //------------------------
 {
+	if(!IsOpen()) return true;
+	Stop();
 	return InternalClose();
 }
 
@@ -201,15 +204,6 @@ void ISoundDevice::Stop()
 			m_FramesRendered = 0;
 		}
 	}
-}
-
-
-void ISoundDevice::Reset()
-//------------------------
-{
-	if(!IsOpen()) return;
-	Stop();
-	InternalReset();
 }
 
 
@@ -609,13 +603,6 @@ void CSoundDeviceWithThread::InternalStop()
 //-----------------------------------------
 {
 	m_AudioThread.Deactivate();
-}
-
-
-void CSoundDeviceWithThread::InternalReset()
-//------------------------------------------
-{
-	ResetFromOutsideSoundThread();
 }
 
 
