@@ -183,6 +183,14 @@ struct SoundDeviceSettings
 	{
 		return !(*this == cmp);
 	}
+	std::size_t GetBytesPerFrame() const
+	{
+		return (sampleFormat.GetBitsPerSample()/8) * Channels;
+	}
+	std::size_t GetBytesPerSecond() const
+	{
+		return Samplerate * GetBytesPerFrame();
+	}
 };
 
 
