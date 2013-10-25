@@ -32,8 +32,6 @@ protected:
 	IDirectSound *m_piDS;
 	IDirectSoundBuffer *m_pPrimary, *m_pMixBuffer;
 	ULONG m_nDSoundBufferSize;
-	ULONG m_nBytesPerSec;
-	ULONG m_BytesPerSample;
 	BOOL m_bMixRunning;
 	DWORD m_dwWritePos, m_dwLatency;
 
@@ -49,7 +47,7 @@ public:
 	void StopFromSoundThread();
 	bool IsOpen() const { return (m_pMixBuffer != NULL); }
 	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
-	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_nBytesPerSec; }
+	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_Settings.GetBytesPerSecond(); }
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 
 protected:

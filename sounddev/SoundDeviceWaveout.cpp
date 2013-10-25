@@ -38,8 +38,6 @@ CWaveDevice::CWaveDevice(SoundDeviceID id, const std::wstring &internalID)
 	m_nWaveBufferSize = 0;
 	m_JustStarted = false;
 	m_nPreparedHeaders = 0;
-	m_nBytesPerSec = 0;
-	m_BytesPerSample = 0;
 }
 
 
@@ -68,8 +66,6 @@ bool CWaveDevice::InternalOpen()
 		LONG err = waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION);
 		if (err) return false;
 	}
-	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
-	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
 	m_nWaveBufferSize = (m_Settings.UpdateIntervalMS * pwfx->nAvgBytesPerSec) / 1000;
 	m_nWaveBufferSize = (m_nWaveBufferSize + 7) & ~7;
 	if (m_nWaveBufferSize < WAVEOUT_MINBUFFERSIZE) m_nWaveBufferSize = WAVEOUT_MINBUFFERSIZE;
@@ -97,8 +93,8 @@ bool CWaveDevice::InternalOpen()
 		Close();
 		return false;
 	}
-	m_RealLatencyMS = m_nWaveBufferSize * m_nPreparedHeaders * 1000.0f / m_nBytesPerSec;
-	m_RealUpdateIntervalMS = m_nWaveBufferSize * 1000.0f / m_nBytesPerSec;
+	m_RealLatencyMS = m_nWaveBufferSize * m_nPreparedHeaders * 1000.0f / m_Settings.GetBytesPerSecond();
+	m_RealUpdateIntervalMS = m_nWaveBufferSize * 1000.0f / m_Settings.GetBytesPerSecond();
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
 	return true;
@@ -156,13 +152,15 @@ void CWaveDevice::FillAudioBuffer()
 		return;
 	}
 	
+	const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
+
 	ULONG oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0); // read
 	ULONG nLatency = oldBuffersPending * m_nWaveBufferSize;
 
 	ULONG nBytesWritten = 0;
 	while(oldBuffersPending < m_nPreparedHeaders)
 	{
-		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize/m_BytesPerSample);
+		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize/bytesPerFrame);
 		nLatency += m_nWaveBufferSize;
 		nBytesWritten += m_nWaveBufferSize;
 		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
@@ -171,7 +169,7 @@ void CWaveDevice::FillAudioBuffer()
 		waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR));
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
-		SourceAudioDone(m_nWaveBufferSize/m_BytesPerSample, nLatency/m_BytesPerSample);
+		SourceAudioDone(m_nWaveBufferSize/bytesPerFrame, nLatency/bytesPerFrame);
 	}
 
 	if(m_JustStarted)
@@ -195,8 +193,8 @@ int64 CWaveDevice::InternalGetStreamPositionSamples() const
 	if(waveOutGetPosition(m_hWaveOut, &mmtime, sizeof(mmtime)) != MMSYSERR_NOERROR) return 0;
 	switch(mmtime.wType)
 	{
-		case TIME_BYTES:   return mmtime.u.cb / m_BytesPerSample; break;
-		case TIME_MS:      return mmtime.u.ms * m_nBytesPerSec / (1000 * m_BytesPerSample); break;
+		case TIME_BYTES:   return mmtime.u.cb / m_Settings.GetBytesPerFrame(); break;
+		case TIME_MS:      return mmtime.u.ms * m_Settings.GetBytesPerSecond() / (1000 * m_Settings.GetBytesPerFrame()); break;
 		case TIME_SAMPLES: return mmtime.u.sample; break;
 		default: return 0; break;
 	}

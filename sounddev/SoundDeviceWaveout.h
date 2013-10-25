@@ -31,8 +31,6 @@ protected:
 	ULONG m_nPreparedHeaders;
 	ULONG m_nWriteBuffer;
 	LONG m_nBuffersPending;
-	ULONG m_nBytesPerSec;
-	ULONG m_BytesPerSample;
 	std::vector<WAVEHDR> m_WaveBuffers;
 	std::vector<std::vector<char> > m_WaveBuffersData;
 
@@ -48,7 +46,7 @@ public:
 	void StopFromSoundThread();
 	bool IsOpen() const { return (m_hWaveOut != NULL); }
 	UINT GetNumBuffers() { return m_nPreparedHeaders; }
-	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_nBytesPerSec; }
+	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_Settings.GetBytesPerSecond(); }
 	bool InternalHasGetStreamPosition() const { return true; }
 	int64 InternalGetStreamPositionSamples() const;
 

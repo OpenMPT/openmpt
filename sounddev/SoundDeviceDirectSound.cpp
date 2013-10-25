@@ -100,8 +100,6 @@ CDSoundDevice::CDSoundDevice(SoundDeviceID id, const std::wstring &internalID)
 	m_pPrimary = NULL;
 	m_pMixBuffer = NULL;
 	m_bMixRunning = FALSE;
-	m_nBytesPerSec = 0;
-	m_BytesPerSample = 0;
 }
 
 
@@ -186,8 +184,6 @@ bool CDSoundDevice::InternalOpen()
 	m_nDSoundBufferSize = (m_nDSoundBufferSize + 15) & ~15;
 	if(m_nDSoundBufferSize < DSOUND_MINBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MINBUFFERSIZE;
 	if(m_nDSoundBufferSize > DSOUND_MAXBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MAXBUFFERSIZE;
-	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
-	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
 	if(!m_Settings.ExclusiveMode)
 	{
 		// Set the format of the primary buffer
@@ -255,8 +251,8 @@ bool CDSoundDevice::InternalOpen()
 		m_pMixBuffer->GetStatus(&dwStat);
 		if (dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
 	}
-	m_RealLatencyMS = m_nDSoundBufferSize * 1000.0f / m_nBytesPerSec;
-	m_RealUpdateIntervalMS = CLAMP(static_cast<float>(m_Settings.UpdateIntervalMS), 1.0f, m_nDSoundBufferSize * 1000.0f / ( 2.0f * m_nBytesPerSec ) );
+	m_RealLatencyMS = m_nDSoundBufferSize * 1000.0f / m_Settings.GetBytesPerSecond();
+	m_RealUpdateIntervalMS = CLAMP(static_cast<float>(m_Settings.UpdateIntervalMS), 1.0f, m_nDSoundBufferSize * 1000.0f / ( 2.0f * m_Settings.GetBytesPerSecond() ) );
 	m_dwWritePos = 0xFFFFFFFF;
 	return true;
 }
@@ -374,8 +370,9 @@ void CDSoundDevice::FillAudioBuffer()
 	dwBytes = LockBuffer(m_nDSoundBufferSize, &lpBuf1, &dwSize1, &lpBuf2, &dwSize2);
 	if (dwBytes)
 	{
-		if ((lpBuf1) && (dwSize1)) SourceAudioRead(lpBuf1, dwSize1/m_BytesPerSample);
-		if ((lpBuf2) && (dwSize2)) SourceAudioRead(lpBuf2, dwSize2/m_BytesPerSample);
+		const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
+		if ((lpBuf1) && (dwSize1)) SourceAudioRead(lpBuf1, dwSize1/bytesPerFrame);
+		if ((lpBuf2) && (dwSize2)) SourceAudioRead(lpBuf2, dwSize2/bytesPerFrame);
 		UnlockBuffer(lpBuf1, dwSize1, lpBuf2, dwSize2);
 		DWORD dwStatus = 0;
 		m_pMixBuffer->GetStatus(&dwStatus);
@@ -402,7 +399,7 @@ void CDSoundDevice::FillAudioBuffer()
 			}
 			m_bMixRunning = TRUE; 
 		}
-		SourceAudioDone((dwSize1+dwSize2)/m_BytesPerSample, m_dwLatency/m_BytesPerSample);
+		SourceAudioDone((dwSize1+dwSize2)/bytesPerFrame, m_dwLatency/bytesPerFrame);
 	}
 }
 
