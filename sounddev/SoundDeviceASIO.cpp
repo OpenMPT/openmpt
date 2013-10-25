@@ -424,9 +424,8 @@ void CASIODevice::InternalStop()
 bool CASIODevice::InternalClose()
 //-------------------------------
 {
-	if (IsOpen())
+	if(IsOpen())
 	{
-		Stop();
 		if (m_bMixRunning)
 		{
 			m_bMixRunning = FALSE;
