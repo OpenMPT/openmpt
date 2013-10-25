@@ -45,20 +45,35 @@ static LHAInputStreamType vtable =
 	LHAcloseFileReader
 };
 
-static inline std::string get_extension( std::string filename )
+
+CLhaArchive::CLhaArchive(FileReader &file) : ArchiveBase(file), inputstream(nullptr), reader(nullptr), firstfile(nullptr)
+//-----------------------------------------------------------------------------------------------------------------------
 {
-	if ( filename.find_last_of( "." ) != std::string::npos )
+	OpenArchive();
+	for(LHAFileHeader *fileheader = firstfile; fileheader; fileheader = lha_reader_next_file(reader))
 	{
-		return filename.substr( filename.find_last_of( "." ) + 1 );
+		ArchiveFileInfo info;
+		info.name = fileheader->filename;
+		info.size = fileheader->length;
+		info.type = ArchiveFileNormal;
+		contents.push_back(info);
 	}
-	return "";
+	CloseArchive();
 }
 
 
-CLhaArchive::CLhaArchive(FileReader file_ ) : file(file_), inputstream(nullptr), reader(nullptr), firstfile(nullptr)
-//------------------------------------------------------------------------------------------------------------------
+CLhaArchive::~CLhaArchive()
+//-------------------------
 {
-	inputstream = lha_input_stream_new(&vtable, &file);
+	return;
+}
+
+
+void CLhaArchive::OpenArchive()
+//-----------------------------
+{
+	inFile.Rewind();
+	inputstream = lha_input_stream_new(&vtable, &inFile);
 	if(inputstream)
 	{
 		reader = lha_reader_new(inputstream);
@@ -71,8 +86,8 @@ CLhaArchive::CLhaArchive(FileReader file_ ) : file(file_), inputstream(nullptr),
 }
 
 
-CLhaArchive::~CLhaArchive()
-//-------------------------
+void CLhaArchive::CloseArchive()
+//------------------------------
 {
 	if(reader)
 	{
@@ -87,79 +102,49 @@ CLhaArchive::~CLhaArchive()
 }
 
 
-bool CLhaArchive::IsArchive()
-//---------------------------
+bool CLhaArchive::ExtractFile(std::size_t index)
+//----------------------------------------------
 {
-	return firstfile != nullptr;
-}
-
-
-bool CLhaArchive::ExtractFile()
-//-----------------------------
-{
+	if(index >= contents.size())
+	{
+		return false;
+	}
+	data.clear();
+	OpenArchive();
 	const std::size_t bufSize = 4096;
+	std::size_t i = 0;
 	for(LHAFileHeader *fileheader = firstfile; fileheader; fileheader = lha_reader_next_file(reader))
 	{
-		// get the biggest file
-		if(fileheader->length >= data.size())
+		if(index == i)
 		{
 			data.clear();
 			std::size_t countRead = 0;
 			do
 			{
-				data.resize(data.size() + bufSize);
+				try
+				{
+					data.resize(data.size() + bufSize);
+				} catch(...)
+				{
+					CloseArchive();
+					return false;
+				}
 				countRead = lha_reader_read(reader, &data[data.size() - bufSize], bufSize);
 				if(countRead < bufSize)
 				{
-					data.resize(data.size() - (bufSize - countRead));
+					try
+					{
+						data.resize(data.size() - (bufSize - countRead));
+					} catch(...)
+					{
+						CloseArchive();
+						return false;
+					}
 				}
 			} while(countRead > 0);
 		}
+		++i;
 	}
+	CloseArchive();
 	return data.size() > 0;
-}
-
-
-bool CLhaArchive::ExtractFile(const std::vector<const char *> &extensions)
-//------------------------------------------------------------------------
-{
-	const std::size_t bufSize = 4096;
-	for(LHAFileHeader *fileheader = firstfile; fileheader; fileheader = lha_reader_next_file(reader))
-	{
-		if(fileheader->filename)
-		{
-			std::string ext = get_extension(fileheader->filename);
-			if(!ext.empty())
-			{
-				std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
-				if(std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
-				{
-					data.clear();
-					std::size_t countRead = 0;
-					do
-					{
-						data.resize(data.size() + bufSize);
-						countRead = lha_reader_read(reader, &data[data.size() - bufSize], bufSize);
-						if(countRead < bufSize)
-						{
-							data.resize(data.size() - (bufSize - countRead));
-						}
-					} while(countRead > 0);
-					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-
-FileReader CLhaArchive::GetOutputFile() const
-//-------------------------------------------
-{
-	if(data.size() == 0)
-	{
-		return FileReader();
-	}
-	return FileReader(&data[0], data.size());
 }

@@ -673,8 +673,8 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		DWORD dwMemLength = file.GetLength();
 
 #ifndef NO_ARCHIVE_SUPPORT
-		CUnarchiver unarchiver(file, GetSupportedExtensions(true));
-		if(unarchiver.IsArchive() && unarchiver.ExtractFile())
+		CUnarchiver unarchiver(file);
+		if(unarchiver.ExtractBestFile(GetSupportedExtensions(true)))
 		{
 			file = unarchiver.GetOutputFile();
 			lpStream = (LPCBYTE)file.GetRawData();
@@ -744,7 +744,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		// Read archive comment if there is no song comment
 		if(songMessage.empty())
 		{
-			songMessage.assign(unarchiver.GetComments());
+			songMessage.assign(unarchiver.GetComment());
 		}
 #endif
 

@@ -9,12 +9,13 @@
 
 #pragma once
 
-//================
-class CGzipArchive
-//================
+#include "archive.h"
+
+//=====================================
+class CGzipArchive : public ArchiveBase
+//=====================================
 {
 protected:
-	FileReader inFile, outFile;
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -72,10 +73,8 @@ protected:
 
 public:
 
-	FileReader GetOutputFile() const { return outFile; }
-	bool IsArchive() const;
-	bool ExtractFile();
+	bool ExtractFile(std::size_t index);
 
 	CGzipArchive(FileReader &file);
-	~CGzipArchive();
+	virtual ~CGzipArchive();
 };

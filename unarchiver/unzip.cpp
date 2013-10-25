@@ -10,10 +10,10 @@
 #include "stdafx.h"
 
 #include "../soundlib/FileReader.h"
-#include <vector>
 #include "unzip.h"
 #include "../common/misc_util.h"
 #include <algorithm>
+#include <vector>
 
 #if !defined(NO_ZLIB)
 #include <contrib/minizip/unzip.h>
@@ -97,8 +97,8 @@ struct ZipFileAbstraction
 };
 
 
-CZipArchive::CZipArchive(FileReader &file, const std::vector<const char *> &ext) : inFile(file), extensions(ext)
-//--------------------------------------------------------------------------------------------------------------
+CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
+//------------------------------------------------------------
 {
 	zlib_filefunc_def functions =
 	{
@@ -112,6 +112,60 @@ CZipArchive::CZipArchive(FileReader &file, const std::vector<const char *> &ext)
 		&inFile
 	};
 	zipFile = unzOpen2(nullptr, &functions);
+
+	if(zipFile == nullptr)
+	{
+		return;
+	}
+
+	// read comment
+	{
+		unz_global_info info;
+		if(unzGetGlobalInfo(zipFile, &info) == UNZ_OK)
+		{
+			if(info.size_comment > 0)
+			{
+				if(info.size_comment < Util::MaxValueOfType(info.size_comment))
+				{
+					info.size_comment++;
+				}
+				std::vector<char> commentData(info.size_comment);
+				if(unzGetGlobalComment(zipFile, &commentData[0], info.size_comment) >= 0)
+				{
+					commentData[info.size_comment - 1] = '\0';
+					comment = &commentData[0];
+				}
+			}
+		}
+	}
+
+	// read contents
+	unz_file_pos bestFile;
+	unz_file_info info;
+
+	int status = unzGoToFirstFile(zipFile);
+	unzGetFilePos(zipFile, &bestFile);
+
+	while(status == UNZ_OK)
+	{
+		ArchiveFileInfo fileinfo;
+
+		fileinfo.type = ArchiveFileNormal;
+		
+		char name[256];
+		unzGetCurrentFileInfo(zipFile, &info, name, sizeof(name), nullptr, 0, nullptr, 0);
+		fileinfo.name = name;
+		fileinfo.size = info.uncompressed_size;
+
+		unzGetFilePos(zipFile, &bestFile);
+		fileinfo.cookie1 = bestFile.pos_in_zip_directory;
+		fileinfo.cookie2 = bestFile.num_of_file;
+
+		contents.push_back(fileinfo);
+
+		status = unzGoToNextFile(zipFile);
+	}
+
 }
 
 
@@ -119,135 +173,52 @@ CZipArchive::~CZipArchive()
 //-------------------------
 {
 	unzClose(zipFile);
-	delete[] outFile.GetRawData();
 }
 
 
-bool CZipArchive::IsArchive() const
-//---------------------------------
+bool CZipArchive::ExtractFile(std::size_t index)
+//----------------------------------------------
 {
-	return (zipFile != nullptr);
-}
-
-
-struct find_str
-{
-	find_str(const char *str): s1(str) { }
-
-	bool operator() (const char *s2) const
+	if(index >= contents.size())
 	{
-		return !strcmp(s1, s2);
+		return false;
 	}
 
-	const char *s1;
-};
+	data.clear();
 
-
-bool CZipArchive::ExtractFile()
-//-----------------------------
-{
 	unz_file_pos bestFile;
 	unz_file_info info;
-	uLong biggestFile = 0;
 
-	int status = unzGoToFirstFile(zipFile);
-	unzGetFilePos(zipFile, &bestFile);
-
-	while(status == UNZ_OK)
-	{
-		char name[256];
-		unzGetCurrentFileInfo(zipFile, &info, name, sizeof(name), nullptr, 0, nullptr, 0);
-
-		// Extract file extension
-		char *ext = name + info.size_filename;
-		while(ext > name)
-		{
-			ext--;
-			*ext = static_cast<char>(tolower(*ext));
-			if(*ext == '.')
-			{
-				ext++;
-				break;
-			}
-		}
-
-		// Compare with list of preferred extensions
-		if(std::find_if(extensions.begin(), extensions.end(), find_str(ext)) != extensions.end())
-		{
-			// File has a preferred extension: use it.
-			unzGetFilePos(zipFile, &bestFile);
-			break;
-		}
-
-		if(strcmp(ext, "diz")
-			&& strcmp(ext, "nfo")
-			&& strcmp(ext, "txt")
-			&& info.uncompressed_size >= biggestFile)
-		{
-			// If this isn't some kind of info file, we should maybe pick it.
-			unzGetFilePos(zipFile, &bestFile);
-			biggestFile = info.uncompressed_size;
-		}
-
-		status = unzGoToNextFile(zipFile);
-	}
+	bestFile.pos_in_zip_directory = static_cast<uLong>(contents[index].cookie1);
+	bestFile.num_of_file = static_cast<uLong>(contents[index].cookie2);
 
 	if(unzGoToFilePos(zipFile, &bestFile) == UNZ_OK && unzOpenCurrentFile(zipFile) == UNZ_OK)
 	{
 		unzGetCurrentFileInfo(zipFile, &info, nullptr, 0, nullptr, 0, nullptr, 0);
 		
-		delete[] outFile.GetRawData();
-		char *data = new (std::nothrow) char[info.uncompressed_size];
-		if(data != nullptr)
+		try
 		{
-			unzReadCurrentFile(zipFile, data, info.uncompressed_size);
-			outFile = FileReader(data, info.uncompressed_size);
+			data.resize(info.uncompressed_size);
+		} catch(...)
+		{
+			unzCloseCurrentFile(zipFile);
+			return false;
 		}
+		unzReadCurrentFile(zipFile, &data[0], info.uncompressed_size);
 		unzCloseCurrentFile(zipFile);
 
-		return (data != nullptr);
+		return true;
 	}
 
 	return false;
 }
 
 
-std::string CZipArchive::GetComments()
-//------------------------------------
-{
-	unz_global_info info;
-	if(zipFile == nullptr || unzGetGlobalInfo(zipFile, &info) != UNZ_OK)
-	{
-		return "";
-	}
-
-	if(info.size_comment > 0)
-	{
-		if(info.size_comment < Util::MaxValueOfType(info.size_comment))
-		{
-			info.size_comment++;
-		}
-		char *comment = new (std::nothrow) char[info.size_comment];
-		if(comment != nullptr && unzGetGlobalComment(zipFile, comment, info.size_comment) >= 0)
-		{
-			comment[info.size_comment - 1] = '\0';
-			std::string result = comment;
-			delete[] comment;
-			return result;
-		} else
-		{
-			delete[] comment;
-		}
-	}
-	return "";
-}
-
-
 #elif !defined(NO_MINIZ)
 
 
-CZipArchive::CZipArchive(FileReader &file, const std::vector<const char *> &ext) : inFile(file), extensions(ext)
-//--------------------------------------------------------------------------------------------------------------
+CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
+//------------------------------------------------------------
 {
 	zipFile = new mz_zip_archive();
 	
@@ -257,7 +228,35 @@ CZipArchive::CZipArchive(FileReader &file, const std::vector<const char *> &ext)
 	if(!mz_zip_reader_init_mem(zip, file.GetRawData(), file.GetLength(), 0))
 	{
 		delete zip;
+		zip = nullptr;
 		zipFile = nullptr;
+	}
+
+	if(!zip)
+	{
+		return;
+	}
+
+	for(mz_uint i = 0; i < mz_zip_reader_get_num_files(zip); ++i)
+	{
+		ArchiveFileInfo info;
+		info.type = ArchiveFileInvalid;
+		mz_zip_archive_file_stat stat;
+		MemsetZero(stat);
+		if(mz_zip_reader_file_stat(zip, i, &stat))
+		{
+			info.type = ArchiveFileNormal;
+			info.name = stat.m_filename;
+			info.size = stat.m_uncomp_size;
+		}
+		if(mz_zip_reader_is_file_a_directory(zip, i))
+		{
+			info.type = ArchiveFileSpecial;
+		} else if(mz_zip_reader_is_file_encrypted(zip, i))
+		{
+			info.type = ArchiveFileSpecial;
+		}
+		contents.push_back(info);
 	}
 
 }
@@ -276,105 +275,41 @@ CZipArchive::~CZipArchive()
 		zipFile = nullptr;
 	}
 
-	delete[] outFile.GetRawData();
 }
 
 
-bool CZipArchive::IsArchive() const
-//---------------------------------
-{
-	return (zipFile != nullptr);
-}
-
-
-static inline std::string GetExtension(const std::string &filename)
-//-----------------------------------------------------------------
-{
-	if(filename.find_last_of(".") != std::string::npos)
-	{
-		return filename.substr(filename.find_last_of(".") + 1);
-	}
-	return std::string();
-}
-
-
-bool CZipArchive::ExtractFile()
-//-----------------------------
+bool CZipArchive::ExtractFile(std::size_t index)
+//----------------------------------------------
 {
 	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
 
-	if(!zip)
+	if(index >= contents.size())
 	{
 		return false;
 	}
 
-	mz_uint bestFile = (mz_uint)-1;
-	mz_uint64 biggestFile = 0;
-	for(mz_uint i = 0; i < mz_zip_reader_get_num_files(zip); ++i)
-	{
-		mz_zip_archive_file_stat stat;
-		MemsetZero(stat);
-		if(!mz_zip_reader_file_stat(zip, i, &stat))
-		{
-			continue;
-		}
-		if(mz_zip_reader_is_file_a_directory(zip, i))
-		{
-			continue;
-		}
-		if(mz_zip_reader_is_file_encrypted(zip, i))
-		{
-			continue;
-		}
-		std::string ext = GetExtension(stat.m_filename);
-		if(std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
-		{
-			// File has a preferred extension: use it.
-			bestFile = i;
-			break;
-		}
-		if(ext != "diz" && ext != "nfo" && ext != "txt" && stat.m_uncomp_size >= biggestFile)
-		{
-			// If this isn't some kind of info file, we should maybe pick it.
-			bestFile = i;
-			biggestFile = stat.m_uncomp_size;
-		}
-	}
-	if(bestFile == (mz_uint)-1)
-	{
-		return false;
-	}
-	delete [] outFile.GetRawData();
+	mz_uint bestFile = index;
+
 	mz_zip_archive_file_stat stat;
 	MemsetZero(stat);
 	mz_zip_reader_file_stat(zip, bestFile, &stat);
-	char *data = new (std::nothrow) char[stat.m_uncomp_size];
-	if(data != nullptr)
+	if(stat.m_uncomp_size >= std::numeric_limits<std::size_t>::max())
 	{
-		if(!mz_zip_reader_extract_to_mem(zip, bestFile, data, stat.m_uncomp_size, 0))
-		{
-			delete [] data;
-			return false;
-		}
-		outFile = FileReader(data, stat.m_uncomp_size);
-		comment = std::string(stat.m_comment, stat.m_comment + stat.m_comment_size);
+		return false;
 	}
-
+	try
+	{
+		data.resize(static_cast<std::size_t>(stat.m_uncomp_size));
+	} catch(...)
+	{
+		return false;
+	}
+	if(!mz_zip_reader_extract_to_mem(zip, bestFile, &data[0], static_cast<std::size_t>(stat.m_uncomp_size), 0))
+	{
+		return false;
+	}
+	comment = std::string(stat.m_comment, stat.m_comment + stat.m_comment_size);
 	return true;
-}
-
-
-std::string CZipArchive::GetComments()
-//------------------------------------
-{
-	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
-
-	if(!zip)
-	{
-		return "";
-	}
-	
-	return comment;
 }
 
 

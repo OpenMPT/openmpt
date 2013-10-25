@@ -957,6 +957,9 @@
     <ClInclude Include="StreamEncoderFLAC.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\unarchiver\archive.h">
+      <Filter>Header Files\unarchiver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
