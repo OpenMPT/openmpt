@@ -186,7 +186,6 @@ void CWaveDevice::FillAudioBuffer()
 int64 CWaveDevice::InternalGetStreamPositionSamples() const
 //---------------------------------------------------------
 {
-	if(!IsOpen()) return 0;
 	MMTIME mmtime;
 	MemsetZero(mmtime);
 	mmtime.wType = TIME_SAMPLES;

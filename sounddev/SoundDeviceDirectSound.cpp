@@ -116,7 +116,7 @@ SoundDeviceCaps CDSoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSamp
 	SoundDeviceCaps caps;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
-	if(IsOpen())
+	if(m_piDS)
 	{
 		ds = m_piDS;
 	} else
