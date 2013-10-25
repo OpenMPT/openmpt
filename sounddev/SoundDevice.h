@@ -233,8 +233,9 @@ protected:
 
 	bool m_IsPlaying;
 
-	mutable Util::mutex m_FramesRenderedMutex;
-	int64 m_FramesRendered;
+	mutable Util::mutex m_StreamPositionMutex;
+	int64 m_FramesStreamRenderPosition;
+	int64 m_FramesStreamOutputPosition;
 
 protected:
 	virtual void FillAudioBuffer() = 0;
