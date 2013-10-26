@@ -1,366 +1,122 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="archive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="arcread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="blake2s.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cmddata.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="consio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="crc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="encname.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="errhnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="extinfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="extract.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="filcreat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="file.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="filefn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="filestr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="find.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="getbits.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="global.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="hash.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="headers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="isnt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="list.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="match.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="options.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pathfn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="qopen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rarpch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rarvm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rawread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rdwrfn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="recvol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="resource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rs16.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="scantree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="secpassword.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sha1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sha256.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="smallfn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="strfn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="strlist.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="system.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="threadpool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="timefn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="unicode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="unpack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="volume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="crypt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rijndael.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="archive.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="array.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="blake2s.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cmddata.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="coder.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="compress.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="consio.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="crc.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="crypt.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dll.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="encname.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="errhnd.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="extinfo.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="extract.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="filcreat.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="file.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="filefn.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="filestr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="find.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="getbits.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="global.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hash.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="headers.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="headers5.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="isnt.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="list.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="loclang.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="log.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="match.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="model.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="options.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="os.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pathfn.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="qopen.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rar.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rardefs.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rarlang.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="raros.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rartypes.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rarvm.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rawread.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rdwrfn.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="recvol.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rijndael.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rs.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rs16.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="savepos.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="scantree.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="secpassword.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sha1.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sha256.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="smallfn.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="strfn.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="strlist.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="suballoc.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="system.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="threadpool.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="timefn.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ulinks.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="unicode.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="unpack.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="version.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="volume.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="openmpt.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="openmpt-callback.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="archive.hpp" />
+		<ClInclude Include="array.hpp" />
+		<ClInclude Include="blake2s.hpp" />
+		<ClInclude Include="cmddata.hpp" />
+		<ClInclude Include="coder.hpp" />
+		<ClInclude Include="compress.hpp" />
+		<ClInclude Include="consio.hpp" />
+		<ClInclude Include="crc.hpp" />
+		<ClInclude Include="crypt.hpp" />
+		<ClInclude Include="dll.hpp" />
+		<ClInclude Include="encname.hpp" />
+		<ClInclude Include="errhnd.hpp" />
+		<ClInclude Include="extinfo.hpp" />
+		<ClInclude Include="extract.hpp" />
+		<ClInclude Include="filcreat.hpp" />
+		<ClInclude Include="file.hpp" />
+		<ClInclude Include="filefn.hpp" />
+		<ClInclude Include="filestr.hpp" />
+		<ClInclude Include="find.hpp" />
+		<ClInclude Include="getbits.hpp" />
+		<ClInclude Include="global.hpp" />
+		<ClInclude Include="hash.hpp" />
+		<ClInclude Include="headers.hpp" />
+		<ClInclude Include="headers5.hpp" />
+		<ClInclude Include="isnt.hpp" />
+		<ClInclude Include="list.hpp" />
+		<ClInclude Include="loclang.hpp" />
+		<ClInclude Include="log.hpp" />
+		<ClInclude Include="match.hpp" />
+		<ClInclude Include="model.hpp" />
+		<ClInclude Include="openmpt.hpp" />
+		<ClInclude Include="openmpt-callback.hpp" />
+		<ClInclude Include="options.hpp" />
+		<ClInclude Include="os.hpp" />
+		<ClInclude Include="pathfn.hpp" />
+		<ClInclude Include="qopen.hpp" />
+		<ClInclude Include="rar.hpp" />
+		<ClInclude Include="rardefs.hpp" />
+		<ClInclude Include="rarlang.hpp" />
+		<ClInclude Include="raros.hpp" />
+		<ClInclude Include="rartypes.hpp" />
+		<ClInclude Include="rarvm.hpp" />
+		<ClInclude Include="rawread.hpp" />
+		<ClInclude Include="rdwrfn.hpp" />
+		<ClInclude Include="recvol.hpp" />
+		<ClInclude Include="resource.hpp" />
+		<ClInclude Include="rijndael.hpp" />
+		<ClInclude Include="rs.hpp" />
+		<ClInclude Include="rs16.hpp" />
+		<ClInclude Include="savepos.hpp" />
+		<ClInclude Include="scantree.hpp" />
+		<ClInclude Include="secpassword.hpp" />
+		<ClInclude Include="sha1.hpp" />
+		<ClInclude Include="sha256.hpp" />
+		<ClInclude Include="smallfn.hpp" />
+		<ClInclude Include="strfn.hpp" />
+		<ClInclude Include="strlist.hpp" />
+		<ClInclude Include="suballoc.hpp" />
+		<ClInclude Include="system.hpp" />
+		<ClInclude Include="threadpool.hpp" />
+		<ClInclude Include="timefn.hpp" />
+		<ClInclude Include="ulinks.hpp" />
+		<ClInclude Include="unicode.hpp" />
+		<ClInclude Include="unpack.hpp" />
+		<ClInclude Include="version.hpp" />
+		<ClInclude Include="volume.hpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="archive.cpp" />
+		<ClCompile Include="arcread.cpp" />
+		<ClCompile Include="blake2s.cpp" />
+		<ClCompile Include="cmddata.cpp" />
+		<ClCompile Include="consio.cpp" />
+		<ClCompile Include="crc.cpp" />
+		<ClCompile Include="crypt.cpp" />
+		<ClCompile Include="encname.cpp" />
+		<ClCompile Include="errhnd.cpp" />
+		<ClCompile Include="extinfo.cpp" />
+		<ClCompile Include="extract.cpp" />
+		<ClCompile Include="filcreat.cpp" />
+		<ClCompile Include="file.cpp" />
+		<ClCompile Include="filefn.cpp" />
+		<ClCompile Include="filestr.cpp" />
+		<ClCompile Include="find.cpp" />
+		<ClCompile Include="getbits.cpp" />
+		<ClCompile Include="global.cpp" />
+		<ClCompile Include="hash.cpp" />
+		<ClCompile Include="headers.cpp" />
+		<ClCompile Include="isnt.cpp" />
+		<ClCompile Include="list.cpp" />
+		<ClCompile Include="match.cpp" />
+		<ClCompile Include="options.cpp" />
+		<ClCompile Include="pathfn.cpp" />
+		<ClCompile Include="qopen.cpp" />
+		<ClCompile Include="rar.cpp" />
+		<ClCompile Include="rarpch.cpp" />
+		<ClCompile Include="rarvm.cpp" />
+		<ClCompile Include="rawread.cpp" />
+		<ClCompile Include="rdwrfn.cpp" />
+		<ClCompile Include="recvol.cpp" />
+		<ClCompile Include="resource.cpp" />
+		<ClCompile Include="rijndael.cpp" />
+		<ClCompile Include="rs.cpp" />
+		<ClCompile Include="rs16.cpp" />
+		<ClCompile Include="scantree.cpp" />
+		<ClCompile Include="secpassword.cpp" />
+		<ClCompile Include="sha1.cpp" />
+		<ClCompile Include="sha256.cpp" />
+		<ClCompile Include="smallfn.cpp" />
+		<ClCompile Include="strfn.cpp" />
+		<ClCompile Include="strlist.cpp" />
+		<ClCompile Include="system.cpp" />
+		<ClCompile Include="threadpool.cpp" />
+		<ClCompile Include="timefn.cpp" />
+		<ClCompile Include="unicode.cpp" />
+		<ClCompile Include="unpack.cpp" />
+		<ClCompile Include="volume.cpp" />
+	</ItemGroup>
 </Project>

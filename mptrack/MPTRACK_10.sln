@@ -1,9 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mptrack", "mptrack_10.vcxproj", "{21D95071-FB97-4E69-B3B1-050D0D4A5021}"
-	ProjectSection(ProjectDependencies) = postProject
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F} = {95CC809B-03FC-4EDB-BB20-FD07A698C05F}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flac", "..\include\flac\flac.vcxproj", "{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
 EndProject
@@ -152,17 +149,18 @@ Global
 		{2512E2CA-578A-4F10-9363-4BFC9A5EF960}.ReleaseNoLTCG|Win32.Build.0 = NormalLib|Win32
 		{2512E2CA-578A-4F10-9363-4BFC9A5EF960}.ReleaseNoLTCG|x64.ActiveCfg = ReleaseLib|x64
 		{2512E2CA-578A-4F10-9363-4BFC9A5EF960}.ReleaseNoLTCG|x64.Build.0 = ReleaseLib|x64
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|Win32.ActiveCfg = Debug|Win32
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|Win32.Build.0 = Debug|Win32
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|x64.ActiveCfg = Debug|x64
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|x64.Build.0 = Debug|x64
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|Win32.ActiveCfg = Release|Win32
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|Win32.Build.0 = Release|Win32
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|x64.ActiveCfg = Release|x64
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|x64.Build.0 = Release|x64
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.ReleaseNoLTCG|Win32.ActiveCfg = Release|x64
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.ReleaseNoLTCG|x64.ActiveCfg = Release|x64
-		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.ReleaseNoLTCG|x64.Build.0 = Release|x64
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|Win32.ActiveCfg = DebugLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|Win32.Build.0 = DebugLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|x64.ActiveCfg = DebugLib|x64
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|x64.Build.0 = DebugLib|x64
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|Win32.ActiveCfg = ReleaseLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|Win32.Build.0 = ReleaseLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|x64.ActiveCfg = ReleaseLib|x64
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|x64.Build.0 = ReleaseLib|x64
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.ReleaseNoLTCG|Win32.ActiveCfg = NormalLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.ReleaseNoLTCG|Win32.Build.0 = NormalLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.ReleaseNoLTCG|x64.ActiveCfg = ReleaseLib|x64
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.ReleaseNoLTCG|x64.Build.0 = ReleaseLib|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
