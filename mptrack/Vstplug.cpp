@@ -33,8 +33,6 @@
 #include "../zlib/zlib.h"			//For CRC32 calculation (to detect plugins with same UID)
 #endif // VST_USE_ALTERNATIVE_MAGIC
 
-#define new DEBUG_NEW
-
 #ifndef NO_VST
 
 char CVstPluginManager::s_szHostProductString[64] = "OpenMPT";
