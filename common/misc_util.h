@@ -410,7 +410,6 @@ namespace Util
 	template <class T> inline T Round(const double& val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		static_assert(sizeof(T) <= 4, "Revise the implementation for integers > 32-bits.");
 		const double valRounded = Round(val);
 		ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
 		const T intval = static_cast<T>(valRounded);
@@ -420,7 +419,6 @@ namespace Util
 	template <class T> inline T Round(const float& val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		static_assert(sizeof(T) <= 4, "Revise the implementation for integers > 32-bits.");
 		const float valRounded = Round(val);
 		ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
 		const T intval = static_cast<T>(valRounded);
@@ -454,44 +452,57 @@ namespace Util {
 	inline int32 muldivrfloor(int64 a, uint32 b, uint32 c)
 	{
 		a *= b;
-		a += c/2;
+		a += c / 2;
 		return (a >= 0) ? mpt::saturate_cast<int32>(a / c) : mpt::saturate_cast<int32>((a - (c - 1)) / c);
 	}
 
 	template<typename T, std::size_t n>
-	class fixed_size_queue {
+	class fixed_size_queue
+	{
 	private:
 		T buffer[n+1];
 		std::size_t read_position;
 		std::size_t write_position;
 	public:
-		fixed_size_queue() : read_position(0), write_position(0) {
+		fixed_size_queue() : read_position(0), write_position(0)
+		{
 			return;
 		}
-		void clear() {
+		void clear()
+		{
 			read_position = 0;
 			write_position = 0;
 		}
-		std::size_t read_size() const {
-			if ( write_position > read_position ) {
+		std::size_t read_size() const
+		{
+			if ( write_position > read_position )
+			{
 				return write_position - read_position;
-			} else if ( write_position < read_position ) {
+			} else if ( write_position < read_position )
+			{
 				return write_position - read_position + n + 1;
-			} else {
+			} else
+			{
 				return 0;
 			}
 		}
-		std::size_t write_size() const {
-			if ( write_position > read_position ) {
+		std::size_t write_size() const
+		{
+			if ( write_position > read_position )
+			{
 				return read_position - write_position + n;
-			} else if ( write_position < read_position ) {
+			} else if ( write_position < read_position )
+			{
 				return read_position - write_position - 1;
-			} else {
+			} else
+			{
 				return n;
 			}
 		}
-		bool push( const T & v ) {
-			if ( !write_size() ) {
+		bool push( const T & v )
+		{
+			if ( !write_size() )
+			{
 				return false;
 			}
 			buffer[write_position] = v;
@@ -499,26 +510,32 @@ namespace Util {
 			return true;
 		}
 		bool pop() {
-			if ( !read_size() ) {
+			if ( !read_size() )
+			{
 				return false;
 			}
 			read_position = ( read_position + 1 ) % ( n + 1 );
 			return true;
 		}
 		T peek() {
-			if ( !read_size() ) {
+			if ( !read_size() )
+			{
 				return T();
 			}
 			return buffer[read_position];
 		}
-		const T * peek_p() {
-			if ( !read_size() ) {
+		const T * peek_p()
+		{
+			if ( !read_size() )
+			{
 				return nullptr;
 			}
 			return &(buffer[read_position]);
 		}
-		const T * peek_next_p() {
-			if ( read_size() < 2 ) {
+		const T * peek_next_p()
+		{
+			if ( read_size() < 2 )
+			{
 				return nullptr;
 			}
 			return &(buffer[(read_position+1)%(n+1)]);
