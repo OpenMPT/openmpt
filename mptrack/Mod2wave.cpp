@@ -260,6 +260,10 @@ void CWaveConvert::FillFileTypes()
 		const Encoder::Traits &encTraits = m_Settings.EncoderFactories[i]->GetTraits();
 		int ndx = m_CbnFileType.AddString(encTraits.fileShortDescription.c_str());
 		m_CbnFileType.SetItemData(ndx, i);
+		if(m_Settings.EncoderIndex == i)
+		{
+			sel = ndx;
+		}
 	}
 	m_CbnFileType.SetCurSel(sel);
 }
