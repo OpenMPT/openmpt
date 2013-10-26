@@ -109,10 +109,8 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 	{
 		delete[] sampleData;
 	}
-	try
-	{
-		sampleData = new int8[sampleLength];
-	} catch(MPTMemoryException)
+	sampleData = new (std::nothrow) int8[sampleLength];
+	if(sampleData == nullptr)
 	{
 		return false;
 	}

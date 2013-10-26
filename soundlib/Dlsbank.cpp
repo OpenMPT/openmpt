@@ -1701,10 +1701,8 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UI
 	}
 #endif
 
-	try
-	{
-		pIns = new ModInstrument();
-	} catch(MPTMemoryException)
+	pIns = new (std::nothrow) ModInstrument();
+	if(pIns == nullptr)
 	{
 		return FALSE;
 	}
