@@ -278,8 +278,6 @@ public:
 	};
 	typedef std::vector<ReadEntry>::const_iterator ReadIterator;
 
-	Ssb(std::istream* pIstrm, std::ostream* pOstrm);
-	Ssb(std::iostream& ioStrm);
 	Ssb(std::ostream& oStrm);
 	Ssb(std::istream& iStrm);
 

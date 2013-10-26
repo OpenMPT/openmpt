@@ -277,20 +277,6 @@ const char strReadNote[] = "Read note: ";
 	m_posMapStart(0)							\
 
 
-Ssb::Ssb(std::istream* pIstrm, std::ostream* pOstrm) :
-		m_pOstrm(pOstrm),
-		m_pIstrm(pIstrm),
-		SSB_INITIALIZATION_LIST
-//-----------------------------------------------
-{}
-
-Ssb::Ssb(std::iostream& ioStrm) :
-		m_pOstrm(&ioStrm),
-		m_pIstrm(&ioStrm),
-		SSB_INITIALIZATION_LIST
-//------------------------------
-{}
-
 Ssb::Ssb(std::ostream& oStrm) :
 		m_pOstrm(&oStrm),
 		m_pIstrm(nullptr),
