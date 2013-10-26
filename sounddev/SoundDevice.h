@@ -234,8 +234,8 @@ protected:
 	bool m_IsPlaying;
 
 	mutable Util::mutex m_StreamPositionMutex;
-	int64 m_FramesStreamRenderPosition;
-	int64 m_FramesStreamOutputPosition;
+	int64 m_StreamPositionRenderFrames;
+	int64 m_StreamPositionOutputFrames;
 
 protected:
 	virtual void FillAudioBuffer() = 0;
@@ -273,14 +273,14 @@ protected:
 	virtual void InternalStop() = 0;
 	virtual bool InternalClose() = 0;
 	virtual bool InternalHasGetStreamPosition() const { return false; }
-	virtual int64 InternalGetStreamPositionSamples() const { return 0; }
+	virtual int64 InternalGetStreamPositionFrames() const { return 0; }
 
 public:
 	bool Open(const SoundDeviceSettings &settings);
 	bool Close();
 	void Start();
 	void Stop();
-	int64 GetStreamPositionSamples() const;
+	int64 GetStreamPositionFrames() const;
 	SampleFormat GetActualSampleFormat() { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
 	virtual bool IsOpen() const = 0;
 	virtual UINT GetNumBuffers() { return 0; }

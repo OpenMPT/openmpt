@@ -100,6 +100,7 @@ bool CWaveDevice::InternalOpen()
 	return true;
 }
 
+
 bool CWaveDevice::InternalClose()
 //-------------------------------
 {
@@ -183,7 +184,7 @@ void CWaveDevice::FillAudioBuffer()
 }
 
 
-int64 CWaveDevice::InternalGetStreamPositionSamples() const
+int64 CWaveDevice::InternalGetStreamPositionFrames() const
 //---------------------------------------------------------
 {
 	MMTIME mmtime;
