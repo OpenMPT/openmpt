@@ -62,7 +62,6 @@ enum
 	// Write failures.
 	SNW_INSUFFICIENT_FIXEDSIZE =						(0x10)	| SNT_FAILURE,
 	SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING =		(0x11)	| SNT_FAILURE,
-	SNW_INSUFFICIENT_MAPSIZE =							(0x12)	| SNT_FAILURE,
 	SNW_DATASIZETYPE_OVERFLOW =							(0x13)	| SNT_FAILURE,
 	SNW_MAX_WRITE_COUNT_REACHED =						(0x14)	| SNT_FAILURE,
 	SNW_INSUFFICIENT_DATASIZETYPE =						(0x16)	| SNT_FAILURE
@@ -416,15 +415,9 @@ public:
 
 	SsbWrite(std::ostream& oStrm);
 
-	// Sets map ID size in writing.
-	void SetIdSize(uint16 idSize);
-
 	// Write header
 	void BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion);
 	void BeginWrite(const char* pszId, const uint64& nVersion) {BeginWrite(pszId, strlen(pszId), nVersion);}
-
-	// Reserves space for map to current position. Call after BeginWrite and before writing any entries.
-	void ReserveMapSize(uint32 nSize);
 
 	// Write item using default write implementation.
 	template <class T>
@@ -469,10 +462,8 @@ private:
 
 private:
 
-	uint32 m_nMapReserveSize;			// Write: Number of bytes to reserve for map if writing it before data.			
 	Postype m_posEntrycount;			// Write: Pos of entrycount field. 
 	Postype m_posMapPosField;			// Write: Pos of map position field.
-	Postype m_posMapStart;				// Write: Pos of map start.
 	std::ostringstream m_MapStream;				// Write: Map stream.
 
 };

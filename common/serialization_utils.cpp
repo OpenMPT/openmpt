@@ -264,10 +264,8 @@ Ssb::Ssb()
 
 SsbWrite::SsbWrite(std::ostream& oStrm)
 	: m_pOstrm(&oStrm)
-	, m_nMapReserveSize(0)
 	, m_posEntrycount(0)
 	, m_posMapPosField(0)
-	, m_posMapStart(0)
 {
 	return;
 }
@@ -385,30 +383,6 @@ void SsbWrite::WriteMapItem( const char* pId,
 		WriteAdaptive1248(m_MapStream, nDatasize);
 	if (GetFlag(RwfWMapDescEntry)) //Entry descriptions
 		WriteAdaptive12String(m_MapStream, std::string(pszDesc));
-}
-
-
-void SsbWrite::ReserveMapSize(uint32 nSize)
-//------------------------------------
-{
-	std::ostream& oStrm = *m_pOstrm;
-	m_nMapReserveSize = nSize;
-	if (nSize > 0)
-	{
-		m_posMapStart = oStrm.tellp();
-		for(size_t i = 0; i < m_nMapReserveSize; i++)
-			oStrm.put(0);
-	}
-}
-
-
-void SsbWrite::SetIdSize(uint16 nSize)
-//-------------------------------
-{
-	if (nSize == IdSizeVariable || nSize > IdSizeMaxFixedSize)
-		m_nIdbytes = IdSizeVariable;
-	else
-		m_nIdbytes = nSize;
 }
 
 
@@ -854,16 +828,11 @@ void SsbWrite::FinishWrite()
 	std::ostream& oStrm = *m_pOstrm;
 	const Postype posDataEnd = oStrm.tellp();
 	std::string mapStreamStr = m_MapStream.str();
-	if (m_posMapStart != Postype(0) && ((uint32)mapStreamStr.length() > m_nMapReserveSize))
-		{ AddWriteNote(SNW_INSUFFICIENT_MAPSIZE); return; }
 		
-	if (m_posMapStart < 1)
-		m_posMapStart = oStrm.tellp();
-	else
-		oStrm.seekp(m_posMapStart);
+	Postype posMapStart = oStrm.tellp();
 
 	if (m_fpLogFunc)
-		m_fpLogFunc(tstrWritingMap, uint32(m_posMapStart - m_posStart));
+		m_fpLogFunc(tstrWritingMap, uint32(posMapStart - m_posStart));
 
 	if (GetFlag(RwfRwHasMap)) //Write map
 	{
@@ -879,7 +848,7 @@ void SsbWrite::FinishWrite()
 	if (GetFlag(RwfRwHasMap))
 	{	// Write map start position.
 		oStrm.seekp(m_posMapPosField);
-		const uint64 rposMap = m_posMapStart - m_posStart;
+		const uint64 rposMap = posMapStart - m_posStart;
 		Binarywrite<uint64>(oStrm, rposMap << 2 | 3);
 	}
 
