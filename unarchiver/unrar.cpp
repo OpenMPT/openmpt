@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "unrar.h"
+#include "../include/unrar/openmpt-callback.hpp"
 
 #if MPT_COMPILER_MSVC
 // Disable "unreferenced formal parameter" and type conversion warnings
@@ -24,38 +25,37 @@ struct RARData
 {
 	CommandData Cmd;
 	Archive Arc;
+	RARFileCallbacks callbacks;
 	int64 firstBlock;
 
-	RARData() : Arc(&Cmd) { }
-};
+	RARData(FileReader &file) : Arc(&Cmd), callbacks(ReadRaw, Seek, GetPosition, GetLength, file) { }
 
+	// FileReader callbacks
+	static size_t CALLBACK ReadRaw(FileReader &file, char *data, size_t size) { return file.ReadRaw(data, size); };
+	static bool CALLBACK Seek(FileReader &file, size_t offset) { return file.Seek(offset); };
+	static size_t CALLBACK GetPosition(FileReader &file) { return file.GetPosition(); };
+	static size_t CALLBACK GetLength(FileReader &file) { return file.GetLength(); };
 
-static int CALLBACK ProcessRARDataProc(unsigned int msg, LPARAM userData, LPARAM p1, LPARAM p2)
-//---------------------------------------------------------------------------------------------
-{
-	if(msg == UCM_PROCESSDATA)
+	static int CALLBACK RARCallback(unsigned int msg, LPARAM userData, LPARAM p1, LPARAM p2)
 	{
-		// Receive extracted data
-		CRarArchive *that = reinterpret_cast<CRarArchive *>(userData);
-		that->WriteData(reinterpret_cast<const char *>(p1), p2);
-		return 1;
+		if(msg == UCM_PROCESSDATA)
+		{
+			// Receive extracted data
+			CRarArchive *that = reinterpret_cast<CRarArchive *>(userData);
+			const char *data = reinterpret_cast<const char *>(p1);
+			that->data.insert(that->data.end(), data, data + p2);
+			return 1;
+		}
+		// No support for passwords or volumes
+		return 0;
 	}
-	// No support for passwords or volumes
-	return 0;
-}
-
-
-void CRarArchive::WriteData(const char *d, size_t s)
-//--------------------------------------------------
-{
-	data.insert(data.end(), d, d + s);
-}
+};
 
 
 CRarArchive::CRarArchive(FileReader &file) : ArchiveBase(file)
 //------------------------------------------------------------
 {
-	rarData = new (std::nothrow) RARData();
+	rarData = new (std::nothrow) RARData(inFile);
 	if(rarData == nullptr)
 	{
 		return;
@@ -66,7 +66,7 @@ CRarArchive::CRarArchive(FileReader &file) : ArchiveBase(file)
 		rarData->Cmd.FileArgs.AddString(MASKALL);
 		rarData->Cmd.VersionControl = 1;
 
-		rarData->Arc.Open(reinterpret_cast<wchar *>(&inFile), 0);
+		rarData->Arc.Open(reinterpret_cast<wchar *>(&rarData->callbacks), 0);
 		if(!rarData->Arc.IsArchive(false))
 		{
 			return;
@@ -142,7 +142,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 		// Extract real file
 		data.clear();
 		data.reserve(static_cast<size_t>(rarData->Arc.FileHead.UnpSize));
-		rarData->Cmd.Callback = ProcessRARDataProc;
+		rarData->Cmd.Callback = RARData::RARCallback;
 		Extract.ExtractCurrentFile(&rarData->Cmd, rarData->Arc, headerSize, repeat);
 		return !data.empty();
 	} catch(...)

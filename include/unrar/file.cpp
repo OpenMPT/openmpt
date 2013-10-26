@@ -1,8 +1,5 @@
 #include "rar.hpp"
-
-#undef Min	// OPENMPT ADDITION
-#include "../../common/BuildSettings.h"	// OPENMPT ADDITION
-#include "../../soundlib/FileReader.h"	// OPENMPT ADDITION
+#include "openmpt-callback.hpp"	// OPENMPT ADDITION
 
 File::File()
 {
@@ -48,8 +45,8 @@ void File::operator = (File &SrcFile)
 
 bool File::Open(const wchar *Name,uint Mode)
 {
-  hFile = reinterpret_cast<FileReader *>(const_cast<wchar *>(Name));	// OPENMPT ADDITION
-  hFile->Rewind();	// OPENMPT ADDITION
+  hFile = reinterpret_cast<RARFileCallbacks *>(const_cast<wchar *>(Name));	// OPENMPT ADDITION
+  hFile->Seek(hFile->file, 0);	// OPENMPT ADDITION
   return true;	// OPENMPT ADDITION
   /*	// OPENMPT ADDITION
   ErrorType=FILE_SUCCESS;
@@ -345,7 +342,7 @@ void File::Write(const void *Data,size_t Size)
 
 int File::Read(void *Data,size_t Size)
 {
-  return hFile->ReadRaw(static_cast<char *>(Data), Size);	// OPENMPT ADDITION
+  return hFile->ReadRaw(hFile->file, static_cast<char *>(Data), Size);	// OPENMPT ADDITION
   /*	// OPENMPT ADDITION
   int64 FilePos=0; // Initialized only to suppress some compilers warning.
 
@@ -457,7 +454,7 @@ bool File::RawSeek(int64 Offset,int Method)
     Offset=(Method==SEEK_CUR ? Tell():FileLength())+Offset;
     Method=SEEK_SET;
   }
-  return hFile->Seek((FileReader::off_t)Offset);	// OPENMPT ADDITION
+  return hFile->Seek(hFile->file, (size_t)Offset);	// OPENMPT ADDITION
   /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   LONG HighDist=(LONG)(Offset>>32);
@@ -480,7 +477,7 @@ bool File::RawSeek(int64 Offset,int Method)
 
 int64 File::Tell()
 {
-  return hFile->GetPosition();	// OPENMPT ADDITION
+  return hFile->GetPosition(hFile->file);	// OPENMPT ADDITION
   /*	// OPENMPT ADDITION
   if (hFile==BAD_HANDLE)
     if (AllowExceptions)
@@ -637,7 +634,7 @@ void File::GetOpenFileTime(RarTime *ft)
 
 int64 File::FileLength()
 {
-  return hFile->GetLength();	// OPENMPT ADDITION
+  return hFile->GetLength(hFile->file);	// OPENMPT ADDITION
   /*	// OPENMPT ADDITION
   SaveFilePos SavePos(*this);
   Seek(0,SEEK_END);
