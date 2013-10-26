@@ -250,43 +250,42 @@ const char tstrNoEntryFound[] = "No entry with id %s found.\n";
 const char strReadNote[] = "Read note: ";
 
 
-#define SSB_INITIALIZATION_LIST					\
-	m_Status(SNT_NONE), \
-	m_nFixedEntrySize(0),						\
-	m_posStart(0),								\
-	m_nReadVersion(0),							\
-	m_nMaxReadEntryCount(16000),				\
-	m_rposMapBegin(0),							\
-	m_posMapEnd(0),								\
-	m_posDataBegin(0),							\
-	m_rposEndofHdrData(0),						\
-	m_nReadEntrycount(0),						\
-	m_nIdbytes(IdSizeVariable),					\
-	m_nCounter(0),								\
-	m_nNextReadHint(0),							\
-	m_Flags(s_DefaultFlags),					\
-	m_nMapReserveSize(0),						\
-	m_posEntrycount(0),							\
-	m_posMapPosField(0),						\
-	m_posMapStart(0)							\
+Ssb::Ssb()
+	: m_Status(SNT_NONE)
+	, m_nFixedEntrySize(0)
+	, m_posStart(0)
+	, m_nIdbytes(IdSizeVariable)
+	, m_nCounter(0)
+	, m_Flags((1 << RwfWMapStartPosEntry) + (1 << RwfWMapSizeEntry) + (1 << RwfWVersionNum) + (1 << RwfRPartialIdMatch))
+{
+	return;
+}
 
 
-Ssb::Ssb(std::ostream& oStrm) :
-		m_pOstrm(&oStrm),
-		m_pIstrm(nullptr),
-		SSB_INITIALIZATION_LIST
-//------------------------------
-{}
+SsbWrite::SsbWrite(std::ostream& oStrm)
+	: m_pOstrm(&oStrm)
+	, m_nMapReserveSize(0)
+	, m_posEntrycount(0)
+	, m_posMapPosField(0)
+	, m_posMapStart(0)
+{
+	return;
+}
 
 
-Ssb::Ssb(std::istream& iStrm) :
-		m_pOstrm(nullptr),
-		m_pIstrm(&iStrm),
-		SSB_INITIALIZATION_LIST
-//------------------------------
-{}
-
-#undef SSB_INITIALIZATION_LIST
+SsbRead::SsbRead(std::istream& iStrm)
+	: m_pIstrm(&iStrm)
+	, m_nReadVersion(0)
+	, m_nMaxReadEntryCount(16000)
+	, m_rposMapBegin(0)
+	, m_posMapEnd(0)
+	, m_posDataBegin(0)
+	, m_rposEndofHdrData(0)
+	, m_nReadEntrycount(0)
+	, m_nNextReadHint(0)
+{
+	return;
+}
 
 
 typedef void (*fpLogFunc_t)(const char*, ...);
@@ -311,11 +310,11 @@ void Ssb::AddNote(const SsbStatus s, const char* sz)
 		m_fpLogFunc("%s: 0x%x\n", sz, s);
 }
 
-void Ssb::AddWriteNote(const SsbStatus s) {AddNote(s, strWriteNote);}
-void Ssb::AddReadNote(const SsbStatus s) {AddNote(s, strReadNote);}
+void SsbWrite::AddWriteNote(const SsbStatus s) {AddNote(s, strWriteNote);}
+void SsbRead::AddReadNote(const SsbStatus s) {AddNote(s, strReadNote);}
 
 
-void Ssb::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
+void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 //-------------------------------------------------------------------
 {
 	m_Status |= SNT_PROGRESS;
@@ -334,7 +333,7 @@ void Ssb::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 
 
 // Called after writing an entry.
-void Ssb::AddWriteNote(const char* pId, const size_t nIdSize, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
+void SsbWrite::AddWriteNote(const char* pId, const size_t nIdSize, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
 //----------------------------------------------------------------------------
 {
 	m_Status |= SNT_PROGRESS;
@@ -347,7 +346,7 @@ void Ssb::AddWriteNote(const char* pId, const size_t nIdSize, const NumType nEnt
 }
 
 
-void Ssb::ResetReadstatus()
+void SsbRead::ResetReadstatus()
 //-------------------------
 {
 	m_Status = SNT_NONE;
@@ -356,7 +355,7 @@ void Ssb::ResetReadstatus()
 }
 
 
-void Ssb::WriteMapItem( const char* pId, 
+void SsbWrite::WriteMapItem( const char* pId, 
 						const size_t nIdSize,
 						const RposType& rposDataStart,
 						const DataSize& nDatasize,
@@ -390,7 +389,7 @@ void Ssb::WriteMapItem( const char* pId,
 }
 
 
-void Ssb::ReserveMapSize(uint32 nSize)
+void SsbWrite::ReserveMapSize(uint32 nSize)
 //------------------------------------
 {
 	std::ostream& oStrm = *m_pOstrm;
@@ -404,7 +403,7 @@ void Ssb::ReserveMapSize(uint32 nSize)
 }
 
 
-void Ssb::SetIdSize(uint16 nSize)
+void SsbWrite::SetIdSize(uint16 nSize)
 //-------------------------------
 {
 	if (nSize == IdSizeVariable || nSize > IdSizeMaxFixedSize)
@@ -414,7 +413,7 @@ void Ssb::SetIdSize(uint16 nSize)
 }
 
 
-void Ssb::IncrementWriteCounter()
+void SsbWrite::IncrementWriteCounter()
 //-------------------------------
 {
 	m_nCounter++;
@@ -426,7 +425,7 @@ void Ssb::IncrementWriteCounter()
 }
 
 
-void Ssb::BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion)
+void SsbWrite::BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion)
 //---------------------------------------------------------------------------------
 {
 	std::ostream& oStrm = *m_pOstrm;
@@ -505,7 +504,7 @@ void Ssb::BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersi
 }
 
 
-Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin)
+SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin)
 //-------------------------------------------------------------------------------------------------------------------
 {
 	if (pE != nullptr)
@@ -528,7 +527,7 @@ Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const char* pId, const size_t 
 }
 
 
-void Ssb::OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite)
+void SsbWrite::OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite)
 //-----------------------------------------------------------------------------------------
 {
 	const Offtype nRawEntrySize = m_pOstrm->tellp() - posBeforeWrite;
@@ -562,7 +561,7 @@ void Ssb::OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posB
 }
 
 
-void Ssb::CompareId(std::istream& iStrm, const char* pId, const size_t nIdlength)
+void SsbRead::CompareId(std::istream& iStrm, const char* pId, const size_t nIdlength)
 //---------------------------------------------------------------------------
 {
 	uint8 tempU8 = 0;
@@ -581,7 +580,7 @@ void Ssb::CompareId(std::istream& iStrm, const char* pId, const size_t nIdlength
 }
 
 
-void Ssb::BeginRead(const char* pId, const size_t nLength, const uint64& nVersion)
+void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVersion)
 //---------------------------------------------------------------------------------
 {
 	std::istream& iStrm = *m_pIstrm;
@@ -726,7 +725,7 @@ void Ssb::BeginRead(const char* pId, const size_t nLength, const uint64& nVersio
 }
 
 
-void Ssb::CacheMap()
+void SsbRead::CacheMap()
 //------------------
 {
 	std::istream& iStrm = *m_pIstrm;
@@ -820,7 +819,7 @@ void Ssb::CacheMap()
 }
 
 
-const ReadEntry* Ssb::Find(const char* pId, const size_t nIdLength)
+const ReadEntry* SsbRead::Find(const char* pId, const size_t nIdLength)
 //-----------------------------------------------------------------
 {
 	m_pIstrm->clear();
@@ -850,7 +849,7 @@ const ReadEntry* Ssb::Find(const char* pId, const size_t nIdLength)
 }
 
 
-void Ssb::FinishWrite()
+void SsbWrite::FinishWrite()
 //---------------------
 {
 	std::ostream& oStrm = *m_pOstrm;

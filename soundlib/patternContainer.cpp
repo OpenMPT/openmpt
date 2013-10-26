@@ -195,7 +195,7 @@ PATTERNINDEX CPatternContainer::GetNumNamedPatterns() const
 void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)
 //----------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(oStrm);
+	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdPatterns, MptVersion::num);
 	const PATTERNINDEX nPatterns = patc.Size();
 	uint16 nCount = 0;
@@ -212,13 +212,13 @@ void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)
 void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t)
 //--------------------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(iStrm);
+	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdPatterns, MptVersion::num);
 	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
 		return;
 	PATTERNINDEX nPatterns = patc.Size();
 	uint16 nCount = uint16_max;
-	if (ssb.ReadItem(nCount, "num") != srlztn::Ssb::EntryNotFound)
+	if (ssb.ReadItem(nCount, "num") != srlztn::SsbRead::EntryNotFound)
 		nPatterns = nCount;
 	LimitMax(nPatterns, ModSpecs::mptm.patternsMax);
 	if (nPatterns > patc.Size())

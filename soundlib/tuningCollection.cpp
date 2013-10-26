@@ -102,7 +102,7 @@ const CTuning* CTuningCollection::GetTuning(const std::string& name) const
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::ostream& oStrm) const
 //--------------------------------------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(oStrm);
+	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite("TC", s_SerializationVersion);
 	ssb.WriteItem(m_Name, "0", 1, &WriteStr);
 	ssb.WriteItem(m_EditMask, "1");
@@ -160,18 +160,18 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std:
 	{	// An old version was not recognised - trying new version.
 		iStrm.clear();
 		iStrm.seekg(startpos);
-		srlztn::Ssb ssb(iStrm);
+		srlztn::SsbRead ssb(iStrm);
 		ssb.BeginRead("TC", s_SerializationVersion);
 
-		const srlztn::Ssb::ReadIterator iterBeg = ssb.GetReadBegin();
-		const srlztn::Ssb::ReadIterator iterEnd = ssb.GetReadEnd();
-		for(srlztn::Ssb::ReadIterator iter = iterBeg; iter != iterEnd; iter++)
+		const srlztn::SsbRead::ReadIterator iterBeg = ssb.GetReadBegin();
+		const srlztn::SsbRead::ReadIterator iterEnd = ssb.GetReadEnd();
+		for(srlztn::SsbRead::ReadIterator iter = iterBeg; iter != iterEnd; iter++)
 		{
-			if (ssb.CompareId(iter, "0") == srlztn::Ssb::IdMatch)
+			if (ssb.CompareId(iter, "0") == srlztn::SsbRead::IdMatch)
 				ssb.ReadItem(iter, m_Name, &ReadStr);
-			else if (ssb.CompareId(iter, "1") == srlztn::Ssb::IdMatch)
+			else if (ssb.CompareId(iter, "1") == srlztn::SsbRead::IdMatch)
 				ssb.ReadItem(iter, m_EditMask);
-			else if (ssb.CompareId(iter, "2") == srlztn::Ssb::IdMatch)
+			else if (ssb.CompareId(iter, "2") == srlztn::SsbRead::IdMatch)
 				ssb.ReadItem(iter, *this, &ReadTuning);
 		}
 

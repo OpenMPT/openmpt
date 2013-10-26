@@ -379,7 +379,7 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 
 	CTuningRTI* pTuning = new CTuningRTI;
 
-	srlztn::Ssb ssb(iStrm);
+	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead("CTB244RTI", (CTuning::GetVersion() << 24) + GetVersion());
 	ssb.ReadItem(pTuning->m_TuningName, "0", 1, ReadStr);
 	ssb.ReadItem(pTuning->m_EditMask, "1");
@@ -470,7 +470,7 @@ bool VectorFromBinaryStream(std::istream& inStrm, std::vector<T>& v, const SIZET
 CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) const
 //----------------------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(outStrm);
+	srlztn::SsbWrite ssb(outStrm);
 	ssb.BeginWrite("CTB244RTI", (GetVersion() << 24) + GetClassVersion());
 	if (m_TuningName.length() > 0)
 		ssb.WriteItem(m_TuningName, "0", 1, WriteStr);

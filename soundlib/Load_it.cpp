@@ -1016,7 +1016,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(version >= 0x88D)
 			{
-				srlztn::Ssb ssb(iStrm);
+				srlztn::SsbRead ssb(iStrm);
 				ssb.BeginRead("mptm", MptVersion::num);
 				ssb.ReadItem(GetTuneSpecificTunings(), "0", 1, &ReadTuningCollection);
 				ssb.ReadItem(*this, "1", 1, &ReadTuningMap);
@@ -1632,7 +1632,7 @@ bool CSoundFile::SaveIT(const char *lpszFileName, bool compatibilityExport)
 	// catch standard library truncating files
 	ALWAYS_ASSERT(MPTStartPos > 0);
 
-	srlztn::Ssb ssb(fout);
+	srlztn::SsbWrite ssb(fout);
 	ssb.BeginWrite("mptm", MptVersion::num);
 
 	if(GetTuneSpecificTunings().GetNumTunings() > 0)

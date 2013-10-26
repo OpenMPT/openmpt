@@ -798,7 +798,7 @@ void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
 void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 //----------------------------------------------------------------
 {
-	srlztn::Ssb ssb(oStrm);
+	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdSequence, MptVersion::num);
 	ssb.WriteItem(seq.m_sName.c_str(), "n");
 	const uint16 nLength = seq.GetLengthTailTrimmed();
@@ -811,7 +811,7 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 //-----------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(iStrm);
+	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequence, MptVersion::num);
 	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
 		return;
@@ -829,7 +829,7 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 //--------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(oStrm);
+	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdSequences, MptVersion::num);
 	const uint8 nSeqs = seq.GetNumSequences();
 	const uint8 nCurrent = seq.GetCurrentSequenceIndex();
@@ -849,7 +849,7 @@ void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 //---------------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(iStrm);
+	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequences, MptVersion::num);
 	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
 		return;
