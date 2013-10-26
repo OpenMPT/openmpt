@@ -231,8 +231,6 @@ std::string IdToString(const char* const pvId, const size_t nLength)
 }
 
 const char Ssb::s_EntryID[3] = {'2','2','8'};
-int32 Ssb::s_DefaultReadLogMask = SNT_DEFAULT_MASK;
-int32 Ssb::s_DefaultWriteLogMask = SNT_DEFAULT_MASK;
 Ssb::fpLogFunc_t Ssb::s_DefaultLogFunc = nullptr;
 
 const char tstrWriteHeader[] = "Write header with ID = %s\n";
@@ -257,8 +255,6 @@ const char strReadNote[] = "Read note: ";
 	m_Status(SNT_NONE), \
 	m_nFixedEntrySize(0),						\
 	m_fpLogFunc(s_DefaultLogFunc),				\
-	m_Readlogmask(s_DefaultReadLogMask),		\
-	m_Writelogmask(s_DefaultWriteLogMask),		\
 	m_posStart(0),								\
 	m_nReadVersion(0),							\
 	m_nMaxReadEntryCount(16000),				\
@@ -294,16 +290,16 @@ Ssb::Ssb(std::istream& iStrm) :
 
 #undef SSB_INITIALIZATION_LIST
 
-void Ssb::AddNote(const SsbStatus s, const SsbStatus mask, const char* sz)
-//------------------------------------------------------------------------
+void Ssb::AddNote(const SsbStatus s, const char* sz)
+//--------------------------------------------------
 {
 	m_Status |= s;
-	if ((s & mask) != 0 && m_fpLogFunc)
+	if (m_fpLogFunc)
 		m_fpLogFunc("%s: 0x%x\n", sz, s);
 }
 
-void Ssb::AddWriteNote(const SsbStatus s) {AddNote(s, m_Writelogmask, strWriteNote);}
-void Ssb::AddReadNote(const SsbStatus s) {AddNote(s, m_Readlogmask, strReadNote);}
+void Ssb::AddWriteNote(const SsbStatus s) {AddNote(s, strWriteNote);}
+void Ssb::AddReadNote(const SsbStatus s) {AddNote(s, strReadNote);}
 
 
 void Ssb::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
@@ -311,7 +307,7 @@ void Ssb::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 {
 	m_Status |= SNT_PROGRESS;
 
-	if ((m_Readlogmask & SNT_PROGRESS) != 0 && m_fpLogFunc)
+	if (m_fpLogFunc)
 	{
 		m_fpLogFunc(
 				 tstrReadProgress,
@@ -329,9 +325,8 @@ void Ssb::AddWriteNote(const char* pId, const size_t nIdSize, const NumType nEnt
 //----------------------------------------------------------------------------
 {
 	m_Status |= SNT_PROGRESS;
-	if ((m_Writelogmask & SNT_PROGRESS) != 0 && m_fpLogFunc)
+	if (m_fpLogFunc)
 	{
-		if (nIdSize < 30)
 		{
 			m_fpLogFunc(tstrWriteProgress, nEntryNum, IdToString(pId, nIdSize).c_str(), rposStart, nBytecount);
 		}
