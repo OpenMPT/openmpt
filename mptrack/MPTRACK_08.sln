@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\include\zlib\zli
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "minizip", "..\include\zlib\minizip.vcproj", "{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnRAR", "..\include\unrar\UnRAR.vcproj", "{95CC809B-03FC-4EDB-BB20-FD07A698C05F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -63,6 +65,10 @@ Global
 		{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}.Debug|Win32.Build.0 = DebugLib|Win32
 		{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}.Release|Win32.ActiveCfg = ReleaseLib|Win32
 		{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}.Release|Win32.Build.0 = ReleaseLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|Win32.ActiveCfg = DebugLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Debug|Win32.Build.0 = DebugLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|Win32.ActiveCfg = ReleaseLib|Win32
+		{95CC809B-03FC-4EDB-BB20-FD07A698C05F}.Release|Win32.Build.0 = ReleaseLib|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
