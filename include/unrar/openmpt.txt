@@ -13,4 +13,9 @@ The following files have been modified:
 arcread.cpp, extract.cpp, filcreat.cpp, file.hpp, file.cpp, filefn.cpp,
 find.cpp, match.cpp, pathfn.cpp, rar.hpp, rdwrfn.cpp, secpassword.cpp,
 volume.cpp, win32acl.cpp, win32lnk.cpp
-The file openmpt.hpp has been added.
+
+The following new files have been added:
+openmpt.hpp, openmpt-callback.hpp
+
+For building, premake4 is used to generate Visual Studio project files.
+See ../premake4.lua for details.
