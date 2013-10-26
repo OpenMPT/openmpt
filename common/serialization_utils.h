@@ -42,8 +42,6 @@ enum
 	SNT_NOTE =			0x20000000, // = 1 << 29
 	SNT_WARNING =		0x10000000, // = 1 << 28
 	SNT_NONE = 0,
-	SNT_ALL_ENABLED = -1,
-	SNT_DEFAULT_MASK = SNT_FAILURE | SNT_WARNING,
 
 	SNRW_BADGIVEN_STREAM =								1	| SNT_FAILURE,
 
@@ -373,7 +371,7 @@ private:
 	// Called after writing an item.
 	void OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite);
 	
-	void AddNote(const SsbStatus s, const SsbStatus mask, const char* sz);
+	void AddNote(const SsbStatus s, const char* sz);
 
 	void AddReadNote(const SsbStatus s);
 
@@ -412,9 +410,6 @@ public:
 
 private:
 
-	SsbStatus m_Readlogmask;			// Read: Controls which read messages will be written to log.
-	SsbStatus m_Writelogmask;			// Write: Controls which write messages will be written to log.
-	
 	std::vector<char> m_Idarray;		// Read: Holds entry ids.
 
 	Postype m_posStart;					// Read/write: Stream position at the beginning of object.
@@ -440,8 +435,6 @@ private:
 
 public:
 	static const uint8 s_DefaultFlagbyte = 0;
-	static int32 s_DefaultReadLogMask;
-	static int32 s_DefaultWriteLogMask;
 	static fpLogFunc_t s_DefaultLogFunc;
 	static const char s_EntryID[3];
 	static const int32 s_DefaultFlags = (1 << RwfWMapStartPosEntry) +
