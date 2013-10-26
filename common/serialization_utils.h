@@ -263,7 +263,6 @@ class Ssb
 //=======
 {
 public:
-	typedef void (*fpLogFunc_t)(const char*, ...);
 
 	enum ReadRv // Read return value.
 	{
@@ -351,7 +350,7 @@ public:
 	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
 
 	// Write given string to log if log func is defined.
-	void AddToLog(const char *psz) {if (m_fpLogFunc) m_fpLogFunc(psz);}
+	void AddToLog(const char *psz);
 
 private:
 	// Reads map to cache.
@@ -406,7 +405,6 @@ public:
 
 	SsbStatus m_Status;
 	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
-	fpLogFunc_t m_fpLogFunc;			// Pointer to log function.
 
 private:
 
@@ -435,7 +433,6 @@ private:
 
 public:
 	static const uint8 s_DefaultFlagbyte = 0;
-	static fpLogFunc_t s_DefaultLogFunc;
 	static const char s_EntryID[3];
 	static const int32 s_DefaultFlags = (1 << RwfWMapStartPosEntry) +
 										 (1 << RwfWMapSizeEntry) + (1 << RwfWVersionNum) +

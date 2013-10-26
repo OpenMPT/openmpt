@@ -231,7 +231,6 @@ std::string IdToString(const char* const pvId, const size_t nLength)
 }
 
 const char Ssb::s_EntryID[3] = {'2','2','8'};
-Ssb::fpLogFunc_t Ssb::s_DefaultLogFunc = nullptr;
 
 const char tstrWriteHeader[] = "Write header with ID = %s\n";
 const char tstrWriteProgress[] = "Wrote entry: {num, id, rpos, size} = {%u, %s, %u, %u}\n";
@@ -254,7 +253,6 @@ const char strReadNote[] = "Read note: ";
 #define SSB_INITIALIZATION_LIST					\
 	m_Status(SNT_NONE), \
 	m_nFixedEntrySize(0),						\
-	m_fpLogFunc(s_DefaultLogFunc),				\
 	m_posStart(0),								\
 	m_nReadVersion(0),							\
 	m_nMaxReadEntryCount(16000),				\
@@ -289,6 +287,21 @@ Ssb::Ssb(std::istream& iStrm) :
 {}
 
 #undef SSB_INITIALIZATION_LIST
+
+
+typedef void (*fpLogFunc_t)(const char*, ...);
+static fpLogFunc_t const m_fpLogFunc = nullptr;			// Pointer to log function.
+
+
+void Ssb::AddToLog(const char *psz)
+//---------------------------------
+{
+	if(m_fpLogFunc)
+	{
+		m_fpLogFunc("%s", psz);
+	}
+}
+
 
 void Ssb::AddNote(const SsbStatus s, const char* sz)
 //--------------------------------------------------
