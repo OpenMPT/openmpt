@@ -135,7 +135,7 @@ void CPortaudioDevice::FillAudioBuffer()
 }
 
 
-int64 CPortaudioDevice::InternalGetStreamPositionSamples() const
+int64 CPortaudioDevice::InternalGetStreamPositionFrames() const
 //--------------------------------------------------------------
 {
 	if(Pa_IsStreamActive(m_Stream) != 1) return 0;

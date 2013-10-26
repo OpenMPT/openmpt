@@ -654,7 +654,7 @@ void CMainFrame::OnTimerNotify()
 	int64 currenttotalsamples = 0;
 	if(gpSoundDevice)
 	{
-		currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
+		currenttotalsamples = gpSoundDevice->GetStreamPositionFrames(); 
 	}
 	{
 		// advance to the newest notification, drop the obsolete ones

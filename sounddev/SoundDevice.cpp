@@ -43,8 +43,8 @@ ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 	m_RealUpdateIntervalMS = static_cast<float>(m_Settings.UpdateIntervalMS);
 
 	m_IsPlaying = false;
-	m_FramesStreamRenderPosition = 0;
-	m_FramesStreamOutputPosition = 0;
+	m_StreamPositionRenderFrames = 0;
+	m_StreamPositionOutputFrames = 0;
 }
 
 
@@ -155,9 +155,9 @@ void ISoundDevice::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 	int64 framesRendered = 0;
 	{
 		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-		m_FramesStreamRenderPosition += numFrames;
-		m_FramesStreamOutputPosition = m_FramesStreamRenderPosition - framesLatency;
-		framesRendered = m_FramesStreamRenderPosition;
+		m_StreamPositionRenderFrames += numFrames;
+		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
+		framesRendered = m_StreamPositionRenderFrames;
 	}
 	m_Source->AudioDone(m_Settings, numFrames, framesRendered);
 }
@@ -181,8 +181,8 @@ void ISoundDevice::Start()
 	{
 		{
 			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-			m_FramesStreamRenderPosition = 0;
-			m_FramesStreamOutputPosition = 0;
+			m_StreamPositionRenderFrames = 0;
+			m_StreamPositionOutputFrames = 0;
 		}
 		InternalStart();
 		m_IsPlaying = true;
@@ -200,24 +200,24 @@ void ISoundDevice::Stop()
 		m_IsPlaying = false;
 		{
 			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-			m_FramesStreamRenderPosition = 0;
-			m_FramesStreamOutputPosition = 0;
+			m_StreamPositionRenderFrames = 0;
+			m_StreamPositionOutputFrames = 0;
 		}
 	}
 }
 
 
-int64 ISoundDevice::GetStreamPositionSamples() const
+int64 ISoundDevice::GetStreamPositionFrames() const
 //--------------------------------------------------
 {
 	if(!IsOpen()) return 0;
 	if(InternalHasGetStreamPosition())
 	{
-		return InternalGetStreamPositionSamples();
+		return InternalGetStreamPositionFrames();
 	} else
 	{
 		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-		return m_FramesStreamOutputPosition;
+		return m_StreamPositionOutputFrames;
 	}
 }
 

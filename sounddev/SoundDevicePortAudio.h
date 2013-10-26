@@ -52,7 +52,7 @@ public:
 	UINT GetNumBuffers() { return 1; }
 	float GetCurrentRealLatencyMS();
 	bool InternalHasGetStreamPosition() const { return false; }
-	int64 InternalGetStreamPositionSamples() const;
+	int64 InternalGetStreamPositionFrames() const;
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 
 	int StreamCallback(

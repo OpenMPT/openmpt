@@ -48,7 +48,7 @@ public:
 	UINT GetNumBuffers() { return m_nPreparedHeaders; }
 	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_Settings.GetBytesPerSecond(); }
 	bool InternalHasGetStreamPosition() const { return true; }
-	int64 InternalGetStreamPositionSamples() const;
+	int64 InternalGetStreamPositionFrames() const;
 
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
