@@ -396,7 +396,6 @@ private:
 
 	std::vector<ReadEntry> mapData;		// Read: Contains map information.
 	uint64 m_nReadVersion;				// Read: Version is placed here when reading.
-	NumType m_nMaxReadEntryCount;		// Read: Limits the number of entries allowed to be read.
 	RposType m_rposMapBegin;			// Read: If map exists, rpos of map begin, else m_rposEndofHdrData.
 	Postype m_posMapEnd;				// Read: If map exists, map end position, else pos of end of hdrData.
 	Postype m_posDataBegin;				// Read: Data begin position.

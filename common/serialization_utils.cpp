@@ -276,7 +276,6 @@ SsbWrite::SsbWrite(std::ostream& oStrm)
 SsbRead::SsbRead(std::istream& iStrm)
 	: m_pIstrm(&iStrm)
 	, m_nReadVersion(0)
-	, m_nMaxReadEntryCount(16000)
 	, m_rposMapBegin(0)
 	, m_posMapEnd(0)
 	, m_posDataBegin(0)
@@ -695,7 +694,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 
 	// Read entrycount
 	ReadAdaptive1248(iStrm, tempU64);
-	if(tempU64 > m_nMaxReadEntryCount)
+	if(tempU64 > 16000) // FIXME: 16000 appear like a totally arbitrary limit. May be to avoid out-of-memory DoS.
 		{ AddReadNote(SNR_TOO_MANY_ENTRIES_TO_READ); return; }
 
 	m_nReadEntrycount = static_cast<NumType>(tempU64);
