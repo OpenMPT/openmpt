@@ -974,15 +974,13 @@ void *CSoundFile::AllocateSample(size_t nbytes)
 	// Allocate with some overhead (16 bytes before sample start, and at least 16 bytes after that)
 	const size_t allocSize = (nbytes + 39) & ~7;
 
-	try
+	char *p = new (std::nothrow) char[allocSize];
+	if(p != nullptr)
 	{
-		char *p = new char[allocSize];
 		memset(p, 0, allocSize);
 		return (p + 16);
-	} catch(MPTMemoryException)
-	{
-		return nullptr;
 	}
+	return nullptr;
 }
 
 

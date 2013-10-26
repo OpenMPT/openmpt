@@ -141,12 +141,8 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 		
 		// Loading Instrument
 
-		ModInstrument *pIns;
-
-		try
-		{
-			pIns = new ModInstrument(nSample);
-		} catch(MPTMemoryException)
+		ModInstrument *pIns = new (std::nothrow) ModInstrument(nSample);
+		if(pIns == nullptr)
 		{
 			return false;
 		}
@@ -254,12 +250,8 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	}
 	if (m_nInstruments < targetInstr) m_nInstruments = targetInstr;
 
-	ModInstrument *pIns;
-
-	try
-	{
-		pIns = new ModInstrument();
-	} catch(MPTMemoryException)
+	ModInstrument *pIns = new (std::nothrow) ModInstrument();
+	if(pIns == nullptr)
 	{
 		return false;
 	}
@@ -720,7 +712,6 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpStream
 	GF1PATCHFILEHEADER *phdr = (GF1PATCHFILEHEADER *)lpStream;
 	GF1INSTRUMENT *pih = (GF1INSTRUMENT *)(lpStream+sizeof(GF1PATCHFILEHEADER));
 	GF1LAYER *plh = (GF1LAYER *)(lpStream+sizeof(GF1PATCHFILEHEADER)+sizeof(GF1INSTRUMENT));
-	ModInstrument *pIns;
 	DWORD dwMemPos = sizeof(GF1PATCHFILEHEADER)+sizeof(GF1INSTRUMENT)+sizeof(GF1LAYER);
 	UINT nSamples;
 
@@ -731,10 +722,8 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpStream
 	 || (!pih->layers) || (!plh->samples)) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 
-	try
-	{
-		pIns = new ModInstrument();
-	} catch(MPTMemoryException)
+	ModInstrument *pIns = new (std::nothrow) ModInstrument();
+	if(pIns == nullptr)
 	{
 		return false;
 	}
@@ -874,12 +863,8 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		return false;
 	}
 
-	ModInstrument *pIns;
-
-	try
-	{
-		pIns = new ModInstrument();
-	} catch(MPTMemoryException)
+	ModInstrument *pIns = new (std::nothrow) ModInstrument();
+	if(pIns == nullptr)
 	{
 		return false;
 	}
@@ -1496,12 +1481,8 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	}
 	if(nInstr > GetNumInstruments()) m_nInstruments = nInstr;
 
-	ModInstrument *pIns;
-
-	try
-	{
-		pIns = new ModInstrument();
-	} catch(MPTMemoryException)
+	ModInstrument *pIns = new (std::nothrow) ModInstrument();
+	if(pIns == nullptr)
 	{
 		return false;
 	}
@@ -2170,11 +2151,8 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const char *lpszFileName) c
 
 	// Convert sample data to signed 32-Bit integer array.
 	const SmpLength numSamples = sample.nLength * sample.GetNumChannels();
-	FLAC__int32 *sampleData;
-	try
-	{
-		sampleData = new FLAC__int32[numSamples];
-	} catch(MPTMemoryException)
+	FLAC__int32 *sampleData = new (std::nothrow) FLAC__int32[numSamples];
+	if(sampleData == nullptr)
 	{
 		return false;
 	}

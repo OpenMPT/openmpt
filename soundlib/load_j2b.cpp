@@ -1015,12 +1015,9 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Header is valid, now unpack the RIFF AM file using inflate
-	Bytef *amFileData;
 	uLongf destSize = fileHeader.unpackedLength;
-	try
-	{
-		amFileData = new Bytef[destSize];
-	} catch(MPTMemoryException)
+	Bytef *amFileData = new (std::nothrow) Bytef[destSize];
+	if(amFileData == nullptr)
 	{
 		return false;
 	}

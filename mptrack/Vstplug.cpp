@@ -309,11 +309,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 
 			if ((szPath[0]) && (!lstrcmpi(szPath, pszDllPath)))
 			{
-				VSTPluginLib *p;
-				try
-				{
-					p = new VSTPluginLib(pszDllPath);
-				} catch(MPTMemoryException)
+				VSTPluginLib *p = new (std::nothrow) VSTPluginLib(pszDllPath);
+				if(p == nullptr)
 				{
 					return nullptr;
 				}
@@ -368,11 +365,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 	HINSTANCE hLib;
 	bool validPlug = false;
 
-	VSTPluginLib *p;
-	try
-	{
-		p = new VSTPluginLib(pszDllPath);
-	} catch(MPTMemoryException)
+	VSTPluginLib *p = new (std::nothrow) VSTPluginLib(pszDllPath);
+	if(p == nullptr)
 	{
 		return nullptr;
 	}
