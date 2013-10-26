@@ -1326,6 +1326,7 @@ int64 Archive::GetStartPos()
 #ifndef SHELL_EXT
 bool Archive::ReadSubData(Array<byte> *UnpData,File *DestFile)
 {
+  return false;	// OPENMPT ADDITION
   if (BrokenHeader)
   {
 #ifndef SHELL_EXT

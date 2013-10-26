@@ -365,6 +365,7 @@ bool CmdExtract::ExtractCurrentFile(CommandData *Cmd,Archive &Arc,size_t HeaderS
     // DestFileName can be set empty in case of excessive -ap switch.
     ExtrFile=!SkipSolid && *DestFileName!=0 && !Arc.FileHead.SplitBefore;
 
+    /*	// OPENMPT ADDITION
     if ((Cmd->FreshFiles || Cmd->UpdateFiles) && (Command=='E' || Command=='X'))
     {
       FindData FD;
@@ -386,6 +387,7 @@ bool CmdExtract::ExtractCurrentFile(CommandData *Cmd,Archive &Arc,size_t HeaderS
         if (Cmd->FreshFiles)
           ExtrFile=false;
     }
+    */	// OPENMPT ADDITION
 
     if (Arc.FileHead.Encrypted)
     {
@@ -545,6 +547,7 @@ bool CmdExtract::ExtractCurrentFile(CommandData *Cmd,Archive &Arc,size_t HeaderS
       bool LinkSuccess=true; // Assume success for test mode.
       if (LinkEntry)
       {
+        /*	// OPENMPT ADDITION
         FILE_SYSTEM_REDIRECT Type=Arc.FileHead.RedirType;
 
         if (Type==FSREDIR_HARDLINK || Type==FSREDIR_FILECOPY)
@@ -581,6 +584,7 @@ bool CmdExtract::ExtractCurrentFile(CommandData *Cmd,Archive &Arc,size_t HeaderS
             ShowChecksum=false;
           }
           PrevExtracted=FileCreateMode && LinkSuccess;
+          */	// OPENMPT ADDITION
       }
       else
         if (!Arc.FileHead.SplitBefore && !WrongPassword)
@@ -652,6 +656,7 @@ bool CmdExtract::ExtractCurrentFile(CommandData *Cmd,Archive &Arc,size_t HeaderS
         mprintf(L"\b\b\b\b\b     ");
 #endif
 
+      /*	// OPENMPT ADDITION
       if (!TestMode && !WrongPassword && (Command=='X' || Command=='E') &&
           (!LinkEntry || Arc.FileHead.RedirType==FSREDIR_FILECOPY && LinkSuccess) && 
           (!BrokenFile || Cmd->KeepBroken))
@@ -688,6 +693,7 @@ bool CmdExtract::ExtractCurrentFile(CommandData *Cmd,Archive &Arc,size_t HeaderS
           SetFileAttr(CurFile.FileName,Arc.FileHead.FileAttr);
         PrevExtracted=true;
       }
+      */	// OPENMPT ADDITION
     }
   }
   if (ExactMatch)
@@ -755,6 +761,8 @@ bool CmdExtract::ExtractFileCopy(File &New,wchar *ArcName,wchar *NameNew,wchar *
 
 void CmdExtract::ExtrPrepareName(CommandData *Cmd,Archive &Arc,const wchar *ArcFileName,wchar *DestName,size_t DestSize)
 {
+  *DestName = L'*';	// OPENMPT ADDITION
+  return;	// OPENMPT ADDITION
   wcsncpyz(DestName,Cmd->ExtrPath,DestSize);
 
   // We need IsPathDiv check here to correctly handle Unix forward slash
@@ -825,6 +833,7 @@ void CmdExtract::ExtrPrepareName(CommandData *Cmd,Archive &Arc,const wchar *ArcF
 #ifdef RARDLL
 bool CmdExtract::ExtrDllGetPassword(CommandData *Cmd)
 {
+  return false;	// OPENMPT ADDITION
   if (!Cmd->Password.IsSet())
   {
     if (Cmd->Callback!=NULL)
@@ -911,6 +920,7 @@ void CmdExtract::ConvertDosPassword(Archive &Arc,SecPassword &DestPwd)
 
 void CmdExtract::ExtrCreateDir(CommandData *Cmd,Archive &Arc,const wchar *ArcFileName)
 {
+  return;	// OPENMPT ADDITION
   if (Cmd->Test)
   {
 #ifndef GUI
@@ -981,6 +991,7 @@ void CmdExtract::ExtrCreateDir(CommandData *Cmd,Archive &Arc,const wchar *ArcFil
 
 bool CmdExtract::ExtrCreateFile(CommandData *Cmd,Archive &Arc,File &CurFile)
 {
+  return true;	// OPENMPT ADDITION
   bool Success=true;
   wchar Command=Cmd->Command[0];
 #if !defined(GUI) && !defined(SFX_MODULE)

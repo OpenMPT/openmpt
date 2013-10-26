@@ -2,6 +2,7 @@
 
 MKDIR_CODE MakeDir(const wchar *Name,bool SetAttr,uint Attr)
 {
+  return MKDIR_SUCCESS;	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   BOOL RetCode=CreateDirectory(Name,NULL);
   if (RetCode==0 && !FileExist(Name))
@@ -36,6 +37,7 @@ MKDIR_CODE MakeDir(const wchar *Name,bool SetAttr,uint Attr)
 
 bool CreatePath(const wchar *Path,bool SkipLastName)
 {
+  return true;	// OPENMPT ADDITION
   if (Path==NULL || *Path==0)
     return false;
 
@@ -85,6 +87,7 @@ bool CreatePath(const wchar *Path,bool SkipLastName)
 
 void SetDirTime(const wchar *Name,RarTime *ftm,RarTime *ftc,RarTime *fta)
 {
+  return;	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   bool sm=ftm!=NULL && ftm->IsSet();
   bool sc=ftc!=NULL && ftc->IsSet();
@@ -127,6 +130,7 @@ void SetDirTime(const wchar *Name,RarTime *ftm,RarTime *ftc,RarTime *fta)
 
 bool IsRemovable(const wchar *Name)
 {
+  return false;	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   wchar Root[NM];
   GetPathRoot(Name,Root,ASIZE(Root));
@@ -141,6 +145,7 @@ bool IsRemovable(const wchar *Name)
 #ifndef SFX_MODULE
 int64 GetFreeDisk(const wchar *Name)
 {
+  return 0;	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   wchar Root[NM];
   GetFilePath(Name,Root,ASIZE(Root));
@@ -173,6 +178,7 @@ int64 GetFreeDisk(const wchar *Name)
 
 bool FileExist(const wchar *Name)
 {
+  return false;	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   return GetFileAttr(Name)!=0xffffffff;
 #elif defined(ENABLE_ACCESS)
@@ -188,6 +194,7 @@ bool FileExist(const wchar *Name)
 
 bool WildFileExist(const wchar *Name)
 {
+  return false;	// OPENMPT ADDITION
   if (IsWildcard(Name))
   {
     FindFile Find;
@@ -247,6 +254,7 @@ bool IsDeleteAllowed(uint FileAttr)
 
 void PrepareToDelete(const wchar *Name)
 {
+  return;	// OPENMPT ADDITION
 #if defined(_WIN_ALL) || defined(_EMX)
   SetFileAttr(Name,0);
 #endif
@@ -263,6 +271,7 @@ void PrepareToDelete(const wchar *Name)
 
 uint GetFileAttr(const wchar *Name)
 {
+  return 0;	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   DWORD Attr=GetFileAttributes(Name);
   if (Attr==0xffffffff)
@@ -285,6 +294,7 @@ uint GetFileAttr(const wchar *Name)
 
 bool SetFileAttr(const wchar *Name,uint Attr)
 {
+  return false;	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   bool Success=SetFileAttributes(Name,Attr)!=0;
   if (!Success)
@@ -379,6 +389,7 @@ void CalcFileSum(File *SrcFile,uint *CRC32,byte *Blake2,uint Threads,int64 Size,
 
 bool RenameFile(const wchar *SrcName,const wchar *DestName)
 {
+  return true;	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   bool Success=MoveFile(SrcName,DestName)!=0;
   if (!Success)
@@ -400,6 +411,7 @@ bool RenameFile(const wchar *SrcName,const wchar *DestName)
 
 bool DelFile(const wchar *Name)
 {
+  return true;	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   bool Success=DeleteFile(Name)!=0;
   if (!Success)
@@ -422,6 +434,7 @@ bool DelFile(const wchar *Name)
 #if defined(_WIN_ALL) && !defined(SFX_MODULE)
 bool SetFileCompression(const wchar *Name,bool State)
 {
+  return true;	// OPENMPT ADDITION
   HANDLE hFile=CreateFile(Name,FILE_READ_DATA|FILE_WRITE_DATA,
                  FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,
                  FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_SEQUENTIAL_SCAN,NULL);

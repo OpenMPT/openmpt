@@ -18,6 +18,7 @@ inline uint touppercw(uint ch,bool ForceCase)
 
 bool CmpName(const wchar *Wildcard,const wchar *Name,int CmpMode)
 {
+  return true;	// OPENMPT ADDITION
   bool ForceCase=(CmpMode&MATCH_FORCECASESENSITIVE)!=0;
 
   CmpMode&=MATCH_MODEMASK;

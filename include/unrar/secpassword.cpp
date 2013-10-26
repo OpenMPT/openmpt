@@ -1,5 +1,6 @@
 #include "rar.hpp"
 
+/*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
 typedef BOOL (WINAPI *CRYPTPROTECTMEMORY)(LPVOID pData,DWORD cbData,DWORD dwFlags);
 typedef BOOL (WINAPI *CRYPTUNPROTECTMEMORY)(LPVOID pData,DWORD cbData,DWORD dwFlags);
@@ -51,21 +52,25 @@ class CryptLoader
 // We want to call FreeLibrary when RAR is exiting.
 CryptLoader GlobalCryptLoader;
 #endif
+*/	// OPENMPT ADDITION
 
 SecPassword::SecPassword()
 {
+  return;	// OPENMPT ADDITION
   Set(L"");
 }
 
 
 SecPassword::~SecPassword()
 {
+  return;	// OPENMPT ADDITION
   Clean();
 }
 
 
 void SecPassword::Clean()
 {
+  return;	// OPENMPT ADDITION
   PasswordSet=false;
   cleandata(Password,sizeof(Password));
 }
@@ -76,6 +81,7 @@ void SecPassword::Clean()
 // So we use our own function for this purpose.
 void cleandata(void *data,size_t size)
 {
+  return;	// OPENMPT ADDITION
 #if defined(_WIN_ALL) && defined(_MSC_VER)
   SecureZeroMemory(data,size);
 #else
@@ -96,6 +102,7 @@ void cleandata(void *data,size_t size)
 // to find it in dump.
 void SecPassword::Process(const wchar *Src,size_t SrcSize,wchar *Dst,size_t DstSize,bool Encode)
 {
+  return;	// OPENMPT ADDITION
   // Source string can be shorter than destination as in case when we process
   // -p<pwd> parameter, so we need to take into account both sizes.
   memcpy(Dst,Src,Min(SrcSize,DstSize)*sizeof(*Dst));
@@ -105,6 +112,7 @@ void SecPassword::Process(const wchar *Src,size_t SrcSize,wchar *Dst,size_t DstS
 
 void SecPassword::Get(wchar *Psw,size_t MaxSize)
 {
+  return;	// OPENMPT ADDITION
   if (PasswordSet)
   {
     Process(Password,ASIZE(Password),Psw,MaxSize,false);
@@ -117,6 +125,7 @@ void SecPassword::Get(wchar *Psw,size_t MaxSize)
 
 void SecPassword::Set(const wchar *Psw)
 {
+  return;	// OPENMPT ADDITION
   if (*Psw==0)
   {
     PasswordSet=false;
@@ -132,6 +141,7 @@ void SecPassword::Set(const wchar *Psw)
 
 size_t SecPassword::Length()
 {
+  return 0;	// OPENMPT ADDITION
   wchar Plain[MAXPASSWORD];
   Get(Plain,ASIZE(Plain));
   size_t Length=wcslen(Plain);
@@ -142,6 +152,7 @@ size_t SecPassword::Length()
 
 bool SecPassword::operator == (SecPassword &psw)
 {
+  return false;	// OPENMPT ADDITION
   // We cannot compare encoded data directly, because there is no guarantee
   // than encryption function will always produce the same result for same
   // data (salt?) and because we do not clean the rest of password buffer
@@ -158,6 +169,7 @@ bool SecPassword::operator == (SecPassword &psw)
 
 void SecHideData(void *Data,size_t DataSize,bool Encode)
 {
+  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   // Try to utilize the secure Crypt[Un]ProtectMemory if possible.
   if (GlobalCryptLoader.pCryptProtectMemory==NULL)
@@ -203,4 +215,5 @@ void SecHideData(void *Data,size_t DataSize,bool Encode)
 
   for (size_t I=0;I<DataSize;I++)
     *((byte *)Data+I)^=Key+I+75;
+  */	// OPENMPT ADDITION
 }

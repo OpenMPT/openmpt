@@ -18,6 +18,7 @@ wchar* PointToLastChar(const wchar *Path)
 
 wchar* ConvertPath(const wchar *SrcPath,wchar *DestPath)
 {
+  return (wchar *)SrcPath;	// OPENMPT ADDITION
   const wchar *DestPtr=SrcPath;
 
   // Prevent \..\ in any part of path string.

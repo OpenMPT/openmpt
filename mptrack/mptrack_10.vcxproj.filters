@@ -433,33 +433,6 @@
     <ClCompile Include="..\unarchiver\unzip.cpp">
       <Filter>Source Files\unarchiver</Filter>
     </ClCompile>
-    <ClCompile Include="..\unarchiver\unrar\BLOCK.CPP">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unrar\COMPR.CPP">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unrar\CRCCRYPT.CPP">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unrar\Extract.cpp">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unrar\Global.cpp">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unrar\Rdwrfn.cpp">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unrar\Smallfn.cpp">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unrar\Unpack.cpp">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unarchiver\unrar\UNPOLD.CPP">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClCompile>
     <ClCompile Include="..\test\test.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -888,9 +861,6 @@
     <ClInclude Include="..\unarchiver\unzip.h">
       <Filter>Header Files\unarchiver</Filter>
     </ClInclude>
-    <ClInclude Include="..\unarchiver\unrar\CONST.H">
-      <Filter>Source Files\unarchiver\unrar</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\versionNumber.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -1113,9 +1083,6 @@
     </Filter>
     <Filter Include="Source Files\unarchiver">
       <UniqueIdentifier>{2e5a8242-6eec-48cd-93b3-5880bee8b740}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\unarchiver\unrar">
-      <UniqueIdentifier>{ffd114ee-74f6-4d3e-87af-44e29e79b71f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

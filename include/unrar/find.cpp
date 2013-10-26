@@ -33,6 +33,7 @@ void FindFile::SetMask(const wchar *Mask)
 
 bool FindFile::Next(FindData *fd,bool GetSymLink)
 {
+  return true;	// OPENMPT ADDITION
   fd->Error=false;
   if (*FindMask==0)
     return false;
@@ -110,6 +111,7 @@ bool FindFile::Next(FindData *fd,bool GetSymLink)
 
 bool FindFile::FastFind(const wchar *FindMask,FindData *fd,bool GetSymLink)
 {
+  return true;	// OPENMPT ADDITION
   fd->Error=false;
 #ifndef _UNIX
   if (IsWildcard(FindMask))

@@ -1,5 +1,9 @@
 #include "rar.hpp"
 
+#undef Min	// OPENMPT ADDITION
+#include "../../common/BuildSettings.h"	// OPENMPT ADDITION
+#include "../../soundlib/FileReader.h"	// OPENMPT ADDITION
+
 File::File()
 {
   hFile=BAD_HANDLE;
@@ -22,11 +26,13 @@ File::File()
 
 File::~File()
 {
+  /*	// OPENMPT ADDITION
   if (hFile!=BAD_HANDLE && !SkipClose)
     if (NewFile)
       Delete();
     else
       Close();
+  */	// OPENMPT ADDITION
 }
 
 
@@ -42,6 +48,10 @@ void File::operator = (File &SrcFile)
 
 bool File::Open(const wchar *Name,uint Mode)
 {
+  hFile = reinterpret_cast<FileReader *>(const_cast<wchar *>(Name));	// OPENMPT ADDITION
+  hFile->Rewind();	// OPENMPT ADDITION
+  return true;	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
   ErrorType=FILE_SUCCESS;
   FileHandle hNewFile;
   bool OpenShared=File::OpenShared || (Mode & FMF_OPENSHARED)!=0;
@@ -111,6 +121,7 @@ bool File::Open(const wchar *Name,uint Mode)
     wcsncpyz(FileName,Name,ASIZE(FileName));
   }
   return Success;
+  */	// OPENMPT ADDITION
 }
 
 
@@ -134,6 +145,8 @@ bool File::WOpen(const wchar *Name)
 
 bool File::Create(const wchar *Name,uint Mode)
 {
+  return false;	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
   // OpenIndiana based NAS and CIFS shares fail to set the file time if file
   // was created in read+write mode and some data was written and not flushed
   // before SetFileTime call. So we should use the write only mode if we plan
@@ -163,6 +176,7 @@ bool File::Create(const wchar *Name,uint Mode)
   SkipClose=false;
   wcsncpyz(FileName,Name,ASIZE(FileName));
   return hFile!=BAD_HANDLE;
+  */	// OPENMPT ADDITION
 }
 
 
@@ -188,6 +202,7 @@ bool File::WCreate(const wchar *Name,uint Mode)
 bool File::Close()
 {
   bool Success=true;
+  /*	// OPENMPT ADDITION
   if (HandleType!=FILE_HANDLENORMAL)
     HandleType=FILE_HANDLENORMAL;
   else
@@ -205,22 +220,27 @@ bool File::Close()
       if (!Success && AllowExceptions)
         ErrHandler.CloseError(FileName);
     }
+  */	// OPENMPT ADDITION
   return Success;
 }
 
 
 void File::Flush()
 {
+  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   FlushFileBuffers(hFile);
 #else
   fflush(hFile);
 #endif
+  */	// OPENMPT ADDITION
 }
 
 
 bool File::Delete()
 {
+  return false;	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
   if (HandleType!=FILE_HANDLENORMAL)
     return false;
   if (hFile!=BAD_HANDLE)
@@ -228,11 +248,14 @@ bool File::Delete()
   if (!AllowDelete)
     return false;
   return DelFile(FileName);
+  */	// OPENMPT ADDITION
 }
 
 
 bool File::Rename(const wchar *NewName)
 {
+  return false;	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
   // No need to rename if names are already same.
   bool Success=wcscmp(FileName,NewName)==0;
 
@@ -243,11 +266,13 @@ bool File::Rename(const wchar *NewName)
     wcscpy(FileName,NewName);
 
   return Success;
+  */	// OPENMPT ADDITION
 }
 
 
 void File::Write(const void *Data,size_t Size)
 {
+  /* 	// OPENMPT ADDITION
   if (Size==0)
     return;
   if (HandleType!=FILE_HANDLENORMAL)
@@ -314,11 +339,14 @@ void File::Write(const void *Data,size_t Size)
     break;
   }
   LastWrite=true;
+  */	// OPENMPT ADDITION
 }
 
 
 int File::Read(void *Data,size_t Size)
 {
+  return hFile->ReadRaw(static_cast<char *>(Data), Size);	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
   int64 FilePos=0; // Initialized only to suppress some compilers warning.
 
   if (IgnoreReadErrors)
@@ -352,12 +380,15 @@ int File::Read(void *Data,size_t Size)
     break;
   }
   return ReadSize;
+  */	// OPENMPT ADDITION
 }
 
 
 // Returns -1 in case of error.
 int File::DirectRead(void *Data,size_t Size)
 {
+  return Read(Data, Size);	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   const size_t MaxDeviceRead=20000;
   const size_t MaxLockedRead=32768;
@@ -406,6 +437,7 @@ int File::DirectRead(void *Data,size_t Size)
     return -1;
   return (int)ReadSize;
 #endif
+  */	// OPENMPT ADDITION
 }
 
 
@@ -425,6 +457,8 @@ bool File::RawSeek(int64 Offset,int Method)
     Offset=(Method==SEEK_CUR ? Tell():FileLength())+Offset;
     Method=SEEK_SET;
   }
+  return hFile->Seek((FileReader::off_t)Offset);	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   LONG HighDist=(LONG)(Offset>>32);
   if (SetFilePointer(hFile,(LONG)Offset,&HighDist,Method)==0xffffffff &&
@@ -440,11 +474,14 @@ bool File::RawSeek(int64 Offset,int Method)
     return false;
 #endif
   return true;
+  */	// OPENMPT ADDITION
 }
 
 
 int64 File::Tell()
 {
+  return hFile->GetPosition();	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
   if (hFile==BAD_HANDLE)
     if (AllowExceptions)
       ErrHandler.SeekError(FileName);
@@ -466,11 +503,13 @@ int64 File::Tell()
   return ftell(hFile);
 #endif
 #endif
+  */	// OPENMPT ADDITION
 }
 
 
 void File::Prealloc(int64 Size)
 {
+  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   if (RawSeek(Size,SEEK_SET))
   {
@@ -486,6 +525,7 @@ void File::Prealloc(int64 Size)
   if (fd >= 0)
     fallocate(fd, 0, 0, Size);
 #endif
+  */	// OPENMPT ADDITION
 }
 
 
@@ -505,16 +545,20 @@ void File::PutByte(byte Byte)
 
 bool File::Truncate()
 {
+  return false;	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   return SetEndOfFile(hFile)==TRUE;
 #else
   return false;
 #endif
+  */	// OPENMPT ADDITION
 }
 
 
 void File::SetOpenFileTime(RarTime *ftm,RarTime *ftc,RarTime *fta)
 {
+  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   // Workaround for OpenIndiana NAS time bug. If we cannot create a file
   // in write only mode, we need to flush the write buffer before calling
@@ -534,19 +578,23 @@ void File::SetOpenFileTime(RarTime *ftm,RarTime *ftc,RarTime *fta)
     fta->GetWin32(&fa);
   SetFileTime(hFile,sc ? &fc:NULL,sa ? &fa:NULL,sm ? &fm:NULL);
 #endif
+  */	// OPENMPT ADDITION
 }
 
 
 void File::SetCloseFileTime(RarTime *ftm,RarTime *fta)
 {
+  /*	// OPENMPT ADDITION
 #ifdef _UNIX
   SetCloseFileTimeByName(FileName,ftm,fta);
 #endif
+  */	// OPENMPT ADDITION
 }
 
 
 void File::SetCloseFileTimeByName(const wchar *Name,RarTime *ftm,RarTime *fta)
 {
+  /*	// OPENMPT ADDITION
 #ifdef _UNIX
   bool setm=ftm!=NULL && ftm->IsSet();
   bool seta=fta!=NULL && fta->IsSet();
@@ -566,11 +614,13 @@ void File::SetCloseFileTimeByName(const wchar *Name,RarTime *ftm,RarTime *fta)
     utime(NameA,&ut);
   }
 #endif
+  */	// OPENMPT ADDITION
 }
 
 
 void File::GetOpenFileTime(RarTime *ft)
 {
+  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   FILETIME FileTime;
   GetFileTime(hFile,NULL,NULL,&FileTime);
@@ -581,19 +631,25 @@ void File::GetOpenFileTime(RarTime *ft)
   fstat(fileno(hFile),&st);
   *ft=st.st_mtime;
 #endif
+  */	// OPENMPT ADDITION
 }
 
 
 int64 File::FileLength()
 {
+  return hFile->GetLength();	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
   SaveFilePos SavePos(*this);
   Seek(0,SEEK_END);
   return Tell();
+  */	// OPENMPT ADDITION
 }
 
 
 bool File::IsDevice()
 {
+  return false;	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
   if (hFile==BAD_HANDLE)
     return false;
 #ifdef _WIN_ALL
@@ -602,6 +658,7 @@ bool File::IsDevice()
 #else
   return isatty(fileno(hFile));
 #endif
+  */	// OPENMPT ADDITION
 }
 
 

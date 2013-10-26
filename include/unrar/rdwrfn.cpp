@@ -126,6 +126,7 @@ void ComprDataIO::UnpWrite(byte *Addr,size_t Count)
     if (Cmd->Callback!=NULL &&
         Cmd->Callback(UCM_PROCESSDATA,Cmd->UserData,(LPARAM)Addr,Count)==-1)
       ErrHandler.Exit(RARX_USERBREAK);
+    /*	// OPENMPT ADDITION
     if (Cmd->ProcessDataProc!=NULL)
     {
       // Here we preserve ESP value. It is necessary for those developers,
@@ -153,6 +154,7 @@ void ComprDataIO::UnpWrite(byte *Addr,size_t Count)
       if (RetCode==0)
         ErrHandler.Exit(RARX_USERBREAK);
     }
+    */	// OPENMPT ADDITION
   }
 #endif // RARDLL
 
@@ -189,6 +191,7 @@ void ComprDataIO::UnpWrite(byte *Addr,size_t Count)
 
 void ComprDataIO::ShowUnpRead(int64 ArcPos,int64 ArcSize)
 {
+  return;	// OPENMPT ADDITION
   if (ShowProgress && SrcFile!=NULL)
   {
     if (TotalArcSize!=0)

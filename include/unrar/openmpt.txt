@@ -1,0 +1,16 @@
+This folder is based on http://www.rarlab.com/rar/unrarsrc-5.0.12.tar.gz
+
+All modifications to existing files have been done in a manner so that no
+existing lines were edited; only new lines were added.
+Added lines can be found by looking for "// OPENMPT ADDITION" comments.
+
+The most important modifications have been done in file.cpp / file.hpp to allow
+memory-based files (using OpenMPT's own FileReader class).
+In other files, optimizations have been done to elimiate dead code that would
+never be used in OpenMPT's context.
+
+The following files have been modified:
+arcread.cpp, extract.cpp, filcreat.cpp, file.hpp, file.cpp, filefn.cpp,
+find.cpp, match.cpp, pathfn.cpp, rar.hpp, rdwrfn.cpp, secpassword.cpp,
+volume.cpp, win32acl.cpp, win32lnk.cpp
+The file openmpt.hpp has been added.
