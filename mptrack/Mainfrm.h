@@ -14,7 +14,6 @@
 #include "InputHandler.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/mutex.h"
-#include "../sounddev/SoundDevice.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/Dither.h"
 

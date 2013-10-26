@@ -15,7 +15,6 @@
 #include "moddoc.h"
 #include "globals.h"
 #include "Dlsbank.h"
-#include "../sounddev/SoundDevice.h"
 #include "vstplug.h"
 #include "CreditStatic.h"
 #include "commctrl.h"

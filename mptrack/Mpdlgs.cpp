@@ -17,7 +17,7 @@
 #include "moptions.h"
 #include "moddoc.h"
 #include "../sounddev/SoundDevice.h"
-#include ".\mpdlgs.h"
+#include "mpdlgs.h"
 #include "../common/StringFixer.h"
 
 #define str_preampChangeNote GetStrI18N(_TEXT("Note: The Pre-Amp setting affects sample volume only. Changing it may cause undesired effects on volume balance between sample based instruments and plugin instruments.\nIn other words: Don't touch this slider unless you know what you are doing."))
