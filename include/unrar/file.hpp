@@ -3,7 +3,7 @@
 
 struct RARFileCallbacks;	// OPENMPT ADDITION
 typedef RARFileCallbacks* FileHandle;	// OPENMPT ADDITION
-#define BAD_HANDLE nullptr	// OPENMPT ADDITION
+#define BAD_HANDLE NULL	// OPENMPT ADDITION
 
 /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
