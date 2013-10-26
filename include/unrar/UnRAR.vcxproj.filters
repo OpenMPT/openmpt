@@ -359,5 +359,8 @@
     <ClInclude Include="openmpt.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="openmpt-callback.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

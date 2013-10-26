@@ -1,8 +1,8 @@
 #ifndef _RAR_FILE_
 #define _RAR_FILE_
 
-class FileReader;	// OPENMPT ADDITION
-typedef FileReader* FileHandle;	// OPENMPT ADDITION
+struct RARFileCallbacks;	// OPENMPT ADDITION
+typedef RARFileCallbacks* FileHandle;	// OPENMPT ADDITION
 #define BAD_HANDLE nullptr	// OPENMPT ADDITION
 
 /*	// OPENMPT ADDITION

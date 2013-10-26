@@ -18,6 +18,7 @@ class CRarArchive : public ArchiveBase
 //====================================
 {
 protected:
+	friend struct RARData;
 	RARData *rarData;
 
 public:
@@ -25,6 +26,4 @@ public:
 	virtual ~CRarArchive();
 	
 	virtual bool ExtractFile(std::size_t index);
-
-	void WriteData(const char *d, size_t s);
 };
