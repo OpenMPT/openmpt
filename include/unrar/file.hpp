@@ -1,6 +1,11 @@
 #ifndef _RAR_FILE_
 #define _RAR_FILE_
 
+class FileReader;	// OPENMPT ADDITION
+typedef FileReader* FileHandle;	// OPENMPT ADDITION
+#define BAD_HANDLE nullptr	// OPENMPT ADDITION
+
+/*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
 typedef HANDLE FileHandle;
 #define BAD_HANDLE INVALID_HANDLE_VALUE
@@ -8,6 +13,7 @@ typedef HANDLE FileHandle;
 typedef FILE* FileHandle;
 #define BAD_HANDLE NULL
 #endif
+*/	// OPENMPT ADDITION
 
 class RAROptions;
 

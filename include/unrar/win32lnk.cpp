@@ -105,6 +105,8 @@ void GetReparsePoint(const wchar *Name,FileHeader *hd)
 
 bool CreateReparsePoint(CommandData *Cmd,const wchar *Name,FileHeader *hd)
 {
+  return false;	// OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
   static bool PrivSet=false;
   if (!PrivSet)
   {
@@ -233,4 +235,5 @@ bool CreateReparsePoint(CommandData *Cmd,const wchar *Name,FileHeader *hd)
   if (!Cmd->IgnoreGeneralAttr)
     SetFileAttr(Name,hd->FileAttr);
   return true;
+  */	// OPENMPT ADDITION
 }

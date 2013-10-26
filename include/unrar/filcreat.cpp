@@ -7,6 +7,7 @@ bool FileCreate(RAROptions *Cmd,File *NewFile,wchar *Name,size_t MaxNameSize,
                 OVERWRITE_MODE Mode,bool *UserReject,int64 FileSize,
                 RarTime *FileTime,bool WriteOnly)
 {
+  return true;	// OPENMPT ADDITION
   if (UserReject!=NULL)
     *UserReject=false;
 #ifdef _WIN_ALL
@@ -113,6 +114,7 @@ bool FileCreate(RAROptions *Cmd,File *NewFile,wchar *Name,size_t MaxNameSize,
 
 bool GetAutoRenamedName(wchar *Name,size_t MaxNameSize)
 {
+  return true;	// OPENMPT ADDITION
   wchar NewName[NM];
   if (wcslen(Name)>ASIZE(NewName)-10)
     return false;

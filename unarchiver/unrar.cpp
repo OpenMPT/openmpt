@@ -1,119 +1,152 @@
+/*
+ * unrar.cpp
+ * ---------
+ * Purpose: Implementation file for extracting modules from .rar archives
+ * Notes  : Based on modified UnRAR library to support in-memory files.
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
 #include "stdafx.h"
-
-#include "windows.h"
-#include "windowsx.h"
 #include "unrar.h"
 
-#define SEEK_SET	0
-#define SEEK_CUR	1
-#define SEEK_END	2
-
-#include "unrar/const.h"
-#include "unrar/global.cpp"
-#include "unrar/rdwrfn.cpp"
-#include "unrar/smallfn.cpp"
-#include "unrar/block.cpp"
-#include "unrar/extract.cpp"
-#include "unrar/compr.cpp"
+#if MPT_COMPILER_MSVC
+// Disable "unreferenced formal parameter" and type conversion warnings
+#pragma warning(disable:4100; disable:4244)
+#endif
+#include "../include/unrar/rar.hpp"
+#if MPT_COMPILER_MSVC
+#pragma warning(default:4100; default:4244)
+#endif
 
 
-
-CRarArchive::CRarArchive(LPBYTE lpStream, DWORD dwMemLength)
-//----------------------------------------------------------
+struct RARData
 {
-	// File Read
-	m_lpStream = lpStream;
-	m_dwStreamLen = dwMemLength;
-	m_dwStreamPos = 0;
-	// File Write
-	m_lpOutputFile = 0;
-	m_dwOutputPos = 0;
-	m_dwOutputLen = 0;
-	// init
-	InitCRC();
+	CommandData Cmd;
+	Archive Arc;
+	int64 firstBlock;
+
+	RARData() : Arc(&Cmd) { }
+};
+
+
+static int CALLBACK ProcessRARDataProc(unsigned int msg, LPARAM userData, LPARAM p1, LPARAM p2)
+//---------------------------------------------------------------------------------------------
+{
+	if(msg == UCM_PROCESSDATA)
+	{
+		// Receive extracted data
+		CRarArchive *that = reinterpret_cast<CRarArchive *>(userData);
+		that->WriteData(reinterpret_cast<const char *>(p1), p2);
+		return 1;
+	}
+	// No support for passwords or volumes
+	return 0;
+}
+
+
+void CRarArchive::WriteData(const char *d, size_t s)
+//--------------------------------------------------
+{
+	data.insert(data.end(), d, d + s);
+}
+
+
+CRarArchive::CRarArchive(FileReader &file) : ArchiveBase(file)
+//------------------------------------------------------------
+{
+	rarData = new (std::nothrow) RARData();
+	if(rarData == nullptr)
+	{
+		return;
+	}
+
+	try
+	{
+		rarData->Cmd.FileArgs.AddString(MASKALL);
+		rarData->Cmd.VersionControl = 1;
+
+		rarData->Arc.Open(reinterpret_cast<wchar *>(&inFile), 0);
+		if(!rarData->Arc.IsArchive(false))
+		{
+			return;
+		}
+
+		// Read comment
+		Array<wchar> rarComment;
+		if(rarData->Arc.GetComment(&rarComment))
+		{
+			comment = mpt::String::Encode(std::wstring(&rarComment[0], rarComment.Size()), mpt::CharsetLocale);
+		}
+
+		// Scan all files
+		rarData->firstBlock = rarData->Arc.Tell();
+		while(rarData->Arc.SearchBlock(HEAD_FILE) > 0)
+		{
+			ArchiveFileInfo fileInfo;
+			fileInfo.name = mpt::String::Encode(rarData->Arc.FileHead.FileName, mpt::CharsetLocale);
+			fileInfo.type = ArchiveFileNormal;
+			fileInfo.size = rarData->Arc.FileHead.UnpSize;
+			contents.push_back(fileInfo);
+
+			rarData->Arc.SeekToNext();
+		}
+	} catch(RAR_EXIT)
+	{
+	}
 }
 
 
 CRarArchive::~CRarArchive()
 //-------------------------
 {
-	if (UnpMemory)
-	{
-		delete UnpMemory;
-		UnpMemory=NULL;
-	}
-	if (m_lpOutputFile)
-	{
-		GlobalFreePtr(m_lpOutputFile);
-		m_lpOutputFile = NULL;
-	}
+	delete rarData;
 }
 
 
-BOOL CRarArchive::IsArchive()
-//---------------------------
+bool CRarArchive::ExtractFile(std::size_t index)
+//----------------------------------------------
 {
-	struct MarkHeader MarkHead;
-	int SFXLen,ArcType;
-  
-	SFXLen=ArcType=SolidType=LockedType=0;
-	ArcFormat=0;
-
-	tseek(0, SEEK_SET);
-	if (tread(MarkHead.Mark,SIZEOF_MARKHEAD)!=SIZEOF_MARKHEAD) return FALSE;
-	if (MarkHead.Mark[0]==0x52 && MarkHead.Mark[1]==0x45 &&
-		MarkHead.Mark[2]==0x7e && MarkHead.Mark[3]==0x5e)
+	if(index >= contents.size())
 	{
-		ArcFormat=OLD;
-		tseek(0,SEEK_SET);
-		ReadHeader(MAIN_HEAD);
-		ArcType=(OldMhd.Flags & MHD_MULT_VOL) ? VOL : ARC;
-	} else
-	if (MarkHead.Mark[0]==0x52 && MarkHead.Mark[1]==0x61 &&
-		MarkHead.Mark[2]==0x72 && MarkHead.Mark[3]==0x21 &&
-		MarkHead.Mark[4]==0x1a && MarkHead.Mark[5]==0x07 &&
-		MarkHead.Mark[6]==0x00)
-	{
-		ArcFormat=NEW;
-		if (ReadHeader(MAIN_HEAD)!=SIZEOF_NEWMHD) return FALSE;
-		ArcType = (NewMhd.Flags & MHD_MULT_VOL) ? VOL : ARC;
+		return false;
 	}
-	if (ArcFormat==OLD)
+
+	try
 	{
-		MainHeadSize=SIZEOF_OLDMHD;
-		NewMhd.Flags=OldMhd.Flags & 0x3f;
-		NewMhd.HeadSize=OldMhd.HeadSize;
-	} else
-	{
-		MainHeadSize=SIZEOF_NEWMHD;
-		if ((UWORD)~HeaderCRC!=NewMhd.HeadCRC)
+		// Rewind...
+		rarData->Arc.Seek(rarData->firstBlock, SEEK_SET);
+		CmdExtract Extract(&rarData->Cmd);
+		Extract.ExtractArchiveInit(&rarData->Cmd, rarData->Arc);
+
+		// Don't extract, only test (and use the callback function for writing our data)
+		rarData->Cmd.Test = true;
+		rarData->Cmd.DllOpMode = RAR_TEST;
+		rarData->Cmd.Callback = nullptr;
+		rarData->Cmd.UserData = reinterpret_cast<LPARAM>(this);
+
+		bool repeat = false;
+		size_t headerSize;
+		do
 		{
-			// Warning
-			return FALSE; //?
-		}
-	}
-	if (NewMhd.Flags & MHD_SOLID) SolidType=1;
-	if (NewMhd.Flags & MHD_LOCK) LockedType=1;
-	return (ArcType) ? TRUE : FALSE;
-}
+			headerSize = rarData->Arc.SearchBlock(HEAD_FILE);
+			ASSERT(headerSize);
+			if(rarData->Arc.Solid && index)
+			{
+				// Skip solid files
+				Extract.ExtractCurrentFile(&rarData->Cmd, rarData->Arc, headerSize, repeat);
+			}
+			rarData->Arc.SeekToNext();
+		} while(index--);
 
-
-
-void CRarArchive::UnstoreFile()
-//-----------------------------
-{
-	int Code;
-	while (1)
+		// Extract real file
+		data.clear();
+		data.reserve(static_cast<size_t>(rarData->Arc.FileHead.UnpSize));
+		rarData->Cmd.Callback = ProcessRARDataProc;
+		Extract.ExtractCurrentFile(&rarData->Cmd, rarData->Arc, headerSize, repeat);
+		return !data.empty();
+	} catch(...)
 	{
-		if ((Code=UnpRead(UnpMemory,0x7f00))==-1) return; // Read Error
-		if (Code==0) break;
-		Code=(int)Min((long)Code,DestUnpSize);
-		if (UnpWrite(UnpMemory,Code)==(UINT)-1) return; // Write error
-		if (DestUnpSize>=0) DestUnpSize-=Code;
+		return false;
 	}
 }
-
-
-
-
