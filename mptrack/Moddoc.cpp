@@ -1648,7 +1648,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	if ((!pMainFrm) || (!m_SndFile.GetType()) || encFactories.empty()) return;
 
-	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1, &m_SndFile, 0, encFactories);
+	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1, &m_SndFile, encFactories.size() > 2 ? 2 : 0, encFactories);
 	if (wsdlg.DoModal() != IDOK) return;
 
 	EncoderFactoryBase *encFactory = wsdlg.m_Settings.GetEncoderFactory();
@@ -1853,33 +1853,32 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 void CModDoc::OnFileMP3Convert()
 //------------------------------
 {
+	WAVEncoder wavencoder;
+	FLACEncoder flacencoder;
+	OggOpusEncoder opusencoder;
+	VorbisEncoder vorbisencoder;
 	MP3Encoder mp3lame(MP3EncoderLame);
 	MP3Encoder mp3blade(MP3EncoderBlade);
 	MP3Encoder mp3acm(MP3EncoderACM);
-	VorbisEncoder vorbisencoder;
-	OggOpusEncoder opusencoder;
-	FLACEncoder flacencoder;
-	WAVEncoder wavencoder;
 	std::vector<EncoderFactoryBase*> encoders;
+	if(wavencoder.IsAvailable())    encoders.push_back(&wavencoder);
+	if(flacencoder.IsAvailable())   encoders.push_back(&flacencoder);
+	if(opusencoder.IsAvailable())   encoders.push_back(&opusencoder);
+	if(vorbisencoder.IsAvailable()) encoders.push_back(&vorbisencoder);
 	if(mp3lame.IsAvailable())       encoders.push_back(&mp3lame);
 	if(mp3blade.IsAvailable())      encoders.push_back(&mp3blade);
 	if(mp3acm.IsAvailable())        encoders.push_back(&mp3acm);
-	if(vorbisencoder.IsAvailable()) encoders.push_back(&vorbisencoder);
-	if(opusencoder.IsAvailable())   encoders.push_back(&opusencoder);
-	if(flacencoder.IsAvailable())   encoders.push_back(&flacencoder);
-	if(wavencoder.IsAvailable())    encoders.push_back(&wavencoder);
-	if(encoders.empty())
+	if(encoders.size() == 2)
 	{
-		Reporting::Error(
-			"No MP3/Vorbis/Opus codec found.\n"
+		Reporting::Warning(
+			"No Opus/Vorbis/MP3 codec found.\n"
 			"Please copy\n"
-			" - libmp3lame.dll or Lame_Enc.dll\n"
-			" - Ogg Vorbis libraries\n"
 			" - Xipg.Org Opus libraries\n"
+			" - Ogg Vorbis libraries\n"
+			" - libmp3lame.dll or Lame_Enc.dll\n"
 			"into OpenMPT's root directory.\n"
 			"Alternatively, you can install a MP3 ACM codec.",
 			"OpenMPT - Export");
-		return;
 	}
 	OnFileWaveConvert(ORDERINDEX_INVALID, ORDERINDEX_INVALID, encoders);
 }
