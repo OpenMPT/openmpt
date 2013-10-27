@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup Label="ProjectConfigurations">
-		<ProjectConfiguration Include="DebugDLL|Win32">
-			<Configuration>DebugDLL</Configuration>
+		<ProjectConfiguration Include="Debug|Win32">
+			<Configuration>Debug</Configuration>
 			<Platform>Win32</Platform>
 		</ProjectConfiguration>
-		<ProjectConfiguration Include="DebugDLL|x64">
-			<Configuration>DebugDLL</Configuration>
+		<ProjectConfiguration Include="Debug|x64">
+			<Configuration>Debug</Configuration>
 			<Platform>x64</Platform>
 		</ProjectConfiguration>
-		<ProjectConfiguration Include="NormalDLL|Win32">
-			<Configuration>NormalDLL</Configuration>
+		<ProjectConfiguration Include="Normal|Win32">
+			<Configuration>Normal</Configuration>
 			<Platform>Win32</Platform>
 		</ProjectConfiguration>
-		<ProjectConfiguration Include="NormalDLL|x64">
-			<Configuration>NormalDLL</Configuration>
+		<ProjectConfiguration Include="Normal|x64">
+			<Configuration>Normal</Configuration>
 			<Platform>x64</Platform>
 		</ProjectConfiguration>
-		<ProjectConfiguration Include="ReleaseDLL|Win32">
-			<Configuration>ReleaseDLL</Configuration>
+		<ProjectConfiguration Include="Release|Win32">
+			<Configuration>Release</Configuration>
 			<Platform>Win32</Platform>
 		</ProjectConfiguration>
-		<ProjectConfiguration Include="ReleaseDLL|x64">
-			<Configuration>ReleaseDLL</Configuration>
+		<ProjectConfiguration Include="Release|x64">
+			<Configuration>Release</Configuration>
 			<Platform>x64</Platform>
 		</ProjectConfiguration>
 	</ItemGroup>
@@ -32,35 +32,35 @@
 		<Keyword>Win32Proj</Keyword>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="Configuration">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<CharacterSet>MultiByte</CharacterSet>
 		<UseDebugLibraries>true</UseDebugLibraries>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="Configuration">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<CharacterSet>MultiByte</CharacterSet>
 		<UseDebugLibraries>true</UseDebugLibraries>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'" Label="Configuration">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'" Label="Configuration">
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<CharacterSet>MultiByte</CharacterSet>
 		<WholeProgramOptimization>true</WholeProgramOptimization>
 		<UseDebugLibraries>false</UseDebugLibraries>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'" Label="Configuration">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Normal|x64'" Label="Configuration">
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<CharacterSet>MultiByte</CharacterSet>
 		<WholeProgramOptimization>true</WholeProgramOptimization>
 		<UseDebugLibraries>false</UseDebugLibraries>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="Configuration">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<CharacterSet>MultiByte</CharacterSet>
 		<WholeProgramOptimization>true</WholeProgramOptimization>
 		<UseDebugLibraries>false</UseDebugLibraries>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'" Label="Configuration">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
 		<ConfigurationType>DynamicLibrary</ConfigurationType>
 		<CharacterSet>MultiByte</CharacterSet>
 		<WholeProgramOptimization>true</WholeProgramOptimization>
@@ -69,59 +69,59 @@
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 	<ImportGroup Label="ExtensionSettings">
 	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="PropertySheets">
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="PropertySheets">
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'" Label="PropertySheets">
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'" Label="PropertySheets">
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Normal|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="PropertySheets">
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'" Label="PropertySheets">
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
 	<PropertyGroup Label="UserMacros" />
 	<PropertyGroup>
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">..\..\mptrack\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">obj\x32\DebugDLL\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">OpenMPT_SoundTouch_i16</TargetName>
-		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">false</IgnoreImportLibrary>
-		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">true</LinkIncremental>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">..\..\mptrack\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">obj\x64\DebugDLL\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">OpenMPT_SoundTouch_i1664</TargetName>
-		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">false</IgnoreImportLibrary>
-		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">true</LinkIncremental>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">..\..\mptrack\bin\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">obj\x32\NormalDLL\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">OpenMPT_SoundTouch_i16</TargetName>
-		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">false</IgnoreImportLibrary>
-		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">false</LinkIncremental>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">..\..\mptrack\bin\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">obj\x64\NormalDLL\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">OpenMPT_SoundTouch_i1664</TargetName>
-		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">false</IgnoreImportLibrary>
-		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">false</LinkIncremental>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">..\..\mptrack\bin\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">obj\x32\ReleaseDLL\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">OpenMPT_SoundTouch_i16</TargetName>
-		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">false</IgnoreImportLibrary>
-		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">false</LinkIncremental>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">..\..\mptrack\bin\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">obj\x64\ReleaseDLL\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">OpenMPT_SoundTouch_i1664</TargetName>
-		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">false</IgnoreImportLibrary>
-		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">false</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\mptrack\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">obj\x32\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">OpenMPT_SoundTouch_i16</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\mptrack\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">obj\x64\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">OpenMPT_SoundTouch_i1664</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">..\..\mptrack\bin\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">obj\x32\Normal\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">OpenMPT_SoundTouch_i16</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">false</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">..\..\mptrack\bin\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">obj\x64\Normal\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">OpenMPT_SoundTouch_i1664</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">false</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\mptrack\bin\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">obj\x32\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">OpenMPT_SoundTouch_i16</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\mptrack\bin\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">obj\x64\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">OpenMPT_SoundTouch_i1664</TargetName>
+		<IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</IgnoreImportLibrary>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
 	</PropertyGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
 			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -146,7 +146,7 @@
 			<TargetMachine>MachineX86</TargetMachine>
 		</Link>
 	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
 			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -171,7 +171,7 @@
 			<TargetMachine>MachineX64</TargetMachine>
 		</Link>
 	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|Win32'">
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
@@ -200,7 +200,7 @@
 			<TargetMachine>MachineX86</TargetMachine>
 		</Link>
 	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='NormalDLL|x64'">
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
@@ -229,7 +229,7 @@
 			<TargetMachine>MachineX64</TargetMachine>
 		</Link>
 	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
@@ -258,7 +258,7 @@
 			<TargetMachine>MachineX86</TargetMachine>
 		</Link>
 	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>

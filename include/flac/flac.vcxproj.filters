@@ -2,25 +2,25 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="src">
-			<UniqueIdentifier>{BBF2D14A-8E59-A544-9020-5934856C6448}</UniqueIdentifier>
+			<UniqueIdentifier>{C7DF4DA4-81D6-C14C-8755-F9F64D5469F8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\libFLAC">
-			<UniqueIdentifier>{D099BA2E-71AE-E749-9790-2E15124CFA84}</UniqueIdentifier>
+			<UniqueIdentifier>{18BBCF5D-DA3A-384A-8346-98F0C474457F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\libFLAC\include">
-			<UniqueIdentifier>{7BAE1380-58B5-F84A-84D3-435738E5A493}</UniqueIdentifier>
+			<UniqueIdentifier>{236E0FCD-E5F3-8F4B-B347-269E6B84A0D3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\libFLAC\include\private">
-			<UniqueIdentifier>{CD4927A6-4150-534C-A102-B7BEA298EB87}</UniqueIdentifier>
+			<UniqueIdentifier>{B61606EA-324C-1444-9095-1A0C8DFA0454}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\libFLAC\include\protected">
-			<UniqueIdentifier>{404C67D4-91D9-DD40-A9CA-655744FEB544}</UniqueIdentifier>
+			<UniqueIdentifier>{5362FF1D-ACAA-0B49-B0A8-B6888135580B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include">
-			<UniqueIdentifier>{D0B2E3C1-5592-6F4B-A6C8-B76AFC874957}</UniqueIdentifier>
+			<UniqueIdentifier>{1AD6DE94-BBD9-2D46-8047-02AE7ADDC671}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\FLAC">
-			<UniqueIdentifier>{EA0AFA08-1C54-3A49-B735-1CB0686E3C39}</UniqueIdentifier>
+			<UniqueIdentifier>{BB586A5B-E0AE-3B44-AEF2-7F5D54961ACB}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

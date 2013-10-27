@@ -19,9 +19,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DebugLib|Win32"
-			OutputDirectory="..\bin\DebugLib"
-			IntermediateDirectory="obj\x32\DebugLib\minizip"
+			Name="Debug|Win32"
+			OutputDirectory="..\bin\Debug"
+			IntermediateDirectory="obj\x32\Debug\minizip"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -68,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\DebugLib\zlib.lib"
+				AdditionalDependencies="..\bin\Debug\zlib.lib"
 				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
@@ -97,9 +97,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="DebugLib|x64"
-			OutputDirectory="..\bin\DebugLib"
-			IntermediateDirectory="obj\x64\DebugLib\minizip"
+			Name="Debug|x64"
+			OutputDirectory="..\bin\Debug"
+			IntermediateDirectory="obj\x64\Debug\minizip"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -147,7 +147,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\DebugLib\zlib64.lib"
+				AdditionalDependencies="..\bin\Debug\zlib64.lib"
 				OutputFile="$(OutDir)\minizip64.lib"
 			/>
 			<Tool
@@ -176,9 +176,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="NormalLib|Win32"
-			OutputDirectory="..\bin\NormalLib"
-			IntermediateDirectory="obj\x32\NormalLib\minizip"
+			Name="Normal|Win32"
+			OutputDirectory="..\bin\Normal"
+			IntermediateDirectory="obj\x32\Normal\minizip"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -226,7 +226,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\NormalLib\zlib.lib"
+				AdditionalDependencies="..\bin\Normal\zlib.lib"
 				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
@@ -255,9 +255,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="NormalLib|x64"
-			OutputDirectory="..\bin\NormalLib"
-			IntermediateDirectory="obj\x64\NormalLib\minizip"
+			Name="Normal|x64"
+			OutputDirectory="..\bin\Normal"
+			IntermediateDirectory="obj\x64\Normal\minizip"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -306,7 +306,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\NormalLib\zlib64.lib"
+				AdditionalDependencies="..\bin\Normal\zlib64.lib"
 				OutputFile="$(OutDir)\minizip64.lib"
 			/>
 			<Tool
@@ -335,9 +335,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseLib|Win32"
-			OutputDirectory="..\bin\ReleaseLib"
-			IntermediateDirectory="obj\x32\ReleaseLib\minizip"
+			Name="Release|Win32"
+			OutputDirectory="..\bin\Release"
+			IntermediateDirectory="obj\x32\Release\minizip"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -385,7 +385,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\ReleaseLib\zlib.lib"
+				AdditionalDependencies="..\bin\Release\zlib.lib"
 				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
@@ -414,9 +414,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseLib|x64"
-			OutputDirectory="..\bin\ReleaseLib"
-			IntermediateDirectory="obj\x64\ReleaseLib\minizip"
+			Name="Release|x64"
+			OutputDirectory="..\bin\Release"
+			IntermediateDirectory="obj\x64\Release\minizip"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -465,7 +465,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\ReleaseLib\zlib64.lib"
+				AdditionalDependencies="..\bin\Release\zlib64.lib"
 				OutputFile="$(OutDir)\minizip64.lib"
 			/>
 			<Tool

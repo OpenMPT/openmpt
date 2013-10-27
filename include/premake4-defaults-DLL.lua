@@ -3,17 +3,17 @@
    targetsuffix "64"
   
   configuration "Debug"
-   targetdir "bin/Debug"
+   targetdir "../mptrack/Debug"
   
   configuration "Normal"
-   targetdir "bin/Normal"
+   targetdir "../mptrack/bin"
   
   configuration "Release"
-   targetdir "bin/Release"
+   targetdir "../mptrack/bin"
   
   configuration "*"
-   kind "StaticLib"
-   
+   kind "SharedLib"
+
   configuration "Debug"
    defines { "DEBUG" }
    defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }

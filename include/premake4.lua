@@ -1,5 +1,5 @@
 solution "include"
- configurations { "DebugLib", "NormalLib", "ReleaseLib" }
+ configurations { "Debug", "Normal", "Release" }
  platforms { "x32", "x64" }
  
  
@@ -167,8 +167,6 @@ solution "include"
    "zlib/zlib.h",
    "zlib/zutil.h",
   }
-  configuration "*DLL"
-   defines { "ZLIB_DLL" }
   dofile "premake4-defaults.lua"
   
   
@@ -194,8 +192,6 @@ solution "include"
    "zlib/contrib/minizip/zip.h",
   }
   links { "zlib" }
-  configuration "*DLL"
-   defines { "ZLIB_DLL" }
   dofile "premake4-defaults.lua"
    
    
@@ -439,7 +435,7 @@ solution "include"
   
   
 solution "includeDLL"
- configurations { "DebugDLL", "NormalDLL", "ReleaseDLL" }
+ configurations { "Debug", "Normal", "Release" }
  platforms { "x32", "x64" }
  
  
@@ -479,7 +475,7 @@ solution "includeDLL"
    "soundtouch/TDStretch.h",
   }
   defines { "DLL_EXPORTS", "SOUNDTOUCH_INTEGER_SAMPLES=1" }
-  dofile "premake4-defaults.lua"
+  dofile "premake4-defaults-DLL.lua"
  
  
  
