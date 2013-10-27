@@ -68,7 +68,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\Debug\zlib.lib"
 				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
@@ -147,7 +146,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\Debug\zlib64.lib"
 				OutputFile="$(OutDir)\minizip64.lib"
 			/>
 			<Tool
@@ -226,7 +224,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\Normal\zlib.lib"
 				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
@@ -306,7 +303,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\Normal\zlib64.lib"
 				OutputFile="$(OutDir)\minizip64.lib"
 			/>
 			<Tool
@@ -385,7 +381,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\Release\zlib.lib"
 				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
@@ -465,7 +460,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\bin\Release\zlib64.lib"
 				OutputFile="$(OutDir)\minizip64.lib"
 			/>
 			<Tool
