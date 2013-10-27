@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="contrib">
-			<UniqueIdentifier>{A7A6C35B-FC64-4041-8591-58BE3A379CC4}</UniqueIdentifier>
+			<UniqueIdentifier>{1BB2F548-1289-E843-B652-270DBCB97ED6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="contrib\minizip">
-			<UniqueIdentifier>{0ED7D9B3-6736-724E-A30B-5FA858BDAF41}</UniqueIdentifier>
+			<UniqueIdentifier>{AEECBFB7-C5D9-D049-BAFE-735FBC7552B1}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

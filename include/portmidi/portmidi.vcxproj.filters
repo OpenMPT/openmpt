@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="porttime">
-			<UniqueIdentifier>{F06818CF-7722-8E45-B2BD-9B3984EB3412}</UniqueIdentifier>
+			<UniqueIdentifier>{B7F29323-3B38-D341-BB0E-0FBBC0926981}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="pm_common">
-			<UniqueIdentifier>{B7911BCA-4CCF-0D46-B849-76F62EAF72FB}</UniqueIdentifier>
+			<UniqueIdentifier>{A047E9D0-ADFC-8F42-B7CA-D41BACB10256}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="pm_win">
-			<UniqueIdentifier>{9C8C0E93-99E6-E44D-A2A0-507443729E9F}</UniqueIdentifier>
+			<UniqueIdentifier>{852A4948-7E76-6043-96A0-6C89E1681B3D}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

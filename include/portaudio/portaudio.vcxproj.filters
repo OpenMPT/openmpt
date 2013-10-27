@@ -2,34 +2,34 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="src">
-			<UniqueIdentifier>{89AF7C91-A5D1-2A4E-942C-FFAB8AF95B13}</UniqueIdentifier>
+			<UniqueIdentifier>{3CEDB898-0E1C-6846-87F2-A220F9076138}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\common">
-			<UniqueIdentifier>{4A501462-4267-E948-B690-BE4ACEA6E35E}</UniqueIdentifier>
+			<UniqueIdentifier>{9111EF3B-A753-1943-AE4F-98E42FD3DE30}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\os">
-			<UniqueIdentifier>{9880B775-7302-4946-B386-5D9F6D2C6164}</UniqueIdentifier>
+			<UniqueIdentifier>{7F894CAA-AE59-624D-A33B-F24C8E69F332}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\os\win">
-			<UniqueIdentifier>{9169CC4A-0027-234C-8955-7837FA67DE3A}</UniqueIdentifier>
+			<UniqueIdentifier>{41F309B7-93A9-7648-9DF1-4983A93CE502}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include">
-			<UniqueIdentifier>{23EF15D3-E62C-E44B-85E7-112A9FC19214}</UniqueIdentifier>
+			<UniqueIdentifier>{3009F5D7-7BE5-4349-9D4E-FC2CE7FDFD96}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi">
-			<UniqueIdentifier>{CEEEE102-882E-4F43-9600-01664B2C87AF}</UniqueIdentifier>
+			<UniqueIdentifier>{6C21D2C4-B5C4-0041-9B80-C0B740838870}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\skeleton">
-			<UniqueIdentifier>{C756382A-FB24-0040-B6FC-667EB21537D0}</UniqueIdentifier>
+			<UniqueIdentifier>{6A0EA374-3010-CA4D-B9CB-5B8ED69339A8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\wasapi">
-			<UniqueIdentifier>{CA573667-BA06-354A-B42A-441026B9CA83}</UniqueIdentifier>
+			<UniqueIdentifier>{361E7FF8-8642-0E4E-980A-7495EF8D7BF3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\wdmks">
-			<UniqueIdentifier>{7D195F48-9D17-6245-8106-32AE23076E95}</UniqueIdentifier>
+			<UniqueIdentifier>{665127BB-5690-3342-B0F6-63D5430AD35C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\hostapi\wmme">
-			<UniqueIdentifier>{F115BC14-4305-284D-9091-8F61E4B0EA3D}</UniqueIdentifier>
+			<UniqueIdentifier>{524E58E7-7E70-014B-AE87-B211C9708D8C}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
