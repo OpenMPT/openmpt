@@ -1,0 +1,144 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MYPREFERENCES DIALOGEX 0, 0, 332, 288
+STYLE DS_SETFONT | WS_CHILD
+FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    RTEXT           "Bogo setting 1:",IDC_STATIC,44,60,59,8
+    EDITTEXT        IDC_BOGO1,104,58,40,12,ES_AUTOHSCROLL | ES_NUMBER
+    RTEXT           "Bogo setting 2:",IDC_STATIC,44,82,59,8
+    EDITTEXT        IDC_BOGO2,104,80,40,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "This is a sample preferences page with meaningless settings.",IDC_STATIC,52,24,204,8
+END
+
+IDD_PLAYBACK_STATE DIALOGEX 0, 0, 260, 95
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Playback State Demo"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Pattern:",IDC_STATIC,12,8,28,8
+    EDITTEXT        IDC_PATTERN,8,16,244,12,ES_AUTOHSCROLL
+    LTEXT           "State:",IDC_STATIC,12,36,21,8
+    EDITTEXT        IDC_STATE,8,44,244,12,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "Context menu test area - right click me",IDC_CONTEXTMENU,8,60,244,14
+    PUSHBUTTON      "Play",IDC_PLAY,12,76,36,14
+    PUSHBUTTON      "Pause",IDC_PAUSE,52,76,36,14
+    PUSHBUTTON      "Stop",IDC_STOP,92,76,36,14
+    PUSHBUTTON      "Prev",IDC_PREV,132,76,36,14
+    PUSHBUTTON      "Next",IDC_NEXT,172,76,36,14
+    PUSHBUTTON      "Rand",IDC_RAND,212,76,36,14
+END
+
+IDD_DSP DIALOGEX 0, 0, 284, 83
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Sample DSP Configuration"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,172,64,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,226,64,50,14
+    CONTROL         "",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,12,12,260,24
+    CTEXT           "N dB",IDC_SLIDER_LABEL,120,44,44,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_MYPREFERENCES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 325
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 281
+    END
+
+    IDD_PLAYBACK_STATE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 253
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_DSP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 277
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 76
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

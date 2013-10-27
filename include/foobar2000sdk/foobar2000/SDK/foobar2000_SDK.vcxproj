@@ -1,0 +1,335 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E8091321-D79D-4575-86EF-064EA1A4A20D}</ProjectGuid>
+    <RootNamespace>foobar2000_SDK</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>foobar2000.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>foobar2000.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MinSpace</Optimization>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_WIN32_WINNT=0x501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>foobar2000.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>foobar2000.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="abort_callback.h" />
+    <ClInclude Include="advconfig.h" />
+    <ClInclude Include="album_art.h" />
+    <ClInclude Include="app_close_blocker.h" />
+    <ClInclude Include="audio_chunk.h" />
+    <ClInclude Include="audio_postprocessor.h" />
+    <ClInclude Include="autoplaylist.h" />
+    <ClInclude Include="cfg_var.h" />
+    <ClInclude Include="chapterizer.h" />
+    <ClInclude Include="commandline.h" />
+    <ClInclude Include="completion_notify.h" />
+    <ClInclude Include="component.h" />
+    <ClInclude Include="componentversion.h" />
+    <ClInclude Include="config_io_callback.h" />
+    <ClInclude Include="config_object.h" />
+    <ClInclude Include="config_object_impl.h" />
+    <ClInclude Include="console.h" />
+    <ClInclude Include="contextmenu.h" />
+    <ClInclude Include="contextmenu_manager.h" />
+    <ClInclude Include="core_api.h" />
+    <ClInclude Include="coreversion.h" />
+    <ClInclude Include="decode_postprocessor.h" />
+    <ClInclude Include="dsp.h" />
+    <ClInclude Include="dsp_manager.h" />
+    <ClInclude Include="event_logger.h" />
+    <ClInclude Include="exceptions.h" />
+    <ClInclude Include="file_info.h" />
+    <ClInclude Include="file_info_impl.h" />
+    <ClInclude Include="file_operation_callback.h" />
+    <ClInclude Include="filesystem.h" />
+    <ClInclude Include="filesystem_helper.h" />
+    <ClInclude Include="foobar2000.h" />
+    <ClInclude Include="genrand.h" />
+    <ClInclude Include="hasher_md5.h" />
+    <ClInclude Include="http_client.h" />
+    <ClInclude Include="icon_remap.h" />
+    <ClInclude Include="info_lookup_handler.h" />
+    <ClInclude Include="initquit.h" />
+    <ClInclude Include="input.h" />
+    <ClInclude Include="input_file_type.h" />
+    <ClInclude Include="input_impl.h" />
+    <ClInclude Include="library_manager.h" />
+    <ClInclude Include="link_resolver.h" />
+    <ClInclude Include="main_thread_callback.h" />
+    <ClInclude Include="mem_block_container.h" />
+    <ClInclude Include="menu.h" />
+    <ClInclude Include="menu_helpers.h" />
+    <ClInclude Include="message_loop.h" />
+    <ClInclude Include="metadb.h" />
+    <ClInclude Include="metadb_handle.h" />
+    <ClInclude Include="modeless_dialog.h" />
+    <ClInclude Include="ole_interaction.h" />
+    <ClInclude Include="packet_decoder.h" />
+    <ClInclude Include="play_callback.h" />
+    <ClInclude Include="playable_location.h" />
+    <ClInclude Include="playback_control.h" />
+    <ClInclude Include="playback_stream_capture.h" />
+    <ClInclude Include="playlist.h" />
+    <ClInclude Include="playlist_loader.h" />
+    <ClInclude Include="popup_message.h" />
+    <ClInclude Include="preferences_page.h" />
+    <ClInclude Include="progress_meter.h" />
+    <ClInclude Include="replaygain.h" />
+    <ClInclude Include="replaygain_scanner.h" />
+    <ClInclude Include="resampler.h" />
+    <ClInclude Include="search_tools.h" />
+    <ClInclude Include="service.h" />
+    <ClInclude Include="service_impl.h" />
+    <ClInclude Include="system_time_keeper.h" />
+    <ClInclude Include="tag_processor.h" />
+    <ClInclude Include="threaded_process.h" />
+    <ClInclude Include="titleformat.h" />
+    <ClInclude Include="track_property.h" />
+    <ClInclude Include="ui.h" />
+    <ClInclude Include="ui_edit_context.h" />
+    <ClInclude Include="ui_element.h" />
+    <ClInclude Include="unpack.h" />
+    <ClInclude Include="vis.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="abort_callback.cpp" />
+    <ClCompile Include="advconfig.cpp" />
+    <ClCompile Include="album_art.cpp" />
+    <ClCompile Include="app_close_blocker.cpp" />
+    <ClCompile Include="audio_chunk.cpp" />
+    <ClCompile Include="audio_chunk_channel_config.cpp" />
+    <ClCompile Include="cfg_var.cpp" />
+    <ClCompile Include="chapterizer.cpp" />
+    <ClCompile Include="commandline.cpp" />
+    <ClCompile Include="completion_notify.cpp" />
+    <ClCompile Include="config_object.cpp" />
+    <ClCompile Include="console.cpp">
+    </ClCompile>
+    <ClCompile Include="dsp.cpp">
+    </ClCompile>
+    <ClCompile Include="dsp_manager.cpp">
+    </ClCompile>
+    <ClCompile Include="file_info.cpp">
+    </ClCompile>
+    <ClCompile Include="file_info_impl.cpp">
+    </ClCompile>
+    <ClCompile Include="file_info_merge.cpp">
+    </ClCompile>
+    <ClCompile Include="file_operation_callback.cpp">
+    </ClCompile>
+    <ClCompile Include="filesystem.cpp">
+    </ClCompile>
+    <ClCompile Include="filesystem_helper.cpp">
+    </ClCompile>
+    <ClCompile Include="guids.cpp">
+    </ClCompile>
+    <ClCompile Include="hasher_md5.cpp">
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+    </ClCompile>
+    <ClCompile Include="input_file_type.cpp" />
+    <ClCompile Include="link_resolver.cpp" />
+    <ClCompile Include="mainmenu.cpp" />
+    <ClCompile Include="mem_block_container.cpp" />
+    <ClCompile Include="menu_helpers.cpp">
+    </ClCompile>
+    <ClCompile Include="menu_item.cpp">
+    </ClCompile>
+    <ClCompile Include="menu_manager.cpp">
+    </ClCompile>
+    <ClCompile Include="metadb.cpp">
+    </ClCompile>
+    <ClCompile Include="metadb_handle.cpp">
+    </ClCompile>
+    <ClCompile Include="metadb_handle_list.cpp">
+    </ClCompile>
+    <ClCompile Include="packet_decoder.cpp">
+    </ClCompile>
+    <ClCompile Include="playable_location.cpp">
+    </ClCompile>
+    <ClCompile Include="playback_control.cpp">
+    </ClCompile>
+    <ClCompile Include="playlist.cpp">
+    </ClCompile>
+    <ClCompile Include="playlist_loader.cpp">
+    </ClCompile>
+    <ClCompile Include="popup_message.cpp">
+    </ClCompile>
+    <ClCompile Include="preferences_page.cpp" />
+    <ClCompile Include="replaygain.cpp">
+    </ClCompile>
+    <ClCompile Include="replaygain_info.cpp">
+    </ClCompile>
+    <ClCompile Include="service.cpp">
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="tag_processor.cpp">
+    </ClCompile>
+    <ClCompile Include="tag_processor_id3v2.cpp">
+    </ClCompile>
+    <ClCompile Include="threaded_process.cpp">
+    </ClCompile>
+    <ClCompile Include="titleformat.cpp">
+    </ClCompile>
+    <ClCompile Include="ui.cpp">
+    </ClCompile>
+    <ClCompile Include="ui_element.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
