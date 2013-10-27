@@ -526,13 +526,9 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		if ((pEffect) && (pEffect->dispatcher) && (pEffect->magic == kDmoMagic))
 		{
 			bool result = false;
-
-			CriticalSection cs;
-
-			CVstPlugin *pVstPlug = new CVstPlugin(NULL, *pFound, mixPlugin, *pEffect, sndFile);
+			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(NULL, *pFound, mixPlugin, *pEffect, sndFile);
 			if(pVstPlug)
 			{
-				pVstPlug->Initialize();
 				result = true;
 			}
 			return result;
@@ -581,8 +577,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 		try
 		{
-			CriticalSection cs;
-
 			LoadPlugin(pFound->szDllPath, pEffect, hLibrary);
 
 			if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == kEffectMagic)
@@ -604,8 +598,11 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 					CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, pFound->EncodeCacheFlags(), cacheFile);
 				}
 
-				CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
-				if (pVstPlug) pVstPlug->Initialize();
+				CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
+				if(pVstPlug == nullptr)
+				{
+					validPlugin = false;
+				}
 			}
 
 			if(!validPlugin)
@@ -1289,14 +1286,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	m_nEditorX = m_nEditorY = -1;
 	m_pProcessFP = nullptr;
 
-	// Insert ourselves in the beginning of the list
-	m_pNext = m_Factory.pPluginsList;
-	if(m_Factory.pPluginsList)
-	{
-		m_Factory.pPluginsList->m_pPrev = this;
-	}
-	m_Factory.pPluginsList = this;
-
 	m_MixState.dwFlags = 0;
 	m_MixState.nVolDecayL = 0;
 	m_MixState.nVolDecayR = 0;
@@ -1313,6 +1302,21 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	{
 		m_MidiCh[ch].midiPitchBendPos = EncodePitchBendParam(MIDIEvents::pitchBendCentre); // centre pitch bend on all channels
 	}
+
+	// Update Mix structure
+	m_pMixStruct->pMixState = &m_MixState;
+	// Open plugin and initialize data structures
+	Initialize();
+	// Now we should be ready to go
+	m_pMixStruct->pMixPlugin = this;
+
+	// Insert ourselves in the beginning of the list
+	m_pNext = m_Factory.pPluginsList;
+	if(m_Factory.pPluginsList)
+	{
+		m_Factory.pPluginsList->m_pPrev = this;
+	}
+	m_Factory.pPluginsList = this;
 }
 
 
@@ -1331,7 +1335,7 @@ void CVstPlugin::Initialize()
 
 	Dispatch(effOpen, 0, 0, nullptr, 0.0f);
 	// VST 2.0 plugins return 2 here, VST 2.4 plugins return 2400... Great!
-	m_bIsVst2 = (CVstPlugin::Dispatch(effGetVstVersion, 0,0, nullptr, 0.0f) >= 2);
+	m_bIsVst2 = Dispatch(effGetVstVersion, 0,0, nullptr, 0.0f) >= 2;
 	if (m_bIsVst2)
 	{
 		// Set VST speaker in/out setup to Stereo. Required for some plugins (possibly all VST 2.4+ plugins?)
@@ -1403,14 +1407,7 @@ void CVstPlugin::Initialize()
 		m_Factory.szLibraryName, (m_bIsVst2) ? 2 : 1, m_Effect.flags,
 		m_Effect.numPrograms, m_Effect.numParams);
 #endif
-	// Update Mix structure
-	if (m_pMixStruct)
-	{
-		m_pMixStruct->pMixPlugin = this;
-		m_pMixStruct->pMixState = &m_MixState;
-	}
 
-	//rewbs.VSTcompliance
 	m_bIsInstrument = isInstrument();
 	RecalculateGain();
 	m_pProcessFP = (m_Effect.flags & effFlagsCanReplacing) ? m_Effect.processReplacing : m_Effect.process;
