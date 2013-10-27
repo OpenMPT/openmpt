@@ -191,7 +191,6 @@ solution "include"
    "zlib/contrib/minizip/unzip.h",
    "zlib/contrib/minizip/zip.h",
   }
-  links { "zlib" }
   dofile "premake4-defaults.lua"
    
    
