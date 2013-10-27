@@ -1,0 +1,2 @@
+This directory containts the contents of the foobar2000 SDK 1.1. (SDK-2011-03-11.zip).
+No modifications have been made for OpenMPT.
