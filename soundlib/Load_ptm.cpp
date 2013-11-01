@@ -194,7 +194,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading Patterns
-	if(!(loadFlags && loadPatternData))
+	if(!(loadFlags & loadPatternData))
 	{
 		return true;
 	}
