@@ -25,26 +25,80 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.22.06.00 (2 November 2013, revision 3063)
+--------------------------------------------
+Pattern Tab::Note Properties
+   [Fix] <js> IT / S3M volume slide mapping was a bit off.
+
+Tree view
+   [Fix] <js> Note-off on key-up was accidentally also applied to the lower part of the tree view.
+
+VST / DMO Plugins
+   [Imp] <js> Audio is longer paused while a plugin is loaded.
+   [Fix] <js> SysEx messages are sent to plugins in a different way now. This fixes SysEx messages sent through OpenMPT's MIDI Input / Output plugin.
+
+MPTM::Loading
+   [Fix] <js> Loading MPTM files made with older versions of OpenMPT could trash some Parameter Control parameters.
+   [Fix] <js> Reading extended instrument and song properties in files with no samples was broken for the I-don't-know-how-manieth-time (also applies to IT files).
+
+IT::Compatible Playback Mode
+   [Fix] <js> In Compatible Gxx mode, sliding between two different samples shouldn't switch to the new sample (like in XM).
+
+XM::Loading
+   [Imp] <js> Don't enable smooth ramping heuristic for old XM revisions (this feature was introduced in a later version of Fasttracker 2).
+
+MOD::Loading
+   [Imp] <js> When loading SoundTracker modules, automatically enable ProTracker 1.x mode.
+   [Imp] <js> Re-enabled support for ADPCM-compressed samples.
+
+Other formats
+   [Imp] <js> Updated RAR unpacker. All RAR formats up to the current RAR 5.0 are now supported.
+   [Imp] <js> DBM: Support for panning envelopes, 32-bit samples, pattern names, multiple songs and various other small improvements.
+   [Imp] <js> Added support for AMS (Velvet Studio) format revision 2.0.
+   [Fix] <js> AMS (Velvet Studio): Default speed and tempo broke in OpenMPT 1.22.03.00. Instrument fadeout was too quick. Vibrato Envelope is now imported more correctly.
+   [Fix] <js> AMS (Extreme's Tracker): 16-bit sample support was broken.
+   [Fix] <js> DSM: Fixed broken patterns and added support for delta-encoded samples.
+   [Fix] <jh> Loading some malformed files in various format could lead to a crash (introduced in OpenMPT 1.22.03.00).
+   [Fix] <jh> WAV Loader: Loading 24-/32-bit WAV files as module crashed since (introduced in OpenMPT 1.22.04.00, http://bugs.openmpt.org/view.php?id=436).
+
+Misc
+   [New] <jh> Added support for Kernel Streaming sound output on Windows XP and for WaveRT on Vista or newer. Both drivers are listed as "WDM-KS" in the soundcard options dialog.
+   [New] <jh> Added a button to re-enumerate sound devices to soundcard options dialog. This allows selecting sound devices that got added / installed while OpenMPT was already running.
+   [New] <jh> Use a common dialog for WAV and compressed exporting. Support for FLAC (built-in), OGG and Opus added.
+   [New] <jh> WAV export also supports tags now.
+   [New] <jh> Can now also normalize audio during compressed export (via temporary file).
+   [New] <js> Added option to clean output buffers of plugins before exporting (renders up to 20 seconds of silence per plugin, http://bugs.openmpt.org/view.php?id=19).
+   [New] <jh> Added option to disable cue point writing on pattern transitions in WAV export (http://forum.openmpt.org/index.php?topic=5131.0).
+   [New] <js> Added command-line option /fullMemDump to write a minidump with heap when OpenMPT crashes.
+   [Imp] <jh> Removed static limit of 16 DirectSound and 8 ASIO devices.
+   [Imp] <jh> Limit WFIR cutoff setting to a sensible range.
+   [Mod] <jh> Calculate mixer channel statistics over the interval as maximum used channels instead of a approximation of average used channels.
+   [Mod] <jh> Remove /wavex command line option (not relevant anymore on any of the supported Windows versions)
+   [Mod] <jh> Always default or fallback to a Wave Out device which is by far the most stable and has the least suprising user experience.
+   [Mod] <jh> Slightly changed audio thread code to avoid sporadic deadlocks in Wine.
+   [Fix] <jh> All Loaders: When loading modules from a ZIP file, no longer overwrite existing song comments with ZIP file comments (broke in OpenMPT 1.22.02.00).
+
+
 v1.22.05.00 (31 August 2013, revision 2622)
 -------------------------------------------
 General Tab
-   [Imp] <js> Effect parameters are now also updated while dragging the corresponding slider (tx madbrain).
+   [Imp] <js> Plugin parameters are now also updated while dragging the corresponding slider (tx madbrain).
 
 Sample Editor
    [Imp] <js> Don't limit size of loaded sample file to the size of physical memory (old code relict).
 
 Instrument Editor
-   [Imp] <js> Also show FLAC files when loading instruments in instrument view.
+   [Imp] <js> FLAC files are also shown in the file selection dialog.
 
 Tree view
    [New] <js> Can now drag and drop samples / instruments between modules (tx madbrain).
    [Imp] <js> Releasing note keys now also stops sample / instrument previews (tx madbrain).
-   [Fix] <js> Previewing sound font instruments in the treeview broke in OpenMPT 1.22.04.00.
+   [Fix] <js> Previewing sound font instruments in the treeview broke in OpenMPT 1.22.04.00 (http://bugs.openmpt.org/view.php?id=429).
    [Fix] <js> Trying to rename items that are not part of a song folder crashed the application.
    [Fix] <js> Adding and renaming sequences didn't update the tree view properly.
 
 Playback
-   [Fix] <js> Fine / extra fine portamento slides in IT / S3M with a parameter of 0 were broken in OpenMPT 1.22.04.00.
+   [Fix] <js> Fine / extra fine portamento slides in IT / S3M with a parameter of 0 were broken in OpenMPT 1.22.04.00 (http://bugs.openmpt.org/view.php?id=433).
 
 Other formats
    [Fix] <jh> DSM: Support files that start with a slightly different header than usual DSM files (http://forum.openmpt.org/index.php?topic=5091).
@@ -71,7 +125,7 @@ Sample Editor
    [Fix] <jh> Reduce quantization noise by correcting the rounding and scaling in floating point conversion and float or 24-/32-Bit normalization when loading such WAV samples.
 
 Tree view
-   [Imp] <js> Can now load more than 64 soundfonts.
+   [Imp] <js> Can now load more than 64 soundfonts (http://bugs.openmpt.org/view.php?id=333).
    [Fix] <js> Fixed a rare crash when switching between previewed files in tree view (probably present since OpenMPT 1.22.01).
    [Fix] <js> Fixed various issues with editing sequence / instrument / pattern names.
 
