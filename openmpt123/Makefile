@@ -335,17 +335,17 @@ bin/openmpt123$(EXESUFFIX): $(OPENMPT123_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(OPENMPT123_OBJECTS) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
-bin/libopenmpt_example_c$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_example_c.o $(OUTPUT_LIBOPENMPT)
+bin/libopenmpt_example_c$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_c.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(OBJECTS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_c.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
-bin/libopenmpt_example_c_mem$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_example_c_mem.o $(OUTPUT_LIBOPENMPT)
+bin/libopenmpt_example_c_mem$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_c_mem.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(OBJECTS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_c_mem.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
-bin/libopenmpt_example_cxx$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_example_cxx.o $(OUTPUT_LIBOPENMPT)
+bin/libopenmpt_example_cxx$(EXESUFFIX): ../libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_cxx.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(OBJECTS_LIBOPENMPT) ../libopenmpt/examples/libopenmpt_example_cxx.o $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
 ifeq ($(HOST),windows)
 clean:
