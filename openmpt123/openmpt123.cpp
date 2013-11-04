@@ -388,7 +388,7 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 
 static void show_help_keyboard( textout & log ) {
 	show_info( log, false );
-	log << "Keyboard hotkeys (use 'openmpt --ui'):" << std::endl;
+	log << "Keyboard hotkeys (use 'openmpt123 --ui'):" << std::endl;
 	log << std::endl;
 	log << " [q]     quit" << std::endl;
 	log << " [N]     skip 10 files backward" << std::endl;
