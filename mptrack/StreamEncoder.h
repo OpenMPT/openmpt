@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "Settings.h"
+
 #include "soundlib/Tagging.h"
 #include "soundlib/SampleFormat.h"
 
@@ -75,12 +77,42 @@ namespace Encoder
 		ModeInvalid    = 0
 	};
 
+} // namespace Encoder
+
+template<> inline SettingValue ToSettingValue(const Encoder::Mode &val)
+{
+	switch(val)
+	{
+		case Encoder::ModeCBR: return SettingValue("CBR", "Encoder::Mode"); break;
+		case Encoder::ModeABR: return SettingValue("ABR", "Encoder::Mode"); break;
+		case Encoder::ModeVBR: return SettingValue("VBR", "Encoder::Mode"); break;
+		case Encoder::ModeQuality: return SettingValue("Quality", "Encoder::Mode"); break;
+		case Encoder::ModeEnumerated: return SettingValue("Enumerated", "Encoder::Mode"); break;
+		default: return SettingValue("Invalid", "Encoder::Mode"); break;
+	}
+}
+template<> inline Encoder::Mode FromSettingValue(const SettingValue &val)
+{
+	ASSERT(val.GetTypeTag() == "Encoder::Mode");
+	if(val.as<std::string>() == "") { return Encoder::ModeInvalid; }
+	else if(val.as<std::string>() == "CBR") { return Encoder::ModeCBR; }
+	else if(val.as<std::string>() == "ABR") { return Encoder::ModeABR; }
+	else if(val.as<std::string>() == "VBR") { return Encoder::ModeVBR; }
+	else if(val.as<std::string>() == "Quality") { return Encoder::ModeQuality; }
+	else if(val.as<std::string>() == "Enumerated") { return Encoder::ModeEnumerated; }
+	else { return Encoder::ModeInvalid; }
+}
+
+namespace Encoder
+{
+
 	struct Traits
 	{
 		
 		std::string fileExtension;
 		std::string fileDescription;
 		std::string fileShortDescription;
+		std::string encoderSettingsName;
 		std::string encoderName;
 		std::string description;
 
@@ -126,26 +158,26 @@ namespace Encoder
 	struct Settings
 	{
 		
-		bool Cues;
-		bool Tags;
+		Setting<bool> Cues;
+		Setting<bool> Tags;
 
-		uint32 Samplerate;
-		uint16 Channels;
+		Setting<uint32> Samplerate;
+		Setting<uint16> Channels;
 
-		Encoder::Mode Mode;
-		int Bitrate;
-		float Quality;
-		int Format;
+		Setting<Encoder::Mode> Mode;
+		Setting<int> Bitrate;
+		Setting<float> Quality;
+		Setting<int> Format;
 		
-		Settings(bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format)
-			: Cues(cues)
-			, Tags(tags)
-			, Samplerate(samplerate)
-			, Channels(channels)
-			, Mode(mode)
-			, Bitrate(bitrate)
-			, Quality(quality)
-			, Format(format)
+		Settings(SettingsContainer &conf, const std::string &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format)
+			: Cues(conf, "Export", encoderName + "_" + "Cues", cues)
+			, Tags(conf, "Export", encoderName + "_" + "Tags", tags)
+			, Samplerate(conf, "Export", encoderName + "_" + "Samplerate", samplerate)
+			, Channels(conf, "Export", encoderName + "_" + "Channels", channels)
+			, Mode(conf, "Export", encoderName + "_" + "Mode", mode)
+			, Bitrate(conf, "Export", encoderName + "_" + "Bitrate", bitrate)
+			, Quality(conf, "Export", encoderName + "_" + "Quality", quality)
+			, Format(conf, "Export", encoderName + "_" + "Format", format)
 		{
 			return;
 		}

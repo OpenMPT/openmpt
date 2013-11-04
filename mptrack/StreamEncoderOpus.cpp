@@ -160,6 +160,7 @@ struct OpusDynBind
 		traits.fileExtension = "opus";
 		traits.fileShortDescription = "Opus";
 		traits.fileDescription = "Opus";
+		traits.encoderSettingsName = "Opus";
 		traits.encoderName = "libOpus";
 		traits.description += "Version: ";
 		traits.description += (opus_get_version_string&&opus_get_version_string()?opus_get_version_string():"");

@@ -260,6 +260,7 @@ FLACEncoder::FLACEncoder()
 	traits.fileExtension = "flac";
 	traits.fileShortDescription = "FLAC";
 	traits.fileDescription = "FLAC";
+	traits.encoderSettingsName = "FLAC";
 	traits.encoderName = "libFLAC";
 	std::ostringstream description;
 	description << "Free Lossless Audio Codec" << std::endl;
@@ -288,7 +289,7 @@ FLACEncoder::FLACEncoder()
 			}
 		}
 	}
-	traits.defaultSamplerate = 44100;
+	traits.defaultSamplerate = 96000;
 	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeEnumerated;
 	traits.defaultFormat = 0;
