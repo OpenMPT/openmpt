@@ -63,7 +63,7 @@ public:
 			wavebuffers[i].resize( bytes_per_chunk );
 			waveheaders[i] = WAVEHDR();
 			waveheaders[i].lpData = wavebuffers[i].data();
-			waveheaders[i].dwBufferLength = wavebuffers[i].size();
+			waveheaders[i].dwBufferLength = static_cast<DWORD>( wavebuffers[i].size() );
 			waveheaders[i].dwFlags = 0;
 			waveOutPrepareHeader( waveout, &waveheaders[i], sizeof( WAVEHDR ) );
 		}
@@ -74,7 +74,7 @@ public:
 			drain();
 			waveOutReset( waveout );
 			for ( std::size_t i = 0; i < num_chunks; ++i ) {
-				waveheaders[i].dwBufferLength = wavebuffers[i].size();
+				waveheaders[i].dwBufferLength = static_cast<DWORD>( wavebuffers[i].size() );
 				waveOutUnprepareHeader( waveout, &waveheaders[i], sizeof( WAVEHDR ) );
 			}
 			wavebuffers.clear();
@@ -115,7 +115,7 @@ private:
 	void write_chunk() {
 		std::size_t chunk = wait_for_empty_chunk();
 		std::size_t chunk_bytes = std::min( byte_queue.size(), bytes_per_chunk );
-		waveheaders[chunk].dwBufferLength = chunk_bytes;
+		waveheaders[chunk].dwBufferLength = static_cast<DWORD>( chunk_bytes );
 		for ( std::size_t byte = 0; byte < chunk_bytes; ++byte ) {
 			wavebuffers[chunk][byte] = byte_queue.front();
 			byte_queue.pop_front();
