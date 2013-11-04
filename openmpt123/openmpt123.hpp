@@ -257,7 +257,7 @@ struct commandlineflags {
 					terminal_height = tmp;
 				}
 			}
-			#if TIOCGSIZE
+			#if defined(TIOCGSIZE)
 				struct ttysize ts;
 				if ( ioctl( STDERR_FILENO, TIOCGSIZE, &ts ) >= 0 ) {
 					terminal_width = ts.ts_cols;
