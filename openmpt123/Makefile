@@ -24,7 +24,11 @@ VERYSILENT = @
 endif
 
 
-DYNLINK = 1
+DYNLINK=1
+SHARED_LIB=1
+STATIC_LIB=1
+EXAMPLES=1
+OPENMPT123=1
 
 
 # get commandline or defaults
@@ -234,20 +238,9 @@ ALL_OBJECTS += $(OPENMPT123_OBJECTS)
 ALL_DEPENDS += $(OPENMPT123_DEPENDS)
 
 
-ifeq ($(DYNLINK),1)
 LIBOPENMPTTEST_CXX_SOURCES += \
  ../libopenmpt/libopenmpt_test.cpp \
  
-else
-LIBOPENMPTTEST_CXX_SOURCES += \
- $(LIBOPENMPT_CXX_SOURCES) \
- ../libopenmpt/libopenmpt_test.cpp \
- 
-LIBOPENMPTTEST_C_SOURCES += \
- $(LIBOPENMPT_C_SOURCES) \
- 
-endif
-
 LIBOPENMPTTEST_OBJECTS += $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.o) $(LIBOPENMPTTEST_C_SOURCES:.c=.o)
 LIBOPENMPTTEST_DEPENDS = $(LIBOPENMPTEST_OBJECTS:.o=.d)
 ALL_OBJECTS += $(LIBOPENMPTTEST_OBJECTS)
@@ -270,16 +263,26 @@ all:
 -include $(ALL_DEPENDS)
 
 ifeq ($(DYNLINK),1)
-OUTPUTS += bin/openmpt.a
 OUTPUTS += bin/libopenmpt.so
 OUTPUTS += bin/libopenmpt_modplug.so
 endif
+ifeq ($(SHARED_LIB),1)
+OUTPUTS += bin/libopenmpt.so
+OUTPUTS += bin/libopenmpt_modplug.so
+endif
+ifeq ($(STATIC_LIB),1)
+OUTPUTS += bin/openmpt.a
+endif
+ifeq ($(OPENMPT123),1)
 OUTPUTS += bin/openmpt123$(EXESUFFIX)
+endif
 ifeq ($(NO_PORTAUDIO),1)
 else
+ifeq ($(EXAMPLES),1)
 OUTPUTS += bin/libopenmpt_example_c$(EXESUFFIX)
 OUTPUTS += bin/libopenmpt_example_c_mem$(EXESUFFIX)
 OUTPUTS += bin/libopenmpt_example_cxx$(EXESUFFIX)
+endif
 endif
 ifeq ($(TEST),1)
 OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
@@ -291,9 +294,9 @@ all: $(OUTPUTS)
 test: bin/libopenmpt_test$(EXESUFFIX)
 	bin/libopenmpt_test$(EXESUFFIX)
 
-bin/libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) $(OUTPUT_LIBOPENMPT)
+bin/libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPTTEST_OBJECTS) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPTTEST_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
 bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR ] $@

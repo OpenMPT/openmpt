@@ -3,4 +3,4 @@ include Makefile.config.defaults
 
 LDLIBS += -liconv
 
-DYNLINK = 0
+DYNLINK=0
