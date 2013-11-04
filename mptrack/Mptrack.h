@@ -11,6 +11,7 @@
 #pragma once
 
 #include "resource.h"       // main symbols
+#include "Settings.h"
 #include <windows.h>
 #include "../mptrack/MpTrackUtil.h"
 #include "../mptrack/Reporting.h"
@@ -22,6 +23,7 @@ class CModDoc;
 class CVstPluginManager;
 class SoundDevicesManager;
 class CDLSBank;
+class TrackerSettings;
 
 /////////////////////////////////////////////////////////////////////////////
 // 16-colors DIB
@@ -110,6 +112,11 @@ public:
 #endif
 
 protected:
+
+	IniFileSettingsBackend *m_pSettingsIniFile;
+	SettingsContainer *m_pSettings;
+	TrackerSettings *m_pTrackerSettings;
+	IniFileSettingsContainer *m_pPluginCache;
 	CMultiDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
 	SoundDevicesManager *m_pSoundDevicesManager;
@@ -140,6 +147,8 @@ public:
 	static LPMIDILIBSTRUCT GetMidiLibrary() { return glpMidiLibrary; }
 	static BOOL ImportMidiConfig(LPCSTR lpszFileName, BOOL bNoWarning=FALSE);
 	static BOOL ExportMidiConfig(LPCSTR lpszFileName);
+	static BOOL ImportMidiConfig(SettingsContainer &file);
+	static BOOL ExportMidiConfig(SettingsContainer &file);
 	static void RegisterExtensions();
 	static BOOL LoadDefaultDLSBanks();
 	static BOOL SaveDefaultDLSBanks();
@@ -160,9 +169,23 @@ public:
 	SoundDevicesManager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
-	LPCTSTR GetConfigFileName() const { return m_szConfigFileName; }
+	std::string GetConfigFileName() const { return m_szConfigFileName; }
+	SettingsContainer & GetSettings()
+	{
+		ASSERT(m_pSettings);
+		return *m_pSettings;
+	}
+	TrackerSettings & GetTrackerSettings()
+	{
+		ASSERT(m_pTrackerSettings);
+		return *m_pTrackerSettings;
+	}
 	bool IsPortableMode() { return m_bPortableMode; }
-	LPCTSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
+	SettingsContainer & GetPluginCache()
+	{
+		ASSERT(m_pPluginCache);
+		return *m_pPluginCache;
+	}
 
 	/// Returns path to config folder including trailing '\'.
 	LPCTSTR GetConfigPath() const { return m_szConfigDirectory; }
@@ -170,8 +193,10 @@ public:
 	// Relative / absolute paths conversion
 	template <size_t nLength>
 	void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
+	CString AbsolutePathToRelative(const CString &path);
 	template <size_t nLength>
 	void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
+	CString RelativePathToAbsolute(const CString &path);
 
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const int nItem);

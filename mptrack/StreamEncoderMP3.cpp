@@ -485,7 +485,7 @@ public:
 		lame.lame_set_num_channels(gfp, channels);
 
 #ifdef MODPLUG_TRACKER
-		int lameQuality = CMainFrame::GetPrivateProfileLong("Export", "MP3LameQuality", 3, theApp.GetConfigFileName());
+		int lameQuality = theApp.GetSettings().Read<int32>("Export", "MP3LameQuality", 3);
 		lame.lame_set_quality(gfp, lameQuality);
 #endif // MODPLUG_TRACKER
 
@@ -1163,7 +1163,7 @@ public:
 
 		bool acmFast = false;
 #ifdef MODPLUG_TRACKER
-		acmFast = CMainFrame::GetPrivateProfileBool("Export", "MP3ACMFast", acmFast, theApp.GetConfigFileName());
+		acmFast = theApp.GetSettings().Read<bool>("Export", "MP3ACMFast", acmFast);
 #endif // MODPLUG_TRACKER
 
 		if(acmStreamOpen(&acmStream, acmDriver, &wfex, pwfexDst, NULL, 0, 0, acmFast ? 0 : ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR)

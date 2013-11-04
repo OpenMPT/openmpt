@@ -291,17 +291,17 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 	// Look if the plugin info is stored in the PluginCache
 	if(fromCache)
 	{
-		const CString cacheSection = "PluginCache";
-		const CString cacheFile = theApp.GetPluginCacheFileName();
+		const std::string cacheSection = "PluginCache";
+		SettingsContainer & cacheFile = theApp.GetPluginCache();
 		char fileName[_MAX_PATH];
 		_splitpath(pszDllPath, nullptr, nullptr, fileName, nullptr);
 
-		CString IDs = CMainFrame::GetPrivateProfileCString(cacheSection, fileName, "", cacheFile);
+		std::string IDs = cacheFile.Read<std::string>(cacheSection, fileName, "");
 
-		if (IDs.GetLength() >= 16)
+		if (IDs.length() >= 16)
 		{
 			// Get path from cache file
-			GetPrivateProfileString(cacheSection, IDs, "", szPath, CountOf(szPath), cacheFile);
+			mpt::String::Copy(szPath, cacheFile.Read<std::string>(cacheSection, IDs, ""));
 			mpt::String::SetNullTerminator(szPath);
 			theApp.RelativePathToAbsolute(szPath);
 
@@ -321,8 +321,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 				// Extract plugin Ids
 				for (UINT i=0; i<16; i++)
 				{
-					UINT n = ((LPCTSTR)IDs)[i] - '0';
-					if (n > 9) n = ((LPCTSTR)IDs)[i] + 10 - 'A';
+					UINT n = IDs[i] - '0';
+					if (n > 9) n = IDs[i] + 10 - 'A';
 					n &= 0x0f;
 					if (i < 8)
 					{
@@ -333,9 +333,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 					}
 				}
 
-				CString flagKey;
-				flagKey.Format("%s.Flags", IDs);
-				p->DecodeCacheFlags(CMainFrame::GetPrivateProfileLong(cacheSection, flagKey, 0, cacheFile));
+				std::string flagKey = mpt::String::Format("%s.Flags", IDs.c_str());
+				p->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
 
 			#ifdef VST_USE_ALTERNATIVE_MAGIC
 				if( p->dwPluginId1 == kEffectMagic )
@@ -357,7 +356,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 	}
 
 	// If this key contains a file name on program launch, a plugin previously crashed OpenMPT.
-	WritePrivateProfileString("VST Plugins", "FailedPlugin", pszDllPath, theApp.GetConfigFileName());
+	theApp.GetSettings().Write<std::string>("VST Plugins", "FailedPlugin", pszDllPath);
 
 	AEffect *pEffect;
 	HINSTANCE hLib;
@@ -414,16 +413,15 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 	}
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
-	WritePrivateProfileString("VST Plugins", "FailedPlugin", nullptr, theApp.GetConfigFileName());
+	theApp.GetSettings().Write<std::string>("VST Plugins", "FailedPlugin", "");
 
 	// If OK, write the information in PluginCache
 	if(validPlug)
 	{
-		const CString cacheSection = "PluginCache";
-		const CString cacheFile = theApp.GetPluginCacheFileName();
-		CString IDs, flagsKey;
-		IDs.Format("%08X%08X", p->dwPluginId1, p->dwPluginId2);
-		flagsKey.Format("%s.Flags", IDs);
+		const std::string cacheSection = "PluginCache";
+		SettingsContainer & cacheFile = theApp.GetPluginCache();
+		std::string IDs = mpt::String::Format("%08X%08X", p->dwPluginId1, p->dwPluginId2);
+		std::string flagsKey = mpt::String::Format("%s.Flags", IDs);
 
 		_tcsncpy(szPath, pszDllPath, CountOf(szPath) - 1);
 		if(theApp.IsPortableMode())
@@ -432,10 +430,10 @@ VSTPluginLib *CVstPluginManager::AddPlugin(LPCSTR pszDllPath, bool fromCache, co
 		}
 		mpt::String::SetNullTerminator(szPath);
 
-		WritePrivateProfileString(cacheSection, IDs, szPath, cacheFile);
-		CMainFrame::WritePrivateProfileCString(cacheSection, IDs, pszDllPath, cacheFile);
-		CMainFrame::WritePrivateProfileCString(cacheSection, p->szLibraryName, IDs, cacheFile);
-		CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, p->EncodeCacheFlags(), cacheFile);
+		cacheFile.Write<std::string>(cacheSection, IDs, szPath);
+		cacheFile.Write<CString>(cacheSection, IDs, pszDllPath);
+		cacheFile.Write<std::string>(cacheSection, p->szLibraryName, IDs);
+		cacheFile.Write<int32>(cacheSection, flagsKey, p->EncodeCacheFlags());
 	} else
 	{
 		delete p;
@@ -557,12 +555,12 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		pFound = AddPlugin(s);
 		if (!pFound)
 		{
-			CString cacheSection = "PluginCache";
-			CString cacheFile = theApp.GetPluginCacheFileName();
-			CString IDs = CMainFrame::GetPrivateProfileCString(cacheSection, mixPlugin.GetLibraryName(), "", cacheFile);
-			if (IDs.GetLength() >= 16)
+			std::string cacheSection = "PluginCache";
+			SettingsContainer & cacheFile = theApp.GetPluginCache();
+			std::string IDs = cacheFile.Read<std::string>(cacheSection, mixPlugin.GetLibraryName(), "");
+			if (IDs.length() >= 16)
 			{
-				CString strFullPath = CMainFrame::GetPrivateProfileCString(cacheSection, IDs, "", cacheFile);
+				CString strFullPath = cacheFile.Read<CString>(cacheSection, IDs, "");
 				if ((strFullPath) && (strFullPath[0])) pFound = AddPlugin(strFullPath);
 			}
 		}
@@ -591,11 +589,10 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				if(oldIsInstrument != pFound->isInstrument || oldCategory != pFound->category)
 				{
 					// Update cached information
-					CString cacheSection = "PluginCache";
-					CString cacheFile = theApp.GetPluginCacheFileName();
-					CString flagsKey;
-					flagsKey.Format("%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
-					CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, pFound->EncodeCacheFlags(), cacheFile);
+					const std::string cacheSection = "PluginCache";
+					SettingsContainer & cacheFile = theApp.GetPluginCache();
+					std::string flagsKey = mpt::String::Format("%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
+					cacheFile.Write<int32>(cacheSection, flagsKey, pFound->EncodeCacheFlags());
 				}
 
 				CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);

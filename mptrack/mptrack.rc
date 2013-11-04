@@ -258,6 +258,15 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,108,42,50,14
 END
 
+IDD_OPTIONS_ADVANCED DIALOGEX 0, 0, 268, 274
+STYLE DS_SETFONT | DS_3DLOOK | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Advanced"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LISTBOX         IDC_LIST4,6,36,258,234,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Warning:\nChanging advanced settings might cause stability problems.\nYou should only continue if you know what you are doing.",IDC_STATIC,6,6,258,24
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -369,6 +378,14 @@ BEGIN
         RIGHTMARGIN, 159
         TOPMARGIN, 7
         BOTTOMMARGIN, 59
+    END
+
+    IDD_OPTIONS_ADVANCED, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 261
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 267
     END
 END
 #endif    // APSTUDIO_INVOKED

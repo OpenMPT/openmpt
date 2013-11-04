@@ -247,6 +247,14 @@ enum
 #include "TrackerSettings.h"
 struct MODPLUGDIB;
 
+template<> inline SettingValue ToSettingValue(const WINDOWPLACEMENT &val) {
+	return SettingValue(EncodeBinarySetting<WINDOWPLACEMENT>(val), "WINDOWPLACEMENT");
+}
+template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val) {
+	ASSERT(val.GetTypeTag() == "WINDOWPLACEMENT");
+	return DecodeBinarySetting<WINDOWPLACEMENT>(val.as<std::vector<char> >());
+}
+
 //======================================================================================
 class CMainFrame: public CMDIFrameWnd, public ISoundSource, public ISoundMessageReceiver
 //======================================================================================
@@ -356,16 +364,6 @@ public:
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
-
-	static bool WritePrivateProfileBool(const CString section, const CString key, const bool value, const CString iniFile);
-	static bool GetPrivateProfileBool(const CString section, const CString key, const bool defaultValue, const CString iniFile);
-	static bool WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile);
-	static long GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile);
-	static bool WritePrivateProfileDWord(const CString section, const CString key, const DWORD value, const CString iniFile);
-	static DWORD GetPrivateProfileDWord(const CString section, const CString key, const DWORD defaultValue, const CString iniFile);
-	static bool WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile);
-	static CString GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile);
-
 
 	// Misc functions
 public:

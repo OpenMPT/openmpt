@@ -146,6 +146,7 @@
 #define IDD_AUTOTUNE                    531
 #define IDD_INPUT                       532
 #define IDD_CLIPBOARD                   533
+#define IDD_OPTIONS_ADVANCED            540
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -1221,9 +1222,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        539
+#define _APS_NEXT_RESOURCE_VALUE        541
 #define _APS_NEXT_COMMAND_VALUE         44611
-#define _APS_NEXT_CONTROL_VALUE         2460
+#define _APS_NEXT_CONTROL_VALUE         2461
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

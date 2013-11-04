@@ -1564,7 +1564,7 @@ bool CSoundFile::SaveIT(const char *lpszFileName, bool compatibilityExport)
 #ifdef MODPLUG_TRACKER
 		int type = GetType() == MOD_TYPE_IT ? 1 : 4;
 		if(compatibilityExport) type = 2;
-		bool compress = (::GetPrivateProfileInt("Misc", Samples[nsmp].GetNumChannels() > 1 ? "ITCompressionStereo" : "ITCompressionMono", 0, theApp.GetConfigFileName()) & type) != 0;
+		bool compress = (theApp.GetSettings().Read<int32>("Misc", Samples[nsmp].GetNumChannels() > 1 ? "ITCompressionStereo" : "ITCompressionMono", 0) & type) != 0;
 #else
 		bool compress = false;
 #endif // MODPLUG_TRACKER

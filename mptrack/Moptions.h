@@ -23,6 +23,7 @@ enum {
 	OPTIONS_PAGE_MIDI,
 	OPTIONS_PAGE_AUTOSAVE,
 	OPTIONS_PAGE_UPDATE,
+	OPTIONS_PAGE_ADVANCED,
 };
 
 
@@ -54,6 +55,35 @@ protected:
 //rewbs.customkeys: COptionsKeyboard moved to separate file
 	DECLARE_MESSAGE_MAP();
 };
+
+
+#if defined(MPT_SETTINGS_CACHE)
+
+//==========================================
+class COptionsAdvanced: public CPropertyPage
+//==========================================
+{
+protected:
+	CListBox m_List;
+	std::map<int, SettingPath> m_IndexToPath;
+
+public:
+	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED) {}
+
+protected:
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual BOOL OnSetActive();
+	virtual void DoDataExchange(CDataExchange* pDX);
+	afx_msg void OnOptionDblClick();
+	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+
+	void ReInit();
+
+	DECLARE_MESSAGE_MAP();
+};
+
+#endif // MPT_SETTINGS_CACHE
 
 
 //========================================

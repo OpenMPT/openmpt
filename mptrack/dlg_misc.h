@@ -233,7 +233,7 @@ class CInputDlg: public CDialog
 {
 protected:
 	CSpinButtonCtrl spin;
-	const char *description;
+	CString description;
 	int32 minValue, maxValue;
 
 public:

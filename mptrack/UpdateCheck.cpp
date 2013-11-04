@@ -105,7 +105,7 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 	const CString userAgent = CString("OpenMPT ") + MptVersion::str;
 	CString updateURL = CUpdateCheck::updateBaseURL;
 	updateURL.Replace("$VERSION", MptVersion::str);
-	updateURL.Replace("$GUID", GetSendGUID() ? TrackerSettings::Instance().gcsInstallGUID : "anonymous");
+	updateURL.Replace("$GUID", GetSendGUID() ? TrackerSettings::Instance().gcsInstallGUID.Get() : "anonymous");
 
 	// Establish a connection.
 	caller->internetHandle = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);

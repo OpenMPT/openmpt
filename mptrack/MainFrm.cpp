@@ -208,8 +208,6 @@ CMainFrame::CMainFrame()
 	MemsetZero(g_csAudio);
 	InitializeCriticalSection(&g_csAudio);
 
-	TrackerSettings::Instance().LoadSettings();
-
 	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
 
 	//Loading static tunings here - probably not the best place to do that but anyway.
@@ -244,14 +242,14 @@ VOID CMainFrame::Initialize()
 		// Fall back to default WaveOut device
 		TrackerSettings::Instance().m_nWaveDevice = SoundDeviceID();
 	}
-	if(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq == 0)
+	if(TrackerSettings::Instance().MixerSamplerate == 0)
 	{
-		TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = MixerSettings().gdwMixingFreq;
+		TrackerSettings::Instance().MixerSamplerate = MixerSettings().gdwMixingFreq;
 		#ifndef NO_ASIO
 			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
-			if(TrackerSettings::Instance().m_nWaveDevice.GetType() == SNDDEV_ASIO)
+			if(TrackerSettings::Instance().GetSoundDeviceID().GetType() == SNDDEV_ASIO)
 			{
-				TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = theApp.GetSoundDevicesManager()->GetDeviceCaps(TrackerSettings::Instance().m_nWaveDevice, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
+				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceCaps(TrackerSettings::Instance().m_nWaveDevice, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
 			}
 		#endif // NO_ASIO
 	}
@@ -462,8 +460,9 @@ void CMainFrame::OnClose()
 
 	// Save Settings
 	RemoveControlBar(&m_wndStatusBar); // Remove statusbar so that its state won't get saved.
-	TrackerSettings::Instance().SaveSettings();
+	SaveBarState("Toolbars");
 	AddControlBar(&m_wndStatusBar); // Restore statusbar to mainframe.
+	TrackerSettings::Instance().SaveSettings();
 
 	if(m_InputHandler && m_InputHandler->activeCommandSet)
 	{
@@ -474,77 +473,6 @@ void CMainFrame::OnClose()
 	CMDIFrameWnd::OnClose();
 }
 
-
-bool CMainFrame::WritePrivateProfileBool(const CString section, const CString key, const bool value, const CString iniFile)
-{
-	CHAR valueBuffer[INIBUFFERSIZE];
-	wsprintf(valueBuffer, "%li", value?1:0);
-	return (WritePrivateProfileString(section, key, valueBuffer, iniFile) != 0);
-}
-
-
-bool CMainFrame::GetPrivateProfileBool(const CString section, const CString key, const bool defaultValue, const CString iniFile)
-{
-	CHAR defaultValueBuffer[INIBUFFERSIZE];
-	wsprintf(defaultValueBuffer, "%li", defaultValue?1:0);
-
-	CHAR valueBuffer[INIBUFFERSIZE];
-	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-
-	return atol(valueBuffer)?true:false;
-}
-
-
-bool CMainFrame::WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile)
-{
-	CHAR valueBuffer[INIBUFFERSIZE];
-	wsprintf(valueBuffer, "%li", value);
-	return (WritePrivateProfileString(section, key, valueBuffer, iniFile) != 0);
-}
-
-
-long CMainFrame::GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile)
-{
-	CHAR defaultValueBuffer[INIBUFFERSIZE];
-	wsprintf(defaultValueBuffer, "%li", defaultValue);
-
-	CHAR valueBuffer[INIBUFFERSIZE];
-	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-
-	return ConvertStrTo<long>(valueBuffer);
-}
-
-
-bool CMainFrame::WritePrivateProfileDWord(const CString section, const CString key, const DWORD value, const CString iniFile)
-{
-	CHAR valueBuffer[INIBUFFERSIZE];
-	wsprintf(valueBuffer, "%lu", value);
-	return (WritePrivateProfileString(section, key, valueBuffer, iniFile) != 0);
-}
-
-DWORD CMainFrame::GetPrivateProfileDWord(const CString section, const CString key, const DWORD defaultValue, const CString iniFile)
-{
-	CHAR defaultValueBuffer[INIBUFFERSIZE];
-	wsprintf(defaultValueBuffer, "%lu", defaultValue);
-
-	CHAR valueBuffer[INIBUFFERSIZE];
-	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-	return ConvertStrTo<uint32>(valueBuffer);
-}
-
-bool CMainFrame::WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile)
-{
-	return (WritePrivateProfileString(section, key, value, iniFile) != 0);
-}
-
-CString CMainFrame::GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile)
-{
-	CHAR defaultValueBuffer[INIBUFFERSIZE];
-	strcpy(defaultValueBuffer, defaultValue);
-	CHAR valueBuffer[INIBUFFERSIZE];
-	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-	return valueBuffer;
-}
 
 
 
@@ -841,7 +769,7 @@ bool CMainFrame::audioOpenDevice()
 	{
 		return true;
 	}
-	if(TrackerSettings::Instance().m_MixerSettings.IsValid())
+	if(TrackerSettings::Instance().GetMixerSettings().IsValid())
 	{
 		if(audioTryOpeningDevice())
 		{
@@ -1031,7 +959,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		notification.masterVU[1] = rVu;
 		if(gnClipLeft) notification.masterVU[0] |= Notification::ClipVU;
 		if(gnClipRight) notification.masterVU[1] |= Notification::ClipVU;
-		uint32 dwVuDecay = Util::muldiv(dwSamplesRead, 120000, TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq) + 1;
+		uint32 dwVuDecay = Util::muldiv(dwSamplesRead, 120000, m_pSndFile->m_MixerSettings.gdwMixingFreq) + 1;
 
 		if (lVu >= dwVuDecay) gnLVuMeter = (lVu - dwVuDecay) << 11; else gnLVuMeter = 0;
 		if (rVu >= dwVuDecay) gnRVuMeter = (rVu - dwVuDecay) << 11; else gnRVuMeter = 0;
@@ -1060,7 +988,7 @@ void CMainFrame::UpdateDspEffects(CSoundFile &sndFile, bool reset)
 #ifndef NO_EQ
 	sndFile.SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset?TRUE:FALSE);
 #endif
-	sndFile.SetDspEffects(TrackerSettings::Instance().m_MixerSettings.DSPMask);
+	sndFile.SetDspEffects(TrackerSettings::Instance().MixerDSPMask);
 	sndFile.InitPlayer(reset?TRUE:FALSE);
 }
 
@@ -1070,11 +998,11 @@ void CMainFrame::UpdateAudioParameters(CSoundFile &sndFile, bool reset)
 {
 	CriticalSection cs;
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_MUTECHNMODE;
+		TrackerSettings::Instance().MixerFlags |= SNDMIX_MUTECHNMODE;
 	else
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_MUTECHNMODE;
-	sndFile.SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
-	sndFile.SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
+		TrackerSettings::Instance().MixerFlags &= ~SNDMIX_MUTECHNMODE;
+	sndFile.SetMixerSettings(TrackerSettings::Instance().GetMixerSettings());
+	sndFile.SetResamplerSettings(TrackerSettings::Instance().GetResamplerSettings());
 	UpdateDspEffects(sndFile, false); // reset done in next line
 	sndFile.InitPlayer(reset?TRUE:FALSE);
 }
@@ -1202,8 +1130,8 @@ UINT CMainFrame::GetBaseOctave() const
 void CMainFrame::SetPreAmp(UINT n)
 //--------------------------------
 {
-	TrackerSettings::Instance().m_MixerSettings.m_nPreAmp = n;
-	if (m_pSndFile) m_pSndFile->SetPreAmp(TrackerSettings::Instance().m_MixerSettings.m_nPreAmp);
+	TrackerSettings::Instance().MixerPreAmp = n;
+	if (m_pSndFile) m_pSndFile->SetPreAmp(TrackerSettings::Instance().MixerPreAmp);
 }
 
 
@@ -1636,7 +1564,7 @@ BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, Sound
 //------------------------------------------------------------------------------------------------
 {
 	const bool isPlaying = IsPlaying();
-	if((TrackerSettings::Instance().m_nWaveDevice != deviceID) || (TrackerSettings::Instance().GetSoundDeviceSettings() != deviceSettings))
+	if((TrackerSettings::Instance().GetSoundDeviceID() != deviceID) || (TrackerSettings::Instance().GetSoundDeviceSettings() != deviceSettings))
 	{
 		CModDoc *pActiveMod = NULL;
 		if (isPlaying)
@@ -1644,7 +1572,7 @@ BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, Sound
 			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = GetModPlaying();
 			PauseMod();
 		}
-		TrackerSettings::Instance().m_nWaveDevice = deviceID;
+		TrackerSettings::Instance().SetSoundDeviceID(deviceID);
 		TrackerSettings::Instance().SetSoundDeviceSettings(deviceSettings);
 		{
 			CriticalSection cs;
@@ -1687,9 +1615,9 @@ BOOL CMainFrame::SetupMiscOptions()
 //---------------------------------
 {
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_MUTECHNMODE;
+		TrackerSettings::Instance().MixerFlags |= SNDMIX_MUTECHNMODE;
 	else
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_MUTECHNMODE;
+		TrackerSettings::Instance().MixerFlags &= ~SNDMIX_MUTECHNMODE;
 	{
 		CriticalSection cs;
 		if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying());
@@ -1823,6 +1751,9 @@ void CMainFrame::OnViewOptions()
 #endif
 	CAutoSaverGUI autosavedlg(m_pAutoSaver); //rewbs.AutoSaver
 	CUpdateSetupDlg updatedlg;
+#if defined(MPT_SETTINGS_CACHE)
+	COptionsAdvanced advanced;
+#endif // MPT_SETTINGS_CACHE
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
 	dlg.AddPage(&playerdlg);
@@ -1834,6 +1765,9 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&mididlg);
 	dlg.AddPage(&autosavedlg);
 	dlg.AddPage(&updatedlg);
+#if defined(MPT_SETTINGS_CACHE)
+	dlg.AddPage(&advanced);
+#endif // MPT_SETTINGS_CACHE
 	m_bOptionsLocked=true;	//rewbs.customKeys
 	m_SoundCardOptionsDialog = &sounddlg;
 	dlg.DoModal();
@@ -2526,10 +2460,9 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 	{
 		firstShow = false;
 		WINDOWPLACEMENT wpl;
-		if (GetPrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), theApp.GetConfigFileName()))
-		{
-			SetWindowPlacement(&wpl);
-		}
+		GetWindowPlacement(&wpl);
+		wpl = theApp.GetSettings().Read<WINDOWPLACEMENT>("Display", "WindowPlacement", wpl);
+		SetWindowPlacement(&wpl);
 	}
 }
 

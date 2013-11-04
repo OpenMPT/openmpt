@@ -511,6 +511,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Settings.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\snd_flt.cpp"
 				>
 			</File>
@@ -1142,6 +1146,10 @@
 			</File>
 			<File
 				RelativePath="..\common\serialization_utils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Settings.h"
 				>
 			</File>
 			<File

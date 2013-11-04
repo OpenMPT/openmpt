@@ -128,7 +128,7 @@ public:
 	BOOL OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
 	BOOL EditSample(UINT nSample);
 	VOID UpdateFilterText();
-	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glInstrumentWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG>* GetSplitPosRef() {return &TrackerSettings::Instance().glInstrumentWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)

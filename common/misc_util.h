@@ -38,6 +38,18 @@ inline std::string Stringify(const T& x)
 template<> inline std::string Stringify(const signed char& x) { return Stringify((signed int)x); }
 template<> inline std::string Stringify(const unsigned char& x) { return Stringify((unsigned int)x); }
 
+template<class T>
+inline std::wstring StringifyW(const T& x)
+//----------------------------------------
+{
+	std::wostringstream o;
+	if(!(o << x)) return L"FAILURE";
+	else return o.str();
+}
+
+template<> inline std::wstring StringifyW(const signed char& x) { return StringifyW((signed int)x); }
+template<> inline std::wstring StringifyW(const unsigned char& x) { return StringifyW((unsigned int)x); }
+
 //Convert string to number.
 template<class T>
 inline T ConvertStrTo(const char *str)
@@ -52,6 +64,13 @@ inline T ConvertStrTo(const char *str)
 		return static_cast<T>(atof(str));
 }
 
+template<class T>
+inline T ConvertStrTo(const std::string &str)
+//-------------------------------------------
+{
+	return ConvertStrTo<T>(str.c_str());
+}
+
 #if MPT_COMPILER_MSVC
 #define cxx11_strtoll  _strtoi64
 #define cxx11_strtoull _strtoui64
@@ -59,12 +78,24 @@ inline T ConvertStrTo(const char *str)
 #define cxx11_strtoll  std::strtoll
 #define cxx11_strtoull std::strtoull
 #endif
+template<> inline bool           ConvertStrTo(const char *str) {return std::strtol(str, nullptr, 10) ? true : false;}
+template<> inline signed char      ConvertStrTo(const char *str) {return (signed char)std::strtol(str, nullptr, 10);}
+template<> inline signed short     ConvertStrTo(const char *str) {return (signed short)std::strtol(str, nullptr, 10);}
 template<> inline signed int       ConvertStrTo(const char *str) {return (signed int)std::strtol(str, nullptr, 10);}
 template<> inline signed long      ConvertStrTo(const char *str) {return std::strtol(str, nullptr, 10);}
 template<> inline signed long long ConvertStrTo(const char *str) {return cxx11_strtoll(str, nullptr, 10);}
+template<> inline unsigned char      ConvertStrTo(const char *str) {return (unsigned char)std::strtoul(str, nullptr, 10);}
+template<> inline unsigned short     ConvertStrTo(const char *str) {return (unsigned short)std::strtoul(str, nullptr, 10);}
 template<> inline unsigned int       ConvertStrTo(const char *str) {return (unsigned int)std::strtoul(str, nullptr, 10);}
 template<> inline unsigned long      ConvertStrTo(const char *str) {return std::strtoul(str, nullptr, 10);}
 template<> inline unsigned long long ConvertStrTo(const char *str) {return cxx11_strtoull(str, nullptr, 10);}
+
+template<class T>
+inline T ConvertStrTo(const std::wstring &str)
+//--------------------------------------------
+{
+	return ConvertStrTo<T>(mpt::String::Encode(str, mpt::CharsetLocale));
+}
 
 
 // Memset given object to zero.

@@ -133,9 +133,6 @@ public:
 	}
 };
 
-#define SNDDEV_DEFAULT_LATENCY_MS        100
-#define SNDDEV_DEFAULT_UPDATEINTERVAL_MS   5
-
 #define SNDDEV_MAXBUFFERS	       	  256
 #define SNDDEV_MAXBUFFERSIZE        (1024*1024)
 #define SNDDEV_MINLATENCY_MS        1
@@ -156,8 +153,8 @@ struct SoundDeviceSettings
 	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
 	SoundDeviceSettings()
 		: hWnd(NULL)
-		, LatencyMS(SNDDEV_DEFAULT_LATENCY_MS)
-		, UpdateIntervalMS(SNDDEV_DEFAULT_UPDATEINTERVAL_MS)
+		, LatencyMS(100)
+		, UpdateIntervalMS(5)
 		, Samplerate(48000)
 		, Channels(2)
 		, sampleFormat(SampleFormatInt16)

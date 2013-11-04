@@ -482,7 +482,7 @@ void CSampleUndo::RestrictBufferSize()
 //------------------------------------
 {
 	size_t capacity = GetUndoBufferCapacity();
-	while(capacity > TrackerSettings::Instance().m_nSampleUndoMaxBuffer)
+	while(capacity > TrackerSettings::Instance().GetSampleUndoBufferSize())
 	{
 		for(SAMPLEINDEX smp = 1; smp <= UndoBuffer.size(); smp++)
 		{
@@ -499,7 +499,7 @@ void CSampleUndo::RestrictBufferSize()
 					break;
 				}
 			}
-			if(capacity <= TrackerSettings::Instance().m_nSampleUndoMaxBuffer) return;
+			if(capacity <= TrackerSettings::Instance().GetSampleUndoBufferSize()) return;
 		}
 	}
 }

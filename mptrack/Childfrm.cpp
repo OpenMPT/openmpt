@@ -92,7 +92,7 @@ CChildFrame::~CChildFrame()
 {
 	if ((--glMdiOpenCount) == 0)
 	{
-		TrackerSettings::Instance().gbMdiMaximize = m_bMaxWhenClosed;
+		TrackerSettings::Instance().gbMdiMaximize = (m_bMaxWhenClosed != 0);
 	}
 }
 
@@ -245,7 +245,7 @@ void CChildFrame::SavePosition(BOOL bForce)
 		CRect rect;
 		
 		m_bMaxWhenClosed = IsZoomed();
-		if (bForce) TrackerSettings::Instance().gbMdiMaximize = m_bMaxWhenClosed;
+		if (bForce) TrackerSettings::Instance().gbMdiMaximize = (m_bMaxWhenClosed != 0);
 		if (!IsIconic())
 		{
 			CWnd *pWnd = m_wndSplitter.GetPane(0, 0);

@@ -372,6 +372,7 @@
     <ClCompile Include="..\soundlib\tuningbase.cpp" />
     <ClCompile Include="..\soundlib\tuningCollection.cpp" />
     <ClCompile Include="SelectPluginDialog.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="StreamEncoder.cpp" />
     <ClCompile Include="StreamEncoderFLAC.cpp" />
     <ClCompile Include="StreamEncoderMP3.cpp" />
@@ -552,6 +553,7 @@
     <ClInclude Include="..\soundlib\tuning.h" />
     <ClInclude Include="..\soundlib\tuningbase.h" />
     <ClInclude Include="..\soundlib\tuningcollection.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="StreamEncoder.h" />
     <ClInclude Include="StreamEncoderFLAC.h" />
     <ClInclude Include="StreamEncoderMP3.h" />

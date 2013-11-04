@@ -26,6 +26,7 @@
 #include "../common/StringFixer.h"
 #include "ExceptionHandler.h"
 #include "CloseMainDialog.h"
+#include "AutoSaver.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -305,23 +306,23 @@ LPMIDILIBSTRUCT CTrackApp::glpMidiLibrary = NULL;
 BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 //-------------------------------------------------------------------
 {
-	TCHAR szFileName[_MAX_PATH], s[_MAX_PATH], szUltraSndPath[_MAX_PATH];
-
 	if ((!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
+
 	if (!glpMidiLibrary)
 	{
 		glpMidiLibrary = new MIDILIBSTRUCT;
 		if (!glpMidiLibrary) return FALSE;
 		MemsetZero(*glpMidiLibrary);
 	}
+
 	if (CDLSBank::IsDLSBank(lpszConfigFile))
 	{
 		ConfirmAnswer result = cnfYes;
 		if (!bNoWarn)
 		{
 			result = Reporting::Confirm("You are about to replace the current MIDI library:\n"
-									"Do you want to replace only the missing instruments? (recommended)",
-									"Warning", true);
+				"Do you want to replace only the missing instruments? (recommended)",
+				"Warning", true);
 		}
 		if (result == cnfCancel) return FALSE;
 		const bool bReplaceAll = (result == cnfNo);
@@ -348,24 +349,41 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 		}
 		return TRUE;
 	}
-	GetPrivateProfileString(_T("Ultrasound"), _T("PatchDir"), _T(""), szUltraSndPath, CountOf(szUltraSndPath), lpszConfigFile);
+
+	IniFileSettingsContainer file(mpt::LocaleToPath(lpszConfigFile));
+	return ImportMidiConfig(file);
+}
+
+BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file)
+//-------------------------------------------------------
+{
+	TCHAR szFileName[_MAX_PATH], s[_MAX_PATH], szUltraSndPath[_MAX_PATH];
+
+	if (!glpMidiLibrary)
+	{
+		glpMidiLibrary = new MIDILIBSTRUCT;
+		if (!glpMidiLibrary) return FALSE;
+		MemsetZero(*glpMidiLibrary);
+	}
+
+	mpt::String::Copy(szUltraSndPath, file.Read<std::string>("Ultrasound", "PatchDir", ""));
 	if (!strcmp(szUltraSndPath, _T(".\\"))) szUltraSndPath[0] = 0;
 	if (!szUltraSndPath[0]) GetCurrentDirectory(CountOf(szUltraSndPath), szUltraSndPath);
 	for (UINT iMidi=0; iMidi<256; iMidi++)
 	{
 		szFileName[0] = 0;
 		wsprintf(s, (iMidi < 128) ? _T("Midi%d") : _T("Perc%d"), iMidi & 0x7f);
-		GetPrivateProfileString(_T("Midi Library"), s, _T(""), szFileName, CountOf(szFileName), lpszConfigFile);
+		mpt::String::Copy(szFileName, file.Read<std::string>("Midi Library", s, ""));
 		// Check for ULTRASND.INI
 		if (!szFileName[0])
 		{
 			LPCSTR pszSection = (iMidi < 128) ? _T("Melodic Patches") : _T("Drum Patches");
 			wsprintf(s, _T("%d"), iMidi & 0x7f);
-			GetPrivateProfileString(pszSection, s, _T(""), szFileName, CountOf(szFileName), lpszConfigFile);
+			mpt::String::Copy(szFileName, file.Read<std::string>(pszSection, s, ""));
 			if (!szFileName[0])
 			{
 				pszSection = (iMidi < 128) ? _T("Melodic Bank 0") : _T("Drum Bank 0");
-				GetPrivateProfileString(pszSection, s, "", szFileName, CountOf(szFileName), lpszConfigFile);
+				mpt::String::Copy(szFileName, file.Read<std::string>(pszSection, s, ""));
 			}
 			if (szFileName[0])
 			{
@@ -398,9 +416,17 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 //-----------------------------------------------------
 {
+	if ((!glpMidiLibrary) || (!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
+	IniFileSettingsContainer file(mpt::LocaleToPath(lpszConfigFile));
+	return ExportMidiConfig(file);
+}
+
+BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
+//-------------------------------------------------------
+{
 	TCHAR szFileName[_MAX_PATH], s[128];
 
-	if ((!glpMidiLibrary) || (!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
+	if (!glpMidiLibrary) return FALSE;
 	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (glpMidiLibrary->MidiMap[iMidi])
 	{
 		if (iMidi < 128)
@@ -414,7 +440,7 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 		{
 			if(theApp.IsPortableMode())
 				theApp.AbsolutePathToRelative(szFileName);
-			if (!WritePrivateProfileString("Midi Library", s, szFileName, lpszConfigFile)) break;
+			file.Write<std::string>("Midi Library", s, szFileName);
 		}
 	}
 	return TRUE;
@@ -434,18 +460,18 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 	CHAR szFileName[MAX_PATH];
 	HKEY key;
 
-	CString storedVersion = CMainFrame::GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
+	CString storedVersion = theApp.GetSettings().Read<CString>("Version", "Version", "");
 	//If version number stored in INI is 1.17.02.40 or later, load DLS from INI file.
 	//Else load DLS from Registry
 	if (storedVersion >= "1.17.02.40")
 	{
 		CHAR s[MAX_PATH];
-		UINT numBanks = CMainFrame::GetPrivateProfileLong("DLS Banks", "NumBanks", 0, theApp.GetConfigFileName());
+		UINT numBanks = theApp.GetSettings().Read<int32>("DLS Banks", "NumBanks", 0);
 		for(size_t i = 0; i < numBanks; i++)
 		{
 			wsprintf(s, _T("Bank%d"), i + 1);
 			TCHAR szPath[_MAX_PATH];
-			GetPrivateProfileString("DLS Banks", s, "", szPath, INIBUFFERSIZE, theApp.GetConfigFileName());
+			mpt::String::Copy(szPath, theApp.GetSettings().Read<std::string>("DLS Banks", s, ""));
 			theApp.RelativePathToAbsolute(szPath);
 			AddDLSBank(szPath);
 		}
@@ -531,11 +557,11 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 		}
 
 		wsprintf(s, _T("Bank%d"), nBanks+1);
-		WritePrivateProfileString("DLS Banks", s, szPath, theApp.GetConfigFileName());
+		theApp.GetSettings().Write<std::string>("DLS Banks", s, szPath);
 		nBanks++;
 
 	}
-	CMainFrame::WritePrivateProfileLong("DLS Banks", "NumBanks", nBanks, theApp.GetConfigFileName());
+	theApp.GetSettings().Write<int32>("DLS Banks", "NumBanks", nBanks);
 	return TRUE;
 }
 
@@ -610,6 +636,10 @@ END_MESSAGE_MAP()
 
 CTrackApp::CTrackApp()
 //--------------------
+	: m_pSettingsIniFile(nullptr)
+	, m_pSettings(nullptr)
+	, m_pTrackerSettings(nullptr)
+	, m_pPluginCache(nullptr)
 {
 	#if MPT_COMPILER_MSVC
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
@@ -623,6 +653,7 @@ CTrackApp::CTrackApp()
 	m_pSoundDevicesManager = nullptr;
 	m_bInitialized = FALSE;
 	m_szConfigFileName[0] = 0;
+	m_szPluginCacheFileName[0] = 0;
 }
 
 
@@ -719,11 +750,11 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// Create tunings dir
 	CString sTuningPath;
 	sTuningPath.Format(TEXT("%stunings\\"), m_szConfigDirectory);
-	TrackerSettings::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
+	TrackerDirectories::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
 
-	if(PathIsDirectory(TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING)) == 0)
+	if(PathIsDirectory(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING)) == 0)
 	{
-		CreateDirectory(TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING), 0);
+		CreateDirectory(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING), 0);
 	}
 
 	if(!bIsAppDir)
@@ -763,7 +794,14 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	TCHAR szTemplatePath[MAX_PATH];
 	_tcscpy(szTemplatePath, m_szConfigDirectory);
 	_tcscat(szTemplatePath, _T("TemplateModules\\"));
-	TrackerSettings::Instance().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
+	TrackerDirectories::Instance().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
+
+	//Force use of custom ini file rather than windowsDir\executableName.ini
+	if(m_pszProfileName)
+	{
+		free((void *)m_pszProfileName);
+	}
+	m_pszProfileName = _tcsdup(m_szConfigFileName);
 
 	m_bPortableMode = bIsAppDir;
 }
@@ -781,18 +819,10 @@ BOOL CTrackApp::InitInstance()
 	// Start loading
 	BeginWaitCursor();
 
-	MEMORYSTATUS gMemStatus;
-	MemsetZero(gMemStatus);
-	GlobalMemoryStatus(&gMemStatus);
-#if 0
-	Log("Physical: %lu\n", gMemStatus.dwTotalPhys);
-	Log("Page File: %lu\n", gMemStatus.dwTotalPageFile);
-	Log("Virtual: %lu\n", gMemStatus.dwTotalVirtual);
+	// Initialize Audio
+#ifdef ENABLE_ASM
+	InitProcSupport();
 #endif
-	// Allow allocations of at least 16MB
-	if (gMemStatus.dwTotalPhys < 16*1024*1024) gMemStatus.dwTotalPhys = 16*1024*1024;
-	TrackerSettings::Instance().m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
-	if(TrackerSettings::Instance().m_nSampleUndoMaxBuffer < (1 << 20)) TrackerSettings::Instance().m_nSampleUndoMaxBuffer = (1 << 20);
 
 	ASSERT(nullptr == m_pDocManager);
 	m_pDocManager = new CModDocManager();
@@ -806,14 +836,18 @@ BOOL CTrackApp::InitInstance()
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
 
-	//Force use of custom ini file rather than windowsDir\executableName.ini
-	if (m_pszProfileName)
-	{
-		free((void *)m_pszProfileName);
-	}
-	m_pszProfileName = _tcsdup(m_szConfigFileName);
+	// Construct auto saver instance, class TrackerSettings expects it being available.
+	CMainFrame::m_pAutoSaver = new CAutoSaver();
 
-	int mruListLength = GetPrivateProfileInt("Misc", "MRUListLength", 10, m_pszProfileName);
+	m_pSettingsIniFile = new IniFileSettingsBackend(mpt::LocaleToPath(m_szConfigFileName));
+	
+	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
+
+	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
+
+	m_pPluginCache = new IniFileSettingsContainer(mpt::LocaleToPath(m_szPluginCacheFileName));
+
+	int mruListLength = GetSettings().Read<int32>("Misc", "MRUListLength", 10);
 	Limit(mruListLength, 0, 15);
 	LoadStdProfileSettings((UINT)mruListLength);  // Load standard INI file options (including MRU)
 
@@ -825,24 +859,8 @@ BOOL CTrackApp::InitInstance()
 		RUNTIME_CLASS(CModControlView));
 	AddDocTemplate(m_pModTemplate);
 
-	// Initialize Audio
-#ifdef ENABLE_ASM
-	InitProcSupport();
-	// rough heuristic to select less cpu consuming defaults for old CPUs
-	if(GetProcSupport() & PROCSUPPORT_MMX)
-	{
-		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_SPLINE;
-	}
-	if(GetProcSupport() & PROCSUPPORT_SSE)
-	{
-		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_POLYPHASE;
-	}
-#else
-	// just use a sane default
-	TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_POLYPHASE;
-#endif
 	// Load Midi Library
-	if (m_szConfigFileName[0]) ImportMidiConfig(m_szConfigFileName);
+	ImportMidiConfig(theApp.GetSettings());
 
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame(/*cmdInfo.m_csExtension*/);
@@ -921,7 +939,7 @@ int CTrackApp::ExitInstance()
 	m_pSoundDevicesManager = nullptr;
 	if (glpMidiLibrary)
 	{
-		if (m_szConfigFileName[0]) ExportMidiConfig(m_szConfigFileName);
+		ExportMidiConfig(theApp.GetSettings());
 		for (UINT iMidi=0; iMidi<256; iMidi++)
 		{
 			if (glpMidiLibrary->MidiMap[iMidi])
@@ -941,6 +959,15 @@ int CTrackApp::ExitInstance()
 
 	// Uninitialize Plugins
 	UninitializeDXPlugins();
+
+	delete m_pPluginCache;
+	m_pPluginCache = nullptr;
+	delete m_pTrackerSettings;
+	m_pTrackerSettings = nullptr;
+	delete m_pSettings;
+	m_pSettings = nullptr;
+	delete m_pSettingsIniFile;
+	m_pSettingsIniFile = nullptr;
 
 	return CWinApp::ExitInstance();
 }
@@ -1916,38 +1943,34 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 	m_pPluginManager = new CVstPluginManager;
 	if(!m_pPluginManager) return FALSE;
-	const size_t numPlugins = GetPrivateProfileInt("VST Plugins", "NumPlugins", 0, m_szConfigFileName);
+	const size_t numPlugins = theApp.GetSettings().Read<int32>("VST Plugins", "NumPlugins", 0);
 
 	#ifndef NO_VST
-		char buffer[64];
-		GetPrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, buffer, CountOf(buffer), m_szConfigFileName);
+		std::string buffer = theApp.GetSettings().Read<std::string>("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString);
 
 		// Version <= 1.19.03.00 had buggy handling of custom host information. If last open was from
 		// such OpenMPT version, clear the related settings to get a clean start.
-		if(TrackerSettings::Instance().gcsPreviousVersion != 0 && TrackerSettings::Instance().gcsPreviousVersion < MAKE_VERSION_NUMERIC(1, 19, 03, 01) && !strcmp(buffer, "OpenMPT"))
+		if(TrackerSettings::Instance().gcsPreviousVersion != 0 && TrackerSettings::Instance().gcsPreviousVersion < MAKE_VERSION_NUMERIC(1, 19, 03, 01) && buffer == "OpenMPT")
 		{
-			// Remove keys by calling write with nullptr.
-			WritePrivateProfileString(_T("VST Plugins"), _T("HostProductString"), nullptr, m_szConfigFileName);
-			WritePrivateProfileString(_T("VST Plugins"), _T("HostVendorString"), nullptr, m_szConfigFileName);
-			WritePrivateProfileString(_T("VST Plugins"), _T("HostVendorVersion"), nullptr, m_szConfigFileName);
+			theApp.GetSettings().Remove("VST Plugins", "HostProductString");
+			theApp.GetSettings().Remove("VST Plugins", "HostVendorString");
+			theApp.GetSettings().Remove("VST Plugins", "HostVendorVersion");
 		}
 
-		GetPrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, buffer, CountOf(buffer), m_szConfigFileName);
-		strcpy(CVstPluginManager::s_szHostProductString, buffer);
-		GetPrivateProfileString("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString, buffer, CountOf(buffer), m_szConfigFileName);
-		strcpy(CVstPluginManager::s_szHostVendorString, buffer);
-		CVstPluginManager::s_nHostVendorVersion = GetPrivateProfileInt("VST Plugins", "HostVendorVersion", CVstPluginManager::s_nHostVendorVersion, m_szConfigFileName);
+		mpt::String::Copy(CVstPluginManager::s_szHostProductString, theApp.GetSettings().Read<std::string>("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString));
+		mpt::String::Copy(CVstPluginManager::s_szHostVendorString, theApp.GetSettings().Read<std::string>("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString));
+		CVstPluginManager::s_nHostVendorVersion = theApp.GetSettings().Read<int32>("VST Plugins", "HostVendorVersion", CVstPluginManager::s_nHostVendorVersion);
 	#endif
 
 
 	CString nonFoundPlugs;
-	const CString failedPlugin = CMainFrame::GetPrivateProfileCString("VST Plugins", "FailedPlugin", "", m_szConfigFileName);
+	const CString failedPlugin = theApp.GetSettings().Read<CString>("VST Plugins", "FailedPlugin", "");
 
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
 		s[0] = 0;
 		wsprintf(tmp, "Plugin%d", plug);
-		GetPrivateProfileString("VST Plugins", tmp, "", s, sizeof(s), m_szConfigFileName);
+		mpt::String::Copy(s, theApp.GetSettings().Read<std::string>("VST Plugins", tmp, ""));
 		if (s[0])
 		{
 			RelativePathToAbsolute(s);
@@ -1994,13 +2017,12 @@ BOOL CTrackApp::UninitializeDXPlugins()
 			{
 				AbsolutePathToRelative(s);
 			}
-			WritePrivateProfileString("VST Plugins", tmp, s, m_szConfigFileName);
+			theApp.GetSettings().Write<std::string>("VST Plugins", tmp, s);
 			plug++;
 		}
 		pPlug = pPlug->pNext;
 	}
-	wsprintf(s, "%d", plug);
-	WritePrivateProfileString("VST Plugins", "NumPlugins", s, m_szConfigFileName);
+	theApp.GetSettings().Write<int32>("VST Plugins", "NumPlugins", plug);
 #endif // NO_VST
 
 	delete m_pPluginManager;
@@ -2154,6 +2176,15 @@ void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
 	mpt::String::SetNullTerminator(szPath);
 }
 
+CString CTrackApp::AbsolutePathToRelative(const CString &path)
+//------------------------------------------------------------
+{
+	TCHAR szPath[_MAX_PATH] = "";
+	mpt::String::Copy(szPath, std::string(path.GetString()));
+	AbsolutePathToRelative(szPath);
+	return szPath;
+}
+
 
 // Convert a relative path to an absolute path.
 // Paths are relative to the executable path.
@@ -2191,6 +2222,16 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 	}
 	mpt::String::SetNullTerminator(szPath);
 }
+
+CString CTrackApp::RelativePathToAbsolute(const CString &path)
+//------------------------------------------------------------
+{
+	TCHAR szPath[_MAX_PATH] = "";
+	mpt::String::Copy(szPath, std::string(path.GetString()));
+	RelativePathToAbsolute(szPath);
+	return szPath;
+}
+
 
 void CTrackApp::RemoveMruItem(const int nItem)
 //--------------------------------------------
