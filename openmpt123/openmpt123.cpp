@@ -168,8 +168,9 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Show channel peak meters: " << flags.show_channel_meters << std::endl;
 	s << "Show details: " << flags.show_details << std::endl;
 	s << "Show message: " << flags.show_message << std::endl;
+	s << "Update: " << flags.ui_redraw_interval << "ms" << std::endl;
 	s << "Device: " << flags.device << std::endl;
-	s << "Buffer: " << flags.buffer << std::endl;
+	s << "Buffer: " << flags.buffer << "ms" << std::endl;
 	s << "Samplerate: " << flags.samplerate << std::endl;
 	s << "Channels: " << flags.channels << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
@@ -339,6 +340,8 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 		log << std::endl;
 		log << "     --[no-]details        Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
 		log << "     --[no-]message        Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
+		log << std::endl;
+		log << "     --update n            Set output update interval to n ms [default: " << commandlineflags().ui_redraw_interval << "]" << std::endl;
 		log << std::endl;
 		log << "     --samplerate n        Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
 		log << "     --channels n          use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
@@ -1272,6 +1275,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 			} else if ( arg == "--buffer" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.buffer;
+				++i;
+			} else if ( arg == "--update" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.ui_redraw_interval;
 				++i;
 			} else if ( arg == "--stdout" ) {
 				flags.use_stdout = true;
