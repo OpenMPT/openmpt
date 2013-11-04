@@ -473,7 +473,7 @@ void IniFileSettingsBackend::ConvertToUnicode(const std::wstring &backupTag)
 		? filename + L".ansi.bak"
 		: filename + L".ansi." + backupTag + L".bak"
 		;
-	MoveFileExW(filename.c_str(), backupFilename.c_str(), MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH);
+	CopyFileW(filename.c_str(), backupFilename.c_str(), FALSE);
 	WriteFileUTF16LE(filename, mpt::String::Decode(std::string(&data[0], &data[0] + data.size()), mpt::CharsetLocale));
 }
 
