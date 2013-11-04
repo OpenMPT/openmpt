@@ -431,7 +431,7 @@ public:
 #ifdef MODPLUG_TRACKER
 		opus_int32 complexity = 0;
 		opus.opus_multistream_encoder_ctl(st, OPUS_GET_COMPLEXITY(&complexity));
-		complexity = CMainFrame::GetPrivateProfileLong("Export", "OpusComplexity", complexity, theApp.GetConfigFileName());
+		complexity = theApp.GetSettings().Read<int32>("Export", "OpusComplexity", complexity);
 		opus.opus_multistream_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
 #endif // MODPLUG_TRACKER
 

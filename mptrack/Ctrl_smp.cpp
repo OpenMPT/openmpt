@@ -389,7 +389,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 	}
 	SetCurrentSample((lParam > 0) ? ((SAMPLEINDEX)lParam) : m_nSample);
 
-	m_nFinetuneStep = (uint16)GetPrivateProfileInt("Sample Editor", "FinetuneStep", 25, theApp.GetConfigFileName());
+	m_nFinetuneStep = (uint16)theApp.GetSettings().Read<int32>("Sample Editor", "FinetuneStep", 25);
 
 	// Initial Update
 	if (!m_bInitialized) UpdateView((m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
@@ -1027,7 +1027,7 @@ void CCtrlSamples::OnSampleSave()
 	mpt::String::SetNullTerminator(szFileName);
 	SanitizeFilename(szFileName);
 
-	CString format = CMainFrame::GetPrivateProfileCString("Sample Editor", "DefaultFormat", defaultFLAC ? "flac" : "wav", theApp.GetConfigFileName());
+	CString format = theApp.GetSettings().Read<CString>("Sample Editor", "DefaultFormat", defaultFLAC ? "flac" : "wav");
 	int filter = 1;
 	if(!format.CompareNoCase("flac"))
 		filter = 2;

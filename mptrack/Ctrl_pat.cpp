@@ -449,7 +449,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_SETRECORD:
 		if (lParam >= 0) m_bRecord = (BOOL)(lParam); else m_bRecord = !m_bRecord;
 		m_ToolBar.SetState(IDC_PATTERN_RECORD, ((m_bRecord) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
-		TrackerSettings::Instance().gbPatternRecord = m_bRecord;
+		TrackerSettings::Instance().gbPatternRecord = (m_bRecord != 0);
 		SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		break;
 
@@ -943,7 +943,7 @@ void CCtrlPatterns::OnPatternRecord()
 {
 	UINT nState = m_ToolBar.GetState(IDC_PATTERN_RECORD);
 	m_bRecord = ((nState & TBSTATE_CHECKED) != 0);
-	TrackerSettings::Instance().gbPatternRecord = m_bRecord;
+	TrackerSettings::Instance().gbPatternRecord = (m_bRecord != 0);
 	SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 	SwitchToView();
 }
@@ -954,7 +954,7 @@ void CCtrlPatterns::OnPatternVUMeters()
 {
 	UINT nState = m_ToolBar.GetState(ID_PATTERN_VUMETERS);
 	m_bVUMeters = ((nState & TBSTATE_CHECKED) != 0);
-	TrackerSettings::Instance().gbPatternVUMeters = m_bVUMeters;
+	TrackerSettings::Instance().gbPatternVUMeters = (m_bVUMeters != 0);
 	SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
 	SwitchToView();
 }
@@ -965,7 +965,7 @@ void CCtrlPatterns::OnPatternViewPlugNames()
 {
 	UINT nState = m_ToolBar.GetState(ID_VIEWPLUGNAMES);
 	m_bPluginNames = ((nState & TBSTATE_CHECKED) != 0);
-	TrackerSettings::Instance().gbPatternPluginNames = m_bPluginNames;
+	TrackerSettings::Instance().gbPatternPluginNames = (m_bPluginNames != 0);
 	SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
 	SwitchToView();
 }

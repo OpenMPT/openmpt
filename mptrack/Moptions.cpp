@@ -15,6 +15,8 @@
 #include "mainfrm.h"
 #include "moptions.h"
 #include "moddoc.h"
+#include "Settings.h"
+#include "dlg_misc.h"
 
 
 //////////////////////////////////////////////////////////////
@@ -492,11 +494,14 @@ void COptionsColors::OnLoadColorScheme()
 
 	// Ensure that all colours are reset (for outdated colour schemes)
 	OnPresetMPT();
-	for(int i = 0; i < MAX_MODCOLORS; i++)
 	{
-		TCHAR sKeyName[16];
-		wsprintf(sKeyName, "Color%02d", i);
-		CustomColors[i] = CMainFrame::GetPrivateProfileLong("Colors", sKeyName, CustomColors[i], files.first_file.c_str());
+		IniFileSettingsContainer file(mpt::LocaleToPath(files.first_file));
+		for(int i = 0; i < MAX_MODCOLORS; i++)
+		{
+			TCHAR sKeyName[16];
+			wsprintf(sKeyName, "Color%02d", i);
+			CustomColors[i] = file.Read<int32>("Colors", sKeyName, CustomColors[i]);
+		}
 	}
 	OnPreviewChanged();
 }
@@ -507,13 +512,16 @@ void COptionsColors::OnSaveColorScheme()
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mptcolor", "",
 		"OpenMPT Color Schemes|*.mptcolor||",
 		theApp.GetConfigPath());
-	if(files.abort) return;
-
-	for(int i = 0; i < MAX_MODCOLORS; i++)
+	if(files.abort)
+		return;
 	{
-		TCHAR sKeyName[16];
-		wsprintf(sKeyName, "Color%02d", i);
-		CMainFrame::WritePrivateProfileLong("Colors", sKeyName, CustomColors[i], files.first_file.c_str());
+		IniFileSettingsContainer file(mpt::LocaleToPath(files.first_file));
+		for(int i = 0; i < MAX_MODCOLORS; i++)
+		{
+			TCHAR sKeyName[16];
+			wsprintf(sKeyName, "Color%02d", i);
+			file.Write<int32>("Colors", sKeyName, CustomColors[i]);
+		}
 	}
 }
 
@@ -678,3 +686,91 @@ void COptionsGeneral::OnOptionSelChanged()
 	}
 	SetDlgItemText(IDC_TEXT1, (pszDesc) ? pszDesc : "");
 }
+
+
+
+#if defined(MPT_SETTINGS_CACHE)
+
+BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
+	ON_LBN_DBLCLK(IDC_LIST4,					OnOptionDblClick)
+END_MESSAGE_MAP()
+
+void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
+//-------------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CModTypeDlg)
+	DDX_Control(pDX, IDC_LIST4,			m_List);
+	//}}AFX_DATA_MAP
+}
+
+
+static std::string FormatSetting(const SettingPath &path, const SettingValue &val)
+//--------------------------------------------------------------------------------
+{
+	return path.FormatAsString() + " = " + mpt::String::Encode(val.FormatAsString(), mpt::CharsetLocale);
+}
+
+
+BOOL COptionsAdvanced::OnInitDialog()
+//-----------------------------------
+{
+	CPropertyPage::OnInitDialog();
+	ReInit();
+	return TRUE;
+}
+
+
+void COptionsAdvanced::ReInit()
+//-----------------------------
+{
+	m_List.ResetContent();
+	m_IndexToPath.clear();
+	for(SettingsContainer::SettingsMap::const_iterator it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
+	{
+		int index = m_List.AddString(FormatSetting(it->first, it->second).c_str());
+		m_IndexToPath[index] = it->first;
+	}
+}
+
+
+void COptionsAdvanced::OnOK()
+//---------------------------
+{
+	CPropertyPage::OnOK();
+}
+
+
+BOOL COptionsAdvanced::OnSetActive()
+//----------------------------------
+{
+	ReInit();
+	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_ADVANCED;
+	return CPropertyPage::OnSetActive();
+}
+
+
+void COptionsAdvanced::OnOptionDblClick()
+//---------------------------------------
+{
+	const int index = m_List.GetCurSel();
+	if(m_IndexToPath.find(index) == m_IndexToPath.end())
+	{
+		return;
+	}
+	const SettingPath path = m_IndexToPath[index];
+	SettingValue val = theApp.GetSettings().GetMap().find(path)->second;
+	CInputDlg inputDlg(this, path.FormatAsString().c_str(), mpt::String::Encode(val.FormatValueAsString(), mpt::CharsetLocale).c_str());
+	if(inputDlg.DoModal() != IDOK)
+	{
+		return;
+	}
+	val.SetFromString(mpt::String::Decode(inputDlg.resultString.GetString(), mpt::CharsetLocale));
+	theApp.GetSettings().Write(path, val);
+	m_List.DeleteString(index);
+	m_List.InsertString(index, FormatSetting(path, val).c_str());
+	m_List.SetCurSel(index);
+	OnSettingsChanged();
+}
+
+#endif // MPT_SETTINGS_CACHE

@@ -193,7 +193,7 @@ protected:
 
 public:
 	CCtrlPatterns(CModControlView &parent, CModDoc &document);
-	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glPatternWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG>* GetSplitPosRef() {return &TrackerSettings::Instance().glPatternWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	void SetCurrentPattern(PATTERNINDEX nPat);

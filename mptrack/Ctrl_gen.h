@@ -45,7 +45,7 @@ class CCtrlGeneral: public CModControlDlg
 {
 public:
 	CCtrlGeneral(CModControlView &parent, CModDoc &document);
-	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glGeneralWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG>* GetSplitPosRef() {return &TrackerSettings::Instance().glGeneralWindowHeight;} 	//rewbs.varWindowSize
 
 private:
 	void setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB);

@@ -29,6 +29,7 @@
 #include "../mptrack/mptrack.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/MainFrm.h"
+#include "../mptrack/Settings.h"
 #endif // MODPLUG_TRACKER
 #ifndef MODPLUG_TRACKER
 #include <fstream>
@@ -302,13 +303,14 @@ do{ \
 
 void TestVersion();
 void TestTypes();
-void TestLoadSaveFile();
-void TestPCnoteSerialization();
 void TestMisc();
-void TestMIDIEvents();
+void TestSettings();
 void TestStringIO();
+void TestMIDIEvents();
 void TestSampleConversion();
 void TestITCompression();
+void TestPCnoteSerialization();
+void TestLoadSaveFile();
 
 
 
@@ -319,6 +321,7 @@ void DoTests()
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
 	DO_TEST(TestMisc);
+	DO_TEST(TestSettings);
 	DO_TEST(TestStringIO);
 	DO_TEST(TestMIDIEvents);
 	DO_TEST(TestSampleConversion);
@@ -572,6 +575,122 @@ void TestMisc()
 		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->commands), MAX_EFFECTS);
 		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->volcommands), MAX_VOLCMDS);
 	}
+
+}
+
+
+
+#ifdef MODPLUG_TRACKER
+
+struct CustomSettingsTestType
+{
+	float x;
+	float y;
+	CustomSettingsTestType(float x_ = 0.0f, float y_ = 0.0f) : x(x_), y(y_) { }
+};
+
+} // namespace MptTest
+
+template <>
+inline MptTest::CustomSettingsTestType FromSettingValue(const SettingValue &val)
+{
+	ASSERT(val.GetTypeTag() == "myType");
+	std::string xy = val.as<std::string>();
+	if(xy.empty())
+	{
+		return MptTest::CustomSettingsTestType(0.0f, 0.0f);
+	}
+	std::size_t pos = xy.find("|");
+	std::string x = xy.substr(0, pos);
+	std::string y = xy.substr(pos + 1);
+	return MptTest::CustomSettingsTestType(ConvertStrTo<float>(x.c_str()), ConvertStrTo<float>(y.c_str()));
+}
+
+template <>
+inline SettingValue ToSettingValue(const MptTest::CustomSettingsTestType &val)
+{
+	return SettingValue(Stringify(val.x) + "|" + Stringify(val.y), "myType");
+}
+
+namespace MptTest {
+
+#endif // MODPLUG_TRACKER
+
+void TestSettings()
+//-----------------
+{
+
+#ifdef MODPLUG_TRACKER
+
+	VERIFY_EQUAL(SettingPath("a","b") < SettingPath("a","c"), true);
+	VERIFY_EQUAL(!(SettingPath("c","b") < SettingPath("a","c")), true);
+
+	{
+		DefaultSettingsContainer conf;
+
+		int32 foobar = conf.Read("Test", "bar", 23, "foobar");
+		conf.Write("Test", "bar", 64);
+		conf.Write("Test", "bar", 42);
+		conf.Read("Test", "baz", 4711);
+		foobar = conf.Read("Test", "bar", 28);
+	}
+
+	{
+		DefaultSettingsContainer conf;
+
+		int32 foobar = conf.Read("Test", "bar", 28, "foobar");
+		VERIFY_EQUAL(foobar, 42);
+		conf.Write("Test", "bar", 43);
+	}
+
+	{
+		DefaultSettingsContainer conf;
+		
+		int32 foobar = conf.Read("Test", "bar", 123, "foobar");
+		VERIFY_EQUAL(foobar, 43);
+		conf.Write("Test", "bar", 88);
+	}
+
+	{
+		DefaultSettingsContainer conf;
+
+		Setting<int> foo(conf, "Test", "bar", 99, "something");
+
+		VERIFY_EQUAL(foo, 88);
+
+		foo = 7;
+
+	}
+
+	{
+		DefaultSettingsContainer conf;
+		Setting<int> foo(conf, "Test", "bar", 99, "something");
+		VERIFY_EQUAL(foo, 7);
+	}
+
+
+	{
+		DefaultSettingsContainer conf;
+		conf.Read("Test", "struct", std::string(""));
+		conf.Write("Test", "struct", std::string(""));
+	}
+
+	{
+		DefaultSettingsContainer conf;
+		CustomSettingsTestType dummy = conf.Read("Test", "struct", CustomSettingsTestType(1.0f, 1.0f));
+		dummy = CustomSettingsTestType(0.125f, 32.0f);
+		conf.Write("Test", "struct", dummy);
+	}
+
+	{
+		DefaultSettingsContainer conf;
+		Setting<CustomSettingsTestType> dummyVar(conf, "Test", "struct", CustomSettingsTestType(1.0f, 1.0f));
+		CustomSettingsTestType dummy = dummyVar;
+		VERIFY_EQUAL(dummy.x, 0.125f);
+		VERIFY_EQUAL(dummy.y, 32.0f);
+	}
+
+#endif // MODPLUG_TRACKER
 
 }
 

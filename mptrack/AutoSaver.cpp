@@ -28,10 +28,6 @@
 // Construction/Destruction
 ///////////////////////////
 
-CAutoSaver::CAutoSaver() : m_bSaveInProgress(false)
-{
-}
-
 CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory,
 					   bool useOriginalPath, CString path, CString fileNameTemplate) :
 	m_bSaveInProgress(false)
@@ -45,7 +41,7 @@ CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory,
 	m_csFileNameTemplate = fileNameTemplate;
 }
 
-CAutoSaver::~CAutoSaver(void)
+CAutoSaver::~CAutoSaver()
 {
 }
 

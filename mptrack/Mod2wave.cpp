@@ -738,7 +738,7 @@ void CDoWaveConvert::OnButton1()
 	}
 
 	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
-	MixerSettings mixersettings = TrackerSettings::Instance().m_MixerSettings;
+	MixerSettings mixersettings = TrackerSettings::Instance().GetMixerSettings();
 	mixersettings.m_nMaxMixChannels = MAX_CHANNELS; // always use max mixing channels when rendering
 	mixersettings.gdwMixingFreq = samplerate;
 	mixersettings.gnChannels = channels;
@@ -754,7 +754,7 @@ void CDoWaveConvert::OnButton1()
 
 	m_pSndFile->ResetChannels();
 	m_pSndFile->SetMixerSettings(mixersettings);
-	m_pSndFile->SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
+	m_pSndFile->SetResamplerSettings(TrackerSettings::Instance().GetResamplerSettings());
 	m_pSndFile->InitPlayer(TRUE);
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 2047*1024)) m_dwFileLimit = 2047*1024; // 2GB
 	m_dwFileLimit <<= 10;

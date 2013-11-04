@@ -128,7 +128,7 @@ void COptionsSoundcard::UpdateEverything()
 	
 	CHAR s[128];
 
-	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING) ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().MixerFlags & SNDMIX_SOFTPANNING) ? MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK4, m_Settings.ExclusiveMode ? MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK5, m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
 
@@ -142,7 +142,7 @@ void COptionsSoundcard::UpdateEverything()
 		{
 			wsprintf(s, "%d (%s)", nCPUMix[n], szCPUNames[n]);
 			m_CbnPolyphony.AddString(s);
-			if (TrackerSettings::Instance().m_MixerSettings.m_nMaxMixChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
+			if (TrackerSettings::Instance().MixerMaxChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
 		}
 	}
 	// latency
@@ -188,7 +188,7 @@ void COptionsSoundcard::UpdateEverything()
 		m_SliderStereoSep.SetPos(2);
 		for (int n=0; n<=4; n++)
 		{
-			if ((int)TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation <= (int)(32 << n))
+			if ((int)TrackerSettings::Instance().MixerStereoSeparation <= (int)(32 << n))
 			{
 				m_SliderStereoSep.SetPos(n);
 				break;
@@ -371,9 +371,9 @@ void COptionsSoundcard::UpdateStereoSep()
 //---------------------------------------
 {
 	CHAR s[64];
-	TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation = 32 << m_SliderStereoSep.GetPos();
+	TrackerSettings::Instance().MixerStereoSeparation = 32 << m_SliderStereoSep.GetPos();
 	CMainFrame::GetMainFrame()->SetupPlayer();
-	wsprintf(s, "%d%%", (TrackerSettings::Instance().m_MixerSettings.m_nStereoSeparation * 100) / 128);
+	wsprintf(s, "%d%%", (TrackerSettings::Instance().MixerStereoSeparation * 100) / 128);
 	SetDlgItemText(IDC_TEXT1, s);
 
 }
@@ -382,7 +382,7 @@ void COptionsSoundcard::UpdateStereoSep()
 void COptionsSoundcard::SetPreAmpSliderPosition()
 //-----------------------------------------------
 {
-	int n = (TrackerSettings::Instance().m_MixerSettings.m_nPreAmp - 64) / 8;
+	int n = (TrackerSettings::Instance().MixerPreAmp - 64) / 8;
 	if ((n < 0) || (n > 40)) n = 16;
 	m_SliderPreAmp.SetPos(n);
 }
@@ -468,7 +468,10 @@ BOOL COptionsSoundcard::OnSetActive()
 void COptionsSoundcard::OnOK()
 //----------------------------
 {
-	if(IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_SOFTPANNING; else TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_SOFTPANNING;
+	if(IsDlgButtonChecked(IDC_CHECK2))
+		TrackerSettings::Instance().MixerFlags = TrackerSettings::Instance().MixerFlags | SNDMIX_SOFTPANNING;
+	else
+		TrackerSettings::Instance().MixerFlags = TrackerSettings::Instance().MixerFlags & ~SNDMIX_SOFTPANNING;
 	m_Settings.ExclusiveMode = IsDlgButtonChecked(IDC_CHECK4) ? true : false;
 	m_Settings.BoostThreadPriority = IsDlgButtonChecked(IDC_CHECK5) ? true : false;
 	// Mixing Freq
@@ -494,7 +497,7 @@ void COptionsSoundcard::OnOK()
 		int nmmx = m_CbnPolyphony.GetCurSel();
 		if ((nmmx >= 0) && (nmmx < CountOf(nCPUMix)))
 		{
-			TrackerSettings::Instance().m_MixerSettings.m_nMaxMixChannels = nCPUMix[nmmx];
+			TrackerSettings::Instance().MixerMaxChannels = nCPUMix[nmmx];
 			CMainFrame::GetMainFrame()->SetupPlayer();
 		}
 	}
@@ -606,7 +609,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	DWORD dwQuality;
 
 	CPropertyPage::OnInitDialog();
-	dwQuality = TrackerSettings::Instance().m_MixerSettings.DSPMask;
+	dwQuality = TrackerSettings::Instance().MixerDSPMask;
 	// Resampling type
 	{
 		m_CbnResampling.AddString("No Interpolation");
@@ -616,7 +619,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnResampling.AddString("Polyphase");
 		m_CbnResampling.AddString("XMMS-ModPlug");
 		//end rewbs.resamplerConf
-		m_CbnResampling.SetCurSel(TrackerSettings::Instance().m_ResamplerSettings.SrcMode);
+		m_CbnResampling.SetCurSel(TrackerSettings::Instance().ResamplerMode);
 	}
 	// Effects
 #ifndef NO_DSP
@@ -704,10 +707,10 @@ BOOL COptionsPlayer::OnInitDialog()
 	OnResamplerChanged();
 
 	char s[16] = "";
-	_ltoa(TrackerSettings::Instance().m_MixerSettings.glVolumeRampUpSamples, s, 10);
+	_ltoa(TrackerSettings::Instance().MixerVolumeRampUpSamples, s, 10);
 	m_CEditRampUp.SetWindowText(s);
 
-	_ltoa(TrackerSettings::Instance().m_MixerSettings.glVolumeRampDownSamples, s, 10);
+	_ltoa(TrackerSettings::Instance().MixerVolumeRampDownSamples, s, 10);
 	m_CEditRampDown.SetWindowText(s);
 
 	//end rewbs.resamplerConf
@@ -744,7 +747,7 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 //rewbs.resamplerConf
 void COptionsPlayer::OnWFIRTypeChanged()
 {
-	TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
+	TrackerSettings::Instance().ResamplerSubMode = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
 	OnSettingsChanged();
 }
 
@@ -761,7 +764,7 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.SetCurSel(0);
 		m_CbnWFIRType.EnableWindow(FALSE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff * 100)));
+		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().ResamplerCutoffPercent)));
 		break;
 	case SRCMODE_FIRFILTER:
 		m_CbnWFIRType.AddString("Hann");
@@ -772,10 +775,10 @@ void COptionsPlayer::OnResamplerChanged()
 		m_CbnWFIRType.AddString("Blackman 4 Tap 92");
 		m_CbnWFIRType.AddString("Blackman 4 Tap 74");
 		m_CbnWFIRType.AddString("Kaiser 4 Tap");
-		m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType);
+		m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
 		m_CbnWFIRType.EnableWindow(TRUE);
 		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff*100)));
+		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().ResamplerCutoffPercent)));
 		break;
 	default:
 		m_CbnWFIRType.AddString("None");
@@ -865,23 +868,23 @@ void COptionsPlayer::OnOK()
 	m_CEditWFIRCutoff.GetWindowText(s);
 	if(s != "")
 	{
-		double newCutoff = atoi(s)/100.0;
-		Limit(newCutoff, 0.0, 1.0);
-		TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff = newCutoff;
+		int newCutoff = atoi(s);
+		Limit(newCutoff, 0, 100);
+		TrackerSettings::Instance().ResamplerCutoffPercent = newCutoff;
 	}
 	{
 		CHAR s[64];
-		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().m_ResamplerSettings.gdWFIRCutoff*100)));
+		wsprintf(s, "%d", TrackerSettings::Instance().ResamplerCutoffPercent.Get());
 		m_CEditWFIRCutoff.SetWindowText(s);
 	}
 	//TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType set in OnWFIRTypeChange
 
 	m_CEditRampUp.GetWindowText(s);
-	TrackerSettings::Instance().m_MixerSettings.glVolumeRampUpSamples = atol(s);
+	TrackerSettings::Instance().MixerVolumeRampUpSamples = atol(s);
 	m_CEditRampDown.GetWindowText(s);
-	TrackerSettings::Instance().m_MixerSettings.glVolumeRampDownSamples = atol(s);
-	TrackerSettings::Instance().m_ResamplerSettings.SrcMode = (ResamplingMode)dwSrcMode;
-	TrackerSettings::Instance().m_MixerSettings.DSPMask = dwQuality;
+	TrackerSettings::Instance().MixerVolumeRampDownSamples = atol(s);
+	TrackerSettings::Instance().ResamplerMode = (ResamplingMode)dwSrcMode;
+	TrackerSettings::Instance().MixerDSPMask = dwQuality;
 	CMainFrame::GetMainFrame()->SetupPlayer();
 	CPropertyPage::OnOK();
 }
@@ -1258,12 +1261,12 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	static const struct
 	{
 		const char *text;
-		TrackerSettings::RecordAftertouchOptions option;
+		RecordAftertouchOptions option;
 	} aftertouchOptions[] =
 	{
-		{ "Do not record Aftertouch", TrackerSettings::atDoNotRecord },
-		{ "Record as Volume Commands", TrackerSettings::atRecordAsVolume },
-		{ "Record as MIDI Macros", TrackerSettings::atRecordAsMacro },
+		{ "Do not record Aftertouch", atDoNotRecord },
+		{ "Record as Volume Commands", atRecordAsVolume },
+		{ "Record as MIDI Macros", atRecordAsMacro },
 	};
 
 	for(size_t i = 0; i < CountOf(aftertouchOptions); i++)
@@ -1280,7 +1283,7 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT3, TrackerSettings::Instance().midiVelocityAmp);
 	m_SpinAmp.SetRange(1, 10000);
 
-	SetDlgItemText(IDC_EDIT4, TrackerSettings::Instance().IgnoredCCsToString().c_str());
+	SetDlgItemText(IDC_EDIT4, IgnoredCCsToString(TrackerSettings::Instance().midiIgnoreCCs).c_str());
 
 	// Midi Import settings
 	SetDlgItemInt(IDC_EDIT1, TrackerSettings::Instance().midiImportSpeed);
@@ -1313,7 +1316,7 @@ void CMidiSetupDlg::OnOK()
 		if (n >= 0) m_nMidiDevice = combo->GetItemData(n);
 	}
 
-	TrackerSettings::Instance().aftertouchBehaviour = static_cast<TrackerSettings::RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
+	TrackerSettings::Instance().aftertouchBehaviour = static_cast<RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
 
 	TrackerSettings::Instance().midiImportSpeed = GetDlgItemInt(IDC_EDIT1);
 	TrackerSettings::Instance().midiImportPatternLen = GetDlgItemInt(IDC_EDIT2);
@@ -1321,7 +1324,7 @@ void CMidiSetupDlg::OnOK()
 
 	CString cc;
 	GetDlgItemText(IDC_EDIT4, cc);
-	TrackerSettings::Instance().ParseIgnoredCCs(cc);
+	TrackerSettings::Instance().midiIgnoreCCs = StringToIgnoredCCs(cc.GetString());
 
 	if (pMainFrm) pMainFrm->SetupMidi(m_dwMidiSetup, m_nMidiDevice);
 	CPropertyPage::OnOK();

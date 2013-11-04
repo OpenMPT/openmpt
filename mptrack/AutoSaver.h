@@ -9,6 +9,7 @@
 
 
 #pragma once
+
 #include "resource.h"
 
 class CModDoc;
@@ -17,10 +18,9 @@ class CAutoSaver
 {
 public:
 //Cons/Destr
-	CAutoSaver(void);
-	CAutoSaver(bool enabled, int saveInterval, int backupHistory,
-			   bool useOriginalPath, CString path, CString fileNameTemplate);
-	~CAutoSaver(void);
+	CAutoSaver(bool enabled=true, int saveInterval=10, int backupHistory=3,
+			   bool useOriginalPath=true, CString path="", CString fileNameTemplate="");
+	~CAutoSaver();
 	
 //Work
 	bool DoSave(DWORD curTime);
@@ -28,6 +28,7 @@ public:
 //Member access
 	void Enable();
 	void Disable();
+	void SetEnabled(bool enabled) { if(enabled) Enable(); else Disable(); }
 	bool IsEnabled();
 	void SetUseOriginalPath(bool useOrgPath);
 	bool GetUseOriginalPath();
@@ -62,7 +63,6 @@ private:
 	CString m_csFileNameTemplate;
 
 };
-#pragma once
 
 
 // CAutoSaverGUI dialog

@@ -157,7 +157,7 @@ public:
 
 #ifdef MODPLUG_TRACKER
 		int compressionLevel = 5;
-		compressionLevel = CMainFrame::GetPrivateProfileLong("Export", "FLACCompressionLevel", compressionLevel, theApp.GetConfigFileName());
+		compressionLevel = theApp.GetSettings().Read<int32>("Export", "FLACCompressionLevel", compressionLevel);
 		FLAC__stream_encoder_set_compression_level(encoder, compressionLevel);
 #endif // MODPLUG_TRACKER
 		
