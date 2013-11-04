@@ -11,27 +11,49 @@
 #pragma once
 
 #include "StreamEncoder.h"
+#include "Settings.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Direct To Disk Recording
 
 
+struct StoredTags
+{
+	Setting<std::wstring> artist;
+	Setting<std::wstring> album;
+	Setting<std::wstring> trackno;
+	Setting<std::wstring> year;
+	Setting<std::wstring> url;
+
+	Setting<std::wstring> genre;
+
+	StoredTags(SettingsContainer &conf);
+
+};
+
+
 struct CWaveConvertSettings
 {
 	std::vector<EncoderFactoryBase*> EncoderFactories;
+	std::vector<MPT_SHARED_PTR<Encoder::Settings> > EncoderSettings;
+
+	Setting<std::string> EncoderName;
 	std::size_t EncoderIndex;
 
 	SampleFormat FinalSampleFormat;
-	Encoder::Settings EncoderSettings;
+
+	StoredTags storedTags;
 	FileTags Tags;
 
 	bool Normalize;
 	bool SilencePlugBuffers;
 
+	std::size_t FindEncoder(const std::string &name) const;
 	void SelectEncoder(std::size_t index);
 	EncoderFactoryBase *GetEncoderFactory() const;
 	const Encoder::Traits *GetTraits() const;
-	CWaveConvertSettings(std::size_t defaultEncoder, const std::vector<EncoderFactoryBase*> &encFactories);
+	Encoder::Settings &GetEncoderSettings() const;
+	CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories);
 };
 
 //================================
@@ -66,8 +88,13 @@ private:
 	void FillFormats();
 	void FillTags();
 
+	void LoadTags();
+
+	void SaveEncoderSettings();
+	void SaveTags();
+
 public:
-	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile *sndfile, std::size_t defaultEncoder, const std::vector<EncoderFactoryBase*> &encFactories);
+	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile *sndfile, const std::vector<EncoderFactoryBase*> &encFactories);
 
 public:
 	void UpdateDialog();

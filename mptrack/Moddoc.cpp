@@ -1648,7 +1648,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	if ((!pMainFrm) || (!m_SndFile.GetType()) || encFactories.empty()) return;
 
-	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1, &m_SndFile, encFactories.size() > 2 ? 2 : 0, encFactories);
+	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1, &m_SndFile, encFactories);
 	if (wsdlg.DoModal() != IDOK) return;
 
 	EncoderFactoryBase *encFactory = wsdlg.m_Settings.GetEncoderFactory();

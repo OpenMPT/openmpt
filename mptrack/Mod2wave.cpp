@@ -72,6 +72,38 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 	return 0;
 }
 
+
+static std::wstring GetDefaultArtist()
+//------------------------------------
+{
+	if(std::getenv("USERNAME"))
+	{
+		return mpt::String::Decode(std::getenv("USERNAME"), mpt::CharsetLocale);
+	}
+	return std::wstring();
+}
+
+
+static std::wstring GetDefaultYear()
+//----------------------------------
+{
+	return mpt::String::Decode(CTime::GetCurrentTime().Format("%Y").GetString(), mpt::CharsetLocale);
+}
+
+
+StoredTags::StoredTags(SettingsContainer &conf)
+//---------------------------------------------
+	: artist(conf, "Export", "TagArtist", GetDefaultArtist())
+	, album(conf, "Export", "TagAlbum", L"")
+	, trackno(conf, "Export", "TagTrackNo", L"")
+	, year(conf, "Export", "TagYear", GetDefaultYear())
+	, url(conf, "Export", "TagURL", L"")
+	, genre(conf, "Export", "TagGenre", L"")
+{
+	return;
+}
+
+
 ///////////////////////////////////////////////////
 // CWaveConvert - setup for converting a wave file
 
@@ -91,10 +123,10 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 END_MESSAGE_MAP()
 
 
-CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile *sndfile, std::size_t defaultEncoder, const std::vector<EncoderFactoryBase*> &encFactories)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile *sndfile, const std::vector<EncoderFactoryBase*> &encFactories)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	: CDialog(IDD_WAVECONVERT, parent)
-	, m_Settings(defaultEncoder, encFactories)
+	, m_Settings(theApp.GetSettings(), encFactories)
 {
 	ASSERT(!encFactories.empty());
 	encTraits = m_Settings.GetTraits();
@@ -167,10 +199,16 @@ BOOL CWaveConvert::OnInitDialog()
 	FillChannels();
 	FillFormats();
 
-	SetDlgItemText(IDC_EDIT11, m_pSndFile->GetTitle().c_str());
+	LoadTags();
+
 	m_EditYear.SetLimitText(4);
-	CTime tTime = CTime::GetCurrentTime();
-	m_EditYear.SetWindowText(tTime.Format("%Y"));
+
+	m_EditTitle.SetWindowText(mpt::String::Encode(m_Settings.Tags.title, mpt::CharsetLocale).c_str());
+	m_EditAuthor.SetWindowText(mpt::String::Encode(m_Settings.Tags.artist, mpt::CharsetLocale).c_str());
+	m_EditURL.SetWindowText(mpt::String::Encode(m_Settings.Tags.url, mpt::CharsetLocale).c_str());
+	m_EditAlbum.SetWindowText(mpt::String::Encode(m_Settings.Tags.album, mpt::CharsetLocale).c_str());
+	m_EditYear.SetWindowText(mpt::String::Encode(m_Settings.Tags.year, mpt::CharsetLocale).c_str());
+	m_EditGenre.SetWindowText(mpt::String::Encode(m_Settings.Tags.genre, mpt::CharsetLocale).c_str());
 
 	FillTags();
 
@@ -192,19 +230,46 @@ BOOL CWaveConvert::OnInitDialog()
 }
 
 
+void CWaveConvert::LoadTags()
+//---------------------------
+{
+	m_Settings.Tags.title = mpt::String::Decode(m_pSndFile->GetTitle(), mpt::CharsetLocale);
+	m_Settings.Tags.comments = mpt::String::Decode(m_pSndFile->songMessage, mpt::CharsetLocale);
+	m_Settings.Tags.artist = m_Settings.storedTags.artist;
+	m_Settings.Tags.album = m_Settings.storedTags.album;
+	m_Settings.Tags.trackno = m_Settings.storedTags.trackno;
+	m_Settings.Tags.year = m_Settings.storedTags.year;
+	m_Settings.Tags.url = m_Settings.storedTags.url;
+	m_Settings.Tags.genre = m_Settings.storedTags.genre;
+}
+
+
+void CWaveConvert::SaveTags()
+//---------------------------
+{
+	m_Settings.storedTags.artist = m_Settings.Tags.artist;
+	m_Settings.storedTags.album = m_Settings.Tags.album;
+	m_Settings.storedTags.trackno = m_Settings.Tags.trackno;
+	m_Settings.storedTags.year = m_Settings.Tags.year;
+	m_Settings.storedTags.url = m_Settings.Tags.url;
+	m_Settings.storedTags.genre = m_Settings.Tags.genre;
+}
+
+
 void CWaveConvert::FillTags()
 //---------------------------
 {
+	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 
 	const bool canTags = encTraits->canTags;
 
 	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 	Encoder::Mode mode = (Encoder::Mode)((dwFormat >> 24) & 0xff);
 
-	CheckDlgButton(IDC_CHECK3, encTraits->canCues?m_Settings.EncoderSettings.Cues?TRUE:FALSE:FALSE);
+	CheckDlgButton(IDC_CHECK3, encTraits->canCues?encSettings.Cues?TRUE:FALSE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), encTraits->canCues?TRUE:FALSE);
 
-	CheckDlgButton(IDC_CHECK7, canTags?m_Settings.EncoderSettings.Tags?TRUE:FALSE:FALSE);
+	CheckDlgButton(IDC_CHECK7, canTags?encSettings.Tags?TRUE:FALSE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK7), canTags?TRUE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO3), canTags?TRUE:FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), canTags?TRUE:FALSE);
@@ -272,6 +337,7 @@ void CWaveConvert::FillFileTypes()
 void CWaveConvert::FillSamplerates()
 //----------------------------------
 {
+	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnSampleRate.CComboBox::ResetContent();
 	int sel = 0;
 	for(std::vector<uint32>::const_iterator it = encTraits->samplerates.begin(); it != encTraits->samplerates.end(); ++it)
@@ -279,7 +345,7 @@ void CWaveConvert::FillSamplerates()
 		uint32 samplerate = *it;
 		int ndx = m_CbnSampleRate.AddString(mpt::String::Format("%d Hz", samplerate).c_str());
 		m_CbnSampleRate.SetItemData(ndx, samplerate);
-		if(samplerate == m_Settings.EncoderSettings.Samplerate)
+		if(samplerate == encSettings.Samplerate)
 		{
 			sel = ndx;
 		}
@@ -291,6 +357,7 @@ void CWaveConvert::FillSamplerates()
 void CWaveConvert::FillChannels()
 //-------------------------------
 {
+	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnChannels.CComboBox::ResetContent();
 	int sel = 0;
 	for(int channels = 4; channels >= 1; channels /= 2)
@@ -301,7 +368,7 @@ void CWaveConvert::FillChannels()
 		}
 		int ndx = m_CbnChannels.AddString(gszChnCfgNames[(channels+2)/2-1]);
 		m_CbnChannels.SetItemData(ndx, channels);
-		if(channels == m_Settings.EncoderSettings.Channels)
+		if(channels == encSettings.Channels)
 		{
 			sel = ndx;
 		}
@@ -313,8 +380,9 @@ void CWaveConvert::FillChannels()
 void CWaveConvert::FillFormats()
 //------------------------------
 {
+	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnSampleFormat.CComboBox::ResetContent();
-	int sel = 0;
+	int sel = -1;
 	DWORD dwSamplerate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
 	int nChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
 	if(encTraits->modes & Encoder::ModeQuality)
@@ -323,7 +391,7 @@ void CWaveConvert::FillFormats()
 		{
 			int ndx = m_CbnSampleFormat.AddString(m_Settings.GetEncoderFactory()->DescribeQuality(quality * 0.01f).c_str());
 			m_CbnSampleFormat.SetItemData(ndx, (Encoder::ModeQuality<<24) | (quality<<0));
-			if(m_Settings.EncoderSettings.Mode == Encoder::ModeQuality && Util::Round<int>(m_Settings.EncoderSettings.Quality*100.0f) == quality)
+			if(encSettings.Mode == Encoder::ModeQuality && Util::Round<int>(encSettings.Quality*100.0f) == quality)
 			{
 				sel = ndx;
 			}
@@ -335,7 +403,7 @@ void CWaveConvert::FillFormats()
 		{
 			int ndx = m_CbnSampleFormat.AddString(m_Settings.GetEncoderFactory()->DescribeBitrateVBR(encTraits->bitrates[bitrate]).c_str());
 			m_CbnSampleFormat.SetItemData(ndx, (Encoder::ModeVBR<<24) | (encTraits->bitrates[bitrate]<<0));
-			if(m_Settings.EncoderSettings.Mode == Encoder::ModeVBR && static_cast<int>(m_Settings.EncoderSettings.Bitrate) == encTraits->bitrates[bitrate])
+			if(encSettings.Mode == Encoder::ModeVBR && static_cast<int>(encSettings.Bitrate) == encTraits->bitrates[bitrate])
 			{
 				sel = ndx;
 			}
@@ -347,7 +415,7 @@ void CWaveConvert::FillFormats()
 		{
 			int ndx = m_CbnSampleFormat.AddString(m_Settings.GetEncoderFactory()->DescribeBitrateABR(encTraits->bitrates[bitrate]).c_str());
 			m_CbnSampleFormat.SetItemData(ndx, (Encoder::ModeABR<<24) | (encTraits->bitrates[bitrate]<<0));
-			if(m_Settings.EncoderSettings.Mode == Encoder::ModeABR && static_cast<int>(m_Settings.EncoderSettings.Bitrate) == encTraits->bitrates[bitrate])
+			if(encSettings.Mode == Encoder::ModeABR && static_cast<int>(encSettings.Bitrate) == encTraits->bitrates[bitrate])
 			{
 				sel = ndx;
 			}
@@ -359,7 +427,7 @@ void CWaveConvert::FillFormats()
 		{
 			int ndx = m_CbnSampleFormat.AddString(m_Settings.GetEncoderFactory()->DescribeBitrateCBR(encTraits->bitrates[bitrate]).c_str());
 			m_CbnSampleFormat.SetItemData(ndx, (Encoder::ModeCBR<<24) | (encTraits->bitrates[bitrate]<<0));
-			if(m_Settings.EncoderSettings.Mode == Encoder::ModeCBR && static_cast<int>(m_Settings.EncoderSettings.Bitrate) == encTraits->bitrates[bitrate])
+			if(encSettings.Mode == Encoder::ModeCBR && static_cast<int>(encSettings.Bitrate) == encTraits->bitrates[bitrate])
 			{
 				sel = ndx;
 			}
@@ -381,14 +449,41 @@ void CWaveConvert::FillFormats()
 			}
 			int ndx = m_CbnSampleFormat.AddString(format.Description.c_str());
 			m_CbnSampleFormat.SetItemData(ndx, i & 0xffff);
-			if(m_Settings.EncoderSettings.Mode & Encoder::ModeEnumerated && (int)i == encTraits->defaultFormat)
-			{
-				sel = ndx;
-			} else if(m_Settings.EncoderSettings.Mode & Encoder::ModeEnumerated && format.Bitrate > 0 && m_Settings.EncoderSettings.Bitrate == format.Bitrate)
+			if(encSettings.Mode & Encoder::ModeEnumerated && (int)i == encSettings.Format)
 			{
 				sel = ndx;
 			}
 		}
+		if(sel == -1 && encSettings.Mode & Encoder::ModeEnumerated)
+		{
+			// select enumerated format based on bitrate
+			for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
+			{
+				int i = (int)((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
+				const Encoder::Format &format = encTraits->formats[i];
+				if(format.Bitrate != 0 && encSettings.Bitrate == format.Bitrate)
+				{
+					sel = ndx;
+				}
+			}
+		}
+		if(sel == -1 && encSettings.Mode & Encoder::ModeEnumerated && encTraits->defaultBitrate != 0)
+		{
+			// select enumerated format based on default bitrate
+			for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
+			{
+				int i = (int)((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
+				const Encoder::Format &format = encTraits->formats[i];
+				if(encSettings.Bitrate == encTraits->defaultBitrate)
+				{
+					sel = ndx;
+				}
+			}
+		}
+	}
+	if(sel == -1)
+	{
+		sel = 0;
 	}
 	m_CbnSampleFormat.SetCurSel(sel);
 }
@@ -397,6 +492,7 @@ void CWaveConvert::FillFormats()
 void CWaveConvert::OnFileTypeChanged()
 //------------------------------------
 {
+	SaveEncoderSettings();
 	DWORD dwFileType = m_CbnFileType.GetItemData(m_CbnFileType.GetCurSel());
 	m_Settings.SelectEncoder(dwFileType);
 	encTraits = m_Settings.GetTraits();
@@ -410,6 +506,7 @@ void CWaveConvert::OnFileTypeChanged()
 void CWaveConvert::OnSamplerateChanged()
 //--------------------------------------
 {
+	SaveEncoderSettings();
 	//DWORD dwSamplerate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
 	FillFormats();
 }
@@ -418,6 +515,7 @@ void CWaveConvert::OnSamplerateChanged()
 void CWaveConvert::OnChannelsChanged()
 //------------------------------------
 {
+	SaveEncoderSettings();
 	//UINT nChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
 	FillFormats();
 }
@@ -426,6 +524,7 @@ void CWaveConvert::OnChannelsChanged()
 void CWaveConvert::OnFormatChanged()
 //----------------------------------
 {
+	SaveEncoderSettings();
 	//DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 	FillTags();
 }
@@ -528,8 +627,69 @@ void CWaveConvert::OnOK()
 	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED;
 	m_bInstrumentMode= IsDlgButtonChecked(IDC_CHECK6) != BST_UNCHECKED;
 
-	m_Settings.EncoderSettings.Samplerate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
-	m_Settings.EncoderSettings.Channels = (uint16)m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+	SaveEncoderSettings();
+
+	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+
+	m_Settings.Tags = FileTags();
+
+	if(encSettings.Tags)
+	{
+		CString tmp;
+
+		m_EditTitle.GetWindowText(tmp);
+		m_Settings.Tags.title = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+
+		m_EditAuthor.GetWindowText(tmp);
+		m_Settings.Tags.artist = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+
+		m_EditAlbum.GetWindowText(tmp);
+		m_Settings.Tags.album = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+
+		m_EditURL.GetWindowText(tmp);
+		m_Settings.Tags.url = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+
+		if((encTraits->modesWithFixedGenres & encSettings.Mode) && !encTraits->genres.empty())
+		{
+			m_CbnGenre.GetWindowText(tmp);
+			m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+		} else
+		{
+			m_EditGenre.GetWindowText(tmp);
+			m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+		}
+
+		m_EditYear.GetWindowText(tmp);
+		m_Settings.Tags.year = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+		if(m_Settings.Tags.year == L"0")
+		{
+			m_Settings.Tags.year = std::wstring();
+		}
+
+		if(!m_pSndFile->songMessage.empty())
+		{
+			m_Settings.Tags.comments = mpt::String::Decode(m_pSndFile->songMessage, mpt::CharsetLocale);
+		}
+
+		m_Settings.Tags.bpm = mpt::String::Decode(mpt::String::Format("%d", (int)m_pSndFile->GetCurrentBPM()), mpt::CharsetLocale);
+
+		SaveTags();
+
+	}
+
+	CDialog::OnOK();
+
+}
+
+
+void CWaveConvert::SaveEncoderSettings()
+//--------------------------------------
+{
+
+	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+
+	encSettings.Samplerate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
+	encSettings.Channels = (uint16)m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
 	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 
 	if(encTraits->modes & Encoder::ModeEnumerated)
@@ -542,75 +702,40 @@ void CWaveConvert::OnOK()
 		{
 			m_Settings.FinalSampleFormat = encTraits->formats[format].Sampleformat;
 		}
-		m_Settings.EncoderSettings.Format = format;
-		m_Settings.EncoderSettings.Mode = encTraits->defaultMode;
-		m_Settings.EncoderSettings.Bitrate = encTraits->defaultBitrate;
-		m_Settings.EncoderSettings.Quality = encTraits->defaultQuality;
+		encSettings.Format = format;
+		encSettings.Mode = Encoder::ModeEnumerated;
+		encSettings.Bitrate = encTraits->formats[format].Bitrate != 0 ? encTraits->formats[format].Bitrate : encTraits->defaultBitrate;
+		encSettings.Quality = encTraits->defaultQuality;
 	} else
 	{
 		m_Settings.FinalSampleFormat = SampleFormatFloat32;
 		Encoder::Mode mode = (Encoder::Mode)((dwFormat >> 24) & 0xff);
 		int quality = (int)((dwFormat >> 0) & 0xff);
 		int bitrate = (int)((dwFormat >> 0) & 0xffff);
-		m_Settings.EncoderSettings.Mode = mode;
-		m_Settings.EncoderSettings.Bitrate = bitrate;
-		m_Settings.EncoderSettings.Quality = static_cast<float>(quality) * 0.01f;
-		m_Settings.EncoderSettings.Format = -1;
+		encSettings.Mode = mode;
+		encSettings.Bitrate = bitrate;
+		encSettings.Quality = static_cast<float>(quality) * 0.01f;
+		encSettings.Format = -1;
 	}
 	
-	m_Settings.EncoderSettings.Cues = IsDlgButtonChecked(IDC_CHECK3) ? true : false;
+	encSettings.Cues = IsDlgButtonChecked(IDC_CHECK3) ? true : false;
 
+	encSettings.Tags = IsDlgButtonChecked(IDC_CHECK7) ? true : false;
+
+}
+
+
+std::size_t CWaveConvertSettings::FindEncoder(const std::string &name) const
+//--------------------------------------------------------------------------
+{
+	for(std::size_t i = 0; i < EncoderFactories.size(); ++i)
 	{
-
-		m_Settings.EncoderSettings.Tags = IsDlgButtonChecked(IDC_CHECK7) ? true : false;
-
-		m_Settings.Tags = FileTags();
-
-		if(m_Settings.EncoderSettings.Tags)
+		if(EncoderFactories[i]->GetTraits().encoderSettingsName == name)
 		{
-			CString tmp;
-
-			m_EditTitle.GetWindowText(tmp);
-			m_Settings.Tags.title = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
-
-			m_EditAuthor.GetWindowText(tmp);
-			m_Settings.Tags.artist = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
-
-			m_EditAlbum.GetWindowText(tmp);
-			m_Settings.Tags.album = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
-
-			m_EditURL.GetWindowText(tmp);
-			m_Settings.Tags.url = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
-
-			if((encTraits->modesWithFixedGenres & m_Settings.EncoderSettings.Mode) && !encTraits->genres.empty())
-			{
-				m_CbnGenre.GetWindowText(tmp);
-				m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
-			} else
-			{
-				m_EditGenre.GetWindowText(tmp);
-				m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
-			}
-
-			m_EditYear.GetWindowText(tmp);
-			m_Settings.Tags.year = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
-			if(m_Settings.Tags.year == L"0")
-			{
-				m_Settings.Tags.year = std::wstring();
-			}
-
-			if(!m_pSndFile->songMessage.empty())
-			{
-				m_Settings.Tags.comments = mpt::String::Decode(m_pSndFile->songMessage, mpt::CharsetLocale);
-			}
-
-			m_Settings.Tags.bpm = mpt::String::Decode(mpt::String::Format("%d", (int)m_pSndFile->GetCurrentBPM()), mpt::CharsetLocale);
-
+			return i;
 		}
-
 	}
-
-	CDialog::OnOK();
+	return EncoderFactories.size() > 2 ? 2 : 0;
 }
 
 
@@ -620,15 +745,12 @@ void CWaveConvertSettings::SelectEncoder(std::size_t index)
 	ASSERT(!EncoderFactories.empty());
 	ASSERT(index < EncoderFactories.size());
 	EncoderIndex = index;
-	const Encoder::Traits *encTraits = GetTraits();
-	EncoderSettings.Mode = encTraits->defaultMode;
-	EncoderSettings.Bitrate = encTraits->defaultBitrate;
-	EncoderSettings.Quality = encTraits->defaultQuality;
+	EncoderName = EncoderFactories[EncoderIndex]->GetTraits().encoderSettingsName;
 }
 
 
 EncoderFactoryBase *CWaveConvertSettings::GetEncoderFactory() const
-//--------------------------------------------------------------
+//-----------------------------------------------------------------
 {
 	ASSERT(!EncoderFactories.empty());
 	return EncoderFactories[EncoderIndex];
@@ -643,15 +765,44 @@ const Encoder::Traits *CWaveConvertSettings::GetTraits() const
 }
 
 
-CWaveConvertSettings::CWaveConvertSettings(std::size_t defaultEncoder, const std::vector<EncoderFactoryBase*> &encFactories)
-//--------------------------------------------------------------------------------------------------------------------------
+Encoder::Settings &CWaveConvertSettings::GetEncoderSettings() const
+//-----------------------------------------------------------------
+{
+	ASSERT(!EncoderSettings.empty());
+	return *(EncoderSettings[EncoderIndex]);
+}
+
+
+CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories)
+//-----------------------------------------------------------------------------------------------------------------------
 	: EncoderFactories(encFactories)
-	, EncoderIndex(defaultEncoder)
+	, EncoderName(conf, "Export", encFactories.size() > 2 ? "LossyEncoder" : "LosslessEncoder", "")
+	, EncoderIndex(FindEncoder(EncoderName))
 	, FinalSampleFormat(SampleFormatInt16)
-	, EncoderSettings(true, true, 44100, 2, Encoder::ModeCBR, 256, 0.8f, -1)
+	, storedTags(conf)
 	, Normalize(false)
 	, SilencePlugBuffers(false)
 {
+	for(std::size_t i = 0; i < EncoderFactories.size(); ++i)
+	{
+		const Encoder::Traits &encTraits = EncoderFactories[i]->GetTraits();
+		EncoderSettings.push_back(
+			MPT_SHARED_PTR<Encoder::Settings>(
+				new Encoder::Settings(
+					conf,
+					encTraits.encoderSettingsName,
+					encTraits.canCues,
+					encTraits.canTags,
+					encTraits.defaultSamplerate,
+					encTraits.defaultChannels,
+					encTraits.defaultMode,
+					encTraits.defaultBitrate,
+					encTraits.defaultQuality,
+					encTraits.defaultFormat
+				)
+			)
+		);
+	}
 	SelectEncoder(EncoderIndex);
 }
 
@@ -711,8 +862,9 @@ void CDoWaveConvert::OnButton1()
 		return;
 	}
 
-	const uint32 samplerate = m_Settings.EncoderSettings.Samplerate;
-	const uint16 channels = m_Settings.EncoderSettings.Channels;
+	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	const uint32 samplerate = encSettings.Samplerate;
+	const uint16 channels = encSettings.Channels;
 
 	ASSERT(m_Settings.GetEncoderFactory() && m_Settings.GetEncoderFactory()->IsAvailable());
 	IAudioStreamEncoder *fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream);
@@ -759,8 +911,8 @@ void CDoWaveConvert::OnButton1()
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 2047*1024)) m_dwFileLimit = 2047*1024; // 2GB
 	m_dwFileLimit <<= 10;
 
-	fileEnc->SetFormat(m_Settings.EncoderSettings);
-	if(m_Settings.EncoderSettings.Tags)
+	fileEnc->SetFormat(encSettings);
+	if(encSettings.Tags)
 	{
 		// Tags must be written before audio data,
 		// so that the encoder class could write them before audio data if mandated by the format,
@@ -1013,7 +1165,7 @@ void CDoWaveConvert::OnButton1()
 
 	if(m_pSndFile->m_PatternCuePoints.size() > 0)
 	{
-		if(m_Settings.EncoderSettings.Cues)
+		if(encSettings.Cues)
 		{
 			std::vector<PatternCuePoint>::const_iterator iter;
 			std::vector<uint64> cues;

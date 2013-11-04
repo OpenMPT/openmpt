@@ -19,8 +19,20 @@ struct FileTags
 //=============
 {
 
-	// Tag data
-	std::wstring title, artist, album, year, comments, genre, url, encoder, bpm, trackno;
+	std::wstring encoder;
+
+	std::wstring title;
+	std::wstring comments;
+
+	std::wstring bpm;
+
+	std::wstring artist;
+	std::wstring album;
+	std::wstring trackno;
+	std::wstring year;
+	std::wstring url;
+
+	std::wstring genre;
 
 	FileTags();
 

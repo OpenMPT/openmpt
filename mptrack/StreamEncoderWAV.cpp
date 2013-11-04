@@ -165,6 +165,7 @@ WAVEncoder::WAVEncoder()
 	traits.fileExtension = "wav";
 	traits.fileShortDescription = "Wave";
 	traits.fileDescription = "Wave";
+	traits.encoderSettingsName = "Wave";
 	traits.encoderName = "OpenMPT";
 	traits.description = "Microsoft RIFF WAVE";
 	traits.canTags = true;
@@ -196,7 +197,7 @@ WAVEncoder::WAVEncoder()
 			}
 		}
 	}
-	traits.defaultSamplerate = 44100;
+	traits.defaultSamplerate = 96000;
 	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeEnumerated;
 	traits.defaultFormat = 0;
