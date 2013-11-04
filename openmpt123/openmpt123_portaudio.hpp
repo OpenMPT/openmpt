@@ -87,15 +87,35 @@ std::ostream * portaudio_raii::portaudio_log_stream = 0;
 class portaudio_stream_raii : public portaudio_raii, public write_buffers_interface {
 private:
 	PaStream * stream;
+	bool interleaved;
+	std::size_t channels;
+	std::vector<float> sampleBufFloat;
+	std::vector<std::int16_t> sampleBufInt;
 public:
-	portaudio_stream_raii( const commandlineflags & flags, std::ostream & log = std::cerr ) : portaudio_raii(flags.verbose, log), stream(NULL) {
+	portaudio_stream_raii( const commandlineflags & flags, std::ostream & log = std::cerr )
+		: portaudio_raii(flags.verbose, log)
+		, stream(NULL)
+		, interleaved(false)
+		, channels(flags.channels)
+	{
 		PaStreamParameters streamparameters;
 		std::memset( &streamparameters, 0, sizeof(PaStreamParameters) );
 		streamparameters.device = ( flags.device == -1 ) ? Pa_GetDefaultOutputDevice() : flags.device;
 		streamparameters.channelCount = flags.channels;
 		streamparameters.sampleFormat = ( flags.use_float ? paFloat32 : paInt16 ) | paNonInterleaved;
 		streamparameters.suggestedLatency = flags.buffer * 0.001;
-		check_portaudio_error( Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, ( flags.mode == ModeUI ) ? flags.ui_redraw_interval * flags.samplerate / 1000 : paFramesPerBufferUnspecified, 0, NULL, NULL ) );
+		PaError e = PaError();
+		e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, ( flags.mode == ModeUI ) ? flags.ui_redraw_interval * flags.samplerate / 1000 : paFramesPerBufferUnspecified, 0, NULL, NULL );
+		if ( e != paNoError ) {
+			// Non-interleaved failed, try interleaved next.
+			// This might help broken portaudio on MacOS X.
+			streamparameters.sampleFormat &= ~paNonInterleaved;
+			e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, ( flags.mode == ModeUI ) ? flags.ui_redraw_interval * flags.samplerate / 1000 : paFramesPerBufferUnspecified, 0, NULL, NULL );
+			if ( e == paNoError ) {
+				interleaved = true;
+			}
+			check_portaudio_error( e );
+		}
 		check_portaudio_error( Pa_StartStream( stream ) );
 		if ( flags.verbose ) {
 			log << "PortAudio:" << std::endl;
@@ -119,17 +139,37 @@ public:
 	}
 public:
 	void write( const std::vector<float*> buffers, std::size_t frames ) {
-		while ( frames > 0 ) {
-			unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
-			check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
-			frames -= chunk_frames;
+		if ( interleaved ) {
+			sampleBufFloat.clear();
+			for ( std::size_t frame = 0; frame < frames; ++frame ) {
+				for ( std::size_t channel = 0; channel < channels; ++channel ) {
+					sampleBufFloat.push_back( buffers[channel][frame] );
+				}
+			}
+			Pa_WriteStream( stream, sampleBufFloat.data(), frames );
+		} else {
+			while ( frames > 0 ) {
+				unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
+				check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
+				frames -= chunk_frames;
+			}
 		}
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
-		while ( frames > 0 ) {
-			unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
-			check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
-			frames -= chunk_frames;
+		if ( interleaved ) {
+			sampleBufInt.clear();
+			for ( std::size_t frame = 0; frame < frames; ++frame ) {
+				for ( std::size_t channel = 0; channel < channels; ++channel ) {
+					sampleBufInt.push_back( buffers[channel][frame] );
+				}
+			}
+			Pa_WriteStream( stream, sampleBufInt.data(), frames );
+		} else {
+			while ( frames > 0 ) {
+				unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
+				check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
+				frames -= chunk_frames;
+			}
 		}
 	}
 };
