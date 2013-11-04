@@ -121,7 +121,7 @@ public:
 		#if defined(UNICODE)
 			std::wstring wtext = utf8_to_wstring( text );
 			WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), NULL, NULL );
-#else
+		#else
 			WriteConsole( handle, text.data(), static_cast<DWORD>( text.size() ), NULL, NULL );
 		#endif
 	}
