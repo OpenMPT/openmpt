@@ -41,20 +41,7 @@ ARFLAGS  := $(ARFLAGS)
 
 ifeq ($(CONFIG)x,x)
 
-CC  = gcc 
-CXX = g++
-LD  = g++
-AR  = ar
-
-#CPPFLAGS += -DMPT_COMPILER_GENERIC
-CPPFLAGS += 
-CXXFLAGS += -std=c++0x -fPIC 
-CFLAGS   += -std=c99   -fPIC 
-LDFLAGS  += 
-LDLIBS   += -lm
-ARFLAGS  := rcs
-
-EXESUFFIX=
+include Makefile.config.defaults
 
 else
 
