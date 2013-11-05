@@ -230,8 +230,8 @@ public:
 			log << std::endl;
 		}
 		double bufferSeconds = ( flags.buffer * 0.001 ) - Pa_GetStreamInfo( stream )->outputLatency;
-		if ( bufferSeconds <= ( flags.ui_redraw_interval * 0.001 )  ) {
-			bufferSeconds = flags.ui_redraw_interval * 0.001;
+		if ( bufferSeconds <= ( flags.ui_redraw_interval * 0.001 * 2.0 )  ) {
+			bufferSeconds = flags.ui_redraw_interval * 0.001 * 2.0;
 		}
 		set_queue_size_frames( static_cast<std::size_t>( bufferSeconds * Pa_GetStreamInfo( stream )->sampleRate ) );
 		check_portaudio_error( Pa_StartStream( stream ) );
@@ -248,13 +248,11 @@ private:
 		return reinterpret_cast<portaudio_stream_callback_raii*>( userData )->portaudio_callback( input, output, frameCount, timeInfo, statusFlags );
 	}
 	int portaudio_callback( const void * input, void * output, unsigned long frameCount, const PaStreamCallbackTimeInfo * timeInfo, PaStreamCallbackFlags statusFlags ) {
-		lock();
 		if ( use_float ) {
 			fill_buffer( reinterpret_cast<float*>( output ), frameCount );
 		} else {
 			fill_buffer( reinterpret_cast<std::int16_t*>( output ), frameCount );
 		}
-		unlock();
 		return paContinue;
 	}
 public:
