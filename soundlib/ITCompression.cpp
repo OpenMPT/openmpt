@@ -180,7 +180,7 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 int ITCompression::GetWidthChangeSize(int w, bool is16)
 //-----------------------------------------------------
 {
-	ASSERT(w > 0 && w <= CountOf(ITWidthChangeSize));
+	ASSERT(w > 0 && static_cast<unsigned int>(w) <= CountOf(ITWidthChangeSize));
 	int wcs = ITWidthChangeSize[w - 1];
 	if(w <= 6 && is16)
 		wcs++;
@@ -199,7 +199,7 @@ void ITCompression::SquishRecurse(int sWidth, int lWidth, int rWidth, int width,
 		return;
 	}
 
-	ASSERT(width < CountOf(Properties::lowerTab));
+	ASSERT(width >= 0 && static_cast<unsigned int>(width) < CountOf(Properties::lowerTab));
 
 	SmpLength i = offset;
 	SmpLength end = offset + length;
