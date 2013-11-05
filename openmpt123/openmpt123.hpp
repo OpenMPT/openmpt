@@ -52,6 +52,8 @@ std::wstring utf8_to_wstring( const std::string & utf8_string ) {
 
 #if defined(MPT_NEEDS_THREADS)
 
+#if defined(WIN32)
+
 class mutex {
 private:
 	CRITICAL_SECTION impl;
@@ -79,6 +81,8 @@ public:
 	void lock() { pthread_mutex_lock( &impl ); }
 	void unlock() { pthread_mutex_unlock( &impl ); }
 };
+
+#endif
 
 #endif
 
