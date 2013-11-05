@@ -86,22 +86,23 @@ std::ostream * portaudio_raii::portaudio_log_stream = 0;
 
 #if defined(MPT_PORTAUDIO_CALLBACK)
 
+template < typename Tsample > Tsample convert_to( float val );
+template < > float convert_to( float val ) {
+	return val;
+}
+template < > std::int16_t convert_to( float val ) {
+	std::int32_t tmp = static_cast<std::int32_t>( val * 32768.0f );
+	tmp = std::min( tmp, 32767 );
+	tmp = std::max( tmp, -32768 );
+	return static_cast<std::int16_t>( tmp );
+}
+
 class write_buffers_blocking_wrapper : public write_buffers_interface {
 protected:
 	std::size_t channels;
 	std::size_t sampleQueueMaxFrames;
 	std::deque<float> sampleQueue;
 private:
-	template < typename Tsample > static Tsample convert_to( float val );
-	template < > static float convert_to( float val ) {
-		return val;
-	}
-	template < > static std::int16_t convert_to( float val ) {
-		std::int32_t tmp = static_cast<std::int32_t>( val * 32768.0f );
-		tmp = std::min( tmp, 32767 );
-		tmp = std::max( tmp, -32768 );
-		return static_cast<std::int16_t>( tmp );
-	}
 protected:
 	write_buffers_blocking_wrapper( const commandlineflags & flags )
 		: channels(flags.channels)
@@ -244,7 +245,7 @@ public:
 	}
 private:
 	static int portaudio_callback_wrapper( const void * input, void * output, unsigned long frameCount, const PaStreamCallbackTimeInfo * timeInfo, PaStreamCallbackFlags statusFlags, void * userData ) {
-		return reinterpret_cast<portaudio_stream_threaded_raii*>( userData )->portaudio_callback( input, output, frameCount, timeInfo, statusFlags );
+		return reinterpret_cast<portaudio_stream_callback_raii*>( userData )->portaudio_callback( input, output, frameCount, timeInfo, statusFlags );
 	}
 	int portaudio_callback( const void * input, void * output, unsigned long frameCount, const PaStreamCallbackTimeInfo * timeInfo, PaStreamCallbackFlags statusFlags ) {
 		lock();
