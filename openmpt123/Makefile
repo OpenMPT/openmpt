@@ -268,7 +268,6 @@ OUTPUTS += bin/libopenmpt_modplug.so
 endif
 ifeq ($(SHARED_LIB),1)
 OUTPUTS += bin/libopenmpt.so
-OUTPUTS += bin/libopenmpt_modplug.so
 endif
 ifeq ($(STATIC_LIB),1)
 OUTPUTS += bin/openmpt.a
