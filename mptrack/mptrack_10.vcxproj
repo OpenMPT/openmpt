@@ -603,28 +603,28 @@
     <None Include="VTune\mptrack.vpj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\include\flac\flac.vcxproj">
+    <ProjectReference Include="..\build\flac.vcxproj">
       <Project>{e599f5aa-f9a3-46cc-8db0-c8defceb90c5}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\lhasa\lhasa.vcxproj">
+    <ProjectReference Include="..\build\lhasa.vcxproj">
       <Project>{6b11f6a8-b131-4d2b-80ef-5731a9016436}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\portaudio\portaudio.vcxproj">
+    <ProjectReference Include="..\build\portaudio.vcxproj">
       <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\smbPitchShift\smbPitchShift.vcxproj">
+    <ProjectReference Include="..\build\smbPitchShift.vcxproj">
       <Project>{89af16dd-32cc-4a7e-b219-5f117d761f9f}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\soundtouch\soundtouch.vcxproj">
+    <ProjectReference Include="..\build\soundtouch.vcxproj">
       <Project>{f5f8f6de-84cf-4e9d-91ea-d9b5e2aa36cd}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\unrar\UnRAR.vcxproj">
+    <ProjectReference Include="..\build\UnRAR.vcxproj">
       <Project>{95cc809b-03fc-4edb-bb20-fd07a698c05f}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\zlib\minizip.vcxproj">
+    <ProjectReference Include="..\build\minizip.vcxproj">
       <Project>{63af9025-a6ce-4147-a05d-6e2ccfd3a0d7}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\zlib\zlib.vcxproj">
+    <ProjectReference Include="..\build\zlib.vcxproj">
       <Project>{1654fb18-fde6-406f-9d84-ba12bfbd67b2}</Project>
     </ProjectReference>
   </ItemGroup>
