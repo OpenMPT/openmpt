@@ -58,6 +58,7 @@
 #include "openmpt123_sndfile.hpp"
 #include "openmpt123_stdout.hpp"
 #include "openmpt123_portaudio.hpp"
+#include "openmpt123_sdl.hpp"
 #include "openmpt123_waveout.hpp"
 #include "openmpt123_wavpack.hpp"
 
@@ -1263,7 +1264,8 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				} else if ( nextarg == "stdout" ) {
 					flags.use_stdout = true;
 				} else if ( nextarg == "help" ) {
-#if defined( MPT_WITH_PORTAUDIO )
+#if defined( MPT_WITH_SDL )
+#elif defined( MPT_WITH_PORTAUDIO )
 					show_portaudio_devices();
 #elif defined( WIN32 )
 					show_waveout_devices();
@@ -1455,7 +1457,11 @@ static int main( int argc, char * argv [] ) {
 				} else if ( !flags.output_filename.empty() ) {
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream );
-#if defined( MPT_WITH_PORTAUDIO )
+#if defined( MPT_WITH_SDL )
+				} else {
+					sdl_stream_raii sdl_stream( flags, log );
+					render_files( flags, log, sdl_stream );
+#elif defined( MPT_WITH_PORTAUDIO )
 				} else {
 					portaudio_stream_raii portaudio_stream( flags, log );
 					render_files( flags, log, portaudio_stream );
@@ -1492,6 +1498,11 @@ static int main( int argc, char * argv [] ) {
 #ifdef MPT_WITH_PORTAUDIO
 	} catch ( portaudio_exception & e ) {
 		std_log << "PortAudio error: " << e.what() << std::endl;
+		std_log.writeout();
+#endif
+#ifdef MPT_WITH_SDL
+	} catch ( sdl_exception & e ) {
+		std_log << "SDL error: " << e.what() << std::endl;
 		std_log.writeout();
 #endif
 	} catch ( silent_exit_exception & ) {
