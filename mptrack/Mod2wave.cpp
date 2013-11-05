@@ -474,7 +474,7 @@ void CWaveConvert::FillFormats()
 			{
 				int i = (int)((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
 				const Encoder::Format &format = encTraits->formats[i];
-				if(encSettings.Bitrate == encTraits->defaultBitrate)
+				if(format.Bitrate == encTraits->defaultBitrate)
 				{
 					sel = ndx;
 				}
