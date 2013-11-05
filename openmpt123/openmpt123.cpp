@@ -38,7 +38,7 @@
 #include <mmsystem.h>
 #include <mmreg.h>
 #else
-#if defined(MPT_WITH_PORTAUDIO) && defined(MPT_PORTAUDIO_CALLBACK)
+#if defined(MPT_NEEDS_THREADS)
 #include <pthread.h>
 #endif
 #include <sys/ioctl.h>

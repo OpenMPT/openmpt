@@ -86,122 +86,10 @@ std::ostream * portaudio_raii::portaudio_log_stream = 0;
 
 #if defined(MPT_PORTAUDIO_CALLBACK)
 
-template < typename Tsample > Tsample convert_to( float val );
-template < > float convert_to( float val ) {
-	return val;
-}
-template < > std::int16_t convert_to( float val ) {
-	std::int32_t tmp = static_cast<std::int32_t>( val * 32768.0f );
-	tmp = std::min( tmp, 32767 );
-	tmp = std::max( tmp, -32768 );
-	return static_cast<std::int16_t>( tmp );
-}
-
-class write_buffers_blocking_wrapper : public write_buffers_interface {
-protected:
-	std::size_t channels;
-	std::size_t sampleQueueMaxFrames;
-	std::deque<float> sampleQueue;
-private:
-protected:
-	write_buffers_blocking_wrapper( const commandlineflags & flags )
-		: channels(flags.channels)
-		, sampleQueueMaxFrames(0)
-	{
-		return;
-	}
-	void set_queue_size_frames( std::size_t frames ) {
-		sampleQueueMaxFrames = frames;
-	}
-	template < typename Tsample >
-	void fill_buffer( Tsample * buf, std::size_t framesToRender ) {
-		lock();
-		for ( std::size_t frame = 0; frame < framesToRender; ++frame ) {
-			for ( std::size_t channel = 0; channel < channels; ++channel ) {
-				float val = 0.0f;
-				if ( !sampleQueue.empty() ) {
-					val = sampleQueue.front();
-					sampleQueue.pop_front();
-				}
-				*buf = convert_to<Tsample>( val );
-				buf++;
-			}
-		}
-		unlock();
-	}
-private:
-	void wait_for_queue_space() {
-		while ( sampleQueue.size() >= sampleQueueMaxFrames * channels ) {
-			unlock();
-			Pa_Sleep( 1 );
-			lock();
-		}
-	}
-public:
-	void write( const std::vector<float*> buffers, std::size_t frames ) {
-		lock();
-		for ( std::size_t frame = 0; frame < frames; ++frame ) {
-			for ( std::size_t channel = 0; channel < channels; ++channel ) {
-				wait_for_queue_space();
-				sampleQueue.push_back( buffers[channel][frame] );
-			}
-		}
-		unlock();
-	}
-	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
-		lock();
-		for ( std::size_t frame = 0; frame < frames; ++frame ) {
-			for ( std::size_t channel = 0; channel < channels; ++channel ) {
-				wait_for_queue_space();
-				sampleQueue.push_back( buffers[channel][frame] * (1.0f/32768.0f) );
-			}
-		}
-		unlock();
-	}
-	virtual void lock() = 0;
-	virtual void unlock() = 0;
-};
-
-namespace mpt {
-
-#if defined(WIN32)
-
-class mutex {
-private:
-	CRITICAL_SECTION impl;
-public:
-	mutex() { InitializeCriticalSection(&impl); }
-	~mutex() { DeleteCriticalSection(&impl); }
-	void lock() { EnterCriticalSection(&impl); }
-	void unlock() { LeaveCriticalSection(&impl); }
-};
-
-#else
-
-class mutex {
-private:
-	pthread_mutex_t impl;
-public:
-	mutex() {
-		pthread_mutexattr_t attr;
-		pthread_mutexattr_init( &attr );
-		pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_NORMAL );
-		pthread_mutex_init( &impl, &attr );
-		pthread_mutexattr_destroy( &attr );
-	}
-	~mutex() { pthread_mutex_destroy( &impl ); }
-	void lock() { pthread_mutex_lock( &impl ); }
-	void unlock() { pthread_mutex_unlock( &impl ); }
-};
-
-#endif
-
-} // namespace mpt
-
 class portaudio_stream_callback_raii : public portaudio_raii, public write_buffers_blocking_wrapper {
 private:
 	PaStream * stream;
-	mpt::mutex audioMutex;
+	openmpt123::mutex audioMutex;
 	bool use_float;
 public:
 	portaudio_stream_callback_raii( const commandlineflags & flags, std::ostream & log = std::cerr )
@@ -261,6 +149,9 @@ public:
 	}
 	void unlock() {
 		audioMutex.unlock();
+	}
+	void sleep( int ms ) {
+		Pa_Sleep( ms );
 	}
 };
 
