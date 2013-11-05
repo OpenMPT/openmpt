@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="include">
+			<UniqueIdentifier>{C93D7C1C-922C-CC42-9ED7-4ACF2F041D3D}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio">
+			<UniqueIdentifier>{436DA380-9E34-434D-8BF5-09D260F3C2B3}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\src">
+			<UniqueIdentifier>{FDC65665-8B21-824A-8404-7BD651A0E16C}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\src\common">
+			<UniqueIdentifier>{17C5BC75-59A0-3B4F-86F9-4BDFEA9E2058}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\src\os">
+			<UniqueIdentifier>{898B4D32-A302-9647-B056-1BE922E89380}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\src\os\win">
+			<UniqueIdentifier>{EBE73051-60D2-774E-B674-5719C8A52118}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\include">
+			<UniqueIdentifier>{64AD3111-9B17-164D-AF83-320C083B8D4D}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\src\hostapi">
+			<UniqueIdentifier>{459DEB8C-6DBA-CA4E-B0E2-59259E74B592}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\src\hostapi\skeleton">
+			<UniqueIdentifier>{1CF39AA4-CEFF-3A43-849A-0AD37EAA3EEC}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\src\hostapi\wasapi">
+			<UniqueIdentifier>{E3FFE5D9-75CD-E240-B15D-5250CBAA394C}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\src\hostapi\wdmks">
+			<UniqueIdentifier>{707854F8-2093-6B49-A3D4-3A870C0F28C6}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portaudio\src\hostapi\wmme">
+			<UniqueIdentifier>{2F10F42F-4BB0-6E48-BD11-F91E9D0B5E7B}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\include\portaudio\src\common\pa_allocation.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_converters.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_cpuload.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_debugprint.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_dither.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_endianness.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_hostapi.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_memorybarrier.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_process.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_ringbuffer.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_stream.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_trace.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_types.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\common\pa_util.h">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\os\win\pa_win_coinitialize.h">
+			<Filter>include\portaudio\src\os\win</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\os\win\pa_win_wdmks_utils.h">
+			<Filter>include\portaudio\src\os\win</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\src\os\win\pa_x86_plain_converters.h">
+			<Filter>include\portaudio\src\os\win</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\pa_asio.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\pa_jack.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\pa_linux_alsa.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\pa_mac_core.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\pa_win_ds.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\pa_win_wasapi.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\pa_win_waveformat.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\pa_win_wdmks.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\pa_win_wmme.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+		<ClInclude Include="..\include\portaudio\include\portaudio.h">
+			<Filter>include\portaudio\include</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\include\portaudio\src\common\pa_allocation.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\common\pa_converters.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\common\pa_cpuload.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\common\pa_debugprint.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\common\pa_dither.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\common\pa_front.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\common\pa_process.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\common\pa_ringbuffer.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\common\pa_stream.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\common\pa_trace.c">
+			<Filter>include\portaudio\src\common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\hostapi\skeleton\pa_hostapi_skeleton.c">
+			<Filter>include\portaudio\src\hostapi\skeleton</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\hostapi\wasapi\pa_win_wasapi.c">
+			<Filter>include\portaudio\src\hostapi\wasapi</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\hostapi\wdmks\pa_win_wdmks.c">
+			<Filter>include\portaudio\src\hostapi\wdmks</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\hostapi\wmme\pa_win_wmme.c">
+			<Filter>include\portaudio\src\hostapi\wmme</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\os\win\pa_win_coinitialize.c">
+			<Filter>include\portaudio\src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\os\win\pa_win_hostapis.c">
+			<Filter>include\portaudio\src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\os\win\pa_win_util.c">
+			<Filter>include\portaudio\src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\os\win\pa_win_waveformat.c">
+			<Filter>include\portaudio\src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\os\win\pa_win_wdmks_utils.c">
+			<Filter>include\portaudio\src\os\win</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\portaudio\src\os\win\pa_x86_plain_converters.c">
+			<Filter>include\portaudio\src\os\win</Filter>
+		</ClCompile>
+	</ItemGroup>
+</Project>

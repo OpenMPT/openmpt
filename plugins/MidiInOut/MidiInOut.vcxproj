@@ -208,7 +208,7 @@
     <ClInclude Include="MidiInOutEditor.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\include\portmidi\portmidi.vcxproj">
+    <ProjectReference Include="..\..\build\portmidi.vcxproj">
       <Project>{2512e2ca-578a-4f10-9363-4bfc9a5ef960}</Project>
     </ProjectReference>
   </ItemGroup>

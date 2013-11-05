@@ -7,7 +7,8 @@ solution "include"
  project "UnRAR"
   uuid "95CC809B-03FC-4EDB-BB20-FD07A698C05F"
   language "C++"
-  location "unrar"
+  location "../build"
+  objdir "../build/obj/unrar"
   includedirs { "unrar" }
   files {
    "unrar/archive.cpp",
@@ -135,7 +136,8 @@ solution "include"
  project "zlib"
   uuid "1654FB18-FDE6-406F-9D84-BA12BFBD67B2"
   language "C"
-  location "zlib"
+  location "../build"
+  objdir "../build/obj/zlib"
   includedirs { "zlib" }
   files {
    "zlib/adler32.c",
@@ -174,7 +176,8 @@ solution "include"
  project "minizip"
   uuid "63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7"
   language "C"
-  location "zlib"
+  location "../build"
+  objdir "../build/obj/minizip"
   includedirs { "zlib", "zlib/contrib/minizip" }
   files {
    "zlib/contrib/minizip/ioapi.c",
@@ -198,7 +201,8 @@ solution "include"
  project "miniz"
   uuid "B5E0C06B-8121-426A-8FFB-4293ECAAE29C"
   language "C"
-  location "miniz"
+  location "../build"
+  objdir "../build/obj/miniz"
   files {
    "miniz/miniz.c",
   }
@@ -209,7 +213,8 @@ solution "include"
  project "smbPitchShift"
   uuid "89AF16DD-32CC-4A7E-B219-5F117D761F9F"
   language "C++"
-  location "smbPitchShift"
+  location "../build"
+  objdir "../build/obj/smbPitchShift"
   includedirs { }
   files {
    "smbPitchShift/smbPitchShift.cpp",
@@ -224,7 +229,8 @@ solution "include"
  project "lhasa"
   uuid "6B11F6A8-B131-4D2B-80EF-5731A9016436"
   language "C"
-  location "lhasa"
+  location "../build"
+  objdir "../build/obj/lhasa"
   includedirs { "msinttypes/inttypes" }
   files {
    "lhasa/lib/crc16.c",
@@ -273,7 +279,8 @@ solution "include"
  project "flac"
   uuid "E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5"
   language "C"
-  location "flac"
+  location "../build"
+  objdir "../build/obj/flac"
   includedirs { "flac/include", "flac/src/libFLAC/include" }
   files {
    "flac/src/libFLAC/bitmath.c",
@@ -339,7 +346,8 @@ solution "include"
  project "portaudio"
   uuid "189B867F-FF4B-45A1-B741-A97492EE69AF"
   language "C"
-  location "portaudio"
+  location "../build"
+  objdir "../build/obj/portaudio"
   includedirs { "portaudio/include", "portaudio/src/common", "portaudio/src/os/win" }
   defines {
    "PAWIN_USE_WDMKS_DEVICE_INFO",
@@ -410,7 +418,8 @@ solution "include"
  project "portmidi"
   uuid "2512E2CA-578A-4F10-9363-4BFC9A5EF960"
   language "C"
-  location "portmidi"
+  location "../build"
+  objdir "../build/obj/portmidi"
   includedirs { "portmidi/porttime", "portmidi/pm_common", "portmidi/pm_win" }
   files {
    "portmidi/porttime/porttime.c",
@@ -442,7 +451,8 @@ solution "includeDLL"
  project "soundtouch"
   uuid "F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD"
   language "C++"
-  location "soundtouch"
+  location "../build"
+  objdir "../build/obj/soundtouch"
   targetname "OpenMPT_SoundTouch_i16"
   includedirs { }
   files {
