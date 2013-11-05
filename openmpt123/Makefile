@@ -114,6 +114,17 @@ LDLIBS   += $(shell pkg-config --libs-only-l     zlib )
 endif
 endif
 
+ifeq ($(USE_SDL),1)
+#LDLIBS   += -lsdl
+ifeq ($(shell pkg-config --exists sdl && echo yes),yes)
+CPPFLAGS += -DMPT_WITH_SDL
+CPPFLAGS += $(shell pkg-config --cflags-only-I   sdl )
+LDFLAGS  += $(shell pkg-config --libs-only-other sdl )
+LDFLAGS  += $(shell pkg-config --libs-only-L     sdl )
+LDLIBS   += $(shell pkg-config --libs-only-l     sdl )
+endif
+endif
+
 ifeq ($(NO_PORTAUDIO),1)
 else
 #LDLIBS   += -lportaudio

@@ -136,11 +136,13 @@ private:
 		return reinterpret_cast<portaudio_stream_callback_raii*>( userData )->portaudio_callback( input, output, frameCount, timeInfo, statusFlags );
 	}
 	int portaudio_callback( const void * input, void * output, unsigned long frameCount, const PaStreamCallbackTimeInfo * timeInfo, PaStreamCallbackFlags statusFlags ) {
+		lock();
 		if ( use_float ) {
 			fill_buffer( reinterpret_cast<float*>( output ), frameCount );
 		} else {
 			fill_buffer( reinterpret_cast<std::int16_t*>( output ), frameCount );
 		}
+		unlock();
 		return paContinue;
 	}
 public:

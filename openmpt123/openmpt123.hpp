@@ -451,7 +451,6 @@ protected:
 	}
 	template < typename Tsample >
 	void fill_buffer( Tsample * buf, std::size_t framesToRender ) {
-		lock();
 		for ( std::size_t frame = 0; frame < framesToRender; ++frame ) {
 			for ( std::size_t channel = 0; channel < channels; ++channel ) {
 				float val = 0.0f;
@@ -463,7 +462,6 @@ protected:
 				buf++;
 			}
 		}
-		unlock();
 	}
 private:
 	void wait_for_queue_space() {
