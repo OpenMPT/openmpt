@@ -44,6 +44,18 @@
 
 #endif // _MSC_VER
 
+#if defined(MPT_WITH_PORTAUDIO) && defined(MPT_PORTAUDIO_CALLBACK)
+#ifndef MPT_NEEDS_THREADS
+#define MPT_NEEDS_THREADS
+#endif
+#endif
+
+#if defined(MPT_WITH_SDL)
+#ifndef MPT_NEEDS_THREADS
+#define MPT_NEEDS_THREADS
+#endif
+#endif
+
 #define OPENMPT123_VERSION_STRING "0.1"
 
 #endif // OPENMPT123_CONFIG_HPP
