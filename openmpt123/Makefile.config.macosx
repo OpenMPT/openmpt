@@ -1,7 +1,6 @@
 
 include Makefile.config.defaults
 
-CPPFLAGS += -DMPT_PORTAUDIO_CALLBACK
 LDLIBS += -liconv
 
 DYNLINK=0
