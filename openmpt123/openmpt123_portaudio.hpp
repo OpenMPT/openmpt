@@ -125,8 +125,8 @@ public:
 				<< std::endl;
 			log << " channels: " << streamparameters.channelCount << std::endl;
 			log << " sampleformat: " << ( ( streamparameters.sampleFormat == ( paFloat32 | paNonInterleaved ) ) ? "paFloat32" : "paInt16" ) << std::endl;
-			log << " latency: " << streamparameters.suggestedLatency << std::endl;
-			log << " samplerate: " << flags.samplerate << std::endl;
+			log << " latency: " << Pa_GetStreamInfo( stream )->outputLatency << std::endl;
+			log << " samplerate: " << Pa_GetStreamInfo( stream )->sampleRate << std::endl;
 			log << std::endl;
 		}
 	}
