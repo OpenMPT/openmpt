@@ -90,24 +90,24 @@
 	<PropertyGroup Label="UserMacros" />
 	<PropertyGroup>
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\include\bin\Debug\</OutDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\x32\Debug\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">obj\portaudio\x32\Debug\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">portaudio</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\include\bin\Debug\</OutDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\x64\Debug\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">obj\portaudio\x64\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">portaudio64</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\include\bin\Release\</OutDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">portaudio</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\x32\Release\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">obj\portaudio\x32\Release\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">portaudio</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\include\bin\Release\</OutDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\x64\Release\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">obj\portaudio\x64\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">portaudio64</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\include\bin\ReleaseNoLTCG\</OutDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">portaudio</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">lib\x32\ReleaseNoLTCG\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">obj\portaudio\x32\ReleaseNoLTCG\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">portaudio</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\include\bin\ReleaseNoLTCG\</OutDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">lib\x64\ReleaseNoLTCG\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">obj\portaudio\x64\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">portaudio64</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">portaudio</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<ClCompile>
@@ -157,12 +157,12 @@
 			<AdditionalIncludeDirectories>..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)portaudio64.lib</OutputFile>
+		<OutputFile>$(OutDir)portaudio.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)portaudio64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)portaudio.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -217,14 +217,14 @@
 			<AdditionalIncludeDirectories>..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)portaudio64.lib</OutputFile>
+		<OutputFile>$(OutDir)portaudio.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)portaudio64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)portaudio.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
@@ -279,14 +279,14 @@
 			<AdditionalIncludeDirectories>..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)portaudio64.lib</OutputFile>
+		<OutputFile>$(OutDir)portaudio.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)portaudio64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)portaudio.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>

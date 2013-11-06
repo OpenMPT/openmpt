@@ -1,15 +1,21 @@
 
-  configuration "x64"
-   targetsuffix "64"
+  configuration { "Debug", "x32" }
+   targetdir "../build/lib/x32/Debug"
   
-  configuration "Debug"
-   targetdir "bin/Debug"
+  configuration { "Release", "x32" }
+   targetdir "../build/lib/x32/Release"
   
-  configuration "Release"
-   targetdir "bin/Release"
+  configuration { "ReleaseNoLTCG", "x32" }
+   targetdir "../build/lib/x32/ReleaseNoLTCG"
   
-  configuration "ReleaseNoLTCG"
-   targetdir "bin/ReleaseNoLTCG"
+  configuration { "Debug", "x64" }
+   targetdir "../build/lib/x64/Debug"
+  
+  configuration { "Release", "x64" }
+   targetdir "../build/lib/x64/Release"
+  
+  configuration { "ReleaseNoLTCG", "x64" }
+   targetdir "../build/lib/x64/ReleaseNoLTCG"
   
   configuration "*"
    kind "StaticLib"

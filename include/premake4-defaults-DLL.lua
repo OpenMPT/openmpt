@@ -1,15 +1,21 @@
 
-  configuration "x64"
-   targetsuffix "64"
+  configuration { "Debug", "x32" }
+   targetdir "../bin/Win32-Debug"
   
-  configuration "Debug"
-   targetdir "../mptrack/Debug"
+  configuration { "Release", "x32" }
+   targetdir "../bin/Win32"
   
-  configuration "Release"
-   targetdir "../mptrack/bin"
+  configuration { "ReleaseNoLTCG", "x32" }
+   targetdir "../bin/Win32"
   
-  configuration "ReleaseNoLTCG"
-   targetdir "../mptrack/bin"
+  configuration { "Debug", "x64" }
+   targetdir "../bin/x64-Debug"
+  
+  configuration { "Release", "x64" }
+   targetdir "../bin/x64"
+  
+  configuration { "ReleaseNoLTCG", "x64" }
+   targetdir "../bin/x64"
   
   configuration "*"
    kind "SharedLib"

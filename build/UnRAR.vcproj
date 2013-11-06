@@ -20,7 +20,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\include\bin\Debug"
+			OutputDirectory="lib\x32\Debug"
 			IntermediateDirectory="obj\unrar\x32\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -96,7 +96,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\include\bin\Debug"
+			OutputDirectory="lib\x64\Debug"
 			IntermediateDirectory="obj\unrar\x64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -128,7 +128,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\UnRAR64.pdb"
+				ProgramDataBaseFileName="$(OutDir)\UnRAR.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -144,7 +144,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\UnRAR64.lib"
+				OutputFile="$(OutDir)\UnRAR.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -173,7 +173,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\include\bin\Release"
+			OutputDirectory="lib\x32\Release"
 			IntermediateDirectory="obj\unrar\x32\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -250,7 +250,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\include\bin\Release"
+			OutputDirectory="lib\x64\Release"
 			IntermediateDirectory="obj\unrar\x64\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -283,7 +283,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\UnRAR64.pdb"
+				ProgramDataBaseFileName="$(OutDir)\UnRAR.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -299,7 +299,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\UnRAR64.lib"
+				OutputFile="$(OutDir)\UnRAR.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -328,7 +328,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="..\include\bin\ReleaseNoLTCG"
+			OutputDirectory="lib\x32\ReleaseNoLTCG"
 			IntermediateDirectory="obj\unrar\x32\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -405,7 +405,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="..\include\bin\ReleaseNoLTCG"
+			OutputDirectory="lib\x64\ReleaseNoLTCG"
 			IntermediateDirectory="obj\unrar\x64\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -438,7 +438,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\UnRAR64.pdb"
+				ProgramDataBaseFileName="$(OutDir)\UnRAR.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -454,7 +454,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\UnRAR64.lib"
+				OutputFile="$(OutDir)\UnRAR.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

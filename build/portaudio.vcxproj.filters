@@ -2,40 +2,40 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{460A288B-937D-2444-9BA8-5A82315DB6BE}</UniqueIdentifier>
+			<UniqueIdentifier>{455A4AD8-7F19-1740-A2A1-A81AEC2A2F2A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio">
-			<UniqueIdentifier>{AECE5B06-1B7D-AA43-8F91-FE3BB15116A5}</UniqueIdentifier>
+			<UniqueIdentifier>{E99D1DCD-EDEA-7E4E-8A84-E0D59D218607}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\src">
-			<UniqueIdentifier>{CA133FEA-5EBE-8E4C-9D91-F099211198FA}</UniqueIdentifier>
+			<UniqueIdentifier>{A8E9B71E-9412-6349-AC9B-333F61821F72}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\src\common">
-			<UniqueIdentifier>{8D493485-BCD7-2E47-B84B-1ECDB3FBC4CA}</UniqueIdentifier>
+			<UniqueIdentifier>{13AE8E55-FE11-3B4B-93A7-000039535B61}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\src\os">
-			<UniqueIdentifier>{CA81A82E-62DC-8147-89EB-C4722F05EA36}</UniqueIdentifier>
+			<UniqueIdentifier>{4699E520-3AE4-6141-9093-087992BBB213}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\src\os\win">
-			<UniqueIdentifier>{BF103FA6-84BC-2545-9DE0-F290921C7F8F}</UniqueIdentifier>
+			<UniqueIdentifier>{A2B3933A-ECC3-734E-975A-8B46190AE1EB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\include">
-			<UniqueIdentifier>{AD03A863-CCDD-954F-AF0C-AB72D3E5E19E}</UniqueIdentifier>
+			<UniqueIdentifier>{58D3A6A2-25AA-2F40-8257-E52743AE99F7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\src\hostapi">
-			<UniqueIdentifier>{CD4FBF15-7652-AB43-89A7-38B299604B71}</UniqueIdentifier>
+			<UniqueIdentifier>{8C14202C-0574-8345-BB77-34EA1BAA9DF1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\src\hostapi\skeleton">
-			<UniqueIdentifier>{96795B96-B4F2-274E-8468-198F1FCA3603}</UniqueIdentifier>
+			<UniqueIdentifier>{588B0977-E6B3-854B-9190-98A3D6B7CC77}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\src\hostapi\wasapi">
-			<UniqueIdentifier>{6345DD80-B04F-7F4C-BE6E-38FEA122BAA8}</UniqueIdentifier>
+			<UniqueIdentifier>{DD60F2D1-ACB0-D047-AD86-46423AB4AE28}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\src\hostapi\wdmks">
-			<UniqueIdentifier>{A0899968-6FFF-D942-8719-D4373C844594}</UniqueIdentifier>
+			<UniqueIdentifier>{8D97D935-B3C7-6E48-A743-FF00CED9224D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portaudio\src\hostapi\wmme">
-			<UniqueIdentifier>{30356822-9A68-7741-9475-B89066FB9A34}</UniqueIdentifier>
+			<UniqueIdentifier>{83CD4FDE-848C-0146-ADE4-6F769FAC0465}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

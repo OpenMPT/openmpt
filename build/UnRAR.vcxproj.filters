@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{9FE71192-DB6B-5041-A92C-32BDD18C730D}</UniqueIdentifier>
+			<UniqueIdentifier>{51B7AB45-ACC4-A449-9AF7-00C9FCCFB1D3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\unrar">
-			<UniqueIdentifier>{3A336712-7D81-3948-BA4A-D73201BEA649}</UniqueIdentifier>
+			<UniqueIdentifier>{9F0BFE6F-155F-6846-918A-6175DC85C5E7}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
