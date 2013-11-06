@@ -199,6 +199,10 @@
 #define NO_REVERB // reverb requires mmx
 #endif
 
+#if !defined(ENABLE_X86) && !defined(NO_DSP)
+#define NO_DSP // DSP requires x86 inline asm
+#endif
+
 #if defined(ENABLE_TESTS) && defined(MODPLUG_NO_FILESAVE)
 #undef MODPLUG_NO_FILESAVE // tests recommend file saving
 #endif
