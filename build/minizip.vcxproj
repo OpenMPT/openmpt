@@ -90,24 +90,24 @@
 	<PropertyGroup Label="UserMacros" />
 	<PropertyGroup>
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\include\bin\Debug\</OutDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\x32\Debug\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">obj\minizip\x32\Debug\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">minizip</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\include\bin\Debug\</OutDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\x64\Debug\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">obj\minizip\x64\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">minizip64</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\include\bin\Release\</OutDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\x32\Release\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">obj\minizip\x32\Release\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">minizip</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\include\bin\Release\</OutDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\x64\Release\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">obj\minizip\x64\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">minizip64</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\include\bin\ReleaseNoLTCG\</OutDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">lib\x32\ReleaseNoLTCG\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">obj\minizip\x32\ReleaseNoLTCG\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">minizip</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\include\bin\ReleaseNoLTCG\</OutDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">lib\x64\ReleaseNoLTCG\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">obj\minizip\x64\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">minizip64</TargetName>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">minizip</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<ClCompile>
@@ -155,12 +155,12 @@
 			<AdditionalIncludeDirectories>..\include\zlib;..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)minizip64.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)minizip64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -215,14 +215,14 @@
 			<AdditionalIncludeDirectories>..\include\zlib;..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)minizip64.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)minizip64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
@@ -277,14 +277,14 @@
 			<AdditionalIncludeDirectories>..\include\zlib;..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)minizip64.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)minizip64.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>

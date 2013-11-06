@@ -1327,18 +1327,40 @@ void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 #ifdef MODPLUG_TRACKER
 
+static const char * debugPaths [] = { "mptrack\\Debug", "bin\\Win32-Debug", "bin\\x64-Debug" };
+
+static bool PathEndsIn(const CString &path, const CString &match)
+{
+	return path.Mid(path.GetLength() - match.GetLength() - 1, match.GetLength()) == match;
+}
+
 static bool ShouldRunTests()
 {
 	CString theFile = theApp.GetAppDirPath();
 	// Only run the tests when we're in the project directory structure.
-	return theFile.Mid(theFile.GetLength() - 6, 5) == "Debug";
+	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
+	{
+		if(PathEndsIn(theFile, debugPaths[i]))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 static std::string GetTestFilenameBase()
 {
 	CString theFile = theApp.GetAppDirPath();
-	theFile.Delete(theFile.GetLength() - 6, 6);
-	theFile.Append("../test/test.");
+	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
+	{
+		if(PathEndsIn(theFile, debugPaths[i]))
+		{
+			std::size_t count = CString(debugPaths[i]).GetLength() + 1;
+			theFile.Delete(theFile.GetLength() - count, count);
+			break;
+		}
+	}
+	theFile.Append("test/test.");
 	return theFile.GetString();
 }
 

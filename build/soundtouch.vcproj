@@ -20,7 +20,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\mptrack\Debug"
+			OutputDirectory="..\bin\Win32-Debug"
 			IntermediateDirectory="obj\soundtouch\x32\Debug"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -71,7 +71,7 @@
 				GenerateDebugInformation="true"
 				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i16.pdb"
 				SubSystem="2"
-				ImportLibrary="..\mptrack\Debug\OpenMPT_SoundTouch_i16.lib"
+				ImportLibrary="..\bin\Win32-Debug\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -101,7 +101,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\mptrack\Debug"
+			OutputDirectory="..\bin\x64-Debug"
 			IntermediateDirectory="obj\soundtouch\x64\Debug"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -132,7 +132,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i1664.pdb"
+				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i16.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -147,13 +147,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\OpenMPT_SoundTouch_i1664.dll"
+				OutputFile="$(OutDir)\OpenMPT_SoundTouch_i16.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
-				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i1664.pdb"
+				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i16.pdb"
 				SubSystem="2"
-				ImportLibrary="..\mptrack\Debug\OpenMPT_SoundTouch_i1664.lib"
+				ImportLibrary="..\bin\x64-Debug\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -183,7 +183,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\mptrack\bin"
+			OutputDirectory="..\bin\Win32"
 			IntermediateDirectory="obj\soundtouch\x32\Release"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -237,7 +237,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\mptrack\bin\OpenMPT_SoundTouch_i16.lib"
+				ImportLibrary="..\bin\Win32\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -267,7 +267,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\mptrack\bin"
+			OutputDirectory="..\bin\x64"
 			IntermediateDirectory="obj\soundtouch\x64\Release"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -299,7 +299,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i1664.pdb"
+				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i16.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -314,15 +314,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\OpenMPT_SoundTouch_i1664.dll"
+				OutputFile="$(OutDir)\OpenMPT_SoundTouch_i16.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
-				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i1664.pdb"
+				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i16.pdb"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\mptrack\bin\OpenMPT_SoundTouch_i1664.lib"
+				ImportLibrary="..\bin\x64\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -352,7 +352,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="..\mptrack\bin"
+			OutputDirectory="..\bin\Win32"
 			IntermediateDirectory="obj\soundtouch\x32\ReleaseNoLTCG"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -406,7 +406,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\mptrack\bin\OpenMPT_SoundTouch_i16.lib"
+				ImportLibrary="..\bin\Win32\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -436,7 +436,7 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="..\mptrack\bin"
+			OutputDirectory="..\bin\x64"
 			IntermediateDirectory="obj\soundtouch\x64\ReleaseNoLTCG"
 			ConfigurationType="2"
 			CharacterSet="2"
@@ -468,7 +468,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i1664.pdb"
+				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i16.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -483,15 +483,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\OpenMPT_SoundTouch_i1664.dll"
+				OutputFile="$(OutDir)\OpenMPT_SoundTouch_i16.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
-				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i1664.pdb"
+				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i16.pdb"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\mptrack\bin\OpenMPT_SoundTouch_i1664.lib"
+				ImportLibrary="..\bin\x64\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="17"
 			/>
 			<Tool

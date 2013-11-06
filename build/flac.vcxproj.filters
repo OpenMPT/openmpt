@@ -2,31 +2,31 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{15185494-76EB-8B47-B933-96DB3E256190}</UniqueIdentifier>
+			<UniqueIdentifier>{BC279AC7-C6B4-AE41-9ECC-A7C52B3C8A0D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac">
-			<UniqueIdentifier>{593AB6B7-383E-BA42-B1A5-21A12FFC6E17}</UniqueIdentifier>
+			<UniqueIdentifier>{3CFFBEDE-7D8E-A945-A8EC-D6F443D35E0A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src">
-			<UniqueIdentifier>{1E7FF733-2E9B-9340-A8DE-6B2D05191C7D}</UniqueIdentifier>
+			<UniqueIdentifier>{95A41CB5-5215-8D4F-8396-C62A7188EFEA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC">
-			<UniqueIdentifier>{93D40968-3ABD-B649-BED6-4EE88041D22C}</UniqueIdentifier>
+			<UniqueIdentifier>{520298DF-75E3-F349-A4A1-6EFED0096B06}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include">
-			<UniqueIdentifier>{D79C2522-5B53-1544-9930-D5DFFC6CB112}</UniqueIdentifier>
+			<UniqueIdentifier>{E982D50B-C72D-B142-B902-2654348C1634}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\private">
-			<UniqueIdentifier>{614D2380-3BBF-7E40-88A5-8D045D5D3EB5}</UniqueIdentifier>
+			<UniqueIdentifier>{6A4252D2-AFB2-484A-9255-12EE5A59463A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\protected">
-			<UniqueIdentifier>{55FD65F0-65DC-7546-8F4B-16C46A417DC0}</UniqueIdentifier>
+			<UniqueIdentifier>{C5A39CAF-4859-6C44-A0BC-8B8CAA772238}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include">
-			<UniqueIdentifier>{DB4C430F-246D-DD49-9B9B-9F3FA19B6E12}</UniqueIdentifier>
+			<UniqueIdentifier>{1B8F9693-09EE-2147-815C-476B021C5415}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include\FLAC">
-			<UniqueIdentifier>{F9E0C192-74B7-9C4F-A474-F49E35056ADA}</UniqueIdentifier>
+			<UniqueIdentifier>{7ACCC449-A61B-0F47-A15B-DDF1E1736629}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

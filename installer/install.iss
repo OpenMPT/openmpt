@@ -8,7 +8,7 @@
 ; Check install-unmo3-free.iss (ISTool) and install-unmo3-free-itd.iss (InnoIDE) for details on this matter.
 ; To download and install InnoIDE, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
 
-#define GetAppVersion StringChange(GetFileProductVersion("..\mptrack\bin\mptrack.exe"), ",", ".")
+#define GetAppVersion StringChange(GetFileProductVersion("..\bin\Win32\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
 
 #ifndef BaseNameAddition
@@ -60,10 +60,10 @@ Name: english; MessagesFile: compiler:Default.isl
 
 ; preserve file type order for best solid compression results (first binary, then text)
 ; home folder
-Source: ..\mptrack\bin\mptrack.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\mptrack\bin\OpenMPT_SoundTouch_i16.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\Win32\mptrack.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\Win32\OpenMPT_SoundTouch_i16.dll; DestDir: {app}; Flags: ignoreversion
 #ifndef DOWNLOAD_MO3
-Source: ..\mptrack\bin\unmo3.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\Win32\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 #endif
 
 ; Plugins
