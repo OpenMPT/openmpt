@@ -18,6 +18,6 @@
    targetdir "../bin/x64"
   
   configuration "*"
-   kind "SharedLib"
+   kind "ConsoleApp"
 
   dofile "premake4-defaults.lua"
