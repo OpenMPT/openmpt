@@ -578,7 +578,6 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">CompileAsC</CompileAs>
     </ClCompile>
     <ClCompile Include="libopenmpt_test.cpp" />
-    <ClCompile Include="libopenmpt_version.cpp" />
     <ClCompile Include="libopenmpt_winamp.cpp" />
     <ClCompile Include="libopenmpt_xmplay.cpp" />
   </ItemGroup>
