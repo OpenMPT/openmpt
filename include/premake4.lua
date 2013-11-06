@@ -129,7 +129,7 @@ solution "include"
    "../include/unrar/version.hpp",
    "../include/unrar/volume.hpp",
   }
-  dofile "premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-LIB.lua"
   
   
   
@@ -169,7 +169,7 @@ solution "include"
    "../include/zlib/zlib.h",
    "../include/zlib/zutil.h",
   }
-  dofile "premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-LIB.lua"
   
   
   
@@ -194,7 +194,7 @@ solution "include"
    "../include/zlib/contrib/minizip/unzip.h",
    "../include/zlib/contrib/minizip/zip.h",
   }
-  dofile "premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-LIB.lua"
    
    
    
@@ -206,7 +206,7 @@ solution "include"
   files {
    "../include/miniz/miniz.c",
   }
-  dofile "premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-LIB.lua"
 
 
 
@@ -222,7 +222,7 @@ solution "include"
   files {
    "../include/smbPitchShift/smbPitchShift.h",
   }
-  dofile "premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-LIB.lua"
 
   
   
@@ -272,7 +272,7 @@ solution "include"
   }
   configuration "vs2008"
    includedirs { "../include/msinttypes/stdint" }
-  dofile "premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-LIB.lua"
 
 
     
@@ -339,7 +339,7 @@ solution "include"
    defines { "VERSION=\"1.2.1\"" }
   configuration "vs2008"
    defines { "VERSION=\\\"1.2.1\\\"" }
-  dofile "premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-LIB.lua"
 
   
   
@@ -411,7 +411,7 @@ solution "include"
   buildoptions { "/wd4018", "/wd4267" }
   configuration "Debug*"
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
-  dofile "premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-LIB.lua"
   
 
   
@@ -436,16 +436,8 @@ solution "include"
    "../include/portmidi/pm_common/portmidi.h",
    "../include/portmidi/pm_win/pmwinmm.h",
   }
-  dofile "premake4-defaults-LIB.lua"
-  
+  dofile "../build/premake4-defaults-LIB.lua"
 
-
-  
-  
-solution "includeDLL"
- configurations { "Debug", "Release", "ReleaseNoLTCG" }
- platforms { "x32", "x64" }
- 
  
  
  project "soundtouch"
@@ -484,7 +476,7 @@ solution "includeDLL"
    "../include/soundtouch/TDStretch.h",
   }
   defines { "DLL_EXPORTS", "SOUNDTOUCH_INTEGER_SAMPLES=1" }
-  dofile "premake4-defaults-DLL.lua"
+  dofile "../build/premake4-defaults-DLL.lua"
  
  
  
