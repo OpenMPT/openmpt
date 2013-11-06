@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{CD049271-B2C4-614A-BC99-1B2F69648645}</UniqueIdentifier>
+			<UniqueIdentifier>{00997B2B-018C-2D43-B99D-8DD3DFBBA35C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\smbPitchShift">
-			<UniqueIdentifier>{847A9FB0-3E8D-274C-BA03-9E0A3C7D7440}</UniqueIdentifier>
+			<UniqueIdentifier>{95778F5D-A8FD-DC40-9BA2-7821140D2A99}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{97D1E331-6DDB-524D-86A7-AC751F87D7B1}</UniqueIdentifier>
+			<UniqueIdentifier>{6B048AFC-489B-C74E-9268-5E73B3846663}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\miniz">
-			<UniqueIdentifier>{2E204F2F-1C6A-ED49-9E56-038193EEF15B}</UniqueIdentifier>
+			<UniqueIdentifier>{65774DFA-D430-984F-B926-8C0C5A58077A}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

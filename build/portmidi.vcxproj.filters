@@ -2,19 +2,19 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{F65B5E7E-5015-AB42-AFFD-96C9A381D40A}</UniqueIdentifier>
+			<UniqueIdentifier>{2943DD7C-15EA-8C46-AEF1-1BD82A7B7458}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portmidi">
-			<UniqueIdentifier>{D4A97C2B-FADF-414F-9576-CC229AD7D797}</UniqueIdentifier>
+			<UniqueIdentifier>{DA766F9F-BEAF-E04C-A80F-B447E19E290B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portmidi\porttime">
-			<UniqueIdentifier>{955069D0-0A23-9949-B6E3-2C437DB5C95E}</UniqueIdentifier>
+			<UniqueIdentifier>{F769E33E-AB0A-164C-BAB9-05AB733348DE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portmidi\pm_common">
-			<UniqueIdentifier>{E0849365-0CDE-6E4A-ABE3-14079E388422}</UniqueIdentifier>
+			<UniqueIdentifier>{AC6D8E13-1B5F-3E49-A73F-71A0C50EB28F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\portmidi\pm_win">
-			<UniqueIdentifier>{7A6F33C0-CD93-B644-A71D-D86EDEB4F02D}</UniqueIdentifier>
+			<UniqueIdentifier>{C78FB942-DF36-E645-AB30-C95826ED20C6}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

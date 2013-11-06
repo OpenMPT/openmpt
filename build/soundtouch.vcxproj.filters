@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{776C3D6E-8ED5-7F4E-9EC0-D5042713BF0F}</UniqueIdentifier>
+			<UniqueIdentifier>{2B25F283-9568-554B-B7E5-C8B23690E213}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\soundtouch">
-			<UniqueIdentifier>{82A1BCC0-869D-4140-BADC-0AA357B0CAF1}</UniqueIdentifier>
+			<UniqueIdentifier>{33E36556-338C-5E49-A037-B4A9D56FE243}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

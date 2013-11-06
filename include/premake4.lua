@@ -1,5 +1,5 @@
 solution "include"
- configurations { "Debug", "Normal", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoLTCG" }
  platforms { "x32", "x64" }
  
  
@@ -443,7 +443,7 @@ solution "include"
   
   
 solution "includeDLL"
- configurations { "Debug", "Normal", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoLTCG" }
  platforms { "x32", "x64" }
  
  
