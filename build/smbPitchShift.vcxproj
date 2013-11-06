@@ -225,7 +225,7 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<DebugInformationFormat></DebugInformationFormat>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -235,10 +235,9 @@
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<GenerateDebugInformation>false</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">
@@ -253,7 +252,7 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<DebugInformationFormat></DebugInformationFormat>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -263,10 +262,9 @@
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<GenerateDebugInformation>false</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>

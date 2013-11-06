@@ -2,31 +2,31 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{BC279AC7-C6B4-AE41-9ECC-A7C52B3C8A0D}</UniqueIdentifier>
+			<UniqueIdentifier>{8D73C555-D4B8-2D41-AA64-549185F6A866}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac">
-			<UniqueIdentifier>{3CFFBEDE-7D8E-A945-A8EC-D6F443D35E0A}</UniqueIdentifier>
+			<UniqueIdentifier>{7DBFD967-716A-5D4C-ADB7-87AD1E067B04}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src">
-			<UniqueIdentifier>{95A41CB5-5215-8D4F-8396-C62A7188EFEA}</UniqueIdentifier>
+			<UniqueIdentifier>{D7462892-CBBF-FF43-9AAB-B693D2FBDC29}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC">
-			<UniqueIdentifier>{520298DF-75E3-F349-A4A1-6EFED0096B06}</UniqueIdentifier>
+			<UniqueIdentifier>{EF8383C6-ED33-B646-902E-3CAC851D6EC9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include">
-			<UniqueIdentifier>{E982D50B-C72D-B142-B902-2654348C1634}</UniqueIdentifier>
+			<UniqueIdentifier>{81BF1A39-AD5A-8E42-AE15-62BE0CE41E4C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\private">
-			<UniqueIdentifier>{6A4252D2-AFB2-484A-9255-12EE5A59463A}</UniqueIdentifier>
+			<UniqueIdentifier>{FE262055-A0D1-3744-9497-258BCA1F6C01}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\protected">
-			<UniqueIdentifier>{C5A39CAF-4859-6C44-A0BC-8B8CAA772238}</UniqueIdentifier>
+			<UniqueIdentifier>{FF7B7C17-1823-974C-89DA-FF2A5247C924}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include">
-			<UniqueIdentifier>{1B8F9693-09EE-2147-815C-476B021C5415}</UniqueIdentifier>
+			<UniqueIdentifier>{0990FB44-4019-D04E-BB03-72B126850B59}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include\FLAC">
-			<UniqueIdentifier>{7ACCC449-A61B-0F47-A15B-DDF1E1736629}</UniqueIdentifier>
+			<UniqueIdentifier>{1150D860-3747-1442-B79E-D73527226503}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

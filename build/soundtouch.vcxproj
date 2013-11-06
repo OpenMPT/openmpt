@@ -241,7 +241,7 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<DebugInformationFormat></DebugInformationFormat>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -250,10 +250,9 @@
 			<OutputFile>$(OutDir)OpenMPT_SoundTouch_i16.dll</OutputFile>
 			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<GenerateDebugInformation>false</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)OpenMPT_SoundTouch_i16.pdb</ProgramDataBaseFileName>
 			<ImportLibrary>..\bin\Win32\OpenMPT_SoundTouch_i16.lib</ImportLibrary>
 			<TargetMachine>MachineX86</TargetMachine>
 		</Link>
@@ -270,7 +269,7 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<DebugInformationFormat></DebugInformationFormat>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DLL_EXPORTS;SOUNDTOUCH_INTEGER_SAMPLES=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -279,10 +278,9 @@
 			<OutputFile>$(OutDir)OpenMPT_SoundTouch_i16.dll</OutputFile>
 			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<GenerateDebugInformation>false</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)OpenMPT_SoundTouch_i16.pdb</ProgramDataBaseFileName>
 			<ImportLibrary>..\bin\x64\OpenMPT_SoundTouch_i16.lib</ImportLibrary>
 			<TargetMachine>MachineX64</TargetMachine>
 		</Link>

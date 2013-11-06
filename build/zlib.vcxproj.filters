@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{03311BD6-ECC2-D946-8069-8756F632AFAD}</UniqueIdentifier>
+			<UniqueIdentifier>{BE54134D-FF2C-5046-9105-407487BD1D22}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\zlib">
-			<UniqueIdentifier>{EF032031-D569-954F-89A3-685063F250C1}</UniqueIdentifier>
+			<UniqueIdentifier>{CD49036E-5713-3445-9AC9-2B28DE4FE443}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
