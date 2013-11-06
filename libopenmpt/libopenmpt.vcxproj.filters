@@ -478,9 +478,6 @@
     <ClCompile Include="libopenmpt_cxx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="libopenmpt_version.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="libopenmpt_interactive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
