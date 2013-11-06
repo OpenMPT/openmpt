@@ -5,11 +5,11 @@
   configuration "Debug"
    targetdir "bin/Debug"
   
-  configuration "Normal"
-   targetdir "bin/Normal"
-  
   configuration "Release"
    targetdir "bin/Release"
+  
+  configuration "ReleaseNoLTCG"
+   targetdir "bin/ReleaseNoLTCG"
   
   configuration "*"
    kind "StaticLib"
@@ -19,14 +19,14 @@
    defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
    flags { "Symbols" }
   
-  configuration "Normal"
-   defines { "NDEBUG" }
-   defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
-   flags { "Symbols", "Optimize", "FloatFast", "StaticRuntime" }
-   buildoptions { "/GL- /MP" }
-
   configuration "Release"
    defines { "NDEBUG" }
    defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
    flags { "Symbols", "Optimize", "FloatFast", "StaticRuntime" }
    buildoptions { "/MP" }
+
+  configuration "ReleaseNoLTCG"
+   defines { "NDEBUG" }
+   defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
+   flags { "Symbols", "Optimize", "FloatFast", "StaticRuntime" }
+   buildoptions { "/GL- /MP" }

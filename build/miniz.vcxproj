@@ -9,20 +9,20 @@
 			<Configuration>Debug</Configuration>
 			<Platform>x64</Platform>
 		</ProjectConfiguration>
-		<ProjectConfiguration Include="Normal|Win32">
-			<Configuration>Normal</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Normal|x64">
-			<Configuration>Normal</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
 		<ProjectConfiguration Include="Release|Win32">
 			<Configuration>Release</Configuration>
 			<Platform>Win32</Platform>
 		</ProjectConfiguration>
 		<ProjectConfiguration Include="Release|x64">
 			<Configuration>Release</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="ReleaseNoLTCG|Win32">
+			<Configuration>ReleaseNoLTCG</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="ReleaseNoLTCG|x64">
+			<Configuration>ReleaseNoLTCG</Configuration>
 			<Platform>x64</Platform>
 		</ProjectConfiguration>
 	</ItemGroup>
@@ -42,18 +42,6 @@
 		<CharacterSet>MultiByte</CharacterSet>
 		<UseDebugLibraries>true</UseDebugLibraries>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'" Label="Configuration">
-		<ConfigurationType>StaticLibrary</ConfigurationType>
-		<CharacterSet>MultiByte</CharacterSet>
-		<WholeProgramOptimization>true</WholeProgramOptimization>
-		<UseDebugLibraries>false</UseDebugLibraries>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Normal|x64'" Label="Configuration">
-		<ConfigurationType>StaticLibrary</ConfigurationType>
-		<CharacterSet>MultiByte</CharacterSet>
-		<WholeProgramOptimization>true</WholeProgramOptimization>
-		<UseDebugLibraries>false</UseDebugLibraries>
-	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
 		<ConfigurationType>StaticLibrary</ConfigurationType>
 		<CharacterSet>MultiByte</CharacterSet>
@@ -61,6 +49,18 @@
 		<UseDebugLibraries>false</UseDebugLibraries>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'" Label="Configuration">
 		<ConfigurationType>StaticLibrary</ConfigurationType>
 		<CharacterSet>MultiByte</CharacterSet>
 		<WholeProgramOptimization>true</WholeProgramOptimization>
@@ -75,16 +75,16 @@
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'" Label="PropertySheets">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Normal|x64'" Label="PropertySheets">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
 	<PropertyGroup Label="UserMacros" />
@@ -96,18 +96,18 @@
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\include\bin\Debug\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">obj\miniz\x64\Debug\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">miniz64</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">..\include\bin\Normal\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">obj\miniz\x32\Normal\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">miniz</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">..\include\bin\Normal\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">obj\miniz\x64\Normal\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">miniz64</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\include\bin\Release\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">obj\miniz\x32\Release\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">miniz</TargetName>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\include\bin\Release\</OutDir>
 		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">obj\miniz\x64\Release\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">miniz64</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\include\bin\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">obj\miniz\x32\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">miniz</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\include\bin\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">obj\miniz\x64\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">miniz64</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<ClCompile>
@@ -159,64 +159,6 @@
 			<ProgramDataBaseFileName>$(OutDir)miniz64.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Normal|Win32'">
-		<ClCompile>
-			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
-			<Optimization>Full</Optimization>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<MinimalRebuild>false</MinimalRebuild>
-			<StringPooling>true</StringPooling>
-			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-			<FunctionLevelLinking>true</FunctionLevelLinking>
-			<PrecompiledHeader></PrecompiledHeader>
-			<WarningLevel>Level3</WarningLevel>
-			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
-		</ClCompile>
-		<ResourceCompile>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ResourceCompile>
-	<Lib>
-		<OutputFile>$(OutDir)miniz.lib</OutputFile>
-	</Lib>
-		<Link>
-			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<OptimizeReferences>true</OptimizeReferences>
-			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)miniz.pdb</ProgramDataBaseFileName>
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Normal|x64'">
-		<ClCompile>
-			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
-			<Optimization>Full</Optimization>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<MinimalRebuild>false</MinimalRebuild>
-			<StringPooling>true</StringPooling>
-			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-			<FunctionLevelLinking>true</FunctionLevelLinking>
-			<PrecompiledHeader></PrecompiledHeader>
-			<WarningLevel>Level3</WarningLevel>
-			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
-		</ClCompile>
-		<ResourceCompile>
-			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ResourceCompile>
-	<Lib>
-		<OutputFile>$(OutDir)miniz64.lib</OutputFile>
-	</Lib>
-		<Link>
-			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<OptimizeReferences>true</OptimizeReferences>
-			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)miniz64.pdb</ProgramDataBaseFileName>
-		</Link>
-	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
@@ -249,6 +191,64 @@
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)miniz64.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)miniz64.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
+		<ClCompile>
+			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)miniz.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)miniz.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">
+		<ClCompile>
+			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
