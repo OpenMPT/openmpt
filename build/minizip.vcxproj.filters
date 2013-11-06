@@ -2,16 +2,16 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{68E4E657-7DF1-0C4B-8987-D76FD8397852}</UniqueIdentifier>
+			<UniqueIdentifier>{7457BDD8-5A7E-3645-AA83-D02E7EA0B204}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\zlib">
-			<UniqueIdentifier>{15B45470-842E-9B43-B697-6023C422B24E}</UniqueIdentifier>
+			<UniqueIdentifier>{75761BC3-8F76-2248-AEE3-4A454563635E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\zlib\contrib">
-			<UniqueIdentifier>{63B7D41F-8A1F-C241-A874-442FA1EAA018}</UniqueIdentifier>
+			<UniqueIdentifier>{2EC4A12B-43A7-744E-B99F-8657B723A342}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\zlib\contrib\minizip">
-			<UniqueIdentifier>{EF7621CA-D165-674C-803F-38D7C80333B9}</UniqueIdentifier>
+			<UniqueIdentifier>{412A0F97-BBA5-A549-98DC-1F287CA99178}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

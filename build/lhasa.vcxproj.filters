@@ -2,16 +2,16 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{5C28B7BC-E688-F04C-AA7A-4C818FF0B931}</UniqueIdentifier>
+			<UniqueIdentifier>{57BB3C0A-4A1D-D048-B470-7CF98B0CBDCB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\lhasa">
-			<UniqueIdentifier>{E594F94D-4264-C845-85EE-136F04FDC899}</UniqueIdentifier>
+			<UniqueIdentifier>{7412795A-0437-7643-B5D9-22E06ED9098C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\lhasa\lib">
-			<UniqueIdentifier>{D40C9477-3313-964A-979A-69394903E541}</UniqueIdentifier>
+			<UniqueIdentifier>{931B1DF3-70F2-8740-803C-39C953DD9FEC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\lhasa\lib\public">
-			<UniqueIdentifier>{8DFECA0F-7BAD-204D-913B-C35F91525497}</UniqueIdentifier>
+			<UniqueIdentifier>{C54B6B76-3F76-EE45-A718-EC0297A09AEF}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
