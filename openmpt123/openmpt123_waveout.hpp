@@ -151,11 +151,9 @@ public:
 	}
 };
 
-static void show_waveout_devices() {
+static std::string show_waveout_devices() {
 	std::ostringstream devices;
-	devices << " Available devices:" << std::endl;
-	devices << "    " << "stdout" << ": " << "use standard output" << std::endl;
-	devices << "    " << "default" << ": " << "default" << std::endl;
+	devices << " waveout:" << std::endl;
 	for ( UINT i = 0; i < waveOutGetNumDevs(); ++i ) {
 		devices << "    " << i << ": ";
 		WAVEOUTCAPSW caps;
@@ -164,7 +162,7 @@ static void show_waveout_devices() {
 		devices << wstring_to_utf8( caps.szPname );
 		devices << std::endl;
 	}
-	throw show_help_exception( devices.str() );
+	return devices.str();
 }
 
 } // namespace openmpt123

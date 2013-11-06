@@ -255,12 +255,10 @@ public:
 
 #endif
 
-static void show_portaudio_devices() {
+static std::string show_portaudio_devices() {
 	std::ostringstream devices;
-	devices << " Available devices:" << std::endl;
+	devices << " portaudio:" << std::endl;
 	portaudio_raii portaudio( false );
-	devices << "    " << "stdout" << ": " << "use standard output" << std::endl;
-	devices << "    " << "default" << ": " << "default" << std::endl;
 	for ( PaDeviceIndex i = 0; i < Pa_GetDeviceCount(); ++i ) {
 		if ( Pa_GetDeviceInfo( i ) && Pa_GetDeviceInfo( i )->maxOutputChannels > 0 ) {
 			devices << "    " << i << ": ";
@@ -284,7 +282,7 @@ static void show_portaudio_devices() {
 			devices << std::endl;
 		}
 	}
-	throw show_help_exception( devices.str() );
+	return devices.str();
 }
 
 } // namespace openmpt123

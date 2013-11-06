@@ -303,6 +303,13 @@ static void show_version( textout & log ) {
 	log.writeout();
 }
 
+static std::string get_driver_string( const std::string & driver ) {
+	if ( driver.empty() ) {
+		return "default";
+	}
+	return driver;
+}
+
 static std::string get_device_string( int device ) {
 	if ( device == -1 ) {
 		return "default";
@@ -359,6 +366,7 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 		log << "     --repeat n            Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		log << "     --seek n              Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
 		log << std::endl;
+		log << "     --driver n            Set output driver [default: " << get_driver_string( commandlineflags().driver ) << "]," << std::endl;
 		log << "     --device n            Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
 		log << "                           use --device help to show available devices" << std::endl;
 		log << "     --buffer n            Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
@@ -1258,18 +1266,43 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.show_message = true;
 			} else if ( arg == "--no-message" ) {
 				flags.show_message = false;
+			} else if ( arg == "--driver" && nextarg != "" ) {
+				if ( false ) {
+					// nothing
+				} else if ( nextarg == "help" ) {
+					std::ostringstream drivers;
+					drivers << " Available drivers:" << std::endl;
+					drivers << "    " << "default" << std::endl;
+#if defined( MPT_WITH_PORTAUDIO )
+					drivers << "    " << "portaudio" << std::endl;
+#endif
+#if defined( MPT_WITH_SDL )
+					drivers << "    " << "sdl" << std::endl;
+#endif
+#if defined( WIN32 )
+					drivers << "    " << "waveout" << std::endl;
+#endif
+					throw show_help_exception( drivers.str() );
+				} else if ( nextarg == "default" ) {
+					flags.driver = "";
+				} else {
+					flags.driver = nextarg;
+				}
+				++i;
 			} else if ( arg == "--device" && nextarg != "" ) {
 				if ( false ) {
 					// nothing
-				} else if ( nextarg == "stdout" ) {
-					flags.use_stdout = true;
 				} else if ( nextarg == "help" ) {
-#if defined( MPT_WITH_SDL )
-#elif defined( MPT_WITH_PORTAUDIO )
-					show_portaudio_devices();
-#elif defined( WIN32 )
-					show_waveout_devices();
+					std::ostringstream devices;
+					devices << " Available devices:" << std::endl;
+					devices << "    " << "default" << ": " << "default" << std::endl;
+#if defined( MPT_WITH_PORTAUDIO )
+					devices << show_portaudio_devices();
 #endif
+#if defined( WIN32 )
+					devices << show_waveout_devices();
+#endif
+					throw show_help_exception( devices.str() );
 				} else if ( nextarg == "default" ) {
 					flags.device = -1;
 				} else {
@@ -1457,16 +1490,18 @@ static int main( int argc, char * argv [] ) {
 				} else if ( !flags.output_filename.empty() ) {
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream );
-#if defined( MPT_WITH_SDL )
-				} else {
-					sdl_stream_raii sdl_stream( flags, log );
-					render_files( flags, log, sdl_stream );
-#elif defined( MPT_WITH_PORTAUDIO )
-				} else {
+#if defined( MPT_WITH_PORTAUDIO )
+				} else if ( flags.driver == "portaudio" || flags.driver.empty() ) {
 					portaudio_stream_raii portaudio_stream( flags, log );
 					render_files( flags, log, portaudio_stream );
-#elif defined( WIN32 )
-				} else {
+#endif
+#if defined( MPT_WITH_SDL )
+				} else if ( flags.driver == "sdl" || flags.driver.empty() ) {
+					sdl_stream_raii sdl_stream( flags, log );
+					render_files( flags, log, sdl_stream );
+#endif
+#if defined( WIN32 )
+				} else if ( flags.driver == "waveout" || flags.driver.empty() ) {
 					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream );
 #endif
