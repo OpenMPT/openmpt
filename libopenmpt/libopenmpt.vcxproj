@@ -158,7 +158,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -168,7 +168,7 @@
       </DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -179,7 +179,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -189,7 +189,7 @@
       </DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -200,7 +200,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -208,7 +208,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <Lib>
       <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
@@ -218,7 +218,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -226,7 +226,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <Lib>
       <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
@@ -241,7 +241,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -256,7 +256,7 @@
       </DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>copy /y bin\libopenmpt.dll bin\in_openmpt.dll
@@ -274,7 +274,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -290,7 +290,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <SubSystem>Console</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -303,7 +303,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -318,7 +318,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       </DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>copy /y bin\libopenmpt64.dll bin\libmodplug64.dll
@@ -334,7 +334,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -350,7 +350,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <SubSystem>Console</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -363,7 +363,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -375,7 +375,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <Lib>
       <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
@@ -390,7 +390,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;../common/svn_version_subwcrev;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../libopenmpt/svn_version;../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -402,7 +402,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\common\svn_version_subwcrev\svn_version.h || del ..\common\svn_version_subwcrev\svn_version.h || true</Command>
+      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <Lib>
       <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
