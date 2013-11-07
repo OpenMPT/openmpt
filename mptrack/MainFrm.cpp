@@ -39,6 +39,7 @@
 #include "MemoryMappedFile.h"
 #include "soundlib/FileReader.h"
 #include "../common/Profiler.h"
+#include "FileDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1846,19 +1847,19 @@ void CMainFrame::OnClipboardManager()
 void CMainFrame::OnAddDlsBank()
 //-----------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "dls", "",
-		"All Sound Banks|*.dls;*.sbk;*.sf2;*.mss|"
-		"Downloadable Sounds Banks (*.dls)|*.dls;*.mss|"
-		"SoundFont 2.0 Banks (*.sf2)|*.sbk;*.sf2|"
-		"All Files (*.*)|*.*||",
-		"",
-		true);
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter("All Sound Banks|*.dls;*.sbk;*.sf2;*.mss|"
+			"Downloadable Sounds Banks (*.dls)|*.dls;*.mss|"
+			"SoundFont 2.0 Banks (*.sf2)|*.sbk;*.sf2|"
+			"All Files (*.*)|*.*||");
+	if(!dlg.Show()) return;
 
 	BeginWaitCursor();
-	for(size_t counter = 0; counter < files.filenames.size(); counter++)
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-		CTrackApp::AddDLSBank(files.filenames[counter].c_str());
+		CTrackApp::AddDLSBank(files[counter].c_str());
 	}
 	m_wndTree.RefreshDlsBanks();
 	EndWaitCursor();
@@ -1868,16 +1869,16 @@ void CMainFrame::OnAddDlsBank()
 void CMainFrame::OnImportMidiLib()
 //--------------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"Text and INI files (*.txt,*.ini)|*.txt;*.ini;*.dls;*.sf2;*.sbk|"
-		"Downloadable Sound Banks (*.dls)|*.dls;*.mss|"
-		"SoundFont 2.0 banks (*.sf2)|*.sbk;*.sf2|"
-		"Gravis UltraSound (ultrasnd.ini)|ultrasnd.ini|"
-		"All Files (*.*)|*.*||");
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.ExtensionFilter("Text and INI files (*.txt,*.ini)|*.txt;*.ini;*.dls;*.sf2;*.sbk|"
+			"Downloadable Sound Banks (*.dls)|*.dls;*.mss|"
+			"SoundFont 2.0 banks (*.sf2)|*.sbk;*.sf2|"
+			"Gravis UltraSound (ultrasnd.ini)|ultrasnd.ini|"
+			"All Files (*.*)|*.*||");
+	if(!dlg.Show()) return;
 
 	BeginWaitCursor();
-	CTrackApp::ImportMidiConfig(files.first_file.c_str());
+	CTrackApp::ImportMidiConfig(dlg.GetFirstFile().c_str());
 	m_wndTree.RefreshMidiLibrary();
 	EndWaitCursor();
 }

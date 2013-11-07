@@ -15,6 +15,7 @@
 #include "Moddoc.h"
 #include "SelectPluginDialog.h"
 #include "../common/StringFixer.h"
+#include "FileDialog.h"
 
 
 #ifndef NO_VST
@@ -453,22 +454,24 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug)
 void CSelectPluginDlg::OnAddPlugin()
 //----------------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "dll", "",
-		"VST Plugins (*.dll)|*.dll||",
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_PLUGINS),
-		true);
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.DefaultExtension("dll")
+		.ExtensionFilter("VST Plugins (*.dll)|*.dll||")
+		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_PLUGINS));
+	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINS, true);
+	TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_PLUGINS, true);
 
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	bool bOk = false;
 
 	VSTPluginLib *plugLib = nullptr;
-	for(size_t counter = 0; counter < files.filenames.size(); counter++)
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 
-		CString sFilename = files.filenames[counter].c_str();
+		CString sFilename = files[counter].c_str();
 
 		if (pManager)
 		{

@@ -14,6 +14,7 @@
 #include "moddoc.h"
 #include "AutoSaver.h"
 #include "moptions.h"
+#include "FileDialog.h"
 #include <algorithm>
 #include <io.h>
 #include <stdio.h>
@@ -402,19 +403,12 @@ void CAutoSaverGUI::OnOK()
 void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 {
 	CHAR szPath[_MAX_PATH] = "";
-	BROWSEINFO bi;
-
 	GetDlgItemText(IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
-	MemsetZero(bi);
-	bi.hwndOwner = m_hWnd;
-	bi.lpszTitle = "Select a folder to store autosaved files in...";
-	bi.pszDisplayName = szPath;
-	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
-	LPITEMIDLIST pid = SHBrowseForFolder(&bi);
-	if (pid != NULL)
+
+	BrowseForFolder dlg(szPath, "Select a folder to store autosaved files in...");
+	if(dlg.Show())
 	{
-		SHGetPathFromIDList(pid, szPath);
-		SetDlgItemText(IDC_AUTOSAVE_PATH, szPath);
+		SetDlgItemText(IDC_AUTOSAVE_PATH, dlg.GetDirectory().c_str());
 		OnSettingsChanged();
 	}
 }

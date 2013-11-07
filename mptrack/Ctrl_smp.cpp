@@ -30,6 +30,7 @@
 #include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
 #include <Shlwapi.h>
+#include "FileDialog.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -943,31 +944,31 @@ void CCtrlSamples::OnSampleOpen()
 //-------------------------------
 {
 	static int nLastIndex = 0;
-	
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"All Samples|*.wav;*.flac;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3|"
-		"Wave Files (*.wav)|*.wav|"
-#ifndef NO_FLAC
-		"FLAC Files (*.flac)|*.flac|"
-#endif // NO_FLAC
-#ifndef NO_MP3_SAMPLES
-		"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
-#endif // NO_MP3_SAMPLES
-		"XI Samples (*.xi)|*.xi|"
-		"Impulse Tracker Samples (*.its)|*.its|"
-		"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
-		"GF1 Patches (*.pat)|*.pat|"
-		"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.8sv;*.8svx;*.svx|"
-		"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
-		"All Files (*.*)|*.*||",
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_SAMPLES),
-		true,
-		&nLastIndex);
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter("All Samples|*.wav;*.flac;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3|"
+			"Wave Files (*.wav)|*.wav|"
+	#ifndef NO_FLAC
+			"FLAC Files (*.flac)|*.flac|"
+	#endif // NO_FLAC
+	#ifndef NO_MP3_SAMPLES
+			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
+	#endif // NO_MP3_SAMPLES
+			"XI Samples (*.xi)|*.xi|"
+			"Impulse Tracker Samples (*.its)|*.its|"
+			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
+			"GF1 Patches (*.pat)|*.pat|"
+			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.8sv;*.8svx;*.svx|"
+			"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
+			"All Files (*.*)|*.*||")
+		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_SAMPLES))
+		.FilterIndex(&nLastIndex);
+	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_SAMPLES, true);
+	TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_SAMPLES, true);
 
-	for(size_t counter = 0; counter < files.filenames.size(); counter++)
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 		// If loading multiple samples, create new slots for them
 		if(counter > 0)
@@ -975,7 +976,7 @@ void CCtrlSamples::OnSampleOpen()
 			OnSampleNew();
 		}
 
-		if(!OpenSample(files.filenames[counter].c_str()))
+		if(!OpenSample(files[counter].c_str()))
 			ErrorBox(IDS_ERR_FILEOPEN, this);
 	}
 	SwitchToView();
@@ -1034,21 +1035,24 @@ void CCtrlSamples::OnSampleSave()
 	else if(!format.CompareNoCase("raw"))
 		filter = 3;
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, std::string(format), szFileName,
-		"Wave File (*.wav)|*.wav|"
-		"FLAC File (*.flac)|*.flac|"
-		"RAW Audio (*.raw)|*.raw||",
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_SAMPLES), false, &filter);
-	if(files.abort) return;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension(std::string(format))
+		.DefaultFilename(szFileName)
+		.ExtensionFilter("Wave File (*.wav)|*.wav|"
+			"FLAC File (*.flac)|*.flac|"
+			"RAW Audio (*.raw)|*.raw||")
+			.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_SAMPLES))
+			.FilterIndex(&filter);
+	if(!dlg.Show()) return;
 
 	BeginWaitCursor();
 
 	TCHAR ext[_MAX_EXT];
-	_splitpath(files.first_file.c_str(), NULL, NULL, NULL, ext);
+	_splitpath(dlg.GetFirstFile().c_str(), NULL, NULL, NULL, ext);
 
 	bool bOk = false;
 	SAMPLEINDEX iMinSmp = m_nSample, iMaxSmp = m_nSample;
-	CString sFilename = files.first_file.c_str(), sNumberFormat;
+	CString sFilename = dlg.GetFirstFile().c_str(), sNumberFormat;
 	if(doBatchSave)
 	{
 		iMinSmp = 1;
@@ -1071,7 +1075,7 @@ void CCtrlSamples::OnSampleSave()
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 
-				sFilename = files.first_file.c_str();
+				sFilename = dlg.GetFirstFile().c_str();
 				sFilename.Replace("%sample_number%", sSampleNumber);
 				sFilename.Replace("%sample_filename%", sSampleFilename);
 				sFilename.Replace("%sample_name%", sSampleName);
@@ -1091,7 +1095,7 @@ void CCtrlSamples::OnSampleSave()
 		ErrorBox(IDS_ERR_SAVESMP, this);
 	} else
 	{
-		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_SAMPLES, true);
+		TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_SAMPLES, true);
 	}
 	SwitchToView();
 }

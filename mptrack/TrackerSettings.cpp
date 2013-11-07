@@ -783,7 +783,7 @@ void TrackerSettings::SetDefaultDirectory(const LPCTSTR szFilenameFrom, Director
 void TrackerSettings::SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
 //---------------------------------------------------------------------------------------------------------
 {
-	TrackerDirectories::Instance().SetDefaultDirectory(szFilenameFrom, dir, bStripFilename);
+	TrackerDirectories::Instance().SetWorkingDirectory(szFilenameFrom, dir, bStripFilename);
 }
 
 

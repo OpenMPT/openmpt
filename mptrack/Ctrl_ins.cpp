@@ -23,6 +23,7 @@
 #include "../common/StringFixer.h"
 #include "SelectPluginDialog.h"
 #include "MemoryMappedFile.h"
+#include "FileDialog.h"
 
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
@@ -1680,20 +1681,22 @@ void CCtrlInstruments::OnInstrumentOpen()
 {
 	static int nLastIndex = 0;
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"All Instruments|*.xi;*.pat;*.iti;*.flac;*.wav;*.aif;*.aiff|"
-		"FastTracker II Instruments (*.xi)|*.xi|"
-		"GF1 Patches (*.pat)|*.pat|"
-		"Impulse Tracker Instruments (*.iti)|*.iti|"
-		"All Files (*.*)|*.*||",
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_INSTRUMENTS),
-		true,
-		&nLastIndex);
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter(
+			"All Instruments|*.xi;*.pat;*.iti;*.flac;*.wav;*.aif;*.aiff|"
+			"FastTracker II Instruments (*.xi)|*.xi|"
+			"GF1 Patches (*.pat)|*.pat|"
+			"Impulse Tracker Instruments (*.iti)|*.iti|"
+			"All Files (*.*)|*.*||")
+		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
+		.FilterIndex(&nLastIndex);
+	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS, true);
+	TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_INSTRUMENTS, true);
 
-	for(size_t counter = 0; counter < files.filenames.size(); counter++)
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 		//If loading multiple instruments, advancing to next instrument and creating
 		//new instrument if necessary.
@@ -1708,7 +1711,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 				OnInstrumentNew();
 		}
 
-		if(!OpenInstrument(files.filenames[counter].c_str()))
+		if(!OpenInstrument(files[counter].c_str()))
 			ErrorBox(IDS_ERR_FILEOPEN, this);
 	}
 
@@ -1734,39 +1737,42 @@ void CCtrlInstruments::OnInstrumentSave()
 	SanitizeFilename(szFileName);
 
 	int index = 0;
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, (m_sndFile.GetType() == MOD_TYPE_XM) ? "xi" : "iti", szFileName,
-		(m_sndFile.GetType() == MOD_TYPE_XM) ?
-			"FastTracker II Instruments (*.xi)|*.xi|"
-			"Impulse Tracker Instruments (*.iti)|*.iti|"
-			"Compressed Impulse Tracker Instruments (*.iti)|*.iti||" :
-			"Impulse Tracker Instruments (*.iti)|*.iti|"
-			"Compressed Impulse Tracker Instruments (*.iti)|*.iti|"
-			"FastTracker II Instruments (*.xi)|*.xi||",
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_INSTRUMENTS), false, &index);
-	if(files.abort) return;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension(m_sndFile.GetType() == MOD_TYPE_XM ? "xi" : "iti")
+		.DefaultFilename(szFileName)
+		.ExtensionFilter((m_sndFile.GetType() == MOD_TYPE_XM) ?
+		"FastTracker II Instruments (*.xi)|*.xi|"
+		"Impulse Tracker Instruments (*.iti)|*.iti|"
+		"Compressed Impulse Tracker Instruments (*.iti)|*.iti||"
+		: "Impulse Tracker Instruments (*.iti)|*.iti|"
+		"Compressed Impulse Tracker Instruments (*.iti)|*.iti|"
+		"FastTracker II Instruments (*.xi)|*.xi||")
+		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
+		.FilterIndex(&index);
+	if(!dlg.Show()) return;
 	
 	BeginWaitCursor();
 
-	_splitpath(files.first_file.c_str(), drive, path, NULL, ext);
-	BOOL bOk = FALSE;
+	_splitpath(dlg.GetFirstFile().c_str(), drive, path, NULL, ext);
+	bool ok = false;
 	if (!lstrcmpi(ext, ".iti"))
-		bOk = m_sndFile.SaveITIInstrument(m_nInstrument, files.first_file.c_str(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
+		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile().c_str(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
 	else
-		bOk = m_sndFile.SaveXIInstrument(m_nInstrument, files.first_file.c_str());
+		ok = m_sndFile.SaveXIInstrument(m_nInstrument, dlg.GetFirstFile().c_str());
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = files.first_file;
+	m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = dlg.GetFirstFile();
 	SetInstrumentModified(false);
 // -! NEW_FEATURE#0023
 
 	EndWaitCursor();
-	if (!bOk) ErrorBox(IDS_ERR_SAVEINS, this); else
+	if (!ok) ErrorBox(IDS_ERR_SAVEINS, this); else
 	{
 		strcpy(szFileName, drive);
 		strcat(szFileName, path);
 		
-		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS);
+		TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_INSTRUMENTS);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

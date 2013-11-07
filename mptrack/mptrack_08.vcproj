@@ -323,6 +323,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\globals.cpp"
 				>
 			</File>
@@ -938,6 +942,10 @@
 			</File>
 			<File
 				RelativePath="..\common\FlagSet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FileDialog.h"
 				>
 			</File>
 			<File

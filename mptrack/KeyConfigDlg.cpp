@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "KeyConfigDlg.h"
+#include "FileDialog.h"
 
 //***************************************************************************************//
 // CCustEdit: customised CEdit control to catch keypresses.
@@ -836,14 +837,15 @@ void COptionsKeyboard::OnDestroy()
 
 void COptionsKeyboard::OnLoad()
 //-----------------------------
-{ 
-	std::string filename = m_sFullPathName;
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "mkb", filename,
-		"OpenMPT Key Bindings (*.mkb)|*.mkb||",
-		TrackerSettings::Instance().m_szKbdFile);
-	if(files.abort)	return;
+{
+	FileDialog dlg = OpenFileDialog()
+		.DefaultExtension("mkb")
+		.DefaultFilename(std::string(m_sFullPathName))
+		.ExtensionFilter("OpenMPT Key Bindings (*.mkb)|*.mkb||")
+		.WorkingDirectory(TrackerSettings::Instance().m_szKbdFile);
+	if(!dlg.Show()) return;
 
-	m_sFullPathName = files.first_file.c_str();
+	m_sFullPathName = dlg.GetFirstFile().c_str();
 	plocalCmdSet->LoadFile(m_sFullPathName);
 	ForceUpdateGUI();
 	//TentativeSetToDefaultFile(m_sFullPathName);
@@ -853,13 +855,14 @@ void COptionsKeyboard::OnLoad()
 void COptionsKeyboard::OnSave()
 //-----------------------------
 {	
-	std::string filename = m_sFullPathName;
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mkb", filename,
-		"OpenMPT Key Bindings (*.mkb)|*.mkb||",
-		TrackerSettings::Instance().m_szKbdFile);
-	if(files.abort)	return;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension("mkb")
+		.DefaultFilename(std::string(m_sFullPathName))
+		.ExtensionFilter("OpenMPT Key Bindings (*.mkb)|*.mkb||")
+		.WorkingDirectory(TrackerSettings::Instance().m_szKbdFile);
+	if(!dlg.Show()) return;
 
-	m_sFullPathName = files.first_file.c_str();
+	m_sFullPathName = dlg.GetFirstFile().c_str();
 	plocalCmdSet->SaveFile(m_sFullPathName);
 	//TentativeSetToDefaultFile(m_sFullPathName);
 }

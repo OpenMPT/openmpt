@@ -17,6 +17,7 @@
 #include "moddoc.h"
 #include "Settings.h"
 #include "dlg_misc.h"
+#include "FileDialog.h"
 
 
 //////////////////////////////////////////////////////////////
@@ -487,15 +488,16 @@ void COptionsColors::OnPresetBuzz()
 void COptionsColors::OnLoadColorScheme()
 //--------------------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "mptcolor", "",
-		"OpenMPT Color Schemes|*.mptcolor||",
-		theApp.GetConfigPath());
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.DefaultExtension("mptcolor")
+		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
+		.WorkingDirectory(theApp.GetConfigPath());
+	if(!dlg.Show()) return;
 
 	// Ensure that all colours are reset (for outdated colour schemes)
 	OnPresetMPT();
 	{
-		IniFileSettingsContainer file(mpt::PathString::FromLocale(files.first_file));
+		IniFileSettingsContainer file(mpt::PathString::FromLocale(dlg.GetFirstFile()));
 		for(int i = 0; i < MAX_MODCOLORS; i++)
 		{
 			TCHAR sKeyName[16];
@@ -509,13 +511,14 @@ void COptionsColors::OnLoadColorScheme()
 void COptionsColors::OnSaveColorScheme()
 //--------------------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mptcolor", "",
-		"OpenMPT Color Schemes|*.mptcolor||",
-		theApp.GetConfigPath());
-	if(files.abort)
-		return;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension("mptcolor")
+		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
+		.WorkingDirectory(theApp.GetConfigPath());
+	if(!dlg.Show()) return;
+
 	{
-		IniFileSettingsContainer file(mpt::PathString::FromLocale(files.first_file));
+		IniFileSettingsContainer file(mpt::PathString::FromLocale(dlg.GetFirstFile()));
 		for(int i = 0; i < MAX_MODCOLORS; i++)
 		{
 			TCHAR sKeyName[16];
@@ -657,19 +660,12 @@ void COptionsGeneral::BrowseForFolder(UINT nID)
 //---------------------------------------------
 {
 	CHAR szPath[_MAX_PATH] = "";
-	BROWSEINFO bi;
-
 	GetDlgItemText(nID, szPath, CountOf(szPath));
-	MemsetZero(bi);
-	bi.hwndOwner = m_hWnd;
-	bi.lpszTitle = "Select a default folder...";
-	bi.pszDisplayName = szPath;
-	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
-	LPITEMIDLIST pid = SHBrowseForFolder(&bi);
-	if (pid != NULL)
+
+	::BrowseForFolder dlg(szPath, "Select a default folder...");
+	if(dlg.Show())
 	{
-		SHGetPathFromIDList(pid, szPath);
-		SetDlgItemText(nID, szPath);
+		SetDlgItemText(nID, dlg.GetDirectory().c_str());
 		OnSettingsChanged();
 	}
 }
