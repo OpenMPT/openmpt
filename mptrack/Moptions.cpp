@@ -495,7 +495,7 @@ void COptionsColors::OnLoadColorScheme()
 	// Ensure that all colours are reset (for outdated colour schemes)
 	OnPresetMPT();
 	{
-		IniFileSettingsContainer file(mpt::LocaleToPath(files.first_file));
+		IniFileSettingsContainer file(mpt::PathString::FromLocale(files.first_file));
 		for(int i = 0; i < MAX_MODCOLORS; i++)
 		{
 			TCHAR sKeyName[16];
@@ -515,7 +515,7 @@ void COptionsColors::OnSaveColorScheme()
 	if(files.abort)
 		return;
 	{
-		IniFileSettingsContainer file(mpt::LocaleToPath(files.first_file));
+		IniFileSettingsContainer file(mpt::PathString::FromLocale(files.first_file));
 		for(int i = 0; i < MAX_MODCOLORS; i++)
 		{
 			TCHAR sKeyName[16];

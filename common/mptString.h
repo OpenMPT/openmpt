@@ -160,24 +160,123 @@ std::string Convert(const std::string &src, Charset from, Charset to);
 } // namespace String
 
 
+
 #if defined(WIN32)
-typedef std::wstring PathString;
-#define MPT_PATHSTRING(lit) L##lit
-static inline std::string PathToLocale(const PathString &path) { return mpt::String::Encode(path, mpt::CharsetLocale); }
-static inline std::string PathToUTF8(const PathString &path)   { return mpt::String::Encode(path, mpt::CharsetUTF8);   }
-static inline std::wstring PathToWide(const PathString &path)  { return path; }
-static inline PathString LocaleToPath(const std::string &path) { return mpt::String::Decode(path, mpt::CharsetLocale); }
-static inline PathString UTF8ToPath(const std::string &path)   { return mpt::String::Decode(path, mpt::CharsetUTF8);   }
-static inline PathString WideToPath(const std::wstring &path)  { return path; }
+
+typedef std::wstring RawPathString;
+
+class PathString
+{
+private:
+	RawPathString path;
+private:
+	PathString(const RawPathString & path)
+		: path(path)
+	{
+		return;
+	}
+public:
+	PathString()
+	{
+		return;
+	}
+	PathString(const PathString & other)
+		: path(other.path)
+	{
+		return;
+	}
+	PathString & assign(const PathString & other)
+	{
+		path = other.path;
+		return *this;
+	}
+	PathString & operator = (const PathString & other)
+	{
+		return assign(other);
+	}
+	PathString & append(const PathString & other)
+	{
+		path.append(other.path);
+		return *this;
+	}
+	PathString & operator += (const PathString & other)
+	{
+		return append(other);
+	}
+	friend PathString operator + (const PathString & a, const PathString & b)
+	{
+		return PathString(a).append(b);
+	}
+public:
+	// conversions
+	std::string ToLocale() const { return mpt::String::Encode(path, mpt::CharsetLocale); }
+	std::string ToUTF8() const { return mpt::String::Encode(path, mpt::CharsetUTF8); }
+	std::wstring ToWide() const { return path; }
+	static PathString FromLocale(const std::string &path) { return PathString(mpt::String::Decode(path, mpt::CharsetLocale)); }
+	static PathString FromUTF8(const std::string &path) { return PathString(mpt::String::Decode(path, mpt::CharsetUTF8)); }
+	static PathString FromWide(const std::wstring &path) { return PathString(path); }
+	RawPathString AsNative() const { return path; }
+	static PathString FromNative(const RawPathString &path) { return PathString(path); }
+};
+
 #else // !WIN32
-typedef std::string PathString;
-#define MPT_PATHSTRING(lit) lit
-static inline std::string PathToLocale(const PathString &path) { return path; }
-static inline std::string PathToUTF8(const PathString &path)   { return mpt::String::Convert(path, mpt::CharsetLocale, mpt::CharsetUTF8); }
-static inline std::wstring PathToWide(const PathString &path)  { return mpt::String::Decode(path, mpt::CharsetLocale); }
-static inline PathString LocaleToPath(const std::string &path) { return path; }
-static inline PathString UTF8ToPath(const std::string &path)   { return mpt::String::Convert(path, mpt::CharsetUTF8, mpt::CharsetLocale); }
-static inline PathString WideToPath(const std::wstring &path)  { return mpt::String::Encode(path, mpt::CharsetLocale); }
+
+typedef std::string RawPathString;
+
+class PathString
+{
+private:
+	RawPathString path;
+private:
+	PathString(const RawPathString & path)
+		: path(path)
+	{
+		return;
+	}
+public:
+	PathString()
+	{
+		return;
+	}
+	PathString(const PathString & other)
+		: path(other.path)
+	{
+		return;
+	}
+	PathString & assign(const PathString & other)
+	{
+		path = other.path;
+		return *this;
+	}
+	PathString & operator = (const PathString & other)
+	{
+		return assign(other);
+	}
+	PathString & append(const PathString & other)
+	{
+		path.append(other.path);
+		return *this;
+	}
+	PathString & operator += (const PathString & other)
+	{
+		return append(other);
+	}
+	friend PathString operator + (const PathString & a, const PathString & b)
+	{
+		return PathString(a).append(b);
+	}
+public:
+	// conversions
+	std::string ToLocale() const { return path; }
+	std::string ToUTF8() const { return mpt::String::Convert(path, mpt::CharsetLocale, mpt::CharsetUTF8); }
+	std::wstring ToWide() const { return mpt::String::Decode(path, mpt::CharsetLocale); }
+	static PathString FromLocale(const std::string &path) { return PathString(path); }
+	static PathString FromUTF8(const std::string &path) { return PathString(mpt::String::Convert(path, mpt::CharsetUTF8, mpt::CharsetLocale)); }
+	static PathString FromWide(const std::wstring &path) { return PathString(mpt::String::Encode(path, mpt::CharsetLocale)); }
+	RawPathString AsNative() const { return path; }
+	static PathString FromNative(const RawPathString &path) { return PathString(path); }
+};
+
 #endif // WIN32
 
 

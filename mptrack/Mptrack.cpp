@@ -350,7 +350,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 		return TRUE;
 	}
 
-	IniFileSettingsContainer file(mpt::LocaleToPath(lpszConfigFile));
+	IniFileSettingsContainer file(mpt::PathString::FromLocale(lpszConfigFile));
 	return ImportMidiConfig(file);
 }
 
@@ -417,7 +417,7 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 //-----------------------------------------------------
 {
 	if ((!glpMidiLibrary) || (!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
-	IniFileSettingsContainer file(mpt::LocaleToPath(lpszConfigFile));
+	IniFileSettingsContainer file(mpt::PathString::FromLocale(lpszConfigFile));
 	return ExportMidiConfig(file);
 }
 
@@ -839,13 +839,13 @@ BOOL CTrackApp::InitInstance()
 	// Construct auto saver instance, class TrackerSettings expects it being available.
 	CMainFrame::m_pAutoSaver = new CAutoSaver();
 
-	m_pSettingsIniFile = new IniFileSettingsBackend(mpt::LocaleToPath(m_szConfigFileName));
+	m_pSettingsIniFile = new IniFileSettingsBackend(mpt::PathString::FromLocale(m_szConfigFileName));
 	
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
 
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
 
-	m_pPluginCache = new IniFileSettingsContainer(mpt::LocaleToPath(m_szPluginCacheFileName));
+	m_pPluginCache = new IniFileSettingsContainer(mpt::PathString::FromLocale(m_szPluginCacheFileName));
 
 	int mruListLength = GetSettings().Read<int32>("Misc", "MRUListLength", 10);
 	Limit(mruListLength, 0, 15);
