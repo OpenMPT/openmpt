@@ -415,6 +415,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
     <ClInclude Include="..\common\FlagSet.h" />
     <ClInclude Include="..\common\Logging.h" />
     <ClInclude Include="..\common\misc_util.h" />
+    <ClInclude Include="..\common\mptFstream.h" />
     <ClInclude Include="..\common\mptString.h" />
     <ClInclude Include="..\common\mutex.h" />
     <ClInclude Include="..\common\Profiler.h" />

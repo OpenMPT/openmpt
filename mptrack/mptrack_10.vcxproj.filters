@@ -936,6 +936,9 @@
     <ClInclude Include="svn_version\svn_version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\mptFstream.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">

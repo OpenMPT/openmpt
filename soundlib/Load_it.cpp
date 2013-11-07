@@ -16,7 +16,7 @@
 #include "../mptrack/moddoc.h"
 #endif
 #include "../common/serialization_utils.h"
-#include <fstream>
+#include "../common/mptFstream.h"
 #include <sstream>
 #include <list>
 #include "../common/version.h"
@@ -1624,7 +1624,7 @@ bool CSoundFile::SaveIT(const char *lpszFileName, bool compatibilityExport)
 	// Using std::ios::in | std::ios::out | std::ios::ate prevents truncation and sets the file pointer to the end of the so-far saved file,
 	//  but it also allows reading, which does no harm but is not what we actually really want here.
 	// That's a very broken interface.
-	std::ofstream fout(lpszFileName, std::ios::binary | std::ios::ate | std::ios::in);
+	mpt::ofstream fout(lpszFileName, std::ios::binary | std::ios::ate | std::ios::in);
 #endif
 
 	const uint32 MPTStartPos = (uint32)fout.tellp();

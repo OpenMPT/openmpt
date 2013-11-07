@@ -1041,6 +1041,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mptFstream.h"
+				>
+			</File>
+			<File
 				RelativePath=".\mptrack.h"
 				>
 			</File>
