@@ -31,7 +31,7 @@
 #ifdef NO_FILEREADER_STD_ISTREAM
 #include "MemoryMappedFile.h"
 #else
-#include <fstream>
+#include "../common/mptFstream.h"
 #endif
 #include "soundlib/FileReader.h"
 #include <shlwapi.h>
@@ -218,7 +218,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	BeginWaitCursor();
 	#ifndef NO_FILEREADER_STD_ISTREAM
-		std::ifstream f(lpszPathName, std::ios_base::binary);
+		mpt::ifstream f(lpszPathName, std::ios_base::binary);
 		m_SndFile.Create(FileReader(&f), CSoundFile::loadCompleteModule, this);
 	#else
 	{

@@ -16,7 +16,7 @@
 #include "../mptrack/Reporting.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <fstream>
+#include "../common/mptFstream.h"
 
 #define ENABLE_LOGGING 0
 
@@ -1678,7 +1678,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 bool CCommandSet::LoadFile(CString fileName)
 //------------------------------------------
 {
-	std::ifstream fin(fileName);
+	mpt::ifstream fin(fileName);
 	if (fin.fail())
 	{
 		CString strMsg;

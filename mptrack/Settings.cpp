@@ -20,7 +20,7 @@
 #include <shlwapi.h>
 
 #include <algorithm>
-#include <fstream>
+#include "../common/mptFstream.h"
 #include <iterator>
 
 
@@ -434,7 +434,7 @@ IniFileSettingsBackend::~IniFileSettingsBackend()
 
 static std::vector<char> ReadFile(const mpt::PathString &filename)
 {
-	std::ifstream s(filename.c_str(), std::ios::binary);
+	mpt::ifstream s(filename.c_str(), std::ios::binary);
 	std::vector<char> result;
 	while(s)
 	{
@@ -449,7 +449,7 @@ static std::vector<char> ReadFile(const mpt::PathString &filename)
 static void WriteFileUTF16LE(const mpt::PathString &filename, const std::wstring &str)
 {
 	STATIC_ASSERT(sizeof(wchar_t) == 2);
-	std::ofstream inifile(filename.c_str(), std::ios::binary | std::ios::trunc);
+	mpt::ofstream inifile(filename.c_str(), std::ios::binary | std::ios::trunc);
 	const uint8 UTF16LE_BOM[] = { 0xff, 0xfe };
 	inifile.write(reinterpret_cast<const char*>(UTF16LE_BOM), 2);
 	inifile.write(reinterpret_cast<const char*>(str.c_str()), str.length() * sizeof(std::wstring::value_type));

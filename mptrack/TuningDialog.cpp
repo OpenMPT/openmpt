@@ -13,7 +13,7 @@
 #include "TuningDialog.h"
 #include "TrackerSettings.h"
 #include <algorithm>
-#include <fstream>
+#include "../common/mptFstream.h"
 #include "../common/misc_util.h"
 #include "tuningdialog.h"
 
@@ -639,7 +639,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	bool failure = true;
 	
-	std::ofstream fout(files.first_file.c_str(), std::ios::binary);
+	mpt::ofstream fout(files.first_file.c_str(), std::ios::binary);
 	const std::string ext = "." + files.extension;
 
 	if(ext == CTuning::s_FileExtension)
@@ -699,7 +699,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 			if (bIsTun)
 			{
-				std::ifstream fin(files.filenames[counter].c_str(), std::ios::binary);
+				mpt::ifstream fin(files.filenames[counter].c_str(), std::ios::binary);
 				pT = CTuningRTI::DeserializeOLD(fin);
 				if(pT == 0)
 					{fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
