@@ -218,6 +218,7 @@ public:
 	static PathString FromWide(const std::wstring &path) { return PathString(path); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
+#if defined(_MFC_VER)
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
 	MPT_DEPRECATED CString ToCString() const
 	{
@@ -235,6 +236,7 @@ public:
 			return PathString(mpt::String::Decode(path.GetString(), mpt::CharsetLocale));
 		#endif
 	}
+#endif
 };
 
 #else // !WIN32
