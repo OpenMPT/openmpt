@@ -24,7 +24,7 @@
 #include "../soundlib/Dither.h"
 #include "../soundlib/AudioReadTarget.h"
 
-#include <fstream>
+#include "../common/mptFstream.h"
 
 extern const char *gszChnCfgNames[3];
 
@@ -696,13 +696,13 @@ void CDoWaveConvert::OnButton1()
 	char *tempPath = _tempnam("", "OpenMPT_mod2wave");
 	const std::string normalizeFileName = tempPath;
 	free(tempPath);
-	std::fstream normalizeFile;
+	mpt::fstream normalizeFile;
 	if(m_Settings.Normalize)
 	{
 		normalizeFile.open(normalizeFileName.c_str(), std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
 
-	std::ofstream fileStream(m_lpszFileName, std::ios::binary | std::ios::trunc);
+	mpt::ofstream fileStream(m_lpszFileName, std::ios::binary | std::ios::trunc);
 
 	if(!fileStream)
 	{

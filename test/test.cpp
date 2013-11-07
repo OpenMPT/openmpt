@@ -31,7 +31,7 @@
 #include "../mptrack/MainFrm.h"
 #endif // MODPLUG_TRACKER
 #ifndef MODPLUG_TRACKER
-#include <fstream>
+#include "../common/mptFstream.h"
 #endif // !MODPLUG_TRACKER
 #include <limits>
 #ifndef MODPLUG_TRACKER
@@ -1283,7 +1283,7 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 
 static TSoundFileContainer CreateSoundFileContainer(const std::string &filename)
 {
-	std::ifstream stream(filename, std::ios::binary);
+	mpt::ifstream stream(filename, std::ios::binary);
 	FileReader file(&stream);
 	std::shared_ptr<CSoundFile> pSndFile(new CSoundFile());
 	pSndFile->Create(file, CSoundFile::loadCompleteModule);

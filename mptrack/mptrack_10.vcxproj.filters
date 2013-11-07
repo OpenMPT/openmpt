@@ -930,6 +930,9 @@
     <ClInclude Include="..\unarchiver\archive.h">
       <Filter>Header Files\unarchiver</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\mptFstream.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">

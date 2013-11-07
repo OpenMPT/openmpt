@@ -28,7 +28,7 @@
 #include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
 #include "../soundlib/plugins/JBridge.h"
-#include <fstream>
+#include "../common/mptFstream.h"
 #ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
 #include "../zlib/zlib.h"			//For CRC32 calculation (to detect plugins with same UID)
 #endif // VST_USE_ALTERNATIVE_MAGIC
@@ -1625,8 +1625,7 @@ bool CVstPlugin::SaveProgram()
 
 	bool bank = !mpt::strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
 
-	std::fstream f;
-	f.open(files.first_file.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+	mpt::fstream f(files.first_file.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
 	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
 	{
 		return true;

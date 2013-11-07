@@ -13,7 +13,7 @@
 #include "../common/serialization_utils.h"
 #include <algorithm>
 #include <bitset>
-#include <fstream>
+#include "../common/mptFstream.h"
 
 /*
 Version history:
@@ -124,7 +124,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() cons
 {
 	if(m_SavefilePath.length() < 1)
 		return SERIALIZATION_FAILURE;
-	std::ofstream fout(m_SavefilePath.c_str(), std::ios::binary);
+	mpt::ofstream fout(m_SavefilePath.c_str(), std::ios::binary);
 	if(!fout.good())
 		return SERIALIZATION_FAILURE;
 
@@ -139,7 +139,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize()
 {
 	if(m_SavefilePath.length() < 1)
 		return SERIALIZATION_FAILURE;
-	std::ifstream fin(m_SavefilePath.c_str(), std::ios::binary);
+	mpt::ifstream fin(m_SavefilePath.c_str(), std::ios::binary);
 	if(!fin.good())
 		return SERIALIZATION_FAILURE;
 

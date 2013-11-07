@@ -254,6 +254,9 @@
     <ClInclude Include="libopenmpt_stream_callbacks_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\mptFstream.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp">
