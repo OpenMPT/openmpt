@@ -19,6 +19,7 @@
 #include "vstplug.h"
 #include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
+#include "FileDialog.h"
 
 
 CSoundFile *CModTree::m_SongFile = nullptr;
@@ -1501,27 +1502,28 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 //---------------------------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.flac;*.mp1;*.mp2;*.mp3|"
-		"FastTracker II Instruments (*.xi)|*.xi|"
-		"GF1 Patches (*.pat)|*.pat|"
-		"Wave Files (*.wav)|*.wav|"
-#ifndef NO_FLAC
-		"FLAC Files (*.flac)|*.flac|"
-#endif // NO_FLAC
-#ifndef NO_MP3_SAMPLES
-		"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
-#endif // NO_MP3_SAMPLES
-		"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"
-		"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
-		"DLS Sound Banks (*.dls)|*.dls|"
-		"All Files (*.*)|*.*||");
-	if(files.abort) return FALSE;
+	FileDialog dlg = OpenFileDialog()
+		.ExtensionFilter(
+			"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.flac;*.mp1;*.mp2;*.mp3|"
+			"FastTracker II Instruments (*.xi)|*.xi|"
+			"GF1 Patches (*.pat)|*.pat|"
+			"Wave Files (*.wav)|*.wav|"
+	#ifndef NO_FLAC
+			"FLAC Files (*.flac)|*.flac|"
+	#endif // NO_FLAC
+	#ifndef NO_MP3_SAMPLES
+			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
+	#endif // NO_MP3_SAMPLES
+			"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"
+			"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
+			"DLS Sound Banks (*.dls)|*.dls|"
+			"All Files (*.*)|*.*||");
+	if(!dlg.Show()) return FALSE;
 
 	if (dwItem & 0x80)
-		return SetMidiPercussion(dwItem & 0x7F, files.first_file.c_str());
+		return SetMidiPercussion(dwItem & 0x7F, dlg.GetFirstFile().c_str());
 	else
-		return SetMidiInstrument(dwItem, files.first_file.c_str());
+		return SetMidiInstrument(dwItem, dlg.GetFirstFile().c_str());
 }
 
 
@@ -3083,12 +3085,11 @@ void CModTree::OnSetItemPath()
 
 	if(pSndFile && modItem.val1)
 	{
+		FileDialog dlg = OpenFileDialog()
+			.ExtensionFilter("All files(*.*)|*.*||");
+		if(!dlg.Show()) return;
 
-		FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-			"All files(*.*)|*.*||");
-		if(files.abort) return;
-
-		pSndFile->m_szInstrumentPath[modItem.val1 - 1] = files.first_file;
+		pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile();
 		OnRefreshTree();
 	}
 }
@@ -3107,15 +3108,16 @@ void CModTree::OnSaveItem()
 
 		if(pSndFile->m_szInstrumentPath[modItem.val1 - 1].empty())
 		{
-			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, (pSndFile->GetType() == MOD_TYPE_XM) ? "xi" : "iti", "",
-				(pSndFile->GetType() == MOD_TYPE_XM) ?
+			FileDialog dlg = SaveFileDialog()
+				.DefaultExtension(pSndFile->GetType() == MOD_TYPE_XM ? "xi" : "iti")
+				.ExtensionFilter((pSndFile->GetType() == MOD_TYPE_XM) ?
 				"FastTracker II Instruments (*.xi)|*.xi|"
-				"Impulse Tracker Instruments (*.iti)|*.iti||" :
-				"Impulse Tracker Instruments (*.iti)|*.iti|"
+				"Impulse Tracker Instruments (*.iti)|*.iti||"
+				: "Impulse Tracker Instruments (*.iti)|*.iti|"
 				"FastTracker II Instruments (*.xi)|*.xi||");
-			if(files.abort) return;
+			if(!dlg.Show()) return;
 
-			pSndFile->m_szInstrumentPath[modItem.val1 - 1] = files.first_file;
+			pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile();
 		}
 
 		pModDoc->SaveInstrument(static_cast<INSTRUMENTINDEX>(modItem.val1));
@@ -3146,12 +3148,14 @@ void CModTree::OnImportMidiLib()
 void CModTree::OnExportMidiLib()
 //------------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "ini", "mptrack.ini",
-		"Text and INI files (*.txt,*.ini)|*.txt;*.ini|"
-		"All Files (*.*)|*.*||");
-	if(files.abort) return;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension("ini")
+		.DefaultFilename("mptrack.ini")
+		.ExtensionFilter("Text and INI files (*.txt,*.ini)|*.txt;*.ini|"
+			"All Files (*.*)|*.*||");
+	if(!dlg.Show()) return;
 
-	CTrackApp::ExportMidiConfig(files.first_file.c_str());
+	CTrackApp::ExportMidiConfig(dlg.GetFirstFile().c_str());
 }
 
 

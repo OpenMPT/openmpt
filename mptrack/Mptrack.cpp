@@ -27,6 +27,7 @@
 #include "ExceptionHandler.h"
 #include "CloseMainDialog.h"
 #include "AutoSaver.h"
+#include "FileDialog.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -624,10 +625,6 @@ BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 	ON_COMMAND(ID_FILE_OPEN,	OnFileOpen)
 	ON_COMMAND(ID_FILE_CLOSEALL, OnFileCloseAll)
 	ON_COMMAND(ID_APP_ABOUT,	OnAppAbout)
-	ON_COMMAND(ID_HELP_INDEX,	CWinApp::OnHelpIndex)
-	ON_COMMAND(ID_HELP_FINDER,	CWinApp::OnHelpFinder)
-	ON_COMMAND(ID_HELP_USING,	CWinApp::OnHelpUsing)
-	ON_COMMAND(ID_HELP_SEARCH,	OnHelpSearch)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -1107,41 +1104,42 @@ void CTrackApp::OnFileOpen()
 	}
 
 	static int nFilterIndex = 0;
-	FileDlgResult files = ShowOpenSaveFileDialog(true, "", "",
-		"All Modules|" + exts +
-		"|"
-		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz"
-#ifndef NO_MO3
-		";*.mo3"
-#endif
-		")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz"
-#ifndef NO_MO3
-		";*.mo3"
-#endif
-		"|"
-		"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
-		"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
-		"FastTracker Modules (*.xm)|*.xm;*.xmz|"
-		"Impulse Tracker Modules (*.it)|*.it;*.itz|"
-		// -> CODE#0023
-		// -> DESC="IT project files (.itp)"
-		"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
-		// -! NEW_FEATURE#0023
-		"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
-		"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b|"
-		"Wave Files (*.wav)|*.wav|"
-		"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
-		"All Files (*.*)|*.*||",
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS),
-		true,
-		&nFilterIndex);
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter("All Modules|" + exts +
+			"|"
+			"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz"
+	#ifndef NO_MO3
+			";*.mo3"
+	#endif
+			")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz"
+	#ifndef NO_MO3
+			";*.mo3"
+	#endif
+			"|"
+			"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
+			"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
+			"FastTracker Modules (*.xm)|*.xm;*.xmz|"
+			"Impulse Tracker Modules (*.it)|*.it;*.itz|"
+			// -> CODE#0023
+			// -> DESC="IT project files (.itp)"
+			"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
+			// -! NEW_FEATURE#0023
+			"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
+			"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b|"
+			"Wave Files (*.wav)|*.wav|"
+			"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
+			"All Files (*.*)|*.*||")
+		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS))
+		.FilterIndex(&nFilterIndex);
+	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
+	TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_MODS, true);
 
-	for(size_t counter = 0; counter < files.filenames.size(); counter++)
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-		OpenDocumentFile(files.filenames[counter].c_str());
+		OpenDocumentFile(files[counter].c_str());
 	}
 }
 
@@ -1174,13 +1172,6 @@ void CTrackApp::RegisterExtensions()
 	}
 }
 
-
-void CTrackApp::OnHelpSearch()
-//----------------------------
-{
-	CHAR s[80] = "";
-	WinHelp((DWORD)&s, HELP_KEY);
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDlg dialog used for App About
@@ -2051,95 +2042,6 @@ bool CTrackApp::OpenURL(const LPCSTR lpszURL)
 		}
 	}
 	return false;
-}
-
-
-/* Open or save one or multiple files using the system's file dialog
- * Parameter list:
- * - load: true: load dialog. false: save dialog.
- * - defaultExtension: dialog should use this as the default extension for the file(s)
- * - defaultFilename: dialog should use this as the default filename
- * - extFilter: list of possible extensions. format: "description|extensions|...|description|extensions||"
- * - workingDirectory: default directory of the dialog
- * - allowMultiSelect: allow the user to select multiple files? (will be ignored if load == false)
- * - filterIndex: pointer to a variable holding the index of the last extension filter used.
- */
-FileDlgResult CTrackApp::ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory, const bool allowMultiSelect, int *filterIndex)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	FileDlgResult result;
-	result.workingDirectory = workingDirectory;
-	result.first_file = "";
-	result.filenames.clear();
-	result.extension = defaultExtension;
-	result.abort = true;
-
-	// we can't save multiple files.
-	const bool multiSelect = allowMultiSelect && load;
-
-	// First, set up the dialog...
-	CFileDialog dlg(load ? TRUE : FALSE,
-		defaultExtension.empty() ? NULL : defaultExtension.c_str(),
-		defaultFilename.empty() ? NULL : defaultFilename.c_str(),
-		load ? (OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0))
-		     : (OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN),
-		extFilter.empty() ? NULL : extFilter.c_str(),
-		theApp.m_pMainWnd);
-	if(!workingDirectory.empty())
-		dlg.m_ofn.lpstrInitialDir = workingDirectory.c_str();
-	if(filterIndex != nullptr)
-		dlg.m_ofn.nFilterIndex = (DWORD)(*filterIndex);
-
-	std::vector<TCHAR> filenameBuffer;
-	if(multiSelect)
-	{
-		const size_t bufferSize = 2048; // Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
-		filenameBuffer.resize(bufferSize, 0);
-		dlg.GetOFN().lpstrFile = &filenameBuffer[0];
-		dlg.GetOFN().nMaxFile = bufferSize;
-	}
-
-	// Do it!
-	CMainFrame::GetInputHandler()->Bypass(true);
-	bool doCancel = dlg.DoModal() != IDOK;
-	CMainFrame::GetInputHandler()->Bypass(false);
-	if(doCancel)
-	{
-		return result;
-	}
-
-	// Retrieve variables
-	if(filterIndex != nullptr)
-		*filterIndex = dlg.m_ofn.nFilterIndex;
-
-	if(multiSelect)
-	{
-		// multiple files might have been selected
-		POSITION pos = dlg.GetStartPosition();
-		while(pos != NULL)
-		{
-			std::string filename = dlg.GetNextPathName(pos);
-			result.filenames.push_back(filename);
-		}
-
-	} else
-	{
-		// only one file
-		std::string filename = dlg.GetPathName();
-		result.filenames.push_back(filename);
-	}
-
-	if(!result.filenames.empty())
-	{
-		// some file has been selected.
-		result.workingDirectory = result.filenames.back();
-		result.first_file = result.filenames.front();
-		result.abort = false;
-	}
-
-	result.extension = dlg.GetFileExt();
-
-	return result;
 }
 
 

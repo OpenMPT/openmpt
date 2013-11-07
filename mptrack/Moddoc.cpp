@@ -35,6 +35,7 @@
 #endif
 #include "soundlib/FileReader.h"
 #include <shlwapi.h>
+#include "FileDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -602,14 +603,16 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		strcat(s, fname);
 		strcat(s, fext);
 		
-		FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, defaultExtension, s,
-			ModTypeToFilter(m_SndFile),
-			TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS));
-		if(files.abort) return FALSE;
+		FileDialog dlg = SaveFileDialog()
+			.DefaultExtension(defaultExtension)
+			.DefaultFilename(s)
+			.ExtensionFilter(ModTypeToFilter(m_SndFile))
+			.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS));
+		if(!dlg.Show()) return FALSE;
 
-		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
+		TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_MODS, true);
 
-		strcpy(s, files.first_file.c_str());
+		strcpy(s, dlg.GetFirstFile().c_str());
 		_splitpath(s, drive, path, fname, fext);
 	} else
 	{
@@ -1660,19 +1663,18 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	strcat_s(fname, CountOf(fname), ".");
 	strcat_s(fname, CountOf(fname), extension.c_str());
 
-	std::string filter = encFactory->GetTraits().fileDescription + " (*." + extension + ")|*." + extension + "||";
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false,
-		extension.c_str(),
-		fname,
-		filter.c_str(),
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_EXPORT));
-	if(files.abort) return;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension(extension)
+		.DefaultFilename(fname)
+		.ExtensionFilter(encFactory->GetTraits().fileDescription + " (*." + extension + ")|*." + extension + "||")
+		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_EXPORT));
+	if(!dlg.Show()) return;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	TrackerSettings::Instance().SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
+	TrackerSettings::Instance().SetDefaultDirectory(dlg.GetWorkingDirectory().c_str(), DIR_EXPORT, true);
 
 	char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
-	_splitpath(files.first_file.c_str(), drive, dir, name, ext);
+	_splitpath(dlg.GetFirstFile().c_str(), drive, dir, name, ext);
 	const CString fileName = CString(drive) + CString(dir) + CString(name);
 	const CString fileExt = CString(ext);
 
@@ -1898,12 +1900,14 @@ void CModDoc::OnFileMidiConvert()
 	strcat(s, fname);
 	strcat(s, ".mid");
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mid", s,
-		"Midi Files (*.mid,*.rmi)|*.mid;*.rmi||");
-	if(files.abort) return;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension("mid")
+		.DefaultFilename(s)
+		.ExtensionFilter("Midi Files (*.mid,*.rmi)|*.mid;*.rmi||");
+	if(!dlg.Show()) return;
 
-	CModToMidi mididlg(files.first_file.c_str(), &m_SndFile, pMainFrm);
-	if (mididlg.DoModal() == IDOK)
+	CModToMidi mididlg(dlg.GetFirstFile().c_str(), &m_SndFile, pMainFrm);
+	if(mididlg.DoModal() == IDOK)
 	{
 		BeginWaitCursor();
 		mididlg.DoConvert();
@@ -1953,18 +1957,22 @@ void CModDoc::OnFileCompatibilitySave()
 		filename += ext;
 	}
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, ext, filename, pattern, TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS));
-	if(files.abort) return;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension(ext)
+		.DefaultFilename(filename)
+		.ExtensionFilter(pattern)
+		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS));
+	if(!dlg.Show()) return;
 
 	ScopedLogCapturer logcapturer(*this);
 	FixNullStrings();
 	switch (type)
 	{
 		case MOD_TYPE_XM:
-			m_SndFile.SaveXM(files.first_file.c_str(), true);
+			m_SndFile.SaveXM(dlg.GetFirstFile().c_str(), true);
 			break;
 		case MOD_TYPE_IT:
-			m_SndFile.SaveIT(files.first_file.c_str(), true);
+			m_SndFile.SaveIT(dlg.GetFirstFile().c_str(), true);
 			break;
 	}
 }
@@ -2903,14 +2911,16 @@ void CModDoc::OnSaveTemplateModule()
 	}
 
 	// Ask file name from user.
-	FileDlgResult fdr = CTrackApp::ShowOpenSaveFileDialog(false, m_SndFile.GetModSpecifications().fileExtension, (LPCTSTR)sName,
-														  ModTypeToFilter(m_SndFile), pszTemplateFolder);
-
-	if (fdr.abort)
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension(m_SndFile.GetModSpecifications().fileExtension)
+		.DefaultFilename(std::string(sName))
+		.ExtensionFilter(ModTypeToFilter(m_SndFile))
+		.WorkingDirectory(pszTemplateFolder);
+	if(!dlg.Show())
 		return;
 
 	const CString sOldPath = m_strPathName;
-	OnSaveDocument(fdr.first_file.c_str(), true/*template file*/);
+	OnSaveDocument(dlg.GetFirstFile().c_str(), true/*template file*/);
 	m_strPathName = sOldPath;
 }
 

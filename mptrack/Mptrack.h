@@ -70,18 +70,6 @@ enum {
 
 
 /////////////////////////////////////////////////////////////////////////////
-// File dialog (open/save) results
-struct FileDlgResult
-{
-	std::string workingDirectory;			// working directory. will include filename, so beware.
-	std::string first_file;					// for some convenience, this will keep the first filename of the filenames vector.
-	std::vector <std::string> filenames;	// all selected filenames in one vector.
-	std::string extension;					// extension used. beware of this when multiple files can be selected!
-	bool abort;								// no selection has been made.
-};
-
-
-/////////////////////////////////////////////////////////////////////////////
 // CTrackApp:
 // See mptrack.cpp for the implementation of this class
 //
@@ -158,8 +146,6 @@ public:
 	static bool OpenFile(const LPCSTR file) { return OpenURL(file); };
 	static bool OpenDirectory(const LPCSTR directory) { return OpenURL(directory); };
 
-	static FileDlgResult ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory = "", const bool allowMultiSelect = false, int *filterIndex = nullptr);
-
 	int GetOpenDocumentCount() const;
 	std::vector<CModDoc *>GetOpenDocuments() const;
 
@@ -232,7 +218,6 @@ public:
 
 	afx_msg void OnFileOpen();
 	afx_msg void OnAppAbout();
-	afx_msg void OnHelpSearch();
 
 	afx_msg void OnFileCloseAll();
 	//}}AFX_MSG

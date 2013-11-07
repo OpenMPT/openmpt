@@ -16,6 +16,7 @@
 #include "../common/mptFstream.h"
 #include "../common/misc_util.h"
 #include "tuningdialog.h"
+#include "FileDialog.h"
 
 const CTuningDialog::TUNINGTREEITEM CTuningDialog::s_notFoundItemTuning = TUNINGTREEITEM();
 const HTREEITEM CTuningDialog::s_notFoundItemTree = NULL;
@@ -630,27 +631,29 @@ void CTuningDialog::OnBnClickedButtonExport()
 	if(pTC != NULL)
 		filter += std::string("Tuning collection files (") + CTuningCollection::s_FileExtension + std::string(")|*") + CTuningCollection::s_FileExtension + std::string("|");
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, CTuning::s_FileExtension, "",
-		filter,
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_TUNING));
-	if(files.abort) return;
+	int filterIndex = 0;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension(CTuning::s_FileExtension)
+		.ExtensionFilter(filter)
+		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_TUNING))
+		.FilterIndex(&filterIndex);
+	if(!dlg.Show()) return;
 
 	BeginWaitCursor();
 
 	bool failure = true;
 	
-	mpt::ofstream fout(files.first_file.c_str(), std::ios::binary);
-	const std::string ext = "." + files.extension;
+	mpt::ofstream fout(dlg.GetFirstFile().c_str(), std::ios::binary);
 
-	if(ext == CTuning::s_FileExtension)
+	if(filterIndex == 0)
 	{
 		if(pT != NULL)
 			failure = pT->Serialize(fout);
+	} else //Case: Saving tuning collection.
+	{
+		if(pTC != NULL)
+			failure = pTC->Serialize(fout);
 	}
-	else //Case: Saving tuning collection.
-		if(ext == CTuningCollection::s_FileExtension)
-			if(pTC != NULL)
-				failure = pTC->Serialize(fout);
 
 	fout.close();
 	EndWaitCursor();
@@ -664,29 +667,29 @@ void CTuningDialog::OnBnClickedButtonExport()
 void CTuningDialog::OnBnClickedButtonImport()
 //-------------------------------------------
 {
-	CString sFilter;
-	sFilter.Format(TEXT("Tuning files (*%s, *%s, *.scl)|*%s;*%s;*.scl|"),
-				   CTuning::s_FileExtension,
-				   CTuningCollection::s_FileExtension,
-				   CTuning::s_FileExtension,
-				   CTuningCollection::s_FileExtension);
+	std::string sFilter = mpt::String::Format(TEXT("Tuning files (*%s, *%s, *.scl)|*%s;*%s;*.scl|"),
+		CTuning::s_FileExtension,
+		CTuningCollection::s_FileExtension,
+		CTuning::s_FileExtension,
+		CTuningCollection::s_FileExtension);
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, TEXT(""), TEXT(""),
-		(LPCTSTR)sFilter,
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_TUNING),
-		true);
-	if(files.abort)
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter(sFilter)
+		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_TUNING));
+	if(!dlg.Show())
 		return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_TUNING, true);
+	TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_TUNING, true);
 
 	CString sLoadReport;
 
-	const size_t nFiles = files.filenames.size();
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	const size_t nFiles = files.size();
 	for(size_t counter = 0; counter < nFiles; counter++)
 	{
 		TCHAR szFileName[_MAX_FNAME], szExt[_MAX_EXT];
-		_tsplitpath(files.filenames[counter].c_str(), nullptr, nullptr, szFileName, szExt);
+		_tsplitpath(files[counter].c_str(), nullptr, nullptr, szFileName, szExt);
 
 		_tcslwr(szExt); // Convert extension to lower case.
 
@@ -699,7 +702,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 			if (bIsTun)
 			{
-				mpt::ifstream fin(files.filenames[counter].c_str(), std::ios::binary);
+				mpt::ifstream fin(files[counter].c_str(), std::ios::binary);
 				pT = CTuningRTI::DeserializeOLD(fin);
 				if(pT == 0)
 					{fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
@@ -733,7 +736,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			}
 			else // scl import.
 			{
-				EnSclImport a = ImportScl(files.filenames[counter].c_str(), szFileName);
+				EnSclImport a = ImportScl(files[counter].c_str(), szFileName);
 				if (a != enSclImportOk)
 				{
 					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
@@ -767,7 +770,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			// a separate collection - no possibility to 
 			// directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
-			pNewTCol->SetSavefilePath(files.filenames[counter]);
+			pNewTCol->SetSavefilePath(files[counter]);
 			if (pNewTCol->Deserialize())
 			{
 				delete pNewTCol; pNewTCol = 0;

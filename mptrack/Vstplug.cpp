@@ -28,6 +28,7 @@
 #include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
 #include "../soundlib/plugins/JBridge.h"
+#include "FileDialog.h"
 #include "../common/mptFstream.h"
 #ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
 #include "../zlib/zlib.h"			//For CRC32 calculation (to detect plugins with same UID)
@@ -1099,6 +1100,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 #endif
 				extensions += "|";
 			}
+			extensions += "|";
 
 			if(fileSel->initialPath != nullptr)
 			{
@@ -1106,16 +1108,20 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 			} else
 			{
 				// Plugins are probably looking for presets...?
-				workingDir = ""; //TrackerSettings::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
+				//workingDir = TrackerSettings::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
 			}
 
-			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(
-				(fileSel->command != kVstFileSave),
-				"", "", extensions, workingDir,
-				(fileSel->command == kVstMultipleFilesLoad)
-				);
-
-			if(files.abort)
+			FileDialog dlg = OpenFileDialog();
+			if(fileSel->command == kVstFileSave)
+			{
+				dlg = SaveFileDialog();
+			} else if(fileSel->command == kVstMultipleFilesLoad)
+			{
+				dlg = OpenFileDialog().AllowMultiSelect();
+			}
+			dlg.ExtensionFilter(extensions)
+				.WorkingDirectory(workingDir);
+			if(!dlg.Show())
 			{
 				return 0;
 			}
@@ -1123,12 +1129,13 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 			if(fileSel->command == kVstMultipleFilesLoad)
 			{
 				// Multiple paths
-				fileSel->nbReturnPath = files.filenames.size();
+				const FileDialog::PathList &files = dlg.GetFilenames();
+				fileSel->nbReturnPath = files.size();
 				fileSel->returnMultiplePaths = new char *[fileSel->nbReturnPath];
-				for(size_t i = 0; i < files.filenames.size(); i++)
+				for(size_t i = 0; i < files.size(); i++)
 				{
-					char *fname = new char[files.filenames[i].length() + 1];
-					strcpy(fname, files.filenames[i].c_str());
+					char *fname = new char[files[i].length() + 1];
+					strcpy(fname, files[i].c_str());
 					fileSel->returnMultiplePaths[i] = fname;
 				}
 				return 1;
@@ -1146,7 +1153,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				{
 
 					// Provide some memory for the return path.
-					fileSel->sizeReturnPath = files.first_file.length() + 1;
+					fileSel->sizeReturnPath = dlg.GetFirstFile().length() + 1;
 					fileSel->returnPath = new char[fileSel->sizeReturnPath];
 					if(fileSel->returnPath == nullptr)
 					{
@@ -1158,7 +1165,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				{
 					fileSel->reserved = 0;
 				}
-				strncpy(fileSel->returnPath, files.first_file.c_str(), fileSel->sizeReturnPath - 1);
+				strncpy(fileSel->returnPath, dlg.GetFirstFile().c_str(), fileSel->sizeReturnPath - 1);
 				fileSel->nbReturnPath = 1;
 				fileSel->returnMultiplePaths = nullptr;
 			}
@@ -1167,37 +1174,22 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 		} else
 		{
 			// Plugin wants a directory
-
-			char szInitPath[_MAX_PATH] = { '\0' };
-			if(fileSel->initialPath)
+			BrowseForFolder dlg(fileSel->initialPath != nullptr ? fileSel->initialPath : "", fileSel->title);
+			if(dlg.Show())
 			{
-				mpt::String::CopyN(szInitPath, fileSel->initialPath);
-			}
-
-			char szBuffer[_MAX_PATH];
-			MemsetZero(szBuffer);
-
-			BROWSEINFO bi;
-			MemsetZero(bi);
-			bi.hwndOwner = CMainFrame::GetMainFrame()->m_hWnd;
-			bi.lpszTitle = fileSel->title;
-			bi.pszDisplayName = szInitPath;
-			bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
-			LPITEMIDLIST pid = SHBrowseForFolder(&bi);
-			if(pid != nullptr && SHGetPathFromIDList(pid, szBuffer))
-			{
+				const std::string &dir = dlg.GetDirectory();
 				if(CCONST('V', 'S', 'T', 'r') == effect->uniqueID && fileSel->returnPath != nullptr && fileSel->sizeReturnPath == 0)
 				{
 					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.
 					// They report a path size of 0, but when using an own buffer, they will crash.
 					// So we'll just assume that reViSiT can handle long enough (_MAX_PATH) paths here.
-					fileSel->sizeReturnPath = strlen(szBuffer) + 1;
+					fileSel->sizeReturnPath = dir.length() + 1;
 					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
 				}
 				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
 				{
 					// Provide some memory for the return path.
-					fileSel->sizeReturnPath = strlen(szBuffer) + 1;
+					fileSel->sizeReturnPath = dir.length() + 1;
 					fileSel->returnPath = new char[fileSel->sizeReturnPath];
 					if(fileSel->returnPath == nullptr)
 					{
@@ -1209,7 +1201,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				{
 					fileSel->reserved = 0;
 				}
-				strncpy(fileSel->returnPath, szBuffer, fileSel->sizeReturnPath - 1);
+				strncpy(fileSel->returnPath, dir.c_str(), fileSel->sizeReturnPath - 1);
 				fileSel->nbReturnPath = 1;
 				return 1;
 			} else
@@ -1609,20 +1601,23 @@ bool CVstPlugin::SaveProgram()
 	Dispatch(effGetProgramName, 0, 0, rawname, 0);
 	SanitizeFilename(rawname);
 	mpt::String::SetNullTerminator(rawname);
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", rawname,
-		"VST Plugin Programs (*.fxp)|*.fxp|"
-		"VST Plugin Banks (*.fxb)|*.fxb||",
-		defaultDir);
-	if(files.abort) return false;
+
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension("fxp")
+		.DefaultFilename(rawname)
+		.ExtensionFilter("VST Plugin Programs (*.fxp)|*.fxp|"
+			"VST Plugin Banks (*.fxb)|*.fxb||")
+		.WorkingDirectory(defaultDir);
+	if(!dlg.Show()) return false;
 
 	if(useDefaultDir)
 	{
-		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
+		TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_PLUGINPRESETS, true);
 	}
 
-	bool bank = !mpt::strnicmp(files.first_file.substr(files.first_file.length() - 3).c_str(), "fxb", 3);
+	bool bank = (dlg.GetExtension() == "fxb");
 
-	mpt::fstream f(files.first_file.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+	mpt::fstream f(dlg.GetFirstFile().c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
 	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
 	{
 		return true;
@@ -1646,22 +1641,23 @@ bool CVstPlugin::LoadProgram()
 		defaultDir = defaultDir.substr(0, defaultDir.find_last_of("\\/"));
 	}
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
-		"VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
+	FileDialog dlg = OpenFileDialog()
+		.DefaultExtension("fxp")
+		.ExtensionFilter("VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
 		"VST Plugin Programs (*.fxp)|*.fxp|"
 		"VST Plugin Banks (*.fxb)|*.fxb|"
-		"All Files|*.*||",
-		defaultDir);
-	if(files.abort) return false;
+		"All Files|*.*||")
+		.WorkingDirectory(defaultDir);
+	if(!dlg.Show()) return false;
 
 	if(useDefaultDir)
 	{
-		TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
+		TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_PLUGINPRESETS, true);
 	}
 
 	CMappedFile f;
 	const char *errorStr = nullptr;
-	if(f.Open(files.first_file.c_str()))
+	if(f.Open(dlg.GetFirstFile().c_str()))
 	{
 		FileReader file = f.GetFile();
 		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));

@@ -518,6 +518,7 @@
     <ClCompile Include="EffectInfo.cpp" />
     <ClCompile Include="EffectVis.cpp" />
     <ClCompile Include="ExceptionHandler.cpp" />
+    <ClCompile Include="FileDialog.cpp" />
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="KeyConfigDlg.cpp" />
@@ -706,6 +707,7 @@
     <ClInclude Include="DefaultVstEditor.h" />
     <ClInclude Include="EffectInfo.h" />
     <ClInclude Include="ExceptionHandler.h" />
+    <ClInclude Include="FileDialog.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Mainbar.h" />
