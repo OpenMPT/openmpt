@@ -207,16 +207,34 @@ public:
 	{
 		return PathString(a).append(b);
 	}
+	bool empty() const { return path.empty(); }
 public:
 	// conversions
-	std::string ToLocale() const { return mpt::String::Encode(path, mpt::CharsetLocale); }
+	MPT_DEPRECATED std::string ToLocale() const { return mpt::String::Encode(path, mpt::CharsetLocale); }
 	std::string ToUTF8() const { return mpt::String::Encode(path, mpt::CharsetUTF8); }
 	std::wstring ToWide() const { return path; }
-	static PathString FromLocale(const std::string &path) { return PathString(mpt::String::Decode(path, mpt::CharsetLocale)); }
+	MPT_DEPRECATED static PathString FromLocale(const std::string &path) { return PathString(mpt::String::Decode(path, mpt::CharsetLocale)); }
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::String::Decode(path, mpt::CharsetUTF8)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(path); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
+	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
+	MPT_DEPRECATED CString ToCString() const
+	{
+		#ifdef UNICODE
+			return path;
+		#else
+			return mpt::String::Encode(path, mpt::CharsetLocale).c_str();
+		#endif
+	}
+	MPT_DEPRECATED static PathString FromCString(const CString &path)
+	{
+		#ifdef UNICODE
+			return PathString(path.GetString());
+		#else
+			return PathString(mpt::String::Decode(path.GetString(), mpt::CharsetLocale));
+		#endif
+	}
 };
 
 #else // !WIN32
@@ -265,6 +283,7 @@ public:
 	{
 		return PathString(a).append(b);
 	}
+	bool empty() const { return path.empty(); }
 public:
 	// conversions
 	std::string ToLocale() const { return path; }

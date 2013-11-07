@@ -36,6 +36,21 @@ namespace mpt { namespace String
 		buffer[size - 1] = 0;
 	}
 
+	template <size_t size>
+	void SetNullTerminator(wchar_t (&buffer)[size])
+	//---------------------------------------------
+	{
+		STATIC_ASSERT(size > 0);
+		buffer[size - 1] = 0;
+	}
+
+	inline void SetNullTerminator(wchar_t *buffer, size_t size)
+	//---------------------------------------------------------
+	{
+		ASSERT(size > 0);
+		buffer[size - 1] = 0;
+	}
+
 
 	// Remove any chars after the first null char
 	template <size_t size>
