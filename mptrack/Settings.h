@@ -342,8 +342,7 @@ public:
 	SettingState & assign(const SettingValue &other, bool setDirty = true)
 	{
 #if defined(MPT_SETTINGS_CACHE_STORE_DEFAULTS)
-		ASSERT(defaultValue.GetType() == other.GetType());
-		ASSERT(defaultValue.GetTypeTag() == other.GetTypeTag());
+		ASSERT(defaultValue.GetType() == SettingTypeNone || (defaultValue.GetType() == other.GetType() && defaultValue.GetTypeTag() == other.GetTypeTag()));
 #endif // MPT_SETTINGS_CACHE_STORE_DEFAULTS
 		if(setDirty)
 		{
