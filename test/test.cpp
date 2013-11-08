@@ -50,9 +50,6 @@
 #endif
 #endif
 
-#ifndef _T
-#define _T MPT_TEXT
-#endif
 
 
 namespace MptTest

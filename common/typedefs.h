@@ -339,8 +339,6 @@ STATIC_ASSERT(sizeof(FloatInt32) == 4);
 #endif
 #include <windows.h> // defines WIN32
 
-#define MPT_TEXT(x) TEXT(x)
-
 #else // !_WIN32
 
 // openmpt assumes these type have exact WIN32 semantics
@@ -362,8 +360,6 @@ typedef LONG *        LPLONG;
 // for BOOL
 #define TRUE (1)
 #define FALSE (0)
-
-#define MPT_TEXT(x) x
 
 #endif // _WIN32
 
