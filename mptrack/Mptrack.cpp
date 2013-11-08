@@ -2076,91 +2076,92 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 
 // Convert an absolute path to a path that's relative to OpenMPT's directory.
 // Paths are relative to the executable path.
-// nLength specifies the maximum number of character that can be written into szPath,
-// including the trailing null char.
+mpt::PathString CTrackApp::AbsolutePathToRelative(const mpt::PathString &path)
+//----------------------------------------------------------------------------
+{
+	mpt::PathString result = path;
+	if(path.empty())
+	{
+		return result;
+	}
+	mpt::PathString exePath = GetAppDirPath();
+	if(!_wcsnicmp(exePath.AsNative().c_str(), path.AsNative().c_str(), exePath.AsNative().length()))
+	{
+		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
+		result = mpt::PathString::FromUTF8(".\\"); // ".\"
+		result += mpt::PathString::FromNative(path.AsNative().substr(exePath.AsNative().length()));
+	} else if(!_wcsnicmp(exePath.AsNative().c_str(), path.AsNative().c_str(), 2))
+	{
+		// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
+		result = mpt::PathString::FromNative(path.AsNative().substr(2));
+	}
+	return result;
+}
+
 template <size_t nLength>
 void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
 //---------------------------------------------------------------
 {
 	STATIC_ASSERT(nLength >= 3);
-
 	if(_tcslen(szPath) == 0)
 		return;
-
-	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
-	TCHAR szExePath[nLength], szTempPath[nLength];
-	_tcsncpy(szExePath, GetAppDirPath().ToCString(), nStrLength);
-	mpt::String::SetNullTerminator(szExePath);
-
-	if(!_tcsncicmp(szExePath, szPath, _tcslen(szExePath)))
-	{
-		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
-		_tcscpy(szTempPath, _T(".\\"));	// ".\"
-		_tcsncat(szTempPath, &szPath[_tcslen(szExePath)], nStrLength - 2);	// "Somepath"
-		_tcscpy(szPath, szTempPath);
-	} else if(!_tcsncicmp(szExePath, szPath, 2))
-	{
-		// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
-		_tcsncpy(szTempPath, &szPath[2], nStrLength);	// "\Somepath"
-		_tcscpy(szPath, szTempPath);
-	}
-	mpt::String::SetNullTerminator(szPath);
+	#ifdef UNICODE
+		mpt::String::Copy(szPath, AbsolutePathToRelative(mpt::PathString::FromNative(szPath)).AsNative());
+	#else
+		mpt::String::Copy(szPath, AbsolutePathToRelative(mpt::PathString::FromLocale(szPath)).ToLocale());
+	#endif
 }
 
 CString CTrackApp::AbsolutePathToRelative(const CString &path)
 //------------------------------------------------------------
 {
-	TCHAR szPath[_MAX_PATH] = "";
-	mpt::String::Copy(szPath, std::string(path.GetString()));
-	AbsolutePathToRelative(szPath);
-	return szPath;
+	return AbsolutePathToRelative(mpt::PathString::FromCString(path)).ToCString();
 }
 
 
 // Convert a relative path to an absolute path.
 // Paths are relative to the executable path.
-// nLength specifies the maximum number of character that can be written into szPath,
-// including the trailing null char.
+mpt::PathString CTrackApp::RelativePathToAbsolute(const mpt::PathString &path)
+//----------------------------------------------------------------------------
+{
+	mpt::PathString result = path;
+	if(path.empty())
+	{
+		return result;
+	}
+	mpt::PathString exePath = GetAppDirPath();
+	if(path.AsNative().length() >= 2 && path.AsNative().substr(0, 1) == L"\\" && path.AsNative().substr(0, 2) != L"\\\\")
+	{
+		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
+		result = mpt::PathString::FromNative(exePath.AsNative().substr(0, 2));
+		result += path;
+	} else if(path.AsNative().length() >= 2 && path.AsNative().substr(0, 2) == L".\\")
+	{
+		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
+		result = exePath; // "C:\OpenMPT\"
+		result += mpt::PathString::FromNative(path.AsNative().substr(2));
+	}
+	return result;
+}
+
 template <size_t nLength>
 void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 //---------------------------------------------------------------
 {
 	STATIC_ASSERT(nLength >= 3);
-
 	if(_tcslen(szPath) == 0)
 		return;
-
-	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
-	TCHAR szExePath[nLength], szTempPath[nLength] = _T("");
-	_tcsncpy(szExePath, GetAppDirPath().ToCString(), nStrLength);
-	mpt::String::SetNullTerminator(szExePath);
-
-	if(!_tcsncicmp(szPath, _T("\\"), 1) && _tcsncicmp(szPath, _T("\\\\"), 2))
-	{
-		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
-		_tcsncat(szTempPath, szExePath, 2);	// "C:"
-		_tcsncat(szTempPath, szPath, nStrLength - 2);	// "\Somepath\"
-		_tcscpy(szPath, szTempPath);
-	} else if(!_tcsncicmp(szPath, _T(".\\"), 2))
-	{
-		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
-		_tcsncpy(szTempPath, szExePath, nStrLength);	// "C:\OpenMPT\"
-		if(_tcslen(szTempPath) < nStrLength)
-		{
-			_tcsncat(szTempPath, &szPath[2], nStrLength - _tcslen(szTempPath));	//	"Somepath"
-		}
-		_tcscpy(szPath, szTempPath);
-	}
-	mpt::String::SetNullTerminator(szPath);
+	#ifdef UNICODE
+		mpt::String::Copy(szPath, RelativePathToAbsolute(mpt::PathString::FromNative(szPath)).AsNative());
+	#else
+		mpt::String::Copy(szPath, RelativePathToAbsolute(mpt::PathString::FromLocale(szPath)).ToLocale());
+	#endif
 }
 
 CString CTrackApp::RelativePathToAbsolute(const CString &path)
 //------------------------------------------------------------
 {
-	TCHAR szPath[_MAX_PATH] = "";
-	mpt::String::Copy(szPath, std::string(path.GetString()));
-	RelativePathToAbsolute(szPath);
-	return szPath;
+	return RelativePathToAbsolute(mpt::PathString::FromCString(path)).ToCString();
 }
 
 
