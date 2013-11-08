@@ -867,8 +867,6 @@ TrackerDirectories::TrackerDirectories()
 	// Directory Arrays (Default + Last)
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
-		if(i == DIR_TUNING) // Hack: Tuning folder is already set so don't reset it.
-			continue;
 		m_szDefaultDirectory[i][0] = '\0';
 		m_szWorkingDirectory[i][0] = '\0';
 	}
