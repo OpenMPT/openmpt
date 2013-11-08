@@ -176,3 +176,51 @@ std::string Convert(const std::string &src, Charset from, Charset to)
 
 
 } } // namespace mpt::String
+
+
+#if defined(MODPLUG_TRACKER)
+
+namespace mpt {
+
+void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const
+//------------------------------------------------------------------------------------------------------
+{
+	wchar_t tempDrive[_MAX_DRIVE];
+	wchar_t tempDir[_MAX_DIR];
+	wchar_t tempFname[_MAX_FNAME];
+	wchar_t tempExt[_MAX_EXT];
+	_wsplitpath(path.c_str(), tempDrive, tempDir, tempFname, tempExt);
+	if(drive) *drive = mpt::PathString::FromNative(tempDrive);
+	if(dir) *dir = mpt::PathString::FromNative(tempDir);
+	if(fname) *fname = mpt::PathString::FromNative(tempFname);
+	if(ext) *ext = mpt::PathString::FromNative(tempExt);
+}
+
+PathString PathString::GetDrive() const
+{
+	PathString drive;
+	SplitPath(&drive, nullptr, nullptr, nullptr);
+	return drive;
+}
+PathString PathString::GetDir() const
+{
+	PathString dir;
+	SplitPath(nullptr, &dir, nullptr, nullptr);
+	return dir;
+}
+PathString PathString::GetFileName() const
+{
+	PathString fname;
+	SplitPath(nullptr, nullptr, &fname, nullptr);
+	return fname;
+}
+PathString PathString::GetFileExt() const
+{
+	PathString ext;
+	SplitPath(nullptr, nullptr, nullptr, &ext);
+	return ext;
+}
+
+} // namespace mpt
+
+#endif

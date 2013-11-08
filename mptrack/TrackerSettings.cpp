@@ -791,10 +791,7 @@ void TrackerDirectories::SetDirectory(const mpt::PathString &szFilenameFrom, Dir
 
 	if(bStripFilename)
 	{
-		wchar_t szPath[_MAX_PATH];
-		wchar_t szDir[_MAX_DIR];
-		_wsplitpath(szFilenameFrom.AsNative().c_str(), szPath, szDir, 0, 0);
-		path = mpt::PathString::FromNative(szPath) + mpt::PathString::FromNative(szDir);
+		path = szFilenameFrom.GetDrive() + szFilenameFrom.GetDir();
 	}
 	else
 	{
