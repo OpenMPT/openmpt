@@ -659,13 +659,13 @@ BOOL COptionsGeneral::OnSetActive()
 void COptionsGeneral::BrowseForFolder(UINT nID)
 //---------------------------------------------
 {
-	CHAR szPath[_MAX_PATH] = "";
+	TCHAR szPath[MAX_PATH] = TEXT("");
 	GetDlgItemText(nID, szPath, CountOf(szPath));
 
-	::BrowseForFolder dlg(szPath, "Select a default folder...");
+	::BrowseForFolder dlg(mpt::PathString::FromCString(szPath), TEXT("Select a default folder..."));
 	if(dlg.Show())
 	{
-		SetDlgItemText(nID, dlg.GetDirectory().c_str());
+		SetDlgItemText(nID, dlg.GetDirectory().ToCString());
 		OnSettingsChanged();
 	}
 }

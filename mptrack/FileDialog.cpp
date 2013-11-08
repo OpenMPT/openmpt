@@ -112,7 +112,8 @@ int CALLBACK BrowseForFolder::BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM /*
 	if(uMsg == BFFM_INITIALIZED && lpData != NULL)
 	{
 		const BrowseForFolder *that = reinterpret_cast<BrowseForFolder *>(lpData);
-		SendMessage(hwnd, BFFM_SETSELECTION, TRUE, reinterpret_cast<LPARAM>(that->workingDirectory.c_str()));
+		std::wstring startPath = that->workingDirectory.AsNative();
+		SendMessage(hwnd, BFFM_SETSELECTIONW, TRUE, reinterpret_cast<LPARAM>(startPath.c_str()));
 	}
 	return 0;
 }
@@ -122,20 +123,20 @@ int CALLBACK BrowseForFolder::BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM /*
 bool BrowseForFolder::Show()
 //--------------------------
 {
-	TCHAR path[MAX_PATH];
+	WCHAR path[MAX_PATH];
 
-	BROWSEINFO bi;
+	BROWSEINFOW bi;
 	MemsetZero(bi);
 	bi.hwndOwner = theApp.m_pMainWnd->GetSafeHwnd();
-	bi.lpszTitle = caption;
+	bi.lpszTitle = caption.c_str();
 	bi.pszDisplayName = path;
 	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
 	bi.lpfn = BrowseCallbackProc;
 	bi.lParam = reinterpret_cast<LPARAM>(this);
-	LPITEMIDLIST pid = SHBrowseForFolder(&bi);
-	if(pid != NULL && SHGetPathFromIDList(pid, path))
+	LPITEMIDLIST pid = SHBrowseForFolderW(&bi);
+	if(pid != NULL && SHGetPathFromIDListW(pid, path))
 	{
-		workingDirectory = path;
+		workingDirectory = mpt::PathString::FromNative(path);
 		return true;
 	}
 	return false;

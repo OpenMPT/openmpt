@@ -402,13 +402,13 @@ void CAutoSaverGUI::OnOK()
 
 void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 {
-	CHAR szPath[_MAX_PATH] = "";
+	TCHAR szPath[_MAX_PATH] = TEXT("");
 	GetDlgItemText(IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
 
-	BrowseForFolder dlg(szPath, "Select a folder to store autosaved files in...");
+	BrowseForFolder dlg(mpt::PathString::FromCString(szPath), TEXT("Select a folder to store autosaved files in..."));
 	if(dlg.Show())
 	{
-		SetDlgItemText(IDC_AUTOSAVE_PATH, dlg.GetDirectory().c_str());
+		SetDlgItemText(IDC_AUTOSAVE_PATH, dlg.GetDirectory().ToCString());
 		OnSettingsChanged();
 	}
 }
