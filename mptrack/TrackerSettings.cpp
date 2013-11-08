@@ -437,11 +437,12 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Paths
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
-		mpt::String::Copy(TrackerDirectories::Instance().m_szWorkingDirectory[i], TrackerDirectories::Instance().m_szDefaultDirectory[i]);
+		TrackerDirectories::Instance().m_szWorkingDirectory[i] = TrackerDirectories::Instance().m_szDefaultDirectory[i];
+		mpt::String::Copy(TrackerDirectories::Instance().m_szWorkingDirectoryCache[i], TrackerDirectories::Instance().m_szDefaultDirectoryCache[i]);
 	}
-	if(TrackerDirectories::Instance().m_szDefaultDirectory[DIR_MODS][0])
+	if(!TrackerDirectories::Instance().m_szDefaultDirectory[DIR_MODS].empty())
 	{
-		SetCurrentDirectory(TrackerDirectories::Instance().m_szDefaultDirectory[DIR_MODS]);
+		SetCurrentDirectoryW(TrackerDirectories::Instance().m_szDefaultDirectory[DIR_MODS].AsNative().c_str());
 	}
 	CString tmpKbdFile = m_szKbdFile.ToCString();
 	theApp.RelativePathToAbsolute(tmpKbdFile);
@@ -783,72 +784,93 @@ std::bitset<128> StringToIgnoredCCs(const std::string &in)
 
 
 // retrieve / set default directory from given string and store it our setup variables
-void TrackerDirectories::SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&directories)[NUM_DIRS][_MAX_PATH], bool bStripFilename)
-//------------------------------------------------------------------------------------------------------------------------------------------------
+void TrackerDirectories::SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&directories)[NUM_DIRS], TCHAR (&pDirsCache)[NUM_DIRS][MAX_PATH], bool bStripFilename)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	TCHAR szPath[_MAX_PATH], szDir[_MAX_DIR];
+	mpt::PathString path;
 
 	if(bStripFilename)
 	{
-		_tsplitpath(szFilenameFrom, szPath, szDir, 0, 0);
-		_tcscat(szPath, szDir);
+		wchar_t szPath[_MAX_PATH];
+		wchar_t szDir[_MAX_DIR];
+		_wsplitpath(szFilenameFrom.AsNative().c_str(), szPath, szDir, 0, 0);
+		path = mpt::PathString::FromNative(szPath) + mpt::PathString::FromNative(szDir);
 	}
 	else
 	{
-		_tcscpy(szPath, szFilenameFrom);
+		path = szFilenameFrom;
 	}
 
-	TCHAR szOldDir[CountOf(directories[dir])]; // for comparison
-	_tcscpy(szOldDir, directories[dir]);
+	mpt::PathString szOldDir = directories[dir]; // for comparison
 
-	_tcscpy(directories[dir], szPath);
+	directories[dir] = path;
+	_tcscpy(pDirsCache[dir], path.ToCString());
 
 	// When updating default directory, also update the working directory.
-	if(szPath[0] && directories == m_szDefaultDirectory)
+	if(!path.empty() && directories == m_szDefaultDirectory)
 	{
-		if(_tcscmp(szOldDir, szPath) != 0) // update only if default directory has changed
-			SetWorkingDirectory(szPath, dir);
+		if(szOldDir != path) // update only if default directory has changed
+			SetWorkingDirectory(path, dir);
 	}
 }
 
-void TrackerDirectories::SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//------------------------------------------------------------------------------------------------------------
+void TrackerDirectories::SetDefaultDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename)
+//---------------------------------------------------------------------------------------------------------------------
 {
-	SetDirectory(szFilenameFrom, dir, m_szDefaultDirectory, bStripFilename);
+	SetDirectory(szFilenameFrom, dir, m_szDefaultDirectory, m_szDefaultDirectoryCache, bStripFilename);
 }
 
 
-void TrackerDirectories::SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//------------------------------------------------------------------------------------------------------------
+void TrackerDirectories::SetWorkingDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename)
+//---------------------------------------------------------------------------------------------------------------------
 {
-	SetDirectory(szFilenameFrom, dir, m_szWorkingDirectory, bStripFilename);
+	SetDirectory(szFilenameFrom, dir, m_szWorkingDirectory, m_szWorkingDirectoryCache, bStripFilename);
 }
 
 
-LPCTSTR TrackerDirectories::GetDefaultDirectory(Directory dir) const
-//------------------------------------------------------------------
+mpt::PathString TrackerDirectories::GetDefaultDirectoryAsPathString(Directory dir) const
+//--------------------------------------------------------------------------------------
 {
 	return m_szDefaultDirectory[dir];
 }
 
 
-LPCTSTR TrackerDirectories::GetWorkingDirectory(Directory dir) const
-//------------------------------------------------------------------
+mpt::PathString TrackerDirectories::GetWorkingDirectoryAsPathString(Directory dir) const
+//--------------------------------------------------------------------------------------
 {
 	return m_szWorkingDirectory[dir];
 }
+
+
+void TrackerDirectories::SetDefaultDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
+//---------------------------------------------------------------------------------------------------------------------
+{
+	SetDefaultDirectory(mpt::PathString::FromLocale(szFilenameFrom), dir, bStripFilename);
+}
+void TrackerDirectories::SetWorkingDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
+//---------------------------------------------------------------------------------------------------------------------
+{
+	SetWorkingDirectory(mpt::PathString::FromLocale(szFilenameFrom), dir, bStripFilename);
+}
+LPCTSTR TrackerDirectories::GetDefaultDirectory(Directory dir) const
+//------------------------------------------------------------------
+{
+	return m_szDefaultDirectoryCache[dir];
+}
+LPCTSTR TrackerDirectories::GetWorkingDirectory(Directory dir) const
+//------------------------------------------------------------------
+{
+	return m_szWorkingDirectoryCache[dir];
+}
+
 
 
 
 TrackerDirectories::TrackerDirectories()
 //--------------------------------------
 {
-	// Directory Arrays (Default + Last)
-	for(size_t i = 0; i < NUM_DIRS; i++)
-	{
-		m_szDefaultDirectory[i][0] = '\0';
-		m_szWorkingDirectory[i][0] = '\0';
-	}
+	MemsetZero(m_szDefaultDirectoryCache);
+	MemsetZero(m_szWorkingDirectoryCache);
 }
 
 
