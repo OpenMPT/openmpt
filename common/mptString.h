@@ -207,6 +207,14 @@ public:
 	{
 		return PathString(a).append(b);
 	}
+	friend bool operator == (const PathString & a, const PathString & b)
+	{
+		return a.AsNative() == b.AsNative();
+	}
+	friend bool operator != (const PathString & a, const PathString & b)
+	{
+		return a.AsNative() != b.AsNative();
+	}
 	bool empty() const { return path.empty(); }
 public:
 	// conversions
@@ -284,6 +292,14 @@ public:
 	friend PathString operator + (const PathString & a, const PathString & b)
 	{
 		return PathString(a).append(b);
+	}
+	friend bool operator == (const PathString & a, const PathString & b)
+	{
+		return a.AsNative() == b.AsNative();
+	}
+	friend bool operator != (const PathString & a, const PathString & b)
+	{
+		return a.AsNative() != b.AsNative();
 	}
 	bool empty() const { return path.empty(); }
 public:
