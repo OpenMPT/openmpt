@@ -1000,7 +1000,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	// get plug directory, FSSpec on MAC, else char*
 	case audioMasterGetDirectory:
 		//Log("VST plugin to host: Get Directory\n");
-		return ToVstPtr(TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS));
+		// Need to allocate space for path only, but I guess noone relies on this anyway.
+		//return ToVstPtr(pVstPlugin->GetPluginFactory().szDllPath);
+		//return ToVstPtr(TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS));
+		break;
 
 	// something has changed, update 'multi-fx' display
 	case audioMasterUpdateDisplay:
@@ -1174,7 +1177,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 		} else
 		{
 			// Plugin wants a directory
-			BrowseForFolder dlg(mpt::PathString::FromLocale(fileSel->initialPath != nullptr ? fileSel->initialPath : ""), fileSel->title);
+			BrowseForFolder dlg(mpt::PathString::FromLocale(fileSel->initialPath != nullptr ? fileSel->initialPath : ""), fileSel->title != nullptr ? fileSel->title : "");
 			if(dlg.Show())
 			{
 				const std::string dir = dlg.GetDirectory().ToLocale();
@@ -1327,7 +1330,7 @@ void CVstPlugin::Initialize()
 	m_bIsVst2 = Dispatch(effGetVstVersion, 0,0, nullptr, 0.0f) >= 2;
 	if (m_bIsVst2)
 	{
-		// Set VST speaker in/out setup to Stereo. Required for some plugins (possibly all VST 2.4+ plugins?)
+		// Set VST speaker in/out setup to Stereo. Required for some plugins (e.g. Voxengo SPAN 2)
 		// All this might get more interesting when adding sidechaining support...
 		VstSpeakerArrangement sa;
 		MemsetZero(sa);
@@ -1922,9 +1925,8 @@ void CVstPlugin::Resume()
 	{
 		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_Factory.szLibraryName);
 	}
-
-
 }
+
 
 void CVstPlugin::Suspend()
 //------------------------
@@ -2670,7 +2672,7 @@ void CVstPlugin::SaveAllParameters()
 
 			if (!p)
 			{
-				nByteSize = Dispatch(effGetChunk, 1,0, &p, 0); 	// Getting bank failed, try to get get just preset
+				nByteSize = Dispatch(effGetChunk, 1,0, &p, 0); 	// Getting bank failed, try to get just preset
 			} else
 			{
 				m_pMixStruct->defaultProgram = GetCurrentProgram();	//we managed to get the bank, now we need to remember which program we're on.
@@ -3208,6 +3210,15 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 
 	case effSetSampleRate:
 		m_nSamplesPerSec = (int)opt;
+		{
+
+			m_Effect.initialDelay = 0;
+			REFERENCE_TIME time;	// Unit 100-nanoseconds
+			if(m_pMediaProcess->GetLatency(&time) == S_OK)
+			{
+				m_Effect.initialDelay = static_cast<VstInt32>(time * m_nSamplesPerSec / (10 * 1000 * 1000));
+			}
+		}
 		break;
 
 	case effMainsChanged:
