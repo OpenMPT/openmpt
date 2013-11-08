@@ -412,12 +412,10 @@ public:
 	void SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
 	LPCTSTR GetDefaultDirectory(Directory dir) const;
 
-	static TrackerDirectories &Instance() { return directories; }
+	static TrackerDirectories &Instance();
 
 protected:
 
 	void SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&pDirs)[NUM_DIRS][_MAX_PATH], bool bStripFilename);
-
-	static TrackerDirectories directories;
 
 };

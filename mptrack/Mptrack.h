@@ -23,6 +23,7 @@ class CModDoc;
 class CVstPluginManager;
 class SoundDevicesManager;
 class CDLSBank;
+class TrackerDirectories;
 class TrackerSettings;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -101,6 +102,7 @@ public:
 
 protected:
 
+	TrackerDirectories *m_pTrackerDirectories;
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
 	TrackerSettings *m_pTrackerSettings;
@@ -156,6 +158,11 @@ public:
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
 	std::string GetConfigFileName() const { return m_szConfigFileName; }
+	TrackerDirectories & GetTrackerDirectories()
+	{
+		ASSERT(m_pTrackerDirectories);
+		return *m_pTrackerDirectories;
+	}
 	SettingsContainer & GetSettings()
 	{
 		ASSERT(m_pSettings);

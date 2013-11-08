@@ -633,7 +633,8 @@ END_MESSAGE_MAP()
 
 CTrackApp::CTrackApp()
 //--------------------
-	: m_pSettingsIniFile(nullptr)
+	: m_pTrackerDirectories(nullptr)
+	, m_pSettingsIniFile(nullptr)
 	, m_pSettings(nullptr)
 	, m_pTrackerSettings(nullptr)
 	, m_pPluginCache(nullptr)
@@ -830,6 +831,8 @@ BOOL CTrackApp::InitInstance()
 	CMPTCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
 
+	m_pTrackerDirectories = new TrackerDirectories();
+
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
 
@@ -965,6 +968,8 @@ int CTrackApp::ExitInstance()
 	m_pSettings = nullptr;
 	delete m_pSettingsIniFile;
 	m_pSettingsIniFile = nullptr;
+	delete m_pTrackerDirectories;
+	m_pTrackerDirectories = nullptr;
 
 	return CWinApp::ExitInstance();
 }

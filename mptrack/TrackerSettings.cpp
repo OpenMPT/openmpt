@@ -30,7 +30,12 @@
 #define OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY 0x80
 
 
-TrackerDirectories TrackerDirectories::directories;
+TrackerDirectories &TrackerDirectories::Instance()
+//------------------------------------------------
+{
+	return theApp.GetTrackerDirectories();
+}
+
 
 const TCHAR *TrackerDirectories::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T(""), _T("") };
 
