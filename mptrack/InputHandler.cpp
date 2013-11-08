@@ -30,11 +30,11 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	//Init CommandSet and Load defaults
 	activeCommandSet = new CCommandSet();
 	
-	CString sDefaultPath = CString(theApp.GetConfigPath()) + TEXT("Keybindings.mkb");
+	CString sDefaultPath = theApp.GetConfigPath().ToCString() + TEXT("Keybindings.mkb");
 	if (sDefaultPath.GetLength() > MAX_PATH - 1)
 		sDefaultPath = "";
 
-	const bool bNoExistingKbdFileSetting = (TrackerSettings::Instance().m_szKbdFile[0] == 0);
+	const bool bNoExistingKbdFileSetting = TrackerSettings::Instance().m_szKbdFile.empty();
 
 	// 1. Try to load keybindings from the path saved in the settings.
 	// 2. If the setting doesn't exist or the loading fails, try to load from default location.
@@ -42,10 +42,10 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	// 4. If there were no keybinging setting already, create a keybinding file to default location
 	//    and set it's path to settings.
 
-	if (bNoExistingKbdFileSetting || !(activeCommandSet->LoadFile(TrackerSettings::Instance().m_szKbdFile)))
+	if (bNoExistingKbdFileSetting || !(activeCommandSet->LoadFile(TrackerSettings::Instance().m_szKbdFile.ToCString())))
 	{
 		if (bNoExistingKbdFileSetting)
-			_tcscpy(TrackerSettings::Instance().m_szKbdFile, sDefaultPath);
+			TrackerSettings::Instance().m_szKbdFile = mpt::PathString::FromCString(sDefaultPath);
 		bool bSuccess = false;
 		if (PathFileExists(sDefaultPath) == TRUE)
 			bSuccess = activeCommandSet->LoadFile(sDefaultPath);
@@ -56,14 +56,14 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 			bSuccess = activeCommandSet->LoadDefaultKeymap();
 			if (bSuccess && bNoExistingKbdFileSetting)
 			{
-				activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
+				activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile.ToCString());
 			}
 		}
 		if (bSuccess == false)
 			ErrorBox(IDS_UNABLE_TO_LOAD_KEYBINDINGS);
 	}
 	// We will only overwrite the default Keybindings.mkb file from now on.
-	_tcscpy(TrackerSettings::Instance().m_szKbdFile, sDefaultPath);
+	TrackerSettings::Instance().m_szKbdFile = mpt::PathString::FromCString(sDefaultPath);
 
 	//Get Keymap 
 	activeCommandSet->GenKeyMap(keyMap);

@@ -82,21 +82,21 @@ struct VorbisDynBind
 		};
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
-			if(TryLoad(dll_names[i].ogg, dll_names[i].vorbis, dll_names[i].vorbisenc))
+			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].ogg), mpt::PathString::FromUTF8(dll_names[i].vorbis), mpt::PathString::FromUTF8(dll_names[i].vorbisenc)))
 			{
 				// success
 				break;
 			}
 		}
 	}
-	bool TryLoad(std::string Ogg_fn, std::string Vorbis_fn, std::string VorbisEnc_fn)
+	bool TryLoad(mpt::PathString Ogg_fn, mpt::PathString Vorbis_fn, mpt::PathString VorbisEnc_fn)
 	{
 		#ifdef MODPLUG_TRACKER
-			Ogg_fn = std::string(theApp.GetAppDirPath()) + Ogg_fn;
-			Vorbis_fn = std::string(theApp.GetAppDirPath()) + Vorbis_fn;
-			VorbisEnc_fn = std::string(theApp.GetAppDirPath()) + VorbisEnc_fn;
+			Ogg_fn = theApp.GetAppDirPath() + Ogg_fn;
+			Vorbis_fn = theApp.GetAppDirPath() + Vorbis_fn;
+			VorbisEnc_fn = theApp.GetAppDirPath() + VorbisEnc_fn;
 		#endif
-		hOgg = LoadLibrary(Ogg_fn.c_str());
+		hOgg = LoadLibraryW(Ogg_fn.AsNative().c_str());
 		if(!hOgg)
 		{
 			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
@@ -104,7 +104,7 @@ struct VorbisDynBind
 			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
 			return false;
 		}
-		hVorbis = LoadLibrary(Vorbis_fn.c_str());
+		hVorbis = LoadLibraryW(Vorbis_fn.AsNative().c_str());
 		if(!hVorbis)
 		{
 			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
@@ -112,7 +112,7 @@ struct VorbisDynBind
 			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
 			return false;
 		}
-		hVorbisEnc = LoadLibrary(VorbisEnc_fn.c_str());
+		hVorbisEnc = LoadLibraryW(VorbisEnc_fn.AsNative().c_str());
 		if(!hVorbisEnc)
 		{
 			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }

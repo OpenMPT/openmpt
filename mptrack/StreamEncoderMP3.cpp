@@ -319,18 +319,18 @@ struct LameDynBind
 	LameDynBind()
 	{
 		Reset();
-		if(!hLame) TryLoad("libmp3lame.dll", true);
-		if(!hLame) TryLoad("liblame.dll", true);
-		if(!hLame) TryLoad("mp3lame.dll", true);
-		if(!hLame) TryLoad("lame.dll", true);
-		if(!hLame) TryLoad("lame_enc.dll", false);
+		if(!hLame) TryLoad(mpt::PathString::FromUTF8("libmp3lame.dll"), true);
+		if(!hLame) TryLoad(mpt::PathString::FromUTF8("liblame.dll"), true);
+		if(!hLame) TryLoad(mpt::PathString::FromUTF8("mp3lame.dll"), true);
+		if(!hLame) TryLoad(mpt::PathString::FromUTF8("lame.dll"), true);
+		if(!hLame) TryLoad(mpt::PathString::FromUTF8("lame_enc.dll"), false);
 	}
-	void TryLoad(std::string filename, bool warn)
+	void TryLoad(mpt::PathString filename, bool warn)
 	{
 		#ifdef MODPLUG_TRACKER
-			filename = std::string(theApp.GetAppDirPath()) + filename;
+			filename = theApp.GetAppDirPath() + filename;
 		#endif
-		hLame = LoadLibrary(filename.c_str());
+		hLame = LoadLibraryW(filename.AsNative().c_str());
 		if(!hLame)
 		{
 			return;
@@ -648,21 +648,21 @@ struct BladeDynBind
 		Reset();
 		if(!hBlade)
 		{
-			TryLoad("lame_enc.dll");
+			TryLoad(mpt::PathString::FromUTF8("lame_enc.dll"));
 			if(hBlade) lame = 1;
 		}
 		if(!hBlade)
 		{
-			TryLoad("bladeenc.dll");
+			TryLoad(mpt::PathString::FromUTF8("bladeenc.dll"));
 			if(hBlade) lame = 0;
 		}
 	}
-	void TryLoad(std::string filename)
+	void TryLoad(mpt::PathString filename)
 	{
 		#ifdef MODPLUG_TRACKER
-			filename = std::string(theApp.GetAppDirPath()) + filename;
+			filename = theApp.GetAppDirPath() + filename;
 		#endif
-		hBlade = LoadLibrary(filename.c_str());
+		hBlade = LoadLibraryW(filename.AsNative().c_str());
 		if(!hBlade)
 		{
 			return;

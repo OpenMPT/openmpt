@@ -203,8 +203,8 @@ bool CAutoSaver::CheckTimer(DWORD curTime)
 }
 
 
-CString CAutoSaver::BuildFileName(CModDoc &modDoc)
-//------------------------------------------------
+mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
+//--------------------------------------------------------
 {
 	CString timeStamp = (CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S");
 	CString name;
@@ -218,7 +218,7 @@ CString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		} else
 		{
 			// if it doesnt, put it in settings dir
-			name = theApp.GetConfigPath() + modDoc.GetTitle();
+			name = theApp.GetConfigPath().ToCString() + modDoc.GetTitle();
 		}
 	} else
 	{
@@ -236,7 +236,7 @@ CString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		name.Append(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
 	}
 
-	return name;
+	return mpt::PathString::FromCString(name);
 }
 
 
@@ -247,7 +247,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 	// list with backups... hence we have duplicated code.. :(
 	CSoundFile &sndFile = modDoc.GetrSoundFile(); 
 	
-	CString fileName = BuildFileName(modDoc);
+	CString fileName = BuildFileName(modDoc).ToCString();
 
 	// We are acutally not going to show the log for autosaved files.
 	ScopedLogCapturer logcapturer(modDoc, "", nullptr, false);
@@ -296,7 +296,7 @@ void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 			path = fullPath.Left(fullPath.GetLength() - modDoc.GetTitle().GetLength()); //remove file name if necessary
 		} else
 		{
-			path = theApp.GetConfigPath();
+			path = theApp.GetConfigPath().ToCString();
 		}
 	} else
 	{

@@ -891,7 +891,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			{
 				sUrl.AppendFormat("%08X%s%%0a", LittleEndian(m_MixPlugins[*i].Info.dwPluginId2), m_MixPlugins[*i].GetLibraryName());
 			}
-			CTrackApp::OpenURL(sUrl);
+			CTrackApp::OpenURL(mpt::PathString::FromCString(sUrl));
 		}
 	}
 #endif // NO_VST

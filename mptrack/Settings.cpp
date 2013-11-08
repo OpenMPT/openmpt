@@ -525,7 +525,7 @@ IniFileSettingsContainer::~IniFileSettingsContainer()
 
 
 DefaultSettingsContainer::DefaultSettingsContainer()
-	: IniFileSettingsContainer(mpt::PathString::FromLocale(theApp.GetConfigFileName()))
+	: IniFileSettingsContainer(theApp.GetConfigFileName())
 {
 	return;
 }

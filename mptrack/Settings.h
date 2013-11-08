@@ -296,6 +296,9 @@ inline T FromSettingValue(const SettingValue &val)
 template<> inline SettingValue ToSettingValue(const CString &val) { return SettingValue(std::basic_string<TCHAR>(val.GetString())); }
 template<> inline CString FromSettingValue(const SettingValue &val) { return CString(val.as<std::basic_string<TCHAR> >().c_str()); }
 
+template<> inline SettingValue ToSettingValue(const mpt::PathString &val) { return SettingValue(val.AsNative()); }
+template<> inline mpt::PathString FromSettingValue(const SettingValue &val) { return mpt::PathString::FromNative(val); }
+
 template<> inline SettingValue ToSettingValue(const float &val) { return SettingValue(double(val)); }
 template<> inline float FromSettingValue(const SettingValue &val) { return float(val.as<double>()); }
 

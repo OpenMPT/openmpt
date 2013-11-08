@@ -246,9 +246,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		path = theApp.RelativePathToAbsolute(path);
 		SetDefaultDirectory(path, static_cast<Directory>(i), false);
 	}
-	MemsetZero(m_szKbdFile);
-	mpt::String::Copy(m_szKbdFile, conf.Read<std::string>("Paths", "Key_Config_File", ""));
-	theApp.RelativePathToAbsolute(m_szKbdFile);
+	m_szKbdFile = conf.Read<mpt::PathString>("Paths", "Key_Config_File", mpt::PathString());
 
 
 	// init old and messy stuff:
@@ -445,6 +443,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		SetCurrentDirectory(TrackerDirectories::Instance().m_szDefaultDirectory[DIR_MODS]);
 	}
+	CString tmpKbdFile = m_szKbdFile.ToCString();
+	theApp.RelativePathToAbsolute(tmpKbdFile);
+	m_szKbdFile = mpt::PathString::FromCString(tmpKbdFile);
 
 	// Last fixup: update config version
 	IniVersion = MptVersion::str;

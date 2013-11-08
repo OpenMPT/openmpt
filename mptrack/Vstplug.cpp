@@ -541,7 +541,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		mpt::String::CopyN(s, TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS));
 		if(!s[0])
 		{
-			mpt::String::CopyN(s, theApp.GetAppDirPath());
+			mpt::String::CopyN(s, theApp.GetAppDirPath().ToLocale().c_str());
 		}
 		size_t len = strlen(s);
 		if((len > 0) && (s[len - 1] != '\\') && (s[len - 1] != '/'))

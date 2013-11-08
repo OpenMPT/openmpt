@@ -491,7 +491,7 @@ void COptionsColors::OnLoadColorScheme()
 	FileDialog dlg = OpenFileDialog()
 		.DefaultExtension("mptcolor")
 		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
-		.WorkingDirectory(theApp.GetConfigPath());
+		.WorkingDirectory(theApp.GetConfigPath().ToLocale());
 	if(!dlg.Show()) return;
 
 	// Ensure that all colours are reset (for outdated colour schemes)
@@ -514,7 +514,7 @@ void COptionsColors::OnSaveColorScheme()
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("mptcolor")
 		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
-		.WorkingDirectory(theApp.GetConfigPath());
+		.WorkingDirectory(theApp.GetConfigPath().ToLocale());
 	if(!dlg.Show()) return;
 
 	{
