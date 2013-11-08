@@ -1174,10 +1174,10 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 		} else
 		{
 			// Plugin wants a directory
-			BrowseForFolder dlg(fileSel->initialPath != nullptr ? fileSel->initialPath : "", fileSel->title);
+			BrowseForFolder dlg(mpt::PathString::FromLocale(fileSel->initialPath != nullptr ? fileSel->initialPath : ""), fileSel->title);
 			if(dlg.Show())
 			{
-				const std::string &dir = dlg.GetDirectory();
+				const std::string dir = dlg.GetDirectory().ToLocale();
 				if(CCONST('V', 'S', 'T', 'r') == effect->uniqueID && fileSel->returnPath != nullptr && fileSel->sizeReturnPath == 0)
 				{
 					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.

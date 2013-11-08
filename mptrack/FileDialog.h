@@ -83,17 +83,17 @@ public:
 class BrowseForFolder
 {
 protected:
-	std::string workingDirectory;
-	const char *caption;
+	mpt::PathString workingDirectory;
+	std::wstring caption;
 
 public:
-	BrowseForFolder(const std::string &dir, const char *caption) : workingDirectory(dir), caption(caption) { }
+	BrowseForFolder(const mpt::PathString &dir, const CString &caption) : workingDirectory(dir), caption(mpt::String::FromCString(caption)) { }
 
 	// Show the folder selection dialog.
 	bool Show();
 
 	// Gets selected directory.
-	const std::string &GetDirectory() const { return workingDirectory; }
+	const mpt::PathString &GetDirectory() const { return workingDirectory; }
 
 protected:
 	static int CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData);
