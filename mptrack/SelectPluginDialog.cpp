@@ -461,7 +461,7 @@ void CSelectPluginDlg::OnAddPlugin()
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINS));
 	if(!dlg.Show()) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_PLUGINS, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINS, true);
 
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	bool bOk = false;
@@ -471,7 +471,7 @@ void CSelectPluginDlg::OnAddPlugin()
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 
-		CString sFilename = files[counter].c_str();
+		CString sFilename = files[counter].ToCString();
 
 		if (pManager)
 		{

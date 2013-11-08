@@ -164,7 +164,7 @@ void CModTree::Init()
 		m_dwStatus |= TREESTATUS_SINGLEEXPAND;
 	}
 	ModifyStyle(dwRemove, dwAdd);
-	strcpy(m_szInstrLibPath, TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES));
+	mpt::String::Copy(m_szInstrLibPath, TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES).ToLocale());
 	SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
 	if (!IsSampleBrowser())
 	{
@@ -1521,9 +1521,9 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 	if(!dlg.Show()) return FALSE;
 
 	if (dwItem & 0x80)
-		return SetMidiPercussion(dwItem & 0x7F, dlg.GetFirstFile().c_str());
+		return SetMidiPercussion(dwItem & 0x7F, dlg.GetFirstFile().ToCString());
 	else
-		return SetMidiInstrument(dwItem, dlg.GetFirstFile().c_str());
+		return SetMidiInstrument(dwItem, dlg.GetFirstFile().ToCString());
 }
 
 
@@ -3089,7 +3089,7 @@ void CModTree::OnSetItemPath()
 			.ExtensionFilter("All files(*.*)|*.*||");
 		if(!dlg.Show()) return;
 
-		pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile();
+		pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile().ToLocale();
 		OnRefreshTree();
 	}
 }
@@ -3117,7 +3117,7 @@ void CModTree::OnSaveItem()
 				"FastTracker II Instruments (*.xi)|*.xi||");
 			if(!dlg.Show()) return;
 
-			pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile();
+			pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile().ToLocale();
 		}
 
 		pModDoc->SaveInstrument(static_cast<INSTRUMENTINDEX>(modItem.val1));
@@ -3155,7 +3155,7 @@ void CModTree::OnExportMidiLib()
 			"All Files (*.*)|*.*||");
 	if(!dlg.Show()) return;
 
-	CTrackApp::ExportMidiConfig(dlg.GetFirstFile().c_str());
+	CTrackApp::ExportMidiConfig(dlg.GetFirstFile().ToLocale().c_str());
 }
 
 

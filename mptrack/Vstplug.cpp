@@ -538,7 +538,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	{
 		// Try finding the plugin DLL in the plugin directory instead.
 		CHAR s[_MAX_PATH];
-		mpt::String::CopyN(s, TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS));
+		mpt::String::Copy(s, TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS).ToLocale());
 		if(!s[0])
 		{
 			mpt::String::CopyN(s, theApp.GetAppDirPath().ToLocale().c_str());
@@ -1123,7 +1123,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				dlg = OpenFileDialog().AllowMultiSelect();
 			}
 			dlg.ExtensionFilter(extensions)
-				.WorkingDirectory(workingDir);
+				.WorkingDirectory(mpt::PathString::FromLocale(workingDir));
 			if(!dlg.Show())
 			{
 				return 0;
@@ -1137,8 +1137,8 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				fileSel->returnMultiplePaths = new char *[fileSel->nbReturnPath];
 				for(size_t i = 0; i < files.size(); i++)
 				{
-					char *fname = new char[files[i].length() + 1];
-					strcpy(fname, files[i].c_str());
+					char *fname = new char[files[i].ToLocale().length() + 1];
+					strcpy(fname, files[i].ToLocale().c_str());
 					fileSel->returnMultiplePaths[i] = fname;
 				}
 				return 1;
@@ -1156,7 +1156,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				{
 
 					// Provide some memory for the return path.
-					fileSel->sizeReturnPath = dlg.GetFirstFile().length() + 1;
+					fileSel->sizeReturnPath = dlg.GetFirstFile().ToLocale().length() + 1;
 					fileSel->returnPath = new char[fileSel->sizeReturnPath];
 					if(fileSel->returnPath == nullptr)
 					{
@@ -1168,7 +1168,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				{
 					fileSel->reserved = 0;
 				}
-				strncpy(fileSel->returnPath, dlg.GetFirstFile().c_str(), fileSel->sizeReturnPath - 1);
+				strncpy(fileSel->returnPath, dlg.GetFirstFile().ToLocale().c_str(), fileSel->sizeReturnPath - 1);
 				fileSel->nbReturnPath = 1;
 				fileSel->returnMultiplePaths = nullptr;
 			}
@@ -1592,7 +1592,7 @@ bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxPara
 bool CVstPlugin::SaveProgram()
 //----------------------------
 {
-	std::string defaultDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
+	std::string defaultDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS).ToLocale();
 	bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir)
 	{
@@ -1606,21 +1606,21 @@ bool CVstPlugin::SaveProgram()
 	mpt::String::SetNullTerminator(rawname);
 
 	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension("fxp")
+		.DefaultExtension(mpt::PathString::FromUTF8("fxb"))
 		.DefaultFilename(rawname)
 		.ExtensionFilter("VST Plugin Programs (*.fxp)|*.fxp|"
 			"VST Plugin Banks (*.fxb)|*.fxb||")
-		.WorkingDirectory(defaultDir);
+		.WorkingDirectory(mpt::PathString::FromLocale(defaultDir));
 	if(!dlg.Show()) return false;
 
 	if(useDefaultDir)
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_PLUGINPRESETS, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS, true);
 	}
 
-	bool bank = (dlg.GetExtension() == "fxb");
+	bool bank = (dlg.GetExtension() == mpt::PathString::FromUTF8("fxb"));
 
-	mpt::fstream f(dlg.GetFirstFile().c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+	mpt::fstream f(dlg.GetFirstFile().AsNative().c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
 	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
 	{
 		return true;
@@ -1636,7 +1636,7 @@ bool CVstPlugin::SaveProgram()
 bool CVstPlugin::LoadProgram()
 //----------------------------
 {
-	std::string defaultDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
+	std::string defaultDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS).ToLocale();
 	bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir)
 	{
@@ -1650,17 +1650,17 @@ bool CVstPlugin::LoadProgram()
 		"VST Plugin Programs (*.fxp)|*.fxp|"
 		"VST Plugin Banks (*.fxb)|*.fxb|"
 		"All Files|*.*||")
-		.WorkingDirectory(defaultDir);
+		.WorkingDirectory(mpt::PathString::FromLocale(defaultDir));
 	if(!dlg.Show()) return false;
 
 	if(useDefaultDir)
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_PLUGINPRESETS, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS, true);
 	}
 
 	CMappedFile f;
 	const char *errorStr = nullptr;
-	if(f.Open(dlg.GetFirstFile().c_str()))
+	if(f.Open(dlg.GetFirstFile().ToCString()))
 	{
 		FileReader file = f.GetFile();
 		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));

@@ -228,6 +228,10 @@ public:
 		return a.AsNative() != b.AsNative();
 	}
 	bool empty() const { return path.empty(); }
+	const RawPathString &NativeRef() const
+	{
+		return path;
+	}
 
 public:
 

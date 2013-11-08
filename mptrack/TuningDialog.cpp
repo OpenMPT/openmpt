@@ -643,7 +643,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	bool failure = true;
 	
-	mpt::ofstream fout(dlg.GetFirstFile().c_str(), std::ios::binary);
+	mpt::ofstream fout(dlg.GetFirstFile().AsNative().c_str(), std::ios::binary);
 
 	if(filterIndex == 0)
 	{
@@ -680,7 +680,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 	if(!dlg.Show())
 		return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_TUNING, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_TUNING, true);
 
 	CString sLoadReport;
 
@@ -689,7 +689,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 	for(size_t counter = 0; counter < nFiles; counter++)
 	{
 		TCHAR szFileName[_MAX_FNAME], szExt[_MAX_EXT];
-		_tsplitpath(files[counter].c_str(), nullptr, nullptr, szFileName, szExt);
+		_tsplitpath(files[counter].ToCString(), nullptr, nullptr, szFileName, szExt);
 
 		_tcslwr(szExt); // Convert extension to lower case.
 
@@ -702,7 +702,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 			if (bIsTun)
 			{
-				mpt::ifstream fin(files[counter].c_str(), std::ios::binary);
+				mpt::ifstream fin(files[counter].AsNative().c_str(), std::ios::binary);
 				pT = CTuningRTI::DeserializeOLD(fin);
 				if(pT == 0)
 					{fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
@@ -736,7 +736,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			}
 			else // scl import.
 			{
-				EnSclImport a = ImportScl(files[counter].c_str(), szFileName);
+				EnSclImport a = ImportScl(files[counter].ToCString(), szFileName);
 				if (a != enSclImportOk)
 				{
 					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
@@ -770,7 +770,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			// a separate collection - no possibility to 
 			// directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
-			pNewTCol->SetSavefilePath(files[counter]);
+			pNewTCol->SetSavefilePath(files[counter].ToLocale());
 			if (pNewTCol->Deserialize())
 			{
 				delete pNewTCol; pNewTCol = 0;
