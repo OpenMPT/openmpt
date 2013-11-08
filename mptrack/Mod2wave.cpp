@@ -123,28 +123,22 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 END_MESSAGE_MAP()
 
 
-CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile *sndfile, const std::vector<EncoderFactoryBase*> &encFactories)
+CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile &sndFile, const std::vector<EncoderFactoryBase*> &encFactories)
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	: CDialog(IDD_WAVECONVERT, parent)
+	, m_SndFile(sndFile)
 	, m_Settings(theApp.GetSettings(), encFactories)
 {
 	ASSERT(!encFactories.empty());
 	encTraits = m_Settings.GetTraits();
-	m_pSndFile = sndfile;
 	m_bGivePlugsIdleTime = false;
-	m_bHighQuality = false;
-	m_bSelectPlay = false;
 	if(minOrder != ORDERINDEX_INVALID && maxOrder != ORDERINDEX_INVALID)
 	{
 		// render selection
-		m_nMinOrder = minOrder;
-		m_nMaxOrder = maxOrder;
-		m_bSelectPlay = true;
-	} else
-	{
-		m_nMinOrder = m_nMaxOrder = 0;
+		m_Settings.minOrder = minOrder;
+		m_Settings.maxOrder = maxOrder;
 	}
-	loopCount = 1;
+	m_Settings.repeatCount = 1;
 	m_nNumOrders = numOrders;
 
 	m_dwFileLimit = 0;
@@ -178,7 +172,6 @@ BOOL CWaveConvert::OnInitDialog()
 //-------------------------------
 {
 	CDialog::OnInitDialog();
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, m_bSelectPlay ? IDC_RADIO2 : IDC_RADIO1);
 
 	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// Normalize
 	CheckDlgButton(IDC_CHECK3, MF_CHECKED);	// Cue points
@@ -186,12 +179,17 @@ BOOL CWaveConvert::OnInitDialog()
 	CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
 
-	SetDlgItemInt(IDC_EDIT3, m_nMinOrder);
+	const bool selection = (m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID);
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, selection ? IDC_RADIO2 : IDC_RADIO1);
+	if(selection)
+	{
+		SetDlgItemInt(IDC_EDIT3, m_Settings.minOrder);
+		SetDlgItemInt(IDC_EDIT4, m_Settings.maxOrder);
+	}
 	m_SpinMinOrder.SetRange(0, m_nNumOrders);
-	SetDlgItemInt(IDC_EDIT4, m_nMaxOrder);
 	m_SpinMaxOrder.SetRange(0, m_nNumOrders);
 
-	SetDlgItemInt(IDC_EDIT5, loopCount, FALSE);
+	SetDlgItemInt(IDC_EDIT5, m_Settings.repeatCount, FALSE);
 	m_SpinLoopCount.SetRange(1, int16_max);
 
 	FillFileTypes();
@@ -217,7 +215,7 @@ BOOL CWaveConvert::OnInitDialog()
 	GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(FALSE);
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if(m_pSndFile->m_MixPlugins[i].pMixPlugin != nullptr)
+		if(m_SndFile.m_MixPlugins[i].pMixPlugin != nullptr)
 		{
 			GetDlgItem(IDC_GIVEPLUGSIDLETIME)->EnableWindow(TRUE);
 			GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(TRUE);
@@ -233,8 +231,8 @@ BOOL CWaveConvert::OnInitDialog()
 void CWaveConvert::LoadTags()
 //---------------------------
 {
-	m_Settings.Tags.title = mpt::String::Decode(m_pSndFile->GetTitle(), mpt::CharsetLocale);
-	m_Settings.Tags.comments = mpt::String::Decode(m_pSndFile->songMessage, mpt::CharsetLocale);
+	m_Settings.Tags.title = mpt::String::Decode(m_SndFile.GetTitle(), mpt::CharsetLocale);
+	m_Settings.Tags.comments = mpt::String::Decode(m_SndFile.songMessage, mpt::CharsetLocale);
 	m_Settings.Tags.artist = m_Settings.storedTags.artist;
 	m_Settings.Tags.album = m_Settings.storedTags.album;
 	m_Settings.Tags.trackno = m_Settings.storedTags.trackno;
@@ -552,10 +550,15 @@ void CWaveConvert::UpdateDialog()
 	CheckDlgButton(IDC_CHECK2, (m_dwSongLimit) ? MF_CHECKED : 0);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1), (m_dwFileLimit) ? TRUE : FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), (m_dwSongLimit) ? TRUE : FALSE);
+
+	// Repeat / selection play
 	BOOL bSel = IsDlgButtonChecked(IDC_RADIO2) ? TRUE : FALSE;
+	/*m_SpinMinOrder.EnableWindow(bSel);
+	m_SpinMaxOrder.EnableWindow(bSel);*/
 	GetDlgItem(IDC_EDIT3)->EnableWindow(bSel);
 	GetDlgItem(IDC_EDIT4)->EnableWindow(bSel);
 	GetDlgItem(IDC_EDIT5)->EnableWindow(!bSel);
+
 	m_SpinLoopCount.EnableWindow(!bSel);
 }
 
@@ -621,11 +624,20 @@ void CWaveConvert::OnOK()
 {
 	if (m_dwFileLimit) m_dwFileLimit = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 	if (m_dwSongLimit) m_dwSongLimit = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
-	m_bSelectPlay = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
-	m_nMinOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT3, NULL, FALSE));
-	m_nMaxOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT4, NULL, FALSE));
-	loopCount = static_cast<uint16>(GetDlgItemInt(IDC_EDIT5, NULL, FALSE));
-	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = false;
+
+	const bool selection = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
+	if(selection)
+	{
+		// Play selection
+		m_Settings.minOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT3, NULL, FALSE));
+		m_Settings.maxOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT4, NULL, FALSE));
+	}
+	if(!selection || m_Settings.maxOrder < m_Settings.minOrder)
+	{
+		m_Settings.minOrder = m_Settings.maxOrder = ORDERINDEX_INVALID;
+	}
+
+	m_Settings.repeatCount = static_cast<uint16>(GetDlgItemInt(IDC_EDIT5, NULL, FALSE));
 	m_Settings.Normalize = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
 	m_Settings.SilencePlugBuffers = IsDlgButtonChecked(IDC_RENDERSILENCE) != BST_UNCHECKED;
 	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) != BST_UNCHECKED;
@@ -681,12 +693,12 @@ void CWaveConvert::OnOK()
 			m_Settings.Tags.year = std::wstring();
 		}
 
-		if(!m_pSndFile->songMessage.empty())
+		if(!m_SndFile.songMessage.empty())
 		{
-			m_Settings.Tags.comments = mpt::String::Decode(m_pSndFile->songMessage, mpt::CharsetLocale);
+			m_Settings.Tags.comments = mpt::String::Decode(m_SndFile.songMessage, mpt::CharsetLocale);
 		}
 
-		m_Settings.Tags.bpm = mpt::String::Decode(mpt::String::Format("%d", (int)m_pSndFile->GetCurrentBPM()), mpt::CharsetLocale);
+		m_Settings.Tags.bpm = mpt::String::Decode(mpt::String::Format("%d", (int)m_SndFile.GetCurrentBPM()), mpt::CharsetLocale);
 
 		SaveTags();
 
@@ -795,6 +807,8 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	, EncoderIndex(FindEncoder(EncoderName))
 	, FinalSampleFormat(SampleFormatInt16)
 	, storedTags(conf)
+	, repeatCount(0)
+	, minOrder(ORDERINDEX_INVALID), maxOrder(ORDERINDEX_INVALID)
 	, Normalize(false)
 	, SilencePlugBuffers(false)
 {
@@ -852,7 +866,7 @@ void CDoWaveConvert::OnButton1()
 	UINT ok = IDOK, pos = 0;
 	uint64 ullSamples = 0, ullMaxSamples;
 
-	if (!m_pSndFile || !m_lpszFileName)
+	if(!m_lpszFileName)
 	{
 		EndDialog(IDCANCEL);
 		return;
@@ -887,14 +901,15 @@ void CDoWaveConvert::OnButton1()
 	// Silence mix buffer of plugins, for plugins that don't clear their reverb buffers and similar stuff when they are reset
 	if(m_Settings.SilencePlugBuffers)
 	{
+		SetDlgItemText(IDC_TEXT1, "Clearing plugin buffers");
 		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 		{
-			if(m_pSndFile->m_MixPlugins[i].pMixPlugin != nullptr)
+			if(m_SndFile.m_MixPlugins[i].pMixPlugin != nullptr)
 			{
 				// Render up to 20 seconds per plugin
 				for(int j = 0; j < 20; j++)
 				{
-					const float maxVal = m_pSndFile->m_MixPlugins[i].pMixPlugin->RenderSilence(samplerate);
+					const float maxVal = m_SndFile.m_MixPlugins[i].pMixPlugin->RenderSilence(samplerate);
 					if(maxVal <= FLT_EPSILON)
 					{
 						break;
@@ -904,12 +919,12 @@ void CDoWaveConvert::OnButton1()
 		}
 	}
 
-	MixerSettings oldmixersettings = m_pSndFile->m_MixerSettings;
+	MixerSettings oldmixersettings = m_SndFile.m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().GetMixerSettings();
 	mixersettings.m_nMaxMixChannels = MAX_CHANNELS; // always use max mixing channels when rendering
 	mixersettings.gdwMixingFreq = samplerate;
 	mixersettings.gnChannels = channels;
-	m_pSndFile->m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
+	m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 	if(m_Settings.Normalize)
 	{
 #ifndef NO_AGC
@@ -919,10 +934,10 @@ void CDoWaveConvert::OnButton1()
 
 	Dither dither;
 
-	m_pSndFile->ResetChannels();
-	m_pSndFile->SetMixerSettings(mixersettings);
-	m_pSndFile->SetResamplerSettings(TrackerSettings::Instance().GetResamplerSettings());
-	m_pSndFile->InitPlayer(TRUE);
+	m_SndFile.ResetChannels();
+	m_SndFile.SetMixerSettings(mixersettings);
+	m_SndFile.SetResamplerSettings(TrackerSettings::Instance().GetResamplerSettings());
+	m_SndFile.InitPlayer(TRUE);
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 2047*1024)) m_dwFileLimit = 2047*1024; // 2GB
 	m_dwFileLimit <<= 10;
 
@@ -942,14 +957,32 @@ void CDoWaveConvert::OnButton1()
 		if (l < ullMaxSamples) ullMaxSamples = l;
 	}
 
-	// calculate maximum samples
+	// Calculate maximum samples
 	uint64 max = ullMaxSamples;
-	uint64 l = static_cast<uint64>(m_pSndFile->GetSongTime() + 0.5) * samplerate * std::max<uint64>(1, 1 + m_pSndFile->GetRepeatCount());
-	if (m_nMaxPatterns > 0)
+	uint64 l = static_cast<uint64>(m_SndFile.GetSongTime() + 0.5) * samplerate * std::max<uint64>(1, 1 + m_SndFile.GetRepeatCount());
+
+	// Reset song position tracking
+	m_SndFile.InitializeVisitedRows();
+	m_SndFile.SetCurrentPos(0);
+	m_SndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
+	ORDERINDEX startOrder = 0;
+	if(m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID)
 	{
-		ORDERINDEX dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();
-		if ((m_nMaxPatterns < dwOrds) && (dwOrds > 0)) l = (l*m_nMaxPatterns) / dwOrds;
+		startOrder = m_Settings.minOrder;
+		m_SndFile.m_nMaxOrderPosition = m_Settings.maxOrder + 1;
+		m_SndFile.SetRepeatCount(0);
+
+		// Weird calculations ahead...
+		ORDERINDEX dwOrds = m_SndFile.Order.GetLengthFirstEmpty();
+		PATTERNINDEX maxPatterns = m_Settings.maxOrder - m_Settings.minOrder + 1;
+		if((maxPatterns < dwOrds) && (dwOrds > 0)) l = (l * maxPatterns) / dwOrds;
+	} else
+	{
+		m_SndFile.SetRepeatCount(std::max(0, m_Settings.repeatCount - 1));
 	}
+	m_SndFile.SetCurrentOrder(startOrder);
+	m_SndFile.GetLength(eAdjust, GetLengthTarget(startOrder, 0));	// adjust playback variables / visited rows vector
+	m_SndFile.m_nCurrentOrder = startOrder;
 
 	if (l < max) max = l;
 
@@ -959,8 +992,8 @@ void CDoWaveConvert::OnButton1()
 	}
 
 	// No pattern cue points yet
-	m_pSndFile->m_PatternCuePoints.clear();
-	m_pSndFile->m_PatternCuePoints.reserve(m_pSndFile->Order.GetLength());
+	m_SndFile.m_PatternCuePoints.clear();
+	m_SndFile.m_PatternCuePoints.reserve(m_SndFile.Order.GetLength());
 
 	// Process the conversion
 
@@ -972,22 +1005,22 @@ void CDoWaveConvert::OnButton1()
 	size_t bytesWritten = 0;
 
 	CMainFrame::GetMainFrame()->PauseMod();
-	m_pSndFile->m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
-	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
+	m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
+	CMainFrame::GetMainFrame()->InitRenderer(&m_SndFile);	//rewbs.VSTTimeInfo
 	for (UINT n = 0; ; n++)
 	{
 		UINT lRead = 0;
 		if(m_Settings.Normalize || m_Settings.FinalSampleFormat == SampleFormatFloat32)
 		{
-			lRead = ReadInterleaved(*m_pSndFile, floatbuffer, MIXBUFFERSIZE, SampleFormatFloat32, dither);
+			lRead = ReadInterleaved(m_SndFile, floatbuffer, MIXBUFFERSIZE, SampleFormatFloat32, dither);
 		} else
 		{
-			lRead = ReadInterleaved(*m_pSndFile, buffer, MIXBUFFERSIZE, m_Settings.FinalSampleFormat, dither);
+			lRead = ReadInterleaved(m_SndFile, buffer, MIXBUFFERSIZE, m_Settings.FinalSampleFormat, dither);
 		}
 
 		// Process cue points (add base offset), if there are any to process.
 		std::vector<PatternCuePoint>::reverse_iterator iter;
-		for(iter = m_pSndFile->m_PatternCuePoints.rbegin(); iter != m_pSndFile->m_PatternCuePoints.rend(); ++iter)
+		for(iter = m_SndFile.m_PatternCuePoints.rbegin(); iter != m_SndFile.m_PatternCuePoints.rend(); ++iter)
 		{
 			if(iter->processed)
 			{
@@ -1003,14 +1036,14 @@ void CDoWaveConvert::OnButton1()
 			Sleep(20);
 		}
 
-		if (!lRead) 
+		if (!lRead)
 			break;
 		ullSamples += lRead;
 
 		if(m_Settings.Normalize)
 		{
 
-			std::size_t countSamples = lRead * m_pSndFile->m_MixerSettings.gnChannels;
+			std::size_t countSamples = lRead * m_SndFile.m_MixerSettings.gnChannels;
 			const float *src = floatbuffer;
 			while(countSamples--)
 			{
@@ -1020,7 +1053,7 @@ void CDoWaveConvert::OnButton1()
 				src++;
 			}
 
-			normalizeFile.write(reinterpret_cast<const char*>(floatbuffer), lRead * m_pSndFile->m_MixerSettings.gnChannels * sizeof(float));
+			normalizeFile.write(reinterpret_cast<const char*>(floatbuffer), lRead * m_SndFile.m_MixerSettings.gnChannels * sizeof(float));
 			if(!normalizeFile)
 				break;
 
@@ -1051,7 +1084,7 @@ void CDoWaveConvert::OnButton1()
 			break;
 		if (!(n % 10))
 		{
-			DWORD l = (DWORD)(ullSamples / m_pSndFile->m_MixerSettings.gdwMixingFreq);
+			DWORD l = (DWORD)(ullSamples / m_SndFile.m_MixerSettings.gdwMixingFreq);
 
 			const DWORD dwCurrentTime = timeGetTime();
 			DWORD timeRemaining = 0; // estimated remainig time
@@ -1094,9 +1127,9 @@ void CDoWaveConvert::OnButton1()
 		}
 	}
 
-	m_pSndFile->m_nMaxOrderPosition = 0;
+	m_SndFile.m_nMaxOrderPosition = 0;
 
-	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
+	CMainFrame::GetMainFrame()->StopRenderer(&m_SndFile);
 
 	if(m_Settings.Normalize)
 	{
@@ -1178,19 +1211,19 @@ void CDoWaveConvert::OnButton1()
 
 	}
 
-	if(m_pSndFile->m_PatternCuePoints.size() > 0)
+	if(m_SndFile.m_PatternCuePoints.size() > 0)
 	{
 		if(encSettings.Cues)
 		{
 			std::vector<PatternCuePoint>::const_iterator iter;
 			std::vector<uint64> cues;
-			for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); iter++)
+			for(iter = m_SndFile.m_PatternCuePoints.begin(); iter != m_SndFile.m_PatternCuePoints.end(); iter++)
 			{
 				cues.push_back(static_cast<uint32>(iter->offset));
 			}
 			fileEnc->WriteCues(cues);
 		}
-		m_pSndFile->m_PatternCuePoints.clear();
+		m_SndFile.m_PatternCuePoints.clear();
 	}
 
 	fileEnc->Finalize();
@@ -1200,7 +1233,7 @@ void CDoWaveConvert::OnButton1()
 	fileStream.flush();
 	fileStream.close();
 
-	CMainFrame::UpdateAudioParameters(*m_pSndFile, TRUE);
+	CMainFrame::UpdateAudioParameters(m_SndFile, TRUE);
 	EndDialog(ok);
 }
 

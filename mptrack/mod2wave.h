@@ -45,6 +45,9 @@ struct CWaveConvertSettings
 	StoredTags storedTags;
 	FileTags Tags;
 
+	int repeatCount;
+	ORDERINDEX minOrder, maxOrder;
+
 	bool Normalize;
 	bool SilencePlugBuffers;
 
@@ -56,6 +59,7 @@ struct CWaveConvertSettings
 	CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories);
 };
 
+
 //================================
 class CWaveConvert: public CDialog
 //================================
@@ -63,18 +67,17 @@ class CWaveConvert: public CDialog
 public:
 	CWaveConvertSettings m_Settings;
 	const Encoder::Traits *encTraits;
-	CSoundFile *m_pSndFile;
+	CSoundFile &m_SndFile;
 	uint64 m_dwFileLimit;
 	DWORD m_dwSongLimit;
-	bool m_bSelectPlay, m_bHighQuality, m_bGivePlugsIdleTime;
-	ORDERINDEX m_nMinOrder, m_nMaxOrder, m_nNumOrders;
-	int loopCount;
+	ORDERINDEX m_nNumOrders;
 
 	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnSampleFormat;
 	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder;
 
+	bool m_bGivePlugsIdleTime;
 	bool m_bChannelMode;		// Render by channel
-	bool m_bInstrumentMode;	// Render by instrument
+	bool m_bInstrumentMode;		// Render by instrument
 
 	CEdit m_EditTitle, m_EditAuthor, m_EditURL, m_EditAlbum, m_EditYear;
 	CComboBox m_CbnGenre;
@@ -94,7 +97,7 @@ private:
 	void SaveTags();
 
 public:
-	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile *sndfile, const std::vector<EncoderFactoryBase*> &encFactories);
+	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile &sndFile, const std::vector<EncoderFactoryBase*> &encFactories);
 
 public:
 	void UpdateDialog();
@@ -120,21 +123,19 @@ class CDoWaveConvert: public CDialog
 {
 public:
 	const CWaveConvertSettings &m_Settings;
-	CSoundFile *m_pSndFile;
+	CSoundFile &m_SndFile;
 	const char *m_lpszFileName;
 	DWORD m_dwFileLimit, m_dwSongLimit;
-	UINT m_nMaxPatterns;
 	bool m_bAbort, m_bGivePlugsIdleTime;
 
 public:
-	CDoWaveConvert(CSoundFile *sndfile, const char *fname, const CWaveConvertSettings &settings, CWnd *parent = NULL)
+	CDoWaveConvert(CSoundFile &sndFile, const char *fname, const CWaveConvertSettings &settings, CWnd *parent = NULL)
 		: CDialog(IDD_PROGRESS, parent)
+		, m_SndFile(sndFile)
 		, m_Settings(settings)
-		{ m_pSndFile = sndfile; 
-		  m_lpszFileName = fname; 
-		  m_bAbort = false; 
-		  m_dwFileLimit = m_dwSongLimit = 0; 
-		  m_nMaxPatterns = 0; }
+		, m_lpszFileName(fname)
+		, m_bAbort(false)
+		, m_dwFileLimit(0), m_dwSongLimit(0) { }
 	BOOL OnInitDialog();
 	void OnCancel() { m_bAbort = true; }
 	afx_msg void OnButton1();
