@@ -576,6 +576,22 @@ void TestMisc()
 		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->volcommands), MAX_VOLCMDS);
 	}
 
+	// Path conversions
+#ifdef MODPLUG_TRACKER
+	const mpt::PathString realExePath = theApp.GetAppDirPath();
+	const CString exePath = "C:\\OpenMPT\\";
+	theApp.SetAppDirPath(mpt::PathString::FromCString(exePath));
+	VERIFY_EQUAL(theApp.AbsolutePathToRelative("C:\\OpenMPT\\"), ".\\");
+	VERIFY_EQUAL(theApp.AbsolutePathToRelative("c:\\OpenMPT\\foo"), ".\\foo");
+	VERIFY_EQUAL(theApp.AbsolutePathToRelative("C:\\foo"), "\\foo");
+	VERIFY_EQUAL(theApp.RelativePathToAbsolute(".\\"), "C:\\OpenMPT\\");
+	VERIFY_EQUAL(theApp.RelativePathToAbsolute(".\\foo"), "C:\\OpenMPT\\foo");
+	VERIFY_EQUAL(theApp.RelativePathToAbsolute("\\foo"), "C:\\foo");
+	VERIFY_EQUAL(theApp.AbsolutePathToRelative("\\\\server\\path\\file"), "\\\\server\\path\\file");
+	VERIFY_EQUAL(theApp.RelativePathToAbsolute("\\\\server\\path\\file"), "\\\\server\\path\\file");
+	theApp.SetAppDirPath(realExePath);
+#endif
+
 }
 
 
