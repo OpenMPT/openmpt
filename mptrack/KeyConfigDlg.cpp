@@ -162,7 +162,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_nCurKeyChoice = -1;
 	m_bModified = false;
 	m_bChoiceModified = false;
-	m_sFullPathName = TrackerSettings::Instance().m_szKbdFile;
+	m_sFullPathName = TrackerSettings::Instance().m_szKbdFile.ToCString();
 	
 	plocalCmdSet = new CCommandSet();
 	plocalCmdSet->Copy(CMainFrame::GetInputHandler()->activeCommandSet);
@@ -842,7 +842,7 @@ void COptionsKeyboard::OnLoad()
 		.DefaultExtension("mkb")
 		.DefaultFilename(std::string(m_sFullPathName))
 		.ExtensionFilter("OpenMPT Key Bindings (*.mkb)|*.mkb||")
-		.WorkingDirectory(TrackerSettings::Instance().m_szKbdFile);
+		.WorkingDirectory(TrackerSettings::Instance().m_szKbdFile.ToLocale());
 	if(!dlg.Show()) return;
 
 	m_sFullPathName = dlg.GetFirstFile().c_str();
@@ -859,7 +859,7 @@ void COptionsKeyboard::OnSave()
 		.DefaultExtension("mkb")
 		.DefaultFilename(std::string(m_sFullPathName))
 		.ExtensionFilter("OpenMPT Key Bindings (*.mkb)|*.mkb||")
-		.WorkingDirectory(TrackerSettings::Instance().m_szKbdFile);
+		.WorkingDirectory(TrackerSettings::Instance().m_szKbdFile.ToLocale());
 	if(!dlg.Show()) return;
 
 	m_sFullPathName = dlg.GetFirstFile().c_str();

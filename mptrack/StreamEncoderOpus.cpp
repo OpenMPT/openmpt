@@ -86,27 +86,27 @@ struct OpusDynBind
 		};
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
-			if(TryLoad(dll_names[i].ogg, dll_names[i].opus))
+			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].ogg), mpt::PathString::FromUTF8(dll_names[i].opus)))
 			{
 				// success
 				break;
 			}
 		}
 	}
-	bool TryLoad(std::string Ogg_fn, std::string Opus_fn)
+	bool TryLoad(mpt::PathString Ogg_fn, mpt::PathString Opus_fn)
 	{
 		#ifdef MODPLUG_TRACKER
-			Ogg_fn = std::string(theApp.GetAppDirPath()) + Ogg_fn;
-			Opus_fn = std::string(theApp.GetAppDirPath()) + Opus_fn;
+			Ogg_fn = theApp.GetAppDirPath() + Ogg_fn;
+			Opus_fn = theApp.GetAppDirPath() + Opus_fn;
 		#endif
-		hOgg = LoadLibrary(Ogg_fn.c_str());
+		hOgg = LoadLibraryW(Ogg_fn.AsNative().c_str());
 		if(!hOgg)
 		{
 			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
 			if(hOpus) { FreeLibrary(hOpus); hOpus = NULL; }
 			return false;
 		}
-		hOpus = LoadLibrary(Opus_fn.c_str());
+		hOpus = LoadLibraryW(Opus_fn.AsNative().c_str());
 		if(!hOpus)
 		{
 			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }

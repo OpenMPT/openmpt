@@ -44,7 +44,7 @@ public:
 //internal implementation
 private: 
 	bool SaveSingleFile(CModDoc &modDoc);
-	CString BuildFileName(CModDoc &modDoc);
+	mpt::PathString BuildFileName(CModDoc &modDoc);
 	void CleanUpBackups(CModDoc &modDoc);
 	bool CheckTimer(DWORD curTime);
 	

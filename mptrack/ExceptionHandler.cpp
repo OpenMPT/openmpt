@@ -107,7 +107,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 			if(numFiles == 0)
 			{
 				// Show the rescue directory in Explorer...
-				CTrackApp::OpenDirectory(baseRescuePath);
+				CTrackApp::OpenDirectory(mpt::PathString::FromCString(baseRescuePath));
 			}
 			CString filename;
 			filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);

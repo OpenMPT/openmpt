@@ -467,7 +467,7 @@ void CMainFrame::OnClose()
 
 	if(m_InputHandler && m_InputHandler->activeCommandSet)
 	{
-		m_InputHandler->activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
+		m_InputHandler->activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile.ToCString());
 	}
 
 	EndWaitCursor();
@@ -2508,12 +2508,11 @@ void CMainFrame::OnShowSettingsFolder()
 void CMainFrame::OnHelp()
 //-----------------------
 {
-	CString helpFile = theApp.GetAppDirPath();
-	helpFile += "OpenMPT Manual.pdf";
+	mpt::PathString helpFile = theApp.GetAppDirPath();
+	helpFile += mpt::PathString::FromUTF8("OpenMPT Manual.pdf");
 	if(!theApp.OpenFile(helpFile))
 	{
-		helpFile = "Could not find help file:\n" + helpFile;
-		Reporting::Error(helpFile);
+		Reporting::Error(std::string("Could not find help file:\n" + helpFile.ToLocale()).c_str());
 	}
 }
 
@@ -2530,11 +2529,11 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<CString>& v
 		for(size_t i = 0; i < 2; i++) // 0: app items, 1: user items
 		{
 			// To avoid duplicates, check whether app path and config path are the same.
-			if (i == 1 && _tcsicmp(CTrackApp::GetAppDirPath(), theApp.GetConfigPath()) == 0)
+			if (i == 1 && _tcsicmp(CTrackApp::GetAppDirPath().ToCString(), theApp.GetConfigPath().ToCString()) == 0)
 				break;
 			CFileFind fileFind;
 			CFixedStringT<CString, MAX_PATH> sPath;
-			sPath = (i == 0) ? CTrackApp::GetAppDirPath() : theApp.GetConfigPath();
+			sPath = (i == 0) ? CTrackApp::GetAppDirPath().ToCString() : theApp.GetConfigPath().ToCString();
 			sPath += pszFolderName;
 			if (Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists) == false)
 				continue;

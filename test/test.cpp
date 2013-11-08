@@ -1336,7 +1336,7 @@ static bool PathEndsIn(const CString &path, const CString &match)
 
 static bool ShouldRunTests()
 {
-	CString theFile = theApp.GetAppDirPath();
+	CString theFile = theApp.GetAppDirPath().ToCString();
 	// Only run the tests when we're in the project directory structure.
 	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
 	{
@@ -1350,7 +1350,7 @@ static bool ShouldRunTests()
 
 static std::string GetTestFilenameBase()
 {
-	CString theFile = theApp.GetAppDirPath();
+	CString theFile = theApp.GetAppDirPath().ToCString();
 	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
 	{
 		if(PathEndsIn(theFile, debugPaths[i]))

@@ -260,7 +260,7 @@ std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 }
 
 
-TCHAR CTrackApp::m_szExePath[_MAX_PATH] = TEXT("");
+mpt::PathString CTrackApp::m_szExePath;
 
 /////////////////////////////////////////////////////////////////////////////
 // MPTRACK Command Line options
@@ -650,8 +650,6 @@ CTrackApp::CTrackApp()
 	m_pPluginManager = NULL;
 	m_pSoundDevicesManager = nullptr;
 	m_bInitialized = FALSE;
-	m_szConfigFileName[0] = 0;
-	m_szPluginCacheFileName[0] = 0;
 }
 
 
@@ -662,27 +660,29 @@ CTrackApp::CTrackApp()
 // Move a config file called sFileName from the App's directory (or one of its sub directories specified by sSubDir) to
 // %APPDATA%. If specified, it will be renamed to sNewFileName. Existing files are never overwritten.
 // Returns true on success.
-bool CTrackApp::MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH], TCHAR sNewFileName[_MAX_PATH])
-//-----------------------------------------------------------------------------------------------------------------
+bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDir, mpt::PathString sNewFileName)
+//--------------------------------------------------------------------------------------------------------------
 {
 	// copy a config file from the exe directory to the new config dirs
-	TCHAR sOldPath[_MAX_PATH], sNewPath[_MAX_PATH];
-	strcpy(sOldPath, m_szExePath);
-	if(sSubDir[0])
-		strcat(sOldPath, sSubDir);
-	strcat(sOldPath, sFileName);
+	mpt::PathString sOldPath;
+	mpt::PathString sNewPath;
+	sOldPath = m_szExePath;
+	sOldPath += sSubDir;
+	sOldPath += sFileName;
 
-	strcpy(sNewPath, m_szConfigDirectory);
-	if(sSubDir[0])
-		strcat(sNewPath, sSubDir);
-	if(sNewFileName[0])
-		strcat(sNewPath, sNewFileName);
-	else
-		strcat(sNewPath, sFileName);
-
-	if(PathFileExists(sNewPath) == 0 && PathFileExists(sOldPath) != 0)
+	sNewPath = m_szConfigDirectory;
+	sNewPath += sSubDir;
+	if(!sNewFileName.empty())
 	{
-		return (MoveFile(sOldPath, sNewPath) != 0);
+		sNewPath += sNewFileName;
+	} else
+	{
+		sNewPath += sFileName;
+	}
+
+	if(PathFileExistsW(sNewPath.AsNative().c_str()) == 0 && PathFileExistsW(sOldPath.AsNative().c_str()) != 0)
+	{
+		return (MoveFileW(sOldPath.AsNative().c_str(), sNewPath.AsNative().c_str()) != 0);
 	}
 	return false;
 }
@@ -693,33 +693,39 @@ bool CTrackApp::MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PA
 void CTrackApp::SetupPaths(bool overridePortable)
 //-----------------------------------------------
 {
-	if(GetModuleFileName(NULL, m_szExePath, CountOf(m_szExePath)))
+	WCHAR tempExePath[MAX_PATH];
+	if(GetModuleFileNameW(NULL, tempExePath, CountOf(tempExePath)))
 	{
-		mpt::String::SetNullTerminator(m_szExePath);
-		TCHAR szDrive[_MAX_DRIVE] = "", szDir[_MAX_PATH] = "";
-		_splitpath(m_szExePath, szDrive, szDir, NULL, NULL);
-		strcpy(m_szExePath, szDrive);
-		strcat(m_szExePath, szDir);
+		mpt::String::SetNullTerminator(tempExePath);
+		wchar_t szDrive[_MAX_DRIVE] = L"";
+		wchar_t szDir[_MAX_PATH] = L"";
+		_wsplitpath(tempExePath, szDrive, szDir, NULL, NULL);
+		m_szExePath = mpt::PathString::FromNative(szDrive);
+		m_szExePath += mpt::PathString::FromNative(szDir);
 
-		GetFullPathName(m_szExePath, CountOf(szDir), szDir, NULL);
-		strcpy(m_szExePath, szDir);
+		WCHAR wcsDir[MAX_PATH];
+		GetFullPathNameW(m_szExePath.AsNative().c_str(), CountOf(wcsDir), wcsDir, NULL);
+		m_szExePath = mpt::PathString::FromNative(wcsDir);
 	}
 
-	m_szConfigDirectory[0] = 0;
+	m_szConfigDirectory = mpt::PathString();
 	// Try to find a nice directory where we should store our settings (default: %APPDATA%)
 	bool bIsAppDir = overridePortable;
-	if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, m_szConfigDirectory)))
+	WCHAR tempConfigDirectory[MAX_PATH];
+	tempConfigDirectory[0] = 0;
+	if(!SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory)))
 	{
-		if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, m_szConfigDirectory)))
+		if(!SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory)))
 		{
 			bIsAppDir = true;
 		}
 	}
+	m_szConfigDirectory = mpt::PathString::FromNative(tempConfigDirectory);
 
 	// Check if the user prefers to use the app's directory
-	strcpy(m_szConfigFileName, m_szExePath); // config file
-	strcat(m_szConfigFileName, "mptrack.ini");
-	if(GetPrivateProfileInt("Paths", "UseAppDataDirectory", 1, m_szConfigFileName) == 0)
+	m_szConfigFileName = m_szExePath; // config file
+	m_szConfigFileName += mpt::PathString::FromUTF8("mptrack.ini");
+	if(GetPrivateProfileIntW(L"Paths", L"UseAppDataDirectory", 1, m_szConfigFileName.AsNative().c_str()) == 0)
 	{
 		bIsAppDir = true;
 	}
@@ -727,79 +733,81 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	if(!bIsAppDir)
 	{
 		// Store our app settings in %APPDATA% or "My Files"
-		strcat(m_szConfigDirectory, "\\OpenMPT\\");
+		m_szConfigDirectory += mpt::PathString::FromUTF8("\\OpenMPT\\");
 
 		// Path doesn't exist yet, so it has to be created
-		if(PathIsDirectory(m_szConfigDirectory) == 0)
+		if(PathIsDirectoryW(m_szConfigDirectory.AsNative().c_str()) == 0)
 		{
-			CreateDirectory(m_szConfigDirectory, 0);
+			CreateDirectoryW(m_szConfigDirectory.AsNative().c_str(), 0);
 		}
 
 		#ifdef WIN32	// Legacy stuff
 		// Move the config files if they're still in the old place.
-		MoveConfigFile("mptrack.ini");
-		MoveConfigFile("plugin.cache");
+		MoveConfigFile(mpt::PathString::FromUTF8("mptrack.ini"));
+		MoveConfigFile(mpt::PathString::FromUTF8("plugin.cache"));
 		#endif	// WIN32 Legacy Stuff
 	} else
 	{
-		strcpy(m_szConfigDirectory, m_szExePath);
+		m_szConfigDirectory = m_szExePath;
 	}
 
 	// Create tunings dir
-	CString sTuningPath;
-	sTuningPath.Format(TEXT("%stunings\\"), m_szConfigDirectory);
-	TrackerDirectories::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
+	mpt::PathString sTuningPath = m_szConfigDirectory + mpt::PathString::FromUTF8("tunings\\");
+	TrackerDirectories::Instance().SetDefaultDirectory(sTuningPath.ToLocale().c_str(), DIR_TUNING);
 
-	if(PathIsDirectory(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING)) == 0)
+	if(PathIsDirectoryW(mpt::PathString::FromLocale(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING)).AsNative().c_str()) == 0)
 	{
-		CreateDirectory(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING), 0);
+		CreateDirectoryW(mpt::PathString::FromLocale(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING)).AsNative().c_str(), 0);
 	}
 
 	if(!bIsAppDir)
 	{
 		// Import old tunings
-		TCHAR sOldTunings[_MAX_PATH];
-		strcpy(sOldTunings, m_szExePath);
-		strcat(sOldTunings, "tunings\\");
+		mpt::PathString sOldTunings;
+		sOldTunings = m_szExePath;
+		sOldTunings += mpt::PathString::FromUTF8("tunings\\");
 
-		if(PathIsDirectory(sOldTunings) != 0)
+		if(PathIsDirectoryW(sOldTunings.AsNative().c_str()) != 0)
 		{
-			TCHAR sSearchPattern[_MAX_PATH];
-			strcpy(sSearchPattern, sOldTunings);
-			strcat(sSearchPattern, "*.*");
-			WIN32_FIND_DATA FindFileData;
+			mpt::PathString sSearchPattern;
+			sSearchPattern = sOldTunings;
+			sSearchPattern += mpt::PathString::FromUTF8("*.*");
+			WIN32_FIND_DATAW FindFileData;
 			HANDLE hFind;
-			hFind = FindFirstFile(sSearchPattern, &FindFileData);
+			hFind = FindFirstFileW(sSearchPattern.AsNative().c_str(), &FindFileData);
 			if(hFind != INVALID_HANDLE_VALUE)
 			{
 				do
 				{
-					MoveConfigFile(FindFileData.cFileName, "tunings\\");
-				} while(FindNextFile(hFind, &FindFileData) != 0);
+					MoveConfigFile(mpt::PathString::FromNative(FindFileData.cFileName), mpt::PathString::FromUTF8("tunings\\"));
+				} while(FindNextFileW(hFind, &FindFileData) != 0);
 			}
 			FindClose(hFind);
-			RemoveDirectory(sOldTunings);
+			RemoveDirectoryW(sOldTunings.AsNative().c_str());
 		}
 	}
 
 	// Set up default file locations
-	strcpy(m_szConfigFileName, m_szConfigDirectory); // config file
-	strcat(m_szConfigFileName, "mptrack.ini");
+	m_szConfigFileName = m_szConfigDirectory; // config file
+	m_szConfigFileName += mpt::PathString::FromUTF8("mptrack.ini");
 
-	strcpy(m_szPluginCacheFileName, m_szConfigDirectory); // plugin cache
-	strcat(m_szPluginCacheFileName, "plugin.cache");
+	m_szPluginCacheFileName = m_szConfigDirectory + mpt::PathString::FromUTF8("plugin.cache"); // plugin cache
 
-	TCHAR szTemplatePath[MAX_PATH];
-	_tcscpy(szTemplatePath, m_szConfigDirectory);
-	_tcscat(szTemplatePath, _T("TemplateModules\\"));
-	TrackerDirectories::Instance().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
+	mpt::PathString szTemplatePath;
+	szTemplatePath = m_szConfigDirectory;
+	szTemplatePath += mpt::PathString::FromUTF8("TemplateModules\\");
+	TrackerDirectories::Instance().SetDefaultDirectory(szTemplatePath.ToLocale().c_str(), DIR_TEMPLATE_FILES_USER);
 
 	//Force use of custom ini file rather than windowsDir\executableName.ini
 	if(m_pszProfileName)
 	{
 		free((void *)m_pszProfileName);
 	}
-	m_pszProfileName = _tcsdup(m_szConfigFileName);
+	#ifdef UNICODE
+		m_pszProfileName = _tcsdup(m_szConfigFileName.AsNative().c_str());
+	#else
+		m_pszProfileName = _tcsdup(m_szConfigFileName.ToLocale().c_str());
+	#endif
 
 	m_bPortableMode = bIsAppDir;
 }
@@ -839,13 +847,13 @@ BOOL CTrackApp::InitInstance()
 	// Construct auto saver instance, class TrackerSettings expects it being available.
 	CMainFrame::m_pAutoSaver = new CAutoSaver();
 
-	m_pSettingsIniFile = new IniFileSettingsBackend(mpt::PathString::FromLocale(m_szConfigFileName));
+	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
 	
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
 
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
 
-	m_pPluginCache = new IniFileSettingsContainer(mpt::PathString::FromLocale(m_szPluginCacheFileName));
+	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
 
 	int mruListLength = GetSettings().Read<int32>("Misc", "MRUListLength", 10);
 	Limit(mruListLength, 0, 15);
@@ -2030,15 +2038,34 @@ BOOL CTrackApp::UninitializeDXPlugins()
 ///////////////////////////////////////////////////////////////////////////////////
 // Internet-related functions
 
-bool CTrackApp::OpenURL(const LPCSTR lpszURL)
-//-------------------------------------------
+bool CTrackApp::OpenURL(const char *url)
+//--------------------------------------
 {
-	if(lpszURL != nullptr && lpszURL[0] != '\0' && theApp.m_pMainWnd)
+	if(!url) return false;
+	return OpenURL(mpt::PathString::FromUTF8(url));
+}
+
+bool CTrackApp::OpenURL(const std::string &url)
+//---------------------------------------------
+{
+	return OpenURL(mpt::PathString::FromUTF8(url));
+}
+
+bool CTrackApp::OpenURL(const CString &url)
+//-----------------------------------------
+{
+	return OpenURL(mpt::PathString::FromCString(url));
+}
+
+bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
+//-----------------------------------------------------
+{
+	if(!lpszURL.empty() && theApp.m_pMainWnd)
 	{
-		if(reinterpret_cast<int>(ShellExecute(
+		if(reinterpret_cast<int>(ShellExecuteW(
 			theApp.m_pMainWnd->m_hWnd,
-			"open",
-			lpszURL,
+			L"open",
+			lpszURL.AsNative().c_str(),
 			NULL,
 			NULL,
 			SW_SHOW)) >= 32)
@@ -2065,7 +2092,7 @@ void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
 
 	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
 	TCHAR szExePath[nLength], szTempPath[nLength];
-	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
+	_tcsncpy(szExePath, GetAppDirPath().ToCString(), nStrLength);
 	mpt::String::SetNullTerminator(szExePath);
 
 	if(!_tcsncicmp(szExePath, szPath, _tcslen(szExePath)))
@@ -2108,7 +2135,7 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 
 	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
 	TCHAR szExePath[nLength], szTempPath[nLength] = _T("");
-	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
+	_tcsncpy(szExePath, GetAppDirPath().ToCString(), nStrLength);
 	mpt::String::SetNullTerminator(szExePath);
 
 	if(!_tcsncicmp(szPath, _T("\\"), 1) && _tcsncicmp(szPath, _T("\\\\"), 2))

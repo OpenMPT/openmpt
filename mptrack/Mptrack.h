@@ -114,10 +114,10 @@ protected:
 	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
 	// Default macro configuration
 	MIDIMacroConfig m_MidiCfg;
-	static TCHAR m_szExePath[_MAX_PATH];
-	TCHAR m_szConfigDirectory[_MAX_PATH];
-	TCHAR m_szConfigFileName[_MAX_PATH];
-	TCHAR m_szPluginCacheFileName[_MAX_PATH];
+	static mpt::PathString m_szExePath;
+	mpt::PathString m_szConfigDirectory;
+	mpt::PathString m_szConfigFileName;
+	mpt::PathString m_szPluginCacheFileName;
 	bool m_bPortableMode;
 
 public:
@@ -131,7 +131,7 @@ public:
 	static VOID SetAsProject(BOOL n) { m_nProject = n; }
 // -! NEW_FEATURE#0023
 
-	static LPCTSTR GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
+	static mpt::PathString GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
 	static LPMIDILIBSTRUCT GetMidiLibrary() { return glpMidiLibrary; }
@@ -144,9 +144,12 @@ public:
 	static BOOL SaveDefaultDLSBanks();
 	static BOOL RemoveDLSBank(UINT nBank);
 	static BOOL AddDLSBank(LPCSTR);
-	static bool OpenURL(const LPCSTR lpszURL);
-	static bool OpenFile(const LPCSTR file) { return OpenURL(file); };
-	static bool OpenDirectory(const LPCSTR directory) { return OpenURL(directory); };
+	static bool OpenURL(const char *url);
+	static bool OpenURL(const std::string &url);
+	static bool OpenURL(const CString &url);
+	static bool OpenURL(const mpt::PathString &lpszURL);
+	static bool OpenFile(const mpt::PathString &file) { return OpenURL(file); };
+	static bool OpenDirectory(const mpt::PathString &directory) { return OpenURL(directory); };
 
 	int GetOpenDocumentCount() const;
 	std::vector<CModDoc *>GetOpenDocuments() const;
@@ -157,7 +160,7 @@ public:
 	SoundDevicesManager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
-	std::string GetConfigFileName() const { return m_szConfigFileName; }
+	mpt::PathString GetConfigFileName() const { return m_szConfigFileName; }
 	TrackerDirectories & GetTrackerDirectories()
 	{
 		ASSERT(m_pTrackerDirectories);
@@ -181,7 +184,7 @@ public:
 	}
 
 	/// Returns path to config folder including trailing '\'.
-	LPCTSTR GetConfigPath() const { return m_szConfigDirectory; }
+	mpt::PathString GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths(bool overridePortable);
 	// Relative / absolute paths conversion
 	template <size_t nLength>
@@ -239,7 +242,7 @@ protected:
 
 
 #ifdef WIN32	// Legacy stuff
-	bool MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH] = _T(""), TCHAR sNewFileName[_MAX_PATH] = _T(""));
+	bool MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDir = mpt::PathString(), mpt::PathString sNewFileName = mpt::PathString());
 #endif // WIN32
 
 };

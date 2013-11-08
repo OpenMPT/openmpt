@@ -352,7 +352,7 @@ public:
 
 	// Paths
 
-	TCHAR m_szKbdFile[_MAX_PATH];
+	mpt::PathString m_szKbdFile;
 
 	// Chords
 	MPTChords Chords;
