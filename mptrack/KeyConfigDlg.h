@@ -103,7 +103,7 @@ protected:
 	CEdit m_eReport, m_eChordWaitTime;
 	UINT m_nKeyboardCfg;
 	int m_nCurHotKey, m_nCurCategory, m_nCurKeyChoice;
-	CString m_sFullPathName;
+	mpt::PathString m_sFullPathName;
 	CCommandSet *plocalCmdSet;
 	bool m_bForceUpdate;
 	bool m_bModified;

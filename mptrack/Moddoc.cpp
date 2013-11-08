@@ -610,9 +610,9 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 			.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS));
 		if(!dlg.Show()) return FALSE;
 
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_MODS, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_MODS, true);
 
-		strcpy(s, dlg.GetFirstFile().c_str());
+		strcpy(s, dlg.GetFirstFile().ToLocale().c_str());
 		_splitpath(s, drive, path, fname, fext);
 	} else
 	{
@@ -1671,10 +1671,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	if(!dlg.Show()) return;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	TrackerDirectories::Instance().SetDefaultDirectory(dlg.GetWorkingDirectory().c_str(), DIR_EXPORT, true);
+	TrackerDirectories::Instance().SetDefaultDirectory(dlg.GetWorkingDirectory(), DIR_EXPORT, true);
 
 	char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
-	_splitpath(dlg.GetFirstFile().c_str(), drive, dir, name, ext);
+	_splitpath(dlg.GetFirstFile().ToLocale().c_str(), drive, dir, name, ext);
 	const CString fileName = CString(drive) + CString(dir) + CString(name);
 	const CString fileExt = CString(ext);
 
@@ -1890,7 +1890,7 @@ void CModDoc::OnFileMidiConvert()
 		.ExtensionFilter("Midi Files (*.mid,*.rmi)|*.mid;*.rmi||");
 	if(!dlg.Show()) return;
 
-	CModToMidi mididlg(dlg.GetFirstFile().c_str(), &m_SndFile, pMainFrm);
+	CModToMidi mididlg(dlg.GetFirstFile().ToLocale().c_str(), &m_SndFile, pMainFrm);
 	if(mididlg.DoModal() == IDOK)
 	{
 		BeginWaitCursor();
@@ -1953,10 +1953,10 @@ void CModDoc::OnFileCompatibilitySave()
 	switch (type)
 	{
 		case MOD_TYPE_XM:
-			m_SndFile.SaveXM(dlg.GetFirstFile().c_str(), true);
+			m_SndFile.SaveXM(dlg.GetFirstFile().ToLocale().c_str(), true);
 			break;
 		case MOD_TYPE_IT:
-			m_SndFile.SaveIT(dlg.GetFirstFile().c_str(), true);
+			m_SndFile.SaveIT(dlg.GetFirstFile().ToLocale().c_str(), true);
 			break;
 	}
 }
@@ -2872,10 +2872,12 @@ void CModDoc::OnSaveTemplateModule()
 //----------------------------------
 {
 	// Create template folder if doesn't exist already.
-	const LPCTSTR pszTemplateFolder = TrackerDirectories::Instance().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);
-	if (!PathIsDirectory(pszTemplateFolder))
+	const mpt::PathString templateFolder = TrackerDirectories::Instance().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);
+	const CString templateFolderDummy = templateFolder.ToCString();
+	const LPCTSTR pszTemplateFolder = templateFolderDummy;
+	if (!PathIsDirectoryW(templateFolder.AsNative().c_str()))
 	{
-		if (!CreateDirectory(pszTemplateFolder, nullptr))
+		if (!CreateDirectoryW(templateFolder.AsNative().c_str(), nullptr))
 		{
 			CString sErrMsg;
 			AfxFormatString1(sErrMsg, IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER, pszTemplateFolder);
@@ -2899,12 +2901,12 @@ void CModDoc::OnSaveTemplateModule()
 		.DefaultExtension(m_SndFile.GetModSpecifications().fileExtension)
 		.DefaultFilename(std::string(sName))
 		.ExtensionFilter(ModTypeToFilter(m_SndFile))
-		.WorkingDirectory(pszTemplateFolder);
+		.WorkingDirectory(templateFolder);
 	if(!dlg.Show())
 		return;
 
 	const CString sOldPath = m_strPathName;
-	OnSaveDocument(dlg.GetFirstFile().c_str(), true/*template file*/);
+	OnSaveDocument(dlg.GetFirstFile().ToCString(), true/*template file*/);
 	m_strPathName = sOldPath;
 }
 

@@ -395,11 +395,6 @@ private:
 	// Directory to INI setting translation
 	static const TCHAR *m_szDirectoryToSettingsName[NUM_DIRS];
 
-	// Cache is necessary because users might expect long lifetimes of pointers returned from Get*Directory.
-	// Cache can be removed when all users are converted to PathString.
-	MPT_DEPRECATED_PATH TCHAR m_szDefaultDirectoryCache[NUM_DIRS][MAX_PATH];
-	MPT_DEPRECATED_PATH TCHAR m_szWorkingDirectoryCache[NUM_DIRS][MAX_PATH];
-
 public:
 
 	TrackerDirectories();
@@ -407,19 +402,14 @@ public:
 
 	// access to default + working directories
 	void SetWorkingDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename = false);
-	mpt::PathString GetWorkingDirectoryAsPathString(Directory dir) const;
+	mpt::PathString GetWorkingDirectory(Directory dir) const;
 	void SetDefaultDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename = false);
-	mpt::PathString GetDefaultDirectoryAsPathString(Directory dir) const;
-
-	void SetWorkingDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	void SetDefaultDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	MPT_DEPRECATED_PATH LPCTSTR GetWorkingDirectory(Directory dir) const;
-	MPT_DEPRECATED_PATH LPCTSTR GetDefaultDirectory(Directory dir) const;
+	mpt::PathString GetDefaultDirectory(Directory dir) const;
 
 	static TrackerDirectories &Instance();
 
 protected:
 
-	void SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&pDirs)[NUM_DIRS], TCHAR (&pDirsCache)[NUM_DIRS][MAX_PATH], bool bStripFilename);
+	void SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&pDirs)[NUM_DIRS], bool bStripFilename);
 
 };

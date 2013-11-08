@@ -1439,7 +1439,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 		{
 			TCHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
 			_tsplitpath(lpszFileName, nullptr, nullptr, szName, szExt);
-			TrackerDirectories::Instance().SetWorkingDirectory(lpszFileName, DIR_INSTRUMENTS, true);
+			TrackerDirectories::Instance().SetWorkingDirectory(mpt::PathString::FromCString(lpszFileName), DIR_INSTRUMENTS, true);
 	
 			if (!pIns->name[0] && m_sndFile.GetModSpecifications().instrNameLengthMax > 0)
 			{
@@ -1693,7 +1693,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show()) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_INSTRUMENTS, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS, true);
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
@@ -1711,7 +1711,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 				OnInstrumentNew();
 		}
 
-		if(!OpenInstrument(files[counter].c_str()))
+		if(!OpenInstrument(files[counter].ToCString()))
 			ErrorBox(IDS_ERR_FILEOPEN, this);
 	}
 
@@ -1753,16 +1753,16 @@ void CCtrlInstruments::OnInstrumentSave()
 	
 	BeginWaitCursor();
 
-	_splitpath(dlg.GetFirstFile().c_str(), drive, path, NULL, ext);
+	_splitpath(dlg.GetFirstFile().ToLocale().c_str(), drive, path, NULL, ext);
 	bool ok = false;
 	if (!lstrcmpi(ext, ".iti"))
-		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile().c_str(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
+		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile().ToLocale().c_str(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
 	else
-		ok = m_sndFile.SaveXIInstrument(m_nInstrument, dlg.GetFirstFile().c_str());
+		ok = m_sndFile.SaveXIInstrument(m_nInstrument, dlg.GetFirstFile().ToLocale().c_str());
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = dlg.GetFirstFile();
+	m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = dlg.GetFirstFile().ToLocale();
 	SetInstrumentModified(false);
 // -! NEW_FEATURE#0023
 
@@ -1772,7 +1772,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		strcpy(szFileName, drive);
 		strcat(szFileName, path);
 		
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_INSTRUMENTS);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

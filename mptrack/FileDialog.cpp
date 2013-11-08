@@ -27,14 +27,14 @@ bool FileDialog::Show()
 	extFilter.push_back(0);
 
 	// Prepare filename buffer.
-	std::vector<TCHAR> filenameBuffer(uint16_max, 0);
+	std::vector<WCHAR> filenameBuffer(uint16_max, 0);
 	filenameBuffer.insert(filenameBuffer.begin(), defaultFilename.begin(), defaultFilename.end());
 	filenameBuffer.push_back(0);
 
 	// First, set up the dialog...
-	OPENFILENAME ofn;
+	OPENFILENAMEW ofn;
 	MemsetZero(ofn);
-	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.lStructSize = sizeof(OPENFILENAMEW);
 	ofn.hwndOwner = theApp.m_pMainWnd->GetSafeHwnd();
 	ofn.hInstance = theApp.m_hInstance;
 	ofn.lpstrFilter = extFilter.c_str();
@@ -45,7 +45,7 @@ bool FileDialog::Show()
 	ofn.nMaxFile = filenameBuffer.size();
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = workingDirectory.empty() ? NULL : workingDirectory.c_str();
+	ofn.lpstrInitialDir = workingDirectory.empty() ? NULL : workingDirectory.NativeRef().c_str();
 	ofn.lpstrTitle = NULL;
 	ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0) | (load ? 0 : (OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN));
 	ofn.nFileOffset = 0;
@@ -60,7 +60,7 @@ bool FileDialog::Show()
 
 	// Do it!
 	CMainFrame::GetInputHandler()->Bypass(true);
-	BOOL result = load ? GetOpenFileName(&ofn) : GetSaveFileName(&ofn);
+	BOOL result = load ? GetOpenFileNameW(&ofn) : GetSaveFileNameW(&ofn);
 	CMainFrame::GetInputHandler()->Bypass(false);
 
 	if(result == FALSE)
@@ -76,21 +76,21 @@ bool FileDialog::Show()
 	{
 		// Multiple files might have been selected
 		int pos = ofn.nFileOffset;
-		const TCHAR *currentFile = ofn.lpstrFile + pos;
-		TCHAR filePath[MAX_PATH + 1];
-		lstrcpy(filePath, ofn.lpstrFile);
-		lstrcat(filePath, "\\");
+		const WCHAR *currentFile = ofn.lpstrFile + pos;
+		WCHAR filePath[MAX_PATH + 1];
+		lstrcpyW(filePath, ofn.lpstrFile);
+		lstrcatW(filePath, L"\\");
 
 		while(currentFile[0] != 0)
 		{
-			lstrcpy(&filePath[ofn.nFileOffset], currentFile);
-			currentFile += lstrlen(currentFile) + 1;
-			filenames.push_back(filePath);
+			lstrcpyW(&filePath[ofn.nFileOffset], currentFile);
+			currentFile += lstrlenW(currentFile) + 1;
+			filenames.push_back(mpt::PathString::FromNative(filePath));
 		}
 	} else
 	{
 		// Only one file
-		filenames.push_back(ofn.lpstrFile);
+		filenames.push_back(mpt::PathString::FromNative(ofn.lpstrFile));
 	}
 
 	if(filenames.empty())
@@ -98,8 +98,8 @@ bool FileDialog::Show()
 		return false;
 	}
 
-	workingDirectory = filenames.front().substr(0, ofn.nFileOffset);
-	defaultExtension = filenames.front().substr(ofn.nFileExtension);
+	workingDirectory = mpt::PathString::FromNative(filenames.front().AsNative().substr(0, ofn.nFileOffset));
+	extension = mpt::PathString::FromNative(filenames.front().AsNative().substr(ofn.nFileExtension));
 
 	return true;
 }

@@ -16,14 +16,15 @@
 class FileDialog
 {
 public:
-	typedef std::vector<std::string> PathList;
+	typedef std::vector<mpt::PathString> PathList;
 
 protected:
-	std::string defaultExtension;
-	std::string defaultFilename;
-	std::string extFilter;
-	std::string workingDirectory;
-	std::string lastPreviewFile;
+	std::wstring defaultExtension;
+	std::wstring defaultFilename;
+	std::wstring extFilter;
+	mpt::PathString workingDirectory;
+	mpt::PathString lastPreviewFile;
+	mpt::PathString extension;
 	PathList filenames;
 	int *filterIndex;
 	bool load;
@@ -34,13 +35,19 @@ protected:
 
 public:
 	// Default extension to use if none is specified.
-	FileDialog &DefaultExtension(const std::string &ext) { defaultExtension = ext; return *this; }
+	FileDialog &DefaultExtension(const mpt::PathString &ext) { defaultExtension = ext.ToWide(); return *this; }
+	FileDialog &DefaultExtension(const std::wstring &ext) { defaultExtension = ext; return *this; }
+	FileDialog &DefaultExtension(const std::string &ext) { defaultExtension = mpt::String::Decode(ext, mpt::CharsetLocale); return *this; }
 	// Default suggested filename.
-	FileDialog &DefaultFilename(const std::string &name) { defaultFilename = name; return *this; }
+	FileDialog &DefaultFilename(const mpt::PathString &name) { defaultFilename = name.ToWide(); return *this; }
+	FileDialog &DefaultFilename(const std::wstring &name) { defaultFilename = name; return *this; }
+	FileDialog &DefaultFilename(const std::string &name) { defaultFilename = mpt::String::Decode(name, mpt::CharsetLocale); return *this; }
 	// List of possible extensions. Format: "description|extensions|...|description|extensions||"
-	FileDialog &ExtensionFilter(const std::string &filter) { extFilter = filter; return *this; }
+	FileDialog &ExtensionFilter(const mpt::PathString &filter) { extFilter = filter.ToWide(); return *this; }
+	FileDialog &ExtensionFilter(const std::wstring &filter) { extFilter = filter; return *this; }
+	FileDialog &ExtensionFilter(const std::string &filter) { extFilter = mpt::String::Decode(filter, mpt::CharsetLocale); return *this; }
 	// Default directory of the dialog.
-	FileDialog &WorkingDirectory(const std::string &dir) { workingDirectory = dir; return *this; }
+	FileDialog &WorkingDirectory(const mpt::PathString &dir) { workingDirectory = dir; return *this; }
 	// Pointer to a variable holding the index of the last extension filter to use. Holds the selected filter after the dialog has been closed.
 	FileDialog &FilterIndex(int *index) { filterIndex = index; return *this; }
 
@@ -48,13 +55,13 @@ public:
 	bool Show();
 
 	// Get some selected file. Mostly useful when only one selected file is possible anyway.
-	const std::string &GetFirstFile() const { return filenames.front(); }
+	const mpt::PathString &GetFirstFile() const { return filenames.front(); }
 	// Gets all selected files.
 	const PathList &GetFilenames() const { return filenames; }
 	// Gets directory in which the selected files are placed.
-	const std::string &GetWorkingDirectory() const { return workingDirectory; }
+	const mpt::PathString &GetWorkingDirectory() const { return workingDirectory; }
 	// Gets the extension of the first selected file, without dot.
-	const std::string &GetExtension() const { return defaultExtension; }
+	const mpt::PathString &GetExtension() const { return extension; }
 
 protected:
 	static UINT_PTR CALLBACK OFNHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam);

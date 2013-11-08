@@ -491,13 +491,13 @@ void COptionsColors::OnLoadColorScheme()
 	FileDialog dlg = OpenFileDialog()
 		.DefaultExtension("mptcolor")
 		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
-		.WorkingDirectory(theApp.GetConfigPath().ToLocale());
+		.WorkingDirectory(theApp.GetConfigPath());
 	if(!dlg.Show()) return;
 
 	// Ensure that all colours are reset (for outdated colour schemes)
 	OnPresetMPT();
 	{
-		IniFileSettingsContainer file(mpt::PathString::FromLocale(dlg.GetFirstFile()));
+		IniFileSettingsContainer file(dlg.GetFirstFile());
 		for(int i = 0; i < MAX_MODCOLORS; i++)
 		{
 			TCHAR sKeyName[16];
@@ -514,11 +514,11 @@ void COptionsColors::OnSaveColorScheme()
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("mptcolor")
 		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
-		.WorkingDirectory(theApp.GetConfigPath().ToLocale());
+		.WorkingDirectory(theApp.GetConfigPath());
 	if(!dlg.Show()) return;
 
 	{
-		IniFileSettingsContainer file(mpt::PathString::FromLocale(dlg.GetFirstFile()));
+		IniFileSettingsContainer file(dlg.GetFirstFile());
 		for(int i = 0; i < MAX_MODCOLORS; i++)
 		{
 			TCHAR sKeyName[16];
@@ -607,11 +607,11 @@ BOOL COptionsGeneral::OnInitDialog()
 	m_CheckList.SetCurSel(0);
 	OnOptionSelChanged();
 
-	SetDlgItemText(IDC_OPTIONS_DIR_MODS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_MODS));
-	SetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES));
-	SetDlgItemText(IDC_OPTIONS_DIR_INSTS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS));
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS));
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINPRESETS));
+	SetDlgItemText(IDC_OPTIONS_DIR_MODS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_MODS).ToCString());
+	SetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES).ToCString());
+	SetDlgItemText(IDC_OPTIONS_DIR_INSTS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS).ToCString());
+	SetDlgItemText(IDC_OPTIONS_DIR_VSTS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS).ToCString());
+	SetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINPRESETS).ToCString());
 
 	return TRUE;
 }
@@ -640,7 +640,13 @@ void COptionsGeneral::OnOK()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
-		pMainFrm->SetupDirectories(szModDir, szSmpDir, szInsDir, szVstDir, szPresetDir);
+		pMainFrm->SetupDirectories(
+			mpt::PathString::FromCString(szModDir),
+			mpt::PathString::FromCString(szSmpDir),
+			mpt::PathString::FromCString(szInsDir),
+			mpt::PathString::FromCString(szVstDir),
+			mpt::PathString::FromCString(szPresetDir)
+			);
 		pMainFrm->SetupMiscOptions();
 	}
 

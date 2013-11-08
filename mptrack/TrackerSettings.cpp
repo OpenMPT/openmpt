@@ -242,7 +242,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			continue;
 		}
 		const std::string settingKey = TrackerDirectories::Instance().m_szDirectoryToSettingsName[i];
-		CString path = conf.Read<CString>("Paths", settingKey, TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i)));
+		mpt::PathString path = conf.Read<mpt::PathString>("Paths", settingKey, TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i)));
 		path = theApp.RelativePathToAbsolute(path);
 		TrackerDirectories::Instance().SetDefaultDirectory(path, static_cast<Directory>(i), false);
 	}
@@ -438,7 +438,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
 		TrackerDirectories::Instance().m_szWorkingDirectory[i] = TrackerDirectories::Instance().m_szDefaultDirectory[i];
-		mpt::String::Copy(TrackerDirectories::Instance().m_szWorkingDirectoryCache[i], TrackerDirectories::Instance().m_szDefaultDirectoryCache[i]);
 	}
 	if(!TrackerDirectories::Instance().m_szDefaultDirectory[DIR_MODS].empty())
 	{
@@ -654,12 +653,12 @@ void TrackerSettings::SaveSettings()
 		{
 			continue;
 		}
-		CString path = TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i));
+		mpt::PathString path = TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i));
 		if(theApp.IsPortableMode())
 		{
 			path = theApp.AbsolutePathToRelative(path);
 		}
-		conf.Write<CString>("Paths", TrackerDirectories::Instance().m_szDirectoryToSettingsName[i], path);
+		conf.Write<mpt::PathString>("Paths", TrackerDirectories::Instance().m_szDirectoryToSettingsName[i], path);
 	}
 	// Obsolete, since we always write to Keybindings.mkb now.
 	// Older versions of OpenMPT 1.18+ will look for this file if this entry is missing, so removing this entry after having read it is kind of backwards compatible.
@@ -784,8 +783,8 @@ std::bitset<128> StringToIgnoredCCs(const std::string &in)
 
 
 // retrieve / set default directory from given string and store it our setup variables
-void TrackerDirectories::SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&directories)[NUM_DIRS], TCHAR (&pDirsCache)[NUM_DIRS][MAX_PATH], bool bStripFilename)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void TrackerDirectories::SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&directories)[NUM_DIRS], bool bStripFilename)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString path;
 
@@ -801,7 +800,6 @@ void TrackerDirectories::SetDirectory(const mpt::PathString &szFilenameFrom, Dir
 	mpt::PathString szOldDir = directories[dir]; // for comparison
 
 	directories[dir] = path;
-	_tcscpy(pDirsCache[dir], path.ToCString());
 
 	// When updating default directory, also update the working directory.
 	if(!path.empty() && directories == m_szDefaultDirectory)
@@ -814,50 +812,28 @@ void TrackerDirectories::SetDirectory(const mpt::PathString &szFilenameFrom, Dir
 void TrackerDirectories::SetDefaultDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename)
 //---------------------------------------------------------------------------------------------------------------------
 {
-	SetDirectory(szFilenameFrom, dir, m_szDefaultDirectory, m_szDefaultDirectoryCache, bStripFilename);
+	SetDirectory(szFilenameFrom, dir, m_szDefaultDirectory, bStripFilename);
 }
 
 
 void TrackerDirectories::SetWorkingDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename)
 //---------------------------------------------------------------------------------------------------------------------
 {
-	SetDirectory(szFilenameFrom, dir, m_szWorkingDirectory, m_szWorkingDirectoryCache, bStripFilename);
+	SetDirectory(szFilenameFrom, dir, m_szWorkingDirectory, bStripFilename);
 }
 
 
-mpt::PathString TrackerDirectories::GetDefaultDirectoryAsPathString(Directory dir) const
-//--------------------------------------------------------------------------------------
+mpt::PathString TrackerDirectories::GetDefaultDirectory(Directory dir) const
+//--------------------------------------------------------------------------
 {
 	return m_szDefaultDirectory[dir];
 }
 
 
-mpt::PathString TrackerDirectories::GetWorkingDirectoryAsPathString(Directory dir) const
-//--------------------------------------------------------------------------------------
+mpt::PathString TrackerDirectories::GetWorkingDirectory(Directory dir) const
+//--------------------------------------------------------------------------
 {
 	return m_szWorkingDirectory[dir];
-}
-
-
-void TrackerDirectories::SetDefaultDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//---------------------------------------------------------------------------------------------------------------------
-{
-	SetDefaultDirectory(mpt::PathString::FromLocale(szFilenameFrom), dir, bStripFilename);
-}
-void TrackerDirectories::SetWorkingDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//---------------------------------------------------------------------------------------------------------------------
-{
-	SetWorkingDirectory(mpt::PathString::FromLocale(szFilenameFrom), dir, bStripFilename);
-}
-LPCTSTR TrackerDirectories::GetDefaultDirectory(Directory dir) const
-//------------------------------------------------------------------
-{
-	return m_szDefaultDirectoryCache[dir];
-}
-LPCTSTR TrackerDirectories::GetWorkingDirectory(Directory dir) const
-//------------------------------------------------------------------
-{
-	return m_szWorkingDirectoryCache[dir];
 }
 
 
@@ -866,8 +842,7 @@ LPCTSTR TrackerDirectories::GetWorkingDirectory(Directory dir) const
 TrackerDirectories::TrackerDirectories()
 //--------------------------------------
 {
-	MemsetZero(m_szDefaultDirectoryCache);
-	MemsetZero(m_szWorkingDirectoryCache);
+	return;
 }
 
 

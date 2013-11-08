@@ -750,11 +750,11 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	// Create tunings dir
 	mpt::PathString sTuningPath = m_szConfigDirectory + mpt::PathString::FromUTF8("tunings\\");
-	TrackerDirectories::Instance().SetDefaultDirectory(sTuningPath.ToLocale().c_str(), DIR_TUNING);
+	TrackerDirectories::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
 
-	if(PathIsDirectoryW(mpt::PathString::FromLocale(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING)).AsNative().c_str()) == 0)
+	if(PathIsDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str()) == 0)
 	{
-		CreateDirectoryW(mpt::PathString::FromLocale(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING)).AsNative().c_str(), 0);
+		CreateDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str(), 0);
 	}
 
 	if(!bIsAppDir)
@@ -793,7 +793,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	mpt::PathString szTemplatePath;
 	szTemplatePath = m_szConfigDirectory;
 	szTemplatePath += mpt::PathString::FromUTF8("TemplateModules\\");
-	TrackerDirectories::Instance().SetDefaultDirectory(szTemplatePath.ToLocale().c_str(), DIR_TEMPLATE_FILES_USER);
+	TrackerDirectories::Instance().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
 
 	//Force use of custom ini file rather than windowsDir\executableName.ini
 	if(m_pszProfileName)
@@ -1144,12 +1144,12 @@ void CTrackApp::OnFileOpen()
 		.FilterIndex(&nFilterIndex);
 	if(!dlg.Show()) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_MODS, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_MODS, true);
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-		OpenDocumentFile(files[counter].c_str());
+		OpenDocumentFile(files[counter].ToCString());
 	}
 }
 

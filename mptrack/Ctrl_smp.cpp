@@ -819,7 +819,7 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	if (bOk)
 	{
 		ModSample &sample = m_sndFile.GetSample(m_nSample);
-		TrackerDirectories::Instance().SetWorkingDirectory(lpszFileName, DIR_SAMPLES, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(mpt::PathString::FromLocale(lpszFileName), DIR_SAMPLES, true);
 		if (!sample.filename[0])
 		{
 			CHAR szName[_MAX_PATH], szExt[_MAX_EXT];
@@ -965,7 +965,7 @@ void CCtrlSamples::OnSampleOpen()
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show()) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_SAMPLES, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES, true);
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
@@ -976,7 +976,7 @@ void CCtrlSamples::OnSampleOpen()
 			OnSampleNew();
 		}
 
-		if(!OpenSample(files[counter].c_str()))
+		if(!OpenSample(files[counter].ToCString()))
 			ErrorBox(IDS_ERR_FILEOPEN, this);
 	}
 	SwitchToView();
@@ -1048,11 +1048,11 @@ void CCtrlSamples::OnSampleSave()
 	BeginWaitCursor();
 
 	TCHAR ext[_MAX_EXT];
-	_splitpath(dlg.GetFirstFile().c_str(), NULL, NULL, NULL, ext);
+	mpt::String::Copy(ext, dlg.GetFirstFile().GetFileExt().ToCString().GetString());
 
 	bool bOk = false;
 	SAMPLEINDEX iMinSmp = m_nSample, iMaxSmp = m_nSample;
-	CString sFilename = dlg.GetFirstFile().c_str(), sNumberFormat;
+	CString sFilename = dlg.GetFirstFile().ToCString(), sNumberFormat;
 	if(doBatchSave)
 	{
 		iMinSmp = 1;
@@ -1075,7 +1075,7 @@ void CCtrlSamples::OnSampleSave()
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 
-				sFilename = dlg.GetFirstFile().c_str();
+				sFilename = dlg.GetFirstFile().ToCString();
 				sFilename.Replace("%sample_number%", sSampleNumber);
 				sFilename.Replace("%sample_filename%", sSampleFilename);
 				sFilename.Replace("%sample_name%", sSampleName);
@@ -1095,7 +1095,7 @@ void CCtrlSamples::OnSampleSave()
 		ErrorBox(IDS_ERR_SAVESMP, this);
 	} else
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_SAMPLES, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES, true);
 	}
 	SwitchToView();
 }

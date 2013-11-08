@@ -1598,8 +1598,8 @@ BOOL CMainFrame::SetupPlayer()
 }
 
 
-BOOL CMainFrame::SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir)
-//---------------------------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::SetupDirectories(const mpt::PathString &szModDir, const mpt::PathString &szSampleDir, const mpt::PathString &szInstrDir, const mpt::PathString &szVstDir, const mpt::PathString &szPresetDir)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	// will also set working directory
 	TrackerDirectories::Instance().SetDefaultDirectory(szModDir, DIR_MODS);
@@ -1857,7 +1857,7 @@ void CMainFrame::OnAddDlsBank()
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-		CTrackApp::AddDLSBank(files[counter].c_str());
+		CTrackApp::AddDLSBank(files[counter].ToLocale().c_str());
 	}
 	m_wndTree.RefreshDlsBanks();
 	EndWaitCursor();
@@ -1876,7 +1876,7 @@ void CMainFrame::OnImportMidiLib()
 	if(!dlg.Show()) return;
 
 	BeginWaitCursor();
-	CTrackApp::ImportMidiConfig(dlg.GetFirstFile().c_str());
+	CTrackApp::ImportMidiConfig(dlg.GetFirstFile().ToLocale().c_str());
 	m_wndTree.RefreshMidiLibrary();
 	EndWaitCursor();
 }
