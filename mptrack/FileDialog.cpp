@@ -47,7 +47,7 @@ bool FileDialog::Show()
 	ofn.nMaxFileTitle = 0;
 	ofn.lpstrInitialDir = workingDirectory.empty() ? NULL : workingDirectory.c_str();
 	ofn.lpstrTitle = NULL;
-	ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0) | (load ? 0 : OFN_NOREADONLYRETURN);
+	ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0) | (load ? 0 : (OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN));
 	ofn.nFileOffset = 0;
 	ofn.nFileExtension = 0;
 	ofn.lpstrDefExt = defaultExtension.empty() ? NULL : defaultExtension.c_str();

@@ -1651,7 +1651,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	if ((!pMainFrm) || (!m_SndFile.GetType()) || encFactories.empty()) return;
 
-	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1, &m_SndFile, encFactories);
+	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order.GetLengthTailTrimmed() - 1, m_SndFile, encFactories);
 	if (wsdlg.DoModal() != IDOK) return;
 
 	EncoderFactoryBase *encFactory = wsdlg.m_Settings.GetEncoderFactory();
@@ -1796,26 +1796,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		thisName += fileExt;
 
 		// Render song (or current channel, or current sample/instrument)
-		m_SndFile.InitializeVisitedRows();
-		m_SndFile.SetCurrentPos(0);
-		m_SndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
-		if(wsdlg.m_bSelectPlay)
-		{
-			m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
-			m_SndFile.GetLength(eAdjust, GetLengthTarget(wsdlg.m_nMinOrder, 0));	// adjust playback variables / visited rows vector
-			m_SndFile.m_nCurrentOrder = wsdlg.m_nMinOrder;
-			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
-			m_SndFile.SetRepeatCount(0);
-		} else
-		{
-			m_SndFile.SetRepeatCount(std::max(0, wsdlg.loopCount - 1));
-		}
-
-		CDoWaveConvert dwcdlg(&m_SndFile, thisName, wsdlg.m_Settings, pMainFrm);
+		CDoWaveConvert dwcdlg(m_SndFile, thisName, wsdlg.m_Settings, pMainFrm);
 		dwcdlg.m_dwFileLimit = static_cast<DWORD>(wsdlg.m_dwFileLimit);
 		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
-		dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
 
 		if(dwcdlg.DoModal() != IDOK) break;
 	}
