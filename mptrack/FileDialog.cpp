@@ -128,7 +128,7 @@ bool BrowseForFolder::Show()
 	BROWSEINFOW bi;
 	MemsetZero(bi);
 	bi.hwndOwner = theApp.m_pMainWnd->GetSafeHwnd();
-	bi.lpszTitle = caption.c_str();
+	bi.lpszTitle = caption.empty() ? NULL : caption.c_str();
 	bi.pszDisplayName = path;
 	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
 	bi.lpfn = BrowseCallbackProc;
