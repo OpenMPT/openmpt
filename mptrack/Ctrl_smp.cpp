@@ -819,7 +819,7 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	if (bOk)
 	{
 		ModSample &sample = m_sndFile.GetSample(m_nSample);
-		TrackerSettings::Instance().SetWorkingDirectory(lpszFileName, DIR_SAMPLES, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(lpszFileName, DIR_SAMPLES, true);
 		if (!sample.filename[0])
 		{
 			CHAR szName[_MAX_PATH], szExt[_MAX_EXT];
@@ -961,11 +961,11 @@ void CCtrlSamples::OnSampleOpen()
 			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.8sv;*.8svx;*.svx|"
 			"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
 			"All Files (*.*)|*.*||")
-		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_SAMPLES))
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES))
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_SAMPLES, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_SAMPLES, true);
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
@@ -1041,7 +1041,7 @@ void CCtrlSamples::OnSampleSave()
 		.ExtensionFilter("Wave File (*.wav)|*.wav|"
 			"FLAC File (*.flac)|*.flac|"
 			"RAW Audio (*.raw)|*.raw||")
-			.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_SAMPLES))
+			.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES))
 			.FilterIndex(&filter);
 	if(!dlg.Show()) return;
 
@@ -1095,7 +1095,7 @@ void CCtrlSamples::OnSampleSave()
 		ErrorBox(IDS_ERR_SAVESMP, this);
 	} else
 	{
-		TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_SAMPLES, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_SAMPLES, true);
 	}
 	SwitchToView();
 }

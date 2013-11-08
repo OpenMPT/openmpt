@@ -242,9 +242,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			continue;
 		}
 		const std::string settingKey = TrackerDirectories::Instance().m_szDirectoryToSettingsName[i];
-		CString path = conf.Read<CString>("Paths", settingKey, GetDefaultDirectory(static_cast<Directory>(i)));
+		CString path = conf.Read<CString>("Paths", settingKey, TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i)));
 		path = theApp.RelativePathToAbsolute(path);
-		SetDefaultDirectory(path, static_cast<Directory>(i), false);
+		TrackerDirectories::Instance().SetDefaultDirectory(path, static_cast<Directory>(i), false);
 	}
 	m_szKbdFile = conf.Read<mpt::PathString>("Paths", "Key_Config_File", mpt::PathString());
 
@@ -653,7 +653,7 @@ void TrackerSettings::SaveSettings()
 		{
 			continue;
 		}
-		CString path = GetDefaultDirectory(static_cast<Directory>(i));
+		CString path = TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i));
 		if(theApp.IsPortableMode())
 		{
 			path = theApp.AbsolutePathToRelative(path);
@@ -780,33 +780,6 @@ std::bitset<128> StringToIgnoredCCs(const std::string &in)
 	return midiIgnoreCCs;
 }
 
-
-void TrackerSettings::SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//---------------------------------------------------------------------------------------------------------
-{
-	TrackerDirectories::Instance().SetDefaultDirectory(szFilenameFrom, dir, bStripFilename);
-}
-
-
-void TrackerSettings::SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//---------------------------------------------------------------------------------------------------------
-{
-	TrackerDirectories::Instance().SetWorkingDirectory(szFilenameFrom, dir, bStripFilename);
-}
-
-
-LPCTSTR TrackerSettings::GetDefaultDirectory(Directory dir) const
-//---------------------------------------------------------------
-{
-	return TrackerDirectories::Instance().GetDefaultDirectory(dir);
-}
-
-
-LPCTSTR TrackerSettings::GetWorkingDirectory(Directory dir) const
-//---------------------------------------------------------------
-{
-	return TrackerDirectories::Instance().GetWorkingDirectory(dir);
-}
 
 
 // retrieve / set default directory from given string and store it our setup variables

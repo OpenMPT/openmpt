@@ -164,7 +164,7 @@ void CModTree::Init()
 		m_dwStatus |= TREESTATUS_SINGLEEXPAND;
 	}
 	ModifyStyle(dwRemove, dwAdd);
-	strcpy(m_szInstrLibPath, TrackerSettings::Instance().GetDefaultDirectory(DIR_SAMPLES));
+	strcpy(m_szInstrLibPath, TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES));
 	SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
 	if (!IsSampleBrowser())
 	{

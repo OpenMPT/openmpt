@@ -607,11 +607,11 @@ BOOL COptionsGeneral::OnInitDialog()
 	m_CheckList.SetCurSel(0);
 	OnOptionSelChanged();
 
-	SetDlgItemText(IDC_OPTIONS_DIR_MODS,		TrackerSettings::Instance().GetDefaultDirectory(DIR_MODS));
-	SetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		TrackerSettings::Instance().GetDefaultDirectory(DIR_SAMPLES));
-	SetDlgItemText(IDC_OPTIONS_DIR_INSTS,		TrackerSettings::Instance().GetDefaultDirectory(DIR_INSTRUMENTS));
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTS,		TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS));
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINPRESETS));
+	SetDlgItemText(IDC_OPTIONS_DIR_MODS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_MODS));
+	SetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES));
+	SetDlgItemText(IDC_OPTIONS_DIR_INSTS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS));
+	SetDlgItemText(IDC_OPTIONS_DIR_VSTS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS));
+	SetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINPRESETS));
 
 	return TRUE;
 }

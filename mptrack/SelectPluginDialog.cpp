@@ -458,10 +458,10 @@ void CSelectPluginDlg::OnAddPlugin()
 		.AllowMultiSelect()
 		.DefaultExtension("dll")
 		.ExtensionFilter("VST Plugins (*.dll)|*.dll||")
-		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_PLUGINS));
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINS));
 	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_PLUGINS, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_PLUGINS, true);
 
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	bool bOk = false;

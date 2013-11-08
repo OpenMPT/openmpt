@@ -1721,7 +1721,7 @@ bool CSoundFile::LoadStaticTunings()
 	}
 
 	// Load local tunings.
-	s_pTuningsSharedLocal->SetSavefilePath(mpt::String::Format("%slocal_tunings%s", TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING), CTuningCollection::s_FileExtension));
+	s_pTuningsSharedLocal->SetSavefilePath(mpt::String::Format("%slocal_tunings%s", TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING), CTuningCollection::s_FileExtension));
 	s_pTuningsSharedLocal->Deserialize();
 
 	// Enabling adding/removing of tunings for standard collection

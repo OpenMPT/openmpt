@@ -1604,11 +1604,11 @@ BOOL CMainFrame::SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR
 //---------------------------------------------------------------------------------------------------------------------------------
 {
 	// will also set working directory
-	TrackerSettings::Instance().SetDefaultDirectory(szModDir, DIR_MODS);
-	TrackerSettings::Instance().SetDefaultDirectory(szSampleDir, DIR_SAMPLES);
-	TrackerSettings::Instance().SetDefaultDirectory(szInstrDir, DIR_INSTRUMENTS);
-	TrackerSettings::Instance().SetDefaultDirectory(szVstDir, DIR_PLUGINS);
-	TrackerSettings::Instance().SetDefaultDirectory(szPresetDir, DIR_PLUGINPRESETS);
+	TrackerDirectories::Instance().SetDefaultDirectory(szModDir, DIR_MODS);
+	TrackerDirectories::Instance().SetDefaultDirectory(szSampleDir, DIR_SAMPLES);
+	TrackerDirectories::Instance().SetDefaultDirectory(szInstrDir, DIR_INSTRUMENTS);
+	TrackerDirectories::Instance().SetDefaultDirectory(szVstDir, DIR_PLUGINS);
+	TrackerDirectories::Instance().SetDefaultDirectory(szPresetDir, DIR_PLUGINPRESETS);
 	return TRUE;
 }
 
