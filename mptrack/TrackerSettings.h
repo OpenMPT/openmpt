@@ -397,8 +397,8 @@ private:
 
 	// Cache is necessary because users might expect long lifetimes of pointers returned from Get*Directory.
 	// Cache can be removed when all users are converted to PathString.
-	MPT_DEPRECATED TCHAR m_szDefaultDirectoryCache[NUM_DIRS][MAX_PATH];
-	MPT_DEPRECATED TCHAR m_szWorkingDirectoryCache[NUM_DIRS][MAX_PATH];
+	MPT_DEPRECATED_PATH TCHAR m_szDefaultDirectoryCache[NUM_DIRS][MAX_PATH];
+	MPT_DEPRECATED_PATH TCHAR m_szWorkingDirectoryCache[NUM_DIRS][MAX_PATH];
 
 public:
 
@@ -413,8 +413,8 @@ public:
 
 	void SetWorkingDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
 	void SetDefaultDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	MPT_DEPRECATED LPCTSTR GetWorkingDirectory(Directory dir) const;
-	MPT_DEPRECATED LPCTSTR GetDefaultDirectory(Directory dir) const;
+	MPT_DEPRECATED_PATH LPCTSTR GetWorkingDirectory(Directory dir) const;
+	MPT_DEPRECATED_PATH LPCTSTR GetDefaultDirectory(Directory dir) const;
 
 	static TrackerDirectories &Instance();
 
