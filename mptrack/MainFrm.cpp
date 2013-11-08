@@ -804,17 +804,12 @@ void CMainFrame::audioCloseDevice()
 	{
 		gpSoundDevice->Close();
 	}
-
-	// reset notify buffer as timestamps revert here
-	{
-		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-		m_NotifyBuffer.clear();
-	}
 	if(m_NotifyTimer)
 	{
 		KillTimer(m_NotifyTimer);
 		m_NotifyTimer = 0;
 	}
+	ResetNotificationBuffer();
 }
 
 
@@ -968,7 +963,11 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 
 	{
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-		if(m_NotifyBuffer.write_size() == 0) return FALSE; // drop notification
+		if(m_NotifyBuffer.write_size() == 0)
+		{
+			ASSERT(0);
+			return FALSE; // drop notification
+		}
 		m_NotifyBuffer.push(notification);
 	}
 
@@ -1177,6 +1176,7 @@ void CMainFrame::StopPlayback()
 		KillTimer(m_NotifyTimer);
 		m_NotifyTimer = 0;
 	}
+	ResetNotificationBuffer();
 	audioCloseDevice();
 }
 
@@ -1191,6 +1191,7 @@ bool CMainFrame::PausePlayback()
 		KillTimer(m_NotifyTimer);
 		m_NotifyTimer = 0;
 	}
+	ResetNotificationBuffer();
 	return true;
 }
 
@@ -1232,10 +1233,7 @@ void CMainFrame::UnsetPlaybackSoundFile()
 	}
 	m_pSndFile = nullptr;
 	m_wndToolBar.SetCurrentSong(nullptr);
-	{
-		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-		m_NotifyBuffer.clear();
-	}
+	ResetNotificationBuffer();
 }
 
 
