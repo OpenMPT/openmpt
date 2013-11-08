@@ -192,6 +192,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Sample Editor
 	, m_SampleUndoMaxBufferMB(conf, "Sample Editor", "UndoBufferSize", GetDefaultUndoBufferSize() >> 20)
 	, m_MayNormalizeSamplesOnLoad(conf, "Sample Editor", "MayNormalizeSamplesOnLoad", true)
+	// Export
+	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
 {
 	// Effects
 #ifndef NO_DSP
