@@ -180,7 +180,8 @@ std::string Convert(const std::string &src, Charset from, Charset to)
 
 #if defined(MODPLUG_TRACKER)
 
-namespace mpt {
+namespace mpt
+{
 
 void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const
 //------------------------------------------------------------------------------------------------------
@@ -224,3 +225,99 @@ PathString PathString::GetFileExt() const
 } // namespace mpt
 
 #endif
+
+
+#if defined(MODPLUG_TRACKER)
+
+static inline char SanitizeFilenameChar(char c)
+//---------------------------------------------
+{
+	if(	c == '\\' ||
+		c == '\"' ||
+		c == '/'  ||
+		c == ':'  ||
+		c == '?'  ||
+		c == '<'  ||
+		c == '>'  ||
+		c == '*')
+	{
+		c = '_';
+	}
+	return c;
+}
+
+static inline wchar_t SanitizeFilenameChar(wchar_t c)
+//---------------------------------------------------
+{
+	if(	c == L'\\' ||
+		c == L'\"' ||
+		c == L'/'  ||
+		c == L':'  ||
+		c == L'?'  ||
+		c == L'<'  ||
+		c == L'>'  ||
+		c == L'*')
+	{
+		c = L'_';
+	}
+	return c;
+}
+
+void SanitizeFilename(mpt::PathString &filename)
+//-----------------------------------------------
+{
+	mpt::RawPathString tmp = filename.AsNative();
+	for(mpt::RawPathString::iterator it = tmp.begin(); it != tmp.end(); ++it)
+	{
+		*it = SanitizeFilenameChar(*it);
+	}
+	filename = mpt::PathString::FromNative(tmp);
+}
+
+void SanitizeFilename(char *beg, char *end)
+//-----------------------------------------
+{
+	for(char *it = beg; it != end; ++it)
+	{
+		*it = SanitizeFilenameChar(*it);
+	}
+}
+
+void SanitizeFilename(wchar_t *beg, wchar_t *end)
+//-----------------------------------------------
+{
+	for(wchar_t *it = beg; it != end; ++it)
+	{
+		*it = SanitizeFilenameChar(*it);
+	}
+}
+
+void SanitizeFilename(std::string &str)
+//-------------------------------------
+{
+	for(size_t i = 0; i < str.length(); i++)
+	{
+		str[i] = SanitizeFilenameChar(str[i]);
+	}
+}
+
+void SanitizeFilename(std::wstring &str)
+//--------------------------------------
+{
+	for(size_t i = 0; i < str.length(); i++)
+	{
+		str[i] = SanitizeFilenameChar(str[i]);
+	}
+}
+
+#if defined(_MFC_VER)
+void SanitizeFilename(CString &str)
+//---------------------------------
+{
+	std::basic_string<TCHAR> tmp = str;
+	SanitizeFilename(tmp);
+	str = tmp.c_str();
+}
+#endif
+
+#endif // MODPLUG_TRACKER
