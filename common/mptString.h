@@ -229,7 +229,7 @@ public:
 	PathString GetFileName() const;
 	PathString GetFileExt() const;
 
-#endif
+#endif // MODPLUG_TRACKER
 
 public:
 
@@ -282,3 +282,35 @@ public:
 
 } // namespace mpt
 
+#if defined(MODPLUG_TRACKER)
+
+// Sanitize a filename (remove special chars)
+void SanitizeFilename(mpt::PathString &filename);
+
+MPT_DEPRECATED void SanitizeFilename(char *beg, char *end);
+MPT_DEPRECATED void SanitizeFilename(wchar_t *beg, wchar_t *end);
+
+MPT_DEPRECATED void SanitizeFilename(std::string &str);
+MPT_DEPRECATED void SanitizeFilename(std::wstring &str);
+
+template <std::size_t size>
+MPT_DEPRECATED void SanitizeFilename(char (&buffer)[size])
+//--------------------------------------------------------
+{
+	STATIC_ASSERT(size > 0);
+	SanitizeFilename(buffer, buffer + size);
+}
+
+template <std::size_t size>
+MPT_DEPRECATED void SanitizeFilename(wchar_t (&buffer)[size])
+//-----------------------------------------------------------
+{
+	STATIC_ASSERT(size > 0);
+	SanitizeFilename(buffer, buffer + size);
+}
+
+#if defined(_MFC_VER)
+MPT_DEPRECATED void SanitizeFilename(CString &str);
+#endif
+
+#endif // MODPLUG_TRACKER
