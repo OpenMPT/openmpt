@@ -365,12 +365,6 @@ public:
 
 	static void GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS]);
 
-	// access to default + working directories
-	void SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	LPCTSTR GetWorkingDirectory(Directory dir) const;
-	void SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	LPCTSTR GetDefaultDirectory(Directory dir) const;
-
 	std::vector<uint32> GetSampleRates();
 
 	static MPTChords &GetChords() { return Instance().Chords; }

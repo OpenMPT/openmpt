@@ -1439,7 +1439,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 		{
 			TCHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
 			_tsplitpath(lpszFileName, nullptr, nullptr, szName, szExt);
-			TrackerSettings::Instance().SetWorkingDirectory(lpszFileName, DIR_INSTRUMENTS, true);
+			TrackerDirectories::Instance().SetWorkingDirectory(lpszFileName, DIR_INSTRUMENTS, true);
 	
 			if (!pIns->name[0] && m_sndFile.GetModSpecifications().instrNameLengthMax > 0)
 			{
@@ -1689,11 +1689,11 @@ void CCtrlInstruments::OnInstrumentOpen()
 			"GF1 Patches (*.pat)|*.pat|"
 			"Impulse Tracker Instruments (*.iti)|*.iti|"
 			"All Files (*.*)|*.*||")
-		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_INSTRUMENTS, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_INSTRUMENTS, true);
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
@@ -1747,7 +1747,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		: "Impulse Tracker Instruments (*.iti)|*.iti|"
 		"Compressed Impulse Tracker Instruments (*.iti)|*.iti|"
 		"FastTracker II Instruments (*.xi)|*.xi||")
-		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
 		.FilterIndex(&index);
 	if(!dlg.Show()) return;
 	
@@ -1772,7 +1772,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		strcpy(szFileName, drive);
 		strcat(szFileName, path);
 		
-		TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_INSTRUMENTS);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_INSTRUMENTS);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

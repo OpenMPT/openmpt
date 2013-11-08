@@ -607,10 +607,10 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 			.DefaultExtension(defaultExtension)
 			.DefaultFilename(s)
 			.ExtensionFilter(ModTypeToFilter(m_SndFile))
-			.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS));
+			.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS));
 		if(!dlg.Show()) return FALSE;
 
-		TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_MODS, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_MODS, true);
 
 		strcpy(s, dlg.GetFirstFile().c_str());
 		_splitpath(s, drive, path, fname, fext);
@@ -1667,11 +1667,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		.DefaultExtension(extension)
 		.DefaultFilename(fname)
 		.ExtensionFilter(encFactory->GetTraits().fileDescription + " (*." + extension + ")|*." + extension + "||")
-		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_EXPORT));
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_EXPORT));
 	if(!dlg.Show()) return;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	TrackerSettings::Instance().SetDefaultDirectory(dlg.GetWorkingDirectory().c_str(), DIR_EXPORT, true);
+	TrackerDirectories::Instance().SetDefaultDirectory(dlg.GetWorkingDirectory().c_str(), DIR_EXPORT, true);
 
 	char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
 	_splitpath(dlg.GetFirstFile().c_str(), drive, dir, name, ext);
@@ -1945,7 +1945,7 @@ void CModDoc::OnFileCompatibilitySave()
 		.DefaultExtension(ext)
 		.DefaultFilename(filename)
 		.ExtensionFilter(pattern)
-		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS));
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS));
 	if(!dlg.Show()) return;
 
 	ScopedLogCapturer logcapturer(*this);
@@ -2872,7 +2872,7 @@ void CModDoc::OnSaveTemplateModule()
 //----------------------------------
 {
 	// Create template folder if doesn't exist already.
-	const LPCTSTR pszTemplateFolder = TrackerSettings::Instance().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);
+	const LPCTSTR pszTemplateFolder = TrackerDirectories::Instance().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);
 	if (!PathIsDirectory(pszTemplateFolder))
 	{
 		if (!CreateDirectory(pszTemplateFolder, nullptr))

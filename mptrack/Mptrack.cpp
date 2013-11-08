@@ -1143,11 +1143,11 @@ void CTrackApp::OnFileOpen()
 			"Wave Files (*.wav)|*.wav|"
 			"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 			"All Files (*.*)|*.*||")
-		.WorkingDirectory(TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS))
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS))
 		.FilterIndex(&nFilterIndex);
 	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_MODS, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory().c_str(), DIR_MODS, true);
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
