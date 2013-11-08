@@ -390,10 +390,15 @@ class TrackerDirectories
 private:
 
 	// Directory Arrays (default dir + last dir)
-	TCHAR m_szDefaultDirectory[NUM_DIRS][_MAX_PATH];
-	TCHAR m_szWorkingDirectory[NUM_DIRS][_MAX_PATH];
+	mpt::PathString m_szDefaultDirectory[NUM_DIRS];
+	mpt::PathString m_szWorkingDirectory[NUM_DIRS];
 	// Directory to INI setting translation
 	static const TCHAR *m_szDirectoryToSettingsName[NUM_DIRS];
+
+	// Cache is necessary because users might expect long lifetimes of pointers returned from Get*Directory.
+	// Cache can be removed when all users are converted to PathString.
+	MPT_DEPRECATED TCHAR m_szDefaultDirectoryCache[NUM_DIRS][MAX_PATH];
+	MPT_DEPRECATED TCHAR m_szWorkingDirectoryCache[NUM_DIRS][MAX_PATH];
 
 public:
 
@@ -401,15 +406,20 @@ public:
 	~TrackerDirectories();
 
 	// access to default + working directories
-	void SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	LPCTSTR GetWorkingDirectory(Directory dir) const;
-	void SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	LPCTSTR GetDefaultDirectory(Directory dir) const;
+	void SetWorkingDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename = false);
+	mpt::PathString GetWorkingDirectoryAsPathString(Directory dir) const;
+	void SetDefaultDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename = false);
+	mpt::PathString GetDefaultDirectoryAsPathString(Directory dir) const;
+
+	void SetWorkingDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
+	void SetDefaultDirectory(LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
+	MPT_DEPRECATED LPCTSTR GetWorkingDirectory(Directory dir) const;
+	MPT_DEPRECATED LPCTSTR GetDefaultDirectory(Directory dir) const;
 
 	static TrackerDirectories &Instance();
 
 protected:
 
-	void SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&pDirs)[NUM_DIRS][_MAX_PATH], bool bStripFilename);
+	void SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&pDirs)[NUM_DIRS], TCHAR (&pDirsCache)[NUM_DIRS][MAX_PATH], bool bStripFilename);
 
 };
