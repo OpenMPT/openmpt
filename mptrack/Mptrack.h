@@ -189,13 +189,16 @@ public:
 	/// Returns path to config folder including trailing '\'.
 	mpt::PathString GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths(bool overridePortable);
+
 	// Relative / absolute paths conversion
+	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path);
+	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path);
 	template <size_t nLength>
-	void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
-	CString AbsolutePathToRelative(const CString &path);
+	MPT_DEPRECATED void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
+	MPT_DEPRECATED CString AbsolutePathToRelative(const CString &path);
 	template <size_t nLength>
-	void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
-	CString RelativePathToAbsolute(const CString &path);
+	MPT_DEPRECATED void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
+	MPT_DEPRECATED CString RelativePathToAbsolute(const CString &path);
 
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const int nItem);
