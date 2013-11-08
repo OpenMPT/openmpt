@@ -330,6 +330,10 @@ public:
 	uint32 GetSampleUndoBufferSize() const { return m_SampleUndoMaxBufferMB << 20; }
 	Setting<bool> m_MayNormalizeSamplesOnLoad;
 
+	// Export
+
+	Setting<bool> ExportDefaultToSoundcardSamplerate;
+
 	// Effects
 
 #ifndef NO_REVERB

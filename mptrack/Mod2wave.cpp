@@ -339,7 +339,18 @@ void CWaveConvert::FillSamplerates()
 {
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnSampleRate.CComboBox::ResetContent();
-	int sel = 0;
+	int sel = -1;
+	if(TrackerSettings::Instance().ExportDefaultToSoundcardSamplerate)
+	{
+		for(std::vector<uint32>::const_iterator it = encTraits->samplerates.begin(); it != encTraits->samplerates.end(); ++it)
+		{
+			uint32 samplerate = *it;
+			if(samplerate == TrackerSettings::Instance().MixerSamplerate)
+			{
+				encSettings.Samplerate = samplerate;
+			}
+		}
+	}
 	for(std::vector<uint32>::const_iterator it = encTraits->samplerates.begin(); it != encTraits->samplerates.end(); ++it)
 	{
 		uint32 samplerate = *it;
@@ -349,6 +360,10 @@ void CWaveConvert::FillSamplerates()
 		{
 			sel = ndx;
 		}
+	}
+	if(sel == -1)
+	{
+		sel = 0;
 	}
 	m_CbnSampleRate.SetCurSel(sel);
 }
