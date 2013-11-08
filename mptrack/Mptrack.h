@@ -131,6 +131,9 @@ public:
 	static VOID SetAsProject(BOOL n) { m_nProject = n; }
 // -! NEW_FEATURE#0023
 
+#if defined(ENABLE_TESTS)
+	static void SetAppDirPath(mpt::PathString exePath) {m_szExePath=exePath;}
+#endif
 	static mpt::PathString GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
