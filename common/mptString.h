@@ -157,6 +157,13 @@ std::wstring Decode(const std::string &src, Charset charset);
 
 std::string Convert(const std::string &src, Charset from, Charset to);
 
+#if defined(_MFC_VER)
+CString ToCString(const std::string &src, Charset charset);
+CString ToCString(const std::wstring &src);
+std::string FromCString(const CString &src, Charset charset);
+std::wstring FromCString(const CString &src);
+#endif
+
 } // namespace String
 
 
@@ -249,22 +256,8 @@ public:
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #if defined(_MFC_VER)
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
-	MPT_DEPRECATED_PATH CString ToCString() const
-	{
-		#ifdef UNICODE
-			return path;
-		#else
-			return mpt::String::Encode(path, mpt::CharsetLocale).c_str();
-		#endif
-	}
-	MPT_DEPRECATED_PATH static PathString FromCString(const CString &path)
-	{
-		#ifdef UNICODE
-			return PathString(path.GetString());
-		#else
-			return PathString(mpt::String::Decode(path.GetString(), mpt::CharsetLocale));
-		#endif
-	}
+	MPT_DEPRECATED_PATH CString ToCString() const { return mpt::String::ToCString(path); }
+	MPT_DEPRECATED_PATH static PathString FromCString(const CString &path) { return PathString(mpt::String::FromCString(path)); }
 #endif
 
 #else // !WIN32
