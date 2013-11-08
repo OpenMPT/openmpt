@@ -161,6 +161,9 @@ std::string Convert(const std::string &src, Charset from, Charset to);
 
 
 
+//#define MPT_DEPRECATED_PATH
+#define MPT_DEPRECATED_PATH MPT_DEPRECATED
+
 #if defined(WIN32)
 typedef std::wstring RawPathString;
 #else // !WIN32
@@ -236,17 +239,17 @@ public:
 #if defined(WIN32)
 
 	// conversions
-	MPT_DEPRECATED std::string ToLocale() const { return mpt::String::Encode(path, mpt::CharsetLocale); }
+	MPT_DEPRECATED_PATH std::string ToLocale() const { return mpt::String::Encode(path, mpt::CharsetLocale); }
 	std::string ToUTF8() const { return mpt::String::Encode(path, mpt::CharsetUTF8); }
 	std::wstring ToWide() const { return path; }
-	MPT_DEPRECATED static PathString FromLocale(const std::string &path) { return PathString(mpt::String::Decode(path, mpt::CharsetLocale)); }
+	MPT_DEPRECATED_PATH static PathString FromLocale(const std::string &path) { return PathString(mpt::String::Decode(path, mpt::CharsetLocale)); }
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::String::Decode(path, mpt::CharsetUTF8)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(path); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #if defined(_MFC_VER)
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
-	MPT_DEPRECATED CString ToCString() const
+	MPT_DEPRECATED_PATH CString ToCString() const
 	{
 		#ifdef UNICODE
 			return path;
@@ -254,7 +257,7 @@ public:
 			return mpt::String::Encode(path, mpt::CharsetLocale).c_str();
 		#endif
 	}
-	MPT_DEPRECATED static PathString FromCString(const CString &path)
+	MPT_DEPRECATED_PATH static PathString FromCString(const CString &path)
 	{
 		#ifdef UNICODE
 			return PathString(path.GetString());
@@ -287,30 +290,30 @@ public:
 // Sanitize a filename (remove special chars)
 void SanitizeFilename(mpt::PathString &filename);
 
-MPT_DEPRECATED void SanitizeFilename(char *beg, char *end);
-MPT_DEPRECATED void SanitizeFilename(wchar_t *beg, wchar_t *end);
+MPT_DEPRECATED_PATH void SanitizeFilename(char *beg, char *end);
+MPT_DEPRECATED_PATH void SanitizeFilename(wchar_t *beg, wchar_t *end);
 
-MPT_DEPRECATED void SanitizeFilename(std::string &str);
-MPT_DEPRECATED void SanitizeFilename(std::wstring &str);
+MPT_DEPRECATED_PATH void SanitizeFilename(std::string &str);
+MPT_DEPRECATED_PATH void SanitizeFilename(std::wstring &str);
 
 template <std::size_t size>
-MPT_DEPRECATED void SanitizeFilename(char (&buffer)[size])
-//--------------------------------------------------------
+MPT_DEPRECATED_PATH void SanitizeFilename(char (&buffer)[size])
+//-------------------------------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	SanitizeFilename(buffer, buffer + size);
 }
 
 template <std::size_t size>
-MPT_DEPRECATED void SanitizeFilename(wchar_t (&buffer)[size])
-//-----------------------------------------------------------
+MPT_DEPRECATED_PATH void SanitizeFilename(wchar_t (&buffer)[size])
+//----------------------------------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	SanitizeFilename(buffer, buffer + size);
 }
 
 #if defined(_MFC_VER)
-MPT_DEPRECATED void SanitizeFilename(CString &str);
+MPT_DEPRECATED_PATH void SanitizeFilename(CString &str);
 #endif
 
 #endif // MODPLUG_TRACKER

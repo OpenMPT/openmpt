@@ -194,11 +194,11 @@ public:
 	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path);
 	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path);
 	template <size_t nLength>
-	MPT_DEPRECATED void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
-	MPT_DEPRECATED CString AbsolutePathToRelative(const CString &path);
+	MPT_DEPRECATED_PATH void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
+	MPT_DEPRECATED_PATH CString AbsolutePathToRelative(const CString &path);
 	template <size_t nLength>
-	MPT_DEPRECATED void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
-	MPT_DEPRECATED CString RelativePathToAbsolute(const CString &path);
+	MPT_DEPRECATED_PATH void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
+	MPT_DEPRECATED_PATH CString RelativePathToAbsolute(const CString &path);
 
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const int nItem);
