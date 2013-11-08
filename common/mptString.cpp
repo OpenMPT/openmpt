@@ -175,6 +175,47 @@ std::string Convert(const std::string &src, Charset from, Charset to)
 }
 
 
+#if defined(_MFC_VER)
+
+CString ToCString(const std::string &src, Charset charset)
+{
+	#ifdef UNICODE
+		return mpt::String::Decode(src, charset).c_str();
+	#else
+		return mpt::String::Convert(src, charset, mpt::CharsetLocale).c_str();
+	#endif
+}
+
+CString ToCString(const std::wstring &src)
+{
+	#ifdef UNICODE
+		return src.c_str();
+	#else
+		return mpt::String::Encode(src, mpt::CharsetLocale).c_str();
+	#endif
+}
+
+std::string FromCString(const CString &src, Charset charset)
+{
+	#ifdef UNICODE
+		return mpt::String::Encode(src.GetString(), charset);
+	#else
+		return mpt::String::Convert(src.GetString(), mpt::CharsetLocale, charset);
+	#endif
+}
+
+std::wstring FromCString(const CString &src)
+{
+	#ifdef UNICODE
+		return src.GetString();
+	#else
+		return mpt::String::Decode(src.GetString(), mpt::CharsetLocale);
+	#endif
+}
+
+#endif
+
+
 } } // namespace mpt::String
 
 
