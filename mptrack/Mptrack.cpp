@@ -697,11 +697,8 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	if(GetModuleFileNameW(NULL, tempExePath, CountOf(tempExePath)))
 	{
 		mpt::String::SetNullTerminator(tempExePath);
-		wchar_t szDrive[_MAX_DRIVE] = L"";
-		wchar_t szDir[_MAX_PATH] = L"";
-		_wsplitpath(tempExePath, szDrive, szDir, NULL, NULL);
-		m_szExePath = mpt::PathString::FromNative(szDrive);
-		m_szExePath += mpt::PathString::FromNative(szDir);
+		m_szExePath = mpt::PathString::FromNative(tempExePath).GetDrive();
+		m_szExePath += mpt::PathString::FromNative(tempExePath).GetDir();
 
 		WCHAR wcsDir[MAX_PATH];
 		GetFullPathNameW(m_szExePath.AsNative().c_str(), CountOf(wcsDir), wcsDir, NULL);
