@@ -249,7 +249,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditTuningCollectionVersion.SetWindowText(m_pActiveTuningCollection->GetVersionString().c_str());
 		m_EditTuningCollectionEditMask.SetWindowText(m_pActiveTuningCollection->GetEditMaskString().c_str());
 		m_EditTuningCollectionItemNum.SetWindowText(Stringify(m_pActiveTuningCollection->GetNumTunings()).c_str());
-		m_EditTuningCollectionPath.SetWindowText(m_pActiveTuningCollection->GetSaveFilePath().c_str());
+		m_EditTuningCollectionPath.SetWindowText(m_pActiveTuningCollection->GetSaveFilePath().ToCString());
 	}
 	//<-- Updating tuning collection part
 
@@ -770,7 +770,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			// a separate collection - no possibility to 
 			// directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
-			pNewTCol->SetSavefilePath(files[counter].ToLocale());
+			pNewTCol->SetSavefilePath(files[counter]);
 			if (pNewTCol->Deserialize())
 			{
 				delete pNewTCol; pNewTCol = 0;

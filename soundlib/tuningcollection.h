@@ -59,7 +59,7 @@ public:
 		SERIALIZATION_FAILURE = true
 	};
 
-	static const CHAR s_FileExtension[4];
+	static const char s_FileExtension[4];
 	static const size_t s_nMaxTuningCount = 255;
 
 //END PUBLIC STATIC CONSTS
@@ -94,8 +94,8 @@ public:
 
 	const std::string& GetName() const {return m_Name;}
 
-	void SetSavefilePath(const std::string &psz) {m_SavefilePath = psz;}
-	const std::string& GetSaveFilePath() const {return m_SavefilePath;}
+	void SetSavefilePath(const mpt::PathString &psz) {m_SavefilePath = psz;}
+	const mpt::PathString& GetSaveFilePath() const {return m_SavefilePath;}
 
 	std::string GetVersionString() const {return Stringify(static_cast<int>(s_SerializationVersion));}
 
@@ -124,7 +124,7 @@ private:
 
 	//BEGIN: NONSERIALIZABLE DATA MEMBERS
 	TUNINGVECTOR m_DeletedTunings; //See Remove()-method for explanation of this.
-	std::string m_SavefilePath;
+	mpt::PathString m_SavefilePath;
 	//END: NONSERIALIZABLE DATA MEMBERS
 	
 //END: DATA MEMBERS

@@ -1606,7 +1606,7 @@ bool CVstPlugin::SaveProgram()
 	mpt::String::SetNullTerminator(rawname);
 
 	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension(mpt::PathString::FromUTF8("fxb"))
+		.DefaultExtension("fxb")
 		.DefaultFilename(rawname)
 		.ExtensionFilter("VST Plugin Programs (*.fxp)|*.fxp|"
 			"VST Plugin Banks (*.fxb)|*.fxb||")

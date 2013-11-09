@@ -886,12 +886,14 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 		if (Reporting::Confirm(notFoundText.c_str(), "OpenMPT - Plugins missing", false, true) == cnfYes)
 		{
-			CString sUrl = "http://resources.openmpt.org/plugins/search.php?p=";
+			std::string sUrl = "http://resources.openmpt.org/plugins/search.php?p=";
 			for(std::vector<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
-				sUrl.AppendFormat("%08X%s%%0a", LittleEndian(m_MixPlugins[*i].Info.dwPluginId2), m_MixPlugins[*i].GetLibraryName());
+				sUrl += mpt::String::Format("%08X", LittleEndian(m_MixPlugins[*i].Info.dwPluginId2));
+				sUrl += mpt::String::Convert(m_MixPlugins[*i].GetLibraryName(), mpt::CharsetLocale, mpt::CharsetUTF8);
+				sUrl += "%0a";
 			}
-			CTrackApp::OpenURL(mpt::PathString::FromCString(sUrl));
+			CTrackApp::OpenURL(mpt::PathString::FromUTF8(sUrl));
 		}
 	}
 #endif // NO_VST
@@ -1721,11 +1723,11 @@ bool CSoundFile::LoadStaticTunings()
 	}
 
 	// Load local tunings.
-	s_pTuningsSharedLocal->SetSavefilePath((
+	s_pTuningsSharedLocal->SetSavefilePath(
 		TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING)
 		+ mpt::PathString::FromUTF8("local_tunings")
-		+ mpt::PathString::FromLocale(CTuningCollection::s_FileExtension)
-		).ToLocale());
+		+ mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)
+		);
 	s_pTuningsSharedLocal->Deserialize();
 
 	// Enabling adding/removing of tunings for standard collection
