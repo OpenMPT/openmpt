@@ -846,7 +846,7 @@ void COptionsKeyboard::OnLoad()
 	if(!dlg.Show()) return;
 
 	m_sFullPathName = dlg.GetFirstFile();
-	plocalCmdSet->LoadFile(m_sFullPathName.ToCString());
+	plocalCmdSet->LoadFile(m_sFullPathName);
 	ForceUpdateGUI();
 	//TentativeSetToDefaultFile(m_sFullPathName);
 }
@@ -863,7 +863,7 @@ void COptionsKeyboard::OnSave()
 	if(!dlg.Show()) return;
 
 	m_sFullPathName = dlg.GetFirstFile();
-	plocalCmdSet->SaveFile(m_sFullPathName.ToCString());
+	plocalCmdSet->SaveFile(m_sFullPathName);
 	//TentativeSetToDefaultFile(m_sFullPathName);
 }
 

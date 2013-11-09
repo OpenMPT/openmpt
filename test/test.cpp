@@ -1340,20 +1340,23 @@ void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 #ifdef MODPLUG_TRACKER
 
-static const char * debugPaths [] = { "mptrack\\Debug", "bin\\Win32-Debug", "bin\\x64-Debug" };
+static const char * debugPaths [] = { "mptrack\\Debug\\", "bin\\Win32-Debug\\", "bin\\x64-Debug\\" };
 
-static bool PathEndsIn(const CString &path, const CString &match)
+static bool PathEndsIn(const mpt::PathString &path_, const mpt::PathString &match_)
 {
-	return path.Mid(path.GetLength() - match.GetLength() - 1, match.GetLength()) == match;
+	std::wstring path = path_.ToWide();
+	std::wstring match = match_.ToWide();
+	return path.rfind(match) == (path.length() - match.length());
 }
 
 static bool ShouldRunTests()
 {
-	CString theFile = theApp.GetAppDirPath().ToCString();
+	mpt::PathString theFile = theApp.GetAppDirPath();
 	// Only run the tests when we're in the project directory structure.
 	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
 	{
-		if(PathEndsIn(theFile, debugPaths[i]))
+		const mpt::PathString debugPath = mpt::PathString::FromUTF8(debugPaths[i]);
+		if(PathEndsIn(theFile, debugPath))
 		{
 			return true;
 		}
@@ -1361,20 +1364,20 @@ static bool ShouldRunTests()
 	return false;
 }
 
-static std::string GetTestFilenameBase()
+static mpt::PathString GetTestFilenameBase()
 {
-	CString theFile = theApp.GetAppDirPath().ToCString();
+	mpt::PathString theFile = theApp.GetAppDirPath();
 	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
 	{
-		if(PathEndsIn(theFile, debugPaths[i]))
+		const mpt::PathString debugPath = mpt::PathString::FromUTF8(debugPaths[i]);
+		if(PathEndsIn(theFile, debugPath))
 		{
-			std::size_t count = CString(debugPaths[i]).GetLength() + 1;
-			theFile.Delete(theFile.GetLength() - count, count);
+			theFile = mpt::PathString::FromWide(theFile.ToWide().substr(0, theFile.ToWide().length() - debugPath.ToWide().length()));
 			break;
 		}
 	}
-	theFile.Append("test/test.");
-	return theFile.GetString();
+	theFile += mpt::PathString::FromUTF8("test/test.");
+	return theFile;
 }
 
 typedef CModDoc *TSoundFileContainer;
@@ -1384,9 +1387,9 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 	return sndFile->GetrSoundFile();
 }
 
-static TSoundFileContainer CreateSoundFileContainer(const std::string filename)
+static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
-	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename.c_str(), FALSE);
+	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename.ToCString(), FALSE);
 	return pModDoc;
 }
 
@@ -1395,23 +1398,23 @@ static void DestroySoundFileContainer(TSoundFileContainer &sndFile)
 	sndFile->OnCloseDocument();
 }
 
-static void SaveIT(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveIT(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->DoSave(filename.c_str());
+	sndFile->DoSave(filename.ToCString());
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }
 
-static void SaveXM(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveXM(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->DoSave(filename.c_str());
+	sndFile->DoSave(filename.ToCString());
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }
 
-static void SaveS3M(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->DoSave(filename.c_str());
+	sndFile->DoSave(filename.ToCString());
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }
@@ -1423,9 +1426,9 @@ static bool ShouldRunTests()
 	return true;
 }
 
-static std::string GetTestFilenameBase()
+static mpt::PathString GetTestFilenameBase()
 {
-	return "../test/test.";
+	return mpt::PathString::FromUTF8("../test/test.");
 }
 
 typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
@@ -1435,9 +1438,9 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 	return *sndFile.get();
 }
 
-static TSoundFileContainer CreateSoundFileContainer(const std::string &filename)
+static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
-	mpt::ifstream stream(filename, std::ios::binary);
+	mpt::ifstream stream(filename.AsNative().c_str(), std::ios::binary);
 	FileReader file(&stream);
 	std::shared_ptr<CSoundFile> pSndFile(new CSoundFile());
 	pSndFile->Create(file, CSoundFile::loadCompleteModule);
@@ -1451,19 +1454,19 @@ static void DestroySoundFileContainer(TSoundFileContainer & /* sndFile */ )
 
 #ifndef MODPLUG_NO_FILESAVE
 
-static void SaveIT(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveIT(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->SaveIT(filename.c_str(), false);
+	sndFile->SaveIT(filename, false);
 }
 
-static void SaveXM(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveXM(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->SaveXM(filename.c_str(), false);
+	sndFile->SaveXM(filename, false);
 }
 
-static void SaveS3M(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->SaveS3M(filename.c_str());
+	sndFile->SaveS3M(filename);
 }
 
 #endif
@@ -1480,17 +1483,17 @@ void TestLoadSaveFile()
 	{
 		return;
 	}
-	std::string filenameBase = GetTestFilenameBase();
+	mpt::PathString filenameBase = GetTestFilenameBase();
 
 	// Test MPTM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "mptm");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("mptm"));
 
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			SaveIT(sndFileContainer, filenameBase + "saved.mptm");
+			SaveIT(sndFileContainer, filenameBase + mpt::PathString::FromUTF8("saved.mptm"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -1499,7 +1502,7 @@ void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.mptm");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("saved.mptm"));
 
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 		
@@ -1509,7 +1512,7 @@ void TestLoadSaveFile()
 
 	// Test XM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "xm");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("xm"));
 
 		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
@@ -1523,7 +1526,7 @@ void TestLoadSaveFile()
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			SaveXM(sndFileContainer, filenameBase + "saved.xm");
+			SaveXM(sndFileContainer, filenameBase + mpt::PathString::FromUTF8("saved.xm"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -1532,7 +1535,7 @@ void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.xm");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("saved.xm"));
 
 		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
@@ -1542,13 +1545,13 @@ void TestLoadSaveFile()
 
 	// Test S3M file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "s3m");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("s3m"));
 		
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			SaveS3M(sndFileContainer, filenameBase + "saved.s3m");
+			SaveS3M(sndFileContainer, filenameBase + mpt::PathString::FromUTF8("saved.s3m"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -1557,7 +1560,7 @@ void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.s3m");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("saved.s3m"));
 
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), true);
 
@@ -1570,7 +1573,7 @@ void TestLoadSaveFile()
 void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
 //---------------------------------------------------------------------------------------------------------------
 {
-	std::string filename = GetTestFilenameBase() + "itcomp" + Stringify(testcount) + ".raw";
+	mpt::PathString filename = GetTestFilenameBase() + mpt::PathString::FromUTF8("itcomp" + Stringify(testcount) + ".raw");
 
 	ModSample smp;
 	smp.uFlags = smpFormat;
@@ -1578,13 +1581,13 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 	smp.nLength = sampleData.size() / smp.GetBytesPerSample();
 
 	{
-		FILE *f = fopen(filename.c_str(), "wb");
+		FILE *f = mpt_fopen(filename, "wb");
 		ITCompression compression(smp, it215, f);
 		fclose(f);
 	}
 
 	{
-		FILE *f = fopen(filename.c_str(), "rb");
+		FILE *f = mpt_fopen(filename, "rb");
 		fseek(f, 0, SEEK_END);
 		std::vector<int8> fileData(ftell(f), 0);
 		fseek(f, 0, SEEK_SET);
@@ -1598,7 +1601,7 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 		VERIFY_EQUAL_NONCONT(memcmp(&sampleData[0], &sampleDataNew[0], sampleData.size()), 0);
 		fclose(f);
 	}
-	while(remove(filename.c_str()) == EACCES)
+	while(remove(filename.ToLocale().c_str()) == EACCES)
 	{
 		// wait for windows virus scanners
 		#ifdef WIN32
@@ -1611,6 +1614,10 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 void TestITCompression()
 //----------------------
 {
+	if(!ShouldRunTests())
+	{
+		return;
+	}
 	// Test loading / saving of IT-compressed samples
 	const int sampleDataSize = 65536;
 	std::vector<int8> sampleData(sampleDataSize, 0);

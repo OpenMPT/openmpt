@@ -1047,12 +1047,12 @@ void CCtrlSamples::OnSampleSave()
 
 	BeginWaitCursor();
 
-	TCHAR ext[_MAX_EXT];
-	mpt::String::Copy(ext, dlg.GetFirstFile().GetFileExt().ToCString().GetString());
+	CString ext = dlg.GetFirstFile().GetFileExt().ToCString();
 
 	bool bOk = false;
 	SAMPLEINDEX iMinSmp = m_nSample, iMaxSmp = m_nSample;
-	CString sFilename = dlg.GetFirstFile().ToCString(), sNumberFormat;
+	mpt::PathString sFilename = dlg.GetFirstFile();
+	CString sNumberFormat;
 	if(doBatchSave)
 	{
 		iMinSmp = 1;
@@ -1075,14 +1075,14 @@ void CCtrlSamples::OnSampleSave()
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 
-				sFilename = dlg.GetFirstFile().ToCString();
-				sFilename.Replace("%sample_number%", sSampleNumber);
-				sFilename.Replace("%sample_filename%", sSampleFilename);
-				sFilename.Replace("%sample_name%", sSampleName);
+				sFilename = dlg.GetFirstFile();
+				sFilename = mpt::PathString::FromWide(mpt::String::Replace(sFilename.ToWide(), L"%sample_number%", mpt::String::FromCString(sSampleNumber)));
+				sFilename = mpt::PathString::FromWide(mpt::String::Replace(sFilename.ToWide(), L"%sample_filename%", mpt::String::FromCString(sSampleFilename)));
+				sFilename = mpt::PathString::FromWide(mpt::String::Replace(sFilename.ToWide(), L"%sample_name%", mpt::String::FromCString(sSampleName)));
 			}
-			if(!lstrcmpi(ext, ".raw"))
+			if(!ext.CompareNoCase(".raw"))
 				bOk = m_sndFile.SaveRAWSample(iSmp, sFilename);
-			else if(!lstrcmpi(ext, ".flac"))
+			else if(!ext.CompareNoCase(".flac"))
 				bOk = m_sndFile.SaveFLACSample(iSmp, sFilename);
 			else
 				bOk = m_sndFile.SaveWAVSample(iSmp, sFilename);

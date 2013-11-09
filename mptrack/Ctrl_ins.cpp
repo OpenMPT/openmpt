@@ -1756,9 +1756,9 @@ void CCtrlInstruments::OnInstrumentSave()
 	_splitpath(dlg.GetFirstFile().ToLocale().c_str(), drive, path, NULL, ext);
 	bool ok = false;
 	if (!lstrcmpi(ext, ".iti"))
-		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile().ToLocale().c_str(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
+		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
 	else
-		ok = m_sndFile.SaveXIInstrument(m_nInstrument, dlg.GetFirstFile().ToLocale().c_str());
+		ok = m_sndFile.SaveXIInstrument(m_nInstrument, dlg.GetFirstFile());
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

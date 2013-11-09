@@ -103,6 +103,18 @@ static inline std::string Replace(std::string str, const std::string &oldStr, co
 }
 
 
+static inline std::wstring Replace(std::wstring str, const std::wstring &oldStr, const std::wstring &newStr)
+{
+	std::size_t pos = 0;
+	while((pos = str.find(oldStr, pos)) != std::string::npos)
+	{
+		str.replace(pos, oldStr.length(), newStr);
+		pos += newStr.length();
+	}
+	return str;
+}
+
+
 } // namespace String
 
 
@@ -281,6 +293,9 @@ public:
 };
 
 } // namespace mpt
+
+FILE * mpt_fopen(const mpt::PathString &filename, const char *mode);
+FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode);
 
 #if defined(MODPLUG_TRACKER)
 

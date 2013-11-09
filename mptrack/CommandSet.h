@@ -1263,9 +1263,9 @@ public:
 	//Pululation ;)
 	void Copy(CCommandSet *source);	// copy the contents of a commandset into this command set
 	void GenKeyMap(KeyMap &km);		// Generate a keymap from this command set
-	bool SaveFile(CString FileName);
-	bool LoadFile(CString FileName);
-	bool LoadFile(std::istream& iStrm, LPCTSTR szFilename);
+	bool SaveFile(const mpt::PathString &filename);
+	bool LoadFile(const mpt::PathString &filename);
+	bool LoadFile(std::istream& iStrm, const CString &filenameDescription);
 	bool LoadDefaultKeymap();
 	void UpgradeKeymap(CCommandSet *pCommands, int oldVersion);
 	

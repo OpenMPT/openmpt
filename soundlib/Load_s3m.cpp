@@ -539,8 +539,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveS3M(const char *lpszFileName) const
-//------------------------------------------------------
+bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
+//-------------------------------------------------------------
 {
 	static const uint8 filler[16] =
 	{
@@ -549,8 +549,8 @@ bool CSoundFile::SaveS3M(const char *lpszFileName) const
 	};
 
 	FILE *f;
-	if(m_nChannels == 0 || lpszFileName == nullptr) return false;
-	if((f = fopen(lpszFileName, "wb")) == nullptr) return false;
+	if(m_nChannels == 0 || filename.empty()) return false;
+	if((f = mpt_fopen(filename, "wb")) == nullptr) return false;
 
 	S3MFileHeader fileHeader;
 	MemsetZero(fileHeader);

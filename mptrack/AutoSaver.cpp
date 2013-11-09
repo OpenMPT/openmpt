@@ -247,7 +247,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 	// list with backups... hence we have duplicated code.. :(
 	CSoundFile &sndFile = modDoc.GetrSoundFile(); 
 	
-	CString fileName = BuildFileName(modDoc).ToCString();
+	mpt::PathString fileName = BuildFileName(modDoc);
 
 	// We are acutally not going to show the log for autosaved files.
 	ScopedLogCapturer logcapturer(modDoc, "", nullptr, false);

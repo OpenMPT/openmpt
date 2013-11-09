@@ -467,7 +467,7 @@ void CMainFrame::OnClose()
 
 	if(m_InputHandler && m_InputHandler->activeCommandSet)
 	{
-		m_InputHandler->activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile.ToCString());
+		m_InputHandler->activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
 	}
 
 	EndWaitCursor();

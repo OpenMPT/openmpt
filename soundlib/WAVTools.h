@@ -404,7 +404,7 @@ protected:
 
 public:
 	// Output to file: Initialize with filename. The created FILE* is owned by this instance.
-	WAVWriter(const char *filename);
+	WAVWriter(const mpt::PathString &filename);
 	// Output to file: Initialize with FILE*.
 	WAVWriter(FILE *file);
 	// Output to stream: Initialize with std::ostream*.

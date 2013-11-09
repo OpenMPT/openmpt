@@ -651,11 +651,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 #define str_pattern				(GetStrI18N("pattern"))
 
 
-bool CSoundFile::SaveXM(const char *lpszFileName, bool compatibilityExport)
-//-------------------------------------------------------------------------
+bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExport)
+//--------------------------------------------------------------------------------
 {
 	FILE *f;
-	if(lpszFileName == nullptr || (f = fopen(lpszFileName, "wb")) == nullptr)
+	if(filename.empty() || (f = mpt_fopen(filename, "wb")) == nullptr)
 	{
 		return false;
 	}
