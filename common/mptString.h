@@ -245,6 +245,13 @@ public:
 		return path;
 	}
 
+#if defined(WIN32)
+	static int CompareNoCase(const PathString & a, const PathString & b)
+	{
+		return lstrcmpiW(a.ToWide().c_str(), b.ToWide().c_str());
+	}
+#endif
+
 public:
 
 #if defined(MODPLUG_TRACKER)

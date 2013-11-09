@@ -304,10 +304,10 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 
 LPMIDILIBSTRUCT CTrackApp::glpMidiLibrary = NULL;
 
-BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
-//-------------------------------------------------------------------
+BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
+//-----------------------------------------------------------------------------
 {
-	if ((!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
+	if(filename.empty()) return FALSE;
 
 	if (!glpMidiLibrary)
 	{
@@ -316,7 +316,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 		MemsetZero(*glpMidiLibrary);
 	}
 
-	if (CDLSBank::IsDLSBank(lpszConfigFile))
+	if (CDLSBank::IsDLSBank(filename))
 	{
 		ConfirmAnswer result = cnfYes;
 		if (!bNoWarn)
@@ -328,7 +328,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 		if (result == cnfCancel) return FALSE;
 		const bool bReplaceAll = (result == cnfNo);
 		CDLSBank dlsbank;
-		if (dlsbank.Open(lpszConfigFile))
+		if (dlsbank.Open(filename))
 		{
 			for (UINT iIns=0; iIns<256; iIns++)
 			{
@@ -343,7 +343,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 						{
 							if ((glpMidiLibrary->MidiMap[iIns] = new CHAR[_MAX_PATH]) == NULL) break;
 						}
-						strcpy(glpMidiLibrary->MidiMap[iIns], lpszConfigFile);
+						strcpy(glpMidiLibrary->MidiMap[iIns], filename.ToLocale().c_str());
 					}
 				}
 			}
@@ -351,7 +351,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 		return TRUE;
 	}
 
-	IniFileSettingsContainer file(mpt::PathString::FromLocale(lpszConfigFile));
+	IniFileSettingsContainer file(filename);
 	return ImportMidiConfig(file);
 }
 
@@ -414,11 +414,11 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file)
 }
 
 
-BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
-//-----------------------------------------------------
+BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
+//---------------------------------------------------------------
 {
-	if ((!glpMidiLibrary) || (!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
-	IniFileSettingsContainer file(mpt::PathString::FromLocale(lpszConfigFile));
+	if((!glpMidiLibrary) || filename.empty()) return FALSE;
+	IniFileSettingsContainer file(filename);
 	return ExportMidiConfig(file);
 }
 
@@ -458,8 +458,7 @@ std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
 BOOL CTrackApp::LoadDefaultDLSBanks()
 //-----------------------------------
 {
-	CHAR szFileName[MAX_PATH];
-	HKEY key;
+	mpt::PathString filename;
 
 	CString storedVersion = theApp.GetSettings().Read<CString>("Version", "Version", "");
 	//If version number stored in INI is 1.17.02.40 or later, load DLS from INI file.
@@ -471,10 +470,9 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 		for(size_t i = 0; i < numBanks; i++)
 		{
 			wsprintf(s, _T("Bank%d"), i + 1);
-			TCHAR szPath[_MAX_PATH];
-			mpt::String::Copy(szPath, theApp.GetSettings().Read<std::string>("DLS Banks", s, ""));
-			theApp.RelativePathToAbsolute(szPath);
-			AddDLSBank(szPath);
+			mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", s, mpt::PathString());
+			path = theApp.RelativePathToAbsolute(path);
+			AddDLSBank(path);
 		}
 	} else
 	{
@@ -483,29 +481,35 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 
 	SaveDefaultDLSBanks(); // This will avoid a crash the next time if we crash while loading the bank
 
-	szFileName[0] = 0;
-	GetSystemDirectory(szFileName, CountOf(szFileName));
-	lstrcat(szFileName, "\\GM.DLS");
-	if (!AddDLSBank(szFileName))
+	WCHAR szFileNameW[MAX_PATH];
+	szFileNameW[0] = 0;
+	GetSystemDirectoryW(szFileNameW, CountOf(szFileNameW));
+	filename = mpt::PathString::FromNative(szFileNameW);
+	filename += MPT_PATHSTRING("\\GM.DLS");
+	if(!AddDLSBank(filename))
 	{
-		GetWindowsDirectory(szFileName, CountOf(szFileName));
-		lstrcat(szFileName, "\\SYSTEM32\\DRIVERS\\GM.DLS");
-		if (!AddDLSBank(szFileName))
+		szFileNameW[0] = 0;
+		GetWindowsDirectoryW(szFileNameW, CountOf(szFileNameW));
+		filename = mpt::PathString::FromNative(szFileNameW);
+		filename += MPT_PATHSTRING("\\SYSTEM32\\DRIVERS\\GM.DLS");
+		if(!AddDLSBank(filename))
 		{
+			HKEY key;
 			if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
 			{
+				CHAR szFileName[MAX_PATH];
 				DWORD dwRegType = REG_SZ;
 				DWORD dwSize = sizeof(szFileName);
 				szFileName[0] = 0;
 				if (RegQueryValueEx(key, "GMFilePath", NULL, &dwRegType, (LPBYTE)&szFileName, &dwSize) == ERROR_SUCCESS)
 				{
-					AddDLSBank(szFileName);
+					AddDLSBank(mpt::PathString::FromLocale(szFileName));
 				}
 				RegCloseKey(key);
 			}
 		}
 	}
-	if (glpMidiLibrary) ImportMidiConfig(szFileName, TRUE);
+	if(glpMidiLibrary) ImportMidiConfig(filename, TRUE);
 
 	return TRUE;
 }
@@ -531,7 +535,7 @@ void CTrackApp::LoadRegistryDLS()
 				dwRegType = REG_SZ;
 				dwSize = sizeof(szFileNameX);
 				RegQueryValueEx(keyX, s, NULL, &dwRegType, (LPBYTE)szFileNameX, &dwSize);
-				AddDLSBank(szFileNameX);
+				AddDLSBank(mpt::PathString::FromLocale(szFileNameX));
 			}
 		}
 		RegCloseKey(keyX);
@@ -543,22 +547,21 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 //-----------------------------------
 {
 	TCHAR s[64];
-	TCHAR szPath[_MAX_PATH];
 	DWORD nBanks = 0;
 	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
 
-		if(!gpDLSBanks[i] || !gpDLSBanks[i]->GetFileName() || !gpDLSBanks[i]->GetFileName()[0])
+		if(!gpDLSBanks[i] || gpDLSBanks[i]->GetFileName().empty())
 			continue;
 
-		_tcsncpy(szPath, gpDLSBanks[i]->GetFileName(), CountOf(szPath) - 1);
+		mpt::PathString path = gpDLSBanks[i]->GetFileName();
 		if(theApp.IsPortableMode())
 		{
-			theApp.AbsolutePathToRelative(szPath);
+			path = theApp.AbsolutePathToRelative(path);
 		}
 
 		wsprintf(s, _T("Bank%d"), nBanks+1);
-		theApp.GetSettings().Write<std::string>("DLS Banks", s, szPath);
+		theApp.GetSettings().Write<mpt::PathString>("DLS Banks", s, path);
 		nBanks++;
 
 	}
@@ -578,17 +581,17 @@ BOOL CTrackApp::RemoveDLSBank(UINT nBank)
 }
 
 
-BOOL CTrackApp::AddDLSBank(LPCSTR lpszFileName)
-//---------------------------------------------
+BOOL CTrackApp::AddDLSBank(const mpt::PathString &filename)
+//---------------------------------------------------------
 {
-	if(!lpszFileName || !lpszFileName[0] || !CDLSBank::IsDLSBank(lpszFileName)) return FALSE;
+	if(filename.empty() || !CDLSBank::IsDLSBank(filename)) return FALSE;
 	// Check for dupes
 	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
-		if(gpDLSBanks[i] && !lstrcmpi(lpszFileName, gpDLSBanks[i]->GetFileName())) return TRUE;
+		if(gpDLSBanks[i] && !mpt::PathString::CompareNoCase(filename, gpDLSBanks[i]->GetFileName())) return TRUE;
 	}
 	CDLSBank *bank = new CDLSBank;
-	if(bank->Open(lpszFileName))
+	if(bank->Open(filename))
 	{
 		gpDLSBanks.push_back(bank);
 		return TRUE;

@@ -1857,7 +1857,7 @@ void CMainFrame::OnAddDlsBank()
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-		CTrackApp::AddDLSBank(files[counter].ToLocale().c_str());
+		CTrackApp::AddDLSBank(files[counter]);
 	}
 	m_wndTree.RefreshDlsBanks();
 	EndWaitCursor();
@@ -1876,7 +1876,7 @@ void CMainFrame::OnImportMidiLib()
 	if(!dlg.Show()) return;
 
 	BeginWaitCursor();
-	CTrackApp::ImportMidiConfig(dlg.GetFirstFile().ToLocale().c_str());
+	CTrackApp::ImportMidiConfig(dlg.GetFirstFile());
 	m_wndTree.RefreshMidiLibrary();
 	EndWaitCursor();
 }
@@ -2527,7 +2527,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<CString>& v
 		for(size_t i = 0; i < 2; i++) // 0: app items, 1: user items
 		{
 			// To avoid duplicates, check whether app path and config path are the same.
-			if (i == 1 && _tcsicmp(CTrackApp::GetAppDirPath().ToCString(), theApp.GetConfigPath().ToCString()) == 0)
+			if (i == 1 && mpt::PathString::CompareNoCase(CTrackApp::GetAppDirPath(), theApp.GetConfigPath()) == 0)
 				break;
 			CFileFind fileFind;
 			CFixedStringT<CString, MAX_PATH> sPath;

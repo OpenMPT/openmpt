@@ -138,15 +138,15 @@ public:
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
 	static LPMIDILIBSTRUCT GetMidiLibrary() { return glpMidiLibrary; }
-	static BOOL ImportMidiConfig(LPCSTR lpszFileName, BOOL bNoWarning=FALSE);
-	static BOOL ExportMidiConfig(LPCSTR lpszFileName);
+	static BOOL ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarning=FALSE);
+	static BOOL ExportMidiConfig(const mpt::PathString &filename);
 	static BOOL ImportMidiConfig(SettingsContainer &file);
 	static BOOL ExportMidiConfig(SettingsContainer &file);
 	static void RegisterExtensions();
 	static BOOL LoadDefaultDLSBanks();
 	static BOOL SaveDefaultDLSBanks();
 	static BOOL RemoveDLSBank(UINT nBank);
-	static BOOL AddDLSBank(LPCSTR);
+	static BOOL AddDLSBank(const mpt::PathString &filename);
 	static bool OpenURL(const char *url);
 	static bool OpenURL(const std::string &url);
 	static bool OpenURL(const CString &url);

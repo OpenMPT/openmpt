@@ -250,10 +250,10 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		CDLSBank *pCachedBank = NULL, *pEmbeddedBank = NULL;
 		CHAR szCachedBankFile[_MAX_PATH] = "";
 
-		if (CDLSBank::IsDLSBank(lpszPathName))
+		if (CDLSBank::IsDLSBank(mpt::PathString::FromCString(lpszPathName)))
 		{
 			pEmbeddedBank = new CDLSBank();
-			pEmbeddedBank->Open(lpszPathName);
+			pEmbeddedBank->Open(mpt::PathString::FromCString(lpszPathName));
 		}
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
 		BeginWaitCursor();
@@ -300,7 +300,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			if ((pszMidiMapName) && (pszMidiMapName[0]) && (!bEmbedded))
 			{
 				// Load From DLS Bank
-				if (CDLSBank::IsDLSBank(pszMidiMapName))
+				if (CDLSBank::IsDLSBank(mpt::PathString::FromLocale(pszMidiMapName)))
 				{
 					CDLSBank *pDLSBank = NULL;
 					
@@ -312,7 +312,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 						if (pCachedBank) delete pCachedBank;
 						pCachedBank = new CDLSBank;
 						strcpy(szCachedBankFile, pszMidiMapName);
-						if (pCachedBank->Open(pszMidiMapName)) pDLSBank = pCachedBank;
+						if (pCachedBank->Open(mpt::PathString::FromLocale(pszMidiMapName))) pDLSBank = pCachedBank;
 					}
 					if (pDLSBank)
 					{
