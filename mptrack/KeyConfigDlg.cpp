@@ -182,9 +182,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_eReport.FmtLines(TRUE);
 	m_eReport.SetWindowText("");
 
-	CString s;
-	s.Format("%d", TrackerSettings::Instance().gnAutoChordWaitTime);
-	m_eChordWaitTime.SetWindowText(s);
+	m_eChordWaitTime.SetWindowText(Stringify(TrackerSettings::Instance().gnAutoChordWaitTime).c_str());
 	return TRUE;
 }
 
@@ -675,6 +673,7 @@ void COptionsKeyboard::OnChordWaitTimeChanged()
 		val = 5000;
 		m_eChordWaitTime.SetWindowText("5000");
 	}
+	OnSettingsChanged();
 }
 //end rewbs.autochord
 
