@@ -224,7 +224,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	#else
 	{
 		CMappedFile f;
-		if (f.Open(lpszPathName))
+		if (f.Open(mpt::PathString::FromCString(lpszPathName)))
 		{
 			FileReader file = f.GetFile();
 			if(file.IsValid())
@@ -341,7 +341,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 					CHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
 					CMappedFile f;
 
-					if(f.Open(pszMidiMapName))
+					if(f.Open(mpt::PathString::FromLocale(pszMidiMapName)))
 					{
 						FileReader file = f.GetFile();
 						if(file.IsValid())

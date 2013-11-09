@@ -267,7 +267,7 @@ void CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 		CMappedFile f;
 
 		SetCurrentDirectory(m_szInstrLibPath);
-		if (f.Open(pszSongName))
+		if (f.Open(mpt::PathString::FromLocale(pszSongName)))
 		{
 			FileReader file = f.GetFile();
 			if (file.IsValid())

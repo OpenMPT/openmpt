@@ -20,16 +20,16 @@ class CMappedFile
 //===============
 {
 protected:
-	CFile m_File;
+	HANDLE m_hFile;
 	HANDLE m_hFMap;
 	void *m_pData;
 
 public:
-	CMappedFile() : m_hFMap(nullptr), m_pData(nullptr) { }
+	CMappedFile() : m_hFile(nullptr), m_hFMap(nullptr), m_pData(nullptr) { }
 	~CMappedFile();
 
 public:
-	bool Open(const char *lpszFileName);
+	bool Open(const mpt::PathString &filename);
 	void Close();
 	size_t GetLength();
 	const void *Lock();

@@ -1426,7 +1426,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 		{
 			CMappedFile f;
 
-			if(f.Open(lpszFileName))
+			if(f.Open(mpt::PathString::FromLocale(lpszFileName)))
 			{
 				FileReader file = f.GetFile();
 				if(file.IsValid())
