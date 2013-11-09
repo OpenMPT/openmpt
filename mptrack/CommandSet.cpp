@@ -1484,8 +1484,8 @@ CString CCommandSet::GetCommandText(CommandID cmd)
 }
 
 
-bool CCommandSet::SaveFile(CString fileName)
-//------------------------------------------
+bool CCommandSet::SaveFile(const mpt::PathString &filename)
+//---------------------------------------------------------
 { //TODO: Make C++
 
 /* Layout:
@@ -1500,7 +1500,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 	FILE *outStream;
 	KeyCombination kc;
 
-	if( (outStream  = fopen( fileName, "w" )) == NULL )
+	if((outStream = mpt_fopen(filename, "w")) == NULL)
 	{
 		ErrorBox(IDS_CANT_OPEN_FILE_FOR_WRITING);
 		return false;
@@ -1541,8 +1541,8 @@ ctx:UID:Description:Modifier:Key:EventMask
 }
 
 
-bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
-//-----------------------------------------------------------------
+bool CCommandSet::LoadFile(std::istream& iStrm, const CString &filenameDescription)
+//---------------------------------------------------------------------------------
 {
 	KeyCombination kc;
 	CommandID cmd=kcNumCommands;
@@ -1660,8 +1660,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 	}
 	if(!errText.IsEmpty())
 	{
-		CString err;
-		err.Format("The following problems have been encountered while trying to load the key binding file %s:\n", szFilename);
+		CString err = TEXT("The following problems have been encountered while trying to load the key binding file ") + filenameDescription + TEXT(":\n");
 		err += errText;
 		Reporting::Warning(err);
 	}
@@ -1675,19 +1674,19 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 }
 
 
-bool CCommandSet::LoadFile(CString fileName)
-//------------------------------------------
+bool CCommandSet::LoadFile(const mpt::PathString &filename)
+//---------------------------------------------------------
 {
-	mpt::ifstream fin(fileName);
+	mpt::ifstream fin(filename.AsNative().c_str());
 	if (fin.fail())
 	{
 		CString strMsg;
-		AfxFormatString1(strMsg, IDS_CANT_OPEN_KEYBINDING_FILE, fileName);
+		AfxFormatString1(strMsg, IDS_CANT_OPEN_KEYBINDING_FILE, filename.ToCString());
 		Reporting::Warning(strMsg);
 		return false;
 	}
 	else
-		return LoadFile(fin, fileName);
+		return LoadFile(fin, filename.ToCString());
 }
 
 

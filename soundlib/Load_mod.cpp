@@ -1095,13 +1095,13 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 #include "../mptrack/moddoc.h"
 #endif	// MODPLUG_TRACKER
 
-bool CSoundFile::SaveMod(const char *lpszFileName) const
-//------------------------------------------------------
+bool CSoundFile::SaveMod(const mpt::PathString &filename) const
+//-------------------------------------------------------------
 {
 	FILE *f;
 
-	if(m_nChannels == 0 || lpszFileName == nullptr) return false;
-	if((f = fopen(lpszFileName, "wb")) == nullptr) return false;
+	if(m_nChannels == 0 || filename.empty()) return false;
+	if((f = mpt_fopen(filename, "wb")) == nullptr) return false;
 
 	// Write song title
 	{

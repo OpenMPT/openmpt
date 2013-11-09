@@ -428,13 +428,14 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 	}
 	BeginWaitCursor();
 	FixNullStrings();
+	const mpt::PathString filename = mpt::PathString::FromCString(lpszPathName);
 	switch(type)
 	{
-	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(lpszPathName); break;
-	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(lpszPathName); break;
-	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(lpszPathName); break;
-	case MOD_TYPE_IT:	bOk = (m_SndFile.m_SongFlags[SONG_ITPROJECT] ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName)); break;
-	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(lpszPathName); break;
+	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(filename); break;
+	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(filename); break;
+	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(filename); break;
+	case MOD_TYPE_IT:	bOk = (m_SndFile.m_SongFlags[SONG_ITPROJECT] ? m_SndFile.SaveITProject(filename) : m_SndFile.SaveIT(filename)); break;
+	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(filename); break;
 	}
 	EndWaitCursor();
 	if (bOk)
@@ -511,9 +512,9 @@ bool CModDoc::SaveInstrument(INSTRUMENTINDEX instr)
 			const bool xi  = !_stricmp(&m_SndFile.m_szInstrumentPath[instr][len - 2], "xi");
 
 			if(iti || (!xi  && m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
-				success = m_SndFile.SaveITIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr].c_str(), false);
+				success = m_SndFile.SaveITIInstrument(instr + 1, mpt::PathString::FromLocale(m_SndFile.m_szInstrumentPath[instr]), false);
 			else
-				success = m_SndFile.SaveXIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr].c_str());
+				success = m_SndFile.SaveXIInstrument(instr + 1, mpt::PathString::FromLocale(m_SndFile.m_szInstrumentPath[instr]));
 
 			if(success)
 				m_bsInstrumentModified.reset(instr);
@@ -1953,10 +1954,10 @@ void CModDoc::OnFileCompatibilitySave()
 	switch (type)
 	{
 		case MOD_TYPE_XM:
-			m_SndFile.SaveXM(dlg.GetFirstFile().ToLocale().c_str(), true);
+			m_SndFile.SaveXM(dlg.GetFirstFile(), true);
 			break;
 		case MOD_TYPE_IT:
-			m_SndFile.SaveIT(dlg.GetFirstFile().ToLocale().c_str(), true);
+			m_SndFile.SaveIT(dlg.GetFirstFile(), true);
 			break;
 	}
 }

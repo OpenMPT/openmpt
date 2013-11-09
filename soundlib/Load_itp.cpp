@@ -279,11 +279,11 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveITProject(const char *lpszFileName)
-//------------------------------------------------------
+bool CSoundFile::SaveITProject(const mpt::PathString &filename)
+//-------------------------------------------------------------
 {
 #ifndef MODPLUG_TRACKER
-	MPT_UNREFERENCED_PARAMETER(lpszFileName);
+	MPT_UNREFERENCED_PARAMETER(filename);
 	return false;
 #else // MODPLUG_TRACKER
 
@@ -299,7 +299,7 @@ bool CSoundFile::SaveITProject(const char *lpszFileName)
 
 	FILE *f;
 
-	if((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return false;
+	if(filename.empty() || ((f = mpt_fopen(filename, "wb")) == NULL)) return false;
 
 
 	// File ID

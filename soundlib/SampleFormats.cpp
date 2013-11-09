@@ -453,10 +453,10 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 
 #ifndef MODPLUG_NO_FILESAVE
-bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const char *lpszFileName) const
-//---------------------------------------------------------------------------------
+bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
+//----------------------------------------------------------------------------------------
 {
-	WAVWriter file(lpszFileName);
+	WAVWriter file(filename);
 
 	if(!file.IsValid())
 	{
@@ -494,11 +494,11 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const char *lpszFileName) co
 ///////////////////////////////////////////////////////////////
 // Save RAW
 
-bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const char *lpszFileName) const
-//---------------------------------------------------------------------------------
+bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
+//----------------------------------------------------------------------------------------
 {
 	FILE *f;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
+	if((f = mpt_fopen(filename, "wb")) == NULL) return false;
 
 	const ModSample &sample = Samples[nSample];
 	SampleIO(
@@ -953,17 +953,17 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const char *lpszFileName) const
-//---------------------------------------------------------------------------------------
+bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename) const
+//----------------------------------------------------------------------------------------------
 {
 	ModInstrument *pIns = Instruments[nInstr];
-	if(pIns == nullptr || lpszFileName == nullptr)
+	if(pIns == nullptr || filename.empty())
 	{
 		return false;
 	}
 
 	FILE *f;
-	if((f = fopen(lpszFileName, "wb")) == nullptr)
+	if((f = mpt_fopen(filename, "wb")) == nullptr)
 	{
 		return false;
 	}
@@ -1535,15 +1535,15 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const char *lpszFileName, bool compress) const
-//-------------------------------------------------------------------------------------------------------
+bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress) const
+//--------------------------------------------------------------------------------------------------------------
 {
 	ITInstrumentEx iti;
 	ModInstrument *pIns = Instruments[nInstr];
 	FILE *f;
 
-	if((!pIns) || (!lpszFileName)) return false;
-	if((f = fopen(lpszFileName, "wb")) == NULL) return false;
+	if((!pIns) || filename.empty()) return false;
+	if((f = mpt_fopen(filename, "wb")) == NULL) return false;
 	
 	size_t instSize = iti.ConvertToIT(*pIns, false, *this);
 
@@ -2044,8 +2044,8 @@ inline static void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength n
 
 
 #ifndef MODPLUG_NO_FILESAVE
-bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const char *lpszFileName) const
-//----------------------------------------------------------------------------------
+bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
+//-----------------------------------------------------------------------------------------
 {
 #ifndef NO_FLAC
 	FLAC__StreamEncoder *encoder = FLAC__stream_encoder_new();
@@ -2144,7 +2144,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const char *lpszFileName) c
 	FLAC__stream_encoder_set_compression_level(encoder, compression);
 #endif // MODPLUG_TRACKER
 
-	if(FLAC__stream_encoder_init_file(encoder, lpszFileName, nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
+	if(FLAC__stream_encoder_init_file(encoder, filename.ToLocale().c_str(), nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
 	{
 		return false;
 	}

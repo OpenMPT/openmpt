@@ -252,10 +252,10 @@ void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
 
 
 // Output to file: Initialize with filename.
-WAVWriter::WAVWriter(const char *filename) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
-//----------------------------------------------------------------------------------------------------------------
+WAVWriter::WAVWriter(const mpt::PathString &filename) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
+//---------------------------------------------------------------------------------------------------------------------------
 {
-	f = fopen(filename, "w+b");
+	f = mpt_fopen(filename, "w+b");
 	fileOwned = true;
 	Init();
 }
