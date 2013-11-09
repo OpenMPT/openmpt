@@ -137,7 +137,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() cons
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize()
 //---------------------------------------------------------------------------
 {
-	if(m_SavefilePath.empty() < 1)
+	if(m_SavefilePath.empty())
 		return SERIALIZATION_FAILURE;
 	mpt::ifstream fin(m_SavefilePath.AsNative().c_str(), std::ios::binary);
 	if(!fin.good())
