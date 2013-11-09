@@ -232,8 +232,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	CMainFrame::m_pAutoSaver->SetSaveInterval(conf.Read<int32>("AutoSave", "IntervalMinutes", CMainFrame::m_pAutoSaver->GetSaveInterval()));
 	CMainFrame::m_pAutoSaver->SetHistoryDepth(conf.Read<int32>("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth()));
 	CMainFrame::m_pAutoSaver->SetUseOriginalPath(conf.Read<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath()));
-	CMainFrame::m_pAutoSaver->SetPath(theApp.RelativePathToAbsolute(conf.Read<CString>("AutoSave", "Path", CMainFrame::m_pAutoSaver->GetPath())));
-	CMainFrame::m_pAutoSaver->SetFilenameTemplate(conf.Read<CString>("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate()));
+	CMainFrame::m_pAutoSaver->SetPath(theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>("AutoSave", "Path", CMainFrame::m_pAutoSaver->GetPath())));
+	CMainFrame::m_pAutoSaver->SetFilenameTemplate(conf.Read<mpt::PathString>("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate()));
 	// Paths
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
@@ -443,9 +443,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		SetCurrentDirectoryW(TrackerDirectories::Instance().m_szDefaultDirectory[DIR_MODS].AsNative().c_str());
 	}
-	CString tmpKbdFile = m_szKbdFile.ToCString();
-	theApp.RelativePathToAbsolute(tmpKbdFile);
-	m_szKbdFile = mpt::PathString::FromCString(tmpKbdFile);
+	m_szKbdFile = theApp.RelativePathToAbsolute(m_szKbdFile);
 
 	// Last fixup: update config version
 	IniVersion = MptVersion::str;
@@ -643,8 +641,8 @@ void TrackerSettings::SaveSettings()
 	conf.Write<int32>("AutoSave", "IntervalMinutes", CMainFrame::m_pAutoSaver->GetSaveInterval());
 	conf.Write<int32>("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth());
 	conf.Write<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath());
-	conf.Write<CString>("AutoSave", "Path", theApp.AbsolutePathToRelative(CMainFrame::m_pAutoSaver->GetPath()));
-	conf.Write<CString>("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate());
+	conf.Write<mpt::PathString>("AutoSave", "Path", theApp.AbsolutePathToRelative(CMainFrame::m_pAutoSaver->GetPath()));
+	conf.Write<mpt::PathString>("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate());
 
 	// Paths
 	for(size_t i = 0; i < NUM_DIRS; i++)

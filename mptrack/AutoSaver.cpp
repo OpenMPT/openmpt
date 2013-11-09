@@ -29,9 +29,9 @@
 // Construction/Destruction
 ///////////////////////////
 
-CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory,
-					   bool useOriginalPath, CString path, CString fileNameTemplate) :
-	m_bSaveInProgress(false)
+CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory, bool useOriginalPath, mpt::PathString path, mpt::PathString fileNameTemplate)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+	: m_bSaveInProgress(false)
 {
 	m_nLastSave			 = timeGetTime();
 	m_bEnabled			 = enabled;
@@ -131,29 +131,29 @@ bool CAutoSaver::GetUseOriginalPath()
 }
 
 
-void CAutoSaver::SetPath(CString path)
-//------------------------------------
+void CAutoSaver::SetPath(mpt::PathString path)
+//--------------------------------------------
 {
 	m_csPath = path;
 }
 
 
-CString CAutoSaver::GetPath()
-//---------------------------
+mpt::PathString CAutoSaver::GetPath()
+//-----------------------------------
 {
 	return m_csPath;
 }
 
 
-void CAutoSaver::SetFilenameTemplate(CString fnTemplate)
-//------------------------------------------------------
+void CAutoSaver::SetFilenameTemplate(mpt::PathString fnTemplate)
+//--------------------------------------------------------------
 {
 	m_csFileNameTemplate = fnTemplate;
 }
 
 
-CString CAutoSaver::GetFilenameTemplate()
-//---------------------------------------
+mpt::PathString CAutoSaver::GetFilenameTemplate()
+//------------------------------------------------
 {
 	return m_csFileNameTemplate;
 }
@@ -206,37 +206,37 @@ bool CAutoSaver::CheckTimer(DWORD curTime)
 mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 //--------------------------------------------------------
 {
-	CString timeStamp = (CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S");
-	CString name;
+	std::wstring timeStamp = mpt::String::FromCString((CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S"));
+	mpt::PathString name;
 	
 	if(m_bUseOriginalPath)
 	{
 		if(modDoc.m_bHasValidPath)
 		{
 			// Check that the file has a user-chosen path
-			name = modDoc.GetPathName(); 
+			name = mpt::PathString::FromCString(modDoc.GetPathName());
 		} else
 		{
 			// if it doesnt, put it in settings dir
-			name = theApp.GetConfigPath().ToCString() + modDoc.GetTitle();
+			name = theApp.GetConfigPath() + mpt::PathString::FromCString(modDoc.GetTitle());
 		}
 	} else
 	{
-		name = m_csPath+modDoc.GetTitle();
+		name = m_csPath + mpt::PathString::FromCString(modDoc.GetTitle());
 	}
 	
-	name.Append(".AutoSave.");					//append backup tag
-	name.Append(timeStamp);						//append timestamp
-	name.Append(".");							//append extension
+	name += MPT_PATHSTRING(".AutoSave.");					//append backup tag
+	name += mpt::PathString::FromWide(timeStamp);						//append timestamp
+	name += MPT_PATHSTRING(".");							//append extension
 	if(modDoc.GetrSoundFile().m_SongFlags[SONG_ITPROJECT])
 	{
-		name.Append("itp");
+		name += MPT_PATHSTRING("itp");
 	} else
 	{
-		name.Append(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
+		name += mpt::PathString::FromUTF8(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
 	}
 
-	return mpt::PathString::FromCString(name);
+	return name;
 }
 
 
@@ -300,7 +300,7 @@ void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 		}
 	} else
 	{
-		path = m_csPath;
+		path = m_csPath.ToCString();
 	}
 
 	CString searchPattern = path + modDoc.GetTitle() + ".AutoSave.*";
@@ -371,7 +371,7 @@ BOOL CAutoSaverGUI::OnInitDialog()
 	CheckDlgButton(IDC_AUTOSAVE_ENABLE, m_pAutoSaver->IsEnabled()?BST_CHECKED:BST_UNCHECKED);
 	//SetDlgItemText(IDC_AUTOSAVE_FNTEMPLATE, m_pAutoSaver->GetFilenameTemplate());
 	SetDlgItemInt(IDC_AUTOSAVE_HISTORY, m_pAutoSaver->GetHistoryDepth()); //TODO
-	SetDlgItemText(IDC_AUTOSAVE_PATH, m_pAutoSaver->GetPath());
+	SetDlgItemText(IDC_AUTOSAVE_PATH, m_pAutoSaver->GetPath().ToCString());
 	SetDlgItemInt(IDC_AUTOSAVE_INTERVAL, m_pAutoSaver->GetSaveInterval());
 	CheckDlgButton(IDC_AUTOSAVE_USEORIGDIR, m_pAutoSaver->GetUseOriginalPath()?BST_CHECKED:BST_UNCHECKED);
 	CheckDlgButton(IDC_AUTOSAVE_USECUSTOMDIR, m_pAutoSaver->GetUseOriginalPath()?BST_UNCHECKED:BST_CHECKED);
@@ -388,14 +388,14 @@ void CAutoSaverGUI::OnOK()
 {
 	CString tempPath;
 	IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) ? m_pAutoSaver->Enable() : m_pAutoSaver->Disable();
-	m_pAutoSaver->SetFilenameTemplate(""); //TODO
+	m_pAutoSaver->SetFilenameTemplate(MPT_PATHSTRING("")); //TODO
 	m_pAutoSaver->SetHistoryDepth(GetDlgItemInt(IDC_AUTOSAVE_HISTORY));
 	m_pAutoSaver->SetSaveInterval(GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
 	m_pAutoSaver->SetUseOriginalPath(IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
 	GetDlgItemText(IDC_AUTOSAVE_PATH, tempPath);
 	if (!tempPath.IsEmpty() && (tempPath.Right(1)!="\\"))
 		tempPath.Append("\\");
-	m_pAutoSaver->SetPath(tempPath);
+	m_pAutoSaver->SetPath(mpt::PathString::FromCString(tempPath));
 
 	CPropertyPage::OnOK();
 }
