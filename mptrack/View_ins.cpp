@@ -2059,10 +2059,10 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		break;
 
 	case DRAGONDROP_MIDIINSTR:
-		if (CDLSBank::IsDLSBank((LPCSTR)lpDropInfo->lDropParam))
+		if (CDLSBank::IsDLSBank(mpt::PathString::FromCString((LPCSTR)lpDropInfo->lDropParam)))
 		{
 			CDLSBank dlsbank;
-			if (dlsbank.Open((LPCSTR)lpDropInfo->lDropParam))
+			if (dlsbank.Open(mpt::PathString::FromCString((LPCSTR)lpDropInfo->lDropParam)))
 			{
 				DLSINSTRUMENT *pDlsIns;
 				UINT nIns = 0, nRgn = 0xFF;

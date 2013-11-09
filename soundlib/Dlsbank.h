@@ -115,7 +115,7 @@ class CDLSBank
 {
 protected:
 	SOUNDBANKINFO m_BankInfo;
-	CHAR m_szFileName[_MAX_PATH];
+	mpt::PathString m_szFileName;
 	UINT m_nType;
 	DWORD m_dwWavePoolOffset;
 	// DLS Information
@@ -129,13 +129,13 @@ public:
 	CDLSBank();
 	virtual ~CDLSBank();
 	void Destroy();
-	static BOOL IsDLSBank(const char *lpszFileName);
+	static BOOL IsDLSBank(const mpt::PathString &filename);
 	static DWORD MakeMelodicCode(UINT bank, UINT instr) { return ((bank << 16) | (instr));}
 	static DWORD MakeDrumCode(UINT rgn, UINT instr) { return (0x80000000 | (rgn << 16) | (instr));}
 
 public:
-	BOOL Open(const char *lpszFileName);
-	const char *GetFileName() const { return m_szFileName; }
+	BOOL Open(const mpt::PathString &filename);
+	mpt::PathString GetFileName() const { return m_szFileName; }
 	UINT GetBankType() const { return m_nType; }
 	UINT GetBankInfo(SOUNDBANKINFO *pBankInfo=NULL) const { if (pBankInfo) *pBankInfo = m_BankInfo; return m_nType; }
 

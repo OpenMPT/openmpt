@@ -503,7 +503,7 @@ void CModTree::RefreshDlsBanks()
 				TV_SORTCB tvs;
 				CDLSBank *pDlsBank = CTrackApp::gpDLSBanks[iDls];
 				// Add DLS file folder
-				_splitpath(pDlsBank->GetFileName(), NULL, NULL, szName, szExt);
+				_splitpath(pDlsBank->GetFileName().ToLocale().c_str(), NULL, NULL, szName, szExt);
 				strcat(szName, szExt);
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
@@ -3155,7 +3155,7 @@ void CModTree::OnExportMidiLib()
 			"All Files (*.*)|*.*||");
 	if(!dlg.Show()) return;
 
-	CTrackApp::ExportMidiConfig(dlg.GetFirstFile().ToLocale().c_str());
+	CTrackApp::ExportMidiConfig(dlg.GetFirstFile());
 }
 
 

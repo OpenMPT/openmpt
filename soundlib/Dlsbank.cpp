@@ -500,13 +500,13 @@ void CDLSBank::Destroy()
 }
 
 
-BOOL CDLSBank::IsDLSBank(const char *lpszFileName)
-//------------------------------------------------
+BOOL CDLSBank::IsDLSBank(const mpt::PathString &filename)
+//-------------------------------------------------------
 {
 	RIFFCHUNKID riff;
 	FILE *f;
-	if ((!lpszFileName) || (!lpszFileName[0])) return FALSE;
-	if ((f = fopen(lpszFileName, "rb")) == NULL) return FALSE;
+	if(filename.empty()) return FALSE;
+	if((f = mpt_fopen(filename, "rb")) == NULL) return FALSE;
 	MemsetZero(riff);
 	fread(&riff, sizeof(RIFFCHUNKID), 1, f);
 	// Check for embedded DLS sections
@@ -1138,8 +1138,8 @@ BOOL CDLSBank::ConvertSF2ToDLS(LPVOID pvsf2info)
 ///////////////////////////////////////////////////////////////
 // Open: opens a DLS bank
 
-BOOL CDLSBank::Open(const char *lpszFileName)
-//-------------------------------------------
+BOOL CDLSBank::Open(const mpt::PathString &filename)
+//--------------------------------------------------
 {
 	SF2LOADERINFO sf2info;
 	const BYTE *lpMemFile;	// Pointer to memory-mapped file
@@ -1147,12 +1147,12 @@ BOOL CDLSBank::Open(const char *lpszFileName)
 	DWORD dwMemPos, dwMemLength;
 	UINT nInsDef;
 
-	if ((!lpszFileName) || (!lpszFileName[0])) return FALSE;
-	strcpy(m_szFileName, lpszFileName);
+	if(filename.empty()) return FALSE;
+	m_szFileName = filename;
 	lpMemFile = NULL;
 	// Memory-Mapped file
 	CMappedFile MapFile;
-	if (!MapFile.Open(lpszFileName)) return FALSE;
+	if (!MapFile.Open(filename.ToLocale().c_str())) return FALSE;
 	dwMemLength = MapFile.GetLength();
 	if (dwMemLength >= 256) lpMemFile = (const BYTE *)MapFile.Lock();
 	if (!lpMemFile)
@@ -1450,7 +1450,7 @@ BOOL CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen
 		return FALSE;
 	}
 	dwOffset = m_pWaveForms[nWaveLink] + m_dwWavePoolOffset;
-	if ((f = fopen(m_szFileName, "rb")) == NULL) return FALSE;
+	if((f = mpt_fopen(m_szFileName, "rb")) == NULL) return FALSE;
 	if (fseek(f, dwOffset, SEEK_SET) == 0)
 	{
 		if (m_nType & SOUNDBANK_TYPE_SF2)
