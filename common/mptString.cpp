@@ -185,7 +185,7 @@ std::wstring Decode(const std::string &src, Charset charset)
 					outbuf[i] = 0;
 				}
 				#ifdef MPT_PLATFORM_BIG_ENDIAN
-					outbuf[[sizeof(wchar_t)-1 - 1] = 0xff; outbuf[sizeof(wchar_t)-1 - 0] = 0xfd;
+					outbuf[sizeof(wchar_t)-1 - 1] = 0xff; outbuf[sizeof(wchar_t)-1 - 0] = 0xfd;
 				#else
 					outbuf[1] = 0xff; outbuf[0] = 0xfd;
 				#endif
