@@ -586,16 +586,16 @@ void TestMisc()
 	// Path conversions
 #ifdef MODPLUG_TRACKER
 	const mpt::PathString realExePath = theApp.GetAppDirPath();
-	const CString exePath = "C:\\OpenMPT\\";
-	theApp.SetAppDirPath(mpt::PathString::FromCString(exePath));
-	VERIFY_EQUAL(theApp.AbsolutePathToRelative("C:\\OpenMPT\\"), ".\\");
-	VERIFY_EQUAL(theApp.AbsolutePathToRelative("c:\\OpenMPT\\foo"), ".\\foo");
-	VERIFY_EQUAL(theApp.AbsolutePathToRelative("C:\\foo"), "\\foo");
-	VERIFY_EQUAL(theApp.RelativePathToAbsolute(".\\"), "C:\\OpenMPT\\");
-	VERIFY_EQUAL(theApp.RelativePathToAbsolute(".\\foo"), "C:\\OpenMPT\\foo");
-	VERIFY_EQUAL(theApp.RelativePathToAbsolute("\\foo"), "C:\\foo");
-	VERIFY_EQUAL(theApp.AbsolutePathToRelative("\\\\server\\path\\file"), "\\\\server\\path\\file");
-	VERIFY_EQUAL(theApp.RelativePathToAbsolute("\\\\server\\path\\file"), "\\\\server\\path\\file");
+	const mpt::PathString exePath = MPT_PATHSTRING("C:\\OpenMPT\\");
+	theApp.SetAppDirPath(exePath);
+	VERIFY_EQUAL(theApp.AbsolutePathToRelative(MPT_PATHSTRING("C:\\OpenMPT\\")), MPT_PATHSTRING(".\\"));
+	VERIFY_EQUAL(theApp.AbsolutePathToRelative(MPT_PATHSTRING("c:\\OpenMPT\\foo")), MPT_PATHSTRING(".\\foo"));
+	VERIFY_EQUAL(theApp.AbsolutePathToRelative(MPT_PATHSTRING("C:\\foo")), MPT_PATHSTRING("\\foo"));
+	VERIFY_EQUAL(theApp.RelativePathToAbsolute(MPT_PATHSTRING(".\\")), MPT_PATHSTRING("C:\\OpenMPT\\"));
+	VERIFY_EQUAL(theApp.RelativePathToAbsolute(MPT_PATHSTRING(".\\foo")), MPT_PATHSTRING("C:\\OpenMPT\\foo"));
+	VERIFY_EQUAL(theApp.RelativePathToAbsolute(MPT_PATHSTRING("\\foo")), MPT_PATHSTRING("C:\\foo"));
+	VERIFY_EQUAL(theApp.AbsolutePathToRelative(MPT_PATHSTRING("\\\\server\\path\\file")), MPT_PATHSTRING("\\\\server\\path\\file"));
+	VERIFY_EQUAL(theApp.RelativePathToAbsolute(MPT_PATHSTRING("\\\\server\\path\\file")), MPT_PATHSTRING("\\\\server\\path\\file"));
 	theApp.SetAppDirPath(realExePath);
 #endif
 

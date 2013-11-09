@@ -339,7 +339,7 @@ static inline wchar_t SanitizeFilenameChar(wchar_t c)
 }
 
 void SanitizeFilename(mpt::PathString &filename)
-//-----------------------------------------------
+//----------------------------------------------
 {
 	mpt::RawPathString tmp = filename.AsNative();
 	for(mpt::RawPathString::iterator it = tmp.begin(); it != tmp.end(); ++it)

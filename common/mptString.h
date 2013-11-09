@@ -319,23 +319,23 @@ FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode);
 // Sanitize a filename (remove special chars)
 void SanitizeFilename(mpt::PathString &filename);
 
-MPT_DEPRECATED_PATH void SanitizeFilename(char *beg, char *end);
-MPT_DEPRECATED_PATH void SanitizeFilename(wchar_t *beg, wchar_t *end);
+void SanitizeFilename(char *beg, char *end);
+void SanitizeFilename(wchar_t *beg, wchar_t *end);
 
-MPT_DEPRECATED_PATH void SanitizeFilename(std::string &str);
-MPT_DEPRECATED_PATH void SanitizeFilename(std::wstring &str);
+void SanitizeFilename(std::string &str);
+void SanitizeFilename(std::wstring &str);
 
 template <std::size_t size>
-MPT_DEPRECATED_PATH void SanitizeFilename(char (&buffer)[size])
-//-------------------------------------------------------------
+void SanitizeFilename(char (&buffer)[size])
+//-----------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	SanitizeFilename(buffer, buffer + size);
 }
 
 template <std::size_t size>
-MPT_DEPRECATED_PATH void SanitizeFilename(wchar_t (&buffer)[size])
-//----------------------------------------------------------------
+void SanitizeFilename(wchar_t (&buffer)[size])
+//--------------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	SanitizeFilename(buffer, buffer + size);
