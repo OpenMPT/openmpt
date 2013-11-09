@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "mptString.h"
 
+#include <stdexcept>
 #include <vector>
 #include <cstdarg>
 
@@ -68,7 +69,7 @@ static const char * CharsetToString(Charset charset)
 {
 	switch(charset)
 	{
-		case CharsetLocale:      return "char";        break;
+		case CharsetLocale:      return "";            break; // "char" breaks with glibc when no locale is set
 		case CharsetUTF8:        return "UTF-8";       break;
 		case CharsetUS_ASCII:    return "ASCII";       break;
 		case CharsetISO8859_1:   return "ISO-8859-1";  break;
@@ -96,6 +97,10 @@ std::string Encode(const std::wstring &src, Charset charset)
 	#else // !WIN32
 		iconv_t conv = iconv_t();
 		conv = iconv_open(CharsetToString(charset), "wchar_t");
+		if(!conv)
+		{
+			throw std::runtime_error("iconv conversion not working");
+		}
 		std::vector<wchar_t> wide_string(src.c_str(), src.c_str() + src.length() + 1);
 		std::vector<char> encoded_string(wide_string.size() * 8); // large enough
 		char * inbuf = (char*)&wide_string[0];
@@ -130,6 +135,10 @@ std::wstring Decode(const std::string &src, Charset charset)
 	#else // !WIN32
 		iconv_t conv = iconv_t();
 		conv = iconv_open("wchar_t", CharsetToString(charset));
+		if(!conv)
+		{
+			throw std::runtime_error("iconv conversion not working");
+		}
 		std::vector<char> encoded_string(src.c_str(), src.c_str() + src.length() + 1);
 		std::vector<wchar_t> wide_string(encoded_string.size() * 8); // large enough
 		char * inbuf = &encoded_string[0];
@@ -156,6 +165,10 @@ std::string Convert(const std::string &src, Charset from, Charset to)
 	#else // !WIN32
 		iconv_t conv = iconv_t();
 		conv = iconv_open(CharsetToString(to), CharsetToString(from));
+		if(!conv)
+		{
+			throw std::runtime_error("iconv conversion not working");
+		}
 		std::vector<char> src_string(src.c_str(), src.c_str() + src.length() + 1);
 		std::vector<char> dst_string(src_string.size() * 8); // large enough
 		char * inbuf = &src_string[0];
