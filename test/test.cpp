@@ -1611,13 +1611,19 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 		VERIFY_EQUAL_NONCONT(memcmp(&sampleData[0], &sampleDataNew[0], sampleData.size()), 0);
 		fclose(f);
 	}
-	while(remove(filename.ToLocale().c_str()) == EACCES)
-	{
-		// wait for windows virus scanners
-		#ifdef WIN32
-			Sleep(1);
-		#endif
-	}
+	#ifdef WIN32
+		for(int retry=0; retry<10; retry++)
+		{
+			if(DeleteFileW(filename.AsNative().c_str()) != FALSE)
+			{
+				break;
+			}
+			// wait for windows virus scanners
+			Sleep(10);
+		}
+	#else
+		remove(filename.AsNative().c_str());
+	#endif
 }
 
 
