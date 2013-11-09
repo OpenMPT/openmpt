@@ -27,7 +27,7 @@ TODOS:
 -Handle const-status better(e.g. status check in unserialization)
 */
 
-const CHAR CTuningCollection::s_FileExtension[4] = ".tc";
+const char CTuningCollection::s_FileExtension[4] = ".tc";
 
 namespace CTuningS11n
 {
@@ -122,9 +122,9 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::o
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() const
 //-------------------------------------------------------------------------------
 {
-	if(m_SavefilePath.length() < 1)
+	if(m_SavefilePath.empty())
 		return SERIALIZATION_FAILURE;
-	mpt::ofstream fout(m_SavefilePath.c_str(), std::ios::binary);
+	mpt::ofstream fout(m_SavefilePath.AsNative().c_str(), std::ios::binary);
 	if(!fout.good())
 		return SERIALIZATION_FAILURE;
 
@@ -137,9 +137,9 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() cons
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize()
 //---------------------------------------------------------------------------
 {
-	if(m_SavefilePath.length() < 1)
+	if(m_SavefilePath.empty() < 1)
 		return SERIALIZATION_FAILURE;
-	mpt::ifstream fin(m_SavefilePath.c_str(), std::ios::binary);
+	mpt::ifstream fin(m_SavefilePath.AsNative().c_str(), std::ios::binary);
 	if(!fin.good())
 		return SERIALIZATION_FAILURE;
 
