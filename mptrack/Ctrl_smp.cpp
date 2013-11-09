@@ -738,7 +738,7 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 {
 	CMappedFile f;
 	BeginWaitCursor();
-	if ((!lpszFileName) || (!f.Open(lpszFileName)))
+	if ((!lpszFileName) || (!f.Open(mpt::PathString::FromLocale(lpszFileName))))
 	{
 		EndWaitCursor();
 		return false;

@@ -1152,7 +1152,7 @@ BOOL CDLSBank::Open(const mpt::PathString &filename)
 	lpMemFile = NULL;
 	// Memory-Mapped file
 	CMappedFile MapFile;
-	if (!MapFile.Open(filename.ToLocale().c_str())) return FALSE;
+	if (!MapFile.Open(filename)) return FALSE;
 	dwMemLength = MapFile.GetLength();
 	if (dwMemLength >= 256) lpMemFile = (const BYTE *)MapFile.Lock();
 	if (!lpMemFile)

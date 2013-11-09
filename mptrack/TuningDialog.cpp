@@ -1484,17 +1484,11 @@ static inline SclFloat CentToRatio(const SclFloat& val)
 CTuningDialog::EnSclImport CTuningDialog::ImportScl(LPCTSTR pszPath, LPCTSTR pszName)
 //-----------------------------------------------------------------------------------
 {
-	CFile file;
-	if (file.Open(pszPath, CFile::modeRead) == 0)
+	mpt::ifstream iStrm(pszPath, std::ios::in | std::ios::binary);
+	if(!iStrm)
+	{
 		return enSclImportFailUnableToOpenFile;
-
-	size_t nSize = static_cast<size_t>(file.GetLength());
-
-    std::vector<char> data(nSize + 1, 0);
-	nSize = file.Read(&data[0], nSize);
-	file.Close();
-
-    std::istringstream iStrm(std::string(&data[0], nSize));
+	}
 	return ImportScl(iStrm, pszName);
 }
 

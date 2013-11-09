@@ -223,7 +223,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	CMappedFile f;
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
-		if(m_szInstrumentPath[ins].empty() || !f.Open(m_szInstrumentPath[ins].c_str())) continue;
+		if(m_szInstrumentPath[ins].empty() || !f.Open(mpt::PathString::FromLocale(m_szInstrumentPath[ins]))) continue;
 
 		FileReader file = f.GetFile();
 		if(file.IsValid())

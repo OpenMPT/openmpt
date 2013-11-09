@@ -1660,7 +1660,7 @@ bool CVstPlugin::LoadProgram()
 
 	CMappedFile f;
 	const char *errorStr = nullptr;
-	if(f.Open(dlg.GetFirstFile().ToCString()))
+	if(f.Open(dlg.GetFirstFile()))
 	{
 		FileReader file = f.GetFile();
 		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));

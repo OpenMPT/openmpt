@@ -371,9 +371,10 @@ BOOL CModToMidi::DoConvert()
 	CHAR s[256];
 	UINT nTickMultiplier, nClock, nOrder, nRow;
 	UINT nSpeed;
-	CFile f;
+	FILE *f = nullptr;
 
-	if (!f.Open(m_szFileName, CFile::modeCreate | CFile::modeWrite))
+	f = mpt_fopen(mpt::PathString::FromLocale(m_szFileName), "wb");
+	if(!f)
 	{
 		return FALSE;
 	}
@@ -392,8 +393,8 @@ BOOL CModToMidi::DoConvert()
 	mthd.wTrks = static_cast<uint16>(Tracks.size()); // 1 track/channel
 	mthd.wTrks = BigEndianW(mthd.wTrks); //Convert to big endian value.
 	mthd.wDivision = BigEndianW(wPPQN);
-	if (m_bRmi) f.Write(&rmid, sizeof(rmid));
-	f.Write(&mthd, sizeof(mthd));
+	if (m_bRmi) fwrite(&rmid, 1, sizeof(rmid), f);
+	fwrite(&mthd, 1, sizeof(mthd), f);
 
 	// Add Song Name on track 0
 	const std::string modTitle = m_pSndFile->GetTitle();
@@ -566,11 +567,11 @@ BOOL CModToMidi::DoConvert()
 		Tracks[iTrk].Write(tmp, 4);
 		mtrk.id = 0x6B72544D;
 		mtrk.len = BigEndian(Tracks[iTrk].nTrackSize);
-		f.Write(&mtrk, sizeof(mtrk));
+		fwrite(&mtrk, 1, sizeof(mtrk), f);
 		rmid.filelen += sizeof(mtrk) + Tracks[iTrk].nTrackSize;
 		if (Tracks[iTrk].nTrackSize > 0)
 		{
-			f.Write(Tracks[iTrk].pTrackData, Tracks[iTrk].nTrackSize);
+			fwrite(Tracks[iTrk].pTrackData, 1, Tracks[iTrk].nTrackSize, f);
 			delete[] Tracks[iTrk].pTrackData;
 		}
 	}
@@ -578,10 +579,10 @@ BOOL CModToMidi::DoConvert()
 	if (m_bRmi)
 	{
 		// Update header file size
-		f.SeekToBegin();
-		f.Write(&rmid, sizeof(rmid));
+		fseek(f, 0, SEEK_SET);
+		fwrite(&rmid, 1, sizeof(rmid), f);
 	}
-	f.Close();
+	fclose(f);
 	return TRUE;
 }
 

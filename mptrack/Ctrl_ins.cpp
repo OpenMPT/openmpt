@@ -1399,7 +1399,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	BOOL bFirst, bOk;
 	
 	BeginWaitCursor();
-	if ((!lpszFileName) || (!f.Open(lpszFileName)))
+	if ((!lpszFileName) || (!f.Open(mpt::PathString::FromLocale(lpszFileName))))
 	{
 		EndWaitCursor();
 		return FALSE;
