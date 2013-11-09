@@ -2182,7 +2182,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	return true;
 #else
 	MPT_UNREFERENCED_PARAMETER(nSample);
-	MPT_UNREFERENCED_PARAMETER(lpszFileName);
+	MPT_UNREFERENCED_PARAMETER(filename);
 	return false;
 #endif // NO_FLAC
 }
