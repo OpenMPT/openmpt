@@ -710,7 +710,7 @@ void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
 static std::string FormatSetting(const SettingPath &path, const SettingValue &val)
 //--------------------------------------------------------------------------------
 {
-	return path.FormatAsString() + " = " + mpt::String::Encode(val.FormatAsString(), mpt::CharsetLocale);
+	return mpt::String::Encode(path.FormatAsString() + L" = " + val.FormatAsString(), mpt::CharsetLocale);
 }
 
 
@@ -762,7 +762,7 @@ void COptionsAdvanced::OnOptionDblClick()
 	}
 	const SettingPath path = m_IndexToPath[index];
 	SettingValue val = theApp.GetSettings().GetMap().find(path)->second;
-	CInputDlg inputDlg(this, path.FormatAsString().c_str(), mpt::String::Encode(val.FormatValueAsString(), mpt::CharsetLocale).c_str());
+	CInputDlg inputDlg(this, mpt::String::Encode(path.FormatAsString(), mpt::CharsetLocale).c_str(), mpt::String::Encode(val.FormatValueAsString(), mpt::CharsetLocale).c_str());
 	if(inputDlg.DoModal() != IDOK)
 	{
 		return;
