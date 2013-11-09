@@ -19,7 +19,7 @@ class CAutoSaver
 public:
 //Cons/Destr
 	CAutoSaver(bool enabled=true, int saveInterval=10, int backupHistory=3,
-			   bool useOriginalPath=true, CString path="", CString fileNameTemplate="");
+			   bool useOriginalPath=true, mpt::PathString path=mpt::PathString(), mpt::PathString fileNameTemplate=mpt::PathString());
 	~CAutoSaver();
 	
 //Work
@@ -32,10 +32,10 @@ public:
 	bool IsEnabled();
 	void SetUseOriginalPath(bool useOrgPath);
 	bool GetUseOriginalPath();
-	void SetPath(CString path);
-	CString GetPath();
-	void SetFilenameTemplate(CString path);
-	CString GetFilenameTemplate();
+	void SetPath(mpt::PathString path);
+	mpt::PathString GetPath();
+	void SetFilenameTemplate(mpt::PathString path);
+	mpt::PathString GetFilenameTemplate();
 	void SetHistoryDepth(int);
 	int GetHistoryDepth();
 	void SetSaveInterval(int minutes);
@@ -59,8 +59,8 @@ private:
 	DWORD m_nSaveInterval;
 	size_t m_nBackupHistory;
 	bool m_bUseOriginalPath;
-	CString m_csPath;
-	CString m_csFileNameTemplate;
+	mpt::PathString m_csPath;
+	mpt::PathString m_csFileNameTemplate;
 
 };
 
