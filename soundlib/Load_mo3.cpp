@@ -49,12 +49,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	// Try to load unmo3 dynamically.
 #ifdef _WIN32
 #ifdef MODPLUG_TRACKER
-	HMODULE unmo3 = LoadLibraryW((theApp.GetAppDirPath() + mpt::PathString::FromUTF8("unmo3.dll")).AsNative().c_str());
+	HMODULE unmo3 = LoadLibraryW((theApp.GetAppDirPath() + MPT_PATHSTRING("unmo3.dll")).AsNative().c_str());
 #else
-	HMODULE unmo3 = LoadLibraryW(mpt::PathString::FromUTF8("unmo3.dll").AsNative().c_str());
+	HMODULE unmo3 = LoadLibraryW(MPT_PATHSTRING("unmo3.dll").AsNative().c_str());
 #endif // MODPLUG_TRACKER
 #else
-	void unmo3 = dlopen(mpt::PathString::FromUTF8("libunmo3.so").AsNative().c_str(), RTLD_LAZY);
+	void unmo3 = dlopen(MPT_PATHSTRING("libunmo3.so").AsNative().c_str(), RTLD_LAZY);
 #endif // _WIN32
 
 	if(unmo3 == nullptr)

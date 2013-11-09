@@ -123,7 +123,7 @@ static noinline void DoLog(const char *file, int line, const char *function, con
 			static FILE * s_logfile = nullptr;
 			if(!s_logfile)
 			{
-				s_logfile = mpt_fopen(mpt::PathString::FromUTF8("mptrack.log"), "a");
+				s_logfile = mpt_fopen(MPT_PATHSTRING("mptrack.log"), "a");
 			}
 			if(s_logfile)
 			{

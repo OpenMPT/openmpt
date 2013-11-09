@@ -319,11 +319,11 @@ struct LameDynBind
 	LameDynBind()
 	{
 		Reset();
-		if(!hLame) TryLoad(mpt::PathString::FromUTF8("libmp3lame.dll"), true);
-		if(!hLame) TryLoad(mpt::PathString::FromUTF8("liblame.dll"), true);
-		if(!hLame) TryLoad(mpt::PathString::FromUTF8("mp3lame.dll"), true);
-		if(!hLame) TryLoad(mpt::PathString::FromUTF8("lame.dll"), true);
-		if(!hLame) TryLoad(mpt::PathString::FromUTF8("lame_enc.dll"), false);
+		if(!hLame) TryLoad(MPT_PATHSTRING("libmp3lame.dll"), true);
+		if(!hLame) TryLoad(MPT_PATHSTRING("liblame.dll"), true);
+		if(!hLame) TryLoad(MPT_PATHSTRING("mp3lame.dll"), true);
+		if(!hLame) TryLoad(MPT_PATHSTRING("lame.dll"), true);
+		if(!hLame) TryLoad(MPT_PATHSTRING("lame_enc.dll"), false);
 	}
 	void TryLoad(mpt::PathString filename, bool warn)
 	{
@@ -648,12 +648,12 @@ struct BladeDynBind
 		Reset();
 		if(!hBlade)
 		{
-			TryLoad(mpt::PathString::FromUTF8("lame_enc.dll"));
+			TryLoad(MPT_PATHSTRING("lame_enc.dll"));
 			if(hBlade) lame = 1;
 		}
 		if(!hBlade)
 		{
-			TryLoad(mpt::PathString::FromUTF8("bladeenc.dll"));
+			TryLoad(MPT_PATHSTRING("bladeenc.dll"));
 			if(hBlade) lame = 0;
 		}
 	}

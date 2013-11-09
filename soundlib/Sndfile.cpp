@@ -1725,7 +1725,7 @@ bool CSoundFile::LoadStaticTunings()
 	// Load local tunings.
 	s_pTuningsSharedLocal->SetSavefilePath(
 		TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING)
-		+ mpt::PathString::FromUTF8("local_tunings")
+		+ MPT_PATHSTRING("local_tunings")
 		+ mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)
 		);
 	s_pTuningsSharedLocal->Deserialize();

@@ -1386,7 +1386,7 @@ static mpt::PathString GetTestFilenameBase()
 			break;
 		}
 	}
-	theFile += mpt::PathString::FromUTF8("test/test.");
+	theFile += MPT_PATHSTRING("test/test.");
 	return theFile;
 }
 
@@ -1438,7 +1438,7 @@ static bool ShouldRunTests()
 
 static mpt::PathString GetTestFilenameBase()
 {
-	return mpt::PathString::FromUTF8("../test/test.");
+	return MPT_PATHSTRING("../test/test.");
 }
 
 typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
@@ -1497,13 +1497,13 @@ void TestLoadSaveFile()
 
 	// Test MPTM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("mptm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("mptm"));
 
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			SaveIT(sndFileContainer, filenameBase + mpt::PathString::FromUTF8("saved.mptm"));
+			SaveIT(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.mptm"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -1512,7 +1512,7 @@ void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("saved.mptm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.mptm"));
 
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 		
@@ -1522,7 +1522,7 @@ void TestLoadSaveFile()
 
 	// Test XM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("xm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("xm"));
 
 		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
@@ -1536,7 +1536,7 @@ void TestLoadSaveFile()
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			SaveXM(sndFileContainer, filenameBase + mpt::PathString::FromUTF8("saved.xm"));
+			SaveXM(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.xm"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -1545,7 +1545,7 @@ void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("saved.xm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.xm"));
 
 		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
@@ -1555,13 +1555,13 @@ void TestLoadSaveFile()
 
 	// Test S3M file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("s3m"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("s3m"));
 		
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			SaveS3M(sndFileContainer, filenameBase + mpt::PathString::FromUTF8("saved.s3m"));
+			SaveS3M(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.s3m"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -1570,7 +1570,7 @@ void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + mpt::PathString::FromUTF8("saved.s3m"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.s3m"));
 
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), true);
 
@@ -1583,7 +1583,7 @@ void TestLoadSaveFile()
 void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
 //---------------------------------------------------------------------------------------------------------------
 {
-	mpt::PathString filename = GetTestFilenameBase() + mpt::PathString::FromUTF8("itcomp" + Stringify(testcount) + ".raw");
+	mpt::PathString filename = GetTestFilenameBase() + MPT_PATHSTRING("itcomp" + Stringify(testcount) + ".raw");
 
 	ModSample smp;
 	smp.uFlags = smpFormat;

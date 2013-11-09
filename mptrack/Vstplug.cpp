@@ -1618,7 +1618,7 @@ bool CVstPlugin::SaveProgram()
 		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS, true);
 	}
 
-	bool bank = (dlg.GetExtension() == mpt::PathString::FromUTF8("fxb"));
+	bool bank = (dlg.GetExtension() == MPT_PATHSTRING("fxb"));
 
 	mpt::fstream f(dlg.GetFirstFile().AsNative().c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
 	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
