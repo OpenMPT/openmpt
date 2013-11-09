@@ -388,24 +388,30 @@ public:
 class SettingPath
 {
 private:
-	std::string section;
-	std::string key;
+	std::wstring section;
+	std::wstring key;
 public:
 	SettingPath()
 	{
 		return;
 	}
-	SettingPath(const std::string &section_, const std::string &key_)
+	SettingPath(const std::wstring &section_, const std::wstring &key_)
 		: section(section_)
 		, key(key_)
 	{
 		return;
 	}
-	std::string GetSection() const
+	SettingPath(const std::string &section_, const std::string &key_)
+		: section(mpt::String::Decode(section_, mpt::CharsetLocale))
+		, key(mpt::String::Decode(key_, mpt::CharsetLocale))
+	{
+		return;
+	}
+	std::wstring GetSection() const
 	{
 		return section;
 	}
-	std::string GetKey() const
+	std::wstring GetKey() const
 	{
 		return key;
 	}
@@ -419,9 +425,9 @@ public:
 		int cmp_key = key.compare(other.key);
 		return cmp_key;
 	}
-	std::string FormatAsString() const
+	std::wstring FormatAsString() const
 	{
-		return section + "." + key;
+		return section + L"." + key;
 	}
 };
 
@@ -510,6 +516,11 @@ public:
 		return FromSettingValue<T>(ReadSetting(path, ToSettingValue<T>(def), metadata));
 	}
 	template <typename T>
+	T Read(const std::wstring &section, const std::wstring &key, const T &def = T(), const SettingMetadata &metadata = SettingMetadata()) const
+	{
+		return FromSettingValue<T>(ReadSetting(SettingPath(section, key), ToSettingValue<T>(def), metadata));
+	}
+	template <typename T>
 	T Read(const std::string &section, const std::string &key, const T &def = T(), const SettingMetadata &metadata = SettingMetadata()) const
 	{
 		return FromSettingValue<T>(ReadSetting(SettingPath(section, key), ToSettingValue<T>(def), metadata));
@@ -520,6 +531,11 @@ public:
 		WriteSetting(path, ToSettingValue<T>(val));
 	}
 	template <typename T>
+	void Write(const std::wstring &section, const std::wstring &key, const T &val)
+	{
+		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val));
+	}
+	template <typename T>
 	void Write(const std::string &section, const std::string &key, const T &val)
 	{
 		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val));
@@ -527,6 +543,10 @@ public:
 	void Remove(const SettingPath &path)
 	{
 		RemoveSetting(path);
+	}
+	void Remove(const std::wstring &section, const std::wstring &key)
+	{
+		RemoveSetting(SettingPath(section, key));
 	}
 	void Remove(const std::string &section, const std::string &key)
 	{
@@ -586,6 +606,12 @@ public:
 	{
 		conf.Read(path, def, metadata); // set default value
 	}
+	Setting(SettingsContainer &conf_, const std::wstring &section, const std::wstring &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
+		: conf(conf_)
+		, path(section, key)
+	{
+		conf.Read(path, def, metadata); // set default value
+	}
 	Setting(SettingsContainer &conf_, const SettingPath &path_, const T&def, const SettingMetadata &metadata = SettingMetadata())
 		: conf(conf_)
 		, path(path_)
@@ -637,6 +663,14 @@ public:
 	}
 public:
 	CachedSetting(SettingsContainer &conf_, const std::string &section, const std::string &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
+		: value(def)
+		, conf(conf_)
+		, path(section, key)
+	{
+		value = conf.Read(path, def, metadata);
+		conf.Register(this, path);
+	}
+	CachedSetting(SettingsContainer &conf_, const std::wstring &section, const std::wstring &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
 		: value(def)
 		, conf(conf_)
 		, path(section, key)
@@ -713,6 +747,13 @@ public:
 	}
 public:
 	Setting(SettingsContainer &conf_, const std::string &section, const std::string &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
+		: value(def)
+		, conf(conf_)
+		, path(section, key)
+	{
+		value = conf.Read(path, def, metadata);
+	}
+	Setting(SettingsContainer &conf_, const std::wstring &section, const std::wstring &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
 		: value(def)
 		, conf(conf_)
 		, path(section, key)

@@ -412,11 +412,11 @@ void IniFileSettingsBackend::RemoveSettingRaw(const SettingPath &path)
 
 std::wstring IniFileSettingsBackend::GetSection(const SettingPath &path)
 {
-	return mpt::String::Decode(path.GetSection(), mpt::CharsetLocale);
+	return path.GetSection();
 }
 std::wstring IniFileSettingsBackend::GetKey(const SettingPath &path)
 {
-	return mpt::String::Decode(path.GetKey(), mpt::CharsetLocale);
+	return path.GetKey();
 }
 
 
