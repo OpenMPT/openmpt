@@ -39,34 +39,34 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 
-	const CString timestampDir = (CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\");
-	CString baseRescuePath;
+	const mpt::PathString timestampDir = mpt::PathString::FromWide(mpt::String::FromCString((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\")));
+	mpt::PathString baseRescuePath;
 	{
 		// Create a crash directory
-		TCHAR tempPath[_MAX_PATH];
-		GetTempPath(CountOf(tempPath), tempPath);
-		baseRescuePath.Format("%sOpenMPT Crash Files\\", tempPath);
-		if(!PathIsDirectory(baseRescuePath))
+		WCHAR tempPath[MAX_PATH];
+		GetTempPathW(CountOf(tempPath), tempPath);
+		baseRescuePath = mpt::PathString::FromNative(tempPath) + MPT_PATHSTRING("OpenMPT Crash Files\\");
+		if(!PathIsDirectoryW(baseRescuePath.AsNative().c_str()))
 		{
-			CreateDirectory(baseRescuePath, nullptr);
+			CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr);
 		}
-		baseRescuePath.Append(timestampDir);
-		if(!PathIsDirectory(baseRescuePath) && !CreateDirectory(baseRescuePath, nullptr))
+		baseRescuePath += timestampDir;
+		if(!PathIsDirectoryW(baseRescuePath.AsNative().c_str()) && !CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr))
 		{
-			errorMessage.AppendFormat("\n\nCould not create the following directory for saving debug information and modified files to:\n%s", baseRescuePath);
+			errorMessage.AppendFormat("\n\nCould not create the following directory for saving debug information and modified files to:\n%s", mpt::String::ToCString(baseRescuePath.ToWide()));
 		}
 	}
 
 	// Create minidump...
-	HMODULE hDll = ::LoadLibrary("DBGHELP.DLL");
+	HMODULE hDll = ::LoadLibraryW(L"DBGHELP.DLL");
 	if (hDll)
 	{
 		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
 		if (pDump)
 		{
-			const CString filename = baseRescuePath + "crash.dmp";
+			const mpt::PathString filename = baseRescuePath + MPT_PATHSTRING("crash.dmp");
 
-			HANDLE hFile = ::CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			HANDLE hFile = ::CreateFileW(filename.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (hFile != INVALID_HANDLE_VALUE)
 			{
 				_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
@@ -107,7 +107,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 			if(numFiles == 0)
 			{
 				// Show the rescue directory in Explorer...
-				CTrackApp::OpenDirectory(mpt::PathString::FromCString(baseRescuePath));
+				CTrackApp::OpenDirectory(baseRescuePath);
 			}
 			CString filename;
 			filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
