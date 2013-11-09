@@ -721,7 +721,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	// Check if the user prefers to use the app's directory
 	m_szConfigFileName = m_szExePath; // config file
-	m_szConfigFileName += mpt::PathString::FromUTF8("mptrack.ini");
+	m_szConfigFileName += MPT_PATHSTRING("mptrack.ini");
 	if(GetPrivateProfileIntW(L"Paths", L"UseAppDataDirectory", 1, m_szConfigFileName.AsNative().c_str()) == 0)
 	{
 		bIsAppDir = true;
@@ -730,7 +730,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	if(!bIsAppDir)
 	{
 		// Store our app settings in %APPDATA% or "My Files"
-		m_szConfigDirectory += mpt::PathString::FromUTF8("\\OpenMPT\\");
+		m_szConfigDirectory += MPT_PATHSTRING("\\OpenMPT\\");
 
 		// Path doesn't exist yet, so it has to be created
 		if(PathIsDirectoryW(m_szConfigDirectory.AsNative().c_str()) == 0)
@@ -740,8 +740,8 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 		#ifdef WIN32	// Legacy stuff
 		// Move the config files if they're still in the old place.
-		MoveConfigFile(mpt::PathString::FromUTF8("mptrack.ini"));
-		MoveConfigFile(mpt::PathString::FromUTF8("plugin.cache"));
+		MoveConfigFile(MPT_PATHSTRING("mptrack.ini"));
+		MoveConfigFile(MPT_PATHSTRING("plugin.cache"));
 		#endif	// WIN32 Legacy Stuff
 	} else
 	{
@@ -749,7 +749,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	}
 
 	// Create tunings dir
-	mpt::PathString sTuningPath = m_szConfigDirectory + mpt::PathString::FromUTF8("tunings\\");
+	mpt::PathString sTuningPath = m_szConfigDirectory + MPT_PATHSTRING("tunings\\");
 	TrackerDirectories::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
 
 	if(PathIsDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str()) == 0)
@@ -762,13 +762,13 @@ void CTrackApp::SetupPaths(bool overridePortable)
 		// Import old tunings
 		mpt::PathString sOldTunings;
 		sOldTunings = m_szExePath;
-		sOldTunings += mpt::PathString::FromUTF8("tunings\\");
+		sOldTunings += MPT_PATHSTRING("tunings\\");
 
 		if(PathIsDirectoryW(sOldTunings.AsNative().c_str()) != 0)
 		{
 			mpt::PathString sSearchPattern;
 			sSearchPattern = sOldTunings;
-			sSearchPattern += mpt::PathString::FromUTF8("*.*");
+			sSearchPattern += MPT_PATHSTRING("*.*");
 			WIN32_FIND_DATAW FindFileData;
 			HANDLE hFind;
 			hFind = FindFirstFileW(sSearchPattern.AsNative().c_str(), &FindFileData);
@@ -776,7 +776,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 			{
 				do
 				{
-					MoveConfigFile(mpt::PathString::FromNative(FindFileData.cFileName), mpt::PathString::FromUTF8("tunings\\"));
+					MoveConfigFile(mpt::PathString::FromNative(FindFileData.cFileName), MPT_PATHSTRING("tunings\\"));
 				} while(FindNextFileW(hFind, &FindFileData) != 0);
 			}
 			FindClose(hFind);
@@ -786,13 +786,13 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	// Set up default file locations
 	m_szConfigFileName = m_szConfigDirectory; // config file
-	m_szConfigFileName += mpt::PathString::FromUTF8("mptrack.ini");
+	m_szConfigFileName += MPT_PATHSTRING("mptrack.ini");
 
-	m_szPluginCacheFileName = m_szConfigDirectory + mpt::PathString::FromUTF8("plugin.cache"); // plugin cache
+	m_szPluginCacheFileName = m_szConfigDirectory + MPT_PATHSTRING("plugin.cache"); // plugin cache
 
 	mpt::PathString szTemplatePath;
 	szTemplatePath = m_szConfigDirectory;
-	szTemplatePath += mpt::PathString::FromUTF8("TemplateModules\\");
+	szTemplatePath += MPT_PATHSTRING("TemplateModules\\");
 	TrackerDirectories::Instance().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
 
 	//Force use of custom ini file rather than windowsDir\executableName.ini
@@ -2088,7 +2088,7 @@ mpt::PathString CTrackApp::AbsolutePathToRelative(const mpt::PathString &path)
 	if(!_wcsnicmp(exePath.AsNative().c_str(), path.AsNative().c_str(), exePath.AsNative().length()))
 	{
 		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
-		result = mpt::PathString::FromUTF8(".\\"); // ".\"
+		result = MPT_PATHSTRING(".\\"); // ".\"
 		result += mpt::PathString::FromNative(path.AsNative().substr(exePath.AsNative().length()));
 	} else if(!_wcsnicmp(exePath.AsNative().c_str(), path.AsNative().c_str(), 2))
 	{

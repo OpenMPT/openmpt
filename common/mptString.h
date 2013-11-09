@@ -294,6 +294,16 @@ public:
 
 } // namespace mpt
 
+#if defined(WIN32)
+
+#define MPT_PATHSTRING(x) mpt::PathString::FromNative( L ## x )
+
+#else // !WIN32
+
+#define MPT_PATHSTRING(x) mpt::PathString::FromNative( x )
+
+#endif // WIN32
+
 FILE * mpt_fopen(const mpt::PathString &filename, const char *mode);
 FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode);
 

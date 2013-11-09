@@ -2287,11 +2287,11 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 	}
 
 #ifdef MODPLUG_TRACKER
-	if(!mp3lib) mp3lib = LoadLibraryW((theApp.GetAppDirPath() + mpt::PathString::FromUTF8("libmpg123-0.dll")).AsNative().c_str());
-	if(!mp3lib) mp3lib = LoadLibraryW((theApp.GetAppDirPath() + mpt::PathString::FromUTF8("libmpg123.dll")).AsNative().c_str());
+	if(!mp3lib) mp3lib = LoadLibraryW((theApp.GetAppDirPath() + MPT_PATHSTRING("libmpg123-0.dll")).AsNative().c_str());
+	if(!mp3lib) mp3lib = LoadLibraryW((theApp.GetAppDirPath() + MPT_PATHSTRING("libmpg123.dll")).AsNative().c_str());
 #else
-	if(!mp3lib) mp3lib = LoadLibraryW(mpt::PathString::FromUTF8("libmpg123-0.dll").AsNative().c_str());
-	if(!mp3lib) mp3lib = LoadLibraryW(mpt::PathString::FromUTF8("libmpg123.dll").AsNative().c_str());
+	if(!mp3lib) mp3lib = LoadLibraryW(MPT_PATHSTRING("libmpg123-0.dll").AsNative().c_str());
+	if(!mp3lib) mp3lib = LoadLibraryW(MPT_PATHSTRING("libmpg123.dll").AsNative().c_str());
 #endif // MODPLUG_TRACKER
 	if(!mp3lib) return false;
 

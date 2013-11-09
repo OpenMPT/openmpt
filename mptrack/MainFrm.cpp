@@ -2507,7 +2507,7 @@ void CMainFrame::OnHelp()
 //-----------------------
 {
 	mpt::PathString helpFile = theApp.GetAppDirPath();
-	helpFile += mpt::PathString::FromUTF8("OpenMPT Manual.pdf");
+	helpFile += MPT_PATHSTRING("OpenMPT Manual.pdf");
 	if(!theApp.OpenFile(helpFile))
 	{
 		Reporting::Error(std::string("Could not find help file:\n" + helpFile.ToLocale()).c_str());

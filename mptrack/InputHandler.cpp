@@ -30,7 +30,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	//Init CommandSet and Load defaults
 	activeCommandSet = new CCommandSet();
 	
-	mpt::PathString sDefaultPath = theApp.GetConfigPath() + mpt::PathString::FromUTF8("Keybindings.mkb");
+	mpt::PathString sDefaultPath = theApp.GetConfigPath() + MPT_PATHSTRING("Keybindings.mkb");
 	if(sDefaultPath.AsNative().length() > MAX_PATH - 1)
 		sDefaultPath = mpt::PathString();
 
