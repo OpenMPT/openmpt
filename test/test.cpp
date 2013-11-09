@@ -1583,7 +1583,7 @@ void TestLoadSaveFile()
 void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
 //---------------------------------------------------------------------------------------------------------------
 {
-	mpt::PathString filename = GetTestFilenameBase() + MPT_PATHSTRING("itcomp" + Stringify(testcount) + ".raw");
+	mpt::PathString filename = GetTestFilenameBase() + MPT_PATHSTRING("itcomp") + mpt::PathString::FromWide(StringifyW(testcount)) + MPT_PATHSTRING(".raw");
 
 	ModSample smp;
 	smp.uFlags = smpFormat;
