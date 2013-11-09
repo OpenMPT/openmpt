@@ -736,7 +736,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			}
 			else // scl import.
 			{
-				EnSclImport a = ImportScl(files[counter].ToCString(), szFileName);
+				EnSclImport a = ImportScl(files[counter], szFileName);
 				if (a != enSclImportOk)
 				{
 					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
@@ -1481,10 +1481,10 @@ static inline SclFloat CentToRatio(const SclFloat& val)
 }
 
 
-CTuningDialog::EnSclImport CTuningDialog::ImportScl(LPCTSTR pszPath, LPCTSTR pszName)
-//-----------------------------------------------------------------------------------
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, LPCTSTR pszName)
+//---------------------------------------------------------------------------------------------------
 {
-	mpt::ifstream iStrm(pszPath, std::ios::in | std::ios::binary);
+	mpt::ifstream iStrm(filename.AsNative().c_str(), std::ios::in | std::ios::binary);
 	if(!iStrm)
 	{
 		return enSclImportFailUnableToOpenFile;

@@ -255,7 +255,7 @@ private:
 	bool IsDeletable(const CTuningCollection* const pTC) const;
 
 	// Scl-file import.
-	EnSclImport ImportScl(LPCTSTR pszPath, LPCTSTR pszName);
+	EnSclImport ImportScl(const mpt::PathString &filename, LPCTSTR pszName);
 	EnSclImport ImportScl(std::istream& iStrm, LPCTSTR pszName);
 	
 
