@@ -79,6 +79,20 @@ static const char * CharsetToString(Charset charset)
 	}
 	return 0;
 }
+static const char * CharsetToStringTranslit(Charset charset)
+{
+	switch(charset)
+	{
+		case CharsetLocale:      return "//TRANSLIT";            break; // "char" breaks with glibc when no locale is set
+		case CharsetUTF8:        return "UTF-8//TRANSLIT";       break;
+		case CharsetUS_ASCII:    return "ASCII//TRANSLIT";       break;
+		case CharsetISO8859_1:   return "ISO-8859-1//TRANSLIT";  break;
+		case CharsetISO8859_15:  return "ISO-8859-15//TRANSLIT"; break;
+		case CharsetCP437:       return "CP437//TRANSLIT";       break;
+		case CharsetWindows1252: return "CP1252//TRANSLIT";      break;
+	}
+	return 0;
+}
 #endif // WIN32
 
 
@@ -96,10 +110,14 @@ std::string Encode(const std::wstring &src, Charset charset)
 		return &encoded_string[0];
 	#else // !WIN32
 		iconv_t conv = iconv_t();
-		conv = iconv_open(CharsetToString(charset), "wchar_t");
+		conv = iconv_open(CharsetToStringTranslit(charset), "wchar_t");
 		if(!conv)
 		{
-			throw std::runtime_error("iconv conversion not working");
+			conv = iconv_open(CharsetToString(charset), "wchar_t");
+			if(!conv)
+			{
+				throw std::runtime_error("iconv conversion not working");
+			}
 		}
 		std::vector<wchar_t> wide_string(src.c_str(), src.c_str() + src.length() + 1);
 		std::vector<char> encoded_string(wide_string.size() * 8); // large enough
@@ -107,11 +125,22 @@ std::string Encode(const std::wstring &src, Charset charset)
 		size_t inbytesleft = wide_string.size() * sizeof(wchar_t);
 		char * outbuf = &encoded_string[0];
 		size_t outbytesleft = encoded_string.size();
-		if(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1)
+		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1)
 		{
-			iconv_close(conv);
-			conv = iconv_t();
-			return std::string();
+			if(errno == EILSEQ || errno == EILSEQ)
+			{
+				inbuf += sizeof(wchar_t);
+				inbytesleft -= sizeof(wchar_t);
+				outbuf[0] = '?';
+				outbuf++;
+				outbytesleft--;
+				iconv(conv, NULL, NULL, NULL, NULL); // reset state
+			} else
+			{
+				iconv_close(conv);
+				conv = iconv_t();
+				return std::string();
+			}
 		}
 		iconv_close(conv);
 		conv = iconv_t();
@@ -145,11 +174,30 @@ std::wstring Decode(const std::string &src, Charset charset)
 		size_t inbytesleft = encoded_string.size();
 		char * outbuf = (char*)&wide_string[0];
 		size_t outbytesleft = wide_string.size() * sizeof(wchar_t);
-		if(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1)
+		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1)
 		{
-			iconv_close(conv);
-			conv = iconv_t();
-			return std::wstring();
+			if(errno == EILSEQ || errno == EILSEQ)
+			{
+				inbuf++;
+				inbytesleft--;
+				for(std::size_t i = 0; i < sizeof(wchar_t); ++i)
+				{
+					outbuf[i] = 0;
+				}
+				#ifdef MPT_PLATFORM_BIG_ENDIAN
+					outbuf[[sizeof(wchar_t)-1 - 1] = 0xff; outbuf[sizeof(wchar_t)-1 - 0] = 0xfd;
+				#else
+					outbuf[1] = 0xff; outbuf[0] = 0xfd;
+				#endif
+				outbuf += sizeof(wchar_t);
+				outbytesleft -= sizeof(wchar_t);
+				iconv(conv, NULL, NULL, NULL, NULL); // reset state
+			} else
+			{
+				iconv_close(conv);
+				conv = iconv_t();
+				return std::wstring();
+			}
 		}
 		iconv_close(conv);
 		conv = iconv_t();
@@ -164,10 +212,14 @@ std::string Convert(const std::string &src, Charset from, Charset to)
 		return Encode(Decode(src, from), to);
 	#else // !WIN32
 		iconv_t conv = iconv_t();
-		conv = iconv_open(CharsetToString(to), CharsetToString(from));
+		conv = iconv_open(CharsetToStringTranslit(to), CharsetToString(from));
 		if(!conv)
 		{
-			throw std::runtime_error("iconv conversion not working");
+			conv = iconv_open(CharsetToString(to), CharsetToString(from));
+			if(!conv)
+			{
+				throw std::runtime_error("iconv conversion not working");
+			}
 		}
 		std::vector<char> src_string(src.c_str(), src.c_str() + src.length() + 1);
 		std::vector<char> dst_string(src_string.size() * 8); // large enough
@@ -175,11 +227,22 @@ std::string Convert(const std::string &src, Charset from, Charset to)
 		size_t inbytesleft = src_string.size();
 		char * outbuf = &dst_string[0];
 		size_t outbytesleft = dst_string.size();
-		if(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1)
+		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1)
 		{
-			iconv_close(conv);
-			conv = iconv_t();
-			return std::string();
+			if(errno == EILSEQ || errno == EILSEQ)
+			{
+				inbuf++;
+				inbytesleft--;
+				outbuf[0] = '?';
+				outbuf++;
+				outbytesleft--;
+				iconv(conv, NULL, NULL, NULL, NULL); // reset state
+			} else
+			{
+				iconv_close(conv);
+				conv = iconv_t();
+				return std::string();
+			}
 		}
 		iconv_close(conv);
 		conv = iconv_t();
