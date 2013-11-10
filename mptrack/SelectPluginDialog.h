@@ -14,6 +14,7 @@
 #define SELECTPLUGINDIALOG_H
 
 #include "Vstplug.h"
+#include "CTreeCtrl.h"
 
 //====================================
 class CSelectPluginDlg: public CDialog
@@ -23,10 +24,10 @@ protected:
 	int m_nPlugSlot;
 	SNDMIXPLUGIN *m_pPlugin;
 	CModDoc *m_pModDoc;
-	CTreeCtrl m_treePlugins;
+	CTreeCtrlW m_treePlugins;
 	CString m_sNameFilter;
 
-	HTREEITEM AddTreeItem(const TCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
+	HTREEITEM AddTreeItem(const WCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
 
 public:
 	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent);

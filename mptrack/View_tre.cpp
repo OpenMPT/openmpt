@@ -113,21 +113,18 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CViewModTree construction/destruction
 
-CModTree::CModTree(CModTree *pDataTree)
+CModTree::CModTree(CModTree *pDataTree) :
+	m_pDataTree(pDataTree),
+	m_hDropWnd(nullptr),
+	m_dwStatus(0),
+	m_nDocNdx(0), m_nDragDocNdx(0),
+	m_hItemDrag(nullptr), m_hItemDrop(nullptr),
+	m_hInsLib(nullptr), m_hMidiLib(nullptr),
+	m_bShowAllFiles(false), doLabelEdit(false)
 //-------------------------------------
 {
-	m_pDataTree = pDataTree;
-	m_dwStatus = 0;
-	m_bShowAllFiles = false;
-	m_hItemDrag = m_hItemDrop = NULL;
-	m_hDropWnd = NULL;
-	m_hInsLib = m_hMidiLib = NULL;
-	m_nDocNdx = m_nDragDocNdx = 0;
-	doLabelEdit = false;
-	MemsetZero(m_tiMidiGrp);
 	MemsetZero(m_tiMidi);
 	MemsetZero(m_tiPerc);
-	DocInfo.clear();
 }
 
 
@@ -190,7 +187,7 @@ void CModTree::Init()
 		m_hMidiLib = InsertItem("MIDI Library", IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
 		for (UINT iMidGrp=0; iMidGrp<17; iMidGrp++)
 		{
-			m_tiMidiGrp[iMidGrp] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, szMidiGroupNames[iMidGrp], IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (MODITEM_HDR_MIDIGROUP << MIDILIB_SHIFT) | iMidGrp, m_hMidiLib, TVI_LAST);
+			InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, szMidiGroupNames[iMidGrp], IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (MODITEM_HDR_MIDIGROUP << MIDILIB_SHIFT) | iMidGrp, m_hMidiLib, TVI_LAST);
 		}
 	}
 	m_hInsLib = InsertItem("Instrument Library", IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
@@ -263,38 +260,6 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 	}
 	//end rewbs.customKeys
 	return CTreeCtrl::PreTranslateMessage(pMsg);
-}
-
-
-std::wstring CModTree::GetItemTextW(HTREEITEM item) const
-//-------------------------------------------------------
-{
-	WCHAR name[MAX_PATH];	// Maximum displayed text length according to documentation.
-	TVITEMW tvi;
-	MemsetZero(tvi);
-	tvi.hItem = item;
-	tvi.mask = TVIF_TEXT;
-	tvi.pszText = name;
-	tvi.cchTextMax = CountOf(name);
-	if(::SendMessage(m_hWnd, TVM_GETITEMW, 0, (LPARAM)&tvi))
-	{
-		return tvi.pszText;
-	} else
-	{
-		return L"";
-	}
-}
-
-
-void CModTree::SetItemTextW(HTREEITEM item, const WCHAR *text)
-//------------------------------------------------------------
-{
-	TVITEMW tvi;
-	MemsetZero(tvi);
-	tvi.hItem = item;
-	tvi.mask = TVIF_TEXT;
-	tvi.pszText = const_cast<WCHAR *>(text);
-	::SendMessage(m_hWnd, TVM_SETITEMW, 0, (LPARAM)&tvi);
 }
 
 
@@ -447,33 +412,28 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc *pModDoc)
 void CModTree::RefreshMidiLibrary()
 //---------------------------------
 {
-	CHAR s[256], stmp[256];
-	TV_ITEM tvi;
-	CHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
+	std::wstring s;
+	WCHAR stmp[256];
+	TV_ITEMW tvi;
 	const MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
 
 	if (IsSampleBrowser()) return;
 	// Midi Programs
-	for (UINT iMidi=0; iMidi<128; iMidi++)
+	HTREEITEM parent = GetChildItem(m_hMidiLib);
+	for(UINT iMidi = 0; iMidi < 128; iMidi++)
 	{
 		DWORD dwImage = IMAGE_NOINSTRUMENT;
-		wsprintf(s, "%u: %s", iMidi, szMidiProgramNames[iMidi]);
+		s = StringifyW(iMidi) + L": " + mpt::String::Decode(szMidiProgramNames[iMidi], mpt::CharsetUTF8);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if(!midiLib.MidiMap[iMidi].empty())
 		{
-			_splitpath(midiLib.MidiMap[iMidi].ToLocale().c_str(), NULL, NULL, szName, szExt);
-			strncat(s, ": ", sizeof(s));
-			s[sizeof(s)-1] = 0;
-			strncat(s, szName, sizeof(s));
-			s[sizeof(s)-1] = 0;
-			strncat(s, szExt, sizeof(s));
-			s[sizeof(s)-1] = 0;
-			if (szName[0]) dwImage = IMAGE_INSTRUMENTS;
+			s += L": " + midiLib.MidiMap[iMidi].GetFullFileName().ToWide();
+			dwImage = IMAGE_INSTRUMENTS;
 		}
 		if (!m_tiMidi[iMidi])
 		{
 			m_tiMidi[iMidi] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-							s, dwImage, dwImage, 0, 0, param, m_tiMidiGrp[iMidi/8], TVI_LAST);
+							s.c_str(), dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
 		} else
 		{
 			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
@@ -482,34 +442,32 @@ void CModTree::RefreshMidiLibrary()
 			tvi.cchTextMax = sizeof(stmp);
 			tvi.iImage = tvi.iSelectedImage = dwImage;
 			GetItem(&tvi);
-			if ((strcmp(s, stmp)) || (tvi.iImage != (int)dwImage))
+			if(s != stmp || tvi.iImage != (int)dwImage)
 			{
 				SetItem(m_tiMidi[iMidi], TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-								s, dwImage, dwImage, 0, 0, param);
+					s.c_str(), dwImage, dwImage, 0, 0, param);
 			}
+		}
+		if((iMidi % 8u) == 7u)
+		{
+			parent = GetNextSiblingItem(parent);
 		}
 	}
 	// Midi Percussions
 	for (UINT iPerc=24; iPerc<=84; iPerc++)
 	{
 		DWORD dwImage = IMAGE_NOSAMPLE;
-		wsprintf(s, "%s: %s", szDefaultNoteNames[iPerc], szMidiPercussionNames[iPerc-24]);
+		s = mpt::String::Decode(szDefaultNoteNames[iPerc], mpt::CharsetUTF8) + L": " + mpt::String::Decode(szMidiPercussionNames[iPerc - 24], mpt::CharsetUTF8);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
-		if(!midiLib.MidiMap[iPerc|0x80].empty())
+		if(!midiLib.MidiMap[iPerc | 0x80].empty())
 		{
-			_splitpath(midiLib.MidiMap[iPerc|0x80].ToLocale().c_str(), NULL, NULL, szName, szExt);
-			strncat(s, ": ", sizeof(s));
-			mpt::String::SetNullTerminator(s);
-			strncat(s, szName, sizeof(s));
-			mpt::String::SetNullTerminator(s);
-			strncat(s, szExt, sizeof(s));
-			mpt::String::SetNullTerminator(s);
-			if (szName[0]) dwImage = IMAGE_SAMPLES;
+			s += L": " + midiLib.MidiMap[iPerc | 0x80].GetFullFileName().ToWide();
+			dwImage = IMAGE_SAMPLES;
 		}
 		if (!m_tiPerc[iPerc])
 		{
 			m_tiPerc[iPerc] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-							s, dwImage, dwImage, 0, 0, param, m_tiMidiGrp[16], TVI_LAST);
+							s.c_str(), dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
 		} else
 		{
 			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
@@ -518,10 +476,10 @@ void CModTree::RefreshMidiLibrary()
 			tvi.cchTextMax = sizeof(stmp);
 			tvi.iImage = tvi.iSelectedImage = dwImage;
 			GetItem(&tvi);
-			if ((strcmp(s, stmp)) || (tvi.iImage != (int)dwImage))
+			if(s != stmp || tvi.iImage != (int)dwImage)
 			{
 				SetItem(m_tiPerc[iPerc], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
-							s, dwImage, dwImage, 0, 0, param);
+							s.c_str(), dwImage, dwImage, 0, 0, param);
 			}
 		}
 	}
@@ -547,14 +505,12 @@ void CModTree::RefreshDlsBanks()
 		{
 			if(!m_tiDLS[iDls])
 			{
-				CHAR szName[_MAX_PATH] = "", szExt[_MAX_EXT] = ".dls";
 				TV_SORTCB tvs;
 				CDLSBank *pDlsBank = CTrackApp::gpDLSBanks[iDls];
 				// Add DLS file folder
-				_splitpath(pDlsBank->GetFileName().ToLocale().c_str(), NULL, NULL, szName, szExt);
-				strcat(szName, szExt);
+				std::wstring name = pDlsBank->GetFileName().GetFullFileName().ToWide();
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
+								name.c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
 				// Memorize Banks
 				WORD wBanks[16];
 				HTREEITEM hBanks[16];
@@ -571,6 +527,7 @@ void CModTree::RefreshDlsBanks()
 					DLSINSTRUMENT *pDlsIns = pDlsBank->GetInstrument(iIns);
 					if (pDlsIns)
 					{
+						CHAR szName[256];
 						wsprintf(szName, "%u: %s", pDlsIns->ulInstrument & 0x7F, pDlsIns->szName);
 						// Drum Kit
 						if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
@@ -722,7 +679,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		tvi.mask |= TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
 		tvi.hItem = pInfo->hSong;
 		tvi.pszText = stmp;
-		tvi.cchTextMax = sizeof(stmp);
+		tvi.cchTextMax = CountOf(stmp);
 		tvi.iImage = tvi.iSelectedImage = IMAGE_FOLDER;
 		GetItem(&tvi);
 		if ((strcmp(s, stmp)) || (tvi.iImage != IMAGE_FOLDER))
@@ -857,7 +814,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 				tvi.stateMask = TVIS_BOLD;
 				tvi.hItem = pInfo->tiSequences[nSeq];
 				tvi.pszText = stmp;
-				tvi.cchTextMax = sizeof(stmp);
+				tvi.cchTextMax = CountOf(stmp);
 				LPARAM param = (nSeq << SEQU_SHIFT) | ORDERINDEX_INVALID;
 				GetItem(&tvi);
 				if(tvi.state != state || tvi.pszText != sSeqName || tvi.lParam != param)
@@ -915,7 +872,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					tvi.stateMask = TVIS_BOLD;
 					tvi.hItem = pInfo->tiOrders[nSeq][iOrd];
 					tvi.pszText = stmp;
-					tvi.cchTextMax = sizeof(stmp);
+					tvi.cchTextMax = CountOf(stmp);
 					GetItem(&tvi);
 					if ((strcmp(s, stmp)) || (tvi.state != state))
 						SetItem(pInfo->tiOrders[nSeq][iOrd], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, s, 0, 0, state, TVIS_BOLD, param);
@@ -959,7 +916,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE;
 					tvi.hItem = pInfo->tiPatterns[iPat];
 					tvi.pszText = stmp;
-					tvi.cchTextMax = sizeof(stmp);
+					tvi.cchTextMax = CountOf(stmp);
 					GetItem(&tvi);
 					if (strcmp(s, stmp)) SetItem(pInfo->tiPatterns[iPat], TVIF_TEXT, s, 0, 0, 0, 0, 0);
 				} else
@@ -1007,7 +964,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
 					tvi.hItem = hChild;
 					tvi.pszText = stmp;
-					tvi.cchTextMax = sizeof(stmp);
+					tvi.cchTextMax = CountOf(stmp);
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
 					if ((strcmp(s, stmp)) || (tvi.iImage != nImage))
@@ -1064,7 +1021,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
 					tvi.hItem = hChild;
 					tvi.pszText = stmp;
-					tvi.cchTextMax = sizeof(stmp);
+					tvi.cchTextMax = CountOf(stmp);
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
 					if ((strcmp(s, stmp)) || (tvi.iImage != nImage))
@@ -1501,12 +1458,13 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 	case MODITEM_INSLIB_SAMPLE:
 	case MODITEM_INSLIB_INSTRUMENT:
 		{
+			// Create double-null-terminated path
+			const std::wstring fullPath = InsLibGetFullPath(hItem).ToWide() + L'\0';
 			SHFILEOPSTRUCTW fos;
-			mpt::PathString fullPath = InsLibGetFullPath(hItem);
-			memset(&fos, 0, sizeof(fos));
+			MemsetZero(fos);
 			fos.hwnd = m_hWnd;
 			fos.wFunc = FO_DELETE;
-			fos.pFrom = fullPath.AsNative().c_str();
+			fos.pFrom = fullPath.c_str();
 			fos.fFlags = FOF_ALLOWUNDO;
 			if ((0 == SHFileOperationW(&fos)) && (!fos.fAnyOperationsAborted)) RefreshInstrumentLibrary();
 		}
@@ -1604,7 +1562,7 @@ void CModTree::FillInstrumentLibrary()
 	if(!m_szSongName.empty() && IsSampleBrowser() && m_SongFile)
 	{
 		// Fill browser with samples / instruments of module file
-		SetItemTextW(m_hInsLib, m_szSongName.AsNative().c_str());
+		SetItemText(m_hInsLib, m_szSongName.AsNative().c_str());
 		SetItemImage(m_hInsLib, IMAGE_FOLDERSONG, IMAGE_FOLDERSONG);
 		for(INSTRUMENTINDEX ins = 1; ins <= m_SongFile->GetNumInstruments(); ins++)
 		{
@@ -1632,10 +1590,10 @@ void CModTree::FillInstrumentLibrary()
 		if(!IsSampleBrowser())
 		{
 			text = L"Instrument Library (" + m_szInstrLibPath.ToWide() + L")";
-			SetItemTextW(m_hInsLib, text.c_str());
+			SetItemText(m_hInsLib, text.c_str());
 		} else
 		{
-			SetItemTextW(m_hInsLib, m_szInstrLibPath.ToWide().c_str());
+			SetItemText(m_hInsLib, m_szInstrLibPath.ToWide().c_str());
 			SetItemImage(m_hInsLib, IMAGE_FOLDER, IMAGE_FOLDER);
 		}
 
@@ -1786,7 +1744,6 @@ void CModTree::FillInstrumentLibrary()
 void CModTree::ModTreeInsert(const WCHAR *name, int image)
 //--------------------------------------------------------
 {
-	TV_INSERTSTRUCTW tvis;
 	DWORD dwId = 0;
 	switch(image)
 	{
@@ -1805,20 +1762,13 @@ void CModTree::ModTreeInsert(const WCHAR *name, int image)
 		dwId = 4;
 		break;
 	}
-	tvis.hParent = (!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT;
-	tvis.hInsertAfter = TVI_LAST;
-	tvis.item.mask = TVIF_IMAGE | TVIF_PARAM | TVIF_SELECTEDIMAGE | TVIF_TEXT;
-	tvis.item.hItem = 0;
-	tvis.item.state = 0;
-	tvis.item.stateMask = 0;
-	tvis.item.pszText = const_cast<WCHAR *>(name);
-	tvis.item.cchTextMax = 0;
-	tvis.item.iImage = image;
-	tvis.item.iSelectedImage = image;
-	tvis.item.cChildren = 0;
-	tvis.item.lParam = (LPARAM)dwId;
-
-	::SendMessage(m_hWnd, TVM_INSERTITEMW, 0, (LPARAM)&tvis);
+	InsertItem(TVIF_IMAGE | TVIF_PARAM | TVIF_SELECTEDIMAGE | TVIF_TEXT,
+		name,
+		image, image,
+		0, 0,
+		(LPARAM)dwId,
+		(!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT,
+		TVI_LAST);
 }
 
 
@@ -1838,12 +1788,9 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 	lParam2 &= 0x7FFFFFFF;
 	if ((lParam1 & 0xFF00FFFF) == (lParam2 & 0xFF00FFFF))
 	{
-		/*UINT iDls = (lParam1 >> 24) & 0xFF;
-		if ((iDls < CTrackApp::gpDLSBanks.size()) && (CTrackApp::gpDLSBanks[iDls]))*/
 		if(pDLSBank)
 		{
-			//CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[iDls];
-			DLSINSTRUMENT *pDlsIns = reinterpret_cast<CDLSBank *>(pDLSBank)->GetInstrument(lParam1 & 0xFFFF);
+			const DLSINSTRUMENT *pDlsIns = reinterpret_cast<CDLSBank *>(pDLSBank)->GetInstrument(lParam1 & 0xFFFF);
 			lParam1 = (lParam1 >> 16) & 0xFF;
 			lParam2 = (lParam2 >> 16) & 0xFF;
 			if ((pDlsIns) && (lParam1 < (LONG)pDlsIns->nRegions) && (lParam2 < (LONG)pDlsIns->nRegions))
@@ -3283,17 +3230,12 @@ void CModTree::OnShowSoundFiles()
 void CModTree::OnSoundBankProperties()
 //------------------------------------
 {
-	HTREEITEM hItem = GetSelectedItem();
-
-	const ModItem modItem = GetModItem(hItem);
-
-	if (modItem.type == MODITEM_DLSBANK_FOLDER)
+	const ModItem modItem = GetModItem(GetSelectedItem());
+	if(modItem.type == MODITEM_DLSBANK_FOLDER
+		&& modItem.val1 < CTrackApp::gpDLSBanks.size() && CTrackApp::gpDLSBanks[modItem.val1])
 	{
-		if ((modItem.val1 < CTrackApp::gpDLSBanks.size()) && (CTrackApp::gpDLSBanks[modItem.val1]))
-		{
-			CSoundBankProperties dlg(CTrackApp::gpDLSBanks[modItem.val1], this);
-			dlg.DoModal();
-		}
+		CSoundBankProperties dlg(CTrackApp::gpDLSBanks[modItem.val1], this);
+		dlg.DoModal();
 	}
 }
 
