@@ -426,13 +426,13 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_SMP_OPENFILE:
-		if (lParam) return OpenSample(mpt::PathString::FromCString((LPCSTR)lParam)) ? TRUE : FALSE;
+		if (lParam) return OpenSample(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;
 
 	case CTRLMSG_SMP_SONGDROP:
 		if (lParam)
 		{
-			LPDRAGONDROP pDropInfo = (LPDRAGONDROP)lParam;
+			const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
 			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
 			if (pDropInfo->pModDoc) pSndFile = pDropInfo->pModDoc->GetSoundFile();
 			if (pSndFile) return OpenSample(*pSndFile, (SAMPLEINDEX)pDropInfo->dwDropItem) ? TRUE : FALSE;

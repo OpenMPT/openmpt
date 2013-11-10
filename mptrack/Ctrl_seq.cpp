@@ -1286,7 +1286,7 @@ LRESULT COrderList::OnHelpHitTest(WPARAM, LPARAM)
 LRESULT COrderList::OnDragonDropping(WPARAM doDrop, LPARAM lParam)
 //-----------------------------------------------------------------
 {
-	LPDRAGONDROP pDropInfo = (LPDRAGONDROP)lParam;
+	const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
 	ORDERINDEX posdest;
 	BOOL canDrop;
 	CPoint pt;

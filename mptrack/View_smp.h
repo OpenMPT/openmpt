@@ -98,7 +98,7 @@ public:
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll=TRUE);
-	virtual BOOL OnDragonDrop(BOOL, LPDRAGONDROP);
+	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
 	virtual LRESULT OnPlayerNotify(Notification *);
 	virtual BOOL PreTranslateMessage(MSG *pMsg); //rewbs.customKeys
 	//}}AFX_VIRTUAL
