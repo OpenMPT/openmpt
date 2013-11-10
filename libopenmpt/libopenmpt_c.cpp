@@ -15,7 +15,6 @@
 #include "libopenmpt_impl.hpp"
 
 #include <limits>
-#include <sstream>
 #include <stdexcept>
 
 #include <cmath>
@@ -109,25 +108,25 @@ public:
 }; // class logfunc_logger
 
 static std::string format_exception( const char * const function ) {
-	std::ostringstream err;
+	std::string err;
 	try {
 		throw;
 	} catch ( openmpt::exception & e ) {
-		err
-			<< function << ": "
-			<< "ERROR: "
-			<< e.what();
+		err += function;
+		err += ": ";
+		err += "ERROR: ";
+		err += e.what();
 	} catch ( std::exception & e ) {
-		err
-			<< function << ": "
-			<< "INTERNAL ERROR: "
-			<< e.what();
+		err += function;
+		err += ": ";
+		err += "INTERNAL ERROR: ";
+		err += e.what();
 	} catch ( ... ) {
-		err
-			<< function << ": "
-			<< "UNKOWN INTERNAL ERROR";
+		err += function;
+		err += ": ";
+		err += "UNKOWN INTERNAL ERROR";
 	}
-	return err.str();
+	return err;
 }
 
 static void report_exception( const char * const function, openmpt_log_func const logfunc = 0, void * const user = 0, openmpt::module_impl * const impl = 0 ) {

@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "version.h"
 
-#include <sstream>
+#include "misc_util.h"
 
 #include <cstdlib>
 
@@ -219,21 +219,21 @@ std::string GetBuildFlagsString()
 
 std::string GetRevisionString()
 {
+	std::string str;
 	if(GetRevision() == 0)
 	{
-		return "";
+		return str;
 	}
-	std::ostringstream str;
-	str << "-r" << GetRevision();
+	str = std::string("-r") + Stringify(GetRevision());
 	if(HasMixedRevisions())
 	{
-		str << "!";
+		str += "!";
 	}
 	if(IsDirty())
 	{
-		str << "+";
+		str += "+";
 	}
-	return str.str();
+	return str;
 }
 
 std::string GetVersionStringExtended()
@@ -263,9 +263,7 @@ std::string GetVersionUrlString()
 	{
 		url = url.substr(baseurl.length());
 	}
-	std::ostringstream str;
-	str << url << "@" << GetRevision() << GetStateString();
-	return str.str();
+	return url + "@" + Stringify(GetRevision()) + GetStateString();
 }
 
 std::string GetContactString()

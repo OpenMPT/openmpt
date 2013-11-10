@@ -236,12 +236,11 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	#endif
 	EndWaitCursor();
 
-	std::ostringstream str;
-	str
-		<< "File: " << lpszPathName << std::endl
-		<< "Last saved with: " << m_SndFile.madeWithTracker << ", you are using OpenMPT " << MptVersion::str << std::endl
-		<< std::endl;
-	logcapturer.ShowLog(str.str());
+	logcapturer.ShowLog(std::string()
+		+ "File: " + lpszPathName + "\n"
+		+ "Last saved with: " + m_SndFile.madeWithTracker + ", you are using OpenMPT " + MptVersion::str + "\n"
+		+ "\n"
+		);
 
 	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels())) return FALSE;
 	// Midi Import
@@ -858,12 +857,13 @@ void CModDoc::AddToLog(LogLevel level, const std::string &text) const
 std::string CModDoc::GetLogString() const
 //---------------------------------------
 {
-	std::ostringstream ret;
+	std::string ret;
 	for(std::vector<LogEntry>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
 	{
-		ret << (*i).message << "\r\n";//std::endl;
+		ret += (*i).message;
+		ret += "\r\n";
 	}
-	return ret.str();
+	return ret;
 }
 
 
