@@ -124,7 +124,7 @@ public:
 public:
 	void SetInstrumentModified(const bool modified = true);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
-	BOOL OpenInstrument(LPCSTR lpszFileName);
+	BOOL OpenInstrument(const mpt::PathString &fileName);
 	BOOL OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
 	BOOL EditSample(UINT nSample);
 	VOID UpdateFilterText();

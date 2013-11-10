@@ -1077,7 +1077,7 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_INS_OPENFILE:
-		if (lParam) return OpenInstrument((LPCSTR)lParam);
+		if (lParam) return OpenInstrument(mpt::PathString::FromCString((LPCSTR)lParam));
 		break;
 
 	case CTRLMSG_INS_SONGDROP:
@@ -1392,14 +1392,14 @@ void CCtrlInstruments::UpdateFilterText()
 }
 
 
-BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
-//--------------------------------------------------------
+BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
+//--------------------------------------------------------------------
 {
 	CMappedFile f;
 	BOOL bFirst, bOk;
 	
 	BeginWaitCursor();
-	if ((!lpszFileName) || (!f.Open(mpt::PathString::FromLocale(lpszFileName))))
+	if(!f.Open(fileName))
 	{
 		EndWaitCursor();
 		return FALSE;
@@ -1424,7 +1424,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 			m_modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 			// -> CODE#0023
 			// -> DESC="IT project files (.itp)"
-			m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = lpszFileName;
+			m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = fileName.ToLocale();
 			SetInstrumentModified(false);
 			// -! NEW_FEATURE#0023
 			bOk = TRUE;
@@ -1434,21 +1434,21 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	EndWaitCursor();
 	if (bOk)
 	{
+		TrackerDirectories::Instance().SetWorkingDirectory(fileName, DIR_INSTRUMENTS, true);
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 		if (pIns)
 		{
-			TCHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
-			_tsplitpath(lpszFileName, nullptr, nullptr, szName, szExt);
-			TrackerDirectories::Instance().SetWorkingDirectory(mpt::PathString::FromCString(lpszFileName), DIR_INSTRUMENTS, true);
+			mpt::PathString name, ext;
+			fileName.SplitPath(nullptr, nullptr, &name, &ext);
 	
 			if (!pIns->name[0] && m_sndFile.GetModSpecifications().instrNameLengthMax > 0)
 			{
-				mpt::String::CopyN(pIns->name, szName, m_sndFile.GetModSpecifications().instrNameLengthMax);
+				mpt::String::CopyN(pIns->name, name.ToLocale().c_str(), m_sndFile.GetModSpecifications().instrNameLengthMax);
 			}
 			if (!pIns->filename[0] && m_sndFile.GetModSpecifications().instrFilenameLengthMax > 0)
 			{
-				strcat(szName, szExt);
-				mpt::String::CopyN(pIns->filename, szName, m_sndFile.GetModSpecifications().instrFilenameLengthMax);
+				name += ext;
+				mpt::String::CopyN(pIns->filename, name.ToLocale().c_str(), m_sndFile.GetModSpecifications().instrFilenameLengthMax);
 			}
 
 			SetCurrentInstrument(m_nInstrument);
@@ -1711,7 +1711,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 				OnInstrumentNew();
 		}
 
-		if(!OpenInstrument(files[counter].ToCString()))
+		if(!OpenInstrument(files[counter]))
 			ErrorBox(IDS_ERR_FILEOPEN, this);
 	}
 
@@ -1723,7 +1723,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 void CCtrlInstruments::OnInstrumentSave()
 //---------------------------------------
 {
-	TCHAR szFileName[_MAX_PATH] = "", drive[_MAX_DRIVE], path[_MAX_PATH], ext[_MAX_EXT];
+	TCHAR szFileName[_MAX_PATH] = "";
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	
 	if (!pIns) return;
@@ -1753,12 +1753,11 @@ void CCtrlInstruments::OnInstrumentSave()
 	
 	BeginWaitCursor();
 
-	_splitpath(dlg.GetFirstFile().ToLocale().c_str(), drive, path, NULL, ext);
 	bool ok = false;
-	if (!lstrcmpi(ext, ".iti"))
-		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
-	else
+	if(!mpt::PathString::CompareNoCase(dlg.GetExtension(), MPT_PATHSTRING("xi")))
 		ok = m_sndFile.SaveXIInstrument(m_nInstrument, dlg.GetFirstFile());
+	else
+		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -1769,9 +1768,6 @@ void CCtrlInstruments::OnInstrumentSave()
 	EndWaitCursor();
 	if (!ok) ErrorBox(IDS_ERR_SAVEINS, this); else
 	{
-		strcpy(szFileName, drive);
-		strcat(szFileName, path);
-		
 		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS);
 
 // -> CODE#0023
