@@ -866,23 +866,23 @@ void CDoWaveConvert::OnButton1()
 	UINT ok = IDOK, pos = 0;
 	uint64 ullSamples = 0, ullMaxSamples;
 
-	if(!m_lpszFileName)
+	if(m_lpszFileName.empty())
 	{
 		EndDialog(IDCANCEL);
 		return;
 	}
 	
 	float normalizePeak = 0.0f;
-	char *tempPath = _tempnam("", "OpenMPT_mod2wave");
-	const std::string normalizeFileName = tempPath;
+	wchar_t *tempPath = _wtempnam(L"", L"OpenMPT_mod2wave");
+	const mpt::PathString normalizeFileName = mpt::PathString::FromNative(tempPath);
 	free(tempPath);
 	mpt::fstream normalizeFile;
 	if(m_Settings.Normalize)
 	{
-		normalizeFile.open(normalizeFileName.c_str(), std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
+		normalizeFile.open(normalizeFileName.AsNative().c_str(), std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
 
-	mpt::ofstream fileStream(m_lpszFileName, std::ios::binary | std::ios::trunc);
+	mpt::ofstream fileStream(m_lpszFileName.AsNative().c_str(), std::ios::binary | std::ios::trunc);
 
 	if(!fileStream)
 	{
@@ -1202,7 +1202,7 @@ void CDoWaveConvert::OnButton1()
 		for(int retry=0; retry<10; retry++)
 		{
 			// stupid virus scanners
-			if(remove(normalizeFileName.c_str()) != EACCES)
+			if(DeleteFileW(normalizeFileName.AsNative().c_str()) != EACCES)
 			{
 				break;
 			}

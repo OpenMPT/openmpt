@@ -1657,16 +1657,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	EncoderFactoryBase *encFactory = wsdlg.m_Settings.GetEncoderFactory();
 
-	std::string extension = encFactory->GetTraits().fileExtension;
-
-	TCHAR fname[_MAX_FNAME] = _T("");
-	_splitpath(GetPathName(), NULL, NULL, fname, NULL);
-	strcat_s(fname, CountOf(fname), ".");
-	strcat_s(fname, CountOf(fname), extension.c_str());
+	const std::string extension = encFactory->GetTraits().fileExtension;
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(extension)
-		.DefaultFilename(fname)
+		.DefaultFilename(mpt::PathString::FromCString(GetPathName()).GetFileName() + MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(extension))
 		.ExtensionFilter(encFactory->GetTraits().fileDescription + " (*." + extension + ")|*." + extension + "||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_EXPORT));
 	if(!dlg.Show()) return;
@@ -1674,10 +1669,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
 	TrackerDirectories::Instance().SetDefaultDirectory(dlg.GetWorkingDirectory(), DIR_EXPORT, true);
 
-	char drive[_MAX_DRIVE], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
-	_splitpath(dlg.GetFirstFile().ToLocale().c_str(), drive, dir, name, ext);
-	const CString fileName = CString(drive) + CString(dir) + CString(name);
-	const CString fileExt = CString(ext);
+	mpt::PathString drive, dir, name, ext;
+	dlg.GetFirstFile().SplitPath(&drive, &dir, &name, &ext);
+	const mpt::PathString fileName = drive + dir + name;
+	const mpt::PathString fileExt = ext;
 
 	// Saving as wave file
 
@@ -1736,7 +1731,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	for(int i = 0 ; i < nRenderPasses ; i++)
 	{
-		CString thisName = fileName;
+		mpt::PathString thisName = fileName;
 		char fileNameAdd[_MAX_FNAME] = "";
 
 		// Channel mode
@@ -1792,7 +1787,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		if(strcmp(fileNameAdd, ""))
 		{
 			SanitizeFilename(fileNameAdd);
-			thisName += CString(fileNameAdd);
+			thisName += mpt::PathString::FromLocale(fileNameAdd);
 		}
 		thisName += fileExt;
 
