@@ -411,9 +411,9 @@ void CModTree::RefreshMidiLibrary()
 		DWORD dwImage = IMAGE_NOINSTRUMENT;
 		wsprintf(s, "%u: %s", iMidi, szMidiProgramNames[iMidi]);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
-		if ((lpMidiLib) && (lpMidiLib->MidiMap[iMidi]) && (lpMidiLib->MidiMap[iMidi][0]))
+		if((lpMidiLib) && (!lpMidiLib->MidiMap[iMidi].empty()))
 		{
-			_splitpath(lpMidiLib->MidiMap[iMidi], NULL, NULL, szName, szExt);
+			_splitpath(lpMidiLib->MidiMap[iMidi].ToLocale().c_str(), NULL, NULL, szName, szExt);
 			strncat(s, ": ", sizeof(s));
 			s[sizeof(s)-1] = 0;
 			strncat(s, szName, sizeof(s));
@@ -447,9 +447,9 @@ void CModTree::RefreshMidiLibrary()
 		DWORD dwImage = IMAGE_NOSAMPLE;
 		wsprintf(s, "%s: %s", szDefaultNoteNames[iPerc], szMidiPercussionNames[iPerc-24]);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
-		if ((lpMidiLib) && (lpMidiLib->MidiMap[iPerc|0x80]) && (lpMidiLib->MidiMap[iPerc|0x80][0]))
+		if((lpMidiLib) && (!lpMidiLib->MidiMap[iPerc|0x80].empty()))
 		{
-			_splitpath(lpMidiLib->MidiMap[iPerc|0x80], NULL, NULL, szName, szExt);
+			_splitpath(lpMidiLib->MidiMap[iPerc|0x80].ToLocale().c_str(), NULL, NULL, szName, szExt);
 			strncat(s, ": ", sizeof(s));
 			mpt::String::SetNullTerminator(s);
 			strncat(s, szName, sizeof(s));
@@ -1313,10 +1313,10 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 		case MODITEM_MIDIINSTRUMENT:
 			{
 				LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
-				if ((lpMidiLib) && (modItemID < 256) && (lpMidiLib->MidiMap[modItemID]))
+				if((lpMidiLib) && (modItemID < 256) && (!lpMidiLib->MidiMap[modItemID].empty()))
 				{
 					CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-					if (pMainFrm) pMainFrm->PlaySoundFile(mpt::PathString::FromLocale(lpMidiLib->MidiMap[modItemID]), static_cast<ModCommand::NOTE>(nParam));
+					if (pMainFrm) pMainFrm->PlaySoundFile(lpMidiLib->MidiMap[modItemID], static_cast<ModCommand::NOTE>(nParam));
 				}
 			}
 			return TRUE;
@@ -1357,11 +1357,7 @@ BOOL CModTree::SetMidiInstrument(UINT nIns, LPCTSTR lpszFileName)
 	LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
 	if ((lpMidiLib) && (nIns < 128))
 	{
-		if (!lpMidiLib->MidiMap[nIns])
-		{
-			if ((lpMidiLib->MidiMap[nIns] = new TCHAR[_MAX_PATH]) == NULL) return FALSE;
-		}
-		strcpy(lpMidiLib->MidiMap[nIns], lpszFileName);
+		lpMidiLib->MidiMap[nIns] = mpt::PathString::FromCString(lpszFileName);
 		RefreshMidiLibrary();
 		return TRUE;
 	}
@@ -1376,11 +1372,7 @@ BOOL CModTree::SetMidiPercussion(UINT nPerc, LPCTSTR lpszFileName)
 	if ((lpMidiLib) && (nPerc < 128))
 	{
 		UINT nIns = nPerc | 0x80;
-		if (!lpMidiLib->MidiMap[nIns])
-		{
-			if ((lpMidiLib->MidiMap[nIns] = new TCHAR[_MAX_PATH]) == NULL) return FALSE;
-		}
-		strcpy(lpMidiLib->MidiMap[nIns], lpszFileName);
+		lpMidiLib->MidiMap[nIns] = mpt::PathString::FromCString(lpszFileName);
 		RefreshMidiLibrary();
 		return TRUE;
 	}
@@ -1980,9 +1972,9 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 	case MODITEM_MIDIINSTRUMENT:
 		{
 			LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
-			if ((lpMidiLib) && (lpMidiLib->MidiMap[pdropinfo->dwDropItem&0xFF]))
+			if((lpMidiLib) && (!lpMidiLib->MidiMap[pdropinfo->dwDropItem&0xFF].empty()))
 			{
-				strcpy(pszFullPath, lpMidiLib->MidiMap[pdropinfo->dwDropItem&0xFF]);
+				strcpy(pszFullPath, lpMidiLib->MidiMap[pdropinfo->dwDropItem&0xFF].ToLocale().c_str());
 				pdropinfo->dwDropType = DRAGONDROP_MIDIINSTR;
 				pdropinfo->lDropParam = (LPARAM)pszFullPath;
 			}

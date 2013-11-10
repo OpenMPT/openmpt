@@ -313,7 +313,6 @@ BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 	{
 		glpMidiLibrary = new MIDILIBSTRUCT;
 		if (!glpMidiLibrary) return FALSE;
-		MemsetZero(*glpMidiLibrary);
 	}
 
 	if (CDLSBank::IsDLSBank(filename))
@@ -332,18 +331,14 @@ BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 		{
 			for (UINT iIns=0; iIns<256; iIns++)
 			{
-				if ((bReplaceAll) || (!glpMidiLibrary->MidiMap[iIns]) || (!glpMidiLibrary->MidiMap[iIns][0]))
+				if((bReplaceAll) || glpMidiLibrary->MidiMap[iIns].empty())
 				{
 					DWORD dwProgram = (iIns < 128) ? iIns : 0xFF;
 					DWORD dwKey = (iIns < 128) ? 0xFF : iIns & 0x7F;
 					DWORD dwBank = (iIns < 128) ? 0 : F_INSTRUMENT_DRUMS;
 					if (dlsbank.FindInstrument((iIns < 128) ? FALSE : TRUE,	dwBank, dwProgram, dwKey))
 					{
-						if (!glpMidiLibrary->MidiMap[iIns])
-						{
-							if ((glpMidiLibrary->MidiMap[iIns] = new CHAR[_MAX_PATH]) == NULL) break;
-						}
-						strcpy(glpMidiLibrary->MidiMap[iIns], filename.ToLocale().c_str());
+						glpMidiLibrary->MidiMap[iIns] = filename;
 					}
 				}
 			}
@@ -358,56 +353,59 @@ BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file)
 //-------------------------------------------------------
 {
-	TCHAR szFileName[_MAX_PATH], s[_MAX_PATH], szUltraSndPath[_MAX_PATH];
+	TCHAR s[_MAX_PATH];
+	mpt::PathString UltraSndPath;
 
 	if (!glpMidiLibrary)
 	{
 		glpMidiLibrary = new MIDILIBSTRUCT;
 		if (!glpMidiLibrary) return FALSE;
-		MemsetZero(*glpMidiLibrary);
 	}
 
-	mpt::String::Copy(szUltraSndPath, file.Read<std::string>("Ultrasound", "PatchDir", ""));
-	if (!strcmp(szUltraSndPath, _T(".\\"))) szUltraSndPath[0] = 0;
-	if (!szUltraSndPath[0]) GetCurrentDirectory(CountOf(szUltraSndPath), szUltraSndPath);
+	UltraSndPath = file.Read<mpt::PathString>("Ultrasound", "PatchDir", mpt::PathString());
+	if(UltraSndPath == MPT_PATHSTRING(".\\")) UltraSndPath = mpt::PathString();
+	if(UltraSndPath.empty())
+	{
+		WCHAR curDir[MAX_PATH];
+		GetCurrentDirectoryW(CountOf(curDir), curDir);
+		UltraSndPath = mpt::PathString::FromNative(curDir);
+	}
 	for (UINT iMidi=0; iMidi<256; iMidi++)
 	{
-		szFileName[0] = 0;
+		mpt::PathString filename;
 		wsprintf(s, (iMidi < 128) ? _T("Midi%d") : _T("Perc%d"), iMidi & 0x7f);
-		mpt::String::Copy(szFileName, file.Read<std::string>("Midi Library", s, ""));
+		filename = file.Read<mpt::PathString>("Midi Library", s, mpt::PathString());
 		// Check for ULTRASND.INI
-		if (!szFileName[0])
+		if(filename.empty())
 		{
 			LPCSTR pszSection = (iMidi < 128) ? _T("Melodic Patches") : _T("Drum Patches");
 			wsprintf(s, _T("%d"), iMidi & 0x7f);
-			mpt::String::Copy(szFileName, file.Read<std::string>(pszSection, s, ""));
-			if (!szFileName[0])
+			filename = file.Read<mpt::PathString>(pszSection, s, mpt::PathString());
+			if(filename.empty())
 			{
 				pszSection = (iMidi < 128) ? _T("Melodic Bank 0") : _T("Drum Bank 0");
-				mpt::String::Copy(szFileName, file.Read<std::string>(pszSection, s, ""));
+				filename = file.Read<mpt::PathString>(pszSection, s, mpt::PathString());
 			}
-			if (szFileName[0])
+			if(!filename.empty())
 			{
-				s[0] = 0;
-				if (szUltraSndPath[0])
+				mpt::PathString tmp;
+				if(!UltraSndPath.empty())
 				{
-					strcpy(s, szUltraSndPath);
-					int len = strlen(s)-1;
-					if ((len) && (s[len-1] != '\\')) strcat(s, _T("\\"));
+					tmp = UltraSndPath;
+					if(!tmp.HasTrailingSlash())
+					{
+						tmp += MPT_PATHSTRING("\\");
+					}
 				}
-				_tcsncat(s, szFileName, CountOf(s));
-				_tcsncat(s, ".pat", CountOf(s));
-				_tcscpy(szFileName, s);
+				tmp += filename;
+				tmp += MPT_PATHSTRING(".pat");
+				filename = tmp;
 			}
 		}
-		if (szFileName[0])
+		if(!filename.empty())
 		{
-			if (!glpMidiLibrary->MidiMap[iMidi])
-			{
-				if ((glpMidiLibrary->MidiMap[iMidi] = new TCHAR[_MAX_PATH]) == nullptr) return FALSE;
-			}
-			theApp.RelativePathToAbsolute(szFileName);
-			_tcscpy(glpMidiLibrary->MidiMap[iMidi], szFileName);
+			filename = theApp.RelativePathToAbsolute(filename);
+			glpMidiLibrary->MidiMap[iMidi] = filename;
 		}
 	}
 	return FALSE;
@@ -425,23 +423,23 @@ BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
 BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 //-------------------------------------------------------
 {
-	TCHAR szFileName[_MAX_PATH], s[128];
+	CHAR s[128];
 
 	if (!glpMidiLibrary) return FALSE;
-	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (glpMidiLibrary->MidiMap[iMidi])
+	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (!glpMidiLibrary->MidiMap[iMidi].empty())
 	{
 		if (iMidi < 128)
 			wsprintf(s, _T("Midi%d"), iMidi);
 		else
 			wsprintf(s, _T("Perc%d"), iMidi & 0x7F);
 
-		strcpy(szFileName, glpMidiLibrary->MidiMap[iMidi]);
+		mpt::PathString szFileName = glpMidiLibrary->MidiMap[iMidi];
 
-		if(szFileName[0])
+		if(!szFileName.empty())
 		{
 			if(theApp.IsPortableMode())
 				theApp.AbsolutePathToRelative(szFileName);
-			file.Write<std::string>("Midi Library", s, szFileName);
+			file.Write<mpt::PathString>("Midi Library", s, szFileName);
 		}
 	}
 	return TRUE;
@@ -948,13 +946,6 @@ int CTrackApp::ExitInstance()
 	if (glpMidiLibrary)
 	{
 		ExportMidiConfig(theApp.GetSettings());
-		for (UINT iMidi=0; iMidi<256; iMidi++)
-		{
-			if (glpMidiLibrary->MidiMap[iMidi])
-			{
-				delete[] glpMidiLibrary->MidiMap[iMidi];
-			}
-		}
 		delete glpMidiLibrary;
 		glpMidiLibrary = NULL;
 	}

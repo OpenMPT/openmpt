@@ -41,7 +41,7 @@ typedef struct MODPLUGDIB
 
 typedef struct MIDILIBSTRUCT
 {
-	LPTSTR MidiMap[128*2];	// 128 instruments + 128 percussions
+	mpt::PathString MidiMap[128*2];	// 128 instruments + 128 percussions
 } MIDILIBSTRUCT, *LPMIDILIBSTRUCT;
 
 

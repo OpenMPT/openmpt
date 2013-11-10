@@ -247,7 +247,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	if (m_SndFile.m_nType == MOD_TYPE_MID)
 	{
 		CDLSBank *pCachedBank = NULL, *pEmbeddedBank = NULL;
-		CHAR szCachedBankFile[_MAX_PATH] = "";
+		mpt::PathString szCachedBankFile = MPT_PATHSTRING("");
 
 		if (CDLSBank::IsDLSBank(mpt::PathString::FromCString(lpszPathName)))
 		{
@@ -260,7 +260,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		// Scan Instruments
 		if (lpMidiLib) for (INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
 		{
-			const char *pszMidiMapName;
+			mpt::PathString pszMidiMapName;
 			ModInstrument *pIns = m_SndFile.Instruments[nIns];
 			UINT nMidiCode;
 			BOOL bEmbedded = FALSE;
@@ -296,22 +296,22 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 						pIns = m_SndFile.Instruments[nIns]; // Reset pIns because ExtractInstrument may delete the previous value.
 				}
 			}
-			if ((pszMidiMapName) && (pszMidiMapName[0]) && (!bEmbedded))
+			if((!pszMidiMapName.empty()) && (!bEmbedded))
 			{
 				// Load From DLS Bank
-				if (CDLSBank::IsDLSBank(mpt::PathString::FromLocale(pszMidiMapName)))
+				if (CDLSBank::IsDLSBank(pszMidiMapName))
 				{
 					CDLSBank *pDLSBank = NULL;
 					
-					if ((pCachedBank) && (!lstrcmpi(szCachedBankFile, pszMidiMapName)))
+					if ((pCachedBank) && (!mpt::PathString::CompareNoCase(szCachedBankFile, pszMidiMapName)))
 					{
 						pDLSBank = pCachedBank;
 					} else
 					{
 						if (pCachedBank) delete pCachedBank;
 						pCachedBank = new CDLSBank;
-						strcpy(szCachedBankFile, pszMidiMapName);
-						if (pCachedBank->Open(mpt::PathString::FromLocale(pszMidiMapName))) pDLSBank = pCachedBank;
+						szCachedBankFile = pszMidiMapName;
+						if (pCachedBank->Open(pszMidiMapName)) pDLSBank = pCachedBank;
 					}
 					if (pDLSBank)
 					{
@@ -337,19 +337,19 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				} else
 				{
 					// Load from Instrument or Sample file
-					CHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
 					CMappedFile f;
 
-					if(f.Open(mpt::PathString::FromLocale(pszMidiMapName)))
+					if(f.Open(pszMidiMapName))
 					{
 						FileReader file = f.GetFile();
 						if(file.IsValid())
 						{
 							m_SndFile.ReadInstrumentFromFile(nIns, file, false);
-							_splitpath(pszMidiMapName, NULL, NULL, szName, szExt);
-							strncat(szName, szExt, sizeof(szName));
+							mpt::PathString szName, szExt;
+							pszMidiMapName.SplitPath(nullptr, nullptr, &szName, &szExt);
+							szName += szExt;
 							pIns = m_SndFile.Instruments[nIns];
-							if (!pIns->filename[0]) mpt::String::Copy(pIns->filename, szName);
+							if (!pIns->filename[0]) mpt::String::Copy(pIns->filename, szName.ToLocale().c_str());
 							if (!pIns->name[0])
 							{
 								if (nMidiCode < 128)
