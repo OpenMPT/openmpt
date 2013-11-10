@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include "../common/mptFstream.h"
 
+#include <sstream>
+
 #define ENABLE_LOGGING 0
 
 #if(ENABLE_LOGGING)
