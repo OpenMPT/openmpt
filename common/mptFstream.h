@@ -66,6 +66,14 @@ public:
 	{
 		mptopen(filename, mode);
 	}
+	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+	{
+		mptopen(filename, mode);
+	}
+	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+	{
+		mptopen(filename, mode);
+	}
 };
 
 class ifstream
@@ -110,6 +118,14 @@ public:
 	{
 		mptopen(filename, mode);
 	}
+	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in)
+	{
+		mptopen(filename, mode);
+	}
+	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in)
+	{
+		mptopen(filename, mode);
+	}
 };
 
 class ofstream
@@ -151,6 +167,14 @@ public:
 		mptopen(filename, mode);
 	}
 	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::out)
+	{
+		mptopen(filename, mode);
+	}
+	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::out)
+	{
+		mptopen(filename, mode);
+	}
+	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
 		mptopen(filename, mode);
 	}
