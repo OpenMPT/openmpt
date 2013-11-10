@@ -27,6 +27,8 @@
 
 #include <deque>
 #include <iomanip>
+#include <locale>
+#include <sstream>
 
 #include <cstdlib>
 
@@ -711,6 +713,7 @@ struct BladeDynBind
 		traits.encoderSettingsName = "MP3Blade";
 		traits.encoderName = lame ? "Lame_enc.dll" : "BladeEnc.dll";
 		std::ostringstream description;
+		description.imbue(std::locale::classic());
 		BE_VERSION ver;
 		MemsetZero(ver);
 		beVersion(&ver);
@@ -927,6 +930,7 @@ struct AcmDynBind
 				if(layer3_samplerates[i] == (int)pafd->pwfx->nSamplesPerSec)
 				{
 					std::ostringstream driverDescription;
+					driverDescription.imbue(std::locale::classic());
 					std::string driverNameLong;
 					std::string driverNameShort;
 					std::string driverNameCombined;
@@ -1074,6 +1078,7 @@ struct AcmDynBind
 		traits.fileShortDescription = "MP3 (ACM)";
 		traits.fileDescription = "MPEG Layer 3";
 		std::ostringstream name;
+		name.imbue(std::locale::classic());
 		DWORD ver = acmGetVersion();
 		if(ver & 0xffff)
 		{

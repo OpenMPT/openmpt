@@ -21,6 +21,8 @@
 #include "VstPresets.h"
 #include "../soundlib/FileReader.h"
 
+#include <sstream>
+
 #ifndef NO_VST
 
 UINT CAbstractVstEditor::clipboardFormat = RegisterClipboardFormat("VST Preset Data");

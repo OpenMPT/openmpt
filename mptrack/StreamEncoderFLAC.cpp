@@ -17,6 +17,9 @@
 #include "Mptrack.h"
 #include "TrackerSettings.h"
 
+#include <locale>
+#include <sstream>
+
 #define FLAC__NO_DLL
 #include <flac/include/FLAC/metadata.h>
 #include <flac/include/FLAC/format.h>
@@ -263,6 +266,7 @@ FLACEncoder::FLACEncoder()
 	traits.encoderSettingsName = "FLAC";
 	traits.encoderName = "libFLAC";
 	std::ostringstream description;
+	description.imbue(std::locale::classic());
 	description << "Free Lossless Audio Codec" << std::endl;
 	description << "Vendor: " << FLAC__VENDOR_STRING << std::endl;
 	description << "Version: " << FLAC__VERSION_STRING << std::endl;
