@@ -2123,11 +2123,6 @@ BEGIN
     IDS_TUNING_IMPORT_UNRECOGNIZED_FILE 
                             "-Unable to import file ""%1%2"": unrecognized file.\n"
     IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_i16.dll."
-    IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER 
-                            """Error: Unable to create template folder '%1'"""
-    IDS_FILE_DOES_NOT_EXIST "The file '%1' does not exist"
-    IDS_FILE_EXISTS_BUT_IS_NOT_READABLE 
-                            "The file '%1' exists but can't be read"
     IDS_ERR_FILEOPEN        "Unable to open file."
     IDS_ERR_FILETYPE        "Unsupported file type"
     IDS_ERR_SAVEINS         "Unable to save instrument"
@@ -2439,12 +2434,9 @@ BEGIN
     IDS_UNSUPPORTED_TUNING_DnD 
                             "For the time being Drag and Drop is only supported for tuning instances."
     IDS_OPERATION_FAIL      "Operation failed."
-    IDS_CANT_OPEN_KEYBINDING_FILE 
-                            "Can't open keybindings file %1 for reading. Default keybindings will be used."
     IDS_UNABLE_TO_LOAD_KEYBINDINGS 
                             "Loading keybindings failed. The keyboard won't work properly."
     IDS_CANT_OPEN_FILE_FOR_WRITING "Can't open keybindings file for writing."
-    IDS_CONFIRM_SEQUENCE_DELETE "Delete sequence %1?"
     IDS_PATTERN_CLEANUP_UNAVAILABLE 
                             "Removing unused patterns is not available when using multiple sequences."
     IDS_SCL_IMPORT_FAIL_1   "Invalid numerator or denominator"
