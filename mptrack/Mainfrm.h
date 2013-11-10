@@ -24,6 +24,7 @@ class ISoundDevice;
 class ISoundSource;
 
 #define MAINFRAME_TITLE				"Open ModPlug Tracker"
+#define MAINFRAME_TITLEW				L"Open ModPlug Tracker"
 
 enum
 {

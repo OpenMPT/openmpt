@@ -2506,11 +2506,10 @@ void CMainFrame::OnShowSettingsFolder()
 void CMainFrame::OnHelp()
 //-----------------------
 {
-	mpt::PathString helpFile = theApp.GetAppDirPath();
-	helpFile += MPT_PATHSTRING("OpenMPT Manual.pdf");
+	mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.pdf");
 	if(!theApp.OpenFile(helpFile))
 	{
-		Reporting::Error(std::string("Could not find help file:\n" + helpFile.ToLocale()).c_str());
+		Reporting::Error(L"Could not find help file:\n" + helpFile.ToWide());
 	}
 }
 
