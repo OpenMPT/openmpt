@@ -132,9 +132,9 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	size = file.ReadUint32LE();	// path string length
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
-		char path[_MAX_PATH];
+		std::string path;
 		file.ReadString<mpt::String::maybeNullTerminated>(path, size);
-		m_szInstrumentPath[ins] = path;
+		m_szInstrumentPath[ins] = mpt::PathString::FromLocale(path);
 	}
 
 	// Song Orders
@@ -223,7 +223,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	CMappedFile f;
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
-		if(m_szInstrumentPath[ins].empty() || !f.Open(mpt::PathString::FromLocale(m_szInstrumentPath[ins]))) continue;
+		if(m_szInstrumentPath[ins].empty() || !f.Open(m_szInstrumentPath[ins])) continue;
 
 		FileReader file = f.GetFile();
 		if(file.IsValid())
@@ -399,7 +399,7 @@ bool CSoundFile::SaveITProject(const mpt::PathString &filename)
 	{
 		char path[_MAX_PATH];
 		MemsetZero(path);
-		strncpy(path, m_szInstrumentPath[i].c_str(), _MAX_PATH);
+		strncpy(path, m_szInstrumentPath[i].ToLocale().c_str(), _MAX_PATH);
 		fwrite(path, 1, _MAX_PATH, f);
 	}
 

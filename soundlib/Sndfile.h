@@ -406,7 +406,7 @@ public:
 #ifdef MODPLUG_TRACKER
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	std::string m_szInstrumentPath[MAX_INSTRUMENTS];
+	mpt::PathString m_szInstrumentPath[MAX_INSTRUMENTS];
 // -! NEW_FEATURE#0023
 #endif // MODPLUG_TRACKER
 

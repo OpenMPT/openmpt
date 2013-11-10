@@ -181,7 +181,7 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSampl
 #ifdef MODPLUG_TRACKER
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	m_szInstrumentPath[nInstr - 1].clear();
+	m_szInstrumentPath[nInstr - 1] = mpt::PathString();
 	if(GetpModDoc())
 	{
 		GetpModDoc()->m_bsInstrumentModified.reset(nInstr - 1);

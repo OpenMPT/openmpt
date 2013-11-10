@@ -506,19 +506,19 @@ bool CModDoc::SaveInstrument(INSTRUMENTINDEX instr)
 		instr--;
 		if(!m_SndFile.m_szInstrumentPath[instr].empty())
 		{
-			const size_t len = m_SndFile.m_szInstrumentPath[instr].length();
-			const bool iti = !_stricmp(&m_SndFile.m_szInstrumentPath[instr][len - 3], "iti");
-			const bool xi  = !_stricmp(&m_SndFile.m_szInstrumentPath[instr][len - 2], "xi");
+			const mpt::PathString dotExt = m_SndFile.m_szInstrumentPath[instr].GetFileExt();
+			const bool iti = !mpt::PathString::CompareNoCase(dotExt, MPT_PATHSTRING(".iti"));
+			const bool xi  = !mpt::PathString::CompareNoCase(dotExt, MPT_PATHSTRING(".xi"));
 
 			if(iti || (!xi  && m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
-				success = m_SndFile.SaveITIInstrument(instr + 1, mpt::PathString::FromLocale(m_SndFile.m_szInstrumentPath[instr]), false);
+				success = m_SndFile.SaveITIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr], false);
 			else
-				success = m_SndFile.SaveXIInstrument(instr + 1, mpt::PathString::FromLocale(m_SndFile.m_szInstrumentPath[instr]));
+				success = m_SndFile.SaveXIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr]);
 
 			if(success)
 				m_bsInstrumentModified.reset(instr);
 			else
-				Reporting::Error(("Error while saving\n" + m_SndFile.m_szInstrumentPath[instr] + "!").c_str());
+				Reporting::Error(("Error while saving\n" + m_SndFile.m_szInstrumentPath[instr].ToLocale() + "!").c_str());
 		}
 	}
 	return success;
