@@ -403,10 +403,12 @@ public:
 	SongMessage songMessage;
 	std::string madeWithTracker;
 
+#ifdef MODPLUG_TRACKER
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	std::string m_szInstrumentPath[MAX_INSTRUMENTS];
 // -! NEW_FEATURE#0023
+#endif // MODPLUG_TRACKER
 
 	bool m_bIsRendering;
 	bool m_bPatternTransitionOccurred;
