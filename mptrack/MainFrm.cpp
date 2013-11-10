@@ -61,6 +61,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_CLOSE()
 	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_DROPFILES()
 	ON_COMMAND(ID_VIEW_OPTIONS,				OnViewOptions)
 
 	ON_COMMAND(ID_PLUGIN_SETUP,				OnPluginManager)
@@ -475,6 +476,23 @@ void CMainFrame::OnClose()
 }
 
 
+// Drop files from Windows
+void CMainFrame::OnDropFiles(HDROP hDropInfo)
+//-------------------------------------------
+{
+	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	CMainFrame::GetMainFrame()->SetForegroundWindow();
+	for(UINT f = 0; f < nFiles; f++)
+	{
+		WCHAR fileName[MAX_PATH];
+		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
+		{
+			const mpt::PathString file = mpt::PathString::FromNative(fileName);
+			theApp.OpenDocumentFile(file.ToCString());
+		}
+	}
+	::DragFinish(hDropInfo);
+}
 
 
 LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam)
