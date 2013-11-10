@@ -63,6 +63,8 @@
 // <cstdio>
 // <stdio.h>
 // <windows.h> or just basic typedefs found in there
+#include "../common/mptString.h"
+#include "../common/mptPathString.h"
 
 
 //{{AFX_INSERT_LOCATION}}
