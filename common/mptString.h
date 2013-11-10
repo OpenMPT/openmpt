@@ -259,8 +259,23 @@ public:
 	void SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const;
 	PathString GetDrive() const;
 	PathString GetDir() const;
+	PathString GetPath() const;
 	PathString GetFileName() const;
 	PathString GetFileExt() const;
+
+	bool HasTrailingSlash() const
+	{
+		if(empty())
+			return false;
+#if defined(WIN32)
+		if(path.back() == L'\\' || path.back() == L'/')
+			return true;
+#else
+		if(path.back() == '/')
+			return true;
+#endif
+		return false;
+	}
 
 #endif // MODPLUG_TRACKER
 

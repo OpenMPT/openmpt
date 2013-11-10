@@ -26,7 +26,7 @@ protected:
 	CTreeCtrl m_treePlugins;
 	CString m_sNameFilter;
 
-	HTREEITEM AddTreeItem(const char *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
+	HTREEITEM AddTreeItem(const TCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
 
 public:
 	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent);

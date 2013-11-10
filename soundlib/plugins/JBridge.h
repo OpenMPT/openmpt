@@ -18,8 +18,8 @@
 namespace JBridge
 {
 #ifdef ENABLE_JBRIDGE
-	AEffect *LoadBridgedPlugin(audioMasterCallback audioMaster, const char *pluginPath);
+	AEffect *LoadBridgedPlugin(audioMasterCallback audioMaster, const mpt::PathString &pluginPath);
 #else
-	inline void *LoadBridgedPlugin(void *, const char *) { return nullptr; }
+	inline void *LoadBridgedPlugin(void *, const mpt::PathString &) { return nullptr; }
 #endif // ENABLE_JBRIDGE
 }

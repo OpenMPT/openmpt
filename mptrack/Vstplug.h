@@ -62,24 +62,20 @@ struct VSTPluginLib
 
 	VSTPluginLib *pPrev, *pNext;
 	CVstPlugin *pPluginsList;
-	VstInt32 dwPluginId1;
-	VstInt32 dwPluginId2;
+	mpt::PathString libraryName;	// Display name
+	mpt::PathString dllPath;		// Full path name
+	VstInt32 pluginId1;
+	VstInt32 pluginId2;
 	PluginCategory category;
 	bool isInstrument;
-	CHAR szLibraryName[_MAX_FNAME];
-	CHAR szDllPath[_MAX_PATH];
 
-	VSTPluginLib(const CHAR *dllPath = nullptr)
+	VSTPluginLib(const mpt::PathString &dllPath, const mpt::PathString &libraryName)
+		: pPrev(nullptr), pNext(nullptr), pPluginsList(nullptr),
+		libraryName(libraryName), dllPath(dllPath),
+		pluginId1(0), pluginId2(0),
+		category(catUnknown),
+		isInstrument(false)
 	{
-		pPrev = pNext = nullptr;
-		dwPluginId1 = dwPluginId2 = 0;
-		isInstrument = false;
-		pPluginsList = nullptr;
-		category = catUnknown;
-		if(dllPath != nullptr)
-		{
-			mpt::String::CopyN(szDllPath, dllPath);
-		}
 	}
 
 	uint32 EncodeCacheFlags()
@@ -336,7 +332,7 @@ public:
 public:
 	VSTPluginLib *GetFirstPlugin() const { return m_pVstHead; }
 	bool IsValidPlugin(const VSTPluginLib *pLib);
-	VSTPluginLib *AddPlugin(LPCSTR pszDllPath, bool fromCache = true, const bool checkFileExistence = false, CString* const errStr = 0);
+	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, bool fromCache = true, const bool checkFileExistence = false, CString* const errStr = 0);
 	bool RemovePlugin(VSTPluginLib *);
 	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
 	void OnIdle();
@@ -344,7 +340,7 @@ public:
 
 protected:
 	void EnumerateDirectXDMOs();
-	void LoadPlugin(const char *pluginPath, AEffect *&effect, HINSTANCE &library);
+	void LoadPlugin(const mpt::PathString &pluginPath, AEffect *&effect, HINSTANCE &library);
 
 protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
@@ -360,7 +356,7 @@ public:
 
 #else // NO_VST
 public:
-	VSTPluginLib *AddPlugin(LPCSTR, bool = true, const bool = false, CString* const = 0) {return 0;}
+	VSTPluginLib *AddPlugin(const mpt::PathString &, bool = true, const bool = false, CString* const = 0) {return 0;}
 	VSTPluginLib *GetFirstPlugin() const { return 0; }
 	void OnIdle() {}
 #endif // NO_VST
