@@ -268,10 +268,10 @@ public:
 		if(empty())
 			return false;
 #if defined(WIN32)
-		if(path.back() == L'\\' || path.back() == L'/')
+		if(path[path.length()-1] == L'\\' || path[path.length()-1] == L'/')
 			return true;
 #else
-		if(path.back() == '/')
+		if(path[path.length()-1] == '/')
 			return true;
 #endif
 		return false;
