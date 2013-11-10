@@ -682,19 +682,19 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_TUNING, true);
 
-	CString sLoadReport;
+	std::wstring sLoadReport;
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	const size_t nFiles = files.size();
 	for(size_t counter = 0; counter < nFiles; counter++)
 	{
-		TCHAR szFileName[_MAX_FNAME], szExt[_MAX_EXT];
-		_tsplitpath(files[counter].ToCString(), nullptr, nullptr, szFileName, szExt);
+		mpt::PathString fileName;
+		mpt::PathString fileExt;
+		files[counter].SplitPath(nullptr, nullptr, &fileName, &fileExt);
+		const std::wstring fileNameExt = (fileName + fileExt).ToWide();
 
-		_tcslwr(szExt); // Convert extension to lower case.
-
-		const bool bIsTun = (_tcscmp(szExt, CTuning::s_FileExtension) == 0);
-		const bool bIsScl = (_tcscmp(szExt, TEXT(".scl")) == 0);
+		const bool bIsTun = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);
+		const bool bIsScl = (mpt::PathString::CompareNoCase(fileExt, MPT_PATHSTRING(".scl")) == 0);
 		
 		if (bIsTun || bIsScl)
 		{
@@ -714,44 +714,31 @@ void CTuningDialog::OnBnClickedButtonImport()
 						delete pT; pT = nullptr;
 						if (m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 						{
-							CString sFormat, sMsg;
-							sFormat.LoadString(IDS_TUNING_IMPORT_LIMIT);
-							sMsg.FormatMessage(sFormat, szFileName, szExt, CTuningCollection::s_nMaxTuningCount);
-							sLoadReport += sMsg;
+							sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + StringifyW(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
 						}
 						else // Case: Can't add tuning to tuning collection for unknown reason.
 						{
-							CString sMsg;
-							AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNKNOWN_FAILURE, szFileName, szExt);
-							sLoadReport += sMsg;				
+							sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unknown reason.\n";				
 						}
 					}
 				}
 				else // pT == nullptr
 				{
-					CString sMsg;
-					AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNRECOGNIZED_FILE, szFileName, szExt);
-					sLoadReport += sMsg;
+					sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unrecognized file.\n";				
 				}
 			}
 			else // scl import.
 			{
-				EnSclImport a = ImportScl(files[counter], szFileName);
+				EnSclImport a = ImportScl(files[counter], fileName.ToCString());
 				if (a != enSclImportOk)
 				{
 					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 					{
-						CString sFormat, sMsg;
-						sFormat.LoadString(IDS_TUNING_IMPORT_LIMIT);
-						sMsg.FormatMessage(sFormat, szFileName, szExt, CTuningCollection::s_nMaxTuningCount);
-						sLoadReport += sMsg;
+						sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + StringifyW(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
 					}
 					else
 					{
-						CString sFormat, sMsg;
-						sFormat.LoadString(IDS_TUNING_IMPORT_SCL_FAILURE);
-						sMsg.FormatMessage(sFormat, szFileName, szExt, (LPCTSTR)GetSclImportFailureMsg(a));
-						sLoadReport += sMsg;
+						sLoadReport += L"-Unable to import " + fileNameExt + L": " + mpt::String::FromCString(GetSclImportFailureMsg(a)) + L".\n";
 					}
 				}
 				else // scl import successful.
@@ -764,7 +751,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				AddTreeItem(m_pActiveTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(&m_TempTunings)), NULL);
 			}
 		}
-		else if (_tcscmp(szExt, CTuningCollection::s_FileExtension) == 0)
+		else if(mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)) == 0)
 		{
 			// For now only loading tuning collection as 
 			// a separate collection - no possibility to 
@@ -774,9 +761,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			if (pNewTCol->Deserialize())
 			{
 				delete pNewTCol; pNewTCol = 0;
-				CString sMsg;
-				AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNKNOWN_TC_FAILURE, szFileName, szExt);
-				sLoadReport += sMsg;
+				sLoadReport += L"-Unable to import tuning collection \"" + fileNameExt + L"\": unrecognized file.\n";				
 			}
 			else
 			{
@@ -787,12 +772,10 @@ void CTuningDialog::OnBnClickedButtonImport()
 		}
 		else // Case: Unknown extension (should not happen).
 		{
-			CString sMsg;
-			AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNRECOGNIZED_FILE_EXT, szFileName, szExt);
-			sLoadReport += sMsg;
+			sLoadReport += L"-Unable to load \"" + fileNameExt + L"\": unrecognized file extension.\n";				
 		}
 	}
-	if (sLoadReport.GetLength() > 0)
+	if(sLoadReport.length() > 0)
 		Reporting::Information(sLoadReport);
 	UpdateView();
 }
