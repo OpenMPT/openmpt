@@ -58,6 +58,15 @@ UINT32 CalculateCRC32fromFilename(const char *s)
 }
 #endif // VST_USE_ALTERNATIVE_MAGIC
 
+
+static HRESULT CLSIDFromWString(const std::wstring &str, CLSID *clsid)
+//--------------------------------------------------------------------
+{
+	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	return CLSIDFromString(&tmp[0], clsid);
+}
+
+
 VstIntPtr VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 //----------------------------------------------------------------------------------------------------------------------------------------------
 {
@@ -140,7 +149,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 		{
 			CLSID clsid;
 			std::wstring formattedKey = std::wstring(L"{") + std::wstring(keyname) + std::wstring(L"}");
-			if(CLSIDFromString(formattedKey.c_str(), &clsid) == S_OK)
+			if(CLSIDFromWString(formattedKey, &clsid) == S_OK)
 			{
 				HKEY hksub;
 				formattedKey = std::wstring(L"software\\classes\\DirectShow\\MediaObjects\\") + std::wstring(keyname);
@@ -3452,7 +3461,7 @@ AEffect *DmoToVst(VSTPluginLib *pLib)
 {
 	CLSID clsid;
 
-	if (CLSIDFromString(pLib->dllPath.ToWide().c_str(), &clsid) == S_OK)
+	if (CLSIDFromWString(pLib->dllPath.ToWide(), &clsid) == S_OK)
 	{
 		IMediaObject *pMO = nullptr;
 		IMediaObjectInPlace *pMOIP = nullptr;
