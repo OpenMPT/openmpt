@@ -30,7 +30,7 @@ namespace Util { namespace sdOs
 {
 	/// Checks whether file or folder exists and whether it has the given mode.
 	enum FileMode {FileModeExists = 0, FileModeRead = 4, FileModeWrite = 2, FileModeReadWrite = 6};
-	bool IsPathFileAvailable(LPCTSTR pszFilePath, FileMode fm);
+	bool IsPathFileAvailable(const mpt::PathString &pszFilePath, FileMode fm);
 
 }} // namespace Util::sdOs
 

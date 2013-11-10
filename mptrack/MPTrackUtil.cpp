@@ -71,7 +71,7 @@ time_t Util::sdTime::MakeGmTime(tm& timeUtc)
 }
 
 
-bool Util::sdOs::IsPathFileAvailable(LPCTSTR pszFilePath, FileMode fm)
+bool Util::sdOs::IsPathFileAvailable(const mpt::PathString &pszFilePath, FileMode fm)
 {
-	return (_taccess(pszFilePath, fm) == 0);
+	return (_waccess(pszFilePath.AsNative().c_str(), fm) == 0);
 }

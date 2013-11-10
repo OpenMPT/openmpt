@@ -2888,19 +2888,19 @@ void CModDoc::OnSaveTemplateModule()
 	}
 
 	// Generate file name candidate.
-	CString sName;
+	mpt::PathString sName;
 	for(size_t i = 0; i<1000; ++i)
 	{
-		sName.Format(_T("newTemplate%u."), i);
-		sName += m_SndFile.GetModSpecifications().fileExtension;
-		if (!Util::sdOs::IsPathFileAvailable(pszTemplateFolder + sName, Util::sdOs::FileModeExists))
+		sName += MPT_PATHSTRING("newTemplate") + mpt::PathString::FromWide(StringifyW(i));
+		sName += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(m_SndFile.GetModSpecifications().fileExtension);
+		if (!Util::sdOs::IsPathFileAvailable(templateFolder + sName, Util::sdOs::FileModeExists))
 			break;
 	}
 
 	// Ask file name from user.
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(m_SndFile.GetModSpecifications().fileExtension)
-		.DefaultFilename(std::string(sName))
+		.DefaultFilename(sName)
 		.ExtensionFilter(ModTypeToFilter(m_SndFile))
 		.WorkingDirectory(templateFolder);
 	if(!dlg.Show())
