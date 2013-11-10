@@ -801,11 +801,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	{
 		free((void *)m_pszProfileName);
 	}
-	#ifdef UNICODE
-		m_pszProfileName = _tcsdup(m_szConfigFileName.AsNative().c_str());
-	#else
-		m_pszProfileName = _tcsdup(m_szConfigFileName.ToLocale().c_str());
-	#endif
+	m_pszProfileName = _tcsdup(m_szConfigFileName.ToCString());
 
 	m_bPortableMode = bIsAppDir;
 }
@@ -1970,7 +1966,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 			if(plugPath == failedPlugin)
 			{
-				const CString text = "The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin.ToCString() + "\n\nDo you still want to load it?";
+				const std::wstring text = L"The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin.ToWide() + L"\n\nDo you still want to load it?";
 				if(Reporting::Confirm(text, false, true) == cnfNo)
 				{
 					continue;
@@ -2096,11 +2092,7 @@ void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
 	STATIC_ASSERT(nLength >= 3);
 	if(_tcslen(szPath) == 0)
 		return;
-	#ifdef UNICODE
-		mpt::String::Copy(szPath, AbsolutePathToRelative(mpt::PathString::FromNative(szPath)).AsNative());
-	#else
-		mpt::String::Copy(szPath, AbsolutePathToRelative(mpt::PathString::FromLocale(szPath)).ToLocale());
-	#endif
+	mpt::String::Copy(szPath, AbsolutePathToRelative(mpt::PathString::ToCString(szPath)).ToCString());
 }
 
 CString CTrackApp::AbsolutePathToRelative(const CString &path)
@@ -2142,11 +2134,7 @@ void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 	STATIC_ASSERT(nLength >= 3);
 	if(_tcslen(szPath) == 0)
 		return;
-	#ifdef UNICODE
-		mpt::String::Copy(szPath, RelativePathToAbsolute(mpt::PathString::FromNative(szPath)).AsNative());
-	#else
-		mpt::String::Copy(szPath, RelativePathToAbsolute(mpt::PathString::FromLocale(szPath)).ToLocale());
-	#endif
+	mpt::String::Copy(szPath, RelativePathToAbsolute(mpt::PathString::ToCString(szPath)).ToCString());
 }
 
 CString CTrackApp::RelativePathToAbsolute(const CString &path)
