@@ -2040,6 +2040,23 @@ inline static void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength n
 		dst[i] = in[i];
 	}
 };
+
+// RAII-style helper struct for FLAC encoder
+struct FLAC__StreamEncoder_RAII
+{
+	FLAC__StreamEncoder *encoder;
+	FILE *f;
+
+	operator FLAC__StreamEncoder *() { return encoder; }
+
+	FLAC__StreamEncoder_RAII() : encoder(FLAC__stream_encoder_new()), f(nullptr) { }
+	~FLAC__StreamEncoder_RAII()
+	{
+		FLAC__stream_encoder_delete(encoder);
+		if(f != nullptr) fclose(f);
+	}
+};
+
 #endif
 
 
@@ -2048,7 +2065,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 //-----------------------------------------------------------------------------------------
 {
 #ifndef NO_FLAC
-	FLAC__StreamEncoder *encoder = FLAC__stream_encoder_new();
+	FLAC__StreamEncoder_RAII encoder;
 	if(encoder == nullptr)
 	{
 		return false;
@@ -2144,7 +2161,8 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	FLAC__stream_encoder_set_compression_level(encoder, compression);
 #endif // MODPLUG_TRACKER
 
-	if(FLAC__stream_encoder_init_file(encoder, filename.ToLocale().c_str(), nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
+	encoder.f = mpt_fopen(filename, "wb");
+	if(encoder.f == nullptr || FLAC__stream_encoder_init_FILE(encoder, encoder.f, nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
 	{
 		return false;
 	}
@@ -2178,7 +2196,6 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		FLAC__metadata_object_delete(metadata[i]);
 	}
 
-	FLAC__stream_encoder_delete(encoder);
 	return true;
 #else
 	MPT_UNREFERENCED_PARAMETER(nSample);
