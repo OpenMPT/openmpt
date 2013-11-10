@@ -36,12 +36,12 @@ typedef AEffect * (*PFNBRIDGEMAIN)(audioMasterCallback audioMaster, const char *
 
 
 //Check if it's a plugin_name.xx.dll
-bool IsBootStrapDll(const char *path)
-//-----------------------------------
+bool IsBootStrapDll(const mpt::PathString &path)
+//----------------------------------------------
 {
 	bool ret = false;
 
-	HMODULE hModule = LoadLibrary(path);
+	HMODULE hModule = LoadLibraryW(path.ToWide().c_str());
 	if(!hModule)
 	{
 		// Some error...
@@ -61,8 +61,8 @@ bool IsBootStrapDll(const char *path)
 }
 
 
-AEffect *LoadBridgedPlugin(audioMasterCallback audioMaster, const char *pluginPath)
-//---------------------------------------------------------------------------------
+AEffect *LoadBridgedPlugin(audioMasterCallback audioMaster, const mpt::PathString &pluginPath)
+//--------------------------------------------------------------------------------------------
 {
 	// Ignore JBridge bootstrap DLLs
 	if(IsBootStrapDll(pluginPath))
@@ -105,7 +105,7 @@ AEffect *LoadBridgedPlugin(audioMasterCallback audioMaster, const char *pluginPa
 		return nullptr;
 	}
 
-	return pfnBridgeMain(audioMaster, pluginPath);
+	return pfnBridgeMain(audioMaster, pluginPath.ToLocale().c_str());
 }
 
 }

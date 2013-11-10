@@ -81,7 +81,7 @@ public:
 			CVstPluginManager *pPluginManager = theApp.GetPluginManager();
 			if (pPluginManager)
 			{
-				pPluginManager->AddPlugin(path);
+				pPluginManager->AddPlugin(mpt::PathString::FromCString(path));
 				return NULL;
 			}
 		}
@@ -1943,8 +1943,6 @@ void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, LPMO
 BOOL CTrackApp::InitializeDXPlugins()
 //-----------------------------------
 {
-	TCHAR s[_MAX_PATH], tmp[32];
-
 	m_pPluginManager = new CVstPluginManager;
 	if(!m_pPluginManager) return FALSE;
 	const size_t numPlugins = theApp.GetSettings().Read<int32>("VST Plugins", "NumPlugins", 0);
@@ -1968,26 +1966,26 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 
 	CString nonFoundPlugs;
-	const CString failedPlugin = theApp.GetSettings().Read<CString>("VST Plugins", "FailedPlugin", "");
+	const mpt::PathString failedPlugin = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
 
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
-		s[0] = 0;
+		char tmp[32];
 		wsprintf(tmp, "Plugin%d", plug);
-		mpt::String::Copy(s, theApp.GetSettings().Read<std::string>("VST Plugins", tmp, ""));
-		if (s[0])
+		mpt::PathString plugPath = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", tmp, MPT_PATHSTRING(""));
+		if(!plugPath.empty())
 		{
-			RelativePathToAbsolute(s);
+			RelativePathToAbsolute(plugPath);
 
-			if(!failedPlugin.Compare(s))
+			if(plugPath == failedPlugin)
 			{
-				const CString text = "The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin + "\n\nDo you still want to load it?";
+				const CString text = "The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin.ToCString() + "\n\nDo you still want to load it?";
 				if(Reporting::Confirm(text, false, true) == cnfNo)
 				{
 					continue;
 				}
 			}
-			m_pPluginManager->AddPlugin(s, true, true, &nonFoundPlugs);
+			m_pPluginManager->AddPlugin(plugPath, true, true, &nonFoundPlugs);
 		}
 	}
 	if(nonFoundPlugs.GetLength() > 0)
@@ -2005,23 +2003,22 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	if(!m_pPluginManager) return FALSE;
 
 #ifndef NO_VST
-	TCHAR s[_MAX_PATH], tmp[32];
 	VSTPluginLib *pPlug;
 
 	pPlug = m_pPluginManager->GetFirstPlugin();
 	size_t plug = 0;
 	while(pPlug)
 	{
-		if(pPlug->dwPluginId1 != kDmoMagic)
+		if(pPlug->pluginId1 != kDmoMagic)
 		{
-			s[0] = 0;
+			char tmp[32];
 			wsprintf(tmp, "Plugin%d", plug);
-			strcpy(s, pPlug->szDllPath);
+			mpt::PathString plugPath = pPlug->dllPath;
 			if(theApp.IsPortableMode())
 			{
-				AbsolutePathToRelative(s);
+				AbsolutePathToRelative(plugPath);
 			}
-			theApp.GetSettings().Write<std::string>("VST Plugins", tmp, s);
+			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", tmp, plugPath);
 			plug++;
 		}
 		pPlug = pPlug->pNext;

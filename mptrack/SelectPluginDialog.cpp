@@ -138,8 +138,8 @@ void CSelectPluginDlg::OnOK()
 
 			// Initialize plugin info
 			MemsetZero(m_pPlugin->Info);
-			m_pPlugin->Info.dwPluginId1 = pFactory->dwPluginId1;
-			m_pPlugin->Info.dwPluginId2 = pFactory->dwPluginId2;
+			m_pPlugin->Info.dwPluginId1 = pFactory->pluginId1;
+			m_pPlugin->Info.dwPluginId2 = pFactory->pluginId2;
 
 			switch(m_pPlugin->Info.dwPluginId2)
 			{
@@ -149,8 +149,9 @@ void CSelectPluginDlg::OnOK()
 				break;
 			}
 
-			mpt::String::Copy(m_pPlugin->Info.szName, pFactory->szLibraryName);
-			mpt::String::Copy(m_pPlugin->Info.szLibraryName, pFactory->szLibraryName);
+			const std::string libraryName = pFactory->libraryName.ToLocale();
+			mpt::String::Copy(m_pPlugin->Info.szName, libraryName);
+			mpt::String::Copy(m_pPlugin->Info.szLibraryName, libraryName);
 
 			cs.Leave();
 
@@ -165,7 +166,6 @@ void CSelectPluginDlg::OnOK()
 					s[0] = 0;
 					if ((p->GetDefaultEffectName(s)) && (s[0]))
 					{
-						s[31] = 0;
 						mpt::String::Copy(m_pPlugin->Info.szName, s);
 					}
 				}
@@ -291,7 +291,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 			if(nameFilterActive)
 			{
 				// Apply name filter
-				CString displayName = p->szLibraryName;
+				CString displayName = p->libraryName.ToCString();
 				if (displayName.MakeLower().Find(m_sNameFilter) == -1)
 				{
 					p = p->pNext;
@@ -299,7 +299,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				}
 			}
 
-			HTREEITEM h = AddTreeItem(p->szLibraryName, p->isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[p->category], reinterpret_cast<LPARAM>(p));
+			HTREEITEM h = AddTreeItem(p->libraryName.ToCString(), p->isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[p->category], reinterpret_cast<LPARAM>(p));
 			categoryUsed[p->category] = true;
 
 			if(nameFilterActive)
@@ -317,7 +317,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 			{
 				//Which plugin should be selected?
 
-				if(forceSelect != 0 && p->dwPluginId2 == forceSelect)
+				if(forceSelect != 0 && p->pluginId2 == forceSelect)
 				{
 					//forced selection (e.g. just after add plugin)
 					currentPlug = h;
@@ -332,12 +332,12 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				} else if(m_pPlugin->Info.dwPluginId1 != 0 || m_pPlugin->Info.dwPluginId2 != 0)
 				{
 					//Plugin with matching ID to current slot's plug
-					if(p->dwPluginId1 == m_pPlugin->Info.dwPluginId1
-						&& p->dwPluginId2 == m_pPlugin->Info.dwPluginId2)
+					if(p->pluginId1 == m_pPlugin->Info.dwPluginId1
+						&& p->pluginId2 == m_pPlugin->Info.dwPluginId2)
 					{
 						currentPlug = h;
 					}
-				} else if(p->dwPluginId2 == TrackerSettings::Instance().gnPlugWindowLast)
+				} else if(p->pluginId2 == TrackerSettings::Instance().gnPlugWindowLast)
 				{
 					// Previously selected plugin
 					currentPlug = h;
@@ -375,9 +375,18 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 }
 
 
-HTREEITEM CSelectPluginDlg::AddTreeItem(const char *title, int image, bool sort, HTREEITEM hParent, LPARAM lParam)
-//----------------------------------------------------------------------------------------------------------------
+HTREEITEM CSelectPluginDlg::AddTreeItem(const TCHAR *title, int image, bool sort, HTREEITEM hParent, LPARAM lParam)
+//-----------------------------------------------------------------------------------------------------------------
 {
+	/*TVINSERTSTRUCTW tvi;
+	MemsetZero(tvi);
+	tvi.hInsertAfter = (sort ? TVI_SORT : TVI_FIRST);
+	tvi.hParent = hParent;
+	tvi.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT;
+	tvi.item.iImage = tvi.item.iSelectedImage = image;
+	tvi.item.pszText = title;
+	tvi.item.lParam = lParam;
+	return (HTREEITEM)::SendMessage(m_treePlugins.m_hWnd, TVM_INSERTITEMW, 0, (LPARAM)&tvi);*/
 	return m_treePlugins.InsertItem(
 		TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT,
 		title,
@@ -410,7 +419,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	VSTPluginLib *pPlug = (VSTPluginLib *)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
 	if ((pManager) && (pManager->IsValidPlugin(pPlug)))
 	{
-		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, pPlug->szDllPath);
+		SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
 	} else
 	{
 		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, "");
@@ -439,7 +448,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug)
 
 	for(size_t p = 0; p < CountOf(problemPlugs); p++)
 	{
-		if(problemPlugs[p].id2 == plug->dwPluginId2 /*&& gProblemPlugs[p].id1 == plug->dwPluginId1*/)
+		if(problemPlugs[p].id2 == plug->pluginId2 /*&& gProblemPlugs[p].id1 == plug->dwPluginId1*/)
 		{
 			CString s;
 			s.Format("WARNING: This plugin has been identified as %s,\nwhich is known to have the following problem with OpenMPT:\n\n%s\n\nWould you still like to add this plugin to the library?", problemPlugs[p].name, problemPlugs[p].problem);
@@ -470,12 +479,9 @@ void CSelectPluginDlg::OnAddPlugin()
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-
-		CString sFilename = files[counter].ToCString();
-
 		if (pManager)
 		{
-			plugLib = pManager->AddPlugin(sFilename, false);
+			plugLib = pManager->AddPlugin(files[counter], false);
 			if (plugLib)
 			{
 				bOk = true;
@@ -489,7 +495,7 @@ void CSelectPluginDlg::OnAddPlugin()
 	if (bOk)
 	{
 		// Force selection to last added plug.
-		UpdatePluginsList(plugLib ? plugLib->dwPluginId2 : 0);
+		UpdatePluginsList(plugLib ? plugLib->pluginId2 : 0);
 	} else
 	{
 		Reporting::Error("At least one selected file was not a valid VST Plugin.");

@@ -326,6 +326,12 @@ PathString PathString::GetDir() const
 	SplitPath(nullptr, &dir, nullptr, nullptr);
 	return dir;
 }
+PathString PathString::GetPath() const
+{
+	PathString drive, dir;
+	SplitPath(&drive, &dir, nullptr, nullptr);
+	return drive + dir;
+}
 PathString PathString::GetFileName() const
 {
 	PathString fname;
