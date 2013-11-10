@@ -2869,15 +2869,11 @@ void CModDoc::OnSaveTemplateModule()
 {
 	// Create template folder if doesn't exist already.
 	const mpt::PathString templateFolder = TrackerDirectories::Instance().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);
-	const CString templateFolderDummy = templateFolder.ToCString();
-	const LPCTSTR pszTemplateFolder = templateFolderDummy;
 	if (!PathIsDirectoryW(templateFolder.AsNative().c_str()))
 	{
 		if (!CreateDirectoryW(templateFolder.AsNative().c_str(), nullptr))
 		{
-			CString sErrMsg;
-			AfxFormatString1(sErrMsg, IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER, pszTemplateFolder);
-			Reporting::Notification(sErrMsg);
+			Reporting::Notification(L"Error: Unable to create template folder '" + templateFolder.ToWide() + L"'");
 			return;
 		}
 	}

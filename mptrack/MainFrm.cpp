@@ -2134,12 +2134,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 		else
 		{
 			const bool bExists = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists);
-			CString str;
-			if (bExists)
-				AfxFormatString1(str, IDS_FILE_EXISTS_BUT_IS_NOT_READABLE, (LPCTSTR)sPath.ToCString());
-			else
-				AfxFormatString1(str, IDS_FILE_DOES_NOT_EXIST, (LPCTSTR)sPath.ToCString());
-			Reporting::Notification(str);
+			Reporting::Notification(L"The file '" + sPath.ToWide() + L"' " + (bExists ? L"exists but can't be read" : L"does not exist"));
 		}
 	}
 	else

@@ -1680,9 +1680,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 	mpt::ifstream fin(filename.AsNative().c_str());
 	if (fin.fail())
 	{
-		CString strMsg;
-		AfxFormatString1(strMsg, IDS_CANT_OPEN_KEYBINDING_FILE, filename.ToCString());
-		Reporting::Warning(strMsg);
+		Reporting::Warning(L"Can't open keybindings file " + filename.ToWide() + L" for reading. Default keybindings will be used.");
 		return false;
 	}
 	else
