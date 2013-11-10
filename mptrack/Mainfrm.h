@@ -24,7 +24,6 @@ class ISoundDevice;
 class ISoundSource;
 
 #define MAINFRAME_TITLE				"Open ModPlug Tracker"
-#define INIBUFFERSIZE				MAX_PATH
 
 enum
 {
