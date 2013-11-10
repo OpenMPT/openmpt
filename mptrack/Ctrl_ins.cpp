@@ -1424,7 +1424,7 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 			m_modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 			// -> CODE#0023
 			// -> DESC="IT project files (.itp)"
-			m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = fileName.ToLocale();
+			m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = fileName;
 			SetInstrumentModified(false);
 			// -! NEW_FEATURE#0023
 			bOk = TRUE;
@@ -1761,7 +1761,7 @@ void CCtrlInstruments::OnInstrumentSave()
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = dlg.GetFirstFile().ToLocale();
+	m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = dlg.GetFirstFile();
 	SetInstrumentModified(false);
 // -! NEW_FEATURE#0023
 

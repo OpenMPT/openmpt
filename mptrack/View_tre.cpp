@@ -3089,7 +3089,7 @@ void CModTree::OnSetItemPath()
 			.ExtensionFilter("All files(*.*)|*.*||");
 		if(!dlg.Show()) return;
 
-		pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile().ToLocale();
+		pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile();
 		OnRefreshTree();
 	}
 }
@@ -3117,7 +3117,7 @@ void CModTree::OnSaveItem()
 				"FastTracker II Instruments (*.xi)|*.xi||");
 			if(!dlg.Show()) return;
 
-			pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile().ToLocale();
+			pSndFile->m_szInstrumentPath[modItem.val1 - 1] = dlg.GetFirstFile();
 		}
 
 		pModDoc->SaveInstrument(static_cast<INSTRUMENTINDEX>(modItem.val1));
