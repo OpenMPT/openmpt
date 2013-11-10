@@ -162,7 +162,7 @@ public:
 	virtual void OnInitialUpdate();
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-	virtual BOOL OnDragonDrop(BOOL, LPDRAGONDROP);
+	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
 	virtual LRESULT OnPlayerNotify(Notification *);
 	//}}AFX_VIRTUAL
 

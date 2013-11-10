@@ -1077,13 +1077,13 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_INS_OPENFILE:
-		if (lParam) return OpenInstrument(mpt::PathString::FromCString((LPCSTR)lParam));
+		if (lParam) return OpenInstrument(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;
 
 	case CTRLMSG_INS_SONGDROP:
 		if (lParam)
 		{
-			LPDRAGONDROP pDropInfo = (LPDRAGONDROP)lParam;
+			const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
 			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
 			if (pDropInfo->pModDoc) pSndFile = pDropInfo->pModDoc->GetSoundFile();
 			if (pSndFile) return OpenInstrument(*pSndFile, pDropInfo->dwDropItem);

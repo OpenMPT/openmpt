@@ -210,7 +210,7 @@ public:
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 	virtual void UpdateView(DWORD, CObject *) {}
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
-	virtual BOOL OnDragonDrop(BOOL, LPDRAGONDROP) { return FALSE; }
+	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
 	virtual LRESULT OnPlayerNotify(Notification *) { return 0; }
 	//}}AFX_VIRTUAL
 
@@ -219,7 +219,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnReceiveModViewMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL OnMouseWheel(UINT fFlags, short zDelta, CPoint point);
-	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (LPDRAGONDROP)lParam); }
+	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (const DRAGONDROP *)lParam); }
 	LRESULT OnUpdatePosition(WPARAM, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

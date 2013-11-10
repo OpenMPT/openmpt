@@ -39,22 +39,24 @@ typedef struct MODPLUGDIB
 /////////////////////////////////////////////////////////////////////////////
 // Midi Library
 
-typedef struct MIDILIBSTRUCT
+struct MIDILIBSTRUCT
 {
 	mpt::PathString MidiMap[128*2];	// 128 instruments + 128 percussions
-} MIDILIBSTRUCT, *LPMIDILIBSTRUCT;
+};
 
 
 //////////////////////////////////////////////////////////////////////////
 // Dragon Droppings
 
-typedef struct DRAGONDROP
+struct DRAGONDROP
 {
 	CModDoc *pModDoc;
 	DWORD dwDropType;
 	DWORD dwDropItem;
 	LPARAM lDropParam;
-} DRAGONDROP, *LPDRAGONDROP;
+
+	const mpt::PathString &GetPath() const { return *reinterpret_cast<const mpt::PathString *>(lDropParam); }
+};
 
 enum {
 	DRAGONDROP_NOTHING=0,	// |------< Drop Type >-------------|--< dwDropItem >---|--< lDropParam >---|
@@ -83,8 +85,8 @@ class CTrackApp: public CWinApp
 // static data
 protected:
 	static MODTYPE m_nDefaultDocType;
-	static LPMIDILIBSTRUCT glpMidiLibrary;
 	static BOOL m_nProject;
+	static MIDILIBSTRUCT midiLibrary;
 
 public:
 	static std::vector<CDLSBank *> gpDLSBanks;
@@ -137,7 +139,7 @@ public:
 	static mpt::PathString GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
-	static LPMIDILIBSTRUCT GetMidiLibrary() { return glpMidiLibrary; }
+	static MIDILIBSTRUCT &GetMidiLibrary() { return midiLibrary; }
 	static BOOL ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarning=FALSE);
 	static BOOL ExportMidiConfig(const mpt::PathString &filename);
 	static BOOL ImportMidiConfig(SettingsContainer &file);

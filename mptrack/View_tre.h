@@ -173,7 +173,8 @@ protected:
 	std::vector<ModTreeDocInfo *> DocInfo;
 	// Instrument library
 	bool m_bShowAllFiles, doLabelEdit;
-	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];
+	mpt::PathString m_szInstrLibPath, m_szOldPath;
+	mpt::PathString m_szSongName;	// Name of open module, without path (== m_szInstrLibPath).
 
 public:
 	CModTree(CModTree *pDataTree);
@@ -182,23 +183,23 @@ public:
 // Attributes
 public:
 	void Init();
-	void InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongFolder);
-	void InsLibGetFullPath(HTREEITEM hItem, LPSTR pszFullPath) const;
+	void InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songFolder);
+	mpt::PathString InsLibGetFullPath(HTREEITEM hItem) const;
 	void RefreshMidiLibrary();
 	void RefreshDlsBanks();
 	void RefreshInstrumentLibrary();
 	void EmptyInstrumentLibrary();
 	void FillInstrumentLibrary();
 	ModItem GetModItem(HTREEITEM hItem);
-	BOOL SetMidiInstrument(UINT nIns, LPCTSTR lpszFileName);
-	BOOL SetMidiPercussion(UINT nPerc, LPCTSTR lpszFileName);
+	BOOL SetMidiInstrument(UINT nIns, const mpt::PathString &fileName);
+	BOOL SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName);
 	BOOL ExecuteItem(HTREEITEM hItem);
 	BOOL DeleteTreeItem(HTREEITEM hItem);
 	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam);
 	BOOL OpenTreeItem(HTREEITEM hItem);
 	BOOL OpenMidiInstrument(DWORD dwItem);
-	BOOL InstrumentLibraryChDir(LPCSTR lpszDir);
-	BOOL GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR lpszPath);
+	void InstrumentLibraryChDir(mpt::PathString dir, bool isSong);
+	bool GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath);
 	void OnOptionsChanged();
 	void AddDocument(CModDoc *pModDoc);
 	void RemoveDocument(CModDoc *pModDoc);
@@ -211,6 +212,9 @@ public:
 	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index);
 
 	bool IsSampleBrowser() const { return m_pDataTree == nullptr; }
+
+	std::wstring GetItemTextW(HTREEITEM item) const;
+	void SetItemTextW(HTREEITEM item, const WCHAR *text);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -228,7 +232,7 @@ public:
 protected:
 	static int CALLBACK ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	void ModTreeBuildTVIParam(TV_INSERTSTRUCT &tvis, LPCSTR lpszName, int iImage);
+	void ModTreeInsert(const WCHAR *name, int image);
 	CModDoc *GetDocumentFromItem(HTREEITEM hItem);
 	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc *pModDoc);
 

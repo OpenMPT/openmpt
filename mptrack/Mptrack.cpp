@@ -302,18 +302,12 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 /////////////////////////////////////////////////////////////////////////////
 // Midi Library
 
-LPMIDILIBSTRUCT CTrackApp::glpMidiLibrary = NULL;
+MIDILIBSTRUCT CTrackApp::midiLibrary;
 
 BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 //-----------------------------------------------------------------------------
 {
 	if(filename.empty()) return FALSE;
-
-	if (!glpMidiLibrary)
-	{
-		glpMidiLibrary = new MIDILIBSTRUCT;
-		if (!glpMidiLibrary) return FALSE;
-	}
 
 	if (CDLSBank::IsDLSBank(filename))
 	{
@@ -331,14 +325,14 @@ BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 		{
 			for (UINT iIns=0; iIns<256; iIns++)
 			{
-				if((bReplaceAll) || glpMidiLibrary->MidiMap[iIns].empty())
+				if((bReplaceAll) || midiLibrary.MidiMap[iIns].empty())
 				{
 					DWORD dwProgram = (iIns < 128) ? iIns : 0xFF;
 					DWORD dwKey = (iIns < 128) ? 0xFF : iIns & 0x7F;
 					DWORD dwBank = (iIns < 128) ? 0 : F_INSTRUMENT_DRUMS;
 					if (dlsbank.FindInstrument((iIns < 128) ? FALSE : TRUE,	dwBank, dwProgram, dwKey))
 					{
-						glpMidiLibrary->MidiMap[iIns] = filename;
+						midiLibrary.MidiMap[iIns] = filename;
 					}
 				}
 			}
@@ -355,12 +349,6 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file)
 {
 	TCHAR s[_MAX_PATH];
 	mpt::PathString UltraSndPath;
-
-	if (!glpMidiLibrary)
-	{
-		glpMidiLibrary = new MIDILIBSTRUCT;
-		if (!glpMidiLibrary) return FALSE;
-	}
 
 	UltraSndPath = file.Read<mpt::PathString>("Ultrasound", "PatchDir", mpt::PathString());
 	if(UltraSndPath == MPT_PATHSTRING(".\\")) UltraSndPath = mpt::PathString();
@@ -405,7 +393,7 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file)
 		if(!filename.empty())
 		{
 			filename = theApp.RelativePathToAbsolute(filename);
-			glpMidiLibrary->MidiMap[iMidi] = filename;
+			midiLibrary.MidiMap[iMidi] = filename;
 		}
 	}
 	return FALSE;
@@ -415,7 +403,7 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file)
 BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
 //---------------------------------------------------------------
 {
-	if((!glpMidiLibrary) || filename.empty()) return FALSE;
+	if(filename.empty()) return FALSE;
 	IniFileSettingsContainer file(filename);
 	return ExportMidiConfig(file);
 }
@@ -425,15 +413,14 @@ BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 {
 	CHAR s[128];
 
-	if (!glpMidiLibrary) return FALSE;
-	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (!glpMidiLibrary->MidiMap[iMidi].empty())
+	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (!midiLibrary.MidiMap[iMidi].empty())
 	{
 		if (iMidi < 128)
 			wsprintf(s, _T("Midi%d"), iMidi);
 		else
 			wsprintf(s, _T("Perc%d"), iMidi & 0x7F);
 
-		mpt::PathString szFileName = glpMidiLibrary->MidiMap[iMidi];
+		mpt::PathString szFileName = midiLibrary.MidiMap[iMidi];
 
 		if(!szFileName.empty())
 		{
@@ -507,7 +494,7 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 			}
 		}
 	}
-	if(glpMidiLibrary) ImportMidiConfig(filename, TRUE);
+	ImportMidiConfig(filename, TRUE);
 
 	return TRUE;
 }
@@ -939,12 +926,7 @@ int CTrackApp::ExitInstance()
 {
 	delete m_pSoundDevicesManager;
 	m_pSoundDevicesManager = nullptr;
-	if (glpMidiLibrary)
-	{
-		ExportMidiConfig(theApp.GetSettings());
-		delete glpMidiLibrary;
-		glpMidiLibrary = NULL;
-	}
+	ExportMidiConfig(theApp.GetSettings());
 	SaveDefaultDLSBanks();
 	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{

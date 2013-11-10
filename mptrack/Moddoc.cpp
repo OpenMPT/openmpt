@@ -256,9 +256,9 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		}
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
 		BeginWaitCursor();
-		LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
+		MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
 		// Scan Instruments
-		if (lpMidiLib) for (INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
+		for (INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
 		{
 			mpt::PathString pszMidiMapName;
 			ModInstrument *pIns = m_SndFile.Instruments[nIns];
@@ -269,7 +269,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				nMidiCode = 0x80 | (pIns->nMidiDrumKey & 0x7F);
 			else
 				nMidiCode = pIns->nMidiProgram & 0x7F;
-			pszMidiMapName = lpMidiLib->MidiMap[nMidiCode];
+			pszMidiMapName = midiLib.MidiMap[nMidiCode];
 			if (pEmbeddedBank)
 			{
 				UINT nDlsIns = 0, nDrumRgn = 0;

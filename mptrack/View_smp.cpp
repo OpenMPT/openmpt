@@ -2223,18 +2223,19 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 }
 
 
+// Drop files from Windows
 void CViewSample::OnDropFiles(HDROP hDropInfo)
 //--------------------------------------------
 {
-	const UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
+	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		TCHAR szFileName[_MAX_PATH] = "";
-		CMainFrame::GetMainFrame()->SetForegroundWindow();
-		::DragQueryFile(hDropInfo, f, szFileName, _MAX_PATH);
-		if(szFileName[0])
+		WCHAR fileName[MAX_PATH];
+		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
 		{
-			if(SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)szFileName) && f < nFiles - 1)
+			const mpt::PathString file = mpt::PathString::FromNative(fileName);
+			if(SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
 			{
 				// Insert more sample slots
 				SendCtrlMessage(IDC_SAMPLE_NEW);
@@ -2245,8 +2246,8 @@ void CViewSample::OnDropFiles(HDROP hDropInfo)
 }
 
 
-BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
-//-------------------------------------------------------------------
+BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
+//------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
@@ -2275,8 +2276,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 
 	case DRAGONDROP_SOUNDFILE:
 	case DRAGONDROP_MIDIINSTR:
-		bCanDrop = ((lpDropInfo->lDropParam)
-				 && (*((LPCSTR)lpDropInfo->lDropParam)));
+		bCanDrop = !lpDropInfo->GetPath().empty();
 		break;
 	}
 	if ((!bCanDrop) || (!bDoDrop)) return bCanDrop;
@@ -2296,10 +2296,10 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		break;
 
 	case DRAGONDROP_MIDIINSTR:
-		if (CDLSBank::IsDLSBank(mpt::PathString::FromCString((LPCSTR)lpDropInfo->lDropParam)))
+		if (CDLSBank::IsDLSBank(lpDropInfo->GetPath()))
 		{
 			CDLSBank dlsbank;
-			if (dlsbank.Open(mpt::PathString::FromCString((LPCSTR)lpDropInfo->lDropParam)))
+			if (dlsbank.Open(lpDropInfo->GetPath()))
 			{
 				DLSINSTRUMENT *pDlsIns;
 				UINT nIns = 0, nRgn = 0xFF;
@@ -2329,7 +2329,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		}
 		MPT_FALLTHROUGH;
 	case DRAGONDROP_SOUNDFILE:
-		SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)lpDropInfo->lDropParam);
+		SendCtrlMessage(CTRLMSG_SMP_OPENFILE, lpDropInfo->lDropParam);
 		break;
 
 	case DRAGONDROP_DLS:

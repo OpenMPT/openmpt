@@ -1980,18 +1980,19 @@ void CViewInstrument::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 }
 
 
+// Drop files from Windows
 void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 //------------------------------------------------
 {
-	const UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
+	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		TCHAR szFileName[_MAX_PATH] = "";
-		CMainFrame::GetMainFrame()->SetForegroundWindow();
-		::DragQueryFile(hDropInfo, f, szFileName, _MAX_PATH);
-		if(szFileName[0])
+		WCHAR fileName[MAX_PATH];
+		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
 		{
-			if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)szFileName) && f < nFiles - 1)
+			const mpt::PathString file = mpt::PathString::FromNative(fileName);
+			if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
 			{
 				// Insert more instrument slots
 				SendCtrlMessage(IDC_INSTRUMENT_NEW);
@@ -2002,8 +2003,8 @@ void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 }
 
 
-BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
-//-----------------------------------------------------------------------
+BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
+//----------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	BOOL bCanDrop = FALSE;
@@ -2033,8 +2034,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 
 	case DRAGONDROP_SOUNDFILE:
 	case DRAGONDROP_MIDIINSTR:
-		bCanDrop = ((lpDropInfo->lDropParam)
-				 && (*((LPCSTR)lpDropInfo->lDropParam)));
+		bCanDrop = !lpDropInfo->GetPath().empty();
 		break;
 	}
 	if ((!bCanDrop) || (!bDoDrop)) return bCanDrop;
@@ -2059,10 +2059,10 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		break;
 
 	case DRAGONDROP_MIDIINSTR:
-		if (CDLSBank::IsDLSBank(mpt::PathString::FromCString((LPCSTR)lpDropInfo->lDropParam)))
+		if (CDLSBank::IsDLSBank(lpDropInfo->GetPath()))
 		{
 			CDLSBank dlsbank;
-			if (dlsbank.Open(mpt::PathString::FromCString((LPCSTR)lpDropInfo->lDropParam)))
+			if (dlsbank.Open(lpDropInfo->GetPath()))
 			{
 				DLSINSTRUMENT *pDlsIns;
 				UINT nIns = 0, nRgn = 0xFF;

@@ -675,7 +675,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 8;
 	m_nMaxPeriod = 0xF000;
 
-	const PATTERNINDEX numPats = std::min(static_cast<PATTERNINDEX>(patPos.size()), GetModSpecifications().patternsMax);
+	PATTERNINDEX numPats = std::min(static_cast<PATTERNINDEX>(patPos.size()), GetModSpecifications().patternsMax);
 
 	if(numPats != patPos.size())
 	{
@@ -683,10 +683,15 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		AddToLog(mpt::String::Format(str_PatternSetTruncationNote, (unsigned int)patPos.size(), numPats));
 	}
 
+	if(!(loadFlags & loadPatternData))
+	{
+		numPats = 0;
+	}
+
 	// Checking for number of used channels, which is not explicitely specified in the file.
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
-		if(!(loadFlags & loadPatternData) || patPos[pat] == 0 || !file.Seek(patPos[pat]))
+		if(patPos[pat] == 0 || !file.Seek(patPos[pat]))
 			continue;
 
 		uint16 len = file.ReadUint16LE();
