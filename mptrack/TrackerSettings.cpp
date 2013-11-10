@@ -637,11 +637,16 @@ void TrackerSettings::SaveSettings()
 	}
 
 	// AutoSave
+	mpt::PathString path = CMainFrame::m_pAutoSaver->GetPath();
+	if(theApp.IsPortableMode())
+	{
+		path = theApp.AbsolutePathToRelative(path);
+	}
 	conf.Write<bool>("AutoSave", "Enabled", CMainFrame::m_pAutoSaver->IsEnabled());
 	conf.Write<int32>("AutoSave", "IntervalMinutes", CMainFrame::m_pAutoSaver->GetSaveInterval());
 	conf.Write<int32>("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth());
 	conf.Write<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath());
-	conf.Write<mpt::PathString>("AutoSave", "Path", theApp.AbsolutePathToRelative(CMainFrame::m_pAutoSaver->GetPath()));
+	conf.Write<mpt::PathString>("AutoSave", "Path", path);
 	conf.Write<mpt::PathString>("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate());
 
 	// Paths
