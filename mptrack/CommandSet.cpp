@@ -1541,8 +1541,8 @@ ctx:UID:Description:Modifier:Key:EventMask
 }
 
 
-bool CCommandSet::LoadFile(std::istream& iStrm, const CString &filenameDescription)
-//---------------------------------------------------------------------------------
+bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDescription)
+//--------------------------------------------------------------------------------------
 {
 	KeyCombination kc;
 	CommandID cmd=kcNumCommands;
@@ -1660,8 +1660,8 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const CString &filenameDescripti
 	}
 	if(!errText.IsEmpty())
 	{
-		CString err = TEXT("The following problems have been encountered while trying to load the key binding file ") + filenameDescription + TEXT(":\n");
-		err += errText;
+		std::wstring err = L"The following problems have been encountered while trying to load the key binding file " + filenameDescription + L":\n";
+		err += mpt::String::FromCString(errText);
 		Reporting::Warning(err);
 	}
 
@@ -1684,7 +1684,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 		return false;
 	}
 	else
-		return LoadFile(fin, filename.ToCString());
+		return LoadFile(fin, filename.ToWide());
 }
 
 
@@ -1698,7 +1698,7 @@ bool CCommandSet::LoadDefaultKeymap()
 	if (LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
 	{
 		std::istringstream iStrm(std::string(pData, nSize));
-		success = LoadFile(iStrm, TEXT("\"executable resource\""));
+		success = LoadFile(iStrm, L"\"executable resource\"");
 		FreeResource(hglob);
 	}
 	return success;
