@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
-#include <sstream>
 
 #include <cmath>
 #include <cstdlib>
@@ -41,19 +40,25 @@ std::uint32_t get_core_version() {
 }
 
 static std::string get_library_version_string() {
-	std::ostringstream str;
+	std::string str;
 	std::uint32_t version = get_library_version();
 	if ( ( version & 0xffff ) == 0 ) {
-		str << ((version>>24) & 0xff) << "." << ((version>>16) & 0xff);
+		str += Stringify((version>>24) & 0xff);
+		str += ".";
+		str += Stringify((version>>16) & 0xff);
 	} else {
-		str << ((version>>24) & 0xff) << "." << ((version>>16) & 0xff) << "." << ((version>>0) & 0xffff);
+		str += Stringify((version>>24) & 0xff);
+		str += ".";
+		str += Stringify((version>>16) & 0xff);
+		str += ".";
+		str += Stringify((version>>0) & 0xffff);
 	}
 	if ( MptVersion::IsDirty() ) {
-		str << ".2-modified";
+		str += ".2-modified";
 	} else if ( MptVersion::HasMixedRevisions() ) {
-		str << ".1-modified";
+		str += ".1-modified";
 	}
-	return str.str();
+	return str;
 }
 
 static std::string get_core_version_string() {
@@ -629,45 +634,47 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 	} else if ( key == std::string("message") ) {
 		std::string retval = m_sndFile->songMessage.GetFormatted( SongMessage::leLF );
 		if ( retval.empty() ) {
-			std::ostringstream tmp;
+			std::string tmp;
 			bool valid = false;
 			for ( INSTRUMENTINDEX i = 1; i <= m_sndFile->GetNumInstruments(); ++i ) {
 				std::string instname = m_sndFile->GetInstrumentName( i );
 				if ( !instname.empty() ) {
 					valid = true;
 				}
-				tmp << instname << std::endl;
+				tmp += instname;
+				tmp += "\n";
 			}
 			if ( valid ) {
-				retval = tmp.str();
+				retval = tmp;
 			}
 		}
 		if ( retval.empty() ) {
-			std::ostringstream tmp;
+			std::string tmp;
 			bool valid = false;
 			for ( SAMPLEINDEX i = 1; i <= m_sndFile->GetNumSamples(); ++i ) {
 				std::string samplename = m_sndFile->GetSampleName( i );
 				if ( !samplename.empty() ) {
 					valid = true;
 				}
-				tmp << samplename << std::endl;
+				tmp += samplename;
+				tmp += "\n";
 			}
 			if ( valid ) {
-				retval = tmp.str();
+				retval = tmp;
 			}
 		}
 		return mod_string_to_utf8( retval );
 	} else if ( key == std::string("warnings") ) {
-		std::ostringstream retval;
+		std::string retval;
 		bool first = true;
 		for ( std::vector<std::string>::const_iterator i = m_loaderMessages.begin(); i != m_loaderMessages.end(); ++i ) {
 			if ( !first ) {
-				retval << std::endl;
+				retval += "\n";
 				first = false;
 			}
-			retval << *i;
+			retval += *i;
 		}
-		return retval.str();
+		return retval;
 	}
 	return "";
 }
