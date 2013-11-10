@@ -443,6 +443,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mptPathString.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\mptrack.cpp"
 				>
 			</File>
@@ -1050,6 +1054,10 @@
 			</File>
 			<File
 				RelativePath="..\common\mptFstream.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\mptPathString.h"
 				>
 			</File>
 			<File
