@@ -607,11 +607,11 @@ BOOL COptionsGeneral::OnInitDialog()
 	m_CheckList.SetCurSel(0);
 	OnOptionSelChanged();
 
-	SetDlgItemText(IDC_OPTIONS_DIR_MODS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_MODS).ToCString());
-	SetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES).ToCString());
-	SetDlgItemText(IDC_OPTIONS_DIR_INSTS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS).ToCString());
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTS,		TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS).ToCString());
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINPRESETS).ToCString());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_MODS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_MODS).AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_SAMPS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES).AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_INSTS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS).AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS).AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS,	TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINPRESETS).AsNative().c_str());
 
 	return TRUE;
 }
@@ -621,13 +621,13 @@ void COptionsGeneral::OnOK()
 //--------------------------
 {
 	// Default paths
-	TCHAR szModDir[_MAX_PATH], szSmpDir[_MAX_PATH], szInsDir[_MAX_PATH], szVstDir[_MAX_PATH], szPresetDir[_MAX_PATH];
+	WCHAR szModDir[MAX_PATH], szSmpDir[MAX_PATH], szInsDir[MAX_PATH], szVstDir[MAX_PATH], szPresetDir[MAX_PATH];
 	szModDir[0] = szInsDir[0] = szSmpDir[0] = szVstDir[0] = szPresetDir[0] = 0;
-	GetDlgItemText(IDC_OPTIONS_DIR_MODS,		szModDir, _MAX_PATH);
-	GetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		szSmpDir, _MAX_PATH);
-	GetDlgItemText(IDC_OPTIONS_DIR_INSTS,		szInsDir, _MAX_PATH);
-	GetDlgItemText(IDC_OPTIONS_DIR_VSTS,		szVstDir, _MAX_PATH);
-	GetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	szPresetDir, _MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_MODS, szModDir, MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_SAMPS, szSmpDir, MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_INSTS, szInsDir, MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTS, szVstDir, MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS, szPresetDir, MAX_PATH);
 
 	for(size_t i = 0; i < CountOf(generalOptionsList); i++)
 	{
@@ -641,11 +641,11 @@ void COptionsGeneral::OnOK()
 	if (pMainFrm)
 	{
 		pMainFrm->SetupDirectories(
-			mpt::PathString::FromCString(szModDir),
-			mpt::PathString::FromCString(szSmpDir),
-			mpt::PathString::FromCString(szInsDir),
-			mpt::PathString::FromCString(szVstDir),
-			mpt::PathString::FromCString(szPresetDir)
+			mpt::PathString::FromNative(szModDir),
+			mpt::PathString::FromNative(szSmpDir),
+			mpt::PathString::FromNative(szInsDir),
+			mpt::PathString::FromNative(szVstDir),
+			mpt::PathString::FromNative(szPresetDir)
 			);
 		pMainFrm->SetupMiscOptions();
 	}
@@ -665,13 +665,13 @@ BOOL COptionsGeneral::OnSetActive()
 void COptionsGeneral::BrowseForFolder(UINT nID)
 //---------------------------------------------
 {
-	TCHAR szPath[MAX_PATH] = TEXT("");
-	GetDlgItemText(nID, szPath, CountOf(szPath));
+	WCHAR szPath[MAX_PATH] = L"";
+	::GetDlgItemTextW(m_hWnd, nID, szPath, CountOf(szPath));
 
-	::BrowseForFolder dlg(mpt::PathString::FromCString(szPath), TEXT("Select a default folder..."));
+	::BrowseForFolder dlg(mpt::PathString::FromNative(szPath), TEXT("Select a default folder..."));
 	if(dlg.Show())
 	{
-		SetDlgItemText(nID, dlg.GetDirectory().ToCString());
+		::SetDlgItemTextW(m_hWnd, nID, dlg.GetDirectory().AsNative().c_str());
 		OnSettingsChanged();
 	}
 }
