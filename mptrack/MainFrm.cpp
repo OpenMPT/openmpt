@@ -1411,22 +1411,22 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 }
 
 
-BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
-//------------------------------------------------------------------------
+BOOL CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE note)
+//------------------------------------------------------------------------------------
 {
 	bool ok = false;
 	BeginWaitCursor();
 	{
 		CriticalSection cs;
-		static CString prevFile;
+		static mpt::PathString prevFile;
 		// Did we already load this file for previewing? Don't load it again if the preview is still running.
-		ok = (prevFile == lpszFileName && m_pSndFile == &m_WaveFile);
+		ok = (prevFile == filename && m_pSndFile == &m_WaveFile);
 
-		if(!ok && lpszFileName)
+		if(!ok && !filename.empty())
 		{
 			CMappedFile f;
 
-			if(f.Open(mpt::PathString::FromLocale(lpszFileName)))
+			if(f.Open(filename))
 			{
 				FileReader file = f.GetFile();
 				if(file.IsValid())
@@ -1451,7 +1451,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 		{
 			// Write notes to pattern. Also done if we have previously loaded this file, since we might be previewing another note now.
 			PreparePreview(note);
-			prevFile = lpszFileName;
+			prevFile = filename;
 		}
 	}
 	EndWaitCursor();

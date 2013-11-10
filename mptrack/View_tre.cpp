@@ -1304,7 +1304,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 				CHAR szFullPath[_MAX_PATH] = "";
 				InsLibGetFullPath(hItem, szFullPath);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm) pMainFrm->PlaySoundFile(szFullPath, nParam);
+				if (pMainFrm) pMainFrm->PlaySoundFile(mpt::PathString::FromLocale(szFullPath), nParam);
 			}
 			return TRUE;
 
@@ -1316,7 +1316,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 				if ((lpMidiLib) && (modItemID < 256) && (lpMidiLib->MidiMap[modItemID]))
 				{
 					CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-					if (pMainFrm) pMainFrm->PlaySoundFile(lpMidiLib->MidiMap[modItemID], static_cast<ModCommand::NOTE>(nParam));
+					if (pMainFrm) pMainFrm->PlaySoundFile(mpt::PathString::FromLocale(lpMidiLib->MidiMap[modItemID]), static_cast<ModCommand::NOTE>(nParam));
 				}
 			}
 			return TRUE;
