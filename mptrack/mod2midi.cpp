@@ -150,16 +150,13 @@ void CModToMidi::DoDataExchange(CDataExchange *pDX)
 }
 
 
-CModToMidi::CModToMidi(const char * pszPathName, CSoundFile *pSndFile, CWnd *pWndParent):CDialog(IDD_MOD2MIDI, pWndParent)
-//------------------------------------------------------------------------------------------------------------------------
+CModToMidi::CModToMidi(const mpt::PathString &filename, CSoundFile *pSndFile, CWnd *pWndParent):CDialog(IDD_MOD2MIDI, pWndParent)
+//-------------------------------------------------------------------------------------------------------------------------------
 {
-	CHAR fext[_MAX_EXT];
-	
 	m_bRmi = FALSE;
 	m_pSndFile = pSndFile;
-	strcpy(m_szFileName, pszPathName);
-	_splitpath(pszPathName, NULL, NULL, NULL, fext);
-	if (!_stricmp(fext, ".rmi")) m_bRmi = TRUE;
+	m_szFileName = filename;
+	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".rmi"))) m_bRmi = TRUE;
 	MemsetZero(m_InstrMap);
 	for (UINT nIns=1; nIns<=m_pSndFile->m_nInstruments; nIns++)
 	{
@@ -373,7 +370,7 @@ BOOL CModToMidi::DoConvert()
 	UINT nSpeed;
 	FILE *f = nullptr;
 
-	f = mpt_fopen(mpt::PathString::FromLocale(m_szFileName), "wb");
+	f = mpt_fopen(m_szFileName, "wb");
 	if(!f)
 	{
 		return FALSE;

@@ -1886,7 +1886,7 @@ void CModDoc::OnFileMidiConvert()
 		.ExtensionFilter("Midi Files (*.mid,*.rmi)|*.mid;*.rmi||");
 	if(!dlg.Show()) return;
 
-	CModToMidi mididlg(dlg.GetFirstFile().ToLocale().c_str(), &m_SndFile, pMainFrm);
+	CModToMidi mididlg(dlg.GetFirstFile(), &m_SndFile, pMainFrm);
 	if(mididlg.DoModal() == IDOK)
 	{
 		BeginWaitCursor();

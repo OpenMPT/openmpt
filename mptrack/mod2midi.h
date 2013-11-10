@@ -27,11 +27,11 @@ protected:
 	CSoundFile *m_pSndFile;
 	BOOL m_bRmi, m_bPerc;
 	UINT m_nCurrInstr;
-	CHAR m_szFileName[_MAX_PATH];
+	mpt::PathString m_szFileName;
 	MOD2MIDIINSTR m_InstrMap[MAX_SAMPLES];
 
 public:
-	CModToMidi(const char *pszFileName, CSoundFile *pSndFile, CWnd *pWndParent=NULL);
+	CModToMidi(const mpt::PathString &filename, CSoundFile *pSndFile, CWnd *pWndParent=NULL);
 	~CModToMidi() {}
 	BOOL DoConvert();
 
