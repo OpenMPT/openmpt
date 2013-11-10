@@ -124,16 +124,16 @@ class CDoWaveConvert: public CDialog
 public:
 	const CWaveConvertSettings &m_Settings;
 	CSoundFile &m_SndFile;
-	const char *m_lpszFileName;
+	mpt::PathString m_lpszFileName;
 	DWORD m_dwFileLimit, m_dwSongLimit;
 	bool m_bAbort, m_bGivePlugsIdleTime;
 
 public:
-	CDoWaveConvert(CSoundFile &sndFile, const char *fname, const CWaveConvertSettings &settings, CWnd *parent = NULL)
+	CDoWaveConvert(CSoundFile &sndFile, const mpt::PathString &filename, const CWaveConvertSettings &settings, CWnd *parent = NULL)
 		: CDialog(IDD_PROGRESS, parent)
 		, m_SndFile(sndFile)
 		, m_Settings(settings)
-		, m_lpszFileName(fname)
+		, m_lpszFileName(filename)
 		, m_bAbort(false)
 		, m_dwFileLimit(0), m_dwSongLimit(0) { }
 	BOOL OnInitDialog();
