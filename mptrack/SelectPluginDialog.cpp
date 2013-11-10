@@ -250,22 +250,22 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 	static const struct
 	{
 		VSTPluginLib::PluginCategory category;
-		const char *description;
+		const WCHAR *description;
 	} categories[] =
 	{
-		{ VSTPluginLib::catEffect,			"Audio Effects" },
-		{ VSTPluginLib::catGenerator,		"Tone Generators" },
-		{ VSTPluginLib::catRestoration,		"Audio Restauration" },
-		{ VSTPluginLib::catSurroundFx,		"Surround Effects" },
-		{ VSTPluginLib::catRoomFx,			"Room Effects" },
-		{ VSTPluginLib::catSpacializer,		"Spacializers" },
-		{ VSTPluginLib::catMastering,		"Mastering Plugins" },
-		{ VSTPluginLib::catAnalysis,		"Analysis Plugins" },
-		{ VSTPluginLib::catOfflineProcess,	"Offline Processing" },
-		{ VSTPluginLib::catShell,			"Shell Plugins" },
-		{ VSTPluginLib::catUnknown,			"Unsorted" },
-		{ VSTPluginLib::catDMO,				"DirectX Media Audio Effects" },
-		{ VSTPluginLib::catSynth,			"Instrument Plugins" },
+		{ VSTPluginLib::catEffect,			L"Audio Effects" },
+		{ VSTPluginLib::catGenerator,		L"Tone Generators" },
+		{ VSTPluginLib::catRestoration,		L"Audio Restauration" },
+		{ VSTPluginLib::catSurroundFx,		L"Surround Effects" },
+		{ VSTPluginLib::catRoomFx,			L"Room Effects" },
+		{ VSTPluginLib::catSpacializer,		L"Spacializers" },
+		{ VSTPluginLib::catMastering,		L"Mastering Plugins" },
+		{ VSTPluginLib::catAnalysis,		L"Analysis Plugins" },
+		{ VSTPluginLib::catOfflineProcess,	L"Offline Processing" },
+		{ VSTPluginLib::catShell,			L"Shell Plugins" },
+		{ VSTPluginLib::catUnknown,			L"Unsorted" },
+		{ VSTPluginLib::catDMO,				L"DirectX Media Audio Effects" },
+		{ VSTPluginLib::catSynth,			L"Instrument Plugins" },
 	};
 
 	std::bitset<VSTPluginLib::numCategories> categoryUsed;
@@ -276,7 +276,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 		categoryFolders[categories[i].category] = AddTreeItem(categories[i].description, IMAGE_FOLDER, false);
 	}
 
-	HTREEITEM noPlug = AddTreeItem("No plugin (empty slot)", IMAGE_NOPLUGIN, false);
+	HTREEITEM noPlug = AddTreeItem(L"No plugin (empty slot)", IMAGE_NOPLUGIN, false);
 	HTREEITEM currentPlug = noPlug;
 	bool foundCurrentPlug = false;
 
@@ -299,7 +299,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				}
 			}
 
-			HTREEITEM h = AddTreeItem(p->libraryName.ToCString(), p->isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[p->category], reinterpret_cast<LPARAM>(p));
+			HTREEITEM h = AddTreeItem(p->libraryName.AsNative().c_str(), p->isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[p->category], reinterpret_cast<LPARAM>(p));
 			categoryUsed[p->category] = true;
 
 			if(nameFilterActive)
@@ -375,18 +375,9 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 }
 
 
-HTREEITEM CSelectPluginDlg::AddTreeItem(const TCHAR *title, int image, bool sort, HTREEITEM hParent, LPARAM lParam)
+HTREEITEM CSelectPluginDlg::AddTreeItem(const WCHAR *title, int image, bool sort, HTREEITEM hParent, LPARAM lParam)
 //-----------------------------------------------------------------------------------------------------------------
 {
-	/*TVINSERTSTRUCTW tvi;
-	MemsetZero(tvi);
-	tvi.hInsertAfter = (sort ? TVI_SORT : TVI_FIRST);
-	tvi.hParent = hParent;
-	tvi.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT;
-	tvi.item.iImage = tvi.item.iSelectedImage = image;
-	tvi.item.pszText = title;
-	tvi.item.lParam = lParam;
-	return (HTREEITEM)::SendMessage(m_treePlugins.m_hWnd, TVM_INSERTITEMW, 0, (LPARAM)&tvi);*/
 	return m_treePlugins.InsertItem(
 		TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT,
 		title,

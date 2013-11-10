@@ -893,6 +893,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CTreeCtrl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ctrl_com.h"
 				>
 			</File>

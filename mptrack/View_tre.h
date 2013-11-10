@@ -36,7 +36,7 @@ struct ModTreeDocInfo
 
 	std::bitset<MAX_SAMPLES> samplesPlaying;
 	std::bitset<MAX_INSTRUMENTS> instrumentsPlaying;
-	
+
 	ModTreeDocInfo(const CSoundFile &sndFile)
 	{
 		pModDoc = sndFile.GetpModDoc();
@@ -70,9 +70,11 @@ public:
 };
 
 
-//==============================
-class CModTree: public CTreeCtrl
-//==============================
+#include "CTreeCtrl.h"
+
+//===============================
+class CModTree: public CTreeCtrlW
+//===============================
 {
 protected:
 
@@ -166,7 +168,6 @@ protected:
 	UINT m_nDocNdx, m_nDragDocNdx;
 	HTREEITEM m_hItemDrag, m_hItemDrop;
 	HTREEITEM m_hInsLib, m_hMidiLib;
-	HTREEITEM m_tiMidiGrp[17];
 	HTREEITEM m_tiMidi[128];
 	HTREEITEM m_tiPerc[128];
 	std::vector<HTREEITEM> m_tiDLS;
@@ -212,9 +213,6 @@ public:
 	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index);
 
 	bool IsSampleBrowser() const { return m_pDataTree == nullptr; }
-
-	std::wstring GetItemTextW(HTREEITEM item) const;
-	void SetItemTextW(HTREEITEM item, const WCHAR *text);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

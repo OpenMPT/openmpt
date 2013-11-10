@@ -701,6 +701,7 @@
     <ClInclude Include="ColourEdit.h" />
     <ClInclude Include="CommandSet.h" />
     <ClInclude Include="CreditStatic.h" />
+    <ClInclude Include="CTreeCtrl.h" />
     <ClInclude Include="Ctrl_com.h" />
     <ClInclude Include="Ctrl_gen.h" />
     <ClInclude Include="Ctrl_ins.h" />

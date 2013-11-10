@@ -90,21 +90,23 @@ public:
 #if defined(MODPLUG_TRACKER)
 
 	void SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const;
-	PathString GetDrive() const;
-	PathString GetDir() const;
-	PathString GetPath() const;
-	PathString GetFileName() const;
-	PathString GetFileExt() const;
+	PathString GetDrive() const;		// Drive letter + colon, e.g. "C:"
+	PathString GetDir() const;			// Directory, e.g. "\OpenMPT\"
+	PathString GetPath() const;			// Drive + Dir, e.g. "C:\OpenMPT\"
+	PathString GetFileName() const;		// File name without extension, e.g. "mptrack"
+	PathString GetFileExt() const;		// Extension including dot, e.g. ".exe"
+	PathString GetFullFileName() const;	// File name + extension, e.g. "mptrack.exe"
 
 	bool HasTrailingSlash() const
 	{
 		if(empty())
 			return false;
+		const RawPathString::value_type &c = path[path.length() - 1];
 #if defined(WIN32)
-		if(path[path.length()-1] == L'\\' || path[path.length()-1] == L'/')
+		if(c == L'\\' || c == L'/')
 			return true;
 #else
-		if(path[path.length()-1] == '/')
+		if(c == '/')
 			return true;
 #endif
 		return false;

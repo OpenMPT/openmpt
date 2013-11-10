@@ -60,6 +60,12 @@ PathString PathString::GetFileExt() const
 	SplitPath(nullptr, nullptr, nullptr, &ext);
 	return ext;
 }
+PathString PathString::GetFullFileName() const
+{
+	PathString name, ext;
+	SplitPath(nullptr, nullptr, &name, &ext);
+	return name + ext;
+}
 
 } // namespace mpt
 
