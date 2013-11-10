@@ -400,7 +400,7 @@ public:
 	/// [out] vPaths: Receives the full paths of the files added to the menu.
 	/// [in] pszFolderName: Name of the folder (should end with \)
 	/// [in] nIdRangeBegin: First ID for the menu item.
-	static HMENU CreateFileMenu(const size_t nMaxCount, std::vector<CString>& vPaths, const LPCTSTR pszFolderName, const uint16 nIdRangeBegin);
+	static HMENU CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathString>& vPaths, const mpt::PathString &pszFolderName, const uint16 nIdRangeBegin);
 
 // Player functions
 public:
@@ -534,9 +534,9 @@ public:
 	static const size_t nMaxItemsInTemplateModulesMenu = 50;
 
 	/// Array of paths of example modules that are available from help menu.
-	static std::vector<CString> s_ExampleModulePaths;
+	static std::vector<mpt::PathString> s_ExampleModulePaths;
 	/// Array of paths of template modules that are available from file menu.
-	static std::vector<CString> s_TemplateModulePaths;
+	static std::vector<mpt::PathString> s_TemplateModulePaths;
 };
 
 

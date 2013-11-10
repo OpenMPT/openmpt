@@ -108,8 +108,8 @@ END_MESSAGE_MAP()
 UINT CMainFrame::m_nLastOptionsPage = 0;
 HHOOK CMainFrame::ghKbdHook = NULL;
 
-std::vector<CString> CMainFrame::s_ExampleModulePaths;
-std::vector<CString> CMainFrame::s_TemplateModulePaths;
+std::vector<mpt::PathString> CMainFrame::s_ExampleModulePaths;
+std::vector<mpt::PathString> CMainFrame::s_TemplateModulePaths;
 
 LONG CMainFrame::gnLVuMeter = 0;
 LONG CMainFrame::gnRVuMeter = 0;
@@ -2100,16 +2100,16 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 //-------------------------------------------------------------------------
 {
 	const UINT nIdBegin = (bTemplateFile) ? ID_FILE_OPENTEMPLATE : ID_EXAMPLE_MODULES;
-	const std::vector<CString>& vecFilePaths = (bTemplateFile) ? s_TemplateModulePaths : s_ExampleModulePaths;
+	const std::vector<mpt::PathString>& vecFilePaths = (bTemplateFile) ? s_TemplateModulePaths : s_ExampleModulePaths;
 
 	const UINT nIndex = nId - nIdBegin;
 	if (nIndex < vecFilePaths.size())
 	{
-		const CString& sPath = vecFilePaths[nIndex];
+		const mpt::PathString& sPath = vecFilePaths[nIndex];
 		const bool bAvailable = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeRead);
 		if (bAvailable)
 		{
-			CDocument* pDoc = theApp.OpenDocumentFile(sPath, bTemplateFile ? FALSE : TRUE);
+			CDocument* pDoc = theApp.OpenDocumentFile(sPath.ToCString(), bTemplateFile ? FALSE : TRUE);
 			if (pDoc != nullptr)
 			{
 				ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CModDoc)) == TRUE);
@@ -2136,9 +2136,9 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 			const bool bExists = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists);
 			CString str;
 			if (bExists)
-				AfxFormatString1(str, IDS_FILE_EXISTS_BUT_IS_NOT_READABLE, (LPCTSTR)sPath);
+				AfxFormatString1(str, IDS_FILE_EXISTS_BUT_IS_NOT_READABLE, (LPCTSTR)sPath.ToCString());
 			else
-				AfxFormatString1(str, IDS_FILE_DOES_NOT_EXIST, (LPCTSTR)sPath);
+				AfxFormatString1(str, IDS_FILE_DOES_NOT_EXIST, (LPCTSTR)sPath.ToCString());
 			Reporting::Notification(str);
 		}
 	}
@@ -2514,8 +2514,8 @@ void CMainFrame::OnHelp()
 }
 
 
-HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<CString>& vPaths, const LPCTSTR pszFolderName, const uint16 nIdRangeBegin)
-//---------------------------------------------------------------------------------------------------------------------------------------------
+HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathString>& vPaths, const mpt::PathString &pszFolderName, const uint16 nIdRangeBegin)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	vPaths.clear();
 	HMENU hMenu = ::CreatePopupMenu();
@@ -2529,14 +2529,14 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<CString>& v
 			if (i == 1 && mpt::PathString::CompareNoCase(CTrackApp::GetAppDirPath(), theApp.GetConfigPath()) == 0)
 				break;
 			CFileFind fileFind;
-			CFixedStringT<CString, MAX_PATH> sPath;
-			sPath = (i == 0) ? CTrackApp::GetAppDirPath().ToCString() : theApp.GetConfigPath().ToCString();
+			mpt::PathString sPath;
+			sPath = (i == 0) ? CTrackApp::GetAppDirPath() : theApp.GetConfigPath();
 			sPath += pszFolderName;
 			if (Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists) == false)
 				continue;
-			sPath += _T("*");
+			sPath += MPT_PATHSTRING("*");
 
-			BOOL bWorking = fileFind.FindFile(sPath);
+			BOOL bWorking = fileFind.FindFile(sPath.ToCString());
 			// Note: The order in which the example files appears in the menu is unspecified.
 			while (bWorking && nAddCounter < nMaxCount)
 			{
@@ -2544,7 +2544,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<CString>& v
 				const CString fn = fileFind.GetFileName();
 				if (fileFind.IsDirectory() == FALSE)
 				{
-					vPaths.push_back(fileFind.GetFilePath());
+					vPaths.push_back(mpt::PathString::FromCString(fileFind.GetFilePath()));
 					AppendMenu(hMenu, MF_STRING, nIdRangeBegin + nAddCounter, fileFind.GetFileName());
 					++nAddCounter;
 				}
@@ -2565,7 +2565,7 @@ void CMainFrame::CreateExampleModulesMenu()
 {
 	static_assert(nMaxItemsInExampleModulesMenu == ID_EXAMPLE_MODULES_LASTINRANGE - ID_EXAMPLE_MODULES + 1,
 				  "Make sure that there's a proper range for menu commands in resources.");
-	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, s_ExampleModulePaths, _T("ExampleSongs\\"), ID_EXAMPLE_MODULES);
+	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, s_ExampleModulePaths, MPT_PATHSTRING("ExampleSongs\\"), ID_EXAMPLE_MODULES);
 	CMenu* const pMainMenu = GetMenu();
 	if (hMenu && pMainMenu && m_InputHandler)
 		VERIFY(pMainMenu->ModifyMenu(ID_EXAMPLE_MODULES, MF_BYCOMMAND | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_EXAMPLE_MODULES)));
@@ -2579,7 +2579,7 @@ void CMainFrame::CreateTemplateModulesMenu()
 {
 	static_assert(nMaxItemsInTemplateModulesMenu == ID_FILE_OPENTEMPLATE_LASTINRANGE - ID_FILE_OPENTEMPLATE + 1,
 				  "Make sure that there's a proper range for menu commands in resources.");
-	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, s_TemplateModulePaths, _T("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
+	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, s_TemplateModulePaths, MPT_PATHSTRING("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
 	CMenu* const pMainMenu = GetMenu();
 	CMenu* pFileMenu = (pMainMenu) ? pMainMenu->GetSubMenu(0) : nullptr;
 	if (hMenu && pFileMenu && m_InputHandler)
