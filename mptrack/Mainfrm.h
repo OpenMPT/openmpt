@@ -521,6 +521,7 @@ protected:
 	afx_msg void OnInternetUpdate();
 	afx_msg void OnShowSettingsFolder();
 	afx_msg void OnHelp();
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
