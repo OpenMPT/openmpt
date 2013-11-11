@@ -1472,7 +1472,7 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 
 static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
-	mpt::ifstream stream(filename.AsNative().c_str(), std::ios::binary);
+	mpt::ifstream stream(filename, std::ios::binary);
 	FileReader file(&stream);
 	std::shared_ptr<CSoundFile> pSndFile(new CSoundFile());
 	pSndFile->Create(file, CSoundFile::loadCompleteModule);

@@ -1609,7 +1609,7 @@ bool CVstPlugin::SaveProgram()
 
 	bool bank = (dlg.GetExtension() == MPT_PATHSTRING("fxb"));
 
-	mpt::fstream f(dlg.GetFirstFile().AsNative().c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+	mpt::fstream f(dlg.GetFirstFile(), std::ios::out | std::ios::trunc | std::ios::binary);
 	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
 	{
 		return true;
