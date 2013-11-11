@@ -180,6 +180,7 @@ static noinline void show_ok(const char * const file, const int line, const char
 static noinline void show_fail(const char * const file, const int line, const char * const description, bool exception = false, const char * const exception_text = nullptr)
 {
 	std::cout << "FAIL" << std::endl;
+	std::cout.flush();
 	if(!exception)
 	{
 		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << std::endl;
@@ -190,6 +191,7 @@ static noinline void show_fail(const char * const file, const int line, const ch
 	{
 		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << " EXCEPTION: " << exception_text << std::endl;
 	}
+	std::cerr.flush();
 }
 
 static int fail_count = 0;
@@ -474,7 +476,13 @@ void TestMisc()
 	VERIFY_EQUAL(Stringify(42), "42");
 
 	VERIFY_EQUAL(Stringify(-87.0f), "-87");
-	VERIFY_EQUAL(Stringify(-0.5e-6), "-5e-007");
+	if(Stringify(-0.5e-6) != "-5e-007"
+		&& Stringify(-0.5e-6) != "-5e-07"
+		&& Stringify(-0.5e-6) != "-5e-7"
+		)
+	{
+		VERIFY_EQUAL(true, false);
+	}
 	VERIFY_EQUAL(Stringify(58.65403492763), "58.654");
 
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586);
