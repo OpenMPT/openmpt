@@ -1629,7 +1629,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Using std::ios::in | std::ios::out | std::ios::ate prevents truncation and sets the file pointer to the end of the so-far saved file,
 	//  but it also allows reading, which does no harm but is not what we actually really want here.
 	// That's a very broken interface.
-	mpt::ofstream fout(filename.AsNative().c_str(), std::ios::binary | std::ios::ate | std::ios::in);
+	mpt::ofstream fout(filename, std::ios::binary | std::ios::ate | std::ios::in);
 #endif
 
 	const uint32 MPTStartPos = (uint32)fout.tellp();

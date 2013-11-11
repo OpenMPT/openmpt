@@ -643,7 +643,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	bool failure = true;
 	
-	mpt::ofstream fout(dlg.GetFirstFile().AsNative().c_str(), std::ios::binary);
+	mpt::ofstream fout(dlg.GetFirstFile(), std::ios::binary);
 
 	if(filterIndex == 0)
 	{
@@ -702,7 +702,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 			if (bIsTun)
 			{
-				mpt::ifstream fin(files[counter].AsNative().c_str(), std::ios::binary);
+				mpt::ifstream fin(files[counter], std::ios::binary);
 				pT = CTuningRTI::DeserializeOLD(fin);
 				if(pT == 0)
 					{fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
@@ -1467,7 +1467,7 @@ static inline SclFloat CentToRatio(const SclFloat& val)
 CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, LPCTSTR pszName)
 //---------------------------------------------------------------------------------------------------
 {
-	mpt::ifstream iStrm(filename.AsNative().c_str(), std::ios::in | std::ios::binary);
+	mpt::ifstream iStrm(filename, std::ios::in | std::ios::binary);
 	if(!iStrm)
 	{
 		return enSclImportFailUnableToOpenFile;

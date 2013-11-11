@@ -1679,7 +1679,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 bool CCommandSet::LoadFile(const mpt::PathString &filename)
 //---------------------------------------------------------
 {
-	mpt::ifstream fin(filename.AsNative().c_str());
+	mpt::ifstream fin(filename);
 	if (fin.fail())
 	{
 		Reporting::Warning(L"Can't open keybindings file " + filename.ToWide() + L" for reading. Default keybindings will be used.");

@@ -879,10 +879,10 @@ void CDoWaveConvert::OnButton1()
 	mpt::fstream normalizeFile;
 	if(m_Settings.Normalize)
 	{
-		normalizeFile.open(normalizeFileName.AsNative().c_str(), std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
+		normalizeFile.open(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
 
-	mpt::ofstream fileStream(m_lpszFileName.AsNative().c_str(), std::ios::binary | std::ios::trunc);
+	mpt::ofstream fileStream(m_lpszFileName, std::ios::binary | std::ios::trunc);
 
 	if(!fileStream)
 	{

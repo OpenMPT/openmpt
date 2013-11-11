@@ -1,7 +1,7 @@
 /*
  * mptFstream.h
  * ------------
- * Purpose: A wrapper around std::fstream, fixing VS2008 charset conversion braindamage.
+ * Purpose: A wrapper around std::fstream, fixing VS2008 charset conversion braindamage, and enforcing usage of mpt::PathString.
  * Notes  : You should only ever use these wrappers instead of plain std::fstream classes.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -11,9 +11,8 @@
 
 #include <fstream>
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 #include "../common/mptString.h"
-#endif
+#include "../common/mptPathString.h"
 
 namespace mpt
 {
@@ -24,168 +23,160 @@ namespace mpt
 // This is totally wrong for Win32 GUI applications because the C locale does not necessarily match the current windows ANSI codepage (CP_ACP).
 // Work around this insanity by using our own string conversions for the std::fstream filenames.
 
+#define MPT_FSTREAM_DO_CONVERSIONS
+
+#endif
+
+#ifdef MPT_FSTREAM_DO_CONVERSIONS
+#define MPT_FSTREAM_OPEN(filename, mode) detail::fstream_open<Tbase>(*this, (filename), (mode))
+#else
+#define MPT_FSTREAM_OPEN(filename, mode) Tbase::open((filename), (mode))
+#endif
+
+namespace detail
+{
+
+template<typename Tbase>
+inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::ios_base::openmode mode)
+{
+	base.open(filename.AsNative().c_str(), mode);
+}
+
+#ifdef MPT_FSTREAM_DO_CONVERSIONS
+
+template<typename Tbase>
+inline void fstream_open(Tbase & base, const std::wstring & filename, std::ios_base::openmode mode)
+{
+	base.open(filename.c_str(), mode);
+}
+
+template<typename Tbase>
+inline void fstream_open(Tbase & base, const wchar_t * filename, std::ios_base::openmode mode)
+{
+	base.open(filename, mode);
+}
+
+template<typename Tbase>
+inline void fstream_open(Tbase & base, const std::string & filename, std::ios_base::openmode mode)
+{
+	detail::fstream_open<Tbase>(base, mpt::String::Decode(filename, mpt::CharsetLocale), mode);
+}
+
+template<typename Tbase>
+inline void fstream_open(Tbase & base, const char * filename, std::ios_base::openmode mode)
+{
+	detail::fstream_open<Tbase>(base, filename ? std::string(filename) : std::string(), mode);
+}
+
+#endif
+
+} // namespace detail
+
 class fstream
 	: public std::fstream
 {
 private:
-	void mptopen(const std::wstring & filename, std::ios_base::openmode mode)
-	{
-		std::fstream::open(filename.c_str(), mode);
-	}
-	void mptopen(const std::string & filename, std::ios_base::openmode mode)
-	{
-		mptopen(mpt::String::Decode(filename, mpt::CharsetLocale).c_str(), mode);
-	}
-	void mptopen(const char * filename, std::ios_base::openmode mode)
-	{
-		mptopen(filename ? std::string(filename) : std::string(), mode);
-	}
+	typedef std::fstream Tbase;
 public:
 	fstream() {}
-	fstream(const char * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+	fstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-	fstream(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-	fstream(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+	MPT_DEPRECATED_PATH void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename, mode);
 	}
-	fstream(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+	MPT_DEPRECATED_PATH void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename.c_str(), mode);
 	}
-	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+#if defined(WIN32)
+	MPT_DEPRECATED_PATH void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename, mode);
 	}
-	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
+	MPT_DEPRECATED_PATH void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename.c_str(), mode);
 	}
-	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
-	{
-		mptopen(filename, mode);
-	}
-	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
-	{
-		mptopen(filename, mode);
-	}
+#endif
 };
 
 class ifstream
 	: public std::ifstream
 {
 private:
-	void mptopen(const std::wstring & filename, std::ios_base::openmode mode)
-	{
-		std::ifstream::open(filename.c_str(), mode);
-	}
-	void mptopen(const std::string & filename, std::ios_base::openmode mode)
-	{
-		mptopen(mpt::String::Decode(filename, mpt::CharsetLocale).c_str(), mode);
-	}
-	void mptopen(const char * filename, std::ios_base::openmode mode)
-	{
-		mptopen(filename ? std::string(filename) : std::string(), mode);
-	}
+	typedef std::ifstream Tbase;
 public:
 	ifstream() {}
-	ifstream(const char * filename, std::ios_base::openmode mode = std::ios_base::in)
+	ifstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
-		mptopen(filename, mode);
+		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-	ifstream(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in)
+	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
-		mptopen(filename, mode);
+		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-	ifstream(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in)
+	MPT_DEPRECATED_PATH void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename, mode);
 	}
-	ifstream(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in)
+	MPT_DEPRECATED_PATH void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename.c_str(), mode);
 	}
-	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in)
+#if defined(WIN32)
+	MPT_DEPRECATED_PATH void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename, mode);
 	}
-	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in)
+	MPT_DEPRECATED_PATH void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename.c_str(), mode);
 	}
-	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in)
-	{
-		mptopen(filename, mode);
-	}
-	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in)
-	{
-		mptopen(filename, mode);
-	}
+#endif
 };
 
 class ofstream
 	: public std::ofstream
 {
 private:
-	void mptopen(const std::wstring & filename, std::ios_base::openmode mode)
-	{
-		std::ofstream::open(filename.c_str(), mode);
-	}
-	void mptopen(const std::string & filename, std::ios_base::openmode mode)
-	{
-		mptopen(mpt::String::Decode(filename, mpt::CharsetLocale).c_str(), mode);
-	}
-	void mptopen(const char * filename, std::ios_base::openmode mode)
-	{
-		mptopen(filename ? std::string(filename) : std::string(), mode);
-	}
+	typedef std::ofstream Tbase;
 public:
 	ofstream() {}
-	ofstream(const char * filename, std::ios_base::openmode mode = std::ios_base::out)
+	ofstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-	ofstream(const std::string & filename, std::ios_base::openmode mode = std::ios_base::out)
+	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-	ofstream(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::out)
+	MPT_DEPRECATED_PATH void open(const char * filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename, mode);
 	}
-	ofstream(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::out)
+	MPT_DEPRECATED_PATH void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename.c_str(), mode);
 	}
-	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::out)
+#if defined(WIN32)
+	MPT_DEPRECATED_PATH void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename, mode);
 	}
-	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::out)
+	MPT_DEPRECATED_PATH void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
-		mptopen(filename, mode);
+		MPT_FSTREAM_OPEN(filename.c_str(), mode);
 	}
-	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::out)
-	{
-		mptopen(filename, mode);
-	}
-	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::out)
-	{
-		mptopen(filename, mode);
-	}
+#endif
 };
 
-#else
-
-typedef std::fstream fstream;
-typedef std::ifstream ifstream;
-typedef std::ofstream ofstream;
-
-#endif
+#undef MPT_FSTREAM_OPEN
 
 } // namespace mpt
