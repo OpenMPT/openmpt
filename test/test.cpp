@@ -463,6 +463,20 @@ void TestMisc()
 	VERIFY_EQUAL(EncodeFloatLE(1.0f).GetLE(), 0x3f800000u);
 	VERIFY_EQUAL(EncodeFloatBE(1.0f).GetLE(), 0x0000803fu);
 
+	VERIFY_EQUAL(Stringify(1.5f), "1.5");
+	VERIFY_EQUAL(Stringify(true), "1");
+	VERIFY_EQUAL(Stringify(false), "0");
+	VERIFY_EQUAL(Stringify('A'), "A");
+	//VERIFY_EQUAL(Stringify(L'A'), "A"); // currently fails
+
+	VERIFY_EQUAL(Stringify(0), "0");
+	VERIFY_EQUAL(Stringify(-23), "-23");
+	VERIFY_EQUAL(Stringify(42), "42");
+
+	VERIFY_EQUAL(Stringify(-87.0f), "-87");
+	VERIFY_EQUAL(Stringify(-0.5e-6), "-5e-007");
+	VERIFY_EQUAL(Stringify(58.65403492763), "58.654");
+
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);
