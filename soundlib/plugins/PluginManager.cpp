@@ -118,18 +118,16 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 {
 	HKEY hkEnum;
 	WCHAR keyname[128];
-	LONG cr;
-	DWORD index;
 
-	cr = RegOpenKey(HKEY_LOCAL_MACHINE, "software\\classes\\DirectShow\\MediaObjects\\Categories\\f3602b3f-0592-48df-a4cd-674721e7ebeb", &hkEnum);
-	index = 0;
+	LONG cr = RegOpenKey(HKEY_LOCAL_MACHINE, "software\\classes\\DirectShow\\MediaObjects\\Categories\\f3602b3f-0592-48df-a4cd-674721e7ebeb", &hkEnum);
+	DWORD index = 0;
 	while (cr == ERROR_SUCCESS)
 	{
 		if ((cr = RegEnumKeyW(hkEnum, index, keyname, CountOf(keyname))) == ERROR_SUCCESS)
 		{
 			CLSID clsid;
 			std::wstring formattedKey = std::wstring(L"{") + std::wstring(keyname) + std::wstring(L"}");
-			if(Util::StringToCLSID(formattedKey, clsid) == S_OK)
+			if(Util::StringToCLSID(formattedKey, clsid))
 			{
 				HKEY hksub;
 				formattedKey = std::wstring(L"software\\classes\\DirectShow\\MediaObjects\\") + std::wstring(keyname);

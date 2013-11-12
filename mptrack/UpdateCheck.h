@@ -14,7 +14,7 @@
 #include <time.h>
 
 #include "resource.h"
-
+#include "../common/thread.h"
 
 #define DOWNLOAD_BUFFER_SIZE 256
 
@@ -26,9 +26,7 @@ public:
 
 	static const CString defaultUpdateURL;
 
-	// Force creation via "new" as we're using "delete this".
-	static CUpdateCheck *Create(bool autoUpdate) { return new CUpdateCheck(autoUpdate); };
-	void DoUpdateCheck();
+	static void DoUpdateCheck(bool autoUpdate);
 
 	static time_t GetLastUpdateCheck() { return lastUpdateCheck; };
 	static int GetUpdateCheckPeriod() { return updateCheckPeriod; };
@@ -50,13 +48,13 @@ protected:
 	bool isAutoUpdate;	// Are we running an automatic update check?
 
 	// Runtime resource handles
-	HANDLE threadHandle;
+	mpt::thread threadHandle;
 	HINTERNET internetHandle, connectionHandle;
 
-	CUpdateCheck(const bool showErrors);
-	~CUpdateCheck();
+	// Force creation via "new" as we're using "delete this". Use CUpdateCheck::DoUpdateCheck to create an object.
+	CUpdateCheck::CUpdateCheck(bool autoUpdate) : internetHandle(nullptr), connectionHandle(nullptr), isAutoUpdate(autoUpdate) { }
 
-	static DWORD WINAPI UpdateThread(LPVOID param);
+	void UpdateThread();
 	void Die(CString errorMessage);
 	void Die(CString errorMessage, DWORD errorCode);
 	void Terminate();

@@ -1257,6 +1257,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\thread.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\typedefs.h"
 				>
 			</File>

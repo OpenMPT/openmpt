@@ -2504,8 +2504,7 @@ void CMainFrame::OnViewEditHistory()
 void CMainFrame::OnInternetUpdate()
 //---------------------------------
 {
-	CUpdateCheck *updateCheck = CUpdateCheck::Create(false);
-	updateCheck->DoUpdateCheck();
+	CUpdateCheck::DoUpdateCheck(false);
 }
 
 

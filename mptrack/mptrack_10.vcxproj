@@ -634,6 +634,7 @@
     <ClInclude Include="..\common\serialization_utils.h" />
     <ClInclude Include="..\common\StringFixer.h" />
     <ClInclude Include="..\common\svn_version_default\svn_version.h" />
+    <ClInclude Include="..\common\thread.h" />
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\common\version.h" />
     <ClInclude Include="..\common\versionNumber.h" />
