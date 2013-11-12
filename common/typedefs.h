@@ -365,6 +365,13 @@ typedef LONG *        LPLONG;
 
 
 
+
+#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#define MPT_PRINTF_FUNC(formatstringindex,varargsindex) __attribute__((format(printf, formatstringindex, varargsindex)))
+#else
+#define MPT_PRINTF_FUNC(formatstringindex,varargsindex)
+#endif
+
 #include "../common/mptString.h"
 
 //To mark string that should be translated in case of multilingual version.

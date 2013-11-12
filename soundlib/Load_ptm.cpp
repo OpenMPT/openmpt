@@ -161,7 +161,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songname);
 
 	InitializeGlobals();
-	madeWithTracker = mpt::String::Format("PolyTracker %d.%02x", fileHeader.versionHi, fileHeader.versionLo);
+	madeWithTracker = mpt::String::Print("PolyTracker %1.%2", fileHeader.versionHi, mpt::fmt::hex0<2>(fileHeader.versionLo));
 	m_nType = MOD_TYPE_PTM;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;

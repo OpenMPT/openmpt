@@ -848,17 +848,17 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	if ( width >= 6 ) {
 		text += std::string(" ");
 		high += std::string(" ");
-		text += cell.instr ? mpt::String::Format( "%02X", cell.instr ) : std::string("..");
+		text += cell.instr ? mpt::fmt::HEX0<2>( cell.instr ) : std::string("..");
 		high += cell.instr ? std::string("ii") : std::string("..");
 	}
 	if ( width >= 9 ) {
-		text += cell.IsPcNote() ? mpt::String::Format( " %02X", cell.GetValueVolCol() & 0xff ) : cell.volcmd != VOLCMD_NONE ? mpt::String::Format( "%1c%02X", m_sndFile->GetModSpecifications().GetVolEffectLetter( cell.volcmd ), cell.vol ) : std::string(" ..");
+		text += cell.IsPcNote() ? mpt::fmt::HEX0<2>( cell.GetValueVolCol() & 0xff ) : cell.volcmd != VOLCMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetVolEffectLetter( cell.volcmd ) ) + mpt::fmt::HEX0<2>( cell.vol ) : std::string(" ..");
 		high += cell.IsPcNote() ? std::string(" vv") : cell.volcmd != VOLCMD_NONE ? std::string("wvv") : std::string(" ..");
 	}
 	if ( width >= 13 ) {
 		text += std::string(" ");
 		high += std::string(" ");
-		text += cell.IsPcNote() ? mpt::String::Format( "%03X", cell.GetValueEffectCol() & 0x0fff ) : cell.command != CMD_NONE ? mpt::String::Format( "%1c%02X", m_sndFile->GetModSpecifications().GetEffectLetter( cell.command ), cell.param ) : std::string("...");
+		text += cell.IsPcNote() ? mpt::fmt::HEX0<3>( cell.GetValueEffectCol() & 0x0fff ) : cell.command != CMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetEffectLetter( cell.command ) ) + mpt::fmt::HEX0<2>( cell.param ) : std::string("...");
 		high += cell.IsPcNote() ? std::string("eff") : cell.command != CMD_NONE ? std::string("eff") : std::string("...");
 	}
 	if ( text.length() > width ) {

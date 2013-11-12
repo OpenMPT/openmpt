@@ -548,7 +548,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	InitializeChannels();
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Format("OctaMED (MMD%c)", version);
+	madeWithTracker = mpt::String::Print("OctaMED (MMD%1)", std::string(1, version));
 
 	m_nType = MOD_TYPE_MED;
 	m_nSamplePreAmp = 32;

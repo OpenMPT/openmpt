@@ -11,7 +11,6 @@
 #pragma once
 
 #include <limits>
-#include <sstream>
 #include <string>
 
 #include <cmath>
@@ -25,76 +24,86 @@
 #include <type_traits>
 #endif
 
-//Convert object(typically number) to string
-template<class T>
-inline std::string Stringify(const T& x)
-//--------------------------------------
-{
-	std::ostringstream o;
-	if(!(o << x)) return "FAILURE";
-	else return o.str();
-}
+bool ConvertStrToBool(const std::string &str);
+signed char ConvertStrToSignedChar(const std::string &str);
+unsigned char ConvertStrToUnsignedChar(const std::string &str);
+signed short ConvertStrToSignedShort(const std::string &str);
+unsigned short ConvertStrToUnsignedShort(const std::string &str);
+signed int ConvertStrToSignedInt(const std::string &str);
+unsigned int ConvertStrToUnsignedInt(const std::string &str);
+signed long ConvertStrToSignedLong(const std::string &str);
+unsigned long ConvertStrToUnsignedLong(const std::string &str);
+signed long long ConvertStrToSignedLongLong(const std::string &str);
+unsigned long long ConvertStrToUnsignedLongLong(const std::string &str);
+float ConvertStrToFloat(const std::string &str);
+double ConvertStrToDouble(const std::string &str);
+long double ConvertStrToLongDouble(const std::string &str);
 
-template<> inline std::string Stringify(const signed char& x) { return Stringify((signed int)x); }
-template<> inline std::string Stringify(const unsigned char& x) { return Stringify((unsigned int)x); }
+template<typename T> inline T ConvertStrTo(const std::string &str); // not defined, generates compiler error for non-specialized types
+template<> inline bool ConvertStrTo(const std::string &str) { return ConvertStrToBool(str); }
+template<> inline signed char ConvertStrTo(const std::string &str) { return ConvertStrToSignedChar(str); }
+template<> inline unsigned char ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedChar(str); }
+template<> inline signed short ConvertStrTo(const std::string &str) { return ConvertStrToSignedShort(str); }
+template<> inline unsigned short ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedShort(str); }
+template<> inline signed int ConvertStrTo(const std::string &str) { return ConvertStrToSignedInt(str); }
+template<> inline unsigned int ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedInt(str); }
+template<> inline signed long ConvertStrTo(const std::string &str) { return ConvertStrToSignedLong(str); }
+template<> inline unsigned long ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedLong(str); }
+template<> inline signed long long ConvertStrTo(const std::string &str) { return ConvertStrToSignedLongLong(str); }
+template<> inline unsigned long long ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedLongLong(str); }
+template<> inline float ConvertStrTo(const std::string &str) { return ConvertStrToFloat(str); }
+template<> inline double ConvertStrTo(const std::string &str) { return ConvertStrToDouble(str); }
+template<> inline long double ConvertStrTo(const std::string &str) { return ConvertStrToLongDouble(str); }
 
-template<class T>
-inline std::wstring StringifyW(const T& x)
-//----------------------------------------
-{
-	std::wostringstream o;
-	if(!(o << x)) return L"FAILURE";
-	else return o.str();
-}
+bool ConvertStrToBool(const std::wstring &str);
+signed char ConvertStrToSignedChar(const std::wstring &str);
+unsigned char ConvertStrToUnsignedChar(const std::wstring &str);
+signed short ConvertStrToSignedShort(const std::wstring &str);
+unsigned short ConvertStrToUnsignedShort(const std::wstring &str);
+signed int ConvertStrToSignedInt(const std::wstring &str);
+unsigned int ConvertStrToUnsignedInt(const std::wstring &str);
+signed long ConvertStrToSignedLong(const std::wstring &str);
+unsigned long ConvertStrToUnsignedLong(const std::wstring &str);
+signed long long ConvertStrToSignedLongLong(const std::wstring &str);
+unsigned long long ConvertStrToUnsignedLongLong(const std::wstring &str);
+float ConvertStrToFloat(const std::wstring &str);
+double ConvertStrToDouble(const std::wstring &str);
+long double ConvertStrToLongDouble(const std::wstring &str);
 
-template<> inline std::wstring StringifyW(const signed char& x) { return StringifyW((signed int)x); }
-template<> inline std::wstring StringifyW(const unsigned char& x) { return StringifyW((unsigned int)x); }
+template<typename T> inline T ConvertStrTo(const std::wstring &str); // not defined, generates compiler error for non-specialized types
+template<> inline bool ConvertStrTo(const std::wstring &str) { return ConvertStrToBool(str); }
+template<> inline signed char ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedChar(str); }
+template<> inline unsigned char ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedChar(str); }
+template<> inline signed short ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedShort(str); }
+template<> inline unsigned short ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedShort(str); }
+template<> inline signed int ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedInt(str); }
+template<> inline unsigned int ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedInt(str); }
+template<> inline signed long ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedLong(str); }
+template<> inline unsigned long ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedLong(str); }
+template<> inline signed long long ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedLongLong(str); }
+template<> inline unsigned long long ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedLongLong(str); }
+template<> inline float ConvertStrTo(const std::wstring &str) { return ConvertStrToFloat(str); }
+template<> inline double ConvertStrTo(const std::wstring &str) { return ConvertStrToDouble(str); }
+template<> inline long double ConvertStrTo(const std::wstring &str) { return ConvertStrToLongDouble(str); }
 
-//Convert string to number.
-template<class T>
+template<typename T>
 inline T ConvertStrTo(const char *str)
-//------------------------------------
 {
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_const<T>::value == false && std::is_volatile<T>::value == false, "Const and volatile types are not handled correctly.");
-	#endif
-	if(std::numeric_limits<T>::is_integer)
-		return static_cast<T>(atoi(str));
-	else
-		return static_cast<T>(atof(str));
+	if(!str)
+	{
+		return T();
+	}
+	return ConvertStrTo<T>(std::string(str));
 }
 
-template<class T>
-inline T ConvertStrTo(const std::string &str)
-//-------------------------------------------
+template<typename T>
+inline T ConvertStrTo(const wchar_t *str)
 {
-	return ConvertStrTo<T>(str.c_str());
-}
-
-#if MPT_COMPILER_MSVC
-#define cxx11_strtoll  _strtoi64
-#define cxx11_strtoull _strtoui64
-#else
-#define cxx11_strtoll  std::strtoll
-#define cxx11_strtoull std::strtoull
-#endif
-template<> inline bool           ConvertStrTo(const char *str) {return std::strtol(str, nullptr, 10) ? true : false;}
-template<> inline signed char      ConvertStrTo(const char *str) {return (signed char)std::strtol(str, nullptr, 10);}
-template<> inline signed short     ConvertStrTo(const char *str) {return (signed short)std::strtol(str, nullptr, 10);}
-template<> inline signed int       ConvertStrTo(const char *str) {return (signed int)std::strtol(str, nullptr, 10);}
-template<> inline signed long      ConvertStrTo(const char *str) {return std::strtol(str, nullptr, 10);}
-template<> inline signed long long ConvertStrTo(const char *str) {return cxx11_strtoll(str, nullptr, 10);}
-template<> inline unsigned char      ConvertStrTo(const char *str) {return (unsigned char)std::strtoul(str, nullptr, 10);}
-template<> inline unsigned short     ConvertStrTo(const char *str) {return (unsigned short)std::strtoul(str, nullptr, 10);}
-template<> inline unsigned int       ConvertStrTo(const char *str) {return (unsigned int)std::strtoul(str, nullptr, 10);}
-template<> inline unsigned long      ConvertStrTo(const char *str) {return std::strtoul(str, nullptr, 10);}
-template<> inline unsigned long long ConvertStrTo(const char *str) {return cxx11_strtoull(str, nullptr, 10);}
-
-template<class T>
-inline T ConvertStrTo(const std::wstring &str)
-//--------------------------------------------
-{
-	return ConvertStrTo<T>(mpt::String::Encode(str, mpt::CharsetLocale));
+	if(!str)
+	{
+		return T();
+	}
+	return ConvertStrTo<T>(std::wstring(str));
 }
 
 

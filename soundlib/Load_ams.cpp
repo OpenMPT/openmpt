@@ -421,7 +421,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = fileHeader.numSamps;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Format("Extreme's Tracker %d.%d", fileHeader.versionHigh, fileHeader.versionLow);
+	madeWithTracker = mpt::String::Print("Extreme's Tracker %1.%2", fileHeader.versionHigh, fileHeader.versionLow);
 
 	std::vector<bool> packSample(fileHeader.numSamps);
 
@@ -808,7 +808,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 32;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Format("Velvet Studio %d.%02d", fileHeader.versionHigh, fileHeader.versionLow);
+	madeWithTracker = mpt::String::Print("Velvet Studio %1.%2", fileHeader.versionHigh, mpt::fmt::dec0<2>(fileHeader.versionLow));
 
 	uint16 headerFlags;
 	if(fileHeader.versionLow >= 2)

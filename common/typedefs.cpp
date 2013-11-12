@@ -76,7 +76,7 @@ static std::string TimeAsAsString(uint64 ms)
 static std::string TimeDiffAsString(uint64 ms)
 //--------------------------------------------
 {
-	return mpt::String::Format("%6u", (unsigned)(ms));
+	return mpt::fmt::dec<6>(ms);
 }
 
 

@@ -10,9 +10,13 @@
 #include "stdafx.h"
 #include "version.h"
 
-#include "misc_util.h"
+#include <iomanip>
+#include <locale>
+#include <sstream>
 
 #include <cstdlib>
+
+#include "misc_util.h"
 
 #include "versionNumber.h"
 #include "svn_version.h"
@@ -45,7 +49,7 @@ static int parse_svnversion_to_revision( std::string svnversion )
 	{
 		svnversion = svnversion.substr(0, svnversion.find("P"));
 	}
-	return std::strtol(svnversion.c_str(), 0, 10);
+	return ConvertStrTo<int>(svnversion);
 }
 
 static bool parse_svnversion_to_mixed_revisions( std::string svnversion )
@@ -87,15 +91,34 @@ std::string GetOpenMPTVersionStr()
 	return std::string("OpenMPT ") + std::string(MPT_VERSION_STR);
 }
 
+struct version
+{
+	unsigned int a;
+	unsigned int b;
+	unsigned int c;
+	unsigned int d;
+	version() : a(0),b(0),c(0),d(0) {}
+	VersionNum Get() const
+	{
+		return (((a&0xff) << 24) | ((b&0xff) << 16) | ((c&0xff) << 8) | (d&0xff));
+	}
+};
+
 VersionNum ToNum(const std::string &s_)
 {
-	const char *s = s_.c_str();
-	unsigned int v1 = 0;
-	unsigned int v2 = 0;
-	unsigned int v3 = 0;
-	unsigned int v4 = 0;
-	sscanf(s, "%x.%x.%x.%x", &v1, &v2, &v3, &v4);
-	return ((v1 << 24) |  (v2 << 16) | (v3 << 8) | v4);
+	std::istringstream s(s_);
+	s.imbue(std::locale::classic());
+	version v;
+	char dot = '\0';
+	s >> std::hex >> v.a;
+	s >> dot; if(dot != '.') return v.Get();
+	s >> std::hex >> v.b;
+	s >> dot; if(dot != '.') return v.Get();
+	s >> std::hex >> v.c;
+	s >> dot; if(dot != '.') return v.Get();
+	s >> std::hex >> v.d;
+	s >> dot; if(dot != '.') return v.Get();
+	return v.Get();
 }
 
 std::string ToStr(const VersionNum v)
@@ -107,11 +130,11 @@ std::string ToStr(const VersionNum v)
 	} else if((v & 0xFFFF) == 0)
 	{
 		// Only parts of the version number are known (e.g. when reading the version from the IT or S3M file header)
-		return mpt::String::Format("%X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF);
+		return mpt::String::Print("%1.%2", mpt::fmt::HEX((v >> 24) & 0xFF), mpt::fmt::HEX0<2>((v >> 16) & 0xFF));
 	} else
 	{
 		// Full version info available
-		return mpt::String::Format("%X.%02X.%02X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, (v) & 0xFF);
+		return mpt::String::Print("%1.%2.%3.%4", mpt::fmt::HEX((v >> 24) & 0xFF), mpt::fmt::HEX0<2>((v >> 16) & 0xFF), mpt::fmt::HEX0<2>((v >> 8) & 0xFF), mpt::fmt::HEX0<2>((v) & 0xFF));
 	}
 }
 

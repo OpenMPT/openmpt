@@ -401,7 +401,7 @@ void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, int32 val)
 
 void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, bool val)
 {
-	::WritePrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), StringifyW(val?1:0).c_str(), filename.AsNative().c_str());
+	::WritePrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), StringifyW(val).c_str(), filename.AsNative().c_str());
 }
 
 void IniFileSettingsBackend::RemoveSettingRaw(const SettingPath &path)
