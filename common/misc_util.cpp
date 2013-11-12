@@ -131,3 +131,43 @@ void InitProcSupport()
 
 #endif // ENABLE_ASM
 
+
+
+#ifdef MODPLUG_TRACKER
+
+namespace Util
+{
+	std::wstring CLSIDToString(CLSID clsid)
+	//-------------------------------------
+	{
+		std::wstring str;
+		LPOLESTR tmp = nullptr;
+		StringFromCLSID(clsid, &tmp);
+		if(tmp)
+		{
+			str = tmp;
+			CoTaskMemFree(tmp);
+			tmp = nullptr;
+		}
+		return str;
+	}
+
+
+	bool StringToCLSID(const std::wstring &str, CLSID &clsid)
+	//-------------------------------------------------------
+	{
+		std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+		return CLSIDFromString(&tmp[0], &clsid) == S_OK;
+	}
+
+
+	bool IsCLSID(const std::wstring &str)
+	//-----------------------------------
+	{
+		CLSID clsid = CLSID();
+		std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+		return CLSIDFromString(&tmp[0], &clsid) == S_OK;
+	}
+} // namespace Util
+
+#endif // MODPLUG_TRACKER

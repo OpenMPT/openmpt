@@ -339,7 +339,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\plugins\DmoToVst.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\plugins\JBridge.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\plugins\PluginManager.cpp"
 				>
 			</File>
 			<File

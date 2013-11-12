@@ -476,7 +476,9 @@
     <ClCompile Include="..\soundlib\mod_specifications.cpp" />
     <ClCompile Include="..\soundlib\pattern.cpp" />
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
+    <ClCompile Include="..\soundlib\plugins\DmoToVst.cpp" />
     <ClCompile Include="..\soundlib\plugins\JBridge.cpp" />
+    <ClCompile Include="..\soundlib\plugins\PluginManager.cpp" />
     <ClCompile Include="..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="..\soundlib\S3MTools.cpp" />
     <ClCompile Include="..\soundlib\SampleFormats.cpp" />

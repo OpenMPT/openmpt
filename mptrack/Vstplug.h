@@ -17,8 +17,7 @@
 
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/plugins/PluginMixBuffer.h"
-
-#include "../common/StringFixer.h"
+#include "../soundlib/plugins/PlugInterface.h"
 
 //#define kBuzzMagic	'Buzz'
 #define kDmoMagic	'DXMO'
@@ -188,8 +187,8 @@ public:
 	bool GetParams(float* param, VstInt32 min, VstInt32 max);
 	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0);
 #ifdef MODPLUG_TRACKER
-	inline CModDoc *GetModDoc() { return m_SndFile.GetpModDoc(); }
-	inline const CModDoc *GetModDoc() const { return m_SndFile.GetpModDoc(); }
+	forceinline CModDoc *GetModDoc();
+	forceinline const CModDoc *GetModDoc() const;
 #endif // MODPLUG_TRACKER
 	inline CSoundFile &GetSoundFile() { return m_SndFile; }
 	inline const CSoundFile &GetSoundFile() const { return m_SndFile; }
@@ -340,14 +339,14 @@ public:
 
 protected:
 	void EnumerateDirectXDMOs();
-	void LoadPlugin(const mpt::PathString &pluginPath, AEffect *&effect, HINSTANCE &library);
+	AEffect *LoadPlugin(const mpt::PathString &pluginPath, HINSTANCE &library);
 
 protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel, const AEffect *effect);
 	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static bool CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);
-	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
+	VstTimeInfo timeInfo;
 
 public:
 	static char s_szHostProductString[64];
