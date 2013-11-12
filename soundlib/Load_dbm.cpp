@@ -141,7 +141,7 @@ struct PACKED DBMEnvelope
 	void ConvertEndianness()
 	{
 		SwapBytesBE(instrument);
-		for(int i = 0; i < CountOf(data); i++)
+		for(size_t i = 0; i < CountOf(data); i++)
 		{
 			SwapBytesBE(data[i]);
 		}
