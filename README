@@ -1,38 +1,101 @@
-How to compile the code:
 
-- Visual Studio 2008/2010 is required. Express versions won't work as they don't
-  include MFC.
-- The VST 2.4 and ASIO SDKs are needed for compiling with VST and ASIO support.
+How to compile OpenMPT:
+
+- Visual Studio 2008/2010 is required. Express versions won't work as they
+  don't include MFC.
+- The VST 2.4 and ASIO SDKs are needed for compiling with VST and ASIO
+  support.
   If you don't want this, uncomment #define NO_VST and #define NO_ASIO in the
-  file StdAfx.h. Have a look at include/readme.txt to find out which exact files
-  you need and where you can get them. If you need further help with the VST and
-  ASIO SDKs, get in touch with the main developers. 
-- You need the DirectX SDK to enable DirectSound output. If you don't want this,
-  uncomment #define NO_DSOUND in the file StdAfx.h.
+  file common/BuildSettings.h.
+  - ASIO:
+    If you don't use #define NO_ASIO, you will need to put the ASIO SDK in the
+    "include/ASIOSDK2" folder. The top level directory of the SDK is already
+    named "ASIOSDK2", so simply move that directory in the include folder.
+    Please visit http://www.steinberg.net/en/company/developer.html
+    to download the SDK.
+  - VST:
+    If you don't use #define NO_VST, you will need to put the VST 2.4 SDK in
+    the "include/vstsdk2.4" folder.
+    Please visit http://www.steinberg.net/en/company/developer.html
+    to download the SDK.
+  If you need further help with the VST and ASIO SDKs, get in touch with the
+  main developers. 
+- You need the DirectX SDK to enable DirectSound output. If you don't want
+  this, uncomment #define NO_DSOUND in the file common/BuildSettings.h.
 - To compile the project, open mptrack/MPTRACK_08.SLN (if you're using VS2008)
   or mptrack/MPTRACK_10.SLN (VS2010) and hit the compile button! :)
 
 
 
+How to compile libopenmpt and openmpt123:
+
+- Visual Studio 2010 (express version should work, but this is not tested):
+  - The libopenmpt solution is in libopenmpt/libopenmpt.sln.
+    You will need the Winamp 5 SDK and the xmplay SDK if you want to compile
+    the plugins for these 2 players:
+    - Winamp 5 SDK:
+      To build libopenmpt as a winamp input plugin, copy the headers in
+      Winamp/ from WA5.55_SDK.exe to include/winamp/.
+      Please visit http://wiki.winamp.com/wiki/Plug-in_Developer to download
+      the SDK.
+      Use #define NO_WINAMP in common/BuildSettings.h to disable.
+    - xmplay SDK:
+      To build libopenmpt with xmplay input plugin support, copy the contents
+      of xmpin.zip into include/xmplay/.
+      Please get in touch with un4seen developments at
+      http://www.un4seen.com/ to obtain the SDK.
+      Use #define NO_XMPLAY in common/BuildSettings.h to disable.
+  - The openmpt123 solution is in openmpt123/openmpt123.sln.
+- Makefile
+  The makefile resides in openmpt123/Makefile. You should cd into openmpt123
+  for using it.
+  The makefile supports different build environments and targets via HOST= and
+  CONFIG= parameters directly to the make invocation.
+  Use 'make CONFIG=$newconfig clean' when switching between different configs
+  because the makefile cleans only intermediates and target that are active
+  for the current config and no configuration state is kept around across
+  invocations.
+  - mingw-w64 (on windows):
+    The required version should be at least 4.4. Only 4.6 and up are tested.
+    - cd openmpt123 ; mingw32-make HOST=windows CONFIG=mingw64-win32
+    - cd openmpt123 ; mingw32-make HOST=windows CONFIG=mingw64-win64
+    depending on whether you want win32 or win64 builds.
+  - mingw-w64 (on unix):
+    The required version should be at least 4.4. Only 4.6 and up are tested.
+    - cd openmpt123 ; make CONFIG=mingw64-win32
+    - cd openmpt123 ; make CONFIG=mingw64-win64
+    depending on whether you want win32 or win64 builds.
+  - gcc or clang (on unix, including Mac OS X with MacPorts):
+    The minimum required compiler versions are:
+    - gcc 4.4
+    - clang 3.0
+    The Makefile requires pkg-config for native unix builds.
+    For sound output in openmpt123, PortAudio or SDL is required.
+    openmpt123 can optionally use libflac, libwavpack and libsndfile to render
+    PCM files to disk.
+    When using gcc, you should simply do:
+    - cd openmpt123 ; make
+    When using clang, it is recommended to do:
+    - cd openmpt123 ; make CONFIG=llvm
+  The Makefile supports some customizations. You might want to read the top
+  which should get you some possible make settings, like e.g. make DYNLINK=0
+  or similar. Cross compiling or different compiler would best be implemented
+  via new Makefile.config.* files.
+
+
+
 Coding conventions (see below for an example):
 
-* Functions / methods are "underlined" (The "//------" comment, see below for an
-  example what it should look like).
+* Functions / methods are "underlined" (The "//------" comment, see below for
+  an example what it should look like).
 * Place curly braces at the beginning of the line, not at the end
 * Generally make use of the custom index types like SAMPLEINDEX or ORDERINDEX
   when referring to samples, orders, etc.
 * When changing playback behaviour, make sure that you use the function
-* CSoundFile::IsCompatibleMode() so that modules made with previous versions of
-  MPT still sound correct (if the change is extremely small, this might be
+  CSoundFile::IsCompatibleMode() so that modules made with previous versions
+  of MPT still sound correct (if the change is extremely small, this might be
   unnecessary)
 * CamelCase function and variable names are preferred.
-* When checking the module type, use something like
-    if(GetType() & MOD_TYPE_XXX)
-  instead of
-    if(GetType() == MOD_TYPE_XXX)
-  as it could be theoretically possible that two mod types are set (currently
-  this doesn't happen, but in the future this might actually be used as a code
-  feature :)
 
 Code example:
 
