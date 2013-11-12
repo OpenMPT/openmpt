@@ -44,42 +44,8 @@ static DWORD g_dwBuffer = 0;
 static int g_asio_startcount = 0;
 
 
-static std::wstring CLSIDToString(CLSID clsid)
-//--------------------------------------------
-{
-	std::wstring str;
-	LPOLESTR tmp = nullptr;
-	StringFromCLSID(clsid, &tmp);
-	if(tmp)
-	{
-		str = tmp;
-		CoTaskMemFree(tmp);
-		tmp = nullptr;
-	}
-	return str;
-}
-
-
-static CLSID StringToCLSID(const std::wstring &str)
-//-------------------------------------------------
-{
-	CLSID clsid = CLSID();
-	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	CLSIDFromString(&tmp[0], &clsid);
-	return clsid;
-}
-
-
-static bool IsCLSID(const std::wstring &str)
-{
-	CLSID clsid = CLSID();
-	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	return CLSIDFromString(&tmp[0], &clsid) == S_OK;
-}
-
-
-std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
-//-----------------------------------------------------------
+std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
+//----------------------------------------------------------
 {
 	std::vector<SoundDeviceInfo> devices;
 
@@ -128,7 +94,7 @@ std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
 		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"CLSID", 0, &datatype, (LPBYTE)idBuf, &datasize))
 		{
 			const std::wstring internalID = idBuf;
-			if(IsCLSID(internalID))
+			if(Util::IsCLSID(internalID))
 			{
 				#ifdef ASIO_LOG
 					Log("  clsid=\"%s\"\n", mpt::String::Encode(idBuf, mpt::CharsetLocale).c_str());
@@ -463,7 +429,8 @@ void CASIODevice::OpenDevice()
 		return;
 	}
 
-	CLSID clsid = StringToCLSID(GetDeviceInternalID());
+	CLSID clsid;
+	Util::StringToCLSID(GetDeviceInternalID(), clsid);
 	if (CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) == S_OK)
 	{
 		m_pAsioDrv->init((void *)m_Settings.hWnd);

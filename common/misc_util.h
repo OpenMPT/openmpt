@@ -510,3 +510,14 @@ static inline uint32 GetProcSupport()
 }
 #endif // ENABLE_ASM
 
+
+#ifdef MODPLUG_TRACKER
+
+namespace Util
+{
+	std::wstring CLSIDToString(CLSID clsid);
+	bool StringToCLSID(const std::wstring &str, CLSID &clsid);
+	bool IsCLSID(const std::wstring &str);
+} // namespace Util
+
+#endif // MODPLUG_TRACKER
