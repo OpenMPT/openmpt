@@ -13,6 +13,10 @@
 #include "libopenmpt.hpp"
 #include "libopenmpt.h"
 
+#include <locale>
+
+#include <clocale>
+
 #if defined( LIBOPENMPT_BUILD_TEST )
 
 #if defined(WIN32) && defined(UNICODE)
@@ -25,7 +29,22 @@ int wmain( int /*wargc*/, wchar_t * /*wargv*/ [] ) {
 int main( int /*argc*/, char * /*argv*/ [] ) {
 #endif
 	try {
+
+		// run test with "C" / classic() locale
 		openmpt::run_tests();
+
+		// try setting the locale to the user locale
+		setlocale( LC_ALL, "" );
+		try {
+			std::locale::global( std::locale( "" ) );
+		} catch ( ... ) {
+			// Setting c++ global locale does not work.
+			// This is no problem for libopenmpt, just continue.
+		}
+		
+		// and now, run all tests again with the user locale
+		openmpt::run_tests();
+
 	} catch ( const std::exception & e ) {
 		std::cerr << "TEST ERROR: exception: " << ( e.what() ? e.what() : "" ) << std::endl;
 		return -1;
