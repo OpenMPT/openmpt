@@ -214,6 +214,27 @@ public:
 			stream = NULL;
 		}
 	}
+private:
+	template<typename Tsample>
+	void write_frames( const Tsample * buffer, std::size_t frames ) {
+		while ( frames > 0 ) {
+			unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
+			check_portaudio_error( Pa_WriteStream( stream, buffer, chunk_frames ) );
+			buffer += chunk_frames * channels;
+			frames -= chunk_frames;
+		}
+	}
+	template<typename Tsample>
+	void write_frames( std::vector<Tsample*> buffers, std::size_t frames ) {
+		while ( frames > 0 ) {
+			unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
+			check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
+			for ( std::size_t channel = 0; channel < channels; ++channel ) {
+				buffers[channel] += chunk_frames;
+			}
+			frames -= chunk_frames;
+		}
+	}
 public:
 	void write( const std::vector<float*> buffers, std::size_t frames ) {
 		if ( interleaved ) {
@@ -223,13 +244,9 @@ public:
 					sampleBufFloat.push_back( buffers[channel][frame] );
 				}
 			}
-			Pa_WriteStream( stream, sampleBufFloat.data(), frames );
+			write_frames( sampleBufFloat.data(), frames );
 		} else {
-			while ( frames > 0 ) {
-				unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
-				check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
-				frames -= chunk_frames;
-			}
+			write_frames( buffers, frames );
 		}
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
@@ -240,13 +257,9 @@ public:
 					sampleBufInt.push_back( buffers[channel][frame] );
 				}
 			}
-			Pa_WriteStream( stream, sampleBufInt.data(), frames );
+			write_frames( sampleBufInt.data(), frames );
 		} else {
-			while ( frames > 0 ) {
-				unsigned long chunk_frames = static_cast<unsigned long>( std::min<std::size_t>( frames, std::numeric_limits<unsigned long>::max() ) );
-				check_portaudio_error( Pa_WriteStream( stream, buffers.data(), chunk_frames ) );
-				frames -= chunk_frames;
-			}
+			write_frames( buffers, frames );
 		}
 	}
 };
