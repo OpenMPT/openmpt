@@ -898,10 +898,9 @@ BOOL CTrackApp::InitInstance()
 	m_dwTimeStarted = timeGetTime();
 	m_bInitialized = TRUE;
 
-	if (CUpdateCheck::GetUpdateCheckPeriod() != 0)
+	if(CUpdateCheck::GetUpdateCheckPeriod() != 0)
 	{
-		CUpdateCheck *updateCheck = CUpdateCheck::Create(true);
-		updateCheck->DoUpdateCheck();
+		CUpdateCheck::DoUpdateCheck(true);
 	}
 
 	// Open settings if the previous execution was with an earlier version.

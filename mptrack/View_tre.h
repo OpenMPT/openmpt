@@ -71,6 +71,7 @@ public:
 
 
 #include "CTreeCtrl.h"
+#include "../common/thread.h"
 
 //===============================
 class CModTree: public CTreeCtrlW
@@ -163,6 +164,9 @@ protected:
 	CModTreeDropTarget m_DropTarget;
 	CModTree *m_pDataTree;	// Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
 	HWND m_hDropWnd;
+	volatile HANDLE m_hWatchDir;
+	HANDLE m_hWatchDirKillThread;
+	mpt::thread watchDirThread;
 	ModItem m_itemDrag;
 	DWORD m_dwStatus;
 	UINT m_nDocNdx, m_nDragDocNdx;
@@ -191,11 +195,12 @@ public:
 	void RefreshInstrumentLibrary();
 	void EmptyInstrumentLibrary();
 	void FillInstrumentLibrary();
+	void MonitorInstrumentLibrary();
 	ModItem GetModItem(HTREEITEM hItem);
 	BOOL SetMidiInstrument(UINT nIns, const mpt::PathString &fileName);
 	BOOL SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName);
 	BOOL ExecuteItem(HTREEITEM hItem);
-	BOOL DeleteTreeItem(HTREEITEM hItem);
+	void DeleteTreeItem(HTREEITEM hItem);
 	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam);
 	BOOL OpenTreeItem(HTREEITEM hItem);
 	BOOL OpenMidiInstrument(DWORD dwItem);

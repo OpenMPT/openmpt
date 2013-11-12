@@ -18,10 +18,6 @@
 #include "Mainfrm.h"
 #include "Moptions.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
-
 
 const CString CUpdateCheck::defaultUpdateURL = "http://update.openmpt.org/check/$VERSION/$GUID";
 
@@ -33,55 +29,31 @@ bool CUpdateCheck::sendGUID = true;
 bool CUpdateCheck::showUpdateHint = true;
 
 
-CUpdateCheck::CUpdateCheck(const bool autoUpdate)
+// Start update check
+void CUpdateCheck::DoUpdateCheck(bool autoUpdate)
 //-----------------------------------------------
 {
-	isAutoUpdate = autoUpdate;
-	threadHandle = NULL;
-}
-
-
-CUpdateCheck::~CUpdateCheck()
-//---------------------------
-{
-	if(threadHandle != NULL)
+	CUpdateCheck *that = new (std::nothrow) CUpdateCheck(autoUpdate);
+	if(that != nullptr)
 	{
-		CloseHandle(threadHandle);
-	}
-}
-
-
-// Start update check
-void CUpdateCheck::DoUpdateCheck()
-//--------------------------------
-{
-	internetHandle = NULL;
-	connectionHandle = NULL;
-
-	DWORD dummy;	// For Win9x
-	threadHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&CUpdateCheck::UpdateThread, (LPVOID)this, 0, &dummy);
-	if(isAutoUpdate)
-	{
-		SetThreadPriority(threadHandle, THREAD_PRIORITY_BELOW_NORMAL);
+		that->threadHandle = mpt::thread_member<CUpdateCheck, &CUpdateCheck::UpdateThread>(that, autoUpdate ? mpt::thread::lower : mpt::thread::normal);
 	}
 }
 
 
 // Run update check (independent thread)
-DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
-//---------------------------------------------------
+void CUpdateCheck::UpdateThread()
+//-------------------------------
 {
-	CUpdateCheck *caller = (CUpdateCheck *)param;
-
 	const time_t now = time(nullptr);
 
-	if(caller->isAutoUpdate)
+	if(isAutoUpdate)
 	{
 		// Do we actually need to run the update check right now?
 		if(CUpdateCheck::updateCheckPeriod == 0 || difftime(now, CUpdateCheck::lastUpdateCheck) < (double)(CUpdateCheck::updateCheckPeriod * 86400))
 		{
-			caller->Terminate();
-			return 0;
+			Terminate();
+			return;
 		}
 
 		// Never ran update checks before, so we notify the user of automatic update checks.
@@ -93,8 +65,8 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 			if(Reporting::Confirm(msg, "OpenMPT Internet Update") == cnfNo)
 			{
 				CUpdateCheck::lastUpdateCheck = now;
-				caller->Terminate();
-				return 0;
+				Terminate();
+				return;
 			}
 			
 		}
@@ -108,57 +80,57 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 	updateURL.Replace("$GUID", GetSendGUID() ? TrackerSettings::Instance().gcsInstallGUID.Get() : "anonymous");
 
 	// Establish a connection.
-	caller->internetHandle = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	if(caller->internetHandle == NULL)
+	internetHandle = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if(internetHandle == NULL)
 	{
-		caller->Die("Could not start update check:\n", GetLastError());
-		return 0;
+		Die("Could not start update check:\n", GetLastError());
+		return;
 	}
-	caller->connectionHandle = InternetOpenUrl(caller->internetHandle, updateURL, NULL, 0, INTERNET_FLAG_RELOAD | INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_UI, 0);
-	if(caller->connectionHandle == NULL)
+	connectionHandle = InternetOpenUrl(internetHandle, updateURL, NULL, 0, INTERNET_FLAG_RELOAD | INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_UI, 0);
+	if(connectionHandle == NULL)
 	{
-		caller->Die("Could not establish connection:\n", GetLastError());
-		return 0;
+		Die("Could not establish connection:\n", GetLastError());
+		return;
 	}
 
 	// Retrieve HTTP status code.
 	DWORD statusCodeHTTP = 0;
 	DWORD length = sizeof(statusCodeHTTP);
-	if(HttpQueryInfo(caller->connectionHandle, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&statusCodeHTTP, &length, NULL) == FALSE)
+	if(HttpQueryInfo(connectionHandle, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&statusCodeHTTP, &length, NULL) == FALSE)
 	{
-		caller->Die("Could not retrieve HTTP header information:\n", GetLastError());
-		return 0;
+		Die("Could not retrieve HTTP header information:\n", GetLastError());
+		return;
 	}
 	if(statusCodeHTTP >= 400)
 	{
 		CString error;
 		error.Format("Version information could not be found on the server (HTTP status code %d). Maybe your version of OpenMPT is too old!", statusCodeHTTP);
-		caller->Die(error);
-		return 0;
+		Die(error);
+		return;
 	}
 
 	// Download data.
 	CString resultData = "";
 	char *downloadBuffer = new char[DOWNLOAD_BUFFER_SIZE];
-    DWORD availableSize, bytesRead;
+	DWORD availableSize, bytesRead;
 	do
 	{
 		// Query number of available bytes to download
-		if(InternetQueryDataAvailable(caller->connectionHandle, &availableSize, 0, NULL) == FALSE)
+		if(InternetQueryDataAvailable(connectionHandle, &availableSize, 0, NULL) == FALSE)
 		{
 			delete[] downloadBuffer;
-			caller->Die("Error while downloading update information data:\n", GetLastError());
-			return 0;
+			Die("Error while downloading update information data:\n", GetLastError());
+			return;
 		}
 
 		LimitMax(availableSize, (DWORD)DOWNLOAD_BUFFER_SIZE);
 
 		// Put downloaded bytes into our buffer
-		if(InternetReadFile(caller->connectionHandle, downloadBuffer, availableSize, &bytesRead) == FALSE)
+		if(InternetReadFile(connectionHandle, downloadBuffer, availableSize, &bytesRead) == FALSE)
 		{
 			delete[] downloadBuffer;
-			caller->Die("Error while downloading update information data:\n", GetLastError());
-			return 0;
+			Die("Error while downloading update information data:\n", GetLastError());
+			return;
 		}
 
 		resultData.Append(downloadBuffer, availableSize);
@@ -170,7 +142,7 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 	// Now, evaluate the downloaded data.
 	if(!resultData.CompareNoCase("noupdate"))
 	{
-		if(!caller->isAutoUpdate)
+		if(!isAutoUpdate)
 		{
 			Reporting::Information("You already have the latest version of OpenMPT installed.", "OpenMPT Internet Update");
 		}
@@ -187,8 +159,8 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 			case 0:
 				if(token.CompareNoCase("update") != 0)
 				{
-					caller->Die("Could not understand server response. Maybe your version of OpenMPT is too old!");
-					return 0;
+					Die("Could not understand server response. Maybe your version of OpenMPT is too old!");
+					return;
 				}
 				break;
 			case 1:
@@ -211,15 +183,14 @@ DWORD WINAPI CUpdateCheck::UpdateThread(LPVOID param)
 			}
 		} else
 		{
-			caller->Die("Could not understand server response. Maybe your version of OpenMPT is too old!");
-			return 0;
+			Die("Could not understand server response. Maybe your version of OpenMPT is too old!");
+			return;
 		}
 	}
 
 	CUpdateCheck::lastUpdateCheck = now;
 
-	caller->Terminate();
-	return 0;
+	Terminate();
 }
 
 
@@ -241,7 +212,7 @@ void CUpdateCheck::Die(CString errorMessage, DWORD errorCode)
 {
 	if(!isAutoUpdate)
 	{
-		LPVOID lpMsgBuf;
+		void *lpMsgBuf;
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			GetModuleHandle(TEXT("wininet.dll")), errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
 
@@ -256,17 +227,16 @@ void CUpdateCheck::Die(CString errorMessage, DWORD errorCode)
 void CUpdateCheck::Terminate()
 //----------------------------
 {
-	if(connectionHandle != NULL)
+	if(connectionHandle != nullptr)
 	{
 		InternetCloseHandle(connectionHandle);
-		connectionHandle = NULL;
+		connectionHandle = nullptr;
 	}
-	if(internetHandle != NULL)
+	if(internetHandle != nullptr)
 	{
 		InternetCloseHandle(internetHandle);
-		internetHandle = NULL;
+		internetHandle = nullptr;
 	}
-	threadHandle = NULL;	// If we got here, the thread asked for termination, so don't use CloseHandle()
 	delete this;
 }
 
