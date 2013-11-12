@@ -1765,7 +1765,7 @@ void TestPCnoteSerialization()
 	pat[1].resize(numCommands[1]);
 	pat[2].resize(numCommands[2]);
 
-	for(size_t i = 0; i < 3; i++) // Copy pattern data for comparison.
+	for(int i = 0; i < 3; i++) // Copy pattern data for comparison.
 	{
 		CPattern::const_iterator iter = sndFile.Patterns[i].Begin();
 		for(size_t j = 0; j < numCommands[i]; j++, iter++) pat[i][j] = *iter;
@@ -1788,7 +1788,7 @@ void TestPCnoteSerialization()
 	VERIFY_EQUAL_NONCONT( sndFile.Patterns[0].GetNumRows(), ModSpecs::mptm.patternRowsMin);
 	VERIFY_EQUAL_NONCONT( sndFile.Patterns[1].GetNumRows(), 64);
 	VERIFY_EQUAL_NONCONT( sndFile.Patterns[2].GetNumRows(), ModSpecs::mptm.patternRowsMax);
-	for(size_t i = 0; i < 3; i++)
+	for(int i = 0; i < 3; i++)
 	{
 		bool bPatternDataMatch = true;
 		CPattern::const_iterator iter = sndFile.Patterns[i].Begin();
