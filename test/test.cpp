@@ -169,6 +169,12 @@ static noinline void show_start(const char * const file, const int line, const c
 	std::cout << "Test: " << file << "(" << line << "): " << remove_newlines(description) << ": ";
 }
 
+static noinline void MultiTestStart(const char * const file, const int line, const char * const description)
+{
+	show_start(file, line, description);
+	std::cout << "..." << std::endl;
+}
+
 static noinline void show_ok(const char * const file, const int line, const char * const description)
 {
 	MPT_UNREFERENCED_PARAMETER(file);
@@ -196,6 +202,14 @@ static noinline void show_fail(const char * const file, const int line, const ch
 
 static int fail_count = 0;
 
+static noinline void CheckFailCountOrThrow()
+{
+	if(fail_count > 0)
+	{
+		throw std::runtime_error("Test failed.");
+	}
+}
+
 static noinline void ReportException(const char * const file, const int line, const char * const description)
 {
 	try
@@ -212,13 +226,24 @@ static noinline void ReportException(const char * const file, const int line, co
 	}
 }
 
+static noinline void TestFail(const char * const file, const int line, const char * const description)
+{
+	show_fail(file, line, description);
+	fail_count++;
+}
+
+static noinline void TestFailStop(const char * const file, const int line, const char * const description)
+{
+	show_fail(file, line, description);
+	fail_count++;
+	throw std::runtime_error(std::string("Test failed: ") + description);
+}
+
 #define MULTI_TEST_TRY   try { \
                           fail_count = 0;
-#define MULTI_TEST_START show_start(THIS_FILE, __LINE__, description); std::cout << "..." << std::endl;
+#define MULTI_TEST_START MultiTestStart(THIS_FILE, __LINE__, description);
 #define MULTI_TEST_END   show_start(THIS_FILE, __LINE__, description);
-#define MULTI_TEST_CATCH  if(fail_count > 0) { \
-                           throw std::runtime_error("Test failed."); \
-                          } \
+#define MULTI_TEST_CATCH  CheckFailCountOrThrow(); \
                           show_ok(THIS_FILE, __LINE__, description); \
                          } catch(...) { \
                           ReportException(THIS_FILE, __LINE__, description); \
@@ -231,8 +256,8 @@ static noinline void ReportException(const char * const file, const int line, co
                          }
 #define TEST_START()     show_start(THIS_FILE, __LINE__, description)
 #define TEST_OK()        show_ok(THIS_FILE, __LINE__, description)
-#define TEST_FAIL()      do { show_fail(THIS_FILE, __LINE__, description); fail_count++; } while(0)
-#define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, description); fail_count++; throw std::runtime_error(std::string("Test failed: ") + description); } while(0)
+#define TEST_FAIL()      TestFail(THIS_FILE, __LINE__, description)
+#define TEST_FAIL_STOP() TestFailStop(THIS_FILE, __LINE__, description)
 
 #endif // MODPLUG_TRACKER
 
