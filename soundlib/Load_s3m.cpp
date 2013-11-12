@@ -204,7 +204,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// ST3 ignored Zxx commands, so if we find that a file was made with ST3, we should erase all MIDI macros.
 	bool keepMidiMacros = false;
 
-	const char *trackerFormatStr = nullptr;
+	std::string trackerStr;
 	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
 	{
 	case S3MFileHeader::trkScreamTracker:
@@ -219,17 +219,17 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = "Velvet Studio";
 		} else
 		{
-			trackerFormatStr = "Scream Tracker %d.%02x";
+			trackerStr = "Scream Tracker";
 		}
 		break;
 	case S3MFileHeader::trkImagoOrpheus:
-		trackerFormatStr = "Imago Orpheus %d.%02x";
+		trackerStr = "Imago Orpheus";
 		break;
 	case S3MFileHeader::trkImpulseTracker:
 		if(fileHeader.cwtv <= S3MFileHeader::trkIT2_14)
-			trackerFormatStr = "Impulse Tracker %d.%02x";
+			trackerStr = "Impulse Tracker";
 		else
-			madeWithTracker = mpt::String::Format("Impulse Tracker 2.14p%d", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
+			madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
 		break;
 	case S3MFileHeader::trkSchismTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
@@ -238,7 +238,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 		break;
 	case S3MFileHeader::trkOpenMPT:
-		trackerFormatStr = "OpenMPT %d.%02x";
+		trackerStr = "OpenMPT";
 		m_dwLastSavedWithVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
@@ -248,9 +248,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		madeWithTracker = "CreamTracker";
 		break;
 	}
-	if(trackerFormatStr)
+	if(!trackerStr.empty())
 	{
-		madeWithTracker = mpt::String::Format(trackerFormatStr, (fileHeader.cwtv & 0xF00) >> 8, (fileHeader.cwtv & 0xFF));
+		madeWithTracker = mpt::String::Print("%1 %2.%3", trackerStr, (fileHeader.cwtv & 0xF00) >> 8, mpt::fmt::hex0<2>(fileHeader.cwtv & 0xFF));
 	}
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)

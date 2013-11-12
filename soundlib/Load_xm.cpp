@@ -864,7 +864,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 		// Reaching the limits of file format?
 		if(len > uint16_max)
 		{
-			AddToLog(mpt::String::Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, pat));
+			AddToLog(mpt::String::Print("%1 (%2 %3)", str_tooMuchPatternData, str_pattern, pat));
 			len = uint16_max;
 		}
 

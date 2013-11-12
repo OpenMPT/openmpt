@@ -20,7 +20,7 @@
 #include "FileReader.h"
 #include <functional>
 
-#define str_SequenceTruncationNote (GetStrI18N("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))
+#define str_SequenceTruncationNote (GetStrI18N("Module has sequence of length %1; it will be truncated to maximum supported length, %2."))
 
 #if defined(MODPLUG_TRACKER)
 #ifdef _DEBUG
@@ -602,7 +602,7 @@ bool ModSequenceSet::MergeSequences()
 		const ORDERINDEX nFirstOrder = GetLengthTailTrimmed() + 1; // +1 for separator item
 		if(nFirstOrder + GetSequence(1).GetLengthTailTrimmed() > m_sndFile.GetModSpecifications().ordersMax)
 		{
-			m_sndFile.AddToLog(mpt::String::Format("WARNING: Cannot merge Sequence %d (too long!)", removedSequences));
+			m_sndFile.AddToLog(mpt::String::Print("WARNING: Cannot merge Sequence %1 (too long!)", removedSequences));
 			RemoveSequence(1);
 			continue;
 		}
@@ -637,7 +637,7 @@ bool ModSequenceSet::MergeSequences()
 						} else
 						{
 							// cannot create new pattern: notify the user
-							m_sndFile.AddToLog(mpt::String::Format("CONFLICT: Pattern break commands in Pattern %d might be broken since it has been used in several sequences!", nPat));
+							m_sndFile.AddToLog(mpt::String::Print("CONFLICT: Pattern break commands in Pattern %1 might be broken since it has been used in several sequences!", nPat));
 						}
 					}
 					m->param  = static_cast<BYTE>(m->param + nFirstOrder);
@@ -765,7 +765,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	srlztn::Binaryread<uint16>(iStrm, size);
 	if(size > ModSpecs::mptm.ordersMax)
 	{
-		seq.m_sndFile.AddToLog(mpt::String::Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax));
+		seq.m_sndFile.AddToLog(mpt::String::Print(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax));
 		size = ModSpecs::mptm.ordersMax;
 	}
 	seq.resize(MAX(size, MAX_ORDERS));

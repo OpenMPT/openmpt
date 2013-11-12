@@ -476,6 +476,47 @@ static uint32 AsInt(float x)
 	return conv.i;
 }
 
+
+static void TestFloatFormat(double x, const char * format, mpt::FormatFlags f, std::size_t width = 0, int precision = -1)
+{
+#ifdef MODPLUG_TRACKER
+	std::string str_sprintf = mpt::String::Format(format, x);
+#endif
+	std::string str_iostreams = mpt::Format().SetFlags(f).SetWidth(width).SetPrecision(precision).ToString(x);
+	std::string str_parsed = mpt::Format().ParsePrintf(format).ToString(x);
+	//Log("%s", str_sprintf.c_str());
+	//Log("%s", str_iostreams.c_str());
+	//Log("%s", str_iostreams.c_str());
+#ifdef MODPLUG_TRACKER
+	VERIFY_EQUAL(str_iostreams, str_sprintf); // this will fail with a set c locale (and there is nothing that can be done about that in libopenmpt)
+#endif
+	VERIFY_EQUAL(str_iostreams, str_parsed);
+}
+
+
+static void TestFloatFormats(double x)
+{
+
+	TestFloatFormat(x, "%g", mpt::fmt::NotaNrm | mpt::fmt::FillOff);
+	TestFloatFormat(x, "%.8g", mpt::fmt::NotaNrm | mpt::fmt::FillOff, 0, 8);
+
+	TestFloatFormat(x, "%f", mpt::fmt::NotaFix | mpt::fmt::FillOff);
+
+	TestFloatFormat(x, "%.0f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 0);
+	TestFloatFormat(x, "%.1f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 1);
+	TestFloatFormat(x, "%.2f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 2);
+	TestFloatFormat(x, "%.3f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 3);
+	TestFloatFormat(x, "%1.1f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 1, 1);
+	TestFloatFormat(x, "%3.1f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 3, 1);
+	TestFloatFormat(x, "%4.1f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 4, 1);
+	TestFloatFormat(x, "%6.3f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 6, 3);
+	TestFloatFormat(x, "%0.1f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 0, 1);
+	TestFloatFormat(x, "%02.0f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 2, 0);
+
+}
+
+
+
 void TestMisc()
 //-------------
 {
@@ -496,12 +537,18 @@ void TestMisc()
 	VERIFY_EQUAL(Stringify(1.5f), "1.5");
 	VERIFY_EQUAL(Stringify(true), "1");
 	VERIFY_EQUAL(Stringify(false), "0");
-	VERIFY_EQUAL(Stringify('A'), "A");
-	//VERIFY_EQUAL(Stringify(L'A'), "A"); // currently fails
+	//VERIFY_EQUAL(Stringify('A'), "A"); // deprecated
+	//VERIFY_EQUAL(Stringify(L'A'), "A"); // deprecated
 
 	VERIFY_EQUAL(Stringify(0), "0");
 	VERIFY_EQUAL(Stringify(-23), "-23");
 	VERIFY_EQUAL(Stringify(42), "42");
+
+	VERIFY_EQUAL(mpt::fmt::hex<3>((int32)-1), "ffffffff");
+
+	VERIFY_EQUAL(mpt::fmt::hex(0x123e), "123e");
+	VERIFY_EQUAL(mpt::fmt::hex0<6>(0x123e), "00123e");
+	VERIFY_EQUAL(mpt::fmt::hex0<2>(0x123e), "123e");
 
 	VERIFY_EQUAL(Stringify(-87.0f), "-87");
 	if(Stringify(-0.5e-6) != "-5e-007"
@@ -512,6 +559,7 @@ void TestMisc()
 		VERIFY_EQUAL(true, false);
 	}
 	VERIFY_EQUAL(Stringify(58.65403492763), "58.654");
+	VERIFY_EQUAL(mpt::Format("%3.1f").ToString(23.42), "23.4");
 
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
@@ -528,6 +576,31 @@ void TestMisc()
 	VERIFY_EQUAL(ConvertStrTo<float>("-87.0"), -87.0);
 	VERIFY_EQUAL(ConvertStrTo<double>("-0.5e-6"), -0.5e-6);
 	VERIFY_EQUAL(ConvertStrTo<double>("58.65403492763"), 58.65403492763);
+
+	VERIFY_EQUAL(ConvertStrTo<float>(Stringify(-87.0)), -87.0);
+	VERIFY_EQUAL(ConvertStrTo<double>(Stringify(-0.5e-6)), -0.5e-6);
+
+	TestFloatFormats(0.0f);
+	TestFloatFormats(1.0f);
+	TestFloatFormats(-1.0f);
+	TestFloatFormats(0.1f);
+	TestFloatFormats(-0.1f);
+	TestFloatFormats(1000000000.0f);
+	TestFloatFormats(-1000000000.0f);
+	TestFloatFormats(0.0000000001f);
+	TestFloatFormats(-0.0000000001f);
+	TestFloatFormats(6.12345f);
+
+	TestFloatFormats(42.1234567890);
+	TestFloatFormats(0.1234567890);
+	TestFloatFormats(1234567890000000.0);
+	TestFloatFormats(0.0000001234567890);
+
+	VERIFY_EQUAL(mpt::Format().ParsePrintf("%7.3f").ToString(6.12345), "  6.123");
+	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 7, 3), "  6.123");
+	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 7, 3), "  6.123");
+	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 0, 4), "6.123");
+	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 0, 4), "6.1235");
 
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_MAX), false);
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_PC), true);

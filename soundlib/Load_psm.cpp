@@ -339,7 +339,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			newFormat = true;
 			chunk.ReadString<mpt::String::spacePadded>(patternID, 4);
 		}
-		patternIDs.push_back(atoi(&patternID[newFormat ? 0 : 1]));
+		patternIDs.push_back(ConvertStrTo<uint32>(&patternID[newFormat ? 0 : 1]));
 		// We're going to read the rest of the pattern data later.
 		patternChunks.push_back(chunk.GetChunk(chunk.BytesLeft()));
 
@@ -388,7 +388,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					char cversion[7];
 					subChunk.ReadString<mpt::String::maybeNullTerminated>(cversion, 6);
-					int version = atoi(cversion);
+					int version = ConvertStrTo<int>(cversion);
 					// Sinaria song dates (just to go sure...)
 					if(version == 800211 || version == 940902 || version == 940903 ||
 						version == 940906 || version == 940914 || version == 941213)
@@ -431,7 +431,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 									subChunk.Skip(1);
 									subChunk.ReadString<mpt::String::spacePadded>(patternID, 3);
 								}
-								uint32 pat = atoi(patternID);
+								uint32 pat = ConvertStrTo<uint32>(patternID);
 
 								// seek which pattern has this ID
 								for(size_t i = 0; i < patternIDs.size(); i++)

@@ -28,7 +28,7 @@
 
 #define str_tooMuchPatternData	(GetStrI18N(("Warning: File format limit was reached. Some pattern data may not get written to file.")))
 #define str_pattern				(GetStrI18N(("pattern")))
-#define str_PatternSetTruncationNote (GetStrI18N(("The module contains %u patterns but only %u patterns can be loaded in this OpenMPT version.")))
+#define str_PatternSetTruncationNote (GetStrI18N(("The module contains %1 patterns but only %2 patterns can be loaded in this OpenMPT version.")))
 #define str_LoadingIncompatibleVersion	"The file informed that it is incompatible with this version of OpenMPT. Loading was terminated."
 #define str_LoadingMoreRecentVersion	"The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly."
 
@@ -303,12 +303,14 @@ std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 		time_t versionSec = ((cwtv - 0x050) * 86400) + mktime(&epoch);
 		if((verTime = localtime(&versionSec)) != nullptr)
 		{
-			version = mpt::String::Format("Schism Tracker %04d-%02d-%02d",
-				verTime->tm_year + 1900, verTime->tm_mon + 1, verTime->tm_mday);
+			version = mpt::String::Print("Schism Tracker %1-%2-%3",
+				mpt::fmt::dec0<4>(verTime->tm_year + 1900),
+				mpt::fmt::dec0<2>(verTime->tm_mon + 1),
+				mpt::fmt::dec0<2>(verTime->tm_mday));
 		}
 	} else
 	{
-		version = mpt::String::Format("Schism Tracker 0.%x", cwtv & 0xFF);
+		version = mpt::String::Print("Schism Tracker %1.%2", 0, mpt::fmt::hex(cwtv & 0xFF));
 	}
 	return version;
 }
@@ -680,7 +682,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(numPats != patPos.size())
 	{
 		// Hack: Notify user here if file contains more patterns than what can be read.
-		AddToLog(mpt::String::Format(str_PatternSetTruncationNote, (unsigned int)patPos.size(), numPats));
+		AddToLog(mpt::String::Print(str_PatternSetTruncationNote, patPos.size(), numPats));
 	}
 
 	if(!(loadFlags & loadPatternData))
@@ -775,7 +777,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Empty 64-row pattern
 			if(Patterns.Insert(pat, 64))
 			{
-				AddToLog(mpt::String::Format("Allocating patterns failed starting from pattern %u", pat));
+				AddToLog(mpt::String::Print("Allocating patterns failed starting from pattern %1", pat));
 				break;
 			}
 			// Now (after the Insert() call), we can read the pattern name.
@@ -982,10 +984,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					// Patched update of IT 2.14 (0x0215 - 0x0217 == p1 - p3)
 					// p4 (as found on modland) adds the ITVSOUND driver, but doesn't seem to change
 					// anything as far as file saving is concerned.
-					madeWithTracker = mpt::String::Format("Impulse Tracker 2.14p%d", fileHeader.cwtv - 0x0214);
+					madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - 0x0214);
 				} else
 				{
-					madeWithTracker = mpt::String::Format("Impulse Tracker %d.%02x", (fileHeader.cwtv & 0x0F00) >> 8, (fileHeader.cwtv & 0xFF));
+					madeWithTracker = mpt::String::Print("Impulse Tracker %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 				}
 			}
 			break;
@@ -996,7 +998,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = "BeRoTracker";
 			break;
 		case 7:
-			madeWithTracker = mpt::String::Format("ITMCK %d.%d.%d", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+			madeWithTracker = mpt::String::Print("ITMCK %1.%2.%3", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		}
 	}
@@ -1549,7 +1551,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 			buf[len++] = 0;
 			if(patinfo[0] > uint16_max - len)
 			{
-				AddToLog(mpt::String::Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, pat));
+				AddToLog(mpt::String::Print("%1 (%2 %3)", str_tooMuchPatternData, str_pattern, pat));
 				break;
 			} else
 			{
