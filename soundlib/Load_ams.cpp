@@ -26,15 +26,16 @@
 static char ConvertAMSTextChars(char c)
 //-------------------------------------
 {
+	// Convert to Windows-1252 for now.
 	switch((unsigned char)c)
 	{
 	case 0x00: return ' ';
-	case 0x04: return 'ä';	// Lower-case ae
-	case 0x06: return 'å';	// Lower-case a-ring
-	case 0x0E: return 'Ä';	// Upper-case AE
-	case 0x0F: return 'Å';	// Upper-case A-ring
-	case 0x14: return 'ö';	// Lower-case oe
-	case 0x19: return 'Ö';	// Upper-case OE
+	case 0x04: return '\xE4';	// Lower-case ae
+	case 0x06: return '\xE5';	// Lower-case a-ring
+	case 0x0E: return '\xC4';	// Upper-case AE
+	case 0x0F: return '\xC5';	// Upper-case A-ring
+	case 0x14: return '\xF6';	// Lower-case oe
+	case 0x19: return '\xD6';	// Upper-case OE
 	}
 	return c;
 }
@@ -533,13 +534,14 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 static char ConvertAMS2TextChars(char c)
 //--------------------------------------
 {
+	// Convert to Windows-1252 for now.
 	const char controlChars[] =
 	{ 
-		' ', '©', 'v' /* actually supposed to be a root/check sign */, '·',
+		' ', '\xA9', 'v' /* actually supposed to be a root/check sign */, '\xB7',
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',	// Small GUI letters
-		' ', '§'
+		' ', '\xA7'
 	};
-	const char highChars[] = { 'ä', ' ', 'å', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'Ä', 'Å', ' ', ' ', ' ', ' ', 'ö', ' ', ' ', ' ', ' ', 'Ö' };
+	const char highChars[] = { '\xE4', ' ', '\xE5', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '\xC4', '\xC5', ' ', ' ', ' ', ' ', '\xF6', ' ', ' ', ' ', ' ', '\xD6' };
 
 	if((unsigned char)c < CountOf(controlChars))
 	{
