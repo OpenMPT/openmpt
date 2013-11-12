@@ -12,6 +12,8 @@
 namespace mpt
 {
 
+#if defined(WIN32)
+
 // Default WinAPI thread
 class thread
 {
@@ -57,5 +59,11 @@ public:
 
 	thread_member(T *instance, Priority priority = normal) : thread(wrapperFunc, instance, priority) { }
 };
+
+#else // !WIN32
+
+#error "thread.h is unimplemented on non-WIN32"
+
+#endif // !WIN32
 
 }	// namespace mpt
