@@ -86,55 +86,58 @@ std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
 	LONG cr;
 
 	HKEY hkEnum = NULL;
-	cr = RegOpenKey(HKEY_LOCAL_MACHINE, TEXT("software\\asio"), &hkEnum);
+	cr = RegOpenKeyW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\ASIO", &hkEnum);
 
 	for(DWORD index = 0; ; ++index)
 	{
 
-		TCHAR keyname[ASIO_MAXDRVNAMELEN];
-		if((cr = RegEnumKey(hkEnum, index, keyname, ASIO_MAXDRVNAMELEN)) != ERROR_SUCCESS)
+		WCHAR keynameBuf[ASIO_MAXDRVNAMELEN];
+		if((cr = RegEnumKeyW(hkEnum, index, keynameBuf, ASIO_MAXDRVNAMELEN)) != ERROR_SUCCESS)
 		{
 			break;
 		}
+		const std::wstring keyname = keynameBuf;
 		#ifdef ASIO_LOG
-			Log("ASIO: Found \"%s\":\n", keyname);
+			Log("ASIO: Found \"%s\":\n", mpt::String::Encode(keynameBuf, mpt::CharsetLocale).c_str());
 		#endif
 
 		HKEY hksub = NULL;
-		if(RegOpenKeyEx(hkEnum, keyname, 0, KEY_READ, &hksub) != ERROR_SUCCESS)
+		if(RegOpenKeyExW(hkEnum, keynameBuf, 0, KEY_READ, &hksub) != ERROR_SUCCESS)
 		{
 			continue;
 		}
 
-		CHAR description[ASIO_MAXDRVNAMELEN];
+		WCHAR descriptionBuf[ASIO_MAXDRVNAMELEN];
 		DWORD datatype = REG_SZ;
-		DWORD datasize = sizeof(description);
-		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("description"), 0, &datatype, (LPBYTE)description, &datasize))
+		DWORD datasize = sizeof(descriptionBuf);
+		std::wstring description;
+		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"Description", 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
 		{
 		#ifdef ASIO_LOG
-			Log("  description =\"%s\":\n", description);
+			Log("  description =\"%s\":\n", mpt::String::Encode(descriptionBuf, mpt::CharsetLocale).c_str());
 		#endif
+			description = descriptionBuf;
 		} else
 		{
-			mpt::String::Copy(description, keyname);
+			description = keyname;
 		}
 
-		CHAR s[256];
+		WCHAR idBuf[256];
 		datatype = REG_SZ;
-		datasize = sizeof(s);
-		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("clsid"), 0, &datatype, (LPBYTE)s, &datasize))
+		datasize = sizeof(idBuf);
+		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"CLSID", 0, &datatype, (LPBYTE)idBuf, &datasize))
 		{
-			const std::wstring internalID = mpt::String::Decode(s, mpt::CharsetLocale);
+			const std::wstring internalID = idBuf;
 			if(IsCLSID(internalID))
 			{
 				#ifdef ASIO_LOG
-					Log("  clsid=\"%s\"\n", s);
+					Log("  clsid=\"%s\"\n", mpt::String::Encode(idBuf, mpt::CharsetLocale).c_str());
 				#endif
 
 				if(SoundDeviceIndexIsValid(devices.size()))
 				{
 					// everything ok
-					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), mpt::String::Decode(description, mpt::CharsetLocale), L"ASIO", internalID));
+					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), description, L"ASIO", internalID));
 				}
 
 			}
