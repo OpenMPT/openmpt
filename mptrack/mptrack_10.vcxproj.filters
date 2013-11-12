@@ -957,11 +957,11 @@
     <ClInclude Include="..\common\mptPathString.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="CTreeCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\thread.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="CTreeCtrl.h">
+      <Filter>Header Files\mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
