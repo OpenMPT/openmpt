@@ -88,7 +88,7 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 				patList[pattern] = insertedPats++;
 
 				patternData.AppendFormat("Rows: %u\r\n", sndFile.Patterns[pattern].GetNumRows());
-				CString name = sndFile.Patterns[pattern].GetName();
+				CString name = sndFile.Patterns[pattern].GetName().c_str();
 				if(!name.IsEmpty())
 				{
 					patternData.Append("Name: " + name + "\r\n");
