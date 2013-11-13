@@ -131,7 +131,7 @@ protected:
 	//For example GetRefNote(-1) is to return note :'groupsize-1'.
 	NOTEINDEXTYPE GetRefNote(NOTEINDEXTYPE note) const;
 
-	virtual const std::string& GetDerivedClassID() const {return s_DerivedclassID;}
+	virtual std::string GetDerivedClassID() const {return s_DerivedclassID;}
 
 private:
 	//PRIVATE METHODS:

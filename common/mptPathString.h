@@ -73,10 +73,6 @@ public:
 		return a.AsNative() != b.AsNative();
 	}
 	bool empty() const { return path.empty(); }
-	const RawPathString &NativeRef() const
-	{
-		return path;
-	}
 
 #if defined(WIN32)
 	static int CompareNoCase(const PathString & a, const PathString & b)

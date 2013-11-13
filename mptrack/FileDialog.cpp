@@ -31,6 +31,8 @@ bool FileDialog::Show()
 	filenameBuffer.insert(filenameBuffer.begin(), defaultFilename.begin(), defaultFilename.end());
 	filenameBuffer.push_back(0);
 
+	const std::wstring workingDirectoryNative = workingDirectory.AsNative();
+
 	// First, set up the dialog...
 	OPENFILENAMEW ofn;
 	MemsetZero(ofn);
@@ -45,7 +47,7 @@ bool FileDialog::Show()
 	ofn.nMaxFile = filenameBuffer.size();
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = workingDirectory.empty() ? NULL : workingDirectory.NativeRef().c_str();
+	ofn.lpstrInitialDir = workingDirectory.empty() ? NULL : workingDirectoryNative.c_str();
 	ofn.lpstrTitle = NULL;
 	ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0) | (load ? 0 : (OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN));
 	ofn.nFileOffset = 0;

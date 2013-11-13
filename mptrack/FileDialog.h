@@ -55,13 +55,22 @@ public:
 	bool Show();
 
 	// Get some selected file. Mostly useful when only one selected file is possible anyway.
-	const mpt::PathString &GetFirstFile() const { return filenames.front(); }
-	// Gets all selected files.
+	mpt::PathString GetFirstFile() const
+	{
+		if(!filenames.empty())
+		{
+			return filenames.front();
+		} else
+		{
+			return mpt::PathString();
+		}
+	}
+	// Gets a reference to all selected filenames.
 	const PathList &GetFilenames() const { return filenames; }
 	// Gets directory in which the selected files are placed.
-	const mpt::PathString &GetWorkingDirectory() const { return workingDirectory; }
+	mpt::PathString GetWorkingDirectory() const { return workingDirectory; }
 	// Gets the extension of the first selected file, without dot.
-	const mpt::PathString &GetExtension() const { return extension; }
+	mpt::PathString GetExtension() const { return extension; }
 
 protected:
 	static UINT_PTR CALLBACK OFNHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam);
@@ -100,7 +109,7 @@ public:
 	bool Show();
 
 	// Gets selected directory.
-	const mpt::PathString &GetDirectory() const { return workingDirectory; }
+	mpt::PathString GetDirectory() const { return workingDirectory; }
 
 protected:
 	static int CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData);
