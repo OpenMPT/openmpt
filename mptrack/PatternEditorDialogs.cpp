@@ -479,7 +479,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		SetDlgItemText(IDC_TEXT1, s);
 
 		// Window title
-		const CString patternName = sndFile.Patterns[m_nPattern].GetName();
+		const CString patternName = sndFile.Patterns[m_nPattern].GetName().c_str();
 		wsprintf(s, "Pattern Properties for Pattern #%d", m_nPattern);
 		if(!patternName.IsEmpty())
 		{

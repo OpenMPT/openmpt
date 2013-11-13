@@ -103,7 +103,7 @@ public:
 		return GetName(buffer, bufferSize);
 	}
 	bool GetName(char *buffer, size_t maxChars) const;
-	mpt::string GetName() const { return m_PatternName; };
+	std::string GetName() const { return m_PatternName; };
 
 	// Double number of rows
 	bool Expand();
