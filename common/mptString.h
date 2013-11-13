@@ -1,7 +1,7 @@
 /*
  * mptString.h
  * ----------
- * Purpose: MFC compatibility classes, small string-related utilities, number and message formatting.
+ * Purpose: Small string-related utilities, number and message formatting.
  * Notes  : Currently none.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -26,24 +26,6 @@
 
 namespace mpt
 {
-
-
-#ifdef MODPLUG_TRACKER
-	// std::string compatible class that is convertible to const char* (and thus CString).
-	// This eases interfacing CSoundFile from MFC code in some cases.
-	// The goal is to remove this sometime in the future.
-	class string : public std::string
-	{
-	public:
-		string() {}
-		string(const char *psz) : std::string(psz) {}
-		string(const std::string &other) : std::string(other) {}
-		string& operator=(const char *psz) { std::string::operator=(psz); return *this; }
-		operator const char *() const { return c_str(); } // To allow easy assignment to CString in GUI side.
-	};
-#else
-	typedef std::string string;
-#endif
 
 
 namespace String
