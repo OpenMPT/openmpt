@@ -732,7 +732,7 @@ std::int32_t module_impl::get_num_samples() const {
 std::vector<std::string> module_impl::get_subsong_names() const {
 	std::vector<std::string> retval;
 	for ( SEQUENCEINDEX i = 0; i < m_sndFile->Order.GetNumSequences(); ++i ) {
-		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( i ).m_sName ) );
+		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( i ).GetName() ) );
 	}
 	return retval;
 }
