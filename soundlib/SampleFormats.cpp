@@ -73,7 +73,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 		&& !ReadAIFFSample(nSample, file, mayNormalize)
 		&& !ReadITSSample(nSample, file)
 		&& !ReadPATSample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
-		&& !Read8SVXSample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
+		&& !ReadIFFSample(nSample, file)
 		&& !ReadS3ISample(nSample, file)
 		&& !ReadFLACSample(nSample, file)
 		&& !ReadMP3Sample(nSample, file))
@@ -1690,121 +1690,148 @@ void ConvertReadExtendedFlags(ModInstrument *pIns)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// 8SVX Samples
-
-#define IFFID_8SVX	0x58565338
-#define IFFID_VHDR	0x52444856
-#define IFFID_BODY	0x59444f42
-#define IFFID_NAME	0x454d414e
-#define IFFID_ANNO	0x4f4e4e41
+// 8SVX / 16SVX Samples
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
 
-typedef struct PACKED IFF8SVXFILEHEADER
+// IFF File Header
+struct PACKED IFFHeader
 {
-	DWORD dwFORM;	// "FORM"
-	DWORD dwSize;
-	DWORD dw8SVX;	// "8SVX"
-} IFF8SVXFILEHEADER;
+	char   form[4];		// "FORM"
+	uint32 size;
+	char   magic[4];	// "8SVX" or "16SV"
 
-STATIC_ASSERT(sizeof(IFF8SVXFILEHEADER) == 12);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(size);
+	}
+};
 
-typedef struct PACKED IFFVHDR
+STATIC_ASSERT(sizeof(IFFHeader) == 12);
+
+
+// General IFF Chunk header
+struct PACKED IFFChunk
 {
-	DWORD dwVHDR;	// "VHDR"
-	DWORD dwSize;
-	ULONG oneShotHiSamples,			/* # samples in the high octave 1-shot part */
-			repeatHiSamples,		/* # samples in the high octave repeat part */
-			samplesPerHiCycle;		/* # samples/cycle in high octave, else 0 */
-	WORD samplesPerSec;				/* data sampling rate */
-	BYTE	ctOctave,				/* # octaves of waveforms */
-			sCompression;			/* data compression technique used */
-	DWORD Volume;
-} IFFVHDR;
+	// 32-Bit chunk identifiers
+	enum ChunkIdentifiers
+	{
+		idVHDR	= 0x52444856,
+		idBODY	= 0x59444F42,
+		idNAME	= 0x454D414E,
+	};
 
-STATIC_ASSERT(sizeof(IFFVHDR) == 28);
+	typedef ChunkIdentifiers id_type;
 
-typedef struct PACKED IFFBODY
+	uint32 id;		// See ChunkIdentifiers
+	uint32 length;	// Chunk size without header
+
+	size_t GetLength() const
+	{
+		if(length == 0)	// Broken files
+			return SIZE_MAX;
+		return SwapBytesReturnBE(length);
+	}
+
+	id_type GetID() const
+	{
+		return static_cast<id_type>(SwapBytesReturnLE(id));
+	}
+};
+
+STATIC_ASSERT(sizeof(AIFFChunk) == 8);
+
+
+struct PACKED IFFSampleHeader
 {
-	DWORD dwBody;
-	DWORD dwSize;
-} IFFBODY;
+	uint32 oneShotHiSamples;	// Samples in the high octave 1-shot part
+	uint32 repeatHiSamples;		// Samples in the high octave repeat part
+	uint32 samplesPerHiCycle;	// Samples/cycle in high octave, else 0
+	uint16 samplesPerSec;		// Data sampling rate
+	uint8  octave;				// Octaves of waveforms
+	uint8  compression;			// Data compression technique used
+	uint32 volume;
 
-STATIC_ASSERT(sizeof(IFFBODY) == 8);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(oneShotHiSamples);
+		SwapBytesBE(repeatHiSamples);
+		SwapBytesBE(samplesPerHiCycle);
+		SwapBytesBE(samplesPerSec);
+		SwapBytesBE(volume);
+	}
+};
+
+STATIC_ASSERT(sizeof(IFFSampleHeader) == 20);
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
 
 
-
-bool CSoundFile::Read8SVXSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//----------------------------------------------------------------------------------------
+bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
+//--------------------------------------------------------------------
 {
-	IFF8SVXFILEHEADER *pfh = (IFF8SVXFILEHEADER *)lpMemFile;
-	IFFVHDR *pvh = (IFFVHDR *)(lpMemFile + 12);
-	ModSample &sample = Samples[nSample];
-	DWORD dwMemPos = 12;
-	
-	if ((!lpMemFile) || (dwFileLength < sizeof(IFFVHDR)+12) || (pfh->dwFORM != IFFID_FORM)
-	 || (pfh->dw8SVX != IFFID_8SVX) || (BigEndian(pfh->dwSize) >= dwFileLength)
-	 || (pvh->dwVHDR != IFFID_VHDR) || (BigEndian(pvh->dwSize) >= dwFileLength)) return false;
+	file.Rewind();
 
+	IFFHeader fileHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| memcmp(fileHeader.form, "FORM", 4 )
+		|| (memcmp(fileHeader.magic, "8SVX", 4) && memcmp(fileHeader.magic, "16SV", 4)))
+	{
+		return false;
+	}
+
+	ChunkReader chunkFile(file);
+	ChunkReader::ChunkList<IFFChunk> chunks = chunkFile.ReadChunks<IFFChunk>(2);
+
+	FileReader vhdrChunk = chunks.GetChunk(IFFChunk::idVHDR);
+	FileReader bodyChunk = chunks.GetChunk(IFFChunk::idBODY);
+	IFFSampleHeader sampleHeader;
+	if(!bodyChunk.IsValid()
+		|| !vhdrChunk.IsValid()
+		|| !vhdrChunk.ReadConvertEndianness(sampleHeader))
+	{
+		return false;
+	}
+	
 	DestroySampleThreadsafe(nSample);
 	// Default values
+	ModSample &sample = Samples[nSample];
 	sample.Initialize();
-	sample.nLoopStart = BigEndian(pvh->oneShotHiSamples);
-	sample.nLoopEnd = sample.nLoopStart + BigEndian(pvh->repeatHiSamples);
-	sample.nVolume = (WORD)(BigEndianW((WORD)pvh->Volume) >> 8);
-	sample.nC5Speed = BigEndianW(pvh->samplesPerSec);
-	if((!sample.nVolume) || (sample.nVolume > 256)) sample.nVolume = 256;
+	sample.nLoopStart = sampleHeader.oneShotHiSamples;
+	sample.nLoopEnd = sample.nLoopStart + sampleHeader.repeatHiSamples;
+	sample.nC5Speed = sampleHeader.samplesPerSec;
+	sample.nVolume = static_cast<uint16>(sampleHeader.volume >> 8);
+	if(!sample.nVolume || sample.nVolume > 256) sample.nVolume = 256;
 	if(!sample.nC5Speed) sample.nC5Speed = 22050;
 
 	sample.Convert(MOD_TYPE_IT, GetType());
 
-	dwMemPos += BigEndian(pvh->dwSize) + 8;
-	while (dwMemPos + 8 < dwFileLength)
+	FileReader nameChunk = chunks.GetChunk(IFFChunk::idNAME);
+	if(nameChunk.IsValid())
 	{
-		DWORD dwChunkId = *((LPDWORD)(lpMemFile+dwMemPos));
-		DWORD dwChunkLen = BigEndian(*((LPDWORD)(lpMemFile+dwMemPos+4)));
-		LPBYTE pChunkData = (LPBYTE)(lpMemFile+dwMemPos+8);
-		// Hack for broken files: Trim claimed length if it's too long
-		dwChunkLen = MIN(dwChunkLen, dwFileLength - dwMemPos);
-		switch(dwChunkId)
-		{
-		case IFFID_NAME:
-			{
-				const UINT len = MIN(dwChunkLen, MAX_SAMPLENAME - 1);
-				MemsetZero(m_szNames[nSample]);
-				memcpy(m_szNames[nSample], pChunkData, len);
-			}
-			break;
-		case IFFID_BODY:
-			if (!sample.pSample)
-			{
-				UINT len = dwChunkLen;
-				if (len > dwFileLength - dwMemPos - 8) len = dwFileLength - dwMemPos - 8;
-				if (len > 4)
-				{
-					sample.nLength = len;
-					if ((sample.nLoopStart + 4 < sample.nLoopEnd) && (sample.nLoopEnd <= sample.nLength)) sample.uFlags |= CHN_LOOP;
-
-					FileReader chunk(pChunkData, len);
-					SampleIO(
-						SampleIO::_8bit,
-						SampleIO::mono,
-						SampleIO::bigEndian,
-						SampleIO::signedPCM)
-						.ReadSample(sample, chunk);
-				}
-			}
-			break;
-		}
-		dwMemPos += dwChunkLen + 8;
+		nameChunk.ReadString<mpt::String::maybeNullTerminated>(m_szNames[nSample], nameChunk.GetLength());
+	} else
+	{
+		strcpy(m_szNames[nSample], "");
 	}
-	return (sample.pSample != nullptr);
+
+	sample.nLength = mpt::saturate_cast<SmpLength>(bodyChunk.GetLength());
+	if((sample.nLoopStart + 4 < sample.nLoopEnd) && (sample.nLoopEnd <= sample.nLength)) sample.uFlags.set(CHN_LOOP);
+
+	SampleIO(
+		memcmp(fileHeader.magic, "8SVX", 4) ? SampleIO::_16bit : SampleIO::_8bit,
+		SampleIO::mono,
+		SampleIO::bigEndian,
+		SampleIO::signedPCM)
+		.ReadSample(sample, bodyChunk);
+
+	return true;
 }
 
 
