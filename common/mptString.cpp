@@ -1,7 +1,7 @@
 /*
  * mptString.cpp
  * -------------
- * Purpose: MFC compatibility classes, small string-related utilities, number and message formatting.
+ * Purpose: Small string-related utilities, number and message formatting.
  * Notes  : Currently none.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
