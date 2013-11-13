@@ -92,10 +92,10 @@ public:
 
 	size_t GetNumTunings() const {return m_Tunings.size();}
 
-	const std::string& GetName() const {return m_Name;}
+	std::string GetName() const {return m_Name;}
 
 	void SetSavefilePath(const mpt::PathString &psz) {m_SavefilePath = psz;}
-	const mpt::PathString& GetSaveFilePath() const {return m_SavefilePath;}
+	mpt::PathString GetSaveFilePath() const {return m_SavefilePath;}
 
 	std::string GetVersionString() const {return Stringify(static_cast<int>(s_SerializationVersion));}
 
