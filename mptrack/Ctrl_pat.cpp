@@ -192,7 +192,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
-	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.m_sName);
+	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.GetName().c_str());
 
 	m_OrderList.SetFocus(); 
 
@@ -243,7 +243,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 
 	if(dwHintMask & HINT_MODSEQUENCE)
 	{
-		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.m_sName);
+		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.GetName().c_str());
 	}
 	if(dwHintMask & (HINT_MODSEQUENCE|HINT_MODTYPE))
 	{
@@ -1093,9 +1093,9 @@ void CCtrlPatterns::OnSequenceNameChanged()
 {
 	CString str;
 	GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, str);
-	if (str != m_sndFile.Order.m_sName)
+	if(str != m_sndFile.Order.GetName().c_str())
 	{
-		m_sndFile.Order.m_sName = str.GetString();
+		m_sndFile.Order.SetName(str.GetString());
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(NULL, (m_sndFile.Order.GetCurrentSequenceIndex() << HINT_SHIFT_SEQUENCE) | HINT_SEQNAMES, this);
 	}

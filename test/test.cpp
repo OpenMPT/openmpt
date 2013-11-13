@@ -1278,13 +1278,13 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetNumSequences(), 2);
 
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).GetLengthTailTrimmed(), 3);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).m_sName, "First Sequence");
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).GetName(), "First Sequence");
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[0], sndFile.Order.GetIgnoreIndex());
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[1], 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[2], sndFile.Order.GetIgnoreIndex());
 
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).GetLengthTailTrimmed(), 2);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).m_sName, "Second Sequence");
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).GetName(), "Second Sequence");
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1)[0], 1);
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1)[1], 2);
 

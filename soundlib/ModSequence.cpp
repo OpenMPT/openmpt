@@ -669,6 +669,20 @@ bool ModSequence::IsPositionLocked(ORDERINDEX position)
 #endif // MODPLUG_TRACKER
 
 
+void ModSequence::SetName(const std::string &newName)
+//---------------------------------------------------
+{
+	m_sName = newName;
+}
+
+
+std::string ModSequence::GetName() const
+//--------------------------------------
+{
+	return m_sName;
+}
+
+
 /////////////////////////////////////
 // Read/Write
 /////////////////////////////////////
