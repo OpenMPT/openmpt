@@ -295,10 +295,9 @@ mpt::PathString CModTree::InsLibGetFullPath(HTREEITEM hItem) const
 }
 
 
-void CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songName)
+bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songName)
 //-----------------------------------------------------------------------------------------------
 {
-	m_InstrLibPath =  libPath;
 	if(!songName.empty() && mpt::PathString::CompareNoCase(m_SongFileName, songName))
 	{
 		// Load module for previewing its instruments
@@ -318,15 +317,23 @@ void CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 				}
 				if(m_SongFile != nullptr)
 				{
-					m_SongFile->Create(file, CSoundFile::loadNoPatternData, nullptr);
+					if(!m_SongFile->Create(file, CSoundFile::loadNoPatternData, nullptr))
+					{
+						return false;
+					}
 					// Destroy some stuff that we're not going to use anyway.
 					m_SongFile->Patterns.DestroyPatterns();
 					m_SongFile->songMessage.clear();
 				}
 			}
+		} else
+		{
+			return false;
 		}
 	}
+	m_InstrLibPath =  libPath;
 	m_SongFileName = songName;
+	return true;
 }
 
 
@@ -1853,16 +1860,19 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 	bool ok = false;
 	if(isSong)
 	{
-		m_InstrLibHighlightPath = m_SongFileName = dir;
 		if(!IsSampleBrowser())
 		{
-			m_pDataTree->InsLibSetFullPath(m_InstrLibPath, m_SongFileName);
+			ok = m_pDataTree->InsLibSetFullPath(m_InstrLibPath, dir);
 			m_pDataTree->RefreshInstrumentLibrary();
 		} else
 		{
 			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
+			ok = true;
 		}
-		ok = true;
+		if(ok)
+		{
+			m_InstrLibHighlightPath = dir;
+		}
 	} else
 	{
 		if(dir == MPT_PATHSTRING(".."))
@@ -1898,7 +1908,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 
 	if(!ok)
 	{
-		std::wstring s = L"Unable to browse to \"" + dir.AsNative() + L"\"";
+		std::wstring s = L"Unable to browse to \"" + dir.ToWide() + L"\"";
 		Reporting::Error(s, L"Instrument Library");
 	} else
 	{
@@ -3233,8 +3243,7 @@ void CModTree::OnRefreshInstrLib()
 			while (hItem != NULL)
 			{
 				const mpt::PathString str = mpt::PathString::FromWide(GetItemTextW(hItem));
-				if((!m_SongFileName.empty() && !mpt::PathString::CompareNoCase(str, m_SongFileName))
-					|| (m_SongFileName.empty() && !mpt::PathString::CompareNoCase(str, m_InstrLibHighlightPath)))
+				if(!mpt::PathString::CompareNoCase(str, m_InstrLibHighlightPath))
 				{
 					hActive = hItem;
 					break;

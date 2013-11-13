@@ -192,7 +192,7 @@ public:
 // Attributes
 public:
 	void Init();
-	void InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songFolder);
+	bool InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songFolder);
 	mpt::PathString InsLibGetFullPath(HTREEITEM hItem) const;
 	void RefreshMidiLibrary();
 	void RefreshDlsBanks();
