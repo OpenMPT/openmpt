@@ -794,7 +794,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		// Adjust caption of the "Sequence" node (if only one sequence exists, it should be labeled with the sequence name)
 		if(((hintFlagPart & HINT_SEQNAMES) && sndFile.Order.GetNumSequences() == 1) || adjustParentNode)
 		{
-			CString seqName = sndFile.Order.GetSequence(0).m_sName;
+			CString seqName = sndFile.Order.GetSequence(0).GetName().c_str();
 			if(seqName.IsEmpty() || sndFile.Order.GetNumSequences() > 1)
 				seqName = _T("Sequence");
 			else
@@ -809,10 +809,10 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 			{
 				// more than one sequence -> add folder
 				CString sSeqName;
-				if(sndFile.Order.GetSequence(nSeq).m_sName.empty())
+				if(sndFile.Order.GetSequence(nSeq).GetName().empty())
 					sSeqName.Format("Sequence %u", nSeq);
 				else
-					sSeqName.Format("%u: %s", nSeq, (LPCTSTR)sndFile.Order.GetSequence(nSeq).m_sName);
+					sSeqName.Format("%u: %s", nSeq, sndFile.Order.GetSequence(nSeq).GetName().c_str());
 
 				UINT state = (nSeq == sndFile.Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;
 
@@ -3430,7 +3430,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_SEQUENCE:
 			if(modItem.val1 < sndFile.Order.GetNumSequences())
 			{
-				text = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).m_sName;
+				text = sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).GetName();
 				doLabelEdit = true;
 			}
 			break;
@@ -3523,9 +3523,9 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 		case MODITEM_HDR_ORDERS:
 		case MODITEM_SEQUENCE:
-			if(modItem.val1 < sndFile.Order.GetNumSequences() && sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).m_sName != info->item.pszText)
+			if(modItem.val1 < sndFile.Order.GetNumSequences() && sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).GetName() != info->item.pszText)
 			{
-				sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).m_sName = info->item.pszText;
+				sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).SetName(info->item.pszText);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(NULL, HINT_SEQNAMES | HINT_MODSEQUENCE | ((modItem.val1) << HINT_SHIFT_SEQUENCE), NULL);
 			}

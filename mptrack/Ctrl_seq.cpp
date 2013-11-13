@@ -1008,10 +1008,10 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			for(SEQUENCEINDEX i = 0; i < numSequences; i++)
 			{
 				CString str;
-				if(sndFile.Order.GetSequence(i).m_sName.empty())
+				if(sndFile.Order.GetSequence(i).GetName().empty())
 					str.Format(TEXT("Sequence %u"), i);
 				else
-					str.Format(TEXT("%u: %s"), i, (LPCTSTR)sndFile.Order.GetSequence(i).m_sName);
+					str.Format(TEXT("%u: %s"), i, sndFile.Order.GetSequence(i).GetName().c_str());
 				const UINT flags = (sndFile.Order.GetCurrentSequenceIndex() == i) ? MF_STRING|MF_CHECKED : MF_STRING;
 				AppendMenu(menuSequence, flags, ID_SEQUENCE_ITEM + i, str);
 			}
@@ -1345,7 +1345,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 	CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
 	if(nSeq == MAX_SEQUENCES + 2)
 	{
-		std::wstring str = L"Delete sequence " + StringifyW(sndFile.Order.GetCurrentSequenceIndex()) + L": " + mpt::String::Decode(sndFile.Order.m_sName, mpt::CharsetLocale) + L"?";
+		std::wstring str = L"Delete sequence " + StringifyW(sndFile.Order.GetCurrentSequenceIndex()) + L": " + mpt::String::Decode(sndFile.Order.GetName(), mpt::CharsetLocale) + L"?";
 		if (Reporting::Confirm(str) == cnfYes)
 			sndFile.Order.RemoveSequence();
 		else

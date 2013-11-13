@@ -115,7 +115,11 @@ public:
 	bool IsPositionLocked(ORDERINDEX position);
 #endif // MODPLUG_TRACKER
 
-
+	// Sequence name setter
+	void SetName(const std::string &newName);
+	
+	// Sequence name getter
+	std::string GetName() const;
 
 protected:
 	iterator begin() {return m_pArray;}
@@ -123,8 +127,8 @@ protected:
 	iterator end() {return m_pArray + m_nSize;}
 	const_iterator end() const {return m_pArray + m_nSize;}
 
-public:
-	mpt::string m_sName;				// Sequence name.
+protected:
+	std::string m_sName;				// Sequence name.
 
 protected:
 	CSoundFile &m_sndFile;			// Pointer to associated CSoundFile.
