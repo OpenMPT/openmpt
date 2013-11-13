@@ -176,10 +176,14 @@ protected:
 	HTREEITEM m_tiPerc[128];
 	std::vector<HTREEITEM> m_tiDLS;
 	std::vector<ModTreeDocInfo *> DocInfo;
+
 	// Instrument library
-	bool m_bShowAllFiles, doLabelEdit;
-	mpt::PathString m_szInstrLibPath, m_szOldPath;
-	mpt::PathString m_szSongName;	// Name of open module, without path (== m_szInstrLibPath).
+	mpt::PathString m_InstrLibPath;				// Current path to be explored
+	mpt::PathString m_InstrLibHighlightPath;	// Folder to highlight in browser after a refresh
+	mpt::PathString m_SongFileName;				// Name of open module, without path (== m_szInstrLibPath).
+	bool m_bShowAllFiles;
+	
+	bool doLabelEdit;
 
 public:
 	CModTree(CModTree *pDataTree);
@@ -216,6 +220,7 @@ public:
 	bool IsItemExpanded(HTREEITEM hItem);
 	void DeleteChildren(HTREEITEM hItem);
 	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index);
+	HTREEITEM GetParentRootItem(HTREEITEM hItem);
 
 	bool IsSampleBrowser() const { return m_pDataTree == nullptr; }
 
