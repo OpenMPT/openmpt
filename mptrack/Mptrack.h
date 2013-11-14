@@ -55,7 +55,16 @@ struct DRAGONDROP
 	DWORD dwDropItem;
 	LPARAM lDropParam;
 
-	const mpt::PathString &GetPath() const { return *reinterpret_cast<const mpt::PathString *>(lDropParam); }
+	mpt::PathString GetPath() const
+	{
+		const mpt::PathString *const pPath = reinterpret_cast<const mpt::PathString *>(lDropParam);
+		ASSERT(pPath);
+		if(!pPath)
+		{
+			return mpt::PathString();
+		}
+		return *pPath;
+	}
 };
 
 enum {
