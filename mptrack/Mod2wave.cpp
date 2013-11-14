@@ -78,7 +78,7 @@ static std::wstring GetDefaultArtist()
 {
 	if(std::getenv("USERNAME"))
 	{
-		return mpt::String::Decode(std::getenv("USERNAME"), mpt::CharsetLocale);
+		return mpt::ToWide(mpt::CharsetLocale, std::getenv("USERNAME"));
 	}
 	return std::wstring();
 }
@@ -87,7 +87,7 @@ static std::wstring GetDefaultArtist()
 static std::wstring GetDefaultYear()
 //----------------------------------
 {
-	return mpt::String::Decode(CTime::GetCurrentTime().Format("%Y").GetString(), mpt::CharsetLocale);
+	return mpt::ToWide(CTime::GetCurrentTime().Format("%Y"));
 }
 
 
@@ -201,12 +201,12 @@ BOOL CWaveConvert::OnInitDialog()
 
 	m_EditYear.SetLimitText(4);
 
-	m_EditTitle.SetWindowText(mpt::String::Encode(m_Settings.Tags.title, mpt::CharsetLocale).c_str());
-	m_EditAuthor.SetWindowText(mpt::String::Encode(m_Settings.Tags.artist, mpt::CharsetLocale).c_str());
-	m_EditURL.SetWindowText(mpt::String::Encode(m_Settings.Tags.url, mpt::CharsetLocale).c_str());
-	m_EditAlbum.SetWindowText(mpt::String::Encode(m_Settings.Tags.album, mpt::CharsetLocale).c_str());
-	m_EditYear.SetWindowText(mpt::String::Encode(m_Settings.Tags.year, mpt::CharsetLocale).c_str());
-	m_EditGenre.SetWindowText(mpt::String::Encode(m_Settings.Tags.genre, mpt::CharsetLocale).c_str());
+	m_EditTitle.SetWindowText(mpt::ToCString(m_Settings.Tags.title));
+	m_EditAuthor.SetWindowText(mpt::ToCString(m_Settings.Tags.artist));
+	m_EditURL.SetWindowText(mpt::ToCString(m_Settings.Tags.url));
+	m_EditAlbum.SetWindowText(mpt::ToCString(m_Settings.Tags.album));
+	m_EditYear.SetWindowText(mpt::ToCString(m_Settings.Tags.year));
+	m_EditGenre.SetWindowText(mpt::ToCString(m_Settings.Tags.genre));
 
 	FillTags();
 
@@ -231,8 +231,8 @@ BOOL CWaveConvert::OnInitDialog()
 void CWaveConvert::LoadTags()
 //---------------------------
 {
-	m_Settings.Tags.title = mpt::String::Decode(m_SndFile.GetTitle(), mpt::CharsetLocale);
-	m_Settings.Tags.comments = mpt::String::Decode(m_SndFile.songMessage, mpt::CharsetLocale);
+	m_Settings.Tags.title = mpt::ToWide(mpt::CharsetLocale, m_SndFile.GetTitle());
+	m_Settings.Tags.comments = mpt::ToWide(mpt::CharsetLocale, m_SndFile.songMessage);
 	m_Settings.Tags.artist = m_Settings.storedTags.artist;
 	m_Settings.Tags.album = m_Settings.storedTags.album;
 	m_Settings.Tags.trackno = m_Settings.storedTags.trackno;
@@ -665,29 +665,29 @@ void CWaveConvert::OnOK()
 		CString tmp;
 
 		m_EditTitle.GetWindowText(tmp);
-		m_Settings.Tags.title = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+		m_Settings.Tags.title = mpt::ToWide(tmp);
 
 		m_EditAuthor.GetWindowText(tmp);
-		m_Settings.Tags.artist = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+		m_Settings.Tags.artist = mpt::ToWide(tmp);
 
 		m_EditAlbum.GetWindowText(tmp);
-		m_Settings.Tags.album = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+		m_Settings.Tags.album = mpt::ToWide(tmp);
 
 		m_EditURL.GetWindowText(tmp);
-		m_Settings.Tags.url = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+		m_Settings.Tags.url = mpt::ToWide(tmp);
 
 		if((encTraits->modesWithFixedGenres & encSettings.Mode) && !encTraits->genres.empty())
 		{
 			m_CbnGenre.GetWindowText(tmp);
-			m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+			m_Settings.Tags.genre = mpt::ToWide(tmp);
 		} else
 		{
 			m_EditGenre.GetWindowText(tmp);
-			m_Settings.Tags.genre = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+			m_Settings.Tags.genre = mpt::ToWide(tmp);
 		}
 
 		m_EditYear.GetWindowText(tmp);
-		m_Settings.Tags.year = mpt::String::Decode(tmp.GetString(), mpt::CharsetLocale);
+		m_Settings.Tags.year = mpt::ToWide(tmp);
 		if(m_Settings.Tags.year == L"0")
 		{
 			m_Settings.Tags.year = std::wstring();
@@ -695,10 +695,10 @@ void CWaveConvert::OnOK()
 
 		if(!m_SndFile.songMessage.empty())
 		{
-			m_Settings.Tags.comments = mpt::String::Decode(m_SndFile.songMessage, mpt::CharsetLocale);
+			m_Settings.Tags.comments = mpt::ToWide(mpt::CharsetLocale, m_SndFile.songMessage);
 		}
 
-		m_Settings.Tags.bpm = mpt::String::Decode(mpt::String::Format("%d", (int)m_SndFile.GetCurrentBPM()), mpt::CharsetLocale);
+		m_Settings.Tags.bpm = mpt::ToWString(m_SndFile.GetCurrentBPM());
 
 		SaveTags();
 
