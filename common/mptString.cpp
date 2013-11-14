@@ -274,24 +274,6 @@ Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 }
 
 
-std::string Encode(const std::wstring &src, Charset to)
-{
-	return EncodeImpl<std::string>(to, src);
-}
-
-
-std::wstring Decode(const std::string &src, Charset from)
-{
-	return DecodeImpl(from, src);
-}
-
-
-std::string Convert(const std::string &src, Charset from, Charset to)
-{
-	return ConvertImpl<std::string>(to, from, src);
-}
-
-
 } // namespace String
 
 
