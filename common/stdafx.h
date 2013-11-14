@@ -50,6 +50,10 @@
 #endif // NO_PCH
 
 
+#if defined(_WIN32) && !defined(NO_WINDOWS_H)
+#include <windows.h>
+#endif
+
 // this will be available everywhere
 #include "../common/typedefs.h"
 // this adds:
@@ -61,7 +65,6 @@
 // <cstdint>
 // <cstdio>
 // <stdio.h>
-// <windows.h> or just basic typedefs found in there
 #include "../common/mptString.h"
 #include "../common/mptPathString.h"
 
