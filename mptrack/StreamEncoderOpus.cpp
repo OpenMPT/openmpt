@@ -332,7 +332,7 @@ private:
 	{
 		if(!field.empty() && !data.empty())
 		{
-			opus_comments.push_back(field + "=" + mpt::String::Encode(data, mpt::CharsetUTF8));
+			opus_comments.push_back(field + "=" + mpt::To(mpt::CharsetUTF8, data));
 		}
 	}
 public:

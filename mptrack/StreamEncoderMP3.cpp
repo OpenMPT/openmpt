@@ -181,17 +181,17 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags)
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
 
 	// Write TIT2 (Title), TCOM / TPE1 (Composer), TALB (Album), TCON (Genre), TYER / TDRC (Date), WXXX (URL), TENC (Encoder), COMM (Comment)
-	WriteID3v2Frame("TIT2", mpt::String::Encode(tags.title, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TPE1", mpt::String::Encode(tags.artist, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TCOM", mpt::String::Encode(tags.artist, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TALB", mpt::String::Encode(tags.album, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TCON", mpt::String::Encode(tags.genre, mpt::CharsetUTF8), s);
-	//WriteID3v2Frame("TYER", mpt::String::Encode(tags.year, mpt::CharsetUTF8), s);		// Deprecated
-	WriteID3v2Frame("TDRC", mpt::String::Encode(tags.year, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TBPM", mpt::String::Encode(tags.bpm, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("WXXX", mpt::String::Encode(tags.url, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TENC", mpt::String::Encode(tags.encoder, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("COMM", mpt::String::Encode(tags.comments, mpt::CharsetUTF8), s);
+	WriteID3v2Frame("TIT2", mpt::To(mpt::CharsetUTF8, tags.title), s);
+	WriteID3v2Frame("TPE1", mpt::To(mpt::CharsetUTF8, tags.artist), s);
+	WriteID3v2Frame("TCOM", mpt::To(mpt::CharsetUTF8, tags.artist), s);
+	WriteID3v2Frame("TALB", mpt::To(mpt::CharsetUTF8, tags.album), s);
+	WriteID3v2Frame("TCON", mpt::To(mpt::CharsetUTF8, tags.genre), s);
+	//WriteID3v2Frame("TYER", mpt::To(mpt::CharsetUTF8, tags.year), s);		// Deprecated
+	WriteID3v2Frame("TDRC", mpt::To(mpt::CharsetUTF8, tags.year), s);
+	WriteID3v2Frame("TBPM", mpt::To(mpt::CharsetUTF8, tags.bpm), s);
+	WriteID3v2Frame("WXXX", mpt::To(mpt::CharsetUTF8, tags.url), s);
+	WriteID3v2Frame("TENC", mpt::To(mpt::CharsetUTF8, tags.encoder), s);
+	WriteID3v2Frame("COMM", mpt::To(mpt::CharsetUTF8, tags.comments), s);
 
 	// Write Padding
 	for(size_t i = 0; i < ID3v2_PADDING; i++)
@@ -564,13 +564,13 @@ public:
 	virtual void WriteMetatags(const FileTags &tags)
 	{
 		// Lame API expects Latin1, which is sad, but we cannot change that.
-		if(!tags.title.empty())    lame.id3tag_set_title(   gfp, mpt::String::Encode(tags.title   , mpt::CharsetISO8859_1).c_str());
-		if(!tags.artist.empty())   lame.id3tag_set_artist(  gfp, mpt::String::Encode(tags.artist  , mpt::CharsetISO8859_1).c_str());
-		if(!tags.album.empty())    lame.id3tag_set_album(   gfp, mpt::String::Encode(tags.album   , mpt::CharsetISO8859_1).c_str());
-		if(!tags.year.empty())     lame.id3tag_set_year(    gfp, mpt::String::Encode(tags.year    , mpt::CharsetISO8859_1).c_str());
-		if(!tags.comments.empty()) lame.id3tag_set_comment( gfp, mpt::String::Encode(tags.comments, mpt::CharsetISO8859_1).c_str());
-		if(!tags.trackno.empty())  lame.id3tag_set_track(   gfp, mpt::String::Encode(tags.trackno , mpt::CharsetISO8859_1).c_str());
-		if(!tags.genre.empty())    lame.id3tag_set_genre(   gfp, mpt::String::Encode(tags.genre   , mpt::CharsetISO8859_1).c_str());
+		if(!tags.title.empty())    lame.id3tag_set_title(   gfp, mpt::To(mpt::CharsetISO8859_1, tags.title   ).c_str());
+		if(!tags.artist.empty())   lame.id3tag_set_artist(  gfp, mpt::To(mpt::CharsetISO8859_1, tags.artist  ).c_str());
+		if(!tags.album.empty())    lame.id3tag_set_album(   gfp, mpt::To(mpt::CharsetISO8859_1, tags.album   ).c_str());
+		if(!tags.year.empty())     lame.id3tag_set_year(    gfp, mpt::To(mpt::CharsetISO8859_1, tags.year    ).c_str());
+		if(!tags.comments.empty()) lame.id3tag_set_comment( gfp, mpt::To(mpt::CharsetISO8859_1, tags.comments).c_str());
+		if(!tags.trackno.empty())  lame.id3tag_set_track(   gfp, mpt::To(mpt::CharsetISO8859_1, tags.trackno ).c_str());
+		if(!tags.genre.empty())    lame.id3tag_set_genre(   gfp, mpt::To(mpt::CharsetISO8859_1, tags.genre   ).c_str());
 	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{
