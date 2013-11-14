@@ -63,7 +63,7 @@ public:
 	virtual ~CUnarchiver();
 
 	virtual bool IsArchive() const;
-	virtual std::string GetComment() const;
+	virtual std::wstring GetComment() const;
 	virtual bool ExtractFile(std::size_t index);
 	virtual FileReader GetOutputFile() const;
 	virtual std::size_t size() const;

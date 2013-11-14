@@ -53,7 +53,7 @@ CLhaArchive::CLhaArchive(FileReader &file) : ArchiveBase(file), inputstream(null
 	for(LHAFileHeader *fileheader = firstfile; fileheader; fileheader = lha_reader_next_file(reader))
 	{
 		ArchiveFileInfo info;
-		info.name = fileheader->filename;
+		info.name = mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetISO8859_1, fileheader->filename));
 		info.size = fileheader->length;
 		info.type = ArchiveFileNormal;
 		contents.push_back(info);

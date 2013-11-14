@@ -133,7 +133,7 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 				if(unzGetGlobalComment(zipFile, &commentData[0], info.size_comment) >= 0)
 				{
 					commentData[info.size_comment - 1] = '\0';
-					comment = &commentData[0];
+					comment = mpt::ToWide(mpt::CharsetCP437, &commentData[0]);
 				}
 			}
 		}
@@ -154,7 +154,7 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 		
 		char name[256];
 		unzGetCurrentFileInfo(zipFile, &info, name, sizeof(name), nullptr, 0, nullptr, 0);
-		fileinfo.name = name;
+		fileinfo.name = mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetCP437, std::string(name)));
 		fileinfo.size = info.uncompressed_size;
 
 		unzGetFilePos(zipFile, &bestFile);
@@ -246,7 +246,7 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 		if(mz_zip_reader_file_stat(zip, i, &stat))
 		{
 			info.type = ArchiveFileNormal;
-			info.name = stat.m_filename;
+			info.name = mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetCP437, stat.m_filename));
 			info.size = stat.m_uncomp_size;
 		}
 		if(mz_zip_reader_is_file_a_directory(zip, i))
@@ -308,7 +308,7 @@ bool CZipArchive::ExtractFile(std::size_t index)
 	{
 		return false;
 	}
-	comment = std::string(stat.m_comment, stat.m_comment + stat.m_comment_size);
+	comment = mpt::ToWide(mpt::CharsetCP437, std::string(stat.m_comment, stat.m_comment + stat.m_comment_size));
 	return true;
 }
 

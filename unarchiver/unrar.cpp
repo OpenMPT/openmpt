@@ -76,7 +76,7 @@ CRarArchive::CRarArchive(FileReader &file) : ArchiveBase(file)
 		Array<wchar> rarComment;
 		if(rarData->Arc.GetComment(&rarComment))
 		{
-			comment = mpt::ToLocale(std::wstring(&rarComment[0], rarComment.Size()));
+			comment = std::wstring(&rarComment[0], rarComment.Size());
 		}
 
 		// Scan all files
@@ -84,7 +84,7 @@ CRarArchive::CRarArchive(FileReader &file) : ArchiveBase(file)
 		while(rarData->Arc.SearchBlock(HEAD_FILE) > 0)
 		{
 			ArchiveFileInfo fileInfo;
-			fileInfo.name = mpt::ToLocale(std::wstring(rarData->Arc.FileHead.FileName));
+			fileInfo.name = mpt::PathString::FromWide(std::wstring(rarData->Arc.FileHead.FileName));
 			fileInfo.type = ArchiveFileNormal;
 			fileInfo.size = rarData->Arc.FileHead.UnpSize;
 			contents.push_back(fileInfo);
