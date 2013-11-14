@@ -240,7 +240,8 @@
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(NO_WINDOWS_H)
+
 #if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
 #define _WIN32_WINNT        0x0501 // _WIN32_WINNT_WINXP
 #else
