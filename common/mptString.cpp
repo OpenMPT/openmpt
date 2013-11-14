@@ -65,7 +65,7 @@ static UINT CharsetToCodepage(Charset charset)
 	{
 		case CharsetLocale:      return CP_ACP;  break;
 		case CharsetUTF8:        return CP_UTF8; break;
-		case CharsetUS_ASCII:    return 20127;   break;
+		case CharsetASCII:       return 20127;   break;
 		case CharsetISO8859_1:   return 28591;   break;
 		case CharsetISO8859_15:  return 28605;   break;
 		case CharsetCP437:       return 437;     break;
@@ -80,7 +80,7 @@ static const char * CharsetToString(Charset charset)
 	{
 		case CharsetLocale:      return "";            break; // "char" breaks with glibc when no locale is set
 		case CharsetUTF8:        return "UTF-8";       break;
-		case CharsetUS_ASCII:    return "ASCII";       break;
+		case CharsetASCII:       return "ASCII";       break;
 		case CharsetISO8859_1:   return "ISO-8859-1";  break;
 		case CharsetISO8859_15:  return "ISO-8859-15"; break;
 		case CharsetCP437:       return "CP437";       break;
@@ -94,7 +94,7 @@ static const char * CharsetToStringTranslit(Charset charset)
 	{
 		case CharsetLocale:      return "//TRANSLIT";            break; // "char" breaks with glibc when no locale is set
 		case CharsetUTF8:        return "UTF-8//TRANSLIT";       break;
-		case CharsetUS_ASCII:    return "ASCII//TRANSLIT";       break;
+		case CharsetASCII:       return "ASCII//TRANSLIT";       break;
 		case CharsetISO8859_1:   return "ISO-8859-1//TRANSLIT";  break;
 		case CharsetISO8859_15:  return "ISO-8859-15//TRANSLIT"; break;
 		case CharsetCP437:       return "CP437//TRANSLIT";       break;

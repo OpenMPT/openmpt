@@ -700,11 +700,11 @@ void TestMisc()
 	VERIFY_EQUAL(mpt::String::Encode(L"a", mpt::CharsetLocale), "a");
 	VERIFY_EQUAL(mpt::String::Encode(L"a", mpt::CharsetUTF8), "a");
 	VERIFY_EQUAL(mpt::String::Encode(L"a", mpt::CharsetISO8859_1), "a");
-	VERIFY_EQUAL(mpt::String::Encode(L"a", mpt::CharsetUS_ASCII), "a");
+	VERIFY_EQUAL(mpt::String::Encode(L"a", mpt::CharsetASCII), "a");
 	VERIFY_EQUAL(mpt::String::Decode("a", mpt::CharsetLocale), L"a");
 	VERIFY_EQUAL(mpt::String::Decode("a", mpt::CharsetUTF8), L"a");
 	VERIFY_EQUAL(mpt::String::Decode("a", mpt::CharsetISO8859_1), L"a");
-	VERIFY_EQUAL(mpt::String::Decode("a", mpt::CharsetUS_ASCII), L"a");
+	VERIFY_EQUAL(mpt::String::Decode("a", mpt::CharsetASCII), L"a");
 
 	// Path conversions
 #ifdef MODPLUG_TRACKER

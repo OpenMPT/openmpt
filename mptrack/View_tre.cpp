@@ -448,7 +448,7 @@ void CModTree::RefreshMidiLibrary()
 	for(UINT iMidi = 0; iMidi < 128; iMidi++)
 	{
 		DWORD dwImage = IMAGE_NOINSTRUMENT;
-		s = StringifyW(iMidi) + L": " + mpt::String::Decode(szMidiProgramNames[iMidi], mpt::CharsetUS_ASCII);
+		s = StringifyW(iMidi) + L": " + mpt::String::Decode(szMidiProgramNames[iMidi], mpt::CharsetASCII);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if(!midiLib.MidiMap[iMidi].empty())
 		{
@@ -482,7 +482,7 @@ void CModTree::RefreshMidiLibrary()
 	for (UINT iPerc=24; iPerc<=84; iPerc++)
 	{
 		DWORD dwImage = IMAGE_NOSAMPLE;
-		s = mpt::String::Decode(szDefaultNoteNames[iPerc], mpt::CharsetUS_ASCII) + L": " + mpt::String::Decode(szMidiPercussionNames[iPerc - 24], mpt::CharsetUS_ASCII);
+		s = mpt::String::Decode(szDefaultNoteNames[iPerc], mpt::CharsetUS_ASCII) + L": " + mpt::String::Decode(szMidiPercussionNames[iPerc - 24], mpt::CharsetASCII);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
 		if(!midiLib.MidiMap[iPerc | 0x80].empty())
 		{
