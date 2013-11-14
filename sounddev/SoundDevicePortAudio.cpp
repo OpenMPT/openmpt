@@ -311,13 +311,8 @@ bool CPortaudioDevice::EnumerateDevices(SoundDeviceInfo &result, SoundDeviceInde
 	if(!Pa_GetDeviceInfo(dev))
 		return false;
 	result.id = SoundDeviceID(HostApiToSndDevType(hostapi), index);
-	result.name = mpt::String::Decode(
-		mpt::String::Format("%s%s",
-			Pa_GetDeviceInfo(dev)->name,
-			Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev ? " (Default)" : ""
-		),
-		mpt::CharsetUTF8);
-	result.apiName = mpt::String::Decode(HostApiToString(Pa_GetDeviceInfo(dev)->hostApi).c_str(), mpt::CharsetUTF8);
+	result.name = mpt::ToWide(mpt::CharsetUTF8, std::string(Pa_GetDeviceInfo(dev)->name) + std::string(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev ? " (Default)" : ""));
+	result.apiName = mpt::ToWide(mpt::CharsetUTF8, HostApiToString(Pa_GetDeviceInfo(dev)->hostApi));
 	return true;
 }
 

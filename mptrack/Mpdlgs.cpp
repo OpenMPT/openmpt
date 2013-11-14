@@ -224,7 +224,7 @@ void COptionsSoundcard::UpdateEverything()
 			}
 
 			{
-				std::string name = mpt::String::Encode(it->name, mpt::CharsetLocale);
+				CString name = mpt::ToCString(it->name);
 				cbi.mask = CBEIF_IMAGE | CBEIF_LPARAM | CBEIF_TEXT | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 				cbi.iItem = iItem;
 				cbi.cchTextMax = 0;
@@ -247,7 +247,7 @@ void COptionsSoundcard::UpdateEverything()
 					cbi.iImage = IMAGE_WAVEOUT;
 					// No image available for now,
 					// prepend API name to name.
-					name = mpt::String::Encode(it->apiName, mpt::CharsetLocale) + " - " + name;
+					name = mpt::ToCString(it->apiName) + TEXT(" - ") + name;
 					break;
 				default:
 					cbi.iImage = IMAGE_WAVEOUT;
@@ -257,8 +257,9 @@ void COptionsSoundcard::UpdateEverything()
 				cbi.iOverlay = cbi.iImage;
 				cbi.iIndent = 0;
 				cbi.lParam = it->id.GetIdRaw();
-				mpt::String::Copy(s, name);
-				cbi.pszText = s;
+				TCHAR tmp[256];
+				_tcscpy(tmp, name);
+				cbi.pszText = tmp;
 				int pos = m_CbnDevice.InsertItem(&cbi);
 				if(cbi.lParam == m_nSoundDevice.GetIdRaw())
 				{

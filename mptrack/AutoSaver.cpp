@@ -206,7 +206,7 @@ bool CAutoSaver::CheckTimer(DWORD curTime)
 mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 //--------------------------------------------------------
 {
-	std::wstring timeStamp = mpt::String::FromCString((CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S"));
+	std::wstring timeStamp = mpt::ToWide((CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S"));
 	mpt::PathString name;
 	
 	if(m_bUseOriginalPath)

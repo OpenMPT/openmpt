@@ -1065,9 +1065,9 @@ void CCtrlSamples::OnSampleSave()
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 
-				fileName = mpt::PathString::FromWide(mpt::String::Replace(fileName.ToWide(), L"%sample_number%", mpt::String::FromCString(sSampleNumber)));
-				fileName = mpt::PathString::FromWide(mpt::String::Replace(fileName.ToWide(), L"%sample_filename%", mpt::String::FromCString(sSampleFilename)));
-				fileName = mpt::PathString::FromWide(mpt::String::Replace(fileName.ToWide(), L"%sample_name%", mpt::String::FromCString(sSampleName)));
+				fileName = mpt::PathString::FromWide(mpt::String::Replace(fileName.ToWide(), L"%sample_number%", mpt::ToWide(sSampleNumber)));
+				fileName = mpt::PathString::FromWide(mpt::String::Replace(fileName.ToWide(), L"%sample_filename%", mpt::ToWide(sSampleFilename)));
+				fileName = mpt::PathString::FromWide(mpt::String::Replace(fileName.ToWide(), L"%sample_name%", mpt::ToWide(sSampleName)));
 			}
 			if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING("raw")))
 				ok = m_sndFile.SaveRAWSample(smp, fileName);
