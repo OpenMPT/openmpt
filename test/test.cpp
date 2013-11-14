@@ -697,10 +697,10 @@ void TestMisc()
 	}
 	
 	// Charset conversions (basic sanity checks)
-	VERIFY_EQUAL(mpt::ToLocale(std::wstring(L"a")), "a");
-	VERIFY_EQUAL(mpt::To(mpt::CharsetUTF8, std::wstring(L"a")), "a");
-	VERIFY_EQUAL(mpt::To(mpt::CharsetISO8859_1, std::wstring(L"a")), "a");
-	VERIFY_EQUAL(mpt::To(mpt::CharsetASCII, std::wstring(L"a")), "a");
+	VERIFY_EQUAL(mpt::ToLocale(L"a"), "a");
+	VERIFY_EQUAL(mpt::To(mpt::CharsetUTF8, L"a"), "a");
+	VERIFY_EQUAL(mpt::To(mpt::CharsetISO8859_1, L"a"), "a");
+	VERIFY_EQUAL(mpt::To(mpt::CharsetASCII, L"a"), "a");
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetLocale, "a"), L"a");
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetUTF8, "a"), L"a");
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetISO8859_1, "a"), L"a");
