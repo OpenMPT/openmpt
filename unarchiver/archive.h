@@ -22,14 +22,14 @@ enum ArchiveFileType
 
 struct ArchiveFileInfo
 {
-	std::string name;
+	mpt::PathString name;
 	ArchiveFileType type;
 	uint64 size;
 	std::string comment;
 	uint64 cookie1;
 	uint64 cookie2;
 	ArchiveFileInfo()
-		: name(std::string())
+		: name(mpt::PathString())
 		, type(ArchiveFileInvalid)
 		, size(0)
 		, comment(std::string())
@@ -52,7 +52,7 @@ public:
 	virtual ~IArchive() {};
 public:
 	virtual bool IsArchive() const = 0;
-	virtual std::string GetComment() const = 0;
+	virtual std::wstring GetComment() const = 0;
 	virtual bool ExtractFile(std::size_t index) = 0;
 	virtual FileReader GetOutputFile() const = 0;
 	virtual std::size_t size() const = 0;
@@ -68,7 +68,7 @@ class ArchiveBase : public IArchive
 {
 protected:
 	FileReader inFile;
-	std::string comment;
+	std::wstring comment;
 	std::vector<ArchiveFileInfo> contents;
 	std::vector<char> data;
 public:
@@ -87,7 +87,7 @@ public:
 	{
 		return !contents.empty();
 	}
-	virtual std::string GetComment() const
+	virtual std::wstring GetComment() const
 	{
 		return comment;
 	}

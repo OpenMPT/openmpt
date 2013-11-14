@@ -67,16 +67,16 @@ struct find_str
 };
 
 
-static inline std::string GetExtension(const std::string &filename)
-//-----------------------------------------------------------------
+static inline std::wstring GetExtension(const std::wstring &filename)
+//-------------------------------------------------------------------
 {
-	if(filename.find_last_of(".") != std::string::npos)
+	if(filename.find_last_of(L".") != std::wstring::npos)
 	{
-		std::string ext = filename.substr(filename.find_last_of(".") + 1);
+		std::wstring ext = filename.substr(filename.find_last_of(L".") + 1);
 		std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
 		return ext;
 	}
-	return std::string();
+	return std::wstring();
 }
 
 
@@ -95,7 +95,7 @@ std::size_t CUnarchiver::FindBestFile(const std::vector<const char *> &extension
 		{
 			continue;
 		}
-		const std::string ext = GetExtension(at(i).name);
+		const std::string ext = mpt::To(mpt::CharsetUTF8, GetExtension(at(i).name.ToWide()));
 
 		// Compare with list of preferred extensions
 		if(std::find_if(extensions.begin(), extensions.end(), find_str(ext.c_str())) != extensions.end())
@@ -139,8 +139,8 @@ bool CUnarchiver::IsArchive() const
 }
 
 
-std::string CUnarchiver::GetComment() const
-//-----------------------------------------
+std::wstring CUnarchiver::GetComment() const
+//------------------------------------------
 {
 	return impl->GetComment();
 }
