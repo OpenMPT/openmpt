@@ -140,7 +140,7 @@ enum Charset {
 
 	CharsetUTF8,
 
-	CharsetUS_ASCII, // strictly 7-bit ASCII
+	CharsetASCII, // strictly 7-bit ASCII
 
 	CharsetISO8859_1,
 	CharsetISO8859_15,

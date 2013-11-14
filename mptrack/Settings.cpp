@@ -113,7 +113,7 @@ std::wstring SettingValue::FormatTypeAsString() const
 	}
 	if(HasTypeTag() && !GetTypeTag().empty())
 	{
-		result += L":" + mpt::String::Decode(GetTypeTag(), mpt::CharsetUS_ASCII);
+		result += L":" + mpt::String::Decode(GetTypeTag(), mpt::CharsetASCII);
 	}
 	return result;
 }
