@@ -151,17 +151,38 @@ enum Charset {
 };
 
 
+static inline std::wstring ToWide(const std::wstring &str) { return str; }
+
+std::wstring ToWide(Charset from, const std::string &str);
+
+std::string ToLocale(const std::wstring &str);
+std::string ToLocale(Charset from, const std::string &str);
+
+std::string To(Charset to, const std::wstring &str);
+std::string To(Charset to, Charset from, const std::string &str);
+
+#if defined(_MFC_VER)
+static inline CString ToCString(const CString &str) { return str; }
+CString ToCString(const std::wstring &str);
+CString ToCString(Charset from, const std::string &str);
+std::wstring ToWide(const CString &str);
+std::string ToLocale(const CString &str);
+std::string To(Charset to, const CString &str);
+#endif
+
+
+
 namespace String {
 
 // Encode a wide unicode string into the specified encoding.
 // Invalid unicode code points, or code points not representable are silently substituted.
 // The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
-std::string Encode(const std::wstring &src, Charset charset);
+std::string Encode(const std::wstring &src, Charset to);
 
 // Decode a 8-bit or multi-byte encoded string from the specified charset into a wide unicode string.
 // Invalid char sequences are silently substituted.
 // The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
-std::wstring Decode(const std::string &src, Charset charset);
+std::wstring Decode(const std::string &src, Charset from);
 
 // Convert from one 8-bit charset to another.
 // This is semantically equivalent to Encode(Decode(src, from), to).

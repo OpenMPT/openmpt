@@ -121,13 +121,13 @@ public:
 	{
 		Init();
 		type = SettingTypeString;
-		valueString = mpt::String::Decode(val, mpt::CharsetLocale);
+		valueString = mpt::ToWide(mpt::CharsetLocale, val);
 	}
 	SettingValue(const std::string &val)
 	{
 		Init();
 		type = SettingTypeString;
-		valueString = mpt::String::Decode(val, mpt::CharsetLocale);
+		valueString = mpt::ToWide(mpt::CharsetLocale, val);
 	}
 	SettingValue(const wchar_t *val)
 	{
@@ -173,14 +173,14 @@ public:
 		Init();
 		type = SettingTypeString;
 		typeTag = typeTag_;
-		valueString = mpt::String::Decode(val, mpt::CharsetLocale);
+		valueString = mpt::ToWide(mpt::CharsetLocale, val);
 	}
 	SettingValue(const std::string &val, const std::string &typeTag_)
 	{
 		Init();
 		type = SettingTypeString;
 		typeTag = typeTag_;
-		valueString = mpt::String::Decode(val, mpt::CharsetLocale);
+		valueString = mpt::ToWide(mpt::CharsetLocale, val);
 	}
 	SettingValue(const wchar_t *val, const std::string &typeTag_)
 	{
@@ -238,7 +238,7 @@ public:
 	operator std::string () const
 	{
 		ASSERT(type == SettingTypeString);
-		return mpt::String::Encode(valueString, mpt::CharsetLocale);
+		return mpt::ToLocale(valueString);
 	}
 	operator std::wstring () const
 	{
@@ -293,8 +293,8 @@ inline T FromSettingValue(const SettingValue &val)
 // You may use the SettingValue(value, typeTag) constructor in ToSettingValue
 // and check the typeTag FromSettingsValue to implement runtime type-checking for custom types.
 
-template<> inline SettingValue ToSettingValue(const CString &val) { return SettingValue(std::basic_string<TCHAR>(val.GetString())); }
-template<> inline CString FromSettingValue(const SettingValue &val) { return CString(val.as<std::basic_string<TCHAR> >().c_str()); }
+template<> inline SettingValue ToSettingValue(const CString &val) { return SettingValue(mpt::ToWide(val)); }
+template<> inline CString FromSettingValue(const SettingValue &val) { return mpt::ToCString(val.as<std::wstring>()); }
 
 template<> inline SettingValue ToSettingValue(const mpt::PathString &val) { return SettingValue(val.AsNative()); }
 template<> inline mpt::PathString FromSettingValue(const SettingValue &val) { return mpt::PathString::FromNative(val); }
@@ -402,8 +402,8 @@ public:
 		return;
 	}
 	SettingPath(const std::string &section_, const std::string &key_)
-		: section(mpt::String::Decode(section_, mpt::CharsetLocale))
-		, key(mpt::String::Decode(key_, mpt::CharsetLocale))
+		: section(mpt::ToWide(mpt::CharsetLocale, section_))
+		, key(mpt::ToWide(mpt::CharsetLocale, key_))
 	{
 		return;
 	}
