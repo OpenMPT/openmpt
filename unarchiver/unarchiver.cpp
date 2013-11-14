@@ -9,8 +9,6 @@
 
 #include "stdafx.h"
 
-#include <Windows.h>
-
 #include "unarchiver.h"
 #include "../soundlib/FileReader.h"
 

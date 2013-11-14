@@ -25,7 +25,9 @@
 #include <afxdlgs.h>
 #include <afxole.h>
 
+#include <windows.h>
 #include <windowsx.h>
+#include <shlwapi.h>
 
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4201)

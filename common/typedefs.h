@@ -332,14 +332,7 @@ STATIC_ASSERT(sizeof(FloatInt32) == 4);
 
 
 
-#if defined(_WIN32) && !defined(NO_WINDOWS_H)
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h> // defines WIN32
-
-#else // !_WIN32
+#if !defined(WIN32)
 
 // openmpt assumes these type have exact WIN32 semantics
 
@@ -361,7 +354,7 @@ typedef LONG *        LPLONG;
 #define TRUE (1)
 #define FALSE (0)
 
-#endif // _WIN32
+#endif // !WIN32
 
 
 
