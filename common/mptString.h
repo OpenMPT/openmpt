@@ -203,25 +203,6 @@ static inline CString ToCString(const wchar_t * str) { return ToCString(str ? st
 #endif
 
 
-
-namespace String {
-
-// Encode a wide unicode string into the specified encoding.
-// Invalid unicode code points, or code points not representable are silently substituted.
-// The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
-MPT_DEPRECATED std::string Encode(const std::wstring &src, Charset to);
-
-// Decode a 8-bit or multi-byte encoded string from the specified charset into a wide unicode string.
-// Invalid char sequences are silently substituted.
-// The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
-MPT_DEPRECATED std::wstring Decode(const std::string &src, Charset from);
-
-// Convert from one 8-bit charset to another.
-// This is semantically equivalent to Encode(Decode(src, from), to).
-MPT_DEPRECATED std::string Convert(const std::string &src, Charset from, Charset to);
-
-} // namespace String
-
 } // namespace mpt
 
 
