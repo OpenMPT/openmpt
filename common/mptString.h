@@ -194,6 +194,12 @@ std::wstring ToWide(const CString &str);
 std::string ToLocale(const CString &str);
 std::string To(Charset to, const CString &str);
 
+// Provide un-ambiguous conversion from wide string literal.
+static inline std::wstring ToWide(const wchar_t * str) { return ToWide(str ? std::wstring(str) : std::wstring()); }
+static inline std::string ToLocale(const wchar_t * str) { return ToLocale(str ? std::wstring(str) : std::wstring()); }
+static inline std::string To(Charset to, const wchar_t * str) { return To(to, str ? std::wstring(str) : std::wstring()); }
+static inline CString ToCString(const wchar_t * str) { return ToCString(str ? std::wstring(str) : std::wstring()); }
+
 #endif
 
 
