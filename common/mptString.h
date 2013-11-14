@@ -151,13 +151,30 @@ enum Charset {
 };
 
 
+// Convert to a wide character string.
+// The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
+// If str does not contain any invalid characters, this conversion is lossless.
+// Invalid source bytes will be replaced by some replacement character or string.
 static inline std::wstring ToWide(const std::wstring &str) { return str; }
-
 std::wstring ToWide(Charset from, const std::string &str);
 
+// Convert to locale-encoded string.
+// On Windows, CP_ACP is used,
+// otherwise, the global "C" locale is used.
+// If str does not contain any invalid characters,
+// this conversion will be lossless iff, and only iff, the system is NOT
+// windows AND a UTF8 locale is set.
+// Invalid source bytes or characters that are not representable in the
+// destination charset will be replaced by some replacement character or string.
 std::string ToLocale(const std::wstring &str);
 std::string ToLocale(Charset from, const std::string &str);
 
+// Convert to a string encoded in the 'to'-specified character set.
+// If str does not contain any invalid characters,
+// this conversion will be lossless iff, and only iff,
+// 'to' is UTF8.
+// Invalid source bytes or characters that are not representable in the
+// destination charset will be replaced by some replacement character or string.
 std::string To(Charset to, const std::wstring &str);
 std::string To(Charset to, Charset from, const std::string &str);
 
