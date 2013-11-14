@@ -738,7 +738,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 					}
 					else
 					{
-						sLoadReport += L"-Unable to import " + fileNameExt + L": " + mpt::String::FromCString(GetSclImportFailureMsg(a)) + L".\n";
+						sLoadReport += L"-Unable to import " + fileNameExt + L": " + mpt::ToWide(GetSclImportFailureMsg(a)) + L".\n";
 					}
 				}
 				else // scl import successful.

@@ -707,10 +707,10 @@ void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
 }
 
 
-static std::string FormatSetting(const SettingPath &path, const SettingValue &val)
-//--------------------------------------------------------------------------------
+static CString FormatSetting(const SettingPath &path, const SettingValue &val)
+//----------------------------------------------------------------------------
 {
-	return mpt::String::Encode(path.FormatAsString() + L" = " + val.FormatAsString(), mpt::CharsetLocale);
+	return mpt::ToCString(path.FormatAsString() + L" = " + val.FormatAsString());
 }
 
 
@@ -730,7 +730,7 @@ void COptionsAdvanced::ReInit()
 	m_IndexToPath.clear();
 	for(SettingsContainer::SettingsMap::const_iterator it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
 	{
-		int index = m_List.AddString(FormatSetting(it->first, it->second).c_str());
+		int index = m_List.AddString(FormatSetting(it->first, it->second));
 		m_IndexToPath[index] = it->first;
 	}
 }
@@ -762,15 +762,15 @@ void COptionsAdvanced::OnOptionDblClick()
 	}
 	const SettingPath path = m_IndexToPath[index];
 	SettingValue val = theApp.GetSettings().GetMap().find(path)->second;
-	CInputDlg inputDlg(this, mpt::String::Encode(path.FormatAsString(), mpt::CharsetLocale).c_str(), mpt::String::Encode(val.FormatValueAsString(), mpt::CharsetLocale).c_str());
+	CInputDlg inputDlg(this, mpt::ToCString(path.FormatAsString()), mpt::ToCString(val.FormatValueAsString()));
 	if(inputDlg.DoModal() != IDOK)
 	{
 		return;
 	}
-	val.SetFromString(mpt::String::Decode(inputDlg.resultString.GetString(), mpt::CharsetLocale));
+	val.SetFromString(mpt::ToWide(inputDlg.resultString));
 	theApp.GetSettings().Write(path, val);
 	m_List.DeleteString(index);
-	m_List.InsertString(index, FormatSetting(path, val).c_str());
+	m_List.InsertString(index, FormatSetting(path, val));
 	m_List.SetCurSel(index);
 	OnSettingsChanged();
 }

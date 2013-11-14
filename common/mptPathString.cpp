@@ -76,7 +76,7 @@ FILE * mpt_fopen(const mpt::PathString &filename, const char *mode)
 //-----------------------------------------------------------------
 {
 	#if defined(WIN32)
-		return _wfopen(filename.AsNative().c_str(), mode ? mpt::String::Decode(mode, mpt::CharsetLocale).c_str() : nullptr);
+		return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetLocale, mode).c_str() : nullptr);
 	#else // !WIN32
 		return fopen(filename.AsNative().c_str(), mode);
 	#endif // WIN32
@@ -88,7 +88,7 @@ FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode)
 	#if defined(WIN32)
 		return _wfopen(filename.AsNative().c_str(), mode);
 	#else // !WIN32
-		return fopen(filename.AsNative().c_str(), mode ? mpt::String::Encode(mode, mpt::CharsetLocale).c_str() : nullptr);
+		return fopen(filename.AsNative().c_str(), mode ? mpt::ToLocale(mode).c_str() : nullptr);
 	#endif // WIN32
 }
 

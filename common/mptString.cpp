@@ -292,47 +292,6 @@ std::string Convert(const std::string &src, Charset from, Charset to)
 }
 
 
-#if defined(_MFC_VER)
-
-CString ToCString(const std::string &src, Charset charset)
-{
-	#ifdef UNICODE
-		return mpt::String::Decode(src, charset).c_str();
-	#else
-		return mpt::String::Convert(src, charset, mpt::CharsetLocale).c_str();
-	#endif
-}
-
-CString ToCString(const std::wstring &src)
-{
-	#ifdef UNICODE
-		return src.c_str();
-	#else
-		return mpt::String::Encode(src, mpt::CharsetLocale).c_str();
-	#endif
-}
-
-std::string FromCString(const CString &src, Charset charset)
-{
-	#ifdef UNICODE
-		return mpt::String::Encode(src.GetString(), charset);
-	#else
-		return mpt::String::Convert(src.GetString(), mpt::CharsetLocale, charset);
-	#endif
-}
-
-std::wstring FromCString(const CString &src)
-{
-	#ifdef UNICODE
-		return src.GetString();
-	#else
-		return mpt::String::Decode(src.GetString(), mpt::CharsetLocale);
-	#endif
-}
-
-#endif
-
-
 } // namespace String
 
 
@@ -439,7 +398,7 @@ inline std::wstring ToWStringHelper(const T & x)
 }
 
 std::string ToString(const char & x) { return std::string(1, x); }
-std::string ToString(const wchar_t & x) { return mpt::String::Encode(std::wstring(1, x), mpt::CharsetLocale); }
+std::string ToString(const wchar_t & x) { return mpt::ToLocale(std::wstring(1, x)); }
 std::string ToString(const bool & x) { return ToStringHelper(x); }
 std::string ToString(const signed char & x) { return ToStringHelper(x); }
 std::string ToString(const unsigned char & x) { return ToStringHelper(x); }
@@ -455,7 +414,7 @@ std::string ToString(const float & x) { return ToStringHelper(x); }
 std::string ToString(const double & x) { return ToStringHelper(x); }
 std::string ToString(const long double & x) { return ToStringHelper(x); }
 
-std::wstring ToWString(const char & x) { return mpt::String::Decode(std::string(1, x), mpt::CharsetLocale); }
+std::wstring ToWString(const char & x) { return mpt::ToWide(mpt::CharsetLocale, std::string(1, x)); }
 std::wstring ToWString(const wchar_t & x) { return std::wstring(1, x); }
 std::wstring ToWString(const bool & x) { return ToWStringHelper(x); }
 std::wstring ToWString(const signed char & x) { return ToWStringHelper(x); }

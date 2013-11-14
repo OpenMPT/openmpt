@@ -59,7 +59,7 @@ inline void fstream_open(Tbase & base, const wchar_t * filename, std::ios_base::
 template<typename Tbase>
 inline void fstream_open(Tbase & base, const std::string & filename, std::ios_base::openmode mode)
 {
-	detail::fstream_open<Tbase>(base, mpt::String::Decode(filename, mpt::CharsetLocale), mode);
+	detail::fstream_open<Tbase>(base, mpt::ToWide(mpt::CharsetLocale, filename), mode);
 }
 
 template<typename Tbase>

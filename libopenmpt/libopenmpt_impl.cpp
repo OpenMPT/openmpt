@@ -231,7 +231,7 @@ std::string module_impl::mod_string_to_utf8( const std::string & encoded ) const
 	else if ( encoding == "cp437"        ) { charset = mpt::CharsetCP437;       }
 	else if ( encoding == "windows-1252" ) { charset = mpt::CharsetWindows1252; }
 	else                                   { charset = mpt::CharsetASCII;       } // fallback
-	return mpt::String::Convert( encoded, charset, mpt::CharsetUTF8 );
+	return mpt::To( mpt::CharsetUTF8, charset, encoded );
 }
 void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) {
 	if (

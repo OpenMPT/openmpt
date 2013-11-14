@@ -1663,7 +1663,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	if(!errText.IsEmpty())
 	{
 		std::wstring err = L"The following problems have been encountered while trying to load the key binding file " + filenameDescription + L":\n";
-		err += mpt::String::FromCString(errText);
+		err += mpt::ToWide(errText);
 		Reporting::Warning(err);
 	}
 

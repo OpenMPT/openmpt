@@ -64,7 +64,7 @@ std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
 		}
 		const std::wstring keyname = keynameBuf;
 		#ifdef ASIO_LOG
-			Log("ASIO: Found \"%s\":\n", mpt::String::Encode(keynameBuf, mpt::CharsetLocale).c_str());
+			Log("ASIO: Found \"%s\":\n", mpt::ToLocale(keyname).c_str());
 		#endif
 
 		HKEY hksub = NULL;
@@ -80,7 +80,7 @@ std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
 		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"Description", 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
 		{
 		#ifdef ASIO_LOG
-			Log("  description =\"%s\":\n", mpt::String::Encode(descriptionBuf, mpt::CharsetLocale).c_str());
+			Log("  description =\"%s\":\n", mpt::ToLocale(description).c_str());
 		#endif
 			description = descriptionBuf;
 		} else
@@ -97,7 +97,7 @@ std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
 			if(Util::IsCLSID(internalID))
 			{
 				#ifdef ASIO_LOG
-					Log("  clsid=\"%s\"\n", mpt::String::Encode(idBuf, mpt::CharsetLocale).c_str());
+					Log("  clsid=\"%s\"\n", mpt::ToLocale(internalID).c_str());
 				#endif
 
 				if(SoundDeviceIndexIsValid(devices.size()))
@@ -157,7 +157,7 @@ bool CASIODevice::InternalOpen()
 
 #ifdef ASIO_LOG
 	Log("CASIODevice::Open(%d:\"%s\"): %d-bit, %d channels, %dHz\n",
-		GetDeviceIndex(), mpt::String::Encode(GetDeviceInternalID(), mpt::CharsetLocale).c_str(), (int)m_Settings.sampleFormat.GetBitsPerSample(), m_Settings.Channels, m_Settings.Samplerate);
+		GetDeviceIndex(), mpt::ToLocale(GetDeviceInternalID()).c_str(), (int)m_Settings.sampleFormat.GetBitsPerSample(), m_Settings.Channels, m_Settings.Samplerate);
 #endif
 	OpenDevice();
 

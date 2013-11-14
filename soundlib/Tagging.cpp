@@ -17,7 +17,7 @@
 FileTags::FileTags()
 //------------------
 {
-	encoder = mpt::String::Decode(MptVersion::GetOpenMPTVersionStr(), mpt::CharsetLocale);
+	encoder = mpt::ToWide(mpt::CharsetASCII, MptVersion::GetOpenMPTVersionStr());
 }
 
 #endif // MODPLUG_NO_FILESAVE

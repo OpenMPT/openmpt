@@ -448,7 +448,7 @@ void CModTree::RefreshMidiLibrary()
 	for(UINT iMidi = 0; iMidi < 128; iMidi++)
 	{
 		DWORD dwImage = IMAGE_NOINSTRUMENT;
-		s = StringifyW(iMidi) + L": " + mpt::String::Decode(szMidiProgramNames[iMidi], mpt::CharsetASCII);
+		s = StringifyW(iMidi) + L": " + mpt::ToWide(mpt::CharsetASCII, szMidiProgramNames[iMidi]);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if(!midiLib.MidiMap[iMidi].empty())
 		{
@@ -482,7 +482,7 @@ void CModTree::RefreshMidiLibrary()
 	for (UINT iPerc=24; iPerc<=84; iPerc++)
 	{
 		DWORD dwImage = IMAGE_NOSAMPLE;
-		s = mpt::String::Decode(szDefaultNoteNames[iPerc], mpt::CharsetASCII) + L": " + mpt::String::Decode(szMidiPercussionNames[iPerc - 24], mpt::CharsetASCII);
+		s = mpt::ToWide(mpt::CharsetASCII, szDefaultNoteNames[iPerc]) + L": " + mpt::ToWide(mpt::CharsetASCII, szMidiPercussionNames[iPerc - 24]);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
 		if(!midiLib.MidiMap[iPerc | 0x80].empty())
 		{
@@ -1589,7 +1589,7 @@ void CModTree::FillInstrumentLibrary()
 			if(pIns)
 			{
 				WCHAR s[MAX_INSTRUMENTNAME + 10];
-				swprintf(s, CountOf(s), L"%3d: %s", ins, mpt::String::Decode(pIns->name, mpt::CharsetLocale).c_str());
+				swprintf(s, CountOf(s), L"%3d: %s", ins, mpt::ToWide(mpt::CharsetLocale, pIns->name).c_str());
 				ModTreeInsert(s, IMAGE_INSTRUMENTS);
 			}
 		}
@@ -1599,7 +1599,7 @@ void CModTree::FillInstrumentLibrary()
 			if(sample.pSample)
 			{
 				WCHAR s[MAX_SAMPLENAME + 10];
-				swprintf(s, CountOf(s), L"%3d: %s", smp, mpt::String::Decode(m_SongFile->m_szNames[smp], mpt::CharsetLocale).c_str());
+				swprintf(s, CountOf(s), L"%3d: %s", smp, mpt::ToWide(mpt::CharsetLocale, m_SongFile->m_szNames[smp]).c_str());
 				ModTreeInsert(s, IMAGE_SAMPLES);
 			}
 		}
@@ -1674,7 +1674,7 @@ void CModTree::FillInstrumentLibrary()
 				} else if(wfd.nFileSizeHigh > 0 || wfd.nFileSizeLow >= 16)
 				{
 					// Get lower-case file extension without dot.
-					const std::string ext = mpt::String::Encode(mpt::PathString::FromNative(wfd.cFileName).GetFileExt().ToWide(), mpt::CharsetUTF8);
+					const std::string ext = mpt::To(mpt::CharsetUTF8, mpt::PathString::FromNative(wfd.cFileName).GetFileExt().ToWide());
 					char s[16];
 					mpt::String::Copy(s, ext);
 

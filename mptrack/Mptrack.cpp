@@ -1470,7 +1470,7 @@ BOOL CAboutDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT2, CString("Build Date: ") + MptVersion::GetBuildDateString().c_str());
 	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::GetVersionStringExtended().c_str());
 	m_static.SubclassDlgItem(IDC_CREDITS,this);
-	m_static.SetCredits((mpt::String::Replace(mpt::String::Convert(MptVersion::GetFullCreditsString(), mpt::CharsetUTF8, mpt::CharsetLocale), "\n", "|") + "|" + mpt::String::Replace(MptVersion::GetContactString(), "\n", "|" ) + "||||||").c_str());
+	m_static.SetCredits((mpt::String::Replace(mpt::To(mpt::CharsetLocale, mpt::CharsetUTF8, MptVersion::GetFullCreditsString()), "\n", "|") + "|" + mpt::String::Replace(MptVersion::GetContactString(), "\n", "|" ) + "||||||").c_str());
 	m_static.SetSpeed(DISPLAY_SLOW);
 	m_static.SetColor(BACKGROUND_COLOR, RGB(138, 165, 219)); // Background Colour
 	m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent

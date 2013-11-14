@@ -162,12 +162,21 @@ std::string To(Charset to, const std::wstring &str);
 std::string To(Charset to, Charset from, const std::string &str);
 
 #if defined(_MFC_VER)
+
+// Convert to a MFC CString. The CString encoding depends on UNICODE.
+// This should also be used when converting to TCHAR strings.
+// If UNICODE is defined, this is a completely lossless operation.
 static inline CString ToCString(const CString &str) { return str; }
 CString ToCString(const std::wstring &str);
 CString ToCString(Charset from, const std::string &str);
+
+// Convert from a MFC CString. The CString encoding depends on UNICODE.
+// This should also be used when converting from TCHAR strings.
+// If UNICODE is defined, this is a completely lossless operation.
 std::wstring ToWide(const CString &str);
 std::string ToLocale(const CString &str);
 std::string To(Charset to, const CString &str);
+
 #endif
 
 
@@ -177,30 +186,16 @@ namespace String {
 // Encode a wide unicode string into the specified encoding.
 // Invalid unicode code points, or code points not representable are silently substituted.
 // The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
-std::string Encode(const std::wstring &src, Charset to);
+MPT_DEPRECATED std::string Encode(const std::wstring &src, Charset to);
 
 // Decode a 8-bit or multi-byte encoded string from the specified charset into a wide unicode string.
 // Invalid char sequences are silently substituted.
 // The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
-std::wstring Decode(const std::string &src, Charset from);
+MPT_DEPRECATED std::wstring Decode(const std::string &src, Charset from);
 
 // Convert from one 8-bit charset to another.
 // This is semantically equivalent to Encode(Decode(src, from), to).
-std::string Convert(const std::string &src, Charset from, Charset to);
-
-#if defined(_MFC_VER)
-// Convert to a MFC CString. The CString encoding depends on UNICODE.
-// This should also be used when converting to TCHAR strings.
-// If UNICODE is defined, this is a completely lossless operation.
-CString ToCString(const std::string &src, Charset charset);
-CString ToCString(const std::wstring &src);
-
-// Convert from a MFC CString. The CString encoding depends on UNICODE.
-// This should also be used when converting from TCHAR strings.
-// If UNICODE is defined, this is a completely lossless operation.
-std::string FromCString(const CString &src, Charset charset);
-std::wstring FromCString(const CString &src);
-#endif
+MPT_DEPRECATED std::string Convert(const std::string &src, Charset from, Charset to);
 
 } // namespace String
 

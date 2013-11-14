@@ -1345,7 +1345,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 	CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
 	if(nSeq == MAX_SEQUENCES + 2)
 	{
-		std::wstring str = L"Delete sequence " + StringifyW(sndFile.Order.GetCurrentSequenceIndex()) + L": " + mpt::String::Decode(sndFile.Order.GetName(), mpt::CharsetLocale) + L"?";
+		std::wstring str = L"Delete sequence " + StringifyW(sndFile.Order.GetCurrentSequenceIndex()) + L": " + mpt::ToWide(mpt::CharsetLocale, sndFile.Order.GetName()) + L"?";
 		if (Reporting::Confirm(str) == cnfYes)
 			sndFile.Order.RemoveSequence();
 		else

@@ -39,7 +39,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 
-	const mpt::PathString timestampDir = mpt::PathString::FromWide(mpt::String::FromCString((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\")));
+	const mpt::PathString timestampDir = mpt::PathString::FromWide(mpt::ToWide((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\")));
 	mpt::PathString baseRescuePath;
 	{
 		// Create a crash directory
@@ -53,7 +53,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 		baseRescuePath += timestampDir;
 		if(!PathIsDirectoryW(baseRescuePath.AsNative().c_str()) && !CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr))
 		{
-			errorMessage.AppendFormat("\n\nCould not create the following directory for saving debug information and modified files to:\n%s", mpt::String::ToCString(baseRescuePath.ToWide()));
+			errorMessage.AppendFormat("\n\nCould not create the following directory for saving debug information and modified files to:\n%s", mpt::ToCString(baseRescuePath.ToWide()));
 		}
 	}
 

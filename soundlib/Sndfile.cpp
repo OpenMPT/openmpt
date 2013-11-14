@@ -889,8 +889,8 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			std::string sUrl = "http://resources.openmpt.org/plugins/search.php?p=";
 			for(std::vector<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
-				sUrl += mpt::String::Format("%08X", LittleEndian(m_MixPlugins[*i].Info.dwPluginId2));
-				sUrl += mpt::String::Convert(m_MixPlugins[*i].GetLibraryName(), mpt::CharsetLocale, mpt::CharsetUTF8);
+				sUrl += mpt::fmt::HEX0<8>(LittleEndian(m_MixPlugins[*i].Info.dwPluginId2));
+				sUrl += mpt::To(mpt::CharsetUTF8, mpt::CharsetLocale, m_MixPlugins[*i].GetLibraryName());
 				sUrl += "%0a";
 			}
 			CTrackApp::OpenURL(mpt::PathString::FromUTF8(sUrl));
