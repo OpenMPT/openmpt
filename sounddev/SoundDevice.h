@@ -219,14 +219,17 @@ private:
 
 	const SoundDeviceID m_ID;
 
-protected:
-
 	std::wstring m_InternalID;
+
+protected:
 
 	SoundDeviceSettings m_Settings;
 
-	float m_RealLatencyMS;
-	float m_RealUpdateIntervalMS;
+private:
+
+	double m_RealLatency;
+	double m_RealUpdateInterval;
+	int m_RealNumBuffers;
 
 	bool m_IsPlaying;
 
@@ -235,20 +238,46 @@ protected:
 	int64 m_StreamPositionOutputFrames;
 
 protected:
+
 	virtual void FillAudioBuffer() = 0;
+
 	void SourceFillAudioBufferLocked();
 	void SourceAudioRead(void *buffer, std::size_t numFrames);
 	void SourceAudioDone(std::size_t numFrames, int32 framesLatency);
+
 	void AudioSendMessage(const std::string &str);
 
+protected:
+
+	bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat);
+
+	void UpdateLatencyInfo(double latency, double updateInterval, int numBuffers)
+	{
+		m_RealLatency = latency;
+		m_RealUpdateInterval = updateInterval;
+		m_RealNumBuffers = numBuffers;
+	}
+
+	virtual bool InternalHasGetStreamPosition() const { return false; }
+	virtual int64 InternalGetStreamPositionFrames() const { return 0; }
+
+	virtual bool InternalIsOpen() const = 0;
+
+	virtual bool InternalOpen() = 0;
+	virtual void InternalStart() = 0;
+	virtual void InternalStop() = 0;
+	virtual bool InternalClose() = 0;
+
 public:
+
 	ISoundDevice(SoundDeviceID id, const std::wstring &internalID);
 	virtual ~ISoundDevice();
+
 	void SetSource(ISoundSource *source) { m_Source = source; }
 	ISoundSource *GetSource() const { return m_Source; }
 	void SetMessageReceiver(ISoundMessageReceiver *receiver) { m_MessageReceiver = receiver; }
 	ISoundMessageReceiver *GetMessageReceiver() const { return m_MessageReceiver; }
-public:
+
 	SoundDeviceID GetDeviceID() const { return m_ID; }
 	SoundDeviceType GetDeviceType() const { return m_ID.GetType(); }
 	SoundDeviceIndex GetDeviceIndex() const { return m_ID.GetIndex(); }
@@ -256,32 +285,24 @@ public:
 
 	virtual SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 
-public:
-	float GetRealLatencyMS() const  { return m_RealLatencyMS; }
-	float GetRealUpdateIntervalMS() const { return m_RealUpdateIntervalMS; }
-	bool IsPlaying() const { return m_IsPlaying; }
-
-protected:
-	bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat);
-
-protected:
-	virtual bool InternalOpen() = 0;
-	virtual void InternalStart() = 0;
-	virtual void InternalStop() = 0;
-	virtual bool InternalClose() = 0;
-	virtual bool InternalHasGetStreamPosition() const { return false; }
-	virtual int64 InternalGetStreamPositionFrames() const { return 0; }
-
-public:
 	bool Open(const SoundDeviceSettings &settings);
 	bool Close();
 	void Start();
 	void Stop();
-	int64 GetStreamPositionFrames() const;
+
+	bool IsOpen() const { return InternalIsOpen(); }
+	bool IsPlaying() const { return m_IsPlaying; }
+
 	SampleFormat GetActualSampleFormat() { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
-	virtual bool IsOpen() const = 0;
-	virtual UINT GetNumBuffers() { return 0; }
-	virtual float GetCurrentRealLatencyMS() { return GetRealLatencyMS(); }
+
+	double GetRealLatency() const  { return m_RealLatency; } // seconds
+	double GetRealUpdateInterval() const { return m_RealUpdateInterval; } // seconds
+	int GetRealNumBuffers() const { return m_RealNumBuffers; }
+
+	virtual double GetCurrentRealLatency() const { return GetRealLatency(); }
+
+	int64 GetStreamPositionFrames() const;
+
 };
 
 

@@ -61,9 +61,7 @@ public:
 	void FillAudioBuffer();
 	void InternalStart();
 	void InternalStop();
-	bool IsOpen() const { return (m_pAsioDrv != nullptr); }
-	UINT GetNumBuffers() { return 2; }
-	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate; }
+	bool InternalIsOpen() const { return (m_pAsioDrv != nullptr); }
 
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 

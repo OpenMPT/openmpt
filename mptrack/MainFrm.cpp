@@ -747,33 +747,6 @@ void CMainFrame::AudioDone(const SoundDeviceSettings &settings, std::size_t numF
 }
 
 
-bool CMainFrame::audioTryOpeningDevice()
-//--------------------------------------
-{
-	const SoundDeviceID deviceID = TrackerSettings::Instance().m_nWaveDevice;
-	if(gpSoundDevice && (gpSoundDevice->GetDeviceID() != deviceID))
-	{
-		delete gpSoundDevice;
-		gpSoundDevice = nullptr;
-	}
-	if(!gpSoundDevice)
-	{
-		gpSoundDevice = theApp.GetSoundDevicesManager()->CreateSoundDevice(deviceID);
-	}
-	if(!gpSoundDevice)
-	{
-		return false;
-	}
-	gpSoundDevice->SetMessageReceiver(this);
-	gpSoundDevice->SetSource(this);
-	if(!gpSoundDevice->Open(TrackerSettings::Instance().GetSoundDeviceSettings()))
-	{
-		return false;
-	}
-	return true;
-}
-
-
 bool CMainFrame::IsAudioDeviceOpen() const
 //----------------------------------------
 {
@@ -788,22 +761,41 @@ bool CMainFrame::audioOpenDevice()
 	{
 		return true;
 	}
-	if(TrackerSettings::Instance().GetMixerSettings().IsValid())
+	if(!TrackerSettings::Instance().GetMixerSettings().IsValid())
 	{
-		if(audioTryOpeningDevice())
-		{
-			SampleFormat actualSampleFormat = gpSoundDevice->GetActualSampleFormat();
-			if(actualSampleFormat.IsValid())
-			{
-				TrackerSettings::Instance().m_SampleFormat = actualSampleFormat;
-				// Device is ready
-				return true;
-			}
-		}
+		Reporting::Error("Unable to open sound device: Invalid mixer settings.");
+		return false;
 	}
-	// Display error message box
-	Reporting::Error("Unable to open sound device!");
-	return false;
+	const SoundDeviceID deviceID = TrackerSettings::Instance().m_nWaveDevice;
+	if(gpSoundDevice && (gpSoundDevice->GetDeviceID() != deviceID))
+	{
+		delete gpSoundDevice;
+		gpSoundDevice = nullptr;
+	}
+	if(!gpSoundDevice)
+	{
+		gpSoundDevice = theApp.GetSoundDevicesManager()->CreateSoundDevice(deviceID);
+	}
+	if(!gpSoundDevice)
+	{
+		Reporting::Error("Unable to open sound device: Could not find sound device.");
+		return false;
+	}
+	gpSoundDevice->SetMessageReceiver(this);
+	gpSoundDevice->SetSource(this);
+	if(!gpSoundDevice->Open(TrackerSettings::Instance().GetSoundDeviceSettings()))
+	{
+		Reporting::Error("Unable to open sound device: Could not open sound device.");
+		return false;
+	}
+	SampleFormat actualSampleFormat = gpSoundDevice->GetActualSampleFormat();
+	if(!actualSampleFormat.IsValid())
+	{
+		Reporting::Error("Unable to open sound device: Unknown sample format.");
+		return false;
+	}
+	TrackerSettings::Instance().m_SampleFormat = actualSampleFormat;
+	return true;
 }
 
 

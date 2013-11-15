@@ -39,8 +39,9 @@ ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 	, m_InternalID(internalID)
 {
 
-	m_RealLatencyMS = static_cast<float>(m_Settings.LatencyMS);
-	m_RealUpdateIntervalMS = static_cast<float>(m_Settings.UpdateIntervalMS);
+	m_RealLatency = m_Settings.LatencyMS / 1000.0;
+	m_RealUpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
+	m_RealNumBuffers = 0;
 
 	m_IsPlaying = false;
 	m_StreamPositionRenderFrames = 0;
@@ -109,8 +110,9 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 	if(m_Settings.LatencyMS > SNDDEV_MAXLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MAXLATENCY_MS;
 	if(m_Settings.UpdateIntervalMS < SNDDEV_MINUPDATEINTERVAL_MS) m_Settings.UpdateIntervalMS = SNDDEV_MINUPDATEINTERVAL_MS;
 	if(m_Settings.UpdateIntervalMS > SNDDEV_MAXUPDATEINTERVAL_MS) m_Settings.UpdateIntervalMS = SNDDEV_MAXUPDATEINTERVAL_MS;
-	m_RealLatencyMS = static_cast<float>(m_Settings.LatencyMS);
-	m_RealUpdateIntervalMS = static_cast<float>(m_Settings.UpdateIntervalMS);
+	m_RealLatency = m_Settings.LatencyMS / 1000.0;
+	m_RealUpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
+	m_RealNumBuffers = 0;
 	return InternalOpen();
 }
 
@@ -525,7 +527,7 @@ DWORD CAudioThread::AudioThread()
 		{
 
 			CPriorityBooster priorityBooster(*this, m_SoundDevice.m_Settings.BoostThreadPriority);
-			CPeriodicWaker periodicWaker(*this, 0.001 * m_SoundDevice.GetRealUpdateIntervalMS());
+			CPeriodicWaker periodicWaker(*this, m_SoundDevice.GetRealUpdateInterval());
 
 			m_SoundDevice.StartFromSoundThread();
 

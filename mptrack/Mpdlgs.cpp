@@ -545,10 +545,10 @@ void COptionsSoundcard::UpdateStatistics()
 	{
 		CHAR s[256];
 		_snprintf(s, 255, "Buffers: %d\r\nUpdate interval: %4.1f ms\r\nLatency: %4.1f ms\r\nCurrent Latency: %4.1f ms",
-			pMainFrm->gpSoundDevice->GetNumBuffers(),
-			(float)pMainFrm->gpSoundDevice->GetRealUpdateIntervalMS(),
-			(float)pMainFrm->gpSoundDevice->GetRealLatencyMS(),
-			(float)pMainFrm->gpSoundDevice->GetCurrentRealLatencyMS()
+			pMainFrm->gpSoundDevice->GetRealNumBuffers(),
+			(float)(pMainFrm->gpSoundDevice->GetRealUpdateInterval() * 1000.0f),
+			(float)(pMainFrm->gpSoundDevice->GetRealLatency() * 1000.0f),
+			(float)(pMainFrm->gpSoundDevice->GetCurrentRealLatency() * 1000.0f)
 			);
 		m_EditStatistics.SetWindowText(s);
 	}	else

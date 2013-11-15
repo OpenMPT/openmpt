@@ -45,9 +45,8 @@ public:
 	void FillAudioBuffer();
 	void StartFromSoundThread();
 	void StopFromSoundThread();
-	bool IsOpen() const { return (m_pMixBuffer != NULL); }
-	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
-	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_Settings.GetBytesPerSecond(); }
+	bool InternalIsOpen() const { return (m_pMixBuffer != NULL); }
+	double GetCurrentRealLatency() const { return 1.0 * m_dwLatency / m_Settings.GetBytesPerSecond(); }
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 
 protected:
