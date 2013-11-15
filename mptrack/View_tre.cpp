@@ -211,10 +211,22 @@ void CModTree::Init()
 }
 
 
-BOOL CModTree::PreTranslateMessage(MSG* pMsg)
+BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 //-------------------------------------------
 {
 	if (!pMsg) return TRUE;
+
+	if(doLabelEdit)
+	{
+		if(pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+		{
+			// End editing by making edit box lose focus.
+			SetFocus();
+			return TRUE;
+		}
+		return CTreeCtrl::PreTranslateMessage(pMsg);
+	}
+
 	if (pMsg->message == WM_KEYDOWN)
 	{
 		switch(pMsg->wParam)
@@ -224,13 +236,6 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 			return TRUE;
 
 		case VK_RETURN:
-			if(doLabelEdit)
-			{
-				// End editing by making edit box lose focus.
-				SetFocus();
-				return TRUE;
-			}
-
 			if(!(pMsg->lParam & 0x40000000))
 			{
 				HTREEITEM hItem = GetSelectedItem();
@@ -260,8 +265,8 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 			if(GetParentRootItem(GetSelectedItem()) == m_hInsLib)
 			{
 				InstrumentLibraryChDir(MPT_PATHSTRING(".."), false);
+				return TRUE;
 			}
-			return TRUE;
 		}
 	}
 	//rewbs.customKeys
@@ -278,7 +283,7 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 		KeyEventType kT = ih->GetKeyEventType(nFlags);
 		InputTargetContext ctx = (InputTargetContext)(kCtxViewTree);
 
-		if (!doLabelEdit && ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
 			return true; // Mapped to a command, no need to pass message on.
 	}
 	//end rewbs.customKeys
