@@ -42,7 +42,23 @@ bool CMappedFile::Open(const mpt::PathString &filename)
 void CMappedFile::Close()
 //-----------------------
 {
-	if(m_pData) Unlock();
+	// Unlock file
+	if(m_hFMap)
+	{
+		if(m_pData)
+		{
+			UnmapViewOfFile(m_pData);
+			m_pData = nullptr;
+		}
+		CloseHandle(m_hFMap);
+		m_hFMap = nullptr;
+	} else if(m_pData)
+	{
+		free(m_pData);
+		m_pData = nullptr;
+	}
+
+	// Close file handle
 	if(m_hFile)
 	{
 		CloseHandle(m_hFile);
@@ -123,24 +139,4 @@ FileReader CMappedFile::GetFile()
 //-------------------------------
 {
 	return FileReader(Lock(), GetLength());
-}
-
-
-void CMappedFile::Unlock()
-//------------------------
-{
-	if(m_hFMap)
-	{
-		if(m_pData)
-		{
-			UnmapViewOfFile(m_pData);
-			m_pData = nullptr;
-		}
-		CloseHandle(m_hFMap);
-		m_hFMap = nullptr;
-	} else if(m_pData)
-	{
-		free(m_pData);
-		m_pData = nullptr;
-	}
 }
