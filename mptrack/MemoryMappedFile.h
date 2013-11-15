@@ -34,5 +34,4 @@ public:
 	size_t GetLength();
 	const void *Lock();
 	FileReader GetFile();
-	void Unlock();
 };

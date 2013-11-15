@@ -1199,8 +1199,6 @@ BOOL CDLSBank::Open(const mpt::PathString &filename)
 	 || ((priff->id_DLS != IFFID_DLS) && (priff->id_DLS != IFFID_MLS) && (priff->id_DLS != IFFID_sfbk))
 	 || (dwMemPos + priff->riff_len > dwMemLength-8))
 	{
-		MapFile.Unlock();
-		MapFile.Close();
 	#ifdef DLSBANK_LOG
 		Log("Invalid DLS bank!\n");
 	#endif
