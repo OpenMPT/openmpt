@@ -187,6 +187,9 @@ CMainFrame::CMainFrame()
 	m_NotifyTimer = 0;
 	gpSoundDevice = NULL;
 
+	m_AudioThreadId = 0;
+	m_InNotifyHandler = false;
+
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = nullptr;	//rewbs.customKeys
 	m_pOrderlistHasFocus = nullptr;
@@ -596,6 +599,9 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 void CMainFrame::OnTimerNotify()
 //------------------------------
 {
+	ASSERT(InGuiThread());
+	ASSERT(!InNotifyHandler());
+	m_InNotifyHandler = true;
 	Notification PendingNotification;
 	bool found = false;
 	int64 currenttotalsamples = 0;
@@ -631,6 +637,8 @@ void CMainFrame::OnTimerNotify()
 	{
 		OnUpdatePosition(0, (LPARAM)&PendingNotification);
 	}
+	m_InNotifyHandler = false;
+	ASSERT(!InNotifyHandler());
 }
 
 
@@ -646,7 +654,9 @@ void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
 {
 	CriticalSection cs;
 	ALWAYS_ASSERT(m_pSndFile != nullptr);
+	m_AudioThreadId = GetCurrentThreadId();
 	callback.FillAudioBuffer();
+	m_AudioThreadId = 0;
 }
 
 
@@ -717,6 +727,7 @@ public:
 void CMainFrame::AudioRead(const SoundDeviceSettings &settings, std::size_t numFrames, void *buffer)
 //--------------------------------------------------------------------------------------------------
 {
+	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	StereoVuMeterTargetWrapper target(settings.sampleFormat, m_Dither, buffer);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(numFrames, target);
@@ -742,6 +753,7 @@ void CMainFrame::AudioDone(const SoundDeviceSettings &settings, std::size_t numF
 //----------------------------------------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(settings);
+	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
 	DoNotification(numFrames, streamPosition);
 }
@@ -859,6 +871,7 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 //------------------------------------------------------------------------
 {
+	ASSERT(InAudioThread());
 	if(!m_pSndFile) return false;
 
 	FlagSet<Notification::Type> notifyType(Notification::Default);

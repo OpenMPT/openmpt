@@ -621,7 +621,8 @@ END_MESSAGE_MAP()
 
 CTrackApp::CTrackApp()
 //--------------------
-	: m_pTrackerDirectories(nullptr)
+	: m_GuiThreadId(0)
+	, m_pTrackerDirectories(nullptr)
 	, m_pSettingsIniFile(nullptr)
 	, m_pSettings(nullptr)
 	, m_pTrackerSettings(nullptr)
@@ -630,6 +631,8 @@ CTrackApp::CTrackApp()
 	#if MPT_COMPILER_MSVC
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
+
+	m_GuiThreadId = GetCurrentThreadId();
 
 	ExceptionHandler::Register();
 
@@ -796,6 +799,8 @@ void CTrackApp::SetupPaths(bool overridePortable)
 BOOL CTrackApp::InitInstance()
 //----------------------------
 {
+
+	m_GuiThreadId = GetCurrentThreadId();
 
 	// Initialize OLE MFC support
 	AfxOleInit();

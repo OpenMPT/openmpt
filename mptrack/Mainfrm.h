@@ -284,6 +284,9 @@ public:
 	UINT_PTR m_NotifyTimer;
 	Dither m_Dither;
 
+	DWORD m_AudioThreadId;
+	bool m_InNotifyHandler;
+
 	static LONG gnLVuMeter, gnRVuMeter;
 	static bool gnClipLeft, gnClipRight;
 
@@ -334,6 +337,10 @@ public:
 	
 	// from ISoundMessageReceiver
 	void AudioMessage(const std::string &str);
+
+	bool InGuiThread() const { return theApp.InGuiThread(); }
+	bool InAudioThread() const { return GetCurrentThreadId() == m_AudioThreadId; }
+	bool InNotifyHandler() const { return m_InNotifyHandler; }
 
 	bool audioOpenDevice();
 	bool audioReopenDevice();
