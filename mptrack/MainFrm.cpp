@@ -2545,28 +2545,37 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 			// To avoid duplicates, check whether app path and config path are the same.
 			if (i == 1 && mpt::PathString::CompareNoCase(CTrackApp::GetAppDirPath(), theApp.GetConfigPath()) == 0)
 				break;
-			CFileFind fileFind;
-			mpt::PathString sPath;
-			sPath = (i == 0) ? CTrackApp::GetAppDirPath() : theApp.GetConfigPath();
-			sPath += pszFolderName;
-			if (Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists) == false)
+			
+			mpt::PathString basePath;
+			basePath = (i == 0) ? CTrackApp::GetAppDirPath() : theApp.GetConfigPath();
+			basePath += pszFolderName;
+			if (Util::sdOs::IsPathFileAvailable(basePath, Util::sdOs::FileModeExists) == false)
 				continue;
-			sPath += MPT_PATHSTRING("*");
-
-			BOOL bWorking = fileFind.FindFile(sPath.ToCString());
-			// Note: The order in which the example files appears in the menu is unspecified.
-			while (bWorking && nAddCounter < nMaxCount)
+			mpt::PathString sPath = basePath + MPT_PATHSTRING("*");
+			
+			WIN32_FIND_DATAW findData;
+			MemsetZero(findData);
+			HANDLE hFindFile = FindFirstFileW(sPath.AsNative().c_str(), &findData);
+			if(hFindFile != INVALID_HANDLE_VALUE)
 			{
-				bWorking = fileFind.FindNextFile();
-				const CString fn = fileFind.GetFileName();
-				if (fileFind.IsDirectory() == FALSE)
+				while(nAddCounter < nMaxCount)
 				{
-					vPaths.push_back(mpt::PathString::FromCString(fileFind.GetFilePath()));
-					AppendMenu(hMenu, MF_STRING, nIdRangeBegin + nAddCounter, fileFind.GetFileName());
-					++nAddCounter;
+					// Note: The order in which the example files appears in the menu is unspecified.
+					if(!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+					{
+						vPaths.push_back(basePath + mpt::PathString::FromNative(findData.cFileName));
+						AppendMenuW(hMenu, MF_STRING, nIdRangeBegin + nAddCounter, findData.cFileName);
+						++nAddCounter;
+					}
+					if(FindNextFileW(hFindFile, &findData) == FALSE)
+					{
+						break;
+					}
 				}
+				FindClose(hFindFile);
+				hFindFile = INVALID_HANDLE_VALUE;
 			}
-			fileFind.Close();
+			
 		}
 
 		if (nAddCounter == 0)
