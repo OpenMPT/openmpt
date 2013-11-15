@@ -1797,17 +1797,19 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		m_SndFile.InitializeVisitedRows();
 		m_SndFile.SetCurrentPos(0);
 		m_SndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
+		ORDERINDEX startOrder = 0;
 		if(wsdlg.m_bSelectPlay)
 		{
-			m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
-			m_SndFile.GetLength(eAdjust, GetLengthTarget(wsdlg.m_nMinOrder, 0));	// adjust playback variables / visited rows vector
-			m_SndFile.m_nCurrentOrder = wsdlg.m_nMinOrder;
+			startOrder = wsdlg.m_nMinOrder;
 			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
 			m_SndFile.SetRepeatCount(0);
 		} else
 		{
 			m_SndFile.SetRepeatCount(std::max(0, wsdlg.loopCount - 1));
 		}
+		m_SndFile.SetCurrentOrder(startOrder);
+		m_SndFile.GetLength(eAdjust, GetLengthTarget(startOrder, 0));	// adjust playback variables / visited rows vector
+		m_SndFile.m_nCurrentOrder = startOrder;
 
 		CDoWaveConvert dwcdlg(&m_SndFile, thisName, wsdlg.m_Settings, pMainFrm);
 		dwcdlg.m_dwFileLimit = static_cast<DWORD>(wsdlg.m_dwFileLimit);

@@ -25,6 +25,19 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.22.07.00 (16 November 2013, revision 3235)
+---------------------------------------------
+Tree view
+   [Fix] <js> Space key couldn't be used when editing labels.
+   [Fix] <jh> The global VU meter didn't work properly when previewing instruments in OpenMPT 1.22.06.00. 
+
+VST / DMO Plugins
+   [Fix] <js> When rendering the full module (i.e. not a selection), the song position was not reset properly, so some plugins were not in sync.
+
+Misc
+   [Fix] <jh> Module export to a directory or file name with non-ASCII characters could fail in OpenMPT 1.22.06.00 (http://forum.openmpt.org/index.php?topic=5158.0).
+
+
 v1.22.06.00 (2 November 2013, revision 3063)
 --------------------------------------------
 Pattern Tab::Note Properties
@@ -34,7 +47,7 @@ Tree view
    [Fix] <js> Note-off on key-up was accidentally also applied to the lower part of the tree view.
 
 VST / DMO Plugins
-   [Imp] <js> Audio is longer paused while a plugin is loaded.
+   [Imp] <js> Audio is no longer paused while a plugin is loaded.
    [Fix] <js> SysEx messages are sent to plugins in a different way now. This fixes SysEx messages sent through OpenMPT's MIDI Input / Output plugin.
 
 MPTM::Loading
@@ -59,12 +72,12 @@ Other formats
    [Fix] <js> AMS (Extreme's Tracker): 16-bit sample support was broken.
    [Fix] <js> DSM: Fixed broken patterns and added support for delta-encoded samples.
    [Fix] <jh> Loading some malformed files in various format could lead to a crash (introduced in OpenMPT 1.22.03.00).
-   [Fix] <jh> WAV Loader: Loading 24-/32-bit WAV files as module crashed since (introduced in OpenMPT 1.22.04.00, http://bugs.openmpt.org/view.php?id=436).
+   [Fix] <jh> WAV Loader: Loading 24-/32-bit WAV files as module crashed since OpenMPT 1.22.04.00 (http://bugs.openmpt.org/view.php?id=436).
 
 Misc
    [New] <jh> Added support for Kernel Streaming sound output on Windows XP and for WaveRT on Vista or newer. Both drivers are listed as "WDM-KS" in the soundcard options dialog.
    [New] <jh> Added a button to re-enumerate sound devices to soundcard options dialog. This allows selecting sound devices that got added / installed while OpenMPT was already running.
-   [New] <jh> Use a common dialog for WAV and compressed exporting. Support for FLAC (built-in), OGG and Opus added.
+   [New] <jh> Use a common dialog for WAV and compressed exporting. Support for FLAC (built-in), Opus and OGG Vorbis has been added.
    [New] <jh> WAV export also supports tags now.
    [New] <jh> Can now also normalize audio during compressed export (via temporary file).
    [New] <js> Added option to clean output buffers of plugins before exporting (renders up to 20 seconds of silence per plugin, http://bugs.openmpt.org/view.php?id=19).
@@ -330,8 +343,8 @@ Sample tab
    [Mod] <js> 8-Bit/Mono conversion items are now also shown in the context menu if a selection has been made.
    [Fix] <js> Memory was leaked when loading a sample into an empty sample slot and undoing that action.
    [Fix] <js> Inserting samples did not clear previously existing sample names since some time ago.
-   [Fix] <js> The sample filename wasn't imported properly when loading a FLAC sample with RIFF chunks.
-   [Fix] <js> Selection length display didn't show the correct in length in seconds for long samples.
+   [Fix] <js> The sample filename wasn't imported properly when loading a FLAC sample with embedded RIFF chunks.
+   [Fix] <js> Selection length display didn't show the correct length in seconds for long samples.
 
 Instrument tab
    [Imp] <js> Mouse wheel and middle mouse button can be used in Sample Map (http://bugs.openmpt.org/view.php?id=345).

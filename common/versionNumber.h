@@ -16,7 +16,7 @@
 //Version definitions. The only thing that needs to be changed when changing version number.
 #define VER_MAJORMAJOR          1
 #define VER_MAJOR               22
-#define VER_MINOR               06
+#define VER_MINOR               07
 #define VER_MINORMINOR          00
 
 //Version string. For example "1.17.02.28"
