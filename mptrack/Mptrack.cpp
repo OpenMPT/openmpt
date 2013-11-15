@@ -425,7 +425,7 @@ BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 		if(!szFileName.empty())
 		{
 			if(theApp.IsPortableMode())
-				theApp.AbsolutePathToRelative(szFileName);
+				szFileName = theApp.AbsolutePathToRelative(szFileName);
 			file.Write<mpt::PathString>("Midi Library", s, szFileName);
 		}
 	}
@@ -1948,7 +1948,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 		mpt::PathString plugPath = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", tmp, MPT_PATHSTRING(""));
 		if(!plugPath.empty())
 		{
-			RelativePathToAbsolute(plugPath);
+			plugPath = RelativePathToAbsolute(plugPath);
 
 			if(plugPath == failedPlugin)
 			{
@@ -1989,7 +1989,7 @@ BOOL CTrackApp::UninitializeDXPlugins()
 			mpt::PathString plugPath = pPlug->dllPath;
 			if(theApp.IsPortableMode())
 			{
-				AbsolutePathToRelative(plugPath);
+				plugPath = AbsolutePathToRelative(plugPath);
 			}
 			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", tmp, plugPath);
 			plug++;
@@ -2071,22 +2071,6 @@ mpt::PathString CTrackApp::AbsolutePathToRelative(const mpt::PathString &path)
 	return result;
 }
 
-template <size_t nLength>
-void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
-//---------------------------------------------------------------
-{
-	STATIC_ASSERT(nLength >= 3);
-	if(_tcslen(szPath) == 0)
-		return;
-	mpt::String::Copy(szPath, AbsolutePathToRelative(mpt::PathString::ToCString(szPath)).ToCString());
-}
-
-CString CTrackApp::AbsolutePathToRelative(const CString &path)
-//------------------------------------------------------------
-{
-	return AbsolutePathToRelative(mpt::PathString::FromCString(path)).ToCString();
-}
-
 
 // Convert a relative path to an absolute path.
 // Paths are relative to the executable path.
@@ -2112,23 +2096,6 @@ mpt::PathString CTrackApp::RelativePathToAbsolute(const mpt::PathString &path)
 	}
 	return result;
 }
-
-template <size_t nLength>
-void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
-//---------------------------------------------------------------
-{
-	STATIC_ASSERT(nLength >= 3);
-	if(_tcslen(szPath) == 0)
-		return;
-	mpt::String::Copy(szPath, RelativePathToAbsolute(mpt::PathString::ToCString(szPath)).ToCString());
-}
-
-CString CTrackApp::RelativePathToAbsolute(const CString &path)
-//------------------------------------------------------------
-{
-	return RelativePathToAbsolute(mpt::PathString::FromCString(path)).ToCString();
-}
-
 
 void CTrackApp::RemoveMruItem(const int nItem)
 //--------------------------------------------
