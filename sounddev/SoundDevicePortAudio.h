@@ -36,7 +36,7 @@ protected:
 	void * m_CurrentFrameBuffer;
 	unsigned long m_CurrentFrameCount;
 
-	float m_CurrentRealLatencyMS;
+	double m_CurrentRealLatency; // seconds
 
 public:
 	CPortaudioDevice(SoundDeviceID id, const std::wstring &internalID);
@@ -48,9 +48,8 @@ public:
 	void FillAudioBuffer();
 	void InternalStart();
 	void InternalStop();
-	bool IsOpen() const { return m_Stream ? true : false; }
-	UINT GetNumBuffers() { return 1; }
-	float GetCurrentRealLatencyMS();
+	bool InternalIsOpen() const { return m_Stream ? true : false; }
+	double GetCurrentRealLatency() const;
 	bool InternalHasGetStreamPosition() const { return false; }
 	int64 InternalGetStreamPositionFrames() const;
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);

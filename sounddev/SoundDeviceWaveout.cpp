@@ -93,8 +93,10 @@ bool CWaveDevice::InternalOpen()
 		Close();
 		return false;
 	}
-	m_RealLatencyMS = m_nWaveBufferSize * m_nPreparedHeaders * 1000.0f / m_Settings.GetBytesPerSecond();
-	m_RealUpdateIntervalMS = m_nWaveBufferSize * 1000.0f / m_Settings.GetBytesPerSecond();
+	UpdateLatencyInfo(
+		m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond(),
+		m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond(),
+		m_nPreparedHeaders);
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
 	return true;

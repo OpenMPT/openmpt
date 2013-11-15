@@ -335,7 +335,6 @@ public:
 	// from ISoundMessageReceiver
 	void AudioMessage(const std::string &str);
 
-	bool audioTryOpeningDevice();
 	bool audioOpenDevice();
 	bool audioReopenDevice();
 	void audioCloseDevice();

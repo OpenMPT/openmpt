@@ -30,7 +30,7 @@ protected:
 	bool m_JustStarted;
 	ULONG m_nPreparedHeaders;
 	ULONG m_nWriteBuffer;
-	LONG m_nBuffersPending;
+	mutable LONG m_nBuffersPending;
 	std::vector<WAVEHDR> m_WaveBuffers;
 	std::vector<std::vector<char> > m_WaveBuffersData;
 
@@ -44,9 +44,8 @@ public:
 	void FillAudioBuffer();
 	void StartFromSoundThread();
 	void StopFromSoundThread();
-	bool IsOpen() const { return (m_hWaveOut != NULL); }
-	UINT GetNumBuffers() { return m_nPreparedHeaders; }
-	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_Settings.GetBytesPerSecond(); }
+	bool InternalIsOpen() const { return (m_hWaveOut != NULL); }
+	double GetCurrentRealLatency() const { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond(); }
 	bool InternalHasGetStreamPosition() const { return true; }
 	int64 InternalGetStreamPositionFrames() const;
 

@@ -270,8 +270,10 @@ bool CASIODevice::InternalOpen()
 			}
 			m_nAsioBufferLen = n;
 		}
-		m_RealLatencyMS = m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate;
-		m_RealUpdateIntervalMS = m_nAsioBufferLen * 1000.0f / m_Settings.Samplerate;
+		UpdateLatencyInfo(
+			m_nAsioBufferLen * 2.0 / m_Settings.Samplerate,
+			m_nAsioBufferLen * 1.0 / m_Settings.Samplerate,
+			2);
 	#ifdef ASIO_LOG
 		Log("  Using buffersize=%d samples\n", m_nAsioBufferLen);
 	#endif
