@@ -257,7 +257,7 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 		
 		case VK_BACK:
 			// Backspace: Go up one directory
-			if(!IsSampleBrowser() && GetParentRootItem(GetSelectedItem()) == m_hInsLib)
+			if(GetParentRootItem(GetSelectedItem()) == m_hInsLib)
 			{
 				InstrumentLibraryChDir(MPT_PATHSTRING(".."), false);
 			}
@@ -1860,15 +1860,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 	bool ok = false;
 	if(isSong)
 	{
-		if(!IsSampleBrowser())
-		{
-			ok = m_pDataTree->InsLibSetFullPath(m_InstrLibPath, dir);
-			m_pDataTree->RefreshInstrumentLibrary();
-		} else
-		{
-			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
-			ok = true;
-		}
+		ok = m_pDataTree->InsLibSetFullPath(m_InstrLibPath, dir);
 		if(ok)
 		{
 			m_InstrLibHighlightPath = dir;
@@ -1900,21 +1892,25 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			delete m_SongFile;
 			m_SongFile = nullptr;
 			m_InstrLibPath = dir;
-			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
 			ok = true;
 		}
 	}
 	EndWaitCursor();
 
-	if(!ok)
-	{
-		std::wstring s = L"Unable to browse to \"" + dir.ToWide() + L"\"";
-		Reporting::Error(s, L"Instrument Library");
-	} else
+	if(ok)
 	{
 		HANDLE watchDir = m_hWatchDir;
 		m_hWatchDir = nullptr;
 		FindCloseChangeNotification(watchDir);
+
+		if(!IsSampleBrowser())
+			m_pDataTree->RefreshInstrumentLibrary();
+		else
+			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
+	} else
+	{
+		std::wstring s = L"Unable to browse to \"" + dir.ToWide() + L"\"";
+		Reporting::Error(s, L"Instrument Library");
 	}
 }
 
