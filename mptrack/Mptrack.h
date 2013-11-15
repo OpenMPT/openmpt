@@ -113,6 +113,8 @@ public:
 
 protected:
 
+	DWORD m_GuiThreadId;
+
 	TrackerDirectories *m_pTrackerDirectories;
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
@@ -169,6 +171,7 @@ public:
 	std::vector<CModDoc *>GetOpenDocuments() const;
 
 public:
+	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
 	CDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	SoundDevicesManager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }

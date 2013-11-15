@@ -16,8 +16,7 @@
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 #include "Mptrack.h"
-
-#include <shlwapi.h>
+#include "Mainfrm.h"
 
 #include <algorithm>
 #include "../common/mptFstream.h"
@@ -199,6 +198,8 @@ void SettingsContainer::BackendsRemoveSetting(const SettingPath &path)
 
 SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const SettingValue &def, const SettingMetadata &metadata) const
 {
+	ASSERT(theApp.InGuiThread());
+	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
 	SettingsMap::iterator entry = map.find(path);
 	if(entry == map.end())
 	{
@@ -210,6 +211,8 @@ SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const Setti
 
 void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue &val)
 {
+	ASSERT(theApp.InGuiThread());
+	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
 	SettingsMap::iterator entry = map.find(path);
 	if(entry == map.end())
 	{
@@ -229,6 +232,8 @@ void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue
 
 void SettingsContainer::RemoveSetting(const SettingPath &path)
 {
+	ASSERT(theApp.InGuiThread());
+	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
 	map.erase(path);
 	BackendsRemoveSetting(path);
 }
@@ -249,6 +254,8 @@ void SettingsContainer::NotifyListeners(const SettingPath &path)
 
 void SettingsContainer::WriteSettings()
 {
+	ASSERT(theApp.InGuiThread());
+	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
 	for(SettingsMap::iterator i = map.begin(); i != map.end(); ++i)
 	{
 		if(i->second.IsDirty())
@@ -261,6 +268,8 @@ void SettingsContainer::WriteSettings()
 
 void SettingsContainer::Flush()
 {
+	ASSERT(theApp.InGuiThread());
+	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
 	WriteSettings();
 }
 
