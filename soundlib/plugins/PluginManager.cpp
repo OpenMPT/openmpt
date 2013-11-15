@@ -400,7 +400,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		mpt::PathString writePath = dllPath;
 		if(theApp.IsPortableMode())
 		{
-			theApp.AbsolutePathToRelative(writePath);
+			writePath = theApp.AbsolutePathToRelative(writePath);
 		}
 
 		cacheFile.Write<mpt::PathString>(cacheSection, IDs, writePath);
