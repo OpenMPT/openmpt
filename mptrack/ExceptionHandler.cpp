@@ -90,7 +90,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 					pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
 				::CloseHandle(hFile);
 
-				errorMessage.AppendFormat("\n\nDebug information has been saved to\n%s", baseRescuePath);
+				errorMessage.AppendFormat("\n\nDebug information has been saved to\n%s", mpt::ToCString(baseRescuePath.ToWide()));
 			}
 		}
 		::FreeLibrary(hDll);
@@ -110,7 +110,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 				CTrackApp::OpenDirectory(baseRescuePath);
 			}
 			CString filename;
-			filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
+			filename.Format("%s%d_%s.%s", baseRescuePath.ToCString(), ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
 
 			try
 			{
