@@ -1809,9 +1809,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	if (handleSt == NULL)
 	{
 		// Check whether the DLL file exists.
-		CString sPath;
-		sPath.Format(TEXT("%s%s"), CTrackApp::GetAppDirPath(), TEXT("OpenMPT_SoundTouch_i16.dll"));
-		if (sPath.GetLength() <= _MAX_PATH && PathFileExists(sPath) == TRUE)
+		if(PathFileExistsW((CTrackApp::GetAppDirPath() + MPT_PATHSTRING("OpenMPT_SoundTouch_i16.dll")).AsNative().c_str()) == TRUE)
 			handleSt = soundtouch_createInstance();
 	}
 	if (handleSt == NULL) 
