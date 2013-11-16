@@ -410,7 +410,7 @@ protected:
 			// with replacement character but overall the
 			// unicode handling is sane and consistent this
 			// way.
-			SetTitle(mpt::ToCString(filename.GetFileName().ToWide()));
+			SetTitle(mpt::ToCString((filename.GetFileName() + filename.GetFileExt()).ToWide()));
 		#endif
 	}
 	MPT_DEPRECATED_PATH const CString& GetPathName() const
