@@ -218,11 +218,11 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		} else
 		{
 			// if it doesnt, put it in settings dir
-			name = theApp.GetConfigPath() + mpt::PathString::FromWide(mpt::ToWide(modDoc.GetTitle())).SanitizeComponent();
+			name = theApp.GetConfigPath() + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
 		}
 	} else
 	{
-		name = m_csPath + mpt::PathString::FromWide(mpt::ToWide(modDoc.GetTitle())).SanitizeComponent();
+		name = m_csPath + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
 	}
 	
 	name += MPT_PATHSTRING(".AutoSave.");					//append backup tag
@@ -304,7 +304,7 @@ void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 	}
 
 	std::vector<mpt::PathString> foundfiles;
-	mpt::PathString searchPattern = path + mpt::PathString::FromWide(mpt::ToWide(modDoc.GetTitle())).SanitizeComponent() + MPT_PATHSTRING(".AutoSave.*");
+	mpt::PathString searchPattern = path + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent() + MPT_PATHSTRING(".AutoSave.*");
 
 	WIN32_FIND_DATAW findData;
 	MemsetZero(findData);

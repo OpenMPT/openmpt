@@ -39,7 +39,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 
-	const mpt::PathString timestampDir = mpt::PathString::FromWide(mpt::ToWide((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\")));
+	const mpt::PathString timestampDir = mpt::PathString::FromCStringSilent((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\"));
 	mpt::PathString baseRescuePath;
 	{
 		// Create a crash directory
@@ -114,7 +114,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 			filename += baseRescuePath;
 			filename += mpt::PathString::FromWide(mpt::ToWString(++numFiles));
 			filename += MPT_PATHSTRING("_");
-			filename += mpt::PathString::FromWide(mpt::ToWide(pModDoc->GetTitle())).SanitizeComponent();
+			filename += mpt::PathString::FromCStringSilent(pModDoc->GetTitle()).SanitizeComponent();
 			filename += MPT_PATHSTRING(".");
 			filename += mpt::PathString::FromUTF8(pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
 

@@ -139,6 +139,9 @@ public:
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
 	MPT_DEPRECATED_PATH CString ToCString() const { return mpt::ToCString(path); }
 	MPT_DEPRECATED_PATH static PathString FromCString(const CString &path) { return PathString(mpt::ToWide(path)); }
+	// Non-warning-generating versions of the above. Use with extra care.
+	CString ToCStringSilent() const { return mpt::ToCString(path); }
+	static PathString FromCStringSilent(const CString &path) { return PathString(mpt::ToWide(path)); }
 	// really special purpose, if !UNICODE, encode unicode in CString as UTF8:
 	static mpt::PathString TunnelOutofCString(const CString &path);
 	static CString TunnelIntoCString(const mpt::PathString &path);
