@@ -82,14 +82,12 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 			else //Case: Valid path but opening fails.
 			{
 				const int nOdc = theApp.GetOpenDocumentCount();
-				CString str;
-				str.Format(GetStrI18N(_TEXT("Opening \"%s\" failed. This can happen if "
-					"no more documents can be opened or if the file type was not "
-					"recognised. If the former is true, it's "
-					"recommended to close some documents as otherwise crash is likely"
-					"(currently there %s %d document%s open).")),
-					filename.ToCString().GetString(), (nOdc == 1) ? "is" : "are", nOdc, (nOdc == 1) ? "" : "s");
-				Reporting::Notification(str);
+				Reporting::Notification(mpt::String::PrintW(L"Opening \"%1\" failed. This can happen if "
+					L"no more documents can be opened or if the file type was not "
+					L"recognised. If the former is true, it's "
+					L"recommended to close some documents as otherwise crash is likely"
+					L"(currently there %2 %3 document%4 open).",
+					filename, (nOdc == 1) ? L"is" : L"are", nOdc, (nOdc == 1) ? L"" : L"s"));
 			}
 		}
 	}
@@ -630,13 +628,13 @@ void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
 	#ifdef UNICODE
 		CWinApp::AddToRecentFileList(filename.AsNative().c_str());
 	#else
-		if(filename.AsNative() != (mpt::PathString::FromCString(filename.ToCString())).AsNative())
+		if(filename.AsNative() != (mpt::PathString::FromCStringSilent(filename.ToCStringSilent())).AsNative())
 		{
 			// MFC ANSI builds fire strict assertions if the file path is invalid.
 			// Only proceed for string representable in CP_ACP.
 			return;
 		}
-		CWinApp::AddToRecentFileList(filename.ToCString());
+		CWinApp::AddToRecentFileList(filename.ToCStringSilent());
 	#endif
 }
 
