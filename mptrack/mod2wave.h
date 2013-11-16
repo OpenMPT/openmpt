@@ -68,8 +68,7 @@ public:
 	CWaveConvertSettings m_Settings;
 	const Encoder::Traits *encTraits;
 	CSoundFile &m_SndFile;
-	uint64 m_dwFileLimit;
-	DWORD m_dwSongLimit;
+	uint64 m_dwFileLimit, m_dwSongLimit;
 	ORDERINDEX m_nNumOrders;
 
 	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnSampleFormat;
@@ -125,7 +124,7 @@ public:
 	const CWaveConvertSettings &m_Settings;
 	CSoundFile &m_SndFile;
 	mpt::PathString m_lpszFileName;
-	DWORD m_dwFileLimit, m_dwSongLimit;
+	uint64 m_dwFileLimit, m_dwSongLimit;
 	bool m_bAbort, m_bGivePlugsIdleTime;
 
 public:

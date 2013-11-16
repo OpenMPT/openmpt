@@ -1793,7 +1793,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 		// Render song (or current channel, or current sample/instrument)
 		CDoWaveConvert dwcdlg(m_SndFile, thisName, wsdlg.m_Settings, pMainFrm);
-		dwcdlg.m_dwFileLimit = static_cast<DWORD>(wsdlg.m_dwFileLimit);
+		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
 		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 
