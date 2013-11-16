@@ -261,6 +261,8 @@ namespace mpt
 
 static inline std::string ToString(const std::string & x) { return x; }
 static inline std::string ToString(const char * const & x) { return x; }
+MPT_DEPRECATED std::string ToString(const std::wstring & x);
+MPT_DEPRECATED std::string ToString(const wchar_t * const & x);
 MPT_DEPRECATED std::string ToString(const char & x); // deprecated to catch potential API mis-use, use std::string(1, x) instead
 MPT_DEPRECATED std::string ToString(const wchar_t & x); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 std::string ToString(const bool & x);
@@ -278,6 +280,8 @@ std::string ToString(const float & x);
 std::string ToString(const double & x);
 std::string ToString(const long double & x);
 
+MPT_DEPRECATED std::wstring ToWString(const std::string & x);
+MPT_DEPRECATED std::wstring ToWString(const char * const & x);
 static inline std::wstring ToWString(const std::wstring & x) { return x; }
 static inline std::wstring ToWString(const wchar_t * const & x) { return x; }
 MPT_DEPRECATED std::wstring ToWString(const char & x); // deprecated to catch potential API mis-use, use std::string(1, x) instead
