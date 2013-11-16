@@ -1935,7 +1935,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	#endif
 
 
-	CString nonFoundPlugs;
+	std::wstring nonFoundPlugs;
 	const mpt::PathString failedPlugin = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
 
 	for(size_t plug = 0; plug < numPlugins; plug++)
@@ -1958,10 +1958,9 @@ BOOL CTrackApp::InitializeDXPlugins()
 			m_pPluginManager->AddPlugin(plugPath, true, true, &nonFoundPlugs);
 		}
 	}
-	if(nonFoundPlugs.GetLength() > 0)
+	if(!nonFoundPlugs.empty())
 	{
-		nonFoundPlugs.Insert(0, "Problems were encountered with plugins:\n");
-		Reporting::Notification(nonFoundPlugs);
+		Reporting::Notification(L"Problems were encountered with plugins:\n" + nonFoundPlugs);
 	}
 	return FALSE;
 }

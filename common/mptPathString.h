@@ -160,6 +160,9 @@ public:
 
 };
 
+MPT_DEPRECATED_PATH static inline std::string ToString(const mpt::PathString & x) { return mpt::ToLocale(x.ToWide()); }
+static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWide(); }
+
 } // namespace mpt
 
 #if defined(WIN32)

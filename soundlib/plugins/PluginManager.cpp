@@ -193,7 +193,7 @@ AEffect *CVstPluginManager::LoadPlugin(const mpt::PathString &pluginPath, HINSTA
 		}
 	} catch(...)
 	{
-		CVstPluginManager::ReportPlugException("Exception caught in LoadLibrary (%s)", pluginPath.ToLocale().c_str());
+		CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception caught in LoadLibrary (%1)", pluginPath));
 	}
 
 	if(library != nullptr && library != INVALID_HANDLE_VALUE)
@@ -250,8 +250,8 @@ void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 // ID100000ID200000 = FullDllPath
 // ID100000ID200000.Flags = Plugin Flags (isInstrument + category).
 
-VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool fromCache, const bool checkFileExistence, CString *const errStr)
-//----------------------------------------------------------------------------------------------------------------------------------------------
+VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool fromCache, const bool checkFileExistence, std::wstring *const errStr)
+//---------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const mpt::PathString fileName = dllPath.GetFileName();
 
@@ -259,8 +259,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	{
 		if(errStr)
 		{
-			*errStr += "\nUnable to find ";
-			*errStr += dllPath.ToCString();
+			*errStr += L"\nUnable to find ";
+			*errStr += dllPath.ToWide();
 		}
 	}
 
@@ -274,8 +274,9 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	if(fromCache)
 	{
 		SettingsContainer & cacheFile = theApp.GetPluginCache();
-		const char *cacheSection = "PluginCache";
-		const std::string IDs = cacheFile.Read<std::string>(cacheSection, fileName.ToLocale(), "");
+		const char *const cacheSection = "PluginCache";
+		const wchar_t *const cacheSectionW = L"PluginCache";
+		const std::string IDs = cacheFile.Read<std::string>(cacheSectionW, fileName.ToWide(), "");
 
 		if(IDs.length() >= 16)
 		{
@@ -383,7 +384,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		FreeLibrary(hLib);
 	} catch(...)
 	{
-		CVstPluginManager::ReportPlugException("Exception while trying to load plugin \"%s\"!\n", p->libraryName);
+		CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception while trying to load plugin \"%1\"!\n", p->libraryName));
 	}
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
@@ -393,7 +394,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	if(validPlug)
 	{
 		SettingsContainer &cacheFile = theApp.GetPluginCache();
-		const char *cacheSection = "PluginCache";
+		const char *const cacheSection = "PluginCache";
+		const wchar_t *const cacheSectionW = L"PluginCache";
 		const std::string IDs = mpt::String::Format("%08X%08X", p->pluginId1, p->pluginId2);
 		const std::string flagsKey = mpt::String::Format("%s.Flags", IDs);
 
@@ -405,7 +407,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 
 		cacheFile.Write<mpt::PathString>(cacheSection, IDs, writePath);
 		cacheFile.Write<mpt::PathString>(cacheSection, IDs, dllPath);
-		cacheFile.Write<std::string>(cacheSection, p->libraryName.ToLocale(), IDs);
+		cacheFile.Write<std::string>(cacheSectionW, p->libraryName.ToWide(), IDs);
 		cacheFile.Write<int32>(cacheSection, flagsKey, p->EncodeCacheFlags());
 	} else
 	{
@@ -441,7 +443,7 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 				delete p;
 			} catch (...)
 			{
-				CVstPluginManager::ReportPlugException("Exception while trying to release plugin \"%s\"!\n", pFactory->libraryName);
+				CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception while trying to release plugin \"%1\"!\n", pFactory->libraryName));
 			}
 
 			return true;
@@ -563,7 +565,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			}
 		} catch(...)
 		{
-			CVstPluginManager::ReportPlugException("Exception while trying to create plugin \"%s\"!\n", pFound->libraryName);
+			CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception while trying to create plugin \"%1\"!\n", pFound->libraryName));
 		}
 
 		return validPlugin;
@@ -627,6 +629,22 @@ void CVstPluginManager::ReportPlugException(LPCSTR format,...)
 		if (pMainFrm) pMainFrm->StopMod();
 */
 	va_end(va);
+}
+
+void CVstPluginManager::ReportPlugException(const std::string &msg)
+{
+	Reporting::Notification(msg.c_str());
+#ifdef VST_LOG
+	Log("%s", msg.c_str());
+#endif
+}
+
+void CVstPluginManager::ReportPlugException(const std::wstring &msg)
+{
+	Reporting::Notification(msg);
+#ifdef VST_LOG
+	Log("%s", mpt::ToLocale(msg).c_str());
+#endif
 }
 
 #endif // NO_VST
