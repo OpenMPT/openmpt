@@ -36,7 +36,7 @@ void CloseMainDialog::DoDataExchange(CDataExchange* pDX)
 CString CloseMainDialog::FormatTitle(const CModDoc *pModDoc, bool fullPath)
 //-------------------------------------------------------------------------
 {
-	const CString &path = (!fullPath || pModDoc->GetPathName().IsEmpty()) ? pModDoc->GetTitle() :  pModDoc->GetPathName();
+	const CString &path = (!fullPath || pModDoc->GetPathNameMpt().empty()) ? pModDoc->GetTitle() : pModDoc->GetPathNameMpt().ToCString();
 	return CString(pModDoc->GetrSoundFile().GetTitle().c_str()) + CString(" (") + path + CString(")");
 }
 

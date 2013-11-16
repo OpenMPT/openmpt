@@ -693,7 +693,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 	s[0] = 0;
 	if ((hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE)) || (!pInfo->hSong))
 	{
-		_splitpath(pDoc->GetPathName(), NULL, NULL, s, NULL);
+		_tcscpy(s, pDoc->GetPathNameMpt().GetFileName().ToCString().GetString());
 		if (!s[0]) strcpy(s, "untitled");
 		MemsetZero(tvi);
 	}
@@ -1506,7 +1506,7 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 	{
 	case MODITEM_INSLIB_SONG:
 		{
-			theApp.OpenDocumentFile(InsLibGetFullPath(hItem).ToCString());
+			theApp.OpenDocumentFile(InsLibGetFullPath(hItem));
 		}
 		break;
 	}
@@ -2698,7 +2698,7 @@ void CModTree::OnEndDrag(DWORD dwMask)
 				{
 					if (dropinfo.dwDropType == DRAGONDROP_SONG)
 					{
-						theApp.OpenDocumentFile(fullPath.ToCString());
+						theApp.OpenDocumentFile(fullPath);
 					} else
 					{
 						::SendMessage(m_hDropWnd, WM_MOD_DRAGONDROPPING, TRUE, (LPARAM)&dropinfo);

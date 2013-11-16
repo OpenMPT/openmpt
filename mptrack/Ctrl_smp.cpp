@@ -1007,7 +1007,7 @@ void CCtrlSamples::OnSampleSave()
 	} else
 	{
 		// save all samples
-		fileName = mpt::PathString::FromCString(m_sndFile.GetpModDoc()->GetPathName()).GetFileName();
+		fileName = m_sndFile.GetpModDoc()->GetPathNameMpt().GetFileName();
 		if(fileName.empty()) fileName = MPT_PATHSTRING("untitled");
 
 		fileName += MPT_PATHSTRING(" - %sample_number% - ");

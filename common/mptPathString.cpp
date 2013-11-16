@@ -67,6 +67,54 @@ PathString PathString::GetFullFileName() const
 	return name + ext;
 }
 
+PathString PathString::ReplaceExt(const mpt::PathString &newExt) const
+{
+	return GetDrive() + GetDir() + GetFileName() + newExt;
+}
+
+PathString PathString::SanitizeComponent() const
+{
+	PathString result = *this;
+	SanitizeFilename(result);
+	return result;
+}
+
+#if defined(WIN32)
+#if defined(_MFC_VER)
+
+mpt::PathString PathString::TunnelOutofCString(const CString &path)
+{
+	#ifdef UNICODE
+		return mpt::PathString::FromWide(path.GetString());
+	#else
+		// Since MFC code can call into our code from a lot of places, we cannot assume
+		// that filenames we get from MFC are always encoded in our hacked UTF8-in-CString encoding.
+		// Instead, we use a rough heuristic: if the string is parseable as UTF8, we assume it is.
+		// This fails for CP_ACP strings, that are also valid UTF8. That's the trade-off here.
+		if(mpt::To(mpt::CharsetUTF8, mpt::ToWide(mpt::CharsetUTF8, path.GetString())) == path.GetString())
+		{
+			// utf8
+			return mpt::PathString::FromUTF8(path.GetString());
+		} else
+		{
+			// ANSI
+			return mpt::PathString::FromWide(mpt::ToWide(path));
+		}
+	#endif
+}
+
+CString PathString::TunnelIntoCString(const mpt::PathString &path)
+{
+	#ifdef UNICODE
+		return path.ToWide().c_str();
+	#else
+		return path.ToUTF8().c_str();
+	#endif
+}
+
+#endif
+#endif
+
 } // namespace mpt
 
 #endif

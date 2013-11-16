@@ -64,6 +64,10 @@ public:
 	{
 		return PathString(a).append(b);
 	}
+	friend bool operator < (const PathString & a, const PathString & b)
+	{
+		return a.AsNative() < b.AsNative();
+	}
 	friend bool operator == (const PathString & a, const PathString & b)
 	{
 		return a.AsNative() == b.AsNative();
@@ -92,6 +96,14 @@ public:
 	PathString GetFileName() const;		// File name without extension, e.g. "mptrack"
 	PathString GetFileExt() const;		// Extension including dot, e.g. ".exe"
 	PathString GetFullFileName() const;	// File name + extension, e.g. "mptrack.exe"
+
+	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
+	PathString ReplaceExt(const mpt::PathString &newExt) const;
+
+	// Removes special characters from a filename component and replaces them with a safe replacement character ("_" on windows).
+	// Returns the result.
+	// Note that this also removes path component separators, so this should only be used on single-component PathString objects.
+	PathString SanitizeComponent() const;
 
 	bool HasTrailingSlash() const
 	{
@@ -127,6 +139,9 @@ public:
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
 	MPT_DEPRECATED_PATH CString ToCString() const { return mpt::ToCString(path); }
 	MPT_DEPRECATED_PATH static PathString FromCString(const CString &path) { return PathString(mpt::ToWide(path)); }
+	// really special purpose, if !UNICODE, encode unicode in CString as UTF8:
+	static mpt::PathString TunnelOutofCString(const CString &path);
+	static CString TunnelIntoCString(const mpt::PathString &path);
 #endif
 
 #else // !WIN32

@@ -379,11 +379,48 @@ protected:
 	//{{AFX_VIRTUAL(CModDoc)
 	public:
 	virtual BOOL OnNewDocument();
-	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
-	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName) {return OnSaveDocument(lpszPathName, false);}
+	MPT_DEPRECATED_PATH virtual BOOL OnOpenDocument(LPCTSTR lpszPathName)
+	{
+		return OnOpenDocument(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString());
+	}
+	virtual BOOL OnOpenDocument(const mpt::PathString &filename);
+	MPT_DEPRECATED_PATH virtual BOOL OnSaveDocument(LPCTSTR lpszPathName)
+	{
+		return OnSaveDocument(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), false);
+	}
+	BOOL OnSaveDocument(const mpt::PathString &filename)
+	{
+		return OnSaveDocument(filename, false);
+	}
 	virtual void OnCloseDocument();
 	void SafeFileClose();
-	BOOL OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile);
+	BOOL OnSaveDocument(const mpt::PathString &filename, const bool bTemplateFile);
+
+	MPT_DEPRECATED_PATH virtual void SetPathName(LPCTSTR lpszPathName, BOOL bAddToMRU = TRUE)
+	{
+		return SetPathName(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), bAddToMRU);
+	}
+	virtual void SetPathName(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
+	{
+		CDocument::SetPathName(mpt::PathString::TunnelIntoCString(filename), bAddToMRU);
+		#ifndef UNICODE
+			// As paths are faked into utf8 when !UNICODE,
+			// explicitly set the title in locale again.
+			// This replaces non-ANSI characters in the title
+			// with replacement character but overall the
+			// unicode handling is sane and consistent this
+			// way.
+			SetTitle(mpt::ToCString(filename.GetFileName().ToWide()));
+		#endif
+	}
+	MPT_DEPRECATED_PATH const CString& GetPathName() const
+	{
+		return CDocument::GetPathName();
+	}
+	mpt::PathString GetPathNameMpt() const
+	{
+		return mpt::PathString::TunnelOutofCString(CDocument::GetPathName());
+	}
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -391,7 +428,11 @@ protected:
 	bool SaveInstrument(INSTRUMENTINDEX instr);
 // -! NEW_FEATURE#0023
 
-	virtual BOOL DoSave(LPCSTR lpszPathName, BOOL bSaveAs=TRUE);
+	MPT_DEPRECATED_PATH virtual BOOL DoSave(LPCSTR lpszPathName, BOOL bSaveAs=TRUE)
+	{
+		return DoSave(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), bSaveAs);
+	}
+	virtual BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs=TRUE);
 	virtual void DeleteContents();
 	virtual void SetModifiedFlag(BOOL bModified=TRUE);
 	//}}AFX_VIRTUAL

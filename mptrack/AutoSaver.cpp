@@ -214,15 +214,15 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		if(modDoc.m_bHasValidPath)
 		{
 			// Check that the file has a user-chosen path
-			name = mpt::PathString::FromCString(modDoc.GetPathName());
+			name = modDoc.GetPathNameMpt();
 		} else
 		{
 			// if it doesnt, put it in settings dir
-			name = theApp.GetConfigPath() + mpt::PathString::FromCString(modDoc.GetTitle());
+			name = theApp.GetConfigPath() + mpt::PathString::FromWide(mpt::ToWide(modDoc.GetTitle())).SanitizeComponent();
 		}
 	} else
 	{
-		name = m_csPath + mpt::PathString::FromCString(modDoc.GetTitle());
+		name = m_csPath + mpt::PathString::FromWide(mpt::ToWide(modDoc.GetTitle())).SanitizeComponent();
 	}
 	
 	name += MPT_PATHSTRING(".AutoSave.");					//append backup tag
@@ -286,44 +286,50 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 //----------------------------------------------
 {
-	CString path;
+	mpt::PathString path;
 	
 	if (m_bUseOriginalPath)
 	{
 		if (modDoc.m_bHasValidPath)	// Check that the file has a user-chosen path
 		{
-			CString fullPath = modDoc.GetPathName();
-			path = fullPath.Left(fullPath.GetLength() - modDoc.GetTitle().GetLength()); //remove file name if necessary
+			mpt::PathString fullPath = modDoc.GetPathNameMpt();
+			path = fullPath.GetDrive() + fullPath.GetDir(); // remove file name
 		} else
 		{
-			path = theApp.GetConfigPath().ToCString();
+			path = theApp.GetConfigPath();
 		}
 	} else
 	{
-		path = m_csPath.ToCString();
+		path = m_csPath;
 	}
 
-	CString searchPattern = path + modDoc.GetTitle() + ".AutoSave.*";
+	std::vector<mpt::PathString> foundfiles;
+	mpt::PathString searchPattern = path + mpt::PathString::FromWide(mpt::ToWide(modDoc.GetTitle())).SanitizeComponent() + MPT_PATHSTRING(".AutoSave.*");
 
-	CFileFind finder;
-	BOOL bResult = finder.FindFile(searchPattern);
-	std::vector<CString> foundfiles;
-	
-	while(bResult)
+	WIN32_FIND_DATAW findData;
+	MemsetZero(findData);
+	HANDLE hFindFile = FindFirstFileW(searchPattern.AsNative().c_str(), &findData);
+	if(hFindFile != INVALID_HANDLE_VALUE)
 	{
-		bResult = finder.FindNextFile();
-		foundfiles.push_back(path + finder.GetFileName());
+		while(true)
+		{
+			if(!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+			{
+				foundfiles.push_back(path + mpt::PathString::FromNative(findData.cFileName));
+			}
+			if(FindNextFileW(hFindFile, &findData) == FALSE)
+			{
+				break;
+			}
+		}
+		FindClose(hFindFile);
+		hFindFile = INVALID_HANDLE_VALUE;
 	}
-	finder.Close();
-	
 	std::sort(foundfiles.begin(), foundfiles.end());
+	
 	while(foundfiles.size() > m_nBackupHistory)
 	{
-		try
-		{
-			CString toRemove = foundfiles[0];
-			CFile::Remove(toRemove);
-		} catch (CFileException* /*pEx*/){}
+		DeleteFileW(foundfiles[0].AsNative().c_str());
 		foundfiles.erase(foundfiles.begin());
 	}
 	
@@ -371,7 +377,7 @@ BOOL CAutoSaverGUI::OnInitDialog()
 	CheckDlgButton(IDC_AUTOSAVE_ENABLE, m_pAutoSaver->IsEnabled()?BST_CHECKED:BST_UNCHECKED);
 	//SetDlgItemText(IDC_AUTOSAVE_FNTEMPLATE, m_pAutoSaver->GetFilenameTemplate());
 	SetDlgItemInt(IDC_AUTOSAVE_HISTORY, m_pAutoSaver->GetHistoryDepth()); //TODO
-	SetDlgItemText(IDC_AUTOSAVE_PATH, m_pAutoSaver->GetPath().ToCString());
+	::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, m_pAutoSaver->GetPath().AsNative().c_str());
 	SetDlgItemInt(IDC_AUTOSAVE_INTERVAL, m_pAutoSaver->GetSaveInterval());
 	CheckDlgButton(IDC_AUTOSAVE_USEORIGDIR, m_pAutoSaver->GetUseOriginalPath()?BST_CHECKED:BST_UNCHECKED);
 	CheckDlgButton(IDC_AUTOSAVE_USECUSTOMDIR, m_pAutoSaver->GetUseOriginalPath()?BST_UNCHECKED:BST_CHECKED);
@@ -386,29 +392,32 @@ BOOL CAutoSaverGUI::OnInitDialog()
 
 void CAutoSaverGUI::OnOK()
 {
-	CString tempPath;
+	WCHAR tempPath[MAX_PATH];
 	IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) ? m_pAutoSaver->Enable() : m_pAutoSaver->Disable();
 	m_pAutoSaver->SetFilenameTemplate(MPT_PATHSTRING("")); //TODO
 	m_pAutoSaver->SetHistoryDepth(GetDlgItemInt(IDC_AUTOSAVE_HISTORY));
 	m_pAutoSaver->SetSaveInterval(GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
 	m_pAutoSaver->SetUseOriginalPath(IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
-	GetDlgItemText(IDC_AUTOSAVE_PATH, tempPath);
-	if (!tempPath.IsEmpty() && (tempPath.Right(1)!="\\"))
-		tempPath.Append("\\");
-	m_pAutoSaver->SetPath(mpt::PathString::FromCString(tempPath));
+	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, tempPath, CountOf(tempPath));
+	mpt::PathString path = mpt::PathString::FromNative(tempPath);
+	if(!path.empty() && !path.HasTrailingSlash())
+	{
+		path += MPT_PATHSTRING("\\");
+	}
+	m_pAutoSaver->SetPath(path);
 
 	CPropertyPage::OnOK();
 }
 
 void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 {
-	TCHAR szPath[_MAX_PATH] = TEXT("");
-	GetDlgItemText(IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
+	WCHAR szPath[MAX_PATH] = L"";
+	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
 
-	BrowseForFolder dlg(mpt::PathString::FromCString(szPath), TEXT("Select a folder to store autosaved files in..."));
+	BrowseForFolder dlg(mpt::PathString::FromNative(szPath), TEXT("Select a folder to store autosaved files in..."));
 	if(dlg.Show())
 	{
-		SetDlgItemText(IDC_AUTOSAVE_PATH, dlg.GetDirectory().ToCString());
+		::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, dlg.GetDirectory().AsNative().c_str());
 		OnSettingsChanged();
 	}
 }
