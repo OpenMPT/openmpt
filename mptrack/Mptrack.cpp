@@ -47,65 +47,37 @@ static char THIS_FILE[] = __FILE__;
 CTrackApp theApp;
 
 
-/////////////////////////////////////////////////////////////////////////////
-// Document Template
-
-//=============================================
-class CModDocTemplate: public CMultiDocTemplate
-//=============================================
+CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru, BOOL makeVisible)
+//------------------------------------------------------------------------------------------------------------
 {
-public:
-	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
-		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
 
-	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-		virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL makeVisible = TRUE);
-	#else
-		virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
-	#endif
-};
-
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-	CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL makeVisible)
-#else
-	CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL addToMru, BOOL makeVisible)
-#endif
-//-----------------------------------------------------------------------------------------
-{
-	if (path)
+	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".dll")))
 	{
-		TCHAR s[_MAX_EXT];
-		_tsplitpath(path, NULL, NULL, NULL, s);
-		if (!_tcsicmp(s, _TEXT(".dll")))
+		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
+		if(pPluginManager)
 		{
-			CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-			if (pPluginManager)
-			{
-				pPluginManager->AddPlugin(mpt::PathString::FromCString(path));
-				return NULL;
-			}
+			pPluginManager->AddPlugin(filename);
+			return NULL;
 		}
 	}
 
 	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, makeVisible);
+		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), makeVisible);
 	#else
-		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, addToMru, makeVisible);
+		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), addToMru, makeVisible);
 	#endif
-	if (pDoc)
-	{
+	if(pDoc)
+	{		
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm) pMainFrm->OnDocumentCreated(static_cast<CModDoc *>(pDoc));
 	}
 	else //Case: pDoc == 0, opening document failed.
 	{
-		if(path != NULL)
+		if(!filename.empty())
 		{
-			if(PathFileExists(path) == FALSE)
+			if(PathFileExistsW(filename.AsNative().c_str()) == FALSE)
 			{
-				CString str;
-				str.Format(GetStrI18N(_TEXT("Unable to open \"%s\": file does not exist.")), path);
-				Reporting::Error(str);
+				Reporting::Error(L"Unable to open \"" + filename.ToWide() + L"\": file does not exist.");
 			}
 			else //Case: Valid path but opening fails.
 			{
@@ -116,7 +88,7 @@ public:
 					"recognised. If the former is true, it's "
 					"recommended to close some documents as otherwise crash is likely"
 					"(currently there %s %d document%s open).")),
-					path, (nOdc == 1) ? "is" : "are", nOdc, (nOdc == 1) ? "" : "s");
+					filename.ToCString().GetString(), (nOdc == 1) ? "is" : "are", nOdc, (nOdc == 1) ? "" : "s");
 				Reporting::Notification(str);
 			}
 		}
@@ -137,6 +109,14 @@ class CModDocManager: public CDocManager
 public:
 	CModDocManager() {}
 	virtual BOOL OnDDECommand(LPTSTR lpszCommand);
+	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName)
+	{
+		return OpenDocumentFile(lpszFileName ? mpt::PathString::TunnelOutofCString(lpszFileName) : mpt::PathString());
+	}
+	virtual CDocument* OpenDocumentFile(const mpt::PathString	&filename)
+	{
+		return CDocManager::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString());
+	}
 };
 
 
@@ -181,13 +161,13 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 			{
 				bResult = TRUE;
 				bActivate = TRUE;
-				OpenDocumentFile(pszData);
+				OpenDocumentFile(mpt::PathString::FromCString(pszData));
 			}
 		} else
 		// New
 		if (!lstrcmpi(pszCmd, "New"))
 		{
-			OpenDocumentFile(NULL);
+			OpenDocumentFile(mpt::PathString());
 			bResult = TRUE;
 			bActivate = TRUE;
 		}
@@ -644,6 +624,24 @@ CTrackApp::CTrackApp()
 }
 
 
+void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
+//-------------------------------------------------------
+{
+	mpt::PathString filename = mpt::PathString::TunnelOutofCString(lpszPathName);
+	#ifdef UNICODE
+		CWinApp::AddToRecentFileList(filename.AsNative().c_str());
+	#else
+		if(filename.AsNative() != (mpt::PathString::FromCString(filename.ToCString())).AsNative())
+		{
+			// MFC ANSI builds fire strict assertions if the file path is invalid.
+			// Only proceed for string representable in CP_ACP.
+			return;
+		}
+		CWinApp::AddToRecentFileList(filename.ToCString());
+	#endif
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CTrackApp initialization
 
@@ -1015,7 +1013,7 @@ void CTrackApp::OnFileNewMOD()
 // -! NEW_FEATURE#0023
 
 	SetDefaultDocType(MOD_TYPE_MOD);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 
@@ -1028,7 +1026,7 @@ void CTrackApp::OnFileNewS3M()
 // -! NEW_FEATURE#0023
 
 	SetDefaultDocType(MOD_TYPE_S3M);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 
@@ -1041,7 +1039,7 @@ void CTrackApp::OnFileNewXM()
 // -! NEW_FEATURE#0023
 
 	SetDefaultDocType(MOD_TYPE_XM);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 
@@ -1054,7 +1052,7 @@ void CTrackApp::OnFileNewIT()
 // -! NEW_FEATURE#0023
 
 	SetDefaultDocType(MOD_TYPE_IT);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 void CTrackApp::OnFileNewMPT()
@@ -1062,7 +1060,7 @@ void CTrackApp::OnFileNewMPT()
 {
 	SetAsProject(FALSE);
 	SetDefaultDocType(MOD_TYPE_MPT);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 
@@ -1074,7 +1072,7 @@ void CTrackApp::OnFileNewITProject()
 {
 	SetAsProject(TRUE);
 	SetDefaultDocType(MOD_TYPE_IT);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 // -! NEW_FEATURE#0023
 
@@ -1125,7 +1123,7 @@ void CTrackApp::OnFileOpen()
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-		OpenDocumentFile(files[counter].ToCString());
+		OpenDocumentFile(files[counter]);
 	}
 }
 

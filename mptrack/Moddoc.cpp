@@ -208,14 +208,14 @@ BOOL CModDoc::OnNewDocument()
 }
 
 
-BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
-//------------------------------------------------
+BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
+//-----------------------------------------------------------
 {
 	BOOL bModified = TRUE;
 
 	ScopedLogCapturer logcapturer(*this);
 
-	if (!lpszPathName) return OnNewDocument();
+	if(filename.empty()) return OnNewDocument();
 
 	BeginWaitCursor();
 	#ifndef NO_FILEREADER_STD_ISTREAM
@@ -224,7 +224,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	#else
 	{
 		CMappedFile f;
-		if (f.Open(mpt::PathString::FromCString(lpszPathName)))
+		if (f.Open(filename))
 		{
 			FileReader file = f.GetFile();
 			if(file.IsValid())
@@ -237,7 +237,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	EndWaitCursor();
 
 	logcapturer.ShowLog(std::string()
-		+ "File: " + lpszPathName + "\n"
+		+ "File: " + filename.ToLocale() + "\n"
 		+ "Last saved with: " + m_SndFile.madeWithTracker + ", you are using OpenMPT " + MptVersion::str + "\n"
 		+ "\n"
 		);
@@ -249,10 +249,10 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		CDLSBank *pCachedBank = NULL, *pEmbeddedBank = NULL;
 		mpt::PathString szCachedBankFile = MPT_PATHSTRING("");
 
-		if (CDLSBank::IsDLSBank(mpt::PathString::FromCString(lpszPathName)))
+		if (CDLSBank::IsDLSBank(filename))
 		{
 			pEmbeddedBank = new CDLSBank();
-			pEmbeddedBank->Open(mpt::PathString::FromCString(lpszPathName));
+			pEmbeddedBank->Open(filename);
 		}
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
 		BeginWaitCursor();
@@ -407,27 +407,26 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 }
 
 
-BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
-//--------------------------------------------------------------------------
+BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTemplateFile)
+//-------------------------------------------------------------------------------------
 {
 	ScopedLogCapturer logcapturer(*this);
 	static int greccount = 0;
 	BOOL bOk = FALSE;
 	m_SndFile.m_dwLastSavedWithVersion = MptVersion::num;
-	if (!lpszPathName) 
+	if(filename.empty()) 
 		return FALSE;
 	MODTYPE type = m_SndFile.GetType(); // CModSpecifications::ExtensionToType(fext);
 
 	if (type == MOD_TYPE_NONE && !greccount)
 	{
 		greccount++;
-		bOk = DoSave(NULL, TRUE);
+		bOk = DoSave(mpt::PathString(), TRUE);
 		greccount--;
 		return bOk;
 	}
 	BeginWaitCursor();
 	FixNullStrings();
-	const mpt::PathString filename = mpt::PathString::FromCString(lpszPathName);
 	switch(type)
 	{
 	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(filename); break;
@@ -442,7 +441,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile)
 		if (!bTemplateFile)
 		{
 			// Set new path for this file, unless we are saving a template, in which case we want to keep the old file path.
-			SetPathName(lpszPathName);
+			SetPathName(filename);
 		}
 		logcapturer.ShowLog(true);
 		if (bTemplateFile)
@@ -549,12 +548,11 @@ void CModDoc::DeleteContents()
 }
 
 
-BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
-//---------------------------------------------
+BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
+//---------------------------------------------------------
 {
-	CHAR s[_MAX_PATH] = "";
-	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
-	CHAR fname[_MAX_FNAME]="", fext[_MAX_EXT]="";
+	const mpt::PathString docFileName = GetPathNameMpt();
+	
 	std::string defaultExtension = m_SndFile.GetModSpecifications().fileExtension;
 	
 	switch(m_SndFile.GetType())
@@ -591,57 +589,51 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		return FALSE;
 	}
 
-	strcpy(fext, ".");
-	strcat(fext, defaultExtension.c_str());
+	mpt::PathString ext = MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(defaultExtension);
 
-	if ((!lpszPathName) || (!lpszPathName[0]) || m_ShowSavedialog)
+	mpt::PathString saveFileName;
+
+	if(filename.empty() || m_ShowSavedialog)
 	{
-		_splitpath(m_strPathName, drive, path, fname, NULL);
-		if (!fname[0]) strcpy(fname, GetTitle());
-		strcpy(s, drive);
-		strcat(s, path);
-		strcat(s, fname);
-		strcat(s, fext);
+		mpt::PathString drive = docFileName.GetDrive();
+		mpt::PathString dir = docFileName.GetDir();
+		mpt::PathString fileName = docFileName.GetFileName();
+		if(fileName.empty())
+		{
+			fileName = mpt::PathString::FromWide(mpt::ToWide(GetTitle())).SanitizeComponent();
+		}
+		mpt::PathString defaultSaveName = drive + dir + fileName + ext;
 		
 		FileDialog dlg = SaveFileDialog()
 			.DefaultExtension(defaultExtension)
-			.DefaultFilename(s)
+			.DefaultFilename(defaultSaveName)
 			.ExtensionFilter(ModTypeToFilter(m_SndFile))
 			.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS));
 		if(!dlg.Show()) return FALSE;
 
 		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_MODS, true);
 
-		strcpy(s, dlg.GetFirstFile().ToLocale().c_str());
-		_splitpath(s, drive, path, fname, fext);
+		saveFileName = dlg.GetFirstFile();
 	} else
 	{
-		_splitpath(lpszPathName, drive, path, fname, NULL);
-		strcpy(s, drive);
-		strcat(s, path);
-		strcat(s, fname);
-		strcat(s, fext);
+		saveFileName = filename.ReplaceExt(ext);
 	}
+
 	// Do we need to create a backup file ?
-	if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CREATEBACKUP)
-	 && (IsModified()) && (!lstrcmpi(s, m_strPathName)))
+	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CREATEBACKUP)
+		&& (IsModified()) && (!mpt::PathString::CompareNoCase(saveFileName, docFileName)))
 	{
-		CFileStatus rStatus;
-		if (CFile::GetStatus(s, rStatus))
+		if(PathFileExistsW(saveFileName.AsNative().c_str()))
 		{
-			CHAR bkname[_MAX_PATH] = "";
-			_splitpath(s, bkname, path, fname, NULL);
-			strcat(bkname, path);
-			strcat(bkname, fname);
-			strcat(bkname, ".bak");
-			if (CFile::GetStatus(bkname, rStatus))
+			mpt::PathString backupFileName = saveFileName.ReplaceExt(MPT_PATHSTRING(".bak"));
+			if(PathFileExistsW(backupFileName.AsNative().c_str()))
 			{
-				DeleteFile(bkname);
+				DeleteFileW(backupFileName.AsNative().c_str());
 			}
-			MoveFile(s, bkname);
+			MoveFileW(saveFileName.AsNative().c_str(), backupFileName.AsNative().c_str());
 		}
 	}
-	if (OnSaveDocument(s))
+	if(OnSaveDocument(saveFileName))
 	{
 		SetModified(FALSE);
 		m_bHasValidPath=true;
@@ -1661,7 +1653,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(extension)
-		.DefaultFilename(mpt::PathString::FromCString(GetPathName()).GetFileName() + MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(extension))
+		.DefaultFilename(GetPathNameMpt().GetFileName() + MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(extension))
 		.ExtensionFilter(encFactory->GetTraits().fileDescription + " (*." + extension + ")|*." + extension + "||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_EXPORT));
 	if(!dlg.Show()) return;
@@ -1869,20 +1861,15 @@ void CModDoc::OnFileMP3Convert()
 void CModDoc::OnFileMidiConvert()
 //-------------------------------
 {
-	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
-	CHAR s[_MAX_PATH], fname[_MAX_FNAME]="";
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
-	_splitpath(GetPathName(), drive, path, fname, NULL);
-	strcpy(s, drive);
-	strcat(s, path);
-	strcat(s, fname);
-	strcat(s, ".mid");
+
+	mpt::PathString filename = GetPathNameMpt().ReplaceExt(MPT_PATHSTRING(".mid"));
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("mid")
-		.DefaultFilename(s)
+		.DefaultFilename(filename)
 		.ExtensionFilter("Midi Files (*.mid,*.rmi)|*.mid;*.rmi||");
 	if(!dlg.Show()) return;
 
@@ -1902,7 +1889,7 @@ void CModDoc::OnFileCompatibilitySave()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return;
 
-	std::string ext, pattern, filename;
+	std::string pattern;
 
 	const MODTYPE type = m_SndFile.GetType();
 
@@ -1920,21 +1907,25 @@ void CModDoc::OnFileCompatibilitySave()
 			// Not available for this format.
 			return;
 	}
-	ext = m_SndFile.GetModSpecifications().fileExtension;
+
+	std::string ext = m_SndFile.GetModSpecifications().fileExtension;
+
+	mpt::PathString filename;
 
 	{
-		CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
-		CHAR fname[_MAX_FNAME]="";
-		_splitpath(GetPathName(), drive, path, fname, NULL);
+		mpt::PathString drive;
+		mpt::PathString dir;
+		mpt::PathString fileName;
+		GetPathNameMpt().SplitPath(&drive, &dir, &fileName, nullptr);
 
 		filename = drive;
-		filename += path;
-		filename += fname;
-		if (!strstr(fname, "compat"))
-			filename += ".compat.";
+		filename += dir;
+		filename += fileName;
+		if(!strstr(fileName.ToUTF8().c_str(), "compat"))
+			filename += MPT_PATHSTRING(".compat.");
 		else
-			filename += ".";
-		filename += ext;
+			filename += MPT_PATHSTRING(".");
+		filename += mpt::PathString::FromUTF8(ext);
 	}
 
 	FileDialog dlg = SaveFileDialog()
@@ -2553,8 +2544,8 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcFileExportCompat:  OnFileCompatibilitySave(); break;
 		case kcEstimateSongLength: OnEstimateSongLength(); break;
 		case kcApproxRealBPM:	OnApproximateBPM(); break;
-		case kcFileSave:		DoSave(m_strPathName, 0); break;
-		case kcFileSaveAs:		DoSave(NULL, TRUE); break;
+		case kcFileSave:		DoSave(GetPathNameMpt(), 0); break;
+		case kcFileSaveAs:		DoSave(mpt::PathString(), TRUE); break;
 		case kcFileSaveTemplate: OnSaveTemplateModule(); break;
 		case kcFileClose:		SafeFileClose(); break;
 
@@ -2593,18 +2584,22 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 //-------------------------------------------------
 {
 	//Not making path if path is empty(case only(?) for new file)
-	if(GetPathName().GetLength() > 0)
+	if(!GetPathNameMpt().empty())
 	{
-		CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME], ext[_MAX_EXT];
-		_splitpath(GetPathName(), drive, path, fname, ext);
+		mpt::PathString drive;
+		mpt::PathString dir;
+		mpt::PathString fname;
+		mpt::PathString fext;
+		GetPathNameMpt().SplitPath(&drive, &dir, &fname, &fext);
 
-		CString newPath = drive;
-		newPath += path;
+		mpt::PathString newPath;
+		newPath += drive;
+		newPath += dir;
 
 		//Catch case where we don't have a filename yet.
-		if (fname[0] == 0)
+		if(fname.empty())
 		{
-			newPath += GetTitle();
+			newPath += mpt::PathString::FromWide(mpt::ToWide(GetTitle())).SanitizeComponent();
 		} else
 		{
 			newPath += fname;
@@ -2612,19 +2607,19 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 
 		switch(nNewType)
 		{
-		case MOD_TYPE_XM:  newPath += ".xm"; break;
-		case MOD_TYPE_IT:  newPath += m_SndFile.m_SongFlags[SONG_ITPROJECT] ? ".itp" : ".it"; break;
-		case MOD_TYPE_MPT: newPath += ".mptm"; break;
-		case MOD_TYPE_S3M: newPath += ".s3m"; break;
-		case MOD_TYPE_MOD: newPath += ".mod"; break;
+		case MOD_TYPE_XM:  newPath += MPT_PATHSTRING(".xm"); break;
+		case MOD_TYPE_IT:  newPath += m_SndFile.m_SongFlags[SONG_ITPROJECT] ? MPT_PATHSTRING(".itp") : MPT_PATHSTRING(".it"); break;
+		case MOD_TYPE_MPT: newPath += MPT_PATHSTRING(".mptm"); break;
+		case MOD_TYPE_S3M: newPath += MPT_PATHSTRING(".s3m"); break;
+		case MOD_TYPE_MOD: newPath += MPT_PATHSTRING(".mod"); break;
 		default: ASSERT(false);		
 		}
 	
 		if(nNewType != MOD_TYPE_IT ||
 			(nNewType == MOD_TYPE_IT &&
 				(
-					(!strcmp(ext, ".it") && m_SndFile.m_SongFlags[SONG_ITPROJECT]) ||
-					(!strcmp(ext, ".itp") && !m_SndFile.m_SongFlags[SONG_ITPROJECT])
+					(!mpt::PathString::CompareNoCase(fext, MPT_PATHSTRING(".it")) && m_SndFile.m_SongFlags[SONG_ITPROJECT]) ||
+					(!mpt::PathString::CompareNoCase(fext, MPT_PATHSTRING(".itp")) && !m_SndFile.m_SongFlags[SONG_ITPROJECT])
 				)
 			)
 		  ) 
@@ -2634,8 +2629,6 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 
 		SetPathName(newPath, FALSE);
 
-		
-		
 	}
 
 	UpdateAllViews(NULL, HINT_MODTYPE);
@@ -2898,7 +2891,7 @@ void CModDoc::OnSaveTemplateModule()
 		return;
 
 	const CString sOldPath = m_strPathName;
-	OnSaveDocument(dlg.GetFirstFile().ToCString(), true/*template file*/);
+	OnSaveDocument(dlg.GetFirstFile(), true/*template file*/);
 	m_strPathName = sOldPath;
 }
 

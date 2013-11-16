@@ -82,6 +82,57 @@ enum {
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Document Template
+
+// OK, this is a really dirty hack for ANSI builds (which are still used because the code is not yet UNICODE compatible).
+// To support wide path names even in ansi builds, we use mpt::PathString everywhere.
+// Except, there is one set of cases, where MFC dictates TCHAR/CString on us: The filename handling for MDI documents.
+// Here, if in ANSI build, we encode the wide string in utf8 and pass it around through MFC. When MFC calls us again,
+// we unpack it again. This works surprisingly well for the hackish nature this has.
+// Rough edges:
+//  - CDocument::GetTitle is still ANSI encoded and returns replacement chars for non-representable chars.
+//  - CWinApp::AddToRecentFileList chokes on filenames it cannot access. We simply avoid passing non-ansi-representable filenames there.
+// Modified MFC functionality:
+//  CTrackApp:
+//   CWinApp::OpenDocument
+//   CWinApp::AddToRecentFileList
+//  CModDocManager:
+//   CDocManager::OpenDocumentFile
+//  CModDocTemplate:
+//   CMultiDocTemplate::OpenDocumentFile
+//  CModDoc:
+//   CDocument::GetPathName
+//   CDocument::SetPathName
+//   CDocument::DoSave
+//   CDocument::OnOpenDocument
+//   CDocument::OnSaveDocument
+
+//=============================================
+class CModDocTemplate: public CMultiDocTemplate
+//=============================================
+{
+public:
+	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
+		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
+
+	CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
+
+	// inherited members, overload them all
+	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
+		MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL makeVisible = TRUE)
+		{
+			return OpenDocumentFile(path ? mpt::PathString::TunnelOutofCString(path) : mpt::PathString(), TRUE, makeVisible);
+		}
+	#else
+		MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE)
+		{
+			return OpenDocumentFile(path ? mpt::PathString::TunnelOutofCString(path) : mpt::PathString(), addToMru, makeVisible);
+		}
+	#endif
+};
+
+
+/////////////////////////////////////////////////////////////////////////////
 // CTrackApp:
 // See mptrack.cpp for the implementation of this class
 //
@@ -101,15 +152,30 @@ public:
 	static std::vector<CDLSBank *> gpDLSBanks;
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-	virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
+	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
 	{
-		CDocument* pDoc = CWinApp::OpenDocumentFile(lpszFileName);
+		return OpenDocumentFile(lpszFileName ? mpt::PathString::TunnelOutofCString(lpszFileName) : mpt::PathString(), bAddToMRU);
+	}
+	virtual CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
+	{
+		CDocument* pDoc = CWinApp::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString());
 		if (pDoc && bAddToMRU != TRUE)
 			RemoveMruItem(0); // This doesn't result to the same behaviour as not adding to MRU 
 							  // (if the new item got added, it might have already dropped the last item out)
 		return pDoc;
 	}
+#else
+	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
+	{
+		return CWinApp::OpenDocumentFile(lpszFileName, bAddToMRU);
+	}
+	virtual CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
+	{
+		return CWinApp::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), bAddToMRU);
+	}
 #endif
+
+	MPT_DEPRECATED_PATH virtual void AddToRecentFileList(LPCTSTR lpszPathName);
 
 protected:
 
@@ -120,7 +186,7 @@ protected:
 	SettingsContainer *m_pSettings;
 	TrackerSettings *m_pTrackerSettings;
 	IniFileSettingsContainer *m_pPluginCache;
-	CMultiDocTemplate *m_pModTemplate;
+	CModDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
 	SoundDevicesManager *m_pSoundDevicesManager;
 	BOOL m_bInitialized;
@@ -172,7 +238,7 @@ public:
 
 public:
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
-	CDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
+	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	SoundDevicesManager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }

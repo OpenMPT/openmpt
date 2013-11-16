@@ -1522,7 +1522,7 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 
 static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
-	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename.ToCString(), FALSE);
+	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename, FALSE);
 	return pModDoc;
 }
 
@@ -1533,21 +1533,21 @@ static void DestroySoundFileContainer(TSoundFileContainer &sndFile)
 
 static void SaveIT(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->DoSave(filename.ToCString());
+	sndFile->DoSave(filename);
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }
 
 static void SaveXM(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->DoSave(filename.ToCString());
+	sndFile->DoSave(filename);
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }
 
 static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->DoSave(filename.ToCString());
+	sndFile->DoSave(filename);
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }

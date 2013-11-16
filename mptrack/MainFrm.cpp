@@ -491,7 +491,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
 		{
 			const mpt::PathString file = mpt::PathString::FromNative(fileName);
-			theApp.OpenDocumentFile(file.ToCString());
+			theApp.OpenDocumentFile(file);
 		}
 	}
 	::DragFinish(hDropInfo);
@@ -2132,7 +2132,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 		const bool bAvailable = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeRead);
 		if (bAvailable)
 		{
-			CDocument* pDoc = theApp.OpenDocumentFile(sPath.ToCString(), bTemplateFile ? FALSE : TRUE);
+			CDocument* pDoc = theApp.OpenDocumentFile(sPath, bTemplateFile ? FALSE : TRUE);
 			if (pDoc != nullptr)
 			{
 				ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CModDoc)) == TRUE);

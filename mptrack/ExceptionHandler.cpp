@@ -109,8 +109,14 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 				// Show the rescue directory in Explorer...
 				CTrackApp::OpenDirectory(baseRescuePath);
 			}
-			CString filename;
-			filename.Format("%s%d_%s.%s", baseRescuePath.ToCString(), ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
+
+			mpt::PathString filename;
+			filename += baseRescuePath;
+			filename += mpt::PathString::FromWide(mpt::ToWString(++numFiles));
+			filename += MPT_PATHSTRING("_");
+			filename += mpt::PathString::FromWide(mpt::ToWide(pModDoc->GetTitle())).SanitizeComponent();
+			filename += MPT_PATHSTRING(".");
+			filename += mpt::PathString::FromUTF8(pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
 
 			try
 			{
