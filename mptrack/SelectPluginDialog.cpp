@@ -40,7 +40,6 @@ void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TREE1, m_treePlugins);
-	DDX_Text(pDX, IDC_NAMEFILTER, m_sNameFilter);
 }
 
 
@@ -230,11 +229,45 @@ void CSelectPluginDlg::OnCancel()
 }
 
 
+BOOL CSelectPluginDlg::PreTranslateMessage(MSG *pMsg)
+//---------------------------------------------------
+{
+	// Use up/down keys to navigate in tree view, even if search field is focussed.
+	if(pMsg != nullptr && pMsg->message == WM_KEYDOWN && (pMsg->wParam == VK_UP || pMsg->wParam == VK_DOWN) && GetFocus() != &m_treePlugins)
+	{
+		HTREEITEM selItem = m_treePlugins.GetSelectedItem();
+		if(selItem == nullptr)
+		{
+			selItem = m_treePlugins.GetRootItem();
+		}
+		while((selItem = m_treePlugins.GetNextItem(selItem, pMsg->wParam == VK_UP ? TVGN_PREVIOUSVISIBLE : TVGN_NEXTVISIBLE)) != nullptr)
+		{
+			int nImage, nSelectedImage;
+			m_treePlugins.GetItemImage(selItem, nImage, nSelectedImage);
+			if(nImage != IMAGE_FOLDER)
+			{
+				m_treePlugins.SelectItem(selItem);
+				m_treePlugins.EnsureVisible(selItem);
+				return TRUE;
+			}
+		}
+		return TRUE;
+	}
+
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
+
 void CSelectPluginDlg::OnNameFilterChanged()
 //------------------------------------------
 {
-	GetDlgItem(IDC_NAMEFILTER)->GetWindowText(m_sNameFilter);
-	m_sNameFilter = m_sNameFilter.MakeLower();
+	// Update name filter text
+	HWND hwnd = GetDlgItem(IDC_NAMEFILTER)->m_hWnd;
+	int len = GetWindowTextLengthW(hwnd);
+	m_nameFilter.resize(len);
+	GetWindowTextW(hwnd, &m_nameFilter[0], len + 1);
+	for(int i = 0; i < len; i++) m_nameFilter[i] = ::towlower(m_nameFilter[i]);
+
 	UpdatePluginsList();
 }
 
@@ -280,7 +313,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 	HTREEITEM currentPlug = noPlug;
 	bool foundCurrentPlug = false;
 
-	const bool nameFilterActive = !m_sNameFilter.IsEmpty();
+	const bool nameFilterActive = !m_nameFilter.empty();
 	if(pManager)
 	{
 		bool first = true;
@@ -291,8 +324,9 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 			if(nameFilterActive)
 			{
 				// Apply name filter
-				CString displayName = p->libraryName.ToCString();
-				if (displayName.MakeLower().Find(m_sNameFilter) == -1)
+				std::wstring displayName = p->libraryName.ToWide();
+				for(size_t i = 0; i < displayName.length(); i++) displayName[i] = ::towlower(displayName[i]);
+				if(displayName.find(m_nameFilter, 0) == displayName.npos)
 				{
 					p = p->pNext;
 					continue;
@@ -363,15 +397,13 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 	}
 
 	m_treePlugins.SetRedraw(TRUE);
-	if(currentPlug)
+
+	if(!nameFilterActive || currentPlug != noPlug)
 	{
-		if(!nameFilterActive || currentPlug != noPlug)
-		{
-			m_treePlugins.SelectItem(currentPlug);
-		}
-		m_treePlugins.SetItemState(currentPlug, TVIS_BOLD, TVIS_BOLD);
-		m_treePlugins.EnsureVisible(currentPlug);
+		m_treePlugins.SelectItem(currentPlug);
 	}
+	m_treePlugins.SetItemState(currentPlug, TVIS_BOLD, TVIS_BOLD);
+	m_treePlugins.EnsureVisible(currentPlug);
 }
 
 
