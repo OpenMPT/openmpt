@@ -331,11 +331,13 @@ public:
 public:
 	VSTPluginLib *GetFirstPlugin() const { return m_pVstHead; }
 	bool IsValidPlugin(const VSTPluginLib *pLib);
-	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, bool fromCache = true, const bool checkFileExistence = false, CString* const errStr = 0);
+	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, bool fromCache = true, const bool checkFileExistence = false, std::wstring* const errStr = nullptr);
 	bool RemovePlugin(VSTPluginLib *);
 	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
 	void OnIdle();
 	static void ReportPlugException(LPCSTR format,...);
+	static void ReportPlugException(const std::wstring &msg);
+	static void ReportPlugException(const std::string &msg);
 
 protected:
 	void EnumerateDirectXDMOs();
