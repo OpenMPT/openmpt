@@ -379,6 +379,8 @@ inline std::wstring ToWStringHelper(const T & x)
 	return o.str();
 }
 
+std::string ToString(const std::wstring & x) { return mpt::ToLocale(x); }
+std::string ToString(const wchar_t * const & x) { return mpt::ToLocale(x); };
 std::string ToString(const char & x) { return std::string(1, x); }
 std::string ToString(const wchar_t & x) { return mpt::ToLocale(std::wstring(1, x)); }
 std::string ToString(const bool & x) { return ToStringHelper(x); }
@@ -396,6 +398,8 @@ std::string ToString(const float & x) { return ToStringHelper(x); }
 std::string ToString(const double & x) { return ToStringHelper(x); }
 std::string ToString(const long double & x) { return ToStringHelper(x); }
 
+std::wstring ToWString(const std::string & x) { return mpt::ToWide(mpt::CharsetLocale, x); }
+std::wstring ToWString(const char * const & x) { return mpt::ToWide(mpt::CharsetLocale, x); }
 std::wstring ToWString(const char & x) { return mpt::ToWide(mpt::CharsetLocale, std::string(1, x)); }
 std::wstring ToWString(const wchar_t & x) { return std::wstring(1, x); }
 std::wstring ToWString(const bool & x) { return ToWStringHelper(x); }
