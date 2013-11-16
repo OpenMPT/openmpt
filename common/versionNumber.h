@@ -16,8 +16,8 @@
 //Version definitions. The only thing that needs to be changed when changing version number.
 #define VER_MAJORMAJOR          1
 #define VER_MAJOR               22
-#define VER_MINOR               06
-#define VER_MINORMINOR          03
+#define VER_MINOR               07
+#define VER_MINORMINOR          01
 
 //Version string. For example "1.17.02.28"
 #define MPT_VERSION_STR         VER_STRINGIZE(VER_MAJORMAJOR) "." VER_STRINGIZE(VER_MAJOR) "." VER_STRINGIZE(VER_MINOR) "." VER_STRINGIZE(VER_MINORMINOR)

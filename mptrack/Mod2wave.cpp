@@ -861,7 +861,7 @@ void CDoWaveConvert::OnButton1()
 	static int mixbuffer[MIXBUFFERSIZE * 4]; // channels
 
 	MSG msg;
-	CHAR s[80];
+	TCHAR s[80];
 	HWND progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	UINT ok = IDOK, pos = 0;
 	uint64 ullSamples = 0, ullMaxSamples;
@@ -938,7 +938,7 @@ void CDoWaveConvert::OnButton1()
 	m_SndFile.SetMixerSettings(mixersettings);
 	m_SndFile.SetResamplerSettings(TrackerSettings::Instance().GetResamplerSettings());
 	m_SndFile.InitPlayer(TRUE);
-	if ((!m_dwFileLimit) || (m_dwFileLimit > 2047*1024)) m_dwFileLimit = 2047*1024; // 2GB
+	if(!m_dwFileLimit) m_dwFileLimit = Util::MaxValueOfType(m_dwFileLimit) >> 10;
 	m_dwFileLimit <<= 10;
 
 	fileEnc->SetFormat(encSettings);
@@ -1002,7 +1002,7 @@ void CDoWaveConvert::OnButton1()
 	// For giving away some processing time every now and then
 	DWORD dwSleepTime = dwStartTime;
 
-	size_t bytesWritten = 0;
+	uint64 bytesWritten = 0;
 
 	CMainFrame::GetMainFrame()->PauseMod();
 	m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
@@ -1069,7 +1069,7 @@ void CDoWaveConvert::OnButton1()
 				fileEnc->WriteInterleavedConverted(lRead, buffer);
 			}
 			const std::streampos newPos = fileStream.tellp();
-			bytesWritten += static_cast<std::size_t>(newPos - oldPos);
+			bytesWritten += static_cast<uint64>(newPos - oldPos);
 
 			if(bytesWritten >= m_dwFileLimit)
 			{
@@ -1087,18 +1087,18 @@ void CDoWaveConvert::OnButton1()
 			DWORD l = (DWORD)(ullSamples / m_SndFile.m_MixerSettings.gdwMixingFreq);
 
 			const DWORD dwCurrentTime = timeGetTime();
-			DWORD timeRemaining = 0; // estimated remainig time
+			uint32 timeRemaining = 0; // estimated remainig time
 			if((ullSamples > 0) && (ullSamples < max))
 			{
-				timeRemaining = static_cast<DWORD>(((dwCurrentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
+				timeRemaining = static_cast<uint32>(((dwCurrentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
 			}
 
 			if(m_Settings.Normalize)
 			{
-				wsprintf(s, "Rendering file... (%umn%02us, %umn%02us remaining)", l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
+				_stprintf(s, _T("Rendering file... (%umn%02us, %umn%02us remaining)"), l / 60, l % 60, timeRemaining / 60, timeRemaining % 60u);
 			} else
 			{
-				wsprintf(s, "Writing file... (%uKB, %umn%02us, %umn%02us remaining)", bytesWritten >> 10, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
+				_stprintf(s, _T("Writing file... (%lluKB, %umn%02us, %umn%02us remaining)"), bytesWritten >> 10, l / 60, l % 60u, timeRemaining / 60, timeRemaining % 60u);
 			}
 			SetDlgItemText(IDC_TEXT1, s);
 
@@ -1186,7 +1186,7 @@ void CDoWaveConvert::OnButton1()
 				int percent = static_cast<int>(100 * framesProcessed / framesTotal);
 				if(percent != lastPercent)
 				{
-					wsprintf(s, "Normalizing... (%d%%)", percent);
+					_stprintf(s, _T("Normalizing... (%d%%)"), percent);
 					SetDlgItemText(IDC_TEXT1, s);
 					::SendMessage(progress, PBM_SETPOS, percent, 0);
 					lastPercent = percent;
