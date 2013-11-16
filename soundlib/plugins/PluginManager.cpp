@@ -254,6 +254,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const mpt::PathString fileName = dllPath.GetFileName();
+	const char *const cacheSection = "PluginCache";
+	const wchar_t *const cacheSectionW = L"PluginCache";
 
 	if(checkFileExistence && (PathFileExistsW(dllPath.AsNative().c_str()) == FALSE))
 	{
@@ -274,8 +276,6 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	if(fromCache)
 	{
 		SettingsContainer & cacheFile = theApp.GetPluginCache();
-		const char *const cacheSection = "PluginCache";
-		const wchar_t *const cacheSectionW = L"PluginCache";
 		const std::string IDs = cacheFile.Read<std::string>(cacheSectionW, fileName.ToWide(), "");
 
 		if(IDs.length() >= 16)
@@ -394,8 +394,6 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	if(validPlug)
 	{
 		SettingsContainer &cacheFile = theApp.GetPluginCache();
-		const char *const cacheSection = "PluginCache";
-		const wchar_t *const cacheSectionW = L"PluginCache";
 		const std::string IDs = mpt::String::Format("%08X%08X", p->pluginId1, p->pluginId2);
 		const std::string flagsKey = mpt::String::Format("%s.Flags", IDs);
 
@@ -458,6 +456,8 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 //-----------------------------------------------------------------------------------
 {
 	VSTPluginLib *pFound = nullptr;
+	const char *cacheSection = "PluginCache";
+	const wchar_t *cacheSectionW = L"PluginCache";
 
 	// Find plugin in library
 	VSTPluginLib *p = m_pVstHead;
@@ -466,7 +466,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	{
 		const bool matchID = (p->pluginId1 == mixPlugin.Info.dwPluginId1)
 			&& (p->pluginId2 == mixPlugin.Info.dwPluginId2);
-		const bool matchName = !mpt::strnicmp(p->libraryName.ToLocale().c_str(), mixPlugin.GetLibraryName(), CountOf(mixPlugin.Info.szLibraryName));
+		const bool matchName = !mpt::PathString::CompareNoCase(p->libraryName, mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()));
 
 		if(matchID && matchName)
 		{
@@ -508,14 +508,13 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			fullPath += MPT_PATHSTRING("\\");
 		}
-		fullPath += mpt::PathString::FromLocale(mixPlugin.GetLibraryName()) + MPT_PATHSTRING(".dll");
+		fullPath += mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()) + MPT_PATHSTRING(".dll");
 
 		pFound = AddPlugin(fullPath);
 		if(!pFound)
 		{
 			SettingsContainer &cacheFile = theApp.GetPluginCache();
-			const char *cacheSection = "PluginCache";
-			std::string IDs = cacheFile.Read<std::string>(cacheSection, mixPlugin.GetLibraryName(), "");
+			std::string IDs = cacheFile.Read<std::string>(cacheSectionW, mpt::ToWide(mpt::CharsetUTF8, mixPlugin.GetLibraryName()), "");
 			if(IDs.length() >= 16)
 			{
 				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, MPT_PATHSTRING(""));
@@ -547,7 +546,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				{
 					// Update cached information
 					SettingsContainer &cacheFile = theApp.GetPluginCache();
-					const char *cacheSection = "PluginCache";
 					std::string flagsKey = mpt::String::Format("%08X%08X.Flags", pFound->pluginId1, pFound->pluginId2);
 					cacheFile.Write<int32>(cacheSection, flagsKey, pFound->EncodeCacheFlags());
 				}
