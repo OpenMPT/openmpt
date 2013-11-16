@@ -416,7 +416,6 @@ BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 /////////////////////////////////////////////////////////////////////////////
 // DLS Banks support
 
-#define MPTRACK_REG_DLS		"Software\\Olivier Lapicque\\ModPlug Tracker\\DLS Banks"
 std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
 
 
@@ -460,15 +459,15 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 		if(!AddDLSBank(filename))
 		{
 			HKEY key;
-			if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
+			if(RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
 			{
-				CHAR szFileName[MAX_PATH];
+				WCHAR szFileName[MAX_PATH];
 				DWORD dwRegType = REG_SZ;
 				DWORD dwSize = sizeof(szFileName);
 				szFileName[0] = 0;
-				if (RegQueryValueEx(key, "GMFilePath", NULL, &dwRegType, (LPBYTE)&szFileName, &dwSize) == ERROR_SUCCESS)
+				if(RegQueryValueExW(key, L"GMFilePath", NULL, &dwRegType, (LPBYTE)&szFileName, &dwSize) == ERROR_SUCCESS)
 				{
-					AddDLSBank(mpt::PathString::FromLocale(szFileName));
+					AddDLSBank(mpt::PathString::FromNative(szFileName));
 				}
 				RegCloseKey(key);
 			}
@@ -482,15 +481,15 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 void CTrackApp::LoadRegistryDLS()
 //-------------------------------
 {
-	CHAR szFileNameX[_MAX_PATH];
+	WCHAR szFileNameX[MAX_PATH];
 	HKEY keyX;
 
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MPTRACK_REG_DLS, 0, KEY_READ, &keyX) == ERROR_SUCCESS)
+	if(RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Olivier Lapicque\\ModPlug Tracker\\DLS Banks", 0, KEY_READ, &keyX) == ERROR_SUCCESS)
 	{
 		DWORD dwRegType = REG_DWORD;
 		DWORD dwSize = sizeof(DWORD);
 		DWORD d = 0;
-		if (RegQueryValueEx(keyX, "NumBanks", NULL, &dwRegType, (LPBYTE)&d, &dwSize) == ERROR_SUCCESS)
+		if(RegQueryValueExW(keyX, L"NumBanks", NULL, &dwRegType, (LPBYTE)&d, &dwSize) == ERROR_SUCCESS)
 		{
 			CHAR s[64];
 			for (UINT i=0; i<d; i++)
@@ -499,8 +498,8 @@ void CTrackApp::LoadRegistryDLS()
 				szFileNameX[0] = 0;
 				dwRegType = REG_SZ;
 				dwSize = sizeof(szFileNameX);
-				RegQueryValueEx(keyX, s, NULL, &dwRegType, (LPBYTE)szFileNameX, &dwSize);
-				AddDLSBank(mpt::PathString::FromLocale(szFileNameX));
+				RegQueryValueExW(keyX, mpt::ToWide(mpt::CharsetLocale, s).c_str(), NULL, &dwRegType, (LPBYTE)szFileNameX, &dwSize);
+				AddDLSBank(mpt::PathString::FromNative(szFileNameX));
 			}
 		}
 		RegCloseKey(keyX);
