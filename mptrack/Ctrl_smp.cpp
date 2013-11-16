@@ -1018,15 +1018,15 @@ void CCtrlSamples::OnSampleSave()
 	}
 	SanitizeFilename(fileName);
 
-	CString format = theApp.GetSettings().Read<CString>("Sample Editor", "DefaultFormat", defaultFLAC ? "flac" : "wav");
+	mpt::PathString format = theApp.GetSettings().Read<mpt::PathString>("Sample Editor", "DefaultFormat", defaultFLAC ? MPT_PATHSTRING("flac") : MPT_PATHSTRING("wav"));
 	int filter = 1;
-	if(!format.CompareNoCase("flac"))
+	if(!mpt::PathString::CompareNoCase(format, MPT_PATHSTRING("flac")))
 		filter = 2;
-	else if(!format.CompareNoCase("raw"))
+	else if(!mpt::PathString::CompareNoCase(format, MPT_PATHSTRING("raw")))
 		filter = 3;
 
 	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension(mpt::PathString::FromCString(format))
+		.DefaultExtension(format)
 		.DefaultFilename(fileName)
 		.ExtensionFilter("Wave File (*.wav)|*.wav|"
 			"FLAC File (*.flac)|*.flac|"
