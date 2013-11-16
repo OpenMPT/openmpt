@@ -550,12 +550,13 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			const SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[iOut];
 			if(plugin.IsValidPlugin())
 			{
-				if(!strcmp(plugin.GetLibraryName(), plugin.GetName()) || !strcmp(plugin.GetName(), ""))
+				std::string libName = mpt::ToLocale(mpt::CharsetUTF8, plugin.GetLibraryName());
+				if(!strcmp(plugin.GetName(), "") || libName != plugin.GetName())
 				{
-					wsprintf(s, "FX%d: %s", iOut + 1, plugin.GetLibraryName());
+					wsprintf(s, "FX%d: %s", iOut + 1, libName.c_str());
 				} else
 				{
-					wsprintf(s, "FX%d: %s (%s)", iOut + 1, plugin.GetLibraryName(), plugin.GetName());
+					wsprintf(s, "FX%d: %s (%s)", iOut + 1, libName.c_str(), plugin.GetName());
 				}
 
 				int n = m_CbnOutput.AddString(s);

@@ -884,13 +884,13 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		{
 			notFoundText =	"The following plugins have not been found:\n\n" + notFoundText + "\nDo you want to search for them online?";
 		}
-		if (Reporting::Confirm(notFoundText.c_str(), "OpenMPT - Plugins missing", false, true) == cnfYes)
+		if (Reporting::Confirm(mpt::ToWide(mpt::CharsetUTF8, notFoundText.c_str()), L"OpenMPT - Plugins missing", false, true) == cnfYes)
 		{
 			std::string sUrl = "http://resources.openmpt.org/plugins/search.php?p=";
 			for(std::vector<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
 				sUrl += mpt::fmt::HEX0<8>(LittleEndian(m_MixPlugins[*i].Info.dwPluginId2));
-				sUrl += mpt::To(mpt::CharsetUTF8, mpt::CharsetLocale, m_MixPlugins[*i].GetLibraryName());
+				sUrl += m_MixPlugins[*i].GetLibraryName();
 				sUrl += "%0a";
 			}
 			CTrackApp::OpenURL(mpt::PathString::FromUTF8(sUrl));
@@ -2345,6 +2345,16 @@ void CSoundFile::UpgradeSong()
 			{
 				Instruments[i]->nPanSwing = 0;
 			}
+		}
+	}
+
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 01))
+	{
+		// Convert ANSI plugin path names to UTF-8 (irrelevant in probably 99% of all cases anyway, I think I've never seen a VST plugin with a non-ASCII file name)
+		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		{
+			const std::string name = mpt::To(mpt::CharsetUTF8, mpt::CharsetLocale, m_MixPlugins[i].Info.szLibraryName);
+			mpt::String::Copy(m_MixPlugins[i].Info.szLibraryName, name);
 		}
 	}
 

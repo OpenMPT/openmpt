@@ -121,8 +121,8 @@ struct PACKED SNDMIXPLUGININFO
 	uint8 reserved;
 	uint32 dwOutputRouting;			// 0 = send to master 0x80 + x = send to plugin x
 	uint32 dwReserved[4];			// Reserved for routing info
-	char szName[32];				// User-chosen plugin name
-	char szLibraryName[64];			// original DLL name
+	char szName[32];				// User-chosen plugin name - this is locale ANSI!
+	char szLibraryName[64];			// original DLL name - this is UTF-8!
 
 	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()
 	void SetBypass(bool bypass = true) { if(bypass) routingFlags |= irBypass; else routingFlags &= ~irBypass; }

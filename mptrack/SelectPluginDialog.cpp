@@ -148,9 +148,8 @@ void CSelectPluginDlg::OnOK()
 				break;
 			}
 
-			const std::string libraryName = pFactory->libraryName.ToLocale();
-			mpt::String::Copy(m_pPlugin->Info.szName, libraryName);
-			mpt::String::Copy(m_pPlugin->Info.szLibraryName, libraryName);
+			mpt::String::Copy(m_pPlugin->Info.szName, pFactory->libraryName.ToLocale().c_str());
+			mpt::String::Copy(m_pPlugin->Info.szLibraryName, pFactory->libraryName.ToUTF8().c_str());
 
 			cs.Leave();
 
