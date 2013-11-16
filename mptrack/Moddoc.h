@@ -171,6 +171,7 @@ public:
 	~ScopedLogCapturer();
 	void ShowLog(bool force = false);
 	void ShowLog(const std::string &preamble, bool force = false);
+	void ShowLog(const std::wstring &preamble, bool force = false);
 };
 
 
@@ -238,6 +239,7 @@ protected:
 	void SetLogMode(LogMode mode) { m_LogMode = mode; }
 	void ClearLog();
 	UINT ShowLog(const std::string &preamble, const std::string &title = "", CWnd *parent = nullptr);
+	UINT ShowLog(const std::wstring &preamble, const std::wstring &title = std::wstring(), CWnd *parent = nullptr);
 	UINT ShowLog(const std::string &title = "", CWnd *parent = nullptr) { return ShowLog("", title, parent); }
 
 public:

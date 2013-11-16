@@ -236,10 +236,10 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	#endif
 	EndWaitCursor();
 
-	logcapturer.ShowLog(std::string()
-		+ "File: " + filename.ToLocale() + "\n"
-		+ "Last saved with: " + m_SndFile.madeWithTracker + ", you are using OpenMPT " + MptVersion::str + "\n"
-		+ "\n"
+	logcapturer.ShowLog(std::wstring()
+		+ L"File: " + filename.ToWide() + L"\n"
+		+ L"Last saved with: " + mpt::ToWide(mpt::CharsetLocale, m_SndFile.madeWithTracker) + L", you are using OpenMPT " + mpt::ToWide(mpt::CharsetUTF8, MptVersion::str) + L"\n"
+		+ L"\n"
 		);
 
 	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels())) return FALSE;
@@ -517,7 +517,7 @@ bool CModDoc::SaveInstrument(INSTRUMENTINDEX instr)
 			if(success)
 				m_bsInstrumentModified.reset(instr);
 			else
-				Reporting::Error(("Error while saving\n" + m_SndFile.m_szInstrumentPath[instr].ToLocale() + "!").c_str());
+				Reporting::Error(L"Error while saving\n" + m_SndFile.m_szInstrumentPath[instr].ToWide() + L"!");
 		}
 	}
 	return success;
@@ -815,6 +815,17 @@ void ScopedLogCapturer::ShowLog(const std::string &preamble, bool force)
 }
 
 
+void ScopedLogCapturer::ShowLog(const std::wstring &preamble, bool force)
+//-----------------------------------------------------------------------
+{
+	if(force || m_oldLogMode == LogModeInstantReporting)
+	{
+		m_modDoc.ShowLog(preamble, mpt::ToWide(mpt::CharsetLocale, m_title), m_pParent);
+		m_modDoc.ClearLog();
+	}
+}
+
+
 ScopedLogCapturer::~ScopedLogCapturer()
 //-------------------------------------
 {
@@ -881,11 +892,18 @@ void CModDoc::ClearLog()
 UINT CModDoc::ShowLog(const std::string &preamble, const std::string &title, CWnd *parent)
 //----------------------------------------------------------------------------------------
 {
+	return ShowLog(mpt::ToWide(mpt::CharsetLocale, preamble), mpt::ToWide(mpt::CharsetLocale, title), parent);
+}
+
+
+UINT CModDoc::ShowLog(const std::wstring &preamble, const std::wstring &title, CWnd *parent)
+//------------------------------------------------------------------------------------------
+{
 	if(!parent) parent = CMainFrame::GetMainFrame();
 	if(GetLog().size() > 0)
 	{
-		std::string text = preamble + GetLogString();
-		std::string actualTitle = (title.length() == 0) ? std::string(MAINFRAME_TITLE) : title;
+		std::wstring text = preamble + mpt::ToWide(mpt::CharsetLocale, GetLogString());
+		std::wstring actualTitle = (title.length() == 0) ? MAINFRAME_TITLEW : title;
 		switch(GetMaxLogLevel())
 		{
 		case LogError:        Reporting::Error(text.c_str(), actualTitle.c_str(), parent); break;
