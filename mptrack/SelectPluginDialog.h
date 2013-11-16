@@ -25,7 +25,7 @@ protected:
 	SNDMIXPLUGIN *m_pPlugin;
 	CModDoc *m_pModDoc;
 	CTreeCtrlW m_treePlugins;
-	CString m_sNameFilter;
+	std::wstring m_nameFilter;
 
 	HTREEITEM AddTreeItem(const WCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
 
@@ -39,6 +39,7 @@ public:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	virtual void OnCancel();
+	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	afx_msg void OnAddPlugin();
 	afx_msg void OnRemovePlugin();
 	afx_msg void OnNameFilterChanged();
