@@ -32,7 +32,8 @@ void CloseMainDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 
-// Format a list entry string
+// Format a list entry string - apparently list boxes in ANSI windows are ANSI too, so inserted unicode
+// strings are converted to ANSI. Thus, we will keep using CStrings here for ANSI builds.
 CString CloseMainDialog::FormatTitle(const CModDoc *pModDoc, bool fullPath)
 //-------------------------------------------------------------------------
 {

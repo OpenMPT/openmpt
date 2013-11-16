@@ -678,10 +678,11 @@ void CModTree::RefreshInstrumentLibrary()
 
 
 void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
-//----------------------------------------------------------
+//-----------------------------------------------------------
 {
 	TCHAR s[256], stmp[256];
 	TV_ITEM tvi;
+	MemsetZero(tvi);
 	const DWORD hintFlagPart = HintFlagPart(lHint);
 	if ((pInfo == nullptr) || (pInfo->pModDoc == nullptr) || IsSampleBrowser()) return;
 	if (!hintFlagPart) return;
@@ -691,40 +692,30 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 
 	// Create headers
 	s[0] = 0;
-	if ((hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE)) || (!pInfo->hSong))
+	if((hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE)) || (!pInfo->hSong))
 	{
-		_tcscpy(s, pDoc->GetPathNameMpt().GetFileName().ToCString().GetString());
-		if (!s[0]) strcpy(s, "untitled");
-		MemsetZero(tvi);
-	}
-	if (!pInfo->hSong)
-	{
-		pInfo->hSong = InsertItem(s, TVI_ROOT, TVI_FIRST);
-		pInfo->hOrders = InsertItem(_T("Sequence"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
-		pInfo->hPatterns = InsertItem(_T("Patterns"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
-		pInfo->hSamples = InsertItem(_T("Samples"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
-	}
-	if (hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE))
-	{
-		tvi.mask |= TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
-		tvi.hItem = pInfo->hSong;
-		tvi.pszText = stmp;
-		tvi.cchTextMax = CountOf(stmp);
-		tvi.iImage = tvi.iSelectedImage = IMAGE_FOLDER;
-		GetItem(&tvi);
-		if(tvi.iImage != IMAGE_FOLDER || strcmp(s, stmp))
+		// Module folder + sub folders
+		std::wstring name = pDoc->GetPathNameMpt().GetFileName().ToWide();
+		if(name.empty()) name = mpt::PathString::FromWide(mpt::ToWide(pInfo->pModDoc->GetTitle())).SanitizeComponent().ToWide();
+
+		if(!pInfo->hSong)
 		{
-			tvi.mask |= TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
-			tvi.hItem = pInfo->hSong;
-			tvi.pszText = s;
-			tvi.iImage = tvi.iSelectedImage = IMAGE_FOLDER;
-			tvi.lParam = (LPARAM)pInfo->pModDoc;
-			SetItem(&tvi);
+			pInfo->hSong = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, name.c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (LPARAM)pInfo->pModDoc, TVI_ROOT, TVI_FIRST);
+			pInfo->hOrders = InsertItem(_T("Sequence"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
+			pInfo->hPatterns = InsertItem(_T("Patterns"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
+			pInfo->hSamples = InsertItem(_T("Samples"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
+		} else if(hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE))
+		{
+			if(name != GetItemTextW(tvi.hItem))
+			{
+				SetItemText(pInfo->hSong, name.c_str());
+			}
 		}
 	}
+
 	if (sndFile.GetModSpecifications().instrumentsMax > 0)
 	{
-		if (!pInfo->hInstruments) pInfo->hInstruments = InsertItem(_T("Instruments"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
+		if (!pInfo->hInstruments) pInfo->hInstruments = InsertItem(_T("Instruments"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, pInfo->hSamples);
 	} else
 	{
 		if (pInfo->hInstruments)
@@ -738,31 +729,30 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 	// Add effects
 	if (hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE|HINT_MODCHANNELS|HINT_MIXPLUGINS))
 	{
-		UINT nFx = 0;
-		DeleteChildren(pInfo->hEffects);
-		for (UINT iFx=0; iFx<MAX_MIXPLUGINS; iFx++)
+		if(!pInfo->hEffects)
 		{
-			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[iFx];
+			pInfo->hEffects = InsertItem(_T("Plugins"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, pInfo->hInstruments ? pInfo->hInstruments : pInfo->hSamples);
+		} else
+		{
+			DeleteChildren(pInfo->hEffects);
+		}
+		bool hasPlugs = false;
+		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		{
+			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[i];
 			if (plugin.IsValidPlugin())
 			{
-				if (!pInfo->hEffects)
-				{
-					pInfo->hEffects = InsertItem(_T("Plugins"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
-				}
-				wsprintf(s, "FX%u: %s", iFx + 1, plugin.GetName());
+				wsprintf(s, "FX%u: %s", i + 1, plugin.GetName());
 				int nImage = IMAGE_NOPLUGIN;
 				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->isInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
-				InsertItem(TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, iFx, pInfo->hEffects, TVI_LAST);
-				nFx++;
+				InsertItem(TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, i, pInfo->hEffects, TVI_LAST);
+				hasPlugs = true;
 			}
 		}
-		if (!nFx)
+		if(!hasPlugs && pInfo->hEffects)
 		{
-			if (pInfo->hEffects)
-			{
-				DeleteItem(pInfo->hEffects);
-				pInfo->hEffects = NULL;
-			}
+			DeleteItem(pInfo->hEffects);
+			pInfo->hEffects = NULL;
 		}
 	}
 	// Add Orders
