@@ -3279,7 +3279,7 @@ void CModTree::OnSoundBankProperties()
 	if(modItem.type == MODITEM_DLSBANK_FOLDER
 		&& modItem.val1 < CTrackApp::gpDLSBanks.size() && CTrackApp::gpDLSBanks[modItem.val1])
 	{
-		CSoundBankProperties dlg(CTrackApp::gpDLSBanks[modItem.val1], this);
+		CSoundBankProperties dlg(*CTrackApp::gpDLSBanks[modItem.val1], this);
 		dlg.DoModal();
 	}
 }
