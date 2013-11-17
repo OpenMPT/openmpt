@@ -7,7 +7,8 @@
  *          with the IT format, but keeping the instrument files with big samples separate
  *          from the pattern data, to keep the work files small and handy.
  *          The current design of the format is quite flawed, though, so expect this to
- *          change in the (far?) future.
+ *          change in the (far?) future. Most likely, the new MPTM format will contain
+ *          optional functionality to link samples and instruments instead of embedding them.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -18,13 +19,21 @@
 #include "../mptrack/mptrack.h"
 #include "../mptrack/TrackerSettings.h"
 #include "../mptrack/MemoryMappedFile.h"
+#include "../mptrack/Moddoc.h"
 #endif
 #include "../common/version.h"
 #include "Loaders.h"
 #include "ITTools.h"
 
+// Version changelog:
+// v1.03: - Relative unicode instrument paths instead of absolute ANSI paths
+//        - Per-path variable string length
+//        - Embedded samples are IT-compressed
+//        (rev. 3249)
+// v1.02: Explicitely updated format to use new instrument flags representation (rev. 483)
+// v1.01: Added option to embed instrument headers
 
-#define ITP_VERSION 0x00000102	// v1.02
+#define ITP_VERSION 0x00000103	// v1.03
 #define ITP_FILE_ID 0x2E697470	// .itp ASCII
 
 
@@ -63,7 +72,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.CanRead(12 + 4 + 24 + 4)
 		|| file.ReadUint32LE() != ITP_FILE_ID				// Magic bytes
 		|| (version = file.ReadUint32LE()) > ITP_VERSION	// Format version
-		|| !ReadITPString(songName, file))				// Song name
+		|| !ReadITPString(songName, file))					// Song name
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -129,12 +138,28 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Instruments' paths
-	size = file.ReadUint32LE();	// path string length
+	if(version <= 0x00000102)
+	{
+		size = file.ReadUint32LE();	// path string length
+	}
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
+		if(version > 0x00000102)
+		{
+			size = file.ReadUint32LE();	// path string length
+		}
 		std::string path;
 		file.ReadString<mpt::String::maybeNullTerminated>(path, size);
-		m_szInstrumentPath[ins] = mpt::PathString::FromLocale(path);
+		if(version <= 0x00000102)
+		{
+			path = mpt::To(mpt::CharsetUTF8, mpt::CharsetLocale, path);
+		}
+		m_szInstrumentPath[ins] = mpt::PathString::FromUTF8(path);
+
+		if(GetpModDoc() != nullptr)
+		{
+			m_szInstrumentPath[ins] = m_szInstrumentPath[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt());
+		}
 	}
 
 	// Song Orders
@@ -390,17 +415,14 @@ bool CSoundFile::SaveITProject(const mpt::PathString &filename)
 	id = m_nInstruments;
 	fwrite(&id, 1, sizeof(id), f);
 
-	// path name string length
-	id = _MAX_PATH;
-	fwrite(&id, 1, sizeof(id), f);
-
 	// instruments' path
 	for(i = 0; i < m_nInstruments; i++)
 	{
-		char path[_MAX_PATH];
-		MemsetZero(path);
-		strncpy(path, m_szInstrumentPath[i].ToLocale().c_str(), _MAX_PATH);
-		fwrite(path, 1, _MAX_PATH, f);
+		const std::string path = m_szInstrumentPath[i].AbsolutePathToRelative(filename).ToUTF8();
+		// path name string length
+		id = path.length();
+		fwrite(&id, 1, sizeof(id), f);
+		fwrite(path.c_str(), 1, path.length(), f);
 	}
 
 	// Song Orders
@@ -482,7 +504,7 @@ bool CSoundFile::SaveITProject(const mpt::PathString &filename)
 		if(!sampleUsed[nsmp] && Samples[nsmp].pSample)
 		{
 			ITSample itss;
-			itss.ConvertToIT(Samples[nsmp], GetType(), false, false);
+			itss.ConvertToIT(Samples[nsmp], GetType(), true, true);
 
 			mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[nsmp]);
 

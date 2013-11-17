@@ -708,18 +708,15 @@ void TestMisc()
 
 	// Path conversions
 #ifdef MODPLUG_TRACKER
-	const mpt::PathString realExePath = theApp.GetAppDirPath();
 	const mpt::PathString exePath = MPT_PATHSTRING("C:\\OpenMPT\\");
-	theApp.SetAppDirPath(exePath);
-	VERIFY_EQUAL(theApp.AbsolutePathToRelative(MPT_PATHSTRING("C:\\OpenMPT\\")), MPT_PATHSTRING(".\\"));
-	VERIFY_EQUAL(theApp.AbsolutePathToRelative(MPT_PATHSTRING("c:\\OpenMPT\\foo")), MPT_PATHSTRING(".\\foo"));
-	VERIFY_EQUAL(theApp.AbsolutePathToRelative(MPT_PATHSTRING("C:\\foo")), MPT_PATHSTRING("\\foo"));
-	VERIFY_EQUAL(theApp.RelativePathToAbsolute(MPT_PATHSTRING(".\\")), MPT_PATHSTRING("C:\\OpenMPT\\"));
-	VERIFY_EQUAL(theApp.RelativePathToAbsolute(MPT_PATHSTRING(".\\foo")), MPT_PATHSTRING("C:\\OpenMPT\\foo"));
-	VERIFY_EQUAL(theApp.RelativePathToAbsolute(MPT_PATHSTRING("\\foo")), MPT_PATHSTRING("C:\\foo"));
-	VERIFY_EQUAL(theApp.AbsolutePathToRelative(MPT_PATHSTRING("\\\\server\\path\\file")), MPT_PATHSTRING("\\\\server\\path\\file"));
-	VERIFY_EQUAL(theApp.RelativePathToAbsolute(MPT_PATHSTRING("\\\\server\\path\\file")), MPT_PATHSTRING("\\\\server\\path\\file"));
-	theApp.SetAppDirPath(realExePath);
+	VERIFY_EQUAL(MPT_PATHSTRING("C:\\OpenMPT\\").AbsolutePathToRelative(exePath), MPT_PATHSTRING(".\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("c:\\OpenMPT\\foo").AbsolutePathToRelative(exePath), MPT_PATHSTRING(".\\foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING("C:\\foo").AbsolutePathToRelative(exePath), MPT_PATHSTRING("\\foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING(".\\").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\OpenMPT\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING(".\\foo").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\OpenMPT\\foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\foo").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").AbsolutePathToRelative(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").RelativePathToAbsolute(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
 #endif
 
 }

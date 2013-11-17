@@ -120,6 +120,10 @@ public:
 		return false;
 	}
 
+	// Relative / absolute paths conversion
+	mpt::PathString AbsolutePathToRelative(const mpt::PathString &relativeTo) const;
+	mpt::PathString RelativePathToAbsolute(const mpt::PathString &relativeTo) const;
+
 #endif // MODPLUG_TRACKER
 
 public:

@@ -219,7 +219,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 
 	BeginWaitCursor();
 	#ifndef NO_FILEREADER_STD_ISTREAM
-		mpt::ifstream f(lpszPathName, std::ios_base::binary);
+		mpt::ifstream f(filename, std::ios_base::binary);
 		m_SndFile.Create(FileReader(&f), CSoundFile::loadCompleteModule, this);
 	#else
 	{
@@ -229,6 +229,9 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 			FileReader file = f.GetFile();
 			if(file.IsValid())
 			{
+				ASSERT(GetPathNameMpt() == mpt::PathString());
+				SetPathName(filename, FALSE);	// Path is not set yet, but ITP loader needs this for relative paths.
+
 				m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
 			}
 		}

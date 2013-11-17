@@ -210,9 +210,6 @@ public:
 	static VOID SetAsProject(BOOL n) { m_nProject = n; }
 // -! NEW_FEATURE#0023
 
-#if defined(ENABLE_TESTS)
-	static void SetAppDirPath(mpt::PathString exePath) {m_szExePath=exePath;}
-#endif
 	static mpt::PathString GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
@@ -271,8 +268,8 @@ public:
 	void SetupPaths(bool overridePortable);
 
 	// Relative / absolute paths conversion
-	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path);
-	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path);
+	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetAppDirPath()); }
+	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetAppDirPath()); }
 
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const int nItem);
