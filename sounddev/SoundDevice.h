@@ -305,7 +305,8 @@ public:
 	bool IsOpen() const { return InternalIsOpen(); }
 	bool IsPlaying() const { return m_IsPlaying; }
 
-	SampleFormat GetActualSampleFormat() { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
+	SoundDeviceSettings GetSettings() const { return m_Settings; }
+	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
 
 	SoundBufferAttributes GetBufferAttributes() const { return m_BufferAttributes; }
 
