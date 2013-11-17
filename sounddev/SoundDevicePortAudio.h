@@ -33,6 +33,7 @@ protected:
 	PaStreamParameters m_StreamParameters;
 	PaWasapiStreamInfo m_WasapiStreamInfo;
 	PaStream * m_Stream;
+	const PaStreamInfo * m_StreamInfo;
 	void * m_CurrentFrameBuffer;
 	unsigned long m_CurrentFrameCount;
 
@@ -49,7 +50,7 @@ public:
 	void InternalStart();
 	void InternalStop();
 	bool InternalIsOpen() const { return m_Stream ? true : false; }
-	double GetCurrentRealLatency() const;
+	double GetCurrentLatency() const;
 	bool InternalHasGetStreamPosition() const { return false; }
 	int64 InternalGetStreamPositionFrames() const;
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);

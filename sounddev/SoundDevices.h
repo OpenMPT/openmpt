@@ -38,6 +38,7 @@ private:
 	FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics;
 	FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics;
 
+	double m_WakeupInterval;
 	HANDLE m_hAudioWakeUp;
 	HANDLE m_hPlayThread;
 	HANDLE m_hAudioThreadTerminateRequest;
@@ -52,6 +53,7 @@ public:
 	~CAudioThread();
 	void Activate();
 	void Deactivate();
+	void SetWakeupInterval(double seconds);
 };
 
 
@@ -62,6 +64,8 @@ protected:
 	CAudioThread m_AudioThread;
 private:
 	void FillAudioBufferLocked();
+protected:
+	void SetWakeupInterval(double seconds);
 public:
 	CSoundDeviceWithThread(SoundDeviceID id, const std::wstring &internalID) : ISoundDevice(id, internalID), m_AudioThread(*this) {}
 	virtual ~CSoundDeviceWithThread() {}

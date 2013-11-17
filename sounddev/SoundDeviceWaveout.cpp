@@ -93,12 +93,14 @@ bool CWaveDevice::InternalOpen()
 		Close();
 		return false;
 	}
-	UpdateLatencyInfo(
-		m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond(),
-		m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond(),
-		m_nPreparedHeaders);
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
+	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
+	SoundBufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond();
+	bufferAttributes.UpdateInterval = m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
+	bufferAttributes.NumBuffers = m_nPreparedHeaders;
+	UpdateBufferAttributes(bufferAttributes);
 	return true;
 }
 

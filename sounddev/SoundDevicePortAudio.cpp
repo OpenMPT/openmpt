@@ -33,6 +33,7 @@ CPortaudioDevice::CPortaudioDevice(SoundDeviceID id, const std::wstring &interna
 	m_HostApi = SndDevTypeToHostApi(id.GetType());
 	MemsetZero(m_StreamParameters);
 	m_Stream = 0;
+	m_StreamInfo = 0;
 	m_CurrentFrameCount = 0;
 	m_CurrentRealLatency = 0.0;
 }
@@ -50,6 +51,7 @@ bool CPortaudioDevice::InternalOpen()
 {
 	MemsetZero(m_StreamParameters);
 	m_Stream = 0;
+	m_StreamInfo = 0;
 	m_CurrentFrameBuffer = 0;
 	m_CurrentFrameCount = 0;
 	m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi);
@@ -83,16 +85,18 @@ bool CPortaudioDevice::InternalOpen()
 	}
 	if(Pa_IsFormatSupported(NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported) return false;
 	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, m_Settings.Samplerate, /*static_cast<long>(m_UpdateIntervalMS * pwfx->nSamplesPerSec / 1000.0f)*/ paFramesPerBufferUnspecified, paNoFlag, StreamCallbackWrapper, (void*)this) != paNoError) return false;
-	if(!Pa_GetStreamInfo(m_Stream))
+	m_StreamInfo = Pa_GetStreamInfo(m_Stream);
+	if(!m_StreamInfo)
 	{
 		Pa_CloseStream(m_Stream);
 		m_Stream = 0;
 		return false;
 	}
-	UpdateLatencyInfo(
-		Pa_GetStreamInfo(m_Stream)->outputLatency,
-		m_Settings.UpdateIntervalMS / 1000.0,
-		1);
+	SoundBufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_StreamInfo->outputLatency;
+	bufferAttributes.UpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
+	bufferAttributes.NumBuffers = 1;
+	UpdateBufferAttributes(bufferAttributes);
 	return true;
 }
 
@@ -106,9 +110,10 @@ bool CPortaudioDevice::InternalClose()
 		Pa_CloseStream(m_Stream);
 		if(Pa_GetDeviceInfo(m_StreamParameters.device)->hostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
 		{
-			Pa_Sleep((long)(GetRealLatency() * 2.0 * 1000.0)); // wait for broken wdm drivers not closing the stream immediatly
+			Pa_Sleep(Util::Round<long>(GetBufferAttributes().Latency * 2.0 * 1000.0 + 0.5)); // wait for broken wdm drivers not closing the stream immediatly
 		}
 		MemsetZero(m_StreamParameters);
+		m_StreamInfo = 0;
 		m_Stream = 0;
 		m_CurrentFrameCount = 0;
 		m_CurrentFrameBuffer = 0;
@@ -136,7 +141,7 @@ void CPortaudioDevice::FillAudioBuffer()
 {
 	if(m_CurrentFrameCount == 0) return;
 	SourceAudioRead(m_CurrentFrameBuffer, m_CurrentFrameCount);
-	SourceAudioDone(m_CurrentFrameCount, static_cast<ULONG>(m_CurrentRealLatency * Pa_GetStreamInfo(m_Stream)->sampleRate));
+	SourceAudioDone(m_CurrentFrameCount, static_cast<ULONG>(m_CurrentRealLatency * m_StreamInfo->sampleRate));
 }
 
 
@@ -144,12 +149,12 @@ int64 CPortaudioDevice::InternalGetStreamPositionFrames() const
 //--------------------------------------------------------------
 {
 	if(Pa_IsStreamActive(m_Stream) != 1) return 0;
-	return static_cast<int64>(Pa_GetStreamTime(m_Stream) * Pa_GetStreamInfo(m_Stream)->sampleRate);
+	return static_cast<int64>(Pa_GetStreamTime(m_Stream) * m_StreamInfo->sampleRate);
 }
 
 
-double CPortaudioDevice::GetCurrentRealLatency() const
-//----------------------------------------------------
+double CPortaudioDevice::GetCurrentLatency() const
+//------------------------------------------------
 {
 	return m_CurrentRealLatency;
 }
@@ -206,11 +211,16 @@ int CPortaudioDevice::StreamCallback(
 	{
 		// For WDM-KS, timeInfo->outputBufferDacTime seems to contain bogus values.
 		// Work-around it by using the slightly less accurate per-stream latency estimation.
-		m_CurrentRealLatency = Pa_GetStreamInfo(m_Stream)->outputLatency;
+		m_CurrentRealLatency = m_StreamInfo->outputLatency;
 	} else
 	{
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime;
 	}
+	SoundBufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_StreamInfo->outputLatency;
+	bufferAttributes.UpdateInterval = (double)frameCount / (double)m_StreamInfo->sampleRate;
+	bufferAttributes.NumBuffers = 1;
+	UpdateBufferAttributes(bufferAttributes);
 	m_CurrentFrameBuffer = output;
 	m_CurrentFrameCount = frameCount;
 	SourceFillAudioBufferLocked();

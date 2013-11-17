@@ -206,6 +206,21 @@ struct SoundDeviceCaps
 class SoundDevicesManager;
 
 
+struct SoundBufferAttributes
+{
+	double Latency; // seconds
+	double UpdateInterval; // seconds
+	int NumBuffers;
+	SoundBufferAttributes()
+		: Latency(0.0)
+		, UpdateInterval(0.0)
+		, NumBuffers(0)
+	{
+		return;
+	}
+};
+
+
 //=============================================
 class ISoundDevice : protected IFillAudioBuffer
 //=============================================
@@ -227,9 +242,7 @@ protected:
 
 private:
 
-	double m_RealLatency;
-	double m_RealUpdateInterval;
-	int m_RealNumBuffers;
+	SoundBufferAttributes m_BufferAttributes;
 
 	bool m_IsPlaying;
 
@@ -251,12 +264,7 @@ protected:
 
 	bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat);
 
-	void UpdateLatencyInfo(double latency, double updateInterval, int numBuffers)
-	{
-		m_RealLatency = latency;
-		m_RealUpdateInterval = updateInterval;
-		m_RealNumBuffers = numBuffers;
-	}
+	void UpdateBufferAttributes(SoundBufferAttributes attributes);
 
 	virtual bool InternalHasGetStreamPosition() const { return false; }
 	virtual int64 InternalGetStreamPositionFrames() const { return 0; }
@@ -295,11 +303,11 @@ public:
 
 	SampleFormat GetActualSampleFormat() { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
 
-	double GetRealLatency() const  { return m_RealLatency; } // seconds
-	double GetRealUpdateInterval() const { return m_RealUpdateInterval; } // seconds
-	int GetRealNumBuffers() const { return m_RealNumBuffers; }
+	SoundBufferAttributes GetBufferAttributes() const { return m_BufferAttributes; }
 
-	virtual double GetCurrentRealLatency() const { return GetRealLatency(); }
+	// Informational only, do not use for timing.
+	// Use GetStreamPositionFrames() for timing
+	virtual double GetCurrentLatency() const { return m_BufferAttributes.Latency; }
 
 	int64 GetStreamPositionFrames() const;
 
