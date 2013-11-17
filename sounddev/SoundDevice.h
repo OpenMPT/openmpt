@@ -247,6 +247,7 @@ private:
 	bool m_IsPlaying;
 
 	mutable Util::mutex m_StreamPositionMutex;
+	double m_CurrentUpdateInterval;
 	int64 m_StreamPositionRenderFrames;
 	int64 m_StreamPositionOutputFrames;
 
@@ -308,6 +309,7 @@ public:
 	// Informational only, do not use for timing.
 	// Use GetStreamPositionFrames() for timing
 	virtual double GetCurrentLatency() const { return m_BufferAttributes.Latency; }
+	double GetCurrentUpdateInterval() const;
 
 	int64 GetStreamPositionFrames() const;
 
