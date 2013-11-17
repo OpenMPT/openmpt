@@ -111,9 +111,10 @@ class CSoundBankProperties: public CDialog
 {
 protected:
 	CHAR m_szInfo[4096];
+	mpt::PathString fileName;
 
 public:
-	CSoundBankProperties(CDLSBank *pBank, CWnd *parent=NULL);
+	CSoundBankProperties(CDLSBank &bank, CWnd *parent = nullptr);
 	virtual BOOL OnInitDialog();
 };
 
