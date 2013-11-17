@@ -90,8 +90,7 @@ PathString PathString::SanitizeComponent() const
 }
 
 
-// Convert an absolute path to a path that's relative to OpenMPT's directory.
-// Paths are relative to the executable path.
+// Convert an absolute path to a path that's relative to "&relativeTo".
 PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) const
 //-------------------------------------------------------------------------------
 {
@@ -114,8 +113,7 @@ PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) cons
 }
 
 
-// Convert a relative path to an absolute path.
-// Paths are relative to the executable path.
+// Convert a path that is relative to "&relativeTo" to an absolute path.
 PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) const
 //-------------------------------------------------------------------------------
 {

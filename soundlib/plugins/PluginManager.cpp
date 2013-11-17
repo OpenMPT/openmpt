@@ -75,7 +75,6 @@ bool CVstPluginManager::CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile 
 CVstPluginManager::CVstPluginManager()
 //------------------------------------
 {
-	m_pVstHead = nullptr;
 	CSoundFile::gpMixPluginCreateProc = CreateMixPluginProc;
 	EnumerateDirectXDMOs();
 }
@@ -85,17 +84,13 @@ CVstPluginManager::~CVstPluginManager()
 //-------------------------------------
 {
 	CSoundFile::gpMixPluginCreateProc = nullptr;
-	while (m_pVstHead)
+	for(const_iterator p = begin(); p != end(); p++)
 	{
-		VSTPluginLib *p = m_pVstHead;
-		m_pVstHead = m_pVstHead->pNext;
-		if (m_pVstHead) m_pVstHead->pPrev = nullptr;
-		p->pPrev = p->pNext = nullptr;
-		while ((volatile void *)(p->pPluginsList) != nullptr)
+		while((**p).pPluginsList != nullptr)
 		{
-			p->pPluginsList->Release();
+			(**p).pPluginsList->Release();
 		}
-		delete p;
+		delete *p;
 	}
 }
 
@@ -103,11 +98,9 @@ CVstPluginManager::~CVstPluginManager()
 bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib)
 //-------------------------------------------------------------
 {
-	VSTPluginLib *p = m_pVstHead;
-	while (p)
+	for(const_iterator p = begin(); p != end(); p++)
 	{
-		if (p == pLib) return true;
-		p = p->pNext;
+		if(*p == pLib) return true;
 	}
 	return false;
 }
@@ -141,16 +134,17 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 					{
 						StringFromGUID2(clsid, keyname, 100);
 
-						VSTPluginLib *p = new VSTPluginLib(mpt::PathString::FromNative(keyname), mpt::PathString::FromWide(name));
-						p->pNext = m_pVstHead;
-						p->pluginId1 = kDmoMagic;
-						p->pluginId2 = clsid.Data1;
-						p->category = VSTPluginLib::catDMO;
+						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(mpt::PathString::FromNative(keyname), mpt::PathString::FromWide(name));
+						if(plug != nullptr)
+						{
+							pluginList.push_back(plug);
+							plug->pluginId1 = kDmoMagic;
+							plug->pluginId2 = clsid.Data1;
+							plug->category = VSTPluginLib::catDMO;
 #ifdef DMO_LOG
-						Log("Found \"%s\" clsid=%s\n", p->libraryName.AsNative().c_str(), p->dllPath.AsNative().c_str());
+							Log("Found \"%s\" clsid=%s\n", plug->libraryName.AsNative().c_str(), plug->dllPath.AsNative().c_str());
 #endif
-						if (m_pVstHead) m_pVstHead->pPrev = p;
-						m_pVstHead = p;
+						}
 					}
 					RegCloseKey(hksub);
 				}
@@ -266,12 +260,12 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		}
 	}
 
-	VSTPluginLib *pDup = m_pVstHead;
-	while(pDup != nullptr)
+	// Check if this is already a known plugin.
+	for(const_iterator dupePlug = begin(); dupePlug != end(); dupePlug++)
 	{
-		if(!dllPath.CompareNoCase(dllPath, pDup->dllPath)) return pDup;
-		pDup = pDup->pNext;
+		if(!dllPath.CompareNoCase(dllPath, (**dupePlug).dllPath)) return *dupePlug;
 	}
+
 	// Look if the plugin info is stored in the PluginCache
 	if(fromCache)
 	{
@@ -286,14 +280,12 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 
 			if(!realPath.empty() && !dllPath.CompareNoCase(realPath, dllPath))
 			{
-				VSTPluginLib *p = new (std::nothrow) VSTPluginLib(dllPath, fileName);
-				if(p == nullptr)
+				VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(dllPath, fileName);
+				if(plug == nullptr)
 				{
 					return nullptr;
 				}
-				p->pNext = m_pVstHead;
-				if (m_pVstHead) m_pVstHead->pPrev = p;
-				m_pVstHead = p;
+				pluginList.push_back(plug);
 
 				// Extract plugin Ids
 				for (UINT i=0; i<16; i++)
@@ -303,26 +295,26 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 					n &= 0x0f;
 					if (i < 8)
 					{
-						p->pluginId1 = (p->pluginId1 << 4) | n;
+						plug->pluginId1 = (plug->pluginId1 << 4) | n;
 					} else
 					{
-						p->pluginId2 = (p->pluginId2 << 4) | n;
+						plug->pluginId2 = (plug->pluginId2 << 4) | n;
 					}
 				}
 
 				std::string flagKey = mpt::String::Format("%s.Flags", IDs.c_str());
-				p->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
+				plug->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
 
 #ifdef VST_USE_ALTERNATIVE_MAGIC
-				if( p->pluginId1 == kEffectMagic )
+				if( plug->pluginId1 == kEffectMagic )
 				{
-					p->pluginId1 = CalculateCRC32fromFilename(p->libraryName); // Make Plugin ID unique for sure (for VSTs with same UID)
+					plug->pluginId1 = CalculateCRC32fromFilename(plug->libraryName); // Make Plugin ID unique for sure (for VSTs with same UID)
 				};
 #endif // VST_USE_ALTERNATIVE_MAGIC
 #ifdef VST_LOG
-				Log("Plugin \"%s\" found in PluginCache\n", p->libraryName);
+				Log("Plugin \"%s\" found in PluginCache\n", plug->libraryName.ToLocale().c_str());
 #endif // VST_LOG
-				return p;
+				return plug;
 			} else
 			{
 #ifdef VST_LOG
@@ -339,12 +331,11 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	HINSTANCE hLib;
 	bool validPlug = false;
 
-	VSTPluginLib *p = new (std::nothrow) VSTPluginLib(dllPath, fileName);
-	if(p == nullptr)
+	VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(dllPath, fileName);
+	if(plug == nullptr)
 	{
 		return nullptr;
 	}
-	p->pNext = m_pVstHead;
 
 	try
 	{
@@ -354,23 +345,20 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		{
 			pEffect->dispatcher(pEffect, effOpen, 0, 0, 0, 0);
 
-			if (m_pVstHead) m_pVstHead->pPrev = p;
-			m_pVstHead = p;
-
 #ifdef VST_USE_ALTERNATIVE_MAGIC
-			p->pluginId1 = CalculateCRC32fromFilename(p->libraryName); // Make Plugin ID unique for sure
+			plug.pluginId1 = CalculateCRC32fromFilename(plug->libraryName); // Make Plugin ID unique for sure
 #else
-			p->pluginId1 = pEffect->magic;
+			plug->pluginId1 = pEffect->magic;
 #endif // VST_USE_ALTERNATIVE_MAGIC
-			p->pluginId2 = pEffect->uniqueID;
+			plug->pluginId2 = pEffect->uniqueID;
 
-			GetPluginInformation(pEffect, *p);
+			GetPluginInformation(pEffect, *plug);
 
 #ifdef VST_LOG
 			int nver = pEffect->dispatcher(pEffect, effGetVstVersion, 0,0, nullptr, 0);
 			if (!nver) nver = pEffect->version;
 			Log("%-20s: v%d.0, %d in, %d out, %2d programs, %2d params, flags=0x%04X realQ=%d offQ=%d\n",
-				p->libraryName, nver,
+				plug->libraryName.ToLocale().c_str(), nver,
 				pEffect->numInputs, pEffect->numOutputs,
 				pEffect->numPrograms, pEffect->numParams,
 				pEffect->flags, pEffect->realQualities, pEffect->offQualities);
@@ -384,7 +372,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		FreeLibrary(hLib);
 	} catch(...)
 	{
-		CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception while trying to load plugin \"%1\"!\n", p->libraryName));
+		CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception while trying to load plugin \"%1\"!\n", plug->libraryName));
 	}
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
@@ -393,8 +381,10 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	// If OK, write the information in PluginCache
 	if(validPlug)
 	{
+		pluginList.push_back(plug);
+
 		SettingsContainer &cacheFile = theApp.GetPluginCache();
-		const std::string IDs = mpt::String::Format("%08X%08X", p->pluginId1, p->pluginId2);
+		const std::string IDs = mpt::String::Format("%08X%08X", plug->pluginId1, plug->pluginId2);
 		const std::string flagsKey = mpt::String::Format("%s.Flags", IDs);
 
 		mpt::PathString writePath = dllPath;
@@ -405,40 +395,32 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 
 		cacheFile.Write<mpt::PathString>(cacheSection, IDs, writePath);
 		cacheFile.Write<mpt::PathString>(cacheSection, IDs, dllPath);
-		cacheFile.Write<std::string>(cacheSectionW, p->libraryName.ToWide(), IDs);
-		cacheFile.Write<int32>(cacheSection, flagsKey, p->EncodeCacheFlags());
-	} else
-	{
-		delete p;
+		cacheFile.Write<std::string>(cacheSectionW, plug->libraryName.ToWide(), IDs);
+		cacheFile.Write<int32>(cacheSection, flagsKey, plug->EncodeCacheFlags());
 	}
 
-	return (validPlug ? m_pVstHead : nullptr);
+	return (validPlug ? plug : nullptr);
 }
 
 
 bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 //----------------------------------------------------------
 {
-	VSTPluginLib *p = m_pVstHead;
-
-	while (p)
+	for(const_iterator p = begin(); p != end(); p++)
 	{
-		if (p == pFactory)
+		VSTPluginLib *plug = *p;
+		if(plug == pFactory)
 		{
-			if (p == m_pVstHead) m_pVstHead = p->pNext;
-			if (p->pPrev) p->pPrev->pNext = p->pNext;
-			if (p->pNext) p->pNext->pPrev = p->pPrev;
-			p->pPrev = p->pNext = nullptr;
-
 			try
 			{
 				CriticalSection cs;
 
-				while ((volatile void *)(p->pPluginsList) != nullptr)
+				while(plug->pPluginsList != nullptr)
 				{
-					p->pPluginsList->Release();
+					plug->pPluginsList->Release();
 				}
-				delete p;
+				pluginList.erase(p);
+				delete plug;
 			} catch (...)
 			{
 				CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception while trying to release plugin \"%1\"!\n", pFactory->libraryName));
@@ -446,7 +428,6 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 
 			return true;
 		}
-		p = p->pNext;
 	}
 	return false;
 }
@@ -460,28 +441,27 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	const wchar_t *cacheSectionW = L"PluginCache";
 
 	// Find plugin in library
-	VSTPluginLib *p = m_pVstHead;
 	int match = 0;
-	while(p)
+	for(const_iterator p = begin(); p != end(); p++)
 	{
-		const bool matchID = (p->pluginId1 == mixPlugin.Info.dwPluginId1)
-			&& (p->pluginId2 == mixPlugin.Info.dwPluginId2);
-		const bool matchName = !mpt::PathString::CompareNoCase(p->libraryName, mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()));
+		VSTPluginLib *plug = *p;
+		const bool matchID = (plug->pluginId1 == mixPlugin.Info.dwPluginId1)
+			&& (plug->pluginId2 == mixPlugin.Info.dwPluginId2);
+		const bool matchName = !mpt::PathString::CompareNoCase(plug->libraryName, mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()));
 
 		if(matchID && matchName)
 		{
-			pFound = p;
+			pFound = plug;
 			break;
 		} else if(matchID && match < 2)
 		{
 			match = 2;
-			pFound = p;
+			pFound = plug;
 		} else if(matchName && match < 1)
 		{
 			match = 1;
-			pFound = p;
+			pFound = plug;
 		}
-		p = p->pNext;
 	}
 
 	if(mixPlugin.Info.dwPluginId1 == kDmoMagic)
@@ -581,11 +561,9 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 void CVstPluginManager::OnIdle()
 //------------------------------
 {
-	VSTPluginLib *pFactory = m_pVstHead;
-
-	while (pFactory)
+	for(const_iterator pFactory = begin(); pFactory != end(); pFactory++)
 	{
-		CVstPlugin *p = pFactory->pPluginsList;
+		CVstPlugin *p = (**pFactory).pPluginsList;
 		while (p)
 		{
 			//rewbs. VSTCompliance: A specific plug has requested indefinite periodic processing time.
@@ -603,7 +581,6 @@ void CVstPluginManager::OnIdle()
 
 			p = p->m_pNext;
 		}
-		pFactory = pFactory->pNext;
 	}
 
 }
