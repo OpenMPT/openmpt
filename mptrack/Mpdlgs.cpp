@@ -543,16 +543,15 @@ void COptionsSoundcard::UpdateStatistics()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm->gpSoundDevice && pMainFrm->IsPlaying())
 	{
-		CHAR s[256];
 		const SoundBufferAttributes bufferAttributes = pMainFrm->gpSoundDevice->GetBufferAttributes();
 		const double currentLatency = pMainFrm->gpSoundDevice->GetCurrentLatency();
-		_snprintf(s, 255, "Buffers: %d (%d%%)\r\nUpdate interval: %4.1f ms\r\nLatency: %4.1f ms\r\nCurrent Latency: %4.1f ms",
-			(int)bufferAttributes.NumBuffers, (bufferAttributes.Latency > 0.0) ? Util::Round<int>(currentLatency / bufferAttributes.Latency * 100.0) : 0,
-			(float)(bufferAttributes.UpdateInterval * 1000.0f),
-			(float)(bufferAttributes.Latency * 1000.0f),
-			(float)(currentLatency * 1000.0f)
-			);
-		m_EditStatistics.SetWindowText(s);
+		const double currentUpdateInterval = pMainFrm->gpSoundDevice->GetCurrentUpdateInterval();
+		std::string s;
+		s += mpt::String::Print("Buffer: %1%%\r\n", (bufferAttributes.Latency > 0.0) ? Util::Round<int64>(currentLatency / bufferAttributes.Latency * 100.0) : 0);
+		s += mpt::String::Print("Buffers: %1 (current: %2)\r\n", bufferAttributes.NumBuffers, (currentUpdateInterval > 0.0) ? Util::Round<int64>(bufferAttributes.Latency / currentUpdateInterval) : 0);
+		s += mpt::String::Print("Latency: %1 ms (current: %2 ms)\r\n", mpt::Format("%4.1f").ToString(bufferAttributes.Latency * 1000.0), mpt::Format("%4.1f").ToString(currentLatency * 1000.0));
+		s += mpt::String::Print("Update Interval: %1 ms (current: %2 ms)\r\n", mpt::Format("%4.1f").ToString(bufferAttributes.UpdateInterval * 1000.0), mpt::Format("%4.1f").ToString(currentUpdateInterval * 1000.0));
+		m_EditStatistics.SetWindowText(s.c_str());
 	}	else
 	{
 		m_EditStatistics.SetWindowText("");

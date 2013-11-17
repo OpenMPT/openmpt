@@ -44,6 +44,7 @@ ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 	m_BufferAttributes.NumBuffers = 0;
 
 	m_IsPlaying = false;
+	m_CurrentUpdateInterval = 0.0;
 	m_StreamPositionRenderFrames = 0;
 	m_StreamPositionOutputFrames = 0;
 }
@@ -164,6 +165,7 @@ void ISoundDevice::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 	int64 framesRendered = 0;
 	{
 		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+		m_CurrentUpdateInterval = (double)numFrames / (double)m_Settings.Samplerate;
 		m_StreamPositionRenderFrames += numFrames;
 		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
 		framesRendered = m_StreamPositionRenderFrames;
@@ -190,6 +192,7 @@ void ISoundDevice::Start()
 	{
 		{
 			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+			m_CurrentUpdateInterval = 0.0;
 			m_StreamPositionRenderFrames = 0;
 			m_StreamPositionOutputFrames = 0;
 		}
@@ -209,6 +212,7 @@ void ISoundDevice::Stop()
 		m_IsPlaying = false;
 		{
 			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+			m_CurrentUpdateInterval = 0.0;
 			m_StreamPositionRenderFrames = 0;
 			m_StreamPositionOutputFrames = 0;
 		}
@@ -216,8 +220,16 @@ void ISoundDevice::Stop()
 }
 
 
+double ISoundDevice::GetCurrentUpdateInterval() const
+//---------------------------------------------------
+{
+	Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+	return m_CurrentUpdateInterval;
+}
+
+
 int64 ISoundDevice::GetStreamPositionFrames() const
-//--------------------------------------------------
+//-------------------------------------------------
 {
 	if(!IsOpen()) return 0;
 	if(InternalHasGetStreamPosition())

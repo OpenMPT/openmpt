@@ -216,11 +216,6 @@ int CPortaudioDevice::StreamCallback(
 	{
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime;
 	}
-	SoundBufferAttributes bufferAttributes;
-	bufferAttributes.Latency = m_StreamInfo->outputLatency;
-	bufferAttributes.UpdateInterval = (double)frameCount / (double)m_StreamInfo->sampleRate;
-	bufferAttributes.NumBuffers = 1;
-	UpdateBufferAttributes(bufferAttributes);
 	m_CurrentFrameBuffer = output;
 	m_CurrentFrameCount = frameCount;
 	SourceFillAudioBufferLocked();
