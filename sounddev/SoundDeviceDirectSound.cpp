@@ -251,11 +251,13 @@ bool CDSoundDevice::InternalOpen()
 		m_pMixBuffer->GetStatus(&dwStat);
 		if (dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
 	}
-	UpdateLatencyInfo(
-		m_nDSoundBufferSize * 1.0 / m_Settings.GetBytesPerSecond(),
-		std::min(m_Settings.UpdateIntervalMS / 1000.0, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())),
-		1);
 	m_dwWritePos = 0xFFFFFFFF;
+	SetWakeupInterval(std::min(m_Settings.UpdateIntervalMS / 1000.0, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
+	SoundBufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_nDSoundBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
+	bufferAttributes.UpdateInterval = std::min(m_Settings.UpdateIntervalMS / 1000.0, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond()));
+	bufferAttributes.NumBuffers = 1;
+	UpdateBufferAttributes(bufferAttributes);
 	return true;
 }
 

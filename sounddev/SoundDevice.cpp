@@ -39,9 +39,9 @@ ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 	, m_InternalID(internalID)
 {
 
-	m_RealLatency = m_Settings.LatencyMS / 1000.0;
-	m_RealUpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
-	m_RealNumBuffers = 0;
+	m_BufferAttributes.Latency = m_Settings.LatencyMS / 1000.0;
+	m_BufferAttributes.UpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
+	m_BufferAttributes.NumBuffers = 0;
 
 	m_IsPlaying = false;
 	m_StreamPositionRenderFrames = 0;
@@ -98,6 +98,13 @@ bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
 }
 
 
+void ISoundDevice::UpdateBufferAttributes(SoundBufferAttributes attributes)
+//-------------------------------------------------------------------------
+{
+	m_BufferAttributes = attributes;
+}
+
+
 bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 //----------------------------------------------------------
 {
@@ -110,9 +117,9 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 	if(m_Settings.LatencyMS > SNDDEV_MAXLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MAXLATENCY_MS;
 	if(m_Settings.UpdateIntervalMS < SNDDEV_MINUPDATEINTERVAL_MS) m_Settings.UpdateIntervalMS = SNDDEV_MINUPDATEINTERVAL_MS;
 	if(m_Settings.UpdateIntervalMS > SNDDEV_MAXUPDATEINTERVAL_MS) m_Settings.UpdateIntervalMS = SNDDEV_MAXUPDATEINTERVAL_MS;
-	m_RealLatency = m_Settings.LatencyMS / 1000.0;
-	m_RealUpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
-	m_RealNumBuffers = 0;
+	m_BufferAttributes.Latency = m_Settings.LatencyMS / 1000.0;
+	m_BufferAttributes.UpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
+	m_BufferAttributes.NumBuffers = 0;
 	return InternalOpen();
 }
 
@@ -276,6 +283,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 		}
 	}
 
+	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
 	m_dwPlayThreadId = 0;
 	m_hAudioWakeUp = NULL;
@@ -527,7 +535,7 @@ DWORD CAudioThread::AudioThread()
 		{
 
 			CPriorityBooster priorityBooster(*this, m_SoundDevice.m_Settings.BoostThreadPriority);
-			CPeriodicWaker periodicWaker(*this, m_SoundDevice.GetRealUpdateInterval());
+			CPeriodicWaker periodicWaker(*this, m_WakeupInterval);
 
 			m_SoundDevice.StartFromSoundThread();
 
@@ -558,6 +566,13 @@ DWORD CAudioThread::AudioThread()
 
 	return 0;
 
+}
+
+
+void CAudioThread::SetWakeupInterval(double seconds)
+//--------------------------------------------------
+{
+	m_WakeupInterval = seconds;
 }
 
 
@@ -592,6 +607,13 @@ void CSoundDeviceWithThread::FillAudioBufferLocked()
 //--------------------------------------------------
 {
 	SourceFillAudioBufferLocked();
+}
+
+
+void CSoundDeviceWithThread::SetWakeupInterval(double seconds)
+//------------------------------------------------------------
+{
+	m_AudioThread.SetWakeupInterval(seconds);
 }
 
 

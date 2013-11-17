@@ -270,10 +270,11 @@ bool CASIODevice::InternalOpen()
 			}
 			m_nAsioBufferLen = n;
 		}
-		UpdateLatencyInfo(
-			m_nAsioBufferLen * 2.0 / m_Settings.Samplerate,
-			m_nAsioBufferLen * 1.0 / m_Settings.Samplerate,
-			2);
+		SoundBufferAttributes bufferAttributes;
+		bufferAttributes.Latency = m_nAsioBufferLen * 2.0 / m_Settings.Samplerate;
+		bufferAttributes.UpdateInterval = m_nAsioBufferLen * 1.0 / m_Settings.Samplerate;
+		bufferAttributes.NumBuffers = 2;
+		UpdateBufferAttributes(bufferAttributes);
 	#ifdef ASIO_LOG
 		Log("  Using buffersize=%d samples\n", m_nAsioBufferLen);
 	#endif

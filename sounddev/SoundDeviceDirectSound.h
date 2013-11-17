@@ -46,7 +46,7 @@ public:
 	void StartFromSoundThread();
 	void StopFromSoundThread();
 	bool InternalIsOpen() const { return (m_pMixBuffer != NULL); }
-	double GetCurrentRealLatency() const { return 1.0 * m_dwLatency / m_Settings.GetBytesPerSecond(); }
+	double GetCurrentLatency() const { return 1.0 * m_dwLatency / m_Settings.GetBytesPerSecond(); }
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 
 protected:
