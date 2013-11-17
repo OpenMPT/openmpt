@@ -2041,56 +2041,6 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 }
 
 
-// Convert an absolute path to a path that's relative to OpenMPT's directory.
-// Paths are relative to the executable path.
-mpt::PathString CTrackApp::AbsolutePathToRelative(const mpt::PathString &path)
-//----------------------------------------------------------------------------
-{
-	mpt::PathString result = path;
-	if(path.empty())
-	{
-		return result;
-	}
-	mpt::PathString exePath = GetAppDirPath();
-	if(!_wcsnicmp(exePath.AsNative().c_str(), path.AsNative().c_str(), exePath.AsNative().length()))
-	{
-		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
-		result = MPT_PATHSTRING(".\\"); // ".\"
-		result += mpt::PathString::FromNative(path.AsNative().substr(exePath.AsNative().length()));
-	} else if(!_wcsnicmp(exePath.AsNative().c_str(), path.AsNative().c_str(), 2))
-	{
-		// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
-		result = mpt::PathString::FromNative(path.AsNative().substr(2));
-	}
-	return result;
-}
-
-
-// Convert a relative path to an absolute path.
-// Paths are relative to the executable path.
-mpt::PathString CTrackApp::RelativePathToAbsolute(const mpt::PathString &path)
-//----------------------------------------------------------------------------
-{
-	mpt::PathString result = path;
-	if(path.empty())
-	{
-		return result;
-	}
-	mpt::PathString exePath = GetAppDirPath();
-	if(path.AsNative().length() >= 2 && path.AsNative().substr(0, 1) == L"\\" && path.AsNative().substr(0, 2) != L"\\\\")
-	{
-		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
-		result = mpt::PathString::FromNative(exePath.AsNative().substr(0, 2));
-		result += path;
-	} else if(path.AsNative().length() >= 2 && path.AsNative().substr(0, 2) == L".\\")
-	{
-		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
-		result = exePath; // "C:\OpenMPT\"
-		result += mpt::PathString::FromNative(path.AsNative().substr(2));
-	}
-	return result;
-}
-
 void CTrackApp::RemoveMruItem(const int nItem)
 //--------------------------------------------
 {

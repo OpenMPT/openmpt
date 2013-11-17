@@ -31,58 +31,119 @@ void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname
 }
 
 PathString PathString::GetDrive() const
+//-------------------------------------
 {
 	PathString drive;
 	SplitPath(&drive, nullptr, nullptr, nullptr);
 	return drive;
 }
 PathString PathString::GetDir() const
+//-----------------------------------
 {
 	PathString dir;
 	SplitPath(nullptr, &dir, nullptr, nullptr);
 	return dir;
 }
 PathString PathString::GetPath() const
+//------------------------------------
 {
 	PathString drive, dir;
 	SplitPath(&drive, &dir, nullptr, nullptr);
 	return drive + dir;
 }
 PathString PathString::GetFileName() const
+//----------------------------------------
 {
 	PathString fname;
 	SplitPath(nullptr, nullptr, &fname, nullptr);
 	return fname;
 }
 PathString PathString::GetFileExt() const
+//---------------------------------------
 {
 	PathString ext;
 	SplitPath(nullptr, nullptr, nullptr, &ext);
 	return ext;
 }
 PathString PathString::GetFullFileName() const
+//--------------------------------------------
 {
 	PathString name, ext;
 	SplitPath(nullptr, nullptr, &name, &ext);
 	return name + ext;
 }
 
+
 PathString PathString::ReplaceExt(const mpt::PathString &newExt) const
+//--------------------------------------------------------------------
 {
 	return GetDrive() + GetDir() + GetFileName() + newExt;
 }
 
+
 PathString PathString::SanitizeComponent() const
+//----------------------------------------------
 {
 	PathString result = *this;
 	SanitizeFilename(result);
 	return result;
 }
 
+
+// Convert an absolute path to a path that's relative to OpenMPT's directory.
+// Paths are relative to the executable path.
+PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) const
+//-------------------------------------------------------------------------------
+{
+	mpt::PathString result = path;
+	if(path.empty())
+	{
+		return result;
+	}
+	if(!_wcsnicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), relativeTo.AsNative().length()))
+	{
+		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
+		result = MPT_PATHSTRING(".\\"); // ".\"
+		result += mpt::PathString::FromNative(AsNative().substr(relativeTo.AsNative().length()));
+	} else if(!_wcsnicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), 2))
+	{
+		// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
+		result = mpt::PathString::FromNative(AsNative().substr(2));
+	}
+	return result;
+}
+
+
+// Convert a relative path to an absolute path.
+// Paths are relative to the executable path.
+PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) const
+//-------------------------------------------------------------------------------
+{
+	mpt::PathString result = path;
+	if(path.empty())
+	{
+		return result;
+	}
+	if(AsNative().length() >= 2 && AsNative().substr(0, 1) == L"\\" && AsNative().substr(0, 2) != L"\\\\")
+	{
+		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
+		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
+		result += path;
+	} else if(AsNative().length() >= 2 && AsNative().substr(0, 2) == L".\\")
+	{
+		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
+		result = relativeTo; // "C:\OpenMPT\"
+		result += mpt::PathString::FromNative(AsNative().substr(2));
+	}
+	return result;
+}
+
+
 #if defined(WIN32)
 #if defined(_MFC_VER)
 
 mpt::PathString PathString::TunnelOutofCString(const CString &path)
+//-----------------------------------------------------------------
 {
 	#ifdef UNICODE
 		return mpt::PathString::FromWide(path.GetString());
@@ -103,7 +164,9 @@ mpt::PathString PathString::TunnelOutofCString(const CString &path)
 	#endif
 }
 
+
 CString PathString::TunnelIntoCString(const mpt::PathString &path)
+//----------------------------------------------------------------
 {
 	#ifdef UNICODE
 		return path.ToWide().c_str();
