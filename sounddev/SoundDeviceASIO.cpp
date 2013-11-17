@@ -268,11 +268,6 @@ bool CASIODevice::InternalOpen()
 			}
 			m_nAsioBufferLen = n;
 		}
-		SoundBufferAttributes bufferAttributes;
-		bufferAttributes.Latency = m_nAsioBufferLen * 2.0 / m_Settings.Samplerate;
-		bufferAttributes.UpdateInterval = m_nAsioBufferLen * 1.0 / m_Settings.Samplerate;
-		bufferAttributes.NumBuffers = 2;
-		UpdateBufferAttributes(bufferAttributes);
 	#ifdef ASIO_LOG
 		Log("  Using buffersize=%d samples\n", m_nAsioBufferLen);
 	#endif
@@ -289,7 +284,29 @@ bool CASIODevice::InternalOpen()
 					memset(m_BufferInfo[iInit].buffers[1], 0, m_nAsioBufferLen * m_nAsioSampleSize);
 				}
 			}
+
 			m_bPostOutput = (m_pAsioDrv->outputReady() == ASE_OK) ? TRUE : FALSE;
+
+			SoundBufferAttributes bufferAttributes;
+			long inputLatency = 0;
+			long outputLatency = 0;
+			if(m_pAsioDrv->getLatencies(&inputLatency, &outputLatency) != ASE_OK)
+			{
+				inputLatency = 0;
+				outputLatency = 0;
+			}
+			if(outputLatency >= (long)m_nAsioBufferLen)
+			{
+				bufferAttributes.Latency = (double)(outputLatency + m_nAsioBufferLen) / (double)m_Settings.Samplerate; // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
+			} else
+			{
+				// pointless value returned from asio driver, use a sane estimate
+				bufferAttributes.Latency = 2.0 * (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
+			}
+			bufferAttributes.UpdateInterval = (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
+			bufferAttributes.NumBuffers = 2;
+			UpdateBufferAttributes(bufferAttributes);
+
 			bOk = true;
 		}
 	#ifdef ASIO_LOG
