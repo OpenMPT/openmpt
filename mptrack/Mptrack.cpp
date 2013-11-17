@@ -1936,6 +1936,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	std::wstring nonFoundPlugs;
 	const mpt::PathString failedPlugin = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
 
+	m_pPluginManager->reserve(numPlugins);
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
 		char tmp[32];
@@ -1970,17 +1971,15 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	if(!m_pPluginManager) return FALSE;
 
 #ifndef NO_VST
-	VSTPluginLib *pPlug;
 
-	pPlug = m_pPluginManager->GetFirstPlugin();
 	size_t plug = 0;
-	while(pPlug)
+	for(CVstPluginManager::const_iterator pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
 	{
-		if(pPlug->pluginId1 != kDmoMagic)
+		if((**pPlug).pluginId1 != kDmoMagic)
 		{
 			char tmp[32];
 			wsprintf(tmp, "Plugin%d", plug);
-			mpt::PathString plugPath = pPlug->dllPath;
+			mpt::PathString plugPath = (**pPlug).dllPath;
 			if(theApp.IsPortableMode())
 			{
 				plugPath = AbsolutePathToRelative(plugPath);
@@ -1988,7 +1987,6 @@ BOOL CTrackApp::UninitializeDXPlugins()
 			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", tmp, plugPath);
 			plug++;
 		}
-		pPlug = pPlug->pNext;
 	}
 	theApp.GetSettings().Write<int32>("VST Plugins", "NumPlugins", plug);
 #endif // NO_VST

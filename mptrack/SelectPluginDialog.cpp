@@ -317,23 +317,23 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 	{
 		bool first = true;
 
-		VSTPluginLib *p = pManager->GetFirstPlugin();
-		while(p)
+		for(CVstPluginManager::const_iterator p = pManager->begin(); p != pManager->end(); p++)
 		{
+			ASSERT(*p);
+			const VSTPluginLib &plug = **p;
 			if(nameFilterActive)
 			{
 				// Apply name filter
-				std::wstring displayName = p->libraryName.ToWide();
+				std::wstring displayName = plug.libraryName.ToWide();
 				for(size_t i = 0; i < displayName.length(); i++) displayName[i] = ::towlower(displayName[i]);
 				if(displayName.find(m_nameFilter, 0) == displayName.npos)
 				{
-					p = p->pNext;
 					continue;
 				}
 			}
 
-			HTREEITEM h = AddTreeItem(p->libraryName.AsNative().c_str(), p->isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[p->category], reinterpret_cast<LPARAM>(p));
-			categoryUsed[p->category] = true;
+			HTREEITEM h = AddTreeItem(plug.libraryName.AsNative().c_str(), plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
+			categoryUsed[plug.category] = true;
 
 			if(nameFilterActive)
 			{
@@ -350,7 +350,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 			{
 				//Which plugin should be selected?
 
-				if(forceSelect != 0 && p->pluginId2 == forceSelect)
+				if(forceSelect != 0 && plug.pluginId2 == forceSelect)
 				{
 					//forced selection (e.g. just after add plugin)
 					currentPlug = h;
@@ -358,19 +358,19 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				{
 					//Current slot's plugin
 					CVstPlugin *pVstPlug = (CVstPlugin *)m_pPlugin->pMixPlugin;
-					if (&pVstPlug->GetPluginFactory() == p)
+					if (&pVstPlug->GetPluginFactory() == &plug)
 					{
 						currentPlug = h;
 					}
 				} else if(m_pPlugin->Info.dwPluginId1 != 0 || m_pPlugin->Info.dwPluginId2 != 0)
 				{
 					//Plugin with matching ID to current slot's plug
-					if(p->pluginId1 == m_pPlugin->Info.dwPluginId1
-						&& p->pluginId2 == m_pPlugin->Info.dwPluginId2)
+					if(plug.pluginId1 == m_pPlugin->Info.dwPluginId1
+						&& plug.pluginId2 == m_pPlugin->Info.dwPluginId2)
 					{
 						currentPlug = h;
 					}
-				} else if(p->pluginId2 == TrackerSettings::Instance().gnPlugWindowLast)
+				} else if(plug.pluginId2 == TrackerSettings::Instance().gnPlugWindowLast)
 				{
 					// Previously selected plugin
 					currentPlug = h;
@@ -381,8 +381,6 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 					foundCurrentPlug = true;
 				}
 			}
-
-			p = p->pNext;
 		}
 	}
 
@@ -450,8 +448,8 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 }
 
 
-bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug)
-//---------------------------------------------------
+bool CSelectPluginDlg::VerifyPlug(const VSTPluginLib *plug)
+//---------------------------------------------------------
 {
 	// TODO: Keep this list up-to-date.
 	static const struct

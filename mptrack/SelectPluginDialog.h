@@ -34,7 +34,7 @@ public:
 	~CSelectPluginDlg();
 	void DoClose();
 	void UpdatePluginsList(VstInt32 forceSelect = 0);
-	bool VerifyPlug(VSTPluginLib *plug);
+	bool VerifyPlug(const VSTPluginLib *plug);
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();

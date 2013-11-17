@@ -59,8 +59,7 @@ struct VSTPluginLib
 		numCategories,
 	};
 
-	VSTPluginLib *pPrev, *pNext;
-	CVstPlugin *pPluginsList;
+	CVstPlugin *pPluginsList;		// Pointer to first plugin instance (this instance carries pointers to other instances)
 	mpt::PathString libraryName;	// Display name
 	mpt::PathString dllPath;		// Full path name
 	VstInt32 pluginId1;
@@ -69,7 +68,7 @@ struct VSTPluginLib
 	bool isInstrument;
 
 	VSTPluginLib(const mpt::PathString &dllPath, const mpt::PathString &libraryName)
-		: pPrev(nullptr), pNext(nullptr), pPluginsList(nullptr),
+		: pPluginsList(nullptr),
 		libraryName(libraryName), dllPath(dllPath),
 		pluginId1(0), pluginId2(0),
 		category(catUnknown),
@@ -322,14 +321,22 @@ class CVstPluginManager
 {
 #ifndef NO_VST
 protected:
-	VSTPluginLib *m_pVstHead;
+	std::vector<VSTPluginLib *> pluginList;
 
 public:
 	CVstPluginManager();
 	~CVstPluginManager();
 
 public:
-	VSTPluginLib *GetFirstPlugin() const { return m_pVstHead; }
+	typedef std::vector<VSTPluginLib *>::iterator iterator;
+	typedef std::vector<VSTPluginLib *>::const_iterator const_iterator;
+
+	iterator begin() { return pluginList.begin(); }
+	const_iterator begin() const { return pluginList.begin(); }
+	iterator end() { return pluginList.end(); }
+	const_iterator end() const { return pluginList.end(); }
+	void reserve(size_t num) { pluginList.reserve(num); }
+
 	bool IsValidPlugin(const VSTPluginLib *pLib);
 	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, bool fromCache = true, const bool checkFileExistence = false, std::wstring* const errStr = nullptr);
 	bool RemovePlugin(VSTPluginLib *);
@@ -357,8 +364,12 @@ public:
 
 #else // NO_VST
 public:
-	VSTPluginLib *AddPlugin(const mpt::PathString &, bool = true, const bool = false, CString* const = 0) {return 0;}
-	VSTPluginLib *GetFirstPlugin() const { return 0; }
+	VSTPluginLib *AddPlugin(const mpt::PathString &, bool = true, const bool = false, std::wstring* const = nullptr) { return 0; }
+
+	const VSTPluginLib **begin() const { return nullptr; }
+	const VSTPluginLib **end() const { return nullptr; }
+	void reserve(size_t num) { }
+
 	void OnIdle() {}
 #endif // NO_VST
 };
