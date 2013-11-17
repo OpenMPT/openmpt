@@ -160,6 +160,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SampleFormat(conf, "Sound Settings", "BitsPerSample", SoundDeviceSettings().sampleFormat)
 	, m_SoundDeviceExclusiveMode(conf, "Sound Settings", "ExclusiveMode", SoundDeviceSettings().ExclusiveMode)
 	, m_SoundDeviceBoostThreadPriority(conf, "Sound Settings", "BoostThreadPriority", SoundDeviceSettings().BoostThreadPriority)
+	, m_SoundDeviceBaseChannel(conf, "Sound Settings", "ASIOBaseChannel", SoundDeviceSettings().BaseChannel)
 	, MixerMaxChannels(conf, "Sound Settings", "MixChannels", MixerSettings().m_nMaxMixChannels)
 	, MixerDSPMask(conf, "Sound Settings", "Quality", MixerSettings().DSPMask)
 	, MixerFlags(conf, "Sound Settings", "SoundSetup", MixerSettings().MixerFlags)
@@ -375,9 +376,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		conf.Remove(MixerVolumeRampSamples_DEPRECATED.GetPath());
 	}
 	Limit(ResamplerCutoffPercent, 0, 100);
-#ifndef NO_ASIO
-	CASIODevice::baseChannel = conf.Read<int32>("Sound Settings", "ASIOBaseChannel", CASIODevice::baseChannel);
-#endif // NO_ASIO
 
 	// Misc
 	if(defaultModType == MOD_TYPE_NONE)
@@ -466,6 +464,7 @@ SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings() const
 	settings.sampleFormat = m_SampleFormat;
 	settings.ExclusiveMode = m_SoundDeviceExclusiveMode;
 	settings.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
+	settings.BaseChannel = m_SoundDeviceBaseChannel;
 	return settings;
 }
 
@@ -479,6 +478,7 @@ void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceSettings &settings
 	m_SampleFormat = settings.sampleFormat;
 	m_SoundDeviceExclusiveMode = settings.ExclusiveMode;
 	m_SoundDeviceBoostThreadPriority = settings.BoostThreadPriority;
+	m_SoundDeviceBaseChannel = settings.BaseChannel;
 }
 
 

@@ -49,9 +49,6 @@ private:
 	void SetRenderSilence(bool silence, bool wait=false);
 
 public:
-	static int baseChannel;
-
-public:
 	CASIODevice(SoundDeviceID id, const std::wstring &internalID);
 	~CASIODevice();
 

@@ -37,8 +37,6 @@
 
 CASIODevice *CASIODevice::gpCurrentAsio = nullptr;
 
-int CASIODevice::baseChannel = 0;
-
 static DWORD g_dwBuffer = 0;
 
 static int g_asio_startcount = 0;
@@ -192,7 +190,7 @@ bool CASIODevice::InternalOpen()
 				ich, m_ChannelInfo[ich].isActive, m_ChannelInfo[ich].channelGroup, m_ChannelInfo[ich].type, m_ChannelInfo[ich].name);
 		#endif
 			m_BufferInfo[ich].isInput = ASIOFalse;
-			m_BufferInfo[ich].channelNum = ich + CASIODevice::baseChannel;		// map MPT channel i to ASIO channel i
+			m_BufferInfo[ich].channelNum = ich + m_Settings.BaseChannel;		// map MPT channel i to ASIO channel i
 			m_BufferInfo[ich].buffers[0] = NULL;
 			m_BufferInfo[ich].buffers[1] = NULL;
 			m_Float = false;
