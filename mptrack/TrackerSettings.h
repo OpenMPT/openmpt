@@ -276,6 +276,7 @@ public:
 	Setting<SampleFormat> m_SampleFormat;
 	Setting<bool> m_SoundDeviceExclusiveMode;
 	Setting<bool> m_SoundDeviceBoostThreadPriority;
+	Setting<uint32> m_SoundDeviceBaseChannel;
 	SoundDeviceSettings GetSoundDeviceSettings() const;
 	void SetSoundDeviceSettings(const SoundDeviceSettings &settings);
 
