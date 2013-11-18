@@ -426,23 +426,14 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 {
 	mpt::PathString filename;
 
-	CString storedVersion = theApp.GetSettings().Read<CString>("Version", "Version", "");
-	//If version number stored in INI is 1.17.02.40 or later, load DLS from INI file.
-	//Else load DLS from Registry
-	if (storedVersion >= "1.17.02.40")
+	UINT numBanks = theApp.GetSettings().Read<int32>("DLS Banks", "NumBanks", 0);
+	for(size_t i = 0; i < numBanks; i++)
 	{
-		CHAR s[MAX_PATH];
-		UINT numBanks = theApp.GetSettings().Read<int32>("DLS Banks", "NumBanks", 0);
-		for(size_t i = 0; i < numBanks; i++)
-		{
-			wsprintf(s, _T("Bank%d"), i + 1);
-			mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", s, mpt::PathString());
-			path = theApp.RelativePathToAbsolute(path);
-			AddDLSBank(path);
-		}
-	} else
-	{
-		LoadRegistryDLS();
+		char s[16];
+		wsprintf(s, _T("Bank%d"), i + 1);
+		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", s, mpt::PathString());
+		path = theApp.RelativePathToAbsolute(path);
+		AddDLSBank(path);
 	}
 
 	SaveDefaultDLSBanks(); // This will avoid a crash the next time if we crash while loading the bank
@@ -478,34 +469,6 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 	ImportMidiConfig(filename, TRUE);
 
 	return TRUE;
-}
-
-void CTrackApp::LoadRegistryDLS()
-//-------------------------------
-{
-	WCHAR szFileNameX[MAX_PATH];
-	HKEY keyX;
-
-	if(RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Olivier Lapicque\\ModPlug Tracker\\DLS Banks", 0, KEY_READ, &keyX) == ERROR_SUCCESS)
-	{
-		DWORD dwRegType = REG_DWORD;
-		DWORD dwSize = sizeof(DWORD);
-		DWORD d = 0;
-		if(RegQueryValueExW(keyX, L"NumBanks", NULL, &dwRegType, (LPBYTE)&d, &dwSize) == ERROR_SUCCESS)
-		{
-			CHAR s[64];
-			for (UINT i=0; i<d; i++)
-			{
-				wsprintf(s, "Bank%d", i+1);
-				szFileNameX[0] = 0;
-				dwRegType = REG_SZ;
-				dwSize = sizeof(szFileNameX);
-				RegQueryValueExW(keyX, mpt::ToWide(mpt::CharsetLocale, s).c_str(), NULL, &dwRegType, (LPBYTE)szFileNameX, &dwSize);
-				AddDLSBank(mpt::PathString::FromNative(szFileNameX));
-			}
-		}
-		RegCloseKey(keyX);
-	}
 }
 
 
