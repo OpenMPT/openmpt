@@ -217,11 +217,6 @@ STATIC_ASSERT(sizeof(ITInstrument) == 554);
 // MPT IT Instrument Extension
 struct PACKED ITInstrumentEx
 {
-	enum Magic
-	{
-		mptx	= 0x5854504D,	// "MPTX" Extended Instrument Header Magic Bytes
-	};
-
 	ITInstrument iti;		// Normal IT Instrument
 	uint8 keyboardhi[120];	// High Byte of Sample map
 

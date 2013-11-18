@@ -421,7 +421,7 @@ uint32 ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExpor
 	if(usedExtension)
 	{
 		// If we actually had to extend the sample map, update the magic bytes and instrument size.
-		memcpy(iti.dummy, "MPTX", 4);
+		memcpy(iti.dummy, "XTPM", 4);
 		instSize = sizeof(ITInstrumentEx);
 	}
 
@@ -436,7 +436,8 @@ uint32 ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 	uint32 insSize = iti.ConvertToMPT(mptIns, fromType);
 
 	// Is this actually an extended instrument?
-	if(insSize == 0 || memcmp(iti.dummy, "MPTX", 4))
+	// Note: OpenMPT 1.20 - 1.22 accidentally wrote "MPTX" here (since revision 1203), while previous versions wrote the reversed version, "XTPM".
+	if(insSize == 0 || (memcmp(iti.dummy, "MPTX", 4) && memcmp(iti.dummy, "XTPM", 4)))
 	{
 		return insSize;
 	}
