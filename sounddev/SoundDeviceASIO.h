@@ -29,6 +29,8 @@
 class CASIODevice: public ISoundDevice
 //====================================
 {
+	friend class TemporaryASIODeviceOpener;
+
 	enum { ASIO_MAX_CHANNELS=4 };
 	enum { ASIO_BLOCK_LEN=1024 };
 protected:
@@ -61,6 +63,7 @@ public:
 	bool InternalIsOpen() const { return (m_pAsioDrv != nullptr); }
 
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
+	bool OpenDriverSettings();
 
 public:
 	static std::vector<SoundDeviceInfo> EnumerateDevices();

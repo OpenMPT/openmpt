@@ -711,10 +711,31 @@ const SoundDeviceInfo * SoundDevicesManager::FindDeviceInfo(SoundDeviceID id) co
 }
 
 
-SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool SoundDevicesManager::OpenDriverSettings(SoundDeviceID id, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice)
+//--------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(m_DeviceCaps.find(id) == m_DeviceCaps.end())
+	bool result = false;
+	if(currentSoundDevice && FindDeviceInfo(id) && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id)->internalID))
+	{
+		result = currentSoundDevice->OpenDriverSettings();
+	} else
+	{
+		ISoundDevice *dummy = CreateSoundDevice(id);
+		if(dummy)
+		{
+			dummy->SetMessageReceiver(messageReceiver);
+			result = dummy->OpenDriverSettings();
+		}
+		delete dummy;
+	}
+	return result;
+}
+
+
+SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice, bool update)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	if((m_DeviceCaps.find(id) == m_DeviceCaps.end()) || update)
 	{
 		if(currentSoundDevice && FindDeviceInfo(id) && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id)->internalID))
 		{

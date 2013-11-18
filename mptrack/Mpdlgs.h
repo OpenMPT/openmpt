@@ -21,24 +21,27 @@ protected:
 	CComboBoxEx m_CbnDevice;
 	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnPolyphony, m_CbnChannels, m_CbnSampleFormat;
 	CSliderCtrl m_SliderStereoSep, m_SliderPreAmp;
+	CComboBox m_CbnBaseChannel;
 	CEdit m_EditStatistics;
-	CButton m_BtnRescan;
+	CButton m_BtnDriverPanel;
 	SoundDeviceSettings m_Settings;
-	SoundDeviceID m_nSoundDevice;
 	bool m_PreAmpNoteShowed;
 
+	void SetDevice(SoundDeviceID dev);
+	SoundDeviceInfo m_CurrentDeviceInfo;
+	SoundDeviceCaps m_CurrentDeviceCaps;
+
 public:
-	COptionsSoundcard(const SoundDeviceSettings &settings, SoundDeviceID sd):CPropertyPage(IDD_OPTIONS_SOUNDCARD)
-		{ m_Settings = settings; m_nSoundDevice = sd; m_PreAmpNoteShowed = false; }
+	COptionsSoundcard(const SoundDeviceSettings &settings, SoundDeviceID sd);
 
 	void UpdateStatistics();
 
 private:
 	void UpdateEverything();
-	void UpdateSampleRates(SoundDeviceID dev);
-	void UpdateChannels(SoundDeviceID dev);
-	void UpdateSampleFormat(SoundDeviceID dev);
-	void UpdateControls(SoundDeviceID dev);
+	void UpdateSampleRates();
+	void UpdateChannels();
+	void UpdateSampleFormat();
+	void UpdateControls();
 	void SetPreAmpSliderPosition();
 
 protected:
@@ -52,6 +55,7 @@ protected:
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnSoundCardRescan();
+	afx_msg void OnSoundCardDriverPanel();
 	DECLARE_MESSAGE_MAP()
 };
 

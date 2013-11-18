@@ -26,6 +26,32 @@
 #include <algorithm>
 
 
+// Helper class to temporarily open a device for a query.
+class TemporaryASIODeviceOpener
+{
+protected:
+	CASIODevice &device;
+	const bool wasOpen;
+
+public:
+	TemporaryASIODeviceOpener(CASIODevice &d) : device(d), wasOpen(d.IsOpen())
+	{
+		if(!wasOpen)
+		{
+			device.OpenDevice();
+		}
+	}
+
+	~TemporaryASIODeviceOpener()
+	{
+		if(!wasOpen)
+		{
+			device.CloseDevice();
+		}
+	}
+};
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // ASIO Device implementation
@@ -679,14 +705,10 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSample
 {
 	SoundDeviceCaps caps;
 
-	const bool wasOpen = (m_pAsioDrv != NULL);
-	if(!wasOpen)
+	TemporaryASIODeviceOpener opener(*this);
+	if(!IsOpen())
 	{
-		OpenDevice();
-		if(m_pAsioDrv == NULL)
-		{
-			return caps;
-		}
+		return caps;
 	}
 
 	ASIOSampleRate samplerate;
@@ -703,13 +725,39 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSample
 			caps.supportedSampleRates.push_back(baseSampleRates[i]);
 		}
 	}
-
-	if(!wasOpen)
+	long inputChannels = 0;
+	long outputChannels = 0;
+	if(m_pAsioDrv->getChannels(&inputChannels, &outputChannels) == ASE_OK)
 	{
-		CloseDevice();
+		for(long i = 0; i < outputChannels; ++i)
+		{
+			ASIOChannelInfo channelInfo;
+			MemsetZero(channelInfo);
+			channelInfo.channel = i;
+			if(m_pAsioDrv->getChannelInfo(&channelInfo) == ASE_OK)
+			{
+				mpt::String::SetNullTerminator(channelInfo.name);
+				caps.channelNames.push_back(mpt::ToWide(mpt::CharsetLocale, channelInfo.name));
+			} else
+			{
+				caps.channelNames.push_back(mpt::ToWString(i));
+			}
+		}
 	}
 
 	return caps;
+}
+
+
+bool CASIODevice::OpenDriverSettings()
+//------------------------------------
+{
+	TemporaryASIODeviceOpener opener(*this);
+	if(!IsOpen())
+	{
+		return false;
+	}
+	return m_pAsioDrv->controlPanel() == ASE_OK;
 }
 
 
