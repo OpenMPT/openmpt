@@ -79,6 +79,90 @@ double ConvertStrToDouble(const std::wstring &str) { return ConvertStrToHelper<d
 long double ConvertStrToLongDouble(const std::wstring &str) { return ConvertStrToHelper<long double>(str); }
 
 
+#ifdef MODPLUG_TRACKER
+
+namespace Util
+{
+
+void MultimediaClock::Init()
+{
+	m_CurrentPeriod = 0;
+}
+
+void MultimediaClock::SetPeriod(uint32 ms)
+{
+	TIMECAPS caps;
+	MemsetZero(caps);
+	if(timeGetDevCaps(&caps, sizeof(caps)) != MMSYSERR_NOERROR)
+	{
+		return;
+	}
+	if((caps.wPeriodMax == 0) || (caps.wPeriodMin > caps.wPeriodMax))
+	{
+		return;
+	}
+	ms = Clamp<uint32>(ms, caps.wPeriodMin, caps.wPeriodMax);
+	if(timeBeginPeriod(ms) != MMSYSERR_NOERROR)
+	{
+		return;
+	}
+	m_CurrentPeriod = ms;
+}
+
+void MultimediaClock::Cleanup()
+{
+	if(m_CurrentPeriod > 0)
+	{
+		if(timeEndPeriod(m_CurrentPeriod) != MMSYSERR_NOERROR)
+		{
+			// should not happen
+			ASSERT(false);
+		}
+		m_CurrentPeriod = 0;
+	}
+}
+
+MultimediaClock::MultimediaClock()
+{
+	Init();
+}
+
+MultimediaClock::MultimediaClock(uint32 ms)
+{
+	Init();
+	SetResolution(ms);
+}
+
+MultimediaClock::~MultimediaClock()
+{
+	Cleanup();
+}
+
+uint32 MultimediaClock::SetResolution(uint32 ms)
+{
+	if(m_CurrentPeriod == ms)
+	{
+		return m_CurrentPeriod;
+	}
+	Cleanup();
+	SetPeriod(ms);
+	return GetResolution();
+}
+
+uint32 MultimediaClock::GetResolution() const
+{
+	return m_CurrentPeriod;
+}
+
+uint32 MultimediaClock::Now() const
+{
+	return timeGetTime();
+}
+
+} // namespace Util
+
+#endif // MODPLUG_TRACKER
+
 
 #if defined(ENABLE_ASM)
 
