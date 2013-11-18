@@ -382,6 +382,18 @@ namespace Util
 		const T intval = static_cast<T>(valRounded);
 		return intval;
 	}
+
+	template<typename T>
+	T Weight(T x)
+	{
+		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+		T c;
+		for(c = 0; x; x >>= 1)
+		{
+			c += x & 1;
+		}
+		return c;
+	}
 	
 }
 

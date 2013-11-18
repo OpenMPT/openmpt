@@ -34,7 +34,7 @@ class CASIODevice: public ISoundDevice
 	enum { ASIO_MAX_CHANNELS=4 };
 protected:
 	IASIO *m_pAsioDrv;
-	UINT m_nAsioBufferLen;
+	long m_nAsioBufferLen;
 	UINT m_nAsioSampleSize;
 	bool m_Float;
 	bool m_CanOutputReady;
