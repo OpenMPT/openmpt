@@ -695,7 +695,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 	if((hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE)) || (!pInfo->hSong))
 	{
 		// Module folder + sub folders
-		std::wstring name = pDoc->GetPathNameMpt().GetFileName().ToWide();
+		std::wstring name = pDoc->GetPathNameMpt().GetFullFileName().ToWide();
 		if(name.empty()) name = mpt::PathString::FromCStringSilent(pInfo->pModDoc->GetTitle()).SanitizeComponent().ToWide();
 
 		if(!pInfo->hSong)
@@ -715,12 +715,11 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 
 	if (sndFile.GetModSpecifications().instrumentsMax > 0)
 	{
-		if (!pInfo->hInstruments) pInfo->hInstruments = InsertItem(_T("Instruments"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, pInfo->hSamples);
+		if(!pInfo->hInstruments) pInfo->hInstruments = InsertItem(_T("Instruments"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, pInfo->hSamples);
 	} else
 	{
-		if (pInfo->hInstruments)
+		if(pInfo->hInstruments)
 		{
-			//DeleteChildren(pInfo->hInstruments);
 			DeleteItem(pInfo->hInstruments);
 			pInfo->hInstruments = NULL;
 		}
@@ -729,19 +728,22 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 	// Add effects
 	if (hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE|HINT_MODCHANNELS|HINT_MIXPLUGINS))
 	{
-		if(!pInfo->hEffects)
-		{
-			pInfo->hEffects = InsertItem(_T("Plugins"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, pInfo->hInstruments ? pInfo->hInstruments : pInfo->hSamples);
-		} else
-		{
-			DeleteChildren(pInfo->hEffects);
-		}
 		bool hasPlugs = false;
 		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 		{
 			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[i];
-			if (plugin.IsValidPlugin())
+			if(plugin.IsValidPlugin())
 			{
+				// Now we can be sure that we want to create this folder.
+				if(!pInfo->hEffects)
+				{
+					pInfo->hEffects = InsertItem(_T("Plugins"), IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, pInfo->hInstruments ? pInfo->hInstruments : pInfo->hSamples);
+				} else if(!hasPlugs)
+				{
+					// Delete previously existing items
+					DeleteChildren(pInfo->hEffects);
+				}
+
 				wsprintf(s, "FX%u: %s", i + 1, plugin.GetName());
 				int nImage = IMAGE_NOPLUGIN;
 				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->isInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
@@ -752,7 +754,7 @@ void CModTree::UpdateView(ModTreeDocInfo *pInfo, DWORD lHint)
 		if(!hasPlugs && pInfo->hEffects)
 		{
 			DeleteItem(pInfo->hEffects);
-			pInfo->hEffects = NULL;
+			pInfo->hEffects = nullptr;
 		}
 	}
 	// Add Orders
@@ -1540,10 +1542,7 @@ void CModTree::EmptyInstrumentLibrary()
 	if (!m_hInsLib) return;
 	if (!IsSampleBrowser())
 	{
-		while ((h = GetChildItem(m_hInsLib)) != NULL)
-		{
-			DeleteItem(h);
-		}
+		DeleteChildren(m_hInsLib);
 	} else
 	{
 		while ((h = GetNextItem(m_hInsLib, TVGN_NEXT)) != NULL)
@@ -3360,14 +3359,12 @@ void CModTree::OnCloseItem()
 void CModTree::DeleteChildren(HTREEITEM hItem)
 //--------------------------------------------
 {
-	if(hItem != nullptr && ItemHasChildren(hItem))
+	if(hItem != nullptr)
 	{
-		HTREEITEM hChildItem = GetChildItem(hItem);
-		while(hChildItem != nullptr)
+		HTREEITEM hChildItem;
+		while((hChildItem = GetChildItem(hItem)) != nullptr)
 		{
-			HTREEITEM hNextItem = GetNextSiblingItem(hChildItem);
 			DeleteItem(hChildItem);
-			hChildItem = hNextItem;
 		}
 	}
 }

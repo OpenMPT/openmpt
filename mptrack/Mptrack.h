@@ -312,9 +312,6 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	static void LoadRegistryDLS();
-
-protected:
 	BOOL InitializeDXPlugins();
 	BOOL UninitializeDXPlugins();
 
