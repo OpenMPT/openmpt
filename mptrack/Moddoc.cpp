@@ -551,6 +551,30 @@ void CModDoc::DeleteContents()
 }
 
 
+#ifndef UNICODE
+BOOL CModDoc::DoFileSave()
+//------------------------
+{
+	// Completely replaces MFC implementation.
+	DWORD dwAttrib = GetFileAttributesW(mpt::PathString::TunnelOutofCString(m_strPathName).AsNative().c_str());
+	if(dwAttrib & FILE_ATTRIBUTE_READONLY)
+	{
+		if(!DoSave(mpt::PathString()))
+		{
+			return FALSE;
+		}
+	} else
+	{
+		if(!DoSave(mpt::PathString::TunnelOutofCString(m_strPathName)))
+		{
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+#endif
+
+
 BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 //---------------------------------------------------------
 {

@@ -430,6 +430,12 @@ protected:
 	bool SaveInstrument(INSTRUMENTINDEX instr);
 // -! NEW_FEATURE#0023
 
+#ifndef UNICODE
+	// MFC checks for writeable filename in there and issues SaveAs dialog if not.
+	// This fails for our utf8-in-CString hack.
+	virtual BOOL DoFileSave();
+#endif
+
 	MPT_DEPRECATED_PATH virtual BOOL DoSave(LPCSTR lpszPathName, BOOL bSaveAs=TRUE)
 	{
 		return DoSave(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), bSaveAs);

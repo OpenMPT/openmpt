@@ -103,6 +103,7 @@ enum {
 //  CModDoc:
 //   CDocument::GetPathName
 //   CDocument::SetPathName
+//   CDocument::DoFileSave
 //   CDocument::DoSave
 //   CDocument::OnOpenDocument
 //   CDocument::OnSaveDocument
