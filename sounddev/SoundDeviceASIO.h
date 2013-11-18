@@ -35,8 +35,6 @@ class CASIODevice: public ISoundDevice
 protected:
 	IASIO *m_pAsioDrv;
 	long m_nAsioBufferLen;
-	UINT m_nAsioSampleSize;
-	bool m_Float;
 	bool m_CanOutputReady;
 	BOOL m_bMixRunning;
 	LONG m_RenderSilence;
@@ -47,6 +45,8 @@ protected:
 	std::vector<int32> m_SampleBuffer;
 
 private:
+	static bool IsSampleTypeFloat(ASIOSampleType sampleType);
+	static std::size_t GetSampleSize(ASIOSampleType sampleType);
 	void SetRenderSilence(bool silence, bool wait=false);
 
 public:

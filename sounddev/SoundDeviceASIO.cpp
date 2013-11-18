@@ -154,8 +154,6 @@ CASIODevice::CASIODevice(SoundDeviceID id, const std::wstring &internalID)
 {
 	m_pAsioDrv = NULL;
 	m_nAsioBufferLen = 0;
-	m_nAsioSampleSize = 0;
-	m_Float = false;
 	m_Callbacks.bufferSwitch = BufferSwitch;
 	m_Callbacks.sampleRateDidChange = SampleRateDidChange;
 	m_Callbacks.asioMessage = AsioMessage;
@@ -206,61 +204,6 @@ bool CASIODevice::InternalOpen()
 		#endif
 			goto abort;
 		}
-		for (UINT ich=0; ich<m_Settings.Channels; ich++)
-		{
-			m_ChannelInfo[ich].channel = ich;
-			m_ChannelInfo[ich].isInput = ASIOFalse;
-			m_pAsioDrv->getChannelInfo(&m_ChannelInfo[ich]);
-		#ifdef ASIO_LOG
-			Log("  getChannelInfo(%d): isActive=%d channelGroup=%d type=%d name=\"%s\"\n",
-				ich, m_ChannelInfo[ich].isActive, m_ChannelInfo[ich].channelGroup, m_ChannelInfo[ich].type, m_ChannelInfo[ich].name);
-		#endif
-			m_BufferInfo[ich].isInput = ASIOFalse;
-			m_BufferInfo[ich].channelNum = ich + m_Settings.BaseChannel;		// map MPT channel i to ASIO channel i
-			m_BufferInfo[ich].buffers[0] = NULL;
-			m_BufferInfo[ich].buffers[1] = NULL;
-			m_Float = false;
-			switch(m_ChannelInfo[ich].type)
-			{
-				case ASIOSTInt16MSB:
-				case ASIOSTInt16LSB:
-					m_nAsioSampleSize = 2;
-					break;
-				case ASIOSTInt24MSB:
-				case ASIOSTInt24LSB:
-					m_nAsioSampleSize = 3;
-					break;
-				case ASIOSTInt32MSB:
-				case ASIOSTInt32LSB:
-					m_nAsioSampleSize = 4;
-					break;
-				case ASIOSTInt32MSB16:
-				case ASIOSTInt32MSB18:
-				case ASIOSTInt32MSB20:
-				case ASIOSTInt32MSB24:
-				case ASIOSTInt32LSB16:
-				case ASIOSTInt32LSB18:
-				case ASIOSTInt32LSB20:
-				case ASIOSTInt32LSB24:
-					m_nAsioSampleSize = 4;
-					break;
-				case ASIOSTFloat32MSB:
-				case ASIOSTFloat32LSB:
-					m_Float = true;
-					m_nAsioSampleSize = 4;
-					break;
-				case ASIOSTFloat64MSB:
-				case ASIOSTFloat64LSB:
-					m_Float = true;
-					m_nAsioSampleSize = 8;
-					break;
-				default:
-					m_nAsioSampleSize = 0;
-					goto abort;
-					break;
-			}
-		}
-		m_Settings.sampleFormat = m_Float ? SampleFormatFloat32 : SampleFormatInt32;
 		m_pAsioDrv->getBufferSize(&minSize, &maxSize, &preferredSize, &granularity);
 	#ifdef ASIO_LOG
 		Log("  getBufferSize(): minSize=%d maxSize=%d preferredSize=%d granularity=%d\n",
@@ -317,17 +260,42 @@ bool CASIODevice::InternalOpen()
 	#ifdef ASIO_LOG
 		Log("  Using buffersize=%d samples\n", m_nAsioBufferLen);
 	#endif
-		if (m_pAsioDrv->createBuffers(m_BufferInfo, m_Settings.Channels, m_nAsioBufferLen, &m_Callbacks) == ASE_OK)
+		for(int channel = 0; channel < m_Settings.Channels; ++channel)
 		{
-			for (UINT iInit=0; iInit<m_Settings.Channels; iInit++)
+			MemsetZero(m_BufferInfo[channel]);
+			m_BufferInfo[channel].isInput = ASIOFalse;
+			m_BufferInfo[channel].channelNum = channel + m_Settings.BaseChannel; // map MPT channel i to ASIO channel i
+		}
+		if(m_pAsioDrv->createBuffers(m_BufferInfo, m_Settings.Channels, m_nAsioBufferLen, &m_Callbacks) == ASE_OK)
+		{
+			bool m_AllFloat = true;
+			for(int channel = 0; channel < m_Settings.Channels; ++channel)
 			{
-				if (m_BufferInfo[iInit].buffers[0])
+				MemsetZero(m_ChannelInfo[channel]);
+				m_ChannelInfo[channel].isInput = ASIOFalse;
+				m_ChannelInfo[channel].channel = channel + m_Settings.BaseChannel; // map MPT channel i to ASIO channel i
+				m_pAsioDrv->getChannelInfo(&m_ChannelInfo[channel]);
+				ASSERT(m_ChannelInfo[channel].isActive);
+				#ifdef ASIO_LOG
+					Log("  getChannelInfo(%d): isActive=%d channelGroup=%d type=%d name=\"%s\"\n",
+						channel, m_ChannelInfo[channel].isActive, m_ChannelInfo[channel].channelGroup, m_ChannelInfo[channel].type, m_ChannelInfo[channel].name);
+				#endif
+				if(!IsSampleTypeFloat(m_ChannelInfo[channel].type))
 				{
-					memset(m_BufferInfo[iInit].buffers[0], 0, m_nAsioBufferLen * m_nAsioSampleSize);
+					m_AllFloat = false;
 				}
-				if (m_BufferInfo[iInit].buffers[1])
+			}
+			m_Settings.sampleFormat = m_AllFloat ? SampleFormatFloat32 : SampleFormatInt32;
+
+			for(int channel = 0; channel < m_Settings.Channels; ++channel)
+			{
+				if(m_BufferInfo[channel].buffers[0])
 				{
-					memset(m_BufferInfo[iInit].buffers[1], 0, m_nAsioBufferLen * m_nAsioSampleSize);
+					std::memset(m_BufferInfo[channel].buffers[0], 0, m_nAsioBufferLen * GetSampleSize(m_ChannelInfo[channel].type));
+				}
+				if(m_BufferInfo[channel].buffers[1])
+				{
+					std::memset(m_BufferInfo[channel].buffers[1], 0, m_nAsioBufferLen * GetSampleSize(m_ChannelInfo[channel].type));
 				}
 			}
 
@@ -539,6 +507,66 @@ static void SwapEndian(uint8 *buf, std::size_t itemCount, std::size_t itemSize)
 }
 
 
+bool CASIODevice::IsSampleTypeFloat(ASIOSampleType sampleType)
+//------------------------------------------------------------
+{
+	switch(sampleType)
+	{
+		case ASIOSTFloat32MSB:
+		case ASIOSTFloat32LSB:
+		case ASIOSTFloat64MSB:
+		case ASIOSTFloat64LSB:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+	}
+}
+
+
+std::size_t CASIODevice::GetSampleSize(ASIOSampleType sampleType)
+//---------------------------------------------------------------
+{
+	switch(sampleType)
+	{
+		case ASIOSTInt16MSB:
+		case ASIOSTInt16LSB:
+			return 2;
+			break;
+		case ASIOSTInt24MSB:
+		case ASIOSTInt24LSB:
+			return 3;
+			break;
+		case ASIOSTInt32MSB:
+		case ASIOSTInt32LSB:
+			return 4;
+			break;
+		case ASIOSTInt32MSB16:
+		case ASIOSTInt32MSB18:
+		case ASIOSTInt32MSB20:
+		case ASIOSTInt32MSB24:
+		case ASIOSTInt32LSB16:
+		case ASIOSTInt32LSB18:
+		case ASIOSTInt32LSB20:
+		case ASIOSTInt32LSB24:
+			return 4;
+			break;
+		case ASIOSTFloat32MSB:
+		case ASIOSTFloat32LSB:
+			return 4;
+			break;
+		case ASIOSTFloat64MSB:
+		case ASIOSTFloat64LSB:
+			return 8;
+			break;
+		default:
+			return 0;
+			break;
+	}
+}
+
+
 void CASIODevice::FillAudioBuffer()
 //---------------------------------
 {
@@ -557,7 +585,7 @@ void CASIODevice::FillAudioBuffer()
 	for(int channel = 0; channel < channels; ++channel)
 	{
 		void *dst = m_BufferInfo[channel].buffers[g_dwBuffer];
-		if(m_Float)
+		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
 			const float *const srcFloat = reinterpret_cast<const float*>(&m_SampleBuffer[0]);
 			switch(m_ChannelInfo[channel].type)
@@ -574,7 +602,7 @@ void CASIODevice::FillAudioBuffer()
 					ASSERT(false);
 					break;
 			}
-		} else
+		} else if(m_Settings.sampleFormat == SampleFormatInt32)
 		{
 			const int32 *const srcInt32 = reinterpret_cast<const int32*>(&m_SampleBuffer[0]);
 			switch(m_ChannelInfo[channel].type)
@@ -631,7 +659,7 @@ void CASIODevice::FillAudioBuffer()
 			case ASIOSTInt32MSB18:
 			case ASIOSTInt32MSB20:
 			case ASIOSTInt32MSB24:
-				SwapEndian(reinterpret_cast<uint8*>(dst), countChunk, m_nAsioSampleSize);
+				SwapEndian(reinterpret_cast<uint8*>(dst), countChunk, GetSampleSize(m_ChannelInfo[channel].type));
 				break;
 		}
 	}
