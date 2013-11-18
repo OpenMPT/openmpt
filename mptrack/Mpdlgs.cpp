@@ -74,9 +74,11 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO4, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO6, OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO9, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO2, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,	OnSoundCardRescan)
+	ON_COMMAND(IDC_BUTTON2,	OnSoundCardDriverPanel)
 END_MESSAGE_MAP()
 
 
@@ -92,10 +94,30 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO4,		m_CbnPolyphony);
 	DDX_Control(pDX, IDC_COMBO5,		m_CbnChannels);
 	DDX_Control(pDX, IDC_COMBO6,		m_CbnSampleFormat);
+	DDX_Control(pDX, IDC_COMBO9,		m_CbnBaseChannel);
+	DDX_Control(pDX, IDC_BUTTON2,		m_BtnDriverPanel);
 	DDX_Control(pDX, IDC_SLIDER1,		m_SliderStereoSep);
 	DDX_Control(pDX, IDC_SLIDER_PREAMP,	m_SliderPreAmp);
 	DDX_Control(pDX, IDC_EDIT_STATISTICS,	m_EditStatistics);
 	//}}AFX_DATA_MAP
+}
+
+
+COptionsSoundcard::COptionsSoundcard(const SoundDeviceSettings &settings, SoundDeviceID sd)
+//-----------------------------------------------------------------------------------------
+	: CPropertyPage(IDD_OPTIONS_SOUNDCARD)
+	, m_Settings(settings)
+{
+	m_PreAmpNoteShowed = false;
+	SetDevice(sd);
+}
+
+
+void COptionsSoundcard::SetDevice(SoundDeviceID dev)
+//--------------------------------------------------
+{
+	m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(dev) ? *(theApp.GetSoundDevicesManager()->FindDeviceInfo(dev)) : SoundDeviceInfo();
+	m_CurrentDeviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
 }
 
 
@@ -133,7 +155,7 @@ void COptionsSoundcard::UpdateEverything()
 	CheckDlgButton(IDC_CHECK5, m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
 
 	// Sampling Rate
-	UpdateSampleRates(m_nSoundDevice);
+	UpdateSampleRates();
 
 	// Max Mixing Channels
 	{
@@ -261,30 +283,37 @@ void COptionsSoundcard::UpdateEverything()
 				_tcscpy(tmp, name);
 				cbi.pszText = tmp;
 				int pos = m_CbnDevice.InsertItem(&cbi);
-				if(cbi.lParam == m_nSoundDevice.GetIdRaw())
+				if(cbi.lParam == m_CurrentDeviceInfo.id.GetIdRaw())
 				{
 					m_CbnDevice.SetCurSel(pos);
 				}
 				iItem++;
 			}
 		}
-		UpdateControls(m_nSoundDevice);
+		UpdateControls();
 	}
 
-	UpdateChannels(m_nSoundDevice);
-	UpdateSampleFormat(m_nSoundDevice);
+	UpdateChannels();
+	UpdateSampleFormat();
 	
 }
 
 
-void COptionsSoundcard::UpdateChannels(SoundDeviceID dev)
-//-------------------------------------------------------
+void COptionsSoundcard::UpdateChannels()
+//--------------------------------------
 {
-	MPT_UNREFERENCED_PARAMETER(dev);
 	CHAR s[128];
 	UINT n = 0;
 	m_CbnChannels.ResetContent();
-	for(UINT channels = 4; channels >= 1; channels /= 2)
+	UINT maxChannels = 0;
+	if(m_CurrentDeviceCaps.channelNames.size() > 0)
+	{
+		maxChannels = std::min<std::size_t>(4, m_CurrentDeviceCaps.channelNames.size());
+	} else
+	{
+		maxChannels = 4;
+	}
+	for(UINT channels = maxChannels; channels >= 1; channels /= 2)
 	{
 		wsprintf(s, "%s", gszChnCfgNames[(channels+2)/2-1]);
 		UINT ndx = m_CbnChannels.AddString(s);
@@ -295,15 +324,37 @@ void COptionsSoundcard::UpdateChannels(SoundDeviceID dev)
 		}
 	}
 	m_CbnChannels.SetCurSel(n);
+	if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO)
+	{
+		m_CbnBaseChannel.ResetContent();
+		m_CbnBaseChannel.EnableWindow(TRUE);
+		m_BtnDriverPanel.ShowWindow(SW_SHOW);
+		int sel = 0;
+		for(std::size_t channel = 0; channel < m_CurrentDeviceCaps.channelNames.size(); ++channel)
+		{
+			int ndx = m_CbnBaseChannel.AddString(mpt::ToCString(m_CurrentDeviceCaps.channelNames[channel]));
+			m_CbnBaseChannel.SetItemData(ndx, channel);
+			if(channel == m_Settings.BaseChannel)
+			{
+				sel = ndx;
+			}
+		}
+		m_CbnBaseChannel.SetCurSel(sel);
+	} else
+	{
+		m_CbnBaseChannel.ResetContent();
+		m_CbnBaseChannel.EnableWindow(FALSE);
+		m_BtnDriverPanel.ShowWindow(SW_HIDE);
+	}
 }
 
 
-void COptionsSoundcard::UpdateSampleFormat(SoundDeviceID dev)
-//-----------------------------------------------------------
+void COptionsSoundcard::UpdateSampleFormat()
+//------------------------------------------
 {
 	UINT n = 0;
 	m_CbnSampleFormat.ResetContent();
-	const bool asio = dev.GetType() == SNDDEV_ASIO;
+	const bool asio = m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO;
 	if(asio)
 	{
 		m_Settings.sampleFormat = TrackerSettings::Instance().m_SampleFormat;
@@ -400,25 +451,32 @@ void COptionsSoundcard::OnDeviceChanged()
 //---------------------------------------
 {
 	int n = m_CbnDevice.GetCurSel();
-	if (n >= 0)
+	if(n >= 0)
 	{
-		SoundDeviceID dev = SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(n));
-		UpdateControls(dev);
-		UpdateSampleRates(dev);
-		UpdateChannels(dev);
-		UpdateSampleFormat(dev);
+		SetDevice(SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(n)));
+		UpdateControls();
+		UpdateSampleRates();
+		UpdateChannels();
+		UpdateSampleFormat();
 		OnSettingsChanged();
 	}
 }
 
 
+void COptionsSoundcard::OnSoundCardDriverPanel()
+//----------------------------------------------
+{
+	theApp.GetSoundDevicesManager()->OpenDriverSettings(SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(m_CbnDevice.GetCurSel())), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice);
+}
+
+
 // Fill the dropdown box with a list of valid sample rates, depending on the selected sound device.
-void COptionsSoundcard::UpdateSampleRates(SoundDeviceID dev)
-//----------------------------------------------------------
+void COptionsSoundcard::UpdateSampleRates()
+//-----------------------------------------
 {
 	m_CbnMixingFreq.ResetContent();
 
-	std::vector<uint32> samplerates = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).supportedSampleRates;
+	std::vector<uint32> samplerates = m_CurrentDeviceCaps.supportedSampleRates;
 
 	if(samplerates.empty())
 	{
@@ -442,10 +500,12 @@ void COptionsSoundcard::UpdateSampleRates(SoundDeviceID dev)
 }
 
 
-void COptionsSoundcard::UpdateControls(SoundDeviceID dev)
-//-------------------------------------------------------
+void COptionsSoundcard::UpdateControls()
+//--------------------------------------
 {
+	const SoundDeviceID dev = m_CurrentDeviceInfo.id;
 	GetDlgItem(IDC_CHECK4)->EnableWindow((dev.GetType() == SNDDEV_DSOUND || dev.GetType() == SNDDEV_PORTAUDIO_WASAPI) ? TRUE : FALSE);
+	GetDlgItem(IDC_CHECK5)->EnableWindow((dev.GetType() == SNDDEV_WAVEOUT || dev.GetType() == SNDDEV_DSOUND) ? TRUE : FALSE);
 	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow((dev.GetType() == SNDDEV_ASIO) ? FALSE : TRUE);
 	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow((dev.GetType() == SNDDEV_ASIO) ? FALSE : TRUE);
 	if(dev.GetType() == SNDDEV_DSOUND)
@@ -507,9 +567,10 @@ void COptionsSoundcard::OnOK()
 		int n = m_CbnDevice.GetCurSel();
 		if(n >= 0)
 		{
-			m_nSoundDevice = SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(n));
+			SetDevice(SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(n)));
 		}
 	}
+	const SoundDeviceID dev = m_CurrentDeviceInfo.id;
 	// Latency
 	{
 		CHAR s[32];
@@ -530,11 +591,21 @@ void COptionsSoundcard::OnOK()
 		wsprintf(s, "%d ms", m_Settings.UpdateIntervalMS);
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 	}
-	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_nSoundDevice);
-	UpdateSampleFormat(m_nSoundDevice);
+	// Base Channel
+	{
+		if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO)
+		{
+			m_Settings.BaseChannel = m_CbnBaseChannel.GetItemData(m_CbnBaseChannel.GetCurSel());
+		}
+	}
+	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.id);
+	SetDevice(m_CurrentDeviceInfo.id); // Poll changed ASIO channel names
+	UpdateSampleFormat();
+	UpdateChannels();
 	UpdateStatistics();
 	CPropertyPage::OnOK();
 }
+
 
 void COptionsSoundcard::UpdateStatistics()
 //----------------------------------------

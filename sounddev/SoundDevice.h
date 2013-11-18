@@ -198,6 +198,7 @@ struct SoundDeviceCaps
 {
 	uint32 currentSampleRate;
 	std::vector<uint32> supportedSampleRates;	// Which samplerates are actually supported by the device. Currently only implemented properly for ASIO, DirectSound and PortAudio.
+	std::vector<std::wstring> channelNames;
 	SoundDeviceCaps()
 		: currentSampleRate(0)
 	{
@@ -317,6 +318,7 @@ public:
 
 	int64 GetStreamPositionFrames() const;
 
+	virtual bool OpenDriverSettings() { return false; };
 };
 
 
@@ -360,7 +362,9 @@ public:
 
 	const SoundDeviceInfo * FindDeviceInfo(SoundDeviceID id) const;
 
-	SoundDeviceCaps GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
+	bool OpenDriverSettings(SoundDeviceID id, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
+
+	SoundDeviceCaps GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr, bool update = false);
 
 	ISoundDevice * CreateSoundDevice(SoundDeviceID id);
 
