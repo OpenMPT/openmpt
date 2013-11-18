@@ -32,7 +32,6 @@ class CASIODevice: public ISoundDevice
 	friend class TemporaryASIODeviceOpener;
 
 	enum { ASIO_MAX_CHANNELS=4 };
-	enum { ASIO_BLOCK_LEN=1024 };
 protected:
 	IASIO *m_pAsioDrv;
 	UINT m_nAsioBufferLen;
@@ -45,7 +44,7 @@ protected:
 	ASIOCallbacks m_Callbacks;
 	ASIOChannelInfo m_ChannelInfo[ASIO_MAX_CHANNELS];
 	ASIOBufferInfo m_BufferInfo[ASIO_MAX_CHANNELS];
-	int32 m_FrameBuffer[ASIO_BLOCK_LEN];
+	std::vector<int32> m_SampleBuffer;
 
 private:
 	void SetRenderSilence(bool silence, bool wait=false);
