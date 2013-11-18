@@ -503,6 +503,7 @@ private:
 	void NotifyListeners(const SettingPath &path);
 	SettingValue ReadSetting(const SettingPath &path, const SettingValue &def, const SettingMetadata &metadata) const;
 	void WriteSetting(const SettingPath &path, const SettingValue &val);
+	void ForgetSetting(const SettingPath &path);
 	void RemoveSetting(const SettingPath &path);
 private:
 	SettingsContainer(const SettingsContainer &other); // disable
@@ -539,6 +540,18 @@ public:
 	void Write(const std::string &section, const std::string &key, const T &val)
 	{
 		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val));
+	}
+	void Forget(const SettingPath &path)
+	{
+		ForgetSetting(path);
+	}
+	void Forget(const std::wstring &section, const std::wstring &key)
+	{
+		ForgetSetting(SettingPath(section, key));
+	}
+	void Forget(const std::string &section, const std::string &key)
+	{
+		ForgetSetting(SettingPath(section, key));
 	}
 	void Remove(const SettingPath &path)
 	{

@@ -230,6 +230,13 @@ void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue
 	}
 }
 
+void SettingsContainer::ForgetSetting(const SettingPath &path)
+{
+	ASSERT(theApp.InGuiThread());
+	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
+	map.erase(path);
+}
+
 void SettingsContainer::RemoveSetting(const SettingPath &path)
 {
 	ASSERT(theApp.InGuiThread());
