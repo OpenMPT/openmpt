@@ -322,13 +322,14 @@ BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 	return ImportMidiConfig(file);
 }
 
-BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file)
-//-------------------------------------------------------
+BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
+//----------------------------------------------------------------------------
 {
 	TCHAR s[_MAX_PATH];
 	mpt::PathString UltraSndPath;
 
 	UltraSndPath = file.Read<mpt::PathString>("Ultrasound", "PatchDir", mpt::PathString());
+	if(forgetSettings) file.Forget("Ultrasound", "PatchDir");
 	if(UltraSndPath == MPT_PATHSTRING(".\\")) UltraSndPath = mpt::PathString();
 	if(UltraSndPath.empty())
 	{
@@ -341,16 +342,19 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file)
 		mpt::PathString filename;
 		wsprintf(s, (iMidi < 128) ? _T("Midi%d") : _T("Perc%d"), iMidi & 0x7f);
 		filename = file.Read<mpt::PathString>("Midi Library", s, mpt::PathString());
+		if(forgetSettings) file.Forget("Midi Library", s);
 		// Check for ULTRASND.INI
 		if(filename.empty())
 		{
 			LPCSTR pszSection = (iMidi < 128) ? _T("Melodic Patches") : _T("Drum Patches");
 			wsprintf(s, _T("%d"), iMidi & 0x7f);
 			filename = file.Read<mpt::PathString>(pszSection, s, mpt::PathString());
+			if(forgetSettings) file.Forget(pszSection, s);
 			if(filename.empty())
 			{
 				pszSection = (iMidi < 128) ? _T("Melodic Bank 0") : _T("Drum Bank 0");
 				filename = file.Read<mpt::PathString>(pszSection, s, mpt::PathString());
+				if(forgetSettings) file.Forget(pszSection, s);
 			}
 			if(!filename.empty())
 			{
@@ -849,7 +853,7 @@ BOOL CTrackApp::InitInstance()
 	AddDocTemplate(m_pModTemplate);
 
 	// Load Midi Library
-	ImportMidiConfig(theApp.GetSettings());
+	ImportMidiConfig(theApp.GetSettings(), true);
 
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame(/*cmdInfo.m_csExtension*/);

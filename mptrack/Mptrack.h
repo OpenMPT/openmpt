@@ -217,7 +217,7 @@ public:
 	static MIDILIBSTRUCT &GetMidiLibrary() { return midiLibrary; }
 	static BOOL ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarning=FALSE);
 	static BOOL ExportMidiConfig(const mpt::PathString &filename);
-	static BOOL ImportMidiConfig(SettingsContainer &file);
+	static BOOL ImportMidiConfig(SettingsContainer &file, bool forgetSettings = false);
 	static BOOL ExportMidiConfig(SettingsContainer &file);
 	static void RegisterExtensions();
 	static BOOL LoadDefaultDLSBanks();
