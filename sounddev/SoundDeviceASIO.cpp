@@ -311,7 +311,7 @@ bool CASIODevice::InternalOpen()
 				}
 			}
 
-			m_bPostOutput = (m_pAsioDrv->outputReady() == ASE_OK) ? TRUE : FALSE;
+			m_CanOutputReady = (m_pAsioDrv->outputReady() == ASE_OK);
 
 			SoundBufferAttributes bufferAttributes;
 			long inputLatency = 0;
@@ -618,7 +618,7 @@ void CASIODevice::FillAudioBuffer()
 		sampleFramesToRender -= countChunk;
 		sampleFramesRendered += countChunk;
 	}
-	if(m_bPostOutput)
+	if(m_CanOutputReady)
 	{
 		m_pAsioDrv->outputReady();
 	}

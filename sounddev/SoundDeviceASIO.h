@@ -38,8 +38,8 @@ protected:
 	UINT m_nAsioBufferLen;
 	UINT m_nAsioSampleSize;
 	bool m_Float;
+	bool m_CanOutputReady;
 	BOOL m_bMixRunning;
-	BOOL m_bPostOutput;
 	LONG m_RenderSilence;
 	LONG m_RenderingSilence;
 	ASIOCallbacks m_Callbacks;
