@@ -419,6 +419,8 @@ private:
 	long sleepMilliseconds;
 	int64 sleep100Nanoseconds;
 
+	Util::MultimediaClock clock_noxp;
+
 	bool period_noxp_set;
 	bool periodic_xp_timer;
 
@@ -455,7 +457,8 @@ public:
 		} else
 		{
 			sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-			period_noxp_set = (timeBeginPeriod(1) == TIMERR_NOERROR); // increase resolution of multimedia timer
+			clock_noxp.SetResolution(1); // increase resolution of multimedia timer
+			period_noxp_set = true;
 		}
 
 	}
@@ -504,7 +507,7 @@ public:
 		{
 			if(period_noxp_set)
 			{
-				timeEndPeriod(1);
+				clock_noxp.SetResolution(0);
 				period_noxp_set = false;
 			}
 			CloseHandle(sleepEvent);

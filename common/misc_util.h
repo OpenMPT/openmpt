@@ -503,6 +503,44 @@ namespace Util {
 } // namespace Util
 
 
+#ifdef MODPLUG_TRACKER
+
+namespace Util
+{
+
+// RAII wrapper around timeBeginPeriod/timeEndPeriod/timeGetTime (on Windows).
+// This clock is monotonic, even across changing its resolution.
+// This is needed to synchronize time in Steinberg APIs (ASIO and VST).
+class MultimediaClock
+{
+private:
+	UINT m_CurrentPeriod;
+private:
+	void Init();
+	void SetPeriod(uint32 ms);
+	void Cleanup();
+public:
+	MultimediaClock();
+	MultimediaClock(uint32 ms);
+	~MultimediaClock();
+public:
+	// Sets the desired resolution in milliseconds, returns the obtained resolution in milliseconds.
+	// A parameter of 0 causes the resolution to be reset to system defaults.
+	// A return value of 0 means the resolution is unknown, but timestamps will still be valid.
+	uint32 SetResolution(uint32 ms);
+	// Returns obtained resolution in milliseconds.
+	// A return value of 0 means the resolution is unknown, but timestamps will still be valid.
+	uint32 GetResolution() const; 
+	// Returns current instantaneous timestamp in milliseconds.
+	// The epoch (offset) of the timestamps is undefined but constant until the next system reboot.
+	// The resolution is the value returned from GetResolution().
+	uint32 Now() const;
+};
+
+} // namespace Util
+
+#endif
+
 #ifdef ENABLE_ASM
 #define PROCSUPPORT_MMX        0x00001 // Processor supports MMX instructions
 #define PROCSUPPORT_SSE        0x00010 // Processor supports SSE instructions
