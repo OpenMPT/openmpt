@@ -313,6 +313,8 @@ bool CASIODevice::InternalOpen()
 
 			m_CanOutputReady = (m_pAsioDrv->outputReady() == ASE_OK);
 
+			m_SampleBuffer.resize(m_nAsioBufferLen * m_Settings.Channels);
+
 			SoundBufferAttributes bufferAttributes;
 			long inputLatency = 0;
 			long outputLatency = 0;
@@ -457,6 +459,7 @@ bool CASIODevice::InternalClose()
 		CASIODevice::ReportASIOException("ASIO crash in disposeBuffers()\n");
 	}
 	CloseDevice();
+	m_SampleBuffer.clear();
 	if(gpCurrentAsio == this)
 	{
 		gpCurrentAsio = nullptr;
@@ -519,33 +522,25 @@ static void SwapEndian(uint8 *buf, std::size_t itemCount, std::size_t itemSize)
 void CASIODevice::FillAudioBuffer()
 //---------------------------------
 {
-	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
-
+	const bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 	const int channels = m_Settings.Channels;
-	std::size_t sampleFrameSize = channels * sizeof(int32);
-	const std::size_t sampleFramesGoal = m_nAsioBufferLen;
-	std::size_t sampleFramesToRender = sampleFramesGoal;
-	std::size_t sampleFramesRendered = 0;
-	const std::size_t countChunkMax = (ASIO_BLOCK_LEN * sizeof(int32)) / sampleFrameSize;
-	
+	const std::size_t countChunk = m_nAsioBufferLen;
 	g_dwBuffer &= 1;
-	//Log("FillAudioBuffer(%d): dwSampleSize=%d dwSamplesLeft=%d dwFrameLen=%d\n", g_dwBuffer, sampleFrameSize, dwSamplesLeft, dwFrameLen);
-	while(sampleFramesToRender > 0)
+	//Log("FillAudioBuffer(%d): channels=%d countChunk=%d\n", g_dwBuffer, sampleFrameSize, (int)channels, (int)countChunk);
+	if(rendersilence)
 	{
-		const std::size_t countChunk = std::min(sampleFramesToRender, countChunkMax);
-		if(rendersilence)
+		std::memset(&m_SampleBuffer[0], 0, countChunk * channels * sizeof(int32));
+	} else
+	{
+		SourceAudioRead(&m_SampleBuffer[0], countChunk);
+	}
+	for(int channel = 0; channel < channels; ++channel)
+	{
+		void *dst = m_BufferInfo[channel].buffers[g_dwBuffer];
+		if(m_Float)
 		{
-			memset(m_FrameBuffer, 0, countChunk * sampleFrameSize);
-		} else
-		{
-			SourceAudioRead(m_FrameBuffer, countChunk);
-		}
-		for(int channel = 0; channel < channels; ++channel)
-		{
-			const int32 *src = m_FrameBuffer;
-			const float *srcFloat = reinterpret_cast<const float*>(m_FrameBuffer);
-			void *dst = (char*)m_BufferInfo[channel].buffers[g_dwBuffer] + m_nAsioSampleSize * sampleFramesRendered;
-			if(m_Float) switch(m_ChannelInfo[channel].type)
+			const float *const srcFloat = reinterpret_cast<const float*>(&m_SampleBuffer[0]);
+			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTFloat32MSB:
 				case ASIOSTFloat32LSB:
@@ -558,65 +553,67 @@ void CASIODevice::FillAudioBuffer()
 				default:
 					ASSERT(false);
 					break;
-			} else switch(m_ChannelInfo[channel].type)
+			}
+		} else
+		{
+			const int32 *const srcInt32 = reinterpret_cast<const int32*>(&m_SampleBuffer[0]);
+			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTInt16MSB:
 				case ASIOSTInt16LSB:
-					CopyInterleavedToChannel<SC::Convert<int16, int32> >(reinterpret_cast<int16*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int16, int32> >(reinterpret_cast<int16*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt24MSB:
 				case ASIOSTInt24LSB:
-					CopyInterleavedToChannel<SC::Convert<int24, int32> >(reinterpret_cast<int24*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int24, int32> >(reinterpret_cast<int24*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB:
 				case ASIOSTInt32LSB:
-					CopyInterleavedToChannel<SC::Convert<int32, int32> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int32, int32> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTFloat32MSB:
 				case ASIOSTFloat32LSB:
-					CopyInterleavedToChannel<SC::Convert<float, int32> >(reinterpret_cast<float*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<float, int32> >(reinterpret_cast<float*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTFloat64MSB:
 				case ASIOSTFloat64LSB:
-					CopyInterleavedToChannel<SC::Convert<double, int32> >(reinterpret_cast<double*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<double, int32> >(reinterpret_cast<double*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB16:
 				case ASIOSTInt32LSB16:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 16> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 16> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB18:
 				case ASIOSTInt32LSB18:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 14> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 14> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB20:
 				case ASIOSTInt32LSB20:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 12> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 12> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB24:
 				case ASIOSTInt32LSB24:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				default:
 					ASSERT(false);
 					break;
 			}
-			switch(m_ChannelInfo[channel].type)
-			{
-				case ASIOSTInt16MSB:
-				case ASIOSTInt24MSB:
-				case ASIOSTInt32MSB:
-				case ASIOSTFloat32MSB:
-				case ASIOSTFloat64MSB:
-				case ASIOSTInt32MSB16:
-				case ASIOSTInt32MSB18:
-				case ASIOSTInt32MSB20:
-				case ASIOSTInt32MSB24:
-					SwapEndian(reinterpret_cast<uint8*>(dst), countChunk, m_nAsioSampleSize);
-					break;
-			}
 		}
-		sampleFramesToRender -= countChunk;
-		sampleFramesRendered += countChunk;
+		switch(m_ChannelInfo[channel].type)
+		{
+			case ASIOSTInt16MSB:
+			case ASIOSTInt24MSB:
+			case ASIOSTInt32MSB:
+			case ASIOSTFloat32MSB:
+			case ASIOSTFloat64MSB:
+			case ASIOSTInt32MSB16:
+			case ASIOSTInt32MSB18:
+			case ASIOSTInt32MSB20:
+			case ASIOSTInt32MSB24:
+				SwapEndian(reinterpret_cast<uint8*>(dst), countChunk, m_nAsioSampleSize);
+				break;
+		}
 	}
 	if(m_CanOutputReady)
 	{
@@ -624,9 +621,8 @@ void CASIODevice::FillAudioBuffer()
 	}
 	if(!rendersilence)
 	{
-		SourceAudioDone(sampleFramesRendered, m_nAsioBufferLen);
+		SourceAudioDone(countChunk, m_nAsioBufferLen);
 	}
-	return;
 }
 
 
@@ -734,6 +730,7 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSample
 			ASIOChannelInfo channelInfo;
 			MemsetZero(channelInfo);
 			channelInfo.channel = i;
+			channelInfo.isInput = ASIOFalse;
 			if(m_pAsioDrv->getChannelInfo(&channelInfo) == ASE_OK)
 			{
 				mpt::String::SetNullTerminator(channelInfo.name);
