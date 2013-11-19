@@ -921,14 +921,14 @@ void CModTreeBar::OnInvertTracker(UINT x)
 VOID CModTreeBar::OnDocumentCreated(CModDoc *pModDoc)
 //---------------------------------------------------
 {
-	if (m_pModTree) m_pModTree->AddDocument(pModDoc);
+	if (m_pModTree && pModDoc) m_pModTree->AddDocument(*pModDoc);
 }
 
 
 VOID CModTreeBar::OnDocumentClosed(CModDoc *pModDoc)
 //--------------------------------------------------
 {
-	if (m_pModTree) m_pModTree->RemoveDocument(pModDoc);
+	if (m_pModTree && pModDoc) m_pModTree->RemoveDocument(*pModDoc);
 }
 
 
@@ -942,7 +942,7 @@ VOID CModTreeBar::OnUpdate(CModDoc *pModDoc, DWORD lHint, CObject *pHint)
 VOID CModTreeBar::UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify)
 //----------------------------------------------------------------------
 {
-	if (m_pModTree) m_pModTree->UpdatePlayPos(pModDoc, pNotify);
+	if (m_pModTree && pModDoc) m_pModTree->UpdatePlayPos(*pModDoc, pNotify);
 }
 
 
