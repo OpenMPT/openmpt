@@ -383,7 +383,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 }
 
 
-void CASIODevice::InternalStart()
+bool CASIODevice::InternalStart()
 //-------------------------------
 {
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while starting ASIO");
@@ -402,11 +402,13 @@ void CASIODevice::InternalStart()
 			{
 				CASIODevice::ReportASIOException("ASIO crash in start()\n");
 				m_bMixRunning = FALSE;
+				return false;
 			}
 		} else
 		{
 			SetRenderSilence(false, true);
 		}
+		return true;
 }
 
 

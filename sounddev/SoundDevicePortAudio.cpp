@@ -122,10 +122,10 @@ bool CPortaudioDevice::InternalClose()
 }
 
 
-void CPortaudioDevice::InternalStart()
+bool CPortaudioDevice::InternalStart()
 //------------------------------------
 {
-	Pa_StartStream(m_Stream);
+	return Pa_StartStream(m_Stream) == paNoError;
 }
 
 
