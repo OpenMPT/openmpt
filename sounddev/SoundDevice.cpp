@@ -184,10 +184,10 @@ void ISoundDevice::AudioSendMessage(const std::string &str)
 }
 
 
-void ISoundDevice::Start()
+bool ISoundDevice::Start()
 //------------------------
 {
-	if(!IsOpen()) return; 
+	if(!IsOpen()) return false; 
 	if(!IsPlaying())
 	{
 		{
@@ -196,9 +196,13 @@ void ISoundDevice::Start()
 			m_StreamPositionRenderFrames = 0;
 			m_StreamPositionOutputFrames = 0;
 		}
-		InternalStart();
+		if(!InternalStart())
+		{
+			return false;
+		}
 		m_IsPlaying = true;
 	}
+	return true;
 }
 
 
@@ -632,10 +636,11 @@ void CSoundDeviceWithThread::SetWakeupInterval(double seconds)
 }
 
 
-void CSoundDeviceWithThread::InternalStart()
+bool CSoundDeviceWithThread::InternalStart()
 //------------------------------------------
 {
 	m_AudioThread.Activate();
+	return true;
 }
 
 

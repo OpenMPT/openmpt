@@ -69,7 +69,7 @@ protected:
 public:
 	CSoundDeviceWithThread(SoundDeviceID id, const std::wstring &internalID) : ISoundDevice(id, internalID), m_AudioThread(*this) {}
 	virtual ~CSoundDeviceWithThread() {}
-	void InternalStart();
+	bool InternalStart();
 	void InternalStop();
 	virtual void StartFromSoundThread() = 0;
 	virtual void StopFromSoundThread() = 0;

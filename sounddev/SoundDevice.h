@@ -277,7 +277,7 @@ protected:
 	virtual bool InternalIsOpen() const = 0;
 
 	virtual bool InternalOpen() = 0;
-	virtual void InternalStart() = 0;
+	virtual bool InternalStart() = 0;
 	virtual void InternalStop() = 0;
 	virtual bool InternalClose() = 0;
 
@@ -300,7 +300,7 @@ public:
 
 	bool Open(const SoundDeviceSettings &settings);
 	bool Close();
-	void Start();
+	bool Start();
 	void Stop();
 
 	bool IsOpen() const { return InternalIsOpen(); }

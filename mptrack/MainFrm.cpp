@@ -1180,7 +1180,7 @@ bool CMainFrame::StartPlayback()
 {
 	if(!m_pSndFile) return false; // nothing to play
 	if(!IsAudioDeviceOpen()) return false;
-	gpSoundDevice->Start();
+	if(!gpSoundDevice->Start()) return false;
 	if(!m_NotifyTimer)
 	{
 		m_NotifyTimer = SetTimer(TIMERID_NOTIFY, TrackerSettings::Instance().m_UpdateIntervalMS, NULL);
