@@ -697,6 +697,15 @@ std::int32_t module_impl::get_current_row() const {
 std::int32_t module_impl::get_current_playing_channels() const {
 	return m_sndFile->GetMixStat();
 }
+
+float module_impl::get_current_channel_vu_mono( std::int32_t channel ) const {
+	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
+		return 0.0f;
+	}
+	const float left = get_current_channel_vu_left( channel );
+	const float right = get_current_channel_vu_right( channel );
+	return std::sqrt(left*left + right*right);
+}
 float module_impl::get_current_channel_vu_left( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
 		return 0.0f;
@@ -708,6 +717,18 @@ float module_impl::get_current_channel_vu_right( std::int32_t channel ) const {
 		return 0.0f;
 	}
 	return m_sndFile->Chn[channel].nRightVU * (1.0f/128.0f);
+}
+float module_impl::get_current_channel_vu_rear_left( std::int32_t channel ) const {
+	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
+		return 0.0f;
+	}
+	return 0.0f; // FIXME m_sndFile->Chn[channel].nLeftVU * (1.0f/128.0f);
+}
+float module_impl::get_current_channel_vu_rear_right( std::int32_t channel ) const {
+	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
+		return 0.0f;
+	}
+	return 0.0f; // FIXME m_sndFile->Chn[channel].nRightVU * (1.0f/128.0f);
 }
 
 std::int32_t module_impl::get_num_subsongs() const {

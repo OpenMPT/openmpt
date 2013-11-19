@@ -215,11 +215,20 @@ std::int32_t module::get_current_playing_channels() const {
 	return impl->get_current_playing_channels();
 }
 
+float module::get_current_channel_vu_mono( std::int32_t channel ) const {
+	return impl->get_current_channel_vu_mono( channel );
+}
 float module::get_current_channel_vu_left( std::int32_t channel ) const {
 	return impl->get_current_channel_vu_left( channel );
 }
 float module::get_current_channel_vu_right( std::int32_t channel ) const {
 	return impl->get_current_channel_vu_right( channel );
+}
+float module::get_current_channel_vu_rear_left( std::int32_t channel ) const {
+	return impl->get_current_channel_vu_rear_left( channel );
+}
+float module::get_current_channel_vu_rear_right( std::int32_t channel ) const {
+	return impl->get_current_channel_vu_rear_right( channel );
 }
 
 std::int32_t module::get_num_subsongs() const {

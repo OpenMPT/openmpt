@@ -552,6 +552,13 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_playing_channels( openmpt_modu
 	return 0;
 }
 
+LIBOPENMPT_API float openmpt_module_get_current_channel_vu_mono( openmpt_module * mod, int32_t channel ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->get_current_channel_vu_mono( channel );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
 LIBOPENMPT_API float openmpt_module_get_current_channel_vu_left( openmpt_module * mod, int32_t channel ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
@@ -563,6 +570,20 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_right( openmpt_module
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		return mod->impl->get_current_channel_vu_right( channel );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
+LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_left( openmpt_module * mod, int32_t channel ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->get_current_channel_vu_rear_left( channel );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
+LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_right( openmpt_module * mod, int32_t channel ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->get_current_channel_vu_rear_right( channel );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0.0;
 }
