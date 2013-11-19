@@ -112,8 +112,11 @@ public:
 	std::int32_t get_current_pattern() const;
 	std::int32_t get_current_row() const;
 	std::int32_t get_current_playing_channels() const;
+	float get_current_channel_vu_mono( std::int32_t channel ) const;
 	float get_current_channel_vu_left( std::int32_t channel ) const;
 	float get_current_channel_vu_right( std::int32_t channel ) const;
+	float get_current_channel_vu_rear_left( std::int32_t channel ) const;
+	float get_current_channel_vu_rear_right( std::int32_t channel ) const;
 	std::int32_t get_num_subsongs() const;
 	std::int32_t get_num_channels() const;
 	std::int32_t get_num_orders() const;
