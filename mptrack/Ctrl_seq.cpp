@@ -1351,6 +1351,8 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 		else
 			return;
 	}
+	else if(nSeq == sndFile.Order.GetCurrentSequenceIndex())
+		return;
 	else if(nSeq == MAX_SEQUENCES || nSeq == MAX_SEQUENCES + 1)
 		sndFile.Order.AddSequence((nSeq == MAX_SEQUENCES));
 	else if(nSeq < sndFile.Order.GetNumSequences())

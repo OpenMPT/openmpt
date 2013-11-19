@@ -13,6 +13,7 @@
 
 class CModDoc;
 class CModTree;
+class CSoundFile;
 
 #include <vector>
 #include <bitset>
@@ -27,7 +28,7 @@ struct ModTreeDocInfo
 	// Tree state variables
 	std::vector<std::vector<HTREEITEM> > tiOrders;
 	std::vector<HTREEITEM> tiSequences, tiPatterns;
-	CModDoc *pModDoc;
+	CModDoc &modDoc;
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
 
 	// Module information
@@ -37,18 +38,7 @@ struct ModTreeDocInfo
 	std::bitset<MAX_SAMPLES> samplesPlaying;
 	std::bitset<MAX_INSTRUMENTS> instrumentsPlaying;
 
-	ModTreeDocInfo(const CSoundFile &sndFile)
-	{
-		pModDoc = sndFile.GetpModDoc();
-		nSeqSel = SEQUENCEINDEX_INVALID;
-		nOrdSel = ORDERINDEX_INVALID;
-		hSong = hPatterns = hSamples = hInstruments = hComments = hOrders = hEffects = nullptr;
-		tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
-		tiOrders.resize(sndFile.Order.GetNumSequences());
-		tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
-		samplesPlaying.reset();
-		instrumentsPlaying.reset();
-	}
+	ModTreeDocInfo(CModDoc &modDoc);
 };
 
 
@@ -211,12 +201,12 @@ public:
 	void InstrumentLibraryChDir(mpt::PathString dir, bool isSong);
 	bool GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath);
 	void OnOptionsChanged();
-	void AddDocument(CModDoc *pModDoc);
-	void RemoveDocument(CModDoc *pModDoc);
+	void AddDocument(CModDoc &modDoc);
+	void RemoveDocument(CModDoc &modDoc);
 	void UpdateView(ModTreeDocInfo &info, DWORD dwHint);
 	void OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
-	void UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
+	void UpdatePlayPos(CModDoc &modDoc, Notification *pNotify);
 	bool IsItemExpanded(HTREEITEM hItem);
 	void DeleteChildren(HTREEITEM hItem);
 	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index);
@@ -242,8 +232,8 @@ protected:
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	void ModTreeInsert(const WCHAR *name, int image);
 	ModTreeDocInfo *GetDocumentInfoFromItem(HTREEITEM hItem);
-	CModDoc *GetDocumentFromItem(HTREEITEM hItem) { ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem); return info ? info->pModDoc : nullptr; }
-	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc *pModDoc);
+	CModDoc *GetDocumentFromItem(HTREEITEM hItem) { ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem); return info ? &info->modDoc : nullptr; }
+	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc &modDoc);
 
 	void InsertOrDupItem(bool insert);
 
