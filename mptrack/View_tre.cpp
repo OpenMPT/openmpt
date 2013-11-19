@@ -192,20 +192,24 @@ void CModTree::Init()
 	}
 	ModifyStyle(dwRemove, dwAdd);
 
-	m_InstrLibPath = TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES);
-	if(m_InstrLibPath.empty())
+	if(!IsSampleBrowser())
 	{
-		m_InstrLibPath = TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS);
+		m_InstrLibPath = TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES);
 		if(m_InstrLibPath.empty())
 		{
-			// Resort to current directory.
-			WCHAR curDir[MAX_PATH];
-			GetCurrentDirectoryW(CountOf(curDir), curDir);
-			m_InstrLibPath = mpt::PathString::FromNative(curDir);
+			m_InstrLibPath = TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS);
+			if(m_InstrLibPath.empty())
+			{
+				// Resort to current directory.
+				WCHAR curDir[MAX_PATH];
+				GetCurrentDirectoryW(CountOf(curDir), curDir);
+				m_InstrLibPath = mpt::PathString::FromNative(curDir);
+			}
 		}
+		if(!m_InstrLibPath.HasTrailingSlash())
+			m_InstrLibPath += MPT_PATHSTRING("\\");
+		m_pDataTree->InsLibSetFullPath(m_InstrLibPath, mpt::PathString());
 	}
-	if(!m_InstrLibPath.HasTrailingSlash())
-		m_InstrLibPath += MPT_PATHSTRING("\\");
 
 	SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
 	if (!IsSampleBrowser())
@@ -276,9 +280,9 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		
 		case VK_BACK:
 			// Backspace: Go up one directory
-			if(GetParentRootItem(GetSelectedItem()) == m_hInsLib)
+			if(GetParentRootItem(GetSelectedItem()) == m_hInsLib || IsSampleBrowser())
 			{
-				InstrumentLibraryChDir(MPT_PATHSTRING(".."), false);
+				CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(MPT_PATHSTRING(".."), false);
 				return TRUE;
 			}
 		}
@@ -1162,7 +1166,6 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 			if (hItemParent == pInfo->hPatterns)
 			{
 				// Pattern
-				ASSERT(pInfo->tiPatterns.size() == pModDoc->GetrSoundFile().Patterns.Size());
 				modItem.type = MODITEM_PATTERN;
 			} else if (hItemParent == pInfo->hSamples)
 			{
@@ -1792,7 +1795,7 @@ void CModTree::MonitorInstrumentLibrary()
 		if(result == WAIT_OBJECT_0 + 1 && m_hWatchDir == waitHandles[1])
 		{
 			FindNextChangeNotification(m_hWatchDir);
-			RefreshInstrumentLibrary();
+			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
 		} else if(result == WAIT_FAILED)
 		{
 			Sleep(100);
@@ -1868,6 +1871,7 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 //---------------------------------------------------------------------
 {
+	ASSERT(!IsSampleBrowser());
 	if(dir.empty()) return;
 
 	BeginWaitCursor();
@@ -1878,6 +1882,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 		ok = m_pDataTree->InsLibSetFullPath(m_InstrLibPath, dir);
 		if(ok)
 		{
+			m_pDataTree->RefreshInstrumentLibrary();
 			m_InstrLibHighlightPath = dir;
 		}
 	} else
@@ -1907,6 +1912,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			delete m_SongFile;
 			m_SongFile = nullptr;
 			m_InstrLibPath = dir;
+			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
 			ok = true;
 		}
 	}
@@ -1917,11 +1923,6 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 		HANDLE watchDir = m_hWatchDir;
 		m_hWatchDir = nullptr;
 		FindCloseChangeNotification(watchDir);
-
-		if(!IsSampleBrowser())
-			m_pDataTree->RefreshInstrumentLibrary();
-		else
-			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
 	} else
 	{
 		std::wstring s = L"Unable to browse to \"" + dir.ToWide() + L"\"";
