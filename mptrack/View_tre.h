@@ -213,7 +213,7 @@ public:
 	void OnOptionsChanged();
 	void AddDocument(CModDoc *pModDoc);
 	void RemoveDocument(CModDoc *pModDoc);
-	void UpdateView(ModTreeDocInfo *pInfo, DWORD dwHint);
+	void UpdateView(ModTreeDocInfo &info, DWORD dwHint);
 	void OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
 	void UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
@@ -241,7 +241,8 @@ protected:
 	static int CALLBACK ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	void ModTreeInsert(const WCHAR *name, int image);
-	CModDoc *GetDocumentFromItem(HTREEITEM hItem);
+	ModTreeDocInfo *GetDocumentInfoFromItem(HTREEITEM hItem);
+	CModDoc *GetDocumentFromItem(HTREEITEM hItem) { ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem); return info ? info->pModDoc : nullptr; }
 	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc *pModDoc);
 
 	void InsertOrDupItem(bool insert);
