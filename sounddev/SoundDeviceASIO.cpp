@@ -63,8 +63,6 @@ public:
 
 CASIODevice *CASIODevice::gpCurrentAsio = nullptr;
 
-static int g_asio_startcount = 0;
-
 
 std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
 //----------------------------------------------------------
@@ -387,9 +385,6 @@ bool CASIODevice::InternalStart()
 {
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while starting ASIO");
 
-		ALWAYS_ASSERT(g_asio_startcount==0);
-		g_asio_startcount++;
-
 		if(!m_bMixRunning)
 		{
 			m_BufferIndex = 0;
@@ -419,12 +414,9 @@ bool CASIODevice::InternalStart()
 void CASIODevice::InternalStop()
 //------------------------------
 {
-	ALWAYS_ASSERT(g_asio_startcount==1);
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while stopping ASIO");
 
 		SetRenderSilence(true, true);
-		g_asio_startcount--;
-		ALWAYS_ASSERT(g_asio_startcount==0);
 }
 
 
@@ -434,7 +426,6 @@ bool CASIODevice::InternalClose()
 	if (m_bMixRunning)
 	{
 		m_bMixRunning = FALSE;
-		ALWAYS_ASSERT(g_asio_startcount==0);
 		try
 		{
 			m_pAsioDrv->stop();
@@ -443,7 +434,6 @@ bool CASIODevice::InternalClose()
 			CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 		}
 	}
-	g_asio_startcount = 0;
 	SetRenderSilence(false);
 	try
 	{
