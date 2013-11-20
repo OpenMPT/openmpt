@@ -397,7 +397,11 @@ bool CASIODevice::InternalStart()
 			m_bMixRunning = TRUE;
 			try
 			{
-				m_pAsioDrv->start();
+				if(m_pAsioDrv->start() != ASE_OK)
+				{
+					m_bMixRunning = FALSE;
+					return false;
+				}
 			} catch(...)
 			{
 				CASIODevice::ReportASIOException("ASIO crash in start()\n");
