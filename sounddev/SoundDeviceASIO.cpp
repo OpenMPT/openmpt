@@ -63,8 +63,6 @@ public:
 
 CASIODevice *CASIODevice::gpCurrentAsio = nullptr;
 
-static DWORD g_dwBuffer = 0;
-
 static int g_asio_startcount = 0;
 
 
@@ -159,6 +157,7 @@ CASIODevice::CASIODevice(SoundDeviceID id, const std::wstring &internalID)
 	m_Callbacks.asioMessage = AsioMessage;
 	m_Callbacks.bufferSwitchTimeInfo = BufferSwitchTimeInfo;
 	m_bMixRunning = FALSE;
+	m_BufferIndex = 0;
 	InterlockedExchange(&m_RenderSilence, 0);
 	InterlockedExchange(&m_RenderingSilence, 0);
 }
@@ -393,6 +392,7 @@ bool CASIODevice::InternalStart()
 
 		if(!m_bMixRunning)
 		{
+			m_BufferIndex = 0;
 			SetRenderSilence(false);
 			m_bMixRunning = TRUE;
 			try
@@ -602,8 +602,7 @@ void CASIODevice::FillAudioBuffer()
 	const bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 	const int channels = m_Settings.Channels;
 	const std::size_t countChunk = m_nAsioBufferLen;
-	g_dwBuffer &= 1;
-	//Log("FillAudioBuffer(%d): channels=%d countChunk=%d\n", g_dwBuffer, sampleFrameSize, (int)channels, (int)countChunk);
+	//Log("FillAudioBuffer(%d): channels=%d countChunk=%d\n", m_BufferIndex, sampleFrameSize, (int)channels, (int)countChunk);
 	if(rendersilence)
 	{
 		std::memset(&m_SampleBuffer[0], 0, countChunk * channels * sizeof(int32));
@@ -613,7 +612,12 @@ void CASIODevice::FillAudioBuffer()
 	}
 	for(int channel = 0; channel < channels; ++channel)
 	{
-		void *dst = m_BufferInfo[channel].buffers[g_dwBuffer];
+		void *dst = m_BufferInfo[channel].buffers[(unsigned long)m_BufferIndex & 1];
+		if(!dst)
+		{
+			// Skip if we did get no buffer for this channel
+			continue;
+		}
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
 			const float *const srcFloat = reinterpret_cast<const float*>(&m_SampleBuffer[0]);
@@ -696,7 +700,7 @@ void CASIODevice::FillAudioBuffer()
 void CASIODevice::BufferSwitch(long doubleBufferIndex)
 //----------------------------------------------------
 {
-	g_dwBuffer = doubleBufferIndex;
+	m_BufferIndex = doubleBufferIndex;
 	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 	InterlockedExchange(&m_RenderingSilence, rendersilence ? 1 : 0 );
 	if(rendersilence)
