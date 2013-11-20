@@ -83,16 +83,10 @@ static std::string TimeDiffAsString(uint64 ms)
 #endif // MODPLUG_TRACKER
 
 
-static noinline void DoLog(const char *file, int line, const char *function, const char *format, va_list args)
-//------------------------------------------------------------------------------------------------------------
+static noinline void DoLog(const char *file, int line, const char *function, std::string message)
+//-----------------------------------------------------------------------------------------------
 {
 #if !defined(MODPLUG_TRACKER) || (defined(MODPLUG_TRACKER) && defined(_DEBUG))
-	char message[LOGBUF_SIZE];
-	va_list va;
-	va_copy(va, args);
-	vsnprintf(message, LOGBUF_SIZE, format, va);
-	message[LOGBUF_SIZE - 1] = '\0';
-	va_end(va);
 	if(!file)
 	{
 		file = "unknown";
@@ -102,17 +96,7 @@ static noinline void DoLog(const char *file, int line, const char *function, con
 		function = "";
 	}
 	// remove eol if already present
-	std::size_t len = std::strlen(message);
-	if(len > 0 && message[len-1] == '\n')
-	{
-		message[len-1] = '\0';
-		len--;
-	}
-	if(len > 0 && message[len-1] == '\r')
-	{
-		message[len-1] = '\0';
-		len--;
-	}
+	message =  mpt::String::RTrim(message, "\r\n");
 	#if defined(MODPLUG_TRACKER)
 		static uint64_t s_lastlogtime = 0;
 		uint64 cur = GetTimeMS();
@@ -127,22 +111,42 @@ static noinline void DoLog(const char *file, int line, const char *function, con
 			}
 			if(s_logfile)
 			{
-				fprintf(s_logfile, "%s+%s %s(%i): %s [%s]\n", TimeAsAsString(cur).c_str(), TimeDiffAsString(diff).c_str(), file, line, message, function);
+				fprintf(s_logfile, "%s+%s %s(%i): %s [%s]\n", TimeAsAsString(cur).c_str(), TimeDiffAsString(diff).c_str(), file, line, message.c_str(), function);
 				fflush(s_logfile);
 			}
 		}
 		#endif // LOG_TO_FILE
 		{
-			OutputDebugString(mpt::String::Format("%s(%i): +%s %s [%s]\n", file, line, TimeDiffAsString(diff).c_str(), message, function).c_str());
+			OutputDebugString(mpt::String::Format("%s(%i): +%s %s [%s]\n", file, line, TimeDiffAsString(diff).c_str(), message.c_str(), function).c_str());
 		}
 	#else // !MODPLUG_TRACKER
 		std::clog
 			<< "openmpt: "
 			<< file << "(" << line << ")" << ": "
-			<< std::string(message)
+			<< message
 			<< " [" << function << "]"
 			<< std::endl;
 	#endif // MODPLUG_TRACKER
+#else
+	MPT_UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(line);
+	MPT_UNREFERENCED_PARAMETER(function);
+	MPT_UNREFERENCED_PARAMETER(message);
+#endif
+}
+
+
+static noinline void DoLog(const char *file, int line, const char *function, const char *format, va_list args)
+//------------------------------------------------------------------------------------------------------------
+{
+#if !defined(MODPLUG_TRACKER) || (defined(MODPLUG_TRACKER) && defined(_DEBUG))
+	char message[LOGBUF_SIZE];
+	va_list va;
+	va_copy(va, args);
+	vsnprintf(message, LOGBUF_SIZE, format, va);
+	message[LOGBUF_SIZE - 1] = '\0';
+	va_end(va);
+	DoLog(file, line, function, message);
 #else
 	MPT_UNREFERENCED_PARAMETER(file);
 	MPT_UNREFERENCED_PARAMETER(line);
@@ -163,6 +167,16 @@ void Logger::operator () (const char *format, ...)
 	DoLog(file, line, function, format, va);
 	va_end(va);
 }
+void Logger::operator () (const std::string &text)
+//------------------------------------------------
+{
+	DoLog(file, line, function, text);
+}
+void Logger::operator () (const std::wstring &text)
+//-------------------------------------------------
+{
+	DoLog(file, line, function, mpt::ToLocale(text));
+}
 
 
 #undef Log
@@ -173,6 +187,16 @@ void Log(const char * format, ...)
 	va_start(va, format);
 	DoLog(nullptr, 0, nullptr, format, va);
 	va_end(va);
+}
+void Log(const std::string &text)
+//-------------------------------
+{
+	DoLog(nullptr, 0, nullptr, text);
+}
+void Log(const std::wstring &text)
+//--------------------------------
+{
+	DoLog(nullptr, 0, nullptr, mpt::ToLocale(text));
 }
 
 #endif // !NO_LOGGING
