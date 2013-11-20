@@ -573,6 +573,29 @@ std::size_t CASIODevice::GetSampleSize(ASIOSampleType sampleType)
 }
 
 
+bool CASIODevice::IsSampleTypeBigEndian(ASIOSampleType sampleType)
+//----------------------------------------------------------------
+{
+	switch(sampleType)
+	{
+		case ASIOSTInt16MSB:
+		case ASIOSTInt24MSB:
+		case ASIOSTInt32MSB:
+		case ASIOSTFloat32MSB:
+		case ASIOSTFloat64MSB:
+		case ASIOSTInt32MSB16:
+		case ASIOSTInt32MSB18:
+		case ASIOSTInt32MSB20:
+		case ASIOSTInt32MSB24:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+	}
+}
+
+
 void CASIODevice::FillAudioBuffer()
 //---------------------------------
 {
@@ -654,19 +677,9 @@ void CASIODevice::FillAudioBuffer()
 					break;
 			}
 		}
-		switch(m_ChannelInfo[channel].type)
+		if(IsSampleTypeBigEndian(m_ChannelInfo[channel].type))
 		{
-			case ASIOSTInt16MSB:
-			case ASIOSTInt24MSB:
-			case ASIOSTInt32MSB:
-			case ASIOSTFloat32MSB:
-			case ASIOSTFloat64MSB:
-			case ASIOSTInt32MSB16:
-			case ASIOSTInt32MSB18:
-			case ASIOSTInt32MSB20:
-			case ASIOSTInt32MSB24:
-				SwapEndian(reinterpret_cast<uint8*>(dst), countChunk, GetSampleSize(m_ChannelInfo[channel].type));
-				break;
+			SwapEndian(reinterpret_cast<uint8*>(dst), countChunk, GetSampleSize(m_ChannelInfo[channel].type));
 		}
 	}
 	if(m_CanOutputReady)
