@@ -37,6 +37,7 @@ protected:
 	long m_nAsioBufferLen;
 	bool m_CanOutputReady;
 	BOOL m_bMixRunning;
+	long m_BufferIndex;
 	LONG m_RenderSilence;
 	LONG m_RenderingSilence;
 	ASIOCallbacks m_Callbacks;
