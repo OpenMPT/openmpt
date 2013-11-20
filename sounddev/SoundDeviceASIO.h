@@ -47,6 +47,7 @@ protected:
 private:
 	static bool IsSampleTypeFloat(ASIOSampleType sampleType);
 	static std::size_t GetSampleSize(ASIOSampleType sampleType);
+	static bool IsSampleTypeBigEndian(ASIOSampleType sampleType);
 	void SetRenderSilence(bool silence, bool wait=false);
 
 public:
