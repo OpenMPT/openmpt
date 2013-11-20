@@ -724,9 +724,10 @@ public:
 };
 
 
-void CMainFrame::AudioRead(const SoundDeviceSettings &settings, std::size_t numFrames, void *buffer)
-//--------------------------------------------------------------------------------------------------
+void CMainFrame::AudioRead(const SoundDeviceSettings &settings, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer)
+//--------------------------------------------------------------------------------------------------------------------------
 {
+	MPT_UNREFERENCED_PARAMETER(timeInfo);
 	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	StereoVuMeterTargetWrapper target(settings.sampleFormat, m_Dither, buffer);
@@ -749,10 +750,11 @@ void CMainFrame::AudioRead(const SoundDeviceSettings &settings, std::size_t numF
 }
 
 
-void CMainFrame::AudioDone(const SoundDeviceSettings &settings, std::size_t numFrames, int64 streamPosition)
-//----------------------------------------------------------------------------------------------------------
+void CMainFrame::AudioDone(const SoundDeviceSettings &settings, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
+//----------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(settings);
+	MPT_UNREFERENCED_PARAMETER(timeInfo);
 	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
 	DoNotification(numFrames, streamPosition);

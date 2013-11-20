@@ -42,7 +42,7 @@ public:
 public:
 	bool InternalOpen();
 	bool InternalClose();
-	void FillAudioBuffer();
+	void InternalFillAudioBuffer();
 	void StartFromSoundThread();
 	void StopFromSoundThread();
 	bool InternalIsOpen() const { return (m_pMixBuffer != NULL); }

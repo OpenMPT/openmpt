@@ -586,8 +586,8 @@ bool CASIODevice::IsSampleTypeBigEndian(ASIOSampleType sampleType)
 }
 
 
-void CASIODevice::FillAudioBuffer()
-//---------------------------------
+void CASIODevice::InternalFillAudioBuffer()
+//-----------------------------------------
 {
 	const bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 	const int channels = m_Settings.Channels;
@@ -598,6 +598,7 @@ void CASIODevice::FillAudioBuffer()
 		std::memset(&m_SampleBuffer[0], 0, countChunk * channels * sizeof(int32));
 	} else
 	{
+		SourceAudioPreRead(countChunk);
 		SourceAudioRead(&m_SampleBuffer[0], countChunk);
 	}
 	for(int channel = 0; channel < channels; ++channel)
@@ -695,7 +696,7 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex)
 	InterlockedExchange(&m_RenderingSilence, rendersilence ? 1 : 0 );
 	if(rendersilence)
 	{
-		FillAudioBuffer();
+		InternalFillAudioBuffer();
 	} else
 	{
 		SourceFillAudioBufferLocked();

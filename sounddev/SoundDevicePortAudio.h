@@ -46,7 +46,7 @@ public:
 public:
 	bool InternalOpen();
 	bool InternalClose();
-	void FillAudioBuffer();
+	void InternalFillAudioBuffer();
 	bool InternalStart();
 	void InternalStop();
 	bool InternalIsOpen() const { return m_Stream ? true : false; }
