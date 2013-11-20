@@ -29,7 +29,7 @@
 class CASIODevice: public ISoundDevice
 //====================================
 {
-	friend class TemporaryASIODeviceOpener;
+	friend class TemporaryASIODriverOpener;
 
 	enum { ASIO_MAX_CHANNELS=4 };
 protected:
@@ -68,9 +68,9 @@ public:
 	static std::vector<SoundDeviceInfo> EnumerateDevices();
 
 protected:
-	void OpenDevice();
-	void CloseDevice();
-	bool IsDeviceOpen() const { return (m_pAsioDrv != nullptr); }
+	void OpenDriver();
+	void CloseDriver();
+	bool IsDriverOpen() const { return (m_pAsioDrv != nullptr); }
 
 protected:
 	void BufferSwitch(long doubleBufferIndex);

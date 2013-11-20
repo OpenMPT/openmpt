@@ -26,27 +26,27 @@
 #include <algorithm>
 
 
-// Helper class to temporarily open a device for a query.
-class TemporaryASIODeviceOpener
+// Helper class to temporarily open a driver for a query.
+class TemporaryASIODriverOpener
 {
 protected:
 	CASIODevice &device;
 	const bool wasOpen;
 
 public:
-	TemporaryASIODeviceOpener(CASIODevice &d) : device(d), wasOpen(d.IsOpen())
+	TemporaryASIODriverOpener(CASIODevice &d) : device(d), wasOpen(d.IsOpen())
 	{
 		if(!wasOpen)
 		{
-			device.OpenDevice();
+			device.OpenDriver();
 		}
 	}
 
-	~TemporaryASIODeviceOpener()
+	~TemporaryASIODriverOpener()
 	{
 		if(!wasOpen)
 		{
-			device.CloseDevice();
+			device.CloseDriver();
 		}
 	}
 };
@@ -181,9 +181,9 @@ bool CASIODevice::InternalOpen()
 	Log("CASIODevice::Open(%d:\"%s\"): %d-bit, %d channels, %dHz\n",
 		GetDeviceIndex(), mpt::ToLocale(GetDeviceInternalID()).c_str(), (int)m_Settings.sampleFormat.GetBitsPerSample(), m_Settings.Channels, m_Settings.Samplerate);
 #endif
-	OpenDevice();
+	OpenDriver();
 
-	if(IsDeviceOpen())
+	if(IsDriverOpen())
 	{
 		long nInputChannels = 0, nOutputChannels = 0;
 		long minSize = 0, maxSize = 0, preferredSize = 0, granularity = 0;
@@ -338,7 +338,7 @@ abort:
 	#ifdef ASIO_LOG
 		Log("Error opening ASIO device!\n");
 	#endif
-		CloseDevice();
+		CloseDriver();
 	}
 	return bOk;
 }
@@ -448,7 +448,7 @@ bool CASIODevice::InternalClose()
 	{
 		CASIODevice::ReportASIOException("ASIO crash in disposeBuffers()\n");
 	}
-	CloseDevice();
+	CloseDriver();
 	m_SampleBuffer.clear();
 	if(gpCurrentAsio == this)
 	{
@@ -458,10 +458,10 @@ bool CASIODevice::InternalClose()
 }
 
 
-void CASIODevice::OpenDevice()
+void CASIODevice::OpenDriver()
 //----------------------------
 {
-	if(IsDeviceOpen())
+	if(IsDriverOpen())
 	{
 		return;
 	}
@@ -481,10 +481,10 @@ void CASIODevice::OpenDevice()
 }
 
 
-void CASIODevice::CloseDevice()
+void CASIODevice::CloseDriver()
 //-----------------------------
 {
-	if(IsDeviceOpen())
+	if(IsDriverOpen())
 	{
 		try
 		{
@@ -751,7 +751,7 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSample
 {
 	SoundDeviceCaps caps;
 
-	TemporaryASIODeviceOpener opener(*this);
+	TemporaryASIODriverOpener opener(*this);
 	if(!IsOpen())
 	{
 		return caps;
@@ -799,7 +799,7 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSample
 bool CASIODevice::OpenDriverSettings()
 //------------------------------------
 {
-	TemporaryASIODeviceOpener opener(*this);
+	TemporaryASIODriverOpener opener(*this);
 	if(!IsOpen())
 	{
 		return false;
