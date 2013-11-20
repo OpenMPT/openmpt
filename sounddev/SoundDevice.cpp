@@ -177,7 +177,7 @@ void ISoundDevice::SourceAudioPreRead(std::size_t numFrames)
 				Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
 				timeInfo.StreamFrames = m_StreamPositionRenderFrames + numFrames;
 			}
-			timeInfo.SystemTimestamp = (m_Clock.Now() + m_Settings.LatencyMS) * (uint64)1000 * (uint64)1000;
+			timeInfo.SystemTimestamp = m_Clock.Now() * (uint64)1000 * (uint64)1000 + Util::Round<int64>(m_BufferAttributes.Latency * 1000.0 * 1000.0 * 1000.0);
 			timeInfo.Speed = 1.0;
 			UpdateTimeInfo(timeInfo);
 		}
