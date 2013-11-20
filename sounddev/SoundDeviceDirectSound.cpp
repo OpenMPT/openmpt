@@ -289,7 +289,7 @@ void CDSoundDevice::StartFromSoundThread()
 //----------------------------------------
 {
 	if(!m_pMixBuffer) return;
-	// done in FillAudioBuffer for now
+	// done in InternalFillAudioBuffer for now
 }
 
 
@@ -363,8 +363,8 @@ BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DW
 }
 
 
-void CDSoundDevice::FillAudioBuffer()
-//-----------------------------------
+void CDSoundDevice::InternalFillAudioBuffer()
+//-------------------------------------------
 {
 	LPVOID lpBuf1=NULL, lpBuf2=NULL;
 	DWORD dwSize1=0, dwSize2=0;
@@ -375,6 +375,10 @@ void CDSoundDevice::FillAudioBuffer()
 	if (dwBytes)
 	{
 		const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
+		std::size_t countChunk = 0;
+		if(lpBuf1 && (dwSize1 > 0)) countChunk += dwSize1/bytesPerFrame;
+		if(lpBuf2 && (dwSize2 > 0)) countChunk += dwSize2/bytesPerFrame;
+		SourceAudioPreRead(countChunk);
 		if ((lpBuf1) && (dwSize1)) SourceAudioRead(lpBuf1, dwSize1/bytesPerFrame);
 		if ((lpBuf2) && (dwSize2)) SourceAudioRead(lpBuf2, dwSize2/bytesPerFrame);
 		UnlockBuffer(lpBuf1, dwSize1, lpBuf2, dwSize2);

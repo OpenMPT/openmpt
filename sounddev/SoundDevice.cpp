@@ -106,6 +106,13 @@ void ISoundDevice::UpdateBufferAttributes(SoundBufferAttributes attributes)
 }
 
 
+void ISoundDevice::UpdateTimeInfo(SoundTimeInfo timeInfo)
+//-------------------------------------------------------
+{
+	m_TimeInfo = timeInfo;
+}
+
+
 bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 //----------------------------------------------------------
 {
@@ -134,12 +141,46 @@ bool ISoundDevice::Close()
 }
 
 
+void ISoundDevice::FillAudioBuffer()
+//----------------------------------
+{
+	InternalFillAudioBuffer();
+}
+
+
 void ISoundDevice::SourceFillAudioBufferLocked()
 //----------------------------------------------
 {
 	if(m_Source)
 	{
 		m_Source->FillAudioBufferLocked(*this);
+	}
+}
+
+
+void ISoundDevice::SourceAudioPreRead(std::size_t numFrames)
+//----------------------------------------------------------
+{
+	if(!InternalHasTimeInfo())
+	{
+		if(InternalHasGetStreamPosition())
+		{
+			SoundTimeInfo timeInfo;
+			timeInfo.StreamFrames = InternalHasGetStreamPosition();
+			timeInfo.SystemTimestamp = m_Clock.Now() * (uint64)1000 * (uint64)1000;
+			timeInfo.Speed = 1.0;
+			UpdateTimeInfo(timeInfo);
+		} else
+		{
+			SoundTimeInfo timeInfo;
+			{
+				Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+				timeInfo.StreamFrames = m_StreamPositionRenderFrames + numFrames;
+			}
+			timeInfo.SystemTimestamp = (m_Clock.Now() + m_Settings.LatencyMS) * (uint64)1000 * (uint64)1000;
+			timeInfo.Speed = 1.0;
+			UpdateTimeInfo(timeInfo);
+		}
 	}
 }
 
@@ -151,7 +192,7 @@ void ISoundDevice::SourceAudioRead(void *buffer, std::size_t numFrames)
 	{
 		return;
 	}
-	m_Source->AudioRead(m_Settings, numFrames, buffer);
+	m_Source->AudioRead(m_Settings, m_TimeInfo, numFrames, buffer);
 }
 
 
@@ -170,7 +211,7 @@ void ISoundDevice::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
 		framesRendered = m_StreamPositionRenderFrames;
 	}
-	m_Source->AudioDone(m_Settings, numFrames, framesRendered);
+	m_Source->AudioDone(m_Settings, m_TimeInfo, numFrames, framesRendered);
 }
 
 
@@ -196,8 +237,10 @@ bool ISoundDevice::Start()
 			m_StreamPositionRenderFrames = 0;
 			m_StreamPositionOutputFrames = 0;
 		}
+		m_Clock.SetResolution(1);
 		if(!InternalStart())
 		{
+			m_Clock.SetResolution(0);
 			return false;
 		}
 		m_IsPlaying = true;
@@ -213,6 +256,7 @@ void ISoundDevice::Stop()
 	if(IsPlaying())
 	{
 		InternalStop();
+		m_Clock.SetResolution(0);
 		m_IsPlaying = false;
 		{
 			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);

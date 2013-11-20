@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../common/mutex.h"
+#include "../common/misc_util.h"
 #include "../soundlib/SampleFormat.h"
 
 #include <map>
@@ -50,14 +51,29 @@ public:
 };
 
 
+struct SoundTimeInfo
+{
+	uint64 StreamFrames;
+	uint64 SystemTimestamp;
+	double Speed;
+	SoundTimeInfo()
+		: StreamFrames(0)
+		, SystemTimestamp(0)
+		, Speed(1.0)
+	{
+		return;
+	}
+};
+
+
 //================
 class ISoundSource
 //================
 {
 public:
 	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual void AudioRead(const SoundDeviceSettings &settings, std::size_t numFrames, void *buffer) = 0;
-	virtual void AudioDone(const SoundDeviceSettings &settings, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
+	virtual void AudioRead(const SoundDeviceSettings &settings, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
+	virtual void AudioDone(const SoundDeviceSettings &settings, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
 };
 
 
@@ -250,6 +266,9 @@ private:
 
 	bool m_IsPlaying;
 
+	Util::MultimediaClock m_Clock;
+	SoundTimeInfo m_TimeInfo;
+
 	mutable Util::mutex m_StreamPositionMutex;
 	double m_CurrentUpdateInterval;
 	int64 m_StreamPositionRenderFrames;
@@ -257,9 +276,12 @@ private:
 
 protected:
 
-	virtual void FillAudioBuffer() = 0;
+	virtual void InternalFillAudioBuffer() = 0;
+
+	void FillAudioBuffer();
 
 	void SourceFillAudioBufferLocked();
+	void SourceAudioPreRead(std::size_t numFrames);
 	void SourceAudioRead(void *buffer, std::size_t numFrames);
 	void SourceAudioDone(std::size_t numFrames, int32 framesLatency);
 
@@ -270,6 +292,9 @@ protected:
 	bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat);
 
 	void UpdateBufferAttributes(SoundBufferAttributes attributes);
+	void UpdateTimeInfo(SoundTimeInfo timeInfo);
+
+	virtual bool InternalHasTimeInfo() const { return false; }
 
 	virtual bool InternalHasGetStreamPosition() const { return false; }
 	virtual int64 InternalGetStreamPositionFrames() const { return 0; }

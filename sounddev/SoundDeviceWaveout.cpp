@@ -131,7 +131,7 @@ void CWaveDevice::StartFromSoundThread()
 	if(m_hWaveOut)
 	{
 		m_JustStarted = true;
-		// Actual starting is done in FillAudioBuffer to avoid crackling with tiny buffers.
+		// Actual starting is done in InternalFillAudioBuffer to avoid crackling with tiny buffers.
 	}
 }
 
@@ -147,8 +147,8 @@ void CWaveDevice::StopFromSoundThread()
 }
 
 
-void CWaveDevice::FillAudioBuffer()
-//---------------------------------
+void CWaveDevice::InternalFillAudioBuffer()
+//-----------------------------------------
 {
 	if(!m_hWaveOut)
 	{
@@ -163,6 +163,7 @@ void CWaveDevice::FillAudioBuffer()
 	ULONG nBytesWritten = 0;
 	while(oldBuffersPending < m_nPreparedHeaders)
 	{
+		SourceAudioPreRead(m_nWaveBufferSize / bytesPerFrame);
 		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize / bytesPerFrame);
 		nLatency += m_nWaveBufferSize;
 		nBytesWritten += m_nWaveBufferSize;
