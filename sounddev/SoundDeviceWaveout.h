@@ -25,6 +25,7 @@ class CWaveDevice: public CSoundDeviceWithThread
 //==============================================
 {
 protected:
+	HANDLE m_ThreadWakeupEvent;
 	HWAVEOUT m_hWaveOut;
 	ULONG m_nWaveBufferSize;
 	bool m_JustStarted;

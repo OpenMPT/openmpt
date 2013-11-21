@@ -349,6 +349,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 	m_hAudioWakeUp = NULL;
 	m_hAudioThreadTerminateRequest = NULL;
 	m_hAudioThreadGoneIdle = NULL;
+	m_hHardwareWakeupEvent = INVALID_HANDLE_VALUE;
 	m_AudioThreadActive = 0;
 	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_hAudioThreadTerminateRequest = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -609,12 +610,24 @@ DWORD CAudioThread::AudioThread()
 
 				periodicWaker.Retrigger();
 
-				HANDLE waithandles[3] = {m_hAudioThreadTerminateRequest, m_hAudioWakeUp, periodicWaker.GetWakeupEvent()};
-				switch(WaitForMultipleObjects(3, waithandles, FALSE, periodicWaker.GetSleepMilliseconds()))
+				if(m_hHardwareWakeupEvent != INVALID_HANDLE_VALUE)
 				{
-				case WAIT_OBJECT_0:
-					terminate = true;
-					break;
+					HANDLE waithandles[4] = {m_hAudioThreadTerminateRequest, m_hAudioWakeUp, m_hHardwareWakeupEvent, periodicWaker.GetWakeupEvent()};
+					switch(WaitForMultipleObjects(4, waithandles, FALSE, periodicWaker.GetSleepMilliseconds()))
+					{
+					case WAIT_OBJECT_0:
+						terminate = true;
+						break;
+					}
+				} else
+				{
+					HANDLE waithandles[3] = {m_hAudioThreadTerminateRequest, m_hAudioWakeUp, periodicWaker.GetWakeupEvent()};
+					switch(WaitForMultipleObjects(3, waithandles, FALSE, periodicWaker.GetSleepMilliseconds()))
+					{
+					case WAIT_OBJECT_0:
+						terminate = true;
+						break;
+					}
 				}
 
 			}
@@ -629,6 +642,13 @@ DWORD CAudioThread::AudioThread()
 
 	return 0;
 
+}
+
+
+void CAudioThread::SetWakeupEvent(HANDLE ev)
+//------------------------------------------
+{
+	m_hHardwareWakeupEvent = ev;
 }
 
 
@@ -670,6 +690,13 @@ void CSoundDeviceWithThread::FillAudioBufferLocked()
 //--------------------------------------------------
 {
 	SourceFillAudioBufferLocked();
+}
+
+
+void CSoundDeviceWithThread::SetWakeupEvent(HANDLE ev)
+//----------------------------------------------------
+{
+	m_AudioThread.SetWakeupEvent(ev);
 }
 
 
