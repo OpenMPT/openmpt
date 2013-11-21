@@ -14,7 +14,6 @@
 #include "Moddoc.h"
 #include "Mainfrm.h"
 #include "../sounddev/SoundDevice.h"
-#include "../sounddev/SoundDeviceASIO.h"
 #include "../common/version.h"
 #include "UpdateCheck.h"
 #include "Mpdlgs.h"

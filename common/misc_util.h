@@ -547,6 +547,10 @@ public:
 	// The epoch (offset) of the timestamps is undefined but constant until the next system reboot.
 	// The resolution is the value returned from GetResolution().
 	uint32 Now() const;
+	// Returns current instantaneous timestamp in nanoseconds.
+	// The epoch (offset) of the timestamps is undefined but constant until the next system reboot.
+	// The resolution is the value returned from GetResolution() in milliseconds.
+	uint64 NowNanoseconds() const;
 };
 
 } // namespace Util
