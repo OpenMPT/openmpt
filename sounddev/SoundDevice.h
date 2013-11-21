@@ -53,7 +53,7 @@ public:
 
 struct SoundTimeInfo
 {
-	uint64 StreamFrames;
+	int64 StreamFrames; // can actually be negative (e.g. when starting the stream)
 	uint64 SystemTimestamp;
 	double Speed;
 	SoundTimeInfo()
