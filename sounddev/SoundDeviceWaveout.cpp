@@ -35,6 +35,7 @@ CWaveDevice::CWaveDevice(SoundDeviceID id, const std::wstring &internalID)
 //------------------------------------------------------------------------
 	: CSoundDeviceWithThread(id, internalID)
 {
+	m_ThreadWakeupEvent;
 	m_hWaveOut = NULL;
 	m_nWaveBufferSize = 0;
 	m_JustStarted = false;
@@ -60,9 +61,16 @@ bool CWaveDevice::InternalOpen()
 	WAVEFORMATEX *pwfx = &wfext.Format;
 	UINT_PTR nWaveDev = GetDeviceIndex();
 	nWaveDev = (nWaveDev > 0) ? nWaveDev - 1 : WAVE_MAPPER;
+	m_ThreadWakeupEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if(m_ThreadWakeupEvent == INVALID_HANDLE_VALUE)
+	{
+		InternalClose();
+		return false;
+	}
 	m_hWaveOut = NULL;
 	if(waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 	{
+		InternalClose();
 		return false;
 	}
 	m_nWaveBufferSize = m_Settings.UpdateIntervalMS * pwfx->nAvgBytesPerSec / 1000;
@@ -88,11 +96,12 @@ bool CWaveDevice::InternalOpen()
 	}
 	if(!m_nPreparedHeaders)
 	{
-		Close();
+		InternalClose();
 		return false;
 	}
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
+	SetWakeupEvent(m_ThreadWakeupEvent);
 	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
 	SoundBufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond();
@@ -120,6 +129,11 @@ bool CWaveDevice::InternalClose()
 		MMRESULT err = waveOutClose(m_hWaveOut);
 		ALWAYS_ASSERT(err == MMSYSERR_NOERROR);
 		m_hWaveOut = NULL;
+	}
+	if(m_ThreadWakeupEvent)
+	{
+		CloseHandle(m_ThreadWakeupEvent);
+		m_ThreadWakeupEvent = NULL;
 	}
 	return true;
 }
@@ -211,6 +225,7 @@ void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_P
 	{
 		CWaveDevice *that = (CWaveDevice *)dwUser;
 		InterlockedDecrement(&that->m_nBuffersPending);
+		SetEvent(that->m_ThreadWakeupEvent);
 	}
 }
 

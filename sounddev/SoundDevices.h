@@ -43,6 +43,7 @@ private:
 	HANDLE m_hPlayThread;
 	HANDLE m_hAudioThreadTerminateRequest;
 	HANDLE m_hAudioThreadGoneIdle;
+	HANDLE m_hHardwareWakeupEvent;
 	DWORD m_dwPlayThreadId;
 	LONG m_AudioThreadActive;
 	static DWORD WINAPI AudioThreadWrapper(LPVOID user);
@@ -53,6 +54,7 @@ public:
 	~CAudioThread();
 	void Activate();
 	void Deactivate();
+	void SetWakeupEvent(HANDLE ev);
 	void SetWakeupInterval(double seconds);
 };
 
@@ -65,6 +67,7 @@ protected:
 private:
 	void FillAudioBufferLocked();
 protected:
+	void SetWakeupEvent(HANDLE ev);
 	void SetWakeupInterval(double seconds);
 public:
 	CSoundDeviceWithThread(SoundDeviceID id, const std::wstring &internalID) : ISoundDevice(id, internalID), m_AudioThread(*this) {}
