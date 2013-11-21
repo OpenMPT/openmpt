@@ -159,6 +159,11 @@ uint32 MultimediaClock::Now() const
 	return timeGetTime();
 }
 
+uint64 MultimediaClock::NowNanoseconds() const
+{
+	return (uint64)timeGetTime() * (uint64)1000000;
+}
+
 } // namespace Util
 
 #endif // MODPLUG_TRACKER

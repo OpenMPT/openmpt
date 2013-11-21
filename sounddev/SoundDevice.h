@@ -291,6 +291,8 @@ protected:
 
 	bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat);
 
+	const Util::MultimediaClock & Clock() const { return m_Clock; }
+
 	void UpdateBufferAttributes(SoundBufferAttributes attributes);
 	void UpdateTimeInfo(SoundTimeInfo timeInfo);
 
@@ -335,6 +337,7 @@ public:
 	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
 
 	SoundBufferAttributes GetBufferAttributes() const { return m_BufferAttributes; }
+	SoundTimeInfo GetTimeInfo() const { return m_TimeInfo; }
 
 	// Informational only, do not use for timing.
 	// Use GetStreamPositionFrames() for timing
