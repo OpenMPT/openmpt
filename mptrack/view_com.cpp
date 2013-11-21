@@ -23,15 +23,16 @@
 
 #define DETAILS_TOOLBAR_CY	28
 
-typedef struct LISTCOLHDR
+struct LISTCOLHDR
 {
-	LPCSTR pszName;
+	const TCHAR *pszName;
 	UINT cx;
-} LISTCOLHDR, *PLISTCOLHDR;
+};
 
 
-enum {
-	SMPLIST_SAMPLENAME=0,
+enum
+{
+	SMPLIST_SAMPLENAME = 0,
 	SMPLIST_SAMPLENO,
 	SMPLIST_SIZE,
 	SMPLIST_TYPE,
@@ -42,8 +43,9 @@ enum {
 };
 
 
-enum {
-	INSLIST_INSTRUMENTNAME=0,
+enum
+{
+	INSLIST_INSTRUMENTNAME = 0,
 	INSLIST_INSTRUMENTNO,
 	INSLIST_SAMPLES,
 	INSLIST_ENVELOPES,
@@ -57,35 +59,28 @@ enum {
 };
 
 
-enum {
-	PATLIST_PATTERNNAME=0,
-	PATLIST_PATTERNNO,
-	PATLIST_COLUMNS
+const LISTCOLHDR gSampleHeaders[SMPLIST_COLUMNS] =
+{
+	{ _T("Sample Name"), 192},
+	{ _T("Num"), 45},
+	{ _T("Size"), 72},
+	{ _T("Type"), 45},
+	{ _T("C-5 Freq"), 80},
+	{ _T("Instr"), 64},
+	{ _T("File Name"), 128},
 };
 
-
-LISTCOLHDR gSampleHeaders[SMPLIST_COLUMNS] =
+const LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
 {
-	{"Sample Name", 192},
-	{"Num", 36},
-	{"Size", 72},
-	{"Type", 40},
-	{"C-5 Freq", 80},
-	{"Instr", 64},
-	{"File Name", 128},
-};
-
-LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
-{
-	{"Instrument Name", 192},
-	{"Num", 36},
-	{"Samples", 64},
-	{"Envelopes", 128},
-	{"File Name", 128},
-	{"Plugin", 128},
+	{ _T("Instrument Name"), 192},
+	{ _T("Num"), 45},
+	{ _T("Samples"), 64},
+	{ _T("Envelopes"), 128},
+	{ _T("File Name"), 128},
+	{ _T("Plugin"), 128},
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	{"Path", 128},
+	{ _T("Path"), 128},
 // -! NEW_FEATURE#0023
 };
 
@@ -230,7 +225,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				MemsetZero(lvc);
 				lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 				lvc.fmt = (iSmp) ? LVCFMT_RIGHT : LVCFMT_LEFT;
-				lvc.pszText = (LPSTR)gSampleHeaders[iSmp].pszName;
+				lvc.pszText = (LPTSTR)gSampleHeaders[iSmp].pszName;
 				lvc.cx = gSampleHeaders[iSmp].cx;
 				lvc.iSubItem = iSmp;
 				m_ItemList.InsertColumn(nCol, &lvc);
@@ -246,7 +241,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				MemsetZero(lvc);
 				lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 				lvc.fmt = (i) ? LVCFMT_RIGHT : LVCFMT_LEFT;
-				lvc.pszText = (LPSTR)gInstrumentHeaders[i].pszName;
+				lvc.pszText = (LPTSTR)gInstrumentHeaders[i].pszName;
 				lvc.cx = gInstrumentHeaders[i].cx;
 				lvc.iSubItem = i;
 				m_ItemList.InsertColumn(nCol, &lvc);
