@@ -15,7 +15,6 @@
 
 #ifndef NO_ASIO
 #include <iasiodrv.h>
-#define ASIO_LOG
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -31,29 +30,38 @@ class CASIODevice: public ISoundDevice
 {
 	friend class TemporaryASIODriverOpener;
 
-	enum { ASIO_MAX_CHANNELS=4 };
 protected:
+
 	IASIO *m_pAsioDrv;
+
 	long m_nAsioBufferLen;
+	std::vector<ASIOBufferInfo> m_BufferInfo;
+	ASIOCallbacks m_Callbacks;
+	static CASIODevice *g_CallbacksInstance; // only 1 opened instance allowed for ASIO
+	bool m_BuffersCreated;
+	std::vector<ASIOChannelInfo> m_ChannelInfo;
+	std::vector<int32> m_SampleBuffer;
 	bool m_CanOutputReady;
-	BOOL m_bMixRunning;
+
+	bool m_DeviceRunning;
 	long m_BufferIndex;
 	LONG m_RenderSilence;
 	LONG m_RenderingSilence;
-	ASIOCallbacks m_Callbacks;
-	ASIOChannelInfo m_ChannelInfo[ASIO_MAX_CHANNELS];
-	ASIOBufferInfo m_BufferInfo[ASIO_MAX_CHANNELS];
-	std::vector<int32> m_SampleBuffer;
 
 private:
+
 	static bool IsSampleTypeFloat(ASIOSampleType sampleType);
 	static std::size_t GetSampleSize(ASIOSampleType sampleType);
 	static bool IsSampleTypeBigEndian(ASIOSampleType sampleType);
+	
 	void SetRenderSilence(bool silence, bool wait=false);
 
 public:
 	CASIODevice(SoundDeviceID id, const std::wstring &internalID);
 	~CASIODevice();
+
+private:
+	void Init();
 
 public:
 	bool InternalOpen();
@@ -61,7 +69,7 @@ public:
 	void InternalFillAudioBuffer();
 	bool InternalStart();
 	void InternalStop();
-	bool InternalIsOpen() const { return (m_pAsioDrv != nullptr); }
+	bool InternalIsOpen() const { return m_BuffersCreated; }
 
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 	bool OpenDriverSettings();
@@ -75,13 +83,15 @@ protected:
 	bool IsDriverOpen() const { return (m_pAsioDrv != nullptr); }
 
 protected:
-	void BufferSwitch(long doubleBufferIndex);
+	long AsioMessage(long selector, long value, void* message, double* opt);
+	void SampleRateDidChange(ASIOSampleRate sRate);
+	void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
+	ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
 
-	static CASIODevice *gpCurrentAsio;
-	static void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
-	static void SampleRateDidChange(ASIOSampleRate sRate);
-	static long AsioMessage(long selector, long value, void* message, double* opt);
-	static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
+	static long CallbackAsioMessage(long selector, long value, void* message, double* opt);
+	static void CallbackSampleRateDidChange(ASIOSampleRate sRate);
+	static void CallbackBufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
+	static ASIOTime* CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
 	
 	void ReportASIOException(const std::string &str);
 };
