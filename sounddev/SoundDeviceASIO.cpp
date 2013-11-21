@@ -194,6 +194,7 @@ void CASIODevice::Init()
 	m_CanOutputReady = false;
 
 	m_DeviceRunning = false;
+	m_TotalFramesWritten = 0;
 	m_BufferIndex = 0;
 	InterlockedExchange(&m_RenderSilence, 0);
 	InterlockedExchange(&m_RenderingSilence, 0);
@@ -215,12 +216,13 @@ bool CASIODevice::InternalOpen()
 
 	Init();
 
-	Log(mpt::String::Print("ASIO: Open(%1:'%2'): %3-bit, %4 channels, %5Hz"
+	Log(mpt::String::Print("ASIO: Open(%1:'%2'): %3-bit, %4 channels, %5Hz, hw-timing=%6"
 		, GetDeviceIndex()
 		, mpt::ToLocale(GetDeviceInternalID())
 		, m_Settings.sampleFormat.GetBitsPerSample()
 		, m_Settings.Channels
 		, m_Settings.Samplerate
+		, m_Settings.UseHardwareTiming
 		));
 
 	try
@@ -369,6 +371,8 @@ bool CASIODevice::InternalOpen()
 			m_CanOutputReady = false;
 		}
 
+		m_StreamPositionOffset = m_nAsioBufferLen;
+
 		m_SampleBuffer.resize(m_nAsioBufferLen * m_Settings.Channels);
 
 		SoundBufferAttributes bufferAttributes;
@@ -464,6 +468,7 @@ bool CASIODevice::InternalStart()
 	{
 		asioCall(start());
 		m_DeviceRunning = true;
+		m_TotalFramesWritten = 0;
 	} catch(...)
 	{
 		return false;
@@ -494,6 +499,7 @@ bool CASIODevice::InternalClose()
 		{
 			// continue
 		}
+		m_TotalFramesWritten = 0;
 		m_DeviceRunning = false;
 	}
 	SetRenderSilence(false);
@@ -780,6 +786,73 @@ void CASIODevice::InternalFillAudioBuffer()
 }
 
 
+bool CASIODevice::InternalHasTimeInfo() const
+//-------------------------------------------
+{
+	return m_Settings.UseHardwareTiming;
+}
+
+
+bool CASIODevice::InternalHasGetStreamPosition() const
+//----------------------------------------------------
+{
+	return m_Settings.UseHardwareTiming;
+}
+
+
+int64 CASIODevice::InternalGetStreamPositionFrames() const
+//--------------------------------------------------------
+{
+	if(m_Settings.UseHardwareTiming)
+	{
+		const uint64 asioNow = Clock().NowNanoseconds();
+		SoundTimeInfo timeInfo = GetTimeInfo();
+		int64 currentStreamPositionFrames =
+			Util::Round<int64>(
+			timeInfo.StreamFrames + ((double)((int64)(asioNow - timeInfo.SystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate / (1000.0 * 1000.0))
+			)
+			;
+		return currentStreamPositionFrames;
+	} else
+	{
+		return ISoundDevice::InternalGetStreamPositionFrames();
+	}
+}
+
+
+void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
+//---------------------------------------------------------
+{
+	if(m_Settings.UseHardwareTiming)
+	{
+		if((asioTimeInfo.flags & kSamplePositionValid) && (asioTimeInfo.flags & kSystemTimeValid))
+		{
+			double speed = 1.0;
+			if((asioTimeInfo.flags & kSpeedValid) && (asioTimeInfo.speed > 0.0))
+			{
+				speed = asioTimeInfo.speed;
+			} else if((asioTimeInfo.flags & kSampleRateValid) && (asioTimeInfo.sampleRate > 0.0))
+			{
+				speed *= asioTimeInfo.sampleRate / m_Settings.Samplerate;
+			}
+			SoundTimeInfo timeInfo;
+			timeInfo.StreamFrames = ((((uint64)asioTimeInfo.samplePosition.hi) << 32) | asioTimeInfo.samplePosition.lo) - m_StreamPositionOffset;
+			timeInfo.SystemTimestamp = (((uint64)asioTimeInfo.systemTime.hi) << 32) | asioTimeInfo.systemTime.lo;
+			timeInfo.Speed = speed;
+			ISoundDevice::UpdateTimeInfo(timeInfo);
+		} else
+		{ // spec violation or nothing provided at all, better to estimate this stuff ourselves
+			const uint64 asioNow = Clock().NowNanoseconds();
+			SoundTimeInfo timeInfo;
+			timeInfo.StreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
+			timeInfo.SystemTimestamp = asioNow + Util::Round<int64>(GetBufferAttributes().Latency * 1000.0 * 1000.0 * 1000.0);
+			timeInfo.Speed = 1.0;
+			ISoundDevice::UpdateTimeInfo(timeInfo);
+		}
+	}
+}
+
+
 void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 //----------------------------------------------------------------------------
 {
@@ -792,16 +865,61 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 {
 	ASSERT(directProcess); // !directProcess is not handled correctly in OpenMPT, would require a separate thread and potentially additional buffering
 	MPT_UNREFERENCED_PARAMETER(directProcess);
+	if(m_Settings.UseHardwareTiming)
+	{
+		if(params)
+		{
+			UpdateTimeInfo(params->timeInfo);
+		} else
+		{
+			AsioTimeInfo asioTimeInfo;
+			MemsetZero(asioTimeInfo);
+			UpdateTimeInfo(asioTimeInfo);
+			try
+			{
+				ASIOSamples samplePosition;
+				ASIOTimeStamp systemTime;
+				MemsetZero(samplePosition);
+				MemsetZero(systemTime);
+				if(asioCallUncatched(getSamplePosition(&samplePosition, &systemTime)) == ASE_OK)
+				{
+					AsioTimeInfo asioTimeInfoQueried;
+					MemsetZero(asioTimeInfoQueried);
+					asioTimeInfoQueried.flags = kSamplePositionValid | kSystemTimeValid;
+					asioTimeInfoQueried.samplePosition = samplePosition;
+					asioTimeInfoQueried.systemTime = systemTime;
+					asioTimeInfoQueried.speed = 1.0;
+					ASIOSampleRate sampleRate;
+					MemsetZero(sampleRate);
+					if(asioCallUncatched(getSampleRate(&sampleRate)) == ASE_OK)
+					{
+						if(sampleRate >= 0.0)
+						{
+							asioTimeInfoQueried.flags |= kSampleRateValid;
+							asioTimeInfoQueried.sampleRate = sampleRate;
+						}
+					}
+					asioTimeInfo = asioTimeInfoQueried;
+				}
+			} catch(...)
+			{
+				// continue
+			}
+			UpdateTimeInfo(asioTimeInfo);
+		}
+	}
 	m_BufferIndex = doubleBufferIndex;
 	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 	InterlockedExchange(&m_RenderingSilence, rendersilence ? 1 : 0 );
 	if(rendersilence)
 	{
+		m_StreamPositionOffset += m_nAsioBufferLen;
 		FillAudioBuffer();
 	} else
 	{
 		SourceFillAudioBufferLocked();
 	}
+	m_TotalFramesWritten += m_nAsioBufferLen;
 	return params;
 }
 
@@ -827,7 +945,7 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 			result = 1;
 			break;
 		case kAsioSupportsTimeInfo:
-			result = 0;
+			result = m_Settings.UseHardwareTiming ? 1 : 0;
 			break;
 		case kAsioResetRequest:
 		case kAsioBufferSizeChange:
@@ -844,7 +962,7 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 		result = 2;
 		break;
 	case kAsioSupportsTimeInfo:
-		result = 0;
+		result = m_Settings.UseHardwareTiming ? 1 : 0;
 		break;
 	case kAsioResetRequest:
 	case kAsioBufferSizeChange:
