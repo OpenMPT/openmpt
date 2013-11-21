@@ -44,11 +44,15 @@ protected:
 	bool m_CanOutputReady;
 
 	bool m_DeviceRunning;
+	uint64 m_TotalFramesWritten;
 	long m_BufferIndex;
 	LONG m_RenderSilence;
 	LONG m_RenderingSilence;
 
+	int64 m_StreamPositionOffset;
+
 private:
+	void UpdateTimeInfo(AsioTimeInfo asioTimeInfo);
 
 	static bool IsSampleTypeFloat(ASIOSampleType sampleType);
 	static std::size_t GetSampleSize(ASIOSampleType sampleType);
@@ -81,6 +85,10 @@ protected:
 	void OpenDriver();
 	void CloseDriver();
 	bool IsDriverOpen() const { return (m_pAsioDrv != nullptr); }
+
+	bool InternalHasTimeInfo() const;
+	bool InternalHasGetStreamPosition() const;
+	int64 InternalGetStreamPositionFrames() const;
 
 protected:
 	long AsioMessage(long selector, long value, void* message, double* opt);

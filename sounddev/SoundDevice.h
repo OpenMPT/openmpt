@@ -167,6 +167,7 @@ struct SoundDeviceSettings
 	SampleFormat sampleFormat;
 	bool ExclusiveMode; // Use hardware buffers directly
 	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
+	bool UseHardwareTiming;
 	uint32 BaseChannel;
 	SoundDeviceSettings()
 		: hWnd(NULL)
@@ -177,6 +178,7 @@ struct SoundDeviceSettings
 		, sampleFormat(SampleFormatInt16)
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
+		, UseHardwareTiming(false)
 		, BaseChannel(0)
 	{
 		return;
@@ -192,6 +194,7 @@ struct SoundDeviceSettings
 			&& sampleFormat == cmp.sampleFormat
 			&& ExclusiveMode == cmp.ExclusiveMode
 			&& BoostThreadPriority == cmp.BoostThreadPriority
+			&& UseHardwareTiming == cmp.UseHardwareTiming
 			&& BaseChannel == cmp.BaseChannel
 			;
 	}
