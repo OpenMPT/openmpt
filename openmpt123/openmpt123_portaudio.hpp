@@ -146,14 +146,23 @@ private:
 		return paContinue;
 	}
 public:
+	bool unpause() {
+		check_portaudio_error( Pa_StartStream( stream ) );
+		return true;
+	}
+	bool pause() {
+		check_portaudio_error( Pa_StopStream( stream ) );
+		return true;
+	}
 	void lock() {
 		audioMutex.lock();
 	}
 	void unlock() {
 		audioMutex.unlock();
 	}
-	void sleep( int ms ) {
+	bool sleep( int ms ) {
 		Pa_Sleep( ms );
+		return true;
 	}
 };
 
@@ -261,6 +270,18 @@ public:
 		} else {
 			write_frames( buffers, frames );
 		}
+	}
+	bool unpause() {
+		check_portaudio_error( Pa_StartStream( stream ) );
+		return true;
+	}
+	bool pause() {
+		check_portaudio_error( Pa_StopStream( stream ) );
+		return true;
+	}
+	bool sleep( int ms ) {
+		Pa_Sleep( ms );
+		return true;
 	}
 };
 
