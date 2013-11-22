@@ -31,6 +31,7 @@ class ISoundSource;
 
 
 struct SoundDeviceSettings;
+struct SoundBufferAttributes;
 
 
 //====================
@@ -72,8 +73,8 @@ class ISoundSource
 {
 public:
 	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual void AudioRead(const SoundDeviceSettings &settings, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
-	virtual void AudioDone(const SoundDeviceSettings &settings, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
+	virtual void AudioRead(const SoundDeviceSettings &settings, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
+	virtual void AudioDone(const SoundDeviceSettings &settings, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
 };
 
 
