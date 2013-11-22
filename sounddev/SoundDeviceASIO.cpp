@@ -977,7 +977,7 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 	Log(mpt::String::Print("ASIO: AsioMessage(selector=%1, value=%2, message=%3, opt=%4) => result=%5"
 		, selector
 		, value
-		, reinterpret_cast<std::uintptr_t>(message)
+		, reinterpret_cast<std::size_t>(message)
 		, opt ? mpt::ToString(*opt) : "NULL"
 		, result
 		));
