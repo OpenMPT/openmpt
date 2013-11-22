@@ -231,8 +231,15 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	case audioMasterGetOutputLatency:
 		if(pVstPlugin)
 		{
-			return Util::muldiv(TrackerSettings::Instance().m_LatencyMS, pVstPlugin->m_nSampleRate, 1000);
+			if(pVstPlugin->GetSoundFile().IsRenderingToDisc())
+			{
+				return 0;
+			} else
+			{
+				return Util::Round<VstIntPtr>(pVstPlugin->GetSoundFile().m_TimingInfo.OutputLatency * pVstPlugin->m_nSampleRate);
+			}
 		}
+		break;
 
 	// input pin in <value> (-1: first to come), returns cEffect* - DEPRECATED in VST 2.4
 	case audioMasterGetPreviousPlug:

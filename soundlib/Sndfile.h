@@ -187,6 +187,25 @@ class CModDoc;
 #endif // MODPLUG_TRACKER
 
 
+struct TimingInfo
+{
+	double InputLatency; // seconds
+	double OutputLatency; // seconds
+	int64 StreamFrames;
+	uint64 SystemTimestamp; // nanoseconds
+	double Speed;
+	TimingInfo()
+		: InputLatency(0.0)
+		, OutputLatency(0.0)
+		, StreamFrames(0)
+		, SystemTimestamp(0)
+		, Speed(1.0)
+	{
+		return;
+	}
+};
+
+
 class IAudioReadTarget
 {
 public:
@@ -411,6 +430,7 @@ public:
 #endif // MODPLUG_TRACKER
 
 	bool m_bIsRendering;
+	TimingInfo m_TimingInfo; // only valid if !m_bIsRendering
 	bool m_bPatternTransitionOccurred;
 
 private:
