@@ -69,14 +69,23 @@ private:
 		fill_buffer( reinterpret_cast<std::int16_t*>( stream ), len / sizeof( std::int16_t ) / channels );
 	}
 public:
+	bool pause() {
+		SDL_PauseAudio( 1 );
+		return true;
+	}
+	bool unpause() {
+		SDL_PauseAudio( 0 );
+		return true;
+	}
 	void lock() {
 		SDL_LockAudio();
 	}
 	void unlock() {
 		SDL_UnlockAudio();
 	}
-	void sleep( int ms ) {
+	bool sleep( int ms ) {
 		SDL_Delay( ms );
+		return true;
 	}
 };
 

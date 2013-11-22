@@ -252,6 +252,7 @@ struct commandlineflags {
 	std::string output_filename;
 	std::string output_extension;
 	bool force_overwrite;
+	bool paused;
 	commandlineflags() {
 		mode = ModeUI;
 		ui_redraw_interval = 50;
@@ -327,6 +328,7 @@ struct commandlineflags {
 		use_stdout = false;
 		output_extension = "wav";
 		force_overwrite = false;
+		paused = false;
 	}
 	void check_and_sanitize() {
 		if ( filenames.size() == 0 ) {
@@ -430,6 +432,15 @@ public:
 	}
 	virtual void write( const std::vector<float*> buffers, std::size_t frames ) = 0;
 	virtual void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) = 0;
+	virtual bool pause() {
+		return false;
+	}
+	virtual bool unpause() {
+		return false;
+	}
+	virtual bool sleep( int /*ms*/ ) {
+		return false;
+	}
 	virtual bool is_dummy() const {
 		return false;
 	}
@@ -496,7 +507,7 @@ public:
 	}
 	virtual void lock() = 0;
 	virtual void unlock() = 0;
-	virtual void sleep( int ms ) = 0;
+	virtual bool sleep( int ms ) = 0;
 };
 
 class void_audio_stream : public write_buffers_interface {

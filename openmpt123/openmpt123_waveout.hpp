@@ -149,6 +149,18 @@ public:
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		write_buffers( buffers, frames );
 	}
+	bool pause() {
+		waveOutPause( waveout );
+		return true;
+	}
+	bool unpause() {
+		waveOutRestart( waveout );
+		return true;
+	}
+	bool sleep( int ms ) {
+		Sleep( ms );
+		return true;
+	}
 };
 
 static std::string show_waveout_devices() {

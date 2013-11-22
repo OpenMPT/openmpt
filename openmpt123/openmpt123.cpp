@@ -72,6 +72,10 @@ struct show_version_number_exception : public std::exception {
 	show_version_number_exception() throw() { }
 };
 
+struct show_long_version_number_exception : public std::exception {
+	show_long_version_number_exception() throw() { }
+};
+
 bool IsTerminal( int fd ) {
 #if defined( WIN32 )
 	return true
@@ -299,7 +303,12 @@ static void show_info( std::ostream & log, bool verbose ) {
 }
 
 static void show_version( textout & log ) {
-	log << OPENMPT123_VERSION_STRING << std::endl;
+	log << OPENMPT123_VERSION_STRING << " / " << openmpt::string::get( openmpt::string::library_version ) << " / " << openmpt::string::get( openmpt::string::core_version ) << std::endl;
+	log.writeout();
+}
+
+static void show_long_version( textout & log ) {
+	show_info( log, true );
 	log.writeout();
 }
 
@@ -329,6 +338,7 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 		log << " -q, --quiet               Suppress non-error screen output" << std::endl;
 		log << " -v, --verbose             Show more screen output" << std::endl;
 		log << "     --version             Show version number and nothing else" << std::endl;
+		log << "     --long-version        Show long version information and exit" << std::endl;
 		log << std::endl;
 		log << " Mode:" << std::endl;
 		log << "     --info                Display information about each file" << std::endl;
@@ -406,6 +416,7 @@ static void show_help_keyboard( textout & log ) {
 	log << "Keyboard hotkeys (use 'openmpt123 --ui'):" << std::endl;
 	log << std::endl;
 	log << " [q]     quit" << std::endl;
+	log << " [ ]     pause / unpause" << std::endl;
 	log << " [N]     skip 10 files backward" << std::endl;
 	log << " [n]     prev file" << std::endl;
 	log << " [m]     next file" << std::endl;
@@ -437,11 +448,12 @@ struct prev_file { int count; prev_file( int c ) : count(c) { } };
 struct next_file { int count; next_file( int c ) : count(c) { } };
 
 template < typename Tmod >
-static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod ) {
+static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod, write_buffers_interface & audio_stream ) {
 	switch ( c ) {
 		case 'q': throw silent_exit_exception(); break;
 		case 'N': throw prev_file(10); break;
 		case 'n': throw prev_file(1); break;
+		case ' ': if ( !flags.paused ) { flags.paused = audio_stream.pause(); } else { flags.paused = false; audio_stream.unpause(); } break;
 		case 'h': mod.set_position_seconds( mod.get_position_seconds() - 10.0 ); break;
 		case 'j': mod.set_position_seconds( mod.get_position_seconds() - 1.0 ); break;
 		case 'k': mod.set_position_seconds( mod.get_position_seconds() + 1.0 ); break;
@@ -716,10 +728,9 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 	if ( multiline ) {
 		lines += 1;
 		if ( flags.show_ui ) {
-			lines += 4;
+			lines += 1;
 		}
 		if ( flags.show_meters ) {
-			lines += 1;
 			for ( int channel = 0; channel < flags.channels; ++channel ) {
 				lines += 1;
 			}
@@ -776,7 +787,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 			while ( kbhit() ) {
 				int c = getch();
-				if ( !handle_keypress( c, flags, mod ) ) {
+				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
 					return;
 				}
 			}
@@ -795,12 +806,17 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				if ( read( STDIN_FILENO, &c, 1 ) != 1 ) {
 					break;
 				}
-				if ( !handle_keypress( c, flags, mod ) ) {
+				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
 					return;
 				}
 			}
 
 #endif
+
+			if ( flags.paused ) {
+				audio_stream.sleep( flags.ui_redraw_interval );
+				continue;
+			}
 
 		}
 		
@@ -851,14 +867,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			}
 #endif
 			log << std::endl;
-			if ( flags.show_ui ) {
-				log << "Gain.......: " << flags.gain * 0.01f << " dB   " << std::endl;
-				log << "Stereo.....: " << flags.separation << " %   " << std::endl;
-				log << "Filter.....: " << flags.filtertaps << " taps   " << std::endl;
-				log << "Ramping....: " << flags.ramping << "   " << std::endl;
-			}
 			if ( flags.show_meters ) {
-				log << std::endl;
 				draw_meters( log, meter, flags );
 			}
 			if ( flags.show_channel_meters ) {
@@ -907,6 +916,14 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					}
 					log << std::endl;
 				}
+			}
+			if ( flags.show_ui ) {
+				log << "Settings...: ";
+				log << "Gain: " << flags.gain * 0.01f << " dB" << "   ";
+				log << "Stereo: " << flags.separation << " %" << "   ";
+				log << "Filter: " << flags.filtertaps << " taps" << "   ";
+				log << "Ramping " << flags.ramping << "   ";
+				log  << std::endl;
 			}
 			if ( flags.show_details ) {
 				log << "Mixer......: ";
@@ -1226,6 +1243,8 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.verbose = true;
 			} else if ( arg == "--version" ) {
 				throw show_version_number_exception();
+			} else if ( arg == "--long-version" ) {
+				throw show_long_version_number_exception();
 			} else if ( arg == "--info" ) {
 				flags.mode = ModeInfo;
 			} else if ( arg == "--ui" ) {
@@ -1527,6 +1546,9 @@ static int main( int argc, char * argv [] ) {
 	} catch ( show_help_keyboard_exception & ) {
 		show_help_keyboard( std_log );
 		return 1;
+	} catch ( show_long_version_number_exception & ) {
+		show_long_version( std_log );
+		return 0;
 	} catch ( show_version_number_exception & ) {
 		show_version( std_log );
 		return 0;
