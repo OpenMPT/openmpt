@@ -1478,7 +1478,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			CString s = "&Quantize ";
 			if(TrackerSettings::Instance().recordQuantizeRows != 0)
 			{
-				s.AppendFormat("(Currently: %d Rows)", TrackerSettings::Instance().recordQuantizeRows);
+				s.AppendFormat("(Currently: %d Rows)", TrackerSettings::Instance().recordQuantizeRows.Get());
 			} else
 			{
 				s.Append("Settings...");
