@@ -244,15 +244,24 @@ std::vector<SoundDeviceInfo> CWaveDevice::EnumerateDevices()
 		SoundDeviceInfo info;
 		info.id = SoundDeviceID(SNDDEV_WAVEOUT, static_cast<SoundDeviceIndex>(index));
 		info.apiName = L"WaveOut";
+		WAVEOUTCAPSW woc;
+		MemsetZero(woc);
 		if(index == 0)
 		{
-			info.name = L"Auto (Wave Mapper)";
+			if(waveOutGetDevCapsW(WAVE_MAPPER, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
+			{
+				info.name = woc.szPname;
+			} else
+			{
+				info.name = L"Auto (Wave Mapper)";
+			}
+			info.isDefault = true;
 		} else
 		{
-			WAVEOUTCAPSW woc;
-			MemsetZero(woc);
-			waveOutGetDevCapsW(index-1, &woc, sizeof(woc));
-			info.name = woc.szPname;
+			if(waveOutGetDevCapsW(index-1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
+			{
+				info.name = woc.szPname;
+			}
 		}
 		devices.push_back(info);
 	}
