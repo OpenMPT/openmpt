@@ -158,6 +158,83 @@ public:
 #define SNDDEV_MAXUPDATEINTERVAL_MS 200
 
 
+struct SoundChannelMapping
+{
+
+private:
+
+	std::vector<uint32> ChannelToDeviceChannel;
+
+public:
+
+	// Construct default identity mapping
+	SoundChannelMapping();
+
+	// Construct mapping from given vector.
+	SoundChannelMapping(const std::vector<uint32> &mapping);
+
+	// Construct mapping for #channels with a baseChannel offset.
+	static SoundChannelMapping BaseChannel(uint32 channels, uint32 baseChannel);
+
+public:
+
+	bool operator == (const SoundChannelMapping &cmp) const
+	{
+		return (ChannelToDeviceChannel == cmp.ChannelToDeviceChannel);
+	}
+
+	// check that the channel mapping is actually a 1:1 mapping
+	bool IsValid(uint32 channels) const;
+
+	// Get the base channel offset. Deprecated because this has no defined semantics for more complex mappings.
+	MPT_DEPRECATED uint32 GetBaseChannel() const
+	{
+		if(ChannelToDeviceChannel.empty())
+		{
+			return 0;
+		}
+		return ChannelToDeviceChannel[0];
+	}
+
+	// Get the number of required device channels for this mapping. Derived from the maximum mapped-to channel number.
+	uint32 GetRequiredDeviceChannels() const
+	{
+		if(ChannelToDeviceChannel.empty())
+		{
+			return 0;
+		}
+		uint32 maxChannel = 0;
+		for(uint32 channel = 0; channel < ChannelToDeviceChannel.size(); ++channel)
+		{
+			if(ChannelToDeviceChannel[channel] > maxChannel)
+			{
+				maxChannel = ChannelToDeviceChannel[channel];
+			}
+		}
+		return maxChannel + 1;
+	}
+	
+	// Convert OpenMPT channel number to the mapped device channel number.
+	uint32 ToDevice(uint32 channel) const
+	{
+		if(ChannelToDeviceChannel.empty())
+		{
+			return channel;
+		}
+		if(channel >= ChannelToDeviceChannel.size())
+		{
+			return channel;
+		}
+		return ChannelToDeviceChannel[channel];
+	}
+
+	std::string ToString() const;
+
+	static SoundChannelMapping FromString(const std::string &str);
+
+};
+
+
 struct SoundDeviceSettings
 {
 	HWND hWnd;
@@ -169,7 +246,7 @@ struct SoundDeviceSettings
 	bool ExclusiveMode; // Use hardware buffers directly
 	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
 	bool UseHardwareTiming;
-	uint32 BaseChannel;
+	SoundChannelMapping ChannelMapping;
 	SoundDeviceSettings()
 		: hWnd(NULL)
 		, LatencyMS(100)
@@ -180,7 +257,6 @@ struct SoundDeviceSettings
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
 		, UseHardwareTiming(false)
-		, BaseChannel(0)
 	{
 		return;
 	}
@@ -196,7 +272,7 @@ struct SoundDeviceSettings
 			&& ExclusiveMode == cmp.ExclusiveMode
 			&& BoostThreadPriority == cmp.BoostThreadPriority
 			&& UseHardwareTiming == cmp.UseHardwareTiming
-			&& BaseChannel == cmp.BaseChannel
+			&& ChannelMapping == cmp.ChannelMapping
 			;
 	}
 	bool operator != (const SoundDeviceSettings &cmp) const

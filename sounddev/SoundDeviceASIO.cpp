@@ -243,6 +243,10 @@ bool CASIODevice::InternalOpen()
 		{
 			throw ASIOException("Not enough output channels.");
 		}
+		if(m_Settings.ChannelMapping.GetRequiredDeviceChannels() > (std::size_t)outputChannels)
+		{
+			throw ASIOException("Channel mapping requires more channels than available.");
+		}
 
 		Log(mpt::String::Print("ASIO: setSampleRate(sampleRate=%1)", m_Settings.Samplerate));
 		asioCall(setSampleRate(m_Settings.Samplerate));
@@ -320,7 +324,7 @@ bool CASIODevice::InternalOpen()
 		{
 			MemsetZero(m_BufferInfo[channel]);
 			m_BufferInfo[channel].isInput = ASIOFalse;
-			m_BufferInfo[channel].channelNum = channel + m_Settings.BaseChannel; // map MPT channel i to ASIO channel i
+			m_BufferInfo[channel].channelNum = m_Settings.ChannelMapping.ToDevice(channel);
 		}
 		m_Callbacks.bufferSwitch = CallbackBufferSwitch;
 		m_Callbacks.sampleRateDidChange = CallbackSampleRateDidChange;
@@ -337,13 +341,13 @@ bool CASIODevice::InternalOpen()
 		{
 			MemsetZero(m_ChannelInfo[channel]);
 			m_ChannelInfo[channel].isInput = ASIOFalse;
-			m_ChannelInfo[channel].channel = channel + m_Settings.BaseChannel; // map MPT channel i to ASIO channel i
+			m_ChannelInfo[channel].channel = m_Settings.ChannelMapping.ToDevice(channel);
 			asioCall(getChannelInfo(&m_ChannelInfo[channel]));
 			ASSERT(m_ChannelInfo[channel].isActive);
 			mpt::String::SetNullTerminator(m_ChannelInfo[channel].name);
 			Log(mpt::String::Print("ASIO: getChannelInfo(isInput=%1 channel=%2) => isActive=%3 channelGroup=%4 type=%5 name='%6'"
 				, ASIOFalse
-				, channel + m_Settings.BaseChannel
+				, m_Settings.ChannelMapping.ToDevice(channel)
 				, m_ChannelInfo[channel].isActive
 				, m_ChannelInfo[channel].channelGroup
 				, m_ChannelInfo[channel].type

@@ -160,7 +160,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SoundDeviceExclusiveMode(conf, "Sound Settings", "ExclusiveMode", SoundDeviceSettings().ExclusiveMode)
 	, m_SoundDeviceBoostThreadPriority(conf, "Sound Settings", "BoostThreadPriority", SoundDeviceSettings().BoostThreadPriority)
 	, m_SoundDeviceUseHardwareTiming(conf, "Sound Settings", "UseHardwareTiming", SoundDeviceSettings().UseHardwareTiming)
-	, m_SoundDeviceBaseChannel(conf, "Sound Settings", "ASIOBaseChannel", SoundDeviceSettings().BaseChannel)
+	, m_SoundDeviceChannelMapping(conf, "Sound Settings", "ChannelMapping", SoundDeviceSettings().ChannelMapping)
 	, MixerMaxChannels(conf, "Sound Settings", "MixChannels", MixerSettings().m_nMaxMixChannels)
 	, MixerDSPMask(conf, "Sound Settings", "Quality", MixerSettings().DSPMask)
 	, MixerFlags(conf, "Sound Settings", "SoundSetup", MixerSettings().MixerFlags)
@@ -337,6 +337,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// Sound Settings
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,03))
+	{
+		m_SoundDeviceChannelMapping = SoundChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>("Sound Settings", "ASIOBaseChannel", 0));
+	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
 	{
 		if(m_BufferLength_DEPRECATED != 0)
@@ -464,7 +468,7 @@ SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings() const
 	settings.sampleFormat = m_SampleFormat;
 	settings.ExclusiveMode = m_SoundDeviceExclusiveMode;
 	settings.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
-	settings.BaseChannel = m_SoundDeviceBaseChannel;
+	settings.ChannelMapping = m_SoundDeviceChannelMapping;
 	return settings;
 }
 
@@ -478,7 +482,7 @@ void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceSettings &settings
 	m_SampleFormat = settings.sampleFormat;
 	m_SoundDeviceExclusiveMode = settings.ExclusiveMode;
 	m_SoundDeviceBoostThreadPriority = settings.BoostThreadPriority;
-	m_SoundDeviceBaseChannel = settings.BaseChannel;
+	m_SoundDeviceChannelMapping = settings.ChannelMapping;
 }
 
 
