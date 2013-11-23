@@ -926,7 +926,7 @@ ISoundDevice * SoundDevicesManager::CreateSoundDevice(SoundDeviceID id)
 //---------------------------------------------------------------------
 {
 	const SoundDeviceInfo info = FindDeviceInfo(id);
-	if(info.IsValid())
+	if(!info.IsValid())
 	{
 		return nullptr;
 	}
