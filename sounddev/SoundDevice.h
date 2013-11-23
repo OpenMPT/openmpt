@@ -121,6 +121,10 @@ public:
 	{
 		return;
 	}
+	bool IsValid() const
+	{
+		return (type > SNDDEV_INVALID);
+	}
 	SoundDeviceType GetType() const { return type; }
 	SoundDeviceIndex GetIndex() const { return index; }
 	bool operator == (const SoundDeviceID &cmp) const
@@ -436,7 +440,7 @@ struct SoundDeviceInfo
 	std::wstring name;
 	std::wstring apiName;
 	std::wstring internalID;
-	SoundDeviceInfo() { }
+	SoundDeviceInfo() : id(SNDDEV_INVALID, 0) { }
 	SoundDeviceInfo(SoundDeviceID id, const std::wstring &name, const std::wstring &apiName, const std::wstring &internalID = std::wstring())
 		: id(id)
 		, name(name)
@@ -444,6 +448,10 @@ struct SoundDeviceInfo
 		, internalID(internalID)
 	{
 		return;
+	}
+	bool IsValid() const
+	{
+		return id.IsValid();
 	}
 };
 
@@ -468,7 +476,7 @@ public:
 	std::vector<SoundDeviceInfo>::const_iterator end() const { return m_SoundDevices.end(); }
 	const std::vector<SoundDeviceInfo> & GetDeviceInfos() const { return m_SoundDevices; }
 
-	const SoundDeviceInfo * FindDeviceInfo(SoundDeviceID id) const;
+	SoundDeviceInfo FindDeviceInfo(SoundDeviceID id) const;
 
 	bool OpenDriverSettings(SoundDeviceID id, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
 

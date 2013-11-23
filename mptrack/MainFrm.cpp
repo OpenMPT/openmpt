@@ -242,7 +242,7 @@ VOID CMainFrame::Initialize()
 	OnUpdateFrameTitle(false);
 
 	// Check for valid sound device
-	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().m_nWaveDevice))
+	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().m_nWaveDevice).IsValid())
 	{
 		// Fall back to default WaveOut device
 		TrackerSettings::Instance().m_nWaveDevice = SoundDeviceID();
