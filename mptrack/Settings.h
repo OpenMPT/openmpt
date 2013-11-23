@@ -381,7 +381,6 @@ public:
 
 
 // SettingPath represents the path in a config backend to a certain setting.
-// An optional alternative old path is used for cases where the setting was named differently in the old registry based settings.
 class SettingPath
 {
 private:
