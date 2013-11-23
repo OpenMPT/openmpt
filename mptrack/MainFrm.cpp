@@ -242,10 +242,10 @@ VOID CMainFrame::Initialize()
 	OnUpdateFrameTitle(false);
 
 	// Check for valid sound device
-	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().m_nWaveDevice).IsValid())
+	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().GetSoundDeviceID()).IsValid())
 	{
 		// Fall back to default WaveOut device
-		TrackerSettings::Instance().m_nWaveDevice = SoundDeviceID();
+		TrackerSettings::Instance().SetSoundDeviceID(SoundDeviceID());
 	}
 	if(TrackerSettings::Instance().MixerSamplerate == 0)
 	{
@@ -254,7 +254,7 @@ VOID CMainFrame::Initialize()
 			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
 			if(TrackerSettings::Instance().GetSoundDeviceID().GetType() == SNDDEV_ASIO)
 			{
-				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceCaps(TrackerSettings::Instance().m_nWaveDevice, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
+				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceCaps(TrackerSettings::Instance().GetSoundDeviceID(), TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
 			}
 		#endif // NO_ASIO
 	}
@@ -787,7 +787,7 @@ bool CMainFrame::audioOpenDevice()
 		Reporting::Error("Unable to open sound device: Invalid mixer settings.");
 		return false;
 	}
-	const SoundDeviceID deviceID = TrackerSettings::Instance().m_nWaveDevice;
+	const SoundDeviceID deviceID = TrackerSettings::Instance().GetSoundDeviceID();
 	if(gpSoundDevice && (gpSoundDevice->GetDeviceID() != deviceID))
 	{
 		delete gpSoundDevice;
@@ -1772,7 +1772,7 @@ void CMainFrame::OnViewOptions()
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().GetSoundDeviceSettings(), TrackerSettings::Instance().m_nWaveDevice);
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().GetSoundDeviceSettings(), TrackerSettings::Instance().GetSoundDeviceID());
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;
