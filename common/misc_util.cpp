@@ -328,3 +328,67 @@ namespace Util
 } // namespace Util
 
 #endif // MODPLUG_TRACKER
+
+
+namespace Util
+{
+
+	
+static const wchar_t EncodeNibble[16] = { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F' };
+
+static inline bool DecodeByte(uint8 &byte, wchar_t c1, wchar_t c2)
+{
+	byte = 0;
+	if(L'0' <= c1 && c1 <= L'9')
+	{
+		byte += static_cast<uint8>((c1 - L'0') << 4);
+	} else if(L'A' <= c1 && c1 <= L'F')
+	{
+		byte += static_cast<uint8>((c1 - L'A' + 10) << 4);
+	} else
+	{
+		return false;
+	}
+	if(L'0' <= c2 && c2 <= L'9')
+	{
+		byte += static_cast<uint8>(c2 - L'0');
+	} else if(L'A' <= c2 && c2 <= L'F')
+	{
+		byte += static_cast<uint8>(c2 - L'A' + 10);
+	} else
+	{
+		return false;
+	}
+	return true;
+}
+
+
+std::wstring BinToHex(const std::vector<char> &src)
+{
+	std::wstring result;
+	for(std::size_t i = 0; i < src.size(); ++i)
+	{
+		uint8 byte = src[i];
+		result.push_back(EncodeNibble[(byte&0xf0)>>4]);
+		result.push_back(EncodeNibble[byte&0x0f]);
+	}
+	return result;
+}
+
+std::vector<char> HexToBin(const std::wstring &src)
+{
+	std::vector<char> result;
+	for(std::size_t i = 0; i+1 < src.size(); i += 2)
+	{
+		uint8 byte = 0;
+		if(!DecodeByte(byte, src[i*2+0], src[i*2+1]))
+		{
+			return result;
+		}
+		result.push_back(byte);
+	}
+	return result;
+}
+
+
+} // namespace Util

@@ -629,3 +629,11 @@ namespace Util
 } // namespace Util
 
 #endif // MODPLUG_TRACKER
+
+namespace Util
+{
+
+std::wstring BinToHex(const std::vector<char> &src);
+std::vector<char> HexToBin(const std::wstring &src);
+
+} // namespace Util

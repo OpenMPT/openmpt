@@ -32,9 +32,6 @@ enum SettingType
 	SettingTypeBinary,
 };
 
-std::wstring SettingBinToHex(const std::vector<char> &src);
-std::vector<char> SettingHexToBin(const std::wstring &src);
-
 // SettingValue is a variant type that stores any type that can natively be represented in a config backend.
 // Any other type that should be stored must provide a matching ToSettingValue and FromSettingValue.
 // Other types can optionally also set a type tag which would get checked in debug builds.
