@@ -440,12 +440,14 @@ struct SoundDeviceInfo
 	std::wstring name;
 	std::wstring apiName;
 	std::wstring internalID;
+	bool isDefault;
 	SoundDeviceInfo() : id(SNDDEV_INVALID, 0) { }
 	SoundDeviceInfo(SoundDeviceID id, const std::wstring &name, const std::wstring &apiName, const std::wstring &internalID = std::wstring())
 		: id(id)
 		, name(name)
 		, apiName(apiName)
 		, internalID(internalID)
+		, isDefault(false)
 	{
 		return;
 	}

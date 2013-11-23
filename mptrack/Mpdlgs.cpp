@@ -275,6 +275,10 @@ void COptionsSoundcard::UpdateEverything()
 					cbi.iImage = IMAGE_WAVEOUT;
 					break;
 				}
+				if(it->isDefault)
+				{
+					name += " (Default)";
+				}
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
 				cbi.iIndent = 0;
