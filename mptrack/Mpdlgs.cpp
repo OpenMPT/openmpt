@@ -334,7 +334,7 @@ void COptionsSoundcard::UpdateChannels()
 		{
 			int ndx = m_CbnBaseChannel.AddString(mpt::ToCString(m_CurrentDeviceCaps.channelNames[channel]));
 			m_CbnBaseChannel.SetItemData(ndx, channel);
-			if(channel == m_Settings.BaseChannel)
+			if(channel == m_Settings.ChannelMapping.GetBaseChannel())
 			{
 				sel = ndx;
 			}
@@ -595,7 +595,7 @@ void COptionsSoundcard::OnOK()
 	{
 		if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO)
 		{
-			m_Settings.BaseChannel = m_CbnBaseChannel.GetItemData(m_CbnBaseChannel.GetCurSel());
+			m_Settings.ChannelMapping = SoundChannelMapping::BaseChannel(m_Settings.Channels, m_CbnBaseChannel.GetItemData(m_CbnBaseChannel.GetCurSel()));
 		}
 	}
 	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.id);

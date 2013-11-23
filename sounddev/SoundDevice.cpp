@@ -26,6 +26,78 @@
 #include <iterator>
 
 
+
+SoundChannelMapping::SoundChannelMapping()
+//----------------------------------------
+{
+	return;
+}
+
+
+SoundChannelMapping::SoundChannelMapping(const std::vector<uint32> &mapping)
+//--------------------------------------------------------------------------
+	: ChannelToDeviceChannel(mapping)
+{
+	return;
+}
+
+
+SoundChannelMapping SoundChannelMapping::BaseChannel(uint32 channels, uint32 baseChannel)
+//---------------------------------------------------------------------------------------
+{
+	SoundChannelMapping result;
+	result.ChannelToDeviceChannel.clear();
+	if(baseChannel == 0)
+	{
+		return result;
+	}
+	result.ChannelToDeviceChannel.resize(channels);
+	for(uint32 channel = 0; channel < channels; ++channel)
+	{
+		result.ChannelToDeviceChannel[channel] = channel + baseChannel;
+	}
+	return result;
+}
+
+
+bool SoundChannelMapping::IsValid(uint32 channels) const
+//------------------------------------------------------
+{
+	if(ChannelToDeviceChannel.empty())
+	{
+		return true;
+	}
+	if(ChannelToDeviceChannel.size() < channels)
+	{
+		return false;
+	}
+	std::map<uint32, uint32> inverseMapping;
+	for(uint32 channel = 0; channel < channels; ++channel)
+	{
+		inverseMapping[ChannelToDeviceChannel[channel]] = channel;
+	}
+	if(inverseMapping.size() != channels)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+std::string SoundChannelMapping::ToString() const
+//-----------------------------------------------
+{
+	return mpt::String::Combine<uint32>(ChannelToDeviceChannel);
+}
+
+
+SoundChannelMapping SoundChannelMapping::FromString(const std::string &str)
+//-------------------------------------------------------------------------
+{
+	return SoundChannelMapping(mpt::String::Split<uint32>(str));
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // ISoundDevice base class
@@ -125,6 +197,10 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 	if(m_Settings.LatencyMS > SNDDEV_MAXLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MAXLATENCY_MS;
 	if(m_Settings.UpdateIntervalMS < SNDDEV_MINUPDATEINTERVAL_MS) m_Settings.UpdateIntervalMS = SNDDEV_MINUPDATEINTERVAL_MS;
 	if(m_Settings.UpdateIntervalMS > SNDDEV_MAXUPDATEINTERVAL_MS) m_Settings.UpdateIntervalMS = SNDDEV_MAXUPDATEINTERVAL_MS;
+	if(!m_Settings.ChannelMapping.IsValid(m_Settings.Channels))
+	{
+		return false;
+	}
 	m_BufferAttributes.Latency = m_Settings.LatencyMS / 1000.0;
 	m_BufferAttributes.UpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
 	m_BufferAttributes.NumBuffers = 0;
