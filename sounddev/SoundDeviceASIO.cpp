@@ -298,6 +298,18 @@ bool CASIODevice::InternalOpen()
 			{
 				m_nAsioBufferLen = bufSize;
 			}
+		} else if(granularity == 0)
+		{ // no granularity given, we should use preferredSize if possible
+			if(preferredSize > 0)
+			{
+				m_nAsioBufferLen = preferredSize;
+			} else if(m_nAsioBufferLen >= maxSize)
+			{ // a large latency was requested, use maxSize
+				m_nAsioBufferLen = maxSize;
+			} else
+			{ // use minSize otherwise
+				m_nAsioBufferLen = minSize;
+			}
 		} else
 		{ // should not happen
 			ASSERT(false);
