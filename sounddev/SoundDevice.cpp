@@ -808,47 +808,59 @@ void CSoundDeviceWithThread::InternalStop()
 void SoundDevicesManager::ReEnumerate()
 //-------------------------------------
 {
+	m_SoundDevices.clear();
+	m_DeviceCaps.clear();
+
 #ifndef NO_PORTAUDIO
 	SndDevPortaudioUnnitialize();
 	SndDevPortaudioInitialize();
 #endif // NO_PORTAUDIO
-	m_SoundDevices.clear();
-	m_DeviceCaps.clear();
-	for(int type = 0; type < SNDDEV_NUM_DEVTYPES; ++type)
+
 	{
-		std::vector<SoundDeviceInfo> infos;
-		switch(type)
-		{
-
-		case SNDDEV_WAVEOUT:
-			infos = CWaveDevice::EnumerateDevices();
-			break;
-
-#ifndef NO_DSOUND
-		case SNDDEV_DSOUND:
-			infos = CDSoundDevice::EnumerateDevices();
-			break;
-#endif // NO_DSOUND
-
-#ifndef NO_ASIO
-		case SNDDEV_ASIO:
-			infos = CASIODevice::EnumerateDevices();
-			break;
-#endif // NO_ASIO
-
-#ifndef NO_PORTAUDIO
-		case SNDDEV_PORTAUDIO_WASAPI:
-		case SNDDEV_PORTAUDIO_WDMKS:
-		case SNDDEV_PORTAUDIO_WMME:
-		case SNDDEV_PORTAUDIO_DS:
-		case SNDDEV_PORTAUDIO_ASIO:
-			infos = CPortaudioDevice::EnumerateDevices((SoundDeviceType)type);
-			break;
-#endif // NO_PORTAUDIO
-
-		}
+		const std::vector<SoundDeviceInfo> infos = CWaveDevice::EnumerateDevices();
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
+#ifndef NO_ASIO
+	{
+		const std::vector<SoundDeviceInfo> infos = CASIODevice::EnumerateDevices();
+		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+	}
+#endif // NO_ASIO
+#ifndef NO_PORTAUDIO
+	{
+		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_WASAPI);
+		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+	}
+	{
+		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_WDMKS);
+		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+	}
+#endif // NO_PORTAUDIO
+
+	// kind of deprecated by now
+#ifndef NO_DSOUND
+	{
+		const std::vector<SoundDeviceInfo> infos = CDSoundDevice::EnumerateDevices();
+		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+	}
+#endif // NO_DSOUND
+
+	// duplicate devices, only used if [Sound Settings]MorePortaudio=1
+#ifndef NO_PORTAUDIO
+	{
+		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_WMME);
+		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+	}
+	{
+		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_ASIO);
+		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+	}
+	{
+		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_DS);
+		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+	}
+#endif // NO_PORTAUDIO
+
 }
 
 
