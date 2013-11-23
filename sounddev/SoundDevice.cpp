@@ -852,17 +852,17 @@ void SoundDevicesManager::ReEnumerate()
 }
 
 
-const SoundDeviceInfo * SoundDevicesManager::FindDeviceInfo(SoundDeviceID id) const
-//---------------------------------------------------------------------------------
+SoundDeviceInfo SoundDevicesManager::FindDeviceInfo(SoundDeviceID id) const
+//-------------------------------------------------------------------------
 {
 	for(std::vector<SoundDeviceInfo>::const_iterator it = begin(); it != end(); ++it)
 	{
 		if(it->id == id)
 		{
-			return &(*it);
+			return *it;
 		}
 	}
-	return nullptr;
+	return SoundDeviceInfo();
 }
 
 
@@ -870,7 +870,7 @@ bool SoundDevicesManager::OpenDriverSettings(SoundDeviceID id, ISoundMessageRece
 //--------------------------------------------------------------------------------------------------------------------------------------
 {
 	bool result = false;
-	if(currentSoundDevice && FindDeviceInfo(id) && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id)->internalID))
+	if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
 	{
 		result = currentSoundDevice->OpenDriverSettings();
 	} else
@@ -892,7 +892,7 @@ SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, const std::
 {
 	if((m_DeviceCaps.find(id) == m_DeviceCaps.end()) || update)
 	{
-		if(currentSoundDevice && FindDeviceInfo(id) && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id)->internalID))
+		if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
 		{
 			m_DeviceCaps[id] = currentSoundDevice->GetDeviceCaps(baseSampleRates);
 		} else
@@ -913,20 +913,20 @@ SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, const std::
 ISoundDevice * SoundDevicesManager::CreateSoundDevice(SoundDeviceID id)
 //---------------------------------------------------------------------
 {
-	const SoundDeviceInfo *info = FindDeviceInfo(id);
-	if(!info)
+	const SoundDeviceInfo info = FindDeviceInfo(id);
+	if(info.IsValid())
 	{
 		return nullptr;
 	}
 	ISoundDevice *result = nullptr;
 	switch(id.GetType())
 	{
-	case SNDDEV_WAVEOUT: result = new CWaveDevice(id, info->internalID); break;
+	case SNDDEV_WAVEOUT: result = new CWaveDevice(id, info.internalID); break;
 #ifndef NO_DSOUND
-	case SNDDEV_DSOUND: result = new CDSoundDevice(id, info->internalID); break;
+	case SNDDEV_DSOUND: result = new CDSoundDevice(id, info.internalID); break;
 #endif // NO_DSOUND
 #ifndef NO_ASIO
-	case SNDDEV_ASIO: result = new CASIODevice(id, info->internalID); break;
+	case SNDDEV_ASIO: result = new CASIODevice(id, info.internalID); break;
 #endif // NO_ASIO
 #ifndef NO_PORTAUDIO
 	case SNDDEV_PORTAUDIO_WASAPI:
@@ -934,7 +934,7 @@ ISoundDevice * SoundDevicesManager::CreateSoundDevice(SoundDeviceID id)
 	case SNDDEV_PORTAUDIO_WMME:
 	case SNDDEV_PORTAUDIO_DS:
 	case SNDDEV_PORTAUDIO_ASIO:
-		result = SndDevPortaudioIsInitialized() ? new CPortaudioDevice(id, info->internalID) : nullptr;
+		result = SndDevPortaudioIsInitialized() ? new CPortaudioDevice(id, info.internalID) : nullptr;
 		break;
 #endif // NO_PORTAUDIO
 	}

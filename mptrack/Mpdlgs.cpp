@@ -116,7 +116,7 @@ COptionsSoundcard::COptionsSoundcard(const SoundDeviceSettings &settings, SoundD
 void COptionsSoundcard::SetDevice(SoundDeviceID dev)
 //--------------------------------------------------
 {
-	m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(dev) ? *(theApp.GetSoundDevicesManager()->FindDeviceInfo(dev)) : SoundDeviceInfo();
+	m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(dev);
 	m_CurrentDeviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
 }
 
