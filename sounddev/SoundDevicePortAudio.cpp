@@ -26,6 +26,10 @@
 
 #ifndef NO_PORTAUDIO
 
+
+#include "../include/portaudio/src/common/pa_debugprint.h"
+
+
 CPortaudioDevice::CPortaudioDevice(SoundDeviceID id, const std::wstring &internalID)
 //----------------------------------------------------------------------------------
 	: ISoundDevice(id, internalID)
@@ -74,17 +78,26 @@ bool CPortaudioDevice::InternalOpen()
 	}
 	m_StreamParameters.suggestedLatency = m_Settings.LatencyMS / 1000.0;
 	m_StreamParameters.hostApiSpecificStreamInfo = NULL;
-	if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && m_Settings.ExclusiveMode)
+	unsigned long framesPerBuffer = static_cast<long>(m_Settings.UpdateIntervalMS * m_Settings.Samplerate / 1000.0f);
+	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
 	{
-		MemsetZero(m_WasapiStreamInfo);
-		m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
-		m_WasapiStreamInfo.hostApiType = paWASAPI;
-		m_WasapiStreamInfo.version = 1;
-		m_WasapiStreamInfo.flags = paWinWasapiExclusive;
-		m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+		if(m_Settings.ExclusiveMode)
+		{
+			m_StreamParameters.suggestedLatency = 0; // let portaudio choose
+			framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
+			MemsetZero(m_WasapiStreamInfo);
+			m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+			m_WasapiStreamInfo.hostApiType = paWASAPI;
+			m_WasapiStreamInfo.version = 1;
+			m_WasapiStreamInfo.flags = paWinWasapiExclusive;
+			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+		}
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
+	{
+		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 	}
 	if(Pa_IsFormatSupported(NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported) return false;
-	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, m_Settings.Samplerate, /*static_cast<long>(m_UpdateIntervalMS * pwfx->nSamplesPerSec / 1000.0f)*/ paFramesPerBufferUnspecified, paNoFlag, StreamCallbackWrapper, (void*)this) != paNoError) return false;
+	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, paNoFlag, StreamCallbackWrapper, (void*)this) != paNoError) return false;
 	m_StreamInfo = Pa_GetStreamInfo(m_Stream);
 	if(!m_StreamInfo)
 	{
@@ -353,9 +366,18 @@ std::vector<SoundDeviceInfo> CPortaudioDevice::EnumerateDevices(SoundDeviceType 
 static bool g_PortaudioInitialized = false;
 
 
+static void PortaudioLog(const char *text) {
+	if(text)
+	{
+		Log("PortAudio: %s", text);
+	}
+}
+
+
 void SndDevPortaudioInitialize()
 //------------------------------
 {
+	PaUtil_SetDebugPrintFunction(PortaudioLog);
 	if(Pa_Initialize() != paNoError) return;
 	g_PortaudioInitialized = true;
 }
