@@ -160,7 +160,6 @@ protected:
 protected:
 	//{{AFX_MSG(CModControlView)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 	afx_msg void OnDestroy();
 	afx_msg void OnTabSelchange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnEditCut() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }
