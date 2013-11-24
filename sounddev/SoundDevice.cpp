@@ -878,6 +878,28 @@ SoundDeviceInfo SoundDevicesManager::FindDeviceInfo(SoundDeviceID id) const
 }
 
 
+SoundDeviceInfo SoundDevicesManager::FindDeviceInfo(const std::wstring &identifier) const
+//---------------------------------------------------------------------------------------
+{
+	if(m_SoundDevices.empty())
+	{
+		return SoundDeviceInfo();
+	}
+	if(identifier.empty())
+	{
+		return m_SoundDevices[0];
+	}
+	for(std::vector<SoundDeviceInfo>::const_iterator it = begin(); it != end(); ++it)
+	{
+		if(it->GetIdentifier() == identifier)
+		{
+			return *it;
+		}
+	}
+	return SoundDeviceInfo();
+}
+
+
 bool SoundDevicesManager::OpenDriverSettings(SoundDeviceID id, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice)
 //--------------------------------------------------------------------------------------------------------------------------------------
 {

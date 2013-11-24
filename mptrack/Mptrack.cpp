@@ -838,6 +838,16 @@ BOOL CTrackApp::InitInstance()
 
 	// Load sound APIs
 	m_pSoundDevicesManager = new SoundDevicesManager();
+	if(TrackerSettings::Instance().m_SoundDeviceSettingsUseOldDefaults)
+	{
+		// get the old default device
+		TrackerSettings::Instance().m_SoundDeviceIdentifier = m_pSoundDevicesManager->FindDeviceInfo(TrackerSettings::Instance().m_SoundDeviceID_DEPRECATED).GetIdentifier();
+		// apply old global sound device settings to each found device
+		for(std::vector<SoundDeviceInfo>::const_iterator it = m_pSoundDevicesManager->begin(); it != m_pSoundDevicesManager->end(); ++it)
+		{
+			TrackerSettings::Instance().SetSoundDeviceSettings(it->id, TrackerSettings::Instance().GetSoundDeviceSettingsDefaults());
+		}
+	}
 
 	// Load DLS Banks
 	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();

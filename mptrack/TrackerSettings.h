@@ -198,6 +198,9 @@ template<> inline PLUGVOLUMEHANDLING FromSettingValue(const SettingValue &val)
 	return static_cast<PLUGVOLUMEHANDLING>(val.as<int32>());
 }
 
+template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val); }
+template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val); }
+
 template<> inline SettingValue ToSettingValue(const SoundDeviceID &val) { return SettingValue(int32(val.GetIdRaw())); }
 template<> inline SoundDeviceID FromSettingValue(const SettingValue &val) { return SoundDeviceID::FromIdRaw(val.as<int32>()); }
 
@@ -269,20 +272,19 @@ public:
 
 	// Sound Settings
 	
+	Setting<std::vector<uint32> > m_SoundSampleRates;
 	Setting<bool> m_MorePortaudio;
-	Setting<SoundDeviceID> m_nWaveDevice;
-	SoundDeviceID GetSoundDeviceID() const { return m_nWaveDevice; }
-	void SetSoundDeviceID(const SoundDeviceID &id) { m_nWaveDevice = id; }
-	Setting<uint32> m_BufferLength_DEPRECATED;
-	Setting<uint32> m_LatencyMS;
-	Setting<uint32> m_UpdateIntervalMS;
-	Setting<SampleFormat> m_SampleFormat;
-	Setting<bool> m_SoundDeviceExclusiveMode;
-	Setting<bool> m_SoundDeviceBoostThreadPriority;
-	Setting<bool> m_SoundDeviceUseHardwareTiming;
-	Setting<SoundChannelMapping> m_SoundDeviceChannelMapping;
-	SoundDeviceSettings GetSoundDeviceSettings() const;
-	void SetSoundDeviceSettings(const SoundDeviceSettings &settings);
+
+	bool m_SoundDeviceSettingsUseOldDefaults;
+	SoundDeviceID m_SoundDeviceID_DEPRECATED;
+	SoundDeviceSettings m_SoundDeviceSettingsDefaults;
+	SoundDeviceSettings GetSoundDeviceSettingsDefaults() const;
+
+	Setting<std::wstring> m_SoundDeviceIdentifier;
+	SoundDeviceID GetSoundDeviceID() const;
+	void SetSoundDeviceID(const SoundDeviceID &id);
+	SoundDeviceSettings GetSoundDeviceSettings(const SoundDeviceID &device) const;
+	void SetSoundDeviceSettings(const SoundDeviceID &device, const SoundDeviceSettings &settings);
 
 	Setting<uint32> MixerMaxChannels;
 	Setting<uint32> MixerDSPMask;
@@ -370,7 +372,7 @@ public:
 
 	static void GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS]);
 
-	std::vector<uint32> GetSampleRates();
+	std::vector<uint32> GetSampleRates() const;
 
 	static MPTChords &GetChords() { return Instance().Chords; }
 
@@ -378,6 +380,8 @@ public:
 	static TrackerSettings &Instance();
 
 protected:
+
+	static std::vector<uint32> GetDefaultSampleRates();
 
 	void FixupEQ(EQPreset *pEqSettings);
 

@@ -804,7 +804,7 @@ bool CMainFrame::audioOpenDevice()
 	}
 	gpSoundDevice->SetMessageReceiver(this);
 	gpSoundDevice->SetSource(this);
-	if(!gpSoundDevice->Open(TrackerSettings::Instance().GetSoundDeviceSettings()))
+	if(!gpSoundDevice->Open(TrackerSettings::Instance().GetSoundDeviceSettings(deviceID)))
 	{
 		Reporting::Error("Unable to open sound device: Could not open sound device.");
 		return false;
@@ -815,7 +815,9 @@ bool CMainFrame::audioOpenDevice()
 		Reporting::Error("Unable to open sound device: Unknown sample format.");
 		return false;
 	}
-	TrackerSettings::Instance().m_SampleFormat = actualSampleFormat;
+	SoundDeviceSettings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceID);
+	deviceSettings.sampleFormat = actualSampleFormat;
+	TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
 	return true;
 }
 
@@ -1192,7 +1194,7 @@ bool CMainFrame::StartPlayback()
 	if(!gpSoundDevice->Start()) return false;
 	if(!m_NotifyTimer)
 	{
-		m_NotifyTimer = SetTimer(TIMERID_NOTIFY, TrackerSettings::Instance().m_UpdateIntervalMS, NULL);
+		m_NotifyTimer = SetTimer(TIMERID_NOTIFY, std::max<int>(1, Util::Round<int>(gpSoundDevice->GetBufferAttributes().UpdateInterval * 1000.0)), NULL);
 	}
 	return true;
 }
@@ -1595,7 +1597,7 @@ BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, Sound
 //------------------------------------------------------------------------------------------------
 {
 	const bool isPlaying = IsPlaying();
-	if((TrackerSettings::Instance().GetSoundDeviceID() != deviceID) || (TrackerSettings::Instance().GetSoundDeviceSettings() != deviceSettings))
+	if((TrackerSettings::Instance().GetSoundDeviceID() != deviceID) || (TrackerSettings::Instance().GetSoundDeviceSettings(deviceID) != deviceSettings))
 	{
 		CModDoc *pActiveMod = NULL;
 		if (isPlaying)
@@ -1604,7 +1606,10 @@ BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, Sound
 			PauseMod();
 		}
 		TrackerSettings::Instance().SetSoundDeviceID(deviceID);
-		TrackerSettings::Instance().SetSoundDeviceSettings(deviceSettings);
+		TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
+
+		TrackerSettings::Instance().MixerOutputChannels = deviceSettings.Channels;
+		TrackerSettings::Instance().MixerSamplerate = deviceSettings.Samplerate;
 		{
 			CriticalSection cs;
 			if (pActiveMod) UpdateAudioParameters(pActiveMod->GetrSoundFile(), FALSE);
@@ -1772,7 +1777,7 @@ void CMainFrame::OnViewOptions()
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().GetSoundDeviceSettings(), TrackerSettings::Instance().GetSoundDeviceID());
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().GetSoundDeviceID());
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;

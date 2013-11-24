@@ -257,7 +257,7 @@ struct SoundDeviceSettings
 		, UpdateIntervalMS(5)
 		, Samplerate(48000)
 		, Channels(2)
-		, sampleFormat(SampleFormatInt16)
+		, sampleFormat(SampleFormatFloat32)
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
 		, UseHardwareTiming(false)
@@ -469,6 +469,30 @@ struct SoundDeviceInfo
 	{
 		return id.IsValid();
 	}
+	std::wstring GetIdentifier() const
+	{
+		if(!IsValid())
+		{
+			return std::wstring();
+		}
+		std::wstring result = apiName;
+		result += L"_";
+		if(!internalID.empty())
+		{
+			result += internalID; // safe to not contain special characters
+		} else if(!name.empty())
+		{
+			// UTF8-encode the name and convert the utf8 to hex.
+			// This ensures that no special characters are contained in the configuration key.
+			std::string utf8String = mpt::To(mpt::CharsetUTF8, name);
+			std::wstring hexString = Util::BinToHex(std::vector<char>(utf8String.begin(), utf8String.end()));
+			result += hexString;
+		} else
+		{
+			result += mpt::ToWString(id.GetIndex());
+		}
+		return result;
+	}
 };
 
 
@@ -493,6 +517,7 @@ public:
 	const std::vector<SoundDeviceInfo> & GetDeviceInfos() const { return m_SoundDevices; }
 
 	SoundDeviceInfo FindDeviceInfo(SoundDeviceID id) const;
+	SoundDeviceInfo FindDeviceInfo(const std::wstring &identifier) const;
 
 	bool OpenDriverSettings(SoundDeviceID id, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
 

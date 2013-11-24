@@ -24,20 +24,23 @@ protected:
 	CComboBox m_CbnBaseChannel;
 	CEdit m_EditStatistics;
 	CButton m_BtnDriverPanel;
-	SoundDeviceSettings m_Settings;
 	bool m_PreAmpNoteShowed;
 
-	void SetDevice(SoundDeviceID dev);
+	void SetDevice(SoundDeviceID dev, bool forceReload=false);
 	SoundDeviceInfo m_CurrentDeviceInfo;
 	SoundDeviceCaps m_CurrentDeviceCaps;
+	SoundDeviceSettings m_Settings;
 
 public:
-	COptionsSoundcard(const SoundDeviceSettings &settings, SoundDeviceID sd);
+	COptionsSoundcard(SoundDeviceID sd);
 
 	void UpdateStatistics();
 
 private:
 	void UpdateEverything();
+	void UpdateDevice();
+	void UpdateLatency();
+	void UpdateUpdateInterval();
 	void UpdateSampleRates();
 	void UpdateChannels();
 	void UpdateSampleFormat();
