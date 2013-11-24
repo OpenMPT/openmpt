@@ -83,7 +83,7 @@ bool CPortaudioDevice::InternalOpen()
 	{
 		if(m_Settings.ExclusiveMode)
 		{
-			m_StreamParameters.suggestedLatency = 0; // let portaudio choose
+			m_StreamParameters.suggestedLatency = 0.0; // let portaudio choose
 			framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 			MemsetZero(m_WasapiStreamInfo);
 			m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
@@ -178,6 +178,20 @@ SoundDeviceCaps CPortaudioDevice::GetDeviceCaps(const std::vector<uint32> &baseS
 //-----------------------------------------------------------------------------------------
 {
 	SoundDeviceCaps caps;
+	caps.CanUpdateInterval = true;
+	caps.CanSampleFormat = true;
+	caps.CanExclusiveMode = false;
+	caps.CanBoostThreadPriority = false;
+	caps.CanUseHardwareTiming = false;
+	caps.CanChannelMapping = false;
+	caps.CanDriverPanel = false;
+	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
+	{
+		caps.CanExclusiveMode = true;
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
+	{
+		caps.CanUpdateInterval = false;
+	}
 	PaDeviceIndex device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi);
 	if(device == -1)
 	{

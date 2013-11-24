@@ -328,11 +328,10 @@ void COptionsSoundcard::UpdateChannels()
 		}
 	}
 	m_CbnChannels.SetCurSel(n);
-	if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO)
+	if(m_CurrentDeviceCaps.CanChannelMapping)
 	{
 		m_CbnBaseChannel.ResetContent();
 		m_CbnBaseChannel.EnableWindow(TRUE);
-		m_BtnDriverPanel.ShowWindow(SW_SHOW);
 		int sel = 0;
 		for(std::size_t channel = 0; channel < m_CurrentDeviceCaps.channelNames.size(); ++channel)
 		{
@@ -348,8 +347,8 @@ void COptionsSoundcard::UpdateChannels()
 	{
 		m_CbnBaseChannel.ResetContent();
 		m_CbnBaseChannel.EnableWindow(FALSE);
-		m_BtnDriverPanel.ShowWindow(SW_HIDE);
 	}
+	m_BtnDriverPanel.ShowWindow(m_CurrentDeviceCaps.CanDriverPanel ? SW_SHOW : SW_HIDE);
 }
 
 
@@ -358,17 +357,16 @@ void COptionsSoundcard::UpdateSampleFormat()
 {
 	UINT n = 0;
 	m_CbnSampleFormat.ResetContent();
-	const bool asio = m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO;
-	if(asio)
+	if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO)
 	{
 		m_Settings.sampleFormat = TrackerSettings::Instance().m_SampleFormat;
 	}
-	m_CbnSampleFormat.EnableWindow(asio ? FALSE : TRUE);
+	m_CbnSampleFormat.EnableWindow(m_CurrentDeviceCaps.CanSampleFormat ? TRUE : FALSE);
 	for(UINT bits = 40; bits >= 8; bits -= 8)
 	{
 		if(bits == 40)
 		{
-			if(!asio || (asio && SampleFormatFloat32 == m_Settings.sampleFormat))
+			if(m_CurrentDeviceCaps.CanSampleFormat || (SampleFormatFloat32 == m_Settings.sampleFormat))
 			{
 				UINT ndx = m_CbnSampleFormat.AddString("Floating Point");
 				m_CbnSampleFormat.SetItemData(ndx, (32+128));
@@ -379,7 +377,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 			}
 		} else
 		{
-			if(!asio || (asio && (SampleFormat)bits == m_Settings.sampleFormat))
+			if(m_CurrentDeviceCaps.CanSampleFormat || ((SampleFormat)bits == m_Settings.sampleFormat))
 			{
 				UINT ndx = m_CbnSampleFormat.AddString(mpt::String::Format("%d Bit", bits).c_str());
 				m_CbnSampleFormat.SetItemData(ndx, bits);
@@ -507,12 +505,11 @@ void COptionsSoundcard::UpdateSampleRates()
 void COptionsSoundcard::UpdateControls()
 //--------------------------------------
 {
-	const SoundDeviceID dev = m_CurrentDeviceInfo.id;
-	GetDlgItem(IDC_CHECK4)->EnableWindow((dev.GetType() == SNDDEV_DSOUND || dev.GetType() == SNDDEV_PORTAUDIO_WASAPI) ? TRUE : FALSE);
-	GetDlgItem(IDC_CHECK5)->EnableWindow((dev.GetType() == SNDDEV_WAVEOUT || dev.GetType() == SNDDEV_DSOUND) ? TRUE : FALSE);
-	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow((dev.GetType() == SNDDEV_ASIO) ? FALSE : TRUE);
-	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow((dev.GetType() == SNDDEV_ASIO) ? FALSE : TRUE);
-	if(dev.GetType() == SNDDEV_DSOUND)
+	GetDlgItem(IDC_CHECK4)->EnableWindow(m_CurrentDeviceCaps.CanExclusiveMode ? TRUE : FALSE);
+	GetDlgItem(IDC_CHECK5)->EnableWindow(m_CurrentDeviceCaps.CanBoostThreadPriority ? TRUE : FALSE);
+	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
+	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
+	if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_DSOUND)
 	{
 		GetDlgItem(IDC_CHECK4)->SetWindowText("Use primary buffer");
 	} else

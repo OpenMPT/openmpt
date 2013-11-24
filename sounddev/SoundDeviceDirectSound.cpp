@@ -114,6 +114,13 @@ SoundDeviceCaps CDSoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSamp
 //--------------------------------------------------------------------------------------
 {
 	SoundDeviceCaps caps;
+	caps.CanUpdateInterval = true;
+	caps.CanSampleFormat = true;
+	caps.CanExclusiveMode = true;
+	caps.CanBoostThreadPriority = true;
+	caps.CanUseHardwareTiming = false;
+	caps.CanChannelMapping = false;
+	caps.CanDriverPanel = false;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)
