@@ -23,6 +23,7 @@
 #include "../common/misc_util.h"
 #include "PatternClipboard.h"
 
+#include <algorithm>
 
 #define OLD_SOUNDSETUP_REVERSESTEREO         0x20
 #define OLD_SOUNDSETUP_SECONDARY             0x40
@@ -151,16 +152,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, DefaultPlugVolumeHandling(conf, "Misc", "DefaultPlugVolumeHandling", PLUGIN_VOLUMEHANDLING_IGNORE)
 	, autoApplySmoothFT2Ramping(conf, "Misc", "SmoothFT2Ramping", false)
 	// Sound Settings
+	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
-	, m_nWaveDevice(conf, "Sound Settings", "WaveDevice", SoundDeviceID())
-	, m_BufferLength_DEPRECATED(conf, "Sound Settings", "BufferLength", 50)
-	, m_LatencyMS(conf, "Sound Settings", "Latency", SoundDeviceSettings().LatencyMS)
-	, m_UpdateIntervalMS(conf, "Sound Settings", "UpdateInterval", SoundDeviceSettings().UpdateIntervalMS)
-	, m_SampleFormat(conf, "Sound Settings", "BitsPerSample", SoundDeviceSettings().sampleFormat)
-	, m_SoundDeviceExclusiveMode(conf, "Sound Settings", "ExclusiveMode", SoundDeviceSettings().ExclusiveMode)
-	, m_SoundDeviceBoostThreadPriority(conf, "Sound Settings", "BoostThreadPriority", SoundDeviceSettings().BoostThreadPriority)
-	, m_SoundDeviceUseHardwareTiming(conf, "Sound Settings", "UseHardwareTiming", SoundDeviceSettings().UseHardwareTiming)
-	, m_SoundDeviceChannelMapping(conf, "Sound Settings", "ChannelMapping", SoundDeviceSettings().ChannelMapping)
+	, m_SoundDeviceSettingsUseOldDefaults(false)
+	, m_SoundDeviceIdentifier(conf, "Sound Settings", "Device", std::wstring())
 	, MixerMaxChannels(conf, "Sound Settings", "MixChannels", MixerSettings().m_nMaxMixChannels)
 	, MixerDSPMask(conf, "Sound Settings", "Quality", MixerSettings().DSPMask)
 	, MixerFlags(conf, "Sound Settings", "SoundSetup", MixerSettings().MixerFlags)
@@ -337,27 +332,68 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// Sound Settings
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,03))
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
 	{
-		m_SoundDeviceChannelMapping = SoundChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>("Sound Settings", "ASIOBaseChannel", 0));
-	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
-	{
-		if(m_BufferLength_DEPRECATED != 0)
+		std::vector<uint32> sampleRates = m_SoundSampleRates;
+		if(std::count(sampleRates.begin(), sampleRates.end(), MixerSamplerate) == 0)
 		{
-			if(m_BufferLength_DEPRECATED < 1) m_BufferLength_DEPRECATED = 1; // 1ms
-			if(m_BufferLength_DEPRECATED > 1000) m_BufferLength_DEPRECATED = 1000; // 1sec
-			if(GetSoundDeviceID().GetType() == SNDDEV_ASIO)
-			{
-				m_LatencyMS = m_BufferLength_DEPRECATED;
-				m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
-			} else
-			{
-				m_LatencyMS = m_BufferLength_DEPRECATED * 3;
-				m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
-			}
+			sampleRates.push_back(MixerSamplerate);
+			std::sort(sampleRates.begin(), sampleRates.end());
+			std::reverse(sampleRates.begin(), sampleRates.end());
+			m_SoundSampleRates = sampleRates;
 		}
-		conf.Remove(m_BufferLength_DEPRECATED.GetPath());
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
+	{
+		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDeviceID>("Sound Settings", "WaveDevice", SoundDeviceID());
+		Setting<uint32> m_BufferLength_DEPRECATED(conf, "Sound Settings", "BufferLength", 50);
+		Setting<uint32> m_LatencyMS(conf, "Sound Settings", "Latency", SoundDeviceSettings().LatencyMS);
+		Setting<uint32> m_UpdateIntervalMS(conf, "Sound Settings", "UpdateInterval", SoundDeviceSettings().UpdateIntervalMS);
+		Setting<SampleFormat> m_SampleFormat(conf, "Sound Settings", "BitsPerSample", SoundDeviceSettings().sampleFormat);
+		Setting<bool> m_SoundDeviceExclusiveMode(conf, "Sound Settings", "ExclusiveMode", SoundDeviceSettings().ExclusiveMode);
+		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, "Sound Settings", "BoostThreadPriority", SoundDeviceSettings().BoostThreadPriority);
+		Setting<bool> m_SoundDeviceUseHardwareTiming(conf, "Sound Settings", "UseHardwareTiming", SoundDeviceSettings().UseHardwareTiming);
+		Setting<SoundChannelMapping> m_SoundDeviceChannelMapping(conf, "Sound Settings", "ChannelMapping", SoundDeviceSettings().ChannelMapping);
+		if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
+		{
+			if(m_BufferLength_DEPRECATED != 0)
+			{
+				if(m_BufferLength_DEPRECATED < 1) m_BufferLength_DEPRECATED = 1; // 1ms
+				if(m_BufferLength_DEPRECATED > 1000) m_BufferLength_DEPRECATED = 1000; // 1sec
+				if(GetSoundDeviceID().GetType() == SNDDEV_ASIO)
+				{
+					m_LatencyMS = m_BufferLength_DEPRECATED;
+					m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
+				} else
+				{
+					m_LatencyMS = m_BufferLength_DEPRECATED * 3;
+					m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
+				}
+			}
+			conf.Remove(m_BufferLength_DEPRECATED.GetPath());
+		}
+		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+		{
+			m_SoundDeviceExclusiveMode = ((MixerFlags & OLD_SOUNDSETUP_SECONDARY) == 0);
+		}
+		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+		{
+			m_SoundDeviceBoostThreadPriority = ((MixerFlags & OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY) == 0);
+		}
+		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,03))
+		{
+			m_SoundDeviceChannelMapping = SoundChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>("Sound Settings", "ASIOBaseChannel", 0));
+		}
+		m_SoundDeviceSettingsDefaults.LatencyMS = m_LatencyMS;
+		m_SoundDeviceSettingsDefaults.UpdateIntervalMS = m_UpdateIntervalMS;
+		m_SoundDeviceSettingsDefaults.Samplerate = MixerSamplerate;
+		m_SoundDeviceSettingsDefaults.Channels = (uint8)MixerOutputChannels;
+		m_SoundDeviceSettingsDefaults.sampleFormat = m_SampleFormat;
+		m_SoundDeviceSettingsDefaults.ExclusiveMode = m_SoundDeviceExclusiveMode;
+		m_SoundDeviceSettingsDefaults.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
+		m_SoundDeviceSettingsDefaults.UseHardwareTiming = m_SoundDeviceUseHardwareTiming;
+		m_SoundDeviceSettingsDefaults.ChannelMapping = m_SoundDeviceChannelMapping;
+		m_SoundDeviceSettingsUseOldDefaults = true;
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
 	{
@@ -365,12 +401,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
 	{
-		m_SoundDeviceExclusiveMode = ((MixerFlags & OLD_SOUNDSETUP_SECONDARY) == 0);
 		MixerFlags &= ~OLD_SOUNDSETUP_SECONDARY;
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
 	{
-		m_SoundDeviceBoostThreadPriority = ((MixerFlags & OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY) == 0);
 		MixerFlags &= ~OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY;
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,22))
@@ -456,33 +490,119 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 }
 
 
-SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings() const
-//-----------------------------------------------------------------
+struct StoredSoundDeviceSettings
 {
-	SoundDeviceSettings settings;
+
+private:
+
+	SettingsContainer &conf;
+	const SoundDeviceInfo deviceInfo;
+	
+public:
+
+	Setting<uint32> LatencyUS;
+	Setting<uint32> UpdateIntervalUS;
+	Setting<uint32> Samplerate;
+	Setting<uint8> Channels;
+	Setting<SampleFormat> sampleFormat;
+	Setting<bool> ExclusiveMode;
+	Setting<bool> BoostThreadPriority;
+	Setting<bool> UseHardwareTiming;
+	Setting<SoundChannelMapping> ChannelMapping;
+
+public:
+
+	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDeviceInfo & deviceInfo, const SoundDeviceSettings &defaults = SoundDeviceSettings())
+		: conf(conf)
+		, deviceInfo(deviceInfo)
+		, LatencyUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Latency", defaults.LatencyMS * 1000)
+		, UpdateIntervalUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"UpdateInterval", defaults.UpdateIntervalMS * 1000)
+		, Samplerate(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"SampleRate", defaults.Samplerate)
+		, Channels(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Channels", defaults.Channels)
+		, sampleFormat(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"SampleFormat", defaults.sampleFormat)
+		, ExclusiveMode(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ExclusiveMode", defaults.ExclusiveMode)
+		, BoostThreadPriority(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"BoostThreadPriority", defaults.BoostThreadPriority)
+		, UseHardwareTiming(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"UseHardwareTiming", defaults.UseHardwareTiming)
+		, ChannelMapping(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ChannelMapping", defaults.ChannelMapping)
+	{
+		// store informational data (not read back, jsut to allow the user to mock with the raw ini file)
+		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ID", deviceInfo.id);
+		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"InternalID", deviceInfo.internalID);
+		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"API", deviceInfo.apiName);
+		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Name", deviceInfo.name);
+	}
+
+	StoredSoundDeviceSettings & operator = (const SoundDeviceSettings &settings)
+	{
+		LatencyUS = settings.LatencyMS * 1000;
+		UpdateIntervalUS = settings.UpdateIntervalMS * 1000;
+		Samplerate = settings.Samplerate;
+		Channels = settings.Channels;
+		sampleFormat = settings.sampleFormat;
+		ExclusiveMode = settings.ExclusiveMode;
+		BoostThreadPriority = settings.BoostThreadPriority;
+		UseHardwareTiming = settings.UseHardwareTiming;
+		ChannelMapping = settings.ChannelMapping;
+		return *this;
+	}
+
+	operator SoundDeviceSettings () const
+	{
+		SoundDeviceSettings settings;
+		settings.LatencyMS = LatencyUS / 1000;
+		settings.UpdateIntervalMS = UpdateIntervalUS / 1000;
+		settings.Samplerate = Samplerate;
+		settings.Channels = Channels;
+		settings.sampleFormat = sampleFormat;
+		settings.ExclusiveMode = ExclusiveMode;
+		settings.BoostThreadPriority = BoostThreadPriority;
+		settings.UseHardwareTiming = UseHardwareTiming;
+		settings.ChannelMapping = ChannelMapping;
+		return settings;
+	}
+
+};
+
+SoundDeviceSettings TrackerSettings::GetSoundDeviceSettingsDefaults() const
+//-------------------------------------------------------------------------
+{
+	return m_SoundDeviceSettingsDefaults;
+}
+
+SoundDeviceID TrackerSettings::GetSoundDeviceID() const
+//-----------------------------------------------------
+{
+	return theApp.GetSoundDevicesManager()->FindDeviceInfo(m_SoundDeviceIdentifier).id;
+}
+
+void TrackerSettings::SetSoundDeviceID(const SoundDeviceID &id)
+//-------------------------------------------------------------
+{
+	m_SoundDeviceIdentifier = theApp.GetSoundDevicesManager()->FindDeviceInfo(id).GetIdentifier();
+}
+
+SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings(const SoundDeviceID &device) const
+//--------------------------------------------------------------------------------------------
+{
+	const SoundDeviceInfo deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
+	if(!deviceInfo.IsValid())
+	{
+		return GetSoundDeviceSettingsDefaults();
+	}
+	SoundDeviceSettings settings = StoredSoundDeviceSettings(conf, deviceInfo);
 	settings.hWnd = CMainFrame::GetMainFrame()->m_hWnd;
-	settings.LatencyMS = m_LatencyMS;
-	settings.UpdateIntervalMS = m_UpdateIntervalMS;
-	settings.Samplerate = MixerSamplerate;
-	settings.Channels = (uint8)MixerOutputChannels;
-	settings.sampleFormat = m_SampleFormat;
-	settings.ExclusiveMode = m_SoundDeviceExclusiveMode;
-	settings.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
-	settings.ChannelMapping = m_SoundDeviceChannelMapping;
 	return settings;
 }
 
-void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceSettings &settings)
-//-------------------------------------------------------------------------------
+void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceID &device, const SoundDeviceSettings &settings)
+//------------------------------------------------------------------------------------------------------------
 {
-	m_LatencyMS = settings.LatencyMS;
-	m_UpdateIntervalMS = settings.UpdateIntervalMS;
-	MixerSamplerate = settings.Samplerate;
-	MixerOutputChannels = settings.Channels;
-	m_SampleFormat = settings.sampleFormat;
-	m_SoundDeviceExclusiveMode = settings.ExclusiveMode;
-	m_SoundDeviceBoostThreadPriority = settings.BoostThreadPriority;
-	m_SoundDeviceChannelMapping = settings.ChannelMapping;
+	const SoundDeviceInfo deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
+	if(!deviceInfo.IsValid())
+	{
+		return;
+	}
+	StoredSoundDeviceSettings(conf, deviceInfo) = settings;
 }
 
 
@@ -689,26 +809,29 @@ void TrackerSettings::SaveSettings()
 }
 
 
-std::vector<uint32> TrackerSettings::GetSampleRates()
-//---------------------------------------------------
+std::vector<uint32> TrackerSettings::GetSampleRates() const
+//---------------------------------------------------------
+{
+	return m_SoundSampleRates;
+}
+
+
+std::vector<uint32> TrackerSettings::GetDefaultSampleRates()
+//----------------------------------------------------------
 {
 	static const uint32 samplerates [] = {
 		192000,
 		176400,
 		96000,
 		88200,
-		64000,
 		48000,
 		44100,
-		40000,
-		37800,
-		33075,
 		32000,
 		24000,
 		22050,
-		20000,
-		19800,
-		16000
+		16000,
+		11025,
+		8000
 	};
 	return std::vector<uint32>(samplerates, samplerates + CountOf(samplerates));
 }

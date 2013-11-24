@@ -934,6 +934,7 @@
 #define IDC_STATIC_BUFFERLENGTH         2457
 #define IDC_STATIC_UPDATEINTERVAL       2458
 #define IDC_COMBO_UPDATEINTERVAL        2459
+#define IDC_STATIC_BASECHANNEL          2461
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1213,7 +1214,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        541
 #define _APS_NEXT_COMMAND_VALUE         44611
-#define _APS_NEXT_CONTROL_VALUE         2461
+#define _APS_NEXT_CONTROL_VALUE         2462
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
