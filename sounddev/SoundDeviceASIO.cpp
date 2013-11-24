@@ -1050,6 +1050,14 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSample
 {
 	SoundDeviceCaps caps;
 
+	caps.CanUpdateInterval = false;
+	caps.CanSampleFormat = false;
+	caps.CanExclusiveMode = false;
+	caps.CanBoostThreadPriority = false;
+	caps.CanUseHardwareTiming = true;
+	caps.CanChannelMapping = true;
+	caps.CanDriverPanel = true;
+
 	TemporaryASIODriverOpener opener(*this);
 	if(!IsDriverOpen())
 	{

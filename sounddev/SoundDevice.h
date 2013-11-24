@@ -299,8 +299,22 @@ struct SoundDeviceCaps
 	uint32 currentSampleRate;
 	std::vector<uint32> supportedSampleRates;	// Which samplerates are actually supported by the device. Currently only implemented properly for ASIO, DirectSound and PortAudio.
 	std::vector<std::wstring> channelNames;
+	bool CanUpdateInterval;
+	bool CanSampleFormat;
+	bool CanExclusiveMode;
+	bool CanBoostThreadPriority;
+	bool CanUseHardwareTiming;
+	bool CanChannelMapping;
+	bool CanDriverPanel;
 	SoundDeviceCaps()
 		: currentSampleRate(0)
+		, CanUpdateInterval(true)
+		, CanSampleFormat(true)
+		, CanExclusiveMode(false)
+		, CanBoostThreadPriority(true)
+		, CanUseHardwareTiming(false)
+		, CanChannelMapping(false)
+		, CanDriverPanel(false)
 	{
 		return;
 	}
