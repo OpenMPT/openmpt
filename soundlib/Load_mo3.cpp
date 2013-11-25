@@ -90,20 +90,20 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			uint32 length = mpt::saturate_cast<uint32>(file.GetLength());
 
 #ifdef _WIN32
-			int32 result;
+			int32 unmo3result;
 			if(UNMO3_GetVersion == nullptr)
 			{
 				// Old API version: No "flags" parameter.
-				result = static_cast<UNMO3_DECODE_OLD>(UNMO3_Decode)(&stream, &length);
+				unmo3result = static_cast<UNMO3_DECODE_OLD>(UNMO3_Decode)(&stream, &length);
 			} else
 			{
-				result = static_cast<UNMO3_DECODE>(UNMO3_Decode)(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1);
+				unmo3result = static_cast<UNMO3_DECODE>(UNMO3_Decode)(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1);
 			}
 #else
-			int32 result = UNMO3_Decode(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1);
+			int32 unmo3result = UNMO3_Decode(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1);
 #endif // _WIN32
 
-			if(result == 0)
+			if(unmo3result == 0)
 			{
 				// If decoding was successful, stream and length will keep the new pointers now.
 				FileReader unpackedFile(stream, length);
