@@ -40,7 +40,10 @@ protected:
 	static CASIODevice *g_CallbacksInstance; // only 1 opened instance allowed for ASIO
 	bool m_BuffersCreated;
 	std::vector<ASIOChannelInfo> m_ChannelInfo;
-	std::vector<int32> m_SampleBuffer;
+	std::vector<float> m_SampleBufferFloat;
+	std::vector<int16> m_SampleBufferInt16;
+	std::vector<int24> m_SampleBufferInt24;
+	std::vector<int32> m_SampleBufferInt32;
 	bool m_CanOutputReady;
 
 	bool m_DeviceRunning;
@@ -55,6 +58,8 @@ private:
 	void UpdateTimeInfo(AsioTimeInfo asioTimeInfo);
 
 	static bool IsSampleTypeFloat(ASIOSampleType sampleType);
+	static bool IsSampleTypeInt16(ASIOSampleType sampleType);
+	static bool IsSampleTypeInt24(ASIOSampleType sampleType);
 	static std::size_t GetSampleSize(ASIOSampleType sampleType);
 	static bool IsSampleTypeBigEndian(ASIOSampleType sampleType);
 	
