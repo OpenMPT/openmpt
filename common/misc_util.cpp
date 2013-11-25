@@ -345,6 +345,9 @@ static inline bool DecodeByte(uint8 &byte, wchar_t c1, wchar_t c2)
 	} else if(L'A' <= c1 && c1 <= L'F')
 	{
 		byte += static_cast<uint8>((c1 - L'A' + 10) << 4);
+	} else if(L'a' <= c1 && c1 <= L'f')
+	{
+		byte += static_cast<uint8>((c1 - L'a' + 10) << 4);
 	} else
 	{
 		return false;
@@ -355,13 +358,15 @@ static inline bool DecodeByte(uint8 &byte, wchar_t c1, wchar_t c2)
 	} else if(L'A' <= c2 && c2 <= L'F')
 	{
 		byte += static_cast<uint8>(c2 - L'A' + 10);
+	} else if(L'a' <= c2 && c2 <= L'f')
+	{
+		byte += static_cast<uint8>(c2 - L'a' + 10);
 	} else
 	{
 		return false;
 	}
 	return true;
 }
-
 
 std::wstring BinToHex(const std::vector<char> &src)
 {
