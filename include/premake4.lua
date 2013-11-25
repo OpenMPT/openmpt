@@ -302,6 +302,9 @@ solution "include"
    "../include/flac/src/libFLAC/window.c",
   }
   files {
+   "../include/flac/src/share/win_utf8_io/win_utf8_io.c",
+  }
+  files {
    "../include/flac/src/libFLAC/include/private/all.h",
    "../include/flac/src/libFLAC/include/private/bitmath.h",
    "../include/flac/src/libFLAC/include/private/bitreader.h",
@@ -332,13 +335,13 @@ solution "include"
    "../include/flac/include/FLAC/stream_decoder.h",
    "../include/flac/include/FLAC/stream_encoder.h",
   }
-  buildoptions { "/wd4267", "/wd4334" }
+  buildoptions { "/wd4244", "/wd4267", "/wd4334" }
   configuration "*Lib"
    defines { "FLAC__NO_DLL" }
   configuration "vs2010"
-   defines { "VERSION=\"1.2.1\"" }
+   defines { "VERSION=\"1.3.0\"" }
   configuration "vs2008"
-   defines { "VERSION=\\\"1.2.1\\\"" }
+   defines { "VERSION=\\\"1.3.0\\\"" }
   dofile "../build/premake4-defaults-LIB.lua"
 
   

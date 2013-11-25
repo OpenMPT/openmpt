@@ -2,31 +2,37 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{8D73C555-D4B8-2D41-AA64-549185F6A866}</UniqueIdentifier>
+			<UniqueIdentifier>{0992A517-1ED0-1B45-880B-3A82EEA4A4A2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac">
-			<UniqueIdentifier>{7DBFD967-716A-5D4C-ADB7-87AD1E067B04}</UniqueIdentifier>
+			<UniqueIdentifier>{D4E60470-34FE-F94C-8A10-CB91DBDB312F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src">
-			<UniqueIdentifier>{D7462892-CBBF-FF43-9AAB-B693D2FBDC29}</UniqueIdentifier>
+			<UniqueIdentifier>{F31D2B59-96A6-7847-8D52-B86738BC1A59}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC">
-			<UniqueIdentifier>{EF8383C6-ED33-B646-902E-3CAC851D6EC9}</UniqueIdentifier>
+			<UniqueIdentifier>{608C6A5D-C1BB-EB41-B168-05585F6EB8E1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include">
-			<UniqueIdentifier>{81BF1A39-AD5A-8E42-AE15-62BE0CE41E4C}</UniqueIdentifier>
+			<UniqueIdentifier>{F9B48E83-5242-B448-86BD-1A29B723CA7B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\private">
-			<UniqueIdentifier>{FE262055-A0D1-3744-9497-258BCA1F6C01}</UniqueIdentifier>
+			<UniqueIdentifier>{1A2BD308-C89D-824C-BBB7-84667245054D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\protected">
-			<UniqueIdentifier>{FF7B7C17-1823-974C-89DA-FF2A5247C924}</UniqueIdentifier>
+			<UniqueIdentifier>{58211F3B-D7AA-034C-88C8-E7CD1F7BA1D4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include">
-			<UniqueIdentifier>{0990FB44-4019-D04E-BB03-72B126850B59}</UniqueIdentifier>
+			<UniqueIdentifier>{726F14E3-F58F-E447-A070-DA6719901549}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include\FLAC">
-			<UniqueIdentifier>{1150D860-3747-1442-B79E-D73527226503}</UniqueIdentifier>
+			<UniqueIdentifier>{D815D0E7-B7EF-8049-825B-CEDE67038C4B}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\flac\src\share">
+			<UniqueIdentifier>{A78D2877-81FA-4049-A0E8-01E67D8F97D9}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\flac\src\share\win_utf8_io">
+			<UniqueIdentifier>{8F0EF0FC-28BD-4540-9114-266241FD1FE8}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
@@ -163,6 +169,9 @@
 		</ClCompile>
 		<ClCompile Include="..\include\flac\src\libFLAC\window.c">
 			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
+		<ClCompile Include="..\include\flac\src\share\win_utf8_io\win_utf8_io.c">
+			<Filter>include\flac\src\share\win_utf8_io</Filter>
 		</ClCompile>
 	</ItemGroup>
 </Project>

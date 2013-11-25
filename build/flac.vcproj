@@ -42,10 +42,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4267 /wd4334"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
@@ -121,10 +121,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4267 /wd4334"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
@@ -199,10 +199,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4267 /wd4334 /MP"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -218,7 +218,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
@@ -278,10 +278,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4267 /wd4334 /MP"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -297,7 +297,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
@@ -356,10 +356,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4267 /wd4334 /GL- /MP"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334 /GL- /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -375,7 +375,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
@@ -435,10 +435,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4267 /wd4334 /GL- /MP"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334 /GL- /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -454,7 +454,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.2.1\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="FLAC__NO_DLL;VERSION=\&quot;1.3.0\&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\include\flac\include;..\include\flac\src\libFLAC\include"
 			/>
 			<Tool
@@ -664,6 +664,20 @@
 							RelativePath="..\include\flac\src\libFLAC\window.c"
 							>
 						</File>
+					</Filter>
+					<Filter
+						Name="share"
+						Filter=""
+						>
+						<Filter
+							Name="win_utf8_io"
+							Filter=""
+							>
+							<File
+								RelativePath="..\include\flac\src\share\win_utf8_io\win_utf8_io.c"
+								>
+							</File>
+						</Filter>
 					</Filter>
 				</Filter>
 				<Filter
