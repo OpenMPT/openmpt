@@ -1188,9 +1188,6 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 		if ( filename == flags.filenames.end() ) {
 			break;
 		}
-		if ( filename == flags.filenames.begin() - 1 ) {
-			filename++;
-		}
 		try {
 			render_file( flags, *filename, log, audio_stream );
 			filename++;
