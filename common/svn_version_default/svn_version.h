@@ -8,3 +8,4 @@
 #define OPENMPT_VERSION_MIXEDREVISIONS false
 
 #define OPENMPT_VERSION_DATE __DATE__ " " __TIME__
+
