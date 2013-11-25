@@ -1,6 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2013  Xiph.Org Foundation
+ * Copyright (C) 2013  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,17 +29,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FLAC__PRIVATE__STREAM_ENCODER_FRAMING_H
-#define FLAC__PRIVATE__STREAM_ENCODER_FRAMING_H
+#ifdef _WIN32
 
-#include "FLAC/format.h"
-#include "bitwriter.h"
+#ifndef flac__win_utf8_io_h
+#define flac__win_utf8_io_h
 
-FLAC__bool FLAC__add_metadata_block(const FLAC__StreamMetadata *metadata, FLAC__BitWriter *bw);
-FLAC__bool FLAC__frame_add_header(const FLAC__FrameHeader *header, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_constant(const FLAC__Subframe_Constant *subframe, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_fixed(const FLAC__Subframe_Fixed *subframe, unsigned residual_samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_lpc(const FLAC__Subframe_LPC *subframe, unsigned residual_samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_verbatim(const FLAC__Subframe_Verbatim *subframe, unsigned samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+#include <stdio.h>
+#include <sys/stat.h>
+#include <stdarg.h>
+#include <windows.h>
+
+int get_utf8_argv(int *argc, char ***argv);
+
+int printf_utf8(const char *format, ...);
+int fprintf_utf8(FILE *stream, const char *format, ...);
+int vfprintf_utf8(FILE *stream, const char *format, va_list argptr);
+
+FILE *fopen_utf8(const char *filename, const char *mode);
+int stat_utf8(const char *path, struct stat *buffer);
+int _stat64_utf8(const char *path, struct __stat64 *buffer);
+int chmod_utf8(const char *filename, int pmode);
+int utime_utf8(const char *filename, struct utimbuf *times);
+int unlink_utf8(const char *filename);
+int rename_utf8(const char *oldname, const char *newname);
+size_t strlen_utf8(const char *str);
+int win_get_console_width(void);
+int print_console(FILE *stream, const wchar_t *text, uint32_t len);
+HANDLE WINAPI CreateFile_utf8(const char *lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif
 #endif

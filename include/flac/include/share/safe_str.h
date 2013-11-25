@@ -1,6 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2013  Xiph.Org Foundation
+ * Copyright (C) 2013  Xiph.org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,17 +29,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FLAC__PRIVATE__STREAM_ENCODER_FRAMING_H
-#define FLAC__PRIVATE__STREAM_ENCODER_FRAMING_H
+/* Safe string handling functions to replace things like strcpy, strncpy,
+ * strcat, strncat etc.
+ * All of these functions guarantee a correctly NUL terminated string but
+ * the string may be truncated if the destination buffer was too short.
+ */
 
-#include "FLAC/format.h"
-#include "bitwriter.h"
+#ifndef FLAC__SHARE_SAFE_STR_H
+#define FLAC__SHARE_SAFE_STR_H
 
-FLAC__bool FLAC__add_metadata_block(const FLAC__StreamMetadata *metadata, FLAC__BitWriter *bw);
-FLAC__bool FLAC__frame_add_header(const FLAC__FrameHeader *header, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_constant(const FLAC__Subframe_Constant *subframe, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_fixed(const FLAC__Subframe_Fixed *subframe, unsigned residual_samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_lpc(const FLAC__Subframe_LPC *subframe, unsigned residual_samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_verbatim(const FLAC__Subframe_Verbatim *subframe, unsigned samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
+static inline char *
+safe_strncat(char *dest, const char *src, size_t dest_size)
+{
+	char * ret;
 
-#endif
+	if (dest_size < 1)
+		return dest;
+
+	ret = strncat(dest, src, dest_size - strlen (dest));
+	dest [dest_size - 1] = 0;
+
+	return ret;
+}
+
+static inline char *
+safe_strncpy(char *dest, const char *src, size_t dest_size)
+{
+	char * ret;
+
+	if (dest_size < 1)
+		return dest;
+
+	ret = strncpy(dest, src, dest_size);
+	dest [dest_size - 1] = 0;
+
+	return ret;
+}
+
+#endif /* FLAC__SHARE_SAFE_STR_H */

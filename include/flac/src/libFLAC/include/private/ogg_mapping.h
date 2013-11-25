@@ -1,5 +1,5 @@
-/* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000-2009  Josh Coalson
+/* libFLAC - Free Lossless Audio Codec
+ * Copyright (C) 2004-2009  Josh Coalson
  * Copyright (C) 2011-2013  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,17 +30,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FLAC__PRIVATE__STREAM_ENCODER_FRAMING_H
-#define FLAC__PRIVATE__STREAM_ENCODER_FRAMING_H
+#ifndef FLAC__PRIVATE__OGG_MAPPING_H
+#define FLAC__PRIVATE__OGG_MAPPING_H
 
-#include "FLAC/format.h"
-#include "bitwriter.h"
+#include "FLAC/ordinals.h"
 
-FLAC__bool FLAC__add_metadata_block(const FLAC__StreamMetadata *metadata, FLAC__BitWriter *bw);
-FLAC__bool FLAC__frame_add_header(const FLAC__FrameHeader *header, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_constant(const FLAC__Subframe_Constant *subframe, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_fixed(const FLAC__Subframe_Fixed *subframe, unsigned residual_samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_lpc(const FLAC__Subframe_LPC *subframe, unsigned residual_samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
-FLAC__bool FLAC__subframe_add_verbatim(const FLAC__Subframe_Verbatim *subframe, unsigned samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw);
+/** The length of the packet type field in bytes. */
+#define FLAC__OGG_MAPPING_PACKET_TYPE_LENGTH (1u)
+
+extern const unsigned FLAC__OGG_MAPPING_PACKET_TYPE_LEN; /* = 8 bits */
+
+extern const FLAC__byte FLAC__OGG_MAPPING_FIRST_HEADER_PACKET_TYPE; /* = 0x7f */
+
+/** The length of the 'FLAC' magic in bytes. */
+#define FLAC__OGG_MAPPING_MAGIC_LENGTH (4u)
+
+extern const FLAC__byte * const FLAC__OGG_MAPPING_MAGIC; /* = "FLAC" */
+
+extern const unsigned FLAC__OGG_MAPPING_VERSION_MAJOR_LEN; /* = 8 bits */
+extern const unsigned FLAC__OGG_MAPPING_VERSION_MINOR_LEN; /* = 8 bits */
+
+/** The length of the Ogg FLAC mapping major version number in bytes. */
+#define FLAC__OGG_MAPPING_VERSION_MAJOR_LENGTH (1u)
+
+/** The length of the Ogg FLAC mapping minor version number in bytes. */
+#define FLAC__OGG_MAPPING_VERSION_MINOR_LENGTH (1u)
+
+extern const unsigned FLAC__OGG_MAPPING_NUM_HEADERS_LEN; /* = 16 bits */
+
+/** The length of the #-of-header-packets number bytes. */
+#define FLAC__OGG_MAPPING_NUM_HEADERS_LENGTH (2u)
 
 #endif
