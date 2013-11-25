@@ -190,7 +190,10 @@ void CASIODevice::Init()
 	MemsetZero(m_Callbacks);
 	m_BuffersCreated = false;
 	m_ChannelInfo.clear();
-	m_SampleBuffer.clear();
+	m_SampleBufferFloat.clear();
+	m_SampleBufferInt16.clear();
+	m_SampleBufferInt24.clear();
+	m_SampleBufferInt32.clear();
 	m_CanOutputReady = false;
 
 	m_DeviceRunning = false;
@@ -356,14 +359,40 @@ bool CASIODevice::InternalOpen()
 		}
 
 		bool allChannelsAreFloat = true;
+		bool allChannelsAreInt16 = true;
+		bool allChannelsAreInt24 = true;
 		for(int channel = 0; channel < m_Settings.Channels; ++channel)
 		{
 			if(!IsSampleTypeFloat(m_ChannelInfo[channel].type))
 			{
 				allChannelsAreFloat = false;
 			}
+			if(!IsSampleTypeInt16(m_ChannelInfo[channel].type))
+			{
+				allChannelsAreInt16 = false;
+			}
+			if(!IsSampleTypeInt24(m_ChannelInfo[channel].type))
+			{
+				allChannelsAreInt24 = false;
+			}
 		}
-		m_Settings.sampleFormat = allChannelsAreFloat ? SampleFormatFloat32 : SampleFormatInt32;
+		if(allChannelsAreFloat)
+		{
+			m_Settings.sampleFormat = SampleFormatFloat32;
+			m_SampleBufferFloat.resize(m_nAsioBufferLen * m_Settings.Channels);
+		} else if(allChannelsAreInt16)
+		{
+			m_Settings.sampleFormat = SampleFormatInt16;
+			m_SampleBufferInt16.resize(m_nAsioBufferLen * m_Settings.Channels);
+		} else if(allChannelsAreInt24)
+		{
+			m_Settings.sampleFormat = SampleFormatInt24;
+			m_SampleBufferInt24.resize(m_nAsioBufferLen * m_Settings.Channels);
+		} else
+		{
+			m_Settings.sampleFormat = SampleFormatInt32;
+			m_SampleBufferInt32.resize(m_nAsioBufferLen * m_Settings.Channels);
+		}
 
 		for(int channel = 0; channel < m_Settings.Channels; ++channel)
 		{
@@ -388,8 +417,6 @@ bool CASIODevice::InternalOpen()
 		}
 
 		m_StreamPositionOffset = m_nAsioBufferLen;
-
-		m_SampleBuffer.resize(m_nAsioBufferLen * m_Settings.Channels);
 
 		SoundBufferAttributes bufferAttributes;
 		long inputLatency = 0;
@@ -521,7 +548,10 @@ bool CASIODevice::InternalClose()
 	SetRenderSilence(false);
 
 	m_CanOutputReady = false;
-	m_SampleBuffer.clear();
+	m_SampleBufferFloat.clear();
+	m_SampleBufferInt16.clear();
+	m_SampleBufferInt24.clear();
+	m_SampleBufferInt32.clear();
 	m_ChannelInfo.clear();
 	if(m_BuffersCreated)
 	{
@@ -636,6 +666,38 @@ bool CASIODevice::IsSampleTypeFloat(ASIOSampleType sampleType)
 }
 
 
+bool CASIODevice::IsSampleTypeInt16(ASIOSampleType sampleType)
+//------------------------------------------------------------
+{
+	switch(sampleType)
+	{
+		case ASIOSTInt16MSB:
+		case ASIOSTInt16LSB:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+	}
+}
+
+
+bool CASIODevice::IsSampleTypeInt24(ASIOSampleType sampleType)
+//------------------------------------------------------------
+{
+	switch(sampleType)
+	{
+		case ASIOSTInt24MSB:
+		case ASIOSTInt24LSB:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+	}
+}
+
+
 std::size_t CASIODevice::GetSampleSize(ASIOSampleType sampleType)
 //---------------------------------------------------------------
 {
@@ -709,11 +771,41 @@ void CASIODevice::InternalFillAudioBuffer()
 	const std::size_t countChunk = m_nAsioBufferLen;
 	if(rendersilence)
 	{
-		std::memset(&m_SampleBuffer[0], 0, countChunk * channels * sizeof(int32));
+		if(m_Settings.sampleFormat == SampleFormatFloat32)
+		{
+			std::memset(&m_SampleBufferFloat[0], 0, countChunk * channels * sizeof(float));
+		} else if(m_Settings.sampleFormat == SampleFormatInt16)
+		{
+			std::memset(&m_SampleBufferInt16[0], 0, countChunk * channels * sizeof(int16));
+		} else if(m_Settings.sampleFormat == SampleFormatInt24)
+		{
+			std::memset(&m_SampleBufferInt24[0], 0, countChunk * channels * sizeof(int24));
+		} else if(m_Settings.sampleFormat == SampleFormatInt32)
+		{
+			std::memset(&m_SampleBufferInt32[0], 0, countChunk * channels * sizeof(int32));
+		} else
+		{
+			ASSERT(false);
+		}
 	} else
 	{
 		SourceAudioPreRead(countChunk);
-		SourceAudioRead(&m_SampleBuffer[0], countChunk);
+		if(m_Settings.sampleFormat == SampleFormatFloat32)
+		{
+			SourceAudioRead(&m_SampleBufferFloat[0], countChunk);
+		} else if(m_Settings.sampleFormat == SampleFormatInt16)
+		{
+			SourceAudioRead(&m_SampleBufferInt16[0], countChunk);
+		} else if(m_Settings.sampleFormat == SampleFormatInt24)
+		{
+			SourceAudioRead(&m_SampleBufferInt24[0], countChunk);
+		} else if(m_Settings.sampleFormat == SampleFormatInt32)
+		{
+			SourceAudioRead(&m_SampleBufferInt32[0], countChunk);
+		} else
+		{
+			ASSERT(false);
+		}
 	}
 	for(int channel = 0; channel < channels; ++channel)
 	{
@@ -725,7 +817,7 @@ void CASIODevice::InternalFillAudioBuffer()
 		}
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			const float *const srcFloat = reinterpret_cast<const float*>(&m_SampleBuffer[0]);
+			const float *const srcFloat = &m_SampleBufferFloat[0];
 			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTFloat32MSB:
@@ -740,9 +832,35 @@ void CASIODevice::InternalFillAudioBuffer()
 					ASSERT(false);
 					break;
 			}
+		} else if(m_Settings.sampleFormat == SampleFormatInt16)
+		{
+			const int16 *const srcInt16 = &m_SampleBufferInt16[0];
+			switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTInt16MSB:
+				case ASIOSTInt16LSB:
+						CopyInterleavedToChannel<SC::Convert<int16, int16> >(reinterpret_cast<int16*>(dst), srcInt16, channels, countChunk, channel);
+						break;
+					default:
+						ASSERT(false);
+						break;
+			}
+		} else if(m_Settings.sampleFormat == SampleFormatInt24)
+		{
+			const int24 *const srcInt24 = &m_SampleBufferInt24[0];
+			switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTInt24MSB:
+				case ASIOSTInt24LSB:
+						CopyInterleavedToChannel<SC::Convert<int24, int24> >(reinterpret_cast<int24*>(dst), srcInt24, channels, countChunk, channel);
+						break;
+					default:
+						ASSERT(false);
+						break;
+			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt32)
 		{
-			const int32 *const srcInt32 = reinterpret_cast<const int32*>(&m_SampleBuffer[0]);
+			const int32 *const srcInt32 = &m_SampleBufferInt32[0];
 			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTInt16MSB:
@@ -785,6 +903,9 @@ void CASIODevice::InternalFillAudioBuffer()
 					ASSERT(false);
 					break;
 			}
+		} else
+		{
+			ASSERT(false);
 		}
 		if(IsSampleTypeBigEndian(m_ChannelInfo[channel].type))
 		{
