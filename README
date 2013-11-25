@@ -41,9 +41,8 @@ How to compile libopenmpt and openmpt123:
       Use #define NO_WINAMP in common/BuildSettings.h to disable.
     - xmplay SDK:
       To build libopenmpt with xmplay input plugin support, copy the contents
-      of xmpin.zip into include/xmplay/.
-      Please get in touch with un4seen developments at
-      http://www.un4seen.com/ to obtain the SDK.
+      of xmp-sdk.zip into include/xmplay/.
+      Please visit http://www.un4seen.com/xmplay.html to download to SDK.
       Use #define NO_XMPLAY in common/BuildSettings.h to disable.
   - The openmpt123 solution is in openmpt123/openmpt123.sln.
 - Makefile
