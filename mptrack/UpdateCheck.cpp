@@ -76,7 +76,15 @@ void CUpdateCheck::UpdateThread()
 	// Prepare UA / URL strings...
 	const CString userAgent = CString("OpenMPT ") + MptVersion::str;
 	CString updateURL = CUpdateCheck::updateBaseURL;
-	updateURL.Replace("$VERSION", MptVersion::str);
+	CString versionStr = MptVersion::str;
+#ifdef _WIN64
+	versionStr.Append("-win64");
+#elif defined(_WIN32)
+	versionStr.Append("-win32");
+#else
+#error "Platform-specific identifier missing"
+#endif
+	updateURL.Replace("$VERSION", versionStr);
 	updateURL.Replace("$GUID", GetSendGUID() ? TrackerSettings::Instance().gcsInstallGUID.Get() : "anonymous");
 
 	// Establish a connection.
