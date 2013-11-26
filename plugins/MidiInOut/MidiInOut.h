@@ -14,6 +14,7 @@
 #include "../common/mutex.h"
 #include <vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.h>
 #include <portmidi/pm_common/portmidi.h>
+#include <portmidi/porttime/porttime.h>
 #include <string>
 
 
@@ -63,6 +64,7 @@ protected:
 	MidiDevice outputDevice;
 	bool isProcessing;
 	bool isBypassed;
+	bool latencyCompensation;
 
 	char programName[kVstMaxProgNameLen + 1];
 	static int numInstances;

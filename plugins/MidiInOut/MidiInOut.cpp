@@ -41,12 +41,14 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 
 	if(!numInstances++)
 	{
+		Pt_Start(1, nullptr, nullptr);
 		Pm_Initialize();
 	}
 
 	chunk = nullptr;
 	isProcessing = false;
 	isBypassed = false;
+	latencyCompensation = false;
 
 	vst_strncpy(programName, "Default", kVstMaxProgNameLen);	// default program name
 }
@@ -62,6 +64,7 @@ MidiInOut::~MidiInOut()
 	{
 		// This terminates MIDI output for all instances of the plugin, so only ever do it if this was the only instance left.
 		Pm_Terminate();
+		Pt_Stop();
 	}
 }
 
@@ -361,6 +364,8 @@ VstInt32 MidiInOut::processEvents(VstEvents *events)
 		return 1;
 	}
 
+	const PtTimestamp now = (latencyCompensation ? Pt_Time() : 0);
+
 	for(VstInt32 i = 0; i < events->numEvents; i++)
 	{
 		switch(events->events[i]->type)
@@ -372,7 +377,7 @@ VstInt32 MidiInOut::processEvents(VstEvents *events)
 				// Create and send PortMidi event
 				PmEvent event;
 				memcpy(&event.message, midiEvent->midiData, 4);
-				event.timestamp = 0;
+				event.timestamp = now;
 				Pm_Write(outputDevice.stream, &event, 1);
 			}
 			break;
@@ -382,12 +387,19 @@ VstInt32 MidiInOut::processEvents(VstEvents *events)
 				VstMidiSysexEvent *midiEvent = reinterpret_cast<VstMidiSysexEvent *>(events->events[i]);
 
 				// Send a PortMidi sysex event
-				Pm_WriteSysEx(outputDevice.stream, 0, reinterpret_cast<unsigned char*>(midiEvent->sysexDump));
+				Pm_WriteSysEx(outputDevice.stream, now, reinterpret_cast<unsigned char*>(midiEvent->sysexDump));
 			}
 			break;
 		}
 	}
 	return 1;
+}
+
+
+static PmTimestamp PtTimeWrapper(void* /*time_info*/)
+//---------------------------------------------------
+{
+	return Pt_Time();
 }
 
 
@@ -427,7 +439,14 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 			result = Pm_OpenInput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr);
 		} else
 		{
-			result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr, 0);
+			if(latencyCompensation)
+			{
+				// buffer of 10000 events
+				result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 10000, PtTimeWrapper, nullptr, static_cast<PtTimestamp>(1000.0 * getOutputLatency() / getSampleRate()));
+			} else
+			{
+				result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr, 0);
+			}
 		}
 	}
 
