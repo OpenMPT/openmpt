@@ -130,7 +130,7 @@ static noinline void DoLog(const char *file, int line, const char *function, std
 		std::clog
 			<< "openmpt: "
 			<< file << "(" << line << ")" << ": "
-			<< mpt::String::ToLocale(message)
+			<< mpt::ToLocale(message)
 			<< " [" << function << "]"
 			<< std::endl;
 	#endif // MODPLUG_TRACKER
