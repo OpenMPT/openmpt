@@ -25,7 +25,7 @@ bool MidiInOutEditor::getRect(ERect **rect)
 	}
 
 	editRect.top = editRect.left = 0;
-	editRect.bottom = 105;
+	editRect.bottom = 130;
 	editRect.right = 350;
 	*rect = &editRect;
 
@@ -47,6 +47,10 @@ bool MidiInOutEditor::open(void *ptr)
 
 	outputLabel.Create(parent, "MIDI Output Device (Receives MIDI data from host):", 10, 55, 330, 20);
 	outputCombo.Create(parent, 10, 75, 330, 20);
+
+	latencyCheck.Create(parent, "Compensate for host output latency", 10, 105, 330, 20);
+	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
+	latencyCheck.SetState(realEffect != nullptr ? realEffect->latencyCompensation : true);
 
 	PopulateLists();
 
@@ -83,7 +87,7 @@ void MidiInOutEditor::PopulateLists()
 
 	int selectInputItem = 0;
 	int selectOutputItem = 0;
-	MidiInOut *realEffect = dynamic_cast<MidiInOut *>(effect);
+	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
 
 	PmDeviceID i = 0;
 	const PmDeviceInfo *device;
@@ -129,7 +133,7 @@ void MidiInOutEditor::PopulateLists()
 void MidiInOutEditor::SetCurrentDevice(ComboBox &combo, PmDeviceID device)
 //------------------------------------------------------------------------
 {
-	MidiInOut *realEffect = dynamic_cast<MidiInOut *>(effect);
+	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
 
 	if(isOpen() && realEffect != nullptr)
 	{
@@ -150,16 +154,34 @@ void MidiInOutEditor::SetCurrentDevice(ComboBox &combo, PmDeviceID device)
 void MidiInOutEditor::WindowCallback(int message, void *param1, void *param2)
 //---------------------------------------------------------------------------
 {
-	MidiInOut *realEffect = dynamic_cast<MidiInOut *>(effect);
+	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
+	HWND hwnd = static_cast<HWND>(param2);
 
-	if(message == WM_COMMAND && HIWORD(param1) == CBN_SELCHANGE && realEffect != nullptr)
+	if(message == WM_COMMAND && realEffect != nullptr)
 	{
-		// A combo box selection has been changed by the user.
-		bool isInputBox = reinterpret_cast<HWND>(param2) == inputCombo.GetHwnd();
-		const ComboBox &combo = isInputBox ? inputCombo : outputCombo;
+		switch(HIWORD(param1))
+		{
+		case CBN_SELCHANGE:
+			if(hwnd == inputCombo.GetHwnd() || hwnd == outputCombo.GetHwnd())
+			{
+				// A combo box selection has been changed by the user.
+				bool isInputBox = hwnd == inputCombo.GetHwnd();
+				const ComboBox &combo = isInputBox ? inputCombo : outputCombo;
 
-		// Update device ID and notify plugin.
-		PmDeviceID newDevice = reinterpret_cast<PmDeviceID>(combo.GetSelectionData());
-		realEffect->setParameterAutomated(isInputBox ? MidiInOut::inputParameter : MidiInOut::outputParameter, realEffect->DeviceIDToParameter(newDevice));
+				// Update device ID and notify plugin.
+				PmDeviceID newDevice = reinterpret_cast<PmDeviceID>(combo.GetSelectionData());
+				realEffect->setParameterAutomated(isInputBox ? MidiInOut::inputParameter : MidiInOut::outputParameter, realEffect->DeviceIDToParameter(newDevice));
+			}
+			break;
+
+		case BN_CLICKED:
+			if(hwnd == latencyCheck.GetHwnd())
+			{
+				// Update latency compensation
+				realEffect->CloseDevice(realEffect->outputDevice);
+				realEffect->latencyCompensation = latencyCheck.GetState();
+				realEffect->OpenDevice(realEffect->outputDevice.index, false);
+			}
+		}
 	}
 }

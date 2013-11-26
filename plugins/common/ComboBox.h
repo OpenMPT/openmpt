@@ -13,7 +13,8 @@
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #define NOMINMAX
-#include "windows.h"
+#include <windows.h>
+#include <tchar.h>
 
 
 //============
@@ -42,7 +43,7 @@ public:
 		// Remove old instance, if necessary
 		Destroy();
 
-		combo = CreateWindow("COMBOBOX",
+		combo = CreateWindow(_T("COMBOBOX"),
 			nullptr,
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST,
 			x,
@@ -91,7 +92,7 @@ public:
 
 
 	// Add a string to the combo box.
-	int AddString(const char *text, const void *data)
+	int AddString(const TCHAR *text, const void *data)
 	{
 		if(combo != nullptr)
 		{

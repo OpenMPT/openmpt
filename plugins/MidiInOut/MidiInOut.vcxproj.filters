@@ -63,5 +63,8 @@
     <ClInclude Include="..\common\Window.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\CheckBox.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

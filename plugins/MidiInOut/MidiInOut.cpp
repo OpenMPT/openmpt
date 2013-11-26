@@ -48,7 +48,7 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 	chunk = nullptr;
 	isProcessing = false;
 	isBypassed = false;
-	latencyCompensation = false;
+	latencyCompensation = true;
 
 	vst_strncpy(programName, "Default", kVstMaxProgNameLen);	// default program name
 }
@@ -104,7 +104,7 @@ VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
 		header[4] = static_cast<VstInt32>(inputDevice.name.size());
 		header[5] = outputDevice.index;
 		header[6] = static_cast<VstInt32>(outputDevice.name.size());
-		header[7] = 0;	// Reserved
+		header[7] = latencyCompensation;
 		strncpy(chunk + 8 * sizeof(VstInt32), programName, programNameLen);
 		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen, inputDevice.name.c_str(), header[4]);
 		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen + header[4], outputDevice.name.c_str(), header[6]);
@@ -142,6 +142,7 @@ VstInt32 MidiInOut::setChunk(void *data, VstInt32 byteSize, bool /*isPreset*/)
 
 	PmDeviceID inID = header[3];
 	PmDeviceID outID = header[5];
+	latencyCompensation = header[7] != 0;
 
 	vst_strncpy(programName, nameStr, std::min(nameStrSize, VstInt32(kVstMaxProgNameLen)));
 
