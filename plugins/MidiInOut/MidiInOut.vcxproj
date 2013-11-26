@@ -186,6 +186,7 @@
     <ClInclude Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\aeffeditor.h" />
     <ClInclude Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\audioeffect.h" />
     <ClInclude Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\audioeffectx.h" />
+    <ClInclude Include="..\common\CheckBox.h" />
     <ClInclude Include="..\common\ComboBox.h" />
     <ClInclude Include="..\common\Label.h" />
     <ClInclude Include="..\common\Window.h" />

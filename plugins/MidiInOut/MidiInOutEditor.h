@@ -15,6 +15,7 @@
 #include "../common/Window.h"
 #include "../common/Label.h"
 #include "../common/ComboBox.h"
+#include "../common/CheckBox.h"
 
 
 //======================================================
@@ -26,6 +27,7 @@ protected:
 
 	Label inputLabel, outputLabel;
 	ComboBox inputCombo, outputCombo;
+	CheckBox latencyCheck;
 
 public:
 

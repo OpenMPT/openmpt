@@ -13,7 +13,8 @@
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #define NOMINMAX
-#include "windows.h"
+#include <windows.h>
+#include <tchar.h>
 
 
 //=========
@@ -37,12 +38,12 @@ public:
 
 
 	// Create a new label
-	void Create(HWND parent, const char *text, int x, int y, int width, int height)
+	void Create(HWND parent, const TCHAR *text, int x, int y, int width, int height)
 	{
 		// Remove old instance, if necessary
 		Destroy();
 
-		label = CreateWindow("STATIC",
+		label = CreateWindow(_T("STATIC"),
 			text,
 			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
 			x,
