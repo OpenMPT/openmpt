@@ -188,6 +188,7 @@ SoundDeviceCaps CPortaudioDevice::GetDeviceCaps(const std::vector<uint32> &baseS
 	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
 	{
 		caps.CanExclusiveMode = true;
+		caps.CanDriverPanel = true;
 	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
 	{
 		caps.CanUpdateInterval = false;
@@ -221,6 +222,31 @@ SoundDeviceCaps CPortaudioDevice::GetDeviceCaps(const std::vector<uint32> &baseS
 		}
 	}
 	return caps;
+}
+
+
+bool CPortaudioDevice::OpenDriverSettings()
+//-----------------------------------------
+{
+	if(m_HostApi != Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
+	{
+		return false;
+	}
+	OSVERSIONINFO versioninfo;
+	MemsetZero(versioninfo);
+	versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
+	GetVersionEx(&versioninfo);
+	const bool hasVista = (versioninfo.dwMajorVersion >= 6);
+	mpt::PathString controlEXE;
+	WCHAR systemDir[MAX_PATH];
+	MemsetZero(systemDir);
+	if(GetSystemDirectoryW(systemDir, CountOf(systemDir)) > 0)
+	{
+		controlEXE += mpt::PathString::FromNative(systemDir);
+		controlEXE += MPT_PATHSTRING("\\");
+	}
+	controlEXE += MPT_PATHSTRING("control.exe");
+	return ((int)ShellExecuteW(NULL, L"open", controlEXE.AsNative().c_str(), (hasVista ? L"/name Microsoft.Sound" : L"mmsys.cpl"), NULL, SW_SHOW) > 32);
 }
 
 
