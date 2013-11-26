@@ -54,6 +54,7 @@ public:
 	bool InternalHasGetStreamPosition() const { return false; }
 	int64 InternalGetStreamPositionFrames() const;
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
+	bool OpenDriverSettings();
 
 	int StreamCallback(
 		const void *input, void *output,
