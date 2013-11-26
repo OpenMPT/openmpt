@@ -56,6 +56,18 @@ static inline std::string LTrim(std::string str, const std::string &whitespace =
 	}
 	return str;
 }
+static inline std::wstring LTrim(std::wstring str, const std::wstring &whitespace = L" \n\r\t")
+{
+	std::wstring::size_type pos = str.find_first_not_of(whitespace);
+	if(pos != std::wstring::npos)
+	{
+		str.erase(str.begin(), str.begin() + pos);
+	} else if(pos == std::wstring::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1)
+	{
+		return std::wstring();
+	}
+	return str;
+}
 
 
 // Remove whitespace at end of string
@@ -71,10 +83,26 @@ static inline std::string RTrim(std::string str, const std::string &whitespace =
 	}
 	return str;
 }
+static inline std::wstring RTrim(std::wstring str, const std::wstring &whitespace = L" \n\r\t")
+{
+	std::wstring::size_type pos = str.find_last_not_of(whitespace);
+	if(pos != std::wstring::npos)
+	{
+		str.erase(str.begin() + pos + 1, str.end());
+	} else if(pos == std::wstring::npos && str.length() > 0 && str.find_first_of(whitespace) == 0)
+	{
+		return std::wstring();
+	}
+	return str;
+}
 
 
 // Remove whitespace at start and end of string
 static inline std::string Trim(std::string str, const std::string &whitespace = " \n\r\t")
+{
+	return RTrim(LTrim(str, whitespace), whitespace);
+}
+static inline std::wstring Trim(std::wstring str, const std::wstring &whitespace = L" \n\r\t")
 {
 	return RTrim(LTrim(str, whitespace), whitespace);
 }
