@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="miniz"
-	ProjectGUID="{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
-	RootNamespace="miniz"
+	Name="smbPitchShift"
+	ProjectGUID="{89AF16DD-32CC-4A7E-B219-5F117D761F9F}"
+	RootNamespace="smbPitchShift"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="lib\x32\Debug"
-			IntermediateDirectory="obj\miniz\x32\Debug"
+			OutputDirectory="..\lib\x32\Debug"
+			IntermediateDirectory="..\obj\smbPitchShift\x32\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -50,9 +50,8 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
+				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
 				DebugInformationFormat="4"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -66,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\miniz.lib"
+				OutputFile="$(OutDir)\smbPitchShift.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -95,8 +94,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="lib\x64\Debug"
-			IntermediateDirectory="obj\miniz\x64\Debug"
+			OutputDirectory="..\lib\x64\Debug"
+			IntermediateDirectory="..\obj\smbPitchShift\x64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -126,9 +125,8 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
+				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
 				DebugInformationFormat="3"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -142,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\miniz.lib"
+				OutputFile="$(OutDir)\smbPitchShift.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -171,8 +169,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="lib\x32\Release"
-			IntermediateDirectory="obj\miniz\x32\Release"
+			OutputDirectory="..\lib\x32\Release"
+			IntermediateDirectory="..\obj\smbPitchShift\x32\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -202,9 +200,8 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
+				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
 				DebugInformationFormat="3"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -218,7 +215,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\miniz.lib"
+				OutputFile="$(OutDir)\smbPitchShift.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -247,8 +244,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="lib\x64\Release"
-			IntermediateDirectory="obj\miniz\x64\Release"
+			OutputDirectory="..\lib\x64\Release"
+			IntermediateDirectory="..\obj\smbPitchShift\x64\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -279,9 +276,8 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
+				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
 				DebugInformationFormat="3"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -295,7 +291,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\miniz.lib"
+				OutputFile="$(OutDir)\smbPitchShift.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -324,8 +320,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="lib\x32\ReleaseNoLTCG"
-			IntermediateDirectory="obj\miniz\x32\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x32\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\smbPitchShift\x32\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -355,9 +351,8 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
+				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
 				DebugInformationFormat="0"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -371,7 +366,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\miniz.lib"
+				OutputFile="$(OutDir)\smbPitchShift.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -400,8 +395,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="lib\x64\ReleaseNoLTCG"
-			IntermediateDirectory="obj\miniz\x64\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\smbPitchShift\x64\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -432,9 +427,8 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
+				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
 				DebugInformationFormat="0"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -448,7 +442,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\miniz.lib"
+				OutputFile="$(OutDir)\smbPitchShift.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -484,11 +478,15 @@
 			Filter=""
 			>
 			<Filter
-				Name="miniz"
+				Name="smbPitchShift"
 				Filter=""
 				>
 				<File
-					RelativePath="..\include\miniz\miniz.c"
+					RelativePath="..\..\include\smbPitchShift\smbPitchShift.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\smbPitchShift\smbPitchShift.h"
 					>
 				</File>
 			</Filter>

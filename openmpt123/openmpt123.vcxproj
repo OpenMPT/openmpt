@@ -138,10 +138,10 @@
     <ClCompile Include="openmpt123.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\build\flac.vcxproj">
+    <ProjectReference Include="..\build\gen\flac.vcxproj">
       <Project>{e599f5aa-f9a3-46cc-8db0-c8defceb90c5}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\portaudio.vcxproj">
+    <ProjectReference Include="..\build\gen\portaudio.vcxproj">
       <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
     </ProjectReference>
     <ProjectReference Include="..\libopenmpt\libopenmpt.vcxproj">

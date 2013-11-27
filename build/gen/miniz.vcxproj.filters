@@ -2,14 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{15789938-0F62-9846-8B2C-2797DE8CE25D}</UniqueIdentifier>
+			<UniqueIdentifier>{271BFA56-EE90-0B41-ADDA-03838265FA96}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\miniz">
-			<UniqueIdentifier>{46064C07-37BC-A344-8CAE-C7B09727E3F8}</UniqueIdentifier>
+			<UniqueIdentifier>{D3ABAF1A-5179-2C46-B43D-CD080186FC56}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="..\include\miniz\miniz.c">
+		<ClCompile Include="..\..\include\miniz\miniz.c">
 			<Filter>include\miniz</Filter>
 		</ClCompile>
 	</ItemGroup>

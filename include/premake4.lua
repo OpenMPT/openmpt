@@ -2,7 +2,7 @@
  project "UnRAR"
   uuid "95CC809B-03FC-4EDB-BB20-FD07A698C05F"
   language "C++"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/unrar"
   includedirs { "../include/unrar" }
   files {
@@ -132,7 +132,7 @@
  project "zlib"
   uuid "1654FB18-FDE6-406F-9D84-BA12BFBD67B2"
   language "C"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/zlib"
   includedirs { "../include/zlib" }
   files {
@@ -173,7 +173,7 @@
  project "minizip"
   uuid "63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7"
   language "C"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/minizip"
   includedirs { "../include/zlib", "../include/zlib/contrib/minizip" }
   files {
@@ -199,7 +199,7 @@
  project "miniz"
   uuid "B5E0C06B-8121-426A-8FFB-4293ECAAE29C"
   language "C"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/miniz"
   files {
    "../include/miniz/miniz.c",
@@ -212,7 +212,7 @@
  project "smbPitchShift"
   uuid "89AF16DD-32CC-4A7E-B219-5F117D761F9F"
   language "C++"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/smbPitchShift"
   includedirs { }
   files {
@@ -229,7 +229,7 @@
  project "lhasa"
   uuid "6B11F6A8-B131-4D2B-80EF-5731A9016436"
   language "C"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/lhasa"
   includedirs { "../include/msinttypes/inttypes" }
   files {
@@ -280,7 +280,7 @@
  project "flac"
   uuid "E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5"
   language "C"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/flac"
   includedirs { "../include/flac/include", "../include/flac/src/libFLAC/include" }
   files {
@@ -351,7 +351,7 @@
  project "portaudio"
   uuid "189B867F-FF4B-45A1-B741-A97492EE69AF"
   language "C"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/portaudio"
   includedirs { "../include/portaudio/include", "../include/portaudio/src/common", "../include/portaudio/src/os/win" }
   defines {
@@ -424,7 +424,7 @@
  project "portmidi"
   uuid "2512E2CA-578A-4F10-9363-4BFC9A5EF960"
   language "C"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/portmidi"
   includedirs { "../include/portmidi/porttime", "../include/portmidi/pm_common", "../include/portmidi/pm_win" }
   files {
@@ -450,7 +450,7 @@
  project "soundtouch"
   uuid "F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD"
   language "C++"
-  location "../build"
+  location "../build/gen"
   objdir "../build/obj/soundtouch"
   targetname "OpenMPT_SoundTouch_i16"
   includedirs { }

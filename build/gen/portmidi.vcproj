@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="smbPitchShift"
-	ProjectGUID="{89AF16DD-32CC-4A7E-B219-5F117D761F9F}"
-	RootNamespace="smbPitchShift"
+	Name="portmidi"
+	ProjectGUID="{2512E2CA-578A-4F10-9363-4BFC9A5EF960}"
+	RootNamespace="portmidi"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="lib\x32\Debug"
-			IntermediateDirectory="obj\smbPitchShift\x32\Debug"
+			OutputDirectory="..\lib\x32\Debug"
+			IntermediateDirectory="..\obj\portmidi\x32\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -43,6 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -50,8 +51,9 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portmidi.pdb"
 				DebugInformationFormat="4"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -59,13 +61,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\smbPitchShift.lib"
+				OutputFile="$(OutDir)\portmidi.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -94,8 +97,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="lib\x64\Debug"
-			IntermediateDirectory="obj\smbPitchShift\x64\Debug"
+			OutputDirectory="..\lib\x64\Debug"
+			IntermediateDirectory="..\obj\portmidi\x64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -118,6 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -125,8 +129,9 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portmidi.pdb"
 				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -134,13 +139,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\smbPitchShift.lib"
+				OutputFile="$(OutDir)\portmidi.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -169,8 +175,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="lib\x32\Release"
-			IntermediateDirectory="obj\smbPitchShift\x32\Release"
+			OutputDirectory="..\lib\x32\Release"
+			IntermediateDirectory="..\obj\portmidi\x32\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -193,6 +199,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -200,8 +207,9 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portmidi.pdb"
 				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -209,13 +217,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\smbPitchShift.lib"
+				OutputFile="$(OutDir)\portmidi.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -244,8 +253,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="lib\x64\Release"
-			IntermediateDirectory="obj\smbPitchShift\x64\Release"
+			OutputDirectory="..\lib\x64\Release"
+			IntermediateDirectory="..\obj\portmidi\x64\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -269,6 +278,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -276,8 +286,9 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portmidi.pdb"
 				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -285,13 +296,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\smbPitchShift.lib"
+				OutputFile="$(OutDir)\portmidi.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -320,8 +332,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="lib\x32\ReleaseNoLTCG"
-			IntermediateDirectory="obj\smbPitchShift\x32\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x32\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\portmidi\x32\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -344,6 +356,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -351,8 +364,9 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portmidi.pdb"
 				DebugInformationFormat="0"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -360,13 +374,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\smbPitchShift.lib"
+				OutputFile="$(OutDir)\portmidi.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -395,8 +410,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="lib\x64\ReleaseNoLTCG"
-			IntermediateDirectory="obj\smbPitchShift\x64\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\portmidi\x64\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -420,6 +435,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -427,8 +443,9 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\smbPitchShift.pdb"
+				ProgramDataBaseFileName="$(OutDir)\portmidi.pdb"
 				DebugInformationFormat="0"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -436,13 +453,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\portmidi\porttime;..\..\include\portmidi\pm_common;..\..\include\portmidi\pm_win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\smbPitchShift.lib"
+				OutputFile="$(OutDir)\portmidi.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -478,17 +496,68 @@
 			Filter=""
 			>
 			<Filter
-				Name="smbPitchShift"
+				Name="portmidi"
 				Filter=""
 				>
-				<File
-					RelativePath="..\include\smbPitchShift\smbPitchShift.cpp"
+				<Filter
+					Name="porttime"
+					Filter=""
 					>
-				</File>
-				<File
-					RelativePath="..\include\smbPitchShift\smbPitchShift.h"
+					<File
+						RelativePath="..\..\include\portmidi\porttime\porttime.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\portmidi\porttime\ptwinmm.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\portmidi\porttime\porttime.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="pm_common"
+					Filter=""
 					>
-				</File>
+					<File
+						RelativePath="..\..\include\portmidi\pm_common\pmutil.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\portmidi\pm_common\portmidi.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\portmidi\pm_common\pminternal.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\portmidi\pm_common\pmutil.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\portmidi\pm_common\portmidi.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="pm_win"
+					Filter=""
+					>
+					<File
+						RelativePath="..\..\include\portmidi\pm_win\pmwin.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\portmidi\pm_win\pmwinmm.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\portmidi\pm_win\pmwinmm.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 	</Files>

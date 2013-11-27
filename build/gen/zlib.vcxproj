@@ -27,8 +27,8 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{2512E2CA-578A-4F10-9363-4BFC9A5EF960}</ProjectGuid>
-		<RootNamespace>portmidi</RootNamespace>
+		<ProjectGuid>{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}</ProjectGuid>
+		<RootNamespace>zlib</RootNamespace>
 		<Keyword>Win32Proj</Keyword>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -90,29 +90,29 @@
 	<PropertyGroup Label="UserMacros" />
 	<PropertyGroup>
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\x32\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">obj\portmidi\x32\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">portmidi</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\x64\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">obj\portmidi\x64\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">portmidi</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\x32\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">obj\portmidi\x32\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">portmidi</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\x64\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">obj\portmidi\x64\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">portmidi</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">lib\x32\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">obj\portmidi\x32\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">portmidi</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">lib\x64\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">obj\portmidi\x64\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">portmidi</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\x32\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\obj\zlib\x32\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">zlib</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\lib\x64\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\obj\zlib\x64\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">zlib</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\lib\x32\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\obj\zlib\x32\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">zlib</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\lib\x64\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\obj\zlib\x64\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">zlib</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\lib\x32\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\obj\zlib\x32\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">zlib</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\lib\x64\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\obj\zlib\x64\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">zlib</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -125,21 +125,21 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)portmidi.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)portmidi.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -152,22 +152,22 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)portmidi.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)portmidi.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -181,24 +181,24 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)portmidi.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)portmidi.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -212,24 +212,24 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)portmidi.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)portmidi.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)zlib.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -243,10 +243,10 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)portmidi.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
@@ -259,7 +259,7 @@
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -273,10 +273,10 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\portmidi\porttime;..\include\portmidi\pm_common;..\include\portmidi\pm_win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)portmidi.lib</OutputFile>
+		<OutputFile>$(OutDir)zlib.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
@@ -286,24 +286,48 @@
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>
-		<ClInclude Include="..\include\portmidi\porttime\porttime.h" />
-		<ClInclude Include="..\include\portmidi\pm_common\pminternal.h" />
-		<ClInclude Include="..\include\portmidi\pm_common\pmutil.h" />
-		<ClInclude Include="..\include\portmidi\pm_common\portmidi.h" />
-		<ClInclude Include="..\include\portmidi\pm_win\pmwinmm.h" />
+		<ClInclude Include="..\..\include\zlib\crc32.h" />
+		<ClInclude Include="..\..\include\zlib\deflate.h" />
+		<ClInclude Include="..\..\include\zlib\gzguts.h" />
+		<ClInclude Include="..\..\include\zlib\inffast.h" />
+		<ClInclude Include="..\..\include\zlib\inffixed.h" />
+		<ClInclude Include="..\..\include\zlib\inflate.h" />
+		<ClInclude Include="..\..\include\zlib\inftrees.h" />
+		<ClInclude Include="..\..\include\zlib\trees.h" />
+		<ClInclude Include="..\..\include\zlib\zconf.h" />
+		<ClInclude Include="..\..\include\zlib\zlib.h" />
+		<ClInclude Include="..\..\include\zlib\zutil.h" />
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="..\include\portmidi\porttime\porttime.c">
+		<ClCompile Include="..\..\include\zlib\adler32.c">
 		</ClCompile>
-		<ClCompile Include="..\include\portmidi\porttime\ptwinmm.c">
+		<ClCompile Include="..\..\include\zlib\compress.c">
 		</ClCompile>
-		<ClCompile Include="..\include\portmidi\pm_common\pmutil.c">
+		<ClCompile Include="..\..\include\zlib\crc32.c">
 		</ClCompile>
-		<ClCompile Include="..\include\portmidi\pm_common\portmidi.c">
+		<ClCompile Include="..\..\include\zlib\deflate.c">
 		</ClCompile>
-		<ClCompile Include="..\include\portmidi\pm_win\pmwin.c">
+		<ClCompile Include="..\..\include\zlib\gzclose.c">
 		</ClCompile>
-		<ClCompile Include="..\include\portmidi\pm_win\pmwinmm.c">
+		<ClCompile Include="..\..\include\zlib\gzlib.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\gzread.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\gzwrite.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\infback.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\inffast.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\inflate.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\inftrees.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\trees.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\uncompr.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\zutil.c">
 		</ClCompile>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

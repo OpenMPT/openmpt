@@ -27,8 +27,8 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}</ProjectGuid>
-		<RootNamespace>miniz</RootNamespace>
+		<ProjectGuid>{89AF16DD-32CC-4A7E-B219-5F117D761F9F}</ProjectGuid>
+		<RootNamespace>smbPitchShift</RootNamespace>
 		<Keyword>Win32Proj</Keyword>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -90,24 +90,24 @@
 	<PropertyGroup Label="UserMacros" />
 	<PropertyGroup>
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\x32\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">obj\miniz\x32\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">miniz</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\x64\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">obj\miniz\x64\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">miniz</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\x32\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">obj\miniz\x32\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">miniz</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\x64\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">obj\miniz\x64\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">miniz</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">lib\x32\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">obj\miniz\x32\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">miniz</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">lib\x64\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">obj\miniz\x64\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">miniz</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\x32\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\obj\smbPitchShift\x32\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">smbPitchShift</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\lib\x64\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\obj\smbPitchShift\x64\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">smbPitchShift</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\lib\x32\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\obj\smbPitchShift\x32\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">smbPitchShift</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\lib\x64\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\obj\smbPitchShift\x64\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">smbPitchShift</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\lib\x32\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\obj\smbPitchShift\x32\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">smbPitchShift</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\lib\x64\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\obj\smbPitchShift\x64\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">smbPitchShift</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<ClCompile>
@@ -120,18 +120,17 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)miniz.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)miniz.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -145,18 +144,17 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<DebugInformationFormat>OldStyle</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)miniz.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)miniz.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -172,20 +170,19 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)miniz.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)miniz.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -201,20 +198,19 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)miniz.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)miniz.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
@@ -230,13 +226,12 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat></DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)miniz.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
@@ -258,13 +253,12 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat></DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)miniz.lib</OutputFile>
+		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
@@ -274,7 +268,10 @@
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>
-		<ClCompile Include="..\include\miniz\miniz.c">
+		<ClInclude Include="..\..\include\smbPitchShift\smbPitchShift.h" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\include\smbPitchShift\smbPitchShift.cpp">
 		</ClCompile>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

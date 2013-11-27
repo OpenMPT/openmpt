@@ -2,91 +2,91 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{BE54134D-FF2C-5046-9105-407487BD1D22}</UniqueIdentifier>
+			<UniqueIdentifier>{DB7A7CAC-5B84-164D-87E8-C1E70D7309A7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\zlib">
-			<UniqueIdentifier>{CD49036E-5713-3445-9AC9-2B28DE4FE443}</UniqueIdentifier>
+			<UniqueIdentifier>{A78F5FBB-C386-1846-B3E7-E92786A910EA}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
-		<ClInclude Include="..\include\zlib\crc32.h">
+		<ClInclude Include="..\..\include\zlib\crc32.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\deflate.h">
+		<ClInclude Include="..\..\include\zlib\deflate.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\gzguts.h">
+		<ClInclude Include="..\..\include\zlib\gzguts.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\inffast.h">
+		<ClInclude Include="..\..\include\zlib\inffast.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\inffixed.h">
+		<ClInclude Include="..\..\include\zlib\inffixed.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\inflate.h">
+		<ClInclude Include="..\..\include\zlib\inflate.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\inftrees.h">
+		<ClInclude Include="..\..\include\zlib\inftrees.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\trees.h">
+		<ClInclude Include="..\..\include\zlib\trees.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\zconf.h">
+		<ClInclude Include="..\..\include\zlib\zconf.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\zlib.h">
+		<ClInclude Include="..\..\include\zlib\zlib.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\zutil.h">
+		<ClInclude Include="..\..\include\zlib\zutil.h">
 			<Filter>include\zlib</Filter>
 		</ClInclude>
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="..\include\zlib\adler32.c">
+		<ClCompile Include="..\..\include\zlib\adler32.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\compress.c">
+		<ClCompile Include="..\..\include\zlib\compress.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\crc32.c">
+		<ClCompile Include="..\..\include\zlib\crc32.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\deflate.c">
+		<ClCompile Include="..\..\include\zlib\deflate.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\gzclose.c">
+		<ClCompile Include="..\..\include\zlib\gzclose.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\gzlib.c">
+		<ClCompile Include="..\..\include\zlib\gzlib.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\gzread.c">
+		<ClCompile Include="..\..\include\zlib\gzread.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\gzwrite.c">
+		<ClCompile Include="..\..\include\zlib\gzwrite.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\infback.c">
+		<ClCompile Include="..\..\include\zlib\infback.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\inffast.c">
+		<ClCompile Include="..\..\include\zlib\inffast.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\inflate.c">
+		<ClCompile Include="..\..\include\zlib\inflate.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\inftrees.c">
+		<ClCompile Include="..\..\include\zlib\inftrees.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\trees.c">
+		<ClCompile Include="..\..\include\zlib\trees.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\uncompr.c">
+		<ClCompile Include="..\..\include\zlib\uncompr.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\zutil.c">
+		<ClCompile Include="..\..\include\zlib\zutil.c">
 			<Filter>include\zlib</Filter>
 		</ClCompile>
 	</ItemGroup>

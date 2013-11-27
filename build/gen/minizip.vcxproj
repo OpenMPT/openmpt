@@ -27,8 +27,8 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{89AF16DD-32CC-4A7E-B219-5F117D761F9F}</ProjectGuid>
-		<RootNamespace>smbPitchShift</RootNamespace>
+		<ProjectGuid>{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}</ProjectGuid>
+		<RootNamespace>minizip</RootNamespace>
 		<Keyword>Win32Proj</Keyword>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -90,28 +90,29 @@
 	<PropertyGroup Label="UserMacros" />
 	<PropertyGroup>
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\x32\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">obj\smbPitchShift\x32\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">smbPitchShift</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\x64\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">obj\smbPitchShift\x64\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">smbPitchShift</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\x32\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">obj\smbPitchShift\x32\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">smbPitchShift</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\x64\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">obj\smbPitchShift\x64\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">smbPitchShift</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">lib\x32\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">obj\smbPitchShift\x32\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">smbPitchShift</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">lib\x64\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">obj\smbPitchShift\x64\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">smbPitchShift</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\x32\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\obj\minizip\x32\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\lib\x64\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\obj\minizip\x64\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\lib\x32\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\obj\minizip\x32\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\lib\x64\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\obj\minizip\x64\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\lib\x32\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\obj\minizip\x32\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">minizip</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\lib\x64\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\obj\minizip\x64\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">minizip</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -120,22 +121,25 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<ClCompile>
 			<Optimization>Disabled</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -144,23 +148,26 @@
 			<PrecompiledHeader></PrecompiledHeader>
 			<WarningLevel>Level3</WarningLevel>
 			<DebugInformationFormat>OldStyle</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -170,25 +177,28 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<ClCompile>
 			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -198,25 +208,28 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)smbPitchShift.pdb</ProgramDataBaseFileName>
+			<ProgramDataBaseFileName>$(OutDir)minizip.pdb</ProgramDataBaseFileName>
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -226,12 +239,14 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat></DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
@@ -244,6 +259,7 @@
 		<ClCompile>
 			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -253,12 +269,14 @@
 			<WarningLevel>Level3</WarningLevel>
 			<FloatingPointModel>Fast</FloatingPointModel>
 			<DebugInformationFormat></DebugInformationFormat>
+			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\zlib;..\..\include\zlib\contrib\minizip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
-		<OutputFile>$(OutDir)smbPitchShift.lib</OutputFile>
+		<OutputFile>$(OutDir)minizip.lib</OutputFile>
 	</Lib>
 		<Link>
 			<SubSystem>Windows</SubSystem>
@@ -268,10 +286,23 @@
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>
-		<ClInclude Include="..\include\smbPitchShift\smbPitchShift.h" />
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\crypt.h" />
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\ioapi.h" />
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\iowin32.h" />
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\mztools.h" />
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\unzip.h" />
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\zip.h" />
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="..\include\smbPitchShift\smbPitchShift.cpp">
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\ioapi.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\iowin32.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\mztools.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\unzip.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\zip.c">
 		</ClCompile>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
