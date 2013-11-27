@@ -17,17 +17,15 @@
 #include "../../mptrack/TrackerSettings.h"
 #include "../../mptrack/AbstractVstEditor.h"
 #include "../../common/AudioCriticalSection.h"
+#include "../../common/StringFixer.h"
 #include "../Sndfile.h"
 #include "JBridge.h"
-
-
-#ifdef VST_USE_ALTERNATIVE_MAGIC		// Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
-#include "../../include/zlib/zlib.h"	// For CRC32 calculation (to detect plugins with same UID)
-#endif // VST_USE_ALTERNATIVE_MAGIC
 
 char CVstPluginManager::s_szHostProductString[64] = "OpenMPT";
 char CVstPluginManager::s_szHostVendorString[64] = "OpenMPT project";
 VstIntPtr CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
+
+typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 
 //#define VST_LOG
 #define DMO_LOG
@@ -35,6 +33,10 @@ VstIntPtr CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
 AEffect *DmoToVst(VSTPluginLib &lib);
 
 #ifdef VST_USE_ALTERNATIVE_MAGIC
+// Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
+// A better solution would be to change the plugin.cache format so that the ID1+ID2 strings are combined with a CRC,
+// Or maybe we should just switch to a proper database format.
+#include "../../include/zlib/zlib.h"	// For CRC32 calculation (to detect plugins with same UID)
 uint32 CalculateCRC32fromFilename(const char *s)
 //----------------------------------------------
 {
@@ -43,7 +45,6 @@ uint32 CalculateCRC32fromFilename(const char *s)
 	int f;
 	for(f = 0; fn[f] != 0; f++) fn[f] = toupper(fn[f]);
 	return LittleEndian(crc32(0, (uint8 *)fn, f));
-
 }
 #endif // VST_USE_ALTERNATIVE_MAGIC
 
@@ -52,7 +53,7 @@ VstIntPtr VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect, VstInt3
 //----------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CVstPluginManager *that = theApp.GetPluginManager();
-	if (that)
+	if(that)
 	{
 		return that->VstCallback(effect, opcode, index, value, ptr, opt);
 	}
@@ -95,8 +96,8 @@ CVstPluginManager::~CVstPluginManager()
 }
 
 
-bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib)
-//-------------------------------------------------------------
+bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
+//-------------------------------------------------------------------
 {
 	for(const_iterator p = begin(); p != end(); p++)
 	{
@@ -112,7 +113,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 	HKEY hkEnum;
 	WCHAR keyname[128];
 
-	LONG cr = RegOpenKey(HKEY_LOCAL_MACHINE, "software\\classes\\DirectShow\\MediaObjects\\Categories\\f3602b3f-0592-48df-a4cd-674721e7ebeb", &hkEnum);
+	LONG cr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "software\\classes\\DirectShow\\MediaObjects\\Categories\\f3602b3f-0592-48df-a4cd-674721e7ebeb", 0, KEY_READ, &hkEnum);
 	DWORD index = 0;
 	while (cr == ERROR_SUCCESS)
 	{
@@ -132,9 +133,10 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 
 					if(ERROR_SUCCESS == RegQueryValueExW(hksub, nullptr, 0, &datatype, (LPBYTE)name, &datasize))
 					{
+						mpt::String::SetNullTerminator(name);
 						StringFromGUID2(clsid, keyname, 100);
 
-						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(mpt::PathString::FromNative(keyname), mpt::PathString::FromWide(name));
+						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(mpt::PathString::FromNative(keyname), mpt::PathString::FromNative(name));
 						if(plug != nullptr)
 						{
 							pluginList.push_back(plug);
@@ -142,7 +144,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 							plug->pluginId2 = clsid.Data1;
 							plug->category = VSTPluginLib::catDMO;
 #ifdef DMO_LOG
-							Log("Found \"%s\" clsid=%s\n", plug->libraryName.AsNative().c_str(), plug->dllPath.AsNative().c_str());
+							Log(mpt::String::PrintW(L"Found \"%1\" clsid=%2\n", plug->libraryName, plug->dllPath));
 #endif
 						}
 					}
@@ -238,12 +240,12 @@ void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 }
 
 
-//
 // PluginCache format:
 // LibraryName = ID100000ID200000
 // ID100000ID200000 = FullDllPath
-// ID100000ID200000.Flags = Plugin Flags (isInstrument + category).
+// ID100000ID200000.Flags = Plugin Flags (set VSTPluginLib::DecodeCacheFlags).
 
+// Add a plugin to the list of known plugins.
 VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool fromCache, const bool checkFileExistence, std::wstring *const errStr)
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 {
@@ -287,8 +289,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 				}
 				pluginList.push_back(plug);
 
-				// Extract plugin Ids
-				for (UINT i=0; i<16; i++)
+				// Extract plugin IDs
+				for (int i = 0; i < 16; i++)
 				{
 					UINT n = IDs[i] - '0';
 					if (n > 9) n = IDs[i] + 10 - 'A';
@@ -302,7 +304,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 					}
 				}
 
-				std::string flagKey = mpt::String::Format("%s.Flags", IDs.c_str());
+				const std::string flagKey = mpt::String::Format("%s.Flags", IDs.c_str());
 				plug->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
 
 #ifdef VST_USE_ALTERNATIVE_MAGIC
@@ -376,7 +378,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	}
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
-	theApp.GetSettings().Write<std::string>("VST Plugins", "FailedPlugin", "");
+	theApp.GetSettings().Remove("VST Plugins", "FailedPlugin");
 
 	// If OK, write the information in PluginCache
 	if(validPlug)
@@ -397,12 +399,16 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		cacheFile.Write<mpt::PathString>(cacheSection, IDs, dllPath);
 		cacheFile.Write<std::string>(cacheSectionW, plug->libraryName.ToWide(), IDs);
 		cacheFile.Write<int32>(cacheSection, flagsKey, plug->EncodeCacheFlags());
+	} else
+	{
+		delete plug;
 	}
 
 	return (validPlug ? plug : nullptr);
 }
 
 
+// Remove a plugin from the list of known plugins and release any remaining instances of it.
 bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 //----------------------------------------------------------
 {
@@ -411,6 +417,7 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 		VSTPluginLib *plug = *p;
 		if(plug == pFactory)
 		{
+			// Kill all instances of this plugin
 			try
 			{
 				CriticalSection cs;
@@ -433,6 +440,7 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 }
 
 
+// Create an instance of a plugin.
 bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
 //-----------------------------------------------------------------------------------
 {
@@ -477,9 +485,8 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 	if(!pFound && strcmp(mixPlugin.GetLibraryName(), ""))
 	{
-		// Try finding the plugin DLL in the plugin directory instead.
-		mpt::PathString fullPath;
-		fullPath = TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS);
+		// Try finding the plugin DLL in the plugin directory or plugin cache instead.
+		mpt::PathString fullPath = TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS);
 		if(fullPath.empty())
 		{
 			fullPath = theApp.GetAppDirPath() + MPT_PATHSTRING("Plugins\\");
@@ -493,6 +500,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		pFound = AddPlugin(fullPath);
 		if(!pFound)
 		{
+			// Try plugin cache (search for library name)
 			SettingsContainer &cacheFile = theApp.GetPluginCache();
 			std::string IDs = cacheFile.Read<std::string>(cacheSectionW, mpt::ToWide(mpt::CharsetUTF8, mixPlugin.GetLibraryName()), "");
 			if(IDs.length() >= 16)
