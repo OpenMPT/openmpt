@@ -143,6 +143,13 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		bool patternBreakOnThisRow = false;
 		bool patternLoopEndedOnThisRow = false;
 
+		if(nPattern == Order.GetIgnoreIndex() && target.mode == GetLengthTarget::SeekPosition && nCurrentOrder == target.pos.order)
+		{
+			// Early test: Target is inside +++ pattern
+			retval.targetReached = true;
+			break;
+		}
+
 		while(nPattern >= Patterns.Size())
 		{
 			// End of song?
@@ -4075,7 +4082,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 	{
 		// Not an internal device. Pass on to appropriate plugin.
 		const CHANNELINDEX plugChannel = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
-		if(plugChannel > 0 && plugChannel <= GetNumChannels())	// XXX do we need this?
+		if(plugChannel > 0 && plugChannel <= GetNumChannels())	// XXX do we need this? I guess it might be relevant for previewing notes in the pattern...
 		{
 			PLUGINDEX nPlug = 0;
 			if(!pChn->dwFlags[CHN_NOFX])

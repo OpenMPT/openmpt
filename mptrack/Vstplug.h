@@ -25,15 +25,10 @@
 
 class CVstPluginManager;
 class CVstPlugin;
-class CVstEditor;
-class Cfxp;				//rewbs.VSTpresets
+#ifdef MODPLUG_TRACKER
 class CModDoc;
+#endif // MODPLUG_TRACKER
 class CSoundFile;
-
-
-#ifndef NO_VST
-	typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
-#endif // NO_VST
 
 
 struct VSTPluginLib
@@ -62,8 +57,8 @@ struct VSTPluginLib
 	CVstPlugin *pPluginsList;		// Pointer to first plugin instance (this instance carries pointers to other instances)
 	mpt::PathString libraryName;	// Display name
 	mpt::PathString dllPath;		// Full path name
-	VstInt32 pluginId1;
-	VstInt32 pluginId2;
+	VstInt32 pluginId1;				// Plugin type (kEffectMagic, kDmoMagic)
+	VstInt32 pluginId2;				// Plugin unique ID
 	PluginCategory category;
 	bool isInstrument;
 
@@ -76,7 +71,7 @@ struct VSTPluginLib
 	{
 	}
 
-	uint32 EncodeCacheFlags()
+	uint32 EncodeCacheFlags() const
 	{
 		return (isInstrument ? 1 : 0) | (category << 1);
 	}
@@ -94,15 +89,6 @@ struct VSTPluginLib
 			category = catSynth;
 		}
 	}
-};
-
-
-struct VSTInstrChannel
-{
-	int32  midiPitchBendPos;		// Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
-	uint16 currentProgram;
-	uint16 currentBank;
-	uint8  noteOnMap[128][MAX_CHANNELS];
 };
 
 
@@ -131,6 +117,14 @@ protected:
 		vstVibratoFlag		= 1,
 	};
 
+	struct VSTInstrChannel
+	{
+		int32  midiPitchBendPos;		// Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
+		uint16 currentProgram;
+		uint16 currentBank;
+		uint8  noteOnMap[128][MAX_CHANNELS];
+	};
+
 	CVstPlugin *m_pNext, *m_pPrev;
 	HINSTANCE m_hLibrary;
 	VSTPluginLib &m_Factory;
@@ -148,8 +142,8 @@ protected:
 
 	float m_fGain;
 	PLUGINDEX m_nSlot;
-	bool m_bSongPlaying; //rewbs.VSTCompliance
-	bool m_bPlugResumed; //rewbs.VSTCompliance
+	bool m_bSongPlaying;
+	bool m_bPlugResumed;
 	bool m_bIsVst2;
 	bool m_bIsInstrument;
 
@@ -327,7 +321,6 @@ public:
 	CVstPluginManager();
 	~CVstPluginManager();
 
-public:
 	typedef std::vector<VSTPluginLib *>::iterator iterator;
 	typedef std::vector<VSTPluginLib *>::const_iterator const_iterator;
 
@@ -337,7 +330,7 @@ public:
 	const_iterator end() const { return pluginList.end(); }
 	void reserve(size_t num) { pluginList.reserve(num); }
 
-	bool IsValidPlugin(const VSTPluginLib *pLib);
+	bool IsValidPlugin(const VSTPluginLib *pLib) const;
 	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, bool fromCache = true, const bool checkFileExistence = false, std::wstring* const errStr = nullptr);
 	bool RemovePlugin(VSTPluginLib *);
 	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
