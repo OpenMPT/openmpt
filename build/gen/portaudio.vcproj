@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="lib\x32\Debug"
-			IntermediateDirectory="obj\portaudio\x32\Debug"
+			OutputDirectory="..\lib\x32\Debug"
+			IntermediateDirectory="..\obj\portaudio\x32\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4018 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -98,8 +98,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="lib\x64\Debug"
-			IntermediateDirectory="obj\portaudio\x64\Debug"
+			OutputDirectory="..\lib\x64\Debug"
+			IntermediateDirectory="..\obj\portaudio\x64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -123,7 +123,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4018 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -141,7 +141,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -177,8 +177,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="lib\x32\Release"
-			IntermediateDirectory="obj\portaudio\x32\Release"
+			OutputDirectory="..\lib\x32\Release"
+			IntermediateDirectory="..\obj\portaudio\x32\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -201,7 +201,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4018 /wd4267 /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -219,7 +219,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -255,8 +255,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="lib\x64\Release"
-			IntermediateDirectory="obj\portaudio\x64\Release"
+			OutputDirectory="..\lib\x64\Release"
+			IntermediateDirectory="..\obj\portaudio\x64\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -280,7 +280,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4018 /wd4267 /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -298,7 +298,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -334,8 +334,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="lib\x32\ReleaseNoLTCG"
-			IntermediateDirectory="obj\portaudio\x32\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x32\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\portaudio\x32\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -358,7 +358,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4018 /wd4267 /GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -376,7 +376,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -412,8 +412,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="lib\x64\ReleaseNoLTCG"
-			IntermediateDirectory="obj\portaudio\x64\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\portaudio\x64\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -437,7 +437,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4018 /wd4267 /GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -455,7 +455,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_USE_ASIO=0;PA_USE_DS=0;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\portaudio\include;..\include\portaudio\src\common;..\include\portaudio\src\os\win"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -510,99 +510,99 @@
 						Filter=""
 						>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_allocation.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_allocation.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_allocation.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_allocation.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_converters.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_converters.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_converters.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_converters.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_cpuload.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_cpuload.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_cpuload.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_cpuload.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_debugprint.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_debugprint.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_debugprint.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_debugprint.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_dither.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_dither.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_dither.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_dither.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_endianness.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_endianness.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_front.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_front.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_hostapi.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_hostapi.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_memorybarrier.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_memorybarrier.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_process.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_process.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_process.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_process.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_ringbuffer.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_ringbuffer.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_ringbuffer.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_ringbuffer.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_stream.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_stream.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_stream.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_stream.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_trace.c"
+							RelativePath="..\..\include\portaudio\src\common\pa_trace.c"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_trace.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_trace.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_types.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_types.h"
 							>
 						</File>
 						<File
-							RelativePath="..\include\portaudio\src\common\pa_util.h"
+							RelativePath="..\..\include\portaudio\src\common\pa_util.h"
 							>
 						</File>
 					</Filter>
@@ -615,7 +615,7 @@
 							Filter=""
 							>
 							<File
-								RelativePath="..\include\portaudio\src\hostapi\skeleton\pa_hostapi_skeleton.c"
+								RelativePath="..\..\include\portaudio\src\hostapi\skeleton\pa_hostapi_skeleton.c"
 								>
 							</File>
 						</Filter>
@@ -624,7 +624,7 @@
 							Filter=""
 							>
 							<File
-								RelativePath="..\include\portaudio\src\hostapi\wasapi\pa_win_wasapi.c"
+								RelativePath="..\..\include\portaudio\src\hostapi\wasapi\pa_win_wasapi.c"
 								>
 							</File>
 						</Filter>
@@ -633,7 +633,7 @@
 							Filter=""
 							>
 							<File
-								RelativePath="..\include\portaudio\src\hostapi\wdmks\pa_win_wdmks.c"
+								RelativePath="..\..\include\portaudio\src\hostapi\wdmks\pa_win_wdmks.c"
 								>
 							</File>
 						</Filter>
@@ -642,7 +642,7 @@
 							Filter=""
 							>
 							<File
-								RelativePath="..\include\portaudio\src\hostapi\wmme\pa_win_wmme.c"
+								RelativePath="..\..\include\portaudio\src\hostapi\wmme\pa_win_wmme.c"
 								>
 							</File>
 						</Filter>
@@ -656,39 +656,39 @@
 							Filter=""
 							>
 							<File
-								RelativePath="..\include\portaudio\src\os\win\pa_win_coinitialize.c"
+								RelativePath="..\..\include\portaudio\src\os\win\pa_win_coinitialize.c"
 								>
 							</File>
 							<File
-								RelativePath="..\include\portaudio\src\os\win\pa_win_coinitialize.h"
+								RelativePath="..\..\include\portaudio\src\os\win\pa_win_coinitialize.h"
 								>
 							</File>
 							<File
-								RelativePath="..\include\portaudio\src\os\win\pa_win_hostapis.c"
+								RelativePath="..\..\include\portaudio\src\os\win\pa_win_hostapis.c"
 								>
 							</File>
 							<File
-								RelativePath="..\include\portaudio\src\os\win\pa_win_util.c"
+								RelativePath="..\..\include\portaudio\src\os\win\pa_win_util.c"
 								>
 							</File>
 							<File
-								RelativePath="..\include\portaudio\src\os\win\pa_win_waveformat.c"
+								RelativePath="..\..\include\portaudio\src\os\win\pa_win_waveformat.c"
 								>
 							</File>
 							<File
-								RelativePath="..\include\portaudio\src\os\win\pa_win_wdmks_utils.c"
+								RelativePath="..\..\include\portaudio\src\os\win\pa_win_wdmks_utils.c"
 								>
 							</File>
 							<File
-								RelativePath="..\include\portaudio\src\os\win\pa_win_wdmks_utils.h"
+								RelativePath="..\..\include\portaudio\src\os\win\pa_win_wdmks_utils.h"
 								>
 							</File>
 							<File
-								RelativePath="..\include\portaudio\src\os\win\pa_x86_plain_converters.c"
+								RelativePath="..\..\include\portaudio\src\os\win\pa_x86_plain_converters.c"
 								>
 							</File>
 							<File
-								RelativePath="..\include\portaudio\src\os\win\pa_x86_plain_converters.h"
+								RelativePath="..\..\include\portaudio\src\os\win\pa_x86_plain_converters.h"
 								>
 							</File>
 						</Filter>
@@ -699,43 +699,43 @@
 					Filter=""
 					>
 					<File
-						RelativePath="..\include\portaudio\include\pa_asio.h"
+						RelativePath="..\..\include\portaudio\include\pa_asio.h"
 						>
 					</File>
 					<File
-						RelativePath="..\include\portaudio\include\pa_jack.h"
+						RelativePath="..\..\include\portaudio\include\pa_jack.h"
 						>
 					</File>
 					<File
-						RelativePath="..\include\portaudio\include\pa_linux_alsa.h"
+						RelativePath="..\..\include\portaudio\include\pa_linux_alsa.h"
 						>
 					</File>
 					<File
-						RelativePath="..\include\portaudio\include\pa_mac_core.h"
+						RelativePath="..\..\include\portaudio\include\pa_mac_core.h"
 						>
 					</File>
 					<File
-						RelativePath="..\include\portaudio\include\pa_win_ds.h"
+						RelativePath="..\..\include\portaudio\include\pa_win_ds.h"
 						>
 					</File>
 					<File
-						RelativePath="..\include\portaudio\include\pa_win_wasapi.h"
+						RelativePath="..\..\include\portaudio\include\pa_win_wasapi.h"
 						>
 					</File>
 					<File
-						RelativePath="..\include\portaudio\include\pa_win_waveformat.h"
+						RelativePath="..\..\include\portaudio\include\pa_win_waveformat.h"
 						>
 					</File>
 					<File
-						RelativePath="..\include\portaudio\include\pa_win_wdmks.h"
+						RelativePath="..\..\include\portaudio\include\pa_win_wdmks.h"
 						>
 					</File>
 					<File
-						RelativePath="..\include\portaudio\include\pa_win_wmme.h"
+						RelativePath="..\..\include\portaudio\include\pa_win_wmme.h"
 						>
 					</File>
 					<File
-						RelativePath="..\include\portaudio\include\portaudio.h"
+						RelativePath="..\..\include\portaudio\include\portaudio.h"
 						>
 					</File>
 				</Filter>

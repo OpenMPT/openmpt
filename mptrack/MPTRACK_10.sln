@@ -2,25 +2,25 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mptrack", "mptrack_10.vcxproj", "{21D95071-FB97-4E69-B3B1-050D0D4A5021}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flac", "..\build\flac.vcxproj", "{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flac", "..\build\gen\flac.vcxproj", "{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lhasa", "..\build\lhasa.vcxproj", "{6B11F6A8-B131-4D2B-80EF-5731A9016436}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lhasa", "..\build\gen\lhasa.vcxproj", "{6B11F6A8-B131-4D2B-80EF-5731A9016436}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\build\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\build\gen\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "smbPitchShift", "..\build\smbPitchShift.vcxproj", "{89AF16DD-32CC-4A7E-B219-5F117D761F9F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "smbPitchShift", "..\build\gen\smbPitchShift.vcxproj", "{89AF16DD-32CC-4A7E-B219-5F117D761F9F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "soundtouch", "..\build\soundtouch.vcxproj", "{F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "soundtouch", "..\build\gen\soundtouch.vcxproj", "{F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\build\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\build\gen\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "minizip", "..\build\minizip.vcxproj", "{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "minizip", "..\build\gen\minizip.vcxproj", "{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MIDI Input Output", "..\plugins\MidiInOut\MidiInOut.vcxproj", "{59248302-52E0-4CC0-9BBE-E475BA4A9B41}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portmidi", "..\build\portmidi.vcxproj", "{2512E2CA-578A-4F10-9363-4BFC9A5EF960}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portmidi", "..\build\gen\portmidi.vcxproj", "{2512E2CA-578A-4F10-9363-4BFC9A5EF960}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnRAR", "..\build\UnRAR.vcxproj", "{95CC809B-03FC-4EDB-BB20-FD07A698C05F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnRAR", "..\build\gen\UnRAR.vcxproj", "{95CC809B-03FC-4EDB-BB20-FD07A698C05F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\bin\Win32-Debug"
-			IntermediateDirectory="obj\soundtouch\x32\Debug"
+			OutputDirectory="..\..\bin\Win32-Debug"
+			IntermediateDirectory="..\obj\soundtouch\x32\Debug"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -71,7 +71,7 @@
 				GenerateDebugInformation="true"
 				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i16.pdb"
 				SubSystem="2"
-				ImportLibrary="..\bin\Win32-Debug\OpenMPT_SoundTouch_i16.lib"
+				ImportLibrary="..\..\bin\Win32-Debug\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -101,8 +101,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\bin\x64-Debug"
-			IntermediateDirectory="obj\soundtouch\x64\Debug"
+			OutputDirectory="..\..\bin\x64-Debug"
+			IntermediateDirectory="..\obj\soundtouch\x64\Debug"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -153,7 +153,7 @@
 				GenerateDebugInformation="true"
 				ProgramDataBaseFileName="$(OutDir)\OpenMPT_SoundTouch_i16.pdb"
 				SubSystem="2"
-				ImportLibrary="..\bin\x64-Debug\OpenMPT_SoundTouch_i16.lib"
+				ImportLibrary="..\..\bin\x64-Debug\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -183,8 +183,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\bin\Win32"
-			IntermediateDirectory="obj\soundtouch\x32\Release"
+			OutputDirectory="..\..\bin\Win32"
+			IntermediateDirectory="..\obj\soundtouch\x32\Release"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -237,7 +237,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\bin\Win32\OpenMPT_SoundTouch_i16.lib"
+				ImportLibrary="..\..\bin\Win32\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -267,8 +267,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\bin\x64"
-			IntermediateDirectory="obj\soundtouch\x64\Release"
+			OutputDirectory="..\..\bin\x64"
+			IntermediateDirectory="..\obj\soundtouch\x64\Release"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -322,7 +322,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\bin\x64\OpenMPT_SoundTouch_i16.lib"
+				ImportLibrary="..\..\bin\x64\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -352,8 +352,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="..\bin\Win32"
-			IntermediateDirectory="obj\soundtouch\x32\ReleaseNoLTCG"
+			OutputDirectory="..\..\bin\Win32"
+			IntermediateDirectory="..\obj\soundtouch\x32\ReleaseNoLTCG"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -405,7 +405,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\bin\Win32\OpenMPT_SoundTouch_i16.lib"
+				ImportLibrary="..\..\bin\Win32\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -435,8 +435,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="..\bin\x64"
-			IntermediateDirectory="obj\soundtouch\x64\ReleaseNoLTCG"
+			OutputDirectory="..\..\bin\x64"
+			IntermediateDirectory="..\obj\soundtouch\x64\ReleaseNoLTCG"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -489,7 +489,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\bin\x64\OpenMPT_SoundTouch_i16.lib"
+				ImportLibrary="..\..\bin\x64\OpenMPT_SoundTouch_i16.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -530,99 +530,99 @@
 				Filter=""
 				>
 				<File
-					RelativePath="..\include\soundtouch\AAFilter.cpp"
+					RelativePath="..\..\include\soundtouch\AAFilter.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\BPMDetect.cpp"
+					RelativePath="..\..\include\soundtouch\BPMDetect.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\cpu_detect_x86_win.cpp"
+					RelativePath="..\..\include\soundtouch\cpu_detect_x86_win.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\FIFOSampleBuffer.cpp"
+					RelativePath="..\..\include\soundtouch\FIFOSampleBuffer.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\FIRFilter.cpp"
+					RelativePath="..\..\include\soundtouch\FIRFilter.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\mmx_optimized.cpp"
+					RelativePath="..\..\include\soundtouch\mmx_optimized.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\PeakFinder.cpp"
+					RelativePath="..\..\include\soundtouch\PeakFinder.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\RateTransposer.cpp"
+					RelativePath="..\..\include\soundtouch\RateTransposer.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\SoundTouch.cpp"
+					RelativePath="..\..\include\soundtouch\SoundTouch.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\SoundTouchDLL.cpp"
+					RelativePath="..\..\include\soundtouch\SoundTouchDLL.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\sse_optimized.cpp"
+					RelativePath="..\..\include\soundtouch\sse_optimized.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\TDStretch.cpp"
+					RelativePath="..\..\include\soundtouch\TDStretch.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\AAFilter.h"
+					RelativePath="..\..\include\soundtouch\AAFilter.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\BPMDetect.h"
+					RelativePath="..\..\include\soundtouch\BPMDetect.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\cpu_detect.h"
+					RelativePath="..\..\include\soundtouch\cpu_detect.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\FIFOSampleBuffer.h"
+					RelativePath="..\..\include\soundtouch\FIFOSampleBuffer.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\FIFOSamplePipe.h"
+					RelativePath="..\..\include\soundtouch\FIFOSamplePipe.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\FIRFilter.h"
+					RelativePath="..\..\include\soundtouch\FIRFilter.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\PeakFinder.h"
+					RelativePath="..\..\include\soundtouch\PeakFinder.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\RateTransposer.h"
+					RelativePath="..\..\include\soundtouch\RateTransposer.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\SoundTouch.h"
+					RelativePath="..\..\include\soundtouch\SoundTouch.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\SoundTouchDLL.h"
+					RelativePath="..\..\include\soundtouch\SoundTouchDLL.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\STTypes.h"
+					RelativePath="..\..\include\soundtouch\STTypes.h"
 					>
 				</File>
 				<File
-					RelativePath="..\include\soundtouch\TDStretch.h"
+					RelativePath="..\..\include\soundtouch\TDStretch.h"
 					>
 				</File>
 			</Filter>

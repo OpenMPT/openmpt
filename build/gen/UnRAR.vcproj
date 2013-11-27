@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="lib\x32\Debug"
-			IntermediateDirectory="obj\unrar\x32\Debug"
+			OutputDirectory="..\lib\x32\Debug"
+			IntermediateDirectory="..\obj\unrar\x32\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -60,7 +60,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -96,8 +96,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="lib\x64\Debug"
-			IntermediateDirectory="obj\unrar\x64\Debug"
+			OutputDirectory="..\lib\x64\Debug"
+			IntermediateDirectory="..\obj\unrar\x64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -120,7 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -137,7 +137,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -173,8 +173,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="lib\x32\Release"
-			IntermediateDirectory="obj\unrar\x32\Release"
+			OutputDirectory="..\lib\x32\Release"
+			IntermediateDirectory="..\obj\unrar\x32\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -197,7 +197,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -214,7 +214,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -250,8 +250,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="lib\x64\Release"
-			IntermediateDirectory="obj\unrar\x64\Release"
+			OutputDirectory="..\lib\x64\Release"
+			IntermediateDirectory="..\obj\unrar\x64\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -275,7 +275,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -292,7 +292,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -328,8 +328,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="lib\x32\ReleaseNoLTCG"
-			IntermediateDirectory="obj\unrar\x32\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x32\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\unrar\x32\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -352,7 +352,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -369,7 +369,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -405,8 +405,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="lib\x64\ReleaseNoLTCG"
-			IntermediateDirectory="obj\unrar\x64\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\unrar\x64\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -430,7 +430,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -447,7 +447,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\unrar"
+				AdditionalIncludeDirectories="..\..\include\unrar"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -494,463 +494,463 @@
 				Filter=""
 				>
 				<File
-					RelativePath="..\include\unrar\archive.cpp"
+					RelativePath="..\..\include\unrar\archive.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\arcread.cpp"
+					RelativePath="..\..\include\unrar\arcread.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\blake2s.cpp"
+					RelativePath="..\..\include\unrar\blake2s.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\cmddata.cpp"
+					RelativePath="..\..\include\unrar\cmddata.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\consio.cpp"
+					RelativePath="..\..\include\unrar\consio.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\crc.cpp"
+					RelativePath="..\..\include\unrar\crc.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\crypt.cpp"
+					RelativePath="..\..\include\unrar\crypt.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\encname.cpp"
+					RelativePath="..\..\include\unrar\encname.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\errhnd.cpp"
+					RelativePath="..\..\include\unrar\errhnd.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\extinfo.cpp"
+					RelativePath="..\..\include\unrar\extinfo.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\extract.cpp"
+					RelativePath="..\..\include\unrar\extract.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\filcreat.cpp"
+					RelativePath="..\..\include\unrar\filcreat.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\file.cpp"
+					RelativePath="..\..\include\unrar\file.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\filefn.cpp"
+					RelativePath="..\..\include\unrar\filefn.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\filestr.cpp"
+					RelativePath="..\..\include\unrar\filestr.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\find.cpp"
+					RelativePath="..\..\include\unrar\find.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\getbits.cpp"
+					RelativePath="..\..\include\unrar\getbits.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\global.cpp"
+					RelativePath="..\..\include\unrar\global.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\hash.cpp"
+					RelativePath="..\..\include\unrar\hash.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\headers.cpp"
+					RelativePath="..\..\include\unrar\headers.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\isnt.cpp"
+					RelativePath="..\..\include\unrar\isnt.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\list.cpp"
+					RelativePath="..\..\include\unrar\list.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\match.cpp"
+					RelativePath="..\..\include\unrar\match.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\options.cpp"
+					RelativePath="..\..\include\unrar\options.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\pathfn.cpp"
+					RelativePath="..\..\include\unrar\pathfn.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\qopen.cpp"
+					RelativePath="..\..\include\unrar\qopen.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rar.cpp"
+					RelativePath="..\..\include\unrar\rar.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rarpch.cpp"
+					RelativePath="..\..\include\unrar\rarpch.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rarvm.cpp"
+					RelativePath="..\..\include\unrar\rarvm.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rawread.cpp"
+					RelativePath="..\..\include\unrar\rawread.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rdwrfn.cpp"
+					RelativePath="..\..\include\unrar\rdwrfn.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\recvol.cpp"
+					RelativePath="..\..\include\unrar\recvol.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\resource.cpp"
+					RelativePath="..\..\include\unrar\resource.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rijndael.cpp"
+					RelativePath="..\..\include\unrar\rijndael.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rs.cpp"
+					RelativePath="..\..\include\unrar\rs.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rs16.cpp"
+					RelativePath="..\..\include\unrar\rs16.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\scantree.cpp"
+					RelativePath="..\..\include\unrar\scantree.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\secpassword.cpp"
+					RelativePath="..\..\include\unrar\secpassword.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\sha1.cpp"
+					RelativePath="..\..\include\unrar\sha1.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\sha256.cpp"
+					RelativePath="..\..\include\unrar\sha256.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\smallfn.cpp"
+					RelativePath="..\..\include\unrar\smallfn.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\strfn.cpp"
+					RelativePath="..\..\include\unrar\strfn.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\strlist.cpp"
+					RelativePath="..\..\include\unrar\strlist.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\system.cpp"
+					RelativePath="..\..\include\unrar\system.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\threadpool.cpp"
+					RelativePath="..\..\include\unrar\threadpool.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\timefn.cpp"
+					RelativePath="..\..\include\unrar\timefn.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\unicode.cpp"
+					RelativePath="..\..\include\unrar\unicode.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\unpack.cpp"
+					RelativePath="..\..\include\unrar\unpack.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\volume.cpp"
+					RelativePath="..\..\include\unrar\volume.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\archive.hpp"
+					RelativePath="..\..\include\unrar\archive.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\array.hpp"
+					RelativePath="..\..\include\unrar\array.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\blake2s.hpp"
+					RelativePath="..\..\include\unrar\blake2s.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\cmddata.hpp"
+					RelativePath="..\..\include\unrar\cmddata.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\coder.hpp"
+					RelativePath="..\..\include\unrar\coder.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\compress.hpp"
+					RelativePath="..\..\include\unrar\compress.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\consio.hpp"
+					RelativePath="..\..\include\unrar\consio.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\crc.hpp"
+					RelativePath="..\..\include\unrar\crc.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\crypt.hpp"
+					RelativePath="..\..\include\unrar\crypt.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\dll.hpp"
+					RelativePath="..\..\include\unrar\dll.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\encname.hpp"
+					RelativePath="..\..\include\unrar\encname.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\errhnd.hpp"
+					RelativePath="..\..\include\unrar\errhnd.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\extinfo.hpp"
+					RelativePath="..\..\include\unrar\extinfo.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\extract.hpp"
+					RelativePath="..\..\include\unrar\extract.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\filcreat.hpp"
+					RelativePath="..\..\include\unrar\filcreat.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\file.hpp"
+					RelativePath="..\..\include\unrar\file.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\filefn.hpp"
+					RelativePath="..\..\include\unrar\filefn.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\filestr.hpp"
+					RelativePath="..\..\include\unrar\filestr.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\find.hpp"
+					RelativePath="..\..\include\unrar\find.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\getbits.hpp"
+					RelativePath="..\..\include\unrar\getbits.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\global.hpp"
+					RelativePath="..\..\include\unrar\global.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\hash.hpp"
+					RelativePath="..\..\include\unrar\hash.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\headers.hpp"
+					RelativePath="..\..\include\unrar\headers.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\headers5.hpp"
+					RelativePath="..\..\include\unrar\headers5.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\isnt.hpp"
+					RelativePath="..\..\include\unrar\isnt.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\list.hpp"
+					RelativePath="..\..\include\unrar\list.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\loclang.hpp"
+					RelativePath="..\..\include\unrar\loclang.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\log.hpp"
+					RelativePath="..\..\include\unrar\log.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\match.hpp"
+					RelativePath="..\..\include\unrar\match.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\model.hpp"
+					RelativePath="..\..\include\unrar\model.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\openmpt.hpp"
+					RelativePath="..\..\include\unrar\openmpt.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\openmpt-callback.hpp"
+					RelativePath="..\..\include\unrar\openmpt-callback.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\options.hpp"
+					RelativePath="..\..\include\unrar\options.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\os.hpp"
+					RelativePath="..\..\include\unrar\os.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\pathfn.hpp"
+					RelativePath="..\..\include\unrar\pathfn.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\qopen.hpp"
+					RelativePath="..\..\include\unrar\qopen.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rar.hpp"
+					RelativePath="..\..\include\unrar\rar.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rardefs.hpp"
+					RelativePath="..\..\include\unrar\rardefs.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rarlang.hpp"
+					RelativePath="..\..\include\unrar\rarlang.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\raros.hpp"
+					RelativePath="..\..\include\unrar\raros.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rartypes.hpp"
+					RelativePath="..\..\include\unrar\rartypes.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rarvm.hpp"
+					RelativePath="..\..\include\unrar\rarvm.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rawread.hpp"
+					RelativePath="..\..\include\unrar\rawread.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rdwrfn.hpp"
+					RelativePath="..\..\include\unrar\rdwrfn.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\recvol.hpp"
+					RelativePath="..\..\include\unrar\recvol.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\resource.hpp"
+					RelativePath="..\..\include\unrar\resource.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rijndael.hpp"
+					RelativePath="..\..\include\unrar\rijndael.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rs.hpp"
+					RelativePath="..\..\include\unrar\rs.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\rs16.hpp"
+					RelativePath="..\..\include\unrar\rs16.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\savepos.hpp"
+					RelativePath="..\..\include\unrar\savepos.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\scantree.hpp"
+					RelativePath="..\..\include\unrar\scantree.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\secpassword.hpp"
+					RelativePath="..\..\include\unrar\secpassword.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\sha1.hpp"
+					RelativePath="..\..\include\unrar\sha1.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\sha256.hpp"
+					RelativePath="..\..\include\unrar\sha256.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\smallfn.hpp"
+					RelativePath="..\..\include\unrar\smallfn.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\strfn.hpp"
+					RelativePath="..\..\include\unrar\strfn.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\strlist.hpp"
+					RelativePath="..\..\include\unrar\strlist.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\suballoc.hpp"
+					RelativePath="..\..\include\unrar\suballoc.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\system.hpp"
+					RelativePath="..\..\include\unrar\system.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\threadpool.hpp"
+					RelativePath="..\..\include\unrar\threadpool.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\timefn.hpp"
+					RelativePath="..\..\include\unrar\timefn.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\ulinks.hpp"
+					RelativePath="..\..\include\unrar\ulinks.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\unicode.hpp"
+					RelativePath="..\..\include\unrar\unicode.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\unpack.hpp"
+					RelativePath="..\..\include\unrar\unpack.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\version.hpp"
+					RelativePath="..\..\include\unrar\version.hpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\unrar\volume.hpp"
+					RelativePath="..\..\include\unrar\volume.hpp"
 					>
 				</File>
 			</Filter>

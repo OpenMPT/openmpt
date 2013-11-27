@@ -90,30 +90,30 @@
 	<PropertyGroup Label="UserMacros" />
 	<PropertyGroup>
 		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib\x32\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">obj\flac\x32\Debug\</IntDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\x32\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\obj\flac\x32\Debug\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib\x64\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">obj\flac\x64\Debug\</IntDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\lib\x64\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\obj\flac\x64\Debug\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib\x32\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">obj\flac\x32\Release\</IntDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\lib\x32\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\obj\flac\x32\Release\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib\x64\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">obj\flac\x64\Release\</IntDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\lib\x64\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\obj\flac\x64\Release\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">lib\x32\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">obj\flac\x32\ReleaseNoLTCG\</IntDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\lib\x32\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\obj\flac\x32\ReleaseNoLTCG\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">lib\x64\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">obj\flac\x64\ReleaseNoLTCG\</IntDir>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\lib\x64\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\obj\flac\x64\ReleaseNoLTCG\</IntDir>
 		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">flac</TargetName>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -126,7 +126,7 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -141,7 +141,7 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -154,7 +154,7 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -169,7 +169,7 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -183,7 +183,7 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -200,7 +200,7 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -214,7 +214,7 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -231,7 +231,7 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -245,7 +245,7 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -261,7 +261,7 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
@@ -275,7 +275,7 @@
 		</ClCompile>
 		<ResourceCompile>
 			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\include\flac\include;..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -288,70 +288,70 @@
 		</Link>
 	</ItemDefinitionGroup>
 	<ItemGroup>
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\all.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\bitmath.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\bitreader.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\bitwriter.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\cpu.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\crc.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\fixed.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\float.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\format.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\lpc.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\md5.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\memory.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\metadata.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\stream_encoder_framing.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\private\window.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\protected\all.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\protected\stream_decoder.h" />
-		<ClInclude Include="..\include\flac\src\libFLAC\include\protected\stream_encoder.h" />
-		<ClInclude Include="..\include\flac\include\FLAC\all.h" />
-		<ClInclude Include="..\include\flac\include\FLAC\assert.h" />
-		<ClInclude Include="..\include\flac\include\FLAC\callback.h" />
-		<ClInclude Include="..\include\flac\include\FLAC\export.h" />
-		<ClInclude Include="..\include\flac\include\FLAC\format.h" />
-		<ClInclude Include="..\include\flac\include\FLAC\metadata.h" />
-		<ClInclude Include="..\include\flac\include\FLAC\ordinals.h" />
-		<ClInclude Include="..\include\flac\include\FLAC\stream_decoder.h" />
-		<ClInclude Include="..\include\flac\include\FLAC\stream_encoder.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\all.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\bitmath.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\bitreader.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\bitwriter.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\cpu.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\crc.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\fixed.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\float.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\format.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\lpc.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\md5.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\memory.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\metadata.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder_framing.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\window.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\all.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\stream_decoder.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\stream_encoder.h" />
+		<ClInclude Include="..\..\include\flac\include\FLAC\all.h" />
+		<ClInclude Include="..\..\include\flac\include\FLAC\assert.h" />
+		<ClInclude Include="..\..\include\flac\include\FLAC\callback.h" />
+		<ClInclude Include="..\..\include\flac\include\FLAC\export.h" />
+		<ClInclude Include="..\..\include\flac\include\FLAC\format.h" />
+		<ClInclude Include="..\..\include\flac\include\FLAC\metadata.h" />
+		<ClInclude Include="..\..\include\flac\include\FLAC\ordinals.h" />
+		<ClInclude Include="..\..\include\flac\include\FLAC\stream_decoder.h" />
+		<ClInclude Include="..\..\include\flac\include\FLAC\stream_encoder.h" />
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="..\include\flac\src\libFLAC\bitmath.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\bitmath.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\bitreader.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\bitreader.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\bitwriter.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\bitwriter.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\cpu.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\cpu.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\crc.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\crc.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\fixed.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\float.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\float.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\format.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\format.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\lpc.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\md5.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\md5.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\memory.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\memory.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\metadata_iterators.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\metadata_iterators.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\metadata_object.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\metadata_object.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\stream_decoder.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_decoder.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\stream_encoder.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\stream_encoder_framing.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_framing.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\libFLAC\window.c">
+		<ClCompile Include="..\..\include\flac\src\libFLAC\window.c">
 		</ClCompile>
-		<ClCompile Include="..\include\flac\src\share\win_utf8_io\win_utf8_io.c">
+		<ClCompile Include="..\..\include\flac\src\share\win_utf8_io\win_utf8_io.c">
 		</ClCompile>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="lhasa"
-	ProjectGUID="{6B11F6A8-B131-4D2B-80EF-5731A9016436}"
-	RootNamespace="lhasa"
+	Name="miniz"
+	ProjectGUID="{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
+	RootNamespace="miniz"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="lib\x32\Debug"
-			IntermediateDirectory="obj\lhasa\x32\Debug"
+			OutputDirectory="..\lib\x32\Debug"
+			IntermediateDirectory="..\obj\miniz\x32\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -43,7 +43,6 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -51,7 +50,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
 				DebugInformationFormat="4"
 				CompileAs="1"
 			/>
@@ -61,14 +60,13 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\miniz.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -97,8 +95,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="lib\x64\Debug"
-			IntermediateDirectory="obj\lhasa\x64\Debug"
+			OutputDirectory="..\lib\x64\Debug"
+			IntermediateDirectory="..\obj\miniz\x64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -121,7 +119,6 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -129,7 +126,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -139,14 +136,13 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\miniz.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -175,8 +171,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="lib\x32\Release"
-			IntermediateDirectory="obj\lhasa\x32\Release"
+			OutputDirectory="..\lib\x32\Release"
+			IntermediateDirectory="..\obj\miniz\x32\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -199,7 +195,6 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -207,7 +202,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -217,14 +212,13 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\miniz.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -253,8 +247,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="lib\x64\Release"
-			IntermediateDirectory="obj\lhasa\x64\Release"
+			OutputDirectory="..\lib\x64\Release"
+			IntermediateDirectory="..\obj\miniz\x64\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -278,7 +272,6 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -286,7 +279,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -296,14 +289,13 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\miniz.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -332,8 +324,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="lib\x32\ReleaseNoLTCG"
-			IntermediateDirectory="obj\lhasa\x32\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x32\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\miniz\x32\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -356,7 +348,6 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -364,7 +355,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
 				DebugInformationFormat="0"
 				CompileAs="1"
 			/>
@@ -374,14 +365,13 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\miniz.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -410,8 +400,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="lib\x64\ReleaseNoLTCG"
-			IntermediateDirectory="obj\lhasa\x64\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\miniz\x64\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -435,7 +425,6 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -443,7 +432,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
+				ProgramDataBaseFileName="$(OutDir)\miniz.pdb"
 				DebugInformationFormat="0"
 				CompileAs="1"
 			/>
@@ -453,14 +442,13 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\msinttypes\inttypes;..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
+				OutputFile="$(OutDir)\miniz.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -496,155 +484,13 @@
 			Filter=""
 			>
 			<Filter
-				Name="lhasa"
+				Name="miniz"
 				Filter=""
 				>
-				<Filter
-					Name="lib"
-					Filter=""
+				<File
+					RelativePath="..\..\include\miniz\miniz.c"
 					>
-					<Filter
-						Name="public"
-						Filter=""
-						>
-						<File
-							RelativePath="..\include\lhasa\lib\public\lha_decoder.h"
-							>
-						</File>
-						<File
-							RelativePath="..\include\lhasa\lib\public\lha_file_header.h"
-							>
-						</File>
-						<File
-							RelativePath="..\include\lhasa\lib\public\lha_input_stream.h"
-							>
-						</File>
-						<File
-							RelativePath="..\include\lhasa\lib\public\lha_reader.h"
-							>
-						</File>
-						<File
-							RelativePath="..\include\lhasa\lib\public\lhasa.h"
-							>
-						</File>
-					</Filter>
-					<File
-						RelativePath="..\include\lhasa\lib\crc16.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\ext_header.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lh1_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lh5_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lh6_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lh7_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_arch_unix.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_arch_win32.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_basic_reader.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_endian.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_file_header.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_input_stream.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_reader.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lz5_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lzs_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\macbinary.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\null_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\pm1_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\pm2_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\crc16.h"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\ext_header.h"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_arch.h"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_basic_reader.h"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_decoder.h"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_endian.h"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_file_header.h"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\lha_input_stream.h"
-						>
-					</File>
-					<File
-						RelativePath="..\include\lhasa\lib\macbinary.h"
-						>
-					</File>
-				</Filter>
+				</File>
 			</Filter>
 		</Filter>
 	</Files>

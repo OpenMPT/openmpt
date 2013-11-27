@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="include">
+			<UniqueIdentifier>{4CC001D5-E8C8-FB49-AE0F-FCC370246B1D}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\unrar">
+			<UniqueIdentifier>{AE8B1C43-0F76-2F4F-A248-36C2D481521C}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\include\unrar\archive.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\array.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\blake2s.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\cmddata.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\coder.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\compress.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\consio.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\crc.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\crypt.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\dll.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\encname.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\errhnd.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\extinfo.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\extract.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\filcreat.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\file.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\filefn.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\filestr.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\find.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\getbits.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\global.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\hash.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\headers.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\headers5.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\isnt.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\list.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\loclang.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\log.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\match.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\model.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\openmpt.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\openmpt-callback.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\options.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\os.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\pathfn.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\qopen.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rar.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rardefs.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rarlang.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\raros.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rartypes.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rarvm.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rawread.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rdwrfn.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\recvol.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\resource.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rijndael.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rs.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\rs16.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\savepos.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\scantree.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\secpassword.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\sha1.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\sha256.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\smallfn.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\strfn.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\strlist.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\suballoc.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\system.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\threadpool.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\timefn.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\ulinks.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\unicode.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\unpack.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\version.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\volume.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\include\unrar\archive.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\arcread.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\blake2s.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\cmddata.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\consio.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\crc.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\crypt.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\encname.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\errhnd.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\extinfo.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\extract.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\filcreat.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\file.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\filefn.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\filestr.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\find.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\getbits.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\global.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\hash.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\headers.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\isnt.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\list.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\match.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\options.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\pathfn.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\qopen.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rar.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rarpch.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rarvm.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rawread.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rdwrfn.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\recvol.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\resource.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rijndael.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rs.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rs16.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\scantree.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\secpassword.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\sha1.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\sha256.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\smallfn.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\strfn.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\strlist.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\system.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\threadpool.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\timefn.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\unicode.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\unpack.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\volume.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+	</ItemGroup>
+</Project>

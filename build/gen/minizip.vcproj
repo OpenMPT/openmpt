@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="zlib"
-	ProjectGUID="{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
-	RootNamespace="zlib"
+	Name="minizip"
+	ProjectGUID="{63AF9025-A6CE-4147-A05D-6E2CCFD3A0D7}"
+	RootNamespace="minizip"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="lib\x32\Debug"
-			IntermediateDirectory="obj\zlib\x32\Debug"
+			OutputDirectory="..\lib\x32\Debug"
+			IntermediateDirectory="..\obj\minizip\x32\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -51,7 +51,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
+				ProgramDataBaseFileName="$(OutDir)\minizip.pdb"
 				DebugInformationFormat="4"
 				CompileAs="1"
 			/>
@@ -61,14 +61,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\zlib.lib"
+				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -97,8 +97,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="lib\x64\Debug"
-			IntermediateDirectory="obj\zlib\x64\Debug"
+			OutputDirectory="..\lib\x64\Debug"
+			IntermediateDirectory="..\obj\minizip\x64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -121,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -129,7 +129,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
+				ProgramDataBaseFileName="$(OutDir)\minizip.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -139,14 +139,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\zlib.lib"
+				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -175,8 +175,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="lib\x32\Release"
-			IntermediateDirectory="obj\zlib\x32\Release"
+			OutputDirectory="..\lib\x32\Release"
+			IntermediateDirectory="..\obj\minizip\x32\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -199,7 +199,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -207,7 +207,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
+				ProgramDataBaseFileName="$(OutDir)\minizip.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -217,14 +217,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\zlib.lib"
+				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -253,8 +253,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="lib\x64\Release"
-			IntermediateDirectory="obj\zlib\x64\Release"
+			OutputDirectory="..\lib\x64\Release"
+			IntermediateDirectory="..\obj\minizip\x64\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -278,7 +278,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -286,7 +286,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
+				ProgramDataBaseFileName="$(OutDir)\minizip.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -296,14 +296,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\zlib.lib"
+				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -332,8 +332,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="lib\x32\ReleaseNoLTCG"
-			IntermediateDirectory="obj\zlib\x32\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x32\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\minizip\x32\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -356,7 +356,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -364,7 +364,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
+				ProgramDataBaseFileName="$(OutDir)\minizip.pdb"
 				DebugInformationFormat="0"
 				CompileAs="1"
 			/>
@@ -374,14 +374,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\zlib.lib"
+				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -410,8 +410,8 @@
 		</Configuration>
 		<Configuration
 			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="lib\x64\ReleaseNoLTCG"
-			IntermediateDirectory="obj\zlib\x64\ReleaseNoLTCG"
+			OutputDirectory="..\lib\x64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\minizip\x64\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -435,7 +435,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -443,7 +443,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
+				ProgramDataBaseFileName="$(OutDir)\minizip.pdb"
 				DebugInformationFormat="0"
 				CompileAs="1"
 			/>
@@ -453,14 +453,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\include\zlib"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\zlib.lib"
+				OutputFile="$(OutDir)\minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -499,110 +499,60 @@
 				Name="zlib"
 				Filter=""
 				>
-				<File
-					RelativePath="..\include\zlib\adler32.c"
+				<Filter
+					Name="contrib"
+					Filter=""
 					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\compress.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\crc32.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\deflate.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\gzclose.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\gzlib.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\gzread.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\gzwrite.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\infback.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\inffast.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\inflate.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\inftrees.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\trees.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\uncompr.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\zutil.c"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\crc32.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\deflate.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\gzguts.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\inffast.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\inffixed.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\inflate.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\inftrees.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\trees.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\zconf.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\zlib.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\zlib\zutil.h"
-					>
-				</File>
+					<Filter
+						Name="minizip"
+						Filter=""
+						>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\ioapi.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\iowin32.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\mztools.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\unzip.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\zip.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\crypt.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\ioapi.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\iowin32.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\mztools.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\unzip.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\zip.h"
+							>
+						</File>
+					</Filter>
+				</Filter>
 			</Filter>
 		</Filter>
 	</Files>

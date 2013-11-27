@@ -2,52 +2,52 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{7457BDD8-5A7E-3645-AA83-D02E7EA0B204}</UniqueIdentifier>
+			<UniqueIdentifier>{2C981997-A8F5-584D-8DC7-564B5FF15627}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\zlib">
-			<UniqueIdentifier>{75761BC3-8F76-2248-AEE3-4A454563635E}</UniqueIdentifier>
+			<UniqueIdentifier>{C82542F6-C867-A04B-942C-0FCF62DAD213}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\zlib\contrib">
-			<UniqueIdentifier>{2EC4A12B-43A7-744E-B99F-8657B723A342}</UniqueIdentifier>
+			<UniqueIdentifier>{F4398E48-F7CB-9A41-904C-A02F5D242592}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\zlib\contrib\minizip">
-			<UniqueIdentifier>{412A0F97-BBA5-A549-98DC-1F287CA99178}</UniqueIdentifier>
+			<UniqueIdentifier>{0288F3AC-9DFE-BB4C-B1A7-E85C6EEB0024}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
-		<ClInclude Include="..\include\zlib\contrib\minizip\crypt.h">
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\crypt.h">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\contrib\minizip\ioapi.h">
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\ioapi.h">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\contrib\minizip\iowin32.h">
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\iowin32.h">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\contrib\minizip\mztools.h">
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\mztools.h">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\contrib\minizip\unzip.h">
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\unzip.h">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClInclude>
-		<ClInclude Include="..\include\zlib\contrib\minizip\zip.h">
+		<ClInclude Include="..\..\include\zlib\contrib\minizip\zip.h">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClInclude>
 	</ItemGroup>
 	<ItemGroup>
-		<ClCompile Include="..\include\zlib\contrib\minizip\ioapi.c">
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\ioapi.c">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\contrib\minizip\iowin32.c">
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\iowin32.c">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\contrib\minizip\mztools.c">
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\mztools.c">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\contrib\minizip\unzip.c">
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\unzip.c">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClCompile>
-		<ClCompile Include="..\include\zlib\contrib\minizip\zip.c">
+		<ClCompile Include="..\..\include\zlib\contrib\minizip\zip.c">
 			<Filter>include\zlib\contrib\minizip</Filter>
 		</ClCompile>
 	</ItemGroup>
