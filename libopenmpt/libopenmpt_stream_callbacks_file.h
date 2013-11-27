@@ -33,11 +33,13 @@ extern "C" {
 /* This stuff has to be in a header file because of possibly different MSVC CRTs which cause problems for FILE * crossing CRT boundaries. */
 
 static size_t openmpt_stream_file_read_func( void * stream, void * dst, size_t bytes ) {
-	FILE * f = (FILE*)stream;
+	FILE * f = 0;
+	size_t retval = 0;
+	f = (FILE*)stream;
 	if ( !f ) {
 		return 0;
 	}
-	size_t retval = fread( dst, 1, bytes, f );
+	retval = fread( dst, 1, bytes, f );
 	if ( retval <= 0 ) {
 		return 0;
 	}
@@ -45,7 +47,8 @@ static size_t openmpt_stream_file_read_func( void * stream, void * dst, size_t b
 }
 
 static int openmpt_stream_file_seek_func( void * stream, int64_t offset, int whence ) {
-	FILE * f = (FILE*)stream;
+	FILE * f = 0;
+	f = (FILE*)stream;
 	if ( !f ) {
 		return -1;
 	}
@@ -59,16 +62,18 @@ static int openmpt_stream_file_seek_func( void * stream, int64_t offset, int whe
 }
 
 static int64_t openmpt_stream_file_tell_func( void * stream ) {
-	FILE * f = (FILE*)stream;
+	FILE * f = 0;
+	int64_t retval = 0;
+	f = (FILE*)stream;
 	if ( !f ) {
 		return -1;
 	}
 	#if defined(_MSC_VER)
-		int64_t retval = _ftelli64( f );
+		retval = _ftelli64( f );
 	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
-		int64_t retval = ftello( f );
+		retval = ftello( f );
 	#else
-		int64_t retval = ftell( f );
+		retval = ftell( f );
 	#endif
 	if ( retval < 0 ) {
 		return -1;
