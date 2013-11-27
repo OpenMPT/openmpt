@@ -19,5 +19,3 @@
   
   configuration "*"
    kind "ConsoleApp"
-
-  dofile "premake4-defaults.lua"
