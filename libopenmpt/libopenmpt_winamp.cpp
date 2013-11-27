@@ -7,11 +7,17 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#include "BuildSettings.h"
-
 #ifndef NO_WINAMP
 
-#include "libopenmpt_internal.h"
+#ifdef LIBOPENMPT_BUILD_DLL
+#undef LIBOPENMPT_BUILD_DLL
+#endif
+
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#endif // _MSC_VER
 
 #include "libopenmpt.hpp"
 
@@ -19,8 +25,6 @@
 
 #include "svn_version.h"
 static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING "." OPENMPT_API_VERSION_STRINGIZE(OPENMPT_VERSION_REVISION);
-
-#define LIBOPENMPT_WINAMP_API LIBOPENMPT_API
 
 #define NOMINMAX
 #include <windows.h>
@@ -441,7 +445,7 @@ In_Module inmod = {
 	0 // out_mod
 };
 
-extern "C" LIBOPENMPT_WINAMP_API In_Module * winampGetInModule2() {
+extern "C" __declspec(dllexport) In_Module * winampGetInModule2() {
 	return &inmod;
 }
 

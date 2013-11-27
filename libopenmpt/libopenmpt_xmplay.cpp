@@ -7,11 +7,17 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#include "BuildSettings.h"
-
 #ifndef NO_XMPLAY
 
-#include "libopenmpt_internal.h"
+#ifdef LIBOPENMPT_BUILD_DLL
+#undef LIBOPENMPT_BUILD_DLL
+#endif
+
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#endif // _MSC_VER
 
 #include "libopenmpt.hpp"
 
@@ -267,6 +273,10 @@ static void WINAPI openmpt_About( HWND win ) {
 	}
 	std::ostringstream credits;
 	credits << openmpt::string::get( openmpt::string::credits );
+	credits << "Additional thanks to:" << std::endl;
+	credits << std::endl;
+	credits << "Arseny Kapoulkine for pugixml" << std::endl;
+	credits << "http://pugixml.org/" << std::endl;
 	MessageBox( win, StringDecode( credits.str(), CP_UTF8 ).c_str(), TEXT(SHORT_TITLE), MB_ICONINFORMATION );
 }
 
