@@ -19,5 +19,3 @@
   
   configuration "*"
    kind "StaticLib"
-   
-  dofile "premake4-defaults.lua"

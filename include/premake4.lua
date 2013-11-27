@@ -1,8 +1,3 @@
-solution "include"
- configurations { "Debug", "Release", "ReleaseNoLTCG" }
- platforms { "x32", "x64" }
- 
- 
  
  project "UnRAR"
   uuid "95CC809B-03FC-4EDB-BB20-FD07A698C05F"
@@ -130,6 +125,7 @@ solution "include"
    "../include/unrar/volume.hpp",
   }
   dofile "../build/premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-static.lua"
   
   
   
@@ -170,6 +166,7 @@ solution "include"
    "../include/zlib/zutil.h",
   }
   dofile "../build/premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-static.lua"
   
   
   
@@ -195,6 +192,7 @@ solution "include"
    "../include/zlib/contrib/minizip/zip.h",
   }
   dofile "../build/premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-static.lua"
    
    
    
@@ -207,6 +205,7 @@ solution "include"
    "../include/miniz/miniz.c",
   }
   dofile "../build/premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-static.lua"
 
 
 
@@ -223,6 +222,7 @@ solution "include"
    "../include/smbPitchShift/smbPitchShift.h",
   }
   dofile "../build/premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-static.lua"
 
   
   
@@ -273,6 +273,7 @@ solution "include"
   configuration "vs2008"
    includedirs { "../include/msinttypes/stdint" }
   dofile "../build/premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-static.lua"
 
 
     
@@ -343,6 +344,7 @@ solution "include"
   configuration "vs2008"
    defines { "VERSION=\\\"1.3.0\\\"" }
   dofile "../build/premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-static.lua"
 
   
   
@@ -415,6 +417,7 @@ solution "include"
   configuration "Debug*"
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
   dofile "../build/premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-static.lua"
   
 
   
@@ -440,6 +443,7 @@ solution "include"
    "../include/portmidi/pm_win/pmwinmm.h",
   }
   dofile "../build/premake4-defaults-LIB.lua"
+  dofile "../build/premake4-defaults-static.lua"
 
  
  
@@ -480,6 +484,7 @@ solution "include"
   }
   defines { "DLL_EXPORTS", "SOUNDTOUCH_INTEGER_SAMPLES=1" }
   dofile "../build/premake4-defaults-DLL.lua"
+  dofile "../build/premake4-defaults-static.lua"
  
  
  

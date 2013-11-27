@@ -19,5 +19,3 @@
   
   configuration "*"
    kind "SharedLib"
-
-  dofile "premake4-defaults.lua"
