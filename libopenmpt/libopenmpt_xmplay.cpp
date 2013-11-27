@@ -1016,7 +1016,7 @@ static const char * xmp_openmpt_default_exts = "OpenMPT\0mptm/mptmz";
 
 static char * file_formats;
 
-void xmp_openmpt_on_dll_load() {
+static void xmp_openmpt_on_dll_load() {
 	std::vector<char> filetypes_string;
 	filetypes_string.clear();
 	std::vector<std::string> extensions = openmpt::get_supported_extensions();
@@ -1044,7 +1044,7 @@ void xmp_openmpt_on_dll_load() {
 	self = new self_xmplay_t();
 }
 
-void xmp_openmpt_on_dll_unload() {
+static void xmp_openmpt_on_dll_unload() {
 	delete self;
 	self = nullptr;
 	if ( settings_dll ) {
@@ -1081,5 +1081,17 @@ XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
 #pragma comment(linker, "/EXPORT:XMPIN_GetInterface=_XMPIN_GetInterface@8")
 
 }; // extern "C"
+
+BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
+	switch ( fdwReason ) {
+	case DLL_PROCESS_ATTACH:
+		xmp_openmpt_on_dll_load();
+		break;
+	case DLL_PROCESS_DETACH:
+		xmp_openmpt_on_dll_unload();
+		break;
+	}
+	return TRUE;
+}
 
 #endif // NO_XMPLAY
