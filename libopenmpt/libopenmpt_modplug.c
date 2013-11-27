@@ -7,15 +7,17 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#include "BuildSettings.h"
-
 #ifndef NO_LIBMODPLUG
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif /* _MSC_VER */
+#ifdef LIBOPENMPT_BUILD_DLL
+#undef LIBOPENMPT_BUILD_DLL
+#endif
 
-#include "libopenmpt_internal.h"
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#endif /* _MSC_VER */
 
 #include "libopenmpt.h"
 
@@ -30,7 +32,7 @@
 /* msvc errors when seeing dllexport declarations after prototypes have been declared in modplug.h */
 #define LIBOPENMPT_MODPLUG_API
 #else /* !_MSC_VER */
-#define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API
+#define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API_HELPER_EXPORT
 #endif /* _MSC_VER */
 #include "libmodplug/modplug.h"
 
