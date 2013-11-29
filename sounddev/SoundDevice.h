@@ -98,6 +98,8 @@ enum SoundDeviceType
 	SNDDEV_NUM_DEVTYPES
 };
 
+std::wstring SoundDeviceTypeToString(SoundDeviceType type);
+
 typedef uint8 SoundDeviceIndex;
 
 template<typename T>
@@ -518,6 +520,7 @@ public:
 
 	SoundDeviceInfo FindDeviceInfo(SoundDeviceID id) const;
 	SoundDeviceInfo FindDeviceInfo(const std::wstring &identifier) const;
+	SoundDeviceInfo FindDeviceInfoBestMatch(const std::wstring &identifier) const;
 
 	bool OpenDriverSettings(SoundDeviceID id, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
 

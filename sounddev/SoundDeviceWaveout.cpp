@@ -243,7 +243,7 @@ std::vector<SoundDeviceInfo> CWaveDevice::EnumerateDevices()
 		}
 		SoundDeviceInfo info;
 		info.id = SoundDeviceID(SNDDEV_WAVEOUT, static_cast<SoundDeviceIndex>(index));
-		info.apiName = L"WaveOut";
+		info.apiName = SoundDeviceTypeToString(SNDDEV_WAVEOUT);
 		WAVEOUTCAPSW woc;
 		MemsetZero(woc);
 		if(index == 0)

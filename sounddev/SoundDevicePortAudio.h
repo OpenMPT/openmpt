@@ -72,7 +72,7 @@ public:
 		void *userData
 		);
 
-	static std::string HostApiToString(PaHostApiIndex hostapi);
+	static std::wstring HostApiToString(PaHostApiIndex hostapi);
 
 	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi);
 	static SoundDeviceType HostApiToSndDevType(PaHostApiIndex hostapi);

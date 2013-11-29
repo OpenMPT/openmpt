@@ -572,7 +572,7 @@ SoundDeviceSettings TrackerSettings::GetSoundDeviceSettingsDefaults() const
 SoundDeviceID TrackerSettings::GetSoundDeviceID() const
 //-----------------------------------------------------
 {
-	return theApp.GetSoundDevicesManager()->FindDeviceInfo(m_SoundDeviceIdentifier).id;
+	return theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_SoundDeviceIdentifier).id;
 }
 
 void TrackerSettings::SetSoundDeviceID(const SoundDeviceID &id)
