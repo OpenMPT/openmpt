@@ -61,14 +61,14 @@ public:
 	// Set one or more flags.
 	FlagSet &set(enum_t flag)
 	{
-		flags = (flags | static_cast<store_t>(flag));
+		flags = static_cast<store_t>(flags | flag);
 		return *this;
 	}
 
 	// Set or clear one or more flags.
 	FlagSet &set(enum_t flag, bool val)
 	{
-		flags = (val ? (flags | static_cast<store_t>(flag)) : (flags & ~static_cast<store_t>(flag)));
+		flags = static_cast<store_t>(val ? (flags | flag) : (flags & ~flag));
 		return *this;
 	}
 
@@ -82,7 +82,7 @@ public:
 	// Clear one or more flags.
 	FlagSet &reset(enum_t flag)
 	{
-		flags &= ~static_cast<store_t>(flag);
+		flags = static_cast<store_t>(flags & ~flag);
 		return *this;
 	}
 
@@ -96,7 +96,7 @@ public:
 	// Toggle one or more flags.
 	FlagSet &flip(enum_t flag)
 	{
-		flags ^= static_cast<store_t>(flag);
+		flags = static_cast<store_t>(flags ^ flag);
 		return *this;
 	}
 
