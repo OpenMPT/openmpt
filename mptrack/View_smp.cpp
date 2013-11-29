@@ -798,7 +798,15 @@ void CViewSample::OnDraw(CDC *pDC)
 	UINT nSmpScrollPos = ScrollPosToSamplePos();
 
 	if ((!pModDoc) || (!pDC)) return;
-	hdc = pDC->m_hDC;
+
+	// Create off-screen image
+	DeleteObject(offScreenBitmap);
+	DeleteDC(offScreenDC);
+	offScreenDC = CreateCompatibleDC(pDC->m_hDC);
+	offScreenBitmap = CreateCompatibleBitmap(pDC->m_hDC, m_rcClient.Width(), m_rcClient.Height());
+	SelectObject(offScreenDC, offScreenBitmap);
+
+	hdc = offScreenDC;
 	oldpen = ::SelectObject(hdc, CMainFrame::penBlack);
 	pSndFile = pModDoc->GetSoundFile();
 	rect = rcClient;
@@ -881,13 +889,12 @@ void CViewSample::OnDraw(CDC *pDC)
 			}
 			// Drawing Sample Data
 			::SelectObject(hdc, CMainFrame::penSample);
-			int smplsize = (sample.uFlags & CHN_16BIT) ? 2 : 1;
-			if (sample.uFlags & CHN_STEREO) smplsize *= 2;
+			int smplsize = sample.GetBytesPerSample();
 			if ((m_nZoom == 1) || ((!m_nZoom) && (sample.nLength <= (UINT)rect.right)))
 			{
 				int len = sample.nLength - nSmpScrollPos;
 				signed char *psample = ((signed char *)sample.pSample) + nSmpScrollPos * smplsize;
-				if (sample.uFlags & CHN_STEREO)
+				if (sample.uFlags[CHN_STEREO])
 				{
 					DrawSampleData1(hdc, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
 					DrawSampleData1(hdc, ymed+yrange/2, rect.right, yrange, len, sample.uFlags, psample+smplsize/2);
@@ -905,7 +912,7 @@ void CViewSample::OnDraw(CDC *pDC)
 					len -= nSmpScrollPos;
 				}
 				signed char *psample = ((signed char *)sample.pSample) + xscroll * smplsize;
-				if (sample.uFlags & CHN_STEREO)
+				if (sample.uFlags[CHN_STEREO])
 				{
 					DrawSampleData2(hdc, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
 					DrawSampleData2(hdc, ymed+yrange/2, rect.right, yrange, len, sample.uFlags, psample+smplsize/2);
@@ -917,16 +924,8 @@ void CViewSample::OnDraw(CDC *pDC)
 		}
 	}
 
-	// Create off-screen image
-	DeleteObject(offScreenBitmap);
-	DeleteDC(offScreenDC);
-	offScreenDC = CreateCompatibleDC(pDC->m_hDC);
-	offScreenBitmap = CreateCompatibleBitmap(pDC->m_hDC, m_rcClient.Width(), m_rcClient.Height());
-	SelectObject(offScreenDC, offScreenBitmap);
-	BitBlt(offScreenDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), pDC->m_hDC, 0, 0, SRCCOPY);
-
 	DrawPositionMarks();
-	BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
+	BitBlt(pDC->m_hDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
 
 	if (oldpen) ::SelectObject(hdc, oldpen);
 
@@ -1853,12 +1852,12 @@ void CViewSample::OnEditDelete()
 
 		if(sample.nLoopEnd == 0)
 		{
-			sample.uFlags &= ~(CHN_LOOP | CHN_PINGPONGLOOP);
+			sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
 		}
 
 		if(sample.nSustainEnd == 0)
 		{
-			sample.uFlags &= ~(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+			sample.uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 		}
 	}
 	SetCurSel(0, 0);
