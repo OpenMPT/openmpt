@@ -123,15 +123,6 @@
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
-// Do not build libmodplug emulation layer (only makes sense for library)
-#define NO_LIBMODPLUG
-
-// Do not build xmplay input plugin code (only makes sense for library)
-#define NO_XMPLAY
-
-// Do not build winamp input plugin code (only makes sense for library)
-#define NO_WINAMP
-
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C
 
@@ -168,15 +159,6 @@
 #endif
 //#define NO_MINIZ
 #define NO_MP3_SAMPLES
-#if defined(LIBOPENMPT_BUILD_TEST)
-#define NO_LIBMODPLUG
-#endif
-#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86)) || defined(LIBOPENMPT_BUILD_TEST)
-#define NO_WINAMP
-#endif
-#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86)) || defined(LIBOPENMPT_BUILD_TEST)
-#define NO_XMPLAY
-#endif
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
@@ -214,24 +196,6 @@
 
 #if defined(MPT_PLATFORM_BIG_ENDIAN) && !defined(MODPLUG_NO_FILESAVE)
 #define MODPLUG_NO_FILESAVE // file saving is broken on big endian
-#endif
-
-#if !defined(NO_LIBMODPLUG)
-#if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && defined(_WIN32) && !defined(LIBOPENMPT_BUILD_DLL))
-#define NO_LIBMODPLUG // libmodplug interface emulation requires libopenmpt dll build on windows
-#endif
-#endif
-
-#if !defined(NO_WINAMP)
-#if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && !defined(LIBOPENMPT_BUILD_DLL))
-#define NO_WINAMP // winamp plugin requires libopenmpt dll build
-#endif
-#endif
-
-#if !defined(NO_XMPLAY)
-#if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && !defined(LIBOPENMPT_BUILD_DLL))
-#define NO_XMPLAY // xmplay plugin requires libopenmpt dll build
-#endif
 #endif
 
 
