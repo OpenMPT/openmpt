@@ -152,7 +152,7 @@ std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
 				if(SoundDeviceIndexIsValid(devices.size()))
 				{
 					// everything ok
-					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), description, L"ASIO", internalID));
+					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), description, SoundDeviceTypeToString(SNDDEV_ASIO), internalID));
 				}
 			}
 		}

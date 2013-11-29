@@ -26,6 +26,23 @@
 #include <iterator>
 
 
+std::wstring SoundDeviceTypeToString(SoundDeviceType type)
+//--------------------------------------------------------
+{
+	switch(type)
+	{
+	case SNDDEV_WAVEOUT: return L"WaveOut"; break;
+	case SNDDEV_DSOUND: return L"DirectSound"; break;
+	case SNDDEV_ASIO: return L"ASIO"; break;
+	case SNDDEV_PORTAUDIO_WASAPI: return L"WASAPI"; break;
+	case SNDDEV_PORTAUDIO_WDMKS: return L"WDM-KS"; break;
+	case SNDDEV_PORTAUDIO_WMME: return L"MME"; break;
+	case SNDDEV_PORTAUDIO_DS: return L"DS"; break;
+	case SNDDEV_PORTAUDIO_ASIO: return L"ASIO"; break;
+	}
+	return std::wstring();
+}
+
 
 SoundChannelMapping::SoundChannelMapping()
 //----------------------------------------
@@ -896,6 +913,72 @@ SoundDeviceInfo SoundDevicesManager::FindDeviceInfo(const std::wstring &identifi
 			return *it;
 		}
 	}
+	return SoundDeviceInfo();
+}
+
+
+static SoundDeviceType ParseType(const std::wstring &identifier)
+//--------------------------------------------------------------
+{
+	for(int i = 0; i < SNDDEV_NUM_DEVTYPES; ++i)
+	{
+		const std::wstring api = SoundDeviceTypeToString(static_cast<SoundDeviceType>(i));
+		if(identifier.find(api) == 0)
+		{
+			return static_cast<SoundDeviceType>(i);
+		}
+	}
+	return SNDDEV_INVALID;
+}
+
+
+SoundDeviceInfo SoundDevicesManager::FindDeviceInfoBestMatch(const std::wstring &identifier) const
+//------------------------------------------------------------------------------------------------
+{
+	if(m_SoundDevices.empty())
+	{
+		return SoundDeviceInfo();
+	}
+	if(identifier.empty())
+	{
+		return m_SoundDevices[0];
+	}
+	for(std::vector<SoundDeviceInfo>::const_iterator it = begin(); it != end(); ++it)
+	{
+		if(it->GetIdentifier() == identifier)
+		{ // exact match
+			return *it;
+		}
+	}
+	const SoundDeviceType type = ParseType(identifier);
+	switch(type)
+	{
+		case SNDDEV_PORTAUDIO_WASAPI:
+			// WASAPI devices might change names if a different connector jack is used.
+			// In order to avoid defaulting to wave mapper in that case,
+			// just find the first WASAPI device.
+			for(std::vector<SoundDeviceInfo>::const_iterator it = begin(); it != end(); ++it)
+			{
+				if(it->id.GetType() == SNDDEV_PORTAUDIO_WASAPI)
+				{
+					return *it;
+				}
+			}
+			// default to first device
+			return *begin();
+			break;
+		case SNDDEV_WAVEOUT:
+		case SNDDEV_DSOUND:
+		case SNDDEV_PORTAUDIO_WMME:
+		case SNDDEV_PORTAUDIO_DS:
+		case SNDDEV_ASIO:
+		case SNDDEV_PORTAUDIO_WDMKS:
+		case SNDDEV_PORTAUDIO_ASIO:
+			// default to first device
+			return *begin();
+			break;
+	}
+	// invalid
 	return SoundDeviceInfo();
 }
 
