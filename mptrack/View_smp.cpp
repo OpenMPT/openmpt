@@ -130,6 +130,16 @@ CViewSample::CViewSample()
 	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(IDB_SMPTOOLBAR, 20, 0, RGB(192,192,192));
 	m_lastDrawPoint.SetPoint(-1, -1);
+	offScreenDC = nullptr;
+	offScreenBitmap = nullptr;
+}
+
+
+CViewSample::~CViewSample()
+//-------------------------
+{
+	DeleteObject(offScreenBitmap);
+	DeleteDC(offScreenDC);
 }
 
 
@@ -906,7 +916,18 @@ void CViewSample::OnDraw(CDC *pDC)
 			}
 		}
 	}
-	DrawPositionMarks(hdc);
+
+	// Create off-screen image
+	DeleteObject(offScreenBitmap);
+	DeleteDC(offScreenDC);
+	offScreenDC = CreateCompatibleDC(pDC->m_hDC);
+	offScreenBitmap = CreateCompatibleBitmap(pDC->m_hDC, m_rcClient.Width(), m_rcClient.Height());
+	SelectObject(offScreenDC, offScreenBitmap);
+	BitBlt(offScreenDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), pDC->m_hDC, 0, 0, SRCCOPY);
+
+	DrawPositionMarks();
+	BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
+
 	if (oldpen) ::SelectObject(hdc, oldpen);
 
 // -> CODE#0015
@@ -920,21 +941,21 @@ void CViewSample::OnDraw(CDC *pDC)
 }
 
 
-void CViewSample::DrawPositionMarks(HDC hdc)
-//------------------------------------------
+void CViewSample::DrawPositionMarks()
+//-----------------------------------
 {
-	CRect rect;
 	if(GetDocument()->GetrSoundFile().GetSample(m_nSample).pSample == nullptr)
 	{
 		return;
 	}
-	for (UINT i=0; i<MAX_CHANNELS; i++) if (m_dwNotifyPos[i] != Notification::PosInvalid)
+	CRect rect;
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++) if (m_dwNotifyPos[i] != Notification::PosInvalid)
 	{
 		rect.top = -2;
 		rect.left = SampleToScreen(m_dwNotifyPos[i]);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
-		if ((rect.right >= 0) && (rect.right < m_rcClient.right)) InvertRect(hdc, &rect);
+		if ((rect.right >= 0) && (rect.right < m_rcClient.right)) InvertRect(offScreenDC, &rect);
 	}
 }
 
@@ -964,8 +985,7 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 		bool doUpdate = false;
 		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			SmpLength newpos = pnotify->pos[i];
-			if (m_dwNotifyPos[i] != newpos)
+			if (m_dwNotifyPos[i] != pnotify->pos[i])
 			{
 				doUpdate = true;
 				break;
@@ -974,12 +994,13 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 		if (doUpdate)
 		{
 			HDC hdc = ::GetDC(m_hWnd);
-			DrawPositionMarks(hdc);
+			DrawPositionMarks();	// Erase old marks...
 			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 			{
 				m_dwNotifyPos[i] = pnotify->pos[i];
 			}
-			DrawPositionMarks(hdc);
+			DrawPositionMarks();	// ...and draw new ones
+			BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
 			::ReleaseDC(m_hWnd, hdc);
 		}
 	}
@@ -1694,8 +1715,8 @@ void CViewSample::OnSetLoop()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModSample &sample = pSndFile->GetSample(m_nSample);
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwEndSel > m_dwBeginSel + 15) && (m_dwEndSel <= sample.nLength))
 		{
 			if ((sample.nLoopStart != m_dwBeginSel) || (sample.nLoopEnd != m_dwEndSel))
@@ -1718,8 +1739,8 @@ void CViewSample::OnSetSustainLoop()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModSample &sample = pSndFile->GetSample(m_nSample);
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwEndSel > m_dwBeginSel + 15) && (m_dwEndSel <= sample.nLength))
 		{
 			if ((sample.nSustainStart != m_dwBeginSel) || (sample.nSustainEnd != m_dwEndSel))
@@ -1788,13 +1809,12 @@ void CViewSample::OnEditDelete()
 //------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	DWORD dwUpdateFlags = HINT_SAMPLEINFO | HINT_SAMPLEDATA;
 	DWORD len;
 
 	if (!pModDoc) return;
-	pSndFile = pModDoc->GetSoundFile();
-	ModSample &sample = pSndFile->GetSample(m_nSample);
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
 	len = sample.nLength;
 	if ((!sample.pSample) || (!len)) return;
 	if (m_dwEndSel > len) m_dwEndSel = len;
@@ -1804,7 +1824,7 @@ void CViewSample::OnEditDelete()
 		if (Reporting::Confirm("Remove this sample?", "Remove Sample", true) != cnfYes) return;
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
 
-		pSndFile->DestroySampleThreadsafe(m_nSample);
+		sndFile.DestroySampleThreadsafe(m_nSample);
 
 		dwUpdateFlags |= HINT_SMPNAMES;
 	} else
@@ -2423,15 +2443,15 @@ void CViewSample::OnSetLoopStart()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModSample &sample = pSndFile->GetSample(m_nSample);
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwMenuParam+4 <= sample.nLoopEnd) && (sample.nLoopStart != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
 			sample.nLoopStart = m_dwMenuParam;
 			sample.uFlags |= CHN_LOOP;
 			pModDoc->SetModified();
-			ctrlSmp::UpdateLoopPoints(sample, *pSndFile);
+			ctrlSmp::UpdateLoopPoints(sample, sndFile);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2444,15 +2464,15 @@ void CViewSample::OnSetLoopEnd()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModSample &sample = pSndFile->GetSample(m_nSample);
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwMenuParam >= sample.nLoopStart+4) && (sample.nLoopEnd != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
 			sample.nLoopEnd = m_dwMenuParam;
 			sample.uFlags |= CHN_LOOP;
 			pModDoc->SetModified();
-			ctrlSmp::UpdateLoopPoints(sample, *pSndFile);
+			ctrlSmp::UpdateLoopPoints(sample, sndFile);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2465,15 +2485,15 @@ void CViewSample::OnSetSustainStart()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModSample &sample = pSndFile->GetSample(m_nSample);
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwMenuParam+4 <= sample.nSustainEnd) && (sample.nSustainStart != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
 			sample.nSustainStart = m_dwMenuParam;
 			sample.uFlags |= CHN_SUSTAINLOOP;
 			pModDoc->SetModified();
-			ctrlSmp::UpdateLoopPoints(sample, *pSndFile);
+			ctrlSmp::UpdateLoopPoints(sample, sndFile);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2486,15 +2506,15 @@ void CViewSample::OnSetSustainEnd()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		ModSample &sample = pSndFile->GetSample(m_nSample);
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwMenuParam >= sample.nSustainStart+4) && (sample.nSustainEnd != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
 			sample.nSustainEnd = m_dwMenuParam;
 			sample.uFlags |= CHN_SUSTAINLOOP;
 			pModDoc->SetModified();
-			ctrlSmp::UpdateLoopPoints(sample, *pSndFile);
+			ctrlSmp::UpdateLoopPoints(sample, sndFile);
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}

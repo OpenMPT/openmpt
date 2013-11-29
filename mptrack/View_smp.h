@@ -26,6 +26,8 @@ class CViewSample: public CModScrollView
 protected:
 	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
+	HDC offScreenDC;
+	HGDIOBJ offScreenBitmap;
 	SIZE m_sizeTotal;
 	SAMPLEINDEX m_nSample;
 	UINT m_nZoom, m_nScrollPos, m_nScrollFactor, m_nBtnMouseOver;
@@ -42,6 +44,7 @@ protected:
 
 public:
 	CViewSample();
+	~CViewSample();
 	DECLARE_SERIAL(CViewSample)
 
 protected:
@@ -55,7 +58,7 @@ protected:
 	void InvalidateSample();
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);
-	void DrawPositionMarks(HDC hdc);
+	void DrawPositionMarks();
 	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData);
 	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData);
 	void DrawNcButton(CDC *pDC, UINT nBtn);
