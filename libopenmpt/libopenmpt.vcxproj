@@ -601,7 +601,6 @@ copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
     <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />
     <ClCompile Include="..\test\test.cpp" />
-    <ClCompile Include="libopenmpt.cpp" />
     <ClCompile Include="libopenmpt_c.cpp" />
     <ClCompile Include="libopenmpt_cxx.cpp" />
     <ClCompile Include="libopenmpt_impl.cpp" />

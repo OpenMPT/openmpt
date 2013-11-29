@@ -286,9 +286,6 @@
     <ClCompile Include="..\common\stdafx.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="libopenmpt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\ITTools.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>

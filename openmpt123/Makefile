@@ -208,7 +208,6 @@ SOUNDLIB_CXX_SOURCES += \
 LIBOPENMPT_CXX_SOURCES += \
  $(SOUNDLIB_CXX_SOURCES) \
  $(wildcard ../test/*.cpp) \
- ../libopenmpt/libopenmpt.cpp \
  ../libopenmpt/libopenmpt_c.cpp \
  ../libopenmpt/libopenmpt_cxx.cpp \
  ../libopenmpt/libopenmpt_impl.cpp \
