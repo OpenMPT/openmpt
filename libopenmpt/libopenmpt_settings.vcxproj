@@ -36,11 +36,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(ProjectName)-$(Configuration)\</IntDir>
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>..\bin\$(Platform)-Debug\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(ProjectName)-$(Configuration)\</IntDir>
-    <OutDir>bin\</OutDir>
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>..\bin\$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

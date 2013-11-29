@@ -5,7 +5,7 @@ set MY_DIR=%CD%
 
 
 
-cd libopenmpt\bin || goto error
+cd bin\Win32 || goto error
 del /f /q openmpt-plugins.tar
 del /f /q openmpt-plugins-r%GOT_REVISION%.7z
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 openmpt-plugins-r%GOT_REVISION%.7z in_openmpt.dll xmp-openmpt.dll foo_openmpt.dll libopenmpt_settings.dll || goto error
