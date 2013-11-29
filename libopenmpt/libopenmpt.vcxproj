@@ -138,22 +138,59 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>bin\</OutDir>
+    <OutDir>..\bin\$(Platform)\</OutDir>
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
-    <OutDir>bin\</OutDir>
+    <OutDir>..\bin\$(Platform)\</OutDir>
     <TargetName>$(ProjectName)-test</TargetName>
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>bin\</OutDir>
-    <TargetName>$(ProjectName)64</TargetName>
+    <OutDir>..\bin\$(Platform)\</OutDir>
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
-    <OutDir>bin\</OutDir>
-    <TargetName>$(ProjectName)64-test</TargetName>
+    <OutDir>..\bin\$(Platform)\</OutDir>
+    <TargetName>$(ProjectName)-test</TargetName>
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\bin\$(Platform)-Debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\bin\$(Platform)-Debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">
+    <OutDir>..\build\lib\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|Win32'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|x64'">
+    <OutDir>..\build\lib\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStatic|x64'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
+    <OutDir>..\build\lib\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|Win32'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">
+    <OutDir>..\build\lib\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStatic|x64'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -259,9 +296,9 @@
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>copy /y bin\libopenmpt.dll bin\in_openmpt.dll
-copy /y bin\libopenmpt.dll bin\xmp-openmpt.dll
-copy /y bin\libopenmpt.dll bin\libmodplug.dll
+      <Command>copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\in_openmpt.dll
+copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\xmp-openmpt.dll
+copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -321,7 +358,7 @@ copy /y bin\libopenmpt.dll bin\libmodplug.dll
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\libopenmpt\svn_version\svn_version.h || del ..\libopenmpt\svn_version\svn_version.h || true</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>copy /y bin\libopenmpt64.dll bin\libmodplug64.dll
+      <Command>copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

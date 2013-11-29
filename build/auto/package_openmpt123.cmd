@@ -5,7 +5,7 @@ set MY_DIR=%CD%
 
 
 
-cd openmpt123\bin || goto error
+cd bin\Win32 || goto error
 del /f /q openmpt123.tar
 del /f /q openmpt123-r%GOT_REVISION%.7z
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 openmpt123-r%GOT_REVISION%.7z openmpt123.exe || goto error
