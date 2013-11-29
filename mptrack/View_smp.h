@@ -11,11 +11,7 @@
 
 #pragma once
 
-#define SMPSTATUS_MOUSEDRAG		0x01
-#define SMPSTATUS_KEYDOWN		0x02
-#define SMPSTATUS_NCLBTNDOWN	0x04
-
-#define SMP_LEFTBAR_BUTTONS		8
+#define SMP_LEFTBAR_BUTTONS		9
 
 #include "modsmp_ctrl.h"
 
@@ -23,23 +19,34 @@
 class CViewSample: public CModScrollView
 //======================================
 {
+public:
+	enum Flags
+	{
+		SMPSTATUS_MOUSEDRAG		= 0x01,
+		SMPSTATUS_KEYDOWN		= 0x02,
+		SMPSTATUS_NCLBTNDOWN	= 0x04,
+		SMPSTATUS_DRAWING		= 0x08,
+	};
+
 protected:
 	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
 	HDC offScreenDC;
 	HGDIOBJ offScreenBitmap;
 	SIZE m_sizeTotal;
-	SAMPLEINDEX m_nSample;
 	UINT m_nZoom, m_nScrollPos, m_nScrollFactor, m_nBtnMouseOver;
-	DWORD m_dwStatus;
+	FlagSet<Flags> m_dwStatus;
 	SmpLength m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
 	DWORD m_dwMenuParam;
-	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	int m_nGridSegments;
+	SAMPLEINDEX m_nSample;
 
-	CPoint m_lastDrawPoint;	// for drawing horizontal lines
-	bool m_bDrawingEnabled;	// sample drawing mode enabled?
+	std::vector<CHANNELINDEX> noteChannel;	// Note -> Preview channel assignment
 
+	// Sample drawing
+	CPoint m_lastDrawPoint;					// For drawing horizontal lines
+
+	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	SmpLength m_dwNotifyPos[MAX_CHANNELS];
 
 public:
@@ -52,8 +59,8 @@ protected:
 	void UpdateScrollSize(const UINT nZoomOld);
 	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
 	BOOL SetZoom(UINT nZoom);
-	LONG SampleToScreen(LONG n) const;
-	DWORD ScreenToSample(LONG x) const;
+	int32 SampleToScreen(SmpLength pos) const;
+	SmpLength ScreenToSample(int32 x) const;
 	void PlayNote(UINT note, const uint32 nStartPos = 0); //rewbs.customKeys
 	void InvalidateSample();
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
@@ -162,3 +169,5 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+DECLARE_FLAGSET(CViewSample::Flags)

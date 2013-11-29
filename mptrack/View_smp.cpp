@@ -120,7 +120,6 @@ CViewSample::CViewSample()
 	m_nSample = 1;
 	m_nZoom = 0;
 	m_nScrollPos = 0;
-	m_dwStatus = 0;
 	m_nScrollFactor = 0;
 	m_nBtnMouseOver = 0xFFFF;
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
@@ -147,7 +146,7 @@ void CViewSample::OnInitialUpdate()
 //---------------------------------
 {
 	m_dwBeginSel = m_dwEndSel = 0;
-	m_bDrawingEnabled = false; // sample drawing
+	m_dwStatus.reset(SMPSTATUS_DRAWING);
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 	CModScrollView::OnInitialUpdate();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -238,7 +237,7 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 	pModDoc->SetFollowWnd(m_hWnd);
 	if (nSmp == m_nSample) return FALSE;
 	m_dwBeginSel = m_dwEndSel = 0;
-	m_bDrawingEnabled = false; // sample drawing
+	m_dwStatus.reset(SMPSTATUS_DRAWING);
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->SetInfoText("");
 	m_nSample = nSmp;
@@ -351,37 +350,35 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 }
 
 
-LONG CViewSample::SampleToScreen(LONG n) const
-//--------------------------------------------
+int32 CViewSample::SampleToScreen(SmpLength pos) const
+//----------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		SmpLength nLen = pSndFile->GetSample(m_nSample).nLength;
+		SmpLength nLen = pModDoc->GetrSoundFile().GetSample(m_nSample).nLength;
 		if (!nLen) return 0;
 		if (m_nZoom)
 		{
-			return (n >> ((LONG)m_nZoom-1)) - m_nScrollPos;
+			return (pos >> ((int32)m_nZoom - 1)) - m_nScrollPos;
 		} else
 		{
-			return Util::muldiv(n, m_sizeTotal.cx, nLen);
+			return Util::muldiv(pos, m_sizeTotal.cx, nLen);
 		}
 	}
 	return 0;
 }
 
 
-DWORD CViewSample::ScreenToSample(LONG x) const
-//---------------------------------------------
+SmpLength CViewSample::ScreenToSample(int32 x) const
+//--------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	LONG n = 0;
+	SmpLength n = 0;
 
 	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		SmpLength nLen = pSndFile->GetSample(m_nSample).nLength;
+		SmpLength nLen = pModDoc->GetrSoundFile().GetSample(m_nSample).nLength;
 		if (!nLen) return 0;
 		if (m_nZoom)
 		{
@@ -392,7 +389,7 @@ DWORD CViewSample::ScreenToSample(LONG x) const
 			if (m_sizeTotal.cx) n = Util::muldiv(x, nLen, m_sizeTotal.cx);
 		}
 		if (n < 0) n = 0;
-		if (n > (LONG)nLen) n = nLen;
+		LimitMax(n, nLen);
 	}
 	return n;
 }
@@ -467,7 +464,7 @@ void CViewSample::UpdateView(DWORD dwHintMask, CObject *)
 	// sample drawing
 	if(dwHintMask & HINT_SAMPLEINFO)
 	{
-		m_bDrawingEnabled = false;
+		m_dwStatus.reset(SMPSTATUS_DRAWING);
 		UpdateNcButtonState();
 	}
 }
@@ -793,21 +790,21 @@ void CViewSample::OnDraw(CDC *pDC)
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
 	HGDIOBJ oldpen;
-	HDC hdc;
 
 	UINT nSmpScrollPos = ScrollPosToSamplePos();
 
 	if ((!pModDoc) || (!pDC)) return;
 
 	// Create off-screen image
-	DeleteObject(offScreenBitmap);
-	DeleteDC(offScreenDC);
-	offScreenDC = CreateCompatibleDC(pDC->m_hDC);
-	offScreenBitmap = CreateCompatibleBitmap(pDC->m_hDC, m_rcClient.Width(), m_rcClient.Height());
-	SelectObject(offScreenDC, offScreenBitmap);
+	if(offScreenDC == nullptr)
+	{
+		offScreenDC = CreateCompatibleDC(pDC->m_hDC);
+		offScreenBitmap = CreateCompatibleBitmap(pDC->m_hDC, m_rcClient.Width(), m_rcClient.Height());
+		SelectObject(offScreenDC, offScreenBitmap);
+	}
 
-	hdc = offScreenDC;
-	oldpen = ::SelectObject(hdc, CMainFrame::penBlack);
+	offScreenDC = offScreenDC;
+	oldpen = ::SelectObject(offScreenDC, CMainFrame::penBlack);
 	pSndFile = pModDoc->GetSoundFile();
 	rect = rcClient;
 	if ((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
@@ -824,32 +821,32 @@ void CViewSample::OnDraw(CDC *pDC)
 			{
 				rc.right = SampleToScreen(m_dwBeginSel);
 				if (rc.right > rcClient.right) rc.right = rcClient.right;
-				if (rc.right > rc.left) ::FillRect(hdc, &rc, CMainFrame::brushBlack);
+				if (rc.right > rc.left) ::FillRect(offScreenDC, &rc, CMainFrame::brushBlack);
 				rc.left = rc.right;
 			}
 			if (rc.left < 0) rc.left = 0;
 			rc.right = SampleToScreen(m_dwEndSel) + 1;
 			if (rc.right > rcClient.right) rc.right = rcClient.right;
-			if (rc.right > rc.left) ::FillRect(hdc, &rc, CMainFrame::brushWhite);
+			if (rc.right > rc.left) ::FillRect(offScreenDC, &rc, CMainFrame::brushWhite);
 			rc.left = rc.right;
 			if (rc.left < 0) rc.left = 0;
 			rc.right = rcClient.right;
-			if (rc.right > rc.left) ::FillRect(hdc, &rc, CMainFrame::brushBlack);
+			if (rc.right > rc.left) ::FillRect(offScreenDC, &rc, CMainFrame::brushBlack);
 		} else
 		{
-			::FillRect(hdc, &rcClient, CMainFrame::brushBlack);
+			::FillRect(offScreenDC, &rcClient, CMainFrame::brushBlack);
 		}
-		::SelectObject(hdc, CMainFrame::penDarkGray);
+		::SelectObject(offScreenDC, CMainFrame::penDarkGray);
 		if (sample.uFlags & CHN_STEREO)
 		{
-			::MoveToEx(hdc, 0, ymed-yrange/2, NULL);
-			::LineTo(hdc, rcClient.right, ymed-yrange/2);
-			::MoveToEx(hdc, 0, ymed+yrange/2, NULL);
-			::LineTo(hdc, rcClient.right, ymed+yrange/2);
+			::MoveToEx(offScreenDC, 0, ymed-yrange/2, NULL);
+			::LineTo(offScreenDC, rcClient.right, ymed-yrange/2);
+			::MoveToEx(offScreenDC, 0, ymed+yrange/2, NULL);
+			::LineTo(offScreenDC, rcClient.right, ymed+yrange/2);
 		} else
 		{
-			::MoveToEx(hdc, 0, ymed, NULL);
-			::LineTo(hdc, rcClient.right, ymed);
+			::MoveToEx(offScreenDC, 0, ymed, NULL);
+			::LineTo(offScreenDC, rcClient.right, ymed);
 		}
 		// Drawing sample
 		if ((sample.pSample) && (yrange) && (sample.nLength > 1) && (rect.right > 1))
@@ -860,35 +857,35 @@ void CViewSample::OnDraw(CDC *pDC)
 				int xl = SampleToScreen(sample.nLoopStart);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					::MoveToEx(hdc, xl, rect.top, NULL);
-					::LineTo(hdc, xl, rect.bottom);
+					::MoveToEx(offScreenDC, xl, rect.top, NULL);
+					::LineTo(offScreenDC, xl, rect.bottom);
 				}
 				xl = SampleToScreen(sample.nLoopEnd);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					::MoveToEx(hdc, xl, rect.top, NULL);
-					::LineTo(hdc, xl, rect.bottom);
+					::MoveToEx(offScreenDC, xl, rect.top, NULL);
+					::LineTo(offScreenDC, xl, rect.bottom);
 				}
 			}
 			// Sustain Loop Start/End
 			if ((sample.nSustainEnd > nSmpScrollPos) && (sample.nSustainEnd > sample.nSustainStart))
 			{
-				::SelectObject(hdc, CMainFrame::penHalfDarkGray);
+				::SelectObject(offScreenDC, CMainFrame::penHalfDarkGray);
 				int xl = SampleToScreen(sample.nSustainStart);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					::MoveToEx(hdc, xl, rect.top, NULL);
-					::LineTo(hdc, xl, rect.bottom);
+					::MoveToEx(offScreenDC, xl, rect.top, NULL);
+					::LineTo(offScreenDC, xl, rect.bottom);
 				}
 				xl = SampleToScreen(sample.nSustainEnd);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					::MoveToEx(hdc, xl, rect.top, NULL);
-					::LineTo(hdc, xl, rect.bottom);
+					::MoveToEx(offScreenDC, xl, rect.top, NULL);
+					::LineTo(offScreenDC, xl, rect.bottom);
 				}
 			}
 			// Drawing Sample Data
-			::SelectObject(hdc, CMainFrame::penSample);
+			::SelectObject(offScreenDC, CMainFrame::penSample);
 			int smplsize = sample.GetBytesPerSample();
 			if ((m_nZoom == 1) || ((!m_nZoom) && (sample.nLength <= (UINT)rect.right)))
 			{
@@ -896,11 +893,11 @@ void CViewSample::OnDraw(CDC *pDC)
 				signed char *psample = ((signed char *)sample.pSample) + nSmpScrollPos * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
-					DrawSampleData1(hdc, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
-					DrawSampleData1(hdc, ymed+yrange/2, rect.right, yrange, len, sample.uFlags, psample+smplsize/2);
+					DrawSampleData1(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
+					DrawSampleData1(offScreenDC, ymed+yrange/2, rect.right, yrange, len, sample.uFlags, psample+smplsize/2);
 				} else
 				{
-					DrawSampleData1(hdc, ymed, rect.right, yrange*2, len, sample.uFlags, psample);
+					DrawSampleData1(offScreenDC, ymed, rect.right, yrange*2, len, sample.uFlags, psample);
 				}
 			} else
 			{
@@ -914,11 +911,11 @@ void CViewSample::OnDraw(CDC *pDC)
 				signed char *psample = ((signed char *)sample.pSample) + xscroll * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
-					DrawSampleData2(hdc, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
-					DrawSampleData2(hdc, ymed+yrange/2, rect.right, yrange, len, sample.uFlags, psample+smplsize/2);
+					DrawSampleData2(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
+					DrawSampleData2(offScreenDC, ymed+yrange/2, rect.right, yrange, len, sample.uFlags, psample+smplsize/2);
 				} else
 				{
-					DrawSampleData2(hdc, ymed, rect.right, yrange*2, len, sample.uFlags, psample);
+					DrawSampleData2(offScreenDC, ymed, rect.right, yrange*2, len, sample.uFlags, psample);
 				}
 			}
 		}
@@ -927,7 +924,7 @@ void CViewSample::OnDraw(CDC *pDC)
 	DrawPositionMarks();
 	BitBlt(pDC->m_hDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
 
-	if (oldpen) ::SelectObject(hdc, oldpen);
+	if (oldpen) ::SelectObject(offScreenDC, oldpen);
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -1154,13 +1151,13 @@ void CViewSample::UpdateNcButtonState()
 		if (m_nBtnMouseOver == i)
 		{
 			dwStyle |= NCBTNS_MOUSEOVER;
-			if (m_dwStatus & SMPSTATUS_NCLBTNDOWN) dwStyle |= NCBTNS_PUSHED;
+			if(m_dwStatus[SMPSTATUS_NCLBTNDOWN]) dwStyle |= NCBTNS_PUSHED;
 		}
 
 		switch(cLeftBarButtons[i])
 		{
 			case ID_SAMPLE_DRAW:
-				if(m_bDrawingEnabled) dwStyle |= NCBTNS_CHECKED;
+				if(m_dwStatus[SMPSTATUS_DRAWING]) dwStyle |= NCBTNS_CHECKED;
 				if(m_nSample > pSndFile->GetNumSamples() ||
 					pSndFile->GetSample(m_nSample).GetNumChannels() > 1 ||
 					pSndFile->GetSample(m_nSample).pSample == nullptr)
@@ -1188,6 +1185,12 @@ void CViewSample::OnSize(UINT nType, int cx, int cy)
 //--------------------------------------------------
 {
 	CScrollView::OnSize(nType, cx, cy);
+
+	DeleteObject(offScreenBitmap);
+	DeleteDC(offScreenDC);
+	offScreenBitmap = nullptr;
+	offScreenDC = nullptr;
+
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
 	{
 		UpdateScrollSize();
@@ -1313,9 +1316,9 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	CHAR s[64];
 	CModDoc *pModDoc = GetDocument();
 
-	if ((m_nBtnMouseOver < SMP_LEFTBAR_BUTTONS) || (m_dwStatus & SMPSTATUS_NCLBTNDOWN))
+	if(m_nBtnMouseOver < SMP_LEFTBAR_BUTTONS || m_dwStatus[SMPSTATUS_NCLBTNDOWN])
 	{
-		m_dwStatus &= ~SMPSTATUS_NCLBTNDOWN;
+		m_dwStatus.reset(SMPSTATUS_NCLBTNDOWN);
 		m_nBtnMouseOver = 0xFFFF;
 		UpdateNcButtonState();
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -1325,7 +1328,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	if (m_rcClient.PtInRect(point))
 	{
-		const DWORD x = ScreenToSample(point.x);
+		const SmpLength x = ScreenToSample(point.x);
 		wsprintf(s, "Cursor: %u", x);
 		UpdateIndicator(s);
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -1356,7 +1359,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 			}
 		}
 	} else UpdateIndicator(NULL);
-	if (m_dwStatus & SMPSTATUS_MOUSEDRAG)
+	if(m_dwStatus[SMPSTATUS_MOUSEDRAG])
 	{
 		BOOL bAgain = FALSE;
 		const DWORD len = sndFile.GetSample(m_nSample).nLength;
@@ -1390,7 +1393,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 			}
 		}
 		m_dwEndDrag = ScreenToSample(point.x);
-		if(m_bDrawingEnabled)
+		if(m_dwStatus[SMPSTATUS_DRAWING])
 		{
 			if(m_dwEndDrag < len)
 			{
@@ -1432,7 +1435,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	CSoundFile *pSndFile;
 	DWORD len;
 
-	if ((m_dwStatus & SMPSTATUS_MOUSEDRAG) || (!pModDoc)) return;
+	if(m_dwStatus[SMPSTATUS_MOUSEDRAG] || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
 	ModSample &sample = pSndFile->GetSample(m_nSample);
 
@@ -1440,13 +1443,13 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	if (!len)
 		return;
 
-	m_dwStatus |= SMPSTATUS_MOUSEDRAG;
+	m_dwStatus.set(SMPSTATUS_MOUSEDRAG);
 	SetFocus();
 	SetCapture();
 	bool oldsel = (m_dwBeginSel != m_dwEndSel);
 
 	// shift + click = update selection
-	if(!m_bDrawingEnabled && CMainFrame::GetInputHandler()->ShiftPressed())
+	if(!m_dwStatus[SMPSTATUS_DRAWING] && CMainFrame::GetInputHandler()->ShiftPressed())
 	{
 		oldsel = true;
 		m_dwEndDrag = ScreenToSample(point.x);
@@ -1459,7 +1462,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	}
 	if (oldsel) SetCurSel(m_dwBeginDrag, m_dwEndDrag);
 	// set initial point for sample drawing
-	if (m_bDrawingEnabled)
+	if (m_dwStatus[SMPSTATUS_DRAWING])
 	{
 		m_lastDrawPoint = point;
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
@@ -1482,9 +1485,9 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 void CViewSample::OnLButtonUp(UINT, CPoint)
 //-----------------------------------------
 {
-	if (m_dwStatus & SMPSTATUS_MOUSEDRAG)
+	if(m_dwStatus[SMPSTATUS_MOUSEDRAG])
 	{
-		m_dwStatus &= ~SMPSTATUS_MOUSEDRAG;
+		m_dwStatus.reset(SMPSTATUS_MOUSEDRAG);
 		ReleaseCapture();
 	}
 	m_lastDrawPoint.SetPoint(-1, -1);
@@ -1500,7 +1503,7 @@ void CViewSample::OnLButtonDblClk(UINT, CPoint)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		DWORD len = pSndFile->GetSample(m_nSample).nLength;
-		if (len && !m_bDrawingEnabled) SetCurSel(0, len);
+		if (len && !m_dwStatus[SMPSTATUS_DRAWING]) SetCurSel(0, len);
 	}
 }
 
@@ -1528,7 +1531,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			} else
 			{
 				CHAR s[256];
-				DWORD dwPos = ScreenToSample(pt.x);
+				SmpLength dwPos = ScreenToSample(pt.x);
 				if (dwPos <= sample.nLength)
 				{
 					//Set loop points
@@ -1646,7 +1649,7 @@ void CViewSample::OnNcLButtonDown(UINT uFlags, CPoint point)
 {
 	if (m_nBtnMouseOver < SMP_LEFTBAR_BUTTONS)
 	{
-		m_dwStatus |= SMPSTATUS_NCLBTNDOWN;
+		m_dwStatus.set(SMPSTATUS_NCLBTNDOWN);
 		if (cLeftBarButtons[m_nBtnMouseOver] != ID_SEPARATOR)
 		{
 			PostMessage(WM_COMMAND, cLeftBarButtons[m_nBtnMouseOver]);
@@ -1660,9 +1663,9 @@ void CViewSample::OnNcLButtonDown(UINT uFlags, CPoint point)
 void CViewSample::OnNcLButtonUp(UINT uFlags, CPoint point)
 //--------------------------------------------------------
 {
-	if (m_dwStatus & SMPSTATUS_NCLBTNDOWN)
+	if(m_dwStatus[SMPSTATUS_NCLBTNDOWN])
 	{
-		m_dwStatus &= ~SMPSTATUS_NCLBTNDOWN;
+		m_dwStatus.reset(SMPSTATUS_NCLBTNDOWN);
 		UpdateNcButtonState();
 	}
 	CModScrollView::OnNcLButtonUp(uFlags, point);
@@ -2216,7 +2219,7 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 			pModDoc->NoteOff(0, (note == NOTE_NOTECUT));
 		} else if(ModCommand::IsNote((ModCommand::NOTE)note))
 		{
-			if (m_dwStatus & SMPSTATUS_KEYDOWN)
+			if(m_dwStatus[SMPSTATUS_KEYDOWN])
 				pModDoc->NoteOff(note, true);
 			else
 				pModDoc->NoteOff(0, true);
@@ -2227,7 +2230,7 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 
 			pModDoc->PlayNote(note, 0, m_nSample, false, -1, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
 
-			m_dwStatus |= SMPSTATUS_KEYDOWN;
+			m_dwStatus.set(SMPSTATUS_KEYDOWN);
 
 			CSoundFile &sndFile = pModDoc->GetrSoundFile();
 			ModSample &sample = sndFile.GetSample(m_nSample);
@@ -2538,7 +2541,7 @@ void CViewSample::OnZoomDown()
 void CViewSample::OnDrawingToggle()
 //---------------------------------
 {
-	m_bDrawingEnabled = !m_bDrawingEnabled;
+	m_dwStatus.flip(SMPSTATUS_DRAWING);
 	UpdateNcButtonState();
 }
 
@@ -2747,7 +2750,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	}
 	if (wParam >= kcSampStartNoteStops && wParam <= kcSampEndNoteStops)
 	{
-		m_dwStatus &= ~SMPSTATUS_KEYDOWN;
+		m_dwStatus.reset(SMPSTATUS_KEYDOWN);
 		return wParam;
 	}
 
