@@ -16,7 +16,7 @@ void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char 
 	try {
 		libopenmpt::SettingsForm ^ form = gcnew libopenmpt::SettingsForm( title, s );
 		System::Windows::Forms::IWin32Window ^w = System::Windows::Forms::Control::FromHandle((System::IntPtr)parent);
-		form->Show(w);
+		form->ShowDialog(w);
 	} catch ( ... ) {
 		// nothing
 	}
