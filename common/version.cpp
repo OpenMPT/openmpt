@@ -316,6 +316,8 @@ std::string GetFullCreditsString()
 #ifdef MODPLUG_TRACKER
 		"Pel K. Txnder for the scrolling credits control :)\n"
 		"http://tinyurl.com/4yze8\n"
+		"Nobuyuki for application and file icon\n"
+		"http://twitter.com/nobuyukinyuu\n"
 #endif
 		"\n"
 		"The people at ModPlug forums for crucial contribution\n"
