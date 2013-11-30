@@ -809,7 +809,7 @@ BOOL CTrackApp::InitInstance()
 
 	// Register document templates
 	m_pModTemplate = new CModDocTemplate(
-		IDR_MODULETYPE,
+		IDR_MAINFRAME,
 		RUNTIME_CLASS(CModDoc),
 		RUNTIME_CLASS(CChildFrame), // custom MDI child frame
 		RUNTIME_CLASS(CModControlView));
