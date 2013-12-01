@@ -32,21 +32,14 @@ typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 
 AEffect *DmoToVst(VSTPluginLib &lib);
 
-#ifdef VST_USE_ALTERNATIVE_MAGIC
-// Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
-// A better solution would be to change the plugin.cache format so that the ID1+ID2 strings are combined with a CRC,
-// Or maybe we should just switch to a proper database format.
-#include "../../include/zlib/zlib.h"	// For CRC32 calculation (to detect plugins with same UID)
-uint32 CalculateCRC32fromFilename(const char *s)
-//----------------------------------------------
+#include "../../include/zlib/zlib.h"	// For CRC32 calculation (to tell plugins with same UID apart)
+static std::string GetPluginCacheID(const VSTPluginLib &lib)
+//----------------------------------------------------------
 {
-	char fn[_MAX_PATH];
-	mpt::String::Copy(fn, s);
-	int f;
-	for(f = 0; fn[f] != 0; f++) fn[f] = toupper(fn[f]);
-	return LittleEndian(crc32(0, (uint8 *)fn, f));
+	const std::string libName = lib.libraryName.ToUTF8();
+	uint32 crc = crc32(0, reinterpret_cast<const Bytef *>(&libName[0]), libName.length());
+	return mpt::String::Format("%08X%08X%08X", SwapBytesReturnLE(lib.pluginId1), SwapBytesReturnLE(lib.pluginId2), SwapBytesReturnLE(crc));
 }
-#endif // VST_USE_ALTERNATIVE_MAGIC
 
 
 VstIntPtr VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
@@ -292,7 +285,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 				// Extract plugin IDs
 				for (int i = 0; i < 16; i++)
 				{
-					UINT n = IDs[i] - '0';
+					VstInt32 n = IDs[i] - '0';
 					if (n > 9) n = IDs[i] + 10 - 'A';
 					n &= 0x0f;
 					if (i < 8)
@@ -304,15 +297,9 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 					}
 				}
 
-				const std::string flagKey = mpt::String::Format("%s.Flags", IDs.c_str());
+				const std::string flagKey = IDs + ".Flags";
 				plug->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
 
-#ifdef VST_USE_ALTERNATIVE_MAGIC
-				if( plug->pluginId1 == kEffectMagic )
-				{
-					plug->pluginId1 = CalculateCRC32fromFilename(plug->libraryName); // Make Plugin ID unique for sure (for VSTs with same UID)
-				};
-#endif // VST_USE_ALTERNATIVE_MAGIC
 #ifdef VST_LOG
 				Log("Plugin \"%s\" found in PluginCache\n", plug->libraryName.ToLocale().c_str());
 #endif // VST_LOG
@@ -347,11 +334,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		{
 			pEffect->dispatcher(pEffect, effOpen, 0, 0, 0, 0);
 
-#ifdef VST_USE_ALTERNATIVE_MAGIC
-			plug.pluginId1 = CalculateCRC32fromFilename(plug->libraryName); // Make Plugin ID unique for sure
-#else
 			plug->pluginId1 = pEffect->magic;
-#endif // VST_USE_ALTERNATIVE_MAGIC
 			plug->pluginId2 = pEffect->uniqueID;
 
 			GetPluginInformation(pEffect, *plug);
@@ -386,8 +369,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		pluginList.push_back(plug);
 
 		SettingsContainer &cacheFile = theApp.GetPluginCache();
-		const std::string IDs = mpt::String::Format("%08X%08X", plug->pluginId1, plug->pluginId2);
-		const std::string flagsKey = mpt::String::Format("%s.Flags", IDs);
+		const std::string IDs = GetPluginCacheID(*plug);
+		const std::string flagsKey = IDs + ".Flags";
 
 		mpt::PathString writePath = dllPath;
 		if(theApp.IsPortableMode())
@@ -534,7 +517,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				{
 					// Update cached information
 					SettingsContainer &cacheFile = theApp.GetPluginCache();
-					std::string flagsKey = mpt::String::Format("%08X%08X.Flags", pFound->pluginId1, pFound->pluginId2);
+					std::string flagsKey = GetPluginCacheID(*pFound) + ".Flags";
 					cacheFile.Write<int32>(cacheSection, flagsKey, pFound->EncodeCacheFlags());
 				}
 
