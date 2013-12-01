@@ -297,6 +297,8 @@ std::string GetFullCreditsString()
 #ifndef NO_ARCHIVE_SUPPORT
 		"Simon Howard for lhasa\n"
 		"http://fragglet.github.io/lhasa/\n"
+		"Alexander L. Roshal for UnRAR\n"
+		"http://rarlab.com/\n"
 #endif
 #ifndef NO_PORTAUDIO
 		"PortAudio contributors\n"

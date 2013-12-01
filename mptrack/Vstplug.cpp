@@ -1,5 +1,5 @@
 /*
- * vstplug.cpp
+ * Vstplug.cpp
  * -----------
  * Purpose: Plugin handling / processing
  * Notes  : (currently none)
@@ -12,7 +12,9 @@
 #include "Mainfrm.h"
 #include "Vstplug.h"
 #include "VstPresets.h"
+#ifdef MODPLUG_TRACKER
 #include "Moddoc.h"
+#endif // MODPLUG_TRACKER
 #include "../soundlib/Sndfile.h"
 #include "AbstractVstEditor.h"
 #include "VstEditor.h"
@@ -428,6 +430,13 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	// get the native path of currently loading bank or project
 	// (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec)) - DEPRECATED in VST 2.4
 	case audioMasterGetChunkFile:
+#ifdef MODPLUG_TRACKER
+		if(pVstPlugin)
+		{
+			strcpy(ptr, pVstPlugin->GetModDoc()->GetPathNameMpt().ToLocale().c_str());
+			return 1;
+		}
+#endif
 		Log("VST plugin to host: Get Chunk File\n");
 		break;
 
@@ -1033,10 +1042,12 @@ bool CVstPlugin::LoadProgram()
 
 	if(errorStr == nullptr)
 	{
+#ifndef MODPLUG_TRACKER
 		if(GetModDoc() != nullptr && GetSoundFile().GetModSpecifications().supportsPlugins)
 		{
 			GetModDoc()->SetModified();
 		}
+#endif // MODPLUG_TRACKER
 		return true;
 	} else
 	{
