@@ -1691,7 +1691,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 			"All Files (*.*)|*.*||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
 		.FilterIndex(&nLastIndex);
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 
 	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS, true);
 
@@ -1749,7 +1749,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		"FastTracker II Instruments (*.xi)|*.xi||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
 		.FilterIndex(&index);
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 	
 	BeginWaitCursor();
 

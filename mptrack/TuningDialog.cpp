@@ -637,7 +637,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 		.ExtensionFilter(filter)
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_TUNING))
 		.FilterIndex(&filterIndex);
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 
 	BeginWaitCursor();
 
@@ -677,7 +677,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		.AllowMultiSelect()
 		.ExtensionFilter(sFilter)
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_TUNING));
-	if(!dlg.Show())
+	if(!dlg.Show(this))
 		return;
 
 	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_TUNING, true);

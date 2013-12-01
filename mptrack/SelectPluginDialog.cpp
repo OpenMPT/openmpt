@@ -488,7 +488,7 @@ void CSelectPluginDlg::OnAddPlugin()
 		.DefaultExtension("dll")
 		.ExtensionFilter("VST Plugins (*.dll)|*.dll||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINS));
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 
 	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINS, true);
 

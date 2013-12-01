@@ -16,8 +16,8 @@
 
 
 // Display the file dialog.
-bool FileDialog::Show()
-//---------------------
+bool FileDialog::Show(CWnd *parent)
+//---------------------------------
 {
 	filenames.clear();
 
@@ -37,7 +37,7 @@ bool FileDialog::Show()
 	OPENFILENAMEW ofn;
 	MemsetZero(ofn);
 	ofn.lStructSize = sizeof(OPENFILENAMEW);
-	ofn.hwndOwner = theApp.m_pMainWnd->GetSafeHwnd();
+	ofn.hwndOwner = (parent != nullptr ? parent : theApp.m_pMainWnd)->GetSafeHwnd();
 	ofn.hInstance = theApp.m_hInstance;
 	ofn.lpstrFilter = extFilter.c_str();
 	ofn.lpstrCustomFilter = NULL;
@@ -122,14 +122,14 @@ int CALLBACK BrowseForFolder::BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM /*
 
 
 // Display the folder dialog.
-bool BrowseForFolder::Show()
-//--------------------------
+bool BrowseForFolder::Show(CWnd *parent)
+//--------------------------------------
 {
 	WCHAR path[MAX_PATH];
 
 	BROWSEINFOW bi;
 	MemsetZero(bi);
-	bi.hwndOwner = theApp.m_pMainWnd->GetSafeHwnd();
+	bi.hwndOwner = (parent != nullptr ? parent : theApp.m_pMainWnd)->GetSafeHwnd();
 	bi.lpszTitle = caption.empty() ? NULL : caption.c_str();
 	bi.pszDisplayName = path;
 	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;

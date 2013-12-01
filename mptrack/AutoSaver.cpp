@@ -415,7 +415,7 @@ void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
 
 	BrowseForFolder dlg(mpt::PathString::FromNative(szPath), TEXT("Select a folder to store autosaved files in..."));
-	if(dlg.Show())
+	if(dlg.Show(this))
 	{
 		::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, dlg.GetDirectory().AsNative().c_str());
 		OnSettingsChanged();

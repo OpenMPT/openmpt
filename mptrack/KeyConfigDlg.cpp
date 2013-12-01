@@ -842,7 +842,7 @@ void COptionsKeyboard::OnLoad()
 		.DefaultFilename(m_sFullPathName)
 		.ExtensionFilter("OpenMPT Key Bindings (*.mkb)|*.mkb||")
 		.WorkingDirectory(TrackerSettings::Instance().m_szKbdFile);
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 
 	m_sFullPathName = dlg.GetFirstFile();
 	plocalCmdSet->LoadFile(m_sFullPathName);
@@ -859,7 +859,7 @@ void COptionsKeyboard::OnSave()
 		.DefaultFilename(m_sFullPathName)
 		.ExtensionFilter("OpenMPT Key Bindings (*.mkb)|*.mkb||")
 		.WorkingDirectory(TrackerSettings::Instance().m_szKbdFile);
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 
 	m_sFullPathName = dlg.GetFirstFile();
 	plocalCmdSet->SaveFile(m_sFullPathName);

@@ -492,7 +492,7 @@ void COptionsColors::OnLoadColorScheme()
 		.DefaultExtension("mptcolor")
 		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
 		.WorkingDirectory(theApp.GetConfigPath());
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 
 	// Ensure that all colours are reset (for outdated colour schemes)
 	OnPresetMPT();
@@ -515,7 +515,7 @@ void COptionsColors::OnSaveColorScheme()
 		.DefaultExtension("mptcolor")
 		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
 		.WorkingDirectory(theApp.GetConfigPath());
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 
 	{
 		IniFileSettingsContainer file(dlg.GetFirstFile());
@@ -669,7 +669,7 @@ void COptionsGeneral::BrowseForFolder(UINT nID)
 	::GetDlgItemTextW(m_hWnd, nID, szPath, CountOf(szPath));
 
 	::BrowseForFolder dlg(mpt::PathString::FromNative(szPath), TEXT("Select a default folder..."));
-	if(dlg.Show())
+	if(dlg.Show(this))
 	{
 		::SetDlgItemTextW(m_hWnd, nID, dlg.GetDirectory().AsNative().c_str());
 		OnSettingsChanged();
