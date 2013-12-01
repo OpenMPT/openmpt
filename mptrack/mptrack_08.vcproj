@@ -91,6 +91,7 @@
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
+				LargeAddressAware="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -190,6 +191,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="2"
 				DataExecutionPrevention="0"
+				LargeAddressAware="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
