@@ -21,6 +21,14 @@
 #include "../Sndfile.h"
 #include "JBridge.h"
 
+// For CRC32 calculation (to tell plugins with same UID apart in our cache file)
+#if !defined(NO_ZLIB)
+#include <zlib/zlib.h>
+#elif !defined(NO_MINIZ)
+#define MINIZ_HEADER_FILE_ONLY
+#include <miniz/miniz.c>
+#endif
+
 char CVstPluginManager::s_szHostProductString[64] = "OpenMPT";
 char CVstPluginManager::s_szHostVendorString[64] = "OpenMPT project";
 VstIntPtr CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
@@ -32,13 +40,34 @@ typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 
 AEffect *DmoToVst(VSTPluginLib &lib);
 
-#include "../../include/zlib/zlib.h"	// For CRC32 calculation (to tell plugins with same UID apart)
-static std::string GetPluginCacheID(const VSTPluginLib &lib)
-//----------------------------------------------------------
+static const char *const cacheSection = "PluginCache";
+static const wchar_t *const cacheSectionW = L"PluginCache";
+
+
+// PluginCache format:
+// LibraryName = <ID1><ID2><CRC32> (hex-encoded)
+// <ID1><ID2><CRC32> = FullDllPath
+// <ID1><ID2><CRC32>.Flags = Plugin Flags (set VSTPluginLib::DecodeCacheFlags).
+
+static void WriteToCache(const VSTPluginLib &lib)
+//-----------------------------------------------
 {
+	SettingsContainer &cacheFile = theApp.GetPluginCache();
+
 	const std::string libName = lib.libraryName.ToUTF8();
-	uint32 crc = crc32(0, reinterpret_cast<const Bytef *>(&libName[0]), libName.length());
-	return mpt::String::Format("%08X%08X%08X", SwapBytesReturnLE(lib.pluginId1), SwapBytesReturnLE(lib.pluginId2), SwapBytesReturnLE(crc));
+	const uint32 crc = crc32(0, reinterpret_cast<const Bytef *>(&libName[0]), libName.length());
+	const std::string IDs = mpt::String::Format("%08X%08X%08X", SwapBytesReturnLE(lib.pluginId1), SwapBytesReturnLE(lib.pluginId2), SwapBytesReturnLE(crc));
+	const std::string flagsKey = IDs + ".Flags";
+
+	mpt::PathString writePath = lib.dllPath;
+	if(theApp.IsPortableMode())
+	{
+		writePath = theApp.AbsolutePathToRelative(writePath);
+	}
+
+	cacheFile.Write<std::string>(cacheSectionW, lib.libraryName.ToWide(), IDs);
+	cacheFile.Write<mpt::PathString>(cacheSection, IDs, writePath);
+	cacheFile.Write<int32>(cacheSection, flagsKey, lib.EncodeCacheFlags());
 }
 
 
@@ -233,18 +262,11 @@ void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 }
 
 
-// PluginCache format:
-// LibraryName = ID100000ID200000
-// ID100000ID200000 = FullDllPath
-// ID100000ID200000.Flags = Plugin Flags (set VSTPluginLib::DecodeCacheFlags).
-
 // Add a plugin to the list of known plugins.
 VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool fromCache, const bool checkFileExistence, std::wstring *const errStr)
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const mpt::PathString fileName = dllPath.GetFileName();
-	const char *const cacheSection = "PluginCache";
-	const wchar_t *const cacheSectionW = L"PluginCache";
 
 	if(checkFileExistence && (PathFileExistsW(dllPath.AsNative().c_str()) == FALSE))
 	{
@@ -367,21 +389,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	if(validPlug)
 	{
 		pluginList.push_back(plug);
-
-		SettingsContainer &cacheFile = theApp.GetPluginCache();
-		const std::string IDs = GetPluginCacheID(*plug);
-		const std::string flagsKey = IDs + ".Flags";
-
-		mpt::PathString writePath = dllPath;
-		if(theApp.IsPortableMode())
-		{
-			writePath = theApp.AbsolutePathToRelative(writePath);
-		}
-
-		cacheFile.Write<mpt::PathString>(cacheSection, IDs, writePath);
-		cacheFile.Write<mpt::PathString>(cacheSection, IDs, dllPath);
-		cacheFile.Write<std::string>(cacheSectionW, plug->libraryName.ToWide(), IDs);
-		cacheFile.Write<int32>(cacheSection, flagsKey, plug->EncodeCacheFlags());
+		WriteToCache(*plug);
 	} else
 	{
 		delete plug;
@@ -428,8 +436,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 //-----------------------------------------------------------------------------------
 {
 	VSTPluginLib *pFound = nullptr;
-	const char *cacheSection = "PluginCache";
-	const wchar_t *cacheSectionW = L"PluginCache";
 
 	// Find plugin in library
 	int match = 0;
@@ -489,7 +495,11 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			if(IDs.length() >= 16)
 			{
 				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, MPT_PATHSTRING(""));
-				if(!fullPath.empty()) pFound = AddPlugin(fullPath);
+				if(!fullPath.empty())
+				{
+					theApp.RelativePathToAbsolute(fullPath);
+					pFound = AddPlugin(fullPath);
+				}
 			}
 		}
 	}
@@ -516,9 +526,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				if(oldIsInstrument != pFound->isInstrument || oldCategory != pFound->category)
 				{
 					// Update cached information
-					SettingsContainer &cacheFile = theApp.GetPluginCache();
-					std::string flagsKey = GetPluginCacheID(*pFound) + ".Flags";
-					cacheFile.Write<int32>(cacheSection, flagsKey, pFound->EncodeCacheFlags());
+					WriteToCache(*pFound);
 				}
 
 				CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);

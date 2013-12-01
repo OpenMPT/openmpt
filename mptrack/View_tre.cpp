@@ -1790,15 +1790,13 @@ void CModTree::MonitorInstrumentLibrary()
 	DWORD result;
 	do
 	{
+		Sleep(500);
 		const HANDLE waitHandles[] = { m_hWatchDirKillThread, m_hWatchDir };
 		result = WaitForMultipleObjects(m_hWatchDir != nullptr ? 2 : 1, waitHandles, FALSE, 1000);
 		if(result == WAIT_OBJECT_0 + 1 && m_hWatchDir == waitHandles[1])
 		{
 			FindNextChangeNotification(m_hWatchDir);
 			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
-		} else if(result == WAIT_FAILED)
-		{
-			Sleep(100);
 		}
 	} while(result != WAIT_OBJECT_0);
 }
