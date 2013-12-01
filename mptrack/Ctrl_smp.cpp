@@ -962,7 +962,7 @@ void CCtrlSamples::OnSampleOpen()
 			"All Files (*.*)|*.*||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES))
 		.FilterIndex(&nLastIndex);
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 
 	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES, true);
 
@@ -1033,7 +1033,7 @@ void CCtrlSamples::OnSampleSave()
 			"RAW Audio (*.raw)|*.raw||")
 			.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES))
 			.FilterIndex(&filter);
-	if(!dlg.Show()) return;
+	if(!dlg.Show(this)) return;
 
 	BeginWaitCursor();
 

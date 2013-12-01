@@ -52,7 +52,7 @@ public:
 	FileDialog &FilterIndex(int *index) { filterIndex = index; return *this; }
 
 	// Show the file selection dialog.
-	bool Show();
+	bool Show(CWnd *parent = nullptr);
 
 	// Get some selected file. Mostly useful when only one selected file is possible anyway.
 	mpt::PathString GetFirstFile() const
@@ -106,7 +106,7 @@ public:
 	BrowseForFolder(const mpt::PathString &dir, const CString &caption) : workingDirectory(dir), caption(mpt::ToWide(caption)) { }
 
 	// Show the folder selection dialog.
-	bool Show();
+	bool Show(CWnd *parent = nullptr);
 
 	// Gets selected directory.
 	mpt::PathString GetDirectory() const { return workingDirectory; }
