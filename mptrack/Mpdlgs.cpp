@@ -526,6 +526,9 @@ void COptionsSoundcard::UpdateControls()
 	if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_DSOUND)
 	{
 		GetDlgItem(IDC_CHECK4)->SetWindowText("Use primary buffer");
+	} else if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO)
+	{
+		GetDlgItem(IDC_CHECK4)->SetWindowText("Keep device running");
 	} else
 	{
 		GetDlgItem(IDC_CHECK4)->SetWindowText("Use device exclusively");
