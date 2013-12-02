@@ -509,9 +509,9 @@ bool CASIODevice::InternalStart()
 	SetRenderSilence(false);
 	try
 	{
+		m_TotalFramesWritten = 0;
 		asioCall(start());
 		m_DeviceRunning = true;
-		m_TotalFramesWritten = 0;
 	} catch(...)
 	{
 		return false;
@@ -535,6 +535,7 @@ bool CASIODevice::InternalClose()
 {
 	if(m_DeviceRunning)
 	{
+		m_DeviceRunning = false;
 		try
 		{
 			asioCall(stop());
@@ -543,7 +544,6 @@ bool CASIODevice::InternalClose()
 			// continue
 		}
 		m_TotalFramesWritten = 0;
-		m_DeviceRunning = false;
 	}
 	SetRenderSilence(false);
 
