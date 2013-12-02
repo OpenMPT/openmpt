@@ -197,7 +197,7 @@ WAVEncoder::WAVEncoder()
 			}
 		}
 	}
-	traits.defaultSamplerate = 96000;
+	traits.defaultSamplerate = 48000;
 	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeEnumerated;
 	traits.defaultFormat = 0;
