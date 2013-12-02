@@ -459,6 +459,8 @@ void CMainFrame::OnClose()
 
 	if(gpSoundDevice)
 	{
+		gpSoundDevice->Stop();
+		gpSoundDevice->Close();
 		delete gpSoundDevice;
 		gpSoundDevice = nullptr;
 	}
@@ -786,6 +788,8 @@ bool CMainFrame::audioOpenDevice()
 	const SoundDeviceID deviceID = TrackerSettings::Instance().GetSoundDeviceID();
 	if(gpSoundDevice && (gpSoundDevice->GetDeviceID() != deviceID))
 	{
+		gpSoundDevice->Stop();
+		gpSoundDevice->Close();
 		delete gpSoundDevice;
 		gpSoundDevice = nullptr;
 	}
@@ -819,14 +823,6 @@ bool CMainFrame::audioOpenDevice()
 	deviceSettings.sampleFormat = actualSampleFormat;
 	TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
 	return true;
-}
-
-
-bool CMainFrame::audioReopenDevice()
-//----------------------------------
-{
-	audioCloseDevice();
-	return audioOpenDevice();
 }
 
 
@@ -1211,7 +1207,10 @@ void CMainFrame::StopPlayback()
 		m_NotifyTimer = 0;
 	}
 	ResetNotificationBuffer();
-	audioCloseDevice();
+	if(!TrackerSettings::Instance().m_SoundSettingsKeepDeviceOpen)
+	{
+		audioCloseDevice();
+	}
 }
 
 
@@ -1596,25 +1595,23 @@ HWND CMainFrame::GetFollowSong() const
 BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, SoundDeviceID deviceID)
 //------------------------------------------------------------------------------------------------
 {
-	const bool isPlaying = IsPlaying();
 	if((TrackerSettings::Instance().GetSoundDeviceID() != deviceID) || (TrackerSettings::Instance().GetSoundDeviceSettings(deviceID) != deviceSettings))
 	{
-		CModDoc *pActiveMod = NULL;
-		if (isPlaying)
+		CModDoc *pActiveMod = nullptr;
+		if(IsPlaying())
 		{
 			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = GetModPlaying();
 			PauseMod();
 		}
+		gpSoundDevice->Close();
 		TrackerSettings::Instance().SetSoundDeviceID(deviceID);
 		TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
-
 		TrackerSettings::Instance().MixerOutputChannels = deviceSettings.Channels;
 		TrackerSettings::Instance().MixerSamplerate = deviceSettings.Samplerate;
+		if(pActiveMod)
 		{
-			CriticalSection cs;
-			if (pActiveMod) UpdateAudioParameters(pActiveMod->GetrSoundFile(), FALSE);
+			PlayMod(pActiveMod);
 		}
-		if (pActiveMod) PlayMod(pActiveMod);
 		UpdateWindow();
 	} else
 	{

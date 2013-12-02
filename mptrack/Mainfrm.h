@@ -343,7 +343,6 @@ public:
 	bool InNotifyHandler() const { return m_InNotifyHandler; }
 
 	bool audioOpenDevice();
-	bool audioReopenDevice();
 	void audioCloseDevice();
 	bool IsAudioDeviceOpen() const;
 	bool DoNotification(DWORD dwSamplesRead, int64 streamPosition);
