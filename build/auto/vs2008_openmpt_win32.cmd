@@ -22,8 +22,8 @@ goto compile
 xcopy /e /y /c ..\..\externals\*.* include
 
 cd mptrack || goto error
-devenv MPTRACK_10.sln /clean "Release|Win32" || goto error
-devenv MPTRACK_10.sln /build "Release|Win32" || goto error
+devenv MPTRACK_08.sln /clean "Release|Win32" || goto error
+devenv MPTRACK_08.sln /build "Release|Win32" || goto error
 cd .. || goto error
 
 
