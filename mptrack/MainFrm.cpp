@@ -778,10 +778,6 @@ bool CMainFrame::IsAudioDeviceOpen() const
 bool CMainFrame::audioOpenDevice()
 //--------------------------------
 {
-	if(IsAudioDeviceOpen())
-	{
-		return true;
-	}
 	if(!TrackerSettings::Instance().GetMixerSettings().IsValid())
 	{
 		Reporting::Error("Unable to open sound device: Invalid mixer settings.");
@@ -792,6 +788,10 @@ bool CMainFrame::audioOpenDevice()
 	{
 		delete gpSoundDevice;
 		gpSoundDevice = nullptr;
+	}
+	if(IsAudioDeviceOpen())
+	{
+		return true;
 	}
 	if(!gpSoundDevice)
 	{
