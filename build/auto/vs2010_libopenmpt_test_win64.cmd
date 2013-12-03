@@ -22,8 +22,8 @@ goto compile
 xcopy /e /y /c ..\..\externals\*.* include
 
 cd libopenmpt || goto error
- devenv libopenmpt.sln /clean "Test|x64" || goto error
- devenv libopenmpt.sln /build "Test|x64" || goto error
+ devenv libopenmpt_test.sln /clean "Release|x64" || goto error
+ devenv libopenmpt_test.sln /build "Release|x64" || goto error
 cd .. || goto error
 
 

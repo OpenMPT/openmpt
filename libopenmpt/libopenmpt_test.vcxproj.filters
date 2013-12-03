@@ -2,33 +2,33 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <UniqueIdentifier>{F169471F-7267-4A08-B70B-1C9D2B5018D8}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <UniqueIdentifier>{4FE39C9C-5A27-4048-8CC8-2720A067FDC0}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Source Files\soundlib">
-      <UniqueIdentifier>{31765892-63ca-4ab1-8fba-cd7a44e7b6cc}</UniqueIdentifier>
+      <UniqueIdentifier>{DE088F32-475B-46A0-97A1-D51AFFEB52F3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\soundlib">
-      <UniqueIdentifier>{89063439-f7da-443d-bd44-9640b86240f2}</UniqueIdentifier>
+      <UniqueIdentifier>{78F4E2CD-63DB-4D50-B2D4-388EE9E29126}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\common">
-      <UniqueIdentifier>{57743edd-00bc-4281-9c59-e4d785df03a4}</UniqueIdentifier>
+      <UniqueIdentifier>{828568AC-024C-4FAB-8B3D-62B5EE61D000}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\common">
-      <UniqueIdentifier>{308f7ed3-af26-4d69-8925-7203894ef468}</UniqueIdentifier>
+      <UniqueIdentifier>{106172CA-255C-4BF8-950C-CCE50A239B89}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\test">
-      <UniqueIdentifier>{d7ef920e-4335-4ea9-96f3-e4721d61b5b5}</UniqueIdentifier>
+      <UniqueIdentifier>{BA64DD96-3380-49B7-862F-CBE507BF489B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\test">
-      <UniqueIdentifier>{7e476eee-06d3-440e-89c1-29c78a21daa9}</UniqueIdentifier>
+      <UniqueIdentifier>{2265E5AE-D933-4465-B365-6161938108F6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\miniz">
-      <UniqueIdentifier>{3800b9bf-c28e-489f-8792-64b1b5a58b40}</UniqueIdentifier>
+      <UniqueIdentifier>{22F21220-5EE1-4066-B397-69DE6509570B}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -474,6 +474,9 @@
     </ClCompile>
     <ClCompile Include="..\soundlib\S3MTools.cpp">
       <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_test.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Dither.cpp">
       <Filter>Source Files\soundlib</Filter>
