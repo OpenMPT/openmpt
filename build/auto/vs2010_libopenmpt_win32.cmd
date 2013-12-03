@@ -23,7 +23,7 @@ xcopy /e /y /c ..\..\externals\*.* include
 
 cd libopenmpt || goto error
  devenv libopenmpt.sln /clean "Release|Win32" || goto error
- devenv libopenmpt_foobar2000.sln /clean "Release|Win32" || goto error
+ devenv foo_openmpt.sln /clean "Release|Win32" || goto error
 cd .. || goto error
 cd openmpt123 || goto error
  devenv openmpt123.sln /clean "Release|Win32" || goto error
@@ -31,7 +31,7 @@ cd .. || goto error
 
 cd libopenmpt || goto error
  devenv libopenmpt.sln /build "Release|Win32" || goto error
- devenv libopenmpt_foobar2000.sln /build "Release|Win32" || goto error
+ devenv foo_openmpt.sln /build "Release|Win32" || goto error
 cd .. || goto error
 cd openmpt123 || goto error
  devenv openmpt123.sln /build "Release|Win32" || goto error
