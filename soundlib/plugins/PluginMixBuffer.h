@@ -106,12 +106,12 @@ public:
 		return true;
 	}
 
-	// Silence all output buffers.
+	// Silence all input buffers.
 	void ClearInputBuffers(size_t numSamples)
 	//---------------------------------------
 	{
 		ASSERT(numSamples <= bufferSize);
-		for(size_t i = 0; i < outputs; i++)
+		for(size_t i = 0; i < inputs; i++)
 		{
 			memset(inputsArray[i], 0, numSamples * sizeof(buffer_t));
 		}
