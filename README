@@ -38,12 +38,12 @@ How to compile libopenmpt and openmpt123:
       Winamp/ from WA5.55_SDK.exe to include/winamp/.
       Please visit http://wiki.winamp.com/wiki/Plug-in_Developer to download
       the SDK.
-      Exclude libopenmpt_winamp.cpp from build to disable.
+      You can disable in_openmpt in the solution configuration.
     - xmplay SDK:
       To build libopenmpt with xmplay input plugin support, copy the contents
       of xmp-sdk.zip into include/xmplay/.
       Please visit http://www.un4seen.com/xmplay.html to download to SDK.
-      Exclude libopenmpt_xmplay.cpp from build to disable.
+      You can disable xmp-openmpt in the solution configuration.
   - The openmpt123 solution is in openmpt123/openmpt123.sln.
 - Makefile
   The makefile resides in openmpt123/Makefile. You should cd into openmpt123
