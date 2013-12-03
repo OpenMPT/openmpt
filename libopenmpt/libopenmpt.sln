@@ -10,6 +10,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_settings", "libo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmptDLL", "libopenmptDLL.vcxproj", "{A1C5B6FA-F333-4999-8DF0-BE2F5FD4B882}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "in_openmpt", "in_openmpt.vcxproj", "{268A016B-2468-4849-8444-782752F555FC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xmp-openmpt", "xmp-openmpt.vcxproj", "{6E0BF509-12E3-413D-88FF-4EE4AB0019F1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_modplug", "libopenmpt_modplug.vcxproj", "{78C5DE5D-62BA-41EB-9A70-AE9C20536450}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -40,6 +46,26 @@ Global
 		{A1C5B6FA-F333-4999-8DF0-BE2F5FD4B882}.Release|Win32.Build.0 = Release|Win32
 		{A1C5B6FA-F333-4999-8DF0-BE2F5FD4B882}.Release|x64.ActiveCfg = Release|x64
 		{A1C5B6FA-F333-4999-8DF0-BE2F5FD4B882}.Release|x64.Build.0 = Release|x64
+		{268A016B-2468-4849-8444-782752F555FC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{268A016B-2468-4849-8444-782752F555FC}.Debug|Win32.Build.0 = Debug|Win32
+		{268A016B-2468-4849-8444-782752F555FC}.Debug|x64.ActiveCfg = Debug|Win32
+		{268A016B-2468-4849-8444-782752F555FC}.Release|Win32.ActiveCfg = Release|Win32
+		{268A016B-2468-4849-8444-782752F555FC}.Release|Win32.Build.0 = Release|Win32
+		{268A016B-2468-4849-8444-782752F555FC}.Release|x64.ActiveCfg = Release|Win32
+		{6E0BF509-12E3-413D-88FF-4EE4AB0019F1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6E0BF509-12E3-413D-88FF-4EE4AB0019F1}.Debug|Win32.Build.0 = Debug|Win32
+		{6E0BF509-12E3-413D-88FF-4EE4AB0019F1}.Debug|x64.ActiveCfg = Debug|Win32
+		{6E0BF509-12E3-413D-88FF-4EE4AB0019F1}.Release|Win32.ActiveCfg = Release|Win32
+		{6E0BF509-12E3-413D-88FF-4EE4AB0019F1}.Release|Win32.Build.0 = Release|Win32
+		{6E0BF509-12E3-413D-88FF-4EE4AB0019F1}.Release|x64.ActiveCfg = Release|Win32
+		{78C5DE5D-62BA-41EB-9A70-AE9C20536450}.Debug|Win32.ActiveCfg = Debug|Win32
+		{78C5DE5D-62BA-41EB-9A70-AE9C20536450}.Debug|Win32.Build.0 = Debug|Win32
+		{78C5DE5D-62BA-41EB-9A70-AE9C20536450}.Debug|x64.ActiveCfg = Debug|x64
+		{78C5DE5D-62BA-41EB-9A70-AE9C20536450}.Debug|x64.Build.0 = Debug|x64
+		{78C5DE5D-62BA-41EB-9A70-AE9C20536450}.Release|Win32.ActiveCfg = Release|Win32
+		{78C5DE5D-62BA-41EB-9A70-AE9C20536450}.Release|Win32.Build.0 = Release|Win32
+		{78C5DE5D-62BA-41EB-9A70-AE9C20536450}.Release|x64.ActiveCfg = Release|x64
+		{78C5DE5D-62BA-41EB-9A70-AE9C20536450}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
