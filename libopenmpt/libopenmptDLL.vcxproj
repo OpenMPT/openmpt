@@ -89,7 +89,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -110,7 +110,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -136,8 +136,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <StringPooling>true</StringPooling>
@@ -153,12 +153,7 @@
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
     </PreBuildEvent>
-    <PostBuildEvent>
-      <Command>copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\in_openmpt.dll
-copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\xmp-openmpt.dll
-copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -169,8 +164,8 @@ copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <StringPooling>true</StringPooling>
@@ -186,10 +181,7 @@ copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
     </PreBuildEvent>
-    <PostBuildEvent>
-      <Command>copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\common\AudioCriticalSection.h" />
@@ -212,8 +204,6 @@ copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\common\version.h" />
     <ClInclude Include="..\common\versionNumber.h" />
-    <ClInclude Include="..\include\pugixml\src\pugiconfig.hpp" />
-    <ClInclude Include="..\include\pugixml\src\pugixml.hpp" />
     <ClInclude Include="..\soundlib\AudioReadTarget.h" />
     <ClInclude Include="..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\soundlib\Dither.h" />
@@ -279,7 +269,6 @@ copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
     <ClCompile Include="..\common\typedefs.cpp" />
     <ClCompile Include="..\common\version.cpp" />
     <ClCompile Include="..\include\miniz\miniz.c" />
-    <ClCompile Include="..\include\pugixml\src\pugixml.cpp" />
     <ClCompile Include="..\soundlib\Dither.cpp" />
     <ClCompile Include="..\soundlib\Dlsbank.cpp" />
     <ClCompile Include="..\soundlib\Fastmix.cpp" />
@@ -351,21 +340,6 @@ copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
     <ClCompile Include="libopenmpt_cxx.cpp" />
     <ClCompile Include="libopenmpt_impl.cpp" />
     <ClCompile Include="libopenmpt_interactive.cpp" />
-    <ClCompile Include="libopenmpt_modplug.c">
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
-    </ClCompile>
-    <ClCompile Include="libopenmpt_test.cpp" />
-    <ClCompile Include="libopenmpt_winamp.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="libopenmpt_xmplay.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{AB2E7546-F2B8-4631-9715-63EA2426ACBC}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{180D2B19-0330-4C38-93DC-6616D684E1AA}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{F4138DCF-90EE-41BF-BDDB-E13FF5BDDD2C}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\pugixml">
+      <UniqueIdentifier>{2cf6ac76-86c7-45f3-856b-7d9f3b71096b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pugixml">
+      <UniqueIdentifier>{32038de6-25cb-4ed5-848d-b4319ea01a9b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="xmp-openmpt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\pugixml\src\pugixml.cpp">
+      <Filter>Source Files\pugixml</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\pugixml\src\pugiconfig.hpp">
+      <Filter>Header Files\pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pugixml\src\pugixml.hpp">
+      <Filter>Header Files\pugixml</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
