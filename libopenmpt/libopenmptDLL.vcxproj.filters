@@ -2,33 +2,39 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <UniqueIdentifier>{09F809D5-B9F4-4EE6-90F9-B86BA0FA3CA3}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <UniqueIdentifier>{B78AAE73-4372-47E1-8046-015DD8082B74}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Source Files\soundlib">
-      <UniqueIdentifier>{31765892-63ca-4ab1-8fba-cd7a44e7b6cc}</UniqueIdentifier>
+      <UniqueIdentifier>{D602F9EA-C24B-428A-9681-899747A05BC8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\soundlib">
-      <UniqueIdentifier>{89063439-f7da-443d-bd44-9640b86240f2}</UniqueIdentifier>
+      <UniqueIdentifier>{BFAAB8A2-1782-4C36-A473-76275B054AD0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\common">
-      <UniqueIdentifier>{57743edd-00bc-4281-9c59-e4d785df03a4}</UniqueIdentifier>
+      <UniqueIdentifier>{63889AAE-8950-4182-BAB7-86B59E562BDF}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\common">
-      <UniqueIdentifier>{308f7ed3-af26-4d69-8925-7203894ef468}</UniqueIdentifier>
+      <UniqueIdentifier>{4B409AAC-E83A-4697-92CE-E6AC3BCAFC98}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\test">
-      <UniqueIdentifier>{d7ef920e-4335-4ea9-96f3-e4721d61b5b5}</UniqueIdentifier>
+      <UniqueIdentifier>{7A9DFCA8-1412-48AD-AA8B-9AD660311BBC}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\test">
-      <UniqueIdentifier>{7e476eee-06d3-440e-89c1-29c78a21daa9}</UniqueIdentifier>
+      <UniqueIdentifier>{0104E590-BA3F-429C-9B3E-09E85C392231}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pugixml">
+      <UniqueIdentifier>{E1F0BD42-F986-4CB0-A742-5945771CAC94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pugixml">
+      <UniqueIdentifier>{1FBAD40C-9890-49C7-994B-D4346A2127BE}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\miniz">
-      <UniqueIdentifier>{3800b9bf-c28e-489f-8792-64b1b5a58b40}</UniqueIdentifier>
+      <UniqueIdentifier>{923D49A8-AD2D-4C1E-920D-EC2D6A995F41}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -209,6 +215,12 @@
     <ClInclude Include="..\common\Logging.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\pugixml\src\pugiconfig.hpp">
+      <Filter>Header Files\pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pugixml\src\pugixml.hpp">
+      <Filter>Header Files\pugixml</Filter>
+    </ClInclude>
     <ClInclude Include="..\soundlib\S3MTools.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
@@ -229,6 +241,12 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\Tagging.h">
       <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="libopenmpt_settings.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libopenmpt_settings.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="libopenmpt_stream_callbacks_fd.h">
       <Filter>Header Files</Filter>
@@ -454,6 +472,12 @@
     <ClCompile Include="..\common\version.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="libopenmpt_modplug.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_winamp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="libopenmpt_c.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -461,6 +485,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="libopenmpt_interactive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_xmplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Load_digi.cpp">
@@ -472,8 +499,14 @@
     <ClCompile Include="libopenmpt_impl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\include\pugixml\src\pugixml.cpp">
+      <Filter>Source Files\pugixml</Filter>
+    </ClCompile>
     <ClCompile Include="..\soundlib\S3MTools.cpp">
       <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_test.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Dither.cpp">
       <Filter>Source Files\soundlib</Filter>

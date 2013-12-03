@@ -19,28 +19,28 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{812A654D-99BE-4D13-B97F-86332AD3E363}</ProjectGuid>
-    <RootNamespace>libopenmpt</RootNamespace>
+    <ProjectGuid>{A1C5B6FA-F333-4999-8DF0-BE2F5FD4B882}</ProjectGuid>
+    <RootNamespace>libopenmptDLL</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -48,78 +48,84 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\build\lib\$(Platform)\$(Configuration)\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>..\build\lib\$(Platform)\$(Configuration)\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\build\lib\$(Platform)\$(Configuration)\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\bin\$(Platform)\</OutDir>
     <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>libopenmpt</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\build\lib\$(Platform)\$(Configuration)\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\bin\$(Platform)\</OutDir>
     <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\bin\$(Platform)-Debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\bin\$(Platform)-Debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>libopenmpt</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>libopenmpt</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
     </PreBuildEvent>
-    <Lib>
-      <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
-    </Lib>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
     </PreBuildEvent>
-    <Lib>
-      <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
-    </Lib>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -129,24 +135,30 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <StringPooling>true</StringPooling>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
     </PreBuildEvent>
-    <Lib>
-      <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
-    </Lib>
+    <PostBuildEvent>
+      <Command>copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\in_openmpt.dll
+copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\xmp-openmpt.dll
+copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -156,24 +168,28 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <StringPooling>true</StringPooling>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
     </PreBuildEvent>
-    <Lib>
-      <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
-    </Lib>
+    <PostBuildEvent>
+      <Command>copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\common\AudioCriticalSection.h" />
@@ -196,6 +212,8 @@
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\common\version.h" />
     <ClInclude Include="..\common\versionNumber.h" />
+    <ClInclude Include="..\include\pugixml\src\pugiconfig.hpp" />
+    <ClInclude Include="..\include\pugixml\src\pugixml.hpp" />
     <ClInclude Include="..\soundlib\AudioReadTarget.h" />
     <ClInclude Include="..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\soundlib\Dither.h" />
@@ -244,6 +262,8 @@
     <ClInclude Include="libopenmpt_impl.hpp" />
     <ClInclude Include="libopenmpt_interactive.hpp" />
     <ClInclude Include="libopenmpt_internal.h" />
+    <ClInclude Include="libopenmpt_settings.h" />
+    <ClInclude Include="libopenmpt_settings.hpp" />
     <ClInclude Include="libopenmpt_stream_callbacks_fd.h" />
     <ClInclude Include="libopenmpt_stream_callbacks_file.h" />
     <ClInclude Include="libopenmpt_version.h" />
@@ -259,6 +279,7 @@
     <ClCompile Include="..\common\typedefs.cpp" />
     <ClCompile Include="..\common\version.cpp" />
     <ClCompile Include="..\include\miniz\miniz.c" />
+    <ClCompile Include="..\include\pugixml\src\pugixml.cpp" />
     <ClCompile Include="..\soundlib\Dither.cpp" />
     <ClCompile Include="..\soundlib\Dlsbank.cpp" />
     <ClCompile Include="..\soundlib\Fastmix.cpp" />
@@ -330,6 +351,21 @@
     <ClCompile Include="libopenmpt_cxx.cpp" />
     <ClCompile Include="libopenmpt_impl.cpp" />
     <ClCompile Include="libopenmpt_interactive.cpp" />
+    <ClCompile Include="libopenmpt_modplug.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_test.cpp" />
+    <ClCompile Include="libopenmpt_winamp.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_xmplay.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
