@@ -2,24 +2,11 @@
 
 set MY_DIR=%CD%
 
-if exist "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" goto msvc64bit
-if exist "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" goto msvc32bit
+call build\auto\setup_vs2010.cmd
 
-goto error
-
-:msvc32bit
-call "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
-goto compile
-
-:msvc64bit
-call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
-goto compile
-
-:compile
+call build\auto\prepare_win.cmd
 
 
-
-xcopy /e /y /c ..\..\externals\*.* include
 
 cd libopenmpt || goto error
  devenv libopenmpt.sln /clean "Release|x64" || goto error
