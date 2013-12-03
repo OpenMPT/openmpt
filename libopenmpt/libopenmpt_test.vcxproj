@@ -85,7 +85,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -106,7 +106,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -132,7 +132,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -149,12 +149,7 @@
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
     </PreBuildEvent>
-    <PostBuildEvent>
-      <Command>copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\in_openmpt.dll
-copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\xmp-openmpt.dll
-copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -165,7 +160,7 @@ copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include;../include/modplug/include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -182,10 +177,7 @@ copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
     <PreBuildEvent>
       <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
     </PreBuildEvent>
-    <PostBuildEvent>
-      <Command>copy /y ..\bin\$(Platform)\libopenmpt.dll ..\bin\$(Platform)\libmodplug.dll
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\common\AudioCriticalSection.h" />
