@@ -2,5 +2,6 @@
 include Makefile.config.defaults
 
 LDLIBS += -liconv
+CPPFLAGS += -DMPT_ICONV_NO_WCHAR
 
 DYNLINK=0
