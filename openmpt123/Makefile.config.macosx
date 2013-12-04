@@ -1,7 +1,9 @@
 
 include Makefile.config.defaults
 
-LDLIBS += -liconv
-CPPFLAGS += -DMPT_ICONV_NO_WCHAR
+#LDLIBS += -liconv
+#CPPFLAGS += -DMPT_ICONV_NO_WCHAR
+
+CPPFLAGS += -DMPT_CHARSET_CPP
 
 DYNLINK=0
