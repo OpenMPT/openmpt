@@ -139,51 +139,51 @@ struct ModCharsetInfo
 {
 	MODTYPE type;
 	MOD_CHARSET_CERTAINTY certainty;
-	const char *charset;
+	mpt::Charset charset;
 };
 
 static const ModCharsetInfo ModCharsetInfos[] =
 {
 	// Amiga
-	{ MOD_TYPE_OKT , MOD_CHARSET_IS     , "ISO-8859-1"  },
-	{ MOD_TYPE_DBM , MOD_CHARSET_IS     , "ISO-8859-1"  },
-	{ MOD_TYPE_DIGI, MOD_CHARSET_IS     , "ISO-8859-1"  },
+	{ MOD_TYPE_OKT , MOD_CHARSET_IS     , mpt::CharsetISO8859_1  },
+	{ MOD_TYPE_DBM , MOD_CHARSET_IS     , mpt::CharsetISO8859_1  },
+	{ MOD_TYPE_DIGI, MOD_CHARSET_IS     , mpt::CharsetISO8859_1  },
 	// Amiga // DOS
-	{ MOD_TYPE_MOD , MOD_CHARSET_MAYBE  , "ISO-8859-1"  },
-	{ MOD_TYPE_MED , MOD_CHARSET_MAYBE  , "ISO-8859-1"  },
+	{ MOD_TYPE_MOD , MOD_CHARSET_MAYBE  , mpt::CharsetISO8859_1  },
+	{ MOD_TYPE_MED , MOD_CHARSET_MAYBE  , mpt::CharsetISO8859_1  },
 	// DOS
-	{ MOD_TYPE_S3M , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_XM  , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_MTM , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_IT  , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_669 , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_STM , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_FAR , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_AMF , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_AMF0, MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_MDL , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_DMF , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_PTM , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_PSM , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_J2B , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_IMF , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_ULT , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_AMS , MOD_CHARSET_IS     , "Windows-1252"},	// We convert the custom AMS special character set to our own set.
-	{ MOD_TYPE_AMS2, MOD_CHARSET_IS     , "Windows-1252"},	// ditto
-	{ MOD_TYPE_DSM , MOD_CHARSET_IS     , "cp437"       },
+	{ MOD_TYPE_S3M , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_XM  , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_MTM , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_IT  , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_669 , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_STM , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_FAR , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_AMF , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_AMF0, MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_MDL , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_DMF , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_PTM , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_PSM , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_J2B , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_IMF , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_ULT , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_AMS , MOD_CHARSET_IS     , mpt::CharsetWindows1252},	// We convert the custom AMS special character set to our own set.
+	{ MOD_TYPE_AMS2, MOD_CHARSET_IS     , mpt::CharsetWindows1252},	// ditto
+	{ MOD_TYPE_DSM , MOD_CHARSET_IS     , mpt::CharsetCP437      },
 	// Windows
-	{ MOD_TYPE_MT2 , MOD_CHARSET_MAYBE  , "Windows-1252"},
-	{ MOD_TYPE_MPT , MOD_CHARSET_MAYBE  , "Windows-1252"},
+	{ MOD_TYPE_MT2 , MOD_CHARSET_MAYBE  , mpt::CharsetWindows1252},
+	{ MOD_TYPE_MPT , MOD_CHARSET_MAYBE  , mpt::CharsetWindows1252},
 	// random stuff
-	{ MOD_TYPE_MID , MOD_CHARSET_IS     , "US-ASCII"    },
-	{ MOD_TYPE_WAV , MOD_CHARSET_MAYBE  , "US-ASCII"    },
+	{ MOD_TYPE_MID , MOD_CHARSET_IS     , mpt::CharsetASCII      },
+	{ MOD_TYPE_WAV , MOD_CHARSET_MAYBE  , mpt::CharsetASCII      },
 	// end
-	{ MOD_TYPE_NONE, MOD_CHARSET_UNKNOWN, ""            }
+	{ MOD_TYPE_NONE, MOD_CHARSET_UNKNOWN, mpt::CharsetASCII      }
 };
 
 
-std::pair<MOD_CHARSET_CERTAINTY, std::string> CSoundFile::GetCharsetFromModType(MODTYPE modtype)
-//----------------------------------------------------------------------------------------------
+std::pair<MOD_CHARSET_CERTAINTY, mpt::Charset> CSoundFile::GetCharsetFromModType(MODTYPE modtype)
+//-----------------------------------------------------------------------------------------------
 {
 	// This is just a rough heuristic.
 	// It could be improved by adjusting the charset according to the tracker that had been used to save the file.
@@ -195,7 +195,7 @@ std::pair<MOD_CHARSET_CERTAINTY, std::string> CSoundFile::GetCharsetFromModType(
 		}
 	}
 	// fallback
-	return std::make_pair(MOD_CHARSET_UNKNOWN, "");
+	return std::make_pair(MOD_CHARSET_UNKNOWN, mpt::CharsetASCII);
 }
 
 
