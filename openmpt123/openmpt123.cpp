@@ -373,6 +373,8 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 		log << "     --filter n            Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
 		log << "     --ramping n           Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
 		log << std::endl;
+		log << "     --[no-]shuffle        Shuffle playlist (-1 means forever) [default: " << commandlineflags().shuffle << "]" << std::endl;
+		log << std::endl;
 		log << "     --repeat n            Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		log << "     --seek n              Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
 		log << std::endl;
@@ -1050,6 +1052,20 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 	}
 	
 	double duration = mod.get_duration_seconds();
+	if ( flags.filenames.size() > 1 ) {
+		log << "Playlist...: " << flags.playlist_index + 1 << "/" << flags.filenames.size() << std::endl;
+		log << "Prev/Next..: "
+		    << "'"
+		    << ( flags.playlist_index > 0 ? get_filename( flags.filenames[ flags.playlist_index - 1 ] ) : std::string() )
+		    << "'"
+		    << " / "
+		    << "['" << get_filename( filename ) << "']"
+		    << " / "
+		    << "'"
+		    << ( flags.playlist_index + 1 < flags.filenames.size() ? get_filename( flags.filenames[ flags.playlist_index + 1 ] ) : std::string() )
+		    << "'"
+		    << std::endl;
+	}
 	if ( flags.verbose ) {
 		log << "Path.......: " << filename << std::endl;
 	}
@@ -1183,12 +1199,14 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 
 static void render_files( commandlineflags & flags, textout & log, write_buffers_interface & audio_stream ) {
+	std::random_shuffle( flags.filenames.begin(), flags.filenames.end() );
 	std::vector<std::string>::iterator filename = flags.filenames.begin();
 	while ( true ) {
 		if ( filename == flags.filenames.end() ) {
 			break;
 		}
 		try {
+			flags.playlist_index = filename - flags.filenames.begin();
 			render_file( flags, *filename, log, audio_stream );
 			filename++;
 			continue;
@@ -1201,7 +1219,7 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 		} catch ( next_file & e ) {
 			while ( filename != flags.filenames.end() && e.count ) {
 				e.count--;
-				++filename++;
+				++filename;
 			}
 			continue;
 		} catch ( ... ) {
@@ -1374,6 +1392,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				std::istringstream istr( nextarg );
 				istr >> flags.ramping;
 				++i;
+			} else if ( arg == "--shuffle" ) {
+				flags.shuffle = true;
+			} else if ( arg == "--no-shuffle" ) {
+				flags.shuffle = false;
 			} else if ( arg == "--repeat" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.repeatcount;
@@ -1453,6 +1475,8 @@ static int main( int argc, char * argv [] ) {
 		#else
 			args = std::vector<std::string>( argv, argv + argc );
 		#endif
+		
+		std::srand( std::time( NULL ) );
 
 		flags = parse_openmpt123( args );
 
