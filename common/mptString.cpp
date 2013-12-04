@@ -102,6 +102,37 @@ static const char * CharsetToStringTranslit(Charset charset)
 	}
 	return 0;
 }
+static const char * Charset_wchar_t()
+{
+	#if !defined(MPT_ICONV_NO_WCHAR)
+		return "wchar_t";
+	#else // MPT_ICONV_NO_WCHAR
+		// iconv on OSX does not handle wchar_t if no locale is set
+		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
+		if(sizeof(wchar_t) == 2)
+		{
+			// "UTF-16" generates BOM
+			#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+				return "UTF-16LE";
+			#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+				return "UTF-16BE";
+			#else
+				STATIC_ASSERT(false);
+			#endif
+		} else if(sizeof(wchar_t) == 4)
+		{
+			// "UTF-32" generates BOM
+			#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+				return "UTF-32LE";
+			#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+				return "UTF-32BE";
+			#else
+				STATIC_ASSERT(false);
+			#endif
+		}
+		return "";
+	#endif // !MPT_ICONV_NO_WCHAR | MPT_ICONV_NO_WCHAR
+}
 #endif // WIN32
 
 
@@ -122,10 +153,10 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		return reinterpret_cast<const typename Tdststring::value_type*>(&encoded_string[0]);
 	#else // !WIN32
 		iconv_t conv = iconv_t();
-		conv = iconv_open(CharsetToStringTranslit(charset), "wchar_t");
+		conv = iconv_open(CharsetToStringTranslit(charset), Charset_wchar_t());
 		if(!conv)
 		{
-			conv = iconv_open(CharsetToString(charset), "wchar_t");
+			conv = iconv_open(CharsetToString(charset), Charset_wchar_t());
 			if(!conv)
 			{
 				throw std::runtime_error("iconv conversion not working");
@@ -178,7 +209,7 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		return &decoded_string[0];
 	#else // !WIN32
 		iconv_t conv = iconv_t();
-		conv = iconv_open("wchar_t", CharsetToString(charset));
+		conv = iconv_open(Charset_wchar_t(), CharsetToString(charset));
 		if(!conv)
 		{
 			throw std::runtime_error("iconv conversion not working");
