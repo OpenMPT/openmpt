@@ -33,8 +33,13 @@ int main( int /*argc*/, char * /*argv*/ [] ) {
 		// run test with "C" / classic() locale
 		openmpt::run_tests();
 
-		// try setting the locale to the user locale
+		// try setting the C locale to the user locale
 		setlocale( LC_ALL, "" );
+		
+		// run all tests again with a set C locale
+		openmpt::run_tests();
+		
+		// try to set the C and C++ locales to the user locale
 		try {
 			std::locale::global( std::locale( "" ) );
 		} catch ( ... ) {
@@ -42,7 +47,7 @@ int main( int /*argc*/, char * /*argv*/ [] ) {
 			// This is no problem for libopenmpt, just continue.
 		}
 		
-		// and now, run all tests again with the user locale
+		// and now, run all tests once again
 		openmpt::run_tests();
 
 	} catch ( const std::exception & e ) {
