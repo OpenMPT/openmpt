@@ -144,8 +144,8 @@ static const uint32 CharsetTableCP437[256] = {
 	0x2261,0x00b1,0x2265,0x2264,0x2320,0x2321,0x00f7,0x2248,0x00b0,0x2219,0x00b7,0x221a,0x207f,0x00b2,0x25a0,0x00a0
 };
 
-static std::wstring FromTable(const std::string &str, const uint32 (&table)[256], wchar_t replacement = L'\uFFFD')
-//----------------------------------------------------------------------------------------------------------------
+static std::wstring From8bit(const std::string &str, const uint32 (&table)[256], wchar_t replacement = L'\uFFFD')
+//---------------------------------------------------------------------------------------------------------------
 {
 	std::wstring res;
 	for(std::size_t i = 0; i < str.length(); ++i)
@@ -162,8 +162,8 @@ static std::wstring FromTable(const std::string &str, const uint32 (&table)[256]
 	return res;
 }
 
-static std::string ToTable(const std::wstring &str, const uint32 (&table)[256], char replacement = '?')
-//-----------------------------------------------------------------------------------------------------
+static std::string To8bit(const std::wstring &str, const uint32 (&table)[256], char replacement = '?')
+//----------------------------------------------------------------------------------------------------
 {
 	std::string res;
 	for(std::size_t i = 0; i < str.length(); ++i)
