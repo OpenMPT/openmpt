@@ -20,8 +20,6 @@ class SongMessage : public std::string
 {
 public:
 
-	typedef char (*ConverterFunc)(char);
-
 	// Line ending types (for reading song messages from module files)
 	enum LineEnding
 	{
@@ -41,24 +39,21 @@ public:
 	// [in]  data: pointer to the data in memory that is going to be read
 	// [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 	// [in]  lineEnding: line ending formatting of the text in memory.
-	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
-	bool Read(const void *data, const size_t length, LineEnding lineEnding, ConverterFunc pTextConverter = nullptr);
-	bool Read(FileReader &file, const size_t length, LineEnding lineEnding, ConverterFunc pTextConverter = nullptr);
+	bool Read(const void *data, const size_t length, LineEnding lineEnding);
+	bool Read(FileReader &file, const size_t length, LineEnding lineEnding);
 
 	// Read comments with fixed line length from a mapped file.
 	// [in]  data: pointer to the data in memory that is going to be read
 	// [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 	// [in]  lineLength: The fixed length of a line.
 	// [in]  lineEndingLength: The padding space between two fixed lines. (there could for example be a null char after every line)
-	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
-	bool ReadFixedLineLength(const void *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, ConverterFunc pTextConverter = nullptr);
-	bool ReadFixedLineLength(FileReader &file, const size_t length, const size_t lineLength, const size_t lineEndingLength, ConverterFunc pTextConverter = nullptr);
+	bool ReadFixedLineLength(const void *data, const size_t length, const size_t lineLength, const size_t lineEndingLength);
+	bool ReadFixedLineLength(FileReader &file, const size_t length, const size_t lineLength, const size_t lineEndingLength);
 
 	// Retrieve song message.
 	// [in]  lineEnding: line ending formatting of the text in memory.
-	// [in]  pTextConverter: Pointer to a callback function which can be used to post-process the written characters, if necessary (nullptr otherwise).
 	// [out] returns formatted song message.
-	std::string GetFormatted(const LineEnding lineEnding, ConverterFunc pTextConverter = nullptr) const;
+	std::string GetFormatted(const LineEnding lineEnding) const;
 };

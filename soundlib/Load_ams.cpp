@@ -18,28 +18,10 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#include <iterator>
 
 /////////////////////////////////////////////////////////////////////
 // Common code for both AMS formats
-
-// Callback function for reading text
-static char ConvertAMSTextChars(char c)
-//-------------------------------------
-{
-	// Convert to Windows-1252 for now.
-	switch((unsigned char)c)
-	{
-	case 0x00: return ' ';
-	case 0x04: return '\xE4';	// Lower-case ae
-	case 0x06: return '\xE5';	// Lower-case a-ring
-	case 0x0E: return '\xC4';	// Upper-case AE
-	case 0x0F: return '\xC5';	// Upper-case A-ring
-	case 0x14: return '\xF6';	// Lower-case oe
-	case 0x19: return '\xD6';	// Upper-case OE
-	}
-	return c;
-}
-
 
 // Read variable-length AMS string (we ignore the maximum text length specified by the AMS specs and accept any length).
 template<size_t destSize>
@@ -481,8 +463,12 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 
+		std::string str;
+		std::copy(textOut.begin(), textOut.end(), std::back_inserter(str));
+		str = mpt::To(mpt::CharsetCP437, mpt::CharsetCP437AMS, str);
+
 		// Packed text doesn't include any line breaks!
-		songMessage.ReadFixedLineLength(&textOut[0], textOut.size(), 76, 0, ConvertAMSTextChars);
+		songMessage.ReadFixedLineLength(str.c_str(), str.length(), 76, 0);
 	}
 
 	// Read Order List
@@ -528,30 +514,6 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 
 /////////////////////////////////////////////////////////////////////
 // AMS (Velvet Studio) 2.0 - 2.02 loader
-
-
-// Callback function for reading text - looking at Velvet Studio's bitmap font (TPIC32.PCX), these appear to be the only supported non-ASCII chars.
-static char ConvertAMS2TextChars(char c)
-//--------------------------------------
-{
-	// Convert to Windows-1252 for now.
-	const char controlChars[] =
-	{ 
-		' ', '\xA9', 'v' /* actually supposed to be a root/check sign */, '\xB7',
-		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',	// Small GUI letters
-		' ', '\xA7'
-	};
-	const char highChars[] = { '\xE4', ' ', '\xE5', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '\xC4', '\xC5', ' ', ' ', ' ', ' ', '\xF6', ' ', ' ', ' ', ' ', '\xD6' };
-
-	if((unsigned char)c < CountOf(controlChars))
-	{
-		return controlChars[(unsigned char)c];
-	} else if((unsigned char)c >= 0x84 && (unsigned char)c < 0x84 + CountOf(highChars))
-	{
-		return highChars[(unsigned char)c - 0x84];
-	}
-	return c;
-}
 
 
 #ifdef NEEDS_PRAGMA_PACK
@@ -923,7 +885,10 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	uint8 composerLength = file.ReadUint8();
 	if(composerLength)
 	{
-		songMessage.Read(file, composerLength, SongMessage::leAutodetect, ConvertAMS2TextChars);
+		std::string str;
+		file.ReadString<mpt::String::spacePadded>(str, composerLength);
+		str = mpt::To(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
+		songMessage.Read(str.c_str(), str.length(), SongMessage::leAutodetect);
 	}
 
 	// Channel names
@@ -962,8 +927,11 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 				textOut[writeLen++] = c;
 			}
 		}
+		std::string str;
+		std::copy(textOut.begin(), textOut.begin() + descriptionHeader.unpackedLen, std::back_inserter(str));
+		str = mpt::To(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
 		// Packed text doesn't include any line breaks!
-		songMessage.ReadFixedLineLength(&textOut[0], descriptionHeader.unpackedLen, 74, 0, ConvertAMS2TextChars);
+		songMessage.ReadFixedLineLength(str.c_str(), str.length(), 74, 0);
 	}
 
 	// Read Order List

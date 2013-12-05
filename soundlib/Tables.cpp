@@ -168,8 +168,8 @@ static const ModCharsetInfo ModCharsetInfos[] =
 	{ MOD_TYPE_J2B , MOD_CHARSET_IS     , mpt::CharsetCP437      },
 	{ MOD_TYPE_IMF , MOD_CHARSET_IS     , mpt::CharsetCP437      },
 	{ MOD_TYPE_ULT , MOD_CHARSET_IS     , mpt::CharsetCP437      },
-	{ MOD_TYPE_AMS , MOD_CHARSET_IS     , mpt::CharsetWindows1252},	// We convert the custom AMS special character set to our own set.
-	{ MOD_TYPE_AMS2, MOD_CHARSET_IS     , mpt::CharsetWindows1252},	// ditto
+	{ MOD_TYPE_AMS , MOD_CHARSET_IS     , mpt::CharsetCP437      },
+	{ MOD_TYPE_AMS2, MOD_CHARSET_IS     , mpt::CharsetCP437      },
 	{ MOD_TYPE_DSM , MOD_CHARSET_IS     , mpt::CharsetCP437      },
 	// Windows
 	{ MOD_TYPE_MT2 , MOD_CHARSET_MAYBE  , mpt::CharsetWindows1252},

@@ -174,6 +174,8 @@ enum Charset {
 	CharsetISO8859_15,
 
 	CharsetCP437,
+	CharsetCP437AMS,
+	CharsetCP437AMS2,
 
 	CharsetWindows1252,
 };
