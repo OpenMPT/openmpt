@@ -62,8 +62,16 @@ static std::string get_library_version_string() {
 	}
 	if ( MptVersion::IsDirty() ) {
 		str += ".2-modified";
+		if ( MptVersion::IsPackage() ) {
+			str += "-pkg";
+		}
 	} else if ( MptVersion::HasMixedRevisions() ) {
 		str += ".1-modified";
+		if ( MptVersion::IsPackage() ) {
+			str += "-pkg";
+		}
+	} else if ( MptVersion::IsPackage() ) {
+		str += ".0-pkg";
 	}
 	return str;
 }

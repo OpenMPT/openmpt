@@ -7,4 +7,6 @@
 #define OPENMPT_VERSION_DIRTY $WCMODS?true:false$
 #define OPENMPT_VERSION_MIXEDREVISIONS $WCMIXED?true:false$
 
+#define OPENMPT_VERSION_IS_PACKAGE false
+
 #define OPENMPT_VERSION_DATE "$WCNOW=%Y-%m-%d %H:%M:%S$"

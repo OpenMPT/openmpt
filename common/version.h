@@ -60,6 +60,9 @@ namespace MptVersion
 	// Return if the svn working copy had files checked out from different revisions and/or branches (if built from a svn working copy and tsvn was available during build)
 	bool HasMixedRevisions();
 
+	// Return whether the build was done from packaged source code (i.e. from the genertaed .zip or .tar source)
+	bool IsPackage();
+
 	// Return a string decribing the working copy state (dirty and/or mixed revisions) (if built from a svn working copy and tsvn was available during build)
 	std::string GetStateString(); // e.g. "" or "+mixed" or "+mixed+dirty" or "+dirty"
 
