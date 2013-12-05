@@ -5,9 +5,7 @@ set MY_DIR=%CD%
 
 
 
-cd bin || goto error
-Win32\libopenmpt_test.exe || goto error
-cd .. || goto error
+bin\Win32\libopenmpt_test.exe || goto error
 
 
 
