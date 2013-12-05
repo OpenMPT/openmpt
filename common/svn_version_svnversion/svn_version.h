@@ -5,6 +5,12 @@
 
 #define OPENMPT_VERSION_DATE __DATE__ " " __TIME__
 
+#ifdef BUILD_PACKAGE
+#define OPENMPT_VERSION_IS_PACKAGE true
+#else
+#define OPENMPT_VERSION_IS_PACKAGE false
+#endif
+
 #ifndef BUILD_SVNVERSION
 
 #define OPENMPT_VERSION_REVISION 0

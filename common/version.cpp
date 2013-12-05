@@ -134,6 +134,15 @@ bool HasMixedRevisions()
 	#endif
 }
 
+bool IsPackage()
+{
+	#if defined(OPENMPT_VERSION_IS_PACKAGE)
+		return OPENMPT_VERSION_IS_PACKAGE;
+	#else
+		return false;
+	#endif
+}
+
 std::string GetStateString()
 {
 	std::string retval;
@@ -144,6 +153,10 @@ std::string GetStateString()
 	if(IsDirty())
 	{
 		retval += "+dirty";
+	}
+	if(IsPackage())
+	{
+		retval += "-pkg";
 	}
 	return retval;
 }
@@ -193,6 +206,10 @@ std::string GetRevisionString()
 	if(IsDirty())
 	{
 		str += "+";
+	}
+	if(IsPackage())
+	{
+		str += "p";
 	}
 	return str;
 }
