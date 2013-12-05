@@ -1476,7 +1476,7 @@ static int main( int argc, char * argv [] ) {
 			args = std::vector<std::string>( argv, argv + argc );
 		#endif
 		
-		std::srand( std::time( NULL ) );
+		std::srand( static_cast<unsigned int>( std::time( NULL ) ) );
 
 		flags = parse_openmpt123( args );
 
