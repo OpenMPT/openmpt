@@ -523,16 +523,7 @@ void COptionsSoundcard::UpdateControls()
 	GetDlgItem(IDC_CHECK5)->EnableWindow(m_CurrentDeviceCaps.CanBoostThreadPriority ? TRUE : FALSE);
 	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
 	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
-	if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_DSOUND)
-	{
-		GetDlgItem(IDC_CHECK4)->SetWindowText("Use primary buffer");
-	} else if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO)
-	{
-		GetDlgItem(IDC_CHECK4)->SetWindowText("Keep device running");
-	} else
-	{
-		GetDlgItem(IDC_CHECK4)->SetWindowText("Use device exclusively");
-	}
+	GetDlgItem(IDC_CHECK4)->SetWindowText(mpt::ToCString(m_CurrentDeviceCaps.ExclusiveModeDescription));
 	CheckDlgButton(IDC_CHECK4, m_Settings.ExclusiveMode ? MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK5, m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
 }
