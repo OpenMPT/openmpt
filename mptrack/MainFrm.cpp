@@ -1603,7 +1603,10 @@ BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, Sound
 			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = GetModPlaying();
 			PauseMod();
 		}
-		gpSoundDevice->Close();
+		if(gpSoundDevice)
+		{
+			gpSoundDevice->Close();
+		}
 		TrackerSettings::Instance().SetSoundDeviceID(deviceID);
 		TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
 		TrackerSettings::Instance().MixerOutputChannels = deviceSettings.Channels;
