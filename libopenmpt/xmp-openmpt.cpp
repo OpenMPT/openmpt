@@ -54,6 +54,17 @@ static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING 
 #define SHORT_TITLE "xmp-openmpt"
 #define SHORTER_TITLE "openmpt"
 
+static CRITICAL_SECTION xmpopenmpt_mutex;
+class xmpopenmpt_lock {
+public:
+	xmpopenmpt_lock() {
+		EnterCriticalSection( &xmpopenmpt_mutex );
+	}
+	~xmpopenmpt_lock() {
+		LeaveCriticalSection( &xmpopenmpt_mutex );
+	}
+};
+
 static XMPFUNC_IN * xmpfin = NULL;
 static XMPFUNC_MISC * xmpfmisc = NULL;
 static XMPFUNC_FILE * xmpffile = NULL;
@@ -757,6 +768,7 @@ static double WINAPI openmpt_GetGranularity() {
 // return number of floats written. if it's less than requested, playback is ended...
 // so wait for more if there is more to come (use CheckCancel function to check if user wants to cancel)
 static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
+	xmpopenmpt_lock guard;
 	if ( !self->mod || self->num_channels == 0 ) {
 		return 0;
 	}
@@ -845,6 +857,7 @@ static char nibble_to_char( std::uint8_t nibble ) {
 }
 
 static BOOL WINAPI VisOpen(DWORD colors[3]) {
+	xmpopenmpt_lock guard;
 	viscolors[0] = colors[0];
 	viscolors[1] = colors[1];
 	viscolors[2] = colors[2];
@@ -856,10 +869,11 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	visbrushs[2] = CreateSolidBrush( viscolors[2] );
 	if ( !self->mod ) {
 		return FALSE;
-	}
+}
 	return TRUE;
 }
 static void WINAPI VisClose() {
+	xmpopenmpt_lock guard;
 	DeleteObject( vispens[0] );
 	DeleteObject( vispens[1] );
 	DeleteObject( vispens[2] );
@@ -868,12 +882,15 @@ static void WINAPI VisClose() {
 	DeleteObject( visbrushs[2] );
 }
 static void WINAPI VisSize(HDC dc, SIZE *size) {
+	xmpopenmpt_lock guard;
 
 }
 static BOOL WINAPI VisRender(DWORD *buf, SIZE size, DWORD flags) {
+	xmpopenmpt_lock guard;
 	return FALSE;
 }
 static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
+	xmpopenmpt_lock guard;
 	HGDIOBJ oldpen = SelectObject( dc, vispens[1] );
 	HGDIOBJ oldbrush = SelectObject( dc, visbrushs[0] );
 
@@ -969,6 +986,7 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	return TRUE;
 }
 static void WINAPI VisButton(DWORD x, DWORD y) {
+	xmpopenmpt_lock guard;
 
 }
 
@@ -1027,6 +1045,8 @@ static const char * xmp_openmpt_default_exts = "OpenMPT\0mptm/mptmz";
 static char * file_formats;
 
 static void xmp_openmpt_on_dll_load() {
+	ZeroMemory( &xmpopenmpt_mutex, sizeof( xmpopenmpt_mutex ) );
+	InitializeCriticalSection( &xmpopenmpt_mutex );
 	std::vector<char> filetypes_string;
 	filetypes_string.clear();
 	std::vector<std::string> extensions = openmpt::get_supported_extensions();
@@ -1070,6 +1090,7 @@ static void xmp_openmpt_on_dll_unload() {
 	}
 	HeapFree( GetProcessHeap(), 0, (LPVOID)xmpin.exts );
 	xmpin.exts = NULL;
+	DeleteCriticalSection( &xmpopenmpt_mutex );
 }
 
 static XMPIN * XMPIN_GetInterface_cxx( DWORD face, InterfaceProc faceproc ) {
