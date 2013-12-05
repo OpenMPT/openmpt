@@ -843,33 +843,33 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 
 #ifdef EXPERIMENTAL_VIS
 
+HDC visDC;
+HGDIOBJ visbitmap;
+
 DWORD viscolors[3];
 HPEN vispens[3];
 HBRUSH visbrushs[3];
+HFONT visfont;
 static int last_pattern = -1;
-static int last_row = -1;
-
-static char nibble_to_char( std::uint8_t nibble ) {
-	if ( nibble < 10 ) {
-		return '0' + nibble;
-	}
-	return 'a' + nibble - 10;
-}
 
 static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	xmpopenmpt_lock guard;
-	viscolors[0] = colors[0];
-	viscolors[1] = colors[1];
-	viscolors[2] = colors[2];
+	visDC = nullptr;
+	visbitmap = nullptr;
+	visfont = nullptr;
+	viscolors[0] = colors[0];	// Background
+	viscolors[1] = colors[1];	// Text
+	viscolors[2] = colors[2];	// Current row
 	vispens[0] = CreatePen( PS_SOLID, 1, viscolors[0] );
 	vispens[1] = CreatePen( PS_SOLID, 1, viscolors[1] );
 	vispens[2] = CreatePen( PS_SOLID, 1, viscolors[2] );
 	visbrushs[0] = CreateSolidBrush( viscolors[0] );
 	visbrushs[1] = CreateSolidBrush( viscolors[1] );
 	visbrushs[2] = CreateSolidBrush( viscolors[2] );
+
 	if ( !self->mod ) {
 		return FALSE;
-}
+	}
 	return TRUE;
 }
 static void WINAPI VisClose() {
@@ -880,10 +880,13 @@ static void WINAPI VisClose() {
 	DeleteObject( visbrushs[0] );
 	DeleteObject( visbrushs[1] );
 	DeleteObject( visbrushs[2] );
+	DeleteObject( visfont );
+	DeleteObject( visbitmap );
+	DeleteDC( visDC );
 }
 static void WINAPI VisSize(HDC dc, SIZE *size) {
 	xmpopenmpt_lock guard;
-
+	last_pattern = -1;	// Force redraw
 }
 static BOOL WINAPI VisRender(DWORD *buf, SIZE size, DWORD flags) {
 	xmpopenmpt_lock guard;
@@ -891,48 +894,33 @@ static BOOL WINAPI VisRender(DWORD *buf, SIZE size, DWORD flags) {
 }
 static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	xmpopenmpt_lock guard;
-	HGDIOBJ oldpen = SelectObject( dc, vispens[1] );
-	HGDIOBJ oldbrush = SelectObject( dc, visbrushs[0] );
-
-	SetBkColor( dc, viscolors[0] );
-	SetTextColor( dc, viscolors[1] );
-
-	TEXTMETRIC tm;
-	GetTextMetrics( dc, &tm );
-
-	int top = 0;
 
 	timeinfo info = lookup_timeinfo( timeinfo_position - ( (double)xmpfstatus->GetLatency() / (double)self->num_channels / (double)self->samplerate ) );
 	int pattern = info.pattern;
 	int current_row = info.row;
 
+	if( visfont == nullptr ) {
+		// Force usage of a nice monospace font
+		LOGFONT logfont;
+		GetObject ( GetCurrentObject( dc, OBJ_FONT ), sizeof(logfont), &logfont );
+		wcscpy(logfont.lfFaceName, L"Lucida Console");
+		visfont = CreateFontIndirect ( &logfont );
+		SelectObject( dc, visfont );
+	}
+
+	TEXTMETRIC tm;
+	GetTextMetrics( dc, &tm );
+
 	if(flags & XMPIN_VIS_INIT)
 	{
 		last_pattern = -1;
-		last_row = -1;
 	}
-
-	if(!(flags & XMPIN_VIS_INIT))
-	{
-		if(pattern == last_pattern && current_row == last_row)
-		{
-			// causes jitter
-			//return TRUE;
-		}
-	}
-
-	RECT bgrect;
-	bgrect.top = 0;
-	bgrect.left = 0;
-	bgrect.right = size.cx;
-	bgrect.bottom = size.cy;
-	FillRect(dc, &bgrect, visbrushs[0]);
 
 	const std::size_t channels = self->mod->get_num_channels();
 	const std::size_t rows = self->mod->get_pattern_num_rows( pattern );
 
-	std::size_t num_cols = size.cx / tm.tmAveCharWidth;
-	std::size_t num_rows = size.cy / tm.tmHeight;
+	const std::size_t num_cols = size.cx / tm.tmAveCharWidth;
+	const std::size_t num_rows = size.cy / tm.tmHeight;
 
 	std::size_t cols_per_channel = num_cols / channels;
 	if (cols_per_channel <= 1 ) {
@@ -944,50 +932,94 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		cols_per_channel = 13;
 	}
 
-	std::size_t cols_to_write = cols_per_channel * channels + channels - 1;
-	std::size_t rows_to_write = rows;
+	int pattern_width = (cols_per_channel * channels) * tm.tmAveCharWidth + (channels - 1) * (tm.tmAveCharWidth / 2);
+	int pattern_height = rows * tm.tmHeight;
 
-	POINT offset;
-	offset.x = ( num_cols - cols_to_write ) / 2 * tm.tmAveCharWidth;
+	if( visDC == nullptr || last_pattern != pattern ) {
+		DeleteObject( visbitmap );
+		DeleteDC( visDC );
 
-	offset.y = num_rows / 2 * tm.tmHeight;
-	offset.y -= current_row * tm.tmHeight;
+		visDC = CreateCompatibleDC( dc );
+		visbitmap = CreateCompatibleBitmap( dc, pattern_width, pattern_height );
+		SelectObject( visDC, visbitmap );
 
-	for ( std::size_t row = 0; row < rows; row++ ) {
-		if ( row == current_row ) {
-			//SelectObject( dc, vispens[2] );
-			SetTextColor( dc, viscolors[2] );
-		}
+		SelectObject( visDC, vispens[1] );
+		SelectObject( visDC, visbrushs[0] );
+
+		SelectObject( visDC, visfont );
+
+		RECT bgrect;
+		bgrect.top = 0;
+		bgrect.left = 0;
+		bgrect.right = pattern_width;
+		bgrect.bottom = pattern_height;
+		FillRect( visDC, &bgrect, visbrushs[0] );
+
+		SetBkColor( visDC, viscolors[0] );
+		SetTextColor( visDC, viscolors[1] );
 
 		POINT pos;
-		pos.y = top + offset.y;
-		pos.x = 0 + offset.x;
+		pos.y = 0;
 
-		std::wstring rowstring;
-		for ( std::size_t channel = 0; channel < channels; ++channel ) {
-			if ( channel > 0 ) {
-				rowstring += L"|";
+		for ( std::size_t row = 0; row < rows; row++ ) {
+			pos.x = 0;
+
+			for ( std::size_t channel = 0; channel < channels; ++channel ) {
+
+				// "NNN IIvVV EFF"
+				std::wstring chan = StringDecode( self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel ), CP_UTF8 );
+
+				TextOut( visDC, pos.x, pos.y, chan.c_str(), chan.length() );
+				pos.x += cols_per_channel * tm.tmAveCharWidth + tm.tmAveCharWidth / 2;
 			}
-			rowstring += StringDecode( self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel ), CP_UTF8 );
-		}
 
-		TextOut( dc, pos.x, pos.y, rowstring.c_str(), rowstring.length() );
-
-		top += tm.tmHeight;
-		if ( row == current_row ) {
-			//SelectObject( dc, vispens[1] );
-			SetTextColor( dc, viscolors[1] );
+			pos.y += tm.tmHeight;
 		}
 	}
 
+	RECT bgrect;
+	bgrect.top = 0;
+	bgrect.left = 0;
+	bgrect.right = size.cx;
+	bgrect.bottom = size.cy;
+	FillRect( dc, &bgrect, visbrushs[0] );
+
+	int offset_x = (size.cx - pattern_width) / 2;
+	int offset_y = (size.cy - tm.tmHeight) / 2 - current_row * tm.tmHeight;
+	int src_offset_x = 0;
+	int src_offset_y = 0;
+
+	if ( offset_x < 0 ) {
+		src_offset_x -= offset_x;
+		pattern_width = std::min<int>( pattern_width + offset_x, size.cx );
+		offset_x = 0;
+	}
+
+	if ( offset_y < 0 ) {
+		src_offset_y -= offset_y;
+		pattern_height = std::min<int>( pattern_height + offset_y, size.cy );
+		offset_y = 0;
+	}
+
+	BitBlt( dc, offset_x, offset_y, pattern_width, pattern_height, visDC, src_offset_x, src_offset_y , SRCCOPY );
+
+	// Highlight current row
+	POINT line[] = {
+		{ (size.cx - pattern_width) / 2 - 1, (size.cy - tm.tmHeight) / 2 - 1 },
+		{ (size.cx + pattern_width) / 2 + 1, (size.cy - tm.tmHeight) / 2 - 1 },
+		{ (size.cx + pattern_width) / 2 + 1, (size.cy + tm.tmHeight) / 2 + 1 },
+		{ (size.cx - pattern_width) / 2 - 1, (size.cy + tm.tmHeight) / 2 + 1 },
+		{ (size.cx - pattern_width) / 2 - 1, (size.cy - tm.tmHeight) / 2 - 1 },
+	};
+	SelectObject( dc, vispens[2] );
+	Polyline( dc, line, 5 );
+	
 	last_pattern = pattern;
-	last_row = current_row;
 
 	return TRUE;
 }
 static void WINAPI VisButton(DWORD x, DWORD y) {
 	xmpopenmpt_lock guard;
-
 }
 
 #endif
