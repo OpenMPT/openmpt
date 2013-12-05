@@ -28,7 +28,7 @@ namespace mpt
 #elif MPT_COMPILER_GCC
 
 #if defined(WIN32)
-// GCC C++ library has nu wchar_t overloads
+// GCC C++ library has no wchar_t overloads
 #define MPT_FSTREAM_DO_CONVERSIONS
 #define MPT_FSTREAM_DO_CONVERSIONS_ANSI
 #endif
