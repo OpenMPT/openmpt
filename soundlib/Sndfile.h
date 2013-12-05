@@ -35,10 +35,18 @@
 #include "Message.h"
 
 #include "Resampler.h"
+#ifndef NO_REVERB
 #include "../sounddsp/Reverb.h"
+#endif
+#ifndef NO_AGC
 #include "../sounddsp/AGC.h"
+#endif
+#ifndef NO_DSP
 #include "../sounddsp/DSP.h"
+#endif
+#ifndef NO_EQ
 #include "../sounddsp/EQ.h"
+#endif
 
 
 class FileReader;
