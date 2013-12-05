@@ -16,8 +16,11 @@
 #include <vector>
 
 
+#if defined(MODPLUG_TRACKER)
+
 //#define USE_PROFILER
 
+#endif
 
 #ifdef USE_PROFILER
 
