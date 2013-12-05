@@ -500,6 +500,8 @@ static UINT CharsetToCodepage(Charset charset)
 		case CharsetISO8859_1:   return 28591;   break;
 		case CharsetISO8859_15:  return 28605;   break;
 		case CharsetCP437:       return 437;     break;
+		case CharsetCP437AMS:    return 437;     break; // fallback, should not happen
+		case CharsetCP437AMS2:   return 437;     break; // fallback, should not happen
 		case CharsetWindows1252: return 1252;    break;
 	}
 	return 0;
@@ -515,6 +517,8 @@ static const char * CharsetToString(Charset charset)
 		case CharsetISO8859_1:   return "ISO-8859-1";  break;
 		case CharsetISO8859_15:  return "ISO-8859-15"; break;
 		case CharsetCP437:       return "CP437";       break;
+		case CharsetCP437AMS:    return "CP437";       break; // fallback, should not happen
+		case CharsetCP437AMS2:   return "CP437";       break; // fallback, should not happen
 		case CharsetWindows1252: return "CP1252";      break;
 	}
 	return 0;
@@ -529,6 +533,8 @@ static const char * CharsetToStringTranslit(Charset charset)
 		case CharsetISO8859_1:   return "ISO-8859-1//TRANSLIT";  break;
 		case CharsetISO8859_15:  return "ISO-8859-15//TRANSLIT"; break;
 		case CharsetCP437:       return "CP437//TRANSLIT";       break;
+		case CharsetCP437AMS:    return "CP437//TRANSLIT";       break; // fallback, should not happen
+		case CharsetCP437AMS2:   return "CP437//TRANSLIT";       break; // fallback, should not happen
 		case CharsetWindows1252: return "CP1252//TRANSLIT";      break;
 	}
 	return 0;
@@ -575,11 +581,8 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
 	{
 		std::string out;
-		switch(charset)
-		{
-			case CharsetCP437AMS : out = String::To8bit(src, CharsetTableCP437AMS ); break;
-			case CharsetCP437AMS2: out = String::To8bit(src, CharsetTableCP437AMS2); break;
-		}
+		if(charset == CharsetCP437AMS ) out = String::To8bit(src, CharsetTableCP437AMS );
+		if(charset == CharsetCP437AMS2) out = String::To8bit(src, CharsetTableCP437AMS2);
 		Tdststring result;
 		std::copy(out.begin(), out.end(), std::back_inserter(result));
 		return result;
@@ -594,6 +597,8 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 			case CharsetISO8859_1:   out = String::ToISO_8859_1(src); break;
 			case CharsetISO8859_15:  out = String::To8bit(src, CharsetTableISO8859_15); break;
 			case CharsetCP437:       out = String::To8bit(src, CharsetTableCP437); break;
+			case CharsetCP437AMS:    out = String::To8bit(src, CharsetTableCP437AMS); break;
+			case CharsetCP437AMS2:   out = String::To8bit(src, CharsetTableCP437AMS2); break;
 			case CharsetWindows1252: out = String::To8bit(src, CharsetTableWindows1252); break;
 		}
 		Tdststring result;
@@ -660,11 +665,8 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		std::string in;
 		std::copy(src.begin(), src.end(), std::back_inserter(in));
 		std::wstring out;
-		switch(charset)
-		{
-			case CharsetCP437AMS : out = String::From8bit(in, CharsetTableCP437AMS ); break;
-			case CharsetCP437AMS2: out = String::From8bit(in, CharsetTableCP437AMS2); break;
-		}
+		if(charset == CharsetCP437AMS ) out = String::From8bit(in, CharsetTableCP437AMS );
+		if(charset == CharsetCP437AMS2) out = String::From8bit(in, CharsetTableCP437AMS2);
 		return out;
 	}
 	#if defined(MPT_CHARSET_CPP)
@@ -679,6 +681,8 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 			case CharsetISO8859_1:   out = String::FromISO_8859_1(in); break;
 			case CharsetISO8859_15:  out = String::From8bit(in, CharsetTableISO8859_15); break;
 			case CharsetCP437:       out = String::From8bit(in, CharsetTableCP437); break;
+			case CharsetCP437AMS:    out = String::From8bit(in, CharsetTableCP437AMS); break;
+			case CharsetCP437AMS2:   out = String::From8bit(in, CharsetTableCP437AMS2); break;
 			case CharsetWindows1252: out = String::From8bit(in, CharsetTableWindows1252); break;
 		}
 		return out;
