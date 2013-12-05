@@ -1641,7 +1641,7 @@ static bool ShouldRunTests()
 
 static mpt::PathString GetTestFilenameBase()
 {
-	return MPT_PATHSTRING("../test/test.");
+	return MPT_PATHSTRING("./test/test.");
 }
 
 typedef std::shared_ptr<CSoundFile> TSoundFileContainer;

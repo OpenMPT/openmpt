@@ -300,7 +300,7 @@ all: $(OUTPUTS)
 
 .PHONY: test
 test: bin/libopenmpt_test$(EXESUFFIX)
-	bin/libopenmpt_test$(EXESUFFIX)
+	( cd .. && openmpt123/bin/libopenmpt_test$(EXESUFFIX) )
 
 bin/libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
