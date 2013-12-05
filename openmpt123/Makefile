@@ -93,7 +93,7 @@ CXXFLAGS += -Wall -Wextra -Wcast-align
 CFLAGS   += -Wall -Wextra -Wcast-align
 
 ifeq ($(DYNLINK),1)
-LDFLAGS  += -Wl,-rpath,./bin -Wl,-rpath,../bin
+LDFLAGS  += -Wl,-rpath,./bin -Wl,-rpath,../bin -Wl,-rpath,./openmpt123/bin
 LDFLAGS_LIBOPENMPT += -Lbin
 LDLIBS_LIBOPENMPT  += -lopenmpt
 endif
