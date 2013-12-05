@@ -25,6 +25,14 @@ namespace mpt
 
 #define MPT_FSTREAM_DO_CONVERSIONS
 
+#elif MPT_COMPILER_GCC
+
+#if defined(WIN32)
+// GCC C++ library has nu wchar_t overloads
+#define MPT_FSTREAM_DO_CONVERSIONS
+#define MPT_FSTREAM_DO_CONVERSIONS_ANSI
+#endif
+
 #endif
 
 #ifdef MPT_FSTREAM_DO_CONVERSIONS
@@ -39,7 +47,11 @@ namespace detail
 template<typename Tbase>
 inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::ios_base::openmode mode)
 {
+#if defined( MPT_FSTREAM_DO_CONVERSIONS_ANSI)
+	base.open(mpt::ToLocale(filename.AsNative()).c_str(), mode);
+#else
 	base.open(filename.AsNative().c_str(), mode);
+#endif
 }
 
 #ifdef MPT_FSTREAM_DO_CONVERSIONS
@@ -47,25 +59,25 @@ inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::io
 template<typename Tbase>
 inline void fstream_open(Tbase & base, const std::wstring & filename, std::ios_base::openmode mode)
 {
-	base.open(filename.c_str(), mode);
+	detail::fstream_open<Tbase>(base, mpt::PathString::FromWide(filename), mode);
 }
 
 template<typename Tbase>
 inline void fstream_open(Tbase & base, const wchar_t * filename, std::ios_base::openmode mode)
 {
-	base.open(filename, mode);
+	detail::fstream_open<Tbase>(base, mpt::PathString::FromWide(filename ? std::wstring(filename) : std::wstring()), mode);
 }
 
 template<typename Tbase>
 inline void fstream_open(Tbase & base, const std::string & filename, std::ios_base::openmode mode)
 {
-	detail::fstream_open<Tbase>(base, mpt::ToWide(mpt::CharsetLocale, filename), mode);
+	detail::fstream_open<Tbase>(base, mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetLocale, filename)), mode);
 }
 
 template<typename Tbase>
 inline void fstream_open(Tbase & base, const char * filename, std::ios_base::openmode mode)
 {
-	detail::fstream_open<Tbase>(base, filename ? std::string(filename) : std::string(), mode);
+	detail::fstream_open<Tbase>(base, mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetLocale, filename ? std::string(filename) : std::string())), mode);
 }
 
 #endif
