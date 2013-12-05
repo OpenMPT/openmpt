@@ -94,12 +94,12 @@ BOOL CModTypeDlg::OnInitDialog()
 	// Tempo modes
 
 	// Don't show new tempo modes for XM/IT, unless they are currently used
-	const bool showNewTempoModes = (sndFile.GetType() == MOD_TYPE_MPT || (sndFile.m_SongFlags[SONG_ITPROJECT] != 0));
+	const bool showNewModes = (sndFile.GetType() == MOD_TYPE_MPT || (sndFile.m_SongFlags[SONG_ITPROJECT] != 0));
 
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
-	if(showNewTempoModes || sndFile.m_nTempoMode == tempo_mode_alternative)
+	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_alternative)
 		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
-	if(showNewTempoModes || sndFile.m_nTempoMode == tempo_mode_modern)
+	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_modern)
 		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
 	m_TempoModeBox.SetCurSel(0);
 	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
@@ -113,7 +113,8 @@ BOOL CModTypeDlg::OnInitDialog()
 
 	// Mix levels
 
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),		mixLevels_117RC3);
+	if(showNewModes || sndFile.GetMixLevels() == mixLevels_117RC3)	// In XM/IT, this is only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),		mixLevels_117RC3);
 	if(sndFile.GetMixLevels() == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
 	if(sndFile.GetMixLevels() == mixLevels_117RC1)	// Dito

@@ -25,7 +25,7 @@ class CViewInstrument: public CModScrollView
 protected:
 	CImageList m_bmpEnvBar;
 	POINT m_ptMenu;
-	RECT m_rcClient;
+	CRect m_rcClient;
 
 	CBitmap m_bmpGrid;
 	CBitmap m_bmpMemMain;
@@ -145,7 +145,7 @@ protected:
 	int ValueToScreen(int val) const { return m_rcClient.bottom - 1 - (val * (m_rcClient.bottom - 1)) / 64; }
 	int ScreenToValue(int y) const;
 	void InvalidateEnvelope() { InvalidateRect(NULL, FALSE); }
-	void DrawPositionMarks(HDC hdc);
+	void DrawPositionMarks();
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();

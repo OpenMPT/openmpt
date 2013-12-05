@@ -850,7 +850,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 		}
 	}
 
-	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top, &m_dcGrid, 0, 0, SRCCOPY);
+	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcGrid, 0, 0, SRCCOPY);
 }
 //end rewbs.envRowGrid
 
@@ -962,11 +962,11 @@ void CViewInstrument::OnDraw(CDC *pDC)
 
 		}
 	}
-	DrawPositionMarks(m_dcMemMain.m_hDC);
+	DrawPositionMarks();
 	if (oldpen) m_dcMemMain.SelectObject(oldpen);
 
 	//rewbs.envRowGrid
-	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top, &m_dcMemMain, 0, 0, SRCCOPY);
+	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcMemMain, 0, 0, SRCCOPY);
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -1127,8 +1127,8 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 
 
 
-void CViewInstrument::DrawPositionMarks(HDC hdc)
-//----------------------------------------------
+void CViewInstrument::DrawPositionMarks()
+//---------------------------------------
 {
 	CRect rect;
 	for(UINT i = 0; i < MAX_CHANNELS; i++) if (m_dwNotifyPos[i] != Notification::PosInvalid)
@@ -1137,7 +1137,7 @@ void CViewInstrument::DrawPositionMarks(HDC hdc)
 		rect.left = TickToScreen(m_dwNotifyPos[i]);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
-		InvertRect(hdc, &rect);
+		InvertRect(m_dcMemMain.m_hDC, &rect);
 	}
 }
 
@@ -1185,14 +1185,15 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 		if (bUpdate)
 		{
 			HDC hdc = ::GetDC(m_hWnd);
-			DrawPositionMarks(hdc);
+			DrawPositionMarks();
 			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 			{
 				//DWORD newpos = (pSndFile->m_SongFlags[SONG_PAUSED]) ? pnotify->dwPos[j] : 0;
 				uint32 newpos = (uint32)pnotify->pos[j];
 				m_dwNotifyPos[j] = newpos;
 			}
-			DrawPositionMarks(hdc);
+			DrawPositionMarks();
+			BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), m_dcMemMain.GetSafeHdc(), 0, 0, SRCCOPY);
 			::ReleaseDC(m_hWnd, hdc);
 		}
 	}
