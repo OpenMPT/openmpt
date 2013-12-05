@@ -46,8 +46,6 @@ How to compile libopenmpt and openmpt123:
       You can disable xmp-openmpt in the solution configuration.
   - The openmpt123 solution is in openmpt123/openmpt123.sln.
 - Makefile
-  The makefile resides in openmpt123/Makefile. You should cd into openmpt123
-  for using it.
   The makefile supports different build environments and targets via HOST= and
   CONFIG= parameters directly to the make invocation.
   Use 'make CONFIG=$newconfig clean' when switching between different configs
@@ -56,13 +54,13 @@ How to compile libopenmpt and openmpt123:
   invocations.
   - mingw-w64 (on windows):
     The required version should be at least 4.4. Only 4.6 and up are tested.
-    - cd openmpt123 ; mingw32-make HOST=windows CONFIG=mingw64-win32
-    - cd openmpt123 ; mingw32-make HOST=windows CONFIG=mingw64-win64
+    - mingw32-make HOST=windows CONFIG=mingw64-win32
+    - mingw32-make HOST=windows CONFIG=mingw64-win64
     depending on whether you want win32 or win64 builds.
   - mingw-w64 (on unix):
     The required version should be at least 4.4. Only 4.6 and up are tested.
-    - cd openmpt123 ; make CONFIG=mingw64-win32
-    - cd openmpt123 ; make CONFIG=mingw64-win64
+    - make CONFIG=mingw64-win32
+    - make CONFIG=mingw64-win64
     depending on whether you want win32 or win64 builds.
   - gcc or clang (on unix, including Mac OS X with MacPorts):
     The minimum required compiler versions are:
@@ -73,9 +71,9 @@ How to compile libopenmpt and openmpt123:
     openmpt123 can optionally use libflac, libwavpack and libsndfile to render
     PCM files to disk.
     When using gcc, you should simply do:
-    - cd openmpt123 ; make
+    - make
     When using clang, it is recommended to do:
-    - cd openmpt123 ; make CONFIG=llvm
+    - make CONFIG=clang
   The Makefile supports some customizations. You might want to read the top
   which should get you some possible make settings, like e.g. make DYNLINK=0
   or similar. Cross compiling or different compiler would best be implemented
