@@ -121,6 +121,7 @@ SoundDeviceCaps CDSoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSamp
 	caps.CanUseHardwareTiming = false;
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
+	caps.ExclusiveModeDescription = L"Use primary buffer";
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)

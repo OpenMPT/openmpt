@@ -308,6 +308,7 @@ struct SoundDeviceCaps
 	bool CanUseHardwareTiming;
 	bool CanChannelMapping;
 	bool CanDriverPanel;
+	std::wstring ExclusiveModeDescription;
 	SoundDeviceCaps()
 		: currentSampleRate(0)
 		, CanUpdateInterval(true)
@@ -317,6 +318,7 @@ struct SoundDeviceCaps
 		, CanUseHardwareTiming(false)
 		, CanChannelMapping(false)
 		, CanDriverPanel(false)
+		, ExclusiveModeDescription(L"Use device exclusively")
 	{
 		return;
 	}
