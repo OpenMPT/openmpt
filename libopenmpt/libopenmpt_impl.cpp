@@ -630,7 +630,7 @@ std::vector<std::string> module_impl::get_metadata_keys() const {
 	retval.push_back("container");
 	retval.push_back("container_long");
 	retval.push_back("tracker");
-	retval.push_back("author");
+	retval.push_back("artist");
 	retval.push_back("title");
 	retval.push_back("message");
 	retval.push_back("warnings");

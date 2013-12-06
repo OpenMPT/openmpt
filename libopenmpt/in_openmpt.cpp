@@ -1,6 +1,6 @@
 /*
- * libopenmpt_winamp.cpp
- * ---------------------
+ * in_openmpt.cpp
+ * --------------
  * Purpose: libopenmpt winamp input plugin implementation
  * Notes  : (currently none)
  * Authors: OpenMPT Devs

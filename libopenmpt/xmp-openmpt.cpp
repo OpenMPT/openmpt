@@ -1,6 +1,6 @@
 /*
- * libopenmpt_xmplay.cpp
- * ---------------------
+ * xmp-openmpt.cpp
+ * ---------------
  * Purpose: libopenmpt xmplay input plugin implementation
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -424,7 +424,7 @@ static void write_xmplay_tag( char * * tag, const std::string & value ) {
 
 static void write_xmplay_tags( char * tags[8], const openmpt::module & mod ) {
 	write_xmplay_tag( &tags[0], convert_to_native( mod.get_metadata("title") ) );
-	write_xmplay_tag( &tags[1], convert_to_native( mod.get_metadata("author") ) );
+	write_xmplay_tag( &tags[1], convert_to_native( mod.get_metadata("artist") ) );
 	write_xmplay_tag( &tags[2], convert_to_native( mod.get_metadata("xmplay-album") ) ); // todo, libopenmpt does not support that
 	write_xmplay_tag( &tags[3], convert_to_native( mod.get_metadata("xmplay-date") ) ); // todo, libopenmpt does not support that
 	write_xmplay_tag( &tags[4], convert_to_native( mod.get_metadata("xmplay-tracknumber") ) ); // todo, libopenmpt does not support that

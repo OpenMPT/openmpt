@@ -176,7 +176,7 @@ public:
 	}
 	void write_metadata( std::map<std::string,std::string> metadata ) {
 		write_metadata_field( SF_STR_TITLE, metadata[ "title" ] );
-		write_metadata_field( SF_STR_ARTIST, metadata[ "author" ] );
+		write_metadata_field( SF_STR_ARTIST, metadata[ "artist" ] );
 		write_metadata_field( SF_STR_COMMENT, metadata[ "message" ] );
 		write_metadata_field( SF_STR_SOFTWARE, append_software_tag( metadata[ "tracker" ] ) );
 	}
