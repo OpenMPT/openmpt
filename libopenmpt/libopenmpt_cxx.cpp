@@ -151,6 +151,10 @@ double module::get_position_seconds() const {
 	return impl->get_position_seconds();
 }
 
+double module::set_position_order_row( std::int32_t order, std::int32_t row ) {
+	return impl->set_position_order_row( order, row );
+}
+
 std::int32_t module::get_render_param( int param ) const {
 	return impl->get_render_param( param );
 }

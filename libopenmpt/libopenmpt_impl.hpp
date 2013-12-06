@@ -92,6 +92,7 @@ public:
 	double get_duration_seconds() const;
 	double set_position_seconds( double seconds );
 	double get_position_seconds() const;
+	double set_position_order_row( std::int32_t order, std::int32_t row );
 	std::int32_t get_render_param( int param ) const;
 	void set_render_param( int param, std::int32_t value );
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * mono );

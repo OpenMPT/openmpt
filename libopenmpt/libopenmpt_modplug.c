@@ -336,8 +336,7 @@ LIBOPENMPT_MODPLUG_API int ModPlug_GetPlayingChannels(ModPlugFile* file)
 LIBOPENMPT_MODPLUG_API void ModPlug_SeekOrder(ModPlugFile* file,int order)
 {
 	if(!file) return;
-	// todo: seek exactly to order
-	openmpt_module_set_position_seconds(file->mod,openmpt_module_get_duration_seconds(file->mod)*order/openmpt_module_get_num_orders(file->mod));
+	openmpt_module_set_position_order_row(file->mod,order,0);
 }
 
 LIBOPENMPT_MODPLUG_API int ModPlug_GetModuleType(ModPlugFile* file)
