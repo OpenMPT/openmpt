@@ -608,6 +608,21 @@ double module_impl::set_position_seconds( double seconds ) {
 	m_currentPositionSeconds = m_sndFile->GetLength( eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ) ).duration;
 	return m_currentPositionSeconds;
 }
+double module_impl::set_position_order_row( std::int32_t order, std::int32_t row ) {
+	if ( order < 0 || order >= m_sndFile->Order.GetLengthTailTrimmed() ) {
+		return m_currentPositionSeconds;
+	}
+	std::int32_t pattern = m_sndFile->Order[order];
+	if ( row < 0 || row >= (std::int32_t)m_sndFile->Patterns[pattern].GetNumRows() ) {
+		return m_currentPositionSeconds;
+	}
+	m_sndFile->InitializeVisitedRows();
+	m_sndFile->m_nCurrentOrder = order;
+	m_sndFile->SetCurrentOrder( order );
+	m_sndFile->m_nNextRow = row;
+	m_currentPositionSeconds = m_sndFile->GetLength( eAdjust, GetLengthTarget( order, row ) ).duration;
+	return m_currentPositionSeconds;
+}
 std::vector<std::string> module_impl::get_metadata_keys() const {
 	std::vector<std::string> retval;
 	retval.push_back("type");

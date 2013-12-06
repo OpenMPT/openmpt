@@ -88,6 +88,8 @@ LIBOPENMPT_API double openmpt_module_get_duration_seconds( openmpt_module * mod 
 LIBOPENMPT_API double openmpt_module_set_position_seconds( openmpt_module * mod, double seconds );
 LIBOPENMPT_API double openmpt_module_get_position_seconds( openmpt_module * mod );
 
+LIBOPENMPT_API double openmpt_module_set_position_order_row( openmpt_module * mod, int32_t order, int32_t row );
+
 LIBOPENMPT_API int openmpt_module_get_render_param( openmpt_module * mod, int param, int32_t * value );
 LIBOPENMPT_API int openmpt_module_set_render_param( openmpt_module * mod, int param, int32_t value );
 

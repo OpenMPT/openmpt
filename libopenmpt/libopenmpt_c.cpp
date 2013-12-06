@@ -383,12 +383,20 @@ double openmpt_module_set_position_seconds( openmpt_module * mod, double seconds
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		return mod->impl->set_position_seconds( seconds );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0;
+	return 0.0;
 }
 double openmpt_module_get_position_seconds( openmpt_module * mod ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		return mod->impl->get_position_seconds();
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
+
+double openmpt_module_set_position_order_row( openmpt_module * mod, int32_t order, int32_t row ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->set_position_order_row( order, row );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0.0;
 }

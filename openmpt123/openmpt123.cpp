@@ -460,6 +460,10 @@ static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod, write_
 		case 'j': mod.set_position_seconds( mod.get_position_seconds() - 1.0 ); break;
 		case 'k': mod.set_position_seconds( mod.get_position_seconds() + 1.0 ); break;
 		case 'l': mod.set_position_seconds( mod.get_position_seconds() + 10.0 ); break;
+		case 'H': mod.set_position_order_row( mod.get_current_order() - 1, 0 ); break;
+		case 'J': mod.set_position_order_row( mod.get_current_order(), mod.get_current_row() - 1 ); break;
+		case 'K': mod.set_position_order_row( mod.get_current_order(), mod.get_current_row() + 1 ); break;
+		case 'L': mod.set_position_order_row( mod.get_current_order() + 1, 0 ); break;
 		case 'm': throw next_file(1); break;
 		case 'M': throw next_file(10); break;
 		case '3': flags.gain       -=100; apply_mod_settings( flags, mod ); break;
