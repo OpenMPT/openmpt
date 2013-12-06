@@ -882,8 +882,8 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	const ModCommand cell = m_sndFile->Patterns[p][r*numchannels+c];
 	text.clear();
 	high.clear();
-	text += cell.IsNote() ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...");
-	high += cell.IsNote() ? std::string("nnn") : std::string("...");
+	text += ( cell.IsNote() || cell.IsSpecialNote() ) ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...");
+	high += ( cell.IsNote() || cell.IsSpecialNote() ) ? std::string("nnn") : std::string("...");
 	if ( width >= 6 ) {
 		text += std::string(" ");
 		high += std::string(" ");

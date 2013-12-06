@@ -2355,7 +2355,7 @@ EndSearch:
 		// Note
 		if(m_findReplace.findFlags[FindReplace::Note])
 		{
-			result.Append(GetNoteStr(m_findReplace.cmdFind.note));
+			result.Append(pSndFile->GetNoteName(m_findReplace.cmdFind.note).c_str());
 		} else
 		{
 			result.Append("???");

@@ -398,21 +398,12 @@ void AppendNotesToControl(CComboBox& combobox, const ModCommand::NOTE noteStart,
 // default note names.
 void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile* const pSndFile = nullptr, const INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS);
 
-// Returns note name(such as "C-5") of given note. Regular notes are in range [1,MAX_NOTE].
-LPCTSTR GetNoteStr(const ModCommand::NOTE);
-
 ///////////////////////////////////////////////////
 // Tables
 
-//const LPCTSTR szSpecialNoteNames[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~"), TEXT("^^"), TEXT("==")};
-const LPCTSTR szSpecialNoteNames[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~ (Note Fade)"), TEXT("^^ (Note Cut)"), TEXT("== (Note Off)")};
-const LPCTSTR szSpecialNoteShortDesc[] = {TEXT("Param Control (Smooth)"), TEXT("Param Control"), TEXT("Note Fade"), TEXT("Note Cut"), TEXT("Note Off")};
-
-// Make sure that special note arrays include string for every note.
-STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == CountOf(szSpecialNoteNames)); 
-STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNames)); 
-
-const LPCSTR szHexChar = "0123456789ABCDEF";
+extern const char *szSpecialNoteNamesMPT[];
+extern const char *szSpecialNoteShortDesc[];
+extern const char *szHexChar;
 
 // Defined in load_mid.cpp
 extern const char *szMidiProgramNames[128];

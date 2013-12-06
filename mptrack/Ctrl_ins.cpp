@@ -194,7 +194,7 @@ void CNoteMapWnd::OnPaint()
 			// Note
 			s[0] = 0;
 
-			std::string temp = sndFile.GetNoteName(nPos+1, m_nInstrument);
+			std::string temp = sndFile.GetNoteName(static_cast<ModCommand::NOTE>(nPos + 1), m_nInstrument);
 			temp.resize(4);
 			if ((nPos >= 0) && (nPos < NOTE_MAX)) wsprintf(s, "%s", temp.c_str());
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
@@ -206,7 +206,7 @@ void CNoteMapWnd::OnPaint()
 			strcpy(s, "...");
 			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->NoteMap[nPos] != NOTE_NONE))
 			{
-				UINT n = pIns->NoteMap[nPos];
+				ModCommand::NOTE n = pIns->NoteMap[nPos];
 				if(ModCommand::IsNote(n))
 				{
 					std::string temp = sndFile.GetNoteName(n, m_nInstrument);

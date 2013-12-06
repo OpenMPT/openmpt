@@ -305,7 +305,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 					CString sDisplayName;
 					if (m_modDoc.GetSplitKeyboardSettings().IsSplitActive())
 					{
-						wsprintf(s, szSplitFormat, nSplitIns, GetNoteStr(noteSplit), i,
+						wsprintf(s, szSplitFormat, nSplitIns, m_sndFile.GetNoteName(noteSplit, nSplitIns).c_str(), i,
 								 (LPCTSTR)sSplitInsName, (LPCTSTR)m_modDoc.GetPatternViewInstrumentName(i, true, false));
 						sDisplayName = s;
 					}
@@ -323,7 +323,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 				for(SAMPLEINDEX i = 1; i <= nmax; i++) if (m_sndFile.GetSample(i).pSample)
 				{
 					if (m_modDoc.GetSplitKeyboardSettings().IsSplitActive())
-						wsprintf(s, szSplitFormat, nSplitIns, GetNoteStr(noteSplit), i, m_sndFile.m_szNames[nSplitIns], m_sndFile.m_szNames[i]);
+						wsprintf(s, szSplitFormat, nSplitIns, m_sndFile.GetNoteName(noteSplit, nSplitIns).c_str(), i, m_sndFile.m_szNames[nSplitIns], m_sndFile.m_szNames[i]);
 					else
 						wsprintf(s, "%02u: %s", i, m_sndFile.m_szNames[i]);
 
