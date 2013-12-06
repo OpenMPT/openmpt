@@ -23,7 +23,7 @@
 #include <unistd.h>
 #endif
 #ifdef _MSC_VER
-#include <wchar.h> // off_t
+#include <wchar.h> /* off_t */
 #endif
 
 #ifdef __cplusplus
@@ -95,3 +95,4 @@ static openmpt_stream_callbacks openmpt_stream_get_file_callbacks(void) {
 #endif
 
 #endif /* LIBOPENMPT_STREAM_CALLBACKS_FILE_H */
+
