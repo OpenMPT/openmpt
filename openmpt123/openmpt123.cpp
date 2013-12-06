@@ -929,7 +929,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			}
 			if ( flags.show_details ) {
 				log << "Mixer......: ";
-				log << "CPU:" << std::setw(3) << std::setfill(':') << cpu_str;
+				log << "CPU:" << std::setw(6) << std::setfill(':') << cpu_str;
 				log << "   ";
 				log << "Chn:" << std::setw(3) << std::setfill(':') << mod.get_current_playing_channels();
 				log << "   ";
@@ -990,7 +990,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			}
 			if ( flags.show_details && flags.show_ui ) {
 				log << " ";
-				log << "CPU:" << std::setw(3) << std::setfill(':') << cpu_str;
+				log << "CPU:" << std::setw(6) << std::setfill(':') << cpu_str;
 				log << "|";
 				log << "Chn:" << std::setw(3) << std::setfill(':') << mod.get_current_playing_channels();
 			}
