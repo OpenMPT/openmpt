@@ -23,7 +23,7 @@
 #include <unistd.h>
 #endif
 #ifdef _MSC_VER
-#include <wchar.h> // off_t
+#include <wchar.h> /* off_t */
 #endif
 
 #ifdef __cplusplus
@@ -36,11 +36,11 @@ static size_t openmpt_stream_fd_read_func( void * stream, void * dst, size_t byt
 	int fd = 0;
 	#if defined(_MSC_VER)
 		size_t retval = 0;
+		int to_read = 0;
+		int ret_read = 0;
 	#else
 		ssize_t retval = 0;
 	#endif
-	int to_read = 0;
-	int ret_read = 0;
 	fd = (int)(uintptr_t)stream;
 	if ( fd < 0 ) {
 		return 0;
@@ -82,3 +82,4 @@ static openmpt_stream_callbacks openmpt_stream_get_fd_callbacks(void) {
 #endif
 
 #endif /* LIBOPENMPT_STREAM_CALLBACKS_FD_H */
+
