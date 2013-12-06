@@ -46,6 +46,14 @@ static char THIS_FILE[] = __FILE__;
 
 CTrackApp theApp;
 
+const char *szSpecialNoteNamesMPT[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~ (Note Fade)"), TEXT("^^ (Note Cut)"), TEXT("== (Note Off)")};
+const char *szSpecialNoteShortDesc[] = {TEXT("Param Control (Smooth)"), TEXT("Param Control"), TEXT("Note Fade"), TEXT("Note Cut"), TEXT("Note Off")};
+
+// Make sure that special note arrays include string for every note.
+STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == CountOf(szSpecialNoteNamesMPT)); 
+STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNamesMPT)); 
+
+const char *szHexChar = "0123456789ABCDEF";
 
 CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru, BOOL makeVisible)
 //------------------------------------------------------------------------------------------------------------

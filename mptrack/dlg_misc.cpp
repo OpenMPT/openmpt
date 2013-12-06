@@ -960,7 +960,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		SAMPLEINDEX nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
 		
-		const std::string temp = sndFile.GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
+		const std::string temp = sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * nBaseOctave), m_nInstrument).c_str();
 		if(temp.size() >= CountOf(s))
 			wsprintf(s, "%s", "...");
 		else
@@ -1285,29 +1285,7 @@ void CMsgBoxHidable::DoDataExchange(CDataExchange* pDX)
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR szNullNote = TEXT("...");
-const LPCTSTR szUnknownNote = TEXT("???");
 
-
-LPCTSTR GetNoteStr(const ModCommand::NOTE nNote)
-//----------------------------------------------
-{
-	if(nNote == 0)
-		return szNullNote;
-
-	if(nNote >= 1 && nNote <= NOTE_MAX)
-	{
-		return szDefaultNoteNames[nNote-1];
-	}
-	else if(nNote >= NOTE_MIN_SPECIAL && nNote <= NOTE_MAX_SPECIAL)
-	{
-		return szSpecialNoteNames[nNote - NOTE_MIN_SPECIAL];
-	}
-	else
-		return szUnknownNote;
-}
-
-	
 void AppendNotesToControl(CComboBox& combobox, const ModCommand::NOTE noteStart, const ModCommand::NOTE noteEnd)
 //------------------------------------------------------------------------------------------------------------------
 {
@@ -1332,6 +1310,6 @@ void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile* const pSndFil
 	for(ModCommand::NOTE nNote = NOTE_MIN_SPECIAL - 1; nNote++ < NOTE_MAX_SPECIAL;)
 	{
 		if(pSndFile == nullptr || pSndFile->GetModSpecifications().HasNote(nNote) == true)
-			combobox.SetItemData(combobox.AddString(szSpecialNoteNames[nNote-NOTE_MIN_SPECIAL]), nNote);
+			combobox.SetItemData(combobox.AddString(szSpecialNoteNamesMPT[nNote-NOTE_MIN_SPECIAL]), nNote);
 	}
 }

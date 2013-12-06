@@ -43,6 +43,9 @@ const char *szDefaultNoteNames[NOTE_MAX] =
 	"C-9", "C#9", "D-9", "D#9", "E-9", "F-9", "F#9", "G-9", "G#9", "A-9", "A#9", "B-9",
 };
 
+const char *szSpecialNoteNames[] = { "PCs",  "PC", "~~~", "^^^", "===" };
+STATIC_ASSERT(CountOf(szSpecialNoteNames) == NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1);
+
 
 ///////////////////////////////////////////////////////////
 // File Formats Information (name, extension, etc)

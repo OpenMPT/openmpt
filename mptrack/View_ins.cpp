@@ -1956,7 +1956,7 @@ void CViewInstrument::PlayNote(UINT note)
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX))
 			{
-				const std::string temp = pModDoc->GetrSoundFile().GetNoteName(static_cast<int16>(note), m_nInstrument);
+				const std::string temp = pModDoc->GetrSoundFile().GetNoteName(static_cast<ModCommand::NOTE>(note), m_nInstrument);
 				if(temp.size() >= sizeofS)
 					wsprintf(s, "%s", "...");
 				else

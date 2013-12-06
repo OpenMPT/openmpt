@@ -29,6 +29,7 @@
 #endif // NO_ARCHIVE_SUPPORT
 
 extern BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
+extern const char *szSpecialNoteNames[];
 
 
 // -> CODE#0027
@@ -1752,13 +1753,22 @@ void CSoundFile::LoadBuiltInTunings()
 #endif
 
 
-std::string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const INSTRUMENTINDEX inst) const
-//-------------------------------------------------------------------------------------------------------
+std::string CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const
+//------------------------------------------------------------------------------------------------
 {
-	if((inst >= MAX_INSTRUMENTS && inst != INSTRUMENTINDEX_INVALID) || note < NOTE_MIN || note > NOTE_MAX) return "BUG";
+	if(ModCommand::IsSpecialNote(note))
+	{
+		return szSpecialNoteNames[note - NOTE_MIN_SPECIAL];
+	} else if(note == NOTE_NONE)
+	{
+		return "...";
+	} else if(!ModCommand::IsNote(note))
+	{
+		return "???";
+	}
 
 	// For MPTM instruments with custom tuning, find the appropriate note name. Else, use default note names.
-	if(inst != INSTRUMENTINDEX_INVALID && GetType() == MOD_TYPE_MPT && Instruments[inst] && Instruments[inst]->pTuning)
+	if(GetType() == MOD_TYPE_MPT && inst >= 1 && inst <= GetNumInstruments() && Instruments[inst] && Instruments[inst]->pTuning)
 		return Instruments[inst]->pTuning->GetNoteName(note - NOTE_MIDDLEC);
 	else
 		return szDefaultNoteNames[note - 1];
