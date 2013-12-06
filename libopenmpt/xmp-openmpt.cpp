@@ -932,7 +932,7 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		cols_per_channel = 13;
 	}
 
-	int pattern_width = (cols_per_channel * channels) * tm.tmAveCharWidth + (channels - 1) * (tm.tmAveCharWidth / 2);
+	int pattern_width = ((cols_per_channel * channels) + 4) * tm.tmAveCharWidth + (channels - 1) * (tm.tmAveCharWidth / 2);
 	int pattern_height = rows * tm.tmHeight;
 
 	if( visDC == nullptr || last_pattern != pattern ) {
@@ -964,13 +964,46 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		for ( std::size_t row = 0; row < rows; row++ ) {
 			pos.x = 0;
 
+			std::ostringstream s;
+			s.imbue(std::locale::classic());
+			s << std::setfill('0') << std::setw(3) << row;
+			const std::string rowstr = s.str();
+			TextOutA( visDC, pos.x, pos.y, rowstr.c_str(), rowstr.length() );
+			pos.x += 4 * tm.tmAveCharWidth;
+
 			for ( std::size_t channel = 0; channel < channels; ++channel ) {
 
 				// "NNN IIvVV EFF"
-				std::wstring chan = StringDecode( self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel ), CP_UTF8 );
+				std::string highlight = self->mod->highlight_pattern_row_channel( pattern, row, channel, cols_per_channel );
+				std::string chan = self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel );
 
-				TextOut( visDC, pos.x, pos.y, chan.c_str(), chan.length() );
-				pos.x += cols_per_channel * tm.tmAveCharWidth + tm.tmAveCharWidth / 2;
+				int prev_color = -1;
+				int str_start = 0;
+
+				for( size_t col = 0; col < cols_per_channel; ++col) {
+					int color;
+					switch( chan[col] )
+					{
+					case ' ':
+					case '.':
+						color = 1;
+						break;
+
+					default:
+						color = 2;
+					}
+
+					if( ( col != 0 && color != prev_color ) || col == cols_per_channel - 1 ) {
+						SetTextColor( visDC, viscolors[color] );
+						TextOutA( visDC, pos.x, pos.y, &chan[str_start], 1 + col - str_start );
+						pos.x += (1 + col - str_start) * tm.tmAveCharWidth;
+						color = prev_color;
+						str_start = col + 1;
+					}
+				}
+
+				// Channel padding
+				pos.x += tm.tmAveCharWidth / 2;
 			}
 
 			pos.y += tm.tmHeight;
