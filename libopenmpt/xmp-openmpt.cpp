@@ -956,7 +956,6 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		FillRect( visDC, &bgrect, visbrushs[0] );
 
 		SetBkColor( visDC, viscolors[0] );
-		SetTextColor( visDC, viscolors[1] );
 
 		POINT pos;
 		pos.y = 0;
@@ -968,6 +967,8 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 			s.imbue(std::locale::classic());
 			s << std::setfill('0') << std::setw(3) << row;
 			const std::string rowstr = s.str();
+
+			SetTextColor( visDC, viscolors[1] );
 			TextOutA( visDC, pos.x, pos.y, rowstr.c_str(), rowstr.length() );
 			pos.x += 4 * tm.tmAveCharWidth;
 
