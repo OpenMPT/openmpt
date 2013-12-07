@@ -31,6 +31,12 @@ EXAMPLES=1
 OPENMPT123=1
 
 
+# version
+
+LIBOPENMPT_VERSION_MAJOR=0
+LIBOPENMPT_VERSION_MINOR=1
+
+
 # get commandline or defaults
 
 CPPFLAGS := $(CPPFLAGS)
@@ -39,6 +45,16 @@ CFLAGS   := $(CFLAGS)
 LDFLAGS  := $(LDFLAGS)
 LDLIBS   := $(LDLIBS)
 ARFLAGS  := $(ARFLAGS)
+
+PREFIX   := $(PREFIX)
+ifeq ($(PREFIX),)
+PREFIX := /usr/local
+endif
+
+#DESTDIR := $(DESTDIR)
+#ifeq ($(DESTDIR),)
+#DESTDIR := bin/dest
+#endif
 
 
 # compiler setup
@@ -59,16 +75,21 @@ endif
 ifeq ($(HOST),windows)
 
 RM = del /q /f
+INSTALL = echo install
 
 else
 
 RM = rm -f
+INSTALL = install
 
 endif
 
 
 
 # build setup
+
+INSTALL_PROGRAM = $(INSTALL) -m 0755 -D
+INSTALL_DATA = $(INSTALL) -m 0644 -D
 
 CPPFLAGS += -Icommon -I. -Iinclude/modplug/include -Iinclude
 CXXFLAGS += -fvisibility=hidden
@@ -198,13 +219,13 @@ ifneq ($(SVN_INFO),0)
  # not in svn checkout
  CPPFLAGS += -Icommon/svn_version_default
  DIST_OPENMPT_VERSION:=rUNKNOWN
- DIST_LIBOPENMPT_VERSION:=rUNKNOWN
+ DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR)
 else
  # in svn checkout
  BUILD_SVNVERSION := $(shell svnversion -n . )
  CPPFLAGS += -Icommon/svn_version_svnversion -D BUILD_SVNVERSION=\"$(BUILD_SVNVERSION)\"
  DIST_OPENMPT_VERSION:=r$(BUILD_SVNVERSION)
- DIST_LIBOPENMPT_VERSION:=r$(BUILD_SVNVERSION)
+ DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(BUILD_SVNVERSION)
 endif
 
 
@@ -310,6 +331,7 @@ endif
 ifeq ($(TEST),1)
 OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 endif
+OUTPUTS += bin/libopenmpt.pc
 
 all: $(OUTPUTS)
 
@@ -320,6 +342,43 @@ test: bin/libopenmpt_test$(EXESUFFIX)
 bin/libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPTTEST_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+
+bin/libopenmpt.pc:
+	$(INFO) [GEN] $@
+	$(VERYSILENT)rm -rf $@
+	$(VERYSILENT)echo > $@.tmp
+	$(VERYSILENT)echo 'prefix=$(PREFIX)' >> $@.tmp
+	$(VERYSILENT)echo 'exec_prefix=$${prefix}' >> $@.tmp
+	$(VERYSILENT)echo 'libdir=$${exec_prefix}/lib' >> $@.tmp
+	$(VERYSILENT)echo 'includedir=$${prefix}/include' >> $@.tmp
+	$(VERYSILENT)echo '' >> $@.tmp
+	$(VERYSILENT)echo 'Name: libopenmpt' >> $@.tmp
+	$(VERYSILENT)echo 'Description: Tracker module player based on OpenMPT' >> $@.tmp
+	$(VERYSILENT)echo 'Version: $(DIST_LIBOPENMPT_VERSION)' >> $@.tmp
+	$(VERYSILENT)echo 'Libs: -L$${libdir} -lopenmpt' >> $@.tmp
+	$(VERYSILENT)echo 'Libs.private: zlib' >> $@.tmp
+	$(VERYSILENT)echo 'Cflags: -I$${includedir}' >> $@.tmp
+	$(VERYSILENT)mv $@.tmp $@
+
+.PHONY: install
+install: $(OUTPUTS)
+	$(INSTALL_DATA) libopenmpt/libopenmpt_config.h $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt_config.h
+	$(INSTALL_DATA) libopenmpt/libopenmpt_version.h $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt_version.h
+	$(INSTALL_DATA) libopenmpt/libopenmpt.h $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt.h
+	$(INSTALL_DATA) libopenmpt/libopenmpt_stream_callbacks_fd.h $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt_stream_callbacks_fd.h
+	$(INSTALL_DATA) libopenmpt/libopenmpt_stream_callbacks_file.h $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt_stream_callbacks_file.h
+	$(INSTALL_DATA) libopenmpt/libopenmpt.hpp $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt.hpp
+	$(INSTALL_DATA) bin/libopenmpt.pc $(DESTDIR)$(PREFIX)/lib/pkgconfig/libopenmpt.pc
+ifeq ($(SHARED_LIB),1)
+	$(INSTALL_DATA) bin/libopenmpt.so $(DESTDIR)$(PREFIX)/lib/libopenmpt.so
+	$(INSTALL_DATA) bin/libopenmpt_modplug.so $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug.so
+endif
+ifeq ($(STATIC_LIB),1)
+	$(INSTALL_DATA) bin/openmpt.a $(DESTDIR)$(PREFIX)/lib/openmpt.a
+endif
+ifeq ($(OPENMPT123),1)
+	$(INSTALL_PROGRAM) bin/openmpt123$(EXESUFFIX) $(DESTDIR)$(PREFIX)/bin/openmpt123$(EXESUFFIX)
+endif
 
 .PHONY: dist
 dist: bin/dist.tar
@@ -445,4 +504,5 @@ else
 clean:
 	$(INFO) clean ...
 	$(SILENT)$(RM) $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS)
+	$(SILENT)$(RM) -rf bin/dest
 endif
