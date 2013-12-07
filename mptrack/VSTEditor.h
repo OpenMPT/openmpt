@@ -18,6 +18,9 @@
 class COwnerVstEditor: public CAbstractVstEditor
 //==============================================
 {
+protected:
+	CStatic plugWindow;
+
 public:
 	COwnerVstEditor(CVstPlugin &plugin);
 	virtual ~COwnerVstEditor();

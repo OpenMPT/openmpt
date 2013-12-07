@@ -264,8 +264,11 @@ void CSelectPluginDlg::OnNameFilterChanged()
 	HWND hwnd = GetDlgItem(IDC_NAMEFILTER)->m_hWnd;
 	int len = GetWindowTextLengthW(hwnd);
 	m_nameFilter.resize(len);
-	GetWindowTextW(hwnd, &m_nameFilter[0], len + 1);
-	for(int i = 0; i < len; i++) m_nameFilter[i] = ::towlower(m_nameFilter[i]);
+	if(len)
+	{
+		GetWindowTextW(hwnd, &m_nameFilter[0], len + 1);
+		for(int i = 0; i < len; i++) m_nameFilter[i] = ::towlower(m_nameFilter[i]);
+	}
 
 	UpdatePluginsList();
 }
