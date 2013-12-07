@@ -114,7 +114,6 @@ CXXFLAGS += -Wall -Wextra -Wcast-align
 CFLAGS   += -Wall -Wextra -Wcast-align
 
 ifeq ($(DYNLINK),1)
-LDFLAGS  += -Wl,-rpath,./bin -Wl,-rpath,../bin
 LDFLAGS_LIBOPENMPT += -Lbin
 LDLIBS_LIBOPENMPT  += -lopenmpt
 endif
@@ -461,6 +460,10 @@ bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
 bin/libopenmpt.so: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) -shared $^ $(LOADLIBES) $(LDLIBS) -o $@
+ifeq ($(HOST),windows)
+else
+	$(VERYSILENT)ln -s bin/libopenmpt.so libopenmpt.so
+endif
 
 bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
@@ -503,6 +506,6 @@ clean:
 else
 clean:
 	$(INFO) clean ...
-	$(SILENT)$(RM) $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS)
+	$(SILENT)$(RM) $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS) libopenmpt.so
 	$(SILENT)$(RM) -rf bin/dest
 endif
