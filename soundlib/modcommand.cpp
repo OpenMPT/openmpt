@@ -466,7 +466,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	if(newTypeIsMOD)
 	{
 		// convert note off events
-		if(note >= NOTE_MIN_SPECIAL)
+		if(IsSpecialNote())
 		{
 			note = NOTE_NONE;
 			// no effect present, so just convert note off to volume 0
@@ -652,7 +652,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			command = param = 0;
 		}
 
-		if(note >= NOTE_MIN_SPECIAL)
+		if(IsSpecialNote())
 		{
 			// Instrument numbers next to Note Off reset instrument settings
 			instr = 0;

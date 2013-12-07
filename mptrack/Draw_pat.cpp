@@ -1584,7 +1584,7 @@ void CViewPattern::UpdateIndicator()
 				{
 				case PatternCursor::noteColumn:
 					// display note
-					if(m->note >= NOTE_MIN_SPECIAL)
+					if(m->IsSpecialNote())
 						strcpy(s, szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL]);
 					break;
 

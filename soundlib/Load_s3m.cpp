@@ -756,7 +756,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 						{
 							// No Note, or note is too low
 							note = s3mNoteNone;
-						} else if(note >= NOTE_MIN_SPECIAL)
+						} else if(ModCommand::IsSpecialNote(note))
 						{
 							// Note Cut
 							note = s3mNoteOff;

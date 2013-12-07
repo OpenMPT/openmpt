@@ -2921,18 +2921,18 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 					int note = m[chn].note + offset * (coarse ? 12 : 1);
 					Limit(note, noteMin, noteMax);
 					m[chn].note = (ModCommand::NOTE)note;
-				} else if(m[chn].note >= NOTE_MIN_SPECIAL)
+				} else if(m[chn].IsSpecialNote())
 				{
 					int note = m[chn].note;
 					do
 					{
 						note += offset;
-						if(note < NOTE_MIN_SPECIAL || note > NOTE_MAX_SPECIAL)
+						if(!ModCommand::IsSpecialNote(note))
 						{
 							break;
 						}
 					} while(!pSndFile->GetModSpecifications().HasNote((ModCommand::NOTE)note));
-					if(note >= NOTE_MIN_SPECIAL && note <= NOTE_MAX_SPECIAL)
+					if(ModCommand::IsSpecialNote(note))
 					{
 						if(m[chn].IsPcNote() != ModCommand::IsPcNote((ModCommand::NOTE)note))
 						{
@@ -4732,7 +4732,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
-	if(note < NOTE_MIN_SPECIAL)
+	if(!ModCommand::IsSpecialNote(note))
 	{
 		Limit(note, sndFile.GetModSpecifications().noteMin, sndFile.GetModSpecifications().noteMax);
 	}
