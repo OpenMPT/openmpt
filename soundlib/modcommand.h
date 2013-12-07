@@ -12,6 +12,8 @@
 
 #include "Snd_defs.h"
 
+#include "../common/misc_util.h"
+
 #include <cstring>
 
 // Note definitions
@@ -154,8 +156,8 @@ public:
 	bool IsNote() const { return note >= NOTE_MIN && note <= NOTE_MAX; }
 	static bool IsNote(NOTE note) { return note >= NOTE_MIN && note <= NOTE_MAX; }
 	// Returns true if and only if note is a valid special note.
-	bool IsSpecialNote() const { return note >= NOTE_MIN_SPECIAL && note <= NOTE_MAX_SPECIAL; }
-	static bool IsSpecialNote(NOTE note) { return note >= NOTE_MIN_SPECIAL && note <= NOTE_MAX_SPECIAL; }
+	bool IsSpecialNote() const { return IsInRange(note, NOTE_MIN_SPECIAL, NOTE_MAX_SPECIAL); }
+	static bool IsSpecialNote(NOTE note) { return IsInRange(note, NOTE_MIN_SPECIAL, NOTE_MAX_SPECIAL); }
 	// Returns true if and only if note is a valid musical note or the note entry is empty.
 	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }

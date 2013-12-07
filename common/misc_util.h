@@ -275,6 +275,15 @@ inline T Clamp(T val, const C lowerLimit, const C upperLimit)
 	else return val;
 }
 
+// Check if val is in [lo,hi] without causing compiler warnings
+// if theses checks are always true due to the domain of T.
+// GCC does not warn if the type is templated.
+template<typename T, typename C>
+inline bool IsInRange(T val, C lo, C hi)
+//--------------------------------------
+{
+	return lo <= val && val <= hi;
+}
 
 // Like Limit, but with upperlimit only.
 template<class T, class C>

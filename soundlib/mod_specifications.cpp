@@ -402,7 +402,7 @@ bool CModSpecifications::HasNote(ModCommand::NOTE note) const
 {
 	if(note >= noteMin && note <= noteMax)
 		return true;
-	else if(note >= NOTE_MIN_SPECIAL && note <= NOTE_MAX_SPECIAL)
+	else if(ModCommand::IsSpecialNote(note))
 	{
 		if(note == NOTE_NOTECUT)
 			return hasNoteCut;
