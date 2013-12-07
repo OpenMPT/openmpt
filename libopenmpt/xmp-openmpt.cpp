@@ -843,12 +843,44 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 
 #ifdef EXPERIMENTAL_VIS
 
+enum ColorIndex
+{
+	col_background = 0,
+	col_unknown,
+	col_text,
+	col_empty,
+	col_instr,
+	col_vol,
+	col_pitch,
+	col_current_row,
+
+	col_max
+};
+
+const struct Columns
+{
+	int str_offset;
+	int num_chars;
+	int color;
+} pattern_columns[] = {
+	{ 0, 3, col_text },		// C-5
+	{ 4, 2, col_instr },	// 01
+	{ 6, 3, col_vol },		// v64
+	{ 10, 3, col_pitch },	// EFF
+};
+
+union Color
+{
+	struct { uint8_t r, g, b, a; };
+	COLORREF dw;
+};
+
 HDC visDC;
 HGDIOBJ visbitmap;
 
-DWORD viscolors[3];
-HPEN vispens[3];
-HBRUSH visbrushs[3];
+Color viscolors[col_max];
+HPEN vispens[col_max];
+HBRUSH visbrushs[col_max];
 HFONT visfont;
 static int last_pattern = -1;
 
@@ -857,15 +889,39 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	visDC = nullptr;
 	visbitmap = nullptr;
 	visfont = nullptr;
-	viscolors[0] = colors[0];	// Background
-	viscolors[1] = colors[1];	// Text
-	viscolors[2] = colors[2];	// Current row
-	vispens[0] = CreatePen( PS_SOLID, 1, viscolors[0] );
-	vispens[1] = CreatePen( PS_SOLID, 1, viscolors[1] );
-	vispens[2] = CreatePen( PS_SOLID, 1, viscolors[2] );
-	visbrushs[0] = CreateSolidBrush( viscolors[0] );
-	visbrushs[1] = CreateSolidBrush( viscolors[1] );
-	visbrushs[2] = CreateSolidBrush( viscolors[2] );
+
+	viscolors[col_background].dw = colors[0];
+	viscolors[col_unknown].dw = colors[1];
+	viscolors[col_text].dw = colors[2];
+
+	const int r = viscolors[col_text].r, g = viscolors[col_text].g, b = viscolors[col_text].b;
+	viscolors[col_empty].r = (r + viscolors[col_background].r) / 2;
+	viscolors[col_empty].g = (g + viscolors[col_background].g) / 2;
+	viscolors[col_empty].b = (b + viscolors[col_background].b) / 2;
+	viscolors[col_empty].a = 0;
+
+#define MIXCOLOR(col, c1, c2, c3) { \
+	viscolors[col] = viscolors[col_text]; \
+	int mix = viscolors[col].c1 + 0xA0; \
+	viscolors[col].c1 = mix; \
+	if ( mix > 0xFF ) { \
+		viscolors[col].c2 = std::max<uint8_t>( c2 - viscolors[col].c1 / 2, 0 ); \
+		viscolors[col].c3 = std::max<uint8_t>( c3 - viscolors[col].c1 / 2, 0 ); \
+		viscolors[col].c1 = 0xFF; \
+	} }
+
+	MIXCOLOR(col_instr, g, r, b);
+	MIXCOLOR(col_vol, b, r, g);
+	MIXCOLOR(col_pitch, r, g, b);
+#undef MIXCOLOR
+
+	viscolors[col_current_row].dw = ~viscolors[col_background].dw;
+	viscolors[col_current_row].a = 0;
+
+	for( int i = 0; i < col_max; ++i ) {
+		vispens[i] = CreatePen( PS_SOLID, 1, viscolors[i].dw );
+		visbrushs[i] = CreateSolidBrush( viscolors[i].dw );
+	}
 
 	if ( !self->mod ) {
 		return FALSE;
@@ -874,12 +930,12 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 }
 static void WINAPI VisClose() {
 	xmpopenmpt_lock guard;
-	DeleteObject( vispens[0] );
-	DeleteObject( vispens[1] );
-	DeleteObject( vispens[2] );
-	DeleteObject( visbrushs[0] );
-	DeleteObject( visbrushs[1] );
-	DeleteObject( visbrushs[2] );
+
+	for( int i = 0; i < col_max; ++i ) {
+		DeleteObject( vispens[i] );
+		DeleteObject( visbrushs[i] );
+	}
+
 	DeleteObject( visfont );
 	DeleteObject( visbitmap );
 	DeleteDC( visDC );
@@ -905,11 +961,13 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		GetObject ( GetCurrentObject( dc, OBJ_FONT ), sizeof(logfont), &logfont );
 		wcscpy(logfont.lfFaceName, L"Lucida Console");
 		visfont = CreateFontIndirect ( &logfont );
-		SelectObject( dc, visfont );
 	}
 
-	TEXTMETRIC tm;
-	GetTextMetrics( dc, &tm );
+	SIZE text_size;
+	SelectObject( dc, visfont );
+	if ( GetTextExtentPoint32(dc, TEXT("W"), 1, &text_size) == FALSE ) {
+		return FALSE;
+	}
 
 	if(flags & XMPIN_VIS_INIT)
 	{
@@ -919,21 +977,27 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	const std::size_t channels = self->mod->get_num_channels();
 	const std::size_t rows = self->mod->get_pattern_num_rows( pattern );
 
-	const std::size_t num_cols = size.cx / tm.tmAveCharWidth;
-	const std::size_t num_rows = size.cy / tm.tmHeight;
+	const std::size_t num_half_chars = std::max<std::size_t>( 2 * size.cx / text_size.cx, 8 ) - 8;
+	const std::size_t num_rows = size.cy / text_size.cy;
 
-	std::size_t cols_per_channel = num_cols / channels;
-	if (cols_per_channel <= 1 ) {
-		cols_per_channel = 1;
+	// Spaces between pattern components are half width, full space at channel end
+	std::size_t half_chars_per_channel = num_half_chars / channels, cols_per_channel;
+	if ( half_chars_per_channel >= 26 ) {
+		cols_per_channel = 13;	// C-5 01v64 EFF
+		half_chars_per_channel = 6 + 1 + 4 + 1 + 6 + 1 + 6 + 1;
+	} else if ( half_chars_per_channel >= 19 ) {
+		cols_per_channel = 9;	// C-5 01v64
+		half_chars_per_channel = 6 + 1 + 4 + 1 + 6 + 1;
+	} else if ( half_chars_per_channel >= 12 ) {
+		cols_per_channel = 6;	// C-5 01
+		half_chars_per_channel = 6 + 1 + 4 + 1;
 	} else {
-		cols_per_channel -= 1;
-	}
-	if ( cols_per_channel >= 13 ) {
-		cols_per_channel = 13;
+		cols_per_channel = 3;	// C-5, without extra half space
+		half_chars_per_channel = 3 * 2;
 	}
 
-	int pattern_width = ((cols_per_channel * channels) + 4) * tm.tmAveCharWidth + (channels - 1) * (tm.tmAveCharWidth / 2);
-	int pattern_height = rows * tm.tmHeight;
+	int pattern_width = (((half_chars_per_channel * channels) + 8) * text_size.cx) / 2 + (channels - 1) * (text_size.cx / 2);
+	int pattern_height = rows * text_size.cy;
 
 	if( visDC == nullptr || last_pattern != pattern ) {
 		DeleteObject( visbitmap );
@@ -943,8 +1007,8 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		visbitmap = CreateCompatibleBitmap( dc, pattern_width, pattern_height );
 		SelectObject( visDC, visbitmap );
 
-		SelectObject( visDC, vispens[1] );
-		SelectObject( visDC, visbrushs[0] );
+		SelectObject( visDC, vispens[col_unknown] );
+		SelectObject( visDC, visbrushs[col_background] );
 
 		SelectObject( visDC, visfont );
 
@@ -953,9 +1017,9 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		bgrect.left = 0;
 		bgrect.right = pattern_width;
 		bgrect.bottom = pattern_height;
-		FillRect( visDC, &bgrect, visbrushs[0] );
+		FillRect( visDC, &bgrect, visbrushs[col_background] );
 
-		SetBkColor( visDC, viscolors[0] );
+		SetBkColor( visDC, viscolors[col_background].dw );
 
 		POINT pos;
 		pos.y = 0;
@@ -968,46 +1032,40 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 			s << std::setfill('0') << std::setw(3) << row;
 			const std::string rowstr = s.str();
 
-			SetTextColor( visDC, viscolors[1] );
+			SetTextColor( visDC, viscolors[1].dw );
 			TextOutA( visDC, pos.x, pos.y, rowstr.c_str(), rowstr.length() );
-			pos.x += 4 * tm.tmAveCharWidth;
+			pos.x += 4 * text_size.cx;
 
 			for ( std::size_t channel = 0; channel < channels; ++channel ) {
-
 				// "NNN IIvVV EFF"
-				std::string highlight = self->mod->highlight_pattern_row_channel( pattern, row, channel, cols_per_channel );
+				//std::string highlight = self->mod->highlight_pattern_row_channel( pattern, row, channel, cols_per_channel );
 				std::string chan = self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel );
 
-				int prev_color = -1;
-				int str_start = 0;
+				for ( std::size_t col = 0; col < sizeof ( pattern_columns ) / sizeof ( pattern_columns[0] ); ++col) {
+					if ( pattern_columns[col].str_offset + pattern_columns[col].num_chars <= int(cols_per_channel) ) {
+						int color = pattern_columns[col].color;
+						switch(chan[pattern_columns[col].str_offset]) {
+						case ' ':
+						case '.':
+						case '^':
+						case '=':
+						case '~':
+							color = col_empty;
+							break;
+						}
 
-				for( size_t col = 0; col < cols_per_channel; ++col) {
-					int color;
-					switch( chan[col] )
-					{
-					case ' ':
-					case '.':
-						color = 1;
-						break;
-
-					default:
-						color = 2;
-					}
-
-					if( ( col != 0 && color != prev_color ) || col == cols_per_channel - 1 ) {
-						SetTextColor( visDC, viscolors[color] );
-						TextOutA( visDC, pos.x, pos.y, &chan[str_start], 1 + col - str_start );
-						pos.x += (1 + col - str_start) * tm.tmAveCharWidth;
-						color = prev_color;
-						str_start = col + 1;
+						SetTextColor( visDC, viscolors[color].dw );
+						TextOutA( visDC, pos.x, pos.y, &chan[pattern_columns[col].str_offset], pattern_columns[col].num_chars );
+						pos.x += pattern_columns[col].num_chars * text_size.cx + text_size.cx / 2;
 					}
 				}
-
-				// Channel padding
-				pos.x += tm.tmAveCharWidth / 2;
+				// Extra padding
+				if ( cols_per_channel > 3 ) {
+					pos.x += text_size.cx / 2;
+				}
 			}
 
-			pos.y += tm.tmHeight;
+			pos.y += text_size.cy;
 		}
 	}
 
@@ -1016,10 +1074,10 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	bgrect.left = 0;
 	bgrect.right = size.cx;
 	bgrect.bottom = size.cy;
-	FillRect( dc, &bgrect, visbrushs[0] );
+	FillRect( dc, &bgrect, visbrushs[col_background] );
 
 	int offset_x = (size.cx - pattern_width) / 2;
-	int offset_y = (size.cy - tm.tmHeight) / 2 - current_row * tm.tmHeight;
+	int offset_y = (size.cy - text_size.cy) / 2 - current_row * text_size.cy;
 	int src_offset_x = 0;
 	int src_offset_y = 0;
 
@@ -1039,13 +1097,13 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 
 	// Highlight current row
 	POINT line[] = {
-		{ (size.cx - pattern_width) / 2 - 1, (size.cy - tm.tmHeight) / 2 - 1 },
-		{ (size.cx + pattern_width) / 2 + 1, (size.cy - tm.tmHeight) / 2 - 1 },
-		{ (size.cx + pattern_width) / 2 + 1, (size.cy + tm.tmHeight) / 2 + 1 },
-		{ (size.cx - pattern_width) / 2 - 1, (size.cy + tm.tmHeight) / 2 + 1 },
-		{ (size.cx - pattern_width) / 2 - 1, (size.cy - tm.tmHeight) / 2 - 1 },
+		{ (size.cx - pattern_width) / 2 - 1, (size.cy - text_size.cy) / 2 - 1 },
+		{ (size.cx + pattern_width) / 2 + 1, (size.cy - text_size.cy) / 2 - 1 },
+		{ (size.cx + pattern_width) / 2 + 1, (size.cy + text_size.cy) / 2 },
+		{ (size.cx - pattern_width) / 2 - 1, (size.cy + text_size.cy) / 2  },
+		{ (size.cx - pattern_width) / 2 - 1, (size.cy - text_size.cy) / 2 - 1 },
 	};
-	SelectObject( dc, vispens[2] );
+	SelectObject( dc, vispens[col_current_row] );
 	Polyline( dc, line, 5 );
 	
 	last_pattern = pattern;
@@ -1090,10 +1148,10 @@ static XMPIN xmpin = {
 	NULL, // GetDownloaded
 
 #ifdef EXPERIMENTAL_VIS
-	"OpenMPT Pattern",
+	"OpenMPT Pattern Display",
 	VisOpen,
 	VisClose,
-	/*VisSize,*/NULL,
+	VisSize,
 	/*VisRender,*/NULL,
 	VisRenderDC,
 	/*VisButton,*/NULL,
