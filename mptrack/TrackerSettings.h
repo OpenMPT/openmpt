@@ -274,6 +274,7 @@ public:
 	
 	Setting<std::vector<uint32> > m_SoundSampleRates;
 	Setting<bool> m_MorePortaudio;
+	Setting<bool> m_SoundSettingsOpenDeviceAtStartup;
 	Setting<bool> m_SoundSettingsKeepDeviceOpen;
 
 	bool m_SoundDeviceSettingsUseOldDefaults;

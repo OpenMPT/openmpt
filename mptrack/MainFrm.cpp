@@ -1570,13 +1570,16 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 	ModCommand *m = m_WaveFile.Patterns[0];
 	if(m)
 	{
-		m[0].note = note;
-		m[0].instr = 1;
-
-		if(m_WaveFile.m_nSamples > 1 || m_WaveFile.GetSample(1).uFlags[CHN_LOOP])
+		if(m_WaveFile.m_nSamples > 0)
 		{
-			m[48 * 2].note = NOTE_KEYOFF;
-			m[79 * 2].note = NOTE_NOTECUT;
+			m[0].note = note;
+			m[0].instr = 1;
+
+			if(m_WaveFile.m_nSamples > 1 && m_WaveFile.GetSample(1).uFlags[CHN_LOOP])
+			{
+				m[48 * 2].note = NOTE_KEYOFF;
+				m[79 * 2].note = NOTE_NOTECUT;
+			}
 		}
 		m[79 * 2].command = CMD_POSITIONJUMP;
 		m[79 * 2 + 1].command = CMD_PATTERNBREAK;
