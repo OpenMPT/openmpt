@@ -434,6 +434,7 @@ public:
 	void InitPreview();
 	void PreparePreview(ModCommand::NOTE note);
 	void StopPreview() { StopSoundFile(&m_WaveFile); }
+	void PlayPreview() { PlaySoundFile(&m_WaveFile); }
 
 	inline bool IsPlaying() const { return m_pSndFile != nullptr; }
 	inline CModDoc *GetModPlaying() const { return m_pSndFile ? m_pSndFile->GetpModDoc() : nullptr; }

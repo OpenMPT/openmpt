@@ -154,6 +154,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Sound Settings
 	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
+	, m_SoundSettingsOpenDeviceAtStartup(conf, "Sound Settings", "OpenDeviceAtStartup", false)
 	, m_SoundSettingsKeepDeviceOpen(conf, "Sound Settings", "KeepDeviceOpen", false)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
 	, m_SoundDeviceIdentifier(conf, "Sound Settings", "Device", std::wstring())

@@ -901,6 +901,13 @@ BOOL CTrackApp::InitInstance()
 	MptTest::DoTests();
 #endif
 
+	if(TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup)
+	{
+		pMainFrame->InitPreview();
+		pMainFrame->PreparePreview(64);
+		pMainFrame->PlayPreview();
+	}
+
 	return TRUE;
 }
 
