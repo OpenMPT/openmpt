@@ -859,15 +859,24 @@ enum ColorIndex
 
 const struct Columns
 {
-	int str_offset;
 	int num_chars;
 	int color;
 } pattern_columns[] = {
-	{ 0, 3, col_text },		// C-5
-	{ 4, 2, col_instr },	// 01
-	{ 6, 3, col_vol },		// v64
-	{ 10, 3, col_pitch },	// EFF
+	{ 3, col_text },		// C-5
+	{ 2, col_instr },	// 01
+	{ 3, col_vol },		// v64
+	{ 3, col_pitch },	// EFF
 };
+
+static void assure_width( std::string & str, std::size_t width ) {
+	if ( str.length() == width ) {
+		return;
+	} else if ( str.length() < width ) {
+		str += std::string( width - str.length(), ' ' );
+	} else if ( str.length() > width ) {
+		str = str.substr( 0, width );
+	}
+}
 
 union Color
 {
@@ -981,18 +990,19 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	const std::size_t num_rows = size.cy / text_size.cy;
 
 	// Spaces between pattern components are half width, full space at channel end
-	std::size_t half_chars_per_channel = num_half_chars / channels, cols_per_channel;
+	std::size_t half_chars_per_channel = num_half_chars / channels;
+	std::size_t num_cols;
 	if ( half_chars_per_channel >= 26 ) {
-		cols_per_channel = 13;	// C-5 01v64 EFF
+		num_cols = 4;	// C-5 01v64 EFF
 		half_chars_per_channel = 6 + 1 + 4 + 1 + 6 + 1 + 6 + 1;
 	} else if ( half_chars_per_channel >= 19 ) {
-		cols_per_channel = 9;	// C-5 01v64
+		num_cols = 3;	// C-5 01v64
 		half_chars_per_channel = 6 + 1 + 4 + 1 + 6 + 1;
 	} else if ( half_chars_per_channel >= 12 ) {
-		cols_per_channel = 6;	// C-5 01
+		num_cols = 2;	// C-5 01
 		half_chars_per_channel = 6 + 1 + 4 + 1;
 	} else {
-		cols_per_channel = 3;	// C-5, without extra half space
+		num_cols = 1;	// C-5, without extra half space
 		half_chars_per_channel = 3 * 2;
 	}
 
@@ -1039,12 +1049,29 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 			for ( std::size_t channel = 0; channel < channels; ++channel ) {
 				// "NNN IIvVV EFF"
 				//std::string highlight = self->mod->highlight_pattern_row_channel( pattern, row, channel, cols_per_channel );
-				std::string chan = self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel );
+				//std::string chan = self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel );
 
-				for ( std::size_t col = 0; col < sizeof ( pattern_columns ) / sizeof ( pattern_columns[0] ); ++col) {
-					if ( pattern_columns[col].str_offset + pattern_columns[col].num_chars <= int(cols_per_channel) ) {
-						int color = pattern_columns[col].color;
-						switch(chan[pattern_columns[col].str_offset]) {
+				for ( std::size_t col = 0; col < num_cols; ++col ) {
+					std::string col_string;
+					switch ( col ) {
+						case 0:
+							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_note );
+							break;
+						case 1:
+							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_instrument );
+							break;
+						case 2:
+							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_volumeffect );
+							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_volume );
+							break;
+						case 3:
+							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_effect );
+							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_parameter );
+							break;
+					}
+					assure_width( col_string, pattern_columns[col].num_chars );
+					int color = pattern_columns[col].color;
+					switch ( col_string[0] ) {
 						case ' ':
 						case '.':
 						case '^':
@@ -1052,15 +1079,14 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 						case '~':
 							color = col_empty;
 							break;
-						}
-
-						SetTextColor( visDC, viscolors[color].dw );
-						TextOutA( visDC, pos.x, pos.y, &chan[pattern_columns[col].str_offset], pattern_columns[col].num_chars );
-						pos.x += pattern_columns[col].num_chars * text_size.cx + text_size.cx / 2;
 					}
+
+					SetTextColor( visDC, viscolors[color].dw );
+					TextOutA( visDC, pos.x, pos.y, col_string.c_str(), col_string.length() );
+					pos.x += pattern_columns[col].num_chars * text_size.cx + text_size.cx / 2;
 				}
 				// Extra padding
-				if ( cols_per_channel > 3 ) {
+				if ( num_cols > 1 ) {
 					pos.x += text_size.cx / 2;
 				}
 			}
