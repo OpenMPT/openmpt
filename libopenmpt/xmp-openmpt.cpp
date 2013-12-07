@@ -855,7 +855,6 @@ enum ColorIndex
 	col_instr,
 	col_vol,
 	col_pitch,
-	col_current_row,
 
 	col_max
 };
@@ -927,9 +926,6 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	MIXCOLOR(col_pitch, r, g, b);
 #undef MIXCOLOR
 
-	viscolors[col_current_row].dw = ~viscolors[col_background].dw;
-	viscolors[col_current_row].a = 0;
-
 	for( int i = 0; i < col_max; ++i ) {
 		vispens[i] = CreatePen( PS_SOLID, 1, viscolors[i].dw );
 		visbrushs[i] = CreateSolidBrush( viscolors[i].dw );
@@ -962,6 +958,7 @@ static BOOL WINAPI VisRender(DWORD *buf, SIZE size, DWORD flags) {
 }
 static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	xmpopenmpt_lock guard;
+	RECT rect;
 
 	timeinfo info = lookup_timeinfo( xmpfstatus->GetTime() );
 	int pattern = info.pattern;
@@ -1024,12 +1021,11 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 
 		SelectObject( visDC, visfont );
 
-		RECT bgrect;
-		bgrect.top = 0;
-		bgrect.left = 0;
-		bgrect.right = pattern_width;
-		bgrect.bottom = pattern_height;
-		FillRect( visDC, &bgrect, visbrushs[col_background] );
+		rect.top = 0;
+		rect.left = 0;
+		rect.right = pattern_width;
+		rect.bottom = pattern_height;
+		FillRect( visDC, &rect, visbrushs[col_background] );
 
 		SetBkColor( visDC, viscolors[col_background].dw );
 
@@ -1097,12 +1093,11 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		}
 	}
 
-	RECT bgrect;
-	bgrect.top = 0;
-	bgrect.left = 0;
-	bgrect.right = size.cx;
-	bgrect.bottom = size.cy;
-	FillRect( dc, &bgrect, visbrushs[col_background] );
+	rect.top = 0;
+	rect.left = 0;
+	rect.right = size.cx;
+	rect.bottom = size.cy;
+	FillRect( dc, &rect, visbrushs[col_background] );
 
 	int offset_x = (size.cx - pattern_width) / 2;
 	int offset_y = (size.cy - text_size.cy) / 2 - current_row * text_size.cy;
@@ -1124,15 +1119,11 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	BitBlt( dc, offset_x, offset_y, pattern_width, pattern_height, visDC, src_offset_x, src_offset_y , SRCCOPY );
 
 	// Highlight current row
-	POINT line[] = {
-		{ (size.cx - pattern_width) / 2 - 1, (size.cy - text_size.cy) / 2 - 1 },
-		{ (size.cx + pattern_width) / 2 + 1, (size.cy - text_size.cy) / 2 - 1 },
-		{ (size.cx + pattern_width) / 2 + 1, (size.cy + text_size.cy) / 2 },
-		{ (size.cx - pattern_width) / 2 - 1, (size.cy + text_size.cy) / 2  },
-		{ (size.cx - pattern_width) / 2 - 1, (size.cy - text_size.cy) / 2 - 1 },
-	};
-	SelectObject( dc, vispens[col_current_row] );
-	Polyline( dc, line, 5 );
+	rect.left = offset_x;
+	rect.top = (size.cy - text_size.cy) / 2;
+	rect.right = rect.left + pattern_width;
+	rect.bottom = rect.top + text_size.cy;
+	InvertRect( dc, &rect );
 	
 	last_pattern = pattern;
 
