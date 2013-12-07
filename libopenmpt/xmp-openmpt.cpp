@@ -865,7 +865,7 @@ const struct Columns
 	int num_chars;
 	int color;
 } pattern_columns[] = {
-	{ 3, col_text },		// C-5
+	{ 3, col_text },	// C-5
 	{ 2, col_instr },	// 01
 	{ 3, col_vol },		// v64
 	{ 3, col_pitch },	// EFF
@@ -993,23 +993,22 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	const std::size_t num_rows = size.cy / text_size.cy;
 
 	// Spaces between pattern components are half width, full space at channel end
-	std::size_t half_chars_per_channel = num_half_chars / channels;
+	const std::size_t half_chars_per_channel = num_half_chars / channels;
+	std::size_t chars_per_channel, spaces_per_channel;
 	std::size_t num_cols;
-	if ( half_chars_per_channel >= 26 ) {
-		num_cols = 4;	// C-5 01v64 EFF
-		half_chars_per_channel = 6 + 1 + 4 + 1 + 6 + 1 + 6 + 1;
-	} else if ( half_chars_per_channel >= 19 ) {
-		num_cols = 3;	// C-5 01v64
-		half_chars_per_channel = 6 + 1 + 4 + 1 + 6 + 1;
-	} else if ( half_chars_per_channel >= 12 ) {
-		num_cols = 2;	// C-5 01
-		half_chars_per_channel = 6 + 1 + 4 + 1;
-	} else {
-		num_cols = 1;	// C-5, without extra half space
-		half_chars_per_channel = 3 * 2;
+	for ( num_cols = sizeof ( pattern_columns ) / sizeof ( pattern_columns[0] ); num_cols >= 1; num_cols-- ) {
+		chars_per_channel = 0;
+		spaces_per_channel = num_cols > 1 ? num_cols : 0;	// No extra space if we only display notes
+		for ( std::size_t i = 0; i < num_cols; i++ ) {
+			chars_per_channel += pattern_columns[i].num_chars;
+		}
+
+		if ( half_chars_per_channel >= chars_per_channel * 2 + spaces_per_channel + 1 || num_cols == 1 ) {
+			break;
+		}
 	}
 
-	int pattern_width = (((half_chars_per_channel * channels) + 8) * text_size.cx) / 2 + (channels - 1) * (text_size.cx / 2);
+	int pattern_width = ((chars_per_channel * channels + 4) * text_size.cx) + (spaces_per_channel * channels + channels - (num_cols == 1 ? 1 : 2)) * (text_size.cx / 2);
 	int pattern_height = rows * text_size.cy;
 
 	if( visDC == nullptr || last_pattern != pattern ) {
