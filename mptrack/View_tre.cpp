@@ -130,7 +130,7 @@ END_MESSAGE_MAP()
 CModTree::CModTree(CModTree *pDataTree) :
 	m_pDataTree(pDataTree),
 	m_hDropWnd(nullptr),
-	m_hWatchDir(nullptr),
+	m_hWatchDir(INVALID_HANDLE_VALUE),
 	m_dwStatus(0),
 	m_nDocNdx(0), m_nDragDocNdx(0),
 	m_hItemDrag(nullptr), m_hItemDrop(nullptr),
@@ -1776,7 +1776,7 @@ void CModTree::FillInstrumentLibrary()
 	SortChildrenCB(&tvs);
 	SetRedraw(TRUE);
 
-	if(m_hWatchDir == nullptr)
+	if(m_hWatchDir == INVALID_HANDLE_VALUE)
 	{
 		m_hWatchDir = FindFirstChangeNotificationW(m_InstrLibPath.AsNative().c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME);
 	}
@@ -1792,7 +1792,7 @@ void CModTree::MonitorInstrumentLibrary()
 	{
 		Sleep(500);
 		const HANDLE waitHandles[] = { m_hWatchDirKillThread, m_hWatchDir };
-		result = WaitForMultipleObjects(m_hWatchDir != nullptr ? 2 : 1, waitHandles, FALSE, 1000);
+		result = WaitForMultipleObjects(m_hWatchDir != INVALID_HANDLE_VALUE ? 2 : 1, waitHandles, FALSE, 1000);
 		if(result == WAIT_OBJECT_0 + 1 && m_hWatchDir == waitHandles[1])
 		{
 			FindNextChangeNotification(m_hWatchDir);
@@ -1919,7 +1919,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 	if(ok)
 	{
 		HANDLE watchDir = m_hWatchDir;
-		m_hWatchDir = nullptr;
+		m_hWatchDir = INVALID_HANDLE_VALUE;
 		FindCloseChangeNotification(watchDir);
 	} else
 	{
