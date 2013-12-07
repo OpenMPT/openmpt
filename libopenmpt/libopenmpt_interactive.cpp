@@ -1,6 +1,8 @@
 
 #include "BuildSettings.h"
 
+#define LIBOPENMPT_INTERACTIVE_IS_EXPERIMENTAL
+
 #include "libopenmpt_internal.h"
 #include "libopenmpt_interactive.hpp"
 #include "libopenmpt_impl.hpp"

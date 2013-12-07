@@ -247,7 +247,6 @@ LIBOPENMPT_CXX_SOURCES += \
  libopenmpt/libopenmpt_c.cpp \
  libopenmpt/libopenmpt_cxx.cpp \
  libopenmpt/libopenmpt_impl.cpp \
- libopenmpt/libopenmpt_interactive.cpp \
  
 ifeq ($(NO_ZLIB),1)
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
