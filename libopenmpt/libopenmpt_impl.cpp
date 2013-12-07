@@ -860,6 +860,74 @@ std::uint8_t module_impl::get_pattern_row_channel_command( std::int32_t p, std::
 	return 0;
 }
 
+std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
+	CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
+	if ( p < 0 || p >= m_sndFile->Patterns.Size() ) {
+		return std::make_pair( std::string(), std::string() );
+	}
+	if ( r < 0 || r >= (std::int32_t)m_sndFile->Patterns[p].GetNumRows() ) {
+		return std::make_pair( std::string(), std::string() );
+	}
+	if ( c < 0 || c >= numchannels ) {
+		return std::make_pair( std::string(), std::string() );
+	}
+	if ( cmd < module::command_note || cmd > module::command_parameter ) {
+		return std::make_pair( std::string(), std::string() );
+	}
+	const ModCommand & cell = m_sndFile->Patterns[p][r*numchannels+c];
+	switch ( cmd ) {
+		case module::command_note:
+			return std::make_pair(
+					( cell.IsNote() || cell.IsSpecialNote() ) ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...")
+				,
+					( cell.IsNote() || cell.IsSpecialNote() ) ? std::string("nnn") : std::string("...")
+				);
+			break;
+		case module::command_instrument:
+			return std::make_pair(
+					cell.instr ? mpt::fmt::HEX0<2>( cell.instr ) : std::string("..")
+				,
+					cell.instr ? std::string("ii") : std::string("..")
+				);
+			break;
+		case module::command_volumeffect:
+			return std::make_pair(
+					cell.IsPcNote() ? std::string(" ") : cell.volcmd != VOLCMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetVolEffectLetter( cell.volcmd ) ) : std::string(" ")
+				,
+					cell.IsPcNote() ? std::string(" ") : cell.volcmd != VOLCMD_NONE ? std::string("w") : std::string(" ")
+				);
+			break;
+		case module::command_volume:
+			return std::make_pair(
+					cell.IsPcNote() ? mpt::fmt::HEX0<2>( cell.GetValueVolCol() & 0xff ) : cell.volcmd != VOLCMD_NONE ? mpt::fmt::HEX0<2>( cell.vol ) : std::string("..")
+				,
+					cell.IsPcNote() ? std::string("vv") : cell.volcmd != VOLCMD_NONE ? std::string("vv") : std::string("..")
+				);
+			break;
+		case module::command_effect:
+			return std::make_pair(
+					cell.IsPcNote() ? mpt::fmt::HEX0<1>( ( cell.GetValueEffectCol() & 0x0f00 ) > 16 ) : cell.command != CMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetEffectLetter( cell.command ) ) : std::string(".")
+				,
+					cell.IsPcNote() ? std::string("e") : cell.command != CMD_NONE ? std::string("e") : std::string(".")
+				);
+			break;
+		case module::command_parameter:
+			return std::make_pair(
+					cell.IsPcNote() ? mpt::fmt::HEX0<2>( cell.GetValueEffectCol() & 0x00ff ) : cell.command != CMD_NONE ? mpt::fmt::HEX0<2>( cell.param ) : std::string("..")
+				,
+					cell.IsPcNote() ? std::string("ff") : cell.command != CMD_NONE ? std::string("ff") : std::string("..")
+				);
+			break;
+	}
+	return std::make_pair( std::string(), std::string() );
+}
+std::string module_impl::format_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
+	return format_and_highlight_pattern_row_channel_command( p, r, c, cmd ).first;
+}
+std::string module_impl::highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
+	return format_and_highlight_pattern_row_channel_command( p, r, c, cmd ).second;
+}
+
 std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const {
 	std::string text = pad ? std::string( width, ' ' ) : std::string();
 	std::string high = pad ? std::string( width, ' ' ) : std::string();

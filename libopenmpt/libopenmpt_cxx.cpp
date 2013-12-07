@@ -284,6 +284,13 @@ std::uint8_t module::get_pattern_row_channel_command( std::int32_t pattern, std:
 	return impl->get_pattern_row_channel_command( pattern, row, channel, command );
 }
 
+std::string module::format_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const {
+	return impl->format_pattern_row_channel_command( pattern, row, channel, command );
+}
+std::string module::highlight_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const {
+	return impl->highlight_pattern_row_channel_command( pattern, row, channel, command );
+}
+
 std::string module::format_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width, bool pad ) const {
 	return impl->format_pattern_row_channel( pattern, row, channel, width, pad );
 }
