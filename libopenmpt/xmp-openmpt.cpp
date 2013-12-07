@@ -951,7 +951,7 @@ static BOOL WINAPI VisRender(DWORD *buf, SIZE size, DWORD flags) {
 static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	xmpopenmpt_lock guard;
 
-	timeinfo info = lookup_timeinfo( timeinfo_position - ( (double)xmpfstatus->GetLatency() / (double)self->num_channels / (double)self->samplerate ) );
+	timeinfo info = lookup_timeinfo( xmpfstatus->GetTime() );
 	int pattern = info.pattern;
 	int current_row = info.row;
 
