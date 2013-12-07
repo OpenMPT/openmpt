@@ -748,6 +748,22 @@ LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_m
 	return 0;
 }
 
+LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return openmpt::strdup( mod->impl->format_pattern_row_channel_command( pattern, row, channel, command ).c_str() );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+
+LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return openmpt::strdup( mod->impl->highlight_pattern_row_channel_command( pattern, row, channel, command ).c_str() );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+
 LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, size_t width, int pad ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
