@@ -860,6 +860,22 @@ std::uint8_t module_impl::get_pattern_row_channel_command( std::int32_t p, std::
 	return 0;
 }
 
+/*
+
+highlight chars explained:
+
+  : empty/space
+. : empty/dot
+n : generic note
+m : special note
+i : generic instrument
+u : generic volume column effect
+v : generic volume column parameter
+e : generic effect column effect
+f : generic effect column parameter
+
+*/
+
 std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
 	CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
 	if ( p < 0 || p >= m_sndFile->Patterns.Size() ) {
@@ -880,7 +896,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 			return std::make_pair(
 					( cell.IsNote() || cell.IsSpecialNote() ) ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...")
 				,
-					( cell.IsNote() || cell.IsSpecialNote() ) ? std::string("nnn") : std::string("...")
+					( cell.IsNote() ) ? std::string("nnn") : cell.IsSpecialNote() ? std::string("mmm") : std::string("...")
 				);
 			break;
 		case module::command_instrument:
@@ -894,7 +910,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 			return std::make_pair(
 					cell.IsPcNote() ? std::string(" ") : cell.volcmd != VOLCMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetVolEffectLetter( cell.volcmd ) ) : std::string(" ")
 				,
-					cell.IsPcNote() ? std::string(" ") : cell.volcmd != VOLCMD_NONE ? std::string("w") : std::string(" ")
+					cell.IsPcNote() ? std::string(" ") : cell.volcmd != VOLCMD_NONE ? std::string("u") : std::string(" ")
 				);
 			break;
 		case module::command_volume:
@@ -951,7 +967,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	text.clear();
 	high.clear();
 	text += ( cell.IsNote() || cell.IsSpecialNote() ) ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...");
-	high += ( cell.IsNote() || cell.IsSpecialNote() ) ? std::string("nnn") : std::string("...");
+	high += ( cell.IsNote() ) ? std::string("nnn") : cell.IsSpecialNote() ? std::string("mmm") : std::string("...");
 	if ( width >= 6 ) {
 		text += std::string(" ");
 		high += std::string(" ");
@@ -960,7 +976,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	}
 	if ( width >= 9 ) {
 		text += cell.IsPcNote() ? std::string(" ") + mpt::fmt::HEX0<2>( cell.GetValueVolCol() & 0xff ) : cell.volcmd != VOLCMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetVolEffectLetter( cell.volcmd ) ) + mpt::fmt::HEX0<2>( cell.vol ) : std::string(" ..");
-		high += cell.IsPcNote() ? std::string(" vv") : cell.volcmd != VOLCMD_NONE ? std::string("wvv") : std::string(" ..");
+		high += cell.IsPcNote() ? std::string(" vv") : cell.volcmd != VOLCMD_NONE ? std::string("uvv") : std::string(" ..");
 	}
 	if ( width >= 13 ) {
 		text += std::string(" ");
