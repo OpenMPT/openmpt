@@ -13,11 +13,17 @@
 #include "libopenmpt_config.h"
 #include "libopenmpt.hpp"
 
+#if !defined(LIBOPENMPT_INTERACTIVE_IS_EXPERIMENTAL)
+
+#error "libopenmpt_interactive is still completely experimental. The ABI and API WILL change. Use at your own risk, and use only internally for now. You have to #define LIBOPENMPT_INTERACTIVE_IS_EXPERIMENTAL to use it."
+
+#else // LIBOPENMPT_INTERACTIVE_IS_EXPERIMENTAL
+
 namespace openmpt {
 
 class interactive_module_impl;
 
-class LIBOPENMPT_CXX_API interactive_module : public module {
+class /* LIBOPENMPT_CXX_API */ interactive_module : public module {
 	
 private:
 	interactive_module_impl * interactive_impl;
@@ -41,8 +47,10 @@ public:
 
 
 
-}; // class module
+}; // class interactive_module
 
 } // namespace openmpt
+
+#endif // LIBOPENMPT_INTERACTIVE_IS_EXPERIMENTAL
 
 #endif // LIBOPENMPT_INTERACTIVE_HPP

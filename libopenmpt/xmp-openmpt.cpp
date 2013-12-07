@@ -19,7 +19,10 @@
 #endif
 #endif // _MSC_VER
 
+#define LIBOPENMPT_INTERACTIVE_IS_EXPERIMENTAL
+
 #include "libopenmpt.hpp"
+#include "libopenmpt_interactive.hpp"
 
 #include "libopenmpt_settings.hpp"
 
@@ -85,7 +88,7 @@ struct self_xmplay_t {
 	std::size_t samplerate;
 	std::size_t num_channels;
 	openmpt::settings::settings settings;
-	openmpt::module * mod;
+	openmpt::interactive_module * mod;
 	self_xmplay_t() : samplerate(48000), num_channels(2), settings(TEXT(SHORT_TITLE), false), mod(nullptr) {
 		settings.changed = apply_and_save_options;
 		settings.load();
@@ -580,7 +583,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 			#ifdef USE_XMPLAY_ISTREAM
 				switch ( xmpffile->GetType( file ) ) {
 					case XMPFILE_TYPE_MEMORY:
-						self->mod = new openmpt::module( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+						self->mod = new openmpt::interactive_module( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
 						break;
 					case XMPFILE_TYPE_FILE:
 					case XMPFILE_TYPE_NETFILE:
@@ -588,19 +591,19 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 					default:
 						{
 							xmplay_istream stream( file );
-							self->mod = new openmpt::module( stream );
+							self->mod = new openmpt::interactive_module( stream );
 						}
 						break;
 				}
 			#else
 				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
-					self->mod = new openmpt::module( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+					self->mod = new openmpt::interactive_module( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
 				} else {
-					self->mod = new openmpt::module( (read_XMPFILE( file )) );
+					self->mod = new openmpt::interactive_module( (read_XMPFILE( file )) );
 				}
 			#endif
 		#else
-			self->mod = new openmpt::module( std::ifstream( filename, std::ios_base::binary ) );
+			self->mod = new openmpt::interactive_module( std::ifstream( filename, std::ios_base::binary ) );
 		#endif
 		reset_timeinfos();
 		apply_options();
