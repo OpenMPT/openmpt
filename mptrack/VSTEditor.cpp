@@ -35,12 +35,15 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 {
 	Create(IDD_PLUGINEDITOR, parent);
 
+	// Some plugins (e.g. ProteusVX) need to be planted into another control or else they will break our window proc, making the window unusable.
+	plugWindow.Create(nullptr, WS_CHILD | WS_VISIBLE, CRect(0, 0, 100, 100), this);
+
 	SetupMenu();
 
 	// Set editor window size
 	ERect *pRect = nullptr;
 	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
-	m_VstPlugin.Dispatch(effEditOpen, 0, 0, m_hWnd, 0);
+	m_VstPlugin.Dispatch(effEditOpen, 0, 0, plugWindow.m_hWnd, 0);
 	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
 	if((pRect) && (pRect->right > pRect->left) && (pRect->bottom > pRect->top))
 	{
@@ -139,6 +142,9 @@ bool COwnerVstEditor::SetSize(int contentWidth, int contentHeight)
 	const int windowHeight = rcWnd.Height() - rcClient.Height() + contentHeight;
 	SetWindowPos(NULL, 0, 0,
 		windowWidth, windowHeight,
+		SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+	plugWindow.SetWindowPos(NULL, 0, 0,
+		contentWidth, contentHeight,
 		SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
 
 	// Check if the height of the menu bar has changed.
