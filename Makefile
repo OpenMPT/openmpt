@@ -102,26 +102,22 @@ endif
 #CFLAGS   += -mtune=generic
 
 ifeq ($(NO_ZLIB),1)
-CPPFLAGS += -DNO_ZLIB
+CPPFLAGS_ZLIB := -DNO_ZLIB
 else
 #LDLIBS   += -lz
 ifeq ($(shell pkg-config --exists zlib && echo yes),yes)
-CPPFLAGS += -DMPT_WITH_ZLIB
-CPPFLAGS += $(shell pkg-config --cflags-only-I   zlib )
-LDFLAGS  += $(shell pkg-config --libs-only-other zlib )
-LDFLAGS  += $(shell pkg-config --libs-only-L     zlib )
-LDLIBS   += $(shell pkg-config --libs-only-l     zlib )
+CPPFLAGS_ZLIB := $(shell pkg-config --cflags-only-I zlib ) -DMPT_WITH_ZLIB
+LDFLAGS_ZLIB  := $(shell pkg-config --libs-only-L   zlib ) $(shell pkg-config --libs-only-other zlib )
+LDLIBS_ZLIB   := $(shell pkg-config --libs-only-l   zlib )
 endif
 endif
 
 ifeq ($(USE_SDL),1)
 #LDLIBS   += -lsdl
 ifeq ($(shell pkg-config --exists sdl && echo yes),yes)
-CPPFLAGS += -DMPT_WITH_SDL
-CPPFLAGS += $(shell pkg-config --cflags-only-I   sdl )
-LDFLAGS  += $(shell pkg-config --libs-only-other sdl )
-LDFLAGS  += $(shell pkg-config --libs-only-L     sdl )
-LDLIBS   += $(shell pkg-config --libs-only-l     sdl )
+CPPFLAGS_SDL := $(shell pkg-config --cflags-only-I sdl ) -DMPT_WITH_SDL
+LDFLAGS_SDL  := $(shell pkg-config --libs-only-L   sdl ) $(shell pkg-config --libs-only-other sdl )
+LDLIBS_SDL   := $(shell pkg-config --libs-only-l   sdl )
 endif
 endif
 
@@ -129,11 +125,9 @@ ifeq ($(NO_PORTAUDIO),1)
 else
 #LDLIBS   += -lportaudio
 ifeq ($(shell pkg-config --exists portaudio-2.0 && echo yes),yes)
-CPPFLAGS += -DMPT_WITH_PORTAUDIO
-CPPFLAGS += $(shell pkg-config --cflags-only-I   portaudio-2.0 )
-LDFLAGS  += $(shell pkg-config --libs-only-other portaudio-2.0 )
-LDFLAGS  += $(shell pkg-config --libs-only-L     portaudio-2.0 )
-LDLIBS   += $(shell pkg-config --libs-only-l     portaudio-2.0 )
+CPPFLAGS_PORTAUDIO := $(shell pkg-config --cflags-only-I portaudio-2.0 ) -DMPT_WITH_PORTAUDIO
+LDFLAGS_PORTAUDIO  := $(shell pkg-config --libs-only-L   portaudio-2.0 ) $(shell pkg-config --libs-only-other portaudio-2.0 )
+LDLIBS_PORTAUDIO   := $(shell pkg-config --libs-only-l   portaudio-2.0 )
 endif
 endif
 
@@ -141,11 +135,9 @@ ifeq ($(NO_FLAC),1)
 else
 #LDLIBS   += -lFLAC
 ifeq ($(shell pkg-config --exists flac && echo yes),yes)
-CPPFLAGS += -DMPT_WITH_FLAC
-CPPFLAGS += $(shell pkg-config --cflags-only-I   flac )
-LDFLAGS  += $(shell pkg-config --libs-only-other flac )
-LDFLAGS  += $(shell pkg-config --libs-only-L     flac )
-LDLIBS   += $(shell pkg-config --libs-only-l     flac )
+CPPFLAGS_FLAC := $(shell pkg-config --cflags-only-I flac ) -DMPT_WITH_FLAC
+LDFLAGS_FLAC  := $(shell pkg-config --libs-only-L   flac ) $(shell pkg-config --libs-only-other flac )
+LDLIBS_FLAC   := $(shell pkg-config --libs-only-l   flac )
 endif
 endif
 
@@ -153,11 +145,9 @@ ifeq ($(NO_WAVPACK),1)
 else
 #LDLIBS   += -lwavpack
 ifeq ($(shell pkg-config --exists wavpack && echo yes),yes)
-CPPFLAGS += -DMPT_WITH_WAVPACK
-CPPFLAGS += $(shell pkg-config --cflags-only-I   wavpack )
-LDFLAGS  += $(shell pkg-config --libs-only-other wavpack )
-LDFLAGS  += $(shell pkg-config --libs-only-L     wavpack )
-LDLIBS   += $(shell pkg-config --libs-only-l     wavpack )
+CPPFLAGS_WAVPACK := $(shell pkg-config --cflags-only-I wavpack ) -DMPT_WITH_WAVPACK
+LDFLAGS_WAVPACK  := $(shell pkg-config --libs-only-L   wavpack ) $(shell pkg-config --libs-only-other wavpack )
+LDLIBS_WAVPACK   := $(shell pkg-config --libs-only-l   wavpack )
 endif
 endif
 
@@ -165,13 +155,24 @@ ifeq ($(NO_SNDFILE),1)
 else
 #LDLIBS   += -lsndfile
 ifeq ($(shell pkg-config --exists sndfile && echo yes),yes)
-CPPFLAGS += -DMPT_WITH_SNDFILE
-CPPFLAGS += $(shell pkg-config --cflags-only-I   sndfile )
-LDFLAGS  += $(shell pkg-config --libs-only-other sndfile )
-LDFLAGS  += $(shell pkg-config --libs-only-L     sndfile )
-LDLIBS   += $(shell pkg-config --libs-only-l     sndfile )
+CPPFLAGS_SNDFILE := $(shell pkg-config --cflags-only-I   sndfile ) -DMPT_WITH_SNDFILE
+LDFLAGS_SNDFILE  := $(shell pkg-config --libs-only-L     sndfile ) $(shell pkg-config --libs-only-other sndfile )
+LDLIBS_SNDFILE   := $(shell pkg-config --libs-only-l     sndfile )
 endif
 endif
+
+CPPFLAGS += $(CPPFLAGS_ZLIB)
+LDFLAGS += $(LDFLAGS_ZLIB)
+LDLIBS += $(LDLIBS_ZLIB)
+
+CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_WAVPACK) $(CPPFLAGS_SNDFILE)
+LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_WAVPACK) $(LDFLAGS_SNDFILE)
+LDLIBS_OPENMPT123   += $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_FLAC) $(LDLIBS_WAVPACK) $(LDLIBS_SNDFILE)
+
+CPPFLAGS_EXAMPLES += $(CPPFLAGS_PORTAUDIO)
+LDFLAGS_EXAMPLES  += $(LDFLAGS_PORTAUDIO)
+LDLIBS_EXAMPLES   += $(LDLIBS_PORTAUDIO)
+
 
 %: %.o
 	$(INFO) [LD ] $@
@@ -406,21 +407,35 @@ bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) -shared $(LDFLAGS_LIBOPENMPT) $^ $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
+openmpt123/openmpt123.o: openmpt123/openmpt123.cpp
+	$(INFO) [CXX] $<
+	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CXXFLAGS_OPENMPT123) $(CPPFLAGS) $(CPPFLAGS_OPENMPT123) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.cc) $(CXXFLAGS_OPENMPT123) $(CPPFLAGS_OPENMPT123) $(OUTPUT_OPTION) $<
 bin/openmpt123$(EXESUFFIX): $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
 
+libopenmpt/examples/libopenmpt_example_c.o: libopenmpt/examples/libopenmpt_example_c.c
+	$(INFO) [CC ] $<
+	$(VERYSILENT)$(CC) $(CFLAGS) $(CFLAGS_EXAMPLES) $(CPPFLAGS) $(CPPFLAGS_EXAMPLES) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.c) $(CFLAGS_EXAMPLES) $(CPPFLAGS_EXAMPLES) $(OUTPUT_OPTION) $<
+libopenmpt/examples/libopenmpt_example_c_mem.o: libopenmpt/examples/libopenmpt_example_c_mem.c
+	$(INFO) [CC ] $<
+	$(VERYSILENT)$(CC) $(CFLAGS) $(CFLAGS_EXAMPLES) $(CPPFLAGS) $(CPPFLAGS_EXAMPLES) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.c) $(CFLAGS_EXAMPLES) $(CPPFLAGS_EXAMPLES) $(OUTPUT_OPTION) $<
+libopenmpt/examples/libopenmpt_example_cxx.o: libopenmpt/examples/libopenmpt_example_cxx.cpp
+	$(INFO) [CXX] $<
+	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CXXFLAGS_EXAMPLES) $(CPPFLAGS) $(CPPFLAGS_EXAMPLES) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.cc) $(CXXFLAGS_EXAMPLES) $(CPPFLAGS_EXAMPLES) $(OUTPUT_OPTION) $<
 bin/libopenmpt_example_c$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
-
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 bin/libopenmpt_example_c_mem$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
-
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 bin/libopenmpt_example_cxx$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 
 ifeq ($(HOST),windows)
 clean:
