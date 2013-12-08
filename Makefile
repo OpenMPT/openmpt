@@ -76,7 +76,7 @@ ifeq ($(HOST),windows)
 
 RM = del /q /f
 INSTALL = echo install
-INSTALL_MAKE_DIR echo install
+INSTALL_MAKE_DIR = echo install
 INSTALL_DIR = echo install
 
 else
