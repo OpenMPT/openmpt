@@ -128,12 +128,17 @@ endif
 #CXXFLAGS += -mtune=generic
 #CFLAGS   += -mtune=generic
 
+ifeq ($(HOST),windows)
+else
+
 ifeq ($(shell help2man --version > /dev/null 2>&1 && echo yes ),yes)
 MPT_WITH_HELP2MAN := 1
 endif
 
 ifeq ($(shell doxygen --version > /dev/null 2>&1 && echo yes ),yes)
 MPT_WITH_DOXYGEN := 1
+endif
+
 endif
 
 ifeq ($(NO_ZLIB),1)
@@ -344,7 +349,10 @@ endif
 ifeq ($(TEST),1)
 OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 else
+ifeq ($(HOST),windows)
+else
 OUTPUTS += bin/libopenmpt.pc
+endif
 ifeq ($(OPENMPT123),1)
 ifeq ($(MPT_WITH_HELP2MAN),1)
 OUTPUTS += bin/openmpt123.1
@@ -365,8 +373,6 @@ MISC_OUTPUTDIRS += bin/dest
 MISC_OUTPUTDIRS += bin/dist
 MISC_OUTPUTDIRS += bin/dist-zip
 MISC_OUTPUTDIRS += bin/docs
-
-                
 
 
 all: $(OUTPUTS)
