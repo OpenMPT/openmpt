@@ -332,9 +332,6 @@ OUTPUTS += bin/openmpt.a
 endif
 ifeq ($(OPENMPT123),1)
 OUTPUTS += bin/openmpt123$(EXESUFFIX)
-ifeq ($(MPT_WITH_HELP2MAN),1)
-OUTPUTS += bin/openmpt123.1
-endif
 endif
 ifeq ($(NO_PORTAUDIO),1)
 else
@@ -346,10 +343,16 @@ endif
 endif
 ifeq ($(TEST),1)
 OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
-endif
+else
 OUTPUTS += bin/libopenmpt.pc
+ifeq ($(OPENMPT123),1)
+ifeq ($(MPT_WITH_HELP2MAN),1)
+OUTPUTS += bin/openmpt123.1
+endif
+endif
 ifeq ($(MPT_WITH_DOXYGEN),1)
 OUTPUTS += docs
+endif
 endif
 
 MISC_OUTPUTS += libopenmpt.so
