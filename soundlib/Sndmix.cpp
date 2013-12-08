@@ -404,14 +404,13 @@ BOOL CSoundFile::ProcessRow()
 					m_nCurrentOrder = nRestartPosOverride;
 					m_SongFlags.reset(SONG_BREAKTOROW);
 					//If restart pos points to +++, move along
-					while (Order[m_nCurrentOrder] == Order.GetIgnoreIndex())
+					while(m_nCurrentOrder < Order.size() && Order[m_nCurrentOrder] == Order.GetIgnoreIndex())
 					{
 						m_nCurrentOrder++;
 					}
 					//Check for end of song or bad pattern
 					if (m_nCurrentOrder >= Order.size()
-						|| (Order[m_nCurrentOrder] >= Patterns.Size()) 
-						|| (!Patterns[Order[m_nCurrentOrder]]) )
+						|| !Patterns.IsValidPat(Order[m_nCurrentOrder]))
 					{
 						visitedSongRows.Initialize(true);
 						return FALSE;
