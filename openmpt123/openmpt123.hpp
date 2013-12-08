@@ -219,6 +219,9 @@ static inline std::string mode_to_string( Mode mode ) {
 	return "";
 }
 
+static const std::int32_t default_low = -2;
+static const std::int32_t default_high = -1;
+
 struct commandlineflags {
 	Mode mode;
 	bool canUI;
@@ -255,12 +258,24 @@ struct commandlineflags {
 	std::string output_extension;
 	bool force_overwrite;
 	bool paused;
+	void apply_default_buffer_sizes() {
+		if ( ui_redraw_interval == default_high ) {
+			ui_redraw_interval = 50;
+		} else if ( ui_redraw_interval == default_low ) {
+			ui_redraw_interval = 10;
+		}
+		if ( buffer == default_high ) {
+			buffer = 250;
+		} else if ( buffer == default_low ) {
+			buffer = 50;
+		}
+	}
 	commandlineflags() {
 		mode = ModeUI;
-		ui_redraw_interval = 50;
+		ui_redraw_interval = default_high; // 50 ... (-2 == 10)
 		driver = "";
 		device = -1;
-		buffer = 250;
+		buffer = default_high; // 250 ... (-2 == 50)
 		samplerate = 48000;
 		channels = 2;
 		use_float = true;
