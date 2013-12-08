@@ -92,12 +92,13 @@ private:
 	openmpt123::mutex audioMutex;
 	bool use_float;
 public:
-	portaudio_stream_callback_raii( const commandlineflags & flags, std::ostream & log = std::cerr )
+	portaudio_stream_callback_raii( commandlineflags & flags, std::ostream & log = std::cerr )
 		: portaudio_raii(flags.verbose, log)
 		, write_buffers_blocking_wrapper(flags)
 		, stream(NULL)
 		, use_float(flags.use_float)
 	{
+		flags.apply_default_buffer_sizes();
 		PaStreamParameters streamparameters;
 		std::memset( &streamparameters, 0, sizeof(PaStreamParameters) );
 		streamparameters.device = ( flags.device == -1 ) ? Pa_GetDefaultOutputDevice() : flags.device;
@@ -178,7 +179,7 @@ private:
 	std::vector<float> sampleBufFloat;
 	std::vector<std::int16_t> sampleBufInt;
 public:
-	portaudio_stream_blocking_raii( const commandlineflags & flags, std::ostream & log = std::cerr )
+	portaudio_stream_blocking_raii( commandlineflags & flags, std::ostream & log = std::cerr )
 		: portaudio_raii(flags.verbose, log)
 		, stream(NULL)
 		, interleaved(false)
@@ -189,14 +190,53 @@ public:
 		streamparameters.device = ( flags.device == -1 ) ? Pa_GetDefaultOutputDevice() : flags.device;
 		streamparameters.channelCount = flags.channels;
 		streamparameters.sampleFormat = ( flags.use_float ? paFloat32 : paInt16 ) | paNonInterleaved;
-		streamparameters.suggestedLatency = flags.buffer * 0.001;
+		if ( flags.buffer == default_high ) {
+			streamparameters.suggestedLatency = Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency;
+			flags.buffer = static_cast<std::int32_t>( Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency * 1000.0 );
+		} else if ( flags.buffer == default_low ) {
+			streamparameters.suggestedLatency = Pa_GetDeviceInfo( streamparameters.device )->defaultLowOutputLatency;
+			flags.buffer = static_cast<std::int32_t>( Pa_GetDeviceInfo( streamparameters.device )->defaultLowOutputLatency * 1000.0 );
+		} else {
+			streamparameters.suggestedLatency = flags.buffer * 0.001;
+		}
+		unsigned long framesperbuffer = 0;
+		if ( flags.mode != ModeUI ) {
+			framesperbuffer = paFramesPerBufferUnspecified;
+			flags.ui_redraw_interval = 50;
+			flags.ui_redraw_interval = std::min<std::int32_t>( flags.ui_redraw_interval, flags.buffer / 3 );
+		} else if ( flags.ui_redraw_interval == default_high ) {
+			framesperbuffer = paFramesPerBufferUnspecified;
+			flags.ui_redraw_interval = 50;
+			flags.ui_redraw_interval = std::min<std::int32_t>( flags.ui_redraw_interval, flags.buffer / 3 );
+		} else if ( flags.ui_redraw_interval == default_low ) {
+			framesperbuffer = paFramesPerBufferUnspecified;
+			flags.ui_redraw_interval = 10;
+			flags.ui_redraw_interval = std::min<std::int32_t>( flags.ui_redraw_interval, flags.buffer / 3 );
+		} else {
+			framesperbuffer = flags.ui_redraw_interval * flags.samplerate / 1000;
+		}
+		if ( flags.ui_redraw_interval <= 0 ) {
+			flags.ui_redraw_interval = 1;
+		}
+		if ( flags.verbose ) {
+			log << "PortAudio:" << std::endl;
+			log << " device: "
+				<< streamparameters.device
+				<< " [ " << Pa_GetHostApiInfo( Pa_GetDeviceInfo( streamparameters.device )->hostApi )->name << " / " << Pa_GetDeviceInfo( streamparameters.device )->name << " ] "
+				<< std::endl;
+			log << " low latency: " << Pa_GetDeviceInfo( streamparameters.device )->defaultLowOutputLatency << std::endl;
+			log << " high latency: " << Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency << std::endl;
+			log << " suggested latency: " << streamparameters.suggestedLatency << std::endl;
+			log << " frames per buffer: " << framesperbuffer << std::endl;
+			log << " ui redraw: " << flags.ui_redraw_interval << std::endl;
+		}
 		PaError e = PaError();
-		e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, ( flags.mode == ModeUI ) ? flags.ui_redraw_interval * flags.samplerate / 1000 : paFramesPerBufferUnspecified, 0, NULL, NULL );
+		e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, framesperbuffer, 0, NULL, NULL );
 		if ( e != paNoError ) {
 			// Non-interleaved failed, try interleaved next.
 			// This might help broken portaudio on MacOS X.
 			streamparameters.sampleFormat &= ~paNonInterleaved;
-			e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, ( flags.mode == ModeUI ) ? flags.ui_redraw_interval * flags.samplerate / 1000 : paFramesPerBufferUnspecified, 0, NULL, NULL );
+			e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, framesperbuffer, 0, NULL, NULL );
 			if ( e == paNoError ) {
 				interleaved = true;
 			}
@@ -204,11 +244,6 @@ public:
 		}
 		check_portaudio_error( Pa_StartStream( stream ) );
 		if ( flags.verbose ) {
-			log << "PortAudio:" << std::endl;
-			log << " device: "
-				<< streamparameters.device
-				<< " [ " << Pa_GetHostApiInfo( Pa_GetDeviceInfo( streamparameters.device )->hostApi )->name << " / " << Pa_GetDeviceInfo( streamparameters.device )->name << " ] "
-				<< std::endl;
 			log << " channels: " << streamparameters.channelCount << std::endl;
 			log << " sampleformat: " << ( ( ( streamparameters.sampleFormat & ~paNonInterleaved ) == paFloat32 ) ? "paFloat32" : "paInt16" ) << std::endl;
 			log << " latency: " << Pa_GetStreamInfo( stream )->outputLatency << std::endl;
@@ -313,6 +348,11 @@ static std::string show_portaudio_devices() {
 				}
 				devices << Pa_GetDeviceInfo( i )->name;
 			}
+			devices << " (";
+			devices << "high latency: " << Pa_GetDeviceInfo( i )->defaultHighOutputLatency;
+			devices << ", ";
+			devices << "low latency: " << Pa_GetDeviceInfo( i )->defaultLowOutputLatency;
+			devices << ")";
 			devices << std::endl;
 		}
 	}

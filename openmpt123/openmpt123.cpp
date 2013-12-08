@@ -1594,6 +1594,7 @@ static int main( int argc, char * argv [] ) {
 			case ModeUI:
 			case ModeBatch: {
 				if ( flags.use_stdout ) {
+					flags.apply_default_buffer_sizes();
 					stdout_stream_raii stdout_audio_stream;
 					render_files( flags, log, stdout_audio_stream );
 				} else if ( !flags.output_filename.empty() ) {
@@ -1606,11 +1607,13 @@ static int main( int argc, char * argv [] ) {
 #endif
 #if defined( MPT_WITH_SDL )
 				} else if ( flags.driver == "sdl" || flags.driver.empty() ) {
+					flags.apply_default_buffer_sizes();
 					sdl_stream_raii sdl_stream( flags, log );
 					render_files( flags, log, sdl_stream );
 #endif
 #if defined( WIN32 )
 				} else if ( flags.driver == "waveout" || flags.driver.empty() ) {
+					flags.apply_default_buffer_sizes();
 					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream );
 #endif
@@ -1618,6 +1621,7 @@ static int main( int argc, char * argv [] ) {
 			} break;
 			case ModeRender: {
 				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, *filename + std::string(".") + flags.output_extension, log );
 					render_file( flags, *filename, log, file_audio_stream );
 				}
