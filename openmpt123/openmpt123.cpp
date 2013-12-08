@@ -157,7 +157,7 @@ class file_audio_stream_raii : public file_audio_stream_base {
 private:
 	file_audio_stream_base * impl;
 public:
-	file_audio_stream_raii( const commandlineflags & flags, const std::string & filename, std::ostream & /* log */ )
+	file_audio_stream_raii( const commandlineflags & flags, const std::string & filename, std::ostream & log )
 		: impl(0)
 	{
 		if ( !flags.force_overwrite ) {
