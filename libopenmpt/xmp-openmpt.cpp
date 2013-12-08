@@ -230,6 +230,7 @@ static void WINAPI openmpt_SetConfig( void * config, DWORD size ) {
 #ifdef EXPERIMENTAL_VIS
 static double timeinfo_position = 0.0;
 struct timeinfo {
+	bool valid;
 	double seconds;
 	std::int32_t pattern;
 	std::int32_t row;
@@ -244,6 +245,7 @@ static void reset_timeinfos( double position = 0.0 ) {
 static void update_timeinfos( std::int32_t samplerate, std::int32_t count ) {
 	timeinfo_position += (double)count / (double)samplerate;
 	timeinfo info;
+	info.valid = true;
 	info.seconds = timeinfo_position;
 	info.pattern = self->mod->get_current_pattern();
 	info.row = self->mod->get_current_row();
@@ -259,17 +261,23 @@ static timeinfo lookup_timeinfo( double seconds ) {
 	info.pattern = self->mod->get_current_pattern();
 	info.row = self->mod->get_current_row();
 #endif
-	while ( timeinfos.size() > 0 && timeinfos.front().seconds < seconds ) {
+	while ( timeinfos.size() > 0 && timeinfos.front().seconds <= seconds ) {
 		info = timeinfos.front();
 		timeinfos.pop();
 	}
 	current_timeinfo = info;
 	return current_timeinfo;
 }
+
+static void clear_current_timeinfo() {
+	current_timeinfo = timeinfo();
+}
 #else
 static void update_timeinfos( std::int32_t samplerate, std::int32_t count ) {
 }
 static void reset_timeinfos( double position = 0.0 ) {
+}
+static void clear_current_timeinfo() {
 }
 #endif
 
@@ -573,6 +581,7 @@ static BOOL WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, flo
 // open a file for playback
 // return:  0=failed, 1=success, 2=success and XMPlay can close the file
 static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
+	xmpopenmpt_lock guard;
 	reset_options();
 	try {
 		if ( self->mod ) {
@@ -605,6 +614,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 		#else
 			self->mod = new openmpt::interactive_module( std::ifstream( filename, std::ios_base::binary ) );
 		#endif
+		clear_current_timeinfo();
 		reset_timeinfos();
 		apply_options();
 		self->samplerate = self->settings.samplerate;
@@ -623,6 +633,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 
 // close the file
 static void WINAPI openmpt_Close() {
+	xmpopenmpt_lock guard;
 	if ( self->mod ) {
 		delete self->mod;
 		self->mod = nullptr;
@@ -775,6 +786,7 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 	if ( !self->mod || self->num_channels == 0 ) {
 		return 0;
 	}
+	update_timeinfos( self->samplerate, 0 );
 	std::size_t frames = count / self->num_channels;
 	std::size_t frames_to_render = frames;
 	std::size_t frames_rendered = 0;
@@ -931,6 +943,8 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 		visbrushs[i] = CreateSolidBrush( viscolors[i].dw );
 	}
 
+	clear_current_timeinfo();
+
 	if ( !self->mod ) {
 		return FALSE;
 	}
@@ -960,21 +974,16 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	xmpopenmpt_lock guard;
 	RECT rect;
 
-	timeinfo info = lookup_timeinfo( xmpfstatus->GetTime() );
-	int pattern = info.pattern;
-	int current_row = info.row;
-
 	if( visfont == nullptr ) {
 		// Force usage of a nice monospace font
 		LOGFONT logfont;
 		GetObject ( GetCurrentObject( dc, OBJ_FONT ), sizeof(logfont), &logfont );
-		wcscpy(logfont.lfFaceName, L"Lucida Console");
-		visfont = CreateFontIndirect ( &logfont );
+		wcscpy( logfont.lfFaceName, L"Lucida Console" );
+		visfont = CreateFontIndirect( &logfont );
 	}
-
 	SIZE text_size;
 	SelectObject( dc, visfont );
-	if ( GetTextExtentPoint32(dc, TEXT("W"), 1, &text_size) == FALSE ) {
+	if ( GetTextExtentPoint32( dc, TEXT("W"), 1, &text_size ) == FALSE ) {
 		return FALSE;
 	}
 
@@ -982,6 +991,21 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	{
 		last_pattern = -1;
 	}
+
+	timeinfo info = lookup_timeinfo( xmpfstatus->GetTime() );
+
+	if ( !info.valid ) {
+		RECT bgrect;
+		bgrect.top = 0;
+		bgrect.left = 0;
+		bgrect.right = size.cx;
+		bgrect.bottom = size.cy;
+		FillRect(dc, &bgrect, visbrushs[col_background]);
+		return TRUE;
+	}
+
+	int pattern = info.pattern;
+	int current_row = info.row;
 
 	const std::size_t channels = self->mod->get_num_channels();
 	const std::size_t rows = self->mod->get_pattern_num_rows( pattern );
@@ -1008,7 +1032,7 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	int pattern_width = ((chars_per_channel * channels + 4) * text_size.cx) + (spaces_per_channel * channels + channels - (num_cols == 1 ? 1 : 2)) * (text_size.cx / 2);
 	int pattern_height = rows * text_size.cy;
 
-	if( visDC == nullptr || last_pattern != pattern ) {
+	if ( visDC == nullptr || last_pattern != pattern ) {
 		DeleteObject( visbitmap );
 		DeleteDC( visDC );
 

@@ -613,8 +613,12 @@ double module_impl::set_position_order_row( std::int32_t order, std::int32_t row
 		return m_currentPositionSeconds;
 	}
 	std::int32_t pattern = m_sndFile->Order[order];
-	if ( row < 0 || row >= (std::int32_t)m_sndFile->Patterns[pattern].GetNumRows() ) {
-		return m_currentPositionSeconds;
+	if ( m_sndFile->Patterns.IsValidIndex( pattern ) ) {
+		if ( row < 0 || row >= (std::int32_t)m_sndFile->Patterns[pattern].GetNumRows() ) {
+			return m_currentPositionSeconds;
+		}
+	} else {
+		row = 0;
 	}
 	m_sndFile->InitializeVisitedRows();
 	m_sndFile->m_nCurrentOrder = order;
@@ -707,7 +711,15 @@ std::int32_t module_impl::get_current_order() const {
 	return m_sndFile->GetCurrentOrder();
 }
 std::int32_t module_impl::get_current_pattern() const {
-	return m_sndFile->GetCurrentPattern();
+	std::int32_t order = m_sndFile->GetCurrentOrder();
+	if ( order < 0 || order >= m_sndFile->Order.GetLengthTailTrimmed() ) {
+		return m_sndFile->GetCurrentPattern();
+	}
+	std::int32_t pattern = m_sndFile->Order[order];
+	if ( !m_sndFile->Patterns.IsValidIndex( pattern ) ) {
+		return -1;
+	}
+	return pattern;
 }
 std::int32_t module_impl::get_current_row() const {
 	return m_sndFile->m_nRow;
