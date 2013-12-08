@@ -76,11 +76,15 @@ ifeq ($(HOST),windows)
 
 RM = del /q /f
 INSTALL = echo install
+INSTALL_MAKE_DIR echo install
+INSTALL_DIR = echo install
 
 else
 
 RM = rm -f
 INSTALL = install
+INSTALL_MAKE_DIR = install -d
+INSTALL_DIR = cp -r -v
 
 endif
 
@@ -90,6 +94,8 @@ endif
 
 INSTALL_PROGRAM = $(INSTALL) -m 0755 -D
 INSTALL_DATA = $(INSTALL) -m 0644 -D
+INSTALL_DATA_DIR = $(INSTALL_DIR)
+INSTALL_MAKE_DIR += -m 0755
 
 CPPFLAGS += -Icommon -I. -Iinclude/modplug/include -Iinclude
 CXXFLAGS += -fvisibility=hidden
@@ -121,6 +127,14 @@ endif
 
 #CXXFLAGS += -mtune=generic
 #CFLAGS   += -mtune=generic
+
+ifeq ($(shell help2man --version > /dev/null 2>&1 && echo yes ),yes)
+MPT_WITH_HELP2MAN := 1
+endif
+
+ifeq ($(shell doxygen --version > /dev/null 2>&1 && echo yes ),yes)
+MPT_WITH_DOXYGEN := 1
+endif
 
 ifeq ($(NO_ZLIB),1)
 CPPFLAGS_ZLIB := -DNO_ZLIB
@@ -318,6 +332,9 @@ OUTPUTS += bin/openmpt.a
 endif
 ifeq ($(OPENMPT123),1)
 OUTPUTS += bin/openmpt123$(EXESUFFIX)
+ifeq ($(MPT_WITH_HELP2MAN),1)
+OUTPUTS += bin/openmpt123.1
+endif
 endif
 ifeq ($(NO_PORTAUDIO),1)
 else
@@ -331,8 +348,36 @@ ifeq ($(TEST),1)
 OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 endif
 OUTPUTS += bin/libopenmpt.pc
+ifeq ($(MPT_WITH_DOXYGEN),1)
+OUTPUTS += docs
+endif
+
+MISC_OUTPUTS += libopenmpt.so
+MISC_OUTPUTS += bin/.docs
+MISC_OUTPUTS += bin/dist.tar
+MISC_OUTPUTS += bin/svn_version_dist.h
+MISC_OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
+
+MISC_OUTPUTDIRS += bin/dest
+MISC_OUTPUTDIRS += bin/dist
+MISC_OUTPUTDIRS += bin/dist-zip
+MISC_OUTPUTDIRS += bin/docs
+
+                
+
 
 all: $(OUTPUTS)
+
+.PHONY: docs
+docs: bin/.docs
+
+bin/.docs:
+	$(VERYSILENT)mkdir -p bin/docs
+	$(INFO) [DOXYGEN] C
+	$(SILENT)doxygen libopenmpt/Doxyfile-c
+	$(INFO) [DOXYGEN] C++
+	$(SILENT)doxygen libopenmpt/Doxyfile-cpp
+	$(VERYSILENT)touch $@
 
 .PHONY: test
 test: bin/libopenmpt_test$(EXESUFFIX)
@@ -377,14 +422,36 @@ ifeq ($(STATIC_LIB),1)
 endif
 ifeq ($(OPENMPT123),1)
 	$(INSTALL_PROGRAM) bin/openmpt123$(EXESUFFIX).norpath $(DESTDIR)$(PREFIX)/bin/openmpt123$(EXESUFFIX)
+ifeq ($(MPT_WITH_HELP2MAN),1)
+	$(INSTALL_DATA) bin/openmpt123.1 $(DESTDIR)$(PREFIX)/share/man/man.1/openmpt123.1
+endif
+endif
+	$(INSTALL_DATA) LICENSE $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/LICENSE
+	$(INSTALL_DATA) README  $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/README
+	$(INSTALL_DATA) TODO    $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/TODO
+	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c.c
+	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c_mem.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c_mem.c
+	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_cxx.cpp $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_cxx.cpp
+ifeq ($(MPT_WITH_DOXYGEN),1)
+	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/share/doc/man/
+	#$(INSTALL_DATA_DIR) bin/docs/c/man $(DESTDIR)$(PREFIX)/share/doc/man
+	#$(INSTALL_DATA_DIR) bin/docs/cpp/man $(DESTDIR)$(PREFIX)/share/doc/man
 endif
 
 .PHONY: dist
 dist: bin/dist.tar
 
-bin/dist.tar: bin/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz
+bin/dist.tar: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm -rf bin/dist.tar
+	cd bin/ && cp dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip ./
+	cd bin/ && cp dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip ./
+	cd bin/ && cp dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar ./
+	cd bin/ && cp dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
 	cd bin/ && tar cvf dist.tar OpenMPT-src-$(DIST_OPENMPT_VERSION).zip libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	rm bin/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip
+	rm bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip
+	rm bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
+	rm bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz
 
 .PHONY: bin/svn_version_dist.h
 bin/svn_version_dist.h:
@@ -396,8 +463,8 @@ bin/svn_version_dist.h:
 	echo '#include "../svn_version_svnversion/svn_version.h"' >> $@.tmp
 	mv $@.tmp $@
 
-.PHONY: bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
-bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar: bin/svn_version_dist.h
+.PHONY: bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
+bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar: bin/svn_version_dist.h
 	mkdir -p bin/dist
 	rm -rf bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
@@ -416,10 +483,10 @@ bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar: bin/svn_version_dist.h
 	svn export ./include/miniz   bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/miniz
 	svn export ./include/modplug bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/modplug
 	cp bin/svn_version_dist.h bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
-	cd bin/dist/ && tar cv libopenmpt-src-$(DIST_LIBOPENMPT_VERSION) > ../libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
+	cd bin/dist/ && tar cv libopenmpt-src-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
 
-.PHONY: bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip
-bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip: bin/svn_version_dist.h
+.PHONY: bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip
+bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip: bin/svn_version_dist.h
 	mkdir -p bin/dist-zip
 	rm -rf bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
@@ -443,15 +510,15 @@ bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip: bin/svn_version_dist.h
 	svn export ./include/winamp        bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/winamp        --native-eol CRLF
 	svn export ./include/xmplay        bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/xmplay        --native-eol CRLF
 	cp bin/svn_version_dist.h bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
-	cd bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../../libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip --compression-method deflate -9 *
+	cd bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip --compression-method deflate -9 *
 
-.PHONY: bin/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip
-bin/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip: bin/svn_version_dist.h
+.PHONY: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip
+bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip: bin/svn_version_dist.h
 	mkdir -p bin/dist-zip
 	rm -rf bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)
 	svn export ./ bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/ --native-eol CRLF
 	cp bin/svn_version_dist.h bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/common/svn_version_default/svn_version.h
-	cd bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/ && zip -r ../../OpenMPT-src-$(DIST_OPENMPT_VERSION).zip --compression-method deflate -9 *
+	cd bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/ && zip -r ../OpenMPT-src-$(DIST_OPENMPT_VERSION).zip --compression-method deflate -9 *
 
 bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR ] $@
@@ -464,6 +531,10 @@ bin/libopenmpt.so: $(LIBOPENMPT_OBJECTS)
 bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) -shared $(LDFLAGS_LIBOPENMPT) $^ $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+
+bin/openmpt123.1: bin/openmpt123$(EXESUFFIX)
+	$(INFO) [HELP2MAN] $@
+	$(SILENT)help2man --no-discard-stderr --no-info $< > $@
 
 openmpt123/openmpt123.o: openmpt123/openmpt123.cpp
 	$(INFO) [CXX] $<
@@ -526,6 +597,6 @@ clean:
 else
 clean:
 	$(INFO) clean ...
-	$(SILENT)$(RM) $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS) libopenmpt.so
-	$(SILENT)$(RM) -rf bin/dest
+	$(SILENT)$(RM) $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS) $(MISC_OUTPUTS)
+	$(SILENT)$(RM) -rf $(MISC_OUTPUTDIRS)
 endif
