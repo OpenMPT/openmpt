@@ -7,6 +7,36 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+static const char * const license =
+"The OpenMPT code is licensed under the BSD license." "\n"
+" " "\n"
+"Copyright (c) 2004-2013, OpenMPT contributors" "\n"
+"Copyright (c) 1997-2003, Olivier Lapicque" "\n"
+"All rights reserved." "\n"
+"" "\n"
+"Redistribution and use in source and binary forms, with or without" "\n"
+"modification, are permitted provided that the following conditions are met:" "\n"
+"    * Redistributions of source code must retain the above copyright" "\n"
+"      notice, this list of conditions and the following disclaimer." "\n"
+"    * Redistributions in binary form must reproduce the above copyright" "\n"
+"      notice, this list of conditions and the following disclaimer in the" "\n"
+"      documentation and/or other materials provided with the distribution." "\n"
+"    * Neither the name of the OpenMPT project nor the" "\n"
+"      names of its contributors may be used to endorse or promote products" "\n"
+"      derived from this software without specific prior written permission." "\n"
+"" "\n"
+"THIS SOFTWARE IS PROVIDED BY THE CONTRIBUTORS ``AS IS'' AND ANY" "\n"
+"EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED" "\n"
+"WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE" "\n"
+"DISCLAIMED. IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY" "\n"
+"DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES" "\n"
+"(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;" "\n"
+"LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND" "\n"
+"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT" "\n"
+"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS" "\n"
+"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." "\n"
+;
+
 #include "openmpt123_config.hpp"
 
 #include <algorithm>
@@ -66,6 +96,18 @@ namespace openmpt123 {
 
 struct silent_exit_exception : public std::exception {
 	silent_exit_exception() throw() { }
+};
+
+struct show_license_exception : public std::exception {
+	show_license_exception() throw() { }
+};
+
+struct show_credits_exception : public std::exception {
+	show_credits_exception() throw() { }
+};
+
+struct show_short_version_number_exception : public std::exception {
+	show_short_version_number_exception() throw() { }
 };
 
 struct show_version_number_exception : public std::exception {
@@ -281,8 +323,8 @@ std::string bytes_to_string( T bytes ) {
 }
 
 static void show_info( std::ostream & log, bool verbose ) {
-	log << "openmpt123" << " version " << OPENMPT123_VERSION_STRING << ", Copyright (c) 2013 OpenMPT developers (http://openmpt.org/)" << std::endl;
-	log << " libopenmpt " << openmpt::string::get( openmpt::string::library_version ) << " (" << "OpenMPT " << openmpt::string::get( openmpt::string::core_version ) << ")" << std::endl;
+	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", libopenmpt " << openmpt::string::get( openmpt::string::library_version ) << " (" << "OpenMPT " << openmpt::string::get( openmpt::string::core_version ) << ")" << std::endl;
+	log << "Copyright (c) 2013 OpenMPT developers (http://openmpt.org/)" << std::endl;
 	if ( !verbose ) {
 		log << std::endl;
 		return;
@@ -302,13 +344,32 @@ static void show_info( std::ostream & log, bool verbose ) {
 	log << std::endl;
 }
 
-static void show_version( textout & log ) {
+static void show_short_version( textout & log ) {
 	log << OPENMPT123_VERSION_STRING << " / " << openmpt::string::get( openmpt::string::library_version ) << " / " << openmpt::string::get( openmpt::string::core_version ) << std::endl;
+	log.writeout();
+}
+
+static void show_version( textout & log ) {
+	show_info( log, false );
 	log.writeout();
 }
 
 static void show_long_version( textout & log ) {
 	show_info( log, true );
+	log.writeout();
+}
+
+static void show_credits( textout & log ) {
+	show_info( log, false );
+	log << openmpt::string::get( openmpt::string::contact ) << std::endl;
+	log << std::endl;
+	log << openmpt::string::get( openmpt::string::credits ) << std::endl;
+	log.writeout();
+}
+
+static void show_license( textout & log ) {
+	show_info( log, false );
+	log << license << std::endl;
 	log.writeout();
 }
 
@@ -333,61 +394,63 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 	{
 		log << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
 		log << std::endl;
-		log << " -h, --help                Show help" << std::endl;
-		log << "     --help-keyboard       Show keyboard hotkeys in ui mode" << std::endl;
-		log << " -q, --quiet               Suppress non-error screen output" << std::endl;
-		log << " -v, --verbose             Show more screen output" << std::endl;
-		log << "     --version             Show version number and nothing else" << std::endl;
-		log << "     --long-version        Show long version information and exit" << std::endl;
+		log << " -h, --help                 Show help" << std::endl;
+		log << "     --help-keyboard        Show keyboard hotkeys in ui mode" << std::endl;
+		log << " -q, --quiet                Suppress non-error screen output" << std::endl;
+		log << " -v, --verbose              Show more screen output" << std::endl;
+		log << "     --version              Show version information and exit" << std::endl;
+		log << "     --short-version        Show version number and nothing else" << std::endl;
+		log << "     --long-version         Show long version information and exit" << std::endl;
+		log << "     --credits              Show elaborate contributors list" << std::endl;
+		log << "     --license              Show license" << std::endl;
 		log << std::endl;
-		log << " Mode:" << std::endl;
-		log << "     --info                Display information about each file" << std::endl;
-		log << "     --ui                  Interactively play each file" << std::endl;
-		log << "     --batch               Play each file" << std::endl;
-		log << "     --render              Render each file to PCM data" << std::endl;
+		log << "     --info                 Display information about each file" << std::endl;
+		log << "     --ui                   Interactively play each file" << std::endl;
+		log << "     --batch                Play each file" << std::endl;
+		log << "     --render               Render each file to PCM data" << std::endl;
 		if ( !e.longhelp ) {
 			log << std::endl;
 			log.writeout();
 			return;
 		}
 		log << std::endl;
-		log << "     --terminal-width n    Assume terminal is n characters wide [default: " << commandlineflags().terminal_width << "]" << std::endl;
-		log << "     --terminal-height n   Assume terminal is n characters high [default: " << commandlineflags().terminal_height << "]" << std::endl;
+		log << "     --terminal-width n     Assume terminal is n characters wide [default: " << commandlineflags().terminal_width << "]" << std::endl;
+		log << "     --terminal-height n    Assume terminal is n characters high [default: " << commandlineflags().terminal_height << "]" << std::endl;
 		log << std::endl;
-		log << "     --[no-]progress       Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
-		log << "     --[no-]meters         Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
-		log << "     --[no-]channel-meters Show channel peak meters [default: " << commandlineflags().show_channel_meters << "]" << std::endl;
-		log << "     --[no-]pattern        Show pattern [default: " << commandlineflags().show_pattern << "]" << std::endl;
+		log << "     --[no-]progress        Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
+		log << "     --[no-]meters          Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
+		log << "     --[no-]channel-meters  Show channel peak meters [default: " << commandlineflags().show_channel_meters << "]" << std::endl;
+		log << "     --[no-]pattern         Show pattern [default: " << commandlineflags().show_pattern << "]" << std::endl;
 		log << std::endl;
-		log << "     --[no-]details        Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
-		log << "     --[no-]message        Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
+		log << "     --[no-]details         Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
+		log << "     --[no-]message         Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
 		log << std::endl;
-		log << "     --update n            Set output update interval to n ms [default: " << commandlineflags().ui_redraw_interval << "]" << std::endl;
+		log << "     --update n             Set output update interval to n ms [default: " << commandlineflags().ui_redraw_interval << "]" << std::endl;
 		log << std::endl;
-		log << "     --samplerate n        Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
-		log << "     --channels n          use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
-		log << "     --[no-]float          Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
+		log << "     --samplerate n         Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
+		log << "     --channels n           use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
+		log << "     --[no-]float           Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
 		log << std::endl;
-		log << "     --gain n              Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
-		log << "     --stereo n            Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
-		log << "     --filter n            Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
-		log << "     --ramping n           Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
+		log << "     --gain n               Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
+		log << "     --stereo n             Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
+		log << "     --filter n             Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
+		log << "     --ramping n            Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
 		log << std::endl;
-		log << "     --[no-]shuffle        Shuffle playlist (-1 means forever) [default: " << commandlineflags().shuffle << "]" << std::endl;
+		log << "     --[no-]shuffle         Shuffle playlist (-1 means forever) [default: " << commandlineflags().shuffle << "]" << std::endl;
 		log << std::endl;
-		log << "     --repeat n            Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
-		log << "     --seek n              Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
+		log << "     --repeat n             Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
+		log << "     --seek n               Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
 		log << std::endl;
-		log << "     --driver n            Set output driver [default: " << get_driver_string( commandlineflags().driver ) << "]," << std::endl;
-		log << "     --device n            Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
-		log << "                           use --device help to show available devices" << std::endl;
-		log << "     --buffer n            Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
-		log << "     --stdout              Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
-		log << "     --output-type t       Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
-		log << " -o, --output f            Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
-		log << "     --force               Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
+		log << "     --driver n             Set output driver [default: " << get_driver_string( commandlineflags().driver ) << "]," << std::endl;
+		log << "     --device n             Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
+		log << "                            use --device help to show available devices" << std::endl;
+		log << "     --buffer n             Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
+		log << "     --stdout               Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
+		log << "     --output-type t        Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
+		log << " -o, --output f             Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
+		log << "     --force                Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
 		log << std::endl;
-		log << "     --                    Interpret further arguments as filenames" << std::endl;
+		log << "     --                     Interpret further arguments as filenames" << std::endl;
 		log << std::endl;
 		log << " Supported file formats: " << std::endl;
 		log << "    ";
@@ -915,7 +978,11 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					} else {
 						for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 							if ( width >= 3 ) {
-								log << "|";
+								if ( row == mod.get_current_row() ) {
+									log << "+";
+								} else {
+									log << "|";
+								}
 							}
 							log << mod.format_pattern_row_channel( mod.get_current_pattern(), row, channel, width >= 3 ? width - 1 : width );
 						}
@@ -1262,8 +1329,14 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.verbose = true;
 			} else if ( arg == "--version" ) {
 				throw show_version_number_exception();
+			} else if ( arg == "--short-version" ) {
+				throw show_short_version_number_exception();
 			} else if ( arg == "--long-version" ) {
 				throw show_long_version_number_exception();
+			} else if ( arg == "--credits" ) {
+				throw show_credits_exception();
+			} else if ( arg == "--license" ) {
+				throw show_license_exception();
 			} else if ( arg == "--info" ) {
 				flags.mode = ModeInfo;
 			} else if ( arg == "--ui" ) {
@@ -1418,12 +1491,6 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 
 }
 
-static void show_credits( std::ostream & s ) {
-	s << openmpt::string::get( openmpt::string::contact ) << std::endl;
-	s << std::endl;
-	s << openmpt::string::get( openmpt::string::credits );
-}
-
 #if defined(WIN32)
 
 class ConsoleCP_utf8_raii {
@@ -1495,8 +1562,6 @@ static int main( int argc, char * argv [] ) {
 		show_info( log, flags.verbose );
 
 		if ( flags.verbose ) {
-
-			show_credits( log );
 
 			log << flags;
 
@@ -1576,6 +1641,15 @@ static int main( int argc, char * argv [] ) {
 		return 0;
 	} catch ( show_version_number_exception & ) {
 		show_version( std_log );
+		return 0;
+	} catch ( show_short_version_number_exception & ) {
+		show_short_version( std_log );
+		return 0;
+	} catch ( show_credits_exception & ) {
+		show_credits( std_log );
+		return 0;
+	} catch ( show_license_exception & ) {
+		show_license( std_log );
 		return 0;
 #ifdef MPT_WITH_PORTAUDIO
 	} catch ( portaudio_exception & e ) {
