@@ -447,6 +447,14 @@ ifeq ($(MPT_WITH_DOXYGEN),1)
 	#$(INSTALL_DATA_DIR) bin/docs/cpp/man $(DESTDIR)$(PREFIX)/share/doc/man
 endif
 
+.PHONY: install-modplug
+install-modplug: $(OUTPUTS)
+ifeq ($(SHARED_LIB),1)
+	$(INSTALL_DATA) bin/libopenmpt_modplug.so $(DESTDIR)$(PREFIX)/lib/libmodplug.so
+	$(INSTALL_DATA) bin/libopenmpt_modplug.so $(DESTDIR)$(PREFIX)/lib/libmodplug.so.0
+	$(INSTALL_DATA) bin/libopenmpt_modplug.so $(DESTDIR)$(PREFIX)/lib/libmodplug.so.0.0.0
+endif
+
 .PHONY: dist
 dist: bin/dist.tar
 
@@ -539,7 +547,7 @@ bin/libopenmpt.so: $(LIBOPENMPT_OBJECTS)
 
 bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) -shared $(LDFLAGS_LIBOPENMPT) $^ $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+	$(SILENT)$(LINK.cc) -shared $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPT_MODPLUG_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
 bin/openmpt123.1: bin/openmpt123$(EXESUFFIX)
 	$(INFO) [HELP2MAN] $@
