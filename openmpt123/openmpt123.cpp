@@ -961,11 +961,14 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				draw_meters( log, meter, flags );
 			}
 			if ( flags.show_channel_meters ) {
-				int width = flags.terminal_width / mod.get_num_channels();
+				int width = ( flags.terminal_width - 3 ) / mod.get_num_channels();
+				if ( width > 11 ) {
+					width = 11;
+				}
 				log << " ";
 				for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 					if ( width >= 3 ) {
-						log << "|";
+						log << ":";
 					}
 					if ( width == 1 ) {
 						draw_channel_meters_tiny( log, ( mod.get_current_channel_vu_left( channel ) + mod.get_current_channel_vu_right( channel ) ) * (1.0f/std::sqrt(2.0f)) );
@@ -976,12 +979,15 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					}
 				}
 				if ( width >= 3 ) {
-					log << "|";
+					log << ":";
 				}
 				log << std::endl;
 			}
 			if ( flags.show_pattern ) {
-				int width = flags.terminal_width / mod.get_num_channels();
+				int width = ( flags.terminal_width - 3 ) / mod.get_num_channels();
+				if ( width > 11 ) {
+					width = 11;
+				}
 				for ( std::int32_t line = 0; line < pattern_lines; ++line ) {
 					std::int32_t row = mod.get_current_row() - ( pattern_lines / 2 ) + line;
 					if ( row == mod.get_current_row() ) {
@@ -992,7 +998,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					if ( row < 0 || row >= mod.get_pattern_num_rows( mod.get_current_pattern() ) ) {
 						for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 							if ( width >= 3 ) {
-								log << "|";
+								log << ":";
 							}
 							log << std::string( width >= 3 ? width - 1 : width, ' ' );
 						}
@@ -1002,11 +1008,14 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 								if ( row == mod.get_current_row() ) {
 									log << "+";
 								} else {
-									log << "|";
+									log << ":";
 								}
 							}
 							log << mod.format_pattern_row_channel( mod.get_current_pattern(), row, channel, width >= 3 ? width - 1 : width );
 						}
+					}
+					if ( width >= 3 ) {
+						log << ":";
 					}
 					log << std::endl;
 				}
@@ -1046,11 +1055,11 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			}
 		} else if ( flags.show_channel_meters ) {
 			if ( flags.show_ui || flags.show_details || flags.show_progress ) {
-				int width = flags.terminal_width / mod.get_num_channels();
+				int width = ( flags.terminal_width - 3 ) / mod.get_num_channels();
 				log << " ";
 				for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 					if ( width >= 3 ) {
-						log << "|";
+						log << ":";
 					}
 					if ( width == 1 ) {
 						draw_channel_meters_tiny( log, ( mod.get_current_channel_vu_left( channel ) + mod.get_current_channel_vu_right( channel ) ) * (1.0f/std::sqrt(2.0f)) );
@@ -1061,7 +1070,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					}
 				}
 				if ( width >= 3 ) {
-					log << "|";
+					log << ":";
 				}
 			}
 			log << "   " << "\r";
