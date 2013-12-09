@@ -108,6 +108,10 @@ module::module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream
 	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ), ctls );
 }
 
+module::module( const std::uint8_t * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+}
+
 module::module( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
 	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
 }
