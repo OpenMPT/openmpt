@@ -230,6 +230,7 @@ struct commandlineflags {
 	std::string driver;
 	int device;
 	std::int32_t buffer;
+	std::int32_t period;
 	std::int32_t samplerate;
 	std::int32_t channels;
 	std::int32_t gain;
@@ -260,7 +261,7 @@ struct commandlineflags {
 	bool paused;
 	void apply_default_buffer_sizes() {
 		if ( ui_redraw_interval == default_high ) {
-			ui_redraw_interval = 50;
+			ui_redraw_interval = 40;
 		} else if ( ui_redraw_interval == default_low ) {
 			ui_redraw_interval = 10;
 		}
@@ -269,6 +270,11 @@ struct commandlineflags {
 		} else if ( buffer == default_low ) {
 			buffer = 50;
 		}
+		if ( period == default_high ) {
+			period = 50;
+		} else if ( period == default_low ) {
+			period = 10;
+		}
 	}
 	commandlineflags() {
 		mode = ModeUI;
@@ -276,6 +282,7 @@ struct commandlineflags {
 		driver = "";
 		device = -1;
 		buffer = default_high; // 250 ... (-2 == 50)
+		period = default_high; // 50 ... (-2 == 10)
 		samplerate = 48000;
 		channels = 2;
 		use_float = true;

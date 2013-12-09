@@ -221,6 +221,7 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Update: " << flags.ui_redraw_interval << "ms" << std::endl;
 	s << "Device: " << flags.device << std::endl;
 	s << "Buffer: " << flags.buffer << "ms" << std::endl;
+	s << "Period: " << flags.period << "ms" << std::endl;
 	s << "Samplerate: " << flags.samplerate << std::endl;
 	s << "Channels: " << flags.channels << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
@@ -445,6 +446,7 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 		log << "     --device n             Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
 		log << "                            use --device help to show available devices" << std::endl;
 		log << "     --buffer n             Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
+		log << "     --period n             Set output period size to n ms [default: " << commandlineflags().period  << "]" << std::endl;
 		log << "     --stdout               Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
 		log << "     --output-type t        Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
 		log << " -o, --output f             Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
@@ -773,8 +775,18 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 	log.writeout();
 
-	const std::size_t bufsize = ( flags.mode == ModeUI ) ? ( flags.ui_redraw_interval * flags.samplerate / 1000 ) : 1024;
-	
+	std::size_t bufsize;
+	if ( flags.mode == ModeUI ) {
+		bufsize = std::min( flags.ui_redraw_interval, flags.period ) * flags.samplerate / 1000;
+	} else if ( flags.mode == ModeBatch ) {
+		bufsize = flags.period * flags.samplerate / 1000;
+	} else {
+		bufsize = 1024;
+	}
+
+	std::int64_t last_redraw_frame = 0 - flags.ui_redraw_interval;
+	std::int64_t rendered_frames = 0;
+
 	std::vector<Tsample> left( bufsize );
 	std::vector<Tsample> right( bufsize );
 	std::vector<Tsample> rear_left( bufsize );
@@ -922,6 +934,15 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 		if ( count > 0 ) {
 			audio_stream.write( buffers, count );
+		}
+
+		if ( count > 0 ) {
+			rendered_frames += count;
+			if ( rendered_frames >= last_redraw_frame + ( flags.ui_redraw_interval * flags.samplerate / 1000 ) ) {
+				last_redraw_frame = rendered_frames;
+			} else {
+				continue;
+			}
 		}
 
 		if ( multiline ) {
