@@ -388,6 +388,9 @@ bin/.docs:
 	$(SILENT)doxygen libopenmpt/Doxyfile-cpp
 	$(VERYSILENT)touch $@
 
+.PHONY: check
+check: test
+
 .PHONY: test
 test: bin/libopenmpt_test$(EXESUFFIX)
 	bin/libopenmpt_test$(EXESUFFIX)
