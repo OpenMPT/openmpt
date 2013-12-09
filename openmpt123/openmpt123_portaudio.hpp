@@ -119,8 +119,8 @@ public:
 			log << std::endl;
 		}
 		double bufferSeconds = ( flags.buffer * 0.001 ) - Pa_GetStreamInfo( stream )->outputLatency;
-		if ( bufferSeconds <= ( flags.ui_redraw_interval * 0.001 * 2.0 )  ) {
-			bufferSeconds = flags.ui_redraw_interval * 0.001 * 2.0;
+		if ( bufferSeconds <= ( flags.period * 0.001 * 2.0 )  ) {
+			bufferSeconds = flags.period * 0.001 * 2.0;
 		}
 		set_queue_size_frames( static_cast<std::size_t>( bufferSeconds * Pa_GetStreamInfo( stream )->sampleRate ) );
 		check_portaudio_error( Pa_StartStream( stream ) );
@@ -202,22 +202,23 @@ public:
 		unsigned long framesperbuffer = 0;
 		if ( flags.mode != ModeUI ) {
 			framesperbuffer = paFramesPerBufferUnspecified;
-			flags.ui_redraw_interval = 50;
-			flags.ui_redraw_interval = std::min<std::int32_t>( flags.ui_redraw_interval, flags.buffer / 3 );
-		} else if ( flags.ui_redraw_interval == default_high ) {
+			flags.period = 50;
+			flags.period = std::min<std::int32_t>( flags.period, flags.buffer / 3 );
+		} else if ( flags.period == default_high ) {
 			framesperbuffer = paFramesPerBufferUnspecified;
-			flags.ui_redraw_interval = 50;
-			flags.ui_redraw_interval = std::min<std::int32_t>( flags.ui_redraw_interval, flags.buffer / 3 );
-		} else if ( flags.ui_redraw_interval == default_low ) {
+			flags.period = 50;
+			flags.period = std::min<std::int32_t>( flags.period, flags.buffer / 3 );
+		} else if ( flags.period == default_low ) {
 			framesperbuffer = paFramesPerBufferUnspecified;
-			flags.ui_redraw_interval = 10;
-			flags.ui_redraw_interval = std::min<std::int32_t>( flags.ui_redraw_interval, flags.buffer / 3 );
+			flags.period = 10;
+			flags.period = std::min<std::int32_t>( flags.period, flags.buffer / 3 );
 		} else {
-			framesperbuffer = flags.ui_redraw_interval * flags.samplerate / 1000;
+			framesperbuffer = flags.period * flags.samplerate / 1000;
 		}
-		if ( flags.ui_redraw_interval <= 0 ) {
-			flags.ui_redraw_interval = 1;
+		if ( flags.period <= 0 ) {
+			flags.period = 1;
 		}
+		flags.apply_default_buffer_sizes();
 		if ( flags.verbose ) {
 			log << "PortAudio:" << std::endl;
 			log << " device: "
@@ -228,7 +229,7 @@ public:
 			log << " high latency: " << Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency << std::endl;
 			log << " suggested latency: " << streamparameters.suggestedLatency << std::endl;
 			log << " frames per buffer: " << framesperbuffer << std::endl;
-			log << " ui redraw: " << flags.ui_redraw_interval << std::endl;
+			log << " ui redraw: " << flags.period << std::endl;
 		}
 		PaError e = PaError();
 		e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, framesperbuffer, 0, NULL, NULL );
