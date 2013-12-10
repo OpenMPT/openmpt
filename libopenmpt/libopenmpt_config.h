@@ -10,6 +10,12 @@
 #ifndef LIBOPENMPT_CONFIG_H
 #define LIBOPENMPT_CONFIG_H
 
+/*! \defgroup libopenmpt libopenmpt */
+
+/*! \addtogroup libopenmpt
+  @{
+*/
+
 /* provoke warnings if already defined */
 #define LIBOPENMPT_API
 #undef LIBOPENMPT_API
@@ -69,6 +75,10 @@
 #endif
 #endif
 #endif
+
+/*!
+  @}
+*/
 
 #include "libopenmpt_version.h"
 

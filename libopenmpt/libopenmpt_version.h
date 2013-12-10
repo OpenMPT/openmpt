@@ -10,6 +10,10 @@
 #ifndef LIBOPENMPT_VERSION_H
 #define LIBOPENMPT_VERSION_H
 
+/*! \addtogroup libopenmpt
+  @{
+*/
+
 /*! libopenmpt major version number */
 #define OPENMPT_API_VERSION_MAJOR 0
 /*! libopenmpt minor version number */
@@ -21,5 +25,9 @@
 #define OPENMPT_API_VERSION_HELPER_STRINGIZE(x) #x
 #define OPENMPT_API_VERSION_STRINGIZE(x) OPENMPT_API_VERSION_HELPER_STRINGIZE(x)
 #define OPENMPT_API_VERSION_STRING OPENMPT_API_VERSION_STRINGIZE(OPENMPT_API_VERSION_MAJOR) "." OPENMPT_API_VERSION_STRINGIZE(OPENMPT_API_VERSION_MINOR)
+
+/*!
+  @}
+*/
 
 #endif /* LIBOPENMPT_VERSION_H */

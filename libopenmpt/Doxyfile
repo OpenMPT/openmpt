@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "libopenmpt C"
+PROJECT_NAME           = "libopenmpt"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -58,7 +58,7 @@ PROJECT_LOGO           =
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = bin/docs/c
+OUTPUT_DIRECTORY       = bin/docs
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -232,7 +232,7 @@ TCL_SUBST              =
 # members will be omitted, etc.
 # The default value is: NO.
 
-OPTIMIZE_OUTPUT_FOR_C  = YES
+OPTIMIZE_OUTPUT_FOR_C  = NO
 
 # Set the OPTIMIZE_OUTPUT_JAVA tag to YES if your project consists of Java or
 # Python sources only. Doxygen will then generate output that is more tailored
@@ -733,11 +733,12 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = libopenmpt/libopenmpt.h \
-                         libopenmpt/libopenmpt_config.h \
-                         libopenmpt/libopenmpt_version.h \
+INPUT                  = libopenmpt/libopenmpt.hpp \
+                         libopenmpt/libopenmpt.h \
                          libopenmpt/libopenmpt_stream_callbacks_fd.h \
-                         libopenmpt/libopenmpt_stream_callbacks_file.h
+                         libopenmpt/libopenmpt_stream_callbacks_file.h \
+                         libopenmpt/libopenmpt_config.h \
+                         libopenmpt/libopenmpt_version.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
