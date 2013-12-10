@@ -223,7 +223,7 @@ public:
 	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
 	  \param beg Begin of data to load the module from.
-	  \param end Begin of data to load the module from.
+	  \param end End of data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
@@ -249,7 +249,7 @@ public:
 	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
 	  \param beg Begin of data to load the module from.
-	  \param end Begin of data to load the module from.
+	  \param end End of data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
@@ -292,7 +292,7 @@ public:
 	  \sa openmpt::module::get_repeat_count
 	*/
 	void set_repeat_count( std::int32_t repeat_count );
-	//! Set Repeat Count
+	//! Get Repeat Count
 	/*!
 	  \return Repeat Count
 	    - -1: repeat forever
