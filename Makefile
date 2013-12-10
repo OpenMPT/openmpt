@@ -371,6 +371,7 @@ MISC_OUTPUTS += bin/.docs
 MISC_OUTPUTS += bin/dist.tar
 MISC_OUTPUTS += bin/svn_version_dist.h
 MISC_OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
+MISC_OUTPUTS += bin/made.docs
 
 MISC_OUTPUTDIRS += bin/dest
 MISC_OUTPUTDIRS += bin/dist
@@ -381,9 +382,9 @@ MISC_OUTPUTDIRS += bin/docs
 all: $(OUTPUTS)
 
 .PHONY: docs
-docs: bin/.docs
+docs: bin/made.docs
 
-bin/.docs:
+bin/made.docs:
 	$(VERYSILENT)mkdir -p bin/docs
 	$(INFO) [DOXYGEN] C
 	$(SILENT)doxygen libopenmpt/Doxyfile-c
@@ -464,17 +465,17 @@ endif
 .PHONY: dist
 dist: bin/dist.tar
 
-bin/dist.tar: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz
+bin/dist.tar: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm -rf bin/dist.tar
 	cd bin/ && cp dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip ./
 	cd bin/ && cp dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip ./
-	cd bin/ && cp dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar ./
 	cd bin/ && cp dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
-	cd bin/ && tar cvf dist.tar OpenMPT-src-$(DIST_OPENMPT_VERSION).zip libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	cd bin/ && cp dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
+	cd bin/ && tar cvf dist.tar OpenMPT-src-$(DIST_OPENMPT_VERSION).zip libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm bin/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip
 	rm bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip
-	rm bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
 	rm bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	rm bin/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 
 .PHONY: bin/svn_version_dist.h
 bin/svn_version_dist.h:
@@ -485,6 +486,16 @@ bin/svn_version_dist.h:
 	echo '#define BUILD_PACKAGE true' >> $@.tmp
 	echo '#include "../svn_version_svnversion/svn_version.h"' >> $@.tmp
 	mv $@.tmp $@
+
+.PHONY: bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
+bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar: docs
+	mkdir -p bin/dist
+	rm -rf bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs
+	cp -Rv bin/docs/c/html bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs/c
+	cp -Rv bin/docs/cpp/html bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs/cpp
+	cd bin/dist/ && tar cv libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
 
 .PHONY: bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
 bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar: bin/svn_version_dist.h
