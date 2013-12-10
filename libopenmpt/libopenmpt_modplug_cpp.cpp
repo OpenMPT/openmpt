@@ -274,7 +274,7 @@ BOOL CSoundFile::SetSurroundParameters( UINT nDepth, UINT nDelay ) {
 UINT CSoundFile::GetMaxPosition() const {
 	mpcpplog();
 	// rows in original, just use seconds here
-	if ( mod ) return mod->get_duration_seconds() + 0.5;
+	if ( mod ) return static_cast<UINT>( mod->get_duration_seconds() + 0.5 );
 	return 0;
 }
 
@@ -282,7 +282,7 @@ DWORD CSoundFile::GetLength( BOOL bAdjust, BOOL bTotal ) {
 	UNUSED(bAdjust);
 	UNUSED(bTotal);
 	mpcpplog();
-	if ( mod ) return mod->get_duration_seconds() + 0.5;
+	if ( mod ) return static_cast<DWORD>( mod->get_duration_seconds() + 0.5 );
 	return 0;
 }
 
@@ -311,7 +311,7 @@ void CSoundFile::SetCurrentPos( UINT nPos ) {
 
 UINT CSoundFile::GetCurrentPos() const {
 	mpcpplog();
-	if ( mod ) return mod->get_position_seconds() + 0.5;
+	if ( mod ) return static_cast<UINT>( mod->get_position_seconds() + 0.5 );
 	return 0;
 }
 
