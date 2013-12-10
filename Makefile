@@ -387,7 +387,7 @@ docs: bin/made.docs
 bin/made.docs:
 	$(VERYSILENT)mkdir -p bin/docs
 	$(INFO) [DOXYGEN] libopenmpt
-	$(SILENT)doxygen libopenmpt/Doxyfile
+	$(SILENT) ( cat libopenmpt/Doxyfile ; echo 'PROJECT_NUMBER = "$(DIST_LIBOPENMPT_VERSION)"' ) | doxygen -
 	$(VERYSILENT)touch $@
 
 .PHONY: check
