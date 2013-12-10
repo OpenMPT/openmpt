@@ -397,7 +397,7 @@ UINT CSoundFile::Read( LPVOID lpBuffer, UINT cbBuffer ) {
 	} else if ( get_sample_size() == 4 ) {
 		std::int32_t * dst = (std::int32_t*)lpBuffer;
 		for ( std::size_t sample = 0; sample < frames_rendered * get_num_channels(); ++sample ) {
-			dst[sample] = tmpbuf[sample] << 16;
+			dst[sample] = tmpbuf[sample] << (32-16-1-MIXING_ATTENUATION);
 		}
 	}
 	return frames_rendered * get_frame_size();
