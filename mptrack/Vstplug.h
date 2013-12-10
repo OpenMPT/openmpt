@@ -137,7 +137,6 @@ protected:
 	size_t m_nRefCount;
 	uint32 m_nSampleRate;
 	SNDMIXPLUGINSTATE m_MixState;
-	uint32 m_nInputs, m_nOutputs;
 	int32 m_nEditorX, m_nEditorY;
 
 	float m_fGain;
@@ -146,6 +145,7 @@ protected:
 	bool m_bPlugResumed;
 	bool m_bIsVst2;
 	bool m_bIsInstrument;
+	bool isInitialized;
 
 	VSTInstrChannel m_MidiCh[16];						// MIDI channel state
 	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins

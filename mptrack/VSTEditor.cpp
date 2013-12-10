@@ -16,6 +16,11 @@
 
 #ifndef NO_VST
 
+BEGIN_MESSAGE_MAP(COwnerVstEditor, CDialog)
+	ON_WM_ERASEBKGND()
+END_MESSAGE_MAP()
+
+
 COwnerVstEditor::COwnerVstEditor(CVstPlugin &plugin) : CAbstractVstEditor(plugin)
 //-------------------------------------------------------------------------------
 {
