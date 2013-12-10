@@ -22,10 +22,18 @@
 
 #include <cstdint>
 
-namespace openmpt {
+/*!
+ * \mainpage libopenmpt
+ *
+ * \section strings Strings
+ *
+ * - All strings returned from libopenmpt are encoded in UTF-8.
+ * - All strings passed to libopenmpt should also be encoded in UTF-8.
+ * Behaviour in case of invalid UTF-8 is unspecified.
+ */
 
 /*!
- * \mainpage libopenmpt C++
+ * \page libopenmpt-cpp C++ API
  *
  * \section error Error Handling
  *
@@ -35,16 +43,18 @@ namespace openmpt {
  * all exceptions thrown by libopenmpt itself are derived from
  * openmpt::exception.
  * In addition, any libopenmpt function may also throw any exception specified
- * by the C++ language and C++ stndard library. These are all derived from
+ * by the C++ language and C++ standard library. These are all derived from
  * std::exception.
  *
- * \section strings Strings
- *
- * All string returned from libopenmpt are encoded in UTF-8. All strings
- * passed to libopenmpt should also be encoded in UTF-8. Behaviour in case of
- * invalid UTF-8 is unspecified.
- *
 */
+
+/*! \defgroup libopenmpt-cpp libopenmpt C++ */
+
+/*! \addtogroup libopenmpt-cpp
+  @{
+*/
+
+namespace openmpt {
 
 class LIBOPENMPT_CXX_API exception : public std::exception {
 private:
@@ -71,15 +81,15 @@ LIBOPENMPT_CXX_API std::uint32_t get_core_version();
 
 namespace string {
 
-//! Return a verbose library version string from openmpt::string::get.
+//! Return a verbose library version string from openmpt::string::get().
 static const char library_version[] = "library_version";
-//! Return a verbose OpenMPT core version string from openmpt::string::get()
+//! Return a verbose OpenMPT core version string from openmpt::string::get().
 static const char core_version   [] = "core_version";
-//! Return information about the current build (e.g. the build date or compiler used) from openmpt::string::get()
+//! Return information about the current build (e.g. the build date or compiler used) from openmpt::string::get().
 static const char build          [] = "build";
-//! Return all contributors from openmpt::string::get()
+//! Return all contributors from openmpt::string::get().
 static const char credits        [] = "credits";
-//! Return contact infromation about libopenmpt from openmpt::string::get()
+//! Return contact infromation about libopenmpt from openmpt::string::get().
 static const char contact        [] = "contact";
 
 //! Get library related metadata.
@@ -87,7 +97,6 @@ static const char contact        [] = "contact";
   \param key Key to query.
   \return A (possibly multi-line) string containing the queried information. If no information is available, the string is empty.
   \sa openmpt::string::library_version
-  \sa openmpt::string::core_version
   \sa openmpt::string::core_version
   \sa openmpt::string::build
   \sa openmpt::string::credits
@@ -536,5 +545,9 @@ public:
 }; // class module
 
 } // namespace openmpt
+
+/*!
+  @}
+*/
 
 #endif // LIBOPENMPT_HPP

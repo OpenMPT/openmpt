@@ -386,10 +386,8 @@ docs: bin/made.docs
 
 bin/made.docs:
 	$(VERYSILENT)mkdir -p bin/docs
-	$(INFO) [DOXYGEN] C
-	$(SILENT)doxygen libopenmpt/Doxyfile-c
-	$(INFO) [DOXYGEN] C++
-	$(SILENT)doxygen libopenmpt/Doxyfile-cpp
+	$(INFO) [DOXYGEN] libopenmpt
+	$(SILENT)doxygen libopenmpt/Doxyfile
 	$(VERYSILENT)touch $@
 
 .PHONY: check
@@ -450,8 +448,7 @@ endif
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_cxx.cpp $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_cxx.cpp
 ifeq ($(MPT_WITH_DOXYGEN),1)
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/share/doc/man/
-	#$(INSTALL_DATA_DIR) bin/docs/c/man $(DESTDIR)$(PREFIX)/share/doc/man
-	#$(INSTALL_DATA_DIR) bin/docs/cpp/man $(DESTDIR)$(PREFIX)/share/doc/man
+	#$(INSTALL_DATA_DIR) bin/docs/man $(DESTDIR)$(PREFIX)/share/doc/man
 endif
 
 .PHONY: install-modplug
@@ -492,9 +489,7 @@ bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar: docs
 	mkdir -p bin/dist
 	rm -rf bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
-	mkdir -p bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs
-	cp -Rv bin/docs/c/html bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs/c
-	cp -Rv bin/docs/cpp/html bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs/cpp
+	cp -Rv bin/docs/html bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs
 	cd bin/dist/ && tar cv libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
 
 .PHONY: bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
