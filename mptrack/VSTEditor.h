@@ -27,6 +27,9 @@ public:
 	virtual void OnOK();
 	virtual void OnCancel();
 
+	DECLARE_MESSAGE_MAP()
+	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
+
 	// Plugins may request to change the GUI size.
 	virtual bool IsResizable() const { return true; };
 	virtual bool SetSize(int contentWidth, int contentHeight);

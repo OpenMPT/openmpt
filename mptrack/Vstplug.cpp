@@ -23,7 +23,6 @@
 #include "MIDIMappingDialog.h"
 #include "../common/StringFixer.h"
 #include "MemoryMappedFile.h"
-#include "../soundlib/FileReader.h"
 #include "FileDialog.h"
 #include "../common/mptFstream.h"
 
@@ -55,7 +54,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	{
 	// Called when plugin param is changed via gui
 	case audioMasterAutomate:
-		if (pVstPlugin != nullptr && pVstPlugin->CanAutomateParameter(index))
+		// Strum Acoustic GS-1 and Strum Electric GS-1 send audioMasterAutomate during effOpen (WTF #1),
+		// but when sending back effCanBeAutomated, they just crash (WTF #2).
+		// As a consequence, just generally forbid this action while the plugin is not fully initialized yet.
+		if(pVstPlugin != nullptr && pVstPlugin->isInitialized && pVstPlugin->CanAutomateParameter(index))
 		{
 			// This parameter can be automated. Ugo Motion constantly sends automation callback events for parameters that cannot be automated...
 			pVstPlugin->AutomateParameter((PlugParamIndex)index);
@@ -642,7 +644,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	m_pNext = nullptr;
 	m_pMixStruct = &mixStruct;
 	m_pEditor = nullptr;
-	m_nInputs = m_nOutputs = 0;
 	m_nEditorX = m_nEditorY = -1;
 	m_pProcessFP = nullptr;
 
@@ -656,6 +657,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	m_bSongPlaying = false;
 	m_bPlugResumed = false;
 	m_nSampleRate = uint32_max;
+	isInitialized = false;
 
 	MemsetZero(m_MidiCh);
 	for(int ch = 0; ch < 16; ch++)
@@ -677,6 +679,8 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 		m_Factory.pPluginsList->m_pPrev = this;
 	}
 	m_Factory.pPluginsList = this;
+
+	isInitialized = true;
 }
 
 
@@ -692,6 +696,7 @@ void CVstPlugin::Initialize()
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	m_Effect.resvd1 = ToVstPtr(this);
 	m_nSlot = FindSlot();
+	m_nSampleRate = m_SndFile.GetSampleRate();
 
 	Dispatch(effOpen, 0, 0, nullptr, 0.0f);
 	// VST 2.0 plugins return 2 here, VST 2.4 plugins return 2400... Great!
@@ -748,8 +753,7 @@ void CVstPlugin::Initialize()
 
 	}
 
-	m_nSampleRate = m_SndFile.GetSampleRate();
-	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_SndFile.GetSampleRate()));
+	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_nSampleRate));
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, nullptr, 0.0f);
 	if(m_Effect.numPrograms > 0)
 	{
@@ -773,7 +777,7 @@ void CVstPlugin::Initialize()
 	m_pProcessFP = (m_Effect.flags & effFlagsCanReplacing) ? m_Effect.processReplacing : m_Effect.process;
 
 	// issue samplerate again here, cos some plugs like it before the block size, other like it right at the end.
-	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_SndFile.GetSampleRate()));
+	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_nSampleRate));
 
 	// Korg Wavestation GUI won't work until plugin was resumed at least once.
 	// On the other hand, some other plugins (notably Synthedit plugins like Superwave P8 2.3 or Rez 3.0) don't like this
@@ -793,11 +797,8 @@ void CVstPlugin::Initialize()
 bool CVstPlugin::InitializeIOBuffers()
 //------------------------------------
 {
-	m_nInputs = m_Effect.numInputs;
-	m_nOutputs = m_Effect.numOutputs;
-
 	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
-	bool result = mixBuffer.Initialize(MAX(m_nInputs, 2), m_nOutputs);
+	bool result = mixBuffer.Initialize(MAX(m_Effect.numInputs, 2), m_Effect.numOutputs);
 	m_MixState.pOutBufferL = mixBuffer.GetInputBuffer(0);
 	m_MixState.pOutBufferR = mixBuffer.GetInputBuffer(1);
 
@@ -1483,15 +1484,15 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		ASSERT(outputBuffers != nullptr);
 
 		// Mix outputs of multi-output VSTs:
-		if(m_nOutputs > 2)
+		if(m_Effect.numOutputs > 2)
 		{
 			// first, mix extra outputs on a stereo basis
-			uint32 numOutputs = m_nOutputs;
+			VstInt32 numOutputs = m_Effect.numOutputs;
 			// so if nOuts is not even, let process the last output later
 			if((numOutputs % 2u) == 1) numOutputs--;
 
 			// mix extra stereo outputs
-			for(uint32 iOut = 2; iOut < numOutputs; iOut++)
+			for(VstInt32 iOut = 2; iOut < numOutputs; iOut++)
 			{
 				for(size_t i = 0; i < nSamples; i++)
 				{
@@ -1499,10 +1500,10 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 				}
 			}
 
-			// if m_nOutputs is odd, mix half the signal of last output to each channel
-			if(numOutputs != m_nOutputs)
+			// if m_Effect.numOutputs is odd, mix half the signal of last output to each channel
+			if(numOutputs != m_Effect.numOutputs)
 			{
-				// trick : if we are here, nOuts = m_nOutputs - 1 !!!
+				// trick : if we are here, nOuts = m_Effect.numOutputs - 1 !!!
 				for(size_t i = 0; i < nSamples; i++)
 				{
 					float v = 0.5f * outputBuffers[numOutputs][i];
