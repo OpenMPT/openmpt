@@ -18,7 +18,7 @@
 
 #include <portaudio.h>
 
-#define BUFFERSIZE 1024
+#define BUFFERSIZE 480
 #define SAMPLERATE 48000
 
 static int16_t left[BUFFERSIZE];
@@ -40,7 +40,7 @@ int main(int argc,char* argv[]){
 	streamparameters.device = Pa_GetDefaultOutputDevice();
 	streamparameters.channelCount = 2;
 	streamparameters.sampleFormat = paInt16|paNonInterleaved;
-	streamparameters.suggestedLatency = 250*0.001;
+	streamparameters.suggestedLatency = Pa_GetDeviceInfo(streamparameters.device)->defaultHighOutputLatency;
 	Pa_OpenStream(&stream,NULL,&streamparameters,SAMPLERATE,paFramesPerBufferUnspecified,0,NULL,NULL);
 	Pa_StartStream(stream);
 	while(1){
@@ -53,5 +53,6 @@ int main(int argc,char* argv[]){
 	Pa_StopStream(stream);
 	Pa_CloseStream(stream);
 	Pa_Terminate();
+	openmpt_module_destroy(mod);
 	return 0;
 }
