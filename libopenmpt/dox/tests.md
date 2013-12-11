@@ -8,7 +8,7 @@ Tests
 libopenmpt provides some basic unit tests that check the platform for general
 sanity and do some basic internal functionality testing. The test suite
 requires a special libopenmpt build that includes file saving functionality
-that is not included in noarmal builds.
+which is not included in normal builds.
 
 ### Running Tests
 
@@ -25,11 +25,8 @@ In order to build your normal binaries again, run
     make $YOURMAKEOPTIONS clean
     make $YOURMAKEOPTIONS
 
-A separate clean and compile cycle is necessary for the tests because
-libopenmpt is built with file saving functionality when compiling the
-test suite and this is not needed and not built in for normal builds.
 As the build system retains no state between make invocations, you have to
-provide your make options every time.
+provide your make options on every make invocation.
 
 #### On Windows
 
