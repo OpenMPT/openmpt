@@ -464,9 +464,9 @@ ifeq ($(MPT_WITH_HELP2MAN),1)
 	$(INSTALL_DATA) bin/openmpt123.1 $(DESTDIR)$(PREFIX)/share/man/man.1/openmpt123.1
 endif
 endif
-	$(INSTALL_DATA) LICENSE $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/LICENSE
-	$(INSTALL_DATA) README  $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/README
-	$(INSTALL_DATA) TODO    $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/TODO
+	$(INSTALL_DATA) LICENSE   $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/LICENSE
+	$(INSTALL_DATA) README.md $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/README.md
+	$(INSTALL_DATA) TODO      $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/TODO
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c.c
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c_mem.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c_mem.c
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_cxx.cpp $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_cxx.cpp
@@ -529,7 +529,7 @@ bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_vers
 	mkdir -p bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include
 	svn export ./LICENSE         bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/LICENSE
-	svn export ./README          bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/README
+	svn export ./README.md       bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/README.md
 	svn export ./TODO            bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/TODO
 	svn export ./Makefile        bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/Makefile
 	svn export ./bin             bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/bin
@@ -552,7 +552,7 @@ bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip: bin/dist.mk bin/svn_
 	mkdir -p bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include
 	svn export ./LICENSE               bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/LICENSE               --native-eol CRLF
-	svn export ./README                bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/README                --native-eol CRLF
+	svn export ./README.md             bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/README.md             --native-eol CRLF
 	svn export ./TODO                  bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/TODO                  --native-eol CRLF
 	svn export ./Makefile              bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/Makefile              --native-eol CRLF
 	svn export ./bin                   bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/bin                   --native-eol CRLF
