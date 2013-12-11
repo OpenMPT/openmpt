@@ -483,8 +483,10 @@ endif
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c_mem.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c_mem.c
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_cxx.cpp $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_cxx.cpp
 ifeq ($(MPT_WITH_DOXYGEN),1)
+	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/html/
+	$(INSTALL_DATA_DIR) bin/docs/html $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/html
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/share/doc/man/
-	#$(INSTALL_DATA_DIR) bin/docs/man $(DESTDIR)$(PREFIX)/share/doc/man
+	#$(INSTALL_DATA_DIR) bin/docs/man $(DESTDIR)$(PREFIX)/share/man
 endif
 
 .PHONY: install-modplug
