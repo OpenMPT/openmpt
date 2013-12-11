@@ -17,7 +17,7 @@
 #include <portaudio.h>
 
 int main( int /*argc*/, char * argv [] ) {
-	const std::size_t buffersize = 1024;
+	const std::size_t buffersize = 480;
 	const std::int32_t samplerate = 48000;
 	std::vector<float> left( buffersize );
 	std::vector<float> right( buffersize );
@@ -30,7 +30,7 @@ int main( int /*argc*/, char * argv [] ) {
 	streamparameters.device = Pa_GetDefaultOutputDevice();
 	streamparameters.channelCount = 2;
 	streamparameters.sampleFormat = paFloat32 | paNonInterleaved;
-	streamparameters.suggestedLatency = 250 * 0.001;
+	streamparameters.suggestedLatency = Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency;
 	Pa_OpenStream( &stream, NULL, &streamparameters, samplerate, paFramesPerBufferUnspecified, 0, NULL, NULL );
 	Pa_StartStream( stream );
 	while ( true ) {
