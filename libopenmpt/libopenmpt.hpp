@@ -25,15 +25,28 @@
 /*!
  * \mainpage libopenmpt
  *
- * \section strings Strings
+ * \section overview Overview
+ *
+ * \subsection strings Strings
  *
  * - All strings returned from libopenmpt are encoded in UTF-8.
  * - All strings passed to libopenmpt should also be encoded in UTF-8.
  * Behaviour in case of invalid UTF-8 is unspecified.
+ *
+ * \section apis APIs
+ * - libopenmpt C++
+ *   - \ref libopenmpt-cpp-overview "Overview"
+ *   - \ref libopenmpt-cpp "Details"
+ * - libopenmpt C
+ *   - \ref libopenmpt-c-overview "Overview"
+ *   - \ref libopenmpt-c "Details"
+ * - libopenmpt
+ *   - \ref libopenmpt "Details"
+ *
  */
 
 /*!
- * \page libopenmpt-cpp C++ API
+ * \page libopenmpt-cpp-overview C++ API
  *
  * \section error Error Handling
  *
@@ -46,7 +59,11 @@
  * by the C++ language and C++ standard library. These are all derived from
  * std::exception.
  *
-*/
+ * \section libopenmpt-cpp-detailed Detailed documentation
+ *
+ * \ref libopenmpt-cpp
+ *
+ */
 
 /*! \defgroup libopenmpt-cpp libopenmpt C++ */
 
@@ -206,7 +223,7 @@ private:
 public:
 	//! Contruct a openmpt::module
 	/*!
-	  \param stream Input stream from which the module is loaded. After the contructor has finished successfully, the input position of stream is set to the byte after the last byte that has been read. If the constructor fails, the state of the input position of stream is undefined.
+	  \param stream Input stream from which the module is loaded. After the constructor has finished successfully, the input position of stream is set to the byte after the last byte that has been read. If the constructor fails, the state of the input position of stream is undefined.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
