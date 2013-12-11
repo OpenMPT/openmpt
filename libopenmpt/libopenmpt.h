@@ -15,7 +15,7 @@
 #include <stdint.h>
 
 /*!
- * \page libopenmpt-c-overview C API
+ * \page libopenmpt_c_overview C API
  *
  * \section error Error Handling
  *
@@ -25,6 +25,9 @@
  *
  * \section strings Strings
  *
+ * - All strings returned from libopenmpt are encoded in UTF-8.
+ * - All strings passed to libopenmpt should also be encoded in UTF-8.
+ * Behaviour in case of invalid UTF-8 is unspecified.
  * - All strings returned from libopenmpt are dynamically allocated and must be
  * freed with openmpt_free_string(). Do NOT used C standard library free() for
  * libopenmpt strings as that would make your code invalid on windows when
@@ -33,15 +36,22 @@
  * - All strings passed to libopenmpt are copied. No ownership is assumed or
  * transferred.
  *
- * \section libopenmpt-c-detailed Detailed documentation
+ * \section libopenmpt_c_detailed Detailed documentation
  *
- * \ref libopenmpt-c
+ * \ref libopenmpt_c
+ *
+ * \section libopenmpt_c_examples Examples
+ *
+ * \subsection libopenmpt_c_example_file FILE*
+ * \include libopenmpt_example_c.c
+ * \subsection libopenmpt_c_example_inmemory in memory
+ * \include libopenmpt_example_c_mem.c
  *
  */
 
-/*! \defgroup libopenmpt-c libopenmpt C */
+/*! \defgroup libopenmpt_c libopenmpt C */
 
-/*! \addtogroup libopenmpt-c
+/*! \addtogroup libopenmpt_c
   @{
 */
 

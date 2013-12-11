@@ -23,30 +23,7 @@
 #include <cstdint>
 
 /*!
- * \mainpage libopenmpt
- *
- * \section overview Overview
- *
- * \subsection strings Strings
- *
- * - All strings returned from libopenmpt are encoded in UTF-8.
- * - All strings passed to libopenmpt should also be encoded in UTF-8.
- * Behaviour in case of invalid UTF-8 is unspecified.
- *
- * \section apis APIs
- * - libopenmpt C++
- *   - \ref libopenmpt-cpp-overview "Overview"
- *   - \ref libopenmpt-cpp "Details"
- * - libopenmpt C
- *   - \ref libopenmpt-c-overview "Overview"
- *   - \ref libopenmpt-c "Details"
- * - libopenmpt
- *   - \ref libopenmpt "Details"
- *
- */
-
-/*!
- * \page libopenmpt-cpp-overview C++ API
+ * \page libopenmpt_cpp_overview C++ API
  *
  * \section error Error Handling
  *
@@ -59,15 +36,25 @@
  * by the C++ language and C++ standard library. These are all derived from
  * std::exception.
  *
+ * \section strings Strings
+ *
+ * - All strings returned from libopenmpt are encoded in UTF-8.
+ * - All strings passed to libopenmpt should also be encoded in UTF-8.
+ * Behaviour in case of invalid UTF-8 is unspecified.
+ *
  * \section libopenmpt-cpp-detailed Detailed documentation
  *
- * \ref libopenmpt-cpp
+ * \ref libopenmpt_cpp
+ *
+ * \section libopenmpt_cpp_examples Examples
+ *
+ * \include libopenmpt_example_cxx.cpp
  *
  */
 
-/*! \defgroup libopenmpt-cpp libopenmpt C++ */
+/*! \defgroup libopenmpt_cpp libopenmpt C++ */
 
-/*! \addtogroup libopenmpt-cpp
+/*! \addtogroup libopenmpt_cpp
   @{
 */
 
