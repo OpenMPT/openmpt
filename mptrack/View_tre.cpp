@@ -782,7 +782,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 		}
 	}
 	// Add Orders
-	if ((info.hOrders) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_SMPNAMES))
+	if (info.hOrders && (hintFlagPart & (HINT_MODTYPE | HINT_MODSEQUENCE | HINT_SEQNAMES | HINT_PATNAMES)))
 	{
 		const DWORD nPat = (lHint >> HINT_SHIFT_PAT);
 		bool adjustParentNode = false;	// adjust sequence name of "Sequence" node?
@@ -930,7 +930,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 		}
 	}
 	// Add Patterns
-	if ((info.hPatterns) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_SMPNAMES))
+	if (info.hPatterns && (hintFlagPart & (HINT_MODTYPE | HINT_PATNAMES)))
 	{
 		const PATTERNINDEX nPat = (PATTERNINDEX)(lHint >> HINT_SHIFT_PAT);
 		info.tiPatterns.resize(sndFile.Patterns.Size(), NULL);
@@ -982,7 +982,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 		}
 	}
 	// Add Samples
-	if ((info.hSamples) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_PATNAMES))
+	if (info.hSamples && (hintFlagPart & (HINT_MODTYPE | HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA)))
 	{
 		const SAMPLEINDEX nSmp = (SAMPLEINDEX)(lHint >> HINT_SHIFT_SMP);
 		SAMPLEINDEX smin = 1, smax = MAX_SAMPLES - 1;
@@ -1004,7 +1004,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 				wsprintf(s, "%3d: %s", nSmp, sndFile.m_szNames[nSmp]);
 				if (!hChild)
 				{
-					hChild = InsertItem(s, nImage, nImage, info.hSamples, TVI_LAST);
+					hChild = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, nSmp, info.hSamples, TVI_LAST);
 				} else
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
@@ -1013,12 +1013,11 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 					tvi.cchTextMax = CountOf(stmp);
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
-					if(tvi.iImage != nImage || strcmp(s, stmp))
+					if(tvi.iImage != nImage || strcmp(s, stmp) || GetItemData(hChild) != nSmp)
 					{
-						SetItem(hChild, TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
+						SetItem(hChild, TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, nSmp);
 					}
 				}
-				SetItemData(hChild, nSmp);
 			} else if(hChild != nullptr)
 			{
 				DeleteItem(hChild);
@@ -1030,7 +1029,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 		}
 	}
 	// Add Instruments
-	if ((info.hInstruments) && (hintFlagPart != HINT_SMPNAMES) && (hintFlagPart != HINT_PATNAMES))
+	if (info.hInstruments && (hintFlagPart & (HINT_MODTYPE | HINT_INSNAMES | HINT_INSTRUMENT)))
 	{
 		INSTRUMENTINDEX smin = 1, smax = MAX_INSTRUMENTS - 1;
 		const INSTRUMENTINDEX nIns = (INSTRUMENTINDEX)(lHint >> HINT_SHIFT_INS);
@@ -1061,7 +1060,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 
 				if (!hChild)
 				{
-					hChild = InsertItem(s, nImage, nImage, info.hInstruments, TVI_LAST);
+					hChild = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, nIns, info.hInstruments, TVI_LAST);
 				} else
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
@@ -1070,10 +1069,11 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 					tvi.cchTextMax = CountOf(stmp);
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
-					if(tvi.iImage != nImage || strcmp(s, stmp))
-						SetItem(hChild, TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
+					if(tvi.iImage != nImage || strcmp(s, stmp) || GetItemData(hChild) != nIns)
+					{
+						SetItem(hChild, TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, nIns);
+					}
 				}
-				SetItemData(hChild, nIns);
 			} else if(hChild != nullptr)
 			{
 				DeleteItem(hChild);
