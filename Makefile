@@ -72,19 +72,27 @@ endif
 
 # host setup
 
-ifeq ($(HOST),windows)
+ifeq ($(OS),Windows_NT)
+
+HOST=windows
 
 RM = del /q /f
+RMTREE = del /q /f /s
 INSTALL = echo install
 INSTALL_MAKE_DIR = echo install
 INSTALL_DIR = echo install
+FIXPATH = $(subst /,\,$1)
 
 else
 
+HOST=unix
+
 RM = rm -f
+RMTREE = rm -rf
 INSTALL = install
 INSTALL_MAKE_DIR = install -d
 INSTALL_DIR = cp -r -v
+FIXPATH = $1
 
 endif
 
@@ -128,8 +136,7 @@ endif
 #CXXFLAGS += -mtune=generic
 #CFLAGS   += -mtune=generic
 
-ifeq ($(HOST),windows)
-else
+ifeq ($(HOST),unix)
 
 ifeq ($(shell help2man --version > /dev/null 2>&1 && echo yes ),yes)
 MPT_WITH_HELP2MAN := 1
@@ -361,8 +368,7 @@ endif
 ifeq ($(TEST),1)
 OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 else
-ifeq ($(HOST),windows)
-else
+ifeq ($(HOST),unix)
 OUTPUTS += bin/libopenmpt.pc
 endif
 ifeq ($(OPENMPT123),1)
@@ -590,8 +596,7 @@ openmpt123/openmpt123.o: openmpt123/openmpt123.cpp
 bin/openmpt123$(EXESUFFIX): $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
-ifeq ($(HOST),windows)
-else
+ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
@@ -612,8 +617,7 @@ libopenmpt/examples/libopenmpt_example_cxx.o: libopenmpt/examples/libopenmpt_exa
 bin/libopenmpt_example_c$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
-ifeq ($(HOST),windows)
-else
+ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
@@ -621,8 +625,7 @@ endif
 bin/libopenmpt_example_c_mem$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
-ifeq ($(HOST),windows)
-else
+ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
@@ -630,20 +633,14 @@ endif
 bin/libopenmpt_example_cxx$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
-ifeq ($(HOST),windows)
-else
+ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD ] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 endif
 
-ifeq ($(HOST),windows)
+.PHONY: clean
 clean:
 	$(INFO) clean ...
-	$(SILENT)$(RM) $(subst /,\,$(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS) )
-else
-clean:
-	$(INFO) clean ...
-	$(SILENT)$(RM) $(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS) $(MISC_OUTPUTS)
-	$(SILENT)$(RM) -rf $(MISC_OUTPUTDIRS)
-endif
+	$(SILENT)$(RM) $(call FIXPATH,$(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS) $(MISC_OUTPUTS))
+	$(SILENT)$(RMTREE) $(call FIXPATH,$(MISC_OUTPUTDIRS))
