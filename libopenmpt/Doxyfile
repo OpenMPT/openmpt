@@ -733,12 +733,16 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = libopenmpt/libopenmpt.hpp \
+INPUT                  = \
+                         libopenmpt/dox/index.dox \
+                         libopenmpt/dox/dependencies.md \
+                         libopenmpt/libopenmpt.hpp \
                          libopenmpt/libopenmpt.h \
                          libopenmpt/libopenmpt_stream_callbacks_fd.h \
                          libopenmpt/libopenmpt_stream_callbacks_file.h \
                          libopenmpt/libopenmpt_config.h \
-                         libopenmpt/libopenmpt_version.h
+                         libopenmpt/libopenmpt_version.h \
+                         
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -800,13 +804,23 @@ EXCLUDE_PATTERNS       =
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories use the pattern */test/*
 
-EXCLUDE_SYMBOLS        =
+EXCLUDE_SYMBOLS        = \
+                         LIBOPENMPT_API \
+                         LIBOPENMPT_CXX_API \
+                         LIBOPENMPT_API_HELPER_EXPORT \
+                         LIBOPENMPT_API_HELPER_IMPORT \
+                         LIBOPENMPT_API_HELPER_PUBLIC \
+                         LIBOPENMPT_API_HELPER_LOCAL \
+                         OPENMPT_API_VERSION_HELPER_STRINGIZE \
+                         OPENMPT_API_VERSION_STRINGIZE \
+                         openmpt::detail \
+                         
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or directories
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           =
+EXAMPLE_PATH           = libopenmpt/examples/ LICENSE
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
