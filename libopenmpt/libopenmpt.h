@@ -15,7 +15,7 @@
 #include <stdint.h>
 
 /*!
- * \page libopenmpt-c C API
+ * \page libopenmpt-c-overview C API
  *
  * \section error Error Handling
  *
@@ -32,7 +32,12 @@
  * C runtime.
  * - All strings passed to libopenmpt are copied. No ownership is assumed or
  * transferred.
-*/
+ *
+ * \section libopenmpt-c-detailed Detailed documentation
+ *
+ * \ref libopenmpt-c
+ *
+ */
 
 /*! \defgroup libopenmpt-c libopenmpt C */
 
