@@ -31,12 +31,15 @@ SHARED_LIB=1
 STATIC_LIB=1
 EXAMPLES=1
 OPENMPT123=1
+SHARED_SONAME=1
 
 
 # version
 
 LIBOPENMPT_VERSION_MAJOR=0
 LIBOPENMPT_VERSION_MINOR=1
+
+LIBOPENMPT_SONAME=libopenmpt.so.0
 
 
 # get commandline or defaults
@@ -388,6 +391,9 @@ ifeq ($(MPT_WITH_DOXYGEN),1)
 OUTPUTS += docs
 endif
 endif
+ifeq ($(SHARED_SONAME),1)
+LIBOPENMPT_LDFLAGS += -Wl,-soname,$(LIBOPENMPT_SONAME)
+endif
 
 MISC_OUTPUTS += libopenmpt.so
 MISC_OUTPUTS += bin/.docs
@@ -396,6 +402,7 @@ MISC_OUTPUTS += bin/dist.mk
 MISC_OUTPUTS += bin/svn_version_dist.h
 MISC_OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 MISC_OUTPUTS += bin/made.docs
+MISC_OUTPUTS += bin/$(LIBOPENMPT_SONAME)
 
 MISC_OUTPUTDIRS += bin/dest
 MISC_OUTPUTDIRS += bin/dist
@@ -452,7 +459,12 @@ install: $(OUTPUTS)
 	$(INSTALL_DATA) libopenmpt/libopenmpt.hpp $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt.hpp
 	$(INSTALL_DATA) bin/libopenmpt.pc $(DESTDIR)$(PREFIX)/lib/pkgconfig/libopenmpt.pc
 ifeq ($(SHARED_LIB),1)
+ifeq ($(SHARED_SONAME),1)
+	$(INSTALL_DATA) bin/$(LIBOPENMPT_SONAME) $(DESTDIR)$(PREFIX)/lib/$(LIBOPENMPT_SONAME)
+	ln -sf $(LIBOPENMPT_SONAME) $(DESTDIR)$(PREFIX)/lib/libopenmpt.so
+else
 	$(INSTALL_DATA) bin/libopenmpt.so $(DESTDIR)$(PREFIX)/lib/libopenmpt.so
+endif
 	$(INSTALL_DATA) bin/libopenmpt_modplug.so $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug.so
 endif
 ifeq ($(STATIC_LIB),1)
@@ -587,7 +599,11 @@ bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
 
 bin/libopenmpt.so: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) -shared $^ $(LOADLIBES) $(LDLIBS) -o $@
+	$(SILENT)$(LINK.cc) -shared $(LIBOPENMPT_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+ifeq ($(SHARED_SONAME),1)
+	$(SILENT)mv bin/libopenmpt.so bin/$(LIBOPENMPT_SONAME)
+	$(SILENT)ln -sf $(LIBOPENMPT_SONAME) bin/libopenmpt.so
+endif
 
 bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD ] $@
