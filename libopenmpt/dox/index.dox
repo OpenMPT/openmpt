@@ -6,7 +6,10 @@
  *
  * libopenmpt is based on the player code of the Open ModPlug Tracker project (OpenMPT, <a href="http://openmpt.org/">http://openmpt.org/</a>)
  *
- * \section apis APIs
+ * \section toc_tests Test
+ * - \ref md_tests "Tests"
+ *
+ * \section toc_apis APIs
  * - libopenmpt
  *   - \ref libopenmpt "Common Details"
  * - libopenmpt C++
@@ -16,10 +19,10 @@
  *   - \ref libopenmpt_c_overview "Overview"
  *   - \ref libopenmpt_c "Details"
  *
- * \section website Website
+ * \section toc_website Website
  * http://lib.openmpt.org/
  *
- * \section license License
+ * \section toc_license License
  * \include LICENSE
  *
  */
