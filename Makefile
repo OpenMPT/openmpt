@@ -233,19 +233,28 @@ LDLIBS_EXAMPLES   += $(LDLIBS_PORTAUDIO)
 	$(SILENT)gzip --rsyncable --no-name --best > $@ < $<
 
 
+-include build/dist.mk
+ifeq ($(BUILD_SVNVERSION),)
 SVN_INFO:=$(shell svn info . > /dev/null 2>&1 ; echo $$? )
-ifneq ($(SVN_INFO),0)
- # not in svn checkout
- CPPFLAGS += -Icommon/svn_version_default
- DIST_OPENMPT_VERSION:=rUNKNOWN
- DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR)
+ifeq ($(SVN_INFO),0)
+# in svn checkout
+BUILD_SVNVERSION := $(shell svnversion -n . )
+CPPFLAGS += -Icommon/svn_version_svnversion -D BUILD_SVNVERSION=\"$(BUILD_SVNVERSION)\"
+DIST_OPENMPT_VERSION:=r$(BUILD_SVNVERSION)
+DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(BUILD_SVNVERSION)
 else
- # in svn checkout
- BUILD_SVNVERSION := $(shell svnversion -n . )
- CPPFLAGS += -Icommon/svn_version_svnversion -D BUILD_SVNVERSION=\"$(BUILD_SVNVERSION)\"
- DIST_OPENMPT_VERSION:=r$(BUILD_SVNVERSION)
- DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(BUILD_SVNVERSION)
+# not in svn checkout
+CPPFLAGS += -Icommon/svn_version_default
+DIST_OPENMPT_VERSION:=rUNKNOWN
+DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR)
 endif
+else
+# in dist package
+CPPFLAGS += -Icommon/svn_version_svnversion -D BUILD_SVNVERSION=\"$(BUILD_SVNVERSION)\"
+DIST_OPENMPT_VERSION:=r$(BUILD_SVNVERSION)
+DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(BUILD_SVNVERSION)
+endif
+
 
 
 CPPFLAGS += -DLIBOPENMPT_BUILD
@@ -369,6 +378,7 @@ endif
 MISC_OUTPUTS += libopenmpt.so
 MISC_OUTPUTS += bin/.docs
 MISC_OUTPUTS += bin/dist.tar
+MISC_OUTPUTS += bin/dist.mk
 MISC_OUTPUTS += bin/svn_version_dist.h
 MISC_OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 MISC_OUTPUTS += bin/made.docs
@@ -474,6 +484,12 @@ bin/dist.tar: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip bin/dist-zip/
 	rm bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm bin/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 
+.PHONY: bin/dist.mk
+bin/dist.mk:
+	rm -rf $@
+	echo 'BUILD_SVNVERSION=$(BUILD_SVNVERSION)' > $@.tmp
+	mv $@.tmp $@
+
 .PHONY: bin/svn_version_dist.h
 bin/svn_version_dist.h:
 	rm -rf $@
@@ -493,7 +509,7 @@ bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar: docs
 	cd bin/dist/ && tar cv libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
 
 .PHONY: bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
-bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar: bin/svn_version_dist.h
+bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_version_dist.h
 	mkdir -p bin/dist
 	rm -rf bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
@@ -511,11 +527,12 @@ bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar: bin/svn_version_dist.h
 	svn export ./openmpt123      bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/openmpt123
 	svn export ./include/miniz   bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/miniz
 	svn export ./include/modplug bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/modplug
+	cp bin/dist.mk bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
 	cp bin/svn_version_dist.h bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
 	cd bin/dist/ && tar cv libopenmpt-src-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
 
 .PHONY: bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip
-bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip: bin/svn_version_dist.h
+bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip: bin/dist.mk bin/svn_version_dist.h
 	mkdir -p bin/dist-zip
 	rm -rf bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
@@ -538,6 +555,7 @@ bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip: bin/svn_version_dist
 	svn export ./include/foobar2000sdk bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/foobar2000sdk --native-eol CRLF
 	svn export ./include/winamp        bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/winamp        --native-eol CRLF
 	svn export ./include/xmplay        bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/xmplay        --native-eol CRLF
+	cp bin/dist.mk bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
 	cp bin/svn_version_dist.h bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
 	cd bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip --compression-method deflate -9 *
 
