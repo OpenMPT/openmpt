@@ -735,6 +735,7 @@ WARN_LOGFILE           =
 
 INPUT                  = \
                          libopenmpt/dox/index.dox \
+                         README.md \
                          libopenmpt/dox/dependencies.md \
                          libopenmpt/dox/tests.md \
                          libopenmpt/libopenmpt.hpp \
