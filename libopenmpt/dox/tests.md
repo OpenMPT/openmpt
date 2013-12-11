@@ -17,6 +17,7 @@ that is not included in noarmal builds.
 Compile with
 
     make TEST=1 $YOURMAKEOPTIONS clean
+    make TEST=1 $YOURMAKEOPTIONS
     make TEST=1 $YOURMAKEOPTIONS check
 
 In order to build your normal binaries again, run
