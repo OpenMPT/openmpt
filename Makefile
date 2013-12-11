@@ -24,6 +24,8 @@ VERYSILENT = @
 endif
 
 
+# general settings
+
 DYNLINK=1
 SHARED_LIB=1
 STATIC_LIB=1
@@ -57,24 +59,12 @@ endif
 #endif
 
 
-# compiler setup
-
-ifeq ($(CONFIG)x,x)
-
-include build/make/Makefile.config.defaults
-
-else
-
-include build/make/Makefile.config.$(CONFIG)
-
-endif
-
-
 # host setup
 
 ifeq ($(OS),Windows_NT)
 
 HOST=windows
+HOST_FLAVOUR=
 
 RM = del /q /f
 RMTREE = del /q /f /s
@@ -86,6 +76,7 @@ FIXPATH = $(subst /,\,$1)
 else
 
 HOST=unix
+HOST_FLAVOUR=
 
 RM = rm -f
 RMTREE = rm -rf
@@ -94,8 +85,25 @@ INSTALL_MAKE_DIR = install -d
 INSTALL_DIR = cp -r -v
 FIXPATH = $1
 
+UNAME_S:=$(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+HOST_FLAVOUR=MACOSX
 endif
 
+endif
+
+
+# compiler setup
+
+ifeq ($(CONFIG)x,x)
+
+include build/make/Makefile.config.defaults
+
+else
+
+include build/make/Makefile.config.$(CONFIG)
+
+endif
 
 
 # build setup
