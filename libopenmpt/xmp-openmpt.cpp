@@ -904,6 +904,8 @@ const struct Columns
 	{ 3, col_pitch },	// EFF
 };
 
+static const int max_cols = 4;
+
 static void assure_width( std::string & str, std::size_t width ) {
 	if ( str.length() == width ) {
 		return;
@@ -932,9 +934,9 @@ static int last_pattern = -1;
 static Color invert_color( Color c ) {
 	Color res;
 	res.a = c.a;
-	res.r  = 255 - c.r;
-	res.g  = 255 - c.g;
-	res.b  = 255 - c.b;
+	res.r = 255 - c.r;
+	res.g = 255 - c.g;
+	res.b = 255 - c.b;
 	return res;
 }
 
@@ -1050,6 +1052,7 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	const std::size_t half_chars_per_channel = num_half_chars / channels;
 	std::size_t chars_per_channel, spaces_per_channel;
 	std::size_t num_cols;
+	std::size_t col0_width = pattern_columns[0].num_chars;
 	for ( num_cols = sizeof ( pattern_columns ) / sizeof ( pattern_columns[0] ); num_cols >= 1; num_cols-- ) {
 		chars_per_channel = 0;
 		spaces_per_channel = num_cols > 1 ? num_cols : 0;	// No extra space if we only display notes
@@ -1061,6 +1064,14 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 			break;
 		}
 	}
+
+#if 0
+	if ( num_cols == 1 ) {
+		col0_width = std::max<long>( 1, (long)half_chars_per_channel / 2 );
+		chars_per_channel = col0_width;
+		spaces_per_channel = 0;
+	}
+#endif
 
 	int pattern_width = ((chars_per_channel * channels + 4) * text_size.cx) + (spaces_per_channel * channels + channels - (num_cols == 1 ? 1 : 2)) * (text_size.cx / 2);
 	int pattern_height = rows * text_size.cy;
@@ -1102,29 +1113,38 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 			pos.x += 4 * text_size.cx;
 
 			for ( std::size_t channel = 0; channel < channels; ++channel ) {
-				// "NNN IIvVV EFF"
-				//std::string highlight = self->mod->highlight_pattern_row_channel( pattern, row, channel, cols_per_channel );
-				//std::string chan = self->mod->format_pattern_row_channel( pattern, row, channel, cols_per_channel );
 
-				for ( std::size_t col = 0; col < num_cols; ++col ) {
-					std::string col_string;
+				struct coldata {
+					std::string text;
+					bool is_empty;
+					ColorIndex color;
+					coldata()
+						: is_empty(false)
+						, color(col_unknown)
+					{
+						return;
+					}
+				};
+
+				coldata cols[max_cols];
+
+				for ( std::size_t col = 0; col < max_cols; ++col ) {
 					switch ( col ) {
 						case 0:
-							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_note );
+							cols[col].text = self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_note );
 							break;
 						case 1:
-							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_instrument );
+							cols[col].text = self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_instrument );
 							break;
 						case 2:
-							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_volumeffect );
-							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_volume );
+							cols[col].text = self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_volumeffect )
+								+ self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_volume );
 							break;
 						case 3:
-							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_effect );
-							col_string += self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_parameter );
+							cols[col].text = self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_effect )
+								+ self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_parameter );
 							break;
 					}
-					assure_width( col_string, pattern_columns[col].num_chars );
 					int color = pattern_columns[col].color;
 					if ( self->pattern_vis && ( col == 2 || col == 3 ) ) {
 						if ( col == 2 ) {
@@ -1134,19 +1154,43 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 							color = effect_type_to_color_index( self->pattern_vis->get_pattern_row_channel_effect_type( pattern, row, channel ) );
 						}
 					}
-					switch ( col_string[0] ) {
+					switch ( cols[col].text[0] ) {
 						case ' ':
 						case '.':
+							cols[col].is_empty = true;
 						case '^':
 						case '=':
 						case '~':
 							color = col_empty;
 							break;
 					}
+					cols[col].color = (ColorIndex)color;
 
-					SetTextColor( visDC, viscolors[color].dw );
-					TextOutA( visDC, pos.x, pos.y, col_string.c_str(), col_string.length() );
-					pos.x += pattern_columns[col].num_chars * text_size.cx + text_size.cx / 2;
+				}
+
+				if ( num_cols <= 3 && !cols[3].is_empty ) {
+					if ( cols[2].is_empty ) {
+						cols[2] = cols[3];
+					} else if ( cols[0].is_empty ) {
+						cols[0] = cols[3];
+					}
+				}
+
+				if ( num_cols <= 2 && !cols[2].is_empty ) {
+					if ( cols[0].is_empty ) {
+						cols[0] = cols[2];
+					}
+				}
+
+				for ( std::size_t col = 0; col < num_cols; ++col ) {
+
+					std::size_t col_width = ( num_cols > 1 ) ? pattern_columns[col].num_chars : col0_width;
+
+					assure_width( cols[col].text, col_width );
+
+					SetTextColor( visDC, viscolors[cols[col].color].dw );
+					TextOutA( visDC, pos.x, pos.y, cols[col].text.c_str(), cols[col].text.length() );
+					pos.x += col_width * text_size.cx + text_size.cx / 2;
 				}
 				// Extra padding
 				if ( num_cols > 1 ) {
