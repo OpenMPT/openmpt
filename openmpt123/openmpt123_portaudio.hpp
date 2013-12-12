@@ -30,6 +30,7 @@ extern "C" void PaUtil_SetDebugPrintFunction(PaUtilLogCallback  cb);
 
 class portaudio_raii {
 private:
+	std::ostream & log;
 	bool log_set;
 	bool portaudio_initialized;
 	static std::ostream * portaudio_log_stream;
@@ -40,7 +41,7 @@ private:
 		}
 	}
 protected:
-	void check_portaudio_error( PaError e, std::ostream & log = std::cerr ) {
+	void check_portaudio_error( PaError e ) {
 		if ( e == paNoError ) {
 			return;
 		}
@@ -51,7 +52,7 @@ protected:
 		throw portaudio_exception( e );
 	}
 public:
-	portaudio_raii( bool verbose, std::ostream & log = std::cerr ) : log_set(false), portaudio_initialized(false) {
+	portaudio_raii( bool verbose, std::ostream & log ) : log(log), log_set(false), portaudio_initialized(false) {
 		if ( verbose ) {
 			portaudio_log_stream = &log;
 		} else {
@@ -92,7 +93,7 @@ private:
 	openmpt123::mutex audioMutex;
 	bool use_float;
 public:
-	portaudio_stream_callback_raii( commandlineflags & flags, std::ostream & log = std::cerr )
+	portaudio_stream_callback_raii( commandlineflags & flags, std::ostream & log )
 		: portaudio_raii(flags.verbose, log)
 		, write_buffers_blocking_wrapper(flags)
 		, stream(NULL)
@@ -179,7 +180,7 @@ private:
 	std::vector<float> sampleBufFloat;
 	std::vector<std::int16_t> sampleBufInt;
 public:
-	portaudio_stream_blocking_raii( commandlineflags & flags, std::ostream & log = std::cerr )
+	portaudio_stream_blocking_raii( commandlineflags & flags, std::ostream & log )
 		: portaudio_raii(flags.verbose, log)
 		, stream(NULL)
 		, interleaved(false)
@@ -325,10 +326,10 @@ public:
 
 #endif
 
-static std::string show_portaudio_devices() {
+static std::string show_portaudio_devices( std::ostream & log ) {
 	std::ostringstream devices;
 	devices << " portaudio:" << std::endl;
-	portaudio_raii portaudio( false );
+	portaudio_raii portaudio( false, log );
 	for ( PaDeviceIndex i = 0; i < Pa_GetDeviceCount(); ++i ) {
 		if ( Pa_GetDeviceInfo( i ) && Pa_GetDeviceInfo( i )->maxOutputChannels > 0 ) {
 			devices << "    " << i << ": ";

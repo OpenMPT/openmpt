@@ -1330,7 +1330,7 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 }
 
 
-static commandlineflags parse_openmpt123( const std::vector<std::string> & args ) {
+static commandlineflags parse_openmpt123( const std::vector<std::string> & args, std::ostream & log ) {
 
 	commandlineflags flags;
 
@@ -1438,7 +1438,7 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 					devices << " Available devices:" << std::endl;
 					devices << "    " << "default" << ": " << "default" << std::endl;
 #if defined( MPT_WITH_PORTAUDIO )
-					devices << show_portaudio_devices();
+					devices << show_portaudio_devices( log );
 #endif
 #if defined( WIN32 )
 					devices << show_waveout_devices();
@@ -1579,7 +1579,7 @@ static int main( int argc, char * argv [] ) {
 		
 		std::srand( static_cast<unsigned int>( std::time( NULL ) ) );
 
-		flags = parse_openmpt123( args );
+		flags = parse_openmpt123( args, dummy_log );
 
 		if ( args.size() <= 1 ) {
 			throw show_help_exception( "", false );
@@ -1638,7 +1638,7 @@ static int main( int argc, char * argv [] ) {
 #if defined( MPT_WITH_SDL )
 				} else if ( flags.driver == "sdl" || flags.driver.empty() ) {
 					flags.apply_default_buffer_sizes();
-					sdl_stream_raii sdl_stream( flags, log );
+					sdl_stream_raii sdl_stream( flags );
 					render_files( flags, log, sdl_stream );
 #endif
 #if defined( WIN32 )
