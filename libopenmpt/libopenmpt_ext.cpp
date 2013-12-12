@@ -17,6 +17,7 @@ namespace openmpt {
 
 class module_ext_impl
 	: public module_impl
+	, public ext::pattern_vis
 
 
 
@@ -76,6 +77,8 @@ public:
 	void * get_interface( const std::string & interface_id ) {
 		if ( interface_id.empty() ) {
 			return 0;
+		} else if ( interface_id == ext::pattern_vis_id ) {
+			return dynamic_cast< ext::pattern_vis * >( this );
 
 
 
@@ -85,6 +88,32 @@ public:
 
 		} else {
 			return 0;
+		}
+	}
+
+	// pattern_vis
+
+	virtual effect_type get_pattern_row_channel_volume_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const {
+		std::uint8_t byte = get_pattern_row_channel_command( pattern, row, channel, module::command_volumeffect );
+		switch ( ModCommand::GetVolumeEffectType( byte ) ) {
+			case EFFECT_TYPE_NORMAL : return effect_general; break;
+			case EFFECT_TYPE_GLOBAL : return effect_global ; break;
+			case EFFECT_TYPE_VOLUME : return effect_volume ; break;
+			case EFFECT_TYPE_PANNING: return effect_panning; break;
+			case EFFECT_TYPE_PITCH  : return effect_pitch  ; break;
+			default: return effect_unknown; break;
+		}
+	}
+
+	virtual effect_type get_pattern_row_channel_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const {
+		std::uint8_t byte = get_pattern_row_channel_command( pattern, row, channel, module::command_effect );
+		switch ( ModCommand::GetEffectType( byte ) ) {
+			case EFFECT_TYPE_NORMAL : return effect_general; break;
+			case EFFECT_TYPE_GLOBAL : return effect_global ; break;
+			case EFFECT_TYPE_VOLUME : return effect_volume ; break;
+			case EFFECT_TYPE_PANNING: return effect_panning; break;
+			case EFFECT_TYPE_PITCH  : return effect_pitch  ; break;
+			default: return effect_unknown; break;
 		}
 	}
 
