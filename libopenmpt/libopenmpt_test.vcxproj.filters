@@ -194,9 +194,6 @@
     <ClInclude Include="..\common\BuildSettings.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="libopenmpt_interactive.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\versionNumber.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -244,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="..\common\thread.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="libopenmpt_ext.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -460,9 +460,6 @@
     <ClCompile Include="libopenmpt_cxx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="libopenmpt_interactive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\Load_digi.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
@@ -492,6 +489,9 @@
     </ClCompile>
     <ClCompile Include="..\common\mptPathString.cpp">
       <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_ext.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

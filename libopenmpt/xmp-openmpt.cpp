@@ -19,10 +19,10 @@
 #endif
 #endif // _MSC_VER
 
-#define LIBOPENMPT_INTERACTIVE_IS_EXPERIMENTAL
+#define LIBOPENMPT_EXT_IS_EXPERIMENTAL
 
 #include "libopenmpt.hpp"
-#include "libopenmpt_interactive.hpp"
+#include "libopenmpt_ext.hpp"
 
 #include "libopenmpt_settings.hpp"
 
@@ -88,10 +88,16 @@ struct self_xmplay_t {
 	std::size_t samplerate;
 	std::size_t num_channels;
 	openmpt::settings::settings settings;
-	openmpt::interactive_module * mod;
+	openmpt::module_ext * mod;
 	self_xmplay_t() : samplerate(48000), num_channels(2), settings(TEXT(SHORT_TITLE), false), mod(nullptr) {
 		settings.changed = apply_and_save_options;
 		settings.load();
+	}
+	void delete_mod() {
+		if ( mod ) {
+			delete mod;
+			mod = nullptr;
+		}
 	}
 	~self_xmplay_t() {
 		return;
@@ -584,15 +590,12 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 	xmpopenmpt_lock guard;
 	reset_options();
 	try {
-		if ( self->mod ) {
-			delete self->mod;
-			self->mod = nullptr;
-		}
+		self->delete_mod();
 		#ifdef USE_XMPLAY_FILE_IO
 			#ifdef USE_XMPLAY_ISTREAM
 				switch ( xmpffile->GetType( file ) ) {
 					case XMPFILE_TYPE_MEMORY:
-						self->mod = new openmpt::interactive_module( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+						self->mod = new openmpt::module_ext( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
 						break;
 					case XMPFILE_TYPE_FILE:
 					case XMPFILE_TYPE_NETFILE:
@@ -600,19 +603,19 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 					default:
 						{
 							xmplay_istream stream( file );
-							self->mod = new openmpt::interactive_module( stream );
+							self->mod = new openmpt::module_ext( stream );
 						}
 						break;
 				}
 			#else
 				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
-					self->mod = new openmpt::interactive_module( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+					self->mod = new openmpt::module_ext( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
 				} else {
-					self->mod = new openmpt::interactive_module( (read_XMPFILE( file )) );
+					self->mod = new openmpt::module_ext( (read_XMPFILE( file )) );
 				}
 			#endif
 		#else
-			self->mod = new openmpt::interactive_module( std::ifstream( filename, std::ios_base::binary ) );
+			self->mod = new openmpt::module_ext( std::ifstream( filename, std::ios_base::binary ) );
 		#endif
 		clear_current_timeinfo();
 		reset_timeinfos();
@@ -622,10 +625,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 		xmpfin->SetLength( static_cast<float>( self->mod->get_duration_seconds() ), TRUE );
 		return 2;
 	} catch ( ... ) {
-		if ( self->mod ) {
-			delete self->mod;
-			self->mod = nullptr;
-		}
+		self->delete_mod();
 		return 0;
 	}
 	return 0;
@@ -634,10 +634,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 // close the file
 static void WINAPI openmpt_Close() {
 	xmpopenmpt_lock guard;
-	if ( self->mod ) {
-		delete self->mod;
-		self->mod = nullptr;
-	}
+	self->delete_mod();
 }
 
 // set the sample format (in=user chosen format, out=file format if different)

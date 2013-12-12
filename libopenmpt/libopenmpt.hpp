@@ -134,7 +134,7 @@ LIBOPENMPT_CXX_API double could_open_propability( std::istream & stream, double 
 
 class module_impl;
 
-class interactive_module;
+class module_ext;
 
 namespace detail {
 
@@ -144,7 +144,7 @@ typedef std::map< std::string, std::string > initial_ctls_map;
 
 class LIBOPENMPT_CXX_API module {
 
-	friend class interactive_module;
+	friend class module_ext;
 
 public:
 
@@ -204,7 +204,7 @@ private:
 	module( const module & );
 	void operator = ( const module & );
 private:
-	// for interactive_module
+	// for module_ext
 	module();
 	void set_impl( module_impl * i );
 public:

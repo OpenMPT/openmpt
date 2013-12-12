@@ -245,8 +245,8 @@
     <ClInclude Include="libopenmpt.h" />
     <ClInclude Include="libopenmpt.hpp" />
     <ClInclude Include="libopenmpt_config.h" />
+    <ClInclude Include="libopenmpt_ext.hpp" />
     <ClInclude Include="libopenmpt_impl.hpp" />
-    <ClInclude Include="libopenmpt_interactive.hpp" />
     <ClInclude Include="libopenmpt_internal.h" />
     <ClInclude Include="libopenmpt_stream_callbacks_fd.h" />
     <ClInclude Include="libopenmpt_stream_callbacks_file.h" />
@@ -332,8 +332,8 @@
     <ClCompile Include="..\test\test.cpp" />
     <ClCompile Include="libopenmpt_c.cpp" />
     <ClCompile Include="libopenmpt_cxx.cpp" />
+    <ClCompile Include="libopenmpt_ext.cpp" />
     <ClCompile Include="libopenmpt_impl.cpp" />
-    <ClCompile Include="libopenmpt_interactive.cpp" />
     <ClCompile Include="libopenmpt_test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
