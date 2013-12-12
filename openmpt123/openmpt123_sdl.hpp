@@ -36,7 +36,7 @@ protected:
 		}
 	}
 public:
-	sdl_stream_raii( const commandlineflags & flags, std::ostream & /*log*/ = std::cerr )
+	sdl_stream_raii( const commandlineflags & flags )
 		: write_buffers_blocking_wrapper(flags)
 		, channels(flags.channels)
 	{

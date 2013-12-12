@@ -154,7 +154,7 @@ private:
 		}
 	}
 public:
-	sndfile_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & log_ = std::cerr ) : flags(flags_), log(log_), sndfile(0) {
+	sndfile_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & log_ ) : flags(flags_), log(log_), sndfile(0) {
 		if ( flags.verbose ) {
 			find_format( "", match_print );
 			log << std::endl;
