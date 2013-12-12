@@ -21,9 +21,7 @@ private:
 	std::vector<std::int16_t> interleaved_int_buffer;
 public:
 	stdout_stream_raii() {
-		#if defined(_MSC_VER)
-			_setmode( _fileno( stdout ), _O_BINARY );
-		#endif
+		return;
 	}
 public:
 	void write( const std::vector<float*> buffers, std::size_t frames ) {

@@ -186,7 +186,7 @@ public:
 #endif
 		}
 		if ( !impl ) {
-			throw show_help_exception();
+			throw args_error_exception();
 		}
 	}
 	virtual ~file_audio_stream_raii() {
@@ -390,7 +390,7 @@ static std::string get_device_string( int device ) {
 	return str.str();
 }
 
-static void show_help( textout & log, show_help_exception & e, bool verbose ) {
+static void show_help( textout & log, bool longhelp = false, const std::string & message = std::string(), bool verbose = false ) {
 	show_info( log, verbose );
 	{
 		log << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
@@ -409,7 +409,7 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 		log << "     --ui                   Interactively play each file" << std::endl;
 		log << "     --batch                Play each file" << std::endl;
 		log << "     --render               Render each file to PCM data" << std::endl;
-		if ( !e.longhelp ) {
+		if ( !longhelp ) {
 			log << std::endl;
 			log.writeout();
 			return;
@@ -471,8 +471,8 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 
 	log << std::endl;
 
-	if ( e.message.size() > 0 ) {
-		log << e.message;
+	if ( message.size() > 0 ) {
+		log << message;
 		log << std::endl;
 	}
 	log.writeout();
@@ -1300,7 +1300,9 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 
 static void render_files( commandlineflags & flags, textout & log, write_buffers_interface & audio_stream ) {
-	std::random_shuffle( flags.filenames.begin(), flags.filenames.end() );
+	if ( flags.shuffle ) {
+		std::random_shuffle( flags.filenames.begin(), flags.filenames.end() );
+	}
 	std::vector<std::string>::iterator filename = flags.filenames.begin();
 	while ( true ) {
 		if ( filename == flags.filenames.end() ) {
@@ -1331,6 +1333,10 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 
 
 static commandlineflags parse_openmpt123( const std::vector<std::string> & args, std::ostream & log ) {
+
+	if ( args.size() <= 1 ) {
+		throw args_error_exception();
+	}
 
 	commandlineflags flags;
 
@@ -1512,7 +1518,7 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				istr >> flags.seek_target;
 				++i;
 			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == "-" ) {
-				throw show_help_exception();
+				throw args_error_exception();
 			}
 		}
 	}
@@ -1548,74 +1554,120 @@ static int wmain( int wargc, wchar_t * wargv [] ) {
 #else
 static int main( int argc, char * argv [] ) {
 #endif
-
-	#if defined(WIN32)
-
-		ConsoleCP_utf8_raii console_cp;
-
-	#endif
-
-	textout_dummy dummy_log;
-
-	#if defined(WIN32)
-		textout_console std_log( GetStdHandle( STD_ERROR_HANDLE ) );
+	std::vector<std::string> args;
+	#if defined(WIN32) && defined(UNICODE)
+		for ( int arg = 0; arg < wargc; ++arg ) {
+			args.push_back( wstring_to_utf8( wargv[arg] ) );
+		}
 	#else
-		textout_ostream std_log( std::clog );
+		args = std::vector<std::string>( argv, argv + argc );
 	#endif
+
+#if defined(WIN32)
+	ConsoleCP_utf8_raii console_cp;
+#endif
+	textout_dummy dummy_log;
+#if defined(WIN32)
+	textout_console std_out( GetStdHandle( STD_OUTPUT_HANDLE ) );
+	textout_console std_err( GetStdHandle( STD_ERROR_HANDLE ) );
+#else
+	textout_ostream std_out( std::cout );
+	textout_ostream std_err( std::clog );
+#endif
 
 	commandlineflags flags;
 
 	try {
 
-		std::vector<std::string> args;
-		
-		#if defined(WIN32) && defined(UNICODE)
-			for ( int arg = 0; arg < wargc; ++arg ) {
-				args.push_back( wstring_to_utf8( wargv[arg] ) );
-			}
-		#else
-			args = std::vector<std::string>( argv, argv + argc );
-		#endif
-		
-		std::srand( static_cast<unsigned int>( std::time( NULL ) ) );
-
-		flags = parse_openmpt123( args, dummy_log );
-
-		if ( args.size() <= 1 ) {
-			throw show_help_exception( "", false );
-		}
+		flags = parse_openmpt123( args, std::cerr );
 
 		flags.check_and_sanitize();
 
-		textout & log = flags.quiet ? *static_cast<textout*>(&dummy_log) : *static_cast<textout*>(&std_log);
+	} catch ( args_error_exception & e ) {
+		show_help( std_out );
+		return 1;
+	} catch ( show_help_exception & e ) {
+		show_help( std_out, e.longhelp, e.message, flags.verbose );
+		if ( flags.verbose ) {
+			show_credits( std_out );
+		}
+		return 0;
+	} catch ( show_help_keyboard_exception & ) {
+		show_help_keyboard( std_out );
+		return 0;
+	} catch ( show_long_version_number_exception & ) {
+		show_long_version( std_out );
+		return 0;
+	} catch ( show_version_number_exception & ) {
+		show_version( std_out );
+		return 0;
+	} catch ( show_short_version_number_exception & ) {
+		show_short_version( std_out );
+		return 0;
+	} catch ( show_credits_exception & ) {
+		show_credits( std_out );
+		return 0;
+	} catch ( show_license_exception & ) {
+		show_license( std_out );
+		return 0;
+	} catch ( silent_exit_exception & ) {
+		return 0;
+	} catch ( std::exception & e ) {
+		std_err << "error: " << e.what() << std::endl;
+		std_err.writeout();
+		return 1;
+	} catch ( ... ) {
+		std_err << "unknown error" << std::endl;
+		std_err.writeout();
+		return 1;
+	}
+
+	try {
+
+		bool stdin_can_ui = true;
+		for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+			if ( *filename == "-" ) {
+				stdin_can_ui = false;
+				break;
+			}
+		}
+
+		bool stdout_can_ui = true;
+		if ( flags.use_stdout ) {
+			stdout_can_ui = false;
+		}
+
+		// set stdin binary
+		#if defined(WIN32)
+			if ( !stdin_can_ui ) {
+				_setmode( _fileno( stdin ), _O_BINARY );
+			}
+		#endif
+
+		// set stdout binary
+		#if defined(WIN32)
+			if ( !stdout_can_ui ) {
+				_setmode( _fileno( stdout ), _O_BINARY );
+			}
+		#endif
+
+		// setup terminal
+		#if !defined(WIN32)
+			if ( flags.mode == ModeUI ) {
+				set_input_mode();
+			}
+		#endif
+		
+		textout & log = flags.quiet ? *static_cast<textout*>( &dummy_log ) : *static_cast<textout*>( stdout_can_ui ? &std_out : &std_err );
 
 		show_info( log, flags.verbose );
 
 		if ( flags.verbose ) {
-
 			log << flags;
-
 		}
 
-		#if defined(WIN32)
+		std::srand( static_cast<unsigned int>( std::time( NULL ) ) );
 
-			for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-				if ( *filename == "-" ) {
-					_setmode( _fileno( stdin ), _O_BINARY );
-					break;
-				}
-			}
-
-		#endif
-
-		#if !defined(WIN32)
-
-			if ( flags.mode == ModeUI ) {
-				set_input_mode();
-			}
-
-		#endif
-		
 		switch ( flags.mode ) {
 			case ModeInfo: {
 				void_audio_stream dummy;
@@ -1657,53 +1709,33 @@ static int main( int argc, char * argv [] ) {
 				}
 			} break;
 			case ModeNone:
-				throw show_help_exception();
 			break;
 		}
 
-	} catch ( show_help_exception & e ) {
-		show_help( std_log, e, flags.verbose );
-		if ( flags.verbose ) {
-			show_credits( std_log );
-		}
+	} catch ( args_error_exception & e ) {
+		show_help( std_out );
 		return 1;
-	} catch ( show_help_keyboard_exception & ) {
-		show_help_keyboard( std_log );
-		return 1;
-	} catch ( show_long_version_number_exception & ) {
-		show_long_version( std_log );
-		return 0;
-	} catch ( show_version_number_exception & ) {
-		show_version( std_log );
-		return 0;
-	} catch ( show_short_version_number_exception & ) {
-		show_short_version( std_log );
-		return 0;
-	} catch ( show_credits_exception & ) {
-		show_credits( std_log );
-		return 0;
-	} catch ( show_license_exception & ) {
-		show_license( std_log );
-		return 0;
 #ifdef MPT_WITH_PORTAUDIO
 	} catch ( portaudio_exception & e ) {
-		std_log << "PortAudio error: " << e.what() << std::endl;
-		std_log.writeout();
+		std_err << "PortAudio error: " << e.what() << std::endl;
+		std_err.writeout();
+		return 1;
 #endif
 #ifdef MPT_WITH_SDL
 	} catch ( sdl_exception & e ) {
-		std_log << "SDL error: " << e.what() << std::endl;
-		std_log.writeout();
+		std_err << "SDL error: " << e.what() << std::endl;
+		std_err.writeout();
+		return 1;
 #endif
 	} catch ( silent_exit_exception & ) {
 		return 0;
 	} catch ( std::exception & e ) {
-		std_log << "error: " << e.what() << std::endl;
-		std_log.writeout();
+		std_err << "error: " << e.what() << std::endl;
+		std_err.writeout();
 		return 1;
 	} catch ( ... ) {
-		std_log << "unknown error" << std::endl;
-		std_log.writeout();
+		std_err << "unknown error" << std::endl;
+		std_err.writeout();
 		return 1;
 	}
 

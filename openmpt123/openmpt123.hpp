@@ -24,6 +24,10 @@ struct show_help_exception {
 	show_help_exception( const std::string & msg = "", bool longhelp_ = true ) : message(msg), longhelp(longhelp_) { }
 };
 
+struct args_error_exception {
+	args_error_exception() { }
+};
+
 struct show_help_keyboard_exception { };
 
 #if defined(WIN32)
@@ -98,7 +102,7 @@ public:
 	virtual void write( const std::string & text ) = 0;
 	virtual void writeout() {
 		write( str() );
-		str("");
+		str(std::string());
 	}
 };
 
