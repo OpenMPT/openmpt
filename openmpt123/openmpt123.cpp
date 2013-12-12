@@ -1583,7 +1583,7 @@ static int main( int argc, char * argv [] ) {
 
 		flags.check_and_sanitize();
 
-	} catch ( args_error_exception & e ) {
+	} catch ( args_error_exception & ) {
 		show_help( std_out );
 		return 1;
 	} catch ( show_help_exception & e ) {
@@ -1712,7 +1712,7 @@ static int main( int argc, char * argv [] ) {
 			break;
 		}
 
-	} catch ( args_error_exception & e ) {
+	} catch ( args_error_exception & ) {
 		show_help( std_out );
 		return 1;
 #ifdef MPT_WITH_PORTAUDIO
