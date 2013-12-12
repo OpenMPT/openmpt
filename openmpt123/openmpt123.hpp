@@ -362,13 +362,13 @@ struct commandlineflags {
 	}
 	void check_and_sanitize() {
 		if ( filenames.size() == 0 ) {
-			throw show_help_exception();
+			throw args_error_exception();
 		}
 		if ( use_stdout && ( device != commandlineflags().device || !output_filename.empty() ) ) {
-			throw show_help_exception();
+			throw args_error_exception();
 		}
 		if ( !output_filename.empty() && ( device != commandlineflags().device || use_stdout ) ) {
-			throw show_help_exception();
+			throw args_error_exception();
 		}
 		for ( std::vector<std::string>::iterator i = filenames.begin(); i != filenames.end(); ++i ) {
 			if ( *i == "-" ) {
@@ -384,14 +384,14 @@ struct commandlineflags {
 			}
 		}
 		if ( mode == ModeUI && !canUI ) {
-			throw show_help_exception();
+			throw args_error_exception();
 		}
 		if ( show_progress && !canProgress ) {
-			throw show_help_exception();
+			throw args_error_exception();
 		}
 		switch ( mode ) {
 			case ModeNone:
-				throw show_help_exception();
+				throw args_error_exception();
 			break;
 			case ModeInfo:
 				show_ui = false;
@@ -434,7 +434,7 @@ struct commandlineflags {
 			output_extension = get_extension( output_filename );
 		}
 		if ( mode == ModeRender && output_extension.empty() ) {
-			throw show_help_exception();
+			throw args_error_exception();
 		}
 	}
 };
