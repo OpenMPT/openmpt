@@ -59,6 +59,30 @@ namespace ext {
 /**/
 
 
+LIBOPENMPT_DECLARE_EXT_INTERFACE(pattern_vis)
+
+class pattern_vis {
+
+	LIBOPENMPT_EXT_INTERFACE(pattern_vis)
+
+	enum effect_type {
+
+		effect_unknown = 0,
+		effect_general = 1,
+		effect_global = 2,
+		effect_volume = 3,
+		effect_panning = 4,
+		effect_pitch = 5
+
+	}; // enum effect_type
+
+	virtual effect_type get_pattern_row_channel_volume_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const = 0;
+
+	virtual effect_type get_pattern_row_channel_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const = 0;
+
+}; // class pattern_vis
+
+
 
 /* add stuff here */
 

@@ -89,12 +89,23 @@ struct self_xmplay_t {
 	std::size_t num_channels;
 	openmpt::settings::settings settings;
 	openmpt::module_ext * mod;
-	self_xmplay_t() : samplerate(48000), num_channels(2), settings(TEXT(SHORT_TITLE), false), mod(nullptr) {
+	openmpt::ext::pattern_vis * pattern_vis;
+	self_xmplay_t()
+		: samplerate(48000)
+		, num_channels(2)
+		, settings(TEXT(SHORT_TITLE), false)
+		, mod(nullptr)
+		, pattern_vis(nullptr)
+	{
 		settings.changed = apply_and_save_options;
 		settings.load();
 	}
+	void on_new_mod() {
+		self->pattern_vis = static_cast<openmpt::ext::pattern_vis*>( self->mod->get_interface( openmpt::ext::pattern_vis_id ) );
+	}
 	void delete_mod() {
 		if ( mod ) {
+			pattern_vis = nullptr;
 			delete mod;
 			mod = nullptr;
 		}
@@ -617,6 +628,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 		#else
 			self->mod = new openmpt::module_ext( std::ifstream( filename, std::ios_base::binary ) );
 		#endif
+		self->on_new_mod();
 		clear_current_timeinfo();
 		reset_timeinfos();
 		apply_options();
@@ -864,9 +876,22 @@ enum ColorIndex
 	col_instr,
 	col_vol,
 	col_pitch,
+	col_global,
 
 	col_max
 };
+
+static ColorIndex effect_type_to_color_index( openmpt::ext::pattern_vis::effect_type effect_type ) {
+	switch ( effect_type ) {
+		case openmpt::ext::pattern_vis::effect_unknown: return col_unknown; break;
+		case openmpt::ext::pattern_vis::effect_general: return col_text   ; break;
+		case openmpt::ext::pattern_vis::effect_global : return col_global ; break;
+		case openmpt::ext::pattern_vis::effect_volume : return col_vol    ; break;
+		case openmpt::ext::pattern_vis::effect_panning: return col_instr  ; break;
+		case openmpt::ext::pattern_vis::effect_pitch  : return col_pitch  ; break;
+		default: return col_unknown; break;
+	}
+}
 
 const struct Columns
 {
@@ -904,6 +929,15 @@ HBRUSH visbrushs[col_max];
 HFONT visfont;
 static int last_pattern = -1;
 
+static Color invert_color( Color c ) {
+	Color res;
+	res.a = c.a;
+	res.r  = 255 - c.r;
+	res.g  = 255 - c.g;
+	res.b  = 255 - c.b;
+	return res;
+}
+
 static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	xmpopenmpt_lock guard;
 	visDC = nullptr;
@@ -913,6 +947,8 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	viscolors[col_background].dw = colors[0];
 	viscolors[col_unknown].dw = colors[1];
 	viscolors[col_text].dw = colors[2];
+
+	viscolors[col_global] = invert_color( viscolors[col_background] );
 
 	const int r = viscolors[col_text].r, g = viscolors[col_text].g, b = viscolors[col_text].b;
 	viscolors[col_empty].r = (r + viscolors[col_background].r) / 2;
@@ -1090,6 +1126,14 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 					}
 					assure_width( col_string, pattern_columns[col].num_chars );
 					int color = pattern_columns[col].color;
+					if ( self->pattern_vis && ( col == 2 || col == 3 ) ) {
+						if ( col == 2 ) {
+							color = effect_type_to_color_index( self->pattern_vis->get_pattern_row_channel_volume_effect_type( pattern, row, channel ) );
+						}
+						if ( col == 3 ) {
+							color = effect_type_to_color_index( self->pattern_vis->get_pattern_row_channel_effect_type( pattern, row, channel ) );
+						}
+					}
 					switch ( col_string[0] ) {
 						case ' ':
 						case '.':
