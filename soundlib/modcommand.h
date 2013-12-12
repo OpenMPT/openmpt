@@ -100,6 +100,17 @@ enum EffectCommands
 };
 
 
+enum EffectType
+{
+	EFFECT_TYPE_NORMAL  = 0,
+	EFFECT_TYPE_GLOBAL  = 1,
+	EFFECT_TYPE_VOLUME  = 2,
+	EFFECT_TYPE_PANNING = 3,
+	EFFECT_TYPE_PITCH   = 4,
+	MAX_EFFECT_TYPE     = 5
+};
+
+
 //==============
 class ModCommand
 //==============
@@ -161,6 +172,11 @@ public:
 	// Returns true if and only if note is a valid musical note or the note entry is empty.
 	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
+
+	static EffectType GetEffectType(COMMAND cmd);
+	EffectType GetEffectType() const { return GetEffectType(command); }
+	static EffectType GetVolumeEffectType(VOLCMD volcmd);
+	EffectType GetVolumeEffectType() const { return GetVolumeEffectType(volcmd); }
 
 	// Convert a complete ModCommand item from one format to another
 	void Convert(MODTYPE fromType, MODTYPE toType);
