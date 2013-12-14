@@ -8,11 +8,11 @@
  *
  * \section toc Contents
  *
- * - \ref md_quickstart "Quick Start"
+ * - \ref quickstart "Quick Start"
  *
  * - \ref md_README "README"
  *
- * - \ref md_tests "Tests"
+ * - \ref tests "Tests"
  *
  * \subsection toc_apis APIs
  * - libopenmpt
