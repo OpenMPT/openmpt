@@ -988,7 +988,7 @@ bool CVstPlugin::SaveProgram()
 
 	if(useDefaultDir)
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS);
 	}
 
 	bool bank = (dlg.GetExtension() == MPT_PATHSTRING("fxb"));
@@ -1027,7 +1027,7 @@ bool CVstPlugin::LoadProgram()
 
 	if(useDefaultDir)
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS);
 	}
 
 	CMappedFile f;

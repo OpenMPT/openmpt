@@ -680,7 +680,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 	if(!dlg.Show(this))
 		return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_TUNING, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_TUNING);
 
 	std::wstring sLoadReport;
 
