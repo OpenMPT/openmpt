@@ -40,7 +40,9 @@ public:
 	virtual void OnOK();
 	virtual void OnCancel();
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
+
 	afx_msg void OnAddPlugin();
+	afx_msg void OnScanFolder();
 	afx_msg void OnRemovePlugin();
 	afx_msg void OnNameFilterChanged();
 	afx_msg void OnSelChanged(NMHDR *pNotifyStruct, LRESULT *result);

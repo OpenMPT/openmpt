@@ -25,11 +25,12 @@
 
 
 BEGIN_MESSAGE_MAP(CSelectPluginDlg, CDialog)
-	ON_NOTIFY(TVN_SELCHANGED,	 IDC_TREE1, OnSelChanged)
-	ON_NOTIFY(NM_DBLCLK,		 IDC_TREE1, OnSelDblClk)
-	ON_COMMAND(IDC_BUTTON1,		 OnAddPlugin)
-	ON_COMMAND(IDC_BUTTON2,		 OnRemovePlugin)
-	ON_EN_CHANGE(IDC_NAMEFILTER, OnNameFilterChanged)
+	ON_NOTIFY(TVN_SELCHANGED,		IDC_TREE1, OnSelChanged)
+	ON_NOTIFY(NM_DBLCLK,			IDC_TREE1, OnSelDblClk)
+	ON_COMMAND(IDC_BUTTON1,			OnAddPlugin)
+	ON_COMMAND(IDC_BUTTON3,			OnScanFolder)
+	ON_COMMAND(IDC_BUTTON2,			OnRemovePlugin)
+	ON_EN_CHANGE(IDC_NAMEFILTER,	OnNameFilterChanged)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
@@ -471,11 +472,11 @@ bool CSelectPluginDlg::VerifyPlug(const VSTPluginLib *plug)
 
 	for(size_t p = 0; p < CountOf(problemPlugs); p++)
 	{
-		if(problemPlugs[p].id2 == plug->pluginId2 /*&& gProblemPlugs[p].id1 == plug->dwPluginId1*/)
+		if(problemPlugs[p].id2 == plug->pluginId2 && problemPlugs[p].id1 == plug->pluginId1)
 		{
 			CString s;
 			s.Format("WARNING: This plugin has been identified as %s,\nwhich is known to have the following problem with OpenMPT:\n\n%s\n\nWould you still like to add this plugin to the library?", problemPlugs[p].name, problemPlugs[p].problem);
-			return (Reporting::Confirm(s) == cnfYes);
+			return (Reporting::Confirm(s, false, false, this) == cnfYes);
 		}
 	}
 
@@ -493,35 +494,109 @@ void CSelectPluginDlg::OnAddPlugin()
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINS));
 	if(!dlg.Show(this)) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINS, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINS);
 
 	CVstPluginManager *pManager = theApp.GetPluginManager();
-	bool bOk = false;
 
 	VSTPluginLib *plugLib = nullptr;
+	bool update = false;
+
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 		if (pManager)
 		{
-			plugLib = pManager->AddPlugin(files[counter], false);
-			if (plugLib)
+			VSTPluginLib *lib = pManager->AddPlugin(files[counter], false);
+			if(lib != nullptr)
 			{
-				bOk = true;
-				if(!VerifyPlug(plugLib))
+				update = true;
+				if(!VerifyPlug(lib))
 				{
-					pManager->RemovePlugin(plugLib);
+					pManager->RemovePlugin(lib);
+				} else
+				{
+					plugLib = lib;
 				}
 			}
 		}
 	}
-	if (bOk)
+	if(update)
 	{
 		// Force selection to last added plug.
 		UpdatePluginsList(plugLib ? plugLib->pluginId2 : 0);
 	} else
 	{
 		Reporting::Error("At least one selected file was not a valid VST Plugin.");
+	}
+}
+
+
+void CSelectPluginDlg::OnScanFolder()
+//-----------------------------------
+{
+	BrowseForFolder dlg(TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINS), "Select a folder that should be scanned for VST plugins (including sub-folders)");
+	if(!dlg.Show(this)) return;
+
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetDirectory(), DIR_PLUGINS);
+
+	CVstPluginManager *pManager = theApp.GetPluginManager();
+	VSTPluginLib *plugLib = nullptr;
+	bool update = false;
+
+	std::vector<mpt::PathString> paths(1, dlg.GetDirectory());
+	int files = 0;
+	while(!paths.empty())
+	{
+		HANDLE hFind;
+		WIN32_FIND_DATAW wfd;
+		MemsetZero(wfd);
+
+		mpt::PathString path = paths.back();
+		paths.pop_back();
+		if(!path.HasTrailingSlash()) path += MPT_PATHSTRING("\\");
+		if((hFind = FindFirstFileW((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
+		{
+			do
+			{
+				mpt::PathString fileName = path + mpt::PathString::FromNative(wfd.cFileName);
+				if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				{
+					if(wcscmp(wfd.cFileName, L"..")
+						&& wcscmp(wfd.cFileName, L"."))
+					{
+						paths.push_back(fileName);
+					}
+					continue;
+				} else if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".dll")))
+				{
+					CMainFrame::GetMainFrame()->SetHelpText(mpt::ToLocale(wfd.cFileName).c_str());
+					VSTPluginLib *lib = pManager->AddPlugin(fileName, false);
+					if(lib)
+					{
+						update = true;
+						if(!VerifyPlug(lib))
+						{
+							pManager->RemovePlugin(lib);
+						} else
+						{
+							plugLib = lib;
+							files++;
+						}
+					}
+				}
+			} while (FindNextFileW(hFind, &wfd));
+			FindClose(hFind);
+		}
+	}
+
+	if(update)
+	{
+		// Force selection to last added plug.
+		Reporting::Information(mpt::String::Print("Found %1 plugins.", files).c_str(), this);
+		UpdatePluginsList(plugLib ? plugLib->pluginId2 : 0);
+	} else
+	{
+		Reporting::Error("Could not find any valid VST plugins.");
 	}
 }
 
@@ -552,14 +627,15 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 	{
 		m_treePlugins.MoveWindow(8, 36, cx - 104, cy - 63, FALSE);
 
-		::MoveWindow(GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->m_hWnd, 8, 11, 40, 21, FALSE);
-		::MoveWindow(GetDlgItem(IDC_NAMEFILTER)->m_hWnd, 40, 8, cx - 136, 21, FALSE);
-
-		::MoveWindow(GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->m_hWnd, 8, cy - 20, cx - 22, 25, FALSE);
-		::MoveWindow(GetDlgItem(IDOK)->m_hWnd,			cx-85,	8,    75, 23, FALSE);
-		::MoveWindow(GetDlgItem(IDCANCEL)->m_hWnd,		cx-85,	39,    75, 23, FALSE);
-		::MoveWindow(GetDlgItem(IDC_BUTTON1)->m_hWnd ,	cx-85,	cy-80, 75, 23, FALSE);
-		::MoveWindow(GetDlgItem(IDC_BUTTON2)->m_hWnd,	cx-85,	cy-52, 75, 23, FALSE);
+		GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->MoveWindow(8, 11, 40, 21, FALSE);
+		GetDlgItem(IDC_NAMEFILTER)->MoveWindow(40, 8, cx - 136, 21, FALSE);
+		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(8, cy - 20, cx - 22, 25, FALSE);
+		const int rightOff = cx - 85;	// Offset of right button column
+		GetDlgItem(IDOK)->MoveWindow(		rightOff,	8,			75, 23, FALSE);
+		GetDlgItem(IDCANCEL)->MoveWindow(	rightOff,	39,			75, 23, FALSE);
+		GetDlgItem(IDC_BUTTON1)->MoveWindow(rightOff,	cy - 108,	75, 23, FALSE);
+		GetDlgItem(IDC_BUTTON3)->MoveWindow(rightOff,	cy - 80,	75, 23, FALSE);
+		GetDlgItem(IDC_BUTTON2)->MoveWindow(rightOff,	cy - 52,	75, 23, FALSE);
 		Invalidate();
 	}
 }
