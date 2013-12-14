@@ -399,6 +399,7 @@ MISC_OUTPUTS += libopenmpt.so
 MISC_OUTPUTS += bin/.docs
 MISC_OUTPUTS += bin/dist.tar
 MISC_OUTPUTS += bin/dist.mk
+MISC_OUTPUTS += bin/dist-doc.tar
 MISC_OUTPUTS += bin/svn_version_dist.h
 MISC_OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 MISC_OUTPUTS += bin/made.docs
@@ -500,14 +501,21 @@ endif
 .PHONY: dist
 dist: bin/dist.tar
 
-bin/dist.tar: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
+bin/dist.tar: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm -rf bin/dist.tar
 	cd bin/ && cp dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip ./
 	cd bin/ && cp dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
-	cd bin/ && cp dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
-	cd bin/ && tar cvf dist.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	cd bin/ && tar cvf dist.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
 	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
+
+.PHONY: dist-doc
+dist-doc: bin/dist-doc.tar
+
+bin/dist-doc.tar: bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	rm -rf bin/dist-doc.tar
+	cd bin/ && cp dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
+	cd bin/ && tar cvf dist-doc.tar libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm bin/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 
 .PHONY: bin/dist.mk
