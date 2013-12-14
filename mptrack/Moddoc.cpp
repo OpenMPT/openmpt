@@ -638,7 +638,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 			.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS));
 		if(!dlg.Show()) return FALSE;
 
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_MODS, true);
+		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_MODS);
 
 		saveFileName = dlg.GetFirstFile();
 	} else
@@ -1075,77 +1075,63 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 
 		// Find a channel to play on
 		nChn = FindAvailableChannel();
-
-		ModChannel *pChn = &m_SndFile.Chn[nChn];
+		ModChannel &chn = m_SndFile.Chn[nChn];
 		
 		// reset channel properties; in theory the chan is completely unused anyway.
-		pChn->nPos = pChn->nPosLo = 0;
-		pChn->nLength = 0;
-		pChn->dwFlags &= CHN_SAMPLEFLAGS;
-		pChn->dwFlags.reset(CHN_MUTE);
-		pChn->nGlobalVol = 64;
-		pChn->nInsVol = 64;
-		pChn->nPan = 128;
-		pChn->leftVol = pChn->rightVol = 0;
-		pChn->nROfs = pChn->nLOfs = 0;
-		pChn->nCutOff = 0x7F;
-		pChn->nResonance = 0;
-		pChn->nVolume = 256;
-		pChn->nMasterChn = 0;	// remove NNA association
-		pChn->nNewNote = static_cast<BYTE>(note);
+		chn.Reset(ModChannel::resetTotal, m_SndFile, CHANNELINDEX_INVALID);
+		chn.nMasterChn = 0;	// remove NNA association
+		chn.nNewNote = static_cast<uint8>(note);
 
 		if (nins)
 		{
 			// Set instrument
-			pChn->ResetEnvelopes();
-			m_SndFile.InstrumentChange(pChn, nins);
-			pChn->nFadeOutVol = 0x10000;	// Needed for XM files, as the nRowInstr check in NoteChange() will fail.
-		}  else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
+			chn.ResetEnvelopes();
+			m_SndFile.InstrumentChange(&chn, nins);
+			chn.nFadeOutVol = 0x10000;	// Needed for XM files, as the nRowInstr check in NoteChange() will fail.
+		} else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
 		{
 			ModSample &sample = m_SndFile.GetSample(nsmp);
-			pChn->pCurrentSample = sample.pSample;
-			pChn->pModInstrument = nullptr;
-			pChn->pModSample = &sample;
-			pChn->pSample = sample.pSample;
-			pChn->nFineTune = sample.nFineTune;
-			pChn->nC5Speed = sample.nC5Speed;
-			pChn->nPos = pChn->nPosLo = 0;
-			pChn->nLength = 0;
-			pChn->nLoopStart = sample.nLoopStart;
-			pChn->nLoopEnd = sample.nLoopEnd;
-			pChn->dwFlags = static_cast<ChannelFlags>(sample.uFlags) & (CHN_SAMPLEFLAGS & ~CHN_MUTE);
-			pChn->nPan = 128;
-			if (sample.uFlags & CHN_PANNING) pChn->nPan = sample.nPan;
-			pChn->nInsVol = sample.nGlobalVol;
-			pChn->nFadeOutVol = 0x10000;
+			chn.pCurrentSample = sample.pSample;
+			chn.pModInstrument = nullptr;
+			chn.pModSample = &sample;
+			chn.pSample = sample.pSample;
+			chn.nFineTune = sample.nFineTune;
+			chn.nC5Speed = sample.nC5Speed;
+			chn.nLoopStart = sample.nLoopStart;
+			chn.nLoopEnd = sample.nLoopEnd;
+			chn.dwFlags = static_cast<ChannelFlags>(sample.uFlags) & (CHN_SAMPLEFLAGS & ~CHN_MUTE);
+			chn.nPan = 128;
+			if (sample.uFlags & CHN_PANNING) chn.nPan = sample.nPan;
+			chn.nInsVol = sample.nGlobalVol;
+			chn.nFadeOutVol = 0x10000;
 		}
 
 		m_SndFile.NoteChange(nChn, note, false, true, true);
-		if (nVol >= 0) pChn->nVolume = nVol;
+		if (nVol >= 0) chn.nVolume = nVol;
 		
 		// Handle sample looping.
 		// Changed line to fix http://forum.openmpt.org/index.php?topic=1700.0
-		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength))
-		if ((loopStart + 16 < loopEnd) && (loopStart >= 0) && (pChn->pModSample != nullptr))
+		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pchn.nLength))
+		if ((loopStart + 16 < loopEnd) && (loopStart >= 0) && (chn.pModSample != nullptr))
 		{
-			pChn->nPos = loopStart;
-			pChn->nPosLo = 0;
-			pChn->nLoopStart = loopStart;
-			pChn->nLoopEnd = loopEnd;
-			pChn->nLength = std::min(loopEnd, pChn->pModSample->nLength);
+			chn.nPos = loopStart;
+			chn.nPosLo = 0;
+			chn.nLoopStart = loopStart;
+			chn.nLoopEnd = loopEnd;
+			chn.nLength = std::min(loopEnd, chn.pModSample->nLength);
 		}
 
 		// Handle extra-loud flag
-		pChn->dwFlags.set(CHN_EXTRALOUD, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD) && nsmp);
+		chn.dwFlags.set(CHN_EXTRALOUD, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD) && nsmp);
 
 		// Handle custom start position
-		if(sampleOffset > 0 && pChn->pModSample)
+		if(sampleOffset > 0 && chn.pModSample)
 		{
-			pChn->nPos = sampleOffset;
+			chn.nPos = sampleOffset;
 			// If start position is after loop end, set loop end to sample end so that the sample starts 
 			// playing.
-			if(pChn->nLoopEnd < sampleOffset) 
-				pChn->nLength = pChn->nLoopEnd = pChn->pModSample->nLength;
+			if(chn.nLoopEnd < sampleOffset) 
+				chn.nLength = chn.nLoopEnd = chn.pModSample->nLength;
 		}
 
 		//rewbs.vstiLive
@@ -1157,8 +1143,8 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 				// UINT nPlugin = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
 				 
 				PLUGINDEX nPlugin = 0;
-				if (pChn->pModInstrument) 
-					nPlugin = pChn->pModInstrument->nMixPlug;					// First try instrument plugin
+				if (chn.pModInstrument) 
+					nPlugin = chn.pModInstrument->nMixPlug;					// First try instrument plugin
 				if ((!nPlugin || nPlugin > MAX_MIXPLUGINS) && nCurrentChn != CHANNELINDEX_INVALID)
 					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;	// Then try channel plugin
 				
@@ -1168,7 +1154,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 
 					if(pPlugin != nullptr)
 					{
-						pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, nCurrentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], static_cast<uint16>(pChn->nVolume), MAX_BASECHANNELS);
+						pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, nCurrentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], static_cast<uint16>(chn.nVolume), MAX_BASECHANNELS);
 					}
 				}
 			}
