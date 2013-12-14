@@ -1072,21 +1072,16 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		}
 	}
 
-#if 1
-	if ( num_cols == 1 ) {
-		spaces_per_channel = 0;
-		while ( get_pattern_width( chars_per_channel, spaces_per_channel, num_cols, text_size.cx, channels ) > size.cx && chars_per_channel > 1 ) {
-			chars_per_channel -= 1;
+	if ( !self->settings.vis_allow_scroll ) {
+		if ( num_cols == 1 ) {
+			spaces_per_channel = 0;
+			while ( get_pattern_width( chars_per_channel, spaces_per_channel, num_cols, text_size.cx, channels ) > size.cx && chars_per_channel > 1 ) {
+				chars_per_channel -= 1;
+			}
+			col0_width = chars_per_channel;
+			chars_per_channel = col0_width;
 		}
-		/*
-		while ( half_chars_per_channel >= chars_per_channel * 2 + spaces_per_channel + 1 && chars_per_channel > 1 ) {
-			chars_per_channel -= 1;
-		}
-		*/
-		col0_width = chars_per_channel;
-		chars_per_channel = col0_width;
 	}
-#endif
 
 	int pattern_width = get_pattern_width( chars_per_channel, spaces_per_channel, num_cols, text_size.cx, channels );
 	int pattern_height = rows * text_size.cy;
