@@ -60,6 +60,7 @@ public:
 		repeatcount = 0;
 		interpolationfilterlength = 8;
 		ramping = -1;
+		vis_allow_scroll = 1;
 		changed = 0;
 	}
 	void load()
@@ -71,6 +72,7 @@ public:
 		read_setting( subkey, L"RepeatCount", repeatcount );
 		read_setting( subkey, L"InterpolationFilterLength", interpolationfilterlength );
 		read_setting( subkey, L"VolumeRampingStrength", ramping );
+		read_setting( subkey, L"VisAllowScroll", vis_allow_scroll );
 	}
 	void save()
 	{
@@ -80,7 +82,7 @@ public:
 		write_setting( subkey, L"SeteroSeparation_Percent", stereoseparation );
 		write_setting( subkey, L"RepeatCount", repeatcount );
 		write_setting( subkey, L"InterpolationFilterLength", interpolationfilterlength );
-		write_setting( subkey, L"VolumeRampingStrength", ramping );
+		write_setting( subkey, L"VisAllowScroll", vis_allow_scroll );
 	}
 };
 
