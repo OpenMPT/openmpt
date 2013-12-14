@@ -3,8 +3,6 @@ Tests
 =====
 
 
-## Tests
-
 libopenmpt provides some basic unit tests that check the platform for general
 sanity and do some basic internal functionality testing. The test suite
 requires a special libopenmpt build that includes file saving functionality

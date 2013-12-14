@@ -46,7 +46,7 @@
  *
  * \ref libopenmpt_cpp
  *
- * \section libopenmpt_cpp_examples Examples
+ * \section libopenmpt_cpp_examples Example
  *
  * \include libopenmpt_example_cxx.cpp
  *
