@@ -1005,6 +1005,13 @@ static BOOL WINAPI VisRender(DWORD *buf, SIZE size, DWORD flags) {
 	xmpopenmpt_lock guard;
 	return FALSE;
 }
+
+static int get_pattern_width( int chars_per_channel, int spaces_per_channel, int num_cols, int text_size, int channels )
+{
+	int pattern_width = ((chars_per_channel * channels + 4) * text_size) + (spaces_per_channel * channels + channels - (num_cols == 1 ? 1 : 2)) * (text_size / 2);
+	return pattern_width;
+}
+
 static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	xmpopenmpt_lock guard;
 	RECT rect;
@@ -1065,15 +1072,23 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		}
 	}
 
-#if 0
+#if 1
 	if ( num_cols == 1 ) {
-		col0_width = std::max<long>( 1, (long)half_chars_per_channel / 2 );
-		chars_per_channel = col0_width;
 		spaces_per_channel = 0;
+		while ( get_pattern_width( chars_per_channel, spaces_per_channel, num_cols, text_size.cx, channels ) > size.cx && chars_per_channel > 1 ) {
+			chars_per_channel -= 1;
+		}
+		/*
+		while ( half_chars_per_channel >= chars_per_channel * 2 + spaces_per_channel + 1 && chars_per_channel > 1 ) {
+			chars_per_channel -= 1;
+		}
+		*/
+		col0_width = chars_per_channel;
+		chars_per_channel = col0_width;
 	}
 #endif
 
-	int pattern_width = ((chars_per_channel * channels + 4) * text_size.cx) + (spaces_per_channel * channels + channels - (num_cols == 1 ? 1 : 2)) * (text_size.cx / 2);
+	int pattern_width = get_pattern_width( chars_per_channel, spaces_per_channel, num_cols, text_size.cx, channels );
 	int pattern_height = rows * text_size.cy;
 
 	if ( visDC == nullptr || last_pattern != pattern ) {
