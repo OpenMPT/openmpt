@@ -844,7 +844,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 #if defined( WIN32 )
 	HANDLE hStdErr = NULL;
 	COORD coord_cursor = COORD();
-	if( multiline ) {
+	if ( multiline ) {
 		log.flush();
 		hStdErr = GetStdHandle( STD_ERROR_HANDLE );
 		if ( hStdErr ) {
@@ -1142,6 +1142,37 @@ std::map<std::string,std::string> get_metadata( const Tmod & mod ) {
 	return result;
 }
 
+class set_field : public std::ostringstream {
+private:
+	std::vector<field> & fields;
+public:
+	set_field( std::vector<field> & fields, const std::string & name )
+		: fields(fields)
+	{
+		fields.push_back( name );
+	}
+	~set_field() {
+		fields.back().val = str();
+	}
+};
+
+static void show_fields( textout & log, const std::vector<field> & fields ) {
+	const std::size_t fw = 11;
+	for ( std::vector<field>::const_iterator it = fields.begin(); it != fields.end(); ++it ) {
+		std::string key = it->key;
+		std::string val = it->val;
+		if ( key.length() < fw ) {
+			key += std::string( fw - key.length(), '.' );
+		}
+		if ( key.length() > fw ) {
+			key = key.substr( 0, fw );
+		}
+		key += ": ";
+		val = prepend_lines( val, std::string( fw, ' ' ) + ": " );
+		log << key << val << std::endl;
+	}
+}
+
 template < typename Tmod >
 void render_mod_file( commandlineflags & flags, const std::string & filename, std::uint64_t filesize, Tmod & mod, textout & log, write_buffers_interface & audio_stream ) {
 
@@ -1153,9 +1184,12 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 	}
 	
 	double duration = mod.get_duration_seconds();
+
+	std::vector<field> fields;
+
 	if ( flags.filenames.size() > 1 ) {
-		log << "Playlist...: " << flags.playlist_index + 1 << "/" << flags.filenames.size() << std::endl;
-		log << "Prev/Next..: "
+		set_field( fields, "Playlist" ) << flags.playlist_index + 1 << "/" << flags.filenames.size();
+		set_field( fields, "Prev/Next" )
 		    << "'"
 		    << ( flags.playlist_index > 0 ? get_filename( flags.filenames[ flags.playlist_index - 1 ] ) : std::string() )
 		    << "'"
@@ -1165,29 +1199,36 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		    << "'"
 		    << ( flags.playlist_index + 1 < flags.filenames.size() ? get_filename( flags.filenames[ flags.playlist_index + 1 ] ) : std::string() )
 		    << "'"
-		    << std::endl;
+		   ;
 	}
 	if ( flags.verbose ) {
-		log << "Path.......: " << filename << std::endl;
+		set_field( fields, "Path" ) << filename;
 	}
 	if ( flags.show_details ) {
-		log << "Filename...: " << get_filename( filename ) << std::endl;
-		log << "Size.......: " << bytes_to_string( filesize ) << std::endl;
-		log << "Container..: " << ( mod.get_metadata( "container" ).empty() ? std::string("none") : ( mod.get_metadata( "container" ) + " (" + mod.get_metadata( "container_long" ) + ")" ) ) << std::endl;
-		log << "Type.......: " << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")" << std::endl;
-		log << "Tracker....: " << mod.get_metadata( "tracker" ) << std::endl;
+		set_field( fields, "Filename" ) << get_filename( filename );
+		set_field( fields, "Size" ) << bytes_to_string( filesize );
+		set_field( fields, "Container" ) << ( mod.get_metadata( "container" ).empty() ? std::string("none") : ( mod.get_metadata( "container" ) + " (" + mod.get_metadata( "container_long" ) + ")" ) );
+		set_field( fields, "Type" ) << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")";
+		set_field( fields, "Tracker" ) << mod.get_metadata( "tracker" );
 	}
 	if ( true ) {
-		log << "Title......: " << mod.get_metadata( "title" ) << std::endl;
-		log << "Duration...: " << seconds_to_string( duration ) << std::endl;
+		set_field( fields, "Title" ) << mod.get_metadata( "title" );
+		set_field( fields, "Duration" ) << seconds_to_string( duration );
 	}
 	if ( flags.show_details ) {
-		log << "Channels...: " << mod.get_num_channels() << std::endl;
-		log << "Orders.....: " << mod.get_num_orders() << std::endl;
-		log << "Patterns...: " << mod.get_num_patterns() << std::endl;
-		log << "Instruments: " << mod.get_num_instruments() << std::endl;
-		log << "Samples....: " << mod.get_num_samples() << std::endl;
+		set_field( fields, "Channels" ) << mod.get_num_channels();
+		set_field( fields, "Orders" ) << mod.get_num_orders();
+		set_field( fields, "Patterns" ) << mod.get_num_patterns();
+		set_field( fields, "Instruments" ) << mod.get_num_instruments();
+		set_field( fields, "Samples" ) << mod.get_num_samples();
 	}
+	if ( flags.show_message ) {
+		set_field( fields, "Message" ) << mod.get_metadata( "message" );
+	}
+
+	show_fields( log, fields );
+
+	log.writeout();
 
 	if ( flags.filenames.size() == 1 || flags.mode == ModeRender ) {
 		audio_stream.write_metadata( get_metadata( mod ) );
@@ -1195,10 +1236,6 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		audio_stream.write_updated_metadata( get_metadata( mod ) );
 	}
 
-	if ( flags.show_message ) {
-		log << "Message....: " << prepend_lines( mod.get_metadata( "message" ), "           : " ) << std::endl;
-	}
-	
 	if ( flags.mode == ModeInfo ) {
 		return;
 	}

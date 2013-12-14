@@ -90,6 +90,16 @@ public:
 
 #endif
 
+struct field {
+	std::string key;
+	std::string val;
+	field( const std::string & key )
+		: key(key)
+	{
+		return;
+	}
+};
+
 class textout : public std::ostringstream {
 public:
 	textout() {
