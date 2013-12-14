@@ -1693,8 +1693,10 @@ static int main( int argc, char * argv [] ) {
 
 		// setup terminal
 		#if !defined(WIN32)
-			if ( flags.mode == ModeUI ) {
-				set_input_mode();
+			if ( stdin_can_ui ) {
+				if ( flags.mode == ModeUI ) {
+					set_input_mode();
+				}
 			}
 		#endif
 		
