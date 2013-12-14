@@ -53,6 +53,7 @@ static const char * const license =
 
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -61,7 +62,6 @@ static const char * const license =
 #include <conio.h>
 #include <fcntl.h>
 #include <io.h>
-#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <windows.h>
@@ -71,12 +71,12 @@ static const char * const license =
 #if defined(MPT_NEEDS_THREADS)
 #include <pthread.h>
 #endif
+#include <termios.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <termios.h>
-#include <unistd.h>
 #endif
 
 #include <libopenmpt/libopenmpt.hpp>
@@ -1142,14 +1142,17 @@ std::map<std::string,std::string> get_metadata( const Tmod & mod ) {
 	return result;
 }
 
-class set_field : public std::ostringstream {
+class set_field : private std::ostringstream {
 private:
-	std::vector<field> & fields;
+	std::vector<openmpt123::field> & fields;
 public:
-	set_field( std::vector<field> & fields, const std::string & name )
+	set_field( std::vector<openmpt123::field> & fields, const std::string & name )
 		: fields(fields)
 	{
 		fields.push_back( name );
+	}
+	std::ostream & ostream() {
+		return *this;
 	}
 	~set_field() {
 		fields.back().val = str();
@@ -1188,8 +1191,8 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 	std::vector<field> fields;
 
 	if ( flags.filenames.size() > 1 ) {
-		set_field( fields, "Playlist" ) << flags.playlist_index + 1 << "/" << flags.filenames.size();
-		set_field( fields, "Prev/Next" )
+		set_field( fields, "Playlist" ).ostream() << flags.playlist_index + 1 << "/" << flags.filenames.size();
+		set_field( fields, "Prev/Next" ).ostream()
 		    << "'"
 		    << ( flags.playlist_index > 0 ? get_filename( flags.filenames[ flags.playlist_index - 1 ] ) : std::string() )
 		    << "'"
@@ -1202,28 +1205,28 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		   ;
 	}
 	if ( flags.verbose ) {
-		set_field( fields, "Path" ) << filename;
+		set_field( fields, "Path" ).ostream() << filename;
 	}
 	if ( flags.show_details ) {
-		set_field( fields, "Filename" ) << get_filename( filename );
-		set_field( fields, "Size" ) << bytes_to_string( filesize );
-		set_field( fields, "Container" ) << ( mod.get_metadata( "container" ).empty() ? std::string("none") : ( mod.get_metadata( "container" ) + " (" + mod.get_metadata( "container_long" ) + ")" ) );
-		set_field( fields, "Type" ) << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")";
-		set_field( fields, "Tracker" ) << mod.get_metadata( "tracker" );
+		set_field( fields, "Filename" ).ostream() << get_filename( filename );
+		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
+		set_field( fields, "Container" ).ostream() << ( mod.get_metadata( "container" ).empty() ? std::string("none") : ( mod.get_metadata( "container" ) + " (" + mod.get_metadata( "container_long" ) + ")" ) );
+		set_field( fields, "Type" ).ostream() << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")";
+		set_field( fields, "Tracker" ).ostream() << mod.get_metadata( "tracker" );
 	}
 	if ( true ) {
-		set_field( fields, "Title" ) << mod.get_metadata( "title" );
-		set_field( fields, "Duration" ) << seconds_to_string( duration );
+		set_field( fields, "Title" ).ostream() << mod.get_metadata( "title" );
+		set_field( fields, "Duration" ).ostream() << seconds_to_string( duration );
 	}
 	if ( flags.show_details ) {
-		set_field( fields, "Channels" ) << mod.get_num_channels();
-		set_field( fields, "Orders" ) << mod.get_num_orders();
-		set_field( fields, "Patterns" ) << mod.get_num_patterns();
-		set_field( fields, "Instruments" ) << mod.get_num_instruments();
-		set_field( fields, "Samples" ) << mod.get_num_samples();
+		set_field( fields, "Channels" ).ostream() << mod.get_num_channels();
+		set_field( fields, "Orders" ).ostream() << mod.get_num_orders();
+		set_field( fields, "Patterns" ).ostream() << mod.get_num_patterns();
+		set_field( fields, "Instruments" ).ostream() << mod.get_num_instruments();
+		set_field( fields, "Samples" ).ostream() << mod.get_num_samples();
 	}
 	if ( flags.show_message ) {
-		set_field( fields, "Message" ) << mod.get_metadata( "message" );
+		set_field( fields, "Message" ).ostream() << mod.get_metadata( "message" );
 	}
 
 	show_fields( log, fields );
