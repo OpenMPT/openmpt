@@ -16,7 +16,7 @@
 
 #ifndef NO_VST
 
-BEGIN_MESSAGE_MAP(COwnerVstEditor, CDialog)
+BEGIN_MESSAGE_MAP(COwnerVstEditor, CAbstractVstEditor)
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
