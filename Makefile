@@ -500,16 +500,14 @@ endif
 .PHONY: dist
 dist: bin/dist.tar
 
-bin/dist.tar: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
+bin/dist.tar: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm -rf bin/dist.tar
-	cd bin/ && cp dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip ./
-	cd bin/ && cp dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip ./
-	cd bin/ && cp dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
+	cd bin/ && cp dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip ./
+	cd bin/ && cp dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
 	cd bin/ && cp dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
-	cd bin/ && tar cvf dist.tar OpenMPT-src-$(DIST_OPENMPT_VERSION).zip libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
-	rm bin/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip
-	rm bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip
-	rm bin/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	cd bin/ && tar cvf dist.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
+	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm bin/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 
 .PHONY: bin/dist.mk
@@ -536,56 +534,56 @@ bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar: docs
 	cp -Rv bin/docs/html bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs
 	cd bin/dist/ && tar cv libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
 
-.PHONY: bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
-bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_version_dist.h
+.PHONY: bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
+bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_version_dist.h
 	mkdir -p bin/dist
-	rm -rf bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
-	mkdir -p bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
-	mkdir -p bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include
-	svn export ./LICENSE         bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/LICENSE
-	svn export ./README.md       bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/README.md
-	svn export ./TODO            bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/TODO
-	svn export ./Makefile        bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/Makefile
-	svn export ./bin             bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/bin
-	svn export ./build           bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/build
-	svn export ./common          bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/common
-	svn export ./soundlib        bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/soundlib
-	svn export ./test            bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/test
-	svn export ./libopenmpt      bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/libopenmpt
-	svn export ./openmpt123      bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/openmpt123
-	svn export ./include/miniz   bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/miniz
-	svn export ./include/modplug bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/modplug
-	cp bin/dist.mk bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
-	cp bin/svn_version_dist.h bin/dist/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
-	cd bin/dist/ && tar cv libopenmpt-src-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).tar
+	rm -rf bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include
+	svn export ./LICENSE         bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE
+	svn export ./README.md       bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md
+	svn export ./TODO            bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/TODO
+	svn export ./Makefile        bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile
+	svn export ./bin             bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin
+	svn export ./build           bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build
+	svn export ./common          bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common
+	svn export ./soundlib        bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib
+	svn export ./test            bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test
+	svn export ./libopenmpt      bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt
+	svn export ./openmpt123      bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
+	svn export ./include/miniz   bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
+	svn export ./include/modplug bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
+	cp bin/dist.mk bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
+	cp bin/svn_version_dist.h bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
+	cd bin/dist/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
 
-.PHONY: bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip
-bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip: bin/dist.mk bin/svn_version_dist.h
+.PHONY: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
+bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip: bin/dist.mk bin/svn_version_dist.h
 	mkdir -p bin/dist-zip
-	rm -rf bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
-	mkdir -p bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)
-	mkdir -p bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include
-	svn export ./LICENSE               bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/LICENSE               --native-eol CRLF
-	svn export ./README.md             bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/README.md             --native-eol CRLF
-	svn export ./TODO                  bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/TODO                  --native-eol CRLF
-	svn export ./Makefile              bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/Makefile              --native-eol CRLF
-	svn export ./bin                   bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/bin                   --native-eol CRLF
-	svn export ./build                 bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/build                 --native-eol CRLF
-	svn export ./common                bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/common                --native-eol CRLF
-	svn export ./soundlib              bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/soundlib              --native-eol CRLF
-	svn export ./test                  bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/test                  --native-eol CRLF
-	svn export ./libopenmpt            bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/libopenmpt            --native-eol CRLF
-	svn export ./openmpt123            bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/openmpt123            --native-eol CRLF
-	svn export ./include/miniz         bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/miniz         --native-eol CRLF
-	svn export ./include/flac          bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/flac          --native-eol CRLF
-	svn export ./include/portaudio     bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/portaudio     --native-eol CRLF
-	svn export ./include/modplug       bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/modplug       --native-eol CRLF
-	svn export ./include/foobar2000sdk bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/foobar2000sdk --native-eol CRLF
-	svn export ./include/winamp        bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/winamp        --native-eol CRLF
-	svn export ./include/xmplay        bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/include/xmplay        --native-eol CRLF
-	cp bin/dist.mk bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
-	cp bin/svn_version_dist.h bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
-	cd bin/dist-zip/libopenmpt-src-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-src-$(DIST_LIBOPENMPT_VERSION).zip --compression-method deflate -9 *
+	rm -rf bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include
+	svn export ./LICENSE               bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE               --native-eol CRLF
+	svn export ./README.md             bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md             --native-eol CRLF
+	svn export ./TODO                  bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/TODO                  --native-eol CRLF
+	svn export ./Makefile              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile              --native-eol CRLF
+	svn export ./bin                   bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin                   --native-eol CRLF
+	svn export ./build                 bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build                 --native-eol CRLF
+	svn export ./common                bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common                --native-eol CRLF
+	svn export ./soundlib              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib              --native-eol CRLF
+	svn export ./test                  bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test                  --native-eol CRLF
+	svn export ./libopenmpt            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt            --native-eol CRLF
+	svn export ./openmpt123            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123            --native-eol CRLF
+	svn export ./include/miniz         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz         --native-eol CRLF
+	svn export ./include/flac          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/flac          --native-eol CRLF
+	svn export ./include/portaudio     bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/portaudio     --native-eol CRLF
+	svn export ./include/modplug       bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug       --native-eol CRLF
+	svn export ./include/foobar2000sdk bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/foobar2000sdk --native-eol CRLF
+	svn export ./include/winamp        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/winamp        --native-eol CRLF
+	svn export ./include/xmplay        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/xmplay        --native-eol CRLF
+	cp bin/dist.mk bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
+	cp bin/svn_version_dist.h bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
+	cd bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip --compression-method deflate -9 *
 
 .PHONY: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip
 bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip: bin/svn_version_dist.h
