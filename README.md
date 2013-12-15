@@ -123,6 +123,18 @@ How to compile
     `make DYNLINK=0` or similar. Cross compiling or different compiler would
     best be implemented via new `Makefile.config.*` files.
 
+    The `Makefile` also supports building doxygen documentation by using
+
+        make doc
+
+    Binaries and documentation can be installed systen-wide with
+
+        make PREFIX=/yourprefix install
+        make PREFIX=/yourprefix install-doc
+
+    `PREFIX` defaults to `/usr/local`. A `DESTDIR=` parameter is also
+    supported.
+
 
 
 Coding conventions
