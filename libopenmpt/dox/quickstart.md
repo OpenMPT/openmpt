@@ -11,7 +11,9 @@ Quick Start {#quickstart}
     make TEST=1 check
     make clean
     make
+    make doc
     sudo make install
+    sudo make install-doc
     openmpt123 $SOMEMODULE
 
 ### Windows

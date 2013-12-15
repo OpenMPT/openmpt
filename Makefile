@@ -387,9 +387,6 @@ ifeq ($(MPT_WITH_HELP2MAN),1)
 OUTPUTS += bin/openmpt123.1
 endif
 endif
-ifeq ($(MPT_WITH_DOXYGEN),1)
-OUTPUTS += docs
-endif
 endif
 ifeq ($(SHARED_SONAME),1)
 LIBOPENMPT_LDFLAGS += -Wl,-soname,$(LIBOPENMPT_SONAME)
@@ -415,6 +412,9 @@ all: $(OUTPUTS)
 
 .PHONY: docs
 docs: bin/made.docs
+
+.PHONY: doc
+doc: bin/made.docs
 
 bin/made.docs:
 	$(VERYSILENT)mkdir -p bin/docs
@@ -483,6 +483,9 @@ endif
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c.c
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c_mem.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c_mem.c
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_cxx.cpp $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_cxx.cpp
+
+.PHONY: install-doc
+install-doc: bin/made.docs
 ifeq ($(MPT_WITH_DOXYGEN),1)
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/html/
 	$(INSTALL_DATA_DIR) bin/docs/html $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/html
