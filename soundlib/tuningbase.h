@@ -175,7 +175,7 @@ public:
 	bool IsValidNote(const NOTEINDEXTYPE n) const {return (n >= GetValidityRange().first && n <= GetValidityRange().second);}
 
 	//Checking that step distances can be presented with
-	//value range of STEPINDEXTYPE with given finestepcount ja validityrange.
+	//value range of STEPINDEXTYPE with given finestepcount and validityrange.
 	bool IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp);
 	
 	virtual const char* GetTuningTypeDescription() const;
@@ -301,9 +301,13 @@ inline void CTuningBase::SetName(const std::string& s)
 
 
 inline bool CTuningBase::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vrp)
-//------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 {
-	if(vrp.first == STEPINDEXTYPE_MIN && vrp.second == STEPINDEXTYPE_MAX) return true;
+	{ // avoid integer overload
+		//if(vrp.first == STEPINDEXTYPE_MIN && vrp.second == STEPINDEXTYPE_MAX) return true;
+		ASSERT(NOTEINDEXTYPE_MIN / 2 < vrp.first && vrp.second < NOTEINDEXTYPE_MAX / 2);
+		if(NOTEINDEXTYPE_MIN / 2 >= vrp.first || vrp.second >= NOTEINDEXTYPE_MAX / 2) return true;
+	}
 	if(fs > static_cast<USTEPINDEXTYPE>(STEPINDEXTYPE_MAX) / (vrp.second - vrp.first + 1)) return false;
 	else return true;
 }
