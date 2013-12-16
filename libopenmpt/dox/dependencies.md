@@ -3,6 +3,9 @@ Dependencies {#dependencies}
 ============
 
 
+Dependencies
+------------
+
 ### libopenmpt
 
  *  Supported compilers for building libopenmpt:
