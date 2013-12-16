@@ -462,9 +462,10 @@ public:
 		onlyVerifyHeader	= 0x00,
 		loadPatternData		= 0x01,	// If unset, advise loaders to not process any pattern data (if possible)
 		loadSampleData		= 0x02,	// If unset, advise loaders to not process any sample data (if possible)
+		loadPluginData		= 0x04,	// If unset, plugins are not instanciated.
 		// Shortcuts
-		loadCompleteModule	= loadSampleData | loadPatternData,
-		loadNoPatternData	= loadSampleData,
+		loadCompleteModule	= loadSampleData | loadPatternData | loadPluginData,
+		loadNoPatternOrPluginData	= loadSampleData,
 	};
 
 #ifdef MODPLUG_TRACKER

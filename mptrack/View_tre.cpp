@@ -340,7 +340,7 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 				}
 				if(m_SongFile != nullptr)
 				{
-					if(!m_SongFile->Create(file, CSoundFile::loadNoPatternData, nullptr))
+					if(!m_SongFile->Create(file, CSoundFile::loadNoPatternOrPluginData, nullptr))
 					{
 						return false;
 					}
