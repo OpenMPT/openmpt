@@ -766,18 +766,9 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	{
 		if (ChnSettings[ich].nVolume > 64) ChnSettings[ich].nVolume = 64;
 		if (ChnSettings[ich].nPan > 256) ChnSettings[ich].nPan = 128;
-		Chn[ich].nPan = ChnSettings[ich].nPan;
-		Chn[ich].nGlobalVol = ChnSettings[ich].nVolume;
-		Chn[ich].dwFlags = ChnSettings[ich].dwFlags;
-		Chn[ich].nVolume = 256;
-		Chn[ich].nCutOff = 0x7F;
-		Chn[ich].nEFxSpeed = 0;
-		//IT compatibility 15. Retrigger
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
-		{
-			Chn[ich].nRetrigParam = Chn[ich].nRetrigCount = 1;
-		}
+		Chn[ich].Reset(ModChannel::resetTotal, *this, ich);
 	}
+
 	// Checking samples
 	ModSample *pSmp = Samples;
 	for(SAMPLEINDEX nSmp = 0; nSmp < MAX_SAMPLES; nSmp++, pSmp++)
@@ -836,8 +827,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	std::vector<PLUGINDEX> notFoundIDs;
 
 #ifndef NO_VST
-	// Load plugins only when m_pModDoc is valid.  (can be invalid for example when examining module samples in treeview.
-	if (gpMixPluginCreateProc && GetpModDoc() != nullptr)
+	if (gpMixPluginCreateProc && (loadFlags & loadPluginData))
 	{
 		for(PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 		{
@@ -847,15 +837,15 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				if (m_MixPlugins[iPlug].pMixPlugin)
 				{
 					// plugin has been found
-					m_MixPlugins[iPlug].pMixPlugin->RestoreAllParameters(m_MixPlugins[iPlug].defaultProgram); //rewbs.plugDefaultProgram: added param
-				}
-				else
+					m_MixPlugins[iPlug].pMixPlugin->RestoreAllParameters(m_MixPlugins[iPlug].defaultProgram);
+				} else
 				{
 					// plugin not found - add to list
 					bool found = false;
 					for(std::vector<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 					{
-						if(m_MixPlugins[*i].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2)
+						if(m_MixPlugins[*i].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2
+							&& m_MixPlugins[*i].Info.dwPluginId1 == m_MixPlugins[iPlug].Info.dwPluginId1)
 						{
 							found = true;
 							break;
@@ -873,7 +863,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	// Display a nice message so the user sees what plugins are missing
+	// Display a nice message so the user sees which plugins are missing
 	// TODO: Use IDD_MODLOADING_WARNINGS dialog (NON-MODAL!) to display all warnings that are encountered when loading a module.
 	if(!notFoundIDs.empty())
 	{

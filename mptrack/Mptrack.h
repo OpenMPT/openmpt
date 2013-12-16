@@ -48,10 +48,24 @@ struct MIDILIBSTRUCT
 //////////////////////////////////////////////////////////////////////////
 // Dragon Droppings
 
+enum DragonDropType
+{
+	DRAGONDROP_NOTHING=0,	// |------< Drop Type >-------------|--< dwDropItem >---|--< lDropParam >---|
+	DRAGONDROP_DLS,			// | Instrument from a DLS bank     |     DLS Bank #    |   DLS Instrument  |
+	DRAGONDROP_SAMPLE,		// | Sample from a song             |     Sample #      |       NULL        |
+	DRAGONDROP_INSTRUMENT,	// | Instrument from a song         |     Instrument #  |       NULL        |
+	DRAGONDROP_SOUNDFILE,	// | File from instrument library   |        ?          |     File Name     |
+	DRAGONDROP_MIDIINSTR,	// | File from midi library         | Midi Program/Perc |     File Name     |
+	DRAGONDROP_PATTERN,		// | Pattern from a song            |      Pattern #    |       NULL        |
+	DRAGONDROP_ORDER,		// | Pattern index in a song        |       Order #     |       NULL        |
+	DRAGONDROP_SONG,		// | Song file (mod/s3m/xm/it)      |       0           |     File Name     |
+	DRAGONDROP_SEQUENCE		// | Sequence (a set of orders)     |    Sequence #     |       NULL        |
+};
+
 struct DRAGONDROP
 {
 	CModDoc *pModDoc;
-	DWORD dwDropType;
+	DragonDropType dwDropType;
 	DWORD dwDropItem;
 	LPARAM lDropParam;
 
@@ -65,19 +79,6 @@ struct DRAGONDROP
 		}
 		return *pPath;
 	}
-};
-
-enum {
-	DRAGONDROP_NOTHING=0,	// |------< Drop Type >-------------|--< dwDropItem >---|--< lDropParam >---|
-	DRAGONDROP_DLS,			// | Instrument from a DLS bank		|	  DLS Bank #	|	DLS Instrument	|
-	DRAGONDROP_SAMPLE,		// | Sample from a song				|     Sample #		|	    NULL		|
-	DRAGONDROP_INSTRUMENT,	// | Instrument from a song			|	  Instrument #	|	    NULL		|
-	DRAGONDROP_SOUNDFILE,	// | File from instrument library	|		?			|	pszFileName		|
-	DRAGONDROP_MIDIINSTR,	// | File from midi library			| Midi Program/Perc	|	pszFileName		|
-	DRAGONDROP_PATTERN,		// | Pattern from a song			|      Pattern #    |       NULL        |
-	DRAGONDROP_ORDER,		// | Pattern index in a song		|       Order #     |       NULL        |
-	DRAGONDROP_SONG,		// | Song file (mod/s3m/xm/it)		|		0			|	pszFileName		|
-	DRAGONDROP_SEQUENCE		// | Sequence (a set of orders)		|    Sequence #     |       NULL        |
 };
 
 
@@ -232,7 +233,7 @@ public:
 	static bool OpenDirectory(const mpt::PathString &directory) { return OpenURL(directory); };
 
 	int GetOpenDocumentCount() const;
-	std::vector<CModDoc *>GetOpenDocuments() const;
+	std::vector<CModDoc *> GetOpenDocuments() const;
 
 public:
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
