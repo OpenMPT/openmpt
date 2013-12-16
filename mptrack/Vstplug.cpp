@@ -433,7 +433,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 	// (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec)) - DEPRECATED in VST 2.4
 	case audioMasterGetChunkFile:
 #ifdef MODPLUG_TRACKER
-		if(pVstPlugin)
+		if(pVstPlugin && pVstPlugin->GetModDoc())
 		{
 			strcpy(ptr, pVstPlugin->GetModDoc()->GetPathNameMpt().ToLocale().c_str());
 			return 1;

@@ -25,10 +25,10 @@
 
 static const struct ColorDescriptions
 {
-	char *name;
+	const char *name;
 	int previewImage;
 	uint32 colorIndex1, colorIndex2, colorIndex3;
-	char *descText1, *descText2, *descText3;
+	const char *descText1, *descText2, *descText3;
 } colorDefs[] =
 {
 	{"Pattern Editor",	0,	MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT, "Background:", "Foreground:", "Highlighted:"},
@@ -550,7 +550,7 @@ END_MESSAGE_MAP()
 static const struct GeneralOptionsDescriptions
 {
 	uint32 flag;
-	char *name, *description;
+	const char *name, *description;
 } generalOptionsList[] =
 {
 	{PATTERN_PLAYNEWNOTE,	"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
