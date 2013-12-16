@@ -12,6 +12,7 @@
 #include "MIDIMapping.h"
 #include "../soundlib/MIDIEvents.h"
 #include "Mainfrm.h"
+#include "../soundlib/FileReader.h"
 
 
 std::string CMIDIMappingDirective::ToString() const
@@ -64,7 +65,7 @@ void CMIDIMapper::Serialize(FILE* f) const
 		}
 		else temp8 |= (2 << 6);
 
-		fwrite(&temp8, 1, sizeof(temp8), f);	
+		fwrite(&temp8, 1, sizeof(temp8), f);
 		fwrite(&temp16, 1, sizeof(temp16), f);
 		temp8 = citer->GetPlugIndex();
 		fwrite(&temp8, 1, sizeof(temp8), f);
@@ -73,37 +74,35 @@ void CMIDIMapper::Serialize(FILE* f) const
 }
 
 
-bool CMIDIMapper::Deserialize(const char *ptr, const size_t size)
-//---------------------------------------------------------------
+bool CMIDIMapper::Deserialize(FileReader &file)
+//---------------------------------------------
 {
 	m_Directives.clear();
-	const char* endptr = ptr + size;
-	while(ptr + 5 <= endptr)
+	while(file.AreBytesLeft())
 	{
-		uint8 i8 = 0;
-		uint16 i16 = 0;
-		uint32 i32 = 0;
-		memcpy(&i8, ptr, 1); ptr++;
-		BYTE psize = 0;
+		uint8 i8 = file.ReadUint8();
+		uint8 psize = 0;
+		// Determine size of this event (depends on size of plugin parameter index)
 		switch(i8 >> 6)
 		{
-		case 0: psize = 5; break;
-		case 1: psize = 6; break;
-		case 2: psize = 8; break;
-		case 3: default: psize = 12; break;
+		case 0: psize = 4; break;
+		case 1: psize = 5; break;
+		case 2: psize = 7; break;
+		case 3: default: psize = 11; break;
 		}
 
-		if(ptr + psize - 1 > endptr) return true;
-		if(((i8 >> 2) & 7) != 0) {ptr += psize - 1; continue;} //Skipping unrecognised mapping types.
+		if(!file.CanRead(psize)) return true;
+		if(((i8 >> 2) & 7) != 0) { file.Skip(psize); continue;} //Skipping unrecognised mapping types.
 
 		CMIDIMappingDirective s;
 		s.SetActive((i8 & 1) != 0);
 		s.SetCaptureMIDI((i8 & (1 << 1)) != 0);
 		s.SetAllowPatternEdit((i8 & (1 << 5)) != 0);
-		memcpy(&i16, ptr, 2); ptr += 2; //Channel, event, MIDIbyte1.
-		memcpy(&i8, ptr, 1); ptr++;		//Plugindex
-		const BYTE remainingbytes = psize - 4;
-		memcpy(&i32, ptr, MIN(4, remainingbytes)); ptr += remainingbytes;
+		uint16 i16 = file.ReadUint16LE();	//Channel, event, MIDIbyte1.
+		i8 = file.ReadUint8();		//Plugindex
+		uint32 i32;
+		file.ReadStructPartial(i32, psize - 3);
+		SwapBytesLE(i32);
 
 		s.SetChannel(((i16 & 1) != 0) ? 0 : 1 + ((i16 >> 1) & 0xF));
 		s.SetEvent(static_cast<BYTE>((i16 >> 5) & 0xF));

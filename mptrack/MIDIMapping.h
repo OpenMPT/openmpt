@@ -72,6 +72,8 @@ private:
 };
 
 class CSoundFile;
+class FileReader;
+
 inline bool operator<(const CMIDIMappingDirective& a, const CMIDIMappingDirective& b) {return a.GetController() < b.GetController();}
 inline bool operator<(const CMIDIMappingDirective& d, const BYTE& ctrlVal) {return d.GetController() < ctrlVal;}
 inline bool operator<(const BYTE& ctrlVal, const CMIDIMappingDirective& d) {return ctrlVal < d.GetController();}
@@ -111,7 +113,7 @@ public:
 
 	size_t GetSerializationSize() const;
 	void Serialize(FILE* f) const;
-	bool Deserialize(const char *ptr, const size_t size); //Return false if succesful, true otherwise.
+	bool Deserialize(FileReader &file); //Return false if succesful, true otherwise.
 
 	bool AreOrderEqual(const size_t a, const size_t b) {return !(m_Directives[a] < m_Directives[b] || m_Directives[b] < m_Directives[a]);}
 
