@@ -1,3 +1,70 @@
+#
+# libopenmpt and openmpt123 GNU Makefile
+#
+# Authors: Joern Heusipp
+#          OpenMPT Devs
+# 
+# The OpenMPT source code is released under the BSD license.
+# Read LICENSE for more details.
+#
+
+#
+# Supported parameters:
+#
+#
+# Build configuration (provide on each `make` invocation):
+#
+#  CONFIG=[gcc|clang|mingw64-win32|mingw64-win64] (default: CONFIG=)
+#
+#  Build configurations can override or change defaults of other build otions.
+#  See below and in `build/make/` for details.
+#
+#
+# Compiler options (provide on each `make` invocation):
+#
+#  CPPFLAGS
+#  CXXFLAGS
+#  CFLAGS
+#  LDFLAGS
+#  ARFLAGS
+#
+#
+# Build flags (provide on each `make` invocation) (defaults are shown):
+#
+#  DYNLINK=1        Dynamically link examples and openmpt123 against libopenmpt
+#  SHARED_LIB=1     Build shared library
+#  STATIC_LIB=1     Build static library
+#  EXAMPLES=1       Build examples
+#  OPENMPT123=1     Build openmpt123
+#  SHARED_SONAME=1  Set SONAME of shared library
+#  TEST=0           Build libopenmpt in test mode
+#
+#
+# Install options (provide on each `make install` invocation)
+#
+#  PREFIX   (e.g.: PREFIX=$HOME/opt, default: PREFIX=/usr/local)
+#  DESTDIR  (e.g.: DESTDIR=bin/dest, default: DESTDIR=)
+#
+#
+# Verbosity:
+#
+#  QUIET=[0,1]      (default: QUIET=0)
+#  VERBOSE=[0,1,2]  (default: VERBOSE=0)
+#
+#
+# Supported targets:
+#
+#     make clean
+#     make [all]
+#     make doc
+#     make TEST=1 check
+#     make dist
+#     make dist-doc
+#     make install
+#     make install-doc
+#
+
+
 
 INFO       = @echo
 SILENT     = @
@@ -34,14 +101,6 @@ OPENMPT123=1
 SHARED_SONAME=1
 
 
-# version
-
-LIBOPENMPT_VERSION_MAJOR=0
-LIBOPENMPT_VERSION_MINOR=1
-
-LIBOPENMPT_SONAME=libopenmpt.so.0
-
-
 # get commandline or defaults
 
 CPPFLAGS := $(CPPFLAGS)
@@ -60,6 +119,14 @@ endif
 #ifeq ($(DESTDIR),)
 #DESTDIR := bin/dest
 #endif
+
+
+# version
+
+LIBOPENMPT_VERSION_MAJOR=0
+LIBOPENMPT_VERSION_MINOR=1
+
+LIBOPENMPT_SONAME=libopenmpt.so.0
 
 
 # host setup
