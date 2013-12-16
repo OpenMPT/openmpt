@@ -14,12 +14,12 @@
   @{
 */
 
-/*! libopenmpt major version number */
+/*! \brief libopenmpt major version number */
 #define OPENMPT_API_VERSION_MAJOR 0
-/*! libopenmpt minor version number */
+/*! \brief libopenmpt minor version number */
 #define OPENMPT_API_VERSION_MINOR 1
 
-/*! libopenmpt API version number */
+/*! \brief libopenmpt API version number */
 #define OPENMPT_API_VERSION ((OPENMPT_API_VERSION_MAJOR<<24)|(OPENMPT_API_VERSION_MINOR<<16))
 
 #define OPENMPT_API_VERSION_HELPER_STRINGIZE(x) #x
