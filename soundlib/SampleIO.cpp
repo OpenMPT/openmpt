@@ -323,7 +323,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		if(bytesRead)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
-			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(0), uint32(64)));
+			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(1), uint32(64)));
 		}
 	}
 
@@ -343,7 +343,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		if(bytesRead)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
-			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(0), uint32(64)));
+			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(1), uint32(64)));
 		}
 	}
 
@@ -363,7 +363,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		if(bytesRead)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
-			sample.nGlobalVol = Util::Round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 0.0f, 64.0f));
+			sample.nGlobalVol = Util::Round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 1.0f, 64.0f));
 		}
 	}
 
