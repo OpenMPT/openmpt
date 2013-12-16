@@ -378,7 +378,7 @@ double module_impl::could_open_propability( std::istream & stream, double effort
 			sndFile->Destroy();
 			return 1.0;
 		} else if ( effort >= 0.6 ) {
-			if ( !sndFile->Create( FileReader( &stream ), CSoundFile::loadNoPatternData ) ) {
+			if ( !sndFile->Create( FileReader( &stream ), CSoundFile::loadNoPatternOrPluginData ) ) {
 				return 0.0;
 			}
 			sndFile->Destroy();
