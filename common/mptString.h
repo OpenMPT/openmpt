@@ -45,6 +45,7 @@ std::string MPT_PRINTF_FUNC(1,2) Format(const char * format, ...);
 
 // Remove whitespace at start of string
 static inline std::string LTrim(std::string str, const std::string &whitespace = " \n\r\t")
+//-----------------------------------------------------------------------------------------
 {
 	std::string::size_type pos = str.find_first_not_of(whitespace);
 	if(pos != std::string::npos)
@@ -72,6 +73,7 @@ static inline std::wstring LTrim(std::wstring str, const std::wstring &whitespac
 
 // Remove whitespace at end of string
 static inline std::string RTrim(std::string str, const std::string &whitespace = " \n\r\t")
+//-----------------------------------------------------------------------------------------
 {
 	std::string::size_type pos = str.find_last_not_of(whitespace);
 	if(pos != std::string::npos)
@@ -99,6 +101,7 @@ static inline std::wstring RTrim(std::wstring str, const std::wstring &whitespac
 
 // Remove whitespace at start and end of string
 static inline std::string Trim(std::string str, const std::string &whitespace = " \n\r\t")
+//----------------------------------------------------------------------------------------
 {
 	return RTrim(LTrim(str, whitespace), whitespace);
 }
@@ -109,6 +112,7 @@ static inline std::wstring Trim(std::wstring str, const std::wstring &whitespace
 
 
 static inline std::string Replace(std::string str, const std::string &oldStr, const std::string &newStr)
+//------------------------------------------------------------------------------------------------------
 {
 	std::size_t pos = 0;
 	while((pos = str.find(oldStr, pos)) != std::string::npos)
@@ -138,6 +142,9 @@ static inline std::wstring Replace(std::wstring str, const std::wstring &oldStr,
 static inline std::size_t strnlen(const char *str, std::size_t n)
 //---------------------------------------------------------------
 {
+#if MPT_COMPILER_MSVC
+	return ::strnlen(str, n);
+#else
 	if(n >= SIZE_MAX)
 	{
 		return std::strlen(str);
@@ -150,10 +157,12 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 		}
 	}
 	return n;
+#endif
 }
 
 
 static inline int strnicmp(const char *a, const char *b, size_t count)
+//--------------------------------------------------------------------
 {
 	#if MPT_COMPILER_MSVC
 		return _strnicmp(a, b, count);

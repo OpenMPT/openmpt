@@ -639,7 +639,10 @@ const uint32 FineLinearSlideDownTable[16] =
 };
 
 
-const uint32 LinearSlideUpTable[256] = 
+// floor(65536 * 2**(n/192))
+// 192 = 16 finetune steps for 12 notes
+// Table content is in 16.16 format
+const uint32 LinearSlideUpTable[256] =
 {
 	65536, 65773, 66010, 66249, 66489, 66729, 66971, 67213, 
 	67456, 67700, 67945, 68190, 68437, 68685, 68933, 69182, 
@@ -676,8 +679,10 @@ const uint32 LinearSlideUpTable[256] =
 };
 
 
-
-const uint32 LinearSlideDownTable[256] = 
+// floor(65536 * 2**(-n/192))
+// 192 = 16 finetune steps for 12 notes
+// Table content is in 16.16 format
+const uint32 LinearSlideDownTable[256] =
 {
 	65536, 65299, 65064, 64830, 64596, 64363, 64131, 63900, 
 	63670, 63440, 63212, 62984, 62757, 62531, 62305, 62081, 
@@ -824,8 +829,6 @@ const int16 CResampler::FastSincTable[256*4] =
 
 
 
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -871,7 +874,6 @@ static void getsinc(SINC_TYPE *psinc, double beta, double lowpass_factor)
 		*psinc++ = static_cast<SINC_TYPE>(n);
 	}
 }
-
 
 #if 0
 

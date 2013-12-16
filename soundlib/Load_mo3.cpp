@@ -89,19 +89,17 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			const void *stream = file.GetRawData();
 			uint32 length = mpt::saturate_cast<uint32>(file.GetLength());
 
-#ifdef _WIN32
 			int32 unmo3result;
+#ifdef _WIN32
 			if(UNMO3_GetVersion == nullptr)
 			{
 				// Old API version: No "flags" parameter.
 				unmo3result = static_cast<UNMO3_DECODE_OLD>(UNMO3_Decode)(&stream, &length);
 			} else
+#endif // _WIN32
 			{
 				unmo3result = static_cast<UNMO3_DECODE>(UNMO3_Decode)(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1);
 			}
-#else
-			int32 unmo3result = UNMO3_Decode(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1);
-#endif // _WIN32
 
 			if(unmo3result == 0)
 			{

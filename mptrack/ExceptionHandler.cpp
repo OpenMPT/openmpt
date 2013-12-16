@@ -53,7 +53,8 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 		baseRescuePath += timestampDir;
 		if(!PathIsDirectoryW(baseRescuePath.AsNative().c_str()) && !CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr))
 		{
-			errorMessage.AppendFormat("\n\nCould not create the following directory for saving debug information and modified files to:\n%s", mpt::ToCString(baseRescuePath.ToWide()));
+			errorMessage += "\n\nCould not create the following directory for saving debug information and modified files to:\n"
+				+ mpt::ToCString(baseRescuePath.ToWide());
 		}
 	}
 
@@ -90,7 +91,8 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 					pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
 				::CloseHandle(hFile);
 
-				errorMessage.AppendFormat("\n\nDebug information has been saved to\n%s", mpt::ToCString(baseRescuePath.ToWide()));
+				errorMessage += "\n\nDebug information has been saved to\n"
+					+ mpt::ToCString(baseRescuePath.ToWide());
 			}
 		}
 		::FreeLibrary(hDll);
@@ -149,7 +151,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 }
 
 
-// Try to close the audio device and rescue unsaved work if an unhandled exception occours...
+// Try to close the audio device and rescue unsaved work if an unhandled exception occurrs...
 LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
 //----------------------------------------------------------------------------------
 {
@@ -174,7 +176,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 	}
 
 	CString errorMessage;
-	errorMessage.Format("Unhandled exception 0x%X at address %p occoured.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
+	errorMessage.Format("Unhandled exception 0x%X at address %p occurred.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
 
 	GenerateDump(errorMessage, pExceptionInfo);
 

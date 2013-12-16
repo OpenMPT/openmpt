@@ -333,7 +333,6 @@ BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 //----------------------------------------------------------------------------
 {
-	TCHAR s[_MAX_PATH];
 	mpt::PathString UltraSndPath;
 
 	UltraSndPath = file.Read<mpt::PathString>("Ultrasound", "PatchDir", mpt::PathString());
@@ -348,21 +347,22 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 	for (UINT iMidi=0; iMidi<256; iMidi++)
 	{
 		mpt::PathString filename;
-		wsprintf(s, (iMidi < 128) ? _T("Midi%d") : _T("Perc%d"), iMidi & 0x7f);
-		filename = file.Read<mpt::PathString>("Midi Library", s, mpt::PathString());
-		if(forgetSettings) file.Forget("Midi Library", s);
+		char section[32];
+		sprintf(section, (iMidi < 128) ? _T("Midi%d") : _T("Perc%d"), iMidi & 0x7f);
+		filename = file.Read<mpt::PathString>("Midi Library", section, mpt::PathString());
+		if(forgetSettings) file.Forget("Midi Library", section);
 		// Check for ULTRASND.INI
 		if(filename.empty())
 		{
 			LPCSTR pszSection = (iMidi < 128) ? _T("Melodic Patches") : _T("Drum Patches");
-			wsprintf(s, _T("%d"), iMidi & 0x7f);
-			filename = file.Read<mpt::PathString>(pszSection, s, mpt::PathString());
-			if(forgetSettings) file.Forget(pszSection, s);
+			sprintf(section, _T("%d"), iMidi & 0x7f);
+			filename = file.Read<mpt::PathString>(pszSection, section, mpt::PathString());
+			if(forgetSettings) file.Forget(pszSection, section);
 			if(filename.empty())
 			{
 				pszSection = (iMidi < 128) ? _T("Melodic Bank 0") : _T("Drum Bank 0");
-				filename = file.Read<mpt::PathString>(pszSection, s, mpt::PathString());
-				if(forgetSettings) file.Forget(pszSection, s);
+				filename = file.Read<mpt::PathString>(pszSection, section, mpt::PathString());
+				if(forgetSettings) file.Forget(pszSection, section);
 			}
 			if(!filename.empty())
 			{
@@ -401,21 +401,21 @@ BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
 BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 //-------------------------------------------------------
 {
-	CHAR s[128];
-
 	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (!midiLibrary.MidiMap[iMidi].empty())
 	{
-		if (iMidi < 128)
-			wsprintf(s, _T("Midi%d"), iMidi);
-		else
-			wsprintf(s, _T("Perc%d"), iMidi & 0x7F);
-
 		mpt::PathString szFileName = midiLibrary.MidiMap[iMidi];
 
 		if(!szFileName.empty())
 		{
 			if(theApp.IsPortableMode())
 				szFileName = theApp.AbsolutePathToRelative(szFileName);
+
+			char s[16];
+			if (iMidi < 128)
+				sprintf(s, _T("Midi%d"), iMidi);
+			else
+				sprintf(s, _T("Perc%d"), iMidi & 0x7F);
+
 			file.Write<mpt::PathString>("Midi Library", s, szFileName);
 		}
 	}
@@ -438,7 +438,7 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 	for(size_t i = 0; i < numBanks; i++)
 	{
 		char s[16];
-		wsprintf(s, _T("Bank%d"), i + 1);
+		sprintf(s, _T("Bank%d"), i + 1);
 		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", s, mpt::PathString());
 		path = theApp.RelativePathToAbsolute(path);
 		AddDLSBank(path);
@@ -483,7 +483,6 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 BOOL CTrackApp::SaveDefaultDLSBanks()
 //-----------------------------------
 {
-	TCHAR s[64];
 	DWORD nBanks = 0;
 	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
@@ -497,7 +496,8 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 			path = theApp.AbsolutePathToRelative(path);
 		}
 
-		wsprintf(s, _T("Bank%d"), nBanks+1);
+		char s[16];
+		sprintf(s, _T("Bank%d"), nBanks + 1);
 		theApp.GetSettings().Write<mpt::PathString>("DLS Banks", s, path);
 		nBanks++;
 
@@ -776,8 +776,6 @@ BOOL CTrackApp::InitInstance()
 	AfxOleInit();
 	// Standard initialization
 
-	// Change the registry key under which our settings are stored.
-	//SetRegistryKey(_T("Olivier Lapicque"));
 	// Start loading
 	BeginWaitCursor();
 
@@ -827,7 +825,7 @@ BOOL CTrackApp::InitInstance()
 	ImportMidiConfig(theApp.GetSettings(), true);
 
 	// create main MDI Frame window
-	CMainFrame* pMainFrame = new CMainFrame(/*cmdInfo.m_csExtension*/);
+	CMainFrame* pMainFrame = new CMainFrame();
 	if (!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
 	m_pMainWnd = pMainFrame;
 
@@ -960,12 +958,8 @@ void CTrackApp::OnFileNew()
 	CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
 	if(pModDoc != nullptr)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if(pSndFile != nullptr)
-		{
-			nNewType = pSndFile->GetBestSaveFormat();
-			bIsProject = pSndFile->m_SongFlags[SONG_ITPROJECT];
-		}
+		nNewType = pModDoc->GetrSoundFile().GetBestSaveFormat();
+		bIsProject = pModDoc->GetrSoundFile().m_SongFlags[SONG_ITPROJECT];
 	}
 
 	switch(nNewType)
@@ -1932,7 +1926,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
 		char tmp[32];
-		wsprintf(tmp, "Plugin%d", plug);
+		sprintf(tmp, "Plugin%d", plug);
 		mpt::PathString plugPath = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", tmp, MPT_PATHSTRING(""));
 		if(!plugPath.empty())
 		{
@@ -1970,7 +1964,7 @@ BOOL CTrackApp::UninitializeDXPlugins()
 		if((**pPlug).pluginId1 != kDmoMagic)
 		{
 			char tmp[32];
-			wsprintf(tmp, "Plugin%d", plug);
+			sprintf(tmp, "Plugin%d", plug);
 			mpt::PathString plugPath = (**pPlug).dllPath;
 			if(theApp.IsPortableMode())
 			{

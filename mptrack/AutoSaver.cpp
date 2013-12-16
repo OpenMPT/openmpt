@@ -311,17 +311,13 @@ void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 	HANDLE hFindFile = FindFirstFileW(searchPattern.AsNative().c_str(), &findData);
 	if(hFindFile != INVALID_HANDLE_VALUE)
 	{
-		while(true)
+		do
 		{
 			if(!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 			{
 				foundfiles.push_back(path + mpt::PathString::FromNative(findData.cFileName));
 			}
-			if(FindNextFileW(hFindFile, &findData) == FALSE)
-			{
-				break;
-			}
-		}
+		} while(FindNextFileW(hFindFile, &findData));
 		FindClose(hFindFile);
 		hFindFile = INVALID_HANDLE_VALUE;
 	}
