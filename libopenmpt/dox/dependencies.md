@@ -60,3 +60,7 @@ Optional dependencies
      *  **Win32** for WAVE
      *  raw PCM has no external dependencies
  *  **help2man** is required to build the documentation.
+
+### in_openmpt and xmp-openmpt
+
+ *  The **plugin configuration dialog** currently requires **Microsoft .NET Framework 4** on the user machine.
