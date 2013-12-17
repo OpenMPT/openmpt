@@ -40,10 +40,26 @@
 #  TEST=0           Build libopenmpt in test mode
 #
 #
+# Build flags for libopenmpt (provide on each `make` invocation)
+#  (defaults are 0):
+#
+#  NO_ZLIB=1        Avoid using zlib, even if found
+#
+#
+# Build flags for openmpt123 (provide on each `make` invocation)
+#
+#  (defaults are 0):
+#  USE_SDL=1        Use SDL (in addition to or in place of PortAudio)
+#  NO_PORTAUDIO=1   Avoid using PortAudio, even if found
+#  NO_FLAC=1        Avoid using FLAC, even if found
+#  NO_WAVPACK=1     Avoid using WavPack, even if found
+#  NO_SNDFILE=1     Avoid using libsndfile, even if found
+#
+#
 # Install options (provide on each `make install` invocation)
 #
-#  PREFIX   (e.g.: PREFIX=$HOME/opt, default: PREFIX=/usr/local)
-#  DESTDIR  (e.g.: DESTDIR=bin/dest, default: DESTDIR=)
+#  PREFIX   (e.g.:  PREFIX=$HOME/opt, default: PREFIX=/usr/local)
+#  DESTDIR  (e.g.:  DESTDIR=bin/dest, default: DESTDIR=)
 #
 #
 # Verbosity:
@@ -210,9 +226,6 @@ LDFLAGS_RPATH += -Wl,-rpath,./bin
 LDFLAGS_LIBOPENMPT += -Lbin
 LDLIBS_LIBOPENMPT  += -lopenmpt
 endif
-
-#CXXFLAGS += -mtune=generic
-#CFLAGS   += -mtune=generic
 
 ifeq ($(HOST),unix)
 

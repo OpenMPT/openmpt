@@ -1045,7 +1045,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				log << "Gain: " << flags.gain * 0.01f << " dB" << "   ";
 				log << "Stereo: " << flags.separation << " %" << "   ";
 				log << "Filter: " << flags.filtertaps << " taps" << "   ";
-				log << "Ramping " << flags.ramping << "   ";
+				log << "Ramping: " << flags.ramping << "   ";
 				log  << std::endl;
 			}
 			if ( flags.show_details ) {
