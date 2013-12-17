@@ -342,6 +342,11 @@ static std::string show_portaudio_devices( std::ostream & log ) {
 				}
 				devices << Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi )->name;
 			}
+			if ( Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi ) ) {
+				if ( i == Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi )->defaultOutputDevice ) {
+					devices << " (default)";
+				}
+			}
 			if ( Pa_GetDeviceInfo( i )->name ) {
 				if ( first ) {
 					first = false;
