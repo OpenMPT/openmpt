@@ -23,7 +23,7 @@ Dependencies
  *  **J2B** support requires a inflate (deflate decompression) implementation:
      *  **zlib**
      *  **miniz** can be used internally if no zlib is available.
- *  Building on unix systems requires:
+ *  Building on Unix-like systems requires:
      *  **GNU make**
      *  **pkg-config**
  

@@ -325,22 +325,42 @@ std::string bytes_to_string( T bytes ) {
 
 static void show_info( std::ostream & log, bool verbose ) {
 	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", libopenmpt " << openmpt::string::get( openmpt::string::library_version ) << " (" << "OpenMPT " << openmpt::string::get( openmpt::string::core_version ) << ")" << std::endl;
-	log << "Copyright (c) 2013 OpenMPT developers (http://openmpt.org/)" << std::endl;
+	log << "Copyright (c) 2013 OpenMPT developers <http://openmpt.org/>" << std::endl;
 	if ( !verbose ) {
 		log << std::endl;
 		return;
 	}
-	log << "  (built " << openmpt::string::get( openmpt::string::build ) << ")" << std::endl;
+	log << "  libopenmpt Features: " << openmpt::string::get( openmpt::string::library_features ) << std::endl;
+	log << "  libopenmpt Build: " << openmpt::string::get( openmpt::string::build ) << std::endl;
 #ifdef MPT_WITH_PORTAUDIO
-	log << " " << Pa_GetVersionText() << " (http://portaudio.com/)" << std::endl;
+	log << " " << Pa_GetVersionText() << " (" << Pa_GetVersion() << ") <http://portaudio.com/>" << std::endl;
+#endif
+#ifdef MPT_WITH_SDL
+	const SDL_version * linked_sdlver = SDL_Linked_Version();
+	log << " libSDL ";
+	if ( linked_sdlver ) {
+		log << (int)linked_sdlver->major << "." << (int)linked_sdlver->minor << "." << (int)linked_sdlver->patch << " ";
+	}
+	SDL_version sdlver;
+	std::memset( &sdlver, 0, sizeof( SDL_version ) );
+	SDL_VERSION( &sdlver );
+	log << "(API: " << (int)sdlver.major << "." << (int)sdlver.minor << "." << (int)sdlver.patch << ")";
+	log << " <https://libsdl.org/>" << std::endl;
 #endif
 #ifdef MPT_WITH_FLAC
-	log << " FLAC " << FLAC__VERSION_STRING << ", " << FLAC__VENDOR_STRING << ", API " << FLAC_API_VERSION_CURRENT << "." << FLAC_API_VERSION_REVISION << "." << FLAC_API_VERSION_AGE << " (https://xiph.org/flac/)" << std::endl;
+	log << " FLAC " << FLAC__VERSION_STRING << ", " << FLAC__VENDOR_STRING << ", API " << FLAC_API_VERSION_CURRENT << "." << FLAC_API_VERSION_REVISION << "." << FLAC_API_VERSION_AGE << " <https://xiph.org/flac/>" << std::endl;
 #endif
 #ifdef MPT_WITH_SNDFILE
 	char sndfile_info[128];
+	std::memset( sndfile_info, 0, sizeof( sndfile_info ) );
 	sf_command( 0, SFC_GET_LIB_VERSION, sndfile_info, sizeof( sndfile_info ) );
-	log << " libsndfile " << sndfile_info << " (http://mega-nerd.com/libsndfile/)" << std::endl;
+	sndfile_info[127] = '\0';
+	log << " libsndfile " << sndfile_info << " <http://mega-nerd.com/libsndfile/>" << std::endl;
+#endif
+#ifdef MPT_WITH_WAVPACK
+	std::ostringstream wpver;
+	wpver << std::hex << std::setfill('0') << std::setw(8) << WavpackGetLibraryVersion();
+	log << " WavPack " << WavpackGetLibraryVersionString() << " (" << wpver.str() << ") (http://wavpack.com/)" << std::endl;
 #endif
 	log << std::endl;
 }
@@ -390,8 +410,8 @@ static std::string get_device_string( int device ) {
 	return str.str();
 }
 
-static void show_help( textout & log, bool longhelp = false, const std::string & message = std::string(), bool verbose = false ) {
-	show_info( log, verbose );
+static void show_help( textout & log, bool longhelp = false, const std::string & message = std::string() ) {
+	show_info( log, false );
 	{
 		log << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
 		log << std::endl;
@@ -1627,7 +1647,7 @@ static int main( int argc, char * argv [] ) {
 		show_help( std_out );
 		return 1;
 	} catch ( show_help_exception & e ) {
-		show_help( std_out, e.longhelp, e.message, flags.verbose );
+		show_help( std_out, e.longhelp, e.message );
 		if ( flags.verbose ) {
 			show_credits( std_out );
 		}

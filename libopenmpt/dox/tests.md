@@ -10,7 +10,7 @@ which is not included in normal builds.
 
 ### Running Tests
 
-#### On Unix
+#### On Unix-like systems
 
 Compile with
 

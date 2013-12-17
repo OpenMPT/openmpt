@@ -69,8 +69,11 @@ namespace MptVersion
 	// Return a string decribing the time of the build process (if built from a svn working copy and tsvn was available during build, otherwise it returns the time version.cpp was last rebuild which could be unreliable as it does not get rebuild every time without tsvn)
 	std::string GetBuildDateString();
 
-	// Return a string decribing some of the buidl features and/or flags
-	std::string GetBuildFlagsString(); // e.g. " TEST DEBUG NO_VST"
+	// Return a string decribing some of the build flags
+	std::string GetBuildFlagsString(); // e.g. " TEST DEBUG"
+
+	// Return a string decribing some of the build features
+	std::string GetBuildFeaturesString(); // e.g. " NO_VST NO_DSOUND"
 
 	// Return a string decribing the revision of the svn working copy and if it was dirty (+) or had mixed revisions (!) (if built from a svn working copy and tsvn was available during build)
 	std::string GetRevisionString(); // e.g. "-r1234+"

@@ -76,6 +76,10 @@ static std::string get_library_version_string() {
 	return str;
 }
 
+static std::string get_library_features_string() {
+	return MptVersion::GetBuildFeaturesString();
+}
+
 static std::string get_core_version_string() {
 	return MptVersion::GetVersionStringExtended();
 }
@@ -97,6 +101,8 @@ std::string get_string( const std::string & key ) {
 		return std::string();
 	} else if ( key == string::library_version ) {
 		return get_library_version_string();
+	} else if ( key == string::library_features ) {
+		return get_library_features_string();
 	} else if ( key == string::core_version ) {
 		return get_core_version_string();
 	} else if ( key == string::build ) {
