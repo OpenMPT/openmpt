@@ -237,7 +237,7 @@ enum
 /////////////////////////////////////////////////////////////////////////
 // Player position notification
 
-#define MAX_UPDATE_HISTORY		256 // same as SNDDEV_MAXBUFFERS
+#define MAX_UPDATE_HISTORY		2000 // 2 seconds with 1 ms updates
 #include "Notification.h"
 
 #define TIMERID_GUI 1
