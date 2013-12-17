@@ -177,6 +177,44 @@ std::string GetBuildFlagsString()
 	{
 		retval += " DEBUG";
 	}
+	return retval;
+}
+
+std::string GetBuildFeaturesString()
+{
+	std::string retval;
+	#ifdef LIBOPENMPT_BUILD
+		#if MPT_COMPILER_GENERIC
+			retval += "*C++11";
+		#elif MPT_COMPILER_MSVC
+			retval += mpt::String::Print("*MSVC-%1.%2", MPT_COMPILER_MSVC_VERSION / 100, MPT_COMPILER_MSVC_VERSION % 100);
+		#elif MPT_COMPILER_GCC
+			retval += mpt::String::Print("*GCC-%1.%2.%3", MPT_COMPILER_GCC_VERSION / 10000, (MPT_COMPILER_GCC_VERSION / 100) % 100, MPT_COMPILER_GCC_VERSION % 100);
+		#elif MPT_COMPILER_CLANG
+			retval += mpt::String::Print("*Clang-%1.%2.%3", MPT_COMPILER_CLANG_VERSION / 10000, (MPT_COMPILER_CLANG_VERSION / 100) % 100, MPT_COMPILER_CLANG_VERSION % 100);
+		#else
+			retval += "*unknown";
+		#endif
+		#if defined(WIN32)
+			retval += " +WINAPI";
+		#elif defined(MPT_CHARSET_CPP)
+			retval += " +CODECVT";
+		#else
+			retval += " +ICONV";
+		#endif
+		#if !defined(NO_ZLIB)
+			retval += " +ZLIB";
+		#elif !defined(NO_MINIZ)
+			retval += " +MINIZ";
+		#else
+			retval += " -INFLATE";
+		#endif
+		#if !defined(NO_MO3)
+			retval += " +UNMO3";
+		#else
+			retval += " -UNMO3";
+		#endif
+	#endif
 	#ifdef MODPLUG_TRACKER
 		#ifdef NO_VST
 			retval += " NO_VST";
@@ -221,6 +259,9 @@ std::string GetVersionStringExtended()
 	{
 		retval += GetRevisionString();
 		retval += GetBuildFlagsString();
+		#ifdef MODPLUG_TRACKER
+			retval += GetBuildFeaturesString();
+		#endif
 	}
 	return retval;
 }

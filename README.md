@@ -98,7 +98,7 @@ How to compile
 
             make CONFIG=mingw64-win64    # for win64
 
-     -  gcc or clang (on unix, including Mac OS X with MacPorts):
+     -  gcc or clang (on Unix-like systems, including Mac OS X with MacPorts):
 
         The minimum required compiler versions are:
 
@@ -106,7 +106,7 @@ How to compile
 
          -  clang 3.0
 
-        The Makefile requires pkg-config for native unix builds.
+        The Makefile requires pkg-config for native builds.
         For sound output in openmpt123, PortAudio or SDL is required.
         openmpt123 can optionally use libflac, libwavpack and libsndfile to
         render PCM files to disk.
@@ -194,14 +194,14 @@ conventions. Using common sense is recommended.
  -  Do not use ANY locale-dependant C functions. For locale-dependant C++
     functionaly (especially iostream), always imbue the
     `std::locale::classic()` locale.
- -  Prefer unix_style_names over CamelCaseNames.
+ -  Prefer kernel_style_names over CamelCaseNames.
  -  Indentation:
      -  `{` are placed at the end of the opening line.
      -  Enclose even single statements in curly braces.
      -  Avoid placing single statements on the same line as the `if`.
-     -  Opening brackets are separated from keywords with a space.
-     -  Opening brackets are not separated from function names.
-     -  Place spaces around operators and inside brackets.
+     -  Opening parentheses are separated from keywords with a space.
+     -  Opening parentheses are not separated from function names.
+     -  Place spaces around operators and inside parentheses.
      -  Align `:` and `,` when inheriting or initialiasing members in a
         constructor.
      -  The pointer `*` is separated from both the type and the variable name.

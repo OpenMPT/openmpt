@@ -86,15 +86,17 @@ LIBOPENMPT_CXX_API std::uint32_t get_core_version();
 namespace string {
 
 //! Return a verbose library version string from openmpt::string::get().
-static const char library_version[] = "library_version";
+static const char library_version [] = "library_version";
+//! Return a verbose library features string from openmpt::string::get().
+static const char library_features[] = "library_features";
 //! Return a verbose OpenMPT core version string from openmpt::string::get().
-static const char core_version   [] = "core_version";
+static const char core_version    [] = "core_version";
 //! Return information about the current build (e.g. the build date or compiler used) from openmpt::string::get().
-static const char build          [] = "build";
+static const char build           [] = "build";
 //! Return all contributors from openmpt::string::get().
-static const char credits        [] = "credits";
+static const char credits         [] = "credits";
 //! Return contact infromation about libopenmpt from openmpt::string::get().
-static const char contact        [] = "contact";
+static const char contact         [] = "contact";
 
 //! Get library related metadata.
 /*!
