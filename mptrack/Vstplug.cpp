@@ -984,7 +984,7 @@ bool CVstPlugin::SaveProgram()
 		.ExtensionFilter("VST Plugin Programs (*.fxp)|*.fxp|"
 			"VST Plugin Banks (*.fxb)|*.fxb||")
 		.WorkingDirectory(defaultDir);
-	if(!dlg.Show()) return false;
+	if(!dlg.Show(m_pEditor)) return false;
 
 	if(useDefaultDir)
 	{
@@ -999,7 +999,7 @@ bool CVstPlugin::SaveProgram()
 		return true;
 	} else
 	{
-		Reporting::Error("Error saving preset.");
+		Reporting::Error("Error saving preset.", m_pEditor);
 		return false;
 	}
 
@@ -1023,7 +1023,7 @@ bool CVstPlugin::LoadProgram()
 		"VST Plugin Banks (*.fxb)|*.fxb|"
 		"All Files|*.*||")
 		.WorkingDirectory(defaultDir);
-	if(!dlg.Show()) return false;
+	if(!dlg.Show(m_pEditor)) return false;
 
 	if(useDefaultDir)
 	{
@@ -1052,7 +1052,7 @@ bool CVstPlugin::LoadProgram()
 		return true;
 	} else
 	{
-		Reporting::Error(errorStr);
+		Reporting::Error(errorStr, m_pEditor);
 		return false;
 	}
 }
