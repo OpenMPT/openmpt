@@ -37,7 +37,7 @@ noinline void AssertHandler(const char *file, int line, const char *function, co
 static const std::size_t LOGBUF_SIZE = 1024;
 
 
-#if defined(MODPLUG_TRACKER) && defined(_DEBUG)
+#if defined(MODPLUG_TRACKER) && !defined(NO_LOGGING)
 
 
 static uint64 GetTimeMS()
@@ -93,7 +93,7 @@ static std::wstring TimeDiffAsStringW(uint64 ms)
 static noinline void DoLog(const char *file, int line, const char *function, std::wstring message)
 //------------------------------------------------------------------------------------------------
 {
-#if !defined(MODPLUG_TRACKER) || (defined(MODPLUG_TRACKER) && defined(_DEBUG))
+#if !defined(MODPLUG_TRACKER) || (defined(MODPLUG_TRACKER) && !defined(NO_LOGGING))
 	if(!file)
 	{
 		file = "unknown";
@@ -146,7 +146,7 @@ static noinline void DoLog(const char *file, int line, const char *function, std
 static noinline void DoLog(const char *file, int line, const char *function, const char *format, va_list args)
 //------------------------------------------------------------------------------------------------------------
 {
-#if !defined(MODPLUG_TRACKER) || (defined(MODPLUG_TRACKER) && defined(_DEBUG))
+#if !defined(MODPLUG_TRACKER) || (defined(MODPLUG_TRACKER) && !defined(NO_LOGGING))
 	char message[LOGBUF_SIZE];
 	va_list va;
 	va_copy(va, args);
