@@ -610,13 +610,15 @@ void CSoundFile::InitializeGlobals()
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
 	m_dwLastSavedWithVersion = m_dwCreatedWithVersion = 0;
-	madeWithTracker.clear();
 
 	SetMixLevels(mixLevels_compatible);
 	SetModFlags(0);
 
 	Patterns.ClearPatterns();
+
+	songName.clear();
 	songMessage.clear();
+	madeWithTracker.clear();
 }
 
 
@@ -920,7 +922,9 @@ BOOL CSoundFile::Destroy()
 
 	Patterns.DestroyPatterns();
 
+	songName.clear();
 	songMessage.clear();
+	madeWithTracker.clear();
 
 	for(SAMPLEINDEX i = 1; i < MAX_SAMPLES; i++)
 	{
