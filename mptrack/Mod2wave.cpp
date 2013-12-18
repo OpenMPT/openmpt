@@ -467,7 +467,7 @@ void CWaveConvert::FillFormats()
 				sel = ndx;
 			}
 		}
-		if(sel == -1 && encSettings.Mode & Encoder::ModeEnumerated)
+		if(sel == -1 && encSettings.Mode & Encoder::ModeEnumerated && encTraits->defaultBitrate != 0)
 		{
 			// select enumerated format based on bitrate
 			for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
@@ -479,15 +479,33 @@ void CWaveConvert::FillFormats()
 					sel = ndx;
 				}
 			}
+			if(sel == -1)
+			{
+				// select enumerated format based on default bitrate
+				for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
+				{
+					int i = (int)((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
+					const Encoder::Format &format = encTraits->formats[i];
+					if(format.Bitrate == encTraits->defaultBitrate)
+					{
+						sel = ndx;
+					}
+				}
+			}
 		}
-		if(sel == -1 && encSettings.Mode & Encoder::ModeEnumerated && encTraits->defaultBitrate != 0)
+		if(sel == -1 && encSettings.Mode & Encoder::ModeEnumerated && encTraits->defaultBitrate == 0)
 		{
-			// select enumerated format based on default bitrate
+			// select enumerated format based on sampleformat
 			for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
 			{
 				int i = (int)((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
 				const Encoder::Format &format = encTraits->formats[i];
-				if(format.Bitrate == encTraits->defaultBitrate)
+				int32 currentFormat = encSettings.Format;
+				if(encSettings.Format < 0 || (std::size_t)currentFormat >= encTraits->formats.size())
+				{ // out of bounds
+					continue;
+				}
+				if(format.Sampleformat != SampleFormatInvalid && encTraits->formats[currentFormat].Sampleformat == format.Sampleformat)
 				{
 					sel = ndx;
 				}
