@@ -889,6 +889,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadString<mpt::String::spacePadded>(str, composerLength);
 		str = mpt::To(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
 		songMessage.Read(str.c_str(), str.length(), SongMessage::leAutodetect);
+		songArtist = str;
 	}
 
 	// Channel names

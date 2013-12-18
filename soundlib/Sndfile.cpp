@@ -617,6 +617,7 @@ void CSoundFile::InitializeGlobals()
 	Patterns.ClearPatterns();
 
 	songName.clear();
+	songArtist.clear();
 	songMessage.clear();
 	madeWithTracker.clear();
 }
@@ -923,6 +924,7 @@ BOOL CSoundFile::Destroy()
 	Patterns.DestroyPatterns();
 
 	songName.clear();
+	songArtist.clear();
 	songMessage.clear();
 	madeWithTracker.clear();
 

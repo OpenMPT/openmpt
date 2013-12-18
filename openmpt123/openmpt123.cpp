@@ -1233,6 +1233,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		set_field( fields, "Container" ).ostream() << ( mod.get_metadata( "container" ).empty() ? std::string("none") : ( mod.get_metadata( "container" ) + " (" + mod.get_metadata( "container_long" ) + ")" ) );
 		set_field( fields, "Type" ).ostream() << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")";
 		set_field( fields, "Tracker" ).ostream() << mod.get_metadata( "tracker" );
+		set_field( fields, "Artist" ).ostream() << mod.get_metadata( "artist" );
 	}
 	if ( true ) {
 		set_field( fields, "Title" ).ostream() << mod.get_metadata( "title" );
