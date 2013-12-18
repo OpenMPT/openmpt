@@ -925,53 +925,71 @@ struct AcmDynBind
 	{
 		if(pafd && pafd->pwfx && (fdwSupport & ACMDRIVERDETAILS_SUPPORTF_CODEC) && (pafd->dwFormatTag == WAVE_FORMAT_MPEGLAYER3))
 		{
+			ACMDRIVERDETAILS add;
+			MemsetZero(add);
+			add.cbStruct = sizeof(add);
+			try
+			{
+				if(acmDriverDetailsA(driver, &add, 0) != MMSYSERR_NOERROR)
+				{
+					// No driver details? Skip it.
+					return TRUE;
+				}
+			} catch(...)
+			{
+				// Driver crashed? Skip it.
+				return TRUE;
+			}
+
+			std::string driverNameLong;
+			std::string driverNameShort;
+			std::string driverNameCombined;
+			std::ostringstream driverDescription;
+			driverDescription.imbue(std::locale::classic());
+
+			if(add.szLongName[0])
+			{
+				mpt::String::Copy(driverNameLong, add.szLongName);
+			}
+			if(add.szShortName[0])
+			{
+				mpt::String::Copy(driverNameShort, add.szShortName);
+			}
+			if(driverNameShort.empty())
+			{
+				if(driverNameLong.empty())
+				{
+					driverNameCombined = "";
+				} else
+				{
+					driverNameCombined = driverNameLong;
+				}
+			} else
+			{
+				if(driverNameLong.empty())
+				{
+					driverNameCombined = driverNameShort;
+				} else
+				{
+					driverNameCombined = driverNameLong;
+				}
+			}
+
+			AppendField(driverDescription, "Driver", add.szShortName);
+			AppendField(driverDescription, "Description", add.szLongName);
+			AppendField(driverDescription, "Copyright", add.szCopyright);
+			AppendField(driverDescription, "Licensing", add.szLicensing);
+			AppendField(driverDescription, "Features", add.szFeatures);
+
 			for(int i = 0; i < CountOf(layer3_samplerates); ++i)
 			{
 				if(layer3_samplerates[i] == (int)pafd->pwfx->nSamplesPerSec)
 				{
-					std::ostringstream driverDescription;
-					driverDescription.imbue(std::locale::classic());
-					std::string driverNameLong;
-					std::string driverNameShort;
-					std::string driverNameCombined;
+
 					std::string formatName;
-					
-					ACMDRIVERDETAILS add;
-					MemsetZero(add);
-					add.cbStruct = sizeof(add);
+
 					formatName = pafd->szFormat;
-					if(acmDriverDetailsA(driver, &add, 0) != MMSYSERR_NOERROR)
-					{
-						// No driver details? Skip it.
-						continue;
-					}
-					if(add.szLongName[0])
-					{
-						mpt::String::Copy(driverNameLong, add.szLongName);
-					}
-					if(add.szShortName[0])
-					{
-						mpt::String::Copy(driverNameShort, add.szShortName);
-					}
-					if(driverNameShort.empty())
-					{
-						if(driverNameLong.empty())
-						{
-							driverNameCombined = "";
-						} else
-						{
-							driverNameCombined = driverNameLong;
-						}
-					} else
-					{
-						if(driverNameLong.empty())
-						{
-							driverNameCombined = driverNameShort;
-						} else
-						{
-							driverNameCombined = driverNameLong;
-						}
-					}
+					
 					if(!driverNameCombined.empty())
 					{
 						formatName += " (";
@@ -1000,11 +1018,6 @@ struct AcmDynBind
 						formats_waveformats.push_back(wfex);
 					}
 
-					AppendField(driverDescription, "Driver", add.szShortName);
-					AppendField(driverDescription, "Description", add.szLongName);
-					AppendField(driverDescription, "Copyright", add.szCopyright);
-					AppendField(driverDescription, "Licensing", add.szLicensing);
-					AppendField(driverDescription, "Features", add.szFeatures);
 					if(!driverDescription.str().empty())
 					{
 						drivers.insert(driverDescription.str());
@@ -1048,13 +1061,19 @@ struct AcmDynBind
 			{
 				EnumFormats(mpeg1layer3_samplerates[i], 2);
 			}
+		} catch(...)
+		{
+			// continue
+		}
+		try
+		{
 			for(std::size_t i = 0; i < CountOf(mpeg1layer3_samplerates); ++i)
 			{
 				EnumFormats(mpeg1layer3_samplerates[i], 1);
 			}
 		} catch(...)
 		{
-			found_codec = false;
+			// continue
 		}
 		if(!found_codec)
 		{
