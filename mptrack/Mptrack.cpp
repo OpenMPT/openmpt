@@ -779,6 +779,8 @@ BOOL CTrackApp::InitInstance()
 	// Start loading
 	BeginWaitCursor();
 
+	Log("OpenMPT Start");
+
 	// Initialize Audio
 #ifdef ENABLE_ASM
 	InitProcSupport();
