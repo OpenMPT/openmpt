@@ -923,8 +923,64 @@ struct AcmDynBind
 	}
 	BOOL AcmFormatEnumCB(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD fdwSupport)
 	{
+		Log("ACM format found:");
+		Log(mpt::String::Print(" fdwSupport = 0x%1", mpt::fmt::hex0<8>(fdwSupport)));
+		try
+		{
+			ACMDRIVERDETAILS add;
+			MemsetZero(add);
+			add.cbStruct = sizeof(add);
+			if(acmDriverDetailsA(driver, &add, 0) == MMSYSERR_NOERROR)
+			{
+				Log(" ACMDRIVERDETAILS:");
+				Log(mpt::String::Print("  cbStruct = %1", add.cbStruct));
+				Log(mpt::String::Print("  fccType = 0x%1", mpt::fmt::hex0<4>(add.fccType)));
+				Log(mpt::String::Print("  fccComp = 0x%1", mpt::fmt::hex0<4>(add.fccComp)));
+				Log(mpt::String::Print("  wMid = %1", add.wMid));
+				Log(mpt::String::Print("  wPid = %1", add.wPid));
+				Log(mpt::String::Print("  vdwACM = 0x%1", mpt::fmt::hex0<8>(add.vdwACM)));
+				Log(mpt::String::Print("  vdwDriver = 0x%1", mpt::fmt::hex0<8>(add.vdwDriver)));
+				Log(mpt::String::Print("  fdwSupport = %1", mpt::fmt::hex0<8>(add.fdwSupport)));
+				Log(mpt::String::Print("  cFormatTags = %1", add.cFormatTags));
+				Log(mpt::String::Print("  cFilterTags = %1", add.cFilterTags));
+				std::string str;
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szShortName);
+				Log(mpt::String::Print("  ShortName = %1", str));
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szLongName);
+				Log(mpt::String::Print("  LongName = %1", str));
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szCopyright);
+				Log(mpt::String::Print("  Copyright = %1", str));
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szLicensing);
+				Log(mpt::String::Print("  Licensing = %1", str));
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szFeatures);
+				Log(mpt::String::Print("  Features = %1", str));
+			} else
+			{
+				Log(" acmDriverDetailsA = ERROR");
+			}
+		} catch(...)
+		{
+			Log(" acmDriverDetailsA = EXCEPTION");
+		}
+		if(pafd)
+		{
+			Log(" ACMFORMATDETAILS:");
+			Log(mpt::String::Print("  cbStruct = %1", pafd->cbStruct));
+			Log(mpt::String::Print("  dwFormatIndex = %1", pafd->dwFormatIndex));
+			Log(mpt::String::Print("  dwFormatTag = %1", pafd->dwFormatTag));
+			Log(mpt::String::Print("  fdwSupport = 0x%1", mpt::fmt::hex0<8>(pafd->fdwSupport)));
+			std::string str;
+			mpt::String::Read<mpt::String::maybeNullTerminated>(str, pafd->szFormat);
+			Log(mpt::String::Print("  Format = %1", str));
+		} else
+		{
+			Log(" ACMFORMATDETAILS = NULL");
+		}
+
 		if(pafd && pafd->pwfx && (fdwSupport & ACMDRIVERDETAILS_SUPPORTF_CODEC) && (pafd->dwFormatTag == WAVE_FORMAT_MPEGLAYER3))
 		{
+			Log(" VALID!");
+
 			ACMDRIVERDETAILS add;
 			MemsetZero(add);
 			add.cbStruct = sizeof(add);
