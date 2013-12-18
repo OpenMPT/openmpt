@@ -925,13 +925,37 @@ struct AcmDynBind
 	{
 		Log("ACM format found:");
 		Log(mpt::String::Print(" fdwSupport = 0x%1", mpt::fmt::hex0<8>(fdwSupport)));
-		try
+
+		if(pafd)
 		{
+			Log(" ACMFORMATDETAILS:");
+			Log(mpt::String::Print("  cbStruct = %1", pafd->cbStruct));
+			Log(mpt::String::Print("  dwFormatIndex = %1", pafd->dwFormatIndex));
+			Log(mpt::String::Print("  dwFormatTag = %1", pafd->dwFormatTag));
+			Log(mpt::String::Print("  fdwSupport = 0x%1", mpt::fmt::hex0<8>(pafd->fdwSupport)));
+			std::string str;
+			mpt::String::Read<mpt::String::maybeNullTerminated>(str, pafd->szFormat);
+			Log(mpt::String::Print("  Format = %1", str));
+		} else
+		{
+			Log(" ACMFORMATDETAILS = NULL");
+		}
+
+		if(pafd && pafd->pwfx && (fdwSupport & ACMDRIVERDETAILS_SUPPORTF_CODEC) && (pafd->dwFormatTag == WAVE_FORMAT_MPEGLAYER3))
+		{
+			Log(" MP3 format found!");
+
 			ACMDRIVERDETAILS add;
 			MemsetZero(add);
 			add.cbStruct = sizeof(add);
-			if(acmDriverDetailsA(driver, &add, 0) == MMSYSERR_NOERROR)
+			try
 			{
+				if(acmDriverDetails(driver, &add, 0) != MMSYSERR_NOERROR)
+				{
+					Log(" acmDriverDetails = ERROR");
+					// No driver details? Skip it.
+					return TRUE;
+				}
 				Log(" ACMDRIVERDETAILS:");
 				Log(mpt::String::Print("  cbStruct = %1", add.cbStruct));
 				Log(mpt::String::Print("  fccType = 0x%1", mpt::fmt::hex0<4>(add.fccType)));
@@ -954,45 +978,9 @@ struct AcmDynBind
 				Log(mpt::String::Print("  Licensing = %1", str));
 				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szFeatures);
 				Log(mpt::String::Print("  Features = %1", str));
-			} else
-			{
-				Log(" acmDriverDetailsA = ERROR");
-			}
-		} catch(...)
-		{
-			Log(" acmDriverDetailsA = EXCEPTION");
-		}
-		if(pafd)
-		{
-			Log(" ACMFORMATDETAILS:");
-			Log(mpt::String::Print("  cbStruct = %1", pafd->cbStruct));
-			Log(mpt::String::Print("  dwFormatIndex = %1", pafd->dwFormatIndex));
-			Log(mpt::String::Print("  dwFormatTag = %1", pafd->dwFormatTag));
-			Log(mpt::String::Print("  fdwSupport = 0x%1", mpt::fmt::hex0<8>(pafd->fdwSupport)));
-			std::string str;
-			mpt::String::Read<mpt::String::maybeNullTerminated>(str, pafd->szFormat);
-			Log(mpt::String::Print("  Format = %1", str));
-		} else
-		{
-			Log(" ACMFORMATDETAILS = NULL");
-		}
-
-		if(pafd && pafd->pwfx && (fdwSupport & ACMDRIVERDETAILS_SUPPORTF_CODEC) && (pafd->dwFormatTag == WAVE_FORMAT_MPEGLAYER3))
-		{
-			Log(" VALID!");
-
-			ACMDRIVERDETAILS add;
-			MemsetZero(add);
-			add.cbStruct = sizeof(add);
-			try
-			{
-				if(acmDriverDetailsA(driver, &add, 0) != MMSYSERR_NOERROR)
-				{
-					// No driver details? Skip it.
-					return TRUE;
-				}
 			} catch(...)
 			{
+				Log(" acmDriverDetails = EXCEPTION");
 				// Driver crashed? Skip it.
 				return TRUE;
 			}
@@ -1102,7 +1090,7 @@ struct AcmDynBind
 		pwfx->wBitsPerSample = 16;
 		pwfx->nBlockAlign = (WORD)((pwfx->nChannels * pwfx->wBitsPerSample) / 8);
 		pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
-		acmFormatEnumA(NULL, &afd, AcmFormatEnumCallback, reinterpret_cast<DWORD_PTR>(this), ACM_FORMATENUMF_CONVERT);
+		acmFormatEnum(NULL, &afd, AcmFormatEnumCallback, reinterpret_cast<DWORD_PTR>(this), ACM_FORMATENUMF_CONVERT);
 	}
 	void TryLoad()
 	{
