@@ -425,6 +425,7 @@ protected:
 public:
 
 	std::string songName;
+	std::string songArtist;
 
 	// Song message
 	SongMessage songMessage;

@@ -657,6 +657,8 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		return CSoundFile::ModContainerTypeToTracker( m_sndFile->GetContainerType() );
 	} else if ( key == std::string("tracker") ) {
 		return m_sndFile->madeWithTracker;
+	} else if ( key == std::string("artist") ) {
+		return mod_string_to_utf8( m_sndFile->songArtist );
 	} else if ( key == std::string("title") ) {
 		return mod_string_to_utf8( m_sndFile->GetTitle() );
 	} else if ( key == std::string("message") ) {
