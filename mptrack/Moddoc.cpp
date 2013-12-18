@@ -1858,6 +1858,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 void CModDoc::OnFileMP3Convert()
 //------------------------------
 {
+	OnFileMP3Convert(ORDERINDEX_INVALID, ORDERINDEX_INVALID, true);
+}
+
+void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, bool showWarning)
+//------------------------------------------------------------------------------------------
+{
 	WAVEncoder wavencoder;
 	FLACEncoder flacencoder;
 	OggOpusEncoder opusencoder;
@@ -1873,7 +1879,7 @@ void CModDoc::OnFileMP3Convert()
 	if(mp3lame.IsAvailable())       encoders.push_back(&mp3lame);
 	if(mp3blade.IsAvailable())      encoders.push_back(&mp3blade);
 	if(mp3acm.IsAvailable())        encoders.push_back(&mp3acm);
-	if(encoders.size() == 2)
+	if(showWarning && encoders.size() == 2)
 	{
 		Reporting::Warning(
 			"No Opus/Vorbis/MP3 codec found.\n"
@@ -1885,7 +1891,7 @@ void CModDoc::OnFileMP3Convert()
 			"Alternatively, you can install a MP3 ACM codec.",
 			"OpenMPT - Export");
 	}
-	OnFileWaveConvert(ORDERINDEX_INVALID, ORDERINDEX_INVALID, encoders);
+	OnFileWaveConvert(nMinOrder, nMaxOrder, encoders);
 }
 
 
