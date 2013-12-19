@@ -736,9 +736,7 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 		return;
 	}
 	std::ostringstream str;
-	str
-		<< "\r"
-		<< "Format" << "\t" << sanitize_xmplay_info_string( self->mod->get_metadata("type") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("type_long") ) << ")" << "\r";
+	str << "\r";
 	bool metadatainfo = false;
 	if ( !self->mod->get_metadata("artist").empty() ) {
 		metadatainfo = true;
@@ -751,6 +749,7 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 	if ( metadatainfo ) {
 		str << "\r";
 	}
+	str << "Format" << "\t" << sanitize_xmplay_info_string( self->mod->get_metadata("type") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("type_long") ) << ")" << "\r";
 	if ( !self->mod->get_metadata("container").empty() ) {
 		str << "Container" << "\t"  << sanitize_xmplay_info_string( self->mod->get_metadata("container") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("container_long") ) << ")" << "\r";
 	}
