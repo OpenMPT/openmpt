@@ -524,7 +524,9 @@ template < typename Tmod >
 static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
 	flags.separation = std::max( flags.separation,  0 );
 	flags.filtertaps = std::max( flags.filtertaps,  1 );
+	flags.filtertaps = std::min( flags.filtertaps,  8 );
 	flags.ramping    = std::max( flags.ramping,    -1 );
+	flags.ramping    = std::min( flags.ramping,    10 );
 	mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
 	mod.set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, flags.separation );
 	mod.set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, flags.filtertaps );
@@ -555,8 +557,8 @@ static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod, write_
 		case '4': flags.gain       +=100; apply_mod_settings( flags, mod ); break;
 		case '5': flags.separation -=  5; apply_mod_settings( flags, mod ); break;
 		case '6': flags.separation +=  5; apply_mod_settings( flags, mod ); break;
-		case '7': flags.filtertaps -=  1; apply_mod_settings( flags, mod ); break;
-		case '8': flags.filtertaps +=  1; apply_mod_settings( flags, mod ); break;
+		case '7': flags.filtertaps /=  2; apply_mod_settings( flags, mod ); break;
+		case '8': flags.filtertaps *=  2; apply_mod_settings( flags, mod ); break;
 		case '9': flags.ramping    -=  1; apply_mod_settings( flags, mod ); break;
 		case '0': flags.ramping    +=  1; apply_mod_settings( flags, mod ); break;
 	}
