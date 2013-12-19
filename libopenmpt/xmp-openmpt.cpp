@@ -454,7 +454,7 @@ static void write_xmplay_tags( char * tags[8], const openmpt::module & mod ) {
 	write_xmplay_tag( &tags[0], convert_to_native( mod.get_metadata("title") ) );
 	write_xmplay_tag( &tags[1], convert_to_native( mod.get_metadata("artist") ) );
 	write_xmplay_tag( &tags[2], convert_to_native( mod.get_metadata("xmplay-album") ) ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[3], convert_to_native( mod.get_metadata("xmplay-date") ) ); // todo, libopenmpt does not support that
+	write_xmplay_tag( &tags[3], convert_to_native( mod.get_metadata("date") ) );
 	write_xmplay_tag( &tags[4], convert_to_native( mod.get_metadata("xmplay-tracknumber") ) ); // todo, libopenmpt does not support that
 	write_xmplay_tag( &tags[5], convert_to_native( mod.get_metadata("xmplay-genre") ) ); // todo, libopenmpt does not support that
 	write_xmplay_tag( &tags[6], convert_to_native( mod.get_metadata("message") ) );
@@ -739,6 +739,18 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 	str
 		<< "\r"
 		<< "Format" << "\t" << sanitize_xmplay_info_string( self->mod->get_metadata("type") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("type_long") ) << ")" << "\r";
+	bool metadatainfo = false;
+	if ( !self->mod->get_metadata("artist").empty() ) {
+		metadatainfo = true;
+		str << "Artist" << "\t"  << sanitize_xmplay_info_string( self->mod->get_metadata("artist") ) << "\r";
+	}
+	if ( !self->mod->get_metadata("date").empty() ) {
+		metadatainfo = true;
+		str << "Date" << "\t"  << sanitize_xmplay_info_string( self->mod->get_metadata("date") ) << "\r";
+	}
+	if ( metadatainfo ) {
+		str << "\r";
+	}
 	if ( !self->mod->get_metadata("container").empty() ) {
 		str << "Container" << "\t"  << sanitize_xmplay_info_string( self->mod->get_metadata("container") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("container_long") ) << ")" << "\r";
 	}

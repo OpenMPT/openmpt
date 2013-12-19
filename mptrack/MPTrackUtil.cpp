@@ -65,12 +65,6 @@ std::string GetErrorMessage(DWORD nErrorCode)
 }
 
 
-time_t Util::sdTime::MakeGmTime(tm& timeUtc)
-{
-	return _mkgmtime(&timeUtc);
-}
-
-
 bool Util::sdOs::IsPathFileAvailable(const mpt::PathString &pszFilePath, FileMode fm)
 {
 	return (_waccess(pszFilePath.AsNative().c_str(), fm) == 0);

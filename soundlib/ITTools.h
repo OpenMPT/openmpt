@@ -297,9 +297,7 @@ struct PACKED ITSample
 STATIC_ASSERT(sizeof(ITSample) == 80);
 
 
-#ifdef MODPLUG_TRACKER
 struct FileHistory;
-#endif // MODPLUG_TRACKER
 
 // IT Header extension: Save history
 struct PACKED ITHistoryStruct
@@ -308,8 +306,6 @@ struct PACKED ITHistoryStruct
 	uint16 fattime;	// DOS / FAT time when the file was opened / created in the editor.
 	uint32 runtime;	// The time how long the file was open in the editor, in 1/18.2th seconds. (= ticks of the DOS timer)
 
-#ifdef MODPLUG_TRACKER
-
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness();
 
@@ -317,8 +313,6 @@ struct PACKED ITHistoryStruct
 	void ConvertToMPT(FileHistory &mptHistory) const;
 	// Convert OpenMPT's internal edit history representation to an ITHistoryStruct
 	void ConvertToIT(const FileHistory &mptHistory);
-
-#endif // MODPLUG_TRACKER
 
 };
 

@@ -641,10 +641,6 @@ SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
 }
 
 
-#ifdef MODPLUG_TRACKER
-
-#include "../mptrack/Moddoc.h"
-
 // Convert all multi-byte numeric values to current platform's endianness or vice versa.
 void ITHistoryStruct::ConvertEndianness()
 //---------------------------------------
@@ -680,5 +676,3 @@ void ITHistoryStruct::ConvertToIT(const FileHistory &mptHistory)
 	fattime = static_cast<uint16>((mptHistory.loadDate.tm_sec / 2) | (mptHistory.loadDate.tm_min << 5) | (mptHistory.loadDate.tm_hour << 11));
 	runtime = static_cast<uint32>(mptHistory.openTime * (18.2f / HISTORY_TIMER_PRECISION));
 }
-
-#endif // MODPLUG_TRACKER

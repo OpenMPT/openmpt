@@ -288,7 +288,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			lastUpdate.tm_year -= 1900;
 			lastUpdate.tm_mon--;
 		}
-		time_t outTime = Util::sdTime::MakeGmTime(lastUpdate);
+		time_t outTime = Util::MakeGmTime(&lastUpdate);
 		if(outTime < 0) outTime = 0;
 		CUpdateCheck::SetUpdateSettings
 			(
