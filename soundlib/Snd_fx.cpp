@@ -306,6 +306,14 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				break;
 			// Set Speed
 			case CMD_SPEED:
+#ifdef MODPLUG_TRACKER
+				// FT2 appears to be decrementing the tick count before checking for zero,
+				// so it effectively counts down 65536 ticks with speed = 0 (song speed is a 16-bit variable in FT2)
+				if(GetType() == MOD_TYPE_XM && !param)
+				{
+					memory.musicSpeed = uint16_max;
+				}
+#endif	// MODPLUG_TRACKER
 				if (!param) break;
 				// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
 				if ((param <= GetModSpecifications().speedMax) || GetType() == MOD_TYPE_MOD)
@@ -4482,6 +4490,15 @@ void CSoundFile::KeyOff(CHANNELINDEX nChn)
 void CSoundFile::SetSpeed(UINT param)
 //-----------------------------------
 {
+#ifdef MODPLUG_TRACKER
+	// FT2 appears to be decrementing the tick count before checking for zero,
+	// so it effectively counts down 65536 ticks with speed = 0 (song speed is a 16-bit variable in FT2)
+	if(GetType() == MOD_TYPE_XM && !param)
+	{
+		m_nMusicSpeed = uint16_max;
+	}
+#endif	// MODPLUG_TRACKER
+
 	// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
 	if ((param) && (param <= GetModSpecifications().speedMax || (GetType() & MOD_TYPE_MOD))) m_nMusicSpeed = param;
 }

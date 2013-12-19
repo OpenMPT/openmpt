@@ -2330,6 +2330,12 @@ struct UpgradePatternData
 				const uint16 param = static_cast<uint16>(m.param) + static_cast<uint16>(m.vol << 4);
 				m.param = mpt::saturate_cast<uint8>(param);
 			}
+
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 09) && m.command == CMD_SPEED && m.param == 0)
+			{
+				// OpenMPT can emulate FT2's F00 behaviour now.
+				m.command = CMD_NONE;
+			}
 		}
 
 		chn++;
