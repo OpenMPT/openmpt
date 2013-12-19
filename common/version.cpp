@@ -169,10 +169,12 @@ std::string GetBuildDateString()
 std::string GetBuildFlagsString()
 {
 	std::string retval;
+#ifdef MODPLUG_TRACKER
 	if(IsTestBuild())
 	{
 		retval += " TEST";
 	}
+#endif // MODPLUG_TRACKER
 	if(IsDebugBuild())
 	{
 		retval += " DEBUG";
