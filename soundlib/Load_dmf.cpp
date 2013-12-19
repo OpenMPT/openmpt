@@ -1056,6 +1056,10 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	chunk = chunks.GetChunk(DMFChunk::idCMSG);
 	if(chunk.IsValid())
 	{
+		// The song message seems to start at a 1 byte offset.
+		// The skipped byte seems to always be 0.
+		// This also matches how XT 1.03 itself displays the song message.
+		chunk.Skip(1);
 		songMessage.ReadFixedLineLength(chunk, chunk.GetLength() - 1, 40, 0);
 	}
 	
