@@ -84,8 +84,8 @@ long double ConvertStrToLongDouble(const std::wstring &str) { return ConvertStrT
 namespace Util
 {
 
-time_t Util::MakeGmTime(tm *timeUtc)
-//----------------------------------
+time_t MakeGmTime(tm *timeUtc)
+//----------------------------
 {
 	#if MPT_COMPILER_MSVC
 		return _mkgmtime(timeUtc);
