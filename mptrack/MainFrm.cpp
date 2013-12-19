@@ -2165,7 +2165,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 
 				if (bTemplateFile)
 				{
-					pModDoc->GetFileHistory().clear();	// Reset edit history for template files
+					pModDoc->GetSoundFile()->GetFileHistory().clear();	// Reset edit history for template files
 					pModDoc->GetSoundFile()->m_dwCreatedWithVersion = MptVersion::num;
 					pModDoc->GetSoundFile()->m_dwLastSavedWithVersion = 0;
 				}
