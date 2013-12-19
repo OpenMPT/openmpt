@@ -535,7 +535,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				FileHistory mptHistory;
 				ITHistoryStruct itHistory;
-				file.Read(itHistory);
+				file.ReadConvertEndianness(itHistory);
 				itHistory.ConvertToMPT(mptHistory);
 				m_FileHistory.push_back(mptHistory);
 			}
