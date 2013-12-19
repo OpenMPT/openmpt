@@ -18,6 +18,7 @@
 #include <cstdlib>
 
 #include <string.h>
+#include <time.h>
 
 #include "typedefs.h"
 
@@ -401,6 +402,8 @@ size_t ConvertInt2MIDI(uint8 *result, size_t maxLength, TIn value)
 
 namespace Util
 {
+
+	time_t MakeGmTime(tm *timeUtc);
 
 	// Minimum of 3 values
 	template <class T> inline const T& Min(const T& a, const T& b, const T& c) {return std::min(std::min(a, b), c);}

@@ -140,7 +140,6 @@ CModDoc::CModDoc() : m_LogMode(LogModeInstantReporting), m_PatternUndo(*this), m
 
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	time(&m_creationTime);
-	m_FileHistory.clear();
 
 	m_bsInstrumentModified.reset();
 

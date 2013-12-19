@@ -642,6 +642,7 @@ std::vector<std::string> module_impl::get_metadata_keys() const {
 	retval.push_back("tracker");
 	retval.push_back("artist");
 	retval.push_back("title");
+	retval.push_back("date");
 	retval.push_back("message");
 	retval.push_back("warnings");
 	return retval;
@@ -661,6 +662,11 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		return mod_string_to_utf8( m_sndFile->songArtist );
 	} else if ( key == std::string("title") ) {
 		return mod_string_to_utf8( m_sndFile->GetTitle() );
+	} else if ( key == std::string("date") ) {
+		if ( m_sndFile->GetFileHistory().empty() ) {
+			return std::string();
+		}
+		return mod_string_to_utf8( m_sndFile->GetFileHistory()[m_sndFile->GetFileHistory().size() - 1].AsISO8601() );
 	} else if ( key == std::string("message") ) {
 		std::string retval = m_sndFile->songMessage.GetFormatted( SongMessage::leLF );
 		if ( retval.empty() ) {

@@ -15,6 +15,8 @@
 #include <sstream>
 #include <string>
 
+#include <time.h>
+
 
 template<typename T>
 inline T ConvertStrToHelper(const std::string &str)
@@ -77,6 +79,47 @@ unsigned long long ConvertStrToUnsignedLongLong(const std::wstring &str) { retur
 float ConvertStrToFloat(const std::wstring &str) { return ConvertStrToHelper<float>(str); }
 double ConvertStrToDouble(const std::wstring &str) { return ConvertStrToHelper<double>(str); }
 long double ConvertStrToLongDouble(const std::wstring &str) { return ConvertStrToHelper<long double>(str); }
+
+
+namespace Util
+{
+
+time_t Util::MakeGmTime(tm *timeUtc)
+//----------------------------------
+{
+	#if MPT_COMPILER_MSVC
+		return _mkgmtime(timeUtc);
+	#else // !MPT_COMPILER_MSVC
+		// There is no portable way in C/C++ to convert between time_t and struct tm in UTC.
+		// Approximate it as good as possible without implementing full date handling logic.
+		// NOTE:
+		// This can be wrong for dates during DST switch.
+		if(!timeUtc)
+		{
+			return time_t();
+		}
+		tm t = *timeUtc;
+		time_t localSinceEpoch = mktime(&t);
+		const tm * tmpLocal = localtime(&localSinceEpoch);
+		if(!tmpLocal)
+		{
+			return localSinceEpoch;
+		}
+		tm localTM = *tmpLocal;
+		const tm * tmpUTC = gmtime(&localSinceEpoch);
+		if(!tmpUTC)
+		{
+			return localSinceEpoch;
+		}
+		tm utcTM = *tmpUTC;
+		double offset = difftime(mktime(&localTM), mktime(&utcTM));
+		double timeScaleFactor = difftime(2, 1);
+		time_t utcSinceEpoch = localSinceEpoch + Util::Round<time_t>(offset / timeScaleFactor);
+		return utcSinceEpoch;
+	#endif // MPT_COMPILER_MSVC
+}
+
+} // namespace Util
 
 
 #ifdef MODPLUG_TRACKER

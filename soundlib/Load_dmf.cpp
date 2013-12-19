@@ -976,18 +976,13 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songname);
 	mpt::String::Read<mpt::String::spacePadded>(songArtist, fileHeader.composer);
 
-#ifdef MODPLUG_TRACKER
-	if(GetpModDoc() != nullptr)
-	{
-		FileHistory mptHistory;
-		MemsetZero(mptHistory);
-		mptHistory.loadDate.tm_mday = Clamp(fileHeader.creationDay, uint8(0), uint8(31));
-		mptHistory.loadDate.tm_mon = Clamp(fileHeader.creationMonth, uint8(1), uint8(12)) - 1;
-		mptHistory.loadDate.tm_year = fileHeader.creationYear;
-		GetpModDoc()->GetFileHistory().clear();
-		GetpModDoc()->GetFileHistory().push_back(mptHistory);
-	}
-#endif // MODPLUG_TRACKER
+	FileHistory mptHistory;
+	MemsetZero(mptHistory);
+	mptHistory.loadDate.tm_mday = Clamp(fileHeader.creationDay, uint8(0), uint8(31));
+	mptHistory.loadDate.tm_mon = Clamp(fileHeader.creationMonth, uint8(1), uint8(12)) - 1;
+	mptHistory.loadDate.tm_year = fileHeader.creationYear;
+	m_FileHistory.clear();
+	m_FileHistory.push_back(mptHistory);
 
 	// Go through all chunks now
 	ChunkReader chunkFile(file);

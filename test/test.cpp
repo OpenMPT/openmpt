@@ -1168,9 +1168,6 @@ void TestLoadXMFile(const CSoundFile &sndFile)
 void TestLoadMPTMFile(const CSoundFile &sndFile)
 //----------------------------------------------
 {
-#ifdef MODPLUG_TRACKER
-	const CModDoc *pModDoc = sndFile.GetpModDoc();
-#endif // MODPLUG_TRACKER
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "Test Module_____________X");
@@ -1192,10 +1189,9 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 1);
 	
-#ifdef MODPLUG_TRACKER
 	// Edit history
-	VERIFY_EQUAL_NONCONT(pModDoc->GetFileHistory().size() > 0, true);
-	const FileHistory &fh = pModDoc->GetFileHistory().at(0);
+	VERIFY_EQUAL_NONCONT(sndFile.GetFileHistory().size() > 0, true);
+	const FileHistory &fh = sndFile.GetFileHistory().at(0);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_year, 111);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mon, 5);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mday, 14);
@@ -1203,7 +1199,6 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_min, 8);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_sec, 32);
 	VERIFY_EQUAL_NONCONT((uint32)((double)fh.openTime / HISTORY_TIMER_PRECISION), 31);
-#endif // MODPLUG_TRACKER
 
 	// Macros
 	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetParameteredMacroType(0), sfx_reso);

@@ -94,21 +94,6 @@ STATIC_ASSERT( ((-1 << HINT_SHIFT_SEQUENCE) & HINT_MASK_ITEM) == (-1 << HINT_SHI
 
 
 /////////////////////////////////////////////////////////////////////////
-// File edit history
-
-#define HISTORY_TIMER_PRECISION	18.2f
-
-//================
-struct FileHistory
-//================
-{
-	// Date when the file was loaded in the the tracker or created.
-	tm loadDate;
-	// Time the file was open in the editor, in 1/18.2th seconds (frequency of a standard DOS timer, to keep compatibility with Impulse Tracker easy).
-	uint32 openTime;
-};
-
-/////////////////////////////////////////////////////////////////////////
 // Split Keyboard Settings (pattern editor)
 
 //==========================
@@ -193,7 +178,6 @@ protected:
 	CPatternUndo m_PatternUndo;
 	CSampleUndo m_SampleUndo;
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
-	std::vector<FileHistory> m_FileHistory;	// File edit history
 	time_t m_creationTime;
 
 	bool bModifiedAutosave; // Modified since last autosave?
@@ -265,8 +249,6 @@ public:
 	CSampleUndo &GetSampleUndo() { return m_SampleUndo; }
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
 
-	std::vector<FileHistory> &GetFileHistory() { return m_FileHistory; }
-	const std::vector<FileHistory> &GetFileHistory() const { return m_FileHistory; }
 	time_t GetCreationTime() const { return m_creationTime; }
 	
 // operations

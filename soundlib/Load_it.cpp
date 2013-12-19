@@ -530,22 +530,14 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(file.CanRead(nflt * sizeof(ITHistoryStruct)) && file.GetPosition() + nflt * sizeof(ITHistoryStruct) <= minPtr)
 		{
-#ifdef MODPLUG_TRACKER
-			if(GetpModDoc() != nullptr)
+			m_FileHistory.reserve(nflt);
+			for(size_t n = 0; n < nflt; n++)
 			{
-				GetpModDoc()->GetFileHistory().reserve(nflt);
-				for(size_t n = 0; n < nflt; n++)
-				{
-					FileHistory mptHistory;
-					ITHistoryStruct itHistory;
-					file.Read(itHistory);
-					itHistory.ConvertToMPT(mptHistory);
-					GetpModDoc()->GetFileHistory().push_back(mptHistory);
-				}
-			} else
-#endif // MODPLUG_TRACKER
-			{
-				file.Skip(nflt * sizeof(ITHistoryStruct));
+				FileHistory mptHistory;
+				ITHistoryStruct itHistory;
+				file.Read(itHistory);
+				itHistory.ConvertToMPT(mptHistory);
+				m_FileHistory.push_back(mptHistory);
 			}
 		} else
 		{
@@ -1057,12 +1049,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 //-----------------------------------------------------------
 {
+	size_t num = pSndFile->GetFileHistory().size();
 #ifdef MODPLUG_TRACKER
 	CModDoc *pModDoc = pSndFile->GetpModDoc();
-	const size_t num = (pModDoc != nullptr) ? pModDoc->GetFileHistory().size() + 1 : 0;	// + 1 for this session
-#else
-	const size_t num = 0;
-	MPT_UNREFERENCED_PARAMETER(pSndFile);
+	num += (pModDoc != nullptr) ? 1 : 0;	// + 1 for this session
 #endif // MODPLUG_TRACKER
 
 	uint16 fnum = (uint16)MIN(num, uint16_max);		// Number of entries that are actually going to be written
@@ -1075,17 +1065,19 @@ uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	SwapBytesLE(fnum);
 	fwrite(&fnum, 2, 1, f);
 
-#ifdef MODPLUG_TRACKER
 	// Write history data
 	const size_t start = (num > uint16_max) ? num - uint16_max : 0;
 	for(size_t n = start; n < num; n++)
 	{
 		FileHistory mptHistory;
 
-		if(n < num - 1)
+#ifdef MODPLUG_TRACKER
+		if(n < pSndFile->GetFileHistory().size())
+#endif // MODPLUG_TRACKER
 		{
 			// Previous timestamps
-			mptHistory = pModDoc->GetFileHistory().at(n);
+			mptHistory = pSndFile->GetFileHistory().at(n);
+#ifdef MODPLUG_TRACKER
 		} else
 		{
 			// Current ("new") timestamp
@@ -1100,6 +1092,7 @@ uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 				pSndFile->AddToLog("localtime() returned nullptr.");
 
 			mptHistory.openTime = (uint32)(difftime(time(nullptr), creationTime) * (double)HISTORY_TIMER_PRECISION);
+#endif // MODPLUG_TRACKER
 		}
 
 		ITHistoryStruct itHistory;
@@ -1107,7 +1100,6 @@ uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 
 		fwrite(&itHistory, 1, sizeof(itHistory), f);
 	}
-#endif // MODPLUG_TRACKER
 
 	return bytes_written;
 }

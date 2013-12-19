@@ -67,6 +67,7 @@ public:
 		tags.clear();
 		tags.push_back( std::make_pair( "TITLE", metadata[ "title" ] ) );
 		tags.push_back( std::make_pair( "ARTIST", metadata[ "artist" ] ) );
+		tags.push_back( std::make_pair( "DATE", metadata[ "date" ] ) );
 		tags.push_back( std::make_pair( "COMMENT", metadata[ "message" ] ) );
 		if ( !metadata[ "type" ].empty() && !metadata[ "tracker" ].empty() ) {
 			tags.push_back( std::make_pair( "SOURCEMEDIA", std::string() + "'" + metadata[ "type" ] + "' tracked music file, made with '" + metadata[ "tracker" ] + "', rendered with '" + get_encoder_tag() + "'" ) );

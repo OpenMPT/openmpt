@@ -195,6 +195,24 @@ class CModDoc;
 #endif // MODPLUG_TRACKER
 
 
+/////////////////////////////////////////////////////////////////////////
+// File edit history
+
+#define HISTORY_TIMER_PRECISION	18.2f
+
+//================
+struct FileHistory
+//================
+{
+	// Date when the file was loaded in the the tracker or created.
+	tm loadDate;
+	// Time the file was open in the editor, in 1/18.2th seconds (frequency of a standard DOS timer, to keep compatibility with Impulse Tracker easy).
+	uint32 openTime;
+	// Return the date as a (possibly truncated if not enough precision is available) ISO 8601 formatted date.
+	std::string AsISO8601() const;
+};
+
+
 struct TimingInfo
 {
 	double InputLatency; // seconds
@@ -430,6 +448,12 @@ public:
 	// Song message
 	SongMessage songMessage;
 	std::string madeWithTracker;
+
+protected:
+	std::vector<FileHistory> m_FileHistory;	// File edit history
+public:
+	std::vector<FileHistory> &GetFileHistory() { return m_FileHistory; }
+	const std::vector<FileHistory> &GetFileHistory() const { return m_FileHistory; }
 
 #ifdef MODPLUG_TRACKER
 // -> CODE#0023

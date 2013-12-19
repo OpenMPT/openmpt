@@ -12,19 +12,11 @@
 
 
 #include <string>
-#include <time.h>
 
 
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
 
 std::string GetErrorMessage(DWORD nErrorCode);
-
-namespace Util { namespace sdTime
-{
-
-	time_t MakeGmTime(tm& timeUtc);
-
-}} // namespace Util::sdTime
 
 namespace Util { namespace sdOs
 {
