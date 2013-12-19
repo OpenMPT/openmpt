@@ -1097,7 +1097,7 @@ uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 
 		ITHistoryStruct itHistory;
 		itHistory.ConvertToIT(mptHistory);
-
+		itHistory.ConvertEndianness();
 		fwrite(&itHistory, 1, sizeof(itHistory), f);
 	}
 
