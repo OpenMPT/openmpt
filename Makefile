@@ -210,8 +210,9 @@ ifeq ($(DEBUG),1)
 CXXFLAGS += -O0 -g
 CFLAGS   += -O0 -g
 else
-CXXFLAGS += -O3 -fno-strict-aliasing -ffast-math
-CFLAGS   += -O3 -fno-strict-aliasing -ffast-math
+# should be -O3, but current stable GCC (4.8.2) mis-analyzes code with -O3
+CXXFLAGS += -O2 -fno-strict-aliasing -ffast-math
+CFLAGS   += -O2 -fno-strict-aliasing -ffast-math
 endif
 
 ifeq ($(TEST),1)
