@@ -132,8 +132,6 @@ template<class TUNNUMTYPE, class STRSIZETYPE>
 static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::string>& shortToTNameMap, const size_t maxNum = 500)
 //-------------------------------------------------------------------------------------------------------------------------------
 {
-	typedef std::map<uint16, std::string> MAP;
-	typedef MAP::iterator MAP_ITER;
 	TUNNUMTYPE numTuning = 0;
 	iStrm.read(reinterpret_cast<char*>(&numTuning), sizeof(numTuning));
 	if(numTuning > maxNum)
