@@ -1232,11 +1232,17 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 	if ( flags.show_details ) {
 		set_field( fields, "Filename" ).ostream() << get_filename( filename );
 		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
-		set_field( fields, "Container" ).ostream() << ( mod.get_metadata( "container" ).empty() ? std::string("none") : ( mod.get_metadata( "container" ) + " (" + mod.get_metadata( "container_long" ) + ")" ) );
+		if ( !mod.get_metadata( "container" ).empty() ) {
+			set_field( fields, "Container" ).ostream() << mod.get_metadata( "container" ) << " (" << mod.get_metadata( "container_long" ) << ")";
+		}
 		set_field( fields, "Type" ).ostream() << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")";
 		set_field( fields, "Tracker" ).ostream() << mod.get_metadata( "tracker" );
-		set_field( fields, "Date" ).ostream() << mod.get_metadata( "date" );
-		set_field( fields, "Artist" ).ostream() << mod.get_metadata( "artist" );
+		if ( !mod.get_metadata( "date" ).empty() ) {
+			set_field( fields, "Date" ).ostream() << mod.get_metadata( "date" );
+		}
+		if ( !mod.get_metadata( "artist" ).empty() ) {
+			set_field( fields, "Artist" ).ostream() << mod.get_metadata( "artist" );
+		}
 	}
 	if ( true ) {
 		set_field( fields, "Title" ).ostream() << mod.get_metadata( "title" );
