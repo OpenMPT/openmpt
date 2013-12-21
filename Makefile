@@ -20,12 +20,17 @@
 #  See below and in `build/make/` for details.
 #
 #
-# Compiler options (provide on each `make` invocation):
+# Compiler options (environment variables):
 #
+#  CC
+#  CXX
+#  LD
+#  AR
 #  CPPFLAGS
 #  CXXFLAGS
 #  CFLAGS
 #  LDFLAGS
+#  LDLIBS
 #  ARFLAGS
 #
 #
@@ -38,6 +43,8 @@
 #  OPENMPT123=1     Build openmpt123
 #  SHARED_SONAME=1  Set SONAME of shared library
 #  TEST=0           Build libopenmpt in test mode
+#  DEBUG=0          Build debug binaries without optimization and with symbols
+#  OPTIMIZE=1       Build optimized binaries
 #
 #
 # Build flags for libopenmpt (provide on each `make` invocation)
@@ -115,6 +122,8 @@ STATIC_LIB=1
 EXAMPLES=1
 OPENMPT123=1
 SHARED_SONAME=1
+DEBUG=0
+OPTIMIZE=1
 
 
 # get commandline or defaults
@@ -210,9 +219,11 @@ ifeq ($(DEBUG),1)
 CXXFLAGS += -O0 -g
 CFLAGS   += -O0 -g
 else
+ifeq ($(OPTIMIZE),1)
 # should be -O3, but current stable GCC (4.8.2) mis-analyzes code with -O3
 CXXFLAGS += -O2 -fno-strict-aliasing -ffast-math
 CFLAGS   += -O2 -fno-strict-aliasing -ffast-math
+endif
 endif
 
 ifeq ($(TEST),1)
