@@ -363,6 +363,9 @@ public:
 
 	mpt::PathString m_szKbdFile;
 
+	Setting<uint32> mruListLength;
+	std::vector<mpt::PathString> mruFiles;
+
 	// Chords
 	MPTChords Chords;
 

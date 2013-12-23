@@ -58,14 +58,25 @@ const char *szHexChar = "0123456789ABCDEF";
 CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru, BOOL makeVisible)
 //------------------------------------------------------------------------------------------------------------
 {
-
 	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".dll")))
 	{
 		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-		if(pPluginManager)
+		if(pPluginManager && pPluginManager->AddPlugin(filename) != nullptr)
 		{
-			pPluginManager->AddPlugin(filename);
-			return NULL;
+			return nullptr;
+		}
+	}
+
+	// First, remove document from MRU list.
+	if(addToMru)
+	{
+		for(std::vector<mpt::PathString>::iterator i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
+		{
+			if(!mpt::PathString::CompareNoCase(*i, filename))
+			{
+				TrackerSettings::Instance().mruFiles.erase(i);
+				break;
+			}
 		}
 	}
 
@@ -75,11 +86,18 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), addToMru, makeVisible);
 	#endif
 	if(pDoc)
-	{		
+	{
+		if(addToMru)
+		{
+			TrackerSettings::Instance().mruFiles.insert(TrackerSettings::Instance().mruFiles.begin(), filename);
+			if(TrackerSettings::Instance().mruFiles.size() > TrackerSettings::Instance().mruListLength)
+			{
+				TrackerSettings::Instance().mruFiles.resize(TrackerSettings::Instance().mruListLength);
+			}
+		}
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm) pMainFrm->OnDocumentCreated(static_cast<CModDoc *>(pDoc));
-	}
-	else //Case: pDoc == 0, opening document failed.
+	} else //Case: pDoc == 0, opening document failed.
 	{
 		if(!filename.empty())
 		{
@@ -119,7 +137,7 @@ public:
 	{
 		return OpenDocumentFile(lpszFileName ? mpt::PathString::TunnelOutofCString(lpszFileName) : mpt::PathString());
 	}
-	virtual CDocument* OpenDocumentFile(const mpt::PathString	&filename)
+	virtual CDocument* OpenDocumentFile(const mpt::PathString &filename)
 	{
 		return CDocManager::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString());
 	}
@@ -811,9 +829,7 @@ BOOL CTrackApp::InitInstance()
 
 	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
 
-	int mruListLength = GetSettings().Read<int32>("Misc", "MRUListLength", 10);
-	Limit(mruListLength, 0, 15);
-	LoadStdProfileSettings((UINT)mruListLength);  // Load standard INI file options (including MRU)
+	LoadStdProfileSettings(0);  // Load standard INI file options (without MRU)
 
 	// Register document templates
 	m_pModTemplate = new CModDocTemplate(

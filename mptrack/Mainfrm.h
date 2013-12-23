@@ -468,6 +468,8 @@ protected:
 	/// Opens either template or example menu item.
 	void OpenMenuItemFile(const UINT nId, const bool bTemplateFile);
 
+	void UpdateMRUList();
+
 // Implementation
 public:
 	virtual ~CMainFrame();
@@ -492,12 +494,7 @@ protected:
 	afx_msg void OnTimer(UINT_PTR);
 	afx_msg void OnSongProperties();
 
-// -> CODE#0002
-// -> DESC="list box to choose VST plugin presets (programs)"
 	afx_msg void OnPluginManager();
-// -! NEW_FEATURE#0002
-
-
 
 	afx_msg void OnChannelManager();
 	afx_msg void OnClipboardManager();
@@ -505,8 +502,7 @@ protected:
 	afx_msg void OnUpdateTime(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateUser(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateInfo(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateXInfo(CCmdUI *pCmdUI); //rewbs.xinfo
-	afx_msg void OnUpdateCPU(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateXInfo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMidiRecord(CCmdUI *pCmdUI);
 	afx_msg void OnPlayerPause();
 	afx_msg void OnMidiRecord();
@@ -514,11 +510,13 @@ protected:
 	afx_msg void OnNextOctave();
 	afx_msg void OnOctaveChanged();
 	afx_msg void OnPanic();
-	afx_msg void OnReportBug();	//rewbs.customKeys
+	afx_msg void OnReportBug();
 	afx_msg BOOL OnInternetLink(UINT nID);
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM lParam);
-	afx_msg void OnExampleSong(UINT nId);
 	afx_msg void OnOpenTemplateModule(UINT nId);
+	afx_msg void OnExampleSong(UINT nId);
+	afx_msg void OnOpenMRUItem(UINT nId);
+	afx_msg void OnUpdateMRUItem(CCmdUI *cmd);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
 	afx_msg LRESULT OnSpecialKey(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
