@@ -12,8 +12,13 @@
 #include "MidiInOutEditor.h"
 #include <algorithm>
 
+#ifdef _WIN64
+#pragma comment(linker, "/EXPORT:VSTPluginMain")
+#pragma comment(linker, "/EXPORT:main=VSTPluginMain")
+#else
 #pragma comment(linker, "/EXPORT:_VSTPluginMain")
 #pragma comment(linker, "/EXPORT:_main=_VSTPluginMain")
+#endif
 
 AudioEffect *createEffectInstance(audioMasterCallback audioMaster)
 //----------------------------------------------------------------
