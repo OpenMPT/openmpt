@@ -1610,6 +1610,7 @@ BOOL CSoundFile::ProcessEffects()
 		bool bPorta = (cmd == CMD_TONEPORTAMENTO) || (cmd == CMD_TONEPORTAVOL) || (volcmd == VOLCMD_TONEPORTAMENTO);
 
 		UINT nStartTick = 0;
+		pChn->isFirstTick = (m_nTickCount == 0);
 
 		pChn->dwFlags.reset(CHN_FASTVOLRAMP);
 
@@ -1783,6 +1784,13 @@ BOOL CSoundFile::ProcessEffects()
 		if((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) && nStartTick > 0 && (m_nTickCount % (m_nMusicSpeed + m_nFrameDelay)) == nStartTick)
 		{
 			triggerNote = true;
+		}
+
+		// IT compatibility: Tick-0 vs non-tick-0 effect distinction is always based on tick delay.
+		// Test case: SlideDelay.it
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		{
+			pChn->isFirstTick = triggerNote;
 		}
 
 		// Handles note/instrument/volume changes
@@ -2156,7 +2164,7 @@ BOOL CSoundFile::ProcessEffects()
 				case VOLCMD_FINEVOLUP:
 					// IT Compatibility: Fine volume slides in the volume column are only executed on the first tick, not on multiples of the first tick in case of pattern delay
 					// Test case: FineVolColSlide.it
-					if(m_nTickCount == 0 || !IsCompatibleMode(TRK_IMPULSETRACKER))
+					if(m_nTickCount == nStartTick || !IsCompatibleMode(TRK_IMPULSETRACKER))
 					{
 						// IT Compatibility: Volume column volume slides have their own memory
 						// Test case: VolColMemory.it
@@ -2167,7 +2175,7 @@ BOOL CSoundFile::ProcessEffects()
 				case VOLCMD_FINEVOLDOWN:
 					// IT Compatibility: Fine volume slides in the volume column are only executed on the first tick, not on multiples of the first tick in case of pattern delay
 					// Test case: FineVolColSlide.it
-					if(m_nTickCount == 0 || !IsCompatibleMode(TRK_IMPULSETRACKER))
+					if(m_nTickCount == nStartTick || !IsCompatibleMode(TRK_IMPULSETRACKER))
 					{
 						// IT Compatibility: Volume column volume slides have their own memory
 						// Test case: VolColMemory.it
@@ -2775,7 +2783,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 		}
 	}
 	// Regular Slide
-	if(!m_SongFlags[SONG_FIRSTTICK])
+	if(!pChn->isFirstTick)
 	{
 		DoFreqSlide(pChn, -int(param) * 4);
 	}
@@ -2827,7 +2835,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 		}
 	}
 
-	if(!m_SongFlags[SONG_FIRSTTICK])
+	if(!pChn->isFirstTick)
 	{
 		DoFreqSlide(pChn, int(param) * 4);
 	}
@@ -2849,7 +2857,7 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 
 	if(doFineSlides && actualParam >= 0xE0 && !GetModFlag(MSF_OLD_MIDI_PITCHBENDS))
 	{
-		if(m_SongFlags[SONG_FIRSTTICK])
+		if(Chn[nChn].isFirstTick)
 		{
 			// Extra fine slide...
 			pitchBend = (actualParam & 0x0F) * sgn(param);
@@ -2859,7 +2867,7 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 				pitchBend *= 4;
 			}
 		}
-	} else if(!m_SongFlags[SONG_FIRSTTICK] || GetModFlag(MSF_OLD_MIDI_PITCHBENDS))
+	} else if(!Chn[nChn].isFirstTick || GetModFlag(MSF_OLD_MIDI_PITCHBENDS))
 	{
 		// Regular slide
 		pitchBend = param * 4;
@@ -2894,7 +2902,7 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 		if(param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
 
-	if(m_SongFlags[SONG_FIRSTTICK])
+	if(pChn->isFirstTick)
 	{
 		if ((pChn->nPeriod) && (param))
 		{
@@ -2929,7 +2937,7 @@ void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
 		if(param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
 
-	if(m_SongFlags[SONG_FIRSTTICK])
+	if(pChn->isFirstTick)
 	{
 		if ((pChn->nPeriod) && (param))
 		{
@@ -2964,7 +2972,7 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 		if(param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
 
-	if(m_SongFlags[SONG_FIRSTTICK])
+	if(pChn->isFirstTick)
 	{
 		if ((pChn->nPeriod) && (param))
 		{
@@ -2999,7 +3007,7 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
 		if(param) pChn->nOldFinePortaUpDown = param; else param = pChn->nOldFinePortaUpDown;
 	}
 
-	if(m_SongFlags[SONG_FIRSTTICK])
+	if(pChn->isFirstTick)
 	{
 		if ((pChn->nPeriod) && (param))
 		{
@@ -3112,7 +3120,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 	} //End candidate MPT behavior.
 
 	if(param) pChn->nPortamentoSlide = param * 4;
-	if(pChn->nPeriod && pChn->nPortamentoDest && !m_SongFlags[SONG_FIRSTTICK])
+	if(pChn->nPeriod && pChn->nPortamentoDest && !pChn->isFirstTick)
 	{
 		if (pChn->nPeriod < pChn->nPortamentoDest)
 		{
@@ -3213,7 +3221,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 				return;
 			} else //Slide -15
 			{
-				if(m_SongFlags[SONG_FIRSTTICK] && !m_SongFlags[SONG_FASTVOLSLIDES])
+				if(pChn->isFirstTick && !m_SongFlags[SONG_FASTVOLSLIDES])
 				{
 					newvolume -= 0x0F * 4;
 				}
@@ -3227,14 +3235,14 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 				return;
 			} else //Slide +15
 			{
-				if(m_SongFlags[SONG_FIRSTTICK] && !m_SongFlags[SONG_FASTVOLSLIDES])
+				if(pChn->isFirstTick && !m_SongFlags[SONG_FASTVOLSLIDES])
 				{
 					newvolume += 0x0F * 4;
 				}
 			}
 		}
 	}
-	if(!m_SongFlags[SONG_FIRSTTICK] || m_SongFlags[SONG_FASTVOLSLIDES])
+	if(!pChn->isFirstTick || m_SongFlags[SONG_FASTVOLSLIDES])
 	{
 		// IT compatibility: Ignore slide commands with both nibbles set.
 		if (param & 0x0F)
@@ -3354,7 +3362,7 @@ void CSoundFile::FineVolumeUp(ModChannel *pChn, UINT param, bool volCol)
 		if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
 	}
 
-	if(m_SongFlags[SONG_FIRSTTICK])
+	if(pChn->isFirstTick)
 	{
 		pChn->nVolume += param * 4;
 		if(pChn->nVolume > 256) pChn->nVolume = 256;
@@ -3379,7 +3387,7 @@ void CSoundFile::FineVolumeDown(ModChannel *pChn, UINT param, bool volCol)
 		if(param) pChn->nOldFineVolUpDown = param; else param = pChn->nOldFineVolUpDown;
 	}
 
-	if(m_SongFlags[SONG_FIRSTTICK])
+	if(pChn->isFirstTick)
 	{
 		pChn->nVolume -= param * 4;
 		if(pChn->nVolume < 0) pChn->nVolume = 0;
