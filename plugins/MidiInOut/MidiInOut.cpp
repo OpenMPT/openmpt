@@ -2,8 +2,7 @@
  * MidiInOut.cpp
  * -------------
  * Purpose: A VST plugin for sending and receiving MIDI data.
- * Notes  : Compile the static PortMidi library first. PortMidi comes with a Visual Studio solution so this should be simple.
- *          The PortMidi directory should be played in OpenMPT's include folder (./include/portmidi)
+ * Notes  : (currently none)
  * Authors: Johannes Schultz (OpenMPT Devs)
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -13,6 +12,8 @@
 #include "MidiInOutEditor.h"
 #include <algorithm>
 
+#pragma comment(linker, "/EXPORT:_VSTPluginMain")
+#pragma comment(linker, "/EXPORT:_main=_VSTPluginMain")
 
 AudioEffect *createEffectInstance(audioMasterCallback audioMaster)
 //----------------------------------------------------------------
