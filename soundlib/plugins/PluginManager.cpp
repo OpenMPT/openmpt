@@ -480,10 +480,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			fullPath = theApp.GetAppDirPath() + MPT_PATHSTRING("Plugins\\");
 		}
-		if(!fullPath.HasTrailingSlash())
-		{
-			fullPath += MPT_PATHSTRING("\\");
-		}
 		fullPath += mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()) + MPT_PATHSTRING(".dll");
 
 		pFound = AddPlugin(fullPath);

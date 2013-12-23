@@ -197,6 +197,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_MayNormalizeSamplesOnLoad(conf, "Sample Editor", "MayNormalizeSamplesOnLoad", true)
 	// Export
 	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
+	// MRU List
+	, mruListLength(conf, "Misc", "MRUListLength", 10)
 {
 	// Effects
 #ifndef NO_DSP
@@ -315,6 +317,21 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		mpt::String::Copy(macros.szMidiZXXExt[izxx], conf.Read<std::string>("Zxx Macros", mpt::String::Format("Z%02X", izxx | 0x80), macros.szMidiZXXExt[izxx]));
 	}
 
+
+	// MRU list
+	Limit(mruListLength, 0u, 32u);
+	mruFiles.reserve(mruListLength);
+	for(uint32 i = 0; i < mruListLength; i++)
+	{
+		char key[16];
+		sprintf(key, "File%d", i);
+
+		mpt::PathString path = theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>("Recent File List", key, mpt::PathString()));
+		if(!path.empty())
+		{
+			mruFiles.push_back(path);
+		}
+	}
 
 	// Fixups:
 	// -------
@@ -808,6 +825,25 @@ void TrackerSettings::SaveSettings()
 		conf.Write<std::string>("Zxx Macros", mpt::String::Format("Z%02X", izxx | 0x80), macros.szMidiZXXExt[izxx]);
 	}
 
+	// MRU list
+	for(uint32 i = 0; i < (ID_MRU_LIST_LAST - ID_MRU_LIST_FIRST + 1); i++)
+	{
+		char key[16];
+		sprintf(key, "File%d", i);
+
+		if(i < mruFiles.size())
+		{
+			mpt::PathString path = mruFiles[i];
+			if(theApp.IsPortableMode())
+			{
+				path = theApp.AbsolutePathToRelative(path);
+			}
+			conf.Write<mpt::PathString>("Recent File List", key, path);
+		} else
+		{
+			conf.Remove("Recent File List", key);
+		}
+	}
 }
 
 
@@ -923,20 +959,24 @@ void TrackerDirectories::SetDirectory(const mpt::PathString &szFilenameFrom, Dir
 	if(bStripFilename)
 	{
 		path = szFilenameFrom.GetDrive() + szFilenameFrom.GetDir();
-	}
-	else
+	} else
 	{
 		path = szFilenameFrom;
 	}
 
-	mpt::PathString szOldDir = directories[dir]; // for comparison
+	if(!path.HasTrailingSlash())
+	{
+		path += MPT_PATHSTRING("\\");
+	}
+
+	const mpt::PathString oldDir = directories[dir]; // for comparison
 
 	directories[dir] = path;
 
 	// When updating default directory, also update the working directory.
 	if(!path.empty() && directories == m_szDefaultDirectory)
 	{
-		if(szOldDir != path) // update only if default directory has changed
+		if(oldDir != path) // update only if default directory has changed
 			SetWorkingDirectory(path, dir);
 	}
 }

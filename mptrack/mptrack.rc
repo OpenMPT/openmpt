@@ -1967,7 +1967,7 @@ BEGIN
         MENUITEM "Import &MIDI Library...",     ID_IMPORT_MIDILIB
         MENUITEM "Add Sound &Bank...",          ID_ADD_SOUNDBANK
         MENUITEM SEPARATOR
-        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1
+        MENUITEM "Recent File",                 ID_MRU_LIST_FIRST, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
     END

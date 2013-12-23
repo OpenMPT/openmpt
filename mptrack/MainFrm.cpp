@@ -89,7 +89,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_USER,	OnUpdateUser)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_INFO,	OnUpdateInfo)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,OnUpdateXInfo) //rewbs.xinfo
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_CPU,  OnUpdateCPU)
 	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		OnUpdateControlBarMenu)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
@@ -98,6 +97,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
 	ON_COMMAND(ID_HELPSHOW,					OnHelp)
+
+	ON_COMMAND_RANGE(ID_MRU_LIST_FIRST, ID_MRU_LIST_LAST, OnOpenMRUItem)
+	ON_UPDATE_COMMAND_UI(ID_MRU_LIST_FIRST,	OnUpdateMRUItem)
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
 	ON_WM_KILLFOCUS() //rewbs.fix3116
@@ -173,7 +175,6 @@ static UINT indicators[] =
 	ID_INDICATOR_INFO,
 	ID_INDICATOR_USER,
 	ID_INDICATOR_TIME,
-	ID_INDICATOR_CPU
 };
 
 
@@ -183,7 +184,6 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 //----------------------
 {
-
 	m_NotifyTimer = 0;
 	gpSoundDevice = NULL;
 
@@ -271,6 +271,7 @@ VOID CMainFrame::Initialize()
 
 	CreateExampleModulesMenu();
 	CreateTemplateModulesMenu();
+	UpdateMRUList();
 }
 
 
@@ -329,7 +330,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Cursors
 	curDragging = theApp.LoadCursor(IDC_DRAGGING);
 	curArrow = theApp.LoadStandardCursor(IDC_ARROW);
-	curNoDrop = theApp.LoadCursor(IDC_NODROP);
+	curNoDrop = theApp.LoadStandardCursor(IDC_NO);
 	curNoDrop2 = theApp.LoadCursor(IDC_NODRAG);
 	curVSplit = theApp.LoadCursor(AFX_IDC_HSPLITBAR);
 	// bitmaps
@@ -344,6 +345,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!m_wndStatusBar.Create(this)) return -1;
 	if (!m_wndTree.Create(this, IDD_TREEVIEW, CBRS_LEFT|CBRS_BORDER_RIGHT, IDD_TREEVIEW)) return -1;
 	m_wndStatusBar.SetIndicators(indicators, CountOf(indicators));
+	m_wndStatusBar.SetPaneInfo(0, ID_SEPARATOR, SBPS_STRETCH, 256);
 	m_wndToolBar.Init(this);
 	m_wndTree.RecalcLayout();
 
@@ -1745,6 +1747,7 @@ VOID CMainFrame::SetHelpText(LPCSTR lpszText)
 VOID CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 //--------------------------------------------------
 {
+	UpdateMRUList();
 	m_wndTree.OnDocumentCreated(pModDoc);
 }
 
@@ -2104,24 +2107,11 @@ void CMainFrame::OnUpdateInfo(CCmdUI *)
 }
 
 
-void CMainFrame::OnUpdateCPU(CCmdUI *)
-//-------------------------------------
-{
-/*	CString s;
-	double totalCPUPercent = m_dTotalCPU*100;
-	UINT intPart = static_cast<int>(totalCPUPercent);
-	UINT decPart = static_cast<int>(totalCPUPercent-intPart)*100;
-	s.Format("%d.%d%%", intPart, decPart);
-	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_CPU), s, TRUE);*/
-}
-
-//rewbs.xinfo
 void CMainFrame::OnUpdateXInfo(CCmdUI *)
 //-------------------------------------
 {
 	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_XINFO), m_szXInfoText, TRUE);
 }
-//end rewbs.xinfo
 
 void CMainFrame::OnPlayerPause()
 //------------------------------
@@ -2193,7 +2183,21 @@ void CMainFrame::OnExampleSong(UINT nId)
 //--------------------------------------
 {
 	OpenMenuItemFile(nId, false/*open example menu file*/);
+}
 
+
+void CMainFrame::OnOpenMRUItem(UINT nId)
+//--------------------------------------
+{
+	mpt::PathString file = TrackerSettings::Instance().mruFiles[nId - ID_MRU_LIST_FIRST];
+	theApp.OpenDocumentFile(file);
+}
+
+
+void CMainFrame::OnUpdateMRUItem(CCmdUI *cmd)
+//-------------------------------------------
+{
+	cmd->Enable(!TrackerSettings::Instance().mruFiles.empty());
 }
 
 
@@ -2635,6 +2639,78 @@ void CMainFrame::CreateTemplateModulesMenu()
 	}
 	else
 		ASSERT(false);
+}
+
+
+void CMainFrame::UpdateMRUList()
+//------------------------------
+{
+	CMenu *pMenu = (CMainFrame::GetMainFrame())->GetMenu()->GetSubMenu(0);
+	static int firstMenu = -1;
+	if(firstMenu == -1)
+	{
+		int numMenus = pMenu->GetMenuItemCount();
+		for(int i = 0; i < numMenus; i++)
+		{
+			if(pMenu->GetMenuItemID(i) == ID_MRU_LIST_FIRST)
+			{
+				firstMenu = i;
+				break;
+			}
+		}
+	}
+
+	for(int i = ID_MRU_LIST_FIRST; i <= ID_MRU_LIST_LAST; i++)
+	{
+		pMenu->DeleteMenu(i, MF_BYCOMMAND);
+	}
+
+	if(TrackerSettings::Instance().mruFiles.empty())
+	{
+		// MFC will automatically ignore if we set MF_GRAYED here because of CFrameWnd::m_bAutoMenuEnable.
+		// So we will have to install a ON_UPDATE_COMMAND_UI callback...
+		pMenu->InsertMenu(firstMenu, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST, _T("Recent File"));
+	} else
+	{
+		const std::wstring dir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS).ToWide();
+		const size_t dirLength = dir.size();
+
+		for(size_t i = 0; i < TrackerSettings::Instance().mruFiles.size(); i++)
+		{
+			std::wstring s = StringifyW(i + 1) + L" ";
+			// Add mnemonics
+			if(i < 9)
+			{
+				s = L"&" + s;
+			} else if(i == 9)
+			{
+				s = L"1&0 ";
+			}
+
+			std::wstring path = TrackerSettings::Instance().mruFiles[i].ToWide();
+			if(!lstrcmpiW(dir.c_str(), path.substr(0, dirLength).c_str()))
+			{
+				// Only show filename
+				s += path.substr(dirLength);
+			} else if(path.length() <= 30)
+			{
+				s += path;
+			} else
+			{
+				// Shorten path
+				size_t start = path.find_first_of(L"\\/");
+				size_t end = path.find_last_of(L"\\/");
+				if(start != end)
+				{
+					s += path.substr(0, start + 1) + L"..." + path.substr(end);
+				} else
+				{
+					s += path;
+				}
+			}
+			::InsertMenuW(pMenu->m_hMenu, firstMenu + i, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST + i, s.c_str());
+		}
+	}
 }
 
 
