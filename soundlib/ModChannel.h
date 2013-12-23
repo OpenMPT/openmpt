@@ -102,6 +102,7 @@ struct ALIGN(32) ModChannel
 	uint8 nActiveMacro, nFilterMode;
 	uint8 nEFxSpeed, nEFxDelay;		// memory for Invert Loop (EFx, .MOD only)
 	uint8 nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;	// IMF / PTM Note Slide
+	bool isFirstTick;
 
 	ModCommand rowCommand;
 

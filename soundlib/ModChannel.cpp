@@ -35,6 +35,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		}
 		nTremorCount = 0;
 		nEFxSpeed = 0;
+		isFirstTick = false;
 	}
 
 	if(resetMask & resetSetPosAdvanced)
