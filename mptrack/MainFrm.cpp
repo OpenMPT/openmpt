@@ -1725,7 +1725,7 @@ VOID CMainFrame::SetInfoText(LPCSTR lpszText)
 	}
 }
 
-//rewbs.xinfo
+
 VOID CMainFrame::SetXInfoText(LPCSTR lpszText)
 //-------------------------------------------
 {
@@ -1735,7 +1735,7 @@ VOID CMainFrame::SetXInfoText(LPCSTR lpszText)
 		OnUpdateInfo(NULL);
 	}
 }
-//end rewbs.xinfo
+
 
 VOID CMainFrame::SetHelpText(LPCSTR lpszText)
 //-------------------------------------------
@@ -1747,8 +1747,8 @@ VOID CMainFrame::SetHelpText(LPCSTR lpszText)
 VOID CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 //--------------------------------------------------
 {
-	UpdateMRUList();
 	m_wndTree.OnDocumentCreated(pModDoc);
+	UpdateMRUList();
 }
 
 

@@ -70,14 +70,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 	// First, remove document from MRU list.
 	if(addToMru)
 	{
-		for(std::vector<mpt::PathString>::iterator i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
-		{
-			if(!mpt::PathString::CompareNoCase(*i, filename))
-			{
-				TrackerSettings::Instance().mruFiles.erase(i);
-				break;
-			}
-		}
+		theApp.RemoveMruItem(filename);
 	}
 
 	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
@@ -87,14 +80,6 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 	#endif
 	if(pDoc)
 	{
-		if(addToMru)
-		{
-			TrackerSettings::Instance().mruFiles.insert(TrackerSettings::Instance().mruFiles.begin(), filename);
-			if(TrackerSettings::Instance().mruFiles.size() > TrackerSettings::Instance().mruListLength)
-			{
-				TrackerSettings::Instance().mruFiles.resize(TrackerSettings::Instance().mruListLength);
-			}
-		}
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm) pMainFrm->OnDocumentCreated(static_cast<CModDoc *>(pDoc));
 	} else //Case: pDoc == 0, opening document failed.
@@ -617,18 +602,19 @@ CTrackApp::CTrackApp()
 void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
 //-------------------------------------------------------
 {
-	mpt::PathString filename = mpt::PathString::TunnelOutofCString(lpszPathName);
-	#ifdef UNICODE
-		CWinApp::AddToRecentFileList(filename.AsNative().c_str());
-	#else
-		if(filename.AsNative() != (mpt::PathString::FromCStringSilent(filename.ToCStringSilent())).AsNative())
-		{
-			// MFC ANSI builds fire strict assertions if the file path is invalid.
-			// Only proceed for string representable in CP_ACP.
-			return;
-		}
-		CWinApp::AddToRecentFileList(filename.ToCStringSilent());
-	#endif
+	AddToRecentFileList(mpt::PathString::TunnelOutofCString(lpszPathName));
+}
+
+
+void CTrackApp::AddToRecentFileList(const mpt::PathString &path)
+//--------------------------------------------------------------
+{
+	TrackerSettings::Instance().mruFiles.insert(TrackerSettings::Instance().mruFiles.begin(), path);
+	if(TrackerSettings::Instance().mruFiles.size() > TrackerSettings::Instance().mruListLength)
+	{
+		TrackerSettings::Instance().mruFiles.resize(TrackerSettings::Instance().mruListLength);
+	}
+	CMainFrame::GetMainFrame()->UpdateMRUList();
 }
 
 
@@ -2043,9 +2029,26 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 }
 
 
-void CTrackApp::RemoveMruItem(const int nItem)
-//--------------------------------------------
+void CTrackApp::RemoveMruItem(const size_t item)
+//----------------------------------------------
 {
-	if (m_pRecentFileList && nItem >= 0 && nItem < m_pRecentFileList->GetSize())
-		m_pRecentFileList->Remove(nItem);
+	if(item < TrackerSettings::Instance().mruFiles.size())
+	{
+		TrackerSettings::Instance().mruFiles.erase(TrackerSettings::Instance().mruFiles.begin() + item);
+		CMainFrame::GetMainFrame()->UpdateMRUList();
+	}
+}
+
+
+void CTrackApp::RemoveMruItem(const mpt::PathString &path)
+//--------------------------------------------------------
+{
+	for(std::vector<mpt::PathString>::iterator i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
+	{
+		if(!mpt::PathString::CompareNoCase(*i, path))
+		{
+			TrackerSettings::Instance().mruFiles.erase(i);
+			break;
+		}
+	}
 }

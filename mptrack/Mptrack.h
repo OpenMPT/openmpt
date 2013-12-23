@@ -178,6 +178,10 @@ public:
 #endif
 
 	MPT_DEPRECATED_PATH virtual void AddToRecentFileList(LPCTSTR lpszPathName);
+	void AddToRecentFileList(const mpt::PathString &path);
+	/// Removes item from MRU-list; most recent item has index zero.
+	void RemoveMruItem(const size_t item);
+	void RemoveMruItem(const mpt::PathString &path);
 
 protected:
 
@@ -272,9 +276,6 @@ public:
 	// Relative / absolute paths conversion
 	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetAppDirPath()); }
 	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetAppDirPath()); }
-
-	/// Removes item from MRU-list; most recent item has index zero.
-	void RemoveMruItem(const int nItem);
 
 // Splash Screen
 protected:
