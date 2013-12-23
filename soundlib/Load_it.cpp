@@ -349,7 +349,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		ChangeModTypeTo(MOD_TYPE_MPT);
 	} else
 	{
-		if(mptStartPos <= file.GetLength() - 3 && fileHeader.cwtv > 0x888)
+		if(mptStartPos <= file.GetLength() - 3 && fileHeader.cwtv > 0x888 && fileHeader.cwtv <= 0xFFF)
 		{
 			file.Seek(mptStartPos);
 			ChangeModTypeTo(file.ReadMagic("228") ? MOD_TYPE_MPT : MOD_TYPE_IT);
