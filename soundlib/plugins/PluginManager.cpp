@@ -246,8 +246,8 @@ AEffect *CVstPluginManager::LoadPlugin(const mpt::PathString &pluginPath, HINSTA
 
 
 // Extract instrument and category information from plugin.
-void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
-//---------------------------------------------------------------
+static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
+//----------------------------------------------------------------------
 {
 	library.category = static_cast<VSTPluginLib::PluginCategory>(effect->dispatcher(effect, effGetPlugCategory, 0, 0, nullptr, 0.0f));
 	library.isInstrument = ((effect->flags & effFlagsIsSynth) || !effect->numInputs);
@@ -275,6 +275,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 			*errStr += L"\nUnable to find ";
 			*errStr += dllPath.ToWide();
 		}
+		return nullptr;
 	}
 
 	// Check if this is already a known plugin.
@@ -493,8 +494,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, MPT_PATHSTRING(""));
 				if(!fullPath.empty())
 				{
-					theApp.RelativePathToAbsolute(fullPath);
-					pFound = AddPlugin(fullPath);
+					pFound = AddPlugin(theApp.RelativePathToAbsolute(fullPath), true, true);
 				}
 			}
 		}
