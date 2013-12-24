@@ -428,12 +428,10 @@ void CModControlView::UpdateView(DWORD lHint, CObject *pObject)
 	// Module type changed: update tabs
 	if (lHint & HINT_MODTYPE)
 	{
-		CSoundFile *pSndFile = pDoc->GetSoundFile();
 		UINT nCount = 4;
-		UINT nType = pSndFile->GetType();
 		UINT mask = 1 | 2 | 4 | 16;
 
-		if (nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if(pDoc->GetrSoundFile().GetModSpecifications().instrumentsMax > 0)
 		{
 			mask |= 8;
 			//mask |= 32; //rewbs.graph
@@ -490,7 +488,7 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 			int nItems = m_TabCtrl.GetItemCount();
 			for (int i=0; i<nItems; i++)
 			{
-				if (m_TabCtrl.GetItemData(i) == nIndex)
+				if (m_TabCtrl.GetItemData(i) == nIndex && m_TabCtrl.GetCurSel() != i)
 				{
 					m_TabCtrl.SetCurSel(i);
 					SetActivePage(i, lParam);
