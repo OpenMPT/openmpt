@@ -415,9 +415,9 @@ public:
 	~TrackerDirectories();
 
 	// access to default + working directories
-	void SetWorkingDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename = false);
+	void SetWorkingDirectory(const mpt::PathString &filenameFrom, Directory dir, bool stripFilename = false);
 	mpt::PathString GetWorkingDirectory(Directory dir) const;
-	void SetDefaultDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename = false);
+	void SetDefaultDirectory(const mpt::PathString &filenameFrom, Directory dir, bool stripFilename = false);
 	mpt::PathString GetDefaultDirectory(Directory dir) const;
 
 	static TrackerDirectories &Instance();
