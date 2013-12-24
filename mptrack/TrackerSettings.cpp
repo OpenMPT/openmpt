@@ -463,15 +463,15 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,04))
 	{
-		m_dwPatternSetup &= ~0x200000;				// dito
+		m_dwPatternSetup &= ~0x200000;				// ditto
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,07))
 	{
-		m_dwPatternSetup &= ~0x400000;				// dito
+		m_dwPatternSetup &= ~0x400000;				// ditto
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,39))
 	{
-		m_dwPatternSetup &= ~0x10000000;			// dito
+		m_dwPatternSetup &= ~0x10000000;			// ditto
 	}
 
 	// Effects
@@ -949,22 +949,22 @@ std::bitset<128> StringToIgnoredCCs(const std::string &in)
 }
 
 
-
-// retrieve / set default directory from given string and store it our setup variables
-void TrackerDirectories::SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&directories)[NUM_DIRS], bool bStripFilename)
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
+// Retrieve / set default directory from given string and store it our setup variables
+// If stripFilename is true, the filenameFrom parameter is assumed to be a full path including a filename.
+void TrackerDirectories::SetDirectory(const mpt::PathString &filenameFrom, Directory dir, mpt::PathString (&directories)[NUM_DIRS], bool stripFilename)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString path;
 
-	if(bStripFilename)
+	if(stripFilename)
 	{
-		path = szFilenameFrom.GetDrive() + szFilenameFrom.GetDir();
+		path = filenameFrom.GetDrive() + filenameFrom.GetDir();
 	} else
 	{
-		path = szFilenameFrom;
+		path = filenameFrom;
 	}
 
-	if(!path.HasTrailingSlash())
+	if(!path.empty() && !path.HasTrailingSlash())
 	{
 		path += MPT_PATHSTRING("\\");
 	}
@@ -981,6 +981,7 @@ void TrackerDirectories::SetDirectory(const mpt::PathString &szFilenameFrom, Dir
 	}
 }
 
+
 void TrackerDirectories::SetDefaultDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename)
 //---------------------------------------------------------------------------------------------------------------------
 {
@@ -995,6 +996,7 @@ void TrackerDirectories::SetWorkingDirectory(const mpt::PathString &szFilenameFr
 }
 
 
+// Get slash-terminated default directory of given type.
 mpt::PathString TrackerDirectories::GetDefaultDirectory(Directory dir) const
 //--------------------------------------------------------------------------
 {
@@ -1002,6 +1004,7 @@ mpt::PathString TrackerDirectories::GetDefaultDirectory(Directory dir) const
 }
 
 
+// Get slash-terminated working directory of given type.
 mpt::PathString TrackerDirectories::GetWorkingDirectory(Directory dir) const
 //--------------------------------------------------------------------------
 {
