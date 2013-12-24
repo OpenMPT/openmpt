@@ -1,8 +1,8 @@
 
-CC  ?= gcc 
-CXX ?= g++
-LD  ?= g++
-AR  ?= ar
+CC  = gcc 
+CXX = g++
+LD  = g++
+AR  = ar
 
 #CPPFLAGS += -DMPT_COMPILER_GENERIC
 CPPFLAGS += 
