@@ -1,8 +1,8 @@
 
-CC  ?= x86_64-w64-mingw32-gcc
-CXX ?= x86_64-w64-mingw32-g++
-LD  ?= x86_64-w64-mingw32-g++
-AR  ?= x86_64-w64-mingw32-ar
+CC  = x86_64-w64-mingw32-gcc
+CXX = x86_64-w64-mingw32-g++
+LD  = x86_64-w64-mingw32-g++
+AR  = x86_64-w64-mingw32-ar
 
 CPPFLAGS += -DWIN32 -D_WIN32 -DWIN64 -D_WIN64
 CXXFLAGS += -std=c++0x -municode -mconsole 

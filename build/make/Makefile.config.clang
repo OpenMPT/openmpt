@@ -1,8 +1,8 @@
 
-CC  ?= clang 
-CXX ?= clang++
-LD  ?= clang++
-AR  ?= ar 
+CC  = clang 
+CXX = clang++
+LD  = clang++
+AR  = ar 
 
 #CPPFLAGS += -DMPT_COMPILER_GENERIC
 CPPFLAGS +=
