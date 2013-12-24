@@ -275,7 +275,6 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 			*errStr += L"\nUnable to find ";
 			*errStr += dllPath.ToWide();
 		}
-		return nullptr;
 	}
 
 	// Check if this is already a known plugin.
@@ -494,7 +493,11 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, MPT_PATHSTRING(""));
 				if(!fullPath.empty())
 				{
-					pFound = AddPlugin(theApp.RelativePathToAbsolute(fullPath), true, true);
+					fullPath = theApp.RelativePathToAbsolute(fullPath);
+					if(PathFileExistsW(fullPath.AsNative().c_str()))
+					{
+						pFound = AddPlugin(fullPath);
+					}
 				}
 			}
 		}
