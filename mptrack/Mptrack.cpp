@@ -609,12 +609,38 @@ void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
 void CTrackApp::AddToRecentFileList(const mpt::PathString &path)
 //--------------------------------------------------------------
 {
+	RemoveMruItem(path);
 	TrackerSettings::Instance().mruFiles.insert(TrackerSettings::Instance().mruFiles.begin(), path);
 	if(TrackerSettings::Instance().mruFiles.size() > TrackerSettings::Instance().mruListLength)
 	{
 		TrackerSettings::Instance().mruFiles.resize(TrackerSettings::Instance().mruListLength);
 	}
 	CMainFrame::GetMainFrame()->UpdateMRUList();
+}
+
+
+void CTrackApp::RemoveMruItem(const size_t item)
+//----------------------------------------------
+{
+	if(item < TrackerSettings::Instance().mruFiles.size())
+	{
+		TrackerSettings::Instance().mruFiles.erase(TrackerSettings::Instance().mruFiles.begin() + item);
+		CMainFrame::GetMainFrame()->UpdateMRUList();
+	}
+}
+
+
+void CTrackApp::RemoveMruItem(const mpt::PathString &path)
+//--------------------------------------------------------
+{
+	for(std::vector<mpt::PathString>::iterator i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
+	{
+		if(!mpt::PathString::CompareNoCase(*i, path))
+		{
+			TrackerSettings::Instance().mruFiles.erase(i);
+			break;
+		}
+	}
 }
 
 
@@ -2026,29 +2052,4 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 		}
 	}
 	return false;
-}
-
-
-void CTrackApp::RemoveMruItem(const size_t item)
-//----------------------------------------------
-{
-	if(item < TrackerSettings::Instance().mruFiles.size())
-	{
-		TrackerSettings::Instance().mruFiles.erase(TrackerSettings::Instance().mruFiles.begin() + item);
-		CMainFrame::GetMainFrame()->UpdateMRUList();
-	}
-}
-
-
-void CTrackApp::RemoveMruItem(const mpt::PathString &path)
-//--------------------------------------------------------
-{
-	for(std::vector<mpt::PathString>::iterator i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
-	{
-		if(!mpt::PathString::CompareNoCase(*i, path))
-		{
-			TrackerSettings::Instance().mruFiles.erase(i);
-			break;
-		}
-	}
 }
