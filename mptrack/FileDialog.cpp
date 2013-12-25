@@ -16,8 +16,8 @@
 
 
 // Display the file dialog.
-bool FileDialog::Show(CWnd *parent)
-//---------------------------------
+bool FileDialog::Show(const CWnd *parent)
+//---------------------------------------
 {
 	filenames.clear();
 
@@ -122,8 +122,8 @@ int CALLBACK BrowseForFolder::BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM /*
 
 
 // Display the folder dialog.
-bool BrowseForFolder::Show(CWnd *parent)
-//--------------------------------------
+bool BrowseForFolder::Show(const CWnd *parent)
+//--------------------------------------------
 {
 	WCHAR path[MAX_PATH];
 

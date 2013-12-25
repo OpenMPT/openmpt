@@ -207,7 +207,8 @@ public:
 	void ToggleEditor();
 	void GetPluginType(LPSTR pszType);
 	BOOL GetDefaultEffectName(LPSTR pszName);
-	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
+	CAbstractVstEditor *GetEditor() { return m_pEditor; }
+	const CAbstractVstEditor *GetEditor() const { return m_pEditor; }
 
 	void Bypass(bool bypass = true);
 	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); };
@@ -345,7 +346,7 @@ protected:
 
 protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel, const AEffect *effect);
+	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel, const CVstPlugin *plugin);
 	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static bool CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);
 	VstTimeInfo timeInfo;

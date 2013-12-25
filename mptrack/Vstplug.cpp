@@ -422,7 +422,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	// close a fileselector operation with VstFileSelect* in <ptr>: Must be always called after an open !
 	case audioMasterCloseFileSelector:
-		return VstFileSelector(opcode == audioMasterCloseFileSelector, static_cast<VstFileSelect *>(ptr), effect);
+		if(pVstPlugin != nullptr)
+		{
+			return VstFileSelector(opcode == audioMasterCloseFileSelector, static_cast<VstFileSelect *>(ptr), pVstPlugin);
+		}
 
 	// open an editor for audio (defined by XML text in ptr) - DEPRECATED in VST 2.4
 	case audioMasterEditFile:
@@ -458,8 +461,8 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 
 // Helper function for file selection dialog stuff.
-VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fileSel, const AEffect *effect)
-//----------------------------------------------------------------------------------------------------------
+VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fileSel, const CVstPlugin *plugin)
+//-------------------------------------------------------------------------------------------------------------
 {
 	if(fileSel == nullptr)
 	{
@@ -515,7 +518,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 			}
 			dlg.ExtensionFilter(extensions)
 				.WorkingDirectory(mpt::PathString::FromLocale(workingDir));
-			if(!dlg.Show())
+			if(!dlg.Show(plugin->GetEditor()))
 			{
 				return 0;
 			}
@@ -538,7 +541,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				// Single path
 
 				// VOPM doesn't initialize required information properly (it doesn't memset the struct to 0)...
-				if(CCONST('V', 'O', 'P', 'M') == effect->uniqueID)
+				if(CCONST('V', 'O', 'P', 'M') == plugin->GetUID())
 				{
 					fileSel->sizeReturnPath = _MAX_PATH;
 				}
@@ -569,10 +572,10 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 		{
 			// Plugin wants a directory
 			BrowseForFolder dlg(mpt::PathString::FromLocale(fileSel->initialPath != nullptr ? fileSel->initialPath : ""), fileSel->title != nullptr ? fileSel->title : "");
-			if(dlg.Show())
+			if(dlg.Show(plugin->GetEditor()))
 			{
 				const std::string dir = dlg.GetDirectory().ToLocale();
-				if(CCONST('V', 'S', 'T', 'r') == effect->uniqueID && fileSel->returnPath != nullptr && fileSel->sizeReturnPath == 0)
+				if(CCONST('V', 'S', 'T', 'r') == plugin->GetUID() && fileSel->returnPath != nullptr && fileSel->sizeReturnPath == 0)
 				{
 					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.
 					// They report a path size of 0, but when using an own buffer, they will crash.
@@ -2177,13 +2180,6 @@ void CVstPlugin::ToggleEditor()
 	{
 		CVstPluginManager::ReportPlugException("Exception in ToggleEditor() (Plugin=%s)\n", m_Factory.libraryName);
 	}
-}
-
-
-CAbstractVstEditor* CVstPlugin::GetEditor()
-//-----------------------------------------
-{
-	return m_pEditor;
 }
 
 
