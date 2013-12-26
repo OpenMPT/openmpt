@@ -86,6 +86,10 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 	{
 		if(!filename.empty())
 		{
+			if(CMainFrame::GetMainFrame() && addToMru)
+			{
+				CMainFrame::GetMainFrame()->UpdateMRUList();
+			}
 			if(PathFileExistsW(filename.AsNative().c_str()) == FALSE)
 			{
 				Reporting::Error(L"Unable to open \"" + filename.ToWide() + L"\": file does not exist.");
@@ -606,8 +610,8 @@ void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
 }
 
 
-void CTrackApp::AddToRecentFileList(const mpt::PathString &path)
-//--------------------------------------------------------------
+void CTrackApp::AddToRecentFileList(const mpt::PathString path)
+//-------------------------------------------------------------
 {
 	RemoveMruItem(path);
 	TrackerSettings::Instance().mruFiles.insert(TrackerSettings::Instance().mruFiles.begin(), path);

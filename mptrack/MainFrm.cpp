@@ -2621,19 +2621,32 @@ void CMainFrame::CreateExampleModulesMenu()
 }
 
 
+// Hack-ish way to get the file menu (this is necessary because the MDI document icon next to the File menu is a sub menu, too).
+CMenu *CMainFrame::GetFileMenu() const
+//------------------------------------
+{
+	CMenu *mainMenu = GetMenu();
+	CMenu *fileMenu = mainMenu ? mainMenu->GetSubMenu(0) : nullptr;
+	if(fileMenu)
+	{
+		if(fileMenu->GetMenuItemID(1) != ID_FILE_OPEN)
+			fileMenu = mainMenu->GetSubMenu(1);
+		ASSERT(fileMenu->GetMenuItemID(1) == ID_FILE_OPEN);
+	}
+	ASSERT(fileMenu);
+	return fileMenu;
+}
+
+
 void CMainFrame::CreateTemplateModulesMenu()
 //------------------------------------------
 {
 	static_assert(nMaxItemsInTemplateModulesMenu == ID_FILE_OPENTEMPLATE_LASTINRANGE - ID_FILE_OPENTEMPLATE + 1,
 				  "Make sure that there's a proper range for menu commands in resources.");
 	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, s_TemplateModulePaths, MPT_PATHSTRING("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
-	CMenu* const pMainMenu = GetMenu();
-	CMenu* pFileMenu = (pMainMenu) ? pMainMenu->GetSubMenu(0) : nullptr;
+	CMenu *pFileMenu = GetFileMenu();
 	if (hMenu && pFileMenu && m_InputHandler)
 	{
-		if (pFileMenu->GetMenuItemID(1) != ID_FILE_OPEN)
-			pFileMenu = pMainMenu->GetSubMenu(1);
-		ASSERT(pFileMenu->GetMenuItemID(1) == ID_FILE_OPEN);
 		VERIFY(pFileMenu->RemoveMenu(2, MF_BYPOSITION));
 		VERIFY(pFileMenu->InsertMenu(2, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_FILE_OPENTEMPLATE)));
 	}
@@ -2645,7 +2658,7 @@ void CMainFrame::CreateTemplateModulesMenu()
 void CMainFrame::UpdateMRUList()
 //------------------------------
 {
-	CMenu *pMenu = (CMainFrame::GetMainFrame())->GetMenu()->GetSubMenu(0);
+	CMenu *pMenu = GetFileMenu();
 	static int firstMenu = -1;
 	if(firstMenu == -1)
 	{
@@ -2697,10 +2710,10 @@ void CMainFrame::UpdateMRUList()
 				s += path;
 			} else
 			{
-				// Shorten path
-				size_t start = path.find_first_of(L"\\/");
+				// Shorten path ("C:\Foo\VeryLongString...\Bar.it" => "C:\Foo\...\Bar.it")
+				size_t start = path.find_first_of(L"\\/", path.find_first_of(L"\\/") + 1);
 				size_t end = path.find_last_of(L"\\/");
-				if(start != end)
+				if(start < end)
 				{
 					s += path.substr(0, start + 1) + L"..." + path.substr(end);
 				} else
