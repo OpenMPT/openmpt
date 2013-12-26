@@ -2685,8 +2685,7 @@ void CMainFrame::UpdateMRUList()
 		pMenu->InsertMenu(firstMenu, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST, _T("Recent File"));
 	} else
 	{
-		const std::wstring dir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS).ToWide();
-		const size_t dirLength = dir.size();
+		const mpt::PathString workDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS);
 
 		for(size_t i = 0; i < TrackerSettings::Instance().mruFiles.size(); i++)
 		{
@@ -2700,12 +2699,13 @@ void CMainFrame::UpdateMRUList()
 				s = L"1&0 ";
 			}
 
-			std::wstring path = TrackerSettings::Instance().mruFiles[i].ToWide();
-			if(!lstrcmpiW(dir.c_str(), path.substr(0, dirLength).c_str()))
+			const mpt::PathString &pathMPT = TrackerSettings::Instance().mruFiles[i];
+			const std::wstring path = pathMPT.ToWide();
+			if(!mpt::PathString::CompareNoCase(workDir, pathMPT.GetPath()))
 			{
 				// Only show filename
-				s += path.substr(dirLength);
-			} else if(path.length() <= 30)
+				s += path.substr(workDir.ToWide().length());
+			} else if(path.length() <= 30)	// Magic number experimentally determined to be equal to MFC's behaviour
 			{
 				s += path;
 			} else
