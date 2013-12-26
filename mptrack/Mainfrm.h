@@ -396,6 +396,7 @@ public:
 
 	void CreateExampleModulesMenu();
 	void CreateTemplateModulesMenu();
+	CMenu *GetFileMenu() const;
 
 	/// Creates submenu whose items are filenames of files in both
 	/// AppDirectory\pszFolderName\   (usually C:\program files\OpenMPT\pszFolderName\)
