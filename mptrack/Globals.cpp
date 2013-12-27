@@ -488,7 +488,7 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 			int nItems = m_TabCtrl.GetItemCount();
 			for (int i=0; i<nItems; i++)
 			{
-				if (m_TabCtrl.GetItemData(i) == nIndex && m_TabCtrl.GetCurSel() != i)
+				if (m_TabCtrl.GetItemData(i) == nIndex)
 				{
 					m_TabCtrl.SetCurSel(i);
 					SetActivePage(i, lParam);
