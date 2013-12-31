@@ -10,40 +10,21 @@
 
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#define NOMINMAX
-#include <windows.h>
-#include <tchar.h>
+#include "WindowBase.h"
 
 
-//============
-class CheckBox
-//============
+//================================
+class CheckBox : public WindowBase
+//================================
 { 
-protected:
-	HWND check;
-
 public:
-	CheckBox()
-	{
-		check = nullptr;
-	}
-
-
-	~CheckBox()
-	{
-		Destroy();
-	}
-
-
 	// Create a new check box.
 	void Create(HWND parent, const TCHAR *text, int x, int y, int width, int height)
 	{
 		// Remove old instance, if necessary
 		Destroy();
 
-		check = CreateWindow(_T("BUTTON"),
+		hwnd = CreateWindow(_T("BUTTON"),
 			text,
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CHECKBOX | BS_AUTOCHECKBOX,
 			x,
@@ -55,34 +36,16 @@ public:
 			NULL,
 			0);
 
-		SendMessage(check, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
-	}
-
-
-	// Destroy the combo box.
-	void Destroy()
-	{
-		if(check != nullptr)
-		{
-			DestroyWindow(check);
-		}
-		check = nullptr;
-	}
-
-
-	// Get the HWND associated with this combo box.
-	HWND GetHwnd()
-	{
-		return check;
+		SendMessage(hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
 	}
 
 
 	// Select an item.
 	void SetState(bool state)
 	{
-		if(check != nullptr)
+		if(hwnd != nullptr)
 		{
-			SendMessage(check,
+			SendMessage(hwnd,
 				BM_SETCHECK,
 				state ? BST_CHECKED : BST_UNCHECKED,
 				0);
@@ -93,9 +56,9 @@ public:
 	// Get the currently selected item.
 	bool GetState() const
 	{
-		if(check != nullptr)
+		if(hwnd != nullptr)
 		{
-			return SendMessage(check,
+			return SendMessage(hwnd,
 				BM_GETCHECK,
 				0,
 				0) != BST_UNCHECKED;

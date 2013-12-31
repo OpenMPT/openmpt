@@ -10,52 +10,34 @@
 
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#define NOMINMAX
-#include "windows.h"
+#include "WindowBase.h"
 
 
-//==========
-class Window
-//==========
+//==============================
+class Window : public WindowBase
+//==============================
 { 
-private:
-	HWND window;
+protected:
 	WNDPROC originalWinProc;
 
 public:
-	Window() : window(nullptr), originalWinProc(nullptr) { };
-
-
-	~Window()
-	{
-		DestroyWindow();
-	}
-
-
-	// Get system pointer to window
-	HWND GetHwnd() const
-	{
-		return static_cast<HWND>(window);
-	}
-
+	Window() : originalWinProc(nullptr) { };
 
 	// Register window callback function and initialize window
 	void InitializeWindow(void *windowHandle)
 	{
 		DestroyWindow();
 
-		window = static_cast<HWND>(windowHandle);
+		hwnd = static_cast<HWND>(windowHandle);
 
 		// Inject our own window processing function into the window.
-		originalWinProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
+		originalWinProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
 
 		// Store pointer to the window object in the window's user data, so we have access to the custom callback function and original window processing function later.
-		SetWindowLongPtr(window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+		SetPropA(hwnd, "ptr", reinterpret_cast<HANDLE>(this));
 
 		// Set background colour (or else, the plugin's background is black in Renoise)
-		SetClassLongPtr(window, GCLP_HBRBACKGROUND, reinterpret_cast<LONG_PTR>(GetSysColorBrush(COLOR_3DFACE))); 
+		SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, reinterpret_cast<LONG_PTR>(GetSysColorBrush(COLOR_3DFACE)));
 	}
 
 
@@ -63,11 +45,11 @@ public:
 	void DestroyWindow()
 	{
 		// Restore original window processing function.
-		if(window != nullptr)
+		if(hwnd != nullptr)
 		{
-			SetWindowLongPtr(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(originalWinProc));
+			SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(originalWinProc));
 		}
-		window = nullptr;
+		hwnd = nullptr;
 		originalWinProc = nullptr;
 	}
 
@@ -79,7 +61,7 @@ private:
 	// Window processing callback function
 	static INT_PTR CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
-		Window *owner = reinterpret_cast<Window *>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+		Window *owner = reinterpret_cast<Window *>(GetPropA(hWnd, "ptr"));
 
 		if(owner != nullptr)
 		{

@@ -196,6 +196,7 @@
     <ClInclude Include="..\common\ComboBox.h" />
     <ClInclude Include="..\common\Label.h" />
     <ClInclude Include="..\common\Window.h" />
+    <ClInclude Include="..\common\WindowBase.h" />
     <ClInclude Include="MidiInOut.h" />
     <ClInclude Include="MidiInOutEditor.h" />
   </ItemGroup>
