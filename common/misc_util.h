@@ -649,3 +649,28 @@ std::wstring BinToHex(const std::vector<char> &src);
 std::vector<char> HexToBin(const std::wstring &src);
 
 } // namespace Util
+
+namespace mpt
+{
+
+#if defined(WIN32)
+
+namespace Windows
+{
+
+// returns version in the form of the _WIN32_WINNT_* macros
+static inline uint32 GetWinNTVersion()
+//------------------------------------
+{
+	OSVERSIONINFO versioninfo;
+	MemsetZero(versioninfo);
+	versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
+	GetVersionEx(&versioninfo);
+	return ((uint32)mpt::saturate_cast<uint8>(versioninfo.dwMajorVersion) << 8) | (uint32)mpt::saturate_cast<uint8>(versioninfo.dwMinorVersion);
+}
+
+} // namespace Windows
+
+#endif // WIN32
+
+} // namespace mpt
