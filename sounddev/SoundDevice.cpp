@@ -388,15 +388,9 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 //------------------------------------------------------------------------------------------
 {
 
-	OSVERSIONINFO versioninfo;
-	MemsetZero(versioninfo);
-	versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
-	GetVersionEx(&versioninfo);
-	m_HasXP = versioninfo.dwMajorVersion >= 6 || (versioninfo.dwMajorVersion == 5 && versioninfo.dwMinorVersion >= 1);
-	m_HasVista = versioninfo.dwMajorVersion >= 6;
+	m_HasXP = (mpt::Windows::GetWinNTVersion() >= _WIN32_WINNT_WINXP);
 
 	m_hKernel32DLL = NULL;
-	m_hAvRtDLL = NULL;
 
 	pCreateWaitableTimer = nullptr;
 	pSetWaitableTimer = nullptr;
@@ -419,22 +413,6 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 			}
 		}
 	#endif
-
-	pAvSetMmThreadCharacteristics = nullptr;
-	pAvRevertMmThreadCharacteristics = nullptr;
-	if(m_HasVista)
-	{
-		m_hAvRtDLL = LoadLibrary(TEXT("avrt.dll"));
-		if(m_hAvRtDLL)
-		{
-			pAvSetMmThreadCharacteristics = (FAvSetMmThreadCharacteristics)GetProcAddress(m_hAvRtDLL, "AvSetMmThreadCharacteristicsA");
-			pAvRevertMmThreadCharacteristics = (FAvRevertMmThreadCharacteristics)GetProcAddress(m_hAvRtDLL, "AvRevertMmThreadCharacteristics");
-		}
-		if(!pAvSetMmThreadCharacteristics || !pAvRevertMmThreadCharacteristics)
-		{
-			m_HasVista = false;
-		}
-	}
 
 	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
@@ -477,17 +455,9 @@ CAudioThread::~CAudioThread()
 		m_hAudioWakeUp = NULL;
 	}
 
-	pAvRevertMmThreadCharacteristics = nullptr;
-	pAvSetMmThreadCharacteristics = nullptr;
 	pCreateWaitableTimer = nullptr;
 	pSetWaitableTimer = nullptr;
 	pCancelWaitableTimer = nullptr;
-
-	if(m_hAvRtDLL)
-	{
-		FreeLibrary(m_hAvRtDLL);
-		m_hAvRtDLL = NULL;
-	}
 
 	if(m_hKernel32DLL)
 	{
@@ -498,58 +468,78 @@ CAudioThread::~CAudioThread()
 }
 
 
-class CPriorityBooster
+CPriorityBooster::CPriorityBooster(bool boostPriority)
+//----------------------------------------------------
+	: m_HasVista(false)
+	, m_hAvRtDLL(NULL)
+	, pAvSetMmThreadCharacteristics(nullptr)
+	, pAvRevertMmThreadCharacteristics(nullptr)
+	, m_BoostPriority(boostPriority)
+	, task_idx(0)
+	, hTask(NULL)
 {
-private:
-	CAudioThread &self;
-	bool m_BoostPriority;
-	DWORD task_idx;
-	HANDLE hTask;
-public:
 
-	CPriorityBooster(CAudioThread &self_, bool boostPriority) : self(self_), m_BoostPriority(boostPriority)
-	//-----------------------------------------------------------------------------------------------------
+	m_HasVista = (mpt::Windows::GetWinNTVersion() >= _WIN32_WINNT_VISTA);
+
+	if(m_HasVista)
 	{
-		#ifdef _DEBUG
-			m_BoostPriority = false;
-		#endif
-
-		task_idx = 0;
-		hTask = NULL;
-
-		if(m_BoostPriority)
+		m_hAvRtDLL = LoadLibrary(TEXT("avrt.dll"));
+		if(m_hAvRtDLL && m_hAvRtDLL != INVALID_HANDLE_VALUE)
 		{
-			if(self.m_HasVista)
-			{
-				hTask = self.pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &task_idx);
-			} else
-			{
-				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-			}
+			pAvSetMmThreadCharacteristics = (FAvSetMmThreadCharacteristics)GetProcAddress(m_hAvRtDLL, "AvSetMmThreadCharacteristicsA");
+			pAvRevertMmThreadCharacteristics = (FAvRevertMmThreadCharacteristics)GetProcAddress(m_hAvRtDLL, "AvRevertMmThreadCharacteristics");
 		}
-
+		if(!pAvSetMmThreadCharacteristics || !pAvRevertMmThreadCharacteristics)
+		{
+			m_HasVista = false;
+		}
 	}
 
-	CPriorityBooster::~CPriorityBooster()
-	//-----------------------------------
+	#ifdef _DEBUG
+		m_BoostPriority = false;
+	#endif
+
+	if(m_BoostPriority)
 	{
-
-		if(m_BoostPriority)
+		if(m_HasVista)
 		{
-			if(self.m_HasVista)
-			{
-				self.pAvRevertMmThreadCharacteristics(hTask);
-				hTask = NULL;
-				task_idx = 0;
-			} else
-			{
-				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-			}
+			hTask = pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &task_idx);
+		} else
+		{
+			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 		}
-
 	}
 
-};
+}
+
+
+CPriorityBooster::~CPriorityBooster()
+//-----------------------------------
+{
+
+	if(m_BoostPriority)
+	{
+		if(m_HasVista)
+		{
+			pAvRevertMmThreadCharacteristics(hTask);
+			hTask = NULL;
+			task_idx = 0;
+		} else
+		{
+			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+		}
+	}
+
+	pAvRevertMmThreadCharacteristics = nullptr;
+	pAvSetMmThreadCharacteristics = nullptr;
+
+	if(m_hAvRtDLL)
+	{
+		FreeLibrary(m_hAvRtDLL);
+		m_hAvRtDLL = NULL;
+	}
+
+}
 
 
 class CPeriodicWaker
@@ -691,7 +681,7 @@ DWORD CAudioThread::AudioThread()
 		if(!terminate)
 		{
 
-			CPriorityBooster priorityBooster(*this, m_SoundDevice.m_Settings.BoostThreadPriority);
+			CPriorityBooster priorityBooster(m_SoundDevice.m_Settings.BoostThreadPriority);
 			CPeriodicWaker periodicWaker(*this, m_WakeupInterval);
 
 			m_SoundDevice.StartFromSoundThread();
