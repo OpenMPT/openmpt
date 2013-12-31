@@ -440,8 +440,8 @@ static void show_help( textout & log, bool longhelp = false, const std::string &
 		log << std::endl;
 		log << "     --[no-]progress        Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
 		log << "     --[no-]meters          Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
-		log << "     --[no-]channel-meters  Show channel peak meters [default: " << commandlineflags().show_channel_meters << "]" << std::endl;
-		log << "     --[no-]pattern         Show pattern [default: " << commandlineflags().show_pattern << "]" << std::endl;
+		log << "     --[no-]channel-meters  Show channel peak meters (EXPERIMENTAL) [default: " << commandlineflags().show_channel_meters << "]" << std::endl;
+		log << "     --[no-]pattern         Show pattern (EXPERIMENTAL) [default: " << commandlineflags().show_pattern << "]" << std::endl;
 		log << std::endl;
 		log << "     --[no-]details         Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
 		log << "     --[no-]message         Show song message [default: " << commandlineflags().show_message << "]" << std::endl;

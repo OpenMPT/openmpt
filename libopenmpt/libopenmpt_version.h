@@ -17,7 +17,7 @@
 /*! \brief libopenmpt major version number */
 #define OPENMPT_API_VERSION_MAJOR 0
 /*! \brief libopenmpt minor version number */
-#define OPENMPT_API_VERSION_MINOR 1
+#define OPENMPT_API_VERSION_MINOR 2
 
 /*! \brief libopenmpt API version number */
 #define OPENMPT_API_VERSION ((OPENMPT_API_VERSION_MAJOR<<24)|(OPENMPT_API_VERSION_MINOR<<16))

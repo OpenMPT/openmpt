@@ -56,6 +56,6 @@
 #endif
 #endif
 
-#define OPENMPT123_VERSION_STRING "0.1"
+#define OPENMPT123_VERSION_STRING "0.2"
 
 #endif // OPENMPT123_CONFIG_HPP
