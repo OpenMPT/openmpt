@@ -10,40 +10,21 @@
 
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#define NOMINMAX
-#include <windows.h>
-#include <tchar.h>
+#include "WindowBase.h"
 
 
-//============
-class ComboBox
-//============
+//================================
+class ComboBox : public WindowBase
+//================================
 { 
-protected:
-	HWND combo;
-
 public:
-	ComboBox()
-	{
-		combo = nullptr;
-	}
-
-
-	~ComboBox()
-	{
-		Destroy();
-	}
-
-
 	// Create a new combo box.
 	void Create(HWND parent, int x, int y, int width, int height)
 	{
 		// Remove old instance, if necessary
 		Destroy();
 
-		combo = CreateWindow(_T("COMBOBOX"),
+		hwnd = CreateWindow(_T("COMBOBOX"),
 			nullptr,
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST,
 			x,
@@ -55,28 +36,28 @@ public:
 			NULL,
 			0);
 
-		SendMessage(combo, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
+		SendMessage(hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
 	}
 
 
 	// Destroy the combo box.
 	void Destroy()
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
 			ResetContent();
-			DestroyWindow(combo);
+			DestroyWindow(hwnd);
 		}
-		combo = nullptr;
+		hwnd = nullptr;
 	}
 
 
 	// Remove all items in the combo box.
 	void ResetContent()
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			SendMessage(combo,
+			SendMessage(hwnd,
 				CB_RESETCONTENT,
 				0,
 				0);
@@ -84,26 +65,19 @@ public:
 	}
 
 
-	// Get the HWND associated with this combo box.
-	HWND GetHwnd()
-	{
-		return combo;
-	}
-
-
 	// Add a string to the combo box.
 	int AddString(const TCHAR *text, const void *data)
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			LRESULT result = SendMessage(combo,
+			LRESULT result = SendMessage(hwnd,
 				CB_ADDSTRING,
 				0,
 				reinterpret_cast<LPARAM>(text));
 
 			if(result != CB_ERR)
 			{
-				SendMessage(combo,
+				SendMessage(hwnd,
 					CB_SETITEMDATA,
 					result,
 					reinterpret_cast<LPARAM>(data)
@@ -118,9 +92,9 @@ public:
 	// Return number of items in combo box.
 	int GetCount() const
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			return static_cast<int>(SendMessage(combo,
+			return static_cast<int>(SendMessage(hwnd,
 				CB_GETCOUNT,
 				0,
 				0));
@@ -132,9 +106,9 @@ public:
 	// Select an item.
 	void SetSelection(int index)
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			SendMessage(combo,
+			SendMessage(hwnd,
 				CB_SETCURSEL,
 				index,
 				0);
@@ -145,9 +119,9 @@ public:
 	// Get the currently selected item.
 	LRESULT GetSelection() const
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			return SendMessage(combo,
+			return SendMessage(hwnd,
 				CB_GETCURSEL,
 				0,
 				0);
@@ -166,9 +140,9 @@ public:
 	// Get item data associated with a list item.
 	void *GetItemData(int index) const
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			return reinterpret_cast<void *>(SendMessage(combo,
+			return reinterpret_cast<void *>(SendMessage(hwnd,
 				CB_GETITEMDATA,
 				index,
 				0));
