@@ -36,7 +36,7 @@ private:
 	}
 	static void write_setting( const std::wstring & subkey, const std::wstring & key, int val ) {
 		HKEY regkey = HKEY();
-		if ( RegOpenKeyEx( HKEY_CURRENT_USER, ( L"Software\\libopenmpt\\" + subkey ).c_str(), 0, KEY_WRITE, &regkey ) == ERROR_SUCCESS ) {
+		if ( RegCreateKeyEx( HKEY_CURRENT_USER, ( L"Software\\libopenmpt\\" + subkey ).c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &regkey, NULL ) == ERROR_SUCCESS ) {
 			DWORD v = val;
 			DWORD type = REG_DWORD;
 			DWORD typesize = sizeof(v);
