@@ -55,10 +55,6 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 	{
 		return wrongPlugin;
 	}
-	if(header.fxVersion > plugin.GetVersion())
-	{
-		return outdatedPlugin;
-	}
 
 	if(header.fxMagic == fMagic || header.fxMagic == chunkPresetMagic)
 	{
@@ -259,8 +255,6 @@ const char *VSTPresets::GetErrorMessage(ErrorCode code)
 		return "This does not appear to be a valid preset file.";
 	case VSTPresets::wrongPlugin:
 		return "This file appears to be for a different plugin.";
-	case VSTPresets::outdatedPlugin:
-		return "This file is for a newer version of this plugin.";
 	case VSTPresets::wrongParameters:
 		return "The number of parameters in this file is incompatible with the current plugin.";
 	}

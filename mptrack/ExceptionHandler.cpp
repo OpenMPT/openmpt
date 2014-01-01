@@ -151,7 +151,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 }
 
 
-// Try to close the audio device and rescue unsaved work if an unhandled exception occurrs...
+// Try to close the audio device and rescue unsaved work if an unhandled exception occurs...
 LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
 //----------------------------------------------------------------------------------
 {
@@ -168,7 +168,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 			if(pMainFrame->m_NotifyTimer)
 			{
 				pMainFrame->KillTimer(pMainFrame->m_NotifyTimer);
-				pMainFrame->m_NotifyTimer =  0;
+				pMainFrame->m_NotifyTimer = 0;
 			}
 		} catch(...)
 		{
