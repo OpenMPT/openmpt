@@ -71,8 +71,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	// Check file ID
 	if(!file.CanRead(12 + 4 + 24 + 4)
 		|| file.ReadUint32LE() != ITP_FILE_ID				// Magic bytes
-		|| (version = file.ReadUint32LE()) > ITP_VERSION	// Format version
-		|| !ReadITPString(songName, file))					// Song name
+		|| (version = file.ReadUint32LE()) > ITP_VERSION)	// Format version
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -81,6 +80,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
+	ReadITPString(songName, file);
 
 	// Song comments
 	songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
