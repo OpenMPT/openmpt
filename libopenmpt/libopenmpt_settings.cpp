@@ -15,7 +15,14 @@ extern "C" {
 void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char * title ) {
 	try {
 		libopenmpt::SettingsForm ^ form = gcnew libopenmpt::SettingsForm( title, s );
+		bool topmost = false;
+		if ( parent && parent != INVALID_HANDLE_VALUE ) {
+			topmost = ( GetWindowLong( parent, GWL_EXSTYLE ) & WS_EX_TOPMOST ) ? true : false;
+		}
 		System::Windows::Forms::IWin32Window ^w = System::Windows::Forms::Control::FromHandle((System::IntPtr)parent);
+		if ( topmost ) {
+			form->TopMost = true;
+		}
 		form->ShowDialog(w);
 	} catch ( ... ) {
 		// nothing
