@@ -4282,6 +4282,11 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 			{
 				if ((m_nTickCount) || ((param & 0x100) && (!chn.rowCommand.note))) doRetrig = true;
 			}
+			if(IsCompatibleMode(TRK_FASTTRACKER2) && param == 0)
+			{
+				// E90 = Retrig instantly, and only once
+				doRetrig = (m_nTickCount == 0);
+			}
 		}
 	}
 
