@@ -18,7 +18,6 @@
 void ITFileHeader::ConvertEndianness()
 //------------------------------------
 {
-	SwapBytesLE(id);
 	SwapBytesLE(ordnum);
 	SwapBytesLE(insnum);
 	SwapBytesLE(smpnum);
@@ -29,7 +28,6 @@ void ITFileHeader::ConvertEndianness()
 	SwapBytesLE(special);
 	SwapBytesLE(msglength);
 	SwapBytesLE(msgoffset);
-	SwapBytesLE(reserved);
 }
 
 
@@ -118,7 +116,6 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, int m
 void ITOldInstrument::ConvertEndianness()
 //---------------------------------------
 {
-	SwapBytesLE(id);
 	SwapBytesLE(fadeout);
 	SwapBytesLE(trkvers);
 }
@@ -129,7 +126,7 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 //-------------------------------------------------------------
 {
 	// Header
-	if(id != ITOldInstrument::magic)
+	if(memcmp(id, "IMPI", 4))
 	{
 		return;
 	}
@@ -196,7 +193,6 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 void ITInstrument::ConvertEndianness()
 //------------------------------------
 {
-	SwapBytesLE(id);
 	SwapBytesLE(fadeout);
 	SwapBytesLE(trkvers);
 	SwapBytesLE(mbank);
@@ -210,7 +206,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	MemsetZero(*this);
 
 	// Header
-	id = ITInstrument::magic;
+	memcpy(id, "IMPI", 4);
 	trkvers = 0x0214;
 
 	mpt::String::Write<mpt::String::nullTerminated>(filename, mptIns.filename);
@@ -289,7 +285,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) const
 //-------------------------------------------------------------------------------
 {
-	if(id != ITInstrument::magic)
+	if(memcmp(id, "IMPI", 4))
 	{
 		return 0;
 	}
@@ -456,7 +452,6 @@ uint32 ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 void ITSample::ConvertEndianness()
 //--------------------------------
 {
-	SwapBytesLE(id);
 	SwapBytesLE(length);
 	SwapBytesLE(loopbegin);
 	SwapBytesLE(loopend);
@@ -474,7 +469,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	MemsetZero(*this);
 
 	// Header
-	id = ITSample::magic;
+	memcpy(id, "IMPS", 4);
 
 	mpt::String::Write<mpt::String::nullTerminated>(filename, mptSmp.filename);
 	//mpt::String::Write<mpt::String::nullTerminated>(name, m_szNames[nsmp]);
@@ -546,7 +541,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
 //----------------------------------------------------
 {
-	if(id != ITSample::magic)
+	if(memcmp(id, "IMPS", 4))
 	{
 		return 0;
 	}

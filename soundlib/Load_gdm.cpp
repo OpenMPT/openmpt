@@ -24,18 +24,11 @@
 // GDM File Header
 struct PACKED GDMFileHeader
 {
-	// Header magic bytes
-	enum HeaderMagic
-	{
-		magicGDM_ = 0xFE4D4447,
-		magicGMFS = 0x53464D47,
-	};
-
-	uint32 magic;					// ID: 'GDMþ'
+	char   magic[4];				// ID: 'GDM\xFE'
 	char   songTitle[32];			// Music's title
 	char   songMusician[32];		// Name of music's composer
 	char   dosEOF[3];				// 13, 10, 26
-	uint32 magic2;					// ID: 'GMFS'
+	char   magic2[4];				// ID: 'GMFS'
 	uint8  formatMajorVer;			// Format major version
 	uint8  formatMinorVer;			// Format minor version
 	uint16 trackerID;				// Composing Tracker ID code (00 = 2GDM)
@@ -66,8 +59,6 @@ struct PACKED GDMFileHeader
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
-		SwapBytesLE(magic);
-		SwapBytesLE(magic2);
 		SwapBytesLE(trackerID);
 		SwapBytesLE(originalFormat);
 		SwapBytesLE(orderOffset);
@@ -143,9 +134,9 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 	GDMFileHeader fileHeader;
 	if(!file.ReadConvertEndianness(fileHeader)
-		|| fileHeader.magic != GDMFileHeader::magicGDM_
+		|| memcmp(fileHeader.magic, "GDM\xFE", 4)
 		|| fileHeader.dosEOF[0] != 13 || fileHeader.dosEOF[1] != 10 || fileHeader.dosEOF[2] != 26
-		|| fileHeader.magic2 != GDMFileHeader::magicGMFS
+		|| memcmp(fileHeader.magic2, "GMFS", 4)
 		|| fileHeader.formatMajorVer != 1 || fileHeader.formatMinorVer != 0
 		|| fileHeader.originalFormat >= CountOf(gdmFormatOrigin)
 		|| fileHeader.originalFormat == 0)

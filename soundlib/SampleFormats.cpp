@@ -828,7 +828,7 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 	S3MSampleHeader sampleHeader;
 	if(!file.ReadConvertEndianness(sampleHeader)
 		|| sampleHeader.sampleType != S3MSampleHeader::typePCM
-		|| sampleHeader.magic != S3MSampleHeader::idSCRS
+		|| memcmp(sampleHeader.magic, "SRCS", 4)
 		|| !file.Seek((sampleHeader.dataPointer[1] << 4) | (sampleHeader.dataPointer[2] << 12) | (sampleHeader.dataPointer[0] << 20)))
 	{
 		return false;
@@ -1431,7 +1431,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 
 	ITSample sampleHeader;
 	if(!file.ReadConvertEndianness(sampleHeader)
-		|| sampleHeader.id != ITSample::magic)
+		|| memcmp(sampleHeader.id, "IMPS", 4))
 	{
 		return false;
 	}
@@ -1453,7 +1453,7 @@ bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
 
 	file.Rewind();
 	if(!file.ReadConvertEndianness(instrumentHeader)
-		|| instrumentHeader.id != ITInstrument::magic
+		|| memcmp(instrumentHeader.id, "IMPI", 4)
 		|| instrumentHeader.nos == 0)
 	{
 		return false;
@@ -1475,7 +1475,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 	file.Rewind();
 	if(!file.ReadConvertEndianness(instrumentHeader)
-		|| instrumentHeader.id != ITInstrument::magic)
+		|| memcmp(instrumentHeader.id, "IMPI", 4))
 	{
 		return false;
 	}

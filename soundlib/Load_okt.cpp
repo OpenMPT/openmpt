@@ -21,14 +21,14 @@ struct PACKED OktIffChunk
 	// IFF chunk names
 	enum ChunkIdentifiers
 	{
-		idCMOD	= 0x434D4F44,
-		idSAMP	= 0x53414D50,
-		idSPEE	= 0x53504545,
-		idSLEN	= 0x534C454E,
-		idPLEN	= 0x504C454E,
-		idPATT	= 0x50415454,
-		idPBOD	= 0x50424F44,
-		idSBOD	= 0x53424F44,
+		idCMOD	= MAGIC4BE('C','M','O','D'),
+		idSAMP	= MAGIC4BE('S','A','M','P'),
+		idSPEE	= MAGIC4BE('S','P','E','E'),
+		idSLEN	= MAGIC4BE('S','L','E','N'),
+		idPLEN	= MAGIC4BE('P','L','E','N'),
+		idPATT	= MAGIC4BE('P','A','T','T'),
+		idPBOD	= MAGIC4BE('P','B','O','D'),
+		idSBOD	= MAGIC4BE('S','B','O','D'),
 	};
 
 	uint32 signature;	// IFF chunk name

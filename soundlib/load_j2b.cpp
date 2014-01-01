@@ -48,12 +48,11 @@ struct PACKED J2BFileHeader
 	enum J2BMagic
 	{
 		// 32-Bit J2B header identifiers
-		magicMUSE		= 0x4553554D,
 		magicDEADBEAF	= 0xAFBEADDE,
 		magicDEADBABE	= 0xBEBAADDE,
 	};
 
-	uint32 signature;		// MUSE
+	char   signature[4];	// MUSE
 	uint32 deadbeaf;		// 0xDEADBEAF (AM) or 0xDEADBABE (AMFF)
 	uint32 fileLength;		// complete filesize
 	uint32 crc32;			// checksum of the compressed data block
@@ -63,7 +62,6 @@ struct PACKED J2BFileHeader
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
-		SwapBytesLE(signature);
 		SwapBytesLE(deadbeaf);
 		SwapBytesLE(fileLength);
 		SwapBytesLE(crc32);
@@ -82,17 +80,17 @@ struct PACKED AMFFRiffChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idRIFF	= 0x46464952,
-		idAMFF	= 0x46464D41,
-		idAM__	= 0x20204D41,
-		idMAIN	= 0x4E49414D,
-		idINIT	= 0x54494E49,
-		idORDR	= 0x5244524F,
-		idPATT	= 0x54544150,
-		idINST	= 0x54534E49,
-		idSAMP	= 0x504D4153,
-		idAI__	= 0x20204941,
-		idAS__	= 0x20205341,
+		idRIFF	= MAGIC4LE('R','I','F','F'),
+		idAMFF	= MAGIC4LE('A','M','F','F'),
+		idAM__	= MAGIC4LE('A','M',' ',' '),
+		idMAIN	= MAGIC4LE('M','A','I','N'),
+		idINIT	= MAGIC4LE('I','N','I','T'),
+		idORDR	= MAGIC4LE('O','R','D','R'),
+		idPATT	= MAGIC4LE('P','A','T','T'),
+		idINST	= MAGIC4LE('I','N','S','T'),
+		idSAMP	= MAGIC4LE('S','A','M','P'),
+		idAI__	= MAGIC4LE('A','I',' ',' '),
+		idAS__	= MAGIC4LE('A','S',' ',' '),
 	};
 
 	typedef ChunkIdentifiers id_type;
@@ -999,7 +997,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	if(fileHeader.signature != J2BFileHeader::magicMUSE // "MUSE"
+	if(memcmp(fileHeader.signature, "MUSE", 4)
 		|| (fileHeader.deadbeaf != J2BFileHeader::magicDEADBEAF // 0xDEADBEAF (RIFF AM)
 			&& fileHeader.deadbeaf != J2BFileHeader::magicDEADBABE) // 0xDEADBABE (RIFF AMFF)
 		|| fileHeader.fileLength != file.GetLength()

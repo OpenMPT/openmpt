@@ -24,7 +24,6 @@ struct PACKED S3MFileHeader
 	// Magic Bytes
 	enum S3MMagic
 	{
-		idSCRM				= 0x4D524353,
 		idEOF				= 0x1A,
 		idS3MType			= 0x10,
 		idPanning			= 0xFC,
@@ -74,7 +73,7 @@ struct PACKED S3MFileHeader
 	uint16 flags;			// Flags, see S3MHeaderFlags
 	uint16 cwtv;			// "Made With" Tracker ID, see S3MTrackerVersions
 	uint16 formatVersion;	// Format Version, see S3MFormatVersion
-	uint32 magic;			// "SCRM" magic bytes
+	char   magic[4];		// "SCRM" magic bytes
 	uint8  globalVol;		// Default Global Volume (0...64)
 	uint8  speed;			// Default Speed (1...254)
 	uint8  tempo;			// Default Tempo (33...255)
@@ -95,11 +94,6 @@ STATIC_ASSERT(sizeof(S3MFileHeader) == 96);
 // S3M Sample Header
 struct PACKED S3MSampleHeader
 {
-	enum SampleMagic
-	{
-		idSCRS		= 0x53524353,
-	};
-
 	enum SampleType
 	{
 		typeNone	= 0,
@@ -134,7 +128,7 @@ struct PACKED S3MSampleHeader
 	uint32 c5speed;				// Middle-C frequency
 	char   reserved2[12];		// Reserved + Internal ST3 stuff
 	char   name[28];			// Sample name
-	uint32 magic;				// "SCRS" magic bytes ("SCRI" for Adlib instruments)
+	char   magic[4];			// "SCRS" magic bytes ("SCRI" for Adlib instruments)
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness();
