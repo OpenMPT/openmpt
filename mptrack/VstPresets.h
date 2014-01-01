@@ -20,7 +20,6 @@ public:
 		noError,
 		invalidFile,
 		wrongPlugin,
-		outdatedPlugin,
 		wrongParameters,
 	};
 

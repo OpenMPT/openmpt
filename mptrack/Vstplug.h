@@ -252,7 +252,7 @@ public:
 	void SetZxxParameter(UINT nParam, UINT nValue);
 	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST
 
-private:
+protected:
 	void MidiPitchBend(uint8 nMidiCh, int32 pitchBendPos);
 	// Converts a 14-bit MIDI pitch bend position to a 16.11 fixed point pitch bend position
 	static int32 EncodePitchBendParam(int32 position) { return (position << vstPitchBendShift); }
@@ -274,6 +274,8 @@ private:
 	void ReceiveVSTEvents(const VstEvents *events) const;
 
 	void ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples);
+
+	void ReportPlugException(std::wstring text) const;
 
 #else // case: NO_VST
 public:

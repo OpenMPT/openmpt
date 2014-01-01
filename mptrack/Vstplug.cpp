@@ -863,7 +863,7 @@ size_t CVstPlugin::Release()
 			delete this;
 		} catch (...)
 		{
-			CVstPluginManager::ReportPlugException("Exception while destroying plugin!\n");
+			ReportPlugException(L"Exception while destroying plugin!");
 		}
 
 		return 0;
@@ -1077,7 +1077,7 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		}
 	} catch (...)
 	{
-		CVstPluginManager::ReportPlugException("Exception in Dispatch(%d) (Plugin=\"%s\")!\n", opCode, m_Factory.libraryName);
+		CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception in Dispatch(%1)!", opCode));
 	}
 
 	return result;
@@ -1196,7 +1196,7 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 		}
 	} catch (...)
 	{
-		CVstPluginManager::ReportPlugException("Exception in SetParameter(%d, 0.%03d) (Plugin=%s)\n", nIndex, (int)(fValue*1000), m_Factory.libraryName);
+		ReportPlugException(mpt::String::PrintW(L"Exception in SetParameter(%1, %2)!", nIndex, fValue));
 	}
 }
 
@@ -1300,7 +1300,7 @@ void CVstPlugin::Resume()
 		m_bPlugResumed = true;
 	} catch (...)
 	{
-		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_Factory.libraryName);
+		ReportPlugException(L"Exception in Resume()!");
 	}
 }
 
@@ -1317,7 +1317,7 @@ void CVstPlugin::Suspend()
 			m_bPlugResumed = false;
 		} catch (...)
 		{
-			CVstPluginManager::ReportPlugException("Exception in Suspend() (Plugin=%s)\n", m_Factory.libraryName);
+			ReportPlugException(L"Exception in Suspend()!");
 		}
 	}
 }
@@ -1335,8 +1335,8 @@ void CVstPlugin::ProcessVSTEvents()
 			m_Effect.dispatcher(&m_Effect, effProcessEvents, 0, 0, &vstEvents, 0);
 		} catch (...)
 		{
-			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s, numEvents:%d)\n",
-				m_Factory.libraryName, vstEvents.GetNumEvents());
+			ReportPlugException(mpt::String::PrintW(L"Exception in ProcessVSTEvents(numEvents:%1)!",
+				vstEvents.GetNumEvents()));
 		}
 	}
 }
@@ -1480,8 +1480,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		} catch (...)
 		{
 			Bypass();
-			CString processMethod = (m_Effect.flags & effFlagsCanReplacing) ? "processReplacing" : "process";
-			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->GetName(), processMethod);
+			const wchar_t *processMethod = (m_Effect.flags & effFlagsCanReplacing) ? L"processReplacing" : L"process";
+			ReportPlugException(mpt::String::PrintW(L"The plugin threw an exception in %1. It has automatically been set to \"Bypass\".", processMethod));
 		}
 
 		ASSERT(outputBuffers != nullptr);
@@ -2178,7 +2178,7 @@ void CVstPlugin::ToggleEditor()
 		}
 	} catch (...)
 	{
-		CVstPluginManager::ReportPlugException("Exception in ToggleEditor() (Plugin=%s)\n", m_Factory.libraryName);
+		ReportPlugException(L"Exception in ToggleEditor()");
 	}
 }
 
@@ -2340,6 +2340,15 @@ size_t CVstPlugin::GetInputChannelList(std::vector<CHANNELINDEX> &list)
 	return list.size();
 
 }
+
+
+void CVstPlugin::ReportPlugException(std::wstring text) const
+//-----------------------------------------------------------
+{
+	text += L" (Plugin=" + m_Factory.libraryName.ToWide() + L")";
+	CVstPluginManager::ReportPlugException(text);
+}
+
 
 #endif // NO_VST
 
