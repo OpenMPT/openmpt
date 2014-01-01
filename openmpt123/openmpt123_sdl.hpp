@@ -31,7 +31,7 @@ private:
 protected:
 	void check_sdl_error( int e ) {
 		if ( e < 0 ) {
-			throw portaudio_exception( e );
+			throw sdl_exception( e );
 			return;
 		}
 	}
