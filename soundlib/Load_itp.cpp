@@ -34,7 +34,7 @@
 // v1.01: Added option to embed instrument headers
 
 #define ITP_VERSION 0x00000103	// v1.03
-#define ITP_FILE_ID 0x2E697470	// .itp ASCII
+#define ITP_FILE_ID MAGIC4BE('.','i','t','p')	// .itp ASCII
 
 
 // Read variable-length ITP string.
@@ -231,7 +231,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadConvertEndianness(sampleHeader);
 		size = file.ReadUint32LE();
 
-		if(realSample >= 1 && realSample < MAX_SAMPLES && sampleHeader.id == ITSample::magic)
+		if(realSample >= 1 && realSample < MAX_SAMPLES && !memcmp(sampleHeader.id, "IMPS", 4))
 		{
 			sampleHeader.ConvertToMPT(Samples[realSample]);
 			mpt::String::Read<mpt::String::nullTerminated>(m_szNames[realSample], sampleHeader.name);

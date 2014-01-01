@@ -189,7 +189,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	S3MFileHeader fileHeader;
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| !file.CanRead(fileHeader.ordNum + (fileHeader.smpNum + fileHeader.patNum) * 2) 
-		|| fileHeader.magic != S3MFileHeader::idSCRM
+		|| memcmp(fileHeader.magic, "SCRM", 4)
 		|| fileHeader.fileType != S3MFileHeader::idS3MType
 		|| (fileHeader.formatVersion != S3MFileHeader::oldVersion && fileHeader.formatVersion != S3MFileHeader::newVersion))
 	{
@@ -600,7 +600,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	// Following: One nibble = Major version, one byte = Minor version (hex)
 	fileHeader.cwtv = S3MFileHeader::trkOpenMPT | static_cast<uint16>((MptVersion::num >> 16) & S3MFileHeader::versionMask);
 	fileHeader.formatVersion = S3MFileHeader::newVersion;
-	fileHeader.magic = S3MFileHeader::idSCRM;
+	memcpy(fileHeader.magic, "SCRM", 4);
 
 	// Song Variables
 	fileHeader.globalVol = static_cast<uint8>(MIN(m_nDefaultGlobalVolume / 4, 64));

@@ -321,7 +321,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	ITFileHeader fileHeader;
 	if(!file.ReadConvertEndianness(fileHeader)
-		|| (fileHeader.id != ITFileHeader::itMagic && fileHeader.id != ITFileHeader::mptmMagic)
+		|| (memcmp(fileHeader.id, "IMPM", 4) && memcmp(fileHeader.id, "tpm.", 4))
 		|| fileHeader.insnum > 0xFF
 		|| fileHeader.smpnum >= MAX_SAMPLES
 		|| !file.CanRead(fileHeader.ordnum + (fileHeader.insnum + fileHeader.smpnum + fileHeader.patnum) * 4))
@@ -344,8 +344,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		mptStartPos = file.GetLength();
 	}
 
-	if(fileHeader.id == ITFileHeader::mptmMagic)
+	if(!memcmp(fileHeader.id, "tpm.", 4))
 	{
+		// Legacy MPTM files (old 1.17.02.xx releases)
 		ChangeModTypeTo(MOD_TYPE_MPT);
 	} else
 	{
@@ -366,7 +367,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// OpenMPT Version number (Major.Minor)
 				// This will only be interpreted as "made with ModPlug" (i.e. disable compatible playback etc) if the "reserved" field is set to "OMPT" - else, compatibility was used.
 				m_dwLastSavedWithVersion = (fileHeader.cwtv & 0x0FFF) << 16;
-				if(fileHeader.reserved == ITFileHeader::omptMagic)
+				if(!memcmp(fileHeader.reserved, "OMPT", 4))
 					interpretModPlugMade = true;
 			} else if(fileHeader.cmwt == 0x888 || fileHeader.cwtv == 0x888)
 			{
@@ -648,7 +649,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		ITSample sampleHeader;
 		if(smpPos[i] > 0 && file.Seek(smpPos[i]) && file.ReadConvertEndianness(sampleHeader))
 		{
-			if(sampleHeader.id == ITSample::magic)
+			if(!memcmp(sampleHeader.id, "IMPS", 4))
 			{
 				size_t sampleOffset = sampleHeader.ConvertToMPT(Samples[i + 1]);
 
@@ -930,7 +931,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(m_dwLastSavedWithVersion && madeWithTracker.empty())
 	{
 		madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
-		if(fileHeader.reserved != ITFileHeader::omptMagic && (fileHeader.cwtv & 0xF000) == 0x5000)
+		if(memcmp(fileHeader.reserved, "OMPT", 4) && (fileHeader.cwtv & 0xF000) == 0x5000)
 		{
 			madeWithTracker += " (compatibility export)";
 		} else if(MptVersion::IsTestBuild(m_dwLastSavedWithVersion))
@@ -958,7 +959,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
 				madeWithTracker = "ModPlug tracker 1.00a5";
 				interpretModPlugMade = true;
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.reserved == ITFileHeader::chibiMagic)
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(fileHeader.reserved, "CHBI", 4))
 			{
 				madeWithTracker = "ChibiTracker";
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && fileHeader.reserved == 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
@@ -1122,7 +1123,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing Header
 	MemsetZero(itHeader);
 	dwChnNamLen = 0;
-	itHeader.id = ITFileHeader::itMagic;
+	memcpy(itHeader.id, "IMPM", 4);
 	mpt::String::Write<mpt::String::nullTerminated>(itHeader.songname, songName);
 
 	itHeader.highlight_minor = (uint8)std::min(m_nDefaultRowsPerBeat, ROWINDEX(uint8_max));
@@ -1177,7 +1178,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		if(!compatibilityExport)
 		{
 			// This way, we indicate that the file will most likely contain OpenMPT hacks. Compatibility export puts 0 here.
-			itHeader.reserved = ITFileHeader::omptMagic;
+			memcpy(itHeader.reserved, "OMPT", 4);
 		}
 	}
 
@@ -1885,35 +1886,35 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const
 //---------------------------------------------------------------------------------
 {
-	uint32 code = MULTICHAR4_LE_MSVC('M','P','T','X');							// write extension header code
+	uint32 code = MAGIC4BE('M','P','T','X');							// write extension header code
 	fwrite(&code, 1, sizeof(uint32), f);
 
 	if (nInstruments == 0)
 		return;
 
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','R','.','.'), sizeof(ModInstrument().nVolRampUp),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','i','P','.'), sizeof(ModInstrument().nMixPlug),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','C','.','.'), sizeof(ModInstrument().nMidiChannel),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','P','.','.'), sizeof(ModInstrument().nMidiProgram),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','B','.','.'), sizeof(ModInstrument().wMidiBank),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','.','.','.'), sizeof(ModInstrument().nPan),        f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('G','V','.','.'), sizeof(ModInstrument().nGlobalVol),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('F','O','.','.'), sizeof(ModInstrument().nFadeOut),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('R','.','.','.'), sizeof(ModInstrument().nResampling), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('C','S','.','.'), sizeof(ModInstrument().nCutSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('R','S','.','.'), sizeof(ModInstrument().nResSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('F','M','.','.'), sizeof(ModInstrument().nFilterMode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','E','R','N'), sizeof(ModInstrument().PitchEnv.nReleaseNode ), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('A','E','R','N'), sizeof(ModInstrument().PanEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','E','R','N'), sizeof(ModInstrument().VolEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','T','T','L'), sizeof(ModInstrument().wPitchToTempoLock),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','V','E','H'), sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','V','O','H'), sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','R','.','.'), sizeof(ModInstrument().nVolRampUp),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','i','P','.'), sizeof(ModInstrument().nMixPlug),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','C','.','.'), sizeof(ModInstrument().nMidiChannel),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','P','.','.'), sizeof(ModInstrument().nMidiProgram),f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','B','.','.'), sizeof(ModInstrument().wMidiBank),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','.','.','.'), sizeof(ModInstrument().nPan),        f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('G','V','.','.'), sizeof(ModInstrument().nGlobalVol),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('F','O','.','.'), sizeof(ModInstrument().nFadeOut),    f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('R','.','.','.'), sizeof(ModInstrument().nResampling), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('C','S','.','.'), sizeof(ModInstrument().nCutSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('R','S','.','.'), sizeof(ModInstrument().nResSwing),   f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('F','M','.','.'), sizeof(ModInstrument().nFilterMode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','R','N'), sizeof(ModInstrument().PitchEnv.nReleaseNode ), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('A','E','R','N'), sizeof(ModInstrument().PanEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','R','N'), sizeof(ModInstrument().VolEnv.nReleaseNode), f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','T','T','L'), sizeof(ModInstrument().wPitchToTempoLock),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','V','E','H'), sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
+	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','V','O','H'), sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
 
 	if(!(GetType() & MOD_TYPE_XM))
 	{
 		// XM instrument headers already have support for this
-		WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('M','P','W','D'), sizeof(ModInstrument().midiPWD), f, nInstruments);
+		WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','P','W','D'), sizeof(ModInstrument().midiPWD), f, nInstruments);
 	}
 
 	if(GetType() & MOD_TYPE_MPT)
@@ -1928,17 +1929,17 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','E','.','.'), sizeof(ModInstrument().VolEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','P','[','.'), sizeof(ModInstrument().VolEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('V','E','[','.'), sizeof(ModInstrument().VolEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','.','.'), sizeof(ModInstrument().VolEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','P','[','.'), sizeof(ModInstrument().VolEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','[','.'), sizeof(ModInstrument().VolEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','E','.','.'), sizeof(ModInstrument().PanEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','P','[','.'), sizeof(ModInstrument().PanEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','E','[','.'), sizeof(ModInstrument().PanEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','.','.'), sizeof(ModInstrument().PanEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','P','[','.'), sizeof(ModInstrument().PanEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','[','.'), sizeof(ModInstrument().PanEnv.Values), f, nInstruments);
 
-			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','i','E','.'), sizeof(ModInstrument().PitchEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','i','P','['), sizeof(ModInstrument().PitchEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MULTICHAR4_LE_MSVC('P','i','E','['), sizeof(ModInstrument().PitchEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','.'), sizeof(ModInstrument().PitchEnv.nNodes), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','P','['), sizeof(ModInstrument().PitchEnv.Ticks),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','['), sizeof(ModInstrument().PitchEnv.Values), f, nInstruments);
 		}
 	}
 
@@ -1967,12 +1968,12 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 //--------------------------------------------------------
 {
 	//Extra song data - Yet Another Hack.
-	const uint32 code = MULTICHAR4_LE_MSVC('M','P','T','S');
+	const uint32 code = MAGIC4BE('M','P','T','S');
 	fwrite(&code, 1, sizeof(uint32), f);
 
 #define WRITEMODULARHEADER(c1, c2, c3, c4, fsize) \
 	{ \
-	const uint32 code = MULTICHAR4_LE_MSVC(c1, c2, c3, c4); \
+	const uint32 code = MAGIC4BE(c1, c2, c3, c4); \
 	fwrite(&code, 1, sizeof(code), f); \
 	const uint16 size = (fsize); \
 	fwrite(&size, 1, sizeof(size), f); \
@@ -2079,7 +2080,7 @@ void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInter
 	{
 		uint32 code = file.ReadUint32LE();
 
-		if(code == MULTICHAR4_LE_MSVC('M','P','T','S'))					//Reached song extensions, break out of this loop
+		if(code == MAGIC4BE('M','P','T','S'))					//Reached song extensions, break out of this loop
 		{
 			file.SkipBack(4);
 			return;
@@ -2153,23 +2154,23 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 
 		switch (code)					// interpret field code
 		{
-			case MULTICHAR4_LE_MSVC('D','T','.','.'): ReadField(chunk, size, m_nDefaultTempo); break;
-			case MULTICHAR4_LE_MSVC('R','P','B','.'): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
-			case MULTICHAR4_LE_MSVC('R','P','M','.'): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
-			case MULTICHAR4_LE_MSVC('C','.','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nChannels); break;
-			case MULTICHAR4_LE_MSVC('T','M','.','.'): ReadField(chunk, size, m_nTempoMode); break;
-			case MULTICHAR4_LE_MSVC('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
-			case MULTICHAR4_LE_MSVC('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
-			case MULTICHAR4_LE_MSVC('L','S','W','V'): ReadField(chunk, size, m_dwLastSavedWithVersion); break;
-			case MULTICHAR4_LE_MSVC('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
-			case MULTICHAR4_LE_MSVC('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
-			case MULTICHAR4_LE_MSVC('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
-			case MULTICHAR4_LE_MSVC('R','P','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nRestartPos); break;
-			case MULTICHAR4_LE_MSVC('M','S','F','.'): ReadFieldFlagSet(chunk, size, m_ModFlags); break;
+			case MAGIC4BE('D','T','.','.'): ReadField(chunk, size, m_nDefaultTempo); break;
+			case MAGIC4BE('R','P','B','.'): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
+			case MAGIC4BE('R','P','M','.'): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
+			case MAGIC4BE('C','.','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nChannels); break;
+			case MAGIC4BE('T','M','.','.'): ReadField(chunk, size, m_nTempoMode); break;
+			case MAGIC4BE('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
+			case MAGIC4BE('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
+			case MAGIC4BE('L','S','W','V'): ReadField(chunk, size, m_dwLastSavedWithVersion); break;
+			case MAGIC4BE('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
+			case MAGIC4BE('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
+			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
+			case MAGIC4BE('R','P','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nRestartPos); break;
+			case MAGIC4BE('M','S','F','.'): ReadFieldFlagSet(chunk, size, m_ModFlags); break;
 #ifdef MODPLUG_TRACKER
-			case MULTICHAR4_LE_MSVC('M','I','M','A'): GetMIDIMapper().Deserialize(chunk); break;
+			case MAGIC4BE('M','I','M','A'): GetMIDIMapper().Deserialize(chunk); break;
 #endif
-			case MULTICHAR4_LE_MSVC('C','h','n','S'):
+			case MAGIC4BE('C','h','n','S'):
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
 					STATIC_ASSERT(CountOf(ChnSettings) >= 64);
@@ -2227,7 +2228,7 @@ size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns)
 	}
 
 	uint32 modularInstSize = 0;
-	uint32 id = MULTICHAR4_LE_MSVC('I','N','S','M');
+	uint32 id = MAGIC4BE('I','N','S','M');
 	SwapBytesLE(id);
 	fwrite(&id, 1, sizeof(id), f);				// mark this as an instrument with modular extensions
 	long sizePos = ftell(f);									// we will want to write the modular data's total size here
@@ -2235,7 +2236,7 @@ size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns)
 
 	// Write chunks
 	{	//VST Slot chunk:
-		id = MULTICHAR4_LE_MSVC('P','L','U','G');
+		id = MAGIC4BE('P','L','U','G');
 		SwapBytesLE(id);
 		fwrite(&id, 1, sizeof(uint32), f);
 		fwrite(&(pIns->nMixPlug), 1, sizeof(uint8), f);
@@ -2286,7 +2287,7 @@ size_t CSoundFile::LoadModularInstrumentData(FileReader &file, ModInstrument &in
 
 		switch (chunkID)
 		{
-		case MULTICHAR4_LE_MSVC('P','L','U','G'):
+		case MAGIC4BE('P','L','U','G'):
 			// Chunks don't tell us their length - stupid!
 			ins.nMixPlug = modularData.ReadUint8();
 			break;

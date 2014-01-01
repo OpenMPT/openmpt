@@ -44,14 +44,14 @@ struct PACKED DMFChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idCMSG	= 0x47534D43,	// Song message
-		idSEQU	= 0x55514553,	// Order list
-		idPATT	= 0x54544150,	// Patterns
-		idSMPI	= 0x49504D53,	// Sample headers
-		idSMPD	= 0x44504D53,	// Sample data
-		idSMPJ	= 0x4A504D53,	// Sample jump table (XTrakcker 32 only)
-		idENDE	= 0x45444E45,	// Last four bytes of DMF file
-		idSETT	= 0x9C219DE4,	// Probably contains GUI settings
+		idCMSG	= MAGIC4LE('C','M','S','G'),	// Song message
+		idSEQU	= MAGIC4LE('S','E','Q','U'),	// Order list
+		idPATT	= MAGIC4LE('P','A','T','T'),	// Patterns
+		idSMPI	= MAGIC4LE('S','M','P','I'),	// Sample headers
+		idSMPD	= MAGIC4LE('S','M','P','D'),	// Sample data
+		idSMPJ	= MAGIC4LE('S','M','P','J'),	// Sample jump table (XTrakcker 32 only)
+		idENDE	= MAGIC4LE('E','N','D','E'),	// Last four bytes of DMF file
+		idSETT	= MAGIC4LE('S','E','T','T'),	// Probably contains GUI settings
 	};
 
 	typedef ChunkIdentifiers id_type;
