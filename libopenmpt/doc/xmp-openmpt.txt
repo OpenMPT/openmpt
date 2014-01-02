@@ -1,0 +1,1 @@
+See http://lib.openmpt.org/ for documentation, FAQ and other details.

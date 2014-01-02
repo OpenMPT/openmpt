@@ -16,7 +16,10 @@ copy /y ..\..\libopenmpt\libopenmpt_config.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_version.h inc\libopenmpt\ || goto error
 copy /y libopenmpt.lib lib\Win32\ || goto error
 copy /y libopenmpt.dll bin\Win32\ || goto error
-"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 libopenmpt-win32-r%GOT_REVISION%.7z libopenmpt.dll libmodplug.dll in_openmpt.dll xmp-openmpt.dll foo_openmpt.dll libopenmpt_settings.dll openmpt123.exe inc\libopenmpt\libopenmpt.h inc\libopenmpt\libopenmpt.hpp inc\libopenmpt\libopenmpt_config.h inc\libopenmpt\libopenmpt_version.h lib\Win32\libopenmpt.lib bin\Win32\libopenmpt.dll || goto error
+copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\ || goto error
+copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\ || goto error
+copy /y ..\..\libopenmpt\doc\foo_openmpt.txt .\ || goto error
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 libopenmpt-win32-r%GOT_REVISION%.7z libopenmpt.dll libmodplug.dll in_openmpt.dll xmp-openmpt.dll foo_openmpt.dll libopenmpt_settings.dll openmpt123.exe inc\libopenmpt\libopenmpt.h inc\libopenmpt\libopenmpt.hpp inc\libopenmpt\libopenmpt_config.h inc\libopenmpt\libopenmpt_version.h lib\Win32\libopenmpt.lib bin\Win32\libopenmpt.dll in_openmpt.txt xmp-openmpt.txt foo_openmpt.txt || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-win32.tar libopenmpt-win32-r%GOT_REVISION%.7z || goto error
 del /f /q libopenmpt-win32-r%GOT_REVISION%.7z
 cd ..\.. || goto error
