@@ -183,6 +183,9 @@ static void init() {
 	if ( !settings_dll ) {
 		settings_dll = LoadLibrary( TEXT("libopenmpt_settings.dll") );
 	}
+	if ( !settings_dll ) {
+		settings_dll = LoadLibrary( TEXT("Plugins\\libopenmpt_settings.dll") );
+	}
 	if ( !self ) {
 		self = new self_winamp_t();
 		inmod.FileExtensions = self->filetypes_string.data();
