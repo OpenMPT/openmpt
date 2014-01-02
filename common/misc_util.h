@@ -658,7 +658,18 @@ namespace mpt
 namespace Windows
 {
 
-// returns version in the form of the _WIN32_WINNT_* macros
+enum WinNTVersion
+{
+	VerWin2000  = 0x0500,
+	VerWinXP    = 0x0501,
+	VerWinXPSP2 = 0x0502,
+	VerWinVista = 0x0600,
+	VerWinVista = 0x0600,
+	VerWin7     = 0x0601,
+	VerWin8     = 0x0602,
+};
+
+// returns version in the form of the _WIN32_WINNT_* macros or mpt::Windows::WinNTVersion
 static inline uint32 GetWinNTVersion()
 //------------------------------------
 {
