@@ -388,7 +388,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 //------------------------------------------------------------------------------------------
 {
 
-	m_HasXP = (mpt::Windows::GetWinNTVersion() >= _WIN32_WINNT_WINXP);
+	m_HasXP = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinXP);
 
 	m_hKernel32DLL = NULL;
 
@@ -479,7 +479,7 @@ CPriorityBooster::CPriorityBooster(bool boostPriority)
 	, hTask(NULL)
 {
 
-	m_HasVista = (mpt::Windows::GetWinNTVersion() >= _WIN32_WINNT_VISTA);
+	m_HasVista = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinVista);
 
 	if(m_HasVista)
 	{
