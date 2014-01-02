@@ -610,7 +610,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 					{
 						UINT nSmp = pmg->nSmpNo+1;
 						pIns->Keyboard[i + 12] = (SAMPLEINDEX)nSmp;
-						if (nSmp <= m_nSamples)
+						if (nSmp <= m_nSamples && SampleMap[nSmp - 1] != nullptr)
 						{
 							Samples[nSmp].nVibType = pmi->bVibType;
 							Samples[nSmp].nVibSweep = pmi->bVibSweep;
