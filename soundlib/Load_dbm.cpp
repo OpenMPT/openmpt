@@ -509,7 +509,9 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 					m.vol = param1;
 					m.command = cmd2;
 					m.param = param2;
+#ifdef MODPLUG_TRACKER
 					m.ExtendedMODtoS3MEffect();
+#endif // MODPLUG_TRACKER
 				}
 			}
 		}
