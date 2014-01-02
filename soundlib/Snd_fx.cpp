@@ -3198,7 +3198,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 	else
 		param = pChn->nOldVolumeSlide;
 
-	if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_DIGI | MOD_TYPE_DBM)))
+	if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_DIGI)))
 	{
 		// MOD / XM nibble priority
 		if((param & 0xF0) != 0)
