@@ -664,7 +664,6 @@ enum WinNTVersion
 	VerWinXP    = 0x0501,
 	VerWinXPSP2 = 0x0502,
 	VerWinVista = 0x0600,
-	VerWinVista = 0x0600,
 	VerWin7     = 0x0601,
 	VerWin8     = 0x0602,
 };
