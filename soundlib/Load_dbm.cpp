@@ -156,6 +156,7 @@ STATIC_ASSERT(sizeof(DBMEnvelope) == 136);
 #endif
 
 
+// Note: Unlike in MOD, 1Fx, 2Fx, 5Fx / 5xF, 6Fx / 6xF and AFx / AxF are fine slides.
 static const ModCommand::COMMAND dbmEffects[] =
 {
 	CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
@@ -182,8 +183,11 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 			command = CMD_NONE;
 		break;
 
+	// Volume slide nibble priority - first nibble (slide up) has precedence.
 	case CMD_VOLUMESLIDE:
-		if(param & 0xF0)
+	case CMD_TONEPORTAVOL:
+	case CMD_VIBRATOVOL:
+		if((param & 0xF0) != 0x00 && (param & 0xF0) != 0xF0 && (param & 0x0F) != 0x0F)
 			param &= 0xF0;
 		break;
 
@@ -204,11 +208,12 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 			command = CMD_S3MCMDEX;
 			param = 0x9F;
 			break;
-		case 0x40:	// turn off sound in channel
-			// TODO
+		case 0x40:	// turn off sound in channel (volume / portamento commands after this can't pick up the note anymore)
+			command = CMD_S3MCMDEX;
+			param = 0xC0;
 			break;
 		case 0x50:	// turn on/off channel
-			// TODO is this correct?
+			// TODO: Apparently this should also kill the playing note.
 			if((param & 0x0F) <= 0x01)
 			{
 				command = CMD_CHANNELVOLUME;
@@ -219,9 +224,6 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 			// TODO
 			break;
 		case 0x70:	// set offset
-			// TODO
-			break;
-		case 0xF0:	// turn on/off channel
 			// TODO
 			break;
 		default:
