@@ -324,6 +324,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	InitializeChannels();
 	m_nType = MOD_TYPE_DBM;
+	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nChannels = Clamp(infoData.channels, uint16(1), uint16(MAX_BASECHANNELS));	// note: MAX_BASECHANNELS is currently 127, but DBPro 2 supports up to 128 channels, DBPro 3 apparently up to 254.
 	m_nInstruments = std::min<INSTRUMENTINDEX>(infoData.instruments, MAX_INSTRUMENTS - 1);
 	m_nSamples = std::min<SAMPLEINDEX>(infoData.samples, MAX_SAMPLES - 1);
@@ -382,7 +384,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			mpt::String::Read<mpt::String::maybeNullTerminated>(mptIns->name, instrHeader.name);
 			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[instrHeader.sample], instrHeader.name);
 
-			mptIns->nFadeOut = 1024;	// ???
+			mptIns->nFadeOut = 0;
 			mptIns->nPan = static_cast<uint16>(instrHeader.panning + 128);
 			LimitMax(mptIns->nPan, uint32(256));
 			mptIns->dwFlags.set(INS_SETPANNING);
@@ -405,6 +407,15 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	// Read envelopes
 	ReadDBMEnvelopeChunk(chunks.GetChunk(DBMChunk::idVENV), ENV_VOLUME, *this, false);
 	ReadDBMEnvelopeChunk(chunks.GetChunk(DBMChunk::idPENV), ENV_PANNING, *this, fileHeader.trkVerHi > 2);
+
+	// Note-Off cuts samples if there's no envelope.
+	for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+	{
+		if(Instruments[i] != nullptr && !Instruments[i]->VolEnv.dwFlags[ENV_ENABLED])
+		{
+			Instruments[i]->nFadeOut = 32767;
+		}
+	}
 
 	// Patterns
 	FileReader patternChunk = chunks.GetChunk(DBMChunk::idPATT);
