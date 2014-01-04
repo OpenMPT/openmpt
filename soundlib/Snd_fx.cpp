@@ -818,9 +818,9 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 			resetAlways = (!pChn->nFadeOutVol || instrumentChanged || pChn->dwFlags[CHN_KEYOFF]);
 		} else
 		{
-			reset = (!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || m_SongFlags[SONG_ITCOMPATGXX]
+			reset = (!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_DBM)) || m_SongFlags[SONG_ITCOMPATGXX]
 				|| !pChn->nLength || (pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol));
-			resetAlways = !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || instrumentChanged || pIns == nullptr || pChn->dwFlags[CHN_KEYOFF | CHN_NOTEFADE];
+			resetAlways = !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_DBM)) || instrumentChanged || pIns == nullptr || pChn->dwFlags[CHN_KEYOFF | CHN_NOTEFADE];
 		}
 
 		if(reset)
@@ -1163,11 +1163,11 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 	}
 
 	if (!bPorta
-		|| (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+		|| (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_DBM)))
 		|| (pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol)
 		|| (m_SongFlags[SONG_ITCOMPATGXX] && pChn->rowCommand.instr != 0))
 	{
-		if((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol)
+		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_DBM)) && pChn->dwFlags[CHN_NOTEFADE] && !pChn->nFadeOutVol)
 		{
 			pChn->ResetEnvelopes();
 			// IT Compatibility: Autovibrato reset
@@ -1227,38 +1227,35 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 				if(!pIns->PanEnv.dwFlags[ENV_CARRY]) pChn->PanEnv.Reset();
 				if(!pIns->PitchEnv.dwFlags[ENV_CARRY]) pChn->PitchEnv.Reset();
 
-				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
+				// Volume Swing
+				if(pIns->nVolSwing)
 				{
-					// Volume Swing
-					if(pIns->nVolSwing)
+					const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
+					pChn->nVolSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) * pIns->nVolSwing / 100.0));
+				}
+				// Pan Swing
+				if(pIns->nPanSwing)
+				{
+					const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
+					pChn->nPanSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 1) * pIns->nPanSwing));
+					if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 					{
-						const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
-						pChn->nVolSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) * pIns->nVolSwing / 100.0));
+						pChn->nRestorePanOnNewNote = pChn->nPan + 1;
 					}
-					// Pan Swing
-					if(pIns->nPanSwing)
-					{
-						const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
-						pChn->nPanSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 1) * pIns->nPanSwing));
-						if(!IsCompatibleMode(TRK_IMPULSETRACKER))
-						{
-							pChn->nRestorePanOnNewNote = pChn->nPan + 1;
-						}
-					}
-					// Cutoff Swing
-					if(pIns->nCutSwing)
-					{
-						int32 d = ((int32)pIns->nCutSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
-						pChn->nCutSwing = (int16)((d * pChn->nCutOff + 1) / 128);
-						pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
-					}
-					// Resonance Swing
-					if(pIns->nResSwing)
-					{
-						int32 d = ((int32)pIns->nResSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
-						pChn->nResSwing = (int16)((d * pChn->nResonance + 1) / 128);
-						pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
-					}
+				}
+				// Cutoff Swing
+				if(pIns->nCutSwing)
+				{
+					int32 d = ((int32)pIns->nCutSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
+					pChn->nCutSwing = (int16)((d * pChn->nCutOff + 1) / 128);
+					pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
+				}
+				// Resonance Swing
+				if(pIns->nResSwing)
+				{
+					int32 d = ((int32)pIns->nResSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
+					pChn->nResSwing = (int16)((d * pChn->nResonance + 1) / 128);
+					pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
 				}
 			}
 			pChn->nAutoVibDepth = 0;
@@ -3120,7 +3117,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 	} //End candidate MPT behavior.
 
 	if(param) pChn->nPortamentoSlide = param * 4;
-	if(pChn->nPeriod && pChn->nPortamentoDest && !pChn->isFirstTick)
+	if(pChn->nPeriod && pChn->nPortamentoDest && (!pChn->isFirstTick || GetType() == MOD_TYPE_DBM))
 	{
 		if (pChn->nPeriod < pChn->nPortamentoDest)
 		{
