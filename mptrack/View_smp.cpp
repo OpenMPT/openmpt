@@ -326,12 +326,12 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if(pMainFrm)
 		{
-			CHAR s[64];
-			s[0] = 0;
+			std::string s;
 			if(m_dwEndSel > m_dwBeginSel)
 			{
 				const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
-				wsprintf(s, "[%u,%u] (%u sample%s, ", m_dwBeginSel, m_dwEndSel, selLength, (selLength == 1) ? "" : "s");
+				s = mpt::String::Print("[%1,%2] (%3 sample%4, ", m_dwBeginSel, m_dwEndSel, selLength, (selLength == 1) ? "" : "s");
+
 				uint32 lSampleRate = pSndFile->GetSample(m_nSample).nC5Speed;
 				if(pSndFile->GetType() & (MOD_TYPE_MOD|MOD_TYPE_XM))
 				{
@@ -340,11 +340,11 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 				if (!lSampleRate) lSampleRate = 8363;
 				uint64 msec = (uint64(selLength) * 1000) / lSampleRate;
 				if(msec < 1000)
-					wsprintf(s + strlen(s), "%lums)", msec);
+					s += mpt::String::Print("%1ms)", msec);
 				else
-					wsprintf(s + strlen(s), "%lu.%lus)", msec / 1000, (msec / 100) % 10);
+					s += mpt::String::Print("%1.%2s)", msec / 1000, mpt::fmt::dec0<2>((msec / 10) % 100));
 			}
-			pMainFrm->SetInfoText(s);
+			pMainFrm->SetInfoText(s.c_str());
 		}
 	}
 }

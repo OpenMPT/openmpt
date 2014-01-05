@@ -350,15 +350,17 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				}
 			}
 
+			if(forceSelect != 0 && plug.pluginId2 == forceSelect)
+			{
+				// Forced selection (e.g. just after add plugin)
+				currentPlug = h;
+				foundCurrentPlug = true;
+			}
+
 			if(m_pPlugin && !foundCurrentPlug)
 			{
 				//Which plugin should be selected?
-
-				if(forceSelect != 0 && plug.pluginId2 == forceSelect)
-				{
-					//forced selection (e.g. just after add plugin)
-					currentPlug = h;
-				} else if(m_pPlugin->pMixPlugin)
+				if(m_pPlugin->pMixPlugin)
 				{
 					//Current slot's plugin
 					CVstPlugin *pVstPlug = (CVstPlugin *)m_pPlugin->pMixPlugin;
