@@ -494,10 +494,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		TrackerDirectories::Instance().m_szWorkingDirectory[i] = TrackerDirectories::Instance().m_szDefaultDirectory[i];
 	}
-	if(!TrackerDirectories::Instance().m_szDefaultDirectory[DIR_MODS].empty())
-	{
-		SetCurrentDirectoryW(TrackerDirectories::Instance().m_szDefaultDirectory[DIR_MODS].AsNative().c_str());
-	}
 	m_szKbdFile = theApp.RelativePathToAbsolute(m_szKbdFile);
 
 	// Last fixup: update config version
