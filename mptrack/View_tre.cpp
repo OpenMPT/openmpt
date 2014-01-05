@@ -194,11 +194,14 @@ void CModTree::Init()
 
 	if(!IsSampleBrowser())
 	{
-		m_InstrLibPath = TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES);
-		if(m_InstrLibPath.empty())
+		const Directory dirs[] = { DIR_SAMPLES, DIR_INSTRUMENTS, DIR_MODS };
+		for(int i = 0; i < CountOf(dirs); i++)
 		{
-			m_InstrLibPath = TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS);
-			if(m_InstrLibPath.empty())
+			m_InstrLibPath = TrackerDirectories::Instance().GetDefaultDirectory(dirs[i]);
+			if(!m_InstrLibPath.empty())
+			{
+				break;
+			} else if(i == CountOf(dirs) - 1)
 			{
 				// Resort to current directory.
 				WCHAR curDir[MAX_PATH];
@@ -1464,19 +1467,26 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_SAMPLE:
 		wsprintf(s, _T("Remove sample %u?"), modItemID);
-		if(Reporting::Confirm(s, false, true) == cnfNo) break;
-		modDoc->GetSampleUndo().PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace);
-		if (modDoc->RemoveSample((SAMPLEINDEX)modItemID))
+		if(Reporting::Confirm(s, false, true) == cnfYes)
 		{
-			modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_SMP) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
+			modDoc->GetSampleUndo().PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace);
+			const SAMPLEINDEX oldNumSamples = modDoc->GetNumSamples();
+			if (modDoc->RemoveSample((SAMPLEINDEX)modItemID))
+			{
+				modDoc->UpdateAllViews(NULL, (modDoc->GetNumSamples() != oldNumSamples ? 0 : (UINT(modItemID) << HINT_SHIFT_SMP)) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
+			}
 		}
 		break;
 
 	case MODITEM_INSTRUMENT:
 		wsprintf(s, _T("Remove instrument %u?"), modItemID);
-		if(Reporting::Confirm(s, false, true) == cnfYes && modDoc->RemoveInstrument((INSTRUMENTINDEX)modItemID))
+		if(Reporting::Confirm(s, false, true) == cnfYes)
 		{
-			modDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_INS) | HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
+			const INSTRUMENTINDEX oldNumInstrs = modDoc->GetNumInstruments();
+			if(modDoc->RemoveInstrument((INSTRUMENTINDEX)modItemID))
+			{
+				modDoc->UpdateAllViews(NULL, (modDoc->GetNumInstruments() != oldNumInstrs ? 0 : (UINT(modItemID) << HINT_SHIFT_INS)) | HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
+			}
 		}
 		break;
 
@@ -1505,7 +1515,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 			fos.hwnd = m_hWnd;
 			fos.wFunc = FO_DELETE;
 			fos.pFrom = fullPath.c_str();
-			fos.fFlags = FOF_ALLOWUNDO;
+			fos.fFlags = CMainFrame::GetInputHandler()->ShiftPressed() ? 0 : FOF_ALLOWUNDO;
 			if ((0 == SHFileOperationW(&fos)) && (!fos.fAnyOperationsAborted)) RefreshInstrumentLibrary();
 		}
 		break;
@@ -3391,6 +3401,7 @@ HTREEITEM CModTree::GetNthChildItem(HTREEITEM hItem, int index)
 
 
 // Gets the root parent of an item, i.e. if C is a child of B and B is a child of A, GetParentRootItem(C) returns A.
+// A root item is considered to be its own parent, i.e. the returned value is only ever NULL if the input value was NULL.
 HTREEITEM CModTree::GetParentRootItem(HTREEITEM hItem)
 //----------------------------------------------------
 {

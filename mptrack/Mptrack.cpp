@@ -698,6 +698,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 		WCHAR wcsDir[MAX_PATH];
 		GetFullPathNameW(m_szExePath.AsNative().c_str(), CountOf(wcsDir), wcsDir, NULL);
 		m_szExePath = mpt::PathString::FromNative(wcsDir);
+		SetCurrentDirectoryW(wcsDir);
 	}
 
 	m_szConfigDirectory = mpt::PathString();
