@@ -441,14 +441,11 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 								switch(m.param & 0x0F)
 								{
 								case 0x0:	// Surround Off
-									m.param = 0x90;
-									break;
 								case 0x1:	// Surround On
-									m.command = CMD_PANNING8;
-									m.param = 0xA4;
+									m.param += 0x90;
 									break;
 								case 0x2:	// Set normal loop - not implemented in BWSB or 2GDM.
-								case 0x3:	// Set bidi loop - dito
+								case 0x3:	// Set bidi loop - ditto
 									m.command = CMD_NONE;
 									break;
 								case 0x4:	// Play sample forwards
@@ -460,9 +457,9 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 									m.param = 0x9F;
 									break;
 								case 0x6:	// Monaural sample - also not implemented.
-								case 0x7:	// Stereo sample - dito
-								case 0x8:	// Stop sample on end - dito
-								case 0x9:	// Loop sample on end - dito
+								case 0x7:	// Stereo sample - ditto
+								case 0x8:	// Stop sample on end - ditto
+								case 0x9:	// Loop sample on end - ditto
 								default:
 									m.command = CMD_NONE;
 									break;

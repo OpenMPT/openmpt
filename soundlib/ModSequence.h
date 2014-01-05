@@ -112,7 +112,7 @@ public:
 
 #ifdef MODPLUG_TRACKER
 	// Check if a playback position is currently locked (inaccessible)
-	bool IsPositionLocked(ORDERINDEX position);
+	bool IsPositionLocked(ORDERINDEX position) const;
 #endif // MODPLUG_TRACKER
 
 	// Sequence name setter

@@ -2780,7 +2780,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 		}
 	}
 	// Regular Slide
-	if(!pChn->isFirstTick)
+	if(!pChn->isFirstTick || (m_nMusicSpeed == 1 && GetType() == MOD_TYPE_DBM))
 	{
 		DoFreqSlide(pChn, -int(param) * 4);
 	}
@@ -2832,7 +2832,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 		}
 	}
 
-	if(!pChn->isFirstTick)
+	if(!pChn->isFirstTick || (m_nMusicSpeed == 1 && GetType() == MOD_TYPE_DBM))
 	{
 		DoFreqSlide(pChn, int(param) * 4);
 	}
@@ -3239,7 +3239,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 			}
 		}
 	}
-	if(!pChn->isFirstTick || m_SongFlags[SONG_FASTVOLSLIDES])
+	if(!pChn->isFirstTick || m_SongFlags[SONG_FASTVOLSLIDES] || (m_nMusicSpeed == 1 && GetType() == MOD_TYPE_DBM))
 	{
 		// IT compatibility: Ignore slide commands with both nibbles set.
 		if (param & 0x0F)

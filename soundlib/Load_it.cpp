@@ -375,7 +375,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// Exact version number will be determined later.
 				interpretModPlugMade = true;
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
-			} else if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
+			} else if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
 				if(memchr(fileHeader.chnpan, 0xFF, sizeof(fileHeader.chnpan)) != NULL)
 				{
@@ -390,7 +390,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					madeWithTracker = "OpenMPT 1.17 (compatibility export)";
 				}
 				interpretModPlugMade = true;
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && fileHeader.reserved == 0)
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
@@ -543,7 +543,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Oops, we were not supposed to read this.
 			file.SkipBack(2);
 		}
-	} else if(fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.cmwt == 0x0214 && fileHeader.cwtv == 0x0214 && fileHeader.reserved == 0 && (fileHeader.special & (ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights)) == 0)
+	} else if(fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.cmwt == 0x0214 && fileHeader.cwtv == 0x0214 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && (fileHeader.special & (ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights)) == 0)
 	{
 		// Another non-conforming application is unmo3 < v2.4.0.1, which doesn't set the special bit
 		// at all, but still writes the two edit history length bytes (zeroes)...
@@ -950,10 +950,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				&& fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0
 				&& fileHeader.insnum == 0 && fileHeader.patnum + 1 == fileHeader.ordnum
 				&& fileHeader.globalvol == 128 && fileHeader.mv == 100 && fileHeader.speed == 1 && fileHeader.sep == 128 && fileHeader.pwd == 0
-				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && fileHeader.reserved == 0)
+				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
 				madeWithTracker = "OpenSPC conversion";
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
@@ -962,7 +962,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(fileHeader.reserved, "CHBI", 4))
 			{
 				madeWithTracker = "ChibiTracker";
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && fileHeader.reserved == 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
 				madeWithTracker = "CheeseTracker";
 			} else
