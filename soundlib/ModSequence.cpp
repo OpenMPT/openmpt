@@ -660,8 +660,8 @@ bool ModSequenceSet::MergeSequences()
 
 #ifdef MODPLUG_TRACKER
 // Check if a playback position is currently locked (inaccessible)
-bool ModSequence::IsPositionLocked(ORDERINDEX position)
-//-----------------------------------------------------
+bool ModSequence::IsPositionLocked(ORDERINDEX position) const
+//-----------------------------------------------------------
 {
 	return(m_sndFile.m_lockOrderStart != ORDERINDEX_INVALID
 		&& (position < m_sndFile.m_lockOrderStart || position > m_sndFile.m_lockOrderEnd));
@@ -741,6 +741,7 @@ size_t ModSequence::WriteAsByte(FILE* f, const uint16 count) const
 }
 
 
+// TODO: Need a way to declare skip/stop indices?
 bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntries)
 //--------------------------------------------------------------------------------
 {
@@ -760,6 +761,8 @@ bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntrie
 	{
 		(*this)[i] = file.ReadUint8();
 	}
+	std::fill(begin() + readEntries, end(), GetInvalidPatIndex());
+
 	file.Skip(howMany - readEntries);
 	return true;
 }
