@@ -739,6 +739,7 @@ INPUT                  = \
                          README.md \
                          libopenmpt/dox/dependencies.md \
                          libopenmpt/dox/tests.md \
+                         libopenmpt/dox/changelog.md \
                          libopenmpt/dox/todo.md \
                          libopenmpt/libopenmpt.hpp \
                          libopenmpt/libopenmpt.h \
