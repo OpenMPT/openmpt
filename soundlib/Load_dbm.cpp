@@ -242,11 +242,6 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 			// TODO key of at tick 0
 		}
 		break;
-
-	case CMD_OFFSET:
-		// TODO Sample offset slide
-		command = CMD_NONE;
-		break;
 	}
 }
 
