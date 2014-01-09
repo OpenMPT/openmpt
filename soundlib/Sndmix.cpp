@@ -1245,8 +1245,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 		} else
 		{
 			// Original behaviour
-
-			if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT1XMODE))
+			if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT1XMODE) || ((GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM)) && m_SongFlags[SONG_FIRSTTICK]))
 			{
 				// ProTracker doesn't apply vibrato nor advance on the first tick.
 				// Test case: VibratoReset.mod
@@ -1276,6 +1275,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			} else
 			{
 				vdepth = ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_SongFlags[SONG_ITOLDEFFECTS]) ? 6 : 7;
+				if(GetType() == MOD_TYPE_DBM) vdepth = 7;	// Closer than 6, but not quite.
 			}
 
 			vdelta = (vdelta * (int)chn.nVibratoDepth) >> vdepth;
