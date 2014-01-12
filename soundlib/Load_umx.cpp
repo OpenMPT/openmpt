@@ -59,8 +59,8 @@ STATIC_ASSERT(sizeof(UMXFileHeader) == 36);
 
 
 // Read compressed unreal integers - similar to MIDI integers, but signed values are possible.
-int32 ReadUMXIndex(FileReader &chunk)
-//-----------------------------------
+static int32 ReadUMXIndex(FileReader &chunk)
+//------------------------------------------
 {
 	enum
 	{
@@ -99,8 +99,8 @@ int32 ReadUMXIndex(FileReader &chunk)
 
 
 // Read an entry from the name table.
-std::string ReadUMXNameTableEntry(FileReader &chunk, uint16 packageVersion)
-//-------------------------------------------------------------------------
+static std::string ReadUMXNameTableEntry(FileReader &chunk, uint16 packageVersion)
+//--------------------------------------------------------------------------------
 {
 	std::string name;
 	if(packageVersion >= 64)
@@ -132,23 +132,32 @@ std::string ReadUMXNameTableEntry(FileReader &chunk, uint16 packageVersion)
 
 
 // Read an entry from the import table.
-int32 ReadUMXImportTableEntry(FileReader &chunk)
-//----------------------------------------------
+static int32 ReadUMXImportTableEntry(FileReader &chunk, uint16 packageVersion)
+//----------------------------------------------------------------------------
 {
 	ReadUMXIndex(chunk);		// Class package
 	ReadUMXIndex(chunk);		// Class name
-	chunk.Skip(4);				// Package
+	if(packageVersion >= 60)
+	{
+		chunk.Skip(4); // Package
+	} else
+	{
+		ReadUMXIndex(chunk); // ??
+	}
 	return ReadUMXIndex(chunk);	// Object name (offset into the name table)
 }
 
 
 // Read an entry from the export table.
-void ReadUMXExportTableEntry(FileReader &chunk, int32 &objClass, int32 &objOffset, int32 &objSize, int32 &objName)
-//----------------------------------------------------------------------------------------------------------------
+static void ReadUMXExportTableEntry(FileReader &chunk, int32 &objClass, int32 &objOffset, int32 &objSize, int32 &objName, uint16 packageVersion)
+//----------------------------------------------------------------------------------------------------------------------------------------------
 {
 	objClass = ReadUMXIndex(chunk);	// Object class
 	ReadUMXIndex(chunk);			// Object parent
-	chunk.Skip(4);					// Internal package / group of the object
+	if(packageVersion >= 60)
+	{
+		chunk.Skip(4);					// Internal package / group of the object
+	}
 	objName = ReadUMXIndex(chunk);	// Object name (offset into the name table)
 	chunk.Skip(4);					// Object flags
 	objSize = ReadUMXIndex(chunk);
@@ -189,7 +198,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 	classes.reserve(fileHeader.importCount);
 	for(uint32 i = 0; i < fileHeader.importCount; i++)
 	{
-		int32 objName = ReadUMXImportTableEntry(file);
+		int32 objName = ReadUMXImportTableEntry(file, fileHeader.packageVersion);
 		if(static_cast<size_t>(objName) < names.size())
 		{
 			classes.push_back(objName);
@@ -209,7 +218,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 	for(uint32 i = 0; i < fileHeader.exportCount; i++)
 	{
 		int32 objClass, objOffset, objSize, objName;
-		ReadUMXExportTableEntry(file, objClass, objOffset, objSize, objName);
+		ReadUMXExportTableEntry(file, objClass, objOffset, objSize, objName, fileHeader.packageVersion);
 
 		if(objSize <= 0 || objClass >= 0)
 		{
@@ -246,15 +255,24 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(chunk.IsValid())
 		{
+			if(fileHeader.packageVersion < 40)
+			{
+				chunk.Skip(8); // 00 00 00 00 00 00 00 00
+			}
+			if(fileHeader.packageVersion < 60)
+			{
+				chunk.Skip(16); // 81 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 00
+			}
 			// Read object properties
 			size_t propertyName = static_cast<size_t>(ReadUMXIndex(chunk));
-			if(propertyName >= names.size() || strcmp(names[propertyName].c_str(), "none"))
+			/*if(propertyName >= names.size() || strcmp(names[propertyName].c_str(), "none"))
 			{
-				// Can't bother to implement property reading, as no UMX or UAX files I've seen so far use properties for the relevant objects.
+				// Can't bother to implement property reading, as no UMX files I've seen so far use properties for the relevant objects,
+				// and only the UAX files in the Unreal 1997/98 beta seem to use this and still load just fine when ignoring it.
 				// If it should be necessary to implement this, check CUnProperty.cpp in http://ut-files.com/index.php?dir=Utilities/&file=utcms_source.zip
 				ASSERT(false);
 				continue;
-			}
+			}*/
 
 			if(fileHeader.packageVersion >= 120)
 			{
@@ -305,7 +323,6 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 				// Read as sample
 				if(ReadSampleFromFile(GetNumSamples() + 1, fileChunk, true))
 				{
-					m_nSamples++;
 					if(static_cast<size_t>(objName) < names.size())
 					{
 						mpt::String::Copy(m_szNames[GetNumSamples()], names[objName]);
