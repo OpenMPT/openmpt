@@ -207,7 +207,9 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand *m, MT2COMMAND *p)
 			m->command = p->fxparam2;
 			m->param = p->fxparam1;
 			that->ConvertModCommand(*m);
+#ifdef MODPLUG_TRACKER
 			m->Convert(MOD_TYPE_XM, MOD_TYPE_IT);
+#endif // MODPLUG_TRACKER
 		} else
 		{
 			// TODO: MT2 Effects
@@ -296,7 +298,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 		switch(dwId)
 		{
 		// MSG
-		case 0x0047534D:
+		case MAGIC4LE('M','S','G','\0'):
 			if (dwLen > 3)
 			{
 				DWORD nTxtLen = dwLen;
@@ -304,11 +306,25 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 				songMessage.Read(lpStream + dwMemPos + 1, nTxtLen - 1, SongMessage::leCRLF);
 			}
 			break;
+		case MAGIC4LE('T','R','K','S'):
+			if (dwLen >= 2)
+			{
+				m_nSamplePreAmp = LittleEndianW(*(uint16 *)(lpStream+dwMemPos)) >> 9;
+				dwMemPos += 2;
+			}
+			for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
+			{
+				ChnSettings[c].Reset();
+				if(dwMemPos + 1030 < dwMemLength)
+				{
+					ChnSettings[c].nVolume = LittleEndianW(*(uint16 *)(lpStream+dwMemPos)) >> 9;
+					LimitMax(ChnSettings[c].nVolume, uint16(64));
+					dwMemPos += 1030;
+				}
+			}
+			break;
 		// SUM -> author name (or "Unregistered")
 		// TMAP
-		// TRKS
-		case 0x534b5254:
-			break;
 		}
 		dwMemPos += dwLen;
 	}

@@ -28,7 +28,12 @@
 
 
 // Formats which have 7-bit (0...128) instead of 6-bit (0...64) global volume commands, or which are imported to this range (mostly formats which are converted to IT internally)
-#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2 | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM | MOD_TYPE_PTM)
+#ifdef MODPLUG_TRACKER
+#define GLOBALVOL_7BIT_FORMATS_EXT (MOD_TYPE_MT2)
+#else
+#define GLOBALVOL_7BIT_FORMATS_EXT 0
+#endif // MODPLUG_TRACKER
+#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM | MOD_TYPE_PTM | GLOBALVOL_7BIT_FORMATS_EXT)
 
 
 ////////////////////////////////////////////////////////////
