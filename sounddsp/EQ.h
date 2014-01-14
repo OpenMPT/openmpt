@@ -10,7 +10,7 @@
 
 
 #pragma once
-
+#include "../soundlib/Mixer.h"	// For MIXBUFFERSIZE
 
 #define MAX_EQ_BANDS	6
 

@@ -11,8 +11,7 @@
 #include "stdafx.h"
 
 #include "Dither.h"
-
-#include "Snd_defs.h"
+#include "Mixer.h"
 
 
 

@@ -94,6 +94,7 @@ struct VSTPluginLib
 
 #ifndef NO_VST
 #include "../soundlib/plugins/PluginEventQueue.h"
+#include "../soundlib/Mixer.h"
 #endif // NO_VST
 
 
@@ -149,7 +150,7 @@ protected:
 
 	VSTInstrChannel m_MidiCh[16];						// MIDI channel state
 	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
-	int32 m_MixBuffer[MIXBUFFERSIZE * 2 + 2];			// Stereo interleaved
+	mixsample_t m_MixBuffer[MIXBUFFERSIZE * 2 + 2];		// Stereo interleaved
 	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
 
 public:

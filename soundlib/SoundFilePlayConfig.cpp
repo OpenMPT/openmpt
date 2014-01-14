@@ -10,8 +10,8 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
-#include "../soundlib/SoundFilePlayConfig.h"
+#include "Mixer.h"
+#include "SoundFilePlayConfig.h"
 
 CSoundFilePlayConfig::CSoundFilePlayConfig()
 //------------------------------------------

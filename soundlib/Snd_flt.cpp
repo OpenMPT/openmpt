@@ -104,27 +104,42 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	float fb0 = (d + e + e) / (1 + d + e);
 	float fb1 = -e / (1.0f + d + e);
 
+#if defined(MPT_INTMIXER)
+#define FILTER_CONVERT(x) static_cast<mixsample_t>((x) * (1 << MIXING_FILTER_PRECISION))
+#else
+#define FILTER_CONVERT(x) (x)
+#endif
+
 	switch(pChn->nFilterMode)
 	{
 	case FLTMODE_HIGHPASS:
-		pChn->nFilter_A0 = 1.0f - fg;
-		pChn->nFilter_B0 = fb0;
-		pChn->nFilter_B1 = fb1;
+		pChn->nFilter_A0 = FILTER_CONVERT(1.0f - fg);
+		pChn->nFilter_B0 = FILTER_CONVERT(fb0);
+		pChn->nFilter_B1 = FILTER_CONVERT(fb1);
+#ifdef MPT_INTMIXER
 		pChn->nFilter_HP = -1;
+#else
+		pChn->nFilter_HP = 1.0f;
+#endif // MPT_INTMIXER
 		break;
 
 	default:
-		pChn->nFilter_A0 = fg;
-		pChn->nFilter_B0 = fb0;
-		pChn->nFilter_B1 = fb1;
+		pChn->nFilter_A0 = FILTER_CONVERT(fg);
+		pChn->nFilter_B0 = FILTER_CONVERT(fb0);
+		pChn->nFilter_B1 = FILTER_CONVERT(fb1);
+#ifdef MPT_INTMIXER
 		pChn->nFilter_HP = 0;
+#else
+		pChn->nFilter_HP = 0;
+#endif // MPT_INTMIXER
 		break;
 	}
-	
+#undef FILTER_CONVERT
+
 	if (bReset)
 	{
-		pChn->nFilter_Y1 = pChn->nFilter_Y2 = 0;
-		pChn->nFilter_Y3 = pChn->nFilter_Y4 = 0;
+		pChn->nFilter_Y[0][0] = pChn->nFilter_Y[0][1] = 0;
+		pChn->nFilter_Y[1][0] = pChn->nFilter_Y[1][1] = 0;
 	}
 
 }
