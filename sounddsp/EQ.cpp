@@ -28,10 +28,6 @@ static const UINT gEqLinearToDB[33] =
 	160, 172, 184, 196, 208, 220, 232, 244, 256
 };
 
-
-static const float32 f2ic = (float32)(1 << 28);
-static const float32 i2fc = (float32)(1.0 / (1 << 28));
-
 static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 {
 	// Default: Flat EQ

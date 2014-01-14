@@ -11,6 +11,7 @@
 #pragma once
 
 #ifndef NO_REVERB
+#include "../soundlib/Mixer.h"	// For MIXBUFFERSIZE
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -129,8 +130,7 @@ public:
 private:
 	int MixReverbBuffer[MIXBUFFERSIZE * 2];
 public:
-	LONG gnRvbROfsVol;
-	LONG gnRvbLOfsVol;
+	mixsample_t gnRvbROfsVol, gnRvbLOfsVol;
 
 private:
 

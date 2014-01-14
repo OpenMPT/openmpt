@@ -659,8 +659,8 @@ struct NormalizationChain
 // Template arguments:
 // SampleConversion: Functor of type SampleConversionFunctor to apply sample conversion (see above for existing functors).
 template <typename SampleConversion>
-size_t CopySample(typename SampleConversion::output_t *outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t *inBuf, size_t sourceSize, size_t incSource, SampleConversion conv = SampleConversion())
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+size_t CopySample(typename SampleConversion::output_t * MPT_RESTRICT outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t sourceSize, size_t incSource, SampleConversion conv = SampleConversion())
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const size_t sampleSize = incSource * SampleConversion::input_inc * sizeof(typename SampleConversion::input_t);
 	LimitMax(numSamples, sourceSize / sampleSize);
@@ -690,8 +690,8 @@ size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t source
 	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
 	size_t numFrames = countFrames;
 	SampleConversion sampleConv(conv);
-	const char * inBuf = sourceBuffer;
-	typename SampleConversion::output_t * outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	const char * MPT_RESTRICT inBuf = sourceBuffer;
+	typename SampleConversion::output_t * MPT_RESTRICT outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numFrames--)
 	{
 		*outBuf = sampleConv(inBuf);
@@ -715,8 +715,8 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, 
 	size_t numFrames = countFrames;
 	SampleConversion sampleConvLeft(conv);
 	SampleConversion sampleConvRight(conv);
-	const char * inBuf = sourceBuffer;
-	typename SampleConversion::output_t * outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	const char * MPT_RESTRICT inBuf = sourceBuffer;
+	typename SampleConversion::output_t * MPT_RESTRICT outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numFrames--)
 	{
 		*outBuf = sampleConvLeft(inBuf);
@@ -743,9 +743,9 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 	size_t numFrames = countFrames;
 	SampleConversion sampleConvLeft(conv);
 	SampleConversion sampleConvRight(conv);
-	const char * inBufLeft = sourceBuffer;
-	const char * inBufRight = sourceBuffer + sample.nLength * SampleConversion::input_inc;
-	typename SampleConversion::output_t * outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	const char * MPT_RESTRICT inBufLeft = sourceBuffer;
+	const char * MPT_RESTRICT inBufRight = sourceBuffer + sample.nLength * SampleConversion::input_inc;
+	typename SampleConversion::output_t * MPT_RESTRICT outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numFrames--)
 	{
 		*outBuf = sampleConvLeft(inBufLeft);
@@ -805,8 +805,8 @@ size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_
 
 
 template<int fractionalBits, typename Tsample, typename Tfixed>
-void ConvertInterleavedFixedPointToInterleaved(Tsample *p, const Tfixed *mixbuffer, std::size_t channels, std::size_t count)
-//--------------------------------------------------------------------------------------------------------------------------
+void ConvertInterleavedFixedPointToInterleaved(Tsample * MPT_RESTRICT p, const Tfixed * MPT_RESTRICT mixbuffer, std::size_t channels, std::size_t count)
+//------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	SC::ConvertFixedPoint<Tsample, int, fractionalBits> conv;
 	count *= channels;
@@ -817,8 +817,8 @@ void ConvertInterleavedFixedPointToInterleaved(Tsample *p, const Tfixed *mixbuff
 }
 
 template<int fractionalBits, typename Tsample, typename Tfixed>
-void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const buffers, const Tfixed *mixbuffer, std::size_t channels, std::size_t count)
-//--------------------------------------------------------------------------------------------------------------------------------------------------
+void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const MPT_RESTRICT buffers, const Tfixed * MPT_RESTRICT mixbuffer, std::size_t channels, std::size_t count)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	SC::ConvertFixedPoint<Tsample, int, fractionalBits> conv;
 	for(std::size_t i = 0; i < count; ++i)
@@ -834,8 +834,8 @@ void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const buffer
 
 // Copy from an interleaed buffer of #channels.
 template <typename SampleConversion>
-void CopyInterleavedToChannel(typename SampleConversion::output_t *dst, const typename SampleConversion::input_t *src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CopyInterleavedToChannel(typename SampleConversion::output_t * MPT_RESTRICT dst, const typename SampleConversion::input_t * MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	SampleConversion sampleConv(conv);
 	src += channel;

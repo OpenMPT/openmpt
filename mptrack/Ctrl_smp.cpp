@@ -804,6 +804,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 				sample.filename[0] = '\0';
 				m_sndFile.m_szNames[m_nSample][0] = '\0';
 				if(!sample.nC5Speed) sample.nC5Speed = 22050;
+				sample.PrecomputeLoops(m_sndFile, false);
 			} else
 			{
 				m_modDoc.GetSampleUndo().Undo(m_nSample);
@@ -1203,7 +1204,7 @@ void CCtrlSamples::OnNormalize()
 
 			if (bOk)
 			{
-				m_modDoc.AdjustEndOfSample(iSmp);
+				sample.PrecomputeLoops(m_sndFile, false);
 				m_modDoc.UpdateAllViews(NULL, (iSmp << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 			}
 		}
@@ -1260,7 +1261,7 @@ void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
 			p[i] = (signed char)l;
 		}
 	}
-	m_modDoc.AdjustEndOfSample(m_nSample);
+	sample.PrecomputeLoops(m_sndFile, false);
 	m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 	m_modDoc.SetModified();
 	EndWaitCursor();
@@ -1412,7 +1413,7 @@ void CCtrlSamples::OnUpsample()
 	pOriginal = sample.pSample;
 	dwNewLen = sample.nLength + (dwEnd - dwStart);
 	pNewSample = NULL;
-	if (dwNewLen + 4 <= MAX_SAMPLE_LENGTH) pNewSample = CSoundFile::AllocateSample((dwNewLen + 4)*newsmplsize);
+	if (dwNewLen <= MAX_SAMPLE_LENGTH) pNewSample = ModSample::AllocateSample(dwNewLen, newsmplsize);
 	if (pNewSample)
 	{
 		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
@@ -1466,7 +1467,7 @@ void CCtrlSamples::OnUpsample()
 				}
 			}
 		}
-		if (sample.uFlags & CHN_16BIT)
+		if (sample.uFlags[CHN_16BIT])
 		{
 			if (dwStart > 0) memcpy(pNewSample, pOriginal, dwStart*smplsize);
 			if (dwEnd < sample.nLength) memcpy(((LPSTR)pNewSample)+(dwStart+(dwEnd-dwStart)*2)*smplsize, ((LPSTR)pOriginal)+(dwEnd*smplsize), (sample.nLength-dwEnd)*smplsize);
@@ -1499,6 +1500,9 @@ void CCtrlSamples::OnUpsample()
 		
 		sample.uFlags.set(CHN_16BIT);
 		ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, dwNewLen, m_sndFile);
+		// Update loop wrap-around buffer
+		sample.PrecomputeLoops(m_sndFile);
+		
 		if(!selection.selectionActive)
 		{
 			if(!(m_sndFile.GetType() & MOD_TYPE_MOD))
@@ -1506,10 +1510,7 @@ void CCtrlSamples::OnUpsample()
 				if(sample.nC5Speed < 1000000) sample.nC5Speed *= 2;
 				if(sample.RelativeTone < 84) sample.RelativeTone += 12;
 			}
-		}
-
-		m_modDoc.AdjustEndOfSample(m_nSample);
-		if (selection.selectionActive == true)
+		} else
 		{
 			SetSelectionPoints(dwStart, dwEnd + (dwEnd - dwStart));
 		}
@@ -1548,7 +1549,7 @@ void CCtrlSamples::OnDownsample()
 	dwNewLen = sample.nLength - dwRemove;
 	dwEnd = dwStart+dwRemove*2;
 	pNewSample = NULL;
-	if ((dwNewLen > 32) && (dwRemove)) pNewSample = CSoundFile::AllocateSample((dwNewLen + 4) * smplsize);
+	if ((dwNewLen >= 4) && (dwRemove)) pNewSample = ModSample::AllocateSample(dwNewLen, smplsize);
 	if (pNewSample)
 	{
 
@@ -1615,6 +1616,9 @@ void CCtrlSamples::OnDownsample()
 		if (sample.nSustainEnd > dwNewLen) sample.nSustainEnd = dwNewLen;
 
 		ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, dwNewLen, m_sndFile);
+		// Update loop wrap-around buffer
+		sample.PrecomputeLoops(m_sndFile);
+
 		if(!selection.selectionActive)
 		{
 			if(!(m_sndFile.GetType() & MOD_TYPE_MOD))
@@ -1622,10 +1626,7 @@ void CCtrlSamples::OnDownsample()
 				if(sample.nC5Speed > 2000) sample.nC5Speed /= 2;
 				if(sample.RelativeTone > -84) sample.RelativeTone -= 12;
 			}
-		}
-
-		m_modDoc.AdjustEndOfSample(m_nSample);
-		if (selection.selectionActive == true)
+		} else
 		{
 			SetSelectionPoints(dwStart, dwStart + dwRemove);
 		}
@@ -1723,10 +1724,19 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 		//Update loop points only if no error occured.
 		if(errorcode == 0)
 		{
-			sample.nLoopStart = (UINT)MIN(sample.nLoopStart * (m_dTimeStretchRatio / 100.0), sample.nLength);
-			sample.nLoopEnd = (UINT)MIN(sample.nLoopEnd * (m_dTimeStretchRatio/100.0), sample.nLength);
-			sample.nSustainStart = (UINT)MIN(sample.nSustainStart * (m_dTimeStretchRatio/100.0), sample.nLength);
-			sample.nSustainEnd = (UINT)MIN(sample.nSustainEnd * (m_dTimeStretchRatio/100.0), sample.nLength);
+			// Update loop wrap-around buffer
+			sample.SetLoop(
+				static_cast<SmpLength>(sample.nLoopStart * (m_dTimeStretchRatio / 100.0)),
+				static_cast<SmpLength>(sample.nLoopEnd * (m_dTimeStretchRatio / 100.0)),
+				sample.uFlags[CHN_LOOP],
+				sample.uFlags[CHN_PINGPONGLOOP],
+				m_sndFile);
+			sample.SetSustainLoop(
+				static_cast<SmpLength>(sample.nSustainStart * (m_dTimeStretchRatio / 100.0)),
+				static_cast<SmpLength>(sample.nSustainEnd * (m_dTimeStretchRatio / 100.0)),
+				sample.uFlags[CHN_SUSTAINLOOP],
+				sample.uFlags[CHN_PINGPONGSUSTAIN],
+				m_sndFile);
 		}
 		
 	}
@@ -1850,7 +1860,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	void *pNewSample = nullptr;
 	if(nNewSampleLength <= MAX_SAMPLE_LENGTH)
 	{
-		pNewSample = CSoundFile::AllocateSample(nNewSampleLength * nChn * smpsize);
+		pNewSample = ModSample::AllocateSample(nNewSampleLength, nChn * smpsize);
 	}
 	if(pNewSample == nullptr)
 	{
@@ -2269,7 +2279,7 @@ void CCtrlSamples::OnSilence()
 					p[i] = (signed char)n;
 				}
 			}
-			m_modDoc.AdjustEndOfSample(m_nSample);
+			sample.PrecomputeLoops(m_sndFile, false);
 			m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 			m_modDoc.SetModified();
 	}
@@ -2558,23 +2568,25 @@ void CCtrlSamples::OnLoopTypeChanged()
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	bool wasDisabled = !sample.uFlags[CHN_LOOP];
 
-	// 0: Off, 1: On, 2: PingPong
+	// Loop type index: 0: Off, 1: On, 2: PingPong
 	sample.uFlags.set(CHN_LOOP, n > 0);
 	sample.uFlags.set(CHN_PINGPONGLOOP, n == 2);
 
 	// set loop points if theren't any
-	if(wasDisabled && ((sample.uFlags & CHN_LOOP) != 0) && (sample.nLoopStart == sample.nLoopEnd) && (sample.nLoopStart == 0))
+	if(wasDisabled && sample.uFlags[CHN_LOOP] && sample.nLoopStart == sample.nLoopEnd)
 	{
 		SampleSelectionPoints selection = GetSelectionPoints();
 		if(selection.selectionActive)
 		{
-			sample.nLoopStart = selection.nStart;
-			sample.nLoopEnd = selection.nEnd;
+			sample.SetLoop(selection.nStart, selection.nEnd, true, n == 2, m_sndFile);
 		} else
 		{
-			sample.nLoopEnd = sample.nLength;
+			sample.SetLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
+	} else
+	{
+		sample.PrecomputeLoops(m_sndFile);
 	}
 	ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
 	m_modDoc.SetModified();
@@ -2589,8 +2601,7 @@ void CCtrlSamples::OnLoopStartChanged()
 	SmpLength n = GetDlgItemInt(IDC_EDIT1);
 	if ((n >= 0) && (n < sample.nLength) && ((n < sample.nLoopEnd) || !sample.uFlags[CHN_LOOP]))
 	{
-		sample.nLoopStart = n;
-		ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
+		sample.SetLoop(n, sample.nLoopEnd, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_modDoc.SetModified();
 	}
@@ -2605,8 +2616,7 @@ void CCtrlSamples::OnLoopEndChanged()
 	SmpLength n = GetDlgItemInt(IDC_EDIT2);
 	if ((n >= 0) && (n <= sample.nLength) && ((n > sample.nLoopStart) || !sample.uFlags[CHN_LOOP]))
 	{
-		sample.nLoopEnd = n;
-		ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
+		sample.SetLoop(sample.nLoopStart, n, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_modDoc.SetModified();
 	}
@@ -2621,24 +2631,26 @@ void CCtrlSamples::OnSustainTypeChanged()
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	bool wasDisabled = !sample.uFlags[CHN_SUSTAINLOOP];
 
-	// 0: Off, 1: On, 2: PingPong
+	// Loop type index: 0: Off, 1: On, 2: PingPong
 	sample.uFlags.set(CHN_SUSTAINLOOP, n > 0);
 	sample.uFlags.set(CHN_PINGPONGSUSTAIN, n == 2);
 
 
 	// set sustain loop points if theren't any
-	if(wasDisabled && ((sample.uFlags & CHN_SUSTAINLOOP) != 0) && (sample.nSustainStart == sample.nSustainEnd) && (sample.nSustainStart == 0))
+	if(wasDisabled && sample.uFlags[CHN_SUSTAINLOOP] && sample.nSustainStart == sample.nSustainEnd)
 	{
 		SampleSelectionPoints selection = GetSelectionPoints();
 		if(selection.selectionActive)
 		{
-			sample.nSustainStart = selection.nStart;
-			sample.nSustainEnd = selection.nEnd;
+			sample.SetSustainLoop(selection.nStart, selection.nEnd, true, n == 2, m_sndFile);
 		} else
 		{
-			sample.nSustainEnd = sample.nLength;
+			sample.SetSustainLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
+	} else
+	{
+		sample.PrecomputeLoops(m_sndFile);
 	}
 	ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
 	m_modDoc.SetModified();
@@ -2654,8 +2666,7 @@ void CCtrlSamples::OnSustainStartChanged()
 	if ((n >= 0) && (n <= sample.nLength)
 	 && ((n < sample.nSustainEnd) || !sample.uFlags[CHN_SUSTAINLOOP]))
 	{
-		sample.nSustainStart = n;
-		ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
+		sample.SetSustainLoop(n, sample.nSustainEnd, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_modDoc.SetModified();
 	}
@@ -2671,8 +2682,7 @@ void CCtrlSamples::OnSustainEndChanged()
 	if ((n >= 0) && (n <= sample.nLength)
 	 && ((n > sample.nSustainStart) || !sample.uFlags[CHN_SUSTAINLOOP]))
 	{
-		sample.nSustainEnd = n;
-		ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
+		sample.SetSustainLoop(sample.nSustainStart, n, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_modDoc.SetModified();
 	}
@@ -2785,9 +2795,8 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		{
 			wsprintf(s, "%u", sample.nLoopStart);
 			m_EditLoopStart.SetWindowText(s);
-			m_modDoc.AdjustEndOfSample(m_nSample);
 			redraw = true;
-			ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
+			sample.PrecomputeLoops(m_sndFile);
 		}
 		m_SpinLoopStart.SetPos(0);
 	}
@@ -2830,9 +2839,8 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		{
 			wsprintf(s, "%u", sample.nLoopEnd);
 			m_EditLoopEnd.SetWindowText(s);
-			m_modDoc.AdjustEndOfSample(m_nSample);
 			redraw = true;
-			ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
+			sample.PrecomputeLoops(m_sndFile);
 		}
 		m_SpinLoopEnd.SetPos(0);
 	}
@@ -2877,7 +2885,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			wsprintf(s, "%u", sample.nSustainStart);
 			m_EditSustainStart.SetWindowText(s);
 			redraw = true;
-			ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
+			sample.PrecomputeLoops(m_sndFile);
 		}
 		m_SpinSustainStart.SetPos(0);
 	}
@@ -2921,7 +2929,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			wsprintf(s, "%u", sample.nSustainEnd);
 			m_EditSustainEnd.SetWindowText(s);
 			redraw = true;
-			ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
+			sample.PrecomputeLoops(m_sndFile);
 		}
 		m_SpinSustainEnd.SetPos(0);
 	}

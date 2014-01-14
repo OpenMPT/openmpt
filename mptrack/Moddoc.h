@@ -308,7 +308,6 @@ public:
 
 	CHANNELINDEX GetNumChannels() const { return m_SndFile.m_nChannels; }
 	UINT GetPatternSize(PATTERNINDEX nPat) const;
-	BOOL AdjustEndOfSample(UINT nSample);
 	bool IsChildSample(INSTRUMENTINDEX nIns, SAMPLEINDEX nSmp) const;
 	INSTRUMENTINDEX FindSampleParent(SAMPLEINDEX sample) const;
 	UINT FindInstrumentChild(UINT nIns) const;

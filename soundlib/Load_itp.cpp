@@ -15,15 +15,15 @@
 
 
 #include "stdafx.h"
+#include "../common/version.h"
+#include "Loaders.h"
+#include "ITTools.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
 #include "../mptrack/TrackerSettings.h"
 #include "../mptrack/MemoryMappedFile.h"
 #include "../mptrack/Moddoc.h"
 #endif
-#include "../common/version.h"
-#include "Loaders.h"
-#include "ITTools.h"
 
 // Version changelog:
 // v1.03: - Relative unicode instrument paths instead of absolute ANSI paths

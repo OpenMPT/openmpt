@@ -1015,6 +1015,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\FloatMixer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\IntMixer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\Mixer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\MixerInterface.h"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\MixerLoops.h"
 				>
 			</File>
