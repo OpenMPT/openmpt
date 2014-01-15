@@ -149,7 +149,9 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 		{
 			for (UINT i=0; i<pblk->sub_blk; i++)
 			{
-				if ((psubblk->unpk_pos > dwFileSize) || (psubblk->unpk_pos + psubblk->unpk_size > dwFileSize)) break;
+				if ((psubblk->unpk_pos >= dwFileSize) ||
+					(psubblk->unpk_size >= dwFileSize) ||
+					(psubblk->unpk_size > dwFileSize - psubblk->unpk_pos)) break;
 #ifdef MMCMP_LOG
 				Log("  Unpacked sub-block %d: offset %d, size=%d\n", i, psubblk->unpk_pos, psubblk->unpk_size);
 #endif

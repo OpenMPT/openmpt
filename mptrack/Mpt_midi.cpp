@@ -10,7 +10,8 @@
 
 #include "stdafx.h"
 #include <mmsystem.h>
-#include "mainfrm.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
 #include "Dlsbank.h"
 #include "../soundlib/MIDIEvents.h"
 #include "Moptions.h"	// for OPTIONS_PAGE_MIDI

@@ -10,10 +10,11 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "childfrm.h"
-#include "moddoc.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
+#include "Childfrm.h"
+#include "Moddoc.h"
 #include "SampleEditorDialogs.h" // For amplification dialog (which is re-used from sample editor)
 #include "globals.h"
 #include "view_pat.h"

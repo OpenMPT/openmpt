@@ -94,7 +94,7 @@
 
 
 
-// Use RESTRICT to indicate that a pointer is guaranteed to not be aliased.
+// Use MPT_RESTRICT to indicate that a pointer is guaranteed to not be aliased.
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_RESTRICT __restrict
 #else

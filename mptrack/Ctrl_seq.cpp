@@ -12,10 +12,17 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
+#include "InputHandler.h"
 #include "moddoc.h"
 #include "globals.h"
 #include "ctrl_pat.h"
 #include "PatternClipboard.h"
+
+
+// Little helper function to avoid copypasta
+static bool IsSelectionKeyPressed() { return CMainFrame::GetInputHandler()->SelectionPressed(); }
+static bool IsCtrlKeyPressed() { return CMainFrame::GetInputHandler()->CtrlPressed(); }
+
 
 //////////////////////////////////////////////////////////////
 // CPatEdit

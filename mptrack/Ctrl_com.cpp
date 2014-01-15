@@ -16,10 +16,10 @@
 #include "globals.h"
 #include "ctrl_com.h"
 #include "view_com.h"
+#include "InputHandler.h"
 
 BEGIN_MESSAGE_MAP(CCtrlComments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlComments)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)	//rewbs.customKeys
 	ON_EN_CHANGE(IDC_EDIT_COMMENTS,		OnCommentsChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -213,13 +213,3 @@ void CCtrlComments::OnCommentsChanged()
 		delete[] p;
 	}
 }
-
-//rewbs.customKeys
-LRESULT CCtrlComments::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
-{
-	if (wParam == kcNull)
-		return NULL;
-	//currently no specific custom keys for this context
-	return wParam;
-}
-//end rewbs.customKeys
