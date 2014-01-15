@@ -1401,7 +1401,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	CArray<InputTargetContext, InputTargetContext> contexts;
 
 	//Clear map
-	memset(km, kcNull, sizeof(KeyMap));
+	km.clear();
 
 	//Copy commandlist content into map:
 	for(UINT cmd=0; cmd<kcNumCommands; cmd++)
@@ -1432,22 +1432,19 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 				contexts.Add(kCtxViewPatternsVol);
 				contexts.Add(kCtxViewPatternsFX);
 				contexts.Add(kCtxViewPatternsFXparam);
-			}
-			else if(curKc.ctx == kCtxCtrlPatterns)
+			} else if(curKc.ctx == kCtxCtrlPatterns)
 			{
 				contexts.Add(kCtxCtrlOrderlist);
-			}
-			else
+			} else
 			{
 				contexts.Add(curKc.ctx);
 			}
 
-			//long label = 0;
 			for (int cx=0; cx<contexts.GetSize(); cx++)
 			{
 				for (int ke=0; ke<eventTypes.GetSize(); ke++)
 				{
-					km[contexts[cx]][curKc.mod][curKc.code][eventTypes[ke]] = (CommandID)cmd;
+					km[KeyMapID(contexts[cx], curKc.mod, curKc.code, eventTypes[ke])] = (CommandID)cmd;
 				}
 			}
 		}

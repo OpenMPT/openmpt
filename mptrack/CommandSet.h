@@ -1132,13 +1132,49 @@ enum Modifiers
 	RAlt     = 1<<5,
 	MaxMod   = 1<<6,
 */
-	MaxMod = HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_EXT | HOTKEYF_SHIFT | HOTKEYF_MIDI,
+	MaxMod = (HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_EXT | HOTKEYF_SHIFT | HOTKEYF_MIDI) + 1,
 };
 
 
 #define MAINKEYS 256
-typedef CommandID KeyMap[kCtxMaxInputContexts][MaxMod][MAINKEYS][kNumKeyEvents];
-//typedef CMap<long, long, CommandID, CommandID> KeyMap;
+
+struct KeyMapID
+{
+	uint8 context;
+	uint8 modifier;
+	uint8 key;
+	uint8 type;
+
+	KeyMapID(InputTargetContext context, UINT modifier, UINT key, KeyEventType type)
+		: context(static_cast<uint8>(context))
+		, modifier(static_cast<uint8>(modifier))
+		, key(static_cast<uint8>(key))
+		, type(static_cast<uint8>(type))
+	{ }
+
+	bool operator== (const KeyMapID &other) const
+	{
+		return context == other.context && modifier == other.modifier && key == other.key && type == other.type;
+	}
+
+	// Hash
+	operator size_t() const
+	{
+		return *reinterpret_cast<const uint32 *>(this);
+	}
+
+	STATIC_ASSERT(static_cast<uint8>(kCtxMaxInputContexts - 1) == kCtxMaxInputContexts - 1);
+	STATIC_ASSERT(static_cast<uint8>(MaxMod - 1) == MaxMod - 1);
+	STATIC_ASSERT(static_cast<uint8>(MAINKEYS - 1) == MAINKEYS - 1);
+	STATIC_ASSERT(static_cast<uint8>(kNumKeyEvents - 1) == kNumKeyEvents - 1);
+};
+
+#include <unordered_map>
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
+typedef std::tr1::unordered_map<KeyMapID, CommandID> KeyMap;
+#else
+typedef std::unordered_map<KeyMapID, CommandID> KeyMap;
+#endif
 
 //KeyMap
 
@@ -1174,12 +1210,6 @@ struct CommandStruct
 
 };
 
-struct Rule
-{
-	UINT ID;
-	CString desc;
-	bool enforce;
-};
 
 enum RuleID
 {
