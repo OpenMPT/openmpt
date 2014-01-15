@@ -11,8 +11,9 @@
 
 #include "stdafx.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/mainfrm.h"
-#include "../mptrack/moddoc.h"
+#include "../mptrack/Mptrack.h"	// For CTrackApp::OpenURL
+#include "../mptrack/TrackerSettings.h"
+#include "../mptrack/Moddoc.h"
 #include "../mptrack/Reporting.h"
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"
