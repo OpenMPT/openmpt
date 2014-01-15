@@ -10,7 +10,8 @@
 
 
 #include "stdafx.h"
-#include "mainfrm.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
 #include "view_tre.h"
 #include "mptrack.h"
 #include "moddoc.h"

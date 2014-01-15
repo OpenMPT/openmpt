@@ -20,6 +20,7 @@
 #include "MIDIMacros.h"
 #include "VstPresets.h"
 #include "../soundlib/FileReader.h"
+#include "InputHandler.h"
 
 #include <sstream>
 

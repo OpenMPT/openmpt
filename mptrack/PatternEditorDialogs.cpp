@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "Moddoc.h"
 #include "view_pat.h"
 #include "PatternEditorDialogs.h"

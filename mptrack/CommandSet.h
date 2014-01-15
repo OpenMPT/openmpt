@@ -11,6 +11,7 @@
 #pragma once
 #include "afxtempl.h"
 #include <string>
+#include "../common/FlagSet.h"
 struct CModSpecifications;
 
 //#define VK_ALT 0x12
@@ -50,11 +51,14 @@ enum InputTargetContext
 
 enum KeyEventType
 {
+	kKeyEventNone	= 0,
 	kKeyEventDown	= 1 << 0,
 	kKeyEventUp		= 1 << 1,
 	kKeyEventRepeat	= 1 << 2,
 	kNumKeyEvents	= 1 << 3
 };
+DECLARE_FLAGSET(KeyEventType)
+
 
 enum CommandID
 {
@@ -79,7 +83,7 @@ enum CommandID
 	kcFileImportMidiLib,
 	kcFileAddSoundBank,
 	kcEndFile=kcFileAddSoundBank,
-	
+
 	kcStartPlayCommands,
 	kcPlayPauseSong=kcStartPlayCommands,
 	kcPauseSong,
@@ -465,7 +469,7 @@ enum CommandID
 	kcVPChordStopGS2,
 	kcVPChordStopA_3,
 	kcVPEndChordStops=kcVPChordStopA_3,
-	
+
 	//Set octave from note column
 	kcSetOctave0,
 	kcSetOctave1,
@@ -477,7 +481,7 @@ enum CommandID
 	kcSetOctave7,
 	kcSetOctave8,
 	kcSetOctave9,
-	
+
 	// Release set octave key
 	kcSetOctaveStop0,
 	kcSetOctaveStop1,
@@ -543,7 +547,7 @@ enum CommandID
 	kcSetVolumeITPortaDown,		//e
 	kcSetVolumeITUnused,		//:
 	kcSetVolumeITOffset,		//o
-	kcSetVolumeEnd=kcSetVolumeITOffset,		
+	kcSetVolumeEnd=kcSetVolumeITOffset,
 
 	//Effect params
 	kcSetFXParam0,
@@ -1132,61 +1136,83 @@ enum Modifiers
 	RAlt     = 1<<5,
 	MaxMod   = 1<<6,
 */
-	MaxMod = (HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_EXT | HOTKEYF_SHIFT | HOTKEYF_MIDI) + 1,
+	MaxMod = HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_EXT | HOTKEYF_SHIFT | HOTKEYF_MIDI,
 };
 
 
 #define MAINKEYS 256
 
-struct KeyMapID
+struct KeyCombination
 {
-	uint8 context;
-	uint8 modifier;
-	uint8 key;
-	uint8 type;
+protected:
+	uint8 ctx;
+	uint8 mod;
+	uint8 code;
+	uint8 event;
 
-	KeyMapID(InputTargetContext context, UINT modifier, UINT key, KeyEventType type)
-		: context(static_cast<uint8>(context))
-		, modifier(static_cast<uint8>(modifier))
-		, key(static_cast<uint8>(key))
-		, type(static_cast<uint8>(type))
+	STATIC_ASSERT(static_cast<uint8>(kCtxMaxInputContexts - 1) == kCtxMaxInputContexts - 1);
+	STATIC_ASSERT(static_cast<uint8>(MaxMod) == MaxMod);
+	STATIC_ASSERT(static_cast<uint8>(MAINKEYS - 1) == MAINKEYS - 1);
+	STATIC_ASSERT(static_cast<uint8>(kNumKeyEvents - 1) == kNumKeyEvents - 1);
+
+public:
+	KeyCombination(InputTargetContext context = kCtxAllContexts, UINT modifier = 0, UINT key = 0, KeyEventType type = kKeyEventNone)
+		: ctx(static_cast<uint8>(context))
+		, mod(static_cast<uint8>(modifier))
+		, code(static_cast<uint8>(key))
+		, event(static_cast<uint8>(type))
 	{ }
 
-	bool operator== (const KeyMapID &other) const
+	bool operator== (const KeyCombination &other) const
 	{
-		return context == other.context && modifier == other.modifier && key == other.key && type == other.type;
+		return ctx == other.ctx && mod == other.mod && code == other.code && event == other.event;
 	}
 
-	// Hash
+	// For hash
 	operator size_t() const
 	{
 		return *reinterpret_cast<const uint32 *>(this);
 	}
 
-	STATIC_ASSERT(static_cast<uint8>(kCtxMaxInputContexts - 1) == kCtxMaxInputContexts - 1);
-	STATIC_ASSERT(static_cast<uint8>(MaxMod - 1) == MaxMod - 1);
-	STATIC_ASSERT(static_cast<uint8>(MAINKEYS - 1) == MAINKEYS - 1);
-	STATIC_ASSERT(static_cast<uint8>(kNumKeyEvents - 1) == kNumKeyEvents - 1);
+	// Getters / Setters
+	void Context(InputTargetContext context) { ctx = static_cast<uint8>(context); }
+	InputTargetContext Context() const { return static_cast<InputTargetContext>(ctx); }
+
+	void Modifier(UINT modifier) { mod = static_cast<uint8>(modifier); }
+	UINT Modifier() const { return static_cast<UINT>(mod); }
+	void AddModifier(UINT modifier) { mod |= static_cast<uint8>(modifier); }
+	void AddModifier(const KeyCombination &other) { mod |= other.mod; }
+
+	void KeyCode(UINT key) { code = static_cast<uint8>(key); }
+	UINT KeyCode() const { return static_cast<UINT>(code); }
+
+	void EventType(KeyEventType type) { event = static_cast<uint8>(type); }
+	KeyEventType EventType() const { return static_cast<KeyEventType>(event); }
+
+	// Key combination to string
+	static CString GetContextText(InputTargetContext ctx);
+	CString GetContextText() const { return GetContextText(Context()); }
+	
+	static CString GetModifierText(UINT mod);
+	CString GetModifierText() const { return GetModifierText(Modifier()); }
+	
+	static CString GetKeyText(UINT mod, UINT code);
+	CString GetKeyText() const { return GetKeyText(Modifier(), KeyCode()); }
+	
+	static CString GetKeyEventText(KeyEventType event);
+	CString GetKeyEventText() const { return GetKeyEventText(EventType()); }
+
+	static bool IsExtended(UINT code);
 };
 
 #include <unordered_map>
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-typedef std::tr1::unordered_map<KeyMapID, CommandID> KeyMap;
+typedef std::tr1::unordered_map<KeyCombination, CommandID> KeyMap;
 #else
-typedef std::unordered_map<KeyMapID, CommandID> KeyMap;
+typedef std::unordered_map<KeyCombination, CommandID> KeyMap;
 #endif
 
 //KeyMap
-
-struct KeyCombination
-{
-	UINT mod;
-	UINT code;
-	InputTargetContext ctx;
-	KeyEventType event;
-	bool operator==(const KeyCombination &other)
-		{return (mod==other.mod && code==other.code && ctx==other.ctx && event==other.event);}
-};
 
 struct CommandStruct
 {
@@ -1197,7 +1223,7 @@ struct CommandStruct
 	CString Message;
 	CArray <KeyCombination, KeyCombination> kcList;
 	//KeyCombination kcList[10];
-	
+
 	bool operator = (const CommandStruct &other)
 	{
 		UID = other.UID;
@@ -1210,6 +1236,12 @@ struct CommandStruct
 
 };
 
+struct Rule
+{
+	UINT ID;
+	CString desc;
+	bool enforce;
+};
 
 enum RuleID
 {
@@ -1251,10 +1283,8 @@ protected:
 	void SetupCommands();
 	void SetupContextHierarchy();
 	bool IsDummyCommand(CommandID cmd);
-	UINT CodeToModifier(UINT code);
 	CString EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
 
-	bool IsExtended(UINT code);
 	int FindCmd(int uid);
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict);
 
@@ -1268,7 +1298,7 @@ public:
 
 	CCommandSet(void);
 	~CCommandSet(void);
-	
+
 	//Population
 	CString Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos = -1);
 	CString Remove(KeyCombination kc, CommandID cmd);
@@ -1284,11 +1314,7 @@ public:
 	bool isHidden(UINT c);
 	int GetKeyListSize(CommandID cmd);
 	CString GetCommandText(CommandID cmd);
-	CString GetKeyText(UINT mod, UINT code);
 	CString GetKeyTextFromCommand(CommandID c, UINT key);
-	CString GetContextText(InputTargetContext ctx);
-	CString GetKeyEventText(KeyEventType ke);
-	CString GetModifierText(UINT mod);
 
 	//Pululation ;)
 	void Copy(CCommandSet *source);	// copy the contents of a commandset into this command set
@@ -1298,6 +1324,6 @@ public:
 	bool LoadFile(std::istream& iStrm, const std::wstring &filenameDescription);
 	bool LoadDefaultKeymap();
 	void UpgradeKeymap(CCommandSet *pCommands, int oldVersion);
-	
+
 };
 //end rewbs.customKeys

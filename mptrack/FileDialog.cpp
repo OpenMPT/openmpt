@@ -12,6 +12,7 @@
 #include "FileDialog.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "../common/StringFixer.h"
 
 

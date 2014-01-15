@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "Moddoc.h"
 #include "SelectPluginDialog.h"
 #include "../common/StringFixer.h"
