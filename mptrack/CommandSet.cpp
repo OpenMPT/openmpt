@@ -30,7 +30,8 @@
 #endif
 
 
-CCommandSet::CCommandSet(void)
+CCommandSet::CCommandSet()
+//------------------------
 {
 	// Which keybinding rules to enforce?
 	enforceRule[krPreventDuplicate]				= true;
@@ -48,17 +49,8 @@ CCommandSet::CCommandSet(void)
 	enforceRule[krPropagateSampleManipulation]  = true;
 //	enforceRule[krCheckContextHierarchy]		= true;
 
-	commands.SetSize(kcNumCommands);
 	SetupCommands();
 	SetupContextHierarchy();
-}
-
-CCommandSet::~CCommandSet(void)
-{
-	//CHAR s[64];
-	//wsprintf(s, "pointer = %lX",plocalCmdSet);
-	//Reporting::Notification("about to remove all", MB_OK | MB_ICONEXCLAMATION); //disabled by rewbs
-	//commands.RemoveAll();
 }
 
 
@@ -696,7 +688,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 
 	KeyCombination curKc;
 	//Avoid duplicate
-	for (int k=0; k<commands[cmd].kcList.GetSize(); k++)
+	for(size_t k = 0; k < commands[cmd].kcList.size(); k++)
 	{
 		curKc=commands[cmd].kcList[k];
 		if (curKc==kc)
@@ -713,7 +705,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 			break;
 		if (IsDummyCommand((CommandID)curCmd)) //no need to check against a dummy key
 			continue;
-		for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
+		for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
 		{ //search all keys for curCommand
 			curKc=commands[curCmd].kcList[k];
 			bool crossContext=false;
@@ -742,10 +734,9 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 		}
 	}
 
-	if (pos>=0)
-		commands[cmd].kcList.InsertAt(pos, kc);
-	else
-		commands[cmd].kcList.Add(kc);
+	if (pos < 0)
+		pos = commands[cmd].kcList.size();
+	commands[cmd].kcList.insert(commands[cmd].kcList.begin() + pos, kc);
 
 	//enfore rules on CommandSet
 	report+=EnforceAll(kc, cmd, true);
@@ -765,7 +756,7 @@ bool CCommandSet::IsDummyCommand(CommandID cmd)
 CString CCommandSet::Remove(int pos, CommandID cmd)
 //-------------------------------------------------
 {
-	if (pos>=0 && pos<commands[cmd].kcList.GetSize())
+	if (pos>=0 && (size_t)pos<commands[cmd].kcList.size())
 	{
 		return Remove(commands[cmd].kcList[pos], cmd);
 	}
@@ -779,15 +770,15 @@ CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
 //-----------------------------------------------------------
 {
 	//find kc in commands[cmd].kcList
-	int index=-1;
-	for (index=0; index<commands[cmd].kcList.GetSize(); index++)
+	std::vector<KeyCombination>::const_iterator index;
+	for(index = commands[cmd].kcList.begin(); index != commands[cmd].kcList.end(); index++)
 	{
-		if (kc==commands[cmd].kcList[index])
+		if (kc == *index)
 			break;
 	}
-	if (index>=0 && index<commands[cmd].kcList.GetSize())
+	if (index != commands[cmd].kcList.end())
 	{
-		commands[cmd].kcList.RemoveAt(index);
+		commands[cmd].kcList.erase(index);
 		Log("Removed a key\n");
 		return  EnforceAll(kc, cmd, false);
 	}
@@ -816,7 +807,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		if(inCmd >= kcStartPatNavigation && inCmd <= kcEndPatNavigation)
 		{//Check that it is a nav cmd
 			CommandID cmdNavSelection = (CommandID)(kcStartPatNavigationSelect + (inCmd-kcStartPatNavigation));
-			for(int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
+			for(size_t kSel = 0; kSel < commands[kcSelect].kcList.size(); kSel++)
 			{//for all selection modifiers
 				curKc=commands[kcSelect].kcList[kSel];
 				newKc=inKc;
@@ -836,7 +827,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		else if(inCmd >= kcStartOrderlistNavigation && inCmd <= kcEndOrderlistNavigation)
 		{//Check that it is a nav cmd
 			CommandID cmdNavSelection = (CommandID)(kcStartOrderlistNavigationSelect+ (inCmd-kcStartOrderlistNavigation));
-			for (int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
+			for(size_t kSel = 0; kSel < commands[kcSelect].kcList.size(); kSel++)
 			{//for all selection modifiers
 				curKc=commands[kcSelect].kcList[kSel];
 				newKc=inKc;
@@ -860,7 +851,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			for(int curCmd=kcStartPatNavigation; curCmd<=kcEndPatNavigation; curCmd++)
 			{
 				// for all nav commands
-				for(int k = 0; k < commands[curCmd].kcList.GetSize(); k++)
+				for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
 				{
 					// for all keys for this command
 					CommandID cmdNavSelection = (CommandID)(kcStartPatNavigationSelect + (curCmd-kcStartPatNavigation));
@@ -879,7 +870,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			} // end all nav commands
 			for(int curCmd = kcStartOrderlistNavigation; curCmd <= kcEndOrderlistNavigation; curCmd++)
 			{// for all nav commands
-				for(int k = 0; k < commands[curCmd].kcList.GetSize(); k++)
+				for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
 				{// for all keys for this command
 					CommandID cmdNavSelection = (CommandID)(kcStartOrderlistNavigationSelect+ (curCmd-kcStartOrderlistNavigation));
 					newKc=commands[curCmd].kcList[k];	// get all properties from the current nav cmd key
@@ -906,7 +897,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		// all selection keys will work even when this new selection key is pressed
 		if(inCmd >= kcStartPatNavigation && inCmd <= kcEndPatNavigation)
 		{//if this is a navigation command
-			for(int kSel = 0; kSel < commands[kcSelect].kcList.GetSize(); kSel++)
+			for(size_t kSel = 0; kSel < commands[kcSelect].kcList.size(); kSel++)
 			{//for all deselection modifiers
 				newKcSel = commands[kcSelect].kcList[kSel];	// get all properties from the selection key
 				newKcSel.AddModifier(inKc);					// add modifiers from the new nav command
@@ -924,7 +915,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		// Same for orderlist navigation
 		if(inCmd >= kcStartOrderlistNavigation && inCmd <= kcEndOrderlistNavigation)
 		{//if this is a navigation command
-			for(int kSel = 0; kSel < commands[kcSelect].kcList.GetSize(); kSel++)
+			for(size_t kSel = 0; kSel < commands[kcSelect].kcList.size(); kSel++)
 			{//for all deselection modifiers
 				newKcSel=commands[kcSelect].kcList[kSel];	// get all properties from the selection key
 				newKcSel.AddModifier(inKc);						// add modifiers from the new nav command
@@ -945,7 +936,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		{
 			for(int curCmd = kcStartPatNavigation; curCmd <= kcEndPatNavigation; curCmd++)
 			{//for all nav commands
-				for(int k = 0; k < commands[curCmd].kcList.GetSize(); k++)
+				for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
 				{// for all keys for this command
 					newKcSel=inKc; // get all properties from the selection key
 					newKcSel.AddModifier(commands[curCmd].kcList[k]); //add the nav keys' modifiers
@@ -963,7 +954,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 
 			for(int curCmd = kcStartOrderlistNavigation; curCmd <= kcEndOrderlistNavigation; curCmd++)
 			{//for all nav commands
-				for(int k = 0; k <commands[curCmd].kcList.GetSize(); k++)
+				for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
 				{// for all keys for this command
 					newKcSel=inKc; // get all properties from the selection key
 					newKcSel.AddModifier(commands[curCmd].kcList[k]); //add the nav keys' modifiers
@@ -1030,7 +1021,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		{
 			// On getting a new selection key, make this selection key work with all copy selects' modifiers
 			// On getting a new selection key, make all copyselects work with this key's modifiers
-			for (int k=0; k<commands[kcCopySelect].kcList.GetSize(); k++)
+			for(size_t k = 0; k < commands[kcCopySelect].kcList.size(); k++)
 			{
 				newKcSel=inKc;
 				newKcSel.AddModifier(commands[kcCopySelect].kcList[k]);
@@ -1052,7 +1043,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		{
 			// On getting a new copyselection key, make this copyselection key work with all selects' modifiers
 			// On getting a new copyselection key, make all selects work with this key's modifiers
-			for(int k = 0; k < commands[kcSelect].kcList.GetSize(); k++)
+			for(size_t k = 0; k < commands[kcSelect].kcList.size(); k++)
 			{
 				newKcSel=commands[kcSelect].kcList[k];
 				newKcSel.AddModifier(inKc);
@@ -1079,7 +1070,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		if (inCmd>=kcVPStartNotes && inCmd<=kcVPEndNotes)
 		{
 			int noteOffset = inCmd - kcVPStartNotes;
-			for (int k=0; k<commands[kcChordModifier].kcList.GetSize(); k++)
+			for(size_t k = 0; k < commands[kcChordModifier].kcList.size(); k++)
 			{//for all chord modifier keys
 				newKc=inKc;
 				newKc.AddModifier(commands[kcChordModifier].kcList[k]);
@@ -1100,7 +1091,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			int noteOffset;
 			for (int curCmd=kcVPStartNotes; curCmd<=kcVPEndNotes; curCmd++)
 			{//for all notes
-				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
+				for (size_t k=0; k<commands[curCmd].kcList.size(); k++)
 				{//for all keys for this note
 					noteOffset = curCmd - kcVPStartNotes;
 					newKc=commands[curCmd].kcList[k];
@@ -1202,7 +1193,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		}
 		else if (!adding && (inCmd<kcSetSpacing && kcSetSpacing9<inCmd))
 		{
-			for (int k=0; k<commands[kcSetSpacing].kcList.GetSize(); k++)
+			for (size_t k=0; k<commands[kcSetSpacing].kcList.size(); k++)
 			{
 				KeyCombination spacing = commands[kcSetSpacing].kcList[k];
 				if ((('0'<=inKc.KeyCode() && inKc.KeyCode()<='9')||(VK_NUMPAD0<=inKc.KeyCode() && inKc.KeyCode()<=VK_NUMPAD9)) && !adding)
@@ -1302,7 +1293,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			CommandID curCmd = forcedModifiers[i];
 
 			//for all of this command's key combinations
-			for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
+			for (size_t k=0; k<commands[curCmd].kcList.size(); k++)
 			{
 				curKc = commands[curCmd].kcList[k];
 				if ((!curKc.Modifier()) || (curKc.KeyCode()!=VK_SHIFT && curKc.KeyCode()!=VK_CONTROL && curKc.KeyCode()!=VK_MENU && curKc.KeyCode()!=0 &&
@@ -1328,8 +1319,8 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 
 			//propagate to InstrumentView
 			newCmd = kcStartInstrumentMisc+offset;
-			commands[newCmd].kcList.SetSize(commands[inCmd].kcList.GetSize());
-			for (int k=0; k<commands[inCmd].kcList.GetSize(); k++)
+			commands[newCmd].kcList.resize(commands[inCmd].kcList.size());
+			for (size_t k=0; k<commands[inCmd].kcList.size(); k++)
 			{
 				commands[newCmd].kcList[k] = commands[inCmd].kcList[k];
 				commands[newCmd].kcList[k].Context(kCtxViewInstruments);
@@ -1372,8 +1363,8 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 //-------------------------------------
 {
 	KeyCombination curKc;
-	CArray<KeyEventType, KeyEventType> eventTypes;
-	CArray<InputTargetContext, InputTargetContext> contexts;
+	std::vector<KeyEventType> eventTypes;
+	std::vector<InputTargetContext> contexts;
 
 	//Clear map
 	km.clear();
@@ -1384,40 +1375,40 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 		if(IsDummyCommand((CommandID)cmd))
 			continue;
 
-		for(INT_PTR k=0; k<commands[cmd].kcList.GetSize(); k++)
+		for(size_t k=0; k<commands[cmd].kcList.size(); k++)
 		{
-			contexts.RemoveAll();
-			eventTypes.RemoveAll();
+			std::vector<KeyEventType> eventTypes;
+			std::vector<InputTargetContext> contexts;
 			curKc = commands[cmd].kcList[k];
 
 			//Handle keyEventType mask.
 			if (curKc.EventType() & kKeyEventDown)
-				eventTypes.Add(kKeyEventDown);
+				eventTypes.push_back(kKeyEventDown);
 			if (curKc.EventType() & kKeyEventUp)
-				eventTypes.Add(kKeyEventUp);
+				eventTypes.push_back(kKeyEventUp);
 			if (curKc.EventType() & kKeyEventRepeat)
-				eventTypes.Add(kKeyEventRepeat);
+				eventTypes.push_back(kKeyEventRepeat);
 			//ASSERT(eventTypes.GetSize()>0);
 
 			//Handle super-contexts (contexts that represent a set of sub contexts)
 			if (curKc.Context() == kCtxViewPatterns)
 			{
-				contexts.Add(kCtxViewPatternsNote);
-				contexts.Add(kCtxViewPatternsIns);
-				contexts.Add(kCtxViewPatternsVol);
-				contexts.Add(kCtxViewPatternsFX);
-				contexts.Add(kCtxViewPatternsFXparam);
+				contexts.push_back(kCtxViewPatternsNote);
+				contexts.push_back(kCtxViewPatternsIns);
+				contexts.push_back(kCtxViewPatternsVol);
+				contexts.push_back(kCtxViewPatternsFX);
+				contexts.push_back(kCtxViewPatternsFXparam);
 			} else if(curKc.Context() == kCtxCtrlPatterns)
 			{
-				contexts.Add(kCtxCtrlOrderlist);
+				contexts.push_back(kCtxCtrlOrderlist);
 			} else
 			{
-				contexts.Add(curKc.Context());
+				contexts.push_back(curKc.Context());
 			}
 
-			for (int cx=0; cx<contexts.GetSize(); cx++)
+			for (size_t cx=0; cx<contexts.size(); cx++)
 			{
-				for (int ke=0; ke<eventTypes.GetSize(); ke++)
+				for (size_t ke=0; ke<eventTypes.size(); ke++)
 				{
 					km[KeyCombination(contexts[cx], curKc.Modifier(), curKc.KeyCode(), eventTypes[ke])] = (CommandID)cmd;
 				}
@@ -1432,7 +1423,7 @@ void CCommandSet::Copy(CCommandSet *source)
 //-----------------------------------------
 {
 	// copy constructors should take care of complexity (I hope)
-	for (int cmd = 0; cmd < commands.GetSize(); cmd++)
+	for (size_t cmd = 0; cmd < CountOf(commands); cmd++)
 		commands[cmd] = source->commands[cmd];
 }
 
@@ -1447,7 +1438,7 @@ KeyCombination CCommandSet::GetKey(CommandID cmd, UINT key)
 int CCommandSet::GetKeyListSize(CommandID cmd)
 //--------------------------------------------
 {
-	return  commands[cmd].kcList.GetSize();
+	return  commands[cmd].kcList.size();
 }
 
 
@@ -1858,7 +1849,7 @@ CString KeyCombination::GetKeyText(UINT mod, UINT code)
 CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
 //---------------------------------------------------------------
 {
-	if ( static_cast<INT_PTR>(key) < commands[c].kcList.GetSize())
+	if ( key < commands[c].kcList.size())
 		return commands[c].kcList[0].GetKeyText();
 	else
 		return "";

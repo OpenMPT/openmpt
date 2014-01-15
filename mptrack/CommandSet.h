@@ -9,7 +9,6 @@
 
 
 #pragma once
-#include "afxtempl.h"
 #include <string>
 #include "../common/FlagSet.h"
 struct CModSpecifications;
@@ -1216,21 +1215,19 @@ typedef std::unordered_map<KeyCombination, CommandID> KeyMap;
 
 struct CommandStruct
 {
-//public:
+	std::vector<KeyCombination> kcList;
+	CString Message;
 	UINT UID;
 	bool isDummy;
 	bool isHidden;
-	CString Message;
-	CArray <KeyCombination, KeyCombination> kcList;
-	//KeyCombination kcList[10];
 
-	bool operator = (const CommandStruct &other)
+	bool operator= (const CommandStruct &other)
 	{
 		UID = other.UID;
 		Message = other.Message;
 		isDummy = other.isDummy;
 		isHidden = other.isHidden;
-		kcList.Copy(other.kcList);
+		kcList = other.kcList;
 		return true;
 	}
 
@@ -1288,16 +1285,13 @@ protected:
 	int FindCmd(int uid);
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict);
 
-	//members
-	CArray <CommandStruct,CommandStruct> commands;
-	//CArray<CArray<bool,bool>, CArray<bool,bool> > m_isParentContext;
+	CommandStruct commands[kcNumCommands];
 	bool m_isParentContext[kCtxMaxInputContexts][kCtxMaxInputContexts];
 	bool enforceRule[kNumRules];
 
 public:
 
-	CCommandSet(void);
-	~CCommandSet(void);
+	CCommandSet();
 
 	//Population
 	CString Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos = -1);
@@ -1326,4 +1320,3 @@ public:
 	void UpgradeKeymap(CCommandSet *pCommands, int oldVersion);
 
 };
-//end rewbs.customKeys
