@@ -30,7 +30,7 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(dwMidiDataParam) != 0 && isFocussed)
 	{
 		SetKey(HOTKEYF_MIDI, MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
-		m_pOptKeyDlg->OnSetKeyChoice(); 
+		m_pOptKeyDlg->OnSetKeyChoice();
 	}
 	return 1;
 }
@@ -65,7 +65,7 @@ void CCustEdit::SetKey(UINT inMod, UINT inCode)
 	mod = inMod;
 	code = inCode;
 	//Setup display
-	SetWindowText(CMainFrame::GetInputHandler()->activeCommandSet->GetKeyText(mod, code));
+	SetWindowText(KeyCombination::GetKeyText(mod, code));
 }
 
 
@@ -131,7 +131,7 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_KEYCATEGORY,	m_cmbCategory);
-	DDX_Control(pDX, IDC_COMMAND_LIST,	m_lbnCommandKeys); 
+	DDX_Control(pDX, IDC_COMMAND_LIST,	m_lbnCommandKeys);
 	DDX_Control(pDX, IDC_CHOICECOMBO,	m_cmbKeyChoice);
 	DDX_Control(pDX, IDC_CHORDDETECTWAITTIME, m_eChordWaitTime);//rewbs.autochord
 	DDX_Control(pDX, IDC_KEYREPORT,		m_eReport);
@@ -163,17 +163,17 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_bModified = false;
 	m_bChoiceModified = false;
 	m_sFullPathName = TrackerSettings::Instance().m_szKbdFile;
-	
+
 	plocalCmdSet = new CCommandSet();
 	plocalCmdSet->Copy(CMainFrame::GetInputHandler()->activeCommandSet);
-	
+
 	//Fill category combo and automatically selects first category
 	DefineCommandCategories();
 	for (int c=0; c<commandCategories.GetSize(); c++)
 	{
 		if (commandCategories[c].name && commandCategories[c].commands.GetCount())
 			m_cmbCategory.SetItemData(m_cmbCategory.AddString(commandCategories[c].name), c);
-	}	
+	}
 	m_cmbCategory.SetCurSel(0);
 	UpdateDialog();
 
@@ -518,7 +518,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 				for(size_t choice = 0; choice < numChoices; choice++)
 				{
 					const KeyCombination &kc = plocalCmdSet->GetKey(com, choice);
-					if(kc.code == m_eFindHotKey.code && kc.mod == m_eFindHotKey.mod)
+					if(kc.KeyCode() == m_eFindHotKey.code && kc.Modifier() == m_eFindHotKey.mod)
 					{
 						addKey = true;
 						break;
@@ -595,17 +595,17 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 	else if ((nCmd >= 0) && (nCmd != m_nCurHotKey) || m_bForceUpdate)	//have we changed command?
 	{
 		m_bForceUpdate = false;
-		
+
 		m_cmbKeyChoice.EnableWindow(TRUE);
 		m_eCustHotKey.EnableWindow(TRUE);
 		m_bKeyDown.EnableWindow(TRUE);
 		m_bKeyHold.EnableWindow(TRUE);
 		m_bKeyUp.EnableWindow(TRUE);
-		
+
 		m_nCurHotKey = nCmd;
 		m_nCurCategory = GetCategoryFromCommandID(nCmd);
 		char s[20];
-			
+
 		m_cmbKeyChoice.ResetContent();
 		int numChoices=plocalCmdSet->GetKeyListSize(nCmd);
 		if ((nCmd<kcNumCommands) && (numChoices>0))
@@ -631,7 +631,7 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 	int choice = m_cmbKeyChoice.GetItemData( m_cmbKeyChoice.GetCurSel() );
 	CommandID cmd = (CommandID)m_nCurHotKey;
 
-	//If nothing there, clear 
+	//If nothing there, clear
 	if (choice>=plocalCmdSet->GetKeyListSize(cmd) || choice<0)
 	{
 		m_nCurKeyChoice = choice;
@@ -642,20 +642,20 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 		m_bKeyUp.SetCheck(0);
 		return;
 	}
-	
+
 	//else, if changed, Fill
 	if (choice != m_nCurKeyChoice || m_bForceUpdate)
-	{	
+	{
 		m_nCurKeyChoice = choice;
 		m_bForceUpdate = false;
 		KeyCombination kc = plocalCmdSet->GetKey(cmd, choice);
-		m_eCustHotKey.SetKey(kc.mod, kc.code);
-	
-		if (kc.event & kKeyEventDown) m_bKeyDown.SetCheck(1);
+		m_eCustHotKey.SetKey(kc.Modifier(), kc.KeyCode());
+
+		if (kc.EventType() & kKeyEventDown) m_bKeyDown.SetCheck(1);
 		else m_bKeyDown.SetCheck(0);
-		if (kc.event & kKeyEventRepeat) m_bKeyHold.SetCheck(1);
+		if (kc.EventType() & kKeyEventRepeat) m_bKeyHold.SetCheck(1);
 		else m_bKeyHold.SetCheck(0);
-		if (kc.event & kKeyEventUp) m_bKeyUp.SetCheck(1);
+		if (kc.EventType() & kKeyEventUp) m_bKeyUp.SetCheck(1);
 		else m_bKeyUp.SetCheck(0);
 	}
 }
@@ -668,7 +668,7 @@ void COptionsKeyboard::OnChordWaitTimeChanged()
 	UINT val;
 	m_eChordWaitTime.GetWindowText(s);
 	val = atoi(s);
-	if (val>5000) 
+	if (val>5000)
 	{
 		val = 5000;
 		m_eChordWaitTime.SetWindowText("5000");
@@ -689,7 +689,7 @@ void COptionsKeyboard::OnHotKeyChanged()
 	{
 		BOOL bChanged = FALSE;
 		WORD wVk=0, wMod=0;
-		
+
 		m_HotKey.GetHotKey(wVk, wMod);
 		DWORD dwHk = ((DWORD)wVk) | (((DWORD)wMod) << 16);
 		for (UINT i = 0; i<MAX_MPTHOTKEYS; i++) if (i != (UINT)m_nCurHotKey)
@@ -727,7 +727,7 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 		::MessageBeep(MB_ICONWARNING);
 		return;
 	}
-	
+
 	// Restore current key combination choice for currently selected command.
 	kc = ih->activeCommandSet->GetKey(cmd, m_nCurKeyChoice);
 	plocalCmdSet->Remove(m_nCurKeyChoice, cmd);
@@ -763,8 +763,6 @@ void COptionsKeyboard::OnSetKeyChoice()
 //-------------------------------------
 {
 	CString report, reportHistory;
-	KeyCombination kc;
-	UINT temp = 0;
 	CommandID cmd = (CommandID)m_nCurHotKey;
 	if (cmd<0)
 	{
@@ -773,35 +771,33 @@ void COptionsKeyboard::OnSetKeyChoice()
 		return;
 	}
 
-	kc.mod  = m_eCustHotKey.mod;
-	kc.code = m_eCustHotKey.code;
-	kc.ctx  = (commandCategories[m_nCurCategory]).id;
-	temp |= m_bKeyDown.GetCheck() ? kKeyEventDown : 0;
-	temp |= m_bKeyHold.GetCheck() ? kKeyEventRepeat : 0;
-	temp |= m_bKeyUp.GetCheck() ? kKeyEventUp : 0;
-	kc.event =(KeyEventType)temp;
-	//kc.event =(KeyEventType)((UINT)kKeyEventDown|(UINT)kKeyEventRepeat);
-	//detect invalid input	
-	if (!kc.code)
+	KeyEventType event = kKeyEventNone;
+	if(m_bKeyDown.GetCheck()) event |= kKeyEventDown;
+	if(m_bKeyHold.GetCheck()) event |= kKeyEventRepeat;
+	if(m_bKeyUp.GetCheck()) event |= kKeyEventUp;
+
+	KeyCombination kc((commandCategories[m_nCurCategory]).id, m_eCustHotKey.mod, m_eCustHotKey.code, (KeyEventType)event);
+	//detect invalid input
+	if (!kc.KeyCode())
 	{
 		CString error = "You need to say to which key you'd like to map this command to.";
 		Reporting::Warning(error, "Invalid key data", this);
 		return;
 	}
-	if (!kc.event)
+	if (!kc.EventType())
 	{
 		::MessageBeep(MB_ICONWARNING);
 /*		CString error = "You need to select at least one key event type (up, down or hold).";
 		Reporting::Warning(error, "Invalid key data");
 		return;
 */
-		kc.event = kKeyEventDown;
+		kc.EventType(kKeyEventDown);
 	}
 
 	//process valid input
 	plocalCmdSet->Remove(m_nCurKeyChoice, cmd);
 	report = plocalCmdSet->Add(kc, cmd, true, m_nCurKeyChoice);
-	
+
 	//Update log
 	m_eReport.GetWindowText(reportHistory);
 	//reportHistory = reportHistory.Mid(6,reportHistory.GetLength()-1);
@@ -853,7 +849,7 @@ void COptionsKeyboard::OnLoad()
 
 void COptionsKeyboard::OnSave()
 //-----------------------------
-{	
+{
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("mkb")
 		.DefaultFilename(m_sFullPathName)

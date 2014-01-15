@@ -38,6 +38,7 @@
 #include "Stdafx.h"
 #include "Moddoc.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "modsmp_ctrl.h"
 #include "ModConvert.h"
 

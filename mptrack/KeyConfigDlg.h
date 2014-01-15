@@ -11,6 +11,7 @@
 #pragma once
 #include "mptrack.h"
 #include "MainFrm.h"
+#include "InputHandler.h"
 #include "mpdlgs.h"
 #include "moptions.h"
 

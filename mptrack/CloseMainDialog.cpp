@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "Moddoc.h"
 #include "CloseMainDialog.h"
 
@@ -30,6 +31,20 @@ void CloseMainDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST1,		m_List);
 	//}}AFX_DATA_MAP
 }
+
+
+CloseMainDialog::CloseMainDialog() : CDialog(IDD_CLOSEDOCUMENTS)
+//--------------------------------------------------------------
+{
+	CMainFrame::GetInputHandler()->Bypass(true);
+};
+
+
+CloseMainDialog::~CloseMainDialog()
+//---------------------------------
+{
+	CMainFrame::GetInputHandler()->Bypass(false);
+};
 
 
 // Format a list entry string - apparently list boxes in ANSI windows are ANSI too, so inserted unicode

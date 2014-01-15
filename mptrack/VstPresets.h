@@ -12,6 +12,9 @@
 
 #include <ostream>
 
+class FileReader;
+class CVstPlugin;
+
 class VSTPresets
 {
 public:

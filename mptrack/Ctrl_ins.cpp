@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
+#include "InputHandler.h"
 #include "childfrm.h"
 #include "moddoc.h"
 #include "globals.h"

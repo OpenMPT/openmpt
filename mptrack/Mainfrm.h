@@ -11,7 +11,6 @@
 #pragma once
 
 #include "Mptrack.h"
-#include "InputHandler.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/mutex.h"
 #include "../soundlib/Sndfile.h"
@@ -24,7 +23,28 @@ class ISoundDevice;
 class ISoundSource;
 
 #define MAINFRAME_TITLE				"Open ModPlug Tracker"
-#define MAINFRAME_TITLEW				L"Open ModPlug Tracker"
+#define MAINFRAME_TITLEW			L"Open ModPlug Tracker"
+
+// Custom window messages
+enum
+{
+	WM_MOD_UPDATEPOSITION	=	(WM_USER+1973),
+	WM_MOD_INVALIDATEPATTERNS,
+	WM_MOD_ACTIVATEVIEW,
+	WM_MOD_CHANGEVIEWCLASS,
+	WM_MOD_UNLOCKCONTROLS,
+	WM_MOD_CTRLMSG,
+	WM_MOD_VIEWMSG,
+	WM_MOD_TREEMSG,
+	WM_MOD_MIDIMSG,
+	WM_MOD_GETTOOLTIPTEXT,
+	WM_MOD_DRAGONDROPPING,
+	WM_MOD_SPECIALKEY,
+	WM_MOD_KBDNOTIFY,
+	WM_MOD_INSTRSELECTED,
+	WM_MOD_KEYCOMMAND,
+	WM_MOD_RECORDPARAM,
+};
 
 enum
 {

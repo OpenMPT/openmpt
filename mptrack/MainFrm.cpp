@@ -22,12 +22,10 @@
 #include "KeyConfigDlg.h"
 #include "AutoSaver.h"
 #include "MainFrm.h"
-// -> CODE#0015
-// -> DESC="channels management dlg"
+#include "InputHandler.h"
 #include "globals.h"
 #include "ChannelManagerDlg.h"
 #include "MIDIMappingDialog.h"
-// -! NEW_FEATURE#0015
 #include <direct.h>
 #include "../common/version.h"
 #include "ctrl_pat.h"

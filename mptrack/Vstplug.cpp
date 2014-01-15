@@ -9,11 +9,12 @@
 
 
 #include "stdafx.h"
-#include "Mainfrm.h"
 #include "Vstplug.h"
 #include "VstPresets.h"
 #ifdef MODPLUG_TRACKER
 #include "Moddoc.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
 #endif // MODPLUG_TRACKER
 #include "../soundlib/Sndfile.h"
 #include "AbstractVstEditor.h"

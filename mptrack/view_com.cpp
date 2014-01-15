@@ -10,11 +10,12 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "childfrm.h"
-#include "moddoc.h"
-#include "globals.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
+#include "Childfrm.h"
+#include "Moddoc.h"
+#include "Globals.h"
 #include "ctrl_com.h"
 #include "ChannelManagerDlg.h"
 #include "../common/StringFixer.h"
