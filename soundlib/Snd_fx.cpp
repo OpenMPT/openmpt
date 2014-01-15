@@ -688,22 +688,23 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 
 	bool returnAfterVolumeAdjust = false;
 
-	// IT compatibility: No sample change (also within multi-sample instruments) during portamento when using Compatible Gxx.
-	// Test case: PortaInsNumCompat.it, PortaSampleCompat.it
-	if(bPorta && pChn->pModSample != nullptr && pChn->pModSample != pSmp && IsCompatibleMode(TRK_IMPULSETRACKER) && m_SongFlags[SONG_ITCOMPATGXX])
-	{
-		pSmp = pChn->pModSample;
-	}
-
 	// instrumentChanged is used for IT carry-on env option
 	bool instrumentChanged = (pIns != pChn->pModInstrument);
 	const bool sampleChanged = (pChn->pModSample != nullptr) && (pSmp != pChn->pModSample);
 
-	if(!instrumentChanged)
+	if(sampleChanged && bPorta)
 	{
-		// Special XM hack
-		if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (pIns)
-			&& sampleChanged)
+		// IT compatibility: No sample change (also within multi-sample instruments) during portamento when using Compatible Gxx.
+		// Test case: PortaInsNumCompat.it, PortaSampleCompat.it
+		if(IsCompatibleMode(TRK_IMPULSETRACKER) && m_SongFlags[SONG_ITCOMPATGXX])
+		{
+			pSmp = pChn->pModSample;
+		}
+
+		// Special XM hack (also applies to MOD / S3M)
+		// Test case: PortaSmpChange.mod, PortaSmpChange.s3m
+		if((!instrumentChanged && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) && pIns)
+			|| (GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
 		{
 			// FT2 doesn't change the sample in this case,
 			// but still uses the sample info from the old one (bug?)
@@ -734,10 +735,12 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	// Update Volume
 	if (bUpdVol)
 	{
-		pChn->nVolume = 0;
-		if(pSmp)
-			pChn->nVolume = pSmp->nVolume;
-		else
+		if(!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)) || pSmp->pSample != nullptr)
+		{
+			pChn->nVolume = 0;
+			if(pSmp)
+				pChn->nVolume = pSmp->nVolume;
+		} else
 		{
 			if(pIns && pIns->nMixPlug)
 				pChn->nVolume = pChn->GetVSTVolume();
@@ -3110,8 +3113,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 				pChn->nPortamentoDest = 0;
 				pChn->m_CalculateFreq = true;
 			}
-		}
-		else
+		} else
 		{
 			pChn->m_PortamentoFineSteps += slide;
 			pChn->nPortamentoDest -= slide;

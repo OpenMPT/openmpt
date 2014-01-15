@@ -104,10 +104,6 @@ public:
 	// Set given sqeuence and update orderlist display.
 	void SelectSequence(const SEQUENCEINDEX nSeq);
 
-	// Little helper function to avoid copypasta
-	bool IsSelectionKeyPressed() const { return CMainFrame::GetInputHandler()->SelectionPressed(); }
-	bool IsCtrlKeyPressed() const { return CMainFrame::GetInputHandler()->CtrlPressed(); }
-
 	// Clipboard.
 	void OnEditCopy();
 	void OnEditCut();

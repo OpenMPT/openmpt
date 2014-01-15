@@ -11,6 +11,7 @@
 #include "Stdafx.h"
 #include "Reporting.h"
 #include "../mptrack/Mainfrm.h"
+#include "../mptrack/InputHandler.h"
 
 
 UINT Reporting::ShowNotification(const char *text, const char *caption, UINT flags, const CWnd *parent)
