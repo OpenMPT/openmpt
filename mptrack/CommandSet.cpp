@@ -1506,24 +1506,24 @@ ctx:UID:Description:Modifier:Key:EventMask
 }
 
 
-bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDescription)
-//--------------------------------------------------------------------------------------
+bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDescription, CCommandSet *commandSet)
+//---------------------------------------------------------------------------------------------------------------
 {
 	KeyCombination kc;
 	CommandID cmd=kcNumCommands;
 	char s[1024];
 	CString curLine, token;
 	int commentStart;
-	CCommandSet *pTempCS;
 	int l=0;
 	int fileVersion = 0;
 
-	pTempCS = new CCommandSet();
+	// If commandSet is valid, add new commands to it (this is used for adding the default shortcuts to existing keymaps)
+	CCommandSet *pTempCS = commandSet ? commandSet : new CCommandSet();
 
 	int errorCount=0;
 	CString errText = "";
 
-	while(iStrm.getline(s, sizeof(s)))
+	while(iStrm.getline(s, CountOf(s)))
 	{
 		curLine = s;
 
@@ -1612,10 +1612,9 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 						errText += err + "\n";
 						Log(err);
 					}
-				}
-				else
+				} else
 				{
-					pTempCS->Add(kc, cmd, true);
+					pTempCS->Add(kc, cmd, commandSet == nullptr);
 				}
 			}
 
@@ -1623,14 +1622,32 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 
 		l++;
 	}
+	//if(fileVersion < KEYMAP_VERSION) UpgradeKeymap(pTempCS, fileVersion);
+
+	if(commandSet == nullptr)
+	{
+		// Add the default command set to our freshly loaded command set.
+		const char *pData = nullptr;
+		HGLOBAL hglob = nullptr;
+		size_t nSize = 0;
+		if(LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
+		{
+			std::istringstream iStrm(std::string(pData, nSize));
+			LoadFile(iStrm, std::wstring(), pTempCS);
+			FreeResource(hglob);
+		}
+	} else
+	{
+		// We were just adding stuff to an existing command set - don't delete it!
+		return true;
+	}
+
 	if(!errText.IsEmpty())
 	{
 		std::wstring err = L"The following problems have been encountered while trying to load the key binding file " + filenameDescription + L":\n";
 		err += mpt::ToWide(errText);
 		Reporting::Warning(err);
 	}
-
-	if(fileVersion < KEYMAP_VERSION) UpgradeKeymap(pTempCS, fileVersion);
 
 	Copy(pTempCS);
 	delete pTempCS;
@@ -1656,90 +1673,8 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 bool CCommandSet::LoadDefaultKeymap()
 //-----------------------------------
 {
-	bool success = false;
-	const char* pData = nullptr;
-	HGLOBAL hglob = nullptr;
-	size_t nSize = 0;
-	if (LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
-	{
-		std::istringstream iStrm(std::string(pData, nSize));
-		success = LoadFile(iStrm, L"\"executable resource\"");
-		FreeResource(hglob);
-	}
-	return success;
-}
-
-
-// Fix outdated keymap files
-void CCommandSet::UpgradeKeymap(CCommandSet *pCommands, int oldVersion)
-//---------------------------------------------------------------------
-{
-	// no orderlist context
-	if(oldVersion == 0)
-	{
-		KeyCombination kc(kCtxCtrlOrderlist, 0, 0, kKeyEventDown | kKeyEventRepeat);
-
-		kc.KeyCode(VK_DELETE);
-		pCommands->Add(kc, kcOrderlistEditDelete, false);
-
-		kc.KeyCode(VK_INSERT);
-		pCommands->Add(kc, kcOrderlistEditInsert, false);
-
-		kc.KeyCode(VK_RETURN);
-		pCommands->Add(kc, kcOrderlistEditPattern, false);
-
-		kc.KeyCode(VK_TAB);
-		pCommands->Add(kc, kcOrderlistSwitchToPatternView, false);
-
-		kc.KeyCode(VK_LEFT);
-		pCommands->Add(kc, kcOrderlistNavigateLeft, false);
-		kc.KeyCode(VK_UP);
-		pCommands->Add(kc, kcOrderlistNavigateLeft, false);
-
-		kc.KeyCode(VK_RIGHT);
-		pCommands->Add(kc, kcOrderlistNavigateRight, false);
-		kc.KeyCode(VK_DOWN);
-		pCommands->Add(kc, kcOrderlistNavigateRight, false);
-
-		kc.KeyCode(VK_HOME);
-		pCommands->Add(kc, kcOrderlistNavigateFirst, false);
-
-		kc.KeyCode(VK_END);
-		pCommands->Add(kc, kcOrderlistNavigateLast, false);
-
-		kc.KeyCode(VK_ADD);
-		pCommands->Add(kc, kcOrderlistPatPlus, false);
-		kc.KeyCode(VK_OEM_PLUS);
-		pCommands->Add(kc, kcOrderlistPatPlus, false);
-
-		kc.KeyCode(VK_SUBTRACT);
-		pCommands->Add(kc, kcOrderlistPatMinus, false);
-		kc.KeyCode(VK_OEM_MINUS);
-		pCommands->Add(kc, kcOrderlistPatMinus, false);
-
-		STATIC_ASSERT(VK_NUMPAD0 + 9 == VK_NUMPAD9);
-		STATIC_ASSERT(kcOrderlistPat0 + 9 == kcOrderlistPat9);
-		for(int i = 0; i <= 9; i++)
-		{
-			kc.KeyCode('0' + i);
-			pCommands->Add(kc, static_cast<CommandID>(kcOrderlistPat0 + i), false);
-			kc.KeyCode(VK_NUMPAD0 + i);
-			pCommands->Add(kc, static_cast<CommandID>(kcOrderlistPat0 + i), false);
-		}
-
-		kc.KeyCode('I');
-		pCommands->Add(kc, kcOrderlistPatIgnore, false);
-
-		kc.KeyCode(VK_SPACE);
-		pCommands->Add(kc, kcOrderlistPatInvalid, false);
-
-		kc.KeyCode('L');
-		kc.Modifier(HOTKEYF_CONTROL);
-		pCommands->Add(kc, kcOrderlistLockPlayback, false);
-
-		kc.KeyCode('U');
-		pCommands->Add(kc, kcOrderlistUnlockPlayback, false);
-	}
+	std::istringstream s;
+	return LoadFile(s, L"\"executable resource\"");
 }
 
 
