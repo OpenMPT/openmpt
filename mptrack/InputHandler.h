@@ -61,7 +61,7 @@ protected:
 	CWnd *m_pMainFrm;
 	int AsciiToScancode(char ch);
 	KeyMap keyMap;
-	void LogModifiers(UINT mask);	
+	void LogModifiers(UINT mask);
 	UINT modifierMask;
 	bool m_bBypass;
 	bool m_bNoAltMenu;

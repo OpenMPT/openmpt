@@ -90,7 +90,7 @@ CInputHandler::~CInputHandler()
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam)
 //-----------------------------------------------------------------------------------------------------------
 {
-	CommandID executeCommand = kcNull;
+	KeyMap::const_iterator cmd = keyMap.end();
 	KeyEventType keyEventType;
 
 	if(code == HC_ACTION)
@@ -120,16 +120,18 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 		{
 			// only execute command when the input handler is not locked
 			// and the input is not a consequence of special key interception.
-			executeCommand = keyMap[context][modifierMask][wParam][keyEventType];
+			cmd = keyMap.find(KeyMapID(context, modifierMask, wParam, keyEventType));
 		}
 	}
 	if(code == HC_MIDI)
 	{
-		executeCommand = keyMap[context][HOTKEYF_MIDI][wParam][kKeyEventDown];
+		cmd = keyMap.find(KeyMapID(context, HOTKEYF_MIDI, wParam, kKeyEventDown));
 	}
 
-	if(m_pMainFrm && executeCommand != kcNull)
+	CommandID executeCommand = kcNull;
+	if(m_pMainFrm && cmd != keyMap.end())
 	{
+		executeCommand = cmd->second;
 		if(!m_pMainFrm->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam))
 		{
 			// Command was not handled, so let Windows process it.
@@ -144,13 +146,15 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &/*nFlags*/, KeyEventType keyEventType, CWnd* pSourceWnd)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	CommandID executeCommand = keyMap[context][modifierMask][nChar][keyEventType];
+	KeyMap::const_iterator cmd = keyMap.find(KeyMapID(context, modifierMask, nChar, keyEventType));
+	CommandID executeCommand = kcNull;
 
 	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	//by default, send command message to main frame.
 
-	if(pSourceWnd && (executeCommand != kcNull))
+	if(pSourceWnd && cmd != keyMap.end())
 	{
+		executeCommand = cmd->second;
 		if(!pSourceWnd->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar))
 		{
 			// Command was not handled, so let Windows process it.
@@ -212,16 +216,14 @@ void CInputHandler::SetupSpecialKeyInterception()
 //-----------------------------------------------
 {
 	m_bInterceptWindowsKeys = m_bInterceptNumLock = m_bInterceptCapsLock = m_bInterceptScrollLock = false;
-	for( int context=0; context < CountOf(keyMap); context++ )
-	for( int mod=0; mod < CountOf(keyMap[0]); mod++ )
-	for( int key=0; key < CountOf(keyMap[0][0]); key++ )
-	for( int kevent=0; kevent < CountOf(keyMap[0][0][0]); kevent++ ) {
-		if( keyMap[context][mod][key][kevent] == kcNull ) continue;
-		if( mod == HOTKEYF_EXT ) m_bInterceptWindowsKeys = true;
-		if( key == VK_NUMLOCK ) m_bInterceptNumLock = true;
-		if( key == VK_CAPITAL ) m_bInterceptCapsLock = true;
-		if( key == VK_SCROLL ) m_bInterceptScrollLock = true;
-	};
+	for(KeyMap::const_iterator i = keyMap.begin(); i != keyMap.end(); i++)
+	{
+		ASSERT(i->second != kcNull);
+		if(i->first.modifier == HOTKEYF_EXT) m_bInterceptWindowsKeys = true;
+		if(i->first.key == VK_NUMLOCK) m_bInterceptNumLock = true;
+		if(i->first.key == VK_CAPITAL) m_bInterceptCapsLock = true;
+		if(i->first.key == VK_SCROLL) m_bInterceptScrollLock = true;
+	}
 };
 
 
