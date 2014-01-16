@@ -733,13 +733,12 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 
 	// Update Volume
-	if (bUpdVol)
+	if (bUpdVol && (!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)) || (pSmp != nullptr && pSmp->pSample != nullptr)))
 	{
-		if(!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)) || pSmp->pSample != nullptr)
+		pChn->nVolume = 0;
+		if(pSmp)
 		{
-			pChn->nVolume = 0;
-			if(pSmp)
-				pChn->nVolume = pSmp->nVolume;
+			pChn->nVolume = pSmp->nVolume;
 		} else
 		{
 			if(pIns && pIns->nMixPlug)
