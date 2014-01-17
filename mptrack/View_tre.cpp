@@ -1270,6 +1270,17 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 		case MODITEM_DLSBANK_INSTRUMENT:
 			PlayItem(hItem, NOTE_MIDDLEC);
 			return TRUE;
+
+		case MODITEM_HDR_INSTRUMENTLIB:
+			if(IsSampleBrowser())
+			{
+				BrowseForFolder dlg(m_InstrLibPath, TEXT("Select a new instrument library folder..."));
+				if(dlg.Show())
+				{
+					CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dlg.GetDirectory(), false);
+				}
+			}
+			return TRUE;
 		}
 	}
 	return FALSE;
@@ -2615,6 +2626,14 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			case MODITEM_DLSBANK_INSTRUMENT:
 				nDefault = ID_MODTREE_PLAY;
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, "&Play Instrument");
+				break;
+
+			case MODITEM_HDR_INSTRUMENTLIB:
+				if(IsSampleBrowser())
+				{
+					nDefault = ID_MODTREE_EXECUTE;
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_EXECUTE, "&Browse...");
+				}
 				break;
 			}
 			if (nDefault) SetMenuDefaultItem(hMenu, nDefault, FALSE);
