@@ -1277,7 +1277,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 				BrowseForFolder dlg(m_InstrLibPath, TEXT("Select a new instrument library folder..."));
 				if(dlg.Show())
 				{
-					CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dlg.GetDirectory(), false);
+					CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dlg.GetDirectory() + MPT_PATHSTRING("\\"), false);
 				}
 			}
 			return TRUE;
