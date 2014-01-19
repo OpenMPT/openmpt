@@ -362,6 +362,8 @@ public:
 	// Paths
 
 	mpt::PathString m_szKbdFile;
+	// Default template
+	Setting<mpt::PathString> defaultTemplateFile;
 
 	Setting<uint32> mruListLength;
 	std::vector<mpt::PathString> mruFiles;

@@ -111,6 +111,41 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 }
 
 
+CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune)
+//-----------------------------------------------------------------------------------------------
+{
+	CDocument *doc = OpenDocumentFile(filename, isExampleTune ? TRUE : FALSE, TRUE);
+	if(doc)
+	{
+		CModDoc *modDoc = static_cast<CModDoc *>(doc);
+		// Clear path so that saving will not take place in templates/examples folder.
+		modDoc->ClearFilePath();
+		if(!isExampleTune)
+		{
+			CMultiDocTemplate::SetDefaultTitle(modDoc);
+			m_nUntitledCount++;
+			// Name has changed...
+			CMainFrame::GetMainFrame()->UpdateTree(modDoc, HINT_MODGENERAL);
+
+			// Reset edit history for template files
+			modDoc->GetrSoundFile().GetFileHistory().clear();
+			modDoc->GetrSoundFile().m_dwCreatedWithVersion = MptVersion::num;
+			modDoc->GetrSoundFile().m_dwLastSavedWithVersion = 0;
+		} else
+		{
+			// Remove extension from title, so that saving the file will not suggest a filename like e.g. "example.it.it".
+			const CString title = modDoc->GetTitle();
+			const int dotPos = title.ReverseFind('.');
+			if(dotPos >= 0)
+			{
+				modDoc->SetTitle(title.Left(dotPos));
+			}
+		}
+	}
+	return doc;
+}
+
+
 #ifdef _DEBUG
 #define DDEDEBUG
 #endif
@@ -985,6 +1020,24 @@ void CTrackApp::OnFileNew()
 //-------------------------
 {
 	if (!m_bInitialized) return;
+
+	// Build from template
+	const mpt::PathString templateFile = TrackerSettings::Instance().defaultTemplateFile;
+	if(!templateFile.empty())
+	{
+		const mpt::PathString dirs[] = { GetConfigPath(), GetAppDirPath(), mpt::PathString() };
+		for(size_t i = 0; i < CountOf(dirs); i++)
+		{
+			if(Util::sdOs::IsPathFileAvailable(dirs[i] + templateFile, Util::sdOs::FileModeExists))
+			{
+				if(m_pModTemplate->OpenTemplateFile(dirs[i] + templateFile) != nullptr)
+				{
+					return;
+				}
+			}
+		}
+	}
+
 
 	// Default module type
 	MODTYPE nNewType = TrackerSettings::Instance().defaultModType;
