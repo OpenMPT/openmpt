@@ -58,8 +58,8 @@ struct PACKED XMInstrument
 	};
 
 	uint8  sampleMap[96];	// Note -> Sample assignment
-	uint16 volEnv[24];		// Volume envelope nodes / values
-	uint16 panEnv[24];		// Panning envelope nodes / values
+	uint16 volEnv[24];		// Volume envelope nodes / values (0...64)
+	uint16 panEnv[24];		// Panning envelope nodes / values (0...63)
 	uint8  volPoints;		// Volume envelope length
 	uint8  panPoints;		// Panning envelope length
 	uint8  volSustain;		// Volume envelope sustain point

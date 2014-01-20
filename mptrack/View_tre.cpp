@@ -170,6 +170,7 @@ CModTree::~CModTree()
 	{
 		SetEvent(m_hWatchDirKillThread);
 		WaitForSingleObject(watchDirThread, INFINITE);
+		CloseHandle(watchDirThread);
 	}
 }
 
@@ -934,7 +935,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 		}
 	}
 	// Add Patterns
-	if (info.hPatterns && (hintFlagPart & (HINT_MODTYPE | HINT_PATNAMES)))
+	if (info.hPatterns && (hintFlagPart & (HINT_MODTYPE | HINT_PATNAMES)) && sndFile.Patterns.Size() > 0)
 	{
 		const PATTERNINDEX nPat = (PATTERNINDEX)(lHint >> HINT_SHIFT_PAT);
 		info.tiPatterns.resize(sndFile.Patterns.Size(), NULL);
@@ -1821,6 +1822,7 @@ void CModTree::MonitorInstrumentLibrary()
 			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
 		}
 	} while(result != WAIT_OBJECT_0);
+	CloseHandle(m_hWatchDirKillThread);
 }
 
 
