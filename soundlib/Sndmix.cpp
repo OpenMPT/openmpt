@@ -548,6 +548,9 @@ BOOL CSoundFile::ProcessRow()
 				m_SongFlags.set(SONG_FIRSTTICK);
 			}
 		}
+	} else
+	{
+		m_SongFlags.reset(SONG_BREAKTOROW);
 	}
 
 	// Update Effects
@@ -712,19 +715,19 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 				vol = 0;
 		} else
 		{
-			UINT ontime = pChn->nTremorParam >> 4;
-			UINT n = ontime + (pChn->nTremorParam & 0x0F);	// Total tremor cycle time (On + Off)
+			uint8 ontime = pChn->nTremorParam >> 4;
+			uint8 n = ontime + (pChn->nTremorParam & 0x0F);	// Total tremor cycle time (On + Off)
 			if ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_SongFlags[SONG_ITOLDEFFECTS])
 			{
 				n += 2;
 				ontime++;
 			}
-			UINT tremcount = (UINT)pChn->nTremorCount;
+			uint8 tremcount = pChn->nTremorCount;
 			if(!(GetType() & MOD_TYPE_XM))
 			{
 				if (tremcount >= n) tremcount = 0;
 				if (tremcount >= ontime) vol = 0;
-				pChn->nTremorCount = (BYTE)(tremcount + 1);
+				pChn->nTremorCount = tremcount + 1;
 			} else
 			{
 				if(m_SongFlags[SONG_FIRSTTICK])
@@ -736,7 +739,7 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
 					}
 				} else
 				{
-					pChn->nTremorCount = (BYTE)(tremcount + 1);
+					pChn->nTremorCount = tremcount + 1;
 				}
 				if (tremcount % n >= ontime) vol = 0;
 			}
@@ -853,6 +856,8 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 		const int range = ENVELOPE_MAX;
 		const float amp = 512.0f;
 #else
+		// TODO: AMS2 envelopes behave differently when linear slides are off - emulate with 15 * (-128...127) >> 6
+		// Copy over vibrato behaviour for that?
 		const int range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
 		const float amp = GetType() == MOD_TYPE_AMS2 ? 64.0f : 512.0f;
 #endif
