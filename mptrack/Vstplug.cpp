@@ -818,18 +818,6 @@ CVstPlugin::~CVstPlugin()
 #endif
 	CriticalSection cs;
 
-	// First thing to do, if we don't want to hang in a loop
-	if (m_Factory.pPluginsList == this) m_Factory.pPluginsList = m_pNext;
-	if (m_pMixStruct)
-	{
-		m_pMixStruct->pMixPlugin = nullptr;
-		m_pMixStruct->pMixState = nullptr;
-		m_pMixStruct = nullptr;
-	}
-	if (m_pNext) m_pNext->m_pPrev = m_pPrev;
-	if (m_pPrev) m_pPrev->m_pNext = m_pNext;
-	m_pPrev = nullptr;
-	m_pNext = nullptr;
 	if (m_pEditor)
 	{
 		if (m_pEditor->m_hWnd) m_pEditor->OnClose();
@@ -844,6 +832,20 @@ CVstPlugin::~CVstPlugin()
 		if (m_Effect.numOutputs > 1) Dispatch(effConnectOutput, 1, 0, nullptr, 0);
 	}
 	Suspend();
+
+	// First thing to do, if we don't want to hang in a loop
+	if (m_Factory.pPluginsList == this) m_Factory.pPluginsList = m_pNext;
+	if (m_pMixStruct)
+	{
+		m_pMixStruct->pMixPlugin = nullptr;
+		m_pMixStruct->pMixState = nullptr;
+		m_pMixStruct = nullptr;
+	}
+	if (m_pNext) m_pNext->m_pPrev = m_pPrev;
+	if (m_pPrev) m_pPrev->m_pNext = m_pNext;
+	m_pPrev = nullptr;
+	m_pNext = nullptr;
+
 	CVstPlugin::Dispatch(effClose, 0, 0, nullptr, 0);
 	if(m_hLibrary)
 	{
