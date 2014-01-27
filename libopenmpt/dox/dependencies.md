@@ -26,8 +26,8 @@ Dependencies
  *  Building on Unix-like systems requires:
      *  **GNU make**
      *  **pkg-config**
- 
-Note that, when building with a C++11 compliant compiler or when building on Windows, libopenmpt can be built without any dependency on other libraries except the C++ standard library.
+
+Note that it is possible to build libopenmpt without either Win32, iconv or a C++1 compliant compiler, in which case a custom UTF8 conversion routine is used. `#define MPT_CHARSET_CUSTOMUTF8` in your build system to build that way. It is, however, recommended to stick with the system-rpovided character set conversions.
 
 ### openmpt123
 

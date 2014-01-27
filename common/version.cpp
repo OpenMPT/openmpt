@@ -201,6 +201,8 @@ std::string GetBuildFeaturesString()
 			retval += " +WINAPI";
 		#elif defined(MPT_CHARSET_CPP)
 			retval += " +CODECVT";
+		#elif defined(MPT_CHARSET_CUSTOMUTF8)
+			retval += " +CUSTOMUTF8";
 		#else
 			retval += " +ICONV";
 		#endif
