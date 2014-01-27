@@ -314,7 +314,8 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue, bool moveTa
 		}
 		if(nValue >= 0)
 		{
-			if(nValue > 64) nValue = 64;
+			const int maxVal = (GetDocument()->GetModType() != MOD_TYPE_XM || m_nEnv != ENV_PANNING) ? 64 : 63;
+			LimitMax(nValue, maxVal);
 			if(nValue != envelope->Values[nPoint])
 			{
 				envelope->Values[nPoint] = (uint8)nValue;

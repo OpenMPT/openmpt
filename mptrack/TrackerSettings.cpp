@@ -197,6 +197,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_MayNormalizeSamplesOnLoad(conf, "Sample Editor", "MayNormalizeSamplesOnLoad", true)
 	// Export
 	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
+	// Default template
+	, defaultTemplateFile(conf, "Paths", "DefaultTemplate", mpt::PathString())
 	// MRU List
 	, mruListLength(conf, "Misc", "MRUListLength", 10)
 {
