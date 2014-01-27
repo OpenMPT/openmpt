@@ -12,6 +12,8 @@
 
 #if defined(MPT_CHARSET_CPP)
 #include <codecvt>
+#elif defined(MPT_CHARSET_CUSTOMUTF8)
+#include <cstdlib>
 #endif
 #include <iomanip>
 #include <iterator>
@@ -23,7 +25,7 @@
 
 #include <cstdarg>
 
-#if !defined(MPT_CHARSET_CPP) && !defined(WIN32)
+#if !defined(MPT_CHARSET_CPP) && !defined(MPT_CHARSET_CUSTOMUTF8) && !defined(WIN32)
 #include <iconv.h>
 #endif // !WIN32
 
@@ -85,7 +87,7 @@ static const uint32 CharsetTableISO8859_1[256] = {
 };
 */
 
-#if defined(MPT_CHARSET_CPP)
+#if defined(MPT_CHARSET_CPP) || defined(MPT_CHARSET_CUSTOMUTF8)
 
 static const uint32 CharsetTableISO8859_15[256] = {
 	0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
@@ -254,7 +256,7 @@ static std::string To8bit(const std::wstring &str, const uint32 (&table)[256], c
 	return res;
 }
 
-#if defined(MPT_CHARSET_CPP)
+#if defined(MPT_CHARSET_CPP) || defined(MPT_CHARSET_CUSTOMUTF8)
 
 static std::wstring FromAscii(const std::string &str, wchar_t replacement = L'\uFFFD')
 //------------------------------------------------------------------------------------
@@ -473,6 +475,8 @@ static std::string ToLocale(const std::wstring &str, char replacement = '?')
 	return String::ToAscii(str, replacement); // fallback
 }
 
+#if defined(MPT_CHARSET_CPP)
+
 static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uFFFD')
 //-----------------------------------------------------------------------------------
 {
@@ -488,6 +492,167 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 	std::wstring_convert<std::codecvt_utf8<wchar_t> > conv;
 	return conv.to_bytes(str);
 }
+
+#elif defined(MPT_CHARSET_CUSTOMUTF8)
+
+static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uFFFD')
+//-----------------------------------------------------------------------------------
+{
+	const std::string &in = str;
+
+	std::wstring out;
+
+	// state:
+	std::size_t charsleft = 0;
+	uint32 ucs4 = 0;
+
+	for ( std::string::const_iterator i = in.begin(); i != in.end(); ++i ) {
+
+		uint8 c = *i;
+
+		if ( charsleft == 0 ) {
+
+			if ( ( c & 0x80 ) == 0x00 ) {
+				out.push_back( (wchar_t)c );
+			} else if ( ( c & 0xE0 ) == 0xC0 ) {
+				ucs4 = c & 0x1F;
+				charsleft = 1;
+			} else if ( ( c & 0xF0 ) == 0xE0 ) {
+				ucs4 = c & 0x0F;
+				charsleft = 2;
+			} else if ( ( c & 0xF8 ) == 0xF0 ) {
+				ucs4 = c & 0x07;
+				charsleft = 3;
+			} else {
+				out.push_back( replacement );
+				ucs4 = 0;
+				charsleft = 0;
+			}
+
+		} else {
+
+			if ( ( c & 0xC0 ) != 0x80 ) {
+				out.push_back( replacement );
+				ucs4 = 0;
+				charsleft = 0;
+			}
+			ucs4 <<= 6;
+			ucs4 |= c & 0x3F;
+			charsleft--;
+
+			if ( charsleft == 0 ) {
+				if ( sizeof( wchar_t ) == 2 ) {
+					if ( ucs4 > 0x1fffff ) {
+						out.push_back( replacement );
+						ucs4 = 0;
+						charsleft = 0;
+					}
+					if ( ucs4 <= 0xffff ) {
+						out.push_back( (uint16)ucs4 );
+					} else {
+						uint32 surrogate = ucs4 - 0x10000;
+						uint16 hi_sur = static_cast<uint16>( ( 0x36 << 10 ) | ( (surrogate>>10) & ((1<<10)-1) ) );
+						uint16 lo_sur = static_cast<uint16>( ( 0x37 << 10 ) | ( (surrogate>> 0) & ((1<<10)-1) ) );
+						out.push_back( hi_sur );
+						out.push_back( lo_sur );
+					}
+				} else {
+					out.push_back( ucs4 );
+				}
+				ucs4 = 0;
+			}
+
+		}
+
+	}
+
+	if ( charsleft != 0 ) {
+		out.push_back( replacement );
+		ucs4 = 0;
+		charsleft = 0;
+	}
+
+	return out;
+
+}
+
+static std::string ToUTF8(const std::wstring &str, char replacement = '?')
+//------------------------------------------------------------------------
+{
+	const std::wstring &in = str;
+
+	std::string out;
+
+	for ( std::size_t i=0; i<in.length(); i++ ) {
+
+		wchar_t c = in[i];
+		if ( c > 0x1fffff || c < 0 ) {
+			out.push_back( replacement );
+		}
+
+		uint32 ucs4 = 0;
+		if ( sizeof( wchar_t ) == 2 ) {
+			if ( i + 1 < in.length() ) {
+				// check for surrogate pair
+				uint16 hi_sur = in[i+0];
+				uint16 lo_sur = in[i+1];
+				if ( hi_sur >> 10 == 0x36 && lo_sur >> 10 == 0x37 ) {
+					// surrogate pair
+					++i;
+					hi_sur &= (1<<10)-1;
+					lo_sur &= (1<<10)-1;
+					ucs4 = ( (uint32)hi_sur << 10 ) | ( (uint32)lo_sur << 0 );
+				} else {
+					// no surrogate pair
+					ucs4 = (uint32)(uint16)c;
+				}
+			} else {
+				// no surrogate possible
+				ucs4 = (uint32)(uint16)c;
+			}
+		} else {
+			ucs4 = c;
+		}
+
+		uint8 utf8[6];
+		std::size_t numchars = 0;
+		for ( numchars = 0; numchars < 6; numchars++ ) {
+			utf8[numchars] = ucs4 & 0x3F;
+			ucs4 >>= 6;
+			if ( ucs4 == 0 ) {
+				break;
+			}
+		}
+		numchars++;
+
+		if ( numchars == 1 ) {
+			out.push_back( utf8[0] );
+			continue;
+		}
+
+		if ( numchars == 2 && utf8[numchars-1] == 0x01 ) {
+			// generate shortest form
+			out.push_back( utf8[0] | 0x40 );
+			continue;
+		}
+
+		std::size_t charsleft = numchars;
+		while ( charsleft > 0 ) {
+			if ( charsleft == numchars ) {
+				out.push_back( utf8[ charsleft - 1 ] | ( ((1<<numchars)-1) << (8-numchars) ) );
+			} else {
+				out.push_back( utf8[ charsleft - 1 ] | 0x80 );
+			}
+			charsleft--;
+		}
+
+	}
+
+	return out;
+
+}
+
+#endif // MPT_CHARSET_CPP || MPT_CHARSET_CUSTOMUTF8
 
 #elif defined(WIN32)
 static UINT CharsetToCodepage(Charset charset)
@@ -587,7 +752,7 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		std::copy(out.begin(), out.end(), std::back_inserter(result));
 		return result;
 	}
-	#if defined(MPT_CHARSET_CPP)
+	#if defined(MPT_CHARSET_CPP) || defined(MPT_CHARSET_CUSTOMUTF8)
 		std::string out;
 		switch(charset)
 		{
@@ -669,7 +834,7 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		if(charset == CharsetCP437AMS2) out = String::From8bit(in, CharsetTableCP437AMS2);
 		return out;
 	}
-	#if defined(MPT_CHARSET_CPP)
+	#if defined(MPT_CHARSET_CPP) || defined(MPT_CHARSET_CUSTOMUTF8)
 		std::string in;
 		std::copy(src.begin(), src.end(), std::back_inserter(in));
 		std::wstring out;
@@ -751,7 +916,7 @@ Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 	{
 		return Tdststring(reinterpret_cast<const typename Tdststring::value_type*>(&*src.begin()), reinterpret_cast<const typename Tdststring::value_type*>(&*src.end()));
 	}
-	#if defined(MPT_CHARSET_CPP) || defined(WIN32)
+	#if defined(MPT_CHARSET_CPP) || defined(MPT_CHARSET_CUSTOMUTF8) || defined(WIN32)
 		return EncodeImpl<Tdststring>(to, DecodeImpl(from, src));
 	#else // !WIN32
 		if(to == CharsetCP437AMS || to == CharsetCP437AMS2 || from == CharsetCP437AMS || from == CharsetCP437AMS2)
