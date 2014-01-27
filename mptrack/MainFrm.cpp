@@ -2137,29 +2137,8 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 		const bool bAvailable = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeRead);
 		if (bAvailable)
 		{
-			CDocument* pDoc = theApp.OpenDocumentFile(sPath, bTemplateFile ? FALSE : TRUE);
-			if (pDoc != nullptr)
-			{
-				ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CModDoc)) == TRUE);
-				CModDoc* pModDoc = static_cast<CModDoc*>(pDoc);
-				pModDoc->ClearFilePath(); // Clear path so that saving will not take place in templates/examples folder.
-				// Remove extension from title, so that saving the file will not suggest a filename like e.g. "template.mptm.mptm".
-				const CString title = pModDoc->GetTitle();
-				const int dotPos = title.ReverseFind('.');
-				if(dotPos >= 0)
-				{
-					pModDoc->SetTitle(title.Left(dotPos));
-				}
-
-				if (bTemplateFile)
-				{
-					pModDoc->GetSoundFile()->GetFileHistory().clear();	// Reset edit history for template files
-					pModDoc->GetSoundFile()->m_dwCreatedWithVersion = MptVersion::num;
-					pModDoc->GetSoundFile()->m_dwLastSavedWithVersion = 0;
-				}
-			}
-		}
-		else
+			theApp.GetModDocTemplate()->OpenTemplateFile(sPath, !bTemplateFile);
+		} else
 		{
 			const bool bExists = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists);
 			Reporting::Notification(L"The file '" + sPath.ToWide() + L"' " + (bExists ? L"exists but can't be read" : L"does not exist"));
@@ -2460,7 +2439,6 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 }
 //end rewbs.VSTTimeInfo
 
-//rewbs.customKeys
 // We have swicthed focus to a new module - might need to update effect keys to reflect module type
 bool CMainFrame::UpdateEffectKeys()
 //---------------------------------
@@ -2473,10 +2451,8 @@ bool CMainFrame::UpdateEffectKeys()
 
 	return false;
 }
-//end rewbs.customKeys
 
 
-//rewbs.fix3116
 void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 //-----------------------------------------
 {
@@ -2484,9 +2460,8 @@ void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 
 	//rewbs: ensure modifiers are reset when we leave the window (e.g. alt-tab)
 	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
-	//end rewbs
 }
-//end rewbs.fix3116
+
 
 void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 //---------------------------------------------------------
@@ -2542,7 +2517,7 @@ void CMainFrame::OnShowSettingsFolder()
 void CMainFrame::OnHelp()
 //-----------------------
 {
-	mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.pdf");
+	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.pdf");
 	if(!theApp.OpenFile(helpFile))
 	{
 		Reporting::Error(L"Could not find help file:\n" + helpFile.ToWide());
@@ -2687,7 +2662,7 @@ void CMainFrame::UpdateMRUList()
 
 		for(size_t i = 0; i < TrackerSettings::Instance().mruFiles.size(); i++)
 		{
-			std::wstring s = StringifyW(i + 1) + L" ";
+			std::wstring s = mpt::ToWString(i + 1) + L" ";
 			// Add mnemonics
 			if(i < 9)
 			{

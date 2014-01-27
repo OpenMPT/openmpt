@@ -118,6 +118,7 @@ public:
 		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
 
 	CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
+	CDocument* OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune = false);
 
 	// inherited members, overload them all
 	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)

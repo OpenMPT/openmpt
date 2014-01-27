@@ -170,6 +170,7 @@ CModTree::~CModTree()
 	{
 		SetEvent(m_hWatchDirKillThread);
 		WaitForSingleObject(watchDirThread, INFINITE);
+		CloseHandle(watchDirThread);
 	}
 }
 
@@ -934,7 +935,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 		}
 	}
 	// Add Patterns
-	if (info.hPatterns && (hintFlagPart & (HINT_MODTYPE | HINT_PATNAMES)))
+	if (info.hPatterns && (hintFlagPart & (HINT_MODTYPE | HINT_PATNAMES)) && sndFile.Patterns.Size() > 0)
 	{
 		const PATTERNINDEX nPat = (PATTERNINDEX)(lHint >> HINT_SHIFT_PAT);
 		info.tiPatterns.resize(sndFile.Patterns.Size(), NULL);
@@ -1269,6 +1270,17 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 
 		case MODITEM_DLSBANK_INSTRUMENT:
 			PlayItem(hItem, NOTE_MIDDLEC);
+			return TRUE;
+
+		case MODITEM_HDR_INSTRUMENTLIB:
+			if(IsSampleBrowser())
+			{
+				BrowseForFolder dlg(m_InstrLibPath, TEXT("Select a new instrument library folder..."));
+				if(dlg.Show())
+				{
+					CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dlg.GetDirectory() + MPT_PATHSTRING("\\"), false);
+				}
+			}
 			return TRUE;
 		}
 	}
@@ -1810,6 +1822,7 @@ void CModTree::MonitorInstrumentLibrary()
 			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
 		}
 	} while(result != WAIT_OBJECT_0);
+	CloseHandle(m_hWatchDirKillThread);
 }
 
 
@@ -2615,6 +2628,14 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			case MODITEM_DLSBANK_INSTRUMENT:
 				nDefault = ID_MODTREE_PLAY;
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, "&Play Instrument");
+				break;
+
+			case MODITEM_HDR_INSTRUMENTLIB:
+				if(IsSampleBrowser())
+				{
+					nDefault = ID_MODTREE_EXECUTE;
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_EXECUTE, "&Browse...");
+				}
 				break;
 			}
 			if (nDefault) SetMenuDefaultItem(hMenu, nDefault, FALSE);
