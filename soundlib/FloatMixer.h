@@ -11,8 +11,6 @@
 
 #pragma once
 
-extern mixsample_t gLinearInterpolation[];
-
 #include "MixerInterface.h"
 #include "Resampler.h"
 

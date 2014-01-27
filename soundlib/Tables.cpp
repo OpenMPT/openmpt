@@ -502,6 +502,9 @@ const uint16 XMPeriodTable[104] =
 };
 
 
+// floor(8363 * 64 * 2**(-n/768))
+// 768 = 64 period steps for 12 notes
+// Table is for highest possible octave
 const uint32 XMLinearTable[768] = 
 {
 	535232,534749,534266,533784,533303,532822,532341,531861,
