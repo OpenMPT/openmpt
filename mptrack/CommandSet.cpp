@@ -1872,9 +1872,15 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 		if(effect != '?')
 		{
 			SHORT codeNmod = VkKeyScanEx(effect, GetKeyboardLayout(0));
-			kc.KeyCode(LOBYTE(codeNmod));
-			kc.Modifier(HIBYTE(codeNmod) & 0x07);	//We're only interest in the bottom 3 bits.
-			Add(kc, cmd, true);
+			// Hack for situations where a non-latin keyboard layout without A...Z key code mapping may the current layout (e.g. Russian),
+			// but a latin layout (e.g. EN-US) is installed as well.
+			if(codeNmod == -1) codeNmod = VkKeyScanEx(effect, GetKeyboardLayout(1));
+			if(codeNmod != -1)
+			{
+				kc.KeyCode(LOBYTE(codeNmod));
+				kc.Modifier(HIBYTE(codeNmod) & 0x07);	//We're only interest in the bottom 3 bits.
+				Add(kc, cmd, true);
+			}
 
 			if (kc.KeyCode() >= '0' && kc.KeyCode() <= '9')		//for numbers, ensure numpad works too
 			{
