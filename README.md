@@ -135,6 +135,10 @@ How to compile
     `PREFIX` defaults to `/usr/local`. A `DESTDIR=` parameter is also
     supported.
 
+ -  Android NDK
+
+    See `build/android_ndk/README.AndroidNDK.txt`.
+
 
 
 Coding conventions
