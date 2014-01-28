@@ -634,7 +634,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_instruments( openmpt_module * mod 
 LIBOPENMPT_API int32_t openmpt_module_get_num_samples( openmpt_module * mod ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		return mod->impl->get_num_channels();
+		return mod->impl->get_num_samples();
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0;
 }
