@@ -370,7 +370,7 @@ struct FixMODPatterns
 static bool IsMagic(const char *magic1, const char *magic2)
 //---------------------------------------------------------
 {
-	return (*reinterpret_cast<const uint32 *>(magic1) == *reinterpret_cast<const uint32 *>(magic2));
+	return std::memcmp(magic1, magic2, 4) == 0;
 }
 
 
