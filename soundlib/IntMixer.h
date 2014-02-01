@@ -195,9 +195,10 @@ struct Ramp
 template<class Traits>
 struct MixMonoFastNoRamp : public NoRamp<Traits>
 {
+	typedef NoRamp<Traits> base_t;
 	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &chn, typename Traits::output_t * const outBuffer)
 	{
-		typename Traits::output_t vol = outSample[0] * lVol;
+		typename Traits::output_t vol = outSample[0] * base_t::lVol;
 		for(int i = 0; i < Traits::numChannelsOut; i++)
 		{
 			outBuffer[i] += vol;
@@ -209,10 +210,11 @@ struct MixMonoFastNoRamp : public NoRamp<Traits>
 template<class Traits>
 struct MixMonoNoRamp : public NoRamp<Traits>
 {
+	typedef NoRamp<Traits> base_t;
 	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &, typename Traits::output_t * const outBuffer)
 	{
-		outBuffer[0] += outSample[0] * lVol;
-		outBuffer[1] += outSample[0] * rVol;
+		outBuffer[0] += outSample[0] * base_t::lVol;
+		outBuffer[1] += outSample[0] * base_t::rVol;
 	}
 };
 
@@ -233,10 +235,11 @@ struct MixMonoRamp : public Ramp
 template<class Traits>
 struct MixStereoNoRamp : public NoRamp<Traits>
 {
+	typedef NoRamp<Traits> base_t;
 	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &, typename Traits::output_t * const outBuffer)
 	{
-		outBuffer[0] += outSample[0] * lVol;
-		outBuffer[1] += outSample[1] * rVol;
+		outBuffer[0] += outSample[0] * base_t::lVol;
+		outBuffer[1] += outSample[1] * base_t::rVol;
 	}
 };
 
