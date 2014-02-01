@@ -17,6 +17,9 @@
 template<int channelsOut, int channelsIn, typename out, typename in, size_t mixPrecision>
 struct IntToIntTraits : public MixerTraits<channelsOut, channelsIn, out, in>
 {
+	typedef MixerTraits<channelsOut, channelsIn, out, in> base_t;
+	typedef typename base_t::input_t input_t;
+	typedef typename base_t::output_t output_t;
 	static_assert(std::numeric_limits<input_t>::is_integer, "Input must be integer");
 	static_assert(std::numeric_limits<output_t>::is_integer, "Output must be integer");
 	static_assert(sizeof(out) * 8 >= mixPrecision, "Mix precision is higher than output type can handle");
@@ -47,12 +50,12 @@ struct LinearInterpolation
 	forceinline void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32 posLo)
 	{
 		static_assert(Traits::numChannelsIn <= Traits::numChannelsOut, "Too many input channels");
-		const Traits::output_t fract = posLo >> 8;
+		const typename Traits::output_t fract = posLo >> 8;
 
 		for(int i = 0; i < Traits::numChannelsIn; i++)
 		{
-			Traits::output_t srcVol = Traits::Convert(inBuffer[i]);
-			Traits::output_t destVol = Traits::Convert(inBuffer[i + Traits::numChannelsIn]);
+			typename Traits::output_t srcVol = Traits::Convert(inBuffer[i]);
+			typename Traits::output_t destVol = Traits::Convert(inBuffer[i + Traits::numChannelsIn]);
 
 			outSample[i] = srcVol + ((fract * (destVol - srcVol)) >> 8);
 		}
@@ -194,7 +197,7 @@ struct MixMonoFastNoRamp : public NoRamp<Traits>
 {
 	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &chn, typename Traits::output_t * const outBuffer)
 	{
-		Traits::output_t vol = outSample[0] * lVol;
+		typename Traits::output_t vol = outSample[0] * lVol;
 		for(int i = 0; i < Traits::numChannelsOut; i++)
 		{
 			outBuffer[i] += vol;
@@ -291,7 +294,7 @@ struct ResonantFilter
 	}
 
 	// Filter values are clipped to double the input range
-#define ClipFilter(x) Clamp<Traits::output_t, Traits::output_t>(x, int16_min << (MIXING_FILTER_PRECISION + 1), int16_max << (MIXING_FILTER_PRECISION + 1))
+#define ClipFilter(x) Clamp<typename Traits::output_t, typename Traits::output_t>(x, int16_min << (MIXING_FILTER_PRECISION + 1), int16_max << (MIXING_FILTER_PRECISION + 1))
 
 	forceinline void operator() (typename Traits::outbuf_t &outSample, const ModChannel &chn)
 	{
@@ -299,7 +302,7 @@ struct ResonantFilter
 
 		for(int i = 0; i < Traits::numChannelsIn; i++)
 		{
-			Traits::output_t val = (outSample[i] * chn.nFilter_A0 + ClipFilter(fy[i][0]) * chn.nFilter_B0 + ClipFilter(fy[i][1]) * chn.nFilter_B1
+			typename Traits::output_t val = (outSample[i] * chn.nFilter_A0 + ClipFilter(fy[i][0]) * chn.nFilter_B0 + ClipFilter(fy[i][1]) * chn.nFilter_B1
 				+ (1 << (MIXING_FILTER_PRECISION - 1))) >> MIXING_FILTER_PRECISION;
 			fy[i][1] = fy[i][0];
 			fy[i][0] = val - (outSample[i] & chn.nFilter_HP);
