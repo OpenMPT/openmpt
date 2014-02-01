@@ -252,6 +252,7 @@ struct SoundDeviceSettings
 	bool ExclusiveMode; // Use hardware buffers directly
 	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
 	bool UseHardwareTiming;
+	int DitherType;
 	SoundChannelMapping ChannelMapping;
 	SoundDeviceSettings()
 		: hWnd(NULL)
@@ -263,6 +264,7 @@ struct SoundDeviceSettings
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
 		, UseHardwareTiming(false)
+		, DitherType(1)
 	{
 		return;
 	}
@@ -279,6 +281,7 @@ struct SoundDeviceSettings
 			&& BoostThreadPriority == cmp.BoostThreadPriority
 			&& UseHardwareTiming == cmp.UseHardwareTiming
 			&& ChannelMapping == cmp.ChannelMapping
+			&& DitherType == cmp.DitherType
 			;
 	}
 	bool operator != (const SoundDeviceSettings &cmp) const
@@ -308,6 +311,7 @@ struct SoundDeviceCaps
 	bool CanUseHardwareTiming;
 	bool CanChannelMapping;
 	bool CanDriverPanel;
+	bool HasInternalDither;
 	std::wstring ExclusiveModeDescription;
 	SoundDeviceCaps()
 		: currentSampleRate(0)
@@ -318,6 +322,7 @@ struct SoundDeviceCaps
 		, CanUseHardwareTiming(false)
 		, CanChannelMapping(false)
 		, CanDriverPanel(false)
+		, HasInternalDither(false)
 		, ExclusiveModeDescription(L"Use device exclusively")
 	{
 		return;

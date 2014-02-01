@@ -136,6 +136,7 @@ namespace Encoder
 		int defaultBitrate;
 		float defaultQuality;
 		int defaultFormat;
+		int defaultDitherType;
 
 		Traits()
 			: canCues(false)
@@ -149,6 +150,7 @@ namespace Encoder
 			, defaultBitrate(0)
 			, defaultQuality(0.0f)
 			, defaultFormat(0)
+			, defaultDitherType(1)
 		{
 			return;
 		}
@@ -168,8 +170,9 @@ namespace Encoder
 		Setting<int> Bitrate;
 		Setting<float> Quality;
 		Setting<int> Format;
+		Setting<int> Dither;
 		
-		Settings(SettingsContainer &conf, const std::string &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format)
+		Settings(SettingsContainer &conf, const std::string &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format, int dither)
 			: Cues(conf, "Export", encoderName + "_" + "Cues", cues)
 			, Tags(conf, "Export", encoderName + "_" + "Tags", tags)
 			, Samplerate(conf, "Export", encoderName + "_" + "Samplerate", samplerate)
@@ -178,6 +181,7 @@ namespace Encoder
 			, Bitrate(conf, "Export", encoderName + "_" + "Bitrate", bitrate)
 			, Quality(conf, "Export", encoderName + "_" + "Quality", quality)
 			, Format(conf, "Export", encoderName + "_" + "Format", format)
+			, Dither(conf, "Export", encoderName + "_" + "Dither", dither)
 		{
 			return;
 		}

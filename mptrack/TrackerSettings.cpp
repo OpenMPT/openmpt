@@ -525,6 +525,7 @@ public:
 	Setting<bool> ExclusiveMode;
 	Setting<bool> BoostThreadPriority;
 	Setting<bool> UseHardwareTiming;
+	Setting<int> DitherType;
 	Setting<SoundChannelMapping> ChannelMapping;
 
 public:
@@ -540,6 +541,7 @@ public:
 		, ExclusiveMode(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ExclusiveMode", defaults.ExclusiveMode)
 		, BoostThreadPriority(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"BoostThreadPriority", defaults.BoostThreadPriority)
 		, UseHardwareTiming(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"UseHardwareTiming", defaults.UseHardwareTiming)
+		, DitherType(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"DitherType", defaults.DitherType)
 		, ChannelMapping(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ChannelMapping", defaults.ChannelMapping)
 	{
 		// store informational data (not read back, jsut to allow the user to mock with the raw ini file)
@@ -559,6 +561,7 @@ public:
 		ExclusiveMode = settings.ExclusiveMode;
 		BoostThreadPriority = settings.BoostThreadPriority;
 		UseHardwareTiming = settings.UseHardwareTiming;
+		DitherType = settings.DitherType;
 		ChannelMapping = settings.ChannelMapping;
 		return *this;
 	}
@@ -574,6 +577,7 @@ public:
 		settings.ExclusiveMode = ExclusiveMode;
 		settings.BoostThreadPriority = BoostThreadPriority;
 		settings.UseHardwareTiming = UseHardwareTiming;
+		settings.DitherType = DitherType;
 		settings.ChannelMapping = ChannelMapping;
 		return settings;
 	}

@@ -97,7 +97,12 @@ bool CPortaudioDevice::InternalOpen()
 		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 	}
 	if(Pa_IsFormatSupported(NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported) return false;
-	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, paNoFlag, StreamCallbackWrapper, (void*)this) != paNoError) return false;
+	PaStreamFlags flags = paNoFlag;
+	if(m_Settings.DitherType == 0)
+	{
+		flags |= paDitherOff;
+	}
+	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, (void*)this) != paNoError) return false;
 	m_StreamInfo = Pa_GetStreamInfo(m_Stream);
 	if(!m_StreamInfo)
 	{
@@ -185,6 +190,7 @@ SoundDeviceCaps CPortaudioDevice::GetDeviceCaps(const std::vector<uint32> &baseS
 	caps.CanUseHardwareTiming = false;
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
+	caps.HasInternalDither = true;
 	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
 	{
 		caps.CanExclusiveMode = true;

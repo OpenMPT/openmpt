@@ -845,7 +845,8 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 					encTraits.defaultMode,
 					encTraits.defaultBitrate,
 					encTraits.defaultQuality,
-					encTraits.defaultFormat
+					encTraits.defaultFormat,
+					encTraits.defaultDitherType
 				)
 			)
 		);
@@ -951,6 +952,7 @@ void CDoWaveConvert::OnButton1()
 	}
 
 	Dither dither;
+	dither.SetMode((DitherMode)encSettings.Dither.Get());
 
 	m_SndFile.ResetChannels();
 	m_SndFile.SetMixerSettings(mixersettings);
