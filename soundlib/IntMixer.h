@@ -196,7 +196,7 @@ template<class Traits>
 struct MixMonoFastNoRamp : public NoRamp<Traits>
 {
 	typedef NoRamp<Traits> base_t;
-	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &chn, typename Traits::output_t * const outBuffer)
+	forceinline void operator() (const typename Traits::outbuf_t &outSample, const ModChannel &, typename Traits::output_t * const outBuffer)
 	{
 		typename Traits::output_t vol = outSample[0] * base_t::lVol;
 		for(int i = 0; i < Traits::numChannelsOut; i++)
