@@ -19,12 +19,10 @@ class COptionsSoundcard: public CPropertyPage
 {
 protected:
 	CComboBoxEx m_CbnDevice;
-	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnPolyphony, m_CbnChannels, m_CbnSampleFormat;
-	CSliderCtrl m_SliderStereoSep, m_SliderPreAmp;
+	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnChannels, m_CbnSampleFormat, m_CbnDither;
 	CComboBox m_CbnBaseChannel;
 	CEdit m_EditStatistics;
 	CButton m_BtnDriverPanel;
-	bool m_PreAmpNoteShowed;
 
 	void SetDevice(SoundDeviceID dev, bool forceReload=false);
 	SoundDeviceInfo m_CurrentDeviceInfo;
@@ -44,8 +42,8 @@ private:
 	void UpdateSampleRates();
 	void UpdateChannels();
 	void UpdateSampleFormat();
+	void UpdateDither();
 	void UpdateControls();
-	void SetPreAmpSliderPosition();
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -55,11 +53,58 @@ protected:
 	void UpdateStereoSep();
 	afx_msg void OnDeviceChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
-	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
-	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
+	afx_msg void OnSampleFormatChanged();
 	afx_msg void OnSoundCardRescan();
 	afx_msg void OnSoundCardDriverPanel();
 	DECLARE_MESSAGE_MAP()
+};
+
+
+//=======================================
+class COptionsMixer: public CPropertyPage
+//=======================================
+{
+protected:
+
+	CComboBox m_CbnResampling;
+	CEdit m_CEditWFIRCutoff;
+	CComboBox m_CbnWFIRType;
+
+	CEdit m_CEditRampUp;
+	CEdit m_CEditRampDown;
+	CEdit m_CInfoRampUp;
+	CEdit m_CInfoRampDown;
+
+	CComboBox m_CbnPolyphony;
+
+	CSliderCtrl m_SliderStereoSep;
+
+	// check box soft pan
+
+	CSliderCtrl m_SliderPreAmp;
+
+public:
+	COptionsMixer():CPropertyPage(IDD_OPTIONS_MIXER) {}
+
+protected:
+	void UpdateRamping();
+	void UpdateStereoSep();
+
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual BOOL OnSetActive();
+	virtual void DoDataExchange(CDataExchange* pDX);
+
+	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnResamplerChanged();
+	afx_msg void OnRampingChanged();
+
+	afx_msg void OnHScroll(UINT n, UINT pos, CScrollBar *p) { CPropertyPage::OnHScroll(n, pos, p); OnScroll(n, pos, p); }
+	afx_msg void OnVScroll(UINT n, UINT pos, CScrollBar *p) { CPropertyPage::OnVScroll(n, pos, p); OnScroll(n, pos, p); }
+	void OnScroll(UINT n, UINT pos, CScrollBar *p);
+
+	DECLARE_MESSAGE_MAP()
+
 };
 
 
@@ -68,12 +113,10 @@ class COptionsPlayer: public CPropertyPage
 //========================================
 {
 protected:
-	CComboBox m_CbnResampling, m_CbnReverbPreset, m_CbnWFIRType; //rewbs.resamplerConf: added m_CbnWFIRType
+	CComboBox m_CbnReverbPreset;
 	CSliderCtrl m_SbXBassDepth, m_SbXBassRange;
 	CSliderCtrl m_SbSurroundDepth, m_SbSurroundDelay;
 	CSliderCtrl m_SbReverbDepth;
-	CEdit m_CEditWFIRCutoff;
-	CEdit m_CEditRampUp, m_CEditRampDown;
 
 public:
 	COptionsPlayer():CPropertyPage(IDD_OPTIONS_PLAYER) {}
@@ -85,11 +128,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
-	//rewbs.resamplerConf
-	afx_msg void OnWFIRTypeChanged();
-	afx_msg void OnResamplerChanged();
-	afx_msg void OnDefaultResampling();
-	//end rewbs.resamplerConf
 
 	DECLARE_MESSAGE_MAP()
 };

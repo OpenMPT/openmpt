@@ -470,7 +470,6 @@ public:
 
 	BOOL SetupDirectories(const mpt::PathString &szModDir, const mpt::PathString &szSampleDir, const mpt::PathString &szInstrDir, const mpt::PathString &szVstDir, const mpt::PathString &szPresetDir);
 	BOOL SetupMidi(DWORD d, LONG n);
-	void SetPreAmp(UINT n);
 	HWND GetFollowSong() const;
 	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? GetFollowSong() : NULL; }
 	void ResetNotificationBuffer();

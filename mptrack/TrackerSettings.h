@@ -295,9 +295,8 @@ public:
 	Setting<uint32> MixerOutputChannels;
 	Setting<uint32> MixerPreAmp;
 	Setting<uint32> MixerStereoSeparation;
-	Setting<uint32> MixerVolumeRampUpSamples;
-	Setting<uint32> MixerVolumeRampDownSamples;
-	Setting<uint32> MixerVolumeRampSamples_DEPRECATED;
+	Setting<uint32> MixerVolumeRampUpMicroseconds;
+	Setting<uint32> MixerVolumeRampDownMicroseconds;
 	MixerSettings GetMixerSettings() const;
 	void SetMixerSettings(const MixerSettings &settings);
 

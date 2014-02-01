@@ -21,14 +21,19 @@ struct MixerSettings
 	DWORD gnChannels;
 	DWORD m_nPreAmp;
 
-	long glVolumeRampUpSamples;
-	long glVolumeRampDownSamples;
+	int32 VolumeRampUpMicroseconds;
+	int32 VolumeRampDownMicroseconds;
+	int32 GetVolumeRampUpMicroseconds() const { return VolumeRampUpMicroseconds; }
+	int32 GetVolumeRampDownMicroseconds() const { return VolumeRampDownMicroseconds; }
+	void SetVolumeRampUpMicroseconds(int32 rampUpMicroseconds) { VolumeRampUpMicroseconds = rampUpMicroseconds; }
+	void SetVolumeRampDownMicroseconds(int32 rampDownMicroseconds) { VolumeRampDownMicroseconds = rampDownMicroseconds; }
 	
-	int32 GetVolumeRampUpMicroseconds() const;
-	int32 GetVolumeRampDownMicroseconds() const;
-	void SetVolumeRampUpMicroseconds(int32 rampUpMicroseconds);
-	void SetVolumeRampDownMicroseconds(int32 rampDownMicroseconds);
+	int32 GetVolumeRampUpSamples() const;
+	int32 GetVolumeRampDownSamples() const;
 
+	void SetVolumeRampUpSamples(int32 rampUpSamples);
+	void SetVolumeRampDownSamples(int32 rampDownSamples);
+	
 	bool IsValid() const
 	{
 		return (gdwMixingFreq > 0) && (gnChannels == 1 || gnChannels == 2 || gnChannels == 4);

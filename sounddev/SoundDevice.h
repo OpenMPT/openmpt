@@ -251,6 +251,7 @@ struct SoundDeviceSettings
 	SampleFormat sampleFormat;
 	bool ExclusiveMode; // Use hardware buffers directly
 	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
+	bool KeepDeviceRunning;
 	bool UseHardwareTiming;
 	int DitherType;
 	SoundChannelMapping ChannelMapping;
@@ -263,6 +264,7 @@ struct SoundDeviceSettings
 		, sampleFormat(SampleFormatFloat32)
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
+		, KeepDeviceRunning(true)
 		, UseHardwareTiming(false)
 		, DitherType(1)
 	{
@@ -279,6 +281,7 @@ struct SoundDeviceSettings
 			&& sampleFormat == cmp.sampleFormat
 			&& ExclusiveMode == cmp.ExclusiveMode
 			&& BoostThreadPriority == cmp.BoostThreadPriority
+			&& KeepDeviceRunning == cmp.KeepDeviceRunning
 			&& UseHardwareTiming == cmp.UseHardwareTiming
 			&& ChannelMapping == cmp.ChannelMapping
 			&& DitherType == cmp.DitherType
@@ -308,6 +311,7 @@ struct SoundDeviceCaps
 	bool CanSampleFormat;
 	bool CanExclusiveMode;
 	bool CanBoostThreadPriority;
+	bool CanKeepDeviceRunning;
 	bool CanUseHardwareTiming;
 	bool CanChannelMapping;
 	bool CanDriverPanel;
@@ -319,6 +323,7 @@ struct SoundDeviceCaps
 		, CanSampleFormat(true)
 		, CanExclusiveMode(false)
 		, CanBoostThreadPriority(true)
+		, CanKeepDeviceRunning(false)
 		, CanUseHardwareTiming(false)
 		, CanChannelMapping(false)
 		, CanDriverPanel(false)
