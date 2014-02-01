@@ -264,15 +264,19 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 				chunk.Skip(16); // 81 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 00
 			}
 			// Read object properties
+#if 0
 			size_t propertyName = static_cast<size_t>(ReadUMXIndex(chunk));
-			/*if(propertyName >= names.size() || strcmp(names[propertyName].c_str(), "none"))
+			if(propertyName >= names.size() || names[propertyName] != "none")
 			{
 				// Can't bother to implement property reading, as no UMX files I've seen so far use properties for the relevant objects,
 				// and only the UAX files in the Unreal 1997/98 beta seem to use this and still load just fine when ignoring it.
 				// If it should be necessary to implement this, check CUnProperty.cpp in http://ut-files.com/index.php?dir=Utilities/&file=utcms_source.zip
 				ASSERT(false);
 				continue;
-			}*/
+			}
+#else
+			ReadUMXIndex(chunk);
+#endif
 
 			if(fileHeader.packageVersion >= 120)
 			{
