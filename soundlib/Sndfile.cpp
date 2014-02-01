@@ -615,7 +615,9 @@ CSoundFile::CSoundFile() :
 
 	m_dwLastSavedWithVersion=0;
 	m_dwCreatedWithVersion=0;
+#ifdef MODPLUG_TRACKER
 	m_bChannelMuteTogglePending.reset();
+#endif // MODPLUG_TRACKER
 
 	MemsetZero(ChnMix);
 	MemsetZero(Instruments);
@@ -1309,6 +1311,8 @@ void CSoundFile::ResetChannels()
 }
 
 
+#ifdef MODPLUG_TRACKER
+
 void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX chnIndex)
 //-------------------------------------------------------------------
 {
@@ -1331,6 +1335,8 @@ void CSoundFile::PatternTransitionChnUnmuteAll()
 		m_bChannelMuteTogglePending[i] = ChnSettings[i].dwFlags[CHN_MUTE];
 	}
 }
+
+#endif // MODPLUG_TRACKER
 
 
 void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
@@ -1462,7 +1468,10 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 		GetpModDoc()->Record2Channel(nChn, false);
 	}
 #endif // MODPLUG_TRACKER
+
+#ifdef MODPLUG_TRACKER
 	m_bChannelMuteTogglePending[nChn] = false;
+#endif // MODPLUG_TRACKER
 
 	return false;
 }
