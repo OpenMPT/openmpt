@@ -401,7 +401,7 @@ void CViewPattern::SetModified(bool updateAllViews)
 // When we switching to other tab the CViewPattern object is deleted
 // and when switching back new one is created
 bool CViewPattern::UpdateScrollbarPositions(bool updateHorizontalScrollbar)
-//---------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 {
 // HACK - after new CViewPattern object created SetCurrentRow() and SetCurrentColumn() are called -
 // just skip first two calls of UpdateScrollbarPositions() if pModDoc->GetOldPatternScrollbarsPos() is valid
@@ -409,17 +409,16 @@ bool CViewPattern::UpdateScrollbarPositions(bool updateHorizontalScrollbar)
 	if (pModDoc)
 	{
 		CSize scroll = pModDoc->GetOldPatternScrollbarsPos();
-		if( scroll.cx >= 0 )
+		if(scroll.cx >= 0)
 		{
-			OnScrollBy( scroll );
+			OnScrollBy(scroll);
 			scroll.cx = -1;
-			pModDoc->SetOldPatternScrollbarsPos( scroll );
+			pModDoc->SetOldPatternScrollbarsPos(scroll);
 			return true;
-		} else
-		if( scroll.cx >= -1 )
+		} else if(scroll.cx >= -1)
 		{
 			scroll.cx = -2;
-			pModDoc->SetOldPatternScrollbarsPos( scroll );
+			pModDoc->SetOldPatternScrollbarsPos(scroll);
 			return true;
 		}
 	}
@@ -5016,6 +5015,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 
 	const bool liveRecord = IsLiveRecord();
 	const bool usePlaybackPosition = (liveRecord && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_AUTODELAY) && !sndFile.m_SongFlags[SONG_STEP]);
+	const bool isSpecial = note >= NOTE_MIN_SPECIAL;
 	const bool isSplit = IsNoteSplit(note);
 
 	ModCommandPos editPos = GetEditPos(sndFile, usePlaybackPosition);
@@ -5025,7 +5025,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 
 	BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 
-	if(pModDoc->GetSplitKeyboardSettings().IsSplitActive()
+	if(!isSpecial && pModDoc->GetSplitKeyboardSettings().IsSplitActive()
 		&& ((recordGroup == 1 && isSplit) || (recordGroup == 2 && !isSplit)))
 	{
 		// Record group 1 should be used for normal notes, record group 2 for split notes.
@@ -5115,7 +5115,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 			}
 		}
 
-		if(volWrite != -1)
+		if(volWrite != -1 && !isSpecial)
 		{
 			if(sndFile.GetModSpecifications().HasVolCommand(VOLCMD_VOLUME))
 			{
