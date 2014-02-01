@@ -11,6 +11,7 @@ is just a high-level summary.
     access.
  *  [Bug] openmpt_module_get_num_samples() returned the wrong value.
 
+ *  Support building on Android NDK.
  *  IT filters are now done in integer instead of floating point. This improves
     performances, especially on architectures with no or a slow FPU.
  *  MOD pattern break handling fixes.
