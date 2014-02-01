@@ -425,7 +425,9 @@ public:
 	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
+#ifdef MODPLUG_TRACKER
 	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
+#endif // MODPLUG_TRACKER
 
 	uint32 m_dwCreatedWithVersion;
 	uint32 m_dwLastSavedWithVersion;
@@ -533,8 +535,11 @@ public:
 	const CModSpecifications& GetModSpecifications() const {return *m_pModSpecs;}
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
+#ifdef MODPLUG_TRACKER
 	void PatternTranstionChnSolo(const CHANNELINDEX chnIndex);
 	void PatternTransitionChnUnmuteAll();
+#endif // MODPLUG_TRACKER
+
 	double GetCurrentBPM() const;
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
 	CHANNELINDEX GetMixStat() const { return m_nMixStat; }
