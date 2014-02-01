@@ -59,6 +59,7 @@ const char *gszChnCfgNames[3] =
 
 
 
+
 BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
@@ -72,14 +73,17 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4, OnSettingsChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO5, OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO5, OnChannelsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO6, OnSampleFormatChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO10, OnSettingsChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO9, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO2, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,	OnSoundCardRescan)
 	ON_COMMAND(IDC_BUTTON2,	OnSoundCardDriverPanel)
+	ON_CBN_SELCHANGE(IDC_COMBO_CHANNEL_FRONTLEFT, OnChannel1Changed)
+	ON_CBN_SELCHANGE(IDC_COMBO_CHANNEL_FRONTRIGHT, OnChannel2Changed)
+	ON_CBN_SELCHANGE(IDC_COMBO_CHANNEL_REARLEFT, OnChannel3Changed)
+	ON_CBN_SELCHANGE(IDC_COMBO_CHANNEL_REARRIGHT, OnChannel4Changed)
 END_MESSAGE_MAP()
 
 
@@ -103,8 +107,16 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO5,		m_CbnChannels);
 	DDX_Control(pDX, IDC_COMBO6,		m_CbnSampleFormat);
 	DDX_Control(pDX, IDC_COMBO10,		m_CbnDither);
-	DDX_Control(pDX, IDC_COMBO9,		m_CbnBaseChannel);
 	DDX_Control(pDX, IDC_BUTTON2,		m_BtnDriverPanel);
+	DDX_Control(pDX, IDC_COMBO6,		m_CbnSampleFormat);
+	DDX_Control(pDX, IDC_STATIC_CHANNEL_FRONTLEFT , m_StaticChannelMapping[0]);
+	DDX_Control(pDX, IDC_STATIC_CHANNEL_FRONTRIGHT, m_StaticChannelMapping[1]);
+	DDX_Control(pDX, IDC_STATIC_CHANNEL_REARLEFT  , m_StaticChannelMapping[2]);
+	DDX_Control(pDX, IDC_STATIC_CHANNEL_REARRIGHT , m_StaticChannelMapping[3]);
+	DDX_Control(pDX, IDC_COMBO_CHANNEL_FRONTLEFT , m_CbnChannelMapping[0]);
+	DDX_Control(pDX, IDC_COMBO_CHANNEL_FRONTRIGHT, m_CbnChannelMapping[1]);
+	DDX_Control(pDX, IDC_COMBO_CHANNEL_REARLEFT  , m_CbnChannelMapping[2]);
+	DDX_Control(pDX, IDC_COMBO_CHANNEL_REARRIGHT , m_CbnChannelMapping[3]);
 	DDX_Control(pDX, IDC_EDIT_STATISTICS,	m_EditStatistics);
 	//}}AFX_DATA_MAP
 }
@@ -304,6 +316,7 @@ void COptionsSoundcard::UpdateDevice()
 	UpdateChannels();
 	UpdateSampleFormat();
 	UpdateDither();
+	UpdateChannelMapping();
 }
 
 
@@ -330,24 +343,6 @@ void COptionsSoundcard::UpdateChannels()
 		}
 	}
 	m_CbnChannels.SetCurSel(sel);
-
-	GetDlgItem(IDC_STATIC_BASECHANNEL)->EnableWindow(m_CurrentDeviceCaps.CanChannelMapping ? TRUE : FALSE);
-	m_CbnBaseChannel.EnableWindow(m_CurrentDeviceCaps.CanChannelMapping ? TRUE : FALSE);
-	m_CbnBaseChannel.ResetContent();
-	if(m_CurrentDeviceCaps.CanChannelMapping)
-	{
-		int sel = 0;
-		for(std::size_t channel = 0; channel < m_CurrentDeviceCaps.channelNames.size(); ++channel)
-		{
-			int ndx = m_CbnBaseChannel.AddString(mpt::ToCString(m_CurrentDeviceCaps.channelNames[channel]));
-			m_CbnBaseChannel.SetItemData(ndx, channel);
-			if(channel == m_Settings.ChannelMapping.GetBaseChannel())
-			{
-				sel = ndx;
-			}
-		}
-		m_CbnBaseChannel.SetCurSel(sel);
-	}
 }
 
 
@@ -420,6 +415,38 @@ void COptionsSoundcard::UpdateDither()
 }
 
 
+void COptionsSoundcard::UpdateChannelMapping()
+//--------------------------------------------
+{
+	int usedChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+	for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)	// Host channels
+	{
+		CStatic *statictext = &m_StaticChannelMapping[mch];
+		CComboBox *combo = &m_CbnChannelMapping[mch];
+		statictext->EnableWindow((m_CurrentDeviceCaps.CanChannelMapping && mch < usedChannels) ? TRUE : FALSE);
+		combo->EnableWindow((m_CurrentDeviceCaps.CanChannelMapping && mch < usedChannels) ? TRUE : FALSE);
+		combo->ResetContent();
+		if(m_CurrentDeviceCaps.CanChannelMapping)
+		{
+			combo->SetItemData(combo->AddString("Unassigned"), (DWORD_PTR)-1);
+			combo->SetCurSel(0);
+			if(mch < usedChannels)
+			{
+				for(size_t dch = 0; dch < m_CurrentDeviceCaps.channelNames.size(); dch++)	// Device channels
+				{
+					const int pos = (int)::SendMessageW(combo->m_hWnd, CB_ADDSTRING, 0, (LPARAM)m_CurrentDeviceCaps.channelNames[dch].c_str());
+					combo->SetItemData(pos, (DWORD_PTR)dch);
+					if(dch == m_Settings.ChannelMapping.ToDevice(mch))
+					{
+						combo->SetCurSel(pos);
+					}
+				}
+			}
+		}
+	}
+}
+
+
 void COptionsSoundcard::OnDeviceChanged()
 //---------------------------------------
 {
@@ -433,10 +460,70 @@ void COptionsSoundcard::OnDeviceChanged()
 }
 
 
+void COptionsSoundcard::OnChannelsChanged()
+//-----------------------------------------
+{
+	UpdateChannelMapping();
+	OnSettingsChanged();
+}
+
+
 void COptionsSoundcard::OnSoundCardDriverPanel()
 //----------------------------------------------
 {
 	theApp.GetSoundDevicesManager()->OpenDriverSettings(SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(m_CbnDevice.GetCurSel())), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice);
+}
+
+
+void COptionsSoundcard::OnChannelChanged(int channel)
+//---------------------------------------------------
+{
+	CComboBox *combo = &m_CbnChannelMapping[channel];
+	const int newChn = combo->GetItemData(combo->GetCurSel());
+	if(newChn == -1)
+	{
+		return;
+	}
+	// Ensure that no channel is used twice
+	for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)	// Host channels
+	{
+		if(mch != channel)
+		{
+			combo = &m_CbnChannelMapping[mch];
+			if((int)combo->GetItemData(combo->GetCurSel()) == newChn)
+			{
+				// find an unused channel
+				bool found = false;
+				std::size_t deviceChannel = 0;
+				for(; deviceChannel < m_CurrentDeviceCaps.channelNames.size(); ++deviceChannel)
+				{
+					bool used = false;
+					for(int hostChannel = 0; hostChannel < NUM_CHANNELCOMBOBOXES; ++hostChannel)
+					{
+						if((int)m_CbnChannelMapping[hostChannel].GetItemData(m_CbnChannelMapping[hostChannel].GetCurSel()) == (int)deviceChannel)
+						{
+							used = true;
+							break;
+						}
+					}
+					if(!used)
+					{
+						found = true;
+						break;
+					}
+				}
+				if(found)
+				{
+					combo->SetCurSel(deviceChannel+1);
+				} else
+				{
+					combo->SetCurSel(0);
+				}
+				break;
+			}
+		}
+	}
+	OnSettingsChanged();
 }
 
 
@@ -556,11 +643,21 @@ void COptionsSoundcard::OnOK()
 		wsprintf(s, "%d ms", m_Settings.UpdateIntervalMS);
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 	}
-	// Base Channel
+	// Channel Mapping
 	{
-		if(m_CurrentDeviceInfo.id.GetType() == SNDDEV_ASIO)
+		if(m_CurrentDeviceCaps.CanChannelMapping)
 		{
-			m_Settings.ChannelMapping = SoundChannelMapping::BaseChannel(m_Settings.Channels, m_CbnBaseChannel.GetItemData(m_CbnBaseChannel.GetCurSel()));
+			int numChannels = std::min<int>(m_Settings.Channels, NUM_CHANNELCOMBOBOXES);
+			std::vector<uint32> channels(numChannels);
+			for(int mch = 0; mch < numChannels; mch++)	// Host channels
+			{
+				CComboBox *combo = &m_CbnChannelMapping[mch];
+				channels[mch] = combo->GetItemData(combo->GetCurSel());
+			}
+			m_Settings.ChannelMapping = SoundChannelMapping(channels);
+		} else
+		{
+			m_Settings.ChannelMapping = SoundChannelMapping();
 		}
 	}
 	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.id);

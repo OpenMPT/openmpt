@@ -13,6 +13,8 @@
 class CSoundFile;
 class CMainFrame;
 
+#define NUM_CHANNELCOMBOBOXES	4
+
 //===========================================
 class COptionsSoundcard: public CPropertyPage
 //===========================================
@@ -20,9 +22,11 @@ class COptionsSoundcard: public CPropertyPage
 protected:
 	CComboBoxEx m_CbnDevice;
 	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnChannels, m_CbnSampleFormat, m_CbnDither;
-	CComboBox m_CbnBaseChannel;
 	CEdit m_EditStatistics;
 	CButton m_BtnDriverPanel;
+
+	CStatic m_StaticChannelMapping[NUM_CHANNELCOMBOBOXES];
+	CComboBox m_CbnChannelMapping[NUM_CHANNELCOMBOBOXES];
 
 	void SetDevice(SoundDeviceID dev, bool forceReload=false);
 	SoundDeviceInfo m_CurrentDeviceInfo;
@@ -43,6 +47,7 @@ private:
 	void UpdateChannels();
 	void UpdateSampleFormat();
 	void UpdateDither();
+	void UpdateChannelMapping();
 	void UpdateControls();
 
 protected:
@@ -51,11 +56,20 @@ protected:
 	virtual BOOL OnSetActive();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	void UpdateStereoSep();
+
 	afx_msg void OnDeviceChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnChannelsChanged();
 	afx_msg void OnSampleFormatChanged();
 	afx_msg void OnSoundCardRescan();
 	afx_msg void OnSoundCardDriverPanel();
+
+	void OnChannelChanged(int channel);
+	afx_msg void OnChannel1Changed() { OnChannelChanged(0); };
+	afx_msg void OnChannel2Changed() { OnChannelChanged(1); };
+	afx_msg void OnChannel3Changed() { OnChannelChanged(2); };
+	afx_msg void OnChannel4Changed() { OnChannelChanged(3); };
+
 	DECLARE_MESSAGE_MAP()
 };
 
