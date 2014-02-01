@@ -97,6 +97,8 @@ static const char build           [] = "build";
 static const char credits         [] = "credits";
 //! Return contact infromation about libopenmpt from openmpt::string::get().
 static const char contact         [] = "contact";
+//! Return the libopenmpt license from openmpt::string::get().
+static const char license         [] = "license";
 
 //! Get library related metadata.
 /*!
@@ -107,6 +109,7 @@ static const char contact         [] = "contact";
   \sa openmpt::string::build
   \sa openmpt::string::credits
   \sa openmpt::string::contact
+  \sa openmpt::string::license
 */
 LIBOPENMPT_CXX_API std::string get( const std::string & key );
 

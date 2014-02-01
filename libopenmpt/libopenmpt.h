@@ -90,6 +90,8 @@ LIBOPENMPT_API uint32_t openmpt_get_core_version(void);
 #define OPENMPT_STRING_CREDITS          "credits"
 /*! Return contact infromation about libopenmpt from openmpt_string_get(). */
 #define OPENMPT_STRING_CONTACT         "contact"
+/*! Return the libopenmpt license openmpt_string_get(). */
+#define OPENMPT_STRING_LICENSE         "license"
 
 /*! \brief Free a string returned by libopenmpt
  *
@@ -106,6 +108,7 @@ LIBOPENMPT_API void openmpt_free_string( const char * str );
  * \sa OPENMPT_STRING_BUILD
  * \sa OPENMPT_STRING_CREDITS
  * \sa OPENMPT_STRING_CONTACT
+ * \sa OPENMPT_STRING_LICENSE
  */
 LIBOPENMPT_API const char * openmpt_get_string( const char * key );
 
