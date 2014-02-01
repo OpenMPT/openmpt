@@ -390,9 +390,8 @@ void COptionsSoundcard::UpdateSampleFormat()
 void COptionsSoundcard::UpdateDither()
 //------------------------------------
 {
-	UINT n = 0;
 	m_CbnDither.ResetContent();
-	SampleFormat sampleFormat = (SampleFormat)(m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()));
+	SampleFormat sampleFormat = static_cast<SampleFormatEnum>(m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()));
 	if(sampleFormat.IsInt())
 	{
 		m_CbnDither.EnableWindow(TRUE);
