@@ -177,9 +177,9 @@ public:
 			// Copy sample over to lookahead buffer
 			for(int c = 0; c < numChannels; c++)
 			{
-				*dest = sampleData[readPosition * numChannels + c];
-				dest += writeIncrement;
+				dest[c] = sampleData[readPosition * numChannels + c];
 			}
+			dest += writeIncrement * numChannels;
 
 			if(readPosition == loopEnd - 1 && readIncrement > 0)
 			{
