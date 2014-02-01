@@ -519,7 +519,7 @@ void module_impl::set_render_param( int param, std::int32_t value ) {
 		case module::RENDER_VOLUMERAMPING_STRENGTH: {
 			MixerSettings newsettings = m_sndFile->m_MixerSettings;
 			ramping_to_mixersettings( newsettings, value );
-			if ( m_sndFile->m_MixerSettings.glVolumeRampUpSamples != newsettings.glVolumeRampUpSamples || m_sndFile->m_MixerSettings.glVolumeRampDownSamples != newsettings.glVolumeRampDownSamples ) {
+			if ( m_sndFile->m_MixerSettings.VolumeRampUpMicroseconds != newsettings.VolumeRampUpMicroseconds || m_sndFile->m_MixerSettings.VolumeRampDownMicroseconds != newsettings.VolumeRampDownMicroseconds ) {
 				m_sndFile->SetMixerSettings( newsettings );
 			}
 		} break;
