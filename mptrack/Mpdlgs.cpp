@@ -73,13 +73,22 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO3, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5, OnSettingsChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO6, OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO6, OnSampleFormatChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO10, OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO9, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO2, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,	OnSoundCardRescan)
 	ON_COMMAND(IDC_BUTTON2,	OnSoundCardDriverPanel)
 END_MESSAGE_MAP()
+
+
+void COptionsSoundcard::OnSampleFormatChanged()
+//---------------------------------------------
+{
+	OnSettingsChanged();
+	UpdateDither();
+}
 
 
 void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
@@ -91,13 +100,11 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2,		m_CbnLatencyMS);
 	DDX_Control(pDX, IDC_COMBO_UPDATEINTERVAL, m_CbnUpdateIntervalMS);
 	DDX_Control(pDX, IDC_COMBO3,		m_CbnMixingFreq);
-	DDX_Control(pDX, IDC_COMBO4,		m_CbnPolyphony);
 	DDX_Control(pDX, IDC_COMBO5,		m_CbnChannels);
 	DDX_Control(pDX, IDC_COMBO6,		m_CbnSampleFormat);
+	DDX_Control(pDX, IDC_COMBO10,		m_CbnDither);
 	DDX_Control(pDX, IDC_COMBO9,		m_CbnBaseChannel);
 	DDX_Control(pDX, IDC_BUTTON2,		m_BtnDriverPanel);
-	DDX_Control(pDX, IDC_SLIDER1,		m_SliderStereoSep);
-	DDX_Control(pDX, IDC_SLIDER_PREAMP,	m_SliderPreAmp);
 	DDX_Control(pDX, IDC_EDIT_STATISTICS,	m_EditStatistics);
 	//}}AFX_DATA_MAP
 }
@@ -110,7 +117,7 @@ COptionsSoundcard::COptionsSoundcard(SoundDeviceID dev)
 	, m_CurrentDeviceCaps(theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true))
 	, m_Settings(TrackerSettings::Instance().GetSoundDeviceSettings(dev))
 {
-	m_PreAmpNoteShowed = false;
+	return;
 }
 
 
@@ -204,41 +211,12 @@ void COptionsSoundcard::UpdateUpdateInterval()
 void COptionsSoundcard::UpdateEverything()
 //----------------------------------------
 {
-	
-	CHAR s[128];
+	// General
+	{
+		CheckDlgButton(IDC_CHECK6, TrackerSettings::Instance().m_SoundSettingsKeepDeviceOpen ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(IDC_CHECK7, TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup ? BST_CHECKED : BST_UNCHECKED);
+	}
 
-	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().MixerFlags & SNDMIX_SOFTPANNING) ? MF_CHECKED : MF_UNCHECKED);
-
-	// Max Mixing Channels
-	{
-		m_CbnPolyphony.ResetContent();
-		for (UINT n = 0; n < CountOf(nCPUMix); n++)
-		{
-			wsprintf(s, "%d (%s)", nCPUMix[n], szCPUNames[n]);
-			m_CbnPolyphony.AddString(s);
-			if (TrackerSettings::Instance().MixerMaxChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
-		}
-	}
-	// Stereo Separation
-	{
-		m_SliderStereoSep.SetRange(0, 4);
-		m_SliderStereoSep.SetPos(2);
-		for (int n=0; n<=4; n++)
-		{
-			if ((int)TrackerSettings::Instance().MixerStereoSeparation <= (int)(32 << n))
-			{
-				m_SliderStereoSep.SetPos(n);
-				break;
-			}
-		}
-		UpdateStereoSep();
-	}
-	// Pre-Amplification
-	{
-		m_SliderPreAmp.SetTicFreq(5);
-		m_SliderPreAmp.SetRange(0, 40);
-		SetPreAmpSliderPosition();
-	}
 	// Sound Device
 	{
 		m_CbnDevice.ResetContent();
@@ -325,6 +303,7 @@ void COptionsSoundcard::UpdateDevice()
 	UpdateSampleRates();
 	UpdateChannels();
 	UpdateSampleFormat();
+	UpdateDither();
 }
 
 
@@ -369,7 +348,6 @@ void COptionsSoundcard::UpdateChannels()
 		}
 		m_CbnBaseChannel.SetCurSel(sel);
 	}
-	m_BtnDriverPanel.ShowWindow(m_CurrentDeviceCaps.CanDriverPanel ? SW_SHOW : SW_HIDE);
 }
 
 
@@ -385,7 +363,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || (SampleFormatFloat32 == m_Settings.sampleFormat))
 			{
-				UINT ndx = m_CbnSampleFormat.AddString("Floating Point");
+				UINT ndx = m_CbnSampleFormat.AddString("Float");
 				m_CbnSampleFormat.SetItemData(ndx, (32+128));
 				if(SampleFormatFloat32 == m_Settings.sampleFormat)
 				{
@@ -409,60 +387,37 @@ void COptionsSoundcard::UpdateSampleFormat()
 }
 
 
-void COptionsSoundcard::OnHScroll(UINT n, UINT pos, CScrollBar *p)
-//----------------------------------------------------------------
+void COptionsSoundcard::UpdateDither()
+//------------------------------------
 {
-	CPropertyPage::OnHScroll(n, pos, p);
-	// stereo sep
+	UINT n = 0;
+	m_CbnDither.ResetContent();
+	SampleFormat sampleFormat = (SampleFormat)(m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()));
+	if(sampleFormat.IsInt())
 	{
-		UpdateStereoSep();
-	}
-	// PreAmp
-	if(p == (CScrollBar *)(&m_SliderPreAmp))
+		m_CbnDither.EnableWindow(TRUE);
+		m_CbnDither.AddString("no dithering");
+		m_CbnDither.AddString("default dithering");
+		m_CbnDither.AddString("0.5bit dithering");
+		m_CbnDither.AddString("1bit dithering");
+	} else if(m_CurrentDeviceCaps.HasInternalDither)
 	{
-		if(m_PreAmpNoteShowed == true)
-		{
-			int n = m_SliderPreAmp.GetPos();
-			if ((n >= 0) && (n <= 40)) // approximately +/- 10dB
-			{
-				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm) pMainFrm->SetPreAmp(64 + (n * 8));
-			}
-		} else
-		{
-			m_PreAmpNoteShowed = true;
-			Reporting::Information(str_preampChangeNote);
-			SetPreAmpSliderPosition();
-		}
+		m_CbnDither.EnableWindow(TRUE);
+		m_CbnDither.AddString("no dithering");
+		m_CbnDither.AddString("default dithering");
+	} else
+	{
+		m_CbnDither.EnableWindow(FALSE);
+		m_CbnDither.AddString("no dithering");
+		m_CbnDither.AddString("no dithering");
 	}
-}
-
-
-void COptionsSoundcard::UpdateStereoSep()
-//---------------------------------------
-{
-	CHAR s[64];
-	TrackerSettings::Instance().MixerStereoSeparation = 32 << m_SliderStereoSep.GetPos();
-	CMainFrame::GetMainFrame()->SetupPlayer();
-	wsprintf(s, "%d%%", (TrackerSettings::Instance().MixerStereoSeparation * 100) / 128);
-	SetDlgItemText(IDC_TEXT1, s);
-
-}
-
-
-void COptionsSoundcard::SetPreAmpSliderPosition()
-//-----------------------------------------------
-{
-	int n = (TrackerSettings::Instance().MixerPreAmp - 64) / 8;
-	if ((n < 0) || (n > 40)) n = 16;
-	m_SliderPreAmp.SetPos(n);
-}
-
-
-void COptionsSoundcard::OnVScroll(UINT n, UINT pos, CScrollBar *p)
-//----------------------------------------------------------------
-{
-	CPropertyPage::OnVScroll(n, pos, p);
+	if(m_Settings.DitherType < 0 || m_Settings.DitherType > m_CbnDither.GetCount())
+	{
+		m_CbnDither.SetCurSel(1);
+	} else
+	{
+		m_CbnDither.SetCurSel(m_Settings.DitherType);
+	}
 }
 
 
@@ -519,13 +474,22 @@ void COptionsSoundcard::UpdateSampleRates()
 void COptionsSoundcard::UpdateControls()
 //--------------------------------------
 {
+	if(!m_CurrentDeviceCaps.CanKeepDeviceRunning)
+	{
+		m_Settings.KeepDeviceRunning = false;
+	}
+	m_BtnDriverPanel.EnableWindow(m_CurrentDeviceCaps.CanDriverPanel ? TRUE : FALSE);
 	GetDlgItem(IDC_CHECK4)->EnableWindow(m_CurrentDeviceCaps.CanExclusiveMode ? TRUE : FALSE);
 	GetDlgItem(IDC_CHECK5)->EnableWindow(m_CurrentDeviceCaps.CanBoostThreadPriority ? TRUE : FALSE);
+	GetDlgItem(IDC_CHECK8)->EnableWindow(m_CurrentDeviceCaps.CanKeepDeviceRunning ? TRUE : FALSE);
+	GetDlgItem(IDC_CHECK9)->EnableWindow(m_CurrentDeviceCaps.CanUseHardwareTiming ? TRUE : FALSE);
 	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
 	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
 	GetDlgItem(IDC_CHECK4)->SetWindowText(mpt::ToCString(m_CurrentDeviceCaps.ExclusiveModeDescription));
 	CheckDlgButton(IDC_CHECK4, m_Settings.ExclusiveMode ? MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK5, m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK8, m_Settings.KeepDeviceRunning ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK9, m_Settings.UseHardwareTiming ? MF_CHECKED : MF_UNCHECKED);
 }
 
 
@@ -540,12 +504,15 @@ BOOL COptionsSoundcard::OnSetActive()
 void COptionsSoundcard::OnOK()
 //----------------------------
 {
-	if(IsDlgButtonChecked(IDC_CHECK2))
-		TrackerSettings::Instance().MixerFlags = TrackerSettings::Instance().MixerFlags | SNDMIX_SOFTPANNING;
-	else
-		TrackerSettings::Instance().MixerFlags = TrackerSettings::Instance().MixerFlags & ~SNDMIX_SOFTPANNING;
+	// General
+	{
+		TrackerSettings::Instance().m_SoundSettingsKeepDeviceOpen = IsDlgButtonChecked(IDC_CHECK6) ? true : false;
+		TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup = IsDlgButtonChecked(IDC_CHECK7) ? true : false;
+	}
 	m_Settings.ExclusiveMode = IsDlgButtonChecked(IDC_CHECK4) ? true : false;
 	m_Settings.BoostThreadPriority = IsDlgButtonChecked(IDC_CHECK5) ? true : false;
+	m_Settings.KeepDeviceRunning = IsDlgButtonChecked(IDC_CHECK8) ? true : false;
+	m_Settings.UseHardwareTiming = IsDlgButtonChecked(IDC_CHECK9) ? true : false;
 	// Mixing Freq
 	{
 		m_Settings.Samplerate = m_CbnMixingFreq.GetItemData(m_CbnMixingFreq.GetCurSel());
@@ -564,14 +531,10 @@ void COptionsSoundcard::OnOK()
 		UINT n = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 		m_Settings.sampleFormat = (SampleFormat)(n & 0xFF);
 	}
-	// Polyphony
+	// Dither
 	{
-		int nmmx = m_CbnPolyphony.GetCurSel();
-		if ((nmmx >= 0) && (nmmx < CountOf(nCPUMix)))
-		{
-			TrackerSettings::Instance().MixerMaxChannels = nCPUMix[nmmx];
-			CMainFrame::GetMainFrame()->SetupPlayer();
-		}
+		UINT n = m_CbnDither.GetCurSel();
+		m_Settings.DitherType = (DitherMode)(n);
 	}
 	const SoundDeviceID dev = m_CurrentDeviceInfo.id;
 	// Latency
@@ -638,19 +601,338 @@ void COptionsSoundcard::UpdateStatistics()
 }
 
 
+//////////////////
+// COptionsMixer
+
+BEGIN_MESSAGE_MAP(COptionsMixer, CPropertyPage)
+	ON_WM_HSCROLL()
+	ON_WM_VSCROLL()
+	ON_CBN_SELCHANGE(IDC_COMBO_FILTER, OnResamplerChanged)
+	ON_EN_UPDATE(IDC_WFIRCUTOFF, OnSettingsChanged)
+	ON_EN_UPDATE(IDC_COMBO_FILTERWINDOW, OnSettingsChanged)
+	ON_EN_UPDATE(IDC_RAMPING_IN, OnResamplerChanged)
+	ON_EN_UPDATE(IDC_RAMPING_OUT,	OnResamplerChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_POLYPHONY, OnSettingsChanged)
+	// slider stereo sep
+	ON_COMMAND(IDC_CHECK_SOFTPAN, OnSettingsChanged)
+	// slider preamp
+END_MESSAGE_MAP()
+
+
+void COptionsMixer::DoDataExchange(CDataExchange* pDX)
+//----------------------------------------------------
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(COptionsSoundcard)
+	DDX_Control(pDX, IDC_COMBO_FILTER, m_CbnResampling);
+	DDX_Control(pDX, IDC_WFIRCUTOFF, m_CEditWFIRCutoff);
+	DDX_Control(pDX, IDC_COMBO_FILTERWINDOW, m_CbnWFIRType);
+	DDX_Control(pDX, IDC_RAMPING_IN, m_CEditRampUp);
+	DDX_Control(pDX, IDC_RAMPING_OUT, m_CEditRampDown);
+	DDX_Control(pDX, IDC_EDIT_VOLRAMP_SAMPLES_UP, m_CInfoRampUp);
+	DDX_Control(pDX, IDC_EDIT_VOLRAMP_SAMPLES_DOWN, m_CInfoRampDown);
+	DDX_Control(pDX, IDC_COMBO_POLYPHONY, m_CbnPolyphony);
+	DDX_Control(pDX, IDC_SLIDER_STEREOSEP, m_SliderStereoSep);
+	// check box soft pan
+	DDX_Control(pDX, IDC_SLIDER_PREAMP, m_SliderPreAmp);
+	//}}AFX_DATA_MAP
+}
+
+
+BOOL COptionsMixer::OnInitDialog()
+//--------------------------------
+{
+	CPropertyPage::OnInitDialog();
+
+	// Resampling type
+	{
+		m_CbnResampling.AddString("No Interpolation (1 tap)");
+		m_CbnResampling.AddString("Linear (2 tap)");
+		m_CbnResampling.AddString("Cubic spline (4 tap)");
+		m_CbnResampling.AddString("Polyphase (8 tap)");
+		m_CbnResampling.AddString("XMMS-ModPlug (8 tap)");
+		m_CbnResampling.SetCurSel(TrackerSettings::Instance().ResamplerMode);
+	}
+
+	// Resampler bandwidth
+	{
+		m_CEditWFIRCutoff.SetWindowText(mpt::ToString(TrackerSettings::Instance().ResamplerCutoffPercent).c_str());
+	}
+
+	// Resampler filter window
+	{
+		// done in OnResamplerChanged()
+	}
+
+	// volume ramping
+	{
+#if 0
+		m_CEditRampUp.SetWindowText(mpt::ToString(TrackerSettings::Instance().MixerVolumeRampUpSamples).c_str());
+		m_CEditRampDown.SetWindowText(mpt::ToString(TrackerSettings::Instance().MixerVolumeRampDownSamples).c_str());
+#else
+		m_CEditRampUp.SetWindowText(mpt::ToString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampUpMicroseconds()).c_str());
+		m_CEditRampDown.SetWindowText(mpt::ToString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampDownMicroseconds()).c_str());
+#endif
+		UpdateRamping();
+	}
+
+	// Max Mixing Channels
+	{
+		m_CbnPolyphony.ResetContent();
+		for (UINT n = 0; n < CountOf(nCPUMix); n++)
+		{
+			CHAR s[64];
+			wsprintf(s, "%d (%s)", nCPUMix[n], szCPUNames[n]);
+			m_CbnPolyphony.AddString(s);
+			if (TrackerSettings::Instance().MixerMaxChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
+		}
+	}
+
+	// Stereo Separation
+	{
+		m_SliderStereoSep.SetRange(0, 4);
+		m_SliderStereoSep.SetPos(2);
+		for (int n=0; n<=4; n++)
+		{
+			if ((int)TrackerSettings::Instance().MixerStereoSeparation <= (int)(32 << n))
+			{
+				m_SliderStereoSep.SetPos(n);
+				break;
+			}
+		}
+		UpdateStereoSep();
+	}
+
+	// soft pan
+	{
+		CheckDlgButton(IDC_CHECK_SOFTPAN, (TrackerSettings::Instance().MixerFlags & SNDMIX_SOFTPANNING) ? BST_CHECKED : BST_UNCHECKED);
+	}
+
+	// Pre-Amplification
+	{
+		m_SliderPreAmp.SetTicFreq(5);
+		m_SliderPreAmp.SetRange(0, 40);
+		int n = (TrackerSettings::Instance().MixerPreAmp - 64) / 8;
+		if ((n < 0) || (n > 40)) n = 16;
+		m_SliderPreAmp.SetPos(n);
+	}
+
+	OnResamplerChanged();
+
+	return TRUE;
+}
+
+
+BOOL COptionsMixer::OnSetActive()
+//-------------------------------
+{
+	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIXER;
+	return CPropertyPage::OnSetActive();
+}
+
+
+void COptionsMixer::OnResamplerChanged()
+//--------------------------------------
+{
+	int dwSrcMode = m_CbnResampling.GetCurSel();
+	switch(dwSrcMode)
+	{
+		case SRCMODE_FIRFILTER:
+			m_CbnWFIRType.ResetContent();
+			m_CbnWFIRType.AddString("Hann");
+			m_CbnWFIRType.AddString("Hamming");
+			m_CbnWFIRType.AddString("Blackman Exact");
+			m_CbnWFIRType.AddString("Blackman 3 Tap 61");
+			m_CbnWFIRType.AddString("Blackman 3 Tap 67");
+			m_CbnWFIRType.AddString("Blackman Harris");
+			m_CbnWFIRType.AddString("Blackman 4 Tap 74");
+			m_CbnWFIRType.AddString("Kaiser a=7.5");
+			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
+			break;
+		case SRCMODE_POLYPHASE:
+			m_CbnWFIRType.ResetContent();
+			m_CbnWFIRType.AddString("Auto");
+			m_CbnWFIRType.AddString("Auto");
+			m_CbnWFIRType.AddString("Auto");
+			m_CbnWFIRType.AddString("Auto");
+			m_CbnWFIRType.AddString("Auto");
+			m_CbnWFIRType.AddString("Auto");
+			m_CbnWFIRType.AddString("Auto");
+			m_CbnWFIRType.AddString("Auto");
+			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
+			break;
+		default:
+			m_CbnWFIRType.ResetContent();
+			m_CbnWFIRType.AddString("none");
+			m_CbnWFIRType.AddString("none");
+			m_CbnWFIRType.AddString("none");
+			m_CbnWFIRType.AddString("none");
+			m_CbnWFIRType.AddString("none");
+			m_CbnWFIRType.AddString("none");
+			m_CbnWFIRType.AddString("none");
+			m_CbnWFIRType.AddString("none");
+			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
+			break;
+	}
+	switch(dwSrcMode)
+	{
+		case SRCMODE_POLYPHASE:
+			m_CEditWFIRCutoff.EnableWindow(TRUE);
+			m_CbnWFIRType.EnableWindow(FALSE);
+			break;
+		case SRCMODE_FIRFILTER:
+			m_CEditWFIRCutoff.EnableWindow(TRUE);
+			m_CbnWFIRType.EnableWindow(TRUE);
+			break;
+		default:
+			m_CEditWFIRCutoff.EnableWindow(FALSE);
+			m_CbnWFIRType.EnableWindow(FALSE);
+			break;
+	}
+	OnSettingsChanged();
+}
+
+
+void COptionsMixer::OnRampingChanged()
+//------------------------------------
+{
+	UpdateRamping();
+	OnSettingsChanged();
+}
+
+
+void COptionsMixer::OnScroll(UINT n, UINT pos, CScrollBar *p)
+//-----------------------------------------------------------
+{
+	MPT_UNREFERENCED_PARAMETER(n);
+	MPT_UNREFERENCED_PARAMETER(pos);
+	MPT_UNREFERENCED_PARAMETER(p);
+	// stereo sep
+	{
+		UpdateStereoSep();
+	}
+}
+
+
+void COptionsMixer::UpdateRamping()
+//---------------------------------
+{
+	MixerSettings settings = TrackerSettings::Instance().GetMixerSettings();
+	CString s;
+	m_CEditRampUp.GetWindowText(s);
+	settings.SetVolumeRampUpMicroseconds(atol(s));
+	m_CEditRampDown.GetWindowText(s);
+	settings.SetVolumeRampDownMicroseconds(atol(s));
+	s.Format("%i samples at %i Hz", (int)settings.GetVolumeRampUpSamples(), (int)settings.gdwMixingFreq);
+	m_CInfoRampUp.SetWindowText(s);
+	s.Format("%i samples at %i Hz", (int)settings.GetVolumeRampDownSamples(), (int)settings.gdwMixingFreq);
+	m_CInfoRampDown.SetWindowText(s);
+}
+
+
+void COptionsMixer::UpdateStereoSep()
+//-----------------------------------
+{
+	CString s;
+	s.Format("%d%%", ((32 << m_SliderStereoSep.GetPos()) * 100) / 128);
+	SetDlgItemText(IDC_TEXT_STEREOSEP, s);
+}
+
+
+void COptionsMixer::OnOK()
+//------------------------
+{
+	// resampler mode
+	{
+		TrackerSettings::Instance().ResamplerMode = (ResamplingMode)m_CbnResampling.GetCurSel();
+	}
+
+	// resampler bandwidth
+	{
+		CString s;
+		m_CEditWFIRCutoff.GetWindowText(s);
+		if(s != "")
+		{
+			int newCutoff = atoi(s);
+			Limit(newCutoff, 0, 100);
+			TrackerSettings::Instance().ResamplerCutoffPercent = newCutoff;
+		}
+		{
+			s.Format("%d", TrackerSettings::Instance().ResamplerCutoffPercent.Get());
+			m_CEditWFIRCutoff.SetWindowText(s);
+		}
+	}
+
+	// resampler filter window
+	{
+		TrackerSettings::Instance().ResamplerSubMode = (uint8)m_CbnWFIRType.GetCurSel();
+	}
+
+	// volume ramping
+	{
+#if 0
+		CString s;
+		m_CEditRampUp.GetWindowText(s);
+		TrackerSettings::Instance().MixerVolumeRampUpSamples = atol(s);
+		m_CEditRampDown.GetWindowText(s);
+		TrackerSettings::Instance().MixerVolumeRampDownSamples = atol(s);
+#else
+		MixerSettings settings = TrackerSettings::Instance().GetMixerSettings();
+		CString s;
+		m_CEditRampUp.GetWindowText(s);
+		settings.SetVolumeRampUpMicroseconds(atol(s));
+		m_CEditRampDown.GetWindowText(s);
+		settings.SetVolumeRampDownMicroseconds(atol(s));
+		TrackerSettings::Instance().SetMixerSettings(settings);
+#endif
+	}
+
+	// Polyphony
+	{
+		int nmmx = m_CbnPolyphony.GetCurSel();
+		if((nmmx >= 0) && (nmmx < CountOf(nCPUMix)))
+		{
+			TrackerSettings::Instance().MixerMaxChannels = nCPUMix[nmmx];
+		}
+	}
+
+	// stereo sep
+	{
+		TrackerSettings::Instance().MixerStereoSeparation = 32 << m_SliderStereoSep.GetPos();
+	}
+
+	// soft pan
+	{
+		if(IsDlgButtonChecked(IDC_CHECK2))
+		{
+			TrackerSettings::Instance().MixerFlags = TrackerSettings::Instance().MixerFlags | SNDMIX_SOFTPANNING;
+		} else
+		{
+			TrackerSettings::Instance().MixerFlags = TrackerSettings::Instance().MixerFlags & ~SNDMIX_SOFTPANNING;
+		}
+	}
+
+	// pre amp
+	{
+		int n = m_SliderPreAmp.GetPos();
+		if ((n >= 0) && (n <= 40)) // approximately +/- 10dB
+		{
+			TrackerSettings::Instance().MixerPreAmp = 64 + (n * 8);
+		}
+	}
+
+	CMainFrame::GetMainFrame()->SetupPlayer();
+
+	CPropertyPage::OnOK();
+}
+
+
 //////////////////////////////////////////////////////////
 // COptionsPlayer
 
 BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 	ON_WM_HSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnResamplerChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnSettingsChanged)
-	//rewbs.resamplerConf
-	ON_CBN_SELCHANGE(IDC_WFIRTYPE,	OnWFIRTypeChanged)
-	ON_EN_UPDATE(IDC_WFIRCUTOFF,	OnSettingsChanged)
-	ON_EN_UPDATE(IDC_RAMPING_IN,	OnSettingsChanged)
-	ON_EN_UPDATE(IDC_RAMPING_OUT,	OnSettingsChanged)
-	//end rewbs.resamplerConf
 	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK2,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK3,			OnSettingsChanged)
@@ -658,7 +940,6 @@ BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 	ON_COMMAND(IDC_CHECK5,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK6,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK7,			OnSettingsChanged)
-	ON_COMMAND(IDC_BUTTON_DEFAULT_RESAMPLING,	OnDefaultResampling)
 END_MESSAGE_MAP()
 
 
@@ -667,13 +948,6 @@ void COptionsPlayer::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsPlayer)
-	DDX_Control(pDX, IDC_COMBO1,		m_CbnResampling);
-	//rewbs.resamplerConf
-	DDX_Control(pDX, IDC_WFIRTYPE,		m_CbnWFIRType);
-	DDX_Control(pDX, IDC_WFIRCUTOFF,	m_CEditWFIRCutoff);
-	DDX_Control(pDX, IDC_RAMPING_IN,	m_CEditRampUp);
-	DDX_Control(pDX, IDC_RAMPING_OUT,	m_CEditRampDown);
-	//end rewbs.resamplerConf
 	DDX_Control(pDX, IDC_COMBO2,		m_CbnReverbPreset);
 	DDX_Control(pDX, IDC_SLIDER1,		m_SbXBassDepth);
 	DDX_Control(pDX, IDC_SLIDER2,		m_SbXBassRange);
@@ -691,17 +965,6 @@ BOOL COptionsPlayer::OnInitDialog()
 
 	CPropertyPage::OnInitDialog();
 	dwQuality = TrackerSettings::Instance().MixerDSPMask;
-	// Resampling type
-	{
-		m_CbnResampling.AddString("No Interpolation");
-		m_CbnResampling.AddString("Linear");
-		m_CbnResampling.AddString("Cubic spline");
-		//rewbs.resamplerConf
-		m_CbnResampling.AddString("Polyphase");
-		m_CbnResampling.AddString("XMMS-ModPlug");
-		//end rewbs.resamplerConf
-		m_CbnResampling.SetCurSel(TrackerSettings::Instance().ResamplerMode);
-	}
 	// Effects
 #ifndef NO_DSP
 	if (dwQuality & SNDDSP_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
@@ -784,17 +1047,6 @@ BOOL COptionsPlayer::OnInitDialog()
 	m_SbSurroundDepth.ShowWindow(SW_HIDE);
 	m_SbSurroundDelay.ShowWindow(SW_HIDE);
 #endif
-	//rewbs.resamplerConf
-	OnResamplerChanged();
-
-	char s[16] = "";
-	_ltoa(TrackerSettings::Instance().MixerVolumeRampUpSamples, s, 10);
-	m_CEditRampUp.SetWindowText(s);
-
-	_ltoa(TrackerSettings::Instance().MixerVolumeRampDownSamples, s, 10);
-	m_CEditRampDown.SetWindowText(s);
-
-	//end rewbs.resamplerConf
 	return TRUE;
 }
 
@@ -825,91 +1077,36 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 	}
 }
 
-//rewbs.resamplerConf
-void COptionsPlayer::OnWFIRTypeChanged()
-{
-	TrackerSettings::Instance().ResamplerSubMode = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
-	OnSettingsChanged();
-}
-
-void COptionsPlayer::OnResamplerChanged()
-{
-	DWORD dwSrcMode = m_CbnResampling.GetCurSel();
-	m_CbnWFIRType.ResetContent();
-
-	char s[10] = "";
-	switch (dwSrcMode)
-	{
-	case SRCMODE_POLYPHASE:
-		m_CbnWFIRType.AddString("Kaiser 8 Tap");
-		m_CbnWFIRType.SetCurSel(0);
-		m_CbnWFIRType.EnableWindow(FALSE);
-		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().ResamplerCutoffPercent)));
-		break;
-	case SRCMODE_FIRFILTER:
-		m_CbnWFIRType.AddString("Hann");
-		m_CbnWFIRType.AddString("Hamming");
-		m_CbnWFIRType.AddString("Blackman Exact");
-		m_CbnWFIRType.AddString("Blackman 3 Tap 61");
-		m_CbnWFIRType.AddString("Blackman 3 Tap 67");
-		m_CbnWFIRType.AddString("Blackman 4 Tap 92");
-		m_CbnWFIRType.AddString("Blackman 4 Tap 74");
-		m_CbnWFIRType.AddString("Kaiser 4 Tap");
-		m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
-		m_CbnWFIRType.EnableWindow(TRUE);
-		m_CEditWFIRCutoff.EnableWindow(TRUE);
-		wsprintf(s, "%d", static_cast<int>((TrackerSettings::Instance().ResamplerCutoffPercent)));
-		break;
-	default:
-		m_CbnWFIRType.AddString("None");
-		m_CEditWFIRCutoff.EnableWindow(FALSE);
-		m_CbnWFIRType.EnableWindow(FALSE);
-	}
-
-	m_CEditWFIRCutoff.SetWindowText(s);
-	OnSettingsChanged();
-}
-
-
-void COptionsPlayer::OnDefaultResampling()
-//----------------------------------------
-{
-	CResamplerSettings resamplerDefaults;
-	m_CbnResampling.SetCurSel(resamplerDefaults.SrcMode);
-	OnResamplerChanged();
-	m_CbnWFIRType.SetCurSel(resamplerDefaults.gbWFIRType);
-	m_CEditWFIRCutoff.SetWindowText(Stringify(static_cast<int>(resamplerDefaults.gdWFIRCutoff * 100)).c_str());
-	MixerSettings mixerDefaults;
-	m_CEditRampUp.SetWindowText(Stringify(mixerDefaults.glVolumeRampUpSamples).c_str());
-	m_CEditRampDown.SetWindowText(Stringify(mixerDefaults.glVolumeRampDownSamples).c_str());
-	OnSettingsChanged();
-}
-
 
 void COptionsPlayer::OnOK()
 //-------------------------
 {
 	DWORD dwQuality = 0;
-	DWORD dwSrcMode = 0;
+
+	DWORD dwQualityMask = 0;
 
 #ifndef NO_DSP
+	dwQualityMask |= SNDDSP_MEGABASS;
 	if (IsDlgButtonChecked(IDC_CHECK1)) dwQuality |= SNDDSP_MEGABASS;
 #endif
 #ifndef NO_AGC
+	dwQualityMask |= SNDDSP_AGC;
 	if (IsDlgButtonChecked(IDC_CHECK2)) dwQuality |= SNDDSP_AGC;
 #endif
 #ifndef NO_EQ
+	dwQualityMask |= SNDDSP_EQ;
 	if (IsDlgButtonChecked(IDC_CHECK3)) dwQuality |= SNDDSP_EQ;
 #endif
 #ifndef NO_DSP
+	dwQualityMask |= SNDDSP_SURROUND;
+	dwQualityMask |= SNDDSP_NOISEREDUCTION;
 	if (IsDlgButtonChecked(IDC_CHECK4)) dwQuality |= SNDDSP_SURROUND;
 	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= SNDDSP_NOISEREDUCTION;
 #endif
 #ifndef NO_REVERB
+	dwQualityMask |= SNDDSP_REVERB;
 	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= SNDDSP_REVERB;
 #endif
-	dwSrcMode = m_CbnResampling.GetCurSel();
 
 #ifndef NO_DSP
 	// Bass Expansion
@@ -922,7 +1119,6 @@ void COptionsPlayer::OnOK()
 		if (nXBassRange > 21) nXBassRange = 21;
 		TrackerSettings::Instance().m_DSPSettings.m_nXBassDepth = nXBassDepth;
 		TrackerSettings::Instance().m_DSPSettings.m_nXBassRange = nXBassRange;
-		CMainFrame::GetMainFrame()->SetupPlayer();
 	}
 #endif
 #ifndef NO_REVERB
@@ -931,7 +1127,6 @@ void COptionsPlayer::OnOK()
 		// Reverb depth is dynamically changed
 		UINT nReverbType = m_CbnReverbPreset.GetItemData(m_CbnReverbPreset.GetCurSel());
 		if (nReverbType < NUM_REVERBTYPES) TrackerSettings::Instance().m_ReverbSettings.m_nReverbType = nReverbType;
-		CMainFrame::GetMainFrame()->SetupPlayer();
 	}
 #endif
 #ifndef NO_DSP
@@ -941,31 +1136,11 @@ void COptionsPlayer::OnOK()
 		UINT nProLogicDelay = 5 + (m_SbSurroundDelay.GetPos() * 5);
 		TrackerSettings::Instance().m_DSPSettings.m_nProLogicDepth = nProLogicDepth;
 		TrackerSettings::Instance().m_DSPSettings.m_nProLogicDelay = nProLogicDelay;
-		CMainFrame::GetMainFrame()->SetupPlayer();
 	}
 #endif
-	//rewbs.resamplerConf
-	CString s;
-	m_CEditWFIRCutoff.GetWindowText(s);
-	if(s != "")
-	{
-		int newCutoff = atoi(s);
-		Limit(newCutoff, 0, 100);
-		TrackerSettings::Instance().ResamplerCutoffPercent = newCutoff;
-	}
-	{
-		CHAR s[64];
-		wsprintf(s, "%d", TrackerSettings::Instance().ResamplerCutoffPercent.Get());
-		m_CEditWFIRCutoff.SetWindowText(s);
-	}
-	//TrackerSettings::Instance().m_ResamplerSettings.gbWFIRType set in OnWFIRTypeChange
 
-	m_CEditRampUp.GetWindowText(s);
-	TrackerSettings::Instance().MixerVolumeRampUpSamples = atol(s);
-	m_CEditRampDown.GetWindowText(s);
-	TrackerSettings::Instance().MixerVolumeRampDownSamples = atol(s);
-	TrackerSettings::Instance().ResamplerMode = (ResamplingMode)dwSrcMode;
 	TrackerSettings::Instance().MixerDSPMask = dwQuality;
+
 	CMainFrame::GetMainFrame()->SetupPlayer();
 	CPropertyPage::OnOK();
 }

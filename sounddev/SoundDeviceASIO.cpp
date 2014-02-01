@@ -500,7 +500,7 @@ bool CASIODevice::InternalStart()
 {
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while starting ASIO");
 
-	if(m_Settings.ExclusiveMode)
+	if(m_Settings.KeepDeviceRunning)
 	{
 		if(m_DeviceRunning)
 		{
@@ -529,7 +529,7 @@ void CASIODevice::InternalStop()
 {
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while stopping ASIO");
 
-	if(m_Settings.ExclusiveMode)
+	if(m_Settings.KeepDeviceRunning)
 	{
 		SetRenderSilence(true, true);
 		return;
@@ -1192,12 +1192,12 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSample
 
 	caps.CanUpdateInterval = false;
 	caps.CanSampleFormat = false;
-	caps.CanExclusiveMode = true;
+	caps.CanExclusiveMode = false;
 	caps.CanBoostThreadPriority = false;
+	caps.CanKeepDeviceRunning = true;
 	caps.CanUseHardwareTiming = true;
 	caps.CanChannelMapping = true;
 	caps.CanDriverPanel = true;
-	caps.ExclusiveModeDescription = L"Keep device running";
 
 	TemporaryASIODriverOpener opener(*this);
 	if(!IsDriverOpen())

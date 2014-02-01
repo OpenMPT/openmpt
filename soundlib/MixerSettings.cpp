@@ -28,31 +28,25 @@ MixerSettings::MixerSettings()
 
 	m_nPreAmp = 128;
 
-	glVolumeRampUpSamples = 16;
-	glVolumeRampDownSamples = 42;
+	VolumeRampUpMicroseconds = 363; // 16 @44100
+	VolumeRampDownMicroseconds = 952; // 42 @44100
 
 }
 
-
-int32 MixerSettings::GetVolumeRampUpMicroseconds() const
+int32 MixerSettings::GetVolumeRampUpSamples() const
 {
-	return Util::muldivr(glVolumeRampUpSamples, 1000000, gdwMixingFreq);
+	return Util::muldivr(VolumeRampUpMicroseconds, gdwMixingFreq, 1000000);
+}
+int32 MixerSettings::GetVolumeRampDownSamples() const
+{
+	return Util::muldivr(VolumeRampDownMicroseconds, gdwMixingFreq, 1000000);
 }
 
-
-int32 MixerSettings::GetVolumeRampDownMicroseconds() const
+void MixerSettings::SetVolumeRampUpSamples(int32 rampUpSamples)
 {
-	return Util::muldivr(glVolumeRampDownSamples, 1000000, gdwMixingFreq);
+	VolumeRampUpMicroseconds = Util::muldivr(rampUpSamples, 1000000, gdwMixingFreq);
 }
-
-
-void MixerSettings::SetVolumeRampUpMicroseconds(int32 rampUpMicroseconds)
+void MixerSettings::SetVolumeRampDownSamples(int32 rampDownSamples)
 {
-	glVolumeRampUpSamples = Util::muldivr(rampUpMicroseconds, gdwMixingFreq, 1000000);
-}
-
-
-void MixerSettings::SetVolumeRampDownMicroseconds(int32 rampDownMicroseconds)
-{
-	glVolumeRampDownSamples = Util::muldivr(rampDownMicroseconds, gdwMixingFreq, 1000000);
+	VolumeRampDownMicroseconds = Util::muldivr(rampDownSamples, 1000000, gdwMixingFreq);
 }

@@ -1509,7 +1509,7 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 	{
 		const bool rampUp = (pChn->newLeftVol > pChn->leftVol) || (pChn->newRightVol > pChn->rightVol);
 		int32 rampLength, globalRampLength, instrRampLength = 0;
-		rampLength = globalRampLength = (rampUp ? m_MixerSettings.glVolumeRampUpSamples : m_MixerSettings.glVolumeRampDownSamples);
+		rampLength = globalRampLength = (rampUp ? m_MixerSettings.GetVolumeRampUpSamples() : m_MixerSettings.GetVolumeRampDownSamples());
 		//XXXih: add real support for bidi ramping here
 
 		if(GetModFlag(MSF_VOLRAMP) && (GetType() & MOD_TYPE_XM))
@@ -2184,7 +2184,7 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 		const bool rampUp = m_nGlobalVolume > m_nGlobalVolumeDestination;
 
 		m_nGlobalVolumeDestination = m_nGlobalVolume;
-		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? m_MixerSettings.glVolumeRampUpSamples : m_MixerSettings.glVolumeRampDownSamples;
+		m_nSamplesToGlobalVolRampDest = m_nGlobalVolumeRampAmount = rampUp ? m_MixerSettings.GetVolumeRampUpSamples() : m_MixerSettings.GetVolumeRampDownSamples();
 	} 
 
 	// calculate ramping step

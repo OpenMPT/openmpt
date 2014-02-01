@@ -600,8 +600,16 @@ void CWaveConvert::OnCheck1()
 void CWaveConvert::OnPlayerOptions()
 //----------------------------------
 {
-	CMainFrame::m_nLastOptionsPage = 2;
-	CMainFrame::GetMainFrame()->OnViewOptions();
+	CPropertySheet dlg("Mixer Settings", this);
+	COptionsMixer mixerpage;
+	dlg.AddPage(&mixerpage);
+	COptionsPlayer dsppage;
+	dlg.AddPage(&dsppage);
+#ifndef NO_EQ
+	CEQSetupDlg eqpage(&TrackerSettings::Instance().m_EqSettings);
+	dlg.AddPage(&eqpage);
+#endif
+	dlg.DoModal();
 }
 
 

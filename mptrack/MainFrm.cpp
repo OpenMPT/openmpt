@@ -1158,14 +1158,6 @@ UINT CMainFrame::GetBaseOctave() const
 }
 
 
-void CMainFrame::SetPreAmp(UINT n)
-//--------------------------------
-{
-	TrackerSettings::Instance().MixerPreAmp = n;
-	if (m_pSndFile) m_pSndFile->SetPreAmp(TrackerSettings::Instance().MixerPreAmp);
-}
-
-
 void CMainFrame::ResetNotificationBuffer()
 //----------------------------------------
 {
@@ -1786,6 +1778,7 @@ void CMainFrame::OnViewOptions()
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;
+	COptionsMixer mixerdlg;
 	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().m_nMidiDevice);
 #ifndef NO_EQ
 	CEQSetupDlg eqdlg(&TrackerSettings::Instance().m_EqSettings);
@@ -1797,7 +1790,10 @@ void CMainFrame::OnViewOptions()
 #endif // MPT_SETTINGS_CACHE
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
+	dlg.AddPage(&mixerdlg);
+#if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC)
 	dlg.AddPage(&playerdlg);
+#endif
 #ifndef NO_EQ
 	dlg.AddPage(&eqdlg);
 #endif

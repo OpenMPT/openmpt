@@ -8,6 +8,7 @@
 #define IDD_DIRECTORIES                 104
 #define IDD_WAVECONVERT                 105
 #define IDD_PROGRESS                    106
+#define IDD_OPTIONS_MIXER               107
 #define IDD_OPTIONS_KEYBOARD            108
 #define IDD_OPTIONS_COLORS              109
 #define IDD_OPTIONS_MIDI                111
@@ -200,6 +201,7 @@
 #define IDC_COMBO5                      1205
 #define IDC_COMBO6                      1206
 #define IDC_COMBO9                      1207
+#define IDC_COMBO10                     1208
 #define IDC_NOTEMAP                     1213
 #define IDC_TEXT1                       1301
 #define IDC_TEXT2                       1302
@@ -935,6 +937,15 @@
 #define IDC_STATIC_UPDATEINTERVAL       2458
 #define IDC_COMBO_UPDATEINTERVAL        2459
 #define IDC_STATIC_BASECHANNEL          2461
+#define IDC_COMBO_FILTER                2462
+#define IDC_COMBO_POLYPHONY             2463
+#define IDC_SLIDER_STEREOSEP            2464
+#define IDC_CHECK_SOFTPAN               2465
+#define IDC_COMBO_FILTERWINDOW          2466
+#define IDC_TEXT_STEREOSEP              2467
+#define IDC_EDIT_VOLRAMP_SAMPLES_UP     2468
+#define IDC_EDIT_VOLRAMP_SAMPLES_DOWN   2469
+#define IDC_CHECK_KEEPDEVICEOPEN        2470
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1216,7 +1227,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        541
 #define _APS_NEXT_COMMAND_VALUE         44643
-#define _APS_NEXT_CONTROL_VALUE         2462
+#define _APS_NEXT_CONTROL_VALUE         2471
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

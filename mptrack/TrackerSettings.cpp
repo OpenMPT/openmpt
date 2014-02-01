@@ -165,9 +165,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MixerOutputChannels(conf, "Sound Settings", "ChannelMode", MixerSettings().gnChannels)
 	, MixerPreAmp(conf, "Sound Settings", "PreAmp", MixerSettings().m_nPreAmp)
 	, MixerStereoSeparation(conf, "Sound Settings", "StereoSeparation", MixerSettings().m_nStereoSeparation)
-	, MixerVolumeRampUpSamples(conf, "Sound Settings", "VolumeRampUpSamples", MixerSettings().glVolumeRampUpSamples)
-	, MixerVolumeRampDownSamples(conf, "Sound Settings", "VolumeRampDownSamples", MixerSettings().glVolumeRampDownSamples)
-	, MixerVolumeRampSamples_DEPRECATED(conf, "Sound Settings", "VolumeRampSamples", 42)
+	, MixerVolumeRampUpMicroseconds(conf, "Sound Settings", "VolumeRampUpMicroseconds", MixerSettings().GetVolumeRampUpMicroseconds())
+	, MixerVolumeRampDownMicroseconds(conf, "Sound Settings", "VolumeRampDownMicroseconds", MixerSettings().GetVolumeRampDownMicroseconds())
 	, ResamplerMode(conf, "Sound Settings", "SrcMode", GetDefaultResamplerMode())
 	, ResamplerSubMode(conf, "Sound Settings", "XMMSModplugResamplerWFIRType", CResamplerSettings().gbWFIRType)
 	, ResamplerCutoffPercent(conf, "Sound Settings", "ResamplerWFIRCutoff", Util::Round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
@@ -430,9 +429,17 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,22))
 	{
-		MixerVolumeRampUpSamples = MixerVolumeRampSamples_DEPRECATED.Get();
-		MixerVolumeRampDownSamples = MixerVolumeRampSamples_DEPRECATED.Get();
-		conf.Remove(MixerVolumeRampSamples_DEPRECATED.GetPath());
+		MixerSettings settings = GetMixerSettings();
+		settings.SetVolumeRampUpSamples(conf.Read<int32>("Sound Settings", "VolumeRampSamples", 42));
+		settings.SetVolumeRampDownSamples(conf.Read<int32>("Sound Settings", "VolumeRampSamples", 42));
+		SetMixerSettings(settings);
+		conf.Remove("Sound Settings", "VolumeRampSamples");
+	} else if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,18))
+	{
+		MixerSettings settings = GetMixerSettings();
+		settings.SetVolumeRampUpSamples(conf.Read<int32>("Sound Settings", "VolumeRampUpSamples", MixerSettings().GetVolumeRampUpSamples()));
+		settings.SetVolumeRampDownSamples(conf.Read<int32>("Sound Settings", "VolumeRampDownSamples", MixerSettings().GetVolumeRampDownSamples()));
+		SetMixerSettings(settings);
 	}
 	Limit(ResamplerCutoffPercent, 0, 100);
 
@@ -524,6 +531,7 @@ public:
 	Setting<SampleFormat> sampleFormat;
 	Setting<bool> ExclusiveMode;
 	Setting<bool> BoostThreadPriority;
+	Setting<bool> KeepDeviceRunning;
 	Setting<bool> UseHardwareTiming;
 	Setting<int> DitherType;
 	Setting<SoundChannelMapping> ChannelMapping;
@@ -540,6 +548,7 @@ public:
 		, sampleFormat(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"SampleFormat", defaults.sampleFormat)
 		, ExclusiveMode(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ExclusiveMode", defaults.ExclusiveMode)
 		, BoostThreadPriority(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"BoostThreadPriority", defaults.BoostThreadPriority)
+		, KeepDeviceRunning(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"KeepDeviceRunning", defaults.KeepDeviceRunning)
 		, UseHardwareTiming(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"UseHardwareTiming", defaults.UseHardwareTiming)
 		, DitherType(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"DitherType", defaults.DitherType)
 		, ChannelMapping(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ChannelMapping", defaults.ChannelMapping)
@@ -560,6 +569,7 @@ public:
 		sampleFormat = settings.sampleFormat;
 		ExclusiveMode = settings.ExclusiveMode;
 		BoostThreadPriority = settings.BoostThreadPriority;
+		KeepDeviceRunning = settings.KeepDeviceRunning;
 		UseHardwareTiming = settings.UseHardwareTiming;
 		DitherType = settings.DitherType;
 		ChannelMapping = settings.ChannelMapping;
@@ -576,6 +586,7 @@ public:
 		settings.sampleFormat = sampleFormat;
 		settings.ExclusiveMode = ExclusiveMode;
 		settings.BoostThreadPriority = BoostThreadPriority;
+		settings.KeepDeviceRunning = KeepDeviceRunning;
 		settings.UseHardwareTiming = UseHardwareTiming;
 		settings.DitherType = DitherType;
 		settings.ChannelMapping = ChannelMapping;
@@ -638,8 +649,8 @@ MixerSettings TrackerSettings::GetMixerSettings() const
 	settings.gnChannels = MixerOutputChannels;
 	settings.m_nPreAmp = MixerPreAmp;
 	settings.m_nStereoSeparation = MixerStereoSeparation;
-	settings.glVolumeRampUpSamples = MixerVolumeRampUpSamples;
-	settings.glVolumeRampDownSamples = MixerVolumeRampDownSamples;
+	settings.VolumeRampUpMicroseconds = MixerVolumeRampUpMicroseconds;
+	settings.VolumeRampDownMicroseconds = MixerVolumeRampDownMicroseconds;
 	return settings;
 }
 
@@ -653,8 +664,8 @@ void TrackerSettings::SetMixerSettings(const MixerSettings &settings)
 	MixerOutputChannels = settings.gnChannels;
 	MixerPreAmp = settings.m_nPreAmp;
 	MixerStereoSeparation = settings.m_nStereoSeparation;
-	MixerVolumeRampUpSamples = settings.glVolumeRampUpSamples;
-	MixerVolumeRampDownSamples = settings.glVolumeRampDownSamples;
+	MixerVolumeRampUpMicroseconds = settings.VolumeRampUpMicroseconds;
+	MixerVolumeRampDownMicroseconds = settings.VolumeRampDownMicroseconds;
 }
 
 
