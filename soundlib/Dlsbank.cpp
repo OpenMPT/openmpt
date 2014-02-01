@@ -1560,6 +1560,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 				SampleIO::littleEndian,
 				SampleIO::signedPCM)
 				.ReadSample(sample, chunk);
+			sample.PrecomputeLoops(sndFile, false);
 		}
 		bWaveForm = (sample.pSample) ? TRUE : FALSE;
 	} else

@@ -502,6 +502,9 @@ const uint16 XMPeriodTable[104] =
 };
 
 
+// floor(8363 * 64 * 2**(-n/768))
+// 768 = 64 period steps for 12 notes
+// Table is for highest possible octave
 const uint32 XMLinearTable[768] = 
 {
 	535232,534749,534266,533784,533303,532822,532341,531861,
@@ -757,8 +760,7 @@ const float ITResonanceTable[128] =
 };
 
 
-// Reversed sinc coefficients
-
+// Reversed sinc coefficients for 4x256 taps polyphase FIR resampling filter
 const int16 CResampler::FastSincTable[256*4] =
 { // Cubic Spline
     0, 16384,     0,     0,   -31, 16383,    32,     0,   -63, 16381,    65,     0,   -93, 16378,   100,    -1, 
@@ -828,19 +830,18 @@ const int16 CResampler::FastSincTable[256*4] =
 };
 
 
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Compute Bessel function Izero(y) using a series approximation
 static double izero(double y)
 {
-    double s=1, ds=1, d=0;
+	double s=1, ds=1, d=0;
 	do
 	{
-        d = d + 2; ds = ds * (y*y)/(d*d);
-        s = s + ds;
-    } while (ds > 1E-7 * s);
+		d = d + 2; ds = ds * (y*y)/(d*d);
+		s = s + ds;
+	} while (ds > 1E-7 * s);
 	return s;
 }
 
@@ -868,10 +869,14 @@ static void getsinc(SINC_TYPE *psinc, double beta, double lowpass_factor)
 			fsinc = sin(x*kPi) * izero(beta*sqrt(1-x*x*(1.0/16.0))) / (izero_beta*x*kPi); // Kaiser window
 		}
 		double coeff = fsinc * lowpass_factor;
+#ifdef MPT_INTMIXER
 		int n = (int)std::floor(coeff * (1<<SINC_QUANTSHIFT) + 0.5);
 		ASSERT(n <= int16_max);
 		ASSERT(n > int16_min);
 		*psinc++ = static_cast<SINC_TYPE>(n);
+#else
+		*psinc++ = static_cast<SINC_TYPE>(coeff);
+#endif
 	}
 }
 
@@ -915,30 +920,51 @@ static void getdownsample2x(short int *psinc)
 bool CResampler::StaticTablesInitialized = false;
 SINC_TYPE CResampler::gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
 SINC_TYPE CResampler::gDownsample2x[SINC_PHASES*8];		// Downsample 2x
-#endif
+#ifndef MPT_INTMIXER
+mixsample_t CResampler::FastSincTablef[256 * 4];		// Cubic spline LUT
+mixsample_t CResampler::LinearTablef[256];				// Linear interpolation LUT
+#endif // !defined(MPT_INTMIXER)
+#endif // MODPLUG_TRACKER
 
 
 void CResampler::InitializeTables(bool force)
 {
-	#ifdef MODPLUG_TRACKER
-		if(!StaticTablesInitialized)
-		{
-			//ericus' downsampling improvement.
-			//getsinc(gDownsample13x, 8.5, 3.0/4.0);
-			//getdownsample2x(gDownsample2x);
-			getsinc(gDownsample13x, 8.5, 0.5);	   
-			getsinc(gDownsample2x, 2.7625, 0.425); 
-			//end ericus' downsampling improvement.
-			StaticTablesInitialized = true;
-		}
-	#endif
+#ifdef MODPLUG_TRACKER
+	if((m_OldSettings == m_Settings) && !force && StaticTablesInitialized) return;
+	if(!StaticTablesInitialized)
+#else
 	if((m_OldSettings == m_Settings) && !force) return;
-	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
-	getsinc(gKaiserSinc, 9.6377, m_Settings.gdWFIRCutoff);
-	#ifndef MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER
+	{
+		//ericus' downsampling improvement.
+		//getsinc(gDownsample13x, 8.5, 3.0/4.0);
+		//getdownsample2x(gDownsample2x);
 		getsinc(gDownsample13x, 8.5, 0.5);
 		getsinc(gDownsample2x, 2.7625, 0.425);
-	#endif
+		//end ericus' downsampling improvement.
+
+#ifndef MPT_INTMIXER
+		// Prepare fast sinc coefficients for floating point mixer
+		for(size_t i = 0; i < CountOf(FastSincTable); i++)
+		{
+			FastSincTablef[i] = static_cast<mixsample_t>(FastSincTable[i] * mixsample_t(1.0f / 16384.0f));
+		}
+
+		// Prepare linear interpolation coefficients for floating point mixer
+		for(size_t i = 0; i < CountOf(LinearTablef); i++)
+		{
+			LinearTablef[i] = static_cast<mixsample_t>(i * mixsample_t(1.0f / CountOf(LinearTablef)));
+		}
+#endif // !defined(MPT_INTMIXER)
+	}
+
+	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
+	getsinc(gKaiserSinc, 9.6377, m_Settings.gdWFIRCutoff);
+
+#ifdef MODPLUG_TRACKER
+	StaticTablesInitialized = true;
+#endif // MODPLUG_TRACKER
+
 	m_OldSettings = m_Settings;
 }
 

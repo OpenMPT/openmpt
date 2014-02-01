@@ -39,7 +39,8 @@ SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile &s
 // Replaces sample in 'smp' with given sample and frees the old sample.
 void ReplaceSample(ModSample &smp, void *pNewSample,  const SmpLength nNewLength, CSoundFile &sndFile);
 
-bool AdjustEndOfSample(ModSample &smp, CSoundFile &sndFile);
+// Update loop wrap-around buffers
+bool PrecomputeLoops(ModSample &smp, CSoundFile &sndFile, bool updateChannels = true);
 
 // Propagate loop point changes to player
 bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sndFile);
@@ -68,9 +69,6 @@ bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 
 // Invert sample data (flip by 180 degrees)
 bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile);
-
-// Detect whether to enable smart sample ramping.
-bool EnableSmartSampleRamping(const ModSample &smp, SmpLength sampleOffset, const CSoundFile &sndFile);
 
 // Crossfade sample data to create smooth loops
 bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile &sndFile);

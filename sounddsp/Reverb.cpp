@@ -18,7 +18,7 @@
 #pragma warning(disable:4725)	// Pentium fdiv bug
 #pragma warning(disable:4731)	// ebp modified
 
-extern void StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+extern void StereoFill(int *pBuffer, UINT nSamples, mixsample_t &lpROfs, mixsample_t &lpLOfs);
 
 
 
@@ -409,7 +409,7 @@ int *CReverb::GetReverbSendBuffer(UINT nSamples)
 {
 	if(!gnReverbSend)
 	{ // and we did not clear the buffer yet, do it now because we will get new data
-		StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
+		StereoFill(MixReverbBuffer, nSamples, gnRvbROfsVol, gnRvbLOfsVol);
 	}
 	gnReverbSend = 1; // we will have to process reverb
 	return MixReverbBuffer;
@@ -427,7 +427,7 @@ void CReverb::Process(int *MixSoundBuffer, UINT nSamples)
 	}
 	if(!gnReverbSend)
 	{ // no input data in MixReverbBuffer, so the buffer got not cleared in GetReverbSendBuffer(), do it now for decay
-		StereoFill(MixReverbBuffer, nSamples, &gnRvbROfsVol, &gnRvbLOfsVol);
+		StereoFill(MixReverbBuffer, nSamples, gnRvbROfsVol, gnRvbLOfsVol);
 	}
 
 	UINT nIn, nOut;

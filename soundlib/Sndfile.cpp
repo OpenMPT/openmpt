@@ -852,7 +852,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 		if(pSmp->pSample)
 		{
-			pSmp->SanitizeLoops();
+			pSmp->PrecomputeLoops(*this, false);
 		} else
 		{
 			pSmp->nLength = 0;
@@ -1029,39 +1029,6 @@ BOOL CSoundFile::Destroy()
 	m_ContainerType = MOD_CONTAINERTYPE_NONE;
 	m_nChannels = m_nSamples = m_nInstruments = 0;
 	return TRUE;
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-// Memory Allocation
-
-// Allocate sample memory. On sucess, a pointer to the silenced sample buffer is returned. On failure, nullptr is returned.
-void *CSoundFile::AllocateSample(size_t nbytes)
-//---------------------------------------------
-{
-	if(nbytes > SIZE_MAX - 0x29u)
-		return nullptr;
-
-	// Allocate with some overhead (16 bytes before sample start, and at least 16 bytes after that)
-	const size_t allocSize = (nbytes + 39) & ~7;
-
-	char *p = new (std::nothrow) char[allocSize];
-	if(p != nullptr)
-	{
-		memset(p, 0, allocSize);
-		return (p + 16);
-	}
-	return nullptr;
-}
-
-
-void CSoundFile::FreeSample(void *p)
-//----------------------------------
-{
-	if (p)
-	{
-		delete[] (((char *)p) - 16);
-	}
 }
 
 
@@ -1498,61 +1465,6 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 	m_bChannelMuteTogglePending[nChn] = false;
 
 	return false;
-}
-
-
-template<typename T>
-void AdjustSampleLoopImpl(ModSample &sample)
-{
-	T *data = static_cast<T *>(sample.pSample);
-	SmpLength numSamples = sample.nLength;
-
-	// Adjust end of sample
-	data[numSamples + 4] = data[numSamples + 3] = data[numSamples + 2] = data[numSamples + 1] = data[numSamples] = data[numSamples - 1];
-
-	// Fix bad loops
-	// Second condition is to fix some old S3M files which have very short loops just before some garbage data. Very dirty method (just like the rest of this "fixing")!
-	if((sample.nLoopEnd + 3 >= numSamples || sample.nLoopEnd == sample.nLoopStart + 1)
-		&& sample.nLoopEnd <= sample.nLength && sample.nLoopStart < sample.nLoopEnd
-		&& (sample.uFlags & (CHN_LOOP | CHN_PINGPONGLOOP | CHN_STEREO)) == CHN_LOOP)
-	{
-		data[sample.nLoopEnd] = data[sample.nLoopStart];
-		data[sample.nLoopEnd + 1] = data[sample.nLoopStart + 1];
-		data[sample.nLoopEnd + 2] = data[sample.nLoopStart + 2];
-		data[sample.nLoopEnd + 3] = data[sample.nLoopStart + 3];
-		data[sample.nLoopEnd + 4] = data[sample.nLoopStart + 4];
-	}
-}
-
-
-void CSoundFile::AdjustSampleLoop(ModSample &sample)
-//--------------------------------------------------
-{
-	if(sample.pSample == nullptr || sample.nLength == 0)
-	{
-		return;
-	}
-
-	LimitMax(sample.nLoopEnd, sample.nLoopEnd);
-	if(sample.nLoopStart >= sample.nLoopEnd)
-	{
-		sample.nLoopStart = sample.nLoopEnd = 0;
-		sample.uFlags &= ~CHN_LOOP;
-	}
-
-	if(sample.GetBytesPerSample() == 8)
-	{
-		AdjustSampleLoopImpl<uint64>(sample);
-	} else if(sample.GetBytesPerSample() == 4)
-	{
-		AdjustSampleLoopImpl<uint32>(sample);
-	} else if(sample.GetBytesPerSample() == 2)
-	{
-		AdjustSampleLoopImpl<uint16>(sample);
-	} else if(sample.GetBytesPerSample() == 1)
-	{
-		AdjustSampleLoopImpl<uint8>(sample);
-	}
 }
 
 
@@ -2139,6 +2051,16 @@ ModInstrument *CSoundFile::AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX
 		Instruments[instr] = ins = new (std::nothrow) ModInstrument(assignedSample);
 	}
 	return ins;
+}
+
+
+void CSoundFile::PrecomputeSampleLoops(bool updateChannels)
+//---------------------------------------------------------
+{
+	for(SAMPLEINDEX i = 1; i < GetNumSamples(); i++)
+	{
+		Samples[i].PrecomputeLoops(*this, updateChannels);
+	}
 }
 
 

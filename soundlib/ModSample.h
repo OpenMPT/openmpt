@@ -10,21 +10,23 @@
 
 #pragma once
 
+class CSoundFile;
+
 // Sample Struct
 struct ModSample
 {
 	SmpLength nLength;						// In samples, not bytes
 	SmpLength nLoopStart, nLoopEnd;			// Dito
 	SmpLength nSustainStart, nSustainEnd;	// Dito
-	void *pSample;							// Pointer to sample data
+	void   *pSample;						// Pointer to sample data
 	uint32 nC5Speed;						// Frequency of middle-C, in Hz (for IT/S3M/MPTM)
-	uint16 nPan;							// Default sample panning (if pan flag is set)
-	uint16 nVolume;							// Default volume
-	uint16 nGlobalVol;						// Global volume (sample volume is multiplied by this)
+	uint16 nPan;							// Default sample panning (if pan flag is set), 0...256
+	uint16 nVolume;							// Default volume, 0...256
+	uint16 nGlobalVol;						// Global volume (sample volume is multiplied by this), 0...64
 	FlagSet<ChannelFlags, uint16> uFlags;	// Sample flags
 	int8   RelativeTone;					// Relative note to middle c (for MOD/XM)
-	int8   nFineTune;						// Finetune period (for MOD/XM)
-	uint8  nVibType;						// Auto vibrato type
+	int8   nFineTune;						// Finetune period (for MOD/XM), -128...127
+	uint8  nVibType;						// Auto vibrato type, see VibratoType enum
 	uint8  nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
 	uint8  nVibDepth;						// Auto vibrato depth
 	uint8  nVibRate;						// Auto vibrato rate (speed)
@@ -62,8 +64,20 @@ struct ModSample
 	// Allocate sample based on a ModSample's properties.
 	// Returns number of bytes allocated, 0 on failure.
 	size_t AllocateSample();
+	// Allocate sample memory. On sucess, a pointer to the silenced sample buffer is returned. On failure, nullptr is returned.
+	static void *AllocateSample(SmpLength numSamples, size_t bytesPerSample);
+	// Compute sample buffer size in bytes, including any overhead introduced by pre-computed loops and such. Returns 0 if sample is too big.
+	static size_t GetRealSampleBufferSize(SmpLength numSamples, size_t bytesPerSample);
 
 	void FreeSample();
+	static void FreeSample(void *samplePtr);
+
+	// Set loop points and update loop wrap-around buffer
+	void SetLoop(SmpLength start, SmpLength end, bool enable, bool pingpong, CSoundFile &sndFile);
+	// Set sustain loop points and update loop wrap-around buffer
+	void SetSustainLoop(SmpLength start, SmpLength end, bool enable, bool pingpong, CSoundFile &sndFile);
+	// Update loop wrap-around buffer
+	void PrecomputeLoops(CSoundFile &sndFile, bool updateChannels = true);
 
 	// Remove loop points if they're invalid.
 	void SanitizeLoops();

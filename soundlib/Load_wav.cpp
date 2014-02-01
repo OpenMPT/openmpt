@@ -35,7 +35,6 @@ bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelInd
 
 	const char *inBuf = file.GetRawData();
 	CopySample<SampleConversion>(reinterpret_cast<typename SampleConversion::output_t*>(sample.pSample), sample.nLength, 1, inBuf + offset, file.BytesLeft() - offset, numChannels, conv);
-	CSoundFile::AdjustSampleLoop(sample);
 	return true;
 }
 

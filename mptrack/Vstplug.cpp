@@ -654,7 +654,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	m_MixState.dwFlags = 0;
 	m_MixState.nVolDecayL = 0;
 	m_MixState.nVolDecayR = 0;
-	m_MixState.pMixBuffer = (int *)((((intptr_t)m_MixBuffer) + 7) & ~7);
+	m_MixState.pMixBuffer = (mixsample_t *)((((intptr_t)m_MixBuffer) + 7) & ~7);
 	m_MixState.pOutBufferL = mixBuffer.GetInputBuffer(0);
 	m_MixState.pOutBufferR = mixBuffer.GetInputBuffer(1);
 

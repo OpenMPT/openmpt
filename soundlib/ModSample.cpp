@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #include "ModSample.h"
+#include "modsmp_ctrl.h"
 
 #include <cmath>
 
@@ -137,29 +138,128 @@ uint32 ModSample::GetSampleRate(const MODTYPE type) const
 size_t ModSample::AllocateSample()
 //--------------------------------
 {
-	// Prevent overflows...
-	if(nLength > SIZE_MAX - 6u || SIZE_MAX / GetBytesPerSample() < nLength + 6u)
-	{
-		return 0;
-	}
 	FreeSample();
 
-	size_t sampleSize = (nLength + 6u) * GetBytesPerSample();
-	if((pSample = CSoundFile::AllocateSample(sampleSize)) == nullptr)
+	if((pSample = AllocateSample(nLength, GetBytesPerSample())) == nullptr)
 	{
 		return 0;
 	} else
 	{
-		return sampleSize;
+		return GetSampleSizeInBytes();
 	}
+}
+
+
+// Allocate sample memory. On sucess, a pointer to the silenced sample buffer is returned. On failure, nullptr is returned.
+void *ModSample::AllocateSample(SmpLength numSamples, size_t bytesPerSample)
+//--------------------------------------------------------------------------
+{
+	const size_t allocSize = GetRealSampleBufferSize(numSamples, bytesPerSample);
+
+	if(allocSize != 0)
+	{
+		char *p = new (std::nothrow) char[allocSize];
+		if(p != nullptr)
+		{
+			memset(p, 0, allocSize);
+			return p + (InterpolationMaxLookahead * MaxSamplingPointSize);
+		}
+	}
+	return nullptr;
+}
+
+
+// Compute sample buffer size in bytes, including any overhead introduced by pre-computed loops and such. Returns 0 if sample is too big.
+size_t ModSample::GetRealSampleBufferSize(SmpLength numSamples, size_t bytesPerSample)
+//------------------------------------------------------------------------------------
+{
+	// Number of required lookahead samples:
+	// * 1x InterpolationMaxLookahead samples before the actual sample start. NOTE: This is currently hardcoded to 16!
+	// * 1x InterpolationMaxLookahead samples of silence after the sample end (if normal loop end == sample end, this can be optimized out).
+	// * 2x InterpolationMaxLookahead before the loop point (because we start at InterpolationMaxLookahead before the loop point and will look backwards from there as well)
+	// * 2x InterpolationMaxLookahead after the loop point (for wrap-around)
+	// * 4x InterpolationMaxLookahead for the sustain loop (same as the two points above)
+	
+	const SmpLength maxSize = Util::MaxValueOfType(numSamples);
+	const SmpLength lookaheadBufferSize = 16 + (1 + 4 + 4) * InterpolationMaxLookahead;
+
+	if(numSamples > maxSize || lookaheadBufferSize > maxSize - numSamples)
+	{
+		return 0;
+	}
+	numSamples += lookaheadBufferSize;
+
+	if(maxSize / bytesPerSample < numSamples)
+	{
+		return 0;
+	}
+
+	return numSamples * bytesPerSample;
 }
 
 
 void ModSample::FreeSample()
 //--------------------------
 {
-	CSoundFile::FreeSample(pSample);
+	FreeSample(pSample);
 	pSample = nullptr;
+}
+
+
+void ModSample::FreeSample(void *samplePtr)
+//-----------------------------------------
+{
+	if(samplePtr)
+	{
+		delete[] (((char *)samplePtr) - (InterpolationMaxLookahead * MaxSamplingPointSize));
+	}
+}
+
+
+// Set loop points and update loop wrap-around buffer
+void ModSample::SetLoop(SmpLength start, SmpLength end, bool enable, bool pingpong, CSoundFile &sndFile)
+//------------------------------------------------------------------------------------------------------
+{
+	nLoopStart = start;
+	nLoopEnd = end;
+	LimitMax(nLoopEnd, nLength);
+	if(nLoopStart < nLoopEnd)
+	{
+		uFlags.set(CHN_LOOP, enable);
+		uFlags.set(CHN_PINGPONGLOOP, pingpong && enable);
+	} else
+	{
+		nLoopStart = nLoopEnd = 0;
+		uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
+	}
+	PrecomputeLoops(sndFile, true);
+}
+
+
+// Set sustain loop points and update loop wrap-around buffer
+void ModSample::SetSustainLoop(SmpLength start, SmpLength end, bool enable, bool pingpong, CSoundFile &sndFile)
+//-------------------------------------------------------------------------------------------------------------
+{
+	nSustainStart = start;
+	nSustainEnd = end;
+	LimitMax(nLoopEnd, nLength);
+	if(nSustainStart < nSustainEnd)
+	{
+		uFlags.set(CHN_SUSTAINLOOP, enable);
+		uFlags.set(CHN_PINGPONGSUSTAIN, pingpong && enable);
+	} else
+	{
+		nLoopStart = nLoopEnd = 0;
+		uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+	}
+	PrecomputeLoops(sndFile, true);
+}
+
+
+void ModSample::PrecomputeLoops(CSoundFile &sndFile, bool updateChannels)
+//-----------------------------------------------------------------------
+{
+	ctrlSmp::PrecomputeLoops(*this, sndFile, updateChannels);
 }
 
 

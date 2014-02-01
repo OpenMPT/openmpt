@@ -13,6 +13,7 @@
 #include "SampleFormatConverters.h"
 #include "SampleFormat.h"
 #include "MixerLoops.h"
+#include "Mixer.h"
 
 
 template<typename Tsample>

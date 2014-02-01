@@ -11,6 +11,7 @@
 
 
 #include "WindowedFIR.h"
+#include "Mixer.h"
 #include "MixerSettings.h"
 
 
@@ -19,8 +20,12 @@
 #define SINC_PHASES_BITS 12
 #define SINC_PHASES      (1<<SINC_PHASES_BITS)
 
-#define SINC_TYPE       int16
+#ifdef MPT_INTMIXER
+typedef int16 SINC_TYPE;
 #define SINC_QUANTSHIFT 15
+#else
+typedef mixsample_t SINC_TYPE;
+#endif // MPT_INTMIXER
 
 #define SINC_MASK (SINC_PHASES-1)
 STATIC_ASSERT((SINC_MASK & 0xffff) == SINC_MASK); // exceeding fractional freq
@@ -56,17 +61,28 @@ class CResampler
 public:
 	CResamplerSettings m_Settings;
 	CWindowedFIR m_WindowedFIR;
-	static const int16 FastSincTable[256*4];
-	SINC_TYPE gKaiserSinc[SINC_PHASES*8];		// Upsampling
+	static const int16 FastSincTable[256 * 4];
+
+	SINC_TYPE gKaiserSinc[SINC_PHASES * 8];				// Upsampling
+
 #ifdef MODPLUG_TRACKER
 	static bool StaticTablesInitialized;
-	static SINC_TYPE gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-	static SINC_TYPE gDownsample2x[SINC_PHASES*8];		// Downsample 2x
+	#define RESAMPLER_TABLE static
 #else
 	// no global data which has to be initialized by hand in the library
-	SINC_TYPE gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-	SINC_TYPE gDownsample2x[SINC_PHASES*8];		// Downsample 2x
-#endif
+	#define RESAMPLER_TABLE 
+#endif // MODPLUG_TRACKER
+
+	RESAMPLER_TABLE SINC_TYPE gDownsample13x[SINC_PHASES * 8];	// Downsample 1.333x
+	RESAMPLER_TABLE SINC_TYPE gDownsample2x[SINC_PHASES * 8];	// Downsample 2x
+
+#ifndef MPT_INTMIXER
+	RESAMPLER_TABLE mixsample_t FastSincTablef[256 * 4];	// Cubic spline LUT
+	RESAMPLER_TABLE mixsample_t LinearTablef[256];		// Linear interpolation LUT
+#endif // !defined(MPT_INTMIXER)
+
+#undef RESAMPLER_TABLE
+
 private:
 	CResamplerSettings m_OldSettings;
 public:

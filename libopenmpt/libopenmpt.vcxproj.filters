@@ -245,6 +245,18 @@
     <ClInclude Include="libopenmpt_ext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\FloatMixer.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\IntMixer.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\Mixer.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\MixerInterface.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp">
