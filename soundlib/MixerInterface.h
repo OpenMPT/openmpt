@@ -66,7 +66,7 @@ template<class Traits, class InterpolationFunc, class FilterFunc, class MixFunc>
 static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Traits::output_t * MPT_RESTRICT outBuffer, int numSamples)
 {
 	register ModChannel &c = chn;
-	const Traits::input_t * MPT_RESTRICT inSample = static_cast<const Traits::input_t *>(c.pCurrentSample) + c.nPos * Traits::numChannelsIn;
+	const typename Traits::input_t * MPT_RESTRICT inSample = static_cast<const typename Traits::input_t *>(c.pCurrentSample) + c.nPos * Traits::numChannelsIn;
 
 	int32 smpPos = c.nPosLo;	// 16.16 sample position relative to c.nPos
 
@@ -82,7 +82,7 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 	register int samples = numSamples;
 	do
 	{
-		Traits::outbuf_t outSample;
+		typename Traits::outbuf_t outSample;
 		interpolate(outSample, inSample + (smpPos >> 16) * Traits::numChannelsIn, (smpPos & 0xFFFF));
 		filter(outSample, c);
 		mix(outSample, c, outBuffer);

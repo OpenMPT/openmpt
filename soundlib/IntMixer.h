@@ -136,12 +136,12 @@ struct FIRFilterInterpolation
 
 		for(int i = 0; i < Traits::numChannelsIn; i++)
 		{
-			Traits::output_t vol1 =
+			typename Traits::output_t vol1 =
 				  (lut[0] * Traits::Convert(inBuffer[i - 3 * Traits::numChannelsIn]))
 				+ (lut[1] * Traits::Convert(inBuffer[i - 2 * Traits::numChannelsIn]))
 				+ (lut[2] * Traits::Convert(inBuffer[i - Traits::numChannelsIn]))
 				+ (lut[3] * Traits::Convert(inBuffer[i]));
-			Traits::output_t vol2 =
+			typename Traits::output_t vol2 =
 				  (lut[4] * Traits::Convert(inBuffer[i + 1 * Traits::numChannelsIn]))
 				+ (lut[5] * Traits::Convert(inBuffer[i + 2 * Traits::numChannelsIn]))
 				+ (lut[6] * Traits::Convert(inBuffer[i + 3 * Traits::numChannelsIn]))
