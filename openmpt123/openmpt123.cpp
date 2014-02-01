@@ -459,7 +459,7 @@ static void show_help( textout & log, bool longhelp = false, const std::string &
 		log << "     --ramping n            Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
 		log << "     --dither n             Dither type for 16bit integer output: [0=off,1=auto,2=0.5bit,3=1bit] [default: " << commandlineflags().dither << "]" << std::endl;
 		log << std::endl;
-		log << "     --[no-]shuffle         Shuffle playlist (-1 means forever) [default: " << commandlineflags().shuffle << "]" << std::endl;
+		log << "     --[no-]shuffle         Shuffle playlist [default: " << commandlineflags().shuffle << "]" << std::endl;
 		log << std::endl;
 		log << "     --repeat n             Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		log << "     --seek n               Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
