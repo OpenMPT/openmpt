@@ -178,7 +178,7 @@ void Foo::Bar(int foobar)
 
 **Note:**
 **This applies to `libopenmpt/` and `openmpt123/` directories only.**
-**Use OpenMPT style (see above) otherwise).**
+**Use OpenMPT style (see above) otherwise.**
 
 The code generally tries to follow these conventions, but they are not
 strictly enforced and there are valid reasons to diverge from these
