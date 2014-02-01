@@ -737,6 +737,7 @@ void CMainFrame::AudioRead(const SoundDeviceSettings &settings, const SoundBuffe
 	timingInfo.SystemTimestamp = timeInfo.SystemTimestamp;
 	timingInfo.Speed = timeInfo.Speed;
 	m_pSndFile->m_TimingInfo = timingInfo;
+	m_Dither.SetMode((DitherMode)settings.DitherType);
 	StereoVuMeterTargetWrapper target(settings.sampleFormat, m_Dither, buffer);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(numFrames, target);
 	ASSERT(renderedFrames <= numFrames);
