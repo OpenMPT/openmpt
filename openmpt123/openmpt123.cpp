@@ -1788,6 +1788,7 @@ static int main( int argc, char * argv [] ) {
 					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, *filename + std::string(".") + flags.output_extension, log );
 					render_file( flags, *filename, log, file_audio_stream );
+					flags.playlist_index++;
 				}
 			} break;
 			case ModeNone:
