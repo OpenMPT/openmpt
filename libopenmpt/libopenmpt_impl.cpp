@@ -1040,16 +1040,18 @@ std::string module_impl::ctl_get( const std::string & ctl ) const {
 		throw openmpt::exception("unknown ctl");
 	} else if ( ctl == "dither" ) {
 		return mpt::ToString( static_cast<int>( m_Dither->GetMode() ) );
+	} else {
+		throw openmpt::exception("unknown ctl");
 	}
-	throw openmpt::exception("unknown ctl");
 }
 void module_impl::ctl_set( const std::string & ctl, const std::string & value ) {
 	if ( ctl == "" ) {
 		throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
 	} else if ( ctl == "dither" ) {
 		m_Dither->SetMode( static_cast<DitherMode>( ConvertStrTo<int>( value ) ) );
+	} else {
+		throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
 	}
-	throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
 }
 
 } // namespace openmpt
