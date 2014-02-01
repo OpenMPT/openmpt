@@ -20,13 +20,13 @@ struct IntToIntTraits : public MixerTraits<channelsOut, channelsIn, out, in>
 	typedef MixerTraits<channelsOut, channelsIn, out, in> base_t;
 	typedef typename base_t::input_t input_t;
 	typedef typename base_t::output_t output_t;
-	static_assert(std::numeric_limits<input_t>::is_integer, "Input must be integer");
-	static_assert(std::numeric_limits<output_t>::is_integer, "Output must be integer");
-	static_assert(sizeof(out) * 8 >= mixPrecision, "Mix precision is higher than output type can handle");
-	static_assert(sizeof(in) * 8 <= mixPrecision, "Mix precision is lower than input type");
 
 	static forceinline output_t Convert(const input_t x)
 	{
+		static_assert(std::numeric_limits<input_t>::is_integer, "Input must be integer");
+		static_assert(std::numeric_limits<output_t>::is_integer, "Output must be integer");
+		static_assert(sizeof(out) * 8 >= mixPrecision, "Mix precision is higher than output type can handle");
+		static_assert(sizeof(in) * 8 <= mixPrecision, "Mix precision is lower than input type");
 		return static_cast<output_t>(x) << (mixPrecision - sizeof(in) * 8);
 	}
 };
