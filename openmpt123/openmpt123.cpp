@@ -229,6 +229,7 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Stereo separation: " << flags.separation << std::endl;
 	s << "Interpolation filter taps: " << flags.filtertaps << std::endl;
 	s << "Volume ramping strength: " << flags.ramping << std::endl;
+	s << "Output dithering: " << flags.dither << std::endl;
 	s << "Repeat count: " << flags.repeatcount << std::endl;
 	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Standard output: " << flags.use_stdout << std::endl;
@@ -456,6 +457,7 @@ static void show_help( textout & log, bool longhelp = false, const std::string &
 		log << "     --stereo n             Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
 		log << "     --filter n             Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
 		log << "     --ramping n            Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
+		log << "     --dither n             Dither type for 16bit integer output: [0=off,1=auto,2=0.5bit,3=1bit] [default: " << commandlineflags().dither << "]" << std::endl;
 		log << std::endl;
 		log << "     --[no-]shuffle         Shuffle playlist (-1 means forever) [default: " << commandlineflags().shuffle << "]" << std::endl;
 		log << std::endl;
@@ -531,6 +533,10 @@ static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
 	mod.set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, flags.separation );
 	mod.set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, flags.filtertaps );
 	mod.set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, flags.ramping );
+	std::ostringstream dither_str;
+	dither_str.imbue( std::locale::classic() );
+	dither_str << flags.dither;
+	mod.ctl_set( "dither", dither_str.str() );
 }
 
 struct prev_file { int count; prev_file( int c ) : count(c) { } };
@@ -1574,6 +1580,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--ramping" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.ramping;
+				++i;
+			} else if ( arg == "--dither" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.dither;
 				++i;
 			} else if ( arg == "--shuffle" ) {
 				flags.shuffle = true;

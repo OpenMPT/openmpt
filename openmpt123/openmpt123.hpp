@@ -251,6 +251,7 @@ struct commandlineflags {
 	std::int32_t separation;
 	std::int32_t filtertaps;
 	std::int32_t ramping; // ramping strength : -1:default 0:off 1 2 3 4 5 // roughly milliseconds
+	std::int32_t dither;
 	std::int32_t repeatcount;
 	double seek_target;
 	bool quiet;
@@ -304,6 +305,7 @@ struct commandlineflags {
 		separation = 100;
 		filtertaps = 8;
 		ramping = -1;
+		dither = 1;
 		repeatcount = 0;
 		seek_target = 0.0;
 		quiet = false;
