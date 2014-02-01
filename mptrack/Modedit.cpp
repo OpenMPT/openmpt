@@ -322,23 +322,24 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	for(SAMPLEINDEX i = 0; i < newNumSamples; i++)
 	{
 		const SAMPLEINDEX origSlot = newOrder[i];
+		ModSample &target = m_SndFile.GetSample(i + 1);
 		if(origSlot > 0 && origSlot <= oldNumSamples)
 		{
 			// Copy an original sample.
-			m_SndFile.GetSample(i + 1) = sampleHeaders[origSlot];
+			target = sampleHeaders[origSlot];
 			if(--sampleCount[origSlot] > 0 && sampleHeaders[origSlot].pSample != nullptr)
 			{
 				// This sample slot is referenced multiple times, so we have to copy the actual sample.
-				m_SndFile.GetSample(i + 1).pSample = m_SndFile.AllocateSample(m_SndFile.GetSample(i + 1).GetSampleSizeInBytes());
-				memcpy(m_SndFile.GetSample(i + 1).pSample, sampleHeaders[origSlot].pSample, m_SndFile.GetSample(i + 1).GetSampleSizeInBytes());
-				ctrlSmp::AdjustEndOfSample(m_SndFile.GetSample(i + 1), m_SndFile);
+				target.pSample = ModSample::AllocateSample(target.nLength, target.GetSampleSizeInBytes());
+				memcpy(target.pSample, sampleHeaders[origSlot].pSample, target.GetSampleSizeInBytes());
+				target.PrecomputeLoops(m_SndFile, false);
 			}
 			strcpy(m_SndFile.m_szNames[i + 1], sampleNames[origSlot].c_str());
 		} else
 		{
 			// Invalid sample reference.
-			m_SndFile.GetSample(i + 1).Initialize(m_SndFile.GetType());
-			m_SndFile.GetSample(i + 1).pSample = nullptr;
+			target.Initialize(m_SndFile.GetType());
+			target.pSample = nullptr;
 			strcpy(m_SndFile.m_szNames[i + 1], "");
 		}
 	}
@@ -580,19 +581,6 @@ UINT CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 	}
 
 	return nRemoved;
-}
-
-
-BOOL CModDoc::AdjustEndOfSample(UINT nSample)
-//-------------------------------------------
-{
-	if (nSample >= MAX_SAMPLES) return FALSE;
-	ModSample &sample = m_SndFile.GetSample(nSample);
-	if ((!sample.nLength) || (!sample.pSample)) return FALSE;
-
-	ctrlSmp::AdjustEndOfSample(sample, m_SndFile);
-
-	return TRUE;
 }
 
 

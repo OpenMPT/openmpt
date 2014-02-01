@@ -1021,7 +1021,6 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		if(sample.AllocateSample())
 		{
 			memcpy(sample.pSample, source.pSample, source.GetSampleSizeInBytes());
-			AdjustSampleLoop(sample);
 		}
 	}
 

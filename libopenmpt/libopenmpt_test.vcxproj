@@ -206,12 +206,16 @@
     <ClInclude Include="..\soundlib\Dlsbank.h" />
     <ClInclude Include="..\soundlib\Endianness.h" />
     <ClInclude Include="..\soundlib\FileReader.h" />
+    <ClInclude Include="..\soundlib\FloatMixer.h" />
+    <ClInclude Include="..\soundlib\IntMixer.h" />
     <ClInclude Include="..\soundlib\ITCompression.h" />
     <ClInclude Include="..\soundlib\ITTools.h" />
     <ClInclude Include="..\soundlib\Loaders.h" />
     <ClInclude Include="..\soundlib\Message.h" />
     <ClInclude Include="..\soundlib\MIDIEvents.h" />
     <ClInclude Include="..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\soundlib\Mixer.h" />
+    <ClInclude Include="..\soundlib\MixerInterface.h" />
     <ClInclude Include="..\soundlib\MixerLoops.h" />
     <ClInclude Include="..\soundlib\MixerSettings.h" />
     <ClInclude Include="..\soundlib\ModChannel.h" />

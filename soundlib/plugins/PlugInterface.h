@@ -23,6 +23,7 @@ typedef intptr_t VstIntPtr;
 #include "../../common/misc_util.h"
 #include "../../soundlib/MIDIEvents.h"
 #include "../../soundlib/Endianness.h"
+#include "../../soundlib/Mixer.h"
 
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
@@ -87,14 +88,14 @@ struct SNDMIXPLUGINSTATE
 	// dwFlags flags
 	enum PluginStateFlags
 	{
-		psfMixReady = 0x01,			// Set when cleared
+		psfMixReady = 0x01,				// Set when cleared
 	};
 
-	int *pMixBuffer;				// Stereo effect send buffer
-	float *pOutBufferL;				// Temp storage for int -> float conversion
+	mixsample_t *pMixBuffer;			// Stereo effect send buffer
+	float *pOutBufferL;					// Temp storage for int -> float conversion
 	float *pOutBufferR;
-	uint32 dwFlags;					// PluginStateFlags
-	LONG nVolDecayL, nVolDecayR;	// Buffer click removal
+	uint32 dwFlags;						// PluginStateFlags
+	mixsample_t nVolDecayL, nVolDecayR;	// Buffer click removal
 };
 
 

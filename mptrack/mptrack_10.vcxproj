@@ -463,7 +463,13 @@
     <ClCompile Include="..\sounddsp\Reverb.cpp" />
     <ClCompile Include="..\soundlib\Dither.cpp" />
     <ClCompile Include="..\soundlib\Dlsbank.cpp" />
-    <ClCompile Include="..\soundlib\Fastmix.cpp" />
+    <ClCompile Include="..\soundlib\Fastmix.cpp">
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ProgramDatabase</DebugInformationFormat>
+      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IntrinsicFunctions>
+      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IntrinsicFunctions>
+    </ClCompile>
     <ClCompile Include="..\soundlib\ITCompression.cpp" />
     <ClCompile Include="..\soundlib\ITTools.cpp" />
     <ClCompile Include="..\soundlib\Load_digi.cpp" />
@@ -660,11 +666,15 @@
     <ClInclude Include="..\soundlib\Dlsbank.h" />
     <ClInclude Include="..\soundlib\Endianness.h" />
     <ClInclude Include="..\soundlib\FileReader.h" />
+    <ClInclude Include="..\soundlib\FloatMixer.h" />
+    <ClInclude Include="..\soundlib\IntMixer.h" />
     <ClInclude Include="..\soundlib\ITCompression.h" />
     <ClInclude Include="..\soundlib\ITTools.h" />
     <ClInclude Include="..\soundlib\Message.h" />
     <ClInclude Include="..\soundlib\MIDIEvents.h" />
     <ClInclude Include="..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\soundlib\Mixer.h" />
+    <ClInclude Include="..\soundlib\MixerInterface.h" />
     <ClInclude Include="..\soundlib\MixerLoops.h" />
     <ClInclude Include="..\soundlib\MixerSettings.h" />
     <ClInclude Include="..\soundlib\ModChannel.h" />

@@ -26,10 +26,12 @@ float CWindowedFIR::coef( int _PCnr, float _POfs, float _PCut, int _PWidth, int 
 	double	_LPos           = _LPosU-_LWidthM1Half;
 	double	_LPIdl          = 2.0*M_zPI/_LWidthM1;
 	double	_LWc,_LSi;
-	if( fabs(_LPos)<M_zEPS ) {	
+	if(fabs(_LPos) < M_zEPS)
+	{
 		_LWc	= 1.0;
 		_LSi	= _PCut;
-	} else {	
+	} else
+	{
 		switch( _PType )
 		{	
 		case WFIR_HANN:
@@ -66,12 +68,12 @@ float CWindowedFIR::coef( int _PCnr, float _POfs, float _PCut, int _PWidth, int 
 	return (float)(_LWc*_LSi);
 }
 
-void CWindowedFIR::InitTable(double WFIRCutoff, uint8 WFIRType) {
+void CWindowedFIR::InitTable(double WFIRCutoff, uint8 WFIRType)
+{
 	int _LPcl;
 	float _LPcllen	= (float)(1L<<WFIR_FRACBITS);	// number of precalculated lines for 0..1 (-1..0)
 	float _LNorm	= 1.0f / (float)(2.0f * _LPcllen);
 	float _LCut		= static_cast<float>(WFIRCutoff);
-	float _LScale	= (float)WFIR_QUANTSCALE;
 	for( _LPcl=0;_LPcl<WFIR_LUTLEN;_LPcl++ )
 	{	
 		float _LGain,_LCoefs[WFIR_WIDTH];
@@ -82,20 +84,14 @@ void CWindowedFIR::InitTable(double WFIRCutoff, uint8 WFIRType) {
 		}
 		_LGain = 1.0f/_LGain;
 		for( _LCc=0;_LCc<WFIR_WIDTH;_LCc++ )
-		{	float _LCoef = (float)floor( 0.5 + _LScale*_LCoefs[_LCc]*_LGain );
-		lut[_LIdx+_LCc] = (signed short)( (_LCoef<-_LScale)?-_LScale:((_LCoef>_LScale)?_LScale:_LCoef) );
+		{
+#ifdef MPT_INTMIXER
+			float _LCoef = floorf( 0.5f + WFIR_QUANTSCALE*_LCoefs[_LCc]*_LGain );
+			lut[_LIdx+_LCc] = (signed short)( (_LCoef<-WFIR_QUANTSCALE)?-WFIR_QUANTSCALE:((_LCoef>WFIR_QUANTSCALE)?WFIR_QUANTSCALE:_LCoef) );
+#else
+			float _LCoef = _LCoefs[_LCc] * _LGain;
+			lut[_LIdx+_LCc] = _LCoef;
+#endif // MPT_INTMIXER
 		}
 	}
 }
-
-
-CWindowedFIR::CWindowedFIR()
-{	
-}
-
-CWindowedFIR::~CWindowedFIR()
-{	// nothing todo
-}
-
-
-// -! BEHAVIOUR_CHANGE#0025

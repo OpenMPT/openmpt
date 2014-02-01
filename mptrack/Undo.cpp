@@ -326,7 +326,7 @@ bool CSampleUndo::PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType,
 			const size_t bytesPerSample = oldSample.GetBytesPerSample();
 			const size_t changeLen = changeEnd - changeStart;
 
-			undo.samplePtr = sndFile.AllocateSample((changeLen + 4) * bytesPerSample);
+			undo.samplePtr = ModSample::AllocateSample(changeLen, bytesPerSample);
 			if(undo.samplePtr == nullptr) return false;
 			memcpy(undo.samplePtr, static_cast<const char *>(oldSample.pSample) + changeStart * bytesPerSample, changeLen * bytesPerSample);
 
@@ -408,7 +408,7 @@ bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 
 	case sundo_delete:
 		// insert deleted data
-		pNewSample = static_cast<char *>(sndFile.AllocateSample(undo.OldSample.GetSampleSizeInBytes() + 4 * bytesPerSample));
+		pNewSample = static_cast<char *>(ModSample::AllocateSample(undo.OldSample.nLength, bytesPerSample));
 		if(pNewSample == nullptr) return false;
 		replace = true;
 		memcpy(pNewSample, pCurrentSample, undo.changeStart * bytesPerSample);
@@ -437,7 +437,7 @@ bool CSampleUndo::Undo(const SAMPLEINDEX smp)
 	{
 		ctrlSmp::ReplaceSample(sample, pNewSample, undo.OldSample.nLength, sndFile);
 	}
-	ctrlSmp::AdjustEndOfSample(sample, sndFile);
+	sample.PrecomputeLoops(sndFile, true);
 
 	RemoveLastUndoStep(smp);
 
@@ -462,7 +462,7 @@ void CSampleUndo::DeleteUndoStep(const SAMPLEINDEX smp, const size_t step)
 //------------------------------------------------------------------------
 {
 	if(!SampleBufferExists(smp, false) || step >= UndoBuffer[smp - 1].size()) return;
-	CSoundFile::FreeSample(UndoBuffer[smp - 1][step].samplePtr);
+	ModSample::FreeSample(UndoBuffer[smp - 1][step].samplePtr);
 	UndoBuffer[smp - 1].erase(UndoBuffer[smp - 1].begin() + step);
 }
 
