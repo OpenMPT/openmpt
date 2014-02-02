@@ -457,7 +457,7 @@ static void show_help( textout & log, bool longhelp = false, const std::string &
 		log << "     --stereo n             Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
 		log << "     --filter n             Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
 		log << "     --ramping n            Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
-		log << "     --dither n             Dither type for 16bit integer output: [0=off,1=auto,2=0.5bit,3=1bit] [default: " << commandlineflags().dither << "]" << std::endl;
+		log << "     --dither n             Dither type to use (if applicable for selected output format): [0=off,1=auto,2=0.5bit,3=1bit] [default: " << commandlineflags().dither << "]" << std::endl;
 		log << std::endl;
 		log << "     --[no-]shuffle         Shuffle playlist [default: " << commandlineflags().shuffle << "]" << std::endl;
 		log << std::endl;
