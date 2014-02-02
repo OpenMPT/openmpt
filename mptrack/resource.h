@@ -98,7 +98,6 @@
 #define IDD_EDITSAMPLEMAP               422
 #define IDD_SELECTMIXPLUGIN             423
 #define IDD_PLUGINEDITOR                424
-#define IDD_SETUP_REVERB                425
 #define IDD_EFFECTVISUALIZER            426
 #define IDB_VISNODE                     427
 #define IDB_SPLASHTEST                  432
