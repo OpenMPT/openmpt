@@ -182,17 +182,7 @@ CString PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDE
 			// Note
 			if(selection.ContainsHorizontal(cursor))
 			{
-				switch(m->note)
-				{
-				case NOTE_NONE:		data.Append("..."); break;
-				case NOTE_KEYOFF:	data.Append("==="); break;
-				case NOTE_NOTECUT:	data.Append("^^^"); break;
-				case NOTE_FADE:		data.Append("~~~"); break;
-				case NOTE_PC:		data.Append("PC "); break;
-				case NOTE_PCS:		data.Append("PCS"); break;
-				default:			if(m->IsNote()) data.Append(szDefaultNoteNames[m->note - NOTE_MIN]);
-									else data.Append("...");
-				}
+				data.Append(CSoundFile::GetNoteName(m->note).c_str());
 			} else
 			{
 				// No note

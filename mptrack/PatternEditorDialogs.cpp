@@ -168,7 +168,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		{
 			combo->SetItemData(combo->AddString("any"), findAny);
 		}
-		AppendNotesToControlEx(*combo, &sndFile);
+		AppendNotesToControlEx(*combo, sndFile);
 
 		UINT ncount = combo->GetCount();
 		for (UINT i=0; i<ncount; i++) if (m_Cmd.note == combo->GetItemData(i))
@@ -628,9 +628,9 @@ BOOL CEditCommand::SetParent(CWnd *parent, CModDoc *pModDoc)
 	if ((!parent) || (!pModDoc)) return FALSE;
 	m_hWndView = parent->m_hWnd;
 	m_pModDoc = pModDoc;
-	m_pageNote = new CPageEditNote(m_pModDoc->GetrSoundFile(), this);
-	m_pageVolume = new CPageEditVolume(m_pModDoc->GetrSoundFile(), this);
-	m_pageEffect = new CPageEditEffect(m_pModDoc->GetrSoundFile(), this);
+	m_pageNote = new CPageEditNote(m_pModDoc->GetrSoundFile(), *this);
+	m_pageVolume = new CPageEditVolume(m_pModDoc->GetrSoundFile(), *this);
+	m_pageEffect = new CPageEditEffect(m_pModDoc->GetrSoundFile(), *this);
 	AddPage(m_pageNote);
 	AddPage(m_pageVolume);
 	AddPage(m_pageEffect);
@@ -746,11 +746,7 @@ void CEditCommand::UpdateNote(ModCommand::NOTE note, ModCommand::INSTR instr)
 		m->instr = instr;
 		m_Command = *m;
 		m_pModDoc->SetModified();
-		// -> CODE#0008
-		// -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
-		//		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
 		m_pModDoc->UpdateAllViews(NULL, (m_nRow << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
-		// -! BEHAVIOUR_CHANGE#0008
 	}
 }
 
@@ -774,11 +770,7 @@ void CEditCommand::UpdateVolume(ModCommand::VOLCMD volcmd, ModCommand::VOL vol)
 		m->volcmd = volcmd;
 		m->vol = vol;
 		m_pModDoc->SetModified();
-		// -> CODE#0008
-		// -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
-		//		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
 		m_pModDoc->UpdateAllViews(NULL, (m_nRow << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
-		// -! BEHAVIOUR_CHANGE#0008
 	}
 }
 
@@ -814,11 +806,7 @@ void CEditCommand::UpdateEffect(ModCommand::COMMAND command, ModCommand::PARAM p
 		m->command = command;
 		m->param = param;
 		m_pModDoc->SetModified();
-		// -> CODE#0008
-		// -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
-		//		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
 		m_pModDoc->UpdateAllViews(NULL, (m_nRow << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
-		// -! BEHAVIOUR_CHANGE#0008
 	}
 }
 
@@ -866,15 +854,14 @@ void CPageEditNote::UpdateDialog()
 	{	
 		combo->ResetContent();
 		combo->SetItemData(combo->AddString("No note"), 0);
-		AppendNotesToControlEx(*combo, &sndFile, m_nInstr);
+		AppendNotesToControlEx(*combo, sndFile, m_nInstr);
 
 		if (ModCommand::IsNoteOrEmpty(m_nNote))
 		{
 			// Normal note / no note
 			const ModCommand::NOTE noteStart = sndFile.GetModSpecifications().noteMin;
 			combo->SetCurSel(m_nNote - (noteStart - 1));
-		}
-		else
+		} else
 		{
 			// Special notes
 			for(int i = combo->GetCount() - 1; i >= 0; --i)
@@ -951,9 +938,13 @@ void CPageEditNote::OnNoteChanged()
 	}
 	const bool bIsNowParamControl = ModCommand::IsPcNote(m_nNote);
 	if(bWasParamControl != bIsNowParamControl)
+	{
 		UpdateDialog();
+		m_pParent.m_pageVolume->UpdateDialog();
+		m_pParent.m_pageEffect->UpdateDialog();
+	}
 
-	if (m_pParent) m_pParent->UpdateNote(m_nNote, m_nInstr);
+	m_pParent.UpdateNote(m_nNote, m_nInstr);
 }
 
 
@@ -1054,7 +1045,7 @@ void CPageEditVolume::OnVolCmdChanged()
 	{
 		m_nVolume = static_cast<ModCommand::VOL>(slider->GetPos());
 	}
-	if (m_pParent) m_pParent->UpdateVolume(m_nVolCmd, m_nVolume);
+	m_pParent.UpdateVolume(m_nVolCmd, m_nVolume);
 }
 
 
@@ -1178,7 +1169,7 @@ void CPageEditEffect::UpdateValue(BOOL bSet)
 	}
 	SetDlgItemText(IDC_TEXT1, s);
 
-	if ((m_pParent) && (bSet)) m_pParent->UpdateEffect(m_nCommand, m_nParam);
+	if (bSet) m_pParent.UpdateEffect(m_nCommand, m_nParam);
 }
 
 
