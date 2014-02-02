@@ -249,7 +249,7 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 	{
 		PrecomputeLoop<T>(sustainLookAheadStart,
 			sampleData + smp.nSustainStart * numChannels,
-			smp.nSustainEnd - smp.nSustainEnd,
+			smp.nSustainEnd - smp.nSustainStart,
 			numChannels,
 			smp.uFlags[CHN_PINGPONGSUSTAIN],
 			sndFile.IsITPingPongMode());
