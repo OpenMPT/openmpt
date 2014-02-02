@@ -1737,8 +1737,8 @@ void QuickChannelProperties::OnPanChanged()
 }
 
 
-void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *)
-//--------------------------------------------------------------
+void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
+//-----------------------------------------------------------------
 {
 	if(!visible)
 	{
@@ -1748,9 +1748,9 @@ void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *)
 	bool update = false;
 
 	// Volume slider
-	uint16 pos = static_cast<uint16>(volSlider.GetPos());
-	if(pos >= 0 && pos <= 64)
+	if(bar == reinterpret_cast<CScrollBar *>(&volSlider))
 	{
+		uint16 pos = static_cast<uint16>(volSlider.GetPos());
 		PrepareUndo();
 		if(document->SetChannelGlobalVolume(channel, pos))
 		{
@@ -1759,9 +1759,9 @@ void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *)
 		}
 	}
 	// Pan slider
-	pos = static_cast<uint16>(panSlider.GetPos());
-	if(pos >= 0 && pos <= 64)
+	if(bar == reinterpret_cast<CScrollBar *>(&panSlider))
 	{
+		uint16 pos = static_cast<uint16>(panSlider.GetPos());
 		PrepareUndo();
 		if(document->SetChannelDefaultPan(channel, pos * 4u))
 		{
