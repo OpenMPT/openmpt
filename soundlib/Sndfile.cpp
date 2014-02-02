@@ -990,7 +990,6 @@ BOOL CSoundFile::Destroy()
 		Chn[i].pModInstrument = nullptr;
 		Chn[i].pModSample = nullptr;
 		Chn[i].pCurrentSample = nullptr;
-		Chn[i].pSample = nullptr;
 		Chn[i].nLength = 0;
 	}
 
@@ -1633,11 +1632,11 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		if(Chn[i].pSample == sample.pSample)
+		if(Chn[i].pModSample == &sample)
 		{
 			Chn[i].nPos = 0;
 			Chn[i].nLength = 0;
-			Chn[i].pSample = Chn[i].pCurrentSample = nullptr;
+			Chn[i].pCurrentSample = nullptr;
 		}
 	}
 

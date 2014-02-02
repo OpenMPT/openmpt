@@ -908,8 +908,8 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
 				const ModChannel &chn = m_pSndFile->Chn[k];
-				if(chn.pSample == m_pSndFile->GetSample(smp).pSample && chn.nLength != 0	// Corrent sample is set up on this channel
-					&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))						// And it hasn't completely faded out yet, so it's still playing
+				if(chn.pModSample == &m_pSndFile->GetSample(smp) && chn.nLength != 0	// Corrent sample is set up on this channel
+					&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))					// And it hasn't completely faded out yet, so it's still playing
 				{
 					notification.pos[k] = chn.nPos;
 				} else

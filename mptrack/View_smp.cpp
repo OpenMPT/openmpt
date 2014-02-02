@@ -2042,7 +2042,7 @@ void CViewSample::On8BitConvert()
 				p[i] = (signed char) ((*((short int *)(p+i*2))) / 256);
 			}
 			sample.uFlags.reset(CHN_16BIT);
-			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++) if (sndFile.Chn[j].pSample == sample.pSample)
+			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++) if (sndFile.Chn[j].pModSample == &sample)
 			{
 				sndFile.Chn[j].dwFlags.reset(CHN_16BIT);
 			}

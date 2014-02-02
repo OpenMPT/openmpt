@@ -59,8 +59,7 @@ struct ALIGN(32) ModChannel
 	uint32 nRampLength;
 	// Up to here: 100 bytes
 
-	const void *pSample;				// Currently playing sample, or previously played sample if no sample is playing.
-	ModSample *pModSample;				// Currently assigned sample slot
+	ModSample *pModSample;				// Currently assigned sample slot (can already be stopped)
 
 	// Information not used in the mixer
 	ModInstrument *pModInstrument;		// Currently assigned instrument slot
