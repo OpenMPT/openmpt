@@ -230,10 +230,15 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 	T *loopLookAheadStart = afterSampleStart + (loopEndsAtSampleEnd ? -2 * copySamples : copySamples);
 	T *sustainLookAheadStart = loopLookAheadStart + 4 * copySamples;
 
-	// Put silence at sample end - maybe we can "bake" the anti-click fade-out ramp into this as well?
-	for(int i = 0; i < copySamples; i++)
+	// Hold sample on the same level as the last sampling point at the end to prevent extra pops with interpolation.
+	// Do the same at the sample start, too.
+	for(int i = 0; i < InterpolationMaxLookahead; i++)
 	{
-		afterSampleStart[i] = 0;
+		for(int c = 0; c < numChannels; c++)
+		{
+			afterSampleStart[i * numChannels + c] = afterSampleStart[-numChannels + c];
+			sampleData[-(i + 1) * numChannels + c] = sampleData[c];
+		}
 	}
 
 	if(smp.uFlags[CHN_LOOP])
