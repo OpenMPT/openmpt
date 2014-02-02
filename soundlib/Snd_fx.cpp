@@ -947,7 +947,6 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 
 
-	pChn->pSample = pSmp->pSample;
 	pChn->nTranspose = pSmp->RelativeTone;
 
 	// FT2 compatibility: Don't reset portamento target with new instrument numbers.
@@ -1121,7 +1120,6 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 		if(!bPorta || (!pChn->nLength && !(GetType() & MOD_TYPE_S3M)))
 		{
 			pChn->pModSample = pSmp;
-			pChn->pSample = pSmp->pSample;
 			pChn->nLength = pSmp->nLength;
 			pChn->nLoopEnd = pSmp->nLength;
 			pChn->nLoopStart = 0;
@@ -1384,7 +1382,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 		return;
 	}
 	if(instr >= MAX_INSTRUMENTS) instr = 0;
-	const void *pSample = pChn->pSample;
+	const ModSample *pSample = pChn->pModSample;
 	pIns = pChn->pModInstrument;
 	if(instr && note)
 	{
@@ -1398,7 +1396,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 				note = pIns->NoteMap[note - 1];
 				if ((n) && (n < MAX_SAMPLES))
 				{
-					pSample = Samples[n].pSample;
+					pSample = &Samples[n];
 				} else if(IsCompatibleMode(TRK_IMPULSETRACKER) && !pIns->HasValidMIDIChannel())
 				{
 					// Impulse Tracker ignores empty slots.
@@ -1432,7 +1430,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 				break;
 			// Sample
 			case DCT_SAMPLE:
-				if(pSample != nullptr && pSample == p->pSample) bOk = true;
+				if(pSample != nullptr && pSample == p->pModSample) bOk = true;
 				break;
 			// Instrument
 			case DCT_INSTRUMENT:
@@ -1955,7 +1953,7 @@ BOOL CSoundFile::ProcessEffects()
 					} else
 					{
 						// Sample mode
-						if(instr < MAX_SAMPLES && pChn->pSample != Samples[instr].pSample)
+						if(instr < MAX_SAMPLES && pChn->pModSample != &Samples[instr])
 							note = pChn->nNote;
 					}
 				}

@@ -32,7 +32,7 @@ void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength,
 
 	CriticalSection cs;
 
-	ctrlChn::ReplaceSample(sndFile.Chn, pOldSmp, pNewSample, nNewLength, setFlags, resetFlags);
+	ctrlChn::ReplaceSample(sndFile.Chn, &smp, pNewSample, nNewLength, setFlags, resetFlags);
 	smp.pSample = pNewSample;
 	smp.nLength = nNewLength;
 	ModSample::FreeSample(pOldSmp);
@@ -500,7 +500,7 @@ float RemoveDCOffset(ModSample &smp,
 		smp.nGlobalVol = MIN((WORD)(smp.nGlobalVol / dAmplify), 64);
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			if(sndFile.Chn[i].pSample == smp.pSample)
+			if(sndFile.Chn[i].pModSample == &smp)
 			{
 				sndFile.Chn[i].nGlobalVol = smp.nGlobalVol;
 			}
@@ -714,7 +714,7 @@ bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode convers
 	smp.uFlags.reset(CHN_STEREO);
 	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		if(sndFile.Chn[i].pSample == smp.pSample)
+		if(sndFile.Chn[i].pModSample == &smp)
 		{
 			sndFile.Chn[i].dwFlags.reset(CHN_STEREO);
 		}
@@ -733,7 +733,7 @@ namespace ctrlChn
 {
 
 void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
-					const void * const pOldSample,
+					const ModSample * const pSample,
 					const void * const pNewSample,
 					const SmpLength nNewLength,
 					FlagSet<ChannelFlags> setFlags,
@@ -741,9 +741,8 @@ void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 {
 	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		if (Chn[i].pSample == pOldSample)
+		if (Chn[i].pModSample == pSample)
 		{
-			Chn[i].pSample = pNewSample;
 			if (Chn[i].pCurrentSample != nullptr)
 				Chn[i].pCurrentSample = pNewSample;
 			if (Chn[i].nPos > nNewLength)

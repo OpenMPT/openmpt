@@ -123,7 +123,7 @@ BOOL CSoundFile::FadeSong(UINT msec)
 	if (nsamples <= 0) return FALSE;
 	if (nsamples > 0x100000) nsamples = 0x100000;
 	m_nBufferCount = nsamples;
-	uint32 nRampLength = static_cast<uint32>(m_nBufferCount);
+	int32 nRampLength = static_cast<int32>(m_nBufferCount);
 	// Ramp everything down
 	for (UINT noff=0; noff < m_nMixChannels; noff++)
 	{
@@ -392,7 +392,6 @@ BOOL CSoundFile::ProcessRow()
 									Chn[i].nLoopStart = 0;
 									Chn[i].nLoopEnd = 0;
 									Chn[i].pModInstrument = nullptr;
-									Chn[i].pSample = nullptr;
 									Chn[i].pModSample = nullptr;
 								}
 							}
@@ -1877,7 +1876,7 @@ BOOL CSoundFile::ReadNote()
 		// Check for too big nInc
 		//if (((pChn->nInc >> 16) + 1) >= (int32)(pChn->nLoopEnd - pChn->nLoopStart)) pChn->dwFlags.reset(CHN_LOOP);
 		pChn->newLeftVol = pChn->newRightVol = 0;
-		pChn->pCurrentSample = ((pChn->pSample) && (pChn->nLength) && (pChn->nInc)) ? pChn->pSample : NULL;
+		pChn->pCurrentSample = (pChn->pModSample && pChn->pModSample->pSample && pChn->nLength && pChn->nInc) ? pChn->pModSample->pSample : nullptr;
 		if (pChn->pCurrentSample)
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)

@@ -1094,7 +1094,6 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			chn.pCurrentSample = sample.pSample;
 			chn.pModInstrument = nullptr;
 			chn.pModSample = &sample;
-			chn.pSample = sample.pSample;
 			chn.nFineTune = sample.nFineTune;
 			chn.nC5Speed = sample.nC5Speed;
 			chn.nLoopStart = sample.nLoopStart;
