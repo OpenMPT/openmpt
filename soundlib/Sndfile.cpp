@@ -31,7 +31,6 @@
 #endif // NO_ARCHIVE_SUPPORT
 
 extern BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
-extern const char *szSpecialNoteNames[];
 
 
 // -> CODE#0027
@@ -1744,22 +1743,37 @@ void CSoundFile::LoadBuiltInTunings()
 std::string CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const
 //------------------------------------------------------------------------------------------------
 {
+	// For MPTM instruments with custom tuning, find the appropriate note name. Else, use default note names.
+	if(ModCommand::IsNote(note) && GetType() == MOD_TYPE_MPT && inst >= 1 && inst <= GetNumInstruments() && Instruments[inst] && Instruments[inst]->pTuning)
+	{
+		return Instruments[inst]->pTuning->GetNoteName(note - NOTE_MIDDLEC);
+	} else
+	{
+		return GetNoteName(note);
+	}
+}
+
+
+std::string CSoundFile::GetNoteName(const ModCommand::NOTE note)
+//--------------------------------------------------------------
+{
 	if(ModCommand::IsSpecialNote(note))
 	{
-		return szSpecialNoteNames[note - NOTE_MIN_SPECIAL];
+		const char specialNoteNames[][4] = { "PCs",  "PC ", "~~~", "^^^", "===" };
+		STATIC_ASSERT(CountOf(specialNoteNames) == NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1);
+
+		return specialNoteNames[note - NOTE_MIN_SPECIAL];
+	} else if(ModCommand::IsNote(note))
+	{
+		char name[4];
+		MemCopy<char[4]>(name, szNoteNames[(note - NOTE_MIN) % 12]);	// e.g. "C#"
+		name[2] = '0' + (note - NOTE_MIN) / 12;	// e.g. 5
+		return name; //szNoteNames[(note - NOTE_MIN) % 12] + std::string(1, '0' + (note - NOTE_MIN) / 12);
 	} else if(note == NOTE_NONE)
 	{
 		return "...";
-	} else if(!ModCommand::IsNote(note))
-	{
-		return "???";
 	}
-
-	// For MPTM instruments with custom tuning, find the appropriate note name. Else, use default note names.
-	if(GetType() == MOD_TYPE_MPT && inst >= 1 && inst <= GetNumInstruments() && Instruments[inst] && Instruments[inst]->pTuning)
-		return Instruments[inst]->pTuning->GetNoteName(note - NOTE_MIDDLEC);
-	else
-		return szDefaultNoteNames[note - 1];
+	return "???";
 }
 
 

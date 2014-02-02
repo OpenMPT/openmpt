@@ -578,7 +578,10 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 
 	case 2:
 		// IT compatibility: IT has its own, more precise tables
-		return IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[position] : ModSquareTable[position];
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			return position < 128 ? 64 : 0;
+		else
+			return position < 32 ? 127 : -127;
 
 	case 3:
 		//IT compatibility 19. Use random values
@@ -1381,7 +1384,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 				vdelta = -ITRampDownTable[vibpos];
 				break;
 			case VIB_SQUARE:
-				vdelta = ITSquareTable[vibpos];
+				vdelta = vibpos < 128 ? 64 : 0;
 				break;
 			case VIB_SINE:
 			default:

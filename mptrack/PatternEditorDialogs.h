@@ -123,11 +123,11 @@ class CPageEditCommand: public CPropertyPage
 protected:
 	CSoundFile &sndFile;
 	EffectInfo effectInfo;
-	CEditCommand *m_pParent;
+	CEditCommand &m_pParent;
 	bool m_bInitialized;
 
 public:
-	CPageEditCommand(CSoundFile &sf, CEditCommand *parent, UINT id) : CPropertyPage(id), sndFile(sf), effectInfo(sf), m_pParent(parent), m_bInitialized(false) {};
+	CPageEditCommand(CSoundFile &sf, CEditCommand &parent, UINT id) : CPropertyPage(id), sndFile(sf), effectInfo(sf), m_pParent(parent), m_bInitialized(false) {};
 
 	virtual ~CPageEditCommand() {}
 	virtual BOOL OnInitDialog();
@@ -145,7 +145,7 @@ protected:
 	ModCommand::INSTR m_nInstr;
 
 public:
-	CPageEditNote(CSoundFile &sf, CEditCommand *parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITNOTE) {}
+	CPageEditNote(CSoundFile &sf, CEditCommand &parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITNOTE) {}
 	void Init(ModCommand &m) { m_nNote = m.note; m_nInstr = m.instr; }
 	void UpdateDialog();
 
@@ -168,7 +168,7 @@ protected:
 	bool m_bIsParamControl;
 
 public:
-	CPageEditVolume(CSoundFile &sf, CEditCommand *parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITVOLUME) {};
+	CPageEditVolume(CSoundFile &sf, CEditCommand &parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITVOLUME) {};
 	void Init(ModCommand &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = m.IsPcNote(); };
 	void UpdateDialog();
 	void UpdateRanges();
@@ -200,7 +200,7 @@ protected:
 	ModCommand* m_pModcommand;
 
 public:
-	CPageEditEffect(CSoundFile &sf, CEditCommand *parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITEFFECT) {}
+	CPageEditEffect(CSoundFile &sf, CEditCommand &parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITEFFECT) {}
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
 	void Init(ModCommand &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = m.IsPcNote(); m_nPlugin = m.instr; m_nPluginParam = m.GetValueVolCol();}
@@ -224,6 +224,7 @@ protected:
 class CEditCommand: public CPropertySheet
 //=======================================
 {
+	friend class CPageEditNote;
 protected:
 	CPageEditNote *m_pageNote;
 	CPageEditVolume *m_pageVolume;
@@ -242,10 +243,7 @@ public:
 public:
 	BOOL SetParent(CWnd *parent, CModDoc *pModDoc);
 	BOOL ShowEditWindow(PATTERNINDEX nPat, const PatternCursor &cursor);
-	// -> CODE#0010
-	// -> DESC="add extended parameter mechanism to pattern effects"
 	void OnSelListChange();
-	// -! NEW_FEATURE#0010
 	void UpdateNote(ModCommand::NOTE note, ModCommand::INSTR instr);
 	void UpdateVolume(ModCommand::VOLCMD volcmd, ModCommand::VOL vol);
 	void UpdateEffect(ModCommand::COMMAND command, ModCommand::PARAM param);

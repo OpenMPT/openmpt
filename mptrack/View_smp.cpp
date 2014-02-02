@@ -2233,9 +2233,11 @@ void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
 			ModSample &sample = sndFile.GetSample(m_nSample);
 			uint32 freq = sndFile.GetFreqFromPeriod(sndFile.GetPeriodFromNote(note + (sndFile.GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
 
-			CHAR s[32];
-			wsprintf(s, "%s (%d.%02d Hz)", szDefaultNoteNames[note - 1], freq >> FREQ_FRACBITS, Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS));
-			pMainFrm->SetInfoText(s);
+			const std::string s = mpt::String::Print("%1 (%2.%3 Hz)",
+				sndFile.GetNoteName((ModCommand::NOTE)note),
+				freq >> FREQ_FRACBITS,
+				mpt::fmt::dec0<2>(Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS)));
+			pMainFrm->SetInfoText(s.c_str());
 		}
 	}
 

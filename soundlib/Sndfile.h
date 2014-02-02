@@ -296,7 +296,8 @@ public:
 	static CTuning *GetDefaultTuning() {return nullptr;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
-	std::string GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst = INSTRUMENTINDEX_INVALID) const;
+	std::string GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const;
+	static std::string GetNoteName(const ModCommand::NOTE note);
 private:
 	CTuningCollection* m_pTuningsTuneSpecific;
 #ifdef MODPLUG_TRACKER
@@ -870,8 +871,7 @@ public:
 #endif
 
 
-extern const char *szNoteNames[12];
-extern const char *szDefaultNoteNames[NOTE_MAX];
+extern const char szNoteNames[12][4];
 
 
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)

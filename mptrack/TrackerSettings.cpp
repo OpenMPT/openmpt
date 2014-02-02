@@ -897,7 +897,7 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 	for(size_t i = 0; i < CountOf(chords); i++)
 	{
 		uint32 chord;
-		if((chord = conf.Read<int32>("Chords", szDefaultNoteNames[i], -1)) >= 0)
+		if((chord = conf.Read<int32>("Chords", CSoundFile::GetNoteName(i + NOTE_MIN), -1)) >= 0)
 		{
 			if((chord & 0xFFFFFFC0) || (!chords[i].notes[0]))
 			{
@@ -917,7 +917,7 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 	for(size_t i = 0; i < CountOf(chords); i++)
 	{
 		int32 s = (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18);
-		conf.Write<int32>("Chords", szDefaultNoteNames[i], s);
+		conf.Write<int32>("Chords", CSoundFile::GetNoteName(i + NOTE_MIN), s);
 	}
 }
 
