@@ -106,7 +106,7 @@ public:
 		streamparameters.channelCount = flags.channels;
 		streamparameters.sampleFormat = ( flags.use_float ? paFloat32 : paInt16 );
 		streamparameters.suggestedLatency = flags.buffer * 0.001;
-		check_portaudio_error( Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, paFramesPerBufferUnspecified, 0, &portaudio_callback_wrapper, this ) );
+		check_portaudio_error( Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, paFramesPerBufferUnspecified, ( flags.dither > 0 ) ? paNoFlag : paDitherOff, &portaudio_callback_wrapper, this ) );
 		if ( flags.verbose ) {
 			log << "PortAudio (Callback):" << std::endl;
 			log << " device: "
@@ -233,12 +233,12 @@ public:
 			log << " ui redraw: " << flags.period << std::endl;
 		}
 		PaError e = PaError();
-		e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, framesperbuffer, 0, NULL, NULL );
+		e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, framesperbuffer, ( flags.dither > 0 ) ? paNoFlag : paDitherOff, NULL, NULL );
 		if ( e != paNoError ) {
 			// Non-interleaved failed, try interleaved next.
 			// This might help broken portaudio on MacOS X.
 			streamparameters.sampleFormat &= ~paNonInterleaved;
-			e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, framesperbuffer, 0, NULL, NULL );
+			e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, framesperbuffer, ( flags.dither > 0 ) ? paNoFlag : paDitherOff, NULL, NULL );
 			if ( e == paNoError ) {
 				interleaved = true;
 			}
