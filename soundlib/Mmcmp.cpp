@@ -11,12 +11,11 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
+#include "FileReader.h"
+
 
 //#define MMCMP_LOG
 
-
-BOOL XPK_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
-BOOL PP20_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
 
 typedef struct MMCMPFILEHEADER
 {
@@ -109,9 +108,17 @@ const UINT MMCMP16BitFetch[16] =
 };
 
 
-BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
-//---------------------------------------------------------
+bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
+//-----------------------------------------------------------------
 {
+	file.Rewind();
+	unpackedData.clear();
+
+	LPCBYTE argMemFile = (LPCBYTE)file.GetRawData();
+	DWORD argMemLength = file.GetLength();
+	LPCBYTE *ppMemFile = &argMemFile;
+	LPDWORD pdwMemLength = &argMemLength;
+
 	DWORD dwMemLength = *pdwMemLength;
 	LPCBYTE lpMemFile = *ppMemFile;
 	LPBYTE pBuffer;
@@ -120,11 +127,6 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 	LPDWORD pblk_table;
 	DWORD dwFileSize;
 
-	if ((XPK_Unpack(ppMemFile, pdwMemLength))
-	 || (PP20_Unpack(ppMemFile, pdwMemLength)))
-	{
-		return TRUE;
-	}
 	if ((dwMemLength < 256) || (!pmfh) || (pmfh->id_ziRC != 0x4352697A) || (pmfh->id_ONia != 0x61694e4f) || (pmfh->hdrsize < 14)
 	 || (!pmmh->nblocks) || (pmmh->filesize < 16) || (pmmh->filesize > 0x8000000)
 	 || (pmmh->blktable >= dwMemLength) || (pmmh->blktable + 4*pmmh->nblocks > dwMemLength)) return FALSE;
@@ -293,7 +295,10 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 	}
 	*ppMemFile = pBuffer;
 	*pdwMemLength = dwFileSize;
-	return TRUE;
+
+	unpackedData.assign(argMemFile, argMemFile + argMemLength);
+	free(pBuffer);
+	return true;
 }
 
 
@@ -556,8 +561,17 @@ l7ca:
 }
 
 
-BOOL XPK_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
+bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
+//---------------------------------------------------------------
 {
+	file.Rewind();
+	unpackedData.clear();
+
+	LPCBYTE argMemFile = (LPCBYTE)file.GetRawData();
+	DWORD argMemLength = file.GetLength();
+	LPCBYTE *ppMemFile = &argMemFile;
+	LPDWORD pdwMemLength = &argMemLength;
+
 	DWORD dwMemLength = *pdwMemLength;
 	LPCBYTE lpMemFile = *ppMemFile;
 	PXPKFILEHEADER pxfh = (PXPKFILEHEADER)lpMemFile;
@@ -576,7 +590,10 @@ BOOL XPK_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 	XPK_DoUnpack(lpMemFile+sizeof(XPKFILEHEADER), dwSrcLen+8-sizeof(XPKFILEHEADER), pBuffer, dwDstLen);
 	*ppMemFile = pBuffer;
 	*pdwMemLength = dwDstLen;
-	return TRUE;
+
+	unpackedData.assign(argMemFile, argMemFile + argMemLength);
+	free(pBuffer);
+	return true;
 }
 
 
@@ -671,8 +688,17 @@ void PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
 }
 
 
-BOOL PP20_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
+bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
+//----------------------------------------------------------------
 {
+	file.Rewind();
+	unpackedData.clear();
+
+	LPCBYTE argMemFile = (LPCBYTE)file.GetRawData();
+	DWORD argMemLength = file.GetLength();
+	LPCBYTE *ppMemFile = &argMemFile;
+	LPDWORD pdwMemLength = &argMemLength;
+
 	DWORD dwMemLength = *pdwMemLength;
 	LPCBYTE lpMemFile = *ppMemFile;
 	DWORD dwDstLen;
@@ -686,7 +712,10 @@ BOOL PP20_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 	PP20_DoUnpack(lpMemFile+4, dwMemLength-4, pBuffer, dwDstLen);
 	*ppMemFile = pBuffer;
 	*pdwMemLength = dwDstLen;
-	return TRUE;
+
+	unpackedData.assign(argMemFile, argMemFile + argMemLength);
+	free(pBuffer);
+	return true;
 }
 
 
