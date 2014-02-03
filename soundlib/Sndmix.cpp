@@ -1931,6 +1931,17 @@ BOOL CSoundFile::ReadNote()
 						pChn->newLeftVol = (realvol * (256 - pan)) >> 8;
 						pChn->newRightVol = (realvol * 128) >> 8;
 					}
+				} else if(GetType() == MOD_TYPE_XM && m_PlayConfig.getEmulateQuirks())
+				{
+					// FT2 uses square root panning. There is a 257-entry LUT for this,
+					// but FT2's internal panning ranges from 0 to 255 only, meaning that
+					// you can never truly achieve 100% right panning in FT2, only 100% left.
+					// Test case: FT2PanLaw.xm
+					LimitMax(pan, 255);
+					const int panL = pan > 0 ? XMPanningTable[256 - pan] : 65536;
+					const int panR = XMPanningTable[pan];
+					pChn->newLeftVol = (realvol * panL) >> 16;
+					pChn->newRightVol = (realvol * panR) >> 16;
 				} else
 				{
 					pChn->newLeftVol = (realvol * (256 - pan)) >> 8;

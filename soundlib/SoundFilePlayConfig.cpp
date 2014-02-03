@@ -43,6 +43,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
+			setEmulateQuirks(false);
 			break;
 
 		// Ericus' version gives us floats in [-0.06;0.06] and requires attenuation to
@@ -59,6 +60,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
+			setEmulateQuirks(false);
 			break;
 
 		// 117RC2 gives us floats in [-1.0; 1.0] and hopefully plays VSTis at 
@@ -76,6 +78,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
+			setEmulateQuirks(false);
 			break;
 
 		// 117RC3 ignores the horrible global, system-specific pre-amp, 
@@ -94,6 +97,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setNormalVSTiVol(128.0);
 			setNormalGlobalVol(256.0);
 			setExtraSampleAttenuation(0);
+			setEmulateQuirks(false);
 			break;
 
 		// A mixmode that is intended to be compatible to legacy trackers (IT/FT2/etc).
@@ -111,166 +115,10 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setNormalVSTiVol(256.0);
 			setNormalGlobalVol(256.0);
 			setExtraSampleAttenuation(1);
+			setEmulateQuirks(true);
 			break;
 
 	}
 
 	return;
-}
-
-
-
-//getters and setters.
-bool CSoundFilePlayConfig::getGlobalVolumeAppliesToMaster() const
-//---------------------------------------------------------------
-{
-	return m_globalVolumeAppliesToMaster;
-}
-
-
-void CSoundFilePlayConfig::setGlobalVolumeAppliesToMaster(bool inGlobalVolumeAppliesToMaster)
-//-------------------------------------------------------------------------------------------
-{
-	m_globalVolumeAppliesToMaster=inGlobalVolumeAppliesToMaster;
-}
-
-float CSoundFilePlayConfig::getVSTiGainFactor() const
-//---------------------------------------------------
-{
-	return m_VSTiVolume;
-}
-
-float CSoundFilePlayConfig::getVSTiVolume() const
-//-----------------------------------------------
-{
-	return m_VSTiVolume;
-}
-
-void  CSoundFilePlayConfig::setVSTiVolume(float inVSTiVolume)
-//-----------------------------------------------------------
-{
-	m_VSTiVolume = inVSTiVolume;
-}
-
-float CSoundFilePlayConfig::getVSTiAttenuation() const
-//----------------------------------------------------
-{
-	return m_VSTiAttenuation;
-}
-
-void  CSoundFilePlayConfig::setVSTiAttenuation(float inVSTiAttenuation)
-//---------------------------------------------------------------------
-{
-	m_VSTiAttenuation = inVSTiAttenuation;
-}
-
-float CSoundFilePlayConfig::getIntToFloat() const
-//-----------------------------------------------
-{
-	return m_IntToFloat;
-}
-
-void  CSoundFilePlayConfig::setIntToFloat(float inIntToFloat)
-//-----------------------------------------------------------
-{
-	m_IntToFloat = inIntToFloat;
-}
-
-
-float CSoundFilePlayConfig::getFloatToInt() const
-//-----------------------------------------------
-{
-	return m_FloatToInt;
-}
-
-
-void  CSoundFilePlayConfig::setFloatToInt(float inFloatToInt)
-//-----------------------------------------------------------
-{
-	m_FloatToInt = inFloatToInt;
-}
-
-bool CSoundFilePlayConfig::getUseGlobalPreAmp() const
-//---------------------------------------------------
-{
-	return m_ignorePreAmp;
-}
-
-void CSoundFilePlayConfig::setUseGlobalPreAmp(bool inUseGlobalPreAmp)
-//-------------------------------------------------------------------
-{
-	m_ignorePreAmp = inUseGlobalPreAmp;
-}
-
-
-forcePanningMode CSoundFilePlayConfig::getForcePanningMode() const
-//----------------------------------------------------------------
-{
-	return m_forceSoftPanning;
-}
-
-void CSoundFilePlayConfig::setForcePanningMode(forcePanningMode inForceSoftPanning)
-//---------------------------------------------------------------------------------
-{
-	m_forceSoftPanning = inForceSoftPanning;
-}
-
-void CSoundFilePlayConfig::setDisplayDBValues(bool in)
-//----------------------------------------------------
-{
-	m_displayDBValues = in;
-}
-
-void CSoundFilePlayConfig::setNormalSamplePreAmp(double in)
-//---------------------------------------------------------
-{
-	m_normalSamplePreAmp = in;
-}
-
-void CSoundFilePlayConfig::setNormalVSTiVol(double in)
-//----------------------------------------------------
-{
-	m_normalVSTiVol = in;
-}
-
-void CSoundFilePlayConfig::setNormalGlobalVol(double in)
-//------------------------------------------------------
-{
-	m_normalGlobalVol = in;
-}
-
-bool CSoundFilePlayConfig::getDisplayDBValues() const
-//---------------------------------------------------
-{
-	return m_displayDBValues;
-}
-
-double CSoundFilePlayConfig::getNormalSamplePreAmp() const
-//--------------------------------------------------------
-{
-	return m_normalSamplePreAmp;
-}
-
-double CSoundFilePlayConfig::getNormalVSTiVol() const
-//---------------------------------------------------
-{
-	return m_normalVSTiVol;
-}
-
-double CSoundFilePlayConfig::getNormalGlobalVol() const
-//-----------------------------------------------------
-{
-	return m_normalGlobalVol;
-}
-
-void CSoundFilePlayConfig::setExtraSampleAttenuation(int attn)
-//------------------------------------------------------------
-{
-	m_extraAttenuation = attn;
-}
-
-int CSoundFilePlayConfig::getExtraSampleAttenuation() const
-//---------------------------------------------------------
-{
-	return m_extraAttenuation;
 }

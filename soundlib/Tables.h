@@ -33,3 +33,4 @@ extern const uint32 FineLinearSlideDownTable[16];
 extern const uint32 LinearSlideUpTable[256];
 extern const uint32 LinearSlideDownTable[256];
 extern const float ITResonanceTable[128];
+extern const uint16 XMPanningTable[256];
