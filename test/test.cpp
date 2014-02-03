@@ -1152,7 +1152,7 @@ void TestLoadXMFile(const CSoundFile &sndFile)
 	// Test 4-Bit Panning conversion
 	for(int i = 0; i < 16; i++)
 	{
-		VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(10 + i, 0)->vol, ((i * 64 + 8) / 15));
+		VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(10 + i, 0)->vol, i * 4);
 	}
 
 	// Plugins
