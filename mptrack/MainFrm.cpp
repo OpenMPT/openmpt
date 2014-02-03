@@ -2670,27 +2670,23 @@ void CMainFrame::UpdateMRUList()
 			}
 
 			const mpt::PathString &pathMPT = TrackerSettings::Instance().mruFiles[i];
-			const std::wstring path = pathMPT.ToWide();
+			std::wstring path = pathMPT.ToWide();
 			if(!mpt::PathString::CompareNoCase(workDir, pathMPT.GetPath()))
 			{
 				// Only show filename
-				s += path.substr(workDir.ToWide().length());
-			} else if(path.length() <= 30)	// Magic number experimentally determined to be equal to MFC's behaviour
-			{
-				s += path;
-			} else
+				path = path.substr(workDir.ToWide().length());
+			} else if(path.length() > 30)	// Magic number experimentally determined to be equal to MFC's behaviour
 			{
 				// Shorten path ("C:\Foo\VeryLongString...\Bar.it" => "C:\Foo\...\Bar.it")
 				size_t start = path.find_first_of(L"\\/", path.find_first_of(L"\\/") + 1);
 				size_t end = path.find_last_of(L"\\/");
 				if(start < end)
 				{
-					s += path.substr(0, start + 1) + L"..." + path.substr(end);
-				} else
-				{
-					s += path;
+					path = path.substr(0, start + 1) + L"..." + path.substr(end);
 				}
 			}
+			path = mpt::String::Replace(path, L"&", L"&&");
+			s += path;
 			::InsertMenuW(pMenu->m_hMenu, firstMenu + i, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST + i, s.c_str());
 		}
 	}
