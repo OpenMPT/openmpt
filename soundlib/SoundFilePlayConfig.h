@@ -49,47 +49,49 @@ public:
 	void SetMixLevels(int mixLevelType);
 
 //getters/setters
-	float getIntToFloat() const;
-	void setIntToFloat(float);
-	float getFloatToInt() const;
-	void setFloatToInt(float);
-
-	// default VSTi gain factor, different depending on the MPT version we're "emulating"
-	void setVSTiAttenuation(float);
-	float getVSTiAttenuation() const;
+	bool getGlobalVolumeAppliesToMaster() const { return m_globalVolumeAppliesToMaster; }
+	void setGlobalVolumeAppliesToMaster(bool inGlobalVolumeAppliesToMaster) { m_globalVolumeAppliesToMaster=inGlobalVolumeAppliesToMaster; }
 
 	// user-controllable VSTi gain factor.
-	void setVSTiVolume(float);
-	float getVSTiVolume() const;
+	float getVSTiVolume() const { return m_VSTiVolume; }
+	void  setVSTiVolume(float inVSTiVolume) { m_VSTiVolume = inVSTiVolume; }
 
-	void setGlobalVolumeAppliesToMaster(bool);
-	bool getGlobalVolumeAppliesToMaster() const;
-	
-	void setUseGlobalPreAmp(bool);
-	bool getUseGlobalPreAmp() const;
+	// default VSTi gain factor, different depending on the MPT version we're "emulating"
+	float getVSTiAttenuation() const { return m_VSTiAttenuation; }
+	void  setVSTiAttenuation(float inVSTiAttenuation) { m_VSTiAttenuation = inVSTiAttenuation; }
 
-	void setForcePanningMode(forcePanningMode);
-	forcePanningMode getForcePanningMode() const;
+	float getIntToFloat() const { return m_IntToFloat; }
+	void  setIntToFloat(float inIntToFloat) { m_IntToFloat = inIntToFloat; }
 
-	void setDisplayDBValues(bool);
-	bool getDisplayDBValues() const;
+	float getFloatToInt() const { return m_FloatToInt; }
+	void  setFloatToInt(float inFloatToInt) { m_FloatToInt = inFloatToInt; }
+
+	bool getUseGlobalPreAmp() const { return m_ignorePreAmp; }
+	void setUseGlobalPreAmp(bool inUseGlobalPreAmp) { m_ignorePreAmp = inUseGlobalPreAmp; }
+
+	forcePanningMode getForcePanningMode() const { return m_forceSoftPanning; }
+	void setForcePanningMode(forcePanningMode inForceSoftPanning) { m_forceSoftPanning = inForceSoftPanning; }
+
+	bool getDisplayDBValues() const { return m_displayDBValues; }
+	void setDisplayDBValues(bool in) { m_displayDBValues = in; }
+
+	// Values at which volumes are unchanged
+	double getNormalSamplePreAmp() const { return m_normalSamplePreAmp; }
+	void setNormalSamplePreAmp(double in) { m_normalSamplePreAmp = in; }
+	double getNormalVSTiVol() const { return m_normalVSTiVol; }
+	void setNormalVSTiVol(double in) { m_normalVSTiVol = in; }
+	double getNormalGlobalVol() const { return m_normalGlobalVol; }
+	void setNormalGlobalVol(double in) { m_normalGlobalVol = in; }
 
 	// Extra sample attenuation in bits
-	void setExtraSampleAttenuation(int);
-	int getExtraSampleAttenuation() const;
+	int getExtraSampleAttenuation() const { return m_extraAttenuation; }
+	void setExtraSampleAttenuation(int attn) { m_extraAttenuation = attn; }
 
-	//Values at which volumes are unchanged
-	double getNormalSamplePreAmp() const;
-	double getNormalVSTiVol() const;
-	double getNormalGlobalVol() const;
-	void setNormalSamplePreAmp(double);
-	void setNormalVSTiVol(double);
-	void setNormalGlobalVol(double);
+	// True if format-specific mixing quirks should be emulated.
+	bool getEmulateQuirks() const { return m_emualteQuirks; }
+	void setEmulateQuirks(bool emulate) { m_emualteQuirks = emulate; }
 
-private:
-
-//calculated internally (getters only):
-	float getVSTiGainFactor() const;
+protected:
 
 	float m_IntToFloat;
 	float m_FloatToInt;
@@ -100,11 +102,11 @@ private:
 	double m_normalVSTiVol;
 	double m_normalGlobalVol;
 
+	int m_extraAttenuation;
+	forcePanningMode m_forceSoftPanning;
 	bool m_globalVolumeAppliesToMaster;
 	bool m_ignorePreAmp;
-	forcePanningMode m_forceSoftPanning;
 	bool m_displayDBValues;
-
-	int m_extraAttenuation;
+	bool m_emualteQuirks;
 };
 
