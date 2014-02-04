@@ -761,12 +761,12 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 #endif
 
-		bool packed = false;
+		MODCONTAINERTYPE packedContainerType = MOD_CONTAINERTYPE_NONE;
 		std::vector<char> unpackedData;
-		if(!packed && UnpackXPK(unpackedData, file)) packed = true;
-		if(!packed && UnpackPP20(unpackedData, file)) packed = true;
-		if(!packed && UnpackMMCMP(unpackedData, file)) packed = true;
-		if(packed)
+		if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_XPK;
+		if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_PP20;
+		if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
+		if(packedContainerType != MOD_CONTAINERTYPE_NONE)
 		{
 			file = FileReader(&(unpackedData[0]), unpackedData.size());
 			lpStream = (LPCBYTE)file.GetRawData();
@@ -818,6 +818,11 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		{
 			m_nType = MOD_TYPE_NONE;
 			m_ContainerType = MOD_CONTAINERTYPE_NONE;
+		}
+
+		if(packedContainerType != MOD_CONTAINERTYPE_NONE && m_ContainerType == MOD_CONTAINERTYPE_NONE)
+		{
+			m_ContainerType = packedContainerType;
 		}
 
 		if(madeWithTracker.empty())
