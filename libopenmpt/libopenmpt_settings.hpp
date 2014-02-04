@@ -68,7 +68,7 @@ public:
 		read_setting( subkey, L"Samplerate_Hz", samplerate );
 		read_setting( subkey, L"Channels", channels );
 		read_setting( subkey, L"MasterGain_milliBel", mastergain_millibel );
-		read_setting( subkey, L"SeteroSeparation_Percent", stereoseparation );
+		read_setting( subkey, L"StereoSeparation_Percent", stereoseparation );
 		read_setting( subkey, L"RepeatCount", repeatcount );
 		read_setting( subkey, L"InterpolationFilterLength", interpolationfilterlength );
 		read_setting( subkey, L"VolumeRampingStrength", ramping );
@@ -79,7 +79,7 @@ public:
 		write_setting( subkey, L"Samplerate_Hz", samplerate );
 		write_setting( subkey, L"Channels", channels );
 		write_setting( subkey, L"MasterGain_milliBel", mastergain_millibel );
-		write_setting( subkey, L"SeteroSeparation_Percent", stereoseparation );
+		write_setting( subkey, L"StereoSeparation_Percent", stereoseparation );
 		write_setting( subkey, L"RepeatCount", repeatcount );
 		write_setting( subkey, L"InterpolationFilterLength", interpolationfilterlength );
 		write_setting( subkey, L"VolumeRampingStrength", ramping );
