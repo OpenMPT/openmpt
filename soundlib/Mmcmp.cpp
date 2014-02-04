@@ -711,6 +711,7 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 	dstLen |= file.ReadUint8() << 0;
 	if(dstLen < PP20_UNPACKED_SIZE_MIN) return false;
 	if(dstLen > PP20_UNPACKED_SIZE_MAX) return false;
+	if(dstLen > 16*file.GetLength()) return false;
 	unpackedData.resize(dstLen);
 	file.Seek(4);
 	PP20_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), file.GetLength() - 4, reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
