@@ -30,7 +30,10 @@
 #include "../unarchiver/unarchiver.h"
 #endif // NO_ARCHIVE_SUPPORT
 
-extern BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
+bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file);
+bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file);
+bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file);
+
 
 
 // -> CODE#0027
@@ -758,10 +761,16 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 #endif
 
-		BOOL bMMCmp = MMCMP_Unpack(&lpStream, &dwMemLength);
-		if(bMMCmp)
+		bool packed = false;
+		std::vector<char> unpackedData;
+		if(!packed && UnpackXPK(unpackedData, file)) packed = true;
+		if(!packed && UnpackPP20(unpackedData, file)) packed = true;
+		if(!packed && UnpackMMCMP(unpackedData, file)) packed = true;
+		if(packed)
 		{
-			file = FileReader(lpStream, dwMemLength);
+			file = FileReader(&(unpackedData[0]), unpackedData.size());
+			lpStream = (LPCBYTE)file.GetRawData();
+			dwMemLength = file.GetLength();
 		}
 
 		if(!ReadXM(file, loadFlags)
@@ -823,12 +832,6 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			songMessage.assign(mpt::ToLocale(unarchiver.GetComment()));
 		}
 #endif
-
-		if(bMMCmp)
-		{
-			free((void*)lpStream);
-			lpStream = NULL;
-		}
 
 	} else
 	{
