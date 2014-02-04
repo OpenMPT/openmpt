@@ -401,9 +401,7 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 					inmod.SAAddPCMData( self->interleaved_buffer.data(), self->channels, BPS, (int)decode_pos_ms );
 					inmod.VSAAddPCMData( self->interleaved_buffer.data(), self->channels, BPS, (int)decode_pos_ms );
 					if ( dsp_active ) {
-						int samples = frames * self->channels;
-						samples = inmod.dsp_dosamples( self->interleaved_buffer.data(), samples, BPS, self->channels, self->samplerate );
-						frames = samples / self->channels;
+						frames = inmod.dsp_dosamples( self->interleaved_buffer.data(), frames, BPS, self->channels, self->samplerate );
 					}
 					int bytes = frames * self->channels * sizeof( signed short );
 					inmod.outMod->Write( (char*)self->interleaved_buffer.data(), bytes );
