@@ -382,10 +382,6 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 //
 
 
-static const uint32 XPK_PACKED_SIZE_MIN = 256;
-static const uint32 XPK_UNPACKED_SIZE_MIN = 256;
-
-
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -693,14 +689,12 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	file.Rewind();
 	unpackedData.clear();
 
-	if(!file.CanRead(XPK_PACKED_SIZE_MIN)) return false;
 	XPKFILEHEADER header;
 	if(!file.ReadConvertEndianness(header)) return false;
 	if(std::memcmp(header.XPKF, "XPKF", 4) != 0) return false;
 	if(std::memcmp(header.SQSH, "SQSH", 4) != 0) return false;
-	if(header.SrcLen < XPK_PACKED_SIZE_MIN) return false;
-	if(header.DstLen < XPK_UNPACKED_SIZE_MIN) return false;
-	if(header.SrcLen+8 > file.GetLength()) return false;
+	if(header.SrcLen == 0) return false;
+	if(header.DstLen == 0) return false;
 	if(!file.CanRead(header.SrcLen + 8 - sizeof(XPKFILEHEADER))) return false;
 
 #ifdef MMCMP_LOG
