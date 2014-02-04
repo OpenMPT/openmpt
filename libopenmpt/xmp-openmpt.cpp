@@ -154,7 +154,7 @@ static void save_settings_to_map( std::map<std::string,int> & result, const open
 	result[ "Samplerate_Hz" ] = s.samplerate;
 	result[ "Channels" ] = s.channels;
 	result[ "MasterGain_milliBel" ] = s.mastergain_millibel;
-	result[ "SeteroSeparation_Percent" ] = s.stereoseparation;
+	result[ "StereoSeparation_Percent" ] = s.stereoseparation;
 	result[ "RepeatCount" ] = s.repeatcount;
 	result[ "InterpolationFilterLength" ] = s.interpolationfilterlength;
 	result[ "VolumeRampingStrength" ] = s.ramping;
@@ -171,7 +171,7 @@ static void load_settings_from_map( openmpt::settings::settings & s, const std::
 	load_map_setting( map, "Samplerate_Hz", s.samplerate );
 	load_map_setting( map, "Channels", s.channels );
 	load_map_setting( map, "MasterGain_milliBel", s.mastergain_millibel );
-	load_map_setting( map, "SeteroSeparation_Percent", s.stereoseparation );
+	load_map_setting( map, "StereoSeparation_Percent", s.stereoseparation );
 	load_map_setting( map, "RepeatCount", s.repeatcount );
 	load_map_setting( map, "InterpolationFilterLength", s.interpolationfilterlength );
 	load_map_setting( map, "VolumeRampingStrength", s.ramping );
