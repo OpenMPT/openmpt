@@ -13,6 +13,8 @@
 #include "Sndfile.h"
 #include "FileReader.h"
 
+#include <stdexcept>
+
 
 //#define MMCMP_LOG
 
