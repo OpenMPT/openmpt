@@ -194,7 +194,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 	if(!file.ReadConvertEndianness(mfh)) return false;
 	if(std::memcmp(mfh.id_ziRC, "ziRC", 4) != 0) return false;
 	if(std::memcmp(mfh.id_ONia, "ONia", 4) != 0) return false;
-	if(mfh.hdrsize < 14) return false;
+	if(mfh.hdrsize != sizeof(MMCMPHEADER)) return false;
 	MMCMPHEADER mmh;
 	if(!file.ReadConvertEndianness(mmh)) return false;
 	if(mmh.nblocks == 0) return false;
