@@ -602,22 +602,29 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 // PowerPack PP20 Unpacker
 //
 
+
+static const uint32 PP20_PACKED_SIZE_MIN = 256;
+static const uint32 PP20_UNPACKED_SIZE_MIN = 512;
+static const uint32 PP20_UNPACKED_SIZE_MAX = 0x400000;
+
+
 typedef struct _PPBITBUFFER
 {
-	UINT bitcount;
-	ULONG bitbuffer;
-	LPCBYTE pStart;
-	LPCBYTE pSrc;
+	uint32 bitcount;
+	uint32 bitbuffer;
+	const uint8 *pStart;
+	const uint8 *pSrc;
 
-	ULONG GetBits(UINT n);
+	uint32 GetBits(uint32 n);
 } PPBITBUFFER;
 
 
-ULONG PPBITBUFFER::GetBits(UINT n)
+uint32 PPBITBUFFER::GetBits(uint32 n)
+//-----------------------------------
 {
-	ULONG result = 0;
+	uint32 result = 0;
 
-	for (UINT i=0; i<n; i++)
+	for (uint32 i=0; i<n; i++)
 	{
 		if (!bitcount)
 		{
@@ -633,10 +640,11 @@ ULONG PPBITBUFFER::GetBits(UINT n)
 }
 
 
-void PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
+static void PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32 nDstLen)
+//---------------------------------------------------------------------------------------
 {
 	PPBITBUFFER BitBuffer;
-	ULONG nBytesLeft;
+	uint32 nBytesLeft;
 
 	BitBuffer.pStart = pSrc;
 	BitBuffer.pSrc = pSrc + nSrcLen - 4;
@@ -648,29 +656,29 @@ void PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
 	{
 		if (!BitBuffer.GetBits(1))
 		{
-			UINT n = 1;
+			uint32 n = 1;
 			while (n < nBytesLeft)
 			{
-				UINT code = BitBuffer.GetBits(2);
+				uint32 code = BitBuffer.GetBits(2);
 				n += code;
 				if (code != 3) break;
 			}
-			for (UINT i=0; i<n; i++)
+			for (uint32 i=0; i<n; i++)
 			{
-				pDst[--nBytesLeft] = (BYTE)BitBuffer.GetBits(8);
+				pDst[--nBytesLeft] = (uint8)BitBuffer.GetBits(8);
 			}
 			if (!nBytesLeft) break;
 		}
 		{
-			UINT n = BitBuffer.GetBits(2)+1;
-			UINT nbits = pSrc[n-1];
-			UINT nofs;
+			uint32 n = BitBuffer.GetBits(2)+1;
+			uint32 nbits = pSrc[n-1];
+			uint32 nofs;
 			if (n==4)
 			{
 				nofs = BitBuffer.GetBits( (BitBuffer.GetBits(1)) ? nbits : 7 );
 				while (n < nBytesLeft)
 				{
-					UINT code = BitBuffer.GetBits(3);
+					uint32 code = BitBuffer.GetBits(3);
 					n += code;
 					if (code != 7) break;
 				}
@@ -678,7 +686,7 @@ void PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
 			{
 				nofs = BitBuffer.GetBits(nbits);
 			}
-			for (UINT i=0; i<=n; i++)
+			for (uint32 i=0; i<=n; i++)
 			{
 				pDst[nBytesLeft-1] = (nBytesLeft+nofs < nDstLen) ? pDst[nBytesLeft+nofs] : 0;
 				if (!--nBytesLeft) break;
@@ -694,31 +702,19 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 	file.Rewind();
 	unpackedData.clear();
 
-	LPCBYTE argMemFile = (LPCBYTE)file.GetRawData();
-	DWORD argMemLength = file.GetLength();
-	LPCBYTE *ppMemFile = &argMemFile;
-	LPDWORD pdwMemLength = &argMemLength;
+	if(!file.CanRead(PP20_PACKED_SIZE_MIN)) return false;
+	if(!file.ReadMagic("PP20")) return false;
+	file.Seek(file.GetLength() - 4);
+	uint32 dstLen = 0;
+	dstLen |= file.ReadUint8() << 16;
+	dstLen |= file.ReadUint8() << 8;
+	dstLen |= file.ReadUint8() << 0;
+	if(dstLen < PP20_UNPACKED_SIZE_MIN) return false;
+	if(dstLen > PP20_UNPACKED_SIZE_MAX) return false;
+	unpackedData.resize(dstLen);
+	file.Seek(4);
+	PP20_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), file.GetLength() - 4, reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
 
-	DWORD dwMemLength = *pdwMemLength;
-	LPCBYTE lpMemFile = *ppMemFile;
-	DWORD dwDstLen;
-	LPBYTE pBuffer;
-
-	if ((!lpMemFile) || (dwMemLength < 256) || (*(DWORD *)lpMemFile != MULTICHAR4_LE_MSVC('0','2','P','P'))) return FALSE;
-	dwDstLen = (lpMemFile[dwMemLength-4]<<16) | (lpMemFile[dwMemLength-3]<<8) | (lpMemFile[dwMemLength-2]);
-	//Log("PP20 detected: Packed length=%d, Unpacked length=%d\n", dwMemLength, dwDstLen);
-	if ((dwDstLen < 512) || (dwDstLen > 0x400000) || (dwDstLen > 16*dwMemLength)) return FALSE;
-	if ((pBuffer = (LPBYTE)calloc(1, (dwDstLen + 31) & ~15)) == NULL) return FALSE;
-	PP20_DoUnpack(lpMemFile+4, dwMemLength-4, pBuffer, dwDstLen);
-	*ppMemFile = pBuffer;
-	*pdwMemLength = dwDstLen;
-
-	unpackedData.assign(argMemFile, argMemFile + argMemLength);
-	free(pBuffer);
 	return true;
 }
-
-
-
-
 
