@@ -416,14 +416,29 @@ void XPKFILEHEADER::ConvertEndianness()
 }
 
 
-static int32 bfextu(const uint8 *p, int32 bo, int32 bc)
-//-----------------------------------------------------
+struct XPK_BufferBounds
+{
+	const uint8 *pSrcBeg;
+	const uint8 *pSrcEnd;
+	uint8 *pDstBeg;
+	uint8 *pDstEnd;
+};
+
+struct XPK_error : public std::range_error
+{
+	XPK_error() : std::range_error("invalid XPK data") { }
+};
+
+static int32 bfextu(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
+//-----------------------------------------------------------------------------
 {
   int32 r;
   
   p += bo / 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
   r = *(p++);
   r <<= 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
   r |= *(p++);
   r <<= 8;
   r |= *p;
@@ -434,14 +449,16 @@ static int32 bfextu(const uint8 *p, int32 bo, int32 bc)
   return r;
 }
 
-static int32 bfexts(const uint8 *p, int32 bo, int32 bc)
-//-----------------------------------------------------
+static int32 bfexts(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
+//-----------------------------------------------------------------------------
 {
   int32 r;
   
   p += bo / 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
   r = *(p++);
   r <<= 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
   r |= *(p++);
   r <<= 8;
   r |= *p;
@@ -452,21 +469,30 @@ static int32 bfexts(const uint8 *p, int32 bo, int32 bc)
 }
 
 
-static void XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
+static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 //------------------------------------------------------------------------------
 {
+	if(len <= 0) return false;
 	static uint8 xpk_table[] = {
 		2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0
 	};
 	int32 d0,d1,d2,d3,d4,d5,d6,a2,a5;
 	int32 cp, cup1, type;
 	const uint8 *c;
-	uint8 *phist;
+	uint8 *phist = nullptr;
 	uint8 *dstmax = dst + len;
+
+	XPK_BufferBounds bufs;
+	bufs.pSrcBeg = src;
+	bufs.pSrcEnd = src + srcLen;
+	bufs.pDstBeg = dst;
+	bufs.pDstEnd = dst + len;
    
 	c = src;
 	while (len > 0)
 	{
+		if(&(c[0]) < bufs.pSrcBeg || &(c[0]) >= bufs.pSrcEnd) throw XPK_error();
+		if(&(c[7]) < bufs.pSrcBeg || &(c[7]) >= bufs.pSrcEnd) throw XPK_error();
 		type = c[0];
 		cp = (c[4]<<8) | (c[5]); // packed
 		cup1 = (c[6]<<8) | (c[7]); // unpacked
@@ -476,6 +502,10 @@ static void XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 		if (type == 0)
 		{
 			// RAW chunk
+			if(c < bufs.pSrcBeg || c >= bufs.pSrcEnd) throw XPK_error();
+			if(c + cp > bufs.pSrcEnd) throw XPK_error();
+			if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
+			if(dst + cp > bufs.pDstEnd) throw XPK_error();
 			memcpy(dst,c,cp);
 			dst+=cp;
 			c+=cp;
@@ -496,6 +526,7 @@ static void XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 
 		d0 = d1 = d2 = a2 = 0;
 		d3 = *(src++);
+		if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
 		*dst = (uint8)d3;
 		if (dst < dstmax) dst++;
 		cup1--;
@@ -503,25 +534,25 @@ static void XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 		while (cup1 > 0)
 		{
 			if (d1 >= 8) goto l6dc;
-			if (bfextu(src,d0,1)) goto l75a;
+			if (bfextu(src,d0,1,bufs)) goto l75a;
 			d0 += 1;
 			d5 = 0;
 			d6 = 8;
 			goto l734;
   
 		l6dc:	
-			if (bfextu(src,d0,1)) goto l726;
+			if (bfextu(src,d0,1,bufs)) goto l726;
 			d0 += 1;
-			if (! bfextu(src,d0,1)) goto l75a;
+			if (! bfextu(src,d0,1,bufs)) goto l75a;
 			d0 += 1;
-			if (bfextu(src,d0,1)) goto l6f6;
+			if (bfextu(src,d0,1,bufs)) goto l6f6;
 			d6 = 2;
 			goto l708;
 
 		l6f6:	
 			d0 += 1;
-			if (!bfextu(src,d0,1)) goto l706;
-			d6 = bfextu(src,d0,3);
+			if (!bfextu(src,d0,1,bufs)) goto l706;
+			d6 = bfextu(src,d0,3,bufs);
 			d0 += 3;
 			goto l70a;
   
@@ -553,9 +584,10 @@ static void XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 		l734:
 			while ((d5 >= 0) && (cup1 > 0))
 			{
-				d4 = bfexts(src,d0,d6);
+				d4 = bfexts(src,d0,d6,bufs);
 				d0 += d6;
 				d3 -= d4;
+				if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
 				*dst = (uint8)d3;
 				if (dst < dstmax) dst++;
 				cup1--;
@@ -569,52 +601,52 @@ static void XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 			d2 -= d6;
 		}
 	}
-	return;
+	return true;
 
 l75a:	
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l766;
+	if (bfextu(src,d0,1,bufs)) goto l766;
 	d4 = 2;
 	goto l79e;
   
 l766:	
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l772;
+	if (bfextu(src,d0,1,bufs)) goto l772;
 	d4 = 4;
 	goto l79e;
 
 l772:	
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l77e;
+	if (bfextu(src,d0,1,bufs)) goto l77e;
 	d4 = 6;
 	goto l79e;
 
 l77e:	
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l792;
+	if (bfextu(src,d0,1,bufs)) goto l792;
 	d0 += 1;
-	d6 = bfextu(src,d0,3);
+	d6 = bfextu(src,d0,3,bufs);
 	d0 += 3;
 	d6 += 8;
 	goto l7a8;
   
 l792:	
 	d0 += 1;
-	d6 = bfextu(src,d0,5);
+	d6 = bfextu(src,d0,5,bufs);
 	d0 += 5;
 	d4 = 16;
 	goto l7a6;
   
 l79e:
 	d0 += 1;
-	d6 = bfextu(src,d0,1);
+	d6 = bfextu(src,d0,1,bufs);
 	d0 += 1;
 l7a6:
 	d6 += d4;
 l7a8:
-	if (bfextu(src,d0,1)) goto l7c4;
+	if (bfextu(src,d0,1,bufs)) goto l7c4;
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l7bc;
+	if (bfextu(src,d0,1,bufs)) goto l7bc;
 	d5 = 8;
 	a5 = 0;
 	goto l7ca;
@@ -629,7 +661,7 @@ l7c4:
 	a5 = -0x100;
 l7ca:
 	d0 += 1;
-	d4 = bfextu(src,d0,d5);
+	d4 = bfextu(src,d0,d5,bufs);
 	d0 += d5;
 	d6 -= 3;
 	if (d6 >= 0)
@@ -643,7 +675,9 @@ l7ca:
 	
 	while ((d6 >= 0) && (cup1 > 0))
 	{
+		if(phist < bufs.pDstBeg || phist >= bufs.pDstEnd) throw XPK_error();
 		d3 = *phist++;
+		if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
 		*dst = (uint8)d3;
 		if (dst < dstmax) dst++;
 		cup1--;
@@ -673,9 +707,16 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	Log("XPK detected (SrcLen=%d DstLen=%d) filesize=%d\n", header.SrcLen, header.DstLen, file.GetLength());
 #endif
 	unpackedData.resize(header.DstLen);
-	XPK_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), header.SrcLen + 8 - sizeof(XPKFILEHEADER), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
+	bool result = false;
+	try
+	{
+		result = XPK_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), header.SrcLen + 8 - sizeof(XPKFILEHEADER), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
+	} catch(XPK_error&)
+	{
+		return false;
+	}
 
-	return true;
+	return result;
 }
 
 
