@@ -165,4 +165,7 @@ DECLARE_FILE_TYPE("OpenMPT compatible module files",
 	"*.j2b" ";"
 	"*.gdm" ";"
 	"*.umx" ";"
-	"*.mo3" );
+	"*.mo3" ";"
+	"*.xpk" ";"
+	"*.ppm" ";"
+	"*.mmcmp" );
