@@ -505,10 +505,10 @@ void SsbWrite::OnWroteItem(const char* pId, const size_t nIdSize, const Postype&
 {
 	const Offtype nRawEntrySize = m_pOstrm->tellp() - posBeforeWrite;
 
-	if (nRawEntrySize > std::numeric_limits<DataSize>::max())
+	if (nRawEntrySize < 0 || (uint64)nRawEntrySize > std::numeric_limits<DataSize>::max())
 		{ AddWriteNote(SNW_INSUFFICIENT_DATASIZETYPE); return; }
 
-	if(GetFlag(RwfRMapHasSize) && nRawEntrySize > (std::numeric_limits<DataSize>::max() >> 2))
+	if(GetFlag(RwfRMapHasSize) && (nRawEntrySize < 0 || (uint64)nRawEntrySize > (std::numeric_limits<DataSize>::max() >> 2)))
 		{ AddWriteNote(SNW_DATASIZETYPE_OVERFLOW); return; }
 
 	DataSize nEntrySize = static_cast<DataSize>(nRawEntrySize);
@@ -685,7 +685,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 
 	const Offtype rawEndOfHdrData = iStrm.tellg() - m_posStart;
 
-	if (rawEndOfHdrData < 0 || rawEndOfHdrData > std::numeric_limits<RposType>::max())
+	if (rawEndOfHdrData < 0 || (uint64)rawEndOfHdrData > std::numeric_limits<RposType>::max())
 		{ AddReadNote(SNR_INSUFFICIENT_RPOSTYPE); return; }
 
 	m_rposEndofHdrData = static_cast<RposType>(rawEndOfHdrData);
