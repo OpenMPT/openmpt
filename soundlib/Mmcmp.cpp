@@ -307,19 +307,25 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 // XPK unpacker
 //
 
+
+static const uint32 XPK_PACKED_SIZE_MIN = 256;
+static const uint32 XPK_UNPACKED_SIZE_MIN = 256;
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
 
-typedef struct PACKED _XPKFILEHEADER
+struct PACKED XPKFILEHEADER
 {
-	DWORD dwXPKF;
-	DWORD dwSrcLen;
-	DWORD dwSQSH;
-	DWORD dwDstLen;
-	CHAR szName[16];
-	DWORD dwReserved;
-} XPKFILEHEADER, *PXPKFILEHEADER;
+	char   XPKF[4];
+	uint32 SrcLen;
+	char   SQSH[4];
+	uint32 DstLen;
+	char   Name[16];
+	uint32 Reserved;
+	void ConvertEndianness();
+};
 
 STATIC_ASSERT(sizeof(XPKFILEHEADER) == 36);
 
@@ -327,10 +333,19 @@ STATIC_ASSERT(sizeof(XPKFILEHEADER) == 36);
 #pragma pack(pop)
 #endif
 
-
-static int bfextu(const BYTE *p,int bo,int bc)
+void XPKFILEHEADER::ConvertEndianness()
+//-------------------------------------
 {
-  int r;
+	SwapBytesBE(SrcLen);
+	SwapBytesBE(DstLen);
+	SwapBytesBE(Reserved);
+}
+
+
+static int bfextu(const uint8 *p, int32 bo, int32 bc)
+//---------------------------------------------------
+{
+  int32 r;
   
   p += bo / 8;
   r = *(p++);
@@ -345,9 +360,10 @@ static int bfextu(const BYTE *p,int bo,int bc)
   return r;
 }
 
-static int bfexts(const BYTE *p,int bo,int bc)
+static int bfexts(const uint8 *p, int32 bo, int32 bc)
+//---------------------------------------------------
 {
-  int r;
+  int32 r;
   
   p += bo / 8;
   r = *(p++);
@@ -362,15 +378,17 @@ static int bfexts(const BYTE *p,int bo,int bc)
 }
 
 
-void XPK_DoUnpack(const BYTE *src, UINT, BYTE *dst, int len)
+static void XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
+//-------------------------------------------------------------------------------
 {
-	static BYTE xpk_table[] = { 2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,
-        6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0 };
-	int d0,d1,d2,d3,d4,d5,d6,a2,a5;
-	int cp, cup1, type;
-	const BYTE *c;
-	BYTE *phist;
-	BYTE *dstmax = dst + len;
+	static uint8 xpk_table[] = {
+		2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0
+	};
+	int32 d0,d1,d2,d3,d4,d5,d6,a2,a5;
+	int32 cp, cup1, type;
+	const uint8 *c;
+	uint8 *phist;
+	uint8 *dstmax = dst + len;
    
 	c = src;
 	while (len > 0)
@@ -404,7 +422,7 @@ void XPK_DoUnpack(const BYTE *src, UINT, BYTE *dst, int len)
 
 		d0 = d1 = d2 = a2 = 0;
 		d3 = *(src++);
-		*dst = (BYTE)d3;
+		*dst = (uint8)d3;
 		if (dst < dstmax) dst++;
 		cup1--;
 
@@ -464,7 +482,7 @@ void XPK_DoUnpack(const BYTE *src, UINT, BYTE *dst, int len)
 				d4 = bfexts(src,d0,d6);
 				d0 += d6;
 				d3 -= d4;
-				*dst = (BYTE)d3;
+				*dst = (uint8)d3;
 				if (dst < dstmax) dst++;
 				cup1--;
 				d5--;
@@ -552,7 +570,7 @@ l7ca:
 	while ((d6 >= 0) && (cup1 > 0))
 	{
 		d3 = *phist++;
-		*dst = (BYTE)d3;
+		*dst = (uint8)d3;
 		if (dst < dstmax) dst++;
 		cup1--;
 		d6--;
@@ -567,32 +585,22 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	file.Rewind();
 	unpackedData.clear();
 
-	LPCBYTE argMemFile = (LPCBYTE)file.GetRawData();
-	DWORD argMemLength = file.GetLength();
-	LPCBYTE *ppMemFile = &argMemFile;
-	LPDWORD pdwMemLength = &argMemLength;
+	if(!file.CanRead(XPK_PACKED_SIZE_MIN)) return false;
+	XPKFILEHEADER header;
+	if(!file.ReadConvertEndianness(header)) return false;
+	if(std::memcmp(header.XPKF, "XPKF", 4) != 0) return false;
+	if(std::memcmp(header.SQSH, "SQSH", 4) != 0) return false;
+	if(header.SrcLen < XPK_PACKED_SIZE_MIN) return false;
+	if(header.DstLen < XPK_UNPACKED_SIZE_MIN) return false;
+	if(header.SrcLen+8 > file.GetLength()) return false;
+	if(!file.CanRead(header.SrcLen + 8 - sizeof(XPKFILEHEADER))) return false;
 
-	DWORD dwMemLength = *pdwMemLength;
-	LPCBYTE lpMemFile = *ppMemFile;
-	PXPKFILEHEADER pxfh = (PXPKFILEHEADER)lpMemFile;
-	DWORD dwSrcLen, dwDstLen;
-	LPBYTE pBuffer;
-
-	if ((!pxfh) || (dwMemLength < 256)
-	 || (pxfh->dwXPKF != MULTICHAR4_LE_MSVC('F','K','P','X')) || (pxfh->dwSQSH != MULTICHAR4_LE_MSVC('H','S','Q','S'))) return FALSE;
-	dwSrcLen = BigEndian(pxfh->dwSrcLen);
-	dwDstLen = BigEndian(pxfh->dwDstLen);
-	if ((dwSrcLen+8 > dwMemLength) || (dwSrcLen < 256) || (dwDstLen < 256)) return FALSE;
 #ifdef MMCMP_LOG
-	Log("XPK detected (SrcLen=%d DstLen=%d) filesize=%d\n", dwSrcLen, dwDstLen, dwMemLength);
+	Log("XPK detected (SrcLen=%d DstLen=%d) filesize=%d\n", header.SrcLen, header.DstLen, file.GetLength());
 #endif
-	if ((pBuffer = (LPBYTE)calloc(1, (dwDstLen + 31) & ~15)) == NULL) return FALSE;
-	XPK_DoUnpack(lpMemFile+sizeof(XPKFILEHEADER), dwSrcLen+8-sizeof(XPKFILEHEADER), pBuffer, dwDstLen);
-	*ppMemFile = pBuffer;
-	*pdwMemLength = dwDstLen;
+	unpackedData.resize(header.DstLen);
+	XPK_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), header.SrcLen + 8 - sizeof(XPKFILEHEADER), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
 
-	unpackedData.assign(argMemFile, argMemFile + argMemLength);
-	free(pBuffer);
 	return true;
 }
 
