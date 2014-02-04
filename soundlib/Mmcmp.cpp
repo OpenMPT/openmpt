@@ -17,39 +17,96 @@
 //#define MMCMP_LOG
 
 
-typedef struct MMCMPFILEHEADER
-{
-	DWORD id_ziRC;	// "ziRC"
-	DWORD id_ONia;	// "ONia"
-	WORD hdrsize;
-} MMCMPFILEHEADER, *LPMMCMPFILEHEADER;
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(push, 1)
+#endif
 
-typedef struct MMCMPHEADER
+struct PACKED MMCMPFILEHEADER
 {
-	WORD version;
-	WORD nblocks;
-	DWORD filesize;
-	DWORD blktable;
-	BYTE glb_comp;
-	BYTE fmt_comp;
-} MMCMPHEADER, *LPMMCMPHEADER;
+	char id_ziRC[4];	// "ziRC"
+	char id_ONia[4];	// "ONia"
+	uint16 hdrsize;
+	void ConvertEndianness();
+};
 
-typedef struct MMCMPBLOCK
-{
-	DWORD unpk_size;
-	DWORD pk_size;
-	DWORD xor_chk;
-	WORD sub_blk;
-	WORD flags;
-	WORD tt_entries;
-	WORD num_bits;
-} MMCMPBLOCK, *LPMMCMPBLOCK;
+STATIC_ASSERT(sizeof(MMCMPFILEHEADER) == 10);
 
-typedef struct MMCMPSUBBLOCK
+struct PACKED MMCMPHEADER
 {
-	DWORD unpk_pos;
-	DWORD unpk_size;
-} MMCMPSUBBLOCK, *LPMMCMPSUBBLOCK;
+	uint16 version;
+	uint16 nblocks;
+	uint32 filesize;
+	uint32 blktable;
+	uint8 glb_comp;
+	uint8 fmt_comp;
+	void ConvertEndianness();
+};
+
+STATIC_ASSERT(sizeof(MMCMPHEADER) == 14);
+
+struct PACKED MMCMPBLOCK
+{
+	uint32 unpk_size;
+	uint32 pk_size;
+	uint32 xor_chk;
+	uint16 sub_blk;
+	uint16 flags;
+	uint16 tt_entries;
+	uint16 num_bits;
+	void ConvertEndianness();
+};
+
+STATIC_ASSERT(sizeof(MMCMPBLOCK) == 20);
+
+struct PACKED MMCMPSUBBLOCK
+{
+	uint32 unpk_pos;
+	uint32 unpk_size;
+	void ConvertEndianness();
+};
+
+STATIC_ASSERT(sizeof(MMCMPSUBBLOCK) == 8);
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
+
+void MMCMPFILEHEADER::ConvertEndianness()
+//---------------------------------------
+{
+	SwapBytesLE(hdrsize);
+}
+
+void MMCMPHEADER::ConvertEndianness()
+//-----------------------------------
+{
+	SwapBytesLE(version);
+	SwapBytesLE(nblocks);
+	SwapBytesLE(filesize);
+	SwapBytesLE(blktable);
+	SwapBytesLE(glb_comp);
+	SwapBytesLE(fmt_comp);
+}
+
+void MMCMPBLOCK::ConvertEndianness()
+//----------------------------------
+{
+	SwapBytesLE(unpk_size);
+	SwapBytesLE(pk_size);
+	SwapBytesLE(xor_chk);
+	SwapBytesLE(sub_blk);
+	SwapBytesLE(flags);
+	SwapBytesLE(tt_entries);
+	SwapBytesLE(num_bits);
+}
+
+void MMCMPSUBBLOCK::ConvertEndianness()
+//-------------------------------------
+{
+	SwapBytesLE(unpk_pos);
+	SwapBytesLE(unpk_size);
+}
+
 
 #define MMCMP_COMP		0x0001
 #define MMCMP_DELTA		0x0002
@@ -58,21 +115,21 @@ typedef struct MMCMPSUBBLOCK
 #define MMCMP_ABS16		0x0200
 #define MMCMP_ENDIAN	0x0400
 
-typedef struct MMCMPBITBUFFER
+struct MMCMPBITBUFFER
 {
-	UINT bitcount;
-	DWORD bitbuffer;
-	LPCBYTE pSrc;
-	LPCBYTE pEnd;
+	uint32 bitcount;
+	uint32 bitbuffer;
+	const uint8 *pSrc;
+	const uint8 *pEnd;
 
-	DWORD GetBits(UINT nBits);
-} MMCMPBITBUFFER;
+	uint32 GetBits(uint32 nBits);
+};
 
 
-DWORD MMCMPBITBUFFER::GetBits(UINT nBits)
-//---------------------------------------
+uint32 MMCMPBITBUFFER::GetBits(uint32 nBits)
+//------------------------------------------
 {
-	DWORD d;
+	uint32 d;
 	if (!nBits) return 0;
 	while (bitcount < 24)
 	{
@@ -85,27 +142,30 @@ DWORD MMCMPBITBUFFER::GetBits(UINT nBits)
 	return d;
 }
 
-const DWORD MMCMP8BitCommands[8] =
+static const uint32 MMCMP8BitCommands[8] =
 {
 	0x01, 0x03,	0x07, 0x0F,	0x1E, 0x3C,	0x78, 0xF8
 };
 
-const UINT MMCMP8BitFetch[8] =
+static const uint32 MMCMP8BitFetch[8] =
 {
 	3, 3, 3, 3, 2, 1, 0, 0
 };
 
-const DWORD MMCMP16BitCommands[16] =
+static const uint32 MMCMP16BitCommands[16] =
 {
 	0x01, 0x03,	0x07, 0x0F,	0x1E, 0x3C,	0x78, 0xF0,
 	0x1F0, 0x3F0, 0x7F0, 0xFF0, 0x1FF0, 0x3FF0, 0x7FF0, 0xFFF0
 };
 
-const UINT MMCMP16BitFetch[16] =
+static const uint32 MMCMP16BitFetch[16] =
 {
 	4, 4, 4, 4, 3, 2, 1, 0,
 	0, 0, 0, 0, 0, 0, 0, 0
 };
+
+
+static const uint32 MMCMP_PACKED_SIZE_MIN = 256;
 
 
 bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
@@ -114,63 +174,71 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 	file.Rewind();
 	unpackedData.clear();
 
-	LPCBYTE argMemFile = (LPCBYTE)file.GetRawData();
-	DWORD argMemLength = file.GetLength();
-	LPCBYTE *ppMemFile = &argMemFile;
-	LPDWORD pdwMemLength = &argMemLength;
+	if(!file.CanRead(MMCMP_PACKED_SIZE_MIN)) return false;
+	MMCMPFILEHEADER mfh;
+	if(!file.ReadConvertEndianness(mfh)) return false;
+	if(std::memcmp(mfh.id_ziRC, "ziRC", 4) != 0) return false;
+	if(std::memcmp(mfh.id_ONia, "ONia", 4) != 0) return false;
+	if(mfh.hdrsize < 14) return false;
+	MMCMPHEADER mmh;
+	if(!file.ReadConvertEndianness(mmh)) return false;
+	if(mmh.nblocks == 0) return false;
+	if(mmh.filesize < 16) return false;
+	if(mmh.filesize > 0x8000000) return false;
+	if(mmh.blktable > file.GetLength()) return false;
+	if(mmh.blktable + 4 * mmh.nblocks > file.GetLength()) return false;
 
-	DWORD dwMemLength = *pdwMemLength;
-	LPCBYTE lpMemFile = *ppMemFile;
-	LPBYTE pBuffer;
-	LPMMCMPFILEHEADER pmfh = (LPMMCMPFILEHEADER)(lpMemFile);
-	LPMMCMPHEADER pmmh = (LPMMCMPHEADER)(lpMemFile+10);
-	LPDWORD pblk_table;
-	DWORD dwFileSize;
+	unpackedData.resize(mmh.filesize);
 
-	if ((dwMemLength < 256) || (!pmfh) || (pmfh->id_ziRC != 0x4352697A) || (pmfh->id_ONia != 0x61694e4f) || (pmfh->hdrsize < 14)
-	 || (!pmmh->nblocks) || (pmmh->filesize < 16) || (pmmh->filesize > 0x8000000)
-	 || (pmmh->blktable >= dwMemLength) || (pmmh->blktable + 4*pmmh->nblocks > dwMemLength)) return FALSE;
-	dwFileSize = pmmh->filesize;
-	if ((pBuffer = (LPBYTE)calloc(1, (dwFileSize + 31) & ~15)) == NULL) return FALSE;
-	pblk_table = (LPDWORD)(lpMemFile+pmmh->blktable);
-	for (UINT nBlock=0; nBlock<pmmh->nblocks; nBlock++)
+	for (uint32 nBlock=0; nBlock<mmh.nblocks; nBlock++)
 	{
-		DWORD dwMemPos = pblk_table[nBlock];
-		LPMMCMPBLOCK pblk = (LPMMCMPBLOCK)(lpMemFile+dwMemPos);
-		LPMMCMPSUBBLOCK psubblk = (LPMMCMPSUBBLOCK)(lpMemFile+dwMemPos+20);
+		if(!file.Seek(mmh.blktable + 4*nBlock)) return false;
+		if(!file.CanRead(4)) return false;
+		uint32 blkPos = file.ReadUint32LE();
+		if(!file.Seek(blkPos)) return false;
+		MMCMPBLOCK blk;
+		if(!file.ReadConvertEndianness(blk)) return false;
+		std::vector<MMCMPSUBBLOCK> subblks(blk.sub_blk);
+		for(uint32 i=0; i<blk.sub_blk; ++i)
+		{
+			if(!file.ReadConvertEndianness(subblks[i])) return false;
+		}
+		MMCMPSUBBLOCK *psubblk = blk.sub_blk > 0 ? &(subblks[0]) : nullptr;
 
-		if ((dwMemPos + 20 >= dwMemLength) || (dwMemPos + 20 + pblk->sub_blk*8 >= dwMemLength)) break;
-		dwMemPos += 20 + pblk->sub_blk*8;
+		if(blkPos + sizeof(MMCMPBLOCK) + blk.sub_blk * sizeof(MMCMPSUBBLOCK) >= file.GetLength()) return false;
+		uint32 memPos = blkPos + sizeof(MMCMPBLOCK) + blk.sub_blk * sizeof(MMCMPSUBBLOCK);
+
 #ifdef MMCMP_LOG
 		Log("block %d: flags=%04X sub_blocks=%d", nBlock, (UINT)pblk->flags, (UINT)pblk->sub_blk);
 		Log(" pksize=%d unpksize=%d", pblk->pk_size, pblk->unpk_size);
 		Log(" tt_entries=%d num_bits=%d\n", pblk->tt_entries, pblk->num_bits);
 #endif
 		// Data is not packed
-		if (!(pblk->flags & MMCMP_COMP))
+		if (!(blk.flags & MMCMP_COMP))
 		{
-			for (UINT i=0; i<pblk->sub_blk; i++)
+			for (uint32 i=0; i<blk.sub_blk; i++)
 			{
-				if ((psubblk->unpk_pos >= dwFileSize) ||
-					(psubblk->unpk_size >= dwFileSize) ||
-					(psubblk->unpk_size > dwFileSize - psubblk->unpk_pos)) break;
+				if ((psubblk->unpk_pos >= mmh.filesize) ||
+					(psubblk->unpk_size >= mmh.filesize) ||
+					(psubblk->unpk_size > mmh.filesize - psubblk->unpk_pos)) return false;
 #ifdef MMCMP_LOG
 				Log("  Unpacked sub-block %d: offset %d, size=%d\n", i, psubblk->unpk_pos, psubblk->unpk_size);
 #endif
-				memcpy(pBuffer+psubblk->unpk_pos, lpMemFile+dwMemPos, psubblk->unpk_size);
-				dwMemPos += psubblk->unpk_size;
+				if(!file.Seek(memPos)) return false;
+				if(file.ReadRaw(&(unpackedData[psubblk->unpk_pos]), psubblk->unpk_size) != psubblk->unpk_size) return false;
 				psubblk++;
 			}
 		} else
 		// Data is 16-bit packed
-		if (pblk->flags & MMCMP_16BIT)
+		if (blk.flags & MMCMP_16BIT)
 		{
 			MMCMPBITBUFFER bb;
-			uint16 *pDest = (uint16 *)(pBuffer + psubblk->unpk_pos);
-			uint32 dwSize = psubblk->unpk_size >> 1;
+			uint32 subblk = 0;
+			char *pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
+			uint32 dwSize = psubblk[subblk].unpk_size >> 1;
 			uint32 dwPos = 0;
-			uint32 numbits = pblk->num_bits;
-			uint32 subblk = 0, oldval = 0;
+			uint32 numbits = blk.num_bits;
+			uint32 oldval = 0;
 
 #ifdef MMCMP_LOG
 			Log("  16-bit block: pos=%d size=%d ", psubblk->unpk_pos, psubblk->unpk_size);
@@ -180,9 +248,11 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 #endif
 			bb.bitcount = 0;
 			bb.bitbuffer = 0;
-			bb.pSrc = lpMemFile+dwMemPos+pblk->tt_entries;
-			bb.pEnd = lpMemFile+dwMemPos+pblk->pk_size;
-			while (subblk < pblk->sub_blk)
+			if(!file.Seek(memPos + blk.tt_entries)) return false;
+			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
+			bb.pSrc = reinterpret_cast<const uint8 *>(file.GetRawData());
+			bb.pEnd = reinterpret_cast<const uint8 *>(file.GetRawData() - blk.tt_entries + blk.pk_size);
+			while (subblk < blk.sub_blk)
 			{
 				uint32 newval = 0x10000;
 				uint32 d = bb.GetBits(numbits+1);
@@ -212,41 +282,48 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 				if (newval < 0x10000)
 				{
 					newval = (newval & 1) ? (uint32)(-(int32)((newval+1) >> 1)) : (uint32)(newval >> 1);
-					if (pblk->flags & MMCMP_DELTA)
+					if (blk.flags & MMCMP_DELTA)
 					{
 						newval += oldval;
 						oldval = newval;
 					} else
-					if (!(pblk->flags & MMCMP_ABS16))
+					if (!(blk.flags & MMCMP_ABS16))
 					{
 						newval ^= 0x8000;
 					}
-					pDest[dwPos++] = (uint16)newval;
+					pDest[dwPos*2 + 0] = (uint8)(((uint16)newval) & 0xff);
+					pDest[dwPos*2 + 1] = (uint8)(((uint16)newval) >> 8);
+					dwPos++;
 				}
 				if (dwPos >= dwSize)
 				{
 					subblk++;
 					dwPos = 0;
+					if(!(subblk < blk.sub_blk)) break;
 					dwSize = psubblk[subblk].unpk_size >> 1;
-					pDest = (uint16 *)(pBuffer + psubblk[subblk].unpk_pos);
+					pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 				}
 			}
 		} else
 		// Data is 8-bit packed
 		{
 			MMCMPBITBUFFER bb;
-			LPBYTE pDest = pBuffer + psubblk->unpk_pos;
-			uint32 dwSize = psubblk->unpk_size;
+			uint32 subblk = 0;
+			char *pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
+			uint32 dwSize = psubblk[subblk].unpk_size;
 			uint32 dwPos = 0;
-			uint32 numbits = pblk->num_bits;
-			uint32 subblk = 0, oldval = 0;
-			LPCBYTE ptable = lpMemFile+dwMemPos;
+			uint32 numbits = blk.num_bits;
+			uint32 oldval = 0;
+			if(!file.Seek(memPos)) return false;
+			const uint8 *ptable = reinterpret_cast<const uint8 *>(file.GetRawData());
 
 			bb.bitcount = 0;
 			bb.bitbuffer = 0;
-			bb.pSrc = lpMemFile+dwMemPos+pblk->tt_entries;
-			bb.pEnd = lpMemFile+dwMemPos+pblk->pk_size;
-			while (subblk < pblk->sub_blk)
+			if(!file.Seek(memPos + blk.tt_entries)) return false;
+			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
+			bb.pSrc = reinterpret_cast<const uint8 *>(file.GetRawData());
+			bb.pEnd = reinterpret_cast<const uint8 *>(file.GetRawData() - blk.tt_entries + blk.pk_size);
+			while (subblk < blk.sub_blk)
 			{
 				uint32 newval = 0x100;
 				uint32 d = bb.GetBits(numbits+1);
@@ -276,7 +353,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 				if (newval < 0x100)
 				{
 					int n = ptable[newval];
-					if (pblk->flags & MMCMP_DELTA)
+					if (blk.flags & MMCMP_DELTA)
 					{
 						n += oldval;
 						oldval = n;
@@ -287,17 +364,14 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 				{
 					subblk++;
 					dwPos = 0;
+					if(!(subblk < blk.sub_blk)) break;
 					dwSize = psubblk[subblk].unpk_size;
-					pDest = pBuffer + psubblk[subblk].unpk_pos;
+					pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 				}
 			}
 		}
 	}
-	*ppMemFile = pBuffer;
-	*pdwMemLength = dwFileSize;
 
-	unpackedData.assign(argMemFile, argMemFile + argMemLength);
-	free(pBuffer);
 	return true;
 }
 
@@ -379,7 +453,7 @@ static int bfexts(const uint8 *p, int32 bo, int32 bc)
 
 
 static void XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
-//-------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 {
 	static uint8 xpk_table[] = {
 		2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0
