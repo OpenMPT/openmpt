@@ -232,7 +232,7 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 
 	// Hold sample on the same level as the last sampling point at the end to prevent extra pops with interpolation.
 	// Do the same at the sample start, too.
-	for(int i = 0; i < InterpolationMaxLookahead; i++)
+	for(int i = 0; i < (int)InterpolationMaxLookahead; i++)
 	{
 		for(int c = 0; c < numChannels; c++)
 		{
