@@ -167,7 +167,21 @@ static const uint32 MMCMP16BitFetch[16] =
 };
 
 
-static const uint32 MMCMP_PACKED_SIZE_MIN = 256;
+static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, uint32 pos, uint32 len)
+//----------------------------------------------------------------------------------------------
+{
+	if(pos >= unpackedData.size()) return false;
+	if(len > unpackedData.size()) return false;
+	if(len > unpackedData.size() - pos) return false;
+	return true;
+}
+
+
+static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, const MMCMPSUBBLOCK &subblk)
+//---------------------------------------------------------------------------------------------------
+{
+	return MMCMP_IsDstBlockValid(unpackedData, subblk.unpk_pos, subblk.unpk_size);
+}
 
 
 bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
@@ -176,7 +190,6 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 	file.Rewind();
 	unpackedData.clear();
 
-	if(!file.CanRead(MMCMP_PACKED_SIZE_MIN)) return false;
 	MMCMPFILEHEADER mfh;
 	if(!file.ReadConvertEndianness(mfh)) return false;
 	if(std::memcmp(mfh.id_ziRC, "ziRC", 4) != 0) return false;
@@ -185,8 +198,8 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 	MMCMPHEADER mmh;
 	if(!file.ReadConvertEndianness(mmh)) return false;
 	if(mmh.nblocks == 0) return false;
-	if(mmh.filesize < 16) return false;
-	if(mmh.filesize > 0x8000000) return false;
+	if(mmh.filesize == 0) return false;
+	if(mmh.filesize > 0x80000000) return false;
 	if(mmh.blktable > file.GetLength()) return false;
 	if(mmh.blktable + 4 * mmh.nblocks > file.GetLength()) return false;
 
@@ -220,9 +233,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 		{
 			for (uint32 i=0; i<blk.sub_blk; i++)
 			{
-				if ((psubblk->unpk_pos >= mmh.filesize) ||
-					(psubblk->unpk_size >= mmh.filesize) ||
-					(psubblk->unpk_size > mmh.filesize - psubblk->unpk_pos)) return false;
+				if(!MMCMP_IsDstBlockValid(unpackedData, *psubblk)) return false;
 #ifdef MMCMP_LOG
 				Log("  Unpacked sub-block %d: offset %d, size=%d\n", i, psubblk->unpk_pos, psubblk->unpk_size);
 #endif
@@ -236,6 +247,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 		{
 			MMCMPBITBUFFER bb;
 			uint32 subblk = 0;
+			if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 			char *pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 			uint32 dwSize = psubblk[subblk].unpk_size >> 1;
 			uint32 dwPos = 0;
@@ -302,6 +314,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 					subblk++;
 					dwPos = 0;
 					if(!(subblk < blk.sub_blk)) break;
+					if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 					dwSize = psubblk[subblk].unpk_size >> 1;
 					pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 				}
@@ -311,6 +324,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 		{
 			MMCMPBITBUFFER bb;
 			uint32 subblk = 0;
+			if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 			char *pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 			uint32 dwSize = psubblk[subblk].unpk_size;
 			uint32 dwPos = 0;
@@ -367,6 +381,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 					subblk++;
 					dwPos = 0;
 					if(!(subblk < blk.sub_blk)) break;
+					if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 					dwSize = psubblk[subblk].unpk_size;
 					pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 				}
