@@ -685,9 +685,7 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 //
 
 
-static const uint32 PP20_PACKED_SIZE_MIN = 256;
-static const uint32 PP20_UNPACKED_SIZE_MIN = 512;
-static const uint32 PP20_UNPACKED_SIZE_MAX = 0x400000;
+static const uint32 PP20_PACKED_SIZE_MIN = 8;
 
 
 typedef struct _PPBITBUFFER
@@ -722,7 +720,7 @@ uint32 PPBITBUFFER::GetBits(uint32 n)
 }
 
 
-static void PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32 nDstLen)
+static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32 nDstLen)
 //---------------------------------------------------------------------------------------
 {
 	PPBITBUFFER BitBuffer;
@@ -753,6 +751,7 @@ static void PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 		}
 		{
 			uint32 n = BitBuffer.GetBits(2)+1;
+			if(n < 1 || n-1 >= nSrcLen) return false;
 			uint32 nbits = pSrc[n-1];
 			uint32 nofs;
 			if (n==4)
@@ -775,6 +774,7 @@ static void PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 			}
 		}
 	}
+	return true;
 }
 
 
@@ -791,13 +791,11 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 	dstLen |= file.ReadUint8() << 16;
 	dstLen |= file.ReadUint8() << 8;
 	dstLen |= file.ReadUint8() << 0;
-	if(dstLen < PP20_UNPACKED_SIZE_MIN) return false;
-	if(dstLen > PP20_UNPACKED_SIZE_MAX) return false;
-	if(dstLen > 16*file.GetLength()) return false;
+	if(dstLen == 0) return false;
 	unpackedData.resize(dstLen);
 	file.Seek(4);
-	PP20_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), file.GetLength() - 4, reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
+	bool result = PP20_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), file.GetLength() - 4, reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
 
-	return true;
+	return result;
 }
 
