@@ -416,8 +416,8 @@ void XPKFILEHEADER::ConvertEndianness()
 }
 
 
-static int bfextu(const uint8 *p, int32 bo, int32 bc)
-//---------------------------------------------------
+static int32 bfextu(const uint8 *p, int32 bo, int32 bc)
+//-----------------------------------------------------
 {
   int32 r;
   
@@ -434,8 +434,8 @@ static int bfextu(const uint8 *p, int32 bo, int32 bc)
   return r;
 }
 
-static int bfexts(const uint8 *p, int32 bo, int32 bc)
-//---------------------------------------------------
+static int32 bfexts(const uint8 *p, int32 bo, int32 bc)
+//-----------------------------------------------------
 {
   int32 r;
   
@@ -688,7 +688,7 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 static const uint32 PP20_PACKED_SIZE_MIN = 8;
 
 
-typedef struct _PPBITBUFFER
+struct PPBITBUFFER
 {
 	uint32 bitcount;
 	uint32 bitbuffer;
@@ -696,7 +696,7 @@ typedef struct _PPBITBUFFER
 	const uint8 *pSrc;
 
 	uint32 GetBits(uint32 n);
-} PPBITBUFFER;
+};
 
 
 uint32 PPBITBUFFER::GetBits(uint32 n)
