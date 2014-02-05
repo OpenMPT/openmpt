@@ -1,7 +1,7 @@
 /*
  * mmcmp.cpp
  * ---------
- * Purpose: Handling of compressed modules (XPK, PowerPack PP20)
+ * Purpose: Handling of compressed modules (MMCMP, XPK, PowerPack PP20)
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -25,8 +25,7 @@
 
 struct PACKED MMCMPFILEHEADER
 {
-	char id_ziRC[4];	// "ziRC"
-	char id_ONia[4];	// "ONia"
+	char id[8];	// "ziRCONia"
 	uint16 hdrsize;
 	void ConvertEndianness();
 };
@@ -192,8 +191,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 
 	MMCMPFILEHEADER mfh;
 	if(!file.ReadConvertEndianness(mfh)) return false;
-	if(std::memcmp(mfh.id_ziRC, "ziRC", 4) != 0) return false;
-	if(std::memcmp(mfh.id_ONia, "ONia", 4) != 0) return false;
+	if(std::memcmp(mfh.id, "ziRCONia", 8) != 0) return false;
 	if(mfh.hdrsize != sizeof(MMCMPHEADER)) return false;
 	MMCMPHEADER mmh;
 	if(!file.ReadConvertEndianness(mmh)) return false;
@@ -445,40 +443,40 @@ struct XPK_error : public std::range_error
 static int32 bfextu(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 //-----------------------------------------------------------------------------
 {
-  int32 r;
-  
-  p += bo / 8;
-	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
-  r = *(p++);
-  r <<= 8;
-	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
-  r |= *(p++);
-  r <<= 8;
-  r |= *p;
-  r <<= bo % 8;
-  r &= 0xffffff;
-  r >>= 24 - bc;
+	int32 r;
 
-  return r;
+	p += bo / 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
+	r = *(p++);
+	r <<= 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
+	r |= *(p++);
+	r <<= 8;
+	r |= *p;
+	r <<= bo % 8;
+	r &= 0xffffff;
+	r >>= 24 - bc;
+
+	return r;
 }
 
 static int32 bfexts(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 //-----------------------------------------------------------------------------
 {
-  int32 r;
-  
-  p += bo / 8;
-	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
-  r = *(p++);
-  r <<= 8;
-	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
-  r |= *(p++);
-  r <<= 8;
-  r |= *p;
-  r <<= (bo % 8) + 8;
-  r >>= 32 - bc;
+	int32 r;
 
-  return r;
+	p += bo / 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
+	r = *(p++);
+	r <<= 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
+	r |= *(p++);
+	r <<= 8;
+	r |= *p;
+	r <<= (bo % 8) + 8;
+	r >>= 32 - bc;
+
+	return r;
 }
 
 
@@ -486,7 +484,7 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 //------------------------------------------------------------------------------
 {
 	if(len <= 0) return false;
-	static uint8 xpk_table[] = {
+	static const uint8 xpk_table[] = {
 		2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0
 	};
 	int32 d0,d1,d2,d3,d4,d5,d6,a2,a5;
@@ -500,7 +498,7 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 	bufs.pSrcEnd = src + srcLen;
 	bufs.pDstBeg = dst;
 	bufs.pDstEnd = dst + len;
-   
+
 	c = src;
 	while (len > 0)
 	{
@@ -525,7 +523,7 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 			len -= cp;
 			continue;
 		}
-	  
+
 		if (type != 1)
 		{
 		#ifdef MMCMP_LOG
@@ -552,8 +550,8 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 			d5 = 0;
 			d6 = 8;
 			goto l734;
-  
-		l6dc:	
+
+		l6dc:
 			if (bfextu(src,d0,1,bufs)) goto l726;
 			d0 += 1;
 			if (! bfextu(src,d0,1,bufs)) goto l75a;
@@ -562,21 +560,21 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 			d6 = 2;
 			goto l708;
 
-		l6f6:	
+		l6f6:
 			d0 += 1;
 			if (!bfextu(src,d0,1,bufs)) goto l706;
 			d6 = bfextu(src,d0,3,bufs);
 			d0 += 3;
 			goto l70a;
-  
-		l706:	
+
+		l706:
 			d6 = 3;
-		l708:	
+		l708:
 			d0 += 1;
-		l70a:	
+		l70a:
 			d6 = xpk_table[(8*a2) + d6 -17];
 			if (d6 != 8) goto l730;
-		l718:	
+		l718:
 			if (d2 >= 20)
 			{
 				d5 = 1;
@@ -585,14 +583,14 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 			d5 = 0;
 			goto l734;
 
-		l726:	
+		l726:
 			d0 += 1;
 			d6 = 8;
 			if (d6 == a2) goto l718;
 			d6 = a2;
-		l730:	
+		l730:
 			d5 = 4;
-		l732:	
+		l732:
 			d2 += 8;
 		l734:
 			while ((d5 >= 0) && (cup1 > 0))
@@ -608,7 +606,7 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 			}
 			if (d1 != 31) d1++;
 			a2 = d6;
-		l74c:	
+		l74c:
 			d6 = d2;
 			d6 >>= 3;
 			d2 -= d6;
@@ -616,25 +614,25 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 	}
 	return true;
 
-l75a:	
+l75a:
 	d0 += 1;
 	if (bfextu(src,d0,1,bufs)) goto l766;
 	d4 = 2;
 	goto l79e;
-  
-l766:	
+
+l766:
 	d0 += 1;
 	if (bfextu(src,d0,1,bufs)) goto l772;
 	d4 = 4;
 	goto l79e;
 
-l772:	
+l772:
 	d0 += 1;
 	if (bfextu(src,d0,1,bufs)) goto l77e;
 	d4 = 6;
 	goto l79e;
 
-l77e:	
+l77e:
 	d0 += 1;
 	if (bfextu(src,d0,1,bufs)) goto l792;
 	d0 += 1;
@@ -642,14 +640,14 @@ l77e:
 	d0 += 3;
 	d6 += 8;
 	goto l7a8;
-  
-l792:	
+
+l792:
 	d0 += 1;
 	d6 = bfextu(src,d0,5,bufs);
 	d0 += 5;
 	d4 = 16;
 	goto l7a6;
-  
+
 l79e:
 	d0 += 1;
 	d6 = bfextu(src,d0,1,bufs);
@@ -685,7 +683,7 @@ l7ca:
 	}
 	d6 += 2;
 	phist = dst + a5 - d4 - 1;
-	
+
 	while ((d6 >= 0) && (cup1 > 0))
 	{
 		if(phist < bufs.pDstBeg || phist >= bufs.pDstEnd) throw XPK_error();
@@ -767,8 +765,8 @@ uint32 PPBITBUFFER::GetBits(uint32 n)
 		result = (result<<1) | (bitbuffer&1);
 		bitbuffer >>= 1;
 		bitcount--;
-    }
-    return result;
+	}
+	return result;
 }
 
 
@@ -850,4 +848,3 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 
 	return result;
 }
-

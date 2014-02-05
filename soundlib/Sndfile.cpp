@@ -748,16 +748,11 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 	if(file.IsValid())
 	{
-		LPCBYTE lpStream = reinterpret_cast<const unsigned char*>(file.GetRawData());
-		DWORD dwMemLength = file.GetLength();
-
 #ifndef NO_ARCHIVE_SUPPORT
 		CUnarchiver unarchiver(file);
 		if(unarchiver.ExtractBestFile(GetSupportedExtensions(true)))
 		{
 			file = unarchiver.GetOutputFile();
-			lpStream = (LPCBYTE)file.GetRawData();
-			dwMemLength = file.GetLength();
 		}
 #endif
 
@@ -769,9 +764,10 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		if(packedContainerType != MOD_CONTAINERTYPE_NONE)
 		{
 			file = FileReader(&(unpackedData[0]), unpackedData.size());
-			lpStream = (LPCBYTE)file.GetRawData();
-			dwMemLength = file.GetLength();
 		}
+
+		LPCBYTE lpStream = reinterpret_cast<const unsigned char*>(file.GetRawData());
+		DWORD dwMemLength = file.GetLength();
 
 		if(!ReadXM(file, loadFlags)
 // -> CODE#0023
