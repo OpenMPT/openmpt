@@ -1718,12 +1718,6 @@ BOOL CSoundFile::ProcessEffects()
 						}
 					}
 					continue;
-				} else if(nStartTick >= m_nMusicSpeed && IsCompatibleMode(TRK_FASTTRACKER2))
-				{
-					// FT2 compatibility: Note delays greater than the song speed should be ignored.
-					// However, EEx pattern delay is *not* considered at all.
-					// Test case: DelayCombination.xm
-					continue;
 				}
 			} else if(m_SongFlags[SONG_FIRSTTICK])
 			{
@@ -1781,11 +1775,17 @@ BOOL CSoundFile::ProcessEffects()
 		}
 
 		bool triggerNote = (m_nTickCount == nStartTick);	// Can be delayed by a note delay effect
-		// IT compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered. Scream Tracker 3 does the same.
-		// Test case: PatternDelay-NoteDelay.it
 		if((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) && nStartTick > 0 && (m_nTickCount % (m_nMusicSpeed + m_nFrameDelay)) == nStartTick)
 		{
+			// IT compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered. Scream Tracker 3 does the same.
+			// Test case: PatternDelay-NoteDelay.it
 			triggerNote = true;
+		} else if(IsCompatibleMode(TRK_FASTTRACKER2) && nStartTick >= m_nMusicSpeed)
+		{
+			// FT2 compatibility: Note delays greater than the song speed should be ignored.
+			// However, EEx pattern delay is *not* considered at all.
+			// Test case: DelayCombination.xm, PortaDelay.xm
+			triggerNote = false;
 		}
 
 		// IT compatibility: Tick-0 vs non-tick-0 effect distinction is always based on tick delay.
@@ -1793,6 +1793,13 @@ BOOL CSoundFile::ProcessEffects()
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			pChn->isFirstTick = triggerNote;
+		}
+
+		// FT2 compatibility: Note + portamento + note delay = no portamento
+		// Test case: PortaDelay.xm
+		if(IsCompatibleMode(TRK_FASTTRACKER2) && nStartTick != 0)
+		{
+			bPorta = false;
 		}
 
 		// Handles note/instrument/volume changes
@@ -2119,6 +2126,13 @@ BOOL CSoundFile::ProcessEffects()
 						vol *= 2;
 					}
 					param = vol << 4;
+
+					// FT2 compatibility: If there's a portamento and a note delay, execute the portamento, but don't update the parameter
+					// Test case: PortaDelay.xm
+					if(IsCompatibleMode(TRK_FASTTRACKER2) && nStartTick != 0)
+					{
+						param = 0;
+					}
 				}
 				TonePortamento(pChn, param);
 			} else
