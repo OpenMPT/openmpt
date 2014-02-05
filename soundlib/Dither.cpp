@@ -293,12 +293,15 @@ void Dither::Process(int *mixbuffer, std::size_t count, std::size_t channels, in
 		case DitherNone:
 			// nothing
 			break;
-		case DitherDefault:
 		case DitherModPlug:
 			Dither_ModPlug(mixbuffer, count, channels, bits, state.modplug);
 			break;
 		case DitherSimple:
 			Dither_Simple(mixbuffer, count, channels, bits, state.simple);
+			break;
+		case DitherDefault:
+		default:
+			Dither_ModPlug(mixbuffer, count, channels, bits, state.modplug);
 			break;
 	}
 }
