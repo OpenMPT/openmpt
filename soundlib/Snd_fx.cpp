@@ -2100,11 +2100,12 @@ BOOL CSoundFile::ProcessEffects()
 			TODO is this done correctly?
 		*/
 		bool doVolumeColumn = m_nTickCount >= nStartTick;
-		// FT2 compatibility: If there's a note delay, volume column effects are NOT executed on the first tick and on delayed tick.
+		// FT2 compatibility: If there's a note delay, volume column effects are NOT executed
+		// on the first tick and, if there's an instrument number, on the delayed tick.
 		// Test case: VolColDelay.xm
 		if(IsCompatibleMode(TRK_FASTTRACKER2) && nStartTick != 0)
 		{
-			doVolumeColumn = m_nTickCount != 0 && m_nTickCount != nStartTick;
+			doVolumeColumn = m_nTickCount != 0 && (m_nTickCount != nStartTick || pChn->rowCommand.instr == 0);
 		}
 		if(volcmd > VOLCMD_PANNING && doVolumeColumn)
 		{
