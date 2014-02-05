@@ -71,7 +71,7 @@ public:
 	uint64 m_dwFileLimit, m_dwSongLimit;
 	ORDERINDEX m_nNumOrders;
 
-	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnSampleFormat;
+	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnDither, m_CbnSampleFormat;
 	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder;
 
 	bool m_bGivePlugsIdleTime;
@@ -88,6 +88,7 @@ private:
 	void FillSamplerates();
 	void FillChannels();
 	void FillFormats();
+	void FillDither();
 	void FillTags();
 
 	void LoadTags();
@@ -110,6 +111,7 @@ public:
 	afx_msg void OnFileTypeChanged();
 	afx_msg void OnSamplerateChanged();
 	afx_msg void OnChannelsChanged();
+	afx_msg void OnDitherChanged();
 	afx_msg void OnFormatChanged();
 	afx_msg void OnPlayerOptions(); //rewbs.resamplerConf
 	DECLARE_MESSAGE_MAP()

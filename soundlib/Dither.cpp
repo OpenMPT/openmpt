@@ -19,6 +19,21 @@
 //////////////////////////////////////////////////////////////////////////
 // Noise Shaping (Dithering)
 
+
+std::wstring Dither::GetModeName(DitherMode mode)
+//-----------------------------------------------
+{
+	switch(mode)
+	{
+		case DitherNone   : return L"no"     ; break;
+		case DitherDefault: return L"default"; break;
+		case DitherModPlug: return L"0.5 bit"; break;
+		case DitherSimple : return L"1 bit"  ; break;
+		default           : return L""       ; break;
+	}
+}
+
+
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4731) // ebp modified
 #endif

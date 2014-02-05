@@ -119,6 +119,7 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO5,	OnFileTypeChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnSamplerateChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4,	OnChannelsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO6,	OnDitherChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnFormatChanged)
 END_MESSAGE_MAP()
 
@@ -153,6 +154,7 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_COMBO5,	m_CbnFileType);
 	DDX_Control(pDX, IDC_COMBO1,	m_CbnSampleRate);
 	DDX_Control(pDX, IDC_COMBO4,	m_CbnChannels);
+	DDX_Control(pDX, IDC_COMBO6,	m_CbnDither);
 	DDX_Control(pDX, IDC_COMBO2,	m_CbnSampleFormat);
 	DDX_Control(pDX, IDC_SPIN3,		m_SpinMinOrder);
 	DDX_Control(pDX, IDC_SPIN4,		m_SpinMaxOrder);
@@ -196,6 +198,7 @@ BOOL CWaveConvert::OnInitDialog()
 	FillSamplerates();
 	FillChannels();
 	FillFormats();
+	FillDither();
 
 	LoadTags();
 
@@ -520,6 +523,33 @@ void CWaveConvert::FillFormats()
 }
 
 
+void CWaveConvert::FillDither()
+//-----------------------------
+{
+	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	m_CbnDither.CComboBox::ResetContent();
+	int format = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()) & 0xffff;
+	if((encTraits->modes & Encoder::ModeEnumerated) && encTraits->formats[format].Sampleformat != SampleFormatInvalid && encTraits->formats[format].Sampleformat != SampleFormatFloat32)
+	{
+		m_CbnDither.EnableWindow(TRUE);
+		for(int dither = 0; dither < NumDitherModes; ++dither)
+		{
+			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName((DitherMode)dither) + L" dither"));
+			m_CbnDither.SetItemData(ndx, dither);
+		}
+	} else
+	{
+		m_CbnDither.EnableWindow(FALSE);
+		for(int dither = 0; dither < NumDitherModes; ++dither)
+		{
+			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + L" dither"));
+			m_CbnDither.SetItemData(ndx, dither);
+		}
+	}
+	m_CbnDither.SetCurSel(encSettings.Dither);
+}
+
+
 void CWaveConvert::OnFileTypeChanged()
 //------------------------------------
 {
@@ -530,6 +560,7 @@ void CWaveConvert::OnFileTypeChanged()
 	FillSamplerates();
 	FillChannels();
 	FillFormats();
+	FillDither();
 	FillTags();
 }
 
@@ -540,6 +571,7 @@ void CWaveConvert::OnSamplerateChanged()
 	SaveEncoderSettings();
 	//DWORD dwSamplerate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
 	FillFormats();
+	FillDither();
 }
 
 
@@ -549,6 +581,14 @@ void CWaveConvert::OnChannelsChanged()
 	SaveEncoderSettings();
 	//UINT nChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
 	FillFormats();
+	FillDither();
+}
+
+
+void CWaveConvert::OnDitherChanged()
+//----------------------------------
+{
+	SaveEncoderSettings();
 }
 
 
@@ -557,6 +597,7 @@ void CWaveConvert::OnFormatChanged()
 {
 	SaveEncoderSettings();
 	//DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
+	FillDither();
 	FillTags();
 }
 
@@ -755,6 +796,7 @@ void CWaveConvert::SaveEncoderSettings()
 		{
 			m_Settings.FinalSampleFormat = encTraits->formats[format].Sampleformat;
 		}
+		encSettings.Dither = m_CbnDither.GetItemData(m_CbnDither.GetCurSel());
 		encSettings.Format = format;
 		encSettings.Mode = Encoder::ModeEnumerated;
 		encSettings.Bitrate = encTraits->formats[format].Bitrate != 0 ? encTraits->formats[format].Bitrate : encTraits->defaultBitrate;
@@ -762,6 +804,7 @@ void CWaveConvert::SaveEncoderSettings()
 	} else
 	{
 		m_Settings.FinalSampleFormat = SampleFormatFloat32;
+		encSettings.Dither = m_CbnDither.GetItemData(m_CbnDither.GetCurSel());
 		Encoder::Mode mode = (Encoder::Mode)((dwFormat >> 24) & 0xff);
 		int quality = (int)((dwFormat >> 0) & 0xff);
 		int bitrate = (int)((dwFormat >> 0) & 0xffff);
