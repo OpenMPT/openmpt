@@ -184,7 +184,7 @@ private:
 		cache.resize(static_cast<std::size_t>(pos));
 		stream->read(&cache[cache.size() - needcount], needcount);
 		std::size_t readcount = static_cast<std::size_t>(stream->gcount());
-		cache.resize(cache.size() - buffer_size + readcount);
+		cache.resize(cache.size() - needcount + readcount);
 		if(*stream)
 		{
 			// can read further
