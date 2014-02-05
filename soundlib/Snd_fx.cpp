@@ -2092,7 +2092,14 @@ BOOL CSoundFile::ProcessEffects()
 			so... hxx = (hx | (oldhxx & 0xf0))  ???
 			TODO is this done correctly?
 		*/
-		if((volcmd > VOLCMD_PANNING) && (m_nTickCount >= nStartTick))
+		bool doVolumeColumn = m_nTickCount >= nStartTick;
+		// FT2 compatibility: If there's a note delay, volume column effects are NOT executed on the first tick and on delayed tick.
+		// Test case: VolColDelay.xm
+		if(IsCompatibleMode(TRK_FASTTRACKER2) && nStartTick != 0)
+		{
+			doVolumeColumn = m_nTickCount != 0 && m_nTickCount != nStartTick;
+		}
+		if(volcmd > VOLCMD_PANNING && doVolumeColumn)
 		{
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
