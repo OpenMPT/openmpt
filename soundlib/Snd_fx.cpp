@@ -21,6 +21,7 @@
 #endif // MODPLUG_TRACKER
 #include "tuning.h"
 #include "Tables.h"
+#include "modsmp_ctrl.h"	// For updating the loop wraparound data with the invert loop effect
 
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4244)
@@ -3782,7 +3783,7 @@ void CSoundFile::InvertLoop(ModChannel *pChn)
 	// TRASH IT!!! (Yes, the sample!)
 	uint8 &sample = static_cast<uint8 *>(pModSample->pSample)[pModSample->nLoopStart + pChn->nEFxOffset];
 	sample = ~sample;
-	//AdjustSampleLoop(pModSample);
+	ctrlSmp::PrecomputeLoops(*pModSample, *this, false);
 }
 
 
@@ -4706,11 +4707,11 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period) const
 UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const
 //-------------------------------------------------------------------------------
 {
-	if ((!note) || (note >= NOTE_MIN_SPECIAL)) return 0;
+	if (note == NOTE_NONE || (note >= NOTE_MIN_SPECIAL)) return 0;
 	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV
 				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF))
 	{
-		note--;
+		note -= NOTE_MIN;
 		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
 			return (FreqS3MTable[note % 12] << 5) >> (note / 12);
@@ -4726,9 +4727,17 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 	{
 		if (note < 13) note = 13;
 		note -= 13;
+
+		// FT2 Compatibility: The lower three bits of the finetune are truncated.
+		// Test case: Finetune-Precision.xm
+		if(IsCompatibleMode(TRK_FASTTRACKER2))
+		{
+			nFineTune &= ~7;
+		}
+
 		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
-			LONG l = ((NOTE_MAX - note) << 6) - (nFineTune / 2);
+			int l = ((NOTE_MAX - note) << 6) - (nFineTune / 2);
 			if (l < 1) l = 1;
 			return (UINT)l;
 		} else
@@ -4740,7 +4749,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 			int i = rnote + rfine + 8;
 			Limit(i , 0, 103);
 			UINT per1 = XMPeriodTable[i];
-			if ( finetune < 0 )
+			if(finetune < 0)
 			{
 				rfine--;
 				finetune = -finetune;
@@ -4758,10 +4767,10 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 	{
 		note--;
 		nFineTune = XM2MODFineTune(nFineTune);
-		if ((nFineTune) || (note < 36) || (note >= 36+6*12))
-			return (ProTrackerTunedPeriods[nFineTune*12 + note % 12] << 5) >> (note / 12);
+		if ((nFineTune) || (note < 36) || (note >= 36 + 6 * 12))
+			return (ProTrackerTunedPeriods[nFineTune * 12 + note % 12] << 5) >> (note / 12);
 		else
-			return (ProTrackerPeriodTable[note-36] << 2);
+			return (ProTrackerPeriodTable[note - 36] << 2);
 	}
 }
 
