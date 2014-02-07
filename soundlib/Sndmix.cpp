@@ -565,31 +565,35 @@ BOOL CSoundFile::ProcessRow()
 int CSoundFile::GetVibratoDelta(int type, int position) const
 //-----------------------------------------------------------
 {
-	switch(type & 0x03)
+	// IT compatibility: IT has its own, more precise tables
+	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
-	case 0:
-	default:
-		// IT compatibility: IT has its own, more precise tables
-		return IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[position] : ModSinusTable[position];
-
-	case 1:
-		// IT compatibility: IT has its own, more precise tables
-		return IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[position] : ModRampDownTable[position];
-
-	case 2:
-		// IT compatibility: IT has its own, more precise tables
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		switch(type & 0x03)
+		{
+		case 0:
+		default:
+			return ITSinusTable[position];
+		case 1:
+			return ITRampDownTable[position];
+		case 2:
 			return position < 128 ? 64 : 0;
-		else
-			return position < 32 ? 127 : -127;
-
-	case 3:
-		//IT compatibility 19. Use random values
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
-			// TODO delay is not taken into account!
+		case 3:
 			return (rand() & 0x7F) - 0x40;
-		else
+		}
+	} else
+	{
+		switch(type & 0x03)
+		{
+		case 0:
+		default:
+			return ModSinusTable[position];
+		case 1:
+			return ModRampDownTable[position];
+		case 2:
+			return position < 32 ? 127 : -127;
+		case 3:
 			return ModRandomTable[position];
+		}
 	}
 }
 
@@ -1070,7 +1074,7 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn)
 {
 	if(pChn->dwFlags[CHN_PANBRELLO])
 	{
-		UINT panpos;
+		uint32 panpos;
 		// IT compatibility: IT has its own, more precise tables
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			panpos = pChn->nPanbrelloPos & 0xFF;
@@ -1079,7 +1083,22 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn)
 
 		int pdelta = GetVibratoDelta(pChn->nPanbrelloType, panpos);
 
-		pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
+		// IT compatibility: Sample-and-hold style random panbrello (tremolo and vibrato don't use this mechanism in IT)
+		// Test case: RandomWaveform.it
+		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->nPanbrelloType == 3)
+		{
+			if(pChn->nPanbrelloPos == 0 || pChn->nPanbrelloPos >= pChn->nPanbrelloSpeed)
+			{
+				pChn->nPanbrelloPos = 0;
+				pChn->nPanbrelloRandomMemory = static_cast<int8>(pdelta);
+			}
+			pChn->nPanbrelloPos++;
+			pdelta = pChn->nPanbrelloRandomMemory;
+		} else
+		{
+			pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
+		}
+
 		pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
 		pdelta += pChn->nRealPan;
 
