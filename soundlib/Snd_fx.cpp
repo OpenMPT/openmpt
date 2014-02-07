@@ -3578,9 +3578,13 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 	case 0x50:
 		// IT compatibility: Ignore waveform types > 3
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				{
 					pChn->nPanbrelloType = (param < 0x04) ? param : 0;
-				else
+					pChn->nPanbrelloPos = 0;
+				} else
+				{
 					pChn->nPanbrelloType = param & 0x07;
+				}
 				break;
 	// S6x: Pattern Delay for x frames
 	case 0x60:
