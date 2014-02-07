@@ -96,6 +96,7 @@ struct ALIGN(32) ModChannel
 	uint8 nVibratoType, nVibratoSpeed, nVibratoDepth;
 	uint8 nTremoloType, nTremoloSpeed, nTremoloDepth;
 	uint8 nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
+	int8  nPanbrelloRandomMemory;
 	uint8 nOldCmdEx, nOldVolParam, nOldTempo;
 	uint8 nOldOffset, nOldHiOffset;
 	uint8 nCutOff, nResonance;
