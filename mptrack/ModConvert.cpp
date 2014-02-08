@@ -155,14 +155,13 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			m_SndFile.Chn[nChn].pModInstrument = nullptr;
 		}
 
-		for(INSTRUMENTINDEX nIns = 0; nIns < m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
+		for(INSTRUMENTINDEX nIns = 0; nIns <= m_SndFile.GetNumInstruments(); nIns++) if (m_SndFile.Instruments[nIns])
 		{
 			delete m_SndFile.Instruments[nIns];
 			m_SndFile.Instruments[nIns] = nullptr;
 		}
 		m_SndFile.m_nInstruments = 0;
 
-		cs.Leave();
 		EndWaitCursor();
 	} //End if (((m_SndFile.m_nInstruments) || (b64)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 	BeginWaitCursor();
@@ -437,8 +436,22 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	if(newTypeIsMOD)
 	{
 		// Not supported in MOD format
-		m_SndFile.m_nDefaultSpeed = 6;
-		m_SndFile.m_nDefaultTempo = 125;
+		if(m_SndFile.m_nDefaultSpeed != 6)
+		{
+			if(m_SndFile.Order.size() > 0)
+			{
+				m_SndFile.Patterns[m_SndFile.Order[0]].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).Retry(EffectWriter::rmTryNextRow));
+			}
+			m_SndFile.m_nDefaultSpeed = 6;
+		}
+		if(m_SndFile.m_nDefaultTempo)
+		{
+			if(m_SndFile.Order.size() > 0)
+			{
+				m_SndFile.Patterns[m_SndFile.Order[0]].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo)).Retry(EffectWriter::rmTryNextRow));
+			}
+			m_SndFile.m_nDefaultTempo = 125;
+		}
 		m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 		m_SndFile.m_nSamplePreAmp = 48;
 		m_SndFile.m_nVSTiVolume = 48;
