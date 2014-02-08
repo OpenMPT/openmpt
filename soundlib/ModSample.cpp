@@ -29,21 +29,19 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	} else if((toType & (MOD_TYPE_MOD | MOD_TYPE_XM)) && (!(fromType & (MOD_TYPE_MOD | MOD_TYPE_XM))))
 	{
 		FrequencyToTranspose();
-		if(toType & MOD_TYPE_MOD)
-		{
-			RelativeTone = 0;
-		}
 	}
 
 	// No ping-pong loop, panning and auto-vibrato for MOD / S3M samples
 	if(toType & (MOD_TYPE_MOD | MOD_TYPE_S3M))
 	{
-		uFlags &= ~(CHN_PINGPONGLOOP | CHN_PANNING);
+		uFlags.reset(CHN_PINGPONGLOOP | CHN_PANNING);
 
 		nVibDepth = 0;
 		nVibRate = 0;
 		nVibSweep = 0;
 		nVibType = VIB_SINE;
+
+		RelativeTone = 0;
 	}
 
 	// No global volume sustain loops for MOD/S3M/XM
@@ -51,30 +49,24 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		nGlobalVol = 64;
 		// Sustain loops - convert to normal loops
-		if((uFlags & CHN_SUSTAINLOOP) != 0)
+		if(uFlags[CHN_SUSTAINLOOP])
 		{
 			// We probably overwrite a normal loop here, but since sustain loops are evaluated before normal loops, this is just correct.
 			nLoopStart = nSustainStart;
 			nLoopEnd = nSustainEnd;
-			uFlags |= CHN_LOOP;
-			if(uFlags & CHN_PINGPONGSUSTAIN)
-			{
-				uFlags |= CHN_PINGPONGLOOP;
-			} else
-			{
-				uFlags &= ~CHN_PINGPONGLOOP;
-			}
+			uFlags.set(CHN_LOOP);
+			uFlags.set(CHN_PINGPONGLOOP, uFlags[CHN_PINGPONGSUSTAIN]);
 		}
 		nSustainStart = nSustainEnd = 0;
-		uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
+		uFlags.reset(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 	}
 
 	// All XM samples have default panning, and XM's autovibrato settings are rather limited.
 	if(toType & MOD_TYPE_XM)
 	{
-		if(!(uFlags & CHN_PANNING))
+		if(!uFlags[CHN_PANNING])
 		{
-			uFlags |= CHN_PANNING;
+			uFlags.set(CHN_PANNING);
 			nPan = 128;
 		}
 
@@ -302,7 +294,7 @@ void ModSample::TransposeToFrequency()
 int ModSample::FrequencyToTranspose(uint32 freq)
 //----------------------------------------------
 {
-	const float inv_log_2 = 1.44269504089f; // 1.0f/std::log(2.0f)	
+	const float inv_log_2 = 1.44269504089f; // 1.0f/std::log(2.0f)
 	return Util::Round<int>(std::log(freq * (1.0f / 8363.0f)) * (12.0f * 128.0f * inv_log_2));
 }
 
