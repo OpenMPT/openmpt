@@ -444,7 +444,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			}
 			m_SndFile.m_nDefaultSpeed = 6;
 		}
-		if(m_SndFile.m_nDefaultTempo)
+		if(m_SndFile.m_nDefaultTempo != 125)
 		{
 			if(m_SndFile.Order.size() > 0)
 			{
