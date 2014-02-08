@@ -171,6 +171,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	/////////////////////////////
 	// Converting pattern data
 
+	// When converting to MOD, get the new sample transpose setting right here so that we can compensate notes in the pattern.
+	if(newTypeIsMOD && !oldTypeIsXM)
+	{
+		for(SAMPLEINDEX smp = 1; smp <= m_SndFile.GetNumSamples(); smp++)
+		{
+			m_SndFile.GetSample(smp).FrequencyToTranspose();
+		}
+	}
+
 	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++) if (m_SndFile.Patterns[pat])
 	{
 		ModCommand *m = m_SndFile.Patterns[pat];
@@ -178,6 +187,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// This is used for -> MOD/XM conversion
 		std::vector<std::vector<ModCommand::PARAM> > effMemory(GetNumChannels());
 		std::vector<ModCommand::VOL> volMemory(GetNumChannels(), 0);
+		std::vector<ModCommand::INSTR> instrMemory(GetNumChannels(), 0);
 		for(size_t i = 0; i < GetNumChannels(); i++)
 		{
 			effMemory[i].resize(MAX_EFFECTS, 0);
@@ -194,6 +204,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				chn = 0;
 				row++;
 			}
+
+			ModCommand::INSTR instr = m->instr;
+			if(m->instr) instrMemory[chn] = instr;
+			else instr = instrMemory[chn];
 
 			// Deal with volume column slide memory (it's not shared with the effect column)
 			if(oldTypeIsIT_MPT && (newTypeIsMOD_XM || newTypeIsS3M))
@@ -246,6 +260,13 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 						effMemory[chn][m->command] = m->param;
 					break;
 
+				}
+
+				// Compensate for loss of transpose information
+				if(m->IsNote() && instr && instr <= GetNumSamples())
+				{
+					const int newNote = m->note + m_SndFile.GetSample(instr).RelativeTone;
+					m->note = static_cast<uint8>(Clamp(newNote, specs.noteMin, specs.noteMax));
 				}
 			}
 
