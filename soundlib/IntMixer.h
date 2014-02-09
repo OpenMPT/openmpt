@@ -297,7 +297,7 @@ struct ResonantFilter
 	}
 
 	// Filter values are clipped to double the input range
-#define ClipFilter(x) Clamp<typename Traits::output_t, typename Traits::output_t>(x, int16_min << (MIXING_FILTER_PRECISION + 1), int16_max << (MIXING_FILTER_PRECISION + 1))
+#define ClipFilter(x) Clamp<typename Traits::output_t, typename Traits::output_t>(x, int16_min << 1, int16_max << 1)
 
 	forceinline void operator() (typename Traits::outbuf_t &outSample, const ModChannel &chn)
 	{
