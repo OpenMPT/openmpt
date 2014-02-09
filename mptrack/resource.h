@@ -27,9 +27,6 @@
 #define IDD_PATTERN_EDITCOMMAND         124
 #define IDD_SHOWLOG                     125
 #define IDD_VIEW_GLOBALS                126
-#define IDD_PAGEEDITNOTE                127
-#define IDD_PAGEEDITVOLUME              128
-#define IDD_PAGEEDITEFFECT              129
 #define IDD_SAMPLE_AMPLIFY              130
 #define IDD_SAMPLE_RESAMPLE             131
 #define IDD_SETUP_EQ                    132

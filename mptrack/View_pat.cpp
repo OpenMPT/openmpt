@@ -635,8 +635,7 @@ bool CViewPattern::ShowEditWindow()
 {
 	if (!m_pEditWnd)
 	{
-		m_pEditWnd = new CEditCommand;
-		if (m_pEditWnd) m_pEditWnd->SetParent(this, GetDocument());
+		m_pEditWnd = new CEditCommand(*GetSoundFile(), this);
 	}
 	if (m_pEditWnd)
 	{
@@ -2298,10 +2297,10 @@ void CViewPattern::OnEditFindNext()
 							// Fix volume command parameters if necessary. This is necesary e.g.
 							// When there was a command "v24" and the user searched for v and replaced it by d.
 							// In that case, d24 wouldn't be a valid command.
-							DWORD minVal = 0, maxVal = 64;
+							ModCommand::VOL minVal = 0, maxVal = 64;
 							if(effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), nullptr, &minVal, &maxVal))
 							{
-								Limit(m->vol, (ModCommand::VOL)minVal, (ModCommand::VOL)maxVal);
+								Limit(m->vol, minVal, maxVal);
 							}
 						}
 
@@ -2966,7 +2965,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				} else
 				{
 					int vol = m[chn].vol + offset * (coarse ? 10 : 1);
-					DWORD minValue = 0, maxValue = 64;
+					ModCommand::VOL minValue = 0, maxValue = 64;
 					effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m[chn].volcmd), nullptr, &minValue, &maxValue);
 					Limit(vol, (int)minValue, (int)maxValue);
 					m[chn].vol = (ModCommand::VOL)vol;
@@ -2983,7 +2982,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				} else
 				{
 					int param = m[chn].param + offset * (coarse ? 16 : 1);
-					DWORD minValue = 0, maxValue = 0xFF;
+					ModCommand::PARAM minValue = 0, maxValue = 0xFF;
 					effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(m[chn].command, m[chn].param), nullptr, false, &minValue, &maxValue);
 					Limit(param, (int)minValue, (int)maxValue);
 					m[chn].param = (ModCommand::PARAM)param;
@@ -3551,7 +3550,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 					}
 					if (nRow != GetCurrentRow())
 					{
-						SetCurrentRow((nRow < pSndFile->Patterns[nPat].GetNumRows()) ? nRow : 0, FALSE, FALSE);
+						SetCurrentRow((nRow < pSndFile->Patterns[nPat].GetNumRows()) ? nRow : 0, false, false);
 					}
 				}
 			} else

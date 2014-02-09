@@ -20,10 +20,10 @@
 struct MPTEFFECTINFO
 {
 	ModCommand::COMMAND effect;		// CMD_XXXX
-	DWORD paramMask;				// 0 = default
-	DWORD paramValue;				// 0 = default
-	DWORD paramLimit;				// Parameter Editor limit
-	DWORD supportedFormats;			// MOD_TYPE_XXX combo
+	ModCommand::PARAM paramMask;	// 0 = default
+	ModCommand::PARAM paramValue;	// 0 = default
+	ModCommand::PARAM paramLimit;	// Parameter Editor limit
+	MODTYPE supportedFormats;		// MOD_TYPE_XXX combo
 	LPCSTR name;					// e.g. "Tone Portamento"
 };
 
@@ -34,7 +34,7 @@ struct MPTEFFECTINFO
 #define MOD_TYPE_XMIT	(MOD_TYPE_XM | MOD_TYPE_IT)
 #define MOD_TYPE_XMITMPT (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
 #define MOD_TYPE_ITMPT (MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_ALL	0xFFFFFFFF
+#define MOD_TYPE_ALL	((MODTYPE)~0)
 
 
 const MPTEFFECTINFO gFXInfo[] =
@@ -289,8 +289,8 @@ UINT EffectInfo::GetEffectMaskFromIndex(UINT ndx) const
 
 }
 
-bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DWORD *prangeMax) const
-//---------------------------------------------------------------------------------------------------
+bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, ModCommand::PARAM *prangeMin, ModCommand::PARAM *prangeMax) const
+//---------------------------------------------------------------------------------------------------------------------------
 {
 	if (s) s[0] = 0;
 	if (prangeMin) *prangeMin = 0;
@@ -299,7 +299,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DW
 	if (s) GetEffectName(s, gFXInfo[ndx].effect, gFXInfo[ndx].paramValue, bXX);
 	if ((prangeMin) && (prangeMax))
 	{
-		UINT nmin = 0, nmax = 0xFF;
+		ModCommand::PARAM nmin = 0, nmax = 0xFF;
 		if (gFXInfo[ndx].paramMask == 0xF0)
 		{
 			nmin = gFXInfo[ndx].paramValue;
@@ -946,8 +946,8 @@ ModCommand::VOLCMD EffectInfo::GetVolCmdFromIndex(UINT ndx) const
 }
 
 
-bool EffectInfo::GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin, DWORD *prangeMax) const
-//-----------------------------------------------------------------------------------------
+bool EffectInfo::GetVolCmdInfo(UINT ndx, LPSTR s, ModCommand::VOL *prangeMin, ModCommand::VOL *prangeMax) const
+//-------------------------------------------------------------------------------------------------------------
 {
 	if (s) s[0] = 0;
 	if (prangeMin) *prangeMin = 0;
