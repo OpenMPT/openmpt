@@ -766,6 +766,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			file = FileReader(&(unpackedData[0]), unpackedData.size());
 		}
 
+		file.Rewind();
 		LPCBYTE lpStream = reinterpret_cast<const unsigned char*>(file.GetRawData());
 		DWORD dwMemLength = file.GetLength();
 
