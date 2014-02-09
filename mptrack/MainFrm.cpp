@@ -1183,7 +1183,13 @@ bool CMainFrame::StartPlayback()
 	if(!gpSoundDevice->Start()) return false;
 	if(!m_NotifyTimer)
 	{
-		m_NotifyTimer = SetTimer(TIMERID_NOTIFY, std::max<int>(1, Util::Round<int>(gpSoundDevice->GetBufferAttributes().UpdateInterval * 1000.0)), NULL);
+		if(TrackerSettings::Instance().GUIUpdateInterval.Get() > 0)
+		{
+			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, TrackerSettings::Instance().GUIUpdateInterval, NULL);
+		} else
+		{
+			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, std::max<int>(1, Util::Round<int>(gpSoundDevice->GetBufferAttributes().UpdateInterval * 1000.0)), NULL);
+		}
 	}
 	return true;
 }
