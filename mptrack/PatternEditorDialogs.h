@@ -113,154 +113,51 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 // Command Editing
 
-class CEditCommand;
-class CPageEditCommand;
 
-//==========================================
-class CPageEditCommand: public CPropertyPage
-//==========================================
+//================================
+class CEditCommand: public CDialog
+//================================
 {
 protected:
+	CComboBox cbnNote, cbnInstr, cbnVolCmd, cbnCommand;
+	CSliderCtrl sldVolParam, sldParam;
 	CSoundFile &sndFile;
 	EffectInfo effectInfo;
-	CEditCommand &m_pParent;
-	bool m_bInitialized;
+	ModCommand *m;
+	ModCommandPos editPos;
+	UINT xParam, xMultiplier;
+	bool modified;
 
 public:
-	CPageEditCommand(CSoundFile &sf, CEditCommand &parent, UINT id) : CPropertyPage(id), sndFile(sf), effectInfo(sf), m_pParent(parent), m_bInitialized(false) {};
-
-	virtual ~CPageEditCommand() {}
-	virtual BOOL OnInitDialog();
-	virtual void Init(ModCommand&)=0;
-	virtual void UpdateDialog() {}
-};
-
-
-//==========================================
-class CPageEditNote: public CPageEditCommand
-//==========================================
-{
-protected:
-	ModCommand::NOTE m_nNote;
-	ModCommand::INSTR m_nInstr;
+	CEditCommand(CSoundFile &sndFile, CWnd *parent);
 
 public:
-	CPageEditNote(CSoundFile &sf, CEditCommand &parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITNOTE) {}
-	void Init(ModCommand &m) { m_nNote = m.note; m_nInstr = m.instr; }
-	void UpdateDialog();
+	bool ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor);
 
 protected:
-	//{{AFX_MSG(CPageEditNote)
+	void InitAll() { InitNote(); InitVolume(); InitEffect(); }
+	void InitNote();
+	void InitVolume();
+	void InitEffect();
+
+	void UpdateVolCmdRange();
+	void UpdateEffectRange(bool set);
+	void UpdateEffectValue(bool set);
+
+	//{{AFX_VIRTUAL(CEditCommand)
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual void OnOK()		{ ShowWindow(SW_HIDE); }
+	virtual void OnCancel()	{ ShowWindow(SW_HIDE); }
+	virtual BOOL PreTranslateMessage(MSG *pMsg);
+	afx_msg void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
+	afx_msg void OnClose()	{ ShowWindow(SW_HIDE); }
+
 	afx_msg void OnNoteChanged();
-	afx_msg void OnInstrChanged();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
-
-//============================================
-class CPageEditVolume: public CPageEditCommand
-//============================================
-{
-protected:
-	ModCommand::VOLCMD m_nVolCmd;
-	ModCommand::VOL m_nVolume;
-	bool m_bIsParamControl;
-
-public:
-	CPageEditVolume(CSoundFile &sf, CEditCommand &parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITVOLUME) {};
-	void Init(ModCommand &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = m.IsPcNote(); };
-	void UpdateDialog();
-	void UpdateRanges();
-
-protected:
-	//{{AFX_MSG(CPageEditVolume)
 	afx_msg void OnVolCmdChanged();
-	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
-
-//============================================
-class CPageEditEffect: public CPageEditCommand
-//============================================
-{
-protected:
-	ModCommand::COMMAND m_nCommand;
-	ModCommand::PARAM m_nParam;
-	PLUGINDEX m_nPlugin;
-	UINT m_nPluginParam;
-	bool m_bIsParamControl;
-	// -> CODE#0010
-	// -> DESC="add extended parameter mechanism to pattern effects"
-	UINT m_nXParam, m_nMultiplier;
-	// -! NEW_FEATURE#0010
-
-	ModCommand* m_pModcommand;
-
-public:
-	CPageEditEffect(CSoundFile &sf, CEditCommand &parent) : CPageEditCommand(sf, parent, IDD_PAGEEDITEFFECT) {}
-	// -> CODE#0010
-	// -> DESC="add extended parameter mechanism to pattern effects"
-	void Init(ModCommand &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = m.IsPcNote(); m_nPlugin = m.instr; m_nPluginParam = m.GetValueVolCol();}
-	void XInit(UINT xparam = 0, UINT multiplier = 1) { m_nXParam = xparam; m_nMultiplier = multiplier; }
-	// -! NEW_FEATURE#0010
-	void UpdateDialog();
-	void UpdateRange(BOOL bSet);
-	void UpdateValue(BOOL bSet);
-
-protected:
-	//{{AFX_MSG(CPageEditEffect)
 	afx_msg void OnCommandChanged();
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-};
-
-
-
-//=======================================
-class CEditCommand: public CPropertySheet
-//=======================================
-{
-	friend class CPageEditNote;
-protected:
-	CPageEditNote *m_pageNote;
-	CPageEditVolume *m_pageVolume;
-	CPageEditEffect *m_pageEffect;
-	CModDoc *m_pModDoc;
-	HWND m_hWndView;
-	ROWINDEX m_nRow;
-	PATTERNINDEX m_nPattern;
-	CHANNELINDEX m_nChannel;
-	ModCommand m_Command;
-	bool m_bModified;
-
-public:
-	CEditCommand();
-
-public:
-	BOOL SetParent(CWnd *parent, CModDoc *pModDoc);
-	BOOL ShowEditWindow(PATTERNINDEX nPat, const PatternCursor &cursor);
-	void OnSelListChange();
-	void UpdateNote(ModCommand::NOTE note, ModCommand::INSTR instr);
-	void UpdateVolume(ModCommand::VOLCMD volcmd, ModCommand::VOL vol);
-	void UpdateEffect(ModCommand::COMMAND command, ModCommand::PARAM param);
-
-protected:
-	//{{AFX_VIRTUAL(CEditCommand)
-	virtual void OnOK()		{ ShowWindow(SW_HIDE); }
-	virtual void OnCancel()	{ ShowWindow(SW_HIDE); }
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
-	//}}AFX_VIRTUAL
-	//{{AFX_MSG(CEditCommand)
-	afx_msg void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
-	afx_msg void OnClose()	{ ShowWindow(SW_HIDE); }
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-public:
-	afx_msg void OnDestroy();
 };
 
 

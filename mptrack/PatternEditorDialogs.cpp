@@ -316,7 +316,7 @@ void CFindReplaceTab::ChangeVolCmd()
 	// Update Param range
 	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL))
 	{
-		DWORD rangeMin, rangeMax;
+		ModCommand::VOL rangeMin, rangeMax;
 		if(!effectInfo.GetVolCmdInfo(fxndx, nullptr, &rangeMin, &rangeMax))
 		{
 			rangeMin = 0;
@@ -600,67 +600,39 @@ void CPatternPropertiesDlg::OnOK()
 ////////////////////////////////////////////////////////////////////////////////////////////
 // CEditCommand
 
-BEGIN_MESSAGE_MAP(CEditCommand, CPropertySheet)
+BEGIN_MESSAGE_MAP(CEditCommand, CDialog)
 	ON_WM_ACTIVATE()
 	ON_WM_CLOSE()
-	ON_WM_DESTROY()
+
+	ON_CBN_SELCHANGE(IDC_COMBO1,	OnNoteChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	OnNoteChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO3,	OnVolCmdChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO4,	OnCommandChanged)
+	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
 
-CEditCommand::CEditCommand()
-//--------------------------
+void CEditCommand::DoDataExchange(CDataExchange* pDX)
+//---------------------------------------------------
 {
-	m_pModDoc = NULL;
-	m_hWndView = NULL;
-	m_nPattern = 0;
-	m_nRow = 0;
-	m_nChannel = 0;
-	m_pageNote = NULL;
-	m_pageVolume = NULL;
-	m_pageEffect = NULL;
-	m_bModified = false;
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CSplitKeyboadSettings)
+	DDX_Control(pDX, IDC_COMBO1,	cbnNote);
+	DDX_Control(pDX, IDC_COMBO2,	cbnInstr);
+	DDX_Control(pDX, IDC_COMBO3,	cbnVolCmd);
+	DDX_Control(pDX, IDC_COMBO4,	cbnCommand);
+	DDX_Control(pDX, IDC_SLIDER1,	sldVolParam);
+	DDX_Control(pDX, IDC_SLIDER2,	sldParam);
+	//}}AFX_DATA_MAP
 }
 
 
-BOOL CEditCommand::SetParent(CWnd *parent, CModDoc *pModDoc)
-//----------------------------------------------------------
+CEditCommand::CEditCommand(CSoundFile &sndFile, CWnd *parent) : sndFile(sndFile), effectInfo(sndFile), m(nullptr), modified(false)
+//--------------------------------------------------------------------------------------------------------------------------------
 {
-	if ((!parent) || (!pModDoc)) return FALSE;
-	m_hWndView = parent->m_hWnd;
-	m_pModDoc = pModDoc;
-	m_pageNote = new CPageEditNote(m_pModDoc->GetrSoundFile(), *this);
-	m_pageVolume = new CPageEditVolume(m_pModDoc->GetrSoundFile(), *this);
-	m_pageEffect = new CPageEditEffect(m_pModDoc->GetrSoundFile(), *this);
-	AddPage(m_pageNote);
-	AddPage(m_pageVolume);
-	AddPage(m_pageEffect);
-	if (!CPropertySheet::Create(parent,
-		WS_SYSMENU|WS_POPUP|WS_CAPTION,	WS_EX_DLGMODALFRAME)) return FALSE;
-	ModifyStyleEx(0, WS_EX_TOOLWINDOW|WS_EX_PALETTEWINDOW, SWP_FRAMECHANGED);
-	return TRUE;
+	CDialog::Create(IDD_PATTERN_EDITCOMMAND, parent);
 }
 
-void CEditCommand::OnDestroy()
-//----------------------------
-{
-	CPropertySheet::OnDestroy();
-
-	if (m_pageNote)
-	{
-		m_pageNote->DestroyWindow();
-		delete m_pageNote;
-	}
-	if (m_pageVolume)
-	{
-		m_pageVolume->DestroyWindow();
-		delete m_pageVolume;
-	}
-	if (m_pageEffect)
-	{
-		m_pageEffect->DestroyWindow();
-		delete m_pageEffect;
-	}
-}
 
 BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 //-----------------------------------------------
@@ -673,140 +645,469 @@ BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 			return TRUE;
 		}
 	}
-	return CPropertySheet::PreTranslateMessage(pMsg);
+	return CDialog::PreTranslateMessage(pMsg);
 }
 
 
-BOOL CEditCommand::ShowEditWindow(PATTERNINDEX nPat, const PatternCursor &cursor)
-//-------------------------------------------------------------------------------
+bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor)
+//------------------------------------------------------------------------------
 {
-	CHAR s[64];
-	CSoundFile &sndFile = m_pModDoc->GetrSoundFile();
-	const ROWINDEX nRow = cursor.GetRow();
-	const CHANNELINDEX nChannel = cursor.GetChannel();
+	editPos.pattern = pat;
+	const ROWINDEX row = editPos.row = cursor.GetRow();
+	const CHANNELINDEX chn = editPos.channel = cursor.GetChannel();
 
-	if ((nPat >= sndFile.Patterns.Size()) || (!m_pModDoc)
-		|| (nRow >= sndFile.Patterns[nPat].GetNumRows()) || (nChannel >= sndFile.GetNumChannels())
-		|| (!sndFile.Patterns[nPat])) return FALSE;
-	m_Command = *sndFile.Patterns[nPat].GetpModCommand(nRow, nChannel);
-	m_nRow = nRow;
-	m_nChannel = nChannel;
-	m_nPattern = nPat;
-	m_bModified = false;
-	// Init Pages
-	if (m_pageNote) m_pageNote->Init(m_Command);
-	if (m_pageVolume) m_pageVolume->Init(m_Command);
-
-	// -> CODE#0010
-	// -> DESC="add extended parameter mechanism to pattern effects"
-	//	if (m_pageEffect) m_pageEffect->Init(m_Command);
-	if (m_pageEffect)
+	if(!sndFile.Patterns.IsValidPat(pat)
+		|| !sndFile.Patterns[pat].IsValidRow(row)
+		|| chn >= sndFile.GetNumChannels())
 	{
-		UINT xp = 0, ml = 1;
-		getXParam(m_Command.command, nPat, nRow, nChannel, sndFile, xp, ml);
-		m_pageEffect->Init(m_Command);
-		m_pageEffect->XInit(xp,ml);
+		ShowWindow(SW_HIDE);
+		return false;
 	}
-	// -! NEW_FEATURE#0010
+
+	m = sndFile.Patterns[pat].GetpModCommand(row, chn);
+	modified = false;
+
+	InitAll();
+
+	switch(cursor.GetColumnType())
+	{
+	case PatternCursor::noteColumn:
+		GetDlgItem(IDC_COMBO1)->SetFocus();
+		break;
+	case PatternCursor::instrColumn:
+		GetDlgItem(IDC_COMBO2)->SetFocus();
+		break;
+	case PatternCursor::volumeColumn:
+		GetDlgItem(IDC_COMBO3)->SetFocus();
+		break;
+	case PatternCursor::effectColumn:
+		GetDlgItem(IDC_COMBO4)->SetFocus();
+		break;
+	case PatternCursor::paramColumn:
+		GetDlgItem(IDC_SLIDER2)->SetFocus();
+		break;
+	}
 
 	// Update Window Title
-	wsprintf(s, "Note Properties - Row %d, Channel %d", m_nRow, m_nChannel + 1);
-	SetTitle(s);
-	// Activate Page
-	UINT nPage = 2;
-	if(cursor.GetColumnType() < PatternCursor::volumeColumn) nPage = 0;
-	else if (cursor.GetColumnType() < PatternCursor::effectColumn) nPage = 1;
-	SetActivePage(nPage);
-	if (m_pageNote) m_pageNote->UpdateDialog();
-	if (m_pageVolume) m_pageVolume->UpdateDialog();
-	if (m_pageEffect) m_pageEffect->UpdateDialog();
-	//ShowWindow(SW_SHOW);
+	CHAR s[64];
+	wsprintf(s, "Note Properties - Row %d, Channel %d", row, chn + 1);
+	SetWindowText(s);
+
 	ShowWindow(SW_RESTORE);
-	return TRUE;
+	return true;
 }
 
 
-void CEditCommand::UpdateNote(ModCommand::NOTE note, ModCommand::INSTR instr)
-//---------------------------------------------------------------------------
+void CEditCommand::InitNote()
+//---------------------------
 {
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
-		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
-		|| (m_nChannel >= pSndFile->GetNumChannels())
-		|| (!pSndFile->Patterns[m_nPattern])) return;
-	ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
-	if ((m->note != note) || (m->instr != instr))
+	// Note
+	cbnNote.SetRedraw(FALSE);
+	cbnNote.ResetContent();
+	cbnNote.SetItemData(cbnNote.AddString("No note"), 0);
+	AppendNotesToControlEx(cbnNote, sndFile, m->instr);
+
+	if(ModCommand::IsNoteOrEmpty(m->note))
 	{
-		if(!m_bModified)	// let's create just one undo step.
+		// Normal note / no note
+		const ModCommand::NOTE noteStart = sndFile.GetModSpecifications().noteMin;
+		cbnNote.SetCurSel(m->note - (noteStart - 1));
+	} else
+	{
+		// Special notes
+		for(int i = cbnNote.GetCount() - 1; i >= 0; --i)
 		{
-			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
-			m_bModified = true;
+			if(cbnNote.GetItemData(i) == m->note)
+			{
+				cbnNote.SetCurSel(i);
+				break;
+			}
 		}
-		m->note = note;
-		m->instr = instr;
-		m_Command = *m;
-		m_pModDoc->SetModified();
-		m_pModDoc->UpdateAllViews(NULL, (m_nRow << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+	}
+	cbnNote.SetRedraw(TRUE);
+
+	// Instrument
+	cbnInstr.SetRedraw(FALSE);
+	cbnInstr.ResetContent();
+
+	if(ModCommand::IsPcNote(m->note))
+	{
+		// control plugin param note
+		cbnInstr.SetItemData(cbnInstr.AddString("No Effect"), 0);
+		AddPluginNamesToCombobox(cbnInstr, sndFile.m_MixPlugins, false);
+	} else
+	{
+		// instrument / sample
+		cbnInstr.SetItemData(cbnInstr.AddString("No Instrument"), 0);
+		const uint32 nmax = sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples();
+		for(uint32 i = 1; i <= nmax; i++)
+		{
+			std::string s = mpt::ToString(i) + ": ";
+			// instrument / sample
+			if(sndFile.GetNumInstruments())
+			{
+				if(sndFile.Instruments[i])
+					s += sndFile.Instruments[i]->name;
+			} else
+				s += sndFile.m_szNames[i];
+			cbnInstr.SetItemData(cbnInstr.AddString(s.c_str()), i);
+		}
+	}
+	cbnInstr.SetCurSel(m->instr);
+	cbnInstr.SetRedraw(TRUE);
+}
+
+
+void CEditCommand::InitVolume()
+//-----------------------------
+{
+	cbnVolCmd.SetRedraw(FALSE);
+	cbnVolCmd.ResetContent();
+	if(sndFile.GetType() == MOD_TYPE_MOD || m->IsPcNote())
+	{
+		cbnVolCmd.EnableWindow(FALSE);
+		sldVolParam.EnableWindow(FALSE);
+	} else
+	{
+		// Normal volume column effect
+		cbnVolCmd.EnableWindow(TRUE);
+		sldVolParam.EnableWindow(TRUE);
+		uint32 count = effectInfo.GetNumVolCmds();
+		cbnVolCmd.SetItemData(cbnVolCmd.AddString(" None"), (DWORD_PTR)-1);
+		cbnVolCmd.SetCurSel(0);
+		UINT fxndx = effectInfo.GetIndexFromVolCmd(m->volcmd);
+		for(uint32 i = 0; i < count; i++)
+		{
+			CHAR s[64];
+			if(effectInfo.GetVolCmdInfo(i, s))
+			{
+				int k = cbnVolCmd.AddString(s);
+				cbnVolCmd.SetItemData(k, i);
+				if(i == fxndx) cbnVolCmd.SetCurSel(k);
+			}
+		}
+		UpdateVolCmdRange();
+	}
+	cbnVolCmd.SetRedraw(TRUE);
+}
+
+
+void CEditCommand::InitEffect()
+//-----------------------------
+{
+	xParam = 0;
+	xMultiplier = 1;
+	getXParam(m->command, editPos.pattern, editPos.row, editPos.channel, sndFile, xParam, xMultiplier);
+
+	cbnCommand.SetRedraw(FALSE);
+	cbnCommand.ResetContent();
+	if(m->IsPcNote())
+	{
+		// Plugin param control note
+		if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
+		{
+			cbnCommand.ModifyStyle(CBS_SORT, 0);	// Y U NO WORK?
+			AddPluginParameternamesToCombobox(cbnCommand, sndFile.m_MixPlugins[m->instr - 1]);
+			cbnCommand.SetCurSel(m->GetValueVolCol());
+		}
+	} else
+	{
+		// Normal effect
+		uint32 numfx = effectInfo.GetNumEffects();
+		uint32 fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
+		cbnCommand.ModifyStyle(0, CBS_SORT);
+		cbnCommand.SetItemData(cbnCommand.AddString(" None"), (DWORD_PTR)-1);
+		if(m->command == CMD_NONE) cbnCommand.SetCurSel(0);
+
+		CHAR s[128];
+		for(uint32 i = 0; i < numfx; i++)
+		{
+			if(effectInfo.GetEffectInfo(i, s, true))
+			{
+				int k = cbnCommand.AddString(s);
+				cbnCommand.SetItemData(k, i);
+				if (i == fxndx) cbnCommand.SetCurSel(k);
+			}
+		}
+		cbnCommand.ModifyStyle(CBS_SORT, 0);
+	}
+	UpdateEffectRange(false);
+	cbnCommand.SetRedraw(TRUE);
+}
+
+
+void CEditCommand::UpdateVolCmdRange()
+//------------------------------------
+{
+	ModCommand::VOL rangeMin = 0, rangeMax = 0;
+	LONG fxndx = effectInfo.GetIndexFromVolCmd(m->volcmd);
+	bool ok = effectInfo.GetVolCmdInfo(fxndx, NULL, &rangeMin, &rangeMax);
+	if(ok && rangeMax > rangeMin)
+	{
+		sldVolParam.EnableWindow(TRUE);
+		sldVolParam.SetRange(rangeMin, rangeMax);
+		Limit(m->vol, rangeMin, rangeMax);
+		sldVolParam.SetPos(m->vol);
+	} else
+	{
+		// Why does this not update the display at all?
+		sldVolParam.SetRange(0, 0);
+		sldVolParam.SetPos(0);
+		sldVolParam.EnableWindow(FALSE);
 	}
 }
 
 
-void CEditCommand::UpdateVolume(ModCommand::VOLCMD volcmd, ModCommand::VOL vol)
-//-----------------------------------------------------------------------------
+void CEditCommand::UpdateEffectRange(bool set)
+//--------------------------------------------
 {
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
-		|| (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
-		|| (m_nChannel >= pSndFile->GetNumChannels())
-		|| (!pSndFile->Patterns[m_nPattern])) return;
-	ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
-	if ((m->volcmd != volcmd) || (m->vol != vol))
+	DWORD pos;
+	bool enable = true;
+
+	if(m->IsPcNote())
 	{
-		if(!m_bModified)	// let's create just one undo step.
+		// plugin param control note
+		sldParam.SetRange(0, ModCommand::maxColumnValue);
+		pos = m->GetValueEffectCol();
+	} else
+	{
+		// process as effect
+		ModCommand::PARAM rangeMin = 0, rangeMax = 0;
+		LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
+		enable = ((fxndx >= 0) && (effectInfo.GetEffectInfo(fxndx, NULL, false, &rangeMin, &rangeMax)));
+
+		pos = effectInfo.MapValueToPos(fxndx, m->param);
+		if(pos > rangeMax) pos = rangeMin | (pos & 0x0F);
+		Limit(pos, rangeMin, rangeMax);
+
+		sldParam.SetRange(rangeMin, rangeMax);
+	}
+
+	if(enable)
+	{
+		sldParam.EnableWindow(TRUE);
+		sldParam.SetPageSize(1);
+		sldParam.SetPos(pos);
+	} else
+	{
+		// Why does this not update the display at all?
+		sldParam.SetRange(0, 0);
+		sldParam.SetPos(0);
+		sldParam.EnableWindow(FALSE);
+	}
+	UpdateEffectValue(set);
+}
+
+
+void CEditCommand::OnNoteChanged()
+//--------------------------------
+{
+	const bool wasParamControl = ModCommand::IsPcNote(m->note);
+	ModCommand::NOTE newNote = m->note;
+	ModCommand::INSTR newInstr = m->instr;
+
+	int n = cbnNote.GetCurSel();
+	if(n >= 0) newNote = static_cast<ModCommand::NOTE>(cbnNote.GetItemData(n));
+
+	n = cbnInstr.GetCurSel();
+	if(n >= 0) newInstr = static_cast<ModCommand::INSTR>(cbnInstr.GetItemData(n));
+
+	const bool isParamControl = ModCommand::IsPcNote(newNote);
+
+	if(m->note != newNote || m->instr != newInstr)
+	{
+		CModDoc *modDoc = sndFile.GetpModDoc();
+		if(!modified)	// let's create just one undo step.
 		{
-			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
-			m_bModified = true;
+			modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
+			modified = true;
 		}
-		m->volcmd = volcmd;
-		m->vol = vol;
-		m_pModDoc->SetModified();
-		m_pModDoc->UpdateAllViews(NULL, (m_nRow << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+		m->note = newNote;
+		m->instr = newInstr;
+
+		modDoc->SetModified();
+		modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+
+		if(wasParamControl != isParamControl)
+		{
+			InitAll();
+		} else if(!m->IsPcNote()
+			&& m->instr <= sndFile.GetNumInstruments()
+			&& newInstr <= sndFile.GetNumInstruments()
+			&& sndFile.Instruments[m->instr] != nullptr
+			&& sndFile.Instruments[newInstr] != nullptr
+			&& sndFile.Instruments[newInstr]->pTuning != sndFile.Instruments[m->instr]->pTuning)
+		{
+			//Checking whether note names should be recreated.
+			InitNote();
+		} else if(m->IsPcNote())
+		{
+			// Update parameter list
+			InitEffect();
+		}
 	}
 }
 
 
-void CEditCommand::UpdateEffect(ModCommand::COMMAND command, ModCommand::PARAM param)
-//-----------------------------------------------------------------------------------
+void CEditCommand::OnVolCmdChanged()
+//----------------------------------
 {
-	CSoundFile &sndFile = m_pModDoc->GetrSoundFile();
-	if ((m_nPattern >= sndFile.Patterns.Size()) || (!m_pModDoc)
-		|| (m_nRow >= sndFile.Patterns[m_nPattern].GetNumRows())
-		|| (m_nChannel >= sndFile.GetNumChannels())
-		|| (!sndFile.Patterns[m_nPattern])) return;
-	ModCommand *m = sndFile.Patterns[m_nPattern].GetpModCommand(m_nRow, m_nChannel);
+	ModCommand::VOLCMD newVolCmd = m->volcmd;
+	ModCommand::VOL newVol = m->vol;
+
+	int n = cbnVolCmd.GetCurSel();
+	if(n >= 0)
+	{
+		newVolCmd = effectInfo.GetVolCmdFromIndex(cbnVolCmd.GetItemData(n));
+	}
+
+	newVol = static_cast<ModCommand::VOL>(sldVolParam.GetPos());
+
+	const bool volCmdChanged = m->volcmd != newVolCmd;
+	if(volCmdChanged || m->vol != newVol)
+	{
+		CModDoc *modDoc = sndFile.GetpModDoc();
+		if(!modified)	// let's create just one undo step.
+		{
+			modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
+			modified = true;
+		}
+		m->volcmd = newVolCmd;
+		m->vol = newVol;
+
+		modDoc->SetModified();
+		modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+
+		if(volCmdChanged)
+		{
+			UpdateVolCmdRange();
+		}
+	}
+}
+
+
+void CEditCommand::OnCommandChanged()
+//-----------------------------------
+{
+	uint16 newPlugParam = m->GetValueVolCol();
+	ModCommand::COMMAND newCommand = m->command;
+	int newParam = m->param;
+
+	int n = cbnCommand.GetCurSel();
+	if(n >= 0)
+	{
+		if(m->IsPcNote())
+		{
+			// Plugin param control note
+			newPlugParam = static_cast<uint16>(cbnCommand.GetItemData(n));
+		} else
+		{
+			// Process as effect
+			int ndx = cbnCommand.GetItemData(n);
+			newParam = -1;
+			newCommand = static_cast<ModCommand::COMMAND>((ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, newParam) : CMD_NONE);
+		}
+
+	}
 
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
-	if(command == CMD_OFFSET || command == CMD_PATTERNBREAK || command == CMD_TEMPO || command == CMD_XPARAM)
+	if(newCommand == CMD_OFFSET || newCommand == CMD_PATTERNBREAK || newCommand == CMD_TEMPO || newCommand == CMD_XPARAM)
 	{
-		UINT xp = 0, ml = 1;
-		getXParam(command, m_nPattern, m_nRow, m_nChannel, sndFile, xp, ml);
-		m_pageEffect->XInit(xp,ml);
-		m_pageEffect->UpdateDialog();
+		xParam = 0;
+		xMultiplier = 1;
+		getXParam(newCommand, editPos.pattern, editPos.row, editPos.channel, sndFile, xParam, xMultiplier);
 	}
 	// -! NEW_FEATURE#0010
 
-	if ((m->command != command) || (m->param != param))
+	if((!m->IsPcNote() && (m->command != newCommand || m->param != newParam))
+		|| (m->IsPcNote() && m->GetValueVolCol() != newPlugParam))
 	{
-		if(!m_bModified)	// let's create just one undo step.
+		CModDoc *modDoc = sndFile.GetpModDoc();
+		if(!modified)	// let's create just one undo step.
 		{
-			m_pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
-			m_bModified = true;
+			modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
+			modified = true;
 		}
-		m->command = command;
-		m->param = param;
-		m_pModDoc->SetModified();
-		m_pModDoc->UpdateAllViews(NULL, (m_nRow << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+		if(m->IsPcNote())
+		{
+			m->SetValueVolCol(newPlugParam);
+		} else
+		{
+			m->command = newCommand;
+			if(newParam >= 0)
+			{
+				m->param = static_cast<ModCommand::PARAM>(newParam);
+			}
+		}
+		UpdateEffectRange(true);
+
+		modDoc->SetModified();
+		modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+	}
+}
+
+
+void CEditCommand::UpdateEffectValue(bool set)
+//--------------------------------------------
+{
+	CHAR s[128] = "";
+
+	uint16 newPlugParam = 0;
+	ModCommand::PARAM newParam = 0;
+
+	if(m->IsPcNote())
+	{
+		// plugin param control note
+		newPlugParam = static_cast<uint16>(sldParam.GetPos());
+		wsprintf(s, "Value: %u", newPlugParam);
+	} else
+	{
+		// process as effect
+		LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
+		if(fxndx >= 0)
+		{
+			newParam = static_cast<ModCommand::PARAM>(effectInfo.MapPosToValue(fxndx, sldParam.GetPos()));
+			effectInfo.GetEffectNameEx(s, fxndx, newParam * xMultiplier + xParam);
+		}
+	}
+	SetDlgItemText(IDC_TEXT1, s);
+
+	if(set)
+	{
+		if((!m->IsPcNote() && m->param != newParam)
+			|| (m->IsPcNote() && m->GetValueVolCol() != newPlugParam))
+		{
+			CModDoc *modDoc = sndFile.GetpModDoc();
+			if(!modified)	// let's create just one undo step.
+			{
+				modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
+				modified = true;
+			}
+			if(m->IsPcNote())
+			{
+				m->SetValueEffectCol((uint16)newPlugParam);
+			} else
+			{
+				m->param = newParam;
+			}
+
+			modDoc->SetModified();
+			modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+		}
+	}
+}
+
+
+void CEditCommand::OnHScroll(UINT, UINT, CScrollBar *bar)
+//-------------------------------------------------------
+{
+	if(bar == static_cast<CWnd *>(&sldVolParam))
+	{
+		OnVolCmdChanged();
+	} else if(bar == static_cast<CWnd *>(&sldParam))
+	{
+		UpdateEffectValue(true);
 	}
 }
 
@@ -814,431 +1115,8 @@ void CEditCommand::UpdateEffect(ModCommand::COMMAND command, ModCommand::PARAM p
 void CEditCommand::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized)
 //--------------------------------------------------------------------------
 {
-	CWnd::OnActivate(nState, pWndOther, bMinimized);
-	if (nState == WA_INACTIVE) ShowWindow(SW_HIDE);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-// CPageEditCommand
-
-BOOL CPageEditCommand::OnInitDialog()
-//-----------------------------------
-{
-	CPropertyPage::OnInitDialog();
-	m_bInitialized = true;
-	UpdateDialog();
-	return TRUE;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-// CPageEditNote
-
-BEGIN_MESSAGE_MAP(CPageEditNote, CPageEditCommand)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnNoteChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnInstrChanged)
-END_MESSAGE_MAP()
-
-
-void CPageEditNote::UpdateDialog()
-//--------------------------------
-{
-	char s[64];
-	CComboBox *combo;
-
-	if ((!m_bInitialized)) return;
-
-	// Note
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{	
-		combo->ResetContent();
-		combo->SetItemData(combo->AddString("No note"), 0);
-		AppendNotesToControlEx(*combo, sndFile, m_nInstr);
-
-		if (ModCommand::IsNoteOrEmpty(m_nNote))
-		{
-			// Normal note / no note
-			const ModCommand::NOTE noteStart = sndFile.GetModSpecifications().noteMin;
-			combo->SetCurSel(m_nNote - (noteStart - 1));
-		} else
-		{
-			// Special notes
-			for(int i = combo->GetCount() - 1; i >= 0; --i)
-			{
-				if(combo->GetItemData(i) == m_nNote)
-				{
-					combo->SetCurSel(i);
-					break;
-				}
-			}
-		}
-
-	}
-	// Instrument
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
-	{
-		combo->ResetContent();
-
-		if(ModCommand::IsPcNote(m_nNote))
-		{
-			// control plugin param note
-			combo->SetItemData(combo->AddString("No Effect"), 0);
-			AddPluginNamesToCombobox(*combo, sndFile.m_MixPlugins, false);
-		} else
-		{
-			// instrument / sample
-			combo->SetItemData(combo->AddString("No Instrument"), 0);
-			const UINT nmax = sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples();
-			for (UINT i = 1; i <= nmax; i++)
-			{
-				wsprintf(s, "%02d: ", i);
-				int k = strlen(s);
-				// instrument / sample
-				if (sndFile.GetNumInstruments())
-				{
-					if (sndFile.Instruments[i])
-						memcpy(s + k, sndFile.Instruments[i]->name, CountOf(sndFile.Instruments[i]->name));
-				} else
-					memcpy(s+k, sndFile.m_szNames[i], MAX_SAMPLENAME);
-				s[k+32] = 0;
-				combo->SetItemData(combo->AddString(s), i);
-			}
-		}
-		combo->SetCurSel(m_nInstr);
-	}
-}
-
-
-void CPageEditNote::OnNoteChanged()
-//---------------------------------
-{
-	const bool bWasParamControl = ModCommand::IsPcNote(m_nNote);
-
-	CComboBox *combo;
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		int n = combo->GetCurSel();
-		if (n >= 0) m_nNote = static_cast<ModCommand::NOTE>(combo->GetItemData(n));
-	}
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
-	{
-		int n = combo->GetCurSel();
-		if(n >= 0)
-		{
-			const ModCommand::INSTR oldInstr = m_nInstr;
-			m_nInstr = static_cast<ModCommand::INSTR>(combo->GetItemData(n));
-			//Checking whether note names should be recreated.
-			if(!ModCommand::IsPcNote(m_nNote) && sndFile.Instruments[m_nInstr] && sndFile.Instruments[oldInstr])
-			{
-				if(sndFile.Instruments[m_nInstr]->pTuning != sndFile.Instruments[oldInstr]->pTuning)
-					UpdateDialog();
-			}
-		}
-	}
-	const bool bIsNowParamControl = ModCommand::IsPcNote(m_nNote);
-	if(bWasParamControl != bIsNowParamControl)
-	{
-		UpdateDialog();
-		m_pParent.m_pageVolume->UpdateDialog();
-		m_pParent.m_pageEffect->UpdateDialog();
-	}
-
-	m_pParent.UpdateNote(m_nNote, m_nInstr);
-}
-
-
-void CPageEditNote::OnInstrChanged()
-//----------------------------------
-{
-	OnNoteChanged();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-// CPageEditVolume
-
-BEGIN_MESSAGE_MAP(CPageEditVolume, CPageEditCommand)
-	ON_WM_HSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnVolCmdChanged)
-END_MESSAGE_MAP()
-
-
-void CPageEditVolume::UpdateDialog()
-//----------------------------------
-{
-	CComboBox *combo;
-
-	if ((!m_bInitialized)) return;
-	UpdateRanges();
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		if (sndFile.GetType() == MOD_TYPE_MOD || m_bIsParamControl)
-		{
-			combo->EnableWindow(FALSE);
-			return;
-		}
-		combo->EnableWindow(TRUE);
-		combo->ResetContent();
-		UINT count = effectInfo.GetNumVolCmds();
-		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-		combo->SetCurSel(0);
-		UINT fxndx = effectInfo.GetIndexFromVolCmd(m_nVolCmd);
-		for (UINT i=0; i<count; i++)
-		{
-			CHAR s[64];
-			if (effectInfo.GetVolCmdInfo(i, s))
-			{
-				int k = combo->AddString(s);
-				combo->SetItemData(k, i);
-				if (i == fxndx) combo->SetCurSel(k);
-			}
-		}
-	}
-}
-
-
-void CPageEditVolume::UpdateRanges()
-//----------------------------------
-{
-	CSliderCtrl *slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1);
-	if (slider != nullptr)
-	{
-		DWORD rangeMin = 0, rangeMax = 0;
-		LONG fxndx = effectInfo.GetIndexFromVolCmd(m_nVolCmd);
-		BOOL bOk = effectInfo.GetVolCmdInfo(fxndx, NULL, &rangeMin, &rangeMax);
-		if ((bOk) && (rangeMax > rangeMin))
-		{
-			slider->EnableWindow(TRUE);
-			slider->SetRange(rangeMin, rangeMax);
-			UINT pos = m_nVolume;
-			if (pos < rangeMin) pos = rangeMin;
-			if (pos > rangeMax) pos = rangeMax;
-			slider->SetPos(pos);
-		} else
-		{
-			slider->EnableWindow(FALSE);
-		}
-	}
-}
-
-
-void CPageEditVolume::OnVolCmdChanged()
-//-------------------------------------
-{
-	CComboBox *combo;
-	CSliderCtrl *slider;
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		int n = combo->GetCurSel();
-		if (n >= 0)
-		{
-			ModCommand::VOLCMD volcmd = effectInfo.GetVolCmdFromIndex(combo->GetItemData(n));
-			if (volcmd != m_nVolCmd)
-			{
-				m_nVolCmd = volcmd;
-				UpdateRanges();
-			}
-		}
-	}
-	if ((slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1)) != NULL)
-	{
-		m_nVolume = static_cast<ModCommand::VOL>(slider->GetPos());
-	}
-	m_pParent.UpdateVolume(m_nVolCmd, m_nVolume);
-}
-
-
-void CPageEditVolume::OnHScroll(UINT, UINT, CScrollBar *)
-//-------------------------------------------------------
-{
-	OnVolCmdChanged();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-// CPageEditEffect
-
-BEGIN_MESSAGE_MAP(CPageEditEffect, CPageEditCommand)
-	ON_WM_HSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnCommandChanged)
-END_MESSAGE_MAP()
-
-
-void CPageEditEffect::UpdateDialog()
-//----------------------------------
-{
-	CComboBox *combo;
-
-	if (!m_bInitialized) return;
-
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		combo->ResetContent();
-		if(m_bIsParamControl)
-		{
-			// plugin param control note
-			if(m_nPlugin > 0 && m_nPlugin <= MAX_MIXPLUGINS)
-			{
-				combo->ModifyStyle(CBS_SORT, 0);	// Y U NO WORK?
-				AddPluginParameternamesToCombobox(*combo, sndFile.m_MixPlugins[m_nPlugin - 1]);
-				combo->SetCurSel(m_nPluginParam);
-			}
-		} else
-		{
-			// process as effect
-			UINT numfx = effectInfo.GetNumEffects();
-			UINT fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
-			combo->ModifyStyle(0, CBS_SORT);
-			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-			if (m_nCommand == CMD_NONE) combo->SetCurSel(0);
-
-			CHAR s[128];
-			for (UINT i=0; i<numfx; i++)
-			{
-				if (effectInfo.GetEffectInfo(i, s, true))
-				{
-					int k = combo->AddString(s);
-					combo->SetItemData(k, i);
-					if (i == fxndx) combo->SetCurSel(k);
-				}
-			}
-			combo->ModifyStyle(CBS_SORT, 0);
-		}
-	}
-	UpdateRange(FALSE);
-}
-
-
-void CPageEditEffect::UpdateRange(BOOL bSet)
-//------------------------------------------
-{
-	CSliderCtrl *slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1);
-	if (slider)
-	{
-		DWORD rangeMin = 0, rangeMax = 0, pos;
-		bool enable = true;
-
-		if(m_bIsParamControl)
-		{
-			// plugin param control note
-			rangeMax = ModCommand::maxColumnValue;
-			pos = ModCommand::GetValueEffectCol(m_nCommand, m_nParam);
-		} else
-		{
-			// process as effect
-			LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
-			enable = ((fxndx >= 0) && (effectInfo.GetEffectInfo(fxndx, NULL, false, &rangeMin, &rangeMax)));
-
-			pos = effectInfo.MapValueToPos(fxndx, m_nParam);
-			if (pos > rangeMax) pos = rangeMin | (pos & 0x0F);
-			if (pos < rangeMin) pos = rangeMin;
-			if (pos > rangeMax) pos = rangeMax;
-		}
-
-		if (enable)
-		{
-			slider->EnableWindow(TRUE);
-			slider->SetPageSize(1);
-			slider->SetRange(rangeMin, rangeMax);
-			slider->SetPos(pos);
-		} else
-		{
-			slider->SetRange(0, 0);
-			slider->EnableWindow(FALSE);
-		}
-		UpdateValue(bSet);
-	}
-}
-
-
-void CPageEditEffect::UpdateValue(BOOL bSet)
-//------------------------------------------
-{
-	CHAR s[128] = "";
-
-	if(m_bIsParamControl)
-	{
-		// plugin param control note
-		wsprintf(s, "Value: %u", ModCommand::GetValueEffectCol(m_nCommand, m_nParam));
-	} else
-	{
-		// process as effect
-		LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
-		if (fxndx >= 0) effectInfo.GetEffectNameEx(s, fxndx, m_nParam * m_nMultiplier + m_nXParam);
-	}
-	SetDlgItemText(IDC_TEXT1, s);
-
-	if (bSet) m_pParent.UpdateEffect(m_nCommand, m_nParam);
-}
-
-
-void CPageEditEffect::OnCommandChanged()
-//--------------------------------------
-{
-	CComboBox *combo;
-
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		int n = combo->GetCurSel();
-
-		if(m_bIsParamControl)
-		{
-			// plugin param control note
-			if(n >= 0)
-			{
-				// TODO update in pattern
-				m_nPluginParam = n;
-			}
-		} else
-		{
-			// process as effect
-			BOOL bSet = FALSE;
-			if (n >= 0)
-			{
-				int param = -1, ndx = combo->GetItemData(n);
-				m_nCommand = (ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, param) : 0;
-				if (param >= 0) m_nParam = static_cast<ModCommand::PARAM>(param);
-				bSet = TRUE;
-			}
-			UpdateRange(bSet);
-		}
-	}
-}
-
-
-
-void CPageEditEffect::OnHScroll(UINT, UINT, CScrollBar *)
-//-------------------------------------------------------
-{
-	CSliderCtrl *slider = (CSliderCtrl *)GetDlgItem(IDC_SLIDER1);
-	if (slider != nullptr)
-	{
-		if(m_bIsParamControl)
-		{
-			// plugin param control note
-			// HACK
-			ModCommand m;
-			m.SetValueEffectCol(static_cast<int16>(slider->GetPos()));
-			m_nCommand = m.command;
-			m_nParam = m.param;
-			UpdateValue(TRUE);
-		} else
-		{
-			// process as effect
-			LONG fxndx = effectInfo.GetIndexFromEffect(m_nCommand, m_nParam);
-			if (fxndx >= 0)
-			{
-				int pos = slider->GetPos();
-				UINT param = effectInfo.MapPosToValue(fxndx, pos);
-				if (param != m_nParam)
-				{
-					m_nParam = static_cast<ModCommand::PARAM>(param);
-					UpdateValue(TRUE);
-				}
-			}
-		}
-	}
+	CDialog::OnActivate(nState, pWndOther, bMinimized);
+	if(nState == WA_INACTIVE) ShowWindow(SW_HIDE);
 }
 
 
