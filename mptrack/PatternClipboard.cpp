@@ -577,7 +577,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						m.note = NOTE_FADE;
 					else if(data[pos] == 'P')
 					{
-						if(data[pos + 2] == 'S')
+						if(data[pos + 2] == 'S' || data[pos + 2] == 's')
 							m.note = NOTE_PCS;
 						else
 							m.note = NOTE_PC;
