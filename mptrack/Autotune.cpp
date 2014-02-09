@@ -108,7 +108,7 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 	}
 
 	// We should analyse at least a one second (= GetSampleRate() samples) long sample.
-	sampleLength = std::max(sampleLoopEnd, sample.GetSampleRate(modType)) + maxShift;
+	sampleLength = std::max<SmpLength>(sampleLoopEnd, sample.GetSampleRate(modType)) + maxShift;
 
 	if(sampleData != nullptr)
 	{
