@@ -88,8 +88,8 @@ public:
 	void setExtraSampleAttenuation(int attn) { m_extraAttenuation = attn; }
 
 	// True if format-specific mixing quirks should be emulated.
-	bool getEmulateQuirks() const { return m_emualteQuirks; }
-	void setEmulateQuirks(bool emulate) { m_emualteQuirks = emulate; }
+	bool getEmulateQuirks() const { return m_emulateQuirks; }
+	void setEmulateQuirks(bool emulate) { m_emulateQuirks = emulate; }
 
 protected:
 
@@ -107,6 +107,6 @@ protected:
 	bool m_globalVolumeAppliesToMaster;
 	bool m_ignorePreAmp;
 	bool m_displayDBValues;
-	bool m_emualteQuirks;
+	bool m_emulateQuirks;
 };
 

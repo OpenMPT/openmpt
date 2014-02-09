@@ -11,7 +11,7 @@
 
 #pragma once
 
-#define SMP_LEFTBAR_BUTTONS		9
+#define SMP_LEFTBAR_BUTTONS		8
 
 #include "modsmp_ctrl.h"
 
