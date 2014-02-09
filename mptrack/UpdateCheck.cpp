@@ -36,7 +36,8 @@ void CUpdateCheck::DoUpdateCheck(bool autoUpdate)
 	CUpdateCheck *that = new (std::nothrow) CUpdateCheck(autoUpdate);
 	if(that != nullptr)
 	{
-		that->threadHandle = mpt::thread_member<CUpdateCheck, &CUpdateCheck::UpdateThread>(that, autoUpdate ? mpt::thread::lower : mpt::thread::normal);
+		mpt::thread threadHandle = mpt::thread_member<CUpdateCheck, &CUpdateCheck::UpdateThread>(that, autoUpdate ? mpt::thread::lower : mpt::thread::normal);
+		CloseHandle(threadHandle);
 	}
 }
 

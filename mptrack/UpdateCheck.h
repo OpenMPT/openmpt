@@ -48,7 +48,6 @@ protected:
 	bool isAutoUpdate;	// Are we running an automatic update check?
 
 	// Runtime resource handles
-	mpt::thread threadHandle;
 	HINTERNET internetHandle, connectionHandle;
 
 	// Force creation via "new" as we're using "delete this". Use CUpdateCheck::DoUpdateCheck to create an object.

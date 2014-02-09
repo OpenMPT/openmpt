@@ -42,15 +42,16 @@ public:
 	bool Apply(double pitchReference, int targetNote);
 
 protected:
-	double FrequencyToNote(double freq, double pitchReference) const;
-	double NoteToFrequency(double note, double pitchReference) const;
-	SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference) const;
+	static double FrequencyToNote(double freq, double pitchReference);
+	static double NoteToFrequency(double note, double pitchReference);
+	static SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference);
 
 	template <class T>
 	void CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLength sampleLoopEnd);
 
 	bool PrepareSample(SmpLength maxShift);
 
+	static DWORD WINAPI AutotuneThread(void *i);
 };
 
 

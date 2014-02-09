@@ -32,7 +32,7 @@ public:
 	};
 
 	operator HANDLE& () { return threadHandle; }
-	operator bool () { return threadHandle != nullptr; }
+	operator bool () const { return threadHandle != nullptr; }
 
 	thread() : threadHandle(nullptr) { }
 	thread(LPTHREAD_START_ROUTINE function, void *userData = nullptr, Priority priority = normal)
