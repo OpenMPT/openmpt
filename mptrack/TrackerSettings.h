@@ -261,6 +261,7 @@ public:
 	Setting<int32> gnPlugWindowLast;	// Last selected plugin ID
 
 	Setting<uint32> gnMsgBoxVisiblityFlags;
+	Setting<uint32> GUIUpdateInterval;
 	CachedSetting<uint32> VuMeterUpdateInterval;
 
 	// Misc

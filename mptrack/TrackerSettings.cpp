@@ -145,6 +145,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, gnPlugWindowHeight(conf, "Display", "PlugSelectWindowHeight", 332)
 	, gnPlugWindowLast(conf, "Display", "PlugSelectWindowLast", 0)
 	, gnMsgBoxVisiblityFlags(conf, "Display", "MDIGraphHeight", uint32_max)
+	, GUIUpdateInterval(conf, "Display", "GUIUpdateInterval", 0)
 	, VuMeterUpdateInterval(conf, "Display", "VuMeterUpdateInterval", 15)
 	// Misc
 	, gbShowHackControls(conf, "Misc", "ShowHackControls", false)
