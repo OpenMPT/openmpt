@@ -97,6 +97,8 @@ private:
 
 	CVstPlugin *GetCurrentPlugin() const;
 
+	void FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg);
+
 protected:
 	//{{AFX_MSG(CViewGlobals)
 	afx_msg void OnMute1();

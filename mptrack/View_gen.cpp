@@ -36,10 +36,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_WM_DESTROY()
 	ON_WM_CTLCOLOR()
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	ON_WM_ACTIVATE()
-// -! NEW_FEATURE#0015
 	ON_COMMAND(IDC_CHECK1,		OnMute1)
 	ON_COMMAND(IDC_CHECK3,		OnMute2)
 	ON_COMMAND(IDC_CHECK5,		OnMute3)
@@ -61,16 +58,10 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(IDC_CLONEPLUG,   OnClonePlug)
 
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
 	ON_COMMAND(IDC_BUTTON6,		OnLoadParam)
 	ON_COMMAND(IDC_BUTTON8,		OnSaveParam)
-// -! NEW_FEATURE#0002
 
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
 	ON_COMMAND(IDC_BUTTON7,		OnSetWetDry)
-// -! NEW_FEATURE#0014
 	ON_EN_UPDATE(IDC_EDIT1,		OnEditVol1)
 	ON_EN_UPDATE(IDC_EDIT3,		OnEditVol2)
 	ON_EN_UPDATE(IDC_EDIT5,		OnEditVol3)
@@ -95,17 +86,11 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 
 	ON_CBN_SELCHANGE(IDC_COMBO7, OnOutputRoutingChanged)
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
 	ON_CBN_SELCHANGE(IDC_COMBO8, OnProgramChanged)
 	ON_CBN_SETFOCUS(IDC_COMBO8, OnFillProgramCombo)
-// -! NEW_FEATURE#0002
 
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 	ON_COMMAND(IDC_CHECK12,		 OnWetDryExpandChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO9, OnSpecialMixProcessingChanged)
-// -! BEHAVIOUR_CHANGE#0028
 
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	OnTabSelchange)
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		OnUnlockControls)
@@ -129,16 +114,9 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO6,	m_CbnParam);
 	DDX_Control(pDX, IDC_COMBO7,	m_CbnOutput);
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
 	DDX_Control(pDX, IDC_COMBO8,	m_CbnPreset);
-// -! NEW_FEATURE#0002
-
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 	DDX_Control(pDX, IDC_COMBO9,	m_CbnSpecialMixProcessing);
-	DDX_Control(pDX, IDC_SPIN10,	m_SpinMixGain);					// update#02
-// -! BEHAVIOUR_CHANGE#0028
+	DDX_Control(pDX, IDC_SPIN10,	m_SpinMixGain);
 
 	DDX_Control(pDX, IDC_SLIDER1,	m_sbVolume[0]);
 	DDX_Control(pDX, IDC_SLIDER2,	m_sbPan[0]);
@@ -149,7 +127,7 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER7,	m_sbVolume[3]);
 	DDX_Control(pDX, IDC_SLIDER8,	m_sbPan[3]);
 	DDX_Control(pDX, IDC_SLIDER9,	m_sbValue);
-	DDX_Control(pDX, IDC_SLIDER10,  m_sbDryRatio);	//rewbs.VSTdrywet
+	DDX_Control(pDX, IDC_SLIDER10,  m_sbDryRatio);
 	DDX_Control(pDX, IDC_SPIN1,		m_spinVolume[0]);
 	DDX_Control(pDX, IDC_SPIN2,		m_spinPan[0]);
 	DDX_Control(pDX, IDC_SPIN3,		m_spinVolume[1]);
@@ -173,10 +151,6 @@ void CViewGlobals::OnInitialUpdate()
 	m_nActiveTab = -1;
 	m_nCurrentPlugin = 0;
 	m_nCurrentParam = 0;
-// -> CODE#0002
-// -> DESC="VST plugins presets"
-	m_nCurrentPreset = 0;
-// -! NEW_FEATURE#0002
 	CFormView::OnInitialUpdate();
 
 	if (pFrame)
@@ -211,28 +185,21 @@ void CViewGlobals::OnInitialUpdate()
 	m_sbValue.SetPos(0);
 	m_sbValue.SetRange(0, 100);
 
-	m_sbValue.SetPos(0);			// rewbs.dryRatio 20040122
-	m_sbValue.SetRange(0, 100);		// rewbs.dryRatio 20040122
+	m_sbValue.SetPos(0);
+	m_sbValue.SetRange(0, 100);
 
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 	m_CbnSpecialMixProcessing.AddString("Default");
 	m_CbnSpecialMixProcessing.AddString("Wet subtract");
 	m_CbnSpecialMixProcessing.AddString("Dry subtract");
 	m_CbnSpecialMixProcessing.AddString("Mix subtract");
 	m_CbnSpecialMixProcessing.AddString("Middle subtract");
 	m_CbnSpecialMixProcessing.AddString("LR balance");
-	m_SpinMixGain.SetRange(0,80);		// update#02
-	m_SpinMixGain.SetPos(10);			// update#02
-	SetDlgItemText(IDC_STATIC2, "Gain: x 1.0");	// update#02
-// -! BEHAVIOUR_CHANGE#0028
+	m_SpinMixGain.SetRange(0,80);
+	m_SpinMixGain.SetPos(10);
+	SetDlgItemText(IDC_STATIC2, "Gain: x 1.0");
 
 	UpdateView(HINT_MODTYPE);
 	OnParamChanged();
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-	//OnWetDryChanged();
-// -! NEW_FEATURE#0014
 	m_nLockCount = 0;
 
 	
@@ -255,8 +222,6 @@ void CViewGlobals::OnDestroy()
 }
 
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
 void CViewGlobals::OnDraw(CDC* pDC)
 //---------------------------------
 {
@@ -268,7 +233,6 @@ void CViewGlobals::OnDraw(CDC* pDC)
 	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
 }
-// -! NEW_FEATURE#0015
 
 
 LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData, LPARAM)
@@ -455,18 +419,13 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_MOVEFXSLOT), (pVstPlugin) ? TRUE : FALSE);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSERTFXSLOT), (pVstPlugin) ? TRUE : FALSE);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CLONEPLUG), (pVstPlugin) ? TRUE : FALSE);
-		//rewbs.DryRatio
 		int n = static_cast<int>(pPlugin->fDryRatio*100);
 		wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
 		SetDlgItemText(IDC_STATIC8, s);
-	m_sbDryRatio.SetPos(n);
-		//end rewbs.DryRatio
+		m_sbDryRatio.SetPos(n);
 		
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 		if(pVstPlugin && pVstPlugin->isInstrument())
 		{
-			// ericus 18/02/2005 : disable mix mode for VSTi
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), FALSE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), FALSE);
 		}
@@ -476,14 +435,12 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_CbnSpecialMixProcessing.SetCurSel(pPlugin->GetMixMode()); // update#02 (fix)
 			CheckDlgButton(IDC_CHECK12, pPlugin->IsExpandedMix() ? BST_CHECKED : BST_UNCHECKED);
 		}
-		// update#02
 		int gain = pPlugin->GetGain();
 		if(gain == 0) gain = 10;
 		float value = 0.1f * (float)gain;
 		sprintf(s,"Gain: x %1.1f", value);
 		SetDlgItemText(IDC_STATIC2, s);
 		m_SpinMixGain.SetPos(gain);
-// -! BEHAVIOUR_CHANGE#0028
 
 		if (pVstPlugin)
 		{
@@ -511,10 +468,8 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			// Some plugins like Synth1 have so many presets that this *does* indeed make a difference,
 			// even on fairly modern CPUs. The rest of the presets are just added when the combo box
 			// gets the focus, i.e. just when they're needed.
-			m_CbnPreset.SetRedraw(FALSE);
-			m_CbnPreset.ResetContent();
-			m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
-			m_CbnPreset.SetRedraw(TRUE);
+			VstInt32 currentProg = pVstPlugin->GetCurrentProgram();
+			FillPluginProgramBox(currentProg, currentProg);
 			m_CbnPreset.SetCurSel(0);
 
 			m_sbValue.EnableWindow(TRUE);
@@ -533,7 +488,6 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_CbnPreset.ResetContent();
 			wsprintf(s2, "none");
 			m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), 0);
-			m_nCurrentPreset = 0;
 			m_CbnPreset.SetRedraw(TRUE);
 			m_CbnPreset.SetCurSel(0);
 			m_sbValue.EnableWindow(FALSE);
@@ -786,8 +740,6 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //---------------------------------------------------------------------------
 {
-// -> CODE#0028	update#02
-// -> DESC="effect plugin mixing mode combo"
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	CHAR s[32];
@@ -814,7 +766,6 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				pModDoc->SetModified();
 		}
 	}
-// -! BEHAVIOUR_CHANGE#0028
 
 	CFormView::OnVScroll(nSBCode, nPos, pScrollBar);
 }
@@ -828,16 +779,15 @@ void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
 	if ((pModDoc) && (!m_nLockCount))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CHAR s[MAX_CHANNELNAME+4];
+		CHAR s[MAX_CHANNELNAME + 2];
 		const UINT nChn = m_nActiveTab * 4 + chnMod4;
 		
-		memset(s, 0, sizeof(s));
-		GetDlgItemText(itemID, s, sizeof(s));
+		MemsetZero(s);
+		GetDlgItemText(itemID, s, CountOf(s));
 		s[MAX_CHANNELNAME+1] = 0;
-		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
+		if ((pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->GetNumChannels()) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
 		{
-			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
-			pSndFile->ChnSettings[nChn].szName[CountOf(pSndFile->ChnSettings[nChn].szName)-1] = 0;
+			mpt::String::Copy(pSndFile->ChnSettings[nChn].szName, s);
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
@@ -887,7 +837,7 @@ void CViewGlobals::OnPluginNameChanged()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 
-		GetDlgItemText(IDC_EDIT13, s, 32);
+		GetDlgItemText(IDC_EDIT13, s, CountOf(s));
 		mpt::String::SetNullTerminator(s);
 		if (strcmp(s, pSndFile->m_MixPlugins[m_nCurrentPlugin].GetName()))
 		{
@@ -908,9 +858,6 @@ void CViewGlobals::OnPrevPlugin()
 	{
 		m_nCurrentPlugin--;
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-		//OnWetDryChanged();
 
 	}
 }
@@ -924,9 +871,6 @@ void CViewGlobals::OnNextPlugin()
 	{
 		m_nCurrentPlugin++;
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-		//OnWetDryChanged();
 
 	}
 }
@@ -942,16 +886,7 @@ void CViewGlobals::OnPluginChanged()
 		m_nCurrentPlugin = (PLUGINDEX)nPlugin;
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 	}
-// -> CODE#0002
-// -> DESC="VST plugins presets"
-	m_nCurrentPreset = 0;
 	m_CbnPreset.SetCurSel(0);
-// -! NEW_FEATURE#0002
-
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-	//OnWetDryChanged();
-// -! NEW_FEATURE#0014
 }
 
 
@@ -972,10 +907,6 @@ void CViewGlobals::OnSelectPlugin()
 		}
 		OnPluginChanged();
 		OnParamChanged();
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-		//OnWetDryChanged();
-// -! NEW_FEATURE#0014
 	}
 #endif // NO_VST
 }
@@ -1010,33 +941,30 @@ void CViewGlobals::OnParamChanged()
 	m_sbValue.SetPos(0);
 }
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
+
 void CViewGlobals::OnProgramChanged()
 //-----------------------------------
 {
-	int cursel = m_CbnPreset.GetCurSel();
+	VstInt32 cursel = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pSndFile = pModDoc->GetSoundFile();
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
 	if(pVstPlugin != nullptr)
 	{
-		UINT nParams = pVstPlugin->GetNumPrograms();
-		if(cursel > 0 && cursel <= (int)nParams) m_nCurrentPreset = cursel;
-		if(m_nCurrentPreset > 0 && m_nCurrentPreset <= nParams)
+		VstInt32 nParams = pVstPlugin->GetNumPrograms();
+		if(cursel <= nParams)
 		{
-			pVstPlugin->SetCurrentProgram(m_nCurrentPreset - 1);
+			pVstPlugin->SetCurrentProgram(m_nCurrentPreset);
 			// Update parameter display
 			OnParamChanged();
 		}
-		if(pSndFile->GetModSpecifications().supportsPlugins)
+		if(pModDoc->GetrSoundFile().GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
 	}
 }
+
 
 void CViewGlobals::OnLoadParam()
 //------------------------------
@@ -1044,11 +972,8 @@ void CViewGlobals::OnLoadParam()
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 	if(pVstPlugin != nullptr && pVstPlugin->LoadProgram())
 	{
-		m_nCurrentPreset = 0;
-		m_CbnPreset.SetRedraw(FALSE);
-		m_CbnPreset.ResetContent();
-		m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
-		m_CbnPreset.SetRedraw(TRUE);
+		VstInt32 currentProg = pVstPlugin->GetCurrentProgram();
+		FillPluginProgramBox(currentProg, currentProg);
 		m_CbnPreset.SetCurSel(0);
 	}
 }
@@ -1091,8 +1016,6 @@ void CViewGlobals::OnSetParameter()
 }
 
 
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
 void CViewGlobals::OnSetWetDry()
 //------------------------------
 {
@@ -1105,12 +1028,10 @@ void CViewGlobals::OnSetWetDry()
 
 	if (plugin.pMixPlugin != nullptr)
 	{
-		//CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 		UINT value = GetDlgItemIntEx(IDC_EDIT15);
 		plugin.fDryRatio = (float)value / 100.0f;
 		if(pSndFile->GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
-		//OnWetDryChanged();
 	}
 }
 
@@ -1147,8 +1068,6 @@ void CViewGlobals::OnBypassChanged()
 }
 
 
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 void CViewGlobals::OnWetDryExpandChanged()
 //----------------------------------------
 {
@@ -1178,7 +1097,6 @@ void CViewGlobals::OnSpecialMixProcessingChanged()
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
-// -! BEHAVIOUR_CHANGE#0028
 
 
 void CViewGlobals::OnDryMixChanged()
@@ -1497,17 +1415,23 @@ void CViewGlobals::OnFillProgramCombo()
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 	if(pVstPlugin == nullptr) return;
 
-	UINT nProg = pVstPlugin->GetNumPrograms();
+	FillPluginProgramBox(0, pVstPlugin->GetNumPrograms() - 1);
+	m_CbnPreset.SetCurSel(pVstPlugin->GetCurrentProgram());
+}
+
+
+void CViewGlobals::FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg)
+//----------------------------------------------------------------------------
+{
+	CVstPlugin *pVstPlugin = GetCurrentPlugin();
+
 	m_CbnPreset.SetRedraw(FALSE);
 	m_CbnPreset.ResetContent();
-	m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
-	for (UINT i = 0; i < nProg; i++)
+	for (VstInt32 i = firstProg; i <= lastProg; i++)
 	{
-		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i + 1);
+		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i);
 	}
-	m_nCurrentPreset = 0;
 	m_CbnPreset.SetRedraw(TRUE);
-	m_CbnPreset.SetCurSel(0);
 }
 
 
