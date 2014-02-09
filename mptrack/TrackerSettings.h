@@ -309,9 +309,12 @@ public:
 	// MIDI Settings
 
 	Setting<LONG> m_nMidiDevice;
-	Setting<uint32> m_dwMidiSetup;
-	Setting<RecordAftertouchOptions> aftertouchBehaviour;
-	Setting<uint16> midiVelocityAmp;
+	// FIXME: MIDI recording is currently done in its own callback/thread and
+	// accesses settings framework from in there. Work-around the ASSERTs for
+	// now by using cached settings.
+	CachedSetting<uint32> m_dwMidiSetup;
+	CachedSetting<RecordAftertouchOptions> aftertouchBehaviour;
+	CachedSetting<uint16> midiVelocityAmp;
 	CachedSetting<std::bitset<128> > midiIgnoreCCs;
 
 	Setting<int32> midiImportSpeed;
