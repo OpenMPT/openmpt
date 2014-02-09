@@ -672,19 +672,25 @@ bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor)
 	switch(cursor.GetColumnType())
 	{
 	case PatternCursor::noteColumn:
-		GetDlgItem(IDC_COMBO1)->SetFocus();
+		cbnNote.SetFocus();
 		break;
 	case PatternCursor::instrColumn:
-		GetDlgItem(IDC_COMBO2)->SetFocus();
+		cbnInstr.SetFocus();
 		break;
 	case PatternCursor::volumeColumn:
-		GetDlgItem(IDC_COMBO3)->SetFocus();
+		if(m->IsPcNote())
+			cbnCommand.SetFocus();
+		else
+			cbnVolCmd.SetFocus();
 		break;
 	case PatternCursor::effectColumn:
-		GetDlgItem(IDC_COMBO4)->SetFocus();
+		if(m->IsPcNote())
+			sldParam.SetFocus();
+		else
+			cbnCommand.SetFocus();
 		break;
 	case PatternCursor::paramColumn:
-		GetDlgItem(IDC_SLIDER2)->SetFocus();
+		sldParam.SetFocus();
 		break;
 	}
 
