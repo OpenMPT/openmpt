@@ -20,11 +20,8 @@
 #include "mpdlgs.h"
 #include "../common/StringFixer.h"
 
-#define str_preampChangeNote GetStrI18N(_TEXT("Note: The Pre-Amp setting affects sample volume only. Changing it may cause undesired effects on volume balance between sample based instruments and plugin instruments.\nIn other words: Don't touch this slider unless you know what you are doing."))
 
-//#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-
-LPCSTR szCPUNames[8] =
+static const char * const PolyphonyNames[] =
 {
 	"133MHz",
 	"166MHz",
@@ -36,8 +33,7 @@ LPCSTR szCPUNames[8] =
 	"400+MHz"
 };
 
-
-UINT nCPUMix[] =
+static const CHANNELINDEX PolyphonyChannels[] =
 {
 	16,
 	24,
@@ -49,6 +45,8 @@ UINT nCPUMix[] =
 	MAX_CHANNELS
 };
 
+STATIC_ASSERT(CountOf(PolyphonyNames) == CountOf(PolyphonyChannels));
+
 
 const char *gszChnCfgNames[3] =
 {
@@ -56,8 +54,6 @@ const char *gszChnCfgNames[3] =
 	"Stereo",
 	"Quad"
 };
-
-
 
 
 BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
@@ -775,12 +771,13 @@ BOOL COptionsMixer::OnInitDialog()
 	// Max Mixing Channels
 	{
 		m_CbnPolyphony.ResetContent();
-		for (UINT n = 0; n < CountOf(nCPUMix); n++)
+		for(std::size_t n = 0; n < CountOf(PolyphonyChannels); ++n)
 		{
-			CHAR s[64];
-			wsprintf(s, "%d (%s)", nCPUMix[n], szCPUNames[n]);
-			m_CbnPolyphony.AddString(s);
-			if (TrackerSettings::Instance().MixerMaxChannels == nCPUMix[n]) m_CbnPolyphony.SetCurSel(n);
+			m_CbnPolyphony.AddString(mpt::String::Print("%1 (%2)", PolyphonyChannels[n], PolyphonyNames[n]).c_str());
+			if(TrackerSettings::Instance().MixerMaxChannels == PolyphonyChannels[n])
+			{
+				m_CbnPolyphony.SetCurSel(n);
+			}
 		}
 	}
 
@@ -985,10 +982,10 @@ void COptionsMixer::OnOK()
 
 	// Polyphony
 	{
-		int nmmx = m_CbnPolyphony.GetCurSel();
-		if((nmmx >= 0) && (nmmx < CountOf(nCPUMix)))
+		int polyphony = m_CbnPolyphony.GetCurSel();
+		if(polyphony >= 0 && polyphony < CountOf(PolyphonyChannels))
 		{
-			TrackerSettings::Instance().MixerMaxChannels = nCPUMix[nmmx];
+			TrackerSettings::Instance().MixerMaxChannels = PolyphonyChannels[polyphony];
 		}
 	}
 
