@@ -1604,7 +1604,7 @@ SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const std::vector<bool> &keepSampl
 #ifdef MODPLUG_TRACKER
 			if(GetpModDoc())
 			{
-				GetpModDoc()->GetSampleUndo().PrepareUndo(nSmp, sundo_replace);
+				GetpModDoc()->GetSampleUndo().PrepareUndo(nSmp, sundo_replace, "Remove Sample");
 			}
 #endif // MODPLUG_TRACKER
 

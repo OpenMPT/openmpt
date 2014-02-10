@@ -61,7 +61,7 @@ protected:
 	BOOL SetZoom(UINT nZoom);
 	int32 SampleToScreen(SmpLength pos) const;
 	SmpLength ScreenToSample(int32 x) const;
-	void PlayNote(UINT note, const uint32 nStartPos = 0); //rewbs.customKeys
+	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0);
 	void InvalidateSample();
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);
@@ -141,6 +141,7 @@ protected:
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditUndo();
+	afx_msg void OnEditRedo();
 	afx_msg void OnSetLoop();
 	afx_msg void OnSetSustainLoop();
 	afx_msg void On8BitConvert();
@@ -166,6 +167,8 @@ protected:
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

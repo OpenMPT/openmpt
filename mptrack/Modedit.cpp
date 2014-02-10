@@ -279,7 +279,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	{
 		if(newOrder[i] != i + 1)
 		{
-			GetSampleUndo().PrepareUndo(i + 1, sundo_replace);
+			GetSampleUndo().PrepareUndo(i + 1, sundo_replace, "Rearrange");
 		}
 	}
 

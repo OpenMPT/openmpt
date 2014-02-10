@@ -64,10 +64,10 @@ protected:
 
 	// Pattern undo helper functions
 	void ClearBuffer(undobuf_t &buffer);
-	void DeleteUndoStep(undobuf_t &buffer, size_t step);
+	void DeleteStep(undobuf_t &buffer, size_t step);
 	PATTERNINDEX Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linkedFromPrevious);
 
-	bool PrepareUndo(undobuf_t &buffer, PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, const char *description, bool linkToPrevious, bool storeChannelInfo);
+	bool PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, const char *description, bool linkToPrevious, bool storeChannelInfo);
 
 public:
 
@@ -129,30 +129,41 @@ protected:
 		ModSample OldSample;
 		char oldName[MAX_SAMPLENAME];
 		void *samplePtr;
+		const char *description;
 		SmpLength changeStart, changeEnd;
 		sampleUndoTypes changeType;
 	};
 
 	typedef std::vector<std::vector<UndoInfo> > undobuf_t;
 	undobuf_t UndoBuffer;
+	undobuf_t RedoBuffer;
 
 	CModDoc &modDoc;
 
 	// Sample undo helper functions
-	void DeleteUndoStep(const SAMPLEINDEX smp, const size_t step);
-	bool SampleBufferExists(const SAMPLEINDEX smp, bool forceCreation = true);
+	void ClearUndo(undobuf_t &buffer, const SAMPLEINDEX smp);
+	void DeleteStep(undobuf_t &buffer, const SAMPLEINDEX smp, const size_t step);
+	bool SampleBufferExists(const undobuf_t &buffer, const SAMPLEINDEX smp) const;
 	void RestrictBufferSize();
-	size_t GetUndoBufferCapacity();
+	void RestrictBufferSize(undobuf_t &buffer, size_t &capacity);
+	size_t GetBufferCapacity(const undobuf_t &buffer) const;
+
+	bool PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sampleUndoTypes changeType, const char *description, SmpLength changeStart, SmpLength changeEnd);
+	bool Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX smp);
 
 public:
 
 	// Sample undo functions
 	void ClearUndo();
-	void ClearUndo(const SAMPLEINDEX smp);
-	bool PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType, SmpLength changeStart = 0, SmpLength changeEnd = 0);
+	void ClearUndo(const SAMPLEINDEX smp) { ClearUndo(UndoBuffer, smp); ClearUndo(RedoBuffer, smp); }
+	bool PrepareUndo(const SAMPLEINDEX smp, sampleUndoTypes changeType, const char *description, SmpLength changeStart = 0, SmpLength changeEnd = 0);
 	bool Undo(const SAMPLEINDEX smp);
-	bool CanUndo(const SAMPLEINDEX smp);
+	bool Redo(const SAMPLEINDEX smp);
+	bool CanUndo(const SAMPLEINDEX smp) const { return SampleBufferExists(UndoBuffer, smp) && !UndoBuffer[smp - 1].empty(); }
+	bool CanRedo(const SAMPLEINDEX smp) const { return SampleBufferExists(RedoBuffer, smp) && !RedoBuffer[smp - 1].empty(); }
 	void RemoveLastUndoStep(const SAMPLEINDEX smp);
+	const char *GetUndoName(const SAMPLEINDEX smp) const;
+	const char *GetRedoName(const SAMPLEINDEX smp) const;
 
 	CSampleUndo(CModDoc &parent) : modDoc(parent) { }
 

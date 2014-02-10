@@ -337,7 +337,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.GetNumSamples(); smp++)
 	{
 		ModSample &sample = m_SndFile.GetSample(smp);
-		GetSampleUndo().PrepareUndo(smp, sundo_none);
+		GetSampleUndo().PrepareUndo(smp, sundo_none, "Song Conversion");
 
 		// Too many samples? Only 31 samples allowed in MOD format...
 		if(newTypeIsMOD && smp > 31 && sample.nLength > 0)
