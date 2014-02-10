@@ -129,10 +129,10 @@ protected:
 	bool modified;
 
 public:
-	CEditCommand(CSoundFile &sndFile, CWnd *parent);
+	CEditCommand(CSoundFile &sndFile);
 
 public:
-	bool ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor);
+	bool ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor, CWnd *parent);
 
 protected:
 	void InitAll() { InitNote(); InitVolume(); InitEffect(); }

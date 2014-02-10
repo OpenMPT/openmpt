@@ -627,10 +627,10 @@ void CEditCommand::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CEditCommand::CEditCommand(CSoundFile &sndFile, CWnd *parent) : sndFile(sndFile), effectInfo(sndFile), m(nullptr), modified(false)
-//--------------------------------------------------------------------------------------------------------------------------------
+CEditCommand::CEditCommand(CSoundFile &sndFile) : sndFile(sndFile), effectInfo(sndFile), m(nullptr), modified(false)
+//------------------------------------------------------------------------------------------------------------------
 {
-	CDialog::Create(IDD_PATTERN_EDITCOMMAND, parent);
+	CDialog::Create(IDD_PATTERN_EDITCOMMAND);
 }
 
 
@@ -649,8 +649,8 @@ BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 }
 
 
-bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor)
-//------------------------------------------------------------------------------
+bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor, CWnd *parent)
+//--------------------------------------------------------------------------------------------
 {
 	editPos.pattern = pat;
 	const ROWINDEX row = editPos.row = cursor.GetRow();
@@ -698,6 +698,9 @@ bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor)
 	CHAR s[64];
 	wsprintf(s, "Note Properties - Row %d, Channel %d", row, chn + 1);
 	SetWindowText(s);
+
+	SetParent(CMainFrame::GetMainFrame());
+	CenterWindow(parent);
 
 	ShowWindow(SW_RESTORE);
 	return true;
