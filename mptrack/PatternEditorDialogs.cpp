@@ -221,7 +221,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			}
 		}
 		combo->SetCurSel(0);
-		UINT fxndx = effectInfo.GetIndexFromVolCmd(ModCommand::VOLCMD(m_Cmd.volcmd));
+		UINT fxndx = effectInfo.GetIndexFromVolCmd(m_Cmd.volcmd);
 		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
@@ -258,7 +258,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			}
 		}
 		combo->SetCurSel(0);
-		UINT fxndx = effectInfo.GetIndexFromEffect(ModCommand::COMMAND(m_Cmd.command), ModCommand::PARAM(m_Cmd.param));
+		UINT fxndx = effectInfo.GetIndexFromEffect(m_Cmd.command, m_Cmd.param);
 		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
 		{
 			combo->SetCurSel(i);
@@ -713,11 +713,14 @@ void CEditCommand::InitNote()
 	cbnNote.SetItemData(cbnNote.AddString("No note"), 0);
 	AppendNotesToControlEx(cbnNote, sndFile, m->instr);
 
-	if(ModCommand::IsNoteOrEmpty(m->note))
+	if(m->IsNote())
 	{
 		// Normal note / no note
 		const ModCommand::NOTE noteStart = sndFile.GetModSpecifications().noteMin;
 		cbnNote.SetCurSel(m->note - (noteStart - 1));
+	} else if(m->note == NOTE_NONE)
+	{
+		cbnNote.SetCurSel(0);
 	} else
 	{
 		// Special notes
@@ -736,7 +739,7 @@ void CEditCommand::InitNote()
 	cbnInstr.SetRedraw(FALSE);
 	cbnInstr.ResetContent();
 
-	if(ModCommand::IsPcNote(m->note))
+	if(m->IsPcNote())
 	{
 		// control plugin param note
 		cbnInstr.SetItemData(cbnInstr.AddString("No Effect"), 0);
@@ -908,7 +911,7 @@ void CEditCommand::UpdateEffectRange(bool set)
 void CEditCommand::OnNoteChanged()
 //--------------------------------
 {
-	const bool wasParamControl = ModCommand::IsPcNote(m->note);
+	const bool wasParamControl = m->IsPcNote();
 	ModCommand::NOTE newNote = m->note;
 	ModCommand::INSTR newInstr = m->instr;
 
@@ -918,23 +921,16 @@ void CEditCommand::OnNoteChanged()
 	n = cbnInstr.GetCurSel();
 	if(n >= 0) newInstr = static_cast<ModCommand::INSTR>(cbnInstr.GetItemData(n));
 
-	const bool isParamControl = ModCommand::IsPcNote(newNote);
-
 	if(m->note != newNote || m->instr != newInstr)
 	{
+		PrepareUndo();
 		CModDoc *modDoc = sndFile.GetpModDoc();
-		if(!modified)	// let's create just one undo step.
-		{
-			modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
-			modified = true;
-		}
 		m->note = newNote;
 		m->instr = newInstr;
 
-		modDoc->SetModified();
 		modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
 
-		if(wasParamControl != isParamControl)
+		if(wasParamControl != m->IsPcNote())
 		{
 			InitAll();
 		} else if(!m->IsPcNote()
@@ -972,16 +968,11 @@ void CEditCommand::OnVolCmdChanged()
 	const bool volCmdChanged = m->volcmd != newVolCmd;
 	if(volCmdChanged || m->vol != newVol)
 	{
+		PrepareUndo();
 		CModDoc *modDoc = sndFile.GetpModDoc();
-		if(!modified)	// let's create just one undo step.
-		{
-			modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
-			modified = true;
-		}
 		m->volcmd = newVolCmd;
 		m->vol = newVol;
 
-		modDoc->SetModified();
 		modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
 
 		if(volCmdChanged)
@@ -1029,12 +1020,8 @@ void CEditCommand::OnCommandChanged()
 	if((!m->IsPcNote() && (m->command != newCommand || m->param != newParam))
 		|| (m->IsPcNote() && m->GetValueVolCol() != newPlugParam))
 	{
+		PrepareUndo();
 		CModDoc *modDoc = sndFile.GetpModDoc();
-		if(!modified)	// let's create just one undo step.
-		{
-			modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
-			modified = true;
-		}
 		if(m->IsPcNote())
 		{
 			m->SetValueVolCol(newPlugParam);
@@ -1048,7 +1035,6 @@ void CEditCommand::OnCommandChanged()
 		}
 		UpdateEffectRange(true);
 
-		modDoc->SetModified();
 		modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
 	}
 }
@@ -1084,24 +1070,33 @@ void CEditCommand::UpdateEffectValue(bool set)
 		if((!m->IsPcNote() && m->param != newParam)
 			|| (m->IsPcNote() && m->GetValueVolCol() != newPlugParam))
 		{
+			PrepareUndo();
 			CModDoc *modDoc = sndFile.GetpModDoc();
-			if(!modified)	// let's create just one undo step.
-			{
-				modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
-				modified = true;
-			}
 			if(m->IsPcNote())
 			{
-				m->SetValueEffectCol((uint16)newPlugParam);
+				m->SetValueEffectCol(newPlugParam);
 			} else
 			{
 				m->param = newParam;
 			}
 
-			modDoc->SetModified();
 			modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
 		}
 	}
+}
+
+
+void CEditCommand::PrepareUndo()
+//------------------------------
+{
+	CModDoc *modDoc = sndFile.GetpModDoc();
+	if(!modified)
+	{
+		// Let's create just one undo step.
+		modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
+		modified = true;
+	}
+	modDoc->SetModified();
 }
 
 

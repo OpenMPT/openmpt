@@ -144,6 +144,8 @@ protected:
 	void UpdateEffectRange(bool set);
 	void UpdateEffectValue(bool set);
 
+	void PrepareUndo();
+
 	//{{AFX_VIRTUAL(CEditCommand)
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void OnOK()		{ ShowWindow(SW_HIDE); }
