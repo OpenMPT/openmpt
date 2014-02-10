@@ -752,7 +752,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 		return false;
 	}
 	
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
 	bool bOk = m_sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
@@ -850,7 +850,7 @@ bool CCtrlSamples::OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample)
 
 	BeginWaitCursor();
 
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
 	m_sndFile.ReadSampleFromSong(m_nSample, sndFile, nSample);
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	if((m_sndFile.GetType() & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
@@ -922,7 +922,7 @@ void CCtrlSamples::OnSampleNew()
 
 		if(duplicate && nOldSmp >= 1 && nOldSmp <= sndFile.GetNumSamples())
 		{
-			m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace);
+			m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace, "Duplicate");
 			sndFile.ReadSampleFromSong(smp, sndFile, nOldSmp);
 		}
 
@@ -1159,7 +1159,7 @@ void CCtrlSamples::OnNormalize()
 				}
 			}
 
-			m_modDoc.GetSampleUndo().PrepareUndo(iSmp, sundo_update, selStart, selEnd);
+			m_modDoc.GetSampleUndo().PrepareUndo(iSmp, sundo_update, "Normalize", selStart, selEnd);
 
 			if(sample.uFlags & CHN_STEREO) { selStart *= 2; selEnd *= 2; }
 
@@ -1230,7 +1230,7 @@ void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
 
 	SampleSelectionPoints selection = GetSelectionPoints();
 
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, selection.nStart, selection.nEnd);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Amplify", selection.nStart, selection.nEnd);
 
 	if (sample.uFlags & CHN_STEREO) { selection.nStart *= 2; selection.nEnd *= 2; }
 	SmpLength len = selection.nEnd - selection.nStart;
@@ -1309,7 +1309,7 @@ void CCtrlSamples::OnRemoveDCOffset()
 			selEnd = selection.nEnd;
 		}
 
-		m_modDoc.GetSampleUndo().PrepareUndo(iSmp, sundo_update, selStart, selEnd);
+		m_modDoc.GetSampleUndo().PrepareUndo(iSmp, sundo_update, "Remove DC Offset", selStart, selEnd);
 
 		const float fOffset = ctrlSmp::RemoveDCOffset(m_sndFile.GetSample(iSmp), selStart, selEnd, m_sndFile.GetType(), m_sndFile);
 
@@ -1417,7 +1417,7 @@ void CCtrlSamples::OnUpsample()
 	if (dwNewLen <= MAX_SAMPLE_LENGTH) pNewSample = ModSample::AllocateSample(dwNewLen, newsmplsize);
 	if (pNewSample)
 	{
-		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Upsample");
 
 		const UINT nCh = sample.GetNumChannels();
 		for (UINT iCh=0; iCh<nCh; iCh++)
@@ -1554,7 +1554,7 @@ void CCtrlSamples::OnDownsample()
 	if (pNewSample)
 	{
 
-		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Downsample");
 
 		const UINT nCh = sample.GetNumChannels();
 		for (UINT iCh=0; iCh<nCh; iCh++)
@@ -1975,7 +1975,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 
 	ASSERT(nNewSampleLength >= nLengthCounter);
 
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Time Stretch");
 	// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
 	ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, std::min(nLengthCounter, nNewSampleLength), m_sndFile);
 
@@ -2056,7 +2056,7 @@ int CCtrlSamples::PitchShift(float pitch)
 	float * buffer = new float[MAX_BUFFER_LENGTH + fft];
 	float * outbuf = new float[MAX_BUFFER_LENGTH + fft];
 
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Pitch Shift");
 
 	// Process each channel separately
 	for(UINT i = 0 ; i < nChn ; i++){
@@ -2176,7 +2176,7 @@ void CCtrlSamples::OnReverse()
 
 	SampleSelectionPoints selection = GetSelectionPoints();
 
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_reverse, selection.nStart, selection.nEnd);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_reverse, "Reverse", selection.nStart, selection.nEnd);
 	if(ctrlSmp::ReverseSample(sample, selection.nStart, selection.nEnd, m_sndFile))
 	{
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
@@ -2197,7 +2197,7 @@ void CCtrlSamples::OnInvert()
 
 	SampleSelectionPoints selection = GetSelectionPoints();
 
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_invert, selection.nStart, selection.nEnd);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_invert, "Invert", selection.nStart, selection.nEnd);
 	if(ctrlSmp::InvertSample(sample, selection.nStart, selection.nEnd, m_sndFile) == true)
 	{
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
@@ -2223,7 +2223,7 @@ void CCtrlSamples::OnSignUnSign()
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	SampleSelectionPoints selection = GetSelectionPoints();
 
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_unsign, selection.nStart, selection.nEnd);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_unsign, "Unsign", selection.nStart, selection.nEnd);
 	if(ctrlSmp::UnsignSample(sample, selection.nStart, selection.nEnd, m_sndFile) == true)
 	{
 		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
@@ -2248,7 +2248,7 @@ void CCtrlSamples::OnSilence()
 	if(selection.selectionActive == true)
 	{
 		ModSample &sample = m_sndFile.GetSample(m_nSample);
-		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, selection.nStart, selection.nEnd);
+		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Silence", selection.nStart, selection.nEnd);
 
 		SmpLength len = selection.nEnd - selection.nStart;
 		if (sample.uFlags & CHN_STEREO)
@@ -3102,7 +3102,7 @@ void CCtrlSamples::OnXFade()
 
 		if(fadeLength < 4) return;
 
-		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, sample.nLoopEnd - fadeLength, sample.nLoopEnd);
+		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Crossfade", sample.nLoopEnd - fadeLength, sample.nLoopEnd);
 		// If we want to fade nFadeLength bytes, we need as much sample material before the loop point. nFadeLength has been adjusted above.
 		if(sample.nLoopStart < fadeLength)
 		{
@@ -3138,7 +3138,7 @@ void CCtrlSamples::OnAutotune()
 		if(dlg.DoModal() == IDOK)
 		{
 			BeginWaitCursor();
-			m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
+			m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Automatic Sample Tuning");
 			at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
 			m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, NULL);
 			m_modDoc.SetModified();

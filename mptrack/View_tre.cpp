@@ -1482,7 +1482,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 		wsprintf(s, _T("Remove sample %u?"), modItemID);
 		if(Reporting::Confirm(s, false, true) == cnfYes)
 		{
-			modDoc->GetSampleUndo().PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace);
+			modDoc->GetSampleUndo().PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace, "Delete");
 			const SAMPLEINDEX oldNumSamples = modDoc->GetNumSamples();
 			if (modDoc->RemoveSample((SAMPLEINDEX)modItemID))
 			{

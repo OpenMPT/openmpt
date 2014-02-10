@@ -499,7 +499,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 		if(!sndFile.IsSampleUsed(smp))
 		{
 			samplesUsed[smp] = false;
-			modDoc.GetSampleUndo().PrepareUndo(smp, sundo_delete);
+			modDoc.GetSampleUndo().PrepareUndo(smp, sundo_delete, "Remove Unused Sample");
 		}
 	}
 
@@ -584,7 +584,7 @@ bool CModCleanupDlg::OptimizeSamples()
 				SmpLength lmax = loopLength + 2;
 				if(lmax < sample.nLength && lmax >= 2)
 				{
-					modDoc.GetSampleUndo().PrepareUndo(nSmp, sundo_delete, lmax, sample.nLength);
+					modDoc.GetSampleUndo().PrepareUndo(nSmp, sundo_delete, "Trim Unused Data", lmax, sample.nLength);
 					ctrlSmp::ResizeSample(sample, lmax, sndFile);
 				}
 			}

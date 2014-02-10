@@ -80,6 +80,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_WM_DROPFILES()
 	ON_WM_MOUSEWHEEL()
 	ON_COMMAND(ID_EDIT_UNDO,				OnEditUndo)
+	ON_COMMAND(ID_EDIT_REDO,				OnEditRedo)
 	ON_COMMAND(ID_EDIT_SELECT_ALL,			OnEditSelectAll)
 	ON_COMMAND(ID_EDIT_CUT,					OnEditCut)
 	ON_COMMAND(ID_EDIT_COPY,				OnEditCopy)
@@ -105,6 +106,8 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_ADDSILENCE,		OnAddSilence)
 	ON_COMMAND(ID_SAMPLE_GRID,				OnChangeGridSize)
 	ON_COMMAND(ID_SAMPLE_QUICKFADE,			OnQuickFade)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,		OnUpdateUndo)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,		OnUpdateRedo)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
@@ -838,7 +841,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			::FillRect(offScreenDC, &rcClient, CMainFrame::brushBlack);
 		}
 		::SelectObject(offScreenDC, CMainFrame::penDarkGray);
-		if (sample.uFlags & CHN_STEREO)
+		if (sample.uFlags[CHN_STEREO])
 		{
 			::MoveToEx(offScreenDC, 0, ymed-yrange/2, NULL);
 			::LineTo(offScreenDC, rcClient.right, ymed-yrange/2);
@@ -1465,7 +1468,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	if (m_dwStatus[SMPSTATUS_DRAWING])
 	{
 		m_lastDrawPoint = point;
-		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Draw Sample");
 		if(sample.GetElementarySampleSize() == 2)
 			SetInitialDrawPoint<int16, uint16>(sample.pSample, point);
 		else if(sample.GetElementarySampleSize() == 1)
@@ -1537,10 +1540,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				if (dwPos <= sample.nLength)
 				{
 					//Set loop points
-					wsprintf(s, "Set Loop Start to:\t%d", dwPos);
+					wsprintf(s, "Set &Loop Start to:\t%d", dwPos);
 					::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nLoopEnd ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPSTART, s);
-					wsprintf(s, "Set Loop End to:\t%d", dwPos);
+					wsprintf(s, "Set &Loop End to:\t%d", dwPos);
 					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPEND, s);
 
@@ -1548,10 +1551,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					{
 						//Set sustain loop points
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-						wsprintf(s, "Set Sustain Start to:\t%d", dwPos);
+						wsprintf(s, "Set &Sustain Start to:\t%d", dwPos);
 						::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nSustainEnd ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINSTART, s);
-						wsprintf(s, "Set Sustain End to:\t%d", dwPos);
+						wsprintf(s, "Set &Sustain End to:\t%d", dwPos);
 						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINEND, s);
 					}
@@ -1573,7 +1576,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 
 			// "Trim" menu item is responding differently if there's no selection,
 			// but a loop present: "trim around loop point"! (jojo in topic 2258)
-			std::string sTrimMenuText = "T&rim";
+			std::string sTrimMenuText = "Tr&im";
 			bool bIsGrayed = ( (m_dwEndSel<=m_dwBeginSel) || (m_dwEndSel - m_dwBeginSel < MIN_TRIM_LENGTH)
 								|| (m_dwEndSel - m_dwBeginSel == sample.nLength)
 							  );
@@ -1600,7 +1603,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "&Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
 		::AppendMenu(hMenu, MF_STRING | (IsClipboardFormatAvailable(CF_WAVE) ? 0 : MF_GRAYED), ID_EDIT_PASTE, "&Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
-		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "&Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "&Undo" + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample)) + "\t" + ih->GetKeyTextFromCommand(kcEditUndo));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanRedo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_REDO, "&Redo" + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample)) + "\t" + ih->GetKeyTextFromCommand(kcEditRedo));
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 		::DestroyMenu(hMenu);
@@ -1820,14 +1824,14 @@ void CViewSample::OnEditDelete()
 	 || (m_dwEndSel - m_dwBeginSel + 4 >= len))
 	{
 		if (Reporting::Confirm("Remove this sample?", "Remove Sample", true) != cnfYes) return;
-		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Delete Sample");
 
 		sndFile.DestroySampleThreadsafe(m_nSample);
 
 		dwUpdateFlags |= HINT_SMPNAMES;
 	} else
 	{
-		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, m_dwBeginSel, m_dwEndSel);
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Delete Selection", m_dwBeginSel, m_dwEndSel);
 
 		CriticalSection cs;
 
@@ -1978,7 +1982,7 @@ void CViewSample::OnEditPaste()
 
 		if ((hCpy) && ((p = (LPBYTE)GlobalLock(hCpy)) != NULL))
 		{
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Paste");
 
 			CSoundFile &sndFile = pModDoc->GetrSoundFile();
 			ModSample &sample = sndFile.GetSample(m_nSample);
@@ -2015,7 +2019,17 @@ void CViewSample::OnEditUndo()
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
-	if(pModDoc->GetSampleUndo().Undo(m_nSample) == true)
+	if(pModDoc->GetSampleUndo().Undo(m_nSample))
+		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
+}
+
+
+void CViewSample::OnEditRedo()
+//----------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return;
+	if(pModDoc->GetSampleUndo().Redo(m_nSample))
 		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 }
 
@@ -2031,7 +2045,7 @@ void CViewSample::On8BitConvert()
 		ModSample &sample = sndFile.GetSample(m_nSample);
 		if(sample.uFlags[CHN_16BIT] && sample.pSample != nullptr && sample.nLength != 0)
 		{
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "8-Bit Conversion");
 
 			CriticalSection cs;
 
@@ -2083,7 +2097,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 				}
 			}
 
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Mono Conversion");
 
 			if(ctrlSmp::ConvertToMono(sample, sndFile, convert))
 			{
@@ -2156,7 +2170,7 @@ void CViewSample::OnSampleTrim()
 
 	if ((sample.pSample) && (nStart+nEnd <= sample.nLength) && (nEnd >= MIN_TRIM_LENGTH))
 	{
-		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Trim");
 
 		CriticalSection cs;
 
@@ -2186,6 +2200,7 @@ void CViewSample::OnSampleTrim()
 			sample.uFlags.reset(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		}
 		sample.nLength = nEnd;
+		sample.PrecomputeLoops(sndFile);
 
 		sample.PrecomputeLoops(sndFile);
 		cs.Leave();
@@ -2204,8 +2219,8 @@ void CViewSample::OnChar(UINT /*nChar*/, UINT, UINT /*nFlags*/)
 }
 
 
-void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
-//-----------------------------------------------------------
+void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos)
+//--------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -2341,7 +2356,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 				{
 					CriticalSection cs;
 
-					pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+					pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
 					bCanDrop = dlsbank.ExtractSample(*pSndFile, m_nSample, nIns, nRgn);
 				}
 				bUpdate = TRUE;
@@ -2369,7 +2384,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 			}
 			CriticalSection cs;
 
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
 			bCanDrop = pDLSBank->ExtractSample(*pSndFile, m_nSample, nIns, nRgn);
 
 			bUpdate = TRUE;
@@ -2447,7 +2462,7 @@ void CViewSample::OnSetLoopStart()
 		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwMenuParam+4 <= sample.nLoopEnd) && (sample.nLoopStart != m_dwMenuParam))
 		{
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Loop Start");
 			sample.SetLoop(m_dwMenuParam, sample.nLoopEnd, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
@@ -2466,7 +2481,7 @@ void CViewSample::OnSetLoopEnd()
 		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwMenuParam >= sample.nLoopStart+4) && (sample.nLoopEnd != m_dwMenuParam))
 		{
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Loop End");
 			sample.SetLoop(sample.nLoopStart, m_dwMenuParam, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
@@ -2485,7 +2500,7 @@ void CViewSample::OnSetSustainStart()
 		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwMenuParam+4 <= sample.nSustainEnd) && (sample.nSustainStart != m_dwMenuParam))
 		{
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain Start");
 			sample.SetSustainLoop(m_dwMenuParam, sample.nSustainEnd, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
@@ -2504,7 +2519,7 @@ void CViewSample::OnSetSustainEnd()
 		ModSample &sample = sndFile.GetSample(m_nSample);
 		if ((m_dwMenuParam >= sample.nSustainStart+4) && (sample.nSustainEnd != m_dwMenuParam))
 		{
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain End");
 			sample.SetSustainLoop(sample.nSustainStart, m_dwMenuParam, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
@@ -2567,9 +2582,9 @@ void CViewSample::OnAddSilence()
 			CriticalSection cs;
 
 			if(dlg.m_nSamples < sample.nLength)	// make it shorter!
-				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, dlg.m_nSamples, sample.nLength);
+				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Resize", dlg.m_nSamples, sample.nLength);
 			else	// make it longer!
-				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, sample.nLength, dlg.m_nSamples);
+				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", sample.nLength, dlg.m_nSamples);
 			ctrlSmp::ResizeSample(sample, dlg.m_nSamples, sndFile);
 		}
 	} else
@@ -2580,7 +2595,7 @@ void CViewSample::OnAddSilence()
 			CriticalSection cs;
 
 			UINT nStart = (dlg.m_nEditOption == addsilence_at_end) ? sample.nLength : 0;
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, nStart, nStart + dlg.m_nSamples);
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", nStart, nStart + dlg.m_nSamples);
 			ctrlSmp::InsertSilence(sample, dlg.m_nSamples, nStart, sndFile);
 		}
 	}
@@ -2707,6 +2722,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcEditUndo:		OnEditUndo(); return wParam;
+		case kcEditRedo:		OnEditRedo(); return wParam;
 		case kcSample8Bit:		On8BitConvert(); return wParam;
 		case kcSampleMonoMix:	OnMonoConvertMix(); return wParam;
 		case kcSampleMonoLeft:	OnMonoConvertLeft(); return wParam;
@@ -2735,7 +2751,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	}
 	if (wParam >= kcSampStartNotes && wParam <= kcSampEndNotes)
 	{
-		PlayNote(wParam - kcSampStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
+		PlayNote(static_cast<ModCommand::NOTE>(wParam - kcSampStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
 		return wParam;
 	}
 	if (wParam >= kcSampStartNoteStops && wParam <= kcSampEndNoteStops)
@@ -2822,5 +2838,31 @@ void CViewSample::OnChangeGridSize()
 	{
 		m_nGridSegments = dlg.m_nSegments;
 		InvalidateSample();
+	}
+}
+
+
+void CViewSample::OnUpdateUndo(CCmdUI *pCmdUI)
+//--------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if ((pCmdUI) && (pModDoc))
+	{
+		pCmdUI->Enable(pModDoc->GetSampleUndo().CanUndo(m_nSample));
+		pCmdUI->SetText(CString("Undo ") + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample))
+			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo));
+	}
+}
+
+
+void CViewSample::OnUpdateRedo(CCmdUI *pCmdUI)
+//--------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if ((pCmdUI) && (pModDoc))
+	{
+		pCmdUI->Enable(pModDoc->GetSampleUndo().CanRedo(m_nSample));
+		pCmdUI->SetText(CString("Redo ") + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample))
+			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo));
 	}
 }
