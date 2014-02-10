@@ -163,7 +163,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	CriticalSection cs;
 	if(createUndoPoint)
 	{
-		PrepareUndoForAllPatterns(true);
+		PrepareUndoForAllPatterns(true, "Rearrange Channels");
 	}
 
 	for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) 
@@ -367,7 +367,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		}
 	} else
 	{
-		PrepareUndoForAllPatterns();
+		PrepareUndoForAllPatterns("Rearrange Samples");
 
 		std::vector<ModCommand::INSTR> indices(newIndex.size(), 0);
 		for(size_t i = 0; i < newIndex.size(); i++)
@@ -443,7 +443,7 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 		m_SndFile.DestroyInstrument(i, doNoDeleteAssociatedSamples);
 	}
 
-	PrepareUndoForAllPatterns();
+	PrepareUndoForAllPatterns("Rearrange Instrumens");
 
 	std::vector<ModCommand::INSTR> indices(newIndex.size(), 0);
 	for(size_t i = 0; i < newIndex.size(); i++)
@@ -879,7 +879,7 @@ BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
 
 	BeginWaitCursor();
 	CriticalSection cs;
-	GetPatternUndo().PrepareUndo(nPattern, 0, 0, GetNumChannels(), numRows);
+	GetPatternUndo().PrepareUndo(nPattern, 0, 0, GetNumChannels(), numRows, "Expand Pattern");
 	bool success = m_SndFile.Patterns[nPattern].Expand();
 	cs.Leave();
 	EndWaitCursor();
@@ -909,7 +909,7 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 
 	BeginWaitCursor();
 	CriticalSection cs;
-	GetPatternUndo().PrepareUndo(nPattern, 0, 0, GetNumChannels(), numRows);
+	GetPatternUndo().PrepareUndo(nPattern, 0, 0, GetNumChannels(), numRows, "Shrink Pattern");
 	bool success = m_SndFile.Patterns[nPattern].Shrink();
 	cs.Leave();
 	EndWaitCursor();

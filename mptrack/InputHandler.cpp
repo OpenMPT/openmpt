@@ -452,68 +452,69 @@ CString CInputHandler::GetMenuText(UINT id)
 
 	switch(id)
 	{
-		case FILENEW:				s = _T("&New\t"); c = kcFileNew; break;
-		case ID_FILE_OPEN:			s = _T("&Open...\t"); c = kcFileOpen; break;
-		case ID_FILE_OPENTEMPLATE:	return "Open &Template\t";
-		case ID_FILE_CLOSE:			s = _T("&Close\t"); c = kcFileClose; break;
-		case ID_FILE_CLOSEALL:		s = _T("C&lose All\t"); c = kcFileCloseAll; break;
-		case ID_FILE_SAVE:			s = _T("&Save\t"); c = kcFileSave; break;
-		case ID_FILE_SAVE_AS:		s = _T("Save &As...\t"); c = kcFileSaveAs; break;
-		case ID_FILE_SAVEASTEMPLATE:s = _T("Sa&ve as Template\t"); c = kcFileSaveTemplate; break;
-		case ID_FILE_SAVEASWAVE:	s = _T("Export as lossless (&Wave, FLAC)...\t"); c = kcFileSaveAsWave; break;
-		case ID_FILE_SAVEASMP3:		s = _T("Export as lossy (Opus, Vorbis, M&P3)...\t"); c = kcFileSaveAsMP3; break;
-		case ID_FILE_SAVEMIDI:		s = _T("Export as M&IDI...\t"); c = kcFileSaveMidi; break;
-		case ID_FILE_SAVECOMPAT:	s = _T("Compatibility &Export...\t"); c = kcFileExportCompat; break;
-		case ID_IMPORT_MIDILIB:		s = _T("Import &MIDI Library...\t"); c = kcFileImportMidiLib; break;
-		case ID_ADD_SOUNDBANK:		s = _T("Add Sound &Bank...\t"); c = kcFileAddSoundBank; break;
+		case FILENEW:				s = _T("&New"); c = kcFileNew; break;
+		case ID_FILE_OPEN:			s = _T("&Open..."); c = kcFileOpen; break;
+		case ID_FILE_OPENTEMPLATE:	return "Open &Template";
+		case ID_FILE_CLOSE:			s = _T("&Close"); c = kcFileClose; break;
+		case ID_FILE_CLOSEALL:		s = _T("C&lose All"); c = kcFileCloseAll; break;
+		case ID_FILE_SAVE:			s = _T("&Save"); c = kcFileSave; break;
+		case ID_FILE_SAVE_AS:		s = _T("Save &As..."); c = kcFileSaveAs; break;
+		case ID_FILE_SAVEASTEMPLATE:s = _T("Sa&ve as Template"); c = kcFileSaveTemplate; break;
+		case ID_FILE_SAVEASWAVE:	s = _T("Export as lossless (&Wave, FLAC)..."); c = kcFileSaveAsWave; break;
+		case ID_FILE_SAVEASMP3:		s = _T("Export as lossy (Opus, Vorbis, M&P3)..."); c = kcFileSaveAsMP3; break;
+		case ID_FILE_SAVEMIDI:		s = _T("Export as M&IDI..."); c = kcFileSaveMidi; break;
+		case ID_FILE_SAVECOMPAT:	s = _T("Compatibility &Export..."); c = kcFileExportCompat; break;
+		case ID_IMPORT_MIDILIB:		s = _T("Import &MIDI Library..."); c = kcFileImportMidiLib; break;
+		case ID_ADD_SOUNDBANK:		s = _T("Add Sound &Bank..."); c = kcFileAddSoundBank; break;
 
-		case ID_PLAYER_PLAY:		s = _T("Pause / &Resume\t"); c = kcPlayPauseSong; break;
-		case ID_PLAYER_PLAYFROMSTART:	s = _T("&Play from Start\t"); c = kcPlaySongFromStart; break;
-		case ID_PLAYER_STOP:		s = _T("&Stop\t"); c = kcStopSong; break;
-		case ID_PLAYER_PAUSE:		s = _T("P&ause\t"); c = kcPauseSong; break;
-		case ID_MIDI_RECORD:		s = _T("&MIDI Record\t"); c = kcMidiRecord; break;
-		case ID_ESTIMATESONGLENGTH:	s = _T("&Estimate Song Length\t"); c = kcEstimateSongLength; break;
-		case ID_APPROX_BPM:			s = _T("Approx. real &BPM\t"); c = kcApproxRealBPM; break;
+		case ID_PLAYER_PLAY:		s = _T("Pause / &Resume"); c = kcPlayPauseSong; break;
+		case ID_PLAYER_PLAYFROMSTART:	s = _T("&Play from Start"); c = kcPlaySongFromStart; break;
+		case ID_PLAYER_STOP:		s = _T("&Stop"); c = kcStopSong; break;
+		case ID_PLAYER_PAUSE:		s = _T("P&ause"); c = kcPauseSong; break;
+		case ID_MIDI_RECORD:		s = _T("&MIDI Record"); c = kcMidiRecord; break;
+		case ID_ESTIMATESONGLENGTH:	s = _T("&Estimate Song Length"); c = kcEstimateSongLength; break;
+		case ID_APPROX_BPM:			s = _T("Approx. real &BPM"); c = kcApproxRealBPM; break;
 
-		case ID_EDIT_UNDO:			s = _T("&Undo\t"); c = kcEditUndo; break;
-		case ID_EDIT_CUT:			s = _T("Cu&t\t"); c = kcEditCut; break;
-		case ID_EDIT_COPY:			s = _T("&Copy\t"); c = kcEditCopy; break;
-		case ID_EDIT_PASTE:			s = _T("&Paste\t"); c = kcEditPaste; break;
-		case ID_EDIT_SELECT_ALL:	s = _T("Select &All\t"); c = kcEditSelectAll; break;
+		case ID_EDIT_UNDO:			s = _T("&Undo"); c = kcEditUndo; break;
+		case ID_EDIT_REDO:			s = _T("&Redo"); c = kcEditRedo; break;
+		case ID_EDIT_CUT:			s = _T("Cu&t"); c = kcEditCut; break;
+		case ID_EDIT_COPY:			s = _T("&Copy"); c = kcEditCopy; break;
+		case ID_EDIT_PASTE:			s = _T("&Paste"); c = kcEditPaste; break;
+		case ID_EDIT_SELECT_ALL:	s = _T("Select &All"); c = kcEditSelectAll; break;
 		case ID_EDIT_CLEANUP:		s = _T("C&leanup"); break;
-		case ID_EDIT_FIND:			s = _T("&Find / Replace\t"); c = kcEditFind; break;
-		case ID_EDIT_FINDNEXT:		s = _T("Find &Next\t"); c = kcEditFindNext; break;
-		case ID_EDIT_GOTO_MENU:		s = _T("&Goto\t"); c = kcPatternGoto; break;
-		case ID_EDIT_SPLITKEYBOARDSETTINGS:	s = _T("Split &Keyboard Settings\t"); c = kcShowSplitKeyboardSettings; break;
+		case ID_EDIT_FIND:			s = _T("&Find / Replace"); c = kcEditFind; break;
+		case ID_EDIT_FINDNEXT:		s = _T("Find &Next"); c = kcEditFindNext; break;
+		case ID_EDIT_GOTO_MENU:		s = _T("&Goto"); c = kcPatternGoto; break;
+		case ID_EDIT_SPLITKEYBOARDSETTINGS:	s = _T("Split &Keyboard Settings"); c = kcShowSplitKeyboardSettings; break;
 			// "Paste Special" sub menu
-		case ID_EDIT_PASTE_SPECIAL:	s = _T("&Mix Paste\t"); c = kcEditMixPaste; break;
-		case ID_EDIT_MIXPASTE_ITSTYLE:	s = _T("M&ix Paste (IT Style)\t"); c = kcEditMixPasteITStyle; break;
-		case ID_EDIT_PASTEFLOOD:	s = _T("Paste Fl&ood\t"); c = kcEditPasteFlood; break;
-		case ID_EDIT_PUSHFORWARDPASTE:	s = _T("&Push Forward Paste (Insert)\t"); c = kcEditPushForwardPaste; break;
+		case ID_EDIT_PASTE_SPECIAL:	s = _T("&Mix Paste"); c = kcEditMixPaste; break;
+		case ID_EDIT_MIXPASTE_ITSTYLE:	s = _T("M&ix Paste (IT Style)"); c = kcEditMixPasteITStyle; break;
+		case ID_EDIT_PASTEFLOOD:	s = _T("Paste Fl&ood"); c = kcEditPasteFlood; break;
+		case ID_EDIT_PUSHFORWARDPASTE:	s = _T("&Push Forward Paste (Insert)"); c = kcEditPushForwardPaste; break;
 
-		case ID_VIEW_GLOBALS:		s = _T("&General\t"); c = kcViewGeneral; break;
-		case ID_VIEW_SAMPLES:		s = _T("&Samples\t"); c = kcViewSamples; break;
-		case ID_VIEW_PATTERNS:		s = _T("&Patterns\t"); c = kcViewPattern; break;
-		case ID_VIEW_INSTRUMENTS:	s = _T("&Instruments\t"); c = kcViewInstruments; break;
-		case ID_VIEW_COMMENTS:		s = _T("&Comments\t"); c = kcViewComments; break;
-		case ID_VIEW_GRAPH:			s = _T("G&raph\t"); c = kcViewGraph; break; //rewbs.graph
-		case MAINVIEW:				s = _T("&Main\t"); c = kcViewMain; break;
-		case IDD_TREEVIEW:			s = _T("&Tree\t"); c = kcViewTree; break;
-		case ID_VIEW_OPTIONS:		s = _T("S&etup...\t"); c = kcViewOptions; break;
-		case ID_HELP:				s = _T("&Help"); c = kcHelp; break;
-		case ID_PLUGIN_SETUP:		s = _T("Pl&ugin Manager...\t"); c = kcViewAddPlugin; break;
-		case ID_CHANNEL_MANAGER:	s = _T("Ch&annel Manager...\t"); c = kcViewChannelManager; break;
-		case ID_CLIPBOARD_MANAGER:	s = _T("C&lipboard Manager...\t"); c = kcToggleClipboardManager; break;
-		case ID_VIEW_SONGPROPERTIES:s = _T("Song P&roperties...\t"); c = kcViewSongProperties; break; //rewbs.graph
-		case ID_VIEW_MIDIMAPPING:	s = _T("&MIDI Mapping...\t"); c = kcViewMIDImapping; break;
-		case ID_VIEW_EDITHISTORY:	s = _T("Edit &History...\t"); c = kcViewEditHistory; break;
+		case ID_VIEW_GLOBALS:		s = _T("&General"); c = kcViewGeneral; break;
+		case ID_VIEW_SAMPLES:		s = _T("&Samples"); c = kcViewSamples; break;
+		case ID_VIEW_PATTERNS:		s = _T("&Patterns"); c = kcViewPattern; break;
+		case ID_VIEW_INSTRUMENTS:	s = _T("&Instruments"); c = kcViewInstruments; break;
+		case ID_VIEW_COMMENTS:		s = _T("&Comments"); c = kcViewComments; break;
+		case ID_VIEW_GRAPH:			s = _T("G&raph"); c = kcViewGraph; break; //rewbs.graph
+		case MAINVIEW:				s = _T("&Main"); c = kcViewMain; break;
+		case IDD_TREEVIEW:			s = _T("&Tree"); c = kcViewTree; break;
+		case ID_VIEW_OPTIONS:		s = _T("S&etup..."); c = kcViewOptions; break;
+		case ID_HELPSHOW:			s = _T("&Help..."); c = kcHelp; break;
+		case ID_PLUGIN_SETUP:		s = _T("Pl&ugin Manager..."); c = kcViewAddPlugin; break;
+		case ID_CHANNEL_MANAGER:	s = _T("Ch&annel Manager..."); c = kcViewChannelManager; break;
+		case ID_CLIPBOARD_MANAGER:	s = _T("C&lipboard Manager..."); c = kcToggleClipboardManager; break;
+		case ID_VIEW_SONGPROPERTIES:s = _T("Song P&roperties..."); c = kcViewSongProperties; break; //rewbs.graph
+		case ID_VIEW_MIDIMAPPING:	s = _T("&MIDI Mapping..."); c = kcViewMIDImapping; break;
+		case ID_VIEW_EDITHISTORY:	s = _T("Edit &History..."); c = kcViewEditHistory; break;
 		// Help submenu:
-		case ID_EXAMPLE_MODULES:	return _T("&Example Modules\t");
+		case ID_EXAMPLE_MODULES:	return _T("&Example Modules");
 
 		default: return _T("Unknown Item.");
 	}
 
-	return s + GetKeyTextFromCommand(c);
+	return s + CString(_T("\t")) + GetKeyTextFromCommand(c);
 }
 
 
@@ -523,55 +524,57 @@ void CInputHandler::UpdateMainMenu()
 	CMenu *pMenu = (CMainFrame::GetMainFrame())->GetMenu();
 	if (!pMenu) return;
 
+#define UPDATEMENU(id) pMenu->ModifyMenu(id, MF_BYCOMMAND | MF_STRING, id, GetMenuText(id));
 	pMenu->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, 0, GetMenuText(FILENEW));
-	pMenu->ModifyMenu(ID_FILE_OPEN, MF_BYCOMMAND | MF_STRING, ID_FILE_OPEN, GetMenuText(ID_FILE_OPEN));
-	pMenu->ModifyMenu(ID_FILE_CLOSE, MF_BYCOMMAND | MF_STRING, ID_FILE_CLOSE, GetMenuText(ID_FILE_CLOSE));
-	pMenu->ModifyMenu(ID_FILE_SAVE, MF_BYCOMMAND | MF_STRING, ID_FILE_SAVE, GetMenuText(ID_FILE_SAVE));
-	pMenu->ModifyMenu(ID_FILE_SAVE_AS, MF_BYCOMMAND | MF_STRING, ID_FILE_SAVE_AS, GetMenuText(ID_FILE_SAVE_AS));
-	pMenu->ModifyMenu(ID_FILE_SAVEASWAVE, MF_BYCOMMAND | MF_STRING, ID_FILE_SAVEASWAVE, GetMenuText(ID_FILE_SAVEASWAVE));
-	pMenu->ModifyMenu(ID_FILE_SAVEASMP3, MF_BYCOMMAND | MF_STRING, ID_FILE_SAVEASMP3, GetMenuText(ID_FILE_SAVEASMP3));
-	pMenu->ModifyMenu(ID_FILE_SAVEMIDI, MF_BYCOMMAND | MF_STRING, ID_FILE_SAVEMIDI, GetMenuText(ID_FILE_SAVEMIDI));
-	pMenu->ModifyMenu(ID_FILE_SAVECOMPAT, MF_BYCOMMAND | MF_STRING, ID_FILE_SAVECOMPAT, GetMenuText(ID_FILE_SAVECOMPAT));
-	pMenu->ModifyMenu(ID_IMPORT_MIDILIB, MF_BYCOMMAND | MF_STRING, ID_IMPORT_MIDILIB, GetMenuText(ID_IMPORT_MIDILIB));
-	pMenu->ModifyMenu(ID_ADD_SOUNDBANK, MF_BYCOMMAND | MF_STRING, ID_ADD_SOUNDBANK, GetMenuText(ID_ADD_SOUNDBANK));
+	UPDATEMENU(ID_FILE_OPEN);
+	UPDATEMENU(ID_FILE_CLOSE);
+	UPDATEMENU(ID_FILE_SAVE);
+	UPDATEMENU(ID_FILE_SAVE_AS);
+	UPDATEMENU(ID_FILE_SAVEASWAVE);
+	UPDATEMENU(ID_FILE_SAVEASMP3);
+	UPDATEMENU(ID_FILE_SAVEMIDI);
+	UPDATEMENU(ID_FILE_SAVECOMPAT);
+	UPDATEMENU(ID_IMPORT_MIDILIB);
+	UPDATEMENU(ID_ADD_SOUNDBANK);
 
-	pMenu->ModifyMenu(ID_PLAYER_PLAY, MF_BYCOMMAND | MF_STRING, ID_PLAYER_PLAY, GetMenuText(ID_PLAYER_PLAY));
-	pMenu->ModifyMenu(ID_PLAYER_PLAYFROMSTART, MF_BYCOMMAND | MF_STRING, ID_PLAYER_PLAYFROMSTART, GetMenuText(ID_PLAYER_PLAYFROMSTART));
-	pMenu->ModifyMenu(ID_PLAYER_STOP, MF_BYCOMMAND | MF_STRING, ID_PLAYER_STOP, GetMenuText(ID_PLAYER_STOP));
-	pMenu->ModifyMenu(ID_PLAYER_PAUSE, MF_BYCOMMAND | MF_STRING, ID_PLAYER_PAUSE, GetMenuText(ID_PLAYER_PAUSE));
-	pMenu->ModifyMenu(ID_MIDI_RECORD, MF_BYCOMMAND | MF_STRING, ID_MIDI_RECORD, GetMenuText(ID_MIDI_RECORD));
-	pMenu->ModifyMenu(ID_ESTIMATESONGLENGTH, MF_BYCOMMAND | MF_STRING, ID_ESTIMATESONGLENGTH, GetMenuText(ID_ESTIMATESONGLENGTH));
-	pMenu->ModifyMenu(ID_APPROX_BPM, MF_BYCOMMAND | MF_STRING, ID_APPROX_BPM,  GetMenuText(ID_APPROX_BPM));
+	UPDATEMENU(ID_PLAYER_PLAY);
+	UPDATEMENU(ID_PLAYER_PLAYFROMSTART);
+	UPDATEMENU(ID_PLAYER_STOP);
+	UPDATEMENU(ID_PLAYER_PAUSE);
+	UPDATEMENU(ID_MIDI_RECORD);
+	UPDATEMENU(ID_ESTIMATESONGLENGTH);
+	UPDATEMENU(ID_APPROX_BPM);
 
+	UPDATEMENU(ID_EDIT_UNDO);
+	UPDATEMENU(ID_EDIT_REDO);
+	UPDATEMENU(ID_EDIT_CUT);
+	UPDATEMENU(ID_EDIT_COPY);
+	UPDATEMENU(ID_EDIT_PASTE);
+	UPDATEMENU(ID_EDIT_PASTE_SPECIAL);
+	UPDATEMENU(ID_EDIT_MIXPASTE_ITSTYLE);
+	UPDATEMENU(ID_EDIT_PASTEFLOOD);
+	UPDATEMENU(ID_EDIT_PUSHFORWARDPASTE);
+	UPDATEMENU(ID_EDIT_SELECT_ALL);
+	UPDATEMENU(ID_EDIT_FIND);
+	UPDATEMENU(ID_EDIT_FINDNEXT);
+	UPDATEMENU(ID_EDIT_GOTO_MENU);
+	UPDATEMENU(ID_EDIT_SPLITKEYBOARDSETTINGS);
 
-	pMenu->ModifyMenu(ID_EDIT_UNDO, MF_BYCOMMAND | MF_STRING, ID_EDIT_UNDO, GetMenuText(ID_EDIT_UNDO));
-	pMenu->ModifyMenu(ID_EDIT_CUT, MF_BYCOMMAND | MF_STRING, ID_EDIT_CUT, GetMenuText(ID_EDIT_CUT));
-	pMenu->ModifyMenu(ID_EDIT_COPY, MF_BYCOMMAND | MF_STRING, ID_EDIT_COPY, GetMenuText(ID_EDIT_COPY));
-	pMenu->ModifyMenu(ID_EDIT_PASTE, MF_BYCOMMAND | MF_STRING, ID_EDIT_PASTE, GetMenuText(ID_EDIT_PASTE));
-	pMenu->ModifyMenu(ID_EDIT_PASTE_SPECIAL, MF_BYCOMMAND | MF_STRING, ID_EDIT_PASTE_SPECIAL, GetMenuText(ID_EDIT_PASTE_SPECIAL));
-	pMenu->ModifyMenu(ID_EDIT_MIXPASTE_ITSTYLE, MF_BYCOMMAND | MF_STRING, ID_EDIT_MIXPASTE_ITSTYLE, GetMenuText(ID_EDIT_MIXPASTE_ITSTYLE));
-	pMenu->ModifyMenu(ID_EDIT_PASTEFLOOD, MF_BYCOMMAND | MF_STRING, ID_EDIT_PASTEFLOOD, GetMenuText(ID_EDIT_PASTEFLOOD));
-	pMenu->ModifyMenu(ID_EDIT_PUSHFORWARDPASTE, MF_BYCOMMAND | MF_STRING, ID_EDIT_PUSHFORWARDPASTE, GetMenuText(ID_EDIT_PUSHFORWARDPASTE));
-	pMenu->ModifyMenu(ID_EDIT_SELECT_ALL, MF_BYCOMMAND | MF_STRING, ID_EDIT_SELECT_ALL, GetMenuText(ID_EDIT_SELECT_ALL));
-	pMenu->ModifyMenu(ID_EDIT_FIND, MF_BYCOMMAND | MF_STRING, ID_EDIT_FIND, GetMenuText(ID_EDIT_FIND));
-	pMenu->ModifyMenu(ID_EDIT_FINDNEXT, MF_BYCOMMAND | MF_STRING, ID_EDIT_FINDNEXT, GetMenuText(ID_EDIT_FINDNEXT));
-	pMenu->ModifyMenu(ID_EDIT_GOTO_MENU, MF_BYCOMMAND | MF_STRING, ID_EDIT_GOTO_MENU, GetMenuText(ID_EDIT_GOTO_MENU));
-	pMenu->ModifyMenu(ID_EDIT_SPLITKEYBOARDSETTINGS, MF_BYCOMMAND | MF_STRING, ID_EDIT_SPLITKEYBOARDSETTINGS, GetMenuText(ID_EDIT_SPLITKEYBOARDSETTINGS));
-
-	pMenu->ModifyMenu(ID_VIEW_GLOBALS, MF_BYCOMMAND | MF_STRING, ID_VIEW_GLOBALS, GetMenuText(ID_VIEW_GLOBALS));
-	pMenu->ModifyMenu(ID_VIEW_SAMPLES, MF_BYCOMMAND | MF_STRING, ID_VIEW_SAMPLES, GetMenuText(ID_VIEW_SAMPLES));
-	pMenu->ModifyMenu(ID_VIEW_PATTERNS, MF_BYCOMMAND | MF_STRING, ID_VIEW_PATTERNS, GetMenuText(ID_VIEW_PATTERNS));
-	pMenu->ModifyMenu(ID_VIEW_INSTRUMENTS, MF_BYCOMMAND | MF_STRING, ID_VIEW_INSTRUMENTS, GetMenuText(ID_VIEW_INSTRUMENTS));
-	pMenu->ModifyMenu(ID_VIEW_COMMENTS, MF_BYCOMMAND | MF_STRING, ID_VIEW_COMMENTS, GetMenuText(ID_VIEW_COMMENTS));
-	pMenu->ModifyMenu(MAINVIEW, MF_BYCOMMAND | MF_STRING, MAINVIEW, GetMenuText(MAINVIEW));
-	pMenu->ModifyMenu(IDD_TREEVIEW, MF_BYCOMMAND | MF_STRING, IDD_TREEVIEW, GetMenuText(IDD_TREEVIEW));
-	pMenu->ModifyMenu(ID_VIEW_OPTIONS, MF_BYCOMMAND | MF_STRING, ID_VIEW_OPTIONS, GetMenuText(ID_VIEW_OPTIONS));
-	pMenu->ModifyMenu(ID_PLUGIN_SETUP, MF_BYCOMMAND | MF_STRING, ID_PLUGIN_SETUP, GetMenuText(ID_PLUGIN_SETUP));
-	pMenu->ModifyMenu(ID_CHANNEL_MANAGER, MF_BYCOMMAND | MF_STRING, ID_CHANNEL_MANAGER, GetMenuText(ID_CHANNEL_MANAGER));
-	pMenu->ModifyMenu(ID_CLIPBOARD_MANAGER, MF_BYCOMMAND | MF_STRING, ID_CLIPBOARD_MANAGER, GetMenuText(ID_CLIPBOARD_MANAGER));
-	pMenu->ModifyMenu(ID_VIEW_SONGPROPERTIES, MF_BYCOMMAND | MF_STRING, ID_VIEW_SONGPROPERTIES, GetMenuText(ID_VIEW_SONGPROPERTIES));
-	pMenu->ModifyMenu(ID_VIEW_MIDIMAPPING, MF_BYCOMMAND | MF_STRING, ID_VIEW_MIDIMAPPING, GetMenuText(ID_VIEW_MIDIMAPPING));
-	pMenu->ModifyMenu(ID_HELP, MF_BYCOMMAND | MF_STRING, ID_HELP, GetMenuText(ID_HELP));
+	UPDATEMENU(ID_VIEW_GLOBALS);
+	UPDATEMENU(ID_VIEW_SAMPLES);
+	UPDATEMENU(ID_VIEW_PATTERNS);
+	UPDATEMENU(ID_VIEW_INSTRUMENTS);
+	UPDATEMENU(ID_VIEW_COMMENTS);
+	UPDATEMENU(MAINVIEW);
+	UPDATEMENU(IDD_TREEVIEW);
+	UPDATEMENU(ID_VIEW_OPTIONS);
+	UPDATEMENU(ID_PLUGIN_SETUP);
+	UPDATEMENU(ID_CHANNEL_MANAGER);
+	UPDATEMENU(ID_CLIPBOARD_MANAGER);
+	UPDATEMENU(ID_VIEW_SONGPROPERTIES);
+	UPDATEMENU(ID_VIEW_MIDIMAPPING);
+	UPDATEMENU(ID_HELPSHOW);
+#undef UPDATEMENU
 }
 
 

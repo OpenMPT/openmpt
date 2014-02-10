@@ -279,8 +279,9 @@ public:
 	bool TransposeSelection(int transp);
 	bool DataEntry(bool up, bool coarse);
 
-	bool PrepareUndo(const PatternRect &selection) { return PrepareUndo(selection.GetUpperLeft(), selection.GetLowerRight()); };
-	bool PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel);
+	bool PrepareUndo(const PatternRect &selection, const char *description) { return PrepareUndo(selection.GetUpperLeft(), selection.GetLowerRight(), description); };
+	bool PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel, const char *description);
+	void UndoRedo(bool undo);
 
 	void DeleteRows(CHANNELINDEX colmin, CHANNELINDEX colmax, ROWINDEX nrows);
 	void OnDropSelection();
@@ -376,6 +377,7 @@ protected:
 	afx_msg void OnEditGoto();
 	afx_msg void OnEditFindNext();
 	afx_msg void OnEditUndo();
+	afx_msg void OnEditRedo();
 	afx_msg void OnChannelReset();
 	afx_msg void OnMuteFromClick(); //rewbs.customKeys
 	afx_msg void OnSoloFromClick(); //rewbs.customKeys
@@ -417,6 +419,7 @@ protected:
 	afx_msg void OnCursorPaste();
 	afx_msg void OnPatternAmplify();
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	afx_msg void OnSelectPlugin(UINT nID);  //rewbs.patPlugName
 	afx_msg LRESULT OnUpdatePosition(WPARAM nOrd, LPARAM nRow);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);

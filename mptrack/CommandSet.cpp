@@ -653,6 +653,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcClipboardNext, 1902, _T("Cycle to Next Clipboard"));
 	DefineKeyCommand(kcSelectRow, 1903, _T("Select Row"));
 	DefineKeyCommand(kcSelectEvent, 1904, _T("Select Event"));
+	DefineKeyCommand(kcEditRedo, 1905, _T("Redo"));
 
 	// Add new key commands here.
 

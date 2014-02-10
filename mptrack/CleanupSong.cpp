@@ -374,7 +374,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns()
 		if(!patternUsed[pat] && sndFile.Patterns.IsValidPat(pat))
 		{
 			numRemovedPatterns++;
-			modDoc.GetPatternUndo().PrepareUndo(pat, 0, 0, sndFile.GetNumChannels(), sndFile.Patterns[pat].GetNumRows(), numRemovedPatterns != 0, false);
+			modDoc.GetPatternUndo().PrepareUndo(pat, 0, 0, sndFile.GetNumChannels(), sndFile.Patterns[pat].GetNumRows(), "Remove Unused Patterns", numRemovedPatterns != 0, false);
 			sndFile.Patterns.Remove(pat);
 		}
 	}

@@ -244,7 +244,7 @@ public:
 
 	void SongProperties();
 
-	void PrepareUndoForAllPatterns(bool storeChannelInfo = false);
+	void PrepareUndoForAllPatterns(bool storeChannelInfo = false, const char *description = "");
 	CPatternUndo &GetPatternUndo() { return m_PatternUndo; }
 	CSampleUndo &GetSampleUndo() { return m_SampleUndo; }
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
@@ -310,7 +310,7 @@ public:
 	UINT GetPatternSize(PATTERNINDEX nPat) const;
 	bool IsChildSample(INSTRUMENTINDEX nIns, SAMPLEINDEX nSmp) const;
 	INSTRUMENTINDEX FindSampleParent(SAMPLEINDEX sample) const;
-	UINT FindInstrumentChild(UINT nIns) const;
+	SAMPLEINDEX FindInstrumentChild(INSTRUMENTINDEX nIns) const;
 	bool MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate = true, bool bCopy = false, SEQUENCEINDEX nSourceSeq = SEQUENCEINDEX_INVALID, SEQUENCEINDEX nDestSeq = SEQUENCEINDEX_INVALID);
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);

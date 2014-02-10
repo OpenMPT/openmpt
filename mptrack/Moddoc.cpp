@@ -190,14 +190,10 @@ BOOL CModDoc::OnNewDocument()
 	}
 
 	theApp.GetDefaultMidiMacro(m_SndFile.m_MidiCfg);
-	if (m_SndFile.m_nType & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT))
+	m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES & m_SndFile.GetModSpecifications().songFlags);
+	if(!m_SndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
 	{
-		m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES);
-		
-		if(!m_SndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
-		{
-			m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG);
-		}
+		m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG & m_SndFile.GetModSpecifications().songFlags);
 	}
 
 
@@ -1579,17 +1575,16 @@ INSTRUMENTINDEX CModDoc::FindSampleParent(SAMPLEINDEX sample) const
 }
 
 
-UINT CModDoc::FindInstrumentChild(UINT nIns) const
-//------------------------------------------------
+SAMPLEINDEX CModDoc::FindInstrumentChild(INSTRUMENTINDEX nIns) const
+//------------------------------------------------------------------
 {
-	ModInstrument *pIns;
 	if ((!nIns) || (nIns > m_SndFile.GetNumInstruments())) return 0;
-	pIns = m_SndFile.Instruments[nIns];
+	const ModInstrument *pIns = m_SndFile.Instruments[nIns];
 	if (pIns)
 	{
-		for (UINT i=0; i<NOTE_MAX; i++)
+		for (size_t i = 0; i < CountOf(pIns->Keyboard); i++)
 		{
-			UINT n = pIns->Keyboard[i];
+			SAMPLEINDEX n = pIns->Keyboard[i];
 			if ((n) && (n <= m_SndFile.GetNumSamples())) return n;
 		}
 	}
@@ -1850,7 +1845,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	m_SndFile.SetRepeatCount(oldRepeat);
 	m_SndFile.SetCurrentPos(pos);
-	CMainFrame::UpdateAudioParameters(m_SndFile, TRUE);
+	CMainFrame::UpdateAudioParameters(m_SndFile, true);
 }
 
 
@@ -2933,15 +2928,15 @@ void CModDoc::OnSaveTemplateModule()
 
 
 // Create an undo point that stores undo data for all existing patterns
-void CModDoc::PrepareUndoForAllPatterns(bool storeChannelInfo)
-//------------------------------------------------------------
+void CModDoc::PrepareUndoForAllPatterns(bool storeChannelInfo, const char *description)
+//-------------------------------------------------------------------------------------
 {
 	bool linkUndo = false;
 	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++)
 	{
 		if(m_SndFile.Patterns.IsValidPat(pat))
 		{
-			GetPatternUndo().PrepareUndo(pat, 0, 0, GetNumChannels(), m_SndFile.Patterns[pat].GetNumRows(), linkUndo, storeChannelInfo);
+			GetPatternUndo().PrepareUndo(pat, 0, 0, GetNumChannels(), m_SndFile.Patterns[pat].GetNumRows(), description, linkUndo, storeChannelInfo);
 			linkUndo = true;
 			storeChannelInfo = false;
 		}

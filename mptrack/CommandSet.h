@@ -100,6 +100,7 @@ enum CommandID
 
 	kcStartEditCommands,
 	kcEditUndo=kcStartEditCommands,
+	kcEditRedo,
 	kcEditCut,
 	kcEditCopy,
 	kcEditPaste,
