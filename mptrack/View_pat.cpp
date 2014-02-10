@@ -635,11 +635,11 @@ bool CViewPattern::ShowEditWindow()
 {
 	if (!m_pEditWnd)
 	{
-		m_pEditWnd = new CEditCommand(*GetSoundFile(), this);
+		m_pEditWnd = new CEditCommand(*GetSoundFile());
 	}
 	if (m_pEditWnd)
 	{
-		m_pEditWnd->ShowEditWindow(m_nPattern, m_Cursor);
+		m_pEditWnd->ShowEditWindow(m_nPattern, m_Cursor, this);
 		return true;
 	}
 	return false;
