@@ -144,7 +144,7 @@ protected:
 	void UpdateEffectRange(bool set);
 	void UpdateEffectValue(bool set);
 
-	void PrepareUndo();
+	void PrepareUndo(const char *description);
 
 	//{{AFX_VIRTUAL(CEditCommand)
 	virtual void DoDataExchange(CDataExchange* pDX);

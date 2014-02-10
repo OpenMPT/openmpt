@@ -585,8 +585,8 @@ void CPatternPropertiesDlg::OnOK()
 
 	if(resize)
 	{
-		modDoc.GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.Patterns[m_nPattern].GetNumChannels(), sndFile.Patterns[m_nPattern].GetNumRows());
 		modDoc.BeginWaitCursor();
+		modDoc.GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.Patterns[m_nPattern].GetNumChannels(), sndFile.Patterns[m_nPattern].GetNumRows(), "Resize");
 		if(sndFile.Patterns[m_nPattern].Resize(newSize))
 		{
 			modDoc.SetModified();
@@ -926,7 +926,7 @@ void CEditCommand::OnNoteChanged()
 
 	if(m->note != newNote || m->instr != newInstr)
 	{
-		PrepareUndo();
+		PrepareUndo("Note Entry");
 		CModDoc *modDoc = sndFile.GetpModDoc();
 		m->note = newNote;
 		m->instr = newInstr;
@@ -971,7 +971,7 @@ void CEditCommand::OnVolCmdChanged()
 	const bool volCmdChanged = m->volcmd != newVolCmd;
 	if(volCmdChanged || m->vol != newVol)
 	{
-		PrepareUndo();
+		PrepareUndo("Volume Entry");
 		CModDoc *modDoc = sndFile.GetpModDoc();
 		m->volcmd = newVolCmd;
 		m->vol = newVol;
@@ -1023,7 +1023,7 @@ void CEditCommand::OnCommandChanged()
 	if((!m->IsPcNote() && (m->command != newCommand || m->param != newParam))
 		|| (m->IsPcNote() && m->GetValueVolCol() != newPlugParam))
 	{
-		PrepareUndo();
+		PrepareUndo("Effect Entry");
 		CModDoc *modDoc = sndFile.GetpModDoc();
 		if(m->IsPcNote())
 		{
@@ -1073,7 +1073,7 @@ void CEditCommand::UpdateEffectValue(bool set)
 		if((!m->IsPcNote() && m->param != newParam)
 			|| (m->IsPcNote() && m->GetValueVolCol() != newPlugParam))
 		{
-			PrepareUndo();
+			PrepareUndo("Effect Entry");
 			CModDoc *modDoc = sndFile.GetpModDoc();
 			if(m->IsPcNote())
 			{
@@ -1089,14 +1089,14 @@ void CEditCommand::UpdateEffectValue(bool set)
 }
 
 
-void CEditCommand::PrepareUndo()
-//------------------------------
+void CEditCommand::PrepareUndo(const char *description)
+//-----------------------------------------------------
 {
 	CModDoc *modDoc = sndFile.GetpModDoc();
 	if(!modified)
 	{
 		// Let's create just one undo step.
-		modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1);
+		modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1, description);
 		modified = true;
 	}
 	modDoc->SetModified();
@@ -1576,7 +1576,7 @@ void QuickChannelProperties::PrepareUndo()
 	{
 		// Backup old channel settings through pattern undo.
 		settingsChanged = true;
-		document->GetPatternUndo().PrepareUndo(pattern, 0, 0, 1, 1, false, true);
+		document->GetPatternUndo().PrepareUndo(pattern, 0, 0, 1, 1, "Channel Settings", false, true);
 	}
 }
 

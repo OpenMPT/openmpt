@@ -84,6 +84,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_SPLITKEYBOARDSETTINGS,	SetSplitKeyboardSettings)
 // -! NEW_FEATURE#0012
 	ON_COMMAND(ID_EDIT_UNDO,		OnEditUndo)
+	ON_COMMAND(ID_EDIT_REDO,		OnEditRedo)
 	ON_COMMAND(ID_PATTERN_CHNRESET,	OnChannelReset)
 	ON_COMMAND(ID_PATTERN_MUTE,		OnMuteFromClick) //rewbs.customKeys
 	ON_COMMAND(ID_PATTERN_SOLO,		OnSoloFromClick) //rewbs.customKeys
@@ -131,6 +132,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND_RANGE(ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT+MAX_INSTRUMENTS, OnSelectInstrument)
 	ON_COMMAND_RANGE(ID_CHANGE_PCNOTE_PARAM, ID_CHANGE_PCNOTE_PARAM + ModCommand::maxColumnValue, OnSelectPCNoteParam)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,			OnUpdateUndo)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,			OnUpdateRedo)
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnSelectPlugin) //rewbs.patPlugName
 
 
@@ -646,15 +648,15 @@ bool CViewPattern::ShowEditWindow()
 }
 
 
-bool CViewPattern::PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel)
-//----------------------------------------------------------------------------------------
+bool CViewPattern::PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel, const char *description)
+//-----------------------------------------------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	const CHANNELINDEX nChnBeg = beginSel.GetChannel(), nChnEnd = endSel.GetChannel();
 	const ROWINDEX nRowBeg = beginSel.GetRow(), nRowEnd = endSel.GetRow();
 
 	if((nChnEnd < nChnBeg) || (nRowEnd < nRowBeg) || pModDoc == nullptr) return false;
-	return pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, nChnBeg, nRowBeg, nChnEnd - nChnBeg + 1, nRowEnd-nRowBeg + 1);
+	return pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, nChnBeg, nRowBeg, nChnEnd - nChnBeg + 1, nRowEnd-nRowBeg + 1, description);
 }
 
 
@@ -798,7 +800,7 @@ void CViewPattern::OnGrowSelection()
 	m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 	const PatternCursor startSel = m_Selection.GetUpperLeft();
 	const PatternCursor endSel = m_Selection.GetLowerRight();
-	PrepareUndo(startSel, PatternCursor(pSndFile->Patterns[m_nPattern].GetNumRows(), endSel));
+	PrepareUndo(startSel, PatternCursor(pSndFile->Patterns[m_nPattern].GetNumRows(), endSel), "Grow Selection");
 
 	const ROWINDEX finalDest = m_Selection.GetStartRow() + (m_Selection.GetNumRows() - 1) * 2;
 	for(int row = finalDest; row > (int)startSel.GetRow(); row -= 2)
@@ -882,7 +884,7 @@ void CViewPattern::OnShrinkSelection()
 	m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 	const PatternCursor startSel = m_Selection.GetUpperLeft();
 	const PatternCursor endSel = m_Selection.GetLowerRight();
-	PrepareUndo(startSel, endSel);
+	PrepareUndo(startSel, endSel, "Shrink Selection");
 
 	const ROWINDEX finalDest = m_Selection.GetStartRow() + (m_Selection.GetNumRows() - 1) / 2;
 	for(ROWINDEX row = startSel.GetRow(); row <= endSel.GetRow(); row++)
@@ -997,7 +999,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 
 	m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 
-	PrepareUndo(m_Selection);
+	PrepareUndo(m_Selection, "Clear Selection");
 
 	const ROWINDEX endRow = m_Selection.GetEndRow();
 	for(ROWINDEX row = m_Selection.GetStartRow(); row <= endRow; row++)
@@ -1827,7 +1829,7 @@ void CViewPattern::DeleteRows(CHANNELINDEX colmin, CHANNELINDEX colmax, ROWINDEX
 	LimitMax(colmax, CHANNELINDEX(pSndFile->GetNumChannels() - 1));
 	if(colmin > colmax) return;
 
-	PrepareUndo(PatternCursor(0), PatternCursor(maxrow - 1, pSndFile->GetNumChannels() - 1));
+	PrepareUndo(PatternCursor(0), PatternCursor(maxrow - 1, pSndFile->GetNumChannels() - 1), nrows != 1 ? "Delete Rows" : "Delete Row");
 
 	for(ROWINDEX r = row; r < maxrow; r++)
 	{
@@ -1889,7 +1891,7 @@ void CViewPattern::InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax)
 	LimitMax(colmax, CHANNELINDEX(pSndFile->GetNumChannels() - 1));
 	if(colmin > colmax) return;
 
-	PrepareUndo(PatternCursor(0), PatternCursor(maxrow - 1, pSndFile->GetNumChannels() - 1));
+	PrepareUndo(PatternCursor(0), PatternCursor(maxrow - 1, pSndFile->GetNumChannels() - 1), "Insert Row");
 
 	for(ROWINDEX r = maxrow; r > row; )
 	{
@@ -2225,13 +2227,13 @@ void CViewPattern::OnEditFindNext()
 							// Just create one logic undo step per pattern when auto-replacing all occurences.
 							if(firstInPat)
 							{
-								GetDocument()->GetPatternUndo().PrepareUndo(pat, firstChannel, row, lastChannel - firstChannel + 1, numRows - row + 1, (nFound > 1));
+								GetDocument()->GetPatternUndo().PrepareUndo(pat, firstChannel, row, lastChannel - firstChannel + 1, numRows - row + 1, "Find / Replace", (nFound > 1));
 								firstInPat = false;
 							}
 						} else
 						{
 							// Create separately undo-able items when replacing manually.
-							GetDocument()->GetPatternUndo().PrepareUndo(pat, chn, row, 1, 1);
+							GetDocument()->GetPatternUndo().PrepareUndo(pat, chn, row, 1, 1, "Find / Replace");
 						}
 
 						if(m_findReplace.replaceFlags[FindReplace::Note])
@@ -2527,7 +2529,7 @@ void CViewPattern::OnCursorPaste()
 		return;
 	}
 
-	PrepareUndo(m_Cursor, m_Cursor);
+	PrepareUndo(m_Cursor, m_Cursor, "Cursor Paste");
 	PatternCursor::Columns column = m_Cursor.GetColumnType();
 
 	ModCommand &m = GetCursorCommand();
@@ -2685,7 +2687,26 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 			continue; //skip chans where interpolation isn't possible
 
 		if (!changed) //ensure we save undo buffer only before any channels are interpolated
-			PrepareUndo(m_Selection);
+		{
+			const char *description = "";
+			switch(type)
+			{
+			case PatternCursor::noteColumn:
+				description = "Interpolate Note Column";
+				break;
+			case PatternCursor::instrColumn:
+				description = "Interpolate Instrument Column";
+				break;
+			case PatternCursor::volumeColumn:
+				description = "Interpolate Volume Column";
+				break;
+			case PatternCursor::effectColumn:
+			case PatternCursor::paramColumn:
+				description = "Interpolate Effect Column";
+				break;
+			}
+			PrepareUndo(m_Selection, description);
+		}
 
 		bool doPCinterpolation = false;
 
@@ -2863,7 +2884,7 @@ bool CViewPattern::TransposeSelection(int transp)
 	const ModCommand::NOTE noteMin = pSndFile->GetModSpecifications().noteMin;
 	const ModCommand::NOTE noteMax = pSndFile->GetModSpecifications().noteMax;
 
-	PrepareUndo(m_Selection);
+	PrepareUndo(m_Selection, "Transpose");
 
 	for(ROWINDEX row = startRow; row <= endRow; row++)
 	{
@@ -2905,7 +2926,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 	const EffectInfo effectInfo(*pSndFile);
 	const int offset = up ? 1 : -1;
 
-	PrepareUndo(m_Selection);
+	PrepareUndo(m_Selection, "Data Entry");
 
 	for(ROWINDEX row = startRow; row <= endRow; row++)
 	{
@@ -3048,7 +3069,7 @@ void CViewPattern::OnDropSelection()
 	const bool moveSelection = !m_Status[psKeyboardDragSelect | psCtrlDragSelect];
 
 	BeginWaitCursor();
-	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, pSndFile->GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows());
+	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, pSndFile->GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows(), moveSelection ? "Move Selection" : "Copy Selection");
 
 	ModCommand *p = pNewPattern;
 	for(ROWINDEX row = 0; row < pSndFile->Patterns[m_nPattern].GetNumRows(); row++)
@@ -3261,6 +3282,21 @@ void CViewPattern::OnUpdateUndo(CCmdUI *pCmdUI)
 	if ((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetPatternUndo().CanUndo());
+		pCmdUI->SetText(CString("Undo ") + CString(pModDoc->GetPatternUndo().GetUndoName())
+			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo));
+	}
+}
+
+
+void CViewPattern::OnUpdateRedo(CCmdUI *pCmdUI)
+//---------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if ((pCmdUI) && (pModDoc))
+	{
+		pCmdUI->Enable(pModDoc->GetPatternUndo().CanRedo());
+		pCmdUI->SetText(CString("Redo ") + CString(pModDoc->GetPatternUndo().GetRedoName())
+			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo));
 	}
 }
 
@@ -3268,10 +3304,24 @@ void CViewPattern::OnUpdateUndo(CCmdUI *pCmdUI)
 void CViewPattern::OnEditUndo()
 //-----------------------------
 {
+	UndoRedo(true);
+}
+
+
+void CViewPattern::OnEditRedo()
+//-----------------------------
+{
+	UndoRedo(false);
+}
+
+
+void CViewPattern::UndoRedo(bool undo)
+//------------------------------------
+{
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc && IsEditingEnabled_bmsg())
 	{
-		PATTERNINDEX pat = pModDoc->GetPatternUndo().Undo();
+		PATTERNINDEX pat = undo ? pModDoc->GetPatternUndo().Undo() : pModDoc->GetPatternUndo().Redo();
 		if(pat < pModDoc->GetSoundFile()->Patterns.Size())
 		{
 			pModDoc->SetModified();
@@ -3309,7 +3359,7 @@ void CViewPattern::OnPatternAmplify()
 	const bool useVolCol = pSndFile->GetModSpecifications().HasVolCommand(VOLCMD_VOLUME);
 
 	BeginWaitCursor();
-	PrepareUndo(m_Selection);
+	PrepareUndo(m_Selection, "Amplify");
 	snOldAmp = dlg.m_nFactor;
 
 	if(pSndFile->Patterns.IsValidPat(m_nPattern))
@@ -3624,7 +3674,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		// only overwrite existing PC Notes
 		if(pRow->IsEmpty() || pRow->IsPcNote())
 		{
-			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1);
+			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
 
 			pRow->Set(NOTE_PCS, plugSlot + 1, paramIndex, static_cast<uint16>(pPlug->GetParameter(paramIndex) * ModCommand::maxColumnValue));
 			InvalidateRow(nRow);
@@ -3652,7 +3702,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 				pSndFile->Chn[nChn].nActiveMacro = foundMacro;
 				if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) //we overwrite existing Zxx and \xx only.
 				{
-					pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1);
+					pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
 
 					pRow->command = (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? CMD_S3MCMDEX : CMD_MODCMDEX;;
 					pRow->param = 0xF0 + (foundMacro & 0x0F);
@@ -3665,7 +3715,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		// Write the data, but we only overwrite if the command is a macro anyway.
 		if(pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI)
 		{
-			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1);
+			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
 
 			pRow->command = CMD_SMOOTHMIDI;
 			pRow->param = pPlug->GetZxxParameter(paramIndex);
@@ -3869,7 +3919,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
 				{
 					// Write command only if there's no existing command or already a midi macro command.
-					pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1);
+					pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
 					m.command = CMD_SMOOTHMIDI;
 					m.param = nByte2;
 					pMainFrm->ThreadSafeSetModified(pModDoc);
@@ -4343,6 +4393,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNotePCS:			TempEnterNote(NOTE_PCS); return wParam;
 
 		case kcEditUndo:		OnEditUndo(); return wParam;
+		case kcEditRedo:		OnEditRedo(); return wParam;
 		case kcEditFind:		OnEditFind(); return wParam;
 		case kcEditFindNext:	OnEditFindNext(); return wParam;
 		case kcEditCut:			OnEditCut(); return wParam;
@@ -4542,7 +4593,7 @@ void CViewPattern::TempEnterVol(int v)
 		return;
 	}
 		
-	PrepareUndo(m_Cursor, m_Cursor);
+	PrepareUndo(m_Cursor, m_Cursor, "Volume Entry");
 
 	ModCommand &target = GetCursorCommand();
 	ModCommand oldcmd = target; // This is the command we are about to overwrite
@@ -4627,7 +4678,7 @@ void CViewPattern::TempEnterFX(int c, int v)
 	ModCommand &target = GetCursorCommand();
 	ModCommand oldcmd = target; // This is the command we are about to overwrite
 
-	PrepareUndo(m_Cursor, m_Cursor);
+	PrepareUndo(m_Cursor, m_Cursor, "Effect Entry");
 
 	if(target.IsPcNote())
 	{
@@ -4686,7 +4737,7 @@ void CViewPattern::TempEnterFXparam(int v)
 	ModCommand &target = GetCursorCommand();
 	ModCommand oldcmd = target; // This is the command we are about to overwrite
 
-	PrepareUndo(m_Cursor, m_Cursor);
+	PrepareUndo(m_Cursor, m_Cursor, "Parameter Entry");
 
 	if(target.IsPcNote())
 	{
@@ -4831,7 +4882,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 
 	// Create undo-point.
-	pModDoc->GetPatternUndo().PrepareUndo(editPos.pattern, nChn, editPos.row, noteChannels[numNotes - 1] - nChn + 1, 1);
+	pModDoc->GetPatternUndo().PrepareUndo(editPos.pattern, nChn, editPos.row, noteChannels[numNotes - 1] - nChn + 1, 1, "Note Stop Entry");
 
 	for(int i = 0; i < numNotes; i++)
 	{
@@ -4907,7 +4958,7 @@ void CViewPattern::TempEnterOctave(int val)
 	const ModCommand &target = GetCursorCommand();
 	if(target.IsNote())
 	{
-		PrepareUndo(m_Cursor, m_Cursor);
+		PrepareUndo(m_Cursor, m_Cursor, "Octave Entry");
 		TempEnterNote(((target.note - NOTE_MIN) % 12) + val * 12 + NOTE_MIN);
 		// Memorize note for key-up
 		ASSERT(size_t(val) < octaveKeyMemory.size());
@@ -4939,7 +4990,7 @@ void CViewPattern::TempEnterIns(int val)
 		return;
 	}
 
-	PrepareUndo(m_Cursor, m_Cursor);
+	PrepareUndo(m_Cursor, m_Cursor, "Instrument Entry");
 
 	ModCommand &target = GetCursorCommand();
 	ModCommand oldcmd = target;		// This is the command we are about to overwrite
@@ -5149,7 +5200,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 	const bool modified = (recordEnabled && *pTarget != newcmd);
 	if (modified)
 	{
-		pModDoc->GetPatternUndo().PrepareUndo(editPos.pattern, nChn, editPos.row, 1, 1);
+		pModDoc->GetPatternUndo().PrepareUndo(editPos.pattern, nChn, editPos.row, 1, 1, "Note Entry");
 		*pTarget = newcmd;
 	}
 
@@ -5391,7 +5442,7 @@ void CViewPattern::TempEnterChord(int note)
 		if(modified)
 		{
 			// Simply backup the whole row.
-			pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, chn, GetCurrentRow(), sndFile.GetNumChannels(), 1);
+			pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, chn, GetCurrentRow(), sndFile.GetNumChannels(), 1, "Chord Entry");
 
 			for(CHANNELINDEX n = 0; n < sndFile.GetNumChannels(); n++)
 			{
@@ -5543,7 +5594,7 @@ void CViewPattern::EnterAftertouch(int note, int atValue)
 
 	if(target != newCommand)
 	{
-		PrepareUndo(cursor, cursor);
+		PrepareUndo(cursor, cursor, "Aftertouch Entry");
 		target = newCommand;
 
 		SetModified(false);
@@ -5695,7 +5746,7 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 		return;
 	}
 
-	PrepareUndo(m_Cursor, m_Cursor);
+	PrepareUndo(m_Cursor, m_Cursor, "Clear Field");
 
 	ModCommand &target = GetCursorCommand();
 	ModCommand oldcmd = target;
@@ -6077,6 +6128,11 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih, CModDoc* pMo
 	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
 		AppendMenu(hMenu, MF_STRING | greyed, ID_EDIT_UNDO, "&Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
+	}
+	greyed = pModDoc->GetPatternUndo().CanRedo() ? MF_ENABLED : MF_GRAYED;
+	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	{
+		AppendMenu(hMenu, MF_STRING | greyed, ID_EDIT_REDO, "&Redo\t" + ih->GetKeyTextFromCommand(kcEditRedo));
 	}
 
 	AppendMenu(hMenu, MF_STRING, ID_CLEAR_SELECTION, "Clear selection\t" + ih->GetKeyTextFromCommand(kcSampleDelete));
@@ -6614,7 +6670,7 @@ void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
 	bool modified = false;
 
 	BeginWaitCursor();
-	PrepareUndo(m_Selection);
+	PrepareUndo(m_Selection, "Set Instrument");
 
 	//rewbs: re-written to work regardless of selection
 	ROWINDEX startRow  = m_Selection.GetStartRow();

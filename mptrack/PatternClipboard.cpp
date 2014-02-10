@@ -545,7 +545,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				// Before changing anything in this pattern, we have to create an undo point.
 				if(prepareUndo)
 				{
-					modDoc.GetPatternUndo().PrepareUndo(pattern, startChan, startRow, sndFile.GetNumChannels(), sndFile.Patterns[pattern].GetNumRows(), !firstUndo);
+					modDoc.GetPatternUndo().PrepareUndo(pattern, startChan, startRow, sndFile.GetNumChannels(), sndFile.Patterns[pattern].GetNumRows(), "Paste", !firstUndo);
 					prepareUndo = false;
 					firstUndo = false;
 				}

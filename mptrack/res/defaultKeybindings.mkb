@@ -22,6 +22,7 @@ version:1
 0:1026:2:118:1		//Play pattern from cursor: Ctrl+F7 (KeyDown)
 0:1376:0:120:1		//Toggle MIDI Record: F9 (KeyDown)
 0:1359:2:90:1		//Undo: Ctrl+Z (KeyDown)
+0:1905:2:89:1		//Redo: Ctrl+Y (KeyDown)
 0:1360:2:88:1		//Cut: Ctrl+X (KeyDown)
 0:1361:2:67:1		//Copy: Ctrl+C (KeyDown)
 0:1362:2:86:1		//Paste: Ctrl+V (KeyDown)
