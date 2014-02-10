@@ -387,7 +387,7 @@ void COptionsSoundcard::UpdateDither()
 {
 	m_CbnDither.ResetContent();
 	SampleFormat sampleFormat = static_cast<SampleFormatEnum>(m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()));
-	if(sampleFormat.IsInt())
+	if(sampleFormat.IsInt() && sampleFormat.GetBitsPerSample() < 32)
 	{
 		m_CbnDither.EnableWindow(TRUE);
 		for(int i=0; i<NumDitherModes; ++i)
