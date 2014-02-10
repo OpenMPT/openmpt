@@ -1603,8 +1603,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "&Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
 		::AppendMenu(hMenu, MF_STRING | (IsClipboardFormatAvailable(CF_WAVE) ? 0 : MF_GRAYED), ID_EDIT_PASTE, "&Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
-		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "&Undo" + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample)) + "\t" + ih->GetKeyTextFromCommand(kcEditUndo));
-		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanRedo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_REDO, "&Redo" + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample)) + "\t" + ih->GetKeyTextFromCommand(kcEditRedo));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "&Undo " + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample)) + "\t" + ih->GetKeyTextFromCommand(kcEditUndo));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanRedo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_REDO, "&Redo " + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample)) + "\t" + ih->GetKeyTextFromCommand(kcEditRedo));
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 		::DestroyMenu(hMenu);
