@@ -398,10 +398,12 @@ void COptionsSoundcard::UpdateDither()
 	} else
 	{
 		m_CbnDither.EnableWindow(FALSE);
-		m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + L" dithering"));
-		m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + L" dithering"));
+		for(int i=0; i<NumDitherModes; ++i)
+		{
+			m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + L" dithering"));
+		}
 	}
-	if(m_Settings.DitherType < 0 || m_Settings.DitherType > m_CbnDither.GetCount())
+	if(m_Settings.DitherType < 0 || m_Settings.DitherType >= m_CbnDither.GetCount())
 	{
 		m_CbnDither.SetCurSel(1);
 	} else
