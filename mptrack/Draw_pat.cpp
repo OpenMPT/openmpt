@@ -35,7 +35,7 @@
 #define VUMETERS_LOWIDTH		16
 
 
-typedef struct PATTERNFONT
+struct PATTERNFONT
 {
 	int nWidth, nHeight;		// Column Width & Height, including 4-pixels border
 	int nClrX, nClrY;			// Clear (empty note) location
@@ -54,7 +54,7 @@ typedef struct PATTERNFONT
 	int nCmdOfs;				// XOffset (-xxx) around the command letter
 	int nParamHiWidth;
 	int nInstrOfs, nInstr10Ofs, nInstrHiWidth;
-} PATTERNFONT;
+};
 
 typedef const PATTERNFONT * PCPATTERNFONT;
 

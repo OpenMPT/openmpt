@@ -455,11 +455,11 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_PREVORDER:
-		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd - 1, TRUE);
+		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd - 1, true);
 		break;
 	
 	case CTRLMSG_NEXTORDER:
-		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd + 1, TRUE);
+		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd + 1, true);
 		break;
 
 	//rewbs.customKeys

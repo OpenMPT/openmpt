@@ -1529,7 +1529,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	while(iStrm.getline(s, CountOf(s)))
 	{
 		curLine = s;
-
+		l++;
 
 		//Cut everything after a //
 		commentStart = curLine.Find("//");
@@ -1539,10 +1539,9 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 
 		if (!curLine.IsEmpty() && curLine.Compare("\n") !=0)
 		{
-			bool ignoreLine = false;
-
-			//ctx:UID:Description:Modifier:Key:EventMask
 			int spos = 0;
+
+			// Format: ctx:UID:Description:Modifier:Key:EventMask
 
 			//context
 			token=curLine.Tokenize(":",spos);
@@ -1560,7 +1559,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 					Log(err);
 				}
 				spos = -1;
-				ignoreLine = true;
+				continue;
 			}
 
 			//UID
@@ -1595,42 +1594,36 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 			{
 				// Don't fill in missing notes, as this will probably create awkward keymaps when loading
 				// e.g. an IT-style keymap and it contains two keys mapped to the same notes.
-				ignoreLine = true;
+				continue;
 			}
 
-			if(!ignoreLine)
+			//Error checking (TODO):
+			if (cmd < 0 || cmd >= kcNumCommands || kc.Context() >= kCtxMaxInputContexts || spos == -1)
 			{
-				//Error checking (TODO):
-				if (cmd < 0 || cmd >= kcNumCommands || spos == -1)
+				errorCount++;
+				CString err;
+				if (errorCount < 10)
 				{
-					errorCount++;
-					CString err;
-					if (errorCount < 10)
+					if(spos == -1)
 					{
-						if(spos == -1)
-						{
-							err.Format("Line %d was not understood.", l);
-						} else
-						{
-							err.Format("Line %d contained an unknown command.", l);
-						}
-						errText += err + "\n";
-						Log(err);
-					} else if (errorCount == 10)
+						err.Format("Line %d was not understood.", l);
+					} else
 					{
-						err = "Too many errors detected, not reporting any more.";
-						errText += err + "\n";
-						Log(err);
+						err.Format("Line %d contained an unknown command.", l);
 					}
-				} else
+					errText += err + "\n";
+					Log(err);
+				} else if (errorCount == 10)
 				{
-					pTempCS->Add(kc, cmd, commandSet == nullptr);
+					err = "Too many errors detected, not reporting any more.";
+					errText += err + "\n";
+					Log(err);
 				}
+			} else
+			{
+				pTempCS->Add(kc, cmd, commandSet == nullptr);
 			}
-
 		}
-
-		l++;
 	}
 	//if(fileVersion < KEYMAP_VERSION) UpgradeKeymap(pTempCS, fileVersion);
 

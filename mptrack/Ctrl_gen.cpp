@@ -211,9 +211,10 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SliderTempo.EnableWindow(bIsNotMOD);
 		m_EditSpeed.EnableWindow(bIsNotMOD);
 		m_SpinSpeed.EnableWindow(bIsNotMOD);
-		m_SliderGlobalVol.EnableWindow(bIsNotMOD_XM);
-		m_EditGlobalVol.EnableWindow(bIsNotMOD_XM);
-		m_SpinGlobalVol.EnableWindow(bIsNotMOD_XM);
+		const BOOL globalVol = bIsNotMOD_XM || m_sndFile.m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME;
+		m_SliderGlobalVol.EnableWindow(globalVol);
+		m_EditGlobalVol.EnableWindow(globalVol);
+		m_SpinGlobalVol.EnableWindow(globalVol);
 		m_EditSamplePA.EnableWindow(bIsNotMOD);
 		m_SpinSamplePA.EnableWindow(bIsNotMOD);
 		//m_SliderSamplePreAmp.EnableWindow(bIsNotMOD);

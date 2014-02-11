@@ -115,25 +115,23 @@ BOOL CMainFrame::midiOpenDevice()
 //-------------------------------
 {
 	if (shMidiIn) return TRUE;
-	try
+	
+	if (midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 	{
-		if (midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+		shMidiIn = NULL;
+
+		// Show MIDI configuration on fail.
+		CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
+		CMainFrame::GetMainFrame()->OnViewOptions();
+
+		// Let's see if the user updated the settings.
+		if(midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
 			shMidiIn = NULL;
-
-			// Show MIDI configuration on fail.
-			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
-			CMainFrame::GetMainFrame()->OnViewOptions();
-
-			// Let's see if the user updated the settings.
-			if(midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
-			{
-				shMidiIn = NULL;
-				return FALSE;
-			}
+			return FALSE;
 		}
-		midiInStart(shMidiIn);
-	} catch (...) {}
+	}
+	midiInStart(shMidiIn);
 	return TRUE;
 }
 
