@@ -101,7 +101,7 @@ const void *CMappedFile::Lock()
 			hmf,
 			FILE_MAP_READ,
 			0, 0,
-			0);
+			length);
 		if(lpStream)
 		{
 			m_hFMap = hmf;

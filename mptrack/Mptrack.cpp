@@ -742,9 +742,9 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	bool bIsAppDir = overridePortable;
 	WCHAR tempConfigDirectory[MAX_PATH];
 	tempConfigDirectory[0] = 0;
-	if(!SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory)))
+	if(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) != S_OK)
 	{
-		if(!SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory)))
+		if(SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) != S_OK)
 		{
 			bIsAppDir = true;
 		}
@@ -973,7 +973,7 @@ BOOL CTrackApp::InitInstance()
 	if(TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup)
 	{
 		pMainFrame->InitPreview();
-		pMainFrame->PreparePreview(64);
+		pMainFrame->PreparePreview(NOTE_NOTECUT);
 		pMainFrame->PlayPreview();
 	}
 
