@@ -276,8 +276,8 @@ OrdSelection COrderList::GetCurSel(bool bIgnoreSelection) const
 }
 
 
-bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bIgnoreCurSel)
-//------------------------------------------------------------------------------------------
+bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bIgnoreCurSel, bool setPlayPos)
+//-----------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
@@ -317,7 +317,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 	if (bEdit)
 	{
 		PATTERNINDEX n = sndFile.Order[m_nScrollPos];
-		if ((n < sndFile.Patterns.Size()) && (sndFile.Patterns[n]) && !bShiftClick)
+		if (sndFile.Patterns.IsValidPat(n) && setPlayPos && !bShiftClick)
 		{
 			CriticalSection cs;
 
@@ -955,7 +955,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 
 	bool multiSelection = (m_nScrollPos2nd != ORDERINDEX_INVALID);
 
-	if(!multiSelection) SetCurSel(GetOrderFromPoint(rect, pt));
+	if(!multiSelection) SetCurSel(GetOrderFromPoint(rect, pt), true, false, false, false);
 	SetFocus();
 	HMENU hMenu = ::CreatePopupMenu();
 	if(!hMenu) return;
