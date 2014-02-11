@@ -508,7 +508,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	const MMD2SONGHEADER *pmsh2;
 	const MMD0EXP *pmex;
 	DWORD dwBlockArr, dwSmplArr, dwExpData, wNumBlocks;
-	LPDWORD pdwTable;
+	DWORD *pdwTable;
 	CHAR version;
 	UINT deftempo;
 	int playtransp = 0;
@@ -700,7 +700,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 
 			if ((playseqtable) && (playseqtable < dwMemLength) && (nplayseq*4 < dwMemLength - playseqtable))
 			{
-				pseq = BigEndian(((LPDWORD)(lpStream+playseqtable))[nplayseq]);
+				pseq = BigEndian(((DWORD*)(lpStream+playseqtable))[nplayseq]);
 			}
 			if ((pseq) && (pseq < dwMemLength - sizeof(MMD2PLAYSEQ)))
 			{
@@ -799,7 +799,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	}
 	// Reading samples
 	if (dwSmplArr > dwMemLength - 4*m_nSamples) return true;
-	pdwTable = (LPDWORD)(lpStream + dwSmplArr);
+	pdwTable = (DWORD*)(lpStream + dwSmplArr);
 	for (UINT iSmp=0; iSmp<m_nSamples; iSmp++) if (pdwTable[iSmp])
 	{
 		UINT dwPos = BigEndian(pdwTable[iSmp]);
@@ -849,7 +849,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	}
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;
 	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks)) return true;
-	pdwTable = (LPDWORD)(lpStream + dwBlockArr);
+	pdwTable = (DWORD*)(lpStream + dwBlockArr);
 	playtransp += (version == '3') ? 24 : 48;
 	for (PATTERNINDEX iBlk=0; iBlk<wNumBlocks; iBlk++)
 	{

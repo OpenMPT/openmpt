@@ -592,8 +592,8 @@ DLSINSTRUMENT *CDLSBank::FindInstrument(BOOL bDrum, UINT nBank, DWORD dwProgram,
 ///////////////////////////////////////////////////////////////
 // Update DLS instrument definition from an IFF chunk
 
-BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, LPVOID pvchunk, DWORD dwMaxLen)
-//--------------------------------------------------------------------------------------------
+BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk, DWORD dwMaxLen)
+//----------------------------------------------------------------------------------------------
 {
 	IFFCHUNK *pchunk = (IFFCHUNK *)pvchunk;
 	if ((!pchunk->len) || (pchunk->len+8 > dwMaxLen)) return FALSE;
@@ -805,8 +805,8 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, LPVOID pvchunk
 ///////////////////////////////////////////////////////////////
 // Converts SF2 chunks to DLS
 
-BOOL CDLSBank::UpdateSF2PresetData(LPVOID pvsf2, LPVOID pvchunk, DWORD dwMaxLen)
-//------------------------------------------------------------------------------
+BOOL CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, DWORD dwMaxLen)
+//----------------------------------------------------------------------------
 {
 	SF2LOADERINFO *psf2 = (SF2LOADERINFO *)pvsf2;
 	IFFCHUNK *pchunk = (IFFCHUNK *)pvchunk;
@@ -956,8 +956,8 @@ BOOL CDLSBank::UpdateSF2PresetData(LPVOID pvsf2, LPVOID pvchunk, DWORD dwMaxLen)
 
 
 // Convert all instruments to the DLS format
-BOOL CDLSBank::ConvertSF2ToDLS(LPVOID pvsf2info)
-//----------------------------------------------
+BOOL CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
+//---------------------------------------------
 {
 	SF2LOADERINFO *psf2;
 	DLSINSTRUMENT *pDlsIns;
