@@ -130,8 +130,8 @@ inline void Binarywrite(std::ostream& oStrm, const T& data)
 
 //Write only given number of bytes from the beginning.
 template<class T>
-inline void Binarywrite(std::ostream& oStrm, const T& data, const Offtype bytecount)
-//----------------------------------------------------------------------------------
+inline void Binarywrite(std::ostream& oStrm, const T& data, const std::size_t bytecount)
+//--------------------------------------------------------------------------------------
 {
 	union {
 		T t;
@@ -143,7 +143,7 @@ inline void Binarywrite(std::ostream& oStrm, const T& data, const Offtype byteco
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
 		std::reverse(conv.b, conv.b+sizeof(T));
 	#endif
-	oStrm.write(conv.b, MIN(bytecount, sizeof(data)));
+	oStrm.write(conv.b, std::min(bytecount, sizeof(data)));
 }
 
 template <class T>
