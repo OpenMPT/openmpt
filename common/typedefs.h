@@ -415,10 +415,7 @@ typedef std::int16_t  SHORT;
 typedef std::int32_t  LONG;
 typedef std::uint32_t UINT;
 typedef std::uint32_t ULONG;
-typedef void *        LPVOID;
 typedef BYTE *        LPBYTE;
-typedef DWORD *       LPDWORD;
-typedef LONG *        LPLONG;
 
 // for BOOL
 #define TRUE (1)

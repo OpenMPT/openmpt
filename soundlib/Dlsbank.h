@@ -153,9 +153,9 @@ public:
 
 // Internal Loader Functions
 protected:
-	BOOL UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, LPVOID pchunk, DWORD dwMaxLen);
-	BOOL UpdateSF2PresetData(LPVOID psf2info, LPVOID pchunk, DWORD dwMaxLen);
-	BOOL ConvertSF2ToDLS(LPVOID psf2info);
+	BOOL UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pchunk, DWORD dwMaxLen);
+	BOOL UpdateSF2PresetData(void *psf2info, void *pchunk, DWORD dwMaxLen);
+	BOOL ConvertSF2ToDLS(void *psf2info);
 
 public:
 	// DLS Unit conversion
