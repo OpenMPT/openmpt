@@ -1518,8 +1518,10 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	int l=0;
 	int fileVersion = 0;
 
+	bool fillExistingSet = commandSet != nullptr;
+
 	// If commandSet is valid, add new commands to it (this is used for adding the default shortcuts to existing keymaps)
-	CCommandSet *pTempCS = commandSet ? commandSet : new CCommandSet();
+	CCommandSet *pTempCS = fillExistingSet ? commandSet : new CCommandSet();
 
 	int errorCount=0;
 	CString errText = "";
@@ -1589,6 +1591,13 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 				kc.EventType((KeyEventType)atoi(token));
 			}
 
+			if(fillExistingSet && cmd >= kcVPStartNotes && cmd <= kcVPEndNotes)
+			{
+				// Don't fill in missing notes, as this will probably create awkward keymaps when loading
+				// e.g. an IT-style keymap and it contains two keys mapped to the same notes.
+				ignoreLine = true;
+			}
+
 			if(!ignoreLine)
 			{
 				//Error checking (TODO):
@@ -1625,7 +1634,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	}
 	//if(fileVersion < KEYMAP_VERSION) UpgradeKeymap(pTempCS, fileVersion);
 
-	if(commandSet == nullptr)
+	if(!fillExistingSet)
 	{
 		// Add the default command set to our freshly loaded command set.
 		const char *pData = nullptr;
