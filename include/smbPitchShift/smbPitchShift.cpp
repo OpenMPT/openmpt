@@ -1,7 +1,7 @@
 /****************************************************************************
 *
 * NAME: smbPitchShift.cpp
-* VERSION: 1.1
+* VERSION: 1.2
 * HOME URL: http://www.dspdimension.com
 * KNOWN BUGS: none
 *
@@ -15,7 +15,7 @@
 * numSampsToProcess-1]. The two buffers can be identical (ie. it can process the
 * data in-place). fftFrameSize defines the FFT frame size used for the
 * processing. Typical values are 1024, 2048 and 4096. It may be any value <=
-* MAX_FFT_FRAME_LENGTH but it MUST be a power of 2. osamp is the STFT
+* MAX_FRAME_LENGTH but it MUST be a power of 2. osamp is the STFT
 * oversampling factor which also determines the overlap between adjacent STFT
 * frames. It should at least be 4 for moderate scaling ratios. A value of 32 is
 * recommended for best quality. sampleRate takes the sample rate for the signal 
@@ -24,7 +24,7 @@
 * for the data, make sure you scale the data accordingly (for 16bit signed integers
 * you would have to divide (and multiply) by 32768). 
 *
-* COPYRIGHT 1999-2003 Stephan M. Bernsee <smb@dspdimension.com>
+* COPYRIGHT 1999-2009 Stephan M. Bernsee <smb [AT] dspdimension [DOT] com>
 *
 * 						The Wide Open License (WOL)
 *
@@ -40,8 +40,10 @@
 
 #include <string.h>
 #include <math.h>
-#include "smbPitchShift.h"
+#include <stdio.h>
 
+#define M_PI 3.14159265358979323846
+#define MAX_FRAME_LENGTH 8192
 
 void smbFft(float *fftBuffer, long fftFrameSize, long sign);
 double smbAtan2(double x, double y);
@@ -50,14 +52,15 @@ double smbAtan2(double x, double y);
 // -----------------------------------------------------------------------------------------------------------------
 
 
-void smbPitchShift(float pitchShift, long numSampsToProcess, long fftFrameSize, long osamp, float sampleRate, float *indata, float *outdata, bool gInit)
+void smbPitchShift(float pitchShift, long numSampsToProcess, long fftFrameSize, long osamp, float sampleRate, float *indata, float *outdata)
 /*
 	Routine smbPitchShift(). See top of file for explanation
 	Purpose: doing pitch shifting while maintaining duration using the Short
 	Time Fourier Transform.
-	Author: (c)1999-2002 Stephan M. Bernsee <smb@dspdimension.com>
+	Author: (c)1999-2009 Stephan M. Bernsee <smb [AT] dspdimension [DOT] com>
 */
 {
+
 	static float gInFIFO[MAX_FRAME_LENGTH];
 	static float gOutFIFO[MAX_FRAME_LENGTH];
 	static float gFFTworksp[2*MAX_FRAME_LENGTH];
@@ -68,33 +71,31 @@ void smbPitchShift(float pitchShift, long numSampsToProcess, long fftFrameSize, 
 	static float gAnaMagn[MAX_FRAME_LENGTH];
 	static float gSynFreq[MAX_FRAME_LENGTH];
 	static float gSynMagn[MAX_FRAME_LENGTH];
-	static long gRover = false;
+	static long gRover = false, gInit = false;
 	double magn, phase, tmp, window, real, imag;
 	double freqPerBin, expct;
-	long i,k, qpd, index, inFifoLatency, stepSize, fftFrameSize2, fadeZoneLen;
-
-	/* initialize our static arrays */
-	if (gInit == true) {
-		memset(gInFIFO, 0, MAX_FRAME_LENGTH*sizeof(float));
-		memset(gOutFIFO, 0, MAX_FRAME_LENGTH*sizeof(float));
-		memset(gFFTworksp, 0, 2*MAX_FRAME_LENGTH*sizeof(float));
-		memset(gLastPhase, 0, MAX_FRAME_LENGTH*sizeof(float)/2);
-		memset(gSumPhase, 0, MAX_FRAME_LENGTH*sizeof(float)/2);
-		memset(gOutputAccum, 0, 2*MAX_FRAME_LENGTH*sizeof(float));
-		memset(gAnaFreq, 0, MAX_FRAME_LENGTH*sizeof(float));
-		memset(gAnaMagn, 0, MAX_FRAME_LENGTH*sizeof(float));
-		gRover = false;
-		gInit = false;
-	}
+	long i,k, qpd, index, inFifoLatency, stepSize, fftFrameSize2;
 
 	/* set up some handy variables */
-	fadeZoneLen = fftFrameSize/2;
 	fftFrameSize2 = fftFrameSize/2;
 	stepSize = fftFrameSize/osamp;
 	freqPerBin = sampleRate/(double)fftFrameSize;
 	expct = 2.*M_PI*(double)stepSize/(double)fftFrameSize;
 	inFifoLatency = fftFrameSize-stepSize;
 	if (gRover == false) gRover = inFifoLatency;
+
+	/* initialize our static arrays */
+	if (gInit == false) {
+		memset(gInFIFO, 0, MAX_FRAME_LENGTH*sizeof(float));
+		memset(gOutFIFO, 0, MAX_FRAME_LENGTH*sizeof(float));
+		memset(gFFTworksp, 0, 2*MAX_FRAME_LENGTH*sizeof(float));
+		memset(gLastPhase, 0, (MAX_FRAME_LENGTH/2+1)*sizeof(float));
+		memset(gSumPhase, 0, (MAX_FRAME_LENGTH/2+1)*sizeof(float));
+		memset(gOutputAccum, 0, 2*MAX_FRAME_LENGTH*sizeof(float));
+		memset(gAnaFreq, 0, MAX_FRAME_LENGTH*sizeof(float));
+		memset(gAnaMagn, 0, MAX_FRAME_LENGTH*sizeof(float));
+		gInit = true;
+	}
 
 	/* main processing loop */
 	for (i = 0; i < numSampsToProcess; i++){
@@ -156,20 +157,18 @@ void smbPitchShift(float pitchShift, long numSampsToProcess, long fftFrameSize, 
 
 			}
 
-
-
 			/* ***************** PROCESSING ******************* */
 			/* this does the actual pitch shifting */
 			memset(gSynMagn, 0, fftFrameSize*sizeof(float));
 			memset(gSynFreq, 0, fftFrameSize*sizeof(float));
-			for (k = 0; k <= fftFrameSize2; k++) {
-				index = k/pitchShift;
-				if (index <= fftFrameSize2) {
-					gSynMagn[k] += gAnaMagn[index];
-					gSynFreq[k] = gAnaFreq[index] * pitchShift;
-				}
+			for (k = 0; k <= fftFrameSize2; k++) { 
+				index = k*pitchShift;
+				if (index <= fftFrameSize2) { 
+					gSynMagn[index] += gAnaMagn[k]; 
+					gSynFreq[index] = gAnaFreq[k] * pitchShift; 
+				} 
 			}
-
+			
 			/* ***************** SYNTHESIS ******************* */
 			/* this is the synthesis step */
 			for (k = 0; k <= fftFrameSize2; k++) {
@@ -253,7 +252,7 @@ void smbFft(float *fftBuffer, long fftFrameSize, long sign)
 			*p1 = *p2; *p2 = temp;
 		}
 	}
-	for (k = 0, le = 2; k < (long)(log((double)fftFrameSize)/log(2.)); k++) {
+	for (k = 0, le = 2; k < (long)(log((double)fftFrameSize)/log(2.)+.5); k++) {
 		le <<= 1;
 		le2 = le>>1;
 		ur = 1.0;

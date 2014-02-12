@@ -30,6 +30,7 @@
 #include "../common/StringFixer.h"
 #include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
+#include "../soundlib/SampleFormatConverters.h"
 #include <Shlwapi.h>
 #include "FileDialog.h"
 
@@ -46,25 +47,26 @@
 // Float point comparison
 bool EqualTof(const float a, const float b)
 {
-    return (fabs(a - b) <= FLOAT_ERROR);
+	return (fabs(a - b) <= FLOAT_ERROR);
 }
 
 // Round floating point value to "digit" number of digits
 float Round(const float value, const int digit)
 {
 	float v = 0.1f * (value * powf(10.0f, (float)(digit + 1)) + (value < 0.0f ? -5.0f : 5.0f));
-    modff(v, &v);    
-    return v / powf(10.0f, (float)digit);
+	modff(v, &v);    
+	return v / powf(10.0f, (float)digit);
 }
 
-// Deduce exponent from equation : v = 2^exponent
-int PowerOf2Exponent(const unsigned int v)
+template<int v>
+int PowerOf2Exponent()
 {
-	return (int)_logb((double)v);
-	//float v2f = (float)v;
-	//return ( (*(int *)&v2f >> 23) & 0xff ) - 127;
+	if(v <= 1)
+		return 0;
+	else
+		return 1 + PowerOf2Exponent<v / 2>();
 }
-// -! TEST#0029
+
 
 #define	BASENOTE_MIN	(1*12)	// C-1
 #define	BASENOTE_MAX	(9*12)	// C-9
@@ -284,15 +286,16 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	// Quality selection
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO5);
-	if(combo){
+	if(combo)
+	{
 		// Allow quality from 4 to 128
 		for(int i = 4 ; i <= 128 ; i++)
 		{
 			wsprintf(str,"%d",i);
 			combo->SetItemData(combo->AddString(str), i-4);
 		}
-		// Set 4 as default quality
-		combo->SetCurSel(0);
+		// Set 32 as default quality
+		combo->SetCurSel(32 - 4);
 	}
 
 	// FFT size selection
@@ -300,14 +303,15 @@ BOOL CCtrlSamples::OnInitDialog()
 	if(combo)
 	{
 		// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
-		int exponent = PowerOf2Exponent(MAX_FRAME_LENGTH);
+		const int exponent = PowerOf2Exponent<MAX_FRAME_LENGTH>();
 		// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
-		for(int i = 8 ; i <= exponent ; i++){
+		for(int i = 8 ; i <= exponent ; i++)
+		{
 			wsprintf(str,"%d",1<<i);
 			combo->SetItemData(combo->AddString(str), i-8);
 		}
-		// Set 2048 as default FFT size
-		combo->SetCurSel(3);
+		// Set 4096 as default FFT size
+		combo->SetCurSel(4);
 	}
 
 	// Stretch ratio
@@ -1163,9 +1167,9 @@ void CCtrlSamples::OnNormalize()
 
 			m_modDoc.GetSampleUndo().PrepareUndo(iSmp, sundo_update, "Normalize", selStart, selEnd);
 
-			if(sample.uFlags & CHN_STEREO) { selStart *= 2; selEnd *= 2; }
+			if(sample.uFlags[CHN_STEREO]) { selStart *= 2; selEnd *= 2; }
 
-			if(sample.uFlags & CHN_16BIT)
+			if(sample.uFlags[CHN_16BIT])
 			{
 				int16 *p = (int16 *)sample.pSample;
 				int max = 1;
@@ -1234,10 +1238,10 @@ void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
 
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Amplify", selection.nStart, selection.nEnd);
 
-	if (sample.uFlags & CHN_STEREO) { selection.nStart *= 2; selection.nEnd *= 2; }
+	if (sample.uFlags[CHN_STEREO]) { selection.nStart *= 2; selection.nEnd *= 2; }
 	SmpLength len = selection.nEnd - selection.nStart;
 	if ((bFadeIn) && (bFadeOut)) lAmp *= 4;
-	if (sample.uFlags & CHN_16BIT)
+	if (sample.uFlags[CHN_16BIT])
 	{
 		signed short *p = ((signed short *)sample.pSample) + selection.nStart;
 
@@ -1426,7 +1430,7 @@ void CCtrlSamples::OnUpsample()
 		{
 			SmpLength len = dwEnd - dwStart;
 			int maxndx = sample.nLength;
-			if (sample.uFlags & CHN_16BIT)
+			if (sample.uFlags[CHN_16BIT])
 			{
 				signed short *psrc = ((signed short *)pOriginal)+iCh;
 				signed short *pdest = ((signed short *)pNewSample)+dwStart*nCh+iCh;
@@ -1563,7 +1567,7 @@ void CCtrlSamples::OnDownsample()
 		{
 			int len = dwRemove;
 			int maxndx = sample.nLength;
-			if (sample.uFlags & CHN_16BIT)
+			if (sample.uFlags[CHN_16BIT])
 			{
 				signed short *psrc = ((signed short *)pOriginal)+iCh;
 				signed short *pdest = ((signed short *)pNewSample)+dwStart*nCh+iCh;
@@ -1701,7 +1705,7 @@ void CCtrlSamples::OnEstimateSampleSize()
 	CPSRatioCalc dlg(m_sndFile, m_nSample, m_dTimeStretchRatio, this);
 	if (dlg.DoModal() != IDOK) return;
 	
-    //Update ratio value&textbox
+	//Update ratio value&textbox
 	m_dTimeStretchRatio = dlg.m_dRatio;
 	UpdateData(FALSE);
 	//end rewbs.timeStretchMods
@@ -1994,6 +1998,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	return 0;
 }
 
+
 int CCtrlSamples::PitchShift(float pitch)
 //---------------------------------------
 {
@@ -2005,8 +2010,8 @@ int CCtrlSamples::PitchShift(float pitch)
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
 	// Get number of channels & sample size
-	BYTE smpsize = sample.GetElementarySampleSize();
-	UINT nChn = sample.GetNumChannels();
+	const uint8 smpsize = sample.GetElementarySampleSize();
+	const uint8 nChn = sample.GetNumChannels();
 
 	// Get selected oversampling - quality - (also refered as FFT overlapping) factor
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO5);
@@ -2038,33 +2043,21 @@ int CCtrlSamples::PitchShift(float pitch)
 	// Show wait mouse cursor
 	BeginWaitCursor();
 
-
-	// PitchShift seems to work only with 16-bit samples.
-	if(smpsize != 2)
-	{
-		// This has to be converted to 16-bit first.
-		SetSelectionPoints(0, 0); // avoid partial upsampling.
-		OnUpsample();
-		smpsize = sample.GetElementarySampleSize();
-	}
-
 	// Get original sample rate
-	long lSampleRate = sample.GetSampleRate(m_sndFile.GetType());
+	const float sampleRate = static_cast<float>(sample.GetSampleRate(m_sndFile.GetType()));
 
-	// Deduce max sample value (float conversion step)
-	float maxSampleValue = float(( 1 << (smpsize * 8 - 1) ) - 1);
-
-	// Allocate working buffers
-	float * buffer = new float[MAX_BUFFER_LENGTH + fft];
-	float * outbuf = new float[MAX_BUFFER_LENGTH + fft];
+	// Allocate working buffer
+	const size_t bufferSize = MAX_BUFFER_LENGTH + fft;
+	float *buffer = new float[bufferSize];
 
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Pitch Shift");
 
 	// Process each channel separately
-	for(UINT i = 0 ; i < nChn ; i++){
+	for(uint8 i = 0 ; i < nChn ; i++)
+	{
 
-		UINT pos = 0;
-		UINT len = MAX_BUFFER_LENGTH;
+		SmpLength pos = 0;
+		SmpLength len = MAX_BUFFER_LENGTH;
 
 		// Process sample buffer using MAX_BUFFER_LENGTH (max) sized chunk steps (in order to allow
 		// the processing of BIG samples...)
@@ -2077,16 +2070,16 @@ int CCtrlSamples::PitchShift(float pitch)
 			// TRICK : output buffer offset management
 			// as the pitch-shifter adds  some blank signal in head of output  buffer (matching FFT
 			// length - in short it needs a certain amount of data before being able to output some
-			// meaningfull  processed samples) , in order  to avoid this behaviour , we will ignore  
+			// meaningfull  processed samples) , in order  to avoid this behaviour , we will ignore
 			// the  first FFT_length  samples and process  the same  amount of extra  blank samples
 			// (all 0.0f) at the end of the buffer (those extra samples will benefit from  internal
 			// FFT data  computed during the previous  steps resulting in a  correct and consistent
 			// signal output).
 			bool bufstart = ( pos == 0 );
 			bool bufend   = ( pos + MAX_BUFFER_LENGTH >= sample.nLength );
-			UINT startoffset = ( bufstart ? fft : 0 );
-			UINT inneroffset = ( bufstart ? 0 : fft );
-			UINT finaloffset = ( bufend   ? fft : 0 );
+			SmpLength startoffset = ( bufstart ? fft : 0 );
+			SmpLength inneroffset = ( bufstart ? 0 : fft );
+			SmpLength finaloffset = ( bufend   ? fft : 0 );
 
 			// Show progress bar using process button painting & text label
 			CHAR progress[16];
@@ -2103,49 +2096,43 @@ int CCtrlSamples::PitchShift(float pitch)
 			::GdiFlush();
 
 			// Re-initialize pitch-shifter with blank FFT before processing 1st chunk of current channel
-			if(bufstart){
-				for(UINT j = 0 ; j < fft ; j++) buffer[j] = 0.0f;
-				smbPitchShift(pitch, fft, fft, ovs, (float)lSampleRate, buffer, outbuf, true);
+			if(bufstart)
+			{
+				for(UINT j = 0; j < fft; j++) buffer[j] = 0.0f;
+				smbPitchShift(pitch, fft, fft, ovs, sampleRate, buffer, buffer);
 			}
 
 			// Convert current channel's data chunk to float
-			BYTE * ptr = (BYTE *)sample.pSample + pos * smpsize * nChn + i * smpsize;
+			int8 *ptr = (int8 *)sample.pSample + pos * smpsize * nChn + i * smpsize;
 
-			for(UINT j = 0 ; j < len ; j++){
-				switch(smpsize){
-					case 2:
-						buffer[j] = ((float)(*(SHORT *)ptr)) / maxSampleValue;
-						break;
-					case 1:
-						buffer[j] = ((float)*ptr) / maxSampleValue;
-						break;
-				}
-				ptr += smpsize * nChn;
+			switch(smpsize)
+			{
+			case 1:
+				CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8> > >(buffer, len, 1, ptr, sizeof(int8) * len, nChn);
+				break;
+			case 2:
+				CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16> > >(buffer, len, 1, (int16 *)ptr, sizeof(int16) * len, nChn);
+				break;
 			}
 
 			// Fills extra blank samples (read TRICK description comment above)
-			if(bufend) for(UINT j = len ; j < len + finaloffset ; j++) buffer[j] = 0.0f;
+			if(bufend) for(SmpLength j = len ; j < len + finaloffset ; j++) buffer[j] = 0.0f;
 
 			// Apply pitch shifting
-			smbPitchShift(pitch, len + finaloffset, fft, ovs, (float)lSampleRate, buffer, outbuf, false);
+			smbPitchShift(pitch, static_cast<long>(len + finaloffset), fft, ovs, sampleRate, buffer, buffer);
 
 			// Restore pitched-shifted float sample into original sample buffer
-			ptr = (BYTE *)sample.pSample + (pos - inneroffset) * smpsize * nChn + i * smpsize;
+			ptr = (int8 *)sample.pSample + (pos - inneroffset) * smpsize * nChn + i * smpsize;
+			const SmpLength copyLength = len + finaloffset - startoffset + 1;
 
-			for(UINT j = startoffset ; j < len + finaloffset ; j++){
-				// Just perform a little bit of clipping...
-				float v = outbuf[j];
-				CLIP_SOUND(v);
-				// ...before converting back to buffer
-				switch(smpsize){
-					case 2:
-						*(SHORT *)ptr = (SHORT)(v * maxSampleValue);
-						break;
-					case 1:
-						*ptr = (BYTE)(v * maxSampleValue);
-						break;
-				}
-				ptr += smpsize * nChn;
+			switch(smpsize)
+			{
+			case 1:
+				CopySample<SC::ConversionChain<SC::Convert<int8, float>, SC::DecodeIdentity<float> > >((int8 *)ptr, copyLength, nChn, buffer + startoffset, sizeof(float) * bufferSize, 1);
+				break;
+			case 2:
+				CopySample<SC::ConversionChain<SC::Convert<int16, float>, SC::DecodeIdentity<float> > >((int16 *)ptr, copyLength, nChn, buffer + startoffset, sizeof(float) * bufferSize, 1);
+				break;
 			}
 
 			// Next buffer chunk
@@ -2153,9 +2140,8 @@ int CCtrlSamples::PitchShift(float pitch)
 		}
 	}
 
-	// Free working buffers
+	// Free working buffer
 	delete [] buffer;
-	delete [] outbuf;
 
 	// Free progress bar brushes
 	DeleteObject((HBRUSH)green);
@@ -2412,10 +2398,12 @@ void CCtrlSamples::OnPanningChanged()
 	int nPan = GetDlgItemInt(IDC_EDIT9);
 	if (nPan < 0) nPan = 0;
 	//rewbs.fix36944: sample pan range to 0-64.
-	if (m_sndFile.m_nType == MOD_TYPE_XM) {
-		if (nPan>255) nPan = 255;	// displayed panning will be 0-255 with XM
-	} else {
-		if (nPan>64) nPan = 64;		// displayed panning will be 0-64 with anything but XM.
+	if (m_sndFile.GetType() == MOD_TYPE_XM)
+	{
+		if (nPan > 255) nPan = 255;	// displayed panning will be 0-255 with XM
+	} else
+	{
+		if (nPan > 64) nPan = 64;	// displayed panning will be 0-64 with anything but XM.
 		nPan = nPan << 2;			// so we x4 to get MPT's internal 0-256 range.
 	}
 	//end rewbs.fix36944
