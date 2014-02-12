@@ -83,7 +83,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_SAMPLE_REVERSE,		OnReverse)
 	ON_COMMAND(IDC_SAMPLE_SILENCE,		OnSilence)
 	ON_COMMAND(IDC_SAMPLE_INVERT,		OnInvert)
-	ON_COMMAND(IDC_SAMPLE_SIGN_UNSIGN,  OnSignUnSign)
+	ON_COMMAND(IDC_SAMPLE_SIGN_UNSIGN,	OnSignUnSign)
 	ON_COMMAND(IDC_SAMPLE_DCOFFSET,		OnRemoveDCOffset)
 	ON_COMMAND(IDC_SAMPLE_XFADE,		OnXFade)
 	ON_COMMAND(IDC_SAMPLE_AUTOTUNE,		OnAutotune)
@@ -363,7 +363,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 		{
 			if ((nIns > 0) && (!m_modDoc.IsChildSample((INSTRUMENTINDEX)nIns, m_nSample)))
 			{
-				UINT k = m_modDoc.FindInstrumentChild(nIns);
+				SAMPLEINDEX k = m_modDoc.FindInstrumentChild((INSTRUMENTINDEX)nIns);
 				if (k > 0) lParam = k;
 			}
 		} else
@@ -688,7 +688,8 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		{
 			wsprintf(s, "%lu", sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
-			transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
+			if(sample.nC5Speed != 0)
+				transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
 		} else
 		{
 			int ftune = ((int)sample.nFineTune);
@@ -709,7 +710,8 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		SetDlgItemInt(IDC_EDIT16, (UINT)sample.nVibRate);
 		// Loop
 		d = 0;
-		if (sample.uFlags & CHN_LOOP) d = (sample.uFlags & CHN_PINGPONGLOOP) ? 2 : 1;
+		if (sample.uFlags[CHN_LOOP]) d = sample.uFlags[CHN_PINGPONGLOOP] ? 2 : 1;
+		if (sample.uFlags[CHN_REVRSE]) d |= 4;
 		m_ComboLoopType.SetCurSel(d);
 		wsprintf(s, "%lu", sample.nLoopStart);
 		m_EditLoopStart.SetWindowText(s);
@@ -717,7 +719,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_EditLoopEnd.SetWindowText(s);
 		// Sustain Loop
 		d = 0;
-		if (sample.uFlags & CHN_SUSTAINLOOP) d = (sample.uFlags & CHN_PINGPONGSUSTAIN) ? 2 : 1;
+		if (sample.uFlags[CHN_SUSTAINLOOP]) d = sample.uFlags[CHN_PINGPONGSUSTAIN] ? 2 : 1;
 		m_ComboSustainType.SetCurSel(d);
 		wsprintf(s, "%lu", sample.nSustainStart);
 		m_EditSustainStart.SetWindowText(s);
@@ -2466,19 +2468,19 @@ void CCtrlSamples::OnBaseNoteChanged()
 //-------------------------------------
 {
 	if (IsLocked()) return;
-	int n = (NOTE_MIDDLEC - 1) - (m_CbnBaseNote.GetCurSel() + BASENOTE_MIN);
+	int n = (NOTE_MIDDLEC - NOTE_MIN) - (m_CbnBaseNote.GetCurSel() + BASENOTE_MIN);
 
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if (m_sndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
+	if (m_sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
-		LONG ft = ModSample::FrequencyToTranspose(sample.nC5Speed) & 0x7F;
-		n = ModSample::TransposeToFrequency(n, ft);
-		if ((n > 0) && (n <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)sample.nC5Speed))
+		const int oldTransp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
+		const uint32 newTrans = Util::Round<uint32>(sample.nC5Speed * pow(2.0, (n - oldTransp) / 12.0));
+		if (newTrans > 0 && newTrans <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535u : 9999999u) && newTrans != sample.nC5Speed)
 		{
 			CHAR s[32];
-			sample.nC5Speed = n;
-			wsprintf(s, "%lu", n);
+			sample.nC5Speed = newTrans;
+			wsprintf(s, "%lu", newTrans);
 			LockControls();
 			m_EditFineTune.SetWindowText(s);
 			UnlockControls();
@@ -2488,7 +2490,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 	{
 		if ((n >= -128) && (n < 128))
 		{
-			sample.RelativeTone = (signed char)n;
+			sample.RelativeTone = (int8)n;
 			m_modDoc.SetModified();
 		}
 	}
@@ -2502,7 +2504,7 @@ void CCtrlSamples::OnVibTypeChanged()
 	int n = m_ComboAutoVib.GetCurSel();
 	if (n >= 0)
 	{
-		m_sndFile.GetSample(m_nSample).nVibType = (BYTE)n;
+		m_sndFile.GetSample(m_nSample).nVibType = static_cast<uint8>(n);
 
 		PropagateAutoVibratoChanges();
 		m_modDoc.SetModified();
@@ -2519,7 +2521,7 @@ void CCtrlSamples::OnVibDepthChanged()
 	int n = GetDlgItemInt(IDC_EDIT15);
 	if ((n >= lmin) && (n <= lmax))
 	{
-		m_sndFile.GetSample(m_nSample).nVibDepth = (BYTE)n;
+		m_sndFile.GetSample(m_nSample).nVibDepth = static_cast<uint8>(n);
 
 		PropagateAutoVibratoChanges();
 		m_modDoc.SetModified();
@@ -2553,7 +2555,7 @@ void CCtrlSamples::OnVibRateChanged()
 	int n = GetDlgItemInt(IDC_EDIT16);
 	if ((n >= lmin) && (n <= lmax))
 	{
-		m_sndFile.GetSample(m_nSample).nVibRate = (BYTE)n;
+		m_sndFile.GetSample(m_nSample).nVibRate = static_cast<uint8>(n);
 
 		PropagateAutoVibratoChanges();
 		m_modDoc.SetModified();
