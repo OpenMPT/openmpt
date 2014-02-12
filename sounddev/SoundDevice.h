@@ -192,16 +192,6 @@ public:
 	// check that the channel mapping is actually a 1:1 mapping
 	bool IsValid(uint32 channels) const;
 
-	// Get the base channel offset. Deprecated because this has no defined semantics for more complex mappings.
-	MPT_DEPRECATED uint32 GetBaseChannel() const
-	{
-		if(ChannelToDeviceChannel.empty())
-		{
-			return 0;
-		}
-		return ChannelToDeviceChannel[0];
-	}
-
 	// Get the number of required device channels for this mapping. Derived from the maximum mapped-to channel number.
 	uint32 GetRequiredDeviceChannels() const
 	{
