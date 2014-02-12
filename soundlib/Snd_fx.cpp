@@ -2344,7 +2344,10 @@ BOOL CSoundFile::ProcessEffects()
 		// Arpeggio
 		case CMD_ARPEGGIO:
 			// IT compatibility 01. Don't ignore Arpeggio if no note is playing (also valid for ST3)
-			if ((m_nTickCount) || (((!pChn->nPeriod) || !pChn->nNote) && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER))) break;
+			if(m_nTickCount) break;
+			if((!pChn->nPeriod || !pChn->nNote)
+				&& (pChn->pModInstrument == nullptr || !pChn->pModInstrument->HasValidMIDIChannel())	// Plugin arpeggio
+				&& !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER)) break;
 			if ((!param) && (!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))) break;	// Only important when editing MOD/XM files
 			pChn->nCommand = CMD_ARPEGGIO;
 			if (param) pChn->nArpeggio = param;
@@ -4119,7 +4122,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 	{
 		// Not an internal device. Pass on to appropriate plugin.
 		const CHANNELINDEX plugChannel = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
-		if(plugChannel > 0 && plugChannel <= GetNumChannels())	// XXX do we need this? I guess it might be relevant for previewing notes in the pattern...
+		if(plugChannel > 0 && plugChannel <= GetNumChannels())	// XXX do we need this? I guess it might be relevant for previewing notes in the pattern... Or when using this mechanism for volume/panning!
 		{
 			PLUGINDEX nPlug = 0;
 			if(!pChn->dwFlags[CHN_NOFX])
