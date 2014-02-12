@@ -521,7 +521,6 @@ BOOL CSoundFile::ProcessRow()
 	}
 	// Should we process tick0 effects?
 	if (!m_nMusicSpeed) m_nMusicSpeed = 1;
-	m_SongFlags.set(SONG_FIRSTTICK);
 
 	//End of row? stop pattern step (aka "play row").
 #ifdef MODPLUG_TRACKER
@@ -549,6 +548,7 @@ BOOL CSoundFile::ProcessRow()
 		}
 	} else
 	{
+		m_SongFlags.set(SONG_FIRSTTICK);
 		m_SongFlags.reset(SONG_BREAKTOROW);
 	}
 
@@ -1108,51 +1108,54 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn)
 }
 
 
-void CSoundFile::ProcessArpeggio(ModChannel *pChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps)
-//----------------------------------------------------------------------------------------------------
+void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps)
+//-----------------------------------------------------------------------------------------------------
 {
-	if (pChn->nCommand == CMD_ARPEGGIO)
-	{
-#ifndef NO_VST
-#if 0
-		// EXPERIMENTAL VSTi arpeggio. Far from perfect!
-		// Note: We could use pChn->nLastNote here to simplify things.
-		if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug && !m_SongFlags[SONG_FIRSTTICK])
-		{
-			const ModInstrument *pIns = pChn->pModInstrument;
-			IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
-			if(pPlugin)
-			{
-				// Temporary logic: This ensures that the first and last tick are both playing the base note.
-				int nCount = (int)m_nTickCount - (int)(m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay - 1);
-				int nStep = 0, nLastStep = 0;
-				nCount = -nCount;
-				switch(nCount % 3)
-				{
-				case 0:
-					nStep = 0;
-					nLastStep = pChn->nArpeggio & 0x0F;
-					break;
-				case 1: 
-					nStep = pChn->nArpeggio >> 4;
-					nLastStep = 0;
-					break;
-				case 2:
-					nStep = pChn->nArpeggio & 0x0F;
-					nLastStep = pChn->nArpeggio >> 4;
-					break;
-				}
-				// First tick is always 0
-				if(m_nTickCount == 1)
-					nLastStep = 0;
+	ModChannel *pChn = &Chn[nChn];
 
-				pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pChn->nNote + nStep, pChn->nVolume, nChn);
-				pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pChn->nNote + nLastStep + NOTE_KEYOFF, 0, nChn);
+#ifndef NO_VST
+	// Plugin arpeggio
+	if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug)
+	{
+		const ModInstrument *pIns = pChn->pModInstrument;
+		IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
+		if(pPlugin)
+		{
+			uint8 step = 0;
+			const bool arpOnRow = (pChn->rowCommand.command == CMD_ARPEGGIO);
+			if(arpOnRow)
+			{
+				switch(m_nTickCount % 3)
+				{
+				case 1: step = pChn->nArpeggio >> 4; break;
+				case 2: step = pChn->nArpeggio & 0x0F; break;
+				}
+				pChn->nArpeggioBaseNote = pChn->nLastNote;
 			}
+
+			// Trigger new note:
+			// - If there's an arpeggio on this row and
+			//   - the note to trigger is not the same as the previous arpeggio note or
+			//   - a pattern note has just been triggered on this tick
+			// - If there's no arpeggio
+			//   - but an arpeggio note is still active and
+			//   - there's no note stop or new note that would stop it anyway
+			if((arpOnRow && pChn->nArpeggioLastNote != pChn->nArpeggioBaseNote + step && (!m_SongFlags[SONG_FIRSTTICK] || !pChn->rowCommand.IsNote()))
+				|| (!arpOnRow && pChn->rowCommand.note == NOTE_NONE && pChn->nArpeggioLastNote != NOTE_NONE))
+				pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, pChn->nArpeggioBaseNote + step, static_cast<uint16>(pChn->nVolume), nChn);
+			if(pChn->nArpeggioLastNote != NOTE_NONE)
+				pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, pChn->nArpeggioLastNote + NOTE_MAX_SPECIAL, 0, nChn);
+
+			if(pChn->rowCommand.command == CMD_ARPEGGIO)
+				pChn->nArpeggioLastNote = pChn->nArpeggioBaseNote + step;
+			else
+				pChn->nArpeggioLastNote = NOTE_NONE;
 		}
-#endif // 0
+	}
 #endif // NO_VST
 
+	if(pChn->nCommand == CMD_ARPEGGIO)
+	{
 		if((GetType() & MOD_TYPE_MPT) && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 		{
 			switch(m_nTickCount % 3)
@@ -1764,7 +1767,7 @@ BOOL CSoundFile::ReadNote()
 				period = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC5Speed);
 			}
 
-			ProcessArpeggio(pChn, period, arpeggioSteps);
+			ProcessArpeggio(nChn, period, arpeggioSteps);
 
 			// Preserve Amiga freq limits.
 			// In ST3, the frequency is always clamped to periods 113 to 856, while in ProTracker,
