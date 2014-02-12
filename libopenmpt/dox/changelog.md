@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  [Change] The test suite is now built by default with Makefile based builds.
+    Use `TEST=0` to skip building the tests. `make check` runs the test suite.
+
  *  [Bug] Crash in MOD loader on architectures not supporting unaligned memory
     access.
  *  [Bug] MMCMP, PP20 and XPK unpackers should now work on non-x86 hardware and

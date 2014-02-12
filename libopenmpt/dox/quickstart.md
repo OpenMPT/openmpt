@@ -22,12 +22,10 @@ Quick Start {#quickstart}
     
         svn checkout http://svn.code.sf.net/p/modplug/code/trunk/OpenMPT/ openmpt-trunk
         cd openmpt-trunk
-        make TEST=1 clean
-        make TEST=1
-        make TEST=1 check
         make clean
         make
         make doc
+        make check
         sudo make install         # installs into /usr/local by default
         sudo make install-doc     # installs into /usr/local by default
         openmpt123 $SOMEMODULE
