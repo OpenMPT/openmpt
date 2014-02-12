@@ -45,50 +45,42 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 	if(nSilenceLength == 0 || nSilenceLength >= MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength)
 		return smp.nLength;
 
-	const SmpLength nOldBytes = smp.GetSampleSizeInBytes();
-	const SmpLength nSilenceBytes = nSilenceLength * smp.GetBytesPerSample();
-	const SmpLength nNewLength = smp.nLength + nSilenceLength;
+	const bool wasEmpty = smp.nLength == 0 || smp.pSample == nullptr;
+	const SmpLength newLength = smp.nLength + nSilenceLength;
 
 	char *pNewSmp = nullptr;
-#if 0
-	if( GetSampleCapacity(smp) >= nNewSmpBytes ) // If sample has room to expand.
-	{
-		sndFile.AddToLog(LogNotification, "Not implemented: GetSampleCapacity(smp) >= nNewSmpBytes");
-		// Not implemented, GetSampleCapacity() currently always returns length based value
-		// even if there is unused space in the sample.
-	}
-	else // Have to allocate new sample.
-#endif
-	{
-		pNewSmp = static_cast<char *>(ModSample::AllocateSample(smp.nLength + nSilenceLength, smp.GetBytesPerSample()));
-		if(pNewSmp == 0)
-			return smp.nLength; //Sample allocation failed.
-		if(nStartFrom == 0)
-		{
-			memcpy(pNewSmp + nSilenceBytes, smp.pSample, nOldBytes);
-		}
-		else if(nStartFrom == smp.nLength)
-		{
-			memcpy(pNewSmp, smp.pSample, nOldBytes);
-		}
-		else
-			sndFile.AddToLog(LogNotification, "Unsupported start position in InsertSilence.");
-	}
 
-	// Set loop points automatically
-	if(nOldBytes == 0)
+	pNewSmp = static_cast<char *>(ModSample::AllocateSample(newLength, smp.GetBytesPerSample()));
+	if(pNewSmp == nullptr)
+		return smp.nLength; //Sample allocation failed.
+
+	if(!wasEmpty)
 	{
-		smp.nLoopStart = 0;
-		smp.nLoopEnd = nNewLength;
-		smp.uFlags |= CHN_LOOP;
-	} else
-	{
+		// Copy over old sample
+		const SmpLength silenceOffset = nStartFrom * smp.GetSampleSizeInBytes();
+		const SmpLength silenceBytes = nSilenceLength * smp.GetBytesPerSample();
+		if(nStartFrom > 0)
+		{
+			memcpy(pNewSmp, smp.pSample, silenceOffset);
+		}
+		if(nStartFrom < smp.nLength)
+		{
+			memcpy(pNewSmp + silenceOffset + silenceBytes, static_cast<const char *>(smp.pSample) + silenceOffset, smp.nLength - silenceOffset);
+		}
+
+		// Update loop points if necessary.
 		if(smp.nLoopStart >= nStartFrom) smp.nLoopStart += nSilenceLength;
 		if(smp.nLoopEnd >= nStartFrom) smp.nLoopEnd += nSilenceLength;
+	} else
+	{
+		// Set loop points automatically
+		smp.nLoopStart = 0;
+		smp.nLoopEnd = newLength;
+		smp.uFlags.set(CHN_LOOP);
 	}
 
-	ReplaceSample(smp, pNewSmp, nNewLength, sndFile);
-	PrecomputeLoops(smp, sndFile);
+	ReplaceSample(smp, pNewSmp, newLength, sndFile);
+	PrecomputeLoops(smp, sndFile, true);
 
 	return smp.nLength;
 }
