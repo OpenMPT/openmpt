@@ -362,6 +362,28 @@ struct Convert<int24, int32>
 };
 
 template <>
+struct Convert<float32, int8>
+{
+	typedef int8 input_t;
+	typedef float32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return val * (1.0f / static_cast<float>((unsigned int)1<<7));
+	}
+};
+
+template <>
+struct Convert<float32, int16>
+{
+	typedef int16 input_t;
+	typedef float32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return val * (1.0f / static_cast<float>((unsigned int)1<<15));
+	}
+};
+
+template <>
 struct Convert<float32, int32>
 {
 	typedef int32 input_t;
