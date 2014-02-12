@@ -42,9 +42,10 @@
 #  EXAMPLES=1       Build examples
 #  OPENMPT123=1     Build openmpt123
 #  SHARED_SONAME=1  Set SONAME of shared library
-#  TEST=0           Build libopenmpt in test mode
 #  DEBUG=0          Build debug binaries without optimization and with symbols
 #  OPTIMIZE=1       Build optimized binaries
+#  TEST=1           Include test suite in default target.
+#  ONLY_TEST=0      Only build the test suite.
 #
 #
 # Build flags for libopenmpt (provide on each `make` invocation)
@@ -80,7 +81,7 @@
 #     make clean
 #     make [all]
 #     make doc
-#     make TEST=1 check
+#     make check
 #     make dist
 #     make dist-doc
 #     make install
@@ -124,6 +125,8 @@ OPENMPT123=1
 SHARED_SONAME=1
 DEBUG=0
 OPTIMIZE=1
+TEST=1
+ONLY_TEST=0
 
 
 # get commandline or defaults
@@ -226,10 +229,6 @@ CFLAGS   += -O2 -fno-strict-aliasing -ffast-math
 endif
 endif
 
-ifeq ($(TEST),1)
-CPPFLAGS += -DLIBOPENMPT_BUILD_TEST
-endif
-
 CXXFLAGS += -Wall -Wextra -Wcast-align
 CFLAGS   += -Wall -Wextra -Wcast-align
 
@@ -328,7 +327,7 @@ LDLIBS_EXAMPLES   += $(LDLIBS_PORTAUDIO)
 
 
 %: %.o
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 %.o: %.cpp
@@ -337,9 +336,19 @@ LDLIBS_EXAMPLES   += $(LDLIBS_PORTAUDIO)
 	$(SILENT)$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 %.o: %.c
-	$(INFO) [CC ] $<
+	$(INFO) [CC] $<
 	$(VERYSILENT)$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
 	$(SILENT)$(COMPILE.c) $(OUTPUT_OPTION) $<
+
+%.test.o: %.cpp
+	$(INFO) [CXX-TEST] $<
+	$(VERYSILENT)$(CXX) -DLIBOPENMPT_BUILD_TEST $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.test.d
+	$(SILENT)$(COMPILE.cc) -DLIBOPENMPT_BUILD_TEST $(OUTPUT_OPTION) $<
+
+%.test.o: %.c
+	$(INFO) [CC-TEST] $<
+	$(VERYSILENT)$(CC) -DLIBOPENMPT_BUILD_TEST $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.test.d
+	$(SILENT)$(COMPILE.c) -DLIBOPENMPT_BUILD_TEST $(OUTPUT_OPTION) $<
 
 %.tar.gz: %.tar
 	$(INFO) [GZIP] $<
@@ -429,8 +438,10 @@ ALL_DEPENDS += $(OPENMPT123_DEPENDS)
 LIBOPENMPTTEST_CXX_SOURCES += \
  libopenmpt/libopenmpt_test.cpp \
  
-LIBOPENMPTTEST_OBJECTS += $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.o) $(LIBOPENMPTTEST_C_SOURCES:.c=.o)
-LIBOPENMPTTEST_DEPENDS = $(LIBOPENMPTEST_OBJECTS:.o=.d)
+LIBOPENMPTTEST_CXX_SOURCES += $(LIBOPENMPT_CXX_SOURCES)
+LIBOPENMPTTEST_C_SOURCES += $(LIBOPENMPT_C_SOURCES)
+LIBOPENMPTTEST_OBJECTS += $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test.o) $(LIBOPENMPTTEST_C_SOURCES:.c=.test.o)
+LIBOPENMPTTEST_DEPENDS = $(LIBOPENMPTEST_OBJECTS:.test.o=.test.d)
 ALL_OBJECTS += $(LIBOPENMPTTEST_OBJECTS)
 ALL_DEPENDS += $(LIBOPENMPTTEST_DEPENDS)
 
@@ -473,14 +484,13 @@ endif
 endif
 ifeq ($(TEST),1)
 OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
-else
+endif
 ifeq ($(HOST),unix)
 OUTPUTS += bin/libopenmpt.pc
 endif
 ifeq ($(OPENMPT123),1)
 ifeq ($(MPT_WITH_HELP2MAN),1)
 OUTPUTS += bin/openmpt123.1
-endif
 endif
 endif
 ifeq ($(SHARED_SONAME),1)
@@ -503,7 +513,11 @@ MISC_OUTPUTDIRS += bin/dist-zip
 MISC_OUTPUTDIRS += bin/docs
 
 
+ifeq ($(ONLY_TEST),1)
+all: bin/libopenmpt_test$(EXESUFFIX)
+else
 all: $(OUTPUTS)
+endif
 
 .PHONY: docs
 docs: bin/made.docs
@@ -524,9 +538,9 @@ check: test
 test: bin/libopenmpt_test$(EXESUFFIX)
 	bin/libopenmpt_test$(EXESUFFIX)
 
-bin/libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
-	$(INFO) [LD ] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPTTEST_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+bin/libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) 
+	$(INFO) [LD-TEST] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LIBOPENMPTTEST_OBJECTS) $(LOADLIBES) $(LDLIBS) -o $@
 
 bin/libopenmpt.pc:
 	$(INFO) [GEN] $@
@@ -700,11 +714,11 @@ bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip: bin/svn_version_dist.h
 	cd bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/ && zip -r ../OpenMPT-src-$(DIST_OPENMPT_VERSION).zip --compression-method deflate -9 *
 
 bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
-	$(INFO) [AR ] $@
+	$(INFO) [AR] $@
 	$(SILENT)$(AR) $(ARFLAGS) $@ $^
 
 bin/libopenmpt.so: $(LIBOPENMPT_OBJECTS)
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) -shared $(LIBOPENMPT_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 ifeq ($(SHARED_SONAME),1)
 	$(SILENT)mv bin/libopenmpt.so bin/$(LIBOPENMPT_SONAME)
@@ -712,7 +726,7 @@ ifeq ($(SHARED_SONAME),1)
 endif
 
 bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) -shared $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPT_MODPLUG_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
 bin/openmpt123.1: bin/openmpt123$(EXESUFFIX)
@@ -724,20 +738,20 @@ openmpt123/openmpt123.o: openmpt123/openmpt123.cpp
 	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CXXFLAGS_OPENMPT123) $(CPPFLAGS) $(CPPFLAGS_OPENMPT123) $(TARGET_ARCH) -M -MT$@ $< > $*.d
 	$(SILENT)$(COMPILE.cc) $(CXXFLAGS_OPENMPT123) $(CPPFLAGS_OPENMPT123) $(OUTPUT_OPTION) $<
 bin/openmpt123$(EXESUFFIX): $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
 ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
 endif
 
 libopenmpt/examples/libopenmpt_example_c.o: libopenmpt/examples/libopenmpt_example_c.c
-	$(INFO) [CC ] $<
+	$(INFO) [CC] $<
 	$(VERYSILENT)$(CC) $(CFLAGS) $(CFLAGS_EXAMPLES) $(CPPFLAGS) $(CPPFLAGS_EXAMPLES) $(TARGET_ARCH) -M -MT$@ $< > $*.d
 	$(SILENT)$(COMPILE.c) $(CFLAGS_EXAMPLES) $(CPPFLAGS_EXAMPLES) $(OUTPUT_OPTION) $<
 libopenmpt/examples/libopenmpt_example_c_mem.o: libopenmpt/examples/libopenmpt_example_c_mem.c
-	$(INFO) [CC ] $<
+	$(INFO) [CC] $<
 	$(VERYSILENT)$(CC) $(CFLAGS) $(CFLAGS_EXAMPLES) $(CPPFLAGS) $(CPPFLAGS_EXAMPLES) $(TARGET_ARCH) -M -MT$@ $< > $*.d
 	$(SILENT)$(COMPILE.c) $(CFLAGS_EXAMPLES) $(CPPFLAGS_EXAMPLES) $(OUTPUT_OPTION) $<
 libopenmpt/examples/libopenmpt_example_cxx.o: libopenmpt/examples/libopenmpt_example_cxx.cpp
@@ -745,27 +759,27 @@ libopenmpt/examples/libopenmpt_example_cxx.o: libopenmpt/examples/libopenmpt_exa
 	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CXXFLAGS_EXAMPLES) $(CPPFLAGS) $(CPPFLAGS_EXAMPLES) $(TARGET_ARCH) -M -MT$@ $< > $*.d
 	$(SILENT)$(COMPILE.cc) $(CXXFLAGS_EXAMPLES) $(CPPFLAGS_EXAMPLES) $(OUTPUT_OPTION) $<
 bin/libopenmpt_example_c$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 endif
 bin/libopenmpt_example_c_mem$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 endif
 bin/libopenmpt_example_cxx$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
-	$(INFO) [LD ] $@
+	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
 endif
 

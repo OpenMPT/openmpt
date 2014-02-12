@@ -14,15 +14,14 @@ which is not included in normal builds.
 
 Compile with
 
-    make TEST=1 $YOURMAKEOPTIONS clean
-    make TEST=1 $YOURMAKEOPTIONS
-    make TEST=1 $YOURMAKEOPTIONS check
-
-In order to build your normal binaries again, run
-
     make $YOURMAKEOPTIONS clean
     make $YOURMAKEOPTIONS
 
+and run
+
+    make $YOURMAKEOPTIONS check
+
+.
 As the build system retains no state between make invocations, you have to
 provide your make options on every make invocation.
 
