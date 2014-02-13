@@ -201,6 +201,9 @@ void CASIODevice::Init()
 	m_BufferIndex = 0;
 	InterlockedExchange(&m_RenderSilence, 0);
 	InterlockedExchange(&m_RenderingSilence, 0);
+
+	m_QueriedFeatures.reset();
+	m_UsedFeatures.reset();
 }
 
 
@@ -1020,7 +1023,10 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 //-----------------------------------------------------------------------------------------------------------
 {
 	ASSERT(directProcess); // !directProcess is not handled correctly in OpenMPT, would require a separate thread and potentially additional buffering
-	MPT_UNREFERENCED_PARAMETER(directProcess);
+	if(!directProcess)
+	{
+		m_UsedFeatures.set(AsioFeatureNoDirectProcess);
+	}
 	if(m_Settings.UseHardwareTiming)
 	{
 		if(params)
@@ -1087,6 +1093,35 @@ void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
 }
 
 
+static std::string AsioFeaturesToString(FlagSet<AsioFeatures> features)
+//---------------------------------------------------------------------
+{
+	std::string result;
+	bool first = true;
+	if(features[AsioFeatureResetRequest]) { if(!first) { result += ","; } first = false; result += "reset"; }
+	if(features[AsioFeatureResyncRequest]) { if(!first) { result += ","; } first = false; result += "resync"; }
+	if(features[AsioFeatureLatenciesChanged]) { if(!first) { result += ","; } first = false; result += "latency"; }
+	if(features[AsioFeatureBufferSizeChange]) { if(!first) { result += ","; } first = false; result += "buffer"; }
+	if(features[AsioFeatureOverload]) { if(!first) { result += ","; } first = false; result += "load"; }
+	if(features[AsioFeatureNoDirectProcess]) { if(!first) { result += ","; } first = false; result += "nodirect"; }
+	return result;
+}
+
+
+std::string CASIODevice::GetStatistics() const
+//--------------------------------------------
+{
+	if(m_UsedFeatures.any())
+	{
+		return mpt::String::Print("WARNING: unsupported features used: %1", AsioFeaturesToString(m_UsedFeatures));
+	} else if(m_QueriedFeatures.any())
+	{
+		return mpt::String::Print("features queried: %1", AsioFeaturesToString(m_QueriedFeatures));
+	}
+	return std::string();
+}
+
+
 long CASIODevice::AsioMessage(long selector, long value, void* message, double* opt)
 //----------------------------------------------------------------------------------
 {
@@ -1104,10 +1139,30 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 			result = m_Settings.UseHardwareTiming ? 1 : 0;
 			break;
 		case kAsioResetRequest:
+			m_QueriedFeatures.set(AsioFeatureResetRequest);
+			// unsupported
+			result = 0;
+			break;
 		case kAsioBufferSizeChange:
+			m_QueriedFeatures.set(AsioFeatureBufferSizeChange);
+			// unsupported
+			result = 0;
+			break;
 		case kAsioResyncRequest:
+			m_QueriedFeatures.set(AsioFeatureResyncRequest);
+			// unsupported
+			result = 0;
+			break;
 		case kAsioLatenciesChanged:
+			m_QueriedFeatures.set(AsioFeatureLatenciesChanged);
+			// unsupported
+			result = 0;
+			break;
 		case kAsioOverload:
+			m_QueriedFeatures.set(AsioFeatureOverload);
+			// unsupported
+			result = 0;
+			break;
 		default:
 			// unsupported
 			result = 0;
@@ -1121,10 +1176,30 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 		result = m_Settings.UseHardwareTiming ? 1 : 0;
 		break;
 	case kAsioResetRequest:
+		m_UsedFeatures.set(AsioFeatureResetRequest);
+		// unsupported
+		result = 0;
+		break;
 	case kAsioBufferSizeChange:
+		m_UsedFeatures.set(AsioFeatureBufferSizeChange);
+		// unsupported
+		result = 0;
+		break;
 	case kAsioResyncRequest:
+		m_UsedFeatures.set(AsioFeatureResyncRequest);
+		// unsupported
+		result = 0;
+		break;
 	case kAsioLatenciesChanged:
+		m_UsedFeatures.set(AsioFeatureLatenciesChanged);
+		// unsupported
+		result = 0;
+		break;
 	case kAsioOverload:
+		m_UsedFeatures.set(AsioFeatureOverload);
+		// unsupported
+		result = 0;
+		break;
 	default:
 		// unsupported
 		result = 0;

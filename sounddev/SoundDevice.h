@@ -448,7 +448,10 @@ public:
 
 	int64 GetStreamPositionFrames() const;
 
+	virtual std::string GetStatistics() const { return std::string(); }
+
 	virtual bool OpenDriverSettings() { return false; };
+
 };
 
 
