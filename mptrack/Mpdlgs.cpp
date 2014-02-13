@@ -575,10 +575,10 @@ void COptionsSoundcard::UpdateControls()
 	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
 	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
 	GetDlgItem(IDC_CHECK4)->SetWindowText(mpt::ToCString(m_CurrentDeviceCaps.ExclusiveModeDescription));
-	CheckDlgButton(IDC_CHECK4, m_Settings.ExclusiveMode ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK5, m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK8, m_Settings.KeepDeviceRunning ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK9, m_Settings.UseHardwareTiming ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK4, m_CurrentDeviceCaps.CanExclusiveMode && m_Settings.ExclusiveMode ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK5, m_CurrentDeviceCaps.CanBoostThreadPriority && m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK8, m_CurrentDeviceCaps.CanKeepDeviceRunning && m_Settings.KeepDeviceRunning ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK9, m_CurrentDeviceCaps.CanUseHardwareTiming && m_Settings.UseHardwareTiming ? MF_CHECKED : MF_UNCHECKED);
 }
 
 
