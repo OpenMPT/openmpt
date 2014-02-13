@@ -691,7 +691,8 @@ void COptionsSoundcard::UpdateStatistics()
 			s += mpt::String::Print("Buffer: %1%%\r\n", (bufferAttributes.Latency > 0.0) ? Util::Round<int64>(currentLatency / bufferAttributes.Latency * 100.0) : 0);
 		}
 		s += mpt::String::Print("Latency: %1 ms (current: %2 ms, %3 frames)\r\n", mpt::Format("%4.1f").ToString(bufferAttributes.Latency * 1000.0), mpt::Format("%4.1f").ToString(currentLatency * 1000.0), Util::Round<int64>(currentLatency * samplerate));
-		s += mpt::String::Print("Update Interval: %1 ms (current: %2 ms, %3 frames)\r\n", mpt::Format("%4.1f").ToString(bufferAttributes.UpdateInterval * 1000.0), mpt::Format("%4.1f").ToString(currentUpdateInterval * 1000.0), Util::Round<int64>(currentUpdateInterval * samplerate));
+		s += mpt::String::Print("Period: %1 ms (current: %2 ms, %3 frames)\r\n", mpt::Format("%4.1f").ToString(bufferAttributes.UpdateInterval * 1000.0), mpt::Format("%4.1f").ToString(currentUpdateInterval * 1000.0), Util::Round<int64>(currentUpdateInterval * samplerate));
+		s += pMainFrm->gpSoundDevice->GetStatistics();
 		m_EditStatistics.SetWindowText(s.c_str());
 	}	else
 	{

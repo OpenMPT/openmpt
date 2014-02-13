@@ -13,6 +13,8 @@
 
 #include "SoundDevices.h"
 
+#include "../common/FlagSet.h"
+
 #ifndef NO_ASIO
 #include <iasiodrv.h>
 #endif
@@ -23,6 +25,18 @@
 //
 
 #ifndef NO_ASIO
+
+enum AsioFeatures
+{
+	AsioFeatureResetRequest     = 1<<0,
+	AsioFeatureResyncRequest    = 1<<1,
+	AsioFeatureLatenciesChanged = 1<<2,
+	AsioFeatureBufferSizeChange = 1<<3,
+	AsioFeatureOverload         = 1<<4,
+	AsioFeatureNoDirectProcess  = 1<<5,
+	AsioFeatureNone = 0
+};
+DECLARE_FLAGSET(AsioFeatures)
 
 //====================================
 class CASIODevice: public ISoundDevice
@@ -54,6 +68,9 @@ protected:
 
 	int64 m_StreamPositionOffset;
 
+	FlagSet<AsioFeatures> m_QueriedFeatures;
+	FlagSet<AsioFeatures> m_UsedFeatures;
+
 private:
 	void UpdateTimeInfo(AsioTimeInfo asioTimeInfo);
 
@@ -82,6 +99,8 @@ public:
 
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
 	bool OpenDriverSettings();
+
+	std::string GetStatistics() const;
 
 public:
 	static std::vector<SoundDeviceInfo> EnumerateDevices();
