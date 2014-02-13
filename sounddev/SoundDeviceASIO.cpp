@@ -1118,7 +1118,7 @@ std::string CASIODevice::GetStatistics() const
 	{
 		return mpt::String::Print("features queried: %1", AsioFeaturesToString(m_QueriedFeatures));
 	}
-	return std::string();
+	return std::string("OK.");
 }
 
 
