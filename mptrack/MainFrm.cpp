@@ -1213,6 +1213,23 @@ void CMainFrame::StopPlayback()
 }
 
 
+bool CMainFrame::RestartPlayback()
+//--------------------------------
+{
+	if(!m_pSndFile) return false; // nothing to play
+	if(!IsAudioDeviceOpen()) return false;
+	if(!gpSoundDevice->IsPlaying()) return false;
+	gpSoundDevice->Stop(true);
+	if(m_NotifyTimer)
+	{
+		KillTimer(m_NotifyTimer);
+		m_NotifyTimer = 0;
+	}
+	ResetNotificationBuffer();
+	return StartPlayback();
+}
+
+
 bool CMainFrame::PausePlayback()
 //------------------------------
 {
@@ -1594,10 +1611,41 @@ HWND CMainFrame::GetFollowSong() const
 }
 
 
-BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, SoundDeviceID deviceID)
-//------------------------------------------------------------------------------------------------
+void CMainFrame::IdleHandlerSounddevice()
+//---------------------------------------
 {
-	if((TrackerSettings::Instance().GetSoundDeviceID() != deviceID) || (TrackerSettings::Instance().GetSoundDeviceSettings(deviceID) != deviceSettings))
+	if(gpSoundDevice)
+	{
+		const LONG requestFlags = gpSoundDevice->GetRequestFlags();
+		if(requestFlags & ISoundDevice::RequestFlagClose)
+		{
+			StopPlayback();
+			audioCloseDevice();
+		} else if(requestFlags & ISoundDevice::RequestFlagReset)
+		{
+			ResetSoundCard();
+		} else if(requestFlags & ISoundDevice::RequestFlagRestart)
+		{
+			RestartPlayback();
+		} else
+		{
+			gpSoundDevice->OnIdle();
+		}
+	}
+}
+
+
+BOOL CMainFrame::ResetSoundCard()
+//-------------------------------
+{
+	return CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceID()), TrackerSettings::Instance().GetSoundDeviceID(), true);
+}
+
+
+BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, SoundDeviceID deviceID, bool forceReset)
+//-----------------------------------------------------------------------------------------------------------------
+{
+	if(forceReset || (TrackerSettings::Instance().GetSoundDeviceID() != deviceID) || (TrackerSettings::Instance().GetSoundDeviceSettings(deviceID) != deviceSettings))
 	{
 		CModDoc *pActiveMod = nullptr;
 		if(IsPlaying())
@@ -1944,6 +1992,9 @@ void CMainFrame::OnTimer(UINT_PTR timerID)
 void CMainFrame::OnTimerGUI()
 //---------------------------
 {
+
+	IdleHandlerSounddevice();
+
 	// Display Time in status bar
 	CSoundFile::samplecount_t time = 0;
 	if(m_pSndFile != nullptr && m_pSndFile->GetSampleRate() != 0)

@@ -376,6 +376,12 @@ private:
 	int64 m_StreamPositionRenderFrames;
 	int64 m_StreamPositionOutputFrames;
 
+	mutable LONG m_RequestFlags;
+public:
+	static const LONG RequestFlagClose = 1<<0;
+	static const LONG RequestFlagReset = 1<<1;
+	static const LONG RequestFlagRestart = 1<<2;
+
 protected:
 
 	virtual void InternalFillAudioBuffer() = 0;
@@ -386,6 +392,10 @@ protected:
 	void SourceAudioPreRead(std::size_t numFrames);
 	void SourceAudioRead(void *buffer, std::size_t numFrames);
 	void SourceAudioDone(std::size_t numFrames, int32 framesLatency);
+
+	void RequestClose() { _InterlockedOr(&m_RequestFlags, RequestFlagClose); }
+	void RequestReset() { _InterlockedOr(&m_RequestFlags, RequestFlagReset); }
+	void RequestRestart() { _InterlockedOr(&m_RequestFlags, RequestFlagRestart); }
 
 	void AudioSendMessage(const std::string &str);
 
@@ -408,6 +418,7 @@ protected:
 	virtual bool InternalOpen() = 0;
 	virtual bool InternalStart() = 0;
 	virtual void InternalStop() = 0;
+	virtual void InternalStopForce() { InternalStop(); }
 	virtual bool InternalClose() = 0;
 
 public:
@@ -430,10 +441,14 @@ public:
 	bool Open(const SoundDeviceSettings &settings);
 	bool Close();
 	bool Start();
-	void Stop();
+	void Stop(bool force = false);
+
+	LONG GetRequestFlags() const { return InterlockedExchangeAdd(&m_RequestFlags, 0); /* read */ }
 
 	bool IsOpen() const { return InternalIsOpen(); }
 	bool IsPlaying() const { return m_IsPlaying; }
+
+	virtual bool OnIdle() { return false; } // return true if any work has been done
 
 	SoundDeviceSettings GetSettings() const { return m_Settings; }
 	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }

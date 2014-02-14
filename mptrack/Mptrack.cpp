@@ -1684,6 +1684,12 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 //---------------------------------
 {
 	BOOL b = CWinApp::OnIdle(lCount);
+
+	if(CMainFrame::GetMainFrame())
+	{
+		CMainFrame::GetMainFrame()->IdleHandlerSounddevice();
+	}
+
 	if ((gpSplashScreen) && (m_bInitialized))
 	{
 		if (timeGetTime() - m_dwTimeStarted > 1000)		//Set splash screen duration here -rewbs
