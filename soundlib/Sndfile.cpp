@@ -1016,18 +1016,7 @@ BOOL CSoundFile::Destroy()
 	}
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if ((m_MixPlugins[i].nPluginDataSize) && (m_MixPlugins[i].pPluginData))
-		{
-			m_MixPlugins[i].nPluginDataSize = 0;
-			delete[] m_MixPlugins[i].pPluginData;
-			m_MixPlugins[i].pPluginData = NULL;
-		}
-		m_MixPlugins[i].pMixState = NULL;
-		if (m_MixPlugins[i].pMixPlugin)
-		{
-			m_MixPlugins[i].pMixPlugin->Release();
-			m_MixPlugins[i].pMixPlugin = NULL;
-		}
+		m_MixPlugins[i].Destroy();
 	}
 
 	m_nType = MOD_TYPE_NONE;
@@ -2150,7 +2139,7 @@ struct UpgradePatternData
 {
 	UpgradePatternData(CSoundFile &sf) : sndFile(sf), chn(0) { }
 
-	void operator()(ModCommand& m)
+	void operator() (ModCommand &m)
 	{
 		if(m.IsPcNote())
 		{
@@ -2165,7 +2154,7 @@ struct UpgradePatternData
 				// Out-of-range global volume commands should be ignored.
 				// OpenMPT 1.17.03.02 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
 				// So for tracks made with older versions than OpenMPT 1.17.03.02 or tracks made with 1.17.03.02 <= version < 1.20, we limit invalid global volume commands.
-				LimitMax(m.param, (sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? BYTE(128): BYTE(64));
+				LimitMax(m.param, ModCommand::PARAM((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? 128: 64));
 			} else if(m.command == CMD_S3MCMDEX && (sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 			{
 				// SC0 and SD0 should be interpreted as SC1 and SD1 in IT files.
@@ -2231,8 +2220,7 @@ struct UpgradePatternData
 				// OpenMPT 1.20 fixes multiple fine pattern delays on the same row. Previously, only the last command was considered,
 				// but all commands should be added up. Since Scream Tracker 3 itself doesn't support S6x, we also use Impulse Tracker's behaviour here,
 				// since we can assume that most S3Ms that make use of S6x were composed with Impulse Tracker.
-				ModCommand *fixCmd = (&m) - chn;
-				for(CHANNELINDEX i = 0; i < chn; i++, fixCmd++)
+				for(ModCommand *fixCmd = (&m) - chn; fixCmd < &m; fixCmd++)
 				{
 					if((fixCmd->command == CMD_S3MCMDEX || fixCmd->command == CMD_XFINEPORTAUPDOWN) && (fixCmd->param & 0xF0) == 0x60)
 					{
@@ -2245,8 +2233,7 @@ struct UpgradePatternData
 			{
 				// OpenMPT 1.20 fixes multiple pattern delays on the same row. Previously, only the *last* command was considered,
 				// but Scream Tracker 3 and Impulse Tracker only consider the *first* command.
-				ModCommand *fixCmd = (&m) - chn;
-				for(CHANNELINDEX i = 0; i < chn; i++, fixCmd++)
+				for(ModCommand *fixCmd = (&m) - chn; fixCmd < &m; fixCmd++)
 				{
 					if(fixCmd->command == CMD_S3MCMDEX && (fixCmd->param & 0xF0) == 0xE0)
 					{

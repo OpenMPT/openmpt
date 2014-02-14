@@ -123,19 +123,8 @@ void CSelectPluginDlg::OnOK()
 		{
 			CriticalSection cs;
 
-			if (pCurrentPlugin != nullptr)
-			{
-				pCurrentPlugin->Release();
-			}
-
-			// Just in case...
-			m_pPlugin->pMixPlugin = nullptr;
-			m_pPlugin->pMixState = nullptr;
-
-			// Remove old state
-			m_pPlugin->nPluginDataSize = 0;
-			if (m_pPlugin->pPluginData) delete[] m_pPlugin->pPluginData;
-			m_pPlugin->pPluginData = nullptr;
+			// Destroy old plugin, if there was one.
+			m_pPlugin->Destroy();
 
 			// Initialize plugin info
 			MemsetZero(m_pPlugin->Info);
