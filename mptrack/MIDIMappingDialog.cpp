@@ -70,15 +70,25 @@ END_MESSAGE_MAP()
 LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 //-------------------------------------------------------------------
 {
-	if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange && IsDlgButtonChecked(IDC_CHECK_MIDILEARN))
+	if(IsDlgButtonChecked(IDC_CHECK_MIDILEARN))
 	{
-		m_ChannelCBox.SetCurSel(1 + MIDIEvents::GetChannelFromEvent(dwMidiDataParam));
-		m_EventCBox.SetCurSel(0);
-		m_ControllerCBox.SetCurSel(MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
-		OnCbnSelchangeComboChannel();
-		OnCbnSelchangeComboEvent();
-		OnCbnSelchangeComboController();
-		UpdateString();
+		for(int i = 0; i < m_EventCBox.GetCount(); i++)
+		{
+			if(static_cast<MIDIEvents::EventType>(m_EventCBox.GetItemData(i)) == MIDIEvents::GetTypeFromEvent(dwMidiDataParam))
+			{
+				m_ChannelCBox.SetCurSel(1 + MIDIEvents::GetChannelFromEvent(dwMidiDataParam));
+				m_EventCBox.SetCurSel(i);
+				if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange)
+				{
+					m_ControllerCBox.SetCurSel(MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
+				}
+				OnCbnSelchangeComboChannel();
+				OnCbnSelchangeComboEvent();
+				OnCbnSelchangeComboController();
+				UpdateString();
+				break;
+			}
+		}
 	}
 	return 1;
 }
@@ -89,7 +99,18 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	m_EventCBox.SetCurSel(0);
+	m_EventCBox.SetItemData(m_EventCBox.AddString("Controller change (0xB)"), MIDIEvents::evControllerChange);
+	m_EventCBox.SetItemData(m_EventCBox.AddString("Polyphonic aftertouch (0xA)"), MIDIEvents::evPolyAftertouch);
+	m_EventCBox.SetItemData(m_EventCBox.AddString("Channel aftertouch (0xD)"), MIDIEvents::evChannelAftertouch);
+	m_EventCBox.SetCurSel(-1);
+	for(int i = 0; i < m_EventCBox.GetCount(); i++)
+	{
+		if(m_EventCBox.GetItemData(i) == m_Setting.GetEvent())
+		{
+			m_EventCBox.SetCurSel(i);
+			break;
+		}
+	}
 	
 	//Add controller names.
 	for(size_t i = MIDIEvents::MIDICC_start; i <= MIDIEvents::MIDICC_end; i++)
@@ -150,11 +171,15 @@ void CMIDIMappingDialog::OnLbnSelchangeList1()
 	
 	m_ChannelCBox.SetCurSel(activeSetting.GetChannel());
 
-	if(m_Setting.GetEvent() == MIDIEvents::evControllerChange)
-		m_EventCBox.SetCurSel(0);
-	else
-		m_EventCBox.SetCurSel(-1);
-
+	m_EventCBox.SetCurSel(-1);
+	for(int i = 0; i < m_EventCBox.GetCount(); i++)
+	{
+		if(m_EventCBox.GetItemData(i) == m_Setting.GetEvent())
+		{
+			m_EventCBox.SetCurSel(i);
+			break;
+		}
+	}
 
 	m_ControllerCBox.SetCurSel(activeSetting.GetController());
 	m_PluginCBox.SetCurSel(activeSetting.GetPlugIndex()-1);
@@ -240,13 +265,11 @@ void CMIDIMappingDialog::OnCbnSelchangeComboParam()
 void CMIDIMappingDialog::OnCbnSelchangeComboEvent()
 //-------------------------------------------------
 {
-	if(m_EventCBox.GetCurSel() == 0)
-	{
-		m_Setting.SetEvent(0xB);
-		m_ControllerCBox.EnableWindow();
-	}
-	else
-		m_ControllerCBox.EnableWindow(FALSE);
+	uint8 eventType = static_cast<uint8>(m_EventCBox.GetItemData(m_EventCBox.GetCurSel()));
+	m_Setting.SetEvent(eventType);
+	m_ControllerCBox.EnableWindow(eventType == MIDIEvents::evControllerChange ? TRUE : FALSE);
+	if(eventType != MIDIEvents::evControllerChange)
+		m_ControllerCBox.SetCurSel(0);
 
 	UpdateString();
 }
@@ -283,7 +306,7 @@ void CMIDIMappingDialog::OnBnClickedButtonReplace()
 			m_rSndFile.GetpModDoc()->SetModified();
 
 		m_List.DeleteString(i);
-        m_List.InsertString(newIndex, CreateListString(m_Setting));
+		m_List.InsertString(newIndex, CreateListString(m_Setting));
 		m_List.SetCurSel(newIndex);
 		OnLbnSelchangeList1();
 	}
@@ -331,7 +354,7 @@ CString CMIDIMappingDialog::CreateListString(const CMIDIMappingDirective& s)
 	str.AppendChar('.');
 
 	//Controller name
-	if(s.GetController() <= MIDIEvents::MIDICC_end)
+	if(s.GetController() <= MIDIEvents::MIDICC_end && s.GetEvent() == MIDIEvents::evControllerChange)
 	{
 		CString tstr;
 		tstr.Format("%d %s", s.GetController(), MIDIEvents::MidiCCNames[s.GetController()]);

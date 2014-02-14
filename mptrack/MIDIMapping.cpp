@@ -9,10 +9,10 @@
 
 
 #include "stdafx.h"
-#include "MIDIMapping.h"
 #include "../soundlib/MIDIEvents.h"
 #include "Mainfrm.h"
 #include "../soundlib/FileReader.h"
+#include "MIDIMapping.h"
 
 
 std::string CMIDIMappingDirective::ToString() const
@@ -116,46 +116,40 @@ bool CMIDIMapper::Deserialize(FileReader &file)
 }
 
 
-bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, BYTE& mappedIndex, uint32& paramindex, BYTE& paramval)
-//-----------------------------------------------------------------------------------------------------
+bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint8 &paramval)
+//-------------------------------------------------------------------------------------------------------------------
 {
 	bool captured = false;
 
-	if(MIDIEvents::GetTypeFromEvent(midimsg) != MIDIEvents::evControllerChange) return captured;
-	//For now only controllers can be mapped so if event is not controller change,
-	//no mapping will be found and thus no search is done.
-	//NOTE: The event value is not checked in code below.
+	const MIDIEvents::EventType eventType = MIDIEvents::GetTypeFromEvent(midimsg);
+	const uint8 controller = MIDIEvents::GetDataByte1FromEvent(midimsg);
+	const uint8 channel = MIDIEvents::GetChannelFromEvent(midimsg);
 
-	const BYTE controller = MIDIEvents::GetDataByte1FromEvent(midimsg);
-
-	const_iterator citer = std::lower_bound(Begin(), End(), controller); 
-
-	const BYTE channel = MIDIEvents::GetChannelFromEvent(midimsg);
-
-	for(; citer != End() && citer->GetController() == controller && !captured; citer++)
+	for(const_iterator citer = Begin(); citer != End() && !captured; citer++)
 	{
 		if(!citer->IsActive()) continue;
-		BYTE plugindex = 0;
-		uint32 param = 0;
-		if( citer->GetAnyChannel() || channel+1 == citer->GetChannel())
-		{
-			plugindex = citer->GetPlugIndex();
-			param = citer->GetParamIndex();
-			if(citer->GetAllowPatternEdit())
-			{
-				mappedIndex = plugindex;
-				paramindex = param;
-				paramval = MIDIEvents::GetDataByte2FromEvent(midimsg);
-			}
-			if(citer->GetCaptureMIDI()) captured = true;
+		if(citer->GetEvent() != eventType) continue;
+		if(eventType == MIDIEvents::evControllerChange && citer->GetController() != controller) continue;
+		if(!citer->GetAnyChannel() && channel + 1 != citer->GetChannel()) continue;
 
-			if(plugindex > 0 && plugindex <= MAX_MIXPLUGINS)
-			{
-				IMixPlugin* pPlug = m_rSndFile.m_MixPlugins[plugindex-1].pMixPlugin;
-				if(!pPlug) continue;
-				pPlug->SetZxxParameter(param, (midimsg >> 16) & 0x7F);
-				CMainFrame::GetMainFrame()->ThreadSafeSetModified(m_rSndFile.GetpModDoc());
-			}
+		const PLUGINDEX plugindex = citer->GetPlugIndex();
+		const uint32 param = citer->GetParamIndex();
+		const uint8 val = (citer->GetEvent() == MIDIEvents::evChannelAftertouch ? controller : MIDIEvents::GetDataByte2FromEvent(midimsg)) & 0x7F;
+
+		if(citer->GetAllowPatternEdit())
+		{
+			mappedIndex = plugindex;
+			paramindex = param;
+			paramval = val;
+		}
+		if(citer->GetCaptureMIDI()) captured = true;
+
+		if(plugindex > 0 && plugindex <= MAX_MIXPLUGINS)
+		{
+			IMixPlugin *pPlug = m_rSndFile.m_MixPlugins[plugindex - 1].pMixPlugin;
+			if(!pPlug) continue;
+			pPlug->SetZxxParameter(param, val);
+			CMainFrame::GetMainFrame()->ThreadSafeSetModified(m_rSndFile.GetpModDoc());
 		}
 	}
 
