@@ -435,6 +435,7 @@ public:
 	bool PreparePlayback();
 	bool StartPlayback();
 	void StopPlayback();
+	bool RestartPlayback();
 	bool PausePlayback();
 	static bool IsValidSoundFile(CSoundFile &sndFile) { return sndFile.GetType() ? true : false; }
 	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
@@ -464,7 +465,10 @@ public:
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
 
-	BOOL SetupSoundCard(const SoundDeviceSettings &deviceSettings, SoundDeviceID deviceID);
+	void IdleHandlerSounddevice();
+
+	BOOL ResetSoundCard();
+	BOOL SetupSoundCard(const SoundDeviceSettings &deviceSettings, SoundDeviceID deviceID, bool forceReset = false);
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer();
 

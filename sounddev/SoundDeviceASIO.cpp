@@ -29,6 +29,9 @@
 #ifndef NO_ASIO
 
 
+static const double AsioSampleRateTolerance = 0.05;
+
+
 // Helper class to temporarily open a driver for a query.
 class TemporaryASIODriverOpener
 {
@@ -177,6 +180,8 @@ CASIODevice::CASIODevice(SoundDeviceID id, const std::wstring &internalID)
 	: ISoundDevice(id, internalID)
 {
 	Init();
+	m_QueriedFeatures.reset();
+	m_UsedFeatures.reset();
 }
 
 
@@ -202,8 +207,21 @@ void CASIODevice::Init()
 	InterlockedExchange(&m_RenderSilence, 0);
 	InterlockedExchange(&m_RenderingSilence, 0);
 
-	m_QueriedFeatures.reset();
-	m_UsedFeatures.reset();
+	InterlockedExchange(&m_AsioRequestFlags, 0);
+}
+
+
+bool CASIODevice::HandleRequests()
+//--------------------------------
+{
+	bool result = false;
+	LONG flags = InterlockedExchange(&m_AsioRequestFlags, 0);
+	if(flags & AsioRequestFlagLatenciesChanged)
+	{
+		UpdateLatency();
+		result = true;
+	}
+	return result;
 }
 
 
@@ -421,29 +439,7 @@ bool CASIODevice::InternalOpen()
 
 		m_StreamPositionOffset = m_nAsioBufferLen;
 
-		SoundBufferAttributes bufferAttributes;
-		long inputLatency = 0;
-		long outputLatency = 0;
-		try
-		{
-			asioCall(getLatencies(&inputLatency, &outputLatency));
-		} catch(...)
-		{
-			// continue, failure is not fatal here
-			inputLatency = 0;
-			outputLatency = 0;
-		}
-		if(outputLatency >= (long)m_nAsioBufferLen)
-		{
-			bufferAttributes.Latency = (double)(outputLatency + m_nAsioBufferLen) / (double)m_Settings.Samplerate; // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
-		} else
-		{
-			// pointless value returned from asio driver, use a sane estimate
-			bufferAttributes.Latency = 2.0 * (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
-		}
-		bufferAttributes.UpdateInterval = (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
-		bufferAttributes.NumBuffers = 2;
-		UpdateBufferAttributes(bufferAttributes);
+		UpdateLatency();
 
 		return true;
 
@@ -456,6 +452,35 @@ bool CASIODevice::InternalOpen()
 	}
 	InternalClose();
 	return false;
+}
+
+
+void CASIODevice::UpdateLatency()
+//-------------------------------
+{
+	SoundBufferAttributes bufferAttributes;
+	long inputLatency = 0;
+	long outputLatency = 0;
+	try
+	{
+		asioCall(getLatencies(&inputLatency, &outputLatency));
+	} catch(...)
+	{
+		// continue, failure is not fatal here
+		inputLatency = 0;
+		outputLatency = 0;
+	}
+	if(outputLatency >= (long)m_nAsioBufferLen)
+	{
+		bufferAttributes.Latency = (double)(outputLatency + m_nAsioBufferLen) / (double)m_Settings.Samplerate; // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
+	} else
+	{
+		// pointless value returned from asio driver, use a sane estimate
+		bufferAttributes.Latency = 2.0 * (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
+	}
+	bufferAttributes.UpdateInterval = (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
+	bufferAttributes.NumBuffers = 2;
+	UpdateBufferAttributes(bufferAttributes);
 }
 
 
@@ -527,12 +552,24 @@ bool CASIODevice::InternalStart()
 }
 
 
+void CASIODevice::InternalStopForce()
+//-----------------------------------
+{
+	InternalStopImpl(true);
+}
+
 void CASIODevice::InternalStop()
 //------------------------------
 {
+	InternalStopImpl(false);
+}
+
+void CASIODevice::InternalStopImpl(bool force)
+//--------------------------------------------
+{
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while stopping ASIO");
 
-	if(m_Settings.KeepDeviceRunning)
+	if(m_Settings.KeepDeviceRunning && !force)
 	{
 		SetRenderSilence(true, true);
 		return;
@@ -1089,7 +1126,19 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
 //---------------------------------------------------------
 {
-	MPT_UNREFERENCED_PARAMETER(sRate);
+	if(Util::Round<uint32>(sRate) == m_Settings.Samplerate)
+	{
+		// not different, ignore it
+		return;
+	}
+	m_UsedFeatures.set(AsioFeatureSampleRateChange);
+	if((double)m_Settings.Samplerate * (1.0 - AsioSampleRateTolerance) <= sRate && sRate <= (double)m_Settings.Samplerate * (1.0 + AsioSampleRateTolerance))
+	{
+		// ignore slight differences which might me due to a unstable external ASIO clock source
+		return;
+	}
+	// play safe and close the device
+	RequestClose();
 }
 
 
@@ -1104,6 +1153,7 @@ static std::string AsioFeaturesToString(FlagSet<AsioFeatures> features)
 	if(features[AsioFeatureBufferSizeChange]) { if(!first) { result += ","; } first = false; result += "buffer"; }
 	if(features[AsioFeatureOverload]) { if(!first) { result += ","; } first = false; result += "load"; }
 	if(features[AsioFeatureNoDirectProcess]) { if(!first) { result += ","; } first = false; result += "nodirect"; }
+	if(features[AsioFeatureSampleRateChange]) { if(!first) { result += ","; } first = false; result += "srate"; }
 	return result;
 }
 
@@ -1111,12 +1161,18 @@ static std::string AsioFeaturesToString(FlagSet<AsioFeatures> features)
 std::string CASIODevice::GetStatistics() const
 //--------------------------------------------
 {
-	if(m_UsedFeatures.any())
+	const FlagSet<AsioFeatures> unsupported((AsioFeatures)(AsioFeatureNoDirectProcess | AsioFeatureOverload | AsioFeatureBufferSizeChange | AsioFeatureSampleRateChange));
+	FlagSet<AsioFeatures> unsupportedFeatues = m_UsedFeatures;
+	unsupportedFeatues &= unsupported;
+	if(unsupportedFeatues.any())
 	{
-		return mpt::String::Print("WARNING: unsupported features used: %1", AsioFeaturesToString(m_UsedFeatures));
+		return mpt::String::Print("WARNING: unsupported features: %1", AsioFeaturesToString(unsupportedFeatues));
+	} else if(m_UsedFeatures.any())
+	{
+		return mpt::String::Print("OK, features used: %1", AsioFeaturesToString(m_UsedFeatures));
 	} else if(m_QueriedFeatures.any())
 	{
-		return mpt::String::Print("features queried: %1", AsioFeaturesToString(m_QueriedFeatures));
+		return mpt::String::Print("OK, features queried: %1", AsioFeaturesToString(m_QueriedFeatures));
 	}
 	return std::string("OK.");
 }
@@ -1140,23 +1196,19 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 			break;
 		case kAsioResetRequest:
 			m_QueriedFeatures.set(AsioFeatureResetRequest);
-			// unsupported
-			result = 0;
+			result = 1;
 			break;
 		case kAsioBufferSizeChange:
 			m_QueriedFeatures.set(AsioFeatureBufferSizeChange);
-			// unsupported
 			result = 0;
 			break;
 		case kAsioResyncRequest:
 			m_QueriedFeatures.set(AsioFeatureResyncRequest);
-			// unsupported
-			result = 0;
+			result = 1;
 			break;
 		case kAsioLatenciesChanged:
 			m_QueriedFeatures.set(AsioFeatureLatenciesChanged);
-			// unsupported
-			result = 0;
+			result = 1;
 			break;
 		case kAsioOverload:
 			m_QueriedFeatures.set(AsioFeatureOverload);
@@ -1177,23 +1229,23 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 		break;
 	case kAsioResetRequest:
 		m_UsedFeatures.set(AsioFeatureResetRequest);
-		// unsupported
-		result = 0;
+		RequestReset();
+		result = 1;
 		break;
 	case kAsioBufferSizeChange:
 		m_UsedFeatures.set(AsioFeatureBufferSizeChange);
-		// unsupported
+		// We do not support kAsioBufferSizeChange.
+		// This should cause a driver to send a kAsioResetRequest.
 		result = 0;
 		break;
 	case kAsioResyncRequest:
 		m_UsedFeatures.set(AsioFeatureResyncRequest);
-		// unsupported
-		result = 0;
+		RequestRestart();
+		result = 1;
 		break;
 	case kAsioLatenciesChanged:
-		m_UsedFeatures.set(AsioFeatureLatenciesChanged);
-		// unsupported
-		result = 0;
+		_InterlockedOr(&m_AsioRequestFlags, AsioRequestFlagLatenciesChanged);
+		result = 1;
 		break;
 	case kAsioOverload:
 		m_UsedFeatures.set(AsioFeatureOverload);

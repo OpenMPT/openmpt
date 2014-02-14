@@ -34,6 +34,7 @@ enum AsioFeatures
 	AsioFeatureBufferSizeChange = 1<<3,
 	AsioFeatureOverload         = 1<<4,
 	AsioFeatureNoDirectProcess  = 1<<5,
+	AsioFeatureSampleRateChange = 1<<6,
 	AsioFeatureNone = 0
 };
 DECLARE_FLAGSET(AsioFeatures)
@@ -68,6 +69,9 @@ protected:
 
 	int64 m_StreamPositionOffset;
 
+	static const LONG AsioRequestFlagLatenciesChanged = 1<<0;
+	LONG m_AsioRequestFlags;
+
 	FlagSet<AsioFeatures> m_QueriedFeatures;
 	FlagSet<AsioFeatures> m_UsedFeatures;
 
@@ -88,6 +92,10 @@ public:
 
 private:
 	void Init();
+	bool HandleRequests(); // return true if any work has been done
+	void UpdateLatency();
+
+	void InternalStopImpl(bool force);
 
 public:
 	bool InternalOpen();
@@ -95,9 +103,13 @@ public:
 	void InternalFillAudioBuffer();
 	bool InternalStart();
 	void InternalStop();
+	void InternalStopForce();
 	bool InternalIsOpen() const { return m_BuffersCreated; }
 
+	bool OnIdle() { return HandleRequests(); }
+
 	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
+
 	bool OpenDriverSettings();
 
 	std::string GetStatistics() const;
