@@ -1342,9 +1342,7 @@ void CViewGlobals::OnInsertSlot()
 				MovePlug(MAX_MIXPLUGINS - 1, MAX_MIXPLUGINS - 2, true);
 			} else
 			{
-				pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin->Release();
-				memset(&(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1]), 0, sizeof(SNDMIXPLUGIN));
-				//possible mem leak here...
+				pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].Destroy();
 			}
 		}
 

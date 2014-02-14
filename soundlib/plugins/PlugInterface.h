@@ -208,7 +208,20 @@ struct SNDMIXPLUGIN
 	void SetOutputPlugin(PLUGINDEX plugin)
 		{ if(plugin < MAX_MIXPLUGINS) Info.dwOutputRouting = plugin + 0x80; else Info.dwOutputRouting = 0; }
 
-}; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
+	void Destroy()
+	{
+		delete[] pPluginData;
+		pPluginData = nullptr;
+		nPluginDataSize = 0;
+
+		pMixState = nullptr;
+		if(pMixPlugin)
+		{
+			pMixPlugin->Release();
+			pMixPlugin = nullptr;
+		}
+	}
+};
 
 class CSoundFile;
 typedef bool (*PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN &, CSoundFile &);
