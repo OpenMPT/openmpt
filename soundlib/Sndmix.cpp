@@ -1143,8 +1143,13 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 			if((arpOnRow && pChn->nArpeggioLastNote != pChn->nArpeggioBaseNote + step && (!m_SongFlags[SONG_FIRSTTICK] || !pChn->rowCommand.IsNote()))
 				|| (!arpOnRow && pChn->rowCommand.note == NOTE_NONE && pChn->nArpeggioLastNote != NOTE_NONE))
 				pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, pChn->nArpeggioBaseNote + step, static_cast<uint16>(pChn->nVolume), nChn);
+			// Stop note:
+			// - If some arpeggio note is still registered or
+			// - When starting an arpeggio on a row with no other note on it, stop some possibly still playing note.
 			if(pChn->nArpeggioLastNote != NOTE_NONE)
 				pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, pChn->nArpeggioLastNote + NOTE_MAX_SPECIAL, 0, nChn);
+			else if(arpOnRow && m_SongFlags[SONG_FIRSTTICK] && !pChn->rowCommand.IsNote() && ModCommand::IsNote(pChn->nLastNote))
+				pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, pChn->nLastNote + NOTE_MAX_SPECIAL, 0, nChn);
 
 			if(pChn->rowCommand.command == CMD_ARPEGGIO)
 				pChn->nArpeggioLastNote = pChn->nArpeggioBaseNote + step;
