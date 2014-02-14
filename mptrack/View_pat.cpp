@@ -3833,9 +3833,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 
 	// Handle MIDI mapping.
-	uint8 mappedIndex = uint8_max, paramValue = uint8_max;
-	uint32 paramIndex = 0;
-	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue); 
+	PLUGINDEX mappedIndex = uint8_max;
+	PlugParamIndex paramIndex = 0;
+	uint8 paramValue = uint8_max;
+	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue);
 
 
 	// Handle MIDI messages assigned to shortcuts
@@ -3854,7 +3855,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 		ModCommandPos editpos = GetEditPos(sndFile, liveRecord);
 		ModCommand &m = GetModCommand(sndFile, editpos);
-		pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
+		pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Mapping Record");
 		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 127));
 		if(!liveRecord)
 			InvalidateRow(editpos.row);
@@ -4045,14 +4046,8 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_DOMIDISPACING:
 		if (m_nSpacing)
 		{
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-			//CModDoc *pModDoc = GetDocument();
-			//CSoundFile * pSndFile = pModDoc->GetSoundFile();
-//			if (timeGetTime() - lParam >= 10)
 			int temp = timeGetTime();
 			if (temp - lParam >= 60)
-// -! NEW_FEATURE#0012
 			{
 				CModDoc *pModDoc = GetDocument();
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -4064,8 +4059,6 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 				}
 			} else
 			{
-// -> CODE#0012
-// -> DESC="midi keyboard split"
 //				Sleep(1);
 				Sleep(0);
 				PostMessage(WM_MOD_VIEWMSG, VIEWMSG_DOMIDISPACING, lParam);
@@ -5552,6 +5545,11 @@ void CViewPattern::EnterAftertouch(int note, int atValue)
 	ModCommand &target = GetModCommand(cursor);
 	ModCommand newCommand = target;
 	CSoundFile *pSndFile = GetSoundFile();
+
+	if(target.IsPcNote())
+	{
+		return;
+	}
 
 	switch(TrackerSettings::Instance().aftertouchBehaviour)
 	{

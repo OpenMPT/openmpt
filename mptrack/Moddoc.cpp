@@ -971,8 +971,9 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 
 	if((event == MIDIEvents::evNoteOn) && !vol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
 
-	uint8 mappedIndex = 0, paramValue = 0;
-	uint32 paramIndex = 0;
+	PLUGINDEX mappedIndex = 0;
+	PlugParamIndex paramIndex = 0;
+	uint8 paramValue = 0;
 	bool captured = m_SndFile.GetMIDIMapper().OnMIDImsg(midiData, mappedIndex, paramIndex, paramValue);
 
 	// Handle MIDI messages assigned to shortcuts
