@@ -35,7 +35,7 @@ public:
 	// Get effect index in effect list from effect command + param
 	LONG GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PARAM param) const;
 	// Get effect command + param from effect index
-	ModCommand::COMMAND GetEffectFromIndex(UINT ndx, int &refParam) const;
+	ModCommand::COMMAND GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refParam) const;
 	ModCommand::COMMAND GetEffectFromIndex(UINT ndx) const;
 	// Get parameter mask from effect (for extended effects)
 	UINT GetEffectMaskFromIndex(UINT ndx) const;
