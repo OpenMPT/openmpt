@@ -17,7 +17,6 @@
 
 // CMIDIMappingDialog dialog
 
-IMPLEMENT_DYNAMIC(CMIDIMappingDialog, CDialog)
 CMIDIMappingDialog::CMIDIMappingDialog(CWnd* pParent /*=NULL*/, CSoundFile& rSndfile)
 	: CDialog(CMIDIMappingDialog::IDD, pParent), m_rSndFile(rSndfile), 
 	  m_rMIDIMapper(m_rSndFile.GetMIDIMapper())
@@ -99,20 +98,12 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	// Add events
 	m_EventCBox.SetItemData(m_EventCBox.AddString("Controller change (0xB)"), MIDIEvents::evControllerChange);
 	m_EventCBox.SetItemData(m_EventCBox.AddString("Polyphonic aftertouch (0xA)"), MIDIEvents::evPolyAftertouch);
 	m_EventCBox.SetItemData(m_EventCBox.AddString("Channel aftertouch (0xD)"), MIDIEvents::evChannelAftertouch);
-	m_EventCBox.SetCurSel(-1);
-	for(int i = 0; i < m_EventCBox.GetCount(); i++)
-	{
-		if(m_EventCBox.GetItemData(i) == m_Setting.GetEvent())
-		{
-			m_EventCBox.SetCurSel(i);
-			break;
-		}
-	}
 	
-	//Add controller names.
+	// Add controller names
 	for(size_t i = MIDIEvents::MIDICC_start; i <= MIDIEvents::MIDICC_end; i++)
 	{
 		CString temp;
@@ -120,34 +111,26 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 		m_ControllerCBox.AddString(temp);
 	}
 
-	//Add Pluginnames
+	// Add plugin names
 	AddPluginNamesToCombobox(m_PluginCBox, m_rSndFile.m_MixPlugins);
-	m_PluginCBox.SetCurSel(m_Setting.GetPlugIndex()-1);
 
-	//Add plugin parameter names
-	AddPluginParameternamesToCombobox(m_PlugParamCBox, m_rSndFile.m_MixPlugins[(m_Setting.GetPlugIndex() <= MAX_MIXPLUGINS) ? m_Setting.GetPlugIndex() - 1 : 0]);
-	m_PlugParamCBox.SetCurSel(m_Setting.GetParamIndex());
-
-	//Add directives to list.
+	// Add directives to list
 	typedef CMIDIMapper::const_iterator CITER;
 	for(CITER iter = m_rMIDIMapper.Begin(); iter != m_rMIDIMapper.End(); iter++)
 	{
 		m_List.AddString(CreateListString(*iter));
 	}
+
 	if(m_rMIDIMapper.GetCount() > 0 && m_Setting.IsDefault())
 	{
 		m_List.SetCurSel(0);
 		OnLbnSelchangeList1();
-	}
-	else
+	} else
 	{
-		m_ChannelCBox.SetCurSel(m_Setting.GetChannel());
-		m_ControllerCBox.SetCurSel(m_Setting.GetController());
-		CheckDlgButton(IDC_CHECKACTIVE, m_Setting.IsActive() ? BST_CHECKED : BST_UNCHECKED);
-		CheckDlgButton(IDC_CHECKCAPTURE, m_Setting.GetCaptureMIDI() ? BST_CHECKED : BST_UNCHECKED);
-		GetDlgItem(IDC_CHECK_PATRECORD)->ShowWindow((m_rSndFile.GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
-		CheckDlgButton(IDC_CHECK_PATRECORD, m_Setting.GetAllowPatternEdit() ? BST_CHECKED : BST_UNCHECKED);
+		UpdateDialog();
 	}
+
+	GetDlgItem(IDC_CHECK_PATRECORD)->EnableWindow((m_rSndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE);
 
 	UpdateString();
 
@@ -158,18 +141,15 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 }
 
-void CMIDIMappingDialog::OnLbnSelchangeList1()
-//--------------------------------------------
+
+void CMIDIMappingDialog::UpdateDialog()
+//-------------------------------------
 {
-	const int i = m_List.GetCurSel();
-	if(i < 0 || (size_t)i >= m_rMIDIMapper.GetCount()) return;
-	m_Setting = m_rMIDIMapper.GetDirective(i);
-	CMIDIMappingDirective& activeSetting = m_Setting;
-	CheckDlgButton(IDC_CHECKACTIVE, activeSetting.IsActive() ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECKCAPTURE, activeSetting.GetCaptureMIDI() ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK_PATRECORD, activeSetting.GetAllowPatternEdit() ? BST_CHECKED : BST_UNCHECKED);
-	
-	m_ChannelCBox.SetCurSel(activeSetting.GetChannel());
+	CheckDlgButton(IDC_CHECKACTIVE, m_Setting.IsActive() ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECKCAPTURE, m_Setting.GetCaptureMIDI() ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK_PATRECORD, m_Setting.GetAllowPatternEdit() ? BST_CHECKED : BST_UNCHECKED);
+
+	m_ChannelCBox.SetCurSel(m_Setting.GetChannel());
 
 	m_EventCBox.SetCurSel(-1);
 	for(int i = 0; i < m_EventCBox.GetCount(); i++)
@@ -181,16 +161,47 @@ void CMIDIMappingDialog::OnLbnSelchangeList1()
 		}
 	}
 
-	m_ControllerCBox.SetCurSel(activeSetting.GetController());
-	m_PluginCBox.SetCurSel(activeSetting.GetPlugIndex()-1);
-	m_PlugParamCBox.SetCurSel(activeSetting.GetParamIndex());
-	SetDlgItemText(IDC_EDIT1, activeSetting.ToString().c_str());
+	m_ControllerCBox.SetCurSel(m_Setting.GetController());
+	m_PluginCBox.SetCurSel(m_Setting.GetPlugIndex() - 1);
+	m_PlugParamCBox.SetCurSel(m_Setting.GetParamIndex());
+	SetDlgItemText(IDC_EDIT1, m_Setting.ToString().c_str());
 
-	OnCbnSelchangeComboPlugin();
-	OnCbnSelchangeComboEvent();
+	UpdateEvent();
+	UpdateParameters();
 
-	const bool enableMover = ( (i > 0 && m_rMIDIMapper.AreOrderEqual(i-1, i)) || (i + 1 < m_List.GetCount() && m_rMIDIMapper.AreOrderEqual(i, i+1)));
+	const int i = m_List.GetCurSel();
+	const bool enableMover = i >= 0 && ( (i > 0 && m_rMIDIMapper.AreOrderEqual(i - 1, i)) || (i + 1 < m_List.GetCount() && m_rMIDIMapper.AreOrderEqual(i, i + 1)));
 	m_SpinMoveMapping.EnableWindow(enableMover);
+}
+
+
+void CMIDIMappingDialog::UpdateEvent()
+//------------------------------------
+{
+	m_ControllerCBox.EnableWindow(m_Setting.GetEvent() == MIDIEvents::evControllerChange ? TRUE : FALSE);
+	if(m_Setting.GetEvent() != MIDIEvents::evControllerChange)
+		m_ControllerCBox.SetCurSel(0);
+}
+
+
+void CMIDIMappingDialog::UpdateParameters()
+//------------------------------------------
+{
+	m_PlugParamCBox.SetRedraw(FALSE);
+	m_PlugParamCBox.ResetContent();
+	AddPluginParameternamesToCombobox(m_PlugParamCBox, m_rSndFile.m_MixPlugins[m_Setting.GetPlugIndex()]);
+	m_PlugParamCBox.SetCurSel(m_Setting.GetParamIndex());
+	m_PlugParamCBox.SetRedraw(TRUE);
+}
+
+
+void CMIDIMappingDialog::OnLbnSelchangeList1()
+//--------------------------------------------
+{
+	const int i = m_List.GetCurSel();
+	if(i < 0 || (size_t)i >= m_rMIDIMapper.GetCount()) return;
+	m_Setting = m_rMIDIMapper.GetDirective(i);
+	UpdateDialog();
 }
 
 
@@ -247,9 +258,7 @@ void CMIDIMappingDialog::OnCbnSelchangeComboPlugin()
 	int i = m_PluginCBox.GetCurSel();
 	if(i < 0 || i >= MAX_MIXPLUGINS) return;
 	m_Setting.SetPlugIndex(i+1);
-	m_PlugParamCBox.ResetContent();
-	AddPluginParameternamesToCombobox(m_PlugParamCBox, m_rSndFile.m_MixPlugins[i]);
-	m_PlugParamCBox.SetCurSel(m_Setting.GetParamIndex());
+	UpdateParameters();
 	UpdateString();
 }
 
@@ -267,10 +276,7 @@ void CMIDIMappingDialog::OnCbnSelchangeComboEvent()
 {
 	uint8 eventType = static_cast<uint8>(m_EventCBox.GetItemData(m_EventCBox.GetCurSel()));
 	m_Setting.SetEvent(eventType);
-	m_ControllerCBox.EnableWindow(eventType == MIDIEvents::evControllerChange ? TRUE : FALSE);
-	if(eventType != MIDIEvents::evControllerChange)
-		m_ControllerCBox.SetCurSel(0);
-
+	UpdateEvent();
 	UpdateString();
 }
 

@@ -46,15 +46,16 @@ public:
 	BYTE GetController() const {return m_MIDIByte1;}
 
 	//Note: Plug index starts from 1.
-	void SetPlugIndex(const int i) {m_PluginIndex = static_cast<BYTE>(i);}
-	BYTE GetPlugIndex() const {return m_PluginIndex;}
+	void SetPlugIndex(const int i) {m_PluginIndex = static_cast<PLUGINDEX>(i);}
+	PLUGINDEX GetPlugIndex() const {return m_PluginIndex;}
 
 	void SetParamIndex(const int i) {m_Parameter = i;}
 	uint32 GetParamIndex() const {return m_Parameter;}
 
 	bool IsDefault() const {return *this == CMIDIMappingDirective();}
 
-	bool operator==(const CMIDIMappingDirective& d) const {return memcmp(this, &d, sizeof(CMIDIMappingDirective)) == 0;}
+	bool operator==(const CMIDIMappingDirective &other) const { return memcmp(this, &other, sizeof(CMIDIMappingDirective)) == 0; }
+	bool operator<(const CMIDIMappingDirective &other) const { return GetController() < other.GetController(); }
 
 	std::string ToString() const;
 
@@ -67,16 +68,13 @@ private:
 	bool m_AnyChannel;
 	uint8 m_ChnEvent; //0-3 channel, 4-7 event
 	BYTE m_MIDIByte1;
-	BYTE m_PluginIndex;
+	PLUGINDEX m_PluginIndex;
 	uint32 m_Parameter;
 };
 
 class CSoundFile;
 class FileReader;
 
-inline bool operator<(const CMIDIMappingDirective& a, const CMIDIMappingDirective& b) {return a.GetController() < b.GetController();}
-inline bool operator<(const CMIDIMappingDirective& d, const BYTE& ctrlVal) {return d.GetController() < ctrlVal;}
-inline bool operator<(const BYTE& ctrlVal, const CMIDIMappingDirective& d) {return ctrlVal < d.GetController();}
 
 //===============
 class CMIDIMapper
