@@ -50,6 +50,11 @@
 #endif // NO_PCH
 
 
+#if MPT_COMPILER_MSVC
+#include <intrin.h>
+#endif
+
+
 #if defined(_WIN32) && !defined(NO_WINDOWS_H)
 #include <windows.h>
 #endif
