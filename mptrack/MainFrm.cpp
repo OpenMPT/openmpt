@@ -669,11 +669,13 @@ class StereoVuMeterTargetWrapper
 {
 private:
 	const SampleFormat sampleFormat;
+	bool clipFloat;
 	Dither &dither;
 	void *buffer;
 public:
-	StereoVuMeterTargetWrapper(SampleFormat sampleFormat_, Dither &dither_, void *buffer_)
+	StereoVuMeterTargetWrapper(SampleFormat sampleFormat_, bool clipFloat_, Dither &dither_, void *buffer_)
 		: sampleFormat(sampleFormat_)
+		, clipFloat(clipFloat_)
 		, dither(dither_)
 		, buffer(buffer_)
 	{
@@ -713,9 +715,15 @@ public:
 				}
 				break;
 			case SampleFormatFloat32:
+				if(clipFloat)
 				{
 					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					AudioReadTargetBuffer<Tsample, true> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				} else
+				{
+					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+					AudioReadTargetBuffer<Tsample, false> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
@@ -726,8 +734,8 @@ public:
 };
 
 
-void CMainFrame::AudioRead(const SoundDeviceSettings &settings, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::AudioRead(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
@@ -738,7 +746,7 @@ void CMainFrame::AudioRead(const SoundDeviceSettings &settings, const SoundBuffe
 	timingInfo.Speed = timeInfo.Speed;
 	m_pSndFile->m_TimingInfo = timingInfo;
 	m_Dither.SetMode((DitherMode)settings.DitherType);
-	StereoVuMeterTargetWrapper target(settings.sampleFormat, m_Dither, buffer);
+	StereoVuMeterTargetWrapper target(settings.sampleFormat, flags.NeedsClippedFloat, m_Dither, buffer);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(numFrames, target);
 	ASSERT(renderedFrames <= numFrames);
 	CSoundFile::samplecount_t remainingFrames = numFrames - renderedFrames;
@@ -758,10 +766,11 @@ void CMainFrame::AudioRead(const SoundDeviceSettings &settings, const SoundBuffe
 }
 
 
-void CMainFrame::AudioDone(const SoundDeviceSettings &settings, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::AudioDone(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(settings);
+	MPT_UNREFERENCED_PARAMETER(flags);
 	MPT_UNREFERENCED_PARAMETER(bufferAttributes);
 	MPT_UNREFERENCED_PARAMETER(timeInfo);
 	ASSERT(InAudioThread());

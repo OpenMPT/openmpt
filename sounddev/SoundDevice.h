@@ -31,6 +31,7 @@ class ISoundSource;
 
 
 struct SoundDeviceSettings;
+struct SoundDeviceFlags;
 struct SoundBufferAttributes;
 
 
@@ -73,8 +74,8 @@ class ISoundSource
 {
 public:
 	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual void AudioRead(const SoundDeviceSettings &settings, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
-	virtual void AudioDone(const SoundDeviceSettings &settings, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
+	virtual void AudioRead(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
+	virtual void AudioDone(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
 };
 
 
@@ -292,6 +293,25 @@ struct SoundDeviceSettings
 };
 
 
+struct SoundDeviceFlags
+{
+	// Windows since Vista has a limiter/compressor in the audio path that kicks
+	// in as soon as there are samples > 0dBFs (i.e. the absolute float value >
+	// 1.0). This happens for all APIs that get processed through the system-
+	// wide audio engine. It does not happen for exclusive mode WASAPI streams
+	// or direct WaveRT (labeled WDM-KS in PortAudio) streams. As there is no
+	// known way to disable this annoying behavior, avoid unclipped samples on
+	// affected windows versions and clip them ourselves before handing them to
+	// the APIs.
+	bool NeedsClippedFloat;
+	SoundDeviceFlags()
+		: NeedsClippedFloat(false)
+	{
+		return;
+	}
+};
+
+
 struct SoundDeviceCaps
 {
 	uint32 currentSampleRate;
@@ -361,6 +381,7 @@ private:
 protected:
 
 	SoundDeviceSettings m_Settings;
+	SoundDeviceFlags m_Flags;
 
 private:
 
