@@ -32,9 +32,9 @@ size_t CMIDIMapper::GetSerializationSize() const
 	size_t s = 0;
 	for(const_iterator citer = Begin(); citer != End(); citer++)
 	{
-		if(citer->GetParamIndex() <= uint8_max) {s += 5; continue;}
-		if(citer->GetParamIndex() <= uint16_max) {s += 6; continue;}
-		s += 8;
+		if(citer->GetParamIndex() <= uint8_max) s += 5;
+		else if(citer->GetParamIndex() <= uint16_max) s += 6;
+		else s += 8;
 	}
 	return s;
 }
