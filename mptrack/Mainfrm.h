@@ -352,8 +352,8 @@ public:
 
 	// from ISoundSource
 	void FillAudioBufferLocked(IFillAudioBuffer &callback);
-	void AudioRead(const SoundDeviceSettings &settings, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer);
-	void AudioDone(const SoundDeviceSettings &settings, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
+	void AudioRead(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer);
+	void AudioDone(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
 	
 	// from ISoundMessageReceiver
 	void AudioMessage(const std::string &str);

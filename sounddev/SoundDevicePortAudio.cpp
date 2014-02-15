@@ -83,6 +83,7 @@ bool CPortaudioDevice::InternalOpen()
 	{
 		if(m_Settings.ExclusiveMode)
 		{
+			m_Flags.NeedsClippedFloat = false;
 			m_StreamParameters.suggestedLatency = 0.0; // let portaudio choose
 			framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 			MemsetZero(m_WasapiStreamInfo);
@@ -91,10 +92,23 @@ bool CPortaudioDevice::InternalOpen()
 			m_WasapiStreamInfo.version = 1;
 			m_WasapiStreamInfo.flags = paWinWasapiExclusive;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+		} else
+		{
+			m_Flags.NeedsClippedFloat = true;
 		}
 	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
 	{
+		m_Flags.NeedsClippedFloat = false;
 		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paMME))
+	{
+		m_Flags.NeedsClippedFloat = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinVista);
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound))
+	{
+		m_Flags.NeedsClippedFloat = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinVista);
+	} else
+	{
+		m_Flags.NeedsClippedFloat = false;
 	}
 	if(Pa_IsFormatSupported(NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported) return false;
 	PaStreamFlags flags = paNoFlag;

@@ -1242,10 +1242,10 @@ void CDoWaveConvert::OnButton1()
 				dither.Process(mixbuffer, framesChunk, channels, m_Settings.FinalSampleFormat.GetBitsPerSample());
 				switch(m_Settings.FinalSampleFormat.value)
 				{
-					case SampleFormatUnsigned8: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<uint8*>(buffer), mixbuffer, channels, framesChunk); break;
-					case SampleFormatInt16:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int16*>(buffer), mixbuffer, channels, framesChunk); break;
-					case SampleFormatInt24:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int24*>(buffer), mixbuffer, channels, framesChunk); break;
-					case SampleFormatInt32:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(reinterpret_cast<int32*>(buffer), mixbuffer, channels, framesChunk); break;
+					case SampleFormatUnsigned8: ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<uint8*>(buffer), mixbuffer, channels, framesChunk); break;
+					case SampleFormatInt16:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int16*>(buffer), mixbuffer, channels, framesChunk); break;
+					case SampleFormatInt24:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int24*>(buffer), mixbuffer, channels, framesChunk); break;
+					case SampleFormatInt32:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int32*>(buffer), mixbuffer, channels, framesChunk); break;
 					default: ASSERT(false); break;
 				}
 				fileEnc->WriteInterleavedConverted(framesChunk, buffer);

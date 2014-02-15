@@ -220,6 +220,7 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 	{
 		return false;
 	}
+	m_Flags = SoundDeviceFlags();
 	m_BufferAttributes.Latency = m_Settings.LatencyMS / 1000.0;
 	m_BufferAttributes.UpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
 	m_BufferAttributes.NumBuffers = 0;
@@ -290,7 +291,7 @@ void ISoundDevice::SourceAudioRead(void *buffer, std::size_t numFrames)
 	{
 		return;
 	}
-	m_Source->AudioRead(m_Settings, m_BufferAttributes, m_TimeInfo, numFrames, buffer);
+	m_Source->AudioRead(m_Settings, m_Flags, m_BufferAttributes, m_TimeInfo, numFrames, buffer);
 }
 
 
@@ -309,7 +310,7 @@ void ISoundDevice::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
 		framesRendered = m_StreamPositionRenderFrames;
 	}
-	m_Source->AudioDone(m_Settings, m_BufferAttributes, m_TimeInfo, numFrames, framesRendered);
+	m_Source->AudioDone(m_Settings, m_Flags, m_BufferAttributes, m_TimeInfo, numFrames, framesRendered);
 }
 
 
