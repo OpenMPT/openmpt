@@ -602,42 +602,23 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 	CWnd::OnSize(nType,cx,cy);
 	if(!m_hWnd || !show) return;
 
-	CWnd *button;
-	CRect wnd,btn;
-	GetWindowRect(&wnd);
-
-	if((button = GetDlgItem(IDC_BUTTON1)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON2)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON3)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON4)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON5)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON6)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-
+	CRect wnd;
 	GetClientRect(&wnd);
+
+	// Move butttons to bottom of the window
+	static const int buttons[] = { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6 };
+	for(size_t i = 0; i < CountOf(buttons); i++)
+	{
+		CWnd *button = GetDlgItem(buttons[i]);
+		if(button != nullptr)
+		{
+			CRect btn;
+			button->GetClientRect(&btn);
+			button->MapWindowPoints(this, &btn);
+			button->SetWindowPos(nullptr, btn.left, wnd.Height() - btn.Height() - 3, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+		}
+	}
+
 	wnd.DeflateRect(10, 38, 8, 30);
 	if(bkgnd) DeleteObject(bkgnd);
 	bkgnd = ::CreateCompatibleBitmap(::GetDC(m_hWnd), wnd.Width(), wnd.Height());
