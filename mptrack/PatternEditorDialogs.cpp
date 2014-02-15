@@ -413,7 +413,7 @@ void CFindReplaceTab::OnOK()
 	int effectIndex = -1;
 	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL))
 	{
-		int n = -1; // unused parameter adjustment
+		ModCommand::PARAM n = 0; // unused parameter adjustment
 		effectIndex = combo->GetItemData(combo->GetCurSel());
 		m_Cmd.command = effectInfo.GetEffectFromIndex(effectIndex, n);
 	}
@@ -991,7 +991,7 @@ void CEditCommand::OnCommandChanged()
 {
 	uint16 newPlugParam = m->GetValueVolCol();
 	ModCommand::COMMAND newCommand = m->command;
-	int newParam = m->param;
+	ModCommand::PARAM newParam = m->param;
 
 	int n = cbnCommand.GetCurSel();
 	if(n >= 0)
@@ -1004,7 +1004,6 @@ void CEditCommand::OnCommandChanged()
 		{
 			// Process as effect
 			int ndx = cbnCommand.GetItemData(n);
-			newParam = -1;
 			newCommand = static_cast<ModCommand::COMMAND>((ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, newParam) : CMD_NONE);
 		}
 
@@ -1031,7 +1030,7 @@ void CEditCommand::OnCommandChanged()
 		} else
 		{
 			m->command = newCommand;
-			if(newParam >= 0)
+			if(newCommand != CMD_NONE)
 			{
 				m->param = static_cast<ModCommand::PARAM>(newParam);
 			}

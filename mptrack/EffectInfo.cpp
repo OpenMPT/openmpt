@@ -233,10 +233,9 @@ LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PAR
 
 
 //Returns command and corrects parameter refParam if necessary
-ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, int &refParam) const
-//-------------------------------------------------------------------------------
+ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refParam) const
+//---------------------------------------------------------------------------------------------
 {
-	//if (pParam) *pParam = -1;
 	if (ndx >= CountOf(gFXInfo))
 	{
 		refParam = 0;
@@ -246,10 +245,10 @@ ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, int &refParam) cons
 	// Cap parameter to match FX if necessary.
 	if (gFXInfo[ndx].paramMask)
 	{
-		if (refParam < static_cast<int>(gFXInfo[ndx].paramValue))
+		if (refParam < gFXInfo[ndx].paramValue)
 		{
 			refParam = gFXInfo[ndx].paramValue;	 // for example: delay with param < D0 becomes SD0
-		} else if (refParam > static_cast<int>(gFXInfo[ndx].paramValue) + 15)
+		} else if (refParam > gFXInfo[ndx].paramValue + 15)
 		{
 			refParam = gFXInfo[ndx].paramValue + 15; // for example: delay with param > DF becomes SDF
 		}
@@ -257,7 +256,7 @@ ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, int &refParam) cons
 	if (gFXInfo[ndx].paramLimit)
 	{
 		// used for Zxx macro control in parameter editor: limit to 7F max.
-		LimitMax(refParam, static_cast<int>(gFXInfo[ndx].paramLimit));
+		LimitMax(refParam, gFXInfo[ndx].paramLimit);
 	}
 
 	return gFXInfo[ndx].effect;
