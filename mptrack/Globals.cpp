@@ -656,6 +656,72 @@ LRESULT CModScrollView::OnUpdatePosition(WPARAM, LPARAM lParam)
 }
 
 
+BOOL CModScrollView::OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll)
+//------------------------------------------------------------------------
+{
+	SCROLLINFO info;
+	if(LOBYTE(nScrollCode) == SB_THUMBTRACK)
+	{
+		GetScrollInfo(SB_HORZ, &info, SIF_TRACKPOS);
+		nPos = info.nTrackPos;
+		m_nScrollPosX = nPos;
+	} else if(HIBYTE(nScrollCode) == SB_THUMBTRACK)
+	{
+		GetScrollInfo(SB_VERT, &info, SIF_TRACKPOS);
+		nPos = info.nTrackPos;
+		m_nScrollPosY = nPos;
+	}
+	BOOL ret = CScrollView::OnScroll(nScrollCode, nPos, bDoScroll);
+	return ret;
+}
+
+
+BOOL CModScrollView::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
+//---------------------------------------------------------------
+{
+	BOOL ret = CScrollView::OnScrollBy(sizeScroll, bDoScroll);
+	if(ret)
+	{
+		SCROLLINFO info;
+		if(sizeScroll.cx)
+		{
+			GetScrollInfo(SB_HORZ, &info, SIF_POS);
+			m_nScrollPosX = info.nPos;
+		}
+		if(sizeScroll.cy)
+		{
+			GetScrollInfo(SB_VERT, &info, SIF_POS);
+			m_nScrollPosY = info.nPos;
+		}
+	}
+	return ret;
+}
+
+
+int CModScrollView::SetScrollPos(int nBar, int nPos, BOOL bRedraw)
+//----------------------------------------------------------------
+{
+	if(nBar == SB_HORZ)
+		m_nScrollPosX = nPos;
+	else if(nBar == SB_VERT)
+		m_nScrollPosY = nPos;
+	return CScrollView::SetScrollPos(nBar, nPos, bRedraw);
+}
+
+
+void CModScrollView::SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& sizePage, const SIZE& sizeLine)
+//-----------------------------------------------------------------------------------------------------------
+{
+	CScrollView::SetScrollSizes(nMapMode, sizeTotal, sizePage, sizeLine);
+	// Fix scroll positions
+	SCROLLINFO info;
+	GetScrollInfo(SB_HORZ, &info, SIF_POS);
+	m_nScrollPosX = info.nPos;
+	GetScrollInfo(SB_VERT, &info, SIF_POS);
+	m_nScrollPosY = info.nPos;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////
 // 	CModControlBar
 

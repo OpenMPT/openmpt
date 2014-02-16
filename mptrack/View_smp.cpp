@@ -66,7 +66,6 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_WM_NCCALCSIZE()
 	ON_WM_NCHITTEST()
 	ON_WM_NCPAINT()
-	ON_WM_HSCROLL()
 	ON_WM_MOUSEMOVE()
 	ON_WM_NCMOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
@@ -123,8 +122,6 @@ CViewSample::CViewSample()
 	m_nGridSegments = 0;
 	m_nSample = 1;
 	m_nZoom = 0;
-	m_nScrollPos = 0;
-	m_nScrollFactor = 0;
 	m_nBtnMouseOver = 0xFFFF;
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
@@ -188,25 +185,11 @@ void CViewSample::UpdateScrollSize(const UINT nZoomOld)
 		{
 			m_sizeTotal.cx = m_rcClient.Width();
 		}
-		m_nScrollFactor = 0;
 		UINT cx0 = m_sizeTotal.cx;
 		UINT cx = cx0;
-		// Limit scroll size. FIXME: For long samples, this causes the last few sampling points to be invisible! (Rounding error?)
-		while (cx > 30000)
-		{
-			m_nScrollFactor++;
-			m_sizeTotal.cx /= 2;
-			cx = m_sizeTotal.cx;
-			if (cx > (UINT)m_rcClient.right)
-			{
-				UINT wantedsize = (cx0 - m_rcClient.right) >> m_nScrollFactor;
-				UINT mfcsize = cx - m_rcClient.right;
-				cx += wantedsize - mfcsize;
-			}
-		}
 		m_sizeTotal.cx = cx;
 		m_sizeTotal.cy = 1;
-		sizeLine.cx = (m_rcClient.right / (16 << m_nScrollFactor)) + 1;
+		sizeLine.cx = (m_rcClient.right / 16) + 1;
 		sizeLine.cy = 1;
 		sizePage.cx = sizeLine.cx * 4;
 		sizePage.cy = sizeLine.cy;
@@ -216,13 +199,7 @@ void CViewSample::UpdateScrollSize(const UINT nZoomOld)
 		{
 			const UINT nOldPos = ScrollPosToSamplePos(nZoomOld);
 			const float fPosFraction = (dwLen > 0) ? static_cast<float>(nOldPos) / dwLen : 0;
-			m_nScrollPos = 0;
-			m_nScrollPos = SampleToScreen(nOldPos);
 			SetScrollPos(SB_HORZ, static_cast<int>(fPosFraction * GetScrollLimit(SB_HORZ)));
-		}
-		else
-		{
-			m_nScrollPos = GetScrollPos(SB_HORZ) << m_nScrollFactor;
 		}
 	}
 }
@@ -364,7 +341,7 @@ int32 CViewSample::SampleToScreen(SmpLength pos) const
 		if (!nLen) return 0;
 		if (m_nZoom)
 		{
-			return (pos >> ((int32)m_nZoom - 1)) - m_nScrollPos;
+			return (pos >> ((int32)m_nZoom - 1)) - m_nScrollPosX;
 		} else
 		{
 			return Util::muldiv(pos, m_sizeTotal.cx, nLen);
@@ -386,7 +363,7 @@ SmpLength CViewSample::ScreenToSample(int32 x) const
 		if (!nLen) return 0;
 		if (m_nZoom)
 		{
-			n = (m_nScrollPos + x) << (m_nZoom-1);
+			n = (m_nScrollPosX + x) << (m_nZoom - 1);
 		} else
 		{
 			if (x < 0) x = 0;
@@ -423,7 +400,6 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			if (pState->nSample == m_nSample)
 			{
 				SetCurSel(pState->dwBeginSel, pState->dwEndSel);
-				m_nScrollPos = pState->dwScrollPos << m_nScrollFactor;
 				SetScrollPos(SB_HORZ, pState->dwScrollPos);
 				UpdateScrollSize();
 				InvalidateSample();
@@ -436,7 +412,7 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		{
 			SAMPLEVIEWSTATE *pState = (SAMPLEVIEWSTATE *)lParam;
 			pState->cbStruct = sizeof(SAMPLEVIEWSTATE);
-			pState->dwScrollPos = GetScrollPos(SB_HORZ);
+			pState->dwScrollPos = m_nScrollPosX;
 			pState->dwBeginSel = m_dwBeginSel;
 			pState->dwEndSel = m_dwEndSel;
 			pState->nSample = m_nSample;
@@ -1214,54 +1190,6 @@ void CViewSample::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 }
 
 
-void CViewSample::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
-//--------------------------------------------------------------------------
-{
-	CScrollView::OnHScroll(nSBCode, nPos, pScrollBar);
-	m_nScrollPos = GetScrollPos(SB_HORZ) << m_nScrollFactor;
-}
-
-
-BOOL CViewSample::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
-//-------------------------------------------------------------
-{
-	int xOrig, x;
-
-	// don't scroll if there is no valid scroll range (ie. no scroll bar)
-	CScrollBar* pBar;
-	DWORD dwStyle = GetStyle();
-	// vertical scroll bar not enabled
-	pBar = GetScrollBarCtrl(SB_HORZ);
-	if ((pBar != NULL && !pBar->IsWindowEnabled()) || (pBar == NULL && !(dwStyle & WS_HSCROLL)))
-	{
-		// horizontal scroll bar not enabled
-		sizeScroll.cx = 0;
-	}
-
-	// adjust current x position
-	xOrig = x = GetScrollPos(SB_HORZ);
-	int xMax = GetScrollLimit(SB_HORZ);
-	x += sizeScroll.cx;
-	if (x < 0)
-		x = 0;
-	else if (x > xMax)
-		x = xMax;
-
-	// did anything change?
-	if (x == xOrig) return FALSE;
-
-	if (bDoScroll)
-	{
-		// do scroll and update scroll positions:
-		// CViewSample also handles the scroll factor so we can use ranges bigger than 64K
-		ScrollWindow(-((x-xOrig) << m_nScrollFactor), 0);
-		m_nScrollPos = x << m_nScrollFactor;
-		SetScrollPos(SB_HORZ, x);
-	}
-	return TRUE;
-}
-
-
 void CViewSample::ScrollToPosition(int x)    // logical coordinates
 //---------------------------------------
 {
@@ -1274,7 +1202,6 @@ void CViewSample::ScrollToPosition(int x)    // logical coordinates
 		pt.x = 0;
 	else if (pt.x > xMax)
 		pt.x = xMax;
-	pt.x <<= m_nScrollFactor;
 	ScrollToDevicePosition(pt);
 }
 
@@ -2440,8 +2367,7 @@ void CViewSample::OnZoomOnSel()
 			sz.cx = m_dwBeginSel >> (dwZoom-1);
 			l = (m_rcClient.right - ((m_dwEndSel - m_dwBeginSel) >> (dwZoom-1))) / 2;
 			if (l > 0) sz.cx -= l;
-			sz.cx >>= m_nScrollFactor;
-			sz.cx -= GetScrollPos(SB_HORZ);
+			sz.cx -= m_nScrollPosX;
 			sz.cy = 0;
 			OnScrollBy(sz, TRUE);
 		}

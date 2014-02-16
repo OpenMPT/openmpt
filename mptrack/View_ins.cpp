@@ -635,7 +635,7 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 int CViewInstrument::TickToScreen(int nTick) const
 //------------------------------------------------
 {
-	return ((int)((nTick + 1) * m_fZoom)) - GetScrollPos(SB_HORZ);
+	return ((int)((nTick + 1) * m_fZoom)) - m_nScrollPosX;
 }
 
 int CViewInstrument::PointToScreen(int nPoint) const
@@ -648,15 +648,9 @@ int CViewInstrument::PointToScreen(int nPoint) const
 int CViewInstrument::ScreenToTick(int x) const
 //--------------------------------------------
 {
-	return (int)(((float)GetScrollPos(SB_HORZ) + (float)x + 1 - m_fZoom) / m_fZoom);
+	return (int)(((float)m_nScrollPosX + (float)x + 1 - m_fZoom) / m_fZoom);
 }
 
-
-int CViewInstrument::QuickScreenToTick(int x, int cachedScrollPos) const
-//----------------------------------------------------------------------
-{
-	return (int)(((float)cachedScrollPos + (float)x + 1 - m_fZoom) / m_fZoom);
-}
 
 int CViewInstrument::ScreenToValue(int y) const
 //---------------------------------------------
@@ -794,7 +788,6 @@ void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 //--------------------------------------------------
 {
-	int cachedScrollPos = GetScrollPos(SB_HORZ);
 	bool windowResized = false;
 
 	if (m_dcGrid.GetSafeHdc())
@@ -806,11 +799,11 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 	}
 
 
-	if (windowResized || m_bGridForceRedraw || (cachedScrollPos != m_GridScrollPos) || (speed != (UINT)m_GridSpeed))
+	if (windowResized || m_bGridForceRedraw || (m_nScrollPosX != m_GridScrollPos) || (speed != (UINT)m_GridSpeed))
 	{
 
 		m_GridSpeed = speed;
-		m_GridScrollPos = cachedScrollPos;
+		m_GridScrollPos = m_nScrollPosX;
 		m_bGridForceRedraw = false;
 
 		// create a memory based dc for drawing the grid
@@ -832,7 +825,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 
 		for (int x = 3; x < width; x++)
 		{
-			nTick = QuickScreenToTick(x, cachedScrollPos);
+			nTick = ScreenToTick(x);
 			if (nTick != nPrevTick && !(nTick%speed))
 			{
 				nPrevTick = nTick;
@@ -860,7 +853,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 //------------------------------------
 {
 	RECT rect;
-	int nScrollPos = GetScrollPos(SB_HORZ);
+	int nScrollPos = m_nScrollPosX;
 	CModDoc *pModDoc = GetDocument();
 	HGDIOBJ oldpen;
 	//HDC hdc;
