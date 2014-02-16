@@ -39,8 +39,8 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	// 1. Try to load keybindings from the path saved in the settings.
 	// 2. If the setting doesn't exist or the loading fails, try to load from default location.
 	// 3. If neither one of these worked, load default keybindings from resources.
-	// 4. If there were no keybinging setting already, create a keybinding file to default location
-	//    and set it's path to settings.
+	// 4. If there were no keybinding setting already, create a keybinding file to default location
+	//    and set its path to settings.
 
 	if (bNoExistingKbdFileSetting || !(activeCommandSet->LoadFile(TrackerSettings::Instance().m_szKbdFile)))
 	{
@@ -49,7 +49,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		bool bSuccess = false;
 		if (PathFileExistsW(sDefaultPath.AsNative().c_str()) == TRUE)
 			bSuccess = activeCommandSet->LoadFile(sDefaultPath);
-		if (bSuccess == false)
+		if (!bSuccess)
 		{
 			// Load keybindings from resources.
 			Log("Loading keybindings from resources\n");
@@ -59,7 +59,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 				activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
 			}
 		}
-		if (bSuccess == false)
+		if (!bSuccess)
 			ErrorBox(IDS_UNABLE_TO_LOAD_KEYBINDINGS);
 	}
 	// We will only overwrite the default Keybindings.mkb file from now on.
@@ -68,7 +68,6 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	//Get Keymap
 	activeCommandSet->GenKeyMap(keyMap);
 	SetupSpecialKeyInterception(); // Feature: use Windows keys as modifier keys, intercept special keys
-	m_nSkipGeneratedKeypresses = 0;
 
 	m_bBypass = false;
 	modifierMask=0;
@@ -84,8 +83,8 @@ CInputHandler::~CInputHandler()
 }
 
 
-CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam)
-//-----------------------------------------------------------------------------------------------------------
+CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam)
+//----------------------------------------------------------------------------------------------------------
 {
 	KeyMap::const_iterator cmd = keyMap.end();
 	KeyEventType keyEventType;
@@ -113,7 +112,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 			CatchModifierChange(wParam, keyEventType, scancode);
 		}
 
-		if(!InterceptSpecialKeys( wParam, lParam ) && !IsBypassed())
+		if(!InterceptSpecialKeys(wParam, lParam, true) && !IsBypassed())
 		{
 			// only execute command when the input handler is not locked
 			// and the input is not a consequence of special key interception.
@@ -140,9 +139,11 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 }
 
 
-CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &/*nFlags*/, KeyEventType keyEventType, CWnd* pSourceWnd)
+CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	if(InterceptSpecialKeys(nChar, nFlags, false))
+		return kcNull;
 	KeyMap::const_iterator cmd = keyMap.find(KeyCombination(context, modifierMask, nChar, keyEventType));
 	CommandID executeCommand = kcNull;
 
@@ -164,51 +165,51 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 
 
 // Feature: use Windows keys as modifier keys, intercept special keys
-bool CInputHandler::InterceptSpecialKeys(UINT nChar, UINT nFlags)
-//---------------------------------------------------------------
+bool CInputHandler::InterceptSpecialKeys(UINT nChar, UINT nFlags, bool generateMsg)
+//---------------------------------------------------------------------------------
 {
-	KeyEventType keyEventType = GetKeyEventType( HIWORD(nFlags) );
+	KeyEventType keyEventType = GetKeyEventType(HIWORD(nFlags));
 	enum { VK_NonExistentKey = VK_F24+1 };
 
-	if( nChar == VK_NonExistentKey )
+	if(nChar == VK_NonExistentKey)
 	{
 		return true;
-	} else if( m_bInterceptWindowsKeys && ( nChar == VK_LWIN || nChar == VK_RWIN ) )
+	} else if(m_bInterceptWindowsKeys && (nChar == VK_LWIN || nChar == VK_RWIN))
 	{
-		if( keyEventType == kKeyEventDown )
+		if(keyEventType == kKeyEventDown)
 		{
 			INPUT inp[2];
 			inp[0].type = inp[1].type = INPUT_KEYBOARD;
 			inp[0].ki.time = inp[1].ki.time = 0;
-			inp[0].ki.dwExtraInfo = inp[0].ki.dwExtraInfo = 0;
+			inp[0].ki.dwExtraInfo = inp[1].ki.dwExtraInfo = 0;
 			inp[0].ki.wVk = inp[1].ki.wVk = VK_NonExistentKey;
 			inp[0].ki.wScan = inp[1].ki.wScan = 0;
 			inp[0].ki.dwFlags = 0;
 			inp[1].ki.dwFlags = KEYEVENTF_KEYUP;
-			SendInput( 2, inp, sizeof(INPUT) );
+			SendInput(2, inp, sizeof(INPUT));
 		}
 	}
 
-	if( ( nChar == VK_NUMLOCK && m_bInterceptNumLock ) ||
-			( nChar == VK_CAPITAL && m_bInterceptCapsLock ) ||
-			( nChar == VK_SCROLL && m_bInterceptScrollLock ) )
+	if((nChar == VK_NUMLOCK && m_bInterceptNumLock)
+		|| (nChar == VK_CAPITAL && m_bInterceptCapsLock)
+		|| (nChar == VK_SCROLL && m_bInterceptScrollLock))
 	{
-		if( m_nSkipGeneratedKeypresses > 0 )
+		if(GetMessageExtraInfo() == 0xC0FFEE)
 		{
-			m_nSkipGeneratedKeypresses -- ;
+			SetMessageExtraInfo(0);
 			return true;
-		} else if( keyEventType == kKeyEventDown )
+		} else if(keyEventType == kKeyEventDown && generateMsg)
 		{
-			m_nSkipGeneratedKeypresses = 2;
+			// Prevent keys from lighting up by simulating a second press.
 			INPUT inp[2];
 			inp[0].type = inp[1].type = INPUT_KEYBOARD;
 			inp[0].ki.time = inp[1].ki.time = 0;
-			inp[0].ki.dwExtraInfo = inp[0].ki.dwExtraInfo = 0;
+			inp[0].ki.dwExtraInfo = inp[1].ki.dwExtraInfo = 0xC0FFEE;
 			inp[0].ki.wVk = inp[1].ki.wVk = static_cast<WORD>(nChar);
 			inp[0].ki.wScan = inp[1].ki.wScan = 0;
 			inp[0].ki.dwFlags = KEYEVENTF_KEYUP;
 			inp[1].ki.dwFlags = 0;
-			SendInput( 2, inp, sizeof(INPUT) );
+			SendInput(2, inp, sizeof(INPUT));
 		}
 	}
 	return false;

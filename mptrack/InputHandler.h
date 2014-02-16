@@ -41,8 +41,7 @@ protected:
 	bool m_bNoAltMenu;
 	bool CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode);
 	bool m_bInterceptWindowsKeys, m_bInterceptNumLock, m_bInterceptCapsLock, m_bInterceptScrollLock;
-	int m_nSkipGeneratedKeypresses;
-	bool InterceptSpecialKeys( UINT nChar , UINT nFlags );
+	bool InterceptSpecialKeys(UINT nChar , UINT nFlags, bool generateMsg);
 	void SetupSpecialKeyInterception();
 
 public:
