@@ -154,7 +154,7 @@ void CViewSample::OnInitialUpdate()
 	if (pMainFrm)
 	{
 		pMainFrm->SetInfoText("");
-		pMainFrm->SetXInfoText(""); //rewbs.xinfo
+		pMainFrm->SetXInfoText("");
 	}
 	UpdateScrollSize();
 }
@@ -657,7 +657,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	signed char *psample = (signed char *)pSampleData;
 	//int y0 = 0, xmax, posincr, posfrac, poshi;
 	int32 y0 = 0, xmax, poshi;
-	uint64 posincr, posfrac;
+	uint64 posincr, posfrac;	// Increments have 16-bit fractional part
 
 	if (len <= 0) return;
 	smplsize = (uFlags & CHN_16BIT) ? 2 : 1;
@@ -768,13 +768,15 @@ void CViewSample::OnDraw(CDC *pDC)
 {
 	CRect rcClient = m_rcClient, rect, rc;
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	HGDIOBJ oldpen;
 
 	UINT nSmpScrollPos = ScrollPosToSamplePos();
 
 	if ((!pModDoc) || (!pDC)) return;
 
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	const ModSample &sample = sndFile.GetSample((m_nSample <= sndFile.GetNumSamples()) ? m_nSample : 0);
+	
 	// Create off-screen image
 	if(offScreenDC == nullptr)
 	{
@@ -785,11 +787,9 @@ void CViewSample::OnDraw(CDC *pDC)
 
 	offScreenDC = offScreenDC;
 	oldpen = ::SelectObject(offScreenDC, CMainFrame::penBlack);
-	pSndFile = pModDoc->GetSoundFile();
 	rect = rcClient;
 	if ((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
-		const ModSample &sample = pSndFile->GetSample((m_nSample <= pSndFile->GetNumSamples()) ? m_nSample : 0);
 		int ymed = (rect.top + rect.bottom) / 2;
 		int yrange = (rect.bottom - rect.top) / 2;
 
@@ -901,19 +901,29 @@ void CViewSample::OnDraw(CDC *pDC)
 		}
 	}
 
+	if(m_nGridSegments)
+	{
+		// Draw sample grid
+		::SelectObject(offScreenDC, CMainFrame::penHalfDarkGray);
+		for(int i = 0; i < m_nGridSegments; i++)
+		{
+			int screenPos = SampleToScreen(sample.nLength * i / m_nGridSegments);
+			::MoveToEx(offScreenDC, screenPos, rect.top, nullptr);
+			::LineTo(offScreenDC, screenPos, rect.bottom);
+		}
+	}
+
 	DrawPositionMarks();
+
 	BitBlt(pDC->m_hDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
 
 	if (oldpen) ::SelectObject(offScreenDC, oldpen);
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
-	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	bool activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : false;
 
 	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
-// -! NEW_FEATURE#0015
 }
 
 
@@ -1164,7 +1174,7 @@ void CViewSample::UpdateNcButtonState()
 void CViewSample::OnSize(UINT nType, int cx, int cy)
 //--------------------------------------------------
 {
-	CScrollView::OnSize(nType, cx, cy);
+	CModScrollView::OnSize(nType, cx, cy);
 
 	DeleteObject(offScreenBitmap);
 	DeleteDC(offScreenDC);
@@ -2520,7 +2530,7 @@ void CViewSample::OnAddSilence()
 		{
 			CriticalSection cs;
 
-			UINT nStart = (dlg.m_nEditOption == addsilence_at_end) ? sample.nLength : 0;
+			SmpLength nStart = (dlg.m_nEditOption == addsilence_at_end) ? sample.nLength : 0;
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", nStart, nStart + dlg.m_nSamples);
 			ctrlSmp::InsertSilence(sample, dlg.m_nSamples, nStart, sndFile);
 		}
