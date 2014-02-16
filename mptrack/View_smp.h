@@ -34,7 +34,7 @@ protected:
 	HDC offScreenDC;
 	HGDIOBJ offScreenBitmap;
 	SIZE m_sizeTotal;
-	UINT m_nZoom, m_nScrollPos, m_nScrollFactor, m_nBtnMouseOver;
+	UINT m_nZoom, m_nBtnMouseOver;
 	FlagSet<Flags> m_dwStatus;
 	SmpLength m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
 	DWORD m_dwMenuParam;
@@ -95,7 +95,7 @@ protected:
 	bool CanZoomSelection() const { return GetSelectionZoomLevel() != 0; }
 
 	UINT ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
-	UINT ScrollPosToSamplePos(UINT nZoom) const {return (nZoom > 0) ? (m_nScrollPos << (nZoom - 1)) : 0;}
+	UINT ScrollPosToSamplePos(UINT nZoom) const {return (nZoom > 0) ? (m_nScrollPosX << (nZoom - 1)) : 0;}
 
 	void AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, SmpLength length) const;
 
@@ -107,7 +107,6 @@ public:
 	virtual void OnInitialUpdate();
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll=TRUE);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
 	virtual LRESULT OnPlayerNotify(Notification *);
 	virtual BOOL PreTranslateMessage(MSG *pMsg); //rewbs.customKeys
@@ -124,7 +123,6 @@ protected:
 	afx_msg UINT OnNcHitTest(CPoint point);
 #endif 
 	afx_msg void OnNcPaint();
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
 	afx_msg void OnNcLButtonDown(UINT, CPoint);

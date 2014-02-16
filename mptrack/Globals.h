@@ -190,10 +190,11 @@ class CModScrollView: public CScrollView
 {
 protected:
 	HWND m_hWndCtrl;
+	int m_nScrollPosX, m_nScrollPosY;
 
 public:
 	DECLARE_SERIAL(CModScrollView)
-	CModScrollView() { m_hWndCtrl = NULL; }
+	CModScrollView() : m_hWndCtrl(nullptr), m_nScrollPosX(0), m_nScrollPosY(0) { }
 	virtual ~CModScrollView() {}
 
 public:
@@ -220,6 +221,14 @@ protected:
 	afx_msg BOOL OnMouseWheel(UINT fFlags, short zDelta, CPoint point);
 	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (const DRAGONDROP *)lParam); }
 	LRESULT OnUpdatePosition(WPARAM, LPARAM);
+
+	// Fixes for 16-bit limitation in MFC's CScrollView
+	virtual BOOL OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll = TRUE);
+	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE);
+	virtual int SetScrollPos(int nBar, int nPos, BOOL bRedraw = TRUE);
+	virtual void SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& sizePage = CScrollView::sizeDefault, const SIZE& sizeLine = CScrollView::sizeDefault);
+
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

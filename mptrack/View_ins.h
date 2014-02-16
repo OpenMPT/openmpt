@@ -140,7 +140,6 @@ protected:
 	int TickToScreen(int nTick) const;
 	int PointToScreen(int nPoint) const;
 	int ScreenToTick(int x) const;
-	int QuickScreenToTick(int x, int cachedScrollPos) const;
 	int ScreenToPoint(int x, int y) const;
 	int ValueToScreen(int val) const { return m_rcClient.bottom - 1 - (val * (m_rcClient.bottom - 1)) / 64; }
 	int ScreenToValue(int y) const;
