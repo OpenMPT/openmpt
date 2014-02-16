@@ -662,13 +662,13 @@ BOOL CModScrollView::OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll)
 	SCROLLINFO info;
 	if(LOBYTE(nScrollCode) == SB_THUMBTRACK)
 	{
-		GetScrollInfo(SB_HORZ, &info, SIF_TRACKPOS);
-		nPos = info.nTrackPos;
+		if(GetScrollInfo(SB_HORZ, &info, SIF_TRACKPOS))
+			nPos = info.nTrackPos;
 		m_nScrollPosX = nPos;
 	} else if(HIBYTE(nScrollCode) == SB_THUMBTRACK)
 	{
-		GetScrollInfo(SB_VERT, &info, SIF_TRACKPOS);
-		nPos = info.nTrackPos;
+		if(GetScrollInfo(SB_VERT, &info, SIF_TRACKPOS))
+			nPos = info.nTrackPos;
 		m_nScrollPosY = nPos;
 	}
 	BOOL ret = CScrollView::OnScroll(nScrollCode, nPos, bDoScroll);
@@ -685,13 +685,13 @@ BOOL CModScrollView::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 		SCROLLINFO info;
 		if(sizeScroll.cx)
 		{
-			GetScrollInfo(SB_HORZ, &info, SIF_POS);
-			m_nScrollPosX = info.nPos;
+			if(GetScrollInfo(SB_HORZ, &info, SIF_POS))
+				m_nScrollPosX = info.nPos;
 		}
 		if(sizeScroll.cy)
 		{
-			GetScrollInfo(SB_VERT, &info, SIF_POS);
-			m_nScrollPosY = info.nPos;
+			if(GetScrollInfo(SB_VERT, &info, SIF_POS))
+				m_nScrollPosY = info.nPos;
 		}
 	}
 	return ret;
@@ -715,10 +715,10 @@ void CModScrollView::SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& si
 	CScrollView::SetScrollSizes(nMapMode, sizeTotal, sizePage, sizeLine);
 	// Fix scroll positions
 	SCROLLINFO info;
-	GetScrollInfo(SB_HORZ, &info, SIF_POS);
-	m_nScrollPosX = info.nPos;
-	GetScrollInfo(SB_VERT, &info, SIF_POS);
-	m_nScrollPosY = info.nPos;
+	if(GetScrollInfo(SB_HORZ, &info, SIF_POS))
+		m_nScrollPosX = info.nPos;
+	if(GetScrollInfo(SB_VERT, &info, SIF_POS))
+		m_nScrollPosY = info.nPos;
 }
 
 
