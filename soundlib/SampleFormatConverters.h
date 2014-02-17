@@ -769,24 +769,35 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 	ASSERT(sample.GetNumChannels() == 2);
 	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
-	const size_t frameSize = 2 * SampleConversion::input_inc;
-	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
-	size_t numFrames = countFrames;
+	const size_t sampleSize = SampleConversion::input_inc;
+	const size_t sourceSizeLeft = std::min<size_t>(sample.nLength * SampleConversion::input_inc, sourceSize);
+	const size_t sourceSizeRight = std::min<size_t>(sample.nLength * SampleConversion::input_inc, sourceSize - sourceSizeLeft);
+	const size_t countSamplesLeft = sourceSizeLeft / sampleSize;
+	const size_t countSamplesRight = sourceSizeRight / sampleSize;
+
+	size_t numSamplesLeft = countSamplesLeft;
 	SampleConversion sampleConvLeft(conv);
-	SampleConversion sampleConvRight(conv);
 	const char * MPT_RESTRICT inBufLeft = sourceBuffer;
-	const char * MPT_RESTRICT inBufRight = sourceBuffer + sample.nLength * SampleConversion::input_inc;
-	typename SampleConversion::output_t * MPT_RESTRICT outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
-	while(numFrames--)
+	typename SampleConversion::output_t * MPT_RESTRICT outBufLeft = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	while(numSamplesLeft--)
 	{
-		*outBuf = sampleConvLeft(inBufLeft);
+		*outBufLeft = sampleConvLeft(inBufLeft);
 		inBufLeft += SampleConversion::input_inc;
-		outBuf++;
-		*outBuf = sampleConvRight(inBufRight);
-		inBufRight += SampleConversion::input_inc;
-		outBuf++;
+		outBufLeft += 2;
 	}
-	return frameSize * countFrames;
+
+	size_t numSamplesRight = countSamplesRight;
+	SampleConversion sampleConvRight(conv);
+	const char * MPT_RESTRICT inBufRight = sourceBuffer + sample.nLength * SampleConversion::input_inc;
+	typename SampleConversion::output_t * MPT_RESTRICT outBufRight = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample) + 1;
+	while(numSamplesRight--)
+	{
+		*outBufRight = sampleConvRight(inBufRight);
+		inBufRight += SampleConversion::input_inc;
+		outBufRight += 2;
+	}
+
+	return (countSamplesLeft + countSamplesRight) * sampleSize;
 }
 
 
