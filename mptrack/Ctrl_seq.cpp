@@ -284,7 +284,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 	ORDERINDEX &nOrder = bShiftClick ? m_nScrollPos2nd : m_nScrollPos;
 
 	if ((sel < 0) || (sel >= sndFile.Order.GetLength()) || (!m_pParent) || (!pMainFrm)) return false;
-	if (!bIgnoreCurSel && sel == nOrder) return true;
+	if (!bIgnoreCurSel && sel == nOrder && (sel == sndFile.m_nCurrentOrder || !setPlayPos)) return true;
 	const ORDERINDEX nShownLength = GetLength();
 	InvalidateSelection();
 	nOrder = sel;
