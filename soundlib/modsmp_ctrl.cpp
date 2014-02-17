@@ -42,7 +42,7 @@ void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength,
 SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile &sndFile)
 //----------------------------------------------------------------------------------------------------------------------
 {
-	if(nSilenceLength == 0 || nSilenceLength >= MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength)
+	if(nSilenceLength == 0 || nSilenceLength >= MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength || nStartFrom > smp.nLength)
 		return smp.nLength;
 
 	const bool wasEmpty = smp.nLength == 0 || smp.pSample == nullptr;
@@ -57,7 +57,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 	if(!wasEmpty)
 	{
 		// Copy over old sample
-		const SmpLength silenceOffset = nStartFrom * smp.GetSampleSizeInBytes();
+		const SmpLength silenceOffset = nStartFrom * smp.GetBytesPerSample();
 		const SmpLength silenceBytes = nSilenceLength * smp.GetBytesPerSample();
 		if(nStartFrom > 0)
 		{
