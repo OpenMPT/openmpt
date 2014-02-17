@@ -374,7 +374,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// OpenMPT 1.17 and 1.18 (raped IT format)
 				// Exact version number will be determined later.
 				interpretModPlugMade = true;
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
 			} else if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
 				if(memchr(fileHeader.chnpan, 0xFF, sizeof(fileHeader.chnpan)) != NULL)
@@ -928,6 +927,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	UpgradeModFlags();
 
+	if(!m_dwLastSavedWithVersion && fileHeader.cwtv == 0x0888)
+	{
+		// There are some files with OpenMPT extensions, but the "last saved with" field contains 0.
+		// Was there an OpenMPT version that wrote 0 there, or are they hacked?
+		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
+	}
+
 	if(m_dwLastSavedWithVersion && madeWithTracker.empty())
 	{
 		madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
@@ -1428,10 +1434,9 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 				if (m->IsNote()) note--;
 				if (note == NOTE_FADE && GetType() != MOD_TYPE_MPT) note = 0xF6;
 				if (m->instr) b |= 2;
-				if (m->volcmd)
+				if (m->volcmd != VOLCMD_NONE)
 				{
-					uint8 volcmd = m->volcmd;
-					switch(volcmd)
+					switch(m->volcmd)
 					{
 					case VOLCMD_VOLUME:			vol = m->vol; if (vol > 64) vol = 64; break;
 					case VOLCMD_PANNING:		vol = m->vol + 128; if (vol > 192) vol = 192; break;
@@ -1459,7 +1464,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 					}
 				}
 				if (vol != 0xFF) b |= 4;
-				if (command)
+				if (command != CMD_NONE)
 				{
 					S3MSaveConvert(command, param, true, compatibilityExport);
 					if (command) b |= 8;
@@ -1858,7 +1863,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 						else // otherwise move forward a byte.
 						{
 							// Why on earth would you use a modular chunk structure, but not store the size of chunks in the file?!
-							modularData.Skip(1);
+							break;
 						}
 
 					}
@@ -1968,14 +1973,15 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 //--------------------------------------------------------
 {
 	//Extra song data - Yet Another Hack.
-	const uint32 code = MAGIC4BE('M','P','T','S');
+	const uint32 code = SwapBytesReturnLE(MAGIC4BE('M','P','T','S'));
 	fwrite(&code, 1, sizeof(uint32), f);
 
 #define WRITEMODULARHEADER(c1, c2, c3, c4, fsize) \
 	{ \
-	const uint32 code = MAGIC4BE(c1, c2, c3, c4); \
+	const uint32 code = SwapBytesReturnLE(MAGIC4BE(c1, c2, c3, c4)); \
 	fwrite(&code, 1, sizeof(code), f); \
-	const uint16 size = (fsize); \
+	ASSERT(fsize <= uint16_max); \
+	const uint16 size = SwapBytesReturnLE(static_cast<uint16>(fsize)); \
 	fwrite(&size, 1, sizeof(size), f); \
 	}
 #define WRITEMODULAR(c1, c2, c3, c4, field) \
