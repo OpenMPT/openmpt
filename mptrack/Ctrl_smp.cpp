@@ -53,7 +53,7 @@ bool EqualTof(const float a, const float b)
 float Round(const float value, const int digit)
 {
 	float v = 0.1f * (value * powf(10.0f, (float)(digit + 1)) + (value < 0.0f ? -5.0f : 5.0f));
-	modff(v, &v);    
+	modff(v, &v);
 	return v / powf(10.0f, (float)digit);
 }
 
@@ -203,13 +203,13 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_bInitialized = FALSE;
 
 	// Zoom Selection
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("32:1"), (DWORD_PTR)-6);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("16:1"), (DWORD_PTR)-5);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("8:1"), (DWORD_PTR)-4);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("4:1"), (DWORD_PTR)-3);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("2:1"), (DWORD_PTR)-2);
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("Auto"), 0);
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:1"), 1);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("2:1"), (DWORD_PTR)-2);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("4:1"), (DWORD_PTR)-3);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("8:1"), (DWORD_PTR)-4);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("16:1"), (DWORD_PTR)-5);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("32:1"), (DWORD_PTR)-6);
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:2"), 2);
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:4"), 3);
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:8"), 4);
@@ -217,7 +217,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:32"), 6);
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:64"), 7);
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:128"), 8);
-	m_ComboZoom.SetCurSel(5);
+	m_ComboZoom.SetCurSel(0);
 	// File ToolBar
 	m_ToolBar1.Init();
 	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, TIMAGE_SAMPLE_NEW);
@@ -1666,7 +1666,7 @@ void CCtrlSamples::ReadTimeStretchParameters()
 {
 	CString str;
 	GetDlgItemText(IDC_EDIT_STRETCHPARAMS, str);
-	_stscanf(str, __TEXT("%u %u %u"),
+	_stscanf(str, _T("%u %u %u"),
 		&m_nSequenceMs, &m_nSeekWindowMs, &m_nOverlapMs);
 }
 
@@ -1790,8 +1790,6 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 				break;
 			case 3 : _tcscpy(str, _T("Not enough memory..."));
 				break;
-			case 5 : _tcscpy(str, _T("Too low sample rate"));
-				break;
 			case 6 : _tcscpy(str, _T("Too short sample"));
 				break;
 			default: _tcscpy(str, _T("Unknown Error..."));
@@ -1864,7 +1862,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 		soundtouch_setTempoChange(handleSt, (1.0f / ratio - 1.0f) * 100.0f);
 
 		// Read settings from GUI.
-		ReadTimeStretchParameters();	
+		ReadTimeStretchParameters();
 
 		// Set settings to soundtouch. Zero value means 'use default', and
 		// setting value is read back after setting because not all settings are accepted.
