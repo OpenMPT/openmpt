@@ -63,8 +63,7 @@ ExampleSongs (folder): A set of module files which should give an impression of
 History.txt: Version history.
 mptrack.exe: Main executable.
 open_settings_folder.bat: Opens settings folder (%APPDATA\OpenMPT).
-OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
-    stretching feature.
+OpenMPT_SoundTouch_f32.dll: SoundTouch library used in time stretching feature.
 readme.txt: this document
 unmo3.dll: Used in MO3-file import.
 OMPT_1.20_ReleaseNotes.html: Release notes for this version.
