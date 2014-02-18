@@ -21,9 +21,8 @@
 #include "SampleEditorDialogs.h"
 #include "dlg_misc.h"
 #include "PSRatioCalc.h" //rewbs.timeStretchMods
-#include "soundtouch/SoundTouch.h"
-#include "soundtouch/TDStretch.h"
-#include "soundtouch/SoundTouchDLL.h"
+#include "soundtouch/include/SoundTouch.h"
+#include "soundtouch/source/SoundTouchDLL/SoundTouchDLL.h"
 #include "smbPitchShift/smbPitchShift.h"
 #include "modsmp_ctrl.h"
 #include "Autotune.h"
@@ -54,7 +53,7 @@ bool EqualTof(const float a, const float b)
 float Round(const float value, const int digit)
 {
 	float v = 0.1f * (value * powf(10.0f, (float)(digit + 1)) + (value < 0.0f ? -5.0f : 5.0f));
-	modff(v, &v);
+	modff(v, &v);    
 	return v / powf(10.0f, (float)digit);
 }
 
@@ -171,10 +170,9 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 CCtrlSamples::CCtrlSamples(CModControlView &parent, CModDoc &document) :
 //----------------------------------------------------------------------
 	CModControlDlg(parent, document),
-	m_nStretchProcessStepLength(nDefaultStretchChunkSize),
-	m_nSequenceMs(DEFAULT_SEQUENCE_MS),
-	m_nSeekWindowMs(DEFAULT_SEEKWINDOW_MS),
-	m_nOverlapMs(DEFAULT_OVERLAP_MS),
+	m_nSequenceMs(0),
+	m_nSeekWindowMs(0),
+	m_nOverlapMs(0),
 	m_nPreviousRawFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM)
 {
 	m_nSample = 1;
@@ -1668,8 +1666,8 @@ void CCtrlSamples::ReadTimeStretchParameters()
 {
 	CString str;
 	GetDlgItemText(IDC_EDIT_STRETCHPARAMS, str);
-	_stscanf(str, __TEXT("%u %u %u %u"),
-		&m_nSequenceMs, &m_nSeekWindowMs, &m_nOverlapMs, &m_nStretchProcessStepLength);
+	_stscanf(str, __TEXT("%u %u %u"),
+		&m_nSequenceMs, &m_nSeekWindowMs, &m_nOverlapMs);
 }
 
 
@@ -1677,11 +1675,10 @@ void CCtrlSamples::UpdateTimeStretchParameterString()
 //---------------------------------------------------
 {
 	CString str;
-	str.Format(_T("%u %u %u %u"),
+	str.Format(_T("%u %u %u"),
 				m_nSequenceMs,
 				m_nSeekWindowMs,
-				m_nOverlapMs,
-				m_nStretchProcessStepLength);
+				m_nOverlapMs);
 	SetDlgItemText(IDC_EDIT_STRETCHPARAMS, str);
 }
 
@@ -1813,18 +1810,11 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 int CCtrlSamples::TimeStretch(float ratio)
 //----------------------------------------
 {
-	static HANDLE handleSt = NULL; // Handle to SoundTouch object.
 	if((m_sndFile.GetSample(m_nSample).pSample == nullptr)) return -1;
 
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
 	const uint32 nSampleRate = sample.GetSampleRate(m_sndFile.GetType());
-
-	// SoundTouch(1.3.1) seems to crash with short samples. Don't know what
-	// the actual limit or whether it depends on sample rate,
-	// but simply set some semiarbitrary threshold here.
-	if(sample.nLength < 256)
-		return 6;
 
 	// Refuse processing when ratio is negative, equal to zero or equal to 1.0
 	if(ratio <= 0.0 || ratio == 1.0) return -1;
@@ -1834,15 +1824,11 @@ int CCtrlSamples::TimeStretch(float ratio)
 	if(pitch < 0.5f) return 2 + (1<<8);
 	if(pitch > 2.0f) return 2 + (2<<8);
 
-	if (handleSt != NULL && soundtouch_isEmpty(handleSt) == 0)
-		return 10;
+	HANDLE handleSt = NULL;
 
-	if (handleSt == NULL)
-	{
-		// Check whether the DLL file exists.
-		if(PathFileExistsW((CTrackApp::GetAppDirPath() + MPT_PATHSTRING("OpenMPT_SoundTouch_i16.dll")).AsNative().c_str()) == TRUE)
-			handleSt = soundtouch_createInstance();
-	}
+	// Check whether the DLL file exists.
+	if(PathFileExistsW((CTrackApp::GetAppDirPath() + MPT_PATHSTRING("OpenMPT_SoundTouch_f32.dll")).AsNative().c_str()) == TRUE)
+		handleSt = soundtouch_createInstance();
 	if (handleSt == NULL) 
 	{
 		MsgBox(IDS_SOUNDTOUCH_LOADFAILURE);
@@ -1853,15 +1839,6 @@ int CCtrlSamples::TimeStretch(float ratio)
 	uint8 smpsize = sample.GetElementarySampleSize();
 	const uint8 nChn = sample.GetNumChannels();
 
-	// Stretching is implemented only for 16-bit samples.
-	if(smpsize != 2)
-	{
-		// This has to be converted to 16-bit first.
-		SetSelectionPoints(0, 0); // avoid partial upsampling.
-		OnUpsample();
-		smpsize = sample.GetElementarySampleSize();
-	}
-
 	// SoundTouch(v1.4.0) documentation says that sample rates 8000-48000 are supported.
 	// Check whether sample rate is within that range, and if not,
 	// ask user whether to proceed.
@@ -1870,14 +1847,61 @@ int CCtrlSamples::TimeStretch(float ratio)
 		CString str;
 		str.Format(TEXT(GetStrI18N("Current samplerate, %u Hz, is not in the supported samplerate range 8000 Hz - 48000 Hz. Continue?")), nSampleRate);
 		if(Reporting::Confirm(str) != cnfYes)
+		{
+			soundtouch_destroyInstance(handleSt);
 			return -1;
+		}
+	}
 
+	// Initialize soundtouch object.
+	{	
+		soundtouch_setSampleRate(handleSt, nSampleRate);
+		soundtouch_setChannels(handleSt, nChn);
+
+		// Given ratio is time stretch ratio, and must be converted to
+		// tempo change ratio: for example time stretch ratio 2 means
+		// tempo change ratio 0.5.
+		soundtouch_setTempoChange(handleSt, (1.0f / ratio - 1.0f) * 100.0f);
+
+		// Read settings from GUI.
+		ReadTimeStretchParameters();	
+
+		// Set settings to soundtouch. Zero value means 'use default', and
+		// setting value is read back after setting because not all settings are accepted.
+		if(m_nSequenceMs != 0)
+			soundtouch_setSetting(handleSt, SETTING_SEQUENCE_MS, m_nSequenceMs);
+		m_nSequenceMs = soundtouch_getSetting(handleSt, SETTING_SEQUENCE_MS);
+
+		if(m_nSeekWindowMs != 0)
+			soundtouch_setSetting(handleSt, SETTING_SEEKWINDOW_MS, m_nSeekWindowMs);
+		m_nSeekWindowMs = soundtouch_getSetting(handleSt, SETTING_SEEKWINDOW_MS);
+
+		if(m_nOverlapMs != 0)
+			soundtouch_setSetting(handleSt, SETTING_OVERLAP_MS, m_nOverlapMs);
+		m_nOverlapMs = soundtouch_getSetting(handleSt, SETTING_OVERLAP_MS);
+
+		// Update GUI with the actual SoundTouch parameters in effect.
+		UpdateTimeStretchParameterString();
+	}
+
+	const SmpLength inBatchSize = soundtouch_getSetting(handleSt, SETTING_NOMINAL_INPUT_SEQUENCE) + 1; // approximate value, add 1 to play safe
+	const SmpLength outBatchSize = soundtouch_getSetting(handleSt, SETTING_NOMINAL_OUTPUT_SEQUENCE) + 1; // approximate value, add 1 to play safe
+
+	if(sample.nLength < inBatchSize)
+	{
+		soundtouch_destroyInstance(handleSt);
+		return 6;
+	}
+
+	if((SmpLength)std::ceil((double)ratio * (double)sample.nLength) < outBatchSize)
+	{
+		soundtouch_destroyInstance(handleSt);
+		return 6;
 	}
 
 	// Allocate new sample. Returned sample may not be exactly the size what ratio would suggest
-	// so allocate a bit more(1.03*).
-	const SmpLength nNewSampleLength = static_cast<SmpLength>(1.03 * ratio * static_cast<double>(sample.nLength));
-	//const DWORD nNewSampleLength = (DWORD)(0.5 + ratio * (double)sample.nLength);
+	// so allocate a bit more (1.01).
+	const SmpLength nNewSampleLength = static_cast<SmpLength>(1.01 * ratio * static_cast<double>(sample.nLength + inBatchSize)) + outBatchSize;
 	void *pNewSample = nullptr;
 	if(nNewSampleLength <= MAX_SAMPLE_LENGTH)
 	{
@@ -1885,6 +1909,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	}
 	if(pNewSample == nullptr)
 	{
+		soundtouch_destroyInstance(handleSt);
 		return 3;
 	}
 
@@ -1909,95 +1934,117 @@ int CCtrlSamples::TimeStretch(float ratio)
 	// Show wait mouse cursor
 	BeginWaitCursor();
 
-	SmpLength pos = 0;
-	SmpLength len = 0; //To contain length of processing step.
+	std::vector<float> buffer;
+	std::vector<SC::Convert<float,int16> > convf32(nChn);
+	std::vector<SC::Convert<int16,float> > convi16(nChn);
+	std::vector<SC::Convert<float,int8> > conv8f32(nChn);
+	std::vector<SC::Convert<int8,float> > convint8(nChn);
 
-	// Initialize soundtouch object.
-	{	
-		if(nSampleRate < 300) // Too low samplerate crashes soundtouch.
-		{                     // Limiting it to value 300(quite arbitrarily chosen).
-			return 5;         
-		}
-		soundtouch_setSampleRate(handleSt, nSampleRate);
-		soundtouch_setChannels(handleSt, nChn);
-		// Given ratio is time stretch ratio, and must be converted to
-		// tempo change ratio: for example time stretch ratio 2 means
-		// tempo change ratio 0.5.
-		soundtouch_setTempoChange(handleSt, (1.0f / ratio - 1.0f) * 100.0f);
-		soundtouch_setSetting(handleSt, SETTING_USE_QUICKSEEK, 0);
+	static const SmpLength MaxInputChunkSize = 1024;
 
-		// Read settings from GUI.
-		ReadTimeStretchParameters();	
+	SmpLength inPos = 0;
+	SmpLength outPos = 0; // Keeps count of the sample length received from stretching process.
 
-		if(m_nStretchProcessStepLength == 0) m_nStretchProcessStepLength = nDefaultStretchChunkSize;
-		if(m_nStretchProcessStepLength < 64) m_nStretchProcessStepLength = nDefaultStretchChunkSize;
-		len = m_nStretchProcessStepLength;
-		
-		// Set settings to soundtouch. Zero value means 'use default', and
-		// setting value is read back after setting because not all settings are accepted.
-		if(m_nSequenceMs == 0) m_nSequenceMs = DEFAULT_SEQUENCE_MS;
-		soundtouch_setSetting(handleSt, SETTING_SEQUENCE_MS, m_nSequenceMs);
-		m_nSequenceMs = soundtouch_getSetting(handleSt, SETTING_SEQUENCE_MS);
-		
-		if(m_nSeekWindowMs == 0) m_nSeekWindowMs = DEFAULT_SEEKWINDOW_MS;
-		soundtouch_setSetting(handleSt, SETTING_SEEKWINDOW_MS, m_nSeekWindowMs);
-		m_nSeekWindowMs = soundtouch_getSetting(handleSt, SETTING_SEEKWINDOW_MS);
-		
-		if(m_nOverlapMs == 0) m_nOverlapMs = DEFAULT_OVERLAP_MS;
-		soundtouch_setSetting(handleSt, SETTING_OVERLAP_MS, m_nOverlapMs);
-		m_nOverlapMs = soundtouch_getSetting(handleSt, SETTING_OVERLAP_MS);
-		
-		// Update GUI with the actual SoundTouch parameters in effect.
-		UpdateTimeStretchParameterString();
+	uint32 updateInterval = TrackerSettings::Instance().GUIUpdateInterval;
+	if(updateInterval == 0)
+	{
+		updateInterval = 15;
 	}
-
-	// Keeps count of the sample length received from stretching process.
-	SmpLength nLengthCounter = 0;
+	DWORD timeLast = 0;
 
 	// Process sample in steps.
-	while(pos < sample.nLength)
+	while(inPos < sample.nLength)
 	{
+
 		// Current chunk size limit test
-		if(len >= sample.nLength - pos) len = sample.nLength - pos;
+		const SmpLength inChunkSize = std::min(MaxInputChunkSize, sample.nLength - inPos);
 
-		// Show progress bar using process button painting & text label
-		CHAR progress[16];
-		float percent = 100.0f * (pos + len) / sample.nLength;
-		progressBarRECT.right = processButtonRect.left + (int)percent * (processButtonRect.right - processButtonRect.left) / 100;
-		wsprintf(progress,"%d%%",(UINT)percent);
+		DWORD timeNow = timeGetTime();
+		if(timeNow - timeLast >= updateInterval)
+		{
+			// Show progress bar using process button painting & text label
+			CHAR progress[16];
+			float percent = 100.0f * (inPos + inChunkSize) / sample.nLength;
+			progressBarRECT.right = processButtonRect.left + (int)percent * (processButtonRect.right - processButtonRect.left) / 100;
+			wsprintf(progress,"%d%%",(UINT)percent);
 
-		::FillRect(processButtonDC,&processButtonRect,red);
-		::FrameRect(processButtonDC,&processButtonRect,CMainFrame::brushBlack);
-		::FillRect(processButtonDC,&progressBarRECT,green);
-		::SelectObject(processButtonDC,(HBRUSH)HOLLOW_BRUSH);
-		::SetBkMode(processButtonDC,TRANSPARENT);
-		::DrawText(processButtonDC,progress,strlen(progress),&processButtonRect,DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-		::GdiFlush();
+			::FillRect(processButtonDC,&processButtonRect,red);
+			::FrameRect(processButtonDC,&processButtonRect,CMainFrame::brushBlack);
+			::FillRect(processButtonDC,&progressBarRECT,green);
+			::SelectObject(processButtonDC,(HBRUSH)HOLLOW_BRUSH);
+			::SetBkMode(processButtonDC,TRANSPARENT);
+			::DrawText(processButtonDC,progress,strlen(progress),&processButtonRect,DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+			::GdiFlush();
+
+			timeLast = timeNow;
+		}
 
 		// Send sampledata for processing.
-		soundtouch_putSamples(handleSt, static_cast<int16 *>(sample.pSample) + pos * nChn, len);
+		buffer.resize(inChunkSize * nChn);
+		switch(smpsize)
+		{
+		case 1:
+			CopyInterleavedSampleStreams(&(buffer[0]), static_cast<int8 *>(sample.pSample) + inPos * nChn, inChunkSize, nChn, conv8f32);
+			break;
+		case 2:
+			CopyInterleavedSampleStreams(&(buffer[0]), static_cast<int16 *>(sample.pSample) + inPos * nChn, inChunkSize, nChn, convf32);
+			break;
+		}
+		soundtouch_putSamples(handleSt, &(buffer[0]), inChunkSize);
 
 		// Receive some processed samples (it's not guaranteed that there is any available).
-		nLengthCounter += soundtouch_receiveSamples(handleSt, static_cast<int16 *>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
+		{
+			SmpLength outChunkSize = std::min<size_t>(soundtouch_numSamples(handleSt), nNewSampleLength - outPos);
+			if(outChunkSize > 0)
+			{
+				buffer.resize(outChunkSize * nChn);
+				soundtouch_receiveSamples(handleSt, &(buffer[0]), outChunkSize);
+				switch(smpsize)
+				{
+				case 1:
+					CopyInterleavedSampleStreams(static_cast<int8 *>(pNewSample) + nChn * outPos, &(buffer[0]), outChunkSize, nChn, convint8);
+					break;
+				case 2:
+					CopyInterleavedSampleStreams(static_cast<int16 *>(pNewSample) + nChn * outPos, &(buffer[0]), outChunkSize, nChn, convi16);
+					break;
+				}
+				outPos += outChunkSize;
+			}
+		}
 
 		// Next buffer chunk
-		pos += len;
+		inPos += inChunkSize;
 	}
 
 	// The input sample should now be processed. Receive remaining samples.
 	soundtouch_flush(handleSt);
-	while(soundtouch_numSamples(handleSt) > 0 && nNewSampleLength > nLengthCounter)
 	{
-		nLengthCounter += soundtouch_receiveSamples(handleSt, static_cast<int16 *>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
+		SmpLength outChunkSize = std::min<size_t>(soundtouch_numSamples(handleSt), nNewSampleLength - outPos);
+		if(outChunkSize > 0)
+		{
+			buffer.resize(outChunkSize * nChn);
+			soundtouch_receiveSamples(handleSt, &(buffer[0]), outChunkSize);
+			switch(smpsize)
+			{
+			case 1:
+				CopyInterleavedSampleStreams(static_cast<int8 *>(pNewSample) + nChn * outPos, &(buffer[0]), outChunkSize, nChn, convint8);
+				break;
+			case 2:
+				CopyInterleavedSampleStreams(static_cast<int16 *>(pNewSample) + nChn * outPos, &(buffer[0]), outChunkSize, nChn, convi16);
+				break;
+			}
+			outPos += outChunkSize;
+		}
 	}
+
 	soundtouch_clear(handleSt);
 	ASSERT(soundtouch_isEmpty(handleSt) != 0);
 
-	ASSERT(nNewSampleLength >= nLengthCounter);
+	ASSERT(nNewSampleLength >= outPos);
 
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Time Stretch");
 	// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
-	ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, std::min(nLengthCounter, nNewSampleLength), m_sndFile);
+	ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, std::min(outPos, nNewSampleLength), m_sndFile);
 
 	// Free progress bar brushes
 	DeleteObject((HBRUSH)green);
@@ -2008,6 +2055,8 @@ int CCtrlSamples::TimeStretch(float ratio)
 
 	// Restore mouse cursor
 	EndWaitCursor();
+
+	soundtouch_destroyInstance(handleSt);
 
 	return 0;
 }

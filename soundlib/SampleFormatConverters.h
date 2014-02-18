@@ -709,6 +709,33 @@ size_t CopySample(typename SampleConversion::output_t * MPT_RESTRICT outBuf, siz
 }
 
 
+// Copy numChannels interleaved sample streams.
+template <typename SampleConversion>
+void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_RESTRICT outBuf, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, SampleConversion *conv)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	while(numFrames--)
+	{
+		for(size_t channel = 0; channel < numChannels; ++channel)
+		{
+			*outBuf = conv[channel](*inBuf);
+			inBuf++;
+			outBuf++;
+		}
+	}
+}
+
+
+// Copy numChannels interleaved sample streams.
+template <typename SampleConversion>
+void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_RESTRICT outBuf, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, std::vector<SampleConversion> &conv)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	ASSERT(conv.size() >= numChannels);
+	CopyInterleavedSampleStreams(outBuf, inBuf, numFrames, numChannels, &(conv[0]));
+}
+
+
 // Copy a mono sample data buffer.
 template <typename SampleConversion>
 size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
