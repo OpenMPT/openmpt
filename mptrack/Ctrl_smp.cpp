@@ -54,7 +54,7 @@ bool EqualTof(const float a, const float b)
 float Round(const float value, const int digit)
 {
 	float v = 0.1f * (value * powf(10.0f, (float)(digit + 1)) + (value < 0.0f ? -5.0f : 5.0f));
-	modff(v, &v);    
+	modff(v, &v);
 	return v / powf(10.0f, (float)digit);
 }
 
@@ -205,16 +205,21 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_bInitialized = FALSE;
 
 	// Zoom Selection
-	m_ComboZoom.AddString("Auto");
-	m_ComboZoom.AddString("1:1");
-	m_ComboZoom.AddString("1:2");
-	m_ComboZoom.AddString("1:4");
-	m_ComboZoom.AddString("1:8");
-	m_ComboZoom.AddString("1:16");
-	m_ComboZoom.AddString("1:32");
-	m_ComboZoom.AddString("1:64");
-	m_ComboZoom.AddString("1:128");
-	m_ComboZoom.SetCurSel(0);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("32:1"), (DWORD_PTR)-6);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("16:1"), (DWORD_PTR)-5);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("8:1"), (DWORD_PTR)-4);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("4:1"), (DWORD_PTR)-3);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("2:1"), (DWORD_PTR)-2);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("Auto"), 0);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:1"), 1);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:2"), 2);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:4"), 3);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:8"), 4);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:16"), 5);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:32"), 6);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:64"), 7);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:128"), 8);
+	m_ComboZoom.SetCurSel(5);
 	// File ToolBar
 	m_ToolBar1.Init();
 	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, TIMAGE_SAMPLE_NEW);
@@ -347,10 +352,20 @@ bool CCtrlSamples::SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom, bool bUpdNum)
 		SetDlgItemInt(IDC_EDIT_SAMPLE, m_nSample);
 		m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
 	}
-	if (lZoom < 0)
-		lZoom = m_ComboZoom.GetCurSel();
-	else
-		m_ComboZoom.SetCurSel(lZoom);
+	if (lZoom == -1)
+	{
+		lZoom = static_cast<int>(m_ComboZoom.GetItemData(m_ComboZoom.GetCurSel()));
+	} else
+	{
+		for(int i = 0; i< m_ComboZoom.GetCount(); i++)
+		{
+			if(static_cast<int>(m_ComboZoom.GetItemData(i)) == lZoom)
+			{
+				m_ComboZoom.SetCurSel(i);
+				break;
+			}
+		}
+	}
 	PostViewMessage(VIEWMSG_SETCURRENTSAMPLE, (lZoom << 16) | m_nSample);
 	UnlockControls();
 	return true;
@@ -445,7 +460,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_SMP_SETZOOM:
-		SetCurrentSample(m_nSample, lParam, FALSE);
+		SetCurrentSample(m_nSample, static_cast<int>(lParam), FALSE);
 		break;
 
 	case CTRLMSG_SETCURRENTINSTRUMENT:
@@ -1662,12 +1677,11 @@ void CCtrlSamples::UpdateTimeStretchParameterString()
 //---------------------------------------------------
 {
 	CString str;
-	str.Format(__TEXT("%u %u %u %u"),
+	str.Format(_T("%u %u %u %u"),
 				m_nSequenceMs,
 				m_nSeekWindowMs,
 				m_nOverlapMs,
-				m_nStretchProcessStepLength
-	          );
+				m_nStretchProcessStepLength);
 	SetDlgItemText(IDC_EDIT_STRETCHPARAMS, str);
 }
 
@@ -1777,13 +1791,13 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 				break;
 			case 2 : wsprintf(str, _T("Stretch ratio is too %s. Must be between 50% and 200%."), (errorcode >> 8) == 1 ? _T("low") : _T("high"));
 				break;
-			case 3 : wsprintf(str, _T("Not enough memory..."));
+			case 3 : _tcscpy(str, _T("Not enough memory..."));
 				break;
-			case 5 : wsprintf(str, _T("Too low sample rate"));
+			case 5 : _tcscpy(str, _T("Too low sample rate"));
 				break;
-			case 6 : wsprintf(str, _T("Too short sample"));
+			case 6 : _tcscpy(str, _T("Too short sample"));
 				break;
-			default: wsprintf(str, _T("Unknown Error..."));
+			default: _tcscpy(str, _T("Unknown Error..."));
 				break;
 		}
 		Reporting::Error(str);

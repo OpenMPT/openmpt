@@ -35,7 +35,7 @@
 #define SMP_LEFTBAR_CXBTN		24
 #define SMP_LEFTBAR_CYBTN		22
 
-#define MIN_ZOOM	0
+#define MIN_ZOOM	-6
 #define MAX_ZOOM	8
 
 // Defines the minimum length for selection for which
@@ -160,8 +160,8 @@ void CViewSample::OnInitialUpdate()
 }
 
 
-void CViewSample::UpdateScrollSize(const UINT nZoomOld)
-//-----------------------------------------------------
+void CViewSample::UpdateScrollSize(const int nZoomOld)
+//----------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -178,30 +178,80 @@ void CViewSample::UpdateScrollSize(const UINT nZoomOld)
 			const ModSample &sample = pSndFile->GetSample(m_nSample);
 			if (sample.pSample != nullptr) dwLen = sample.nLength;
 		}
-		if (m_nZoom)
-		{
-			m_sizeTotal.cx = (dwLen + (1 << (m_nZoom-1)) - 1) >> (m_nZoom-1);
-		} else
-		{
+		// Compute scroll size in pixels
+		if (m_nZoom == 0)		// Fit to display
 			m_sizeTotal.cx = m_rcClient.Width();
-		}
-		UINT cx0 = m_sizeTotal.cx;
-		UINT cx = cx0;
-		m_sizeTotal.cx = cx;
+		else if(m_nZoom == 1)	// 1:1
+			m_sizeTotal.cx = dwLen;
+		else if(m_nZoom > 1)	// Zoom out
+			m_sizeTotal.cx = (dwLen + (1 << (m_nZoom - 1)) - 1) >> (m_nZoom - 1);
+		else					// Zoom in - here, we don't compute the real number of visible pixels so that the scroll bar doesn't grow unnecessarily long. The scrolling code in OnScrollBy() compensates for this.
+			m_sizeTotal.cx = dwLen + m_rcClient.Width() - (m_rcClient.Width() >> (-m_nZoom - 1));
+
 		m_sizeTotal.cy = 1;
 		sizeLine.cx = (m_rcClient.right / 16) + 1;
+		if(m_nZoom < 0)
+			sizeLine.cx >>= (-m_nZoom - 1);
 		sizeLine.cy = 1;
 		sizePage.cx = sizeLine.cx * 4;
-		sizePage.cy = sizeLine.cy;
+		sizePage.cy = 1;
+
 		SetScrollSizes(MM_TEXT, m_sizeTotal, sizePage, sizeLine);
 
 		if (nZoomOld != m_nZoom) // After zoom change, keep the view position.
 		{
-			const UINT nOldPos = ScrollPosToSamplePos(nZoomOld);
+			const SmpLength nOldPos = ScrollPosToSamplePos(nZoomOld);
 			const float fPosFraction = (dwLen > 0) ? static_cast<float>(nOldPos) / dwLen : 0;
 			SetScrollPos(SB_HORZ, static_cast<int>(fPosFraction * GetScrollLimit(SB_HORZ)));
 		}
 	}
+}
+
+
+BOOL CViewSample::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
+//------------------------------------------------------------
+{
+	int xOrig, x;
+
+	// don't scroll if there is no valid scroll range (ie. no scroll bar)
+	CScrollBar* pBar;
+	DWORD dwStyle = GetStyle();
+	pBar = GetScrollBarCtrl(SB_HORZ);
+	if ((pBar != NULL && !pBar->IsWindowEnabled()) ||
+		(pBar == NULL && !(dwStyle & WS_HSCROLL)))
+	{
+		// horizontal scroll bar not enabled
+		sizeScroll.cx = 0;
+	}
+
+	// adjust current x position
+	xOrig = x = GetScrollPos(SB_HORZ);
+	int xMax = GetScrollLimit(SB_HORZ);
+	x += sizeScroll.cx;
+	if (x < 0)
+		x = 0;
+	else if (x > xMax)
+		x = xMax;
+
+	// did anything change?
+	if (x == xOrig)
+		return FALSE;
+
+	if (bDoScroll)
+	{
+		// do scroll and update scroll positions
+		int scrollBy = -(x - xOrig);
+		// Don't allow to scroll into the middle of a sampling point
+		if(m_nZoom < 0)
+		{
+			scrollBy *= (1 << (-m_nZoom - 1));
+		}
+
+		ScrollWindow(scrollBy, 0);
+		if (x != xOrig)
+			SetScrollPos(SB_HORZ, x);
+	}
+	return TRUE;
 }
 
 
@@ -233,8 +283,8 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 }
 
 
-BOOL CViewSample::SetZoom(UINT nZoom)
-//-----------------------------------
+BOOL CViewSample::SetZoom(int nZoom)
+//----------------------------------
 {
 
 	if (nZoom == m_nZoom)
@@ -242,7 +292,7 @@ BOOL CViewSample::SetZoom(UINT nZoom)
 	if (nZoom > MAX_ZOOM)
 		return FALSE;
 
-	const UINT nZoomOld = m_nZoom;
+	const int nZoomOld = m_nZoom;
 	m_nZoom = nZoom;
 	UpdateScrollSize(nZoomOld);
 	InvalidateRect(NULL, FALSE);
@@ -257,12 +307,14 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 	if(pSndFile == nullptr)
 		return;
 
+	const ModSample &sample = pSndFile->GetSample(m_nSample);
+
 	// Snap to grid
-	if(m_nGridSegments > 0)
+	if(m_nGridSegments > 0 && m_nGridSegments < sample.nLength)
 	{
-		const float sampsPerSegment = (float)(pSndFile->GetSample(m_nSample).nLength / m_nGridSegments);
-		nBegin = (SmpLength)(floor((float)(nBegin / sampsPerSegment) + 0.5f) * sampsPerSegment);
-		nEnd = (SmpLength)(floor((float)(nEnd / sampsPerSegment) + 0.5f) * sampsPerSegment);
+		const float sampsPerSegment = (float)(sample.nLength / m_nGridSegments);
+		nBegin = (SmpLength)(Util::Round((float)(nBegin / sampsPerSegment)) * sampsPerSegment);
+		nEnd = (SmpLength)(Util::Round((float)(nEnd / sampsPerSegment)) * sampsPerSegment);
 	}
 
 	if (nBegin > nEnd)
@@ -339,13 +391,13 @@ int32 CViewSample::SampleToScreen(SmpLength pos) const
 	{
 		SmpLength nLen = pModDoc->GetrSoundFile().GetSample(m_nSample).nLength;
 		if (!nLen) return 0;
-		if (m_nZoom)
-		{
-			return (pos >> ((int32)m_nZoom - 1)) - m_nScrollPosX;
-		} else
-		{
+
+		if(m_nZoom > 0)
+			return (pos >> (m_nZoom - 1)) - m_nScrollPosX;
+		else if(m_nZoom < 0)
+			return (pos - m_nScrollPosX) << (-m_nZoom - 1);
+		else
 			return Util::muldiv(pos, m_sizeTotal.cx, nLen);
-		}
 	}
 	return 0;
 }
@@ -361,10 +413,12 @@ SmpLength CViewSample::ScreenToSample(int32 x) const
 	{
 		SmpLength nLen = pModDoc->GetrSoundFile().GetSample(m_nSample).nLength;
 		if (!nLen) return 0;
-		if (m_nZoom)
-		{
+
+		if(m_nZoom > 0)
 			n = (m_nScrollPosX + x) << (m_nZoom - 1);
-		} else
+		else if(m_nZoom < 0)
+			n = m_nScrollPosX + (x >> (-m_nZoom - 1));
+		else
 		{
 			if (x < 0) x = 0;
 			if (m_sizeTotal.cx) n = Util::muldiv(x, nLen, m_sizeTotal.cx);
@@ -389,7 +443,7 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	switch(wParam)
 	{
 	case VIEWMSG_SETCURRENTSAMPLE:
-		SetZoom(lParam >> 16);
+		SetZoom(static_cast<int>(lParam) >> 16);
 		SetCurrentSample(lParam & 0xFFFF);
 		break;
 
@@ -411,7 +465,6 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		if (lParam)
 		{
 			SAMPLEVIEWSTATE *pState = (SAMPLEVIEWSTATE *)lParam;
-			pState->cbStruct = sizeof(SAMPLEVIEWSTATE);
 			pState->dwScrollPos = m_nScrollPosX;
 			pState->dwBeginSel = m_dwBeginSel;
 			pState->dwEndSel = m_dwEndSel;
@@ -452,14 +505,14 @@ void CViewSample::UpdateView(DWORD dwHintMask, CObject *)
 #define YCVT(n, bits)		(ymed - (((n) * yrange) >> (bits)))
 
 
-// Draw sample data, 1:1 ratio
-void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData)
-//----------------------------------------------------------------------------------------------------------
+// Draw one channel of sample data, 1:1 ratio or higher (zoomed in)
+void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData)
+//----------------------------------------------------------------------------------------------------------------------
 {
 	int smplsize;
 	int yrange = cy/2;
-	signed char *psample = (signed char *)pSampleData;
-	int y0 = 0, looplen, loopdiv;
+	const int8 *psample = static_cast<const int8 *>(pSampleData);
+	int y0 = 0;
 
 	smplsize = (uFlags & CHN_16BIT) ? 2 : 1;
 	if (uFlags & CHN_STEREO) smplsize *= 2;
@@ -471,34 +524,44 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, in
 		y0 = YCVT(*(psample-smplsize),7);
 	}
 	::MoveToEx(hdc, -1, y0, NULL);
-	// Linear 1:1 scale
-	if (m_nZoom)
+
+	SmpLength numDrawSamples, loopDiv = 0;
+	int loopShift = 0;
+	if (m_nZoom == 1)
 	{
-		looplen = cx;
-		if (looplen > len) looplen = len;
-		loopdiv = cx;
+		// Linear 1:1 scale
+		numDrawSamples = cx;
+	} else if(m_nZoom < 0)
+	{
+		// 2:1, 4:1, etc... zoom
+		loopShift = (-m_nZoom - 1);
+		// Round up
+		numDrawSamples = (cx + (1 << loopShift) - 1) >> loopShift;
 	} else
-	// Stretch
 	{
-		looplen = len;
-		loopdiv = len;
+		// Stretch to screen
+		ASSERT(!m_nZoom);
+		numDrawSamples = len;
+		loopDiv = numDrawSamples;
 	}
-	// 16-Bit
+	LimitMax(numDrawSamples, len);
+
 	if (uFlags & CHN_16BIT)
 	{
-		for (int n=0; n<=looplen; n++)
+		// 16-Bit
+		for (SmpLength n = 0; n <= numDrawSamples; n++)
 		{
-			int x = (n*cx) / loopdiv;
-			int y = *(signed short *)psample;
+			int x = loopDiv ? ((n * cx) / loopDiv) : (n << loopShift);
+			int y = *(const int16 *)psample;
 			::LineTo(hdc, x, YCVT(y,15));
 			psample += smplsize;
 		}
 	} else
-	// 8-bit
 	{
-		for (int n=0; n<=looplen; n++)
+		// 8-bit
+		for (SmpLength n = 0; n <= numDrawSamples; n++)
 		{
-			int x = (n*cx) / loopdiv;
+			int x = loopDiv ? ((n * cx) / loopDiv) : (n << loopShift);
 			int y = *psample;
 			::LineTo(hdc, x, YCVT(y,7));
 			psample += smplsize;
@@ -509,8 +572,8 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, in
 
 #if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
 
-static void amdmmxext_or_sse_findminmax16(void *p, int scanlen, int smplsize, int *smin, int *smax)
-//-------------------------------------------------------------------------------------------------
+static void amdmmxext_or_sse_findminmax16(const void *p, int scanlen, int smplsize, int *smin, int *smax)
+//-------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov ebx, p
@@ -571,8 +634,8 @@ done1x:
 }
 
 
-static void amdmmxext_or_sse_findminmax8(void *p, int scanlen, int smplsize, int *smin, int *smax)
-//------------------------------------------------------------------------------------------------
+static void amdmmxext_or_sse_findminmax8(const void *p, int scanlen, int smplsize, int *smin, int *smax)
+//------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov ebx, p
@@ -649,14 +712,15 @@ done1x:
 
 #endif
 
-void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData)
-//----------------------------------------------------------------------------------------------------------
+// Draw one channel of zoomed-out sample data
+void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData)
+//----------------------------------------------------------------------------------------------------------------------
 {
 	int smplsize, oldsmin, oldsmax;
 	int yrange = cy/2;
-	signed char *psample = (signed char *)pSampleData;
-	//int y0 = 0, xmax, posincr, posfrac, poshi;
-	int32 y0 = 0, xmax, poshi;
+	const int8 *psample = static_cast<const int8 *>(pSampleData);
+	int32 y0 = 0, xmax;
+	SmpLength poshi;
 	uint64 posincr, posfrac;	// Increments have 16-bit fractional part
 
 	if (len <= 0) return;
@@ -664,13 +728,13 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	if (uFlags & CHN_STEREO) smplsize *= 2;
 	if (uFlags & CHN_16BIT)
 	{
-		y0 = YCVT(*((signed short *)(psample-smplsize)), 15);
+		y0 = YCVT(*((const int16 *)(psample-smplsize)), 15);
 	} else
 	{
 		y0 = YCVT(*(psample-smplsize), 7);
 	}
 	oldsmin = oldsmax = y0;
-	if (m_nZoom)
+	if (m_nZoom > 0)
 	{
 		xmax = len>>(m_nZoom-1);
 		if (xmax > cx) xmax = cx;
@@ -688,12 +752,12 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	{
 		//int smin, smax, scanlen;
 		int smin, smax;
-		int32 scanlen;
+		SmpLength scanlen;
 
 		posfrac += posincr;
 		scanlen = static_cast<int32>((posfrac+0xffff) >> 16);
 		if (poshi >= len) poshi = len-1;
-		if (poshi+scanlen > len) scanlen = len-poshi;
+		if (poshi + scanlen > len) scanlen = len-poshi;
 		if (scanlen < 1) scanlen = 1;
 		// 16-bit
 		if (uFlags & CHN_16BIT)
@@ -708,7 +772,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			} else
 #endif
 			{
-				for (int i=0; i<scanlen; i++)
+				for (SmpLength i=0; i<scanlen; i++)
 				{
 					int s = *p;
 					if (s < smin) smin = s;
@@ -721,7 +785,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 		} else
 		// 8-bit
 		{
-			signed char *p = psample + poshi * smplsize;
+			const int8 *p = psample + poshi * smplsize;
 			smin = 127;
 			smax = -128;
 #if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
@@ -731,7 +795,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			} else
 #endif
 			{
-				for (int i=0; i<scanlen; i++)
+				for (SmpLength i=0; i<scanlen; i++)
 				{
 
 					int s = *p;
@@ -867,9 +931,10 @@ void CViewSample::OnDraw(CDC *pDC)
 			// Drawing Sample Data
 			::SelectObject(offScreenDC, CMainFrame::penSample);
 			int smplsize = sample.GetBytesPerSample();
-			if ((m_nZoom == 1) || ((!m_nZoom) && (sample.nLength <= (UINT)rect.right)))
+			if (m_nZoom == 1 || m_nZoom < 0 || ((!m_nZoom) && (sample.nLength <= (SmpLength)rect.right)))
 			{
-				int len = sample.nLength - nSmpScrollPos;
+				// Draw sample data in 1:1 ratio or higher (zoom in)
+				SmpLength len = sample.nLength - nSmpScrollPos;
 				signed char *psample = ((signed char *)sample.pSample) + nSmpScrollPos * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
@@ -881,9 +946,10 @@ void CViewSample::OnDraw(CDC *pDC)
 				}
 			} else
 			{
-				int len = sample.nLength;
+				// Draw zoomed-out saple data
+				SmpLength len = sample.nLength;
 				int xscroll = 0;
-				if (m_nZoom)
+				if (m_nZoom > 0)
 				{
 					xscroll = nSmpScrollPos;
 					len -= nSmpScrollPos;
@@ -901,15 +967,18 @@ void CViewSample::OnDraw(CDC *pDC)
 		}
 	}
 
-	if(m_nGridSegments)
+	if(m_nGridSegments && m_nGridSegments < sample.nLength)
 	{
 		// Draw sample grid
 		::SelectObject(offScreenDC, CMainFrame::penHalfDarkGray);
-		for(int i = 0; i < m_nGridSegments; i++)
+		for(SmpLength i = 1; i < m_nGridSegments; i++)
 		{
 			int screenPos = SampleToScreen(sample.nLength * i / m_nGridSegments);
-			::MoveToEx(offScreenDC, screenPos, rect.top, nullptr);
-			::LineTo(offScreenDC, screenPos, rect.bottom);
+			if(screenPos >= rect.left && screenPos <= rect.right)
+			{
+				::MoveToEx(offScreenDC, screenPos, rect.top, nullptr);
+				::LineTo(offScreenDC, screenPos, rect.bottom);
+			}
 		}
 	}
 
@@ -1459,7 +1528,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		const ModSample &sample = pSndFile->GetSample(m_nSample);
 		HMENU hMenu = ::CreatePopupMenu();
-		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler(); //rewbs.customKeys
+		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 		if (!hMenu)	return;
 		if (sample.nLength)
 		{
@@ -1718,19 +1787,16 @@ void CViewSample::AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, Smp
 		// cut part is before loop start
 		loopStart -= m_dwEndSel - m_dwBeginSel;
 		loopEnd -= m_dwEndSel - m_dwBeginSel;
-	}
-	else if(m_dwBeginSel < loopStart  && m_dwEndSel < loopEnd)
+	} else if(m_dwBeginSel < loopStart  && m_dwEndSel < loopEnd)
 	{
 		// cut part is partly before loop start
 		loopStart = m_dwBeginSel;
 		loopEnd -= m_dwEndSel - m_dwBeginSel;
-	}
-	else if(m_dwBeginSel >= loopStart && m_dwEndSel < loopEnd)
+	} else if(m_dwBeginSel >= loopStart && m_dwEndSel < loopEnd)
 	{
 		// cut part is in the loop
 		loopEnd -= m_dwEndSel - m_dwBeginSel;
-	}
-	else if(m_dwBeginSel >= loopStart && m_dwBeginSel < loopEnd && m_dwEndSel > loopEnd)
+	} else if(m_dwBeginSel >= loopStart && m_dwBeginSel < loopEnd && m_dwEndSel > loopEnd)
 	{
 		// cut part is partly before loop end
 		loopEnd = m_dwBeginSel;
@@ -2345,46 +2411,77 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 }
 
 
-UINT CViewSample::GetSelectionZoomLevel() const
-//---------------------------------------------
-{
-	UINT zoom = 0;
-	while(((static_cast<UINT>(m_rcClient.right) << zoom) < m_dwEndSel - m_dwBeginSel) && (zoom < MAX_ZOOM - 1))
-	{
-		zoom++;
-	}
-	if(zoom++ < MAX_ZOOM)
-		return zoom;
-	else
-		return 0;
-}
-
-
 void CViewSample::OnZoomOnSel()
 //-----------------------------
 {
-	if ((m_dwEndSel > m_dwBeginSel) && (m_rcClient.right > 0))
+	int zoom = 0;
+	SmpLength selLength = (m_dwEndSel - m_dwBeginSel);
+	if (selLength > 0 && m_rcClient.right > 0)
 	{
-		DWORD dwZoom = GetSelectionZoomLevel();
-
-		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, dwZoom);
-		if (dwZoom)
+		zoom = GetZoomLevel(selLength);
+		if(zoom < 0)
 		{
-			LONG l;
-			CSize sz;
-			SetZoom(dwZoom);
-			UpdateScrollSize();
-			sz.cx = m_dwBeginSel >> (dwZoom-1);
-			l = (m_rcClient.right - ((m_dwEndSel - m_dwBeginSel) >> (dwZoom-1))) / 2;
-			if (l > 0) sz.cx -= l;
-			sz.cx -= m_nScrollPosX;
-			sz.cy = 0;
-			OnScrollBy(sz, TRUE);
+			zoom++;
+			if(zoom >= -1)
+				zoom = 1;
+			else if(zoom < MIN_ZOOM)
+				zoom = MIN_ZOOM;
+		} else if(zoom > MAX_ZOOM)
+		{
+			zoom = 0;
 		}
-	} else
-	{
-		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, 0);
 	}
+
+	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoom);
+	if (zoom)
+	{
+		CSize sz;
+		SetZoom(zoom);
+		UpdateScrollSize();
+		sz.cx = m_dwBeginSel;
+
+		// Compute width of new selection and center it in the view
+		int scrollToSample = (m_dwBeginSel + selLength / 2) >> (std::max(1, zoom) - 1);
+		scrollToSample -= (m_rcClient.Width() / 2) >> (-std::min(-1, zoom) - 1);
+
+		int minPos, maxPos;
+		GetScrollRange(SB_HORZ, &minPos, &maxPos);
+		Limit(scrollToSample, minPos, maxPos);
+		SetScrollPos(SB_HORZ, scrollToSample);
+		Invalidate();
+
+		/*
+		if(zoom > 1)
+		{
+			sz.cx >>= (zoom - 1);
+			selLength >>= (zoom - 1);
+		} else if(zoom < -1)
+		{
+			sz.cx <<= (-zoom - 1);
+			selLength <<= (-zoom - 1);
+		}
+
+		int l = (m_rcClient.right - selLength) / 2;
+		if (l > 0) sz.cx -= l;
+		if(m_nZoom > 0)
+			sz.cx -= m_nScrollPosX;
+		else
+			sz.cx -= m_nScrollPosX << (-zoom - 1);
+		sz.cy = 0;
+		OnScrollBy(sz, TRUE);*/
+	}
+}
+
+
+SmpLength CViewSample::ScrollPosToSamplePos(int nZoom) const
+//----------------------------------------------------------
+{
+	if(nZoom < 0)
+		return m_nScrollPosX;
+	else if(nZoom > 0)
+		return m_nScrollPosX << (nZoom - 1);
+	else
+		return 0;
 }
 
 
@@ -2467,15 +2564,14 @@ void CViewSample::OnSetSustainEnd()
 void CViewSample::OnZoomUp()
 //--------------------------
 {
-	if (m_nZoom >= MIN_ZOOM)
-		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, (m_nZoom>MIN_ZOOM) ? m_nZoom-1 : MAX_ZOOM);
+	DoZoom(1);
 }
 
 
 void CViewSample::OnZoomDown()
 //----------------------------
 {
-	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, (m_nZoom<MAX_ZOOM) ? m_nZoom+1 : MIN_ZOOM);
+	DoZoom(-1);
 }
 
 
@@ -2700,24 +2796,67 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 }
 
 
-// Returns auto-zoom level compared to other zoom levels.
-// If auto-zoom gives bigger zoom than zoom level N but smaller than zoom level N-1,
-// return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
-// if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
-UINT CViewSample::GetAutoZoomLevel(const ModSample& smp)
-//------------------------------------------------------
+bool CViewSample::CanZoomSelection() const
+//----------------------------------------
 {
-	m_rcClient.NormalizeRect();
-	if (m_rcClient.Width() == 0 || smp.nLength <= 0)
+	return GetZoomLevel(m_dwEndSel - m_dwBeginSel) <= MAX_ZOOM;
+}
+
+
+// Returns auto-zoom level compared to other zoom levels.
+// Result is not limited to MIN_ZOOM...MAX_ZOOM range.
+int CViewSample::GetZoomLevel(SmpLength length) const
+//---------------------------------------------------
+{
+	if (m_rcClient.Width() == 0 || length == 0)
 		return MAX_ZOOM + 1;
 
 	// When m_nZoom > 0, 2^(m_nZoom - 1) = samplesPerPixel  [1]
 	// With auto-zoom setting the whole sample is fitted to screen:
 	// ViewScreenWidthInPixels * samplesPerPixel = sampleLength (approximately)  [2].
 	// Solve samplesPerPixel from [2], then "m_nZoom" from [1].
-	float zoom = static_cast<float>(smp.nLength) / static_cast<float>(m_rcClient.Width());
+	float zoom = static_cast<float>(length) / static_cast<float>(m_rcClient.Width());
 	zoom = 1 + (log10(zoom) / log10(2.0f));
-	return static_cast<UINT>(std::max(zoom + 1, MIN_ZOOM + 1.0f));
+	if(zoom <= 0) zoom -= 2;
+
+	return static_cast<int>(zoom + sgn(zoom));
+}
+
+
+void CViewSample::DoZoom(int direction)
+//-------------------------------------
+{
+	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	// zoomOrder: Biggest to smallest zoom order.
+	int zoomOrder[(-MIN_ZOOM - 1) + (MAX_ZOOM + 1)];
+	for(size_t i = 2; i < -MIN_ZOOM + 1; ++i)
+		zoomOrder[i - 2] = MIN_ZOOM + i - 2;	// -6, -5, -4, -3...
+
+	for(size_t i = 1; i <= MAX_ZOOM; ++i)
+		zoomOrder[i + - 1 + (-MIN_ZOOM - 1)] = i; // 1, 2, 3...
+	zoomOrder[CountOf(zoomOrder) - 1] = 0;
+	int* const pZoomOrderEnd = zoomOrder + CountOf(zoomOrder);
+	int autoZoomLevel = GetZoomLevel(sndFile.GetSample(m_nSample).nLength);
+	if(autoZoomLevel < MIN_ZOOM) autoZoomLevel = MIN_ZOOM;
+
+	// If auto-zoom is not the smallest zoom, move auto-zoom index(=zero)
+	// to the right position in the zoom order.
+	if (autoZoomLevel < MAX_ZOOM + 1)
+	{
+		int* p = std::find(zoomOrder, pZoomOrderEnd, autoZoomLevel);
+		if (p != pZoomOrderEnd)
+		{
+			memmove(p + 1, p, sizeof(zoomOrder[0]) * (pZoomOrderEnd - (p+1)));
+			*p = 0;
+		}
+		else
+			ASSERT(false);
+	}
+	const ptrdiff_t nPos = std::find(zoomOrder, pZoomOrderEnd, m_nZoom) - zoomOrder;
+	if (direction > 0 && nPos > 0)	// Zoom in
+		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoomOrder[nPos - 1]);
+	else if (direction < 0 && nPos + 1 < CountOf(zoomOrder))
+		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoomOrder[nPos + 1]);
 }
 
 
@@ -2728,38 +2867,9 @@ BOOL CViewSample::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	// One scroll direction zooms in and the other zooms out.
 	// This behaviour is different from what would happen if simply scrolling
 	// the zoom levels in the zoom combobox.
-	if (nFlags == MK_CONTROL)
+	if (nFlags == MK_CONTROL && GetDocument())
 	{
-		CSoundFile* const pSndFile = (GetDocument()) ? GetDocument()->GetSoundFile() : nullptr;
-		if (pSndFile != nullptr)
-		{
-			// zoomOrder: Biggest to smallest zoom order.
-			UINT zoomOrder[MAX_ZOOM + 1];
-			for(size_t i = 1; i < CountOf(zoomOrder); ++i)
-				zoomOrder[i-1] = i; // [0]=1, [1]=2, ...
-			zoomOrder[CountOf(zoomOrder) - 1] = 0;
-			UINT* const pZoomOrderEnd = zoomOrder + CountOf(zoomOrder);
-			const UINT nAutoZoomLevel = GetAutoZoomLevel(pSndFile->GetSample(m_nSample));
-
-			// If auto-zoom is not the smallest zoom, move auto-zoom index(=zero)
-			// to the right position in the zoom order.
-			if (nAutoZoomLevel < MAX_ZOOM + 1)
-			{
-				UINT* p = std::find(zoomOrder, pZoomOrderEnd, nAutoZoomLevel);
-				if (p != pZoomOrderEnd)
-				{
-					memmove(p + 1, p, sizeof(zoomOrder[0]) * (pZoomOrderEnd - (p+1)));
-					*p = 0;
-				}
-				else
-					ASSERT(false);
-			}
-			const ptrdiff_t nPos = std::find(zoomOrder, pZoomOrderEnd, m_nZoom) - zoomOrder;
-			if (zDelta > 0 && nPos > 0)
-				SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoomOrder[nPos - 1]);
-			else if (zDelta < 0 && nPos + 1 < CountOf(zoomOrder))
-				SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoomOrder[nPos + 1]);
-		}
+		DoZoom(zDelta);
 	}
 
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
