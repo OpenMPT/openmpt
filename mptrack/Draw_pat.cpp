@@ -1403,6 +1403,7 @@ void CViewPattern::OnSize(UINT nType, int cx, int cy)
 	{
 		UpdateSizes();
 		UpdateScrollSize();
+		UpdateScrollPos();
 		OnScroll(0,0,TRUE);
 	}
 }
