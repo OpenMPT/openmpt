@@ -2104,7 +2104,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_i16.dll."
+    IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_f32.dll."
     IDS_ERR_FILEOPEN        "Unable to open file."
     IDS_ERR_FILETYPE        "Unsupported file type"
     IDS_ERR_SAVEINS         "Unable to save instrument"
@@ -2161,26 +2161,6 @@ BEGIN
     ID_HELP_USING           "Display instructions about how to use help\nHelp"
     ID_CONTEXT_HELP         "Display help for buttons, menus and windows\nHelp"
     ID_HELP                 "Display help for current task or command\nHelp"
-END
-
-STRINGTABLE
-BEGIN
-    ID_FILE_MRU_FILE1       "Open this document"
-    ID_FILE_MRU_FILE2       "Open this document"
-    ID_FILE_MRU_FILE3       "Open this document"
-    ID_FILE_MRU_FILE4       "Open this document"
-    ID_FILE_MRU_FILE5       "Open this document"
-    ID_FILE_MRU_FILE6       "Open this document"
-    ID_FILE_MRU_FILE7       "Open this document"
-    ID_FILE_MRU_FILE8       "Open this document"
-    ID_FILE_MRU_FILE9       "Open this document"
-    ID_FILE_MRU_FILE10      "Open this document"
-    ID_FILE_MRU_FILE11      "Open this document"
-    ID_FILE_MRU_FILE12      "Open this document"
-    ID_FILE_MRU_FILE13      "Open this document"
-    ID_FILE_MRU_FILE14      "Open this document"
-    ID_FILE_MRU_FILE15      "Open this document"
-    ID_FILE_MRU_FILE16      "Open this document"
 END
 
 STRINGTABLE
