@@ -85,10 +85,15 @@ struct PACKED XMInstrument
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness();
 
+	enum EnvType
+	{
+		EnvTypeVol,
+		EnvTypePan,
+	};
 	// Convert OpenMPT's internal envelope representation to XM envelope data.
-	void ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, uint16 *envData);
+	void ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, EnvType env);
 	// Convert XM envelope data to an OpenMPT's internal envelope representation.
-	void ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, const uint16 (&envData)[24]) const;
+	void ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, EnvType env) const;
 
 	// Convert OpenMPT's internal sample representation to an XMInstrument.
 	uint16 ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport);
