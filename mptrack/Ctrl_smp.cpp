@@ -545,7 +545,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPSTR pszText)
 			}
 			break;
 		case IDC_EDIT_STRETCHPARAMS:
-			wsprintf(pszText, "SequenceMs SeekwindowMs OverlapMs ProcessStepLength");
+			wsprintf(pszText, "SequenceMs SeekwindowMs OverlapMs");
 			return TRUE;
 		}
 	}
@@ -1490,7 +1490,7 @@ void CCtrlSamples::OnUpsample()
 		if (sample.uFlags[CHN_16BIT])
 		{
 			if (dwStart > 0) memcpy(pNewSample, pOriginal, dwStart*smplsize);
-			if (dwEnd < sample.nLength) memcpy(((LPSTR)pNewSample)+(dwStart+(dwEnd-dwStart)*2)*smplsize, ((LPSTR)pOriginal)+(dwEnd*smplsize), (sample.nLength-dwEnd)*smplsize);
+			if (dwEnd < sample.nLength) memcpy(((int8 *)pNewSample)+(dwStart+(dwEnd-dwStart)*2)*smplsize, ((int8 *)pOriginal)+(dwEnd*smplsize), (sample.nLength-dwEnd)*smplsize);
 		} else
 		{
 			if (dwStart > 0)
@@ -1519,7 +1519,7 @@ void CCtrlSamples::OnUpsample()
 		if (sample.nSustainEnd > dwStart) sample.nSustainEnd += (sample.nSustainEnd - dwStart);
 		
 		sample.uFlags.set(CHN_16BIT);
-		ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, dwNewLen, m_sndFile);
+		ctrlSmp::ReplaceSample(sample, pNewSample, dwNewLen, m_sndFile);
 		// Update loop wrap-around buffer
 		sample.PrecomputeLoops(m_sndFile);
 		
@@ -1623,7 +1623,7 @@ void CCtrlSamples::OnDownsample()
 			}
 		}
 		if (dwStart > 0) memcpy(pNewSample, pOriginal, dwStart*smplsize);
-		if (dwEnd < sample.nLength) memcpy(((LPSTR)pNewSample)+(dwStart+dwRemove)*smplsize, ((LPSTR)pOriginal)+((dwStart+dwRemove*2)*smplsize), (sample.nLength-dwEnd)*smplsize);
+		if (dwEnd < sample.nLength) memcpy(((int8 *)pNewSample)+(dwStart+dwRemove)*smplsize, ((int8 *)pOriginal)+((dwStart+dwRemove*2)*smplsize), (sample.nLength-dwEnd)*smplsize);
 		if (sample.nLoopStart >= dwEnd) sample.nLoopStart -= dwRemove; else
 		if (sample.nLoopStart > dwStart) sample.nLoopStart -= (sample.nLoopStart - dwStart)/2;
 		if (sample.nLoopEnd >= dwEnd) sample.nLoopEnd -= dwRemove; else
@@ -1635,7 +1635,7 @@ void CCtrlSamples::OnDownsample()
 		if (sample.nSustainEnd > dwStart) sample.nSustainEnd -= (sample.nSustainEnd - dwStart)/2;
 		if (sample.nSustainEnd > dwNewLen) sample.nSustainEnd = dwNewLen;
 
-		ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, dwNewLen, m_sndFile);
+		ctrlSmp::ReplaceSample(sample, pNewSample, dwNewLen, m_sndFile);
 		// Update loop wrap-around buffer
 		sample.PrecomputeLoops(m_sndFile);
 
@@ -2044,7 +2044,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Time Stretch");
 	// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
-	ctrlSmp::ReplaceSample(sample, (LPSTR)pNewSample, std::min(outPos, nNewSampleLength), m_sndFile);
+	ctrlSmp::ReplaceSample(sample, pNewSample, std::min(outPos, nNewSampleLength), m_sndFile);
 
 	// Free progress bar brushes
 	DeleteObject((HBRUSH)green);
