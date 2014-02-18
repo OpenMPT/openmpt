@@ -1,13 +1,7 @@
-Note: The SoundTouch package has pretty much been left untouched (pardon the pun),
-except for a small change in SoundTouchDLL.h:
-
-The "samples" parameter type of soundtouch_putSamples (line 116) has been changed
-from float to short.  
-
-In STTypes.h, the preprocessor statement
-#if (WIN32 || __i386__ || __x86_64__)
-has been changed to
-#if ((WIN32 && defined(_M_IX86)) || __i386__ || __x86_64__)
+SoundTouch Audio Processing Library
+http://www.surina.net/soundtouch/
+version 1.8.0
+No changes have been made.
 
 For building, premake4 is used to generate Visual Studio project files.
 See ../premake4.lua for details.

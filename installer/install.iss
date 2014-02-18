@@ -61,7 +61,7 @@ Name: english; MessagesFile: compiler:Default.isl
 ; preserve file type order for best solid compression results (first binary, then text)
 ; home folder
 Source: ..\bin\Win32\mptrack.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\bin\Win32\OpenMPT_SoundTouch_i16.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\Win32\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion
 #ifndef DOWNLOAD_MO3
 Source: ..\bin\Win32\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 #endif

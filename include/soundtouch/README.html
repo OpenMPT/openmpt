@@ -15,13 +15,8 @@
 </head>
 <body class="normal">
 <hr>
-<h4 style="color:red">Note: Some of the SoundTouch files included in OpenMPT repository are modified versions
-of the original SoundTouch files (check OpenMPT.txt for details).
-This readme, excluding this note, is the original SoundTouch readme.
-</h4>
-<h1>SoundTouch audio processing library v1.6.0 </h1>
-<p class="normal">SoundTouch library Copyright Â© Olli Parviainen
-2001-2011 </p>
+<h1>SoundTouch audio processing library v1.8.0</h1>
+<p class="normal">SoundTouch library Copyright © Olli Parviainen 2001-2014</p>
 <hr>
 <h2>1. Introduction </h2>
 <p>SoundTouch is an open-source audio processing library that allows
@@ -38,26 +33,18 @@ same time </li>
 </ul>
 <h3>1.1 Contact information </h3>
 <p>Author email: oparviai 'at' iki.fi </p>
-<p>SoundTouch WWW page: <a href="http://www.surina.net/soundtouch">http://www.surina.net/soundtouch</a></p>
+<p>SoundTouch WWW page: <a href="http://soundtouch.surina.net">http://soundtouch.surina.net</a></p>
 <hr>
 <h2>2. Compiling SoundTouch</h2>
 <p>Before compiling, notice that you can choose the sample data format
 if it's desirable to use floating point sample data instead of 16bit
 integers. See section "sample data format" for more information.</p>
 <h3>2.1. Building in Microsoft Windows</h3>
-<p>Project files for Microsoft Visual C++ 6.0 and Visual C++ .NET are
-supplied with the source code package.<br>
+<p>Project files for Microsoft Visual C++ are supplied with the source 
+code package. Go to Microsoft WWW page to download 
+<a href="http://www.visualstudio.com/en-US/products/visual-studio-express-vs">
+Microsoft Visual Studio Express version for free</a>.
 </p>
-<p> Please notice that SoundTouch library uses processor-specific
-optimizations for Pentium III and AMD processors. Visual Studio .NET
-and later versions supports the required instructions by default, but
-Visual Studio 6.0 requires a processor pack upgrade to be installed in
-order to support these optimizations. The processor pack upgrade can be
-downloaded from Microsoft site at this URL:</p>
-<p><a href="http://msdn.microsoft.com/en-us/vstudio/aa718349.aspx">http://msdn.microsoft.com/en-us/vstudio/aa718349.aspx</a></p>
-<p>If the above URL is unavailable or removed, go to <a
- href="http://msdn.microsoft.com/"> http://msdn.microsoft.com</a> and
-perform a search with keywords "processor pack". </p>
 <p>To build the binaries with Visual C++ compiler, either run
 "make-win.bat" script, or open the appropriate project files in source
 code directories with Visual Studio. The final executable will appear
@@ -68,15 +55,9 @@ executables. The make-win.bat script creates these directories
 automatically. </p>
 <h3>2.2. Building in Gnu platforms</h3>
 <p>The SoundTouch library compiles in practically any platform
-supporting GNU compiler (GCC) tools. SoundTouch have been tested with
-gcc version 4.4.5 at latest, but it shouldn't be very specific about
-the gcc
-version. Assembler-level performance optimizations for GNU platform are
-currently available in x86 platforms only, and they are automatically
-disabled and replaced with standard C routines in other processor
-platforms.</p>
-<p>To build and install the binaries, run the following commands in the
-SoundTouch/ directory:</p>
+supporting GNU compiler (GCC) tools. SoundTouch requires GCC version 4.3 or later.</p>
+<p>To build and install the binaries, run the following commands in 
+/soundtouch directory:</p>
 <table border="0" cellpadding="0" cellspacing="4">
   <tbody>
     <tr>
@@ -132,36 +113,36 @@ these with the following command:</p>
 <pre><b>sudo apt-get install automake autoconf libtool build-essential</b></pre>
 <h4><b>2.2.2 Problems with GCC compiler compatibility</b></h4>
 <p>At the release time the SoundTouch package has been tested to
-compile in GNU/Linux platform. However, in past it's happened that new
-gcc versions aren't necessarily compatible with the assembler settings
-used in the optimized routines. <b>If you have problems getting the
-SoundTouch library compiled, try disabling the optimizations as a </b><b>workaround</b>
-by editing the file "include/STTypes.h" and removing the following
-definition there:</p>
+compile in GNU/Linux platform. However, If you have problems getting the
+SoundTouch library compiled, try disabling optimizations that are specific for 
+x86 processors by running <b>./configure</b> script with switch
 <blockquote>
-  <pre>#define ALLOW_OPTIMIZATIONS 1</pre>
+<pre>--enable-x86-optimizations=no</pre>
 </blockquote>
-<h4><b>2.2.3 Problems with configure script or build process</b>&nbsp;</h4>
-<p>Incompatibilities between various GNU toolchain versions may cause
-errors when running the "configure" script or building the source
-codes, if your GNU tool versions are not compatible with the versions
-used for preparing the SoundTouch kit.&nbsp;</p>
-<p>To resolve the issue, regenerate the configure scripts with your
-local tool set by running the "<b>./bootstrap</b>" script included in
-the SoundTouch source code kit. After that, run the <b>configure</b>
-script and <b>make</b> as usually.</p>
-<h4><b>2.2.4 Compiler issues with non-x86 processors</b></h4>
-<p>SoundTouch library works also on non-x86 processors.</p>
-<p>However, in case that you get compiler errors when trying to compile
-for non-Intel processor, edit the file "<b>source\SoundTouch\Makefile.am</b>"
-and
-remove the "<b>-msse2</b>" flag on the <b>AM_CXXFLAGS </b>line:</p>
-<pre><b>AM_CXXFLAGS=-O3 -fcheck-new -I../../include&nbsp;&nbsp;&nbsp; # Note: -msse2 flag removed!</b></pre>
-<p>After that, run "<b>./bootstrap</b>" script, and then run <b>configure</b>
-and <b>make</b> again.</p>
+
+Alternatively, if you don't use GNU Configure system, edit file "include/STTypes.h" 
+directly and remove the following definition:<blockquote>
+  <pre>#define SOUNDTOUCH_ALLOW_X86_OPTIMIZATIONS 1</pre>
+</blockquote>
+
+<h4><b>2.2.3 Compiling Shared Library / DLL version</b></h4>
+    <p>
+        The GNU compilation does not automatically create a shared-library version of 
+        SoundTouch (.so or .dll). If such is desired, then you can create it as follows 
+        after running the usual compilation:</p>
+    <blockquote>
+  <pre>g++ -shared -static -DDLL_EXPORTS -I../../include -o SoundTouch.dll \
+     SoundTouchDLL.cpp ../SoundTouch/.libs/libSoundTouch.a
+sstrip SoundTouch.dll</pre>
+</blockquote>
+
+<h3>2.1. Building in Android</h3>
+<p>Android compilation instructions are within the 
+    source code package, see file &quot;<b>source/Android-lib/README-SoundTouch-Android.html</b>&quot; 
+    in the package.</p>
+
 <hr>
-<h2>3. About implementation &amp; Usage tips</h2>
-<h3>3.1. Supported sample data formats</h3>
+<h2>3. About implementation &amp; Usage tips <h3>3.1. Supported sample data formats</h3>
 <p>The sample data format can be chosen between 16bit signed integer
 and 32bit floating point values, the default is 32bit floating point. </p>
 <p> In Windows environment, the sample data format is chosen in file
@@ -375,7 +356,7 @@ from Athlon XP. </li>
 <h2><a name="SoundStretch"></a>4. SoundStretch audio processing utility
 </h2>
 <p>SoundStretch audio processing utility<br>
-Copyright (c) Olli Parviainen 2002-2010</p>
+    Copyright (c) Olli Parviainen 2002-2012</p>
 <p>SoundStretch is a simple command-line application that can change
 tempo, pitch and playback rates of WAV sound files. This program is
 intended primarily to demonstrate how the "SoundTouch" library can be
@@ -524,6 +505,34 @@ and estimates the BPM rate:</p>
 <hr>
 <h2>5. Change History</h2>
 <h3>5.1. SoundTouch library Change History </h3>
+<p><b>1.8.0:</b></p>
+<ul>
+    <li>Added support for multi-channel audio processing</li>
+    <li>Added support for <b>cubic</b> and <b>shannon</b> interpolation for rate and pitch shift effects besides 
+        the original <b>linear</b> interpolation, to reduce aliasing at high frequencies due to interpolation.
+        Cubic interpolation is used as default for floating point processing, and linear interpolation for integer 
+        processing.</li>
+    <li>Fixed bug in anti-alias filtering that limited stop-band attenuation to -10 dB instead of <-50dB, and
+        increased filter length from 32 to 64 taps to further reduce aliasing due to frequency folding.</li>
+    <li>Performance improvements in cross-correlation algorithm</li>
+    <li>Other bug and compatibility fixes</li>
+</ul>
+<p><b>1.7.1:</b></p>
+<ul>
+    <li>Added files for Android compilation
+</ul>
+<p><b>1.7.0:</b></p>
+<ul>
+    <li>Sound quality improvements/li>
+    <li>Improved flush() to adjust output sound stream duration to match better with 
+        ideal duration</li>
+    <li>Rewrote x86 cpu feature check to resolve compatibility problems</li>
+    <li>Configure script automatically checks if CPU supports mmx & sse compatibility for GNU platform, and
+    the script support now "--enable-x86-optimizations" switch to allow disabling x86-specific optimizations.</li>
+    <li>Revised #define conditions for 32bit/64bit compatibility</li>
+    <li>gnu autoconf/automake script compatibility fixes</li>
+    <li>Tuned beat-per-minute detection algorithm</li>
+</ul>
 <p><b>1.6.0:</b></p>
 <ul>
   <li> Added automatic cutoff threshold adaptation to beat detection
@@ -582,7 +591,7 @@ SoundTouch library </li>
 compiler errors due to 'const' keyword mismatch. </li>
   <li> Source code cleanup</li>
 </ul>
-<p><strong>v1.3.1: </strong> </p>
+<p><strong>1.3.1: </strong> </p>
 <ul>
   <li> Changed static class declaration to GCC 4.x compiler compatible
 syntax. </li>
@@ -594,7 +603,7 @@ MMX/SSE-optimized source code with both Visual C++ and GCC compilers. </li>
   <li> Set floating point as the default sample format and added switch
 to the GNU configure script for selecting the other sample format.</li>
 </ul>
-<p><strong>v1.3.0: </strong> </p>
+<p><strong>1.3.0: </strong> </p>
 <ul>
   <li> Fixed tempo routine output duration inaccuracy due to rounding
 error </li>
@@ -611,7 +620,7 @@ routines vs. the standard C routines. </li>
   <li> MMX routine incompatibility with new gcc compiler versions </li>
   <li> Other miscellaneous bug fixes </li>
 </ul>
-<p><strong>v1.2.1: </strong> </p>
+<p><strong>1.2.1: </strong> </p>
 <ul>
   <li> Added automake/autoconf scripts for GNU platforms (in courtesy
 of David Durham) </li>
@@ -619,7 +628,7 @@ of David Durham) </li>
   <li> Fixed 64bit address space bugs. </li>
   <li> Created a 'soundtouch' namespace for SAMPLETYPE definitions.</li>
 </ul>
-<p><strong>v1.2.0: </strong> </p>
+<p><strong>1.2.0: </strong> </p>
 <ul>
   <li> Added support for 32bit floating point sample data type with
 SSE/3DNow! optimizations for Win32 platform (SSE/3DNow! optimizations
@@ -630,7 +639,7 @@ Makefile </li>
 class </li>
   <li> Bugfixes</li>
 </ul>
-<p><strong>v1.1.1: </strong> </p>
+<p><strong>1.1.1: </strong> </p>
 <ul>
   <li> Moved SoundTouch under lesser GPL license (LGPL). This allows
 using SoundTouch library in programs that aren't released under GPL
@@ -641,7 +650,7 @@ having the standard non-mmx routines. </li>
   <li> MMX routines to support gcc version 3. </li>
   <li> Replaced windows makefiles by script using the .dsw files </li>
 </ul>
-<p><strong>v1.01: </strong> </p>
+<p><strong>1.0.1: </strong> </p>
 <ul>
   <li> "mmx_gcc.cpp": Added "using namespace std" and removed "return
 0" from a function with void return value to fix compiler errors when
@@ -649,42 +658,47 @@ compiling the library in Solaris environment. </li>
   <li> Moved file "FIFOSampleBuffer.h" to "include" directory to allow
 accessing the FIFOSampleBuffer class from external files. </li>
 </ul>
-<p><strong>v1.0: </strong> </p>
+<p><strong>1.0: </strong> </p>
 <ul>
   <li> Initial release </li>
 </ul>
 <p>&nbsp;</p>
 <h3>5.2. SoundStretch application Change History </h3>
-<p><b>v1.5.0:</b></p>
+<p><b>1.7.0:</b></p>
+<ul>
+    <li>Bugfixes in Wavfile: exception string formatting, avoid getLengthMs() integer 
+        precision overflow, support WAV files using 24/32bit sample format.</li>
+</ul>
+    <p><b>1.5.0:</b></p>
 <ul>
   <li> Added "-speech" switch to activate algorithm parameters more
 suitable for speech processing than the default parameters tuned for
 music processing.</li>
 </ul>
-<p><strong>v1.4.0:</strong></p>
+<p><strong>1.4.0:</strong></p>
 <ul>
   <li> Moved BPM detection routines from SoundStretch application into
 SoundTouch library </li>
   <li> Allow using standard input/output pipes as audio processing
 input/output streams</li>
 </ul>
-<p><strong>v1.3.0:</strong></p>
+<p><strong>1.3.0:</strong></p>
 <ul>
   <li> Simplified accessing WAV files with floating point sample
 format. </li>
 </ul>
-<p><strong>v1.2.1: </strong> </p>
+<p><strong>1.2.1: </strong> </p>
 <ul>
   <li> Fixed 64bit address space bugs.</li>
 </ul>
-<p><strong>v1.2.0: </strong> </p>
+<p><strong>1.2.0: </strong> </p>
 <ul>
   <li> Added support for 32bit floating point sample data type </li>
   <li> Restructured the BPM routines into separate library </li>
   <li> Fixed big-endian conversion bugs in WAV file routines (hopefully
 :)</li>
 </ul>
-<p><strong>v1.1.1: </strong> </p>
+<p><strong>1.1.1: </strong> </p>
 <ul>
   <li> Fixed bugs in WAV file reading &amp; added byte-order conversion
 for big-endian processors. </li>
@@ -694,14 +708,14 @@ highlight difference from SoundTouch stuff. </li>
   <li> Output file name isn't required if output isn't desired (e.g. if
 using the switch '-bpm' in plain format only) </li>
 </ul>
-<p><strong>v1.1:</strong></p>
+<p><strong>1.1:</strong></p>
 <ul>
   <li> Fixed "Release" settings in Microsoft Visual C++ project file
 (.dsp) </li>
   <li> Added beats-per-minute (BPM) detection routine and command-line
 switch "-bpm" </li>
 </ul>
-<p><strong>v1.01: </strong> </p>
+<p><strong>1.01: </strong> </p>
 <ul>
   <li> Initial release </li>
 </ul>
@@ -710,20 +724,41 @@ switch "-bpm" </li>
 <p>Kudos for these people who have contributed to development or
 submitted bugfixes since SoundTouch v1.3.1: </p>
 <ul>
-  <li> Arthur A </li>
-  <li> Richard Ash </li>
-  <li> Stanislav Brabec </li>
-  <li> Christian Budde </li>
-  <li> Brian Cameron </li>
-  <li> Jason Champion </li>
+  <li> Arthur A</li>
+  <li> Richard Ash</li>
+  <li> Stanislav Brabec</li>
+  <li> Christian Budde</li>
+  <li> Chris Bryan</li>  
+  <li> Jacek Caban</li>
+  <li> Brian Cameron</li>
+  <li> Jason Champion</li>
+  <li> David Clark</li>
+  <li> Patrick Colis</li>
+  <li> Miquel Colon</li>
+  <li> Justin Frankel</li>
+  <li> Jason Garland</li>
+  <li> Takashi Iwai</li>
+  <li> Yuval Naveh</li>
+  <li> Paulo Pizarro</li>
+  <li> Blaise Potard</li>
+  <li> RJ Ryan</li>
   <li> Patrick Colis </li>
+  <li> Miquel Colon </li>
+  <li> Sandro Cumerlato</li>
   <li> Justin Frankel </li>
   <li> Jason Garland </li>
+  <li> Masa H. </li>
   <li> Takashi Iwai </li>
+  <li> Mathias Möhl</li>
   <li> Yuval Naveh </li>
   <li> Paulo Pizarro </li>
+  <li> Blaise Potard</li>
   <li> RJ Ryan </li>
   <li> John Sheehy</li>
+  <li> Tim Shuttleworth</li>
+  <li> John Stumpo</li>
+  <li> Tim Shuttleworth</li>
+  <li> Katja Vetter</li>
 </ul>
 <p>Moral greetings to all other contributors and users also!</p>
 <hr>
@@ -741,11 +776,8 @@ General Public License for more details.</p>
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</p>
 <hr><!--
-
-
-$Id: README.html 106 2011-07-15 19:19:36Z oparviai $
-
-
--->
+$Id: README.html 191 2014-01-07 20:26:30Z oparviai $-->
+    <p>
+        <i>RREADME.html file updated on 7-Jan-2014</i></p>
 </body>
 </html>
