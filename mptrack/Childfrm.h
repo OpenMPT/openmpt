@@ -36,7 +36,6 @@ typedef struct PATTERNVIEWSTATE
 
 typedef struct SAMPLEVIEWSTATE
 {
-	DWORD cbStruct;
 	DWORD dwScrollPos;
 	DWORD dwBeginSel;
 	DWORD dwEndSel;

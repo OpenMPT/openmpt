@@ -34,11 +34,12 @@ protected:
 	HDC offScreenDC;
 	HGDIOBJ offScreenBitmap;
 	SIZE m_sizeTotal;
-	UINT m_nZoom, m_nBtnMouseOver;
+	UINT m_nBtnMouseOver;
+	int m_nZoom;
 	FlagSet<Flags> m_dwStatus;
 	SmpLength m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
 	DWORD m_dwMenuParam;
-	int m_nGridSegments;
+	SmpLength m_nGridSegments;
 	SAMPLEINDEX m_nSample;
 
 	std::vector<CHANNELINDEX> noteChannel;	// Note -> Preview channel assignment
@@ -56,9 +57,9 @@ public:
 
 protected:
 	void UpdateScrollSize() {UpdateScrollSize(m_nZoom);}
-	void UpdateScrollSize(const UINT nZoomOld);
+	void UpdateScrollSize(const int nZoomOld);
 	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
-	BOOL SetZoom(UINT nZoom);
+	BOOL SetZoom(int nZoom);
 	int32 SampleToScreen(SmpLength pos) const;
 	SmpLength ScreenToSample(int32 x) const;
 	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0);
@@ -66,8 +67,8 @@ protected:
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);
 	void DrawPositionMarks();
-	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData);
-	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData);
+	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData);
+	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData);
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
@@ -84,18 +85,12 @@ protected:
 	template<class T, class uT>
 	T GetSampleValueFromPoint(const CPoint &point);
 
-	// Returns auto-zoom level compared to other zoom levels.
-	// If auto-zoom gives bigger zoom than zoom level N but smaller than zoom level N-1,
-	// return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
-	// if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
-	UINT GetAutoZoomLevel(const ModSample &smp);
+	int GetZoomLevel(SmpLength length) const;
+	void DoZoom(int direction);
+	bool CanZoomSelection() const;
 
-	// Calculate zoom level based on the current selection
-	UINT GetSelectionZoomLevel() const;
-	bool CanZoomSelection() const { return GetSelectionZoomLevel() != 0; }
-
-	UINT ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
-	UINT ScrollPosToSamplePos(UINT nZoom) const {return (nZoom > 0) ? (m_nScrollPosX << (nZoom - 1)) : 0;}
+	SmpLength ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
+	inline SmpLength ScrollPosToSamplePos(int nZoom) const;
 
 	void AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, SmpLength length) const;
 
@@ -110,6 +105,7 @@ public:
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
 	virtual LRESULT OnPlayerNotify(Notification *);
 	virtual BOOL PreTranslateMessage(MSG *pMsg); //rewbs.customKeys
+	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE);
 	//}}AFX_VIRTUAL
 
 protected:
