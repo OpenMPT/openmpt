@@ -426,7 +426,7 @@ void ITDecompression::Write(int v, int topBit, void *target)
 		v -= (topBit << 1);
 	mem1 += v;
 	mem2 += mem1;
-	static_cast<typename Properties::sample_t *>(target)[writePos] = static_cast<typename Properties::sample_t>(is215 ? mem2 : mem1);
+	static_cast<typename Properties::sample_t *>(target)[writePos] = static_cast<typename Properties::sample_t>(is215 ? (int)mem2 : (int)mem1);
 	writtenSamples++;
 	writePos += mptSample.GetNumChannels();
 	curLength--;

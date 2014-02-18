@@ -80,7 +80,7 @@ protected:
 	SmpLength writePos;			// Absolut write position in sample (for stereo samples)
 	SmpLength curLength;		// Length of currently processed block
 	FileReader::off_t dataPos;	// Position in input block
-	int mem1, mem2;				// Integrator memory
+	unsigned int mem1, mem2;				// Integrator memory
 
 	// Bit reader
 	int bitPos;		// Current bit position in this byte
