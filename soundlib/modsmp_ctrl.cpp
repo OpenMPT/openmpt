@@ -210,7 +210,6 @@ template<typename T>
 void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 //-----------------------------------------------------------------
 {
-	smp.SanitizeLoops();
 	const int numChannels = smp.GetNumChannels();
 	const int copySamples = numChannels * InterpolationMaxLookahead;
 	// Optimization: Put normal loop wraparound buffer right at the sample end if the normal loop ends there.
@@ -261,6 +260,8 @@ bool PrecomputeLoops(ModSample &smp, CSoundFile &sndFile, bool updateChannels)
 {
 	if(smp.nLength == 0 || smp.pSample == nullptr)
 		return false;
+
+	smp.SanitizeLoops();
 
 	// Update channels with possibly changed loop values
 	if(updateChannels)

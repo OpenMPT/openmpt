@@ -241,7 +241,7 @@ void ModSample::SetSustainLoop(SmpLength start, SmpLength end, bool enable, bool
 		uFlags.set(CHN_PINGPONGSUSTAIN, pingpong && enable);
 	} else
 	{
-		nLoopStart = nLoopEnd = 0;
+		nSustainStart = nSustainEnd = 0;
 		uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 	}
 	PrecomputeLoops(sndFile, true);
