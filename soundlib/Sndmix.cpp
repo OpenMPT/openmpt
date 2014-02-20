@@ -260,14 +260,19 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 
 #ifdef MODPLUG_TRACKER
 		if(IsRenderingToDisc())
-#endif // MODPLUG_TRACKER
 		{
 			// Stop playback on F00 if no more voices are active.
+			// F00 sets the tick count to 65536 in FT2, so it just generates a reaaaally long row.
+			// Usually this command can be found at the end of a song to effectively stop playback.
+			// Since we don't want to render hours of silence, we are going to check if there are
+			// still any channels playing, and if that is no longer the case, we stop playback at
+			// the end of the next tick.
 			if(m_nMusicSpeed == uint16_max && m_nMixStat == 0 && GetType() == MOD_TYPE_XM && !m_nBufferCount)
 			{
 				m_SongFlags.set(SONG_ENDREACHED);
 			}
 		}
+#endif // MODPLUG_TRACKER
 	}
 
 	// mix done
