@@ -941,7 +941,7 @@ void CDoWaveConvert::OnButton1()
 		EndDialog(IDCANCEL);
 		return;
 	}
-	
+
 	float normalizePeak = 0.0f;
 	wchar_t *tempPath = _wtempnam(L"", L"OpenMPT_mod2wave");
 	const mpt::PathString normalizeFileName = mpt::PathString::FromNative(tempPath);
@@ -984,6 +984,17 @@ void CDoWaveConvert::OnButton1()
 					{
 						break;
 					}
+				}
+
+				if(::PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE))
+				{
+					::TranslateMessage(&msg);
+					::DispatchMessage(&msg);
+				}
+				if(m_bAbort)
+				{
+					m_bAbort = false;
+					break;
 				}
 			}
 		}
@@ -1077,7 +1088,8 @@ void CDoWaveConvert::OnButton1()
 
 	CMainFrame::GetMainFrame()->PauseMod();
 	m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
-	CMainFrame::GetMainFrame()->InitRenderer(&m_SndFile);	//rewbs.VSTTimeInfo
+	CMainFrame::GetMainFrame()->InitRenderer(&m_SndFile);
+
 	for (UINT n = 0; ; n++)
 	{
 		UINT lRead = 0;
@@ -1151,7 +1163,7 @@ void CDoWaveConvert::OnButton1()
 			}
 
 		}
-		if (ullSamples >= ullMaxSamples) 
+		if (ullSamples >= ullMaxSamples)
 			break;
 		if (!(n % 10))
 		{
