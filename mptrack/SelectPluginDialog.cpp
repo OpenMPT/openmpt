@@ -165,21 +165,7 @@ void CSelectPluginDlg::OnOK()
 	{
 		// No effect
 		CriticalSection cs;
-		if (pCurrentPlugin)
-		{
-			pCurrentPlugin->Release();
-			changed = true;
-		}
-
-		// Just in case...
-		m_pPlugin->pMixPlugin = nullptr;
-		m_pPlugin->pMixState = nullptr;
-
-		// Remove old state
-		m_pPlugin->nPluginDataSize = 0;
-		if (m_pPlugin->pPluginData) delete[] m_pPlugin->pPluginData;
-		m_pPlugin->pPluginData = nullptr;
-
+		m_pPlugin->Destroy();
 		// Clear plugin info
 		MemsetZero(m_pPlugin->Info);
 	}
