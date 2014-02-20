@@ -184,17 +184,6 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 						m_PatternCuePoints.push_back(cue);
 					}
 				#endif
-
-			#ifdef MODPLUG_TRACKER
-				if(IsRenderingToDisc())
-			#endif // MODPLUG_TRACKER
-				{
-					// Stop playback on F00 if no more voices are active.
-					if(m_nMusicSpeed == uint16_max && m_nMixStat == 0 && GetType() == MOD_TYPE_XM)
-					{
-						m_SongFlags.set(SONG_ENDREACHED);
-					}
-				}
 			} else
 			{ // no new pattern data
 				#ifdef MODPLUG_TRACKER
@@ -231,6 +220,17 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 		const samplecount_t countChunk = std::min<samplecount_t>(MIXBUFFERSIZE, std::min<samplecount_t>(m_nBufferCount, countToRender));
 
 		CreateStereoMix(countChunk);
+
+	#ifdef MODPLUG_TRACKER
+		if(IsRenderingToDisc())
+	#endif // MODPLUG_TRACKER
+		{
+			// Stop playback on F00 if no more voices are active.
+			if(m_nMusicSpeed == uint16_max && m_nMixStat == 0 && GetType() == MOD_TYPE_XM)
+			{
+				m_SongFlags.set(SONG_ENDREACHED);
+			}
+		}
 
 		#ifndef NO_REVERB
 			m_Reverb.Process(MixSoundBuffer, countChunk);
