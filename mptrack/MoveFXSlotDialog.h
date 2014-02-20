@@ -9,36 +9,26 @@
 
 
 #pragma once
-#include "afxwin.h"
-
-// CMoveFXSlotDialog dialog
 
 class CMoveFXSlotDialog : public CDialog
 {
-	DECLARE_DYNAMIC(CMoveFXSlotDialog)
-
-public:
-	CMoveFXSlotDialog(CWnd* pParent = NULL);   // standard constructor
-	virtual ~CMoveFXSlotDialog();
-	void SetupMove(PLUGINDEX currentSlot, std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex);
-	PLUGINDEX m_nToSlot;
-	
-
-
-// Dialog Data
-	enum { IDD = IDD_MOVEFXSLOT };
-
 protected:
+	const std::vector<PLUGINDEX> &m_EmptySlots;
 	CString m_csPrompt, m_csTitle;
 	CEdit m_EditPrompt;
-	std::vector<PLUGINDEX> m_EmptySlots;
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	CComboBox m_CbnEmptySlots;
-	PLUGINDEX m_nDefaultSlot;
+	PLUGINDEX m_nDefaultSlot, m_nToSlot;
 
-	DECLARE_MESSAGE_MAP()
-	virtual void OnOK();
+	CComboBox m_CbnEmptySlots;
+
+	enum { IDD = IDD_MOVEFXSLOT };
+
 public:
-	
+	CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone);
+	PLUGINDEX GetSlot() const { return m_nToSlot; }
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 };

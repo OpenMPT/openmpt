@@ -24,6 +24,9 @@
 #include "ChannelManagerDlg.h"
 #include "SelectPluginDialog.h"
 #include "../common/StringFixer.h"
+#include "VstPresets.h"
+#include "../soundlib/FileReader.h"
+#include <sstream>
 
 
 IMPLEMENT_SERIAL(CViewGlobals, CFormView, 0)
@@ -53,9 +56,9 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(IDC_BUTTON3,		OnSetParameter)
 	ON_COMMAND(IDC_BUTTON4,		OnNextPlugin)
 	ON_COMMAND(IDC_BUTTON5,		OnPrevPlugin)
-	ON_COMMAND(IDC_MOVEFXSLOT,  OnMovePlugToSlot)
+	ON_COMMAND(IDC_MOVEFXSLOT,	OnMovePlugToSlot)
 	ON_COMMAND(IDC_INSERTFXSLOT,OnInsertSlot)
-	ON_COMMAND(IDC_CLONEPLUG,   OnClonePlug)
+	ON_COMMAND(IDC_CLONEPLUG,	OnClonePlug)
 
 
 	ON_COMMAND(IDC_BUTTON6,		OnLoadParam)
@@ -414,7 +417,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		CheckDlgButton(IDC_CHECK9, pPlugin->IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, pPlugin->IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK11, pPlugin->IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
-		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
+		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : nullptr;
 		m_BtnEdit.EnableWindow((pVstPlugin != nullptr && (pVstPlugin->HasEditor() || pVstPlugin->GetNumParameters())) ? TRUE : FALSE);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_MOVEFXSLOT), (pVstPlugin) ? TRUE : FALSE);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSERTFXSLOT), (pVstPlugin) ? TRUE : FALSE);
@@ -1166,8 +1169,6 @@ LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM /*lParam*/)
 void CViewGlobals::OnMovePlugToSlot()
 //-----------------------------------
 {
-	CMoveFXSlotDialog dlg((CWnd*)this);
-
 	// If any plugin routes its output to the current plugin, we shouldn't try to move it before that plugin...
 	PLUGINDEX defaultIndex = 0;
 	const CSoundFile *pSndFile = GetDocument() ? (GetDocument()->GetSoundFile()) : nullptr;
@@ -1184,12 +1185,13 @@ void CViewGlobals::OnMovePlugToSlot()
 
 	std::vector<PLUGINDEX> emptySlots;
 	BuildEmptySlotList(emptySlots);
-	dlg.SetupMove(m_nCurrentPlugin, emptySlots, defaultIndex);
 
-	if (dlg.DoModal() == IDOK)
-	{ 
-		MovePlug(m_nCurrentPlugin, dlg.m_nToSlot);
-		m_CbnPlugin.SetCurSel(dlg.m_nToSlot);
+	CMoveFXSlotDialog dlg(this, m_nCurrentPlugin, emptySlots, defaultIndex, false);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		MovePlug(m_nCurrentPlugin, dlg.GetSlot());
+		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
 	}
 
@@ -1343,6 +1345,7 @@ void CViewGlobals::OnInsertSlot()
 			} else
 			{
 				pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].Destroy();
+				MemsetZero(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].Info);
 			}
 		}
 
@@ -1372,7 +1375,42 @@ void CViewGlobals::OnInsertSlot()
 void CViewGlobals::OnClonePlug()
 //------------------------------
 {
-	//Reporting::Notification("Not yet implemented.");
+	if(GetCurrentPlugin() == nullptr || GetDocument() == nullptr)
+	{
+		MessageBeep(MB_ICONEXCLAMATION);
+		return;
+	}
+
+	std::vector<PLUGINDEX> emptySlots;
+	BuildEmptySlotList(emptySlots);
+
+	CMoveFXSlotDialog dlg(this, m_nCurrentPlugin, emptySlots, 0, true);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+		const SNDMIXPLUGIN &curPlugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
+		SNDMIXPLUGIN &newPlugin = sndFile.m_MixPlugins[dlg.GetSlot()];
+
+		newPlugin.Destroy();
+		MemCopy(newPlugin.Info, curPlugin.Info);
+		if(theApp.GetPluginManager()->CreateMixPlugin(newPlugin, sndFile))
+		{
+			CVstPlugin *vstPlug = static_cast<CVstPlugin *>(newPlugin.pMixPlugin);
+			vstPlug->SetCurrentProgram(GetCurrentPlugin()->GetCurrentProgram());
+
+			std::ostringstream f(std::ios::out | std::ios::binary);
+			if(VSTPresets::SaveFile(f, *GetCurrentPlugin(), false))
+			{
+				const std::string data = f.str();
+				FileReader file(data.c_str(), data.length());
+				VSTPresets::LoadFile(file, *vstPlug);
+			}
+		}
+
+		m_CbnPlugin.SetCurSel(dlg.GetSlot());
+		OnPluginChanged();
+	}
 }
 
 

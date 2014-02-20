@@ -9,22 +9,26 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "afxtempl.h"
+#include "Mptrack.h"
 #include "MoveFXSlotDialog.h"
-#include ".\movefxslotdialog.h"
 
 
-IMPLEMENT_DYNAMIC(CMoveFXSlotDialog, CDialog)
-CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd* pParent /*=NULL*/)
-	: CDialog(CMoveFXSlotDialog::IDD, pParent)
+CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone) :
+	CDialog(CMoveFXSlotDialog::IDD, pParent),
+	m_nDefaultSlot(defaultIndex),
+	m_EmptySlots(emptySlots)
 {
+	if(clone)
+	{
+		m_csPrompt.Format(_T("Clone plugin in slot %d to the following empty slot:"), currentSlot + 1);
+		m_csTitle = _T("Clone To Slot...");
+	} else
+	{
+		m_csPrompt.Format(_T("Move plugin in slot %d to the following empty slot:"), currentSlot + 1);
+		m_csTitle = _T("Move To Slot...");
+	}
 }
 
-CMoveFXSlotDialog::~CMoveFXSlotDialog()
-//-------------------------------------
-{
-}
 
 void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
 //--------------------------------------------------------
@@ -35,27 +39,11 @@ void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CMoveFXSlotDialog, CDialog)
-END_MESSAGE_MAP()
-
-
-// CMoveFXSlotDialog message handlers
-
 void CMoveFXSlotDialog::OnOK()
 //----------------------------
 {
 	m_nToSlot = static_cast<PLUGINDEX>(m_CbnEmptySlots.GetItemData(m_CbnEmptySlots.GetCurSel()));
 	CDialog::OnOK();
-}
-
-
-void CMoveFXSlotDialog::SetupMove(PLUGINDEX currentSlot, std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex)
-//------------------------------------------------------------------------------------------------------------------
-{	
-	m_nDefaultSlot = defaultIndex;
-	m_csPrompt.Format("Move plugin in slot %d to the following empty slot:", currentSlot + 1);
-	m_csTitle.Format("Move To Slot..");
-	m_EmptySlots = emptySlots;
 }
 
 
@@ -66,10 +54,17 @@ BOOL CMoveFXSlotDialog::OnInitDialog()
 	m_EditPrompt.SetWindowText(m_csPrompt);
 	SetWindowText(m_csTitle);
 
- 	CString slotText;
+	if(m_EmptySlots.empty())
+	{
+		Reporting::Error("No empty plugin slots are availabe.");
+		OnCancel();
+		return TRUE;
+	}
+
+	CString slotText;
 	int defaultSlot = 0;
 	bool foundDefault = false;
-	for(size_t nSlot=0; nSlot < m_EmptySlots.size(); nSlot++)
+	for(size_t nSlot = 0; nSlot < m_EmptySlots.size(); nSlot++)
 	{
 		slotText.Format("FX%d", m_EmptySlots[nSlot] + 1);
 		m_CbnEmptySlots.SetItemData(m_CbnEmptySlots.AddString(slotText), m_EmptySlots[nSlot]);
