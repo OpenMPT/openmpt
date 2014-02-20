@@ -221,17 +221,6 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 
 		CreateStereoMix(countChunk);
 
-	#ifdef MODPLUG_TRACKER
-		if(IsRenderingToDisc())
-	#endif // MODPLUG_TRACKER
-		{
-			// Stop playback on F00 if no more voices are active.
-			if(m_nMusicSpeed == uint16_max && m_nMixStat == 0 && GetType() == MOD_TYPE_XM)
-			{
-				m_SongFlags.set(SONG_ENDREACHED);
-			}
-		}
-
 		#ifndef NO_REVERB
 			m_Reverb.Process(MixSoundBuffer, countChunk);
 		#endif // NO_REVERB
@@ -269,6 +258,16 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 		m_nBufferCount -= countChunk;
 		m_lTotalSampleCount += countChunk;		// increase sample count for VSTTimeInfo.
 
+#ifdef MODPLUG_TRACKER
+		if(IsRenderingToDisc())
+#endif // MODPLUG_TRACKER
+		{
+			// Stop playback on F00 if no more voices are active.
+			if(m_nMusicSpeed == uint16_max && m_nMixStat == 0 && GetType() == MOD_TYPE_XM && !m_nBufferCount)
+			{
+				m_SongFlags.set(SONG_ENDREACHED);
+			}
+		}
 	}
 
 	// mix done
