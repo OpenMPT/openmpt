@@ -277,7 +277,7 @@ void CSoundFile::CreateStereoMix(int count)
 	StereoFill(MixSoundBuffer, count, gnDryROfsVol, gnDryLOfsVol);
 	if(m_MixerSettings.gnChannels > 2) InitMixBuffer(MixRearBuffer, count*2);
 
-	CHANNELINDEX nchused = 0, nchmixed = 0;
+	CHANNELINDEX nchmixed = 0;
 
 	const bool ITPingPongMode = IsITPingPongMode();
 	const bool realtimeMix = !IsRenderingToDisc();
@@ -334,7 +334,6 @@ void CSoundFile::CreateStereoMix(int count)
 				}
 			}
 		}
-		nchused++;
 
 		// Calculate offset of loop wrap-around buffer for this sample.
 		const int8 * const samplePointer = static_cast<const int8 *>(chn.pCurrentSample);
@@ -462,7 +461,7 @@ void CSoundFile::CreateStereoMix(int count)
 		chn.pCurrentSample = samplePointer;
 		nchmixed += naddmix;
 	}
-	m_nMixStat = std::max<CHANNELINDEX>(m_nMixStat, nchused);
+	m_nMixStat = std::max<CHANNELINDEX>(m_nMixStat, nchmixed);
 }
 
 

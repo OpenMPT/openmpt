@@ -31,6 +31,7 @@ extern const char *gszChnCfgNames[3];
 static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outputBuffer, CSoundFile::samplecount_t count, SampleFormat sampleFormat, Dither &dither)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	sndFile.ResetMixStat();
 	switch(sampleFormat.value)
 	{
 	case SampleFormatUnsigned8:
