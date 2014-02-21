@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt svn
+### 2014-02-21 - libopenmpt 0.2-beta3
 
  *  [Change] The test suite is now built by default with Makefile based builds.
     Use `TEST=0` to skip building the tests. `make check` runs the test suite.
