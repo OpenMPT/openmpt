@@ -326,7 +326,7 @@ std::string bytes_to_string( T bytes ) {
 
 static void show_info( std::ostream & log, bool verbose ) {
 	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", libopenmpt " << openmpt::string::get( openmpt::string::library_version ) << " (" << "OpenMPT " << openmpt::string::get( openmpt::string::core_version ) << ")" << std::endl;
-	log << "Copyright (c) 2013 OpenMPT developers <http://openmpt.org/>" << std::endl;
+	log << "Copyright (c) 2013-2014 OpenMPT developers <http://openmpt.org/>" << std::endl;
 	if ( !verbose ) {
 		log << std::endl;
 		return;
