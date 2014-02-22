@@ -571,142 +571,148 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 
 #if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
 
-static void amdmmxext_or_sse_findminmax16(const void *p, int scanlen, int smplsize, int *smin, int *smax)
+#include <mmintrin.h>
+
+// AMD MMX/SSE implementation for min/max finder, packs 4*int16 in a 64-bit MMX register.
+// scanlen = How many samples to process on this channel
+static void amdmmxext_or_sse_findminmax16(const void *p, int scanlen, int channels, int &smin, int &smax)
 //-------------------------------------------------------------------------------------------------------
 {
-	_asm {
-	mov ebx, p
-	mov ecx, scanlen
-	mov edx, smplsize
-	mov esi, smin
-	mov edi, smax
-	movd mm0, [esi]	// mm0 = min
-	movd mm1, [edi]	// mm1 = max
-	shr ecx, 2
-	or ecx, ecx
-	punpcklwd mm0, mm0
-	punpcklwd mm1, mm1
-	punpckldq mm0, mm0
-	punpckldq mm1, mm1
-	jz done4x
-mainloop4x:
-	movq mm2, [ebx]
-	add ebx, edx
-	dec ecx
-	pminsw mm0, mm2
-	pmaxsw mm1, mm2
-	jnz mainloop4x
-	movq mm2, mm0
-	movq mm3, mm1
-	punpckhdq mm2, mm2
-	punpckhdq mm3, mm3
-	cmp edx, 2
-	pminsw mm0, mm2
-	pmaxsw mm1, mm3
-	jg done4x
-	psrad mm2, 16
-	psrad mm3, 16
-	pminsw mm0, mm2
-	pmaxsw mm1, mm3
-done4x:
-	mov ecx, scanlen
-	and ecx, 3
-	or ecx, ecx
-	jz done1x
-mainloop1x:
-	movzx eax, word ptr [ebx]
-	add ebx, edx
-	movd mm2, eax
-	dec ecx
-	pminsw mm0, mm2
-	pmaxsw mm1, mm2
-	jnz mainloop1x
-done1x:
-	movd eax, mm0
-	movd edx, mm1
-	movsx eax, ax
-	movsx edx, dx
-	mov [esi], eax
-	mov [edi], edx
-	emms
+	scanlen *= channels;
+
+	__m64 minVal = _mm_cvtsi32_si64(smin);
+	__m64 maxVal = _mm_cvtsi32_si64(smax);
+
+	// Put minimum / maximum in 4 packed int16 values
+	minVal = _mm_unpacklo_pi16(minVal, minVal);
+	maxVal = _mm_unpacklo_pi16(maxVal, maxVal);
+	minVal = _mm_unpacklo_pi32(minVal, minVal);
+	maxVal = _mm_unpacklo_pi32(maxVal, maxVal);
+
+	int scanlen4 = scanlen / 4;
+	if(scanlen4)
+	{
+		const __m64 *v = static_cast<const __m64 *>(p);
+		p = static_cast<const uint64 *>(p) + scanlen4;
+
+		while(scanlen4--)
+		{
+			__m64 curVals = *(v++);
+			minVal = _mm_min_pi16(minVal, curVals);
+			maxVal = _mm_max_pi16(maxVal, curVals);
+		}
+
+		__m64 minVal2 = _mm_unpackhi_pi32(minVal, minVal);
+		__m64 maxVal2 = _mm_unpackhi_pi32(maxVal, maxVal);
+
+		minVal = _mm_min_pi16(minVal, minVal2);
+		maxVal = _mm_max_pi16(maxVal, maxVal2);
+
+		if(channels < 2)
+		{
+			// Mono
+			minVal2 = _mm_sra_pi32(minVal2, _mm_cvtsi32_si64(16));
+			maxVal2 = _mm_sra_pi32(maxVal2, _mm_cvtsi32_si64(16));
+			minVal = _mm_min_pi16(minVal, minVal2);
+			maxVal = _mm_max_pi16(maxVal, maxVal2);
+		}
+
+		ASSERT(p == v);
 	}
+
+	const int8 *p8 = static_cast<const int8 *>(p);
+	while(scanlen & 3)
+	{
+		scanlen -= channels;
+		__m64 curVals = _mm_cvtsi32_si64(*reinterpret_cast<const int16 *>(p8));
+		p8 += channels;
+		minVal = _mm_min_pi16(minVal, curVals);
+		maxVal = _mm_max_pi16(maxVal, curVals);
+	}
+
+	smin = static_cast<int16>(_mm_cvtsi64_si32(minVal));
+	smax = static_cast<int16>(_mm_cvtsi64_si32(maxVal));
+
+	_mm_empty();
 }
 
 
-static void amdmmxext_or_sse_findminmax8(const void *p, int scanlen, int smplsize, int *smin, int *smax)
+// AMD MMX/SSE implementation for min/max finder, packs 8*int8 in a 64-bit MMX register.
+// scanlen = How many samples to process on this channel
+static void amdmmxext_or_sse_findminmax8(const void *p, int scanlen, int channels, int &smin, int &smax)
 //------------------------------------------------------------------------------------------------------
 {
-	_asm {
-	mov ebx, p
-	mov ecx, scanlen
-	mov edx, smplsize
-	mov esi, smin
-	mov edi, smax
-	movd mm0, [esi]	// mm0 = min
-	movd mm1, [edi]	// mm1 = max
-	shr ecx, 3
-	mov eax, 0x80808080
-	movd mm7, eax
-	punpckldq mm7, mm7
-	or ecx, ecx
-	punpcklbw mm0, mm0
-	punpcklbw mm1, mm1
-	punpcklwd mm0, mm0
-	punpcklwd mm1, mm1
-	punpckldq mm0, mm0
-	punpckldq mm1, mm1
-	pxor mm0, mm7
-	pxor mm1, mm7
-	jz done8x
-mainloop8x:
-	movq mm2, [ebx]
-	add ebx, edx
-	dec ecx
-	pxor mm2, mm7
-	pminub mm0, mm2
-	pmaxub mm1, mm2
-	jnz mainloop8x
-	movq mm2, mm0
-	movq mm3, mm1
-	punpckhdq mm2, mm2
-	punpckhdq mm3, mm3
-	pminub mm0, mm2
-	pmaxub mm1, mm3
-	cmp edx, 1
-	psrld mm2, 16
-	psrld mm3, 16
-	pminub mm0, mm2
-	pmaxub mm1, mm3
-	jg done8x
-	psrld mm2, 8
-	psrld mm3, 8
-	pminub mm0, mm2
-	pmaxub mm1, mm3
-done8x:
-	mov ecx, scanlen
-	and ecx, 7
-	or ecx, ecx
-	jz done1x
-mainloop1x:
-	movzx eax, byte ptr [ebx]
-	add ebx, edx
-	movd mm2, eax
-	dec ecx
-	pxor mm2, mm7
-	pminub mm0, mm2
-	pmaxub mm1, mm2
-	jnz mainloop1x
-done1x:
-	pxor mm0, mm7
-	pxor mm1, mm7
-	movd eax, mm0
-	movd edx, mm1
-	movsx eax, al
-	movsx edx, dl
-	mov [esi], eax
-	mov [edi], edx
-	emms
+	scanlen *= channels;
+
+	__m64 minVal = _mm_cvtsi32_si64(smin);
+	__m64 maxVal = _mm_cvtsi32_si64(smax);
+
+	// For signed <-> unsigned conversion
+	__m64 xorVal = _mm_cvtsi32_si64(0x80808080);
+	xorVal = _mm_unpacklo_pi32(xorVal, xorVal);
+
+	// Put minimum / maximum in 8 packed uint8 values
+	minVal = _mm_unpacklo_pi8(minVal, minVal);
+	maxVal = _mm_unpacklo_pi8(maxVal, maxVal);
+	minVal = _mm_unpacklo_pi16(minVal, minVal);
+	maxVal = _mm_unpacklo_pi16(maxVal, maxVal);
+	minVal = _mm_unpacklo_pi32(minVal, minVal);
+	maxVal = _mm_unpacklo_pi32(maxVal, maxVal);
+	minVal = _mm_xor_si64(minVal, xorVal);
+	maxVal = _mm_xor_si64(maxVal, xorVal);
+
+	int scanlen8 = scanlen / 8;
+	if(scanlen8)
+	{
+		const __m64 *v = static_cast<const __m64 *>(p);
+		p = static_cast<const uint64 *>(p) + scanlen8;
+
+		while(scanlen8--)
+		{
+			__m64 curVals = _mm_xor_si64(*(v++), xorVal);
+			minVal = _mm_min_pu8(minVal, curVals);
+			maxVal = _mm_max_pu8(maxVal, curVals);
+		}
+
+		__m64 minVal2 = _mm_unpackhi_pi32(minVal, minVal);
+		__m64 maxVal2 = _mm_unpackhi_pi32(maxVal, maxVal);
+
+		minVal = _mm_min_pu8(minVal, minVal2);
+		maxVal = _mm_max_pu8(maxVal, maxVal2);
+
+		minVal2 = _mm_srl_pi32(minVal2, _mm_cvtsi32_si64(16));
+		maxVal2 = _mm_srl_pi32(maxVal2, _mm_cvtsi32_si64(16));
+		minVal = _mm_min_pu8(minVal, minVal2);
+		maxVal = _mm_max_pu8(maxVal, maxVal2);
+
+		if(channels < 2)
+		{
+			// Mono
+			minVal2 = _mm_srl_pi32(minVal2, _mm_cvtsi32_si64(8));
+			maxVal2 = _mm_srl_pi32(maxVal2, _mm_cvtsi32_si64(8));
+			minVal = _mm_min_pu8(minVal, minVal2);
+			maxVal = _mm_max_pu8(maxVal, maxVal2);
+		}
+
+		ASSERT(p == v);
 	}
+
+	const int8 *p8 = static_cast<const int8 *>(p);
+	while(scanlen & 7)
+	{
+		scanlen -= channels;
+		__m64 curVals = _mm_xor_si64(_mm_cvtsi32_si64(*p8), xorVal);
+		p8 += channels;
+		minVal = _mm_min_pu8(minVal, curVals);
+		maxVal = _mm_max_pu8(maxVal, curVals);
+	}
+
+	minVal = _mm_xor_si64(minVal, xorVal);
+	maxVal = _mm_xor_si64(maxVal, xorVal);
+	smin = static_cast<int8>(_mm_cvtsi64_si32(minVal));
+	smax = static_cast<int8>(_mm_cvtsi64_si32(maxVal));
+
+	_mm_empty();
 }
 
 #endif
@@ -715,7 +721,7 @@ done1x:
 void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData)
 //----------------------------------------------------------------------------------------------------------------------
 {
-	int smplsize, oldsmin, oldsmax;
+	int oldsmin, oldsmax;
 	int yrange = cy/2;
 	const int8 *psample = static_cast<const int8 *>(pSampleData);
 	int32 y0 = 0, xmax;
@@ -723,8 +729,9 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 	uint64 posincr, posfrac;	// Increments have 16-bit fractional part
 
 	if (len <= 0) return;
-	smplsize = (uFlags & CHN_16BIT) ? 2 : 1;
-	if (uFlags & CHN_STEREO) smplsize *= 2;
+	const int numChannels = (uFlags & CHN_STEREO) ? 2 : 1;
+	const int smplsize = ((uFlags & CHN_16BIT) ? 2 : 1) * numChannels;
+
 	if (uFlags & CHN_16BIT)
 	{
 		y0 = YCVT(*((const int16 *)(psample-smplsize)), 15);
@@ -767,7 +774,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 #if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
 			if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT|PROCSUPPORT_SSE))
 			{
-				amdmmxext_or_sse_findminmax16(p, scanlen, smplsize, &smin, &smax);
+				amdmmxext_or_sse_findminmax16(p, scanlen, numChannels, smin, smax);
 			} else
 #endif
 			{
@@ -776,7 +783,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 					int s = *p;
 					if (s < smin) smin = s;
 					if (s > smax) smax = s;
-					p = (signed short *)(((signed char *)p) + smplsize);
+					p += numChannels;
 				}
 			}
 			smin = YCVT(smin,15);
@@ -790,7 +797,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 #if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
 			if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT|PROCSUPPORT_SSE))
 			{
-				amdmmxext_or_sse_findminmax8(p, scanlen, smplsize, &smin, &smax);
+				amdmmxext_or_sse_findminmax8(p, scanlen, numChannels, smin, smax);
 			} else
 #endif
 			{
@@ -800,7 +807,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 					int s = *p;
 					if (s < smin) smin = s;
 					if (s > smax) smax = s;
-					p += smplsize;
+					p += numChannels;
 				}
 			}
 			smin = YCVT(smin,7);
