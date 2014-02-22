@@ -218,7 +218,7 @@ uint64 MultimediaClock::NowNanoseconds() const
 uint32 ProcSupport = 0;
 
 
-#if MPT_COMPILER_MSVC && defined(ENABLE_X86)
+#if MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_X64))
 
 
 #include <intrin.h>

@@ -579,7 +579,6 @@ static void amdmmxext_or_sse_findminmax16(const void *p, int scanlen, int channe
 //-------------------------------------------------------------------------------------------------------
 {
 	scanlen *= channels;
-
 	__m64 minVal = _mm_cvtsi32_si64(smin);
 	__m64 maxVal = _mm_cvtsi32_si64(smax);
 
@@ -593,7 +592,7 @@ static void amdmmxext_or_sse_findminmax16(const void *p, int scanlen, int channe
 	if(scanlen4)
 	{
 		const __m64 *v = static_cast<const __m64 *>(p);
-		p = static_cast<const uint64 *>(p) + scanlen4;
+		p = static_cast<const __m64 *>(p) + scanlen4;
 
 		while(scanlen4--)
 		{
@@ -602,15 +601,16 @@ static void amdmmxext_or_sse_findminmax16(const void *p, int scanlen, int channe
 			maxVal = _mm_max_pi16(maxVal, curVals);
 		}
 
+		// Now we have 4 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 2 values to the lower half and compute the minima/maxima of that.
 		__m64 minVal2 = _mm_unpackhi_pi32(minVal, minVal);
 		__m64 maxVal2 = _mm_unpackhi_pi32(maxVal, maxVal);
-
 		minVal = _mm_min_pi16(minVal, minVal2);
 		maxVal = _mm_max_pi16(maxVal, maxVal2);
 
 		if(channels < 2)
 		{
-			// Mono
+			// Mono: Compute the minima/maxima of the both remaining values
 			minVal2 = _mm_sra_pi32(minVal, _mm_cvtsi32_si64(16));
 			maxVal2 = _mm_sra_pi32(maxVal, _mm_cvtsi32_si64(16));
 			minVal = _mm_min_pi16(minVal, minVal2);
@@ -665,7 +665,7 @@ static void amdmmxext_or_sse_findminmax8(const void *p, int scanlen, int channel
 	if(scanlen8)
 	{
 		const __m64 *v = static_cast<const __m64 *>(p);
-		p = static_cast<const uint64 *>(p) + scanlen8;
+		p = static_cast<const __m64 *>(p) + scanlen8;
 
 		while(scanlen8--)
 		{
@@ -674,12 +674,15 @@ static void amdmmxext_or_sse_findminmax8(const void *p, int scanlen, int channel
 			maxVal = _mm_max_pu8(maxVal, curVals);
 		}
 
+		// Now we have 8 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 4 values to the lower half and compute the minima/maxima of that.
 		__m64 minVal2 = _mm_unpackhi_pi32(minVal, minVal);
 		__m64 maxVal2 = _mm_unpackhi_pi32(maxVal, maxVal);
-
 		minVal = _mm_min_pu8(minVal, minVal2);
 		maxVal = _mm_max_pu8(maxVal, maxVal2);
 
+		// Now we have 4 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 2 values to the lower half and compute the minima/maxima of that.
 		minVal2 = _mm_srl_pi32(minVal, _mm_cvtsi32_si64(16));
 		maxVal2 = _mm_srl_pi32(maxVal, _mm_cvtsi32_si64(16));
 		minVal = _mm_min_pu8(minVal, minVal2);
@@ -687,7 +690,7 @@ static void amdmmxext_or_sse_findminmax8(const void *p, int scanlen, int channel
 
 		if(channels < 2)
 		{
-			// Mono
+			// Mono: Compute the minima/maxima of the both remaining values
 			minVal2 = _mm_srl_pi32(minVal, _mm_cvtsi32_si64(8));
 			maxVal2 = _mm_srl_pi32(maxVal, _mm_cvtsi32_si64(8));
 			minVal = _mm_min_pu8(minVal, minVal2);
@@ -715,7 +718,145 @@ static void amdmmxext_or_sse_findminmax8(const void *p, int scanlen, int channel
 	_mm_empty();
 }
 
-#endif
+#elif defined(ENABLE_SSE2)
+
+#include <emmintrin.h>
+
+// SSE2 implementation for min/max finder, packs 8*int16 in a 128-bit XMM register.
+// scanlen = How many samples to process on this channel
+static void sse2_findminmax16(const void *p, int scanlen, int channels, int &smin, int &smax)
+//-------------------------------------------------------------------------------------------
+{
+	scanlen *= channels;
+
+	// Put minimum / maximum in 8 packed int16 values
+	__m128i minVal = _mm_set1_epi16(static_cast<int16>(smin));
+	__m128i maxVal = _mm_set1_epi16(static_cast<int16>(smax));
+
+	int scanlen8 = scanlen / 8;
+	if(scanlen8)
+	{
+		const __m128i *v = static_cast<const __m128i *>(p);
+		p = static_cast<const __m128i *>(p) + scanlen8;
+
+		while(scanlen8--)
+		{
+			__m128i curVals = _mm_loadu_si128(v++);
+			minVal = _mm_min_epi16(minVal, curVals);
+			maxVal = _mm_max_epi16(maxVal, curVals);
+		}
+
+		// Now we have 8 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 4 values to the lower half and compute the minima/maxima of that.
+		__m128i minVal2 = _mm_unpackhi_epi64(minVal, minVal);
+		__m128i maxVal2 = _mm_unpackhi_epi64(maxVal, maxVal);
+		minVal = _mm_min_epi16(minVal, minVal2);
+		maxVal = _mm_max_epi16(maxVal, maxVal2);
+
+		// Now we have 4 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 2 values to the lower half and compute the minima/maxima of that.
+		minVal2 = _mm_shuffle_epi32(minVal, _MM_SHUFFLE(1, 1, 1, 1));
+		maxVal2 = _mm_shuffle_epi32(maxVal, _MM_SHUFFLE(1, 1, 1, 1));
+		minVal = _mm_min_epi16(minVal, minVal2);
+		maxVal = _mm_max_epi16(maxVal, maxVal2);
+
+		if(channels < 2)
+		{
+			// Mono: Compute the minima/maxima of the both remaining values
+			minVal2 = _mm_shufflelo_epi16(minVal, _MM_SHUFFLE(1, 1, 1, 1));
+			maxVal2 = _mm_shufflelo_epi16(maxVal, _MM_SHUFFLE(1, 1, 1, 1));
+			minVal = _mm_min_epi16(minVal, minVal2);
+			maxVal = _mm_max_epi16(maxVal, maxVal2);
+		}
+	}
+
+	const int16 *p16 = static_cast<const int16 *>(p);
+	while(scanlen & 7)
+	{
+		scanlen -= channels;
+		__m128i curVals = _mm_set1_epi16(*p16);
+		p16 += channels;
+		minVal = _mm_min_epi16(minVal, curVals);
+		maxVal = _mm_max_epi16(maxVal, curVals);
+	}
+
+	smin = static_cast<int16>(_mm_cvtsi128_si32(minVal));
+	smax = static_cast<int16>(_mm_cvtsi128_si32(maxVal));
+}
+
+
+// SSE2 implementation for min/max finder, packs 16*int8 in a 128-bit XMM register.
+// scanlen = How many samples to process on this channel
+static void sse2_findminmax8(const void *p, int scanlen, int channels, int &smin, int &smax)
+//------------------------------------------------------------------------------------------
+{
+	scanlen *= channels;
+
+	// Put minimum / maximum in 8 packed int16 values
+	__m128i minVal = _mm_set1_epi8(static_cast<int8>(smin));
+	__m128i maxVal = _mm_set1_epi8(static_cast<int8>(smax));
+
+	int scanlen16 = scanlen / 16;
+	if(scanlen16)
+	{
+		const __m128i *v = static_cast<const __m128i *>(p);
+		p = static_cast<const __m128i *>(p) + scanlen16;
+
+		while(scanlen16--)
+		{
+			__m128i curVals = _mm_loadu_si128(v++);
+			minVal = _mm_min_epi8(minVal, curVals);
+			maxVal = _mm_max_epi8(maxVal, curVals);
+		}
+
+		// Now we have 16 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 8 values to the lower half and compute the minima/maxima of that.
+		__m128i minVal2 = _mm_unpackhi_epi64(minVal, minVal);
+		__m128i maxVal2 = _mm_unpackhi_epi64(maxVal, maxVal);
+		minVal = _mm_min_epi8(minVal, minVal2);
+		maxVal = _mm_max_epi8(maxVal, maxVal2);
+
+		// Now we have 8 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 4 values to the lower half and compute the minima/maxima of that.
+		minVal2 = _mm_shuffle_epi32(minVal, _MM_SHUFFLE(1, 1, 1, 1));
+		maxVal2 = _mm_shuffle_epi32(maxVal, _MM_SHUFFLE(1, 1, 1, 1));
+		minVal = _mm_min_epi8(minVal, minVal2);
+		maxVal = _mm_max_epi8(maxVal, maxVal2);
+
+		// Now we have 4 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 2 values to the lower half and compute the minima/maxima of that.
+		minVal2 = _mm_srai_epi32(minVal, 16);
+		maxVal2 = _mm_srai_epi32(maxVal, 16);
+		minVal = _mm_min_epi8(minVal, minVal2);
+		maxVal = _mm_max_epi8(maxVal, maxVal2);
+
+		if(channels < 2)
+		{
+			// Mono: Compute the minima/maxima of the both remaining values
+			minVal2 = _mm_srai_epi16(minVal, 8);
+			maxVal2 = _mm_srai_epi16(maxVal, 8);
+			minVal = _mm_min_epi8(minVal, minVal2);
+			maxVal = _mm_max_epi8(maxVal, maxVal2);
+		}
+	}
+
+	const int8 *p8 = static_cast<const int8 *>(p);
+	while(scanlen & 15)
+	{
+		scanlen -= channels;
+		__m128i curVals = _mm_set1_epi8(*p8);
+		p8 += channels;
+		minVal = _mm_min_epi8(minVal, curVals);
+		maxVal = _mm_max_epi8(maxVal, curVals);
+	}
+
+	smin = static_cast<int8>(_mm_cvtsi128_si32(minVal));
+	smax = static_cast<int8>(_mm_cvtsi128_si32(maxVal));
+}
+
+
+#endif // defined(ENABLE_SSE)
+
 
 // Draw one channel of zoomed-out sample data
 void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData)
@@ -776,9 +917,14 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 			{
 				amdmmxext_or_sse_findminmax16(p, scanlen, numChannels, smin, smax);
 			} else
+#elif defined(ENABLE_SSE2)
+			if(GetProcSupport() & PROCSUPPORT_SSE2)
+			{
+				sse2_findminmax16(p, scanlen, numChannels, smin, smax);
+			} else
 #endif
 			{
-				for (SmpLength i=0; i<scanlen; i++)
+				for (SmpLength i = 0; i < scanlen; i++)
 				{
 					int s = *p;
 					if (s < smin) smin = s;
@@ -799,9 +945,14 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 			{
 				amdmmxext_or_sse_findminmax8(p, scanlen, numChannels, smin, smax);
 			} else
+#elif defined(ENABLE_SSE2)
+			if(GetProcSupport() & PROCSUPPORT_SSE2)
+			{
+				sse2_findminmax8(p, scanlen, numChannels, smin, smax);
+			} else
 #endif
 			{
-				for (SmpLength i=0; i<scanlen; i++)
+				for (SmpLength i = 0; i < scanlen; i++)
 				{
 
 					int s = *p;
