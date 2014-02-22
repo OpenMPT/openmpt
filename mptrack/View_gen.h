@@ -27,30 +27,16 @@ protected:
 
 	CSliderCtrl m_sbVolume[4], m_sbPan[4], m_sbValue, m_sbDryRatio;
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
 	CComboBox m_CbnPreset;
-// -! NEW_FEATURE#0002
-//	CSliderCtrl m_sbVolume[4], m_sbPan[4], m_sbValue;
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
 	CSliderCtrl m_sbWetDry;
-// -! NEW_FEATURE#0014
 	CSpinButtonCtrl m_spinVolume[4], m_spinPan[4];
 	CButton m_BtnSelect, m_BtnEdit;
 	int m_nActiveTab, m_nLockCount;
 	PLUGINDEX m_nCurrentPlugin;
 	PlugParamIndex m_nCurrentParam;
-// -> CODE#0002
-// -> DESC="VST plugins presets"
-	UINT m_nCurrentPreset;
-// -! NEW_FEATURE#0002
 
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 	CComboBox m_CbnSpecialMixProcessing;
 	CSpinButtonCtrl m_SpinMixGain;			// update#02
-// -! NEW_FEATURE#0028
 
 	enum {AdjustPattern = true, NoPatternAdjust = false};
 

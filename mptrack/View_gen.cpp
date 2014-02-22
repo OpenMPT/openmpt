@@ -948,23 +948,23 @@ void CViewGlobals::OnParamChanged()
 void CViewGlobals::OnProgramChanged()
 //-----------------------------------
 {
-	VstInt32 cursel = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
+	VstInt32 curProg = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
 	CModDoc *pModDoc = GetDocument();
 	
-	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
 	if(pVstPlugin != nullptr)
 	{
-		VstInt32 nParams = pVstPlugin->GetNumPrograms();
-		if(cursel <= nParams)
+		const VstInt32 numProgs = pVstPlugin->GetNumPrograms();
+		if(curProg <= numProgs)
 		{
-			pVstPlugin->SetCurrentProgram(m_nCurrentPreset);
+			pVstPlugin->SetCurrentProgram(curProg);
 			// Update parameter display
 			OnParamChanged();
+
+			if(pModDoc->GetrSoundFile().GetModSpecifications().supportsPlugins)
+				pModDoc->SetModified();
 		}
-		if(pModDoc->GetrSoundFile().GetModSpecifications().supportsPlugins)
-			pModDoc->SetModified();
 	}
 }
 
