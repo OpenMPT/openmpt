@@ -286,6 +286,10 @@ int CPortaudioDevice::StreamCallback(
 		// For WDM-KS, timeInfo->outputBufferDacTime seems to contain bogus values.
 		// Work-around it by using the slightly less accurate per-stream latency estimation.
 		m_CurrentRealLatency = m_StreamInfo->outputLatency;
+	} else if(Pa_GetHostApiInfo(m_HostApi)->type == paWASAPI)
+	{
+		// PortAudio latency calculation appears to miss the current period or chunk for WASAPI. Compensate it.
+		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + ((double)frameCount / (double)m_Settings.Samplerate);
 	} else
 	{
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime;
