@@ -620,12 +620,12 @@ static void amdmmxext_or_sse_findminmax16(const void *p, int scanlen, int channe
 		ASSERT(p == v);
 	}
 
-	const int8 *p8 = static_cast<const int8 *>(p);
+	const int16 *p16 = static_cast<const int16 *>(p);
 	while(scanlen & 3)
 	{
 		scanlen -= channels;
-		__m64 curVals = _mm_cvtsi32_si64(*reinterpret_cast<const int16 *>(p8));
-		p8 += channels;
+		__m64 curVals = _mm_cvtsi32_si64(*p16);
+		p16 += channels;
 		minVal = _mm_min_pi16(minVal, curVals);
 		maxVal = _mm_max_pi16(maxVal, curVals);
 	}
