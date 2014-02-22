@@ -45,7 +45,8 @@ protected:
 	std::vector<CHANNELINDEX> noteChannel;	// Note -> Preview channel assignment
 
 	// Sample drawing
-	CPoint m_lastDrawPoint;					// For drawing horizontal lines
+	CPoint m_lastDrawPoint;		// For drawing horizontal lines
+	int m_drawChannel;			// Which sample channel are we drawing on?
 
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	SmpLength m_dwNotifyPos[MAX_CHANNELS];
@@ -75,15 +76,15 @@ protected:
 
 	// Sets sample data on sample draw.
 	template<class T, class uT>
-	void SetSampleData(void *pSample, const CPoint &point, const DWORD old);
+	void SetSampleData(ModSample &smp, const CPoint &point, const SmpLength old);
 
 	// Sets initial draw point on sample draw.
 	template<class T, class uT>
-	void SetInitialDrawPoint(void *pSample, const CPoint &point);
+	void SetInitialDrawPoint(ModSample &smp, const CPoint &point);
 
 	// Returns sample value corresponding given point in the sample view.
 	template<class T, class uT>
-	T GetSampleValueFromPoint(const CPoint &point);
+	T GetSampleValueFromPoint(const ModSample &smp, const CPoint &point) const;
 
 	int GetZoomLevel(SmpLength length) const;
 	void DoZoom(int direction);

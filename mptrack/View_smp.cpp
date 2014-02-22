@@ -1217,9 +1217,7 @@ void CViewSample::UpdateNcButtonState()
 		{
 			case ID_SAMPLE_DRAW:
 				if(m_dwStatus[SMPSTATUS_DRAWING]) dwStyle |= NCBTNS_CHECKED;
-				if(m_nSample > pSndFile->GetNumSamples() ||
-					pSndFile->GetSample(m_nSample).GetNumChannels() > 1 ||
-					pSndFile->GetSample(m_nSample).pSample == nullptr)
+				if(m_nSample > pSndFile->GetNumSamples())
 				{
 					dwStyle |= NCBTNS_DISABLED;
 				}
@@ -1286,37 +1284,46 @@ void CViewSample::ScrollToPosition(int x)    // logical coordinates
 
 
 template<class T, class uT>
-T CViewSample::GetSampleValueFromPoint(const CPoint &point)
-//---------------------------------------------------------
+T CViewSample::GetSampleValueFromPoint(const ModSample &smp, const CPoint &point) const
+//-------------------------------------------------------------------------------------
 {
 	STATIC_ASSERT(sizeof(T) == sizeof(uT) && sizeof(T) <= 2);
-	int value = (std::numeric_limits<T>::max)() - (std::numeric_limits<uT>::max)() * point.y / m_rcClient.Height();
-	Limit(value, (std::numeric_limits<T>::min)(), (std::numeric_limits<T>::max)());
+	const int channelHeight = m_rcClient.Height() / smp.GetNumChannels();
+	int yPos = point.y - m_drawChannel * channelHeight - m_rcClient.top;
+
+	int value = std::numeric_limits<T>::max() - std::numeric_limits<uT>::max() * yPos / channelHeight;
+	Limit(value, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 	return static_cast<T>(value);
 }
 
 
 template<class T, class uT>
-void CViewSample::SetInitialDrawPoint(void *pSample, const CPoint &point)
-//-----------------------------------------------------------------------
+void CViewSample::SetInitialDrawPoint(ModSample &smp, const CPoint &point)
+//------------------------------------------------------------------------
 {
-	T* data = static_cast<T *>(pSample);
-	data[m_dwEndDrag] = GetSampleValueFromPoint<T, uT>(point);
+	m_drawChannel = (point.y - m_rcClient.top) * smp.GetNumChannels() / m_rcClient.Height();
+	Limit(m_drawChannel, 0, (int)smp.GetNumChannels() - 1);
+
+	T *data = static_cast<T *>(smp.pSample) + m_drawChannel;
+	data[m_dwEndDrag * smp.GetNumChannels()] = GetSampleValueFromPoint<T, uT>(smp, point);
 }
 
 
 template<class T, class uT>
-void CViewSample::SetSampleData(void *pSample, const CPoint &point, const DWORD old)
-//----------------------------------------------------------------------------------
+void CViewSample::SetSampleData(ModSample &smp, const CPoint &point, const SmpLength old)
+//---------------------------------------------------------------------------------------
 {
-	T* data = static_cast<T *>(pSample);
-	const int oldvalue = data[old];
-	const int value = GetSampleValueFromPoint<T, uT>(point);
-	for(DWORD i=old; i != m_dwEndDrag; i += (m_dwEndDrag > old ? 1 : -1))
+	T *data = static_cast<T *>(smp.pSample) + m_drawChannel + old * smp.GetNumChannels();
+	const int oldvalue = *data;
+	const int value = GetSampleValueFromPoint<T, uT>(smp, point);
+	const int inc = (m_dwEndDrag > old ? 1 : -1);
+	const int ptrInc = inc * smp.GetNumChannels();
+
+	for(SmpLength i = old; i != m_dwEndDrag; i += inc, data += ptrInc)
 	{
-		data[i] = static_cast<T>((float)oldvalue + (value - oldvalue) * ((float)i - old) / ((float)m_dwEndDrag - old));
+		*data = static_cast<T>((float)oldvalue + (value - oldvalue) * ((float)i - old) / ((float)m_dwEndDrag - old));
 	}
-	data[m_dwEndDrag] = static_cast<T>(value);
+	*data = static_cast<T>(value);
 }
 
 
@@ -1371,10 +1378,9 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	} else UpdateIndicator(NULL);
 	if(m_dwStatus[SMPSTATUS_MOUSEDRAG])
 	{
-		BOOL bAgain = FALSE;
-		const DWORD len = sndFile.GetSample(m_nSample).nLength;
+		const SmpLength len = sndFile.GetSample(m_nSample).nLength;
 		if (!len) return;
-		DWORD old = m_dwEndDrag;
+		SmpLength old = m_dwEndDrag;
 		if (m_nZoom)
 		{
 			if (point.x < 0)
@@ -1385,7 +1391,6 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				if (OnScrollBy(pt))
 				{
 					UpdateWindow();
-					bAgain = TRUE;
 				}
 				point.x = 0;
 			}
@@ -1397,7 +1402,6 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				if (OnScrollBy(pt))
 				{
 					UpdateWindow();
-					bAgain = TRUE;
 				}
 				point.x = m_rcClient.right;
 			}
@@ -1419,9 +1423,9 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				}
 
 				if(sndFile.GetSample(m_nSample).GetElementarySampleSize() == 2)
-					SetSampleData<int16, uint16>(sndFile.GetSample(m_nSample).pSample, point, old);
+					SetSampleData<int16, uint16>(sndFile.GetSample(m_nSample), point, old);
 				else if(sndFile.GetSample(m_nSample).GetElementarySampleSize() == 1)
-					SetSampleData<int8, uint8>(sndFile.GetSample(m_nSample).pSample, point, old);
+					SetSampleData<int8, uint8>(sndFile.GetSample(m_nSample), point, old);
 
 				sndFile.GetSample(m_nSample).PrecomputeLoops(sndFile, false);
 
@@ -1476,9 +1480,9 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 		m_lastDrawPoint = point;
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Draw Sample");
 		if(sample.GetElementarySampleSize() == 2)
-			SetInitialDrawPoint<int16, uint16>(sample.pSample, point);
+			SetInitialDrawPoint<int16, uint16>(sample, point);
 		else if(sample.GetElementarySampleSize() == 1)
-			SetInitialDrawPoint<int8, uint8>(sample.pSample, point);
+			SetInitialDrawPoint<int8, uint8>(sample, point);
 
 		sndFile.GetSample(m_nSample).PrecomputeLoops(sndFile, false);
 
@@ -2168,8 +2172,8 @@ void CViewSample::OnSampleTrim()
 	if (m_dwBeginSel >= m_dwEndSel) return; // invalid selection
 
 	BeginWaitCursor();
-	UINT nStart = m_dwBeginSel;
-	UINT nEnd = m_dwEndSel - m_dwBeginSel;
+	SmpLength nStart = m_dwBeginSel;
+	SmpLength nEnd = m_dwEndSel - m_dwBeginSel;
 
 	if ((sample.pSample) && (nStart+nEnd <= sample.nLength) && (nEnd >= MIN_TRIM_LENGTH))
 	{
@@ -2177,14 +2181,9 @@ void CViewSample::OnSampleTrim()
 
 		CriticalSection cs;
 
-
 		// Note: Sample is overwritten in-place! Unused data is not deallocated!
-		const UINT bend = nEnd * sample.GetBytesPerSample() , bstart = nStart * sample.GetBytesPerSample();
-		signed char *p = (signed char *)sample.pSample;
-		for (UINT i = 0; i < bend; i++)
-		{
-			p[i] = p[i + bstart];
-		}
+		int8 *p = (int8 *)sample.pSample;
+		memmove(p, p + nStart * sample.GetBytesPerSample(), nEnd * sample.GetBytesPerSample());
 
 		if (sample.nLoopStart >= nStart) sample.nLoopStart -= nStart;
 		if (sample.nLoopEnd >= nStart) sample.nLoopEnd -= nStart;
@@ -2192,19 +2191,7 @@ void CViewSample::OnSampleTrim()
 		if (sample.nSustainEnd >= nStart) sample.nSustainEnd -= nStart;
 		if (sample.nLoopEnd > nEnd) sample.nLoopEnd = nEnd;
 		if (sample.nSustainEnd > nEnd) sample.nSustainEnd = nEnd;
-		if (sample.nLoopStart >= sample.nLoopEnd)
-		{
-			sample.nLoopStart = sample.nLoopEnd = 0;
-			sample.uFlags.reset(CHN_LOOP|CHN_PINGPONGLOOP);
-		}
-		if (sample.nSustainStart >= sample.nSustainEnd)
-		{
-			sample.nSustainStart = sample.nSustainEnd = 0;
-			sample.uFlags.reset(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
-		}
 		sample.nLength = nEnd;
-		sample.PrecomputeLoops(sndFile);
-
 		sample.PrecomputeLoops(sndFile);
 		cs.Leave();
 
@@ -2435,10 +2422,8 @@ void CViewSample::OnZoomOnSel()
 	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoom);
 	if (zoom)
 	{
-		CSize sz;
 		SetZoom(zoom);
 		UpdateScrollSize();
-		sz.cx = m_dwBeginSel;
 
 		// Compute width of new selection and center it in the view
 		int scrollToSample = (m_dwBeginSel + selLength / 2) >> (std::max(1, zoom) - 1);
@@ -2449,26 +2434,6 @@ void CViewSample::OnZoomOnSel()
 		Limit(scrollToSample, minPos, maxPos);
 		SetScrollPos(SB_HORZ, scrollToSample);
 		Invalidate();
-
-		/*
-		if(zoom > 1)
-		{
-			sz.cx >>= (zoom - 1);
-			selLength >>= (zoom - 1);
-		} else if(zoom < -1)
-		{
-			sz.cx <<= (-zoom - 1);
-			selLength <<= (-zoom - 1);
-		}
-
-		int l = (m_rcClient.right - selLength) / 2;
-		if (l > 0) sz.cx -= l;
-		if(m_nZoom > 0)
-			sz.cx -= m_nScrollPosX;
-		else
-			sz.cx -= m_nScrollPosX << (-zoom - 1);
-		sz.cy = 0;
-		OnScrollBy(sz, TRUE);*/
 	}
 }
 
@@ -2578,6 +2543,20 @@ void CViewSample::OnZoomDown()
 void CViewSample::OnDrawingToggle()
 //---------------------------------
 {
+	const CModDoc *pModDoc = GetDocument();
+	if(!pModDoc) return;
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+
+	const ModSample &sample = sndFile.GetSample(m_nSample);
+	if(sample.pSample == nullptr)
+	{
+		OnAddSilence();
+		if(sample.pSample == nullptr)
+		{
+			return;
+		}
+	}
+
 	m_dwStatus.flip(SMPSTATUS_DRAWING);
 	UpdateNcButtonState();
 }
