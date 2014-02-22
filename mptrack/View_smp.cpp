@@ -611,8 +611,8 @@ static void amdmmxext_or_sse_findminmax16(const void *p, int scanlen, int channe
 		if(channels < 2)
 		{
 			// Mono
-			minVal2 = _mm_sra_pi32(minVal2, _mm_cvtsi32_si64(16));
-			maxVal2 = _mm_sra_pi32(maxVal2, _mm_cvtsi32_si64(16));
+			minVal2 = _mm_sra_pi32(minVal, _mm_cvtsi32_si64(16));
+			maxVal2 = _mm_sra_pi32(maxVal, _mm_cvtsi32_si64(16));
 			minVal = _mm_min_pi16(minVal, minVal2);
 			maxVal = _mm_max_pi16(maxVal, maxVal2);
 		}
@@ -680,16 +680,16 @@ static void amdmmxext_or_sse_findminmax8(const void *p, int scanlen, int channel
 		minVal = _mm_min_pu8(minVal, minVal2);
 		maxVal = _mm_max_pu8(maxVal, maxVal2);
 
-		minVal2 = _mm_srl_pi32(minVal2, _mm_cvtsi32_si64(16));
-		maxVal2 = _mm_srl_pi32(maxVal2, _mm_cvtsi32_si64(16));
+		minVal2 = _mm_srl_pi32(minVal, _mm_cvtsi32_si64(16));
+		maxVal2 = _mm_srl_pi32(maxVal, _mm_cvtsi32_si64(16));
 		minVal = _mm_min_pu8(minVal, minVal2);
 		maxVal = _mm_max_pu8(maxVal, maxVal2);
 
 		if(channels < 2)
 		{
 			// Mono
-			minVal2 = _mm_srl_pi32(minVal2, _mm_cvtsi32_si64(8));
-			maxVal2 = _mm_srl_pi32(maxVal2, _mm_cvtsi32_si64(8));
+			minVal2 = _mm_srl_pi32(minVal, _mm_cvtsi32_si64(8));
+			maxVal2 = _mm_srl_pi32(maxVal, _mm_cvtsi32_si64(8));
 			minVal = _mm_min_pu8(minVal, minVal2);
 			maxVal = _mm_max_pu8(maxVal, maxVal2);
 		}
