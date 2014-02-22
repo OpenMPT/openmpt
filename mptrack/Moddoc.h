@@ -323,8 +323,8 @@ public:
 	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord);
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	void TogglePluginEditor(UINT m_nCurrentPlugin);
-	void RecordParamChange(int slot, long param);
-	void LearnMacro(int macro, long param);
+	void RecordParamChange(PLUGINDEX slot, PlugParamIndex param);
+	void LearnMacro(int macro, PlugParamIndex param);
 	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow);
 
 	// Global settings to pattern effect conversion
@@ -478,7 +478,7 @@ public:
 private:
 
 	void ChangeFileExtension(MODTYPE nNewType);
-	CHANNELINDEX FindAvailableChannel();
+	CHANNELINDEX FindAvailableChannel() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

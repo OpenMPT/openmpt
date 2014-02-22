@@ -1883,7 +1883,7 @@ void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, bool 
 			" - Ogg Vorbis libraries\n"
 			" - libmp3lame.dll or Lame_Enc.dll\n"
 			"into OpenMPT's root directory.\n"
-			"Alternatively, you can install a MP3 ACM codec.",
+			"Alternatively, you can install an MP3 ACM codec.",
 			"OpenMPT - Export");
 	}
 	OnFileWaveConvert(nMinOrder, nMaxOrder, encoders);
@@ -2033,9 +2033,9 @@ void CModDoc::OnPlayerPause()
 		if (pMainFrm->GetModPlaying() == this)
 		{
 			bool isLooping = m_SndFile.m_SongFlags[SONG_PATTERNLOOP];
-			UINT nPat = m_SndFile.m_nPattern;
-			UINT nRow = m_SndFile.m_nRow;
-			UINT nNextRow = m_SndFile.m_nNextRow;
+			PATTERNINDEX nPat = m_SndFile.m_nPattern;
+			ROWINDEX nRow = m_SndFile.m_nRow;
+			ROWINDEX nNextRow = m_SndFile.m_nNextRow;
 			pMainFrm->PauseMod();
 
 			if ((isLooping) && (nPat < m_SndFile.Patterns.Size()))
@@ -2258,17 +2258,17 @@ void CModDoc::OnApproximateBPM()
 	{
 		case tempo_mode_alternative:
 			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
-			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nCurrentRowsPerBeat, bpm); 
+			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nCurrentRowsPerBeat, bpm);
 			break;
 
 		case tempo_mode_modern:
-			Message.Format("Using modern tempo interpretation.\n\nThe tempo is: %.8g BPM", bpm); 
+			Message.Format("Using modern tempo interpretation.\n\nThe tempo is: %.8g BPM", bpm);
 			break;
 
 		case tempo_mode_classic:
 		default:
 			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
-			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nCurrentRowsPerBeat, bpm); 
+			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nCurrentRowsPerBeat, bpm);
 			break;
 	}
 
@@ -2314,7 +2314,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		
 		pat = patternViewState.nPattern;
 		row = patternViewState.cursor.GetRow();
-		ord = patternViewState.nOrder;	
+		ord = patternViewState.nOrder;
 	} else
 	{
 		//patern editor object does not exist (i.e. is not active)  - use saved state.
@@ -2333,11 +2333,11 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	}
 	if(pat >= m_SndFile.Patterns.Size())
 	{
-		pat=0;
+		pat = 0;
 	}
 	if(row >= m_SndFile.Patterns[pat].GetNumRows())
 	{
-		row=0;
+		row = 0;
 	}
 
 	//ensure order correlates with pattern.
@@ -2349,7 +2349,6 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 			ord = tentativeOrder;
 		}
 	}
-
 
 	return followSonghWnd;
 
@@ -2624,9 +2623,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 		mpt::PathString fext;
 		GetPathNameMpt().SplitPath(&drive, &dir, &fname, &fext);
 
-		mpt::PathString newPath;
-		newPath += drive;
-		newPath += dir;
+		mpt::PathString newPath = drive + dir;
 
 		//Catch case where we don't have a filename yet.
 		if(fname.empty())
@@ -2637,14 +2634,12 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 			newPath += fname;
 		}
 
-		switch(nNewType)
+		if(nNewType == MOD_TYPE_IT)
 		{
-		case MOD_TYPE_XM:  newPath += MPT_PATHSTRING(".xm"); break;
-		case MOD_TYPE_IT:  newPath += m_SndFile.m_SongFlags[SONG_ITPROJECT] ? MPT_PATHSTRING(".itp") : MPT_PATHSTRING(".it"); break;
-		case MOD_TYPE_MPT: newPath += MPT_PATHSTRING(".mptm"); break;
-		case MOD_TYPE_S3M: newPath += MPT_PATHSTRING(".s3m"); break;
-		case MOD_TYPE_MOD: newPath += MPT_PATHSTRING(".mod"); break;
-		default: ASSERT(false);		
+			newPath += m_SndFile.m_SongFlags[SONG_ITPROJECT] ? MPT_PATHSTRING(".itp") : MPT_PATHSTRING(".it");
+		} else
+		{
+			newPath += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(CSoundFile::GetModSpecifications(nNewType).fileExtension);
 		}
 	
 		if(nNewType != MOD_TYPE_IT ||
@@ -2654,31 +2649,29 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 					(!mpt::PathString::CompareNoCase(fext, MPT_PATHSTRING(".itp")) && !m_SndFile.m_SongFlags[SONG_ITPROJECT])
 				)
 			)
-		  ) 
+		  )
 			m_ShowSavedialog = true;
 			//Forcing savedialog to appear after extension change - otherwise
 			//unnotified file overwriting may occur.
 
 		SetPathName(newPath, FALSE);
-
 	}
 
 	UpdateAllViews(NULL, HINT_MODTYPE);
 }
 
 
-
-CHANNELINDEX CModDoc::FindAvailableChannel()
-//------------------------------------------
+CHANNELINDEX CModDoc::FindAvailableChannel() const
+//------------------------------------------------
 {
 	CHANNELINDEX nStoppedChannel = CHANNELINDEX_INVALID;
 	// Search for available channel
 	for(CHANNELINDEX j = m_SndFile.m_nChannels; j < MAX_CHANNELS; j++)
 	{
-		ModChannel *p = &m_SndFile.Chn[j];
-		if(!p->nLength)
+		const ModChannel &chn = m_SndFile.Chn[j];
+		if(!chn.nLength)
 			return j;
-		else if(p->dwFlags[CHN_NOTEFADE])
+		else if(chn.dwFlags[CHN_NOTEFADE])
 			nStoppedChannel = j;
 	}
 
@@ -2690,14 +2683,16 @@ CHANNELINDEX CModDoc::FindAvailableChannel()
 	return m_SndFile.m_nChannels;
 }
 
-void CModDoc::RecordParamChange(int plugSlot, long paramIndex) 
-//------------------------------------------------------
+
+void CModDoc::RecordParamChange(PLUGINDEX plugSlot, PlugParamIndex paramIndex)
+//----------------------------------------------------------------------------
 {
 	SendMessageToActiveViews(WM_MOD_RECORDPARAM, plugSlot, paramIndex);
 }
 
-void CModDoc::LearnMacro(int macroToSet, long paramToUse)
-//-------------------------------------------------------
+
+void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
+//-----------------------------------------------------------------
 {
 	if (macroToSet < 0 || macroToSet > NUM_MACROS)
 	{
@@ -2737,6 +2732,7 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	return;
 }
 
+
 void CModDoc::SongProperties()
 //----------------------------
 {
@@ -2751,7 +2747,7 @@ void CModDoc::SongProperties()
 			bShowLog = true;
 		}
 		
-		CHANNELINDEX nNewChannels = CLAMP(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
+		CHANNELINDEX nNewChannels = Clamp(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
 
 		if (nNewChannels != GetNumChannels())
 		{
@@ -2763,7 +2759,6 @@ void CModDoc::SongProperties()
 		UpdateAllViews(NULL, HINT_PATTERNDATA | HINT_MODCHANNELS);
 
 		SetModified();
-
 	}
 }
 
@@ -2828,6 +2823,7 @@ CString CModDoc::GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr,
 	return displayName;
 }
 
+
 void CModDoc::SafeFileClose()
 //---------------------------
 {
@@ -2853,7 +2849,7 @@ void CModDoc::FixNullStrings()
 //----------------------------
 {
 	// Song title
-	mpt::String::FixNullString(m_SndFile.songName);
+	// std::string, doesn't need to be fixed.
 
 	// Sample names + filenames
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)
@@ -2882,10 +2878,10 @@ void CModDoc::FixNullStrings()
 	m_SndFile.m_MidiCfg.Sanitize();
 
 	// Pattern names
-	// Those are CStrings and don't need to be fixed.
+	// std::string, doesn't need to be fixed.
 	
 	// Sequence names.
-	// Those are CStrings and don't need to be fixed.
+	// std::string, doesn't need to be fixed.
 }
 
 
@@ -2905,7 +2901,7 @@ void CModDoc::OnSaveTemplateModule()
 
 	// Generate file name candidate.
 	mpt::PathString sName;
-	for(size_t i = 0; i<1000; ++i)
+	for(size_t i = 0; i < 1000; ++i)
 	{
 		sName += MPT_PATHSTRING("newTemplate") + mpt::PathString::FromWide(StringifyW(i));
 		sName += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(m_SndFile.GetModSpecifications().fileExtension);
