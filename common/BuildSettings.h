@@ -36,7 +36,9 @@
 
 
 // inline assembly requires MSVC compiler
-#if defined(ENABLE_ASM) && MPT_COMPILER_MSVC && defined(_M_IX86)
+#if defined(ENABLE_ASM) && MPT_COMPILER_MSVC
+
+#ifdef _M_IX86
 
 // Generate general x86 inline assembly.
 #define ENABLE_X86
@@ -47,8 +49,21 @@
 // Generate inline assembly using SSE instructions (only used when the CPU supports it).
 #define ENABLE_SSE
 
+// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+#define ENABLE_SSE2
+
 // Generate inline assembly using AMD specific instruction set extensions (only used when the CPU supports it).
 #define ENABLE_X86_AMD
+
+#elif defined(_M_X64)
+
+// Generate general x64 inline assembly.
+#define ENABLE_X64
+
+// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+#define ENABLE_SSE2
+
+#endif
 
 #endif // ENABLE_ASM
 
