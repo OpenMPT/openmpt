@@ -42,7 +42,7 @@
 // trimming will be done. This is the minimum value for
 // selection difference, so the minimum length of result
 // of trimming is nTrimLengthMin + 1.
-#define MIN_TRIM_LENGTH			16
+#define MIN_TRIM_LENGTH			4
 
 const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] =
 {
@@ -336,8 +336,7 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 			dMin = dMax;
 			if (nEnd < dMin) dMin = nEnd;
 			if (nEnd > dMax) dMax = nEnd;
-		} else
-		if ((nEnd == dMax) && (dMin != nBegin))
+		} else if ((nEnd == dMax) && (dMin != nBegin))
 		{
 			dMax = dMin;
 			if (nBegin < dMin) dMin = nBegin;
@@ -1355,8 +1354,8 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 			// Show cursor position as offset effect if no selection is made.
 			if(m_nSample > 0 && m_nSample <= sndFile.GetNumSamples() && x < sndFile.GetSample(m_nSample).nLength)
 			{
-				const DWORD xLow = (x / 0x100) % 0x100;
-				const DWORD xHigh = x / 0x10000;
+				const SmpLength xLow = (x / 0x100) % 0x100;
+				const SmpLength xHigh = x / 0x10000;
 
 				const char cOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(CMD_OFFSET);
 				const bool bHasHighOffset = (sndFile.TypeIsS3M_IT_MPT() || (sndFile.GetType() == MOD_TYPE_XM));
@@ -1446,14 +1445,12 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 //-------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	DWORD len;
 
 	if(m_dwStatus[SMPSTATUS_MOUSEDRAG] || (!pModDoc)) return;
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
 
-	len = sample.nLength;
-	if (!len)
+	if (!sample.nLength)
 		return;
 
 	m_dwStatus.set(SMPSTATUS_MOUSEDRAG);
@@ -1470,7 +1467,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	} else
 	{
 		m_dwBeginDrag = ScreenToSample(point.x);
-		if (m_dwBeginDrag >= len) m_dwBeginDrag = len-1;
+		if (m_dwBeginDrag >= sample.nLength) m_dwBeginDrag = sample.nLength - 1;
 		m_dwEndDrag = m_dwBeginDrag;
 	}
 	if (oldsel) SetCurSel(m_dwBeginDrag, m_dwEndDrag);
@@ -1517,7 +1514,7 @@ void CViewSample::OnLButtonDblClk(UINT, CPoint)
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		DWORD len = pSndFile->GetSample(m_nSample).nLength;
+		SmpLength len = pSndFile->GetSample(m_nSample).nLength;
 		if (len && !m_dwStatus[SMPSTATUS_DRAWING]) SetCurSel(0, len);
 	}
 }
@@ -1775,8 +1772,7 @@ void CViewSample::OnEditSelectAll()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		DWORD len = pSndFile->GetSample(m_nSample).nLength;
+		SmpLength len = pModDoc->GetrSoundFile().GetSample(m_nSample).nLength;
 		if (len) SetCurSel(0, len);
 	}
 }
@@ -1819,16 +1815,14 @@ void CViewSample::OnEditDelete()
 {
 	CModDoc *pModDoc = GetDocument();
 	DWORD dwUpdateFlags = HINT_SAMPLEINFO | HINT_SAMPLEDATA;
-	DWORD len;
 
 	if (!pModDoc) return;
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
-	len = sample.nLength;
-	if ((!sample.pSample) || (!len)) return;
-	if (m_dwEndSel > len) m_dwEndSel = len;
+	if ((!sample.pSample) || (!sample.nLength)) return;
+	if (m_dwEndSel > sample.nLength) m_dwEndSel = sample.nLength;
 	if ((m_dwBeginSel >= m_dwEndSel)
-	 || (m_dwEndSel - m_dwBeginSel + 4 >= len))
+	 || (m_dwEndSel - m_dwBeginSel + 4 >= sample.nLength))
 	{
 		if (Reporting::Confirm("Remove this sample?", "Remove Sample", true) != cnfYes) return;
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Delete Sample");
@@ -1842,23 +1836,17 @@ void CViewSample::OnEditDelete()
 
 		CriticalSection cs;
 
-		UINT cutlen = (m_dwEndSel - m_dwBeginSel);
-		UINT istart = m_dwBeginSel * sample.GetBytesPerSample();
-		UINT iend = len * sample.GetBytesPerSample();
-		sample.nLength -= cutlen;
-		cutlen *= sample.GetBytesPerSample();
+		const SmpLength selStart = m_dwBeginSel * sample.GetBytesPerSample();
+		const SmpLength selEnd = m_dwEndSel * sample.GetBytesPerSample();
+		const SmpLength smpEnd = sample.nLength * sample.GetBytesPerSample();
+		sample.nLength -= (m_dwEndSel - m_dwBeginSel);
 
-		char *p = static_cast<char *>(sample.pSample);
-		for (UINT i=istart; i<iend; i++)
-		{
-			p[i] = (i+cutlen < iend) ? p[i+cutlen] : (char)0;
-		}
-		len = sample.nLength;
-
+		int8 *p = static_cast<int8 *>(sample.pSample);
+		memmove(p + selStart, p + selEnd, smpEnd - selEnd);
 
 		// adjust loop points
-		AdjustLoopPoints(sample.nLoopStart, sample.nLoopEnd, len);
-		AdjustLoopPoints(sample.nSustainStart, sample.nSustainEnd, len);
+		AdjustLoopPoints(sample.nLoopStart, sample.nLoopEnd, sample.nLength);
+		AdjustLoopPoints(sample.nSustainStart, sample.nSustainEnd, sample.nLength);
 
 		if(sample.nLoopEnd == 0)
 		{
@@ -2182,7 +2170,7 @@ void CViewSample::OnSampleTrim()
 		CriticalSection cs;
 
 		// Note: Sample is overwritten in-place! Unused data is not deallocated!
-		int8 *p = (int8 *)sample.pSample;
+		int8 *p = static_cast<int8 *>(sample.pSample);
 		memmove(p, p + nStart * sample.GetBytesPerSample(), nEnd * sample.GetBytesPerSample());
 
 		if (sample.nLoopStart >= nStart) sample.nLoopStart -= nStart;
