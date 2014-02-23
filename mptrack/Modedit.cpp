@@ -815,8 +815,12 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 	if ((nIns) && (nIns <= m_SndFile.GetNumInstruments()) && (m_SndFile.Instruments[nIns]))
 	{
 		bool instrumentsLeft = false;
-
-		if(m_SndFile.DestroyInstrument(nIns, askDeleteAssociatedSamples))
+		ConfirmAnswer result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
+		if(result == cnfCancel)
+		{
+			return false;
+		}
+		if(m_SndFile.DestroyInstrument(nIns, (result == cnfYes) ? deleteAssociatedSamples : doNoDeleteAssociatedSamples))
 		{
 			CriticalSection cs;
 			if (nIns == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;

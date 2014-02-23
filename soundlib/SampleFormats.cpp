@@ -14,7 +14,6 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Mptrack.h"
 #include "../mptrack/Moddoc.h"
-#include "../mptrack/Reporting.h"
 #include "../mptrack/TrackerSettings.h"
 #endif //MODPLUG_TRACKER
 #include "../common/AudioCriticalSection.h"
@@ -163,17 +162,6 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSampl
 {
 	if(nInstr == 0 || nInstr >= MAX_INSTRUMENTS || !Instruments[nInstr]) return true;
 
-#ifdef MODPLUG_TRACKER
-	if(removeSamples == askDeleteAssociatedSamples)
-	{
-		ConfirmAnswer result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
-		if(result == cnfCancel)
-		{
-			return false;
-		}
-		removeSamples = (result == cnfYes) ? deleteAssociatedSamples : doNoDeleteAssociatedSamples;
-	}
-#endif // MODPLUG_TRACKER
 	if(removeSamples == deleteAssociatedSamples)
 	{
 		RemoveInstrumentSamples(nInstr);
