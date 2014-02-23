@@ -25,9 +25,30 @@
 
 #include <cstdarg>
 
+#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#include <strings.h> // for strncasecmp
+#endif
+
 #if !defined(MPT_CHARSET_CPP) && !defined(MPT_CHARSET_CUSTOMUTF8) && !defined(WIN32)
 #include <iconv.h>
 #endif // !WIN32
+
+
+namespace mpt {
+
+
+int strnicmp(const char *a, const char *b, size_t count)
+//------------------------------------------------------
+{
+#if MPT_COMPILER_MSVC
+	return _strnicmp(a, b, count);
+#else
+	return strncasecmp(a, b, count);
+#endif
+}
+
+
+} // namespace mpt
 
 
 namespace mpt { namespace String {

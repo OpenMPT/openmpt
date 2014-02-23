@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <cstdio>
+#include <stdio.h>
+
 //#define MPT_DEPRECATED_PATH
 #define MPT_DEPRECATED_PATH MPT_DEPRECATED
 

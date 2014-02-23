@@ -14,7 +14,6 @@
 #include "../common/misc_util.h"
 #include "Undo.h"
 #include "Notification.h"
-#include "../common/Logging.h"
 #include <time.h>
 
 class EncoderFactoryBase;

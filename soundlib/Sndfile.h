@@ -14,7 +14,6 @@
 #include "../soundlib/SoundFilePlayConfig.h"
 #include "../soundlib/MixerSettings.h"
 #include "../common/misc_util.h"
-#include "../common/Logging.h"
 #include "mod_specifications.h"
 #include <vector>
 #include <bitset>
