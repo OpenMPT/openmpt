@@ -13,10 +13,20 @@
 #include "MoveFXSlotDialog.h"
 
 
-CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone) :
+void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
+//--------------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_COMBO1, m_CbnEmptySlots);
+	DDX_Control(pDX, IDC_EDIT1, m_EditPrompt);
+}
+
+
+CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone, bool hasChain) :
 	CDialog(CMoveFXSlotDialog::IDD, pParent),
 	m_nDefaultSlot(defaultIndex),
-	m_EmptySlots(emptySlots)
+	m_EmptySlots(emptySlots),
+	moveChain(hasChain)
 {
 	if(clone)
 	{
@@ -27,23 +37,6 @@ CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const
 		m_csPrompt.Format(_T("Move plugin in slot %d to the following empty slot:"), currentSlot + 1);
 		m_csTitle = _T("Move To Slot...");
 	}
-}
-
-
-void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
-//--------------------------------------------------------
-{
-	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_COMBO1, m_CbnEmptySlots);
-	DDX_Control(pDX, IDC_EDIT1, m_EditPrompt);
-}
-
-
-void CMoveFXSlotDialog::OnOK()
-//----------------------------
-{
-	m_nToSlot = static_cast<PLUGINDEX>(m_CbnEmptySlots.GetItemData(m_CbnEmptySlots.GetCurSel()));
-	CDialog::OnOK();
 }
 
 
@@ -67,7 +60,7 @@ BOOL CMoveFXSlotDialog::OnInitDialog()
 	for(size_t nSlot = 0; nSlot < m_EmptySlots.size(); nSlot++)
 	{
 		slotText.Format("FX%d", m_EmptySlots[nSlot] + 1);
-		m_CbnEmptySlots.SetItemData(m_CbnEmptySlots.AddString(slotText), m_EmptySlots[nSlot]);
+		m_CbnEmptySlots.SetItemData(m_CbnEmptySlots.AddString(slotText), nSlot);
 		if(m_EmptySlots[nSlot] >= m_nDefaultSlot && !foundDefault)
 		{
 			defaultSlot = nSlot;
@@ -76,5 +69,17 @@ BOOL CMoveFXSlotDialog::OnInitDialog()
 	}
 	m_CbnEmptySlots.SetCurSel(defaultSlot);
 
+	GetDlgItem(IDC_CHECK1)->EnableWindow(moveChain ? TRUE : FALSE);
+	CheckDlgButton(IDC_CHECK1, moveChain ? BST_CHECKED : BST_UNCHECKED);
+
 	return TRUE;
+}
+
+
+void CMoveFXSlotDialog::OnOK()
+//----------------------------
+{
+	m_nToSlot = m_CbnEmptySlots.GetItemData(m_CbnEmptySlots.GetCurSel());
+	moveChain = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+	CDialog::OnOK();
 }
