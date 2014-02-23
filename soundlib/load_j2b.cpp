@@ -581,8 +581,8 @@ STATIC_ASSERT(sizeof(AMSampleHeader) == 60);
 
 
 // Convert RIFF AM(FF) pattern data to MPT pattern data.
-bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile &sndFile)
-//---------------------------------------------------------------------------------------
+static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile &sndFile)
+//----------------------------------------------------------------------------------------------
 {
 	// Effect translation LUT
 	static const ModCommand::COMMAND amEffTrans[] =

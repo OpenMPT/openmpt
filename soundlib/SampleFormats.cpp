@@ -334,8 +334,6 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 ////////////////////////////////////////////////////////////////////////////////
 // WAV Open
 
-extern bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign);
-
 bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, FileReader *wsmpChunk)
 //-------------------------------------------------------------------------------------------------------------
 {
@@ -621,8 +619,8 @@ static int32 PatchFreqToNote(uint32 nFreq)
 }
 
 
-void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMemLength)
-//-------------------------------------------------------------------------------------------
+static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMemLength)
+//--------------------------------------------------------------------------------------------------
 {
 	ModSample &sample = that->GetSample(nSample);
 	DWORD dwMemPos = sizeof(GF1SAMPLEHEADER);

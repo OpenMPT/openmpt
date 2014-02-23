@@ -101,8 +101,8 @@ STATIC_ASSERT(sizeof(MDLSampleHeaderv0) == 57);
 #endif
 
 
-void ConvertMDLCommand(ModCommand *m, UINT eff, UINT data)
-//--------------------------------------------------------
+static void ConvertMDLCommand(ModCommand *m, UINT eff, UINT data)
+//---------------------------------------------------------------
 {
 	UINT command = 0, param = data;
 	switch(eff)
@@ -178,8 +178,8 @@ void ConvertMDLCommand(ModCommand *m, UINT eff, UINT data)
 
 
 // Convert MDL envelope data (env points and flags)
-void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope *pMPTEnv)
-//--------------------------------------------------------------------------------
+static void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope *pMPTEnv)
+//---------------------------------------------------------------------------------------
 {
 	WORD nCurTick = 1;
 	pMPTEnv->nNodes = 15;
@@ -202,8 +202,8 @@ void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope *pMPTEn
 }
 
 
-void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, const BYTE *lpTracks)
-//-------------------------------------------------------------------------------------------------
+static void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, const BYTE *lpTracks)
+//--------------------------------------------------------------------------------------------------------
 {
 	ModCommand cmd, *m = pat;
 	UINT len = *((WORD *)lpTracks);

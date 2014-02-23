@@ -30,11 +30,6 @@
 #include "../unarchiver/unarchiver.h"
 #endif // NO_ARCHIVE_SUPPORT
 
-bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file);
-bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file);
-bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file);
-
-
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"

@@ -241,8 +241,8 @@ struct PSMSubSong // For internal use (pattern conversion)
 
 
 // Portamento effect conversion (depending on format version)
-uint8 ConvertPSMPorta(uint8 param, bool newFormat)
-//------------------------------------------------
+static uint8 ConvertPSMPorta(uint8 param, bool newFormat)
+//-------------------------------------------------------
 {
 	return (newFormat
 		? param

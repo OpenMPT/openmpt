@@ -966,8 +966,8 @@ void TestMIDIEvents()
 
 
 // Check if our test file was loaded correctly.
-void TestLoadXMFile(const CSoundFile &sndFile)
-//--------------------------------------------
+static void TestLoadXMFile(const CSoundFile &sndFile)
+//---------------------------------------------------
 {
 #ifdef MODPLUG_TRACKER
 	const CModDoc *pModDoc = sndFile.GetpModDoc();
@@ -1165,8 +1165,8 @@ void TestLoadXMFile(const CSoundFile &sndFile)
 
 
 // Check if our test file was loaded correctly.
-void TestLoadMPTMFile(const CSoundFile &sndFile)
-//----------------------------------------------
+static void TestLoadMPTMFile(const CSoundFile &sndFile)
+//-----------------------------------------------------
 {
 
 	// Global Variables
@@ -1422,8 +1422,8 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 
 // Check if our test file was loaded correctly.
-void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
-//-----------------------------------------------------------
+static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
+//------------------------------------------------------------------
 {
 
 	// Global Variables
@@ -1778,8 +1778,8 @@ void TestLoadSaveFile()
 }
 
 
-void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
-//---------------------------------------------------------------------------------------------------------------
+static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
+//----------------------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString filename = GetTestFilenameBase() + MPT_PATHSTRING("itcomp") + mpt::PathString::FromWide(StringifyW(testcount)) + MPT_PATHSTRING(".raw");
 
@@ -1854,15 +1854,15 @@ void TestITCompression()
 }
 
 
-double Rand01() {return rand() / double(RAND_MAX);}
+static double Rand01() {return rand() / double(RAND_MAX);}
 
 template <class T>
 T Rand(const T& min, const T& max) {return Util::Round<T>(min + Rand01() * (max - min));}
 
 
 
-void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc)
-//-------------------------------------------------------------------------------
+static void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc)
+//--------------------------------------------------------------------------------------
 {
 	const double dPcxProb = dProbPcs + dProbPc;
 	const CPattern::const_iterator end = pat.End();

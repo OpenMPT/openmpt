@@ -12,4 +12,7 @@ LDFLAGS  +=
 LDLIBS   += -lm
 ARFLAGS  := rcs
 
+CXXFLAGS_WARNINGS += -Wmissing-prototypes
+CFLAGS_WARNINGS   += -Wmissing-prototypes
+
 EXESUFFIX=
