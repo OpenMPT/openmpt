@@ -60,18 +60,25 @@
 #endif
 
 // this will be available everywhere
+
 #include "../common/typedefs.h"
-// this adds:
 // <memory>
 // <new>
-// <string>
-// <vector>
 // <cstdarg>
 // <cstdint>
+// <stdint.h>
+
+#include "../common/mptString.h"
+// <limits>
+// <string>
+// <type_traits>
+// <cstring>
+
+#include "../common/mptPathString.h"
 // <cstdio>
 // <stdio.h>
-#include "../common/mptString.h"
-#include "../common/mptPathString.h"
+
+#include "../common/Logging.h"
 
 
 //{{AFX_INSERT_LOCATION}}

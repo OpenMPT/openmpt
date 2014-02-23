@@ -16,12 +16,7 @@
 #include <type_traits>
 #endif
 
-#include <cstdio>
 #include <cstring>
-#include <stdio.h>
-#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#include <strings.h> // for strcasecmp
-#endif
 
 
 namespace mpt
@@ -161,15 +156,7 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 }
 
 
-static inline int strnicmp(const char *a, const char *b, size_t count)
-//--------------------------------------------------------------------
-{
-	#if MPT_COMPILER_MSVC
-		return _strnicmp(a, b, count);
-	#else
-		return strncasecmp(a, b, count);
-	#endif
-}
+int strnicmp(const char *a, const char *b, size_t count);
 
 
 enum Charset {
