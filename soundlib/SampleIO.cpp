@@ -30,7 +30,11 @@ extern uintptr_t DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufm
 #pragma GCC diagnostic ignored "-Wswitch"
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
+#if MPT_CLANG_AT_LEAST(3,3,0)
+#pragma clang diagnostic ignored "-Wswitch"
+#else
 #pragma clang diagnostic ignored "-Wswitch-enum"
+#endif
 #endif
 
 // Read a sample from memory
