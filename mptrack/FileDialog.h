@@ -22,16 +22,17 @@ protected:
 	std::wstring defaultExtension;
 	std::wstring defaultFilename;
 	std::wstring extFilter;
+	std::wstring lastPreviewFile;
 	mpt::PathString workingDirectory;
-	mpt::PathString lastPreviewFile;
 	mpt::PathString extension;
 	PathList filenames;
 	int *filterIndex;
 	bool load;
 	bool multiSelect;
+	bool preview, stopPreview;
 
 protected:
-	FileDialog(bool load) : filterIndex(nullptr), load(load), multiSelect(false) { }
+	FileDialog(bool load) : filterIndex(nullptr), load(load), multiSelect(false), preview(false), stopPreview(false) { }
 
 public:
 	// Default extension to use if none is specified.
@@ -50,6 +51,8 @@ public:
 	FileDialog &WorkingDirectory(const mpt::PathString &dir) { workingDirectory = dir; return *this; }
 	// Pointer to a variable holding the index of the last extension filter to use. Holds the selected filter after the dialog has been closed.
 	FileDialog &FilterIndex(int *index) { filterIndex = index; return *this; }
+	// Enable preview of instrument files (if globally enabled).
+	FileDialog &EnableAudioPreview() { preview = true; return *this; }
 
 	// Show the file selection dialog.
 	bool Show(const CWnd *parent = nullptr);
@@ -96,6 +99,7 @@ public:
 };
 
 
+// Folder browser.
 class BrowseForFolder
 {
 protected:

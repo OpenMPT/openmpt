@@ -690,6 +690,109 @@ void COptionsGeneral::OnOptionSelChanged()
 }
 
 
+BEGIN_MESSAGE_MAP(COptionsSampleEditor, CPropertyPage)
+	ON_EN_CHANGE(IDC_EDIT_UNDOSIZE,			OnUndoSizeChanged)
+	ON_EN_CHANGE(IDC_EDIT_FINETUNE,			OnSettingsChanged)
+	ON_EN_CHANGE(IDC_FLAC_COMPRESSION,		OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_DEFAULT_FORMAT,	OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_VOLUME_HANDLING,	OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO1,					OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO2,					OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO3,					OnSettingsChanged)
+	ON_COMMAND(IDC_COMPRESS_ITI,			OnSettingsChanged)
+	ON_COMMAND(IDC_PREVIEW_SAMPLES,			OnSettingsChanged)
+	ON_COMMAND(IDC_NORMALIZE,				OnSettingsChanged)
+END_MESSAGE_MAP()
+
+
+void COptionsSampleEditor::DoDataExchange(CDataExchange* pDX)
+//-----------------------------------------------------------
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(COptionsSampleEditor)
+	DDX_Control(pDX, IDC_DEFAULT_FORMAT,		m_cbnDefaultSampleFormat);
+	DDX_Control(pDX, IDC_VOLUME_HANDLING,		m_cbnDefaultVolumeHandling);
+	//}}AFX_DATA_MAP
+}
+
+
+BOOL COptionsSampleEditor::OnInitDialog()
+//---------------------------------------
+{
+	CPropertyPage::OnInitDialog();
+	SetDlgItemInt(IDC_EDIT_FINETUNE, TrackerSettings::Instance().m_nFinetuneStep);
+	SetDlgItemInt(IDC_EDIT_UNDOSIZE, TrackerSettings::Instance().m_SampleUndoBufferSize.Get().GetSizeInPercent());
+	OnUndoSizeChanged();
+
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("FLAC"), dfFLAC);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("WAV"), dfWAV);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("RAW"), dfRAW);
+	m_cbnDefaultSampleFormat.SetCurSel(TrackerSettings::Instance().m_defaultSampleFormat);
+
+	SetDlgItemInt(IDC_FLAC_COMPRESSION, TrackerSettings::Instance().m_FLACCompressionLevel);
+	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1);
+	if(spin)
+	{
+		spin->SetRange(0, 8);
+		spin->SetPos(TrackerSettings::Instance().m_FLACCompressionLevel);
+	}
+
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + TrackerSettings::Instance().sampleEditorKeyBehaviour);
+
+	CheckDlgButton(IDC_COMPRESS_ITI, TrackerSettings::Instance().compressITI ? MF_CHECKED : MF_UNCHECKED);
+
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultVolumeHandling.AddString("MIDI volume"), PLUGIN_VOLUMEHANDLING_MIDI);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultVolumeHandling.AddString("Dry/Wet ratio"), PLUGIN_VOLUMEHANDLING_DRYWET);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultVolumeHandling.AddString("None"), PLUGIN_VOLUMEHANDLING_IGNORE);
+	m_cbnDefaultVolumeHandling.SetCurSel(TrackerSettings::Instance().DefaultPlugVolumeHandling);
+
+	CheckDlgButton(IDC_PREVIEW_SAMPLES, TrackerSettings::Instance().previewInFileDialogs ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_NORMALIZE, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad ? MF_CHECKED : MF_UNCHECKED);
+
+	return TRUE;
+}
+
+
+void COptionsSampleEditor::OnOK()
+//-------------------------------
+{
+	CPropertyPage::OnOK();
+
+	TrackerSettings::Instance().m_nFinetuneStep = GetDlgItemInt(IDC_EDIT_FINETUNE);
+	TrackerSettings::Instance().m_SampleUndoBufferSize = SampleUndoBufferSize(GetDlgItemInt(IDC_EDIT_UNDOSIZE));
+	TrackerSettings::Instance().m_defaultSampleFormat = static_cast<SampleEditorDefaultFormat>(m_cbnDefaultSampleFormat.GetItemData(m_cbnDefaultSampleFormat.GetCurSel()));
+	TrackerSettings::Instance().m_FLACCompressionLevel = GetDlgItemInt(IDC_FLAC_COMPRESSION);
+	TrackerSettings::Instance().sampleEditorKeyBehaviour = static_cast<SampleEditorKeyBehaviour>(GetCheckedRadioButton(IDC_RADIO1, IDC_RADIO3) -IDC_RADIO1);
+	TrackerSettings::Instance().compressITI = IsDlgButtonChecked(IDC_COMPRESS_ITI) != MF_UNCHECKED;
+	TrackerSettings::Instance().DefaultPlugVolumeHandling = static_cast<PLUGVOLUMEHANDLING>(m_cbnDefaultVolumeHandling.GetItemData(m_cbnDefaultVolumeHandling.GetCurSel()));
+	TrackerSettings::Instance().previewInFileDialogs = IsDlgButtonChecked(IDC_PREVIEW_SAMPLES) != MF_UNCHECKED;
+	TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad = IsDlgButtonChecked(IDC_NORMALIZE) != MF_UNCHECKED;
+
+	std::vector<CModDoc *> docs = theApp.GetOpenDocuments();
+	for(std::vector<CModDoc *>::iterator i = docs.begin(); i != docs.end(); i++)
+	{
+		(**i).GetSampleUndo().RestrictBufferSize();
+	}
+}
+
+
+BOOL COptionsSampleEditor::OnSetActive()
+//--------------------------------------
+{
+	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_SAMPLEDITOR;
+	return CPropertyPage::OnSetActive();
+}
+
+
+void COptionsSampleEditor::OnUndoSizeChanged()
+//--------------------------------------------
+{
+	uint32 sizeMB = mpt::saturate_cast<uint32>(SampleUndoBufferSize(GetDlgItemInt(IDC_EDIT_UNDOSIZE)).GetSizeInBytes() >> 20);
+	CString text;
+	text.Format("%% of physical memory (%u MiB)", sizeMB);
+	SetDlgItemText(IDC_UNDOSIZE, text);
+}
+
 
 #if defined(MPT_SETTINGS_CACHE)
 

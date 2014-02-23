@@ -408,8 +408,6 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 	}
 	SetCurrentSample((lParam > 0) ? ((SAMPLEINDEX)lParam) : m_nSample);
 
-	m_nFinetuneStep = (uint16)theApp.GetSettings().Read<int32>("Sample Editor", "FinetuneStep", 25);
-
 	// Initial Update
 	if (!m_bInitialized) UpdateView((m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
@@ -966,6 +964,7 @@ void CCtrlSamples::OnSampleOpen()
 	static int nLastIndex = 0;
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
+		.EnableAudioPreview()
 		.ExtensionFilter("All Samples|*.wav;*.flac;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3|"
 			"Wave Files (*.wav)|*.wav|"
 	#ifndef NO_FLAC
@@ -1008,7 +1007,7 @@ void CCtrlSamples::OnSampleSave()
 {
 	mpt::PathString fileName;
 	bool doBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
-	bool defaultFLAC = false;
+	SampleEditorDefaultFormat defaultFormat = TrackerSettings::Instance().m_defaultSampleFormat;
 
 	if(!doBatchSave)
 	{
@@ -1024,7 +1023,10 @@ void CCtrlSamples::OnSampleSave()
 		}
 		if(fileName.empty()) fileName = mpt::PathString::FromLocale(m_sndFile.m_szNames[m_nSample]);
 		if(fileName.empty()) fileName = MPT_PATHSTRING("untitled");
-		if(mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".flac"))) defaultFLAC = true;
+
+		const mpt::PathString ext = fileName.GetFileExt();
+		if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING(".flac"))) defaultFormat = dfFLAC;
+		else if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING(".wav"))) defaultFormat = dfWAV;
 	} else
 	{
 		// save all samples
@@ -1039,15 +1041,21 @@ void CCtrlSamples::OnSampleSave()
 	}
 	SanitizeFilename(fileName);
 
-	mpt::PathString format = theApp.GetSettings().Read<mpt::PathString>("Sample Editor", "DefaultFormat", defaultFLAC ? MPT_PATHSTRING("flac") : MPT_PATHSTRING("wav"));
-	int filter = 1;
-	if(!mpt::PathString::CompareNoCase(format, MPT_PATHSTRING("flac")))
+	int filter;
+	switch(defaultFormat)
+	{
+	case dfWAV:
+		filter = 0;
+		break;
+	case dfFLAC:
+	default:
+		filter = 1;
+	case dfRAW:
 		filter = 2;
-	else if(!mpt::PathString::CompareNoCase(format, MPT_PATHSTRING("raw")))
-		filter = 3;
+	}
 
 	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension(format)
+		.DefaultExtension(ToSettingValue(defaultFormat).as<std::string>())
 		.DefaultFilename(fileName)
 		.ExtensionFilter("Wave File (*.wav)|*.wav|"
 			"FLAC File (*.flac)|*.flac|"
@@ -2993,8 +3001,8 @@ NoSample:
 		{
 			uint32 d = sample.nC5Speed;
 			if (d < 1) d = 8363;
-			if(d < m_nFinetuneStep) d = m_nFinetuneStep;
-			d += (pos * m_nFinetuneStep);
+			if(d < TrackerSettings::Instance().m_nFinetuneStep) d = TrackerSettings::Instance().m_nFinetuneStep;
+			d += (pos * TrackerSettings::Instance().m_nFinetuneStep);
 			sample.nC5Speed = Clamp(d, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
 			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
 			int basenote = 60 - transp;

@@ -29,16 +29,18 @@ bool FileDialog::Show(const CWnd *parent)
 
 	// Prepare filename buffer.
 	std::vector<WCHAR> filenameBuffer(uint16_max, 0);
-	filenameBuffer.insert(filenameBuffer.begin(), defaultFilename.begin(), defaultFilename.end());
-	filenameBuffer.push_back(0);
+	wcscpy(&filenameBuffer[0], defaultFilename.c_str());
+	//filenameBuffer.insert(filenameBuffer.begin(), defaultFilename.begin(), defaultFilename.end());
+	//filenameBuffer.push_back(0);
 
+	preview = preview && TrackerSettings::Instance().previewInFileDialogs;
 	const std::wstring workingDirectoryNative = workingDirectory.AsNative();
 
 	// First, set up the dialog...
 	OPENFILENAMEW ofn;
 	MemsetZero(ofn);
-	ofn.lStructSize = sizeof(OPENFILENAMEW);
-	ofn.hwndOwner = (parent != nullptr ? parent : theApp.m_pMainWnd)->GetSafeHwnd();
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = (parent != nullptr ? parent : theApp.m_pMainWnd)->m_hWnd;
 	ofn.hInstance = theApp.m_hInstance;
 	ofn.lpstrFilter = extFilter.c_str();
 	ofn.lpstrCustomFilter = NULL;
@@ -50,12 +52,12 @@ bool FileDialog::Show(const CWnd *parent)
 	ofn.nMaxFileTitle = 0;
 	ofn.lpstrInitialDir = workingDirectory.empty() ? NULL : workingDirectoryNative.c_str();
 	ofn.lpstrTitle = NULL;
-	ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0) | (load ? 0 : (OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN));
+	ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0) | (load ? 0 : (OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN)) | (preview ? OFN_ENABLEHOOK : 0);
 	ofn.nFileOffset = 0;
 	ofn.nFileExtension = 0;
 	ofn.lpstrDefExt = defaultExtension.empty() ? NULL : defaultExtension.c_str();
-	ofn.lCustData = NULL;
-	ofn.lpfnHook = NULL;
+	ofn.lCustData = reinterpret_cast<LPARAM>(this);
+	ofn.lpfnHook = OFNHookProc;
 	ofn.lpTemplateName = NULL;
 	ofn.pvReserved = NULL;
 	ofn.dwReserved = 0;
@@ -65,6 +67,11 @@ bool FileDialog::Show(const CWnd *parent)
 	CMainFrame::GetInputHandler()->Bypass(true);
 	BOOL result = load ? GetOpenFileNameW(&ofn) : GetSaveFileNameW(&ofn);
 	CMainFrame::GetInputHandler()->Bypass(false);
+
+	if(stopPreview)
+	{
+		CMainFrame::GetMainFrame()->StopPreview();
+	}
 
 	if(result == FALSE)
 	{
@@ -108,6 +115,31 @@ bool FileDialog::Show(const CWnd *parent)
 }
 
 
+// Callback function for instrument preview
+UINT_PTR CALLBACK FileDialog::OFNHookProc(HWND hdlg, UINT uiMsg, WPARAM /*wParam*/, LPARAM lParam)
+//------------------------------------------------------------------------------------------------
+{
+	if(uiMsg == WM_NOTIFY)
+	{
+		OFNOTIFY *ofn = reinterpret_cast<OFNOTIFY *>(lParam);
+		WCHAR path[MAX_PATH];
+		if(ofn->hdr.code == CDN_SELCHANGE && CommDlg_OpenSave_GetFilePathW(GetParent(hdlg), path, CountOf(path)) > 0)
+		{
+			FileDialog *that = reinterpret_cast<FileDialog *>(ofn->lpOFN->lCustData);
+			if(path[0] && that->lastPreviewFile != path)
+			{
+				that->lastPreviewFile = path;
+				if(CMainFrame::GetMainFrame()->PlaySoundFile(mpt::PathString::FromNative(path), NOTE_MIDDLEC))
+				{
+					that->stopPreview = true;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
 // Helper callback to set start path.
 int CALLBACK BrowseForFolder::BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM /*lParam*/, LPARAM lpData)
 //------------------------------------------------------------------------------------------------------
@@ -130,7 +162,7 @@ bool BrowseForFolder::Show(const CWnd *parent)
 
 	BROWSEINFOW bi;
 	MemsetZero(bi);
-	bi.hwndOwner = (parent != nullptr ? parent : theApp.m_pMainWnd)->GetSafeHwnd();
+	bi.hwndOwner = (parent != nullptr ? parent : theApp.m_pMainWnd)->m_hWnd;
 	bi.lpszTitle = caption.empty() ? NULL : caption.c_str();
 	bi.pszDisplayName = path;
 	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;

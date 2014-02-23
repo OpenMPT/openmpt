@@ -108,16 +108,22 @@ static uint32 GetDefaultPatternSetup()
 }
 
 
-static uint32 GetDefaultUndoBufferSize()
-//--------------------------------------
+void SampleUndoBufferSize::CalculateSize()
+//----------------------------------------
 {
-	MEMORYSTATUS gMemStatus;
-	MemsetZero(gMemStatus);
-	GlobalMemoryStatus(&gMemStatus);
-	// Allow allocations of at least 16MB
-	if(gMemStatus.dwTotalPhys < 16*1024*1024)
-		gMemStatus.dwTotalPhys = 16*1024*1024;
-	return std::max<uint32>(gMemStatus.dwTotalPhys / 10, 1 << 20);;
+	if(sizePercent < 0)
+		sizePercent = 0;
+	// Don't use GlobalMemoryStatusEx here since we want a percentage of the memory that's actually *available* to OpenMPT, which is a max of 4GB in 32-bit mode.
+	MEMORYSTATUS memStatus;
+	memStatus.dwLength = sizeof(MEMORYSTATUS);
+	GlobalMemoryStatus(&memStatus);
+	sizeByte = mpt::saturate_cast<size_t>(memStatus.dwTotalPhys * uint64(sizePercent) / 100);
+
+	// Pretend there's at least one MiB of memory (haha)
+	if(sizePercent != 0 && sizeByte < 1 * 1024 * 1024)
+	{
+		sizeByte = 1 * 1024 * 1024;
+	}
 }
 
 
@@ -195,9 +201,14 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, orderlistMargins(conf, "Pattern Editor", "DefaultSequenceMargins", 0)
 	, rowDisplayOffset(conf, "Pattern Editor", "RowDisplayOffset", 0)
 	// Sample Editor
-	, m_SampleUndoMaxBufferMB(conf, "Sample Editor", "UndoBufferSize", GetDefaultUndoBufferSize() >> 20)
+	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
+	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)
+	, m_defaultSampleFormat(conf, "Sample Editor", "DefaultFormat", dfFLAC)
+	, m_nFinetuneStep(conf, "Sample Editor", "FinetuneStep", 25)
+	, m_FLACCompressionLevel(conf, "Sample Editor", "FLACCompressionLevel", 5)
+	, compressITI(conf, "Sample Editor", "CompressITI", true)
 	, m_MayNormalizeSamplesOnLoad(conf, "Sample Editor", "MayNormalizeSamplesOnLoad", true)
-	, SampleEditorFLACCompressionLevel(conf, "Sample Editor", "FLACCompressionLevel", 5)
+	, previewInFileDialogs(conf, "Sample Editor", "PreviewInFileDialogs", false)
 	// Export
 	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
 	, ExportStreamEncoderSettings(conf, "Export")
@@ -509,6 +520,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		TrackerDirectories::Instance().m_szWorkingDirectory[i] = TrackerDirectories::Instance().m_szDefaultDirectory[i];
 	}
 	m_szKbdFile = theApp.RelativePathToAbsolute(m_szKbdFile);
+
+	// Sample undo buffer size (used to be a hidden, absolute setting in MiB)
+	int64 oldUndoSize = m_SampleUndoBufferSize.Get().GetSizeInPercent();
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,25) && oldUndoSize != SampleUndoBufferSize::defaultSize && oldUndoSize != 0)
+	{
+		m_SampleUndoBufferSize = SampleUndoBufferSize(static_cast<int32>(100 * (oldUndoSize << 20) / SampleUndoBufferSize(100).GetSizeInBytes()));
+	}
 
 	// Last fixup: update config version
 	IniVersion = MptVersion::str;
@@ -902,7 +920,7 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 	for(size_t i = 0; i < CountOf(chords); i++)
 	{
 		uint32 chord;
-		if((chord = conf.Read<int32>("Chords", CSoundFile::GetNoteName(i + NOTE_MIN), -1)) >= 0)
+		if((chord = conf.Read<int32>("Chords", CSoundFile::GetNoteName(ModCommand::NOTE(i + NOTE_MIN)), -1)) >= 0)
 		{
 			if((chord & 0xFFFFFFC0) || (!chords[i].notes[0]))
 			{
@@ -922,7 +940,7 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 	for(size_t i = 0; i < CountOf(chords); i++)
 	{
 		int32 s = (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18);
-		conf.Write<int32>("Chords", CSoundFile::GetNoteName(i + NOTE_MIN), s);
+		conf.Write<int32>("Chords", CSoundFile::GetNoteName(ModCommand::NOTE(i + NOTE_MIN)), s);
 	}
 }
 

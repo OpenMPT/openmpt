@@ -1681,6 +1681,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
+		.EnableAudioPreview()
 		.ExtensionFilter(
 			"All Instruments|*.xi;*.pat;*.iti;*.flac;*.wav;*.aif;*.aiff|"
 			"FastTracker II Instruments (*.xi)|*.xi|"
@@ -1734,7 +1735,7 @@ void CCtrlInstruments::OnInstrumentSave()
 	}
 	SanitizeFilename(szFileName);
 
-	int index = 0;
+	int index = (m_sndFile.GetType() == MOD_TYPE_XM || !TrackerSettings::Instance().compressITI) ? 0 : 1;
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(m_sndFile.GetType() == MOD_TYPE_XM ? "xi" : "iti")
 		.DefaultFilename(szFileName)
@@ -2724,9 +2725,9 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 		uint16 ptl = 0;
 		if(m_EditPitchTempoLock.GetWindowTextLength() > 0)
 		{
-			char buffer[7];
-			m_EditPitchTempoLock.GetWindowText(buffer, 6);
-			ptl = atoi(buffer);
+			TCHAR buffer[8];
+			m_EditPitchTempoLock.GetWindowText(buffer, CountOf(buffer));
+			ptl = _ttoi(buffer);
 		}
 		if(!ptl)
 		{

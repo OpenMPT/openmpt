@@ -1838,6 +1838,7 @@ void CMainFrame::OnViewOptions()
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
 	COptionsSoundcard sounddlg(TrackerSettings::Instance().GetSoundDeviceID());
+	COptionsSampleEditor smpeditor;
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsPlayer playerdlg;
@@ -1860,6 +1861,7 @@ void CMainFrame::OnViewOptions()
 #ifndef NO_EQ
 	dlg.AddPage(&eqdlg);
 #endif
+	dlg.AddPage(&smpeditor);
 	dlg.AddPage(&keyboard);
 	dlg.AddPage(&colors);
 	dlg.AddPage(&mididlg);
@@ -2373,7 +2375,7 @@ LRESULT CMainFrame::OnSpecialKey(WPARAM /*vKey*/, LPARAM)
 	return 0;
 }
 
-//rewbs.customKeys
+
 LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------
 {
@@ -2454,7 +2456,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	return wParam;
 }
-//end rewbs.customKeys
+
 
 void CMainFrame::OnInitMenu(CMenu* pMenu)
 //---------------------------------------
@@ -2500,7 +2502,7 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 	pSndFile->m_bIsRendering = false;
 	return true;
 }
-//end rewbs.VSTTimeInfo
+
 
 // We have swicthed focus to a new module - might need to update effect keys to reflect module type
 bool CMainFrame::UpdateEffectKeys()

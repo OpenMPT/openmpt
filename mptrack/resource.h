@@ -132,7 +132,8 @@
 #define IDD_AUTOTUNE                    531
 #define IDD_INPUT                       532
 #define IDD_CLIPBOARD                   533
-#define IDD_OPTIONS_ADVANCED            540
+#define IDD_OPTIONS_ADVANCED            534
+#define IDD_OPTIONS_SAMPLEEDITOR        535
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -926,6 +927,15 @@
 #define IDC_FIND                        2438
 #define IDC_PITCHWHEELDEPTH             2439
 #define IDC_PROMPT                      2440
+#define IDC_EDIT_FINETUNE               2441
+#define IDC_EDIT_UNDOSIZE               2442
+#define IDC_FLAC_COMPRESSION            2443
+#define IDC_DEFAULT_FORMAT              2444
+#define IDC_COMPRESS_ITI                2445
+#define IDC_PREVIEW_SAMPLES             2446
+#define IDC_VOLUME_HANDLING             2447
+#define IDC_NORMALIZE                   2448
+#define IDC_UNDOSIZE                    2449
 #define IDC_SLIDER_NUMBUFFERS           2454
 #define IDC_EDIT_STATISTICS             2455
 #define IDC_VUMETER                     2456
@@ -1229,7 +1239,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        541
+#define _APS_NEXT_RESOURCE_VALUE        536
 #define _APS_NEXT_COMMAND_VALUE         44643
 #define _APS_NEXT_CONTROL_VALUE         2479
 #define _APS_NEXT_SYMED_VALUE           901

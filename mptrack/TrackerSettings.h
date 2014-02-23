@@ -139,10 +139,12 @@ struct PACKED EQPreset
 #endif
 STATIC_ASSERT(sizeof(EQPreset) == 60);
 
-template<> inline SettingValue ToSettingValue(const EQPreset &val) {
+template<> inline SettingValue ToSettingValue(const EQPreset &val)
+{
 	return SettingValue(EncodeBinarySetting<EQPreset>(val), "EQPreset");
 }
-template<> inline EQPreset FromSettingValue(const SettingValue &val) {
+template<> inline EQPreset FromSettingValue(const SettingValue &val)
+{
 	ASSERT(val.GetTypeTag() == "EQPreset");
 	return DecodeBinarySetting<EQPreset>(val.as<std::vector<char> >());
 }
@@ -172,6 +174,47 @@ enum RecordAftertouchOptions
 	atRecordAsMacro,
 };
 
+// Sample editor preview behaviour
+enum SampleEditorKeyBehaviour
+{
+	seNoteOffOnNewKey,
+	seNoteOffOnKeyUp,
+	seNoteOffOnKeyRestrike,
+};
+
+enum SampleEditorDefaultFormat
+{
+	dfFLAC,
+	dfWAV,
+	dfRAW,
+};
+
+
+class SampleUndoBufferSize
+{
+protected:
+	size_t sizeByte;
+	int32 sizePercent;
+
+	void CalculateSize();
+
+public:
+	enum
+	{
+		defaultSize = 10,	// In percent
+	};
+
+	SampleUndoBufferSize(int32 percent = defaultSize) : sizePercent(percent) { CalculateSize(); }
+	void Set(int32 percent) { sizePercent = percent; CalculateSize(); }
+
+	int32 GetSizeInPercent() const { return sizePercent; }
+	size_t GetSizeInBytes() const { return sizeByte; }
+};
+
+template<> inline SettingValue ToSettingValue(const SampleUndoBufferSize &val) { return SettingValue(val.GetSizeInPercent()); }
+template<> inline SampleUndoBufferSize FromSettingValue(const SettingValue &val) { return SampleUndoBufferSize(val.as<int32>()); }
+
+
 std::string IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs);
 std::bitset<128> StringToIgnoredCCs(const std::string &in);
 
@@ -181,6 +224,9 @@ MODTYPE SettingsStringToModType(const std::string &str);
 
 template<> inline SettingValue ToSettingValue(const RecordAftertouchOptions &val) { return SettingValue(int32(val)); }
 template<> inline RecordAftertouchOptions FromSettingValue(const SettingValue &val) { return RecordAftertouchOptions(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const SampleEditorKeyBehaviour &val) { return SettingValue(int32(val)); }
+template<> inline SampleEditorKeyBehaviour FromSettingValue(const SettingValue &val) { return SampleEditorKeyBehaviour(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const MODTYPE &val) { return SettingValue(SettingsModTypeToString(val), "MODTYPE"); }
 template<> inline MODTYPE FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "MODTYPE"); return SettingsStringToModType(val.as<std::string>()); }
@@ -224,6 +270,34 @@ template<> inline std::bitset<128> FromSettingValue(const SettingValue &val)
 	return StringToIgnoredCCs(val.as<std::string>());
 }
 
+template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &val)
+{
+	const char *format;
+	switch(val)
+	{
+	case dfWAV:
+		format = "wav";
+		break;
+	case dfFLAC:
+	default:
+		format = "flac";
+		break;
+	case dfRAW:
+		format = "raw";
+	}
+	return SettingValue(format);
+}
+template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue &val)
+{
+	std::string format = val.as<std::string>();
+	for(std::string::iterator c = format.begin(); c != format.end(); c++) *c = std::string::value_type(::tolower(*c));
+	if(format == "wav")
+		return dfWAV;
+	if(format == "raw")
+		return dfRAW;
+	else // if(format == "flac")
+		return dfFLAC;
+}
 
 
 //===================
@@ -341,10 +415,14 @@ public:
 
 	// Sample Editor
 
-	Setting<uint32> m_SampleUndoMaxBufferMB;
-	uint32 GetSampleUndoBufferSize() const { return m_SampleUndoMaxBufferMB << 20; }
+	Setting<SampleUndoBufferSize> m_SampleUndoBufferSize;
+	Setting<SampleEditorKeyBehaviour> sampleEditorKeyBehaviour;
+	Setting<SampleEditorDefaultFormat> m_defaultSampleFormat;
+	Setting<uint32> m_nFinetuneStep;	// Increment finetune by x when using spin control. Default = 25
+	Setting<int32> m_FLACCompressionLevel;	// FLAC compression level for saving (0...8)
+	Setting<bool> compressITI;
 	Setting<bool> m_MayNormalizeSamplesOnLoad;
-	Setting<int32> SampleEditorFLACCompressionLevel; // Custom compression level (0...8)
+	Setting<bool> previewInFileDialogs;
 
 	// Export
 
