@@ -12,9 +12,6 @@
 #include "Loaders.h"
 #include "S3MTools.h"
 #include "../common/version.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"	// Logging
-#endif // MODPLUG_TRACKER
 
 
 void CSoundFile::S3MConvert(ModCommand &m, bool fromIT) const

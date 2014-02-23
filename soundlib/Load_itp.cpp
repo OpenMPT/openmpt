@@ -19,7 +19,6 @@
 #include "Loaders.h"
 #include "ITTools.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/mptrack.h"
 #include "../mptrack/TrackerSettings.h"
 #include "../mptrack/MemoryMappedFile.h"
 #include "../mptrack/Moddoc.h"

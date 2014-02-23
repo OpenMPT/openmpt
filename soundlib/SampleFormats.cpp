@@ -12,9 +12,10 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
+#include "../mptrack/Mptrack.h"
 #include "../mptrack/Moddoc.h"
-#include "../mptrack/Mainfrm.h"	// For ini settings
 #include "../mptrack/Reporting.h"
+#include "../mptrack/TrackerSettings.h"
 #endif //MODPLUG_TRACKER
 #include "../common/AudioCriticalSection.h"
 #include "Wav.h"
@@ -2192,9 +2193,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	FLAC__stream_encoder_set_total_samples_estimate(encoder, sample.nLength);
 	FLAC__stream_encoder_set_metadata(encoder, metadata, writeLoopData ? 3 : 2);
 #ifdef MODPLUG_TRACKER
-	// Custom compression level (0...8)
-	static const int compression = theApp.GetSettings().Read<int32>("Sample Editor", "FLACCompressionLevel", 5);
-	FLAC__stream_encoder_set_compression_level(encoder, compression);
+	FLAC__stream_encoder_set_compression_level(encoder, TrackerSettings::Instance().SampleEditorFLACCompressionLevel);
 #endif // MODPLUG_TRACKER
 
 	encoder.f = mpt_fopen(filename, "wb");

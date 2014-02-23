@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
 #include "../mptrack/Mptrack.h"
 #endif // MODPLUG_TRACKER
 

@@ -152,6 +152,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, defaultModType(conf, "Misc", "DefaultModType", MOD_TYPE_IT)
 	, DefaultPlugVolumeHandling(conf, "Misc", "DefaultPlugVolumeHandling", PLUGIN_VOLUMEHANDLING_IGNORE)
 	, autoApplySmoothFT2Ramping(conf, "Misc", "SmoothFT2Ramping", false)
+	, MiscITCompressionStereo(conf, "Misc", "ITCompressionStereo", false)
+	, MiscITCompressionMono(conf, "Misc", "ITCompressionMono", false)
 	// Sound Settings
 	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
@@ -195,6 +197,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Sample Editor
 	, m_SampleUndoMaxBufferMB(conf, "Sample Editor", "UndoBufferSize", GetDefaultUndoBufferSize() >> 20)
 	, m_MayNormalizeSamplesOnLoad(conf, "Sample Editor", "MayNormalizeSamplesOnLoad", true)
+	, SampleEditorFLACCompressionLevel(conf, "Sample Editor", "FLACCompressionLevel", 5)
 	// Export
 	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
 	// Default template

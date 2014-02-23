@@ -11,9 +11,6 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
-#endif // MODPLUG_TRACKER
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)

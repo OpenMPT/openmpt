@@ -12,7 +12,6 @@
 #include "Sndfile.h"
 #include "ModSequence.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
 #include "../mptrack/Reporting.h"
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"

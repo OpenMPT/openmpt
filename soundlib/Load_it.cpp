@@ -14,6 +14,7 @@
 #include "tuningcollection.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
+#include "../mptrack/TrackerSettings.h"
 #endif
 #include "../common/serialization_utils.h"
 #include "../common/mptFstream.h"
@@ -1110,10 +1111,6 @@ uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 }
 
 
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Mptrack.h"	// For config filename
-#endif // MODPLUG_TRACKER
-
 bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExport)
 //--------------------------------------------------------------------------------
 {
@@ -1567,7 +1564,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 #ifdef MODPLUG_TRACKER
 		int type = GetType() == MOD_TYPE_IT ? 1 : 4;
 		if(compatibilityExport) type = 2;
-		bool compress = (theApp.GetSettings().Read<int32>("Misc", Samples[nsmp].GetNumChannels() > 1 ? "ITCompressionStereo" : "ITCompressionMono", 0) & type) != 0;
+		bool compress = (Samples[nsmp].GetNumChannels() > 1) ? TrackerSettings::Instance().MiscITCompressionStereo : TrackerSettings::Instance().MiscITCompressionMono;
 #else
 		bool compress = false;
 #endif // MODPLUG_TRACKER
