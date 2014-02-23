@@ -344,13 +344,18 @@ void CSoundFile::CreateStereoMix(int count)
 		if(chn.dwFlags[CHN_LOOP] && resamplingMode != MixFuncTable::ndxNoInterpolation)
 		{
 			const bool loopEndsAtSampleEnd = chn.pModSample->uFlags[CHN_LOOP] && chn.pModSample->nLoopEnd == chn.pModSample->nLength;
+			const bool inSustainLoop = chn.InSustainLoop();
 
-			SmpLength lookaheadOffset = (loopEndsAtSampleEnd ? 0 : (3 * InterpolationMaxLookahead)) + chn.pModSample->nLength - chn.nLoopEnd;
-			if(chn.InSustainLoop())
+			// Do not enable wraparound magic if we're previewing a custom loop!
+			if(inSustainLoop || chn.nLoopEnd == chn.pModSample->nLoopEnd)
 			{
-				lookaheadOffset += 4 * InterpolationMaxLookahead;
+				SmpLength lookaheadOffset = (loopEndsAtSampleEnd ? 0 : (3 * InterpolationMaxLookahead)) + chn.pModSample->nLength - chn.nLoopEnd;
+				if(inSustainLoop)
+				{
+					lookaheadOffset += 4 * InterpolationMaxLookahead;
+				}
+				lookaheadPointer = samplePointer + lookaheadOffset * chn.pModSample->GetBytesPerSample();
 			}
-			lookaheadPointer = samplePointer + lookaheadOffset * chn.pModSample->GetBytesPerSample();
 		}
 
 		////////////////////////////////////////////////////
