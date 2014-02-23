@@ -191,6 +191,19 @@ namespace Encoder
 } // namespace Encoder
 
 
+//==========================
+struct StreamEncoderSettings
+//==========================
+{
+	Setting<int32> FLACCompressionLevel;
+	Setting<int32> MP3LameQuality;
+	Setting<bool> MP3ACMFast;
+	Setting<int32> OpusComplexity;
+	StreamEncoderSettings(SettingsContainer &conf, const std::string &section);
+	static StreamEncoderSettings &Instance();
+};
+
+
 //=======================
 class IAudioStreamEncoder
 //=======================

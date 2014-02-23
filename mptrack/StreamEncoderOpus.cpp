@@ -13,11 +13,7 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderOpus.h"
 
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Mainfrm.h"
-#include "../mptrack/Mptrack.h"
-#include "../mptrack/Reporting.h"
-#endif //MODPLUG_TRACKER
+#include "Mptrack.h"
 
 #include <deque>
 
@@ -429,12 +425,11 @@ public:
 			opus.opus_multistream_encoder_ctl(st, OPUS_SET_VBR_CONSTRAINT(ctl_vbrcontraint));
 		}
 
-#ifdef MODPLUG_TRACKER
-		opus_int32 complexity = 0;
-		opus.opus_multistream_encoder_ctl(st, OPUS_GET_COMPLEXITY(&complexity));
-		complexity = theApp.GetSettings().Read<int32>("Export", "OpusComplexity", complexity);
-		opus.opus_multistream_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
-#endif // MODPLUG_TRACKER
+		opus_int32 complexity = StreamEncoderSettings::Instance().OpusComplexity;
+		if(complexity >= 0)
+		{
+			opus.opus_multistream_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
+		}
 
 		OpusHeader header;
 		MemsetZero(header);

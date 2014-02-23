@@ -13,11 +13,7 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderMP3.h"
 
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Mainfrm.h"
-#include "../mptrack/Mptrack.h"
-#include "../mptrack/Reporting.h"
-#endif //MODPLUG_TRACKER
+#include "Mptrack.h"
 
 #include "../soundlib/Sndfile.h"
 
@@ -487,10 +483,8 @@ public:
 		lame.lame_set_in_samplerate(gfp, samplerate);
 		lame.lame_set_num_channels(gfp, channels);
 
-#ifdef MODPLUG_TRACKER
-		int lameQuality = theApp.GetSettings().Read<int32>("Export", "MP3LameQuality", 3);
+		int lameQuality = StreamEncoderSettings::Instance().MP3LameQuality;
 		lame.lame_set_quality(gfp, lameQuality);
-#endif // MODPLUG_TRACKER
 
 		if(settings.Mode == Encoder::ModeCBR)
 		{
@@ -1232,11 +1226,7 @@ public:
 		wfex.cbSize = 0;
 		LPWAVEFORMATEX pwfexDst = (LPWAVEFORMATEX)&acm.formats_waveformats[format][0];
 
-		bool acmFast = false;
-#ifdef MODPLUG_TRACKER
-		acmFast = theApp.GetSettings().Read<bool>("Export", "MP3ACMFast", acmFast);
-#endif // MODPLUG_TRACKER
-
+		bool acmFast = StreamEncoderSettings::Instance().MP3ACMFast;
 		if(acmStreamOpen(&acmStream, acmDriver, &wfex, pwfexDst, NULL, 0, 0, acmFast ? 0 : ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR)
 		{
 			acmDriverClose(acmDriver, 0);
