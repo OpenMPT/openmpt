@@ -171,9 +171,6 @@ enum deleteInstrumentSamples
 {
 	deleteAssociatedSamples,
 	doNoDeleteAssociatedSamples,
-#ifdef MODPLUG_TRACKER
-	askDeleteAssociatedSamples,
-#endif // MODPLUG_TRACKER
 };
 
 
