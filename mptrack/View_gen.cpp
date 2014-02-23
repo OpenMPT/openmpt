@@ -1169,28 +1169,49 @@ LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM /*lParam*/)
 void CViewGlobals::OnMovePlugToSlot()
 //-----------------------------------
 {
+	if(GetCurrentPlugin() == nullptr)
+	{
+		return;
+	}
+
 	// If any plugin routes its output to the current plugin, we shouldn't try to move it before that plugin...
 	PLUGINDEX defaultIndex = 0;
-	const CSoundFile *pSndFile = GetDocument() ? (GetDocument()->GetSoundFile()) : nullptr;
-	if(pSndFile)
+	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	for(PLUGINDEX i = 0; i < m_nCurrentPlugin; i++)
 	{
-		for(PLUGINDEX i = 0; i < m_nCurrentPlugin; i++)
+		if(sndFile.m_MixPlugins[i].GetOutputPlugin() == m_nCurrentPlugin)
 		{
-			if(pSndFile->m_MixPlugins[i].GetOutputPlugin() == m_nCurrentPlugin)
-			{
-				defaultIndex = i + 1;
-			}
+			defaultIndex = i + 1;
 		}
 	}
 
 	std::vector<PLUGINDEX> emptySlots;
 	BuildEmptySlotList(emptySlots);
 
-	CMoveFXSlotDialog dlg(this, m_nCurrentPlugin, emptySlots, defaultIndex, false);
+	CMoveFXSlotDialog dlg(this, m_nCurrentPlugin, emptySlots, defaultIndex, false, !sndFile.m_MixPlugins[m_nCurrentPlugin].IsOutputToMaster());
 
 	if(dlg.DoModal() == IDOK)
 	{
-		MovePlug(m_nCurrentPlugin, dlg.GetSlot());
+		size_t toIndex = dlg.GetSlotIndex();
+		do
+		{
+			const SNDMIXPLUGIN &curPlugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
+			SNDMIXPLUGIN &newPlugin = sndFile.m_MixPlugins[emptySlots[toIndex]];
+			const PLUGINDEX nextPlugin = curPlugin.GetOutputPlugin();
+
+			MovePlug(m_nCurrentPlugin, emptySlots[toIndex]);
+
+			if(nextPlugin == PLUGINDEX_INVALID || toIndex == emptySlots.size() - 1)
+			{
+				break;
+			}
+
+			m_nCurrentPlugin = nextPlugin;
+			toIndex++;
+
+			newPlugin.SetOutputPlugin(emptySlots[toIndex]);
+		} while(dlg.DoMoveChain());
+
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
 	}
@@ -1372,41 +1393,63 @@ void CViewGlobals::OnInsertSlot()
 }
 
 
+static void ClonePlugin(const SNDMIXPLUGIN &curPlugin, SNDMIXPLUGIN &newPlugin)
+//-----------------------------------------------------------------------------
+{
+	CVstPlugin *curVstPlug = static_cast<CVstPlugin *>(curPlugin.pMixPlugin);
+	newPlugin.Destroy();
+	MemCopy(newPlugin.Info, curPlugin.Info);
+	if(theApp.GetPluginManager()->CreateMixPlugin(newPlugin, curVstPlug->GetSoundFile()))
+	{
+		CVstPlugin *newVstPlug = static_cast<CVstPlugin *>(newPlugin.pMixPlugin);
+		newVstPlug->SetCurrentProgram(curVstPlug->GetCurrentProgram());
+
+		std::ostringstream f(std::ios::out | std::ios::binary);
+		if(VSTPresets::SaveFile(f, *curVstPlug, false))
+		{
+			const std::string data = f.str();
+			FileReader file(data.c_str(), data.length());
+			VSTPresets::LoadFile(file, *newVstPlug);
+		}
+	}
+}
+
+
 void CViewGlobals::OnClonePlug()
 //------------------------------
 {
-	if(GetCurrentPlugin() == nullptr || GetDocument() == nullptr)
+	if(GetCurrentPlugin() == nullptr)
 	{
-		MessageBeep(MB_ICONEXCLAMATION);
 		return;
 	}
+
+	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 
 	std::vector<PLUGINDEX> emptySlots;
 	BuildEmptySlotList(emptySlots);
 
-	CMoveFXSlotDialog dlg(this, m_nCurrentPlugin, emptySlots, 0, true);
+	CMoveFXSlotDialog dlg(this, m_nCurrentPlugin, emptySlots, 0, true, !sndFile.m_MixPlugins[m_nCurrentPlugin].IsOutputToMaster());
 
 	if(dlg.DoModal() == IDOK)
 	{
-		CSoundFile &sndFile = GetDocument()->GetrSoundFile();
-		const SNDMIXPLUGIN &curPlugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
-		SNDMIXPLUGIN &newPlugin = sndFile.m_MixPlugins[dlg.GetSlot()];
-
-		newPlugin.Destroy();
-		MemCopy(newPlugin.Info, curPlugin.Info);
-		if(theApp.GetPluginManager()->CreateMixPlugin(newPlugin, sndFile))
+		size_t toIndex = dlg.GetSlotIndex();
+		do
 		{
-			CVstPlugin *vstPlug = static_cast<CVstPlugin *>(newPlugin.pMixPlugin);
-			vstPlug->SetCurrentProgram(GetCurrentPlugin()->GetCurrentProgram());
+			const SNDMIXPLUGIN &curPlugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
+			SNDMIXPLUGIN &newPlugin = sndFile.m_MixPlugins[emptySlots[toIndex]];
 
-			std::ostringstream f(std::ios::out | std::ios::binary);
-			if(VSTPresets::SaveFile(f, *GetCurrentPlugin(), false))
+			ClonePlugin(curPlugin, newPlugin);
+
+			if(curPlugin.IsOutputToMaster() || toIndex == emptySlots.size() - 1)
 			{
-				const std::string data = f.str();
-				FileReader file(data.c_str(), data.length());
-				VSTPresets::LoadFile(file, *vstPlug);
+				break;
 			}
-		}
+
+			m_nCurrentPlugin = curPlugin.GetOutputPlugin();
+			toIndex++;
+
+			newPlugin.SetOutputPlugin(emptySlots[toIndex]);
+		} while(dlg.DoMoveChain());
 
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();

@@ -16,15 +16,19 @@ protected:
 	const std::vector<PLUGINDEX> &m_EmptySlots;
 	CString m_csPrompt, m_csTitle;
 	CEdit m_EditPrompt;
-	PLUGINDEX m_nDefaultSlot, m_nToSlot;
+	size_t m_nToSlot;
+	PLUGINDEX m_nDefaultSlot;
+	bool moveChain;
 
 	CComboBox m_CbnEmptySlots;
 
 	enum { IDD = IDD_MOVEFXSLOT };
 
 public:
-	CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone);
-	PLUGINDEX GetSlot() const { return m_nToSlot; }
+	CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone, bool hasChain);
+	PLUGINDEX GetSlot() const { return m_EmptySlots[m_nToSlot]; }
+	size_t GetSlotIndex() const { return m_nToSlot; }
+	bool DoMoveChain() const { return moveChain; }
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
