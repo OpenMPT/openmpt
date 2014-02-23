@@ -14,6 +14,9 @@
 #include "../common/thread.h"
 #include "../soundlib/Sndfile.h"
 #include "Autotune.h"
+#ifdef ENABLE_SSE2
+#include <emmintrin.h>
+#endif
 
 
 // The more bins, the more autocorrelations are done and the more precise the result is.
@@ -66,16 +69,16 @@ void Autotune::CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLe
 
 		const T* sample = origSample + pos;
 
-		int16 data = 0;	// Enough for 256 channels... :)
+		int32 data = 0;	// More than enough for 256 channels... :)
 		for(uint8 chn = 0; chn < channels; chn++)
 		{
 			// We only want the MSB.
-			data += static_cast<int16>(sample[chn] >> ((sizeof(T) - 1) * 8));
+			data += static_cast<int32>(sample[chn] >> ((sizeof(T) - 1) * 8));
 		}
 
 		data /= channels;
 
-		sampleData[i] = static_cast<int8>(data);
+		sampleData[i] = static_cast<int16>(data);
 	}
 }
 
@@ -109,12 +112,13 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 
 	// We should analyse at least a one second (= GetSampleRate() samples) long sample.
 	sampleLength = std::max<SmpLength>(sampleLoopEnd, sample.GetSampleRate(modType)) + maxShift;
+	sampleLength = (sampleLength + 7) & ~7;
 
 	if(sampleData != nullptr)
 	{
 		delete[] sampleData;
 	}
-	sampleData = new (std::nothrow) int8[sampleLength];
+	sampleData = new int16[sampleLength];
 	if(sampleData == nullptr)
 	{
 		return false;
@@ -148,18 +152,21 @@ struct AutotuneThreadData
 {
 	std::vector<uint64> histogram;
 	double pitchReference;
-	int8 *sampleData;
+	int16 *sampleData;
 	SmpLength processLength;
 	uint32 sampleFreq;
 	int startNote, endNote;
-
 };
+
 
 DWORD WINAPI Autotune::AutotuneThread(void *i)
 //--------------------------------------------
 {
 	AutotuneThreadData &info = *static_cast<AutotuneThreadData *>(i);
 	info.histogram.resize(HISTORY_BINS, 0);
+#ifdef ENABLE_SSE2
+	const bool useSSE = (ProcSupport & PROCSUPPORT_SSE3) != 0;
+#endif
 
 	// Do autocorrelation and save results in a note histogram (restriced to one octave).
 	for(int note = info.startNote, noteBin = note; note < info.endNote; note++, noteBin++)
@@ -173,13 +180,35 @@ DWORD WINAPI Autotune::AutotuneThread(void *i)
 		const SmpLength autocorrShift = NoteToShift(info.sampleFreq, note, info.pitchReference);
 
 		uint64 autocorrSum = 0;
-		const int8 *normalData = info.sampleData;
-		const int8 *shiftedData = info.sampleData + autocorrShift;
-		// Add up squared differences of all values
-		for(SmpLength i = info.processLength; i != 0; i--, normalData++, shiftedData++)
+
+#ifdef ENABLE_SSE2
+		if(useSSE)
 		{
-			autocorrSum += (*normalData - *shiftedData) * (*normalData - *shiftedData);
+			const __m128i *normalData = reinterpret_cast<const __m128i *>(info.sampleData);
+			const __m128i *shiftedData = reinterpret_cast<const __m128i *>(info.sampleData + autocorrShift);
+			for(SmpLength i = info.processLength / 8; i != 0; i--)
+			{
+				__m128i normal = _mm_load_si128(normalData++);
+				__m128i shifted = _mm_loadu_si128(shiftedData++);
+				__m128i diff = _mm_sub_epi16(normal, shifted);		// 8 16-bit differences
+				__m128i squares = _mm_madd_epi16(diff, diff);		// Multiply and add: 4 32-bit squares
+				squares = _mm_hadd_epi32(squares, squares);			// This is SSE3!
+				squares = _mm_hadd_epi32(squares, squares);
+				autocorrSum += _mm_cvtsi128_si32(squares);
+				//autocorrSum += squares.m128i_i32[0] +squares.m128i_i32[1] + squares.m128i_i32[2] + squares.m128i_i32[3];	// For SSE2 only
+			}
+		} else
+#endif
+		{
+			const int16 *normalData = info.sampleData;
+			const int16 *shiftedData = info.sampleData + autocorrShift;
+			// Add up squared differences of all values
+			for(SmpLength i = info.processLength; i != 0; i--, normalData++, shiftedData++)
+			{
+				autocorrSum += (*normalData - *shiftedData) * (*normalData - *shiftedData);
+			}
 		}
+
 		info.histogram[noteBin] += autocorrSum;
 	}
 	return 0;

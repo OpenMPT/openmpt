@@ -317,12 +317,13 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 {
 	if ((lpszParam) && (bFlag))
 	{
-		if (!lstrcmpi(lpszParam, "nologo")) { m_bShowSplash = FALSE; return; } else
-		if (!lstrcmpi(lpszParam, "nodls")) { m_bNoDls = true; return; } else
-		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; return; } else
-		if (!lstrcmpi(lpszParam, "portable")) { m_bPortable = true; return; } else
-		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = true; return; }
-		if (!lstrcmpi(lpszParam, "fullMemDump")) { ExceptionHandler::fullMemDump = true; return; }
+		if (!lstrcmpi(lpszParam, _T("nologo"))) { m_bShowSplash = FALSE; return; } else
+		if (!lstrcmpi(lpszParam, _T("nodls"))) { m_bNoDls = true; return; } else
+		if (!lstrcmpi(lpszParam, _T("noplugs"))) { m_bNoPlugins = true; return; } else
+		if (!lstrcmpi(lpszParam, _T("portable"))) { m_bPortable = true; return; } else
+		if (!lstrcmpi(lpszParam, _T("noSettingsOnNewVersion"))) { m_bNoSettingsOnNewVersion = true; return; }
+		if (!lstrcmpi(lpszParam, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
+		if (!lstrcmpi(lpszParam, _T("noAssembly"))) { ProcSupport = 0; return; }
 	}
 	CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
 }
