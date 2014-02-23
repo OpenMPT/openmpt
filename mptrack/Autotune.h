@@ -23,7 +23,7 @@ protected:
 
 	SmpLength selectionStart, selectionEnd;
 
-	int8 *sampleData;
+	int16 *sampleData;
 	SmpLength sampleLength;
 
 public:

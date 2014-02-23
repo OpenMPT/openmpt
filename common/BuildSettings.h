@@ -40,7 +40,7 @@
 
 #ifdef _M_IX86
 
-// Generate general x86 inline assembly.
+// Generate general x86 inline assembly / intrinsics.
 #define ENABLE_X86
 
 // Generate inline assembly using MMX instructions (only used when the CPU supports it).
@@ -49,7 +49,7 @@
 // Generate inline assembly using SSE instructions (only used when the CPU supports it).
 #define ENABLE_SSE
 
-// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+// Generate inline assembly using SSE2/SSE3 instructions (only used when the CPU supports it).
 #define ENABLE_SSE2
 
 // Generate inline assembly using AMD specific instruction set extensions (only used when the CPU supports it).
@@ -57,10 +57,10 @@
 
 #elif defined(_M_X64)
 
-// Generate general x64 inline assembly.
+// Generate general x64 inline assembly / intrinsics.
 #define ENABLE_X64
 
-// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+// Generate inline assembly using SSE2/SSE3 instructions (only used when the CPU supports it).
 #define ENABLE_SSE2
 
 #endif
