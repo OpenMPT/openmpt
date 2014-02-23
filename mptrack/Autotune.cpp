@@ -188,7 +188,7 @@ DWORD WINAPI Autotune::AutotuneThread(void *i)
 			const __m128i *shiftedData = reinterpret_cast<const __m128i *>(info.sampleData + autocorrShift);
 			for(SmpLength i = info.processLength / 8; i != 0; i--)
 			{
-				__m128i normal = _mm_load_si128(normalData++);
+				__m128i normal = _mm_loadu_si128(normalData++);
 				__m128i shifted = _mm_loadu_si128(shiftedData++);
 				__m128i diff = _mm_sub_epi16(normal, shifted);		// 8 16-bit differences
 				__m128i squares = _mm_madd_epi16(diff, diff);		// Multiply and add: 4 32-bit squares
