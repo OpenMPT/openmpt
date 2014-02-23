@@ -80,7 +80,11 @@ fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
 #pragma GCC diagnostic ignored "-Wswitch"
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
+#if MPT_CLANG_AT_LEAST(3,3,0)
+#pragma clang diagnostic ignored "-Wswitch"     
+#else
 #pragma clang diagnostic ignored "-Wswitch-enum"
+#endif
 #endif
 
 void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], parameteredMacroType macroType, int subType) const
@@ -134,7 +138,11 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 #pragma GCC diagnostic ignored "-Wswitch"
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
+#if MPT_CLANG_AT_LEAST(3,3,0)
+#pragma clang diagnostic ignored "-Wswitch"     
+#else
 #pragma clang diagnostic ignored "-Wswitch-enum"
+#endif
 #endif
 
 // Create Zxx (Z80 - ZFF) from one out of five presets
