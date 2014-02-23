@@ -11,9 +11,6 @@
 #include "stdafx.h"
 #include "patternContainer.h"
 #include "Sndfile.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/mainfrm.h"
-#endif
 #include "../common/serialization_utils.h"
 #include "../common/version.h"
 

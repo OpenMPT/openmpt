@@ -1091,10 +1091,6 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
-#endif	// MODPLUG_TRACKER
-
 bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 //-------------------------------------------------------------
 {

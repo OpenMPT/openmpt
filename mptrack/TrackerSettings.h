@@ -270,6 +270,8 @@ public:
 	Setting<MODTYPE> defaultModType;
 	Setting<PLUGVOLUMEHANDLING> DefaultPlugVolumeHandling;
 	Setting<bool> autoApplySmoothFT2Ramping;
+	Setting<bool> MiscITCompressionStereo;
+	Setting<bool> MiscITCompressionMono;
 
 	// Sound Settings
 	
@@ -341,6 +343,7 @@ public:
 	Setting<uint32> m_SampleUndoMaxBufferMB;
 	uint32 GetSampleUndoBufferSize() const { return m_SampleUndoMaxBufferMB << 20; }
 	Setting<bool> m_MayNormalizeSamplesOnLoad;
+	Setting<int32> SampleEditorFLACCompressionLevel; // Custom compression level (0...8)
 
 	// Export
 
