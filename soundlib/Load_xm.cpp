@@ -117,8 +117,8 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 
 
 // Read .XM patterns
-void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile &sndFile)
-//----------------------------------------------------------------------------------------
+static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile &sndFile)
+//-----------------------------------------------------------------------------------------------
 {
 	// Reading patterns
 	sndFile.Patterns.ResizeArray(fileHeader.patterns);

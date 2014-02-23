@@ -209,7 +209,7 @@ public:
 	}
 };                                                                                                                
 
-std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) {
+static std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) {
 	s << "Quiet: " << flags.quiet << std::endl;
 	s << "Verbose: " << flags.verbose << std::endl;
 	s << "Mode : " << mode_to_string( flags.mode ) << std::endl;

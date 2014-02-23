@@ -17,6 +17,9 @@
 
 
 #include "stdafx.h"
+
+#include "MixerLoops.h"
+
 #include "Sndfile.h"
 
 

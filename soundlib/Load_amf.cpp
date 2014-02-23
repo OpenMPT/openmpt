@@ -190,8 +190,8 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 
 
 // Read a single AMF track (channel) into a pattern.
-void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &fileChunk)
-//-----------------------------------------------------------------------------
+static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &fileChunk)
+//------------------------------------------------------------------------------------
 {
 	fileChunk.Rewind();
 	ModCommand::INSTR lastInstr = 0;

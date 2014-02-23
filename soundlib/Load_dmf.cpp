@@ -1123,8 +1123,8 @@ struct DMFHTree
 
 
 // DMF Huffman ReadBits
-BYTE DMFReadBits(DMFHTree *tree, uint32 nbits)
-//--------------------------------------------
+static BYTE DMFReadBits(DMFHTree *tree, uint32 nbits)
+//---------------------------------------------------
 {
 	uint8 x = 0, bitv = 1;
 	while(nbits--)
@@ -1148,8 +1148,8 @@ BYTE DMFReadBits(DMFHTree *tree, uint32 nbits)
 // tree: [8-bit value][12-bit index][12-bit index] = 32-bit
 //
 
-void DMFNewNode(DMFHTree *tree)
-//-----------------------------
+static void DMFNewNode(DMFHTree *tree)
+//------------------------------------
 {
 	uint8 isleft, isright;
 	int actnode;

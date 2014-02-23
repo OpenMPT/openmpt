@@ -1052,8 +1052,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 #ifndef MODPLUG_NO_FILESAVE
 
 // Save edit history. Pass a null pointer for *f to retrieve the number of bytes that would be written.
-uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
-//-----------------------------------------------------------
+static uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
+//------------------------------------------------------------------
 {
 	size_t num = pSndFile->GetFileHistory().size();
 #ifdef MODPLUG_TRACKER

@@ -20,18 +20,18 @@ namespace srlztn
 static const uint8 HeaderId_FlagByte = 0;
 
 // Indexing starts from 0.
-inline bool Testbit(uint8 val, uint8 bitindex) {return ((val & (1 << bitindex)) != 0);}
+static inline bool Testbit(uint8 val, uint8 bitindex) {return ((val & (1 << bitindex)) != 0);}
 
-inline void Setbit(uint8& val, uint8 bitindex, bool newval)
-//----------------------------------------------------------
+static inline void Setbit(uint8& val, uint8 bitindex, bool newval)
+//----------------------------------------------------------------
 {
 	if(newval) val |= (1 << bitindex);
 	else val &= ~(1 << bitindex);
 }
 
 
-bool IsPrintableId(const char* pId, const size_t nLength)
-//--------------------------------------------------------
+static bool IsPrintableId(const char* pId, const size_t nLength)
+//--------------------------------------------------------------
 {
 	for(size_t i = 0; i < nLength; i++)
 	{
@@ -42,8 +42,8 @@ bool IsPrintableId(const char* pId, const size_t nLength)
 }
 
 
-uint8 GetByteReq1248(const uint64 size)
-//-------------------------------------
+static uint8 GetByteReq1248(const uint64 size)
+//--------------------------------------------
 {
 	if((size >> 6) == 0) return 1;
 	if((size >> (1*8+6)) == 0) return 2;
@@ -52,8 +52,8 @@ uint8 GetByteReq1248(const uint64 size)
 }
 
 
-uint8 GetByteReq1234(const uint32 num)
-//------------------------------------
+static uint8 GetByteReq1234(const uint32 num)
+//-------------------------------------------
 {
 	if((num >> 6) == 0) return 1;
 	if((num >> (1*8+6)) == 0) return 2;
@@ -63,7 +63,7 @@ uint8 GetByteReq1234(const uint32 num)
 
 
 void WriteAdaptive12(std::ostream& oStrm, const uint16 num)
-//------------------------------------------------------
+//---------------------------------------------------------
 {
 	if(num >> 7 == 0)
 		Binarywrite<uint16>(oStrm, num << 1, 1);
@@ -73,7 +73,7 @@ void WriteAdaptive12(std::ostream& oStrm, const uint16 num)
 
 
 void WriteAdaptive1234(std::ostream& oStrm, const uint32 num)
-//--------------------------------------------------------
+//-----------------------------------------------------------
 {
 	const uint8 bc = GetByteReq1234(num);
 	const uint32 sizeInstruction = (num << 2) | (bc - 1);
@@ -82,8 +82,8 @@ void WriteAdaptive1234(std::ostream& oStrm, const uint32 num)
 
 
 //Format: First bit tells whether the size indicator is 1 or 2 bytes.
-void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
-//------------------------------------------------------------------
+static void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
+//----------------------------------------------------------------------------
 {
 	uint16 s = static_cast<uint16>(str.size());
 	LimitMax(s, uint16(uint16_max / 2));
@@ -93,8 +93,8 @@ void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
 
 
 // Works only for arguments 1,2,4,8
-uint8 Log2(const uint8& val)
-//--------------------------
+static uint8 Log2(const uint8& val)
+//---------------------------------
 {
 	if(val == 1) return 0;
 	else if(val == 2) return 1;
@@ -102,8 +102,9 @@ uint8 Log2(const uint8& val)
 	else return 3;
 }
 
+
 void WriteAdaptive1248(std::ostream& oStrm, const uint64& num)
-//---------------------------------------------------------
+//------------------------------------------------------------
 {
 	const uint8 bc = GetByteReq1248(num);
 	const uint64 sizeInstruction = (num << 2) | Log2(bc);
@@ -112,7 +113,7 @@ void WriteAdaptive1248(std::ostream& oStrm, const uint64& num)
 
 
 void ReadAdaptive12(std::istream& iStrm, uint16& val)
-//-----------------------------------------------
+//---------------------------------------------------
 {
 	Binaryread<uint16>(iStrm, val, 1);
 	if(val & 1)
@@ -127,7 +128,7 @@ void ReadAdaptive12(std::istream& iStrm, uint16& val)
 
 
 void ReadAdaptive1234(std::istream& iStrm, uint32& val)
-//-------------------------------------------------
+//-----------------------------------------------------
 {
 	Binaryread<uint32>(iStrm, val, 1);
 	const uint8 bc = 1 + static_cast<uint8>(val & 3);
@@ -142,13 +143,15 @@ void ReadAdaptive1234(std::istream& iStrm, uint32& val)
 	val >>= 2;
 }
 
-const uint8 pow2xTable[] = {1, 2, 4, 8, 16, 32, 64, 128};
+
+static const uint8 pow2xTable[] = {1, 2, 4, 8, 16, 32, 64, 128};
 
 // Returns 2^n. n must be within {0,...,7}.
-inline uint8 Pow2xSmall(const uint8& exp) {ASSERT(exp <= 7); return pow2xTable[exp];}
+static inline uint8 Pow2xSmall(const uint8& exp) {ASSERT(exp <= 7); return pow2xTable[exp];}
+
 
 void ReadAdaptive1248(std::istream& iStrm, uint64& val)
-//-------------------------------------------------
+//-----------------------------------------------------
 {
 	Binaryread<uint64>(iStrm, val, 1);
 	uint8 bc = Pow2xSmall(static_cast<uint8>(val & 3));
@@ -212,8 +215,8 @@ void ReadItemString(std::istream& iStrm, std::string& str, const DataSize)
 }
 
 
-std::string IdToString(const char* const pvId, const size_t nLength)
-//-------------------------------------------------------------
+static std::string IdToString(const char* const pvId, const size_t nLength)
+//-------------------------------------------------------------------------
 {
 	const char* pId = static_cast<const char*>(pvId);
 	if (nLength == 0)

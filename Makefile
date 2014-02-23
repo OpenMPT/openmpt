@@ -229,8 +229,8 @@ CFLAGS   += -O2 -fno-strict-aliasing -ffast-math
 endif
 endif
 
-CXXFLAGS += -Wall -Wextra -Wcast-align
-CFLAGS   += -Wall -Wextra -Wcast-align
+CXXFLAGS += -Wall -Wextra -Wcast-align $(CXXFLAGS_WARNINGS)
+CFLAGS   += -Wall -Wextra -Wcast-align $(CFLAGS_WARNINGS)
 
 ifeq ($(DYNLINK),1)
 LDFLAGS_RPATH += -Wl,-rpath,./bin

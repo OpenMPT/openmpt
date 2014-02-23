@@ -58,6 +58,16 @@ extern bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint1
 // --------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------
 
+// Sample decompression
+void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
+uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n);
+uintptr_t DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
+bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign);
+
+// Module decompression
+bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file);
+bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file);
+bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file);
 
 ////////////////////////////////////////////////////////////////////////
 // Reverberation
