@@ -64,6 +64,7 @@ protected:
 	int32 SampleToScreen(SmpLength pos) const;
 	SmpLength ScreenToSample(int32 x) const;
 	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0);
+	void NoteOff(ModCommand::NOTE note);
 	void InvalidateSample();
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);

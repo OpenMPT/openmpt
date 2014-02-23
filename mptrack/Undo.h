@@ -144,7 +144,6 @@ protected:
 	void ClearUndo(undobuf_t &buffer, const SAMPLEINDEX smp);
 	void DeleteStep(undobuf_t &buffer, const SAMPLEINDEX smp, const size_t step);
 	bool SampleBufferExists(const undobuf_t &buffer, const SAMPLEINDEX smp) const;
-	void RestrictBufferSize();
 	void RestrictBufferSize(undobuf_t &buffer, size_t &capacity);
 	size_t GetBufferCapacity(const undobuf_t &buffer) const;
 
@@ -164,6 +163,7 @@ public:
 	void RemoveLastUndoStep(const SAMPLEINDEX smp);
 	const char *GetUndoName(const SAMPLEINDEX smp) const;
 	const char *GetRedoName(const SAMPLEINDEX smp) const;
+	void RestrictBufferSize();
 
 	CSampleUndo(CModDoc &parent) : modDoc(parent) { }
 

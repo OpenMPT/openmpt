@@ -19,6 +19,7 @@ enum {
 	OPTIONS_PAGE_MIXER,
 	OPTIONS_PAGE_PLAYER,
 	OPTIONS_PAGE_EQ,
+	OPTIONS_PAGE_SAMPLEDITOR,
 	OPTIONS_PAGE_KEYBOARD,
 	OPTIONS_PAGE_COLORS,
 	OPTIONS_PAGE_MIDI,
@@ -124,5 +125,28 @@ protected:
 	afx_msg void OnLoadColorScheme();
 	afx_msg void OnSaveColorScheme();
 	afx_msg void OnPreviewChanged();
+	DECLARE_MESSAGE_MAP();
+};
+
+
+//===============================================
+class COptionsSampleEditor : public CPropertyPage
+//===============================================
+{
+protected:
+	CComboBox m_cbnDefaultSampleFormat, m_cbnDefaultVolumeHandling;
+
+public:
+	COptionsSampleEditor() : CPropertyPage(IDD_OPTIONS_SAMPLEEDITOR) { }
+
+protected:
+
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnSetActive();
+
+	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnUndoSizeChanged();
 	DECLARE_MESSAGE_MAP();
 };

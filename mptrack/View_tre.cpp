@@ -1557,6 +1557,7 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 //---------------------------------------------
 {
 	FileDialog dlg = OpenFileDialog()
+		.EnableAudioPreview()
 		.ExtensionFilter(
 			"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.flac;*.mp1;*.mp2;*.mp3|"
 			"FastTracker II Instruments (*.xi)|*.xi|"

@@ -130,6 +130,7 @@ CViewSample::CViewSample()
 	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(IDB_SMPTOOLBAR, 20, 0, RGB(192,192,192));
 	m_lastDrawPoint.SetPoint(-1, -1);
+	noteChannel.assign(NOTE_MAX - NOTE_MIN + 1, CHANNELINDEX_INVALID);
 	offScreenDC = nullptr;
 	offScreenBitmap = nullptr;
 }
@@ -2365,7 +2366,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos)
 		if (note >= NOTE_MIN_SPECIAL)
 		{
 			pModDoc->NoteOff(0, (note == NOTE_NOTECUT));
-		} else if(ModCommand::IsNote((ModCommand::NOTE)note))
+		} else
 		{
 			if(m_dwStatus[SMPSTATUS_KEYDOWN])
 				pModDoc->NoteOff(note, true);
@@ -2373,10 +2374,13 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos)
 				pModDoc->NoteOff(0, true);
 
 			SmpLength loopstart = m_dwBeginSel, loopend = m_dwEndSel;
-			if (loopend - loopstart < (SmpLength)(4 << m_nZoom))
-				loopend = loopstart = 0; // selection is too small -> no loop
+			// If selection is too small -> no loop
+			if(m_nZoom >= 0 && loopend - loopstart < (SmpLength)(4 << m_nZoom))
+				loopend = loopstart = 0;
+			else if(m_nZoom < 0 && loopend - loopstart < 4)
+				loopend = loopstart = 0;
 
-			pModDoc->PlayNote(note, 0, m_nSample, false, -1, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
+			noteChannel[note - NOTE_MIN] = pModDoc->PlayNote(note, 0, m_nSample, false, -1, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
 
 			m_dwStatus.set(SMPSTATUS_KEYDOWN);
 
@@ -2391,7 +2395,16 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos)
 			pMainFrm->SetInfoText(s.c_str());
 		}
 	}
+}
 
+
+void CViewSample::NoteOff(ModCommand::NOTE note)
+//----------------------------------------------
+{
+	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	sndFile.KeyOff(noteChannel[note - NOTE_MIN]);
+	sndFile.Chn[noteChannel[note - NOTE_MIN]].dwFlags.set(CHN_NOTEFADE);
+	noteChannel[note - NOTE_MIN] = CHANNELINDEX_INVALID;
 }
 
 
@@ -2906,15 +2919,49 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
 
 	}
-	if (wParam >= kcSampStartNotes && wParam <= kcSampEndNotes)
+	if(wParam >= kcSampStartNotes && wParam <= kcSampEndNotes)
 	{
-		PlayNote(static_cast<ModCommand::NOTE>(wParam - kcSampStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
-		return wParam;
-	}
-	if (wParam >= kcSampStartNoteStops && wParam <= kcSampEndNoteStops)
+		const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcSampStartNotes + NOTE_MIN + pMainFrm->GetBaseOctave() * 12);
+		if(ModCommand::IsNote(note))
+		{
+			switch(TrackerSettings::Instance().sampleEditorKeyBehaviour)
+			{
+			case seNoteOffOnKeyRestrike:
+				if(noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
+				{
+					NoteOff(note);
+					break;
+				}
+				// Fall-through
+			default:
+				PlayNote(note);
+			}
+			return wParam;
+		}
+	} else if(wParam >= kcSampStartNoteStops && wParam <= kcSampEndNoteStops)
 	{
-		m_dwStatus.reset(SMPSTATUS_KEYDOWN);
-		return wParam;
+		const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcSampStartNoteStops + NOTE_MIN + pMainFrm->GetBaseOctave() * 12);
+		if(ModCommand::IsNote(note))
+		{
+			switch(TrackerSettings::Instance().sampleEditorKeyBehaviour)
+			{
+			case seNoteOffOnNewKey:
+				m_dwStatus.reset(SMPSTATUS_KEYDOWN);
+				if(noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
+				{
+					// Release sustain loop on key up
+					pModDoc->GetrSoundFile().KeyOff(noteChannel[note - NOTE_MIN]);
+				}
+				break;
+			case seNoteOffOnKeyUp:
+				if(noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
+				{
+					NoteOff(note);
+				}
+				break;
+			}
+			return wParam;
+		}
 	}
 
 	return NULL;

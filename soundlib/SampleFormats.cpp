@@ -2179,7 +2179,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	FLAC__stream_encoder_set_total_samples_estimate(encoder, sample.nLength);
 	FLAC__stream_encoder_set_metadata(encoder, metadata, writeLoopData ? 3 : 2);
 #ifdef MODPLUG_TRACKER
-	FLAC__stream_encoder_set_compression_level(encoder, TrackerSettings::Instance().SampleEditorFLACCompressionLevel);
+	FLAC__stream_encoder_set_compression_level(encoder, TrackerSettings::Instance().m_FLACCompressionLevel);
 #endif // MODPLUG_TRACKER
 
 	encoder.f = mpt_fopen(filename, "wb");
