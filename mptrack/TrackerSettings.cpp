@@ -200,6 +200,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, SampleEditorFLACCompressionLevel(conf, "Sample Editor", "FLACCompressionLevel", 5)
 	// Export
 	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
+	, ExportStreamEncoderSettings(conf, "Export")
 	// Default template
 	, defaultTemplateFile(conf, "Paths", "DefaultTemplate", mpt::PathString())
 	// MRU List

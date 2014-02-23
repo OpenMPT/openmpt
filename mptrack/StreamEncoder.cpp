@@ -12,8 +12,28 @@
 
 #include "StreamEncoder.h"
 
+#include "Mptrack.h"
+#include "TrackerSettings.h"
+
 #include <ostream>
 
+
+StreamEncoderSettings &StreamEncoderSettings::Instance()
+//------------------------------------------------------
+{
+	return TrackerSettings::Instance().ExportStreamEncoderSettings;
+}
+
+
+StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const std::string &section)
+//-----------------------------------------------------------------------------------------------
+	: FLACCompressionLevel(conf, section, "FLACCompressionLevel", 5)
+	, MP3LameQuality(conf, section, "MP3LameQuality", 3)
+	, MP3ACMFast(conf, section, "MP3ACMFast", false)
+	, OpusComplexity(conf, section, "OpusComplexity", -1)
+{
+	return;
+}
 
 
 StreamWriterBase::StreamWriterBase(std::ostream &stream)

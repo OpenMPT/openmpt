@@ -13,7 +13,6 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderWAV.h"
 
-#include "Mainfrm.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
 
