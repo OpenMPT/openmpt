@@ -14,7 +14,7 @@
 #include "../common/thread.h"
 #include "../soundlib/Sndfile.h"
 #include "Autotune.h"
-#ifdef ENABLE_SSE2
+#ifdef ENABLE_SSE3
 #include <emmintrin.h>
 #endif
 
@@ -164,7 +164,7 @@ DWORD WINAPI Autotune::AutotuneThread(void *i)
 {
 	AutotuneThreadData &info = *static_cast<AutotuneThreadData *>(i);
 	info.histogram.resize(HISTORY_BINS, 0);
-#ifdef ENABLE_SSE2
+#ifdef ENABLE_SSE3
 	const bool useSSE = (ProcSupport & PROCSUPPORT_SSE3) != 0;
 #endif
 
@@ -181,7 +181,7 @@ DWORD WINAPI Autotune::AutotuneThread(void *i)
 
 		uint64 autocorrSum = 0;
 
-#ifdef ENABLE_SSE2
+#ifdef ENABLE_SSE3
 		if(useSSE)
 		{
 			const __m128i *normalData = reinterpret_cast<const __m128i *>(info.sampleData);
