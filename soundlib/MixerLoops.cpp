@@ -161,6 +161,66 @@ mainloop:
 ///////////////////////////////////////////////////////////////////////////////////////
 // SSE Optimizations
 
+#ifdef ENABLE_SSE2
+
+#include <emmintrin.h>
+
+static void SSE2_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
+//----------------------------------------------------------------------------------------------------------------
+{
+	__m128 i2fc = _mm_load_ps1(&_i2fc);
+	const __m128i *in = reinterpret_cast<const __m128i *>(pSrc);
+
+	// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
+	nCount = (nCount + 3) / 4;
+	do
+	{
+		__m128i i1 = _mm_loadu_si128(in);		// Load four integer values, LRLR
+		__m128i i2 = _mm_loadu_si128(in + 1);	// Load four integer values, LRLR
+		in += 2;
+		__m128 f1 = _mm_cvtepi32_ps(i1);		// Convert to four floats, LRLR
+		__m128 f2 = _mm_cvtepi32_ps(i2);		// Convert to four floats, LRLR
+		f1 = _mm_mul_ps(f1, i2fc);				// Apply int->float factor
+		f2 = _mm_mul_ps(f2, i2fc);				// Apply int->float factor
+		__m128 fl = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(0, 2, 0, 2));	// LRLR+LRLR => LLLL
+		__m128 fr = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(1, 3, 1, 3));	// LRLR+LRLR => RRRR
+		_mm_storeu_ps(pOut1, fl);				// Store four float values, LLLL
+		_mm_storeu_ps(pOut2, fr);				// Store four float values, RRRR
+		pOut1 += 4;
+		pOut2 += 4;
+	} while(--nCount);
+}
+
+
+static void SSE2_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
+//--------------------------------------------------------------------------------------------------------------------
+{
+	__m128 f2ic = _mm_load_ps1(&_f2ic);
+	__m128i *out = reinterpret_cast<__m128i *>(pOut);
+
+	// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
+	nCount = (nCount + 3) / 4;
+	do
+	{
+		__m128 fl = _mm_loadu_ps(pIn1);			// Load four float values, LLLL
+		__m128 fr = _mm_loadu_ps(pIn2);			// Load four float values, RRRR
+		pIn1 += 4;
+		pIn2 += 4;
+		fl = _mm_mul_ps(fl, f2ic);				// Apply int->float factor
+		fr = _mm_mul_ps(fr, f2ic);				// Apply int->float factor
+		__m128 f1 = _mm_unpacklo_ps(fl, fr);	// LL__+RR__ => LRLR
+		__m128 f2 = _mm_unpackhi_ps(fl, fr);	// __LL+__RR => LRLR
+		__m128i i1 =_mm_cvtps_epi32(f1);		// Convert to four ints
+		__m128i i2 =_mm_cvtps_epi32(f2);		// Convert to four ints
+		_mm_storeu_si128(out, i1);				// Store four int values, LRLR
+		_mm_storeu_si128(out + 1, i2);			// Store four int values, LRLR
+		out += 2;
+	} while(--nCount);
+}
+
+#endif // ENABLE_SSE2
+
+
 #ifdef ENABLE_SSE
 
 static void SSE_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
@@ -376,6 +436,13 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 //----------------------------------------------------------------------------------------------------
 {
 
+	#ifdef ENABLE_SSE2
+	if(GetProcSupport() & PROCSUPPORT_SSE2)
+	{
+		SSE2_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
+		return;
+	}
+	#endif // ENABLE_SSE2
 	#ifdef ENABLE_SSE
 		if(GetProcSupport() & PROCSUPPORT_SSE)
 		{
@@ -403,7 +470,13 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
 //--------------------------------------------------------------------------------------------------------
 {
-
+	#ifdef ENABLE_SSE2
+	if(GetProcSupport() & PROCSUPPORT_SSE2)
+	{
+		SSE2_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
+		return;
+	}
+	#endif // ENABLE_SSE2
 	#ifdef ENABLE_X86_AMD
 		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
 		{
