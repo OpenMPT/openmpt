@@ -535,6 +535,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 			nNextPatStartRow = 0;
 		}
 
+		// Interpret F00 effect in XM files as "stop song"
+		if(GetType() == MOD_TYPE_XM && memory.musicSpeed == uint16_max)
+		{
+			break;
+		}
+
 		ROWINDEX rowsPerBeat = m_nDefaultRowsPerBeat;
 		if(Patterns[nPattern].GetOverrideSignature())
 		{
@@ -2348,7 +2354,7 @@ BOOL CSoundFile::ProcessEffects()
 			if((!pChn->nPeriod || !pChn->nNote)
 				&& (pChn->pModInstrument == nullptr || !pChn->pModInstrument->HasValidMIDIChannel())	// Plugin arpeggio
 				&& !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER)) break;
-			if ((!param) && (!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))) break;	// Only important when editing MOD/XM files
+			if (!param && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD))) break;	// Only important when editing MOD/XM files (000 effects are removed when loading files where this means "no effect")
 			pChn->nCommand = CMD_ARPEGGIO;
 			if (param) pChn->nArpeggio = param;
 			break;
@@ -2371,8 +2377,7 @@ BOOL CSoundFile::ProcessEffects()
 					RetrigNote(nChn, pChn->nRetrigParam, vol << 3);
 				else
 					RetrigNote(nChn, pChn->nRetrigParam);
-			}
-			else
+			} else
 			{
 				// XM Retrig
 				if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF); else param = pChn->nRetrigParam;
@@ -2800,6 +2805,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 		}
 		if(GetType() != MOD_TYPE_DBM)
 		{
+			// DBM only has fine slides, no extra-fine slides.
 			return;
 		}
 	}
@@ -2852,6 +2858,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 		}
 		if(GetType() != MOD_TYPE_DBM)
 		{
+			// DBM only has fine slides, no extra-fine slides.
 			return;
 		}
 	}
@@ -3318,26 +3325,22 @@ void CSoundFile::PanningSlide(ModChannel *pChn, UINT param, bool memory)
 				param = (param & 0xF0) >> 2;
 				nPanSlide = - (int)param;
 			}
-		} else
-		if (((param & 0xF0) == 0xF0) && (param & 0x0F))
+		} else if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 		{
 			if(m_SongFlags[SONG_FIRSTTICK])
 			{
 				nPanSlide = (param & 0x0F) << 2;
 			}
-		} else
+		} else if(!m_SongFlags[SONG_FIRSTTICK])
 		{
-			if(!m_SongFlags[SONG_FIRSTTICK])
+			if (param & 0x0F)
 			{
-				if (param & 0x0F)
-				{
-					// IT compatibility: Ignore slide commands with both nibbles set.
-					if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (param & 0xF0) == 0)
-						nPanSlide = (int)((param & 0x0F) << 2);
-				} else
-				{
-					nPanSlide = -(int)((param & 0xF0) >> 2);
-				}
+				// IT compatibility: Ignore slide commands with both nibbles set.
+				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (param & 0xF0) == 0)
+					nPanSlide = (int)((param & 0x0F) << 2);
+			} else
+			{
+				nPanSlide = -(int)((param & 0xF0) >> 2);
 			}
 		}
 	} else
@@ -3359,7 +3362,7 @@ void CSoundFile::PanningSlide(ModChannel *pChn, UINT param, bool memory)
 	if (nPanSlide)
 	{
 		nPanSlide += pChn->nPan;
-		nPanSlide = CLAMP(nPanSlide, 0, 256);
+		nPanSlide = Clamp(nPanSlide, 0, 256);
 		pChn->nPan = nPanSlide;
 		pChn->nRestorePanOnNewNote = 0;
 	}
@@ -3434,8 +3437,7 @@ void CSoundFile::ChannelVolSlide(ModChannel *pChn, UINT param)
 	if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 	{
 		if(m_SongFlags[SONG_FIRSTTICK]) nChnSlide = param >> 4;
-	} else
-	if (((param & 0xF0) == 0xF0) && (param & 0x0F))
+	} else if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 	{
 		if(m_SongFlags[SONG_FIRSTTICK]) nChnSlide = - (int)(param & 0x0F);
 	} else
@@ -3678,7 +3680,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 					pChn->nOldHiOffset = param;
 					if (!IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->rowCommand.IsNote())
 					{
-						DWORD pos = param << 16;
+						SmpLength pos = param << 16;
 						if (pos < pChn->nLength) pChn->nPos = pos;
 					}
 				}
@@ -4800,18 +4802,22 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) 
 		}
 		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
-			uint32 octave = period / 768;
+			uint32 octave;
 			if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
 				// Under normal circumstances, this calculation returns the same values as the non-compatible one.
 				// However, once the 12 octaves are exceeded (through portamento slides), the octave shift goes
 				// crazy in FT2, meaning that the frequency wraps around randomly...
+				// The entries in FT2's conversion table are four times as big, hence we have to do an additional shift by two bits.
 				// Test case: FreqWraparound.xm
 				// 12 octaves * (12 * 64) LUT entries = 9216, add 767 for rounding
 				uint32 div = ((9216u + 767u - period) / 768);
-				octave = ((12 - div) & 0x1F) % 29u;
+				octave = ((14 - div) & 0x1F);
+			} else
+			{
+				octave = (period / 768) + 2;
 			}
-			return (XMLinearTable[period % 768] << FREQ_FRACBITS) >> octave;
+			return (XMLinearTable[period % 768] << (FREQ_FRACBITS + 2)) >> octave;
 		} else
 		{
 			if(!period) period = 1;
