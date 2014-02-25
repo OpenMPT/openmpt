@@ -182,8 +182,8 @@ static void SSE2_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2,
 		__m128 f2 = _mm_cvtepi32_ps(i2);		// Convert to four floats, LRLR
 		f1 = _mm_mul_ps(f1, i2fc);				// Apply int->float factor
 		f2 = _mm_mul_ps(f2, i2fc);				// Apply int->float factor
-		__m128 fl = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(0, 2, 0, 2));	// LRLR+LRLR => LLLL
-		__m128 fr = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(1, 3, 1, 3));	// LRLR+LRLR => RRRR
+		__m128 fl = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(2, 0, 2, 0));	// LRLR+LRLR => LLLL
+		__m128 fr = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(3, 1, 3, 1));	// LRLR+LRLR => RRRR
 		_mm_storeu_ps(pOut1, fl);				// Store four float values, LLLL
 		_mm_storeu_ps(pOut2, fr);				// Store four float values, RRRR
 		pOut1 += 4;
