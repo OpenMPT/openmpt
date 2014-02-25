@@ -5,6 +5,10 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### 2014-02-25 - libopenmpt 0.2-beta4
+
+ *  [Bug] Makefile: Dependency tracking for the test suite did not work.
+
 ### 2014-02-21 - libopenmpt 0.2-beta3
 
  *  [Change] The test suite is now built by default with Makefile based builds.
