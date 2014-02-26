@@ -1080,7 +1080,7 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		}
 	} catch (...)
 	{
-		CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception in Dispatch(%1)!", opCode));
+		ReportPlugException(mpt::String::PrintW(L"Exception in Dispatch(%1)!", opCode));
 	}
 
 	return result;
