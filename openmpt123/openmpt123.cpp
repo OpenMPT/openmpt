@@ -86,6 +86,7 @@ static const char * const license =
 #include "openmpt123_flac.hpp"
 #include "openmpt123_mmio.hpp"
 #include "openmpt123_sndfile.hpp"
+#include "openmpt123_raw.hpp"
 #include "openmpt123_stdout.hpp"
 #include "openmpt123_portaudio.hpp"
 #include "openmpt123_sdl.hpp"
@@ -168,6 +169,8 @@ public:
 		}
 		if ( false ) {
 			// nothing
+		} else if ( flags.output_extension == "raw" ) {
+			impl = new raw_stream_raii( filename, flags );
 #ifdef MPT_WITH_MMIO
 		} else if ( flags.output_extension == "wav" ) {
 			impl = new mmio_stream_raii( filename, flags );
