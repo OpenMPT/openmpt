@@ -161,47 +161,61 @@ void CViewSample::OnInitialUpdate()
 }
 
 
-void CViewSample::UpdateScrollSize(const int nZoomOld)
-//----------------------------------------------------
+void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample)
+//------------------------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr || (newZoom == m_nZoom && !forceRefresh))
+	{
+		return;
+	}
+
+	const int oldZoom = m_nZoom;
+	m_nZoom = newZoom;
 
 	GetClientRect(&m_rcClient);
-	if (pModDoc)
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	SIZE sizePage, sizeLine;
+	SmpLength dwLen = 0;
+
+	if ((m_nSample > 0) && (m_nSample <= sndFile.GetNumSamples()))
 	{
-		CPoint pt;
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		SIZE sizePage, sizeLine;
-		SmpLength dwLen = 0;
+		const ModSample &sample = sndFile.GetSample(m_nSample);
+		if (sample.pSample != nullptr) dwLen = sample.nLength;
+	}
+	// Compute scroll size in pixels
+	if (newZoom == 0)		// Fit to display
+		m_sizeTotal.cx = m_rcClient.Width();
+	else if(newZoom == 1)	// 1:1
+		m_sizeTotal.cx = dwLen;
+	else if(newZoom > 1)	// Zoom out
+		m_sizeTotal.cx = (dwLen + (1 << (newZoom - 1)) - 1) >> (newZoom - 1);
+	else					// Zoom in - here, we don't compute the real number of visible pixels so that the scroll bar doesn't grow unnecessarily long. The scrolling code in OnScrollBy() compensates for this.
+		m_sizeTotal.cx = dwLen + m_rcClient.Width() - (m_rcClient.Width() >> (-newZoom - 1));
 
-		if ((m_nSample > 0) && (m_nSample <= pSndFile->GetNumSamples()))
+	m_sizeTotal.cy = 1;
+	sizeLine.cx = (m_rcClient.right / 16) + 1;
+	if(newZoom < 0)
+		sizeLine.cx >>= (-newZoom - 1);
+	sizeLine.cy = 1;
+	sizePage.cx = sizeLine.cx * 4;
+	sizePage.cy = 1;
+
+	SetScrollSizes(MM_TEXT, m_sizeTotal, sizePage, sizeLine);
+
+	if(oldZoom != newZoom) // After zoom change, keep the view position.
+	{
+		if(centeredSample != SmpLength(-1))
 		{
-			const ModSample &sample = pSndFile->GetSample(m_nSample);
-			if (sample.pSample != nullptr) dwLen = sample.nLength;
-		}
-		// Compute scroll size in pixels
-		if (m_nZoom == 0)		// Fit to display
-			m_sizeTotal.cx = m_rcClient.Width();
-		else if(m_nZoom == 1)	// 1:1
-			m_sizeTotal.cx = dwLen;
-		else if(m_nZoom > 1)	// Zoom out
-			m_sizeTotal.cx = (dwLen + (1 << (m_nZoom - 1)) - 1) >> (m_nZoom - 1);
-		else					// Zoom in - here, we don't compute the real number of visible pixels so that the scroll bar doesn't grow unnecessarily long. The scrolling code in OnScrollBy() compensates for this.
-			m_sizeTotal.cx = dwLen + m_rcClient.Width() - (m_rcClient.Width() >> (-m_nZoom - 1));
+			// Center given sample in the view
+			int scrollToSample = centeredSample >> (std::max(1, newZoom) - 1);
+			scrollToSample -= (m_rcClient.Width() / 2) >> (-std::min(-1, newZoom) - 1);
 
-		m_sizeTotal.cy = 1;
-		sizeLine.cx = (m_rcClient.right / 16) + 1;
-		if(m_nZoom < 0)
-			sizeLine.cx >>= (-m_nZoom - 1);
-		sizeLine.cy = 1;
-		sizePage.cx = sizeLine.cx * 4;
-		sizePage.cy = 1;
-
-		SetScrollSizes(MM_TEXT, m_sizeTotal, sizePage, sizeLine);
-
-		if (nZoomOld != m_nZoom) // After zoom change, keep the view position.
+			Limit(scrollToSample, 0, GetScrollLimit(SB_HORZ));
+			SetScrollPos(SB_HORZ, scrollToSample);
+		} else
 		{
-			const SmpLength nOldPos = ScrollPosToSamplePos(nZoomOld);
+			const SmpLength nOldPos = ScrollPosToSamplePos(oldZoom);
 			const float fPosFraction = (dwLen > 0) ? static_cast<float>(nOldPos) / dwLen : 0;
 			SetScrollPos(SB_HORZ, static_cast<int>(fPosFraction * GetScrollLimit(SB_HORZ)));
 		}
@@ -284,8 +298,8 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 }
 
 
-BOOL CViewSample::SetZoom(int nZoom)
-//----------------------------------
+BOOL CViewSample::SetZoom(int nZoom, SmpLength centeredSample)
+//------------------------------------------------------------
 {
 
 	if (nZoom == m_nZoom)
@@ -293,9 +307,7 @@ BOOL CViewSample::SetZoom(int nZoom)
 	if (nZoom > MAX_ZOOM)
 		return FALSE;
 
-	const int nZoomOld = m_nZoom;
-	m_nZoom = nZoom;
-	UpdateScrollSize(nZoomOld);
+	UpdateScrollSize(nZoom, true, centeredSample);
 	InvalidateRect(NULL, FALSE);
 	return TRUE;
 }
@@ -1089,7 +1101,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			// Drawing Sample Data
 			::SelectObject(offScreenDC, CMainFrame::penSample);
 			int smplsize = sample.GetBytesPerSample();
-			if (m_nZoom == 1 || m_nZoom < 0 || ((!m_nZoom) && (sample.nLength <= (SmpLength)rect.right)))
+			if (m_nZoom == 1 || m_nZoom < 0 || ((!m_nZoom) && (sample.nLength <= (SmpLength)rect.Width())))
 			{
 				// Draw sample data in 1:1 ratio or higher (zoom in)
 				SmpLength len = sample.nLength - nSmpScrollPos;
@@ -2581,18 +2593,7 @@ void CViewSample::OnZoomOnSel()
 	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoom);
 	if (zoom)
 	{
-		SetZoom(zoom);
-		UpdateScrollSize();
-
-		// Compute width of new selection and center it in the view
-		int scrollToSample = (m_dwBeginSel + selLength / 2) >> (std::max(1, zoom) - 1);
-		scrollToSample -= (m_rcClient.Width() / 2) >> (-std::min(-1, zoom) - 1);
-
-		int minPos, maxPos;
-		GetScrollRange(SB_HORZ, &minPos, &maxPos);
-		Limit(scrollToSample, minPos, maxPos);
-		SetScrollPos(SB_HORZ, scrollToSample);
-		Invalidate();
+		SetZoom(zoom, m_dwBeginSel + selLength / 2);
 	}
 }
 
@@ -2995,8 +2996,8 @@ int CViewSample::GetZoomLevel(SmpLength length) const
 }
 
 
-void CViewSample::DoZoom(int direction)
-//-------------------------------------
+void CViewSample::DoZoom(int direction, const CPoint &zoomPoint)
+//--------------------------------------------------------------
 {
 	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 	// zoomOrder: Biggest to smallest zoom order.
@@ -3025,10 +3026,23 @@ void CViewSample::DoZoom(int direction)
 			ASSERT(false);
 	}
 	const ptrdiff_t nPos = std::find(zoomOrder, pZoomOrderEnd, m_nZoom) - zoomOrder;
+
+	int newZoom;
 	if (direction > 0 && nPos > 0)	// Zoom in
-		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoomOrder[nPos - 1]);
+		newZoom = zoomOrder[nPos - 1];
 	else if (direction < 0 && nPos + 1 < CountOf(zoomOrder))
-		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoomOrder[nPos + 1]);
+		newZoom = zoomOrder[nPos + 1];
+	else
+		return;
+
+	if(m_rcClient.PtInRect(zoomPoint))
+	{
+		SetZoom(newZoom, ScreenToSample(zoomPoint.x));
+	} else
+	{
+		SetZoom(newZoom);
+	}
+	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, newZoom);
 }
 
 
@@ -3041,7 +3055,8 @@ BOOL CViewSample::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	// the zoom levels in the zoom combobox.
 	if (nFlags == MK_CONTROL && GetDocument())
 	{
-		DoZoom(zDelta);
+		ScreenToClient(&pt);
+		DoZoom(zDelta, pt);
 	}
 
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
