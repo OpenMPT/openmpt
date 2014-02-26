@@ -216,7 +216,7 @@ CPPFLAGS += -Icommon -I. -Iinclude/modplug/include -Iinclude
 CXXFLAGS += -fvisibility=hidden
 CFLAGS   += -fvisibility=hidden
 LDFLAGS  += 
-LDLIBS   += -lm
+LDLIBS   += 
 ARFLAGS  += 
 
 ifeq ($(DEBUG),1)
@@ -537,11 +537,11 @@ check: test
 
 .PHONY: test
 test: bin/libopenmpt_test$(EXESUFFIX)
-	bin/libopenmpt_test$(EXESUFFIX)
+	$(RUNPREFIX) bin/libopenmpt_test$(EXESUFFIX)
 
 bin/libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) 
 	$(INFO) [LD-TEST] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LIBOPENMPTTEST_OBJECTS) $(LOADLIBES) $(LDLIBS) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(TEST_LDFLAGS) $(LIBOPENMPTTEST_OBJECTS) $(LOADLIBES) $(LDLIBS) -o $@
 
 bin/libopenmpt.pc:
 	$(INFO) [GEN] $@

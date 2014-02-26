@@ -38,6 +38,7 @@
 
 #elif defined(__GNUC__) || defined(__clang__)
 
+#if !defined(MPT_EMSCRIPTEN)
 #if defined(_WIN32)
 #define LIBOPENMPT_API_HELPER_EXPORT __declspec(dllexport)
 #define LIBOPENMPT_API_HELPER_IMPORT __declspec(dllimport)
@@ -47,6 +48,10 @@
 #endif
 #define LIBOPENMPT_API_HELPER_PUBLIC __attribute__((visibility("default")))
 #define LIBOPENMPT_API_HELPER_LOCAL  __attribute__((visibility("hidden")))
+#else
+#define LIBOPENMPT_API_HELPER_PUBLIC __attribute__((visibility("default"))) __attribute__((used))
+#define LIBOPENMPT_API_HELPER_LOCAL  __attribute__((visibility("hidden")))
+#endif
 
 #else
 
@@ -66,7 +71,9 @@
 #endif
 
 #ifdef __cplusplus
+
 #define LIBOPENMPT_CXX_API LIBOPENMPT_API
+
 #if defined(LIBOPENMPT_USE_DLL)
 #if defined(_MSC_VER) && !defined(_DLL)
 #error "C++ interface is disabled if libopenmpt is built as a DLL and the runtime is statically linked. This is not supported by microsoft and cannot possibly work. Ever."
@@ -74,6 +81,13 @@
 #define LIBOPENMPT_CXX_API LIBOPENMPT_API_HELPER_LOCAL
 #endif
 #endif
+
+#if defined(MPT_EMSCRIPTEN)
+/* Only the C API is supported for emscripten. Disable the C++ API. */
+#undef LIBOPENMPT_CXX_API
+#define LIBOPENMPT_CXX_API LIBOPENMPT_API_HELPER_LOCAL 
+#endif
+
 #endif
 
 /*!
