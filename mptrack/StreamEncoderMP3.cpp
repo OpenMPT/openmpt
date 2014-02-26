@@ -28,6 +28,10 @@
 
 #include <cstdlib>
 
+// For ACM debugging purposes
+#define ACMLOG(x, ...)
+//#define ACMLOG Log
+
 #ifdef MPT_MP3ENCODER_LAME
 //#define MPT_USE_LAME_H
 #ifdef MPT_USE_LAME_H
@@ -917,27 +921,27 @@ struct AcmDynBind
 	}
 	BOOL AcmFormatEnumCB(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD fdwSupport)
 	{
-		Log("ACM format found:");
-		Log(mpt::String::Print(" fdwSupport = 0x%1", mpt::fmt::hex0<8>(fdwSupport)));
+		ACMLOG("ACM format found:");
+		ACMLOG(mpt::String::Print(" fdwSupport = 0x%1", mpt::fmt::hex0<8>(fdwSupport)));
 
 		if(pafd)
 		{
-			Log(" ACMFORMATDETAILS:");
-			Log(mpt::String::Print("  cbStruct = %1", pafd->cbStruct));
-			Log(mpt::String::Print("  dwFormatIndex = %1", pafd->dwFormatIndex));
-			Log(mpt::String::Print("  dwFormatTag = %1", pafd->dwFormatTag));
-			Log(mpt::String::Print("  fdwSupport = 0x%1", mpt::fmt::hex0<8>(pafd->fdwSupport)));
+			ACMLOG(" ACMFORMATDETAILS:");
+			ACMLOG(mpt::String::Print("  cbStruct = %1", pafd->cbStruct));
+			ACMLOG(mpt::String::Print("  dwFormatIndex = %1", pafd->dwFormatIndex));
+			ACMLOG(mpt::String::Print("  dwFormatTag = %1", pafd->dwFormatTag));
+			ACMLOG(mpt::String::Print("  fdwSupport = 0x%1", mpt::fmt::hex0<8>(pafd->fdwSupport)));
 			std::string str;
 			mpt::String::Read<mpt::String::maybeNullTerminated>(str, pafd->szFormat);
-			Log(mpt::String::Print("  Format = %1", str));
+			ACMLOG(mpt::String::Print("  Format = %1", str));
 		} else
 		{
-			Log(" ACMFORMATDETAILS = NULL");
+			ACMLOG(" ACMFORMATDETAILS = NULL");
 		}
 
 		if(pafd && pafd->pwfx && (fdwSupport & ACMDRIVERDETAILS_SUPPORTF_CODEC) && (pafd->dwFormatTag == WAVE_FORMAT_MPEGLAYER3))
 		{
-			Log(" MP3 format found!");
+			ACMLOG(" MP3 format found!");
 
 			ACMDRIVERDETAILS add;
 			MemsetZero(add);
@@ -946,35 +950,35 @@ struct AcmDynBind
 			{
 				if(acmDriverDetails(driver, &add, 0) != MMSYSERR_NOERROR)
 				{
-					Log(" acmDriverDetails = ERROR");
+					ACMLOG(" acmDriverDetails = ERROR");
 					// No driver details? Skip it.
 					return TRUE;
 				}
-				Log(" ACMDRIVERDETAILS:");
-				Log(mpt::String::Print("  cbStruct = %1", add.cbStruct));
-				Log(mpt::String::Print("  fccType = 0x%1", mpt::fmt::hex0<4>(add.fccType)));
-				Log(mpt::String::Print("  fccComp = 0x%1", mpt::fmt::hex0<4>(add.fccComp)));
-				Log(mpt::String::Print("  wMid = %1", add.wMid));
-				Log(mpt::String::Print("  wPid = %1", add.wPid));
-				Log(mpt::String::Print("  vdwACM = 0x%1", mpt::fmt::hex0<8>(add.vdwACM)));
-				Log(mpt::String::Print("  vdwDriver = 0x%1", mpt::fmt::hex0<8>(add.vdwDriver)));
-				Log(mpt::String::Print("  fdwSupport = %1", mpt::fmt::hex0<8>(add.fdwSupport)));
-				Log(mpt::String::Print("  cFormatTags = %1", add.cFormatTags));
-				Log(mpt::String::Print("  cFilterTags = %1", add.cFilterTags));
+				ACMLOG(" ACMDRIVERDETAILS:");
+				ACMLOG(mpt::String::Print("  cbStruct = %1", add.cbStruct));
+				ACMLOG(mpt::String::Print("  fccType = 0x%1", mpt::fmt::hex0<4>(add.fccType)));
+				ACMLOG(mpt::String::Print("  fccComp = 0x%1", mpt::fmt::hex0<4>(add.fccComp)));
+				ACMLOG(mpt::String::Print("  wMid = %1", add.wMid));
+				ACMLOG(mpt::String::Print("  wPid = %1", add.wPid));
+				ACMLOG(mpt::String::Print("  vdwACM = 0x%1", mpt::fmt::hex0<8>(add.vdwACM)));
+				ACMLOG(mpt::String::Print("  vdwDriver = 0x%1", mpt::fmt::hex0<8>(add.vdwDriver)));
+				ACMLOG(mpt::String::Print("  fdwSupport = %1", mpt::fmt::hex0<8>(add.fdwSupport)));
+				ACMLOG(mpt::String::Print("  cFormatTags = %1", add.cFormatTags));
+				ACMLOG(mpt::String::Print("  cFilterTags = %1", add.cFilterTags));
 				std::string str;
 				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szShortName);
-				Log(mpt::String::Print("  ShortName = %1", str));
+				ACMLOG(mpt::String::Print("  ShortName = %1", str));
 				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szLongName);
-				Log(mpt::String::Print("  LongName = %1", str));
+				ACMLOG(mpt::String::Print("  LongName = %1", str));
 				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szCopyright);
-				Log(mpt::String::Print("  Copyright = %1", str));
+				ACMLOG(mpt::String::Print("  Copyright = %1", str));
 				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szLicensing);
-				Log(mpt::String::Print("  Licensing = %1", str));
+				ACMLOG(mpt::String::Print("  Licensing = %1", str));
 				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szFeatures);
-				Log(mpt::String::Print("  Features = %1", str));
+				ACMLOG(mpt::String::Print("  Features = %1", str));
 			} catch(...)
 			{
-				Log(" acmDriverDetails = EXCEPTION");
+				ACMLOG(" acmDriverDetails = EXCEPTION");
 				// Driver crashed? Skip it.
 				return TRUE;
 			}
