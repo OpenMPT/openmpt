@@ -99,11 +99,11 @@ void CAbstractVstEditor::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimize
 }
 
 
-LRESULT CAbstractVstEditor::OnMidiMsg(WPARAM midiData, LPARAM)
-//------------------------------------------------------------
+LRESULT CAbstractVstEditor::OnMidiMsg(WPARAM midiData, LPARAM sender)
+//-------------------------------------------------------------------
 {
 	CModDoc *modDoc = m_VstPlugin.GetModDoc();
-	if(modDoc != nullptr)
+	if(modDoc != nullptr && sender != reinterpret_cast<LPARAM>(&m_VstPlugin))
 	{
 		if(!CheckInstrument(m_nInstrument))
 			m_nInstrument = GetBestInstrumentCandidate();

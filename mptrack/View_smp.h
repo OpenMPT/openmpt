@@ -57,10 +57,10 @@ public:
 	DECLARE_SERIAL(CViewSample)
 
 protected:
-	void UpdateScrollSize() {UpdateScrollSize(m_nZoom);}
-	void UpdateScrollSize(const int nZoomOld);
+	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
+	void UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample = SmpLength(-1));
 	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
-	BOOL SetZoom(int nZoom);
+	BOOL SetZoom(int nZoom, SmpLength centeredSample = SmpLength(-1));
 	int32 SampleToScreen(SmpLength pos) const;
 	SmpLength ScreenToSample(int32 x) const;
 	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0);
@@ -88,7 +88,7 @@ protected:
 	T GetSampleValueFromPoint(const ModSample &smp, const CPoint &point) const;
 
 	int GetZoomLevel(SmpLength length) const;
-	void DoZoom(int direction);
+	void DoZoom(int direction, const CPoint &zoomPoint = CPoint(-1, -1));
 	bool CanZoomSelection() const;
 
 	SmpLength ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
