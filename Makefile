@@ -127,6 +127,7 @@ DEBUG=0
 OPTIMIZE=1
 TEST=1
 ONLY_TEST=0
+SOSUFFIX=.so
 
 
 # get commandline or defaults
@@ -154,7 +155,7 @@ endif
 LIBOPENMPT_VERSION_MAJOR=0
 LIBOPENMPT_VERSION_MINOR=2
 
-LIBOPENMPT_SONAME=libopenmpt.so.0
+LIBOPENMPT_SONAME=libopenmpt$(SOSUFFIX).0
 
 
 # host setup
@@ -408,7 +409,7 @@ ALL_OBJECTS += $(LIBOPENMPT_OBJECTS)
 ALL_DEPENDS += $(LIBOPENMPT_DEPENDS)
 
 ifeq ($(DYNLINK),1)
-OUTPUT_LIBOPENMPT += bin/libopenmpt.so
+OUTPUT_LIBOPENMPT += bin/libopenmpt$(SOSUFFIX)
 else
 OBJECTS_LIBOPENMPT += $(LIBOPENMPT_OBJECTS)
 endif
@@ -462,11 +463,11 @@ all:
 -include $(ALL_DEPENDS)
 
 ifeq ($(DYNLINK),1)
-OUTPUTS += bin/libopenmpt.so
-OUTPUTS += bin/libopenmpt_modplug.so
+OUTPUTS += bin/libopenmpt$(SOSUFFIX)
+OUTPUTS += bin/libopenmpt_modplug$(SOSUFFIX)
 endif
 ifeq ($(SHARED_LIB),1)
-OUTPUTS += bin/libopenmpt.so
+OUTPUTS += bin/libopenmpt$(SOSUFFIX)
 endif
 ifeq ($(STATIC_LIB),1)
 OUTPUTS += bin/openmpt.a
@@ -497,7 +498,7 @@ ifeq ($(SHARED_SONAME),1)
 LIBOPENMPT_LDFLAGS += -Wl,-soname,$(LIBOPENMPT_SONAME)
 endif
 
-MISC_OUTPUTS += libopenmpt.so
+MISC_OUTPUTS += libopenmpt$(SOSUFFIX)
 MISC_OUTPUTS += bin/.docs
 MISC_OUTPUTS += bin/dist.tar
 MISC_OUTPUTS += bin/dist.mk
@@ -571,11 +572,11 @@ install: $(OUTPUTS)
 ifeq ($(SHARED_LIB),1)
 ifeq ($(SHARED_SONAME),1)
 	$(INSTALL_DATA) bin/$(LIBOPENMPT_SONAME) $(DESTDIR)$(PREFIX)/lib/$(LIBOPENMPT_SONAME)
-	ln -sf $(LIBOPENMPT_SONAME) $(DESTDIR)$(PREFIX)/lib/libopenmpt.so
+	ln -sf $(LIBOPENMPT_SONAME) $(DESTDIR)$(PREFIX)/lib/libopenmpt$(SOSUFFIX)
 else
-	$(INSTALL_DATA) bin/libopenmpt.so $(DESTDIR)$(PREFIX)/lib/libopenmpt.so
+	$(INSTALL_DATA) bin/libopenmpt$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt$(SOSUFFIX)
 endif
-	$(INSTALL_DATA) bin/libopenmpt_modplug.so $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug.so
+	$(INSTALL_DATA) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX)
 endif
 ifeq ($(STATIC_LIB),1)
 	$(INSTALL_DATA) bin/openmpt.a $(DESTDIR)$(PREFIX)/lib/openmpt.a
@@ -605,9 +606,9 @@ endif
 .PHONY: install-modplug
 install-modplug: $(OUTPUTS)
 ifeq ($(SHARED_LIB),1)
-	$(INSTALL_DATA) bin/libopenmpt_modplug.so $(DESTDIR)$(PREFIX)/lib/libmodplug.so
-	$(INSTALL_DATA) bin/libopenmpt_modplug.so $(DESTDIR)$(PREFIX)/lib/libmodplug.so.0
-	$(INSTALL_DATA) bin/libopenmpt_modplug.so $(DESTDIR)$(PREFIX)/lib/libmodplug.so.0.0.0
+	$(INSTALL_DATA) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX)
+	$(INSTALL_DATA) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).0
+	$(INSTALL_DATA) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).0.0.0
 endif
 
 .PHONY: dist
@@ -717,15 +718,15 @@ bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR] $@
 	$(SILENT)$(AR) $(ARFLAGS) $@ $^
 
-bin/libopenmpt.so: $(LIBOPENMPT_OBJECTS)
+bin/libopenmpt$(SOSUFFIX): $(LIBOPENMPT_OBJECTS)
 	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) -shared $(LIBOPENMPT_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 ifeq ($(SHARED_SONAME),1)
-	$(SILENT)mv bin/libopenmpt.so bin/$(LIBOPENMPT_SONAME)
-	$(SILENT)ln -sf $(LIBOPENMPT_SONAME) bin/libopenmpt.so
+	$(SILENT)mv bin/libopenmpt$(SOSUFFIX) bin/$(LIBOPENMPT_SONAME)
+	$(SILENT)ln -sf $(LIBOPENMPT_SONAME) bin/libopenmpt$(SOSUFFIX)
 endif
 
-bin/libopenmpt_modplug.so: $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
+bin/libopenmpt_modplug$(SOSUFFIX): $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) -shared $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPT_MODPLUG_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 
