@@ -773,6 +773,12 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		std::copy(out.begin(), out.end(), std::back_inserter(result));
 		return result;
 	}
+	#if defined(MPT_CHARSET_ASSUME_UTF8_LOCALE)
+		if(charset == CharsetLocale)
+		{
+			charset = CharsetUTF8;
+		}
+	#endif
 	#if defined(MPT_CHARSET_CPP) || defined(MPT_CHARSET_CUSTOMUTF8)
 		std::string out;
 		switch(charset)
@@ -855,6 +861,12 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		if(charset == CharsetCP437AMS2) out = String::From8bit(in, CharsetTableCP437AMS2);
 		return out;
 	}
+	#if defined(MPT_CHARSET_ASSUME_UTF8_LOCALE)
+		if(charset == CharsetLocale)
+		{
+			charset = CharsetUTF8;
+		}
+	#endif
 	#if defined(MPT_CHARSET_CPP) || defined(MPT_CHARSET_CUSTOMUTF8)
 		std::string in;
 		std::copy(src.begin(), src.end(), std::back_inserter(in));
