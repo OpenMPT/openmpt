@@ -26,6 +26,8 @@
 
 #ifndef NO_PORTAUDIO
 
+#define PALOG(x, ...)
+//#define PALOG Log
 
 #include "../include/portaudio/src/common/pa_debugprint.h"
 
@@ -402,9 +404,9 @@ bool CPortaudioDevice::EnumerateDevices(SoundDeviceInfo &result, SoundDeviceInde
 	result.name = mpt::ToWide(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->name);
 	result.apiName = HostApiToString(Pa_GetDeviceInfo(dev)->hostApi);
 	result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev);
-	Log(mpt::String::Print("PortAudio: %1, %2, %3, %4", result.id.GetIdRaw(), mpt::ToLocale(result.name), mpt::ToLocale(result.apiName), result.isDefault));
-	Log(mpt::String::Print(" low  : %1", Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
-	Log(mpt::String::Print(" high : %1", Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
+	PALOG(mpt::String::Print("PortAudio: %1, %2, %3, %4", result.id.GetIdRaw(), mpt::ToLocale(result.name), mpt::ToLocale(result.apiName), result.isDefault));
+	PALOG(mpt::String::Print(" low  : %1", Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
+	PALOG(mpt::String::Print(" high : %1", Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
 	return true;
 }
 
@@ -433,10 +435,12 @@ std::vector<SoundDeviceInfo> CPortaudioDevice::EnumerateDevices(SoundDeviceType 
 static bool g_PortaudioInitialized = false;
 
 
-static void PortaudioLog(const char *text) {
+static void PortaudioLog(const char *text)
+//----------------------------------------
+{
 	if(text)
 	{
-		Log("PortAudio: %s", text);
+		PALOG("PortAudio: %s", text);
 	}
 }
 
