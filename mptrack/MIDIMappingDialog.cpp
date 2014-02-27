@@ -185,13 +185,14 @@ void CMIDIMappingDialog::UpdateEvent()
 
 
 void CMIDIMappingDialog::UpdateParameters()
-//------------------------------------------
+//-----------------------------------------
 {
 	m_PlugParamCBox.SetRedraw(FALSE);
 	m_PlugParamCBox.ResetContent();
-	AddPluginParameternamesToCombobox(m_PlugParamCBox, m_rSndFile.m_MixPlugins[m_Setting.GetPlugIndex()]);
+	AddPluginParameternamesToCombobox(m_PlugParamCBox, m_rSndFile.m_MixPlugins[m_Setting.GetPlugIndex() - 1]);
 	m_PlugParamCBox.SetCurSel(m_Setting.GetParamIndex());
 	m_PlugParamCBox.SetRedraw(TRUE);
+	m_PlugParamCBox.Invalidate();
 }
 
 
