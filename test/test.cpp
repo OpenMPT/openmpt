@@ -262,54 +262,62 @@ static noinline void TestFailStop(const char * const file, const int line, const
 #endif // MODPLUG_TRACKER
 
 
+template <typename Tx, typename Ty>
+noinline void VerifyEqualImpl(const Tx &x, const Ty &y, const char *const description)
+{
+	TEST_TRY
+	TEST_START();
+	if(x != y)
+	{
+		TEST_FAIL();
+	} else
+	{
+		TEST_OK();
+	}
+	TEST_CATCH
+}
+
+
+template <typename Tx, typename Ty>
+noinline void VerifyEqualNonContImpl(const Tx &x, const Ty &y, const char *const description)
+{
+	TEST_TRY
+	TEST_START();
+	if(x != y)
+	{
+		TEST_FAIL_STOP();
+	} else
+	{
+		TEST_OK();
+	}
+	TEST_CATCH
+}
+
+
+template <typename Tx, typename Ty>
+noinline void VerifyEqualQuietNonContImpl(const Tx &x, const Ty &y, const char *const description)
+{
+	TEST_TRY
+	if(x != y)
+	{
+		TEST_FAIL_STOP();
+	}
+	TEST_CATCH
+}
+
 
 //Verify that given parameters are 'equal'(show error message if not).
 //The exact meaning of equality is not specified; for now using operator!=.
 //The macro is active in both 'debug' and 'release' build.
-#define VERIFY_EQUAL(x,y)	\
-do{ \
-	const char * const description = #x " == " #y ; \
-	TEST_TRY \
-	TEST_START(); \
-	if((x) != (y))		\
-	{					\
-		TEST_FAIL(); \
-	} else \
-	{ \
-		TEST_OK(); \
-	} \
-	TEST_CATCH \
-}while(0)
+#define VERIFY_EQUAL(x,y)	VerifyEqualImpl( (x) , (y) , #x " == " #y )
 
 
 // Like VERIFY_EQUAL, but throws exception if comparison fails.
-#define VERIFY_EQUAL_NONCONT(x,y) \
-do{ \
-	const char * const description = #x " == " #y ; \
-	TEST_TRY \
-	TEST_START(); \
-	if((x) != (y))		\
-	{					\
-		TEST_FAIL_STOP(); \
-	} else \
-	{ \
-		TEST_OK(); \
-	} \
-	TEST_CATCH \
-}while(0)
+#define VERIFY_EQUAL_NONCONT(x,y)	VerifyEqualNonContImpl( (x) , (y) , #x " == " #y )
 
 
 // Like VERIFY_EQUAL_NONCONT, but do not show message if test succeeds
-#define VERIFY_EQUAL_QUIET_NONCONT(x,y) \
-do{ \
-	const char * const description = #x " == " #y ; \
-	TEST_TRY \
-	if((x) != (y))		\
-	{					\
-		TEST_FAIL_STOP(); \
-	} \
-	TEST_CATCH \
-}while(0)
+#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	VerifyEqualQuietNonContImpl( (x) , (y) , #x " == " #y )
 
 
 #define DO_TEST(func) \
@@ -325,16 +333,16 @@ do{ \
 
 
 
-void TestVersion();
-void TestTypes();
-void TestMisc();
-void TestSettings();
-void TestStringIO();
-void TestMIDIEvents();
-void TestSampleConversion();
-void TestITCompression();
-void TestPCnoteSerialization();
-void TestLoadSaveFile();
+static noinline void TestVersion();
+static noinline void TestTypes();
+static noinline void TestMisc();
+static noinline void TestSettings();
+static noinline void TestStringIO();
+static noinline void TestMIDIEvents();
+static noinline void TestSampleConversion();
+static noinline void TestITCompression();
+static noinline void TestPCnoteSerialization();
+static noinline void TestLoadSaveFile();
 
 
 
@@ -359,18 +367,18 @@ void DoTests()
 
 
 // Test if functions related to program version data work
-void TestVersion()
-//----------------
+static noinline void TestVersion()
+//--------------------------------
 {
 	//Verify that macros and functions work.
 	{
 		VERIFY_EQUAL( MptVersion::ToNum(MptVersion::ToStr(MptVersion::num)), MptVersion::num );
 		VERIFY_EQUAL( MptVersion::ToStr(MptVersion::ToNum(MptVersion::str)), MptVersion::str );
 		VERIFY_EQUAL( MptVersion::ToStr(18285096), "1.17.02.28" );
-		VERIFY_EQUAL( MptVersion::ToNum("1.17.02.28"), 18285096 );
-		VERIFY_EQUAL( MptVersion::ToNum("1.fe.02.28"), 0x01fe0228 );
-		VERIFY_EQUAL( MptVersion::ToNum("01.fe.02.28"), 0x01fe0228 );
-		VERIFY_EQUAL( MptVersion::ToNum("1.22"), 0x01220000 );
+		VERIFY_EQUAL( MptVersion::ToNum("1.17.02.28"), MptVersion::VersionNum(18285096) );
+		VERIFY_EQUAL( MptVersion::ToNum("1.fe.02.28"), MptVersion::VersionNum(0x01fe0228) );
+		VERIFY_EQUAL( MptVersion::ToNum("01.fe.02.28"), MptVersion::VersionNum(0x01fe0228) );
+		VERIFY_EQUAL( MptVersion::ToNum("1.22"), MptVersion::VersionNum(0x01220000) );
 		VERIFY_EQUAL( MptVersion::ToNum(MptVersion::str), MptVersion::num );
 		VERIFY_EQUAL( MptVersion::ToStr(MptVersion::num), MptVersion::str );
 		VERIFY_EQUAL( MptVersion::RemoveBuildNumber(MAKE_VERSION_NUMERIC(1,19,02,00)), MAKE_VERSION_NUMERIC(1,19,02,00));
@@ -439,8 +447,8 @@ void TestVersion()
 
 
 // Test if data types are interpreted correctly
-void TestTypes()
-//--------------
+static noinline void TestTypes()
+//------------------------------
 {
 	VERIFY_EQUAL(int8_min, (std::numeric_limits<int8>::min)());
 	VERIFY_EQUAL(int8_max, (std::numeric_limits<int8>::max)());
@@ -536,8 +544,8 @@ static bool BeginsWith(const std::wstring &str, const std::wstring &match)
 }
 
 
-void TestMisc()
-//-------------
+static noinline void TestMisc()
+//-----------------------------
 {
 
 	VERIFY_EQUAL(0x3f800000u, AsInt(1.0f));
@@ -580,7 +588,7 @@ void TestMisc()
 	VERIFY_EQUAL(Stringify(58.65403492763), "58.654");
 	VERIFY_EQUAL(mpt::Format("%3.1f").ToString(23.42), "23.4");
 
-	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586);
+	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586u);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);
 
@@ -588,7 +596,7 @@ void TestMisc()
 	VERIFY_EQUAL(ConvertStrTo<int64>("-159"), -159);
 	VERIFY_EQUAL(ConvertStrTo<int64>("9223372036854775807"), int64_max);
 
-	VERIFY_EQUAL(ConvertStrTo<uint64>("85059"), 85059);
+	VERIFY_EQUAL(ConvertStrTo<uint64>("85059"), 85059u);
 	VERIFY_EQUAL(ConvertStrTo<uint64>("9223372036854775807"), (uint64)int64_max);
 	VERIFY_EQUAL(ConvertStrTo<uint64>("18446744073709551615"), uint64_max);
 
@@ -696,7 +704,7 @@ void TestMisc()
 	VERIFY_EQUAL( mpt::String::Trim(" "), "" );
 
 	// weird things with std::string containing \0 in the middle and trimming \0
-	VERIFY_EQUAL( std::string("\0\ta\0b ",6).length(), 6 );
+	VERIFY_EQUAL( std::string("\0\ta\0b ",6).length(), (std::size_t)6 );
 	VERIFY_EQUAL( mpt::String::RTrim(std::string("\0\ta\0b ",6)), std::string("\0\ta\0b",5) );
 	VERIFY_EQUAL( mpt::String::Trim(std::string("\0\ta\0b\0",6),std::string("\0",1)), std::string("\ta\0b",4) );
 
@@ -711,8 +719,8 @@ void TestMisc()
 	// Check for completeness of supported effect list in mod specifications
 	for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
 	{
-		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->commands), MAX_EFFECTS);
-		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->volcommands), MAX_VOLCMDS);
+		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->commands), (size_t)MAX_EFFECTS);
+		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->volcommands), (size_t)MAX_VOLCMDS);
 	}
 	
 	// Charset conversions (basic sanity checks)
@@ -842,8 +850,8 @@ namespace MptTest {
 
 #endif // MODPLUG_TRACKER
 
-void TestSettings()
-//-----------------
+static noinline void TestSettings()
+//---------------------------------
 {
 
 #ifdef MODPLUG_TRACKER
@@ -922,8 +930,8 @@ void TestSettings()
 
 
 // Test MIDI Event generating / reading
-void TestMIDIEvents()
-//-------------------
+static noinline void TestMIDIEvents()
+//-----------------------------------
 {
 	uint32 midiEvent;
 	
@@ -1058,7 +1066,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(pIns->nPPC, NOTE_MIDDLEC - 1);
 
 	VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
-	VERIFY_EQUAL_NONCONT(pIns->nResampling, SRCMODE_POLYPHASE);
+	VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_POLYPHASE);
 
 	VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), false);
 	VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0);
@@ -1292,7 +1300,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->nPPC, (NOTE_MIDDLEC - NOTE_MIN) + 6);	// F#5
 
 		VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
-		VERIFY_EQUAL_NONCONT(pIns->nResampling, SRCMODE_POLYPHASE);
+		VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_POLYPHASE);
 
 		VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), true);
 		VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0x32);
@@ -1386,6 +1394,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->instr, 99);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->GetValueVolCol(), 1);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->GetValueEffectCol(), 200);
+
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
@@ -1684,8 +1693,8 @@ static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &f
 
 
 // Test file loading and saving
-void TestLoadSaveFile()
-//---------------------
+static noinline void TestLoadSaveFile()
+//-------------------------------------
 {
 	if(!ShouldRunTests())
 	{
@@ -1825,8 +1834,8 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFla
 }
 
 
-void TestITCompression()
-//----------------------
+static noinline void TestITCompression()
+//--------------------------------------
 {
 	if(!ShouldRunTests())
 	{
@@ -1887,8 +1896,8 @@ static void GenerateCommands(CPattern& pat, const double dProbPcs, const double 
 
 
 // Test PC note serialization
-void TestPCnoteSerialization()
-//----------------------------
+static noinline void TestPCnoteSerialization()
+//--------------------------------------------
 {
 	FileReader file;
 	MPT_SHARED_PTR<CSoundFile> pSndFile(new CSoundFile());
@@ -1954,8 +1963,8 @@ void TestPCnoteSerialization()
 
 
 // Test String I/O functionality
-void TestStringIO()
-//-----------------
+static noinline void TestStringIO()
+//---------------------------------
 {
 	char src0[4] = { '\0', 'X', ' ', 'X' };		// Weird empty buffer
 	char src1[4] = { 'X', ' ', '\0', 'X' };		// Weird buffer (hello Impulse Tracker)
@@ -2193,8 +2202,8 @@ void TestStringIO()
 }
 
 
-void TestSampleConversion()
-//-------------------------
+static noinline void TestSampleConversion()
+//-----------------------------------------
 {
 	uint8 *sourceBuf = new uint8[65536 * 4];
 	void *targetBuf = new uint8[65536 * 6];
