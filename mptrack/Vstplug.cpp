@@ -832,6 +832,7 @@ CVstPlugin::~CVstPlugin()
 		if (m_Effect.numOutputs > 1) Dispatch(effConnectOutput, 1, 0, nullptr, 0);
 	}
 	Suspend();
+	isInitialized = false;
 
 	// First thing to do, if we don't want to hang in a loop
 	if (m_Factory.pPluginsList == this) m_Factory.pPluginsList = m_pNext;
@@ -1738,6 +1739,14 @@ void CVstPlugin::HardAllNotesOff()
 	while(vstEvents.GetNumQueuedEvents() > 0)
 	{
 		Process(out[0], out[1], SCRATCH_BUFFER_SIZE);
+	}
+
+	if(!wasSuspended && GetUID() == CCONST('K', 'L', 'W', 'V'))
+	{
+		// Korg Wavestation does weird things (new notes triggered right after resetting aren't played,
+		// and when doing the same thing again, ghost notes may occur), but shutting the plugin processing down helps.
+		Suspend();
+		Resume();
 	}
 
 	if(wasSuspended)
