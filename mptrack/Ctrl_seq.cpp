@@ -326,25 +326,25 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 
 			if(isPlaying && sndFile.m_SongFlags[SONG_PATTERNLOOP])
 			{
-				// update channel parameters and play time
-				m_pModDoc.SetElapsedTime(m_nScrollPos, 0);
-
 				sndFile.m_nPattern = n;
 				sndFile.m_nCurrentOrder = sndFile.m_nNextOrder = m_nScrollPos;
 				pMainFrm->ResetNotificationBuffer();
 				sndFile.m_nNextRow = 0;
+
+				// update channel parameters and play time
+				m_pModDoc.SetElapsedTime(m_nScrollPos, 0);
 
 				changedPos = true;
 			} else if(m_pParent.GetFollowSong())
 			{
 				SongFlags pausedFlags = sndFile.m_SongFlags & (SONG_PAUSED | SONG_STEP | SONG_PATTERNLOOP);
 
-				// update channel parameters and play time
-				m_pModDoc.SetElapsedTime(m_nScrollPos, 0);
-
 				sndFile.m_nCurrentOrder = m_nScrollPos;
 				sndFile.SetCurrentOrder(m_nScrollPos);
 				sndFile.m_SongFlags.set(pausedFlags);
+
+				// update channel parameters and play time
+				m_pModDoc.SetElapsedTime(m_nScrollPos, 0);
 
 				if(isPlaying) pMainFrm->ResetNotificationBuffer();
 				changedPos = true;

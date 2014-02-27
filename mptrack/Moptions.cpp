@@ -572,6 +572,7 @@ static const struct GeneralOptionsDescriptions
 	{PATTERN_MIDIRECORD,	"MIDI record",						"Enable MIDI in record by default."},
 	{PATTERN_OLDCTXMENUSTYLE, "Old style pattern context menu", "Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."},
 	{PATTERN_SYNCMUTE,		"Maintain sample sync on mute",		"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
+	{PATTERN_SYNCSAMPLEPOS,	"Maintain sample sync on seek",		"Sample that are still active from previous patterns are continued to be played after seeking.\nNote: Samples with portamento effects applied are not synced. This feature may slow down seeking."},
 	{PATTERN_AUTODELAY,		"Automatic delay commands",			"Automatically insert appropriate note-delay commands when recording notes during live playback."},
 	{PATTERN_NOTEFADE,		"Note fade on key up",				"Enable to fade / stop notes on key up in pattern tab."},
 	{PATTERN_OVERFLOWPASTE,	"Overflow paste mode",				"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},

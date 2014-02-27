@@ -1282,7 +1282,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
 		{
 			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug - 1].pMixPlugin;
-			ModInstrument* pIns = m_SndFile.Chn[nChn].pModInstrument;
+			const ModInstrument* pIns = m_SndFile.Chn[nChn].pModInstrument;
 			if (pPlug && pIns)
 			{
 				pPlug->MidiCommand(m_SndFile.GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, NOTE_KEYOFF, 0, nChn);
@@ -2768,7 +2768,7 @@ void CModDoc::SongProperties()
 void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow)
 //----------------------------------------------------------
 {
-	double t = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true);
+	double t = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCSAMPLEPOS) != 0);
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm != nullptr)
 	{

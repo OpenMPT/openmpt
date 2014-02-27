@@ -59,11 +59,11 @@ struct ALIGN(32) ModChannel
 	uint32 nRampLength;
 	// Up to here: 100 bytes
 
-	ModSample *pModSample;				// Currently assigned sample slot (can already be stopped)
+	const ModSample *pModSample;			// Currently assigned sample slot (can already be stopped)
 
 	// Information not used in the mixer
-	ModInstrument *pModInstrument;		// Currently assigned instrument slot
-	FlagSet<ChannelFlags> dwOldFlags;	// Flags from previous tick
+	const ModInstrument *pModInstrument;	// Currently assigned instrument slot
+	FlagSet<ChannelFlags> dwOldFlags;		// Flags from previous tick
 	int32 newLeftVol, newRightVol;
 	int32 nRealVolume, nRealPan;
 	int32 nVolume, nPan, nFadeOutVol;

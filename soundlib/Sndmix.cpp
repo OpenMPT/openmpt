@@ -613,8 +613,8 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 }
 
 
-void CSoundFile::ProcessVolumeSwing(ModChannel *pChn, int &vol)
-//-------------------------------------------------------------
+void CSoundFile::ProcessVolumeSwing(ModChannel *pChn, int &vol) const
+//-------------------------------------------------------------------
 {
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
@@ -634,8 +634,8 @@ void CSoundFile::ProcessVolumeSwing(ModChannel *pChn, int &vol)
 }
 
 
-void CSoundFile::ProcessPanningSwing(ModChannel *pChn)
-//----------------------------------------------------
+void CSoundFile::ProcessPanningSwing(ModChannel *pChn) const
+//----------------------------------------------------------
 {
 	if(IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING))
 	{
@@ -651,8 +651,8 @@ void CSoundFile::ProcessPanningSwing(ModChannel *pChn)
 }
 
 
-void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol)
-//---------------------------------------------------------
+void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
+//---------------------------------------------------------------
 {
 	if (pChn->dwFlags[CHN_TREMOLO])
 	{
@@ -684,8 +684,8 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol)
 }
 
 
-void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol)
-//--------------------------------------------------------
+void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol) const
+//--------------------------------------------------------------
 {
 	if(IsCompatibleMode(TRK_FASTTRACKER2))
 	{
@@ -786,8 +786,8 @@ bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, enmEnvelopeTypes en
 }
 
 
-void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
-//----------------------------------------------------------------
+void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
+//----------------------------------------------------------------------
 {
 	if(IsEnvelopeProcessed(pChn, ENV_VOLUME))
 	{
@@ -827,8 +827,8 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol)
 }
 
 
-void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn)
-//-------------------------------------------------------
+void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn) const
+//-------------------------------------------------------------
 {
 	if(IsEnvelopeProcessed(pChn, ENV_PANNING))
 	{
@@ -858,8 +858,8 @@ void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn)
 }
 
 
-void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
-//------------------------------------------------------------------------
+void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
+//------------------------------------------------------------------------------
 {
 	if(IsEnvelopeProcessed(pChn, ENV_PITCH))
 	{
@@ -920,8 +920,8 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period)
 }
 
 
-void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes envType)
-//------------------------------------------------------------------------------------
+void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes envType) const
+//------------------------------------------------------------------------------------------
 {
 	ModChannel::EnvInfo &chnEnv = pChn->GetEnvelope(envType);
 
@@ -1038,8 +1038,8 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 }
 
 
-void CSoundFile::IncrementEnvelopePositions(ModChannel *pChn)
-//-----------------------------------------------------------
+void CSoundFile::IncrementEnvelopePositions(ModChannel *pChn) const
+//-----------------------------------------------------------------
 {
 	IncrementEnvelopePosition(pChn, ENV_VOLUME);
 	IncrementEnvelopePosition(pChn, ENV_PANNING);
@@ -1047,8 +1047,8 @@ void CSoundFile::IncrementEnvelopePositions(ModChannel *pChn)
 }
 
 
-void CSoundFile::ProcessInstrumentFade(ModChannel *pChn, int &vol)
-//----------------------------------------------------------------
+void CSoundFile::ProcessInstrumentFade(ModChannel *pChn, int &vol) const
+//----------------------------------------------------------------------
 {
 	// FadeOut volume
 	if(pChn->dwFlags[CHN_NOTEFADE])
@@ -1069,8 +1069,8 @@ void CSoundFile::ProcessInstrumentFade(ModChannel *pChn, int &vol)
 }
 
 
-void CSoundFile::ProcessPitchPanSeparation(ModChannel *pChn)
-//----------------------------------------------------------
+void CSoundFile::ProcessPitchPanSeparation(ModChannel *pChn) const
+//----------------------------------------------------------------
 {
 	const ModInstrument *pIns = pChn->pModInstrument;
 
@@ -1084,8 +1084,8 @@ void CSoundFile::ProcessPitchPanSeparation(ModChannel *pChn)
 }
 
 
-void CSoundFile::ProcessPanbrello(ModChannel *pChn)
-//-------------------------------------------------
+void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
+//-------------------------------------------------------
 {
 	if(pChn->dwFlags[CHN_PANBRELLO])
 	{
@@ -1271,7 +1271,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 
 
 void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTYPE &vibratoFactor)
-//-----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 {
 	ModChannel &chn = Chn[nChn];
 
@@ -1382,8 +1382,8 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 }
 
 
-void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac)
-//---------------------------------------------------------------------------------------------------------------------------
+void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const
+//---------------------------------------------------------------------------------------------------------------------------------
 {
 	// Sample Auto-Vibrato
 	if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
@@ -1545,8 +1545,8 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 }
 
 
-void CSoundFile::ProcessRamping(ModChannel *pChn)
-//-----------------------------------------------
+void CSoundFile::ProcessRamping(ModChannel *pChn) const
+//-----------------------------------------------------
 {
 	pChn->leftRamp = pChn->rightRamp = 0;
 	if(pChn->dwFlags[CHN_VOLUMERAMP] && (pChn->leftVol != pChn->newLeftVol || pChn->rightVol != pChn->newRightVol))
@@ -1608,6 +1608,38 @@ void CSoundFile::ProcessRamping(ModChannel *pChn)
 	}
 	pChn->rampLeftVol = pChn->leftVol << VOLUMERAMPPRECISION;
 	pChn->rampRightVol = pChn->rightVol << VOLUMERAMPPRECISION;
+}
+
+
+uint32 CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int periodFrac) const
+//-------------------------------------------------------------------------------------------
+{
+	uint32 freq;
+
+	const ModInstrument *pIns = pChn->pModInstrument;
+	if(GetType() != MOD_TYPE_MPT || pIns == nullptr || pIns->pTuning == nullptr)
+	{
+		freq = GetFreqFromPeriod(period, pChn->nC5Speed, periodFrac);
+	} else
+	{
+		freq = pChn->m_Freq;
+	}
+
+	// Applying Pitch/Tempo lock.
+	if(pIns && pIns->wPitchToTempoLock)
+	{
+		freq = Util::muldivr(freq, m_nMusicTempo, pIns->wPitchToTempoLock);
+	}
+
+	if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
+	{
+		pChn->nFadeOutVol = 0;
+		pChn->dwFlags.set(CHN_NOTEFADE);
+		pChn->nRealVolume = 0;
+		pChn->nCalcVolume = 0;
+	}
+
+	return Util::muldivr(freq, 0x10000, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
 }
 
 
@@ -1709,7 +1741,7 @@ BOOL CSoundFile::ReadNote()
 		CTuning::RATIOTYPE vibratoFactor = 1;
 		CTuning::NOTEINDEXTYPE arpeggioSteps = 0;
 
-		ModInstrument *pIns = pChn->pModInstrument;
+		const ModInstrument *pIns = pChn->pModInstrument;
 
 		// Calc Frequency
 		int period;
@@ -1741,7 +1773,7 @@ BOOL CSoundFile::ReadNote()
 					// so we have to update the position before we actually process the envelopes.
 					// When using MPT behaviour, we get the envelope position for the next tick while we are still calculating the current tick,
 					// which then results in wrong position information when the envelope is paused on the next row.
-					// Test cases: s77.it, EnvLoops.xm
+					// Test cases: s77.it
 					IncrementEnvelopePositions(pChn);
 				}
 				ProcessVolumeEnvelope(pChn, vol);
@@ -1854,12 +1886,8 @@ BOOL CSoundFile::ReadNote()
 				period = m_nMaxPeriod;
 				nPeriodFrac = 0;
 			}*/
-			UINT freq = 0;
-
-			if(GetType() != MOD_TYPE_MPT || pIns == nullptr || pIns->pTuning == nullptr)
-			{
-				freq = GetFreqFromPeriod(period, pChn->nC5Speed, nPeriodFrac);
-			} else
+			
+			if(GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning != nullptr)
 			{
 				// In this case: GetType() == MOD_TYPE_MPT and using custom tunings.
 				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_nTickCount == 0))
@@ -1870,25 +1898,10 @@ BOOL CSoundFile::ReadNote()
 					else
 						pChn->m_CalculateFreq = false;
 				}
-
-				freq = pChn->m_Freq;
 			}
 
-			// Applying Pitch/Tempo lock.
-			if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && pIns && pIns->wPitchToTempoLock)
-			{
-				freq = Util::muldivr(freq, m_nMusicTempo, pIns->wPitchToTempoLock);
-			}
 
-			if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
-			{
-				pChn->nFadeOutVol = 0;
-				pChn->dwFlags.set(CHN_NOTEFADE);
-				pChn->nRealVolume = 0;
-				pChn->nCalcVolume = 0;
-			}
-
-			uint32 ninc = Util::muldivr(freq, 0x10000, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
+			uint32 ninc = GetChannelIncrement(pChn, period, nPeriodFrac);
 #ifndef MODPLUG_TRACKER
 			ninc = Util::muldivr(ninc, m_nFreqFactor, 128);
 #endif // !MODPLUG_TRACKER

@@ -172,6 +172,8 @@ enum enmGetLengthResetMode
 	eAdjust				= 0x01,
 	// Same as above, but global variables will only be memorized if the target could be reached. This does *NOT* influence the visited rows vector - it will *ALWAYS* be adjusted in this mode.
 	eAdjustOnSuccess	= 0x02 | eAdjust,
+	// Same as previous option, but will also try to emulate sample playback so that voices from previous patterns will sound when continuing playback at the target position.
+	eAdjustSamplePositions = 0x04 | eAdjustOnSuccess,
 };
 
 
@@ -261,7 +263,8 @@ public: //Misc
 
 	// Returns value in seconds. If given position won't be played at all, returns -1.
 	// If updateVars is true, the state of various playback variables will be updated according to the playback position.
-	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars);
+	// If updateSamplePos is also true, the sample positions of samples still playing from previous patterns will be kept in sync.
+	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars, bool updateSamplePos);
 
 	uint16 GetModFlags() const {return static_cast<uint16>(m_ModFlags);}
 	void SetModFlags(const uint16 v) {m_ModFlags = static_cast<ModSpecificFlag>(v);}
@@ -705,7 +708,7 @@ public:
 	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
 	void CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut);
 	void NoteChange(CHANNELINDEX nChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false);
-	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true);
+	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
 
 	// Channel Effects
 	void KeyOff(CHANNELINDEX nChn);
@@ -717,29 +720,31 @@ protected:
 	// Channel effect processing
 	int GetVibratoDelta(int type, int position) const;
 
-	void ProcessVolumeSwing(ModChannel *pChn, int &vol);
-	void ProcessPanningSwing(ModChannel *pChn);
-	void ProcessTremolo(ModChannel *pChn, int &vol);
-	void ProcessTremor(ModChannel *pChn, int &vol);
+	void ProcessVolumeSwing(ModChannel *pChn, int &vol) const;
+	void ProcessPanningSwing(ModChannel *pChn) const;
+	void ProcessTremolo(ModChannel *pChn, int &vol) const;
+	void ProcessTremor(ModChannel *pChn, int &vol) const;
 
 	bool IsEnvelopeProcessed(const ModChannel *pChn, enmEnvelopeTypes env) const;
-	void ProcessVolumeEnvelope(ModChannel *pChn, int &vol);
-	void ProcessPanningEnvelope(ModChannel *pChn);
-	void ProcessPitchFilterEnvelope(ModChannel *pChn, int &period);
+	void ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const;
+	void ProcessPanningEnvelope(ModChannel *pChn) const;
+	void ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const;
 
-	void IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes envType);
-	void IncrementEnvelopePositions(ModChannel *pChn);
+	void IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes envType) const;
+	void IncrementEnvelopePositions(ModChannel *pChn) const;
 
-	void ProcessInstrumentFade(ModChannel *pChn, int &vol);
+	void ProcessInstrumentFade(ModChannel *pChn, int &vol) const;
 
-	void ProcessPitchPanSeparation(ModChannel *pChn);
-	void ProcessPanbrello(ModChannel *pChn);
+	void ProcessPitchPanSeparation(ModChannel *pChn) const;
+	void ProcessPanbrello(ModChannel *pChn) const;
 
 	void ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEINDEXTYPE &arpeggioSteps);
 	void ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTYPE &vibratoFactor);
-	void ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac);
+	void ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const;
 
-	void ProcessRamping(ModChannel *pChn);
+	void ProcessRamping(ModChannel *pChn) const;
+
+	uint32 GetChannelIncrement(ModChannel *pChn, uint32 period, int periodFrac) const;
 
 protected:
 	// Channel Effects
@@ -778,7 +783,7 @@ protected:
 
 	void SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
-	void DoFreqSlide(ModChannel *pChn, LONG nFreqSlide);
+	void DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const;
 	void GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide);
 	void UpdateTimeSignature();
 
