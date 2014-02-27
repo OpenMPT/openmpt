@@ -36,6 +36,8 @@
 #define ITP_FILE_ID MAGIC4BE('.','i','t','p')	// .itp ASCII
 
 
+#ifdef MODPLUG_TRACKER
+
 // Read variable-length ITP string.
 template<size_t destSize>
 bool ReadITPString(char (&destBuffer)[destSize], FileReader &file)
@@ -51,6 +53,8 @@ static inline bool ReadITPString(std::string &dest, FileReader &file)
 {
 	return file.ReadString<mpt::String::maybeNullTerminated>(dest, file.ReadUint32LE());
 }
+
+#endif // MODPLUG_TRACKER
 
 
 bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
