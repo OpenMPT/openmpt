@@ -122,6 +122,15 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 	retval.lastOrder = retval.endOrder = ORDERINDEX_INVALID;
 	retval.lastRow = retval.endRow = ROWINDEX_INVALID;
 
+	ModChannel origChannels[CountOf(Chn)];
+	if(adjustMode & eAdjust)
+	{
+		for(CHANNELINDEX i = 0; i < CountOf(Chn); i++)
+		{
+			origChannels[i] = Chn[i];
+		}
+	}
+
 	// Are we trying to reach a certain pattern position?
 	const bool hasSearchTarget = target.mode != GetLengthTarget::NoTarget;
 
@@ -290,7 +299,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				nNextPatStartRow = 0;  // FT2 E60 bug
 				if (nRow < Patterns[nPattern].GetNumRows() - 1)
 				{
-					nextRow = Patterns[nPattern].GetpModCommand(nRow +1, nChn);
+					nextRow = Patterns[nPattern].GetpModCommand(nRow + 1, nChn);
 				}
 				if (nextRow && nextRow->command == CMD_XPARAM)
 				{
@@ -548,9 +557,83 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		}
 
 		const uint32 tickDuration = GetTickDuration(memory.musicTempo, memory.musicSpeed, rowsPerBeat);
-		const uint32 rowDuration = tickDuration * (memory.musicSpeed + tickDelay) * MAX(rowDelay, 1);
+		const uint32 numTicks = (memory.musicSpeed + tickDelay) * MAX(rowDelay, 1);
+		const uint32 rowDuration = tickDuration * numTicks;
 		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		memory.renderedSamples += rowDuration;
+
+		if((adjustMode & eAdjustSamplePositions) == eAdjustSamplePositions)
+		{
+			// Super experimental and dirty sample seeking
+			pChn = Chn;
+			p = Patterns[nPattern].GetRow(nRow);
+			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++)
+			{
+				uint32 startTick = 0;
+				uint32 paramHi = p->param >> 4, paramLo = p->param & 0x0F;
+				if(p->IsNote() && p->instr)
+				{
+					InstrumentChange(pChn, p->instr);
+					NoteChange(nChn, p->note);
+					pChn->nInc = GetChannelIncrement(pChn, pChn->nPeriod, 0);
+
+					if((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && (p->param & 0xF0) == 0xD0 && paramLo < numTicks)
+					{
+						startTick = p->param & 0x0F;
+					} else if(p->command == CMD_DELAYCUT && paramHi < numTicks)
+					{
+						startTick = p->param >> 4;
+					} else if(p->command == CMD_OFFSET && p->IsNote())
+					{
+						// TODO: xParam not supported! (Note: xParam doesn't use hiOffset)
+						pChn->nPos = (memory.chnSettings[nChn].hiOffset << 16) + (p->param << 8);
+					} else if(p->volcmd == VOLCMD_OFFSET && p->IsNote())
+					{
+						pChn->nPos = (memory.chnSettings[nChn].hiOffset << 16) + (p->vol << 11);
+					}
+				}
+				if(p->note == NOTE_KEYOFF || p->note == NOTE_NOTECUT || (p->note == NOTE_FADE && GetNumInstruments())
+					|| pChn->dwFlags[CHN_PINGPONGFLAG]	// Ping-pong loops are not supported for now.
+					|| p->command != CMD_NONE &&		// Sample stop commands.
+						(((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && (p->param & 0xF0) == 0xC0 && paramLo < numTicks)
+						|| (p->command == CMD_DELAYCUT && (p->command & 0x0F) != 0 && startTick + paramLo < numTicks)
+						|| p->command == CMD_TONEPORTAMENTO || p->command == CMD_TONEPORTAVOL || p->command == CMD_PORTAMENTOUP || p->command == CMD_PORTAMENTODOWN)
+					|| p->volcmd == VOLCMD_TONEPORTAMENTO || p->volcmd == VOLCMD_PORTAUP || p->volcmd == VOLCMD_PORTADOWN)
+				{
+					// Stop channel.
+					pChn->nPeriod = 0;
+					pChn->nInc = 0;
+					pChn->nPos = pChn->nPosLo = 0;
+				}
+				if(pChn->nInc != 0 && pChn->pModSample)
+				{
+					// Increment playback position of sample and envelopes
+					for(uint32 i = 0; i < (numTicks - startTick); i++)
+					{
+						pChn->nPosLo += pChn->nInc * tickDuration;
+						pChn->nPos += (pChn->nPosLo >> 16);
+						pChn->nPosLo &= 0xFFFF;
+						IncrementEnvelopePositions(pChn);
+						int vol = 0;
+						ProcessInstrumentFade(pChn, vol);
+					}
+					if(pChn->pModSample->uFlags[CHN_SUSTAINLOOP | CHN_LOOP])
+					{
+						// Check if we exceeded the sample loop.
+						while(pChn->nPos >= pChn->nLoopEnd)
+						{
+							pChn->nPos -= (pChn->nLoopEnd - pChn->nLoopStart);
+						}
+					} else if(pChn->nPos >= pChn->nLength)
+					{
+						// Past sample end.
+						pChn->nLeftVU = pChn->nRightVU = 0;
+						pChn->nVolume = 0;
+						pChn->pCurrentSample = nullptr;
+					}
+				}
+			}
+		}
 
 		if(patternLoopEndedOnThisRow)
 		{
@@ -633,6 +716,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 			m_nMusicSpeed = m_nDefaultSpeed;
 			m_nMusicTempo = m_nDefaultTempo;
 			m_nGlobalVolume = m_nDefaultGlobalVolume;
+			for(CHANNELINDEX i = 0; i < CountOf(Chn); i++)
+			{
+				Chn[i] = origChannels[i];
+			}
 		}
 		// When adjusting the playback status, we will also want to update the visited rows vector according to the current position.
 		visitedSongRows.Set(visitedRows);
@@ -647,12 +734,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 // Effects
 
 // Change sample or instrument number.
-void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, bool bUpdVol, bool bResetEnv)
-//--------------------------------------------------------------------------------------------------------
+void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, bool bUpdVol, bool bResetEnv) const
+//--------------------------------------------------------------------------------------------------------------
 {
 	if(instr >= MAX_INSTRUMENTS) return;
-	ModInstrument *pIns = (instr < MAX_INSTRUMENTS) ? Instruments[instr] : nullptr;
-	ModSample *pSmp = &Samples[instr];
+	const ModInstrument *pIns = (instr < MAX_INSTRUMENTS) ? Instruments[instr] : nullptr;
+	const ModSample *pSmp = &Samples[instr];
 	UINT note = pChn->nNewNote;
 
 	if(note == NOTE_NONE && IsCompatibleMode(TRK_IMPULSETRACKER)) return;
@@ -993,9 +1080,9 @@ void CSoundFile::NoteChange(CHANNELINDEX nChn, int note, bool bPorta, bool bRese
 //-------------------------------------------------------------------------------------------------
 {
 	if (note < NOTE_MIN) return;
-	ModChannel * const pChn = &Chn[nChn];
-	ModSample *pSmp = pChn->pModSample;
-	ModInstrument *pIns = pChn->pModInstrument;
+	ModChannel *pChn = &Chn[nChn];
+	const ModSample *pSmp = pChn->pModSample;
+	const ModInstrument *pIns = pChn->pModInstrument;
 
 	const bool newTuning = (GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning);
 	// save the note that's actually used, as it's necessary to properly calculate PPS and stuff
@@ -1358,7 +1445,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 //-------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &Chn[nChn];
-	ModInstrument *pIns = nullptr;
+	const ModInstrument *pIns = nullptr;
 	if(!ModCommand::IsNote(note))
 	{
 		return;
@@ -3779,7 +3866,7 @@ void CSoundFile::InvertLoop(ModChannel *pChn)
 	if(GetType() != MOD_TYPE_MOD || pChn->nEFxSpeed == 0) return;
 
 	// we obviously also need a sample for this
-	ModSample *pModSample = pChn->pModSample;
+	ModSample *pModSample = const_cast<ModSample *>(pChn->pModSample);
 	if(pModSample == nullptr || pModSample->pSample == nullptr || !pModSample->uFlags[CHN_LOOP] || pModSample->uFlags[CHN_16BIT]) return;
 
 	pChn->nEFxDelay += ModEFxTable[pChn->nEFxSpeed & 0x0F];
@@ -4187,8 +4274,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 
 		if(m && m->command == CMD_XPARAM) param = (param << 16) + (tmp << 8) + m->param;
 		else param = (param<<8) + tmp;
-	}
-	else
+	} else
 	{
 		if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
 		param <<= 8;
@@ -4389,8 +4475,8 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 }
 
 
-void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide)
-//-------------------------------------------------------------
+void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
+//-------------------------------------------------------------------
 {
 	// IT Linear slides
 	if (!pChn->nPeriod) return;

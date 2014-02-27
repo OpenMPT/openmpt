@@ -111,6 +111,7 @@ enum
 #define PATTERN_SHOWDEFAULTVOLUME	0x10000000	// if there is no volume command next to note+instr, display the sample's default volume.
 #define PATTERN_RESETCHANNELS		0x20000000	// reset channels when looping
 #define PATTERN_LIVEUPDATETREE		0x40000000	// update active sample / instr icons in treeview
+#define PATTERN_SYNCSAMPLEPOS		0x80000000	// sync sample positions when seeking
 
 
 // Midi Setup

@@ -1075,7 +1075,7 @@ double CSoundFile::GetCurrentBPM() const
 	{																	//with other modes, we calculate it:
 		double ticksPerBeat = m_nMusicSpeed * m_nCurrentRowsPerBeat;	//ticks/beat = ticks/row  * rows/beat
 		double samplesPerBeat = m_nSamplesPerTick * ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
-		bpm =  m_MixerSettings.gdwMixingFreq/samplesPerBeat * 60;						//beats/sec  = samps/sec  / samps/beat
+		bpm =  m_MixerSettings.gdwMixingFreq/samplesPerBeat * 60;		//beats/sec  = samps/sec  / samps/beat
 	}																	//beats/min  =  beats/sec * 60
 
 	return bpm;
@@ -1107,7 +1107,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	for (nPattern = 0; nPattern < Order.size(); nPattern++)
 	{
-		UINT ord = Order[nPattern];
+		ORDERINDEX ord = Order[nPattern];
 		if(ord == Order.GetIgnoreIndex()) continue;
 		if (ord == Order.GetInvalidPatIndex()) break;
 		if (ord < Patterns.Size())
@@ -1843,10 +1843,10 @@ bool CSoundFile::SetTitle(const std::string & newTitle)
 }
 
 
-double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars)
-//---------------------------------------------------------------------------------
+double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars, bool updateSamplePos)
+//-------------------------------------------------------------------------------------------------------
 {
-	const GetLengthType t = GetLength(updateVars ? eAdjust : eNoAdjust, GetLengthTarget(ord, row));
+	const GetLengthType t = GetLength(updateVars ? (updateSamplePos ? eAdjustSamplePositions : eAdjust) : eNoAdjust, GetLengthTarget(ord, row));
 	if(t.targetReached) return t.duration;
 	else return -1; //Given position not found from play sequence.
 }
