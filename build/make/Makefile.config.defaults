@@ -20,12 +20,12 @@ ifeq ($(HOST_FLAVOUR),MACOSX)
 
 # Mac OS X overrides
 
-CPPFLAGS += -DMPT_CHARSET_CPP
 DYNLINK=0
 
 # when using iconv
-#CPPFLAGS += -DMPT_ICONV_NO_WCHAR
+#CPPFLAGS += -DMPT_WITH_ICONV
 #LDLIBS += -liconv
 
 endif
 endif
+

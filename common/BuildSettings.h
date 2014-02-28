@@ -191,6 +191,44 @@
 
 
 
+#if MPT_OS_WINDOWS
+
+#define MPT_CHARSET_WIN32
+
+#elif MPT_OS_LINUX
+
+#define MPT_CHARSET_ICONV
+
+#elif MPT_OS_ANDROID
+
+#define MPT_CHARSET_INTERNAL
+
+#elif MPT_OS_EMSCRIPTEN
+
+#define MPT_CHARSET_CODECVTUTF8
+#ifndef MPT_LOCALE_ASSUME_CHARSET
+#define MPT_LOCALE_ASSUME_CHARSET CharsetUTF8
+#endif
+
+#elif MPT_OS_MACOSX_OR_IOS
+
+#if defined(MPT_WITH_ICONV)
+#define MPT_CHARSET_ICONV
+#ifndef MPT_ICONV_NO_WCHAR
+#define MPT_ICONV_NO_WCHAR
+#endif
+#else
+#define MPT_CHARSET_CODECVTUTF8
+#endif
+
+#elif defined(MPT_WITH_ICONV)
+
+#define MPT_CHARSET_ICONV
+
+#endif
+
+
+
 // fixing stuff up
 
 #if !defined(MODPLUG_TRACKER) && defined(NO_MO3)
@@ -217,6 +255,10 @@
 
 #if defined(MPT_PLATFORM_BIG_ENDIAN) && !defined(MODPLUG_NO_FILESAVE)
 #define MODPLUG_NO_FILESAVE // file saving is broken on big endian
+#endif
+
+#if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)
+#define MPT_CHARSET_INTERNAL
 #endif
 
 
