@@ -594,10 +594,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				}
 				if(p->note == NOTE_KEYOFF || p->note == NOTE_NOTECUT || (p->note == NOTE_FADE && GetNumInstruments())
 					|| pChn->dwFlags[CHN_PINGPONGFLAG]	// Ping-pong loops are not supported for now.
-					|| p->command != CMD_NONE &&		// Sample stop commands.
+					|| (p->command != CMD_NONE &&		// Sample stop commands.
 						(((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && (p->param & 0xF0) == 0xC0 && paramLo < numTicks)
 						|| (p->command == CMD_DELAYCUT && (p->command & 0x0F) != 0 && startTick + paramLo < numTicks)
-						|| p->command == CMD_TONEPORTAMENTO || p->command == CMD_TONEPORTAVOL || p->command == CMD_PORTAMENTOUP || p->command == CMD_PORTAMENTODOWN)
+						|| p->command == CMD_TONEPORTAMENTO || p->command == CMD_TONEPORTAVOL || p->command == CMD_PORTAMENTOUP || p->command == CMD_PORTAMENTODOWN))
 					|| p->volcmd == VOLCMD_TONEPORTAMENTO || p->volcmd == VOLCMD_PORTAUP || p->volcmd == VOLCMD_PORTADOWN)
 				{
 					// Stop channel.
