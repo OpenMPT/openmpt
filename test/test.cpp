@@ -151,11 +151,11 @@ static noinline void ReportException(const char * const file, const int line, co
 #define MULTI_TEST_END   
 #define MULTI_TEST_CATCH } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, description, false); }
 #define TEST_TRY         try {
-#define TEST_CATCH       } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, description, true); }
+#define TEST_CATCH       } catch(...) { ReportExceptionAndBreak(file, line, description, true); }
 #define TEST_START()     do { } while(0)
 #define TEST_OK()        do { MPT_UNREFERENCED_PARAMETER(description); } while(0)
-#define TEST_FAIL()      ReportErrorAndBreak(THIS_FILE, __LINE__, description, false)
-#define TEST_FAIL_STOP() ReportErrorAndBreak(THIS_FILE, __LINE__, description, true)
+#define TEST_FAIL()      ReportErrorAndBreak(file, line, description, false)
+#define TEST_FAIL_STOP() ReportErrorAndBreak(file, line, description, true)
 
 #else // !MODPLUG_TRACKER
 
@@ -251,19 +251,19 @@ static noinline void TestFailStop(const char * const file, const int line, const
 #define TEST_TRY         try {
 #define TEST_CATCH       } catch(...) { \
                           fail_count++; \
-                          ReportException(THIS_FILE, __LINE__, description); \
+                          ReportException(file, line, description); \
                           throw; \
                          }
-#define TEST_START()     show_start(THIS_FILE, __LINE__, description)
-#define TEST_OK()        show_ok(THIS_FILE, __LINE__, description)
-#define TEST_FAIL()      TestFail(THIS_FILE, __LINE__, description)
-#define TEST_FAIL_STOP() TestFailStop(THIS_FILE, __LINE__, description)
+#define TEST_START()     show_start(file, line, description)
+#define TEST_OK()        show_ok(file, line, description)
+#define TEST_FAIL()      TestFail(file, line, description)
+#define TEST_FAIL_STOP() TestFailStop(file, line, description)
 
 #endif // MODPLUG_TRACKER
 
 
 template <typename Tx, typename Ty>
-noinline void VerifyEqualImpl(const Tx &x, const Ty &y, const char *const description)
+noinline void VerifyEqualImpl(const Tx &x, const Ty &y, const char *const description, const char *const file, const int line)
 {
 	TEST_TRY
 	TEST_START();
@@ -279,7 +279,7 @@ noinline void VerifyEqualImpl(const Tx &x, const Ty &y, const char *const descri
 
 
 template <typename Tx, typename Ty>
-noinline void VerifyEqualNonContImpl(const Tx &x, const Ty &y, const char *const description)
+noinline void VerifyEqualNonContImpl(const Tx &x, const Ty &y, const char *const description, const char *const file, const int line)
 {
 	TEST_TRY
 	TEST_START();
@@ -295,7 +295,7 @@ noinline void VerifyEqualNonContImpl(const Tx &x, const Ty &y, const char *const
 
 
 template <typename Tx, typename Ty>
-noinline void VerifyEqualQuietNonContImpl(const Tx &x, const Ty &y, const char *const description)
+noinline void VerifyEqualQuietNonContImpl(const Tx &x, const Ty &y, const char *const description, const char *const file, const int line)
 {
 	TEST_TRY
 	if(x != y)
@@ -309,15 +309,15 @@ noinline void VerifyEqualQuietNonContImpl(const Tx &x, const Ty &y, const char *
 //Verify that given parameters are 'equal'(show error message if not).
 //The exact meaning of equality is not specified; for now using operator!=.
 //The macro is active in both 'debug' and 'release' build.
-#define VERIFY_EQUAL(x,y)	VerifyEqualImpl( (x) , (y) , #x " == " #y )
+#define VERIFY_EQUAL(x,y)	VerifyEqualImpl( (x) , (y) , #x " == " #y , THIS_FILE, __LINE__)
 
 
 // Like VERIFY_EQUAL, but throws exception if comparison fails.
-#define VERIFY_EQUAL_NONCONT(x,y)	VerifyEqualNonContImpl( (x) , (y) , #x " == " #y )
+#define VERIFY_EQUAL_NONCONT(x,y)	VerifyEqualNonContImpl( (x) , (y) , #x " == " #y , THIS_FILE, __LINE__)
 
 
 // Like VERIFY_EQUAL_NONCONT, but do not show message if test succeeds
-#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	VerifyEqualQuietNonContImpl( (x) , (y) , #x " == " #y )
+#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	VerifyEqualQuietNonContImpl( (x) , (y) , #x " == " #y , THIS_FILE, __LINE__)
 
 
 #define DO_TEST(func) \
