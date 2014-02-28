@@ -139,3 +139,71 @@
 		#error "unknown endianness"
 	#endif
 #endif
+
+
+
+// The order of the checks matters!
+#if defined(__EMSCRIPTEN__)
+	#define MPT_OS_EMSCRIPTEN 1
+#elif defined(_WIN32)
+	#define MPT_OS_WINDOWS 1
+#elif defined(__APPLE__)
+	#define MPT_OS_MACOSX_OR_IOS 1
+	//#include "TargetConditionals.h"
+	//#if TARGET_IPHONE_SIMULATOR
+	//#elif TARGET_OS_IPHONE
+	//#elif TARGET_OS_MAC
+	//#else
+	//#endif
+#elif defined(ANDROID)
+	#define MPT_OS_ANDROID 1
+#elif defined(__linux__)
+	#define MPT_OS_LINUX 1
+#elif defined(__DragonFly__)
+	#define MPT_OS_DRAGONFLYBSD 1
+#elif defined(__FreeBSD__)
+	#define MPT_OS_FREEBSD 1
+#elif defined(__OpenBSD__)
+	#define MPT_OS_OPENBSD 1
+#elif defined(__NetBSD__)
+	#define MPT_OS_NETBSD 1
+#elif defined(__unix__)
+	#define MPT_OS_GENERIC_UNIX 1
+#else
+	#define MPT_OS_UNKNOWN 1
+#endif
+
+#ifndef MPT_OS_EMSCRIPTEN
+#define MPT_OS_EMSCRIPTEN 0
+#endif
+#ifndef MPT_OS_WINDOWS
+#define MPT_OS_WINDOWS 0
+#endif
+#ifndef MPT_OS_MACOSX_OR_IOS
+#define MPT_OS_MACOSX_OR_IOS 0
+#endif
+#ifndef MPT_OS_ANDROID
+#define MPT_OS_ANDROID 0
+#endif
+#ifndef MPT_OS_LINUX
+#define MPT_OS_LINUX 0
+#endif
+#ifndef MPT_OS_DRAGONFLYBSD
+#define MPT_OS_DRAGONFLYBSD 0
+#endif
+#ifndef MPT_OS_FREEBSD
+#define MPT_OS_FREEBSD 0
+#endif
+#ifndef MPT_OS_OPENBSD
+#define MPT_OS_OPENBSD 0
+#endif
+#ifndef MPT_OS_NETBSD
+#define MPT_OS_NETBSD 0
+#endif
+#ifndef MPT_OS_GENERIC_UNIX
+#define MPT_OS_GENERIC_UNIX 0
+#endif
+#ifndef MPT_OS_UNKNOWN
+#define MPT_OS_UNKNOWN 0
+#endif
+
