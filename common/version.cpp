@@ -197,14 +197,14 @@ std::string GetBuildFeaturesString()
 		#else
 			retval += "*unknown";
 		#endif
-		#if defined(WIN32)
+		#if defined(MPT_CHARSET_WIN32)
 			retval += " +WINAPI";
-		#elif defined(MPT_CHARSET_CPP)
-			retval += " +CODECVT";
-		#elif defined(MPT_CHARSET_CUSTOMUTF8)
-			retval += " +CUSTOMUTF8";
-		#else
+		#elif defined(MPT_CHARSET_ICONV)
 			retval += " +ICONV";
+		#elif defined(MPT_CHARSET_CODECVTUTF8)
+			retval += " +CODECVTUTF8";
+		#elif defined(MPT_CHARSET_INTERNAL)
+			retval += " +INTERNALCHARSETS";
 		#endif
 		#if !defined(NO_ZLIB)
 			retval += " +ZLIB";
