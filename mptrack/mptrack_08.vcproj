@@ -89,9 +89,9 @@
 				AssemblyDebug="1"
 				GenerateMapFile="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				LargeAddressAware="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -187,11 +187,11 @@
 				DelayLoadDLLs="OpenMPT_SoundTouch_f32.dll"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="2"
 				DataExecutionPrevention="0"
-				LargeAddressAware="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -301,6 +301,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\plugins\DmoToVst.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\draw_pat.cpp"
 				>
 			</File>
@@ -341,15 +345,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\plugins\DmoToVst.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\plugins\JBridge.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\plugins\PluginManager.cpp"
+				RelativePath="..\common\Logging.cpp"
 				>
 			</File>
 			<File
@@ -482,6 +482,10 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\patternContainer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\plugins\PluginManager.cpp"
 				>
 			</File>
 			<File
@@ -959,11 +963,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileDialog.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\FlagSet.h"
 				>
 			</File>
 			<File
-				RelativePath=".\FileDialog.h"
+				RelativePath="..\soundlib\FloatMixer.h"
 				>
 			</File>
 			<File
@@ -972,6 +980,10 @@
 			</File>
 			<File
 				RelativePath="InputHandler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\IntMixer.h"
 				>
 			</File>
 			<File
@@ -1012,14 +1024,6 @@
 			</File>
 			<File
 				RelativePath="..\common\misc_util.h"
-				>
-			</File>
-			<File
-				RelativePath="..\soundlib\FloatMixer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\soundlib\IntMixer.h"
 				>
 			</File>
 			<File
@@ -1255,11 +1259,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\svn_version\svn_version.h"
+				RelativePath="..\common\svn_version_default\svn_version.h"
 				>
 			</File>
 			<File
-				RelativePath="..\common\svn_version_default\svn_version.h"
+				RelativePath=".\svn_version\svn_version.h"
 				>
 			</File>
 			<File
@@ -1271,11 +1275,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TrackerSettings.h"
+				RelativePath="..\common\thread.h"
 				>
 			</File>
 			<File
-				RelativePath="..\common\thread.h"
+				RelativePath=".\TrackerSettings.h"
 				>
 			</File>
 			<File
