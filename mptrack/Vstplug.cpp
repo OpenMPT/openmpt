@@ -1719,7 +1719,12 @@ void CVstPlugin::HardAllNotesOff()
 		VSTInstrChannel &channel = m_MidiCh[mc];
 
 		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));		// centre pitch bend
-		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllControllersOff, mc, 0));		// reset all controllers
+		if(GetUID() != CCONST('K', 'L', 'W', 'V'))
+		{
+			// Korg Wavestation doesn't seem to like this CC, it can introduce ghost notes or
+			// prevent new notes from being played.
+			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllControllersOff, mc, 0));		// reset all controllers
+		}
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 
@@ -1739,14 +1744,6 @@ void CVstPlugin::HardAllNotesOff()
 	while(vstEvents.GetNumQueuedEvents() > 0)
 	{
 		Process(out[0], out[1], SCRATCH_BUFFER_SIZE);
-	}
-
-	if(!wasSuspended && GetUID() == CCONST('K', 'L', 'W', 'V'))
-	{
-		// Korg Wavestation does weird things (new notes triggered right after resetting aren't played,
-		// and when doing the same thing again, ghost notes may occur), but shutting the plugin processing down helps.
-		Suspend();
-		Resume();
 	}
 
 	if(wasSuspended)
