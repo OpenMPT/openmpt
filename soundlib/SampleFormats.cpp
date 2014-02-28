@@ -184,9 +184,9 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSampl
 	Instruments[nInstr] = nullptr;
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		if (Chn[i].pModInstrument == pIns)
+		if (m_PlayState.Chn[i].pModInstrument == pIns)
 		{
-			Chn[i].pModInstrument = nullptr;
+			m_PlayState.Chn[i].pModInstrument = nullptr;
 		}
 	}
 	delete pIns;

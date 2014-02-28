@@ -570,7 +570,7 @@ CSoundFile::CSoundFile() :
 #ifdef MODPLUG_TRACKER
 	m_MIDIMapper(*this),
 #endif
-	visitedSongRows(*this),
+	m_PlayState(*this),
 	m_pCustomLog(nullptr)
 #if MPT_COMPILER_MSVC
 #pragma warning(default : 4355) // "'this' : used in base member initializer list"
@@ -594,8 +594,8 @@ CSoundFile::CSoundFile() :
 	m_nMinPeriod = MIN_PERIOD;
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
-	m_nSeqOverride = ORDERINDEX_INVALID;
-	m_bPatternTransitionOccurred = false;
+	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
+	m_PlayState.m_bPatternTransitionOccurred = false;
 	m_nTempoMode = tempo_mode_classic;
 	m_bIsRendering = false;
 
@@ -603,11 +603,11 @@ CSoundFile::CSoundFile() :
 	m_lockOrderStart = m_lockOrderEnd = ORDERINDEX_INVALID;
 	m_pModDoc = nullptr;
 
-	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = (TrackerSettings::Instance().m_nRowHighlightBeats) ? TrackerSettings::Instance().m_nRowHighlightBeats : 4;
-	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (TrackerSettings::Instance().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? TrackerSettings::Instance().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
+	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = (TrackerSettings::Instance().m_nRowHighlightBeats) ? TrackerSettings::Instance().m_nRowHighlightBeats : 4;
+	m_nDefaultRowsPerMeasure = m_PlayState.m_nCurrentRowsPerMeasure = (TrackerSettings::Instance().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? TrackerSettings::Instance().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
 #else
-	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = 4;
-	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = 16;
+	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = 4;
+	m_nDefaultRowsPerMeasure = m_PlayState.m_nCurrentRowsPerMeasure = 16;
 #endif // MODPLUG_TRACKER
 
 	m_dwLastSavedWithVersion=0;
@@ -616,14 +616,14 @@ CSoundFile::CSoundFile() :
 	m_bChannelMuteTogglePending.reset();
 #endif // MODPLUG_TRACKER
 
-	MemsetZero(ChnMix);
+	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
 	Order.Init();
 	Patterns.ClearPatterns();
-	m_lTotalSampleCount = 0;
-	m_bPositionChanged = true;
+	m_PlayState.m_lTotalSampleCount = 0;
+	m_PlayState.m_bPositionChanged = true;
 
 #ifndef MODPLUG_TRACKER
 	m_pTuningsBuiltIn = new CTuningCollection();
@@ -718,25 +718,25 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #ifndef MODPLUG_TRACKER
 	m_nFreqFactor = m_nTempoFactor = 128;
 #endif
-	m_nGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_nOldGlbVolSlide = 0;
+	m_PlayState.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
+	m_PlayState.m_nOldGlbVolSlide = 0;
 
 	InitializeGlobals();
 	Order.resize(1);
 
 	// Playback
-	m_nPatternDelay = 0;
-	m_nFrameDelay = 0;
-	m_nNextRow = 0;
-	m_nRow = 0;
-	m_nPattern = 0;
-	m_nCurrentOrder = 0;
-	m_nNextOrder = 0;
-	m_nNextPatStartRow = 0;
-	m_nSeqOverride = ORDERINDEX_INVALID;
+	m_PlayState.m_nPatternDelay = 0;
+	m_PlayState.m_nFrameDelay = 0;
+	m_PlayState.m_nNextRow = 0;
+	m_PlayState.m_nRow = 0;
+	m_PlayState.m_nPattern = 0;
+	m_PlayState.m_nCurrentOrder = 0;
+	m_PlayState.m_nNextOrder = 0;
+	m_PlayState.m_nNextPatStartRow = 0;
+	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
 
 	m_nMaxOrderPosition = 0;
-	MemsetZero(ChnMix);
+	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
 	MemsetZero(m_MixPlugins);
@@ -841,7 +841,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	{
 		if (ChnSettings[ich].nVolume > 64) ChnSettings[ich].nVolume = 64;
 		if (ChnSettings[ich].nPan > 256) ChnSettings[ich].nPan = 128;
-		Chn[ich].Reset(ModChannel::resetTotal, *this, ich);
+		m_PlayState.Chn[ich].Reset(ModChannel::resetTotal, *this, ich);
 	}
 
 	// Checking samples
@@ -870,24 +870,24 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	// Set default values
 	if (m_nDefaultTempo < 32) m_nDefaultTempo = 125;
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
-	m_nMusicSpeed = m_nDefaultSpeed;
-	m_nMusicTempo = m_nDefaultTempo;
-	m_nGlobalVolume = m_nDefaultGlobalVolume;
-	m_lHighResRampingGlobalVolume = m_nGlobalVolume<<VOLUMERAMPPRECISION;
-	m_nGlobalVolumeDestination = m_nGlobalVolume;
-	m_nSamplesToGlobalVolRampDest = 0;
-	m_nGlobalVolumeRampAmount = 0;
-	m_nNextOrder = 0;
-	m_nCurrentOrder = 0;
-	m_nPattern = 0;
-	m_nBufferCount = 0;
-	m_dBufferDiff = 0;
-	m_nTickCount = m_nMusicSpeed;
-	m_nNextRow = 0;
-	m_nRow = 0;
+	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
+	m_PlayState.m_nMusicTempo = m_nDefaultTempo;
+	m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
+	m_PlayState.m_lHighResRampingGlobalVolume = m_PlayState.m_nGlobalVolume<<VOLUMERAMPPRECISION;
+	m_PlayState.m_nGlobalVolumeDestination = m_PlayState.m_nGlobalVolume;
+	m_PlayState.m_nSamplesToGlobalVolRampDest = 0;
+	m_PlayState.m_nGlobalVolumeRampAmount = 0;
+	m_PlayState.m_nNextOrder = 0;
+	m_PlayState.m_nCurrentOrder = 0;
+	m_PlayState.m_nPattern = 0;
+	m_PlayState.m_nBufferCount = 0;
+	m_PlayState.m_dBufferDiff = 0;
+	m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+	m_PlayState.m_nNextRow = 0;
+	m_PlayState.m_nRow = 0;
 
 	RecalculateSamplesPerTick();
-	visitedSongRows.Initialize(true);
+	m_PlayState.visitedSongRows.Initialize(true);
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 
@@ -986,10 +986,10 @@ BOOL CSoundFile::Destroy()
 {
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		Chn[i].pModInstrument = nullptr;
-		Chn[i].pModSample = nullptr;
-		Chn[i].pCurrentSample = nullptr;
-		Chn[i].nLength = 0;
+		m_PlayState.Chn[i].pModInstrument = nullptr;
+		m_PlayState.Chn[i].pModSample = nullptr;
+		m_PlayState.Chn[i].pCurrentSample = nullptr;
+		m_PlayState.Chn[i].nLength = 0;
 	}
 
 	Patterns.DestroyPatterns();
@@ -1058,9 +1058,9 @@ UINT CSoundFile::GetCurrentPos() const
 {
 	UINT pos = 0;
 
-	for (UINT i=0; i<m_nCurrentOrder; i++) if (Order[i] < Patterns.Size())
+	for (UINT i=0; i<m_PlayState.m_nCurrentOrder; i++) if (Order[i] < Patterns.Size())
 		pos += Patterns[Order[i]].GetNumRows();
-	return pos + m_nRow;
+	return pos + m_PlayState.m_nRow;
 }
 
 double CSoundFile::GetCurrentBPM() const
@@ -1070,11 +1070,11 @@ double CSoundFile::GetCurrentBPM() const
 
 	if (m_nTempoMode == tempo_mode_modern)			// With modern mode, we trust that true bpm
 	{												// is close enough to what user chose.
-		bpm = static_cast<double>(m_nMusicTempo);	// This avoids oscillation due to tick-to-tick corrections.
+		bpm = static_cast<double>(m_PlayState.m_nMusicTempo);	// This avoids oscillation due to tick-to-tick corrections.
 	} else
 	{																	//with other modes, we calculate it:
-		double ticksPerBeat = m_nMusicSpeed * m_nCurrentRowsPerBeat;	//ticks/beat = ticks/row  * rows/beat
-		double samplesPerBeat = m_nSamplesPerTick * ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
+		double ticksPerBeat = m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat;	//ticks/beat = ticks/row  * rows/beat
+		double samplesPerBeat = m_PlayState.m_nSamplesPerTick * ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
 		bpm =  m_MixerSettings.gdwMixingFreq/samplesPerBeat * 60;		//beats/sec  = samps/sec  / samps/beat
 	}																	//beats/min  =  beats/sec * 60
 
@@ -1088,21 +1088,21 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	ModChannel::ResetFlags resetMask = (!nPos) ? ModChannel::resetSetPosFull : ModChannel::resetSetPosBasic;
 
 	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
-		Chn[i].Reset(resetMask, *this, i);
+		m_PlayState.Chn[i].Reset(resetMask, *this, i);
 
 	if(nPos == 0)
 	{
-		m_nGlobalVolume = m_nDefaultGlobalVolume;
-		m_nMusicSpeed = m_nDefaultSpeed;
-		m_nMusicTempo = m_nDefaultTempo;
+		m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
+		m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
+		m_PlayState.m_nMusicTempo = m_nDefaultTempo;
 
 		// do not ramp global volume when starting playback
-		m_lHighResRampingGlobalVolume = m_nGlobalVolume<<VOLUMERAMPPRECISION;
-		m_nGlobalVolumeDestination = m_nGlobalVolume;
-		m_nSamplesToGlobalVolRampDest = 0;
-		m_nGlobalVolumeRampAmount = 0;
+		m_PlayState.m_lHighResRampingGlobalVolume = m_PlayState.m_nGlobalVolume<<VOLUMERAMPPRECISION;
+		m_PlayState.m_nGlobalVolumeDestination = m_PlayState.m_nGlobalVolume;
+		m_PlayState.m_nSamplesToGlobalVolRampDest = 0;
+		m_PlayState.m_nGlobalVolumeRampAmount = 0;
 
-		visitedSongRows.Initialize(true);
+		m_PlayState.visitedSongRows.Initialize(true);
 	}
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	for (nPattern = 0; nPattern < Order.size(); nPattern++)
@@ -1146,13 +1146,13 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 			}
 		}
 	}
-	m_nNextOrder = nPattern;
-	m_nNextRow = nRow;
-	m_nTickCount = m_nMusicSpeed;
-	m_nBufferCount = 0;
-	m_nPatternDelay = 0;
-	m_nFrameDelay = 0;
-	m_nNextPatStartRow = 0;
+	m_PlayState.m_nNextOrder = nPattern;
+	m_PlayState.m_nNextRow = nRow;
+	m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+	m_PlayState.m_nBufferCount = 0;
+	m_PlayState.m_nPatternDelay = 0;
+	m_PlayState.m_nFrameDelay = 0;
+	m_PlayState.m_nNextPatStartRow = 0;
 	//m_nSeqOverride = 0;
 }
 
@@ -1165,20 +1165,20 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 	if ((nOrder >= Order.size()) || (Order[nOrder] >= Patterns.Size())) return;
 	for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 	{
-		Chn[j].nPeriod = 0;
-		Chn[j].nNote = NOTE_NONE;
-		Chn[j].nPortamentoDest = 0;
-		Chn[j].nCommand = 0;
-		Chn[j].nPatternLoopCount = 0;
-		Chn[j].nPatternLoop = 0;
-		Chn[j].nVibratoPos = Chn[j].nTremoloPos = Chn[j].nPanbrelloPos = 0;
+		m_PlayState.Chn[j].nPeriod = 0;
+		m_PlayState.Chn[j].nNote = NOTE_NONE;
+		m_PlayState.Chn[j].nPortamentoDest = 0;
+		m_PlayState.Chn[j].nCommand = 0;
+		m_PlayState.Chn[j].nPatternLoopCount = 0;
+		m_PlayState.Chn[j].nPatternLoop = 0;
+		m_PlayState.Chn[j].nVibratoPos = m_PlayState.Chn[j].nTremoloPos = m_PlayState.Chn[j].nPanbrelloPos = 0;
 		//IT compatibility 15. Retrigger
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			Chn[j].nRetrigCount = 0;
-			Chn[j].nRetrigParam = 1;
+			m_PlayState.Chn[j].nRetrigCount = 0;
+			m_PlayState.Chn[j].nRetrigParam = 1;
 		}
-		Chn[j].nTremorCount = 0;
+		m_PlayState.Chn[j].nTremorCount = 0;
 	}
 
 #ifndef NO_VST
@@ -1191,14 +1191,14 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		SetCurrentPos(0);
 	} else
 	{
-		m_nNextOrder = nOrder;
-		m_nRow = m_nNextRow = 0;
-		m_nPattern = 0;
-		m_nTickCount = m_nMusicSpeed;
-		m_nBufferCount = 0;
-		m_nPatternDelay = 0;
-		m_nFrameDelay = 0;
-		m_nNextPatStartRow = 0;
+		m_PlayState.m_nNextOrder = nOrder;
+		m_PlayState.m_nRow = m_PlayState.m_nNextRow = 0;
+		m_PlayState.m_nPattern = 0;
+		m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+		m_PlayState.m_nBufferCount = 0;
+		m_PlayState.m_nPatternDelay = 0;
+		m_PlayState.m_nFrameDelay = 0;
+		m_PlayState.m_nNextPatStartRow = 0;
 	}
 
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
@@ -1289,11 +1289,11 @@ void CSoundFile::ResetChannels()
 //------------------------------
 {
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
-	m_nBufferCount = 0;
+	m_PlayState.m_nBufferCount = 0;
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		Chn[i].nROfs = Chn[i].nLOfs = 0;
-		Chn[i].nLength = 0;
+		m_PlayState.Chn[i].nROfs = m_PlayState.Chn[i].nLOfs = 0;
+		m_PlayState.Chn[i].nLength = 0;
 	}
 }
 
@@ -1335,13 +1335,13 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	} else
 	{
 		if(nRow >= Patterns[nPat].GetNumRows()) nRow = 0;
-		m_nPattern = nPat;
-		m_nRow = m_nNextRow = nRow;
-		m_nTickCount = m_nMusicSpeed;
-		m_nPatternDelay = 0;
-		m_nFrameDelay = 0;
-		m_nBufferCount = 0;
-		m_nNextPatStartRow = 0;
+		m_PlayState.m_nPattern = nPat;
+		m_PlayState.m_nRow = m_PlayState.m_nNextRow = nRow;
+		m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+		m_PlayState.m_nPatternDelay = 0;
+		m_PlayState.m_nFrameDelay = 0;
+		m_PlayState.m_nBufferCount = 0;
+		m_PlayState.m_nNextPatStartRow = 0;
 		m_SongFlags.set(SONG_PATTERNLOOP);
 	}
 }
@@ -1353,13 +1353,13 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 {
 	if(!Patterns.IsValidPat(nPat)) nPat = 0;
 	if(nRow >= Patterns[nPat].GetNumRows()) nRow = 0;
-	m_nPattern = nPat;
-	m_nRow = m_nNextRow = nRow;
-	m_nTickCount = m_nMusicSpeed;
-	m_nPatternDelay = 0;
-	m_nFrameDelay = 0;
-	m_nBufferCount = 0;
-	m_nNextPatStartRow = 0;
+	m_PlayState.m_nPattern = nPat;
+	m_PlayState.m_nRow = m_PlayState.m_nNextRow = nRow;
+	m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+	m_PlayState.m_nPatternDelay = 0;
+	m_PlayState.m_nFrameDelay = 0;
+	m_PlayState.m_nBufferCount = 0;
+	m_PlayState.m_nNextPatStartRow = 0;
 	m_SongFlags.reset(SONG_PATTERNLOOP);
 }
 //end rewbs.playSongFromCursor
@@ -1415,8 +1415,8 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 }
 
 
-const char *CSoundFile::GetSampleName(UINT nSample) const
-//-------------------------------------------------------
+const char *CSoundFile::GetSampleName(SAMPLEINDEX nSample) const
+//--------------------------------------------------------------
 {
 	ASSERT(nSample <= GetNumSamples());
 	if (nSample < MAX_SAMPLES)
@@ -1446,7 +1446,7 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 	if(nChn >= MAX_BASECHANNELS) return true;
 
 	ChnSettings[nChn].Reset();
-	Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn);
+	m_PlayState.Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn);
 
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
@@ -1620,11 +1620,11 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		if(Chn[i].pModSample == &sample)
+		if(m_PlayState.Chn[i].pModSample == &sample)
 		{
-			Chn[i].nPos = 0;
-			Chn[i].nLength = 0;
-			Chn[i].pCurrentSample = nullptr;
+			m_PlayState.Chn[i].nPos = 0;
+			m_PlayState.Chn[i].nLength = 0;
+			m_PlayState.Chn[i].pCurrentSample = nullptr;
 		}
 	}
 
@@ -1863,19 +1863,19 @@ void CSoundFile::RecalculateSamplesPerTick()
 	{
 	case tempo_mode_classic:
 	default:
-		m_nSamplesPerTick = (m_MixerSettings.gdwMixingFreq * 5) / (m_nMusicTempo << 1);
+		m_PlayState.m_nSamplesPerTick = (m_MixerSettings.gdwMixingFreq * 5) / (m_PlayState.m_nMusicTempo << 1);
 		break;
 
 	case tempo_mode_modern:
-		m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq * (60 / m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat));
+		m_PlayState.m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq * (60 / m_PlayState.m_nMusicTempo / (m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat));
 		break;
 
 	case tempo_mode_alternative:
-		m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq / m_nMusicTempo;
+		m_PlayState.m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq / m_PlayState.m_nMusicTempo;
 		break;
 	}
 #ifndef MODPLUG_TRACKER
-	m_nSamplesPerTick = Util::muldivr(m_nSamplesPerTick, m_nTempoFactor, 128);
+	m_PlayState.m_nSamplesPerTick = Util::muldivr(m_PlayState.m_nSamplesPerTick, m_nTempoFactor, 128);
 #endif // !MODPLUG_TRACKER
 }
 
@@ -1902,19 +1902,19 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 		{
 			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / static_cast<double>(tempo) / (static_cast<double>(speed * rowsPerBeat)));
 			UINT bufferCount = static_cast<int>(accurateBufferCount);
-			m_dBufferDiff += accurateBufferCount - bufferCount;
+			m_PlayState.m_dBufferDiff += accurateBufferCount - bufferCount;
 
 			//tick-to-tick tempo correction:
-			if(m_dBufferDiff >= 1)
+			if(m_PlayState.m_dBufferDiff >= 1)
 			{
 				bufferCount++;
-				m_dBufferDiff--;
-			} else if(m_dBufferDiff <= -1)
+				m_PlayState.m_dBufferDiff--;
+			} else if(m_PlayState.m_dBufferDiff <= -1)
 			{
 				bufferCount--;
-				m_dBufferDiff++;
+				m_PlayState.m_dBufferDiff++;
 			}
-			ASSERT(abs(m_dBufferDiff) < 1);
+			ASSERT(abs(m_PlayState.m_dBufferDiff) < 1);
 			retval = bufferCount;
 		}
 		break;
@@ -1940,7 +1940,7 @@ double CSoundFile::GetRowDuration(UINT tempo, UINT speed) const
 	case tempo_mode_modern:
 		{
 			// If there are any row delay effects, the row length factor compensates for those.
-			return 60000.0 / static_cast<double>(tempo) / static_cast<double>(m_nCurrentRowsPerBeat);
+			return 60000.0 / static_cast<double>(tempo) / static_cast<double>(m_PlayState.m_nCurrentRowsPerBeat);
 		}
 
 	case tempo_mode_alternative:

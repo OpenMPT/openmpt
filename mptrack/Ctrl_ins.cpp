@@ -2232,14 +2232,14 @@ void CCtrlInstruments::OnEnableCutOff()
 		pIns->SetCutoff(pIns->GetCutoff(), bCutOff);
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			if (m_sndFile.Chn[i].pModInstrument == pIns)
+			if (m_sndFile.m_PlayState.Chn[i].pModInstrument == pIns)
 			{
 				if (bCutOff)
 				{
-					m_sndFile.Chn[i].nCutOff = pIns->GetCutoff();
+					m_sndFile.m_PlayState.Chn[i].nCutOff = pIns->GetCutoff();
 				} else
 				{
-					m_sndFile.Chn[i].nCutOff = 0x7F;
+					m_sndFile.m_PlayState.Chn[i].nCutOff = 0x7F;
 				}
 			}
 		}
@@ -2261,14 +2261,14 @@ void CCtrlInstruments::OnEnableResonance()
 		pIns->SetResonance(pIns->GetResonance(), bReso);
 		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			if (m_sndFile.Chn[i].pModInstrument == pIns)
+			if (m_sndFile.m_PlayState.Chn[i].pModInstrument == pIns)
 			{
 				if (bReso)
 				{
-					m_sndFile.Chn[i].nResonance = pIns->GetResonance();
+					m_sndFile.m_PlayState.Chn[i].nResonance = pIns->GetResonance();
 				} else
 				{
-					m_sndFile.Chn[i].nResonance = 0;
+					m_sndFile.m_PlayState.Chn[i].nResonance = 0;
 				}
 			}
 		}
@@ -2296,8 +2296,8 @@ void CCtrlInstruments::OnFilterModeChanged()
 			{
 				for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 				{
-					if(m_sndFile.Chn[i].pModInstrument == pIns)
-						m_sndFile.Chn[i].nFilterMode = instFiltermode;
+					if(m_sndFile.m_PlayState.Chn[i].pModInstrument == pIns)
+						m_sndFile.m_PlayState.Chn[i].nFilterMode = instFiltermode;
 				}
 			}
 		}
@@ -2414,10 +2414,10 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			{
 				for (UINT i=0; i<MAX_CHANNELS; i++)
 				{
-					if (m_sndFile.Chn[i].pModInstrument == pIns)
+					if (m_sndFile.m_PlayState.Chn[i].pModInstrument == pIns)
 					{
-						if (pIns->IsCutoffEnabled()) m_sndFile.Chn[i].nCutOff = pIns->GetCutoff();
-						if (pIns->IsResonanceEnabled()) m_sndFile.Chn[i].nResonance = pIns->GetResonance();
+						if (pIns->IsCutoffEnabled()) m_sndFile.m_PlayState.Chn[i].nCutOff = pIns->GetCutoff();
+						if (pIns->IsResonanceEnabled()) m_sndFile.m_PlayState.Chn[i].nResonance = pIns->GetResonance();
 					}
 				}
 			}

@@ -390,41 +390,24 @@ public:
 private:
 	CHANNELINDEX m_nMixStat;
 public:
-	samplecount_t m_nBufferCount;
-	double m_dBufferDiff;
-	UINT m_nTickCount;
-	UINT m_nPatternDelay, m_nFrameDelay;	// m_nPatternDelay = pattern delay (rows), m_nFrameDelay = fine pattern delay (ticks)
-	samplecount_t m_lTotalSampleCount;	// rewbs.VSTTimeInfo
-	bool m_bPositionChanged;		// Report to plugins that we jumped around in the module
-	UINT m_nSamplesPerTick;		// rewbs.betterBPM
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module // rewbs.betterBPM
-	ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
-	BYTE m_nTempoMode;			// rewbs.betterBPM
-	UINT m_nMusicSpeed, m_nMusicTempo;	// Current speed and tempo
-	ROWINDEX m_nNextRow, m_nRow;
-	ROWINDEX m_nNextPatStartRow; // for FT2's E60 bug
-	PATTERNINDEX m_nPattern;
-	ORDERINDEX m_nCurrentOrder, m_nNextOrder, m_nRestartPos, m_nSeqOverride;
+	BYTE m_nTempoMode;
+	ORDERINDEX m_nRestartPos;
 
 #ifdef MODPLUG_TRACKER
 	// Lock playback between two orders. Lock is active if lock start != ORDERINDEX_INVALID).
 	ORDERINDEX m_lockOrderStart, m_lockOrderEnd;
 #endif // MODPLUG_TRACKER
 
-	UINT m_nGlobalVolume, m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
-		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
-	long m_lHighResRampingGlobalVolume;
+	UINT m_nSamplePreAmp, m_nVSTiVolume;
 	bool IsGlobalVolumeUnset() const { return IsFirstTick(); }
 #ifndef MODPLUG_TRACKER
 	UINT m_nFreqFactor; // Pitch shift factor (128 = no pitch shifting). Interesting ModPlug Player relict, but unused in OpenMPT.
 	UINT m_nTempoFactor; // Tempo factor (128 = no tempo adjustment). Interesting ModPlug Player relict, but unused in OpenMPT.
 #endif
-	UINT m_nOldGlbVolSlide;
-	LONG m_nMinPeriod, m_nMaxPeriod;	// min period = highest possible frequency, max period = lowest possible frequency
-	LONG m_nRepeatCount;	// -1 means repeat infinitely.
-	UINT m_nMaxOrderPosition;
-	CHANNELINDEX ChnMix[MAX_CHANNELS];							// Channels to be mixed
-	ModChannel Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
+	int32 m_nMinPeriod, m_nMaxPeriod;	// min period = highest possible frequency, max period = lowest possible frequency
+	int32 m_nRepeatCount;	// -1 means repeat infinitely.
+	ORDERINDEX m_nMaxOrderPosition;
 	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
 	CPatternContainer Patterns;							// Patterns
 	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x of the current sequence.
@@ -435,24 +418,76 @@ public:
 	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
-#ifdef MODPLUG_TRACKER
-	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
-#endif // MODPLUG_TRACKER
 
 	uint32 m_dwCreatedWithVersion;
 	uint32 m_dwLastSavedWithVersion;
-
-#ifdef MODPLUG_TRACKER
-	std::vector<PatternCuePoint> m_PatternCuePoints;	// For WAV export (writing pattern positions to file)
-#endif // MODPLUG_TRACKER
 
 protected:
 	// Mix level stuff
 	CSoundFilePlayConfig m_PlayConfig;
 	mixLevels m_nMixLevels;
 
-	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
-	RowVisitor visitedSongRows;
+public:
+	struct PlayState
+	{
+		friend class CSoundFile;
+	protected:
+		samplecount_t m_nBufferCount;
+		double m_dBufferDiff;
+	public:
+		samplecount_t m_lTotalSampleCount;
+
+	public:
+		uint32 m_nTickCount;
+	protected:
+		uint32 m_nPatternDelay, m_nFrameDelay;	// m_nPatternDelay = pattern delay (rows), m_nFrameDelay = fine pattern delay (ticks)
+		uint32 m_nSamplesPerTick;
+	public:
+		ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
+		uint32 m_nMusicSpeed, m_nMusicTempo;	// Current speed and tempo
+
+		// Playback position
+		ROWINDEX m_nRow;
+		ROWINDEX m_nNextRow;
+	protected:
+		ROWINDEX m_nNextPatStartRow; // for FT2's E60 bug
+	public:
+		PATTERNINDEX m_nPattern;
+		ORDERINDEX m_nCurrentOrder, m_nNextOrder, m_nSeqOverride;
+
+		// Global volume
+	public:
+		uint32 m_nGlobalVolume;
+	protected:
+		uint32 m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
+			m_nGlobalVolumeDestination;
+		int32 m_lHighResRampingGlobalVolume;
+		uint32 m_nOldGlbVolSlide;
+
+	public:
+		bool m_bPositionChanged;		// Report to plugins that we jumped around in the module
+
+	protected:
+		CHANNELINDEX ChnMix[MAX_CHANNELS];					// Channels to be mixed
+	public:
+		ModChannel Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
+
+	protected:
+		// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
+		RowVisitor visitedSongRows;
+		bool m_bPatternTransitionOccurred;
+
+	public:
+		PlayState(CSoundFile &owner) : visitedSongRows(owner) { }
+	};
+
+	PlayState m_PlayState;
+
+#ifdef MODPLUG_TRACKER
+	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
+
+	std::vector<PatternCuePoint> m_PatternCuePoints;	// For WAV export (writing pattern positions to file)
+#endif // MODPLUG_TRACKER
 
 public:
 
@@ -478,7 +513,6 @@ public:
 
 	bool m_bIsRendering;
 	TimingInfo m_TimingInfo; // only valid if !m_bIsRendering
-	bool m_bPatternTransitionOccurred;
 
 private:
 	// logging and user interaction
@@ -537,8 +571,8 @@ public:
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
-	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
-	ORDERINDEX GetCurrentOrder() const { return m_nCurrentOrder; }
+	PATTERNINDEX GetCurrentPattern() const { return m_PlayState.m_nPattern; }
+	ORDERINDEX GetCurrentOrder() const { return m_PlayState.m_nCurrentOrder; }
 	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
 
 	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr);
@@ -558,17 +592,17 @@ public:
 	void SetCurrentOrder(ORDERINDEX nOrder);
 	std::string GetTitle() const { return songName; }
 	bool SetTitle(const std::string &newTitle); // Return true if title was changed.
-	const char *GetSampleName(UINT nSample) const;
+	const char *GetSampleName(SAMPLEINDEX nSample) const;
 	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;
-	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
-	UINT GetMusicTempo() const { return m_nMusicTempo; }
-	bool IsFirstTick() const { return (m_lTotalSampleCount == 0); }
+	UINT GetMusicSpeed() const { return m_PlayState.m_nMusicSpeed; }
+	UINT GetMusicTempo() const { return m_PlayState.m_nMusicTempo; }
+	bool IsFirstTick() const { return (m_PlayState.m_lTotalSampleCount == 0); }
 
 	//Get modlength in various cases: total length, length to
 	//specific order&row etc. Return value is in seconds.
 	GetLengthType GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target = GetLengthTarget());
 
-	void InitializeVisitedRows() { visitedSongRows.Initialize(true); }
+	void InitializeVisitedRows() { m_PlayState.visitedSongRows.Initialize(true); }
 
 public:
 	//Returns song length in seconds.
@@ -685,8 +719,8 @@ private:
 	void ProcessDSP(std::size_t countChunk);
 	void ProcessPlugins(UINT nCount);
 public:
-	samplecount_t GetTotalSampleCount() const { return m_lTotalSampleCount; }
-	bool HasPositionChanged() { bool b = m_bPositionChanged; m_bPositionChanged = false; return b; }
+	samplecount_t GetTotalSampleCount() const { return m_PlayState.m_lTotalSampleCount; }
+	bool HasPositionChanged() { bool b = m_PlayState.m_bPositionChanged; m_PlayState.m_bPositionChanged = false; return b; }
 	bool IsRenderingToDisc() const { return m_bIsRendering; }
 
 	void PrecomputeSampleLoops(bool updateChannels = false);
@@ -789,7 +823,7 @@ protected:
 
 	UINT GetNumTicksOnCurrentRow() const
 	{
-		return (m_nMusicSpeed  + m_nFrameDelay) * MAX(m_nPatternDelay, 1);
+		return (m_PlayState.m_nMusicSpeed  + m_PlayState.m_nFrameDelay) * MAX(m_PlayState.m_nPatternDelay, 1);
 	}
 
 public:

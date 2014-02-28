@@ -2222,9 +2222,9 @@ void CViewSample::On8BitConvert()
 				p[i] = (signed char) ((*((short int *)(p+i*2))) / 256);
 			}
 			sample.uFlags.reset(CHN_16BIT);
-			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++) if (sndFile.Chn[j].pModSample == &sample)
+			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++) if (sndFile.m_PlayState.Chn[j].pModSample == &sample)
 			{
-				sndFile.Chn[j].dwFlags.reset(CHN_16BIT);
+				sndFile.m_PlayState.Chn[j].dwFlags.reset(CHN_16BIT);
 			}
 
 			sample.PrecomputeLoops(sndFile, false);
@@ -2415,7 +2415,7 @@ void CViewSample::NoteOff(ModCommand::NOTE note)
 {
 	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 	sndFile.KeyOff(noteChannel[note - NOTE_MIN]);
-	sndFile.Chn[noteChannel[note - NOTE_MIN]].dwFlags.set(CHN_NOTEFADE);
+	sndFile.m_PlayState.Chn[noteChannel[note - NOTE_MIN]].dwFlags.set(CHN_NOTEFADE);
 	noteChannel[note - NOTE_MIN] = CHANNELINDEX_INVALID;
 }
 

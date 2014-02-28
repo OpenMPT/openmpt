@@ -28,8 +28,8 @@ CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double
 	if(sampleRate <= 0) 
 		sampleRate = 8363;
 
-	m_nSpeed = sndFile.m_nMusicSpeed;
-	m_nTempo = sndFile.m_nMusicTempo;
+	m_nSpeed = sndFile.m_PlayState.m_nMusicSpeed;
+	m_nTempo = sndFile.m_PlayState.m_nMusicTempo;
 
 	// Sample rate will not change. We can calculate original duration once and disgard sampleRate.
 	m_lMsOrig = static_cast<ULONGLONG>(1000.0 * ((double)smp.nLength / sampleRate));
@@ -151,7 +151,7 @@ void CPSRatioCalc::CalcMs()
 
 void CPSRatioCalc::CalcRows()
 {
-	double rowTime = sndFile.GetRowDuration(sndFile.m_nMusicTempo, sndFile.m_nMusicSpeed);
+	double rowTime = sndFile.GetRowDuration(sndFile.m_PlayState.m_nMusicTempo, sndFile.m_PlayState.m_nMusicSpeed);
 
 	m_dRowsOrig = (double)m_lMsOrig / rowTime;
 	m_dRowsNew = m_dRowsOrig*(m_dRatio / 100);

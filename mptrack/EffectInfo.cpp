@@ -188,8 +188,8 @@ bool EffectInfo::GetEffectName(LPSTR pszDescription, ModCommand::COMMAND command
 			case CMD_SMOOTHMIDI:
 				if (param < 0x80 && nChn != CHANNELINDEX_INVALID)
 				{
-					macroIndex = sndFile.Chn[nChn].nActiveMacro;
-					chanSpec.Format(": currently %d: ", sndFile.Chn[nChn].nActiveMacro);
+					macroIndex = sndFile.m_PlayState.Chn[nChn].nActiveMacro;
+					chanSpec.Format(": currently %d: ", sndFile.m_PlayState.Chn[nChn].nActiveMacro);
 				}
 				else
 				{
