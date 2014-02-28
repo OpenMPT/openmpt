@@ -38,7 +38,7 @@
 
 #elif defined(__GNUC__) || defined(__clang__)
 
-#if !defined(MPT_EMSCRIPTEN)
+#if !defined(__EMSCRIPTEN__)
 #if defined(_WIN32)
 #define LIBOPENMPT_API_HELPER_EXPORT __declspec(dllexport)
 #define LIBOPENMPT_API_HELPER_IMPORT __declspec(dllimport)
@@ -82,7 +82,8 @@
 #endif
 #endif
 
-#if defined(MPT_EMSCRIPTEN)
+#if defined(__EMSCRIPTEN__)
+
 /* Only the C API is supported for emscripten. Disable the C++ API. */
 #undef LIBOPENMPT_CXX_API
 #define LIBOPENMPT_CXX_API LIBOPENMPT_API_HELPER_LOCAL 
