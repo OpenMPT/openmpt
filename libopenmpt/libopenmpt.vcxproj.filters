@@ -502,5 +502,8 @@
     <ClCompile Include="libopenmpt_ext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\Logging.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

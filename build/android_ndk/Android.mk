@@ -17,6 +17,7 @@ LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES := \
 	common/AudioCriticalSection.cpp \
 	common/stdafx.cpp \
+	common/Logging.cpp \
 	common/misc_util.cpp \
 	common/mptPathString.cpp \
 	common/mptString.cpp \

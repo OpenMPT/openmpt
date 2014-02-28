@@ -41,27 +41,47 @@ public:
 };
 
 
+
+namespace mpt
+{
+namespace log
+{
+
+
 #ifndef NO_LOGGING
-void MPT_PRINTF_FUNC(1,2) Log(const char *format, ...);
-void Log(const std::string &text);
-void Log(const std::wstring &text);
+
+
+class Context
+{
+public:
+	const char * const file;
+	const int line;
+	const char * const function;
+public:
+	Context(const char *file, int line, const char *function);
+	Context(const Context &c);
+}; // class Context
+
+#define MPT_LOG_CURRENTCONTEXT() ::mpt::log::Context( __FILE__ , __LINE__ , __FUNCTION__ )
+
+
 class Logger
 {
 private:
-	const char * const file;
-	int const line;
-	const char * const function;
+	const Context &context;
 public:
-	Logger(const char *file_, int line_, const char *function_) : file(file_), line(line_), function(function_) {}
+	Logger(const Context &context) : context(context) {}
 	void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...);
 	void operator () (const std::string &text);
 	void operator () (const std::wstring &text);
 };
-#define Log Logger(__FILE__, __LINE__, __FUNCTION__)
+
+#define Log ::mpt::log::Logger(MPT_LOG_CURRENTCONTEXT())
+
+
 #else // !NO_LOGGING
-static inline void MPT_PRINTF_FUNC(1,2) Log(const char * /*format*/, ...) {}
-static inline void Log(const std::string & /*text*/ ) {}
-static inline void Log(const std::wstring & /*text*/ ) {}
+
+
 class Logger
 {
 public:
@@ -69,9 +89,12 @@ public:
 	inline void operator () (const std::string & /*text*/ ) {}
 	inline void operator () (const std::wstring & /*text*/ ) {}
 };
-#define Log if(true) {} else Logger() // completely compile out arguments to Log() so that they do not even get evaluated
+
+#define Log if(true) {} else ::mpt::log::Logger() // completely compile out arguments to Log() so that they do not even get evaluated
+
+
 #endif // NO_LOGGING
 
-// just #undef Log in files, where this Log redefinition causes problems
-//#undef Log
 
+} // namespace log
+} // namespace mpt
