@@ -499,6 +499,9 @@
     <ClCompile Include="..\soundlib\plugins\DmoToVst.cpp">
       <Filter>Source Files\soundlib\plugins</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\Logging.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
