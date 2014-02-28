@@ -579,10 +579,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 
 					if((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && (p->param & 0xF0) == 0xD0 && paramLo < numTicks)
 					{
-						startTick = p->param & 0x0F;
+						startTick = paramLo;
 					} else if(p->command == CMD_DELAYCUT && paramHi < numTicks)
 					{
-						startTick = p->param >> 4;
+						startTick = paramHi;
 					} else if(p->command == CMD_OFFSET && p->IsNote())
 					{
 						// TODO: xParam not supported! (Note: xParam doesn't use hiOffset)
@@ -596,7 +596,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 					|| pChn->dwFlags[CHN_PINGPONGFLAG]	// Ping-pong loops are not supported for now.
 					|| (p->command != CMD_NONE &&		// Sample stop commands.
 						(((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && (p->param & 0xF0) == 0xC0 && paramLo < numTicks)
-						|| (p->command == CMD_DELAYCUT && (p->command & 0x0F) != 0 && startTick + paramLo < numTicks)
+						|| (p->command == CMD_DELAYCUT && paramHi != 0 && startTick + paramLo < numTicks)
 						|| p->command == CMD_TONEPORTAMENTO || p->command == CMD_TONEPORTAVOL || p->command == CMD_PORTAMENTOUP || p->command == CMD_PORTAMENTODOWN))
 					|| p->volcmd == VOLCMD_TONEPORTAMENTO || p->volcmd == VOLCMD_PORTAUP || p->volcmd == VOLCMD_PORTADOWN)
 				{
