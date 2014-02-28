@@ -1812,11 +1812,20 @@ BOOL CSoundFile::ReadNote()
 			pChn->nCalcVolume = vol;	// Update calculated volume for MIDI macros
 
 			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
+			if(IsCompatibleMode(TRK_FASTTRACKER2)) Clamp(pChn->nPeriod, 1, 31999);
 			period = pChn->nPeriod;
-			// TODO Glissando effect is reset after portamento! What would this sound like without the CHN_PORTAMENTO flag?
-			if((pChn->dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO))
+			
+			// When glissando mode is set to semitones, clamp to the next halftone.
+			if((pChn->dwFlags[CHN_GLISSANDO] && IsCompatibleMode(TRK_ALLTRACKERS))
+				|| ((pChn->dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO) && !IsCompatibleMode(TRK_ALLTRACKERS)))
 			{
-				period = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC5Speed);
+				if(period != pChn->cachedPeriod)
+				{
+					// Only recompute this whole thing in case the base period has changed.
+					pChn->cachedPeriod = period;
+					pChn->glissandoPeriod = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC5Speed);
+				}
+				period = pChn->glissandoPeriod;
 			}
 
 			ProcessArpeggio(nChn, period, arpeggioSteps);
