@@ -583,9 +583,9 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile &sndFil
 	// Update mixing flags...
 	for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
 	{
-		if(sndFile.Chn[nChn].pModInstrument == &ins)
+		if(sndFile.m_PlayState.Chn[nChn].pModInstrument == &ins)
 		{
-			sndFile.Chn[nChn].GetEnvelope(envelope).flags.set(flags, enable);
+			sndFile.m_PlayState.Chn[nChn].GetEnvelope(envelope).flags.set(flags, enable);
 		}
 	}
 
@@ -886,7 +886,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	m_dcMemMain.FillRect(&m_rcClient, CBrush::FromHandle(CMainFrame::brushBlack));
 	if (m_bGrid)
 	{
-		DrawGrid(&m_dcMemMain, pModDoc->GetrSoundFile().m_nMusicSpeed);
+		DrawGrid(&m_dcMemMain, pModDoc->GetrSoundFile().m_PlayState.m_nMusicSpeed);
 	}
 
 	// Middle line (half volume or pitch / panning center)

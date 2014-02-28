@@ -1680,7 +1680,7 @@ void CViewPattern::ResetChannel(CHANNELINDEX chn)
 
 	const bool isMuted = pModDoc->IsChannelMuted(chn);
 	if(!isMuted) pModDoc->MuteChannel(chn, true);
-	pSndFile->Chn[chn].Reset(ModChannel::resetTotal, *pSndFile, chn);
+	pSndFile->m_PlayState.Chn[chn].Reset(ModChannel::resetTotal, *pSndFile, chn);
 	if(!isMuted) pModDoc->MuteChannel(chn, false);
 }
 
@@ -2459,10 +2459,10 @@ void CViewPattern::PatternStep(ROWINDEX row)
 		// Cut instruments/samples in virtual channels
 		for(CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
 		{
-			pSndFile->Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+			pSndFile->m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
 		pSndFile->LoopPattern(m_nPattern);
-		pSndFile->m_nNextRow = row == ROWINDEX_INVALID ? GetCurrentRow() : row;
+		pSndFile->m_PlayState.m_nNextRow = row == ROWINDEX_INVALID ? GetCurrentRow() : row;
 		pSndFile->m_SongFlags.reset(SONG_PAUSED);
 		pSndFile->m_SongFlags.set(SONG_STEP);
 
@@ -3657,7 +3657,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	ROWINDEX nRow = GetCurrentRow();
 	PATTERNINDEX nPattern = m_nPattern;
 	if(IsLiveRecord())
-		SetEditPos(*pSndFile, nRow, nPattern, pSndFile->m_nRow, pSndFile->m_nPattern);
+		SetEditPos(*pSndFile, nRow, nPattern, pSndFile->m_PlayState.m_nRow, pSndFile->m_PlayState.m_nPattern);
 
 	ModCommand *pRow = pSndFile->Patterns[nPattern].GetpModCommand(nRow, nChn);
 
@@ -3685,7 +3685,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 
 		//Figure out which plug param (if any) is controllable using the active macro on this channel.
 		long activePlugParam  = -1;
-		BYTE activeMacro      = pSndFile->Chn[nChn].nActiveMacro;
+		BYTE activeMacro      = pSndFile->m_PlayState.Chn[nChn].nActiveMacro;
 
 		if (pSndFile->m_MidiCfg.GetParameteredMacroType(activeMacro) == sfx_plug)
 		{
@@ -3699,7 +3699,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 			int foundMacro = pSndFile->m_MidiCfg.FindMacroForParam(paramIndex);
 			if (foundMacro >= 0)
 			{
-				pSndFile->Chn[nChn].nActiveMacro = foundMacro;
+				pSndFile->m_PlayState.Chn[nChn].nActiveMacro = foundMacro;
 				if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) //we overwrite existing Zxx and \xx only.
 				{
 					pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
@@ -3737,7 +3737,7 @@ ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) 
 		if(m_nPlayPat != PATTERNINDEX_INVALID)
 			SetEditPos(rSf, editpos.row, editpos.pattern, m_nPlayRow, m_nPlayPat);
 		else
-			SetEditPos(rSf, editpos.row, editpos.pattern, rSf.m_nRow, rSf.m_nPattern);
+			SetEditPos(rSf, editpos.row, editpos.pattern, rSf.m_PlayState.m_nRow, rSf.m_PlayState.m_nPattern);
 	} else
 	{
 		editpos.pattern = m_nPattern;
@@ -5178,7 +5178,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 			{
 				newcmd.command = (sndFile.TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 				UINT maxSpeed = 0x0F;
-				if(sndFile.m_nMusicSpeed > 0) maxSpeed = MIN(0x0F, sndFile.m_nMusicSpeed - 1);
+				if(sndFile.m_PlayState.m_nMusicSpeed > 0) maxSpeed = MIN(0x0F, sndFile.m_PlayState.m_nMusicSpeed - 1);
 				newcmd.param = 0xD0 + MIN(maxSpeed, m_nPlayTick);
 			}
 		}
@@ -5612,8 +5612,8 @@ void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
 		return;
 	}
 
-	const ROWINDEX currentTick = sndFile->m_nMusicSpeed * row + m_nPlayTick;
-	const ROWINDEX ticksPerNote = TrackerSettings::Instance().recordQuantizeRows * sndFile->m_nMusicSpeed;
+	const ROWINDEX currentTick = sndFile->m_PlayState.m_nMusicSpeed * row + m_nPlayTick;
+	const ROWINDEX ticksPerNote = TrackerSettings::Instance().recordQuantizeRows * sndFile->m_PlayState.m_nMusicSpeed;
 	
 	// Previous quantization step
 	const ROWINDEX quantLow = (currentTick / ticksPerNote) * ticksPerNote;
@@ -5622,10 +5622,10 @@ void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
 
 	if(currentTick - quantLow < quantHigh - currentTick)
 	{
-		row = quantLow / sndFile->m_nMusicSpeed;
+		row = quantLow / sndFile->m_PlayState.m_nMusicSpeed;
 	} else
 	{
-		row = quantHigh / sndFile->m_nMusicSpeed;
+		row = quantHigh / sndFile->m_PlayState.m_nMusicSpeed;
 	}
 	
 	if(!sndFile->Patterns[pat].IsValidRow(row))

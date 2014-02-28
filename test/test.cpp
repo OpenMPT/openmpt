@@ -986,7 +986,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 139);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nGlobalVolume, 128);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE);
@@ -1182,7 +1182,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 139);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nGlobalVolume, 128);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
@@ -1439,7 +1439,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "S3M_Test__________________X");
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 33);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 254);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nGlobalVolume, 32 * 4);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 32 * 4);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 48);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 16);
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);

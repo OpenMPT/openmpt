@@ -146,7 +146,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 				// Time signature. numerator = rows per beats / rows pear measure (should sound somewhat logical to you).
 				// the denominator is a bit more tricky, since it cannot be set explicitely. so we just assume quarters for now.
-				timeInfo.timeSigNumerator = sndFile.m_nCurrentRowsPerMeasure / MAX(sndFile.m_nCurrentRowsPerBeat, 1);
+				timeInfo.timeSigNumerator = sndFile.m_PlayState.m_nCurrentRowsPerMeasure / MAX(sndFile.m_PlayState.m_nCurrentRowsPerBeat, 1);
 				timeInfo.timeSigDenominator = 4; //gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
 		}

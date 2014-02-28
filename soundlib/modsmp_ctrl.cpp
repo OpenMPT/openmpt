@@ -32,7 +32,7 @@ void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength,
 
 	CriticalSection cs;
 
-	ctrlChn::ReplaceSample(sndFile.Chn, &smp, pNewSample, nNewLength, setFlags, resetFlags);
+	ctrlChn::ReplaceSample(sndFile.m_PlayState.Chn, &smp, pNewSample, nNewLength, setFlags, resetFlags);
 	smp.pSample = pNewSample;
 	smp.nLength = nNewLength;
 	ModSample::FreeSample(pOldSmp);
@@ -288,10 +288,10 @@ bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sndFile)
 	CriticalSection cs;
 
 	// Update channels with new loop values
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++) if((sndFile.Chn[i].pModSample == &smp) && sndFile.Chn[i].nLength != 0)
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++) if((sndFile.m_PlayState.Chn[i].pModSample == &smp) && sndFile.m_PlayState.Chn[i].nLength != 0)
 	{
 		bool looped = false, bidi = false;
-		ModChannel &chn = sndFile.Chn[i];
+		ModChannel &chn = sndFile.m_PlayState.Chn[i];
 
 		if(smp.nSustainStart < smp.nSustainEnd && smp.nSustainEnd <= smp.nLength && smp.uFlags[CHN_SUSTAINLOOP] && !chn.dwFlags[CHN_KEYOFF])
 		{
@@ -498,9 +498,9 @@ float RemoveDCOffset(ModSample &smp,
 		smp.nGlobalVol = MIN((WORD)(smp.nGlobalVol / dAmplify), 64);
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
-			if(sndFile.Chn[i].pModSample == &smp)
+			if(sndFile.m_PlayState.Chn[i].pModSample == &smp)
 			{
-				sndFile.Chn[i].nGlobalVol = smp.nGlobalVol;
+				sndFile.m_PlayState.Chn[i].nGlobalVol = smp.nGlobalVol;
 			}
 		}
 	}
@@ -712,9 +712,9 @@ bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode convers
 	smp.uFlags.reset(CHN_STEREO);
 	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		if(sndFile.Chn[i].pModSample == &smp)
+		if(sndFile.m_PlayState.Chn[i].pModSample == &smp)
 		{
-			sndFile.Chn[i].dwFlags.reset(CHN_STEREO);
+			sndFile.m_PlayState.Chn[i].dwFlags.reset(CHN_STEREO);
 		}
 	}
 

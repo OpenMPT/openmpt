@@ -902,7 +902,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 
 	// Add an entry to the notification history
 
-	Notification notification(notifyType, notifyItem, streamPosition, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern, m_pSndFile->GetMixStat());
+	Notification notification(notifyType, notifyItem, streamPosition, m_pSndFile->m_PlayState.m_nRow, m_pSndFile->m_PlayState.m_nTickCount, m_pSndFile->m_PlayState.m_nCurrentOrder, m_pSndFile->m_PlayState.m_nPattern, m_pSndFile->GetMixStat());
 
 	m_pSndFile->ResetMixStat();
 
@@ -916,7 +916,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		{
 			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
-				const ModChannel &chn = m_pSndFile->Chn[k];
+				const ModChannel &chn = m_pSndFile->m_PlayState.Chn[k];
 				if(chn.pModSample == &m_pSndFile->GetSample(smp) && chn.nLength != 0	// Corrent sample is set up on this channel
 					&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))					// And it hasn't completely faded out yet, so it's still playing
 				{
@@ -946,7 +946,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		{
 			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
-				const ModChannel &chn = m_pSndFile->Chn[k];
+				const ModChannel &chn = m_pSndFile->m_PlayState.Chn[k];
 				SmpLength pos = Notification::PosInvalid;
 
 				if(chn.pModInstrument == m_pSndFile->Instruments[ins]				// Correct instrument is set up on this channel
@@ -979,8 +979,8 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		// Pattern channel VU meters
 		for(CHANNELINDEX k = 0; k < m_pSndFile->GetNumChannels(); k++)
 		{
-			uint32 vul = m_pSndFile->Chn[k].nLeftVU;
-			uint32 vur = m_pSndFile->Chn[k].nRightVU;
+			uint32 vul = m_pSndFile->m_PlayState.Chn[k].nLeftVU;
+			uint32 vur = m_pSndFile->m_PlayState.Chn[k].nRightVU;
 			notification.pos[k] = (vul << 8) | (vur);
 		}
 	}
@@ -1282,9 +1282,9 @@ void CMainFrame::UnsetPlaybackSoundFile()
 			// Stop sample preview channels
 			for(CHANNELINDEX i = m_pSndFile->m_nChannels; i < MAX_CHANNELS; i++)
 			{
-				if(!(m_pSndFile->Chn[i].nMasterChn))
+				if(!(m_pSndFile->m_PlayState.Chn[i].nMasterChn))
 				{
-					m_pSndFile->Chn[i].nPos = m_pSndFile->Chn[i].nPosLo = m_pSndFile->Chn[i].nLength = 0;
+					m_pSndFile->m_PlayState.Chn[i].nPos = m_pSndFile->m_PlayState.Chn[i].nPosLo = m_pSndFile->m_PlayState.Chn[i].nLength = 0;
 				}
 			}
 		}
@@ -1570,7 +1570,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.Destroy();
 	m_WaveFile.Create(FileReader());
 	// Avoid global volume ramping when trying samples in the treeview.
-	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
+	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_PlayState.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_WaveFile.SetMixLevels(mixLevels_117RC3);
 	m_WaveFile.m_nSamplePreAmp = static_cast<uint32>(m_WaveFile.GetPlayConfig().getNormalSamplePreAmp());
 	m_WaveFile.m_nDefaultTempo = 125;
@@ -2143,7 +2143,7 @@ void CMainFrame::OnUpdateTime(CCmdUI *)
 
 	if(m_pSndFile != nullptr && m_pSndFile != &m_WaveFile && !m_pSndFile->IsPaused())
 	{
-		PATTERNINDEX nPat = m_pSndFile->m_nPattern;
+		PATTERNINDEX nPat = m_pSndFile->m_PlayState.m_nPattern;
 		if(m_pSndFile->Patterns.IsValidIndex(nPat))
 		{
 			if(nPat < 10) strcat(s, " ");

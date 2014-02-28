@@ -270,7 +270,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			if ((tempo >= m_sndFile.GetModSpecifications().tempoMin) && (tempo <= m_sndFile.GetModSpecifications().tempoMax) && (tempo != m_sndFile.m_nDefaultTempo))
 			{
 				m_sndFile.m_nDefaultTempo = tempo;
-				m_sndFile.m_nMusicTempo = tempo;
+				m_sndFile.m_PlayState.m_nMusicTempo = tempo;
 				m_modDoc.SetModified();
 
 				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
@@ -282,7 +282,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			const UINT gv = MAX_SLIDER_GLOBAL_VOL - m_SliderGlobalVol.GetPos();
 			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_sndFile.m_nDefaultGlobalVolume))
 			{
-				m_sndFile.m_nGlobalVolume = gv;
+				m_sndFile.m_PlayState.m_nGlobalVolume = gv;
 				m_sndFile.m_nDefaultGlobalVolume = gv;
 				m_modDoc.SetModified();
 
@@ -351,7 +351,7 @@ void CCtrlGeneral::OnTempoChanged()
 				m_bEditsLocked=true;
 				m_EditTempo.SetModify(FALSE);
 				m_sndFile.m_nDefaultTempo = n;
-				m_sndFile.m_nMusicTempo = n;
+				m_sndFile.m_PlayState.m_nMusicTempo = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				UpdateView(HINT_MODGENERAL, NULL); 
@@ -378,7 +378,7 @@ void CCtrlGeneral::OnSpeedChanged()
 				m_bEditsLocked=true;
 				m_EditSpeed.SetModify(FALSE);
 				m_sndFile.m_nDefaultSpeed = n;
-				m_sndFile.m_nMusicSpeed = n;
+				m_sndFile.m_PlayState.m_nMusicSpeed = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				m_bEditsLocked=false;
@@ -453,7 +453,7 @@ void CCtrlGeneral::OnGlobalVolChanged()
 				m_bEditsLocked = true;
 				m_EditGlobalVol.SetModify(FALSE);
 				m_sndFile.m_nDefaultGlobalVolume = n;
-				m_sndFile.m_nGlobalVolume = n;
+				m_sndFile.m_PlayState.m_nGlobalVolume = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				UpdateView(HINT_MODGENERAL, NULL);
@@ -543,7 +543,7 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText)
 				return TRUE;
 				break;
 			case IDC_SLIDER_GLOBALVOL:
-				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : wsprintf(pszText, moreRecentMixModeNote);
+				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : wsprintf(pszText, moreRecentMixModeNote);
 				return TRUE;
 				break;
 		}

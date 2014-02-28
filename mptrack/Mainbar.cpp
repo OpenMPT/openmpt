@@ -430,7 +430,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		// Update play/pause button
 		if (nCurrentTempo == -1) SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
 		// Update Speed
-		int nSpeed = pSndFile->m_nMusicSpeed;
+		int nSpeed = pSndFile->m_PlayState.m_nMusicSpeed;
 		if (nSpeed != nCurrentSpeed)
 		{
 			//rewbs.envRowGrid
@@ -445,7 +445,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			wsprintf(s, "%d", nCurrentSpeed);
 			m_EditSpeed.SetWindowText(s);
 		}
-		int nTempo = pSndFile->m_nMusicTempo;
+		int nTempo = pSndFile->m_PlayState.m_nMusicTempo;
 		if (nTempo != nCurrentTempo)
 		{
 			if (nCurrentTempo < 0) m_SpinTempo.EnableWindow(TRUE);
@@ -453,7 +453,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			wsprintf(s, "%d", nCurrentTempo);
 			m_EditTempo.SetWindowText(s);
 		}
-		int nRowsPerBeat = pSndFile->m_nCurrentRowsPerBeat;
+		int nRowsPerBeat = pSndFile->m_PlayState.m_nCurrentRowsPerBeat;
 		if (nRowsPerBeat != nCurrentRowsPerBeat)
 		{	
 			if (nCurrentRowsPerBeat < 0) m_SpinRowsPerBeat.EnableWindow(TRUE);
@@ -518,10 +518,10 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 			{
 				if (n < 0)
 				{
-					pSndFile->m_nMusicSpeed = std::max(UINT(nCurrentSpeed - 1), pSndFile->GetModSpecifications().speedMin);
+					pSndFile->m_PlayState.m_nMusicSpeed = std::max(UINT(nCurrentSpeed - 1), pSndFile->GetModSpecifications().speedMin);
 				} else
 				{
-					pSndFile->m_nMusicSpeed = std::min(UINT(nCurrentSpeed + 1), pSndFile->GetModSpecifications().speedMax);
+					pSndFile->m_PlayState.m_nMusicSpeed = std::min(UINT(nCurrentSpeed + 1), pSndFile->GetModSpecifications().speedMax);
 				}
 				m_SpinSpeed.SetPos(0);
 			}
@@ -535,7 +535,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 					}
 				} else
 				{
-					if (static_cast<ROWINDEX>(nCurrentRowsPerBeat) < pSndFile->m_nCurrentRowsPerMeasure)
+					if (static_cast<ROWINDEX>(nCurrentRowsPerBeat) < pSndFile->m_PlayState.m_nCurrentRowsPerMeasure)
 					{
 						SetRowsPerBeat(nCurrentRowsPerBeat + 1);
 					}
@@ -568,7 +568,7 @@ void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
 	if(pModDoc == nullptr || pSndFile == nullptr)
 		return;
 
-	pSndFile->m_nCurrentRowsPerBeat = nNewRPB;
+	pSndFile->m_PlayState.m_nCurrentRowsPerBeat = nNewRPB;
 	PATTERNINDEX nPat = pSndFile->GetCurrentPattern();
 	if(pSndFile->Patterns[nPat].GetOverrideSignature())
 	{

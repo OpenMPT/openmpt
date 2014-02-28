@@ -645,9 +645,9 @@ double module_impl::get_position_seconds() const {
 double module_impl::set_position_seconds( double seconds ) {
 	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ) );
 	m_sndFile->InitializeVisitedRows();
-	m_sndFile->m_nCurrentOrder = t.lastOrder;
+	m_sndFile->m_PlayState.m_nCurrentOrder = t.lastOrder;
 	m_sndFile->SetCurrentOrder( t.lastOrder );
-	m_sndFile->m_nNextRow = t.lastRow;
+	m_sndFile->m_PlayState.m_nNextRow = t.lastRow;
 	m_currentPositionSeconds = m_sndFile->GetLength( eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ) ).duration;
 	return m_currentPositionSeconds;
 }
@@ -664,9 +664,9 @@ double module_impl::set_position_order_row( std::int32_t order, std::int32_t row
 		row = 0;
 	}
 	m_sndFile->InitializeVisitedRows();
-	m_sndFile->m_nCurrentOrder = order;
+	m_sndFile->m_PlayState.m_nCurrentOrder = order;
 	m_sndFile->SetCurrentOrder( order );
-	m_sndFile->m_nNextRow = row;
+	m_sndFile->m_PlayState.m_nNextRow = row;
 	m_currentPositionSeconds = m_sndFile->GetLength( eAdjust, GetLengthTarget( order, row ) ).duration;
 	return m_currentPositionSeconds;
 }
@@ -753,10 +753,10 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 }
 
 std::int32_t module_impl::get_current_speed() const {
-	return m_sndFile->m_nMusicSpeed;
+	return m_sndFile->m_PlayState.m_nMusicSpeed;
 }
 std::int32_t module_impl::get_current_tempo() const {
-	return m_sndFile->m_nMusicTempo;
+	return m_sndFile->m_PlayState.m_nMusicTempo;
 }
 std::int32_t module_impl::get_current_order() const {
 	return m_sndFile->GetCurrentOrder();
@@ -773,7 +773,7 @@ std::int32_t module_impl::get_current_pattern() const {
 	return pattern;
 }
 std::int32_t module_impl::get_current_row() const {
-	return m_sndFile->m_nRow;
+	return m_sndFile->m_PlayState.m_nRow;
 }
 std::int32_t module_impl::get_current_playing_channels() const {
 	return m_sndFile->GetMixStat();
@@ -791,13 +791,13 @@ float module_impl::get_current_channel_vu_left( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
 		return 0.0f;
 	}
-	return m_sndFile->Chn[channel].nLeftVU * (1.0f/128.0f);
+	return m_sndFile->m_PlayState.Chn[channel].nLeftVU * (1.0f/128.0f);
 }
 float module_impl::get_current_channel_vu_right( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
 		return 0.0f;
 	}
-	return m_sndFile->Chn[channel].nRightVU * (1.0f/128.0f);
+	return m_sndFile->m_PlayState.Chn[channel].nRightVU * (1.0f/128.0f);
 }
 float module_impl::get_current_channel_vu_rear_left( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {

@@ -284,7 +284,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 	ORDERINDEX &nOrder = bShiftClick ? m_nScrollPos2nd : m_nScrollPos;
 
 	if ((sel < 0) || (sel >= sndFile.Order.GetLength()) || (!m_pParent) || (!pMainFrm)) return false;
-	if (!bIgnoreCurSel && sel == nOrder && (sel == sndFile.m_nCurrentOrder || !setPlayPos)) return true;
+	if (!bIgnoreCurSel && sel == nOrder && (sel == sndFile.m_PlayState.m_nCurrentOrder || !setPlayPos)) return true;
 	const ORDERINDEX nShownLength = GetLength();
 	InvalidateSelection();
 	nOrder = sel;
@@ -326,10 +326,10 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 
 			if(isPlaying && sndFile.m_SongFlags[SONG_PATTERNLOOP])
 			{
-				sndFile.m_nPattern = n;
-				sndFile.m_nCurrentOrder = sndFile.m_nNextOrder = m_nScrollPos;
+				sndFile.m_PlayState.m_nPattern = n;
+				sndFile.m_PlayState.m_nCurrentOrder = sndFile.m_PlayState.m_nNextOrder = m_nScrollPos;
 				pMainFrm->ResetNotificationBuffer();
-				sndFile.m_nNextRow = 0;
+				sndFile.m_PlayState.m_nNextRow = 0;
 
 				// update channel parameters and play time
 				m_pModDoc.SetElapsedTime(m_nScrollPos, 0);
@@ -339,7 +339,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 			{
 				SongFlags pausedFlags = sndFile.m_SongFlags & (SONG_PAUSED | SONG_STEP | SONG_PATTERNLOOP);
 
-				sndFile.m_nCurrentOrder = m_nScrollPos;
+				sndFile.m_PlayState.m_nCurrentOrder = m_nScrollPos;
 				sndFile.SetCurrentOrder(m_nScrollPos);
 				sndFile.m_SongFlags.set(pausedFlags);
 
@@ -720,7 +720,7 @@ void COrderList::OnPaint()
 			LineTo(dc.m_hDC, rect.right, rect.bottom);
 
 			// Drawing the 'ctrl-transition' indicator
-			if(nIndex == sndFile.m_nSeqOverride)
+			if(nIndex == sndFile.m_PlayState.m_nSeqOverride)
 			{
 				MoveToEx(dc.m_hDC, rect.left + 4, rect.bottom - 4, NULL);
 				LineTo(dc.m_hDC, rect.right - 4, rect.bottom - 4);
@@ -1402,10 +1402,10 @@ void COrderList::QueuePattern(CPoint pt)
 
 	if(order < length)
 	{
-		if(sndFile.m_nSeqOverride == order)
+		if(sndFile.m_PlayState.m_nSeqOverride == order)
 		{
 			// This item is already queued: Dequeue it.
-			sndFile.m_nSeqOverride = ORDERINDEX_INVALID;
+			sndFile.m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
 		} else
 		{
 			if(sndFile.Order.IsPositionLocked(order))
@@ -1414,7 +1414,7 @@ void COrderList::QueuePattern(CPoint pt)
 				OnUnlockPlayback();
 			}
 
-			sndFile.m_nSeqOverride = order;
+			sndFile.m_PlayState.m_nSeqOverride = order;
 		}
 		InvalidateRect(NULL, FALSE);
 	}

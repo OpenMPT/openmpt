@@ -1065,7 +1065,7 @@ void CDoWaveConvert::OnButton1()
 	}
 	m_SndFile.SetCurrentOrder(startOrder);
 	m_SndFile.GetLength(eAdjust, GetLengthTarget(startOrder, 0));	// adjust playback variables / visited rows vector
-	m_SndFile.m_nCurrentOrder = startOrder;
+	m_SndFile.m_PlayState.m_nCurrentOrder = startOrder;
 
 	if (l < max) max = l;
 

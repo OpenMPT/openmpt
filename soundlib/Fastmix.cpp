@@ -284,7 +284,7 @@ void CSoundFile::CreateStereoMix(int count)
 
 	for(uint32 nChn = 0; nChn < m_nMixChannels; nChn++)
 	{
-		ModChannel &chn = Chn[ChnMix[nChn]];
+		ModChannel &chn = m_PlayState.Chn[m_PlayState.ChnMix[nChn]];
 		uint32 functionNdx = 0;
 
 		if(!chn.pCurrentSample) continue;
@@ -317,7 +317,7 @@ void CSoundFile::CreateStereoMix(int count)
 			pbuffer = MixRearBuffer;
 
 		//Look for plugins associated with this implicit tracker channel.
-		PLUGINDEX nMixPlugin = GetBestPlugin(ChnMix[nChn], PrioritiseInstrument, RespectMutes);
+		PLUGINDEX nMixPlugin = GetBestPlugin(m_PlayState.ChnMix[nChn], PrioritiseInstrument, RespectMutes);
 
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{

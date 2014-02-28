@@ -1669,13 +1669,13 @@ void CViewPattern::UpdateXInfoText()
 		//xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
 		xtraInfo.Format("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s",
 			nChn + 1,
-			pSndFile->Chn[nChn].nGlobalVol,
-			pSndFile->Chn[nChn].nActiveMacro,
-			pSndFile->Chn[nChn].nCutOff,
-			(pSndFile->Chn[nChn].nFilterMode == FLTMODE_HIGHPASS) ? "-Hi" : "",
-			pSndFile->Chn[nChn].nResonance,
-			pSndFile->Chn[nChn].nPan,
-			pSndFile->Chn[nChn].dwFlags[CHN_SURROUND] ? "-S" : "");
+			pSndFile->m_PlayState.Chn[nChn].nGlobalVol,
+			pSndFile->m_PlayState.Chn[nChn].nActiveMacro,
+			pSndFile->m_PlayState.Chn[nChn].nCutOff,
+			(pSndFile->m_PlayState.Chn[nChn].nFilterMode == FLTMODE_HIGHPASS) ? "-Hi" : "",
+			pSndFile->m_PlayState.Chn[nChn].nResonance,
+			pSndFile->m_PlayState.Chn[nChn].nPan,
+			pSndFile->m_PlayState.Chn[nChn].dwFlags[CHN_SURROUND] ? "-S" : "");
 
 		pMainFrm->SetXInfoText(xtraInfo);
 	}
