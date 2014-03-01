@@ -296,7 +296,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue, bool moveTa
 			tickDiff = envelope->Ticks[nPoint];
 			int mintick = (nPoint) ? envelope->Ticks[nPoint - 1] : 0;
 			int maxtick = envelope->Ticks[nPoint + 1];
-			if(nPoint + 1 == (int)envelope->nNodes || moveTail) maxtick = ENVELOPE_MAX_LENGTH;
+			if(nPoint + 1 == (int)envelope->nNodes || moveTail) maxtick = Util::MaxValueOfType(maxtick);
 
 			// Can't have multiple points on same tick
 			if(nPoint > 0 && mintick < maxtick - 1)
@@ -2489,11 +2489,6 @@ bool CViewInstrument::CanMovePoint(UINT envPoint, int step)
 	}
 	// Can't move right of next point
 	if((step > 0) && (envPoint < pEnv->nNodes - 1) && (pEnv->Ticks[envPoint + 1] - pEnv->Ticks[envPoint] <= step))
-	{
-		return false;
-	}
-	// Limit envelope length
-	if((envPoint == pEnv->nNodes - 1) && pEnv->Ticks[envPoint] + step > ENVELOPE_MAX_LENGTH)
 	{
 		return false;
 	}
