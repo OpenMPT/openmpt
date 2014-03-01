@@ -707,6 +707,9 @@
     <ClInclude Include="..\soundlib\WindowedFIR.h" />
     <ClInclude Include="..\soundlib\XMTools.h" />
     <ClInclude Include="..\test\test.h" />
+    <ClInclude Include="..\test\TestTools.h" />
+    <ClInclude Include="..\test\TestToolsLib.h" />
+    <ClInclude Include="..\test\TestToolsTracker.h" />
     <ClInclude Include="..\unarchiver\archive.h" />
     <ClInclude Include="..\unarchiver\unarchiver.h" />
     <ClInclude Include="..\unarchiver\ungzip.h" />

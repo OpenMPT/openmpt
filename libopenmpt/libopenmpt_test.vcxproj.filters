@@ -257,6 +257,15 @@
     <ClInclude Include="..\soundlib\MixerInterface.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\test\TestTools.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test\TestToolsLib.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test\TestToolsTracker.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp">

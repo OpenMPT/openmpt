@@ -1450,6 +1450,18 @@
 				RelativePath="..\test\test.h"
 				>
 			</File>
+			<File
+				RelativePath="..\test\TestTools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\test\TestToolsLib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\test\TestToolsTracker.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Module Loaders"
