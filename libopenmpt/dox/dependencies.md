@@ -23,8 +23,6 @@ Dependencies
      *  **GNU make**
      *  **pkg-config**
 
-Note that it is possible to build libopenmpt without either Win32, iconv or a C++1 compliant compiler, in which case a custom UTF8 conversion routine is used. `#define MPT_CHARSET_CUSTOMUTF8` in your build system to build that way. It is, however, recommended to stick with the system-rpovided character set conversions.
-
 ### openmpt123
 
  *  Supported compilers for building openmpt:
