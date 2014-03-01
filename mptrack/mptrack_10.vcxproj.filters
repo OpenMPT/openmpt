@@ -978,6 +978,15 @@
     <ClInclude Include="..\soundlib\MixerInterface.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\test\TestToolsLib.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test\TestToolsTracker.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test\TestTools.h">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
