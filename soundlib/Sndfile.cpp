@@ -1831,12 +1831,12 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 }
 
 
-bool CSoundFile::SetTitle(const std::string & newTitle)
-//-----------------------------------------------------
+bool CSoundFile::SetTitle(const std::string &newTitle)
+//----------------------------------------------------
 {
 	if(songName != newTitle)
 	{
-		mpt::String::Copy(songName, newTitle);
+		songName = newTitle;
 		return true;
 	}
 	return false;
@@ -2136,6 +2136,13 @@ struct UpgradePatternData
 
 	void operator() (ModCommand &m)
 	{
+		const CHANNELINDEX curChn = chn;
+		chn++;
+		if(chn >= sndFile.GetNumChannels())
+		{
+			chn = 0;
+		}
+
 		if(m.IsPcNote())
 		{
 			return;
@@ -2215,7 +2222,7 @@ struct UpgradePatternData
 				// OpenMPT 1.20 fixes multiple fine pattern delays on the same row. Previously, only the last command was considered,
 				// but all commands should be added up. Since Scream Tracker 3 itself doesn't support S6x, we also use Impulse Tracker's behaviour here,
 				// since we can assume that most S3Ms that make use of S6x were composed with Impulse Tracker.
-				for(ModCommand *fixCmd = (&m) - chn; fixCmd < &m; fixCmd++)
+				for(ModCommand *fixCmd = (&m) - curChn; fixCmd < &m; fixCmd++)
 				{
 					if((fixCmd->command == CMD_S3MCMDEX || fixCmd->command == CMD_XFINEPORTAUPDOWN) && (fixCmd->param & 0xF0) == 0x60)
 					{
@@ -2228,7 +2235,7 @@ struct UpgradePatternData
 			{
 				// OpenMPT 1.20 fixes multiple pattern delays on the same row. Previously, only the *last* command was considered,
 				// but Scream Tracker 3 and Impulse Tracker only consider the *first* command.
-				for(ModCommand *fixCmd = (&m) - chn; fixCmd < &m; fixCmd++)
+				for(ModCommand *fixCmd = (&m) - curChn; fixCmd < &m; fixCmd++)
 				{
 					if(fixCmd->command == CMD_S3MCMDEX && (fixCmd->param & 0xF0) == 0xE0)
 					{
@@ -2268,12 +2275,6 @@ struct UpgradePatternData
 				// OpenMPT can emulate FT2's F00 behaviour now.
 				m.command = CMD_NONE;
 			}
-		}
-
-		chn++;
-		if(chn >= sndFile.GetNumChannels())
-		{
-			chn = 0;
 		}
 
 	}
