@@ -95,6 +95,7 @@ LOCAL_SRC_FILES := \
 	soundlib/WAVTools.cpp \
 	soundlib/WindowedFIR.cpp \
 	soundlib/XMTools.cpp \
+	test/TestToolsLib.cpp \
 	test/test.cpp
 
 include $(BUILD_SHARED_LIBRARY)
