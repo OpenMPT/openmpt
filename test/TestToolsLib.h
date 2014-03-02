@@ -15,6 +15,9 @@
 #ifndef MODPLUG_TRACKER
 
 
+#include "../common/FlagSet.h"
+
+
 namespace MptTest
 {
 
@@ -56,6 +59,28 @@ struct TestFailed
 	TestFailed() { }
 };
 
+} // namespace MptTest
+
+template<typename T>
+struct ToStringHelper
+{
+	std::string operator () (const T &x)
+	{
+		return mpt::ToString(x);
+	}
+};
+
+template<typename enum_t, typename store_t>
+struct ToStringHelper<FlagSet<enum_t, store_t> >
+{
+	std::string operator () (const FlagSet<enum_t, store_t> &x)
+	{
+		return mpt::ToString(x.GetRaw());
+	}
+};
+
+namespace MptTest
+{
 
 class Test
 {
@@ -96,8 +121,8 @@ private:
 	{
 		if(x != y)
 		{
-			//throw TestFailed(mpt::String::Print("%1 != %2", x, y));
-			throw TestFailed();
+			throw TestFailed(mpt::String::Print("%1 != %2", ToStringHelper<Tx>()(x), ToStringHelper<Ty>()(y)));
+			//throw TestFailed();
 		}
 	}
 
