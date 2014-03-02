@@ -514,5 +514,8 @@
     <ClCompile Include="..\common\Logging.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\test\TestToolsLib.cpp">
+      <Filter>Source Files\test</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

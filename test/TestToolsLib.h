@@ -15,181 +15,162 @@
 #ifndef MODPLUG_TRACKER
 
 
-#include <memory>
-#include <iostream>
-
-
 namespace MptTest
 {
 
 
-static std::string remove_newlines(std::string str)
-{
-	return mpt::String::Replace(mpt::String::Replace(str, "\n", " "), "\r", " ");
-}
+extern int fail_count;
 
-static noinline void show_start(const char * const file, const int line, const char * const description)
-{
-	std::cout << "Test: " << file << "(" << line << "): " << remove_newlines(description) << ": ";
-}
 
-static noinline void MultiTestStart(const char * const file, const int line, const char * const description)
+enum Verbosity
 {
-	show_start(file, line, description);
-	std::cout << "..." << std::endl;
-}
+	VerbosityQuiet,
+	VerbosityNormal,
+	VerbosityVerbose,
+};
 
-static noinline void show_ok(const char * const file, const int line, const char * const description)
+enum Fatality
 {
-	MPT_UNREFERENCED_PARAMETER(file);
-	MPT_UNREFERENCED_PARAMETER(line);
-	MPT_UNREFERENCED_PARAMETER(description);
-	std::cout << "PASS" << std::endl;
-}
+	FatalityContinue,
+	FatalityStop
+};
 
-static noinline void show_fail(const char * const file, const int line, const char * const description, bool exception = false, const char * const exception_text = nullptr)
+
+struct Context
 {
-	std::cout << "FAIL" << std::endl;
-	std::cout.flush();
-	if(!exception)
+public:
+	const char * const file;
+	const int line;
+public:
+	Context(const char * file, int line);
+	Context(const Context &c);
+};
+
+#define MPT_TEST_CONTEXT_CURRENT() (::MptTest::Context( __FILE__ , __LINE__ ))
+
+
+struct TestFailed
+{
+	std::string values;
+	TestFailed(const std::string &values) : values(values) { }
+	TestFailed() { }
+};
+
+
+class Test
+{
+
+private:
+
+	Fatality const fatality;
+	Verbosity const verbosity;
+	const char * const desc;
+	Context const context;
+
+public:
+
+	Test(Fatality fatality, Verbosity verbosity, const char * const desc, const Context &context);
+
+public:
+
+	std::string AsString() const;
+
+	void ShowStart() const;
+	void ShowProgress(const char * text) const;
+	void ShowPass() const;
+	void ShowFail(bool exception = false, const char * const text = nullptr) const;
+
+	void ReportPassed();
+	void ReportFailed();
+
+	void ReportException();
+
+public:
+
+#if 0 // C++11 version
+
+private:
+
+	template <typename Tx, typename Ty>
+	noinline void TypeCompareHelper(const Tx &x, const Ty &y)
 	{
-		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << std::endl;
-	} else if(!exception_text || (exception_text && std::string(exception_text).empty()))
-	{
-		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << " EXCEPTION!" << std::endl;
-	} else
-	{
-		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << " EXCEPTION: " << exception_text << std::endl;
+		if(x != y)
+		{
+			//throw TestFailed(mpt::String::Print("%1 != %2", x, y));
+			throw TestFailed();
+		}
 	}
-	std::cerr.flush();
-}
 
-static int fail_count = 0;
+public:
 
-static noinline void CheckFailCountOrThrow()
-{
-	if(fail_count > 0)
+	template <typename Tfx, typename Tfy>
+	noinline void operator () (const Tfx &fx, const Tfy &fy)
 	{
-		throw std::runtime_error("Test failed.");
+		ShowStart();
+		try
+		{
+			ShowProgress("Calculate x ...");
+			const auto x = fx();
+			ShowProgress("Calculate y ...");
+			const auto y = fy();
+			ShowProgress("Compare ...");
+			TypeCompareHelper(x, y);
+			ReportPassed();
+		} catch(...)
+		{
+			ReportFailed();
+		}
 	}
-}
 
-static noinline void ReportException(const char * const file, const int line, const char * const description)
-{
-	try
+	#define VERIFY_EQUAL(x,y)	::MptTest::Test(::MptTest::FatalityContinue, ::MptTest::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_NONCONT(x,y)	::MptTest::Test(::MptTest::FatalityStop, ::MptTest::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	::MptTest::Test(::MptTest::FatalityStop, ::MptTest::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+
+#else
+
+public:
+
+	template <typename Tx, typename Ty>
+	noinline void operator () (const Tx &x, const Ty &y)
 	{
-		throw; // get the exception
-	} catch(std::exception & e)
-	{
-		show_fail(file, line, description, true, e.what());
-		throw; // rethrow
-	} catch(...)
-	{
-		show_fail(file, line, description, true);
-		throw; // rethrow
+		ShowStart();
+		try
+		{
+			if(x != y)
+			{
+				//throw TestFailed(mpt::String::Print("%1 != %2", x, y));
+				throw TestFailed();
+			}
+			ReportPassed();
+		} catch(...)
+		{
+			ReportFailed();
+		}
 	}
-}
 
-static noinline void TestFail(const char * const file, const int line, const char * const description)
-{
-	show_fail(file, line, description);
-	fail_count++;
-}
+	#define VERIFY_EQUAL(x,y)	::MptTest::Test(::MptTest::FatalityContinue, ::MptTest::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_NONCONT(x,y)	::MptTest::Test(::MptTest::FatalityStop, ::MptTest::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	::MptTest::Test(::MptTest::FatalityStop, ::MptTest::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
 
-static noinline void TestFailStop(const char * const file, const int line, const char * const description)
-{
-	show_fail(file, line, description);
-	fail_count++;
-	throw std::runtime_error(std::string("Test failed: ") + description);
-}
+#endif
 
-#define MULTI_TEST_TRY   try { \
-                          fail_count = 0;
-#define MULTI_TEST_START MultiTestStart(THIS_FILE, __LINE__, description);
-#define MULTI_TEST_END   show_start(THIS_FILE, __LINE__, description);
-#define MULTI_TEST_CATCH  CheckFailCountOrThrow(); \
-                          show_ok(THIS_FILE, __LINE__, description); \
-                         } catch(...) { \
-                          ReportException(THIS_FILE, __LINE__, description); \
-                         }
-#define TEST_TRY         try {
-#define TEST_CATCH       } catch(...) { \
-                          fail_count++; \
-                          ReportException(file, line, description); \
-                          throw; \
-                         }
-#define TEST_START()     show_start(file, line, description)
-#define TEST_OK()        show_ok(file, line, description)
-#define TEST_FAIL()      TestFail(file, line, description)
-#define TEST_FAIL_STOP() TestFailStop(file, line, description)
-
-
-template <typename Tx, typename Ty>
-noinline void VerifyEqualImpl(const Tx &x, const Ty &y, const char *const description, const char *const file, const int line)
-{
-	TEST_TRY
-	TEST_START();
-	if(x != y)
-	{
-		TEST_FAIL();
-	} else
-	{
-		TEST_OK();
-	}
-	TEST_CATCH
-}
-
-
-template <typename Tx, typename Ty>
-noinline void VerifyEqualNonContImpl(const Tx &x, const Ty &y, const char *const description, const char *const file, const int line)
-{
-	TEST_TRY
-	TEST_START();
-	if(x != y)
-	{
-		TEST_FAIL_STOP();
-	} else
-	{
-		TEST_OK();
-	}
-	TEST_CATCH
-}
-
-
-template <typename Tx, typename Ty>
-noinline void VerifyEqualQuietNonContImpl(const Tx &x, const Ty &y, const char *const description, const char *const file, const int line)
-{
-	TEST_TRY
-	if(x != y)
-	{
-		TEST_FAIL_STOP();
-	}
-	TEST_CATCH
-}
-
-
-//Verify that given parameters are 'equal'(show error message if not).
-//The exact meaning of equality is not specified; for now using operator!=.
-//The macro is active in both 'debug' and 'release' build.
-#define VERIFY_EQUAL(x,y)	VerifyEqualImpl( (x) , (y) , #x " == " #y , THIS_FILE, __LINE__)
-
-
-// Like VERIFY_EQUAL, but throws exception if comparison fails.
-#define VERIFY_EQUAL_NONCONT(x,y)	VerifyEqualNonContImpl( (x) , (y) , #x " == " #y , THIS_FILE, __LINE__)
-
-
-// Like VERIFY_EQUAL_NONCONT, but do not show message if test succeeds
-#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	VerifyEqualQuietNonContImpl( (x) , (y) , #x " == " #y , THIS_FILE, __LINE__)
+};
 
 
 #define DO_TEST(func) \
 do{ \
-	const char * description = #func ; \
-	MULTI_TEST_TRY \
-	MULTI_TEST_START \
-	func(); \
-	MULTI_TEST_END \
-	MULTI_TEST_CATCH \
+	::MptTest::Test test(::MptTest::FatalityStop, ::MptTest::VerbosityNormal, #func , MPT_TEST_CONTEXT_CURRENT() ); \
+	try { \
+		test.ShowStart(); \
+		fail_count = 0; \
+		func(); \
+		if(fail_count > 0) { \
+			throw ::MptTest::TestFailed(); \
+		} \
+		test.ReportPassed(); \
+	} catch(...) { \
+		test.ReportException(); \
+	} \
 }while(0)
 
 

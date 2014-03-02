@@ -338,6 +338,7 @@
     <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />
     <ClCompile Include="..\test\test.cpp" />
+    <ClCompile Include="..\test\TestToolsLib.cpp" />
     <ClCompile Include="libopenmpt_c.cpp" />
     <ClCompile Include="libopenmpt_cxx.cpp" />
     <ClCompile Include="libopenmpt_ext.cpp" />
