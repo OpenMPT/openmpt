@@ -111,28 +111,31 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD, DWORD dwParam1, DWORD dw
 }
 
 
-BOOL CMainFrame::midiOpenDevice()
-//-------------------------------
+bool CMainFrame::midiOpenDevice(bool showSettings)
+//------------------------------------------------
 {
-	if (shMidiIn) return TRUE;
+	if (shMidiIn) return true;
 	
 	if (midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 	{
 		shMidiIn = NULL;
 
 		// Show MIDI configuration on fail.
-		CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
-		CMainFrame::GetMainFrame()->OnViewOptions();
+		if(showSettings)
+		{
+			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
+			CMainFrame::GetMainFrame()->OnViewOptions();
+		}
 
 		// Let's see if the user updated the settings.
 		if(midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
 			shMidiIn = NULL;
-			return FALSE;
+			return false;
 		}
 	}
 	midiInStart(shMidiIn);
-	return TRUE;
+	return true;
 }
 
 
