@@ -502,6 +502,9 @@
     <ClCompile Include="..\common\Logging.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\test\TestToolsLib.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">

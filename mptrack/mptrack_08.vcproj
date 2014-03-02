@@ -1259,11 +1259,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\svn_version_default\svn_version.h"
+				RelativePath=".\svn_version\svn_version.h"
 				>
 			</File>
 			<File
-				RelativePath=".\svn_version\svn_version.h"
+				RelativePath="..\common\svn_version_default\svn_version.h"
 				>
 			</File>
 			<File
@@ -1452,6 +1452,10 @@
 			</File>
 			<File
 				RelativePath="..\test\TestTools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\test\TestToolsLib.cpp"
 				>
 			</File>
 			<File

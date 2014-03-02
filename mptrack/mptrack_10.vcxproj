@@ -507,6 +507,7 @@
     <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />
     <ClCompile Include="..\test\test.cpp" />
+    <ClCompile Include="..\test\TestToolsLib.cpp" />
     <ClCompile Include="..\unarchiver\unarchiver.cpp" />
     <ClCompile Include="..\unarchiver\ungzip.cpp" />
     <ClCompile Include="..\unarchiver\unlha.cpp" />
