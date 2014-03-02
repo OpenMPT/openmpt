@@ -356,7 +356,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	UpdateColors();
 
-	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MIDIRECORD) OnMidiRecord();
+	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MIDIRECORD) midiOpenDevice(false);
 
 	return 0;
 }

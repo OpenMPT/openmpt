@@ -369,7 +369,7 @@ public:
 
 // Midi Input Functions
 public:
-	BOOL midiOpenDevice();
+	bool midiOpenDevice(bool showSettings = true);
 	void midiCloseDevice();
 	void midiReceive();
 	void SetMidiRecordWnd(HWND hwnd) { m_hWndMidi = hwnd; }
