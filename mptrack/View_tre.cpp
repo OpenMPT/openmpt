@@ -1386,7 +1386,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 			{
 				const DlsItem &item = *static_cast<const DlsItem *>(&modItem);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				size_t bank = item.GetBankIndex();
+				uint32 bank = item.GetBankIndex();
 				if ((bank < CTrackApp::gpDLSBanks.size()) && (CTrackApp::gpDLSBanks[bank]) && (pMainFrm))
 				{
 					CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[bank];
@@ -1864,7 +1864,7 @@ int CALLBACK CModTree::ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, 
 {
 	lParam1 &= 0x7FFFFFFF;
 	lParam2 &= 0x7FFFFFFF;
-	return lParam1 - lParam2;
+	return static_cast<int>(lParam1 - lParam2);
 }
 
 
@@ -1887,7 +1887,7 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 			}
 		}
 	}
-	return lParam1 - lParam2;
+	return static_cast<int>(lParam1 - lParam2);
 }
 
 

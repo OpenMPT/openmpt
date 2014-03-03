@@ -302,7 +302,11 @@ int ModSample::FrequencyToTranspose(uint32 freq)
 void ModSample::FrequencyToTranspose()
 //------------------------------------
 {
-	int f2t = FrequencyToTranspose(nC5Speed);
+	int f2t;
+	if(nC5Speed)
+		f2t = FrequencyToTranspose(nC5Speed);
+	else
+		f2t = 0;
 	int transpose = f2t >> 7;
 	int finetune = f2t & 0x7F;	//0x7F == 111 1111
 	if(finetune > 80)			// XXX Why is this 80?

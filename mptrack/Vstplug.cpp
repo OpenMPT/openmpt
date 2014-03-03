@@ -214,7 +214,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
 			if (pVstEditor && pVstEditor->IsResizable())
 			{
-				pVstEditor->SetSize(index, value);
+				pVstEditor->SetSize(index, static_cast<int>(value));
 			}
 		}
 		Log("VST plugin to host: Size Window\n");
@@ -587,7 +587,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
 				{
 					// Provide some memory for the return path.
-					fileSel->sizeReturnPath = dir.length() + 1;
+					fileSel->sizeReturnPath = mpt::saturate_cast<VstInt32>(dir.length() + 1);
 					fileSel->returnPath = new char[fileSel->sizeReturnPath];
 					if(fileSel->returnPath == nullptr)
 					{
@@ -2051,37 +2051,37 @@ void CVstPlugin::SaveAllParameters()
 		if(ProgramsAreChunks() && Dispatch(effIdentify, 0,0, nullptr, 0.0f) == 'NvEf')
 		{
 			void *p = nullptr;
-			LONG nByteSize = 0;
 
 			// Try to get whole bank
-			nByteSize = Dispatch(effGetChunk, 0,0, &p, 0);
+			uint32 nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 0,0, &p, 0));
 
 			if (!p)
 			{
-				nByteSize = Dispatch(effGetChunk, 1,0, &p, 0); 	// Getting bank failed, try to get just preset
+				nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 1,0, &p, 0)); 	// Getting bank failed, try to get just preset
 			} else
 			{
 				m_pMixStruct->defaultProgram = GetCurrentProgram();	//we managed to get the bank, now we need to remember which program we're on.
 			}
 			if (p != nullptr)
 			{
-				if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= (UINT)(nByteSize+4)))
+				LimitMax(nByteSize, Util::MaxValueOfType(nByteSize) - 4);
+				if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nByteSize + 4))
 				{
-					m_pMixStruct->nPluginDataSize = nByteSize+4;
+					m_pMixStruct->nPluginDataSize = nByteSize + 4;
 				} else
 				{
 					delete[] m_pMixStruct->pPluginData;
 					m_pMixStruct->nPluginDataSize = 0;
-					m_pMixStruct->pPluginData = new char[nByteSize+4];
+					m_pMixStruct->pPluginData = new char[nByteSize + 4];
 					if (m_pMixStruct->pPluginData)
 					{
-						m_pMixStruct->nPluginDataSize = nByteSize+4;
+						m_pMixStruct->nPluginDataSize = nByteSize + 4;
 					}
 				}
 				if (m_pMixStruct->pPluginData)
 				{
-					*(ULONG *)m_pMixStruct->pPluginData = 'NvEf';
-					memcpy(((BYTE*)m_pMixStruct->pPluginData)+4, p, nByteSize);
+					*(uint32 *)m_pMixStruct->pPluginData = 'NvEf';
+					memcpy(m_pMixStruct->pPluginData + 4, p, nByteSize);
 					return;
 				}
 			}
@@ -2136,12 +2136,12 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 			if ((nProgram>=0) && (nProgram < m_Effect.numPrograms))
 			{
 				// Bank
-				Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize - 4, ((BYTE *)m_pMixStruct->pPluginData) + 4, 0);
+				Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize - 4, m_pMixStruct->pPluginData + 4, 0);
 				SetCurrentProgram(nProgram);
 			} else
 			{
 				// Program
-				Dispatch(effSetChunk, 1, m_pMixStruct->nPluginDataSize - 4, ((BYTE *)m_pMixStruct->pPluginData) + 4, 0);
+				Dispatch(effSetChunk, 1, m_pMixStruct->nPluginDataSize - 4, m_pMixStruct->pPluginData + 4, 0);
 			}
 
 		} else

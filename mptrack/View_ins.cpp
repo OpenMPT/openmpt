@@ -2135,7 +2135,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM midiData, LPARAM)
 	CModDoc *modDoc = GetDocument();
 	if(modDoc != nullptr)
 	{
-		modDoc->ProcessMIDI(midiData, m_nInstrument, modDoc->GetrSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
+		modDoc->ProcessMIDI(static_cast<uint32>(midiData), m_nInstrument, modDoc->GetrSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
 		return 1;
 	}
 	return 0;
@@ -2215,12 +2215,12 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	}
 	if(wParam >= kcInstrumentStartNotes && wParam <= kcInstrumentEndNotes)
 	{
-		PlayNote(wParam - kcInstrumentStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
+		PlayNote(static_cast<UINT>(wParam) - kcInstrumentStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
 		return wParam;
 	}
 	if(wParam >= kcInstrumentStartNoteStops && wParam <= kcInstrumentEndNoteStops)
 	{
-		int note =wParam - kcInstrumentStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12;
+		UINT note = static_cast<UINT>(wParam) - kcInstrumentStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12;
 		m_baPlayingNote[note] = false;
 		pModDoc->NoteOff(note, false, m_nInstrument);
 		return wParam;
