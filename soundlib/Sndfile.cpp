@@ -570,7 +570,7 @@ CSoundFile::CSoundFile() :
 #ifdef MODPLUG_TRACKER
 	m_MIDIMapper(*this),
 #endif
-	m_PlayState(*this),
+	visitedSongRows(*this),
 	m_pCustomLog(nullptr)
 #if MPT_COMPILER_MSVC
 #pragma warning(default : 4355) // "'this' : used in base member initializer list"
@@ -719,7 +719,6 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	m_nFreqFactor = m_nTempoFactor = 128;
 #endif
 	m_PlayState.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_PlayState.m_nOldGlbVolSlide = 0;
 
 	InitializeGlobals();
 	Order.resize(1);
@@ -887,7 +886,7 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	m_PlayState.m_nRow = 0;
 
 	RecalculateSamplesPerTick();
-	m_PlayState.visitedSongRows.Initialize(true);
+	visitedSongRows.Initialize(true);
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 
@@ -1102,7 +1101,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 		m_PlayState.m_nSamplesToGlobalVolRampDest = 0;
 		m_PlayState.m_nGlobalVolumeRampAmount = 0;
 
-		m_PlayState.visitedSongRows.Initialize(true);
+		visitedSongRows.Initialize(true);
 	}
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	for (nPattern = 0; nPattern < Order.size(); nPattern++)
@@ -2270,7 +2269,9 @@ struct UpgradePatternData
 				m.param = mpt::saturate_cast<uint8>(param);
 			}
 
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 09) && m.command == CMD_SPEED && m.param == 0)
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 09)
+				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00)	// Ignore compatibility export
+				&& m.command == CMD_SPEED && m.param == 0)
 			{
 				// OpenMPT can emulate FT2's F00 behaviour now.
 				m.command = CMD_NONE;

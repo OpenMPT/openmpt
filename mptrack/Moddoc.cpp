@@ -1102,7 +1102,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			chn.nFadeOutVol = 0x10000;
 		}
 
-		m_SndFile.NoteChange(nChn, note, false, true, true);
+		m_SndFile.NoteChange(&chn, note, false, true, true);
 		if (nVol >= 0) chn.nVolume = nVol;
 		
 		// Handle sample looping.
@@ -1160,7 +1160,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 	} else
 	{
 		CriticalSection cs;
-		m_SndFile.NoteChange(nChn, note);
+		m_SndFile.NoteChange(&m_SndFile.m_PlayState.Chn[nChn], note);
 		if (pause) m_SndFile.m_SongFlags.set(SONG_PAUSED);
 	}
 	return nChn;
@@ -1208,7 +1208,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 		// Could conflict with NNAs.
 		if(!pChn->dwFlags[mask] && pChn->nLength && (note == pChn->nNewNote || !note))
 		{
-			m_SndFile.KeyOff(i);
+			m_SndFile.KeyOff(pChn);
 			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP);	// FIXME: If a sample with pingpong loop is playing backwards, stuff before the loop is played again!
 			if (fade) pChn->dwFlags.set(CHN_NOTEFADE);
 			if (note) break;
