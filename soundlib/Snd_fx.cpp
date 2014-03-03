@@ -611,7 +611,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				} else if(((p->command == CMD_MODCMDEX) || (p->command == CMD_S3MCMDEX)) && (p->param & 0xF0) == 0x80)
 				{
 					Panning(pChn, ((p->param & 0x0F) * 256 + 8) / 15);
-				} else if(p->command == VOLCMD_PANNING)
+				} else if(p->volcmd == VOLCMD_PANNING)
 				{
 					pChn->nPan = p->vol * 4;
 				}
