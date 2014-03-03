@@ -494,7 +494,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 					memory.state.m_nGlobalVolume -= param * (memory.state.m_nMusicSpeed - 1);
 				}
-				memory.state.m_nGlobalVolume = CLAMP(memory.state.m_nGlobalVolume, 0, 256);
+				memory.state.m_nGlobalVolume = Clamp(memory.state.m_nGlobalVolume, 0u, 256u);
 				break;
 			case CMD_CHANNELVOLUME:
 				if (param <= 64) pChn->nGlobalVol = param;
@@ -507,7 +507,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				} else
 				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
-					if (pChn->nGlobalVol > (UINT)(param & 0x0F)) param = pChn->nGlobalVol - (param & 0x0F);
+					if (pChn->nGlobalVol > (param & 0x0F)) param = pChn->nGlobalVol - (param & 0x0F);
 					else param = 0;
 				} else
 				if (param & 0x0F)
@@ -608,7 +608,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				if(p->command == CMD_PANNING8)
 				{
 					Panning(pChn, p->param);
-				} else if((p->command == CMD_MODCMDEX) || (p->command == CMD_S3MCMDEX) && (p->param & 0xF0) == 0x80)
+				} else if(((p->command == CMD_MODCMDEX) || (p->command == CMD_S3MCMDEX)) && (p->param & 0xF0) == 0x80)
 				{
 					Panning(pChn, ((p->param & 0x0F) * 256 + 8) / 15);
 				} else if(p->command == VOLCMD_PANNING)
