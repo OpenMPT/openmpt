@@ -11,7 +11,8 @@
 
 #pragma once
 
-#include "SoundDevices.h"
+#include "SoundDevice.h"
+#include "SoundDeviceThread.h"
 
 #ifndef NO_DSOUND
 #include <dsound.h>

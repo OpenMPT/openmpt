@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "SoundDevices.h"
+#include "SoundDevice.h"
 
 #include "../common/FlagSet.h"
 

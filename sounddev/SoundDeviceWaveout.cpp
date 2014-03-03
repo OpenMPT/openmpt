@@ -12,7 +12,7 @@
 #include "stdafx.h"
 
 #include "SoundDevice.h"
-#include "SoundDevices.h"
+#include "SoundDeviceThread.h"
 
 #include "SoundDeviceWaveout.h"
 

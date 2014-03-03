@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "SoundDevices.h"
+#include "SoundDevice.h"
 
 #ifndef NO_PORTAUDIO
 #include "portaudio/include/portaudio.h"
