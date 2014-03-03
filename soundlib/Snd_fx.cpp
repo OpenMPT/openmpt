@@ -1520,6 +1520,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 		chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO | CHN_MUTE | CHN_PORTAMENTO);
 		chn.nMasterChn = nChn + 1;
 		chn.nCommand = CMD_NONE;
+		chn.rowCommand.Clear();
 		// Cut the note
 		chn.nFadeOutVol = 0;
 		chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
