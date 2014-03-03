@@ -730,13 +730,10 @@ BOOL COptionsSampleEditor::OnInitDialog()
 	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("RAW"), dfRAW);
 	m_cbnDefaultSampleFormat.SetCurSel(TrackerSettings::Instance().m_defaultSampleFormat);
 
-	SetDlgItemInt(IDC_FLAC_COMPRESSION, TrackerSettings::Instance().m_FLACCompressionLevel);
-	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1);
-	if(spin)
-	{
-		spin->SetRange(0, 8);
-		spin->SetPos(TrackerSettings::Instance().m_FLACCompressionLevel);
-	}
+	CSliderCtrl *slider = static_cast<CSliderCtrl *>(GetDlgItem(IDC_SLIDER1));
+	slider->SetRange(0, 8);
+	slider->SetTicFreq(1);
+	slider->SetPos(TrackerSettings::Instance().m_FLACCompressionLevel);
 
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + TrackerSettings::Instance().sampleEditorKeyBehaviour);
 
@@ -762,7 +759,7 @@ void COptionsSampleEditor::OnOK()
 	TrackerSettings::Instance().m_nFinetuneStep = GetDlgItemInt(IDC_EDIT_FINETUNE);
 	TrackerSettings::Instance().m_SampleUndoBufferSize = SampleUndoBufferSize(GetDlgItemInt(IDC_EDIT_UNDOSIZE));
 	TrackerSettings::Instance().m_defaultSampleFormat = static_cast<SampleEditorDefaultFormat>(m_cbnDefaultSampleFormat.GetItemData(m_cbnDefaultSampleFormat.GetCurSel()));
-	TrackerSettings::Instance().m_FLACCompressionLevel = GetDlgItemInt(IDC_FLAC_COMPRESSION);
+	TrackerSettings::Instance().m_FLACCompressionLevel = static_cast<CSliderCtrl *>(GetDlgItem(IDC_SLIDER1))->GetPos();
 	TrackerSettings::Instance().sampleEditorKeyBehaviour = static_cast<SampleEditorKeyBehaviour>(GetCheckedRadioButton(IDC_RADIO1, IDC_RADIO3) -IDC_RADIO1);
 	TrackerSettings::Instance().compressITI = IsDlgButtonChecked(IDC_COMPRESS_ITI) != MF_UNCHECKED;
 	TrackerSettings::Instance().DefaultPlugVolumeHandling = static_cast<PLUGVOLUMEHANDLING>(m_cbnDefaultVolumeHandling.GetItemData(m_cbnDefaultVolumeHandling.GetCurSel()));
