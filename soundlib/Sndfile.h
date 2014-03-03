@@ -462,7 +462,6 @@ public:
 		uint32 m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
 			m_nGlobalVolumeDestination;
 		int32 m_lHighResRampingGlobalVolume;
-		uint32 m_nOldGlbVolSlide;
 
 	public:
 		bool m_bPositionChanged;		// Report to plugins that we jumped around in the module
@@ -473,16 +472,18 @@ public:
 		ModChannel Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
 
 	protected:
-		// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
-		RowVisitor visitedSongRows;
 		bool m_bPatternTransitionOccurred;
 
 	public:
-		PlayState(CSoundFile &owner) : visitedSongRows(owner) { }
+		PlayState &operator= (const PlayState &other) { memcpy(this, &other, sizeof(PlayState)); return *this; }
 	};
 
 	PlayState m_PlayState;
+protected:
+	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
+	RowVisitor visitedSongRows;
 
+public:
 #ifdef MODPLUG_TRACKER
 	std::bitset<MAX_BASECHANNELS> m_bChannelMuteTogglePending;
 
@@ -602,7 +603,7 @@ public:
 	//specific order&row etc. Return value is in seconds.
 	GetLengthType GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target = GetLengthTarget());
 
-	void InitializeVisitedRows() { m_PlayState.visitedSongRows.Initialize(true); }
+	void InitializeVisitedRows() { visitedSongRows.Initialize(true); }
 
 public:
 	//Returns song length in seconds.
@@ -741,11 +742,11 @@ public:
 	BOOL ProcessEffects();
 	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
 	void CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut);
-	void NoteChange(CHANNELINDEX nChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false);
+	void NoteChange(ModChannel *pChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false) const;
 	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
 
 	// Channel Effects
-	void KeyOff(CHANNELINDEX nChn);
+	void KeyOff(ModChannel *pChn) const;
 	// Global Effects
 	void SetTempo(UINT param, bool setAsNonModcommand = false);
 	void SetSpeed(UINT param);
@@ -792,15 +793,16 @@ protected:
 	void ExtraFinePortamentoDown(ModChannel *pChn, UINT param);
 	void NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig);
 	void TonePortamento(ModChannel *pChn, UINT param);
-	void Vibrato(ModChannel *pChn, UINT param);
-	void FineVibrato(ModChannel *pChn, UINT param);
+	void Vibrato(ModChannel *pChn, UINT param) const;
+	void FineVibrato(ModChannel *pChn, UINT param) const;
 	void VolumeSlide(ModChannel *pChn, UINT param);
 	void PanningSlide(ModChannel *pChn, UINT param, bool memory = true);
 	void ChannelVolSlide(ModChannel *pChn, UINT param);
 	void FineVolumeUp(ModChannel *pChn, UINT param, bool volCol);
 	void FineVolumeDown(ModChannel *pChn, UINT param, bool volCol);
-	void Tremolo(ModChannel *pChn, UINT param);
-	void Panbrello(ModChannel *pChn, UINT param);
+	void Tremolo(ModChannel *pChn, UINT param) const;
+	void Panbrello(ModChannel *pChn, UINT param) const;
+	void Panning(ModChannel *pChn, UINT param) const;
 	void RetrigNote(CHANNELINDEX nChn, int param, UINT offset=0);  //rewbs.volOffset: added last param
 	void SampleOffset(CHANNELINDEX nChn, UINT param);
 	void NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample);

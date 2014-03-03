@@ -57,6 +57,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		rightRamp = leftRamp = 0;
 		nVolume = 256;
 		nVibratoPos = nTremoloPos = nPanbrelloPos = 0;
+		nOldHiOffset = 0;
 
 		//-->Custom tuning related
 		m_ReCalculateFreqOnFirstTick = false;
