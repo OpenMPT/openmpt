@@ -1,7 +1,7 @@
 /*
- * SoundDevices.h
- * --------------
- * Purpose: Sound device driver helpers.
+ * SoundDeviceThread.h
+ * -------------------
+ * Purpose: Sound device threading driver helpers.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs

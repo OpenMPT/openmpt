@@ -505,6 +505,9 @@
     <ClCompile Include="..\test\TestToolsLib.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\sounddev\SoundDeviceThread.cpp">
+      <Filter>Source Files\sounddev</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -593,9 +596,6 @@
     </ClInclude>
     <ClInclude Include="..\sounddsp\Reverb.h">
       <Filter>Header Files\sounddsp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\sounddev\SoundDevices.h">
-      <Filter>Header Files\sounddev</Filter>
     </ClInclude>
     <ClInclude Include="..\sounddev\SoundDevice.h">
       <Filter>Header Files\sounddev</Filter>
@@ -989,6 +989,9 @@
     </ClInclude>
     <ClInclude Include="..\test\TestTools.h">
       <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddev\SoundDeviceThread.h">
+      <Filter>Header Files\sounddev</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

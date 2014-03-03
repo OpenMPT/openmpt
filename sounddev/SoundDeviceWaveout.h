@@ -11,7 +11,8 @@
 
 #pragma once
 
-#include "SoundDevices.h"
+#include "SoundDevice.h"
+#include "SoundDeviceThread.h"
 
 #include <MMSystem.h>
 
