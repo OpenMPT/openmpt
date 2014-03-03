@@ -269,10 +269,10 @@ static cpuid_result cpuid(uint32 function)
 static bool has_cpuid()
 //---------------------
 {
-	const uint32 eflags_cpuid = 1<<21;
-	uint32 old_eflags = __readeflags();
+	const size_t eflags_cpuid = 1 << 21;
+	size_t old_eflags = __readeflags();
 	__writeeflags(old_eflags ^ eflags_cpuid);
-	bool result = ((__readeflags() ^ old_eflags) & eflags_cpuid) ? true : false;
+	bool result = ((__readeflags() ^ old_eflags) & eflags_cpuid) != 0;
 	__writeeflags(old_eflags);
 	return result;
 }
@@ -286,7 +286,6 @@ void InitProcSupport()
 
 	if(has_cpuid())
 	{
-
 		cpuid_result VendorString = cpuid(0x00000000u);
 
 		cpuid_result StandardFeatureFlags = cpuid(0x00000001u);
@@ -297,22 +296,16 @@ void InitProcSupport()
 
 		if(VendorString.as_string() == "AuthenticAMD")
 		{
-
 			cpuid_result ExtendedVendorString = cpuid(0x80000000u);
 			if(ExtendedVendorString.a >= 0x80000001u)
 			{
-
 				cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
 				if(ExtendedFeatureFlags.d & (1<<22)) ProcSupport |= PROCSUPPORT_AMD_MMXEXT;
 				if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
 				if(ExtendedFeatureFlags.d & (1<<30)) ProcSupport |= PROCSUPPORT_AMD_3DNOW2;
-
 			}
-
 		}
-
 	}
-
 }
 
 

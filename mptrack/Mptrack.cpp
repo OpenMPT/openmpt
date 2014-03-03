@@ -299,34 +299,30 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	bool m_bNoDls, m_bSafeMode, m_bNoPlugins,
+	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly,
 		 m_bPortable, m_bNoSettingsOnNewVersion;
 
 public:
 	CMPTCommandLineInfo()
 	{
-		m_bNoDls = m_bSafeMode =
-		m_bNoPlugins = m_bNoSettingsOnNewVersion = m_bPortable = false;
+		m_bNoDls = m_bNoPlugins = m_bNoAssembly =
+		m_bPortable = m_bNoSettingsOnNewVersion = false;
 	}
-	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
-};
-
-
-void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
-//-----------------------------------------------------------------------------
-{
-	if ((lpszParam) && (bFlag))
+	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 	{
-		if (!lstrcmpi(lpszParam, _T("nologo"))) { m_bShowSplash = FALSE; return; } else
-		if (!lstrcmpi(lpszParam, _T("nodls"))) { m_bNoDls = true; return; } else
-		if (!lstrcmpi(lpszParam, _T("noplugs"))) { m_bNoPlugins = true; return; } else
-		if (!lstrcmpi(lpszParam, _T("portable"))) { m_bPortable = true; return; } else
-		if (!lstrcmpi(lpszParam, _T("noSettingsOnNewVersion"))) { m_bNoSettingsOnNewVersion = true; return; }
-		if (!lstrcmpi(lpszParam, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
-		if (!lstrcmpi(lpszParam, _T("noAssembly"))) { ProcSupport = 0; return; }
+		if ((lpszParam) && (bFlag))
+		{
+			if (!lstrcmpi(lpszParam, _T("nologo"))) { m_bShowSplash = FALSE; return; }
+			if (!lstrcmpi(lpszParam, _T("nodls"))) { m_bNoDls = true; return; }
+			if (!lstrcmpi(lpszParam, _T("noplugs"))) { m_bNoPlugins = true; return; }
+			if (!lstrcmpi(lpszParam, _T("portable"))) { m_bPortable = true; return; }
+			if (!lstrcmpi(lpszParam, _T("noSettingsOnNewVersion"))) { m_bNoSettingsOnNewVersion = true; return; }
+			if (!lstrcmpi(lpszParam, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
+			if (!lstrcmpi(lpszParam, _T("noAssembly"))) { m_bNoAssembly = true; return; }
+		}
+		CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
 	}
-	CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
-}
+};
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -853,11 +849,6 @@ BOOL CTrackApp::InitInstance()
 
 	Log("OpenMPT Start");
 
-	// Initialize Audio
-#ifdef ENABLE_ASM
-	InitProcSupport();
-#endif
-
 	ASSERT(nullptr == m_pDocManager);
 	m_pDocManager = new CModDocManager();
 
@@ -866,6 +857,13 @@ BOOL CTrackApp::InitInstance()
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
+
+#ifdef ENABLE_ASM
+	if(cmdInfo.m_bNoAssembly)
+		ProcSupport = 0;
+	else
+		InitProcSupport();
+#endif
 
 	m_pTrackerDirectories = new TrackerDirectories();
 
