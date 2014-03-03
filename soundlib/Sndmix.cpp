@@ -1051,11 +1051,11 @@ void CSoundFile::ProcessInstrumentFade(ModChannel *pChn, int &vol) const
 //----------------------------------------------------------------------
 {
 	// FadeOut volume
-	if(pChn->dwFlags[CHN_NOTEFADE])
+	if(pChn->dwFlags[CHN_NOTEFADE] && pChn->pModInstrument != nullptr)
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
 
-		UINT fadeout = pIns->nFadeOut;
+		uint32 fadeout = pIns->nFadeOut;
 		if (fadeout)
 		{
 			pChn->nFadeOutVol -= fadeout << 1;
@@ -1138,6 +1138,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 		{
 			uint8 step = 0;
 			const bool arpOnRow = (pChn->rowCommand.command == CMD_ARPEGGIO);
+			const ModCommand::NOTE lastNote = ModCommand::IsNote(pChn->nLastNote) ? pIns->NoteMap[pChn->nLastNote - NOTE_MIN] : NOTE_NONE;
 			if(arpOnRow)
 			{
 				switch(m_PlayState.m_nTickCount % 3)
@@ -1145,7 +1146,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 				case 1: step = pChn->nArpeggio >> 4; break;
 				case 2: step = pChn->nArpeggio & 0x0F; break;
 				}
-				pChn->nArpeggioBaseNote = pChn->nLastNote;
+				pChn->nArpeggioBaseNote = lastNote;
 			}
 
 			// Trigger new note:
@@ -1163,8 +1164,8 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 			// - When starting an arpeggio on a row with no other note on it, stop some possibly still playing note.
 			if(pChn->nArpeggioLastNote != NOTE_NONE)
 				pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, pChn->nArpeggioLastNote + NOTE_MAX_SPECIAL, 0, nChn);
-			else if(arpOnRow && m_SongFlags[SONG_FIRSTTICK] && !pChn->rowCommand.IsNote() && ModCommand::IsNote(pChn->nLastNote))
-				pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, pChn->nLastNote + NOTE_MAX_SPECIAL, 0, nChn);
+			else if(arpOnRow && m_SongFlags[SONG_FIRSTTICK] && !pChn->rowCommand.IsNote() && ModCommand::IsNote(lastNote))
+				pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, lastNote + NOTE_MAX_SPECIAL, 0, nChn);
 
 			if(pChn->rowCommand.command == CMD_ARPEGGIO)
 				pChn->nArpeggioLastNote = pChn->nArpeggioBaseNote + step;
