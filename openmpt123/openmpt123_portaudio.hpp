@@ -128,7 +128,11 @@ public:
 	}
 	~portaudio_stream_callback_raii() {
 		if ( stream ) {
-			check_portaudio_error( Pa_StopStream( stream ) );
+			PaError stopped = Pa_IsStreamStopped( stream );
+			check_portaudio_error( stopped );
+			if ( !stopped ) {
+				check_portaudio_error( Pa_StopStream( stream ) );
+			}
 			check_portaudio_error( Pa_CloseStream( stream ) );
 			stream = NULL;
 		}
@@ -255,7 +259,11 @@ public:
 	}
 	~portaudio_stream_blocking_raii() {
 		if ( stream ) {
-			check_portaudio_error( Pa_StopStream( stream ) );
+			PaError stopped = Pa_IsStreamStopped( stream );
+			check_portaudio_error( stopped );
+			if ( !stopped ) {
+				check_portaudio_error( Pa_StopStream( stream ) );
+			}
 			check_portaudio_error( Pa_CloseStream( stream ) );
 			stream = NULL;
 		}
