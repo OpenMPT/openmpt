@@ -144,17 +144,11 @@ void ReadAdaptive1234(std::istream& iStrm, uint32& val)
 }
 
 
-static const uint8 pow2xTable[] = {1, 2, 4, 8, 16, 32, 64, 128};
-
-// Returns 2^n. n must be within {0,...,7}.
-static inline uint8 Pow2xSmall(const uint8& exp) {ASSERT(exp <= 7); return pow2xTable[exp];}
-
-
 void ReadAdaptive1248(std::istream& iStrm, uint64& val)
 //-----------------------------------------------------
 {
 	Binaryread<uint64>(iStrm, val, 1);
-	uint8 bc = Pow2xSmall(static_cast<uint8>(val & 3));
+	uint8 bc = 1 << static_cast<uint8>(val & 3);
 	int byte = 1;
 	val &= 0xff;
 	while(bc > 1)
@@ -450,7 +444,7 @@ void SsbWrite::BeginWrite(const char* pId, const size_t nIdSize, const uint64& n
 	if(flags != s_DefaultFlagbyte)
 	{
 		WriteAdaptive1234(oStrm, 2); //Headersize - now it is 2.
-        Binarywrite<uint8>(oStrm, HeaderId_FlagByte);
+		Binarywrite<uint8>(oStrm, HeaderId_FlagByte);
 		Binarywrite<uint8>(oStrm, flags);
 	}
 	else
@@ -631,7 +625,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 
 	if (Testbit(header, 5))
 	{
-        Binaryread<uint8>(iStrm, tempU8);
+		Binaryread<uint8>(iStrm, tempU8);
 		iStrm.ignore(tempU8);
 	}
 
@@ -666,7 +660,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 		iStrm.ignore(size * (GetFlag(RwfRTwoBytesDescChar) ? 2 : 1));
 	}
 
-    if(Testbit(flagbyte, 3))
+	if(Testbit(flagbyte, 3))
 		iStrm.ignore(5);
 
 	// Read entrycount
