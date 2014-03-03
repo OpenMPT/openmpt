@@ -1560,7 +1560,6 @@ BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 				SampleIO::littleEndian,
 				SampleIO::signedPCM)
 				.ReadSample(sample, chunk);
-			sample.PrecomputeLoops(sndFile, false);
 		}
 		bWaveForm = (sample.pSample) ? TRUE : FALSE;
 	} else
@@ -1654,6 +1653,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 		}
 		if (pDlsIns->szName[0]) memcpy(sndFile.m_szNames[nSample], pDlsIns->szName, MAX_SAMPLENAME - 1);
 		sample.Convert(MOD_TYPE_IT, sndFile.GetType());
+		sample.PrecomputeLoops(sndFile, false);
 		bOk = TRUE;
 	}
 	FreeWaveForm(pWaveForm);
