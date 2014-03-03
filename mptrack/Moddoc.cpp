@@ -1077,14 +1077,13 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		// reset channel properties; in theory the chan is completely unused anyway.
 		chn.Reset(ModChannel::resetTotal, m_SndFile, CHANNELINDEX_INVALID);
 		chn.nMasterChn = 0;	// remove NNA association
-		chn.nNewNote = static_cast<uint8>(note);
+		chn.nNewNote = chn.nLastNote = static_cast<uint8>(note);
 
 		if (nins)
 		{
 			// Set instrument
 			chn.ResetEnvelopes();
 			m_SndFile.InstrumentChange(&chn, nins);
-			chn.nFadeOutVol = 0x10000;	// Needed for XM files, as the nRowInstr check in NoteChange() will fail.
 		} else if ((nsmp) && (nsmp < MAX_SAMPLES))	// Or set sample
 		{
 			ModSample &sample = m_SndFile.GetSample(nsmp);
@@ -1097,10 +1096,10 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			chn.nLoopEnd = sample.nLoopEnd;
 			chn.dwFlags = static_cast<ChannelFlags>(sample.uFlags) & (CHN_SAMPLEFLAGS & ~CHN_MUTE);
 			chn.nPan = 128;
-			if (sample.uFlags & CHN_PANNING) chn.nPan = sample.nPan;
+			if (sample.uFlags[CHN_PANNING]) chn.nPan = sample.nPan;
 			chn.nInsVol = sample.nGlobalVol;
-			chn.nFadeOutVol = 0x10000;
 		}
+		chn.nFadeOutVol = 0x10000;
 
 		m_SndFile.NoteChange(&chn, note, false, true, true);
 		if (nVol >= 0) chn.nVolume = nVol;
@@ -2666,7 +2665,7 @@ CHANNELINDEX CModDoc::FindAvailableChannel() const
 {
 	CHANNELINDEX nStoppedChannel = CHANNELINDEX_INVALID;
 	// Search for available channel
-	for(CHANNELINDEX j = m_SndFile.m_nChannels; j < MAX_CHANNELS; j++)
+	for(CHANNELINDEX j = MAX_CHANNELS - 1; j >= m_SndFile.m_nChannels; j--)
 	{
 		const ModChannel &chn = m_SndFile.m_PlayState.Chn[j];
 		if(!chn.nLength)
