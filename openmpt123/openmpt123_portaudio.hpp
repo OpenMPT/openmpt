@@ -42,6 +42,9 @@ private:
 	}
 protected:
 	void check_portaudio_error( PaError e ) {
+		if ( e > 0 ) {
+			return;
+		}
 		if ( e == paNoError ) {
 			return;
 		}
