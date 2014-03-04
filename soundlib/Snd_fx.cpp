@@ -115,6 +115,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 
 	// Are we trying to reach a certain pattern position?
 	const bool hasSearchTarget = target.mode != GetLengthTarget::NoTarget;
+	const bool adjustSamplePos = (adjustMode & eAdjustSamplePositions) == eAdjustSamplePositions;
 
 	ROWINDEX nRow = 0, nNextRow = 0;
 	ROWINDEX nNextPatStartRow = 0; // FT2 E60 bug
@@ -123,6 +124,33 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 	GetLengthMemory memory(*this);
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 	RowVisitor visitedRows(*this);
+
+	// Optimize away channels for which it's pointless to adjust sample positions
+	std::vector<bool> adjustSampleChn(GetNumChannels(), true);
+	if(adjustSamplePos && target.mode == GetLengthTarget::SeekPosition)
+	{
+		PATTERNINDEX seekPat = PATTERNINDEX_INVALID;
+		if(target.pos.order < Order.GetLength()) seekPat = Order[target.pos.order];
+		if(!Patterns.IsValidPat(seekPat) || !Patterns[seekPat].IsValidRow(target.pos.row)) seekPat = PATTERNINDEX_INVALID;
+
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+		{
+			if(ChnSettings[i].dwFlags[CHN_MUTE])
+			{
+				adjustSampleChn[i] = false;
+				continue;
+			}
+			if(seekPat != PATTERNINDEX_INVALID)
+			{
+				ModCommand &m = *Patterns[seekPat].GetpModCommand(target.pos.row, i);
+				if(m.note == NOTE_NOTECUT || m.note == NOTE_KEYOFF || (m.note == NOTE_FADE && GetNumInstruments())
+					|| (m.IsNote() && m.command != CMD_TONEPORTAMENTO && m.command != CMD_TONEPORTAVOL && m.volcmd != VOLCMD_TONEPORTAMENTO))
+				{
+					adjustSampleChn[i] = false;
+				}
+			}
+		}
+	}
 
 	for (;;)
 	{
@@ -547,28 +575,28 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		memory.state.m_lTotalSampleCount += rowDuration;
 
-		if((adjustMode & eAdjustSamplePositions) == eAdjustSamplePositions)
+		if(adjustSamplePos)
 		{
-			const ModCommand::COMMAND forbiddenCommands[] = { CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_VOLUMESLIDE, CMD_VIBRATOVOL, CMD_TONEPORTAVOL, CMD_XFINEPORTAUPDOWN };
+			// Super experimental and dirty sample seeking
+			const ModCommand::COMMAND forbiddenCommands[] = { CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_VOLUMESLIDE, CMD_VIBRATOVOL, CMD_TONEPORTAVOL, CMD_XFINEPORTAUPDOWN, CMD_NOTESLIDEUP, CMD_NOTESLIDEUPRETRIG, CMD_NOTESLIDEDOWN, CMD_NOTESLIDEDOWNRETRIG };
 			const ModCommand::VOLCMD forbiddenVolCommands[] = { VOLCMD_PORTAUP, VOLCMD_PORTADOWN, VOLCMD_TONEPORTAMENTO, VOLCMD_VOLSLIDEUP, VOLCMD_VOLSLIDEDOWN, VOLCMD_FINEVOLUP, VOLCMD_FINEVOLDOWN };
 
-			// Super experimental and dirty sample seeking
 			pChn = memory.state.Chn;
 			p = Patterns[nPattern].GetRow(nRow);
 			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++)
 			{
-				if(ChnSettings[nChn].dwFlags[CHN_MUTE])
+				if(!adjustSampleChn[nChn])
 					continue;
 
 				uint32 startTick = 0;
 				uint32 paramHi = p->param >> 4, paramLo = p->param & 0x0F;
-				bool porta = p->command == CMD_TONEPORTAMENTO; // Volume column tone portamento can be crazy, and CMD_TONEPORTAVOL requires volume slides which we don't emulate right now.
+				bool porta = p->command == CMD_TONEPORTAMENTO /*|| p->command CMD_TONEPORTAVOL || p->volcmd == VOLCMD_TONEPORTAMENTO*/; // Volume column tone portamento can be crazy, and CMD_TONEPORTAVOL requires volume slides which we don't emulate right now.
 				bool stopNote = false;
 
 				if(p->IsNote())
 				{
 					pChn->nNewNote = pChn->nLastNote;
-					InstrumentChange(pChn, pChn->nNewIns, porta);
+					if(pChn->nNewIns != 0) InstrumentChange(pChn, pChn->nNewIns, porta);
 					NoteChange(pChn, p->note, porta);
 					pChn->nInc = GetChannelIncrement(pChn, pChn->nPeriod, 0);
 
@@ -661,19 +689,23 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 					// Increment playback position of sample and envelopes
 					for(uint32 i = 0; i < (numTicks - startTick); i++)
 					{
+						bool updateInc = (pChn->PitchEnv.flags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED;
 						if(porta && i != startTick)
 						{
 							if(p->command == CMD_TONEPORTAMENTO) TonePortamento(pChn, p->param);
 							//else if(p->command == CMD_TONEPORTAVOL) TonePortamento(pChn, 0);
-							pChn->nInc = GetChannelIncrement(pChn, pChn->nPeriod, 0);
+							updateInc = true;
 						}
+
+						IncrementEnvelopePositions(pChn);
+						int vol = 0;
+						ProcessInstrumentFade(pChn, vol);
+
+						if(updateInc) pChn->nInc = GetChannelIncrement(pChn, pChn->nPeriod, 0);
 
 						pChn->nPosLo += pChn->nInc * tickDuration;
 						pChn->nPos += (pChn->nPosLo >> 16);
 						pChn->nPosLo &= 0xFFFF;
-						IncrementEnvelopePositions(pChn);
-						int vol = 0;
-						ProcessInstrumentFade(pChn, vol);
 					}
 					if(pChn->pModSample->uFlags[CHN_SUSTAINLOOP | CHN_LOOP])
 					{
