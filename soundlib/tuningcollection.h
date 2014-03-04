@@ -95,8 +95,10 @@ public:
 
 	std::string GetName() const {return m_Name;}
 
+#ifndef MODPLUG_NO_FILESAVE
 	void SetSavefilePath(const mpt::PathString &psz) {m_SavefilePath = psz;}
 	mpt::PathString GetSaveFilePath() const {return m_SavefilePath;}
+#endif // MODPLUG_NO_FILESAVE
 
 	std::string GetVersionString() const {return Stringify(static_cast<int>(s_SerializationVersion));}
 
@@ -104,9 +106,11 @@ public:
 
 	//Serialization/unserialisation
 	bool Serialize(std::ostream&) const;
-	bool Serialize() const;
 	bool Deserialize(std::istream&);
+#ifndef MODPLUG_NO_FILESAVE
+	bool Serialize() const;
 	bool Deserialize();
+#endif // MODPLUG_NO_FILESAVE
 
 	//Transfer tuning pT from pTCsrc to pTCdest
 	static bool TransferTuning(CTuningCollection* pTCsrc, CTuningCollection* pTCdest, CTuning* pT);
@@ -125,7 +129,9 @@ private:
 
 	//BEGIN: NONSERIALIZABLE DATA MEMBERS
 	TUNINGVECTOR m_DeletedTunings; //See Remove()-method for explanation of this.
+#ifndef MODPLUG_NO_FILESAVE
 	mpt::PathString m_SavefilePath;
+#endif // MODPLUG_NO_FILESAVE
 	//END: NONSERIALIZABLE DATA MEMBERS
 	
 //END: DATA MEMBERS
