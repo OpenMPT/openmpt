@@ -119,6 +119,8 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::o
 }
 
 
+#ifndef MODPLUG_NO_FILESAVE
+
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() const
 //-------------------------------------------------------------------------------
 {
@@ -148,6 +150,8 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize()
 
 	return SERIALIZATION_SUCCESS;
 }
+
+#endif // MODPLUG_NO_FILESAVE
 
 
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std::istream& iStrm)
