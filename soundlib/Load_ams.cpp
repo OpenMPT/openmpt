@@ -752,8 +752,14 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	AMS2FileHeader fileHeader;
-	if(!file.ReadMagic("AMShdr\x1A")
-		|| !ReadAMSString(songName, file)
+	if(!file.ReadMagic("AMShdr\x1A"))
+	{
+		return false;
+	}
+
+	InitializeGlobals();
+
+	if(!ReadAMSString(songName, file)
 		|| !file.ReadConvertEndianness(fileHeader)
 		|| fileHeader.versionHigh != 2 || fileHeader.versionLow > 2)
 	{
@@ -763,8 +769,6 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 	
-	InitializeGlobals();
-
 	m_nType = MOD_TYPE_AMS2;
 	m_nInstruments = fileHeader.numIns;
 	m_nChannels = 32;
