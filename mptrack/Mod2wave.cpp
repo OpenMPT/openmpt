@@ -236,7 +236,7 @@ void CWaveConvert::LoadTags()
 //---------------------------
 {
 	m_Settings.Tags.title = mpt::ToWide(mpt::CharsetLocale, m_SndFile.GetTitle());
-	m_Settings.Tags.comments = mpt::ToWide(mpt::CharsetLocale, m_SndFile.songMessage);
+	m_Settings.Tags.comments = mpt::ToWide(mpt::CharsetLocale, m_SndFile.songMessage.GetFormatted(SongMessage::leLF));
 	m_Settings.Tags.artist = m_Settings.storedTags.artist;
 	m_Settings.Tags.album = m_Settings.storedTags.album;
 	m_Settings.Tags.trackno = m_Settings.storedTags.trackno;
@@ -763,7 +763,7 @@ void CWaveConvert::OnOK()
 
 		if(!m_SndFile.songMessage.empty())
 		{
-			m_Settings.Tags.comments = mpt::ToWide(mpt::CharsetLocale, m_SndFile.songMessage);
+			m_Settings.Tags.comments = mpt::ToWide(mpt::CharsetLocale, m_SndFile.songMessage.GetFormatted(SongMessage::leLF));
 		}
 
 		m_Settings.Tags.bpm = mpt::ToWString(m_SndFile.GetCurrentBPM());
