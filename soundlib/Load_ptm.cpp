@@ -158,11 +158,12 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
+	InitializeGlobals();
+	m_nType = MOD_TYPE_PTM;
+
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songname);
 
-	InitializeGlobals();
 	madeWithTracker = mpt::String::Print("PolyTracker %1.%2", fileHeader.versionHi, mpt::fmt::hex0<2>(fileHeader.versionLo));
-	m_nType = MOD_TYPE_PTM;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nChannels = fileHeader.numChannels;
