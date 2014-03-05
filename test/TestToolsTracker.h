@@ -98,13 +98,13 @@ static noinline void ReportException(const char * const file, const int line, co
 #define MULTI_TEST_TRY   try {
 #define MULTI_TEST_START 
 #define MULTI_TEST_END   
-#define MULTI_TEST_CATCH } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, description, false); }
+#define MULTI_TEST_CATCH } catch(...) { ReportExceptionAndBreak(__FILE__, __LINE__, description, false); }
 #define TEST_TRY         try {
-#define TEST_CATCH       } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, description, true); }
+#define TEST_CATCH       } catch(...) { ReportExceptionAndBreak(__FILE__, __LINE__, description, true); }
 #define TEST_START()     do { } while(0)
 #define TEST_OK()        do { MPT_UNREFERENCED_PARAMETER(description); } while(0)
-#define TEST_FAIL()      ReportErrorAndBreak(THIS_FILE, __LINE__, description, false)
-#define TEST_FAIL_STOP() ReportErrorAndBreak(THIS_FILE, __LINE__, description, true)
+#define TEST_FAIL()      ReportErrorAndBreak(__FILE__, __LINE__, description, false)
+#define TEST_FAIL_STOP() ReportErrorAndBreak(__FILE__, __LINE__, description, true)
 
 
 

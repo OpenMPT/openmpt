@@ -50,17 +50,6 @@
 
 
 
-#ifdef THIS_FILE
-#undef THIS_FILE
-#endif
-#ifdef _MSC_VER
-static const char * const THIS_FILE = "..\\test\\test.cpp"; // __FILE__
-#else
-static const char * const THIS_FILE = "test/test.cpp"; // __FILE__
-#endif
-
-
-
 namespace MptTest
 {
 
