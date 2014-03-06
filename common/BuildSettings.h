@@ -269,6 +269,10 @@
 #define MPT_WITH_DYNBIND // mpg123 and unmo3 are loaded dynamically
 #endif
 
+#if defined(ENABLE_TESTS) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // Test suite requires PathString for file loading.
+#endif
+
 #if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_PATHSTRING)
 #define MPT_WITH_PATHSTRING // Tracker requires PathString
 #endif
