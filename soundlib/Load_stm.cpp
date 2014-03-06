@@ -222,7 +222,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				m->instr = 0;
 			}
 			
-			int8 vol = (entry.insvol & 0x07) | (entry.volcmd >> 1);
+			int8 vol = (entry.insvol & 0x07) | ((entry.volcmd & 0xF0) >> 1);
 			if(vol <= 64)
 			{
 				m->volcmd = VOLCMD_VOLUME;
