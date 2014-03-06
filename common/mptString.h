@@ -160,7 +160,9 @@ int strnicmp(const char *a, const char *b, size_t count);
 
 
 enum Charset {
+#if defined(MPT_WITH_CHARSET_LOCALE)
 	CharsetLocale, // CP_ACP on windows, current C locale otherwise
+#endif
 
 	CharsetUTF8,
 
@@ -184,6 +186,7 @@ enum Charset {
 static inline std::wstring ToWide(const std::wstring &str) { return str; }
 std::wstring ToWide(Charset from, const std::string &str);
 
+#if defined(MPT_WITH_CHARSET_LOCALE)
 // Convert to locale-encoded string.
 // On Windows, CP_ACP is used,
 // otherwise, the global "C" locale is used.
@@ -194,6 +197,7 @@ std::wstring ToWide(Charset from, const std::string &str);
 // destination charset will be replaced by some replacement character or string.
 std::string ToLocale(const std::wstring &str);
 std::string ToLocale(Charset from, const std::string &str);
+#endif
 
 // Convert to a string encoded in the 'to'-specified character set.
 // If str does not contain any invalid characters,

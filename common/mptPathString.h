@@ -13,6 +13,8 @@
 #include <cstdio>
 #include <stdio.h>
 
+#if defined(MPT_WITH_PATHSTRING)
+
 //#define MPT_DEPRECATED_PATH
 #define MPT_DEPRECATED_PATH MPT_DEPRECATED
 
@@ -134,10 +136,14 @@ public:
 #if defined(WIN32)
 
 	// conversions
+#if defined(MPT_WITH_CHARSET_LOCALE)
 	MPT_DEPRECATED_PATH std::string ToLocale() const { return mpt::ToLocale(path); }
+#endif
 	std::string ToUTF8() const { return mpt::To(mpt::CharsetUTF8, path); }
 	std::wstring ToWide() const { return path; }
+#if defined(MPT_WITH_CHARSET_LOCALE)
 	MPT_DEPRECATED_PATH static PathString FromLocale(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetLocale, path)); }
+#endif
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetUTF8, path)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(path); }
 	RawPathString AsNative() const { return path; }
@@ -157,6 +163,7 @@ public:
 #else // !WIN32
 
 	// conversions
+#if defined(MPT_WITH_CHARSET_LOCALE)
 	std::string ToLocale() const { return path; }
 	std::string ToUTF8() const { return mpt::To(mpt::CharsetUTF8, mpt::CharsetLocale, path); }
 	std::wstring ToWide() const { return mpt::ToWide(mpt::CharsetLocale, path); }
@@ -165,12 +172,22 @@ public:
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::To(mpt::CharsetLocale, path)); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
+#else
+	std::string ToUTF8() const { return path; }
+	std::wstring ToWide() const { return mpt::ToWide(mpt::CharsetUTF8, path); }
+	static PathString FromUTF8(const std::string &path) { return path; }
+	static PathString FromWide(const std::wstring &path) { return PathString(mpt::To(mpt::CharsetUTF8, path)); }
+	RawPathString AsNative() const { return path; }
+	static PathString FromNative(const RawPathString &path) { return PathString(path); }
+#endif
 
 #endif // WIN32
 
 };
 
+#if defined(MPT_WITH_CHARSET_LOCALE)
 MPT_DEPRECATED_PATH static inline std::string ToString(const mpt::PathString & x) { return mpt::ToLocale(x.ToWide()); }
+#endif
 static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWide(); }
 
 } // namespace mpt
@@ -220,3 +237,6 @@ MPT_DEPRECATED_PATH void SanitizeFilename(CString &str);
 #endif
 
 #endif // MODPLUG_TRACKER
+
+#endif // MPT_WITH_PATHSTRING
+

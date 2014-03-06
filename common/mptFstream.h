@@ -14,6 +14,8 @@
 #include "../common/mptString.h"
 #include "../common/mptPathString.h"
 
+#if defined(MPT_WITH_PATHSTRING)
+
 namespace mpt
 {
 
@@ -192,3 +194,6 @@ public:
 #undef MPT_FSTREAM_OPEN
 
 } // namespace mpt
+
+#endif // MPT_WITH_PATHSTRING
+

@@ -137,7 +137,11 @@ static noinline void DoLog(const mpt::log::Context &context, std::wstring messag
 		std::clog
 			<< "openmpt: "
 			<< context.file << "(" << context.line << ")" << ": "
+#if defined(MPT_WITH_CHARSET_LOCALE)
 			<< mpt::ToLocale(message)
+#else
+			<< mpt::To(mpt::CharsetUTF8, message)
+#endif
 			<< " [" << context.function << "]"
 			<< std::endl;
 	#endif // MODPLUG_TRACKER
@@ -153,7 +157,11 @@ static noinline void DoLog(const mpt::log::Context &context, const char *format,
 	vsnprintf(message, LOGBUF_SIZE, format, va);
 	message[LOGBUF_SIZE - 1] = '\0';
 	va_end(va);
+#if defined(MPT_WITH_CHARSET_LOCALE)
 	DoLog(context, mpt::ToWide(mpt::CharsetLocale, message));
+#else
+	DoLog(context, mpt::ToWide(mpt::CharsetUTF8, message));
+#endif
 }
 
 
@@ -169,7 +177,11 @@ void Logger::operator () (const char *format, ...)
 void Logger::operator () (const std::string &text)
 //------------------------------------------------
 {
+#if defined(MPT_WITH_CHARSET_LOCALE)
 	DoLog(context, mpt::ToWide(mpt::CharsetLocale, text));
+#else
+	DoLog(context, mpt::ToWide(mpt::CharsetUTF8, text));
+#endif
 }
 
 void Logger::operator () (const std::wstring &text)
