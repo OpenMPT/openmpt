@@ -41,6 +41,8 @@
  * - All strings returned from libopenmpt are encoded in UTF-8.
  * - All strings passed to libopenmpt should also be encoded in UTF-8.
  * Behaviour in case of invalid UTF-8 is unspecified.
+ * - libopenmpt does not enforce or expect any particular unicode
+ * normalization form.
  *
  * \section libopenmpt-cpp-detailed Detailed documentation
  *
