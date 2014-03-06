@@ -261,8 +261,20 @@
 #define MPT_CHARSET_INTERNAL
 #endif
 
+#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_DYNBIND)
+#define MPT_WITH_DYNBIND // Tracker requires dynamic library loading for export codecs
+#endif
+
+#if (!defined(NO_MO3) || !defined(NO_MP3_SAMPLES)) && !defined(MPT_WITH_DYNBIND)
+#define MPT_WITH_DYNBIND // mpg123 and unmo3 are loaded dynamically
+#endif
+
 #if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_PATHSTRING)
 #define MPT_WITH_PATHSTRING // Tracker requires PathString
+#endif
+
+#if defined(MPT_WITH_DYNBIND) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // dynamic library loading requires PathString
 #endif
 
 #if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_WITH_PATHSTRING)
