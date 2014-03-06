@@ -348,6 +348,8 @@ static std::string ToISO_8859_1(const std::wstring &str, char replacement = '?')
 	return res;
 }
 
+#if defined(MPT_WITH_CHARSET_LOCALE)
+
 static std::wstring LocaleDecode(const std::string &str, const std::locale & locale, wchar_t replacement = L'\uFFFD')
 //-------------------------------------------------------------------------------------------------------------------
 {
@@ -497,6 +499,8 @@ static std::string ToLocale(const std::wstring &str, char replacement = '?')
 	ASSERT(false);
 	return String::ToAscii(str, replacement); // fallback
 }
+
+#endif
 
 #endif // MPT_CHARSET_CODECVTUTF8 || MPT_CHARSET_INTERNAL
 
@@ -687,7 +691,9 @@ static UINT CharsetToCodepage(Charset charset)
 {
 	switch(charset)
 	{
+#if defined(MPT_WITH_CHARSET_LOCALE)
 		case CharsetLocale:      return CP_ACP;  break;
+#endif
 		case CharsetUTF8:        return CP_UTF8; break;
 		case CharsetASCII:       return 20127;   break;
 		case CharsetISO8859_1:   return 28591;   break;
@@ -708,7 +714,9 @@ static const char * CharsetToString(Charset charset)
 {
 	switch(charset)
 	{
+#if defined(MPT_WITH_CHARSET_LOCALE)
 		case CharsetLocale:      return "";            break; // "char" breaks with glibc when no locale is set
+#endif
 		case CharsetUTF8:        return "UTF-8";       break;
 		case CharsetASCII:       return "ASCII";       break;
 		case CharsetISO8859_1:   return "ISO-8859-1";  break;
@@ -725,7 +733,9 @@ static const char * CharsetToStringTranslit(Charset charset)
 {
 	switch(charset)
 	{
+#if defined(MPT_WITH_CHARSET_LOCALE)
 		case CharsetLocale:      return "//TRANSLIT";            break; // "char" breaks with glibc when no locale is set
+#endif
 		case CharsetUTF8:        return "UTF-8//TRANSLIT";       break;
 		case CharsetASCII:       return "ASCII//TRANSLIT";       break;
 		case CharsetISO8859_1:   return "ISO-8859-1//TRANSLIT";  break;
@@ -787,12 +797,14 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		std::copy(out.begin(), out.end(), std::back_inserter(result));
 		return result;
 	}
+#if defined(MPT_WITH_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
 		if(charset == CharsetLocale)
 		{
 			charset = MPT_LOCALE_ASSUME_CHARSET;
 		}
 	#endif
+#endif
 	#if defined(MPT_CHARSET_WIN32)
 		const UINT codepage = CharsetToCodepage(charset);
 		int required_size = WideCharToMultiByte(codepage, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
@@ -844,7 +856,9 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		std::string out;
 		switch(charset)
 		{
+#if defined(MPT_WITH_CHARSET_LOCALE)
 			case CharsetLocale:      out = String::ToLocale(src); break;
+#endif
 			case CharsetUTF8:        out = String::ToUTF8(src); break;
 			case CharsetASCII:       out = String::ToAscii(src); break;
 			case CharsetISO8859_1:   out = String::ToISO_8859_1(src); break;
@@ -875,12 +889,14 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		if(charset == CharsetCP437AMS2) out = String::From8bit(in, CharsetTableCP437AMS2);
 		return out;
 	}
+#if defined(MPT_WITH_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
 		if(charset == CharsetLocale)
 		{
 			charset = MPT_LOCALE_ASSUME_CHARSET;
 		}
 	#endif
+#endif
 	#if defined(MPT_CHARSET_WIN32)
 		const UINT codepage = CharsetToCodepage(charset);
 		int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, nullptr, 0);
@@ -938,7 +954,9 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		std::wstring out;
 		switch(charset)
 		{
+#if defined(MPT_WITH_CHARSET_LOCALE)
 			case CharsetLocale:      out = String::FromLocale(in); break;
+#endif
 			case CharsetUTF8:        out = String::FromUTF8(in); break;
 			case CharsetASCII:       out = String::FromAscii(in); break;
 			case CharsetISO8859_1:   out = String::FromISO_8859_1(in); break;
@@ -1018,6 +1036,7 @@ std::wstring ToWide(Charset from, const std::string &str)
 	return String::DecodeImpl(from, str);
 }
 
+#if defined(MPT_WITH_CHARSET_LOCALE)
 std::string ToLocale(const std::wstring &str)
 {
 	return String::EncodeImpl<std::string>(CharsetLocale, str);
@@ -1026,6 +1045,7 @@ std::string ToLocale(Charset from, const std::string &str)
 {
 	return String::ConvertImpl<std::string>(CharsetLocale, from, str);
 }
+#endif
 
 std::string To(Charset to, const std::wstring &str)
 {
@@ -1115,10 +1135,17 @@ inline std::wstring ToWStringHelper(const T & x)
 	return o.str();
 }
 
+#if defined(MPT_WITH_CHARSET_LOCALE)
 std::string ToString(const std::wstring & x) { return mpt::ToLocale(x); }
 std::string ToString(const wchar_t * const & x) { return mpt::ToLocale(x); };
 std::string ToString(const char & x) { return std::string(1, x); }
 std::string ToString(const wchar_t & x) { return mpt::ToLocale(std::wstring(1, x)); }
+#else
+std::string ToString(const std::wstring & x) { return mpt::To(mpt::CharsetUTF8, x); }
+std::string ToString(const wchar_t * const & x) { return mpt::To(mpt::CharsetUTF8, x); };
+std::string ToString(const char & x) { return std::string(1, x); }
+std::string ToString(const wchar_t & x) { return mpt::To(mpt::CharsetUTF8, std::wstring(1, x)); }
+#endif
 std::string ToString(const bool & x) { return ToStringHelper(x); }
 std::string ToString(const signed char & x) { return ToStringHelper(x); }
 std::string ToString(const unsigned char & x) { return ToStringHelper(x); }
@@ -1134,10 +1161,17 @@ std::string ToString(const float & x) { return ToStringHelper(x); }
 std::string ToString(const double & x) { return ToStringHelper(x); }
 std::string ToString(const long double & x) { return ToStringHelper(x); }
 
+#if defined(MPT_WITH_CHARSET_LOCALE)
 std::wstring ToWString(const std::string & x) { return mpt::ToWide(mpt::CharsetLocale, x); }
 std::wstring ToWString(const char * const & x) { return mpt::ToWide(mpt::CharsetLocale, x); }
 std::wstring ToWString(const char & x) { return mpt::ToWide(mpt::CharsetLocale, std::string(1, x)); }
 std::wstring ToWString(const wchar_t & x) { return std::wstring(1, x); }
+#else
+std::wstring ToWString(const std::string & x) { return mpt::ToWide(mpt::CharsetUTF8, x); }
+std::wstring ToWString(const char * const & x) { return mpt::ToWide(mpt::CharsetUTF8, x); }
+std::wstring ToWString(const char & x) { return mpt::ToWide(mpt::CharsetUTF8, std::string(1, x)); }
+std::wstring ToWString(const wchar_t & x) { return std::wstring(1, x); }
+#endif
 std::wstring ToWString(const bool & x) { return ToWStringHelper(x); }
 std::wstring ToWString(const signed char & x) { return ToWStringHelper(x); }
 std::wstring ToWString(const unsigned char & x) { return ToWStringHelper(x); }

@@ -261,6 +261,18 @@
 #define MPT_CHARSET_INTERNAL
 #endif
 
+#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // Tracker requires PathString
+#endif
+
+#if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // file saving requires PathString
+#endif
+
+#if defined(MPT_WITH_PATHSTRING) && !defined(MPT_WITH_CHARSET_LOCALE)
+#define MPT_WITH_CHARSET_LOCALE // PathString requires locale charset
+#endif
+
 
 
 #if MPT_COMPILER_MSVC
@@ -319,3 +331,4 @@
 #define _SCL_SECURE_NO_WARNINGS
 #endif
 #endif
+

@@ -11,6 +11,8 @@
 #include "mptPathString.h"
 
 
+#if defined(MPT_WITH_PATHSTRING)
+
 #if defined(MODPLUG_TRACKER)
 
 namespace mpt
@@ -185,7 +187,11 @@ FILE * mpt_fopen(const mpt::PathString &filename, const char *mode)
 //-----------------------------------------------------------------
 {
 	#if defined(WIN32)
-		return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetLocale, mode).c_str() : nullptr);
+		#if defined(MPT_WITH_CHARSET_LOCALE)
+			return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetLocale, mode).c_str() : nullptr);
+		#else
+			return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetUTF8, mode).c_str() : nullptr);
+		#endif
 	#else // !WIN32
 		return fopen(filename.AsNative().c_str(), mode);
 	#endif // WIN32
@@ -197,7 +203,11 @@ FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode)
 	#if defined(WIN32)
 		return _wfopen(filename.AsNative().c_str(), mode);
 	#else // !WIN32
-		return fopen(filename.AsNative().c_str(), mode ? mpt::ToLocale(mode).c_str() : nullptr);
+		#if defined(MPT_WITH_CHARSET_LOCALE)
+			return fopen(filename.AsNative().c_str(), mode ? mpt::ToLocale(mode).c_str() : nullptr);
+		#else
+			return fopen(filename.AsNative().c_str(), mode ? mpt::To(mpt::CharsetUTF8, mode).c_str() : nullptr);
+		#endif
 	#endif // WIN32
 }
 
@@ -296,3 +306,6 @@ void SanitizeFilename(CString &str)
 #endif
 
 #endif // MODPLUG_TRACKER
+
+#endif // MPT_WITH_PATHSTRING
+

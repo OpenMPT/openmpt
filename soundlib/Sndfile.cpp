@@ -2370,7 +2370,11 @@ void CSoundFile::UpgradeSong()
 		// Convert ANSI plugin path names to UTF-8 (irrelevant in probably 99% of all cases anyway, I think I've never seen a VST plugin with a non-ASCII file name)
 		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 		{
+#if defined(MPT_WITH_CHARSET_LOCALE)
 			const std::string name = mpt::To(mpt::CharsetUTF8, mpt::CharsetLocale, m_MixPlugins[i].Info.szLibraryName);
+#else
+			const std::string name = mpt::To(mpt::CharsetUTF8, mpt::CharsetWindows1252, m_MixPlugins[i].Info.szLibraryName);
+#endif
 			mpt::String::Copy(m_MixPlugins[i].Info.szLibraryName, name);
 		}
 	}
