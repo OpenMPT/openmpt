@@ -44,6 +44,10 @@ static int parse_svnversion_to_revision( std::string svnversion )
 	{
 		svnversion = svnversion.substr(svnversion.find(":") + 1);
 	}
+	if(svnversion.find("-") != std::string::npos)
+	{
+		svnversion = svnversion.substr(svnversion.find("-") + 1);
+	}
 	if(svnversion.find("M") != std::string::npos)
 	{
 		svnversion = svnversion.substr(0, svnversion.find("M"));
@@ -70,6 +74,10 @@ static bool parse_svnversion_to_mixed_revisions( std::string svnversion )
 		return false;
 	}
 	if(svnversion.find(":") != std::string::npos)
+	{
+		return true;
+	}
+	if(svnversion.find("-") != std::string::npos)
 	{
 		return true;
 	}
