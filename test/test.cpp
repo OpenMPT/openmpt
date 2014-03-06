@@ -446,61 +446,71 @@ static noinline void TestMisc()
 	}
 	
 	// Charset conversions (basic sanity checks)
-	VERIFY_EQUAL(mpt::ToLocale(L"a"), "a");
 	VERIFY_EQUAL(mpt::To(mpt::CharsetUTF8, L"a"), "a");
 	VERIFY_EQUAL(mpt::To(mpt::CharsetISO8859_1, L"a"), "a");
 	VERIFY_EQUAL(mpt::To(mpt::CharsetASCII, L"a"), "a");
-	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetLocale, "a"), L"a");
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetUTF8, "a"), L"a");
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetISO8859_1, "a"), L"a");
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetASCII, "a"), L"a");
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(mpt::ToLocale(L"a"), "a");
+	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetLocale, "a"), L"a");
+#endif
 	
 	// Check that some character replacement is done (and not just empty strings or truncated strings are returned)
 	// We test german umlaut-a (U+00E4) and CJK U+5BB6
 
 	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetASCII,L"abc\u00E4xyz"),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetLocale,L"abc\u00E4xyz"),"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetISO8859_1,L"abc\u00E4xyz"),"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetCP437,L"abc\u00E4xyz"),"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetUTF8,L"abc\u00E4xyz"),"xyz"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetASCII,L"abc\u00E4xyz"),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetLocale,L"abc\u00E4xyz"),"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetISO8859_1,L"abc\u00E4xyz"),"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetCP437,L"abc\u00E4xyz"),"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetUTF8,L"abc\u00E4xyz"),"abc"),true);
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetLocale,L"abc\u00E4xyz"),"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetLocale,L"abc\u00E4xyz"),"abc"),true);
+#endif
 
 	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetASCII,L"abc\u5BB6xyz"),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetLocale,L"abc\u5BB6xyz"),"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetISO8859_1,L"abc\u5BB6xyz"),"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetCP437,L"abc\u5BB6xyz"),"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetUTF8,L"abc\u5BB6xyz"),"xyz"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetASCII,L"abc\u5BB6xyz"),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetLocale,L"abc\u5BB6xyz"),"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetISO8859_1,L"abc\u5BB6xyz"),"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetCP437,L"abc\u5BB6xyz"),"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetUTF8,L"abc\u5BB6xyz"),"abc"),true);
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetLocale,L"abc\u5BB6xyz"),"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetLocale,L"abc\u5BB6xyz"),"abc"),true);
+#endif
 
 	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xC3\xA4xyz"),L"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),L"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xC3\xA4xyz"),L"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),L"xyz"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xC3\xA4xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xC3\xA4xyz"),L"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),L"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xC3\xA4xyz"),L"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),L"abc"),true);
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xC3\xA4xyz"),L"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xC3\xA4xyz"),L"abc"),true);
+#endif
 
 	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
 	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
+#endif
 
 	// Check that characters are correctly converted
 	// We test german umlaut-a (U+00E4) and CJK U+5BB6
