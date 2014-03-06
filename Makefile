@@ -361,7 +361,7 @@ ifeq ($(BUILD_SVNVERSION),)
 SVN_INFO:=$(shell svn info . > /dev/null 2>&1 ; echo $$? )
 ifeq ($(SVN_INFO),0)
 # in svn checkout
-BUILD_SVNVERSION := $(shell svnversion -n . )
+BUILD_SVNVERSION := $(shell svnversion -n . | tr ':' '-' )
 CPPFLAGS += -Icommon/svn_version_svnversion -D BUILD_SVNVERSION=\"$(BUILD_SVNVERSION)\"
 DIST_OPENMPT_VERSION:=r$(BUILD_SVNVERSION)
 DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(BUILD_SVNVERSION)
