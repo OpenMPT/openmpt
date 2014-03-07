@@ -13,6 +13,7 @@
 #include "tuning.h"
 #include "Snd_defs.h"
 #include "../common/FlagSet.h"
+#include "../common/misc_util.h"
 #include <set>
 
 // Instrument Envelopes
