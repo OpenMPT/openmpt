@@ -1765,7 +1765,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 }
 
 
-BOOL CSoundFile::ProcessEffects()
+bool CSoundFile::ProcessEffects()
 //-------------------------------
 {
 	ModChannel *pChn = m_PlayState.Chn;
@@ -1776,7 +1776,7 @@ BOOL CSoundFile::ProcessEffects()
 	// ScreamTracker 2 only updates effects on every 16th tick.
 	if((m_PlayState.m_nTickCount & 0x0F) != 0 && GetType() == MOD_TYPE_STM)
 	{
-		return TRUE;
+		return true;
 	}
 
 // -> CODE#0010
@@ -2889,7 +2889,7 @@ BOOL CSoundFile::ProcessEffects()
 		}
 
 	}
-	return TRUE;
+	return true;
 }
 
 

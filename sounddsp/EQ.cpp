@@ -479,7 +479,7 @@ void CEQ::Initialize(bool bReset, DWORD MixingFreq)
 }
 
 
-void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq)
+void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq)
 //------------------------------------------------------------------------------------------------------
 {
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
@@ -509,7 +509,7 @@ void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL b
 			gEQ[i+MAX_EQ_BANDS].bEnable = false;
 		}
 	}
-	Initialize(bReset?true:false, MixingFreq);
+	Initialize(bReset, MixingFreq);
 }
 
 
@@ -520,7 +520,7 @@ void CQuadEQ::Initialize(bool bReset, DWORD MixingFreq)
 	rear.Initialize(bReset, MixingFreq);
 }
 
-void CQuadEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq)
+void CQuadEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq)
 //----------------------------------------------------------------------------------------------------------
 {
 	front.SetEQGains(pGains, nGains, pFreqs, bReset, MixingFreq);

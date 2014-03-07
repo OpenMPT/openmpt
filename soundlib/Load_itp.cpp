@@ -397,11 +397,11 @@ bool CSoundFile::SaveITProject(const mpt::PathString &filename)
 	// Song mix plugins
 
 	// mix plugins data length
-	id = SaveMixPlugins(NULL, TRUE);
+	id = SaveMixPlugins(NULL, true);
 	fwrite(&id, 1, sizeof(id), f);
 
 	// mix plugins data
-	SaveMixPlugins(f, FALSE);
+	SaveMixPlugins(f, false);
 
 	// Song midi config
 

@@ -546,12 +546,12 @@ public:
 	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
 	CModDoc *GetpModDoc() const { return m_pModDoc; }
 
-	BOOL Create(FileReader file, ModLoadingFlags loadFlags = loadCompleteModule, CModDoc *pModDoc = nullptr);
+	bool Create(FileReader file, ModLoadingFlags loadFlags = loadCompleteModule, CModDoc *pModDoc = nullptr);
 #else
-	BOOL Create(FileReader file, ModLoadingFlags loadFlags);
+	bool Create(FileReader file, ModLoadingFlags loadFlags);
 #endif // MODPLUG_TRACKER
 
-	BOOL Destroy();
+	bool Destroy();
 	MODTYPE GetType() const { return m_nType; }
 	bool TypeIsIT_MPT() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
 	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
@@ -678,7 +678,7 @@ public:
 	bool SaveMod(const mpt::PathString &filename) const;
 	bool SaveIT(const mpt::PathString &filename, bool compatibilityExport = false);
 	bool SaveITProject(const mpt::PathString &filename); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
-	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
+	UINT SaveMixPlugins(FILE *f=NULL, bool bUpdate=true);
 	void WriteInstrumentPropertyForAllInstruments(uint32 code,  int16 size, FILE* f, UINT nInstruments) const;
 	void SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const;
 	void SaveExtendedSongProperties(FILE* f) const;
@@ -715,7 +715,7 @@ public:
 private:
 	void CreateStereoMix(int count);
 public:
-	BOOL FadeSong(UINT msec);
+	bool FadeSong(UINT msec);
 private:
 	void ProcessDSP(std::size_t countChunk);
 	void ProcessPlugins(UINT nCount);
@@ -734,12 +734,12 @@ public:
 	void SetDspEffects(DWORD DSPMask);
 	DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
 #ifndef NO_EQ
-	void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
+	void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, bool bReset=false)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
 public:
-	BOOL ReadNote();
-	BOOL ProcessRow();
-	BOOL ProcessEffects();
+	bool ReadNote();
+	bool ProcessRow();
+	bool ProcessEffects();
 	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
 	void CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut);
 	void NoteChange(ModChannel *pChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false) const;
