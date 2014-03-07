@@ -16,8 +16,6 @@
 
 #include <cstdlib>
 
-#include "misc_util.h"
-
 #include "versionNumber.h"
 #include "svn_version.h"
 

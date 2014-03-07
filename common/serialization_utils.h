@@ -10,18 +10,22 @@
 
 #pragma once
 
-#include <string>
-#include <sstream>
-#include <vector>
+#include <algorithm>
 #include <bitset>
-#include "../common/misc_util.h"
-#include "../common/typedefs.h"
+#include <istream>
 #include <limits>
+#include <sstream>
+#include <string>
+#include <ostream>
+#include <vector>
+
+#include <string.h>
+
+#include "../common/typedefs.h"
+
 #ifdef HAS_TYPE_TRAITS
 #include <type_traits>
 #endif
-#include <algorithm>
-#include <string.h>
 
 namespace srlztn //SeRiaLiZaTioN
 {

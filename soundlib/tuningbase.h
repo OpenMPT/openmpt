@@ -18,7 +18,6 @@
 #include <ostream>
 #include <map>
 #include <limits>
-#include "../common/misc_util.h"
 #include "../common/typedefs.h"
 
 namespace srlztn {class Ssb;}
