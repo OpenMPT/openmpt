@@ -37,7 +37,7 @@ typedef struct PACKED DLSREGION
 	WORD uPercEnv;
 	WORD usVolume;		// 0..256
 	WORD fuOptions;	// flags + key group
-	SHORT sFineTune;	// 1..100
+	int16 sFineTune;	// 1..100
 	BYTE uKeyMin;
 	BYTE uKeyMax;
 	BYTE uUnityNote;

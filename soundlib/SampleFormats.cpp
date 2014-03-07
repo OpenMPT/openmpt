@@ -549,14 +549,14 @@ typedef struct PACKED GF1SAMPLEHEADER
 	DWORD loopend;			// end loop position in the wavesample
 	WORD freq;				// Rate at which the wavesample has been sampled
 	DWORD low_freq, high_freq, root_freq;	// check note.h for the correspondance.
-	SHORT finetune;			// fine tune. -512 to +512, EXCLUDING 0 cause it is a multiplier. 512 is one octave off, and 1 is a neutral value
+	int16 finetune;			// fine tune. -512 to +512, EXCLUDING 0 cause it is a multiplier. 512 is one octave off, and 1 is a neutral value
 	BYTE balance;			// Balance: 0-15. 0=full left, 15 = full right
 	BYTE env_rate[6];		// attack rates
 	BYTE env_volume[6];		// attack volumes
 	BYTE tremolo_sweep, tremolo_rate, tremolo_depth;
 	BYTE vibrato_sweep, vibrato_rate, vibrato_depth;
 	BYTE flags;
-	SHORT scale_frequency;
+	int16 scale_frequency;
 	WORD scale_factor;
 	BYTE reserved[36];
 } GF1SAMPLEHEADER;

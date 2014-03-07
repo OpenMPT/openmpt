@@ -411,10 +411,8 @@ typedef std::uint8_t  BYTE;
 typedef std::uint16_t WORD;
 typedef std::uint32_t DWORD;
 typedef std::int8_t   CHAR;
-typedef std::int16_t  SHORT;
 typedef std::int32_t  LONG;
 typedef std::uint32_t UINT;
-typedef std::uint32_t ULONG;
 typedef BYTE *        LPBYTE;
 
 // for BOOL

@@ -263,7 +263,7 @@ typedef struct PACKED WSMPCHUNK
 	DWORD len;
 	DWORD cbSize;
 	WORD usUnityNote;
-	SHORT sFineTune;
+	int16 sFineTune;
 	LONG lAttenuation;
 	DWORD fulOptions;
 	DWORD cSampleLoops;
@@ -1488,8 +1488,8 @@ BOOL CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen
 
 
 // returns 12*128*(log2(freq/8363)+midiftune/100)
-static int DlsFreqToTranspose(ULONG freq, int nMidiFTune)
-//-------------------------------------------------------
+static int DlsFreqToTranspose(uint32 freq, int nMidiFTune)
+//--------------------------------------------------------
 {
 #ifdef ENABLE_X86
 	const float _f1_8363 = 1.0f / 8363.0f;
