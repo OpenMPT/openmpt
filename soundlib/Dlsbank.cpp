@@ -319,7 +319,7 @@ STATIC_ASSERT(sizeof(WSMPSAMPLELOOP) == 16);
 
 typedef struct PACKED SFPRESETHEADER
 {
-	CHAR achPresetName[20];
+	char achPresetName[20];
 	WORD wPreset;
 	WORD wBank;
 	WORD wPresetBagNdx;
@@ -348,7 +348,7 @@ STATIC_ASSERT(sizeof(SFGENLIST) == 4);
 
 typedef struct PACKED SFINST
 {
-	CHAR achInstName[20];
+	char achInstName[20];
 	WORD wInstBagNdx;
 } SFINST;
 
@@ -372,14 +372,14 @@ STATIC_ASSERT(sizeof(SFINSTGENLIST) == 4);
 
 typedef struct PACKED SFSAMPLE
 {
-	CHAR achSampleName[20];
+	char achSampleName[20];
 	DWORD dwStart;
 	DWORD dwEnd;
 	DWORD dwStartloop;
 	DWORD dwEndloop;
 	DWORD dwSampleRate;
 	BYTE byOriginalPitch;
-	CHAR chPitchCorrection;
+	char chPitchCorrection;
 	WORD wSampleLink;
 	WORD sfSampleType;
 } SFSAMPLE;
@@ -791,7 +791,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 	#if 0
 		default:
 			{
-				CHAR sid[5];
+				char sid[5];
 				memcpy(sid, &pchunk->id, 4);
 				sid[4] = 0;
 				Log("    \"%s\": %d bytes\n", (DWORD)sid, pchunk->len);
@@ -944,7 +944,7 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, DWORD dwMaxLen)
 	#ifdef DLSINSTR_LOG
 	default:
 		{
-			CHAR sdbg[5];
+			char sdbg[5];
 			memcpy(sdbg, &pchunk->id, 4);
 			sdbg[4] = 0;
 			Log("Unsupported SF2 chunk: %s (%d bytes)\n", sdbg, pchunk->len);
@@ -1339,7 +1339,7 @@ bool CDLSBank::Open(const mpt::PathString &filename)
 		#ifdef DLSBANK_LOG
 		default:
 			{
-				CHAR sdbg[5];
+				char sdbg[5];
 				memcpy(sdbg, &pchunk->id, 4);
 				sdbg[4] = 0;
 				Log("Unsupported chunk: %s (%d bytes)\n", sdbg, pchunk->len);
@@ -1631,8 +1631,8 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 			int nBaseTune = DlsFreqToTranspose(
 								sample.nC5Speed,
 								sFineTune+(60 + transpose - usUnityNote)*100);
-			sample.nFineTune = (CHAR)(nBaseTune & 0x7F);
-			sample.RelativeTone = (CHAR)(nBaseTune >> 7);
+			sample.nFineTune = (int8)(nBaseTune & 0x7F);
+			sample.RelativeTone = (int8)(nBaseTune >> 7);
 			sample.TransposeToFrequency();
 			if (lVolume > 256) lVolume = 256;
 			if (lVolume < 16) lVolume = 16;
@@ -1713,7 +1713,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UI
 	// Initializes Instrument
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 	{
-		CHAR s[64] = "";
+		char s[64] = "";
 		UINT key = pDlsIns->Regions[nDrumRgn].uKeyMin;
 		if ((key >= 24) && (key <= 84)) lstrcpy(s, szMidiPercussionNames[key-24]);
 		if (pDlsIns->szName[0])
@@ -1955,7 +1955,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UI
 }
 
 
-const CHAR *CDLSBank::GetRegionName(UINT nIns, UINT nRgn) const
+const char *CDLSBank::GetRegionName(UINT nIns, UINT nRgn) const
 //-------------------------------------------------------------
 {
 	DLSINSTRUMENT *pDlsIns;

@@ -409,7 +409,6 @@ STATIC_ASSERT(sizeof(FloatInt32) == 4);
 typedef std::uint8_t  BYTE;
 typedef std::uint16_t WORD;
 typedef std::uint32_t DWORD;
-typedef std::int8_t   CHAR;
 typedef std::int32_t  LONG;
 typedef std::uint32_t UINT;
 typedef BYTE *        LPBYTE;
