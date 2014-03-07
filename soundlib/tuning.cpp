@@ -15,6 +15,7 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Reporting.h"
 #endif
+#include "../common/misc_util.h"
 #include <string>
 
 typedef CTuningRTI::RATIOTYPE RATIOTYPE;
