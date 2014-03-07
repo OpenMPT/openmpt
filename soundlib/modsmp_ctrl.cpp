@@ -495,7 +495,7 @@ float RemoveDCOffset(ModSample &smp,
 	{
 		CriticalSection cs;
 
-		smp.nGlobalVol = MIN((WORD)(smp.nGlobalVol / dAmplify), 64);
+		smp.nGlobalVol = MIN((uint16)(smp.nGlobalVol / dAmplify), 64);
 		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
 			if(sndFile.m_PlayState.Chn[i].pModSample == &smp)
