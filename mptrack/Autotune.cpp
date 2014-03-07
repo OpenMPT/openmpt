@@ -14,7 +14,7 @@
 #include "../common/thread.h"
 #include "../soundlib/Sndfile.h"
 #include "Autotune.h"
-#ifdef ENABLE_SSE3
+#ifdef ENABLE_SSE2
 #include <emmintrin.h>
 #endif
 
@@ -164,8 +164,8 @@ DWORD WINAPI Autotune::AutotuneThread(void *i)
 {
 	AutotuneThreadData &info = *static_cast<AutotuneThreadData *>(i);
 	info.histogram.resize(HISTORY_BINS, 0);
-#ifdef ENABLE_SSE3
-	const bool useSSE = (ProcSupport & PROCSUPPORT_SSE3) != 0;
+#ifdef ENABLE_SSE2
+	const bool useSSE = (GetProcSupport() & PROCSUPPORT_SSE2) != 0;
 #endif
 
 	// Do autocorrelation and save results in a note histogram (restriced to one octave).
@@ -181,7 +181,7 @@ DWORD WINAPI Autotune::AutotuneThread(void *i)
 
 		uint64 autocorrSum = 0;
 
-#ifdef ENABLE_SSE3
+#ifdef ENABLE_SSE2
 		if(useSSE)
 		{
 			const __m128i *normalData = reinterpret_cast<const __m128i *>(info.sampleData);
@@ -192,10 +192,12 @@ DWORD WINAPI Autotune::AutotuneThread(void *i)
 				__m128i shifted = _mm_loadu_si128(shiftedData++);
 				__m128i diff = _mm_sub_epi16(normal, shifted);		// 8 16-bit differences
 				__m128i squares = _mm_madd_epi16(diff, diff);		// Multiply and add: 4 32-bit squares
-				squares = _mm_hadd_epi32(squares, squares);			// This is SSE3!
-				squares = _mm_hadd_epi32(squares, squares);
-				autocorrSum += _mm_cvtsi128_si32(squares);
-				//autocorrSum += squares.m128i_i32[0] +squares.m128i_i32[1] + squares.m128i_i32[2] + squares.m128i_i32[3];	// For SSE2 only
+
+				__m128i sum1 = _mm_shuffle_epi32(squares, _MM_SHUFFLE(0, 1, 2, 3));	// Move upper two integers to lower
+				__m128i sum2  = _mm_add_epi32(squares, sum1);						// Now we can add the (originally) upper two and lower two integers
+				__m128i sum3 = _mm_shuffle_epi32(sum2, _MM_SHUFFLE(1, 1, 1, 1));	// Move the second-lowest integer to lowest position
+				__m128i sum4  = _mm_add_epi32(sum2, sum3);							// Add the two lowest positions
+				autocorrSum += _mm_cvtsi128_si32(sum4);
 			}
 		} else
 #endif
