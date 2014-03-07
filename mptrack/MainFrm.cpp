@@ -1026,7 +1026,7 @@ void CMainFrame::UpdateDspEffects(CSoundFile &sndFile, bool reset)
 	sndFile.m_DSP.m_Settings = TrackerSettings::Instance().m_DSPSettings;
 #endif
 #ifndef NO_EQ
-	sndFile.SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset?TRUE:FALSE);
+	sndFile.SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset);
 #endif
 	sndFile.SetDspEffects(TrackerSettings::Instance().MixerDSPMask);
 	sndFile.InitPlayer(reset);
