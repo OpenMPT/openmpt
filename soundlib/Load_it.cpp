@@ -158,7 +158,7 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0)
 //-------------------------------------------------------------------------------
 {
-	typedef std::map<WORD, std::string> MAP;
+	typedef std::map<uint16, std::string> MAP;
 	typedef MAP::iterator MAP_ITER;
 	MAP shortToTNameMap;
 	ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap);
