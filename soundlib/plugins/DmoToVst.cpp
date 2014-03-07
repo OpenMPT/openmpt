@@ -30,7 +30,7 @@ protected:
 	IMediaObjectInPlace *m_pMediaProcess;
 	IMediaParamInfo *m_pParamInfo;
 	IMediaParams *m_pMediaParams;
-	ULONG m_nSamplesPerSec;
+	uint32 m_nSamplesPerSec;
 	AEffect m_Effect;
 	REFERENCE_TIME m_DataTime;
 	int16 *m_pMixBuffer;

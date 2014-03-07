@@ -121,8 +121,8 @@ typedef struct PACKED tagMMDSAMPLEHEADER
 		// 3: g723_24
 	BYTE commonflags;	// flags common to all packtypes (none defined so far)
 	BYTE packerflags;	// flags for the specific packtype
-	ULONG leftchlen;	// packed length of left channel in bytes
-	ULONG rightchlen;	// packed length of right channel in bytes (ONLY PRESENT IN STEREO SAMPLES)
+	uint32 leftchlen;	// packed length of left channel in bytes
+	uint32 rightchlen;	// packed length of right channel in bytes (ONLY PRESENT IN STEREO SAMPLES)
 	BYTE SampleData[1];	// Sample Data
 } MMDSAMPLEHEADER;
 
@@ -228,7 +228,7 @@ typedef struct PACKED tagMMD1BLOCKINFO
 STATIC_ASSERT(sizeof(MMD1BLOCKINFO) == 36);
 
 
-// A set of play sequences is stored as an array of ULONG files offsets
+// A set of play sequences is stored as an array of uint32 files offsets
 // Each offset points to the play sequence itself.
 typedef struct PACKED tagMMD2PLAYSEQ
 {
