@@ -129,12 +129,12 @@ public:
 	CDLSBank();
 	virtual ~CDLSBank();
 	void Destroy();
-	static BOOL IsDLSBank(const mpt::PathString &filename);
+	static bool IsDLSBank(const mpt::PathString &filename);
 	static DWORD MakeMelodicCode(UINT bank, UINT instr) { return ((bank << 16) | (instr));}
 	static DWORD MakeDrumCode(UINT rgn, UINT instr) { return (0x80000000 | (rgn << 16) | (instr));}
 
 public:
-	BOOL Open(const mpt::PathString &filename);
+	bool Open(const mpt::PathString &filename);
 	mpt::PathString GetFileName() const { return m_szFileName; }
 	UINT GetBankType() const { return m_nType; }
 	UINT GetBankInfo(SOUNDBANKINFO *pBankInfo=NULL) const { if (pBankInfo) *pBankInfo = m_BankInfo; return m_nType; }
@@ -143,19 +143,19 @@ public:
 	UINT GetNumInstruments() const { return m_nInstruments; }
 	UINT GetNumSamples() const { return m_nWaveForms; }
 	DLSINSTRUMENT *GetInstrument(UINT iIns) { return (m_pInstruments) ? &m_pInstruments[iIns] : NULL; }
-	DLSINSTRUMENT *FindInstrument(BOOL bDrum, UINT nBank=0xFF, DWORD dwProgram=0xFF, DWORD dwKey=0xFF, UINT *pInsNo=NULL);
+	DLSINSTRUMENT *FindInstrument(bool bDrum, UINT nBank=0xFF, DWORD dwProgram=0xFF, DWORD dwKey=0xFF, UINT *pInsNo=NULL);
 	UINT GetRegionFromKey(UINT nIns, UINT nKey);
-	BOOL FreeWaveForm(LPBYTE p);
-	BOOL ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen);
-	BOOL ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose=0);
-	BOOL ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn);
+	bool FreeWaveForm(LPBYTE p);
+	bool ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen);
+	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose=0);
+	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn);
 	const CHAR *GetRegionName(UINT nIns, UINT nRgn) const;
 
 // Internal Loader Functions
 protected:
-	BOOL UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pchunk, DWORD dwMaxLen);
-	BOOL UpdateSF2PresetData(void *psf2info, void *pchunk, DWORD dwMaxLen);
-	BOOL ConvertSF2ToDLS(void *psf2info);
+	bool UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pchunk, DWORD dwMaxLen);
+	bool UpdateSF2PresetData(void *psf2info, void *pchunk, DWORD dwMaxLen);
+	bool ConvertSF2ToDLS(void *psf2info);
 
 public:
 	// DLS Unit conversion

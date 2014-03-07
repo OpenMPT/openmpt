@@ -85,7 +85,7 @@ static UINT ProcessAGC(int *pBuffer, int *pRearBuffer, UINT nSamples, UINT nChan
 CAGC::CAGC()
 //----------
 {
-	Initialize(TRUE, 44100);
+	Initialize(true, 44100);
 }
 
 

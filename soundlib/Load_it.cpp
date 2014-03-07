@@ -1251,7 +1251,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Mix Plugins. Just calculate the size of this extra block for now.
 	if(!compatibilityExport)
 	{
-		dwExtra += SaveMixPlugins(NULL, TRUE);
+		dwExtra += SaveMixPlugins(NULL, true);
 	}
 
 	// Edit History. Just calculate the size of this extra block for now.
@@ -1321,7 +1321,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing mix plugins info
 	if(!compatibilityExport)
 	{
-		SaveMixPlugins(f, FALSE);
+		SaveMixPlugins(f, false);
 	}
 
 	// Writing song message
@@ -1687,7 +1687,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 #ifndef MODPLUG_NO_FILESAVE
 
-UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
+UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 //----------------------------------------------------
 {
 	uint32 chinfo[MAX_BASECHANNELS];

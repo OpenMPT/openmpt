@@ -704,12 +704,12 @@ void CSoundFile::InitializeChannels()
 
 
 #ifdef MODPLUG_TRACKER
-BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags, CModDoc *pModDoc)
+bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags, CModDoc *pModDoc)
 //-----------------------------------------------------------------------------------
 {
 	m_pModDoc = pModDoc;
 #else
-BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
+bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 //-----------------------------------------------------------------
 {
 #endif // MODPLUG_TRACKER
@@ -973,14 +973,14 @@ BOOL CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		const ORDERINDEX nMinLength = std::min(CacheSize, GetModSpecifications().ordersMax);
 		if (Order.GetLength() < nMinLength)
 			Order.resize(nMinLength);
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 
-BOOL CSoundFile::Destroy()
+bool CSoundFile::Destroy()
 //------------------------
 {
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
@@ -1016,7 +1016,7 @@ BOOL CSoundFile::Destroy()
 	m_nType = MOD_TYPE_NONE;
 	m_ContainerType = MOD_CONTAINERTYPE_NONE;
 	m_nChannels = m_nSamples = m_nInstruments = 0;
-	return TRUE;
+	return true;
 }
 
 

@@ -116,11 +116,11 @@ void CSoundFile::InitPlayer(bool bReset)
 }
 
 
-BOOL CSoundFile::FadeSong(UINT msec)
+bool CSoundFile::FadeSong(UINT msec)
 //----------------------------------
 {
 	samplecount_t nsamples = Util::muldiv(msec, m_MixerSettings.gdwMixingFreq, 1000);
-	if (nsamples <= 0) return FALSE;
+	if (nsamples <= 0) return false;
 	if (nsamples > 0x100000) nsamples = 0x100000;
 	m_PlayState.m_nBufferCount = nsamples;
 	int32 nRampLength = static_cast<int32>(m_PlayState.m_nBufferCount);
@@ -137,7 +137,7 @@ BOOL CSoundFile::FadeSong(UINT msec)
 		pramp->nRampLength = nRampLength;
 		pramp->dwFlags.set(CHN_VOLUMERAMP);
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -314,7 +314,7 @@ void CSoundFile::ProcessDSP(std::size_t countChunk)
 /////////////////////////////////////////////////////////////////////////////
 // Handles navigation/effects
 
-BOOL CSoundFile::ProcessRow()
+bool CSoundFile::ProcessRow()
 //---------------------------
 {
 	while(++m_PlayState.m_nTickCount >= GetNumTicksOnCurrentRow())
@@ -350,7 +350,7 @@ BOOL CSoundFile::ProcessRow()
 				if ((m_PlayState.m_nPattern == Order.GetInvalidPatIndex()) || (m_PlayState.m_nCurrentOrder >= Order.size()))
 				{
 
-					//if (!m_nRepeatCount) return FALSE;
+					//if (!m_nRepeatCount) return false;
 
 					ORDERINDEX nRestartPosOverride = m_nRestartPos;
 					if(!m_nRestartPos && m_PlayState.m_nCurrentOrder <= Order.size() && m_PlayState.m_nCurrentOrder > 0)
@@ -427,7 +427,7 @@ BOOL CSoundFile::ProcessRow()
 						|| !Patterns.IsValidPat(Order[m_PlayState.m_nCurrentOrder]))
 					{
 						visitedSongRows.Initialize(true);
-						return FALSE;
+						return false;
 					}
 
 				} else
@@ -446,12 +446,12 @@ BOOL CSoundFile::ProcessRow()
 			m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
 
 #ifdef MODPLUG_TRACKER
-			if ((m_nMaxOrderPosition) && (m_PlayState.m_nCurrentOrder >= m_nMaxOrderPosition)) return FALSE;
+			if ((m_nMaxOrderPosition) && (m_PlayState.m_nCurrentOrder >= m_nMaxOrderPosition)) return false;
 #endif // MODPLUG_TRACKER
 		}
 
 		// Weird stuff?
-		if (!Patterns.IsValidPat(m_PlayState.m_nPattern)) return FALSE;
+		if (!Patterns.IsValidPat(m_PlayState.m_nPattern)) return false;
 		// Should never happen
 		if (m_PlayState.m_nRow >= Patterns[m_PlayState.m_nPattern].GetNumRows()) m_PlayState.m_nRow = 0;
 
@@ -486,7 +486,7 @@ BOOL CSoundFile::ProcessRow()
 				{
 					// This is really the song's end!
 					visitedSongRows.Initialize(true);
-					return FALSE;
+					return false;
 				} else
 				{
 					// Ok, this is really dirty, but we have to update the visited rows vector...
@@ -1647,7 +1647,7 @@ uint32 CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int peri
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Handles envelopes & mixer setup
 
-BOOL CSoundFile::ReadNote()
+bool CSoundFile::ReadNote()
 //-------------------------
 {
 #ifdef MODPLUG_TRACKER
@@ -1661,10 +1661,10 @@ BOOL CSoundFile::ReadNote()
 #endif // MODPLUG_TRACKER
 	{
 		if(!ProcessRow())
-			return FALSE;
+			return false;
 	}
 	////////////////////////////////////////////////////////////////////////////////////
-	if (!m_PlayState.m_nMusicTempo) return FALSE;
+	if (!m_PlayState.m_nMusicTempo) return false;
 
 	m_PlayState.m_nSamplesPerTick = GetTickDuration(m_PlayState.m_nMusicTempo, m_PlayState.m_nMusicSpeed, m_PlayState.m_nCurrentRowsPerBeat);
 	m_PlayState.m_nBufferCount = m_PlayState.m_nSamplesPerTick;
@@ -2084,7 +2084,7 @@ BOOL CSoundFile::ReadNote()
 			}
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 

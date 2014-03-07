@@ -406,7 +406,6 @@ STATIC_ASSERT(sizeof(FloatInt32) == 4);
 
 // openmpt assumes these type have exact WIN32 semantics
 
-typedef std::int32_t  BOOL;
 typedef std::uint8_t  BYTE;
 typedef std::uint16_t WORD;
 typedef std::uint32_t DWORD;
@@ -414,10 +413,6 @@ typedef std::int8_t   CHAR;
 typedef std::int32_t  LONG;
 typedef std::uint32_t UINT;
 typedef BYTE *        LPBYTE;
-
-// for BOOL
-#define TRUE (1)
-#define FALSE (0)
 
 #endif // !WIN32
 

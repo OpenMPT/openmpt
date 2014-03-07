@@ -1456,7 +1456,7 @@ void CEQSetupDlg::UpdateEQ(BOOL bReset)
 #ifndef NO_EQ
 	CriticalSection cs;
 	if(CMainFrame::GetMainFrame()->GetSoundFilePlaying())
-		CMainFrame::GetMainFrame()->GetSoundFilePlaying()->SetEQGains( m_pEqPreset->Gains, MAX_EQ_BANDS, m_pEqPreset->Freqs, bReset);
+		CMainFrame::GetMainFrame()->GetSoundFilePlaying()->SetEQGains( m_pEqPreset->Gains, MAX_EQ_BANDS, m_pEqPreset->Freqs, bReset?true:false);
 #endif
 }
 
