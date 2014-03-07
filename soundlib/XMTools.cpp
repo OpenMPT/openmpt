@@ -61,11 +61,11 @@ void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &
 		{
 		case EnvTypeVol:
 			volEnv[i * 2] = std::min(mptEnv.Ticks[i], uint16_max);
-			volEnv[i * 2 + 1] = mptEnv.Values[i];
+			volEnv[i * 2 + 1] = std::min(mptEnv.Values[i], uint8(64));
 			break;
 		case EnvTypePan:
 			panEnv[i * 2] = std::min(mptEnv.Ticks[i], uint16_max);
-			panEnv[i * 2 + 1] = mptEnv.Values[i];
+			panEnv[i * 2 + 1] = std::min(mptEnv.Values[i], uint8(63));
 			break;
 		}
 	}

@@ -151,7 +151,7 @@ static forceinline int32 GetSampleCount(ModChannel &chn, int32 nSamples, bool IT
 		{
 			// Invert loop for bidi loops
 			int32 nDelta = ((nLoopStart - chn.nPos) << 16) - (chn.nPosLo & 0xffff);
-			chn.nPos = nLoopStart | (nDelta >> 16);
+			chn.nPos = nLoopStart + (nDelta >> 16);
 			chn.nPosLo = nDelta & 0xffff;
 			if (((int32)chn.nPos < nLoopStart) || (chn.nPos >= (nLoopStart+chn.nLength)/2))
 			{
@@ -473,8 +473,10 @@ void CSoundFile::CreateStereoMix(int count)
 void CSoundFile::ProcessPlugins(UINT nCount)
 //------------------------------------------
 {
+#ifdef MPT_INTMIXER
 	const float IntToFloat = m_PlayConfig.getIntToFloat();
 	const float FloatToInt = m_PlayConfig.getFloatToInt();
+#endif // MPT_INTMIXER
 	// Setup float inputs
 	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
