@@ -1029,7 +1029,7 @@ void CMainFrame::UpdateDspEffects(CSoundFile &sndFile, bool reset)
 	sndFile.SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset?TRUE:FALSE);
 #endif
 	sndFile.SetDspEffects(TrackerSettings::Instance().MixerDSPMask);
-	sndFile.InitPlayer(reset?TRUE:FALSE);
+	sndFile.InitPlayer(reset);
 }
 
 
@@ -1044,7 +1044,7 @@ void CMainFrame::UpdateAudioParameters(CSoundFile &sndFile, bool reset)
 	sndFile.SetMixerSettings(TrackerSettings::Instance().GetMixerSettings());
 	sndFile.SetResamplerSettings(TrackerSettings::Instance().GetResamplerSettings());
 	UpdateDspEffects(sndFile, false); // reset done in next line
-	sndFile.InitPlayer(reset?TRUE:FALSE);
+	sndFile.InitPlayer(reset);
 }
 
 
@@ -1332,7 +1332,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 	if(!bPatLoop && bPaused) sndFile.m_SongFlags.set(SONG_PAUSED);
 	sndFile.SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
 
-	sndFile.InitPlayer(TRUE);
+	sndFile.InitPlayer(true);
 	sndFile.ResumePlugins();
 
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
@@ -1430,7 +1430,7 @@ bool CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 
 	SetPlaybackSoundFile(pSndFile);
 
-	m_pSndFile->InitPlayer(TRUE);
+	m_pSndFile->InitPlayer(true);
 
 	if(!StartPlayback())
 	{

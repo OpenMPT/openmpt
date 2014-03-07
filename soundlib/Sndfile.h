@@ -730,7 +730,7 @@ public:
 	// Mixer Config
 	void SetMixerSettings(const MixerSettings &mixersettings);
 	void SetResamplerSettings(const CResamplerSettings &resamplersettings);
-	void InitPlayer(BOOL bReset=FALSE);
+	void InitPlayer(bool bReset=false);
 	void SetDspEffects(DWORD DSPMask);
 	DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
 #ifndef NO_EQ

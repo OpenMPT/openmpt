@@ -79,7 +79,7 @@ void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 		(mixersettings.MixerFlags != m_MixerSettings.MixerFlags))
 		reset = true;
 	m_MixerSettings = mixersettings;
-	InitPlayer(reset?TRUE:FALSE);
+	InitPlayer(reset);
 }
 
 
@@ -91,7 +91,7 @@ void CSoundFile::SetResamplerSettings(const CResamplerSettings &resamplersetting
 }
 
 
-void CSoundFile::InitPlayer(BOOL bReset)
+void CSoundFile::InitPlayer(bool bReset)
 //--------------------------------------
 {
 	if(bReset)

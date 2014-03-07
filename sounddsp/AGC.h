@@ -23,7 +23,7 @@ private:
 	UINT m_Timeout;
 public:
 	CAGC();
-	void Initialize(BOOL bReset, DWORD MixingFreq);
+	void Initialize(bool bReset, DWORD MixingFreq);
 public:
 	void Process(int *MixSoundBuffer, int *RearSoundBuffer, int count, UINT nChannels);
 	void Adjust(UINT oldVol, UINT newVol);

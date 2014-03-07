@@ -397,7 +397,7 @@ CEQ::CEQ()
 }
 
 
-void CEQ::Initialize(BOOL bReset, DWORD MixingFreq)
+void CEQ::Initialize(bool bReset, DWORD MixingFreq)
 //-------------------------------------------------
 {
 	float32 fMixingFreq = (float32)MixingFreq;
@@ -406,7 +406,7 @@ void CEQ::Initialize(BOOL bReset, DWORD MixingFreq)
 	{
 		float32 k, k2, r, f;
 		float32 v0, v1;
-		BOOL b = bReset;
+		bool b = bReset;
 
 		f = gEQ[band].CenterFrequency / fMixingFreq;
 		if (f > 0.45f) gEQ[band].Gain = 1;
@@ -509,11 +509,11 @@ void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL b
 			gEQ[i+MAX_EQ_BANDS].bEnable = false;
 		}
 	}
-	Initialize(bReset, MixingFreq);
+	Initialize(bReset?true:false, MixingFreq);
 }
 
 
-void CQuadEQ::Initialize(BOOL bReset, DWORD MixingFreq)
+void CQuadEQ::Initialize(bool bReset, DWORD MixingFreq)
 //-----------------------------------------------------
 {
 	front.Initialize(bReset, MixingFreq);
