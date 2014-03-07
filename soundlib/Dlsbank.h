@@ -66,7 +66,7 @@ typedef struct PACKED DLSINSTRUMENT
 	DWORD ulBank, ulInstrument;
 	UINT nRegions, nMelodicEnv;
 	DLSREGION Regions[DLSMAXREGIONS];
-	CHAR szName[32];
+	char szName[32];
 	// SF2 stuff (DO NOT USE! -> used internally by the SF2 loader)
 	WORD wPresetBagNdx, wPresetBagNum;
 } DLSINSTRUMENT;
@@ -75,13 +75,13 @@ STATIC_ASSERT(sizeof(DLSINSTRUMENT) == 2740);
 
 typedef struct PACKED DLSSAMPLEEX
 {
-	CHAR szName[20];
+	char szName[20];
 	DWORD dwLen;
 	DWORD dwStartloop;
 	DWORD dwEndloop;
 	DWORD dwSampleRate;
 	BYTE byOriginalPitch;
-	CHAR chPitchCorrection;
+	char chPitchCorrection;
 } DLSSAMPLEEX;
 
 STATIC_ASSERT(sizeof(DLSSAMPLEEX) == 38);
@@ -100,12 +100,12 @@ STATIC_ASSERT(sizeof(DLSSAMPLEEX) == 38);
 
 typedef struct SOUNDBANKINFO
 {
-	CHAR szBankName[256];
-	CHAR szCopyRight[256];
-	CHAR szComments[512];
-	CHAR szEngineer[256];
-	CHAR szSoftware[256];		// ISFT: Software
-	CHAR szDescription[256];	// ISBJ: Subject
+	char szBankName[256];
+	char szCopyRight[256];
+	char szComments[512];
+	char szEngineer[256];
+	char szSoftware[256];		// ISFT: Software
+	char szDescription[256];	// ISBJ: Subject
 } SOUNDBANKINFO;
 
 
@@ -149,7 +149,7 @@ public:
 	bool ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen);
 	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose=0);
 	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn);
-	const CHAR *GetRegionName(UINT nIns, UINT nRgn) const;
+	const char *GetRegionName(UINT nIns, UINT nRgn) const;
 
 // Internal Loader Functions
 protected:

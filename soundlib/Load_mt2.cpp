@@ -290,7 +290,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 		dwMemPos += 8;
 		if (dwMemPos + dwLen > dwMemLength) return true;
 #ifdef MT2DEBUG
-		CHAR s[5];
+		char s[5];
 		memcpy(s, &dwId, 4);
 		s[4] = 0;
 		Log("pos=0x%04X: %s: %d bytes\n", dwMemPos-8, s, dwLen);

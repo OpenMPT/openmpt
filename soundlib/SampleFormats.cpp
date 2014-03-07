@@ -513,9 +513,9 @@ bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 typedef struct PACKED GF1PATCHFILEHEADER
 {
 	char  magic[8];			// "GF1PATCH"
-	CHAR version[4];		// "100", or "110"
-	CHAR id[10];			// "ID#000002"
-	CHAR copyright[60];		// Copyright
+	char version[4];		// "100", or "110"
+	char id[10];			// "ID#000002"
+	char copyright[60];		// Copyright
 	BYTE instrum;			// Number of instruments in patch
 	BYTE voices;			// Number of voices, usually 14
 	BYTE channels;			// Number of wav channels that can be played concurently to the patch

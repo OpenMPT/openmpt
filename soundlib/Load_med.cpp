@@ -509,7 +509,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	const MMD0EXP *pmex;
 	DWORD dwBlockArr, dwSmplArr, dwExpData, wNumBlocks;
 	DWORD *pdwTable;
-	CHAR version;
+	int8 version;
 	UINT deftempo;
 	int playtransp = 0;
 
