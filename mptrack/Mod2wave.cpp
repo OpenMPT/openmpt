@@ -1020,7 +1020,7 @@ void CDoWaveConvert::OnButton1()
 	m_SndFile.ResetChannels();
 	m_SndFile.SetMixerSettings(mixersettings);
 	m_SndFile.SetResamplerSettings(TrackerSettings::Instance().GetResamplerSettings());
-	m_SndFile.InitPlayer(TRUE);
+	m_SndFile.InitPlayer(true);
 	if(!m_dwFileLimit) m_dwFileLimit = Util::MaxValueOfType(m_dwFileLimit) >> 10;
 	m_dwFileLimit <<= 10;
 

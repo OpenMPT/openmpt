@@ -18,7 +18,7 @@
 #pragma warning(disable:4725)	// Pentium fdiv bug
 #pragma warning(disable:4731)	// ebp modified
 
-extern void StereoFill(int *pBuffer, UINT nSamples, mixsample_t &lpROfs, mixsample_t &lpLOfs);
+extern void StereoFill(int *pBuffer, uint32 nSamples, mixsample_t &lpROfs, mixsample_t &lpLOfs);
 
 
 
@@ -67,19 +67,19 @@ CReverb::CReverb()
 
 
 // Misc functions
-static LONG OnePoleLowPassCoef(LONG scale, float g, float F_c, float F_s);
-static LONG mBToLinear(LONG scale, LONG value_mB);
-static float mBToLinear(LONG value_mB);
+static int32 OnePoleLowPassCoef(int32 scale, float g, float F_c, float F_s);
+static int32 mBToLinear(int32 scale, int32 value_mB);
+static float mBToLinear(int32 value_mB);
 
 struct SNDMIX_REVERB_PROPERTIES
 {
-	LONG  lRoom;                   // [-10000, 0]      default: -10000 mB
-	LONG  lRoomHF;                 // [-10000, 0]      default: 0 mB
+	int32 lRoom;                   // [-10000, 0]      default: -10000 mB
+	int32 lRoomHF;                 // [-10000, 0]      default: 0 mB
 	float flDecayTime;             // [0.1, 20.0]      default: 1.0 s
 	float flDecayHFRatio;          // [0.1, 2.0]       default: 0.5
-	LONG  lReflections;            // [-10000, 1000]   default: -10000 mB
+	int32 lReflections;            // [-10000, 1000]   default: -10000 mB
 	float flReflectionsDelay;      // [0.0, 0.3]       default: 0.02 s
-	LONG  lReverb;                 // [-10000, 2000]   default: -10000 mB
+	int32 lReverb;                 // [-10000, 2000]   default: -10000 mB
 	float flReverbDelay;           // [0.0, 0.1]       default: 0.04 s
 	float flDiffusion;             // [0.0, 100.0]     default: 100.0 %
 	float flDensity;               // [0.0, 100.0]     default: 100.0 %
@@ -126,7 +126,7 @@ static SNDMIX_RVBPRESET gRvbPresets[NUM_REVERBTYPES] =
 	{{ SNDMIX_REVERB_PRESET_UNDERWATER },		"Underwater"},
 };
 
-const char *GetReverbPresetName(UINT nPreset)
+const char *GetReverbPresetName(uint32 nPreset)
 {
 	return (nPreset < NUM_REVERBTYPES) ? gRvbPresets[nPreset].lpszName : NULL;
 }
@@ -138,8 +138,8 @@ const char *GetReverbPresetName(UINT nPreset)
 
 typedef struct _REFLECTIONPRESET
 {
-	LONG lDelayFactor;
-	SHORT sGainLL, sGainRR, sGainLR, sGainRL;
+	int32 lDelayFactor;
+	int16 sGainLL, sGainRR, sGainLR, sGainRL;
 } REFLECTIONPRESET, *PREFLECTIONPRESET;
 
 const REFLECTIONPRESET gReflectionsPreset[ENVIRONMENT_NUMREFLECTIONS] =
@@ -162,18 +162,18 @@ const REFLECTIONPRESET gReflectionsPreset[ENVIRONMENT_NUMREFLECTIONS] =
 
 inline long ftol(float f) { return ((long)(f)); }
 
-static VOID I3dl2_to_Generic(
+static void I3dl2_to_Generic(
 				const SNDMIX_REVERB_PROPERTIES *pReverb,
 				PENVIRONMENTREVERB pRvb,
 				float flOutputFreq,
-				LONG lMinRefDelay,
-				LONG lMaxRefDelay,
-				LONG lMinRvbDelay,
-				LONG lMaxRvbDelay,
-				LONG lTankLength)
+				int32 lMinRefDelay,
+				int32 lMaxRefDelay,
+				int32 lMinRvbDelay,
+				int32 lMaxRvbDelay,
+				int32 lTankLength)
 {
 	float flDelayFactor, flDelayFactorHF, flDecayTimeHF;
-	LONG lDensity, lTailDiffusion;
+	int32 lDensity, lTailDiffusion;
 
 	// Common parameters
 	pRvb->ReverbLevel = pReverb->lReverb;
@@ -181,7 +181,7 @@ static VOID I3dl2_to_Generic(
 	pRvb->RoomHF = pReverb->lRoomHF;
 
 	// HACK: Somewhat normalize the reverb output level
-	LONG lMaxLevel = (pRvb->ReverbLevel > pRvb->ReflectionsLevel) ? pRvb->ReverbLevel : pRvb->ReflectionsLevel;
+	int32 lMaxLevel = (pRvb->ReverbLevel > pRvb->ReflectionsLevel) ? pRvb->ReverbLevel : pRvb->ReflectionsLevel;
 	if (lMaxLevel < -600)
 	{
 		lMaxLevel += 600;
@@ -201,9 +201,9 @@ static VOID I3dl2_to_Generic(
 	// Verify reflections and reverb delay parameters
 	float flRefDelay = pReverb->flReflectionsDelay;
 	if (flRefDelay > 0.100f) flRefDelay = 0.100f;
-	LONG lReverbDelay = ftol(pReverb->flReverbDelay * flOutputFreq);
-	LONG lReflectionsDelay = ftol(flRefDelay * flOutputFreq);
-	LONG lReverbDecayTime = ftol(pReverb->flDecayTime * flOutputFreq);
+	int32 lReverbDelay = ftol(pReverb->flReverbDelay * flOutputFreq);
+	int32 lReflectionsDelay = ftol(flRefDelay * flOutputFreq);
+	int32 lReverbDecayTime = ftol(pReverb->flDecayTime * flOutputFreq);
 	if (lReflectionsDelay < lMinRefDelay)
 	{
 		lReverbDelay -= (lMinRefDelay - lReflectionsDelay);
@@ -228,7 +228,7 @@ static VOID I3dl2_to_Generic(
 	pRvb->ReverbDelay = lReverbDelay;
 	pRvb->ReverbDecaySamples = lReverbDecayTime;
 	// Setup individual reflections delay and gains
-	for (UINT iRef=0; iRef<ENVIRONMENT_NUMREFLECTIONS; iRef++)
+	for (uint32 iRef=0; iRef<ENVIRONMENT_NUMREFLECTIONS; iRef++)
 	{
 		PENVIRONMENTREFLECTION pRef = &pRvb->Reflections[iRef];
 		pRef->Delay = lReflectionsDelay + (gReflectionsPreset[iRef].lDelayFactor * lReverbDelay + 50)/100;
@@ -259,8 +259,8 @@ void CReverb::Shutdown()
 	gnRvbROfsVol = 0;
 
 	// Clear out all reverb state
-	g_bLastInPresent = FALSE;
-	g_bLastOutPresent = FALSE;
+	g_bLastInPresent = false;
+	g_bLastOutPresent = false;
 	g_nLastRvbIn_xl = g_nLastRvbIn_xr = 0;
 	g_nLastRvbIn_yl = g_nLastRvbIn_yr = 0;
 	g_nLastRvbOut_xl = g_nLastRvbOut_xr = 0;
@@ -278,8 +278,8 @@ void CReverb::Shutdown()
 }
 
 
-void CReverb::Initialize(BOOL bReset, DWORD MixingFreq)
-//-----------------------------------------------------
+void CReverb::Initialize(bool bReset, uint32 MixingFreq)
+//------------------------------------------------------
 {
 	if (m_Settings.m_nReverbType >= NUM_REVERBTYPES) m_Settings.m_nReverbType = 0;
 	static PSNDMIX_REVERB_PROPERTIES spCurrentPreset = NULL;
@@ -305,17 +305,17 @@ void CReverb::Initialize(BOOL bReset, DWORD MixingFreq)
 		gnReverbDecaySamples = rvb.ReverbDecaySamples;
 
 		// Room attenuation at high frequencies
-		LONG nRoomLP;
+		int32 nRoomLP;
 		nRoomLP = OnePoleLowPassCoef(32768, mBToLinear(rvb.RoomHF), 5000, flOutputFrequency);
-		g_RefDelay.nCoeffs[0] = (SHORT)nRoomLP;
-		g_RefDelay.nCoeffs[1] = (SHORT)nRoomLP;
+		g_RefDelay.nCoeffs[0] = (int16)nRoomLP;
+		g_RefDelay.nCoeffs[1] = (int16)nRoomLP;
 
 		// Pre-Diffusion factor (for both reflections and late reverb)
-		g_RefDelay.nPreDifCoeffs[0] = (SHORT)(rvb.PreDiffusion*2);
-		g_RefDelay.nPreDifCoeffs[1] = (SHORT)(rvb.PreDiffusion*2);
+		g_RefDelay.nPreDifCoeffs[0] = (int16)(rvb.PreDiffusion*2);
+		g_RefDelay.nPreDifCoeffs[1] = (int16)(rvb.PreDiffusion*2);
 
 		// Setup individual reflections delay and gains
-		for (UINT iRef=0; iRef<8; iRef++)
+		for (uint32 iRef=0; iRef<8; iRef++)
 		{
 			PSWRVBREFLECTION pRef = &g_RefDelay.Reflections[iRef];
 			pRef->DelayDest = rvb.Reflections[iRef].Delay;
@@ -328,7 +328,7 @@ void CReverb::Initialize(BOOL bReset, DWORD MixingFreq)
 		g_LateReverb.nReverbDelay = rvb.ReverbDelay;
 
 		// Reflections Master Gain
-		ULONG lReflectionsGain = 0;
+		uint32 lReflectionsGain = 0;
 		if (rvb.ReflectionsLevel > -9000)
 		{
 			lReflectionsGain = mBToLinear(32768, rvb.ReflectionsLevel);
@@ -336,7 +336,7 @@ void CReverb::Initialize(BOOL bReset, DWORD MixingFreq)
 		g_RefDelay.lMasterGain = lReflectionsGain;
 
 		// Late reverb master gain
-		ULONG lReverbGain = 0;
+		uint32 lReverbGain = 0;
 		if (rvb.ReverbLevel > -9000)
 		{
 			lReverbGain = mBToLinear(32768, rvb.ReverbLevel);
@@ -344,38 +344,38 @@ void CReverb::Initialize(BOOL bReset, DWORD MixingFreq)
 		g_LateReverb.lMasterGain = lReverbGain;
 
 		// Late reverb diffusion
-		ULONG nTailDiffusion = rvb.TankDiffusion;
+		uint32 nTailDiffusion = rvb.TankDiffusion;
 		if (nTailDiffusion > 0x7f00) nTailDiffusion = 0x7f00;
-		g_LateReverb.nDifCoeffs[0] = (SHORT)nTailDiffusion;
-		g_LateReverb.nDifCoeffs[1] = (SHORT)nTailDiffusion;
-		g_LateReverb.nDifCoeffs[2] = (SHORT)nTailDiffusion;
-		g_LateReverb.nDifCoeffs[3] = (SHORT)nTailDiffusion;
+		g_LateReverb.nDifCoeffs[0] = (int16)nTailDiffusion;
+		g_LateReverb.nDifCoeffs[1] = (int16)nTailDiffusion;
+		g_LateReverb.nDifCoeffs[2] = (int16)nTailDiffusion;
+		g_LateReverb.nDifCoeffs[3] = (int16)nTailDiffusion;
 		g_LateReverb.Dif2InGains[0] = 0x7000;
 		g_LateReverb.Dif2InGains[1] = 0x1000;
 		g_LateReverb.Dif2InGains[2] = 0x1000;
 		g_LateReverb.Dif2InGains[3] = 0x7000;
 
 		// Late reverb decay time
-		LONG nReverbDecay = rvb.ReverbDecay;
+		int32 nReverbDecay = rvb.ReverbDecay;
 		if (nReverbDecay < 0) nReverbDecay = 0;
 		if (nReverbDecay > 0x7ff0) nReverbDecay = 0x7ff0;
-		g_LateReverb.nDecayDC[0] = (SHORT)nReverbDecay;
+		g_LateReverb.nDecayDC[0] = (int16)nReverbDecay;
 		g_LateReverb.nDecayDC[1] = 0;
 		g_LateReverb.nDecayDC[2] = 0;
-		g_LateReverb.nDecayDC[3] = (SHORT)nReverbDecay;
+		g_LateReverb.nDecayDC[3] = (int16)nReverbDecay;
 
 		// Late Reverb Decay HF
 		float fReverbDamping = rvb.flReverbDamping * rvb.flReverbDamping;
-		LONG nDampingLowPass;
+		int32 nDampingLowPass;
 
 		nDampingLowPass = OnePoleLowPassCoef(32768, fReverbDamping, 5000, flOutputFrequency);
 		if (nDampingLowPass < 0x100) nDampingLowPass = 0x100;
 		if (nDampingLowPass >= 0x7f00) nDampingLowPass = 0x7f00;
 		
-		g_LateReverb.nDecayLP[0] = (SHORT)nDampingLowPass;
+		g_LateReverb.nDecayLP[0] = (int16)nDampingLowPass;
 		g_LateReverb.nDecayLP[1] = 0;
 		g_LateReverb.nDecayLP[2] = 0;
-		g_LateReverb.nDecayLP[3] = (SHORT)nDampingLowPass;
+		g_LateReverb.nDecayLP[3] = (int16)nDampingLowPass;
 	}
 	if (bReset)
 	{
@@ -391,11 +391,11 @@ void CReverb::Initialize(BOOL bReset, DWORD MixingFreq)
 
 
 // [Reverb level 0(quiet)-100(loud)], [type = REVERBTYPE_XXXX]
-bool CReverb::SetReverbParameters(UINT nDepth, UINT nType)
-//--------------------------------------------------------
+bool CReverb::SetReverbParameters(uint32 nDepth, uint32 nType)
+//------------------------------------------------------------
 {
 	if (nDepth > 100) nDepth = 100;
-	UINT gain = (nDepth * 16) / 100;
+	uint32 gain = (nDepth * 16) / 100;
 	if (gain > 16) gain = 16;
 	if (gain < 1) gain = 1;
 	m_Settings.m_nReverbDepth = gain;
@@ -404,8 +404,8 @@ bool CReverb::SetReverbParameters(UINT nDepth, UINT nType)
 }
 
 
-int *CReverb::GetReverbSendBuffer(UINT nSamples)
-//----------------------------------------------
+int *CReverb::GetReverbSendBuffer(uint32 nSamples)
+//------------------------------------------------
 {
 	if(!gnReverbSend)
 	{ // and we did not clear the buffer yet, do it now because we will get new data
@@ -417,8 +417,8 @@ int *CReverb::GetReverbSendBuffer(UINT nSamples)
 
 
 // Reverb
-void CReverb::Process(int *MixSoundBuffer, UINT nSamples)
-//-------------------------------------------------------
+void CReverb::Process(int *MixSoundBuffer, uint32 nSamples)
+//---------------------------------------------------------
 {
 	if(!(GetProcSupport() & PROCSUPPORT_MMX)) return;
 	if((!gnReverbSend) && (!gnReverbSamples))
@@ -430,23 +430,23 @@ void CReverb::Process(int *MixSoundBuffer, UINT nSamples)
 		StereoFill(MixReverbBuffer, nSamples, gnRvbROfsVol, gnRvbLOfsVol);
 	}
 
-	UINT nIn, nOut;
+	uint32 nIn, nOut;
 	// Dynamically adjust reverb master gains
-	LONG lMasterGain;
+	int32 lMasterGain;
 	lMasterGain = ((g_RefDelay.lMasterGain * m_Settings.m_nReverbDepth) >> 4);
 	if (lMasterGain > 0x7fff) lMasterGain = 0x7fff;
-	g_RefDelay.ReflectionsGain[0] = (SHORT)lMasterGain;
-	g_RefDelay.ReflectionsGain[1] = (SHORT)lMasterGain;
+	g_RefDelay.ReflectionsGain[0] = (int16)lMasterGain;
+	g_RefDelay.ReflectionsGain[1] = (int16)lMasterGain;
 	lMasterGain = ((g_LateReverb.lMasterGain * m_Settings.m_nReverbDepth) >> 4);
 	if (lMasterGain > 0x10000) lMasterGain = 0x10000;
-	g_LateReverb.RvbOutGains[0] = (SHORT)((lMasterGain+0x7f) >> 3);	// l->l
-	g_LateReverb.RvbOutGains[1] = (SHORT)((lMasterGain+0xff) >> 4);	// r->l
-	g_LateReverb.RvbOutGains[2] = (SHORT)((lMasterGain+0xff) >> 4);	// l->r
-	g_LateReverb.RvbOutGains[3] = (SHORT)((lMasterGain+0x7f) >> 3);	// r->r
+	g_LateReverb.RvbOutGains[0] = (int16)((lMasterGain+0x7f) >> 3);	// l->l
+	g_LateReverb.RvbOutGains[1] = (int16)((lMasterGain+0xff) >> 4);	// r->l
+	g_LateReverb.RvbOutGains[2] = (int16)((lMasterGain+0xff) >> 4);	// l->r
+	g_LateReverb.RvbOutGains[3] = (int16)((lMasterGain+0x7f) >> 3);	// r->r
 	// Process Dry/Wet Mix
-	LONG lMaxRvbGain = (g_RefDelay.lMasterGain > g_LateReverb.lMasterGain) ? g_RefDelay.lMasterGain : g_LateReverb.lMasterGain;
+	int32 lMaxRvbGain = (g_RefDelay.lMasterGain > g_LateReverb.lMasterGain) ? g_RefDelay.lMasterGain : g_LateReverb.lMasterGain;
 	if (lMaxRvbGain > 32768) lMaxRvbGain = 32768;
-	LONG lDryVol = (36 - m_Settings.m_nReverbDepth)>>1;
+	int32 lDryVol = (36 - m_Settings.m_nReverbDepth)>>1;
 	if (lDryVol < 8) lDryVol = 8;
 	if (lDryVol > 16) lDryVol = 16;
 	lDryVol = 16 - (((16-lDryVol) * lMaxRvbGain) >> 15);
@@ -459,15 +459,15 @@ void CReverb::Process(int *MixSoundBuffer, UINT nSamples)
 	if (nIn > 0) MMX_ProcessPreDelay(&g_RefDelay, MixReverbBuffer, nIn);
 	// Process Reverb Reflections and Late Reverberation
 	int *pRvbOut = MixReverbBuffer;
-	UINT nRvbSamples = nOut, nCount = 0;
+	uint32 nRvbSamples = nOut, nCount = 0;
 	while (nRvbSamples > 0)
 	{
-		UINT nPosRef = g_RefDelay.nRefOutPos & SNDMIX_REVERB_DELAY_MASK;
-		UINT nPosRvb = (nPosRef - g_LateReverb.nReverbDelay) & SNDMIX_REVERB_DELAY_MASK;
-		UINT nmax1 = (SNDMIX_REVERB_DELAY_MASK+1) - nPosRef;
-		UINT nmax2 = (SNDMIX_REVERB_DELAY_MASK+1) - nPosRvb;
+		uint32 nPosRef = g_RefDelay.nRefOutPos & SNDMIX_REVERB_DELAY_MASK;
+		uint32 nPosRvb = (nPosRef - g_LateReverb.nReverbDelay) & SNDMIX_REVERB_DELAY_MASK;
+		uint32 nmax1 = (SNDMIX_REVERB_DELAY_MASK+1) - nPosRef;
+		uint32 nmax2 = (SNDMIX_REVERB_DELAY_MASK+1) - nPosRvb;
 		nmax1 = (nmax1 < nmax2) ? nmax1 : nmax2;
-		UINT n = nRvbSamples;
+		uint32 n = nRvbSamples;
 		if (n > nmax1) n = nmax1;
 		if (n > 64) n = 64;
 		// Reflections output + late reverb delay
@@ -497,10 +497,10 @@ void CReverb::Process(int *MixSoundBuffer, UINT nSamples)
 }
 
 
-VOID CReverb::X86_ReverbDryMix(int *pDry, int *pWet, int lDryVol, UINT nSamples)
-//------------------------------------------------------------------------------
+void CReverb::X86_ReverbDryMix(int *pDry, int *pWet, int lDryVol, uint32 nSamples)
+//--------------------------------------------------------------------------------
 {
-	for (UINT i=0; i<nSamples; i++)
+	for (uint32 i=0; i<nSamples; i++)
 	{
 		pDry[i*2] += (pWet[i*2]>>4) * lDryVol;
 		pDry[i*2+1] += (pWet[i*2+1]>>4) * lDryVol;
@@ -508,13 +508,13 @@ VOID CReverb::X86_ReverbDryMix(int *pDry, int *pWet, int lDryVol, UINT nSamples)
 }
 
 
-UINT CReverb::X86_ReverbProcessPreFiltering2x(int *pWet, UINT nSamples)
-//---------------------------------------------------------------------
+uint32 CReverb::X86_ReverbProcessPreFiltering2x(int *pWet, uint32 nSamples)
+//-------------------------------------------------------------------------
 {
-	UINT nOutSamples = 0;
+	uint32 nOutSamples = 0;
 	int lowpass = g_RefDelay.nCoeffs[0];
 	int y1_l = g_nLastRvbIn_yl, y1_r = g_nLastRvbIn_yr;
-	UINT n = nSamples;
+	uint32 n = nSamples;
 
 	if (g_bLastInPresent)
 	{
@@ -529,17 +529,17 @@ UINT CReverb::X86_ReverbProcessPreFiltering2x(int *pWet, UINT nSamples)
 		pWet+=2;
 		n--;
 		nOutSamples = 1;
-		g_bLastInPresent = FALSE;
+		g_bLastInPresent = false;
 	}
 	if (n & 1)
 	{
 		n--;
 		g_nLastRvbIn_xl = pWet[n*2];
 		g_nLastRvbIn_xr = pWet[n*2+1];
-		g_bLastInPresent = TRUE;
+		g_bLastInPresent = true;
 	}
 	n >>= 1;
-	for (UINT i=0; i<n; i++)
+	for (uint32 i=0; i<n; i++)
 	{
 		int x1_l = pWet[i*4];
 		int x2_l = pWet[i*4+2];
@@ -558,13 +558,13 @@ UINT CReverb::X86_ReverbProcessPreFiltering2x(int *pWet, UINT nSamples)
 }
 
 
-UINT CReverb::X86_ReverbProcessPreFiltering1x(int *pWet, UINT nSamples)
-//---------------------------------------------------------------------
+uint32 CReverb::X86_ReverbProcessPreFiltering1x(int *pWet, uint32 nSamples)
+//-------------------------------------------------------------------------
 {
 	int lowpass = g_RefDelay.nCoeffs[0];
 	int y1_l = g_nLastRvbIn_yl, y1_r = g_nLastRvbIn_yr;
 
-	for (UINT i=0; i<nSamples; i++)
+	for (uint32 i=0; i<nSamples; i++)
 	{
 		int x_l = pWet[i*2] >> 12;
 		int x_r = pWet[i*2+1] >> 12;
@@ -579,10 +579,10 @@ UINT CReverb::X86_ReverbProcessPreFiltering1x(int *pWet, UINT nSamples)
 }
 
 
-VOID CReverb::X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, UINT nSamples)
-//---------------------------------------------------------------------------------------
+void CReverb::X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, uint32 nSamples)
+//-----------------------------------------------------------------------------------------
 {
-	UINT n0 = nSamples, n;
+	uint32 n0 = nSamples, n;
 	int x1_l = g_nLastRvbOut_xl, x1_r = g_nLastRvbOut_xr;
 
 	if (g_bLastOutPresent)
@@ -591,10 +591,10 @@ VOID CReverb::X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, UINT 
 		pDry[1] += x1_r;
 		pDry += 2;
 		n0--;
-		g_bLastOutPresent = FALSE;
+		g_bLastOutPresent = false;
 	}
 	n  = n0 >> 1;
-	for (UINT i=0; i<n; i++)
+	for (uint32 i=0; i<n; i++)
 	{
 		int x_l = pRvb[i*2], x_r = pRvb[i*2+1];
 		pDry[i*4] += (x_l + x1_l)>>1;
@@ -611,7 +611,7 @@ VOID CReverb::X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, UINT 
 		pDry[n*4+1] += (x_r + x1_r)>>1;
 		x1_l = x_l;
 		x1_r = x_r;
-		g_bLastOutPresent = TRUE;
+		g_bLastOutPresent = true;
 	}
 	g_nLastRvbOut_xl = x1_l;
 	g_nLastRvbOut_xr = x1_r;
@@ -621,8 +621,8 @@ VOID CReverb::X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, UINT 
 #define DCR_AMOUNT		9
 
 // Stereo Add + DC removal
-VOID CReverb::MMX_ReverbProcessPostFiltering1x(const int *pRvb, int *pDry, UINT nSamples)
-//---------------------------------------------------------------------------------------
+void CReverb::MMX_ReverbProcessPostFiltering1x(const int *pRvb, int *pDry, uint32 nSamples)
+//-----------------------------------------------------------------------------------------
 {
 	__int64 nDCRRvb_X1 = gnDCRRvb_X1;
 	__int64 nDCRRvb_Y1 = gnDCRRvb_Y1;
@@ -659,8 +659,8 @@ stereodcr:
 }
 
 
-VOID CReverb::MMX_ReverbDCRemoval(int *pBuffer, UINT nSamples)
-//------------------------------------------------------------
+void CReverb::MMX_ReverbDCRemoval(int *pBuffer, uint32 nSamples)
+//--------------------------------------------------------------
 {
 	__int64 nDCRRvb_X1 = gnDCRRvb_X1;
 	__int64 nDCRRvb_Y1 = gnDCRRvb_Y1;
@@ -702,8 +702,8 @@ stereodcr:
 // 3. Insert the result in the reflections delay buffer
 //
 
-VOID CReverb::MMX_ProcessPreDelay(PSWRVBREFDELAY pPreDelay, const int *pIn, UINT nSamples)
-//----------------------------------------------------------------------------------------
+void CReverb::MMX_ProcessPreDelay(PSWRVBREFDELAY pPreDelay, const int *pIn, uint32 nSamples)
+//------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov eax, pPreDelay
@@ -776,8 +776,8 @@ typedef struct _DUMMYREFARRAY
 } DUMMYREFARRAY, *PDUMMYREFARRAY;
 
 
-VOID CReverb::MMX_ProcessReflections(PSWRVBREFDELAY pPreDelay, short int *pRefOut, int *pOut, UINT nSamples)
-//----------------------------------------------------------------------------------------------------------
+void CReverb::MMX_ProcessReflections(PSWRVBREFDELAY pPreDelay, short int *pRefOut, int *pOut, uint32 nSamples)
+//------------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	// First stage
@@ -902,8 +902,8 @@ refloop2:
 // Late reverberation (with SW reflections)
 //
 
-VOID CReverb::MMX_ProcessLateReverb(PSWLATEREVERB pReverb, short int *pRefOut, int *pMixOut, UINT nSamples)
-//---------------------------------------------------------------------------------------------------------
+void CReverb::MMX_ProcessLateReverb(PSWLATEREVERB pReverb, short int *pRefOut, int *pMixOut, uint32 nSamples)
+//-----------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	push ebp
@@ -1012,12 +1012,12 @@ rvbloop:
 
 
 // (1-gcos(w)-sqrt(2g(1-cos w) - g2(1-(cos w)^2))) / (1-g)
-static LONG OnePoleLowPassCoef(LONG scale, float g, float F_c, float F_s)
-//----------------------------------------------------------------
+static int32 OnePoleLowPassCoef(int32 scale, float g, float F_c, float F_s)
+//-------------------------------------------------------------------------
 {
 	float cosw; // cos(2*PI*Fc/Fs)
 	float scale_over_1mg; // scale / (1.0f - g);
-	LONG result;
+	int32 result;
 
 	if (g > 0.999999f) return 0;
 	_asm {
@@ -1066,7 +1066,7 @@ static LONG OnePoleLowPassCoef(LONG scale, float g, float F_c, float F_s)
 }
 
 
-static LONG mBToLinear(LONG scale, LONG value_mB)
+static int32 mBToLinear(int32 scale, int32 value_mB)
 {
 	// factor = log2(10)/(100*20)
 	const float _factor = 3.321928094887362304f / (100.0f * 20.0f);
@@ -1093,7 +1093,7 @@ static LONG mBToLinear(LONG scale, LONG value_mB)
 }
 
 
-static float mBToLinear(LONG value_mB)
+static float mBToLinear(int32 value_mB)
 {
 	// factor = log2(10)/(100*20)
 	const float _factor = 3.321928094887362304f / (100.0f * 20.0f);

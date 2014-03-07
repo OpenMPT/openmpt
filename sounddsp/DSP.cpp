@@ -158,7 +158,7 @@ CDSP::CDSP()
 
 }
 
-void CDSP::Initialize(BOOL bReset, DWORD MixingFreq, DWORD DSPMask)
+void CDSP::Initialize(bool bReset, DWORD MixingFreq, DWORD DSPMask)
 //-----------------------------------------------------------------
 {
 	if (!m_Settings.m_nProLogicDelay) m_Settings.m_nProLogicDelay = 20;

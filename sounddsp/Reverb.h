@@ -25,22 +25,22 @@
 
 typedef struct _SWRVBREFLECTION
 {
-	ULONG Delay, DelayDest;
-	SHORT Gains[4];	// g_ll, g_rl, g_lr, g_rr
+	uint32 Delay, DelayDest;
+	int16  Gains[4];	// g_ll, g_rl, g_lr, g_rr
 } SWRVBREFLECTION, *PSWRVBREFLECTION;
 
 typedef struct _SWRVBREFDELAY
 {
-	ULONG nDelayPos, nPreDifPos, nRefOutPos;
-	LONG lMasterGain;			// reflections linear master gain
-	SHORT nCoeffs[2];			// room low-pass coefficients
-	SHORT History[2];			// room low-pass history
-	SHORT nPreDifCoeffs[2];		// prediffusion coefficients
-	SHORT ReflectionsGain[2];	// master reflections gain
+	uint32 nDelayPos, nPreDifPos, nRefOutPos;
+	int32  lMasterGain;			// reflections linear master gain
+	int16  nCoeffs[2];			// room low-pass coefficients
+	int16  History[2];			// room low-pass history
+	int16  nPreDifCoeffs[2];		// prediffusion coefficients
+	int16  ReflectionsGain[2];	// master reflections gain
 	SWRVBREFLECTION Reflections[8];	// Up to 8 SW Reflections
-	short int RefDelayBuffer[(SNDMIX_REFLECTIONS_DELAY_MASK+1)*2]; // reflections delay buffer
-	short int PreDifBuffer[(SNDMIX_PREDIFFUSION_DELAY_MASK+1)*2]; // pre-diffusion
-	short int RefOut[(SNDMIX_REVERB_DELAY_MASK+1)*2]; // stereo output of reflections
+	int16  RefDelayBuffer[(SNDMIX_REFLECTIONS_DELAY_MASK+1)*2]; // reflections delay buffer
+	int16  PreDifBuffer[(SNDMIX_PREDIFFUSION_DELAY_MASK+1)*2]; // pre-diffusion
+	int16  RefOut[(SNDMIX_REVERB_DELAY_MASK+1)*2]; // stereo output of reflections
 } SWRVBREFDELAY, *PSWRVBREFDELAY;
 
 
@@ -67,42 +67,42 @@ typedef struct _SWRVBREFDELAY
 
 typedef struct _SWLATEREVERB
 {
-	ULONG nReverbDelay;			// Reverb delay (in samples)
-	ULONG nDelayPos;			// Delay line position
-	SHORT nDifCoeffs[4];		// Reverb diffusion
-	SHORT nDecayDC[4];			// Reverb DC decay
-	SHORT nDecayLP[4];			// Reverb HF decay
-	SHORT LPHistory[4];			// Low-pass history
-	SHORT Dif2InGains[4];		// 2nd diffuser input gains
-	SHORT RvbOutGains[4];		// 4x2 Reverb output gains
-	LONG lMasterGain;			// late reverb master gain
-	LONG lDummyAlign;
+	uint32 nReverbDelay;			// Reverb delay (in samples)
+	uint32 nDelayPos;			// Delay line position
+	int16  nDifCoeffs[4];		// Reverb diffusion
+	int16  nDecayDC[4];			// Reverb DC decay
+	int16  nDecayLP[4];			// Reverb HF decay
+	int16  LPHistory[4];			// Low-pass history
+	int16  Dif2InGains[4];		// 2nd diffuser input gains
+	int16  RvbOutGains[4];		// 4x2 Reverb output gains
+	int32  lMasterGain;			// late reverb master gain
+	int32  lDummyAlign;
 	// Tank Delay lines
-	short int Diffusion1[(RVBDLY_MASK+1)*2];	// {dif1_l, dif1_r}
-	short int Diffusion2[(RVBDLY_MASK+1)*2];	// {dif2_l, dif2_r}
-	short int Delay1[(RVBDLY_MASK+1)*2];		// {dly1_l, dly1_r}
-	short int Delay2[(RVBDLY_MASK+1)*2];		// {dly2_l, dly2_r}
+	int16  Diffusion1[(RVBDLY_MASK+1)*2];	// {dif1_l, dif1_r}
+	int16  Diffusion2[(RVBDLY_MASK+1)*2];	// {dif2_l, dif2_r}
+	int16  Delay1[(RVBDLY_MASK+1)*2];		// {dly1_l, dly1_r}
+	int16  Delay2[(RVBDLY_MASK+1)*2];		// {dly2_l, dly2_r}
 } SWLATEREVERB, *PSWLATEREVERB;
 
 #define ENVIRONMENT_NUMREFLECTIONS		8
 
 typedef struct _ENVIRONMENTREFLECTION
 {
-	SHORT GainLL, GainRR, GainLR, GainRL;	// +/- 32K scale
-	ULONG Delay;							// In samples
+	int16  GainLL, GainRR, GainLR, GainRL;	// +/- 32K scale
+	uint32 Delay;							// In samples
 } ENVIRONMENTREFLECTION, *PENVIRONMENTREFLECTION;
 
 typedef struct _ENVIRONMENTREVERB
 {
-	LONG ReverbLevel;		// Late reverb gain (mB)
-	LONG ReflectionsLevel;	// Master reflections gain (mB)
-	LONG RoomHF;			// Room gain HF (mB)
-	ULONG ReverbDecay;		// Reverb tank decay (0-7fff scale)
-	LONG PreDiffusion;		// Reverb pre-diffusion amount (+/- 32K scale)
-	LONG TankDiffusion;		// Reverb tank diffusion (+/- 32K scale)
-	ULONG ReverbDelay;		// Reverb delay (in samples)
-	float flReverbDamping;	// HF tank gain [0.0, 1.0]
-	LONG ReverbDecaySamples;// Reverb decay time (in samples)
+	int32  ReverbLevel;		// Late reverb gain (mB)
+	int32  ReflectionsLevel;	// Master reflections gain (mB)
+	int32  RoomHF;			// Room gain HF (mB)
+	uint32 ReverbDecay;		// Reverb tank decay (0-7fff scale)
+	int32  PreDiffusion;		// Reverb pre-diffusion amount (+/- 32K scale)
+	int32  TankDiffusion;		// Reverb tank diffusion (+/- 32K scale)
+	uint32 ReverbDelay;		// Reverb delay (in samples)
+	float  flReverbDamping;	// HF tank gain [0.0, 1.0]
+	int32  ReverbDecaySamples;// Reverb decay time (in samples)
 	ENVIRONMENTREFLECTION Reflections[ENVIRONMENT_NUMREFLECTIONS];
 } ENVIRONMENTREVERB, *PENVIRONMENTREVERB;
 
@@ -112,8 +112,8 @@ class CReverbSettings
 //===================
 {
 public:
-	UINT m_nReverbDepth;
-	UINT m_nReverbType;
+	uint32 m_nReverbDepth;
+	uint32 m_nReverbType;
 public:
 	CReverbSettings();
 };
@@ -134,14 +134,14 @@ public:
 
 private:
 
-	UINT gnReverbSend;
+	uint32 gnReverbSend;
 
-	UINT gnReverbSamples;
-	UINT gnReverbDecaySamples;
+	uint32 gnReverbSamples;
+	uint32 gnReverbDecaySamples;
 
 	// Internal reverb state
-	BOOL g_bLastInPresent;
-	BOOL g_bLastOutPresent;
+	bool g_bLastInPresent;
+	bool g_bLastOutPresent;
 	int g_nLastRvbIn_xl;
 	int g_nLastRvbIn_xr;
 	int g_nLastRvbIn_yl;
@@ -158,31 +158,31 @@ private:
 public:
 	CReverb();
 public:
-	void Initialize(BOOL bReset, DWORD MixingFreq);
+	void Initialize(bool bReset, uint32 MixingFreq);
 
 	// can be called multiple times or never (if no data is sent to reverb)
-	int *GetReverbSendBuffer(UINT nSamples);
+	int *GetReverbSendBuffer(uint32 nSamples);
 
 	// call once after all data has been sent.
-	void Process(int *MixSoundBuffer, UINT nSamples);
+	void Process(int *MixSoundBuffer, uint32 nSamples);
 
 	// [Reverb level 0(quiet)-100(loud)], [REVERBTYPE_XXXX]
-	bool SetReverbParameters(UINT nDepth, UINT nType);
+	bool SetReverbParameters(uint32 nDepth, uint32 nType);
 private:
 	void Shutdown();
 	// Pre/Post resampling and filtering
-	UINT X86_ReverbProcessPreFiltering1x(int *pWet, UINT nSamples);
-	UINT X86_ReverbProcessPreFiltering2x(int *pWet, UINT nSamples);
-	VOID MMX_ReverbProcessPostFiltering1x(const int *pRvb, int *pDry, UINT nSamples);
-	VOID X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, UINT nSamples);
-	VOID MMX_ReverbDCRemoval(int *pBuffer, UINT nSamples);
-	VOID X86_ReverbDryMix(int *pDry, int *pWet, int lDryVol, UINT nSamples);
+	uint32 X86_ReverbProcessPreFiltering1x(int *pWet, uint32 nSamples);
+	uint32 X86_ReverbProcessPreFiltering2x(int *pWet, uint32 nSamples);
+	void MMX_ReverbProcessPostFiltering1x(const int *pRvb, int *pDry, uint32 nSamples);
+	void X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, uint32 nSamples);
+	void MMX_ReverbDCRemoval(int *pBuffer, uint32 nSamples);
+	void X86_ReverbDryMix(int *pDry, int *pWet, int lDryVol, uint32 nSamples);
 	// Process pre-diffusion and pre-delay
-	VOID MMX_ProcessPreDelay(PSWRVBREFDELAY pPreDelay, const int *pIn, UINT nSamples);
+	void MMX_ProcessPreDelay(PSWRVBREFDELAY pPreDelay, const int *pIn, uint32 nSamples);
 	// Process reflections
-	VOID MMX_ProcessReflections(PSWRVBREFDELAY pPreDelay, short int *pRefOut, int *pMixOut, UINT nSamples);
+	void MMX_ProcessReflections(PSWRVBREFDELAY pPreDelay, short int *pRefOut, int *pMixOut, uint32 nSamples);
 	// Process Late Reverb (SW Reflections): stereo reflections output, 32-bit reverb output, SW reverb gain
-	VOID MMX_ProcessLateReverb(PSWLATEREVERB pReverb, short int *pRefOut, int *pMixOut, UINT nSamples);
+	void MMX_ProcessLateReverb(PSWLATEREVERB pReverb, short int *pRefOut, int *pMixOut, uint32 nSamples);
 };
 
 

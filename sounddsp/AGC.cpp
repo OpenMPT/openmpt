@@ -120,7 +120,7 @@ void CAGC::Adjust(UINT oldVol, UINT newVol)
 }
 
 
-void CAGC::Initialize(BOOL bReset, DWORD MixingFreq)
+void CAGC::Initialize(bool bReset, DWORD MixingFreq)
 //--------------------------------------------------
 {
 	if(bReset)

@@ -83,7 +83,7 @@ public:
 	BOOL SetXBassParameters(UINT nDepth, UINT nRange);
 	// [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-40ms]
 	BOOL SetSurroundParameters(UINT nDepth, UINT nDelay);
-	void Initialize(BOOL bReset, DWORD MixingFreq, DWORD DSPMask);
+	void Initialize(bool bReset, DWORD MixingFreq, DWORD DSPMask);
 	void Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels, DWORD DSPMask);
 private:
 	void ProcessStereoSurround(int * MixSoundBuffer, int count);

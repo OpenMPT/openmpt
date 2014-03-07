@@ -1033,7 +1033,7 @@ void CSoundFile::SetDspEffects(DWORD DSPMask)
 #endif
 #endif
 	m_MixerSettings.DSPMask = DSPMask;
-	InitPlayer(FALSE);
+	InitPlayer(false);
 }
 
 
