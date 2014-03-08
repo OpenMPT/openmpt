@@ -893,9 +893,9 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		}
 	}
 
-	// IT Compatibility: Envelope pickup after SCx cut
+	// IT Compatibility: Envelope pickup after SCx cut (but don't do this when working with plugins, or else envelope carry stops working)
 	// Test case: cut-carry.it
-	if(pChn->nInc == 0 && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+	if(pChn->nInc == 0 && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!pIns || !pIns->HasValidMIDIChannel()))
 	{
 		instrumentChanged = true;
 	}
