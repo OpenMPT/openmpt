@@ -29,6 +29,7 @@
 BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlGeneral)
 	ON_WM_VSCROLL()
+	ON_COMMAND(IDC_BUTTON1,					OnTapTempo)
 	ON_COMMAND(IDC_BUTTON_MODTYPE,			OnSongProperties)
 	ON_COMMAND(IDC_BUTTON_PLAYERPROPS,		OnPlayerProperties)
 	ON_COMMAND(IDC_CHECK_LOOPSONG,			OnLoopSongChanged)
@@ -160,6 +161,47 @@ void CCtrlGeneral::OnDeactivatePage()
 }
 
 
+void CCtrlGeneral::OnTapTempo()
+//-----------------------------
+{
+	static uint32 tapLength[16], lastTap = 0;
+	// Shift back the previously recorded tap history
+	for(size_t i = CountOf(tapLength) - 1; i >= 1; i--)
+	{
+		tapLength[i] = tapLength[i - 1];
+	}
+	const uint32 now = timeGetTime();
+	tapLength[0] = now - lastTap;
+	lastTap = now;
+
+	// Now average over complete tap history
+	uint32 numSamples = 0, delay = 0;
+	for(uint32 i = 0; i < CountOf(tapLength); i++)
+	{
+		if(tapLength[i] < 2000)
+		{
+			numSamples++;
+			delay += tapLength[i];
+		} else
+		{
+			break;
+		}
+	}
+	if(delay)
+	{
+		CModSpecifications specs = m_sndFile.GetModSpecifications();
+		uint32 newTempo = 60000 * numSamples;
+		if(m_sndFile.m_nTempoMode != tempo_mode_modern)
+		{
+			newTempo = (newTempo * m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat) / 24;
+		}
+		newTempo /= delay;
+		Limit(newTempo, specs.tempoMin, specs.tempoMax);
+		SetDlgItemInt(IDC_EDIT_TEMPO, newTempo, FALSE);
+	}
+}
+
+
 void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 //---------------------------------------------------------
 {
@@ -208,6 +250,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		const BOOL bIsNotMOD_XM = ((bIsNotMOD) && (m_sndFile.GetType() != MOD_TYPE_XM));
 		m_EditTempo.EnableWindow(bIsNotMOD);
 		m_SpinTempo.EnableWindow(bIsNotMOD);
+		GetDlgItem(IDC_BUTTON1)->EnableWindow(bIsNotMOD);
 		m_SliderTempo.EnableWindow(bIsNotMOD);
 		m_EditSpeed.EnableWindow(bIsNotMOD);
 		m_SpinSpeed.EnableWindow(bIsNotMOD);
@@ -354,7 +397,7 @@ void CCtrlGeneral::OnTempoChanged()
 				m_sndFile.m_PlayState.m_nMusicTempo = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
-				UpdateView(HINT_MODGENERAL, NULL); 
+				UpdateView(HINT_MODGENERAL, NULL);
 				m_bEditsLocked=false;
 			}
 		}
