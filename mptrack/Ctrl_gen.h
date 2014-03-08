@@ -84,6 +84,7 @@ protected:
 	//{{AFX_MSG(CCtrlGeneral)
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM);
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
+	afx_msg void OnTapTempo();
 	afx_msg void OnTitleChanged();
 	afx_msg void OnTempoChanged();
 	afx_msg void OnSpeedChanged();
