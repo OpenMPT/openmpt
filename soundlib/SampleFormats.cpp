@@ -61,15 +61,13 @@ static bool IsID3(FileReader file)
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
 //-------------------------------------------------------------------------------------------
 {
-	file.Rewind();
-
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
 	if(!ReadWAVSample(nSample, file, mayNormalize)
 		&& !ReadXISample(nSample, file)
 		&& !ReadITISample(nSample, file)
 		&& !ReadAIFFSample(nSample, file, mayNormalize)
 		&& !ReadITSSample(nSample, file)
-		&& !ReadPATSample(nSample, reinterpret_cast<const uint8*>(file.GetRawData()), file.GetLength())
+		&& !ReadPATSample(nSample, file)
 		&& !ReadIFFSample(nSample, file)
 		&& !ReadS3ISample(nSample, file)
 		&& !ReadFLACSample(nSample, file)
@@ -90,8 +88,7 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file
 //--------------------------------------------------------------------------------------------------
 {
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
-	file.Rewind();
-	if(!ReadPATInstrument(nInstr, reinterpret_cast<const uint8*>(file.GetRawData()), file.GetLength())
+	if(!ReadPATInstrument(nInstr, file)
 		&& !ReadXIInstrument(nInstr, file)
 		&& !ReadITIInstrument(nInstr, file)
 		// Generic read
@@ -507,58 +504,88 @@ bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 #endif
 
 
-typedef struct PACKED GF1PATCHFILEHEADER
+struct PACKED GF1PatchFileHeader
 {
-	char  magic[8];			// "GF1PATCH"
-	char version[4];		// "100", or "110"
-	char id[10];			// "ID#000002"
-	char copyright[60];		// Copyright
-	BYTE instrum;			// Number of instruments in patch
-	BYTE voices;			// Number of voices, usually 14
-	BYTE channels;			// Number of wav channels that can be played concurently to the patch
-	WORD samples;			// Total number of waveforms for all the .PAT
-	WORD volume;			// Master volume
-	DWORD data_size;
-	BYTE reserved2[36];
-} GF1PATCHFILEHEADER;
+	char   magic[8];		// "GF1PATCH"
+	char   version[4];		// "100", or "110"
+	char   id[10];			// "ID#000002"
+	char   copyright[60];	// Copyright
+	uint8  numInstr;		// Number of instruments in patch
+	uint8  voices;			// Number of voices, usually 14
+	uint8  channels;		// Number of wav channels that can be played concurently to the patch
+	uint16 numSamples;		// Total number of waveforms for all the .PAT
+	uint16 volume;			// Master volume
+	uint32 dataSize;
+	char   reserved2[36];
 
-STATIC_ASSERT(sizeof(GF1PATCHFILEHEADER) == 129);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(numSamples);
+		SwapBytesLE(volume);
+		SwapBytesLE(dataSize);
+	}
+};
+
+STATIC_ASSERT(sizeof(GF1PatchFileHeader) == 129);
 
 
-typedef struct PACKED GF1INSTRUMENT
+struct PACKED GF1Instrument
 {
-	WORD id;				// Instrument id: 0-65535
-	char name[16];			// Name of instrument. Gravis doesn't seem to use it
-	DWORD size;				// Number of bytes for the instrument with header. (To skip to next instrument)
-	BYTE layers;			// Number of layers in instrument: 1-4
-	BYTE reserved[40];
-} GF1INSTRUMENT;
+	uint16 id;				// Instrument id: 0-65535
+	char   name[16];		// Name of instrument. Gravis doesn't seem to use it
+	uint32 size;			// Number of bytes for the instrument with header. (To skip to next instrument)
+	uint8  layers;			// Number of layers in instrument: 1-4
+	char   reserved[40];
 
-STATIC_ASSERT(sizeof(GF1INSTRUMENT) == 63);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(id);
+		SwapBytesLE(size);
+	}
+};
+
+STATIC_ASSERT(sizeof(GF1Instrument) == 63);
 
 
-typedef struct PACKED GF1SAMPLEHEADER
+struct PACKED GF1SampleHeader
 {
 	char name[7];			// null terminated string. name of the wave.
-	BYTE fractions;			// Start loop point fraction in 4 bits + End loop point fraction in the 4 other bits.
-	DWORD length;			// total size of wavesample. limited to 65535 now by the drivers, not the card.
-	DWORD loopstart;		// start loop position in the wavesample
-	DWORD loopend;			// end loop position in the wavesample
-	WORD freq;				// Rate at which the wavesample has been sampled
-	DWORD low_freq, high_freq, root_freq;	// check note.h for the correspondance.
-	int16 finetune;			// fine tune. -512 to +512, EXCLUDING 0 cause it is a multiplier. 512 is one octave off, and 1 is a neutral value
-	BYTE balance;			// Balance: 0-15. 0=full left, 15 = full right
-	BYTE env_rate[6];		// attack rates
-	BYTE env_volume[6];		// attack volumes
-	BYTE tremolo_sweep, tremolo_rate, tremolo_depth;
-	BYTE vibrato_sweep, vibrato_rate, vibrato_depth;
-	BYTE flags;
-	int16 scale_frequency;
-	WORD scale_factor;
-	BYTE reserved[36];
-} GF1SAMPLEHEADER;
+	uint8  fractions;		// Start loop point fraction in 4 bits + End loop point fraction in the 4 other bits.
+	uint32 length;			// total size of wavesample. limited to 65535 now by the drivers, not the card.
+	uint32 loopstart;		// start loop position in the wavesample
+	uint32 loopend;			// end loop position in the wavesample
+	uint16 freq;			// Rate at which the wavesample has been sampled
+	uint32 low_freq, high_freq, root_freq;	// check note.h for the correspondance.
+	int16  finetune;		// fine tune. -512 to +512, EXCLUDING 0 cause it is a multiplier. 512 is one octave off, and 1 is a neutral value
+	uint8  balance;			// Balance: 0-15. 0=full left, 15 = full right
+	uint8  env_rate[6];		// attack rates
+	uint8  env_volume[6];	// attack volumes
+	uint8  tremolo_sweep, tremolo_rate, tremolo_depth;
+	uint8  vibrato_sweep, vibrato_rate, vibrato_depth;
+	uint8  flags;
+	int16  scale_frequency;
+	uint16 scale_factor;
+	char reserved[36];
 
-STATIC_ASSERT(sizeof(GF1SAMPLEHEADER) == 96);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(length);
+		SwapBytesLE(loopstart);
+		SwapBytesLE(loopend);
+		SwapBytesLE(freq);
+		SwapBytesLE(low_freq);
+		SwapBytesLE(high_freq);
+		SwapBytesLE(root_freq);
+		SwapBytesLE(finetune);
+		SwapBytesLE(scale_frequency);
+		SwapBytesLE(scale_factor);
+	}
+};
+
+STATIC_ASSERT(sizeof(GF1SampleHeader) == 96);
 
 // -- GF1 Envelopes --
 //
@@ -591,16 +618,22 @@ STATIC_ASSERT(sizeof(GF1SAMPLEHEADER) == 96);
 // bit 7: off/on clamped release (6th point, env)
 
 
-typedef struct PACKED GF1LAYER
+struct PACKED GF1Layer
 {
-	BYTE previous;			// If !=0 the wavesample to use is from the previous layer. The waveheader is still needed
-	BYTE id;				// Layer id: 0-3
-	DWORD size;				// data size in bytes in the layer, without the header. to skip to next layer for example:
-	BYTE samples;			// number of wavesamples
-	BYTE reserved[40];
-} GF1LAYER;
+	uint8  previous;		// If !=0 the wavesample to use is from the previous layer. The waveheader is still needed
+	uint8  id;				// Layer id: 0-3
+	uint32 size;			// data size in bytes in the layer, without the header. to skip to next layer for example:
+	uint8  samples;			// number of wavesamples
+	char   reserved[40];
 
-STATIC_ASSERT(sizeof(GF1LAYER) == 47);
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(size);
+	}
+};
+
+STATIC_ASSERT(sizeof(GF1Layer) == 47);
 
 
 #ifdef NEEDS_PRAGMA_PACK
@@ -616,36 +649,31 @@ static int32 PatchFreqToNote(uint32 nFreq)
 }
 
 
-static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, const uint8 *lpStream, DWORD dwMemLength)
-//--------------------------------------------------------------------------------------------------------
+static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader &sampleHeader, FileReader &file)
+//---------------------------------------------------------------------------------------------------------------
 {
 	ModSample &sample = that->GetSample(nSample);
-	DWORD dwMemPos = sizeof(GF1SAMPLEHEADER);
-	GF1SAMPLEHEADER *psh = (GF1SAMPLEHEADER *)(lpStream);
 
-	if(dwMemLength < sizeof(GF1SAMPLEHEADER)) return;
-	if(psh->name[0])
-	{
-		mpt::String::Read<mpt::String::maybeNullTerminated>(that->m_szNames[nSample], psh->name);
-	}
+	file.ReadConvertEndianness(sampleHeader);
+
 	sample.Initialize();
-	if(psh->flags & 4) sample.uFlags |= CHN_LOOP;
-	if(psh->flags & 8) sample.uFlags |= CHN_PINGPONGLOOP;
-	sample.nLength = psh->length;
-	sample.nLoopStart = psh->loopstart;
-	sample.nLoopEnd = psh->loopend;
-	sample.nC5Speed = psh->freq;
-	sample.nPan = (psh->balance << 4) + 8;
+	if(sampleHeader.flags & 4) sample.uFlags.set(CHN_LOOP);
+	if(sampleHeader.flags & 8) sample.uFlags.set(CHN_PINGPONGLOOP);
+	sample.nLength = sampleHeader.length;
+	sample.nLoopStart = sampleHeader.loopstart;
+	sample.nLoopEnd = sampleHeader.loopend;
+	sample.nC5Speed = sampleHeader.freq;
+	sample.nPan = (sampleHeader.balance * 256 + 8) / 15;
 	if(sample.nPan > 256) sample.nPan = 128;
 	sample.nVibType = VIB_SINE;
-	sample.nVibSweep = psh->vibrato_sweep;
-	sample.nVibDepth = psh->vibrato_depth;
-	sample.nVibRate = psh->vibrato_rate/4;
+	sample.nVibSweep = sampleHeader.vibrato_sweep;
+	sample.nVibDepth = sampleHeader.vibrato_depth;
+	sample.nVibRate = sampleHeader.vibrato_rate / 4;
 	sample.FrequencyToTranspose();
-	sample.RelativeTone += static_cast<int8>(84 - PatchFreqToNote(psh->root_freq));
-	if(psh->scale_factor)
+	sample.RelativeTone += static_cast<int8>(84 - PatchFreqToNote(sampleHeader.root_freq));
+	if(sampleHeader.scale_factor)
 	{
-		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - (psh->scale_frequency - 60));
+		sample.RelativeTone = static_cast<uint8>(sample.RelativeTone - (sampleHeader.scale_frequency - 60));
 	}
 	sample.TransposeToFrequency();
 
@@ -653,60 +681,74 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, const uint8 *lp
 		SampleIO::_8bit,
 		SampleIO::mono,
 		SampleIO::littleEndian,
-		(psh->flags & 2) ? SampleIO::unsignedPCM : SampleIO::signedPCM);
+		(sampleHeader.flags & 2) ? SampleIO::unsignedPCM : SampleIO::signedPCM);
 
-	if(psh->flags & 1)
+	if(sampleHeader.flags & 1)
 	{
 		sampleIO |= SampleIO::_16bit;
 		sample.nLength /= 2;
 		sample.nLoopStart /= 2;
 		sample.nLoopEnd /= 2;
 	}
-	FileReader chunk(lpStream + dwMemPos, dwMemLength - dwMemPos);
-	sampleIO.ReadSample(sample, chunk);
+	sampleIO.ReadSample(sample, file);
 	sample.PrecomputeLoops(*that, false);
+
+	mpt::String::Read<mpt::String::maybeNullTerminated>(that->m_szNames[nSample], sampleHeader.name);
 }
 
 
-bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, const uint8 *lpStream, DWORD dwMemLength)
-//-------------------------------------------------------------------------------------------
+bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, FileReader &file)
+//-------------------------------------------------------------------
 {
-	DWORD dwMemPos = sizeof(GF1PATCHFILEHEADER)+sizeof(GF1INSTRUMENT)+sizeof(GF1LAYER);
-	GF1PATCHFILEHEADER *phdr = (GF1PATCHFILEHEADER *)lpStream;
-	GF1INSTRUMENT *pinshdr = (GF1INSTRUMENT *)(lpStream+sizeof(GF1PATCHFILEHEADER));
-
-	if ((!lpStream) || (dwMemLength < 512)
-	 || memcmp(phdr->magic, "GF1PATCH", 8)
-	 || (phdr->version[3] != 0) || (phdr->id[9] != 0) || (phdr->instrum < 1)
-	 || (!phdr->samples) || (!pinshdr->layers)) return false;
-	
-	DestroySampleThreadsafe(nSample);
-	PatchToSample(this, nSample, lpStream + dwMemPos, dwMemLength - dwMemPos);
-	if (pinshdr->name[0] > ' ')
+	file.Rewind();
+	GF1PatchFileHeader fileHeader;
+	GF1Instrument instrHeader;	// We only support one instrument
+	GF1Layer layerHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| memcmp(fileHeader.magic, "GF1PATCH", 8)
+		|| (memcmp(fileHeader.version, "110\0", 4) && memcmp(fileHeader.version, "100\0", 4))
+		|| memcmp(fileHeader.id, "ID#000002\0", 10)
+		|| !fileHeader.numInstr || !fileHeader.numSamples
+		|| !file.ReadConvertEndianness(instrHeader)
+		|| !instrHeader.layers
+		|| !file.ReadConvertEndianness(layerHeader)
+		|| !layerHeader.samples)
 	{
-		memcpy(m_szNames[nSample], pinshdr->name, 16);
-		m_szNames[nSample][16] = 0;
+		return false;
+	}
+
+	DestroySampleThreadsafe(nSample);
+	GF1SampleHeader sampleHeader;
+	PatchToSample(this, nSample, sampleHeader, file);
+
+	if(instrHeader.name[0] > ' ')
+	{
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[nSample], instrHeader.name);
 	}
 	return true;
 }
 
 
 // PAT Instrument
-bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, const uint8 *lpStream, DWORD dwMemLength)
-//--------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
+//--------------------------------------------------------------------------
 {
-	GF1PATCHFILEHEADER *phdr = (GF1PATCHFILEHEADER *)lpStream;
-	GF1INSTRUMENT *pih = (GF1INSTRUMENT *)(lpStream+sizeof(GF1PATCHFILEHEADER));
-	GF1LAYER *plh = (GF1LAYER *)(lpStream+sizeof(GF1PATCHFILEHEADER)+sizeof(GF1INSTRUMENT));
-	DWORD dwMemPos = sizeof(GF1PATCHFILEHEADER)+sizeof(GF1INSTRUMENT)+sizeof(GF1LAYER);
-	UINT nSamples;
-
-	if ((!lpStream) || (dwMemLength < 512)
-	 || memcmp(phdr->magic, "GF1PATCH", 8)
-	 || (phdr->version[3] != 0) || (phdr->id[9] != 0)
-	 || (phdr->instrum < 1) || (!phdr->samples)
-	 || (!pih->layers) || (!plh->samples)) return false;
-	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
+	file.Rewind();
+	GF1PatchFileHeader fileHeader;
+	GF1Instrument instrHeader;	// We only support one instrument
+	GF1Layer layerHeader;
+	if(!file.ReadConvertEndianness(fileHeader)
+		|| memcmp(fileHeader.magic, "GF1PATCH", 8)
+		|| (memcmp(fileHeader.version, "110\0", 4) && memcmp(fileHeader.version, "100\0", 4))
+		|| memcmp(fileHeader.id, "ID#000002\0", 10)
+		|| !fileHeader.numInstr || !fileHeader.numSamples
+		|| !file.ReadConvertEndianness(instrHeader)
+		|| !instrHeader.layers
+		|| !file.ReadConvertEndianness(layerHeader)
+		|| !layerHeader.samples)
+	{
+		return false;
+	}
 
 	ModInstrument *pIns = new (std::nothrow) ModInstrument();
 	if(pIns == nullptr)
@@ -715,81 +757,58 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, const uint8 *lpStream
 	}
 
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
-
+	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 	Instruments[nInstr] = pIns;
-	nSamples = plh->samples;
-	if (nSamples > 16) nSamples = 16;
-	mpt::String::Copy(pIns->name, pih->name);
+
+	mpt::String::Read<mpt::String::maybeNullTerminated>(pIns->name, instrHeader.name);
 	pIns->nFadeOut = 2048;
-	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
+	if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 	{
 		pIns->nNNA = NNA_NOTEOFF;
 		pIns->nDNA = DNA_NOTEFADE;
 	}
-	SAMPLEINDEX nFreeSmp = 0;
-	UINT nMinSmpNote = 0xff;
+
+	SAMPLEINDEX nextSample = 0;
+	int32 nMinSmpNote = 0xFF;
 	SAMPLEINDEX nMinSmp = 0;
-	for (UINT iSmp=0; iSmp<nSamples; iSmp++)
+	for(uint8 smp = 0; smp < layerHeader.samples; smp++)
 	{
 		// Find a free sample
-		nFreeSmp = GetNextFreeSample(nInstr, nFreeSmp + 1);
-		if (nFreeSmp == SAMPLEINDEX_INVALID) break;
-		if (m_nSamples < nFreeSmp) m_nSamples = nFreeSmp;
-		if (!nMinSmp) nMinSmp = nFreeSmp;
+		nextSample = GetNextFreeSample(nInstr, nextSample + 1);
+		if(nextSample == SAMPLEINDEX_INVALID) break;
+		if(m_nSamples < nextSample) m_nSamples = nextSample;
+		if(!nMinSmp) nMinSmp = nextSample;
 		// Load it
-		GF1SAMPLEHEADER *psh = (GF1SAMPLEHEADER *)(lpStream+dwMemPos);
-		PatchToSample(this, nFreeSmp, lpStream+dwMemPos, dwMemLength-dwMemPos);
-		LONG nMinNote = (psh->low_freq > 100) ? PatchFreqToNote(psh->low_freq) : 0;
-		LONG nMaxNote = (psh->high_freq > 100) ? PatchFreqToNote(psh->high_freq) : NOTE_MAX;
-		LONG nBaseNote = (psh->root_freq > 100) ? PatchFreqToNote(psh->root_freq) : -1;
-		if ((!psh->scale_factor) && (nSamples == 1)) { nMinNote = 0; nMaxNote = NOTE_MAX; }
+		GF1SampleHeader sampleHeader;
+		PatchToSample(this, nextSample, sampleHeader, file);
+		int32 nMinNote = (sampleHeader.low_freq > 100) ? PatchFreqToNote(sampleHeader.low_freq) : 0;
+		int32 nMaxNote = (sampleHeader.high_freq > 100) ? PatchFreqToNote(sampleHeader.high_freq) : NOTE_MAX;
+		int32 nBaseNote = (sampleHeader.root_freq > 100) ? PatchFreqToNote(sampleHeader.root_freq) : -1;
+		if(!sampleHeader.scale_factor && layerHeader.samples == 1) { nMinNote = 0; nMaxNote = NOTE_MAX; }
 		// Fill Note Map
-		for (UINT k=0; k<NOTE_MAX; k++)
+		for(int32 k = 0; k < NOTE_MAX; k++)
 		{
-			if (((LONG)k == nBaseNote)
-			 || ((!pIns->Keyboard[k])
-			  && ((LONG)k >= nMinNote)
-			  && ((LONG)k <= nMaxNote)))
+			if(k == nBaseNote || (!pIns->Keyboard[k] && k >= nMinNote && k <= nMaxNote))
 			{
-				if(!psh->scale_factor)
+				if(!sampleHeader.scale_factor)
 					pIns->NoteMap[k] = NOTE_MIDDLEC;
 
-				pIns->Keyboard[k] = nFreeSmp;
-				if (k < nMinSmpNote)
+				pIns->Keyboard[k] = nextSample;
+				if(k < nMinSmpNote)
 				{
 					nMinSmpNote = k;
-					nMinSmp = nFreeSmp;
+					nMinSmp = nextSample;
 				}
 			}
 		}
-	/*
-		// Create dummy envelope
-		if (!iSmp)
-		{
-			pIns->dwFlags |= ENV_VOLUME;
-			if (psh->flags & 32) pIns->dwFlags |= ENV_VOLSUSTAIN;
-			pIns->VolEnv.Values[0] = 64;
-			pIns->VolEnv.Ticks[0] = 0;
-			pIns->VolEnv.Values[1] = 64;
-			pIns->VolEnv.Ticks[1] = 1;
-			pIns->VolEnv.Values[2] = 32;
-			pIns->VolEnv.Ticks[2] = 20;
-			pIns->VolEnv.Values[3] = 0;
-			pIns->VolEnv.Ticks[3] = 100;
-			pIns->VolEnv.nNodes = 4;
-		}
-	*/
-		// Skip to next sample
-		dwMemPos += sizeof(GF1SAMPLEHEADER)+psh->length;
-		if (dwMemPos + sizeof(GF1SAMPLEHEADER) >= dwMemLength) break;
 	}
-	if (nMinSmp)
+	if(nMinSmp)
 	{
 		// Fill note map and missing samples
-		for (UINT k=0; k<NOTE_MAX; k++)
+		for(uint8 k = 0; k < NOTE_MAX; k++)
 		{
-			if (!pIns->NoteMap[k]) pIns->NoteMap[k] = (BYTE)(k+1);
-			if (!pIns->Keyboard[k])
+			if(!pIns->NoteMap[k]) pIns->NoteMap[k] = k + 1;
+			if(!pIns->Keyboard[k])
 			{
 				pIns->Keyboard[k] = nMinSmp;
 			} else

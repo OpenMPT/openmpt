@@ -852,7 +852,7 @@ public:
 	// Samples file I/O
 	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false);
 	bool ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false, FileReader *wsmpChunk = nullptr);
-	bool ReadPATSample(SAMPLEINDEX nSample, const uint8 *lpMemFile, DWORD dwFileLength);
+	bool ReadPATSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadS3ISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false);
 	bool ReadXISample(SAMPLEINDEX nSample, FileReader &file);
@@ -871,7 +871,7 @@ public:
 	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize=false);
 	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
-	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, const uint8 *lpMemFile, DWORD dwFileLength);
+	bool ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize=false);
 #ifndef MODPLUG_NO_FILESAVE
 	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename) const;
