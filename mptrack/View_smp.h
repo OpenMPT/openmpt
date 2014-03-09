@@ -63,7 +63,7 @@ protected:
 	BOOL SetZoom(int nZoom, SmpLength centeredSample = SmpLength(-1));
 	int32 SampleToScreen(SmpLength pos) const;
 	SmpLength ScreenToSample(int32 x) const;
-	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0);
+	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0, int volume = -1);
 	void NoteOff(ModCommand::NOTE note);
 	void InvalidateSample();
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
