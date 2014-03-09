@@ -726,7 +726,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// Loop
 		d = 0;
 		if (sample.uFlags[CHN_LOOP]) d = sample.uFlags[CHN_PINGPONGLOOP] ? 2 : 1;
-		if (sample.uFlags[CHN_REVRSE]) d |= 4;
+		if (sample.uFlags[CHN_REVERSE]) d |= 4;
 		m_ComboLoopType.SetCurSel(d);
 		wsprintf(s, "%lu", sample.nLoopStart);
 		m_EditLoopStart.SetWindowText(s);

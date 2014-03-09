@@ -930,8 +930,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(!m_dwLastSavedWithVersion && fileHeader.cwtv == 0x0888)
 	{
-		// There are some files with OpenMPT extensions, but the "last saved with" field contains 0.
-		// Was there an OpenMPT version that wrote 0 there, or are they hacked?
+		// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
+		// when saving a file in OpenMPT for the first time.
 		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
 	}
 

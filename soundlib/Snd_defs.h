@@ -133,7 +133,7 @@ enum MOD_CHARSET_CERTAINTY
 #define TRK_FASTTRACKER2	(MOD_TYPE_XM)
 #define TRK_SCREAMTRACKER	(MOD_TYPE_S3M)
 #define TRK_PROTRACKER		(MOD_TYPE_MOD)
-#define TRK_ALLTRACKERS		(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_SCREAMTRACKER | TRK_PROTRACKER)
+#define TRK_ALLTRACKERS		(MODTYPE(~0))
 
 
 // Channel flags:
@@ -147,7 +147,7 @@ enum ChannelFlags
 	CHN_PINGPONGSUSTAIN	= 0x10,			// sample with bidi sustain loop
 	CHN_PANNING			= 0x20,			// sample with forced panning
 	CHN_STEREO			= 0x40,			// stereo sample
-	CHN_REVRSE			= 0x80,			// start sample playback from sample / loop end (Velvet Studio feature) - this is intentionally the same flag as CHN_PINGPONGFLAG.
+	CHN_REVERSE			= 0x80,			// start sample playback from sample / loop end (Velvet Studio feature) - this is intentionally the same flag as CHN_PINGPONGFLAG.
 	// Channel Flags
 	CHN_PINGPONGFLAG	= 0x80,			// when flag is on, sample is processed backwards
 	CHN_MUTE			= 0x100,		// muted channel
@@ -174,7 +174,7 @@ enum ChannelFlags
 DECLARE_FLAGSET(ChannelFlags)
 
 
-#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVRSE)
+#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVERSE)
 #define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS)
 
 
@@ -249,7 +249,7 @@ enum enmEnvelopeTypes
 #define DCT_NOTE		1
 #define DCT_SAMPLE		2
 #define DCT_INSTRUMENT	3
-#define DCT_PLUGIN		4 //rewbs.VSTiNNA
+#define DCT_PLUGIN		4
 
 // DNA types (Duplicate Note Action)
 #define DNA_NOTECUT		0
@@ -257,7 +257,7 @@ enum enmEnvelopeTypes
 #define DNA_NOTEFADE	2
 
 
-// Module flags
+// Module flags - note: these are written out as-is in ITP files!
 enum SongFlags
 {
 	SONG_EMBEDMIDICFG	= 0x0001,		// Embed macros in file
@@ -312,7 +312,6 @@ DECLARE_FLAGSET(SongFlags)
 #define SNDMIX_SOFTPANNING    0x10	// soft panning mode (this is forced with mixmode RC3 and later)
 
 // Misc Flags (can safely be turned on or off)
-//#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
 
@@ -328,7 +327,7 @@ enum ResamplingMode
 	SRCMODE_LINEAR    = 1,
 	SRCMODE_SPLINE    = 2,
 	SRCMODE_POLYPHASE = 3,
-	SRCMODE_FIRFILTER = 4, //rewbs.resamplerConf
+	SRCMODE_FIRFILTER = 4,
 	SRCMODE_DEFAULT   = 5,
 };
 
