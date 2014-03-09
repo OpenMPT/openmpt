@@ -2368,8 +2368,8 @@ void CViewSample::OnChar(UINT /*nChar*/, UINT, UINT /*nFlags*/)
 }
 
 
-void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos)
-//--------------------------------------------------------------------------
+void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int volume)
+//--------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -2392,7 +2392,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos)
 			else if(m_nZoom < 0 && loopend - loopstart < 4)
 				loopend = loopstart = 0;
 
-			noteChannel[note - NOTE_MIN] = pModDoc->PlayNote(note, 0, m_nSample, false, -1, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
+			noteChannel[note - NOTE_MIN] = pModDoc->PlayNote(note, 0, m_nSample, false, volume, loopstart, loopend, CHANNELINDEX_INVALID, nStartPos);
 
 			m_dwStatus.set(SMPSTATUS_KEYDOWN);
 
@@ -2737,7 +2737,7 @@ void CViewSample::OnAddSilence()
 
 	const SmpLength nOldLength = sample.nLength;
 
-	if(MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples)
+	if(MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples && dlg.m_nEditOption != addsilence_resize)
 	{
 		CString str; str.Format(TEXT("Can't add silence because the new sample length would exceed maximum sample length %u."), MAX_SAMPLE_LENGTH);
 		Reporting::Information(str);
@@ -2823,8 +2823,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if(midibyte2 & 0x7F)
 		{
 			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
-			//pModDoc->PlayNote(nNote, 0, m_nSample, FALSE, nVol);
-			PlayNote(nNote);
+			PlayNote(nNote, 0, nVol);
 		}
 		break;
 
