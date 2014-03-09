@@ -92,7 +92,7 @@ typedef struct MIDICHANNELSTATE
 
 typedef struct MIDITRACK
 {
-	LPCBYTE ptracks, ptrmax;
+	const uint8 *ptracks, *ptrmax;
 	DWORD status;
 	LONG nexteventtime;
 } MIDITRACK;
@@ -466,8 +466,8 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 #define MIDIGLOBAL_XGSYSTEMON		0x0200
 
 
-bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMID(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------------------------------
 {
 	const MIDIFILEHEADER *pmfh = (const MIDIFILEHEADER *)lpStream;
 	const MIDITRACKHEADER *pmth;

@@ -218,8 +218,8 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand *m, MT2COMMAND *p)
 }
 
 
-bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
-//--------------------------------------------------------------------------------------
+bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------
 {
 	MT2FILEHEADER *pfh = (MT2FILEHEADER *)lpStream;
 	DWORD dwMemPos, dwDrumDataPos, dwExtraDataPos;
