@@ -411,7 +411,6 @@ typedef std::uint16_t WORD;
 typedef std::uint32_t DWORD;
 typedef std::int32_t  LONG;
 typedef std::uint32_t UINT;
-typedef BYTE *        LPBYTE;
 
 #endif // !WIN32
 

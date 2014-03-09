@@ -145,8 +145,8 @@ public:
 	DLSINSTRUMENT *GetInstrument(UINT iIns) { return (m_pInstruments) ? &m_pInstruments[iIns] : NULL; }
 	DLSINSTRUMENT *FindInstrument(bool bDrum, UINT nBank=0xFF, DWORD dwProgram=0xFF, DWORD dwKey=0xFF, UINT *pInsNo=NULL);
 	UINT GetRegionFromKey(UINT nIns, UINT nKey);
-	bool FreeWaveForm(LPBYTE p);
-	bool ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen);
+	bool FreeWaveForm(uint8 *p);
+	bool ExtractWaveForm(UINT nIns, UINT nRgn, uint8 **ppWave, DWORD *pLen);
 	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose=0);
 	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn);
 	const char *GetRegionName(UINT nIns, UINT nRgn) const;
