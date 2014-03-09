@@ -626,7 +626,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(m_dwLastSavedWithVersion == 0)
 		{
-			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);	// early versions of OpenMPT had no version indication.
+			// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
+			// when saving a file in OpenMPT for the first time.
+			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
 		}
 	}
 

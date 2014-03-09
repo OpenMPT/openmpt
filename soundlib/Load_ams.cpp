@@ -712,7 +712,7 @@ struct PACKED AMS2SampleHeader
 			}
 			if(flags & smpReverse)
 			{
-				mptSmp.uFlags.set(CHN_REVRSE);
+				mptSmp.uFlags.set(CHN_REVERSE);
 			}
 		}
 	}

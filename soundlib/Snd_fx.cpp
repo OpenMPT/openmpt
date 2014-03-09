@@ -1320,7 +1320,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 				if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
 			}
 
-			if(pChn->dwFlags[CHN_REVRSE])
+			if(pChn->dwFlags[CHN_REVERSE])
 			{
 				pChn->dwFlags.set(CHN_PINGPONGFLAG);
 				pChn->nPos = pChn->nLength - 1;
