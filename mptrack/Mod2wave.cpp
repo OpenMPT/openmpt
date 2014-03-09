@@ -987,7 +987,7 @@ void CDoWaveConvert::OnButton1()
 					}
 				}
 
-				if(::PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE))
+				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 				{
 					::TranslateMessage(&msg);
 					::DispatchMessage(&msg);
@@ -1198,7 +1198,7 @@ void CDoWaveConvert::OnButton1()
 			pos = (DWORD)(ullSamples >> 14);
 			::SendMessage(progress, PBM_SETPOS, pos, 0);
 		}
-		if (::PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE))
+		while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
