@@ -603,10 +603,10 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 		DWORD dwPos = 12;
 		while (dwPos < plist->len)
 		{
-			LPIFFCHUNK p = (LPIFFCHUNK)(((LPBYTE)plist) + dwPos);
+			LPIFFCHUNK p = (LPIFFCHUNK)(((uint8 *)plist) + dwPos);
 			if (!(p->id & 0xFF))
 			{
-				p = (LPIFFCHUNK)( ((LPBYTE)p)+1  );
+				p = (LPIFFCHUNK)( ((uint8 *)p)+1  );
 				dwPos++;
 			}
 			if (dwPos + p->len + 8 <= plist->len + 12)
@@ -674,7 +674,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 				//Log("fulOptions=0x%04X loops=%d\n", p->fulOptions, p->cSampleLoops);
 				if ((p->cSampleLoops) && (p->cbSize + sizeof(WSMPSAMPLELOOP) <= p->len))
 				{
-					WSMPSAMPLELOOP *ploop = (WSMPSAMPLELOOP *)(((LPBYTE)p)+8+p->cbSize);
+					WSMPSAMPLELOOP *ploop = (WSMPSAMPLELOOP *)(((uint8 *)p)+8+p->cbSize);
 					//Log("looptype=%2d loopstart=%5d loopend=%5d\n", ploop->ulLoopType, ploop->ulLoopStart, ploop->ulLoopLength);
 					if (ploop->ulLoopLength > 3)
 					{
@@ -704,7 +704,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 				pDlsEnv->nDefPan = 128;
 				pDlsEnv->nVolSustainLevel = 128;
 				//Log("  art1 (%3d bytes): cbSize=%d cConnectionBlocks=%d\n", p->len, p->cbSize, p->cConnectionBlocks);
-				CONNECTIONBLOCK *pblk = (CONNECTIONBLOCK *)( ((LPBYTE)p)+8+p->cbSize );
+				CONNECTIONBLOCK *pblk = (CONNECTIONBLOCK *)( ((uint8 *)p)+8+p->cbSize );
 				for (UINT iblk=0; iblk<p->cConnectionBlocks; iblk++, pblk++)
 				{
 					// [4-bit transform][12-bit dest][8-bit control][8-bit source] = 32-bit ID
@@ -1404,7 +1404,7 @@ UINT CDLSBank::GetRegionFromKey(UINT nIns, UINT nKey)
 }
 
 
-bool CDLSBank::FreeWaveForm(LPBYTE p)
+bool CDLSBank::FreeWaveForm(uint8 *p)
 //-----------------------------------
 {
 	if (p) free(p);
@@ -1412,7 +1412,7 @@ bool CDLSBank::FreeWaveForm(LPBYTE p)
 }
 
 
-bool CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen)
+bool CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, uint8 **ppWave, DWORD *pLen)
 //-------------------------------------------------------------------------------
 {
 	DLSINSTRUMENT *pDlsIns;
@@ -1458,7 +1458,7 @@ bool CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen
 				if (fseek(f, 8, SEEK_CUR) == 0)
 				{
 					*pLen = m_pSamplesEx[nWaveLink].dwLen;
-					*ppWave = (LPBYTE)calloc(1, *pLen + 8);
+					*ppWave = (uint8 *)calloc(1, *pLen + 8);
 					fread((*ppWave), 1, *pLen, f);
 					bOk = true;
 				}
@@ -1471,7 +1471,7 @@ bool CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen
 				if ((chunk.id == IFFID_LIST) && (chunk.listid == IFFID_wave) && (chunk.len > 4))
 				{
 					*pLen = chunk.len + 8;
-					*ppWave = (LPBYTE)calloc(1, chunk.len + 8);
+					*ppWave = (uint8 *)calloc(1, chunk.len + 8);
 					if (*ppWave)
 					{
 						memcpy((*ppWave), &chunk, 12);
@@ -1521,7 +1521,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 //---------------------------------------------------------------------------------------------------------
 {
 	DLSINSTRUMENT *pDlsIns;
-	LPBYTE pWaveForm = NULL;
+	uint8 *pWaveForm = NULL;
 	DWORD dwLen = 0;
 	bool bOk, bWaveForm;
 

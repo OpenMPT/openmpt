@@ -1183,7 +1183,7 @@ static void DMFNewNode(DMFHTree *tree)
 }
 
 
-uintptr_t DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen)
+uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen)
 //-----------------------------------------------------------------------------------------
 {
 	DMFHTree tree;

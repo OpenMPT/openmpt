@@ -63,16 +63,13 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 {
 	file.Rewind();
 
-	const BYTE * const lpMemFile = reinterpret_cast<const BYTE*>(file.GetRawData());
-	const DWORD dwFileLength = file.GetLength();
-
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
 	if(!ReadWAVSample(nSample, file, mayNormalize)
 		&& !ReadXISample(nSample, file)
 		&& !ReadITISample(nSample, file)
 		&& !ReadAIFFSample(nSample, file, mayNormalize)
 		&& !ReadITSSample(nSample, file)
-		&& !ReadPATSample(nSample, const_cast<BYTE*>(lpMemFile), dwFileLength)
+		&& !ReadPATSample(nSample, reinterpret_cast<const uint8*>(file.GetRawData()), file.GetLength())
 		&& !ReadIFFSample(nSample, file)
 		&& !ReadS3ISample(nSample, file)
 		&& !ReadFLACSample(nSample, file)
@@ -94,7 +91,7 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file
 {
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
 	file.Rewind();
-	if(!ReadPATInstrument(nInstr, (const LPBYTE)file.GetRawData(), file.GetLength())
+	if(!ReadPATInstrument(nInstr, reinterpret_cast<const uint8*>(file.GetRawData()), file.GetLength())
 		&& !ReadXIInstrument(nInstr, file)
 		&& !ReadITIInstrument(nInstr, file)
 		// Generic read
@@ -619,8 +616,8 @@ static int32 PatchFreqToNote(uint32 nFreq)
 }
 
 
-static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMemLength)
-//--------------------------------------------------------------------------------------------------
+static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, const uint8 *lpStream, DWORD dwMemLength)
+//--------------------------------------------------------------------------------------------------------
 {
 	ModSample &sample = that->GetSample(nSample);
 	DWORD dwMemPos = sizeof(GF1SAMPLEHEADER);
@@ -671,8 +668,8 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, LPBYTE lpStream
 }
 
 
-bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMemLength)
-//-------------------------------------------------------------------------------------
+bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, const uint8 *lpStream, DWORD dwMemLength)
+//-------------------------------------------------------------------------------------------
 {
 	DWORD dwMemPos = sizeof(GF1PATCHFILEHEADER)+sizeof(GF1INSTRUMENT)+sizeof(GF1LAYER);
 	GF1PATCHFILEHEADER *phdr = (GF1PATCHFILEHEADER *)lpStream;
@@ -695,7 +692,7 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMem
 
 
 // PAT Instrument
-bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, const LPBYTE lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, const uint8 *lpStream, DWORD dwMemLength)
 //--------------------------------------------------------------------------------------------------
 {
 	GF1PATCHFILEHEADER *phdr = (GF1PATCHFILEHEADER *)lpStream;
