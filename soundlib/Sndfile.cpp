@@ -761,7 +761,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 
 		file.Rewind();
-		LPCBYTE lpStream = reinterpret_cast<const unsigned char*>(file.GetRawData());
+		const uint8 *lpStream = reinterpret_cast<const unsigned char*>(file.GetRawData());
 		DWORD dwMemLength = file.GetLength();
 
 		if(!ReadXM(file, loadFlags)

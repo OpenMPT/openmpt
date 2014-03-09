@@ -286,8 +286,8 @@ static void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTr
 
 
 
-bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------------------------------------
 {
 	DWORD dwMemPos, dwPos, blocklen, dwTrackPos;
 	const MDLFileHeader *pmsh = (const MDLFileHeader *)lpStream;
@@ -299,7 +299,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	BYTE smpinfo[MAX_SAMPLES];
 	BYTE insvolenv[MAX_INSTRUMENTS];
 	BYTE inspanenv[MAX_INSTRUMENTS];
-	LPCBYTE pvolenv, ppanenv, ppitchenv;
+	const uint8 *pvolenv, *ppanenv, *ppitchenv;
 	UINT nvolenv, npanenv, npitchenv;
 	std::vector<ROWINDEX> patternLength;
 
@@ -660,7 +660,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 		// Setup volume envelope
 		if ((nvolenv) && (pvolenv) && (insvolenv[iIns]))
 		{
-			LPCBYTE pve = pvolenv;
+			const uint8 *pve = pvolenv;
 			for (UINT nve = 0; nve < nvolenv; nve++, pve += 33)
 			{
 				if (pve[0] + 1 == insvolenv[iIns])
@@ -670,7 +670,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 		// Setup panning envelope
 		if ((npanenv) && (ppanenv) && (inspanenv[iIns]))
 		{
-			LPCBYTE ppe = ppanenv;
+			const uint8 *ppe = ppanenv;
 			for (UINT npe = 0; npe < npanenv; npe++, ppe += 33)
 			{
 				if (ppe[0] + 1 == inspanenv[iIns])

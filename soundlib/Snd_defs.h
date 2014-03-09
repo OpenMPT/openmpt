@@ -14,10 +14,6 @@
 #include "../common/typedefs.h"
 #include "../common/FlagSet.h"
 
-#ifndef LPCBYTE
-typedef const BYTE * LPCBYTE;
-#endif
-
 typedef uint32 ROWINDEX;
 	const ROWINDEX ROWINDEX_INVALID = uint32_max;
 typedef uint16 CHANNELINDEX;
