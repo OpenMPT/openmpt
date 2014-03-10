@@ -68,6 +68,7 @@ enum CommandID
 	kcStartFile=kcGlobalStart,
 	kcFileNew=kcGlobalStart,
 	kcFileOpen,
+	kcFileAppend,
 	kcFileClose,
 	kcFileCloseAll,
 	kcFileSave,

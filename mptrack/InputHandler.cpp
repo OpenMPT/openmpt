@@ -458,6 +458,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_FILE_OPENTEMPLATE:	return "Open &Template";
 		case ID_FILE_CLOSE:			s = _T("&Close"); c = kcFileClose; break;
 		case ID_FILE_CLOSEALL:		s = _T("C&lose All"); c = kcFileCloseAll; break;
+		case ID_FILE_APPENDMODULE:	s = _T("Appen&d Module..."); c = kcFileAppend; break;
 		case ID_FILE_SAVE:			s = _T("&Save"); c = kcFileSave; break;
 		case ID_FILE_SAVE_AS:		s = _T("Save &As..."); c = kcFileSaveAs; break;
 		case ID_FILE_SAVEASTEMPLATE:s = _T("Sa&ve as Template"); c = kcFileSaveTemplate; break;
@@ -528,6 +529,7 @@ void CInputHandler::UpdateMainMenu()
 #define UPDATEMENU(id) pMenu->ModifyMenu(id, MF_BYCOMMAND | MF_STRING, id, GetMenuText(id));
 	pMenu->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, 0, GetMenuText(FILENEW));
 	UPDATEMENU(ID_FILE_OPEN);
+	UPDATEMENU(ID_FILE_APPENDMODULE);
 	UPDATEMENU(ID_FILE_CLOSE);
 	UPDATEMENU(ID_FILE_SAVE);
 	UPDATEMENU(ID_FILE_SAVE_AS);

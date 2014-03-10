@@ -515,6 +515,7 @@
     <ClCompile Include="..\unarchiver\unrar.cpp" />
     <ClCompile Include="..\unarchiver\unzip.cpp" />
     <ClCompile Include="AbstractVstEditor.cpp" />
+    <ClCompile Include="AppendModule.cpp" />
     <ClCompile Include="AutoSaver.cpp" />
     <ClCompile Include="Autotune.cpp" />
     <ClCompile Include="ChannelManagerDlg.cpp" />

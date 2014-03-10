@@ -229,6 +229,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AppendModule.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\sounddsp\AGC.cpp"
 				>
 			</File>
