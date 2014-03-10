@@ -654,7 +654,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSelectRow, 1903, _T("Select Row"));
 	DefineKeyCommand(kcSelectEvent, 1904, _T("Select Event"));
 	DefineKeyCommand(kcEditRedo, 1905, _T("Redo"));
-	DefineKeyCommand(kcFileAppend, 1906, _T("Append Module"));
+	DefineKeyCommand(kcFileAppend, 1906, _T("File/Append Module"));
 
 	// Add new key commands here.
 
