@@ -23,7 +23,8 @@ void CModDoc::AppendModule(const CSoundFile &source)
 	std::vector<ORDERINDEX> orderMapping;
 	std::vector<PATTERNINDEX> patternMapping(source.Patterns.GetNumPatterns(), PATTERNINDEX_INVALID);
 
-	// Copy plugins (fix instrument assignments!)
+	///////////////////////////////////////////////////////////////////////////
+	// Copy plugins
 	if(specs.supportsPlugins)
 	{
 		PLUGINDEX plug = 0;
@@ -57,6 +58,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		}
 	}
 
+	///////////////////////////////////////////////////////////////////////////
 	// Copy samples / instruments
 	if(source.GetNumInstruments() != 0 && m_SndFile.GetNumInstruments() == 0 && specs.instrumentsMax)
 	{
@@ -142,7 +144,8 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		}
 	}
 
-	// Copy order list
+	///////////////////////////////////////////////////////////////////////////
+	// Copy order lists
 	const bool useOrderMapping = source.Order.GetNumSequences() == 1;
 	for(SEQUENCEINDEX seq = 0; seq < source.Order.GetNumSequences(); seq++)
 	{
@@ -197,6 +200,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		}
 	}
 
+	///////////////////////////////////////////////////////////////////////////
 	// Adjust number of channels
 	if(source.GetNumChannels() > m_SndFile.GetNumChannels())
 	{
@@ -206,12 +210,13 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			AddToLog("Too many channels!");
 			newChn = specs.channelsMax;
 		}
-		if(newChn > source.GetNumChannels())
+		if(newChn > m_SndFile.GetNumChannels())
 		{
 			ChangeNumChannels(newChn, false);
 		}
 	}
 
+	///////////////////////////////////////////////////////////////////////////
 	// Copy patterns
 	const CHANNELINDEX copyChannels = std::min(m_SndFile.GetNumChannels(), source.GetNumChannels());
 	for(PATTERNINDEX pat = 0; pat < patternMapping.size(); pat++)
@@ -269,5 +274,4 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			}
 		}
 	}
-
 }
