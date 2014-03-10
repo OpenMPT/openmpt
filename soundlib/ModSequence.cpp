@@ -470,7 +470,6 @@ void ModSequenceSet::RemoveSequence(SEQUENCEINDEX i)
 void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
 //----------------------------------------------------------
 {
-	const MODTYPE newtype = m_sndFile.GetType();
 	const SEQUENCEINDEX nSeqs = GetNumSequences();
 	for(SEQUENCEINDEX n = 0; n < nSeqs; n++)
 	{
