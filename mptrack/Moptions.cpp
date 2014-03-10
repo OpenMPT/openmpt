@@ -692,6 +692,7 @@ void COptionsGeneral::OnOptionSelChanged()
 
 
 BEGIN_MESSAGE_MAP(COptionsSampleEditor, CPropertyPage)
+	ON_WM_HSCROLL()
 	ON_EN_CHANGE(IDC_EDIT_UNDOSIZE,			OnUndoSizeChanged)
 	ON_EN_CHANGE(IDC_EDIT_FINETUNE,			OnSettingsChanged)
 	ON_EN_CHANGE(IDC_FLAC_COMPRESSION,		OnSettingsChanged)
