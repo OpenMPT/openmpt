@@ -17,6 +17,11 @@
 #include "modsmp_ctrl.h"
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
+// VST cloning
+#include "Vstplug.h"
+#include "VstPresets.h"
+#include "../soundlib/FileReader.h"
+#include <sstream>
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -542,11 +547,11 @@ bool CModDoc::ConvertSamplesToInstruments()
 }
 
 
-UINT CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
-//----------------------------------------------------------
+PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
+//---------------------------------------------------------------
 {
 	//Remove all plugins whose keepMask[plugindex] is false.
-	UINT nRemoved = 0;
+	PLUGINDEX nRemoved = 0;
 	const PLUGINDEX maxPlug = MIN(MAX_MIXPLUGINS, keepMask.size());
 
 	for (PLUGINDEX nPlug = 0; nPlug < maxPlug; nPlug++)
@@ -581,6 +586,29 @@ UINT CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 	}
 
 	return nRemoved;
+}
+
+
+// Clone a plugin slot (source does not necessarily have to be from the current module)
+void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
+//-------------------------------------------------------------------------
+{
+	CVstPlugin *srcVstPlug = static_cast<CVstPlugin *>(source.pMixPlugin);
+	target.Destroy();
+	MemCopy(target.Info, source.Info);
+	if(theApp.GetPluginManager()->CreateMixPlugin(target, GetrSoundFile()))
+	{
+		CVstPlugin *newVstPlug = static_cast<CVstPlugin *>(target.pMixPlugin);
+		newVstPlug->SetCurrentProgram(srcVstPlug->GetCurrentProgram());
+
+		std::ostringstream f(std::ios::out | std::ios::binary);
+		if(VSTPresets::SaveFile(f, *srcVstPlug, false))
+		{
+			const std::string data = f.str();
+			FileReader file(data.c_str(), data.length());
+			VSTPresets::LoadFile(file, *newVstPlug);
+		}
+	}
 }
 
 

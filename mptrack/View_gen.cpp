@@ -24,9 +24,6 @@
 #include "ChannelManagerDlg.h"
 #include "SelectPluginDialog.h"
 #include "../common/StringFixer.h"
-#include "VstPresets.h"
-#include "../soundlib/FileReader.h"
-#include <sstream>
 
 
 IMPLEMENT_SERIAL(CViewGlobals, CFormView, 0)
@@ -431,11 +428,11 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		{
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), FALSE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), FALSE);
-		}
-		else{
+		} else
+		{
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), TRUE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), TRUE);
-			m_CbnSpecialMixProcessing.SetCurSel(pPlugin->GetMixMode()); // update#02 (fix)
+			m_CbnSpecialMixProcessing.SetCurSel(pPlugin->GetMixMode());
 			CheckDlgButton(IDC_CHECK12, pPlugin->IsExpandedMix() ? BST_CHECKED : BST_UNCHECKED);
 		}
 		int gain = pPlugin->GetGain();
@@ -1393,28 +1390,6 @@ void CViewGlobals::OnInsertSlot()
 }
 
 
-static void ClonePlugin(const SNDMIXPLUGIN &curPlugin, SNDMIXPLUGIN &newPlugin)
-//-----------------------------------------------------------------------------
-{
-	CVstPlugin *curVstPlug = static_cast<CVstPlugin *>(curPlugin.pMixPlugin);
-	newPlugin.Destroy();
-	MemCopy(newPlugin.Info, curPlugin.Info);
-	if(theApp.GetPluginManager()->CreateMixPlugin(newPlugin, curVstPlug->GetSoundFile()))
-	{
-		CVstPlugin *newVstPlug = static_cast<CVstPlugin *>(newPlugin.pMixPlugin);
-		newVstPlug->SetCurrentProgram(curVstPlug->GetCurrentProgram());
-
-		std::ostringstream f(std::ios::out | std::ios::binary);
-		if(VSTPresets::SaveFile(f, *curVstPlug, false))
-		{
-			const std::string data = f.str();
-			FileReader file(data.c_str(), data.length());
-			VSTPresets::LoadFile(file, *newVstPlug);
-		}
-	}
-}
-
-
 void CViewGlobals::OnClonePlug()
 //------------------------------
 {
@@ -1438,7 +1413,7 @@ void CViewGlobals::OnClonePlug()
 			const SNDMIXPLUGIN &curPlugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
 			SNDMIXPLUGIN &newPlugin = sndFile.m_MixPlugins[emptySlots[toIndex]];
 
-			ClonePlugin(curPlugin, newPlugin);
+			GetDocument()->ClonePlugin(newPlugin, curPlugin);
 
 			if(curPlugin.IsOutputToMaster() || toIndex == emptySlots.size() - 1)
 			{
@@ -1528,12 +1503,12 @@ HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 	if(!bUxInited)
 	{
 		// retrieve path for uxtheme.dll...
-		TCHAR szPath[MAX_PATH];
-		SHGetSpecialFolderPath(0, szPath, CSIDL_SYSTEM, FALSE);
-		strncat(szPath, _TEXT("\\uxtheme.dll"), MAX_PATH - (_tcslen(szPath) + 1));
+		WCHAR szPath[MAX_PATH];
+		SHGetSpecialFolderPathW(0, szPath, CSIDL_SYSTEM, FALSE);
+		wcsncat(szPath, L"\\uxtheme.dll", MAX_PATH - (wcslen(szPath) + 1));
 
 		// ...and try to load it
-		HMODULE uxlib = LoadLibrary(szPath);
+		HMODULE uxlib = LoadLibraryW(szPath);
 		if(uxlib)
 			hETDT = (ETDT)GetProcAddress(uxlib, "EnableThemeDialogTexture");
 		bUxInited = true;

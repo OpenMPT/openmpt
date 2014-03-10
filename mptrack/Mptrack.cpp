@@ -101,7 +101,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 				Reporting::Notification(mpt::String::PrintW(L"Opening \"%1\" failed. This can happen if "
 					L"no more documents can be opened or if the file type was not "
 					L"recognised. If the former is true, it's "
-					L"recommended to close some documents as otherwise crash is likely"
+					L"recommended to close some documents as otherwise a crash is likely"
 					L"(currently there %2 %3 document%4 open).",
 					filename, (nOdc == 1) ? L"is" : L"are", nOdc, (nOdc == 1) ? L"" : L"s"));
 			}
@@ -388,19 +388,19 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 	{
 		mpt::PathString filename;
 		char section[32];
-		sprintf(section, (iMidi < 128) ? _T("Midi%d") : _T("Perc%d"), iMidi & 0x7f);
+		sprintf(section, (iMidi < 128) ? "Midi%d" : "Perc%d", iMidi & 0x7f);
 		filename = file.Read<mpt::PathString>("Midi Library", section, mpt::PathString());
 		if(forgetSettings) file.Forget("Midi Library", section);
 		// Check for ULTRASND.INI
 		if(filename.empty())
 		{
-			LPCSTR pszSection = (iMidi < 128) ? _T("Melodic Patches") : _T("Drum Patches");
+			const char *pszSection = (iMidi < 128) ? "Melodic Patches" : "Drum Patches";
 			sprintf(section, _T("%d"), iMidi & 0x7f);
 			filename = file.Read<mpt::PathString>(pszSection, section, mpt::PathString());
 			if(forgetSettings) file.Forget(pszSection, section);
 			if(filename.empty())
 			{
-				pszSection = (iMidi < 128) ? _T("Melodic Bank 0") : _T("Drum Bank 0");
+				pszSection = (iMidi < 128) ? "Melodic Bank 0" : "Drum Bank 0";
 				filename = file.Read<mpt::PathString>(pszSection, section, mpt::PathString());
 				if(forgetSettings) file.Forget(pszSection, section);
 			}
@@ -1148,9 +1148,11 @@ void CTrackApp::OnFileNewITProject()
 // -! NEW_FEATURE#0023
 
 
-void CTrackApp::OnFileOpen()
-//--------------------------
+void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
+//--------------------------------------------------------------------
 {
+	files.clear();
+
 	std::vector<const char *> modExtensions = CSoundFile::GetSupportedExtensions(true);
 	std::string exts;
 	for(size_t i = 0; i < modExtensions.size(); i++)
@@ -1162,68 +1164,46 @@ void CTrackApp::OnFileOpen()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.ExtensionFilter("All Modules|" + exts +
-			"|"
-			"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz"
-	#ifndef NO_MO3
-			";*.mo3"
-	#endif
-			")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz"
-	#ifndef NO_MO3
-			";*.mo3"
-	#endif
-			"|"
-			"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
-			"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
-			"FastTracker Modules (*.xm)|*.xm;*.xmz|"
-			"Impulse Tracker Modules (*.it)|*.it;*.itz|"
-			// -> CODE#0023
-			// -> DESC="IT project files (.itp)"
-			"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
-			// -! NEW_FEATURE#0023
-			"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
-			"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b|"
-			"Wave Files (*.wav)|*.wav|"
-			"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
-			"All Files (*.*)|*.*||")
+		"|"
+		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz"
+#ifndef NO_MO3
+		";*.mo3"
+#endif
+		")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz"
+#ifndef NO_MO3
+		";*.mo3"
+#endif
+		"|"
+		"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
+		"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
+		"FastTracker Modules (*.xm)|*.xm;*.xmz|"
+		"Impulse Tracker Modules (*.it)|*.it;*.itz|"
+		// -> CODE#0023
+		// -> DESC="IT project files (.itp)"
+		"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
+		// -! NEW_FEATURE#0023
+		"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
+		"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b|"
+		"Wave Files (*.wav)|*.wav|"
+		"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
+		"All Files (*.*)|*.*||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS))
 		.FilterIndex(&nFilterIndex);
 	if(!dlg.Show()) return;
 
 	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_MODS);
 
-	const FileDialog::PathList &files = dlg.GetFilenames();
+	files = dlg.GetFilenames();
+}
+
+void CTrackApp::OnFileOpen()
+//--------------------------
+{
+	FileDialog::PathList files;
+	OpenModulesDialog(files);
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 		OpenDocumentFile(files[counter]);
-	}
-}
-
-
-void CTrackApp::RegisterExtensions()
-//----------------------------------
-{
-	HKEY key;
-	CHAR s[512] = "";
-	CHAR exename[512] = "";
-
-	GetModuleFileName(AfxGetInstanceHandle(), s, sizeof(s));
-	GetShortPathName(s, exename, sizeof(exename));
-	if (RegCreateKey(HKEY_CLASSES_ROOT,
-					"OpenMPTFile\\shell\\Edit\\command",
-					&key) == ERROR_SUCCESS)
-	{
-		strcpy(s, exename);
-		strcat(s, " \"%1\"");
-		RegSetValueEx(key, NULL, NULL, REG_SZ, (LPBYTE)s, strlen(s)+1);
-		RegCloseKey(key);
-	}
-	if (RegCreateKey(HKEY_CLASSES_ROOT,
-					"OpenMPTFile\\shell\\Edit\\ddeexec",
-					&key) == ERROR_SUCCESS)
-	{
-		strcpy(s, "[Edit(\"%1\")]");
-		RegSetValueEx(key, NULL, NULL, REG_SZ, (LPBYTE)s, strlen(s)+1);
-		RegCloseKey(key);
 	}
 }
 

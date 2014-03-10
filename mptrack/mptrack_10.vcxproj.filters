@@ -508,6 +508,9 @@
     <ClCompile Include="..\sounddev\SoundDeviceThread.cpp">
       <Filter>Source Files\sounddev</Filter>
     </ClCompile>
+    <ClCompile Include="AppendModule.cpp">
+      <Filter>Header Files\mptrack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">

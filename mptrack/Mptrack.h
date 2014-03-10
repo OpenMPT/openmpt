@@ -225,7 +225,6 @@ public:
 	static BOOL ExportMidiConfig(const mpt::PathString &filename);
 	static BOOL ImportMidiConfig(SettingsContainer &file, bool forgetSettings = false);
 	static BOOL ExportMidiConfig(SettingsContainer &file);
-	static void RegisterExtensions();
 	static BOOL LoadDefaultDLSBanks();
 	static BOOL SaveDefaultDLSBanks();
 	static BOOL RemoveDLSBank(UINT nBank);
@@ -277,6 +276,8 @@ public:
 	// Relative / absolute paths conversion
 	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetAppDirPath()); }
 	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetAppDirPath()); }
+
+	static void OpenModulesDialog(std::vector<mpt::PathString> &files);
 
 // Splash Screen
 protected:

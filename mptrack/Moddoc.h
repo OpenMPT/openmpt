@@ -265,7 +265,10 @@ public:
 
 	bool ConvertInstrumentsToSamples();
 	bool ConvertSamplesToInstruments();
-	UINT RemovePlugs(const std::vector<bool> &keepMask);
+	PLUGINDEX RemovePlugs(const std::vector<bool> &keepMask);
+
+	void ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source);
+	void AppendModule(const CSoundFile &source);
 
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
 	SAMPLEINDEX InsertSample(bool bLimit = false);
@@ -472,6 +475,7 @@ public:
 	afx_msg void OnViewEditHistory();
 	afx_msg void OnViewMPTHacks();
 	afx_msg void OnSaveTemplateModule();
+	afx_msg void OnAppendModule();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

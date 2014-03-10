@@ -79,6 +79,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_FILE_SAVEASMP3,		OnFileMP3Convert)
 	ON_COMMAND(ID_FILE_SAVEMIDI,		OnFileMidiConvert)
 	ON_COMMAND(ID_FILE_SAVECOMPAT,		OnFileCompatibilitySave)
+	ON_COMMAND(ID_FILE_APPENDMODULE,	OnAppendModule)
 	ON_COMMAND(ID_PLAYER_PLAY,			OnPlayerPlay)
 	ON_COMMAND(ID_PLAYER_PAUSE,			OnPlayerPause)
 	ON_COMMAND(ID_PLAYER_STOP,			OnPlayerStop)
@@ -670,6 +671,32 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 }
 
 
+void CModDoc::OnAppendModule()
+//----------------------------
+{
+	FileDialog::PathList files;
+	CTrackApp::OpenModulesDialog(files);
+
+	CSoundFile source;
+	ScopedLogCapturer logcapture(*this, "Append Failures");
+
+	for(size_t counter = 0; counter < files.size(); counter++)
+	{
+		CMappedFile mappedFile;
+		if(mappedFile.Open(files[counter]) && source.Create(mappedFile.GetFile(), CSoundFile::loadCompleteModule))
+		{
+			AppendModule(source);
+			source.Destroy();
+			SetModified();
+		} else
+		{
+			AddToLog("Unable to open source file!");
+		}
+	}
+	UpdateAllViews(nullptr, HINT_MODTYPE | HINT_MODSEQUENCE);
+}
+
+
 BOOL CModDoc::InitializeMod()
 //---------------------------
 {
@@ -1125,7 +1152,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			chn.nPos = sampleOffset;
 			// If start position is after loop end, set loop end to sample end so that the sample starts 
 			// playing.
-			if(chn.nLoopEnd < sampleOffset) 
+			if(chn.nLoopEnd < sampleOffset)
 				chn.nLength = chn.nLoopEnd = chn.pModSample->nLength;
 		}
 
@@ -2578,6 +2605,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcFileSaveAs:		DoSave(mpt::PathString(), TRUE); break;
 		case kcFileSaveTemplate: OnSaveTemplateModule(); break;
 		case kcFileClose:		SafeFileClose(); break;
+		case kcFileAppend:		OnAppendModule(); break;
 
 		case kcPlayPatternFromCursor: OnPatternPlay(); break;
 		case kcPlayPatternFromStart: OnPatternRestart(); break;

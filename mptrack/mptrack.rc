@@ -1975,6 +1975,7 @@ BEGIN
         END
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
         MENUITEM "Open template",               65535
+        MENUITEM "Appen&d Module...",           ID_FILE_APPENDMODULE
         MENUITEM "&Close",                      ID_FILE_CLOSE
         MENUITEM "C&lose All",                  ID_FILE_CLOSEALL
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
