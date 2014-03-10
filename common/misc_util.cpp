@@ -724,7 +724,6 @@ LibraryPath LibraryPath::FullPath(const mpt::PathString &path)
 
 Library::Library()
 //----------------
-	: m_Handle(nullptr)
 {
 	return;
 }
@@ -732,7 +731,6 @@ Library::Library()
 
 Library::Library(const mpt::LibraryPath &path)
 //--------------------------------------------
-	: m_Handle(nullptr)
 {
 	m_Handle = MPT_SHARED_PTR<LibraryHandle>(new LibraryHandle(path));
 }
