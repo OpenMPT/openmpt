@@ -189,6 +189,9 @@ protected:
 	DWORD m_GuiThreadId;
 
 	TrackerDirectories *m_pTrackerDirectories;
+	mpt::Library *m_pUXThemeDLL;
+	typedef HRESULT (WINAPI * pfEnableThemeDialogTexture)(HWND, DWORD);
+	pfEnableThemeDialogTexture m_pEnableThemeDialogTexture;
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
 	TrackerSettings *m_pTrackerSettings;
@@ -241,6 +244,7 @@ public:
 
 public:
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
+	HRESULT EnableThemeDialogTexture(HWND hwnd, DWORD dwFlags) { if(m_pEnableThemeDialogTexture) return m_pEnableThemeDialogTexture(hwnd, dwFlags); else return S_OK; }
 	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	SoundDevicesManager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }

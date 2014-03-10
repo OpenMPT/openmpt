@@ -615,6 +615,7 @@ CTrackApp::CTrackApp()
 //--------------------
 	: m_GuiThreadId(0)
 	, m_pTrackerDirectories(nullptr)
+	, m_pUXThemeDLL(nullptr)
 	, m_pSettingsIniFile(nullptr)
 	, m_pSettings(nullptr)
 	, m_pTrackerSettings(nullptr)
@@ -870,6 +871,10 @@ BOOL CTrackApp::InitInstance()
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
 
+	// Load UXTheme.DLL
+	m_pUXThemeDLL = new mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("uxtheme")));
+	m_pUXThemeDLL->Bind(m_pEnableThemeDialogTexture, "EnableThemeDialogTexture");
+
 	// Construct auto saver instance, class TrackerSettings expects it being available.
 	CMainFrame::m_pAutoSaver = new CAutoSaver();
 
@@ -1004,6 +1009,9 @@ int CTrackApp::ExitInstance()
 	m_pSettings = nullptr;
 	delete m_pSettingsIniFile;
 	m_pSettingsIniFile = nullptr;
+	m_pEnableThemeDialogTexture = nullptr;
+	delete m_pUXThemeDLL;
+	m_pUXThemeDLL = nullptr;
 	delete m_pTrackerDirectories;
 	m_pTrackerDirectories = nullptr;
 

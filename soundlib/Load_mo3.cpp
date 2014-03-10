@@ -10,9 +10,6 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Mptrack.h"
-#endif // MODPLUG_TRACKER
 
 
 bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
@@ -46,58 +43,59 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	bool result = false;	// Result of trying to load the module, false == fail.
 
 	// Try to load unmo3 dynamically.
-#ifdef _WIN32
-#ifdef MODPLUG_TRACKER
-	HMODULE unmo3 = LoadLibraryW((theApp.GetAppDirPath() + MPT_PATHSTRING("unmo3.dll")).AsNative().c_str());
-#else
-	HMODULE unmo3 = LoadLibraryW(MPT_PATHSTRING("unmo3.dll").AsNative().c_str());
-#endif // MODPLUG_TRACKER
-#else
-	void unmo3 = dlopen(MPT_PATHSTRING("libunmo3.so").AsNative().c_str(), RTLD_LAZY);
-#endif // _WIN32
+	mpt::Library unmo3 = mpt::Library(mpt::LibraryPath::App(MPT_PATHSTRING("unmo3")));
 
-	if(unmo3 == nullptr)
+	if(!unmo3.IsValid())
 	{
 		// Didn't succeed.
 		AddToLog(GetStrI18N("Loading MO3 file failed because unmo3.dll could not be loaded."));
 	} else
 	{
 		// Library loaded successfully.
-		typedef uint32 (WINAPI * UNMO3_GETVERSION)();
+		#if MPT_OS_WINDOWS
+			#define UNMO3_API WINAPI
+		#else
+			#define UNMO3_API 
+		#endif
+		typedef uint32 (UNMO3_API * UNMO3_GETVERSION)();
 		// Decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
 		// IN: data/len = MO3 data/len
 		// OUT: data/len = decoded data/len (if successful)
 		// flags & 1: Don't load samples
-		typedef int32 (WINAPI * UNMO3_DECODE_OLD)(const void **data, uint32 *len);
-		typedef int32 (WINAPI * UNMO3_DECODE)(const void **data, uint32 *len, uint32 flags);
+		typedef int32 (UNMO3_API * UNMO3_DECODE_OLD)(const void **data, uint32 *len);
+		typedef int32 (UNMO3_API * UNMO3_DECODE)(const void **data, uint32 *len, uint32 flags);
 		// Free the data returned by UNMO3_Decode
-		typedef void (WINAPI * UNMO3_FREE)(const void *data);
+		typedef void (UNMO3_API * UNMO3_FREE)(const void *data);
+		#undef UNMO3_API
 
-#ifdef _WIN32
-		UNMO3_GETVERSION UNMO3_GetVersion = (UNMO3_GETVERSION)GetProcAddress(unmo3, "UNMO3_GetVersion");
-		void *UNMO3_Decode = GetProcAddress(unmo3, "UNMO3_Decode");
-		UNMO3_FREE UNMO3_Free = (UNMO3_FREE)GetProcAddress(unmo3, "UNMO3_Free");
-#else
-		UNMO3_DECODE UNMO3_Decode = (UNMO3_DECODE)dlsym(unmo3, "UNMO3_Decode");
-		UNMO3_FREE UNMO3_Free = (UNMO3_FREE)dlsym(unmo3, "UNMO3_Free");
-#endif // _WIN32
-
-		if(UNMO3_Decode != nullptr && UNMO3_Free != nullptr)
+		UNMO3_GETVERSION UNMO3_GetVersion = nullptr;
+		UNMO3_DECODE_OLD UNMO3_Decode_Old = nullptr;
+		UNMO3_DECODE UNMO3_Decode = nullptr;
+		UNMO3_FREE UNMO3_Free = nullptr;
+		unmo3.Bind(UNMO3_GetVersion, "UNMO3_GetVersion");
+		if(UNMO3_GetVersion == nullptr)
+		{
+			// Old API version: No "flags" parameter.
+			unmo3.Bind(UNMO3_Decode_Old, "UNMO3_Decode");
+		} else
+		{
+			unmo3.Bind(UNMO3_Decode, "UNMO3_Decode");
+		}
+		unmo3.Bind(UNMO3_Free, "UNMO3_Free");
+		if((UNMO3_Decode != nullptr || UNMO3_Decode_Old != nullptr) && UNMO3_Free != nullptr)
 		{
 			file.Rewind();
 			const void *stream = file.GetRawData();
 			uint32 length = mpt::saturate_cast<uint32>(file.GetLength());
 
 			int32 unmo3result;
-#ifdef _WIN32
-			if(UNMO3_GetVersion == nullptr)
+			if(UNMO3_Decode != nullptr)
+			{
+				unmo3result = UNMO3_Decode(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1);
+			} else
 			{
 				// Old API version: No "flags" parameter.
-				unmo3result = static_cast<UNMO3_DECODE_OLD>(UNMO3_Decode)(&stream, &length);
-			} else
-#endif // _WIN32
-			{
-				unmo3result = static_cast<UNMO3_DECODE>(UNMO3_Decode)(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1);
+				unmo3result = UNMO3_Decode_Old(&stream, &length);
 			}
 
 			if(unmo3result == 0)
@@ -119,11 +117,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				UNMO3_Free(stream);
 			}
 		}
-#ifdef _WIN32
-		FreeLibrary(unmo3);
-#else
-		dlclose(unmo3);
-#endif // _WIN32
 	}
 	return result;
 #endif // NO_MO3

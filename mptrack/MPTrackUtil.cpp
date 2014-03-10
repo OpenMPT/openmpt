@@ -10,9 +10,27 @@
 
 #include "stdafx.h"
 #include "MPTrackUtil.h"
+#include "Mptrack.h"
+#include "../common/misc_util.h"
 
 #include <io.h> // for _taccess
 #include <time.h>
+
+
+
+namespace mpt
+{
+
+
+// declared in misc_util.h
+mpt::PathString GetAppPath()
+//--------------------------
+{
+	return theApp.GetAppDirPath();
+}
+
+
+} // namespace mpt
 
 
 /*

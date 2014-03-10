@@ -26,12 +26,10 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 
 	m_HasXP = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinXP);
 
-	m_hKernel32DLL = NULL;
-
 	pCreateWaitableTimer = nullptr;
 	pSetWaitableTimer = nullptr;
 	pCancelWaitableTimer = nullptr;
-	m_hKernel32DLL = LoadLibrary(TEXT("kernel32.dll"));
+	m_Kernel32DLL = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("kernel32")));
 	#if _WIN32_WINNT >= _WIN32_WINNT_WINXP
 		m_HasXP = true;
 		pCreateWaitableTimer = &CreateWaitableTimer;
@@ -40,10 +38,15 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 	#else
 		if(m_HasXP && m_hKernel32DLL)
 		{
-			pCreateWaitableTimer = (FCreateWaitableTimer)GetProcAddress(m_hKernel32DLL, "CreateWaitableTimerA");
-			pSetWaitableTimer = (FSetWaitableTimer)GetProcAddress(m_hKernel32DLL, "SetWaitableTimer");
-			pCancelWaitableTimer = (FCancelWaitableTimer)GetProcAddress(m_hKernel32DLL, "CancelWaitableTimer");
-			if(!pCreateWaitableTimer || !pSetWaitableTimer || !pCancelWaitableTimer)
+			if(!m_Kernel32DLL.Bind(pCreateWaitableTimer, "CreateWaitableTimerA"))
+			{
+				m_HasXP = false;
+			}
+			if(!m_Kernel32DLL.Bind(pSetWaitableTimer, "SetWaitableTimer"))
+			{
+				m_HasXP = false;
+			}
+			if(!m_Kernel32DLL.Bind(pCancelWaitableTimer, "CancelWaitableTimer"))
 			{
 				m_HasXP = false;
 			}
@@ -95,19 +98,12 @@ CAudioThread::~CAudioThread()
 	pSetWaitableTimer = nullptr;
 	pCancelWaitableTimer = nullptr;
 
-	if(m_hKernel32DLL)
-	{
-		FreeLibrary(m_hKernel32DLL);
-		m_hKernel32DLL = NULL;
-	}
-
 }
 
 
 CPriorityBooster::CPriorityBooster(bool boostPriority)
 //----------------------------------------------------
 	: m_HasVista(false)
-	, m_hAvRtDLL(NULL)
 	, pAvSetMmThreadCharacteristics(nullptr)
 	, pAvRevertMmThreadCharacteristics(nullptr)
 	, m_BoostPriority(boostPriority)
@@ -119,13 +115,18 @@ CPriorityBooster::CPriorityBooster(bool boostPriority)
 
 	if(m_HasVista)
 	{
-		m_hAvRtDLL = LoadLibrary(TEXT("avrt.dll"));
-		if(m_hAvRtDLL && m_hAvRtDLL != INVALID_HANDLE_VALUE)
+		m_AvRtDLL = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("avrt")));
+		if(m_AvRtDLL.IsValid())
 		{
-			pAvSetMmThreadCharacteristics = (FAvSetMmThreadCharacteristics)GetProcAddress(m_hAvRtDLL, "AvSetMmThreadCharacteristicsA");
-			pAvRevertMmThreadCharacteristics = (FAvRevertMmThreadCharacteristics)GetProcAddress(m_hAvRtDLL, "AvRevertMmThreadCharacteristics");
-		}
-		if(!pAvSetMmThreadCharacteristics || !pAvRevertMmThreadCharacteristics)
+			if(!m_AvRtDLL.Bind(pAvSetMmThreadCharacteristics, "AvSetMmThreadCharacteristicsA"))
+			{
+				m_HasVista = false;
+			}
+			if(!m_AvRtDLL.Bind(pAvRevertMmThreadCharacteristics, "AvRevertMmThreadCharacteristics"))
+			{
+				m_HasVista = false;
+			}
+		} else
 		{
 			m_HasVista = false;
 		}
@@ -168,12 +169,6 @@ CPriorityBooster::~CPriorityBooster()
 
 	pAvRevertMmThreadCharacteristics = nullptr;
 	pAvSetMmThreadCharacteristics = nullptr;
-
-	if(m_hAvRtDLL)
-	{
-		FreeLibrary(m_hAvRtDLL);
-		m_hAvRtDLL = NULL;
-	}
 
 }
 

@@ -1830,16 +1830,15 @@ int CCtrlSamples::TimeStretch(float ratio)
 	if(pitch < 0.5f) return 2 + (1<<8);
 	if(pitch > 2.0f) return 2 + (2<<8);
 
-	HANDLE handleSt = NULL;
-
 	// Check whether the DLL file exists.
-	HMODULE dllHandle = LoadLibraryW((CTrackApp::GetAppDirPath() + MPT_PATHSTRING("OpenMPT_SoundTouch_f32.dll")).AsNative().c_str());
-	if(dllHandle != NULL)
+	mpt::Library libSoundTouch = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("OpenMPT_SoundTouch_f32")));
+	if(!libSoundTouch.IsValid())
 	{
-		FreeLibrary(dllHandle);
-		handleSt = soundtouch_createInstance();
+		MsgBox(IDS_SOUNDTOUCH_LOADFAILURE);
+		return -1;
 	}
-	if (handleSt == NULL)
+	HANDLE handleSt = soundtouch_createInstance();
+	if(handleSt == NULL)
 	{
 		MsgBox(IDS_SOUNDTOUCH_LOADFAILURE);
 		return -1;

@@ -13,6 +13,8 @@
 
 #include "SoundDevice.h"
 
+#include "../common/misc_util.h"
+
 
 class CSoundDeviceWithThread;
 
@@ -24,7 +26,7 @@ private:
 	typedef BOOL (WINAPI *FAvRevertMmThreadCharacteristics)(HANDLE);
 private:
 	bool m_HasVista;
-	HMODULE m_hAvRtDLL;
+	mpt::Library m_AvRtDLL;
 	FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics;
 	FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics;
 	bool m_BoostPriority;
@@ -43,7 +45,7 @@ private:
 	CSoundDeviceWithThread & m_SoundDevice;
 
 	bool m_HasXP;
-	HMODULE m_hKernel32DLL;
+	mpt::Library m_Kernel32DLL;
 	typedef HANDLE (WINAPI *FCreateWaitableTimer)(LPSECURITY_ATTRIBUTES, BOOL, LPCTSTR);
 	typedef BOOL (WINAPI *FSetWaitableTimer)(HANDLE, const LARGE_INTEGER *, LONG, PTIMERAPCROUTINE, LPVOID, BOOL);
 	typedef BOOL (WINAPI *FCancelWaitableTimer)(HANDLE);

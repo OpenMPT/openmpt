@@ -255,7 +255,7 @@ typedef lame_global_flags *lame_t;
 struct LameDynBind
 {
 
-	HMODULE hLame;
+	mpt::Library hLame;
 
 	const char* (CDECL * get_lame_version)();
 	const char* (CDECL * get_lame_short_version)();
@@ -316,31 +316,27 @@ struct LameDynBind
 
 	void Reset()
 	{
-		std::memset(this, 0, sizeof(*this));
+		return;
 	}
 	LameDynBind()
 	{
 		Reset();
-		if(!hLame) TryLoad(MPT_PATHSTRING("libmp3lame.dll"), true);
-		if(!hLame) TryLoad(MPT_PATHSTRING("liblame.dll"), true);
-		if(!hLame) TryLoad(MPT_PATHSTRING("mp3lame.dll"), true);
-		if(!hLame) TryLoad(MPT_PATHSTRING("lame.dll"), true);
-		if(!hLame) TryLoad(MPT_PATHSTRING("lame_enc.dll"), false);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("libmp3lame"), true);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("liblame"), true);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("mp3lame"), true);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("lame"), true);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("lame_enc"), false);
 	}
-	void TryLoad(mpt::PathString filename, bool warn)
+	void TryLoad(const mpt::PathString &filename, bool warn)
 	{
-		#ifdef MODPLUG_TRACKER
-			filename = theApp.GetAppDirPath() + filename;
-		#endif
-		hLame = LoadLibraryW(filename.AsNative().c_str());
-		if(!hLame)
+		hLame = mpt::Library(mpt::LibraryPath::AppFullName(filename));
+		if(!hLame.IsValid())
 		{
 			return;
 		}
 		bool ok = true;
 		#define LAME_BIND(f) do { \
-			FARPROC pf = GetProcAddress(hLame, #f ); \
-			if(!pf) \
+			if(!hLame.Bind( f , #f )) \
 			{ \
 				ok = false; \
 				if(warn) \
@@ -348,7 +344,6 @@ struct LameDynBind
 					Reporting::Error(mpt::String::Format("Your '%s' is missing '%s'.\n\nPlease copy a newer 'libmp3lame.dll' into OpenMPT's root directory.", filename, #f ).c_str(), "OpenMPT - MP3 Export"); \
 				} \
 			} \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
 		} while(0)
 		LAME_BIND(get_lame_version);
 		LAME_BIND(get_lame_short_version);
@@ -391,18 +386,15 @@ struct LameDynBind
 		#undef LAME_BIND
 		if(!ok)
 		{
-			FreeLibrary(hLame);
+			hLame.Unload();
 			Reset();
 			return;
 		}
 	}
-	operator bool () const { return hLame ? true : false; }
+	operator bool () const { return hLame.IsValid() ? true : false; }
 	~LameDynBind()
 	{
-		if(hLame)
-		{
-			FreeLibrary(hLame);
-		}
+		hLame.Unload();
 		Reset();
 	}
 	static void GenreEnumCallback(int num, const char *name, void *cookie)
@@ -629,7 +621,7 @@ public:
 struct BladeDynBind
 {
 
-	HMODULE hBlade;
+	mpt::Library hBlade;
 
 	int lame;
 
@@ -641,40 +633,35 @@ struct BladeDynBind
 
 	void Reset()
 	{
-		std::memset(this, 0, sizeof(*this));
+		lame = 0;
 	}
 	BladeDynBind()
 	{
 		Reset();
-		if(!hBlade)
+		if(!hBlade.IsValid())
 		{
-			TryLoad(MPT_PATHSTRING("lame_enc.dll"));
-			if(hBlade) lame = 1;
+			TryLoad(MPT_PATHSTRING("lame_enc"));
+			if(hBlade.IsValid()) lame = 1;
 		}
-		if(!hBlade)
+		if(!hBlade.IsValid())
 		{
-			TryLoad(MPT_PATHSTRING("bladeenc.dll"));
-			if(hBlade) lame = 0;
+			TryLoad(MPT_PATHSTRING("bladeenc"));
+			if(hBlade.IsValid()) lame = 0;
 		}
 	}
-	void TryLoad(mpt::PathString filename)
+	void TryLoad(const mpt::PathString &filename)
 	{
-		#ifdef MODPLUG_TRACKER
-			filename = theApp.GetAppDirPath() + filename;
-		#endif
-		hBlade = LoadLibraryW(filename.AsNative().c_str());
-		if(!hBlade)
+		hBlade = mpt::Library(mpt::LibraryPath::AppFullName(filename));
+		if(!hBlade.IsValid())
 		{
 			return;
 		}
 		bool ok = true;
 		#define BLADE_BIND(f) do { \
-			FARPROC pf = GetProcAddress(hBlade, #f ); \
-			if(!pf) \
+			if(!hBlade.Bind( f , #f )) \
 			{ \
 				ok = false; \
 			} \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
 		} while(0)
 		BLADE_BIND(beVersion);
 		BLADE_BIND(beInitStream);
@@ -684,18 +671,15 @@ struct BladeDynBind
 		#undef BLADE_BIND
 		if(!ok)
 		{
-			FreeLibrary(hBlade);
+			hBlade.Unload();
 			Reset();
 			return;
 		}
 	}
-	operator bool () const { return hBlade ? true : false; }
+	operator bool () const { return hBlade.IsValid(); }
 	~BladeDynBind()
 	{
-		if(hBlade)
-		{
-			FreeLibrary(hBlade);
-		}
+		hBlade.Unload();
 		Reset();
 	}
 	Encoder::Traits BuildTraits()
