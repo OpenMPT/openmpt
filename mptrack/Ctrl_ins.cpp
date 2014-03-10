@@ -1735,7 +1735,7 @@ void CCtrlInstruments::OnInstrumentSave()
 	}
 	SanitizeFilename(szFileName);
 
-	int index = (m_sndFile.GetType() == MOD_TYPE_XM || !TrackerSettings::Instance().compressITI) ? 0 : 1;
+	int index = (m_sndFile.GetType() == MOD_TYPE_XM || !TrackerSettings::Instance().compressITI) ? 1 : 2;
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(m_sndFile.GetType() == MOD_TYPE_XM ? "xi" : "iti")
 		.DefaultFilename(szFileName)
