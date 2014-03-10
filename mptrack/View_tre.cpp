@@ -2097,7 +2097,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				const SEQUENCEINDEX nOrigSeq = (SEQUENCEINDEX)modItemDragID;
 				const ModSequence &origSeq = dragSndFile.Order.GetSequence(nOrigSeq);
 
-				if(pSndFile->GetType() == MOD_TYPE_MPT)
+				if(pSndFile->GetModSpecifications().sequencesMax > 1)
 				{
 					pSndFile->Order.AddSequence(false);
 				}
@@ -2483,7 +2483,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					bool isCurSeq = false;
 					CModDoc *pModDoc = GetDocumentFromItem(hItem);
 					CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
-					if(pSndFile && (pSndFile->GetType() == MOD_TYPE_MPT))
+					if(pSndFile && pSndFile->GetModSpecifications().sequencesMax > 1)
 					{
 						if(pSndFile->Order.GetSequence((SEQUENCEINDEX)modItemID).GetLength() == 0)
 						{
@@ -2507,7 +2507,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				{
 					CModDoc *pModDoc = GetDocumentFromItem(hItem);
 					CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
-					if(pSndFile && (pSndFile->GetType() == MOD_TYPE_MPT))
+					if(pSndFile && pSndFile->GetModSpecifications().sequencesMax > 1)
 					{
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Sequence");
 						if(pSndFile->Order.GetNumSequences() == 1) // this is a sequence
@@ -3473,7 +3473,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			break;
 
 		case MODITEM_HDR_ORDERS:
-			if(sndFile.Order.GetNumSequences() != 1 || sndFile.GetType() != MOD_TYPE_MPT)
+			if(sndFile.Order.GetNumSequences() != 1 || sndFile.GetModSpecifications().sequencesMax <= 1)
 			{
 				break;
 			}

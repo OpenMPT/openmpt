@@ -1004,7 +1004,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 			AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_PROPERTIES, "&Pattern Properties...");
 		}
-		if (sndFile.GetType() == MOD_TYPE_MPT)
+		if (sndFile.GetModSpecifications().sequencesMax > 1)
 		{
 			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 

@@ -32,6 +32,7 @@ const CModSpecifications mptm =
 	true,										// Has notefade.
 	4000,										// Pattern max.
 	4000,										// Order max.
+	MAX_SEQUENCES,								// Sequences max
 	1,											// Channel min
 	127,										// Channel max
 	32,											// Min tempo
@@ -77,6 +78,7 @@ const CModSpecifications mod =
 	false,										// No notefade.
 	128,										// Pattern max.
 	128,										// Order max.
+	1,											// Only one order list
 	4,											// Channel min
 	99,											// Channel max
 	32,											// Min tempo
@@ -120,6 +122,7 @@ const CModSpecifications xm =
 	false,										// No notefade.
 	256,										// Pattern max.
 	255,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
 	32,											// Min tempo
@@ -163,6 +166,7 @@ const CModSpecifications xmEx =
 	false,										// No notefade.
 	256,										// Pattern max.
 	255,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
 	32,											// Min tempo
@@ -205,6 +209,7 @@ const CModSpecifications s3m =
 	false,										// No notefade.
 	100,										// Pattern max.
 	255,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
 	33,											// Min tempo
@@ -248,6 +253,7 @@ const CModSpecifications s3mEx =
 	false,										// No notefade.
 	100,										// Pattern max.
 	255,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
 	33,											// Min tempo
@@ -290,6 +296,7 @@ const CModSpecifications it =
 	true,										// Has notefade.
 	200,										// Pattern max.
 	256,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	64,											// Channel max
 	32,											// Min tempo
@@ -332,6 +339,7 @@ const CModSpecifications itEx =
 	true,										// Has notefade.
 	240,										// Pattern max.
 	256,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
 	32,											// Min tempo
