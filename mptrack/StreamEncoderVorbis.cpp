@@ -22,9 +22,9 @@
 struct VorbisDynBind
 {
 
-	HMODULE hOgg;
-	HMODULE hVorbis;
-	HMODULE hVorbisEnc;
+	mpt::Library hOgg;
+	mpt::Library hVorbis;
+	mpt::Library hVorbisEnc;
 
 	// ogg
 	int      (*ogg_stream_init)(ogg_stream_state *os,int serialno);
@@ -59,7 +59,7 @@ struct VorbisDynBind
 
 	void Reset()
 	{
-		std::memset(this, 0, sizeof(*this));
+		return;
 	}
 	VorbisDynBind()
 	{
@@ -71,14 +71,14 @@ struct VorbisDynBind
 		};
 		// start with trying all symbols from a single dll first
 		static const dll_names_t dll_names[] = {
-			{ "libvorbis.dll", "libvorbis.dll"  , "libvorbis.dll"     },
-			{ "vorbis.dll"   , "vorbis.dll"     , "vorbis.dll"        },
-			{ "libogg.dll"   , "libvorbis.dll"  , "libvorbis.dll"     }, // official xiph.org builds
-			{ "ogg.dll"      , "vorbis.dll"     , "vorbis.dll"        },
-			{ "libogg-0.dll" , "libvorbis-0.dll", "libvorbis-0.dll"   }, // mingw builds
-			{ "libogg.dll"   , "libvorbis.dll"  , "libvorbisenc.dll"  },
-			{ "ogg.dll"      , "vorbis.dll"     , "vorbisenc.dll"     },
-			{ "libogg-0.dll" , "libvorbis-0.dll", "libvorbisenc-0.dll"}  // mingw builds
+			{ "libvorbis", "libvorbis"  , "libvorbis"     },
+			{ "vorbis"   , "vorbis"     , "vorbis"        },
+			{ "libogg"   , "libvorbis"  , "libvorbis"     }, // official xiph.org builds
+			{ "ogg"      , "vorbis"     , "vorbis"        },
+			{ "libogg-0" , "libvorbis-0", "libvorbis-0"   }, // mingw builds
+			{ "libogg"   , "libvorbis"  , "libvorbisenc"  },
+			{ "ogg"      , "vorbis"     , "vorbisenc"     },
+			{ "libogg-0" , "libvorbis-0", "libvorbisenc-0"}  // mingw builds
 		};
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
@@ -89,49 +89,41 @@ struct VorbisDynBind
 			}
 		}
 	}
-	bool TryLoad(mpt::PathString Ogg_fn, mpt::PathString Vorbis_fn, mpt::PathString VorbisEnc_fn)
+	bool TryLoad(const mpt::PathString &Ogg_fn, const mpt::PathString &Vorbis_fn, const mpt::PathString &VorbisEnc_fn)
 	{
-		#ifdef MODPLUG_TRACKER
-			Ogg_fn = theApp.GetAppDirPath() + Ogg_fn;
-			Vorbis_fn = theApp.GetAppDirPath() + Vorbis_fn;
-			VorbisEnc_fn = theApp.GetAppDirPath() + VorbisEnc_fn;
-		#endif
-		hOgg = LoadLibraryW(Ogg_fn.AsNative().c_str());
-		if(!hOgg)
+		hOgg = mpt::Library(mpt::LibraryPath::AppFullName(Ogg_fn));
+		if(!hOgg.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hVorbis.IsValid()) { hVorbis.Unload(); }
+			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 			return false;
 		}
-		hVorbis = LoadLibraryW(Vorbis_fn.AsNative().c_str());
-		if(!hVorbis)
+		hVorbis = mpt::Library(mpt::LibraryPath::AppFullName(Vorbis_fn));
+		if(!hVorbis.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hVorbis.IsValid()) { hVorbis.Unload(); }
+			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 			return false;
 		}
-		hVorbisEnc = LoadLibraryW(VorbisEnc_fn.AsNative().c_str());
-		if(!hVorbisEnc)
+		hVorbisEnc = mpt::Library(mpt::LibraryPath::AppFullName(VorbisEnc_fn));
+		if(!hVorbisEnc.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hVorbis.IsValid()) { hVorbis.Unload(); }
+			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 			return false;
 		}
 		bool ok = true;
 		#define VORBIS_BIND(l,f) do { \
-			FARPROC pf = GetProcAddress( l , #f ); \
-			if(!pf) \
+			if(!l.Bind( f , #f )) \
 			{ \
 				ok = false; \
 			} \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
 		} while(0)
 		#define VORBIS_BIND_OPTIONAL(l,f) do { \
-			FARPROC pf = GetProcAddress( l , #f ); \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
+			l.Bind( f , #f ); \
 		} while(0)
 		VORBIS_BIND(hOgg,ogg_stream_init);
 		VORBIS_BIND(hOgg,ogg_stream_packetin);
@@ -162,20 +154,20 @@ struct VorbisDynBind
 		#undef VORBIS_BIND_OPTIONAL
 		if(!ok)
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hVorbis.IsValid()) { hVorbis.Unload(); }
+			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 			Reset();
 			return false;
 		}
 		return true;
 	}
-	operator bool () const { return hOgg && hVorbis && hVorbisEnc; }
+	operator bool () const { return hOgg.IsValid() && hVorbis.IsValid() && hVorbisEnc.IsValid(); }
 	~VorbisDynBind()
 	{
-		if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-		if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-		if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+		if(hOgg.IsValid()) { hOgg.Unload(); }
+		if(hVorbis.IsValid()) { hVorbis.Unload(); }
+		if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 		Reset();
 	}
 	Encoder::Traits BuildTraits()

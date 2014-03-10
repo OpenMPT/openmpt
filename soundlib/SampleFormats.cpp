@@ -12,7 +12,6 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/Mptrack.h"
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/TrackerSettings.h"
 #endif //MODPLUG_TRACKER
@@ -2294,7 +2293,6 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 //------------------------------------------------------------------
 {
 #ifndef NO_MP3_SAMPLES
-	static HMODULE mp3lib = nullptr;
 
 	// Check file for validity, or else mpg123 will happily munch many files that start looking vaguely resemble an MPEG stream mid-file.
 	file.Rewind();
@@ -2340,16 +2338,15 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 		}
 	}
 
-#ifdef MODPLUG_TRACKER
-	if(!mp3lib) mp3lib = LoadLibraryW((theApp.GetAppDirPath() + MPT_PATHSTRING("libmpg123-0.dll")).AsNative().c_str());
-	if(!mp3lib) mp3lib = LoadLibraryW((theApp.GetAppDirPath() + MPT_PATHSTRING("libmpg123.dll")).AsNative().c_str());
-#else
-	if(!mp3lib) mp3lib = LoadLibraryW(MPT_PATHSTRING("libmpg123-0.dll").AsNative().c_str());
-	if(!mp3lib) mp3lib = LoadLibraryW(MPT_PATHSTRING("libmpg123.dll").AsNative().c_str());
-#endif // MODPLUG_TRACKER
-	if(!mp3lib) return false;
+	mpt::Library mp3lib;
 
-	#define MP3_DYNAMICBIND(f) mpg123::pfn_ ## f mpg123_ ## f = (mpg123::pfn_ ## f)GetProcAddress(mp3lib, "mpg123_" #f); if(!mpg123_ ## f) return false
+	if(!mp3lib.IsValid()) mp3lib = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));
+	if(!mp3lib.IsValid()) mp3lib = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123")));
+	if(!mp3lib.IsValid()) mp3lib = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123-0")));
+	if(!mp3lib.IsValid()) mp3lib = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123")));
+	if(!mp3lib.IsValid()) return false;
+
+	#define MP3_DYNAMICBIND(f) mpg123::pfn_ ## f mpg123_ ## f = nullptr; if(!mp3lib.Bind( mpg123_ ## f , "mpg123_" #f )) return false
 
 	MP3_DYNAMICBIND(init);
 	MP3_DYNAMICBIND(new);

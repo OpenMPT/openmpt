@@ -37,8 +37,8 @@
 struct OpusDynBind
 {
 
-	HMODULE hOgg;
-	HMODULE hOpus;
+	mpt::Library hOgg;
+	mpt::Library hOpus;
 
 	// ogg
 	int      (*ogg_stream_init)(ogg_stream_state *os,int serialno);
@@ -62,7 +62,7 @@ struct OpusDynBind
 		
 	void Reset()
 	{
-		std::memset(this, 0, sizeof(*this));
+		return;
 	}
 	OpusDynBind()
 	{
@@ -73,12 +73,12 @@ struct OpusDynBind
 		};
 		// start with trying all symbols from a single dll first
 		static const dll_names_t dll_names[] = {
-			{ "libopus-0.dll", "libopus-0.dll"  },
-			{ "libopus.dll"  , "libopus.dll"    },
-			{ "opus.dll"     , "opus.dll"       },
-			{ "libogg-0.dll" , "libopus-0.dll"  }, // official xiph.org builds
-			{ "libogg.dll"   , "libopus.dll"    },
-			{ "ogg.dll"      , "opus.dll"       }
+			{ "libopus-0", "libopus-0"  },
+			{ "libopus"  , "libopus"    },
+			{ "opus"     , "opus"       },
+			{ "libogg-0" , "libopus-0"  }, // official xiph.org builds
+			{ "libogg"   , "libopus"    },
+			{ "ogg"      , "opus"       }
 		};
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
@@ -89,34 +89,28 @@ struct OpusDynBind
 			}
 		}
 	}
-	bool TryLoad(mpt::PathString Ogg_fn, mpt::PathString Opus_fn)
+	bool TryLoad(const mpt::PathString &Ogg_fn, const mpt::PathString &Opus_fn)
 	{
-		#ifdef MODPLUG_TRACKER
-			Ogg_fn = theApp.GetAppDirPath() + Ogg_fn;
-			Opus_fn = theApp.GetAppDirPath() + Opus_fn;
-		#endif
-		hOgg = LoadLibraryW(Ogg_fn.AsNative().c_str());
-		if(!hOgg)
+		hOgg = mpt::Library(mpt::LibraryPath::AppFullName(Ogg_fn));
+		if(!hOgg.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hOpus) { FreeLibrary(hOpus); hOpus = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hOpus.IsValid()) { hOpus.Unload(); }
 			return false;
 		}
-		hOpus = LoadLibraryW(Opus_fn.AsNative().c_str());
-		if(!hOpus)
+		hOpus = mpt::Library(mpt::LibraryPath::AppFullName(Opus_fn));
+		if(!hOpus.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hOpus) { FreeLibrary(hOpus); hOpus = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hOpus.IsValid()) { hOpus.Unload(); }
 			return false;
 		}
 		bool ok = true;
 		#define OPUS_BIND(l,f,req) do { \
-			FARPROC pf = GetProcAddress( l , #f ); \
-			if(!pf && req) \
+			if(!l.Bind( f , #f ) && req) \
 			{ \
 				ok = false; \
 			} \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
 		} while(0)
 		OPUS_BIND(hOgg,ogg_stream_init,true);
 		OPUS_BIND(hOgg,ogg_stream_packetin,true);
@@ -132,18 +126,18 @@ struct OpusDynBind
 		#undef OPUS_BIND
 		if(!ok)
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hOpus) { FreeLibrary(hOpus); hOpus = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hOpus.IsValid()) { hOpus.Unload(); }
 			Reset();
 			return false;
 		}
 		return true;
 	}
-	operator bool () const { return hOgg && hOpus; }
+	operator bool () const { return hOgg.IsValid() && hOpus.IsValid(); }
 	~OpusDynBind()
 	{
-		if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-		if(hOpus) { FreeLibrary(hOpus); hOpus = NULL; }
+		if(hOgg.IsValid()) { hOgg.Unload(); }
+		if(hOpus.IsValid()) { hOpus.Unload(); }
 		Reset();
 	}
 	Encoder::Traits BuildTraits()

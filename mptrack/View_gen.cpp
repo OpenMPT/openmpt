@@ -1491,35 +1491,16 @@ void CViewGlobals::FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg)
 
 // This is used for retrieving the correct background colour for the
 // frames on the general tab when using WinXP Luna or Vista/Win7 Aero.
-typedef HRESULT (__stdcall * ETDT)(HWND, DWORD);
 #include <uxtheme.h>
 
 HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 //-------------------------------------------------------------------
 {
-	static bool bUxInited = false;
-	static ETDT hETDT = NULL;
-
-	if(!bUxInited)
-	{
-		// retrieve path for uxtheme.dll...
-		WCHAR szPath[MAX_PATH];
-		SHGetSpecialFolderPathW(0, szPath, CSIDL_SYSTEM, FALSE);
-		wcsncat(szPath, L"\\uxtheme.dll", MAX_PATH - (wcslen(szPath) + 1));
-
-		// ...and try to load it
-		HMODULE uxlib = LoadLibraryW(szPath);
-		if(uxlib)
-			hETDT = (ETDT)GetProcAddress(uxlib, "EnableThemeDialogTexture");
-		bUxInited = true;
-	}
-
 	switch(nCtlColor)
 	{
 	case CTLCOLOR_DLG:
-		if(hETDT)
-			hETDT(*pWnd, ETDT_ENABLETAB);
+		theApp.EnableThemeDialogTexture(*pWnd, ETDT_ENABLETAB);
+		break;
 	}
-
 	return CFormView::OnCtlColor(pDC, pWnd, nCtlColor);
 }
