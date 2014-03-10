@@ -1045,13 +1045,14 @@ void CCtrlSamples::OnSampleSave()
 	switch(defaultFormat)
 	{
 	case dfWAV:
-		filter = 0;
+		filter = 1;
 		break;
 	case dfFLAC:
 	default:
-		filter = 1;
-	case dfRAW:
 		filter = 2;
+		break;
+	case dfRAW:
+		filter = 3;
 	}
 
 	FileDialog dlg = SaveFileDialog()
