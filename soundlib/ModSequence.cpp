@@ -267,7 +267,7 @@ ORDERINDEX ModSequence::Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX 
 	// Limit number of orders to be inserted.
 	LimitMax(nCount, ORDERINDEX(m_sndFile.GetModSpecifications().ordersMax - nPos));
 	// Calculate new length.
-	const ORDERINDEX nNewLength = MIN(nLengthTt + nCount, m_sndFile.GetModSpecifications().ordersMax);
+	const ORDERINDEX nNewLength = std::min<ORDERINDEX>(nLengthTt + nCount, m_sndFile.GetModSpecifications().ordersMax);
 	// Resize if needed.
 	if (nNewLength > GetLength())
 		resize(nNewLength);
@@ -477,11 +477,11 @@ void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
 		GetSequence(n).AdjustToNewModType(oldtype);
 	}
 	// Multisequences not suppported by other formats
-	if(oldtype != MOD_TYPE_NONE && newtype != MOD_TYPE_MPT)
+	if(oldtype != MOD_TYPE_NONE && m_sndFile.GetModSpecifications().sequencesMax <= 1)
 		MergeSequences();
 
 	// Convert sequence with separator patterns into multiple sequences?
-	if(oldtype != MOD_TYPE_NONE && newtype == MOD_TYPE_MPT && GetNumSequences() == 1)
+	if(oldtype != MOD_TYPE_NONE && m_sndFile.GetModSpecifications().sequencesMax > 1 && GetNumSequences() == 1)
 		ConvertSubsongsToMultipleSequences();
 }
 
@@ -489,6 +489,7 @@ void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
 bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 //-------------------------------------------------------
 {
+#ifdef MODPLUG_TRACKER
 	// Allow conversion only if there's only one sequence.
 	if(GetNumSequences() != 1 || m_sndFile.GetType() != MOD_TYPE_MPT)
 		return false;
@@ -506,13 +507,8 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 	bool modified = false;
 
 	if(hasSepPatterns &&
-#ifdef MODPLUG_TRACKER
 		Reporting::Confirm("The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
-		"Order list conversion", false, true) == cnfYes
-#else
-		false
-#endif
-		)
+		"Order list conversion", false, true) == cnfYes)
 	{
 
 		SetSequence(0);
@@ -573,6 +569,9 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 		SetSequence(0);
 	}
 	return modified;
+#else
+	return false;
+#endif // MODPLUG_TRACKER
 }
 
 

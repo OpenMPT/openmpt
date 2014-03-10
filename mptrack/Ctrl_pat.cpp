@@ -261,7 +261,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
 
 		// Enable/disable multisequence controls according the current modtype.
-		BOOL isMultiSeqAvail = (m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE;
+		BOOL isMultiSeqAvail = (m_sndFile.GetModSpecifications().sequencesMax > 1) ? TRUE : FALSE;
 		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
 		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
 		GetDlgItem(IDC_EDIT_SEQNUM)->EnableWindow(isMultiSeqAvail);

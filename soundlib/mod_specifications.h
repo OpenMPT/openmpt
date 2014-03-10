@@ -41,6 +41,7 @@ struct CModSpecifications
 	bool hasNoteFade;					// True if format has notefade.
 	PATTERNINDEX patternsMax;
 	ORDERINDEX ordersMax;
+	SEQUENCEINDEX sequencesMax;
 	CHANNELINDEX channelsMin;			// Minimum number of editable channels in pattern.
 	CHANNELINDEX channelsMax;			// Maximum number of editable channels in pattern.
 	TEMPO tempoMin;
