@@ -163,6 +163,8 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		if(useOrderMapping) orderMapping.resize(ordLen, ORDERINDEX_INVALID);
 		for(ORDERINDEX ord = 0; ord < ordLen; ord++)
 		{
+			PATTERNINDEX insertPat = PATTERNINDEX_INVALID;
+
 			PATTERNINDEX srcPat = source.Order.GetSequence(seq)[ord];
 			if(source.Patterns.IsValidPat(srcPat) && srcPat < patternMapping.size())
 			{
@@ -177,16 +179,20 @@ void CModDoc::AppendModule(const CSoundFile &source)
 				}
 				if(patternMapping[srcPat] != PATTERNINDEX_INVALID)
 				{
-					m_SndFile.Order.Insert(insertPos, 1, patternMapping[srcPat]);
-					orderMapping[ord] = insertPos++;
+					insertPat = patternMapping[srcPat];
 				}
 			} else if(srcPat == source.Order.GetIgnoreIndex() && specs.hasIgnoreIndex)
 			{
-				m_SndFile.Order.Insert(insertPos, 1, m_SndFile.Order.GetIgnoreIndex());
-				orderMapping[ord] = insertPos++;
+				insertPat = m_SndFile.Order.GetIgnoreIndex();
 			} else if(srcPat == source.Order.GetInvalidPatIndex() && specs.hasStopIndex)
 			{
-				orderMapping[ord] = insertPos++;
+				insertPat = m_SndFile.Order.GetInvalidPatIndex();
+			}
+
+			if(insertPat != PATTERNINDEX_INVALID)
+			{
+				m_SndFile.Order.Insert(insertPos, 1, insertPat);
+				if(useOrderMapping) orderMapping[ord] = insertPos++;
 			}
 		}
 	}
