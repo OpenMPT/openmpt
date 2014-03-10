@@ -29,15 +29,15 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 	pCreateWaitableTimer = nullptr;
 	pSetWaitableTimer = nullptr;
 	pCancelWaitableTimer = nullptr;
-	m_Kernel32DLL = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("kernel32")));
 	#if _WIN32_WINNT >= _WIN32_WINNT_WINXP
 		m_HasXP = true;
 		pCreateWaitableTimer = &CreateWaitableTimer;
 		pSetWaitableTimer = &SetWaitableTimer;
 		pCancelWaitableTimer = &CancelWaitableTimer;
 	#else
-		if(m_HasXP && m_hKernel32DLL)
+		if(m_HasXP)
 		{
+			m_Kernel32DLL = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("kernel32")));
 			if(!m_Kernel32DLL.Bind(pCreateWaitableTimer, "CreateWaitableTimerA"))
 			{
 				m_HasXP = false;
