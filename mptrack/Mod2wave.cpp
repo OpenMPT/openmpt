@@ -646,7 +646,7 @@ void CWaveConvert::OnPlayerOptions()
 	COptionsMixer mixerpage;
 	dlg.AddPage(&mixerpage);
 #if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC) || !defined(NO_EQ)
-	COptionsPlayer dsppage(TrackerSettings::Instance().m_EqSettings);
+	COptionsPlayer dsppage;
 	dlg.AddPage(&dsppage);
 #endif
 	dlg.DoModal();

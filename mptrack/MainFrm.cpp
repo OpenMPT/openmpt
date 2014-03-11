@@ -1861,8 +1861,8 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&sounddlg);
 	dlg.AddPage(&mixerdlg);
 #if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC) || !defined(NO_EQ)
-	COptionsPlayer playerdlg(TrackerSettings::Instance().m_EqSettings);
-	dlg.AddPage(&playerdlg);
+	COptionsPlayer dspdlg;
+	dlg.AddPage(&dspdlg);
 #endif
 	dlg.AddPage(&smpeditor);
 	dlg.AddPage(&keyboard);
