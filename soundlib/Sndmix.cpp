@@ -286,7 +286,7 @@ void CSoundFile::ProcessDSP(std::size_t countChunk)
 //-------------------------------------------------
 {
 	#ifndef NO_DSP
-		if(m_MixerSettings.DSPMask & (SNDDSP_SURROUND|SNDDSP_MEGABASS|SNDDSP_NOISEREDUCTION))
+		if(m_MixerSettings.DSPMask & (SNDDSP_SURROUND|SNDDSP_MEGABASS))
 		{
 			m_DSP.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels, m_MixerSettings.DSPMask);
 		}
