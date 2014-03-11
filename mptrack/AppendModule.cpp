@@ -179,6 +179,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		{
 			if(insertPos >= specs.ordersMax)
 			{
+				AddToLog("Too many order items!");
 				break;
 			}
 
