@@ -231,11 +231,19 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	m_DSPSettings.m_nProLogicDelay = conf.Read<int32>("Effects", "ProLogicDelay", m_DSPSettings.m_nProLogicDelay);
 #endif
 #ifndef NO_EQ
-	m_EqSettings = conf.Read<EQPreset>("Effects", "EQ_Settings", CEQSetupDlg::gEQPresets[0]);
-	CEQSetupDlg::gUserPresets[0] = conf.Read<EQPreset>("Effects", "EQ_User1", CEQSetupDlg::gUserPresets[0]);
-	CEQSetupDlg::gUserPresets[1] = conf.Read<EQPreset>("Effects", "EQ_User2", CEQSetupDlg::gUserPresets[1]);
-	CEQSetupDlg::gUserPresets[2] = conf.Read<EQPreset>("Effects", "EQ_User3", CEQSetupDlg::gUserPresets[2]);
-	CEQSetupDlg::gUserPresets[3] = conf.Read<EQPreset>("Effects", "EQ_User4", CEQSetupDlg::gUserPresets[3]);
+	m_EqSettings = conf.Read<EQPreset>("Effects", "EQ_Settings", FlatEQPreset);
+	const EQPreset userPresets[] =
+	{
+		FlatEQPreset,																// User1
+		{ "User 1",	{16,16,16,16,16,16}, { 150, 350, 700, 1500, 4500, 8000 } },		// User2
+		{ "User 2",	{16,16,16,16,16,16}, { 200, 400, 800, 1750, 5000, 9000 } },		// User3
+		{ "User 3",	{16,16,16,16,16,16}, { 250, 450, 900, 2000, 5000, 10000 } }		// User4
+	};
+
+	m_EqUserPresets[0] = conf.Read<EQPreset>("Effects", "EQ_User1", userPresets[0]);
+	m_EqUserPresets[1] = conf.Read<EQPreset>("Effects", "EQ_User2", userPresets[1]);
+	m_EqUserPresets[2] = conf.Read<EQPreset>("Effects", "EQ_User3", userPresets[2]);
+	m_EqUserPresets[3] = conf.Read<EQPreset>("Effects", "EQ_User4", userPresets[3]);
 #endif
 	// Display (Colors)
 	GetDefaultColourScheme(rgbCustomColors);
@@ -501,10 +509,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	// Effects
 	FixupEQ(&m_EqSettings);
-	FixupEQ(&CEQSetupDlg::gUserPresets[0]);
-	FixupEQ(&CEQSetupDlg::gUserPresets[1]);
-	FixupEQ(&CEQSetupDlg::gUserPresets[2]);
-	FixupEQ(&CEQSetupDlg::gUserPresets[3]);
+	FixupEQ(&m_EqUserPresets[0]);
+	FixupEQ(&m_EqUserPresets[1]);
+	FixupEQ(&m_EqUserPresets[2]);
+	FixupEQ(&m_EqUserPresets[3]);
 
 	// Zxx Macros
 	if((MAKE_VERSION_NUMERIC(1,17,00,00) <= storedVersion) && (storedVersion < MAKE_VERSION_NUMERIC(1,20,00,00)))
@@ -755,7 +763,7 @@ void TrackerSettings::FixupEQ(EQPreset *pEqSettings)
 		if(pEqSettings->Gains[i] > 32)
 			pEqSettings->Gains[i] = 16;
 		if((pEqSettings->Freqs[i] < 100) || (pEqSettings->Freqs[i] > 10000))
-			pEqSettings->Freqs[i] = CEQSetupDlg::gEQPresets[0].Freqs[i];
+			pEqSettings->Freqs[i] = FlatEQPreset.Freqs[i];
 	}
 	mpt::String::SetNullTerminator(pEqSettings->szName);
 }
@@ -803,10 +811,10 @@ void TrackerSettings::SaveSettings()
 #endif
 #ifndef NO_EQ
 	conf.Write<EQPreset>("Effects", "EQ_Settings", m_EqSettings);
-	conf.Write<EQPreset>("Effects", "EQ_User1", CEQSetupDlg::gUserPresets[0]);
-	conf.Write<EQPreset>("Effects", "EQ_User2", CEQSetupDlg::gUserPresets[1]);
-	conf.Write<EQPreset>("Effects", "EQ_User3", CEQSetupDlg::gUserPresets[2]);
-	conf.Write<EQPreset>("Effects", "EQ_User4", CEQSetupDlg::gUserPresets[3]);
+	conf.Write<EQPreset>("Effects", "EQ_User1", m_EqUserPresets[0]);
+	conf.Write<EQPreset>("Effects", "EQ_User2", m_EqUserPresets[1]);
+	conf.Write<EQPreset>("Effects", "EQ_User3", m_EqUserPresets[2]);
+	conf.Write<EQPreset>("Effects", "EQ_User4", m_EqUserPresets[3]);
 #endif
 
 	// Display (Colors)

@@ -29,7 +29,6 @@
 #define IDD_VIEW_GLOBALS                126
 #define IDD_SAMPLE_AMPLIFY              130
 #define IDD_SAMPLE_RESAMPLE             131
-#define IDD_SETUP_EQ                    132
 #define IDD_OPTIONS_EFFECTS             133
 #define IDD_OPTIONS_AUTHOR              134
 #define IDR_MAINFRAME                   200

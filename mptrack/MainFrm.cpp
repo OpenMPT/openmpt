@@ -218,7 +218,7 @@ CMainFrame::CMainFrame()
 }
 
 
-VOID CMainFrame::Initialize()
+void CMainFrame::Initialize()
 //---------------------------
 {
 	//Adding version number to the frame title
@@ -1850,12 +1850,8 @@ void CMainFrame::OnViewOptions()
 	COptionsSampleEditor smpeditor;
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
-	COptionsPlayer playerdlg;
 	COptionsMixer mixerdlg;
 	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().m_nMidiDevice);
-#ifndef NO_EQ
-	CEQSetupDlg eqdlg(&TrackerSettings::Instance().m_EqSettings);
-#endif
 	CAutoSaverGUI autosavedlg(m_pAutoSaver); //rewbs.AutoSaver
 	CUpdateSetupDlg updatedlg;
 #if defined(MPT_SETTINGS_CACHE)
@@ -1864,11 +1860,9 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
 	dlg.AddPage(&mixerdlg);
-#if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC)
+#if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC) || !defined(NO_EQ)
+	COptionsPlayer playerdlg(TrackerSettings::Instance().m_EqSettings);
 	dlg.AddPage(&playerdlg);
-#endif
-#ifndef NO_EQ
-	dlg.AddPage(&eqdlg);
 #endif
 	dlg.AddPage(&smpeditor);
 	dlg.AddPage(&keyboard);

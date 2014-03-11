@@ -1029,10 +1029,111 @@ void COptionsMixer::OnOK()
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// CEQSavePresetDlg
+//
+
+//====================================
+class CEQSavePresetDlg: public CDialog
+//====================================
+{
+protected:
+	EQPreset &m_EQ;
+
+public:
+	CEQSavePresetDlg(EQPreset &eq, CWnd *parent = nullptr) : CDialog(IDD_SAVEPRESET, parent), m_EQ(eq) { }
+	BOOL OnInitDialog();
+	void OnOK();
+};
+
+
+BOOL CEQSavePresetDlg::OnInitDialog()
+//-----------------------------------
+{
+	CComboBox *pCombo = (CComboBox *)GetDlgItem(IDC_COMBO1);
+	if (pCombo)
+	{
+		int ndx = 0;
+		for (UINT i=0; i<4; i++)
+		{
+			int n = pCombo->AddString(TrackerSettings::Instance().m_EqUserPresets[i].szName);
+			pCombo->SetItemData( n, i);
+			if (!lstrcmpi(TrackerSettings::Instance().m_EqUserPresets[i].szName, m_EQ.szName)) ndx = n;
+		}
+		pCombo->SetCurSel(ndx);
+	}
+	SetDlgItemText(IDC_EDIT1, m_EQ.szName);
+	return TRUE;
+}
+
+
+void CEQSavePresetDlg::OnOK()
+//---------------------------
+{
+	CComboBox *pCombo = (CComboBox *)GetDlgItem(IDC_COMBO1);
+	if (pCombo)
+	{
+		int n = pCombo->GetCurSel();
+		if ((n < 0) || (n >= 4)) n = 0;
+		GetDlgItemText(IDC_EDIT1, m_EQ.szName, CountOf(m_EQ.szName));
+		mpt::String::SetNullTerminator(m_EQ.szName);
+		TrackerSettings::Instance().m_EqUserPresets[n] = m_EQ;
+	}
+	CDialog::OnOK();
+}
+
+
+void CEQSlider::Init(UINT nID, UINT n, CWnd *parent)
+//--------------------------------------------------
+{
+	m_nSliderNo = n;
+	m_pParent = parent;
+	SubclassDlgItem(nID, parent);
+}
+
+
+BOOL CEQSlider::PreTranslateMessage(MSG *pMsg)
+//--------------------------------------------
+{
+	if ((pMsg) && (pMsg->message == WM_RBUTTONDOWN) && (m_pParent))
+	{
+		m_x = LOWORD(pMsg->lParam);
+		m_y = HIWORD(pMsg->lParam);
+		m_pParent->PostMessage(WM_COMMAND, ID_EQSLIDER_BASE+m_nSliderNo, 0);
+	}
+	return CSliderCtrl::PreTranslateMessage(pMsg);
+}
+
+
 //////////////////////////////////////////////////////////
-// COptionsPlayer
+// COptionsPlayer - DSP / EQ settings
+
+
+#define EQ_MAX_FREQS	5
+
+const UINT gEqBandFreqs[MAX_EQ_BANDS][EQ_MAX_FREQS] =
+{
+	{ 100, 125, 150, 200, 250 },
+	{ 300, 350, 400, 450, 500 },
+	{ 600, 700, 800, 900, 1000 },
+	{ 1250, 1500, 1750, 2000, 2500 },
+	{ 3000, 3500, 4000, 4500, 5000 },
+	{ 6000, 7000, 8000, 9000, 10000 },
+};
 
 BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
+	// EQ
+	ON_WM_VSCROLL()
+	ON_COMMAND(IDC_BUTTON1,	OnEqUser1)
+	ON_COMMAND(IDC_BUTTON2,	OnEqUser2)
+	ON_COMMAND(IDC_BUTTON3,	OnEqUser3)
+	ON_COMMAND(IDC_BUTTON4,	OnEqUser4)
+	ON_COMMAND(IDC_BUTTON5,	OnSavePreset)
+	ON_COMMAND_RANGE(ID_EQSLIDER_BASE, ID_EQSLIDER_BASE+MAX_EQ_BANDS,	OnSliderMenu)
+	ON_COMMAND_RANGE(ID_EQMENU_BASE, ID_EQMENU_BASE+EQ_MAX_FREQS,		OnSliderFreq)
+
+	// DSP
 	ON_WM_HSCROLL()
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
@@ -1063,10 +1164,18 @@ void COptionsPlayer::DoDataExchange(CDataExchange* pDX)
 BOOL COptionsPlayer::OnInitDialog()
 //---------------------------------
 {
-	DWORD dwQuality;
-
 	CPropertyPage::OnInitDialog();
-	dwQuality = TrackerSettings::Instance().MixerDSPMask;
+
+#ifndef NO_EQ
+	for (UINT i = 0; i < MAX_EQ_BANDS; i++)
+	{
+		m_Sliders[i].Init(IDC_SLIDER7 + i, i, this);
+		m_Sliders[i].SetRange(0, 32);
+		m_Sliders[i].SetTicFreq(4);
+	}
+#endif
+
+	DWORD dwQuality = TrackerSettings::Instance().MixerDSPMask;
 	// Effects
 #ifndef NO_DSP
 	if (dwQuality & SNDDSP_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
@@ -1149,6 +1258,8 @@ BOOL COptionsPlayer::OnInitDialog()
 	m_SbSurroundDepth.ShowWindow(SW_HIDE);
 	m_SbSurroundDelay.ShowWindow(SW_HIDE);
 #endif
+
+	UpdateDialog();
 	return TRUE;
 }
 
@@ -1157,6 +1268,14 @@ BOOL COptionsPlayer::OnSetActive()
 //--------------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PLAYER;
+
+	SetDlgItemText(IDC_EQ_WARNING,
+		"Note: This EQ is applied to any and all of the modules "
+		"that you load in OpenMPT; its settings are stored globally, "
+		"rather than in each file. This means that you should avoid "
+		"using it as part of your production process, and instead only "
+		"use it to correct deficiencies in your audio hardware.");
+
 	return CPropertyPage::OnSetActive();
 }
 
@@ -1248,163 +1367,47 @@ void COptionsPlayer::OnOK()
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// EQ Globals
-//
-
-#define EQ_MAX_FREQS	5
-
-const UINT gEqBandFreqs[MAX_EQ_BANDS][EQ_MAX_FREQS] =
+void COptionsPlayer::UpdateEQ(bool bReset)
+//----------------------------------------
 {
-	{ 100, 125, 150, 200, 250 },
-	{ 300, 350, 400, 450, 500 },
-	{ 600, 700, 800, 900, 1000 },
-	{ 1250, 1500, 1750, 2000, 2500 },
-	{ 3000, 3500, 4000, 4500, 5000 },
-	{ 6000, 7000, 8000, 9000, 10000 },
-};
-
-
-const EQPreset CEQSetupDlg::gEQPresets[] =
-{
-	{ "Flat",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },	// Flat
-	{ "Jazz",	{16,16,24,20,20,14}, { 125, 300, 600, 1250, 4000, 8000 } },	// Jazz
-	{ "Pop",	{24,16,16,21,16,26}, { 125, 300, 600, 1250, 4000, 8000 } },	// Pop
-	{ "Rock",	{24,16,24,16,24,22}, { 125, 300, 600, 1250, 4000, 8000 } },	// Rock
-	{ "Concert",{22,18,26,16,22,16}, { 125, 300, 600, 1250, 4000, 8000 } },	// Concert
-	{ "Clear",	{20,16,16,22,24,26}, { 125, 300, 600, 1250, 4000, 8000 } }	// Clear
-};
-
-
-EQPreset CEQSetupDlg::gUserPresets[] =
-{
-	{ "User1",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },		// User1
-	{ "User2",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },		// User2
-	{ "User3",	{16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } },		// User3
-	{ "User4",	{16,16,16,16,16,16}, { 150, 500, 1000, 2500, 5000, 10000 } }	// User4
-};
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// CEQSavePresetDlg
-//
-
-//====================================
-class CEQSavePresetDlg: public CDialog
-//====================================
-{
-protected:
-	EQPreset *m_pEq;
-
-public:
-	CEQSavePresetDlg(EQPreset *pEq, CWnd *parent=NULL):CDialog(IDD_SAVEPRESET, parent) { m_pEq = pEq; }
-	BOOL OnInitDialog();
-	VOID OnOK();
-};
-
-
-BOOL CEQSavePresetDlg::OnInitDialog()
-//-----------------------------------
-{
-	CComboBox *pCombo = (CComboBox *)GetDlgItem(IDC_COMBO1);
-	if (pCombo)
-	{
-		int ndx = 0;
-		for (UINT i=0; i<4; i++)
-		{
-			int n = pCombo->AddString(CEQSetupDlg::gUserPresets[i].szName);
-			pCombo->SetItemData( n, i);
-			if (!lstrcmpi(CEQSetupDlg::gUserPresets[i].szName, m_pEq->szName)) ndx = n;
-		}
-		pCombo->SetCurSel(ndx);
-	}
-	SetDlgItemText(IDC_EDIT1, m_pEq->szName);
-	return TRUE;
+#ifndef NO_EQ
+	CriticalSection cs;
+	if(CMainFrame::GetMainFrame()->GetSoundFilePlaying())
+		CMainFrame::GetMainFrame()->GetSoundFilePlaying()->SetEQGains(m_EQPreset.Gains, MAX_EQ_BANDS, m_EQPreset.Freqs, bReset);
+#endif
 }
 
 
-VOID CEQSavePresetDlg::OnOK()
-//---------------------------
+void COptionsPlayer::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
+//-----------------------------------------------------------------------------
 {
-	CComboBox *pCombo = (CComboBox *)GetDlgItem(IDC_COMBO1);
-	if (pCombo)
-	{
-		int n = pCombo->GetCurSel();
-		if ((n < 0) || (n >= 4)) n = 0;
-		GetDlgItemText(IDC_EDIT1, m_pEq->szName, sizeof(m_pEq->szName));
-		m_pEq->szName[sizeof(m_pEq->szName)-1] = 0;
-		CEQSetupDlg::gUserPresets[n] = *m_pEq;
-	}
-	CDialog::OnOK();
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// CEQSetupDlg
-//
-
-
-VOID CEQSlider::Init(UINT nID, UINT n, CWnd *parent)
-//--------------------------------------------------
-{
-	m_nSliderNo = n;
-	m_pParent = parent;
-	SubclassDlgItem(nID, parent);
-}
-
-
-BOOL CEQSlider::PreTranslateMessage(MSG *pMsg)
-//--------------------------------------------
-{
-	if ((pMsg) && (pMsg->message == WM_RBUTTONDOWN) && (m_pParent))
-	{
-		m_x = LOWORD(pMsg->lParam);
-		m_y = HIWORD(pMsg->lParam);
-		m_pParent->PostMessage(WM_COMMAND, ID_EQSLIDER_BASE+m_nSliderNo, 0);
-	}
-	return CSliderCtrl::PreTranslateMessage(pMsg);
-}
-
-
-// CEQSetupDlg
-BEGIN_MESSAGE_MAP(CEQSetupDlg, CDialog)
-	ON_WM_VSCROLL()
-	ON_COMMAND(IDC_BUTTON1,	OnEqFlat)
-	ON_COMMAND(IDC_BUTTON2,	OnEqJazz)
-	ON_COMMAND(IDC_BUTTON5,	OnEqPop)
-	ON_COMMAND(IDC_BUTTON6,	OnEqRock)
-	ON_COMMAND(IDC_BUTTON7,	OnEqConcert)
-	ON_COMMAND(IDC_BUTTON8,	OnEqClear)
-	ON_COMMAND(IDC_BUTTON3,	OnEqUser1)
-	ON_COMMAND(IDC_BUTTON4,	OnEqUser2)
-	ON_COMMAND(IDC_BUTTON9,	OnEqUser3)
-	ON_COMMAND(IDC_BUTTON10,OnEqUser4)
-	ON_COMMAND(IDC_BUTTON13,OnSavePreset)
-	ON_COMMAND_RANGE(ID_EQSLIDER_BASE, ID_EQSLIDER_BASE+MAX_EQ_BANDS, OnSliderMenu)
-	ON_COMMAND_RANGE(ID_EQMENU_BASE, ID_EQMENU_BASE+EQ_MAX_FREQS, OnSliderFreq)
-END_MESSAGE_MAP()
-
-
-BOOL CEQSetupDlg::OnInitDialog()
-//------------------------------
-{
-	CDialog::OnInitDialog();
-	m_Sliders[0].Init(IDC_SLIDER1, 0, this);
-	m_Sliders[1].Init(IDC_SLIDER3, 1, this);
-	m_Sliders[2].Init(IDC_SLIDER5, 2, this);
-	m_Sliders[3].Init(IDC_SLIDER7, 3, this);
-	m_Sliders[4].Init(IDC_SLIDER8, 4, this);
-	m_Sliders[5].Init(IDC_SLIDER9, 5, this);
+	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
-		m_Sliders[i].SetRange(0, 32);
-		m_Sliders[i].SetTicFreq(4);
+		int n = 32 - m_Sliders[i].GetPos();
+		if ((n >= 0) && (n <= 32)) m_EQPreset.Gains[i] = n;
 	}
+	UpdateEQ(FALSE);
+}
+
+
+void COptionsPlayer::LoadEQPreset(const EQPreset &preset)
+//-------------------------------------------------------
+{
+	m_EQPreset = preset;
+	UpdateEQ(TRUE);
 	UpdateDialog();
-	return TRUE;
+}
+
+
+void COptionsPlayer::OnSavePreset()
+//---------------------------------
+{
+	CEQSavePresetDlg dlg(m_EQPreset, this);
+	if (dlg.DoModal() == IDOK)
+	{
+		UpdateDialog();
+	}
 }
 
 
@@ -1429,73 +1432,28 @@ static void f2s(UINT f, LPSTR s)
 }
 
 
-void CEQSetupDlg::UpdateDialog()
-//------------------------------
+void COptionsPlayer::UpdateDialog()
+//---------------------------------
 {
-	const USHORT uTextIds[MAX_EQ_BANDS] = {IDC_TEXT1, IDC_TEXT2, IDC_TEXT3, IDC_TEXT4, IDC_TEXT5, IDC_TEXT6};
 	CHAR s[32];
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
-		int n = 32 - m_pEqPreset->Gains[i];
+		int n = 32 - m_EQPreset.Gains[i];
 		if (n < 0) n = 0;
 		if (n > 32) n = 32;
 		if (n != (m_Sliders[i].GetPos() & 0xFFFF)) m_Sliders[i].SetPos(n);
-		f2s(m_pEqPreset->Freqs[i], s);
-		SetDlgItemText(uTextIds[i], s);
-		SetDlgItemText(IDC_BUTTON3,	gUserPresets[0].szName);
-		SetDlgItemText(IDC_BUTTON4,	gUserPresets[1].szName);
-		SetDlgItemText(IDC_BUTTON9,	gUserPresets[2].szName);
-		SetDlgItemText(IDC_BUTTON10,gUserPresets[3].szName);
+		f2s(m_EQPreset.Freqs[i], s);
+		SetDlgItemText(IDC_TEXT1 + i, s);
+		for(size_t i = 0; i < CountOf(TrackerSettings::Instance().m_EqUserPresets); i++)
+		{
+			SetDlgItemText(IDC_BUTTON1 + i,	TrackerSettings::Instance().m_EqUserPresets[i].szName);
+		}
 	}
 }
 
 
-void CEQSetupDlg::UpdateEQ(BOOL bReset)
-//-------------------------------------
-{
-#ifndef NO_EQ
-	CriticalSection cs;
-	if(CMainFrame::GetMainFrame()->GetSoundFilePlaying())
-		CMainFrame::GetMainFrame()->GetSoundFilePlaying()->SetEQGains( m_pEqPreset->Gains, MAX_EQ_BANDS, m_pEqPreset->Freqs, bReset?true:false);
-#endif
-}
-
-
-void CEQSetupDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
-//--------------------------------------------------------------------------
-{
-	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
-	for (UINT i=0; i<MAX_EQ_BANDS; i++)
-	{
-		int n = 32 - m_Sliders[i].GetPos();
-		if ((n >= 0) && (n <= 32)) m_pEqPreset->Gains[i] = n;
-	}
-	UpdateEQ(FALSE);
-}
-
-
-void CEQSetupDlg::LoadEQPreset(const EQPreset &preset)
-//----------------------------------------------------
-{
-	*m_pEqPreset = preset;
-	UpdateEQ(TRUE);
-	UpdateDialog();
-}
-
-
-void CEQSetupDlg::OnSavePreset()
-//------------------------------
-{
-	CEQSavePresetDlg dlg(m_pEqPreset, this);
-	if (dlg.DoModal() == IDOK)
-	{
-		UpdateDialog();
-	}
-}
-
-
-void CEQSetupDlg::OnSliderMenu(UINT nID)
-//--------------------------------------
+void COptionsPlayer::OnSliderMenu(UINT nID)
+//-----------------------------------------
 {
 	UINT n = nID - ID_EQSLIDER_BASE;
 	if (n < MAX_EQ_BANDS)
@@ -1508,7 +1466,7 @@ void CEQSetupDlg::OnSliderMenu(UINT nID)
 		for (UINT i = 0; i < EQ_MAX_FREQS; i++)
 		{
 			DWORD d = MF_STRING;
-			if (m_pEqPreset->Freqs[m_nSliderMenu] == pFreqs[i]) d |= MF_CHECKED;
+			if (m_EQPreset.Freqs[m_nSliderMenu] == pFreqs[i]) d |= MF_CHECKED;
 			f2s(pFreqs[i], s);
 			::AppendMenu(hMenu, d, ID_EQMENU_BASE+i, s);
 		}
@@ -1520,35 +1478,20 @@ void CEQSetupDlg::OnSliderMenu(UINT nID)
 }
 
 
-void CEQSetupDlg::OnSliderFreq(UINT nID)
-//--------------------------------------
+void COptionsPlayer::OnSliderFreq(UINT nID)
+//-----------------------------------------
 {
 	UINT n = nID - ID_EQMENU_BASE;
 	if ((m_nSliderMenu < MAX_EQ_BANDS) && (n < EQ_MAX_FREQS))
 	{
 		UINT f = gEqBandFreqs[m_nSliderMenu][n];
-		if (f != m_pEqPreset->Freqs[m_nSliderMenu])
+		if (f != m_EQPreset.Freqs[m_nSliderMenu])
 		{
-			m_pEqPreset->Freqs[m_nSliderMenu] = f;
+			m_EQPreset.Freqs[m_nSliderMenu] = f;
 			UpdateEQ(TRUE);
 			UpdateDialog();
 		}
 	}
-}
-
-
-BOOL CEQSetupDlg::OnSetActive()
-//-----------------------------
-{
-	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_EQ;
-	SetDlgItemText(IDC_EQ_WARNING,
-		"Note: This EQ, when enabled from Player tab, is applied to "
-		"any and all of the modules "
-		"that you load in OpenMPT; its settings are stored globally, "
-		"rather than in each file. This means that you should avoid "
-		"using it as part of your production process, and instead only "
-		"use it to correct deficiencies in your audio hardware.");
-	return CPropertyPage::OnSetActive();
 }
 
 
