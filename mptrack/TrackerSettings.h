@@ -135,6 +135,9 @@ struct PACKED EQPreset
 	UINT Gains[MAX_EQ_BANDS];
 	UINT Freqs[MAX_EQ_BANDS];
 };
+
+static const EQPreset FlatEQPreset = { "Flat", {16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } };
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
@@ -440,6 +443,7 @@ public:
 #endif
 #ifndef NO_EQ
 	EQPreset m_EqSettings;
+	EQPreset m_EqUserPresets[4];
 #endif
 
 	// Display (Colors)

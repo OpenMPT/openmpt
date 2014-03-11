@@ -122,32 +122,6 @@ protected:
 };
 
 
-//========================================
-class COptionsPlayer: public CPropertyPage
-//========================================
-{
-protected:
-	CComboBox m_CbnReverbPreset;
-	CSliderCtrl m_SbXBassDepth, m_SbXBassRange;
-	CSliderCtrl m_SbSurroundDepth, m_SbSurroundDelay;
-	CSliderCtrl m_SbReverbDepth;
-
-public:
-	COptionsPlayer():CPropertyPage(IDD_OPTIONS_PLAYER) {}
-
-protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
-	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
-	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
-
-	DECLARE_MESSAGE_MAP()
-};
-
-
-
 //=================================
 class CEQSlider: public CSliderCtrl
 //=================================
@@ -163,58 +137,45 @@ public:
 };
 
 
-//=====================================
-class CEQSetupDlg: public CPropertyPage
-//=====================================
+//========================================
+class COptionsPlayer: public CPropertyPage
+//========================================
 {
 protected:
+	CComboBox m_CbnReverbPreset;
+	CSliderCtrl m_SbXBassDepth, m_SbXBassRange;
+	CSliderCtrl m_SbSurroundDepth, m_SbSurroundDelay;
+	CSliderCtrl m_SbReverbDepth;
+
 	CEQSlider m_Sliders[MAX_EQ_BANDS];
-	EQPreset *m_pEqPreset;
+	EQPreset &m_EQPreset;
 	UINT m_nSliderMenu;
 
 public:
-	CEQSetupDlg(EQPreset *pEq):CPropertyPage(IDD_SETUP_EQ) { m_pEqPreset = pEq; }
-	void UpdateDialog();
-	void UpdateEQ(BOOL bReset);
-
-public:
-	static const EQPreset gEQPresets[];
-	static EQPreset gUserPresets[];
+	COptionsPlayer(EQPreset &eqPreset) : CPropertyPage(IDD_OPTIONS_PLAYER), m_EQPreset(eqPreset) {}
 
 protected:
 	virtual BOOL OnInitDialog();
+	virtual void OnOK();
 	virtual BOOL OnSetActive();
+	virtual void DoDataExchange(CDataExchange* pDX);
+	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-
-	enum
-	{
-		EQPRESET_FLAT = 0,
-		EQPRESET_JAZZ,
-		EQPRESET_POP,
-		EQPRESET_ROCK,
-		EQPRESET_CONCERT,
-		EQPRESET_CLEAR,
-	};
-
-	afx_msg void OnEqFlat()		{ LoadEQPreset(gEQPresets[EQPRESET_FLAT]); };
-	afx_msg void OnEqJazz()		{ LoadEQPreset(gEQPresets[EQPRESET_JAZZ]); };
-	afx_msg void OnEqPop()		{ LoadEQPreset(gEQPresets[EQPRESET_POP]); };
-	afx_msg void OnEqRock()		{ LoadEQPreset(gEQPresets[EQPRESET_ROCK]); };
-	afx_msg void OnEqConcert()	{ LoadEQPreset(gEQPresets[EQPRESET_CONCERT]); };
-	afx_msg void OnEqClear()	{ LoadEQPreset(gEQPresets[EQPRESET_CLEAR]); };
-
-	afx_msg void OnEqUser1()	{ LoadEQPreset(gUserPresets[0]); };
-	afx_msg void OnEqUser2()	{ LoadEQPreset(gUserPresets[1]); };
-	afx_msg void OnEqUser3()	{ LoadEQPreset(gUserPresets[2]); };
-	afx_msg void OnEqUser4()	{ LoadEQPreset(gUserPresets[3]); };
-
+	afx_msg void OnEqUser1()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[0]); };
+	afx_msg void OnEqUser2()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[1]); };
+	afx_msg void OnEqUser3()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[2]); };
+	afx_msg void OnEqUser4()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[3]); };
 	afx_msg void OnSavePreset();
 	afx_msg void OnSliderMenu(UINT);
 	afx_msg void OnSliderFreq(UINT);
-	DECLARE_MESSAGE_MAP()
 
+	void UpdateDialog();
+	void UpdateEQ(bool bReset);
 	void LoadEQPreset(const EQPreset &preset);
+
+	DECLARE_MESSAGE_MAP()
 };
 
 
