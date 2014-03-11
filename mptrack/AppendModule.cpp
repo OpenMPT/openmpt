@@ -22,6 +22,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 	std::vector<INSTRUMENTINDEX> instrMapping((source.GetNumInstruments() ? source.GetNumInstruments() : source.GetNumSamples()) + 1, 0);
 	std::vector<ORDERINDEX> orderMapping;
 	std::vector<PATTERNINDEX> patternMapping(source.Patterns.GetNumPatterns(), PATTERNINDEX_INVALID);
+	std::vector<bool> usedInstruments(instrMapping.size(), false);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Copy plugins
@@ -66,12 +67,22 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		ConvertSamplesToInstruments();
 	}
 
+	// Check which samples / instruments are actually referenced.
+	for(PATTERNINDEX i = 0; i < source.Patterns.Size(); i++) if(source.Patterns.IsValidPat(i))
+	{
+		const ModCommand *m = source.Patterns[i];
+		for(size_t j = source.GetNumChannels() * source.Patterns[i].GetNumRows(); j; m++, j--)
+		{
+			if(!m->IsPcNote()) usedInstruments[m->instr] = true;
+		}
+	}
+
 	if(m_SndFile.GetNumInstruments())
 	{
 		INSTRUMENTINDEX targetIns = 0;
 		if(source.GetNumInstruments())
 		{
-			for(INSTRUMENTINDEX i = 1; i <= source.GetNumInstruments(); i++) if(source.Instruments[i] != nullptr)
+			for(INSTRUMENTINDEX i = 1; i <= source.GetNumInstruments(); i++) if(source.Instruments[i] != nullptr && usedInstruments[i])
 			{
 				targetIns = m_SndFile.GetNextFreeInstrument(targetIns + 1);
 				if(targetIns == INSTRUMENTINDEX_INVALID)
@@ -92,7 +103,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		} else
 		{
 			SAMPLEINDEX targetSmp = 0;
-			for(SAMPLEINDEX i = 1; i <= source.GetNumSamples(); i++)
+			for(SAMPLEINDEX i = 1; i <= source.GetNumSamples(); i++) if(usedInstruments[i])
 			{
 				targetIns = m_SndFile.GetNextFreeInstrument(targetIns + 1);
 				targetSmp = m_SndFile.GetNextFreeSample(targetIns, targetSmp + 1);
@@ -117,7 +128,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		SAMPLEINDEX targetSmp = 0;
 		if(source.GetNumInstruments())
 		{
-			for(INSTRUMENTINDEX i = 1; i <= source.GetNumInstruments(); i++) if(source.Instruments[i] != nullptr)
+			for(INSTRUMENTINDEX i = 1; i <= source.GetNumInstruments(); i++) if(source.Instruments[i] != nullptr && usedInstruments[i])
 			{
 				targetSmp = m_SndFile.GetNextFreeSample(INSTRUMENTINDEX_INVALID, targetSmp + 1);
 				if(targetSmp == SAMPLEINDEX_INVALID)
@@ -130,7 +141,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			}
 		} else
 		{
-			for(SAMPLEINDEX i = 1; i <= source.GetNumSamples(); i++)
+			for(SAMPLEINDEX i = 1; i <= source.GetNumSamples(); i++) if(usedInstruments[i])
 			{
 				targetSmp = m_SndFile.GetNextFreeSample(INSTRUMENTINDEX_INVALID, targetSmp + 1);
 				if(targetSmp == SAMPLEINDEX_INVALID)
@@ -166,6 +177,11 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		if(useOrderMapping) orderMapping.resize(ordLen, ORDERINDEX_INVALID);
 		for(ORDERINDEX ord = 0; ord < ordLen; ord++)
 		{
+			if(insertPos >= specs.ordersMax)
+			{
+				break;
+			}
+
 			PATTERNINDEX insertPat = PATTERNINDEX_INVALID;
 
 			PATTERNINDEX srcPat = source.Order.GetSequence(seq)[ord];
@@ -173,7 +189,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			{
 				if(patternMapping[srcPat] == PATTERNINDEX_INVALID && source.Patterns.IsValidPat(srcPat))
 				{
-					patternMapping[srcPat] = m_SndFile.Patterns.Insert(source.Patterns[srcPat].GetNumRows());
+					patternMapping[srcPat] = m_SndFile.Patterns.Insert(Clamp(source.Patterns[srcPat].GetNumRows(), specs.patternRowsMin, specs.patternRowsMax));
 					if(patternMapping[srcPat] == PATTERNINDEX_INVALID)
 					{
 						AddToLog("Too many patterns!");
@@ -245,7 +261,8 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			}
 		}
 
-		for(ROWINDEX row = 0; row < sourcePat.GetNumRows(); row++)
+		const ROWINDEX copyRows = std::min(sourcePat.GetNumRows(), targetPat.GetNumRows());
+		for(ROWINDEX row = 0; row < copyRows; row++)
 		{
 			const ModCommand *src = sourcePat.GetRow(row);
 			ModCommand *m = targetPat.GetRow(row);
@@ -272,6 +289,11 @@ void CModDoc::AppendModule(const CSoundFile &source)
 					}
 				}
 			}
+		}
+		if(copyRows < targetPat.GetNumRows())
+		{
+			// If source pattern was smaller, write pattern break effect.
+			targetPat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(copyRows - 1).Retry(EffectWriter::rmTryNextRow));
 		}
 	}
 }
