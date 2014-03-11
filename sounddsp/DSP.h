@@ -40,15 +40,11 @@ public:
 	CDSPSettings m_Settings;
 private:
 
-	// Noise Reduction: simple low-pass filter
-	LONG nLeftNR;
-	LONG nRightNR;
-
 	// Surround Encoding: 1 delay line + low-pass filter + high-pass filter
 	LONG nSurroundSize;
 	LONG nSurroundPos;
 	LONG nDolbyDepth;
-	
+
 	// Surround Biquads
 	LONG nDolbyHP_Y1;
 	LONG nDolbyHP_X1;

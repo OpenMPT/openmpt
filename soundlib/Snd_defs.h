@@ -288,9 +288,6 @@ DECLARE_FLAGSET(SongFlags)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)
-#ifndef NO_DSP
-#define SNDDSP_NOISEREDUCTION 0x01	// reduce hiss (do not use, it's just a simple low-pass filter)
-#endif // NO_DSP
 #ifndef NO_AGC
 #define SNDDSP_AGC            0x40	// automatic gain control
 #endif // ~NO_AGC

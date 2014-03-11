@@ -52,14 +52,14 @@ static void ShelfEQ(LONG scale,
 	float gainFT2, gainDC2, gainPI2;
 	float alpha, beta0, beta1, rho;
 	float wT, quad;
-        
+
 	_asm {
 	// wT = PI*Fc/Fs
 	fild F_c
 	fldpi
 	fmulp ST(1), ST(0)
 	fild F_s
-	fdivp ST(1), ST(0)			
+	fdivp ST(1), ST(0)
 	fstp wT
 	// gain^2
 	fld gainDC
@@ -76,19 +76,19 @@ static void ShelfEQ(LONG scale,
 	quad = gainPI2 + gainDC2 - (gainFT2*2);
 
 	alpha = 0;
- 
+
 	if (quad != 0)
 	{
 		float lambda = (gainPI2 - gainDC2) / quad;
 	alpha  = (float)(lambda - Sgn(lambda)*sqrt(lambda*lambda - 1.0f));
 	}
- 
+
 	beta0 = 0.5f * ((gainDC + gainPI) + (gainDC - gainPI) * alpha);
 	beta1 = 0.5f * ((gainDC - gainPI) + (gainDC + gainPI) * alpha);
 	rho   = (float)((sin((wT*0.5f) - (PI/4.0f))) / (sin((wT*0.5f) + (PI/4.0f))));
- 
+
 	quad  = 1.0f / (1.0f + rho*alpha);
-    
+
 	b0 = ((beta0 + rho*beta1) * quad);
 	b1 = ((beta1 + rho*beta0) * quad);
 	a1 = - ((rho + alpha) * quad);
@@ -121,10 +121,6 @@ CDSPSettings::CDSPSettings() : m_nXBassDepth(DEFAULT_XBASS_DEPTH), m_nXBassRange
 
 CDSP::CDSP()
 {
-	// Noise Reduction: simple low-pass filter
-	nLeftNR = 0;
-	nRightNR = 0;
-
 	// Surround Encoding: 1 delay line + low-pass filter + high-pass filter
 	nSurroundSize = 0;
 	nSurroundPos = 0;
@@ -162,11 +158,7 @@ void CDSP::Initialize(bool bReset, DWORD MixingFreq, DWORD DSPMask)
 //-----------------------------------------------------------------
 {
 	if (!m_Settings.m_nProLogicDelay) m_Settings.m_nProLogicDelay = 20;
-	if (bReset)
-	{
-		// Noise Reduction
-		nLeftNR = nRightNR = 0;
-	}
+
 	// Pro-Logic Surround
 	nSurroundPos = nSurroundSize = 0;
 	if (DSPMask & SNDDSP_SURROUND)
@@ -317,26 +309,8 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nC
 		nXBassFlt_X1 = x1;
 		nXBassFlt_Y1 = y1;
 	}
-	// Noise Reduction
-	if (DSPMask & SNDDSP_NOISEREDUCTION)
-	{
-		int n1 = nLeftNR, n2 = nRightNR;
-		int *pnr = MixSoundBuffer;
-		for (int nr=count; nr; nr--)
-		{
-			int vnr = pnr[0] >> 1;
-			pnr[0] = vnr + n1;
-			n1 = vnr;
-			vnr = pnr[1] >> 1;
-			pnr[1] = vnr + n2;
-			n2 = vnr;
-			pnr += 2;
-		}
-		nLeftNR = n1;
-		nRightNR = n2;
-	}
 
-	
+
 	} else
 	{
 
@@ -360,19 +334,6 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nC
 		}
 		nXBassFlt_X1 = x1;
 		nXBassFlt_Y1 = y1;
-	}
-	// Noise Reduction
-	if (DSPMask & SNDDSP_NOISEREDUCTION)
-	{
-		int n = nLeftNR;
-		int *pnr = MixSoundBuffer;
-		for (int nr=count; nr; pnr++, nr--)
-		{
-			int vnr = *pnr >> 1;
-			*pnr = vnr + n;
-			n = vnr;
-		}
-		nLeftNR = n;
 	}
 
 
@@ -507,4 +468,3 @@ bool CDSP::SetSurroundParameters(UINT nDepth, UINT nDelay)
 
 
 #endif // NO_DSP
-

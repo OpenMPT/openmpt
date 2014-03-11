@@ -1140,7 +1140,6 @@ BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 	ON_COMMAND(IDC_CHECK2,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK3,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK5,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK6,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK7,			OnSettingsChanged)
 END_MESSAGE_MAP()
@@ -1189,7 +1188,6 @@ BOOL COptionsPlayer::OnInitDialog()
 #endif
 #ifndef NO_DSP
 	if (dwQuality & SNDDSP_SURROUND) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
-	if (dwQuality & SNDDSP_NOISEREDUCTION) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK4)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_CHECK5)->ShowWindow(SW_HIDE);
@@ -1320,9 +1318,7 @@ void COptionsPlayer::OnOK()
 #endif
 #ifndef NO_DSP
 	dwQualityMask |= SNDDSP_SURROUND;
-	dwQualityMask |= SNDDSP_NOISEREDUCTION;
 	if (IsDlgButtonChecked(IDC_CHECK4)) dwQuality |= SNDDSP_SURROUND;
-	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= SNDDSP_NOISEREDUCTION;
 #endif
 #ifndef NO_REVERB
 	dwQualityMask |= SNDDSP_REVERB;
