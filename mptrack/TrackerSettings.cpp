@@ -508,11 +508,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// Effects
+#ifndef NO_EQ
 	FixupEQ(&m_EqSettings);
 	FixupEQ(&m_EqUserPresets[0]);
 	FixupEQ(&m_EqUserPresets[1]);
 	FixupEQ(&m_EqUserPresets[2]);
 	FixupEQ(&m_EqUserPresets[3]);
+#endif // !NO_EQ
 
 	// Zxx Macros
 	if((MAKE_VERSION_NUMERIC(1,17,00,00) <= storedVersion) && (storedVersion < MAKE_VERSION_NUMERIC(1,20,00,00)))

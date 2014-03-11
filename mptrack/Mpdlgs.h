@@ -122,6 +122,8 @@ protected:
 };
 
 
+#ifndef NO_EQ
+
 //=================================
 class CEQSlider: public CSliderCtrl
 //=================================
@@ -132,9 +134,11 @@ public:
 	short int m_x, m_y;
 public:
 	CEQSlider() {}
-	VOID Init(UINT nID, UINT n, CWnd *parent);
+	void Init(UINT nID, UINT n, CWnd *parent);
 	BOOL PreTranslateMessage(MSG *pMsg);
 };
+
+#endif // !NO_EQ
 
 
 //========================================
@@ -147,12 +151,18 @@ protected:
 	CSliderCtrl m_SbSurroundDepth, m_SbSurroundDelay;
 	CSliderCtrl m_SbReverbDepth;
 
+#ifndef NO_EQ
 	CEQSlider m_Sliders[MAX_EQ_BANDS];
 	EQPreset &m_EQPreset;
 	UINT m_nSliderMenu;
+#endif // !NO_EQ
 
 public:
-	COptionsPlayer(EQPreset &eqPreset) : CPropertyPage(IDD_OPTIONS_PLAYER), m_EQPreset(eqPreset) {}
+	COptionsPlayer() : CPropertyPage(IDD_OPTIONS_PLAYER)
+#ifndef NO_EQ
+		, m_EQPreset(TrackerSettings::Instance().m_EqSettings)
+#endif
+	{ }
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -162,6 +172,7 @@ protected:
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 
+#ifndef NO_EQ
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnEqUser1()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[0]); };
 	afx_msg void OnEqUser2()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[1]); };
@@ -174,6 +185,7 @@ protected:
 	void UpdateDialog();
 	void UpdateEQ(bool bReset);
 	void LoadEQPreset(const EQPreset &preset);
+#endif // !NO_EQ
 
 	DECLARE_MESSAGE_MAP()
 };

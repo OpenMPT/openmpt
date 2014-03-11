@@ -1034,6 +1034,8 @@ void COptionsMixer::OnOK()
 // CEQSavePresetDlg
 //
 
+#ifndef NO_EQ
+
 //====================================
 class CEQSavePresetDlg: public CDialog
 //====================================
@@ -1105,11 +1107,14 @@ BOOL CEQSlider::PreTranslateMessage(MSG *pMsg)
 	return CSliderCtrl::PreTranslateMessage(pMsg);
 }
 
+#endif // !NO_EQ
+
 
 //////////////////////////////////////////////////////////
 // COptionsPlayer - DSP / EQ settings
 
 
+#ifndef NO_EQ
 #define EQ_MAX_FREQS	5
 
 const UINT gEqBandFreqs[MAX_EQ_BANDS][EQ_MAX_FREQS] =
@@ -1121,8 +1126,10 @@ const UINT gEqBandFreqs[MAX_EQ_BANDS][EQ_MAX_FREQS] =
 	{ 3000, 3500, 4000, 4500, 5000 },
 	{ 6000, 7000, 8000, 9000, 10000 },
 };
+#endif // !NO_EQ
 
 BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
+#ifndef NO_EQ
 	// EQ
 	ON_WM_VSCROLL()
 	ON_COMMAND(IDC_BUTTON1,	OnEqUser1)
@@ -1130,8 +1137,9 @@ BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON3,	OnEqUser3)
 	ON_COMMAND(IDC_BUTTON4,	OnEqUser4)
 	ON_COMMAND(IDC_BUTTON5,	OnSavePreset)
-	ON_COMMAND_RANGE(ID_EQSLIDER_BASE, ID_EQSLIDER_BASE+MAX_EQ_BANDS,	OnSliderMenu)
-	ON_COMMAND_RANGE(ID_EQMENU_BASE, ID_EQMENU_BASE+EQ_MAX_FREQS,		OnSliderFreq)
+	ON_COMMAND_RANGE(ID_EQSLIDER_BASE, ID_EQSLIDER_BASE + MAX_EQ_BANDS,	OnSliderMenu)
+	ON_COMMAND_RANGE(ID_EQMENU_BASE, ID_EQMENU_BASE + EQ_MAX_FREQS,		OnSliderFreq)
+#endif // !NO_EQ
 
 	// DSP
 	ON_WM_HSCROLL()
@@ -1172,6 +1180,8 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_Sliders[i].SetRange(0, 32);
 		m_Sliders[i].SetTicFreq(4);
 	}
+
+	UpdateDialog();
 #endif
 
 	DWORD dwQuality = TrackerSettings::Instance().MixerDSPMask;
@@ -1257,7 +1267,6 @@ BOOL COptionsPlayer::OnInitDialog()
 	m_SbSurroundDelay.ShowWindow(SW_HIDE);
 #endif
 
-	UpdateDialog();
 	return TRUE;
 }
 
@@ -1363,14 +1372,14 @@ void COptionsPlayer::OnOK()
 }
 
 
+#ifndef NO_EQ
+
 void COptionsPlayer::UpdateEQ(bool bReset)
 //----------------------------------------
 {
-#ifndef NO_EQ
 	CriticalSection cs;
 	if(CMainFrame::GetMainFrame()->GetSoundFilePlaying())
 		CMainFrame::GetMainFrame()->GetSoundFilePlaying()->SetEQGains(m_EQPreset.Gains, MAX_EQ_BANDS, m_EQPreset.Freqs, bReset);
-#endif
 }
 
 
@@ -1489,6 +1498,8 @@ void COptionsPlayer::OnSliderFreq(UINT nID)
 		}
 	}
 }
+
+#endif // !NO_EQ
 
 
 /////////////////////////////////////////////////////////////

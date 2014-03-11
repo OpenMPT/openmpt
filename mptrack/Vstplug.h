@@ -292,7 +292,7 @@ public:
 	VstInt32 GetUID() const { return 0; }
 	VstInt32 GetVersion() const { return 0; }
 
-	bool CanAutomateParameter(PlugParamIndex index) { return false; }
+	bool CanAutomateParameter(PlugParamIndex) { return false; }
 
 	CString GetFormattedParamName(PlugParamIndex) { return ""; };
 	CString GetFormattedParamValue(PlugParamIndex){ return ""; };
@@ -365,7 +365,7 @@ public:
 
 	const VSTPluginLib **begin() const { return nullptr; }
 	const VSTPluginLib **end() const { return nullptr; }
-	void reserve(size_t num) { }
+	void reserve(size_t) { }
 
 	void OnIdle() {}
 #endif // NO_VST

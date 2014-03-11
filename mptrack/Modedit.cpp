@@ -596,6 +596,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 	CVstPlugin *srcVstPlug = static_cast<CVstPlugin *>(source.pMixPlugin);
 	target.Destroy();
 	MemCopy(target.Info, source.Info);
+#ifndef NO_VST
 	if(theApp.GetPluginManager()->CreateMixPlugin(target, GetrSoundFile()))
 	{
 		CVstPlugin *newVstPlug = static_cast<CVstPlugin *>(target.pMixPlugin);
@@ -609,6 +610,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 			VSTPresets::LoadFile(file, *newVstPlug);
 		}
 	}
+#endif // !NO_VST
 }
 
 
