@@ -1132,6 +1132,7 @@ BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 #ifndef NO_EQ
 	// EQ
 	ON_WM_VSCROLL()
+	ON_COMMAND(IDC_CHECK3,	OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,	OnEqUser1)
 	ON_COMMAND(IDC_BUTTON2,	OnEqUser2)
 	ON_COMMAND(IDC_BUTTON3,	OnEqUser3)
@@ -1146,7 +1147,6 @@ BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK2,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK3,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK6,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK7,			OnSettingsChanged)
@@ -1173,6 +1173,8 @@ BOOL COptionsPlayer::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
+	uint32 dwQuality = TrackerSettings::Instance().MixerDSPMask;
+
 #ifndef NO_EQ
 	for (UINT i = 0; i < MAX_EQ_BANDS; i++)
 	{
@@ -1182,9 +1184,13 @@ BOOL COptionsPlayer::OnInitDialog()
 	}
 
 	UpdateDialog();
+
+	if (dwQuality & SNDDSP_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
+#else
+	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_HIDE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
 #endif
 
-	DWORD dwQuality = TrackerSettings::Instance().MixerDSPMask;
 	// Effects
 #ifndef NO_DSP
 	if (dwQuality & SNDDSP_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
@@ -1200,13 +1206,6 @@ BOOL COptionsPlayer::OnInitDialog()
 	if (dwQuality & SNDDSP_SURROUND) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK4)->ShowWindow(SW_HIDE);
-	GetDlgItem(IDC_CHECK5)->ShowWindow(SW_HIDE);
-#endif
-#ifndef NO_EQ
-	if (dwQuality & SNDDSP_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
-#else
-	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_HIDE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
 #endif
 
 #ifndef NO_DSP
