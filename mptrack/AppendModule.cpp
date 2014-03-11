@@ -19,10 +19,9 @@ void CModDoc::AppendModule(const CSoundFile &source)
 	const CModSpecifications &specs = m_SndFile.GetModSpecifications();
 	// Mappings between old and new indices
 	std::vector<PLUGINDEX> pluginMapping(MAX_MIXPLUGINS + 1, 0);
-	std::vector<INSTRUMENTINDEX> instrMapping((source.GetNumInstruments() ? source.GetNumInstruments() : source.GetNumSamples()) + 1, 0);
+	std::vector<INSTRUMENTINDEX> instrMapping((source.GetNumInstruments() ? source.GetNumInstruments() : source.GetNumSamples()) + 1, INSTRUMENTINDEX_INVALID);
 	std::vector<ORDERINDEX> orderMapping;
 	std::vector<PATTERNINDEX> patternMapping(source.Patterns.GetNumPatterns(), PATTERNINDEX_INVALID);
-	std::vector<bool> usedInstruments(instrMapping.size(), false);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Copy plugins
@@ -73,7 +72,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		const ModCommand *m = source.Patterns[i];
 		for(size_t j = source.GetNumChannels() * source.Patterns[i].GetNumRows(); j; m++, j--)
 		{
-			if(!m->IsPcNote()) usedInstruments[m->instr] = true;
+			if(!m->IsPcNote() && m->instr < instrMapping.size()) instrMapping[m->instr] = 0;
 		}
 	}
 
@@ -82,7 +81,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		INSTRUMENTINDEX targetIns = 0;
 		if(source.GetNumInstruments())
 		{
-			for(INSTRUMENTINDEX i = 1; i <= source.GetNumInstruments(); i++) if(source.Instruments[i] != nullptr && usedInstruments[i])
+			for(INSTRUMENTINDEX i = 1; i <= source.GetNumInstruments(); i++) if(source.Instruments[i] != nullptr && !instrMapping[i])
 			{
 				targetIns = m_SndFile.GetNextFreeInstrument(targetIns + 1);
 				if(targetIns == INSTRUMENTINDEX_INVALID)
@@ -103,7 +102,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		} else
 		{
 			SAMPLEINDEX targetSmp = 0;
-			for(SAMPLEINDEX i = 1; i <= source.GetNumSamples(); i++) if(usedInstruments[i])
+			for(SAMPLEINDEX i = 1; i <= source.GetNumSamples(); i++) if(!instrMapping[i])
 			{
 				targetIns = m_SndFile.GetNextFreeInstrument(targetIns + 1);
 				targetSmp = m_SndFile.GetNextFreeSample(targetIns, targetSmp + 1);
@@ -128,7 +127,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		SAMPLEINDEX targetSmp = 0;
 		if(source.GetNumInstruments())
 		{
-			for(INSTRUMENTINDEX i = 1; i <= source.GetNumInstruments(); i++) if(source.Instruments[i] != nullptr && usedInstruments[i])
+			for(INSTRUMENTINDEX i = 1; i <= source.GetNumInstruments(); i++) if(source.Instruments[i] != nullptr && !instrMapping[i])
 			{
 				targetSmp = m_SndFile.GetNextFreeSample(INSTRUMENTINDEX_INVALID, targetSmp + 1);
 				if(targetSmp == SAMPLEINDEX_INVALID)
@@ -141,7 +140,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			}
 		} else
 		{
-			for(SAMPLEINDEX i = 1; i <= source.GetNumSamples(); i++) if(usedInstruments[i])
+			for(SAMPLEINDEX i = 1; i <= source.GetNumSamples(); i++) if(!instrMapping[i])
 			{
 				targetSmp = m_SndFile.GetNextFreeSample(INSTRUMENTINDEX_INVALID, targetSmp + 1);
 				if(targetSmp == SAMPLEINDEX_INVALID)
@@ -197,23 +196,23 @@ void CModDoc::AppendModule(const CSoundFile &source)
 						break;
 					}
 				}
-				if(patternMapping[srcPat] != PATTERNINDEX_INVALID)
+				if(patternMapping[srcPat] == PATTERNINDEX_INVALID)
 				{
-					insertPat = patternMapping[srcPat];
+					continue;
 				}
+				insertPat = patternMapping[srcPat];
 			} else if(srcPat == source.Order.GetIgnoreIndex() && specs.hasIgnoreIndex)
 			{
 				insertPat = m_SndFile.Order.GetIgnoreIndex();
 			} else if(srcPat == source.Order.GetInvalidPatIndex() && specs.hasStopIndex)
 			{
 				insertPat = m_SndFile.Order.GetInvalidPatIndex();
-			}
-
-			if(insertPat != PATTERNINDEX_INVALID)
+			} else
 			{
-				m_SndFile.Order.Insert(insertPos, 1, insertPat);
-				if(useOrderMapping) orderMapping[ord] = insertPos++;
+				continue;
 			}
+			m_SndFile.Order.Insert(insertPos, 1, insertPat);
+			if(useOrderMapping) orderMapping[ord] = insertPos++;
 		}
 	}
 
