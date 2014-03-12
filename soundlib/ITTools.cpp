@@ -238,7 +238,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	// MIDI Setup
 	mbank = mptIns.wMidiBank;
 	mpr = mptIns.nMidiProgram;
-	if(mptIns.nMidiChannel || mptIns.nMixPlug == 0 || compatExport)
+	if(mptIns.nMidiChannel || mptIns.nMixPlug == 0 || mptIns.nMixPlug > 127 || compatExport)
 	{
 		// Default. Prefer MIDI channel over mixplug to keep the semantics intact.
 		mch = mptIns.nMidiChannel;
