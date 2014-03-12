@@ -327,7 +327,7 @@ public:
 	void TogglePluginEditor(UINT m_nCurrentPlugin);
 	void RecordParamChange(PLUGINDEX slot, PlugParamIndex param);
 	void LearnMacro(int macro, PlugParamIndex param);
-	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow);
+	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool setSamplePos);
 
 	// Global settings to pattern effect conversion
 	bool RestartPosToPattern();
