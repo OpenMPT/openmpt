@@ -823,6 +823,7 @@ public:
 			DWORD size = 0;
 			buf.resize(blade_outputbytes);
 			blade.beEncodeChunk(bestream, samples.size(), &samples[0], (PBYTE)&buf[0], &size);
+			ASSERT(size <= buf.size());
 			buf.resize(size);
 			WriteBuffer();
 		}
@@ -835,12 +836,13 @@ public:
 		}
 		if(blade_sampleBuf.size() > 0)
 		{
-			DWORD size = 0;
-			buf.resize(blade_outputbytes);
 			samples.resize(blade_sampleBuf.size());
 			std::copy(blade_sampleBuf.begin(), blade_sampleBuf.end(), samples.begin());
 			blade_sampleBuf.clear();
+			DWORD size = 0;
+			buf.resize(blade_outputbytes);
 			blade.beEncodeChunk(bestream, samples.size(), &samples[0], (PBYTE)&buf[0], &size);
+			ASSERT(size <= buf.size());
 			buf.resize(size);
 			WriteBuffer();
 		}
