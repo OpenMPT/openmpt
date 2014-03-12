@@ -1714,7 +1714,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 			// rewbs.modularPlugData
 			DWORD MPTxPlugDataSize = 4 + (sizeof(m_MixPlugins[i].fDryRatio)) +     //4 for ID and size of dryRatio
 									 4 + (sizeof(m_MixPlugins[i].defaultProgram)); //rewbs.plugDefaultProgram
-			 					// for each extra entity, add 4 for ID, plus size of entity, plus optionally 4 for size of entity.
+								// for each extra entity, add 4 for ID, plus size of entity, plus optionally 4 for size of entity.
 
 			nPluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(DWORD) is 4
 			// rewbs.modularPlugData
@@ -1722,9 +1722,9 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 			{
 				// write plugin ID
 				id[0] = 'F';
-				id[1] = 'X';
-				id[2] = '0' + (i / 10);
-				id[3] = '0' + (i % 10);
+				id[1] = i < 100 ? 'X' : '0' + i / 100;
+				id[2] = '0' + (i / 10) % 10u;
+				id[3] = '0' + (i % 10u);
 				fwrite(id, 1, 4, f);
 
 				// write plugin size:
@@ -1806,10 +1806,13 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 				ChnSettings[ch].nMixPlugin = (uint8)chunk.ReadUint32LE();
 			}
 		}
-		// Plugin Data
-		else if(memcmp(code, "FX00", 4) >= 0 && memcmp(code, "FX99", 4) <= 0)
+		// Plugin Data FX00, ... FX99, F100, ... F255
+#define ISNUMERIC(x) (code[(x)] >= '0' && code[(x)] <= '9')
+		else if(code[0] == 'F' && (code[1] == 'X' || ISNUMERIC(1)) && ISNUMERIC(2) && ISNUMERIC(3))
+#undef ISNUMERIC
 		{
 			PLUGINDEX plug = (code[2] - '0') * 10 + (code[3] - '0');	//calculate plug-in number.
+			if(code[1] != 'X') plug += (code[1] - '0') * 100;
 
 			if(plug < MAX_MIXPLUGINS)
 			{
