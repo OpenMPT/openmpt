@@ -2427,7 +2427,7 @@ void CModDoc::OnPatternRestart(bool loop)
 		m_SndFile.m_PlayState.m_nNextRow = 0;
 
 		// set playback timer in the status bar (and update channel status)
-		SetElapsedTime(nOrd, 0);
+		SetElapsedTime(nOrd, 0, true);
 
 		if(pModPlaying == this)
 		{
@@ -2482,7 +2482,7 @@ void CModDoc::OnPatternPlay()
 		m_SndFile.m_PlayState.m_nNextRow = nRow;
 		
 		// set playback timer in the status bar (and update channel status)
-		SetElapsedTime(nOrd, nRow);
+		SetElapsedTime(nOrd, nRow, true);
 
 		if(pModPlaying == this)
 		{
@@ -2540,7 +2540,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		m_SndFile.m_PlayState.m_nNextRow = nRow;
 
 		// set playback timer in the status bar (and update channel status)
-		SetElapsedTime(nOrd, nRow);
+		SetElapsedTime(nOrd, nRow, true);
 
 		if(pModPlaying == this)
 		{
@@ -2792,10 +2792,11 @@ void CModDoc::SongProperties()
 
 // Sets playback timer to playback time at given position.
 // At the same time, the playback parameters (global volume, channel volume and stuff like that) are calculated for this position.
-void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow)
-//----------------------------------------------------------
+// Sample channels positions are only updated if setSamplePos is true *and* the user has chosen to update sample play positions on seek.
+void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool setSamplePos)
+//-----------------------------------------------------------------------------
 {
-	double t = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCSAMPLEPOS) != 0);
+	double t = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true, setSamplePos && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCSAMPLEPOS) != 0);
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm != nullptr)
 	{

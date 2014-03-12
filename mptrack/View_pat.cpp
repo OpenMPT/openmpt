@@ -1999,7 +1999,7 @@ void CViewPattern::OnEditGoto()
 			if (m_pGotoWnd->m_nRow != GetCurrentRow())
 				SetCurrentRow(m_pGotoWnd->m_nRow);
 
-			pModDoc->SetElapsedTime(m_pGotoWnd->m_nOrder, m_pGotoWnd->m_nRow);
+			pModDoc->SetElapsedTime(m_pGotoWnd->m_nOrder, m_pGotoWnd->m_nRow, false);
 		}
 	}
 	return;
