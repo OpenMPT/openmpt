@@ -773,9 +773,6 @@ public:
 		}
 		LimitMax(bitrate, mpeg1layer3_bitrates[CountOf(mpeg1layer3_bitrates)-1]);
 
-		blade_inputsamples = 1024;
-		blade_outputbytes = 1024;
-
 		bestream = HBE_STREAM();
 
 		becfg = new BE_CONFIG();
@@ -788,9 +785,10 @@ public:
 		becfg->format.mp3.bCopyright = FALSE;
 		becfg->format.mp3.bOriginal = TRUE;
 
+		blade_inputsamples = 1152 * channels; // 1 frame
+		blade_outputbytes = 1440; // 320kBit 32kHz frame
 		blade.beInitStream(becfg, &blade_inputsamples, &blade_outputbytes, &bestream);
 
-		blade_sampleBuf.resize(blade_inputsamples);
 	}
 	virtual void WriteMetatags(const FileTags &tags)
 	{
