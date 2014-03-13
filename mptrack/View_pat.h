@@ -22,14 +22,14 @@ class CPatternRandomizer;
 class COpenGLEditor;
 
 // Drag & Drop info
-#define DRAGITEM_VALUEMASK		0x00FFFF
-#define DRAGITEM_MASK			0xFF0000
-#define DRAGITEM_CHNHEADER		0x010000
-#define DRAGITEM_PATTERNHEADER	0x020000
-#define DRAGITEM_PLUGNAME		0x040000	//rewbs.patPlugName
+#define DRAGITEM_VALUEMASK		0x00FFFFFF
+#define DRAGITEM_MASK			0xFF000000
+#define DRAGITEM_CHNHEADER		0x01000000
+#define DRAGITEM_PATTERNHEADER	0x02000000
+#define DRAGITEM_PLUGNAME		0x04000000
 
 
-// Row Spacing
+// Edit Step aka Row Spacing
 const ROWINDEX MAX_SPACING = 64; // MAX_PATTERN_ROWS
 
 
@@ -135,8 +135,7 @@ public:
 		psFocussed				= 0x04,		// Is the pattern editor focussed
 		psFollowSong			= 0x08,		// Does the cursor follow playback
 		psRecordingEnabled		= 0x10,		// Recording enabled
-		psDragHScroll			= 0x20,		// Some weird dragging stuff (?) - unused
-		psDragVScroll			= 0x40,		// Some weird dragging stuff (?)
+		psDragVScroll			= 0x40,		// Indicates that the vertical scrollbar is being dragged
 		psShowVUMeters			= 0x80,		// Display channel VU meters
 		psChordPlaying			= 0x100,	// Is a chord playing? (pretty much unused)
 		psDragnDropEdit			= 0x200,	// Drag & Drop editing (?)
@@ -150,7 +149,7 @@ public:
 		psShiftDragging			= 0x20000,	// Drag&Drop: Dragging an item around and holding shift
 
 		// All possible drag flags, to test if user is dragging a selection or a scrollbar
-		psDragActive			= psDragVScroll | psDragHScroll | psMouseDragSelect | psRowSelection | psChannelSelection,
+		psDragActive			= psDragVScroll | psMouseDragSelect | psRowSelection | psChannelSelection,
 	};
 
 protected:

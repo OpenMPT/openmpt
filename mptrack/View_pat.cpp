@@ -5259,7 +5259,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 			}
 		}
 
-		// Set new cursor position (row spacing)
+		// Set new cursor position (edit step aka row spacing)
 		if(!liveRecord)
 		{
 			if((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
@@ -5501,7 +5501,7 @@ void CViewPattern::TempEnterChord(int note)
 	prevChordNote = note;
 	prevChordBaseNote = baseNote;
 
-	// Set new cursor position (row spacing) - only when not recording live
+	// Set new cursor position (edit step aka row spacing) - only when not recording live
 	if(recordEnabled && !liveRecord)
 	{
 		if(m_nSpacing > 0 && m_nSpacing <= MAX_SPACING)
