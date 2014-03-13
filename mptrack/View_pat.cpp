@@ -232,9 +232,9 @@ bool CViewPattern::SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row)
 	UpdateScrollSize();
 	UpdateIndicator();
 
-	if(m_bWholePatternFitsOnScreen) 		//rewbs.scrollFix
+	if(m_bWholePatternFitsOnScreen)
 		SetScrollPos(SB_VERT, 0);
-	else if(updateScroll) //rewbs.fix3147
+	else if(updateScroll)
 		SetScrollPos(SB_VERT, (int)GetCurrentRow() * GetColumnHeight());
 
 	UpdateScrollPos();
@@ -1275,22 +1275,22 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	switch(m_nDragItem & DRAGITEM_MASK)
 	{
 	case DRAGITEM_CHNHEADER:
-		if(nItemNo == nTargetNo)
+		if(nItemNo == nTargetNo && nTargetNo < pModDoc->GetNumChannels())
 		{
 			// Just clicked a channel header...
-
-			if (nFlags & MK_SHIFT)
+			if(nFlags & MK_SHIFT)
 			{
-				if (nItemNo < MAX_BASECHANNELS)
-				{
-					pModDoc->Record1Channel(nItemNo);
-					InvalidateChannelsHeaders();
-				}
-			}
-			else if (!(nFlags & MK_CONTROL))
+				// Toggle record state
+				pModDoc->Record1Channel(nItemNo);
+				InvalidateChannelsHeaders();
+			} else if(CMainFrame::GetMainFrame()->GetInputHandler()->AltPressed())
 			{
-				pModDoc->MuteChannel(nItemNo, !pModDoc->IsChannelMuted(nItemNo));
-				pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((nItemNo / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
+				// Solo / Unsolo
+				OnSoloChannel(nItemNo);
+			} else if(!(nFlags & MK_CONTROL))
+			{
+				// Mute / Unmute
+				OnMuteChannel(nItemNo);
 			}
 		} else if(nTargetNo < pModDoc->GetNumChannels() && (m_nDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER)
 		{
@@ -1692,18 +1692,17 @@ void CViewPattern::OnMuteFromClick()
 }
 
 
-void CViewPattern::OnMuteChannel(bool current)
-//--------------------------------------------
+void CViewPattern::OnMuteChannel(CHANNELINDEX chn)
+//------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		const CHANNELINDEX nChn = current ? GetCurrentChannel() : m_MenuCursor.GetChannel();
-		pModDoc->SoloChannel(nChn, false); //rewbs.merge: recover old solo/mute behaviour
-		pModDoc->MuteChannel(nChn, !pModDoc->IsChannelMuted(nChn));
+		pModDoc->SoloChannel(chn, false); //rewbs.merge: recover old solo/mute behaviour
+		pModDoc->MuteChannel(chn, !pModDoc->IsChannelMuted(chn));
 
 		//If we just unmuted a channel, make sure none are still considered "solo".
-		if(!pModDoc->IsChannelMuted(nChn))
+		if(!pModDoc->IsChannelMuted(chn))
 		{
 			for(CHANNELINDEX i = 0; i < pModDoc->GetNumChannels(); i++)
 			{
@@ -1712,6 +1711,7 @@ void CViewPattern::OnMuteChannel(bool current)
 		}
 
 		InvalidateChannelsHeaders();
+		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((chn / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
 	}
 }
 
@@ -1719,31 +1719,30 @@ void CViewPattern::OnMuteChannel(bool current)
 void CViewPattern::OnSoloFromClick()
 //----------------------------------
 {
-	OnSoloChannel(false);
+	OnSoloChannel(m_MenuCursor.GetChannel());
 }
 
 
 // When trying to solo a channel that is already the only unmuted channel,
 // this will result in unmuting all channels, in order to satisfy user habits.
 // In all other cases, soloing a channel unsoloes all and mutes all except this channel
-void CViewPattern::OnSoloChannel(bool current)
-//--------------------------------------------
+void CViewPattern::OnSoloChannel(CHANNELINDEX chn)
+//------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc == nullptr) return;
 
-	const CHANNELINDEX nChn = current ? GetCurrentChannel() : m_MenuCursor.GetChannel();
-	if (nChn >= pModDoc->GetNumChannels())
+	if (chn >= pModDoc->GetNumChannels())
 	{
 		return;
 	}
 
-	if (pModDoc->IsChannelSolo(nChn))
+	if (pModDoc->IsChannelSolo(chn))
 	{
 		bool nChnIsOnlyUnMutedChan=true;
 		for (CHANNELINDEX i = 0; i < pModDoc->GetNumChannels(); i++)	//check status of all other chans
 		{
-			if (i != nChn && !pModDoc->IsChannelMuted(i))
+			if (i != chn && !pModDoc->IsChannelMuted(i))
 			{
 				nChnIsOnlyUnMutedChan=false;	//found a channel that isn't muted!
 				break;					
@@ -1757,10 +1756,11 @@ void CViewPattern::OnSoloChannel(bool current)
 	} 
 	for(CHANNELINDEX i = 0; i < pModDoc->GetNumChannels(); i++)
 	{
-		pModDoc->MuteChannel(i, !(i == nChn)); //mute all chans except nChn, unmute nChn
-		pModDoc->SoloChannel(i, (i == nChn));  //unsolo all chans except nChn, solo nChn
+		pModDoc->MuteChannel(i, !(i == chn)); //mute all chans except nChn, unmute nChn
+		pModDoc->SoloChannel(i, (i == chn));  //unsolo all chans except nChn, solo nChn
 	}
 	InvalidateChannelsHeaders();
+	pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((chn / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
 }
 
 
@@ -4147,7 +4147,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			InvalidatePattern(true);
 		}
 		break;
-	case VIEWMSG_DOSCROLL: 
+	case VIEWMSG_DOSCROLL:
 		CModScrollView::OnMouseWheel(0, lParam, CPoint(0, 0));
 		break;
 
@@ -4200,8 +4200,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPatternRecord:				OnPatternRecord(); return wParam;
 		case kcCursorCopy:					OnCursorCopy(); return wParam;
 		case kcCursorPaste:					OnCursorPaste(); return wParam;
-		case kcChannelMute:					OnMuteChannel(true); return wParam;
-		case kcChannelSolo:					OnSoloChannel(true); return wParam;
+		case kcChannelMute:					OnMuteChannel(GetCurrentChannel()); return wParam;
+		case kcChannelSolo:					OnSoloChannel(GetCurrentChannel()); return wParam;
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: TogglePendingMute(GetCurrentChannel()); return wParam;
 		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
@@ -5266,7 +5266,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 			{
 				if(editPos.row + m_nSpacing < sndFile.Patterns[editPos.pattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 				{
-					SetCurrentRow(editPos.row + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ? true: false);
+					SetCurrentRow(editPos.row + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) != 0);
 					m_bLastNoteEntryBlocked = false;
 				} else
 				{
