@@ -366,9 +366,9 @@ protected:
 	afx_msg void OnEditPasteFlood() { ExecutePaste(PatternClipboard::pmPasteFlood); };
 	afx_msg void OnEditPushForwardPaste() { ExecutePaste(PatternClipboard::pmPushForward); };
 
-	afx_msg void OnClearSelection(bool ITStyle = false, RowMask sb = RowMask()); //rewbs.customKeys
-	afx_msg void OnGrowSelection();   //rewbs.customKeys
-	afx_msg void OnShrinkSelection(); //rewbs.customKeys
+	afx_msg void OnClearSelection(bool ITStyle = false, RowMask sb = RowMask());
+	afx_msg void OnGrowSelection();
+	afx_msg void OnShrinkSelection();
 	afx_msg void OnEditSelectAll();
 	afx_msg void OnEditSelectColumn();
 	afx_msg void OnSelectCurrentColumn();
@@ -378,13 +378,13 @@ protected:
 	afx_msg void OnEditUndo();
 	afx_msg void OnEditRedo();
 	afx_msg void OnChannelReset();
-	afx_msg void OnMuteFromClick(); //rewbs.customKeys
-	afx_msg void OnSoloFromClick(); //rewbs.customKeys
-	afx_msg void OnTogglePendingMuteFromClick(); //rewbs.customKeys
+	afx_msg void OnMuteFromClick();
+	afx_msg void OnSoloFromClick();
+	afx_msg void OnTogglePendingMuteFromClick();
 	afx_msg void OnPendingSoloChnFromClick();
 	afx_msg void OnPendingUnmuteAllChnFromClick();
-	afx_msg void OnSoloChannel(bool current); //rewbs.customKeys
-	afx_msg void OnMuteChannel(bool current); //rewbs.customKeys
+	afx_msg void OnSoloChannel(CHANNELINDEX chn);
+	afx_msg void OnMuteChannel(CHANNELINDEX chn);
 	afx_msg void OnUnmuteAll();
 	afx_msg void OnRecordSelect();
 	afx_msg void OnSplitRecordSelect();
