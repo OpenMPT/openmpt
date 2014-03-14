@@ -41,6 +41,7 @@ public:
 	void SetLearnMacro(int inMacro);
 	int GetLearnMacro();
 
+	void SetPreset(int32 preset);
 	void UpdatePresetField();
 	bool CreateInstrument();
 
