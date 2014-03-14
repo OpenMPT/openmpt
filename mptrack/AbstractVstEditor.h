@@ -19,16 +19,21 @@ class CVstPlugin;
 
 class CAbstractVstEditor: public CDialog
 {
-
 protected:
-	//{{AFX_VIRTUAL(CNoteMapWnd)
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	//}}AFX_VIRTUAL
-
+	CMenu m_Menu;
+	CMenu m_PresetMenu;
+	std::vector<CMenu *> m_pPresetMenuGroup;
+	CMenu m_InputMenu;
+	CMenu m_OutputMenu;
+	CMenu m_MacroMenu;
+	CMenu m_OptionsMenu;
+	static UINT clipboardFormat;
+	int32 currentPresetMenu;
 
 public:
 	CVstPlugin &m_VstPlugin;
 	int m_nCurProg;
+
 	CAbstractVstEditor(CVstPlugin &plugin);
 	virtual ~CAbstractVstEditor();
 	void SetupMenu(bool force = false);
@@ -72,18 +77,10 @@ public:
 
 	DECLARE_MESSAGE_MAP()
 
-private:
-	CMenu m_Menu;
-	CMenu m_PresetMenu;
-	std::vector<CMenu *> m_pPresetMenuGroup;
-	CMenu m_InputMenu;
-	CMenu m_OutputMenu;
-	CMenu m_MacroMenu;
-	CMenu m_OptionsMenu;
-	static UINT clipboardFormat;
-
-	void FillPresetMenu();
+protected:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	void UpdatePresetMenu(bool force = false);
+	void GeneratePresetMenu(int32 offset, CMenu &parent);
 	void UpdateInputMenu();
 	void UpdateOutputMenu();
 	void UpdateMacroMenu();

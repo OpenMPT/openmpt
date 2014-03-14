@@ -65,8 +65,6 @@ const CHANNELINDEX MAX_CHANNELS			= 256;	//200 // Maximum number of mixing chann
 #define MAX_PATTERNNAME			32
 #define MAX_CHANNELNAME			20
 
-#define MAX_PLUGPRESETS		1000 //rewbs.plugPresets
-
 enum MODTYPE
 {
 	MOD_TYPE_NONE	= 0x00,

@@ -1110,7 +1110,7 @@
 #define ID_MODTREE_SAVEITEM             33917
 #define ID_PLUGIN_SETUP                 33918
 #define ID_PRESET_SET                   33920
-// From here: Command range [ID_PRESET_SET, ID_PRESET_SET + MAX_PLUGPRESETS]
+// From here: Command range [ID_PRESET_SET, ID_PRESET_SET + PRESETS_PER_GROUP]
 #define ID_PLUGSELECT                   35000
 // From here: Command range [ID_PLUGSELECT, ID_PLUGSELECT + MAX_MIXPLUGINS]
 #define ID_VSTMACRO_INFO                36002
