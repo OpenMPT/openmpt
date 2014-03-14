@@ -1205,25 +1205,24 @@ BOOL COptionsPlayer::OnInitDialog()
 
 	if (dwQuality & SNDDSP_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 #else
-	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_HIDE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
+	GetDlgItem(IDC_CHECK3)->EnableWindow(FALSE);
 #endif
 
 	// Effects
 #ifndef NO_DSP
 	if (dwQuality & SNDDSP_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
 #else
-	GetDlgItem(IDC_CHECK1)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_CHECK1)->EnableWindow(FALSE);
 #endif
 #ifndef NO_AGC
 	if (dwQuality & SNDDSP_AGC) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
 #else
-	GetDlgItem(IDC_CHECK2)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_CHECK2)->EnableWindow(FALSE);
 #endif
 #ifndef NO_DSP
 	if (dwQuality & SNDDSP_SURROUND) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
 #else
-	GetDlgItem(IDC_CHECK4)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_CHECK4)->EnableWindow(FALSE);
 #endif
 
 #ifndef NO_DSP
@@ -1233,8 +1232,8 @@ BOOL COptionsPlayer::OnInitDialog()
 	m_SbXBassRange.SetRange(0,4);
 	m_SbXBassRange.SetPos(4 - (TrackerSettings::Instance().m_DSPSettings.m_nXBassRange - 1) / 5);
 #else
-	m_SbXBassDepth.ShowWindow(SW_HIDE);
-	m_SbXBassRange.ShowWindow(SW_HIDE);
+	m_SbXBassDepth.EnableWindow(FALSE);
+	m_SbXBassRange.EnableWindow(FALSE);
 #endif
 
 #ifndef NO_REVERB
@@ -1255,7 +1254,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	m_CbnReverbPreset.SetCurSel(nSel);
 	if(!(GetProcSupport() & PROCSUPPORT_MMX))
 	{
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK6), FALSE);
+		GetDlgItem(IDC_CHECK6)->EnableWindow(FALSE);
 		m_SbReverbDepth.EnableWindow(FALSE);
 		m_CbnReverbPreset.EnableWindow(FALSE);
 	} else
@@ -1263,9 +1262,9 @@ BOOL COptionsPlayer::OnInitDialog()
 		if (dwQuality & SNDDSP_REVERB) CheckDlgButton(IDC_CHECK6, MF_CHECKED);
 	}
 #else
-	GetDlgItem(IDC_CHECK6)->ShowWindow(SW_HIDE);
-	m_SbReverbDepth.ShowWindow(SW_HIDE);
-	m_CbnReverbPreset.ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_CHECK6)->EnableWindow(FALSE);
+	m_SbReverbDepth.EnableWindow(FALSE);
+	m_CbnReverbPreset.EnableWindow(FALSE);
 #endif
 
 #ifndef NO_DSP
@@ -1280,8 +1279,8 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_SbSurroundDelay.SetPos((TrackerSettings::Instance().m_DSPSettings.m_nProLogicDelay-5)/5);
 	}
 #else
-	m_SbSurroundDepth.ShowWindow(SW_HIDE);
-	m_SbSurroundDelay.ShowWindow(SW_HIDE);
+	m_SbSurroundDepth.EnableWindow(FALSE);
+	m_SbSurroundDelay.EnableWindow(FALSE);
 #endif
 
 	return TRUE;
