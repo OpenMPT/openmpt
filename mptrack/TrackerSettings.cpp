@@ -164,7 +164,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
 	, m_SoundSettingsOpenDeviceAtStartup(conf, "Sound Settings", "OpenDeviceAtStartup", false)
-	, m_SoundSettingsKeepDeviceOpen(conf, "Sound Settings", "KeepDeviceOpen", false)
+	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDeviceStopModeClosed)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
 	, m_SoundDeviceIdentifier(conf, "Sound Settings", "Device", std::wstring())
 	, MixerMaxChannels(conf, "Sound Settings", "MixChannels", MixerSettings().m_nMaxMixChannels)
@@ -376,6 +376,16 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// Sound Settings
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,30))
+	{
+		if(conf.Read<bool>("Sound Settings", "KeepDeviceOpen", false))
+		{
+			m_SoundSettingsStopMode = SoundDeviceStopModePlaying;
+		} else
+		{
+			m_SoundSettingsStopMode = SoundDeviceStopModeStopped;
+		}
+	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
 	{
 		std::vector<uint32> sampleRates = m_SoundSampleRates;

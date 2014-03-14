@@ -468,7 +468,7 @@ public:
 	void IdleHandlerSounddevice();
 
 	BOOL ResetSoundCard();
-	BOOL SetupSoundCard(const SoundDeviceSettings &deviceSettings, SoundDeviceID deviceID, bool forceReset = false);
+	BOOL SetupSoundCard(SoundDeviceSettings deviceSettings, SoundDeviceID deviceID, SoundDeviceStopMode stoppedMode, bool forceReset = false);
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer();
 

@@ -25,6 +25,8 @@ protected:
 	CEdit m_EditStatistics;
 	CButton m_BtnDriverPanel;
 
+	CComboBox m_CbnStoppedMode;
+
 	CStatic m_StaticChannelMapping[NUM_CHANNELCOMBOBOXES];
 	CComboBox m_CbnChannelMapping[NUM_CHANNELCOMBOBOXES];
 
@@ -41,6 +43,7 @@ public:
 private:
 	void UpdateEverything();
 	void UpdateDevice();
+	void UpdateGeneral();
 	void UpdateLatency();
 	void UpdateUpdateInterval();
 	void UpdateSampleRates();

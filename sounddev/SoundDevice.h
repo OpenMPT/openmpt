@@ -232,6 +232,14 @@ public:
 };
 
 
+enum SoundDeviceStopMode
+{
+	SoundDeviceStopModeClosed  = 0,
+	SoundDeviceStopModeStopped = 1,
+	SoundDeviceStopModePlaying = 2,
+};
+
+
 struct SoundDeviceSettings
 {
 	HWND hWnd;
@@ -458,6 +466,7 @@ public:
 	std::wstring GetDeviceInternalID() const { return m_InternalID; }
 
 	virtual SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
+	virtual bool CanStopMode() const { return false; }
 
 	bool Open(const SoundDeviceSettings &settings);
 	bool Close();
