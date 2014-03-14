@@ -1215,7 +1215,7 @@ void CMainFrame::StopPlayback()
 		m_NotifyTimer = 0;
 	}
 	ResetNotificationBuffer();
-	if(!TrackerSettings::Instance().m_SoundSettingsKeepDeviceOpen)
+	if(!gpSoundDevice->CanStopMode() || TrackerSettings::Instance().m_SoundSettingsStopMode == SoundDeviceStopModeClosed)
 	{
 		audioCloseDevice();
 	}
@@ -1656,14 +1656,18 @@ void CMainFrame::IdleHandlerSounddevice()
 BOOL CMainFrame::ResetSoundCard()
 //-------------------------------
 {
-	return CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceID()), TrackerSettings::Instance().GetSoundDeviceID(), true);
+	return CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceID()), TrackerSettings::Instance().GetSoundDeviceID(), TrackerSettings::Instance().m_SoundSettingsStopMode, true);
 }
 
 
-BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, SoundDeviceID deviceID, bool forceReset)
-//-----------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::SetupSoundCard(SoundDeviceSettings deviceSettings, SoundDeviceID deviceID, SoundDeviceStopMode stoppedMode, bool forceReset)
+//-------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(forceReset || (TrackerSettings::Instance().GetSoundDeviceID() != deviceID) || (TrackerSettings::Instance().GetSoundDeviceSettings(deviceID) != deviceSettings))
+	if(forceReset
+		|| (TrackerSettings::Instance().GetSoundDeviceID() != deviceID)
+		|| (TrackerSettings::Instance().GetSoundDeviceSettings(deviceID) != deviceSettings)
+		|| (TrackerSettings::Instance().m_SoundSettingsStopMode != stoppedMode)
+		)
 	{
 		CModDoc *pActiveMod = nullptr;
 		if(IsPlaying())
@@ -1674,6 +1678,19 @@ BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, Sound
 		if(gpSoundDevice)
 		{
 			gpSoundDevice->Close();
+		}
+		TrackerSettings::Instance().m_SoundSettingsStopMode = stoppedMode;
+		switch(stoppedMode)
+		{
+			case SoundDeviceStopModeClosed:
+				deviceSettings.KeepDeviceRunning = true;
+				break;
+			case SoundDeviceStopModeStopped:
+				deviceSettings.KeepDeviceRunning = false;
+				break;
+			case SoundDeviceStopModePlaying:
+				deviceSettings.KeepDeviceRunning = true;
+				break;
 		}
 		TrackerSettings::Instance().SetSoundDeviceID(deviceID);
 		TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);

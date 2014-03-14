@@ -61,9 +61,7 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_WM_VSCROLL()
 	ON_COMMAND(IDC_CHECK4,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK5,	OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK6,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK7,	OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK8,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK9,	OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnDeviceChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2, OnSettingsChanged)
@@ -75,6 +73,7 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO10, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO2, OnSettingsChanged)
 	ON_CBN_EDITCHANGE(IDC_COMBO_UPDATEINTERVAL, OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO11, OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,	OnSoundCardRescan)
 	ON_COMMAND(IDC_BUTTON2,	OnSoundCardDriverPanel)
 	ON_CBN_SELCHANGE(IDC_COMBO_CHANNEL_FRONTLEFT, OnChannel1Changed)
@@ -106,6 +105,7 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO10,		m_CbnDither);
 	DDX_Control(pDX, IDC_BUTTON2,		m_BtnDriverPanel);
 	DDX_Control(pDX, IDC_COMBO6,		m_CbnSampleFormat);
+	DDX_Control(pDX, IDC_COMBO11,		m_CbnStoppedMode);
 	DDX_Control(pDX, IDC_STATIC_CHANNEL_FRONTLEFT , m_StaticChannelMapping[0]);
 	DDX_Control(pDX, IDC_STATIC_CHANNEL_FRONTRIGHT, m_StaticChannelMapping[1]);
 	DDX_Control(pDX, IDC_STATIC_CHANNEL_REARLEFT  , m_StaticChannelMapping[2]);
@@ -217,15 +217,36 @@ void COptionsSoundcard::UpdateUpdateInterval()
 }
 
 
-void COptionsSoundcard::UpdateEverything()
-//----------------------------------------
+void COptionsSoundcard::UpdateGeneral()
+//-------------------------------------
 {
 	// General
 	{
-		CheckDlgButton(IDC_CHECK6, TrackerSettings::Instance().m_SoundSettingsKeepDeviceOpen ? BST_CHECKED : BST_UNCHECKED);
+		if(m_CurrentDeviceCaps.CanKeepDeviceRunning)
+		{
+			m_CbnStoppedMode.EnableWindow(TRUE);
+			m_CbnStoppedMode.ResetContent();
+			m_CbnStoppedMode.AddString("Close driver");
+			m_CbnStoppedMode.AddString("Pause driver");
+			m_CbnStoppedMode.AddString("Play silence");
+			m_CbnStoppedMode.SetCurSel(TrackerSettings::Instance().m_SoundSettingsStopMode);
+		} else
+		{
+			m_CbnStoppedMode.EnableWindow(FALSE);
+			m_CbnStoppedMode.ResetContent();
+			m_CbnStoppedMode.AddString("Close driver");
+			m_CbnStoppedMode.AddString("Close driver");
+			m_CbnStoppedMode.AddString("Close driver");
+			m_CbnStoppedMode.SetCurSel(TrackerSettings::Instance().m_SoundSettingsStopMode);
+		}
 		CheckDlgButton(IDC_CHECK7, TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup ? BST_CHECKED : BST_UNCHECKED);
 	}
+}
 
+
+void COptionsSoundcard::UpdateEverything()
+//----------------------------------------
+{
 	// Sound Device
 	{
 		m_CbnDevice.ResetContent();
@@ -311,6 +332,7 @@ void COptionsSoundcard::UpdateEverything()
 void COptionsSoundcard::UpdateDevice()
 //------------------------------------
 {
+	UpdateGeneral();
 	UpdateControls();
 	UpdateLatency();
 	UpdateUpdateInterval();
@@ -571,14 +593,12 @@ void COptionsSoundcard::UpdateControls()
 	m_BtnDriverPanel.EnableWindow(m_CurrentDeviceCaps.CanDriverPanel ? TRUE : FALSE);
 	GetDlgItem(IDC_CHECK4)->EnableWindow(m_CurrentDeviceCaps.CanExclusiveMode ? TRUE : FALSE);
 	GetDlgItem(IDC_CHECK5)->EnableWindow(m_CurrentDeviceCaps.CanBoostThreadPriority ? TRUE : FALSE);
-	GetDlgItem(IDC_CHECK8)->EnableWindow(m_CurrentDeviceCaps.CanKeepDeviceRunning ? TRUE : FALSE);
 	GetDlgItem(IDC_CHECK9)->EnableWindow(m_CurrentDeviceCaps.CanUseHardwareTiming ? TRUE : FALSE);
 	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
 	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
 	GetDlgItem(IDC_CHECK4)->SetWindowText(mpt::ToCString(m_CurrentDeviceCaps.ExclusiveModeDescription));
 	CheckDlgButton(IDC_CHECK4, m_CurrentDeviceCaps.CanExclusiveMode && m_Settings.ExclusiveMode ? MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK5, m_CurrentDeviceCaps.CanBoostThreadPriority && m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK8, m_CurrentDeviceCaps.CanKeepDeviceRunning && m_Settings.KeepDeviceRunning ? MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK9, m_CurrentDeviceCaps.CanUseHardwareTiming && m_Settings.UseHardwareTiming ? MF_CHECKED : MF_UNCHECKED);
 }
 
@@ -596,12 +616,10 @@ void COptionsSoundcard::OnOK()
 {
 	// General
 	{
-		TrackerSettings::Instance().m_SoundSettingsKeepDeviceOpen = IsDlgButtonChecked(IDC_CHECK6) ? true : false;
 		TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup = IsDlgButtonChecked(IDC_CHECK7) ? true : false;
 	}
 	m_Settings.ExclusiveMode = IsDlgButtonChecked(IDC_CHECK4) ? true : false;
 	m_Settings.BoostThreadPriority = IsDlgButtonChecked(IDC_CHECK5) ? true : false;
-	m_Settings.KeepDeviceRunning = IsDlgButtonChecked(IDC_CHECK8) ? true : false;
 	m_Settings.UseHardwareTiming = IsDlgButtonChecked(IDC_CHECK9) ? true : false;
 	// Mixing Freq
 	{
@@ -664,7 +682,7 @@ void COptionsSoundcard::OnOK()
 			m_Settings.ChannelMapping = SoundChannelMapping();
 		}
 	}
-	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.id);
+	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.id, (SoundDeviceStopMode)m_CbnStoppedMode.GetCurSel());
 	SetDevice(m_CurrentDeviceInfo.id, true); // Poll changed ASIO sample format and channel names
 	UpdateDevice();
 	UpdateStatistics();

@@ -303,6 +303,15 @@ template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue 
 		return dfFLAC;
 }
 
+template<> inline SettingValue ToSettingValue(const SoundDeviceStopMode &val)
+{
+	return SettingValue(static_cast<int32>(val));
+}
+template<> inline SoundDeviceStopMode FromSettingValue(const SettingValue &val)
+{
+	return static_cast<SoundDeviceStopMode>(static_cast<int32>(val));
+}
+
 
 //===================
 class TrackerSettings
@@ -357,7 +366,7 @@ public:
 	Setting<std::vector<uint32> > m_SoundSampleRates;
 	Setting<bool> m_MorePortaudio;
 	Setting<bool> m_SoundSettingsOpenDeviceAtStartup;
-	Setting<bool> m_SoundSettingsKeepDeviceOpen;
+	Setting<SoundDeviceStopMode> m_SoundSettingsStopMode;
 
 	bool m_SoundDeviceSettingsUseOldDefaults;
 	SoundDeviceID m_SoundDeviceID_DEPRECATED;

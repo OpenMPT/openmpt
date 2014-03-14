@@ -198,6 +198,7 @@
 #define IDC_COMBO6                      1206
 #define IDC_COMBO9                      1207
 #define IDC_COMBO10                     1208
+#define IDC_COMBO11                     1209
 #define IDC_NOTEMAP                     1213
 #define IDC_TEXT1                       1301
 #define IDC_TEXT2                       1302
