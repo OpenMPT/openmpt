@@ -255,10 +255,44 @@ void CAbstractVstEditor::UpdatePresetField()
 void CAbstractVstEditor::OnSetPreset(UINT nID)
 //--------------------------------------------
 {
-	int nIndex = nID - ID_PRESET_SET + currentPresetMenu * PRESETS_PER_GROUP;
-	if(nIndex >= 0)
+	SetPreset(nID - ID_PRESET_SET + currentPresetMenu * PRESETS_PER_GROUP);
+}
+
+
+void CAbstractVstEditor::OnSetPreviousVSTPreset()
+//-----------------------------------------------
+{
+	SetPreset(m_VstPlugin.GetCurrentProgram() - 1);
+}
+
+
+void CAbstractVstEditor::OnSetNextVSTPreset()
+//-------------------------------------------
+{
+	SetPreset(m_VstPlugin.GetCurrentProgram() + 1);
+}
+
+
+void CAbstractVstEditor::OnVSTPresetBackwardJump()
+//------------------------------------------------
+{
+	SetPreset(std::max(0, m_VstPlugin.GetCurrentProgram() - 10));
+}
+
+
+void CAbstractVstEditor::OnVSTPresetForwardJump()
+//-----------------------------------------------
+{
+	SetPreset(std::min(m_VstPlugin.GetCurrentProgram() + 10, m_VstPlugin.GetNumPrograms() - 1));
+}
+
+
+void CAbstractVstEditor::SetPreset(int32 preset)
+//----------------------------------------------
+{
+	if(preset >= 0 && preset < m_VstPlugin.GetNumPrograms())
 	{
-		m_VstPlugin.SetCurrentProgram(nIndex);
+		m_VstPlugin.SetCurrentProgram(preset);
 		UpdatePresetField();
 
 		if(m_VstPlugin.GetSoundFile().GetModSpecifications().supportsPlugins)
@@ -801,34 +835,6 @@ void CAbstractVstEditor::OnSetInputInstrument(UINT nID)
 //-----------------------------------------------------
 {
 	m_nInstrument = static_cast<INSTRUMENTINDEX>(nID - ID_SELECTINST);
-}
-
-
-void CAbstractVstEditor::OnSetPreviousVSTPreset()
-//-----------------------------------------------
-{
-	OnSetPreset(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() - 1);
-}
-
-
-void CAbstractVstEditor::OnSetNextVSTPreset()
-//-------------------------------------------
-{
-	OnSetPreset(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() + 1);
-}
-
-
-void CAbstractVstEditor::OnVSTPresetBackwardJump()
-//------------------------------------------------
-{
-	OnSetPreset(MAX(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() - 10, ID_PRESET_SET));
-}
-
-
-void CAbstractVstEditor::OnVSTPresetForwardJump()
-//-----------------------------------------------
-{
-	OnSetPreset(MIN(ID_PRESET_SET + m_VstPlugin.GetCurrentProgram() + 10, ID_PRESET_SET + m_VstPlugin.GetNumPrograms() - 1));
 }
 
 
