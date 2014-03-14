@@ -544,14 +544,17 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 		// Depending on the plugin and its number of presets, filling the sub menus can take quite a while (e.g. Synth1),
 		// so we fill the menus only on demand (when they  are opened), so that the editor GUI creation doesn't take forever.
 		m_pPresetMenuGroup.resize(numSubMenus);
-		for(int bank = 0, prog = 1; bank < numSubMenus; bank++, prog += PRESETS_PER_GROUP)
+		for(int bank = 0, prog = 0; bank < numSubMenus; bank++, prog += PRESETS_PER_GROUP)
 		{
 			m_pPresetMenuGroup[bank] = new CMenu();
 			m_pPresetMenuGroup[bank]->CreatePopupMenu();
 
 			CString label;
-			label.Format("Bank %d (%d-%d)", bank + 1, prog, std::min(prog + PRESETS_PER_GROUP - 1, numProgs));
-			m_PresetMenu.AppendMenu(MF_POPUP | (bank % 32 == 0 ? MF_MENUBREAK : 0), reinterpret_cast<UINT_PTR>(m_pPresetMenuGroup[bank]->m_hMenu), label);
+			label.Format(_T("Bank %d (%d-%d)"), bank + 1, prog + 1, std::min(prog + PRESETS_PER_GROUP, numProgs));
+			m_PresetMenu.AppendMenu(MF_POPUP
+				| (bank % 32 == 0 ? MF_MENUBREAK : 0)
+				| (curProg >= prog && curProg < prog + PRESETS_PER_GROUP ? MF_CHECKED : MF_UNCHECKED),
+				reinterpret_cast<UINT_PTR>(m_pPresetMenuGroup[bank]->m_hMenu), label);
 		}
 	} else
 	{
