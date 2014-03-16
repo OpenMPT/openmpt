@@ -15,6 +15,7 @@
 #include "../mptrack/Vstplug.h"
 #include "../common/mptFstream.h"
 #include "../common/thread.h"
+#include "../common/versionNumber.h"
 
 
 // Check whether we need to load a 32-bit or 64-bit wrapper.
@@ -43,6 +44,36 @@ BridgeWrapper::BinaryType BridgeWrapper::GetPluginBinaryType(const mpt::PathStri
 }
 
 
+uint64 BridgeWrapper::GetFileVersion(const WCHAR *exePath)
+{
+	DWORD verHandle = 0;
+	DWORD verSize = GetFileVersionInfoSizeW(exePath, &verHandle);
+	uint64 result = 0;
+	if(verSize != 0)
+	{
+		LPSTR verData = new (std::nothrow) char[verSize];
+		if(verData && GetFileVersionInfoW(exePath, verHandle, verSize, verData))
+		{
+			UINT size = 0;
+			BYTE *lpBuffer = nullptr;
+			if(VerQueryValue(verData, "\\", (void **)&lpBuffer, &size) && size != 0)
+			{
+				VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
+				if (verInfo->dwSignature == 0xfeef04bd)
+				{
+					result = (uint64(HIWORD(verInfo->dwFileVersionMS)) << 48)
+					       | (uint64(LOWORD(verInfo->dwFileVersionMS)) << 32)
+					       | (uint64(HIWORD(verInfo->dwFileVersionLS)) << 16)
+					       | uint64(LOWORD(verInfo->dwFileVersionLS));
+				}
+			}
+		}
+		delete[] verData;
+	}
+	return result;
+}
+
+
 bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 {
 	BinaryType binType;
@@ -55,6 +86,26 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 	plugId++;
 	const DWORD procId = GetCurrentProcessId();
 	const mpt::PathString exeName = theApp.GetAppDirPath() + (binType == bin64Bit ? MPT_PATHSTRING("PluginBridge64.exe") : MPT_PATHSTRING("PluginBridge32.exe"));
+
+	// First, check for validity of the bridge executable.
+	static uint64 mptVersion = 0;
+	if(!mptVersion)
+	{
+		WCHAR exePath[_MAX_PATH];
+		GetModuleFileNameW(0, exePath, CountOf(exePath));
+		mptVersion = GetFileVersion(exePath);
+	}
+	uint64 bridgeVersion = GetFileVersion(exeName.AsNative().c_str());
+	if(bridgeVersion == 0)
+	{
+		Reporting::Error("Could not open plugin bridge.");
+		return false;
+	} else if(bridgeVersion != mptVersion)
+	{
+		Reporting::Error("The plugin bridge version does not match your OpenMPT version.");
+		return false;
+	}
+
 	const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(procId) + L"-" + mpt::ToWString(plugId);
 
 	// Create our shared memory object.
@@ -103,6 +154,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 	sharedMem.effectPtr->setParameter = SetParameter;
 	sharedMem.effectPtr->getParameter = GetParameter;
 	sharedMem.effectPtr->process = Process;
+	memcpy(&(sharedMem.effectPtr->resvd2), "OMPT", 4);
 
 	if(WaitForSingleObject(sharedMem.sigToHost.ack, 5000) != WAIT_OBJECT_0)
 	{
@@ -196,7 +248,7 @@ void BridgeWrapper::MessageThread()
 			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
 			{
 				BridgeMessage &msg = sharedMem.queuePtr->toBridge[i];
-				if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::received)
+				if(InterlockedExchangeAdd(&msg.header.status, 0) != MsgHeader::empty)
 				{
 					InterlockedExchange(&msg.header.status, MsgHeader::empty);
 					sharedMem.ackSignals[msg.header.signalID].Send();
@@ -236,7 +288,7 @@ const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
 					if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::done)
 					{
 						InterlockedExchange(&msg.header.status, MsgHeader::empty);
-						if(msg.header.signalID != uint32_t(-1)) sharedMem.ackSignals[msg.header.signalID].Send();
+						if(msg.header.signalID != uint32_t(-1)) sharedMem.ackSignals[msg.header.signalID].Confirm();
 					}
 				}
 				if(done)
@@ -256,7 +308,7 @@ const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
 	{
 		// Wait until the message thread notifies us.
 		Signal &ackHandle = sharedMem.ackSignals[addr->header.signalID];
-		const HANDLE objects[] = { ackHandle.ack, ackHandle.send };
+		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, sharedMem.otherProcess };
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
 	}
 
@@ -321,6 +373,12 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		ptr = &extraData[0];
 		break;
 
+	case audioMasterVendorSpecific:
+		if(msg->index != CCONST('O', 'M', 'P', 'T') || msg->value != kUpdateProcessingBuffer)
+		{
+			break;
+		}
+		MPT_FALLTHROUGH;
 	case audioMasterIOChanged:
 		// Set up new processing file
 		sharedMem.processMem.Open(reinterpret_cast<wchar_t *>(ptr));
@@ -367,6 +425,10 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
+	if(that == nullptr)
+	{
+		return 0;
+	}
 
 	std::vector<char> dispatchData(sizeof(DispatchMsg), 0);
 	int64_t ptrOut = 0;
@@ -415,8 +477,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		{
 			static uint32_t chunkId = 0;
 			const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-chunkdata-" + mpt::ToWString(chunkId++);
-			const char *str = reinterpret_cast<const char *>(mapName.c_str());
-			dispatchData.insert(dispatchData.end(), str, str + mapName.length() * sizeof(wchar_t));
+			PushToVector(dispatchData, *mapName.c_str(), mapName.length() * sizeof(wchar_t));
 		}
 		break;
 
@@ -660,7 +721,10 @@ void VSTCALLBACK BridgeWrapper::ProcessDoubleReplacing(AEffect *effect, double *
 template<typename buf_t>
 void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 numInputs, VstInt32 numOutputs, buf_t **inputs, buf_t **outputs, VstInt32 sampleFrames)
 {
-	ASSERT(sharedMem.processMem.Good());
+	if(!sharedMem.processMem.Good())
+	{
+		return;
+	}
 	new (sharedMem.processMem.view) ProcessMsg(type, numInputs, numOutputs, sampleFrames);
 
 	buf_t *ptr = reinterpret_cast<buf_t *>(static_cast<ProcessMsg *>(sharedMem.processMem.view) + 1);

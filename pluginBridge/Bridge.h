@@ -24,6 +24,7 @@ protected:
 	ERect windowSize;
 	HWND window;
 	WNDCLASSEX windowClass;
+	uint32_t isProcessing;
 
 	// Static memory for host-to-plugin pointers
 	union
@@ -41,7 +42,7 @@ protected:
 	uint32_t mixBufSize;
 
 public:
-	PluginBridge(TCHAR *argv[]);
+	PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHost, Signal &sigToBridge, Signal &sigProcess);
 
 protected:
 	//bool CreateMapping(const TCHAR *memName);
@@ -52,6 +53,7 @@ protected:
 	void CreateProcessingFile(std::vector<char> &dispatchData);
 
 	void ParseNextMessage();
+	void NewInstance(NewInstanceMsg *msg);
 	void InitBridge(InitMsg *msg);
 	void CloseBridge();
 	void DispatchToPlugin(DispatchMsg *msg);
