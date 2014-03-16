@@ -13,13 +13,15 @@
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow, VstFileSelect
 // Properly handle sharedMem.otherProcess and ask threads to die properly in every situation (random crashes)
 // => sigThreadExit might already be an invalid handle the time it arrives in the thread
-// Fix deadlocks in some plugin GUIs
-// M1 GUI open => adding SPAN deadlocks
+// Fix deadlocks in some plugin GUIs (Synth1 sliders, triggering many notes through the M1 GUI, Electri-Q program change)
+// Ability to put all plugins (or all instances of the same plugin) in the same container. Necessary for plugins like SideKick v3.
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode
 // Re-enable DEP in OpenMPT?
-// Module files supposedly opened in plugin wrapper => Does DuplicateHandle word on the host side? Otherwise, named events
+// Module files supposedly opened in plugin wrapper => Does DuplicateHandle word on the host side? Otherwise, named events (can't repro anymore)
+// Remove native jBridge support
+// Clean up code :)
 
 #define _CRT_SECURE_NO_WARNINGS
 #define NOMINMAX
@@ -31,8 +33,8 @@
 #include <tchar.h>
 #include <cstdint>
 #include <algorithm>
-#include <assert.h>
 
+//#include <assert.h>
 #include <intrin.h>
 #undef assert
 #define assert(x) while(!(x)) { __debugbreak(); break; }
@@ -47,6 +49,8 @@
 // It always points to the last intialized PluginBridge object. Right now there's just one, but we might
 // have to initialize more than one plugin in a container at some point to get plugins like SideKickv3 to work.
 PluginBridge *PluginBridge::latestInstance = nullptr;
+WNDCLASSEX windowClass;
+#define WINDOWCLASSNAME _T("OpenMPTPluginBridge")
 
 
 int _tmain(int argc, TCHAR *argv[])
@@ -56,6 +60,20 @@ int _tmain(int argc, TCHAR *argv[])
 		MessageBox(NULL, _T("This executable is part of OpenMPT. You do not need to run it by yourself."), _T("Plugin Bridge"), 0);
 		return -1;
 	}
+
+	windowClass.cbSize = sizeof(WNDCLASSEX);
+	windowClass.style = CS_HREDRAW | CS_VREDRAW;
+	windowClass.lpfnWndProc = DefWindowProc;
+	windowClass.cbClsExtra = 0;
+	windowClass.cbWndExtra = 0;
+	windowClass.hInstance = GetModuleHandle(NULL);
+	windowClass.hIcon = NULL;
+	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	windowClass.hbrBackground  = (HBRUSH)(COLOR_WINDOW + 1);
+	windowClass.lpszMenuName = NULL;
+	windowClass.lpszClassName = WINDOWCLASSNAME;
+	windowClass.hIconSm = NULL;
+	RegisterClassEx(&windowClass);
 
 	Signal sigToHost, sigToBridge, sigProcess;
 	sigToHost.Create(argv[2], argv[3]);
@@ -99,20 +117,6 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 	mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
 	sharedMem.msgThreadID = GetCurrentThreadId();
 
-	windowClass.cbSize = sizeof(WNDCLASSEX);
-	windowClass.style = CS_HREDRAW | CS_VREDRAW;
-	windowClass.lpfnWndProc = DefWindowProc;
-	windowClass.cbClsExtra = 0;
-	windowClass.cbWndExtra = 0;
-	windowClass.hInstance = GetModuleHandle(NULL);
-	windowClass.hIcon = NULL;
-	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	windowClass.hbrBackground  = (HBRUSH)(COLOR_WINDOW + 1);
-	windowClass.lpszMenuName = NULL;
-	windowClass.lpszClassName = _T("OpenMPTPluginBridge");
-	windowClass.hIconSm = NULL;
-	RegisterClassEx(&windowClass);
-
 	// Tell the parent process that we've initialized the shared memory and are ready to go.
 	sharedMem.sigToHost.Confirm();
 
@@ -130,9 +134,8 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
 			{
 				BridgeMessage &msg = sharedMem.queuePtr->toHost[i];
-				if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::done)
+				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
 				{
-					InterlockedExchange(&msg.header.status, MsgHeader::empty);
 					sharedMem.ackSignals[msg.header.signalID].Confirm();
 				}
 			}
@@ -151,12 +154,7 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 		}
 		if(window)
 		{
-			MSG msg;
-			while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
+			MessageHandler();
 		}
 	} while(result != WAIT_OBJECT_0 + 2);
 	CloseHandle(sharedMem.otherProcess);
@@ -196,9 +194,8 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 				for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
 				{
 					BridgeMessage &msg = sharedMem.queuePtr->toHost[i];
-					if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::done)
+					if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
 					{
-						InterlockedExchange(&msg.header.status, MsgHeader::empty);
 						if(msg.header.signalID != uint32_t(-1)) sharedMem.ackSignals[msg.header.signalID].Confirm();
 					}
 				}
@@ -209,15 +206,6 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 			} else if(result == WAIT_OBJECT_0 + 1)
 			{
 				ParseNextMessage();
-			}
-			if(window && false)
-			{
-				MSG msg;
-				while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				}
 			}
 		} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
 		if(result == WAIT_OBJECT_0 + 2)
@@ -276,9 +264,8 @@ void PluginBridge::ParseNextMessage()
 	for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
 	{
 		BridgeMessage *msg = sharedMem.queuePtr->toBridge + i;
-		if(InterlockedExchangeAdd(&msg->header.status, 0) == MsgHeader::sent)
+		if(InterlockedCompareExchange(&msg->header.status, MsgHeader::received, MsgHeader::sent) == MsgHeader::sent)
 		{
-			InterlockedExchange(&msg->header.status, MsgHeader::received);
 			switch(msg->header.type)
 			{
 			case MsgHeader::newInstance:
@@ -449,16 +436,21 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 			GetModuleFileName(library, str, CountOf(str));
 
 			ptr = window = CreateWindow(
-				_T("OpenMPTPluginBridge"),
+				WINDOWCLASSNAME,
 				str,
 				WS_VISIBLE | WS_POPUP,
 				CW_USEDEFAULT, CW_USEDEFAULT,
-				windowSize.right - windowSize.left, windowSize.bottom- windowSize.top,
-				/*reinterpret_cast<HWND>(msg->ptr)*/ NULL,
+				1, 1,
+				NULL,
 				NULL,
 				windowClass.hInstance,
 				NULL);
+
+			// Need to do this after creating. Otherwise, we'll freeze.
 			SetParent(window, reinterpret_cast<HWND>(msg->ptr));
+
+			// Periodically update the window, in case redrawing failed.
+			SetTimer(window, 0x1337, 1000, nullptr);
 		}
 		break;
 
@@ -574,6 +566,12 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 				assert(static_cast<size_t>(msg->ptr) >= sizeof(ERect));
 				memcpy(origPtr, rectPtr, std::min<size_t>(sizeof(ERect), static_cast<size_t>(msg->ptr)));
 				windowSize = *rectPtr;
+
+				// For plugins that don't know their size until after effEditOpen is done.
+				if(window)
+				{
+					SetWindowPos(window, NULL, 0, 0, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+				}
 			}
 		}
 		break;
@@ -944,4 +942,21 @@ VstIntPtr VSTCALLBACK PluginBridge::MasterCallback(AEffect *effect, VstInt32 opc
 {
 	PluginBridge *instance = (effect != nullptr && effect->resvd1 != 0) ? FromVstPtr<PluginBridge>(effect->resvd1) : PluginBridge::latestInstance;
 	return instance->DispatchToHost(opcode, index, value, ptr, opt);
+}
+
+
+// WinAPI message handler for plugin GUI
+void PluginBridge::MessageHandler()
+{
+	MSG msg;
+	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		if(msg.message == WM_TIMER && msg.wParam == 0x1337)
+		{
+			// Fix failed plugin window redrawing by periodically forcing a redraw
+			RedrawWindow(window, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
+		}
+		DispatchMessage(&msg);
+	}
 }
