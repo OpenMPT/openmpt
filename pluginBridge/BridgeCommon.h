@@ -461,7 +461,6 @@ public:
 		queuePtr = reinterpret_cast<MsgQueue *>(static_cast<AEffect64 *>(queueMem.view) + 1);
 	}
 
-
 	// Copy a message to shared memory and return relative position.
 	BridgeMessage *CopyToSharedMemory(const BridgeMessage &msg, BridgeMessage *queue, bool fromMsgThread)
 	{

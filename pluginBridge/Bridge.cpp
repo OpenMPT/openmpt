@@ -1,5 +1,5 @@
 // TODO
-// Host <-> bridge communication of memory size
+// Replace Local\\foo :)
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow, VstFileSelect
 // Properly handle sharedMem.otherProcess and ask threads to die properly in every situation (random crashes)
 // => sigThreadExit might already be an invalid handle the time it arrives in the thread
@@ -72,6 +72,20 @@ PluginBridge::PluginBridge(TCHAR *argv[]) : window(NULL)
 	mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
 	sharedMem.msgThreadID = GetCurrentThreadId();
 
+	windowClass.cbSize = sizeof(WNDCLASSEX);
+	windowClass.style = CS_HREDRAW | CS_VREDRAW;
+	windowClass.lpfnWndProc = DefWindowProc;
+	windowClass.cbClsExtra = 0;
+	windowClass.cbWndExtra = 0;
+	windowClass.hInstance = GetModuleHandle(NULL);
+	windowClass.hIcon = NULL;
+	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	windowClass.hbrBackground  = (HBRUSH)(COLOR_WINDOW + 1);
+	windowClass.lpszMenuName = NULL;
+	windowClass.lpszClassName = _T("OpenMPTPluginBridge");
+	windowClass.hIconSm = NULL;
+	RegisterClassEx(&windowClass);
+
 	// Tell the parent process that we've initialized the shared memory and are ready to go.
 	sharedMem.sigToHost.Confirm();
 
@@ -79,7 +93,7 @@ PluginBridge::PluginBridge(TCHAR *argv[]) : window(NULL)
 	DWORD result;
 	do
 	{
-		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, /*100*/INFINITE);
+		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, window ? 10 : INFINITE);
 		if(result == WAIT_OBJECT_0)
 		{
 			ParseNextMessage();
@@ -95,7 +109,7 @@ PluginBridge::PluginBridge(TCHAR *argv[]) : window(NULL)
 					sharedMem.ackSignals[msg.header.signalID].Confirm();
 				}
 			}
-		} else
+		} else if(result == WAIT_OBJECT_0 + 2)
 		{
 			// Something failed
 			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
@@ -106,11 +120,12 @@ PluginBridge::PluginBridge(TCHAR *argv[]) : window(NULL)
 		}
 		if(window)
 		{
-			//PeekMessage?
 			MSG msg;
-			GetMessage(&msg, window, 0, 0);
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
 		}
 	} while(result != WAIT_OBJECT_0 + 2);
 	CloseHandle(sharedMem.otherProcess);
@@ -142,7 +157,7 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 		const HANDLE objects[] = { sharedMem.sigToHost.ack, sharedMem.sigToBridge.send, sharedMem.otherProcess };
 		do
 		{
-			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, window ? 10 : INFINITE);
 			if(result == WAIT_OBJECT_0)
 			{
 				// Message got answered
@@ -163,6 +178,15 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 			} else if(result == WAIT_OBJECT_0 + 1)
 			{
 				ParseNextMessage();
+			}
+			if(window)
+			{
+				MSG msg;
+				while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+				{
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
 			}
 		} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
 		if(result == WAIT_OBJECT_0 + 2)
@@ -382,44 +406,17 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 	case effEditOpen:
 		// HWND in [ptr] - Note: Window handles are interoperable between 32-bit and 64-bit applications in Windows (http://msdn.microsoft.com/en-us/library/windows/desktop/aa384203%28v=vs.85%29.aspx)
-		std::cout << "open!" << std::endl;
-		Sleep(1000);
-		ptr = reinterpret_cast<void *>(msg->ptr);
-		if(0)
-		{
-			WNDCLASSEX wcex;
-
-			wcex.cbSize = sizeof(WNDCLASSEX);
-			wcex.style = CS_HREDRAW | CS_VREDRAW;
-			wcex.lpfnWndProc = DefWindowProc;
-			wcex.cbClsExtra = 0;
-			wcex.cbWndExtra = 0;
-			wcex.hInstance = GetModuleHandle(NULL);
-			wcex.hIcon = NULL;
-			wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-			wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW + 1);
-			wcex.lpszMenuName = NULL;
-			wcex.lpszClassName = _T("OpenMPTPluginBridge");
-			wcex.hIconSm = NULL;
-
-			if(!RegisterClassEx(&wcex))
-			{
-				msg->result = 0;
-				return;
-			}
-
-			ptr = window = CreateWindow(
-				_T("OpenMPTPluginBridge"),
-				_T("OpenMPT Plugin Bridge"),
-				WS_VISIBLE | WS_POPUP,
-				CW_USEDEFAULT, CW_USEDEFAULT,
-				windowSize.right - windowSize.left, windowSize.bottom- windowSize.top,
-				/*reinterpret_cast<HWND>(msg->ptr)*/ NULL,
-				NULL,
-				wcex.hInstance,
-				NULL);
-			//SetParent(window, reinterpret_cast<HWND>(msg->ptr));
-		}
+		ptr = window = CreateWindow(
+			_T("OpenMPTPluginBridge"),
+			_T("OpenMPT Plugin Bridge"),
+			WS_VISIBLE | WS_POPUP,
+			CW_USEDEFAULT, CW_USEDEFAULT,
+			windowSize.right - windowSize.left, windowSize.bottom- windowSize.top,
+			/*reinterpret_cast<HWND>(msg->ptr)*/ NULL,
+			NULL,
+			windowClass.hInstance,
+			NULL);
+		SetParent(window, reinterpret_cast<HWND>(msg->ptr));
 		break;
 
 	case effEditClose:

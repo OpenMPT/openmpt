@@ -33,12 +33,12 @@ BridgeWrapper::BinaryType BridgeWrapper::GetPluginBinaryType(const mpt::PathStri
 }
 
 
-BridgeWrapper::BridgeWrapper(const mpt::PathString &pluginPath)
+bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 {
 	BinaryType binType;
 	if((binType = GetPluginBinaryType(pluginPath)) == binUnknown)
 	{
-		return;
+		return false;
 	}
 
 	static uint32 plugId = 0;
@@ -51,7 +51,7 @@ BridgeWrapper::BridgeWrapper(const mpt::PathString &pluginPath)
 	if(!sharedMem.queueMem.Create(mapName.c_str(), sizeof(AEffect64) + sizeof(MsgQueue)))
 	{
 		Reporting::Error("Could not initialize plugin bridge memory.");
-		return;
+		return false;
 	}
 
 	sharedMem.otherPtrSize = binType / 8;
@@ -81,7 +81,7 @@ BridgeWrapper::BridgeWrapper(const mpt::PathString &pluginPath)
 	if(!CreateProcessW(exeName.AsNative().c_str(), cmdLine, NULL, NULL, TRUE, /*CREATE_NO_WINDOW */0, NULL, NULL, &info, &processInfo))
 	{
 		Reporting::Error("Failed to launch plugin bridge.");
-		return;
+		return false;
 	}
 
 	sharedMem.otherProcess = processInfo.hProcess;
@@ -97,7 +97,7 @@ BridgeWrapper::BridgeWrapper(const mpt::PathString &pluginPath)
 	if(WaitForSingleObject(sharedMem.sigToHost.ack, 5000) != WAIT_OBJECT_0)
 	{
 		Reporting::Error("Plugin bridge timed out.");
-		return;
+		return false;
 	}
 
 	mpt::thread_member<BridgeWrapper, &BridgeWrapper::MessageThread>(this);
@@ -116,10 +116,12 @@ BridgeWrapper::BridgeWrapper(const mpt::PathString &pluginPath)
 	{
 		if(sharedMem.effectPtr->flags & effFlagsCanReplacing) sharedMem.effectPtr->processReplacing = ProcessReplacing;
 		if(sharedMem.effectPtr->flags & effFlagsCanDoubleReplacing) sharedMem.effectPtr->processDoubleReplacing = ProcessDoubleReplacing;
-		return;
+		return true;
 	}
 
 	sharedMem.queueMem.Close();
+	delete this;
+	return false;
 	/*	{
 		sharedMem.messagePipe.WaitForClient();
 		//sharedMem.messagePipe.Write(&BridgeProtocolVersion, sizeof(BridgeProtocolVersion));
@@ -149,6 +151,7 @@ BridgeWrapper::~BridgeWrapper()
 	}
 
 	CloseHandle(sharedMem.otherProcess);
+	SetEvent(sharedMem.sigThreadExit);
 	SetEvent(sharedMem.sigThreadExit);
 }
 

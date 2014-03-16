@@ -13,6 +13,7 @@ protected:
 	HINSTANCE library;
 	ERect windowSize;
 	HWND window;
+	WNDCLASSEX windowClass;
 
 	// Static memory for host-to-plugin pointers
 	union
