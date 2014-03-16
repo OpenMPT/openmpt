@@ -27,21 +27,22 @@ protected:
 
 	// Pointers to sample data
 	std::vector<void *> samplePointers;
+	uint32_t mixBufSize;
 
 public:
 	PluginBridge(TCHAR *argv[]);
 
 protected:
-	bool CreateMapping(const TCHAR *memName);
+	//bool CreateMapping(const TCHAR *memName);
 	void CloseMapping();
-	const MsgHeader *SendToHost(const MsgHeader &msg, MsgHeader *sourceHeader = nullptr);
+	const BridgeMessage *SendToHost(const BridgeMessage &msg);
 
 	void UpdateEffectStruct();
+	void CreateProcessingFile(std::vector<char> &dispatchData);
 
-	void ParseNextMessage(MsgHeader *parentMessage = nullptr);
+	void ParseNextMessage();
 	void InitBridge(InitMsg *msg);
 	void CloseBridge();
-	void ReallocateBridge(ReallocMsg *msg);
 	void DispatchToPlugin(DispatchMsg *msg);
 	void SetParameter(ParameterMsg *msg);
 	void GetParameter(ParameterMsg *msg);
@@ -49,11 +50,12 @@ protected:
 	void ProcessReplacing();
 	void ProcessDoubleReplacing();
 	VstIntPtr DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	void SendErrorMessage(const wchar_t *str);
 
 	template<typename buf_t>
 	int32_t BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers));
 
-	static DWORD WINAPI RenderThread(LPVOID param);
+	void RenderThread();
 
 	static VstIntPtr VSTCALLBACK MasterCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 };
