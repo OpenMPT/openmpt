@@ -1,3 +1,13 @@
+/*
+ * AEffectWrapper.h
+ * ----------------
+ * Purpose: Helper functions and structs for translating the VST AEffect struct between bit boundaries.
+ * Notes  : (currently none)
+ * Authors: Johannes Schultz (OpenMPT Devs)
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
 
 #include <vector>

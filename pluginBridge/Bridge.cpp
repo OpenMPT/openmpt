@@ -1,8 +1,19 @@
+/*
+ * Bridge.cpp
+ * ----------
+ * Purpose: VST plugin bridge (plugin side)
+ * Notes  : (currently none)
+ * Authors: Johannes Schultz (OpenMPT Devs)
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 // TODO
 // Replace Local\\foo :)
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow, VstFileSelect
 // Properly handle sharedMem.otherProcess and ask threads to die properly in every situation (random crashes)
 // => sigThreadExit might already be an invalid handle the time it arrives in the thread
+// Fix deadlocks in some plugin GUIs
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode
@@ -115,7 +126,11 @@ PluginBridge::PluginBridge(TCHAR *argv[]) : window(NULL)
 			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
 			{
 				BridgeMessage &msg = sharedMem.queuePtr->toHost[i];
-				sharedMem.ackSignals[msg.header.signalID].Send();
+				if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::received)
+				{
+					InterlockedExchange(&msg.header.status, MsgHeader::empty);
+					sharedMem.ackSignals[msg.header.signalID].Send();
+				}
 			}
 		}
 		if(window)
@@ -160,7 +175,7 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, window ? 10 : INFINITE);
 			if(result == WAIT_OBJECT_0)
 			{
-				// Message got answered
+				// Some message got answered - is it our message?
 				const bool done = (InterlockedExchangeAdd(&addr->header.status, 0) == MsgHeader::done);
 				for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
 				{
@@ -406,17 +421,22 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 	case effEditOpen:
 		// HWND in [ptr] - Note: Window handles are interoperable between 32-bit and 64-bit applications in Windows (http://msdn.microsoft.com/en-us/library/windows/desktop/aa384203%28v=vs.85%29.aspx)
-		ptr = window = CreateWindow(
-			_T("OpenMPTPluginBridge"),
-			_T("OpenMPT Plugin Bridge"),
-			WS_VISIBLE | WS_POPUP,
-			CW_USEDEFAULT, CW_USEDEFAULT,
-			windowSize.right - windowSize.left, windowSize.bottom- windowSize.top,
-			/*reinterpret_cast<HWND>(msg->ptr)*/ NULL,
-			NULL,
-			windowClass.hInstance,
-			NULL);
-		SetParent(window, reinterpret_cast<HWND>(msg->ptr));
+		{
+			TCHAR str[_MAX_PATH];
+			GetModuleFileName(library, str, CountOf(str));
+
+			ptr = window = CreateWindow(
+				_T("OpenMPTPluginBridge"),
+				str,
+				WS_VISIBLE | WS_POPUP,
+				CW_USEDEFAULT, CW_USEDEFAULT,
+				windowSize.right - windowSize.left, windowSize.bottom- windowSize.top,
+				/*reinterpret_cast<HWND>(msg->ptr)*/ NULL,
+				NULL,
+				windowClass.hInstance,
+				NULL);
+			SetParent(window, reinterpret_cast<HWND>(msg->ptr));
+		}
 		break;
 
 	case effEditClose:

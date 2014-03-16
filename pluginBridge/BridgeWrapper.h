@@ -1,3 +1,13 @@
+/*
+ * BridgeWrapper.h
+ * ---------------
+ * Purpose: VST plugin bridge wrapper (host side)
+ * Notes  : (currently none)
+ * Authors: Johannes Schultz (OpenMPT Devs)
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
 
 #include "BridgeCommon.h"
