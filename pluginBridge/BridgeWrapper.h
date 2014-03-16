@@ -17,11 +17,11 @@ public:
 	};
 
 public:
-	BridgeWrapper(const mpt::PathString &pluginPath);
 	~BridgeWrapper();
 
 	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
 
+	bool Init(const mpt::PathString &pluginPath);
 	AEffect *GetEffect() { return sharedMem.queueMem.Good() ? sharedMem.effectPtr : nullptr; }
 
 protected:
