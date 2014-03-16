@@ -17,20 +17,20 @@ public:
 	};
 
 public:
-	BridgeWrapper(const char *pluginPath);
+	BridgeWrapper(const mpt::PathString &pluginPath);
 	~BridgeWrapper();
 
-	static BinaryType GetPluginBinaryType(const char *pluginPath);
+	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
 
-	AEffect *GetEffect() { return sharedMem.mapFile ? sharedMem.effectPtr : nullptr; }
+	AEffect *GetEffect() { return sharedMem.queueMem.Good() ? sharedMem.effectPtr : nullptr; }
 
 protected:
 
-	static DWORD WINAPI MessageThread(LPVOID param);
+	void MessageThread();
 
-	void ParseNextMessage(MsgHeader *parentMessage = nullptr);
+	void ParseNextMessage();
 	void DispatchToHost(DispatchMsg *msg);
-	const MsgHeader *SendToBridge(const MsgHeader &msg);
+	const BridgeMessage *SendToBridge(const BridgeMessage &msg);
 
 	static VstIntPtr VSTCALLBACK DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static void VSTCALLBACK SetParameter(AEffect *effect, VstInt32 index, float parameter);

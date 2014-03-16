@@ -3,14 +3,15 @@
 #include "misc_util.h"
 #include "../mptrack/Mptrack.h"
 #include "../mptrack/Vstplug.h"
-#include <fstream>
+#include "../common/mptFstream.h"
+#include "../common/thread.h"
 
 
 // Check whether we need to load a 32-bit or 64-bit wrapper.
-BridgeWrapper::BinaryType BridgeWrapper::GetPluginBinaryType(const char *pluginPath)
+BridgeWrapper::BinaryType BridgeWrapper::GetPluginBinaryType(const mpt::PathString &pluginPath)
 {
 	BinaryType type = binUnknown;
-	std::ifstream file(pluginPath, std::ios::in | std::ios::binary);
+	mpt::ifstream file(pluginPath, std::ios::in | std::ios::binary);
 	if(file.is_open())
 	{
 		IMAGE_DOS_HEADER dosHeader;
@@ -32,7 +33,7 @@ BridgeWrapper::BinaryType BridgeWrapper::GetPluginBinaryType(const char *pluginP
 }
 
 
-BridgeWrapper::BridgeWrapper(const char *pluginPath)
+BridgeWrapper::BridgeWrapper(const mpt::PathString &pluginPath)
 {
 	BinaryType binType;
 	if((binType = GetPluginBinaryType(pluginPath)) == binUnknown)
@@ -40,12 +41,19 @@ BridgeWrapper::BridgeWrapper(const char *pluginPath)
 		return;
 	}
 
-	static int32 plugId = 0;
+	static uint32 plugId = 0;
+	plugId++;
 	const DWORD procId = GetCurrentProcessId();
-	std::string exeName = std::string(theApp.GetAppDirPath()) + (binType == bin64Bit ? "PluginBridge64.exe" : "PluginBridge32.exe");
-	std::string mapName = "Local\\openmpt-" + Stringify(procId) + "-" + Stringify(plugId++);
+	const mpt::PathString exeName = theApp.GetAppDirPath() + (binType == bin64Bit ? MPT_PATHSTRING("PluginBridge64.exe") : MPT_PATHSTRING("PluginBridge32.exe"));
+	const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(procId) + L"-" + mpt::ToWString(plugId);
 
-	sharedMem.writeOffset = sizeof(MsgQueue) + 512 * 1024;
+	// Create our shared memory object.
+	if(!sharedMem.queueMem.Create(mapName.c_str(), sizeof(AEffect64) + sizeof(MsgQueue)))
+	{
+		Reporting::Error("Could not initialize plugin bridge memory.");
+		return;
+	}
+
 	sharedMem.otherPtrSize = binType / 8;
 
 	sharedMem.sigToHost.Create();
@@ -53,19 +61,69 @@ BridgeWrapper::BridgeWrapper(const char *pluginPath)
 	sharedMem.sigProcess.Create();
 	sharedMem.sigThreadExit = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	// Parameters: Name for shared memory object, parent process ID, signals
-	char cmdLine[64];
-	sprintf(cmdLine, "%s %d %d %d %d %d %d %d", mapName.c_str(), procId, sharedMem.sigToHost.send, sharedMem.sigToHost.ack, sharedMem.sigToBridge.send, sharedMem.sigToBridge.ack, sharedMem.sigProcess.send, sharedMem.sigProcess.ack);
+	//std::wstring pipeName = L"\\\\.\\pipe\\openmpt-" + mpt::ToWString(procId) + L"-" + mpt::ToWString(plugId);
+	//sharedMem.extraMemPipe.Create((pipeName).c_str());
 
-	STARTUPINFO info;
+	// Command-line must be a modfiable string...
+	wchar_t cmdLine[128];
+	//wcscpy(cmdLine, mapName.c_str());
+	//swprintf(cmdLine, CountOf(cmdLine), L"%s %s", pipeName.c_str(), mapName.c_str());
+	// Parameters: Name for shared memory object, parent process ID, signals
+	swprintf(cmdLine, CountOf(cmdLine), L"%s %d %d %d %d %d %d %d", mapName.c_str(), procId, sharedMem.sigToHost.send, sharedMem.sigToHost.ack, sharedMem.sigToBridge.send, sharedMem.sigToBridge.ack, sharedMem.sigProcess.send, sharedMem.sigProcess.ack);
+
+	STARTUPINFOW info;
 	MemsetZero(info);
 	info.cb = sizeof(info);
 	PROCESS_INFORMATION processInfo;
 	MemsetZero(processInfo);
 
-	bool success = false;
-	if(CreateProcess(exeName.c_str(), cmdLine, NULL, NULL, TRUE, /*CREATE_NO_WINDOW */0, NULL, NULL, &info, &processInfo))
+	// TODO un-share handles
+	if(!CreateProcessW(exeName.AsNative().c_str(), cmdLine, NULL, NULL, TRUE, /*CREATE_NO_WINDOW */0, NULL, NULL, &info, &processInfo))
 	{
+		Reporting::Error("Failed to launch plugin bridge.");
+		return;
+	}
+
+	sharedMem.otherProcess = processInfo.hProcess;
+
+	// Initialize bridge
+	sharedMem.SetupPointers();
+	sharedMem.effectPtr->object = this;
+	sharedMem.effectPtr->dispatcher = DispatchToPlugin;
+	sharedMem.effectPtr->setParameter = SetParameter;
+	sharedMem.effectPtr->getParameter = GetParameter;
+	sharedMem.effectPtr->process = Process;
+
+	if(WaitForSingleObject(sharedMem.sigToHost.ack, 5000) != WAIT_OBJECT_0)
+	{
+		Reporting::Error("Plugin bridge timed out.");
+		return;
+	}
+
+	mpt::thread_member<BridgeWrapper, &BridgeWrapper::MessageThread>(this);
+
+	BridgeMessage initMsg;
+	initMsg.Init(pluginPath.ToWide().c_str(), MIXBUFFERSIZE);
+	const BridgeMessage *initResult = SendToBridge(initMsg);
+
+	if(initResult == nullptr)
+	{
+		Reporting::Error("Could not initialize plugin bridge, it probably crashed.");
+	} else if(initResult->init.result != 1)
+	{
+		Reporting::Error(mpt::ToLocale(initResult->init.str).c_str());
+	} else
+	{
+		if(sharedMem.effectPtr->flags & effFlagsCanReplacing) sharedMem.effectPtr->processReplacing = ProcessReplacing;
+		if(sharedMem.effectPtr->flags & effFlagsCanDoubleReplacing) sharedMem.effectPtr->processDoubleReplacing = ProcessDoubleReplacing;
+		return;
+	}
+
+	sharedMem.queueMem.Close();
+	/*	{
+		sharedMem.messagePipe.WaitForClient();
+		//sharedMem.messagePipe.Write(&BridgeProtocolVersion, sizeof(BridgeProtocolVersion));
+
 		sharedMem.otherProcess = processInfo.hProcess;
 		const HANDLE objects[] = { sharedMem.sigToHost.ack, sharedMem.otherProcess };
 		DWORD result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, 10000);
@@ -77,64 +135,17 @@ BridgeWrapper::BridgeWrapper(const char *pluginPath)
 			// Process died
 		}
 		CloseHandle(processInfo.hThread);
-	}
-	if(success)
-	{
-		sharedMem.mapFile = OpenFileMapping(FILE_MAP_ALL_ACCESS, TRUE, mapName.c_str());
-		if(sharedMem.mapFile)
-		{
-			// TODO De-Dupe this code
-			sharedMem.sharedPtr = static_cast<char *>(MapViewOfFile(sharedMem.mapFile, FILE_MAP_ALL_ACCESS, 0, 0, sharedMem.queueSize + sharedMem.sampleBufSize));
-			sharedMem.effectPtr = reinterpret_cast<AEffect *>(sharedMem.sharedPtr);
-			sharedMem.sampleBufPtr = sharedMem.sharedPtr + sizeof(AEffect64);
-			sharedMem.queuePtr = sharedMem.sharedPtr + sharedMem.sampleBufSize;
-			sharedMem.sampleBufSize -= sizeof(AEffect64);
-
-			// Some opcodes might be dispatched before we get the chance to fill the struct out.
-			sharedMem.effectPtr->object = this;
-
-			// Initialize bridge
-			struct InitEffect : public InitMsg
-			{
-				AEffect effectCopy;
-
-				InitEffect(const wchar_t *pluginPath) : InitMsg(pluginPath) { }
-			};
-
-			const InitEffect *initEffect = static_cast<const InitEffect *>(SendToBridge(InitEffect(mpt::String::Decode(pluginPath, mpt::CharsetLocale).c_str())));
-
-			if(initEffect == nullptr)
-			{
-				Reporting::Error("Could not initialize plugin bridge, it probably crashed.");
-			} else if(initEffect->result != 1)
-			{
-				Reporting::Error(mpt::String::Encode(initEffect->str, mpt::CharsetLocale).c_str());
-			} else
-			{
-				ASSERT(initEffect->type == MsgHeader::init);
-				sharedMem.queueSize = initEffect->mapSize;
-
-				sharedMem.effectPtr->object = this;
-				sharedMem.effectPtr->dispatcher = DispatchToPlugin;
-				sharedMem.effectPtr->setParameter = SetParameter;
-				sharedMem.effectPtr->getParameter = GetParameter;
-				sharedMem.effectPtr->process = Process;
-				if(sharedMem.effectPtr->flags & effFlagsCanReplacing) sharedMem.effectPtr->processReplacing = ProcessReplacing;
-				if(sharedMem.effectPtr->flags & effFlagsCanDoubleReplacing) sharedMem.effectPtr->processDoubleReplacing = ProcessDoubleReplacing;
-
-				DWORD dummy;	// For Win9x
-				CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&MessageThread, (LPVOID)this, 0, &dummy);
-			}
-
-		}
-	}
+	}*/
 }
+
 
 BridgeWrapper::~BridgeWrapper()
 {
-	if(sharedMem.queuePtr != nullptr)
+	if(sharedMem.queueMem.Good())
 	{
-		SendToBridge(MsgHeader(MsgHeader::close, sizeof(MsgHeader)));
+		BridgeMessage close;
+		close.Close();
+		SendToBridge(close);
 	}
 
 	CloseHandle(sharedMem.otherProcess);
@@ -142,57 +153,127 @@ BridgeWrapper::~BridgeWrapper()
 }
 
 
-DWORD WINAPI BridgeWrapper::MessageThread(LPVOID param)
+void BridgeWrapper::MessageThread()
 {
-	BridgeWrapper *that = static_cast<BridgeWrapper *>(param);
+	sharedMem.msgThreadID = GetCurrentThreadId();
 
-	const HANDLE objects[] = { that->sharedMem.sigToHost.send, that->sharedMem.otherProcess, that->sharedMem.sigThreadExit };
+	const HANDLE objects[] = { sharedMem.sigToHost.send, sharedMem.sigToBridge.ack, sharedMem.otherProcess, sharedMem.sigThreadExit };
 	DWORD result = 0;
 	do
 	{
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
 		if(result == WAIT_OBJECT_0)
 		{
-			that->ParseNextMessage();
+			ParseNextMessage();
+		} else if(result == WAIT_OBJECT_0 + 1)
+		{
+			// Message got answered
+			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
+			{
+				BridgeMessage &msg = sharedMem.queuePtr->toBridge[i];
+				if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::done)
+				{
+					InterlockedExchange(&msg.header.status, MsgHeader::empty);
+					sharedMem.ackSignals[msg.header.signalID].Confirm();
+				}
+			}
+		} else if(result == WAIT_OBJECT_0 + 2)
+		{
+			// Something failed
+			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
+			{
+				BridgeMessage &msg = sharedMem.queuePtr->toBridge[i];
+				sharedMem.ackSignals[msg.header.signalID].Send();
+			}
 		}
-	} while(result != WAIT_OBJECT_0 + 1 && result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
+	} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_OBJECT_0 + 3 && result != WAIT_FAILED);
 	ASSERT(result != WAIT_FAILED);
-	CloseHandle(that->sharedMem.sigThreadExit);
-	return 0;
+	CloseHandle(sharedMem.sigThreadExit);
+}
+
+
+// Send an arbitrary message to the bridge.
+// Returns a pointer to the message, as processed by the bridge.
+const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
+{
+	const bool inMsgThread = GetCurrentThreadId() == sharedMem.msgThreadID;
+	BridgeMessage *addr = sharedMem.CopyToSharedMemory(msg, sharedMem.queuePtr->toBridge, inMsgThread);
+	sharedMem.sigToBridge.Send();
+
+	// Wait until we get the result from the bridge.
+	DWORD result;
+	if(inMsgThread)
+	{
+		// Since this is the message thread, we must handle messages directly.
+		const HANDLE objects[] = { sharedMem.sigToBridge.ack, sharedMem.sigToHost.send, sharedMem.otherProcess };
+		do
+		{
+			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+			if(result == WAIT_OBJECT_0)
+			{
+				// Message got answered
+				const bool done = (InterlockedExchangeAdd(&addr->header.status, 0) == MsgHeader::done);
+				for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
+				{
+					BridgeMessage &msg = sharedMem.queuePtr->toBridge[i];
+					if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::done)
+					{
+						InterlockedExchange(&msg.header.status, MsgHeader::empty);
+						if(msg.header.signalID != uint32_t(-1)) sharedMem.ackSignals[msg.header.signalID].Send();
+					}
+				}
+				if(done)
+				{
+					break;
+				}
+			} else if(result == WAIT_OBJECT_0 + 1)
+			{
+				ParseNextMessage();
+			}
+		} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
+		if(result == WAIT_OBJECT_0 + 2)
+		{
+			SetEvent(sharedMem.sigThreadExit);
+		}
+	} else
+	{
+		// Wait until the message thread notifies us.
+		Signal &ackHandle = sharedMem.ackSignals[addr->header.signalID];
+		const HANDLE objects[] = { ackHandle.ack, ackHandle.send };
+		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+	}
+
+	return (result == WAIT_OBJECT_0) ? addr : nullptr;
 }
 
 
 // Receive a message from the host and translate it.
-void BridgeWrapper::ParseNextMessage(MsgHeader *parentMessage)
+void BridgeWrapper::ParseNextMessage()
 {
-	MsgHeader *msg;
-	if(parentMessage == nullptr)
+	ASSERT(GetCurrentThreadId() == sharedMem.msgThreadID);
+	for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
 	{
-		// Default: Grab next message
-		MsgQueue *queue = static_cast<MsgQueue *>(sharedMem.queuePtr);
-		uint32_t index = InterlockedExchangeAdd(&(queue->toHost.readIndex), 1) % CountOf(queue->toHost.offset);
-		msg = reinterpret_cast<MsgHeader *>(static_cast<char *>(sharedMem.queuePtr) + queue->toHost.offset[index]);
-	} else
-	{
-		// Read interrupt message
-		msg = reinterpret_cast<MsgHeader *>(static_cast<char *>(sharedMem.queuePtr) + parentMessage->interruptOffset);
+		BridgeMessage *msg = sharedMem.queuePtr->toHost + i;
+		if(InterlockedExchangeAdd(&msg->header.status, 0) == MsgHeader::sent)
+		{
+			InterlockedExchange(&msg->header.status, MsgHeader::received);
+			switch(msg->header.type)
+			{
+			case MsgHeader::dispatch:
+				DispatchToHost(&msg->dispatch);
+				break;
+
+			case MsgHeader::errorMsg:
+				// TODO will deadlock as the main thread is in a waiting state
+				// To reproduce: setChunk with byte size = 0 for otiumfx basslane
+				Reporting::Error(msg->error.str, L"OpenMPT Plugin Bridge");
+				break;
+			}
+
+			InterlockedExchange(&msg->header.status, MsgHeader::done);
+			sharedMem.sigToHost.Confirm();
+		}
 	}
-
-	switch(msg->type)
-	{
-	case MsgHeader::dispatch:
-		DispatchToHost(static_cast<DispatchMsg *>(msg));
-		break;
-
-	case MsgHeader::errorMsg:
-		MessageBoxW(theApp.GetMainWnd()->m_hWnd, static_cast<ErrorMsg *>(msg)->str, L"OpenMPT Plugin Bridge", MB_ICONERROR);
-		break;
-	}
-
-	if(parentMessage == nullptr)
-		sharedMem.sigToHost.Confirm();
-	else
-		SetEvent(reinterpret_cast<HANDLE>(parentMessage->interruptSignal));	// TODO
 }
 
 
@@ -202,7 +283,18 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 	std::vector<char> extraData;
 	size_t extraDataSize = 0;
 
-	void *ptr = msg + 1;		// Content of ptr is usually stored right after the message header.
+	MappedMemory auxMem;
+
+	// Content of ptr is usually stored right after the message header, ptr field indicates size.
+	void *ptr = (msg->ptr != 0) ? (msg + 1) : nullptr;
+	if(msg->size > sizeof(BridgeMessage))
+	{
+		if(!auxMem.Open(L"Local\\foo2"))
+		{
+			return;
+		}
+		ptr = auxMem.view;
+	}
 
 	switch(msg->opcode)
 	{
@@ -210,6 +302,11 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		// VstEvents* in [ptr]
 		TranslateBridgeToVSTEvents(extraData, ptr);
 		ptr = &extraData[0];
+		break;
+
+	case audioMasterIOChanged:
+		// Set up new processing file
+		sharedMem.processMem.Open(reinterpret_cast<wchar_t *>(ptr));
 		break;
 
 		//case audioMasterOpenFileSelector:
@@ -232,6 +329,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		// VstTimeInfo* in [return value]
 		if(msg->result != 0)
 		{
+			ASSERT(static_cast<size_t>(msg->ptr) >= sizeof(VstTimeInfo));
 			memcpy(ptr, reinterpret_cast<void *>(msg->result), std::min(sizeof(VstTimeInfo), static_cast<size_t>(msg->ptr)));
 		}
 		break;
@@ -248,56 +346,6 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 	}
 }
 
-
-// Send an arbitrary message to the bridge.
-// Returns a pointer to the message, as processed by the bridge.
-const MsgHeader *BridgeWrapper::SendToBridge(const MsgHeader &msg)
-{
-	if(msg.size <= sharedMem.queueSize)
-	{
-		sharedMem.writeMutex.lock();
-		if(sharedMem.writeOffset + msg.size > sharedMem.queueSize)
-		{
-			sharedMem.writeOffset = sizeof(MsgQueue) + 512 * 1024;
-		}
-		MsgHeader *addr = reinterpret_cast<MsgHeader *>(static_cast<char *>(sharedMem.queuePtr) + sharedMem.writeOffset);
-		memcpy(addr, &msg, msg.size);
-
-		MsgQueue *queue = static_cast<MsgQueue *>(sharedMem.queuePtr);
-		queue->toBridge.offset[queue->toBridge.writeIndex++] = sharedMem.writeOffset;
-		if(queue->toBridge.writeIndex >= CountOf(queue->toBridge.offset))
-		{
-			queue->toBridge.writeIndex = 0;
-		}
-
-		//sharedMem.writeMutex.unlock();
-
-		sharedMem.sigToBridge.Send();
-
-		if(msg.type == MsgHeader::dispatch && static_cast<const DispatchMsg &>(msg).opcode == effEditOpen)
-		{sharedMem.writeMutex.unlock();
-		return addr;}
-
-		// Wait until we get the result from the bridge.
-		const HANDLE objects[] = { sharedMem.sigToBridge.ack, sharedMem.otherProcess, sharedMem.sigToHost.send };
-		DWORD result;
-		do
-		{
-			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
-			if(result == WAIT_OBJECT_0 + 2)
-			{
-				ParseNextMessage();
-			}
-		} while(result != WAIT_OBJECT_0 && result != WAIT_OBJECT_0 + 1);
-		if(result == WAIT_OBJECT_0 + 1)
-		{
-			SetEvent(sharedMem.sigThreadExit);
-		}
-		sharedMem.writeMutex.unlock();
-		return (result == WAIT_OBJECT_0) ? addr : nullptr;
-	}
-	return nullptr;
-}
 
 VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 {
@@ -347,6 +395,12 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	case effGetChunk:
 		// void** in [ptr] for chunk data address
+		{
+			static uint32_t chunkId = 0;
+			const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-chunkdata-" + mpt::ToWString(chunkId++);
+			const char *str = reinterpret_cast<const char *>(mapName.c_str());
+			dispatchData.insert(dispatchData.end(), str, str + mapName.length() * sizeof(wchar_t));
+		}
 		break;
 
 	case effSetChunk:
@@ -441,11 +495,27 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		dispatchData.resize(sizeof(DispatchMsg) + static_cast<size_t>(ptrOut), 0);
 	}
 
+	uint32_t extraSize = static_cast<uint32_t>(dispatchData.size() - sizeof(DispatchMsg));
+	MappedMemory auxMem;
+	if(dispatchData.size() > sizeof(BridgeMessage))
+	{
+		//that->sharedMem.extraMemPipe.Write(&dispatchData[sizeof(DispatchMsg)], extraSize);
+		//dispatchData.resize(sizeof(DispatchMsg));
+		if(auxMem.Create(L"Local\\foo", extraSize))
+		{
+			memcpy(auxMem.view, &dispatchData[sizeof(DispatchMsg)], extraSize);
+			dispatchData.resize(sizeof(DispatchMsg));
+		} else
+		{
+			return 0;
+		}
+	}
+	
 	const DispatchMsg *resultMsg;
 	{
-		DispatchMsg *msg = reinterpret_cast<DispatchMsg *>(&dispatchData[0]);
-		new (msg) DispatchMsg(opcode, index, value, ptrOut, opt, static_cast<int32_t>(dispatchData.size() - sizeof(DispatchMsg)));
-		resultMsg = static_cast<const DispatchMsg *>(that->SendToBridge(*msg));
+		BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
+		msg->Dispatch(opcode, index, value, ptrOut, opt, extraSize);
+		resultMsg = &(that->SendToBridge(*msg)->dispatch);
 	}
 
 	if(resultMsg == nullptr)
@@ -453,14 +523,14 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		return 0;
 	}
 
-	const char *extraData = reinterpret_cast<const char *>(resultMsg + 1);
+	const char *extraData = dispatchData.size() == sizeof(DispatchMsg) ? static_cast<const char *>(auxMem.view) : reinterpret_cast<const char *>(resultMsg + 1);
 	// Post-fix some opcodes
 	switch(opcode)
 	{
 	case effClose:
 		effect->object = nullptr;
 		delete that;
-		break;
+		return 0;
 
 	case effGetProgramName:
 	case effGetParamLabel:
@@ -485,14 +555,13 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	case effGetChunk:
 		// void** in [ptr] for chunk data address
 		{
-			// Now that we know the chunk size, allocate enough memory for it.
-			dispatchData.resize(sizeof(DispatchMsg) + static_cast<size_t>(resultMsg->result));
-			DispatchMsg *msg = reinterpret_cast<DispatchMsg *>(&dispatchData[0]);
-			new (msg) DispatchMsg(opcode, index, value, resultMsg->result, opt, static_cast<int32_t>(resultMsg->result));
-			resultMsg = static_cast<const DispatchMsg *>(that->SendToBridge(*msg));
-			if(resultMsg != nullptr)
+			const wchar_t *str = reinterpret_cast<const wchar_t *>(extraData);
+			if(that->sharedMem.getChunkMem.Open(str))
 			{
-				*static_cast<void **>(ptr) = const_cast<DispatchMsg *>(resultMsg + 1);
+				*static_cast<void **>(ptr) = that->sharedMem.getChunkMem.view;
+			} else
+			{
+				return 0;
 			}
 		}
 		break;
@@ -520,7 +589,9 @@ void VSTCALLBACK BridgeWrapper::SetParameter(AEffect *effect, VstInt32 index, fl
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(that)
 	{
-		that->SendToBridge(ParameterMsg(index, parameter));
+		BridgeMessage msg;
+		msg.SetParameter(index, parameter);
+		that->SendToBridge(msg);
 	}
 }
 
@@ -530,19 +601,52 @@ float VSTCALLBACK BridgeWrapper::GetParameter(AEffect *effect, VstInt32 index)
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(that)
 	{
-		const ParameterMsg *msg = static_cast<const ParameterMsg *>(that->SendToBridge(ParameterMsg(index)));
-		if(msg != nullptr) return msg->value;
+		BridgeMessage msg;
+		msg.GetParameter(index);
+		const ParameterMsg *resultMsg = &(that->SendToBridge(msg)->parameter);
+		if(resultMsg != nullptr) return resultMsg->value;
 	}
 	return 0.0f;
+}
+
+
+void VSTCALLBACK BridgeWrapper::Process(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames)
+{
+	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
+	if(sampleFrames != 0 && that != nullptr)
+	{
+		that->BuildProcessBuffer(ProcessMsg::process, effect->numInputs, effect->numOutputs, inputs, outputs, sampleFrames);
+	}
+}
+
+
+void VSTCALLBACK BridgeWrapper::ProcessReplacing(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames)
+{
+	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
+	if(sampleFrames != 0 && that != nullptr)
+	{
+		that->BuildProcessBuffer(ProcessMsg::processReplacing, effect->numInputs, effect->numOutputs, inputs, outputs, sampleFrames);
+	}
+}
+
+
+void VSTCALLBACK BridgeWrapper::ProcessDoubleReplacing(AEffect *effect, double **inputs, double **outputs, VstInt32 sampleFrames)
+{
+	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
+	if(sampleFrames != 0 && that != nullptr)
+	{
+		that->BuildProcessBuffer(ProcessMsg::processDoubleReplacing, effect->numInputs, effect->numOutputs, inputs, outputs, sampleFrames);
+	}
 }
 
 
 template<typename buf_t>
 void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 numInputs, VstInt32 numOutputs, buf_t **inputs, buf_t **outputs, VstInt32 sampleFrames)
 {
-	new (sharedMem.sampleBufPtr) ProcessMsg(type, numInputs, numOutputs, sampleFrames);
+	ASSERT(sharedMem.processMem.Good());
+	new (sharedMem.processMem.view) ProcessMsg(type, numInputs, numOutputs, sampleFrames);
 
-	buf_t *ptr = reinterpret_cast<buf_t *>(static_cast<ProcessMsg *>(sharedMem.sampleBufPtr) + 1);
+	buf_t *ptr = reinterpret_cast<buf_t *>(static_cast<ProcessMsg *>(sharedMem.processMem.view) + 1);
 	for(VstInt32 i = 0; i < numInputs; i++)
 	{
 		memcpy(ptr, inputs[i], sampleFrames * sizeof(buf_t));
@@ -560,38 +664,5 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 		//memcpy(outputs[i], ptr, sampleFrames * sizeof(buf_t));
 		outputs[i] = ptr;	// Exactly what you don't want plugins to do usually (bend your output pointers)... muahahaha!
 		ptr += sampleFrames;
-	}
-}
-
-
-void VSTCALLBACK BridgeWrapper::Process(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames)
-{
-	// TODO memory size must probably grow!
-	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
-	if(sampleFrames != 0 && that != nullptr)
-	{
-		that->BuildProcessBuffer(ProcessMsg::process, effect->numInputs, effect->numOutputs, inputs, outputs, sampleFrames);
-	}
-}
-
-
-void VSTCALLBACK BridgeWrapper::ProcessReplacing(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames)
-{
-	// TODO memory size must probably grow!
-	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
-	if(sampleFrames != 0 && that != nullptr)
-	{
-		that->BuildProcessBuffer(ProcessMsg::processReplacing, effect->numInputs, effect->numOutputs, inputs, outputs, sampleFrames);
-	}
-}
-
-
-void VSTCALLBACK BridgeWrapper::ProcessDoubleReplacing(AEffect *effect, double **inputs, double **outputs, VstInt32 sampleFrames)
-{
-	// TODO memory size must probably grow!
-	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
-	if(sampleFrames != 0 && that != nullptr)
-	{
-		that->BuildProcessBuffer(ProcessMsg::processDoubleReplacing, effect->numInputs, effect->numOutputs, inputs, outputs, sampleFrames);
 	}
 }
