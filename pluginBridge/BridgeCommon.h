@@ -1,3 +1,13 @@
+/*
+ * BridgeCommon.h
+ * --------------
+ * Purpose: Declarations of stuff that's common between the VST bridge and bridge wrapper.
+ * Notes  : (currently none)
+ * Authors: Johannes Schultz (OpenMPT Devs)
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #pragma once
 
 #if !defined(assert) && defined(ASSERT)
@@ -64,6 +74,7 @@ struct MsgHeader
 		getParameter,
 	};
 
+	// Message life-cycle
 	enum BridgeMessageStatus
 	{
 		empty = 0,

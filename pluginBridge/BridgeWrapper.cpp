@@ -1,3 +1,13 @@
+/*
+ * BridgeWrapper.cpp
+ * -----------------
+ * Purpose: VST plugin bridge wrapper (host side)
+ * Notes  : (currently none)
+ * Authors: Johannes Schultz (OpenMPT Devs)
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "BridgeWrapper.h"
 #include "misc_util.h"
@@ -186,7 +196,11 @@ void BridgeWrapper::MessageThread()
 			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
 			{
 				BridgeMessage &msg = sharedMem.queuePtr->toBridge[i];
-				sharedMem.ackSignals[msg.header.signalID].Send();
+				if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::received)
+				{
+					InterlockedExchange(&msg.header.status, MsgHeader::empty);
+					sharedMem.ackSignals[msg.header.signalID].Send();
+				}
 			}
 		}
 	} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_OBJECT_0 + 3 && result != WAIT_FAILED);
