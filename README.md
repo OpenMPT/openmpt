@@ -211,7 +211,7 @@ conventions. Using common sense is recommended.
      -  The pointer `*` is separated from both the type and the variable name.
      -  Use tabs for identation, spaces for formatting.
         Tabs should only appear at the very beginning of a line.
-        Do not assume any particular width of the TAB character. Is width is
+        Do not assume any particular width of the TAB character. If width is
         important for formatting reasons, use spaces.
      -  Use empty lines at will.
  -  API documentation is done with doxygen.
