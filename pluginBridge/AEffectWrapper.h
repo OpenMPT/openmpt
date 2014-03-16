@@ -97,6 +97,7 @@ struct AEffectProto
 			flags &= ~effFlagsCanDoubleReplacing;
 		}
 	}
+
 };
 
 typedef AEffectProto<int32_t> AEffect32;
@@ -104,6 +105,13 @@ typedef AEffectProto<int64_t> AEffect64;
 
 
 #pragma pack(pop)
+
+
+enum VendorSpecificOpCodes
+{
+	kUpdateEffectStruct = 0,
+	kUpdateProcessingBuffer,
+};
 
 
 // Translate a VSTEvents struct to bridge format (placed in data vector)

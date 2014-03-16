@@ -14,6 +14,127 @@
 #define assert ASSERT
 #endif
 
+// Internal data structures
+
+typedef int32_t winhandle_t;	// Cross-bridge handle type (WinAPI handles are 32-bit, even on 64-bit systems, so they can be passed between processes of different bitness)
+
+class Signal
+{
+public:
+	HANDLE send, ack;
+
+	Signal() : send(nullptr), ack(nullptr) { }
+	~Signal()
+	{
+		CloseHandle(send);
+		CloseHandle(ack);
+	}
+
+	// Create new signal
+	bool Create()
+	{
+		// TODO un-inherit
+		// We want to share our handles.
+		SECURITY_ATTRIBUTES secAttr;
+		secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+		secAttr.lpSecurityDescriptor = nullptr;
+		secAttr.bInheritHandle = TRUE;
+
+		send = CreateEvent(&secAttr, FALSE, FALSE, NULL);
+		ack = CreateEvent(&secAttr, FALSE, FALSE, NULL);
+		return send != nullptr && ack != nullptr;
+	}
+
+	// Create signal from existing handles
+	void Create(winhandle_t s, winhandle_t a)
+	{
+		send = reinterpret_cast<HANDLE>(s);
+		ack = reinterpret_cast<HANDLE>(a);
+	}
+
+	// Create signal from existing handles
+	void Create(const TCHAR *s, const TCHAR *a)
+	{
+		send = reinterpret_cast<HANDLE>(_ttoi(s));
+		ack = reinterpret_cast<HANDLE>(_ttoi(a));
+	}
+
+	// Create signal from other signal
+	void Create(const Signal &other)
+	{
+		send = other.send;
+		ack = other.ack;
+	}
+
+	void Send()
+	{
+		SetEvent(send);
+	}
+
+	void Confirm()
+	{
+		SetEvent(ack);
+	}
+};
+
+
+class MappedMemory
+{
+protected:
+	HANDLE mapFile;
+public:
+	void *view;
+
+	MappedMemory() : mapFile(nullptr), view(nullptr) { }
+	~MappedMemory() { Close(); }
+
+	// Create a shared memory object.
+	bool Create(const wchar_t *name, uint32_t size)
+	{
+		Close();
+
+		// TODO un-inherit
+		SECURITY_ATTRIBUTES secAttr;
+		secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+		secAttr.lpSecurityDescriptor = nullptr;
+		secAttr.bInheritHandle = TRUE;
+
+		mapFile = CreateFileMappingW(INVALID_HANDLE_VALUE, &secAttr, PAGE_READWRITE,
+			0, size, name);
+		view = MapViewOfFile(mapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+		return Good();
+	}
+
+	// Open an existing shared memory object.
+	bool Open(const wchar_t *name)
+	{
+		Close();
+
+		// TODO un-inherit
+		mapFile = OpenFileMappingW(FILE_MAP_ALL_ACCESS, TRUE, name);
+		view = MapViewOfFile(mapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+		return Good();
+	}
+
+	// Close this shared memory object.
+	void Close()
+	{
+		if(mapFile)
+		{
+			if(view)
+			{
+				UnmapViewOfFile(view);
+				view = nullptr;
+			}
+			CloseHandle(mapFile);
+			mapFile = nullptr;
+		}
+	}
+
+	bool Good() const { return view != nullptr; }
+};
+
+
 // Insert some object at the end of a char vector.
 template<typename T>
 static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize = sizeof(T))
@@ -26,12 +147,9 @@ static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize
 }
 
 #include "AEffectWrapper.h"
-#include "../common/mutex.h"
 //#include <map>
 
 // Bridge communication data
-
-typedef int32_t winhandle_t;	// Cross-bridge handle type (WinAPI handles are 32-bit, even on 64-bit systems, so they can be passed between processes of different bitness)
 
 #pragma pack(push, 8)
 
@@ -62,6 +180,7 @@ struct MsgHeader
 	enum BridgeMessageType
 	{
 		// Management messages, host to bridge
+		newInstance,
 		init,
 		close,
 		// Management messages, bridge to host
@@ -90,14 +209,17 @@ struct MsgHeader
 };
 
 
+// Host-to-bridge new instance message
+struct NewInstanceMsg : public MsgHeader
+{
+	wchar_t memName[64];	// Shared memory object name;
+	winhandle_t handles[6];	// Signal handles
+};
+
+
 // Host-to-bridge initialization message
 struct InitMsg : public MsgHeader
 {
-	enum ProtocolVersion
-	{
-		protocolVersion = 1,
-	};
-
 	int32_t result;
 	int32_t version;		// Protocol version used by host
 	int32_t hostPtrSize;	// Size of VstIntPtr in host
@@ -137,6 +259,7 @@ struct ErrorMsg : public MsgHeader
 union BridgeMessage
 {
 	MsgHeader header;
+	NewInstanceMsg newInstance;
 	InitMsg init;
 	DispatchMsg dispatch;
 	ParameterMsg parameter;
@@ -151,12 +274,23 @@ union BridgeMessage
 		header.signalID = 0;
 	}
 
+	void NewInstance(const wchar_t *memName, const Signal &sigToHost, const Signal &sigToBridge, const Signal &sigProcess)
+	{
+		wcsncpy(newInstance.memName, memName, CountOf(newInstance.memName) - 1);
+		newInstance.memName[CountOf(newInstance.memName) - 1] = 0;
+		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigToHost.send);
+		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigToHost.ack);
+		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigToBridge.send);
+		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigToBridge.ack);
+		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigProcess.send);
+		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigProcess.ack);
+	}
+
 	void Init(const wchar_t *pluginPath, uint32_t mixBufSize)
 	{
 		SetType(MsgHeader::init, sizeof(InitMsg));
 
 		init.result = 0;
-		init.version = InitMsg::protocolVersion;
 		init.hostPtrSize = sizeof(VstIntPtr);
 		init.mixBufSize = mixBufSize;
 		wcsncpy(init.str, pluginPath, CountOf(init.str) - 1);
@@ -224,214 +358,6 @@ struct MsgQueue
 
 #pragma pack(pop)
 
-// Internal data
-
-class Signal
-{
-public:
-	HANDLE send, ack;
-
-	Signal() : send(nullptr), ack(nullptr) { }
-	~Signal()
-	{
-		CloseHandle(send);
-		CloseHandle(ack);
-	}
-
-	// Create new signal
-	bool Create()
-	{
-		// TODO un-inherit
-		// We want to share our handles.
-		SECURITY_ATTRIBUTES secAttr;
-		secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-		secAttr.lpSecurityDescriptor = nullptr;
-		secAttr.bInheritHandle = TRUE;
-
-		send = CreateEvent(&secAttr, FALSE, FALSE, NULL);
-		ack = CreateEvent(&secAttr, FALSE, FALSE, NULL);
-		return send != nullptr && ack != nullptr;
-	}
-
-	// Create signal from existing handles
-	void Create(winhandle_t s, winhandle_t a)
-	{
-		send = reinterpret_cast<HANDLE>(s);
-		ack = reinterpret_cast<HANDLE>(a);
-	}
-
-	// Create signal from existing handles
-	void Create(const TCHAR *s, const TCHAR *a)
-	{
-		send = reinterpret_cast<HANDLE>(_ttoi(s));
-		ack = reinterpret_cast<HANDLE>(_ttoi(a));
-	}
-
-	void Send()
-	{
-		SetEvent(send);
-	}
-
-	void Confirm()
-	{
-		SetEvent(ack);
-	}
-};
-
-
-class MappedMemory
-{
-protected:
-	HANDLE mapFile;
-public:
-	void *view;
-
-	MappedMemory() : mapFile(nullptr), view(nullptr) { }
-	~MappedMemory() { Close(); }
-
-	// Create a shared memory object.
-	bool Create(const wchar_t *name, size_t size)
-	{
-		Close();
-
-		// TODO un-inherit
-		SECURITY_ATTRIBUTES secAttr;
-		secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-		secAttr.lpSecurityDescriptor = nullptr;
-		secAttr.bInheritHandle = TRUE;
-
-		mapFile = CreateFileMappingW(INVALID_HANDLE_VALUE, &secAttr, PAGE_READWRITE,
-			0, size, name);
-		view = MapViewOfFile(mapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
-		return Good();
-	}
-
-	// Open an existing shared memory object.
-	bool Open(const wchar_t *name)
-	{
-		Close();
-
-		// TODO un-inherit
-		mapFile = OpenFileMappingW(FILE_MAP_ALL_ACCESS, TRUE, name);
-		view = MapViewOfFile(mapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
-		return Good();
-	}
-
-	// Close this shared memory object.
-	void Close()
-	{
-		if(mapFile)
-		{
-			if(view)
-			{
-				UnmapViewOfFile(view);
-				view = nullptr;
-			}
-			CloseHandle(mapFile);
-			mapFile = nullptr;
-		}
-	}
-
-	bool Good() const { return view != nullptr; }
-};
-
-
-// Pipe for sending arbitrary-sized data
-class Pipe
-{
-protected:
-	HANDLE pipe;
-	Util::mutex pipeMutex;
-
-public:
-	Pipe() : pipe(nullptr) { }
-	~Pipe()
-	{
-		CloseHandle(pipe);
-	}
-
-	operator HANDLE() const { return pipe; }
-
-	// Create new pipe (host)
-	bool Create(const wchar_t *name)
-	{
-		pipe = CreateNamedPipeW(name, PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT, 1, 0, 0, 10, nullptr);
-		return pipe != INVALID_HANDLE_VALUE;
-	}
-
-	// Connect to pipe (bridge)
-	bool Connect(const wchar_t *name)
-	{
-		pipe = CreateFileW(name, GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
-
-		DWORD mode = PIPE_READMODE_MESSAGE;
-		return SetNamedPipeHandleState(pipe, &mode, nullptr, nullptr) != FALSE;
-	}
-
-	bool Write(const void *data, uint32_t size)
-	{
-		Util::lock_guard<Util::mutex> lock(pipeMutex);
-		DWORD numBytes = 0;
-		WriteFile(pipe, &size, sizeof(uint32_t), &numBytes, nullptr);
-		return WriteFile(pipe, data, size, &numBytes, nullptr) != FALSE;
-	}
-
-	bool WriteAsyc(const void *data, uint32_t size)
-	{
-		Util::lock_guard<Util::mutex> lock(pipeMutex);
-		WriteFileEx(pipe, &size, sizeof(uint32_t), nullptr, nullptr);
-		return WriteFileEx(pipe, data, size, nullptr, nullptr) != FALSE;
-	}
-
-	/*bool Write(MsgHeader &data)
-	{
-		static uint32_t msgID = 0;
-		data.messageID = msgID++;
-		Write(&data, sizeof(MsgHeader));
-		if(data.size - sizeof(MsgHeader) != 0) Write(&data + 1, data.size - sizeof(MsgHeader));
-	}
-
-	bool Write(MsgHeader &data, const void *extraData)
-	{
-		static uint32_t msgID = 0;
-		data.messageID = msgID++;
-		Write(&data, sizeof(MsgHeader));
-		Write(extraData, data.size - sizeof(MsgHeader));
-	}*/
-
-	bool Read(void *data, uint32_t size) const
-	{
-		DWORD numBytes = 0;
-		return ReadFile(pipe, data, size, &numBytes, nullptr) != FALSE;
-	}
-
-	bool Read(std::vector<char> &data)
-	{
-		Util::lock_guard<Util::mutex> lock(pipeMutex);
-		uint32_t size = 0;
-		DWORD numBytes = 0;
-		ReadFile(pipe, &size, sizeof(uint32_t), &numBytes, nullptr);
-		data.resize(size);
-		return ReadFile(pipe, &data[0], size, &numBytes, nullptr) != FALSE;
-	}
-
-	/*bool Read(MsgHeader &data, std::vector<char> &extraData) const
-	{
-		if(Read(&data, sizeof(data)))
-		{
-			extraData.resize(data.size - sizeof(MsgHeader));
-			return Read(&extraData[0], data.size - sizeof(MsgHeader));
-		}
-		return false;
-	}*/
-
-	void WaitForClient() const
-	{
-		ConnectNamedPipe(pipe, nullptr);
-	}
-};
-
-
 class SharedMem
 {
 public:
@@ -447,7 +373,6 @@ public:
 
 	// Shared memory segments
 	MappedMemory queueMem, processMem, getChunkMem;
-	Pipe extraMemPipe;
 
 	// Various pointers into shared memory
 	MsgQueue *queuePtr;				// Message queue indexes

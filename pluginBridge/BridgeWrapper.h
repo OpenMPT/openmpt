@@ -30,6 +30,7 @@ public:
 	~BridgeWrapper();
 
 	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
+	static uint64 GetFileVersion(const WCHAR *exePath);
 
 	bool Init(const mpt::PathString &pluginPath);
 	AEffect *GetEffect() { return sharedMem.queueMem.Good() ? sharedMem.effectPtr : nullptr; }
