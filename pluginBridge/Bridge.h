@@ -23,7 +23,6 @@ protected:
 	HINSTANCE library;
 	ERect windowSize;
 	HWND window;
-	WNDCLASSEX windowClass;
 	uint32_t isProcessing;
 
 	// Static memory for host-to-plugin pointers
@@ -69,6 +68,8 @@ protected:
 	int32_t BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers));
 
 	void RenderThread();
+
+	void MessageHandler();
 
 	static VstIntPtr VSTCALLBACK MasterCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 };

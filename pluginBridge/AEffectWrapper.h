@@ -56,10 +56,6 @@ struct AEffectProto
 	void FromNative(const AEffect &in)
 	{
 		magic = in.magic;
-		//dispatcher = 0;
-		//process = in.process ? 1 : 0;
-		//setParameter = 0;
-		//getParameter = 0;
 
 		numPrograms = in.numPrograms;
 		numParams = in.numParams;
@@ -68,25 +64,14 @@ struct AEffectProto
 
 		flags = in.flags;
 
-		//resvd1 = 0;
-		//resvd2 = 0;
-
 		initialDelay = in.initialDelay;
 
 		realQualities = in.realQualities;
 		offQualities = in.offQualities;
 		ioRatio = in.ioRatio;
 
-		//object = 0;
-		//user = 0;
-
 		uniqueID = in.uniqueID;
 		version = in.version;
-
-		//processReplacing = in.processReplacing ? 2 : 0;
-		//processDoubleReplacing = in.processDoubleReplacing ? 3 : 0;
-
-		//memset(future, 0, sizeof(future));
 
 		if(in.processReplacing == nullptr)
 		{

@@ -16,6 +16,7 @@
 #include "../common/mptFstream.h"
 #include "../common/thread.h"
 #include "../common/versionNumber.h"
+#include "../common/StringFixer.h"
 
 
 // Check whether we need to load a 32-bit or 64-bit wrapper.
@@ -93,12 +94,13 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 	{
 		WCHAR exePath[_MAX_PATH];
 		GetModuleFileNameW(0, exePath, CountOf(exePath));
+		mpt::String::SetNullTerminator(exePath);
 		mptVersion = GetFileVersion(exePath);
 	}
 	uint64 bridgeVersion = GetFileVersion(exeName.AsNative().c_str());
 	if(bridgeVersion == 0)
 	{
-		Reporting::Error("Could not open plugin bridge.");
+		Reporting::Error("Could not open the plugin bridge executable.");
 		return false;
 	} else if(bridgeVersion != mptVersion)
 	{
@@ -236,9 +238,8 @@ void BridgeWrapper::MessageThread()
 			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
 			{
 				BridgeMessage &msg = sharedMem.queuePtr->toBridge[i];
-				if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::done)
+				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
 				{
-					InterlockedExchange(&msg.header.status, MsgHeader::empty);
 					sharedMem.ackSignals[msg.header.signalID].Confirm();
 				}
 			}
@@ -285,9 +286,8 @@ const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
 				for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
 				{
 					BridgeMessage &msg = sharedMem.queuePtr->toBridge[i];
-					if(InterlockedExchangeAdd(&msg.header.status, 0) == MsgHeader::done)
+					if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
 					{
-						InterlockedExchange(&msg.header.status, MsgHeader::empty);
 						if(msg.header.signalID != uint32_t(-1)) sharedMem.ackSignals[msg.header.signalID].Confirm();
 					}
 				}
@@ -323,9 +323,8 @@ void BridgeWrapper::ParseNextMessage()
 	for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
 	{
 		BridgeMessage *msg = sharedMem.queuePtr->toHost + i;
-		if(InterlockedExchangeAdd(&msg->header.status, 0) == MsgHeader::sent)
+		if(InterlockedCompareExchange(&msg->header.status, MsgHeader::received, MsgHeader::sent) == MsgHeader::sent)
 		{
-			InterlockedExchange(&msg->header.status, MsgHeader::received);
 			switch(msg->header.type)
 			{
 			case MsgHeader::dispatch:
@@ -477,7 +476,8 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		{
 			static uint32_t chunkId = 0;
 			const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-chunkdata-" + mpt::ToWString(chunkId++);
-			PushToVector(dispatchData, *mapName.c_str(), mapName.length() * sizeof(wchar_t));
+			ptrOut = (mapName.length() + 1) * sizeof(wchar_t);
+			PushToVector(dispatchData, *mapName.c_str(), static_cast<size_t>(ptrOut));
 		}
 		break;
 
