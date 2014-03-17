@@ -112,7 +112,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 	const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(procId) + L"-" + mpt::ToWString(plugId);
 
 	// Create our shared memory object.
-	if(!sharedMem.queueMem.Create(mapName.c_str(), sizeof(AEffect64) + sizeof(MsgQueue)))
+	if(!sharedMem.queueMem.Create(mapName.c_str(), sizeof(AEffect64) + sizeof(MsgQueue) + sizeof(AutomationQueue)))
 	{
 		Reporting::Error("Could not initialize plugin bridge memory.");
 		return false;
@@ -123,7 +123,6 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 	sharedMem.sigToHost.Create();
 	sharedMem.sigToBridge.Create();
 	sharedMem.sigProcess.Create();
-	sharedMem.sigThreadExit = CreateEvent(NULL, TRUE, FALSE, NULL);
 
 	// Command-line must be a modfiable string...
 	wchar_t cmdLine[128];
@@ -159,7 +158,10 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 		return false;
 	}
 
-	mpt::thread_member<BridgeWrapper, &BridgeWrapper::MessageThread>(this);
+	sharedMem.sigThreadExit.Create(true);
+	sigAutomation.Create(true);
+
+	sharedMem.otherThread = mpt::thread_member<BridgeWrapper, &BridgeWrapper::MessageThread>(this);
 
 	BridgeMessage initMsg;
 	initMsg.Init(pluginPath.ToWide().c_str(), MIXBUFFERSIZE);
@@ -178,24 +180,15 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 		return true;
 	}
 
-	sharedMem.queueMem.Close();
-	delete this;
 	return false;
 }
 
 
 BridgeWrapper::~BridgeWrapper()
 {
-	if(sharedMem.queueMem.Good())
-	{
-		BridgeMessage close;
-		close.Close();
-		SendToBridge(close);
-	}
-
 	CloseHandle(sharedMem.otherProcess);
-	SetEvent(sharedMem.sigThreadExit);
-	SetEvent(sharedMem.sigThreadExit);
+	sharedMem.sigThreadExit.Trigger();
+	WaitForSingleObject(sharedMem.otherThread, INFINITE);
 }
 
 
@@ -225,7 +218,7 @@ void BridgeWrapper::MessageThread()
 		}
 	} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_OBJECT_0 + 3 && result != WAIT_FAILED);
 	ASSERT(result != WAIT_FAILED);
-	CloseHandle(sharedMem.sigThreadExit);
+	sharedMem.otherThread = NULL;
 }
 
 
@@ -269,7 +262,7 @@ const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
 		} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_OBJECT_0 + 3 && result != WAIT_FAILED);
 		if(result == WAIT_OBJECT_0 + 2)
 		{
-			SetEvent(sharedMem.sigThreadExit);
+			sharedMem.sigThreadExit.Trigger();
 		}
 	} else
 	{
@@ -365,7 +358,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		ptr = &extraData[0];
 	}
 
-	msg->result = CVstPluginManager::MasterCallBack(sharedMem.effectPtr, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt);
+	msg->result = static_cast<int32>(CVstPluginManager::MasterCallBack(sharedMem.effectPtr, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt));
 
 	// Post-fix some opcodes
 	switch(msg->opcode)
@@ -530,6 +523,18 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		copyPtrBack = true;
 		break;
 
+	case effBeginSetProgram:
+		that->isSettingProgram = true;
+		break;
+
+	case effEndSetProgram:
+		that->isSettingProgram = false;
+		if(that->sharedMem.automationPtr->pendingEvents)
+		{
+			that->SendAutomationQueue();
+		}
+		break;
+
 	case effGetSpeakerArrangement:
 		// VstSpeakerArrangement* in [value] and [ptr]
 		ptrOut = sizeof(VstSpeakerArrangement) * 2;
@@ -575,7 +580,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		resultMsg = &(that->SendToBridge(*msg)->dispatch);
 	}
 
-	if(resultMsg == nullptr)
+	if(resultMsg == nullptr && opcode != effClose)
 	{
 		return 0;
 	}
@@ -641,11 +646,55 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 }
 
 
+// Send any pending automation events
+void BridgeWrapper::SendAutomationQueue()
+{
+	sigAutomation.Reset();
+	BridgeMessage msg;
+	msg.Automate();
+	if(SendToBridge(msg) == nullptr)
+	{
+		// Failed (plugin probably crashed) - auto-fix event count
+		sharedMem.automationPtr->pendingEvents = 0;
+	}
+	sigAutomation.Trigger();
+
+}
+
 void VSTCALLBACK BridgeWrapper::SetParameter(AEffect *effect, VstInt32 index, float parameter)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
+	const CVstPlugin *plug = FromVstPtr<CVstPlugin>(effect->resvd1);
 	if(that)
 	{
+		AutomationQueue &autoQueue = *that->sharedMem.automationPtr;
+		if(that->isSettingProgram || (plug && plug->IsSongPlaying()))
+		{
+			// Queue up messages while rendering to reduce latency introduced by every single bridge call
+			uint32_t i;
+			while((i = InterlockedExchangeAdd(&autoQueue.pendingEvents, 1)) >= CountOf(autoQueue.params))
+			{
+				// Queue full!
+				if(i == CountOf(autoQueue.params))
+				{
+					// We're the first to notice that it's full
+					that->SendAutomationQueue();
+				} else
+				{
+					// Wait until queue is emptied by someone else (this branch is very unlikely to happen)
+					WaitForSingleObject(that->sigAutomation, INFINITE);
+				}
+			}
+
+			autoQueue.params[i].index = index;
+			autoQueue.params[i].value = parameter;
+			return;
+		} else if(autoQueue.pendingEvents)
+		{
+			// Actually, this should never happen as pending events are cleared before processing and at the end of a set program event.
+			that->SendAutomationQueue();
+		}
+
 		BridgeMessage msg;
 		msg.SetParameter(index, parameter);
 		that->SendToBridge(msg);

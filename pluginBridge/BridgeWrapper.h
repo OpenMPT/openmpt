@@ -17,6 +17,8 @@ class BridgeWrapper
 protected:
 	// Shared signals and memory
 	SharedMem sharedMem;
+	Event sigAutomation;
+	bool isSettingProgram;
 
 public:
 	enum BinaryType
@@ -27,6 +29,7 @@ public:
 	};
 
 public:
+	BridgeWrapper() : isSettingProgram(false) { }
 	~BridgeWrapper();
 
 	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
@@ -42,6 +45,7 @@ protected:
 	void ParseNextMessage();
 	void DispatchToHost(DispatchMsg *msg);
 	const BridgeMessage *SendToBridge(const BridgeMessage &msg);
+	void SendAutomationQueue();
 
 	static VstIntPtr VSTCALLBACK DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static void VSTCALLBACK SetParameter(AEffect *effect, VstInt32 index, float parameter);
