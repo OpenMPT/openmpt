@@ -16,6 +16,9 @@
 // Fix deadlocks in some plugin GUIs (Synth1 sliders, triggering many notes through the M1 GUI, Electri-Q program change)
 // Ability to put all plugins (or all instances of the same plugin) in the same container. Necessary for plugins like SideKick v3.
 // jBridged Rez3 GUI breaks
+// ProteusVX, TriDirt sometimes flickers because of timed redraws
+// ProteusVX freezes on edit close
+// Message handling isn't perfect yet: a message slot may be re-used before its result is being read. Either copy back message, or manually reset message afterwards by caller
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode
@@ -38,7 +41,7 @@
 //#include <assert.h>
 #include <intrin.h>
 #undef assert
-#define assert(x) while(!(x)) { __debugbreak(); break; }
+#define assert(x) while(!(x)) { ::MessageBoxA(NULL, #x, "Debug Assertion Failed", MB_ICONERROR);  __debugbreak(); break; }
 
 #include "Bridge.h"
 #include "../common/thread.h"
@@ -50,7 +53,7 @@
 // It always points to the last intialized PluginBridge object. Right now there's just one, but we might
 // have to initialize more than one plugin in a container at some point to get plugins like SideKickv3 to work.
 PluginBridge *PluginBridge::latestInstance = nullptr;
-WNDCLASSEX windowClass;
+WNDCLASSEX PluginBridge::windowClass;
 #define WINDOWCLASSNAME _T("OpenMPTPluginBridge")
 
 
@@ -62,19 +65,7 @@ int _tmain(int argc, TCHAR *argv[])
 		return -1;
 	}
 
-	windowClass.cbSize = sizeof(WNDCLASSEX);
-	windowClass.style = CS_HREDRAW | CS_VREDRAW;
-	windowClass.lpfnWndProc = DefWindowProc;
-	windowClass.cbClsExtra = 0;
-	windowClass.cbWndExtra = 0;
-	windowClass.hInstance = GetModuleHandle(NULL);
-	windowClass.hIcon = NULL;
-	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	windowClass.hbrBackground  = (HBRUSH)(COLOR_WINDOW + 1);
-	windowClass.lpszMenuName = NULL;
-	windowClass.lpszClassName = WINDOWCLASSNAME;
-	windowClass.hIconSm = NULL;
-	RegisterClassEx(&windowClass);
+	PluginBridge::RegisterWindowClass();
 
 	Signal sigToHost, sigToBridge, sigProcess;
 	sigToHost.Create(argv[2], argv[3]);
@@ -94,8 +85,27 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /
 }
 
 
+// Register the editor window class
+void PluginBridge::RegisterWindowClass()
+{
+	windowClass.cbSize = sizeof(WNDCLASSEX);
+	windowClass.style = CS_HREDRAW | CS_VREDRAW;
+	windowClass.lpfnWndProc = /*DefWindowProc*/WindowProc;
+	windowClass.cbClsExtra = 0;
+	windowClass.cbWndExtra = 0;
+	windowClass.hInstance = GetModuleHandle(NULL);
+	windowClass.hIcon = NULL;
+	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	windowClass.hbrBackground  = (HBRUSH)(COLOR_WINDOW + 1);
+	windowClass.lpszMenuName = NULL;
+	windowClass.lpszClassName = WINDOWCLASSNAME;
+	windowClass.hIconSm = NULL;
+	RegisterClassEx(&windowClass);
+}
+
+
 PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHost, Signal &sigToBridge, Signal &sigProcess)
-	: window(NULL), isProcessing(0), nativeEffect(nullptr)
+	: window(NULL), isProcessing(0), nativeEffect(nullptr), needIdle(false)
 {
 	PluginBridge::latestInstance = this;
 
@@ -114,7 +124,7 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 	sharedMem.sigToBridge.Create(sigToBridge);
 	sharedMem.sigProcess.Create(sigProcess);
 
-	sharedMem.sigThreadExit = CreateEvent(NULL, FALSE, FALSE, NULL);
+	sharedMem.sigThreadExit = CreateEvent(NULL, TRUE, FALSE, NULL);
 	mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
 	sharedMem.msgThreadID = GetCurrentThreadId();
 
@@ -125,7 +135,7 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 	DWORD result;
 	do
 	{
-		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, window ? 10 : INFINITE);
+		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, window ? 15 : INFINITE);
 		if(result == WAIT_OBJECT_0)
 		{
 			ParseNextMessage();
@@ -140,18 +150,10 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 					sharedMem.ackSignals[msg.header.signalID].Confirm();
 				}
 			}
-		} else if(result == WAIT_OBJECT_0 + 2)
+		}
+		if(needIdle && nativeEffect)
 		{
-			// Something failed
-			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
-			{
-				BridgeMessage &msg = sharedMem.queuePtr->toHost[i];
-				if(InterlockedExchangeAdd(&msg.header.status, 0) != MsgHeader::empty)
-				{
-					InterlockedExchange(&msg.header.status, MsgHeader::empty);
-					sharedMem.ackSignals[msg.header.signalID].Send();
-				}
-			}
+			nativeEffect->dispatcher(nativeEffect, effIdle, 0, 0, nullptr, 0.0f);
 		}
 		if(window)
 		{
@@ -187,7 +189,7 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 		const HANDLE objects[] = { sharedMem.sigToHost.ack, sharedMem.sigToBridge.send, sharedMem.otherProcess };
 		do
 		{
-			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, window ? 10 : INFINITE);
+			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
 			if(result == WAIT_OBJECT_0)
 			{
 				// Some message got answered - is it our message?
@@ -219,6 +221,10 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 		Signal &ackHandle = sharedMem.ackSignals[addr->header.signalID];
 		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, sharedMem.otherProcess };
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+		if(result != WAIT_OBJECT_0)
+		{
+			InterlockedExchange(&addr->header.status, MsgHeader::empty);
+		}
 	}
 
 	return (result == WAIT_OBJECT_0) ? addr : nullptr;
@@ -439,7 +445,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 			ptr = window = CreateWindow(
 				WINDOWCLASSNAME,
 				str,
-				WS_VISIBLE | WS_POPUP,
+				WS_POPUP,
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				1, 1,
 				NULL,
@@ -447,11 +453,9 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 				windowClass.hInstance,
 				NULL);
 
-			// Need to do this after creating. Otherwise, we'll freeze.
-			SetParent(window, reinterpret_cast<HWND>(msg->ptr));
-
 			// Periodically update the window, in case redrawing failed.
 			SetTimer(window, 0x1337, 1000, nullptr);
+			windowParent = reinterpret_cast<HWND>(msg->ptr);
 		}
 		break;
 
@@ -576,6 +580,13 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 				}
 			}
 		}
+		break;
+
+	case effEditOpen:
+		// Need to do this after creating. Otherwise, we'll freeze. We also need to do this after the open call, or else ProteusVX will freeze in a SetParent call.
+		SetParent(window, windowParent);
+		SetProp(window, _T("MPT"), this);
+		ShowWindow(window, SW_SHOW);
 		break;
 
 	case effGetChunk:
@@ -793,7 +804,8 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		break;
 
 	case audioMasterNeedIdle:
-		break;
+		needIdle = true;
+		return 1;
 
 	case audioMasterSizeWindow:
 		if(window)
@@ -969,18 +981,36 @@ VstIntPtr VSTCALLBACK PluginBridge::MasterCallback(AEffect *effect, VstInt32 opc
 }
 
 
+LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if(uMsg == WM_NCACTIVATE && wParam == TRUE)
+	{
+		// Window is activated - put the plugin window into foreground
+		PluginBridge *that = reinterpret_cast<PluginBridge *>(GetProp(hwnd, _T("MPT")));
+		if(that != nullptr)
+		{
+			SetForegroundWindow(that->windowParent);
+			SetForegroundWindow(that->window);
+		}
+	}
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+
 // WinAPI message handler for plugin GUI
 void PluginBridge::MessageHandler()
 {
+	nativeEffect->dispatcher(nativeEffect, effEditIdle, 0, 0, nullptr, 0.0f);
+
 	MSG msg;
 	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
-		TranslateMessage(&msg);
 		if(msg.message == WM_TIMER && msg.wParam == 0x1337)
 		{
 			// Fix failed plugin window redrawing by periodically forcing a redraw
 			RedrawWindow(window, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
 		}
+		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
 }
