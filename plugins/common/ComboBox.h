@@ -57,10 +57,7 @@ public:
 	{
 		if(hwnd != nullptr)
 		{
-			SendMessage(hwnd,
-				CB_RESETCONTENT,
-				0,
-				0);
+			ComboBox_ResetContent(hwnd);
 		}
 	}
 
@@ -70,19 +67,11 @@ public:
 	{
 		if(hwnd != nullptr)
 		{
-			LRESULT result = SendMessage(hwnd,
-				CB_ADDSTRING,
-				0,
-				reinterpret_cast<LPARAM>(text));
-
+			int result = ComboBox_AddString(hwnd, text);
 			if(result != CB_ERR)
 			{
-				SendMessage(hwnd,
-					CB_SETITEMDATA,
-					result,
-					reinterpret_cast<LPARAM>(data)
-					);
-				return static_cast<int>(result);
+				ComboBox_SetItemData(hwnd, result, data);
+				return result;
 			}
 		}
 		return -1;
@@ -94,10 +83,7 @@ public:
 	{
 		if(hwnd != nullptr)
 		{
-			return static_cast<int>(SendMessage(hwnd,
-				CB_GETCOUNT,
-				0,
-				0));
+			return ComboBox_GetCount(hwnd);
 		}
 		return 0;
 	}
@@ -108,10 +94,7 @@ public:
 	{
 		if(hwnd != nullptr)
 		{
-			SendMessage(hwnd,
-				CB_SETCURSEL,
-				index,
-				0);
+			ComboBox_SetCurSel(hwnd, index);
 		}
 	}
 
@@ -121,10 +104,7 @@ public:
 	{
 		if(hwnd != nullptr)
 		{
-			return SendMessage(hwnd,
-				CB_GETCURSEL,
-				0,
-				0);
+			return ComboBox_GetCurSel(hwnd);
 		}
 		return -1;
 	}
@@ -142,12 +122,34 @@ public:
 	{
 		if(hwnd != nullptr)
 		{
-			return reinterpret_cast<void *>(SendMessage(hwnd,
-				CB_GETITEMDATA,
-				index,
-				0));
+			return reinterpret_cast<void *>(ComboBox_GetItemData(hwnd, index));
 		}
 		return 0;
+	}
+
+	// Dynamically resize the dropdown list to cover as many items as possible.
+	void SizeDropdownList()
+	{
+		int itemHeight = ComboBox_GetItemHeight(hwnd);
+		int numItems = GetCount();
+		if(numItems < 2) numItems = 2;
+
+		RECT rect;
+		GetWindowRect(hwnd, &rect);
+
+		SIZE sz;
+		sz.cx = rect.right - rect.left;
+		sz.cy = itemHeight * (numItems + 2);
+
+		if(rect.top - sz.cy < 0 || rect.bottom + sz.cy > GetSystemMetrics(SM_CYSCREEN))
+		{
+			// Dropdown exceeds screen height - clamp it.
+			int k = (GetSystemMetrics(SM_CYSCREEN) - rect.bottom) / itemHeight;
+			if(k < rect.top / itemHeight) k = rect.top / itemHeight;
+			if(itemHeight * k < sz.cy) sz.cy = itemHeight * k;
+		}
+
+		SetWindowPos(hwnd, NULL, 0, 0, sz.cx, sz.cy, SWP_NOMOVE | SWP_NOZORDER);
 	}
 
 }; 

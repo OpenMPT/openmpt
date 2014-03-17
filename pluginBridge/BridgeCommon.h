@@ -167,6 +167,7 @@ struct ProcessMsg
 	int32_t numInputs;
 	int32_t numOutputs;
 	int32_t sampleFrames;
+	VstTimeInfo timeInfo;
 	// Input and output buffers follow
 
 	ProcessMsg(ProcessMsg::ProcessType processType, int32_t numInputs, int32_t numOutputs, int32_t sampleFrames) :
@@ -196,10 +197,11 @@ struct MsgHeader
 	// Message life-cycle
 	enum BridgeMessageStatus
 	{
-		empty = 0,
-		sent,
-		received,
-		done,
+		empty = 0,	// Slot is usable
+		prepared,	// Slot got acquired and is being prepared
+		sent,		// Slot is ready to be sent 
+		received,	// Slot is being handled
+		done,		// Slot got handled
 	};
 
 	uint32_t status;		// See BridgeMessageStatus
@@ -361,11 +363,9 @@ struct MsgQueue
 class SharedMem
 {
 public:
-	//std::map<winhandle_t, SignalSlot *> threadMap;	// Map thread IDs to signals
-
 	// Signals for host <-> bridge communication
 	Signal sigToHost, sigToBridge, sigProcess;
-	// Signals for internal communication (wake up waiting threads). Ack() => OK, Send() => Failure
+	// Signals for internal communication (wake up waiting threads). Confirm() => OK, Send() => Failure
 	Signal ackSignals[MsgQueue::queueSize];
 
 	HANDLE otherProcess;	// Handle of "other" process (host handle in the bridge and vice versa)
@@ -400,18 +400,22 @@ public:
 	// Copy a message to shared memory and return relative position.
 	BridgeMessage *CopyToSharedMemory(const BridgeMessage &msg, BridgeMessage *queue, bool fromMsgThread)
 	{
-		assert((reinterpret_cast<intptr_t>(&writeOffset) & 3) == 0);	// InterlockedExchangeAdd operand should be aligned to 32 bits
-		uint32_t offset = InterlockedExchangeAdd(&writeOffset, 1) % MsgQueue::queueSize;
-
 		assert(msg.header.status == MsgHeader::empty);
-		assert(queue[offset].header.status == MsgHeader::empty);
-		memcpy(queue + offset, &msg, std::min(sizeof(BridgeMessage), size_t(msg.header.size)));
-
-		queue[offset].header.signalID = fromMsgThread ? uint32_t(-1) : offset;	// Don't send signal to ourselves
-
-		assert((reinterpret_cast<intptr_t>(&queue[offset].header.status) & 3) == 0);	// InterlockedExchange operand should be aligned to 32 bits
-		InterlockedExchange(&queue[offset].header.status, MsgHeader::sent);
-
-		return queue + offset;
+		
+		// Find a suitable slot to post the message into
+		BridgeMessage *targetMsg = queue;
+		for(size_t i = 0; i < MsgQueue::queueSize; i++, targetMsg++)
+		{
+			assert((reinterpret_cast<intptr_t>(&targetMsg->header.status) & 3) == 0);	// InterlockedExchangeAdd operand should be aligned to 32 bits
+			if(InterlockedCompareExchange(&targetMsg->header.status, MsgHeader::prepared, MsgHeader::empty) == MsgHeader::empty)
+			{
+				memcpy(targetMsg, &msg, std::min(sizeof(BridgeMessage), size_t(msg.header.size)));
+				InterlockedExchange(&targetMsg->header.signalID, fromMsgThread ? uint32_t(-1) : i);	// Don't send signal to ourselves
+				InterlockedExchange(&targetMsg->header.status, MsgHeader::sent);
+				return targetMsg;
+			}
+		}
+		assert(false);
+		return nullptr;
 	}
 };

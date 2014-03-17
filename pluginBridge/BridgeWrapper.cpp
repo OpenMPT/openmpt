@@ -9,6 +9,8 @@
 
 
 #include "stdafx.h"
+
+#ifndef NO_VST
 #include "BridgeWrapper.h"
 #include "misc_util.h"
 #include "../mptrack/Mptrack.h"
@@ -186,22 +188,6 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 	sharedMem.queueMem.Close();
 	delete this;
 	return false;
-	/*	{
-		sharedMem.messagePipe.WaitForClient();
-		//sharedMem.messagePipe.Write(&BridgeProtocolVersion, sizeof(BridgeProtocolVersion));
-
-		sharedMem.otherProcess = processInfo.hProcess;
-		const HANDLE objects[] = { sharedMem.sigToHost.ack, sharedMem.otherProcess };
-		DWORD result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, 10000);
-		if(result == WAIT_OBJECT_0)
-		{
-			success = true;
-		} else if(result == WAIT_OBJECT_0 + 1)
-		{
-			// Process died
-		}
-		CloseHandle(processInfo.hThread);
-	}*/
 }
 
 
@@ -723,11 +709,22 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 {
 	if(!sharedMem.processMem.Good())
 	{
+		ASSERT(false);
 		return;
 	}
-	new (sharedMem.processMem.view) ProcessMsg(type, numInputs, numOutputs, sampleFrames);
 
-	buf_t *ptr = reinterpret_cast<buf_t *>(static_cast<ProcessMsg *>(sharedMem.processMem.view) + 1);
+	ProcessMsg *msg = static_cast<ProcessMsg *>(sharedMem.processMem.view);
+	const VstInt32 timeInfoFlags = msg->timeInfo.flags;
+	new (msg) ProcessMsg(type, numInputs, numOutputs, sampleFrames);
+
+	// Plugin asked for time info in the past (flags are set), so we anticipate that it will do that again
+	// and cache the time info so that plugin doesn't have to ask for it.
+	if(timeInfoFlags != 0)
+	{
+		msg->timeInfo = *reinterpret_cast<VstTimeInfo *>(CVstPluginManager::MasterCallBack(sharedMem.effectPtr, audioMasterGetTime, 0, timeInfoFlags, nullptr, 0.0f));
+	}
+
+	buf_t *ptr = reinterpret_cast<buf_t *>(msg + 1);
 	for(VstInt32 i = 0; i < numInputs; i++)
 	{
 		memcpy(ptr, inputs[i], sampleFrames * sizeof(buf_t));
@@ -747,3 +744,5 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 		ptr += sampleFrames;
 	}
 }
+
+#endif //NO_VST

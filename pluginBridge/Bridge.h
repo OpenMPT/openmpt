@@ -29,9 +29,9 @@ protected:
 	union
 	{
 		VstSpeakerArrangement speakerArrangement;
-		VstTimeInfo timeInfo;
 		char name[256];
 	} host2PlugMem;
+	std::vector<char> eventCache;	// Cached VST (MIDI) events
 
 	// Shared memory
 	SharedMem sharedMem;

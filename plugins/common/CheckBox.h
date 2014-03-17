@@ -45,10 +45,7 @@ public:
 	{
 		if(hwnd != nullptr)
 		{
-			SendMessage(hwnd,
-				BM_SETCHECK,
-				state ? BST_CHECKED : BST_UNCHECKED,
-				0);
+			Button_SetCheck(hwnd, state ? BST_CHECKED : BST_UNCHECKED);
 		}
 	}
 
@@ -58,10 +55,7 @@ public:
 	{
 		if(hwnd != nullptr)
 		{
-			return SendMessage(hwnd,
-				BM_GETCHECK,
-				0,
-				0) != BST_UNCHECKED;
+			return Button_GetCheck(hwnd) != BST_UNCHECKED;
 		}
 		return false;
 	}

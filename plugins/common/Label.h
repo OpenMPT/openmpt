@@ -38,15 +38,4 @@ public:
 
 		SendMessage(hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
 	}
-
-
-	// Destroy the combo box.
-	void Destroy()
-	{
-		if(hwnd != nullptr)
-		{
-			DestroyWindow(hwnd);
-		}
-		hwnd = nullptr;
-	}
-}; 
+};

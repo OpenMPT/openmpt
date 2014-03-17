@@ -14,6 +14,7 @@
 #define VC_EXTRALEAN
 #define NOMINMAX
 #include <windows.h>
+#include <WindowsX.h>
 #include <tchar.h>
 
 
