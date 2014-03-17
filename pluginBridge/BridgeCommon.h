@@ -379,11 +379,10 @@ public:
 	AEffect *effectPtr;				// Pointer to shared AEffect struct (with host pointer format)
 
 	uint32_t msgThreadID;
-	volatile uint32_t writeOffset;	// Message offset in shared memory
 
 	int32_t otherPtrSize;
 
-	SharedMem() : effectPtr(nullptr), queuePtr(nullptr), writeOffset(0), otherPtrSize(0), msgThreadID(0)
+	SharedMem() : effectPtr(nullptr), queuePtr(nullptr), otherPtrSize(0), msgThreadID(0)
 	{
 		for(size_t i = 0; i < CountOf(ackSignals); i++)
 		{

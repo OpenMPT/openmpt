@@ -17,7 +17,6 @@
 #include "../mptrack/Vstplug.h"
 #include "../common/mptFstream.h"
 #include "../common/thread.h"
-#include "../common/versionNumber.h"
 #include "../common/StringFixer.h"
 
 
@@ -124,16 +123,10 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 	sharedMem.sigToHost.Create();
 	sharedMem.sigToBridge.Create();
 	sharedMem.sigProcess.Create();
-	sharedMem.sigThreadExit = CreateEvent(NULL, FALSE, FALSE, NULL);
-
-	//std::wstring pipeName = L"\\\\.\\pipe\\openmpt-" + mpt::ToWString(procId) + L"-" + mpt::ToWString(plugId);
-	//sharedMem.extraMemPipe.Create((pipeName).c_str());
+	sharedMem.sigThreadExit = CreateEvent(NULL, TRUE, FALSE, NULL);
 
 	// Command-line must be a modfiable string...
 	wchar_t cmdLine[128];
-	//wcscpy(cmdLine, mapName.c_str());
-	//swprintf(cmdLine, CountOf(cmdLine), L"%s %s", pipeName.c_str(), mapName.c_str());
-	// Parameters: Name for shared memory object, parent process ID, signals
 	swprintf(cmdLine, CountOf(cmdLine), L"%s %d %d %d %d %d %d %d", mapName.c_str(), procId, sharedMem.sigToHost.send, sharedMem.sigToHost.ack, sharedMem.sigToBridge.send, sharedMem.sigToBridge.ack, sharedMem.sigProcess.send, sharedMem.sigProcess.ack);
 
 	STARTUPINFOW info;
@@ -229,18 +222,6 @@ void BridgeWrapper::MessageThread()
 					sharedMem.ackSignals[msg.header.signalID].Confirm();
 				}
 			}
-		} else if(result == WAIT_OBJECT_0 + 2)
-		{
-			// Something failed
-			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
-			{
-				BridgeMessage &msg = sharedMem.queuePtr->toBridge[i];
-				if(InterlockedExchangeAdd(&msg.header.status, 0) != MsgHeader::empty)
-				{
-					InterlockedExchange(&msg.header.status, MsgHeader::empty);
-					sharedMem.ackSignals[msg.header.signalID].Send();
-				}
-			}
 		}
 	} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_OBJECT_0 + 3 && result != WAIT_FAILED);
 	ASSERT(result != WAIT_FAILED);
@@ -261,7 +242,7 @@ const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
 	if(inMsgThread)
 	{
 		// Since this is the message thread, we must handle messages directly.
-		const HANDLE objects[] = { sharedMem.sigToBridge.ack, sharedMem.sigToHost.send, sharedMem.otherProcess };
+		const HANDLE objects[] = { sharedMem.sigToBridge.ack, sharedMem.sigToHost.send, sharedMem.otherProcess, sharedMem.sigThreadExit };
 		do
 		{
 			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
@@ -285,7 +266,7 @@ const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
 			{
 				ParseNextMessage();
 			}
-		} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
+		} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_OBJECT_0 + 3 && result != WAIT_FAILED);
 		if(result == WAIT_OBJECT_0 + 2)
 		{
 			SetEvent(sharedMem.sigThreadExit);
@@ -296,6 +277,10 @@ const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
 		Signal &ackHandle = sharedMem.ackSignals[addr->header.signalID];
 		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, sharedMem.otherProcess };
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+		if(result != WAIT_OBJECT_0)
+		{
+			InterlockedExchange(&addr->header.status, MsgHeader::empty);
+		}
 	}
 
 	return (result == WAIT_OBJECT_0) ? addr : nullptr;
@@ -445,6 +430,10 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		dispatchData.insert(dispatchData.end(), ptrC, ptrC + ptrOut);
 		break;
 
+	case effIdle:
+		// The plugin bridge will generate these messages by itself
+		break;
+
 	case effEditGetRect:
 		// ERect** in [ptr]
 		ptrOut = sizeof(ERect);
@@ -456,6 +445,10 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		ptrOut = reinterpret_cast<int64_t>(ptr);
 		ptrIsSize = false;
 		break;
+
+	case effEditIdle:
+		// The plugin bridge will generate these messages by itself
+		return 0;
 
 	case effGetChunk:
 		// void** in [ptr] for chunk data address

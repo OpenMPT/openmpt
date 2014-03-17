@@ -17,12 +17,13 @@ class PluginBridge
 {
 protected:
 	static PluginBridge *latestInstance;
+	static WNDCLASSEX windowClass;
 
 	// Plugin
 	AEffect *nativeEffect;
 	HINSTANCE library;
 	ERect windowSize;
-	HWND window;
+	HWND window, windowParent;
 	uint32_t isProcessing;
 
 	// Static memory for host-to-plugin pointers
@@ -40,8 +41,11 @@ protected:
 	std::vector<void *> samplePointers;
 	uint32_t mixBufSize;
 
+	bool needIdle;	// Plugin needs idle time
+
 public:
 	PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHost, Signal &sigToBridge, Signal &sigProcess);
+	static void RegisterWindowClass();
 
 protected:
 	//bool CreateMapping(const TCHAR *memName);
@@ -69,6 +73,7 @@ protected:
 
 	void RenderThread();
 
+	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void MessageHandler();
 
 	static VstIntPtr VSTCALLBACK MasterCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
