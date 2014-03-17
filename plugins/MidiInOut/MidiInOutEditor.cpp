@@ -38,7 +38,7 @@ bool MidiInOutEditor::open(void *ptr)
 //-----------------------------------
 {
 	AEffEditor::open(ptr);
-	InitializeWindow(ptr);
+	Create(ptr);
 
 	HWND parent = static_cast<HWND>(ptr);
 
@@ -68,7 +68,7 @@ void MidiInOutEditor::close()
 	outputLabel.Destroy();
 	outputCombo.Destroy();
 
-	DestroyWindow();
+	Destroy();
 	AEffEditor::close();
 }
 
@@ -171,6 +171,16 @@ void MidiInOutEditor::WindowCallback(int message, void *param1, void *param2)
 				// Update device ID and notify plugin.
 				PmDeviceID newDevice = reinterpret_cast<PmDeviceID>(combo.GetSelectionData());
 				realEffect->setParameterAutomated(isInputBox ? MidiInOut::inputParameter : MidiInOut::outputParameter, realEffect->DeviceIDToParameter(newDevice));
+			}
+			break;
+
+		case CBN_DROPDOWN:
+			if(hwnd == inputCombo.GetHwnd() || hwnd == outputCombo.GetHwnd())
+			{
+				// Combo box is about to drop down -> dynamically size the dropdown list
+				bool isInputBox = hwnd == inputCombo.GetHwnd();
+				ComboBox &combo = isInputBox ? inputCombo : outputCombo;
+				combo.SizeDropdownList();
 			}
 			break;
 

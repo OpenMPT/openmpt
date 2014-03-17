@@ -24,9 +24,9 @@ public:
 	Window() : originalWinProc(nullptr) { };
 
 	// Register window callback function and initialize window
-	void InitializeWindow(void *windowHandle)
+	void Create(void *windowHandle)
 	{
-		DestroyWindow();
+		Destroy();
 
 		hwnd = static_cast<HWND>(windowHandle);
 
@@ -41,8 +41,8 @@ public:
 	}
 
 
-	// Destroy the combo box.
-	void DestroyWindow()
+	// Destroy the window.
+	void Destroy()
 	{
 		// Restore original window processing function.
 		if(hwnd != nullptr)

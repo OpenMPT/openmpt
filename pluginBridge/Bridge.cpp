@@ -15,6 +15,7 @@
 // => sigThreadExit might already be an invalid handle the time it arrives in the thread
 // Fix deadlocks in some plugin GUIs (Synth1 sliders, triggering many notes through the M1 GUI, Electri-Q program change)
 // Ability to put all plugins (or all instances of the same plugin) in the same container. Necessary for plugins like SideKick v3.
+// jBridged Rez3 GUI breaks
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode
@@ -466,8 +467,9 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 	case effProcessEvents:
 		// VstEvents* in [ptr]
-		TranslateBridgeToVSTEvents(extraData, ptr);
-		ptr = &extraData[0];
+		TranslateBridgeToVSTEvents(eventCache, ptr);
+		ptr = &eventCache[0];
+
 		break;
 
 	case effOfflineNotify:
@@ -710,16 +712,22 @@ int32_t PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outP
 {
 	assert(sharedMem.processMem.Good());
 	ProcessMsg *msg = static_cast<ProcessMsg *>(sharedMem.processMem.view);
+
 	size_t numPtrs = msg->numInputs + msg->numOutputs;
 	samplePointers.resize(numPtrs, 0);
-	buf_t *offset = reinterpret_cast<buf_t *>(msg + 1);
-	for(size_t i = 0; i < numPtrs; i++)
+
+	if(numPtrs)
 	{
-		samplePointers[i] = offset;
-		offset += msg->sampleFrames;
+		buf_t *offset = reinterpret_cast<buf_t *>(msg + 1);
+		for(size_t i = 0; i < numPtrs; i++)
+		{
+			samplePointers[i] = offset;
+			offset += msg->sampleFrames;
+		}
+		inPointers = reinterpret_cast<buf_t **>(&samplePointers[0]);
+		outPointers = reinterpret_cast<buf_t **>(&samplePointers[msg->numInputs]);
 	}
-	inPointers = reinterpret_cast<buf_t **>(&samplePointers[0]);
-	outPointers = reinterpret_cast<buf_t **>(&samplePointers[msg->numInputs]);
+
 	return msg->sampleFrames;
 }
 
@@ -727,6 +735,8 @@ int32_t PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outP
 // Send a message to the host.
 VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 {
+	const bool processing = InterlockedExchangeAdd(&isProcessing, 0) != 0;
+
 	std::vector<char> dispatchData(sizeof(DispatchMsg), 0);
 	int64_t ptrOut = 0;
 	char *ptrC = static_cast<char *>(ptr);
@@ -742,6 +752,15 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 
 	case audioMasterGetTime:
 		// VstTimeInfo* in [return value]
+		if(processing)
+		{
+			// During processing, read the cached time info if possible
+			VstTimeInfo &timeInfo = static_cast<ProcessMsg *>(sharedMem.processMem.view)->timeInfo;
+			if((timeInfo.flags & value) == value)
+			{
+				return reinterpret_cast<VstIntPtr>(&static_cast<ProcessMsg *>(sharedMem.processMem.view)->timeInfo);
+			}
+		}
 		ptrOut = sizeof(VstTimeInfo);
 		break;
 
@@ -765,7 +784,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		MPT_FALLTHROUGH;
 	case audioMasterIOChanged:
 		// We need to be sure that the new values are known to the master.
-		if(InterlockedExchangeAdd(&isProcessing, 0) == 0)
+		if(!processing)
 		{
 			UpdateEffectStruct();
 			CreateProcessingFile(dispatchData);
@@ -906,8 +925,13 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	{
 	case audioMasterGetTime:
 		// VstTimeInfo* in [return value]
-		memcpy(&host2PlugMem.timeInfo, extraData, sizeof(VstTimeInfo));
-		return ToVstPtr<VstTimeInfo>(&host2PlugMem.timeInfo);
+		if(sharedMem.processMem.Good())
+		{
+			VstTimeInfo *timeInfo = &static_cast<ProcessMsg *>(sharedMem.processMem.view)->timeInfo;
+			memcpy(timeInfo, extraData, sizeof(VstTimeInfo));
+			return ToVstPtr<VstTimeInfo>(timeInfo);
+		}
+		return 0;
 
 	case audioMasterGetOutputSpeakerArrangement:
 	case audioMasterGetInputSpeakerArrangement:

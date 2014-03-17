@@ -129,14 +129,33 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const VstEvents 
 // Translate bridge format (void *ptr) back to VSTEvents struct (placed in data vector)
 static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 {
-	int32_t numEvents = *static_cast<const int32_t *>(ptr);
+	const int32_t numEvents = *static_cast<const int32_t *>(ptr);
 
-	data.resize(sizeof(VstInt32) + sizeof(VstIntPtr) + sizeof(VstEvent *) * numEvents, 0);
-	VstEvents *events = reinterpret_cast<VstEvents *>(&data[0]);
-	events->numEvents = numEvents;
+	const size_t headerSize = sizeof(VstInt32) + sizeof(VstIntPtr) + sizeof(VstEvent *) * numEvents;
+	data.reserve(headerSize + sizeof(VstEvent) * numEvents);
+	data.resize(headerSize, 0);
+
+	// Copy over event data (this is required for dumb SynthEdit plugins that don't copy over the event data during effProcessEvents)
+	char *offset = static_cast<char *>(ptr) + sizeof(int32_t);
+	for(int32_t i = 0; i < numEvents; i++)
+	{
+		VstEvent *event = reinterpret_cast<VstEvent *>(offset);
+		data.insert(data.end(), offset, offset + event->byteSize);
+		offset += event->byteSize;
+
+		if(event->type == kVstSysExType)
+		{
+			// Copy over sysex dump
+			VstMidiSysexEvent *sysExEvent = reinterpret_cast<VstMidiSysexEvent *>(event);
+			data.insert(data.end(), offset, offset + sysExEvent->dumpBytes);
+			offset += sysExEvent->dumpBytes;
+		}
+	}
 
 	// Write pointers
-	char *offset = static_cast<char *>(ptr) + sizeof(int32_t);
+	VstEvents *events = reinterpret_cast<VstEvents *>(&data[0]);
+	events->numEvents = numEvents;
+	offset = &data[headerSize];
 	for(int32_t i = 0; i < numEvents; i++)
 	{
 		events->events[i] = reinterpret_cast<VstEvent *>(offset);

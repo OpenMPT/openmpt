@@ -11,6 +11,9 @@
     <Filter Include="Interfaces">
       <UniqueIdentifier>{b0c52021-7533-4599-b23f-605c5676b73f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{877d7a3d-a6b8-451f-807d-4af1699dc061}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MidiInOut.cpp">
@@ -30,12 +33,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\ComboBox.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\Label.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="MidiInOut.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -60,14 +57,20 @@
     <ClInclude Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\audioeffectx.h">
       <Filter>Source Files\vst2.x</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\Window.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\CheckBox.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Label.h">
+      <Filter>Source Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\ComboBox.h">
+      <Filter>Source Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Window.h">
+      <Filter>Source Files\GUI</Filter>
     </ClInclude>
     <ClInclude Include="..\common\WindowBase.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\GUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
