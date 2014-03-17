@@ -18,38 +18,75 @@
 
 typedef int32_t winhandle_t;	// Cross-bridge handle type (WinAPI handles are 32-bit, even on 64-bit systems, so they can be passed between processes of different bitness)
 
+
+// Event to notify other threads
+class Event
+{
+protected:
+	HANDLE handle;
+
+public:
+	Event() : handle(nullptr) { }
+	~Event() { CloseHandle(handle); }
+	
+	bool Create(bool manual = false, const TCHAR *name = nullptr)
+	{
+		handle = CreateEvent(NULL, manual ? TRUE : FALSE, FALSE, name);
+		return handle != nullptr;
+	}
+
+	bool CreateShared(bool manual = false, const TCHAR *name = nullptr)
+	{
+		SECURITY_ATTRIBUTES secAttr;
+		secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+		secAttr.lpSecurityDescriptor = nullptr;
+		secAttr.bInheritHandle = TRUE;
+
+		handle = CreateEvent(&secAttr, manual ? TRUE : FALSE, FALSE, name);
+		return handle != nullptr;
+	}
+
+	bool DuplicateFrom(const Event &source)
+	{
+		return DuplicateHandle(GetCurrentProcess(), source.handle, GetCurrentProcess(), &handle, 0, FALSE, DUPLICATE_SAME_ACCESS) != FALSE;
+	}
+
+	void Trigger()
+	{
+		SetEvent(handle);
+	}
+
+	void Reset()
+	{
+		ResetEvent(handle);
+	}
+
+	void operator = (const HANDLE other) { handle = other; }
+	void operator = (const winhandle_t other) { handle = reinterpret_cast<HANDLE>(other); }
+	operator const HANDLE () const { return handle; }
+	operator const winhandle_t () const { return reinterpret_cast<winhandle_t>(handle); }
+};
+
+
+// Two-way event
 class Signal
 {
 public:
-	HANDLE send, ack;
-
-	Signal() : send(nullptr), ack(nullptr) { }
-	~Signal()
-	{
-		CloseHandle(send);
-		CloseHandle(ack);
-	}
+	Event send, ack;
 
 	// Create new signal
 	bool Create()
 	{
 		// TODO un-inherit
 		// We want to share our handles.
-		SECURITY_ATTRIBUTES secAttr;
-		secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-		secAttr.lpSecurityDescriptor = nullptr;
-		secAttr.bInheritHandle = TRUE;
-
-		send = CreateEvent(&secAttr, FALSE, FALSE, NULL);
-		ack = CreateEvent(&secAttr, FALSE, FALSE, NULL);
-		return send != nullptr && ack != nullptr;
+		return send.CreateShared() && ack.CreateShared();
 	}
 
 	// Create signal from existing handles
 	void Create(winhandle_t s, winhandle_t a)
 	{
-		send = reinterpret_cast<HANDLE>(s);
-		ack = reinterpret_cast<HANDLE>(a);
+		send = s;
+		ack = a;
 	}
 
 	// Create signal from existing handles
@@ -64,20 +101,23 @@ public:
 	{
 		send = other.send;
 		ack = other.ack;
+		/*send.DuplicateFrom(other.send);
+		ack.DuplicateFrom(other.ack);*/
 	}
 
 	void Send()
 	{
-		SetEvent(send);
+		send.Trigger();
 	}
 
 	void Confirm()
 	{
-		SetEvent(ack);
+		ack.Trigger();
 	}
 };
 
 
+// Memory that can be shared between processes
 class MappedMemory
 {
 protected:
@@ -147,11 +187,24 @@ static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize
 }
 
 #include "AEffectWrapper.h"
-//#include <map>
 
 // Bridge communication data
 
 #pragma pack(push, 8)
+
+// Host-to-bridge parameter automation message
+struct AutomationQueue
+{
+	struct Parameter
+	{
+		uint32_t index;
+		float value;
+	};
+
+	uint32_t pendingEvents;		// Number of pending automation events
+	Parameter params[64];		// Automation events
+};
+
 
 // Host-to-bridge message to initiate a process call.
 struct ProcessMsg
@@ -183,7 +236,6 @@ struct MsgHeader
 		// Management messages, host to bridge
 		newInstance,
 		init,
-		close,
 		// Management messages, bridge to host
 		errorMsg,
 
@@ -192,6 +244,7 @@ struct MsgHeader
 		// VST messages, host to bridge
 		setParameter,
 		getParameter,
+		automate,
 	};
 
 	// Message life-cycle
@@ -280,12 +333,12 @@ union BridgeMessage
 	{
 		wcsncpy(newInstance.memName, memName, CountOf(newInstance.memName) - 1);
 		newInstance.memName[CountOf(newInstance.memName) - 1] = 0;
-		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigToHost.send);
-		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigToHost.ack);
-		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigToBridge.send);
-		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigToBridge.ack);
-		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigProcess.send);
-		newInstance.handles[0] = reinterpret_cast<winhandle_t>(sigProcess.ack);
+		newInstance.handles[0] = sigToHost.send;
+		newInstance.handles[1] = sigToHost.ack;
+		newInstance.handles[2] = sigToBridge.send;
+		newInstance.handles[3] = sigToBridge.ack;
+		newInstance.handles[4] = sigProcess.send;
+		newInstance.handles[5] = sigProcess.ack;
 	}
 
 	void Init(const wchar_t *pluginPath, uint32_t mixBufSize)
@@ -297,11 +350,6 @@ union BridgeMessage
 		init.mixBufSize = mixBufSize;
 		wcsncpy(init.str, pluginPath, CountOf(init.str) - 1);
 		init.str[CountOf(init.str) - 1] = 0;
-	}
-
-	void Close()
-	{
-		SetType(MsgHeader::close, sizeof(MsgHeader));
 	}
 
 	void Dispatch(int32_t opcode, int32_t index, int64_t value, int64_t ptr, float opt, uint32_t extraDataSize)
@@ -330,6 +378,12 @@ union BridgeMessage
 
 		parameter.index = index;
 		parameter.value = 0.0f;
+	}
+
+	void Automate()
+	{
+		// Dummy message
+		SetType(MsgHeader::automate, sizeof(MsgHeader));
 	}
 
 	void Error(const wchar_t *text)
@@ -369,20 +423,22 @@ public:
 	Signal ackSignals[MsgQueue::queueSize];
 
 	HANDLE otherProcess;	// Handle of "other" process (host handle in the bridge and vice versa)
-	HANDLE sigThreadExit;	// Signal to kill helper thread
+	HANDLE otherThread;		// Handle of the "other" thread (host side: message thread, bridge side: process thread)
+	Event sigThreadExit;	// Signal to kill helper thread
 
 	// Shared memory segments
 	MappedMemory queueMem, processMem, getChunkMem;
 
 	// Various pointers into shared memory
-	MsgQueue *queuePtr;				// Message queue indexes
-	AEffect *effectPtr;				// Pointer to shared AEffect struct (with host pointer format)
+	MsgQueue * volatile queuePtr;				// Message queue indexes
+	AEffect * volatile effectPtr;				// Pointer to shared AEffect struct (with host pointer format)
+	AutomationQueue * volatile automationPtr;	// Pointer to shared parameter automation block
 
 	uint32_t msgThreadID;
 
 	int32_t otherPtrSize;
 
-	SharedMem() : effectPtr(nullptr), queuePtr(nullptr), otherPtrSize(0), msgThreadID(0)
+	SharedMem() : effectPtr(nullptr), queuePtr(nullptr), otherPtrSize(0), msgThreadID(0), otherThread(NULL)
 	{
 		for(size_t i = 0; i < CountOf(ackSignals); i++)
 		{
@@ -394,6 +450,7 @@ public:
 	{
 		effectPtr = reinterpret_cast<AEffect *>(queueMem.view);
 		queuePtr = reinterpret_cast<MsgQueue *>(static_cast<AEffect64 *>(queueMem.view) + 1);
+		automationPtr = reinterpret_cast<AutomationQueue *>(queuePtr + 1);
 	}
 
 	// Copy a message to shared memory and return relative position.

@@ -11,19 +11,18 @@
 // TODO
 // Replace Local\\foo :)
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow, VstFileSelect
-// Properly handle sharedMem.otherProcess and ask threads to die properly in every situation (random crashes)
-// => sigThreadExit might already be an invalid handle the time it arrives in the thread
-// Fix deadlocks in some plugin GUIs (Synth1 sliders, triggering many notes through the M1 GUI, Electri-Q program change)
+// Fix deadlocks in some plugin GUIs (triggering many notes through the M1 GUI)
 // Ability to put all plugins (or all instances of the same plugin) in the same container. Necessary for plugins like SideKick v3.
 // jBridged Rez3 GUI breaks
 // ProteusVX, TriDirt sometimes flickers because of timed redraws
-// ProteusVX freezes on edit close
-// Message handling isn't perfect yet: a message slot may be re-used before its result is being read. Either copy back message, or manually reset message afterwards by caller
+// ProteusVX GUI stops working after closing it once and the plugin crashes when unloading it when the GUI was open at least once
+// Message handling isn't perfect yet: a message slot may be re-used for sending before its result is being read. Either copy back message, or manually reset message afterwards by caller
+// Fix potential thread-safety problems int automation stuff
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode
 // Re-enable DEP in OpenMPT?
-// Module files supposedly opened in plugin wrapper => Does DuplicateHandle word on the host side? Otherwise, named events (can't repro anymore)
+// Module files supposedly opened in plugin wrapper => Does DuplicateHandle work on the host side? Otherwise, named events (can't repro anymore)
 // Remove native jBridge support
 // Clean up code :)
 
@@ -90,7 +89,7 @@ void PluginBridge::RegisterWindowClass()
 {
 	windowClass.cbSize = sizeof(WNDCLASSEX);
 	windowClass.style = CS_HREDRAW | CS_VREDRAW;
-	windowClass.lpfnWndProc = /*DefWindowProc*/WindowProc;
+	windowClass.lpfnWndProc = WindowProc;
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hInstance = GetModuleHandle(NULL);
@@ -124,8 +123,8 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 	sharedMem.sigToBridge.Create(sigToBridge);
 	sharedMem.sigProcess.Create(sigProcess);
 
-	sharedMem.sigThreadExit = CreateEvent(NULL, TRUE, FALSE, NULL);
-	mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
+	sharedMem.sigThreadExit.Create(true);
+	sharedMem.otherThread = mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
 	sharedMem.msgThreadID = GetCurrentThreadId();
 
 	// Tell the parent process that we've initialized the shared memory and are ready to go.
@@ -135,6 +134,7 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 	DWORD result;
 	do
 	{
+		// Wait for incoming messages, time out for window refresh
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, window ? 15 : INFINITE);
 		if(result == WAIT_OBJECT_0)
 		{
@@ -160,7 +160,14 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 			MessageHandler();
 		}
 	} while(result != WAIT_OBJECT_0 + 2);
+}
+
+
+PluginBridge::~PluginBridge()
+{
 	CloseHandle(sharedMem.otherProcess);
+	sharedMem.sigThreadExit.Trigger();
+	WaitForSingleObject(sharedMem.otherThread, INFINITE);
 }
 
 
@@ -213,7 +220,7 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 		} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
 		if(result == WAIT_OBJECT_0 + 2)
 		{
-			SetEvent(sharedMem.sigThreadExit);
+			sharedMem.sigThreadExit.Trigger();
 		}
 	} else
 	{
@@ -281,9 +288,6 @@ void PluginBridge::ParseNextMessage()
 			case MsgHeader::init:
 				InitBridge(&msg->init);
 				break;
-			case MsgHeader::close:
-				CloseBridge();
-				break;
 			case MsgHeader::dispatch:
 				DispatchToPlugin(&msg->dispatch);
 				break;
@@ -292,6 +296,10 @@ void PluginBridge::ParseNextMessage()
 				break;
 			case MsgHeader::getParameter:
 				GetParameter(&msg->parameter);
+				break;
+
+			case MsgHeader::automate:
+				AutomateParameters();
 				break;
 			}
 
@@ -380,7 +388,7 @@ void PluginBridge::InitBridge(InitMsg *msg)
 void PluginBridge::CloseBridge()
 {
 	CloseMapping();
-	SetEvent(sharedMem.sigThreadExit);
+	sharedMem.sigThreadExit.Trigger();
 	exit(0);
 }
 
@@ -545,6 +553,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		nativeEffect = nullptr;
 		FreeLibrary(library);
 		library = nullptr;
+		CloseBridge();
 		return;
 
 	case effGetProgramName:
@@ -631,6 +640,24 @@ void PluginBridge::GetParameter(ParameterMsg *msg)
 }
 
 
+// Execute received parameter automation messages
+void PluginBridge::AutomateParameters()
+{
+	try
+	{
+		uint32_t numEvents = InterlockedExchange(&sharedMem.automationPtr->pendingEvents, 0);
+		const AutomationQueue::Parameter *param = sharedMem.automationPtr->params;
+		for(uint32_t i = 0; i < numEvents; i++, param++)
+		{
+			nativeEffect->setParameter(nativeEffect, param->index, param->value);
+		}
+	} catch(...)
+	{
+		SendErrorMessage(L"Exception in setParameter()!");
+	}
+}
+
+
 // Audio rendering thread
 void PluginBridge::RenderThread()
 {
@@ -659,7 +686,7 @@ void PluginBridge::RenderThread()
 			sharedMem.sigProcess.Confirm();
 		}
 	} while(result != WAIT_OBJECT_0 + 1 && result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
-	CloseHandle(sharedMem.sigThreadExit);
+	sharedMem.otherThread = NULL;
 }
 
 
@@ -721,6 +748,8 @@ void PluginBridge::ProcessDoubleReplacing()
 template<typename buf_t>
 int32_t PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers))
 {
+	AutomateParameters();
+
 	assert(sharedMem.processMem.Good());
 	ProcessMsg *msg = static_cast<ProcessMsg *>(sharedMem.processMem.view);
 
@@ -983,16 +1012,30 @@ VstIntPtr VSTCALLBACK PluginBridge::MasterCallback(AEffect *effect, VstInt32 opc
 
 LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if(uMsg == WM_NCACTIVATE && wParam == TRUE)
+	switch(uMsg)
 	{
-		// Window is activated - put the plugin window into foreground
-		PluginBridge *that = reinterpret_cast<PluginBridge *>(GetProp(hwnd, _T("MPT")));
-		if(that != nullptr)
+	case WM_NCACTIVATE:
+		if(wParam == TRUE)
 		{
-			SetForegroundWindow(that->windowParent);
-			SetForegroundWindow(that->window);
+			// Window is activated - put the plugin window into foreground
+			PluginBridge *that = reinterpret_cast<PluginBridge *>(GetProp(hwnd, _T("MPT")));
+			if(that != nullptr)
+			{
+				SetForegroundWindow(that->windowParent);
+				SetForegroundWindow(that->window);
+			}
 		}
+		break;
+
+	case WM_TIMER:
+		if(wParam == 0x1337)
+		{
+			// Fix failed plugin window redrawing by periodically forcing a redraw
+			RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
+		}
+		break;
 	}
+
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
@@ -1005,11 +1048,6 @@ void PluginBridge::MessageHandler()
 	MSG msg;
 	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
-		if(msg.message == WM_TIMER && msg.wParam == 0x1337)
-		{
-			// Fix failed plugin window redrawing by periodically forcing a redraw
-			RedrawWindow(window, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
-		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}

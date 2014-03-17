@@ -45,6 +45,7 @@ protected:
 
 public:
 	PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHost, Signal &sigToBridge, Signal &sigProcess);
+	~PluginBridge();
 	static void RegisterWindowClass();
 
 protected:
@@ -62,6 +63,7 @@ protected:
 	void DispatchToPlugin(DispatchMsg *msg);
 	void SetParameter(ParameterMsg *msg);
 	void GetParameter(ParameterMsg *msg);
+	void AutomateParameters();
 	void Process();
 	void ProcessReplacing();
 	void ProcessDoubleReplacing();
