@@ -578,14 +578,14 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	FileReader patNames;
 	if(file.ReadMagic("PNAM"))
 	{
-		patNames = file.GetChunk(file.ReadUint32LE());
+		patNames = file.ReadChunk(file.ReadUint32LE());
 	}
 
 	m_nChannels = GetModSpecifications().channelsMin;
 	// Read channel names: "CNAM"
 	if(file.ReadMagic("CNAM"))
 	{
-		FileReader chnNames = file.GetChunk(file.ReadUint32LE());
+		FileReader chnNames = file.ReadChunk(file.ReadUint32LE());
 		const CHANNELINDEX readChns = std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(chnNames.GetLength() / MAX_CHANNELNAME));
 		m_nChannels = readChns;
 
@@ -695,7 +695,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			|| !file.Skip(4))
 			continue;
 
-		FileReader patternData = file.GetChunk(len);
+		FileReader patternData = file.ReadChunk(len);
 		ROWINDEX row = 0;
 		std::vector<uint8> chnMask(GetNumChannels());
 
@@ -785,7 +785,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			|| Patterns.Insert(pat, numRows))
 			continue;
 			
-		FileReader patternData = file.GetChunk(len);
+		FileReader patternData = file.ReadChunk(len);
 
 		// Now (after the Insert() call), we can read the pattern name.
 		CopyPatternName(Patterns[pat], patNames);
@@ -1796,7 +1796,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 			file.SkipBack(8);
 			return;
 		}
-		FileReader chunk = file.GetChunk(chunkSize);
+		FileReader chunk = file.ReadChunk(chunkSize);
 
 		// Channel FX
 		if(!memcmp(code, "CHFX", 4))
@@ -1823,7 +1823,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 
 				//data for VST setchunk? size lies just after standard plugin data.
 				const uint32 pluginDataChunkSize = chunk.ReadUint32LE();
-				FileReader pluginDataChunk = chunk.GetChunk(pluginDataChunkSize);
+				FileReader pluginDataChunk = chunk.ReadChunk(pluginDataChunkSize);
 
 				if(pluginDataChunk.IsValid())
 				{
@@ -1837,7 +1837,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 				}
 
 				//rewbs.modularPlugData
-				FileReader modularData = chunk.GetChunk(chunk.ReadUint32LE());
+				FileReader modularData = chunk.ReadChunk(chunk.ReadUint32LE());
 
 				//if dwMPTExtra is positive and there are dwMPTExtra bytes left in nPluginSize, we have some more data!
 				if(modularData.IsValid())
@@ -2156,7 +2156,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			break;
 		}
 
-		FileReader chunk = file.GetChunk(size);
+		FileReader chunk = file.ReadChunk(size);
 
 		switch (code)					// interpret field code
 		{
@@ -2284,7 +2284,7 @@ size_t CSoundFile::LoadModularInstrumentData(FileReader &file, ModInstrument &in
 		return 0;
 	}
 	//...the next piece of data must be the total size of the modular data
-	FileReader modularData = file.GetChunk(file.ReadUint32LE());
+	FileReader modularData = file.ReadChunk(file.ReadUint32LE());
 
 	// Handle chunks
 	while(modularData.AreBytesLeft())

@@ -201,7 +201,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 	PATTERNINDEX patNum = 0;
 	while(file.ReadConvertEndianness(chunkHeader))
 	{
-		FileReader chunk = file.GetChunk(chunkHeader.size);
+		FileReader chunk = file.ReadChunk(chunkHeader.size);
 
 		if(!memcmp(chunkHeader.magic, "PATT", 4) && (loadFlags & loadPatternData))
 		{

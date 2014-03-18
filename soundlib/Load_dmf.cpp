@@ -1018,7 +1018,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 			DMFPatternHeader header;
 			chunk.ReadConvertEndianness(header);
 			chunk.SkipBack(sizeof(header));
-			patternChunks.push_back(chunk.GetChunk(sizeof(header) + header.patternLength));
+			patternChunks.push_back(chunk.ReadChunk(sizeof(header) + header.patternLength));
 		}
 
 		// Now go through the order list and load them.
@@ -1078,7 +1078,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		chunk.Skip(sizeof(DMFSampleHeaderTail));
 
 		// Now read the sample data from the data chunk
-		FileReader sampleData = sampleDataChunk.GetChunk(sampleDataChunk.ReadUint32LE());
+		FileReader sampleData = sampleDataChunk.ReadChunk(sampleDataChunk.ReadUint32LE());
 		if(sampleData.IsValid() && (loadFlags & loadSampleData))
 		{
 			SampleIO(

@@ -486,7 +486,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
 	{
 		uint32 patLength = file.ReadUint32LE();
-		FileReader patternChunk = file.GetChunk(patLength);
+		FileReader patternChunk = file.ReadChunk(patLength);
 
 		if(loadFlags & loadPatternData)
 		{
@@ -954,7 +954,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
 	{
 		uint32 patLength = file.ReadUint32LE();
-		FileReader patternChunk = file.GetChunk(patLength);
+		FileReader patternChunk = file.ReadChunk(patLength);
 
 		if(loadFlags & loadPatternData)
 		{

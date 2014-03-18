@@ -150,10 +150,10 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 		FileReader patternChunk;
 		if(fileHeader.packEnable)
 		{
-			patternChunk = file.GetChunk(file.ReadUint16BE());
+			patternChunk = file.ReadChunk(file.ReadUint16BE());
 		} else
 		{
-			patternChunk = file.GetChunk(4 * 64 * GetNumChannels());
+			patternChunk = file.ReadChunk(4 * 64 * GetNumChannels());
 		}
 
 		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))

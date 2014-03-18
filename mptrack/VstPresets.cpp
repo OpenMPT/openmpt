@@ -76,7 +76,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 			}
 		} else
 		{
-			FileReader chunk = file.GetChunk(file.ReadUint32BE());
+			FileReader chunk = file.ReadChunk(file.ReadUint32BE());
 			plugin.Dispatch(effSetChunk, 1, chunk.GetLength(), const_cast<char *>(chunk.GetRawData()), 0);
 		}
 	} else if((header.fxMagic == bankMagic || header.fxMagic == chunkBankMagic) && firstChunk)
@@ -101,7 +101,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 			plugin.SetCurrentProgram(oldCurrentProgram);
 		} else
 		{
-			FileReader chunk = file.GetChunk(file.ReadUint32BE());
+			FileReader chunk = file.ReadChunk(file.ReadUint32BE());
 			plugin.Dispatch(effSetChunk, 0, chunk.GetLength(), const_cast<char *>(chunk.GetRawData()), 0);
 		}
 		if(header.version >= 2)

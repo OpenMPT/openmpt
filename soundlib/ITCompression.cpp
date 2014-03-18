@@ -315,7 +315,7 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 		writtenSamples = writePos = 0;
 		while(writtenSamples < sample.nLength && file.AreBytesLeft())
 		{
-			chunk = file.GetChunk(file.ReadUint16LE());
+			chunk = file.ReadChunk(file.ReadUint16LE());
 
 			// Initialise bit reader
 			dataPos = 0;

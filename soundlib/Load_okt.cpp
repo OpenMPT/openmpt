@@ -307,7 +307,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		}
 
-		FileReader chunk = file.GetChunk(iffHead.chunksize);
+		FileReader chunk = file.ReadChunk(iffHead.chunksize);
 		if(!chunk.IsValid())
 		{
 			break;

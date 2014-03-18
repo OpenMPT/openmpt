@@ -119,7 +119,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Song mix plugins
 	{
-		FileReader plugChunk = file.GetChunk(file.ReadUint32LE());
+		FileReader plugChunk = file.ReadChunk(file.ReadUint32LE());
 		LoadMixPlugins(plugChunk);
 	}
 
@@ -172,7 +172,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	const PATTERNINDEX numPats = static_cast<PATTERNINDEX>(file.ReadUint32LE());
 	const PATTERNINDEX numNamedPats = static_cast<PATTERNINDEX>(file.ReadUint32LE());
 	size_t patNameLen = file.ReadUint32LE();	// Size of each pattern name
-	FileReader pattNames = file.GetChunk(numNamedPats * patNameLen);
+	FileReader pattNames = file.ReadChunk(numNamedPats * patNameLen);
 
 
 	// modcommand data length
@@ -186,7 +186,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Patterns[npat].GetNumRows()
 		const ROWINDEX numRows = file.ReadUint32LE();
-		FileReader patternChunk = file.GetChunk(numRows * size * GetNumChannels());
+		FileReader patternChunk = file.ReadChunk(numRows * size * GetNumChannels());
 
 		// Allocate pattern
 		if(!(loadFlags & loadPatternData) || numRows == 0 || numRows > MAX_PATTERN_ROWS || Patterns.Insert(pat, numRows))

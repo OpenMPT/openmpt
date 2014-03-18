@@ -329,7 +329,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		patternIDs.push_back(ConvertStrTo<uint32>(&patternID[newFormat ? 0 : 1]));
 		// We're going to read the rest of the pattern data later.
-		patternChunks.push_back(chunk.GetChunk(chunk.BytesLeft()));
+		patternChunks.push_back(chunk.ReadChunk(chunk.BytesLeft()));
 
 		// Convert later as we have to know how many channels there are.
 	}
@@ -686,7 +686,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				continue;
 			}
 
-			FileReader rowChunk = patternChunk.GetChunk(rowSize - 2);
+			FileReader rowChunk = patternChunk.ReadChunk(rowSize - 2);
 
 			while(rowChunk.AreBytesLeft())
 			{
@@ -1179,7 +1179,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	// Read samples
 	if(fileHeader.smpOffset > 4 && file.Seek(fileHeader.smpOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPSAH)
 	{
-		FileReader sampleChunk = file.GetChunk(file.BytesLeft());
+		FileReader sampleChunk = file.ReadChunk(file.BytesLeft());
 
 		for(SAMPLEINDEX fileSample = 0; fileSample < fileHeader.numSamples; fileSample++)
 		{
@@ -1221,7 +1221,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			// Patterns are padded to 16 Bytes
-			FileReader patternChunk = file.GetChunk(((patternHeader.size + 15) & ~15) - sizeof(PSM16PatternHeader));
+			FileReader patternChunk = file.ReadChunk(((patternHeader.size + 15) & ~15) - sizeof(PSM16PatternHeader));
 
 			if(Patterns.Insert(pat, patternHeader.numRows))
 			{
