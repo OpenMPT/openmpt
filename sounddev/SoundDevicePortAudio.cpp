@@ -194,8 +194,8 @@ double CPortaudioDevice::GetCurrentLatency() const
 }
 
 
-SoundDeviceCaps CPortaudioDevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
-//-----------------------------------------------------------------------------------------
+SoundDeviceCaps CPortaudioDevice::GetDeviceCaps()
+//-----------------------------------------------
 {
 	SoundDeviceCaps caps;
 	caps.CanUpdateInterval = true;
@@ -214,6 +214,14 @@ SoundDeviceCaps CPortaudioDevice::GetDeviceCaps(const std::vector<uint32> &baseS
 	{
 		caps.CanUpdateInterval = false;
 	}
+	return caps;
+}
+
+
+SoundDeviceDynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+//-------------------------------------------------------------------------------------------------------
+{
+	SoundDeviceDynamicCaps caps;
 	PaDeviceIndex device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi);
 	if(device == -1)
 	{

@@ -252,7 +252,7 @@ void CMainFrame::Initialize()
 			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
 			if(TrackerSettings::Instance().GetSoundDeviceID().GetType() == SNDDEV_ASIO)
 			{
-				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceCaps(TrackerSettings::Instance().GetSoundDeviceID(), TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
+				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(TrackerSettings::Instance().GetSoundDeviceID(), TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
 			}
 		#endif // NO_ASIO
 	}
@@ -1215,7 +1215,7 @@ void CMainFrame::StopPlayback()
 		m_NotifyTimer = 0;
 	}
 	ResetNotificationBuffer();
-	if(!gpSoundDevice->CanStopMode() || TrackerSettings::Instance().m_SoundSettingsStopMode == SoundDeviceStopModeClosed)
+	if(!gpSoundDevice->GetDeviceCaps().CanKeepDeviceRunning || TrackerSettings::Instance().m_SoundSettingsStopMode == SoundDeviceStopModeClosed)
 	{
 		audioCloseDevice();
 	}

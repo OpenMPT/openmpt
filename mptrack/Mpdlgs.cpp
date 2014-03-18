@@ -123,7 +123,8 @@ COptionsSoundcard::COptionsSoundcard(SoundDeviceID dev)
 //-----------------------------------------------------
 	: CPropertyPage(IDD_OPTIONS_SOUNDCARD)
 	, m_CurrentDeviceInfo(theApp.GetSoundDevicesManager()->FindDeviceInfo(dev))
-	, m_CurrentDeviceCaps(theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true))
+	, m_CurrentDeviceCaps(theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice))
+	, m_CurrentDeviceDynamicCaps(theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true))
 	, m_Settings(TrackerSettings::Instance().GetSoundDeviceSettings(dev))
 {
 	return;
@@ -135,7 +136,8 @@ void COptionsSoundcard::SetDevice(SoundDeviceID dev, bool forceReload)
 {
 	bool deviceChanged = (dev != m_CurrentDeviceInfo.id);
 	m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(dev);
-	m_CurrentDeviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
+	m_CurrentDeviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice);
+	m_CurrentDeviceDynamicCaps = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
 	if(deviceChanged || forceReload)
 	{
 		m_Settings = TrackerSettings::Instance().GetSoundDeviceSettings(dev);
@@ -349,9 +351,9 @@ void COptionsSoundcard::UpdateChannels()
 {
 	m_CbnChannels.ResetContent();
 	UINT maxChannels = 0;
-	if(m_CurrentDeviceCaps.channelNames.size() > 0)
+	if(m_CurrentDeviceDynamicCaps.channelNames.size() > 0)
 	{
-		maxChannels = std::min<std::size_t>(4, m_CurrentDeviceCaps.channelNames.size());
+		maxChannels = std::min<std::size_t>(4, m_CurrentDeviceDynamicCaps.channelNames.size());
 	} else
 	{
 		maxChannels = 4;
@@ -458,9 +460,9 @@ void COptionsSoundcard::UpdateChannelMapping()
 			combo->SetCurSel(0);
 			if(mch < usedChannels)
 			{
-				for(size_t dch = 0; dch < m_CurrentDeviceCaps.channelNames.size(); dch++)	// Device channels
+				for(size_t dch = 0; dch < m_CurrentDeviceDynamicCaps.channelNames.size(); dch++)	// Device channels
 				{
-					const int pos = (int)::SendMessageW(combo->m_hWnd, CB_ADDSTRING, 0, (LPARAM)m_CurrentDeviceCaps.channelNames[dch].c_str());
+					const int pos = (int)::SendMessageW(combo->m_hWnd, CB_ADDSTRING, 0, (LPARAM)m_CurrentDeviceDynamicCaps.channelNames[dch].c_str());
 					combo->SetItemData(pos, (DWORD_PTR)dch);
 					if(dch == m_Settings.ChannelMapping.ToDevice(mch))
 					{
@@ -521,7 +523,7 @@ void COptionsSoundcard::OnChannelChanged(int channel)
 				// find an unused channel
 				bool found = false;
 				std::size_t deviceChannel = 0;
-				for(; deviceChannel < m_CurrentDeviceCaps.channelNames.size(); ++deviceChannel)
+				for(; deviceChannel < m_CurrentDeviceDynamicCaps.channelNames.size(); ++deviceChannel)
 				{
 					bool used = false;
 					for(int hostChannel = 0; hostChannel < NUM_CHANNELCOMBOBOXES; ++hostChannel)
@@ -559,7 +561,7 @@ void COptionsSoundcard::UpdateSampleRates()
 {
 	m_CbnMixingFreq.ResetContent();
 
-	std::vector<uint32> samplerates = m_CurrentDeviceCaps.supportedSampleRates;
+	std::vector<uint32> samplerates = m_CurrentDeviceDynamicCaps.supportedSampleRates;
 
 	if(samplerates.empty())
 	{

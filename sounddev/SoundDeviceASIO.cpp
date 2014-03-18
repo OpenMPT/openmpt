@@ -1311,8 +1311,8 @@ void CASIODevice::ReportASIOException(const std::string &str)
 }
 
 
-SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
-//------------------------------------------------------------------------------------
+SoundDeviceCaps CASIODevice::GetDeviceCaps()
+//------------------------------------------
 {
 	SoundDeviceCaps caps;
 
@@ -1324,6 +1324,15 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSample
 	caps.CanUseHardwareTiming = true;
 	caps.CanChannelMapping = true;
 	caps.CanDriverPanel = true;
+
+	return caps;
+}
+
+
+SoundDeviceDynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+//--------------------------------------------------------------------------------------------------
+{
+	SoundDeviceDynamicCaps caps;
 
 	TemporaryASIODriverOpener opener(*this);
 	if(!IsDriverOpen())
