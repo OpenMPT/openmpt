@@ -28,10 +28,6 @@
 #ifndef NO_DSOUND
 
 
-#define DSOUND_MINBUFFERSIZE 1024
-#define DSOUND_MAXBUFFERSIZE SNDDEV_MAXBUFFERSIZE
-
-
 static std::wstring GuidToString(GUID guid)
 //-----------------------------------------
 {
@@ -185,6 +181,8 @@ bool CDSoundDevice::InternalOpen()
 	if(!FillWaveFormatExtensible(wfext)) return false;
 	WAVEFORMATEX *pwfx = &wfext.Format;
 
+	const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
+
 	DSBUFFERDESC dsbd;
 	DSBCAPS dsc;
 	UINT nPriorityLevel = (m_Settings.ExclusiveMode) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
@@ -197,9 +195,8 @@ bool CDSoundDevice::InternalOpen()
 	m_piDS->SetCooperativeLevel(m_Settings.hWnd, nPriorityLevel);
 	m_bMixRunning = FALSE;
 	m_nDSoundBufferSize = (m_Settings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
-	m_nDSoundBufferSize = (m_nDSoundBufferSize + 15) & ~15;
-	if(m_nDSoundBufferSize < DSOUND_MINBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MINBUFFERSIZE;
-	if(m_nDSoundBufferSize > DSOUND_MAXBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MAXBUFFERSIZE;
+	m_nDSoundBufferSize = (m_nDSoundBufferSize + (bytesPerFrame-1)) / bytesPerFrame * bytesPerFrame; // round up to full frame
+	m_nDSoundBufferSize = Clamp((LONG)m_nDSoundBufferSize, DSBSIZE_MIN, DSBSIZE_MAX);
 	if(!m_Settings.ExclusiveMode)
 	{
 		// Set the format of the primary buffer
@@ -324,6 +321,7 @@ void CDSoundDevice::StopFromSoundThread()
 DWORD CDSoundDevice::LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2)
 //--------------------------------------------------------------------------------------------------------------
 {
+	const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
 	DWORD d, dwPlay = 0, dwWrite = 0;
 
 	if ((!m_pMixBuffer) || (!m_nDSoundBufferSize)) return 0;
@@ -349,8 +347,8 @@ DWORD CDSoundDevice::LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, 
 		if (m_dwLatency > dwBytes) return 0;
 		if (m_dwLatency+d > dwBytes) d = dwBytes - m_dwLatency;
 	}
-	d &= ~0x0f;
-	if (d <= 16) return 0;
+	d = d / bytesPerFrame * bytesPerFrame; // truncate to full frame
+	if (d <= bytesPerFrame) return 0;
 	HRESULT hr = m_pMixBuffer->Lock(m_dwWritePos, d, lpBuf1, lpSize1, lpBuf2, lpSize2, 0);
 	if(hr == DSERR_BUFFERLOST)
 	{
