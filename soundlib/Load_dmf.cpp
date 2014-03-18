@@ -279,8 +279,8 @@ static uint8 DMFtremor2MPT(uint8 val, const uint8 internalTicks)
 {
 	uint8 ontime = (val >> 4);
 	uint8 offtime = (val & 0x0F);
-	ontime = CLAMP(ontime * internalTicks / 15, 1, 15);
-	offtime = CLAMP(offtime * internalTicks / 15, 1, 15);
+	ontime = Clamp(ontime * internalTicks / 15, 1, 15);
+	offtime = Clamp(offtime * internalTicks / 15, 1, 15);
 	return (ontime << 4) | offtime;
 }
 
@@ -302,7 +302,7 @@ static uint8 DMFvibrato2MPT(uint8 val, const uint8 internalTicks)
 	// MPT: 1 vibrato period == 64 ticks... we have internalTicks ticks per row.
 	// X-Tracker: Period length specified in rows!
 	const int periodInTicks = MAX(1, (val >> 4)) * internalTicks;
-	const uint8 matchingPeriod = (uint8)CLAMP((128 / periodInTicks), 1, 15);
+	const uint8 matchingPeriod = (uint8)Clamp((128 / periodInTicks), 1, 15);
 	return (matchingPeriod << 4) | MAX(1, (val & 0x0F));
 }
 
@@ -742,7 +742,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 						useMem2 = true;
 						break;
 					case 7:		// Scratch to Note (neat! but we don't have such an effect...)
-						m->note = CLAMP(effectParam2 + 25, NOTE_MIN, NOTE_MAX);
+						m->note = Clamp(effectParam2 + 25, NOTE_MIN, NOTE_MAX);
 						effect2 = CMD_TONEPORTAMENTO;
 						effectParam2 = 0xFF;
 						useMem2 = true;
