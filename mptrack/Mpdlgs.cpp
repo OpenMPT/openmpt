@@ -651,7 +651,7 @@ void COptionsSoundcard::OnOK()
 		m_CbnLatencyMS.GetWindowText(s, sizeof(s));
 		m_Settings.LatencyMS = atoi(s);
 		//Check given value.
-		m_Settings.LatencyMS = CLAMP(m_Settings.LatencyMS, SNDDEV_MINLATENCY_MS, SNDDEV_MAXLATENCY_MS);
+		m_Settings.LatencyMS = Clamp(m_Settings.LatencyMS, SNDDEV_MINLATENCY_MS, SNDDEV_MAXLATENCY_MS);
 		wsprintf(s, "%d ms", m_Settings.LatencyMS);
 		m_CbnLatencyMS.SetWindowText(s);
 	}
@@ -661,7 +661,7 @@ void COptionsSoundcard::OnOK()
 		m_CbnUpdateIntervalMS.GetWindowText(s, sizeof(s));
 		m_Settings.UpdateIntervalMS = atoi(s);
 		//Check given value.
-		m_Settings.UpdateIntervalMS = CLAMP(m_Settings.UpdateIntervalMS, SNDDEV_MINUPDATEINTERVAL_MS, SNDDEV_MAXUPDATEINTERVAL_MS);
+		m_Settings.UpdateIntervalMS = Clamp(m_Settings.UpdateIntervalMS, SNDDEV_MINUPDATEINTERVAL_MS, SNDDEV_MAXUPDATEINTERVAL_MS);
 		wsprintf(s, "%d ms", m_Settings.UpdateIntervalMS);
 		m_CbnUpdateIntervalMS.SetWindowText(s);
 	}

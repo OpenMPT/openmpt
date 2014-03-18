@@ -296,12 +296,6 @@ inline void LimitMax(T& val, const C upperLimit)
 }
 
 
-// Like Limit, but returns value
-#ifndef CLAMP
-#define CLAMP(number, low, high) MIN(high, MAX(low, number))
-#endif
-
-
 // Greatest Common Divisor.
 template <class T>
 T gcd(T a, T b)
