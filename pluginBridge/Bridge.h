@@ -13,7 +13,7 @@
 #include <vector>
 #include "BridgeCommon.h"
 
-class PluginBridge
+class PluginBridge : protected BridgeCommon
 {
 protected:
 	static PluginBridge *latestInstance;
@@ -34,9 +34,6 @@ protected:
 	} host2PlugMem;
 	std::vector<char> eventCache;	// Cached VST (MIDI) events
 
-	// Shared memory
-	SharedMem sharedMem;
-
 	// Pointers to sample data
 	std::vector<void *> samplePointers;
 	uint32_t mixBufSize;
@@ -49,8 +46,6 @@ public:
 	static void RegisterWindowClass();
 
 protected:
-	//bool CreateMapping(const TCHAR *memName);
-	void CloseMapping();
 	const BridgeMessage *SendToHost(const BridgeMessage &msg);
 
 	void UpdateEffectStruct();

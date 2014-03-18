@@ -11,13 +11,11 @@
 // TODO
 // Replace Local\\foo :)
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow, VstFileSelect
-// Fix deadlocks in some plugin GUIs (triggering many notes through the M1 GUI)
 // Ability to put all plugins (or all instances of the same plugin) in the same container. Necessary for plugins like SideKick v3.
 // jBridged Rez3 GUI breaks
 // ProteusVX, TriDirt sometimes flickers because of timed redraws
 // ProteusVX GUI stops working after closing it once and the plugin crashes when unloading it when the GUI was open at least once
 // Message handling isn't perfect yet: a message slot may be re-used for sending before its result is being read. Either copy back message, or manually reset message afterwards by caller
-// Fix potential thread-safety problems int automation stuff
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode
@@ -103,34 +101,33 @@ void PluginBridge::RegisterWindowClass()
 }
 
 
-PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHost, Signal &sigToBridge, Signal &sigProcess)
+PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess_, Signal &sigToHost_, Signal &sigToBridge_, Signal &sigProcess_)
 	: window(NULL), isProcessing(0), nativeEffect(nullptr), needIdle(false)
 {
 	PluginBridge::latestInstance = this;
 
-	if(!sharedMem.queueMem.Open(memName))
+	if(!queueMem.Open(memName))
 	{
 		MessageBox(NULL, _T("Could not connect to host."), _T("Plugin Bridge"), 0);
 		exit(-1);
 	}
-
-	sharedMem.SetupPointers();
+	sharedMem = reinterpret_cast<SharedMemLayout *>(queueMem.view);
 
 	// Store parent process handle so that we can terminate the bridge process when OpenMPT closes.
-	sharedMem.otherProcess = otherProcess;
+	otherProcess = otherProcess_;
 
-	sharedMem.sigToHost.Create(sigToHost);
-	sharedMem.sigToBridge.Create(sigToBridge);
-	sharedMem.sigProcess.Create(sigProcess);
+	sigToHost.Create(sigToHost_);
+	sigToBridge.Create(sigToBridge_);
+	sigProcess.Create(sigProcess_);
 
-	sharedMem.sigThreadExit.Create(true);
-	sharedMem.otherThread = mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
-	sharedMem.msgThreadID = GetCurrentThreadId();
+	sigThreadExit.Create(true);
+	otherThread = mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
+	msgThreadID = GetCurrentThreadId();
 
 	// Tell the parent process that we've initialized the shared memory and are ready to go.
-	sharedMem.sigToHost.Confirm();
+	sigToHost.Confirm();
 
-	const HANDLE objects[] = { sharedMem.sigToBridge.send, sharedMem.sigToHost.ack, sharedMem.otherProcess };
+	const HANDLE objects[] = { sigToBridge.send, sigToHost.ack, otherProcess };
 	DWORD result;
 	do
 	{
@@ -142,12 +139,12 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 		} else if(result == WAIT_OBJECT_0 + 1)
 		{
 			// Message got answered
-			for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
+			for(size_t i = 0; i < CountOf(sharedMem->toHost); i++)
 			{
-				BridgeMessage &msg = sharedMem.queuePtr->toHost[i];
+				BridgeMessage &msg = sharedMem->toHost[i];
 				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
 				{
-					sharedMem.ackSignals[msg.header.signalID].Confirm();
+					ackSignals[msg.header.signalID].Confirm();
 				}
 			}
 		}
@@ -165,18 +162,9 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHos
 
 PluginBridge::~PluginBridge()
 {
-	CloseHandle(sharedMem.otherProcess);
-	sharedMem.sigThreadExit.Trigger();
-	WaitForSingleObject(sharedMem.otherThread, INFINITE);
-}
-
-
-// Destroy our shared memory object.
-void PluginBridge::CloseMapping()
-{
-	sharedMem.queuePtr = nullptr;
-	sharedMem.queueMem.Close();
-	sharedMem.processMem.Close();
+	CloseHandle(otherProcess);
+	sigThreadExit.Trigger();
+	WaitForSingleObject(otherThread, INFINITE);
 }
 
 
@@ -184,16 +172,16 @@ void PluginBridge::CloseMapping()
 // Returns a pointer to the message, as processed by the host.
 const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 {
-	const bool inMsgThread = GetCurrentThreadId() == sharedMem.msgThreadID;
-	BridgeMessage *addr = sharedMem.CopyToSharedMemory(msg, sharedMem.queuePtr->toHost, inMsgThread);
-	sharedMem.sigToHost.Send();
+	const bool inMsgThread = GetCurrentThreadId() == msgThreadID;
+	BridgeMessage *addr = CopyToSharedMemory(msg, sharedMem->toHost, inMsgThread);
+	sigToHost.Send();
 
 	// Wait until we get the result from the host.
 	DWORD result;
 	if(inMsgThread)
 	{
 		// Since this is the message thread, we must handle messages directly.
-		const HANDLE objects[] = { sharedMem.sigToHost.ack, sharedMem.sigToBridge.send, sharedMem.otherProcess };
+		const HANDLE objects[] = { sigToHost.ack, sigToBridge.send, otherProcess };
 		do
 		{
 			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
@@ -201,12 +189,12 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 			{
 				// Some message got answered - is it our message?
 				const bool done = (InterlockedExchangeAdd(&addr->header.status, 0) == MsgHeader::done);
-				for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toHost); i++)
+				for(size_t i = 0; i < CountOf(sharedMem->toHost); i++)
 				{
-					BridgeMessage &msg = sharedMem.queuePtr->toHost[i];
+					BridgeMessage &msg = sharedMem->toHost[i];
 					if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
 					{
-						if(msg.header.signalID != uint32_t(-1)) sharedMem.ackSignals[msg.header.signalID].Confirm();
+						if(msg.header.signalID != uint32_t(-1)) ackSignals[msg.header.signalID].Confirm();
 					}
 				}
 				if(done)
@@ -220,13 +208,13 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 		} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
 		if(result == WAIT_OBJECT_0 + 2)
 		{
-			sharedMem.sigThreadExit.Trigger();
+			sigThreadExit.Trigger();
 		}
 	} else
 	{
 		// Wait until the message thread notifies us.
-		Signal &ackHandle = sharedMem.ackSignals[addr->header.signalID];
-		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, sharedMem.otherProcess };
+		Signal &ackHandle = ackSignals[addr->header.signalID];
+		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, otherProcess };
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
 		if(result != WAIT_OBJECT_0)
 		{
@@ -241,12 +229,12 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 // Copy AEffect to shared memory.
 void PluginBridge::UpdateEffectStruct()
 {
-	if(sharedMem.otherPtrSize == 4)
+	if(otherPtrSize == 4)
 	{
-		reinterpret_cast<AEffect32 *>(sharedMem.effectPtr)->FromNative(*nativeEffect);
-	} else if(sharedMem.otherPtrSize == 8)
+		sharedMem->effect32.FromNative(*nativeEffect);
+	} else if(otherPtrSize == 8)
 	{
-		reinterpret_cast<AEffect64 *>(sharedMem.effectPtr)->FromNative(*nativeEffect);
+		sharedMem->effect64.FromNative(*nativeEffect);
 	} else
 	{
 		assert(false);
@@ -263,7 +251,7 @@ void PluginBridge::CreateProcessingFile(std::vector<char> &dispatchData)
 
 	PushToVector(dispatchData, mapName[0], sizeof(mapName));
 
-	if(!sharedMem.processMem.Create(mapName, sizeof(ProcessMsg) + mixBufSize * (nativeEffect->numInputs + nativeEffect->numOutputs) * sizeof(double)))
+	if(!processMem.Create(mapName, sizeof(ProcessMsg) + mixBufSize * (nativeEffect->numInputs + nativeEffect->numOutputs) * sizeof(double)))
 	{
 		SendErrorMessage(L"Could not initialize plugin bridge audio memory.");
 		return;
@@ -274,10 +262,11 @@ void PluginBridge::CreateProcessingFile(std::vector<char> &dispatchData)
 // Receive a message from the host and translate it.
 void PluginBridge::ParseNextMessage()
 {
-	assert(GetCurrentThreadId() == sharedMem.msgThreadID);
-	for(size_t i = 0; i < CountOf(sharedMem.queuePtr->toBridge); i++)
+	assert(GetCurrentThreadId() == msgThreadID);
+
+	BridgeMessage *msg = &sharedMem->toBridge[0];
+	for(size_t i = 0; i < CountOf(sharedMem->toBridge); i++, msg++)
 	{
-		BridgeMessage *msg = sharedMem.queuePtr->toBridge + i;
 		if(InterlockedCompareExchange(&msg->header.status, MsgHeader::received, MsgHeader::sent) == MsgHeader::sent)
 		{
 			switch(msg->header.type)
@@ -304,7 +293,7 @@ void PluginBridge::ParseNextMessage()
 			}
 
 			InterlockedExchange(&msg->header.status, MsgHeader::done);
-			sharedMem.sigToBridge.Confirm();
+			sigToBridge.Confirm();
 		}
 	}
 }
@@ -318,14 +307,14 @@ void PluginBridge::NewInstance(NewInstanceMsg *msg)
 	sigToHost.Create(msg->handles[0], msg->handles[1]);
 	sigToBridge.Create(msg->handles[2], msg->handles[3]);
 	sigProcess.Create(msg->handles[4], msg->handles[5]);
-	new PluginBridge(msg->memName, latestInstance->sharedMem.otherProcess, sigToHost, sigToBridge, sigProcess);
+	new PluginBridge(msg->memName, latestInstance->otherProcess, sigToHost, sigToBridge, sigProcess);
 }
 
 
 // Load the plugin.
 void PluginBridge::InitBridge(InitMsg *msg)
 {
-	sharedMem.otherPtrSize = msg->hostPtrSize;
+	otherPtrSize = msg->hostPtrSize;
 	mixBufSize = msg->mixBufSize;
 	msg->result = 0;
 	
@@ -387,8 +376,11 @@ void PluginBridge::InitBridge(InitMsg *msg)
 // Unload the plugin.
 void PluginBridge::CloseBridge()
 {
-	CloseMapping();
-	sharedMem.sigThreadExit.Trigger();
+	sharedMem = nullptr;
+	queueMem.Close();
+	processMem.Close();
+
+	sigThreadExit.Trigger();
 	exit(0);
 }
 
@@ -602,9 +594,9 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		// void** in [ptr] for chunk data address
 		{
 			void *chunkPtr = *reinterpret_cast<void **>(&extraData[0]);
-			if(sharedMem.getChunkMem.Create(static_cast<const wchar_t *>(origPtr), msg->result))
+			if(getChunkMem.Create(static_cast<const wchar_t *>(origPtr), msg->result))
 			{
-				memcpy(sharedMem.getChunkMem.view, *reinterpret_cast<void **>(&extraData[0]), msg->result);
+				memcpy(getChunkMem.view, *reinterpret_cast<void **>(&extraData[0]), msg->result);
 			}
 		}
 		break;
@@ -645,8 +637,8 @@ void PluginBridge::AutomateParameters()
 {
 	try
 	{
-		uint32_t numEvents = InterlockedExchange(&sharedMem.automationPtr->pendingEvents, 0);
-		const AutomationQueue::Parameter *param = sharedMem.automationPtr->params;
+		uint32_t numEvents = InterlockedExchange(&sharedMem->automationQueue.pendingEvents, 0);
+		const AutomationQueue::Parameter *param = sharedMem->automationQueue.params;
 		for(uint32_t i = 0; i < numEvents; i++, param++)
 		{
 			nativeEffect->setParameter(nativeEffect, param->index, param->value);
@@ -661,14 +653,14 @@ void PluginBridge::AutomateParameters()
 // Audio rendering thread
 void PluginBridge::RenderThread()
 {
-	const HANDLE objects[] = { sharedMem.sigProcess.send, sharedMem.sigThreadExit };
+	const HANDLE objects[] = { sigProcess.send, sigThreadExit };
 	DWORD result = 0;
 	do
 	{
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
 		if(result == WAIT_OBJECT_0)
 		{
-			ProcessMsg *msg = static_cast<ProcessMsg *>(sharedMem.processMem.view);
+			ProcessMsg *msg = static_cast<ProcessMsg *>(processMem.view);
 			InterlockedExchange(&isProcessing, 1);
 			switch(msg->processType)
 			{
@@ -683,10 +675,10 @@ void PluginBridge::RenderThread()
 				break;
 			}
 			InterlockedExchange(&isProcessing, 0);
-			sharedMem.sigProcess.Confirm();
+			sigProcess.Confirm();
 		}
 	} while(result != WAIT_OBJECT_0 + 1 && result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
-	sharedMem.otherThread = NULL;
+	otherThread = NULL;
 }
 
 
@@ -750,8 +742,8 @@ int32_t PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outP
 {
 	AutomateParameters();
 
-	assert(sharedMem.processMem.Good());
-	ProcessMsg *msg = static_cast<ProcessMsg *>(sharedMem.processMem.view);
+	assert(processMem.Good());
+	ProcessMsg *msg = static_cast<ProcessMsg *>(processMem.view);
 
 	size_t numPtrs = msg->numInputs + msg->numOutputs;
 	samplePointers.resize(numPtrs, 0);
@@ -794,19 +786,19 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		// VstTimeInfo* in [return value]
 		if(processing)
 		{
-			// During processing, read the cached time info if possible
-			VstTimeInfo &timeInfo = static_cast<ProcessMsg *>(sharedMem.processMem.view)->timeInfo;
-			if((timeInfo.flags & value) == value)
+			// During processing, read the cached time info if possible.
+			// Only check validity flags. OpenMPT ignores the other flags anyway, as they are host-to-plugin flags.
+			value &= (kVstNanosValid | kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid | kVstTimeSigValid | kVstSmpteValid | kVstClockValid);
+			if((sharedMem->timeInfo.flags & value) == value)
 			{
-				return reinterpret_cast<VstIntPtr>(&static_cast<ProcessMsg *>(sharedMem.processMem.view)->timeInfo);
+				return ToVstPtr<VstTimeInfo>(&sharedMem->timeInfo);
 			}
 		}
-		ptrOut = sizeof(VstTimeInfo);
 		break;
 
 	case audioMasterProcessEvents:
 		// VstEvents* in [ptr]
-		TranslateVSTEventsToBridge(dispatchData, static_cast<VstEvents *>(ptr), sharedMem.otherPtrSize);
+		TranslateVSTEventsToBridge(dispatchData, static_cast<VstEvents *>(ptr), otherPtrSize);
 		ptrOut = dispatchData.size() - sizeof(DispatchMsg);
 		break;
 
@@ -933,7 +925,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	MappedMemory auxMem;
 	if(dispatchData.size() > sizeof(BridgeMessage))
 	{
-		//that->sharedMem.extraMemPipe.Write(&dispatchData[sizeof(DispatchMsg)], extraSize);
+		//that->extraMemPipe.Write(&dispatchData[sizeof(DispatchMsg)], extraSize);
 		//dispatchData.resize(sizeof(DispatchMsg));
 		if(auxMem.Create(L"Local\\foo2", extraSize))
 		{
@@ -966,13 +958,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	{
 	case audioMasterGetTime:
 		// VstTimeInfo* in [return value]
-		if(sharedMem.processMem.Good())
-		{
-			VstTimeInfo *timeInfo = &static_cast<ProcessMsg *>(sharedMem.processMem.view)->timeInfo;
-			memcpy(timeInfo, extraData, sizeof(VstTimeInfo));
-			return ToVstPtr<VstTimeInfo>(timeInfo);
-		}
-		return 0;
+		return ToVstPtr<VstTimeInfo>(&sharedMem->timeInfo);
 
 	case audioMasterGetOutputSpeakerArrangement:
 	case audioMasterGetInputSpeakerArrangement:

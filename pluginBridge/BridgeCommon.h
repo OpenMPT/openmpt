@@ -220,7 +220,6 @@ struct ProcessMsg
 	int32_t numInputs;
 	int32_t numOutputs;
 	int32_t sampleFrames;
-	VstTimeInfo timeInfo;
 	// Input and output buffers follow
 
 	ProcessMsg(ProcessMsg::ProcessType processType, int32_t numInputs, int32_t numOutputs, int32_t sampleFrames) :
@@ -400,27 +399,39 @@ union BridgeMessage
 static_assert(DISPATCH_DATA_SIZE >= 256, "There should be room for at least 256 bytes of dispatch data!");
 
 
-struct MsgQueue
+// Layout of the shared memory chunk
+struct SharedMemLayout
 {
 	enum
 	{
 		queueSize = 8u,	// Must be 2^n
 	};
+	typedef BridgeMessage MsgQueue[queueSize];
 
-	BridgeMessage toHost[queueSize];
-	BridgeMessage toBridge[queueSize];
+	union
+	{
+		AEffect effect;		// Native layout
+		AEffect32 effect32;
+		AEffect64 effect64;
+	};
+	MsgQueue toHost;
+	MsgQueue toBridge;
+	AutomationQueue automationQueue;
+	VstTimeInfo timeInfo;
 };
+static_assert(sizeof(AEffect) <= sizeof(AEffect64), "Something's going very wrong here.");
 
 
 #pragma pack(pop)
 
-class SharedMem
+// Common variables that we will find in both the host and plugin side of the bridge (this is not shared memory)
+class BridgeCommon
 {
 public:
 	// Signals for host <-> bridge communication
 	Signal sigToHost, sigToBridge, sigProcess;
 	// Signals for internal communication (wake up waiting threads). Confirm() => OK, Send() => Failure
-	Signal ackSignals[MsgQueue::queueSize];
+	Signal ackSignals[SharedMemLayout::queueSize];
 
 	HANDLE otherProcess;	// Handle of "other" process (host handle in the bridge and vice versa)
 	HANDLE otherThread;		// Handle of the "other" thread (host side: message thread, bridge side: process thread)
@@ -429,16 +440,16 @@ public:
 	// Shared memory segments
 	MappedMemory queueMem, processMem, getChunkMem;
 
-	// Various pointers into shared memory
-	MsgQueue * volatile queuePtr;				// Message queue indexes
-	AEffect * volatile effectPtr;				// Pointer to shared AEffect struct (with host pointer format)
-	AutomationQueue * volatile automationPtr;	// Pointer to shared parameter automation block
+	// Pointer into shared memory
+	SharedMemLayout * volatile sharedMem;
 
+	// Thread ID for message thread
 	uint32_t msgThreadID;
 
+	// Pointer size of the "other" side of the bridge, in bytes
 	int32_t otherPtrSize;
 
-	SharedMem() : effectPtr(nullptr), queuePtr(nullptr), otherPtrSize(0), msgThreadID(0), otherThread(NULL)
+	BridgeCommon() : sharedMem(nullptr), otherPtrSize(0), msgThreadID(0), otherThread(NULL)
 	{
 		for(size_t i = 0; i < CountOf(ackSignals); i++)
 		{
@@ -446,27 +457,20 @@ public:
 		}
 	}
 
-	void SetupPointers()
-	{
-		effectPtr = reinterpret_cast<AEffect *>(queueMem.view);
-		queuePtr = reinterpret_cast<MsgQueue *>(static_cast<AEffect64 *>(queueMem.view) + 1);
-		automationPtr = reinterpret_cast<AutomationQueue *>(queuePtr + 1);
-	}
-
 	// Copy a message to shared memory and return relative position.
-	BridgeMessage *CopyToSharedMemory(const BridgeMessage &msg, BridgeMessage *queue, bool fromMsgThread)
+	BridgeMessage *CopyToSharedMemory(const BridgeMessage &msg, SharedMemLayout::MsgQueue &queue, bool fromMsgThread)
 	{
 		assert(msg.header.status == MsgHeader::empty);
 		
 		// Find a suitable slot to post the message into
 		BridgeMessage *targetMsg = queue;
-		for(size_t i = 0; i < MsgQueue::queueSize; i++, targetMsg++)
+		for(size_t i = 0; i < CountOf(queue); i++, targetMsg++)
 		{
 			assert((reinterpret_cast<intptr_t>(&targetMsg->header.status) & 3) == 0);	// InterlockedExchangeAdd operand should be aligned to 32 bits
 			if(InterlockedCompareExchange(&targetMsg->header.status, MsgHeader::prepared, MsgHeader::empty) == MsgHeader::empty)
 			{
 				memcpy(targetMsg, &msg, std::min(sizeof(BridgeMessage), size_t(msg.header.size)));
-				InterlockedExchange(&targetMsg->header.signalID, fromMsgThread ? uint32_t(-1) : i);	// Don't send signal to ourselves
+				InterlockedExchange(&targetMsg->header.signalID, fromMsgThread ? uint32_t(-1) : uint32_t(i));	// Don't send signal to ourselves
 				InterlockedExchange(&targetMsg->header.status, MsgHeader::sent);
 				return targetMsg;
 			}

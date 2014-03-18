@@ -12,11 +12,9 @@
 
 #include "BridgeCommon.h"
 
-class BridgeWrapper
+class BridgeWrapper : protected BridgeCommon
 {
 protected:
-	// Shared signals and memory
-	SharedMem sharedMem;
 	Event sigAutomation;
 	bool isSettingProgram;
 
@@ -36,7 +34,7 @@ public:
 	static uint64 GetFileVersion(const WCHAR *exePath);
 
 	bool Init(const mpt::PathString &pluginPath);
-	AEffect *GetEffect() { return sharedMem.queueMem.Good() ? sharedMem.effectPtr : nullptr; }
+	AEffect *GetEffect() { return queueMem.Good() ? &sharedMem->effect : nullptr; }
 
 protected:
 
