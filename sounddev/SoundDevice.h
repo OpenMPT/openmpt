@@ -157,8 +157,7 @@ public:
 	}
 };
 
-#define SNDDEV_MAXBUFFERS	       	  256
-#define SNDDEV_MAXBUFFERSIZE        (1024*1024)
+
 #define SNDDEV_MINLATENCY_MS        1u
 #define SNDDEV_MAXLATENCY_MS        500u
 #define SNDDEV_MINUPDATEINTERVAL_MS 1u
