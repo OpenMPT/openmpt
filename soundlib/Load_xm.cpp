@@ -147,7 +147,7 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 		}
 
 		file.Seek(curPos + headerSize);
-		FileReader patternChunk = file.GetChunk(packedSize);
+		FileReader patternChunk = file.ReadChunk(packedSize);
 
 		if(sndFile.Patterns.Insert(pat, numRows) || packedSize == 0)
 		{
@@ -476,7 +476,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// Sample 15 in dirtysex.xm by J/M/T/M is a 16-bit sample with an odd size of 0x18B according to the header, while the real sample size would be 0x18A.
 					// Always read as many bytes as specified in the header, even if the sample reader would probably read less bytes.
-					FileReader sampleChunk = file.GetChunk(sampleSize[sample]);
+					FileReader sampleChunk = file.ReadChunk(sampleSize[sample]);
 					if(sample < sampleSlots.size())
 					{
 						sampleFlags[sample].ReadSample(Samples[sampleSlots[sample]], sampleChunk);

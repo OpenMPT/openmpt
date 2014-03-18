@@ -113,7 +113,7 @@ public:
 			}
 
 			size_t dataSize = chunkHeader.GetLength();
-			ChunkListItem<T> resultItem(chunkHeader, GetChunk(dataSize));
+			ChunkListItem<T> resultItem(chunkHeader, ReadChunk(dataSize));
 			result.push_back(resultItem);
 
 			// Skip padding bytes

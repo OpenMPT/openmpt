@@ -833,7 +833,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 			FileReader chunk(*patternIter);
 			PATTERNINDEX pat = chunk.ReadUint8();
 			size_t patternSize = chunk.ReadUint32LE();
-			ConvertAMPattern(chunk.GetChunk(patternSize), pat, isAM, *this);
+			ConvertAMPattern(chunk.ReadChunk(patternSize), pat, isAM, *this);
 		}
 	}
 
@@ -953,7 +953,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 				}
 
-				FileReader sampleFileChunk = sampleChunk.GetChunk(sampleHeaderChunk.length);
+				FileReader sampleFileChunk = sampleChunk.ReadChunk(sampleHeaderChunk.length);
 
 				AMSampleHeader sampleHeader;
 				if(!sampleFileChunk.ReadConvertEndianness(sampleHeader))

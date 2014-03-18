@@ -530,15 +530,15 @@ public:
 			return FileReader();
 		}
 		#ifndef NO_FILEREADER_STD_ISTREAM
-			return FileReader(MPT_SHARED_PTR<IFileDataContainer>(new FileDataContainerWindow(data, position, (std::min)(length, DataContainer().GetLength() - position))));
+			return FileReader(MPT_SHARED_PTR<IFileDataContainer>(new FileDataContainerWindow(data, position, std::min(length, DataContainer().GetLength() - position))));
 		#else
-			return FileReader(DataContainer().GetRawData() + position, (std::min)(length, DataContainer().GetLength() - position));
+			return FileReader(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position));
 		#endif
 	}
 
 	// Create a new FileReader object for parsing a sub chunk at the current position with a given length.
 	// The file cursor is advanced by "length" bytes.
-	FileReader GetChunk(off_t length)
+	FileReader ReadChunk(off_t length)
 	{
 		off_t position = streamPos;
 		Skip(length);

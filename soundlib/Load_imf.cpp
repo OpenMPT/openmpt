@@ -477,7 +477,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patNum; pat++)
 	{
 		const uint16 length = file.ReadUint16LE(), numRows = file.ReadUint16LE();
-		FileReader patternChunk = file.GetChunk(length - 4);
+		FileReader patternChunk = file.ReadChunk(length - 4);
 
 		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, numRows))
 		{
@@ -606,7 +606,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(sampleHeader.length)
 			{
-				FileReader sampleChunk = file.GetChunk(sampleHeader.length);
+				FileReader sampleChunk = file.ReadChunk(sampleHeader.length);
 				if(loadFlags & loadSampleData)
 				{
 					SampleIO(

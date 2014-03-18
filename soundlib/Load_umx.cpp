@@ -303,7 +303,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			int32 size = ReadUMXIndex(chunk);
 
-			FileReader fileChunk = chunk.GetChunk(size);
+			FileReader fileChunk = chunk.ReadChunk(size);
 
 			if(isMusic)
 			{

@@ -147,7 +147,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading Patterns
 	const ROWINDEX rowsPerPat = std::min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS);
-	FileReader tracks = file.GetChunk(192 * fileHeader.numTracks);
+	FileReader tracks = file.ReadChunk(192 * fileHeader.numTracks);
 
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
 	{

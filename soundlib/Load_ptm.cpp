@@ -178,7 +178,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading samples
-	FileReader sampleHeaderChunk = file.GetChunk(fileHeader.numSamples * sizeof(PTMSampleHeader));
+	FileReader sampleHeaderChunk = file.ReadChunk(fileHeader.numSamples * sizeof(PTMSampleHeader));
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
 		PTMSampleHeader sampleHeader;
