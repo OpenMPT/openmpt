@@ -3022,12 +3022,12 @@ NoSample:
 			// MOD finetune range -8 to 7 translates to -128 to 112
 			if(m_sndFile.GetType() & MOD_TYPE_MOD)
 			{
-				ftune = CLAMP((ftune >> 4) + pos, -8, 7);
+				ftune = Clamp((ftune >> 4) + pos, -8, 7);
 				sample.nFineTune = MOD2XMFineTune((signed char)ftune);
 			}
 			else
 			{
-				ftune = CLAMP(ftune + pos, -128, 127);
+				ftune = Clamp(ftune + pos, -128, 127);
 				sample.nFineTune = (signed char)ftune;
 			}
 			SetDlgItemInt(IDC_EDIT5, ftune, TRUE);

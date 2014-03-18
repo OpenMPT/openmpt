@@ -388,7 +388,7 @@ void CCtrlGeneral::OnTempoChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			n = CLAMP(n, m_sndFile.GetModSpecifications().tempoMin, m_sndFile.GetModSpecifications().tempoMax);
+			n = Clamp(n, m_sndFile.GetModSpecifications().tempoMin, m_sndFile.GetModSpecifications().tempoMax);
 			if (n != m_sndFile.m_nDefaultTempo)
 			{
 				m_bEditsLocked=true;
@@ -415,7 +415,7 @@ void CCtrlGeneral::OnSpeedChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			n = CLAMP(n, m_sndFile.GetModSpecifications().speedMin, m_sndFile.GetModSpecifications().speedMax);
+			n = Clamp(n, m_sndFile.GetModSpecifications().speedMin, m_sndFile.GetModSpecifications().speedMax);
 			if (n != m_sndFile.m_nDefaultSpeed)
 			{
 				m_bEditsLocked=true;

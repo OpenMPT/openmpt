@@ -402,7 +402,7 @@ UINT EffectInfo::MapValueToPos(UINT ndx, UINT param) const
 	case CMD_PANNING8:
 		if(sndFile.GetType() == MOD_TYPE_S3M)
 		{
-			pos = CLAMP(param, 0, 0x80);
+			pos = Clamp(param, 0u, 0x80u);
 			if(param == 0xA4)
 				pos = 0x81;
 		}

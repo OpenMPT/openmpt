@@ -473,7 +473,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 			int n = pIns->NoteMap[i];
 			if ((n > NOTE_MIN && nAmount < 0) || (n < NOTE_MAX && nAmount > 0))
 			{
-				n = CLAMP(n + nAmount, NOTE_MIN, NOTE_MAX);
+				n = Clamp(n + nAmount, NOTE_MIN, NOTE_MAX);
 				pIns->NoteMap[i] = (BYTE)n;
 				bModified = true;
 			}
