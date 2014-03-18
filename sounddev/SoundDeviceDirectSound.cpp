@@ -110,8 +110,8 @@ CDSoundDevice::~CDSoundDevice()
 }
 
 
-SoundDeviceCaps CDSoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
-//--------------------------------------------------------------------------------------
+SoundDeviceCaps CDSoundDevice::GetDeviceCaps()
+//--------------------------------------------
 {
 	SoundDeviceCaps caps;
 	caps.CanUpdateInterval = true;
@@ -122,6 +122,14 @@ SoundDeviceCaps CDSoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSamp
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.ExclusiveModeDescription = L"Use primary buffer";
+	return caps;
+}
+
+
+SoundDeviceDynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+//----------------------------------------------------------------------------------------------------
+{
+	SoundDeviceDynamicCaps caps;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)

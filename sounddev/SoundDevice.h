@@ -322,9 +322,6 @@ struct SoundDeviceFlags
 
 struct SoundDeviceCaps
 {
-	uint32 currentSampleRate;
-	std::vector<uint32> supportedSampleRates;	// Which samplerates are actually supported by the device. Currently only implemented properly for ASIO, DirectSound and PortAudio.
-	std::vector<std::wstring> channelNames;
 	bool CanUpdateInterval;
 	bool CanSampleFormat;
 	bool CanExclusiveMode;
@@ -336,8 +333,7 @@ struct SoundDeviceCaps
 	bool HasInternalDither;
 	std::wstring ExclusiveModeDescription;
 	SoundDeviceCaps()
-		: currentSampleRate(0)
-		, CanUpdateInterval(true)
+		: CanUpdateInterval(true)
 		, CanSampleFormat(true)
 		, CanExclusiveMode(false)
 		, CanBoostThreadPriority(true)
@@ -347,6 +343,19 @@ struct SoundDeviceCaps
 		, CanDriverPanel(false)
 		, HasInternalDither(false)
 		, ExclusiveModeDescription(L"Use device exclusively")
+	{
+		return;
+	}
+};
+
+
+struct SoundDeviceDynamicCaps
+{
+	uint32 currentSampleRate;
+	std::vector<uint32> supportedSampleRates;	// Which samplerates are actually supported by the device. Currently only implemented properly for ASIO, DirectSound and PortAudio.
+	std::vector<std::wstring> channelNames;
+	SoundDeviceDynamicCaps()
+		: currentSampleRate(0)
 	{
 		return;
 	}
@@ -465,8 +474,8 @@ public:
 	SoundDeviceIndex GetDeviceIndex() const { return m_ID.GetIndex(); }
 	std::wstring GetDeviceInternalID() const { return m_InternalID; }
 
-	virtual SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
-	virtual bool CanStopMode() const { return false; }
+	virtual SoundDeviceCaps GetDeviceCaps();
+	virtual SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 	bool Open(const SoundDeviceSettings &settings);
 	bool Close();
@@ -555,6 +564,7 @@ class SoundDevicesManager
 private:
 	std::vector<SoundDeviceInfo> m_SoundDevices;
 	std::map<SoundDeviceID, SoundDeviceCaps> m_DeviceCaps;
+	std::map<SoundDeviceID, SoundDeviceDynamicCaps> m_DeviceDynamicCaps;
 
 public:
 	SoundDevicesManager();
@@ -574,7 +584,8 @@ public:
 
 	bool OpenDriverSettings(SoundDeviceID id, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
 
-	SoundDeviceCaps GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr, bool update = false);
+	SoundDeviceCaps GetDeviceCaps(SoundDeviceID id, ISoundDevice *currentSoundDevice = nullptr);
+	SoundDeviceDynamicCaps GetDeviceDynamicCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr, bool update = false);
 
 	ISoundDevice * CreateSoundDevice(SoundDeviceID id);
 

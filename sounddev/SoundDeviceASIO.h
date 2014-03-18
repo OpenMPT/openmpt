@@ -108,8 +108,8 @@ public:
 
 	bool OnIdle() { return HandleRequests(); }
 
-	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
-	bool CanStopMode() const { return true; }
+	SoundDeviceCaps GetDeviceCaps();
+	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 	bool OpenDriverSettings();
 

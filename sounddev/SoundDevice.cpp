@@ -147,10 +147,18 @@ ISoundDevice::~ISoundDevice()
 }
 
 
-SoundDeviceCaps ISoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
-//-------------------------------------------------------------------------------------
+SoundDeviceCaps ISoundDevice::GetDeviceCaps()
+//-------------------------------------------
 {
 	SoundDeviceCaps result;
+	return result;
+}
+
+
+SoundDeviceDynamicCaps ISoundDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+//---------------------------------------------------------------------------------------------------
+{
+	SoundDeviceDynamicCaps result;
 	result.supportedSampleRates = baseSampleRates;
 	return result;
 }
@@ -585,26 +593,48 @@ bool SoundDevicesManager::OpenDriverSettings(SoundDeviceID id, ISoundMessageRece
 }
 
 
-SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice, bool update)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, ISoundDevice *currentSoundDevice)
+//----------------------------------------------------------------------------------------------------
 {
-	if((m_DeviceCaps.find(id) == m_DeviceCaps.end()) || update)
+	if(m_DeviceCaps.find(id) == m_DeviceCaps.end())
 	{
 		if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
 		{
-			m_DeviceCaps[id] = currentSoundDevice->GetDeviceCaps(baseSampleRates);
+			m_DeviceCaps[id] = currentSoundDevice->GetDeviceCaps();
+		} else
+		{
+			ISoundDevice *dummy = CreateSoundDevice(id);
+			if(dummy)
+			{
+				m_DeviceCaps[id] = dummy->GetDeviceCaps();
+			}
+			delete dummy;
+		}
+	}
+	return m_DeviceCaps[id];
+}
+
+
+SoundDeviceDynamicCaps SoundDevicesManager::GetDeviceDynamicCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice, bool update)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	if((m_DeviceDynamicCaps.find(id) == m_DeviceDynamicCaps.end()) || update)
+	{
+		if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
+		{
+			m_DeviceDynamicCaps[id] = currentSoundDevice->GetDeviceDynamicCaps(baseSampleRates);
 		} else
 		{
 			ISoundDevice *dummy = CreateSoundDevice(id);
 			if(dummy)
 			{
 				dummy->SetMessageReceiver(messageReceiver);
-				m_DeviceCaps[id] = dummy->GetDeviceCaps(baseSampleRates);
+				m_DeviceDynamicCaps[id] = dummy->GetDeviceDynamicCaps(baseSampleRates);
 			}
 			delete dummy;
 		}
 	}
-	return m_DeviceCaps[id];
+	return m_DeviceDynamicCaps[id];
 }
 
 

@@ -33,6 +33,7 @@ protected:
 	void SetDevice(SoundDeviceID dev, bool forceReload=false);
 	SoundDeviceInfo m_CurrentDeviceInfo;
 	SoundDeviceCaps m_CurrentDeviceCaps;
+	SoundDeviceDynamicCaps m_CurrentDeviceDynamicCaps;
 	SoundDeviceSettings m_Settings;
 
 public:
