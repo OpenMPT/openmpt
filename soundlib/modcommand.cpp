@@ -556,7 +556,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 
 			case VOLCMD_PANNING:
 				command = CMD_PANNING8;
-				param = CLAMP(vol << 2, 0, 0xFF);
+				param = Clamp(vol << 2, 0, 0xFF);
 				break;
 
 			case VOLCMD_VOLSLIDEDOWN:

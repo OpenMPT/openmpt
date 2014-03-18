@@ -374,9 +374,9 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 				if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
-					memory.state.m_nMusicTempo = CLAMP(memory.state.m_nMusicTempo, 32, 255);
+					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, 32u, 255u);
 				else
-					memory.state.m_nMusicTempo = CLAMP(memory.state.m_nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
+					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
 // -! NEW_FEATURE#0010
 				break;
 
@@ -1271,7 +1271,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
 		// need to memorize the original note for various effects (e.g. PPS)
-		pChn->nNote = CLAMP(realnote, NOTE_MIN, NOTE_MAX);
+		pChn->nNote = Clamp(realnote, NOTE_MIN, NOTE_MAX);
 	} else
 	{
 		pChn->nNote = note;
@@ -3637,7 +3637,7 @@ void CSoundFile::ChannelVolSlide(ModChannel *pChn, UINT param)
 	if (nChnSlide)
 	{
 		nChnSlide += pChn->nGlobalVol;
-		nChnSlide = CLAMP(nChnSlide, 0, 64);
+		nChnSlide = Clamp(nChnSlide, 0, 64);
 		pChn->nGlobalVol = nChnSlide;
 	}
 }
@@ -4728,7 +4728,7 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 	if(setAsNonModcommand)
 	{
 		// Set tempo from UI - ignore slide commands and such.
-		m_PlayState.m_nMusicTempo = CLAMP(param, specs.tempoMin, specs.tempoMax);
+		m_PlayState.m_nMusicTempo = Clamp(param, specs.tempoMin, specs.tempoMax);
 	}
 	else
 	{
@@ -4747,9 +4747,9 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 		// -> CODE#0016
 		// -> DESC="default tempo update"
 			if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
-				m_PlayState.m_nMusicTempo = CLAMP(m_PlayState.m_nMusicTempo, 32, 255);
+				m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, 32u, 255u);
 			else
-				m_PlayState.m_nMusicTempo = CLAMP(m_PlayState.m_nMusicTempo, specs.tempoMin, specs.tempoMax);
+				m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, specs.tempoMin, specs.tempoMax);
 		// -! BEHAVIOUR_CHANGE#0016
 		}
 	}
