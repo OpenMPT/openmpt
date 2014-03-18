@@ -279,8 +279,8 @@ static uint8 DMFtremor2MPT(uint8 val, const uint8 internalTicks)
 {
 	uint8 ontime = (val >> 4);
 	uint8 offtime = (val & 0x0F);
-	ontime = Clamp(ontime * internalTicks / 15, 1, 15);
-	offtime = Clamp(offtime * internalTicks / 15, 1, 15);
+	ontime = static_cast<uint8>(Clamp(ontime * internalTicks / 15, 1, 15));
+	offtime = static_cast<uint8>(Clamp(offtime * internalTicks / 15, 1, 15));
 	return (ontime << 4) | offtime;
 }
 
@@ -742,7 +742,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 						useMem2 = true;
 						break;
 					case 7:		// Scratch to Note (neat! but we don't have such an effect...)
-						m->note = Clamp(effectParam2 + 25, NOTE_MIN, NOTE_MAX);
+						m->note = static_cast<ModCommand::NOTE>(Clamp(effectParam2 + 25, NOTE_MIN, NOTE_MAX));
 						effect2 = CMD_TONEPORTAMENTO;
 						effectParam2 = 0xFF;
 						useMem2 = true;
