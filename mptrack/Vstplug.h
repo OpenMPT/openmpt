@@ -140,6 +140,7 @@ protected:
 	SNDMIXPLUGINSTATE m_MixState;
 	int32 m_nEditorX, m_nEditorY;
 
+	double lastBarStartPos;
 	float m_fGain;
 	PLUGINDEX m_nSlot;
 	bool m_bSongPlaying;
@@ -166,6 +167,7 @@ public:
 
 public:
 	VSTPluginLib &GetPluginFactory() const { return m_Factory; }
+	CVstPlugin *GetNextInstance() const { return m_pNext; }
 	bool HasEditor();
 	VstInt32 GetNumPrograms();
 	PlugParamIndex GetNumParameters();
@@ -226,7 +228,7 @@ public:
 	size_t AddRef() { return ++m_nRefCount; }
 	size_t Release();
 	void SaveAllParameters();
-	void RestoreAllParameters(long nProg=-1); //rewbs.plugDefaultProgram - added param
+	void RestoreAllParameters(long nProg=-1);
 	void RecalculateGain();
 	void Process(float *pOutL, float *pOutR, size_t nSamples);
 	float RenderSilence(size_t numSamples);
@@ -255,9 +257,9 @@ public:
 
 protected:
 	void MidiPitchBend(uint8 nMidiCh, int32 pitchBendPos);
-	// Converts a 14-bit MIDI pitch bend position to a 16.11 fixed point pitch bend position
+	// Converts a 14-bit MIDI pitch bend position to our internal pitch bend position representation
 	static int32 EncodePitchBendParam(int32 position) { return (position << vstPitchBendShift); }
-	// Converts a 16.11 fixed point pitch bend position to a 14-bit MIDI pitch bend position
+	// Converts the internal pitch bend position to a 14-bit MIDI pitch bend position
 	static int16 DecodePitchBendParam(int32 position) { return static_cast<int16>(position >> vstPitchBendShift); }
 	// Apply Pitch Wheel Depth (PWD) to some MIDI pitch bend value.
 	static inline void ApplyPitchWheelDepth(int32 &value, int8 pwd);
@@ -304,7 +306,7 @@ public:
 	bool LoadProgram() { return false; }
 	bool SaveProgram() { return false; }
 	void SetCurrentProgram(VstInt32) {}
-	void SetSlot(UINT) {}
+	void SetSlot(PLUGINDEX) {}
 	void UpdateMixStructPtr(void*) {}
 	void Bypass(bool = true) { }
 	bool IsBypassed() const { return false; }
