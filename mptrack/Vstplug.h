@@ -65,7 +65,7 @@ public:
 	bool isInstrument;
 	bool useBridge, shareBridgeInstance;
 protected:
-	int8 dllBits;
+	uint8 dllBits;
 
 public:
 	VSTPluginLib(const mpt::PathString &dllPath, const mpt::PathString &libraryName)
@@ -74,12 +74,12 @@ public:
 		pluginId1(0), pluginId2(0),
 		category(catUnknown),
 		isInstrument(false), useBridge(false), shareBridgeInstance(false),
-		dllBits(-1)
+		dllBits(0)
 	{
 	}
 
 	// Check whether a plugin can be hosted inside OpenMPT or requires bridging
-	int8 GetDllBits();
+	uint8 GetDllBits();
 	bool IsNative() { return GetDllBits() == sizeof(void *) * 8; }
 
 	void WriteToCache() const;

@@ -44,14 +44,14 @@ static const char *const cacheSection = "PluginCache";
 static const wchar_t *const cacheSectionW = L"PluginCache";
 
 
-int8 VSTPluginLib::GetDllBits()
-//-----------------------------
+uint8 VSTPluginLib::GetDllBits()
+//------------------------------
 {
-	if(dllBits == -1)
+	if(!dllBits)
 	{
-		dllBits = BridgeWrapper::GetPluginBinaryType(dllPath);
+		dllBits = static_cast<uint8>(BridgeWrapper::GetPluginBinaryType(dllPath));
 	}
-	return dllBits != 0;
+	return dllBits;
 }
 
 
