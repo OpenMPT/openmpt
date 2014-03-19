@@ -49,7 +49,7 @@ int8 VSTPluginLib::GetDllBits()
 {
 	if(dllBits == -1)
 	{
-		dllBits = BridgeWrapper::IsPluginNative(dllPath) * 8;
+		dllBits = BridgeWrapper::GetPluginBinaryType(dllPath) * 8;
 	}
 	return dllBits != 0;
 }

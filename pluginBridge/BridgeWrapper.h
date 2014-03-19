@@ -24,13 +24,13 @@ public:
 	enum BinaryType
 	{
 		binUnknown = 0,
-		bin32Bit = 4,
-		bin64Bit = 8,
+		bin32Bit = 32,
+		bin64Bit = 64,
 	};
 
 public:
 	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
-	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == sizeof(void *); }
+	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == sizeof(void *) * 8; }
 	static uint64 GetFileVersion(const WCHAR *exePath);
 
 	static AEffect *Create(const VSTPluginLib &plugin);
