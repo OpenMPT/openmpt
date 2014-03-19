@@ -179,7 +179,7 @@ struct AutomationQueue
 		float value;
 	};
 
-	uint32_t pendingEvents;		// Number of pending automation events
+	LONG pendingEvents;			// Number of pending automation events
 	Parameter params[64];		// Automation events
 };
 
@@ -234,10 +234,10 @@ struct MsgHeader
 		done,		// Slot got handled
 	};
 
-	uint32_t status;		// See BridgeMessageStatus
+	LONG status;			// See BridgeMessageStatus
 	uint32_t size;			// Size of complete message, including this header
 	uint32_t type;			// See BridgeMessageType
-	uint32_t signalID;		// Signal that should be triggered to answer this message
+	LONG signalID;			// Signal that should be triggered to answer this message
 };
 
 

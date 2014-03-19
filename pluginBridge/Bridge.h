@@ -16,7 +16,7 @@
 class PluginBridge : protected BridgeCommon
 {
 public:
-	static uint32_t instanceCount;
+	static LONG instanceCount;
 	static Event sigQuit;
 
 protected:
@@ -28,7 +28,7 @@ protected:
 	HINSTANCE library;
 	ERect windowSize;
 	HWND window, windowParent;
-	uint32_t isProcessing;
+	LONG isProcessing;
 
 	// Static memory for host-to-plugin pointers
 	union
