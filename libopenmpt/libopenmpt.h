@@ -19,9 +19,13 @@
  *
  * \section error Error Handling
  *
- * - Functions with no return value in the corresponding C++ API return 0 on failure and 1 on success.
- * - Functions that return a string in the corresponding C++ API return a dynamically allocated const char *. I case of failure or memory allocation failure, a NULL pointer is returned.
- * - Functions that return integer values signal error condition by returning an invalid value (-1 in most cases, 0 in some cases).
+ * - Functions with no return value in the corresponding C++ API return 0 on
+ * failure and 1 on success.
+ * - Functions that return a string in the corresponding C++ API return a
+ * dynamically allocated const char *. I case of failure or memory allocation
+ * failure, a NULL pointer is returned.
+ * - Functions that return integer values signal error condition by returning
+ * an invalid value (-1 in most cases, 0 in some cases).
  *
  * \section strings Strings
  *
@@ -30,11 +34,11 @@
  * Behaviour in case of invalid UTF-8 is unspecified.
  * - libopenmpt does not enforce or expect any particular unicode
  * normalization form.
- * - All strings returned from libopenmpt are dynamically allocated and must be
- * freed with openmpt_free_string(). Do NOT used C standard library free() for
- * libopenmpt strings as that would make your code invalid on windows when
- * dynamically linking against libopenmpt which itself statically links to the
- * C runtime.
+ * - All strings returned from libopenmpt are dynamically allocated and must
+ * be freed with openmpt_free_string(). Do NOT use the C standard library
+ * free() for libopenmpt strings as that would make your code invalid on
+ * windows when dynamically linking against libopenmpt which itself statically
+ * links to the C runtime.
  * - All strings passed to libopenmpt are copied. No ownership is assumed or
  * transferred.
  *
