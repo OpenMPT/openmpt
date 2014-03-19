@@ -15,6 +15,15 @@
 #include "windows.h"
 
 
+MidiInOutEditor::MidiInOutEditor(AudioEffect *effect) : AEffEditor(effect)
+//------------------------------------------------------------------------
+{
+	editRect.top = editRect.left = 0;
+	editRect.bottom = 130;
+	editRect.right = 350;
+}
+
+
 // Retrieve editor size
 bool MidiInOutEditor::getRect(ERect **rect)
 //-----------------------------------------
@@ -24,11 +33,7 @@ bool MidiInOutEditor::getRect(ERect **rect)
 		return false;
 	}
 
-	editRect.top = editRect.left = 0;
-	editRect.bottom = 130;
-	editRect.right = 350;
 	*rect = &editRect;
-
 	return true;
 }
 
@@ -38,17 +43,17 @@ bool MidiInOutEditor::open(void *ptr)
 //-----------------------------------
 {
 	AEffEditor::open(ptr);
-	Create(ptr);
-
 	HWND parent = static_cast<HWND>(ptr);
 
-	inputLabel.Create(parent, "MIDI Input Device (Sends MIDI data to host):", 10, 5, 330, 20);
-	inputCombo.Create(parent, 10, 25, 330, 20);
+	Create(parent, editRect, _T("MIDIInputOutputEditor"));
 
-	outputLabel.Create(parent, "MIDI Output Device (Receives MIDI data from host):", 10, 55, 330, 20);
-	outputCombo.Create(parent, 10, 75, 330, 20);
+	inputLabel.Create(hwnd, "MIDI Input Device (Sends MIDI data to host):", 10, 5, 330, 20);
+	inputCombo.Create(hwnd, 10, 25, 330, 20);
 
-	latencyCheck.Create(parent, "Compensate for host output latency", 10, 105, 330, 20);
+	outputLabel.Create(hwnd, "MIDI Output Device (Receives MIDI data from host):", 10, 55, 330, 20);
+	outputCombo.Create(hwnd, 10, 75, 330, 20);
+
+	latencyCheck.Create(hwnd, "Compensate for host output latency", 10, 105, 330, 20);
 	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
 	latencyCheck.SetState(realEffect != nullptr ? realEffect->latencyCompensation : true);
 
@@ -151,8 +156,8 @@ void MidiInOutEditor::SetCurrentDevice(ComboBox &combo, PmDeviceID device)
 
 
 // Window processing callback function
-void MidiInOutEditor::WindowCallback(int message, void *param1, void *param2)
-//---------------------------------------------------------------------------
+intptr_t MidiInOutEditor::WindowCallback(int message, void *param1, void *param2)
+//-------------------------------------------------------------------------------
 {
 	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
 	HWND hwnd = static_cast<HWND>(param2);
@@ -172,7 +177,7 @@ void MidiInOutEditor::WindowCallback(int message, void *param1, void *param2)
 				PmDeviceID newDevice = reinterpret_cast<PmDeviceID>(combo.GetSelectionData());
 				realEffect->setParameterAutomated(isInputBox ? MidiInOut::inputParameter : MidiInOut::outputParameter, realEffect->DeviceIDToParameter(newDevice));
 			}
-			break;
+			return 0;
 
 		case CBN_DROPDOWN:
 			if(hwnd == inputCombo.GetHwnd() || hwnd == outputCombo.GetHwnd())
@@ -182,7 +187,7 @@ void MidiInOutEditor::WindowCallback(int message, void *param1, void *param2)
 				ComboBox &combo = isInputBox ? inputCombo : outputCombo;
 				combo.SizeDropdownList();
 			}
-			break;
+			return 0;
 
 		case BN_CLICKED:
 			if(hwnd == latencyCheck.GetHwnd())
@@ -192,6 +197,8 @@ void MidiInOutEditor::WindowCallback(int message, void *param1, void *param2)
 				realEffect->latencyCompensation = latencyCheck.GetState();
 				realEffect->OpenDevice(realEffect->outputDevice.index, false);
 			}
+			return 0;
 		}
 	}
+	return Window::WindowCallback(message, param1, param2);
 }

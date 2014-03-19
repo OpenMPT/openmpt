@@ -42,13 +42,13 @@ public:
 
 	void SetText(const TCHAR *text)
 	{
-		SendMessage(hwnd, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(text));
+		Edit_SetText(hwnd, text);
 	}
 
 
 	template<size_t length>
 	void GetText(TCHAR (&text)[length])
 	{
-		SendMessage(hwnd, WM_GETTEXT, length, reinterpret_cast<LPARAM>(text));
+		Edit_GetText(hwnd, text, length);
 	}
 };

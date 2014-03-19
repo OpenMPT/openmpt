@@ -31,7 +31,7 @@ protected:
 
 public:
 
-	MidiInOutEditor(AudioEffect *effect) : AEffEditor(effect), Window() { };
+	MidiInOutEditor(AudioEffect *effect);
 
 	~MidiInOutEditor()
 	{
@@ -61,5 +61,5 @@ protected:
 	void SetCurrentDevice(ComboBox &combo, PmDeviceID device);
 
 	// Window processing callback function
-	virtual void WindowCallback(int message, void *param1, void *param2);
+	virtual intptr_t WindowCallback(int message, void *param1, void *param2);
 };
