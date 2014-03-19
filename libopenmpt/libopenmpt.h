@@ -57,6 +57,8 @@
  * \include libopenmpt_example_c.c
  * \subsection libopenmpt_c_example_inmemory in memory
  * \include libopenmpt_example_c_mem.c
+ * \subsection libopenmpt_c_example_stdout reading FILE* and writing PCM data to STDOUT (usable without PortAudio)
+ * \include libopenmpt_example_c_stdout.c
  *
  */
 

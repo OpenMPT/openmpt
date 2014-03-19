@@ -322,10 +322,6 @@ CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(
 LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_WAVPACK) $(LDFLAGS_SNDFILE)
 LDLIBS_OPENMPT123   += $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_FLAC) $(LDLIBS_WAVPACK) $(LDLIBS_SNDFILE)
 
-CPPFLAGS_EXAMPLES += $(CPPFLAGS_PORTAUDIO)
-LDFLAGS_EXAMPLES  += $(LDFLAGS_PORTAUDIO)
-LDLIBS_EXAMPLES   += $(LDLIBS_PORTAUDIO)
-
 
 %: %.o
 	$(INFO) [LD] $@
@@ -478,9 +474,13 @@ endif
 ifeq ($(NO_PORTAUDIO),1)
 else
 ifeq ($(EXAMPLES),1)
+ifeq ($(NO_PORTAUDIO),1)
+else
 OUTPUTS += bin/libopenmpt_example_c$(EXESUFFIX)
 OUTPUTS += bin/libopenmpt_example_c_mem$(EXESUFFIX)
 OUTPUTS += bin/libopenmpt_example_cxx$(EXESUFFIX)
+endif
+OUTPUTS += bin/libopenmpt_example_c_stdout$(EXESUFFIX)
 endif
 endif
 ifeq ($(TEST),1)
@@ -592,6 +592,7 @@ endif
 	$(INSTALL_DATA) TODO      $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/TODO
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c.c
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c_mem.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c_mem.c
+	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_c_stdout.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c_stdout.c
 	$(INSTALL_DATA) libopenmpt/examples/libopenmpt_example_cxx.cpp $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_cxx.cpp
 
 .PHONY: install-doc
@@ -749,39 +750,51 @@ endif
 
 libopenmpt/examples/libopenmpt_example_c.o: libopenmpt/examples/libopenmpt_example_c.c
 	$(INFO) [CC] $<
-	$(VERYSILENT)$(CC) $(CFLAGS) $(CFLAGS_EXAMPLES) $(CPPFLAGS) $(CPPFLAGS_EXAMPLES) $(TARGET_ARCH) -M -MT$@ $< > $*.d
-	$(SILENT)$(COMPILE.c) $(CFLAGS_EXAMPLES) $(CPPFLAGS_EXAMPLES) $(OUTPUT_OPTION) $<
+	$(VERYSILENT)$(CC) $(CFLAGS) $(CFLAGS_PORTAUDIO) $(CPPFLAGS) $(CPPFLAGS_PORTAUDIO) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.c) $(CFLAGS_PORTAUDIO) $(CPPFLAGS_PORTAUDIO) $(OUTPUT_OPTION) $<
 libopenmpt/examples/libopenmpt_example_c_mem.o: libopenmpt/examples/libopenmpt_example_c_mem.c
 	$(INFO) [CC] $<
-	$(VERYSILENT)$(CC) $(CFLAGS) $(CFLAGS_EXAMPLES) $(CPPFLAGS) $(CPPFLAGS_EXAMPLES) $(TARGET_ARCH) -M -MT$@ $< > $*.d
-	$(SILENT)$(COMPILE.c) $(CFLAGS_EXAMPLES) $(CPPFLAGS_EXAMPLES) $(OUTPUT_OPTION) $<
+	$(VERYSILENT)$(CC) $(CFLAGS) $(CFLAGS_PORTAUDIO) $(CPPFLAGS) $(CPPFLAGS_PORTAUDIO) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.c) $(CFLAGS_PORTAUDIO) $(CPPFLAGS_PORTAUDIO) $(OUTPUT_OPTION) $<
+libopenmpt/examples/libopenmpt_example_c_stdout.o: libopenmpt/examples/libopenmpt_example_c_stdout.c
+	$(INFO) [CC] $<
+	$(VERYSILENT)$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.c) $(OUTPUT_OPTION) $<
 libopenmpt/examples/libopenmpt_example_cxx.o: libopenmpt/examples/libopenmpt_example_cxx.cpp
 	$(INFO) [CXX] $<
-	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CXXFLAGS_EXAMPLES) $(CPPFLAGS) $(CPPFLAGS_EXAMPLES) $(TARGET_ARCH) -M -MT$@ $< > $*.d
-	$(SILENT)$(COMPILE.cc) $(CXXFLAGS_EXAMPLES) $(CPPFLAGS_EXAMPLES) $(OUTPUT_OPTION) $<
+	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CXXFLAGS_PORTAUDIO) $(CPPFLAGS) $(CPPFLAGS_PORTAUDIO) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.cc) $(CXXFLAGS_PORTAUDIO) $(CPPFLAGS_PORTAUDIO) $(OUTPUT_OPTION) $<
 bin/libopenmpt_example_c$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIO) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIO) -o $@
 ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIO) libopenmpt/examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIO) -o $@
 endif
 bin/libopenmpt_example_c_mem$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIO) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIO) -o $@
 ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIO) libopenmpt/examples/libopenmpt_example_c_mem.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIO) -o $@
+endif
+bin/libopenmpt_example_c_stdout$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_c_stdout.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
+	$(INFO) [LD] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) libopenmpt/examples/libopenmpt_example_c_stdout.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+ifeq ($(HOST),unix)
+	$(SILENT)mv $@ $@.norpath
+	$(INFO) [LD] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) libopenmpt/examples/libopenmpt_example_c_stdout.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 endif
 bin/libopenmpt_example_cxx$(EXESUFFIX): libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIO) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIO) -o $@
 ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_EXAMPLES) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_EXAMPLES) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIO) libopenmpt/examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIO) -o $@
 endif
 
 .PHONY: clean
