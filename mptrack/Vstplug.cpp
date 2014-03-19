@@ -412,7 +412,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
 			if(pVstEditor && ::IsWindow(pVstEditor->m_hWnd))
 			{
-				pVstEditor->SetupMenu(true);
+				pVstEditor->UpdateDisplay();
 			}
 		}
 		return 0;
@@ -652,8 +652,9 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 // CVstPlugin
 //
 
-CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixStruct, AEffect &effect, CSoundFile &sndFile) : m_SndFile(sndFile), m_Factory(factory), m_Effect(effect)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixStruct, AEffect &effect, CSoundFile &sndFile)
+	: m_SndFile(sndFile), m_Factory(factory), m_Effect(effect), isBridged(!memcmp(&effect.resvd2, "OMPT", 4))
+//-----------------------------------------------------------------------------------------------------------
 {
 	m_hLibrary = hLibrary;
 	m_nRefCount = 1;
@@ -709,8 +710,7 @@ void CVstPlugin::Initialize()
 	m_bPassKeypressesToPlug = false;
 	m_bRecordMIDIOut = false;
 
-	//rewbs.VSTcompliance
-	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
+	// Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	m_Effect.resvd1 = ToVstPtr(this);
 	m_nSlot = FindSlot();
 	m_nSampleRate = m_SndFile.GetSampleRate();
@@ -815,7 +815,8 @@ bool CVstPlugin::InitializeIOBuffers()
 //------------------------------------
 {
 	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
-	bool result = mixBuffer.Initialize(MAX(m_Effect.numInputs, 2), m_Effect.numOutputs);
+	// In case of a bridged plugin, the AEffect struct has been updated before calling this opcode, so we don't have to worry about it being up-to-date.
+	bool result = mixBuffer.Initialize(std::max<size_t>(m_Effect.numInputs, 2), m_Effect.numOutputs);
 	m_MixState.pOutBufferL = mixBuffer.GetInputBuffer(0);
 	m_MixState.pOutBufferR = mixBuffer.GetInputBuffer(1);
 
@@ -1487,7 +1488,10 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		}
 
 		float **outputBuffers = mixBuffer.GetOutputBufferArray();
-		mixBuffer.ClearOutputBuffers(nSamples);
+		if(!isBridged)
+		{
+			mixBuffer.ClearOutputBuffers(nSamples);
+		}
 
 		// Do the VST processing magic
 		try
@@ -1533,7 +1537,10 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 			}
 		}
 
-		ProcessMixOps(pOutL, pOutR, nSamples);
+		if(m_Effect.numOutputs != 0)
+		{
+			ProcessMixOps(pOutL, pOutR, outputBuffers[0], outputBuffers[m_Effect.numOutputs > 1 ? 1 : 0], nSamples);
+		}
 
 		// If dry mix is ticked, we add the unprocessed buffer,
 		// except if this is an instrument since this it has already been done:
@@ -1551,10 +1558,10 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 }
 
 
-void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples)
-//-------------------------------------------------------------------------
+void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, size_t nSamples)
+//------------------------------------------------------------------------------------------------------------------------
 {
-	float *leftPlugOutput;
+/*	float *leftPlugOutput;
 	float *rightPlugOutput;
 
 	if(m_Effect.numOutputs == 1)
@@ -1569,7 +1576,7 @@ void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples)
 	} else
 	{
 		return;
-	}
+	}*/
 
 	// -> mixop == 0 : normal processing
 	// -> mixop == 1 : MIX += DRY - WET * wetRatio

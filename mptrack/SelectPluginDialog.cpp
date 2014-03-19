@@ -14,9 +14,11 @@
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "Moddoc.h"
-#include "SelectPluginDialog.h"
 #include "../common/StringFixer.h"
 #include "FileDialog.h"
+#include "Vstplug.h"
+#include "SelectPluginDialog.h"
+#include "../pluginBridge/BridgeWrapper.h"
 
 
 #ifndef NO_VST
@@ -31,6 +33,8 @@ BEGIN_MESSAGE_MAP(CSelectPluginDlg, CDialog)
 	ON_COMMAND(IDC_BUTTON1,			OnAddPlugin)
 	ON_COMMAND(IDC_BUTTON3,			OnScanFolder)
 	ON_COMMAND(IDC_BUTTON2,			OnRemovePlugin)
+	ON_COMMAND(IDC_CHECK1,			OnSetBridge)
+	ON_COMMAND(IDC_CHECK2,			OnSetBridge)
 	ON_EN_CHANGE(IDC_NAMEFILTER,	OnNameFilterChanged)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
@@ -42,6 +46,8 @@ void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TREE1, m_treePlugins);
+	DDX_Control(pDX, IDC_CHECK1, m_chkBridge);
+	DDX_Control(pDX, IDC_CHECK2, m_chkShare);
 }
 
 
@@ -51,6 +57,9 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent
 	m_pPlugin = NULL;
 	m_pModDoc = pModDoc;
 	m_nPlugSlot = nPlugSlot;
+
+	hasBridge32 = Util::sdOs::IsPathFileAvailable(theApp.GetAppDirPath() + MPT_PATHSTRING("PluginBridge32.exe"), Util::sdOs::FileModeExists);
+	hasBridge64 = Util::sdOs::IsPathFileAvailable(theApp.GetAppDirPath() + MPT_PATHSTRING("PluginBridge64.exe"), Util::sdOs::FileModeExists);
 
 	if(m_pModDoc)
 	{
@@ -110,7 +119,7 @@ void CSelectPluginDlg::OnOK()
 
 	bool changed = false;
 	CVstPluginManager *pManager = theApp.GetPluginManager();
-	VSTPluginLib *pNewPlug = (VSTPluginLib *)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
+	VSTPluginLib *pNewPlug = GetSelectedPlugin();
 	VSTPluginLib *pFactory = nullptr;
 	CVstPlugin *pCurrentPlugin = nullptr;
 	if (m_pPlugin) pCurrentPlugin = dynamic_cast<CVstPlugin *>(m_pPlugin->pMixPlugin);
@@ -157,6 +166,9 @@ void CSelectPluginDlg::OnOK()
 					{
 						mpt::String::Copy(m_pPlugin->Info.szName, s);
 					}
+				} else
+				{
+					MemsetZero(m_pPlugin->Info);
 				}
 			}
 			changed = true;
@@ -418,22 +430,47 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 //-----------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
-	VSTPluginLib *pPlug = (VSTPluginLib *)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
+	VSTPluginLib *pPlug = GetSelectedPlugin();
+	int showBoxes = SW_HIDE;
 	if ((pManager) && (pManager->IsValidPlugin(pPlug)))
 	{
 		SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
+		if(pPlug->pluginId1 == kEffectMagic)
+		{
+			bool isBridgeAvailable = (hasBridge32 && pPlug->GetDllBits() == 32) || (hasBridge64 && pPlug->GetDllBits() == 64);
+			if(TrackerSettings::Instance().bridgeAllPlugins || !isBridgeAvailable)
+			{
+				m_chkBridge.EnableWindow(FALSE);
+				m_chkBridge.SetCheck(isBridgeAvailable ? BST_CHECKED : BST_UNCHECKED);
+			} else
+			{
+				bool native = pPlug->IsNative();
+
+				m_chkBridge.EnableWindow(native ? TRUE : FALSE);
+				m_chkBridge.SetCheck((pPlug->useBridge || !native) ? BST_CHECKED : BST_UNCHECKED);
+			}
+
+			m_chkShare.SetCheck(pPlug->shareBridgeInstance ? BST_CHECKED : BST_UNCHECKED);
+			m_chkShare.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
+
+			showBoxes = SW_SHOW;
+		} else
+		{
+		}
 	} else
 	{
 		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, "");
 	}
+	m_chkBridge.ShowWindow(showBoxes);
+	m_chkShare.ShowWindow(showBoxes);
 	if (result) *result = 0;
 }
 
 
-bool CSelectPluginDlg::VerifyPlug(const VSTPluginLib *plug)
-//---------------------------------------------------------
+bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug)
+//---------------------------------------------------
 {
-	// TODO: Keep this list up-to-date.
+	// TODO: Keep these lists up-to-date.
 	static const struct
 	{
 		VstInt32 id1;
@@ -444,8 +481,22 @@ bool CSelectPluginDlg::VerifyPlug(const VSTPluginLib *plug)
 	{
 		{ kEffectMagic, CCONST('N', 'i', '4', 'S'), "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5 or newer.  *" },
 		{ kEffectMagic, CCONST('m', 'd', 'a', 'C'), "MDA Degrade", "*  Old versions of this plugin can crash OpenMPT.\nEnsure that you have the latest version of this plugin.  *" },
-		{ kEffectMagic, CCONST('f', 'V', '2', 's'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins.  *" },
-		{ kEffectMagic, CCONST('f', 'r', 'V', '2'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins.  *" },
+		{ kEffectMagic, CCONST('f', 'V', '2', 's'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
+		{ kEffectMagic, CCONST('f', 'r', 'V', '2'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
+	};
+
+	// Plugins that should always be bridged.
+	static const struct
+	{
+		VstInt32 id1;
+		VstInt32 id2;
+		bool useBridge;
+		bool shareInstance;
+	} bridgedPlugs[] =
+	{
+		{ kEffectMagic, CCONST('f', 'V', '2', 's'), true, true },	// Single instances of V2 can communicate (I think)
+		{ kEffectMagic, CCONST('f', 'r', 'V', '2'), true, false },
+		{ kEffectMagic, CCONST('S', 'K', 'V', '3'), false, true },	// SideKick v3 always has to run in a shared instance
 	};
 
 	for(size_t p = 0; p < CountOf(problemPlugs); p++)
@@ -454,7 +505,22 @@ bool CSelectPluginDlg::VerifyPlug(const VSTPluginLib *plug)
 		{
 			CString s;
 			s.Format("WARNING: This plugin has been identified as %s,\nwhich is known to have the following problem with OpenMPT:\n\n%s\n\nWould you still like to add this plugin to the library?", problemPlugs[p].name, problemPlugs[p].problem);
-			return (Reporting::Confirm(s, false, false, this) == cnfYes);
+			if(Reporting::Confirm(s, false, false, this) == cnfNo)
+			{
+				return false;
+			}
+			break;
+		}
+	}
+
+	for(size_t p = 0; p < CountOf(bridgedPlugs); p++)
+	{
+		if(bridgedPlugs[p].id2 == plug->pluginId2 && bridgedPlugs[p].id1 == plug->pluginId1)
+		{
+			plug->useBridge = bridgedPlugs[p].useBridge;
+			plug->shareBridgeInstance = bridgedPlugs[p].shareInstance;
+			plug->WriteToCache();
+			break;
 		}
 	}
 
@@ -583,7 +649,7 @@ void CSelectPluginDlg::OnRemovePlugin()
 //-------------------------------------
 {
 	const HTREEITEM pluginToDelete = m_treePlugins.GetSelectedItem();
-	VSTPluginLib *pPlug = (VSTPluginLib *)m_treePlugins.GetItemData(pluginToDelete);
+	VSTPluginLib *pPlug = GetSelectedPlugin();
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 
 	if ((pManager) && (pPlug))
@@ -596,6 +662,25 @@ void CSelectPluginDlg::OnRemovePlugin()
 }
 
 
+void CSelectPluginDlg::OnSetBridge()
+//----------------------------------
+{
+	VSTPluginLib *plug = GetSelectedPlugin();
+	if(plug)
+	{
+		if(m_chkBridge.IsWindowEnabled())
+		{
+			// Only update this setting if the current setting isn't an enforced setting (e.g. because plugin isn't native).
+			// This has the advantage that plugins don't get force-checked when switching between 32-bit and 64-bit versions of OpenMPT.
+			plug->useBridge = m_chkBridge.GetCheck() != BST_UNCHECKED;
+		}
+		m_chkShare.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
+		plug->shareBridgeInstance = m_chkShare.GetCheck() != BST_UNCHECKED;
+		plug->WriteToCache();
+	}
+}
+
+
 void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 //-------------------------------------------------------
 {
@@ -603,17 +688,19 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 
 	if (m_treePlugins)
 	{
-		m_treePlugins.MoveWindow(8, 36, cx - 104, cy - 63, FALSE);
+		m_treePlugins.MoveWindow(8, 36, cx - 104, cy - 88, FALSE);
 
 		GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->MoveWindow(8, 11, 40, 21, FALSE);
 		GetDlgItem(IDC_NAMEFILTER)->MoveWindow(40, 8, cx - 136, 21, FALSE);
-		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(8, cy - 20, cx - 22, 25, FALSE);
+		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(8, cy - 45, cx - 22, 20, FALSE);
+		m_chkBridge.MoveWindow(8, cy - 25, 110, 20, FALSE);
+		m_chkShare.MoveWindow(120, cy - 25, cx - 128, 20, FALSE);
 		const int rightOff = cx - 85;	// Offset of right button column
 		GetDlgItem(IDOK)->MoveWindow(		rightOff,	8,			75, 23, FALSE);
 		GetDlgItem(IDCANCEL)->MoveWindow(	rightOff,	39,			75, 23, FALSE);
-		GetDlgItem(IDC_BUTTON1)->MoveWindow(rightOff,	cy - 108,	75, 23, FALSE);
-		GetDlgItem(IDC_BUTTON3)->MoveWindow(rightOff,	cy - 80,	75, 23, FALSE);
-		GetDlgItem(IDC_BUTTON2)->MoveWindow(rightOff,	cy - 52,	75, 23, FALSE);
+		GetDlgItem(IDC_BUTTON1)->MoveWindow(rightOff,	cy - 133,	75, 23, FALSE);
+		GetDlgItem(IDC_BUTTON3)->MoveWindow(rightOff,	cy - 105,	75, 23, FALSE);
+		GetDlgItem(IDC_BUTTON2)->MoveWindow(rightOff,	cy - 77,	75, 23, FALSE);
 		Invalidate();
 	}
 }
@@ -621,7 +708,7 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 //-------------------------------------------------------
 {
-	lpMMI->ptMinTrackSize.x = 300;
+	lpMMI->ptMinTrackSize.x = 350;
 	lpMMI->ptMinTrackSize.y = 270;
 	CDialog::OnGetMinMaxInfo(lpMMI);
 }

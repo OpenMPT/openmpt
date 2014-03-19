@@ -67,7 +67,7 @@ public:
 	CDefaultVstEditor(CVstPlugin &plugin);
 	virtual ~CDefaultVstEditor();
 
-	void UpdateParamDisplays() { UpdateControls(false); };
+	virtual void UpdateParamDisplays() { CAbstractVstEditor::UpdateParamDisplays(); UpdateControls(false); };
 
 	virtual void OnOK();
 	virtual void OnCancel();

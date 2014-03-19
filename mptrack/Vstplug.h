@@ -33,6 +33,7 @@ class CSoundFile;
 
 struct VSTPluginLib
 {
+public:
 	enum PluginCategory
 	{
 		// Same plugin categories as defined in VST SDK
@@ -54,6 +55,7 @@ struct VSTPluginLib
 		numCategories,
 	};
 
+public:
 	CVstPlugin *pPluginsList;		// Pointer to first plugin instance (this instance carries pointers to other instances)
 	mpt::PathString libraryName;	// Display name
 	mpt::PathString dllPath;		// Full path name
@@ -61,24 +63,36 @@ struct VSTPluginLib
 	VstInt32 pluginId2;				// Plugin unique ID
 	PluginCategory category;
 	bool isInstrument;
+	bool useBridge, shareBridgeInstance;
+protected:
+	int8 dllBits;
 
+public:
 	VSTPluginLib(const mpt::PathString &dllPath, const mpt::PathString &libraryName)
 		: pPluginsList(nullptr),
 		libraryName(libraryName), dllPath(dllPath),
 		pluginId1(0), pluginId2(0),
 		category(catUnknown),
-		isInstrument(false)
+		isInstrument(false), useBridge(false), shareBridgeInstance(false),
+		dllBits(-1)
 	{
 	}
 
+	// Check whether a plugin can be hosted inside OpenMPT or requires bridging
+	int8 GetDllBits();
+	bool IsNative() { return GetDllBits() == sizeof(void *); }
+
+	void WriteToCache() const;
+
 	uint32 EncodeCacheFlags() const
 	{
-		return (isInstrument ? 1 : 0) | (category << 1);
+		// Format: 00000000.00000000.000000SB.CCCCCCCI
+		return (isInstrument ? 1 : 0) | (category << 1) | (useBridge ? 0x100 : 0) | (shareBridgeInstance ? 0x200 : 0);
 	}
 
 	void DecodeCacheFlags(uint32 flags)
 	{
-		category = static_cast<PluginCategory>(flags >> 1);
+		category = static_cast<PluginCategory>((flags & 0xFF) >> 1);
 		if(category >= numCategories)
 		{
 			category = catUnknown;
@@ -87,6 +101,14 @@ struct VSTPluginLib
 		{
 			isInstrument = true;
 			category = catSynth;
+		}
+		if(flags & 0x100)
+		{
+			useBridge = true;
+		}
+		if(flags & 0x200)
+		{
+			shareBridgeInstance = true;
 		}
 	}
 };
@@ -159,6 +181,7 @@ public:
 	bool m_bRecordAutomation;
 	bool m_bPassKeypressesToPlug;
 	bool m_bRecordMIDIOut;
+	const bool isBridged;		// True if our built-in plugin bridge is being used.
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, AEffect &effect, CSoundFile &sndFile);
@@ -238,11 +261,11 @@ public:
 	void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd);
 	void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd);
 	void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel);
-	void HardAllNotesOff(); //rewbs.VSTiNoteHoldonStopFix
-	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST
-	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn); //rewbs.instroVST
-	void NotifySongPlaying(bool playing);	//rewbs.VSTCompliance
-	bool IsSongPlaying() {return m_bSongPlaying;}	//rewbs.VSTCompliance
+	void HardAllNotesOff();
+	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);
+	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn);
+	void NotifySongPlaying(bool playing);
+	bool IsSongPlaying() const { return m_bSongPlaying; }
 	bool IsResumed() {return m_bPlugResumed;}
 	void Resume();
 	void Suspend();
@@ -276,7 +299,7 @@ protected:
 	void ProcessVSTEvents();
 	void ReceiveVSTEvents(const VstEvents *events) const;
 
-	void ProcessMixOps(float *pOutL, float *pOutR, size_t nSamples);
+	void ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, size_t nSamples);
 
 	void ReportPlugException(std::wstring text) const;
 
@@ -310,6 +333,7 @@ public:
 	void UpdateMixStructPtr(void*) {}
 	void Bypass(bool = true) { }
 	bool IsBypassed() const { return false; }
+	bool IsSongPlaying() const { return false; }
 
 #endif // NO_VST
 };
@@ -347,12 +371,14 @@ public:
 
 protected:
 	void EnumerateDirectXDMOs();
-	AEffect *LoadPlugin(const mpt::PathString &pluginPath, HINSTANCE &library);
+	AEffect *LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
+
+public:
+	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 
 protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel, const CVstPlugin *plugin);
-	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static bool CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);
 	VstTimeInfo timeInfo;
 

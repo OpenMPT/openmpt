@@ -60,6 +60,16 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 	{
 		// Program
 		PlugParamIndex numParams = file.ReadUint32BE();
+
+		VstPatchChunkInfo info;
+		info.version = 1;
+		info.pluginUniqueID = header.fxID;
+		info.pluginVersion = header.fxVersion;
+		info.numElements = numParams;
+		MemsetZero(info.future);
+		plugin.Dispatch(effBeginLoadProgram, 0, 0, &info, 0.0f);
+		plugin.Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
+
 		char prgName[28];
 		file.ReadString<mpt::String::maybeNullTerminated>(prgName, 28);
 		plugin.Dispatch(effSetProgramName, 0, 0, prgName, 0.0f);
@@ -79,6 +89,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 			FileReader chunk = file.ReadChunk(file.ReadUint32BE());
 			plugin.Dispatch(effSetChunk, 1, chunk.GetLength(), const_cast<char *>(chunk.GetRawData()), 0);
 		}
+		plugin.Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
 	} else if((header.fxMagic == bankMagic || header.fxMagic == chunkBankMagic) && firstChunk)
 	{
 		// Bank - only read if it's the first chunk in the file, not if it's a sub chunk.
@@ -86,17 +97,27 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 		uint32 currentProgram = file.ReadUint32BE();
 		file.Skip(124);
 
+		VstPatchChunkInfo info;
+		info.version = 1;
+		info.pluginUniqueID = header.fxID;
+		info.pluginVersion = header.fxVersion;
+		info.numElements = numProgs;
+		MemsetZero(info.future);
+		plugin.Dispatch(effBeginLoadBank, 0, 0, &info, 0.0f);
+
 		if(header.fxMagic == bankMagic)
 		{
 			VstInt32 oldCurrentProgram = plugin.GetCurrentProgram();
 			for(uint32 p = 0; p < numProgs; p++)
 			{
-				plugin.SetCurrentProgram(p);
+				plugin.Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
+				plugin.Dispatch(effSetProgram, 0, 0, nullptr, 0.0f);
 				ErrorCode retVal = LoadFile(file, plugin);
 				if(retVal != noError)
 				{
 					return retVal;
 				}
+				plugin.Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
 			}
 			plugin.SetCurrentProgram(oldCurrentProgram);
 		} else
