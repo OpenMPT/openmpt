@@ -18,6 +18,7 @@
 
 BEGIN_MESSAGE_MAP(COwnerVstEditor, CAbstractVstEditor)
 	ON_WM_ERASEBKGND()
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -35,6 +36,24 @@ COwnerVstEditor::~COwnerVstEditor()
 }
 
 
+void COwnerVstEditor::OnPaint()
+//-----------------------------
+{
+	CAbstractVstEditor::OnPaint();
+	if(m_VstPlugin.isBridged)
+	{
+		// Instantly redraw bridged plugins so that we don't have to wait for their periodic refresh.
+		// This usually makes the timer used in the bridge unnecessary, but not always.
+		CRect rect;
+		if(plugWindow.GetUpdateRect(&rect, FALSE))
+		{
+			CWnd *child = plugWindow.GetWindow(GW_CHILD | GW_HWNDFIRST);
+			if(child) child->RedrawWindow(&rect, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
+		}
+	}
+}
+
+
 bool COwnerVstEditor::OpenEditor(CWnd *parent)
 //--------------------------------------------
 {
@@ -46,14 +65,18 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 	SetupMenu();
 
 	// Set editor window size
+	ERect rect;
+	MemsetZero(rect);
 	ERect *pRect = nullptr;
 	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+	if(pRect) rect = *pRect;
 	m_VstPlugin.Dispatch(effEditOpen, 0, 0, plugWindow.m_hWnd, 0);
 	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
-	if((pRect) && (pRect->right > pRect->left) && (pRect->bottom > pRect->top))
+	if(pRect) rect = *pRect;
+	if(rect.right > rect.left && rect.bottom > rect.top)
 	{
 		// Plugin provided valid window size.
-		SetSize(pRect->right - pRect->left, pRect->bottom - pRect->top);
+		SetSize(rect.right - rect.left, rect.bottom - rect.top);
 	}
 
 	// Restore previous editor position

@@ -29,6 +29,7 @@ protected:
 	CMenu m_OptionsMenu;
 	static UINT clipboardFormat;
 	int32 currentPresetMenu;
+	bool updateDisplay;
 
 public:
 	CVstPlugin &m_VstPlugin;
@@ -69,12 +70,14 @@ public:
 	virtual void OnCancel() = 0;
 	virtual bool OpenEditor(CWnd *parent) = 0;
 	virtual void DoClose() = 0;
-	virtual void UpdateParamDisplays() = 0;
+	virtual void UpdateParamDisplays() { if(updateDisplay) { SetupMenu(true); updateDisplay = false; } }
 	virtual afx_msg void OnClose() = 0;
 	virtual void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
 
 	virtual bool IsResizable() const = 0;
 	virtual bool SetSize(int contentWidth, int contentHeight) = 0;
+
+	void UpdateDisplay() { updateDisplay = true; }
 
 	DECLARE_MESSAGE_MAP()
 

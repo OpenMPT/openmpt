@@ -169,9 +169,6 @@
     <ClCompile Include="..\common\stdafx.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\plugins\JBridge.cpp">
-      <Filter>Source Files\soundlib\plugins</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\Dlsbank.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
@@ -511,6 +508,9 @@
     <ClCompile Include="AppendModule.cpp">
       <Filter>Header Files\mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\pluginBridge\BridgeWrapper.cpp">
+      <Filter>Source Files\pluginBridgeWrapper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -605,9 +605,6 @@
     </ClInclude>
     <ClInclude Include="..\common\stdafx.h">
       <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\soundlib\plugins\JBridge.h">
-      <Filter>Header Files\soundlib\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\plugins\PlugInterface.h">
       <Filter>Header Files\soundlib\plugins</Filter>
@@ -996,6 +993,15 @@
     <ClInclude Include="..\sounddev\SoundDeviceThread.h">
       <Filter>Header Files\sounddev</Filter>
     </ClInclude>
+    <ClInclude Include="..\pluginBridge\AEffectWrapper.h">
+      <Filter>Header Files\pluginBridgeWrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\pluginBridge\BridgeCommon.h">
+      <Filter>Header Files\pluginBridgeWrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\pluginBridge\BridgeWrapper.h">
+      <Filter>Header Files\pluginBridgeWrapper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
@@ -1149,6 +1155,12 @@
     </Filter>
     <Filter Include="Source Files\unarchiver">
       <UniqueIdentifier>{2e5a8242-6eec-48cd-93b3-5880bee8b740}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pluginBridgeWrapper">
+      <UniqueIdentifier>{d5f79087-1086-472a-a35b-402923a7f138}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pluginBridgeWrapper">
+      <UniqueIdentifier>{c5ca412e-0120-4e25-a6c0-945eedd7a0de}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

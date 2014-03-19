@@ -453,6 +453,7 @@
     <ClCompile Include="..\common\serialization_utils.cpp" />
     <ClCompile Include="..\common\typedefs.cpp" />
     <ClCompile Include="..\common\version.cpp" />
+    <ClCompile Include="..\pluginBridge\BridgeWrapper.cpp" />
     <ClCompile Include="..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\sounddev\SoundDeviceASIO.cpp" />
     <ClCompile Include="..\sounddev\SoundDeviceDirectSound.cpp" />
@@ -491,7 +492,6 @@
     <ClCompile Include="..\soundlib\pattern.cpp" />
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
     <ClCompile Include="..\soundlib\plugins\DmoToVst.cpp" />
-    <ClCompile Include="..\soundlib\plugins\JBridge.cpp" />
     <ClCompile Include="..\soundlib\plugins\PluginManager.cpp" />
     <ClCompile Include="..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="..\soundlib\S3MTools.cpp" />
@@ -654,6 +654,9 @@
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\common\version.h" />
     <ClInclude Include="..\common\versionNumber.h" />
+    <ClInclude Include="..\pluginBridge\AEffectWrapper.h" />
+    <ClInclude Include="..\pluginBridge\BridgeCommon.h" />
+    <ClInclude Include="..\pluginBridge\BridgeWrapper.h" />
     <ClInclude Include="..\sounddev\SoundDevice.h" />
     <ClInclude Include="..\sounddev\SoundDeviceASIO.h" />
     <ClInclude Include="..\sounddev\SoundDeviceDirectSound.h" />
@@ -690,7 +693,6 @@
     <ClInclude Include="..\soundlib\mod_specifications.h" />
     <ClInclude Include="..\soundlib\pattern.h" />
     <ClInclude Include="..\soundlib\patternContainer.h" />
-    <ClInclude Include="..\soundlib\plugins\JBridge.h" />
     <ClInclude Include="..\soundlib\plugins\PluginEventQueue.h" />
     <ClInclude Include="..\soundlib\plugins\PluginMixBuffer.h" />
     <ClInclude Include="..\soundlib\plugins\PlugInterface.h" />

@@ -349,7 +349,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\plugins\JBridge.cpp"
+				RelativePath="..\pluginBridge\BridgeWrapper.cpp"
 				>
 			</File>
 			<File
@@ -999,7 +999,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\soundlib\plugins\JBridge.h"
+				RelativePath="..\pluginBridge\BridgeWrapper.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pluginBridge\BridgeCommon.h"
 				>
 			</File>
 			<File

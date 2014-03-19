@@ -471,6 +471,9 @@ public:
 	// Chords
 	MPTChords Chords;
 
+	// Plugins
+	Setting<bool> bridgeAllPlugins;
+
 public:
 
 	TrackerSettings(SettingsContainer &conf);

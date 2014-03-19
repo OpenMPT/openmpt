@@ -216,6 +216,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, defaultTemplateFile(conf, "Paths", "DefaultTemplate", mpt::PathString())
 	// MRU List
 	, mruListLength(conf, "Misc", "MRUListLength", 10)
+	// Plugins
+	, bridgeAllPlugins(conf, "VST Plugins", "BridgeAllPlugins", false)
 {
 	// Effects
 #ifndef NO_DSP
