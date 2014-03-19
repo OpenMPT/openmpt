@@ -60,7 +60,7 @@ public:
 	virtual void AutomateParameter(PlugParamIndex param) = 0;
 	virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt) =0; //rewbs.VSTCompliance
 	virtual void NotifySongPlaying(bool) = 0;	//rewbs.VSTCompliance
-	virtual bool IsSongPlaying() = 0;
+	virtual bool IsSongPlaying() const = 0;
 	virtual bool IsResumed() = 0;
 	virtual void Resume() = 0;
 	virtual void Suspend() = 0;

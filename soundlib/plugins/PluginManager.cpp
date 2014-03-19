@@ -19,7 +19,7 @@
 #include "../../common/AudioCriticalSection.h"
 #include "../../common/StringFixer.h"
 #include "../Sndfile.h"
-#include "JBridge.h"
+#include "../../pluginBridge/BridgeWrapper.h"
 
 // For CRC32 calculation (to tell plugins with same UID apart in our cache file)
 #if !defined(NO_ZLIB)
@@ -44,30 +44,41 @@ static const char *const cacheSection = "PluginCache";
 static const wchar_t *const cacheSectionW = L"PluginCache";
 
 
+int8 VSTPluginLib::GetDllBits()
+//-----------------------------
+{
+	if(dllBits == -1)
+	{
+		dllBits = BridgeWrapper::IsPluginNative(dllPath) * 8;
+	}
+	return dllBits != 0;
+}
+
+
 // PluginCache format:
 // LibraryName = <ID1><ID2><CRC32> (hex-encoded)
 // <ID1><ID2><CRC32> = FullDllPath
 // <ID1><ID2><CRC32>.Flags = Plugin Flags (set VSTPluginLib::DecodeCacheFlags).
 
-static void WriteToCache(const VSTPluginLib &lib)
-//-----------------------------------------------
+void VSTPluginLib::WriteToCache() const
+//-------------------------------------
 {
 	SettingsContainer &cacheFile = theApp.GetPluginCache();
 
-	const std::string libName = lib.libraryName.ToUTF8();
+	const std::string libName = libraryName.ToUTF8();
 	const uint32 crc = crc32(0, reinterpret_cast<const Bytef *>(&libName[0]), libName.length());
-	const std::string IDs = mpt::String::Format("%08X%08X%08X", SwapBytesReturnLE(lib.pluginId1), SwapBytesReturnLE(lib.pluginId2), SwapBytesReturnLE(crc));
+	const std::string IDs = mpt::String::Format("%08X%08X%08X", SwapBytesReturnLE(pluginId1), SwapBytesReturnLE(pluginId2), SwapBytesReturnLE(crc));
 	const std::string flagsKey = IDs + ".Flags";
 
-	mpt::PathString writePath = lib.dllPath;
+	mpt::PathString writePath = dllPath;
 	if(theApp.IsPortableMode())
 	{
 		writePath = theApp.AbsolutePathToRelative(writePath);
 	}
 
-	cacheFile.Write<std::string>(cacheSectionW, lib.libraryName.ToWide(), IDs);
+	cacheFile.Write<std::string>(cacheSectionW, libraryName.ToWide(), IDs);
 	cacheFile.Write<mpt::PathString>(cacheSection, IDs, writePath);
-	cacheFile.Write<int32>(cacheSection, flagsKey, lib.EncodeCacheFlags());
+	cacheFile.Write<int32>(cacheSection, flagsKey, EncodeCacheFlags());
 }
 
 
@@ -180,11 +191,22 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 }
 
 
-AEffect *CVstPluginManager::LoadPlugin(const mpt::PathString &pluginPath, HINSTANCE &library)
-//-------------------------------------------------------------------------------------------
+AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge)
+//------------------------------------------------------------------------------------------------------
 {
+	const mpt::PathString &pluginPath = plugin.dllPath;
+
 	AEffect *effect = nullptr;
 	library = nullptr;
+
+	if(forceBridge || plugin.useBridge || !BridgeWrapper::IsPluginNative(pluginPath))
+	{
+		effect = BridgeWrapper::Create(plugin);
+		if(effect != nullptr)
+		{
+			return effect;
+		}
+	}
 
 	try
 	{
@@ -205,7 +227,7 @@ AEffect *CVstPluginManager::LoadPlugin(const mpt::PathString &pluginPath, HINSTA
 
 			if(error == ERROR_MOD_NOT_FOUND)
 			{
-				// No point in trying with JBride, either...
+				// No point in trying bridging, either...
 				return nullptr;
 			}
 		}
@@ -236,10 +258,11 @@ AEffect *CVstPluginManager::LoadPlugin(const mpt::PathString &pluginPath, HINSTA
 
 	if(effect == nullptr)
 	{
-		// Try loading the plugin using JBridge instead.
+		// Re-try loading the plugin using our bridge instead.
 		FreeLibrary(library);
 		library = nullptr;
-		effect = JBridge::LoadBridgedPlugin(MasterCallBack, pluginPath);
+
+		effect = BridgeWrapper::Create(plugin);
 	}
 	return effect;
 }
@@ -350,7 +373,8 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 
 	try
 	{
-		pEffect = LoadPlugin(dllPath, hLib);
+		// Always scan plugins in a separate process
+		pEffect = LoadPlugin(*plug, hLib, true);
 
 		if(pEffect != nullptr && pEffect->magic == kEffectMagic && pEffect->dispatcher != nullptr)
 		{
@@ -389,7 +413,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	if(validPlug)
 	{
 		pluginList.push_back(plug);
-		WriteToCache(*plug);
+		plug->WriteToCache();
 	} else
 	{
 		delete plug;
@@ -511,7 +535,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 		try
 		{
-			pEffect = LoadPlugin(pFound->dllPath, hLibrary);
+			pEffect = LoadPlugin(*pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
 
 			if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == kEffectMagic)
 			{
@@ -525,7 +549,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				if(oldIsInstrument != pFound->isInstrument || oldCategory != pFound->category)
 				{
 					// Update cached information
-					WriteToCache(*pFound);
+					pFound->WriteToCache();
 				}
 
 				CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
@@ -561,6 +585,7 @@ void CVstPluginManager::OnIdle()
 {
 	for(const_iterator pFactory = begin(); pFactory != end(); pFactory++)
 	{
+		// Note: bridged plugins won't receive these messages and generate their own idle messages.
 		CVstPlugin *p = (**pFactory).pPluginsList;
 		while (p)
 		{
@@ -571,13 +596,14 @@ void CVstPluginManager::OnIdle()
 					p->m_bNeedIdle=false;
 			}
 			//We need to update all open editors
-			if ((p->m_pEditor) && (p->m_pEditor->m_hWnd))
+			CAbstractVstEditor *editor = p->GetEditor();
+			if (editor && editor->m_hWnd)
 			{
-				p->m_pEditor->UpdateParamDisplays();
+				editor->UpdateParamDisplays();
 			}
 			//end rewbs. VSTCompliance:
 
-			p = p->m_pNext;
+			p = p->GetNextInstance();
 		}
 	}
 

@@ -80,7 +80,7 @@ public:
 
 	// Check whether a plugin can be hosted inside OpenMPT or requires bridging
 	int8 GetDllBits();
-	bool IsNative() { return GetDllBits() == sizeof(void *); }
+	bool IsNative() { return GetDllBits() == sizeof(void *) * 8; }
 
 	void WriteToCache() const;
 
