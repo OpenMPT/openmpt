@@ -106,15 +106,18 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 			if(pVstPlugin->IsSongPlaying())
 			{
 				timeInfo.flags |= kVstTransportPlaying;
+				if(pVstPlugin->GetSoundFile().m_SongFlags[SONG_PATTERNLOOP]) timeInfo.flags |= kVstTransportCycleActive;
 				timeInfo.samplePos = sndFile.GetTotalSampleCount();
 				if(sndFile.HasPositionChanged())
 				{
 					timeInfo.flags |= kVstTransportChanged;
+					pVstPlugin->lastBarStartPos = -1.0;
 				}
 			} else
 			{
 				timeInfo.flags |= kVstTransportChanged; //just stopped.
 				timeInfo.samplePos = 0;
+				pVstPlugin->lastBarStartPos = -1.0;
 			}
 			if((value & kVstNanosValid))
 			{
@@ -130,6 +133,16 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 				} else
 				{
 					timeInfo.ppqPos = 0;
+				}
+
+				if((pVstPlugin->GetSoundFile().m_PlayState.m_nRow % pVstPlugin->GetSoundFile().m_PlayState.m_nCurrentRowsPerMeasure) == 0)
+				{
+					pVstPlugin->lastBarStartPos = std::floor(timeInfo.ppqPos);
+				}
+				if(pVstPlugin->lastBarStartPos >= 0)
+				{
+					timeInfo.barStartPos = pVstPlugin->lastBarStartPos;
+					timeInfo.flags |= kVstBarsValid;
 				}
 			}
 			if((value & kVstTempoValid))
@@ -1458,7 +1471,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 {
 	ProcessVSTEvents();
 
-	//If the plug is found & ok, continue
+	// If the plug is found & ok, continue
 	if(m_pProcessFP != nullptr && (mixBuffer.GetInputBufferArray()) && mixBuffer.GetOutputBufferArray() && m_pMixStruct != nullptr)
 	{
 
@@ -1510,7 +1523,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 			// if m_Effect.numOutputs is odd, mix half the signal of last output to each channel
 			if(numOutputs != m_Effect.numOutputs)
 			{
-				// trick : if we are here, nOuts = m_Effect.numOutputs - 1 !!!
+				// trick : if we are here, numOutputs = m_Effect.numOutputs - 1 !!!
 				for(size_t i = 0; i < nSamples; i++)
 				{
 					float v = 0.5f * outputBuffers[numOutputs][i];
@@ -2130,9 +2143,6 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 
 		if ((Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf') && (nType == 'NvEf'))
 		{
-			void *p = nullptr;
-			Dispatch(effGetChunk, 0,0, &p, 0); //init plug for chunk reception
-
 			if ((nProgram>=0) && (nProgram < m_Effect.numPrograms))
 			{
 				// Bank
@@ -2141,11 +2151,14 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 			} else
 			{
 				// Program
+				Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
 				Dispatch(effSetChunk, 1, m_pMixStruct->nPluginDataSize - 4, m_pMixStruct->pPluginData + 4, 0);
+				Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
 			}
 
 		} else
 		{
+			Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
 			float *p = (float *)m_pMixStruct->pPluginData;
 			if (m_pMixStruct->nPluginDataSize >= nLen + 4) p++;
 			if (m_pMixStruct->nPluginDataSize >= nLen)
@@ -2155,6 +2168,7 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 					SetParameter(i, p[i]);
 				}
 			}
+			Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
 		}
 	}
 }
