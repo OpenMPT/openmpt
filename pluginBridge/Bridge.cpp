@@ -43,7 +43,7 @@
 #include "../common/thread.h"
 
 
-uint32_t PluginBridge::instanceCount = 0;
+LONG PluginBridge::instanceCount = 0;
 Event PluginBridge::sigQuit;
 
 // This is kind of a back-up pointer in case we couldn't sneak our pointer into the AEffect struct yet.
