@@ -14,9 +14,22 @@
 #define assert ASSERT
 #endif
 
-// Internal data structures
+// Insert some object at the end of a char vector.
+template<typename T>
+static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize = sizeof(T))
+{
+#ifdef HAS_TYPE_TRAITS
+	static_assert(std::is_pointer<T>::value == false, "Won't push pointers to data vectors.");
+#endif // HAS_TYPE_TRAITS
+	const char *objC = reinterpret_cast<const char *>(&obj);
+	data.insert(data.end(), objC, objC + writeSize);
+}
 
-typedef int32_t winhandle_t;	// Cross-bridge handle type (WinAPI handles are 32-bit, even on 64-bit systems, so they can be passed between processes of different bitness)
+#include "AEffectWrapper.h"
+#include "../common/thread.h"
+
+
+// Internal data structures
 
 
 // Event to notify other threads
@@ -29,26 +42,17 @@ public:
 	Event() : handle(nullptr) { }
 	~Event() { CloseHandle(handle); }
 	
-	bool Create(bool manual = false, const TCHAR *name = nullptr)
+	// Create a new event
+	bool Create(bool manual = false, const wchar_t *name = nullptr)
 	{
-		handle = CreateEvent(NULL, manual ? TRUE : FALSE, FALSE, name);
+		handle = CreateEventW(nullptr, manual ? TRUE : FALSE, FALSE, name);
 		return handle != nullptr;
 	}
 
-	bool CreateShared(bool manual = false, const TCHAR *name = nullptr)
+	// Duplicate a local event
+	bool DuplicateFrom(HANDLE source)
 	{
-		SECURITY_ATTRIBUTES secAttr;
-		secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-		secAttr.lpSecurityDescriptor = nullptr;
-		secAttr.bInheritHandle = TRUE;
-
-		handle = CreateEvent(&secAttr, manual ? TRUE : FALSE, FALSE, name);
-		return handle != nullptr;
-	}
-
-	bool DuplicateFrom(const Event &source)
-	{
-		return DuplicateHandle(GetCurrentProcess(), source.handle, GetCurrentProcess(), &handle, 0, FALSE, DUPLICATE_SAME_ACCESS) != FALSE;
+		return DuplicateHandle(GetCurrentProcess(), source, GetCurrentProcess(), &handle, 0, FALSE, DUPLICATE_SAME_ACCESS) != FALSE;
 	}
 
 	void Trigger()
@@ -62,9 +66,7 @@ public:
 	}
 
 	void operator = (const HANDLE other) { handle = other; }
-	void operator = (const winhandle_t other) { handle = reinterpret_cast<HANDLE>(other); }
 	operator const HANDLE () const { return handle; }
-	operator const winhandle_t () const { return reinterpret_cast<winhandle_t>(handle); }
 };
 
 
@@ -74,35 +76,31 @@ class Signal
 public:
 	Event send, ack;
 
-	// Create new signal
+	// Create new (local) signal
 	bool Create()
 	{
-		// TODO un-inherit
-		// We want to share our handles.
-		return send.CreateShared() && ack.CreateShared();
+		return send.Create() && ack.Create();
 	}
 
-	// Create signal from existing handles
-	void Create(winhandle_t s, winhandle_t a)
+	// Create signal from name (for inter-process communication)
+	bool Create(const wchar_t *name, const wchar_t *addendum)
 	{
-		send = s;
-		ack = a;
-	}
+		wchar_t fullName[64];
+		wcscpy(fullName, name);
+		wcscat(fullName, addendum);
+		size_t nameLen = wcslen(fullName);
+		wcscpy(fullName + nameLen, L"-s");
 
-	// Create signal from existing handles
-	void Create(const TCHAR *s, const TCHAR *a)
-	{
-		send = reinterpret_cast<HANDLE>(_ttoi(s));
-		ack = reinterpret_cast<HANDLE>(_ttoi(a));
+		bool success = send.Create(false, fullName);
+		wcscpy(fullName + nameLen, L"-a");
+		return success && ack.Create(false, fullName);
 	}
 
 	// Create signal from other signal
-	void Create(const Signal &other)
+	bool DuplicateFrom(const Signal &other)
 	{
-		send = other.send;
-		ack = other.ack;
-		/*send.DuplicateFrom(other.send);
-		ack.DuplicateFrom(other.ack);*/
+		return send.DuplicateFrom(other.send)
+			&& ack.DuplicateFrom(other.ack);
 	}
 
 	void Send()
@@ -133,13 +131,7 @@ public:
 	{
 		Close();
 
-		// TODO un-inherit
-		SECURITY_ATTRIBUTES secAttr;
-		secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-		secAttr.lpSecurityDescriptor = nullptr;
-		secAttr.bInheritHandle = TRUE;
-
-		mapFile = CreateFileMappingW(INVALID_HANDLE_VALUE, &secAttr, PAGE_READWRITE,
+		mapFile = CreateFileMappingW(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE,
 			0, size, name);
 		view = MapViewOfFile(mapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
 		return Good();
@@ -150,8 +142,7 @@ public:
 	{
 		Close();
 
-		// TODO un-inherit
-		mapFile = OpenFileMappingW(FILE_MAP_ALL_ACCESS, TRUE, name);
+		mapFile = OpenFileMappingW(FILE_MAP_ALL_ACCESS, FALSE, name);
 		view = MapViewOfFile(mapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
 		return Good();
 	}
@@ -174,19 +165,6 @@ public:
 	bool Good() const { return view != nullptr; }
 };
 
-
-// Insert some object at the end of a char vector.
-template<typename T>
-static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize = sizeof(T))
-{
-#ifdef HAS_TYPE_TRAITS
-	static_assert(std::is_pointer<T>::value == false, "Won't push pointers to data vectors.");
-#endif // HAS_TYPE_TRAITS
-	const char *objC = reinterpret_cast<const char *>(&obj);
-	data.insert(data.end(), objC, objC + writeSize);
-}
-
-#include "AEffectWrapper.h"
 
 // Bridge communication data
 
@@ -267,7 +245,6 @@ struct MsgHeader
 struct NewInstanceMsg : public MsgHeader
 {
 	wchar_t memName[64];	// Shared memory object name;
-	winhandle_t handles[6];	// Signal handles
 };
 
 
@@ -328,16 +305,11 @@ union BridgeMessage
 		header.signalID = 0;
 	}
 
-	void NewInstance(const wchar_t *memName, const Signal &sigToHost, const Signal &sigToBridge, const Signal &sigProcess)
+	void NewInstance(const wchar_t *memName)
 	{
+		SetType(MsgHeader::newInstance, sizeof(NewInstanceMsg));
+
 		wcsncpy(newInstance.memName, memName, CountOf(newInstance.memName) - 1);
-		newInstance.memName[CountOf(newInstance.memName) - 1] = 0;
-		newInstance.handles[0] = sigToHost.send;
-		newInstance.handles[1] = sigToHost.ack;
-		newInstance.handles[2] = sigToBridge.send;
-		newInstance.handles[3] = sigToBridge.ack;
-		newInstance.handles[4] = sigProcess.send;
-		newInstance.handles[5] = sigProcess.ack;
 	}
 
 	void Init(const wchar_t *pluginPath, uint32_t mixBufSize)
@@ -348,7 +320,6 @@ union BridgeMessage
 		init.hostPtrSize = sizeof(VstIntPtr);
 		init.mixBufSize = mixBufSize;
 		wcsncpy(init.str, pluginPath, CountOf(init.str) - 1);
-		init.str[CountOf(init.str) - 1] = 0;
 	}
 
 	void Dispatch(int32_t opcode, int32_t index, int64_t value, int64_t ptr, float opt, uint32_t extraDataSize)
@@ -433,9 +404,9 @@ public:
 	// Signals for internal communication (wake up waiting threads). Confirm() => OK, Send() => Failure
 	Signal ackSignals[SharedMemLayout::queueSize];
 
-	HANDLE otherProcess;	// Handle of "other" process (host handle in the bridge and vice versa)
-	HANDLE otherThread;		// Handle of the "other" thread (host side: message thread, bridge side: process thread)
-	Event sigThreadExit;	// Signal to kill helper thread
+	mpt::thread otherThread;	// Handle of the "other" thread (host side: message thread, bridge side: process thread)
+	Event otherProcess;			// Handle of "other" process (host handle in the bridge and vice versa)
+	Event sigThreadExit;		// Signal to kill helper thread
 
 	// Shared memory segments
 	MappedMemory queueMem, processMem, getChunkMem;
@@ -449,12 +420,19 @@ public:
 	// Pointer size of the "other" side of the bridge, in bytes
 	int32_t otherPtrSize;
 
-	BridgeCommon() : sharedMem(nullptr), otherPtrSize(0), msgThreadID(0), otherThread(NULL)
+	BridgeCommon() : sharedMem(nullptr), otherPtrSize(0), msgThreadID(0)
 	{
 		for(size_t i = 0; i < CountOf(ackSignals); i++)
 		{
 			ackSignals[i].Create();
 		}
+	}
+
+	bool CreateSignals(const wchar_t *mapName)
+	{
+		return sigToHost.Create(mapName, L"h")
+			&& sigToBridge.Create(mapName, L"b")
+			&& sigProcess.Create(mapName, L"p");
 	}
 
 	// Copy a message to shared memory and return relative position.
@@ -466,7 +444,7 @@ public:
 		BridgeMessage *targetMsg = queue;
 		for(size_t i = 0; i < CountOf(queue); i++, targetMsg++)
 		{
-			assert((reinterpret_cast<intptr_t>(&targetMsg->header.status) & 3) == 0);	// InterlockedExchangeAdd operand should be aligned to 32 bits
+			assert((intptr_t(&targetMsg->header.status) & 3) == 0);	// InterlockedExchangeAdd operand should be aligned to 32 bits
 			if(InterlockedCompareExchange(&targetMsg->header.status, MsgHeader::prepared, MsgHeader::empty) == MsgHeader::empty)
 			{
 				memcpy(targetMsg, &msg, std::min(sizeof(BridgeMessage), size_t(msg.header.size)));
@@ -475,6 +453,7 @@ public:
 				return targetMsg;
 			}
 		}
+		// Should never happen, unless there is a crazy amount of threads talking over the bridge, which by itself shouldn't happen.
 		assert(false);
 		return nullptr;
 	}

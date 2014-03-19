@@ -15,6 +15,10 @@
 
 class PluginBridge : protected BridgeCommon
 {
+public:
+	static uint32_t instanceCount;
+	static Event sigQuit;
+
 protected:
 	static PluginBridge *latestInstance;
 	static WNDCLASSEX windowClass;
@@ -39,13 +43,16 @@ protected:
 	uint32_t mixBufSize;
 
 	bool needIdle;	// Plugin needs idle time
+	bool closeInstance;
 
 public:
-	PluginBridge(TCHAR *memName, HANDLE otherProcess, Signal &sigToHost, Signal &sigToBridge, Signal &sigProcess);
+	PluginBridge(const wchar_t *memName, HANDLE otherProcess);
 	~PluginBridge();
 	static void RegisterWindowClass();
 
 protected:
+	void MessageThread();
+
 	const BridgeMessage *SendToHost(const BridgeMessage &msg);
 
 	void UpdateEffectStruct();
@@ -54,7 +61,6 @@ protected:
 	void ParseNextMessage();
 	void NewInstance(NewInstanceMsg *msg);
 	void InitBridge(InitMsg *msg);
-	void CloseBridge();
 	void DispatchToPlugin(DispatchMsg *msg);
 	void SetParameter(ParameterMsg *msg);
 	void GetParameter(ParameterMsg *msg);

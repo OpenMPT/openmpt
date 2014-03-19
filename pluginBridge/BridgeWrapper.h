@@ -12,6 +12,8 @@
 
 #include "BridgeCommon.h"
 
+struct VSTPluginLib;
+
 class BridgeWrapper : protected BridgeCommon
 {
 protected:
@@ -22,21 +24,22 @@ public:
 	enum BinaryType
 	{
 		binUnknown = 0,
-		bin32Bit = 32,
-		bin64Bit = 64,
+		bin32Bit = 4,
+		bin64Bit = 8,
 	};
 
 public:
+	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
+	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == sizeof(void *); }
+	static uint64 GetFileVersion(const WCHAR *exePath);
+
+	static AEffect *Create(const VSTPluginLib &plugin);
+
+protected:
 	BridgeWrapper() : isSettingProgram(false) { }
 	~BridgeWrapper();
 
-	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
-	static uint64 GetFileVersion(const WCHAR *exePath);
-
-	bool Init(const mpt::PathString &pluginPath);
-	AEffect *GetEffect() { return queueMem.Good() ? &sharedMem->effect : nullptr; }
-
-protected:
+	bool Init(const mpt::PathString &pluginPath, BridgeWrapper *sharedInstace);
 
 	void MessageThread();
 
