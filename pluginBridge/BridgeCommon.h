@@ -368,7 +368,7 @@ union BridgeMessage
 	// Copy message to target and clear delivery status
 	void CopyFromSharedMemory(BridgeMessage &target)
 	{
-		std::memcpy(&target, this, std::min(header.size, sizeof(BridgeMessage)));
+		std::memcpy(&target, this, std::min<size_t>(header.size, sizeof(BridgeMessage)));
 		InterlockedExchange(&header.status, MsgHeader::empty);
 	}
 };
