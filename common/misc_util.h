@@ -16,8 +16,8 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 
-#include <string.h>
 #include <time.h>
 
 #include "typedefs.h"
@@ -162,7 +162,7 @@ inline void MemsetZero(T &a)
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
 	static_assert(std::is_pod<T>::value == true, "Won't memset non-pods.");
 #endif
-	memset(&a, 0, sizeof(T));
+	std::memset(&a, 0, sizeof(T));
 }
 
 
@@ -175,7 +175,7 @@ inline T &MemCopy(T &destination, const T &source)
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
 	static_assert(std::is_pod<T>::value == true, "Won't copy non-pods.");
 #endif
-	return *static_cast<T *>(memcpy(&destination, &source, sizeof(T)));
+	return *static_cast<T *>(std::memcpy(&destination, &source, sizeof(T)));
 }
 
 
@@ -577,7 +577,7 @@ namespace Util
 class MultimediaClock
 {
 private:
-	UINT m_CurrentPeriod;
+	uint32 m_CurrentPeriod;
 private:
 	void Init();
 	void SetPeriod(uint32 ms);
