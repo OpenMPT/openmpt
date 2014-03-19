@@ -107,7 +107,8 @@
       </Command>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\x64-Debug\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)..\x64-Debug" mkdir "$(TargetDir)..\x64-Debug"
+copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\x64-Debug\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -130,7 +131,8 @@
       </Command>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\Win32-Debug\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)..\Win32-Debug" mkdir "$(TargetDir)..\Win32-Debug"
+copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\Win32-Debug\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -159,7 +161,8 @@
       </Command>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\x64\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)..\x64" mkdir "$(TargetDir)..\x64"
+copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\x64\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -188,7 +191,8 @@
       </Command>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\Win32\$(TargetFileName)"</Command>
+      <Command>if not exist "$(TargetDir)..\Win32" mkdir "$(TargetDir)..\Win32"
+copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\Win32\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
