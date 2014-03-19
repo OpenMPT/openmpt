@@ -13,13 +13,15 @@
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow, VstFileSelect
 // ProteusVX, TriDirt sometimes flickers because of timed redraws
 // ProteusVX GUI stops working after closing it once and the plugin crashes when unloading it when the GUI was open at least once
-// Message handling isn't perfect yet: a message slot may be re-used for sending before its result is being read. Either copy back message, or manually reset message afterwards by caller
+// Fix Purity Demo GUI freeze more nicely
 // Optimize out effProcessEvents (audioMasterProcessEvents?) by using a buffer that's sent along with the process call, just like we do it with automation
+// Occasional time-outs when loading plugins into shared instances
+// Refactoring maybe move the "constructors" of all message types into these types?
+// When scanning plugins, forbid loading them natively unless the bridge itself cannot be launched
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode
 // Re-enable DEP in OpenMPT?
-// Module files supposedly opened in plugin wrapper => Does DuplicateHandle work on the host side? Otherwise, named events (can't repro anymore)
 // Remove native jBridge support
 // Clean up code :)
 
@@ -93,7 +95,7 @@ void PluginBridge::RegisterWindowClass()
 	windowClass.hInstance = GetModuleHandle(NULL);
 	windowClass.hIcon = NULL;
 	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	windowClass.hbrBackground  = (HBRUSH)(COLOR_WINDOW + 1);
+	windowClass.hbrBackground  = NULL;
 	windowClass.lpszMenuName = NULL;
 	windowClass.lpszClassName = WINDOWCLASSNAME;
 	windowClass.hIconSm = NULL;
@@ -164,7 +166,7 @@ void PluginBridge::MessageThread()
 			for(size_t i = 0; i < CountOf(sharedMem->toHost); i++)
 			{
 				BridgeMessage &msg = sharedMem->toHost[i];
-				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
+				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::delivered, MsgHeader::done) == MsgHeader::done)
 				{
 					ackSignals[msg.header.signalID].Confirm();
 				}
@@ -198,10 +200,15 @@ void PluginBridge::MessageThread()
 
 // Send an arbitrary message to the host.
 // Returns a pointer to the message, as processed by the host.
-const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
+bool PluginBridge::SendToHost(BridgeMessage &sendMsg)
 {
 	const bool inMsgThread = GetCurrentThreadId() == msgThreadID;
-	BridgeMessage *addr = CopyToSharedMemory(msg, sharedMem->toHost, inMsgThread);
+	BridgeMessage *addr = CopyToSharedMemory(sendMsg, sharedMem->toHost);
+	if(addr == nullptr)
+	{
+		return false;
+	}
+
 	sigToHost.Send();
 
 	// Wait until we get the result from the host.
@@ -216,13 +223,21 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 			if(result == WAIT_OBJECT_0)
 			{
 				// Some message got answered - is it our message?
-				const bool done = (InterlockedExchangeAdd(&addr->header.status, 0) == MsgHeader::done);
+				bool done = false;
 				for(size_t i = 0; i < CountOf(sharedMem->toHost); i++)
 				{
 					BridgeMessage &msg = sharedMem->toHost[i];
-					if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
+					if(InterlockedCompareExchange(&msg.header.status, MsgHeader::delivered, MsgHeader::done) == MsgHeader::done)
 					{
-						if(msg.header.signalID != uint32_t(-1)) ackSignals[msg.header.signalID].Confirm();
+						if(&msg != addr)
+						{
+							ackSignals[msg.header.signalID].Confirm();
+						} else
+						{
+							// This is our message!
+							addr->CopyFromSharedMemory(sendMsg);
+							done = true;
+						}
 					}
 				}
 				if(done)
@@ -240,13 +255,10 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 		Signal &ackHandle = ackSignals[addr->header.signalID];
 		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, otherProcess };
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
-		if(result != WAIT_OBJECT_0)
-		{
-			InterlockedExchange(&addr->header.status, MsgHeader::empty);
-		}
+		addr->CopyFromSharedMemory(sendMsg);
 	}
 
-	return (result == WAIT_OBJECT_0) ? addr : nullptr;
+	return (result == WAIT_OBJECT_0);
 }
 
 
@@ -599,6 +611,9 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		break;
 
 	case effEditOpen:
+		// Quick hack to get Purity demo to work (wants to show a message box during first effEditIdle call, this seems to fail after SetParent)
+		nativeEffect->dispatcher(nativeEffect, effEditIdle, 0, 0, nullptr, 0.0f);
+
 		// Need to do this after creating. Otherwise, we'll freeze. We also need to do this after the open call, or else ProteusVX will freeze in a SetParent call.
 		SetParent(window, windowParent);
 		SetProp(window, _T("MPT"), this);
@@ -957,14 +972,13 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	{
 		BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
 		msg->Dispatch(opcode, index, value, ptrOut, opt, extraSize);
-		resultMsg = &(SendToHost(*msg)->dispatch);
+		if(!SendToHost(*msg))
+		{
+			return 0;
+		}
+		resultMsg = &msg->dispatch;
 	}
 	//std::cout << "done." << std::endl;
-
-	if(resultMsg == nullptr)
-	{
-		return 0;
-	}
 
 	const char *extraData = dispatchData.size() == sizeof(DispatchMsg) ? static_cast<const char *>(auxMem.view) : reinterpret_cast<const char *>(resultMsg + 1);
 	// Post-fix some opcodes
@@ -1024,6 +1038,14 @@ LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 				SetForegroundWindow(that->windowParent);
 				SetForegroundWindow(that->window);
 			}
+		}
+		break;
+
+	case WM_ERASEBKGND:
+		// Pretend that we erased the background
+		if(GetProp(hwnd, _T("MPT")) != nullptr)
+		{
+			return 1;
 		}
 		break;
 

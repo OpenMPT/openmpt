@@ -183,7 +183,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 
 		BridgeMessage msg;
 		msg.NewInstance(mapName.c_str());
-		if(sharedInstace->SendToBridge(msg) == nullptr)
+		if(!sharedInstace->SendToBridge(msg))
 		{
 			// Something went wrong, try a new instance
 			return Init(pluginPath, nullptr);
@@ -211,14 +211,13 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 
 	BridgeMessage initMsg;
 	initMsg.Init(pluginPath.ToWide().c_str(), MIXBUFFERSIZE);
-	const BridgeMessage *initResult = SendToBridge(initMsg);
 
-	if(initResult == nullptr)
+	if(!SendToBridge(initMsg))
 	{
 		Reporting::Error("Could not initialize plugin bridge, it probably crashed.");
-	} else if(initResult->init.result != 1)
+	} else if(initMsg.init.result != 1)
 	{
-		Reporting::Error(mpt::ToLocale(initResult->init.str).c_str());
+		Reporting::Error(mpt::ToLocale(initMsg.init.str).c_str());
 	} else
 	{
 		if(sharedMem->effect.flags & effFlagsCanReplacing) sharedMem->effect.processReplacing = ProcessReplacing;
@@ -255,7 +254,7 @@ void BridgeWrapper::MessageThread()
 			for(size_t i = 0; i < CountOf(sharedMem->toBridge); i++)
 			{
 				BridgeMessage &msg = sharedMem->toBridge[i];
-				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
+				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::delivered, MsgHeader::done) == MsgHeader::done)
 				{
 					ackSignals[msg.header.signalID].Confirm();
 				}
@@ -273,10 +272,14 @@ void BridgeWrapper::MessageThread()
 
 // Send an arbitrary message to the bridge.
 // Returns a pointer to the message, as processed by the bridge.
-const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
+bool BridgeWrapper::SendToBridge(BridgeMessage &sendMsg)
 {
 	const bool inMsgThread = GetCurrentThreadId() == msgThreadID;
-	BridgeMessage *addr = CopyToSharedMemory(msg, sharedMem->toBridge, inMsgThread);
+	BridgeMessage *addr = CopyToSharedMemory(sendMsg, sharedMem->toBridge);
+	if(addr == nullptr)
+	{
+		return false;
+	}
 	sigToBridge.Send();
 
 	// Wait until we get the result from the bridge.
@@ -291,13 +294,21 @@ const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
 			if(result == WAIT_OBJECT_0)
 			{
 				// Message got answered
-				const bool done = (InterlockedExchangeAdd(&addr->header.status, 0) == MsgHeader::done);
+				bool done = false;
 				for(size_t i = 0; i < CountOf(sharedMem->toBridge); i++)
 				{
 					BridgeMessage &msg = sharedMem->toBridge[i];
-					if(InterlockedCompareExchange(&msg.header.status, MsgHeader::empty, MsgHeader::done) == MsgHeader::done)
+					if(InterlockedCompareExchange(&msg.header.status, MsgHeader::delivered, MsgHeader::done) == MsgHeader::done)
 					{
-						if(msg.header.signalID != uint32_t(-1)) ackSignals[msg.header.signalID].Confirm();
+						if(&msg != addr)
+						{
+							ackSignals[msg.header.signalID].Confirm();
+						} else
+						{
+							// This is our message!
+							addr->CopyFromSharedMemory(sendMsg);
+							done = true;
+						}
 					}
 				}
 				if(done)
@@ -319,13 +330,10 @@ const BridgeMessage *BridgeWrapper::SendToBridge(const BridgeMessage &msg)
 		Signal &ackHandle = ackSignals[addr->header.signalID];
 		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, otherProcess };
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
-		if(result != WAIT_OBJECT_0)
-		{
-			InterlockedExchange(&addr->header.status, MsgHeader::empty);
-		}
+		addr->CopyFromSharedMemory(sendMsg);
 	}
 
-	return (result == WAIT_OBJECT_0) ? addr : nullptr;
+	return (result == WAIT_OBJECT_0);
 }
 
 
@@ -638,12 +646,11 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	{
 		BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
 		msg->Dispatch(opcode, index, value, ptrOut, opt, extraSize);
-		resultMsg = &(that->SendToBridge(*msg)->dispatch);
-	}
-
-	if(resultMsg == nullptr && opcode != effClose)
-	{
-		return 0;
+		if(!that->SendToBridge(*msg) && opcode != effClose)
+		{
+			return false;
+		}
+		resultMsg = &msg->dispatch;
 	}
 
 	const char *extraData = dispatchData.size() == sizeof(DispatchMsg) ? static_cast<const char *>(auxMem.view) : reinterpret_cast<const char *>(resultMsg + 1);
@@ -672,7 +679,8 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	case effEditGetRect:
 		// ERect** in [ptr]
-		*static_cast<const ERect **>(ptr) = reinterpret_cast<const ERect *>(extraData);
+		that->editRect = *reinterpret_cast<const ERect *>(extraData);
+		*static_cast<const ERect **>(ptr) = &that->editRect;
 		break;
 
 	case effGetChunk:
@@ -691,8 +699,10 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	case effGetSpeakerArrangement:
 		// VstSpeakerArrangement* in [value] and [ptr]
-		*static_cast<VstSpeakerArrangement *>(ptr) = *reinterpret_cast<const VstSpeakerArrangement *>(extraData);
-		*FromVstPtr<VstSpeakerArrangement>(value) = *(reinterpret_cast<const VstSpeakerArrangement *>(extraData) + 1);
+		that->speakers[0] = *reinterpret_cast<const VstSpeakerArrangement *>(extraData);
+		that->speakers[1] = *(reinterpret_cast<const VstSpeakerArrangement *>(extraData) + 1);
+		*static_cast<VstSpeakerArrangement *>(ptr) = that->speakers[0];
+		*FromVstPtr<VstSpeakerArrangement>(value) = that->speakers[1];
 		break;
 
 	default:
@@ -713,7 +723,7 @@ void BridgeWrapper::SendAutomationQueue()
 	sigAutomation.Reset();
 	BridgeMessage msg;
 	msg.Automate();
-	if(SendToBridge(msg) == nullptr)
+	if(!SendToBridge(msg))
 	{
 		// Failed (plugin probably crashed) - auto-fix event count
 		sharedMem->automationQueue.pendingEvents = 0;
@@ -770,8 +780,10 @@ float VSTCALLBACK BridgeWrapper::GetParameter(AEffect *effect, VstInt32 index)
 	{
 		BridgeMessage msg;
 		msg.GetParameter(index);
-		const ParameterMsg *resultMsg = &(that->SendToBridge(msg)->parameter);
-		if(resultMsg != nullptr) return resultMsg->value;
+		if(that->SendToBridge(msg))
+		{
+			return msg.parameter.value;
+		}
 	}
 	return 0.0f;
 }

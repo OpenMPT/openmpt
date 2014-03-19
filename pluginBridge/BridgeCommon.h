@@ -232,6 +232,7 @@ struct MsgHeader
 		sent,		// Slot is ready to be sent 
 		received,	// Slot is being handled
 		done,		// Slot got handled
+		delivered,	// Slot got handed back to sender
 	};
 
 	LONG status;			// See BridgeMessageStatus
@@ -363,6 +364,13 @@ union BridgeMessage
 		wcsncpy(error.str, text, CountOf(error.str) - 1);
 		error.str[CountOf(error.str) - 1] = 0;
 	}
+
+	// Copy message to target and clear delivery status
+	void CopyFromSharedMemory(BridgeMessage &target)
+	{
+		std::memcpy(&target, this, std::min(header.size, sizeof(BridgeMessage)));
+		InterlockedExchange(&header.status, MsgHeader::empty);
+	}
 };
 
 // This is the maximum size of dispatch data that can be sent in a message. If you want to dispatch more data, use a secondary medium for sending it along.
@@ -436,7 +444,7 @@ public:
 	}
 
 	// Copy a message to shared memory and return relative position.
-	BridgeMessage *CopyToSharedMemory(const BridgeMessage &msg, SharedMemLayout::MsgQueue &queue, bool fromMsgThread)
+	BridgeMessage *CopyToSharedMemory(const BridgeMessage &msg, SharedMemLayout::MsgQueue &queue)
 	{
 		assert(msg.header.status == MsgHeader::empty);
 		
@@ -448,7 +456,7 @@ public:
 			if(InterlockedCompareExchange(&targetMsg->header.status, MsgHeader::prepared, MsgHeader::empty) == MsgHeader::empty)
 			{
 				memcpy(targetMsg, &msg, std::min(sizeof(BridgeMessage), size_t(msg.header.size)));
-				InterlockedExchange(&targetMsg->header.signalID, fromMsgThread ? uint32_t(-1) : uint32_t(i));	// Don't send signal to ourselves
+				InterlockedExchange(&targetMsg->header.signalID, LONG(i));
 				InterlockedExchange(&targetMsg->header.status, MsgHeader::sent);
 				return targetMsg;
 			}
