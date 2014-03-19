@@ -76,73 +76,119 @@ uint64 BridgeWrapper::GetFileVersion(const WCHAR *exePath)
 }
 
 
-bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
+// Create a plugin bridge object
+AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin)
 {
-	BinaryType binType;
-	if((binType = GetPluginBinaryType(pluginPath)) == binUnknown)
+	BridgeWrapper *wrapper = new BridgeWrapper();
+	BridgeWrapper *sharedInstance = nullptr;
+
+	// Should we share instances?
+	if(plugin.shareBridgeInstance)
 	{
-		return false;
+		// Well, then find some instance to share with!
+		CVstPlugin *vstPlug = plugin.pPluginsList;
+		while(vstPlug != nullptr)
+		{
+			if(vstPlug->isBridged)
+			{
+				sharedInstance = reinterpret_cast<BridgeWrapper *>(vstPlug->Dispatch(effVendorSpecific, kGetWrapperPointer, 0, nullptr, 0.0f));
+				break;
+			}
+			vstPlug = vstPlug->GetNextInstance();
+		}
 	}
 
+	if(wrapper->Init(plugin.dllPath, sharedInstance) && wrapper->queueMem.Good())
+	{
+		return &wrapper->sharedMem->effect;
+	}
+	delete wrapper;
+	return nullptr;
+}
+
+
+// Initialize and launch bridge
+bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *sharedInstace)
+{
 	static uint32 plugId = 0;
 	plugId++;
 	const DWORD procId = GetCurrentProcessId();
-	const mpt::PathString exeName = theApp.GetAppDirPath() + (binType == bin64Bit ? MPT_PATHSTRING("PluginBridge64.exe") : MPT_PATHSTRING("PluginBridge32.exe"));
-
-	// First, check for validity of the bridge executable.
-	static uint64 mptVersion = 0;
-	if(!mptVersion)
-	{
-		WCHAR exePath[_MAX_PATH];
-		GetModuleFileNameW(0, exePath, CountOf(exePath));
-		mpt::String::SetNullTerminator(exePath);
-		mptVersion = GetFileVersion(exePath);
-	}
-	uint64 bridgeVersion = GetFileVersion(exeName.AsNative().c_str());
-	if(bridgeVersion == 0)
-	{
-		Reporting::Error("Could not open the plugin bridge executable.");
-		return false;
-	} else if(bridgeVersion != mptVersion)
-	{
-		Reporting::Error("The plugin bridge version does not match your OpenMPT version.");
-		return false;
-	}
 
 	const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(procId) + L"-" + mpt::ToWString(plugId);
 
 	// Create our shared memory object.
-	if(!queueMem.Create(mapName.c_str(), sizeof(SharedMemLayout)))
+	if(!queueMem.Create(mapName.c_str(), sizeof(SharedMemLayout))
+		|| !CreateSignals(mapName.c_str()))
 	{
 		Reporting::Error("Could not initialize plugin bridge memory.");
 		return false;
 	}
 	sharedMem = reinterpret_cast<SharedMemLayout *>(queueMem.view);
 
-	otherPtrSize = binType / 8;
-
-	sigToHost.Create();
-	sigToBridge.Create();
-	sigProcess.Create();
-
-	// Command-line must be a modfiable string...
-	wchar_t cmdLine[128];
-	swprintf(cmdLine, CountOf(cmdLine), L"%s %d %d %d %d %d %d %d", mapName.c_str(), procId, sigToHost.send, sigToHost.ack, sigToBridge.send, sigToBridge.ack, sigProcess.send, sigProcess.ack);
-
-	STARTUPINFOW info;
-	MemsetZero(info);
-	info.cb = sizeof(info);
-	PROCESS_INFORMATION processInfo;
-	MemsetZero(processInfo);
-
-	// TODO un-share handles
-	if(!CreateProcessW(exeName.AsNative().c_str(), cmdLine, NULL, NULL, TRUE, /*CREATE_NO_WINDOW */0, NULL, NULL, &info, &processInfo))
+	if(sharedInstace == nullptr)
 	{
-		Reporting::Error("Failed to launch plugin bridge.");
-		return false;
-	}
+		// Create a new bridge instance
+		BinaryType binType;
+		if((binType = GetPluginBinaryType(pluginPath)) == binUnknown)
+		{
+			return false;
+		}
 
-	otherProcess = processInfo.hProcess;
+		const mpt::PathString exeName = theApp.GetAppDirPath() + (binType == bin64Bit ? MPT_PATHSTRING("PluginBridge64.exe") : MPT_PATHSTRING("PluginBridge32.exe"));
+
+		// First, check for validity of the bridge executable.
+		static uint64 mptVersion = 0;
+		if(!mptVersion)
+		{
+			WCHAR exePath[_MAX_PATH];
+			GetModuleFileNameW(0, exePath, CountOf(exePath));
+			mpt::String::SetNullTerminator(exePath);
+			mptVersion = GetFileVersion(exePath);
+		}
+		uint64 bridgeVersion = GetFileVersion(exeName.AsNative().c_str());
+		if(bridgeVersion == 0)
+		{
+			// Silently fail if bridge is missing.
+			//Reporting::Error("Could not open the plugin bridge executable.");
+			return false;
+		} else if(bridgeVersion != mptVersion)
+		{
+			Reporting::Error("The plugin bridge version does not match your OpenMPT version.");
+			return false;
+		}
+
+		otherPtrSize = binType;
+
+		// Command-line must be a modfiable string...
+		wchar_t cmdLine[128];
+		swprintf(cmdLine, CountOf(cmdLine), L"%s %d", mapName.c_str(), procId);
+
+		STARTUPINFOW info;
+		MemsetZero(info);
+		info.cb = sizeof(info);
+		PROCESS_INFORMATION processInfo;
+		MemsetZero(processInfo);
+
+		if(!CreateProcessW(exeName.AsNative().c_str(), cmdLine, NULL, NULL, FALSE, /*CREATE_NO_WINDOW */0, NULL, NULL, &info, &processInfo))
+		{
+			Reporting::Error("Failed to launch plugin bridge.");
+			return false;
+		}
+		otherProcess = processInfo.hProcess;
+	} else
+	{
+		// Re-use existing bridge instance
+		otherPtrSize = sharedInstace->otherPtrSize;
+		otherProcess.DuplicateFrom(sharedInstace->otherProcess);
+
+		BridgeMessage msg;
+		msg.NewInstance(mapName.c_str());
+		if(sharedInstace->SendToBridge(msg) == nullptr)
+		{
+			// Something went wrong, try a new instance
+			return Init(pluginPath, nullptr);
+		}
+	}
 
 	// Initialize bridge
 	sharedMem->effect.object = this;
@@ -186,7 +232,6 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath)
 
 BridgeWrapper::~BridgeWrapper()
 {
-	CloseHandle(otherProcess);
 	sigThreadExit.Trigger();
 	WaitForSingleObject(otherThread, INFINITE);
 }
@@ -217,8 +262,12 @@ void BridgeWrapper::MessageThread()
 			}
 		}
 	} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_OBJECT_0 + 3 && result != WAIT_FAILED);
-	ASSERT(result != WAIT_FAILED);
-	otherThread = NULL;
+
+	// Close any possible waiting queries
+	for(size_t i = 0; i < CountOf(ackSignals); i++)
+	{
+		ackSignals[i].Send();
+	}
 }
 
 
@@ -501,6 +550,13 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		ptrOut = sizeof(VstSpeakerArrangement) * 2;
 		PushToVector(dispatchData, *static_cast<VstSpeakerArrangement *>(ptr));
 		PushToVector(dispatchData, *FromVstPtr<VstSpeakerArrangement>(value));
+		break;
+
+	case effVendorSpecific:
+		if(index == kGetWrapperPointer)
+		{
+			return ToVstPtr<BridgeWrapper>(that);
+		}
 		break;
 
 	case effGetParameterProperties:

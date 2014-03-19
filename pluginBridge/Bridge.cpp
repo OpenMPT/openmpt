@@ -11,11 +11,10 @@
 // TODO
 // Replace Local\\foo :)
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow, VstFileSelect
-// Ability to put all plugins (or all instances of the same plugin) in the same container. Necessary for plugins like SideKick v3.
-// jBridged Rez3 GUI breaks
 // ProteusVX, TriDirt sometimes flickers because of timed redraws
 // ProteusVX GUI stops working after closing it once and the plugin crashes when unloading it when the GUI was open at least once
 // Message handling isn't perfect yet: a message slot may be re-used for sending before its result is being read. Either copy back message, or manually reset message afterwards by caller
+// Optimize out effProcessEvents (audioMasterProcessEvents?) by using a buffer that's sent along with the process call, just like we do it with automation
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode
@@ -43,8 +42,9 @@
 #include "Bridge.h"
 #include "../common/thread.h"
 
-//#include <iostream>	// TODO DEBUG ONLY
 
+uint32_t PluginBridge::instanceCount = 0;
+Event PluginBridge::sigQuit;
 
 // This is kind of a back-up pointer in case we couldn't sneak our pointer into the AEffect struct yet.
 // It always points to the last intialized PluginBridge object. Right now there's just one, but we might
@@ -56,7 +56,7 @@ WNDCLASSEX PluginBridge::windowClass;
 
 int _tmain(int argc, TCHAR *argv[])
 {
-	if(argc < 8)
+	if(argc != 2)
 	{
 		MessageBox(NULL, _T("This executable is part of OpenMPT. You do not need to run it by yourself."), _T("Plugin Bridge"), 0);
 		return -1;
@@ -64,11 +64,11 @@ int _tmain(int argc, TCHAR *argv[])
 
 	PluginBridge::RegisterWindowClass();
 
-	Signal sigToHost, sigToBridge, sigProcess;
-	sigToHost.Create(argv[2], argv[3]);
-	sigToBridge.Create(argv[4], argv[5]);
-	sigProcess.Create(argv[6], argv[7]);
-	PluginBridge pb(argv[0], OpenProcess(SYNCHRONIZE, FALSE, _ttoi(argv[1])), sigToHost, sigToBridge, sigProcess);
+	PluginBridge::sigQuit.Create();
+
+	new PluginBridge(argv[0], OpenProcess(SYNCHRONIZE, FALSE, _ttoi(argv[1])));
+
+	WaitForSingleObject(PluginBridge::sigQuit, INFINITE);
 	return 0;
 }
 
@@ -101,38 +101,60 @@ void PluginBridge::RegisterWindowClass()
 }
 
 
-PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess_, Signal &sigToHost_, Signal &sigToBridge_, Signal &sigProcess_)
-	: window(NULL), isProcessing(0), nativeEffect(nullptr), needIdle(false)
+PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess_)
+	: window(NULL), isProcessing(0), nativeEffect(nullptr), needIdle(false), closeInstance(false)
 {
 	PluginBridge::latestInstance = this;
+	InterlockedIncrement(&instanceCount);
 
-	if(!queueMem.Open(memName))
+	if(!queueMem.Open(memName)
+		|| !CreateSignals(memName))
 	{
 		MessageBox(NULL, _T("Could not connect to host."), _T("Plugin Bridge"), 0);
-		exit(-1);
+		delete this;
+		return;
 	}
 	sharedMem = reinterpret_cast<SharedMemLayout *>(queueMem.view);
 
-	// Store parent process handle so that we can terminate the bridge process when OpenMPT closes.
-	otherProcess = otherProcess_;
-
-	sigToHost.Create(sigToHost_);
-	sigToBridge.Create(sigToBridge_);
-	sigProcess.Create(sigProcess_);
+	// Store parent process handle so that we can terminate the bridge process when OpenMPT closes (e.g. through a crash).
+	otherProcess.DuplicateFrom(otherProcess_);
 
 	sigThreadExit.Create(true);
 	otherThread = mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
-	msgThreadID = GetCurrentThreadId();
 
 	// Tell the parent process that we've initialized the shared memory and are ready to go.
 	sigToHost.Confirm();
+
+	mpt::thread_member<PluginBridge, &PluginBridge::MessageThread>(this);
+}
+
+
+PluginBridge::~PluginBridge()
+{
+	sigThreadExit.Trigger();
+	WaitForSingleObject(otherThread, INFINITE);
+
+	sharedMem = nullptr;
+	queueMem.Close();
+	processMem.Close();
+
+	if(InterlockedDecrement(&instanceCount) == 0)
+	{
+		sigQuit.Trigger();
+	}
+}
+
+
+void PluginBridge::MessageThread()
+{
+	msgThreadID = GetCurrentThreadId();
 
 	const HANDLE objects[] = { sigToBridge.send, sigToHost.ack, otherProcess };
 	DWORD result;
 	do
 	{
-		// Wait for incoming messages, time out for window refresh
-		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, window ? 15 : INFINITE);
+		// Wait for incoming messages, time out periodically for idle messages and window refresh
+		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, 15);
 		if(result == WAIT_OBJECT_0)
 		{
 			ParseNextMessage();
@@ -151,20 +173,26 @@ PluginBridge::PluginBridge(TCHAR *memName, HANDLE otherProcess_, Signal &sigToHo
 		if(needIdle && nativeEffect)
 		{
 			nativeEffect->dispatcher(nativeEffect, effIdle, 0, 0, nullptr, 0.0f);
+			needIdle = false;
 		}
 		if(window)
 		{
 			MessageHandler();
 		}
-	} while(result != WAIT_OBJECT_0 + 2);
-}
+	} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED && !closeInstance);
 
-
-PluginBridge::~PluginBridge()
-{
-	CloseHandle(otherProcess);
-	sigThreadExit.Trigger();
-	WaitForSingleObject(otherThread, INFINITE);
+	if(!closeInstance)
+	{
+		// Close any possible waiting queries
+		for(size_t i = 0; i < CountOf(ackSignals); i++)
+		{
+			ackSignals[i].Send();
+		}
+		BridgeMessage msg;
+		msg.Dispatch(effClose, 0, 0, 0, 0.0f, 0);
+		DispatchToPlugin(&msg.dispatch);
+	}
+	delete this;
 }
 
 
@@ -206,10 +234,6 @@ const BridgeMessage *PluginBridge::SendToHost(const BridgeMessage &msg)
 				ParseNextMessage();
 			}
 		} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
-		if(result == WAIT_OBJECT_0 + 2)
-		{
-			sigThreadExit.Trigger();
-		}
 	} else
 	{
 		// Wait until the message thread notifies us.
@@ -299,15 +323,11 @@ void PluginBridge::ParseNextMessage()
 }
 
 
-// Create a new bridge instance within this one.
+// Create a new bridge instance within this one (creates a new thread).
 void PluginBridge::NewInstance(NewInstanceMsg *msg)
 {
-	// TODO launch a new thread
-	Signal sigToHost, sigToBridge, sigProcess;
-	sigToHost.Create(msg->handles[0], msg->handles[1]);
-	sigToBridge.Create(msg->handles[2], msg->handles[3]);
-	sigProcess.Create(msg->handles[4], msg->handles[5]);
-	new PluginBridge(msg->memName, latestInstance->otherProcess, sigToHost, sigToBridge, sigProcess);
+	msg->memName[CountOf(msg->memName) - 1] = 0;
+	new PluginBridge(msg->memName, otherProcess);
 }
 
 
@@ -317,6 +337,7 @@ void PluginBridge::InitBridge(InitMsg *msg)
 	otherPtrSize = msg->hostPtrSize;
 	mixBufSize = msg->mixBufSize;
 	msg->result = 0;
+	msg->str[CountOf(msg->str) - 1] = 0;
 	
 	// TODO DEBUG
 	//SetConsoleTitleW(msg->str);
@@ -359,6 +380,7 @@ void PluginBridge::InitBridge(InitMsg *msg)
 		library = nullptr;
 		
 		wcscpy(msg->str, L"File is not a valid plugin");
+		closeInstance = true;
 		return;
 	}
 
@@ -373,18 +395,6 @@ void PluginBridge::InitBridge(InitMsg *msg)
 }
 
 
-// Unload the plugin.
-void PluginBridge::CloseBridge()
-{
-	sharedMem = nullptr;
-	queueMem.Close();
-	processMem.Close();
-
-	sigThreadExit.Trigger();
-	exit(0);
-}
-
-
 void PluginBridge::SendErrorMessage(const wchar_t *str)
 {
 	BridgeMessage msg;
@@ -396,6 +406,11 @@ void PluginBridge::SendErrorMessage(const wchar_t *str)
 // Host-to-plugin opcode dispatcher
 void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 {
+	if(nativeEffect == nullptr)
+	{
+		return;
+	}
+
 	// Various dispatch data - depending on the opcode, one of those might be used.
 	std::vector<char> extraData;
 	size_t extraDataSize = 0;
@@ -545,7 +560,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		nativeEffect = nullptr;
 		FreeLibrary(library);
 		library = nullptr;
-		CloseBridge();
+		closeInstance = true;
 		return;
 
 	case effGetProgramName:
@@ -678,7 +693,6 @@ void PluginBridge::RenderThread()
 			sigProcess.Confirm();
 		}
 	} while(result != WAIT_OBJECT_0 + 1 && result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED);
-	otherThread = NULL;
 }
 
 

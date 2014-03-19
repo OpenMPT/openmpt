@@ -96,6 +96,7 @@ enum VendorSpecificOpCodes
 {
 	kUpdateEffectStruct = 0,
 	kUpdateProcessingBuffer,
+	kGetWrapperPointer,
 };
 
 
