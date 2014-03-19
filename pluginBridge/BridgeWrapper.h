@@ -20,6 +20,9 @@ protected:
 	Event sigAutomation;
 	bool isSettingProgram;
 
+	ERect editRect;
+	VstSpeakerArrangement speakers[2];
+
 public:
 	enum BinaryType
 	{
@@ -45,7 +48,7 @@ protected:
 
 	void ParseNextMessage();
 	void DispatchToHost(DispatchMsg *msg);
-	const BridgeMessage *SendToBridge(const BridgeMessage &msg);
+	bool SendToBridge(BridgeMessage &sendMsg);
 	void SendAutomationQueue();
 
 	static VstIntPtr VSTCALLBACK DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);

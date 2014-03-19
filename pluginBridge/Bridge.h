@@ -53,7 +53,7 @@ public:
 protected:
 	void MessageThread();
 
-	const BridgeMessage *SendToHost(const BridgeMessage &msg);
+	bool SendToHost(BridgeMessage &sendMsg);
 
 	void UpdateEffectStruct();
 	void CreateProcessingFile(std::vector<char> &dispatchData);
