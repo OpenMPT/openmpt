@@ -10,7 +10,16 @@ call build\auto\prepare_win.cmd
 
 cd mptrack || goto error
 devenv MPTRACK_10.sln /clean "Release|Win32" || goto error
+cd .. || goto error
+cd pluginBridge || goto error
+devenv PluginBridge.sln /clean "Release|x64" || goto error
+cd .. || goto error
+
+cd mptrack || goto error
 devenv MPTRACK_10.sln /build "Release|Win32" || goto error
+cd .. || goto error
+cd pluginBridge || goto error
+devenv PluginBridge.sln /build "Release|x64" || goto error
 cd .. || goto error
 
 
