@@ -40,11 +40,12 @@ protected:
 
 public:
 	Event() : handle(nullptr) { }
-	~Event() { CloseHandle(handle); }
+	~Event() { Close(); }
 	
 	// Create a new event
 	bool Create(bool manual = false, const wchar_t *name = nullptr)
 	{
+		Close();
 		handle = CreateEventW(nullptr, manual ? TRUE : FALSE, FALSE, name);
 		return handle != nullptr;
 	}
@@ -52,7 +53,13 @@ public:
 	// Duplicate a local event
 	bool DuplicateFrom(HANDLE source)
 	{
+		Close();
 		return DuplicateHandle(GetCurrentProcess(), source, GetCurrentProcess(), &handle, 0, FALSE, DUPLICATE_SAME_ACCESS) != FALSE;
+	}
+
+	void Close()
+	{
+		CloseHandle(handle);
 	}
 
 	void Trigger()

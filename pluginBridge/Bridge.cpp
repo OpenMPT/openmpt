@@ -60,7 +60,7 @@ int _tmain(int argc, TCHAR *argv[])
 {
 	if(argc != 2)
 	{
-		MessageBox(NULL, _T("This executable is part of OpenMPT. You do not need to run it by yourself."), _T("Plugin Bridge"), 0);
+		MessageBox(NULL, _T("This executable is part of OpenMPT. You do not need to run it by yourself."), _T("OpenMPT Plugin Bridge"), 0);
 		return -1;
 	}
 
@@ -112,10 +112,11 @@ PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess_)
 	if(!queueMem.Open(memName)
 		|| !CreateSignals(memName))
 	{
-		MessageBox(NULL, _T("Could not connect to host."), _T("Plugin Bridge"), 0);
+		MessageBox(NULL, _T("Could not connect to OpenMPT."), _T("OpenMPT Plugin Bridge"), 0);
 		delete this;
 		return;
 	}
+
 	sharedMem = reinterpret_cast<SharedMemLayout *>(queueMem.view);
 
 	// Store parent process handle so that we can terminate the bridge process when OpenMPT closes (e.g. through a crash).
@@ -124,17 +125,13 @@ PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess_)
 	sigThreadExit.Create(true);
 	otherThread = mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
 
-	// Tell the parent process that we've initialized the shared memory and are ready to go.
-	sigToHost.Confirm();
-
 	mpt::thread_member<PluginBridge, &PluginBridge::MessageThread>(this);
 }
 
 
 PluginBridge::~PluginBridge()
 {
-	sigThreadExit.Trigger();
-	WaitForSingleObject(otherThread, INFINITE);
+	SignalObjectAndWait(sigThreadExit, otherThread, INFINITE, FALSE);
 
 	sharedMem = nullptr;
 	queueMem.Close();
@@ -480,8 +477,6 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 				windowClass.hInstance,
 				NULL);
 
-			// Periodically update the window, in case redrawing failed.
-			SetTimer(window, 0x1337, 1000, nullptr);
 			windowParent = reinterpret_cast<HWND>(msg->ptr);
 		}
 		break;
@@ -1026,36 +1021,34 @@ VstIntPtr VSTCALLBACK PluginBridge::MasterCallback(AEffect *effect, VstInt32 opc
 
 LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	PluginBridge *that = reinterpret_cast<PluginBridge *>(GetProp(hwnd, _T("MPT")));
+	if(that == nullptr)
+	{
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+
 	switch(uMsg)
 	{
 	case WM_NCACTIVATE:
 		if(wParam == TRUE)
 		{
 			// Window is activated - put the plugin window into foreground
-			PluginBridge *that = reinterpret_cast<PluginBridge *>(GetProp(hwnd, _T("MPT")));
-			if(that != nullptr)
-			{
-				SetForegroundWindow(that->windowParent);
-				SetForegroundWindow(that->window);
-			}
+			SetForegroundWindow(that->windowParent);
+			SetForegroundWindow(that->window);
 		}
+		break;
+
+	case WM_SYSKEYUP:
+	case WM_SYSKEYDOWN:
+	case WM_KEYUP:
+	case WM_KEYDOWN:
+		// Let the host handle these keys, too.
+		PostMessage(GetParent(that->windowParent), uMsg, wParam, lParam);
 		break;
 
 	case WM_ERASEBKGND:
 		// Pretend that we erased the background
-		if(GetProp(hwnd, _T("MPT")) != nullptr)
-		{
-			return 1;
-		}
-		break;
-
-	case WM_TIMER:
-		if(wParam == 0x1337)
-		{
-			// Fix failed plugin window redrawing by periodically forcing a redraw
-			RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
-		}
-		break;
+		return 1;
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
