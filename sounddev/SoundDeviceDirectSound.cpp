@@ -91,11 +91,15 @@ std::vector<SoundDeviceInfo> CDSoundDevice::EnumerateDevices()
 CDSoundDevice::CDSoundDevice(SoundDeviceID id, const std::wstring &internalID)
 //----------------------------------------------------------------------------
 	: CSoundDeviceWithThread(id, internalID)
+	, m_piDS(NULL)
+	, m_pPrimary(NULL)
+	, m_pMixBuffer(NULL)
+	, m_nDSoundBufferSize(0)
+	, m_bMixRunning(FALSE)
+	, m_dwWritePos(0)
+	, m_dwLatency(0)
 {
-	m_piDS = NULL;
-	m_pPrimary = NULL;
-	m_pMixBuffer = NULL;
-	m_bMixRunning = FALSE;
+	return;
 }
 
 
@@ -196,7 +200,7 @@ bool CDSoundDevice::InternalOpen()
 	m_bMixRunning = FALSE;
 	m_nDSoundBufferSize = (m_Settings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
 	m_nDSoundBufferSize = (m_nDSoundBufferSize + (bytesPerFrame-1)) / bytesPerFrame * bytesPerFrame; // round up to full frame
-	m_nDSoundBufferSize = Clamp((LONG)m_nDSoundBufferSize, DSBSIZE_MIN, DSBSIZE_MAX);
+	m_nDSoundBufferSize = Clamp(m_nDSoundBufferSize, (DWORD)DSBSIZE_MIN, (DWORD)DSBSIZE_MAX);
 	if(!m_Settings.ExclusiveMode)
 	{
 		// Set the format of the primary buffer
@@ -302,8 +306,7 @@ bool CDSoundDevice::InternalClose()
 void CDSoundDevice::StartFromSoundThread()
 //----------------------------------------
 {
-	if(!m_pMixBuffer) return;
-	// done in InternalFillAudioBuffer for now
+	// done in InternalFillAudioBuffer
 }
 
 
@@ -318,85 +321,92 @@ void CDSoundDevice::StopFromSoundThread()
 }
 
 
-DWORD CDSoundDevice::LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2)
-//--------------------------------------------------------------------------------------------------------------
-{
-	const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
-	DWORD d, dwPlay = 0, dwWrite = 0;
-
-	if ((!m_pMixBuffer) || (!m_nDSoundBufferSize)) return 0;
-	if (m_pMixBuffer->GetCurrentPosition(&dwPlay, &dwWrite) != DS_OK) return 0;
-	if ((m_dwWritePos >= m_nDSoundBufferSize) || (!m_bMixRunning))
-	{
-		m_dwWritePos = dwWrite;
-		m_dwLatency = 0;
-		d = m_nDSoundBufferSize/2;
-	} else
-	{
-		dwWrite = m_dwWritePos;
-		m_dwLatency = (m_nDSoundBufferSize + dwWrite - dwPlay) % m_nDSoundBufferSize;
-		if (dwPlay >= dwWrite)
-			d = dwPlay - dwWrite;
-		else
-			d = m_nDSoundBufferSize + dwPlay - dwWrite;
-	}
-	if (d > m_nDSoundBufferSize) return FALSE;
-	if (d > m_nDSoundBufferSize/2) d = m_nDSoundBufferSize/2;
-	if (dwBytes)
-	{
-		if (m_dwLatency > dwBytes) return 0;
-		if (m_dwLatency+d > dwBytes) d = dwBytes - m_dwLatency;
-	}
-	d = d / bytesPerFrame * bytesPerFrame; // truncate to full frame
-	if (d <= bytesPerFrame) return 0;
-	HRESULT hr = m_pMixBuffer->Lock(m_dwWritePos, d, lpBuf1, lpSize1, lpBuf2, lpSize2, 0);
-	if(hr == DSERR_BUFFERLOST)
-	{
-		// buffer lost, restore buffer and try again, fail if it fails again
-		if(m_pMixBuffer->Restore() != DS_OK) return 0;
-		if(m_pMixBuffer->Lock(m_dwWritePos, d, lpBuf1, lpSize1, lpBuf2, lpSize2, 0) != DS_OK) return 0;
-		return d;
-	} else if(hr != DS_OK)
-	{
-		return 0;
-	}
-	return d;
-}
-
-
-BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DWORD dwSize2)
-//------------------------------------------------------------------------------------------
-{
-	if (!m_pMixBuffer) return FALSE;
-	if (m_pMixBuffer->Unlock(lpBuf1, dwSize1, lpBuf2, dwSize2) == DS_OK)
-	{
-		m_dwWritePos += dwSize1 + dwSize2;
-		if (m_dwWritePos >= m_nDSoundBufferSize) m_dwWritePos -= m_nDSoundBufferSize;
-		return TRUE;
-	}
-	return FALSE;
-}
-
-
 void CDSoundDevice::InternalFillAudioBuffer()
 //-------------------------------------------
 {
-	LPVOID lpBuf1=NULL, lpBuf2=NULL;
-	DWORD dwSize1=0, dwSize2=0;
-	DWORD dwBytes;
-
-	if (!m_pMixBuffer) return;
-	dwBytes = LockBuffer(m_nDSoundBufferSize, &lpBuf1, &dwSize1, &lpBuf2, &dwSize2);
-	if (dwBytes)
+	if(!m_pMixBuffer)
 	{
+		RequestClose();
+		return;
+	}
+	if(m_nDSoundBufferSize == 0)
+	{
+		RequestClose();
+		return;
+	}
+
+	for(int refillCount = 0; refillCount < 2; ++refillCount)
+	{
+		// Refill the buffer at most twice so we actually sleep some time when CPU is overloaded.
+		
 		const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
-		std::size_t countChunk = 0;
-		if(lpBuf1 && (dwSize1 > 0)) countChunk += dwSize1/bytesPerFrame;
-		if(lpBuf2 && (dwSize2 > 0)) countChunk += dwSize2/bytesPerFrame;
-		SourceAudioPreRead(countChunk);
-		if ((lpBuf1) && (dwSize1)) SourceAudioRead(lpBuf1, dwSize1/bytesPerFrame);
-		if ((lpBuf2) && (dwSize2)) SourceAudioRead(lpBuf2, dwSize2/bytesPerFrame);
-		UnlockBuffer(lpBuf1, dwSize1, lpBuf2, dwSize2);
+
+		DWORD dwPlay = 0;
+		DWORD dwWrite = 0;
+		if(m_pMixBuffer->GetCurrentPosition(&dwPlay, &dwWrite) != DS_OK)
+		{
+			RequestClose();
+			return;
+		}
+
+		DWORD dwBytes = m_nDSoundBufferSize/2;
+		if(!m_bMixRunning)
+		{
+			// startup
+			m_dwWritePos = dwWrite;
+			m_dwLatency = 0;
+		} else
+		{
+			// running
+			m_dwLatency = (m_dwWritePos - dwPlay + m_nDSoundBufferSize) % m_nDSoundBufferSize;
+			m_dwLatency = (m_dwLatency + m_nDSoundBufferSize - 1) % m_nDSoundBufferSize + 1;
+			dwBytes = (dwPlay - m_dwWritePos + m_nDSoundBufferSize) % m_nDSoundBufferSize;
+			dwBytes = Clamp(dwBytes, (DWORD)0u, m_nDSoundBufferSize/2); // limit refill amount to half the buffer size
+		}
+		dwBytes = dwBytes / bytesPerFrame * bytesPerFrame; // truncate to full frame
+		if(dwBytes < bytesPerFrame)
+		{
+			// ok, nothing to do
+			return;
+		}
+
+		void *buf1 = nullptr;
+		void *buf2 = nullptr;
+		DWORD dwSize1 = 0;
+		DWORD dwSize2 = 0;
+		HRESULT hr = m_pMixBuffer->Lock(m_dwWritePos, dwBytes, &buf1, &dwSize1, &buf2, &dwSize2, 0);
+		if(hr == DSERR_BUFFERLOST)
+		{
+			// buffer lost, restore buffer and try again, fail if it fails again
+			if(m_pMixBuffer->Restore() != DS_OK)
+			{
+				RequestClose();
+				return;
+			}
+			if(m_pMixBuffer->Lock(m_dwWritePos, dwBytes, &buf1, &dwSize1, &buf2, &dwSize2, 0) != DS_OK)
+			{
+				RequestClose();
+				return;
+			}
+		} else if(hr != DS_OK)
+		{
+			RequestClose();
+			return;
+		}
+
+		SourceAudioPreRead(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame);
+
+		SourceAudioRead(buf1, dwSize1/bytesPerFrame);
+		SourceAudioRead(buf2, dwSize2/bytesPerFrame);
+
+		if(m_pMixBuffer->Unlock(buf1, dwSize1, buf2, dwSize2) != DS_OK)
+		{
+			RequestClose();
+			return;
+		}
+		m_dwWritePos += dwSize1 + dwSize2;
+		m_dwWritePos %= m_nDSoundBufferSize;
+
 		DWORD dwStatus = 0;
 		m_pMixBuffer->GetStatus(&dwStatus);
 		if(!m_bMixRunning || !(dwStatus & DSBSTATUS_PLAYING))
@@ -414,16 +424,35 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			if(hr == DSERR_BUFFERLOST)
 			{
 				// buffer lost, restore buffer and try again, fail if it fails again
-				if(m_pMixBuffer->Restore() != DS_OK) return;
-				if(m_pMixBuffer->Play(0, 0, DSBPLAY_LOOPING) != DS_OK) return;
+				if(m_pMixBuffer->Restore() != DS_OK)
+				{
+					RequestClose();
+					return;
+				}
+				if(m_pMixBuffer->Play(0, 0, DSBPLAY_LOOPING) != DS_OK)
+				{
+					RequestClose();
+					return;
+				}
 			} else if(hr != DS_OK)
 			{
+				RequestClose();
 				return;
 			}
 			m_bMixRunning = TRUE; 
 		}
-		SourceAudioDone((dwSize1+dwSize2)/bytesPerFrame, m_dwLatency/bytesPerFrame);
+
+		SourceAudioDone(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame, m_dwLatency/bytesPerFrame);
+
+		if(dwBytes < m_nDSoundBufferSize/2)
+		{
+			// Sleep again if we did fill less than half the buffer size.
+			// Otherwise it's a better idea to refill again right away.
+			break;
+		}
+
 	}
+
 }
 
 
