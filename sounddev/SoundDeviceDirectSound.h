@@ -31,10 +31,12 @@ class CDSoundDevice: public CSoundDeviceWithThread
 {
 protected:
 	IDirectSound *m_piDS;
-	IDirectSoundBuffer *m_pPrimary, *m_pMixBuffer;
-	ULONG m_nDSoundBufferSize;
+	IDirectSoundBuffer *m_pPrimary;
+	IDirectSoundBuffer *m_pMixBuffer;
+	DWORD m_nDSoundBufferSize;
 	BOOL m_bMixRunning;
-	DWORD m_dwWritePos, m_dwLatency;
+	DWORD m_dwWritePos;
+	DWORD m_dwLatency;
 
 public:
 	CDSoundDevice(SoundDeviceID id, const std::wstring &internalID);
@@ -50,10 +52,6 @@ public:
 	double GetCurrentLatency() const { return 1.0 * m_dwLatency / m_Settings.GetBytesPerSecond(); }
 	SoundDeviceCaps GetDeviceCaps();
 	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
-
-protected:
-	DWORD LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2);
-	BOOL UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DWORD dwSize2);
 
 public:
 	static std::vector<SoundDeviceInfo> EnumerateDevices();
