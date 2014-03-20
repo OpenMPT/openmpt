@@ -386,6 +386,8 @@ void CAbstractVstEditor::SetTitle()
 			Title.Append(m_VstPlugin.m_pMixStruct->GetName());
 		else
 			Title.Append(mpt::ToLocale(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName()).c_str());
+		if(m_VstPlugin.isBridged)
+			Title.Append(" (Bridged)");
 
 		SetWindowText(Title);
 	}
@@ -449,8 +451,9 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 	{
 		if(m_VstPlugin.CanRecieveMidiEvents())
 		{
+			SetForegroundWindow();	// Might have to steal focus from plugin bridge child window
 			if(!m_VstPlugin.isInstrument() || m_VstPlugin.GetSoundFile().GetModSpecifications().instrumentsMax == 0 ||
-				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false, false, this) == cnfNo)
+				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false, this) == cnfNo)
 			{
 				return false;
 			} else

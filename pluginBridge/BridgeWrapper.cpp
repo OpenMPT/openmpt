@@ -198,12 +198,6 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	sharedMem->effect.process = Process;
 	memcpy(&(sharedMem->effect.resvd2), "OMPT", 4);
 
-	if(WaitForSingleObject(sigToHost.ack, 5000) != WAIT_OBJECT_0)
-	{
-		Reporting::Error("Plugin bridge timed out.");
-		return false;
-	}
-
 	sigThreadExit.Create(true);
 	sigAutomation.Create(true);
 
@@ -231,8 +225,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 
 BridgeWrapper::~BridgeWrapper()
 {
-	sigThreadExit.Trigger();
-	WaitForSingleObject(otherThread, INFINITE);
+	SignalObjectAndWait(sigThreadExit, otherThread, INFINITE, FALSE);
 }
 
 
