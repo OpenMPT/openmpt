@@ -44,14 +44,7 @@ class CAudioThread
 private:
 	CSoundDeviceWithThread & m_SoundDevice;
 
-	bool m_HasXP;
-	mpt::Library m_Kernel32DLL;
-	typedef HANDLE (WINAPI *FCreateWaitableTimer)(LPSECURITY_ATTRIBUTES, BOOL, LPCTSTR);
-	typedef BOOL (WINAPI *FSetWaitableTimer)(HANDLE, const LARGE_INTEGER *, LONG, PTIMERAPCROUTINE, LPVOID, BOOL);
-	typedef BOOL (WINAPI *FCancelWaitableTimer)(HANDLE);
-	FCreateWaitableTimer pCreateWaitableTimer;
-	FSetWaitableTimer pSetWaitableTimer;
-	FCancelWaitableTimer pCancelWaitableTimer;
+	bool m_HasNTKernel;
 
 	double m_WakeupInterval;
 	HANDLE m_hAudioWakeUp;
