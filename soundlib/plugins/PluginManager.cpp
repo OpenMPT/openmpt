@@ -199,12 +199,38 @@ AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &li
 	AEffect *effect = nullptr;
 	library = nullptr;
 
-	if(forceBridge || plugin.useBridge || !BridgeWrapper::IsPluginNative(pluginPath))
+	const bool isNative = BridgeWrapper::IsPluginNative(pluginPath);
+	if(forceBridge || plugin.useBridge || !isNative)
 	{
-		effect = BridgeWrapper::Create(plugin);
-		if(effect != nullptr)
+		try
 		{
-			return effect;
+			effect = BridgeWrapper::Create(plugin);
+			if(effect != nullptr)
+			{
+				return effect;
+			}
+		} catch(BridgeWrapper::BridgeNotFoundException &)
+		{
+			// Try normal loading
+			if(!isNative)
+			{
+				Reporting::Error("Could not locate the plugin bridge executable, which is required for running non-native plugins.", "OpenMPT Plugin Bridge");
+				return false;
+			}
+		} catch(BridgeWrapper::BridgeException &e)
+		{
+			// If there was some error, don't try normal loading as well... unless the user really wants it.
+			if(isNative)
+			{
+				if(Reporting::Confirm((std::string(e.what()) + "\n\nDo you want to try to load the plugin natively?").c_str(), "OpenMPT Plugin Bridge", false, true) == cnfNo)
+				{
+					return nullptr;
+				}
+			} else
+			{
+				Reporting::Error(e.what(), "OpenMPT Plugin Bridge");
+				return nullptr;
+			}
 		}
 	}
 
@@ -256,14 +282,6 @@ AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &li
 		}
 	}
 
-	if(effect == nullptr)
-	{
-		// Re-try loading the plugin using our bridge instead.
-		FreeLibrary(library);
-		library = nullptr;
-
-		effect = BridgeWrapper::Create(plugin);
-	}
 	return effect;
 }
 

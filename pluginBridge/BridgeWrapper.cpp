@@ -79,7 +79,7 @@ uint64 BridgeWrapper::GetFileVersion(const WCHAR *exePath)
 // Create a plugin bridge object
 AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin)
 {
-	BridgeWrapper *wrapper = new BridgeWrapper();
+	BridgeWrapper *wrapper = new (std::nothrow) BridgeWrapper();
 	BridgeWrapper *sharedInstance = nullptr;
 
 	// Should we share instances?
@@ -98,12 +98,19 @@ AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin)
 		}
 	}
 
-	if(wrapper->Init(plugin.dllPath, sharedInstance) && wrapper->queueMem.Good())
+	try
 	{
-		return &wrapper->sharedMem->effect;
+		if(wrapper != nullptr && wrapper->Init(plugin.dllPath, sharedInstance) && wrapper->queueMem.Good())
+		{
+			return &wrapper->sharedMem->effect;
+		}
+		delete wrapper;
+		return nullptr;
+	} catch(BridgeException &)
+	{
+		delete wrapper;
+		throw;
 	}
-	delete wrapper;
-	return nullptr;
 }
 
 
@@ -120,8 +127,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	if(!queueMem.Create(mapName.c_str(), sizeof(SharedMemLayout))
 		|| !CreateSignals(mapName.c_str()))
 	{
-		Reporting::Error("Could not initialize plugin bridge memory.");
-		return false;
+		throw BridgeException("Could not initialize plugin bridge memory.");
 	}
 	sharedMem = reinterpret_cast<SharedMemLayout *>(queueMem.view);
 
@@ -149,12 +155,11 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 		if(bridgeVersion == 0)
 		{
 			// Silently fail if bridge is missing.
-			//Reporting::Error("Could not open the plugin bridge executable.");
-			return false;
+			throw BridgeNotFoundException();
 		} else if(bridgeVersion != mptVersion)
 		{
-			Reporting::Error("The plugin bridge version does not match your OpenMPT version.");
-			return false;
+			throw BridgeException("The plugin bridge version does not match your OpenMPT version.");
+			return nullptr;
 		}
 
 		otherPtrSize = binType;
@@ -171,8 +176,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 
 		if(!CreateProcessW(exeName.AsNative().c_str(), cmdLine, NULL, NULL, FALSE, /*CREATE_NO_WINDOW */0, NULL, NULL, &info, &processInfo))
 		{
-			Reporting::Error("Failed to launch plugin bridge.");
-			return false;
+			throw BridgeException("Failed to launch plugin bridge.");
 		}
 		otherProcess = processInfo.hProcess;
 	} else
@@ -208,10 +212,10 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 
 	if(!SendToBridge(initMsg))
 	{
-		Reporting::Error("Could not initialize plugin bridge, it probably crashed.");
+		throw BridgeException("Could not initialize plugin bridge, it probably crashed.");
 	} else if(initMsg.init.result != 1)
 	{
-		Reporting::Error(mpt::ToLocale(initMsg.init.str).c_str());
+		throw BridgeException(mpt::ToLocale(initMsg.init.str).c_str());
 	} else
 	{
 		if(sharedMem->effect.flags & effFlagsCanReplacing) sharedMem->effect.processReplacing = ProcessReplacing;

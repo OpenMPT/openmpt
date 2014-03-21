@@ -31,6 +31,14 @@ public:
 		bin64Bit = 64,
 	};
 
+	class BridgeException : public std::exception
+	{
+	public:
+		BridgeException(const char *str) : std::exception(str) { }
+		BridgeException() { }
+	};
+	class BridgeNotFoundException : public BridgeException { };
+
 public:
 	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
 	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == sizeof(void *) * 8; }
