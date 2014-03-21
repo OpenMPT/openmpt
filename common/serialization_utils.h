@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <bitset>
 #include <istream>
 #include <limits>
@@ -19,13 +18,13 @@
 #include <ostream>
 #include <vector>
 
-#include <string.h>
-
-#include "../common/typedefs.h"
-
 #ifdef HAS_TYPE_TRAITS
 #include <type_traits>
 #endif
+
+#include <cstring>
+
+#include "../common/typedefs.h"
 
 namespace srlztn //SeRiaLiZaTioN
 {
@@ -172,7 +171,7 @@ template <>
 inline void WriteItem<std::string>(std::ostream& oStrm, const std::string& str) {WriteItemString(oStrm, str.c_str(), str.length());}
 
 template <>
-inline void WriteItem<const char *>(std::ostream& oStrm, const char * const & psz) { WriteItemString(oStrm, psz, strlen(psz));}
+inline void WriteItem<const char *>(std::ostream& oStrm, const char * const & psz) { WriteItemString(oStrm, psz, std::strlen(psz));}
 
 
 template<class T>
@@ -336,7 +335,7 @@ public:
 
 	// Call this to begin reading: must be called before other read functions.
 	void BeginRead(const char* pId, const size_t nLength, const uint64& nVersion);
-	void BeginRead(const char* pszId, const uint64& nVersion) {return BeginRead(pszId, strlen(pszId), nVersion);}
+	void BeginRead(const char* pszId, const uint64& nVersion) {return BeginRead(pszId, std::strlen(pszId), nVersion);}
 
 	// After calling BeginRead(), this returns number of entries in the file.
 	NumType GetNumEntries() const {return m_nReadEntrycount;}
@@ -350,14 +349,14 @@ public:
 	ReadIterator GetReadEnd();
 
 	// Compares given id with read entry id 
-	IdMatchStatus CompareId(const ReadIterator& iter, const char* pszId) {return CompareId(iter, pszId, strlen(pszId));}
+	IdMatchStatus CompareId(const ReadIterator& iter, const char* pszId) {return CompareId(iter, pszId, std::strlen(pszId));}
 	IdMatchStatus CompareId(const ReadIterator& iter, const char* pId, const size_t nIdSize);
 
 	uint64 GetReadVersion() {return m_nReadVersion;}
 
 	// Read item using default read implementation.
 	template <class T>
-	ReadRv ReadItem(T& obj, const char* pszId) {return ReadItem(obj, pszId, strlen(pszId), srlztn::ReadItem<T>);}
+	ReadRv ReadItem(T& obj, const char* pszId) {return ReadItem(obj, pszId, std::strlen(pszId), srlztn::ReadItem<T>);}
 
 	template <class T>
 	ReadRv ReadItem(T& obj, const char* pId, const size_t nIdSize) {return ReadItem(obj, pId, nIdSize, srlztn::ReadItem<T>);}
@@ -383,7 +382,7 @@ private:
 	// Searches for entry with given ID. If found, returns pointer to corresponding entry, else
 	// returns nullptr.
 	const ReadEntry* Find(const char* pId, const size_t nLength);
-	const ReadEntry* Find(const char* pszId) {return Find(pszId, strlen(pszId));}
+	const ReadEntry* Find(const char* pszId) {return Find(pszId, std::strlen(pszId));}
 
 	// Called after reading an object.
 	ReadRv OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin);
@@ -427,11 +426,11 @@ public:
 
 	// Write header
 	void BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion);
-	void BeginWrite(const char* pszId, const uint64& nVersion) {BeginWrite(pszId, strlen(pszId), nVersion);}
+	void BeginWrite(const char* pszId, const uint64& nVersion) {BeginWrite(pszId, std::strlen(pszId), nVersion);}
 
 	// Write item using default write implementation.
 	template <class T>
-	void WriteItem(const T& obj, const char* pszId) {WriteItem(obj, pszId, strlen(pszId), &srlztn::WriteItem<T>);}
+	void WriteItem(const T& obj, const char* pszId) {WriteItem(obj, pszId, std::strlen(pszId), &srlztn::WriteItem<T>);}
 
 	template <class T>
 	void WriteItem(const T& obj, const char* pId, const size_t nIdSize) {WriteItem(obj, pId, nIdSize, &srlztn::WriteItem<T>);}

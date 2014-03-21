@@ -9,10 +9,14 @@
 
 
 #include "stdafx.h"
+
 #include "serialization_utils.h"
-#include "misc_util.h"
+
 #include <algorithm>
 #include <iterator> // for back_inserter
+
+#include "misc_util.h"
+
 
 namespace srlztn
 {
