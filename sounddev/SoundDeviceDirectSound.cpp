@@ -189,14 +189,13 @@ bool CDSoundDevice::InternalOpen()
 
 	DSBUFFERDESC dsbd;
 	DSBCAPS dsc;
-	UINT nPriorityLevel = (m_Settings.ExclusiveMode) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
 
 	if(m_piDS) return true;
 	const std::wstring internalID = GetDeviceInternalID();
 	GUID guid = internalID.empty() ? GUID() : StringToGuid(internalID);
 	if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
-	m_piDS->SetCooperativeLevel(m_Settings.hWnd, nPriorityLevel);
+	m_piDS->SetCooperativeLevel(m_Settings.hWnd, m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY);
 	m_bMixRunning = FALSE;
 	m_nDSoundBufferSize = (m_Settings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
 	m_nDSoundBufferSize = (m_nDSoundBufferSize + (bytesPerFrame-1)) / bytesPerFrame * bytesPerFrame; // round up to full frame
