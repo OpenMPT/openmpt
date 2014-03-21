@@ -12,7 +12,6 @@
 
 #include "serialization_utils.h"
 
-#include <algorithm>
 #include <iterator> // for back_inserter
 
 #include "misc_util.h"
