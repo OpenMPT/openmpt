@@ -792,6 +792,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_CBN_SELCHANGE(IDC_COMBO4,		OnPPCChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5,		OnMCHChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)		//rewbs.instroVSTi
+	ON_CBN_DROPDOWN(IDC_COMBO6,			OnOpenPluginList)
 	ON_CBN_SELCHANGE(IDC_COMBO9,		OnResamplingChanged)
 	ON_CBN_SELCHANGE(IDC_FILTERMODE,	OnFilterModeChanged)
 	ON_CBN_SELCHANGE(IDC_PLUGIN_VOLUMESTYLE,	OnPluginVolumeHandlingChanged)
@@ -861,6 +862,7 @@ CCtrlInstruments::CCtrlInstruments(CModControlView &parent, CModDoc &document) :
 {
 	m_nInstrument = 1;
 	m_nLockCount = 1;
+	openendPluginListWithMouse = false;
 }
 
 
@@ -2068,6 +2070,9 @@ void CCtrlInstruments::OnMixPlugChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	PLUGINDEX nPlug = static_cast<PLUGINDEX>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()));
 
+	bool wasOpenedWithMouse = openendPluginListWithMouse;
+	openendPluginListWithMouse = false;
+
 	if (pIns)
 	{
 		BOOL enableVol = (nPlug < 1 || m_sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION)) ? FALSE : TRUE;
@@ -2092,7 +2097,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 				const SNDMIXPLUGIN &plugin = m_sndFile.m_MixPlugins[pIns->nMixPlug - 1];
 				bool active = !IsLocked();
 
-				if(!plugin.IsValidPlugin() && active)
+				if(!plugin.IsValidPlugin() && active && wasOpenedWithMouse)
 				{
 					// No plugin in this slot yet: Ask user to add one.
 #ifndef NO_VST

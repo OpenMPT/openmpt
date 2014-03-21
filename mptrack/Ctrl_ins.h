@@ -97,16 +97,14 @@ protected:
 	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutSwing, m_SliderResSwing, 
 		        m_SliderCutOff, m_SliderResonance;
 	CNoteMapWnd m_NoteMap;
-	INSTRUMENTINDEX m_nInstrument;
-
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
 	CSliderCtrl m_SliderAttack;
 	CSpinButtonCtrl m_SpinAttack;
-// -! NEW_FEATURE#0027
-
 	//Tuning
 	CComboBox m_ComboTuning;
+
+	INSTRUMENTINDEX m_nInstrument;
+	bool openendPluginListWithMouse;
+
 	void UpdateTuningComboBox();
 	void BuildTuningComboBox();
 
@@ -175,6 +173,7 @@ protected:
 	afx_msg void OnPluginVelocityHandlingChanged();
 	afx_msg void OnPluginVolumeHandlingChanged();
 	afx_msg void OnPitchWheelDepthChanged();
+	afx_msg void OnOpenPluginList() { openendPluginListWithMouse = true; }
 
 
 // -> CODE#0027
