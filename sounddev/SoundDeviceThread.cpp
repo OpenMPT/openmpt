@@ -24,34 +24,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 //------------------------------------------------------------------------------------------
 {
 
-	m_HasXP = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinXP);
-
-	pCreateWaitableTimer = nullptr;
-	pSetWaitableTimer = nullptr;
-	pCancelWaitableTimer = nullptr;
-	#if _WIN32_WINNT >= _WIN32_WINNT_WINXP
-		m_HasXP = true;
-		pCreateWaitableTimer = &CreateWaitableTimer;
-		pSetWaitableTimer = &SetWaitableTimer;
-		pCancelWaitableTimer = &CancelWaitableTimer;
-	#else
-		if(m_HasXP)
-		{
-			m_Kernel32DLL = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("kernel32")));
-			if(!m_Kernel32DLL.Bind(pCreateWaitableTimer, "CreateWaitableTimerA"))
-			{
-				m_HasXP = false;
-			}
-			if(!m_Kernel32DLL.Bind(pSetWaitableTimer, "SetWaitableTimer"))
-			{
-				m_HasXP = false;
-			}
-			if(!m_Kernel32DLL.Bind(pCancelWaitableTimer, "CancelWaitableTimer"))
-			{
-				m_HasXP = false;
-			}
-		}
-	#endif
+	m_HasNTKernel = mpt::Windows::IsWinNT();
 
 	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
@@ -93,11 +66,6 @@ CAudioThread::~CAudioThread()
 		CloseHandle(m_hAudioWakeUp);
 		m_hAudioWakeUp = NULL;
 	}
-
-	pCreateWaitableTimer = nullptr;
-	pSetWaitableTimer = nullptr;
-	pCancelWaitableTimer = nullptr;
-
 }
 
 
@@ -184,8 +152,8 @@ private:
 
 	Util::MultimediaClock clock_noxp;
 
-	bool period_noxp_set;
-	bool periodic_xp_timer;
+	bool period_nont_set;
+	bool periodic_nt_timer;
 
 	HANDLE sleepEvent;
 
@@ -200,28 +168,28 @@ public:
 		if(sleepMilliseconds < 1) sleepMilliseconds = 1;
 		if(sleep100Nanoseconds < 1) sleep100Nanoseconds = 1;
 
-		period_noxp_set = false;
-		periodic_xp_timer = (sleep100Nanoseconds >= 10000); // can be represented as a millisecond period, otherwise use non-periodic timers which allow higher precision but might me slower because we have to set them again in each period
+		period_nont_set = false;
+		periodic_nt_timer = (sleep100Nanoseconds >= 10000); // can be represented as a millisecond period, otherwise use non-periodic timers which allow higher precision but might me slower because we have to set them again in each period
 
 		sleepEvent = NULL;
 
-		if(self.m_HasXP)
+		if(self.m_HasNTKernel)
 		{
-			if(periodic_xp_timer)
+			if(periodic_nt_timer)
 			{
-				sleepEvent = self.pCreateWaitableTimer(NULL, FALSE, NULL);
+				sleepEvent = CreateWaitableTimer(NULL, FALSE, NULL);
 				LARGE_INTEGER dueTime;
 				dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
-				self.pSetWaitableTimer(sleepEvent, &dueTime, sleepMilliseconds, NULL, NULL, FALSE);
+				SetWaitableTimer(sleepEvent, &dueTime, sleepMilliseconds, NULL, NULL, FALSE);
 			} else
 			{
-				sleepEvent = self.pCreateWaitableTimer(NULL, TRUE, NULL);
+				sleepEvent = CreateWaitableTimer(NULL, TRUE, NULL);
 			}
 		} else
 		{
 			sleepEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 			clock_noxp.SetResolution(1); // increase resolution of multimedia timer
-			period_noxp_set = true;
+			period_nont_set = true;
 		}
 
 	}
@@ -241,13 +209,13 @@ public:
 	void Retrigger()
 	//--------------
 	{
-		if(self.m_HasXP)
+		if(self.m_HasNTKernel)
 		{
-			if(!periodic_xp_timer)
+			if(!periodic_nt_timer)
 			{
 				LARGE_INTEGER dueTime;
 				dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
-				self.pSetWaitableTimer(sleepEvent, &dueTime, 0, NULL, NULL, FALSE);
+				SetWaitableTimer(sleepEvent, &dueTime, 0, NULL, NULL, FALSE);
 			}
 		} else
 		{
@@ -258,20 +226,20 @@ public:
 	CPeriodicWaker::~CPeriodicWaker()
 	//-------------------------------
 	{
-		if(self.m_HasXP)
+		if(self.m_HasNTKernel)
 		{
-			if(periodic_xp_timer)
+			if(periodic_nt_timer)
 			{
-				self.pCancelWaitableTimer(sleepEvent);
+				CancelWaitableTimer(sleepEvent);
 			}
 			CloseHandle(sleepEvent);
 			sleepEvent = NULL;
 		} else
 		{
-			if(period_noxp_set)
+			if(period_nont_set)
 			{
 				clock_noxp.SetResolution(0);
-				period_noxp_set = false;
+				period_nont_set = false;
 			}
 			CloseHandle(sleepEvent);
 			sleepEvent = NULL;

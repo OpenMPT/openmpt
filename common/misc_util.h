@@ -654,6 +654,9 @@ namespace Windows
 
 enum WinNTVersion
 {
+	VerWinNT4   = 0x0400,
+	VerWin98    = 0x040a,
+	VerWinME    = 0x045a,
 	VerWin2000  = 0x0500,
 	VerWinXP    = 0x0501,
 	VerWinXPSP2 = 0x0502,
@@ -671,6 +674,16 @@ static inline uint32 GetWinNTVersion()
 	versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
 	GetVersionEx(&versioninfo);
 	return ((uint32)mpt::saturate_cast<uint8>(versioninfo.dwMajorVersion) << 8) | (uint32)mpt::saturate_cast<uint8>(versioninfo.dwMinorVersion);
+}
+
+static inline bool IsWinNT()
+//--------------------------
+{
+	OSVERSIONINFO versioninfo;
+	MemsetZero(versioninfo);
+	versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
+	GetVersionEx(&versioninfo);
+	return (versioninfo.dwPlatformId == VER_PLATFORM_WIN32_NT);
 }
 
 } // namespace Windows
