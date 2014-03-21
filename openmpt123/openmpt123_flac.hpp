@@ -109,7 +109,7 @@ public:
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		if ( !called_init ) {
-			FLAC__stream_encoder_init_file( encoder, flags.output_filename.c_str(), NULL, 0 );
+			FLAC__stream_encoder_init_file( encoder, filename.c_str(), NULL, 0 );
 			called_init = true;
 		}
 		interleaved_buffer.clear();
