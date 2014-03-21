@@ -1765,6 +1765,7 @@ static int main( int argc, char * argv [] ) {
 					stdout_stream_raii stdout_audio_stream;
 					render_files( flags, log, stdout_audio_stream );
 				} else if ( !flags.output_filename.empty() ) {
+					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream );
 #if defined( MPT_WITH_PORTAUDIO )
