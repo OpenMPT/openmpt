@@ -100,8 +100,8 @@ class FileDataContainerWindow : public IFileDataContainer
 {
 private:
 	MPT_SHARED_PTR<IFileDataContainer> data;
-	off_t dataOffset;
-	off_t dataLength;
+	const off_t dataOffset;
+	const off_t dataLength;
 public:
 	FileDataContainerWindow(MPT_SHARED_PTR<IFileDataContainer> src, off_t off, off_t len) : data(src), dataOffset(off), dataLength(len) { }
 	virtual ~FileDataContainerWindow() { }
@@ -118,7 +118,11 @@ public:
 	}
 	off_t Read(char *dst, off_t pos, off_t count) const
 	{
-		return data->Read(dst, dataOffset + pos, count);
+		if(pos >= dataLength)
+		{
+			return 0;
+		}
+		return data->Read(dst, dataOffset + pos, std::min(count, dataLength - pos));
 	}
 	const char *GetPartialRawData(off_t pos, off_t length) const
 	{
@@ -129,7 +133,7 @@ public:
 		return data->GetPartialRawData(dataOffset + pos, length);
 	}
 	bool CanRead(off_t pos, off_t length) const {
-		return pos + length <= dataLength;
+		return (pos + length <= dataLength);
 	}
 	off_t GetReadableLength(off_t pos, off_t length) const
 	{
@@ -137,7 +141,7 @@ public:
 		{
 			return 0;
 		}
-		return std::min<off_t>(length, dataLength - pos);
+		return std::min(length, dataLength - pos);
 	}
 };
 
