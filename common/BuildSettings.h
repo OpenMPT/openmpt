@@ -18,15 +18,10 @@
 
 #ifdef MODPLUG_TRACKER
 
-//#define NO_PCH
-
 // Use inline assembly at all
 #define ENABLE_ASM
 
 #else
-
-// Do not use precompiled headers (prevents include of commonly used headers in stdafx.h)
-#define NO_PCH
 
 // Do not use inline asm in library builds. There is just about no codepath which would use it anyway.
 //#define ENABLE_ASM
