@@ -169,6 +169,14 @@ public:
 		}
 	}
 
+	size_t Size() const
+	{
+		LARGE_INTEGER size;
+		size.QuadPart = 0;
+		GetFileSizeEx(mapFile, &size);
+		return static_cast<size_t>(size.QuadPart);
+	}
+
 	bool Good() const { return view != nullptr; }
 };
 
@@ -424,7 +432,10 @@ public:
 	Event sigThreadExit;		// Signal to kill helper thread
 
 	// Shared memory segments
-	MappedMemory queueMem, processMem, getChunkMem;
+	MappedMemory queueMem;		// AEffect, message, some fixed size VST structures
+	MappedMemory processMem;	// Process message + sample buffer
+	MappedMemory getChunkMem;	// effGetChunk temporary memory
+	MappedMemory eventMem;		// VstEvents memory
 
 	// Pointer into shared memory
 	SharedMemLayout * volatile sharedMem;

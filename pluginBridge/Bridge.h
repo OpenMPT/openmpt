@@ -70,6 +70,7 @@ protected:
 	void ProcessDoubleReplacing();
 	VstIntPtr DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	void SendErrorMessage(const wchar_t *str);
+	VstIntPtr Dispatch(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 
 	template<typename buf_t>
 	int32_t BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers));
