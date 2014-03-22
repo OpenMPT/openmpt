@@ -14,8 +14,6 @@
 #include <locale>
 #include <sstream>
 
-#include <cstdlib>
-
 #include "versionNumber.h"
 #include "svn_version.h"
 
