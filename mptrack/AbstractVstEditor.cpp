@@ -451,22 +451,11 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 	{
 		if(m_VstPlugin.CanRecieveMidiEvents())
 		{
-			CWnd *parent = this;
-			if(m_VstPlugin.isBridged)
-			{
-				// AllowSetForegroundWindow won't work reliably when calling it right when sending
-				// key messages from the bridged plugin, so stealing focus from plugin bridge child window
-				// can be kinda difficult. To prevent the following message box from not being focussed,
-				// we simply make it a child of the bridge window...
-				parent = GetWindow(GW_CHILD | GW_HWNDFIRST);	// Plug container in custom GUIs
-				if(parent) parent = parent->GetWindow(GW_CHILD | GW_HWNDFIRST);	// Bridge container
-				if(!parent)
-				{
-					parent = this;
-				}
-			}
+			// We might need to steal the focus from the plugin bridge. This is going to work
+			// as the plugin bridge will call AllowSetForegroundWindow on key messages.
+			SetForegroundWindow();
 			if(!m_VstPlugin.isInstrument() || m_VstPlugin.GetSoundFile().GetModSpecifications().instrumentsMax == 0 ||
-				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false, parent) == cnfNo)
+				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false, this) == cnfNo)
 			{
 				return false;
 			} else

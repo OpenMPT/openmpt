@@ -16,10 +16,10 @@
 class PluginBridge : protected BridgeCommon
 {
 public:
-	static LONG instanceCount;
 	static Event sigQuit;
 
 protected:
+	static LONG instanceCount;
 	static PluginBridge *latestInstance;
 	static WNDCLASSEX windowClass;
 
@@ -48,7 +48,7 @@ protected:
 public:
 	PluginBridge(const wchar_t *memName, HANDLE otherProcess);
 	~PluginBridge();
-	static void RegisterWindowClass();
+	static void InitializeStaticVariables();
 
 protected:
 	void MessageThread();
