@@ -9,15 +9,14 @@
 
 
 // TODO
-// Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow, VstFileSelect
-// ProteusVX, TriDirt sometimes flickers because of timed redraws
+// Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all but VstFileSelect are currently not supported by OpenMPT)
 // ProteusVX GUI stops working after closing it once and the plugin crashes when unloading it when the GUI was open at least once
 // Fix Purity Demo GUI freeze more nicely
-// Optimize out effProcessEvents (audioMasterProcessEvents?) by using a buffer that's sent along with the process call, just like we do it with automation
+// Optimize out audioMasterProcessEvents the same way as effProcessEvents?
 // Refactoring maybe move the "constructors" of all message types into these types?
 // Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
 // KaramFX EQ breaks sound
-// Maybe don't keep opening and closing aux mem files - they are rarely needed, so would this actually be worth it?
+// Maybe don't keep opening and closing aux mem files - but they are rarely needed, so would this actually be worth it?
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode (is this necessary?)
@@ -171,7 +170,7 @@ void PluginBridge::MessageThread()
 		}
 		if(needIdle && nativeEffect)
 		{
-			nativeEffect->dispatcher(nativeEffect, effIdle, 0, 0, nullptr, 0.0f);
+			Dispatch(effIdle, 0, 0, nullptr, 0.0f);
 			needIdle = false;
 		}
 		if(window)
@@ -400,7 +399,7 @@ void PluginBridge::InitBridge(InitMsg *msg)
 	UpdateEffectStruct();
 
 	// Init process buffer
-	DispatchToHost(audioMasterVendorSpecific, CCONST('O', 'M', 'P', 'T'), kUpdateProcessingBuffer, nullptr, 0.0f);
+	DispatchToHost(audioMasterVendorSpecific, kVendorOpenMPT, kUpdateProcessingBuffer, nullptr, 0.0f);
 }
 
 
@@ -527,13 +526,16 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 	case effVendorSpecific:
 		// Let's implement some custom opcodes!
-		if(msg->index == CCONST('O', 'M', 'P', 'T'))
+		if(msg->index == kVendorOpenMPT)
 		{
 			msg->result = 1;
 			switch(msg->value)
 			{
 			case kUpdateEffectStruct:
 				UpdateEffectStruct();
+				break;
+			case kUpdateEventMemName:
+				eventMem.Open(static_cast<const wchar_t *>(ptr));
 				break;
 			default:
 				msg->result = 0;
@@ -551,13 +553,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 	//std::cout << "about to dispatch " << msg->opcode << " to effect...";
 	//std::flush(std::cout);
-	try
-	{
-		msg->result = static_cast<int32_t>(nativeEffect->dispatcher(nativeEffect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt));
-	} catch(...)
-	{
-		SendErrorMessage(L"Exception in dispatch()!");
-	}
+	msg->result = static_cast<int32_t>(Dispatch(msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt));
 	//std::cout << "done" << std::endl;
 
 	// Post-fix some opcodes
@@ -607,7 +603,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 	case effEditOpen:
 		// Quick hack to get Purity demo to work (wants to show a message box during first effEditIdle call, this seems to fail after SetParent)
-		nativeEffect->dispatcher(nativeEffect, effEditIdle, 0, 0, nullptr, 0.0f);
+		Dispatch(effEditIdle, 0, 0, nullptr, 0.0f);
 
 		// Need to do this after creating. Otherwise, we'll freeze. We also need to do this after the open call, or else ProteusVX will freeze in a SetParent call.
 		SetParent(window, windowParent);
@@ -628,6 +624,19 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	}
 
 	UpdateEffectStruct();	// Regularly update the struct
+}
+
+
+VstIntPtr PluginBridge::Dispatch(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+{
+	try
+	{
+		return nativeEffect->dispatcher(nativeEffect, opcode, index, value, ptr, opt);
+	} catch(...)
+	{
+		SendErrorMessage(L"Exception in dispatch()!");
+	}
+	return 0;
 }
 
 
@@ -689,6 +698,18 @@ void PluginBridge::RenderThread()
 			InterlockedExchange(&isProcessing, 1);
 			AutomateParameters();
 
+			// Prepare VstEvents.
+			if(eventMem.Good())
+			{
+				VstEvents *events = reinterpret_cast<VstEvents *>(eventMem.view);
+				if(events->numEvents)
+				{
+					TranslateBridgeToVSTEvents(eventCache, events);
+					events->numEvents = 0;
+					Dispatch(effProcessEvents, 0, 0, &eventCache[0], 0.0f);
+				}
+			}
+
 			switch(msg->processType)
 			{
 			case ProcessMsg::process:
@@ -701,6 +722,7 @@ void PluginBridge::RenderThread()
 				ProcessDoubleReplacing();
 				break;
 			}
+
 			InterlockedExchange(&isProcessing, 0);
 			sigProcess.Confirm();
 		}
@@ -833,7 +855,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		break;
 
 	case audioMasterVendorSpecific:
-		if(index != CCONST('O', 'M', 'P', 'T') || value != kUpdateProcessingBuffer)
+		if(index != kVendorOpenMPT || value != kUpdateProcessingBuffer)
 		{
 			break;
 		}
@@ -1064,7 +1086,7 @@ LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 // WinAPI message handler for plugin GUI
 void PluginBridge::MessageHandler()
 {
-	nativeEffect->dispatcher(nativeEffect, effEditIdle, 0, 0, nullptr, 0.0f);
+	Dispatch(effEditIdle, 0, 0, nullptr, 0.0f);
 
 	MSG msg;
 	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))

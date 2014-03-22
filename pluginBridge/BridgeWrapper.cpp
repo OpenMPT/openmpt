@@ -392,7 +392,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		break;
 
 	case audioMasterVendorSpecific:
-		if(msg->index != CCONST('O', 'M', 'P', 'T') || msg->value != kUpdateProcessingBuffer)
+		if(msg->index != kVendorOpenMPT || msg->value != kUpdateProcessingBuffer)
 		{
 			break;
 		}
@@ -517,8 +517,29 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	case effProcessEvents:
 		// VstEvents* in [ptr]
-		TranslateVSTEventsToBridge(dispatchData, static_cast<VstEvents *>(ptr), that->otherPtrSize);
-		ptrOut = dispatchData.size() - sizeof(DispatchMsg);
+		// We process in a separate memory segment to save a bridge communication message.
+		{
+			std::vector<char> events;
+			TranslateVSTEventsToBridge(events, static_cast<VstEvents *>(ptr), that->otherPtrSize);
+			if(that->eventMem.Size() < events.size())
+			{
+				// Resize memory
+				static uint32_t chunkId = 0;
+				const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-events-" + mpt::ToWString(chunkId++);
+				ptrOut = (mapName.length() + 1) * sizeof(wchar_t);
+				PushToVector(dispatchData, *mapName.c_str(), static_cast<size_t>(ptrOut));
+				that->eventMem.Create(mapName.c_str(), events.size() + 1024);
+
+				opcode = effVendorSpecific;
+				index = kVendorOpenMPT;
+				value = kUpdateEventMemName;
+			}
+			memcpy(that->eventMem.view, &events[0], events.size());
+		}
+		if(opcode != effVendorSpecific)
+		{
+			return 1;
+		}
 		break;
 
 	case effGetInputProperties:
@@ -650,7 +671,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	//std::cout << "about to dispatch " << opcode << " to host...";
 	//std::flush(std::cout);
-	if(!that->SendToBridge(*msg))
+	if(!that->SendToBridge(*msg) && opcode != effClose)
 	{
 		return 0;
 	}

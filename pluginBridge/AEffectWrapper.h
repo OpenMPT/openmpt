@@ -97,6 +97,9 @@ enum VendorSpecificOpCodes
 	kUpdateEffectStruct = 0,
 	kUpdateProcessingBuffer,
 	kGetWrapperPointer,
+	kUpdateEventMemName,
+
+	kVendorOpenMPT = CCONST('O', 'M', 'P', 'T'),
 };
 
 
@@ -135,6 +138,10 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 	const size_t headerSize = sizeof(VstInt32) + sizeof(VstIntPtr) + sizeof(VstEvent *) * numEvents;
 	data.reserve(headerSize + sizeof(VstEvent) * numEvents);
 	data.resize(headerSize, 0);
+	if(numEvents == 0)
+	{
+		return;
+	}
 
 	// Copy over event data (this is required for dumb SynthEdit plugins that don't copy over the event data during effProcessEvents)
 	char *offset = static_cast<char *>(ptr) + sizeof(int32_t);
