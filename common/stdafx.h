@@ -33,13 +33,6 @@
 #endif // MODPLUG_TRACKER
 
 
-#ifndef NO_PCH
-
-#include <vector>
-
-#endif // NO_PCH
-
-
 #if MPT_COMPILER_MSVC
 #include <intrin.h>
 #endif
@@ -69,6 +62,15 @@
 // <stdio.h>
 
 #include "../common/Logging.h"
+
+#include "../common/misc_util.h"
+// <limits>
+// <string>
+// <type_traits>
+// <vector>
+// <cmath>
+// <cstring>
+// <time.h>
 
 
 //{{AFX_INSERT_LOCATION}}
