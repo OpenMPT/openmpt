@@ -438,8 +438,6 @@ protected:
 
 protected:
 
-	bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat);
-
 	const Util::MultimediaClock & Clock() const { return m_Clock; }
 
 	void UpdateBufferAttributes(SoundBufferAttributes attributes);

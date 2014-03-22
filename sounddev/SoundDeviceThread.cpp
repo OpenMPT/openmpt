@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include <mmsystem.h>
+
 
 CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(SoundDevice)
 //------------------------------------------------------------------------------------------

@@ -23,6 +23,9 @@
 #endif
 #endif
 
+#if defined(MODPLUG_TRACKER)
+#include <mmsystem.h>
+#endif
 
 
 template<typename T>

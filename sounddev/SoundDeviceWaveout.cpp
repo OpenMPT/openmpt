@@ -18,6 +18,11 @@
 
 #include "../common/misc_util.h"
 
+#include <mmreg.h>
+
+
+bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings);
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //
@@ -54,7 +59,7 @@ bool CWaveDevice::InternalOpen()
 //------------------------------
 {
 	WAVEFORMATEXTENSIBLE wfext;
-	if(!FillWaveFormatExtensible(wfext))
+	if(!FillWaveFormatExtensible(wfext, m_Settings))
 	{
 		return false;
 	}

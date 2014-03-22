@@ -28,23 +28,13 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <shlwapi.h>
-
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4201)
-#endif
 #include <mmsystem.h>
-#include <mmreg.h>
-#include <msacm.h>
-#if MPT_COMPILER_MSVC
-#pragma warning(default:4201)
-#endif
 
 #endif // MODPLUG_TRACKER
 
 
 #ifndef NO_PCH
 
-#include <string>
 #include <vector>
 
 #endif // NO_PCH
