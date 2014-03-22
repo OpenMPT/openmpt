@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 #include "Profiler.h"
-#include <stdlib.h>
 
 
 #ifdef USE_PROFILER

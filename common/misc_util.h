@@ -12,19 +12,16 @@
 
 #include <limits>
 #include <string>
+#if defined(HAS_TYPE_TRAITS)
+#include <type_traits>
+#endif
 #include <vector>
 
 #include <cmath>
-#include <cstdlib>
 #include <cstring>
 
 #include <time.h>
 
-#include "typedefs.h"
-
-#if defined(HAS_TYPE_TRAITS)
-#include <type_traits>
-#endif
 
 bool ConvertStrToBool(const std::string &str);
 signed char ConvertStrToSignedChar(const std::string &str);

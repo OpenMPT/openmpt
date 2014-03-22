@@ -26,8 +26,6 @@
 #include <locale>
 #include <sstream>
 
-#include <cstdlib>
-
 // For ACM debugging purposes
 #define ACMLOG(x, ...)
 //#define ACMLOG Log
