@@ -174,7 +174,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 		PROCESS_INFORMATION processInfo;
 		MemsetZero(processInfo);
 
-		if(!CreateProcessW(exeName.AsNative().c_str(), cmdLine, NULL, NULL, FALSE, /*CREATE_NO_WINDOW */0, NULL, NULL, &info, &processInfo))
+		if(!CreateProcessW(exeName.AsNative().c_str(), cmdLine, NULL, NULL, FALSE, 0, NULL, NULL, &info, &processInfo))
 		{
 			throw BridgeException("Failed to launch plugin bridge.");
 		}
@@ -376,7 +376,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 	void *ptr = (msg->ptr != 0) ? (msg + 1) : nullptr;
 	if(msg->size > sizeof(BridgeMessage))
 	{
-		if(!auxMem.Open(L"Local\\foo2"))
+		if(!auxMem.Open(static_cast<const wchar_t *>(ptr)))
 		{
 			return;
 		}
@@ -624,33 +624,40 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	}
 
 	uint32_t extraSize = static_cast<uint32_t>(dispatchData.size() - sizeof(DispatchMsg));
+	
+	// Create message header
+	BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
+	msg->Dispatch(opcode, index, value, ptrOut, opt, extraSize);
+
+	const bool useAuxMem = dispatchData.size() > sizeof(BridgeMessage);
 	MappedMemory auxMem;
-	if(dispatchData.size() > sizeof(BridgeMessage))
+	if(useAuxMem)
 	{
-		//that->extraMemPipe.Write(&dispatchData[sizeof(DispatchMsg)], extraSize);
-		//dispatchData.resize(sizeof(DispatchMsg));
-		if(auxMem.Create(L"Local\\foo", extraSize))
+		// Extra data doesn't fit in message - use secondary memory
+		wchar_t auxMemName[64];
+		static_assert(sizeof(DispatchMsg) + sizeof(auxMemName) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
+		swprintf(auxMemName, CountOf(auxMemName), L"Local\\openmpt-%d-auxmem-%d", GetCurrentProcessId(), GetCurrentThreadId());
+		if(auxMem.Create(auxMemName, extraSize))
 		{
+			// Move message data to shared memory and then move shared memory name to message data
 			memcpy(auxMem.view, &dispatchData[sizeof(DispatchMsg)], extraSize);
-			dispatchData.resize(sizeof(DispatchMsg));
+			memcpy(&dispatchData[sizeof(DispatchMsg)], auxMemName, sizeof(auxMemName));
 		} else
 		{
 			return 0;
 		}
 	}
-	
-	const DispatchMsg *resultMsg;
-	{
-		BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
-		msg->Dispatch(opcode, index, value, ptrOut, opt, extraSize);
-		if(!that->SendToBridge(*msg) && opcode != effClose)
-		{
-			return false;
-		}
-		resultMsg = &msg->dispatch;
-	}
 
-	const char *extraData = dispatchData.size() == sizeof(DispatchMsg) ? static_cast<const char *>(auxMem.view) : reinterpret_cast<const char *>(resultMsg + 1);
+	//std::cout << "about to dispatch " << opcode << " to host...";
+	//std::flush(std::cout);
+	if(!that->SendToBridge(*msg))
+	{
+		return 0;
+	}
+	//std::cout << "done." << std::endl;
+	const DispatchMsg *resultMsg = &msg->dispatch;
+
+	const char *extraData = useAuxMem ? static_cast<const char *>(auxMem.view) : reinterpret_cast<const char *>(resultMsg + 1);
 	// Post-fix some opcodes
 	switch(opcode)
 	{

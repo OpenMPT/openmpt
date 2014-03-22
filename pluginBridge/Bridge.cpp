@@ -9,20 +9,19 @@
 
 
 // TODO
-// Replace Local\\foo :)
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow, VstFileSelect
 // ProteusVX, TriDirt sometimes flickers because of timed redraws
 // ProteusVX GUI stops working after closing it once and the plugin crashes when unloading it when the GUI was open at least once
 // Fix Purity Demo GUI freeze more nicely
 // Optimize out effProcessEvents (audioMasterProcessEvents?) by using a buffer that's sent along with the process call, just like we do it with automation
-// Occasional time-outs when loading plugins into shared instances
 // Refactoring maybe move the "constructors" of all message types into these types?
-// When scanning plugins, forbid loading them natively unless the bridge itself cannot be launched
+// Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
+// KaramFX EQ breaks sound
+// Maybe don't keep opening and closing aux mem files - they are rarely needed, so would this actually be worth it?
 
 // Low priority:
-// Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode
+// Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode (is this necessary?)
 // Re-enable DEP in OpenMPT?
-// Remove native jBridge support
 // Clean up code :)
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -49,8 +48,7 @@ LONG PluginBridge::instanceCount = 0;
 Event PluginBridge::sigQuit;
 
 // This is kind of a back-up pointer in case we couldn't sneak our pointer into the AEffect struct yet.
-// It always points to the last intialized PluginBridge object. Right now there's just one, but we might
-// have to initialize more than one plugin in a container at some point to get plugins like SideKickv3 to work.
+// It always points to the last intialized PluginBridge object.
 PluginBridge *PluginBridge::latestInstance = nullptr;
 WNDCLASSEX PluginBridge::windowClass;
 #define WINDOWCLASSNAME _T("OpenMPTPluginBridge")
@@ -64,11 +62,11 @@ int _tmain(int argc, TCHAR *argv[])
 		return -1;
 	}
 
-	PluginBridge::RegisterWindowClass();
+	uint32_t parentProcessId = _ttoi(argv[1]);
 
-	PluginBridge::sigQuit.Create();
+	PluginBridge::InitializeStaticVariables();
 
-	new PluginBridge(argv[0], OpenProcess(SYNCHRONIZE, FALSE, _ttoi(argv[1])));
+	new PluginBridge(argv[0], OpenProcess(SYNCHRONIZE, FALSE, parentProcessId));
 
 	WaitForSingleObject(PluginBridge::sigQuit, INFINITE);
 	return 0;
@@ -84,8 +82,8 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /
 }
 
 
-// Register the editor window class
-void PluginBridge::RegisterWindowClass()
+// Initialize static stuff like the editor window class
+void PluginBridge::InitializeStaticVariables()
 {
 	windowClass.cbSize = sizeof(WNDCLASSEX);
 	windowClass.style = CS_HREDRAW | CS_VREDRAW;
@@ -100,6 +98,8 @@ void PluginBridge::RegisterWindowClass()
 	windowClass.lpszClassName = WINDOWCLASSNAME;
 	windowClass.hIconSm = NULL;
 	RegisterClassEx(&windowClass);
+
+	sigQuit.Create();
 }
 
 
@@ -430,7 +430,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	void *ptr = (msg->ptr != 0) ? (msg + 1) : nullptr;
 	if(msg->size > sizeof(BridgeMessage))
 	{
-		if(!auxMem.Open(L"Local\\foo"))
+		if(!auxMem.Open(static_cast<const wchar_t *>(ptr)))
 		{
 			return;
 		}
@@ -687,6 +687,8 @@ void PluginBridge::RenderThread()
 		{
 			ProcessMsg *msg = static_cast<ProcessMsg *>(processMem.view);
 			InterlockedExchange(&isProcessing, 1);
+			AutomateParameters();
+
 			switch(msg->processType)
 			{
 			case ProcessMsg::process:
@@ -764,8 +766,6 @@ void PluginBridge::ProcessDoubleReplacing()
 template<typename buf_t>
 int32_t PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers))
 {
-	AutomateParameters();
-
 	assert(processMem.Good());
 	ProcessMsg *msg = static_cast<ProcessMsg *>(processMem.view);
 
@@ -946,15 +946,24 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	}
 	
 	uint32_t extraSize = static_cast<uint32_t>(dispatchData.size() - sizeof(DispatchMsg));
+
+	// Create message header
+	BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
+	msg->Dispatch(opcode, index, value, ptrOut, opt, extraSize);
+
+	const bool useAuxMem = dispatchData.size() > sizeof(BridgeMessage);
 	MappedMemory auxMem;
-	if(dispatchData.size() > sizeof(BridgeMessage))
+	if(useAuxMem)
 	{
-		//that->extraMemPipe.Write(&dispatchData[sizeof(DispatchMsg)], extraSize);
-		//dispatchData.resize(sizeof(DispatchMsg));
-		if(auxMem.Create(L"Local\\foo2", extraSize))
+		// Extra data doesn't fit in message - use secondary memory
+		wchar_t auxMemName[64];
+		static_assert(sizeof(DispatchMsg) + sizeof(auxMemName) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
+		swprintf(auxMemName, CountOf(auxMemName), L"Local\\openmpt-%d-auxmem-%d", GetCurrentProcessId(), GetCurrentThreadId());
+		if(auxMem.Create(auxMemName, extraSize))
 		{
+			// Move message data to shared memory and then move shared memory name to message data
 			memcpy(auxMem.view, &dispatchData[sizeof(DispatchMsg)], extraSize);
-			dispatchData.resize(sizeof(DispatchMsg));
+			memcpy(&dispatchData[sizeof(DispatchMsg)], auxMemName, sizeof(auxMemName));
 		} else
 		{
 			return 0;
@@ -963,19 +972,14 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 
 	//std::cout << "about to dispatch " << opcode << " to host...";
 	//std::flush(std::cout);
-	const DispatchMsg *resultMsg;
+	if(!SendToHost(*msg))
 	{
-		BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
-		msg->Dispatch(opcode, index, value, ptrOut, opt, extraSize);
-		if(!SendToHost(*msg))
-		{
-			return 0;
-		}
-		resultMsg = &msg->dispatch;
+		return 0;
 	}
 	//std::cout << "done." << std::endl;
+	const DispatchMsg *resultMsg = &msg->dispatch;
 
-	const char *extraData = dispatchData.size() == sizeof(DispatchMsg) ? static_cast<const char *>(auxMem.view) : reinterpret_cast<const char *>(resultMsg + 1);
+	const char *extraData = useAuxMem ? static_cast<const char *>(auxMem.view) : reinterpret_cast<const char *>(resultMsg + 1);
 	// Post-fix some opcodes
 	switch(opcode)
 	{
@@ -1043,6 +1047,8 @@ LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 	case WM_KEYUP:
 	case WM_KEYDOWN:
 		// Let the host handle these keys, too.
+		// Allow focus stealing as the host might show a message box as a response to a key shortcut.
+		AllowSetForegroundWindow(ASFW_ANY);
 		PostMessage(GetParent(that->windowParent), uMsg, wParam, lParam);
 		break;
 
