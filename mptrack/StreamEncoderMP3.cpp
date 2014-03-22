@@ -58,7 +58,8 @@ typedef enum vbr_mode_e {
 #endif // MPT_MP3ENCODER_BLADE
 
 #ifdef MPT_MP3ENCODER_ACM
-#include <MSAcm.h>
+#include <mmreg.h>
+#include <msacm.h>
 #endif // MPT_MP3ENCODER_ACM
 
 

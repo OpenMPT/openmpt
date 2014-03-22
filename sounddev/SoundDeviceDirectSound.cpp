@@ -19,6 +19,11 @@
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 
+#include <mmreg.h>
+
+
+bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings);
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -182,7 +187,7 @@ bool CDSoundDevice::InternalOpen()
 //--------------------------------
 {
 	WAVEFORMATEXTENSIBLE wfext;
-	if(!FillWaveFormatExtensible(wfext)) return false;
+	if(!FillWaveFormatExtensible(wfext, m_Settings)) return false;
 	WAVEFORMATEX *pwfx = &wfext.Format;
 
 	const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();

@@ -30,7 +30,6 @@
 #include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
 #include "../soundlib/SampleFormatConverters.h"
-#include <Shlwapi.h>
 #include "FileDialog.h"
 
 #ifdef _DEBUG

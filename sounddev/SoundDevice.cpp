@@ -24,6 +24,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include <mmreg.h>
+
 
 std::wstring SoundDeviceTypeToString(SoundDeviceType type)
 //--------------------------------------------------------
@@ -164,8 +166,8 @@ SoundDeviceDynamicCaps ISoundDevice::GetDeviceDynamicCaps(const std::vector<uint
 }
 
 
-bool ISoundDevice::FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat)
-//---------------------------------------------------------------------------
+bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings)
+//----------------------------------------------------------------------------------------------------
 {
 	MemsetZero(WaveFormat);
 	if(!m_Settings.sampleFormat.IsValid()) return false;
