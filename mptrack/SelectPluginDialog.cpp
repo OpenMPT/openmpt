@@ -587,6 +587,11 @@ void CSelectPluginDlg::OnScanFolder()
 	VSTPluginLib *plugLib = nullptr;
 	bool update = false;
 
+	CDialog pluginScanDlg;
+	pluginScanDlg.Create(IDD_SCANPLUGINS, this);
+	pluginScanDlg.CenterWindow(this);
+	pluginScanDlg.ShowWindow(SW_SHOW);
+
 	std::vector<mpt::PathString> paths(1, dlg.GetDirectory());
 	int files = 0;
 	while(!paths.empty())
@@ -613,7 +618,16 @@ void CSelectPluginDlg::OnScanFolder()
 					continue;
 				} else if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".dll")))
 				{
-					CMainFrame::GetMainFrame()->SetHelpText(mpt::ToLocale(wfd.cFileName).c_str());
+					CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
+					std::wstring scanStr = std::wstring(L"Scanning Plugin...\n") + wfd.cFileName;
+					SetWindowTextW(text->m_hWnd, scanStr.c_str());
+					MSG msg;
+					while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+					{
+						::TranslateMessage(&msg);
+						::DispatchMessage(&msg);
+					}
+
 					VSTPluginLib *lib = pManager->AddPlugin(fileName, false);
 					if(lib)
 					{
