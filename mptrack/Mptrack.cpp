@@ -2004,6 +2004,10 @@ BOOL CTrackApp::InitializeDXPlugins()
 	std::wstring nonFoundPlugs;
 	const mpt::PathString failedPlugin = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
 
+	CDialog pluginScanDlg;
+	DWORD scanStart = GetTickCount();
+	bool dialogShown = false;
+
 	m_pPluginManager->reserve(numPlugins);
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
@@ -2023,6 +2027,26 @@ BOOL CTrackApp::InitializeDXPlugins()
 				}
 			}
 			m_pPluginManager->AddPlugin(plugPath, true, true, &nonFoundPlugs);
+		}
+
+		if(!dialogShown && GetTickCount() >= scanStart + 1000)
+		{
+			// If this is taking too long, show the user what he's waiting for.
+			dialogShown = true;
+			pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
+			pluginScanDlg.ShowWindow(SW_SHOW);
+			pluginScanDlg.CenterWindow(gpSplashScreen);
+		} else if(dialogShown)
+		{
+			CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
+			std::wstring scanStr = mpt::String::PrintW(L"Scanning Plugin %1 / %2...\n%3", plug, numPlugins, plugPath);
+			SetWindowTextW(text->m_hWnd, scanStr.c_str());
+			MSG msg;
+			while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			{
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+			}
 		}
 	}
 	if(!nonFoundPlugs.empty())

@@ -300,6 +300,15 @@ BEGIN
     LTEXT           "Warning:\nChanging advanced settings might cause stability problems.\nYou should only continue if you know what you are doing.",IDC_STATIC,6,6,258,24
 END
 
+IDD_SCANPLUGINS DIALOGEX 0, 0, 316, 34
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Updating Plugin Cache..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CTEXT           "",IDC_SCANTEXT,6,7,306,20,SS_NOPREFIX
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -427,6 +436,14 @@ BEGIN
         RIGHTMARGIN, 261
         TOPMARGIN, 7
         BOTTOMMARGIN, 267
+    END
+
+    IDD_SCANPLUGINS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 27
     END
 END
 #endif    // APSTUDIO_INVOKED
