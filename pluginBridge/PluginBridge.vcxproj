@@ -101,6 +101,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <CustomBuildStep>
       <Command>
@@ -125,6 +126,7 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\x64-Debug\$(TargetFileNa
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <CustomBuildStep>
       <Command>
