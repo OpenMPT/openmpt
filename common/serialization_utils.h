@@ -284,19 +284,23 @@ public:
 	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
 	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
 
+	SsbStatus GetStatus() const
+	{
+		return m_Status;
+	}
+
+protected:
+
 	// Write given string to log if log func is defined.
 	void AddToLog(const char *psz);
 
-protected:
-
 	void AddNote(const SsbStatus s, const char* sz);
 
-public:
+protected:
 
 	SsbStatus m_Status;
-	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
 
-protected:
+	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
 
 	Postype m_posStart;					// Read/write: Stream position at the beginning of object.
 
@@ -305,7 +309,7 @@ protected:
 
 	std::bitset<RwfNumFlags> m_Flags;	// Read/write: Various flags.
 
-public:
+protected:
 
 	static const uint8 s_DefaultFlagbyte = 0;
 	static const char s_EntryID[3];
@@ -398,8 +402,6 @@ private:
 
 	std::istream* m_pIstrm;					// Read: Pointer to read stream.
 
-private:
-
 	std::vector<char> m_Idarray;		// Read: Holds entry ids.
 
 	std::vector<ReadEntry> mapData;		// Read: Contains map information.
@@ -468,8 +470,6 @@ private:
 private:
 
 	std::ostream* m_pOstrm;				// Write: Pointer to write stream.
-
-private:
 
 	Postype m_posEntrycount;			// Write: Pos of entrycount field. 
 	Postype m_posMapPosField;			// Write: Pos of map position field.
