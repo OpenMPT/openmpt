@@ -12,7 +12,10 @@
 
 #include "serialization_utils.h"
 
+#include <istream>
 #include <iterator> // for back_inserter
+#include <ostream>
+#include <sstream>
 
 #include "misc_util.h"
 
@@ -365,24 +368,29 @@ void SsbWrite::WriteMapItem( const char* pId,
 					rposDataStart,
 					nDatasize);
 
+	std::ostringstream mapStream;
+
 	if(m_nIdbytes > 0)
 	{
 		if (m_nIdbytes != IdSizeVariable && nIdSize != m_nIdbytes)
 			{ AddWriteNote(SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING); return; }
 
 		if (m_nIdbytes == IdSizeVariable) //Variablesize ID?
-			WriteAdaptive12(m_MapStream, static_cast<uint16>(nIdSize));
+			WriteAdaptive12(mapStream, static_cast<uint16>(nIdSize));
 
 		if(nIdSize > 0)
-			m_MapStream.write(pId, nIdSize);
+			mapStream.write(pId, nIdSize);
 	}
 
 	if (GetFlag(RwfWMapStartPosEntry)) //Startpos
-		WriteAdaptive1248(m_MapStream, rposDataStart);
+		WriteAdaptive1248(mapStream, rposDataStart);
 	if (GetFlag(RwfWMapSizeEntry)) //Entrysize
-		WriteAdaptive1248(m_MapStream, nDatasize);
+		WriteAdaptive1248(mapStream, nDatasize);
 	if (GetFlag(RwfWMapDescEntry)) //Entry descriptions
-		WriteAdaptive12String(m_MapStream, std::string(pszDesc));
+		WriteAdaptive12String(mapStream, std::string(pszDesc));
+
+	m_MapStreamString.append(mapStream.str());
+
 }
 
 
@@ -827,7 +835,6 @@ void SsbWrite::FinishWrite()
 {
 	std::ostream& oStrm = *m_pOstrm;
 	const Postype posDataEnd = oStrm.tellp();
-	std::string mapStreamStr = m_MapStream.str();
 		
 	Postype posMapStart = oStrm.tellp();
 
@@ -836,7 +843,7 @@ void SsbWrite::FinishWrite()
 
 	if (GetFlag(RwfRwHasMap)) //Write map
 	{
-		oStrm.write(mapStreamStr.c_str(), mapStreamStr.length());
+		oStrm.write(m_MapStreamString.c_str(), m_MapStreamString.length());
 	}
 
 	const Postype posMapEnd = oStrm.tellp();
