@@ -23,6 +23,7 @@
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
 #include "FileReader.h"
+#include <iostream>
 #include <sstream>
 #include <time.h>
 

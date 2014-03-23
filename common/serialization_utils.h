@@ -12,8 +12,9 @@
 
 #include <algorithm>
 #include <bitset>
-#include <iosfwd>
+#include <istream>
 #include <limits>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -28,7 +29,7 @@
 namespace srlztn //SeRiaLiZaTioN
 {
 
-typedef std::ostream::off_type Offtype;
+typedef std::ios::off_type Offtype;
 typedef Offtype Postype;
 
 typedef uintptr_t	DataSize;	// Data size type.
