@@ -10,7 +10,6 @@
 
 // TODO
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all but VstFileSelect are currently not supported by OpenMPT)
-// ProteusVX GUI stops working after closing it once and the plugin crashes when unloading it when the GUI was open at least once
 // Fix Purity Demo GUI freeze more nicely
 // Optimize out audioMasterProcessEvents the same way as effProcessEvents?
 // Refactoring maybe move the "constructors" of all message types into these types?
@@ -34,7 +33,7 @@
 #include <cstdint>
 #include <algorithm>
 
-//#include <assert.h>
+//#include <cassert>
 #include <intrin.h>
 #undef assert
 #define assert(x) while(!(x)) { ::MessageBoxA(NULL, #x, "Debug Assertion Failed", MB_ICONERROR);  __debugbreak(); break; }
@@ -480,11 +479,6 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		}
 		break;
 
-	case effEditClose:
-		DestroyWindow(window);
-		window = NULL;
-		break;
-
 	case effGetChunk:
 		// void** in [ptr] for chunk data address
 		extraDataSize = sizeof(void *);
@@ -609,6 +603,11 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		SetParent(window, windowParent);
 		SetProp(window, _T("MPT"), this);
 		ShowWindow(window, SW_SHOW);
+		break;
+
+	case effEditClose:
+		DestroyWindow(window);
+		window = NULL;
 		break;
 
 	case effGetChunk:
