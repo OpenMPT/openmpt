@@ -1029,7 +1029,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				ssb.ReadItem(Patterns, FileIdPatterns, strlen(FileIdPatterns), &ReadModPatterns);
 				ssb.ReadItem(Order, FileIdSequences, strlen(FileIdSequences), &ReadModSequences);
 
-				if(ssb.m_Status & srlztn::SNT_FAILURE)
+				if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 				{
 					AddToLog("Unknown error occured while deserializing file.");
 				}
@@ -1647,7 +1647,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	ssb.FinishWrite();
 
-	if(ssb.m_Status & srlztn::SNT_FAILURE)
+	if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 	{
 		AddToLog("Error occured in writing MPTM extensions.");
 	}

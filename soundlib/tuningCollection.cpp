@@ -112,7 +112,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::o
 		ssb.WriteItem(*m_Tunings[i], "2", 1, &WriteTuning);
 	ssb.FinishWrite();
 		
-	if(ssb.m_Status & srlztn::SNT_FAILURE)
+	if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 		return true;
 	else
 		return false;
@@ -179,7 +179,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std:
 				ssb.ReadItem(iter, *this, &ReadTuning);
 		}
 
-		if(ssb.m_Status & srlztn::SNT_FAILURE)
+		if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 			return true;
 		else
 			return false;

@@ -396,7 +396,7 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 	ssb.ReadItem(pTuning->m_SerHelperRatiotableSize, "RTI4");
 
 	// If reader status is ok and m_StepMin is somewhat reasonable, process data.
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300) 
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300) 
 	{
 		EDITMASK temp = pTuning->GetEditMask();
 		pTuning->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
@@ -503,7 +503,7 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) 
 
 	ssb.FinishWrite();
 
-	return ((ssb.m_Status & srlztn::SNT_FAILURE) != 0) ? SERIALIZATION_FAILURE : SERIALIZATION_SUCCESS;
+	return ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0) ? SERIALIZATION_FAILURE : SERIALIZATION_SUCCESS;
 }
 
 

@@ -499,7 +499,7 @@ void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdPattern, MptVersion::num);
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
 	ssb.ReadItem(pat, "data", strlen("data"), &ReadData);
 	// pattern time signature

@@ -827,7 +827,7 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequence, MptVersion::num);
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
 	std::string str;
 	ssb.ReadItem(str, "n");
@@ -865,7 +865,7 @@ void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequences, MptVersion::num);
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
 	uint8 nSeqs = 0;
 	uint8 nCurrent = 0;
