@@ -12,11 +12,9 @@
 
 #include <algorithm>
 #include <bitset>
-#include <istream>
+#include <iosfwd>
 #include <limits>
-#include <sstream>
 #include <string>
-#include <ostream>
 #include <vector>
 
 #ifdef HAS_TYPE_TRAITS
@@ -474,7 +472,7 @@ private:
 
 	Postype m_posEntrycount;			// Write: Pos of entrycount field. 
 	Postype m_posMapPosField;			// Write: Pos of map position field.
-	std::ostringstream m_MapStream;				// Write: Map stream.
+	std::string m_MapStreamString;				// Write: Map stream string.
 
 };
 
