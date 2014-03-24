@@ -33,7 +33,7 @@ namespace openmpt {
 
 #if defined( LIBOPENMPT_BUILD_TEST )
 void run_tests() {
-	MptTest::DoTests();
+	mpt::Test::DoTests();
 }
 #endif // LIBOPENMPT_BUILD_TEST
 

@@ -2,7 +2,8 @@
  * TestToolsLib.h
  * --------------
  * Purpose: Unit test framework for libopenmpt.
- * Notes  : Currently somewhat unreadable :/
+ * Notes  : This is more complex than the OpenMPT version because we cannot
+ *          rely on a debugger and have to deal with exceptions ourselves.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -18,8 +19,7 @@
 #include "../common/FlagSet.h"
 
 
-namespace MptTest
-{
+namespace mpt { namespace Test {
 
 
 extern int fail_count;
@@ -49,7 +49,7 @@ public:
 	Context(const Context &c);
 };
 
-#define MPT_TEST_CONTEXT_CURRENT() (::MptTest::Context( __FILE__ , __LINE__ ))
+#define MPT_TEST_CONTEXT_CURRENT() (::mpt::Test::Context( __FILE__ , __LINE__ ))
 
 
 struct TestFailed
@@ -59,7 +59,7 @@ struct TestFailed
 	TestFailed() { }
 };
 
-} // namespace MptTest
+} } // namespace mpt::Test
 
 template<typename T>
 struct ToStringHelper
@@ -79,8 +79,7 @@ struct ToStringHelper<FlagSet<enum_t, store_t> >
 	}
 };
 
-namespace MptTest
-{
+namespace mpt { namespace Test {
 
 class Test
 {
@@ -147,9 +146,9 @@ public:
 		}
 	}
 
-	#define VERIFY_EQUAL(x,y)	::MptTest::Test(::MptTest::FatalityContinue, ::MptTest::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
-	#define VERIFY_EQUAL_NONCONT(x,y)	::MptTest::Test(::MptTest::FatalityStop, ::MptTest::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
-	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	::MptTest::Test(::MptTest::FatalityStop, ::MptTest::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL(x,y)	::mpt::Test::Test(::mpt::Test::FatalityContinue, ::mpt::Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_NONCONT(x,y)	::mpt::Test::Test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	::mpt::Test::Test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
 
 #else
 
@@ -173,9 +172,9 @@ public:
 		}
 	}
 
-	#define VERIFY_EQUAL(x,y)	::MptTest::Test(::MptTest::FatalityContinue, ::MptTest::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
-	#define VERIFY_EQUAL_NONCONT(x,y)	::MptTest::Test(::MptTest::FatalityStop, ::MptTest::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
-	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	::MptTest::Test(::MptTest::FatalityStop, ::MptTest::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL(x,y)	::mpt::Test::Test(::mpt::Test::FatalityContinue, ::mpt::Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_NONCONT(x,y)	::mpt::Test::Test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	::mpt::Test::Test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
 
 #endif
 
@@ -184,13 +183,13 @@ public:
 
 #define DO_TEST(func) \
 do{ \
-	::MptTest::Test test(::MptTest::FatalityStop, ::MptTest::VerbosityNormal, #func , MPT_TEST_CONTEXT_CURRENT() ); \
+	::mpt::Test::Test test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityNormal, #func , MPT_TEST_CONTEXT_CURRENT() ); \
 	try { \
 		test.ShowStart(); \
 		fail_count = 0; \
 		func(); \
 		if(fail_count > 0) { \
-			throw ::MptTest::TestFailed(); \
+			throw ::mpt::Test::TestFailed(); \
 		} \
 		test.ReportPassed(); \
 	} catch(...) { \
@@ -199,7 +198,7 @@ do{ \
 }while(0)
 
 
-} // namespace MptTest
+} } // namespace mpt::Test
 
 
 #endif // !MODPLUG_TRACKER

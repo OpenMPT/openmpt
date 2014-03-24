@@ -50,8 +50,7 @@
 
 
 
-namespace MptTest
-{
+namespace mpt { namespace Test {
 
 
 
@@ -565,7 +564,6 @@ static noinline void TestMisc()
 }
 
 
-
 #ifdef MODPLUG_TRACKER
 
 struct CustomSettingsTestType
@@ -575,30 +573,30 @@ struct CustomSettingsTestType
 	CustomSettingsTestType(float x_ = 0.0f, float y_ = 0.0f) : x(x_), y(y_) { }
 };
 
-} // namespace MptTest
+} } // namespace mpt::Test
 
 template <>
-inline MptTest::CustomSettingsTestType FromSettingValue(const SettingValue &val)
+inline mpt::Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
 {
 	ASSERT(val.GetTypeTag() == "myType");
 	std::string xy = val.as<std::string>();
 	if(xy.empty())
 	{
-		return MptTest::CustomSettingsTestType(0.0f, 0.0f);
+		return mpt::Test::CustomSettingsTestType(0.0f, 0.0f);
 	}
 	std::size_t pos = xy.find("|");
 	std::string x = xy.substr(0, pos);
 	std::string y = xy.substr(pos + 1);
-	return MptTest::CustomSettingsTestType(ConvertStrTo<float>(x.c_str()), ConvertStrTo<float>(y.c_str()));
+	return mpt::Test::CustomSettingsTestType(ConvertStrTo<float>(x.c_str()), ConvertStrTo<float>(y.c_str()));
 }
 
 template <>
-inline SettingValue ToSettingValue(const MptTest::CustomSettingsTestType &val)
+inline SettingValue ToSettingValue(const mpt::Test::CustomSettingsTestType &val)
 {
 	return SettingValue(Stringify(val.x) + "|" + Stringify(val.y), "myType");
 }
 
-namespace MptTest {
+namespace mpt { namespace Test {
 
 #endif // MODPLUG_TRACKER
 
@@ -2114,14 +2112,19 @@ static noinline void TestSampleConversion()
 }
 
 
-} // namespace MptTest
+} } // namespace mpt::Test
 
 #else //Case: ENABLE_TESTS is not defined.
 
-namespace MptTest
+namespace mpt { namespace Test {
+
+void DoTests()
+//------------
 {
-	void DoTests() {}
+	return;
 }
+
+} } // namespace mpt::Test
 
 #endif
 
