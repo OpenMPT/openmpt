@@ -154,7 +154,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 		{
 			CLSID clsid;
 			std::wstring formattedKey = std::wstring(L"{") + std::wstring(keyname) + std::wstring(L"}");
-			if(Util::StringToCLSID(formattedKey, clsid))
+			if(Util::VerifyStringToCLSID(formattedKey, clsid))
 			{
 				HKEY hksub;
 				formattedKey = std::wstring(L"software\\classes\\DirectShow\\MediaObjects\\") + std::wstring(keyname);
@@ -167,9 +167,8 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 					if(ERROR_SUCCESS == RegQueryValueExW(hksub, nullptr, 0, &datatype, (LPBYTE)name, &datasize))
 					{
 						mpt::String::SetNullTerminator(name);
-						StringFromGUID2(clsid, keyname, 100);
 
-						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(mpt::PathString::FromNative(keyname), mpt::PathString::FromNative(name));
+						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name));
 						if(plug != nullptr)
 						{
 							pluginList.push_back(plug);

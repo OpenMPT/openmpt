@@ -644,8 +644,7 @@ void CASIODevice::OpenDriver()
 	{
 		return;
 	}
-	CLSID clsid;
-	Util::StringToCLSID(GetDeviceInternalID(), clsid);
+	CLSID clsid = Util::StringToCLSID(GetDeviceInternalID());
 	try
 	{
 		if(CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) != S_OK)

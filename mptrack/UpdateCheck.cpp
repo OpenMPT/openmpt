@@ -86,7 +86,7 @@ void CUpdateCheck::UpdateThread()
 #error "Platform-specific identifier missing"
 #endif
 	updateURL.Replace("$VERSION", versionStr);
-	updateURL.Replace("$GUID", GetSendGUID() ? TrackerSettings::Instance().gcsInstallGUID.Get() : "anonymous");
+	updateURL.Replace("$GUID", GetSendGUID() ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : "anonymous");
 
 	// Establish a connection.
 	internetHandle = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);

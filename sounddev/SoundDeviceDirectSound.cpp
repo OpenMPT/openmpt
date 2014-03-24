@@ -33,32 +33,6 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 #ifndef NO_DSOUND
 
 
-static std::wstring GuidToString(GUID guid)
-//-----------------------------------------
-{
-	std::wstring str;
-	LPOLESTR tmp = nullptr;
-	StringFromIID(guid, &tmp);
-	if(tmp)
-	{
-		str = tmp;
-		CoTaskMemFree(tmp);
-		tmp = nullptr;
-	}
-	return str;
-}
-
-
-static GUID StringToGuid(const std::wstring &str)
-//-----------------------------------------------
-{
-	GUID guid = GUID();
-	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	IIDFromString(&tmp[0], &guid);
-	return guid;
-}
-
-
 static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR, LPVOID lpContext)
 //----------------------------------------------------------------------------------------------------
 {
@@ -77,7 +51,7 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 	info.apiName = SoundDeviceTypeToString(SNDDEV_DSOUND);
 	if(lpGuid)
 	{
-		info.internalID = GuidToString(*lpGuid);
+		info.internalID = Util::GUIDToString(*lpGuid);
 	}
 	devices.push_back(info);
 	return TRUE;
@@ -143,7 +117,7 @@ SoundDeviceDynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<uin
 	} else
 	{
 		const std::wstring internalID = GetDeviceInternalID();
-		GUID guid = internalID.empty() ? GUID() : StringToGuid(internalID);
+		GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(internalID);
 		if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &dummy, NULL) != DS_OK)
 		{
 			return caps;
@@ -197,7 +171,7 @@ bool CDSoundDevice::InternalOpen()
 
 	if(m_piDS) return true;
 	const std::wstring internalID = GetDeviceInternalID();
-	GUID guid = internalID.empty() ? GUID() : StringToGuid(internalID);
+	GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(internalID);
 	if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
 	m_piDS->SetCooperativeLevel(m_Settings.hWnd, m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY);
