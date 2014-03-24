@@ -619,7 +619,7 @@ void CSelectPluginDlg::OnScanFolder()
 				} else if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".dll")))
 				{
 					CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
-					std::wstring scanStr = std::wstring(L"Scanning Plugin...\n") + wfd.cFileName;
+					std::wstring scanStr = L"Scanning Plugin...\n" + fileName.ToWide();
 					SetWindowTextW(text->m_hWnd, scanStr.c_str());
 					MSG msg;
 					while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -702,19 +702,19 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 
 	if (m_treePlugins)
 	{
-		m_treePlugins.MoveWindow(8, 36, cx - 104, cy - 88, FALSE);
+		m_treePlugins.MoveWindow(8, 36, cx - 109, cy - 88, FALSE);
 
 		GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->MoveWindow(8, 11, 40, 21, FALSE);
-		GetDlgItem(IDC_NAMEFILTER)->MoveWindow(40, 8, cx - 136, 21, FALSE);
+		GetDlgItem(IDC_NAMEFILTER)->MoveWindow(40, 8, cx - 141, 21, FALSE);
 		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(8, cy - 45, cx - 22, 20, FALSE);
 		m_chkBridge.MoveWindow(8, cy - 25, 110, 20, FALSE);
 		m_chkShare.MoveWindow(120, cy - 25, cx - 128, 20, FALSE);
-		const int rightOff = cx - 85;	// Offset of right button column
-		GetDlgItem(IDOK)->MoveWindow(		rightOff,	8,			75, 23, FALSE);
-		GetDlgItem(IDCANCEL)->MoveWindow(	rightOff,	39,			75, 23, FALSE);
-		GetDlgItem(IDC_BUTTON1)->MoveWindow(rightOff,	cy - 133,	75, 23, FALSE);
-		GetDlgItem(IDC_BUTTON3)->MoveWindow(rightOff,	cy - 105,	75, 23, FALSE);
-		GetDlgItem(IDC_BUTTON2)->MoveWindow(rightOff,	cy - 77,	75, 23, FALSE);
+		const int rightOff = cx - 90;	// Offset of right button column
+		GetDlgItem(IDOK)->MoveWindow(		rightOff,	8,			80, 23, FALSE);
+		GetDlgItem(IDCANCEL)->MoveWindow(	rightOff,	39,			80, 23, FALSE);
+		GetDlgItem(IDC_BUTTON1)->MoveWindow(rightOff,	cy - 133,	80, 23, FALSE);
+		GetDlgItem(IDC_BUTTON3)->MoveWindow(rightOff,	cy - 105,	80, 23, FALSE);
+		GetDlgItem(IDC_BUTTON2)->MoveWindow(rightOff,	cy - 77,	80, 23, FALSE);
 		Invalidate();
 	}
 }
