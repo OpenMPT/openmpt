@@ -260,7 +260,10 @@ bool PluginBridge::SendToHost(BridgeMessage &sendMsg)
 // Copy AEffect to shared memory.
 void PluginBridge::UpdateEffectStruct()
 {
-	if(otherPtrSize == 4)
+	if(nativeEffect == nullptr)
+	{
+		return;
+	} else if(otherPtrSize == 4)
 	{
 		sharedMem->effect32.FromNative(*nativeEffect);
 	} else if(otherPtrSize == 8)
@@ -861,7 +864,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		MPT_FALLTHROUGH;
 	case audioMasterIOChanged:
 		// We need to be sure that the new values are known to the master.
-		if(!processing)
+		if(!processing && nativeEffect != nullptr)
 		{
 			UpdateEffectStruct();
 			CreateProcessingFile(dispatchData);

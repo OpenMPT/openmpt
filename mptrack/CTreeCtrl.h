@@ -94,25 +94,27 @@ public:
 
 #endif // UNICODE
 
-	std::wstring GetItemTextW(HTREEITEM item) const
+	CStringW GetItemTextW(HTREEITEM item) const
 	{
 #ifdef UNICODE
 		return GetItemText(item);
 #else
-		WCHAR name[MAX_PATH];	// Maximum displayed text length according to documentation.
 		TVITEMW tvi;
-		MemsetZero(tvi);
 		tvi.hItem = item;
 		tvi.mask = TVIF_TEXT;
-		tvi.pszText = name;
-		tvi.cchTextMax = CountOf(name);
-		if(GetItem(&tvi))
+		CStringW str;
+		int nLen = 128;
+		int nRes;
+		do
 		{
-			return tvi.pszText;
-		} else
-		{
-			return std::wstring();
-		}
+			nLen *= 2;
+			tvi.pszText = str.GetBufferSetLength(nLen);
+			tvi.cchTextMax = nLen;
+			::SendMessage(m_hWnd, TVM_GETITEMW, 0, (LPARAM)&tvi);
+			nRes = wcslen(tvi.pszText);
+		} while (nRes >= nLen - 1);
+		str.ReleaseBuffer();
+		return str;
 #endif // UNICODE
 	}
 

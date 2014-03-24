@@ -735,7 +735,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, DWORD lHint)
 			info.hSamples = InsertItem(_T("Samples"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
 		} else if(hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE))
 		{
-			if(name != GetItemTextW(tvi.hItem))
+			if(name.c_str() != GetItemTextW(info.hSong))
 			{
 				SetItemText(info.hSong, name.c_str());
 			}
