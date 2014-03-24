@@ -52,7 +52,7 @@ private:
 		return true;
 	}
 public:
-	wavpack_stream_raii( const std::string & filename, const commandlineflags & flags_ )
+	wavpack_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & /*log*/ )
 		: flags(flags_)
 		, file(filename.c_str(), std::ios::binary | std::ios::trunc)
 		, wpc(NULL)

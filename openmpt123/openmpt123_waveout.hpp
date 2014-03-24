@@ -163,7 +163,7 @@ public:
 	}
 };
 
-static std::string show_waveout_devices() {
+static std::string show_waveout_devices( std::ostream & /*log*/ ) {
 	std::ostringstream devices;
 	devices << " waveout:" << std::endl;
 	for ( UINT i = 0; i < waveOutGetNumDevs(); ++i ) {
