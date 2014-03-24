@@ -664,6 +664,7 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 	sample.nC5Speed = sampleHeader.freq;
 	sample.nPan = (sampleHeader.balance * 256 + 8) / 15;
 	if(sample.nPan > 256) sample.nPan = 128;
+	else sample.uFlags.set(CHN_PANNING);
 	sample.nVibType = VIB_SINE;
 	sample.nVibSweep = sampleHeader.vibrato_sweep;
 	sample.nVibDepth = sampleHeader.vibrato_depth;
@@ -690,6 +691,7 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 		sample.nLoopEnd /= 2;
 	}
 	sampleIO.ReadSample(sample, file);
+	sample.Convert(MOD_TYPE_IT, that->GetType());
 	sample.PrecomputeLoops(*that, false);
 
 	mpt::String::Read<mpt::String::maybeNullTerminated>(that->m_szNames[nSample], sampleHeader.name);
@@ -816,6 +818,8 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			}
 		}
 	}
+
+	pIns->Convert(MOD_TYPE_IT, GetType());
 	return true;
 }
 
