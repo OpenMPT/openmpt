@@ -85,8 +85,8 @@ static noinline void ReportException(const char * const file, const int line, co
 	}
 }
 
-#if defined(_MSC_VER) && defined(_M_IX86)
-// on x86, break directly using asm break interrupt instead of calling DebugBreak which breaks one stackframe deeper than we want
+#if MPT_COMPILER_MSVC
+// With MSVC, break directly using __debugbreak intrinsic instead of calling DebugBreak which breaks one stackframe deeper than we want
 #define MyDebugBreak() __debugbreak()
 #else
 #define MyDebugBreak() DebugBreak()
