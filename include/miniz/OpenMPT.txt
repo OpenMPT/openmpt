@@ -1,4 +1,5 @@
 miniz DEFLATE implementation.
 http://miniz.googlecode.com/svn/trunk
 v155_r4
+#define MINIZ_NO_STDIO has been set because OpenMPT does not need stdio functionality and miniz relies on secure-CRT file i/o functions in windows builds which are not available on all mingw64 versions.
 No further changes have been made.
