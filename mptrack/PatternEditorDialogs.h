@@ -122,6 +122,7 @@ protected:
 	CComboBox cbnNote, cbnInstr, cbnVolCmd, cbnCommand;
 	CSliderCtrl sldVolParam, sldParam;
 	CSoundFile &sndFile;
+	const CModSpecifications *oldSpecs;
 	EffectInfo effectInfo;
 	ModCommand *m;
 	ModCommandPos editPos;

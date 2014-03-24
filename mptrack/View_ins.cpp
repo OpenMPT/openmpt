@@ -147,7 +147,7 @@ void CViewInstrument::OnInitialUpdate()
 //-------------------------------------
 {
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
-	CScrollView::OnInitialUpdate();
+	CModScrollView::OnInitialUpdate();
 	UpdateScrollSize();
 }
 
@@ -1313,7 +1313,7 @@ void CViewInstrument::OnNcPaint()
 void CViewInstrument::OnSize(UINT nType, int cx, int cy)
 //------------------------------------------------------
 {
-	CScrollView::OnSize(nType, cx, cy);
+	CModScrollView::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
 	{
 		UpdateScrollSize();

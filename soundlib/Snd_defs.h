@@ -58,7 +58,7 @@ const CHANNELINDEX MAX_CHANNELS			= 256;	//200 // Maximum number of mixing chann
 #define FREQ_FRACBITS		4		// Number of fractional bits in return value of CSoundFile::GetFreqFromPeriod()
 
 // String lengths (including trailing null char)
-#define MAX_SAMPLENAME			32	// also affects module name!
+#define MAX_SAMPLENAME			32
 #define MAX_SAMPLEFILENAME		22
 #define MAX_INSTRUMENTNAME		32
 #define MAX_INSTRUMENTFILENAME	32
@@ -96,8 +96,7 @@ enum MODTYPE
 	MOD_TYPE_IMF	= 0x2000000,
 	MOD_TYPE_AMS2	= 0x4000000,
 	MOD_TYPE_DIGI	= 0x8000000,
-	MOD_TYPE_UAX  = 0x10000000, // sampleset as module
-	// Container formats (not used at the moment)
+	MOD_TYPE_UAX	= 0x10000000, // sampleset as module
 };
 DECLARE_FLAGSET(MODTYPE)
 

@@ -528,7 +528,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		{
 			pos++;
 			// Handle pasting large pattern into smaller pattern (e.g. 128-row pattern into MOD, which only allows 64 rows)
-			static ModCommand dummy;
+			ModCommand dummy;
 			ModCommand &m = curRow < sndFile.Patterns[pattern].GetNumRows() ? patData[col] : dummy;
 
 			// Check valid paste condition. Paste will be skipped if

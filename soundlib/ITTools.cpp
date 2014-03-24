@@ -238,7 +238,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	// MIDI Setup
 	mbank = mptIns.wMidiBank;
 	mpr = mptIns.nMidiProgram;
-	if(mptIns.nMidiChannel || mptIns.nMixPlug == 0 || mptIns.nMixPlug > 127 || compatExport)
+	if(mptIns.nMidiChannel != MidiNoChannel || mptIns.nMixPlug == 0 || mptIns.nMixPlug > 127 || compatExport)
 	{
 		// Default. Prefer MIDI channel over mixplug to keep the semantics intact.
 		mch = mptIns.nMidiChannel;
@@ -249,7 +249,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	}
 
 	// Sample Map
-	nos = 0;
+	nos = 0;	// Only really relevant for ITI files
 	std::vector<bool> smpCount(sndFile.GetNumSamples(), false);
 	for(int i = 0; i < 120; i++)
 	{
@@ -478,22 +478,22 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	gvl = static_cast<uint8>(mptSmp.nGlobalVol);
 	vol = static_cast<uint8>(mptSmp.nVolume / 4);
 	dfp = static_cast<uint8>(mptSmp.nPan / 4);
-	if(mptSmp.uFlags & CHN_PANNING) dfp |= ITSample::enablePanning;
+	if(mptSmp.uFlags[CHN_PANNING]) dfp |= ITSample::enablePanning;
 
 	// Sample Format / Loop Flags
 	if(mptSmp.nLength && mptSmp.pSample)
 	{
 		flags = ITSample::sampleDataPresent;
-		if(mptSmp.uFlags & CHN_LOOP) flags |= ITSample::sampleLoop;
-		if(mptSmp.uFlags & CHN_SUSTAINLOOP) flags |= ITSample::sampleSustain;
-		if(mptSmp.uFlags & CHN_PINGPONGLOOP) flags |= ITSample::sampleBidiLoop;
-		if(mptSmp.uFlags & CHN_PINGPONGSUSTAIN) flags |= ITSample::sampleBidiSustain;
+		if(mptSmp.uFlags[CHN_LOOP]) flags |= ITSample::sampleLoop;
+		if(mptSmp.uFlags[CHN_SUSTAINLOOP]) flags |= ITSample::sampleSustain;
+		if(mptSmp.uFlags[CHN_PINGPONGLOOP]) flags |= ITSample::sampleBidiLoop;
+		if(mptSmp.uFlags[CHN_PINGPONGSUSTAIN]) flags |= ITSample::sampleBidiSustain;
 
-		if(mptSmp.uFlags & CHN_STEREO)
+		if(mptSmp.uFlags[CHN_STEREO])
 		{
 			flags |= ITSample::sampleStereo;
 		}
-		if(mptSmp.uFlags & CHN_16BIT)
+		if(mptSmp.uFlags[CHN_16BIT])
 		{
 			flags |= ITSample::sample16Bit;
 		}
@@ -556,13 +556,13 @@ uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
 	LimitMax(mptSmp.nGlobalVol, uint16(64));
 	mptSmp.nPan = (dfp & 0x7F) * 4;
 	LimitMax(mptSmp.nPan, uint16(256));
-	if(dfp & ITSample::enablePanning) mptSmp.uFlags |= CHN_PANNING;
+	if(dfp & ITSample::enablePanning) mptSmp.uFlags.set(CHN_PANNING);
 
 	// Loop Flags
-	if(flags & ITSample::sampleLoop) mptSmp.uFlags |= CHN_LOOP;
-	if(flags & ITSample::sampleSustain) mptSmp.uFlags |= CHN_SUSTAINLOOP;
-	if(flags & ITSample::sampleBidiLoop) mptSmp.uFlags |= CHN_PINGPONGLOOP;
-	if(flags & ITSample::sampleBidiSustain) mptSmp.uFlags |= CHN_PINGPONGSUSTAIN;
+	if(flags & ITSample::sampleLoop) mptSmp.uFlags.set(CHN_LOOP);
+	if(flags & ITSample::sampleSustain) mptSmp.uFlags.set(CHN_SUSTAINLOOP);
+	if(flags & ITSample::sampleBidiLoop) mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+	if(flags & ITSample::sampleBidiSustain) mptSmp.uFlags.set(CHN_PINGPONGSUSTAIN);
 
 	// Frequency
 	mptSmp.nC5Speed = C5Speed;

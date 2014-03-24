@@ -34,6 +34,22 @@
 #define VUMETERS_MEDWIDTH		24
 #define VUMETERS_LOWIDTH		16
 
+enum
+{
+	COLUMN_BITS_NONE			= 0x00,
+	COLUMN_BITS_NOTE			= 0x01,
+	COLUMN_BITS_INSTRUMENT		= 0x02,
+	COLUMN_BITS_VOLUME			= 0x04,
+	COLUMN_BITS_FXCMD			= 0x08,
+	COLUMN_BITS_FXPARAM			= 0x10,
+	COLUMN_BITS_FXCMDANDPARAM	= 0x18,
+	COLUMN_BITS_ALLCOLUMNS		= 0x1F,
+	COLUMN_BITS_UNKNOWN			= 0x20,	// Appears to be unused
+	COLUMN_BITS_ALL				= 0x3F,
+	COLUMN_BITS_SKIP			= 0x40,
+	COLUMN_BITS_INVISIBLE		= 0x80,
+};
+
 
 struct PATTERNFONT
 {
@@ -237,7 +253,7 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 }
 
 
-POINT CViewPattern::GetPointFromPosition(PatternCursor cursor) 
+POINT CViewPattern::GetPointFromPosition(PatternCursor cursor)
 //------------------------------------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
@@ -783,13 +799,13 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 	for(CHANNELINDEX cmk = startChan; cmk < ncols; cmk++)
 	{
 		selectedCols[cmk] = selEnable ? m_Selection.GetSelectionBits(cmk) : 0;
-		if (!::RectVisible(hdc, &rect)) selectedCols[cmk] |= 0x80;
+		if (!::RectVisible(hdc, &rect)) selectedCols[cmk] |= COLUMN_BITS_INVISIBLE;
 		rect.left += nColumnWidth;
 		rect.right += nColumnWidth;
 	}
 	// Max Visible Column
 	CHANNELINDEX maxcol = ncols;
-	while ((maxcol > startChan) && (selectedCols[maxcol-1] & 0x80)) maxcol--;
+	while ((maxcol > startChan) && (selectedCols[maxcol-1] & COLUMN_BITS_INVISIBLE)) maxcol--;
 	// Init bitmap border
 	{
 		UINT maxndx = pSndFile->GetNumChannels() * m_szCell.cx;
@@ -821,7 +837,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 		if (!::RectVisible(hdc, &rect)) 
 		{
 			// No speedup for these columns next time
-			for (CHANNELINDEX iup=startChan; iup<maxcol; iup++) selectedCols[iup] &= ~0x40;
+			for (CHANNELINDEX iup=startChan; iup<maxcol; iup++) selectedCols[iup] &= ~COLUMN_BITS_SKIP;
 			goto SkipRow;
 		}
 		rect.right = rect.left + m_szHeader.cx;
@@ -880,9 +896,9 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 		// Eliminate non-visible column
 		xpaint = m_szHeader.cx;
 		col = startChan;
-		while ((selectedCols[col] & 0x80) && (col < maxcol))
+		while ((selectedCols[col] & COLUMN_BITS_INVISIBLE) && (col < maxcol))
 		{
-			selectedCols[col] &= ~0x40;
+			selectedCols[col] &= ~COLUMN_BITS_SKIP;
 			col++;
 			xpaint += nColumnWidth;
 		}
@@ -899,31 +915,31 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 			const bool drawDefaultVolume = DrawDefaultVolume(m);
 
 			DWORD dwSpeedUpMask = 0;
-			if ((bSpeedUp) && (selectedCols[col] & 0x40) && (pPattern) && (row))
+			if ((bSpeedUp) && (selectedCols[col] & COLUMN_BITS_SKIP) && (pPattern) && (row))
 			{
 				const ModCommand *mold = m - ncols;
 				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);
 
-				if (m->note == mold->note) dwSpeedUpMask |= 0x01;
-				if ((m->instr == mold->instr) || (m_nDetailLevel < PatternCursor::instrColumn)) dwSpeedUpMask |= 0x02;
+				if (m->note == mold->note) dwSpeedUpMask |= COLUMN_BITS_NOTE;
+				if ((m->instr == mold->instr) || (m_nDetailLevel < PatternCursor::instrColumn)) dwSpeedUpMask |= COLUMN_BITS_INSTRUMENT;
 				if ( m->IsPcNote() || mold->IsPcNote() )
-				{   // Handle speedup mask for PC notes.
+				{
+					// Handle speedup mask for PC notes.
 					if(m->note == mold->note)
 					{
-						if(m->GetValueVolCol() == mold->GetValueVolCol() || (m_nDetailLevel < PatternCursor::volumeColumn)) dwSpeedUpMask |= 0x04;
-						if(m->GetValueEffectCol() == mold->GetValueEffectCol() || (m_nDetailLevel < PatternCursor::effectColumn)) dwSpeedUpMask |= 0x18;
-					}		
-				}
-				else
+						if(m->GetValueVolCol() == mold->GetValueVolCol() || (m_nDetailLevel < PatternCursor::volumeColumn)) dwSpeedUpMask |= COLUMN_BITS_VOLUME;
+						if(m->GetValueEffectCol() == mold->GetValueEffectCol() || (m_nDetailLevel < PatternCursor::effectColumn)) dwSpeedUpMask |= COLUMN_BITS_FXCMDANDPARAM;
+					}
+				} else
 				{
-					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume && !drawOldDefaultVolume) || (m_nDetailLevel < PatternCursor::volumeColumn)) dwSpeedUpMask |= 0x04;
-					if ((m->command == mold->command) || (m_nDetailLevel < PatternCursor::effectColumn)) dwSpeedUpMask |= (m->command != CMD_NONE) ? 0x08 : 0x18;
+					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume && !drawOldDefaultVolume) || (m_nDetailLevel < PatternCursor::volumeColumn)) dwSpeedUpMask |= COLUMN_BITS_VOLUME;
+					if ((m->command == mold->command) || (m_nDetailLevel < PatternCursor::effectColumn)) dwSpeedUpMask |= (m->command != CMD_NONE) ? COLUMN_BITS_FXCMD : COLUMN_BITS_FXCMDANDPARAM;
 				}
-				if (dwSpeedUpMask == 0x1F) goto DoBlit;
+				if (dwSpeedUpMask == COLUMN_BITS_ALLCOLUMNS) goto DoBlit;
 			}
-			selectedCols[col] |= 0x40;
+			selectedCols[col] |= COLUMN_BITS_SKIP;
 			col_sel = 0;
-			if (bRowSel) col_sel = selectedCols[col] & 0x3F;
+			if (bRowSel) col_sel = selectedCols[col] & COLUMN_BITS_ALL;
 			tx_col = row_col;
 			bk_col = row_bkcol;
 			if (col_sel)
@@ -932,7 +948,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 				bk_col = MODCOLOR_BACKSELECTED;
 			}
 			// Speedup: Empty command which is either not or fully selected
-			if (m->IsEmpty() && ((!col_sel) || (col_sel == 0x1F)))
+			if (m->IsEmpty() && ((!col_sel) || (col_sel == COLUMN_BITS_ALLCOLUMNS)))
 			{
 				m_Dib.SetTextColor(tx_col, bk_col);
 				m_Dib.TextBlt(xbmp, 0, nColumnWidth-4, m_szCell.cy, pfnt->nClrX, pfnt->nClrY);
@@ -940,7 +956,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 			}
 			x = 0;
 			// Note
-			if (!(dwSpeedUpMask & 0x01))
+			if (!(dwSpeedUpMask & COLUMN_BITS_NOTE))
 			{
 				tx_col = row_col;
 				bk_col = row_bkcol;
@@ -962,7 +978,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 						}
 					}
 				}
-				if (col_sel & 0x01)
+				if (col_sel & COLUMN_BITS_NOTE)
 				{
 					tx_col = MODCOLOR_TEXTSELECTED;
 					bk_col = MODCOLOR_BACKSELECTED;
@@ -978,7 +994,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 			// Instrument
 			if (m_nDetailLevel >= PatternCursor::instrColumn)
 			{
-				if (!(dwSpeedUpMask & 0x02))
+				if (!(dwSpeedUpMask & COLUMN_BITS_INSTRUMENT))
 				{
 					tx_col = row_col;
 					bk_col = row_bkcol;
@@ -986,7 +1002,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 					{
 						tx_col = MODCOLOR_INSTRUMENT;
 					}
-					if (col_sel & 0x02)
+					if (col_sel & COLUMN_BITS_INSTRUMENT)
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
@@ -1000,11 +1016,11 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 			// Volume
 			if (m_nDetailLevel >= PatternCursor::volumeColumn)
 			{
-				if (!(dwSpeedUpMask & 0x04))
+				if (!(dwSpeedUpMask & COLUMN_BITS_VOLUME))
 				{
 					tx_col = row_col;
 					bk_col = row_bkcol;
-					if (col_sel & 0x04)
+					if (col_sel & COLUMN_BITS_VOLUME)
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
@@ -1036,11 +1052,11 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 					if(effectColors[m->GetEffectType()] != 0)
 						fx_col = effectColors[m->GetEffectType()];
 				}
-				if (!(dwSpeedUpMask & 0x08))
+				if (!(dwSpeedUpMask & COLUMN_BITS_FXCMD))
 				{
 					tx_col = fx_col;
 					bk_col = row_bkcol;
-					if (col_sel & 0x08)
+					if (col_sel & COLUMN_BITS_FXCMD)
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
@@ -1067,11 +1083,11 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 				}
 				x += pfnt->nEltWidths[3];
 				// Param
-				if (!(dwSpeedUpMask & 0x10))
+				if (!(dwSpeedUpMask & COLUMN_BITS_FXPARAM))
 				{
 					tx_col = fx_col;
 					bk_col = row_bkcol;
-					if (col_sel & 0x10)
+					if (col_sel & COLUMN_BITS_FXPARAM)
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;

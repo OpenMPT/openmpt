@@ -232,7 +232,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				volcmd = VOLCMD_VOLUME;
 				if(vol > 64) vol = 64;
 				command = CMD_S3MCMDEX;
-				param = 0x80 | ((param * 15 + 32) / 64);	// XM volcol panning is 4-Bit, so we can use 4-Bit panning here.
+				param = 0x80 | (param / 4);	// XM volcol panning is actually 4-Bit, so we can use 4-Bit panning here.
 			}
 			break;
 

@@ -1224,14 +1224,14 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Channel names
 	if(!compatibilityExport)
 	{
-		for (UINT ich=0; ich<m_nChannels; ich++)
+		for(CHANNELINDEX i = 0; i < m_nChannels; i++)
 		{
-			if (ChnSettings[ich].szName[0])
+			if(ChnSettings[i].szName[0])
 			{
-				dwChnNamLen = (ich + 1) * MAX_CHANNELNAME;
+				dwChnNamLen = (i + 1) * MAX_CHANNELNAME;
 			}
 		}
-		if (dwChnNamLen) dwExtra += dwChnNamLen + 8;
+		if(dwChnNamLen) dwExtra += dwChnNamLen + 8;
 	}
 
 	if(m_SongFlags[SONG_EMBEDMIDICFG])
@@ -1262,7 +1262,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	if(!songMessage.empty())
 	{
 		itHeader.special |= ITFileHeader::embedSongMessage;
-		itHeader.msglength = msglength = (uint16)MIN(songMessage.length() + 1, uint16_max);
+		itHeader.msglength = msglength = mpt::saturate_cast<uint16>(songMessage.length() + 1u);
 		itHeader.msgoffset = dwHdrPos + dwExtra + (itHeader.insnum + itHeader.smpnum + itHeader.patnum) * 4;
 	}
 
@@ -1333,7 +1333,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 
 	// Writing instruments
-	for(UINT nins = 1; nins <= itHeader.insnum; nins++)
+	for(INSTRUMENTINDEX nins = 1; nins <= itHeader.insnum; nins++)
 	{
 		ITInstrumentEx iti;
 		uint32 instSize;
@@ -1365,7 +1365,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing sample headers
 	ITSample itss;
 	MemsetZero(itss);
-	for(UINT hsmp=0; hsmp<itHeader.smpnum; hsmp++)
+	for(SAMPLEINDEX hsmp = 0; hsmp < itHeader.smpnum; hsmp++)
 	{
 		smppos[hsmp] = dwPos;
 		dwPos += sizeof(ITSample);
@@ -1392,7 +1392,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		patpos[pat] = dwPos;
 
 		// Write pattern header
-		ROWINDEX writeRows = std::min(Patterns[pat].GetNumRows(), ROWINDEX(uint16_max));
+		ROWINDEX writeRows = mpt::saturate_cast<uint16>(Patterns[pat].GetNumRows());
 		uint16 patinfo[4];
 		patinfo[0] = 0;
 		patinfo[1] = (uint16)writeRows;
@@ -1403,7 +1403,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		fwrite(patinfo, 8, 1, f);
 		dwPos += 8;
 
-		const CHANNELINDEX maxChannels = MIN(specs.channelsMax, GetNumChannels());
+		const CHANNELINDEX maxChannels = std::min(specs.channelsMax, GetNumChannels());
 		std::vector<uint8> chnmask(maxChannels, 0xFF);
 		std::vector<ModCommand> lastvalue(maxChannels, ModCommand::Empty());
 
@@ -1559,7 +1559,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		fseek(f, dwPos, SEEK_SET);
 	}
 	// Writing Sample Data
-	for (UINT nsmp=1; nsmp<=itHeader.smpnum; nsmp++)
+	for(SAMPLEINDEX nsmp = 1; nsmp <= itHeader.smpnum; nsmp++)
 	{
 #ifdef MODPLUG_TRACKER
 		int type = GetType() == MOD_TYPE_IT ? 1 : 4;
@@ -1569,7 +1569,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		bool compress = false;
 #endif // MODPLUG_TRACKER
 		// Old MPT, DUMB and probably other libraries will only consider the IT2.15 compression flag if the header version also indicates IT2.15.
-		// Old MilkyTracker will only assume IT2.15 compression with cmwt == 0x215, ignoring the delta flag completely.
+		// MilkyTracker <= 0.90.85 will only assume IT2.15 compression with cmwt == 0x215, ignoring the delta flag completely.
 		itss.ConvertToIT(Samples[nsmp], GetType(), compress, itHeader.cmwt >= 0x215);
 
 		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[nsmp]);
