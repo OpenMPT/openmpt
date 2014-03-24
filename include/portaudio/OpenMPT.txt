@@ -1,5 +1,8 @@
  - Portaudio version svn-r1910 as of 2013-09-07.
  - A small modification to portaudio code has been made in src/hostapi/wdmks/pa_win_wdmks.c
    to facilitate linking against strmiids.lib . Look for "OpenMPT" there.
+ - The VS2008 x64 SDK does not provide ksguid.lib. src/os/win/pa_win_wdmks_utils.c
+   has a work-around for this problem. Code has been added to automatically activate the work-
+   around in this case. Look for "OpenMPT".
  - For building, premake4 is used to generate Visual Studio project files.
    See ../premake4.lua for details.
