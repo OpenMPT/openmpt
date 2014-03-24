@@ -447,9 +447,9 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 						const BYTE *ps = lpStream+dwPos+34+14*j;
 						while ((note < (UINT)(ps[1]+12)) && (note < NOTE_MAX))
 						{
-							if (ps[0] < MAX_SAMPLES)
+							SAMPLEINDEX ismp = ps[0];
+							if(ismp < MAX_SAMPLES)
 							{
-								int ismp = ps[0];
 								pIns->Keyboard[note] = ps[0];
 								Samples[ismp].nVolume = ps[2];
 								Samples[ismp].nPan = ps[4] << 1;
@@ -521,7 +521,7 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 			for (i = 0; i < nsamples; i++, dwPos += (pmsh->version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0))
 			{
 				const MDLSampleHeaderCommon *info = reinterpret_cast<const MDLSampleHeaderCommon *>(lpStream + dwPos);
-				if(info->sampleIndex >= MAX_SAMPLES || info->sampleIndex == 0)
+				if(!IsInRange(info->sampleIndex, 1, MAX_SAMPLES-1))
 				{
 					continue;
 				}
