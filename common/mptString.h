@@ -230,6 +230,21 @@ static inline std::string ToLocale(const wchar_t * str) { return ToLocale(str ? 
 static inline std::string To(Charset to, const wchar_t * str) { return To(to, str ? std::wstring(str) : std::wstring()); }
 static inline CString ToCString(const wchar_t * str) { return ToCString(str ? std::wstring(str) : std::wstring()); }
 
+#ifdef UNICODE
+MPT_DEPRECATED_PATH static inline CString ToCStringW(const CString &str) { return ToCString(str); }
+MPT_DEPRECATED_PATH CString ToCStringW(const std::wstring &str) { return ToCString(str); }
+MPT_DEPRECATED_PATH CString ToCStringW(Charset from, const std::string &str) { return ToCString(from, str); }
+#else
+CStringW ToCStringW(const CString &str);
+CStringW ToCStringW(const std::wstring &str);
+CStringW ToCStringW(Charset from, const std::string &str);
+CStringW ToCStringW(const CStringW &str);
+std::wstring ToWide(const CStringW &str);
+std::string ToLocale(const CStringW &str);
+std::string To(Charset to, const CStringW &str);
+CString ToCString(const CStringW &str);
+#endif
+
 #endif
 
 

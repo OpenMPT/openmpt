@@ -1086,11 +1086,12 @@ void CCtrlSamples::OnSampleSave()
 			if(doBatchSave)
 			{
 				CString sSampleNumber;
-				TCHAR sSampleName[64], sSampleFilename[64];
+				CString sSampleName;
+				CString sSampleFilename;
 				sSampleNumber.Format(sNumberFormat, smp);
 
-				strcpy(sSampleName, (m_sndFile.m_szNames[smp]) ? m_sndFile.m_szNames[smp] : "untitled");
-				strcpy(sSampleFilename, (m_sndFile.GetSample(smp).filename[0]) ? m_sndFile.GetSample(smp).filename : m_sndFile.m_szNames[smp]);
+				sSampleName = (m_sndFile.m_szNames[smp][0]) ? m_sndFile.m_szNames[smp] : "untitled";
+				sSampleFilename = (m_sndFile.GetSample(smp).filename[0]) ? m_sndFile.GetSample(smp).filename : m_sndFile.m_szNames[smp];
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 

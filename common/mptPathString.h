@@ -146,7 +146,6 @@ public:
 #endif
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetUTF8, path)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(path); }
-	static PathString FromWide(const wchar_t *path) { return PathString(path); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #if defined(_MFC_VER)
@@ -159,6 +158,14 @@ public:
 	// really special purpose, if !UNICODE, encode unicode in CString as UTF8:
 	static mpt::PathString TunnelOutofCString(const CString &path);
 	static CString TunnelIntoCString(const mpt::PathString &path);
+	// CStringW
+#ifdef UNICODE
+	MPT_DEPRECATED_PATH CString ToCStringW() const { return mpt::ToCString(path); }
+	MPT_DEPRECATED_PATH static PathString FromCStringW(const CString &path) { return PathString(mpt::ToWide(path)); }
+#else
+	CStringW ToCStringW() const { return mpt::ToCStringW(path); }
+	static PathString FromCStringW(const CStringW &path) { return PathString(mpt::ToWide(path)); }
+#endif
 #endif
 
 #else // !WIN32
@@ -234,7 +241,7 @@ void SanitizeFilename(wchar_t (&buffer)[size])
 }
 
 #if defined(_MFC_VER)
-MPT_DEPRECATED_PATH void SanitizeFilename(CString &str);
+void SanitizeFilename(CString &str);
 #endif
 
 #endif // MODPLUG_TRACKER
