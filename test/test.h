@@ -11,7 +11,8 @@
 
 #pragma once
 
-namespace MptTest
-{
-	void DoTests();
-} // namespace MptTest
+namespace mpt { namespace Test {
+
+void DoTests();
+
+} } // namespace mpt::Test

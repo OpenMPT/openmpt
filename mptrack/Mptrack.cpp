@@ -970,9 +970,7 @@ BOOL CTrackApp::InitInstance()
 
 	EndWaitCursor();
 
-#ifdef ENABLE_TESTS
-	MptTest::DoTests();
-#endif
+	mpt::Test::DoTests();
 
 	if(TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup)
 	{

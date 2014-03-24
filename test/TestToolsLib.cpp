@@ -20,8 +20,7 @@
 #include <iostream>
 
 
-namespace MptTest
-{
+namespace mpt { namespace Test {
 
 
 int fail_count = 0;
@@ -171,7 +170,7 @@ void Test::ReportException()
 }
 
 
-} // namespace MptTest
+} } // namespace mpt::Test
 
 
 #endif // !MODPLUG_TRACKER
