@@ -379,23 +379,24 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 				}
 				m_CbnEffects[ichn].SetRedraw(TRUE);
 				m_CbnEffects[ichn].SetCurSel(fxsel);
+				m_CbnEffects[ichn].Invalidate(FALSE);
 			}
 			else
 				SetDlgItemText(IDC_TEXT1+ichn, "");
 
 			// Enable/Disable controls for this channel
 			BOOL bIT = ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)));
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK1+ichn*2), bEnable);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK2+ichn*2), bIT);
+			GetDlgItem(IDC_CHECK1 + ichn * 2)->EnableWindow(bEnable);
+			GetDlgItem(IDC_CHECK2 + ichn * 2)->EnableWindow(bIT);
 
-			::EnableWindow(m_sbVolume[ichn].m_hWnd, bIT);
-			::EnableWindow(m_spinVolume[ichn], bIT);
+			m_sbVolume[ichn].EnableWindow(bIT);
+			m_spinVolume[ichn].EnableWindow(bIT);
 
-			::EnableWindow(m_sbPan[ichn].m_hWnd, bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
-			::EnableWindow(m_spinPan[ichn], bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1 + ichn*2), bIT);	// channel vol
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2 + ichn*2), bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));	// channel pan
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9 + ichn), ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))));	// channel name
+			m_sbPan[ichn].EnableWindow(bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
+			m_spinPan[ichn].EnableWindow(bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
+			GetDlgItem(IDC_EDIT1 + ichn * 2)->EnableWindow(bIT);	// channel vol
+			GetDlgItem(IDC_EDIT2 + ichn * 2)->EnableWindow(bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));	// channel pan
+			GetDlgItem(IDC_EDIT9 + ichn)->EnableWindow(((bEnable) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))));	// channel name
 			m_CbnEffects[ichn].EnableWindow(bEnable & (pSndFile->GetModSpecifications().supportsPlugins ? TRUE : FALSE));
 		}
 		UnlockControls();
@@ -416,9 +417,9 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		CheckDlgButton(IDC_CHECK11, pPlugin->IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
 		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : nullptr;
 		m_BtnEdit.EnableWindow((pVstPlugin != nullptr && (pVstPlugin->HasEditor() || pVstPlugin->GetNumParameters())) ? TRUE : FALSE);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_MOVEFXSLOT), (pVstPlugin) ? TRUE : FALSE);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSERTFXSLOT), (pVstPlugin) ? TRUE : FALSE);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CLONEPLUG), (pVstPlugin) ? TRUE : FALSE);
+		GetDlgItem(IDC_MOVEFXSLOT)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
+		GetDlgItem(IDC_INSERTFXSLOT)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
+		GetDlgItem(IDC_CLONEPLUG)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
 		int n = static_cast<int>(pPlugin->fDryRatio*100);
 		wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
 		SetDlgItemText(IDC_STATIC8, s);
@@ -426,12 +427,12 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		
 		if(pVstPlugin && pVstPlugin->isInstrument())
 		{
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), FALSE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), FALSE);
+			m_CbnSpecialMixProcessing.EnableWindow(FALSE);
+			GetDlgItem(IDC_CHECK12)->EnableWindow(FALSE);
 		} else
 		{
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), TRUE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), TRUE);
+			m_CbnSpecialMixProcessing.EnableWindow(TRUE);
+			GetDlgItem(IDC_CHECK12)->EnableWindow(TRUE);
 			m_CbnSpecialMixProcessing.SetCurSel(pPlugin->GetMixMode());
 			CheckDlgButton(IDC_CHECK12, pPlugin->IsExpandedMix() ? BST_CHECKED : BST_UNCHECKED);
 		}
@@ -456,7 +457,6 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 
 			m_CbnParam.SetCurSel(0);
 			m_CbnParam.SetRedraw(TRUE);
-			m_CbnParam.Invalidate();
 			OnParamChanged();
 
 			// Input / Output type
@@ -474,9 +474,8 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 
 			m_sbValue.EnableWindow(TRUE);
 			m_sbDryRatio.EnableWindow(TRUE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), TRUE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), TRUE);
-
+			GetDlgItem(IDC_EDIT14)->EnableWindow(TRUE);
+			GetDlgItem(IDC_BUTTON3)->EnableWindow(TRUE);
 		} else
 		{
 			s[0] = 0;
@@ -492,8 +491,8 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_CbnPreset.SetCurSel(0);
 			m_sbValue.EnableWindow(FALSE);
 			m_sbDryRatio.EnableWindow(FALSE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), FALSE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), FALSE);
+			GetDlgItem(IDC_EDIT14)->EnableWindow(FALSE);
+			GetDlgItem(IDC_BUTTON3)->EnableWindow(FALSE);
 		}
 		SetDlgItemText(IDC_TEXT6, s);
 		int outputsel = 0;
@@ -526,6 +525,12 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_CbnOutput.SetRedraw(TRUE);
 		m_CbnOutput.SetCurSel(outputsel);
 	}
+
+	m_CbnPlugin.Invalidate(FALSE);
+	m_CbnParam.Invalidate(FALSE);
+	m_CbnPreset.Invalidate(FALSE);
+	m_CbnSpecialMixProcessing.Invalidate(FALSE);
+	m_CbnOutput.Invalidate(FALSE);
 }
 
 
@@ -1456,6 +1461,7 @@ void CViewGlobals::OnFillParamCombo()
 	if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
 	m_CbnParam.SetCurSel(m_nCurrentParam);
 	m_CbnParam.SetRedraw(TRUE);
+	m_CbnParam.Invalidate(FALSE);
 }
 
 
@@ -1487,6 +1493,7 @@ void CViewGlobals::FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg)
 		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i);
 	}
 	m_CbnPreset.SetRedraw(TRUE);
+	m_CbnPreset.Invalidate(FALSE);
 }
 
 

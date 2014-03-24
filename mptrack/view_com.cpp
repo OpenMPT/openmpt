@@ -464,6 +464,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	{
 	}
 	m_ItemList.SetRedraw(TRUE);
+	m_ItemList.Invalidate(FALSE);
 }
 
 

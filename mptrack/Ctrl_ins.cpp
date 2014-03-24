@@ -1224,7 +1224,6 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 				s.Format("%d", ich);
 			m_CbnMidiCh.SetItemData(m_CbnMidiCh.AddString(s), ich);
 		}
-
 	}
 	if (dwHintMask & (HINT_INSTRUMENT|HINT_MODTYPE))
 	{
@@ -1358,6 +1357,17 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_bInitialized = TRUE;
 		UnlockControls();
 	}
+
+	m_ComboNNA.Invalidate(FALSE);
+	m_ComboDCT.Invalidate(FALSE);
+	m_ComboDCA.Invalidate(FALSE);
+	m_ComboPPC.Invalidate(FALSE);
+	m_CbnMidiCh.Invalidate(FALSE);
+	m_CbnMixPlug.Invalidate(FALSE);
+	m_CbnResampling.Invalidate(FALSE);
+	m_CbnFilterMode.Invalidate(FALSE);
+	m_CbnPluginVolumeHandling.Invalidate(FALSE);
+	m_ComboTuning.Invalidate(FALSE);
 	UnlockControls();
 }
 

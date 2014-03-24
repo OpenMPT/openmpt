@@ -672,7 +672,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
 		
 		// Length / Type
-		wsprintf(s, "%d-bit %s, len: %d", sample.GetElementarySampleSize() * 8, (sample.uFlags & CHN_STEREO) ? "stereo" : "mono", sample.nLength);
+		wsprintf(s, "%d-bit %s, len: %d", sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? "stereo" : "mono", sample.nLength);
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
 		mpt::String::Copy(s, m_sndFile.m_szNames[m_nSample]);
@@ -686,8 +686,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// Global Volume
 		SetDlgItemInt(IDC_EDIT8, sample.nGlobalVol);
 		// Panning
-		CheckDlgButton(IDC_CHECK1, (sample.uFlags & CHN_PANNING) ? MF_CHECKED : MF_UNCHECKED);
-		//rewbs.fix36944
+		CheckDlgButton(IDC_CHECK1, (sample.uFlags[CHN_PANNING]) ? MF_CHECKED : MF_UNCHECKED);
 		if (m_sndFile.GetType() == MOD_TYPE_XM)
 		{
 			SetDlgItemInt(IDC_EDIT9, sample.nPan);		//displayed panning with XM is 0-256, just like MPT's internal engine
@@ -695,7 +694,6 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		{
 			SetDlgItemInt(IDC_EDIT9, sample.nPan / 4);	//displayed panning with anything but XM is 0-64 so we divide by 4
 		}
-		//end rewbs.fix36944
 		// FineTune / C-4 Speed / BaseNote
 		int transp = 0;
 		if (m_sndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
@@ -746,6 +744,11 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_bInitialized = TRUE;
 		UnlockControls();
 	}
+
+	m_ComboLoopType.Invalidate(FALSE);
+	m_ComboSustainType.Invalidate(FALSE);
+	m_ComboAutoVib.Invalidate(FALSE);
+
 	UnlockControls();
 }
 
@@ -869,10 +872,10 @@ bool CCtrlSamples::OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample)
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
 	m_sndFile.ReadSampleFromSong(m_nSample, sndFile, nSample);
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if((m_sndFile.GetType() & MOD_TYPE_XM) && (!(sample.uFlags & CHN_PANNING)))
+	if((m_sndFile.GetType() & MOD_TYPE_XM) && (!sample.uFlags[CHN_PANNING]))
 	{
 		sample.nPan = 128;
-		sample.uFlags |= CHN_PANNING;
+		sample.uFlags.set(CHN_PANNING);
 	}
 
 	EndWaitCursor();
@@ -2804,12 +2807,12 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	
 	LockControls();
 	if ((!sample.nLength) || (!pSample)) goto NoSample;
-	if (sample.uFlags & CHN_16BIT)
+	if (sample.uFlags[CHN_16BIT])
 	{
 		pSample++;
 		pinc *= 2;
 	}
-	if (sample.uFlags & CHN_STEREO) pinc *= 2;
+	if (sample.uFlags[CHN_STEREO]) pinc *= 2;
 	// Loop Start
 	if ((pos = (short int)m_SpinLoopStart.GetPos()) != 0)
 	{
@@ -2823,7 +2826,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			for (SmpLength i=sample.nLoopStart+1; i+16<sample.nLoopEnd; i++)
 			{
 				p += pinc;
-				bOk = (sample.uFlags & CHN_PINGPONGLOOP) ? MPT_BidiStartCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
+				bOk = sample.uFlags[CHN_PINGPONGLOOP] ? MPT_BidiStartCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
 				if (bOk)
 				{
 					sample.nLoopStart = i;
@@ -2837,7 +2840,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			{
 				i--;
 				p -= pinc;
-				bOk = (sample.uFlags & CHN_PINGPONGLOOP) ? MPT_BidiStartCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
+				bOk = sample.uFlags[CHN_PINGPONGLOOP] ? MPT_BidiStartCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
 				if (bOk)
 				{
 					sample.nLoopStart = i;
@@ -2867,7 +2870,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		{
 			for (SmpLength i=sample.nLoopEnd+1; i<=sample.nLength; i++, p+=pinc)
 			{
-				bOk = (sample.uFlags & CHN_PINGPONGLOOP) ? MPT_BidiEndCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
+				bOk = sample.uFlags[CHN_PINGPONGLOOP] ? MPT_BidiEndCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
 				if (bOk)
 				{
 					sample.nLoopEnd = i;
@@ -2881,7 +2884,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			{
 				i--;
 				p -= pinc;
-				bOk = (sample.uFlags & CHN_PINGPONGLOOP) ? MPT_BidiEndCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
+				bOk = sample.uFlags[CHN_PINGPONGLOOP] ? MPT_BidiEndCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
 				if (bOk)
 				{
 					sample.nLoopEnd = i;
@@ -2912,7 +2915,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			for (SmpLength i=sample.nSustainStart+1; i+16<sample.nSustainEnd; i++)
 			{
 				p += pinc;
-				bOk = (sample.uFlags & CHN_PINGPONGSUSTAIN) ? MPT_BidiStartCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
+				bOk = sample.uFlags[CHN_PINGPONGSUSTAIN] ? MPT_BidiStartCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
 				if (bOk)
 				{
 					sample.nSustainStart = i;
@@ -2926,7 +2929,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			{
 				i--;
 				p -= pinc;
-				bOk = (sample.uFlags & CHN_PINGPONGSUSTAIN) ? MPT_BidiStartCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
+				bOk = sample.uFlags[CHN_PINGPONGSUSTAIN] ? MPT_BidiStartCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
 				if (bOk)
 				{
 					sample.nSustainStart = i;
@@ -2956,7 +2959,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		{
 			for (SmpLength i=sample.nSustainEnd+1; i+1<sample.nLength; i++, p+=pinc)
 			{
-				bOk = (sample.uFlags & CHN_PINGPONGSUSTAIN) ? MPT_BidiEndCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
+				bOk = sample.uFlags[CHN_PINGPONGSUSTAIN] ? MPT_BidiEndCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
 				if (bOk)
 				{
 					sample.nSustainEnd = i;
@@ -2970,7 +2973,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			{
 				i--;
 				p -= pinc;
-				bOk = (sample.uFlags & CHN_PINGPONGSUSTAIN) ? MPT_BidiEndCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
+				bOk = sample.uFlags[CHN_PINGPONGSUSTAIN] ? MPT_BidiEndCheck(p[0], p[pinc], p[pinc*2]) : MPT_LoopCheck(find0, find1, p[0], p[pinc]);
 				if (bOk)
 				{
 					sample.nSustainEnd = i;

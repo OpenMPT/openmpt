@@ -335,6 +335,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			}
 			m_CbnInstrument.SetCurSel(nPos);
 			m_CbnInstrument.SetRedraw(TRUE);
+			m_CbnInstrument.Invalidate(FALSE);
 		}
 		if(dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
 		{
