@@ -155,7 +155,7 @@ std::string get_string( const std::string & key ) {
 
 } // namespace version
 
- log_interface::log_interface() {
+log_interface::log_interface() {
 	return;
 }
 log_interface::~log_interface() {
