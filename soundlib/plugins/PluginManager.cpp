@@ -376,7 +376,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	}
 
 	// If this key contains a file name on program launch, a plugin previously crashed OpenMPT.
-	theApp.GetSettings().Write<mpt::PathString>("VST Plugins", "FailedPlugin", dllPath);
+	theApp.GetSettings().Write<mpt::PathString>("VST Plugins", "FailedPlugin", dllPath, SettingWriteThrough);
 
 	AEffect *pEffect;
 	HINSTANCE hLib;
