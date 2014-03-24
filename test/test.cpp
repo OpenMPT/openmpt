@@ -266,10 +266,12 @@ static bool BeginsWith(const std::wstring &str, const std::wstring &match)
 }
 
 
+#ifdef MODPLUG_TRACKER
 static bool IsEqualUUID(const UUID &lhs, const UUID &rhs)
 {
 	return std::memcmp(&lhs, &rhs, sizeof(UUID)) == 0;
 }
+#endif
 
 
 static noinline void TestMisc()
