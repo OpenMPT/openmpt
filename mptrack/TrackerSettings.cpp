@@ -133,7 +133,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Version
 	, IniVersion(conf, "Version", "Version", "")
 	, gcsPreviousVersion(GetStoredVersion(IniVersion))
-	, gcsInstallGUID(conf, "Version", "InstallGUID", "")
+	, gcsInstallGUID(conf, "Version", "InstallGUID", std::wstring())
 	// Display
 	, m_ShowSplashScreen(conf, "Display", "ShowSplashScreen", true)
 	, gbMdiMaximize(conf, "Display", "MDIMaximize", true)
@@ -366,15 +366,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	const MptVersion::VersionNum storedVersion = gcsPreviousVersion;
 
 	// Version
-	if(gcsInstallGUID == "")
+	if(gcsInstallGUID.Get().empty())
 	{
-		// No GUID found - generate one.
-		GUID guid;
-		CoCreateGuid(&guid);
-		BYTE* Str;
-		UuidToString((UUID*)&guid, &Str);
-		gcsInstallGUID = Str;
-		RpcStringFree(&Str);
+		// No UUID found - generate one.
+		gcsInstallGUID = Util::UUIDToString(Util::CreateUUID());
 	}
 
 	// Sound Settings

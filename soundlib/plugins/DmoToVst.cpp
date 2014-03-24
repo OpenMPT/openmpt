@@ -519,7 +519,7 @@ AEffect *DmoToVst(VSTPluginLib &lib)
 //----------------------------------
 {
 	CLSID clsid;
-	if (Util::StringToCLSID(lib.dllPath.ToWide(), clsid))
+	if (Util::VerifyStringToCLSID(lib.dllPath.ToWide(), clsid))
 	{
 		IMediaObject *pMO = nullptr;
 		IMediaObjectInPlace *pMOIP = nullptr;

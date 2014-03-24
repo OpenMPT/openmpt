@@ -266,6 +266,12 @@ static bool BeginsWith(const std::wstring &str, const std::wstring &match)
 }
 
 
+static bool IsEqualUUID(const UUID &lhs, const UUID &rhs)
+{
+	return std::memcmp(&lhs, &rhs, sizeof(UUID)) == 0;
+}
+
+
 static noinline void TestMisc()
 //-----------------------------
 {
@@ -540,6 +546,18 @@ static noinline void TestMisc()
 	VERIFY_EQUAL(MPT_PATHSTRING("\\foo").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\foo"));
 	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").AbsolutePathToRelative(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
 	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").RelativePathToAbsolute(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
+#endif
+
+	// UUID
+#ifdef MODPLUG_TRACKER
+	VERIFY_EQUAL(Util::IsValid(Util::CreateGUID()), true);
+	VERIFY_EQUAL(Util::IsValid(Util::CreateUUID()), true);
+	VERIFY_EQUAL(Util::IsValid(Util::CreateLocalUUID()), true);
+	UUID uuid = Util::CreateUUID();
+	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToUUID(Util::UUIDToString(uuid))), true);
+	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToGUID(Util::GUIDToString(uuid))), true);
+	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToIID(Util::IIDToString(uuid))), true);
+	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToCLSID(Util::CLSIDToString(uuid))), true);
 #endif
 
 }

@@ -339,37 +339,207 @@ void InitProcSupport()
 
 namespace Util
 {
-	std::wstring CLSIDToString(CLSID clsid)
-	//-------------------------------------
+
+
+std::wstring CLSIDToString(CLSID clsid)
+//-------------------------------------
+{
+	std::wstring str;
+	LPOLESTR tmp = nullptr;
+	::StringFromCLSID(clsid, &tmp);
+	if(tmp)
 	{
-		std::wstring str;
-		LPOLESTR tmp = nullptr;
-		StringFromCLSID(clsid, &tmp);
-		if(tmp)
-		{
-			str = tmp;
-			CoTaskMemFree(tmp);
-			tmp = nullptr;
-		}
-		return str;
+		str = tmp;
+		::CoTaskMemFree(tmp);
+		tmp = nullptr;
 	}
+	return str;
+}
 
 
-	bool StringToCLSID(const std::wstring &str, CLSID &clsid)
-	//-------------------------------------------------------
+CLSID StringToCLSID(const std::wstring &str)
+//------------------------------------------
+{
+	CLSID clsid = CLSID();
+	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	if(::CLSIDFromString(&tmp[0], &clsid) != S_OK)
 	{
-		std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-		return CLSIDFromString(&tmp[0], &clsid) == S_OK;
+		return CLSID();
 	}
+	return clsid;
+}
 
 
-	bool IsCLSID(const std::wstring &str)
-	//-----------------------------------
+bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid)
+//-------------------------------------------------------------
+{
+	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	return (::CLSIDFromString(&tmp[0], &clsid) == S_OK);
+}
+
+
+bool IsCLSID(const std::wstring &str)
+//-----------------------------------
+{
+	CLSID clsid = CLSID();
+	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	return (::CLSIDFromString(&tmp[0], &clsid) == S_OK);
+}
+
+
+std::wstring IIDToString(IID iid)
+//-------------------------------
+{
+	std::wstring str;
+	LPOLESTR tmp = nullptr;
+	::StringFromIID(iid, &tmp);
+	if(tmp)
 	{
-		CLSID clsid = CLSID();
-		std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-		return CLSIDFromString(&tmp[0], &clsid) == S_OK;
+		str = tmp;
+		::CoTaskMemFree(tmp);
+		tmp = nullptr;
 	}
+	return str;
+}
+
+
+IID StringToIID(const std::wstring &str)
+//--------------------------------------
+{
+	IID iid = IID();
+	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	::IIDFromString(&tmp[0], &iid);
+	return iid;
+}
+
+
+std::wstring GUIDToString(GUID guid)
+//----------------------------------
+{
+	std::vector<OLECHAR> tmp(256);
+	::StringFromGUID2(guid, &tmp[0], tmp.size());
+	return &tmp[0];
+}
+
+
+GUID StringToGUID(const std::wstring &str)
+//----------------------------------------
+{
+	return StringToIID(str);
+}
+
+
+UUID StringToUUID(const std::wstring &str)
+//----------------------------------------
+{
+	UUID uuid = UUID();
+	std::vector<wchar_t> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	if(::UuidFromStringW((RPC_WSTR)(&(tmp[0])), &uuid) != RPC_S_OK)
+	{
+		return UUID();
+	}
+	return uuid;
+}
+
+
+std::wstring UUIDToString(UUID uuid)
+//----------------------------------
+{
+	std::wstring str;
+	RPC_WSTR tmp = nullptr;
+	if(::UuidToStringW(&uuid, &tmp) != RPC_S_OK)
+	{
+		return std::wstring();
+	}
+	str = (wchar_t*)tmp;
+	::RpcStringFreeW(&tmp);
+	return str;
+}
+
+
+bool IsValid(UUID uuid)
+//---------------------
+{
+	return false
+		|| uuid.Data1 != 0
+		|| uuid.Data2 != 0
+		|| uuid.Data3 != 0
+		|| uuid.Data4[0] != 0
+		|| uuid.Data4[1] != 0
+		|| uuid.Data4[2] != 0
+		|| uuid.Data4[3] != 0
+		|| uuid.Data4[4] != 0
+		|| uuid.Data4[5] != 0
+		|| uuid.Data4[6] != 0
+		|| uuid.Data4[7] != 0
+		;
+}
+
+
+GUID CreateGUID()
+//---------------
+{
+	GUID guid = GUID();
+	if(::CoCreateGuid(&guid) != S_OK)
+	{
+		return GUID();
+	}
+	return guid;
+}
+
+
+UUID CreateUUID()
+//---------------
+{
+	UUID uuid = UUID();
+	RPC_STATUS status = ::UuidCreate(&uuid);
+	if(status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY)
+	{
+		return UUID();
+	}
+	return uuid;
+}
+
+
+UUID CreateLocalUUID()
+//--------------------
+{
+	UUID uuid = UUID();
+	RPC_STATUS status = ::UuidCreateSequential(&uuid);
+	if(status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY)
+	{
+		return UUID();
+	}
+	return uuid;
+}
+
+
+mpt::PathString GetTempDirectory()
+//--------------------------------
+{
+	WCHAR tempPath[MAX_PATH+2];
+	MemsetZero(tempPath);
+	DWORD result = GetTempPathW(MAX_PATH+1, tempPath);
+	if(result == 0 || result > MAX_PATH+1)
+	{ // error
+		// use app directory as fallback
+		return mpt::GetAppPath();
+	}
+	return mpt::PathString::FromNative(tempPath);
+}
+
+
+mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
+//-----------------------------------------------------------------------------------------------------------------
+{
+	mpt::PathString filename = Util::GetTempDirectory();
+	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
+	filename += mpt::PathString::FromWide(Util::UUIDToString(Util::CreateLocalUUID()));
+	filename += (!fileNameExtension.empty() ? MPT_PATHSTRING(".") + fileNameExtension : mpt::PathString());
+	return filename;
+}
+
+
 } // namespace Util
 
 #endif // MODPLUG_TRACKER

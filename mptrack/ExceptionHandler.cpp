@@ -43,9 +43,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 	mpt::PathString baseRescuePath;
 	{
 		// Create a crash directory
-		WCHAR tempPath[MAX_PATH];
-		GetTempPathW(CountOf(tempPath), tempPath);
-		baseRescuePath = mpt::PathString::FromNative(tempPath) + MPT_PATHSTRING("OpenMPT Crash Files\\");
+		baseRescuePath = Util::GetTempDirectory() + MPT_PATHSTRING("OpenMPT Crash Files\\");
 		if(!PathIsDirectoryW(baseRescuePath.AsNative().c_str()))
 		{
 			CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr);
