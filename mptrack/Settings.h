@@ -470,6 +470,12 @@ public:
 	virtual void SettingChanged(const SettingPath &path) = 0;
 };
 
+enum SettingFlushMode
+{
+	SettingWriteBack    = 0,
+	SettingWriteThrough = 1,
+};
+
 // SettingContainer basically represents a frontend to 1 or 2 backends (e.g. ini files or registry subtrees) for a collection of configuration settings.
 // SettingContainer provides basic read/write access to individual setting. The values are cached and only flushed on destruction or explicit flushs.
 class SettingsContainer
@@ -498,7 +504,7 @@ private:
 	void BackendsRemoveSetting(const SettingPath &path);
 	void NotifyListeners(const SettingPath &path);
 	SettingValue ReadSetting(const SettingPath &path, const SettingValue &def, const SettingMetadata &metadata) const;
-	void WriteSetting(const SettingPath &path, const SettingValue &val);
+	void WriteSetting(const SettingPath &path, const SettingValue &val, SettingFlushMode flushMode);
 	void ForgetSetting(const SettingPath &path);
 	void RemoveSetting(const SettingPath &path);
 private:
@@ -523,19 +529,19 @@ public:
 		return FromSettingValue<T>(ReadSetting(SettingPath(section, key), ToSettingValue<T>(def), metadata));
 	}
 	template <typename T>
-	void Write(const SettingPath &path, const T &val)
+	void Write(const SettingPath &path, const T &val, SettingFlushMode flushMode = SettingWriteBack)
 	{
-		WriteSetting(path, ToSettingValue<T>(val));
+		WriteSetting(path, ToSettingValue<T>(val), flushMode);
 	}
 	template <typename T>
-	void Write(const std::wstring &section, const std::wstring &key, const T &val)
+	void Write(const std::wstring &section, const std::wstring &key, const T &val, SettingFlushMode flushMode = SettingWriteBack)
 	{
-		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val));
+		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val), flushMode);
 	}
 	template <typename T>
-	void Write(const std::string &section, const std::string &key, const T &val)
+	void Write(const std::string &section, const std::string &key, const T &val, SettingFlushMode flushMode = SettingWriteBack)
 	{
-		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val));
+		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val), flushMode);
 	}
 	void Forget(const SettingPath &path)
 	{

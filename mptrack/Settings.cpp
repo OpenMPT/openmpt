@@ -151,7 +151,7 @@ SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const Setti
 	return entry->second;
 }
 
-void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue &val)
+void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue &val, SettingFlushMode flushMode)
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
@@ -165,7 +165,7 @@ void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue
 		entry->second = val;
 	}
 	NotifyListeners(path);
-	if(immediateFlush)
+	if(immediateFlush || flushMode == SettingWriteThrough)
 	{
 		BackendsWriteSetting(path, val);
 		entry->second.Clean();
