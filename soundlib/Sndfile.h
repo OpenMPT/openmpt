@@ -560,7 +560,7 @@ public:
 	MODCONTAINERTYPE GetContainerType() const { return m_ContainerType; }
 
 	// rough heuristic, could be improved
-	std::pair<MOD_CHARSET_CERTAINTY, mpt::Charset> GetCharset() const { return GetCharsetFromModType(GetType()); }
+	mpt::Charset GetCharset() const { return GetCharsetFromModType(GetType()); }
 
 	void SetPreAmp(UINT vol);
 	UINT GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
@@ -662,7 +662,7 @@ public:
 	bool ReadMID(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
-	static std::pair<MOD_CHARSET_CERTAINTY, mpt::Charset> GetCharsetFromModType(MODTYPE modtype);
+	static mpt::Charset GetCharsetFromModType(MODTYPE modtype);
 	static const char * ModTypeToString(MODTYPE modtype);
 	static std::string ModContainerTypeToString(MODCONTAINERTYPE containertype);
 	static std::string ModTypeToTracker(MODTYPE modtype);

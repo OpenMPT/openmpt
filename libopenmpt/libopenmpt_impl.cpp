@@ -277,7 +277,7 @@ static void mixersettings_to_ramping( int & ramping, const MixerSettings & setti
 }
 
 std::string module_impl::mod_string_to_utf8( const std::string & encoded ) const {
-	return mpt::To( mpt::CharsetUTF8, m_sndFile->GetCharset().second, encoded );
+	return mpt::To( mpt::CharsetUTF8, m_sndFile->GetCharset(), encoded );
 }
 void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) {
 	if (
