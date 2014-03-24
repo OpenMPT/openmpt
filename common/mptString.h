@@ -231,9 +231,9 @@ static inline std::string To(Charset to, const wchar_t * str) { return To(to, st
 static inline CString ToCString(const wchar_t * str) { return ToCString(str ? std::wstring(str) : std::wstring()); }
 
 #ifdef UNICODE
-MPT_DEPRECATED_PATH static inline CString ToCStringW(const CString &str) { return ToCString(str); }
-MPT_DEPRECATED_PATH CString ToCStringW(const std::wstring &str) { return ToCString(str); }
-MPT_DEPRECATED_PATH CString ToCStringW(Charset from, const std::string &str) { return ToCString(from, str); }
+MPT_DEPRECATED static inline CString ToCStringW(const CString &str) { return ToCString(str); }
+MPT_DEPRECATED static inline CString ToCStringW(const std::wstring &str) { return ToCString(str); }
+MPT_DEPRECATED static inline CString ToCStringW(Charset from, const std::string &str) { return ToCString(from, str); }
 #else
 CStringW ToCStringW(const CString &str);
 CStringW ToCStringW(const std::wstring &str);
