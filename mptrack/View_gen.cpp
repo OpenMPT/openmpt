@@ -1426,6 +1426,9 @@ void CViewGlobals::OnClonePlug()
 
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
+
+		if(sndFile.GetModSpecifications().supportsPlugins)
+			GetDocument()->SetModified();
 	}
 }
 

@@ -173,13 +173,14 @@ void CSelectPluginDlg::OnOK()
 			}
 			changed = true;
 		}
-	} else
+	} else if(m_pPlugin->IsValidPlugin())
 	{
 		// No effect
 		CriticalSection cs;
 		m_pPlugin->Destroy();
 		// Clear plugin info
 		MemsetZero(m_pPlugin->Info);
+		changed = true;
 	}
 
 	//remember window size:
@@ -190,7 +191,7 @@ void CSelectPluginDlg::OnOK()
 	TrackerSettings::Instance().gnPlugWindowWidth  = rect.right - rect.left;
 	TrackerSettings::Instance().gnPlugWindowHeight = rect.bottom - rect.top;
 
-	if (changed)
+	if(changed)
 	{
 		if(m_pPlugin->Info.dwPluginId2)
 			TrackerSettings::Instance().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
