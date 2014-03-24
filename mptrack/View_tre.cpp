@@ -319,7 +319,7 @@ mpt::PathString CModTree::InsLibGetFullPath(HTREEITEM hItem) const
 {
 	mpt::PathString fullPath = m_InstrLibPath;
 	if(!fullPath.HasTrailingSlash()) fullPath += MPT_PATHSTRING("\\");
-	return fullPath + mpt::PathString::FromWide(GetItemTextW(hItem));
+	return fullPath + mpt::PathString::FromCStringW(GetItemTextW(hItem));
 }
 
 
@@ -1261,7 +1261,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 
 		case MODITEM_INSLIB_SONG:
 		case MODITEM_INSLIB_FOLDER:
-			InstrumentLibraryChDir(mpt::PathString::FromWide(GetItemTextW(hItem)), modItem.type == MODITEM_INSLIB_SONG);
+			InstrumentLibraryChDir(mpt::PathString::FromCStringW(GetItemTextW(hItem)), modItem.type == MODITEM_INSLIB_SONG);
 			return TRUE;
 
 		case MODITEM_HDR_SONG:
@@ -3268,7 +3268,7 @@ void CModTree::OnRefreshInstrLib()
 			HTREEITEM hItem = GetChildItem(m_hInsLib);
 			while (hItem != NULL)
 			{
-				const mpt::PathString str = mpt::PathString::FromWide(GetItemTextW(hItem));
+				const mpt::PathString str = mpt::PathString::FromCStringW(GetItemTextW(hItem));
 				if(!mpt::PathString::CompareNoCase(str, m_InstrLibHighlightPath))
 				{
 					hActive = hItem;

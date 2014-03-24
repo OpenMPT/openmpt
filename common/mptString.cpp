@@ -1100,6 +1100,43 @@ std::string To(Charset to, const CString &str)
 	#endif
 }
 
+#ifdef UNICODE
+// inline
+#else
+CStringW ToCStringW(const CString &str)
+{
+	return ToWide(str).c_str();
+}
+CStringW ToCStringW(const std::wstring &str)
+{
+	return str.c_str();
+}
+CStringW ToCStringW(Charset from, const std::string &str)
+{
+	return ToWide(from, str).c_str();
+}
+CStringW ToCStringW(const CStringW &str)
+{
+	return str;
+}
+std::wstring ToWide(const CStringW &str)
+{
+	return str.GetString();
+}
+std::string ToLocale(const CStringW &str)
+{
+	return ToLocale(str.GetString());
+}
+std::string To(Charset to, const CStringW &str)
+{
+	return To(to, str.GetString());
+}
+CString ToCString(const CStringW &str)
+{
+	return ToLocale(str).c_str();
+}
+#endif
+
 #endif
 
 
