@@ -124,7 +124,7 @@ CChannelManagerDlg::CChannelManagerDlg(void)
 
 CChannelManagerDlg::~CChannelManagerDlg(void)
 {
-	if(this == CChannelManagerDlg::sharedInstance_) CChannelManagerDlg::sharedInstance_ = NULL;
+	if(this == CChannelManagerDlg::sharedInstance_) CChannelManagerDlg::sharedInstance_ = nullptr;
 	if(bkgnd) DeleteObject(bkgnd);
 }
 
@@ -135,16 +135,16 @@ BOOL CChannelManagerDlg::OnInitDialog()
 	HWND menu = ::GetDlgItem(m_hWnd,IDC_TAB1);
 
 	TCITEM tie;
-	tie.mask = TCIF_TEXT | TCIF_IMAGE; 
-	tie.iImage = -1; 
-	tie.pszText = "Solo/Mute"; 
-	TabCtrl_InsertItem(menu, 0, &tie); 
-	tie.pszText = "Record select"; 
-	TabCtrl_InsertItem(menu, 1, &tie); 
-	tie.pszText = "Fx plugins"; 
-	TabCtrl_InsertItem(menu, 2, &tie); 
-	tie.pszText = "Reorder/Remove"; 
-	TabCtrl_InsertItem(menu, 3, &tie); 
+	tie.mask = TCIF_TEXT | TCIF_IMAGE;
+	tie.iImage = -1;
+	tie.pszText = "Solo/Mute";
+	TabCtrl_InsertItem(menu, 0, &tie);
+	tie.pszText = "Record select";
+	TabCtrl_InsertItem(menu, 1, &tie);
+	tie.pszText = "Fx plugins";
+	TabCtrl_InsertItem(menu, 2, &tie);
+	tie.pszText = "Reorder/Remove";
+	TabCtrl_InsertItem(menu, 3, &tie);
 	currentTab = 0;
 
 	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)

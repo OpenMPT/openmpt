@@ -103,7 +103,7 @@
 // Disable the built-in reverb effect
 //#define NO_REVERB
 
-// Disable built-in miscellaneous DSP effects (surround, mega bass)
+// Disable built-in miscellaneous DSP effects (surround, mega bass, noise reduction) 
 //#define NO_DSP
 
 // Disable the built-in equalizer.

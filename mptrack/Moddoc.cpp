@@ -1352,7 +1352,7 @@ bool CModDoc::SoloChannel(CHANNELINDEX nChn, bool bSolo)
 //------------------------------------------------------
 {
 	if (nChn >= m_SndFile.m_nChannels) return false;
-	if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
+	if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) SetModified();
 	m_SndFile.ChnSettings[nChn].dwFlags.set(CHN_SOLO, bSolo);
 	return true;
 }
@@ -1373,11 +1373,8 @@ bool CModDoc::NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix)
 //----------------------------------------------------------------------
 {
 	if (nChn >= m_SndFile.m_nChannels) return false;
-	if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
-
 	m_SndFile.ChnSettings[nChn].dwFlags.set(CHN_NOFX, bNoFx);
 	if(updateMix) m_SndFile.m_PlayState.Chn[nChn].dwFlags.set(CHN_NOFX, bNoFx);
-
 	return true;
 }
 
@@ -1451,8 +1448,7 @@ bool CModDoc::MuteSample(SAMPLEINDEX nSample, bool bMute)
 //-------------------------------------------------------
 {
 	if ((nSample < 1) || (nSample > m_SndFile.GetNumSamples())) return false;
-	if (bMute) m_SndFile.GetSample(nSample).uFlags |= CHN_MUTE;
-	else m_SndFile.GetSample(nSample).uFlags &= ~CHN_MUTE;
+	m_SndFile.GetSample(nSample).uFlags.set(CHN_MUTE, bMute);
 	return true;
 }
 

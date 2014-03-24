@@ -1212,7 +1212,6 @@ void CViewGlobals::OnMovePlugToSlot()
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
 	}
-
 }
 
 
@@ -1314,14 +1313,13 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 void CViewGlobals::BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots) 
 //-----------------------------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 	
 	emptySlots.clear();
 
 	for(PLUGINDEX nSlot = 0; nSlot < MAX_MIXPLUGINS; nSlot++)
 	{
-		if(pSndFile->m_MixPlugins[nSlot].pMixPlugin == nullptr)
+		if(sndFile.m_MixPlugins[nSlot].pMixPlugin == nullptr)
 		{
 			emptySlots.push_back(nSlot);
 		}
@@ -1334,16 +1332,16 @@ void CViewGlobals::OnInsertSlot()
 {
 	CString prompt;
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	prompt.Format("Insert empty slot before slot FX%d?", m_nCurrentPlugin + 1);
 
 	// If last plugin slot is occupied, move it so that the plugin is not lost.
 	// This could certainly be improved...
 	bool moveLastPlug = false;
 
-	if(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
+	if(sndFile.m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
 	{
-		if(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 2].pMixPlugin == nullptr)
+		if(sndFile.m_MixPlugins[MAX_MIXPLUGINS - 2].pMixPlugin == nullptr)
 		{
 			moveLastPlug = true;
 		} else
@@ -1355,26 +1353,26 @@ void CViewGlobals::OnInsertSlot()
 	{
 
 		// Delete last plug...
-		if(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
+		if(sndFile.m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
 		{
 			if(moveLastPlug)
 			{
 				MovePlug(MAX_MIXPLUGINS - 1, MAX_MIXPLUGINS - 2, true);
 			} else
 			{
-				pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].Destroy();
-				MemsetZero(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].Info);
+				sndFile.m_MixPlugins[MAX_MIXPLUGINS - 1].Destroy();
+				MemsetZero(sndFile.m_MixPlugins[MAX_MIXPLUGINS - 1].Info);
 			}
 		}
 
 		// Update MODCOMMANDs so that they won't be referring to old indexes (e.g. with NOTE_PC).
-		if(pSndFile->GetType() == MOD_TYPE_MPT)
-			pSndFile->Patterns.ForEachModCommand(PlugIndexModifier(m_nCurrentPlugin + 1, MAX_MIXPLUGINS - 1, 1));
+		if(sndFile.GetModSpecifications().HasNote(NOTE_PC))
+			sndFile.Patterns.ForEachModCommand(PlugIndexModifier(m_nCurrentPlugin + 1, MAX_MIXPLUGINS - 1, 1));
 
 
 		for(PLUGINDEX nSlot = MAX_MIXPLUGINS - 1; nSlot > m_nCurrentPlugin; nSlot--)
 		{
-			if(pSndFile->m_MixPlugins[nSlot-1].pMixPlugin)
+			if(sndFile.m_MixPlugins[nSlot-1].pMixPlugin)
 			{
 				MovePlug(nSlot - 1, nSlot, NoPatternAdjust);
 			}
@@ -1383,7 +1381,7 @@ void CViewGlobals::OnInsertSlot()
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		OnPluginChanged();
 
-		if(pSndFile->GetModSpecifications().supportsPlugins)
+		if(sndFile.GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
 	}
 

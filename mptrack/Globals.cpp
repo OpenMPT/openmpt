@@ -755,7 +755,7 @@ BOOL CModControlBar::Init(UINT nId)
 					hInstance,
 					::FindResource(hInstance, MAKEINTRESOURCE(nId), RT_BITMAP));
 	tbab.hInst = NULL;
-	tbab.nID = (UINT)m_hBarBmp;
+	tbab.nID = (UINT_PTR)m_hBarBmp;
 	::SendMessage(m_hWnd, TB_ADDBITMAP, 16, (LPARAM)&tbab);
 	UpdateStyle();
 	return TRUE;

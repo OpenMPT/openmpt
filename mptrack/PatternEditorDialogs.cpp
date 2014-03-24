@@ -122,7 +122,7 @@ END_MESSAGE_MAP()
 BOOL CFindReplaceTab::OnInitDialog()
 //----------------------------------
 {
-	CHAR s[256];
+	TCHAR s[256];
 	CComboBox *combo;
 
 	CPropertyPage::OnInitDialog();
@@ -157,16 +157,16 @@ BOOL CFindReplaceTab::OnInitDialog()
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		combo->InitStorage(150, 6);
-		combo->SetItemData(combo->AddString("..."), 0);
+		combo->SetItemData(combo->AddString(_T("...")), 0);
 		if (m_bReplace)
 		{
-			combo->SetItemData(combo->AddString("note -1"), replaceNoteMinusOne);
-			combo->SetItemData(combo->AddString("note +1"), replaceNotePlusOne);
-			combo->SetItemData(combo->AddString("-1 oct"), replaceNoteMinusOctave);
-			combo->SetItemData(combo->AddString("+1 oct"), replaceNotePlusOctave);
+			combo->SetItemData(combo->AddString(_T("note -1")), replaceNoteMinusOne);
+			combo->SetItemData(combo->AddString(_T("note +1")), replaceNotePlusOne);
+			combo->SetItemData(combo->AddString(_T("-1 oct")), replaceNoteMinusOctave);
+			combo->SetItemData(combo->AddString(_T("+1 oct")), replaceNotePlusOctave);
 		} else
 		{
-			combo->SetItemData(combo->AddString("any"), findAny);
+			combo->SetItemData(combo->AddString(_T("any")), findAny);
 		}
 		AppendNotesToControlEx(*combo, sndFile);
 
@@ -180,20 +180,20 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Instrument
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
-		combo->SetItemData(combo->AddString(".."), 0);
+		combo->SetItemData(combo->AddString(_T("..")), 0);
 		if (m_bReplace)
 		{
-			combo->SetItemData(combo->AddString("ins -1"), replaceInstrumentMinusOne);
-			combo->SetItemData(combo->AddString("ins +1"), replaceInstrumentPlusOne);
+			combo->SetItemData(combo->AddString(_T("ins -1")), replaceInstrumentMinusOne);
+			combo->SetItemData(combo->AddString(_T("ins +1")), replaceInstrumentPlusOne);
 		}
 		for(INSTRUMENTINDEX n = 1; n < MAX_INSTRUMENTS; n++)
 		{
 			if(sndFile.GetNumInstruments())
 			{
-				wsprintf(s, "%03d:%s", n, sndFile.GetInstrumentName(n));
+				_stprintf(s, _T("%03d:%s"), n, sndFile.GetInstrumentName(n));
 			} else
 			{
-				wsprintf(s, "%03d:%s", n, sndFile.m_szNames[n]);
+				_stprintf(s, _T("%03d:%s"), n, sndFile.m_szNames[n]);
 			}
 			combo->SetItemData(combo->AddString(s), n);
 		}
@@ -234,7 +234,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		combo->InitStorage(64, 4);
 		for (UINT n=0; n<=64; n++)
 		{
-			wsprintf(s, "%02d", n);
+			_stprintf(s, _T("%02d"), n);
 			combo->SetItemData(combo->AddString(s), n);
 		}
 		UINT ncount = combo->GetCount();
@@ -288,14 +288,14 @@ void CFindReplaceTab::ChangeEffect()
 		UINT newcount = effectInfo.IsExtendedEffect(fxndx) ? 16 : 256;
 		if (oldcount != newcount)
 		{
-			CHAR s[16];
+			TCHAR s[16];
 			int newpos;
 			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_Cmd.param % newcount;
 			combo->ResetContent();
 			combo->InitStorage(newcount, 4);
 			for (UINT i=0; i<newcount; i++)
 			{
-				wsprintf(s, (newcount == 256) ? "%02X" : "%X", i);
+				_stprintf(s, (newcount == 256) ? _T("%02X") : _T("%X"), i);
 				combo->SetItemData(combo->AddString(s), i);
 			}
 			combo->SetCurSel(newpos);
@@ -326,13 +326,13 @@ void CFindReplaceTab::ChangeVolCmd()
 		UINT newcount = rangeMax - rangeMin + 1;
 		if (oldcount != newcount)
 		{
-			CHAR s[16];
+			TCHAR s[16];
 			int newpos;
 			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_Cmd.param % newcount;
 			combo->ResetContent();
 			for (UINT i = rangeMin; i <= rangeMax; i++)
 			{
-				wsprintf(s, (rangeMax < 10) ? "%d" : "%02d", i);
+				_stprintf(s, (rangeMax < 10) ? _T("%d") : _T("%02d"), i);
 				combo->SetItemData(combo->AddString(s), i);
 			}
 			combo->SetCurSel(newpos);
@@ -462,31 +462,31 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 
 	if(m_nPattern < sndFile.Patterns.Size() && combo)
 	{
-		CHAR s[256];
+		TCHAR s[256];
 		UINT nrows = sndFile.Patterns[m_nPattern].GetNumRows();
 
 		const CModSpecifications& specs = sndFile.GetModSpecifications();
 		for (UINT irow = specs.patternRowsMin; irow <= specs.patternRowsMax; irow++)
 		{
-			wsprintf(s, "%d", irow);
+			_stprintf(s, _T("%d"), irow);
 			combo->AddString(s);
 		}
 		combo->SetCurSel(nrows - specs.patternRowsMin);
-		wsprintf(s, "Pattern #%d: %d row%s (%dK)",
+		_stprintf(s, _T("Pattern #%d: %d row%s (%dK)"),
 			m_nPattern,
 			sndFile.Patterns[m_nPattern].GetNumRows(),
-			(sndFile.Patterns[m_nPattern].GetNumRows() == 1) ? "" : "s",
+			(sndFile.Patterns[m_nPattern].GetNumRows() == 1) ? _T("") : _T("s"),
 			(sndFile.Patterns[m_nPattern].GetNumRows() * sndFile.GetNumChannels() * sizeof(ModCommand)) / 1024);
 		SetDlgItemText(IDC_TEXT1, s);
 
 		// Window title
 		const CString patternName = sndFile.Patterns[m_nPattern].GetName().c_str();
-		wsprintf(s, "Pattern Properties for Pattern #%d", m_nPattern);
+		_stprintf(s, _T("Pattern Properties for Pattern #%d"), m_nPattern);
 		if(!patternName.IsEmpty())
 		{
-			strcat(s, " (");
-			strcat(s, patternName);
-			strcat(s, ")");
+			_tcscat(s, _T(" ("));
+			_tcscat(s, patternName);
+			_tcscat(s, _T(")"));
 		}
 		SetWindowText(s);
 
@@ -627,8 +627,8 @@ void CEditCommand::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CEditCommand::CEditCommand(CSoundFile &sndFile) : sndFile(sndFile), effectInfo(sndFile), m(nullptr), modified(false)
-//------------------------------------------------------------------------------------------------------------------
+CEditCommand::CEditCommand(CSoundFile &sndFile) : sndFile(sndFile), oldSpecs(nullptr), effectInfo(sndFile), m(nullptr), modified(false)
+//-------------------------------------------------------------------------------------------------------------------------------------
 {
 	CDialog::Create(IDD_PATTERN_EDITCOMMAND);
 }
@@ -695,8 +695,8 @@ bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor,
 	}
 
 	// Update Window Title
-	CHAR s[64];
-	wsprintf(s, "Note Properties - Row %d, Channel %d", row, chn + 1);
+	TCHAR s[64];
+	_stprintf(s, _T("Note Properties - Row %d, Channel %d"), row, chn + 1);
 	SetWindowText(s);
 
 	SetParent(CMainFrame::GetMainFrame());
@@ -712,9 +712,13 @@ void CEditCommand::InitNote()
 {
 	// Note
 	cbnNote.SetRedraw(FALSE);
-	cbnNote.ResetContent();
-	cbnNote.SetItemData(cbnNote.AddString("No note"), 0);
-	AppendNotesToControlEx(cbnNote, sndFile, m->instr);
+	if(oldSpecs != &sndFile.GetModSpecifications())
+	{
+		cbnNote.ResetContent();
+		cbnNote.SetItemData(cbnNote.AddString(_T("No Note")), 0);
+		AppendNotesToControlEx(cbnNote, sndFile, m->instr);
+		oldSpecs = &sndFile.GetModSpecifications();
+	}
 
 	if(m->IsNote())
 	{
@@ -745,12 +749,12 @@ void CEditCommand::InitNote()
 	if(m->IsPcNote())
 	{
 		// control plugin param note
-		cbnInstr.SetItemData(cbnInstr.AddString("No Effect"), 0);
+		cbnInstr.SetItemData(cbnInstr.AddString(_T("No Effect")), 0);
 		AddPluginNamesToCombobox(cbnInstr, sndFile.m_MixPlugins, false);
 	} else
 	{
 		// instrument / sample
-		cbnInstr.SetItemData(cbnInstr.AddString("No Instrument"), 0);
+		cbnInstr.SetItemData(cbnInstr.AddString(_T("No Instrument")), 0);
 		const uint32 nmax = sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples();
 		for(uint32 i = 1; i <= nmax; i++)
 		{

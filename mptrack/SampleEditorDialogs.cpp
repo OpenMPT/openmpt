@@ -10,7 +10,11 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "resource.h"
+#include "Reporting.h"
+#include "../common/misc_util.h"
+#include "../soundlib/Snd_defs.h"
+#include "../soundlib/ModSample.h"
 #include "SampleEditorDialogs.h"
 
 
@@ -112,8 +116,8 @@ BOOL CAddSilenceDlg::OnInitDialog()
 	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN_ADDSILENCE);
 	if (spin)
 	{
-		spin->SetRange(0, int16_max);
-		spin->SetPos(m_nSamples);
+		spin->SetRange32(0, int32_max);
+		spin->SetPos32(m_nSamples);
 	}
 
 	int iRadioButton = IDC_RADIO_ADDSILENCE_END;
@@ -132,7 +136,7 @@ BOOL CAddSilenceDlg::OnInitDialog()
 	CButton *radioEnd = (CButton *)GetDlgItem(iRadioButton);
 	radioEnd->SetCheck(true);
 
-	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_nEditOption == addsilence_resize) ? m_nLength : m_nSamples);
+	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_nEditOption == addsilence_resize) ? m_nLength : m_nSamples, FALSE);
 
 	return TRUE;
 }
@@ -141,14 +145,14 @@ BOOL CAddSilenceDlg::OnInitDialog()
 void CAddSilenceDlg::OnOK()
 //-------------------------
 {
-	m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
+	m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
 	m_nEditOption = GetEditMode();
 	CDialog::OnOK();
 }
 
 
 void CAddSilenceDlg::OnEditModeChanged()
-//------------------------------------------------
+//--------------------------------------
 {
 	enmAddSilenceOptions cNewEditOption = GetEditMode();
 	if(cNewEditOption != addsilence_resize && m_nEditOption == addsilence_resize)
@@ -167,6 +171,7 @@ void CAddSilenceDlg::OnEditModeChanged()
 
 
 enmAddSilenceOptions CAddSilenceDlg::GetEditMode()
+//------------------------------------------------
 {
 	if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_BEGIN)) return addsilence_at_beginning;
 	else if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_END)) return addsilence_at_end;

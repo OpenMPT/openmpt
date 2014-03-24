@@ -321,7 +321,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		} else
 		{
 			m_nChannels = i + 1;
-			ChnSettings[i].nPan = (fileHeader.channels[i] & 8) ? 192 : 64;	// 200 : 56
+			ChnSettings[i].nPan = (fileHeader.channels[i] & 8) ? 0xCC : 0x33;	// 200 : 56
 			if(fileHeader.channels[i] & 0x80)
 			{
 				ChnSettings[i].dwFlags = CHN_MUTE;
@@ -448,7 +448,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			CHANNELINDEX channel = (info & s3mChannelMask);
-			static ModCommand dummy;
+			ModCommand dummy;
 			ModCommand &m = (channel < GetNumChannels()) ? rowBase[channel] : dummy;
 
 			if(info & s3mNotePresent)

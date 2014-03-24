@@ -1739,21 +1739,21 @@ void CViewPattern::OnSoloChannel(CHANNELINDEX chn)
 
 	if (pModDoc->IsChannelSolo(chn))
 	{
-		bool nChnIsOnlyUnMutedChan=true;
+		bool nChnIsOnlyUnMutedChan = true;
 		for (CHANNELINDEX i = 0; i < pModDoc->GetNumChannels(); i++)	//check status of all other chans
 		{
 			if (i != chn && !pModDoc->IsChannelMuted(i))
 			{
-				nChnIsOnlyUnMutedChan=false;	//found a channel that isn't muted!
-				break;					
+				nChnIsOnlyUnMutedChan = false;	//found a channel that isn't muted!
+				break;
 			}
 		}
-		if (nChnIsOnlyUnMutedChan)	// this is the only playable channel and it is already soloed ->  uunMute all
+		if (nChnIsOnlyUnMutedChan)	// this is the only playable channel and it is already soloed ->  Unmute all
 		{
 			OnUnmuteAll();
 			return;
-		} 
-	} 
+		}
+	}
 	for(CHANNELINDEX i = 0; i < pModDoc->GetNumChannels(); i++)
 	{
 		pModDoc->MuteChannel(i, !(i == chn)); //mute all chans except nChn, unmute nChn
@@ -1779,9 +1779,9 @@ void CViewPattern::OnRecordSelect()
 	}
 }
 
-// -> CODE#0012
-// -> DESC="midi keyboard split"
+
 void CViewPattern::OnSplitRecordSelect()
+//--------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
@@ -1794,7 +1794,6 @@ void CViewPattern::OnSplitRecordSelect()
 		}
 	}
 }
-// -! NEW_FEATURE#0012
 
 
 void CViewPattern::OnUnmuteAll()

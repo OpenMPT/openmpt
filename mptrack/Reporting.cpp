@@ -28,7 +28,7 @@ UINT Reporting::ShowNotification(const char *text, const char *caption, UINT fla
 	{
 		parent = pMainFrm;
 	}
-	UINT result = ::MessageBox((parent ? parent->m_hWnd : NULL), text, caption, flags);
+	UINT result = ::MessageBoxA((parent ? parent->m_hWnd : NULL), text, caption, flags);
 
 	if(pMainFrm != nullptr && pMainFrm->GetInputHandler() != nullptr)
 	{
