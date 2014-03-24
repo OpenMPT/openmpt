@@ -34,7 +34,7 @@ private:
 	MMCKINFO data_chunk;
 	MMIOINFO data_info;
 public:
-	mmio_stream_raii( const std::string & filename, const commandlineflags & flags_ ) : flags(flags_), mmio(NULL) {
+	mmio_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & /*log*/ ) : flags(flags_), mmio(NULL) {
 
 		ZeroMemory( &waveformatex, sizeof( WAVEFORMATEX ) );
 		waveformatex.cbSize = 0;

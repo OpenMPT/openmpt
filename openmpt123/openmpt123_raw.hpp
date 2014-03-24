@@ -24,7 +24,7 @@ private:
 	std::vector<float> interleaved_float_buffer;
 	std::vector<std::int16_t> interleaved_int_buffer;
 public:
-	raw_stream_raii( const std::string & filename, const commandlineflags & flags_ ) : flags(flags_), file(filename.c_str(), std::ios::binary) {
+	raw_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & /*log*/ ) : flags(flags_), file(filename.c_str(), std::ios::binary) {
 		return;
 	}
 	~raw_stream_raii() {

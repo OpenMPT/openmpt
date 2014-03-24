@@ -170,18 +170,18 @@ public:
 		if ( false ) {
 			// nothing
 		} else if ( flags.output_extension == "raw" ) {
-			impl = new raw_stream_raii( filename, flags );
+			impl = new raw_stream_raii( filename, flags, log );
 #ifdef MPT_WITH_MMIO
 		} else if ( flags.output_extension == "wav" ) {
-			impl = new mmio_stream_raii( filename, flags );
+			impl = new mmio_stream_raii( filename, flags, log );
 #endif				
 #ifdef MPT_WITH_FLAC
 		} else if ( flags.output_extension == "flac" ) {
-			impl = new flac_stream_raii( filename, flags );
+			impl = new flac_stream_raii( filename, flags, log );
 #endif				
 #ifdef MPT_WITH_WAVPACK
 		} else if ( flags.output_extension == "wv" ) {
-			impl = new wavpack_stream_raii( filename, flags );
+			impl = new wavpack_stream_raii( filename, flags, log );
 #endif
 #ifdef MPT_WITH_SNDFILE
 		} else {
@@ -1526,7 +1526,7 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 					devices << show_portaudio_devices( log );
 #endif
 #if defined( WIN32 )
-					devices << show_waveout_devices();
+					devices << show_waveout_devices( log );
 #endif
 					throw show_help_exception( devices.str() );
 				} else if ( nextarg == "default" ) {
