@@ -44,10 +44,10 @@ static const char *const cacheSection = "PluginCache";
 static const wchar_t *const cacheSectionW = L"PluginCache";
 
 
-uint8 VSTPluginLib::GetDllBits()
-//------------------------------
+uint8 VSTPluginLib::GetDllBits(bool fromCache) const
+//--------------------------------------------------
 {
-	if(!dllBits)
+	if(!dllBits || !fromCache)
 	{
 		dllBits = static_cast<uint8>(BridgeWrapper::GetPluginBinaryType(dllPath));
 	}
@@ -198,7 +198,7 @@ AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &li
 	AEffect *effect = nullptr;
 	library = nullptr;
 
-	const bool isNative = BridgeWrapper::IsPluginNative(pluginPath);
+	const bool isNative = plugin.IsNative(false);
 	if(forceBridge || plugin.useBridge || !isNative)
 	{
 		try
@@ -558,16 +558,10 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			{
 				validPlugin = true;
 
-				const bool oldIsInstrument = pFound->isInstrument;
-				const VSTPluginLib::PluginCategory oldCategory = pFound->category;
-
 				GetPluginInformation(pEffect, *pFound);
 
-				if(oldIsInstrument != pFound->isInstrument || oldCategory != pFound->category)
-				{
-					// Update cached information
-					pFound->WriteToCache();
-				}
+				// Update cached information
+				pFound->WriteToCache();
 
 				CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
 				if(pVstPlug == nullptr)
