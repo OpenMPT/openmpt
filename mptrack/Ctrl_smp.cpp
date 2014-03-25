@@ -218,12 +218,12 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:128"), 8);
 	m_ComboZoom.SetCurSel(0);
 	// File ToolBar
-	m_ToolBar1.Init();
+	m_ToolBar1.Init(IDB_PATTERNS);
 	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, TIMAGE_SAMPLE_NEW);
 	m_ToolBar1.AddButton(IDC_SAMPLE_OPEN, TIMAGE_OPEN);
 	m_ToolBar1.AddButton(IDC_SAMPLE_SAVEAS, TIMAGE_SAVE);
 	// Edit ToolBar
-	m_ToolBar2.Init();
+	m_ToolBar2.Init(IDB_PATTERNS);
 	m_ToolBar2.AddButton(IDC_SAMPLE_PLAY, TIMAGE_PREVIEW);
 	m_ToolBar2.AddButton(IDC_SAMPLE_NORMALIZE, TIMAGE_SAMPLE_NORMALIZE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_AMPLIFY, TIMAGE_SAMPLE_AMPLIFY);

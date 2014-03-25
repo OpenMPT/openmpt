@@ -457,6 +457,18 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MODULETYPE          ICON                    "res\\moddoc.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDB_ENVTOOLBAR          PNG                     "res\\envelope_toolbar.png"
+IDB_IMAGELIST           PNG                     "res\\icons.png"
+IDB_MAINBAR             PNG                     "res\\main_toolbar.png"
+IDB_PATTERNS            PNG                     "res\\pattern_toolbar.png"
+IDB_SMPTOOLBAR          PNG                     "res\\sample_toolbar.png"
+IDB_SPLASHNOFOLDFIN     PNG                     "res\\splashno.png"
 #endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1399,11 +1411,10 @@ BEGIN
     LTEXT           "In ""Relative"" base note mode, all notes are relative to a previously entered note in the pattern cell where the chord is entered.",IDC_STATIC,6,136,234,20
 END
 
-IDD_SPLASHSCREEN DIALOG 0, 0, 188, 95
-STYLE DS_SETFONT | DS_SETFOREGROUND | DS_CENTER | WS_POPUP
-FONT 8, "MS Shell Dlg"
+IDD_SPLASHSCREEN DIALOGEX 0, 0, 188, 95
+STYLE DS_SETFONT | DS_SETFOREGROUND | DS_FIXEDSYS | DS_CENTER | WS_POPUP
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    CONTROL         "",IDC_SPLASH,"Static",SS_WHITERECT,0,0,187,94
 END
 
 IDD_TREEVIEW DIALOG 0, 0, 85, 266
@@ -1812,6 +1823,10 @@ BEGIN
         BOTTOMMARGIN, 154
     END
 
+    IDD_SPLASHSCREEN, DIALOG
+    BEGIN
+    END
+
     IDD_MOD2MIDI, DIALOG
     BEGIN
         LEFTMARGIN, 4
@@ -1944,13 +1959,9 @@ END
 //
 
 IDB_MPTRACK             BITMAP                  "res\\mptrack.bmp"
-IDB_IMAGELIST           BITMAP                  "res\\img_list.bmp"
-IDB_PATTERNS            BITMAP                  "res\\patterns.bmp"
 IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
 IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
 IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
-IDB_ENVTOOLBAR          BITMAP                  "res\\envbar.bmp"
-IDB_SMPTOOLBAR          BITMAP                  "res\\smptoolb.bmp"
 IDB_VISNODE             BITMAP                  "res\\bitmap1.bmp"
 IDB_VISPCNODE           BITMAP                  "res\\vispcnode.bmp"
 
@@ -2736,14 +2747,6 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Bitmap
-//
-
-IDB_SPLASHNOFOLDFIN     BITMAP                  "res\\splashno.bmp"
-IDB_MAINBAR             BITMAP                  "res\\MAINBAR.BMP"
 
 /////////////////////////////////////////////////////////////////////////////
 //

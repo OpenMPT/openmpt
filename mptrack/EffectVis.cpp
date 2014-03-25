@@ -36,7 +36,6 @@ CEffectVis::CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX e
 	m_pViewPattern = pViewPattern;
 	m_dwStatus = 0x00;
 	m_nDragItem = -1;
-	m_brushBlack.CreateSolidBrush(RGB(0, 0, 0));
 	m_boolForceRedraw = TRUE;
 	m_pModDoc = pModDoc;
 
@@ -266,6 +265,7 @@ CEffectVis::~CEffectVis()
 }
 
 void CEffectVis::DrawGrid()
+//-------------------------
 {
 	// Lots of room for optimisation here.
 	// Draw vertical grid lines
@@ -275,6 +275,8 @@ void CEffectVis::DrawGrid()
 		nBeat = m_pSndFile->Patterns[m_nPattern].GetRowsPerBeat();
 		nMeasure = m_pSndFile->Patterns[m_nPattern].GetRowsPerMeasure();
 	}
+
+	m_dcGrid.FillSolidRect(m_rcDraw, 0);
 	for (ROWINDEX row = m_startRow; row <= m_endRow; row++)
 	{
 		if (row % nMeasure == 0)
@@ -310,7 +312,9 @@ void CEffectVis::DrawGrid()
 
 }
 
+
 void CEffectVis::SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow)
+//--------------------------------------------------------------
 {
 	int x1;
 	//erase current playpos:
@@ -334,8 +338,9 @@ void CEffectVis::SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow)
 	InvalidateRect(NULL, FALSE);
 }
 
-//-----------------------------------------------------------------------------------------
+
 void CEffectVis::ShowVis(CDC * pDC, CRect rectBorder)
+//---------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(rectBorder);
 	if (m_boolForceRedraw)
@@ -388,9 +393,9 @@ void CEffectVis::ShowVis(CDC * pDC, CRect rectBorder)
 void CEffectVis::ShowVisImage(CDC *pDC)
 //-------------------------------------
 {
-	CDC memDC ;
-	CBitmap memBitmap ;
-	CBitmap* oldBitmap ; // bitmap originally found in CMemDC
+	CDC memDC;
+	CBitmap memBitmap;
+	CBitmap* oldBitmap; // bitmap originally found in CMemDC
 
 	// to avoid flicker, establish a memory dc, draw to it
 	// and then BitBlt it to the destination "pDC"
@@ -422,7 +427,7 @@ void CEffectVis::ShowVisImage(CDC *pDC)
 		pDC->BitBlt(LEFTBORDER, TOPBORDER, m_rcDraw.Width()+LEFTBORDER, m_rcDraw.Height()+TOPBORDER, &memDC, 0, 0, SRCCOPY) ;
 	}
 
-	memDC.SelectObject(oldBitmap) ;
+	memDC.SelectObject(oldBitmap);
 
 }
 
@@ -433,12 +438,12 @@ void CEffectVis::DrawNodes()
 	//erase
 	if ((UINT)m_nRowToErase<m_startRow ||  m_nParamToErase < 0)
 	{
-		::FillRect(m_dcNodes.m_hDC, &m_rcDraw, m_brushBlack);
+		m_dcNodes.FillSolidRect(m_rcDraw, 0);
 	} else
 	{
 		int x = RowToScreenX(m_nRowToErase);
-		CRect r( x-NODEHALF-1, m_rcDraw.top, x-NODEHALF+NODESIZE+1, m_rcDraw.bottom);
-		::FillRect(m_dcNodes.m_hDC, r, m_brushBlack);
+		CRect r(x - NODEHALF - 1, m_rcDraw.top, x - NODEHALF + NODESIZE + 1, m_rcDraw.bottom);
+		m_dcNodes.FillSolidRect(r, 0);
 	}
 
 	//Draw
@@ -446,7 +451,7 @@ void CEffectVis::DrawNodes()
 	{
 		int x = RowToScreenX(row);
 		int y = RowToScreenY(row);
-		DibBlt(m_dcNodes.m_hDC, x-NODEHALF, y-NODEHALF, NODESIZE, NODESIZE, 0, 0, IsPcNote(row)? CMainFrame::bmpVisPcNode : CMainFrame::bmpVisNode);
+		DibBlt(m_dcNodes.m_hDC, x-NODEHALF, y-NODEHALF, NODESIZE, NODESIZE, 0, 0, IsPcNote(row) ? CMainFrame::bmpVisPcNode : CMainFrame::bmpVisNode);
 	}
 
 }
@@ -478,41 +483,40 @@ BOOL CEffectVis::OpenEditor(CWnd *parent)
 }
 
 
-VOID CEffectVis::OnClose()
+void CEffectVis::OnClose()
 //------------------------
 {
 	DoClose();
 }
 
 
-VOID CEffectVis::OnOK()
+void CEffectVis::OnOK()
 //---------------------
 {
 	OnClose();
 }
 
 
-VOID CEffectVis::OnCancel()
+void CEffectVis::OnCancel()
 //-------------------------
 {
 	OnClose();
 }
 
 
-VOID CEffectVis::DoClose()
+void CEffectVis::DoClose()
 //------------------------
 {
 	m_dcGrid.SelectObject(m_pbOldGrid);
 	m_dcGrid.DeleteDC();
 	m_dcNodes.SelectObject(m_pbOldNodes);
 	m_dcNodes.DeleteDC();
-	m_dcPlayPos.SelectObject(m_pbOldPlayPos) ;
-	m_dcPlayPos.DeleteDC() ;
+	m_dcPlayPos.SelectObject(m_pbOldPlayPos);
+	m_dcPlayPos.DeleteDC();
 
 	m_bGrid.DeleteObject();
 	m_bNodes.DeleteObject();
-	m_bPlayPos.DeleteObject() ;
-	m_brushBlack.DeleteObject();
+	m_bPlayPos.DeleteObject();
 
 	if (m_hWnd)
 	{

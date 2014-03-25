@@ -562,6 +562,7 @@
     <ClCompile Include="PatternClipboard.cpp" />
     <ClCompile Include="PatternEditorDialogs.cpp" />
     <ClCompile Include="PatternGotoDialog.cpp" />
+    <ClCompile Include="PNG.cpp" />
     <ClCompile Include="PSRatioCalc.cpp" />
     <ClCompile Include="Reporting.cpp" />
     <ClCompile Include="SampleEditorDialogs.cpp" />
@@ -725,6 +726,7 @@
     <ClInclude Include="AutoSaver.h" />
     <ClInclude Include="Autotune.h" />
     <ClInclude Include="Childfrm.h" />
+    <ClInclude Include="CImageListEx.h" />
     <ClInclude Include="CleanupSong.h" />
     <ClInclude Include="ColourEdit.h" />
     <ClInclude Include="CommandSet.h" />
@@ -803,11 +805,15 @@
   <ItemGroup>
     <None Include="..\soundlib\Tunings\built-inTunings.tc" />
     <None Include="res\bitmap1.bmp" />
+    <None Include="res\bmp00001.bmp" />
     <None Include="res\colors.bmp" />
     <None Include="res\dragging.cur" />
     <None Include="Res\envbar.bmp" />
+    <None Include="res\envelope_toolbar.png" />
+    <None Include="res\icons.png" />
     <None Include="res\img_list.bmp" />
     <None Include="res\mainbar.bmp" />
+    <None Include="res\main_toolbar.png" />
     <None Include="res\moddoc.ico" />
     <None Include="res\MPTRACK.bmp" />
     <None Include="res\mptrack.ico" />
@@ -815,9 +821,12 @@
     <None Include="Res\nodrag.cur" />
     <None Include="res\nodrop.cur" />
     <None Include="res\patterns.bmp" />
+    <None Include="res\pattern_toolbar.png" />
     <None Include="res\rt_manif.bin" />
+    <None Include="res\sample_toolbar.png" />
     <None Include="Res\smptoolb.bmp" />
     <None Include="res\splashno.bmp" />
+    <None Include="res\splashno.png" />
     <None Include="res\view_pat.bmp" />
     <None Include="res\visnode1.bmp" />
     <None Include="res\vispcnode.bmp" />

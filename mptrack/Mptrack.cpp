@@ -1484,7 +1484,6 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	virtual void OnCancel();
-	virtual void DoDataExchange(CDataExchange* pDX);
 };
 
 static CAboutDlg *gpAboutDlg = NULL;
@@ -1494,14 +1493,6 @@ CAboutDlg::~CAboutDlg()
 //---------------------
 {
 	gpAboutDlg = NULL;
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
-{
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CModTypeDlg)
-	//}}AFX_DATA_MAP
 }
 
 void CAboutDlg::OnOK()
@@ -1560,31 +1551,62 @@ class CSplashScreen: public CDialog
 //=================================
 {
 protected:
-	CPaletteBitmap m_Bmp;
+	CBitmap *m_Bitmap;
+	BITMAP bm;
 
 public:
-	CSplashScreen() {}
+	CSplashScreen(CWnd *parent);
 	~CSplashScreen();
-	BOOL Initialize(CWnd *);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	virtual void OnCancel() { OnOK(); }
+	virtual void OnPaint();
+	virtual BOOL OnEraseBkgnd(CDC *) { return TRUE; }
+
+	DECLARE_MESSAGE_MAP()
 };
 
+BEGIN_MESSAGE_MAP(CSplashScreen, CDialog)
+	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
+END_MESSAGE_MAP()
+
 static CSplashScreen *gpSplashScreen = NULL;
+
+CSplashScreen::CSplashScreen(CWnd *parent)
+//----------------------------------------
+{
+	m_Bitmap = ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
+	m_Bitmap->GetBitmap(&bm);
+
+	Create(IDD_SPLASHSCREEN, parent);
+	ASSERT(m_Bitmap);
+}
+
 
 CSplashScreen::~CSplashScreen()
 //-----------------------------
 {
 	gpSplashScreen = NULL;
+	m_Bitmap->DeleteObject();
 }
 
 
-BOOL CSplashScreen::Initialize(CWnd *parent)
-//------------------------------------------
+void CSplashScreen::OnPaint()
+//---------------------------
 {
-	Create(IDD_SPLASHSCREEN, parent);
-	return TRUE;
+	CRect rect;
+	GetUpdateRect(&rect);
+	CPaintDC dc(this);
+	
+	CDC hdcMem;
+	hdcMem.CreateCompatibleDC(&dc);
+	CBitmap *oldBitmap = hdcMem.SelectObject(m_Bitmap);
+	dc.BitBlt(0, 0, bm.bmWidth, bm.bmHeight, &hdcMem, 0, 0, SRCCOPY);
+	hdcMem.SelectObject(oldBitmap);
+	hdcMem.DeleteDC();
+
+	CDialog::OnPaint();
 }
 
 
@@ -1595,22 +1617,21 @@ BOOL CSplashScreen::OnInitDialog()
 	int cx, cy, newcx, newcy;
 
 	CDialog::OnInitDialog();
-	m_Bmp.SubclassDlgItem(IDC_SPLASH, this);
-	m_Bmp.LoadBitmap(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
+
 	GetWindowRect(&rect);
 	cx = rect.Width();
 	cy = rect.Height();
-	newcx = m_Bmp.GetWidth();
-	newcy = m_Bmp.GetHeight();
-	if ((newcx) && (newcy))
+	newcx = bm.bmWidth;
+	newcy = bm.bmHeight;
+	if(newcx && newcy)
 	{
 		LONG ExStyle = GetWindowLong(m_hWnd, GWL_EXSTYLE);
 		ExStyle |= WS_EX_TOPMOST;
 		SetWindowLong(m_hWnd, GWL_EXSTYLE, ExStyle);
 		rect.left -= (newcx - cx) / 2;
 		rect.top -= (newcy - cy) / 2;
-		SetWindowPos(&wndTop, rect.left, rect.top, newcx, newcy, 0);
-		m_Bmp.SetWindowPos(NULL, 0,0, newcx, newcy, SWP_NOZORDER);
+		SetWindowPos(&wndTop, rect.left, rect.top, newcx, newcy, SWP_NOCOPYBITS);
+
 	}
 	return TRUE;
 }
@@ -1634,10 +1655,9 @@ VOID CTrackApp::StartSplashScreen()
 {
 	if (!gpSplashScreen)
 	{
-		gpSplashScreen = new CSplashScreen();
+		gpSplashScreen = new CSplashScreen(m_pMainWnd);
 		if (gpSplashScreen)
 		{
-			gpSplashScreen->Initialize(m_pMainWnd);
 			gpSplashScreen->ShowWindow(SW_SHOW);
 			gpSplashScreen->UpdateWindow();
 			gpSplashScreen->BeginWaitCursor();
@@ -2027,7 +2047,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 			m_pPluginManager->AddPlugin(plugPath, true, true, &nonFoundPlugs);
 		}
 
-		if(!dialogShown && GetTickCount() >= scanStart + 1000)
+		if(!dialogShown && GetTickCount() >= scanStart + 2000)
 		{
 			// If this is taking too long, show the user what he's waiting for.
 			dialogShown = true;

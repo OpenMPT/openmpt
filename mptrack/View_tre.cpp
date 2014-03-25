@@ -482,7 +482,7 @@ void CModTree::RefreshMidiLibrary()
 	HTREEITEM parent = GetChildItem(m_hMidiLib);
 	for(UINT iMidi = 0; iMidi < 128; iMidi++)
 	{
-		DWORD dwImage = IMAGE_NOINSTRUMENT;
+		DWORD dwImage = IMAGE_INSTRMUTE;
 		s = StringifyW(iMidi) + L": " + mpt::ToWide(mpt::CharsetASCII, szMidiProgramNames[iMidi]);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if(!midiLib.MidiMap[iMidi].empty())
@@ -1661,24 +1661,21 @@ void CModTree::FillInstrumentLibrary()
 		// Enumerating Drives...
 		if(!IsSampleBrowser())
 		{
+			CImageListEx &images = *CMainFrame::GetMainFrame()->GetImageList();
+			// Avoid adding the same images again and again...
+			images.SetImageCount(IMGLIST_NUMIMAGES);
+
 			WCHAR s[16];
 			wcscpy(s, L"?:\\");
 			for(UINT iDrive = 'A'; iDrive <= 'Z'; iDrive++)
 			{
 				s[0] = (WCHAR)iDrive;
 				UINT nDriveType = GetDriveTypeW(s);
-				int nImage = 0;
-				switch(nDriveType)
+				if(nDriveType != DRIVE_UNKNOWN && nDriveType != DRIVE_NO_ROOT_DIR)
 				{
-				case DRIVE_REMOVABLE:	nImage = (iDrive < 'C') ? IMAGE_FLOPPYDRIVE : IMAGE_REMOVABLEDRIVE; break;
-				case DRIVE_FIXED:		nImage = IMAGE_FIXEDDRIVE; break;
-				case DRIVE_REMOTE:		nImage = IMAGE_NETWORKDRIVE; break;
-				case DRIVE_CDROM:		nImage = IMAGE_CDROMDRIVE; break;
-				case DRIVE_RAMDISK:		nImage = IMAGE_RAMDRIVE; break;
-				}
-				if(nImage)
-				{
-					ModTreeInsert(s, nImage);
+					SHFILEINFOW fileInfo;
+					SHGetFileInfoW(s, 0, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_SMALLICON);
+					ModTreeInsert(s, images.Add(fileInfo.hIcon));
 				}
 			}
 		}

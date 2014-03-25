@@ -230,8 +230,15 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY;
 
 	if (!CToolBar::Create(parent, dwStyle)) return FALSE;
-	if (!LoadBitmap(IDB_MAINBAR)) return FALSE;
+
+	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1);
+	GetToolBarCtrl().SetImageList(&m_ImageList);
+
 	if (!SetButtons(MainButtons, CountOf(MainButtons))) return FALSE;
+
+	CRect temp;
+	GetItemRect(0,&temp);
+	SetSizes(CSize(temp.Width(), temp.Height()), CSize(16, 16));
 
 	nCurrentSpeed = 6;
 	nCurrentTempo = 125;

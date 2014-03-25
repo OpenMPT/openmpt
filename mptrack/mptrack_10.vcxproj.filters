@@ -511,6 +511,9 @@
     <ClCompile Include="..\pluginBridge\BridgeWrapper.cpp">
       <Filter>Source Files\pluginBridgeWrapper</Filter>
     </ClCompile>
+    <ClCompile Include="PNG.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1002,6 +1005,9 @@
     <ClInclude Include="..\pluginBridge\BridgeWrapper.h">
       <Filter>Header Files\pluginBridgeWrapper</Filter>
     </ClInclude>
+    <ClInclude Include="CImageListEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
@@ -1076,6 +1082,15 @@
     <None Include="..\soundlib\Tunings\built-inTunings.tc">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\bmp00001.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\envelope_toolbar.png" />
+    <None Include="res\icons.png" />
+    <None Include="res\main_toolbar.png" />
+    <None Include="res\pattern_toolbar.png" />
+    <None Include="res\sample_toolbar.png" />
+    <None Include="res\splashno.png" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

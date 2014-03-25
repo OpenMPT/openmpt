@@ -167,8 +167,8 @@ BOOL CModTabCtrl::InsertItem(int nIndex, LPSTR pszText, LPARAM lParam, int iImag
 }
 
 
-UINT CModTabCtrl::GetItemData(int nIndex)
-//---------------------------------------
+LPARAM CModTabCtrl::GetItemData(int nIndex)
+//-----------------------------------------
 {
 	TC_ITEM tci;
 	tci.mask = TCIF_PARAM;
@@ -450,7 +450,7 @@ void CModControlView::UpdateView(DWORD lHint, CObject *pObject)
 			if (mask & 2) m_TabCtrl.InsertItem(count++, "Patterns", IDD_CONTROL_PATTERNS, IMAGE_PATTERNS);
 			if (mask & 4) m_TabCtrl.InsertItem(count++, "Samples", IDD_CONTROL_SAMPLES, IMAGE_SAMPLES);
 			if (mask & 8) m_TabCtrl.InsertItem(count++, "Instruments", IDD_CONTROL_INSTRUMENTS, IMAGE_INSTRUMENTS);
-			if (mask & 32) m_TabCtrl.InsertItem(count++, "Graph", IDD_CONTROL_GRAPH, IMAGE_GRAPH); //rewbs.graph
+			//if (mask & 32) m_TabCtrl.InsertItem(count++, "Graph", IDD_CONTROL_GRAPH, IMAGE_GRAPH); //rewbs.graph
 			if (mask & 16) m_TabCtrl.InsertItem(count++, "Comments", IDD_CONTROL_COMMENTS, IMAGE_COMMENTS);
 		}
 	}
@@ -730,33 +730,17 @@ BEGIN_MESSAGE_MAP(CModControlBar, CToolBarCtrl)
 END_MESSAGE_MAP()
 
 
-CModControlBar::~CModControlBar()
-//-------------------------------
-{
-	if (m_hBarBmp)
-	{
-		DeleteObject(m_hBarBmp);
-		m_hBarBmp = NULL;
-	}
-}
-
-
 BOOL CModControlBar::Init(UINT nId)
 //---------------------------------
 {
-	HINSTANCE hInstance = AfxGetInstanceHandle();
-	TBADDBITMAP tbab;
-	
 	SetButtonStructSize(sizeof(TBBUTTON));
-	SetBitmapSize(CSize(16, 15));
+	SetBitmapSize(CSize(16, 16));
 	SetButtonSize(CSize(27, 24));
+
 	// Add bitmaps
-	m_hBarBmp = AfxLoadSysColorBitmap(
-					hInstance,
-					::FindResource(hInstance, MAKEINTRESOURCE(nId), RT_BITMAP));
-	tbab.hInst = NULL;
-	tbab.nID = (UINT_PTR)m_hBarBmp;
-	::SendMessage(m_hWnd, TB_ADDBITMAP, 16, (LPARAM)&tbab);
+	m_ImageList.Create(nId, 16, 16, IMGLIST_NUMIMAGES, 1);
+
+	SetImageList(&m_ImageList);
 	UpdateStyle();
 	return TRUE;
 }

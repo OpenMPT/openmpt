@@ -147,12 +147,12 @@ void CViewComments::OnInitialUpdate()
 	}
 	GetClientRect(&rect);
 	m_ToolBar.Create(WS_CHILD|WS_VISIBLE|CCS_NOPARENTALIGN, rect, this, IDC_TOOLBAR_DETAILS);
-	m_ToolBar.Init();
+	m_ToolBar.Init(IDB_IMAGELIST);
 	m_ItemList.Create(WS_CHILD|WS_VISIBLE|LVS_REPORT|LVS_SINGLESEL|LVS_EDITLABELS|LVS_NOSORTHEADER, rect, this, IDC_LIST_DETAILS);
 	m_ItemList.ModifyStyleEx(0, WS_EX_STATICEDGE);
 	// Add ToolBar Buttons
-	m_ToolBar.AddButton(IDC_LIST_SAMPLES, TIMAGE_TAB_SAMPLES);
-	m_ToolBar.AddButton(IDC_LIST_INSTRUMENTS, TIMAGE_TAB_INSTRUMENTS);
+	m_ToolBar.AddButton(IDC_LIST_SAMPLES, IMAGE_SAMPLES);
+	m_ToolBar.AddButton(IDC_LIST_INSTRUMENTS, IMAGE_INSTRUMENTS);
 	//m_ToolBar.AddButton(IDC_LIST_PATTERNS, TIMAGE_TAB_PATTERNS);
 	m_ToolBar.SetIndent(4);
 	UpdateButtonState();
@@ -194,7 +194,6 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	//CHAR s[256], stmp[256];
 	CHAR s[512], stmp[256]; //rewbs.fix3082
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	LV_COLUMN lvc;
 	LV_ITEM lvi, lvi2;
 
@@ -209,6 +208,11 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 		|HINT_INSNAMES|HINT_INSTRUMENT
 		/*|HINT_PATNAMES|HINT_PATTERNROW*/); // pattern stuff currently unused
 	if (!lHint) return;
+
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+
+	m_ToolBar.ChangeBitmap(IDC_LIST_INSTRUMENTS, sndFile.GetNumInstruments() ? IMAGE_INSTRUMENTS : IMAGE_INSTRMUTE);
+
 	m_ItemList.SetRedraw(FALSE);
 	// Add sample headers
 	if ((m_nListId != m_nCurrentListId) || (lHint & HINT_MODTYPE))
@@ -253,25 +257,24 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	}
 	// Add Items
 	UINT nCount = m_ItemList.GetItemCount();
-	pSndFile = pModDoc->GetSoundFile();
 	// Add Samples
 	if ((m_nCurrentListId == IDC_LIST_SAMPLES) && (lHint & (HINT_MODTYPE|HINT_SMPNAMES|HINT_SAMPLEINFO)))
 	{
 		SAMPLEINDEX nMax = static_cast<SAMPLEINDEX>(nCount);
-		if (nMax < pSndFile->GetNumSamples()) nMax = pSndFile->GetNumSamples();
+		if (nMax < sndFile.GetNumSamples()) nMax = sndFile.GetNumSamples();
 		for (SAMPLEINDEX iSmp = 0; iSmp < nMax; iSmp++)
 		{
-			if (iSmp < pSndFile->GetNumSamples())
+			if (iSmp < sndFile.GetNumSamples())
 			{
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<SMPLIST_COLUMNS; iCol++)
 				{
-					const ModSample &sample = pSndFile->GetSample(iSmp + 1);
+					const ModSample &sample = sndFile.GetSample(iSmp + 1);
 					s[0] = 0;
 					switch(iCol)
 					{
 					case SMPLIST_SAMPLENAME:
-						mpt::String::Copy(s, pSndFile->m_szNames[iSmp + 1]);
+						mpt::String::Copy(s, sndFile.m_szNames[iSmp + 1]);
 						break;
 					case SMPLIST_SAMPLENO:
 						wsprintf(s, "%02d", iSmp + 1);
@@ -292,12 +295,12 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						}
 						break;
 					case SMPLIST_INSTR:
-						if (pSndFile->GetNumInstruments())
+						if (sndFile.GetNumInstruments())
 						{
 							bool first = true;
-							for (INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++)
+							for (INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++)
 							{
-								if (pSndFile->IsSampleReferencedByInstrument(iSmp + 1, i))
+								if (sndFile.IsSampleReferencedByInstrument(iSmp + 1, i))
 								{
 									if (!first) strcat(s, ",");
 									first = false;
@@ -317,7 +320,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case SMPLIST_MIDDLEC:
 						if (sample.nLength)
 						{
-							wsprintf(s, "%d Hz", sample.GetSampleRate(pSndFile->GetType()));
+							wsprintf(s, "%d Hz", sample.GetSampleRate(sndFile.GetType()));
 						}
 						break;
 					case SMPLIST_FILENAME:
@@ -358,15 +361,15 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	if ((m_nCurrentListId == IDC_LIST_INSTRUMENTS) && (lHint & (HINT_MODTYPE|HINT_INSNAMES|HINT_INSTRUMENT)))
 	{
 		INSTRUMENTINDEX nMax = static_cast<INSTRUMENTINDEX>(nCount);
-		if (nMax < pSndFile->GetNumInstruments()) nMax = pSndFile->GetNumInstruments();
+		if (nMax < sndFile.GetNumInstruments()) nMax = sndFile.GetNumInstruments();
 		for (INSTRUMENTINDEX iIns = 0; iIns < nMax; iIns++)
 		{
-			if (iIns < pSndFile->GetNumInstruments())
+			if (iIns < sndFile.GetNumInstruments())
 			{
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<INSLIST_COLUMNS; iCol++)
 				{
-					ModInstrument *pIns = pSndFile->Instruments[iIns+1];
+					ModInstrument *pIns = sndFile.Instruments[iIns+1];
 					s[0] = 0;
 					switch(iCol)
 					{
@@ -414,9 +417,9 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						}
 						break;
 					case INSLIST_PLUGIN:
-						if (pIns != nullptr && pIns->nMixPlug > 0 && pSndFile->m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin != nullptr)
+						if (pIns != nullptr && pIns->nMixPlug > 0 && sndFile.m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin != nullptr)
 						{
-							wsprintf(s, "FX%02d: %s", pIns->nMixPlug, mpt::ToLocale(mpt::CharsetUTF8, pSndFile->m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName()).c_str());
+							wsprintf(s, "FX%02d: %s", pIns->nMixPlug, mpt::ToLocale(mpt::CharsetUTF8, sndFile.m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName()).c_str());
 						}
 						break;
 // -> CODE#0023
@@ -424,7 +427,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case INSLIST_PATH:
 						if (pIns)
 						{
-							strncpy(s, pSndFile->m_szInstrumentPath[iIns].ToLocale().c_str(), _MAX_PATH);
+							strncpy(s, sndFile.m_szInstrumentPath[iIns].ToLocale().c_str(), _MAX_PATH);
 							s[_MAX_PATH] = 0;
 						}
 						break;

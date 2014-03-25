@@ -885,7 +885,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	CModControlDlg::OnInitDialog();
 	m_bInitialized = FALSE;
 
-	m_ToolBar.Init();
+	m_ToolBar.Init(IDB_PATTERNS);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_NEW, TIMAGE_INSTR_NEW);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_OPEN, TIMAGE_OPEN);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_SAVEAS, TIMAGE_SAVE);

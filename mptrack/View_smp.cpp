@@ -128,7 +128,9 @@ CViewSample::CViewSample()
 		m_dwNotifyPos[i] = Notification::PosInvalid;
 	}
 	MemsetZero(m_NcButtonState);
-	m_bmpEnvBar.Create(IDB_SMPTOOLBAR, 20, 0, RGB(192,192,192));
+
+	m_bmpEnvBar.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1);
+
 	m_lastDrawPoint.SetPoint(-1, -1);
 	noteChannel.assign(NOTE_MAX - NOTE_MIN + 1, CHANNELINDEX_INVALID);
 	offScreenDC = nullptr;
@@ -1305,7 +1307,7 @@ void CViewSample::DrawNcButton(CDC *pDC, UINT nBtn)
 		{
 		case ID_SAMPLE_ZOOMUP:		nImage = SIMAGE_ZOOMUP; break;
 		case ID_SAMPLE_ZOOMDOWN:	nImage = SIMAGE_ZOOMDOWN; break;
-		case ID_SAMPLE_DRAW:		nImage = (dwStyle & NCBTNS_DISABLED) ? SIMAGE_NODRAW : SIMAGE_DRAW; break;
+		case ID_SAMPLE_DRAW:		nImage = SIMAGE_DRAW; break;
 		case ID_SAMPLE_ADDSILENCE:	nImage = SIMAGE_RESIZE; break;
 		case ID_SAMPLE_GRID:		nImage = SIMAGE_GRID; break;
 		}
