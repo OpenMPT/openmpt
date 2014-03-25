@@ -138,31 +138,25 @@ enum
 	IMAGE_PATTERNS,
 	IMAGE_SAMPLES,
 	IMAGE_INSTRUMENTS,
+	IMAGE_PLUGININSTRUMENT = IMAGE_INSTRUMENTS,
 	IMAGE_GENERAL,
 	IMAGE_FOLDER,
 	IMAGE_OPENFOLDER,
 	IMAGE_PARTITION,
 	IMAGE_NOSAMPLE,
-	IMAGE_NOINSTRUMENT,
-	IMAGE_NETWORKDRIVE,
-	IMAGE_CDROMDRIVE,
-	IMAGE_RAMDRIVE,
-	IMAGE_FLOPPYDRIVE,
-	IMAGE_REMOVABLEDRIVE,
-	IMAGE_FIXEDDRIVE,
 	IMAGE_FOLDERPARENT,
 	IMAGE_FOLDERSONG,
 	IMAGE_DIRECTX,
 	IMAGE_WAVEOUT,
+	IMAGE_EFFECTPLUGIN = IMAGE_WAVEOUT,
 	IMAGE_ASIO,
-	IMAGE_GRAPH,
+	IMAGE_CHIP,
 	IMAGE_SAMPLEMUTE,
 	IMAGE_INSTRMUTE,
 	IMAGE_SAMPLEACTIVE,
 	IMAGE_INSTRACTIVE,
 	IMAGE_NOPLUGIN,
-	IMAGE_EFFECTPLUGIN,
-	IMAGE_PLUGININSTRUMENT,
+	IMGLIST_NUMIMAGES
 };
 
 
@@ -174,7 +168,7 @@ enum
 	TIMAGE_PATTERN_PLAY,
 	TIMAGE_PATTERN_RESTART,
 	TIMAGE_PATTERN_RECORD,
-	TIMAGE_MIDI_RECORD, // unused?
+	TIMAGE_SAMPLE_FIXLOOP,
 	TIMAGE_SAMPLE_NEW,
 	TIMAGE_INSTR_NEW,
 	TIMAGE_SAMPLE_NORMALIZE,
@@ -184,7 +178,7 @@ enum
 	TIMAGE_OPEN,
 	TIMAGE_SAVE,
 	TIMAGE_PREVIEW,
-	TIMAGE_PAUSE, // unused?
+	TIMAGE_SAMPLE_AUTOTUNE,
 	TIMAGE_PATTERN_VUMETERS,
 	TIMAGE_MACROEDITOR,
 	TIMAGE_CHORDEDITOR,
@@ -192,9 +186,7 @@ enum
 	TIMAGE_PATTERN_EXPAND,
 	TIMAGE_PATTERN_SHRINK,
 	TIMAGE_SAMPLE_SILENCE,
-	TIMAGE_TAB_SAMPLES,
-	TIMAGE_TAB_INSTRUMENTS,
-	TIMAGE_TAB_PATTERNS,
+	TIMAGE_PATTERN_OVERFLOWPASTE,
 	TIMAGE_UNDO,
 	TIMAGE_REDO,
 	TIMAGE_PATTERN_PLAYROW,
@@ -207,9 +199,7 @@ enum
 	TIMAGE_SAMPLE_INVERT,
 	TIMAGE_SAMPLE_UNSIGN,
 	TIMAGE_SAMPLE_DCOFFSET,
-	TIMAGE_PATTERN_OVERFLOWPASTE,
-	TIMAGE_SAMPLE_FIXLOOP,
-	TIMAGE_SAMPLE_AUTOTUNE,
+	PATTERNIMG_NUMIMAGES
 };
 
 
@@ -219,11 +209,11 @@ enum
 	SIMAGE_CHECKED = 0,
 	SIMAGE_ZOOMUP,
 	SIMAGE_ZOOMDOWN,
-	SIMAGE_NODRAW,
 	SIMAGE_DRAW,
 	SIMAGE_RESIZE,
 	SIMAGE_GENERATE,
 	SIMAGE_GRID,
+	SAMPLEIMG_NUMIMAGES
 };
 
 
@@ -251,6 +241,7 @@ enum
 	IIMAGE_NOZOOMIN,
 	IIMAGE_ZOOMOUT,
 	IIMAGE_NOZOOMOUT,
+	ENVIMG_NUMIMAGES
 };
 
 
@@ -263,7 +254,9 @@ enum
 #define TIMERID_GUI 1
 #define TIMERID_NOTIFY 2
 
-#include "mainbar.h"
+extern CBitmap *ReadPNG(const TCHAR *resource);
+#include "CImageListEx.h"
+#include "Mainbar.h"
 #include "TrackerSettings.h"
 struct MODPLUGDIB;
 
@@ -274,6 +267,7 @@ template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val) {
 	ASSERT(val.GetTypeTag() == "WINDOWPLACEMENT");
 	return DecodeBinarySetting<WINDOWPLACEMENT>(val.as<std::vector<char> >());
 }
+
 
 //======================================================================================
 class CMainFrame: public CMDIFrameWnd, public ISoundSource, public ISoundMessageReceiver
@@ -319,7 +313,7 @@ protected:
 	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
-	CImageList m_ImageList;
+	CImageListEx m_ImageList;
 	CSoundFile *m_pSndFile; // != NULL only when currently playing or rendering
 	HWND m_hWndMidi;
 	CSoundFile::samplecount_t m_dwTimeSec;
@@ -399,7 +393,7 @@ public:
 	UINT GetBaseOctave() const;
 	CModDoc *GetActiveDoc();
 	CView *GetActiveView();  	//rewbs.customKeys
-	CImageList *GetImageList() { return &m_ImageList; }
+	CImageListEx *GetImageList() { return &m_ImageList; }
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
@@ -408,7 +402,7 @@ public:
 	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
 	CWnd* m_pOrderlistHasFocus;
 	double GetApproxBPM();
-	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
+	void ThreadSafeSetModified(CModDoc* modified) { InterlockedExchangePointer(reinterpret_cast<void **>(&m_pJustModifiedDoc), modified); }
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
 
 	CModTree *GetUpperTreeview() { return m_wndTree.m_pModTree; }

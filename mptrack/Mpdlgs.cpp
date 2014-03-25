@@ -298,7 +298,7 @@ void COptionsSoundcard::UpdateEverything()
 				case SNDDEV_PORTAUDIO_WDMKS:
 					// No real image available for now,
 					// prepend API name to name and misuse another icon.
-					cbi.iImage = IMAGE_RAMDRIVE;
+					cbi.iImage = IMAGE_CHIP;
 					name = mpt::ToCString(it->apiName) + TEXT(" - ") + name;
 					break;
 				default:

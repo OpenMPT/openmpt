@@ -975,6 +975,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PNG.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\PSRatioCalc.cpp"
 					>
 				</File>
@@ -1143,6 +1147,10 @@
 			</File>
 			<File
 				RelativePath=".\CTreeCtrl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CImageListEx.h"
 				>
 			</File>
 			<File

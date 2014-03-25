@@ -290,7 +290,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CMDIFrameWnd::OnCreate(lpCreateStruct) == -1) return -1;
 	// Load resources
 	m_hIcon = theApp.LoadIcon(IDR_MAINFRAME);
-	m_ImageList.Create(IDB_IMAGELIST, 16, 0, RGB(0,128,128));
+
+	m_ImageList.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1);
+
 	m_hGUIFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	m_hFixedFont = ::CreateFont(12,5, 0,0, 300,
 							FALSE, FALSE, FALSE,

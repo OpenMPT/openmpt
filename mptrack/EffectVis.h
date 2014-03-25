@@ -62,8 +62,6 @@ protected:
 	ROWINDEX m_nOldPlayPos;
 	ModCommand m_templatePCNote;
 
-	CBrush m_brushBlack;
-
 protected:
 	ROWINDEX m_startRow;
 	ROWINDEX m_endRow;
@@ -101,8 +99,8 @@ protected:
 	CComboBox m_cmbEffectList, m_cmbActionList;
 	CEdit m_edVisStatus;
 
-	virtual VOID OnOK();
-	virtual VOID OnCancel();
+	virtual void OnOK();
+	virtual void OnCancel();
 	afx_msg void OnClose();
 	Setting<LONG>* GetSplitPosRef() {return NULL;} 	//rewbs.varWindowSize
 

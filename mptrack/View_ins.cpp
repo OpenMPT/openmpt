@@ -130,7 +130,9 @@ CViewInstrument::CViewInstrument()
 		m_dwNotifyPos[i] = (uint32)Notification::PosInvalid;
 	}
 	MemsetZero(m_NcButtonState);
-	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
+
+	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 18, ENVIMG_NUMIMAGES, 1);
+
 	m_baPlayingNote.reset();
 	//rewbs.envRowGrid
 	m_bGrid=true;
@@ -808,11 +810,11 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 
 		// create a memory based dc for drawing the grid
 		m_dcGrid.CreateCompatibleDC(pDC);
-		m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top);
+		m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.Width(), m_rcClient.Height());
 		m_pbmpOldGrid = m_dcGrid.SelectObject(&m_bmpGrid);
 
 		//do draw
-		int width = m_rcClient.right - m_rcClient.left;
+		int width = m_rcClient.Width();
 		int nPrevTick = -1;
 		int nTick, nRow;
 		int nRowsPerBeat = 1, nRowsPerMeasure = 1;
@@ -823,6 +825,9 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 			nRowsPerMeasure = modDoc->GetrSoundFile().m_nDefaultRowsPerMeasure;
 		}
 
+		// Paint it black!
+		m_dcGrid.FillSolidRect(&m_rcClient, 0);
+
 		for (int x = 3; x < width; x++)
 		{
 			nTick = ScreenToTick(x);
@@ -831,9 +836,9 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 				nPrevTick = nTick;
 				nRow = nTick / speed;
 
-				if (nRow % MAX(1, nRowsPerMeasure) == 0)
+				if (nRow % std::max(1, nRowsPerMeasure) == 0)
 					m_dcGrid.SelectObject(CMainFrame::penGray80);
-				else if (nRow % MAX(1, nRowsPerBeat) == 0)
+				else if (nRow % std::max(1, nRowsPerBeat) == 0)
 					m_dcGrid.SelectObject(CMainFrame::penGray55);
 				else
 					m_dcGrid.SelectObject(CMainFrame::penGray33);
@@ -883,10 +888,13 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	if ((!pModDoc) || (!pDC)) return;
 	//hdc = pDC->m_hDC;
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
-	m_dcMemMain.FillRect(&m_rcClient, CBrush::FromHandle(CMainFrame::brushBlack));
 	if (m_bGrid)
 	{
 		DrawGrid(&m_dcMemMain, pModDoc->GetrSoundFile().m_PlayState.m_nMusicSpeed);
+	} else
+	{
+		// Paint it black!
+		m_dcMemMain.FillSolidRect(&m_rcClient, 0);
 	}
 
 	// Middle line (half volume or pitch / panning center)

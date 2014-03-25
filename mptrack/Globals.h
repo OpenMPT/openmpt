@@ -28,14 +28,10 @@ class CModControlBar: public CToolBarCtrl
 //=======================================
 {
 protected:
-	HBITMAP m_hBarBmp;
+	CImageListEx m_ImageList;
 
 public:
-	CModControlBar() { m_hBarBmp=NULL; }
-	~CModControlBar();
-
-public:
-	BOOL Init(UINT nId=IDB_PATTERNS);
+	BOOL Init(UINT nId);
 	void UpdateStyle();
 	BOOL AddButton(UINT nID, int iImage=0, UINT nStyle=TBSTYLE_BUTTON, UINT nState=TBSTATE_ENABLED);
 	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM);
@@ -113,7 +109,7 @@ class CModTabCtrl: public CTabCtrl
 public:
 	BOOL InsertItem(int nIndex, LPSTR pszText, LPARAM lParam=0, int iImage=-1);
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
-	UINT GetItemData(int nIndex);
+	LPARAM GetItemData(int nIndex);
 };
 
 
