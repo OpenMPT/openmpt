@@ -65,7 +65,7 @@ public:
 	bool isInstrument;
 	bool useBridge, shareBridgeInstance;
 protected:
-	uint8 dllBits;
+	mutable uint8 dllBits;
 
 public:
 	VSTPluginLib(const mpt::PathString &dllPath, const mpt::PathString &libraryName)
@@ -79,15 +79,19 @@ public:
 	}
 
 	// Check whether a plugin can be hosted inside OpenMPT or requires bridging
-	uint8 GetDllBits();
-	bool IsNative() { return GetDllBits() == sizeof(void *) * 8; }
+	uint8 GetDllBits(bool fromCache = true) const;
+	bool IsNative(bool fromCache = true) const { return GetDllBits(fromCache) == sizeof(void *) * 8; }
 
 	void WriteToCache() const;
 
 	uint32 EncodeCacheFlags() const
 	{
-		// Format: 00000000.00000000.000000SB.CCCCCCCI
-		return (isInstrument ? 1 : 0) | (category << 1) | (useBridge ? 0x100 : 0) | (shareBridgeInstance ? 0x200 : 0);
+		// Format: 00000000.00000000.DDDDDDSB.CCCCCCCI
+		return (isInstrument ? 1 : 0)
+			| (category << 1)
+			| (useBridge ? 0x100 : 0)
+			| (shareBridgeInstance ? 0x200 : 0)
+			| (dllBits / 8) << 10;
 	}
 
 	void DecodeCacheFlags(uint32 flags)
@@ -110,6 +114,7 @@ public:
 		{
 			shareBridgeInstance = true;
 		}
+		dllBits = ((flags >> 10) & 0x3F) * 8;
 	}
 };
 

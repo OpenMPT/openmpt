@@ -1589,6 +1589,7 @@ CSplashScreen::~CSplashScreen()
 {
 	gpSplashScreen = NULL;
 	m_Bitmap->DeleteObject();
+	delete m_Bitmap;
 }
 
 
