@@ -44,8 +44,6 @@ class CAudioThread
 private:
 	CSoundDeviceWithThread & m_SoundDevice;
 
-	bool m_HasNTKernel;
-
 	double m_WakeupInterval;
 	HANDLE m_hAudioWakeUp;
 	HANDLE m_hPlayThread;

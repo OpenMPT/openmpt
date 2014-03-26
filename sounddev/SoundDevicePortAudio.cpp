@@ -103,10 +103,10 @@ bool CPortaudioDevice::InternalOpen()
 		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paMME))
 	{
-		m_Flags.NeedsClippedFloat = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinVista);
+		m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
 	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound))
 	{
-		m_Flags.NeedsClippedFloat = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinVista);
+		m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
 	} else
 	{
 		m_Flags.NeedsClippedFloat = false;

@@ -848,6 +848,8 @@ BOOL CTrackApp::InitInstance()
 	// Start loading
 	BeginWaitCursor();
 
+	mpt::Windows::Version::Init();
+
 	Log("OpenMPT Start");
 
 	ASSERT(nullptr == m_pDocManager);

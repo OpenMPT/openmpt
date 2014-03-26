@@ -108,7 +108,7 @@ bool CWaveDevice::InternalOpen()
 	m_nWriteBuffer = 0;
 	SetWakeupEvent(m_ThreadWakeupEvent);
 	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
-	m_Flags.NeedsClippedFloat = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinVista);
+	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
 	SoundBufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond();
 	bufferAttributes.UpdateInterval = m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();

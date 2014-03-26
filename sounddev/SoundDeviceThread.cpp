@@ -26,8 +26,6 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 //------------------------------------------------------------------------------------------
 {
 
-	m_HasNTKernel = mpt::Windows::IsWinNT();
-
 	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
 	m_dwPlayThreadId = 0;
@@ -81,7 +79,7 @@ CPriorityBooster::CPriorityBooster(bool boostPriority)
 	, hTask(NULL)
 {
 
-	m_HasVista = (mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinVista);
+	m_HasVista = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
 
 	if(m_HasVista)
 	{
@@ -175,7 +173,7 @@ public:
 
 		sleepEvent = NULL;
 
-		if(self.m_HasNTKernel)
+		if(mpt::Windows::Version::IsNT())
 		{
 			if(periodic_nt_timer)
 			{
@@ -211,7 +209,7 @@ public:
 	void Retrigger()
 	//--------------
 	{
-		if(self.m_HasNTKernel)
+		if(mpt::Windows::Version::IsNT())
 		{
 			if(!periodic_nt_timer)
 			{
@@ -228,7 +226,7 @@ public:
 	CPeriodicWaker::~CPeriodicWaker()
 	//-------------------------------
 	{
-		if(self.m_HasNTKernel)
+		if(mpt::Windows::Version::IsNT())
 		{
 			if(periodic_nt_timer)
 			{

@@ -680,53 +680,59 @@ std::vector<char> HexToBin(const std::wstring &src);
 
 } // namespace Util
 
-namespace mpt
-{
 
 #if defined(WIN32)
 
+namespace mpt
+{
 namespace Windows
 {
-
-enum WinNTVersion
+namespace Version
 {
-	VerWinNT4   = 0x0400,
-	VerWin98    = 0x040a,
-	VerWinME    = 0x045a,
-	VerWin2000  = 0x0500,
-	VerWinXP    = 0x0501,
-	VerWinXPSP2 = 0x0502,
-	VerWinVista = 0x0600,
-	VerWin7     = 0x0601,
-	VerWin8     = 0x0602,
+
+
+enum Number
+{
+
+	// Win9x
+	Win98    = 0x040a,
+	WinME    = 0x045a,
+
+	// WinNT
+	WinNT4   = 0x0400,
+	Win2000  = 0x0500,
+	WinXP    = 0x0501,
+	WinVista = 0x0600,
+	Win7     = 0x0601,
+	Win8     = 0x0602,
+	Win81    = 0x0603,
+
 };
 
-// returns version in the form of the _WIN32_WINNT_* macros or mpt::Windows::WinNTVersion
-static inline uint32 GetWinNTVersion()
-//------------------------------------
-{
-	OSVERSIONINFO versioninfo;
-	MemsetZero(versioninfo);
-	versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
-	GetVersionEx(&versioninfo);
-	return ((uint32)mpt::saturate_cast<uint8>(versioninfo.dwMajorVersion) << 8) | (uint32)mpt::saturate_cast<uint8>(versioninfo.dwMinorVersion);
-}
 
-static inline bool IsWinNT()
-//--------------------------
-{
-	OSVERSIONINFO versioninfo;
-	MemsetZero(versioninfo);
-	versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
-	GetVersionEx(&versioninfo);
-	return (versioninfo.dwPlatformId == VER_PLATFORM_WIN32_NT);
-}
+#if defined(MODPLUG_TRACKER)
 
+// Initializes version information.
+// Version information is cached in order to be safely available in audio real-time contexts.
+// Checking version information (especially detecting Wine) can be slow.
+void Init();
+
+bool IsAtLeast(mpt::Windows::Version::Number version);
+bool IsNT();
+bool IsWine();
+
+#else // !MODPLUG_TRACKER
+
+bool IsAtLeast(mpt::Windows::Version::Number version);
+
+#endif // MODPLUG_TRACKER
+
+
+} // namespace Version
 } // namespace Windows
+} // namespace mpt
 
 #endif // WIN32
-
-} // namespace mpt
 
 
 #if defined(MPT_WITH_DYNBIND)
