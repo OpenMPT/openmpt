@@ -1555,7 +1555,7 @@ class CSplashScreen: public CDialog
 {
 protected:
 	CBitmap m_Bitmap;
-	BITMAP bm;
+	PNG::Bitmap *bitmap;
 
 public:
 	CSplashScreen(CWnd *parent);
@@ -1579,6 +1579,7 @@ static CSplashScreen *gpSplashScreen = NULL;
 CSplashScreen::CSplashScreen(CWnd *parent)
 //----------------------------------------
 {
+	bitmap = PNG::ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
 	Create(IDD_SPLASHSCREEN, parent);
 }
 
@@ -1587,6 +1588,7 @@ CSplashScreen::~CSplashScreen()
 //-----------------------------
 {
 	gpSplashScreen = NULL;
+	delete bitmap;
 }
 
 
@@ -1600,7 +1602,7 @@ void CSplashScreen::OnPaint()
 	CDC hdcMem;
 	hdcMem.CreateCompatibleDC(&dc);
 	CBitmap *oldBitmap = hdcMem.SelectObject(&m_Bitmap);
-	dc.BitBlt(0, 0, bm.bmWidth, bm.bmHeight, &hdcMem, 0, 0, SRCCOPY);
+	dc.BitBlt(0, 0, bitmap->width, bitmap->height, &hdcMem, 0, 0, SRCCOPY);
 	hdcMem.SelectObject(oldBitmap);
 	hdcMem.DeleteDC();
 
@@ -1611,8 +1613,8 @@ void CSplashScreen::OnPaint()
 BOOL CSplashScreen::OnInitDialog()
 //--------------------------------
 {
-	PNG::ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN))->ToDIB(m_Bitmap, GetDC());
-	m_Bitmap.GetBitmap(&bm);
+	PNG::Bitmap *bitmap = PNG::ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
+	bitmap->ToDIB(m_Bitmap, GetDC());
 
 	CRect rect;
 	int cx, cy, newcx, newcy;
@@ -1622,8 +1624,8 @@ BOOL CSplashScreen::OnInitDialog()
 	GetWindowRect(&rect);
 	cx = rect.Width();
 	cy = rect.Height();
-	newcx = bm.bmWidth;
-	newcy = bm.bmHeight;
+	newcx = bitmap->width;
+	newcy = bitmap->height;
 	if(newcx && newcy)
 	{
 		LONG ExStyle = GetWindowLong(m_hWnd, GWL_EXSTYLE);
