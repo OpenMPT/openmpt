@@ -29,6 +29,7 @@
 #include "CloseMainDialog.h"
 #include "AutoSaver.h"
 #include "FileDialog.h"
+#include "PNG.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -1553,7 +1554,7 @@ class CSplashScreen: public CDialog
 //=================================
 {
 protected:
-	CBitmap *m_Bitmap;
+	CBitmap m_Bitmap;
 	BITMAP bm;
 
 public:
@@ -1578,11 +1579,7 @@ static CSplashScreen *gpSplashScreen = NULL;
 CSplashScreen::CSplashScreen(CWnd *parent)
 //----------------------------------------
 {
-	m_Bitmap = ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
-	m_Bitmap->GetBitmap(&bm);
-
 	Create(IDD_SPLASHSCREEN, parent);
-	ASSERT(m_Bitmap);
 }
 
 
@@ -1590,8 +1587,6 @@ CSplashScreen::~CSplashScreen()
 //-----------------------------
 {
 	gpSplashScreen = NULL;
-	m_Bitmap->DeleteObject();
-	delete m_Bitmap;
 }
 
 
@@ -1604,7 +1599,7 @@ void CSplashScreen::OnPaint()
 	
 	CDC hdcMem;
 	hdcMem.CreateCompatibleDC(&dc);
-	CBitmap *oldBitmap = hdcMem.SelectObject(m_Bitmap);
+	CBitmap *oldBitmap = hdcMem.SelectObject(&m_Bitmap);
 	dc.BitBlt(0, 0, bm.bmWidth, bm.bmHeight, &hdcMem, 0, 0, SRCCOPY);
 	hdcMem.SelectObject(oldBitmap);
 	hdcMem.DeleteDC();
@@ -1616,6 +1611,9 @@ void CSplashScreen::OnPaint()
 BOOL CSplashScreen::OnInitDialog()
 //--------------------------------
 {
+	PNG::ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN))->ToDIB(m_Bitmap, GetDC());
+	m_Bitmap.GetBitmap(&bm);
+
 	CRect rect;
 	int cx, cy, newcx, newcy;
 

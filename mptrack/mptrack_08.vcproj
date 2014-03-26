@@ -460,6 +460,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CImageListEx.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CleanupSong.cpp"
 				>
 			</File>
@@ -1367,6 +1371,10 @@
 			</File>
 			<File
 				RelativePath=".\PatternCursor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PNG.h"
 				>
 			</File>
 			<File

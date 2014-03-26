@@ -68,7 +68,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_VIEW_MIDIMAPPING,			OnViewMIDIMapping)
 	//ON_COMMAND(ID_HELP,					CMDIFrameWnd::OnHelp)
 	ON_COMMAND(ID_VIEW_SONGPROPERTIES,		OnSongProperties)
-	ON_COMMAND(ID_REPORT_BUG,				OnReportBug)	//rewbs.reportBug
+	ON_COMMAND(ID_REPORT_BUG,				OnReportBug)
 	ON_COMMAND(ID_NEXTOCTAVE,				OnNextOctave)
 	ON_COMMAND(ID_PREVOCTAVE,				OnPrevOctave)
 	ON_COMMAND_RANGE(ID_FILE_OPENTEMPLATE, ID_FILE_OPENTEMPLATE_LASTINRANGE, OnOpenTemplateModule)
@@ -86,12 +86,12 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME,	OnUpdateTime)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_USER,	OnUpdateUser)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_INFO,	OnUpdateInfo)
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,OnUpdateXInfo) //rewbs.xinfo
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,OnUpdateXInfo)
 	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		OnUpdateControlBarMenu)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
 	ON_MESSAGE(WM_MOD_SPECIALKEY,			OnSpecialKey)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg)
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
 	ON_COMMAND(ID_HELPSHOW,					OnHelp)
@@ -100,7 +100,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_MRU_LIST_FIRST,	OnUpdateMRUItem)
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
-	ON_WM_KILLFOCUS() //rewbs.fix3116
+	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
@@ -123,7 +123,7 @@ HFONT CMainFrame::m_hGUIFont = NULL;
 HFONT CMainFrame::m_hFixedFont = NULL;
 HFONT CMainFrame::m_hLargeFixedFont = NULL;
 HPEN CMainFrame::penDarkGray = NULL;
-HPEN CMainFrame::penScratch = NULL; //rewbs.fxVis
+HPEN CMainFrame::penScratch = NULL;
 HPEN CMainFrame::penGray00 = NULL;
 HPEN CMainFrame::penGray33 = NULL;
 HPEN CMainFrame::penGray40 = NULL;
@@ -131,7 +131,7 @@ HPEN CMainFrame::penGray55 = NULL;
 HPEN CMainFrame::penGray80 = NULL;
 HPEN CMainFrame::penGray99 = NULL;
 HPEN CMainFrame::penGraycc = NULL;
-HPEN CMainFrame::penGrayff = NULL; //end rewbs.fxVis
+HPEN CMainFrame::penGrayff = NULL;
 HPEN CMainFrame::penLightGray = NULL;
 HPEN CMainFrame::penBlack = NULL;
 HPEN CMainFrame::penWhite = NULL;
@@ -144,8 +144,6 @@ HBRUSH CMainFrame::brushGray = NULL;
 HBRUSH CMainFrame::brushBlack = NULL;
 HBRUSH CMainFrame::brushWhite = NULL;
 HBRUSH CMainFrame::brushText = NULL;
-//CBrush *CMainFrame::pbrushBlack = NULL;//rewbs.envRowGrid
-//CBrush *CMainFrame::pbrushWhite = NULL;//rewbs.envRowGrid
 
 HBRUSH CMainFrame::brushHighLight = NULL;
 HBRUSH CMainFrame::brushHighLightRed = NULL;
@@ -163,13 +161,13 @@ LPMODPLUGDIB CMainFrame::bmpVisNode = NULL;
 LPMODPLUGDIB CMainFrame::bmpVisPcNode = NULL;
 COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
 
-CInputHandler *CMainFrame::m_InputHandler = nullptr; //rewbs.customKeys
-CAutoSaver *CMainFrame::m_pAutoSaver = nullptr; //rewbs.autosave
+CInputHandler *CMainFrame::m_InputHandler = nullptr;
+CAutoSaver *CMainFrame::m_pAutoSaver = nullptr;
 
 static UINT indicators[] =
 {
 	ID_SEPARATOR,			// status line indicator
-	ID_INDICATOR_XINFO,		//rewbs.xinfo
+	ID_INDICATOR_XINFO,
 	ID_INDICATOR_INFO,
 	ID_INDICATOR_USER,
 	ID_INDICATOR_TIME,
@@ -187,10 +185,10 @@ CMainFrame::CMainFrame()
 	m_AudioThreadId = 0;
 	m_InNotifyHandler = false;
 
-	m_bModTreeHasFocus = false;	//rewbs.customKeys
-	m_pNoteMapHasFocus = nullptr;	//rewbs.customKeys
+	m_bModTreeHasFocus = false;
+	m_pNoteMapHasFocus = nullptr;
 	m_pOrderlistHasFocus = nullptr;
-	m_bOptionsLocked = false;	//rewbs.customKeys
+	m_bOptionsLocked = false;
 
 	m_SoundCardOptionsDialog = nullptr;
 
@@ -202,7 +200,7 @@ CMainFrame::CMainFrame()
 	m_nAvgMixChn = m_nMixChn = 0;
 	m_szUserText[0] = 0;
 	m_szInfoText[0] = 0;
-	m_szXInfoText[0]= 0;	//rewbs.xinfo
+	m_szXInfoText[0]= 0;
 
 	MemsetZero(gcolrefVuMeter);
 
@@ -210,7 +208,7 @@ CMainFrame::CMainFrame()
 	MemsetZero(g_csAudio);
 	InitializeCriticalSection(&g_csAudio);
 
-	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
+	m_InputHandler = new CInputHandler(this);
 
 	//Loading static tunings here - probably not the best place to do that but anyway.
 	CSoundFile::LoadStaticTunings();
@@ -276,8 +274,8 @@ CMainFrame::~CMainFrame()
 //-----------------------
 {
 	DeleteCriticalSection(&g_csAudio);
-	delete m_InputHandler; 	//rewbs.customKeys
-	delete m_pAutoSaver; //rewbs.autosaver
+	delete m_InputHandler;
+	delete m_pAutoSaver;
 
 	CChannelManagerDlg::DestroySharedInstance();
 	CSoundFile::DeleteStaticdata();
@@ -290,12 +288,13 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Load resources
 	m_hIcon = theApp.LoadIcon(IDR_MAINFRAME);
 
-	m_MiscIcons.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1);
-	m_MiscIconsDisabled.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, true);
-	m_PatternIcons.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1);
-	m_PatternIconsDisabled.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, true);
-	m_EnvelopeIcons.Create(IDB_ENVTOOLBAR, 20, 18, ENVIMG_NUMIMAGES, 1);
-	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1);
+	// Toolbar and other icons
+	m_MiscIcons.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, GetDC());
+	m_MiscIconsDisabled.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, GetDC(), true);
+	m_PatternIcons.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, GetDC());
+	m_PatternIconsDisabled.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, GetDC(), true);
+	m_EnvelopeIcons.Create(IDB_ENVTOOLBAR, 20, 18, ENVIMG_NUMIMAGES, 1, GetDC());
+	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1, GetDC());
 
 	m_hGUIFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	m_hFixedFont = ::CreateFont(12,5, 0,0, 300,
@@ -1864,7 +1863,7 @@ VOID CMainFrame::UpdateTree(CModDoc *pModDoc, DWORD lHint, CObject *pHint)
 void CMainFrame::OnViewOptions()
 //------------------------------
 {
-	if (m_bOptionsLocked)	//rewbs.customKeys
+	if (m_bOptionsLocked)
 		return;
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
@@ -1875,7 +1874,7 @@ void CMainFrame::OnViewOptions()
 	COptionsColors colors;
 	COptionsMixer mixerdlg;
 	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().m_nMidiDevice);
-	CAutoSaverGUI autosavedlg(m_pAutoSaver); //rewbs.AutoSaver
+	CAutoSaverGUI autosavedlg(m_pAutoSaver);
 	CUpdateSetupDlg updatedlg;
 #if defined(MPT_SETTINGS_CACHE)
 	COptionsAdvanced advanced;
@@ -1896,11 +1895,11 @@ void CMainFrame::OnViewOptions()
 #if defined(MPT_SETTINGS_CACHE)
 	dlg.AddPage(&advanced);
 #endif // MPT_SETTINGS_CACHE
-	m_bOptionsLocked=true;	//rewbs.customKeys
+	m_bOptionsLocked = true;
 	m_SoundCardOptionsDialog = &sounddlg;
 	dlg.DoModal();
 	m_SoundCardOptionsDialog = nullptr;
-	m_bOptionsLocked=false;	//rewbs.customKeys
+	m_bOptionsLocked = false;
 	m_wndTree.OnOptionsChanged();
 }
 
@@ -2130,7 +2129,7 @@ CModDoc *CMainFrame::GetActiveDoc()
 	return NULL;
 }
 
-//rewbs.customKeys
+
 CView *CMainFrame::GetActiveView()
 //---------------------------------
 {
@@ -2140,9 +2139,9 @@ CView *CMainFrame::GetActiveView()
 		return pMDIActive->GetActiveView();
 	}
 
-	return NULL;
+	return nullptr;
 }
-//end rewbs.customKeys
+
 
 void CMainFrame::SwitchToActiveView()
 //-----------------------------------
@@ -2341,14 +2340,14 @@ void CMainFrame::OnOctaveChanged()
 	SwitchToActiveView();
 }
 
-//rewbs.reportBug
+
 void CMainFrame::OnReportBug()
 //----------------------------
 {
 	CTrackApp::OpenURL("http://bugs.openmpt.org/");
 	return;
 }
-//end rewbs.reportBug
+
 
 BOOL CMainFrame::OnInternetLink(UINT nID)
 //---------------------------------------
