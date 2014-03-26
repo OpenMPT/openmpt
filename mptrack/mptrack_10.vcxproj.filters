@@ -364,9 +364,6 @@
     <ClCompile Include="PatternClipboard.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
-    <ClCompile Include="SelectPluginDialog.cpp">
-      <Filter>Source Files\mptrack</Filter>
-    </ClCompile>
     <ClCompile Include="TrackerSettings.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
@@ -484,9 +481,6 @@
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
-    <ClCompile Include="FileDialog.cpp">
-      <Filter>Source Files\mptrack</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\mptPathString.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
@@ -512,6 +506,15 @@
       <Filter>Source Files\pluginBridgeWrapper</Filter>
     </ClCompile>
     <ClCompile Include="PNG.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="FileDialog.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="SelectPluginDialog.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="CImageListEx.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
   </ItemGroup>
@@ -960,9 +963,6 @@
     <ClInclude Include="..\common\mptFstream.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="FileDialog.h">
-      <Filter>Header Files\mptrack</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\mptPathString.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -1006,7 +1006,13 @@
       <Filter>Header Files\pluginBridgeWrapper</Filter>
     </ClInclude>
     <ClInclude Include="CImageListEx.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="FileDialog.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="PNG.h">
+      <Filter>Header Files\mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

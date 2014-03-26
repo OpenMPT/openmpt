@@ -231,8 +231,8 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	if (!CToolBar::Create(parent, dwStyle)) return FALSE;
 
-	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1);
-	m_ImageListDisabled.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, true);
+	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, GetDC());
+	m_ImageListDisabled.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, GetDC(), true);
 	GetToolBarCtrl().SetImageList(&m_ImageList);
 	GetToolBarCtrl().SetDisabledImageList(&m_ImageListDisabled);
 

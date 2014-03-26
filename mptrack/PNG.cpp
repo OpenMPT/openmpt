@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "MPTrackUtil.h"
+#include "PNG.h"
 #include "../soundlib/FileReader.h"
 #if !defined(NO_ZLIB)
 #include <zlib.h>
@@ -20,8 +21,8 @@
 #endif
 
 
-CBitmap *ReadPNG(FileReader &file)
-//--------------------------------
+PNG::Bitmap *PNG::ReadPNG(FileReader &file)
+//-----------------------------------------
 {
 	file.Rewind();
 	if(!file.ReadMagic("\211PNG\r\n\032\n"))
@@ -38,7 +39,7 @@ CBitmap *ReadPNG(FileReader &file)
 	uint8_t interlaceMethod;
 
 	std::vector<uint8_t> dataIn;
-	std::vector<RGBQUAD> palette;
+	std::vector<Pixel> palette;
 
 	while(file.AreBytesLeft())
 	{
@@ -46,7 +47,7 @@ CBitmap *ReadPNG(FileReader &file)
 		char magic[4];
 		file.ReadArray(magic);
 		FileReader chunk = file.ReadChunk(chunkLength);
-		file.Skip(4);
+		file.Skip(4);	// CRC32
 		if(!memcmp(magic, "IHDR", 4))
 		{
 			// Image header
@@ -87,12 +88,8 @@ CBitmap *ReadPNG(FileReader &file)
 			size_t numEntries = std::min<size_t>(256u, chunk.GetLength() / 3u);
 			for(size_t i = 0; i < numEntries; i++)
 			{
-				RGBQUAD col;
-				col.rgbRed = chunk.ReadUint8();
-				col.rgbGreen = chunk.ReadUint8();
-				col.rgbBlue = chunk.ReadUint8();
-				col.rgbReserved = 255;
-				palette[i] = col;
+				uint8_t r = chunk.ReadUint8(), g = chunk.ReadUint8(), b = chunk.ReadUint8();
+				palette[i] = Pixel(r, g, b, 255);
 			}
 		}
 	}
@@ -113,25 +110,15 @@ CBitmap *ReadPNG(FileReader &file)
 	if(!width || !height || !bitsPerPixel
 		|| (colorType != 2  && colorType != 3 && colorType != 6) || bitDepth != 8	// Only RGB(A) and 8-bit palette PNGs for now.
 		|| compressionMethod || interlaceMethod
+		|| (colorType == 3 && palette.empty())
 		|| dataIn.size() < (bitsPerPixel * width * height) / 8 + height)			// Enough data present?
 	{
 		return nullptr;
 	}
 
-	CBitmap *bitmap = new CBitmap;
-	if(!bitmap->CreateBitmap(width, height, 1, 32, nullptr))
-	{
-		delete bitmap;
-		return nullptr;
-	}
+	Bitmap *bitmap = new (std::nothrow) Bitmap(width, height);
 
-	const uint32_t imageSize = width * height * sizeof(RGBQUAD);
-	std::vector<RGBQUAD> dataOut(width * height);
-	bitmap->GetBitmapBits(imageSize, &dataOut[0]);
-
-	FileReader imageData(&dataIn[0], dataIn.size());
-
-	RGBQUAD *pixelOut = &dataOut[0];
+	Pixel *pixelOut = bitmap->GetPixels();
 	uint32_t x = 0, y = 0;
 	size_t offset = 0;
 	while(y < height)
@@ -145,31 +132,17 @@ CBitmap *ReadPNG(FileReader &file)
 		if(colorType == 6)
 		{
 			// RGBA
-			struct PNGPixel32
-			{
-				uint8_t r, g, b, a;
-			};
-
-			const PNGPixel32 &inPixel = reinterpret_cast<const PNGPixel32 &>(dataIn[offset]);
-			pixelOut->rgbRed = inPixel.r;
-			pixelOut->rgbGreen = inPixel.g;
-			pixelOut->rgbBlue = inPixel.b;
-			pixelOut->rgbReserved= inPixel.a;
-			offset += 4;
+			pixelOut->r = dataIn[offset++];
+			pixelOut->g = dataIn[offset++];
+			pixelOut->b = dataIn[offset++];
+			pixelOut->a = dataIn[offset++];
 		} else if(colorType == 2)
 		{
 			// RGB
-			struct PNGPixel24
-			{
-				uint8_t r, g, b;
-			};
-
-			const PNGPixel24 &inPixel = reinterpret_cast<const PNGPixel24 &>(dataIn[offset]);
-			pixelOut->rgbRed = inPixel.r;
-			pixelOut->rgbGreen = inPixel.g;
-			pixelOut->rgbBlue = inPixel.b;
-			pixelOut->rgbReserved= 255;
-			offset += 3;
+			pixelOut->r = dataIn[offset++];
+			pixelOut->g = dataIn[offset++];
+			pixelOut->b = dataIn[offset++];
+			pixelOut->a = 255;
 		} else if(colorType == 3)
 		{
 			// Palette
@@ -185,13 +158,12 @@ CBitmap *ReadPNG(FileReader &file)
 		}
 	}
 
-	bitmap->SetBitmapBits(imageSize, &dataOut[0]);
 	return bitmap;
 }
 
 
-CBitmap *ReadPNG(const TCHAR *resource)
-//-------------------------------------
+PNG::Bitmap *PNG::ReadPNG(const TCHAR *resource)
+//----------------------------------------------
 {
 	const char *pData = nullptr;
 	HGLOBAL hglob = nullptr;
@@ -203,8 +175,28 @@ CBitmap *ReadPNG(const TCHAR *resource)
 
 	FileReader file(pData, nSize);
 
-	CBitmap *bitmap = ReadPNG(file);
+	Bitmap *bitmap = ReadPNG(file);
 
 	FreeResource(hglob);
 	return bitmap;
 }
+
+
+// Create a DIB for the current device from our PNG.
+bool PNG::Bitmap::ToDIB(CBitmap &bitmap, CDC *dc) const
+//-----------------------------------------------------
+{
+	BITMAPINFOHEADER bi;
+	MemsetZero(bi);
+	bi.biSize = sizeof(BITMAPINFOHEADER);
+	bi.biWidth = width;
+	bi.biHeight = -(int32_t)height;
+	bi.biPlanes = 1;
+	bi.biBitCount = 32;
+	bi.biCompression = BI_RGB;
+	bi.biSizeImage = width * height * 4;
+
+	if(dc == nullptr) dc = CDC::FromHandle(GetDC(NULL));
+	return bitmap.CreateCompatibleBitmap(dc, width, height)
+		&& SetDIBits(dc->GetSafeHdc(), bitmap, 0, height, GetPixels(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
+};

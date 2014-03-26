@@ -520,6 +520,7 @@
     <ClCompile Include="Autotune.cpp" />
     <ClCompile Include="ChannelManagerDlg.cpp" />
     <ClCompile Include="Childfrm.cpp" />
+    <ClCompile Include="CImageListEx.cpp" />
     <ClCompile Include="CleanupSong.cpp" />
     <ClCompile Include="CloseMainDialog.cpp" />
     <ClCompile Include="ColourEdit.cpp" />
@@ -757,6 +758,7 @@
     <ClInclude Include="Notification.h" />
     <ClInclude Include="PatternClipboard.h" />
     <ClInclude Include="PatternCursor.h" />
+    <ClInclude Include="PNG.h" />
     <ClInclude Include="Reporting.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SelectPluginDialog.h" />

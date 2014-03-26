@@ -254,16 +254,17 @@ enum
 #define TIMERID_GUI 1
 #define TIMERID_NOTIFY 2
 
-extern CBitmap *ReadPNG(const TCHAR *resource);
 #include "CImageListEx.h"
 #include "Mainbar.h"
 #include "TrackerSettings.h"
 struct MODPLUGDIB;
 
-template<> inline SettingValue ToSettingValue(const WINDOWPLACEMENT &val) {
+template<> inline SettingValue ToSettingValue(const WINDOWPLACEMENT &val)
+{
 	return SettingValue(EncodeBinarySetting<WINDOWPLACEMENT>(val), "WINDOWPLACEMENT");
 }
-template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val) {
+template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val)
+{
 	ASSERT(val.GetTypeTag() == "WINDOWPLACEMENT");
 	return DecodeBinarySetting<WINDOWPLACEMENT>(val.as<std::vector<char> >());
 }
