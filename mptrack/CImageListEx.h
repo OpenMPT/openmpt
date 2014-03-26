@@ -20,10 +20,9 @@ public:
 			return FALSE;
 		}
 
-#ifdef _M_IX86
-		// This is only relevant for Win9x (testing for supported SDK version won't work here because we only support Win9x through KernelEx).
-		// Win9x only supports 1-bit transparency, so we pre-multiply all pixels with the default button face colour and create a transparency mask.
-		if(!mpt::Windows::Version::IsNT())
+		// Icons with alpha transparency screw up in Windows 2000 and older as well as Wine 1.4 and older.
+		// They all support 1-bit transparency, though, so we pre-multiply all pixels with the default button face colour and create a transparency mask.
+		if(!mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP) || mpt::Windows::Version::IsWine())
 		{
 			BITMAP bm;
 			bitmap->GetBitmap(&bm);
@@ -73,7 +72,6 @@ public:
 			}
 			CImageList::Add(bitmap, &bitmapMask);
 		} else
-#endif
 		{
 			if(!CImageList::Create(cx, cy, ILC_COLOR32, nInitial, nGrow))
 			{
