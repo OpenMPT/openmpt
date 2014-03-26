@@ -730,8 +730,8 @@ BEGIN_MESSAGE_MAP(CModControlBar, CToolBarCtrl)
 END_MESSAGE_MAP()
 
 
-BOOL CModControlBar::Init(CImageListEx &icons)
-//--------------------------------------------
+BOOL CModControlBar::Init(CImageList &icons, CImageList &disabledIcons)
+//---------------------------------------------------------------------
 {
 	SetButtonStructSize(sizeof(TBBUTTON));
 	SetBitmapSize(CSize(16, 16));
@@ -739,6 +739,7 @@ BOOL CModControlBar::Init(CImageListEx &icons)
 
 	// Add bitmaps
 	SetImageList(&icons);
+	SetDisabledImageList(&disabledIcons);
 	UpdateStyle();
 	return TRUE;
 }

@@ -309,10 +309,10 @@ public:
 	static HMIDIIN shMidiIn;
 
 public:
-	CImageListEx m_MiscIcons;		// Misc Icons
-	CImageListEx m_EnvelopeIcons;	// Instrument editor icons
-	CImageListEx m_SampleIcons;		// Sample editor icons
-	CImageListEx m_PatternIcons;	// Pattern icons (includes some from sample editor as well...)
+	CImageListEx m_MiscIcons, m_MiscIconsDisabled;			// Misc Icons
+	CImageListEx m_PatternIcons, m_PatternIconsDisabled;	// Pattern icons (includes some from sample editor as well...)
+	CImageListEx m_EnvelopeIcons;							// Instrument editor icons
+	CImageListEx m_SampleIcons;								// Sample editor icons
 
 protected:
 

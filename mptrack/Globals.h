@@ -29,7 +29,7 @@ class CModControlBar: public CToolBarCtrl
 //=======================================
 {
 public:
-	BOOL Init(CImageListEx &icons);
+	BOOL Init(CImageList &icons, CImageList &disabledIcons);
 	void UpdateStyle();
 	BOOL AddButton(UINT nID, int iImage=0, UINT nStyle=TBSTYLE_BUTTON, UINT nState=TBSTATE_ENABLED);
 	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM);
