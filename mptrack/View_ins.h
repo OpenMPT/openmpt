@@ -23,7 +23,7 @@ class CViewInstrument: public CModScrollView
 //==========================================
 {
 protected:
-	CImageListEx m_bmpEnvBar;
+	CImageList m_bmpEnvBar;
 	POINT m_ptMenu;
 	CRect m_rcClient;
 

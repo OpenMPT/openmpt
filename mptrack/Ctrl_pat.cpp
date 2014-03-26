@@ -133,7 +133,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	rcOrderList.right = rect.right - 4;
 	m_OrderList.Init(rcOrderList, pMainFrm->GetGUIFont());
 	// Toolbar buttons
-	m_ToolBar.Init(IDB_PATTERNS);
+	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons);
 	m_ToolBar.AddButton(IDC_PATTERN_NEW, TIMAGE_PATTERN_NEW);
 	m_ToolBar.AddButton(IDC_PATTERN_PLAY, TIMAGE_PATTERN_PLAY);
 	m_ToolBar.AddButton(IDC_PATTERN_PLAYFROMSTART, TIMAGE_PATTERN_RESTART);

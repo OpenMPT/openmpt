@@ -131,7 +131,7 @@ CViewInstrument::CViewInstrument()
 	}
 	MemsetZero(m_NcButtonState);
 
-	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 18, ENVIMG_NUMIMAGES, 1);
+	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_EnvelopeIcons);
 
 	m_baPlayingNote.reset();
 	//rewbs.envRowGrid

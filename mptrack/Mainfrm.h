@@ -308,12 +308,17 @@ public:
 public:
 	static HMIDIIN shMidiIn;
 
+public:
+	CImageListEx m_MiscIcons;		// Misc Icons
+	CImageListEx m_EnvelopeIcons;	// Instrument editor icons
+	CImageListEx m_SampleIcons;		// Sample editor icons
+	CImageListEx m_PatternIcons;	// Pattern icons (includes some from sample editor as well...)
+
 protected:
 
 	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
-	CImageListEx m_ImageList;
 	CSoundFile *m_pSndFile; // != NULL only when currently playing or rendering
 	HWND m_hWndMidi;
 	CSoundFile::samplecount_t m_dwTimeSec;
@@ -393,7 +398,6 @@ public:
 	UINT GetBaseOctave() const;
 	CModDoc *GetActiveDoc();
 	CView *GetActiveView();  	//rewbs.customKeys
-	CImageListEx *GetImageList() { return &m_ImageList; }
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);

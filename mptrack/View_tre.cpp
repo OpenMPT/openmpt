@@ -216,7 +216,7 @@ void CModTree::Init()
 		m_pDataTree->InsLibSetFullPath(m_InstrLibPath, mpt::PathString());
 	}
 
-	SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
+	SetImageList(&CMainFrame::GetMainFrame()->m_MiscIcons, TVSIL_NORMAL);
 	if (!IsSampleBrowser())
 	{
 		// Create Midi Library
@@ -1661,7 +1661,7 @@ void CModTree::FillInstrumentLibrary()
 		// Enumerating Drives...
 		if(!IsSampleBrowser())
 		{
-			CImageListEx &images = *CMainFrame::GetMainFrame()->GetImageList();
+			CImageListEx &images = CMainFrame::GetMainFrame()->m_MiscIcons;
 			// Avoid adding the same images again and again...
 			images.SetImageCount(IMGLIST_NUMIMAGES);
 

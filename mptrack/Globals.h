@@ -22,16 +22,14 @@
 
 class CModControlView;
 class CModControlBar;
+class CImageListEx;
 
 //=======================================
 class CModControlBar: public CToolBarCtrl
 //=======================================
 {
-protected:
-	CImageListEx m_ImageList;
-
 public:
-	BOOL Init(UINT nId);
+	BOOL Init(CImageListEx &icons);
 	void UpdateStyle();
 	BOOL AddButton(UINT nID, int iImage=0, UINT nStyle=TBSTYLE_BUTTON, UINT nState=TBSTATE_ENABLED);
 	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM);

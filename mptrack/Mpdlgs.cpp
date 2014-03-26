@@ -252,7 +252,7 @@ void COptionsSoundcard::UpdateEverything()
 	// Sound Device
 	{
 		m_CbnDevice.ResetContent();
-		m_CbnDevice.SetImageList(CMainFrame::GetMainFrame()->GetImageList());
+		m_CbnDevice.SetImageList(&CMainFrame::GetMainFrame()->m_MiscIcons);
 
 		COMBOBOXEXITEM cbi;
 		UINT iItem = 0;
