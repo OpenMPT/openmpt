@@ -23,7 +23,7 @@ public:
 #ifdef _M_IX86
 		// This is only relevant for Win9x (testing for supported SDK version won't work here because we only support Win9x through KernelEx).
 		// Win9x only supports 1-bit transparency, so we pre-multiply all pixels with the default button face colour and create a transparency mask.
-		if(!mpt::Windows::IsWinNT())
+		if(!mpt::Windows::Version::IsNT())
 		{
 			BITMAP bm;
 			bitmap->GetBitmap(&bm);

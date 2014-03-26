@@ -614,6 +614,111 @@ std::vector<char> HexToBin(const std::wstring &src)
 } // namespace Util
 
 
+
+
+#if defined(WIN32)
+
+namespace mpt
+{
+namespace Windows
+{
+namespace Version
+{
+
+
+#if defined(MODPLUG_TRACKER)
+
+	
+static bool SystemIsNT = true;
+
+// Initialize to used SDK version
+static uint32 SystemVersion =
+#if NTDDI_VERSION >= 0x06030000 // NTDDI_WINBLUE
+	mpt::Windows::Version::Win81
+#elif NTDDI_VERSION >= 0x06020000 // NTDDI_WIN8
+	mpt::Windows::Version::Win8
+#elif NTDDI_VERSION >= 0x06010000 // NTDDI_WIN7
+	mpt::Windows::Version::Win7
+#elif NTDDI_VERSION >= 0x06000000 // NTDDI_VISTA
+	mpt::Windows::Version::WinVista
+#elif NTDDI_VERSION >= NTDDI_WINXP
+	mpt::Windows::Version::WinXP
+#elif NTDDI_VERSION >= NTDDI_WIN2K
+	mpt::Windows::Version::Win2000
+#else
+	mpt::Windows::Version::WinNT4
+#endif
+	;
+
+static bool SystemIsWine = false;
+
+
+void Init()
+//---------
+{
+	OSVERSIONINFOEXW versioninfoex;
+	MemsetZero(versioninfoex);
+	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
+	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
+	SystemIsNT = (versioninfoex.dwPlatformId == VER_PLATFORM_WIN32_NT);
+	SystemVersion = ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMajorVersion) << 8) | ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMinorVersion) << 0);
+	SystemIsWine = false;
+	HMODULE hNTDLL = LoadLibraryW(L"ntdll.dll");
+	if(hNTDLL)
+	{
+		SystemIsWine = (GetProcAddress(hNTDLL, "wine_get_version") != NULL);
+		FreeLibrary(hNTDLL);
+		hNTDLL = NULL;
+	}
+}
+
+
+bool IsAtLeast(mpt::Windows::Version::Number version)
+//---------------------------------------------------
+{
+	return (SystemVersion >= (uint32)version);
+}
+
+
+bool IsNT()
+//---------
+{
+	return SystemIsNT;
+}
+
+
+bool IsWine()
+//-----------
+{
+	return SystemIsWine;
+}
+
+
+#else // !MODPLUG_TRACKER
+
+
+bool IsAtLeast(mpt::Windows::Version::Number version)
+//---------------------------------------------------
+{
+	OSVERSIONINFOEXW versioninfoex;
+	MemsetZero(versioninfoex);
+	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
+	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
+	uint32 SystemVersion = ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMajorVersion) << 8) | ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMinorVersion) << 0);
+	return (SystemVersion >= (uint32)version);
+}
+
+
+#endif // MODPLUG_TRACKER
+
+
+} // namespace Version
+} // namespace Windows
+} // namespace mpt
+
+#endif // WIN32
+
+
 #if defined(MPT_WITH_DYNBIND)
 
 
@@ -671,10 +776,10 @@ public:
 
 		// Check for KB2533623:
 		bool hasKB2533623 = false;
-		if(mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWin8)
+		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win8))
 		{
 			hasKB2533623 = true;
-		} else if(mpt::Windows::GetWinNTVersion() >= mpt::Windows::VerWinVista)
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
 		{
 			HMODULE hKernel32DLL = LoadLibraryW(L"kernel32.dll");
 			if(hKernel32DLL)
