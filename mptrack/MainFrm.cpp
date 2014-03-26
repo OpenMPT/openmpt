@@ -178,7 +178,6 @@ static UINT indicators[] =
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
-//#include <direct.h>
 CMainFrame::CMainFrame()
 //----------------------
 {
@@ -291,7 +290,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Load resources
 	m_hIcon = theApp.LoadIcon(IDR_MAINFRAME);
 
-	m_ImageList.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1);
+	m_MiscIcons.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1);
+	m_PatternIcons.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1);
+	m_EnvelopeIcons.Create(IDB_ENVTOOLBAR, 20, 18, ENVIMG_NUMIMAGES, 1);
+	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1);
 
 	m_hGUIFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	m_hFixedFont = ::CreateFont(12,5, 0,0, 300,

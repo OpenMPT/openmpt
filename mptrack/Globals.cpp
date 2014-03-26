@@ -150,7 +150,7 @@ BOOL CModTabCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 	if (!pMainFrm) return FALSE;
 	if (!CTabCtrl::Create(dwStyle, rect, pParentWnd, nID)) return FALSE;
 	SendMessage(WM_SETFONT, (WPARAM)pMainFrm->GetGUIFont());
-	SetImageList(pMainFrm->GetImageList());
+	SetImageList(&pMainFrm->m_MiscIcons);
 	return TRUE;
 }
 
@@ -488,7 +488,7 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 			int nItems = m_TabCtrl.GetItemCount();
 			for (int i=0; i<nItems; i++)
 			{
-				if (m_TabCtrl.GetItemData(i) == nIndex)
+				if ((WPARAM)m_TabCtrl.GetItemData(i) == nIndex)
 				{
 					m_TabCtrl.SetCurSel(i);
 					SetActivePage(i, lParam);
@@ -730,17 +730,15 @@ BEGIN_MESSAGE_MAP(CModControlBar, CToolBarCtrl)
 END_MESSAGE_MAP()
 
 
-BOOL CModControlBar::Init(UINT nId)
-//---------------------------------
+BOOL CModControlBar::Init(CImageListEx &icons)
+//--------------------------------------------
 {
 	SetButtonStructSize(sizeof(TBBUTTON));
 	SetBitmapSize(CSize(16, 16));
 	SetButtonSize(CSize(27, 24));
 
 	// Add bitmaps
-	m_ImageList.Create(nId, 16, 16, IMGLIST_NUMIMAGES, 1);
-
-	SetImageList(&m_ImageList);
+	SetImageList(&icons);
 	UpdateStyle();
 	return TRUE;
 }

@@ -29,7 +29,7 @@ public:
 	};
 
 protected:
-	CImageListEx m_bmpEnvBar;
+	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
 	HDC offScreenDC;
 	HGDIOBJ offScreenBitmap;

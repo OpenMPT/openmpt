@@ -88,7 +88,7 @@ BOOL CSelectPluginDlg::OnInitDialog()
 
 	CDialog::OnInitDialog();
 	m_treePlugins.ModifyStyle(dwRemove, dwAdd);
-	m_treePlugins.SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
+	m_treePlugins.SetImageList(&CMainFrame::GetMainFrame()->m_MiscIcons, TVSIL_NORMAL);
 
 	if (m_pPlugin)
 	{
