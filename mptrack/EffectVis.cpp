@@ -276,7 +276,7 @@ void CEffectVis::DrawGrid()
 		nMeasure = m_pSndFile->Patterns[m_nPattern].GetRowsPerMeasure();
 	}
 
-	m_dcGrid.FillSolidRect(m_rcDraw, 0);
+	m_dcGrid.FillSolidRect(&m_rcDraw, 0);
 	for (ROWINDEX row = m_startRow; row <= m_endRow; row++)
 	{
 		if (row % nMeasure == 0)
@@ -438,12 +438,13 @@ void CEffectVis::DrawNodes()
 	//erase
 	if ((UINT)m_nRowToErase<m_startRow ||  m_nParamToErase < 0)
 	{
-		m_dcNodes.FillSolidRect(m_rcDraw, 0);
+		if(!m_rcDraw.IsRectEmpty())
+			m_dcNodes.FillSolidRect(&m_rcDraw, 0);
 	} else
 	{
 		int x = RowToScreenX(m_nRowToErase);
 		CRect r(x - NODEHALF - 1, m_rcDraw.top, x - NODEHALF + NODESIZE + 1, m_rcDraw.bottom);
-		m_dcNodes.FillSolidRect(r, 0);
+		m_dcNodes.FillSolidRect(&r, 0);
 	}
 
 	//Draw
