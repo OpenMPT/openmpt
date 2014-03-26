@@ -291,7 +291,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_hIcon = theApp.LoadIcon(IDR_MAINFRAME);
 
 	m_MiscIcons.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1);
+	m_MiscIconsDisabled.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, true);
 	m_PatternIcons.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1);
+	m_PatternIconsDisabled.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, true);
 	m_EnvelopeIcons.Create(IDB_ENVTOOLBAR, 20, 18, ENVIMG_NUMIMAGES, 1);
 	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1);
 

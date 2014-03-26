@@ -147,7 +147,7 @@ void CViewComments::OnInitialUpdate()
 	}
 	GetClientRect(&rect);
 	m_ToolBar.Create(WS_CHILD|WS_VISIBLE|CCS_NOPARENTALIGN, rect, this, IDC_TOOLBAR_DETAILS);
-	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_MiscIcons);
+	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_MiscIcons, CMainFrame::GetMainFrame()->m_MiscIconsDisabled);
 	m_ItemList.Create(WS_CHILD|WS_VISIBLE|LVS_REPORT|LVS_SINGLESEL|LVS_EDITLABELS|LVS_NOSORTHEADER, rect, this, IDC_LIST_DETAILS);
 	m_ItemList.ModifyStyleEx(0, WS_EX_STATICEDGE);
 	// Add ToolBar Buttons
