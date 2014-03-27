@@ -1221,252 +1221,219 @@ void CTrackApp::OnFileOpen()
 // CAboutDlg dialog used for App About
 
 //===============================
-class CPaletteBitmap: public CWnd
+class CRippleBitmap: public CWnd
 //===============================
 {
 protected:
-	LPBITMAPINFO m_lpBmp, m_lpCopy;
-	HPALETTE m_hPal;
-	LPBYTE m_lpRotoZoom;
-	DWORD m_dwStartTime, m_dwFrameTime;
-	UINT m_nRotoWidth, m_nRotoHeight;
-	BOOL m_bFirst;
+	BITMAPINFOHEADER bi;
+	PNG::Bitmap *bitmapSrc, *bitmapTarget;
+	std::vector<int32_t> offset1, offset2;
+	int32_t *frontBuf, *backBuf;
+	DWORD lastFrame;	// Time of last frame
+	bool frame;			// Backbuffer toggle
+	bool damp;			// Ripple damping status
+	bool activity;		// There are actually some ripples
+	bool showMouse;
 
 public:
-	CPaletteBitmap() { m_hPal = NULL; m_lpBmp = NULL; m_lpRotoZoom = NULL; m_lpCopy = NULL; m_bFirst = TRUE; }
-	~CPaletteBitmap();
-	void LoadBitmap(LPCSTR lpszResource);
-	BOOL Animate();
-	UINT GetWidth() const { return (m_lpBmp) ? m_lpBmp->bmiHeader.biWidth : 0; }
-	UINT GetHeight() const { return (m_lpBmp) ? m_lpBmp->bmiHeader.biHeight : 0; }
+	CRippleBitmap();
+	~CRippleBitmap();
+	bool Animate();
+	uint32_t Width() const { return bitmapSrc->width; }
+	uint32_t Height() const { return bitmapSrc->height; }
 
 protected:
-	afx_msg void OnPaint();
-	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
-	afx_msg void OnLButtonDblClk(UINT, CPoint) { m_dwStartTime = timeGetTime(); }
+	virtual void OnPaint();
+	virtual BOOL OnEraseBkgnd(CDC *) { return TRUE; }
+
 	DECLARE_MESSAGE_MAP()
+	void OnMouseMove(UINT nFlags, CPoint point);
+	void OnMouseHover(UINT nFlags, CPoint point) { OnMouseMove(nFlags, point); }
+	void OnMouseLeave();
 };
 
-static CPaletteBitmap *gpRotoZoom = NULL;
+static CRippleBitmap *gpAboutAnimation = nullptr;
 
-BEGIN_MESSAGE_MAP(CPaletteBitmap, CWnd)
+BEGIN_MESSAGE_MAP(CRippleBitmap, CWnd)
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
-	ON_WM_LBUTTONDBLCLK()
+	ON_WM_MOUSEMOVE()
+	ON_WM_MOUSEHOVER()
+	ON_WM_MOUSELEAVE()
 END_MESSAGE_MAP()
 
 
-void CPaletteBitmap::LoadBitmap(LPCSTR lpszResource)
-//--------------------------------------------------
-{
-	m_hPal = NULL;
-	m_lpBmp = NULL;
-	// True Color Mode ?
-	HDC hdc = ::GetDC(AfxGetApp()->m_pMainWnd->m_hWnd);
-	int nbits = GetDeviceCaps(hdc, BITSPIXEL);
-	::ReleaseDC(AfxGetApp()->m_pMainWnd->m_hWnd, hdc);
-	// Creating palette
-	HINSTANCE hInstance = AfxGetInstanceHandle();
-	HRSRC hrsrc = FindResource(hInstance, lpszResource, RT_BITMAP);
-	HGLOBAL hglb = LoadResource(hInstance, hrsrc);
-	LPBITMAPINFO p = (LPBITMAPINFO)LockResource(hglb);
-	m_lpBmp = p;
-	m_nRotoWidth = m_nRotoHeight = 0;
-	if (p)
-	{
-		char pal_buf[sizeof(LOGPALETTE) + 512*sizeof(PALETTEENTRY)];
-		LPLOGPALETTE pal = (LPLOGPALETTE)&pal_buf[0];
-		for (int i=0; i<256; i++)
-		{
-			pal->palPalEntry[i].peRed = p->bmiColors[i].rgbRed;
-			pal->palPalEntry[i].peGreen = p->bmiColors[i].rgbGreen;
-			pal->palPalEntry[i].peBlue = p->bmiColors[i].rgbBlue;
-			pal->palPalEntry[i].peFlags = 0;
-		}
-		pal->palVersion = 0x300;
-		pal->palNumEntries = 256;
-		if (nbits <= 8) m_hPal = CreatePalette(pal);
-		if ((p->bmiHeader.biWidth == 256) && (p->bmiHeader.biHeight == 128))
-		{
-			UINT n;
-			CRect rect;
-			GetClientRect(&rect);
-			m_nRotoWidth = (rect.Width() + 3) & ~3;
-			m_nRotoHeight = rect.Height();
-			if ((n = m_nRotoWidth - rect.Width()) > 0)
-			{
-				GetWindowRect(&rect);
-				SetWindowPos(NULL, 0,0, rect.Width()+n, rect.Height(), SWP_NOMOVE | SWP_NOZORDER);
-			}
-			m_lpRotoZoom = new BYTE[m_nRotoWidth*m_nRotoHeight];
-			if (m_lpRotoZoom)
-			{
-				memset(m_lpRotoZoom, 0, m_nRotoWidth*m_nRotoHeight);
-				m_lpCopy = (LPBITMAPINFO)(new char [sizeof(BITMAPINFO) + 256*sizeof(RGBQUAD)]);
-				if (m_lpCopy)
-				{
-					memcpy(m_lpCopy, p, sizeof(BITMAPINFO) + 256*sizeof(RGBQUAD));
-					m_lpCopy->bmiHeader.biWidth = m_nRotoWidth;
-					m_lpCopy->bmiHeader.biHeight = m_nRotoHeight;
-					m_lpCopy->bmiHeader.biSizeImage = m_nRotoWidth * m_nRotoHeight;
-				}
-				gpRotoZoom = this;
-			}
-
-		}
-	}
-	m_dwStartTime = timeGetTime();
-	m_dwFrameTime = 0;
-}
-
-
-CPaletteBitmap::~CPaletteBitmap()
-//-------------------------------
-{
-	if (gpRotoZoom == this) gpRotoZoom = NULL;
-	if (m_hPal)
-	{
-		DeleteObject(m_hPal);
-		m_hPal = NULL;
-	}
-	if (m_lpRotoZoom)
-	{
-		delete[] m_lpRotoZoom;
-		m_lpRotoZoom = NULL;
-	}
-	if (m_lpCopy)
-	{
-		delete[] m_lpCopy;
-		m_lpCopy = NULL;
-	}
-}
-
-
-void CPaletteBitmap::OnPaint()
+CRippleBitmap::CRippleBitmap()
 //----------------------------
+{
+	bitmapSrc = PNG::ReadPNG(MAKEINTRESOURCE(IDB_MPTRACK));
+	bitmapTarget = new PNG::Bitmap(bitmapSrc->width, bitmapSrc->height);
+	offset1.assign(bitmapSrc->GetNumPixels(), 0);
+	offset2.assign(bitmapSrc->GetNumPixels(), 0);
+	frontBuf = &offset2[0];
+	backBuf = &offset1[0];
+	activity = true;
+	lastFrame = 0;
+	frame = false;
+	damp = true;
+	showMouse = true;
+
+	// Pre-fill first and last row of output bitmap, since those won't be touched.
+	const PNG::Pixel *in1 = bitmapSrc->GetPixels(), *in2 = bitmapSrc->GetPixels() + (bitmapSrc->height - 1) * bitmapSrc->width;
+	PNG::Pixel *out1 = bitmapTarget->GetPixels(), *out2 = bitmapTarget->GetPixels() + (bitmapSrc->height - 1) * bitmapSrc->width;
+	for(uint32_t i = 0; i < bitmapSrc->width; i++)
+	{
+		*(out1++) = *(in1++);
+		*(out2++) = *(in2++);
+	}
+
+	MemsetZero(bi);
+	bi.biSize = sizeof(BITMAPINFOHEADER);
+	bi.biWidth = bitmapSrc->width;
+	bi.biHeight = -(int32_t)bitmapSrc->height;
+	bi.biPlanes = 1;
+	bi.biBitCount = 32;
+	bi.biCompression = BI_RGB;
+	bi.biSizeImage = bitmapSrc->width * bitmapSrc->height * 4;
+
+	gpAboutAnimation = this;
+}
+
+
+CRippleBitmap::~CRippleBitmap()
+//-----------------------------
+{
+	delete bitmapSrc;
+	delete bitmapTarget;
+	if (gpAboutAnimation == this) gpAboutAnimation = nullptr;
+}
+
+
+void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
+//--------------------------------------------------------
+{
+	// Initiate ripples at cursor location
+	Limit(point.x, 1, int(bitmapSrc->width) - 2);
+	Limit(point.y, 2, int(bitmapSrc->height) - 3);
+	int32_t *p = backBuf + point.x + point.y * bitmapSrc->width;
+	p[0] += (nFlags & MK_LBUTTON) ? 50 : 150;
+	p[0] += (nFlags & MK_MBUTTON) ? 150 : 0;
+
+	int32_t w = bitmapSrc->width;
+	// Make the initial point of this ripple a bit "fatter".
+	p[-1] += p[0] / 2;     p[1] += p[0] / 2;
+	p[-w] += p[0] / 2;     p[w] += p[0] / 2;
+	p[-w - 1] += p[0] / 4; p[-w + 1] += p[0] / 4;
+	p[w - 1] += p[0] / 4;  p[w + 1] += p[0] / 4;
+
+	damp = !(nFlags & MK_RBUTTON);
+	activity = true;
+
+	TRACKMOUSEEVENT me;
+	me.cbSize = sizeof(TRACKMOUSEEVENT);
+	me.dwFlags = TME_LEAVE | TME_HOVER;
+	me.hwndTrack = m_hWnd;
+	me.dwHoverTime = 1500;
+
+	if(TrackMouseEvent(&me) && showMouse)
+	{
+		ShowCursor(FALSE);
+		showMouse = false;
+	}
+}
+
+
+void CRippleBitmap::OnMouseLeave()
+//--------------------------------
+{
+	if(!showMouse)
+	{
+		ShowCursor(TRUE);
+		showMouse = true;
+	}
+}
+
+
+void CRippleBitmap::OnPaint()
+//---------------------------
 {
 	CPaintDC dc(this);
-	HDC hdc = dc.m_hDC;
-	HPALETTE oldpal = NULL;
-	LPBITMAPINFO lpdib;
-	if (m_hPal)
-	{
-		oldpal = SelectPalette(hdc, m_hPal, FALSE);
-		RealizePalette(hdc);
-	}
-	if ((lpdib = m_lpBmp) != NULL)
-	{
-		if ((m_lpRotoZoom) && (m_lpCopy))
-		{
-			lpdib = m_lpCopy;
-			SetDIBitsToDevice(hdc,
-						0,
-						0,
-						m_nRotoWidth,
-						m_nRotoHeight,
-						0,
-						0,
-						0,
-						lpdib->bmiHeader.biHeight,
-						m_lpRotoZoom,
-						lpdib,
-						DIB_RGB_COLORS);
-		} else
-		{
-			CRect rect;
-			GetClientRect(&rect);
-			StretchDIBits(hdc,
-						0,
-						0,
-						rect.right,
-						rect.bottom,
-						0,
-						0,
-						lpdib->bmiHeader.biWidth,
-						lpdib->bmiHeader.biHeight,
-						&lpdib->bmiColors[256],
-						lpdib,
-						DIB_RGB_COLORS,
-						SRCCOPY);
-		}
-	}
-	if (oldpal) SelectPalette(hdc, oldpal, FALSE);
+
+	SetDIBitsToDevice(dc.m_hDC,
+		0, 0,
+		bitmapTarget->width, bitmapTarget->height, 0, 0,
+		0, bitmapTarget->height,
+		bitmapTarget->GetPixels(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
 }
 
-////////////////////////////////////////////////////////////////////
-// RotoZoomer
 
-const int __SinusTable[256] =
+bool CRippleBitmap::Animate()
+//---------------------------
 {
-	   0,   6,  12,  18,  25,  31,  37,  43,  49,  56,  62,  68,  74,  80,  86,  92,
-	  97, 103, 109, 115, 120, 126, 131, 136, 142, 147, 152, 157, 162, 167, 171, 176,
-	 181, 185, 189, 193, 197, 201, 205, 209, 212, 216, 219, 222, 225, 228, 231, 234,
-	 236, 238, 241, 243, 244, 246, 248, 249, 251, 252, 253, 254, 254, 255, 255, 255,
-	 256, 255, 255, 255, 254, 254, 253, 252, 251, 249, 248, 246, 244, 243, 241, 238,
-	 236, 234, 231, 228, 225, 222, 219, 216, 212, 209, 205, 201, 197, 193, 189, 185,
-	 181, 176, 171, 167, 162, 157, 152, 147, 142, 136, 131, 126, 120, 115, 109, 103,
-	  97,  92,  86,  80,  74,  68,  62,  56,  49,  43,  37,  31,  25,  18,  12,   6,
-	   0,  -6, -12, -18, -25, -31, -37, -43, -49, -56, -62, -68, -74, -80, -86, -92,
-	 -97,-103,-109,-115,-120,-126,-131,-136,-142,-147,-152,-157,-162,-167,-171,-176,
-	-181,-185,-189,-193,-197,-201,-205,-209,-212,-216,-219,-222,-225,-228,-231,-234,
-	-236,-238,-241,-243,-244,-246,-248,-249,-251,-252,-253,-254,-254,-255,-255,-255,
-	-256,-255,-255,-255,-254,-254,-253,-252,-251,-249,-248,-246,-244,-243,-241,-238,
-	-236,-234,-231,-228,-225,-222,-219,-216,-212,-209,-205,-201,-197,-193,-189,-185,
-	-181,-176,-171,-167,-162,-157,-152,-147,-142,-136,-131,-126,-120,-115,-109,-103,
-	 -97, -92, -86, -80, -74, -68, -62, -56, -49, -43, -37, -31, -25, -18, -12,  -6
-};
+	// Were there any pixels being moved in the last frame?
+	if(!activity)
+		return FALSE;
 
-#define Sinus(x)	__SinusTable[(x)&0xFF]
-#define Cosinus(x)	__SinusTable[((x)+0x40)&0xFF]
+	DWORD now = timeGetTime();
+	if(now - lastFrame < 15)
+		return TRUE;
+	lastFrame = now;
+	activity = false;
 
-#define PI	3.14159265358979323f
-BOOL CPaletteBitmap::Animate()
-//----------------------------
-{
-	//included random hacking by rewbs to get funny animation.
-	LPBYTE dest, src;
-	DWORD t = (timeGetTime() - m_dwStartTime) / 10;
-	LONG Dist, Phi, srcx, srcy, spdx, spdy, sizex, sizey;
-	bool dir;
+	frontBuf = &(frame ? offset2 : offset1)[0];
+	backBuf = &(frame ? offset1 : offset2)[0];
 
-	if ((!m_lpRotoZoom) || (!m_lpBmp) || (!m_nRotoWidth) || (!m_nRotoHeight)) return FALSE;
-	Sleep(2); 	//give away some CPU
-
-	if (t > 256)
-		m_bFirst = FALSE;
-
-	dir = ((t/256) % 2 != 0); //change dir every 256 t
-	t = t%256;
-	if (!dir) t = (256-t);
-
-	sizex = m_nRotoWidth;
-	sizey = m_nRotoHeight;
-	m_dwFrameTime = t;
-	src = (LPBYTE)&m_lpBmp->bmiColors[256];
-	dest = m_lpRotoZoom;
-	Dist = t;
-	Phi = t;
-	spdx = 70000 + Sinus(Phi) * 10000 / 256;
-	spdy = 0;
-	spdx =(Cosinus(Phi)+Sinus(Phi<<2))*(Dist<<9)/sizex;
-	spdy =(Sinus(Phi)+Cosinus(Phi>>2))*(Dist<<9)/sizey;
-	srcx = 0x800000 - ((spdx * sizex) >> 1) + (spdy * sizey);
-	srcy = 0x800000 - ((spdy * sizex) >> 1) + (spdx * sizey);
-	for (UINT y=sizey; y; y--)
+	// Spread the ripples...
+	const int32_t w = bitmapSrc->width, h = bitmapSrc->height;
+	const int32_t numPixels = w * (h - 2);
+	const int32_t *back = backBuf + w;
+	int32_t *front = frontBuf + w;
+	for(int32_t i = numPixels; i != 0; i--, back++, front++)
 	{
-		UINT oldx = srcx, oldy = srcy;
-		for (UINT x=sizex; x; x--)
-		{
-			srcx += spdx;
-			srcy += spdy;
-			*dest++ = src[((srcy & 0x7F0000) >> 8) | ((srcx & 0xFF0000) >> 16)];
-		}
-		srcx=oldx-spdy;
-		srcy=oldy+spdx;
+		(*front) = (back[-1] + back[1] + back[w] + back[-w]) / 2 - (*front);
+		if(damp) (*front) -= (*front) >> 5;
 	}
+
+	// ...and compute the final picture.
+	const int32_t *offset = frontBuf + w;
+	const PNG::Pixel *pixelIn = bitmapSrc->GetPixels() + w;
+	PNG::Pixel *pixelOut = bitmapTarget->GetPixels() + w;
+	PNG::Pixel *limitMin = bitmapSrc->GetPixels(), *limitMax = bitmapSrc->GetPixels() + bitmapSrc->GetNumPixels() - 1;
+	for(int32_t i = numPixels; i != 0; i--, pixelIn++, pixelOut++, offset++)
+	{
+		const int32_t xOff = offset[-1] - offset[1];
+		const int32_t yOff = offset[-w] - offset[w];
+		const PNG::Pixel *p = pixelIn + xOff + yOff * w;
+		Limit(p, limitMin, limitMax);
+		// Add a bit of shading depending on how far we're displacing the pixel...
+		pixelOut->r = (uint8_t)Clamp(p->r + (p->r * xOff) / 32, 0, 255);
+		pixelOut->g = (uint8_t)Clamp(p->g + (p->g * xOff) / 32, 0, 255);
+		pixelOut->b = (uint8_t)Clamp(p->b + (p->b * xOff) / 32, 0, 255);
+		// ...and mix it with original picture
+		pixelOut->r = (pixelOut->r + pixelIn->r) / 2u;
+		pixelOut->g = (pixelOut->g + pixelIn->g) / 2u;
+		pixelOut->b = (pixelOut->b + pixelIn->b) / 2u;
+
+		// And now some cheap image smoothing...
+		if(xOff | yOff)
+		{
+			pixelOut[-1].r = (pixelOut->r + pixelIn[-1].r) / 2u;
+			pixelOut[-1].g = (pixelOut->g + pixelIn[-1].g) / 2u;
+			pixelOut[-1].b = (pixelOut->b + pixelIn[-1].b) / 2u;
+			pixelOut[-w].r = (pixelOut->r + pixelIn[-w].r) / 2u;
+			pixelOut[-w].g = (pixelOut->g + pixelIn[-w].g) / 2u;
+			pixelOut[-w].b = (pixelOut->b + pixelIn[-w].b) / 2u;
+			activity = true;	// Also use this to update activity status...
+		}
+	}
+
+	frame = !frame;
+
 	InvalidateRect(NULL, FALSE);
 	UpdateWindow();
-	return TRUE;
+	Sleep(10); 	//give away some CPU
+
+	return true;
 }
 
 
@@ -1475,11 +1442,10 @@ class CAboutDlg: public CDialog
 //=============================
 {
 protected:
-	CPaletteBitmap m_bmp;
+	CRippleBitmap m_bmp;
 	CCreditStatic m_static;
 
 public:
-	CAboutDlg() {}
 	~CAboutDlg();
 
 // Implementation
@@ -1501,7 +1467,7 @@ CAboutDlg::~CAboutDlg()
 void CAboutDlg::OnOK()
 //--------------------
 {
-	gpRotoZoom = NULL;
+	gpAboutAnimation = NULL;
 	gpAboutDlg = NULL;
 	DestroyWindow();
 	delete this;
@@ -1519,8 +1485,9 @@ BOOL CAboutDlg::OnInitDialog()
 //----------------------------
 {
 	CDialog::OnInitDialog();
+
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
-	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
+
 	SetDlgItemText(IDC_EDIT2, CString("Build Date: ") + MptVersion::GetBuildDateString().c_str());
 	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::GetVersionStringExtended().c_str());
 	m_static.SubclassDlgItem(IDC_CREDITS,this);
@@ -1587,7 +1554,7 @@ CSplashScreen::CSplashScreen(CWnd *parent)
 CSplashScreen::~CSplashScreen()
 //-----------------------------
 {
-	gpSplashScreen = NULL;
+	gpSplashScreen = nullptr;
 	delete bitmap;
 }
 
@@ -1595,8 +1562,6 @@ CSplashScreen::~CSplashScreen()
 void CSplashScreen::OnPaint()
 //---------------------------
 {
-	CRect rect;
-	GetUpdateRect(&rect);
 	CPaintDC dc(this);
 	
 	CDC hdcMem;
@@ -1613,7 +1578,6 @@ void CSplashScreen::OnPaint()
 BOOL CSplashScreen::OnInitDialog()
 //--------------------------------
 {
-	PNG::Bitmap *bitmap = PNG::ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
 	bitmap->ToDIB(m_Bitmap, GetDC());
 
 	CRect rect;
@@ -1659,12 +1623,9 @@ VOID CTrackApp::StartSplashScreen()
 	if (!gpSplashScreen)
 	{
 		gpSplashScreen = new CSplashScreen(m_pMainWnd);
-		if (gpSplashScreen)
-		{
-			gpSplashScreen->ShowWindow(SW_SHOW);
-			gpSplashScreen->UpdateWindow();
-			gpSplashScreen->BeginWaitCursor();
-		}
+		gpSplashScreen->ShowWindow(SW_SHOW);
+		gpSplashScreen->UpdateWindow();
+		gpSplashScreen->BeginWaitCursor();
 	}
 }
 
@@ -1676,11 +1637,7 @@ VOID CTrackApp::StopSplashScreen()
 	{
 		gpSplashScreen->EndWaitCursor();
 		gpSplashScreen->DestroyWindow();
-		if (gpSplashScreen)
-		{
-			delete gpSplashScreen;
-			gpSplashScreen = NULL;
-		}
+		delete gpSplashScreen;
 	}
 }
 
@@ -1705,9 +1662,9 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 			StopSplashScreen();
 		}
 	}
-	if (gpRotoZoom)
+	if (gpAboutAnimation)
 	{
-		if (gpRotoZoom->Animate()) return TRUE;
+		if (gpAboutAnimation->Animate()) return TRUE;
 	}
 
 	// Call plugins idle routine for open editor

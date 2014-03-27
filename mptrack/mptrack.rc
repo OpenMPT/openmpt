@@ -469,6 +469,7 @@ IDB_MAINBAR             PNG                     "res\\main_toolbar.png"
 IDB_PATTERNS            PNG                     "res\\pattern_toolbar.png"
 IDB_SMPTOOLBAR          PNG                     "res\\sample_toolbar.png"
 IDB_SPLASHNOFOLDFIN     PNG                     "res\\splashno.png"
+IDB_MPTRACK             PNG                     "res\\mptrack.png"
 #endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -490,7 +491,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIB
 CAPTION "About OpenMPT"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_BITMAP1,"Static",SS_BLACKRECT | SS_NOTIFY | SS_CENTERIMAGE,5,3,256,81,WS_EX_CLIENTEDGE
+    CONTROL         "",IDC_BITMAP1,"Static",SS_BLACKRECT | SS_NOTIFY | SS_CENTERIMAGE,47,3,173,81,WS_EX_CLIENTEDGE
     CTEXT           "",IDC_CREDITS,5,116,256,72,0,WS_EX_STATICEDGE
     DEFPUSHBUTTON   "OK",IDOK,5,192,256,14,WS_GROUP
     EDITTEXT        IDC_EDIT2,15,100,233,12,ES_CENTER | ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
@@ -1958,7 +1959,6 @@ END
 // Bitmap
 //
 
-IDB_MPTRACK             BITMAP                  "res\\mptrack.bmp"
 IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
 IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
 IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
