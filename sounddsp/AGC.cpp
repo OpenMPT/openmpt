@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 #include "../soundlib/Sndfile.h"
-#include "../sounddsp/DSP.h"
+#include "../sounddsp/AGC.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////
