@@ -514,6 +514,7 @@
     <ClCompile Include="..\unarchiver\unlha.cpp" />
     <ClCompile Include="..\unarchiver\unrar.cpp" />
     <ClCompile Include="..\unarchiver\unzip.cpp" />
+    <ClCompile Include="AboutDialog.cpp" />
     <ClCompile Include="AbstractVstEditor.cpp" />
     <ClCompile Include="AppendModule.cpp" />
     <ClCompile Include="AutoSaver.cpp" />
@@ -723,6 +724,7 @@
     <ClInclude Include="..\unarchiver\unlha.h" />
     <ClInclude Include="..\unarchiver\unrar.h" />
     <ClInclude Include="..\unarchiver\unzip.h" />
+    <ClInclude Include="AboutDialog.h" />
     <ClInclude Include="AbstractVstEditor.h" />
     <ClInclude Include="AutoSaver.h" />
     <ClInclude Include="Autotune.h" />
@@ -807,18 +809,14 @@
   <ItemGroup>
     <None Include="..\soundlib\Tunings\built-inTunings.tc" />
     <None Include="res\bitmap1.bmp" />
-    <None Include="res\bmp00001.bmp" />
     <None Include="res\colors.bmp" />
     <None Include="res\dragging.cur" />
-    <None Include="Res\envbar.bmp" />
     <None Include="res\envelope_toolbar.png" />
     <None Include="res\icons.png" />
-    <None Include="res\img_list.bmp" />
-    <None Include="res\mainbar.bmp" />
     <None Include="res\main_toolbar.png" />
     <None Include="res\moddoc.ico" />
-    <None Include="res\MPTRACK.bmp" />
     <None Include="res\mptrack.ico" />
+    <None Include="res\mptrack.png" />
     <None Include="res\mptrack.rc2" />
     <None Include="Res\nodrag.cur" />
     <None Include="res\nodrop.cur" />
@@ -826,8 +824,6 @@
     <None Include="res\pattern_toolbar.png" />
     <None Include="res\rt_manif.bin" />
     <None Include="res\sample_toolbar.png" />
-    <None Include="Res\smptoolb.bmp" />
-    <None Include="res\splashno.bmp" />
     <None Include="res\splashno.png" />
     <None Include="res\view_pat.bmp" />
     <None Include="res\visnode1.bmp" />

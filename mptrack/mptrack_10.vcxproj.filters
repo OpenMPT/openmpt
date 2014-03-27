@@ -517,6 +517,9 @@
     <ClCompile Include="CImageListEx.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="AboutDialog.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1014,6 +1017,9 @@
     <ClInclude Include="PNG.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="AboutDialog.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
@@ -1031,19 +1037,7 @@
     <None Include="res\dragging.cur">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Res\envbar.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\img_list.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\mainbar.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\moddoc.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\MPTRACK.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\mptrack.ico">
@@ -1070,12 +1064,6 @@
     <None Include="res\rt_manif.bin">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Res\smptoolb.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\splashno.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\view_pat.bmp">
       <Filter>Resource Files</Filter>
     </None>
@@ -1088,15 +1076,27 @@
     <None Include="..\soundlib\Tunings\built-inTunings.tc">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\bmp00001.bmp">
+    <None Include="res\envelope_toolbar.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\envelope_toolbar.png" />
-    <None Include="res\icons.png" />
-    <None Include="res\main_toolbar.png" />
-    <None Include="res\pattern_toolbar.png" />
-    <None Include="res\sample_toolbar.png" />
-    <None Include="res\splashno.png" />
+    <None Include="res\splashno.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\icons.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\main_toolbar.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\mptrack.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\pattern_toolbar.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\sample_toolbar.png">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
