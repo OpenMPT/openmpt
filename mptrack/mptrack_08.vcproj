@@ -428,6 +428,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\AboutDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\AbstractVstEditor.cpp"
 				>
 			</File>
@@ -1002,7 +1006,7 @@
 		</Filter>
 		<Filter
 			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
+			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe;png"
 			>
 			<File
 				RelativePath="res\bitmap1.bmp"
@@ -1017,15 +1021,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Res\envbar.bmp"
+				RelativePath=".\Res\envelope_toolbar.bmp"
 				>
 			</File>
 			<File
-				RelativePath=".\res\img_list.bmp"
+				RelativePath=".\res\icons.bmp"
 				>
 			</File>
 			<File
-				RelativePath=".\res\mainbar.bmp"
+				RelativePath=".\res\main_toolbar.bmp"
 				>
 			</File>
 			<File
@@ -1033,7 +1037,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\MPTRACK.bmp"
+				RelativePath=".\res\mptrack.png"
 				>
 			</File>
 			<File
@@ -1053,7 +1057,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\patterns.bmp"
+				RelativePath=".\res\pattern_toolbar.bmp"
 				>
 			</File>
 			<File
@@ -1061,11 +1065,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Res\smptoolb.bmp"
+				RelativePath=".\Res\sample_toolbar.bmp"
 				>
 			</File>
 			<File
-				RelativePath=".\res\splashno.bmp"
+				RelativePath=".\res\splashno.png"
 				>
 			</File>
 			<File
@@ -1089,6 +1093,10 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath=".\AboutDialog.h"
+				>
+			</File>
 			<File
 				RelativePath=".\AbstractVstEditor.h"
 				>
