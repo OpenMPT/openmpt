@@ -1417,12 +1417,12 @@ bool CRippleBitmap::Animate()
 		// And now some cheap image smoothing...
 		if(xOff | yOff)
 		{
-			pixelOut[-1].r = (pixelOut->r + pixelIn[-1].r) / 2u;
-			pixelOut[-1].g = (pixelOut->g + pixelIn[-1].g) / 2u;
-			pixelOut[-1].b = (pixelOut->b + pixelIn[-1].b) / 2u;
-			pixelOut[-w].r = (pixelOut->r + pixelIn[-w].r) / 2u;
-			pixelOut[-w].g = (pixelOut->g + pixelIn[-w].g) / 2u;
-			pixelOut[-w].b = (pixelOut->b + pixelIn[-w].b) / 2u;
+			pixelOut[-1].r = (pixelOut->r + pixelOut[-1].r) / 2u;
+			pixelOut[-1].g = (pixelOut->g + pixelOut[-1].g) / 2u;
+			pixelOut[-1].b = (pixelOut->b + pixelOut[-1].b) / 2u;
+			pixelOut[-w].r = (pixelOut->r + pixelOut[-w].r) / 2u;
+			pixelOut[-w].g = (pixelOut->g + pixelOut[-w].g) / 2u;
+			pixelOut[-w].b = (pixelOut->b + pixelOut[-w].b) / 2u;
 			activity = true;	// Also use this to update activity status...
 		}
 	}
