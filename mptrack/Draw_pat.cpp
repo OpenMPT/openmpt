@@ -487,7 +487,7 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 			SAMPLEINDEX sample = mc.instr;
 			if(pSndFile->GetNumInstruments())
 			{
-				if(mc.instr <= pSndFile->GetNumInstruments())
+				if(mc.instr <= pSndFile->GetNumInstruments() && pSndFile->Instruments[mc.instr])
 				{
 					sample = pSndFile->Instruments[mc.instr]->Keyboard[mc.note - NOTE_MIN];
 				} else
