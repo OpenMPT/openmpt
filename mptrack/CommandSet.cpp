@@ -1591,9 +1591,9 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 				kc.EventType((KeyEventType)atoi(token));
 			}
 
-			if(fillExistingSet && cmd >= kcVPStartNotes && cmd <= kcVPEndNotes)
+			if(fillExistingSet && cmd >= kcVPStartNotes && cmd <= kcVPEndNotes && pTempCS->GetKeyListSize(cmd) != 0)
 			{
-				// Don't fill in missing notes, as this will probably create awkward keymaps when loading
+				// Don't fill in default note keys, as this will probably create awkward keymaps when loading
 				// e.g. an IT-style keymap and it contains two keys mapped to the same notes.
 				continue;
 			}
@@ -1664,13 +1664,14 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 //---------------------------------------------------------
 {
 	mpt::ifstream fin(filename);
-	if (fin.fail())
+	if(fin.fail())
 	{
 		Reporting::Warning(L"Can't open keybindings file " + filename.ToWide() + L" for reading. Default keybindings will be used.");
 		return false;
-	}
-	else
+	} else
+	{
 		return LoadFile(fin, filename.ToWide());
+	}
 }
 
 
