@@ -1069,11 +1069,105 @@ static const KSTOPOLOGY_CONNECTION* FindStartConnectionTo(ULONG startPin, PaWinW
     return 0;
 }
 
+#define LASSESB_GCP_LOOP_DETECTION
+
+#ifdef LASSESB_GCP_LOOP_DETECTION
+
+struct S_GDP_Loop_Detection {
+    KSTOPOLOGY_CONNECTION conn;
+    ULONG muxInputPinId;
+    ULONG muxNodeId;
+    struct S_GDP_Loop_Detection* pPrev;
+};
+struct S_GDP_Loop_Detection* g_p_S_GDP_Loop_Detection;
+
+void S_GDP_Loop_Detection__Init( void )
+{
+    g_p_S_GDP_Loop_Detection = NULL;
+} /* S_GDP_Loop_Detection__Init */
+
+BOOL S_GDP_Loop_Detection__TestAndAdd(const KSTOPOLOGY_CONNECTION* p_conn, ULONG* p_muxInputPinId, ULONG* p_muxNodeId)
+{
+    struct S_GDP_Loop_Detection* pPivot;
+    struct S_GDP_Loop_Detection* pPrev;
+    ULONG muxInputPinId;
+    ULONG muxNodeId;
+
+    /* Avoid NULL derefs - replace with -2 because -1 is in use (KSFILTER_NODE) */
+    muxInputPinId = ((p_muxInputPinId) ? *p_muxInputPinId : (ULONG)-2);
+    muxNodeId = ((p_muxNodeId) ? *p_muxNodeId : (ULONG)-2);
+
+    /* See if we've had this combo before */
+    pPivot = g_p_S_GDP_Loop_Detection;
+    while (pPivot)
+    {
+        if (
+            (p_conn->FromNode == pPivot->conn.FromNode)
+            && (p_conn->FromNodePin == pPivot->conn.FromNodePin)
+            && (p_conn->ToNode == pPivot->conn.ToNode)
+            && (p_conn->ToNodePin == pPivot->conn.ToNodePin)
+            && (muxInputPinId == pPivot->muxInputPinId)
+            && (muxNodeId == pPivot->muxNodeId)
+        )
+        {
+            /* That's a doppelganger - fail */
+            PA_DEBUG(("S_GDP_Loop_Detection__TestAndAdd: Connection loop detected\n"));
+            return FALSE;
+        }
+        else
+        {
+            /* Test previous */
+            pPivot = pPivot->pPrev;
+        }
+    }
+
+    /* Add a new combo */
+    pPrev = g_p_S_GDP_Loop_Detection;
+    g_p_S_GDP_Loop_Detection = (struct S_GDP_Loop_Detection*)malloc( sizeof(struct S_GDP_Loop_Detection) );
+    if (!g_p_S_GDP_Loop_Detection) {
+        PA_DEBUG(("S_GDP_Loop_Detection__TestAndAdd: Insufficient memory\n"));
+        return FALSE;
+    }
+    g_p_S_GDP_Loop_Detection->pPrev = pPrev;
+    g_p_S_GDP_Loop_Detection->conn = *p_conn;
+    g_p_S_GDP_Loop_Detection->muxInputPinId = muxInputPinId;
+    g_p_S_GDP_Loop_Detection->muxNodeId = muxNodeId;
+
+    /* return TRUE because no error and this combo is new */
+    return TRUE;
+} /* S_GDP_Loop_Detection__TestAndAdd */
+
+void S_GDP_Loop_Detection__Destroy()
+{
+    struct S_GDP_Loop_Detection* pDelete;
+    struct S_GDP_Loop_Detection* pPrev;
+    
+    pDelete = g_p_S_GDP_Loop_Detection;
+    g_p_S_GDP_Loop_Detection = NULL;
+
+    while (pDelete)
+    {
+        pPrev = pDelete->pPrev;
+        free(pDelete);
+        pDelete = pPrev;
+    }
+} /* S_GDP_Loop_Detection__Destroy */
+
+#endif /* LASSESB_GCP_LOOP_DETECTION */
+
 static ULONG GetConnectedPin(ULONG startPin, BOOL forward, PaWinWdmFilter* filter, int muxPosition, ULONG *muxInputPinId, ULONG *muxNodeId)
 {
     const KSTOPOLOGY_CONNECTION *conn = NULL; 
     TFnGetConnection fnGetConnection = forward ? GetConnectionTo : GetConnectionFrom ;
+
+#ifdef LASSESB_GCP_LOOP_DETECTION
+    int iTimeout = 1024;
+    S_GDP_Loop_Detection__Init();
+
+    while(--iTimeout)
+#else /* LASSESB_GCP_LOOP_DETECTION */
     while (1)
+#endif /* LASSESB_GCP_LOOP_DETECTION */
     {
         if (conn == NULL)
         {
@@ -1087,11 +1181,29 @@ static ULONG GetConnectedPin(ULONG startPin, BOOL forward, PaWinWdmFilter* filte
         /* Handling case of erroneous connection list */
         if (conn == NULL)
         {
+#ifdef LASSESB_GCP_LOOP_DETECTION
+            PA_DEBUG(("GetConnectedPin: Erroneous connection list\n"));
+            S_GDP_Loop_Detection__Destroy();
+            return KSFILTER_NODE;
+#else /* LASSESB_GCP_LOOP_DETECTION */
             break;
+#endif /* LASSESB_GCP_LOOP_DETECTION */
         }
+
+#ifdef LASSESB_GCP_LOOP_DETECTION
+        if (!S_GDP_Loop_Detection__TestAndAdd(conn,muxInputPinId,muxNodeId))
+        {
+            PA_DEBUG(("GetConnectedPin: Connection loop or other error - escaping gracefully\n"));
+            S_GDP_Loop_Detection__Destroy();
+            return KSFILTER_NODE;
+        }
+#endif /* LASSESB_GCP_LOOP_DETECTION */
 
         if (forward ? conn->ToNode == KSFILTER_NODE : conn->FromNode == KSFILTER_NODE)
         {
+#ifdef LASSESB_GCP_LOOP_DETECTION
+            S_GDP_Loop_Detection__Destroy();
+#endif /* LASSESB_GCP_LOOP_DETECTION */
             return forward ? conn->ToNodePin : conn->FromNodePin;
         }
         else
@@ -1106,7 +1218,13 @@ static ULONG GetConnectedPin(ULONG startPin, BOOL forward, PaWinWdmFilter* filte
                     conn = fnGetConnection(conn, filter, muxPosition);
                     if (conn == NULL)
                     {
+#ifdef LASSESB_GCP_LOOP_DETECTION
+                        PA_DEBUG(("GetConnectedPin: Erroneous connection list - part 2\n"));
+                        S_GDP_Loop_Detection__Destroy();
+                        return KSFILTER_NODE;
+#else /* LASSESB_GCP_LOOP_DETECTION */
                         break;
+#endif /* LASSESB_GCP_LOOP_DETECTION */
                     }
                     if (muxInputPinId != 0)
                     {
@@ -1120,6 +1238,9 @@ static ULONG GetConnectedPin(ULONG startPin, BOOL forward, PaWinWdmFilter* filte
             }
         }
     }
+#ifdef LASSESB_GCP_LOOP_DETECTION
+    PA_DEBUG(("GetConnectedPin: Timeout reached\n"));
+#endif /* LASSESB_GCP_LOOP_DETECTION */
     return KSFILTER_NODE;
 }
 
