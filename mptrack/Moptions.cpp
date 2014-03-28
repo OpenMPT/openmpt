@@ -796,7 +796,8 @@ void COptionsSampleEditor::OnUndoSizeChanged()
 #if defined(MPT_SETTINGS_CACHE)
 
 BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
-	ON_LBN_DBLCLK(IDC_LIST4,					OnOptionDblClick)
+	ON_LBN_DBLCLK(IDC_LIST4,	OnOptionDblClick)
+	ON_EN_CHANGE(IDC_EDIT1,		OnFindStringChanged)
 END_MESSAGE_MAP()
 
 void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
@@ -816,6 +817,18 @@ static CString FormatSetting(const SettingPath &path, const SettingValue &val)
 }
 
 
+BOOL COptionsAdvanced::PreTranslateMessage(MSG *msg)
+//--------------------------------------------------
+{
+	if(msg->message == WM_KEYDOWN && msg->wParam == VK_RETURN)
+	{
+		OnOptionDblClick();
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
 BOOL COptionsAdvanced::OnInitDialog()
 //-----------------------------------
 {
@@ -828,13 +841,29 @@ BOOL COptionsAdvanced::OnInitDialog()
 void COptionsAdvanced::ReInit()
 //-----------------------------
 {
+	m_List.SetRedraw(FALSE);
 	m_List.ResetContent();
 	m_IndexToPath.clear();
+	CString findStr;
+	GetDlgItemText(IDC_EDIT1, findStr);
+	findStr.MakeLower();
 	for(SettingsContainer::SettingsMap::const_iterator it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
 	{
-		int index = m_List.AddString(FormatSetting(it->first, it->second));
-		m_IndexToPath[index] = it->first;
+		CString str = FormatSetting(it->first, it->second);
+		bool addString = true;
+		if(!findStr.IsEmpty())
+		{
+			CString strLower = str;
+			addString = strLower.MakeLower().Find(findStr) >= 0;
+		}
+		if(addString)
+		{
+			int index = m_List.AddString(str);
+			m_IndexToPath[index] = it->first;
+		}
 	}
+	m_List.SetRedraw(TRUE);
+	m_List.Invalidate(FALSE);
 }
 
 

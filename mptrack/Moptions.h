@@ -76,8 +76,10 @@ protected:
 	virtual void OnOK();
 	virtual BOOL OnSetActive();
 	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL PreTranslateMessage(MSG *msg);
 	afx_msg void OnOptionDblClick();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnFindStringChanged() { ReInit(); }
 
 	void ReInit();
 
