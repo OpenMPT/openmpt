@@ -5,6 +5,15 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### 2014-02-25 - libopenmpt svn
+
+ *  Add experimental support for building libopenmpt with emscripten.
+ *  Iconv is now completely optional and only used on Linux systems by default.
+ *  Added libopenmpt_example_c_stdout.c, an example without requiring
+    PortAudio.
+ *  Fix ping-pong loop behaviour which broke in beta3.
+ *  Smaller playback accuracy improvements.
+
 ### 2014-02-25 - libopenmpt 0.2-beta4
 
  *  [Bug] Makefile: Dependency tracking for the test suite did not work.
