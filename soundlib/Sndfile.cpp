@@ -1979,7 +1979,7 @@ SAMPLEINDEX CSoundFile::GetNextFreeSample(INSTRUMENTINDEX targetInstrument, SAMP
 				// In instrument mode, check whether any instrument references this sample slot. If that is the case, we won't use it as it could lead to unwanted conflicts.
 				// If we are loading the sample *into* an instrument, we should also not consider that instrument's sample map, since it might be inconsistent at this time.
 				bool isReferenced = false;
-				for(INSTRUMENTINDEX ins = 1; ins < GetNumInstruments(); ins++)
+				for(INSTRUMENTINDEX ins = 1; ins <= GetNumInstruments(); ins++)
 				{
 					if(ins == targetInstrument)
 					{
