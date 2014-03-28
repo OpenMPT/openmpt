@@ -881,8 +881,6 @@ BOOL CTrackApp::InitInstance()
 	// Construct auto saver instance, class TrackerSettings expects it being available.
 	CMainFrame::m_pAutoSaver = new CAutoSaver();
 
-	m_pSoundDevicesManager = new SoundDevicesManager();
-
 	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
 	
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
@@ -923,6 +921,7 @@ BOOL CTrackApp::InitInstance()
 	//RegisterExtensions();
 
 	// Load sound APIs
+	m_pSoundDevicesManager = new SoundDevicesManager();
 	if(TrackerSettings::Instance().m_SoundDeviceSettingsUseOldDefaults)
 	{
 		// get the old default device
