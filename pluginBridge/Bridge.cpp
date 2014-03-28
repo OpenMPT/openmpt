@@ -12,7 +12,6 @@
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all but VstFileSelect are currently not supported by OpenMPT)
 // Fix Purity Demo GUI freeze more nicely
 // Optimize out audioMasterProcessEvents the same way as effProcessEvents?
-// Refactoring maybe move the "constructors" of all message types into these types?
 // Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
 // KaramFX EQ breaks sound
 // Maybe don't keep opening and closing aux mem files - but they are rarely needed, so would this actually be worth it?
@@ -550,7 +549,14 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 	//std::cout << "about to dispatch " << msg->opcode << " to effect...";
 	//std::flush(std::cout);
-	msg->result = static_cast<int32_t>(Dispatch(msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt));
+	try
+	{
+		msg->result = static_cast<int32_t>(nativeEffect->dispatcher(nativeEffect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt));
+	} catch(...)
+	{
+		msg->type = MsgHeader::exceptionMsg;
+		return;
+	}
 	//std::cout << "done" << std::endl;
 
 	// Post-fix some opcodes
@@ -650,7 +656,7 @@ void PluginBridge::SetParameter(ParameterMsg *msg)
 		nativeEffect->setParameter(nativeEffect, msg->index, msg->value);
 	} catch(...)
 	{
-		SendErrorMessage(L"Exception in setParameter()!");
+		msg->type = MsgHeader::exceptionMsg;
 	}
 }
 
@@ -663,7 +669,7 @@ void PluginBridge::GetParameter(ParameterMsg *msg)
 		msg->value = nativeEffect->getParameter(nativeEffect, msg->index);
 	} catch(...)
 	{
-		SendErrorMessage(L"Exception in getParameter()!");
+		msg->type = MsgHeader::exceptionMsg;
 	}
 }
 
@@ -906,6 +912,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	case audioMasterOfflineGetCurrentMetaPass:
 		// TODO
 		assert(false);
+		return 0;
 		break;
 
 	case audioMasterSetOutputSampleRate:
@@ -953,6 +960,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		// VstFileSelect* in [ptr]
 		// TODO
 		ptrOut = sizeof(VstFileSelect);
+		return 0;
 		break;
 
 	case audioMasterEditFile:

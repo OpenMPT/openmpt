@@ -91,7 +91,7 @@ AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin)
 		{
 			if(vstPlug->isBridged)
 			{
-				sharedInstance = reinterpret_cast<BridgeWrapper *>(vstPlug->Dispatch(effVendorSpecific, kGetWrapperPointer, 0, nullptr, 0.0f));
+				sharedInstance = reinterpret_cast<BridgeWrapper *>(vstPlug->Dispatch(effVendorSpecific, kVendorOpenMPT, kGetWrapperPointer, nullptr, 0.0f));
 				break;
 			}
 			vstPlug = vstPlug->GetNextInstance();
@@ -117,7 +117,7 @@ AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin)
 // Initialize and launch bridge
 bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *sharedInstace)
 {
-	static uint32 plugId = 0;
+	static uint32_t plugId = 0;
 	plugId++;
 	const DWORD procId = GetCurrentProcessId();
 
@@ -328,6 +328,13 @@ bool BridgeWrapper::SendToBridge(BridgeMessage &sendMsg)
 		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, otherProcess };
 		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
 		addr->CopyFromSharedMemory(sendMsg);
+
+		// Bridge caught an exception while processing this request
+		if(sendMsg.header.type == MsgHeader::exceptionMsg)
+		{
+			throw BridgeException();
+		}
+
 	}
 
 	return (result == WAIT_OBJECT_0);
@@ -351,9 +358,8 @@ void BridgeWrapper::ParseNextMessage()
 				break;
 
 			case MsgHeader::errorMsg:
-				// TODO will deadlock as the main thread is in a waiting state
-				// To reproduce: setChunk with byte size = 0 for otiumfx basslane
-				Reporting::Error(msg->error.str, L"OpenMPT Plugin Bridge");
+				// TODO Showing a message box here will deadlock as the main thread can be in a waiting state
+				//throw BridgeErrorException(msg->error.str);
 				break;
 			}
 
@@ -528,7 +534,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 				const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-events-" + mpt::ToWString(chunkId++);
 				ptrOut = (mapName.length() + 1) * sizeof(wchar_t);
 				PushToVector(dispatchData, *mapName.c_str(), static_cast<size_t>(ptrOut));
-				that->eventMem.Create(mapName.c_str(), events.size() + 1024);
+				that->eventMem.Create(mapName.c_str(), static_cast<uint32_t>(events.size() + 1024));
 
 				opcode = effVendorSpecific;
 				index = kVendorOpenMPT;
@@ -579,7 +585,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		break;
 
 	case effVendorSpecific:
-		if(index == kGetWrapperPointer)
+		if(index == kVendorOpenMPT && value == kGetWrapperPointer)
 		{
 			return ToVstPtr<BridgeWrapper>(that);
 		}

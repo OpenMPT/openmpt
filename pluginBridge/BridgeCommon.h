@@ -230,6 +230,7 @@ struct MsgHeader
 		init,
 		// Management messages, bridge to host
 		errorMsg,
+		exceptionMsg,
 
 		// VST messages, common
 		dispatch,

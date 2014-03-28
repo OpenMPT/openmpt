@@ -31,6 +31,7 @@ public:
 		bin64Bit = 64,
 	};
 
+	// Generic bridge exception
 	class BridgeException : public std::exception
 	{
 	public:
@@ -38,6 +39,17 @@ public:
 		BridgeException() { }
 	};
 	class BridgeNotFoundException : public BridgeException { };
+
+	// Exception from bridge process
+	class BridgeRemoteException
+	{
+	protected:
+		wchar_t *str;
+	public:
+		BridgeRemoteException(const wchar_t *str_) : str(_wcsdup(str_)) { }
+		~BridgeRemoteException() { free(str); }
+		const wchar_t *what() const { return str; }
+	};
 
 public:
 	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
