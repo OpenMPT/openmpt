@@ -69,17 +69,6 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file);
 bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file);
 bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file);
 
-////////////////////////////////////////////////////////////////////////
-// Reverberation
-
-#ifndef NO_REVERB
-
-#define NUM_REVERBTYPES			29
-
-const char *GetReverbPresetName(UINT nPreset);
-
-#endif
-
 typedef void (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
 #include "pattern.h"

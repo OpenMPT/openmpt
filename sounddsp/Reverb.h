@@ -13,6 +13,13 @@
 #ifndef NO_REVERB
 #include "../soundlib/Mixer.h"	// For MIXBUFFERSIZE
 
+////////////////////////////////////////////////////////////////////////
+// Reverberation
+
+#define NUM_REVERBTYPES			29
+
+const char *GetReverbPresetName(UINT nPreset);
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // SW Reverb structures
@@ -148,8 +155,8 @@ private:
 	int g_nLastRvbIn_yr;
 	int g_nLastRvbOut_xl;
 	int g_nLastRvbOut_xr;
-	__int64 gnDCRRvb_Y1;
-	__int64 gnDCRRvb_X1;
+	int64 gnDCRRvb_Y1;
+	int64 gnDCRRvb_X1;
 
 	// Reverb mix buffers
 	SWRVBREFDELAY g_RefDelay;

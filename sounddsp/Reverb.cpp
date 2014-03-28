@@ -624,8 +624,8 @@ void CReverb::X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, uint3
 void CReverb::MMX_ReverbProcessPostFiltering1x(const int *pRvb, int *pDry, uint32 nSamples)
 //-----------------------------------------------------------------------------------------
 {
-	__int64 nDCRRvb_X1 = gnDCRRvb_X1;
-	__int64 nDCRRvb_Y1 = gnDCRRvb_Y1;
+	int64 nDCRRvb_X1 = gnDCRRvb_X1;
+	int64 nDCRRvb_Y1 = gnDCRRvb_Y1;
 	_asm {
 	movq mm4, nDCRRvb_Y1	// mm4 = [ y1r | y1l ]
 	movq mm1, nDCRRvb_X1	// mm5 = [ x1r | x1l ]
@@ -662,8 +662,8 @@ stereodcr:
 void CReverb::MMX_ReverbDCRemoval(int *pBuffer, uint32 nSamples)
 //--------------------------------------------------------------
 {
-	__int64 nDCRRvb_X1 = gnDCRRvb_X1;
-	__int64 nDCRRvb_Y1 = gnDCRRvb_Y1;
+	int64 nDCRRvb_X1 = gnDCRRvb_X1;
+	int64 nDCRRvb_Y1 = gnDCRRvb_Y1;
 	_asm {
 	movq mm4, nDCRRvb_Y1	// mm4 = [ y1r | y1l ]
 	movq mm1, nDCRRvb_X1	// mm5 = [ x1r | x1l ]
