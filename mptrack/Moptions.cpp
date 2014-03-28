@@ -893,12 +893,18 @@ void COptionsAdvanced::OnOptionDblClick()
 	}
 	const SettingPath path = m_IndexToPath[index];
 	SettingValue val = theApp.GetSettings().GetMap().find(path)->second;
-	CInputDlg inputDlg(this, mpt::ToCString(path.FormatAsString()), mpt::ToCString(val.FormatValueAsString()));
-	if(inputDlg.DoModal() != IDOK)
+	if(val.GetType() == SettingTypeBool)
 	{
-		return;
+		val = !val.as<bool>();
+	} else
+	{
+		CInputDlg inputDlg(this, mpt::ToCString(path.FormatAsString()), mpt::ToCString(val.FormatValueAsString()));
+		if(inputDlg.DoModal() != IDOK)
+		{
+			return;
+		}
+		val.SetFromString(mpt::ToWide(inputDlg.resultString));
 	}
-	val.SetFromString(mpt::ToWide(inputDlg.resultString));
 	theApp.GetSettings().Write(path, val);
 	m_List.DeleteString(index);
 	m_List.InsertString(index, FormatSetting(path, val));
