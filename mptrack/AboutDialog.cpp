@@ -57,6 +57,10 @@ CRippleBitmap::CRippleBitmap()
 CRippleBitmap::~CRippleBitmap()
 //-----------------------------
 {
+	if(!showMouse)
+	{
+		ShowCursor(TRUE);
+	}
 	delete bitmapSrc;
 	delete bitmapTarget;
 	if(instance == this) instance = nullptr;
@@ -113,11 +117,13 @@ void CRippleBitmap::OnPaint()
 {
 	CPaintDC dc(this);
 
-	SetDIBitsToDevice(dc.m_hDC,
-		0, 0,
-		bitmapTarget->width, bitmapTarget->height, 0, 0,
-		0, bitmapTarget->height,
-		bitmapTarget->GetPixels(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
+	CRect rect;
+	GetClientRect(rect);
+	StretchDIBits(dc.m_hDC,
+		0, 0, rect.Width(), rect.Height(),
+		0, 0, bitmapTarget->width, bitmapTarget->height,
+		bitmapTarget->GetPixels(),
+		reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS, SRCCOPY);
 }
 
 
