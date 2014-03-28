@@ -358,8 +358,8 @@ public:
 	Setting<MODTYPE> defaultModType;
 	Setting<PLUGVOLUMEHANDLING> DefaultPlugVolumeHandling;
 	Setting<bool> autoApplySmoothFT2Ramping;
-	Setting<bool> MiscITCompressionStereo;
-	Setting<bool> MiscITCompressionMono;
+	Setting<uint32> MiscITCompressionStereo; // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
+	Setting<uint32> MiscITCompressionMono;   // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
 
 	// Sound Settings
 	
