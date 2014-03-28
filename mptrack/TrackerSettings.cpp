@@ -166,6 +166,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SoundSettingsOpenDeviceAtStartup(conf, "Sound Settings", "OpenDeviceAtStartup", false)
 	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDeviceStopModeClosed)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
+	, m_SoundDeviceID_DEPRECATED(SoundDeviceID())
 	, m_SoundDeviceIdentifier(conf, "Sound Settings", "Device", std::wstring())
 	, MixerMaxChannels(conf, "Sound Settings", "MixChannels", MixerSettings().m_nMaxMixChannels)
 	, MixerDSPMask(conf, "Sound Settings", "Quality", MixerSettings().DSPMask)
@@ -411,7 +412,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			{
 				if(m_BufferLength_DEPRECATED < 1) m_BufferLength_DEPRECATED = 1; // 1ms
 				if(m_BufferLength_DEPRECATED > 1000) m_BufferLength_DEPRECATED = 1000; // 1sec
-				if(GetSoundDeviceID().GetType() == SNDDEV_ASIO)
+				if(m_SoundDeviceID_DEPRECATED.GetType() == SNDDEV_ASIO)
 				{
 					m_LatencyMS = m_BufferLength_DEPRECATED;
 					m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
