@@ -1676,6 +1676,7 @@ void CModTree::FillInstrumentLibrary()
 					SHFILEINFOW fileInfo;
 					SHGetFileInfoW(s, 0, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_SMALLICON);
 					ModTreeInsert(s, images.Add(fileInfo.hIcon));
+					DestroyIcon(fileInfo.hIcon);
 				}
 			}
 		}
