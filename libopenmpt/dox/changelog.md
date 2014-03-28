@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### 2014-02-25 - libopenmpt svn
+### libopenmpt svn
 
  *  Add experimental support for building libopenmpt with emscripten.
  *  Iconv is now completely optional and only used on Linux systems by default.
@@ -13,6 +13,11 @@ is just a high-level summary.
     PortAudio.
  *  Fix ping-pong loop behaviour which broke in beta3.
  *  Smaller playback accuracy improvements.
+
+ *  [Bug] openmpt123: Crash when quitting while playback is stopped.
+ *  [Bug] openmpt123: Crash when writing output to a file in interactive UI
+    mode.
+ *  [Bug] openmpt123: Wrong FLAC output filename in --render mode.
 
 ### 2014-02-25 - libopenmpt 0.2-beta4
 
