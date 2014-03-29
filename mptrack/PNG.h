@@ -23,12 +23,13 @@ namespace PNG
 	struct Bitmap
 	{
 		const uint32_t width, height;
-		std::vector<Pixel> pixels;
+		Pixel *pixels;
 
-		Bitmap(uint32_t width, uint32_t height) : width(width), height(height), pixels(width * height) { }
+		Bitmap(uint32_t width, uint32_t height) : width(width), height(height), pixels(new Pixel[width * height]) { }
+		~Bitmap() { delete[] pixels; }
 
-		Pixel *GetPixels() { ASSERT(!pixels.empty()); return &pixels[0]; }
-		const Pixel *GetPixels() const { ASSERT(!pixels.empty()); return &pixels[0]; }
+		Pixel *GetPixels() { ASSERT(width && height && pixels); return pixels; }
+		const Pixel *GetPixels() const { ASSERT(width && height && pixels); return pixels; }
 		uint32_t GetNumPixels() const { return width * height; }
 
 		// Create a DIB for the current device from our PNG.

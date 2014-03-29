@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Mptrack.h"
+#include "resource.h"
 #include "AboutDialog.h"
 #include "PNG.h"
 #include "../common/version.h"

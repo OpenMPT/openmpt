@@ -582,6 +582,7 @@ const int8 ft2VibratoTable[256] =
 
 
 
+// Apart from a few small differences, this table seems to contain elements with a difference of 59.
 const uint32 FineLinearSlideUpTable[16] =
 {
 	65536, 65595, 65654, 65714,	65773, 65832, 65892, 65951,
@@ -589,6 +590,7 @@ const uint32 FineLinearSlideUpTable[16] =
 };
 
 
+// Apart from a few small differences, this table seems to contain elements with a difference of 59.
 const uint32 FineLinearSlideDownTable[16] =
 {
 	65535, 65477, 65418, 65359, 65300, 65241, 65182, 65123,
@@ -737,7 +739,7 @@ const uint16 XMPanningTable[256] =
 };
 
 
-// Reversed sinc coefficients for 4x256 taps polyphase FIR resampling filter
+// Reversed sinc coefficients for 4x256 taps polyphase FIR resampling filter (SchismTracker's lutgen.c should generate a very similar table, but it's more precise)
 const int16 CResampler::FastSincTable[256*4] =
 { // Cubic Spline
     0, 16384,     0,     0,   -31, 16383,    32,     0,   -63, 16381,    65,     0,   -93, 16378,   100,    -1, 

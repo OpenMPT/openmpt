@@ -724,7 +724,7 @@ BOOL COptionsSampleEditor::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	SetDlgItemInt(IDC_EDIT_FINETUNE, TrackerSettings::Instance().m_nFinetuneStep);
 	SetDlgItemInt(IDC_EDIT_UNDOSIZE, TrackerSettings::Instance().m_SampleUndoBufferSize.Get().GetSizeInPercent());
-	OnUndoSizeChanged();
+	RecalcUndoSize();
 
 	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("FLAC"), dfFLAC);
 	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("WAV"), dfWAV);
@@ -785,6 +785,14 @@ BOOL COptionsSampleEditor::OnSetActive()
 
 void COptionsSampleEditor::OnUndoSizeChanged()
 //--------------------------------------------
+{
+	RecalcUndoSize();
+	OnSettingsChanged();
+}
+
+
+void COptionsSampleEditor::RecalcUndoSize()
+//-----------------------------------------
 {
 	uint32 sizeMB = mpt::saturate_cast<uint32>(SampleUndoBufferSize(GetDlgItemInt(IDC_EDIT_UNDOSIZE)).GetSizeInBytes() >> 20);
 	CString text;
