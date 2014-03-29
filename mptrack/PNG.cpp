@@ -88,8 +88,9 @@ PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 			size_t numEntries = std::min<size_t>(256u, chunk.GetLength() / 3u);
 			for(size_t i = 0; i < numEntries; i++)
 			{
-				uint8_t r = chunk.ReadUint8(), g = chunk.ReadUint8(), b = chunk.ReadUint8();
-				palette[i] = Pixel(r, g, b, 255);
+				uint8_t p[3];
+				chunk.ReadArray(p);
+				palette[i] = Pixel(p[0], p[1], p[2], 255);
 			}
 		}
 	}

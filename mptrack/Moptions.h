@@ -147,6 +147,8 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnSetActive();
 
+	void RecalcUndoSize();
+
 	afx_msg void OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* /*pScrollBar*/) { OnSettingsChanged(); }
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnUndoSizeChanged();
