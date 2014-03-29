@@ -1,5 +1,5 @@
 ******************
-*  OpenMPT 1.22  *
+*  OpenMPT 1.23  *
 ******************
 
 
@@ -62,11 +62,13 @@ ExampleSongs (folder): A set of module files which should give an impression of
     what can be done in OpenMPT with only a few kilobytes.
 History.txt: Version history.
 mptrack.exe: Main executable.
+PluginBridge32.exe: Plugin bridge server for 32-bit VST plugins.
+PluginBridge64.exe: Plugin bridge server for 64-bit VST plugins.
 open_settings_folder.bat: Opens settings folder (%APPDATA\OpenMPT).
 OpenMPT_SoundTouch_f32.dll: SoundTouch library used in time stretching feature.
-readme.txt: this document
+readme.txt: This document
 unmo3.dll: Used in MO3-file import.
-OMPT_1.20_ReleaseNotes.html: Release notes for this version.
+OMPT_1.23_ReleaseNotes.html: Release notes for this version.
 
 
 License
@@ -115,7 +117,7 @@ information.
 
 unmo3.dll
 ---------
-Copyright (c) 2001-2011 Ian Luck. All rights reserved
+Copyright (c) 2001-2014 Ian Luck. All rights reserved
 
 The MO3 software is free for non-commercial use; if anyone tries to
 charge you for it, kick 'em where it hurts!

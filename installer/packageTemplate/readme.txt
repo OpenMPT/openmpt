@@ -1,5 +1,5 @@
 ******************
-*  OpenMPT 1.22  *
+*  OpenMPT 1.23  *
 ******************
 
 
@@ -47,17 +47,20 @@ ExampleSongs (folder): A set of module files which should give an impression of
     what can be done in OpenMPT with only a few kilobytes.
 History.txt: Version history.
 mptrack.exe: Main executable.
+PluginBridge32.exe: Plugin bridge server for 32-bit VST plugins.
+PluginBridge64.exe: Plugin bridge server for 64-bit VST plugins.
 OpenMPT_SoundTouch_f32.dll: SoundTouch library used in time stretching feature.
-readme.txt: this document
+readme.txt: This document
 unmo3.dll: Used in MO3-file import.
-OMPT_1.20_ReleaseNotes.html: Release notes for this version.
+OMPT_1.23_ReleaseNotes.html: Release notes for this version.
+
 
 License
 -------
 
 OpenMPT is partially under the following license:
 
-> Copyright (c) 2004-2013, OpenMPT contributors
+> Copyright (c) 2004-2014, OpenMPT contributors
 > Copyright (c) 1997-2003, Olivier Lapicque
 > All rights reserved.
 >
@@ -98,7 +101,7 @@ information.
 
 unmo3.dll
 ---------
-Copyright (c) 2001-2011 Ian Luck. All rights reserved
+Copyright (c) 2001-2014 Ian Luck. All rights reserved
 
 The MO3 software is free for non-commercial use; if anyone tries to
 charge you for it, kick 'em where it hurts!
@@ -152,3 +155,43 @@ libmpg123
 OpenMPT makes use of libmpg123, which is released under the LGPL license.
 A copy of the LGPL license can be found in SoundTouch\COPYING.TXT
 Visit http://mpg123.de/ for more information.
+
+lhasa
+-----
+OpenMPT makes use of lhasa, which is released under the ISC license.
+Visit https://github.com/fragglet/lhasa for more information.
+
+UnRAR
+-----
+OpenMPT makes use of the UnRAR library by Alexander L. Roshal.
+
+      The source code of UnRAR utility is freeware. This means:
+
+   1. All copyrights to RAR and the utility UnRAR are exclusively
+      owned by the author - Alexander Roshal.
+
+   2. UnRAR source code may be used in any software to handle
+      RAR archives without limitations free of charge, but cannot be
+      used to develop RAR (WinRAR) compatible archiver and to
+      re-create RAR compression algorithm, which is proprietary.
+      Distribution of modified UnRAR source code in separate form
+      or as a part of other software is permitted, provided that
+      full text of this paragraph, starting from "UnRAR source code"
+      words, is included in license, or in documentation if license
+      is not available, and in source code comments of resulting package.
+
+   3. The UnRAR utility may be freely distributed. It is allowed
+      to distribute UnRAR inside of other software packages.
+
+   4. THE RAR ARCHIVER AND THE UnRAR UTILITY ARE DISTRIBUTED "AS IS".
+      NO WARRANTY OF ANY KIND IS EXPRESSED OR IMPLIED.  YOU USE AT 
+      YOUR OWN RISK. THE AUTHOR WILL NOT BE LIABLE FOR DATA LOSS, 
+      DAMAGES, LOSS OF PROFITS OR ANY OTHER KIND OF LOSS WHILE USING
+      OR MISUSING THIS SOFTWARE.
+
+   5. Installing and using the UnRAR utility signifies acceptance of
+      these terms and conditions of the license.
+
+   6. If you don't agree with terms of the license you must remove
+      UnRAR files from your storage devices and cease to use the
+      utility.
