@@ -79,7 +79,7 @@ namespace MptVersion
 	std::string GetRevisionString(); // e.g. "-r1234+"
 
 	// Returns MptVersion::str if the build is a clean release build straight from the repository or an extended strin otherwise (if built from a svn working copy and tsvn was available during build)
-	std::string GetVersionStringExtended(); // e.g. "1.17.02.08-r1234+ DEBUG"
+	std::string GetVersionStringExtended(); // e.g. "1.17.02.08-r1234+ 32 bit DEBUG"
 
 	// Returns a string combining the repository url and the revision, suitable for checkout if the working copy was clean (if built from a svn working copy and tsvn was available during build)
 	std::string GetVersionUrlString(); // e.g. "https://svn.code.sf.net/p/modplug/code/trunk/OpenMPT@1234+dirty"
