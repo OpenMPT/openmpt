@@ -89,7 +89,7 @@ public:
 			state.Chn[chn].nOldHiOffset = 0;
 			state.Chn[chn].nOldGlobalVolSlide = 0;
 			state.Chn[chn].nOldChnVolSlide = 0;
-			state.Chn[chn].nNewNote = state.Chn[chn].nLastNote = NOTE_NONE;
+			state.Chn[chn].nNote = state.Chn[chn].nNewNote = state.Chn[chn].nLastNote = NOTE_NONE;
 		}
 	}
 };
@@ -142,7 +142,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 			}
 			if(seekPat != PATTERNINDEX_INVALID)
 			{
-				ModCommand &m = *Patterns[seekPat].GetpModCommand(target.pos.row, i);
+				const ModCommand &m = *Patterns[seekPat].GetpModCommand(target.pos.row, i);
 				if(m.note == NOTE_NOTECUT || m.note == NOTE_KEYOFF || (m.note == NOTE_FADE && GetNumInstruments())
 					|| (m.IsNote() && m.command != CMD_TONEPORTAMENTO && m.command != CMD_TONEPORTAVOL && m.volcmd != VOLCMD_TONEPORTAMENTO))
 				{
@@ -165,7 +165,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		PATTERNINDEX nPattern = Order[nCurrentOrder];
 		bool positionJumpOnThisRow = false;
 		bool patternBreakOnThisRow = false;
-		bool patternLoopEndedOnThisRow = false;
+		bool patternLoopEndedOnThisRow = false, patternLoopStartedOnThisRow = false;
 
 		if(nPattern == Order.GetIgnoreIndex() && target.mode == GetLengthTarget::SeekPosition && nCurrentOrder == target.pos.order)
 		{
@@ -354,12 +354,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 			case CMD_TEMPO:
 				if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
-					if (param) pChn->nOldTempo = (BYTE)param; else param = pChn->nOldTempo;
+					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
 				}
 				if (param >= 0x20) memory.state.m_nMusicTempo = param; else
 				{
 					// Tempo Slide
-					uint32 tempoDiff = (param & 0x0F)  * (memory.state.m_nMusicSpeed - 1);
+					uint32 tempoDiff = (param & 0x0F) * (memory.state.m_nMusicSpeed - 1);
 					if ((param & 0xF0) == 0x10)
 					{
 						memory.state.m_nMusicTempo += tempoDiff;
@@ -418,6 +418,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 							memory.chnSettings[c].patLoop = memory.elapsedTime;
 							memory.chnSettings[c].patLoopStart = nRow;
 						}
+						patternLoopStartedOnThisRow = true;
 					}
 				}
 				break;
@@ -436,6 +437,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 						patternLoopEndedOnThisRow = true;
 					} else
 					{
+						patternLoopStartedOnThisRow = true;
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
 						memory.chnSettings[nChn].patLoopStart = nRow;
 					}
@@ -578,7 +580,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		if(adjustSamplePos)
 		{
 			// Super experimental and dirty sample seeking
-			const ModCommand::COMMAND forbiddenCommands[] = { CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_VOLUMESLIDE, CMD_VIBRATOVOL, CMD_TONEPORTAVOL, CMD_XFINEPORTAUPDOWN, CMD_NOTESLIDEUP, CMD_NOTESLIDEUPRETRIG, CMD_NOTESLIDEDOWN, CMD_NOTESLIDEDOWNRETRIG };
+			const ModCommand::COMMAND forbiddenCommands[] = { CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_VOLUMESLIDE, CMD_VIBRATOVOL, CMD_TONEPORTAVOL, CMD_XFINEPORTAUPDOWN, CMD_NOTESLIDEUP, CMD_NOTESLIDEUPRETRIG, CMD_NOTESLIDEDOWN, CMD_NOTESLIDEDOWNRETRIG };
 			const ModCommand::VOLCMD forbiddenVolCommands[] = { VOLCMD_PORTAUP, VOLCMD_PORTADOWN, VOLCMD_TONEPORTAMENTO, VOLCMD_VOLSLIDEUP, VOLCMD_VOLSLIDEDOWN, VOLCMD_FINEVOLUP, VOLCMD_FINEVOLDOWN };
 
 			pChn = memory.state.Chn;
@@ -591,7 +593,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				uint32 startTick = 0;
 				uint32 paramHi = p->param >> 4, paramLo = p->param & 0x0F;
 				bool porta = p->command == CMD_TONEPORTAMENTO /*|| p->command CMD_TONEPORTAVOL || p->volcmd == VOLCMD_TONEPORTAMENTO*/; // Volume column tone portamento can be crazy, and CMD_TONEPORTAVOL requires volume slides which we don't emulate right now.
-				bool stopNote = false;
+				bool stopNote = patternLoopStartedOnThisRow;	// It's too much trouble to keep those pattern loops in sync...
 
 				if(p->IsNote())
 				{
@@ -616,7 +618,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				} else if(p->volcmd == VOLCMD_OFFSET)
 				{
 					if(p->vol != 0) pChn->nOldOffset = p->vol << 3;
-					if(p->IsNote()) pChn->nPos = (pChn->nOldHiOffset<< 16) + (pChn->nOldOffset << 8);
+					if(p->IsNote()) pChn->nPos = (pChn->nOldHiOffset << 16) + (pChn->nOldOffset << 8);
 				}
 
 				if(p->note == NOTE_KEYOFF || p->note == NOTE_NOTECUT || (p->note == NOTE_FADE && GetNumInstruments())
@@ -642,6 +644,23 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				} else if(p->volcmd == VOLCMD_PANNING)
 				{
 					pChn->nPan = p->vol * 4;
+				}
+				if(p->command == CMD_S3MCMDEX)
+				{
+					if(p->param == 0x9E)
+					{
+						// Play forward
+						pChn->dwFlags.reset(CHN_PINGPONGFLAG);
+					} else if(p->param == 0x9F)
+					{
+						// Reverse
+						pChn->dwFlags.set(CHN_PINGPONGFLAG);
+						if(!pChn->nPos && pChn->nLength && (p->IsNote() || !pChn->dwFlags[CHN_LOOP]))
+						{
+							pChn->nPos = pChn->nLength - 1;
+							pChn->nPosLo = 0xFFFF;
+						}
+					}
 				}
 
 				if(pChn->nInc != 0 && pChn->pModSample && !stopNote)
@@ -683,7 +702,6 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 					}
 				}
 
-
 				if(pChn->nInc != 0 && pChn->pModSample && !stopNote)
 				{
 					// Increment playback position of sample and envelopes
@@ -703,14 +721,16 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 
 						if(updateInc) pChn->nInc = GetChannelIncrement(pChn, pChn->nPeriod, 0);
 
-						pChn->nPosLo += pChn->nInc * tickDuration;
-						pChn->nPos += (pChn->nPosLo >> 16);
+						int32 inc = pChn->nInc;
+						if(pChn->dwFlags[CHN_PINGPONGFLAG]) inc = -inc;
+						pChn->nPosLo += inc * tickDuration;
+						pChn->nPos += ((int32)pChn->nPosLo >> 16);
 						pChn->nPosLo &= 0xFFFF;
 					}
 					if(pChn->pModSample->uFlags[CHN_SUSTAINLOOP | CHN_LOOP])
 					{
 						// Check if we exceeded the sample loop.
-						if(pChn->dwFlags[CHN_PINGPONGFLAG] && pChn->nPos >= pChn->nLoopEnd)
+						if(pChn->dwFlags[CHN_PINGPONGLOOP] && pChn->nPos >= pChn->nLoopEnd)
 						{
 							// Ping-pong loops are not supported for now.
 							stopNote = true;
@@ -4278,7 +4298,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		{
 			// F0.F0.{80|n}.xx / F0.F1.n.xx: Set VST effect parameter n to xx
 			const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
-			const UINT plugParam = isExtended ? (0x80 + macroCode) : (macroCode & 0x7F);
+			const uint32 plugParam = isExtended ? (0x80 + macroCode) : (macroCode & 0x7F);
 			if((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 			{
 				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
@@ -4289,7 +4309,7 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 						pPlugin->SetZxxParameter(plugParam, param & 0x7F);
 					} else
 					{
-						pPlugin->SetZxxParameter(plugParam, (UINT)CalculateSmoothParamChange((float)pPlugin->GetZxxParameter(plugParam), (float)(param & 0x7F)));
+						pPlugin->SetZxxParameter(plugParam, (uint32)CalculateSmoothParamChange((float)pPlugin->GetZxxParameter(plugParam), (float)(param & 0x7F)));
 					}
 				}
 			}

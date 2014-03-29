@@ -314,7 +314,7 @@ public:
 	void EnterAftertouch(int note, int atValue);
 
 	// Construct a chord from the chord presets. Returns number of notes in chord.
-	static int ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote);
+	int ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote);
 
 	void QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const;
 	PATTERNINDEX GetNextPattern() const;
