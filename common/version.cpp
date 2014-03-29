@@ -236,7 +236,7 @@ std::string GetRevisionString()
 	{
 		return str;
 	}
-	str = std::string("-r") + Stringify(GetRevision());
+	str = std::string("-r") + mpt::ToString(GetRevision());
 	if(HasMixedRevisions())
 	{
 		str += "!";
@@ -258,6 +258,12 @@ std::string GetVersionStringExtended()
 	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
 	{
 		retval += GetRevisionString();
+	}
+	#ifdef MODPLUG_TRACKER
+		retval += mpt::String::Print(" %1 bit", sizeof(void*) * 8);
+	#endif
+	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
+	{
 		retval += GetBuildFlagsString();
 		#ifdef MODPLUG_TRACKER
 			retval += GetBuildFeaturesString();
@@ -282,7 +288,7 @@ std::string GetVersionUrlString()
 	{
 		url = url.substr(baseurl.length());
 	}
-	return url + "@" + Stringify(GetRevision()) + GetStateString();
+	return url + "@" + mpt::ToString(GetRevision()) + GetStateString();
 }
 
 std::string GetContactString()
