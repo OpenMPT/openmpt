@@ -938,7 +938,7 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 	for(size_t i = 0; i < CountOf(chords); i++)
 	{
 		uint32 chord;
-		if((chord = conf.Read<int32>("Chords", CSoundFile::GetNoteName(ModCommand::NOTE(i + NOTE_MIN)), -1)) >= 0)
+		if((chord = conf.Read<int32>("Chords", CSoundFile::GetNoteName(ModCommand::NOTE(i + NOTE_MIN)), -1)) != uint32(-1))
 		{
 			if((chord & 0xFFFFFFC0) || (!chords[i].notes[0]))
 			{

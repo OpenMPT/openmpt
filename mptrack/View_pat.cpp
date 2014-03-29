@@ -5333,8 +5333,12 @@ int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord
 		return 0;
 	}
 
-	int numNotes = 1;
-	outNotes[0] = key;
+	int numNotes = 0;
+	const CModSpecifications &specs = GetSoundFile()->GetModSpecifications();
+	if(specs.HasNote(key))
+	{
+		outNotes[numNotes++] = key;
+	}
 
 	for(size_t i = 0; i < CountOf(chord.notes); i++)
 	{
@@ -5347,7 +5351,7 @@ int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord
 				note = (note / 12) * 12;
 			}
 			note += chord.notes[i];
-			if(ModCommand::IsNote(note))
+			if(specs.HasNote(note))
 			{
 				outNotes[numNotes++] = note;
 			}
