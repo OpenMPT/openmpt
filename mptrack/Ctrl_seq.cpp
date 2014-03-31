@@ -332,7 +332,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				sndFile.m_PlayState.m_nNextRow = 0;
 
 				// update channel parameters and play time
-				m_pModDoc.SetElapsedTime(m_nScrollPos, 0, true);
+				m_pModDoc.SetElapsedTime(m_nScrollPos, 0, !sndFile.m_SongFlags[SONG_PAUSED | SONG_STEP]);
 
 				changedPos = true;
 			} else if(m_pParent.GetFollowSong())
