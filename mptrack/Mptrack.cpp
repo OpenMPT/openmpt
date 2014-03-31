@@ -1033,7 +1033,7 @@ void CTrackApp::OnFileNew()
 	const mpt::PathString templateFile = TrackerSettings::Instance().defaultTemplateFile;
 	if(!templateFile.empty())
 	{
-		const mpt::PathString dirs[] = { GetConfigPath(), GetAppDirPath(), mpt::PathString() };
+		const mpt::PathString dirs[] = { GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\"), mpt::PathString() };
 		for(size_t i = 0; i < CountOf(dirs); i++)
 		{
 			if(Util::sdOs::IsPathFileAvailable(dirs[i] + templateFile, Util::sdOs::FileModeExists))

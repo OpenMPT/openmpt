@@ -317,6 +317,7 @@ public:
 	int ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote);
 
 	void QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const;
+	PATTERNINDEX GetPrevPattern() const;
 	PATTERNINDEX GetNextPattern() const;
 
 	void SetSpacing(int n);

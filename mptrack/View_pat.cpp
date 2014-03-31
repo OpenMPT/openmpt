@@ -389,10 +389,7 @@ void CViewPattern::SetModified(bool updateAllViews)
 	if(pModDoc != nullptr)
 	{
 		pModDoc->SetModified();
-		if(updateAllViews)
-		{
-			pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
-		}
+		pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), updateAllViews ? nullptr : this);
 	}
 }
 
@@ -1332,7 +1329,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 					SetCurrentPattern(m_nPattern);
 				}
 				InvalidatePattern(true);
-				pModDoc->SetModified();
+				SetModified(false);
 			}
 		}
 		break;
@@ -1688,7 +1685,7 @@ void CViewPattern::ResetChannel(CHANNELINDEX chn)
 void CViewPattern::OnMuteFromClick()
 //----------------------------------
 {
-	OnMuteChannel(false);
+	OnMuteChannel(m_MenuCursor.GetChannel());
 }
 
 
@@ -3129,7 +3126,7 @@ void CViewPattern::OnDropSelection()
 	SetCursorPosition(begin);
 	SetCurSel(destination);
 	InvalidatePattern();
-	pModDoc->SetModified();
+	SetModified(false);
 	EndWaitCursor();
 }
 
@@ -3323,7 +3320,6 @@ void CViewPattern::UndoRedo(bool undo)
 		PATTERNINDEX pat = undo ? pModDoc->GetPatternUndo().Undo() : pModDoc->GetPatternUndo().Redo();
 		if(pat < pModDoc->GetSoundFile()->Patterns.Size())
 		{
-			pModDoc->SetModified();
 			if(pat != m_nPattern)
 			{
 				// Find pattern in sequence.
@@ -3337,6 +3333,7 @@ void CViewPattern::UndoRedo(bool undo)
 			{
 				InvalidatePattern(true);
 			}
+			SetModified(false);
 			SanitizeCursor();
 		}
 	}
@@ -4916,7 +4913,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		pTarget->vol = 0;
 	}
 
-	pModDoc->SetModified();
+	SetModified(false);
 
 	if(editPos.pattern == m_nPattern)
 	{
@@ -5246,7 +5243,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 
 		if(modified) // Has it really changed?
 		{
-			pModDoc->SetModified();
+			SetModified(false);
 			if(editPos.pattern == m_nPattern)
 				InvalidateCell(sel);
 			else
@@ -5444,7 +5441,7 @@ void CViewPattern::TempEnterChord(int note)
 			{
 				rowBase[n] = newRow[n];
 			}
-			pModDoc->SetModified();
+			SetModified(false);
 			InvalidateRow();
 			UpdateIndicator();
 		}
@@ -5644,6 +5641,28 @@ void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
 			row = sndFile->Patterns[pat].GetNumRows() - 1;
 		}
 	}
+}
+
+
+// Get previous pattern in order list
+PATTERNINDEX CViewPattern::GetPrevPattern() const
+//-----------------------------------------------
+{
+	const CSoundFile *sndFile = GetSoundFile();
+	if(sndFile != nullptr)
+	{
+		const ORDERINDEX curOrder = GetCurrentOrder();
+		if(curOrder > 0 && m_nPattern == sndFile->Order[curOrder])
+		{
+			const ORDERINDEX nextOrder = sndFile->Order.GetPreviousOrderIgnoringSkips(curOrder);
+			const PATTERNINDEX nextPat = sndFile->Order[nextOrder];
+			if(sndFile->Patterns.IsValidPat(nextPat) && sndFile->Patterns[nextPat].GetNumRows())
+			{
+				return nextPat;
+			}
+		}
+	}
+	return PATTERNINDEX_INVALID;
 }
 
 
@@ -6826,7 +6845,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	if(result)
 	{
 		GetDocument()->SetModified();
-		GetDocument()->UpdateAllViews(NULL, HINT_MODSEQUENCE | HINT_PATTERNDATA | (pos.pattern << HINT_SHIFT_PAT), NULL);
+		GetDocument()->UpdateAllViews(NULL, HINT_MODSEQUENCE | HINT_PATTERNDATA | (pos.pattern << HINT_SHIFT_PAT), nullptr);
 	}
 
 	return result;
