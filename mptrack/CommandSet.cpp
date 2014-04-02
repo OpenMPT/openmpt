@@ -486,9 +486,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleLoad, 1673, _T("Load Sample"));
 	DefineKeyCommand(kcSampleSave, 1674, _T("Save Sample"));
 	DefineKeyCommand(kcSampleNew, 1675, _T("New Sample"));
-	DefineKeyCommand(kcSampleCtrlLoad, 1676, _T("Load Sample"), kcHidden);
-	DefineKeyCommand(kcSampleCtrlSave, 1677, _T("Save Sample"), kcHidden);
-	DefineKeyCommand(kcSampleCtrlNew, 1678, _T("New Sample"), kcHidden);
+	//DefineKeyCommand(kcSampleCtrlLoad, 1676, _T("Load Sample"), kcHidden);
+	//DefineKeyCommand(kcSampleCtrlSave, 1677, _T("Save Sample"), kcHidden);
+	//DefineKeyCommand(kcSampleCtrlNew, 1678, _T("New Sample"), kcHidden);
 	DefineKeyCommand(kcInstrumentLoad, 1679, _T("Load an instrument"), kcHidden);
 	DefineKeyCommand(kcInstrumentSave, 1680, _T("Save instrument"), kcHidden);
 	DefineKeyCommand(kcInstrumentNew, 1681, _T("New instrument"), kcHidden);
@@ -655,6 +655,10 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSelectEvent, 1904, _T("Select Event"));
 	DefineKeyCommand(kcEditRedo, 1905, _T("Redo"));
 	DefineKeyCommand(kcFileAppend, 1906, _T("File/Append Module"));
+	DefineKeyCommand(kcSampleTransposeUp, 1907, _T("Transpose +1"));
+	DefineKeyCommand(kcSampleTransposeDown, 1908, _T("Transpose -1"));
+	DefineKeyCommand(kcSampleTransposeOctUp, 1909, _T("Transpose +12"));
+	DefineKeyCommand(kcSampleTransposeOctDown, 1910, _T("Transpose -12"));
 
 	// Add new key commands here.
 

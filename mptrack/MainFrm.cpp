@@ -2474,9 +2474,18 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				return m_pOrderlistHasFocus->PostMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 
 			//Else send it to the active view
-			CView* pView = GetActiveView();
-			if (pView)
-				return pView->PostMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
+			CMDIChildWnd *pMDIActive = MDIGetActive();
+			CWnd *wnd = nullptr;
+			if(pMDIActive)
+			{
+				wnd = pMDIActive->GetActiveView();
+				// Hack: If the upper view is active, we only get the "container" (the dialog view with the tabs), not the view itself.
+				if(!strcmp(wnd->GetRuntimeClass()->m_lpszClassName, "CModControlView"))
+				{
+					wnd = static_cast<CModControlView *>(wnd)->GetCurrentControlDlg();
+				}
+			}
+			if(wnd) return wnd->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 	}
 
 	return wParam;
