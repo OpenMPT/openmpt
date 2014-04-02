@@ -3856,6 +3856,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if(!liveRecord)
 			InvalidateRow(editpos.row);
 		pMainFrm->ThreadSafeSetModified(pModDoc);
+		pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (editpos.pattern << HINT_SHIFT_PAT), this);
 	}
 
 	if(captured)
@@ -3920,13 +3921,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 					m.command = CMD_SMOOTHMIDI;
 					m.param = nByte2;
 					pMainFrm->ThreadSafeSetModified(pModDoc);
+					pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (editpos.pattern << HINT_SHIFT_PAT), this);
 
 					// Update GUI only if not recording live.
 					if(!liveRecord)
 						InvalidateRow(editpos.row);
 				}
 			}
-
+			MPT_FALLTHROUGH;
 		default:
 			if(event == MIDIEvents::evSystem && TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS)
 			{

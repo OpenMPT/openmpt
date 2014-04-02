@@ -131,7 +131,7 @@ protected:
 	////////////////////////
 	// Misc stuff
 	void UpdateScrollSize();
-	void SetInstrumentModified();
+	void SetModified(DWORD mask, bool updateAll);
 	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes m_nEnv = ENV_VOLUME);
 	ModInstrument *GetInstrumentPtr() const;
 	InstrumentEnvelope *GetEnvelopePtr() const;

@@ -396,7 +396,7 @@ void CNoteMapWnd::OnMapCopyNote()
 		}
 		if (bModified)
 		{
-			m_pParent.SetInstrumentModified();
+			m_pParent.SetModified(HINT_INSTRUMENT, false);
 			InvalidateRect(NULL, FALSE);
 		}
 	}
@@ -417,7 +417,7 @@ void CNoteMapWnd::OnMapCopySample()
 		}
 		if (bModified)
 		{
-			m_pParent.SetInstrumentModified();
+			m_pParent.SetModified(HINT_INSTRUMENT, false);
 			InvalidateRect(NULL, FALSE);
 		}
 	}
@@ -438,7 +438,7 @@ void CNoteMapWnd::OnMapReset()
 		}
 		if (bModified)
 		{
-			m_pParent.SetInstrumentModified();
+			m_pParent.SetModified(HINT_INSTRUMENT, false);
 			InvalidateRect(NULL, FALSE);
 		}
 	}
@@ -480,7 +480,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 		}
 		if (bModified)
 		{
-			m_pParent.SetInstrumentModified();
+			m_pParent.SetModified(HINT_INSTRUMENT, false);
 			InvalidateRect(NULL, FALSE);
 		}
 	}
@@ -581,7 +581,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 			if (n != pIns->NoteMap[m_nNote])
 			{
 				pIns->NoteMap[m_nNote] = n;
-				m_pParent.SetInstrumentModified();
+				m_pParent.SetModified(HINT_INSTRUMENT, false);
 				InvalidateRect(NULL, FALSE);
 			}
 			if (bOk) 
@@ -616,7 +616,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			if (n != pIns->Keyboard[m_nNote])
 			{
 				pIns->Keyboard[m_nNote] = n;
-				m_pParent.SetInstrumentModified();
+				m_pParent.SetModified(HINT_INSTRUMENT, false);
 				InvalidateRect(NULL, FALSE);
 				PlayNote(m_nNote+1);
 			}
@@ -648,7 +648,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			if (n != pIns->NoteMap[m_nNote])
 			{
 				pIns->NoteMap[m_nNote] = n;
-				m_pParent.SetInstrumentModified();
+				m_pParent.SetModified(HINT_INSTRUMENT, false);
 				InvalidateRect(NULL, FALSE);
 			}
 			
@@ -975,18 +975,23 @@ void CCtrlInstruments::RecalcLayout()
 
 
 // Set instrument (and moddoc) as modified.
-void CCtrlInstruments::SetInstrumentModified(const bool modified)
-//---------------------------------------------------------------
+// updateAll: Update all views including this one. Otherwise, only update update other views.
+void CCtrlInstruments::SetModified(DWORD mask, bool updateAll, bool modified)
+//---------------------------------------------------------------------------
 {
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	m_modDoc.m_bsInstrumentModified.set(m_nInstrument - 1, modified);
-	m_modDoc.UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES, this);
-// -! NEW_FEATURE#0023
-	if(modified)
+	// -> CODE#0023
+	// -> DESC="IT project files (.itp)"
+	if(m_modDoc.GetrSoundFile().m_SongFlags[SONG_ITPROJECT])
 	{
-		m_modDoc.SetModified();
+		if(m_modDoc.m_bsInstrumentModified[m_nInstrument - 1] != modified)
+		{
+			m_modDoc.m_bsInstrumentModified.set(m_nInstrument - 1, modified);
+			mask |= HINT_INSNAMES;
+		}
 	}
+	m_modDoc.UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | mask, updateAll ? nullptr : this);
+	// -! NEW_FEATURE#0023
+	if(modified) m_modDoc.SetModified();
 }
 
 
@@ -1431,12 +1436,8 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 		if (!m_nInstrument) m_nInstrument = 1;
 		if (m_sndFile.ReadInstrumentFromFile(m_nInstrument, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad))
 		{
-			m_modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
-			// -> CODE#0023
-			// -> DESC="IT project files (.itp)"
 			m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = fileName;
-			SetInstrumentModified(false);
-			// -! NEW_FEATURE#0023
+			SetModified(HINT_SAMPLEINFO | HINT_MODTYPE, true, false);
 			bOk = TRUE;
 		}
 	}
@@ -1770,23 +1771,15 @@ void CCtrlInstruments::OnInstrumentSave()
 	else
 		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
 
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
 	m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = dlg.GetFirstFile();
-	SetInstrumentModified(false);
-// -! NEW_FEATURE#0023
+	SetModified(HINT_MODTYPE | HINT_INSNAMES, true, false);
+	m_modDoc.UpdateAllViews(nullptr, HINT_SMPNAMES, this);
 
 	EndWaitCursor();
-	if (!ok) ErrorBox(IDS_ERR_SAVEINS, this); else
-	{
+	if (!ok)
+		ErrorBox(IDS_ERR_SAVEINS, this);
+	else
 		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS);
-
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//		m_pModDoc.UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSTRUMENT);
-		m_modDoc.UpdateAllViews(NULL, HINT_MODTYPE | HINT_INSNAMES | HINT_SMPNAMES);
-// -! NEW_FEATURE#0023
-	}
 	SwitchToView();
 }
 
@@ -1817,7 +1810,7 @@ void CCtrlInstruments::OnNameChanged()
 		if ((pIns) && (strncmp(s, pIns->name, MAX_INSTRUMENTNAME)))
 		{
 			mpt::String::Copy(pIns->name, s);
-			SetInstrumentModified(true);
+			SetModified(HINT_INSNAMES, false);
 		}
 	}
 }
@@ -1835,7 +1828,7 @@ void CCtrlInstruments::OnFileNameChanged()
 		if ((pIns) && (strncmp(s, pIns->filename, 12)))
 		{
 			mpt::String::Copy(pIns->filename, s);
-			SetInstrumentModified(true);
+			SetModified(HINT_INSNAMES, false);
 		}
 	}
 }
@@ -1855,7 +1848,7 @@ void CCtrlInstruments::OnFadeOutVolChanged()
 		if(nVol != (int)pIns->nFadeOut)
 		{
 			pIns->nFadeOut = nVol;
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }
@@ -1872,7 +1865,7 @@ void CCtrlInstruments::OnGlobalVolChanged()
 		if (nVol != (int)pIns->nGlobalVol)
 		{
 			pIns->nGlobalVol = nVol;
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }
@@ -1916,11 +1909,11 @@ void CCtrlInstruments::OnSetPanningChanged()
 						if(smp > 0 && smp <= m_sndFile.GetNumSamples())
 							m_sndFile.GetSample(smp).uFlags &= ~CHN_PANNING;
 					}
-					m_modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE);
+					m_modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, this);
 				}
 			}
 		}
-		SetInstrumentModified(true);
+		SetModified(HINT_INSTRUMENT, false);
 	}
 }
 
@@ -1939,7 +1932,7 @@ void CCtrlInstruments::OnPanningChanged()
 		if (nPan != (int)pIns->nPan)
 		{
 			pIns->nPan = nPan;
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }
@@ -1954,12 +1947,12 @@ void CCtrlInstruments::OnNNAChanged()
 		if (pIns->nNNA != m_ComboNNA.GetCurSel())
 		{
 			pIns->nNNA = m_ComboNNA.GetCurSel();
-			SetInstrumentModified(true);
-		}		
+			SetModified(HINT_INSTRUMENT, false);
+		}
 	}
 }
-	
-	
+
+
 void CCtrlInstruments::OnDCTChanged()
 //-----------------------------------
 {
@@ -1969,11 +1962,11 @@ void CCtrlInstruments::OnDCTChanged()
 		if (pIns->nDCT != m_ComboDCT.GetCurSel())
 		{
 			pIns->nDCT = m_ComboDCT.GetCurSel();
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }
-	
+
 
 void CCtrlInstruments::OnDCAChanged()
 //-----------------------------------
@@ -1984,7 +1977,7 @@ void CCtrlInstruments::OnDCAChanged()
 		if (pIns->nDNA != m_ComboDCA.GetCurSel())
 		{
 			pIns->nDNA = m_ComboDCA.GetCurSel();
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }
@@ -2002,7 +1995,7 @@ void CCtrlInstruments::OnMPRChanged()
 			if (pIns->nMidiProgram != n)
 			{
 				pIns->nMidiProgram = n;
-				SetInstrumentModified(true);
+				SetModified(HINT_INSTRUMENT, false);
 			}
 		}
 		//rewbs.MidiBank: we will not set the midi bank/program if it is 0
@@ -2027,7 +2020,7 @@ void CCtrlInstruments::OnMBKChanged()
 		if(w >= 0 && w <= 16384 && pIns->wMidiBank != w)
 		{
 			pIns->wMidiBank = w;
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 		//rewbs.MidiBank: we will not set the midi bank/program if it is 0
 		if(w == 0)
@@ -2051,7 +2044,7 @@ void CCtrlInstruments::OnMCHChanged()
 		if(pIns->nMidiChannel != ch)
 		{
 			pIns->nMidiChannel = ch;
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }
@@ -2066,8 +2059,7 @@ void CCtrlInstruments::OnResamplingChanged()
 		if (pIns->nResampling != (BYTE)(n & 0xff))
 		{
 			pIns->nResampling = (BYTE)(n & 0xff);
-			SetInstrumentModified(true);
-			m_modDoc.UpdateAllViews(NULL, HINT_INSNAMES, this);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }
@@ -2094,7 +2086,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 			if ((!IsLocked()) && pIns->nMixPlug != nPlug)
 			{ 
 				pIns->nMixPlug = nPlug;
-				SetInstrumentModified(true);
+				SetModified(HINT_INSTRUMENT, false);
 				m_modDoc.UpdateAllViews(NULL, HINT_MIXPLUGINS, this);
 			}
 
@@ -2184,7 +2176,7 @@ void CCtrlInstruments::OnPPSChanged()
 			if (pIns->nPPS != (signed char)n)
 			{
 				pIns->nPPS = (signed char)n;
-				SetInstrumentModified(true);
+				SetModified(HINT_INSTRUMENT, false);
 			}
 		}
 	}
@@ -2204,7 +2196,7 @@ void CCtrlInstruments::OnAttackChanged()
 		if(pIns->nVolRampUp != newRamp)
 		{
 			pIns->nVolRampUp = newRamp;
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 
 		m_SliderAttack.SetPos(n);
@@ -2229,7 +2221,7 @@ void CCtrlInstruments::OnPPCChanged()
 			if (pIns->nPPC != n)
 			{
 				pIns->nPPC = n;
-				SetInstrumentModified(true);
+				SetModified(HINT_INSTRUMENT, false);
 			}
 		}
 	}
@@ -2260,7 +2252,7 @@ void CCtrlInstruments::OnEnableCutOff()
 		}
 	}
 	UpdateFilterText();
-	SetInstrumentModified(true);
+	SetModified(HINT_INSTRUMENT, false);
 	SwitchToView();
 }
 
@@ -2289,7 +2281,7 @@ void CCtrlInstruments::OnEnableResonance()
 		}
 	}
 	UpdateFilterText();
-	SetInstrumentModified(true);
+	SetModified(HINT_INSTRUMENT, false);
 	SwitchToView();
 }
 
@@ -2355,7 +2347,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				{
 					pIns->nVolRampUp = newRamp;
 					SetDlgItemInt(IDC_EDIT2,n);
-					SetInstrumentModified(true);
+					SetModified(HINT_INSTRUMENT, false);
 				}
 // -! NEW_FEATURE#0027
 			} 
@@ -2365,8 +2357,8 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				n = m_SliderVolSwing.GetPos();
 				if ((n >= 0) && (n <= 100) && (n != (int)pIns->nVolSwing))
 				{
-					pIns->nVolSwing = (BYTE)n;
-					SetInstrumentModified(true);
+					pIns->nVolSwing = (uint8)n;
+					SetModified(HINT_INSTRUMENT, false);
 				}
 			}
 			// Pan Swing
@@ -2375,8 +2367,8 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				n = m_SliderPanSwing.GetPos();
 				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nPanSwing))
 				{
-					pIns->nPanSwing = (BYTE)n;
-					SetInstrumentModified(true);
+					pIns->nPanSwing = (uint8)n;
+					SetModified(HINT_INSTRUMENT, false);
 				}
 			}
 			//Cutoff swing
@@ -2385,8 +2377,8 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				n = m_SliderCutSwing.GetPos();
 				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nCutSwing))
 				{
-					pIns->nCutSwing = (BYTE)n;
-					SetInstrumentModified(true);
+					pIns->nCutSwing = (uint8)n;
+					SetModified(HINT_INSTRUMENT, false);
 				}
 			}
 			//Resonance swing
@@ -2395,8 +2387,8 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				n = m_SliderResSwing.GetPos();
 				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nResSwing))
 				{
-					pIns->nResSwing = (BYTE)n;
-					SetInstrumentModified(true);
+					pIns->nResSwing = (uint8)n;
+					SetModified(HINT_INSTRUMENT, false);
 				}
 			}
 			// Filter CutOff
@@ -2406,7 +2398,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetCutoff())))
 				{
 					pIns->SetCutoff(n, pIns->IsCutoffEnabled());
-					SetInstrumentModified(true);
+					SetModified(HINT_INSTRUMENT, false);
 					UpdateFilterText();
 					filterChanger = true;
 				}
@@ -2418,7 +2410,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetResonance())))
 				{
 					pIns->SetResonance(n, pIns->IsResonanceEnabled());
-					SetInstrumentModified(true);
+					SetModified(HINT_INSTRUMENT, false);
 					UpdateFilterText();
 					filterChanger = true;
 				}
@@ -2672,7 +2664,7 @@ void CCtrlInstruments::OnPluginVelocityHandlingChanged()
 			}
 
 			pIns->nPluginVelocityHandling = n;
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }
@@ -2695,7 +2687,7 @@ void CCtrlInstruments::OnPluginVolumeHandlingChanged()
 			}
 
 			pIns->nPluginVolumeHandling = n;
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }
@@ -2715,7 +2707,7 @@ void CCtrlInstruments::OnPitchWheelDepthChanged()
 		if(pwd != pIns->midiPWD)
 		{
 			pIns->midiPWD = static_cast<int8>(pwd);
-			SetInstrumentModified(true);
+			SetModified(HINT_INSTRUMENT, false);
 		}
 	}
 }

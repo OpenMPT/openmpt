@@ -177,15 +177,16 @@ void CViewInstrument::UpdateScrollSize()
 
 
 // Set instrument (and moddoc) as modified.
-void CViewInstrument::SetInstrumentModified()
-//-------------------------------------------
+// updateAll: Update all views including this one. Otherwise, only update update other views.
+void CViewInstrument::SetModified(DWORD mask, bool updateAll)
+//-----------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	pModDoc->m_bsInstrumentModified.set(m_nInstrument - 1, true);
-	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES, this);
+	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES | mask, updateAll ? nullptr : this);
 // -! NEW_FEATURE#0023
 	pModDoc->SetModified();
 }
@@ -772,9 +773,13 @@ void CViewInstrument::UpdateNcButtonState()
 ////////////////////////////////////////////////////////////////////
 // CViewInstrument drawing
 
-void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
-//-----------------------------------------------------------
+void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *hint)
+//---------------------------------------------------------------
 {
+	if(hint == this)
+	{
+		return;
+	}
 	const INSTRUMENTINDEX updateIns = (dwHintMask >> HINT_SHIFT_INS);
 	if((dwHintMask & (HINT_MPTOPTIONS | HINT_MODTYPE))
 		|| ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == updateIns || updateIns == 0))
@@ -1044,8 +1049,7 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 				envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
 
-			SetInstrumentModified();
-			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+			SetModified(HINT_ENVELOPE, true);
 			return true;
 		}
 	}
@@ -1119,8 +1123,7 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 				if (envelope->nSustainEnd >= i) envelope->nSustainEnd++;
 				if (envelope->nReleaseNode >= i && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode++;
 
-				SetInstrumentModified();
-				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+				SetModified(HINT_ENVELOPE, true);
 				return i + 1;
 			}
 		}
@@ -1517,8 +1520,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			CModDoc *pModDoc = GetDocument();
 			if(pModDoc)
 			{
-				SetInstrumentModified();
-				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+				SetModified(HINT_ENVELOPE, true);
 			}
 			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
 		}
@@ -1776,9 +1778,7 @@ void CViewInstrument::OnEnvLoopChanged()
 			pEnv->nLoopStart = 0;
 			pEnv->nLoopEnd = static_cast<uint8>(pEnv->nNodes - 1);
 		}
-		SetInstrumentModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, true);
 	}
 }
 
@@ -1795,9 +1795,7 @@ void CViewInstrument::OnEnvSustainChanged()
 			// Enabled sustain loop => set sustain loop points if no sustain loop has been specified yet.
 			pEnv->nSustainStart = pEnv->nSustainEnd = static_cast<uint8>(m_nDragItem - 1);
 		}
-		SetInstrumentModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, true);
 	}
 }
 
@@ -1808,8 +1806,7 @@ void CViewInstrument::OnEnvCarryChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetCarry(!EnvGetCarry())))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1818,8 +1815,7 @@ void CViewInstrument::OnEnvToggleReleasNode()
 {
 	if(IsDragItemEnvPoint() && EnvToggleReleaseNode(m_nDragItem - 1))
 	{
-		SetInstrumentModified();
-		InvalidateRect(NULL, FALSE);
+		SetModified(HINT_ENVELOPE, true);
 	}
 }
 
@@ -1829,8 +1825,7 @@ void CViewInstrument::OnEnvVolChanged()
 {
 	if (EnvSetVolEnv(!EnvGetVolEnv()))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1840,8 +1835,7 @@ void CViewInstrument::OnEnvPanChanged()
 {
 	if (EnvSetPanEnv(!EnvGetPanEnv()))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1851,8 +1845,7 @@ void CViewInstrument::OnEnvPitchChanged()
 {
 	if (EnvSetPitchEnv(!EnvGetPitchEnv()))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1862,8 +1855,7 @@ void CViewInstrument::OnEnvFilterChanged()
 {
 	if (EnvSetFilterEnv(!EnvGetFilterEnv()))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1873,10 +1865,10 @@ void CViewInstrument::OnEnvToggleGrid()
 {
 	m_bGrid = !m_bGrid;
 	if (m_bGrid)
-		m_bGridForceRedraw;
+		m_bGridForceRedraw = true;
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE);
 
 }
 //end rewbs.envRowGrid
@@ -2122,8 +2114,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 	}
 	if (bUpdate)
 	{
-		SetInstrumentModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES, NULL);
+		SetModified(HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES, true);
 	}
 	CMDIChildWnd *pMDIFrame = (CMDIChildWnd *)GetParentFrame();
 	if (pMDIFrame)
@@ -2254,8 +2245,7 @@ void CViewInstrument::OnEnvelopeScalepoints()
 		CScaleEnvPointsDlg dlg(this, *GetEnvelopePtr(), nOffset);
 		if(dlg.DoModal() == IDOK)
 		{
-			SetInstrumentModified();
-			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+			SetModified(HINT_ENVELOPE, true);
 		}
 	}
 }
@@ -2310,8 +2300,7 @@ void CViewInstrument::EnvKbdMovePointLeft()
 		return;
 	pEnv->Ticks[m_nDragItem - 1]--;
 
-	SetInstrumentModified();
-	InvalidateRect(NULL, FALSE);
+	SetModified(HINT_ENVELOPE, true);
 }
 
 
@@ -2324,8 +2313,7 @@ void CViewInstrument::EnvKbdMovePointRight()
 		return;
 	pEnv->Ticks[m_nDragItem - 1]++;
 
-	SetInstrumentModified();
-	InvalidateRect(NULL, FALSE);
+	SetModified(HINT_ENVELOPE, true);
 }
 
 
@@ -2339,8 +2327,7 @@ void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
 	else
 		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MAX;
 
-	SetInstrumentModified();
-	InvalidateRect(NULL, FALSE);
+	SetModified(HINT_ENVELOPE, true);
 }
 
 
@@ -2354,8 +2341,7 @@ void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
 	else
 		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MIN;
 
-	SetInstrumentModified();
-	InvalidateRect(NULL, FALSE);
+	SetModified(HINT_ENVELOPE, true);
 }
 
 void CViewInstrument::EnvKbdInsertPoint()
@@ -2450,8 +2436,7 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
 		CModDoc *pModDoc = GetDocument();	// sanity checks are done in GetEnvelopePtr() already
-		SetInstrumentModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+		SetModified(HINT_ENVELOPE, true);
 	}
 }
 

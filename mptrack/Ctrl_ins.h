@@ -120,7 +120,7 @@ public:
 	virtual ~CCtrlInstruments();
 
 public:
-	void SetInstrumentModified(const bool modified = true);
+	void SetModified(DWORD mask, bool updateAll, bool modified = true);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
 	BOOL OpenInstrument(const mpt::PathString &fileName);
 	BOOL OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
