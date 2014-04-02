@@ -128,6 +128,8 @@ protected:
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
 
+	void SetModified(DWORD mask, bool updateAll);
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

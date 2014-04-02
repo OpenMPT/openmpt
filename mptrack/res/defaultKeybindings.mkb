@@ -284,7 +284,6 @@ version:1
 8:1380:2:84:1		//Trim sample around loop points: Ctrl+T (KeyDown)
 8:1383:0:8:1		//Silence sample selection: BACKSPACE (KeyDown)
 8:1384:1:78:1		//Normalise Sample: Shift+N (KeyDown)
-8:1385:3:65:1		//Amplify Sample: Shift+Ctrl+A (KeyDown)
 8:1385:2:77:1		//Amplify Sample: Ctrl+M (KeyDown)
 8:1381:3:82:1		//Reverse Sample: Shift+Ctrl+R (KeyDown)
 8:1382:0:46:1		//Delete sample selection: DELETE (KeyDown)
@@ -296,6 +295,10 @@ version:1
 8:1790:2:69:1		//Remove DC Offset: Ctrl+E (KeyDown)
 8:1856:2:68:1		//Quick Fade: Ctrl+D (KeyDown)
 8:1857:2:76:1		//Crossfade Sample Loop: Ctrl+L (KeyDown)
+8:1907:2:81:1		//Transpose +1 (Note Map): Ctrl+Q (KeyDown)
+8:1908:2:65:1		//Transpose -1 (Note Map): Ctrl+A (KeyDown)
+8:1909:3:81:1		//Transpose +12 (Note Map): Shift+Ctrl+Q (KeyDown)
+8:1910:3:65:1		//Transpose -12 (Note Map): Shift+Ctrl+A (KeyDown)
 
 //----( Instrument Context [bottom] (9) )------------
 9:1837:0:107:5		//Zoom In: NUM PLUS (KeyDown|KeyHold)

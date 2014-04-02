@@ -135,6 +135,7 @@ public:
 	int GetInstrumentChange() const { return m_nInstrumentChanged; }
 	void SetMDIParentFrame(HWND hwnd) { m_hWndMDI = hwnd; }
 	void ForceRefresh();
+	CModControlDlg *GetCurrentControlDlg() { return m_Pages[m_nActiveDlg]; }
 
 protected:
 	void RecalcLayout();
@@ -207,6 +208,8 @@ public:
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
 	virtual LRESULT OnPlayerNotify(Notification *) { return 0; }
 	//}}AFX_VIRTUAL
+
+	CModControlDlg *GetControlDlg() { return static_cast<CModControlView *>(CWnd::FromHandle(m_hWndCtrl))->GetCurrentControlDlg(); }
 
 protected:
 	//{{AFX_MSG(CModScrollView)

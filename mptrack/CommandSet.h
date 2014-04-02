@@ -651,13 +651,11 @@ enum CommandID
 	kcSampleLoad=kcStartSampleMisc,
 	kcSampleSave,
 	kcSampleNew,
-	kcEndSampleMisc=kcSampleNew,
-
-	kcStartSampleCtrlMisc,
-	kcSampleCtrlLoad=kcStartSampleCtrlMisc,
-	kcSampleCtrlSave,
-	kcSampleCtrlNew,
-	kcEndSampleCtrlMisc=kcSampleCtrlNew,
+	kcSampleTransposeUp,
+	kcSampleTransposeDown,
+	kcSampleTransposeOctUp,
+	kcSampleTransposeOctDown,
+	kcEndSampleMisc=kcSampleTransposeOctDown,
 
 	kcStartSampleEditing,
 	kcSampleTrim=kcStartSampleEditing,
