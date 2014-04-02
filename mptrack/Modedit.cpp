@@ -349,6 +349,23 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		}
 	}
 
+	for(CHANNELINDEX c = 0; c < CountOf(m_SndFile.m_PlayState.Chn); c++)
+	{
+		ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
+		for(SAMPLEINDEX i = 1; i <= oldNumSamples; i++)
+		{
+			if(chn.pModSample == &m_SndFile.GetSample(i))
+			{
+				chn.pModSample = &m_SndFile.GetSample(newIndex[i]);
+				if(i == 0 || i > newNumSamples)
+				{
+					chn.Reset(ModChannel::resetTotal, m_SndFile, c);
+				}
+				break;
+			}
+		}
+	}
+
 	if(m_SndFile.GetNumInstruments())
 	{
 		// Instrument mode: Update sample maps.
@@ -845,7 +862,10 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 	if ((nIns) && (nIns <= m_SndFile.GetNumInstruments()) && (m_SndFile.Instruments[nIns]))
 	{
 		bool instrumentsLeft = false;
-		ConfirmAnswer result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
+		ConfirmAnswer result = cnfNo;
+		std::vector<bool> samples;
+		m_SndFile.Instruments[nIns]->GetSamples(samples);
+		if(!samples.empty()) result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
 		if(result == cnfCancel)
 		{
 			return false;
