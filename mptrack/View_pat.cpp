@@ -1695,7 +1695,7 @@ void CViewPattern::OnMuteChannel(CHANNELINDEX chn)
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		pModDoc->SoloChannel(chn, false); //rewbs.merge: recover old solo/mute behaviour
+		pModDoc->SoloChannel(chn, false);
 		pModDoc->MuteChannel(chn, !pModDoc->IsChannelMuted(chn));
 
 		//If we just unmuted a channel, make sure none are still considered "solo".
@@ -1803,7 +1803,7 @@ void CViewPattern::OnUnmuteAll()
 		for(CHANNELINDEX i = 0; i < nChns; i++)
 		{
 			pModDoc->MuteChannel(i, false);
-			pModDoc->SoloChannel(i, false); //rewbs.merge: binary solo/mute behaviour 
+			pModDoc->SoloChannel(i, false);
 		}
 		InvalidateChannelsHeaders();
 	}
@@ -4266,11 +4266,11 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNavigateLeftSelect:
 		case kcNavigateLeft:
 			MoveCursor(false);
-			break;
+			return wParam;
 		case kcNavigateRightSelect:
 		case kcNavigateRight:
 			MoveCursor(true);
-			break;
+			return wParam;
 
 		case kcNavigateNextChanSelect:
 		case kcNavigateNextChan: SetCurrentColumn((GetCurrentChannel() + 1) % pSndFile->GetNumChannels(), m_Cursor.GetColumnType()); return wParam;
@@ -4424,23 +4424,23 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		case kcDecreaseSpacing:
 			if(m_nSpacing > 0) SetSpacing(m_nSpacing - 1);
-			break;
+			return wParam;
 		case kcIncreaseSpacing:
 			if(m_nSpacing < MAX_SPACING) SetSpacing(m_nSpacing + 1);
-			break;
+			return wParam;
 
 		// Clipboard Manager
 		case kcToggleClipboardManager:
 			PatternClipboardDialog::Toggle();
-			break;
+			return wParam;
 		case kcClipboardPrev:
 			PatternClipboard::CycleBackward();
 			PatternClipboardDialog::UpdateList();
-			break;
+			return wParam;
 		case kcClipboardNext:
 			PatternClipboard::CycleForward();
 			PatternClipboardDialog::UpdateList();
-			break;
+			return wParam;
 
 	}
 	//Ranges:
@@ -5928,7 +5928,7 @@ void CViewPattern::OnSelectPlugin(UINT nID)
 	}
 }
 
-//rewbs.merge
+
 bool CViewPattern::HandleSplit(ModCommand &m, int note)
 //-----------------------------------------------------
 {

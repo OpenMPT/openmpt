@@ -635,7 +635,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcChannelSplitRecordSelect, 1884, _T("Channel Split Record Select"));
 	DefineKeyCommand(kcDataEntryUp, 1885, _T("Data Entry +1"));
 	DefineKeyCommand(kcDataEntryDown, 1886, _T("Data Entry -1"));
-	DefineKeyCommand(kcSample8Bit, 1887, _T("Conver to 8-bit"));
+	DefineKeyCommand(kcSample8Bit, 1887, _T("Convert to 8-bit"));
 	DefineKeyCommand(kcSampleMonoMix, 1888, _T("Convert to Mono (Mix)"));
 	DefineKeyCommand(kcSampleMonoLeft, 1889, _T("Convert to Mono (Left Channel)"));
 	DefineKeyCommand(kcSampleMonoRight, 1890, _T("Convert to Mono (Right Channel)"));
