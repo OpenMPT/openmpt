@@ -462,6 +462,60 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		SetCurrentSample((SAMPLEINDEX)lParam, -1, TRUE);
 		break;
 
+	//rewbs.customKeys
+	case IDC_SAMPLE_REVERSE:
+		OnReverse();
+		break;
+
+	case IDC_SAMPLE_SILENCE:
+		OnSilence();
+		break;
+
+	case IDC_SAMPLE_INVERT:
+		OnInvert();
+		break;
+
+	case IDC_SAMPLE_XFADE:
+		OnXFade();
+		break;
+
+	case IDC_SAMPLE_AUTOTUNE:
+		OnAutotune();
+		break;
+
+	case IDC_SAMPLE_SIGN_UNSIGN:
+		OnSignUnSign();
+		break;
+
+	case IDC_SAMPLE_DCOFFSET:
+		OnRemoveDCOffset();
+		break;
+
+	case IDC_SAMPLE_NORMALIZE:
+		OnNormalize();
+		break;
+
+	case IDC_SAMPLE_AMPLIFY:
+		OnAmplify();
+		break;
+
+	case IDC_SAMPLE_QUICKFADE:
+		OnQuickFade();
+		break;
+
+	case IDC_SAMPLE_OPEN:
+		OnSampleOpen();
+		break;
+
+	case IDC_SAMPLE_SAVEAS:
+		OnSampleSave();
+		break;
+	
+	case IDC_SAMPLE_NEW:
+		OnSampleNew();
+		break;
+	//end rewbs.customKeys
+
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);
 	}
@@ -3016,17 +3070,6 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcSampleLoad:		OnSampleOpen(); return wParam;
 	case kcSampleSave:		OnSampleSave(); return wParam;
 	case kcSampleNew:		OnSampleNew(); return wParam;
-
-	case kcSampleReverse:			OnReverse(); return wParam;
-	case kcSampleSilence:			OnSilence(); return wParam;
-	case kcSampleNormalize:			OnNormalize(); return wParam;
-	case kcSampleAmplify:			OnAmplify(); return wParam;
-	case kcSampleInvert:			OnInvert(); return wParam;
-	case kcSampleSignUnsign:		OnSignUnSign(); return wParam;
-	case kcSampleRemoveDCOffset:	OnRemoveDCOffset(); return wParam;
-	case kcSampleXFade:				OnXFade(); return wParam;
-	case kcSampleAutotune:			OnAutotune(); return wParam;
-	case kcSampleQuickFade:			OnQuickFade(); return wParam;
 
 	case kcSampleTransposeUp: transpose = 1; break;
 	case kcSampleTransposeDown: transpose = -1; break;
