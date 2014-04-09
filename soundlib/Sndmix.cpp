@@ -988,7 +988,9 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes en
 		// Test case: EnvLoops.it
 		uint32 start, end;
 
-		if(insEnv.dwFlags[ENV_SUSTAIN] && !pChn->dwFlags[CHN_KEYOFF])
+		// IT compatiblity: OpenMPT processes the key-off flag earlier than IT. Grab the flag from the previous tick instead.
+		// Test case: EnvOffLength.it
+		if(insEnv.dwFlags[ENV_SUSTAIN] && !pChn->dwOldFlags[CHN_KEYOFF])
 		{
 			// Envelope sustained
 			start = insEnv.Ticks[insEnv.nSustainStart];
