@@ -413,25 +413,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(GetType() == MOD_TYPE_IT) mptStartPos = file.GetLength();
 
-	// Read row highlights
-	if((fileHeader.special & ITFileHeader::embedPatternHighlights))
-	{
-		// MPT 1.09, 1.07 and most likely other old MPT versions leave this blank (0/0), but have the "special" flag set.
-		// Newer versions of MPT and OpenMPT 1.17 *always* write 4/16 here.
-		// Thus, we will just ignore those old versions.
-		if(m_dwLastSavedWithVersion == 0 || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02))
-		{
-			m_nDefaultRowsPerBeat = fileHeader.highlight_minor;
-			m_nDefaultRowsPerMeasure = fileHeader.highlight_major;
-		}
-#ifdef _DEBUG
-		if((fileHeader.highlight_minor | fileHeader.highlight_major) == 0)
-		{
-			Log("IT Header: Row highlight is 0");
-		}
-#endif
-	}
-
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & ITFileHeader::linearSlides) != 0);
 	m_SongFlags.set(SONG_ITOLDEFFECTS, (fileHeader.flags & ITFileHeader::itOldEffects) != 0);
 	m_SongFlags.set(SONG_ITCOMPATGXX, (fileHeader.flags & ITFileHeader::itCompatGxx) != 0);
@@ -998,6 +979,19 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		case 7:
 			madeWithTracker = mpt::String::Print("ITMCK %1.%2.%3", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
+		}
+	}
+
+	// Read row highlights
+	if((fileHeader.special & ITFileHeader::embedPatternHighlights))
+	{
+		// MPT 1.09 and older (and maybe also newer) versions leave this blank (0/0), but have the "special" flag set.
+		// Newer versions of MPT and OpenMPT 1.17 *always* write 4/16 here.
+		// Thus, we will just ignore those old versions.
+		if(m_dwLastSavedWithVersion == 0 || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02))
+		{
+			m_nDefaultRowsPerBeat = fileHeader.highlight_minor;
+			m_nDefaultRowsPerMeasure = fileHeader.highlight_major;
 		}
 	}
 

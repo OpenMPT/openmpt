@@ -3024,7 +3024,7 @@ NoSample:
 	if(nCode == SB_ENDSCROLL) SwitchToView();
 	if(redraw)
 	{
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
 	}
 	UnlockControls();
 }
