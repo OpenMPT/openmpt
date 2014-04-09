@@ -335,9 +335,15 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 			if(--sampleCount[origSlot] > 0 && sampleHeaders[origSlot].pSample != nullptr)
 			{
 				// This sample slot is referenced multiple times, so we have to copy the actual sample.
-				target.pSample = ModSample::AllocateSample(target.nLength, target.GetSampleSizeInBytes());
-				memcpy(target.pSample, sampleHeaders[origSlot].pSample, target.GetSampleSizeInBytes());
-				target.PrecomputeLoops(m_SndFile, false);
+				target.pSample = ModSample::AllocateSample(target.nLength, target.GetBytesPerSample());
+				if(target.pSample != nullptr)
+				{
+					memcpy(target.pSample, sampleHeaders[origSlot].pSample, target.GetBytesPerSample());
+					target.PrecomputeLoops(m_SndFile, false);
+				} else
+				{
+					Reporting::Error("Cannot duplicate sample - out of memory!");
+				}
 			}
 			strcpy(m_SndFile.m_szNames[i + 1], sampleNames[origSlot].c_str());
 		} else
