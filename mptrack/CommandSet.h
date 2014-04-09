@@ -1168,10 +1168,13 @@ public:
 	}
 
 	// For hash
-	operator size_t() const
+	struct hash
 	{
-		return *reinterpret_cast<const uint32 *>(this);
-	}
+		size_t operator() (const KeyCombination &kc) const
+		{
+			return *reinterpret_cast<const uint32 *>(&kc);
+		}
+	};
 
 	// Getters / Setters
 	void Context(InputTargetContext context) { ctx = static_cast<uint8>(context); }
@@ -1179,6 +1182,7 @@ public:
 
 	void Modifier(UINT modifier) { mod = static_cast<uint8>(modifier); }
 	UINT Modifier() const { return static_cast<UINT>(mod); }
+	void Modifier(const KeyCombination &other) { mod = other.mod; }
 	void AddModifier(UINT modifier) { mod |= static_cast<uint8>(modifier); }
 	void AddModifier(const KeyCombination &other) { mod |= other.mod; }
 
@@ -1206,9 +1210,9 @@ public:
 
 #include <unordered_map>
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-typedef std::tr1::unordered_map<KeyCombination, CommandID> KeyMap;
+typedef std::tr1::unordered_map<KeyCombination, CommandID, KeyCombination::hash> KeyMap;
 #else
-typedef std::unordered_map<KeyCombination, CommandID> KeyMap;
+typedef std::unordered_map<KeyCombination, CommandID, KeyCombination::hash> KeyMap;
 #endif
 
 //KeyMap
