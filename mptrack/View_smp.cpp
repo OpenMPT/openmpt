@@ -2049,7 +2049,7 @@ void CViewSample::OnEditDelete()
 		sample.PrecomputeLoops(sndFile);
 	}
 	SetCurSel(0, 0);
-	SetModified(dwUpdateFlags, false);
+	SetModified(dwUpdateFlags, true);
 }
 
 

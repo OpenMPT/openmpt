@@ -863,9 +863,7 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 	{
 		bool instrumentsLeft = false;
 		ConfirmAnswer result = cnfNo;
-		std::vector<bool> samples;
-		m_SndFile.Instruments[nIns]->GetSamples(samples);
-		if(!samples.empty()) result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
+		if(!m_SndFile.Instruments[nIns]->GetSamples().empty()) result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
 		if(result == cnfCancel)
 		{
 			return false;
