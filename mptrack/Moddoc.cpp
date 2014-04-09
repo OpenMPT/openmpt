@@ -2953,13 +2953,19 @@ void CModDoc::PrepareUndoForAllPatterns(bool storeChannelInfo, const char *descr
 //-------------------------------------------------------------------------------------
 {
 	bool linkUndo = false;
+
+	PATTERNINDEX lastPat = PATTERNINDEX_INVALID;
+	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++)
+	{
+		if(m_SndFile.Patterns.IsValidPat(pat)) lastPat = pat;
+	}
+
 	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++)
 	{
 		if(m_SndFile.Patterns.IsValidPat(pat))
 		{
-			GetPatternUndo().PrepareUndo(pat, 0, 0, GetNumChannels(), m_SndFile.Patterns[pat].GetNumRows(), description, linkUndo, storeChannelInfo);
+			GetPatternUndo().PrepareUndo(pat, 0, 0, GetNumChannels(), m_SndFile.Patterns[pat].GetNumRows(), description, linkUndo, storeChannelInfo && pat == lastPat);
 			linkUndo = true;
-			storeChannelInfo = false;
 		}
 	}
 }

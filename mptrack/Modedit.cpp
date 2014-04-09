@@ -395,7 +395,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		}
 	} else
 	{
-		PrepareUndoForAllPatterns("Rearrange Samples");
+		PrepareUndoForAllPatterns(false, "Rearrange Samples");
 
 		std::vector<ModCommand::INSTR> indices(newIndex.size(), 0);
 		for(size_t i = 0; i < newIndex.size(); i++)
@@ -471,7 +471,7 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 		m_SndFile.DestroyInstrument(i, doNoDeleteAssociatedSamples);
 	}
 
-	PrepareUndoForAllPatterns("Rearrange Instrumens");
+	PrepareUndoForAllPatterns(false, "Rearrange Instrumens");
 
 	std::vector<ModCommand::INSTR> indices(newIndex.size(), 0);
 	for(size_t i = 0; i < newIndex.size(); i++)
