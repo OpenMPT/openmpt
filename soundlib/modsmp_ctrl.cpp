@@ -622,7 +622,7 @@ template <class T>
 void XFadeSampleImpl(T *pStart, const SmpLength nOffset, SmpLength nFadeLength)
 //-----------------------------------------------------------------------------
 {
-	for(SmpLength i = 0; i <= nFadeLength; i++)
+	for(SmpLength i = 0; i < nFadeLength; i++)
 	{
 		double dPercentage = sqrt((double)i / (double)nFadeLength); // linear fades are boring
 		pStart[nOffset + i] = (T)(((double)pStart[nOffset + i]) * (1 - dPercentage) + ((double)pStart[i]) * dPercentage);
