@@ -52,7 +52,7 @@ protected:
 
 	// Applies amplification to sample. Negative values
 	// can be used to invert phase.
-	void ApplyAmplify(LONG nAmp, bool bFadeIn = false, bool bFadeOut = false);
+	void ApplyAmplify(int32 nAmp, bool fadeIn = false, bool fadeOut = false);
 
 	SampleSelectionPoints GetSelectionPoints();
 	void SetSelectionPoints(SmpLength nStart, SmpLength nEnd);

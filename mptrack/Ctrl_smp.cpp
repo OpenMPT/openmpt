@@ -1259,8 +1259,27 @@ void CCtrlSamples::OnNormalize()
 }
 
 
-void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
-//-----------------------------------------------------------------------
+template<typename T>
+void ApplyAmplifyImpl(void *pSample, SmpLength start, SmpLength end, int32 amp, bool fadeIn, bool fadeOut)
+//--------------------------------------------------------------------------------------------------------
+{
+	T *p = static_cast<T *>(pSample) + start;
+	SmpLength len = end - start;
+	int64 l64 = static_cast<int64>(len);
+
+	for(SmpLength i = 0; i < len; i++)
+	{
+		int32 l = (p[i] * amp) / 100;
+		if(fadeIn) l = (int32)((l * (int64)i) / l64);
+		if(fadeOut) l = (int32)((l * (int64)(len - i)) / l64);
+		Clamp(l, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+		p[i] = static_cast<T>(l);
+	}
+}
+
+
+void CCtrlSamples::ApplyAmplify(int32 lAmp, bool fadeIn, bool fadeOut)
+//--------------------------------------------------------------------
 {
 	if((!m_sndFile.GetSample(m_nSample).pSample)) return;
 
@@ -1272,34 +1291,13 @@ void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Amplify", selection.nStart, selection.nEnd);
 
 	if (sample.uFlags[CHN_STEREO]) { selection.nStart *= 2; selection.nEnd *= 2; }
-	SmpLength len = selection.nEnd - selection.nStart;
-	if ((bFadeIn) && (bFadeOut)) lAmp *= 4;
+	if ((fadeIn) && (fadeOut)) lAmp *= 4;
 	if (sample.uFlags[CHN_16BIT])
 	{
-		signed short *p = ((signed short *)sample.pSample) + selection.nStart;
-
-		for (SmpLength i=0; i<len; i++)
-		{
-			LONG l = (p[i] * lAmp) / 100;
-			if (bFadeIn) l = (LONG)((l * (LONGLONG)i) / len);
-			if (bFadeOut) l = (LONG)((l * (LONGLONG)(len-i)) / len);
-			if (l < -32768) l = -32768;
-			if (l > 32767) l = 32767;
-			p[i] = (signed short)l;
-		}
+		ApplyAmplifyImpl<int16>(sample.pSample, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut);
 	} else
 	{
-		signed char *p = ((signed char *)sample.pSample) + selection.nStart;
-
-		for (SmpLength i=0; i<len; i++)
-		{
-			LONG l = (p[i] * lAmp) / 100;
-			if (bFadeIn) l = (LONG)((l * (LONGLONG)i) / len);
-			if (bFadeOut) l = (LONG)((l * (LONGLONG)(len-i)) / len);
-			if (l < -128) l = -128;
-			if (l > 127) l = 127;
-			p[i] = (signed char)l;
-		}
+		ApplyAmplifyImpl<int8>(sample.pSample, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut);
 	}
 	sample.PrecomputeLoops(m_sndFile, false);
 	SetModified(HINT_SAMPLEDATA, false);
