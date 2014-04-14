@@ -13,8 +13,8 @@
 // Fix Purity Demo GUI freeze more nicely
 // Optimize out audioMasterProcessEvents the same way as effProcessEvents?
 // Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
-// KaramFX EQ breaks sound
 // Maybe don't keep opening and closing aux mem files - but they are rarely needed, so would this actually be worth it?
+// Kirnu GUI deadlocks
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode (is this necessary?)
@@ -33,9 +33,13 @@
 #include <algorithm>
 
 //#include <cassert>
+#ifdef _DEBUG
 #include <intrin.h>
 #undef assert
 #define assert(x) while(!(x)) { ::MessageBoxA(NULL, #x, "Debug Assertion Failed", MB_ICONERROR);  __debugbreak(); break; }
+#else
+#define assert(x)
+#endif
 
 #include "Bridge.h"
 #include "../common/thread.h"
@@ -49,6 +53,8 @@ Event PluginBridge::sigQuit;
 PluginBridge *PluginBridge::latestInstance = nullptr;
 WNDCLASSEX PluginBridge::windowClass;
 #define WINDOWCLASSNAME _T("OpenMPTPluginBridge")
+
+enum { kVstTimeInfoInit = 1 << 31 };
 
 
 int _tmain(int argc, TCHAR *argv[])
@@ -348,8 +354,9 @@ void PluginBridge::InitBridge(InitMsg *msg)
 	msg->result = 0;
 	msg->str[CountOf(msg->str) - 1] = 0;
 	
-	// TODO DEBUG
-	//SetConsoleTitleW(msg->str);
+#ifdef _CONSOLE
+	SetConsoleTitleW(msg->str);
+#endif
 
 	nativeEffect = nullptr;
 	library = LoadLibraryW(msg->str);
@@ -398,6 +405,9 @@ void PluginBridge::InitBridge(InitMsg *msg)
 	msg->result = 1;
 
 	UpdateEffectStruct();
+	// Set a custom time info flag that will differ from any other flags on the first audioMasterGetTime call.
+	// This fixes plugins like KarmaFX EQ that don't send any flags (only query sample frequency).
+	sharedMem->timeInfo.flags = kVstTimeInfoInit;
 
 	// Init process buffer
 	DispatchToHost(audioMasterVendorSpecific, kVendorOpenMPT, kUpdateProcessingBuffer, nullptr, 0.0f);
@@ -695,6 +705,8 @@ void PluginBridge::AutomateParameters()
 // Audio rendering thread
 void PluginBridge::RenderThread()
 {
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+
 	const HANDLE objects[] = { sigProcess.send, sigThreadExit };
 	DWORD result = 0;
 	do
@@ -811,7 +823,7 @@ int32_t PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outP
 			offset += msg->sampleFrames;
 		}
 		inPointers = reinterpret_cast<buf_t **>(&samplePointers[0]);
-		outPointers = reinterpret_cast<buf_t **>(&samplePointers[msg->numInputs]);
+		outPointers = inPointers + msg->numInputs;
 	}
 
 	return msg->sampleFrames;
@@ -842,7 +854,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		{
 			// During processing, read the cached time info if possible.
 			// Only check validity flags. OpenMPT ignores the other flags anyway, as they are host-to-plugin flags.
-			value &= (kVstNanosValid | kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid | kVstTimeSigValid | kVstSmpteValid | kVstClockValid);
+			value &= (kVstNanosValid | kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid | kVstTimeSigValid | kVstSmpteValid | kVstClockValid | kVstTimeInfoInit);
 			if((sharedMem->timeInfo.flags & value) == value)
 			{
 				return ToVstPtr<VstTimeInfo>(&sharedMem->timeInfo);

@@ -805,9 +805,9 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 				m_nScrollPos2nd = ORDERINDEX_INVALID;
 				SetCurSel(nOrder, true, IsSelectionKeyPressed());
 			}
-			m_bDragging = !IsOrderInMargins(m_nScrollPos, oldXScroll);
+			m_bDragging = !IsOrderInMargins(m_nScrollPos, oldXScroll) || !IsOrderInMargins(m_nScrollPos2nd, oldXScroll);
 
-			if(m_bDragging == true)
+			if(m_bDragging)
 			{
 				m_nDragOrder = GetCurSel(true).firstOrd;
 				m_nDropPos = m_nDragOrder;
