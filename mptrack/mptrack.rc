@@ -211,9 +211,9 @@ BEGIN
     LTEXT           "If enabled, a randomized user ID is created and transmitted with every update check. This ID can not be linked to you or your computer in any way.",IDC_STATIC,12,102,264,24
     GROUPBOX        "Advanced Settings",IDC_STATIC,6,138,276,60
     LTEXT           "&Update server URL:",IDC_STATIC,12,150,186,8
-    EDITTEXT        IDC_EDIT1,12,162,246,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Reset",IDC_BUTTON2,204,146,54,12
-    LTEXT           "Do not change this unless you are absolutely sure of what you are doing.",IDC_STATIC,12,180,246,12
+    EDITTEXT        IDC_EDIT1,12,162,264,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Reset",IDC_BUTTON2,222,146,54,12
+    LTEXT           "Do not change this unless you are absolutely sure of what you are doing.",IDC_STATIC,12,180,264,12
     PUSHBUTTON      "&Check for Updates",IDC_BUTTON1,6,204,84,18
     LTEXT           "",IDC_LASTUPDATE,6,228,276,24
 END
@@ -634,7 +634,7 @@ BEGIN
     LISTBOX         IDC_COMMAND_LIST,5,32,139,226,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Key setup for this command ",IDC_STATIC,150,6,132,84
     COMBOBOX        IDC_CHOICECOMBO,156,18,78,51,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Key:",IDC_STATIC,150,38,16,8
+    LTEXT           "Key:",IDC_STATIC,156,38,16,8
     EDITTEXT        IDC_CUSTHOTKEY,174,36,60,13,ES_AUTOHSCROLL
     CONTROL         "On Key Down",IDC_CHECKKEYDOWN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,156,54,66,8
     CONTROL         "On Key Hold",IDC_CHECKKEYHOLD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,156,66,66,8
@@ -2419,6 +2419,8 @@ BEGIN
     ID_SAMPLE_TRIM          "Delete everything except the current selection\nTrim Sample"
     ID_FILE_SAVEMIDI        "Export the current song to a standard MIDI file"
     ID_INSTRUMENT_SAMPLEMAP "Edit the sample map"
+    ID_SAMPLE_ZOOMUP        "Zoom In"
+    ID_SAMPLE_ZOOMDOWN      "Zoom Out"
     ID_PATTERNDETAIL_LO     "Low pattern detail level\nLow pattern detail level"
     ID_PATTERNDETAIL_MED    "Medium pattern detail level\nMedium pattern detail level"
     ID_PATTERNDETAIL_HI     "High pattern detail level\nHigh pattern detail level"
@@ -2470,6 +2472,7 @@ STRINGTABLE
 BEGIN
     ID_PANIC                "Kill all VSTi and sample voices\nStop all hanging VSTi and sample voices"
     ID_VIEW_EDITHISTORY     "View the edit history of this module"
+    ID_SAMPLE_GRID          "Configure Sample Grid"
     ID_FILE_SAVEASTEMPLATE  "Save the active document as template module\nSave as Template"
 END
 
