@@ -1272,7 +1272,7 @@ void ApplyAmplifyImpl(void *pSample, SmpLength start, SmpLength end, int32 amp, 
 		int32 l = (p[i] * amp) / 100;
 		if(fadeIn) l = (int32)((l * (int64)i) / l64);
 		if(fadeOut) l = (int32)((l * (int64)(len - i)) / l64);
-		Clamp(l, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+		Limit(l, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 		p[i] = static_cast<T>(l);
 	}
 }
