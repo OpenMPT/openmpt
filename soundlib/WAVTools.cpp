@@ -554,11 +554,17 @@ void WAVWriter::WriteLoopInformation(const ModSample &sample)
 	if(sample.uFlags[CHN_LOOP])
 	{
 		loops[info.numLoops++].ConvertToWAV(sample.nLoopStart, sample.nLoopEnd, sample.uFlags[CHN_PINGPONGLOOP]);
+	} else if(sample.uFlags[CHN_SUSTAINLOOP])
+	{
+		// Since there are no "loop types" to distinguish between sustain and normal loops, OpenMPT assumes
+		// that the first loop is a sustain loop if there are two loops. If we only want a sustain loop,
+		// we will have to write a second bogus loop.
+		loops[info.numLoops++].ConvertToWAV(0, 0, false);
 	}
 
 	info.ConvertEndianness();
 	Write(info);
-	for(size_t i = 0; i < info.numLoops; i++)
+	for(uint32 i = 0; i < info.numLoops; i++)
 	{
 		loops[i].ConvertEndianness();
 		Write(loops[i]);
