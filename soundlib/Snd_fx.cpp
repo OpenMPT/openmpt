@@ -86,7 +86,6 @@ public:
 		for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
 		{
 			state.Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn);
-			state.Chn[chn].nOldHiOffset = 0;
 			state.Chn[chn].nOldGlobalVolSlide = 0;
 			state.Chn[chn].nOldChnVolSlide = 0;
 			state.Chn[chn].nNote = state.Chn[chn].nNewNote = state.Chn[chn].nLastNote = NOTE_NONE;
@@ -1327,7 +1326,11 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			pChn->nPosLo = 0;
 			if(m_SongFlags[SONG_PT1XMODE] && !pChn->rowCommand.instr)
 			{
-				pChn->nPos = (pChn->nOldHiOffset << 16) + (pChn->nOldOffset << 8);
+				pChn->nPos = pChn->proTrackerOffset;
+				LimitMax(pChn->nPos, pChn->nLength - 1);
+			} else
+			{
+				pChn->proTrackerOffset = 0;
 			}
 			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (static_cast<ChannelFlags>(pSmp->uFlags) & CHN_SAMPLEFLAGS);
 			if(pChn->dwFlags[CHN_SUSTAINLOOP])
@@ -4439,6 +4442,9 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 		pChn->nPos = param;
 		pChn->nPosLo = 0;
 	}
+	if(pChn->rowCommand.IsNote()) pChn->proTrackerOffset = param;
+	else if(pChn->rowCommand.instr) pChn->proTrackerOffset = 0;
+	pChn->proTrackerOffset += param;
 
 	return;
 }
