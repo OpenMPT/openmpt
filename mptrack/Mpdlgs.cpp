@@ -728,15 +728,13 @@ void COptionsSoundcard::UpdateStatistics()
 BEGIN_MESSAGE_MAP(COptionsMixer, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO_FILTER, OnResamplerChanged)
-	ON_EN_UPDATE(IDC_WFIRCUTOFF, OnSettingsChanged)
-	ON_EN_UPDATE(IDC_COMBO_FILTERWINDOW, OnSettingsChanged)
-	ON_EN_UPDATE(IDC_RAMPING_IN, OnRampingChanged)
-	ON_EN_UPDATE(IDC_RAMPING_OUT,	OnRampingChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO_POLYPHONY, OnSettingsChanged)
-	// slider stereo sep
-	ON_COMMAND(IDC_CHECK_SOFTPAN, OnSettingsChanged)
-	// slider preamp
+	ON_CBN_SELCHANGE(IDC_COMBO_FILTER,			OnResamplerChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_FILTERWINDOW,	OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_POLYPHONY,		OnSettingsChanged)
+	ON_EN_UPDATE(IDC_WFIRCUTOFF,				OnSettingsChanged)
+	ON_EN_UPDATE(IDC_RAMPING_IN,				OnRampingChanged)
+	ON_EN_UPDATE(IDC_RAMPING_OUT,				OnRampingChanged)
+	ON_COMMAND(IDC_CHECK_SOFTPAN,				OnSettingsChanged)
 END_MESSAGE_MAP()
 
 

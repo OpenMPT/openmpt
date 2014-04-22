@@ -1642,7 +1642,6 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 		{
 			std::istringstream iStrm(std::string(pData, nSize));
 			LoadFile(iStrm, std::wstring(), pTempCS);
-			FreeResource(hglob);
 		}
 	} else
 	{
@@ -1855,7 +1854,7 @@ bool CCommandSet::QuickChange_NoNotesRepeat()
 bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 //--------------------------------------------------------------------------
 {
-	int choices=0;
+	int choices = 0;
 	KeyCombination kc(kCtxViewPatternsFX, 0, 0, kKeyEventDown);
 
 	for(CommandID cmd = kcFixedFXStart; cmd <= kcFixedFXend; cmd = static_cast<CommandID>(cmd + 1))
@@ -1887,13 +1886,16 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 			if(codeNmod != -1)
 			{
 				kc.KeyCode(LOBYTE(codeNmod));
-				kc.Modifier(HIBYTE(codeNmod) & 0x07);	//We're only interest in the bottom 3 bits.
+				kc.Modifier(0);
+				// Don't add modifier keys, since on French keyboards, numbers are input using Shift.
+				// We don't really want that behaviour here, and I'm sure we don't want that in other cases on other layouts as well.
+				//kc.Modifier(HIBYTE(codeNmod) & 0x07);	//We're only interest in the bottom 3 bits.
 				Add(kc, cmd, true);
 			}
 
-			if (kc.KeyCode() >= '0' && kc.KeyCode() <= '9')		//for numbers, ensure numpad works too
+			if (effect >= '0' && effect <= '9')		//for numbers, ensure numpad works too
 			{
-				kc.KeyCode(VK_NUMPAD0 + (kc.KeyCode() - '0'));
+				kc.KeyCode(VK_NUMPAD0 + (effect - '0'));
 				Add(kc, cmd, true);
 			}
 		}
