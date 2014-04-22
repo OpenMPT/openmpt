@@ -63,6 +63,7 @@ struct ALIGN(32) ModChannel
 
 	// Information not used in the mixer
 	const ModInstrument *pModInstrument;	// Currently assigned instrument slot
+	SmpLength proTrackerOffset;				// Offset for instrument-less notes in ProTracker mode
 	FlagSet<ChannelFlags> dwOldFlags;		// Flags from previous tick
 	int32 newLeftVol, newRightVol;
 	int32 nRealVolume, nRealPan;

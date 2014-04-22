@@ -35,6 +35,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		}
 		nTremorCount = 0;
 		nEFxSpeed = 0;
+		proTrackerOffset = 0;
 		isFirstTick = false;
 	}
 
@@ -76,8 +77,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 			dwFlags = sndFile.ChnSettings[sourceChannel].dwFlags;
 			nPan = sndFile.ChnSettings[sourceChannel].nPan;
 			nGlobalVol = sndFile.ChnSettings[sourceChannel].nVolume;
-		}
-		else
+		} else
 		{
 			dwFlags.reset();
 			nPan = 128;
