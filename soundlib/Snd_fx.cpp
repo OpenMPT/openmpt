@@ -1325,6 +1325,10 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			pChn->nLoopStart = 0;
 			pChn->nPos = 0;
 			pChn->nPosLo = 0;
+			if(m_SongFlags[SONG_PT1XMODE] && !pChn->rowCommand.instr)
+			{
+				pChn->nPos = (pChn->nOldHiOffset << 16) + (pChn->nOldOffset << 8);
+			}
 			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (static_cast<ChannelFlags>(pSmp->uFlags) & CHN_SAMPLEFLAGS);
 			if(pChn->dwFlags[CHN_SUSTAINLOOP])
 			{
@@ -4403,7 +4407,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 		if (pChn->nPos >= pChn->nLength)
 		{
 			// Offset beyond sample size
-			if (!(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)))
+			if (!(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MOD)))
 			{
 				// IT Compatibility: Offset
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -5092,7 +5096,13 @@ PLUGINDEX CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority res
 			nChn = channel.nMasterChn - 1;
 		}
 
-		nPlugin = ChnSettings[nChn].nMixPlugin;
+		if(nChn < MAX_BASECHANNELS)
+		{
+			nPlugin = ChnSettings[nChn].nMixPlugin;
+		} else
+		{
+			nPlugin = 0;
+		}
 	}
 	return nPlugin;
 }
