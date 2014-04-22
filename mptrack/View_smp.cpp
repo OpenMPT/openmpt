@@ -2788,7 +2788,7 @@ void CViewSample::OnAddSilence()
 	if(nOldLength != sample.nLength)
 	{
 		SetCurSel(0, 0);
-		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true);
 	}
 }
 
