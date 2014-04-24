@@ -31,9 +31,10 @@ protected:
 	CSliderCtrl m_sbWetDry;
 	CSpinButtonCtrl m_spinVolume[4], m_spinPan[4];
 	CButton m_BtnSelect, m_BtnEdit;
-	int m_nActiveTab, m_nLockCount;
-	PLUGINDEX m_nCurrentPlugin;
+	int m_nLockCount;
 	PlugParamIndex m_nCurrentParam;
+	CHANNELINDEX m_nActiveTab;
+	PLUGINDEX m_nCurrentPlugin;
 
 	CComboBox m_CbnSpecialMixProcessing;
 	CSpinButtonCtrl m_SpinMixGain;			// update#02
