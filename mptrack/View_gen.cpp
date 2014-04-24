@@ -148,7 +148,7 @@ void CViewGlobals::OnInitialUpdate()
 	int nMapMode = MM_TEXT;
 	SIZE sizeTotal, sizePage, sizeLine;
 
-	m_nActiveTab = -1;
+	m_nActiveTab = CHANNELINDEX(-1);
 	m_nCurrentPlugin = 0;
 	m_nCurrentParam = 0;
 	CFormView::OnInitialUpdate();
@@ -202,7 +202,7 @@ void CViewGlobals::OnInitialUpdate()
 	OnParamChanged();
 	m_nLockCount = 0;
 
-	
+
 }
 
 
@@ -298,7 +298,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
 	int nTabCount, nTabIndex;
-	
+
 	if (!pModDoc) return;
 	if (!(dwHintMask & (HINT_MODTYPE|HINT_MODCHANNELS|HINT_MIXPLUGINS))) return;
 	pSndFile = pModDoc->GetSoundFile();
@@ -319,10 +319,10 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_TabCtrl.InsertItem(iItem, &tci);
 		}
 		if (nOldSel >= (UINT)nTabCount) nOldSel = 0;
-		
+
 		m_TabCtrl.SetRedraw(TRUE);
 		m_TabCtrl.SetCurSel(nOldSel);
-		
+
 		InvalidateRect(NULL, FALSE);
 	}
 	nTabIndex = m_TabCtrl.GetCurSel();
@@ -330,7 +330,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 	if ((m_nActiveTab != nTabIndex) || (dwHintMask & (HINT_MODTYPE|HINT_MODCHANNELS)))
 	{
 		LockControls();
-		m_nActiveTab = nTabIndex;
+		m_nActiveTab = static_cast<CHANNELINDEX>(nTabIndex);
 		for (int ichn=0; ichn<4; ichn++)
 		{
 			const UINT nChn = nTabIndex*4+ichn;
@@ -424,7 +424,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
 		SetDlgItemText(IDC_STATIC8, s);
 		m_sbDryRatio.SetPos(n);
-		
+
 		if(pVstPlugin && pVstPlugin->isInstrument())
 		{
 			m_CbnSpecialMixProcessing.EnableWindow(FALSE);
@@ -560,7 +560,7 @@ void CViewGlobals::OnMute(const CHANNELINDEX chnMod4, const UINT itemID)
 //----------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	
+
 	if (pModDoc)
 	{
 		const bool b = (IsDlgButtonChecked(itemID) != FALSE);
@@ -580,7 +580,7 @@ void CViewGlobals::OnSurround(const CHANNELINDEX chnMod4, const UINT itemID)
 //--------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	
+
 	if (pModDoc)
 	{
 		const bool b = (IsDlgButtonChecked(itemID) != FALSE);
@@ -658,7 +658,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	{
 		BOOL bUpdate = FALSE;
 		short int pos;
-		
+
 		LockControls();
 		const CHANNELINDEX nLoopLimit = MIN(4, pModDoc->GetSoundFile()->GetNumChannels() - nChn);
 		for (CHANNELINDEX iCh = 0; iCh < nLoopLimit; iCh++)
@@ -692,12 +692,12 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
 			int n = m_sbDryRatio.GetPos();
 			if ((n >= 0) && (n <= 100) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
-			{				
+			{
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
 				SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
 
 				if(plugin.pMixPlugin)
-				{	
+				{
 					wsprintf(s, "(%d%% wet, %d%% dry)", 100 - n, n);
 					SetDlgItemText(IDC_STATIC8, s);
 					plugin.fDryRatio = static_cast<float>(n) / 100.0f;
@@ -762,7 +762,7 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			if(gain == 0) gain = 1;
 
 			plugin.SetGain(gain);
-			
+
 			float fValue = 0.1f * (float)gain;
 			sprintf(s,"Gain: x %1.1f",fValue);
 			SetDlgItemText(IDC_STATIC2, s);
@@ -786,7 +786,7 @@ void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		CHAR s[MAX_CHANNELNAME + 2];
 		const UINT nChn = m_nActiveTab * 4 + chnMod4;
-		
+
 		MemsetZero(s);
 		GetDlgItemText(itemID, s, CountOf(s));
 		s[MAX_CHANNELNAME+1] = 0;
@@ -812,9 +812,9 @@ void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		UINT nChn = m_nActiveTab * 4 + chnMod4;
+		CHANNELINDEX nChn = m_nActiveTab * 4 + chnMod4;
 		int nfx = m_CbnEffects[chnMod4].GetItemData(m_CbnEffects[chnMod4].GetCurSel());
-		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->m_nChannels)
+		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->GetNumChannels())
 		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
 		{
 			pSndFile->ChnSettings[nChn].nMixPlugin = (PLUGINDEX)nfx;
@@ -904,7 +904,7 @@ void CViewGlobals::OnSelectPlugin()
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CSelectPluginDlg dlg(pModDoc, m_nCurrentPlugin, this); 
+		CSelectPluginDlg dlg(pModDoc, m_nCurrentPlugin, this);
 		if (dlg.DoModal() == IDOK)
 		{
 			if(pSndFile->GetModSpecifications().supportsPlugins)
@@ -922,7 +922,7 @@ void CViewGlobals::OnParamChanged()
 {
 	int cursel = m_CbnParam.GetItemData(m_CbnParam.GetCurSel());
 	CHAR s[256];
-	
+
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
 	if(pVstPlugin != nullptr && cursel != CB_ERR)
@@ -952,7 +952,7 @@ void CViewGlobals::OnProgramChanged()
 {
 	VstInt32 curProg = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
 	CModDoc *pModDoc = GetDocument();
-	
+
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
 	if(pVstPlugin != nullptr)
@@ -999,7 +999,7 @@ void CViewGlobals::OnSetParameter()
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
-	
+
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
@@ -1026,7 +1026,7 @@ void CViewGlobals::OnSetWetDry()
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
-	
+
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
 	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
@@ -1051,7 +1051,7 @@ void CViewGlobals::OnMixModeChanged()
 	pSndFile = pModDoc->GetSoundFile();
 
 	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetMasterEffect(IsDlgButtonChecked(IDC_CHECK9) != BST_UNCHECKED);
-	
+
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
@@ -1081,9 +1081,9 @@ void CViewGlobals::OnWetDryExpandChanged()
 
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	
+
 	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetExpandedMix(IsDlgButtonChecked(IDC_CHECK12) != BST_UNCHECKED);
-	
+
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
@@ -1126,7 +1126,7 @@ void CViewGlobals::OnEditPlugin()
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pModDoc->TogglePluginEditor(m_nCurrentPlugin);
-	return;	
+	return;
 }
 
 
@@ -1209,9 +1209,12 @@ void CViewGlobals::OnMovePlugToSlot()
 			}
 
 			m_nCurrentPlugin = nextPlugin;
-			toIndex++;
 
-			newPlugin.SetOutputPlugin(emptySlots[toIndex]);
+			if(dlg.DoMoveChain())
+			{
+				toIndex++;
+				newPlugin.SetOutputPlugin(emptySlots[toIndex]);
+			}
 		} while(dlg.DoMoveChain());
 
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
@@ -1220,7 +1223,7 @@ void CViewGlobals::OnMovePlugToSlot()
 }
 
 
-// Functor for adjusting plug indexes in modcommands. Adjusts all instrument column values in 
+// Functor for adjusting plug indexes in modcommands. Adjusts all instrument column values in
 // range [m_nInstrMin, m_nInstrMax] by m_nDiff.
 struct PlugIndexModifier
 //======================
@@ -1247,13 +1250,13 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 
 	BeginWaitCursor();
-	
+
 	CriticalSection cs;
-		
+
 	// Move plug data
 	MemCopy(pSndFile->m_MixPlugins[dest], pSndFile->m_MixPlugins[src]);
 	MemsetZero(pSndFile->m_MixPlugins[src]);
-	
+
 	//Prevent plug from pointing backwards.
 	if(!pSndFile->m_MixPlugins[dest].IsOutputToMaster())
 	{
@@ -1263,16 +1266,16 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 			pSndFile->m_MixPlugins[dest].SetOutputToMaster();
 		}
 	}
-	
+
 	// Update current plug
 	if(pSndFile->m_MixPlugins[dest].pMixPlugin)
 	{
 		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->SetSlot(dest);
 		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->UpdateMixStructPtr(&(pSndFile->m_MixPlugins[dest]));
 	}
-	
+
 	// Update all other plugs' outputs
-	for (PLUGINDEX nPlug = 0; nPlug < src; nPlug++) 
+	for (PLUGINDEX nPlug = 0; nPlug < src; nPlug++)
 	{
 		if(!pSndFile->m_MixPlugins[nPlug].IsOutputToMaster())
 		{
@@ -1315,11 +1318,11 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 }
 
 
-void CViewGlobals::BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots) 
+void CViewGlobals::BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots)
 //-----------------------------------------------------------------------
 {
 	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
-	
+
 	emptySlots.clear();
 
 	for(PLUGINDEX nSlot = 0; nSlot < MAX_MIXPLUGINS; nSlot++)
@@ -1351,7 +1354,7 @@ void CViewGlobals::OnInsertSlot()
 			moveLastPlug = true;
 		} else
 		{
-			prompt.Append("\nWarning: plugin data in last slot will be lost."); 
+			prompt.Append("\nWarning: plugin data in last slot will be lost.");
 		}
 	}
 	if(Reporting::Confirm(prompt) == cnfYes)
@@ -1424,9 +1427,12 @@ void CViewGlobals::OnClonePlug()
 			}
 
 			m_nCurrentPlugin = curPlugin.GetOutputPlugin();
-			toIndex++;
 
-			newPlugin.SetOutputPlugin(emptySlots[toIndex]);
+			if(dlg.DoMoveChain())
+			{
+				toIndex++;
+				newPlugin.SetOutputPlugin(emptySlots[toIndex]);
+			}
 		} while(dlg.DoMoveChain());
 
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
