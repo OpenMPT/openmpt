@@ -2011,7 +2011,11 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		}
 	}
 
-	WRITEMODULAR('T','M','.','.', m_nTempoMode);
+	{
+		WRITEMODULARHEADER('T','M','.','.', 1);
+		uint8 mode = static_cast<uint8>(m_nTempoMode);
+		fwrite(&mode, sizeof(mode), 1, f);
+	}
 
 	WRITEMODULAR('P','M','M','.', m_nMixLevels);
 
@@ -2158,7 +2162,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			case MAGIC4BE('R','P','B','.'): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
 			case MAGIC4BE('R','P','M','.'): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
 			case MAGIC4BE('C','.','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nChannels); break;
-			case MAGIC4BE('T','M','.','.'): ReadField(chunk, size, m_nTempoMode); break;
+			case MAGIC4BE('T','M','.','.'): ReadFieldCast(chunk, size, m_nTempoMode); break;
 			case MAGIC4BE('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
 			case MAGIC4BE('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
 			case MAGIC4BE('L','S','W','V'): ReadField(chunk, size, m_dwLastSavedWithVersion); break;

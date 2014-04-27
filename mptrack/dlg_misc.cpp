@@ -67,6 +67,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_nType = sndFile.GetType();
 	m_nChannels = sndFile.GetNumChannels();
+	initialized = false;
 
 	// Mod types
 
@@ -89,47 +90,6 @@ BOOL CModTypeDlg::OnInitDialog()
 // -! NEW_FEATURE#0023
 	case MOD_TYPE_MPT:	m_TypeBox.SetCurSel(5); break;
 	default:			m_TypeBox.SetCurSel(0); break;
-	}
-
-	// Tempo modes
-
-	// Don't show new tempo modes for XM/IT, unless they are currently used
-	const bool showNewModes = (sndFile.GetType() == MOD_TYPE_MPT || (sndFile.m_SongFlags[SONG_ITPROJECT] != 0));
-
-	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
-	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_alternative)
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
-	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_modern)
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
-	m_TempoModeBox.SetCurSel(0);
-	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
-	{
-		if(m_TempoModeBox.GetItemData(i) == sndFile.m_nTempoMode)
-		{
-			m_TempoModeBox.SetCurSel(i);
-			break;
-		}
-	}
-
-	// Mix levels
-
-	if(showNewModes || sndFile.GetMixLevels() == mixLevels_117RC3)	// In XM/IT, this is only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),		mixLevels_117RC3);
-	if(sndFile.GetMixLevels() == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
-	if(sndFile.GetMixLevels() == mixLevels_117RC1)	// Dito
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),	mixLevels_117RC1);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);
-
-	m_PlugMixBox.SetCurSel(0);
-	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
-	{
-		if(static_cast<mixLevels>(m_PlugMixBox.GetItemData(i)) == sndFile.GetMixLevels())
-		{
-			m_PlugMixBox.SetCurSel(i);
-			break;
-		}
 	}
 
 	// Misc flags
@@ -157,6 +117,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT_SAVEDWITH, sndFile.madeWithTracker.c_str());
 	UpdateDialog();
 
+	initialized = true;
 	EnableToolTips(TRUE);
 	return TRUE;
 }
@@ -254,6 +215,49 @@ void CModTypeDlg::UpdateDialog()
 	GetDlgItem(IDC_CHK_OLDRANDOM)->EnableWindow((ITorMPT && sndFile.GetModFlag(MSF_OLDVOLSWING)) ? TRUE : FALSE);
 	GetDlgItem(IDC_CHK_OLDPITCH)->EnableWindow(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS) ? TRUE : FALSE);
 
+	// Tempo modes
+	const tempoMode oldTempoMode = initialized ? static_cast<tempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
+	m_TempoModeBox.ResetContent();
+	// Don't show new tempo modes for XM/IT, unless they are currently used
+	const bool showNewModes = (type == MOD_TYPE_MPT || (sndFile.m_SongFlags[SONG_ITPROJECT] != 0));
+
+	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
+	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_alternative)
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
+	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_modern)
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
+	m_TempoModeBox.SetCurSel(0);
+	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
+	{
+		if(static_cast<tempoMode>(m_TempoModeBox.GetItemData(i)) == oldTempoMode)
+		{
+			m_TempoModeBox.SetCurSel(i);
+			break;
+		}
+	}
+
+	// Mix levels
+	const mixLevels oldMixLevels = initialized ? static_cast<mixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
+	m_PlugMixBox.ResetContent();
+	if(showNewModes || sndFile.GetMixLevels() == mixLevels_117RC3)	// In XM/IT, this is only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),	mixLevels_117RC3);
+	if(sndFile.GetMixLevels() == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
+	if(sndFile.GetMixLevels() == mixLevels_117RC1)	// Ditto
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),	mixLevels_117RC1);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);
+
+	m_PlugMixBox.SetCurSel(0);
+	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
+	{
+		if(static_cast<mixLevels>(m_PlugMixBox.GetItemData(i)) == oldMixLevels)
+		{
+			m_PlugMixBox.SetCurSel(i);
+			break;
+		}
+	}
+
 	// Mixmode Box
 	GetDlgItem(IDC_TEXT_MIXMODE)->ShowWindow(XMorITorMPT);
 	m_PlugMixBox.ShowWindow(XMorITorMPT);
@@ -294,9 +298,9 @@ bool CModTypeDlg::VerifyData()
 
 	int temp_nRPB = GetDlgItemInt(IDC_ROWSPERBEAT);
 	int temp_nRPM = GetDlgItemInt(IDC_ROWSPERMEASURE);
-	if ((temp_nRPB > temp_nRPM))
+	if(temp_nRPB > temp_nRPM)
 	{
-		Reporting::Warning("Error: Rows per measure must be greater than or equal rows per beat.");
+		Reporting::Warning("Error: Rows per measure must be greater than or equal to rows per beat.");
 		GetDlgItem(IDC_ROWSPERMEASURE)->SetFocus();
 		return false;
 	}
@@ -306,7 +310,7 @@ bool CModTypeDlg::VerifyData()
 
 	CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
 
-	if (sel > maxChans)
+	if(sel > maxChans)
 	{
 		CString error;
 		error.Format("Error: Maximum number of channels for this module type is %d.", maxChans);
@@ -361,7 +365,7 @@ void CModTypeDlg::OnOK()
 	sel = m_TempoModeBox.GetCurSel();
 	if (sel >= 0)
 	{
-		sndFile.m_nTempoMode = m_TempoModeBox.GetItemData(sel);
+		sndFile.m_nTempoMode = static_cast<tempoMode>(m_TempoModeBox.GetItemData(sel));
 	}
 
 	sel = m_PlugMixBox.GetCurSel();
@@ -452,8 +456,6 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 
 	if(pNMHDR->code == TTN_NEEDTEXTA)
 	{
-		//strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
-		//	strTipText.GetLength() + 1);
 		// 80 chars max?!
 		mpt::String::CopyN(pTTTA->szText, strTipText);
 	} else

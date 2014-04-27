@@ -380,7 +380,7 @@ private:
 	CHANNELINDEX m_nMixStat;
 public:
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module // rewbs.betterBPM
-	BYTE m_nTempoMode;
+	tempoMode m_nTempoMode;
 	ORDERINDEX m_nRestartPos;
 
 #ifdef MODPLUG_TRACKER
