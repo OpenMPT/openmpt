@@ -4198,10 +4198,14 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPatternRecord:				OnPatternRecord(); return wParam;
 		case kcCursorCopy:					OnCursorCopy(); return wParam;
 		case kcCursorPaste:					OnCursorPaste(); return wParam;
-		case kcChannelMute:					OnMuteChannel(GetCurrentChannel()); return wParam;
+		case kcChannelMute:					for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+												OnMuteChannel(c);
+											return wParam;
 		case kcChannelSolo:					OnSoloChannel(GetCurrentChannel()); return wParam;
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
-		case kcToggleChanMuteOnPatTransition: TogglePendingMute(GetCurrentChannel()); return wParam;
+		case kcToggleChanMuteOnPatTransition: for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+												TogglePendingMute(c);
+											return wParam;
 		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
 		case kcChannelRecordSelect:			for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
 												pModDoc->Record1Channel(c);
