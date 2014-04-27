@@ -24,6 +24,7 @@ public:
 	CSoundFile &sndFile;
 	CHANNELINDEX m_nChannels;
 	MODTYPE m_nType;
+	bool initialized;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
