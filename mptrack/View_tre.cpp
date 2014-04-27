@@ -264,11 +264,17 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 				HTREEITEM hItem = GetSelectedItem();
 				if(hItem)
 				{
-					if(!ExecuteItem(hItem))
+					if(CMainFrame::GetInputHandler()->CtrlPressed())
 					{
-						if(ItemHasChildren(hItem))
+						EditLabel(hItem);
+					} else
+					{
+						if(!ExecuteItem(hItem))
 						{
-							Expand(hItem, TVE_TOGGLE);
+							if(ItemHasChildren(hItem))
+							{
+								Expand(hItem, TVE_TOGGLE);
+							}
 						}
 					}
 				}
@@ -1661,7 +1667,7 @@ void CModTree::FillInstrumentLibrary()
 		// Enumerating Drives...
 		if(!IsSampleBrowser())
 		{
-			CImageListEx &images = CMainFrame::GetMainFrame()->m_MiscIcons;
+			CImageList &images = CMainFrame::GetMainFrame()->m_MiscIcons;
 			// Avoid adding the same images again and again...
 			images.SetImageCount(IMGLIST_NUMIMAGES);
 
