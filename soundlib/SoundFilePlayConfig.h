@@ -25,11 +25,12 @@ enum tempoMode
 
 enum mixLevels
 {
-	mixLevels_original		= 0,
-	mixLevels_117RC1		= 1,
-	mixLevels_117RC2		= 2,
-	mixLevels_117RC3		= 3,
-	mixLevels_compatible	= 4,
+	mixLevels_original			= 0,
+	mixLevels_117RC1			= 1,
+	mixLevels_117RC2			= 2,
+	mixLevels_117RC3			= 3,
+	mixLevels_compatible		= 4,
+	mixLevels_compatible_FT2	= 5,
 };
 
 enum forcePanningMode
@@ -37,6 +38,7 @@ enum forcePanningMode
 	dontForcePanningMode,
 	forceSoftPanning,
 	forceNoSoftPanning,
+	forceFT2Panning,
 };
 
 // Class used to store settings for a song file.
@@ -87,10 +89,6 @@ public:
 	int getExtraSampleAttenuation() const { return m_extraAttenuation; }
 	void setExtraSampleAttenuation(int attn) { m_extraAttenuation = attn; }
 
-	// True if format-specific mixing quirks should be emulated.
-	bool getEmulateQuirks() const { return m_emulateQuirks; }
-	void setEmulateQuirks(bool emulate) { m_emulateQuirks = emulate; }
-
 protected:
 
 	float m_IntToFloat;
@@ -107,6 +105,5 @@ protected:
 	bool m_globalVolumeAppliesToMaster;
 	bool m_ignorePreAmp;
 	bool m_displayDBValues;
-	bool m_emulateQuirks;
 };
 

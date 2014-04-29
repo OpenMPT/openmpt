@@ -136,7 +136,7 @@ const CModSpecifications xm =
 	0,											// Max instrument filename length
 	128 * 16,									// SamplesMax (actually 16 per instrument)
 	128,										// instrumentMax
-	mixLevels_compatible,						// defaultMixLevels
+	mixLevels_compatible_FT2,					// defaultMixLevels
 	0,											// Max MIDI mapping directives
 	1,											// Min Speed
 	31,											// Max Speed
@@ -180,7 +180,7 @@ const CModSpecifications xmEx =
 	0,											// Max instrument filename length
 	MAX_SAMPLES - 1,							// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
 	255,										// instrumentMax
-	mixLevels_compatible,						// defaultMixLevels
+	mixLevels_compatible_FT2,					// defaultMixLevels
 	200,										// Max MIDI mapping directives
 	1,											// Min Speed
 	31,											// Max Speed

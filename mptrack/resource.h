@@ -896,6 +896,7 @@
 #define IDC_CHK_MERGE_SEQUENCES         2408
 #define IDC_CHECK_PT1X                  2409
 #define IDC_STATIC_CHANNEL_NAME         2410
+#define IDC_CHECK_AMIGALIMITS           2410
 #define IDC_FINDHOTKEY                  2411
 #define IDC_STATIC_PATTERNNAME          2412
 #define IDC_EDIT_SAMPLE_LENGTH          2413
