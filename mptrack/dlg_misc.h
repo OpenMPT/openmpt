@@ -20,7 +20,7 @@ class CModTypeDlg: public CDialog
 {
 public:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
-	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x, m_CheckBoxFt2VolRamp;
+	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x, m_CheckBoxFt2VolRamp, m_CheckBoxAmigaLimits;
 	CSoundFile &sndFile;
 	CHANNELINDEX m_nChannels;
 	MODTYPE m_nType;
@@ -183,12 +183,12 @@ protected:
 	CComboBox m_CbnSample;
 	CSliderCtrl m_SbOctave;
 	CSoundFile &sndFile;
-	UINT m_nInstrument;
+	INSTRUMENTINDEX m_nInstrument;
 	SAMPLEINDEX KeyboardMap[NOTE_MAX];
 	MouseAction mouseAction;
 
 public:
-	CSampleMapDlg(CSoundFile &sf, UINT nInstr, CWnd *parent=NULL) : CDialog(IDD_EDITSAMPLEMAP, parent), mouseAction(mouseUnknown), sndFile(sf)
+	CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX nInstr, CWnd *parent=NULL) : CDialog(IDD_EDITSAMPLEMAP, parent), mouseAction(mouseUnknown), sndFile(sf)
 		{ m_nInstrument = nInstr; }
 
 protected:

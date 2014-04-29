@@ -277,6 +277,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	InitializeChannels();
 	ChangeModTypeTo(MOD_TYPE_XM);
+	m_nMixLevels = mixLevels_compatible_FT2;
 
 	FlagSet<TrackerVersions> madeWith(verUnknown);
 
@@ -304,15 +305,15 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	} else
 	{
 		// Something else!
-		madeWith = verUnknown |verConfirmed;
+		madeWith = verUnknown | verConfirmed;
 
 		mpt::String::Read<mpt::String::spacePadded>(madeWithTracker, fileHeader.trackerName);
 	}
 
 	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
 
-	m_nMinPeriod = 27;
-	m_nMaxPeriod = 54784;
+	m_nMinPeriod = 1;
+	m_nMaxPeriod = 31999;
 
 	m_nRestartPos = fileHeader.restartPos;
 	m_nChannels = fileHeader.channels;

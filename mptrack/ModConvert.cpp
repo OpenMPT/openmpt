@@ -534,7 +534,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	{
 		m_SndFile.SetMixLevels(mixLevels_compatible);
 	}
-	if(oldTypeIsMPT && m_SndFile.GetMixLevels() != mixLevels_compatible)
+	if(oldTypeIsMPT && m_SndFile.GetMixLevels() != mixLevels_compatible && m_SndFile.GetMixLevels() != mixLevels_compatible_FT2)
 	{
 		CHANGEMODTYPE_WARNING(wMixmode);
 	}

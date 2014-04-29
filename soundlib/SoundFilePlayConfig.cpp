@@ -43,7 +43,6 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
-			setEmulateQuirks(false);
 			break;
 
 		// Ericus' version gives us floats in [-0.06;0.06] and requires attenuation to
@@ -60,7 +59,6 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
-			setEmulateQuirks(false);
 			break;
 
 		// 117RC2 gives us floats in [-1.0; 1.0] and hopefully plays VSTis at 
@@ -78,7 +76,6 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
-			setEmulateQuirks(false);
 			break;
 
 		// 117RC3 ignores the horrible global, system-specific pre-amp, 
@@ -97,25 +94,24 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setNormalVSTiVol(128.0);
 			setNormalGlobalVol(256.0);
 			setExtraSampleAttenuation(0);
-			setEmulateQuirks(false);
 			break;
 
 		// A mixmode that is intended to be compatible to legacy trackers (IT/FT2/etc).
 		// This is basically derived from mixmode 1.17 RC3, with panning mode and volume levels changed.
 		// Sample attenuation is the same as in Schism Tracker (more attenuation than with RC3, thus VSTi attenuation is also higher).
 		case mixLevels_compatible:
+		case mixLevels_compatible_FT2:
 			setVSTiAttenuation(0.75f);
 			setIntToFloat(1.0f/MIXING_SCALEF);
 			setFloatToInt(MIXING_SCALEF);
 			setGlobalVolumeAppliesToMaster(true);
 			setUseGlobalPreAmp(false);
-			setForcePanningMode(forceNoSoftPanning);
+			setForcePanningMode(mixLevelType == mixLevels_compatible ? forceNoSoftPanning : forceFT2Panning);
 			setDisplayDBValues(true);
 			setNormalSamplePreAmp(256.0);
 			setNormalVSTiVol(256.0);
 			setNormalGlobalVol(256.0);
 			setExtraSampleAttenuation(1);
-			setEmulateQuirks(true);
 			break;
 
 	}

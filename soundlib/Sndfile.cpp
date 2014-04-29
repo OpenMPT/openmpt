@@ -1687,7 +1687,6 @@ bool CSoundFile::LoadStaticTunings()
 	{
 		std::istringstream iStrm(std::string(pData, nSize));
 		s_pTuningsSharedBuiltIn->Deserialize(iStrm);
-		FreeResource(hglob);
 	}
 	if(s_pTuningsSharedBuiltIn->GetNumTunings() == 0)
 	{
@@ -1972,7 +1971,7 @@ SAMPLEINDEX CSoundFile::GetNextFreeSample(INSTRUMENTINDEX targetInstrument, SAMP
 			// When loading into an instrument, ignore non-empty sample names. Else, only use this slot if the sample name is empty or we're in second pass.
 			if((i > GetNumSamples() && passes == 1)
 				|| (Samples[i].pSample == nullptr && (!m_szNames[i][0] || passes == 1 || targetInstrument != INSTRUMENTINDEX_INVALID))
-				|| (targetInstrument != INSTRUMENTINDEX_INVALID && IsSampleReferencedByInstrument(i, targetInstrument)))	// Not empty, but already used by this instrument.
+				|| (targetInstrument != INSTRUMENTINDEX_INVALID && IsSampleReferencedByInstrument(i, targetInstrument)))	// Not empty, but already used by this instrument. XXX this should only be done when replacing an instrument with a single sample! Otherwise it will use an inconsistent sample map!
 			{
 				// Empty slot, so it's a good candidate already.
 
@@ -2105,10 +2104,10 @@ void CSoundFile::UpgradeModFlags()
 
 		if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 		{
-			// If there are any plugins, enable volume bug emulation.
-			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+			// If there are any plugins that can receive volume commands, enable volume bug emulation.
+			for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i])
 			{
-				if(m_MixPlugins[i].IsValidPlugin())
+				if(Instruments[i]->nMixPlug && Instruments[i]->HasValidMIDIChannel())
 				{
 					SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 					break;
@@ -2378,6 +2377,14 @@ void CSoundFile::UpgradeSong()
 #endif
 			mpt::String::Copy(m_MixPlugins[i].Info.szLibraryName, name);
 		}
+	}
+
+	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 22, 07, 19)
+		&& m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 23, 01, 04)
+		&& GetType() == MOD_TYPE_XM
+		&& GetMixLevels() == mixLevels_compatible)
+	{
+		SetMixLevels(mixLevels_compatible_FT2);
 	}
 
 	Patterns.ForEachModCommand(UpgradePatternData(*this));
