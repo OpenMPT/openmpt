@@ -37,7 +37,7 @@ protected:
 	KeyMap keyMap;
 	void LogModifiers(UINT mask);
 	UINT modifierMask;
-	bool m_bBypass;
+	int bypassCount;
 	bool m_bNoAltMenu;
 	bool CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode);
 	bool m_bInterceptWindowsKeys, m_bInterceptNumLock, m_bInterceptCapsLock, m_bInterceptScrollLock;
