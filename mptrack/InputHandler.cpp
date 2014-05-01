@@ -69,8 +69,8 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	activeCommandSet->GenKeyMap(keyMap);
 	SetupSpecialKeyInterception(); // Feature: use Windows keys as modifier keys, intercept special keys
 
-	m_bBypass = false;
-	modifierMask=0;
+	bypassCount = 0;
+	modifierMask = 0;
 	m_bNoAltMenu = true;
 
 }
@@ -140,7 +140,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 
 
 CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(InterceptSpecialKeys(nChar, nFlags, false))
 		return kcNull;
@@ -410,14 +410,18 @@ bool CInputHandler::AltPressed()
 void CInputHandler::Bypass(bool b)
 //--------------------------------
 {
-	m_bBypass=b;
+	if(b)
+		bypassCount++;
+	else
+		bypassCount--;
+	ASSERT(bypassCount >= 0);
 }
 
 
 bool CInputHandler::IsBypassed()
 //------------------------------
 {
-	return m_bBypass;
+	return bypassCount > 0;
 }
 
 
@@ -606,7 +610,7 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 {
 
 	//Alpha-numerics (only shift or no modifier):
-	if(!CtrlPressed() &&  !AltPressed()
+	if(!(GetModifierMask() & (~HOTKEYF_SHIFT))
 		&&  ((key>='A'&&key<='Z') || (key>='0'&&key<='9') ||
 		 key==VK_DIVIDE  || key==VK_MULTIPLY || key==VK_SPACE || key==VK_RETURN ||
 		 key==VK_CAPITAL || (key>=VK_OEM_1 && key<=VK_OEM_3) || (key>=VK_OEM_4 && key<=VK_OEM_8)))
@@ -618,7 +622,7 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 		return true;
 
 	//Copy paste etc..
-	if(CMainFrame::GetInputHandler()->GetModifierMask()==HOTKEYF_CONTROL &&
+	if(GetModifierMask()==HOTKEYF_CONTROL &&
 		(key == 'Y' || key == 'Z' || key == 'X' ||  key == 'C' || key == 'V' || key == 'A'))
 		return true;
 
