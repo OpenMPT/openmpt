@@ -38,6 +38,7 @@
 #include "soundlib/FileReader.h"
 #include "../common/Profiler.h"
 #include "FileDialog.h"
+#include <HtmlHelp.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -106,7 +107,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 END_MESSAGE_MAP()
 
 // Globals
-UINT CMainFrame::m_nLastOptionsPage = 0;
+OptionsPage CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_DEFAULT;
 HHOOK CMainFrame::ghKbdHook = NULL;
 
 std::vector<mpt::PathString> CMainFrame::s_ExampleModulePaths;
@@ -363,6 +364,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MIDIRECORD) midiOpenDevice(false);
 
+	HtmlHelpW(m_hWnd, nullptr, HH_INITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
+
 	return 0;
 }
 
@@ -377,6 +380,8 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 BOOL CMainFrame::DestroyWindow()
 //------------------------------
 {
+	HtmlHelpW(m_hWnd, nullptr, HH_UNINITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
+
 	// Uninstall Keyboard Hook
 	if (ghKbdHook)
 	{
@@ -2616,11 +2621,41 @@ void CMainFrame::OnShowSettingsFolder()
 void CMainFrame::OnHelp()
 //-----------------------
 {
-	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.pdf");
-	if(!theApp.OpenFile(helpFile))
+	CView *view = GetActiveView();
+	const char *page = "";
+	if(m_bOptionsLocked)
+	{
+		switch(m_nLastOptionsPage)
+		{
+			case OPTIONS_PAGE_GENERAL:		page = "::/Setup_General.html"; break;
+			case OPTIONS_PAGE_SOUNDCARD:	page = "::/Setup_Soundcard.html"; break;
+			case OPTIONS_PAGE_MIXER:		page = "::/Setup_Mixer.html"; break;
+			case OPTIONS_PAGE_PLAYER:		page = "::/Setup_DSP.html"; break;
+			case OPTIONS_PAGE_SAMPLEDITOR:	page = "::/Setup_Samples.html"; break;
+			case OPTIONS_PAGE_KEYBOARD:		page = "::/Setup_Keyboard.html"; break;
+			case OPTIONS_PAGE_COLORS:		page = "::/Setup_Colours.html"; break;
+			case OPTIONS_PAGE_MIDI:			page = "::/Setup_MIDI.html"; break;
+			case OPTIONS_PAGE_AUTOSAVE:		page = "::/Setup_Autosave.html"; break;
+			case OPTIONS_PAGE_UPDATE:		page = "::/Setup_Update.html"; break;
+			case OPTIONS_PAGE_ADVANCED:		page = "::/Setup_Advanced.html"; break;
+		}
+	} else if(view != nullptr)
+	{
+		const char *className = view->GetRuntimeClass()->m_lpszClassName;
+		if(!strcmp("CViewGlobals", className))			page = "::/General.html";
+		else if(!strcmp("CViewPattern", className))		page = "::/Patterns.html";
+		else if(!strcmp("CViewSample", className))		page = "::/Samples.html";
+		else if(!strcmp("CViewInstrument", className))	page = "::/Instruments.html";
+		else if(!strcmp("CModControlView", className))	page = "::/Comments.html";
+	}
+
+	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page);
+	if(!HtmlHelpW(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
 	{
 		Reporting::Error(L"Could not find help file:\n" + helpFile.ToWide());
+		return;
 	}
+	//::ShowWindow(hwndHelp, SW_SHOWMAXIMIZED);
 }
 
 

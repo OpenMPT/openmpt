@@ -245,6 +245,24 @@ enum
 };
 
 
+// Tab Order
+enum OptionsPage
+{
+	OPTIONS_PAGE_DEFAULT = 0,
+	OPTIONS_PAGE_GENERAL = OPTIONS_PAGE_DEFAULT,
+	OPTIONS_PAGE_SOUNDCARD,
+	OPTIONS_PAGE_MIXER,
+	OPTIONS_PAGE_PLAYER,
+	OPTIONS_PAGE_SAMPLEDITOR,
+	OPTIONS_PAGE_KEYBOARD,
+	OPTIONS_PAGE_COLORS,
+	OPTIONS_PAGE_MIDI,
+	OPTIONS_PAGE_AUTOSAVE,
+	OPTIONS_PAGE_UPDATE,
+	OPTIONS_PAGE_ADVANCED,
+};
+
+
 /////////////////////////////////////////////////////////////////////////
 // Player position notification
 
@@ -279,7 +297,7 @@ class CMainFrame: public CMDIFrameWnd, public ISoundSource, public ISoundMessage
 public:
 
 	// Globals
-	static UINT m_nLastOptionsPage;
+	static OptionsPage m_nLastOptionsPage;
 	static HHOOK ghKbdHook;
 
 	// GDI
@@ -328,6 +346,7 @@ protected:
 	// Misc
 	CModDoc* m_pJustModifiedDoc;
 	class COptionsSoundcard *m_SoundCardOptionsDialog;
+	DWORD helpCookie;
 	bool m_bOptionsLocked;
 
 	// Notification Buffer
