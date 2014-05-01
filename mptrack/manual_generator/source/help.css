@@ -1,0 +1,36 @@
+body
+{
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: #fff;
+    color: #000;
+}
+
+h1
+{
+    background-color: #DFEFFF;
+    padding: 0.25em;
+}
+
+#content
+{
+    margin: 0 !important;
+    border: 0 !important;
+    padding: 1em !important;
+}
+
+#toc
+{
+    display: none;
+}
+
+ul
+{
+    list-style-image: url(bullet.png) !important;
+}
+
+div#content a.external
+{
+    background-image: url(external.png) !important;
+}

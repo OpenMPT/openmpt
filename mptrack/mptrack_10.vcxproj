@@ -145,7 +145,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;dsound.lib;msacm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;dsound.lib;msacm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -196,7 +196,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;dsound.lib;msacm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;dsound.lib;msacm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -251,7 +251,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;dsound.lib;msacm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;dsound.lib;msacm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -307,7 +307,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;dsound.lib;msacm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;dsound.lib;msacm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -364,7 +364,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;dsound.lib;msacm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;dsound.lib;msacm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -420,7 +420,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;dsound.lib;msacm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;strmiids.lib;dmoguids.lib;version.lib;Rpcrt4.lib;delayimp.lib;wininet.lib;dsound.lib;msacm32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

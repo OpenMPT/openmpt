@@ -535,7 +535,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 void CCtrlGeneral::OnPlayerProperties()
 //-------------------------------------
 {
-	CMainFrame::m_nLastOptionsPage = 2; //OPTIONS_PAGE_PLAYER
+	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PLAYER;
 	CMainFrame::GetMainFrame()->OnViewOptions();
 }
 

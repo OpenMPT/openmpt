@@ -12,22 +12,6 @@
 
 class COptionsKeyboard;
 
-// Tab Order
-enum {
-	OPTIONS_PAGE_GENERAL=0,
-	OPTIONS_PAGE_SOUNDCARD,
-	OPTIONS_PAGE_MIXER,
-	OPTIONS_PAGE_PLAYER,
-	OPTIONS_PAGE_SAMPLEDITOR,
-	OPTIONS_PAGE_KEYBOARD,
-	OPTIONS_PAGE_COLORS,
-	OPTIONS_PAGE_MIDI,
-	OPTIONS_PAGE_AUTOSAVE,
-	OPTIONS_PAGE_UPDATE,
-	OPTIONS_PAGE_ADVANCED,
-};
-
-
 
 //=========================================
 class COptionsGeneral: public CPropertyPage
