@@ -446,9 +446,9 @@ public:
 
 		// Global volume
 	public:
-		uint32 m_nGlobalVolume;
+		int32 m_nGlobalVolume;
 	protected:
-		uint32 m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
+		int32 m_nSamplesToGlobalVolRampDest, m_nGlobalVolumeRampAmount,
 			m_nGlobalVolumeDestination;
 		int32 m_lHighResRampingGlobalVolume;
 

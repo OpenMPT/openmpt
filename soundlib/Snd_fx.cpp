@@ -523,7 +523,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 					memory.state.m_nGlobalVolume -= param * (memory.state.m_nMusicSpeed - 1);
 				}
-				memory.state.m_nGlobalVolume = Clamp(memory.state.m_nGlobalVolume, 0u, 256u);
+				memory.state.m_nGlobalVolume = Clamp(memory.state.m_nGlobalVolume, 0, 256);
 				break;
 			case CMD_CHANNELVOLUME:
 				if (param <= 64) pChn->nGlobalVol = param;
@@ -679,12 +679,14 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 						if(p->command == CMD_MODCMDEX)
 						{
 							switch(p->param & 0xF0)
+							{
 							case 0x10:
 							case 0x20:
 							case 0xA0:
 							case 0xB0:
 								stopNote = true;
-							break;
+								break;
+							}
 						}
 					}
 					
