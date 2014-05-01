@@ -600,7 +600,7 @@ bool CInputHandler::SetEffectLetters(const CModSpecifications &modSpecs)
 {
 	Log("Changing command set.\n");
 	bool retval = activeCommandSet->QuickChange_SetEffects(modSpecs);
-	activeCommandSet->GenKeyMap(keyMap);
+	if(retval) activeCommandSet->GenKeyMap(keyMap);
 	return retval;
 }
 
