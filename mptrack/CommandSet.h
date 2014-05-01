@@ -1270,6 +1270,8 @@ enum enmKcDummy
 	kcDummy
 };
 
+struct CModSpecifications;
+
 class CCommandSet
 {
 protected:
@@ -1283,6 +1285,7 @@ protected:
 	int FindCmd(int uid);
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict);
 
+	const CModSpecifications *oldSpecs;
 	CommandStruct commands[kcNumCommands];
 	bool m_isParentContext[kCtxMaxInputContexts][kCtxMaxInputContexts];
 	bool enforceRule[kNumRules];

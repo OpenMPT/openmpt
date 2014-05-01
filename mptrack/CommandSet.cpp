@@ -51,6 +51,8 @@ CCommandSet::CCommandSet()
 
 	SetupCommands();
 	SetupContextHierarchy();
+
+	oldSpecs = nullptr;
 }
 
 
@@ -1854,6 +1856,13 @@ bool CCommandSet::QuickChange_NoNotesRepeat()
 bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 //--------------------------------------------------------------------------
 {
+	// Is this already the active key configuration?
+	if(&modSpecs == oldSpecs)
+	{
+		return false;
+	}
+	oldSpecs = &modSpecs;
+
 	int choices = 0;
 	KeyCombination kc(kCtxViewPatternsFX, 0, 0, kKeyEventDown);
 
@@ -1932,9 +1941,11 @@ void CCommandSet::SetupContextHierarchy()
 {
 //	m_isParentContext.SetSize(kCtxMaxInputContexts);
 
-	for (UINT nCtx=0; nCtx<kCtxMaxInputContexts; nCtx++) {
+	for (UINT nCtx=0; nCtx<kCtxMaxInputContexts; nCtx++)
+	{
 //		m_isParentContext[nCtx].SetSize(kCtxMaxInputContexts);
-		for (UINT nCtx2=0; nCtx2<kCtxMaxInputContexts; nCtx2++) {
+		for (UINT nCtx2=0; nCtx2<kCtxMaxInputContexts; nCtx2++)
+		{
 			m_isParentContext[nCtx][nCtx2] = false;
 		}//InputTargetContext
 	}
