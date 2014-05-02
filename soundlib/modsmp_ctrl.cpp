@@ -65,7 +65,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 		}
 		if(nStartFrom < smp.nLength)
 		{
-			memcpy(pNewSmp + silenceOffset + silenceBytes, static_cast<const char *>(smp.pSample) + silenceOffset, smp.nLength - silenceOffset);
+			memcpy(pNewSmp + silenceOffset + silenceBytes, static_cast<const char *>(smp.pSample) + silenceOffset, smp.GetSampleSizeInBytes() - silenceOffset);
 		}
 
 		// Update loop points if necessary.
