@@ -2649,7 +2649,7 @@ void CMainFrame::OnHelp()
 		else if(!strcmp("CModControlView", className))	page = "::/Comments.html";
 	}
 
-	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page);
+	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + MPT_PATHSTRING(">OpenMPT");
 	if(!HtmlHelpW(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
 	{
 		Reporting::Error(L"Could not find help file:\n" + helpFile.ToWide());
