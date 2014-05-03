@@ -465,6 +465,11 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		extraDataSize = 256;
 		break;
 
+	case effMainsChanged:
+		// [value]: 0 means "turn off", 1 means "turn on"
+		SetThreadPriority(otherThread, msg->value ? THREAD_PRIORITY_ABOVE_NORMAL : THREAD_PRIORITY_NORMAL);
+		break;
+
 	case effEditGetRect:
 		// ERect** in [ptr]
 		extraDataSize = sizeof(void *);
@@ -705,8 +710,6 @@ void PluginBridge::AutomateParameters()
 // Audio rendering thread
 void PluginBridge::RenderThread()
 {
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-
 	const HANDLE objects[] = { sigProcess.send, sigThreadExit };
 	DWORD result = 0;
 	do
