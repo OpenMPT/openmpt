@@ -841,9 +841,9 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 				nPrevTick = nTick;
 				nRow = nTick / speed;
 
-				if (nRow % std::max(1, nRowsPerMeasure) == 0)
+				if (nRowsPerMeasure > 0 && nRow % nRowsPerMeasure == 0)
 					m_dcGrid.SelectObject(CMainFrame::penGray80);
-				else if (nRow % std::max(1, nRowsPerBeat) == 0)
+				else if (nRowsPerBeat > 0 && nRow % nRowsPerBeat == 0)
 					m_dcGrid.SelectObject(CMainFrame::penGray55);
 				else
 					m_dcGrid.SelectObject(CMainFrame::penGray33);

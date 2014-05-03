@@ -2,7 +2,7 @@
  * PNG.cpp
  * -------
  * Purpose: Extremely minimalistic PNG loader (only for internal data resources)
- * Notes  : Currenlty implemented: 8-bit, 24-bit and 32-bit images (8 bits per component), no filters, no interlaced pictures.
+ * Notes  : Currently implemented: 8-bit, 24-bit and 32-bit images (8 bits per component), no filters, no interlaced pictures.
  *          Paletted pictures are automatically depalettized.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -175,11 +175,7 @@ PNG::Bitmap *PNG::ReadPNG(const TCHAR *resource)
 	}
 
 	FileReader file(pData, nSize);
-
-	Bitmap *bitmap = ReadPNG(file);
-
-	FreeResource(hglob);
-	return bitmap;
+	return ReadPNG(file);
 }
 
 

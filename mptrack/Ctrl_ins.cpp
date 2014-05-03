@@ -1463,8 +1463,7 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 			}
 
 			SetCurrentInstrument(m_nInstrument);
-			m_modDoc.SetModified();
-			m_modDoc.UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES);
+			SetModified(HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES, true);
 		} else bOk = FALSE;
 	}
 	if (bFirst) m_modDoc.UpdateAllViews(NULL, HINT_MODTYPE | HINT_INSNAMES | HINT_SMPNAMES);
@@ -1487,7 +1486,6 @@ BOOL CCtrlInstruments::OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInst
 		bFirst = true;
 		m_sndFile.m_nInstruments = 1;
 		m_NoteMap.SetCurrentInstrument(1);
-		m_modDoc.SetModified();
 		bFirst = true;
 	}
 	if (!m_nInstrument)
@@ -1499,10 +1497,8 @@ BOOL CCtrlInstruments::OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInst
 
 	cs.Leave();
 
-	m_modDoc.SetModified();
-	m_modDoc.UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES);
+	SetModified(HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES, true);
 	if (bFirst) m_modDoc.UpdateAllViews(NULL, HINT_MODTYPE | HINT_INSNAMES | HINT_SMPNAMES);
-	m_modDoc.SetModified();
 	EndWaitCursor();
 	return TRUE;
 }

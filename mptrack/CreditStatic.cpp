@@ -562,7 +562,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
    								ANSI_CHARSET,
                    	OUT_DEFAULT_PRECIS,
                    	CLIP_DEFAULT_PRECIS,
-                   	PROOF_QUALITY,
+                   	ANTIALIASED_QUALITY,
                    	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
                    	(LPSTR)"Arial");
 			memDC.SetTextColor(m_Colors[TOP_LEVEL_GROUP_COLOR]);
@@ -580,7 +580,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
    								ANSI_CHARSET,
                    	OUT_DEFAULT_PRECIS,
                    	CLIP_DEFAULT_PRECIS,
-                   	PROOF_QUALITY,
+                   	ANTIALIASED_QUALITY,
                    	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
                    	(LPSTR)"Arial");
 			memDC.SetTextColor(m_Colors[GROUP_TITLE_COLOR]);
@@ -598,7 +598,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
 								ANSI_CHARSET,
 	               	OUT_DEFAULT_PRECIS,
 	               	CLIP_DEFAULT_PRECIS,
-	               	PROOF_QUALITY,
+	               	ANTIALIASED_QUALITY,
 	               	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
 	               	(LPSTR)"Arial");
 			memDC.SetTextColor(m_Colors[TOP_LEVEL_TITLE_COLOR]);
@@ -642,7 +642,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
    								ANSI_CHARSET,
                    	OUT_DEFAULT_PRECIS,
                    	CLIP_DEFAULT_PRECIS,
-                   	PROOF_QUALITY,
+                   	ANTIALIASED_QUALITY,
                    	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
                    	(LPSTR)"Arial");
 			memDC.SetTextColor(m_Colors[NORMAL_TEXT_COLOR]);
