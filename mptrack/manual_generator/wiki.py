@@ -65,6 +65,8 @@ Language=0x409 English (United States)
 Title=OpenMPT Manual
 Default topic=""" + localurl(pages[0]) + """
 
+[WINDOWS]
+OpenMPT=,"OpenMPT Manual.hhc",,"" + localurl(pages[0]) + "",,,,,,0x42520,,0x300e,[50,50,750,550],0xb0000,,,,,,0
 
 [FILES]
 style.css
