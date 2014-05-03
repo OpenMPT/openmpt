@@ -25,6 +25,61 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.23.02.00 (3 May 2014, revision 4035)
+---------------------------------------
+General tab
+   [Fix] <js> Moving plugins unintentionally broke the plugin chain in many cases (http://bugs.openmpt.org/view.php?id=514).
+
+Pattern tab
+   [Imp] <js> Don't require shift key to be pressed when entering numeric effect letters on French keyboards (https://forum.openmpt.org/index.php?topic=5279.0).
+   [Imp] <js> Channel mute / channel mute on pattern transition shortcuts got extended to cover all channels covered by the selection instead of just the channel where the cursor is.
+   [Mod] <js> After pasting pattern data, the pasted area is automatically marked (http://bugs.openmpt.org/view.php?id=498).
+   [Fix] <js> When "loop pattern" was enabled, jumping between patterns could trigger sample syncing while playback was paused.
+   [Fix] <js> Other small fixes in playback adjustment code when jumping around.
+   [Fix] <js> Undoing channel deletion didn't work properly.
+   [Fix] <js> Dragging an order selection also works if the first selection point isn't visible.
+
+Sample tab
+   [New] <js> Added sample transpose shortcuts to quickly change the middle-C frequency.
+   [Fix] <js> Fade operation was broken in 64-bit builds (http://bugs.openmpt.org/view.php?id=507).
+   [Fix] <js> Crossfading sample loops modified one sampling point too much, which couldn't be undone properly.
+   [Imp] <js> WAV / FLAC saving: When there's only a sustain loop and no normal loop, ensure that it is treated as a sustain loop after reloading the sample (like it was done in older versions, tx dusthillguy).
+   [Fix] <js> Load / Save / New shortcuts are now also handled properly when the upper panel is focussed.
+   [Fix] <js> Adding silence to a sample that's not 8-bit mono broke in OpenMPT 1.23.
+
+Tree view
+   [New] <js> In the instrument library, Ctrl+Enter loads the selected instrument into the currently active sample / instrument editor window (http://bugs.openmpt.org/view.php?id=499).
+   [Imp] <js> Ctrl+Enter starts label editing.
+   [Fix] <js> Duplicating samples allocated way too much memory in the previous version, which could result in crashes (http://bugs.openmpt.org/view.php?id=505).
+
+VST::Plugin Bridge
+   [Fix] <js> Fixed KarmaFX EQ, a couple of VarietyOfSound plugins and possibly others that don't set any specific time flags, but still call audioMasterGetTime.
+
+Playback
+   [Imp] <js> For XM files, a new mix mode "Compatible (FT2 Pan Law)" has been added which is the same as the "compatible" mix mode, but this enforces FT2's pan law, while the "normal" compatible mix mode no longer does so. This should make tunes created with OpenMPT 1.22 or older not break drastically anymore if they make use of a lot of panning stuff.
+   [Fix] <js> Fixed potential crash in 64-bit version when playing certain songs with instrument envelopes (tx xTr1m).
+
+IT::Compatible Playback Mode
+   [Fix] <js> Sustained envelopes were released too early if the loop end was hit on exactly the same tick as the note-off event.
+
+MOD
+   [Imp] <js> Added ProTracker-style offset when note but no instrument number is specified in ProTracker 1/2 mode (fixes h0ffman's Revision 2014 tracked music entry).
+
+Module cleanup
+   [Fix] <js> Rearranging samples broke in the previous version (http://bugs.openmpt.org/view.php?id=497).
+
+Audio I/O
+   [Fix] <js> With new installations (and probably also upgraded ones), it was possible that OpenMPT was internally rendering at a different sample rate than the sound device was outputting (https://forum.openmpt.org/index.php?topic=5265.0).
+
+Misc
+   [Imp] <js> All parts of the Song Properties dialog are now updated instantly when switching between formats.
+   [Imp] <js> Made S3M amiga frequency limits option editable from the Song Properties dialog.
+   [Mod] <js> Changed manual format from PDF to CHM. When opening help from certain dialogs, the relevant manual page is automatically opened.
+   [Fix] <js> SF2 sample frequency conversion was broken in 64-bit builds (https://bugs.openmpt.org/view.php?id=508).
+   [Fix] <js> Modifying patterns, samples, etc. should now always update other views of the same type of the same module properly.
+   [Fix] <js> DefaultTemplate option was looking for the template file in the wrong paths.
+
+
 v1.23.01.00 (29 March 2014, revision 3998)
 ------------------------------------------
 General tab
@@ -381,7 +436,7 @@ XM::Compatible Playback Mode
 MOD
    [Fix] <js> EEx + Dxx on the same row causes the target row of Dxx to be skipped in ProTracker (fixes condom_corruption by Travolta).
    [Fix] <js> When using EEx, there should be only one "first tick" event. Ticks that are multiples of the song speed are longer treated as first ticks.
-   [Fix] <js> Frequency limiting was not always correct in PT 1.x mode (Fixes black_queen.mod).
+   [Fix] <js> Frequency limiting was not always correct in ProTracker 1.x mode (Fixes black_queen.mod).
    [Fix] <js> SoundTracker modules with "hidden" patterns in their order list didn't play properly anymore (probably since v1.22.03, affected e.g. Bad Dudes soundtrack).
 
 Other formats
@@ -1452,7 +1507,7 @@ MOD
 
 MOD::Loading
    [New] <js> Heuristic detection for VBlank MODs. Most MODs use the CIA timer instead of VBlank timing, but some don't.
-   [New] <js> Heuristic detection for PT 1.x playback mode: If there is pattern data that looks like it needs on-the-fly sample swapping, PT 1.x mode is enabled.
+   [New] <js> Heuristic detection for ProTracker 1.x playback mode: If there is pattern data that looks like it needs on-the-fly sample swapping, ProTracker 1.x mode is enabled.
    [New] <js> Heuristic detection for MODs with 7-bit panning, which is then automatically converted to 8-Bit panning.
    [Fix] <js> Tentative fix for MODs with short loops at the sample start that were most likely not intended.
 
@@ -2195,7 +2250,7 @@ XM::Loading
    [Fix] <js> Don't ignore last pattern anymore if an XM file has no instruments.
 
 XM::Saving
-   [Imp] <js> Compatibility export: Export cuts off channels > 32.
+   [Imp] <js> Compatibility export: Only save up to 32 channels.
    [Imp] <js> Setting "OpenMPT <version number>" in the "made with" field (as any other tracker put their signature in here as well).
    [Fix] <js> Always save with a channel number that's a multiple of two so FT2 will load the file correctly.
    [Fix] <js> F20 won't turn into G20 anymore.
@@ -2212,14 +2267,14 @@ XM::Compatible Playback Mode
    [Fix] <js> Tempo slides won't exceed 255 BPM in compatible mode.
    [Fix] <js> In compatibility mode, retrigger with vxx on the same channel will always reset the retriggered note's volume.
    [Fix] <js> More compatible handling of Kxx effect.
-   [Fix] <js> Pattern loops are now handled correctly (using compatibility switch).
+   [Fix] <js> Pattern loops are now handled correctly.
    [Fix] <js> Out of range global volume, local global volume slides.
 
 MOD
    [Imp] <js> Module Creation: MOD files have 4 channels by default.
    [Imp] <js> Moved loop length check from compatibility export to normal save. There you go, Amiga users! :)
    [Fix] <js> Module Creation / Loading: Sane default volume settings for MOD / S3M files again (128 global volume, 48 sample volume).
-   [Fix] <js> Inserting more than 128 orders in MOD format is not possible anymore.
+   [Fix] <js> Inserting more than the allowed 128 orders in MOD format is not possible anymore.
 
 MOD::Loading
    [Fix] <js> Last pattern was not loading in .MODs that have no samples.
@@ -2904,8 +2959,7 @@ v1.17RC1 (revision 1.13.2.13)
    [Fix] <rf> More fixes to plugs that try to get tempo before we've had a chance to init them properly.
    [Fix] <rf> Backed out first attempt at reducing hangs on stop (from rev. 1.13.2.10) - it was pointless. I think 1.13.2.11 really solved it though.
    [Fix] <rf> Fixed minor imprecision in \xx slide calculations.
-   [Fix] <rf> Minor GUI refresh fixes (tx xtr1m).
-
+   [Fix] <rf> Minor GUI refresh fixes (tx xTr1m).
 
 
 v1.17RC1 (revision 1.13.2.12)

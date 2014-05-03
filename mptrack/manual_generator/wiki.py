@@ -63,10 +63,11 @@ Display compile progress=No
 Full-text search=Yes
 Language=0x409 English (United States)
 Title=OpenMPT Manual
+Default Window=OpenMPT
 Default topic=""" + localurl(pages[0]) + """
 
 [WINDOWS]
-OpenMPT=,"OpenMPT Manual.hhc",,"" + localurl(pages[0]) + "",,,,,,0x42520,,0x300e,[50,50,750,550],0xb0000,,,,,,0
+OpenMPT=,"OpenMPT Manual.hhc",,""" + localurl(pages[0]) + """,,,,,,0x42520,215,0x300e,[20,20,780,580],0xb0000,,,,,,0
 
 [FILES]
 style.css

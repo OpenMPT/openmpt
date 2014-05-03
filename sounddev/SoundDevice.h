@@ -257,7 +257,7 @@ struct SoundDeviceSettings
 		: hWnd(NULL)
 		, LatencyMS(100)
 		, UpdateIntervalMS(5)
-		, Samplerate(48000)
+		, Samplerate(44100)
 		, Channels(2)
 		, sampleFormat(SampleFormatFloat32)
 		, ExclusiveMode(false)
