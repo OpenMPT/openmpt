@@ -273,7 +273,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 							CModScrollView *view = static_cast<CModScrollView *>(CMainFrame::GetMainFrame()->GetActiveView());
 							HTREEITEM hItem = GetSelectedItem();
 							const ModItem modItem = GetModItem(hItem);
-							if(view && modItem.type == MODITEM_INSLIB_SAMPLE || modItem.type == MODITEM_INSLIB_INSTRUMENT)
+							if(view && (modItem.type == MODITEM_INSLIB_SAMPLE || modItem.type == MODITEM_INSLIB_INSTRUMENT))
 							{
 								const mpt::PathString file = InsLibGetFullPath(hItem);
 								const char *className = view->GetRuntimeClass()->m_lpszClassName;

@@ -107,14 +107,14 @@
 
     <h3>General</h3>
     <ul>
-        <li>OpenMPT is now available as a native <strong>64-bit application</strong>!</li>
+        <li>OpenMPT is now available as native <strong>64-bit application</strong>!</li>
         <li><strong>Redo</strong> functionality for the pattern and sample editor.</li>
-        <li>A <strong>tempo tap</strong> button to quickly tap in the desired beats per minutes instead of guessing them.</li>
-        <li>Reduced <strong>clicks on badly looped samples</strong> when interpolation is turned on.</li>
+        <li>A <strong>tempo tap</strong> to quickly tap in the desired beats per minutes instead of guessing them.</li>
+        <li>Reduced <strong>clicks on looped samples</strong> when interpolation is turned on.</li>
         <li>Sound device settings are now <strong>remembered per device</strong>.</li>
         <li>Codec export settings are now remembered between sessions.</li>
         <li>Added options to open the sound device right at the program start and keep playing silence when stopping sound.</li>
-        <li>Support for <strong>unicode paths</strong> almost everywhere (just some internal settings that are written to the settings file might not be saved if the settings folder contains non-ANSI characters).</li>
+        <li>Support for <strong>unicode paths</strong> almost everywhere (just some internal settings that are written to the settings file might not be written correctly if the settings folder contains non-ANSI characters).</li>
         <li>OpenMPT (32-bit) is now <strong>large address aware</strong>, so more than 2 GB of RAM can be used for samples and plugins on systems where it's available.</li>
         <li>Restructured the settings dialog into some more logical divisions.</li>
         <li>Missing shortcuts from the default keyboard layout are now automatically added to other keyboard layouts.</li>
@@ -129,7 +129,7 @@
     <h3>Pattern Editor</h3>
     <ul>
         <li>Experimental new feature: Seeking in a module tries to <strong>keep sample sync</strong>, i.e. notes that are still playing from a previous pattern can still be heard. This can be enabled from the general options.</li>
-        <li>The <strong>Note Properites Dialog</strong> has been simplified from three tabs into one bigger dialog, with much better support for PC events.</li>
+        <li>The <strong>Note Properties Dialog</strong> has been simplified from three tabs into one bigger dialog, with much better support for PC events.</li>
         <li>Effect letter input should now work better on <strong>non-latin keyboard layouts</strong>, such as cyrillic.</li>
     </ul>
     
@@ -138,6 +138,7 @@
         <li><strong>Double-clicking the instrument library path</strong> (first item in the lower view) opens a folder browser dialog to quickly browse to a new location.</li>
         <li>The instrument library is now <strong>refreshed automatically</strong> when there are changes in the folder (e.g. adding new files).</li>
         <li>Backspace can now be used to <strong>go up one directory</strong> in the instrument library.</li>
+        <li>In the instrument library, Ctrl+Enter loads the selected instrument into the currently active sample / instrument editor window.</li>
     </ul>
     
     <h3>Plugins</h3>
@@ -180,10 +181,10 @@
         <i>This list has mostly been copied over from the old OpenMPT 1.17 RC2 release notes, so this not very comprehensive... :-)</i>
     </p>
     <ul>
-        <li>The plugin bridge is new and hasn't been tested very much yet. It is known that some plugins don't work in it at all (e.g. KarmaFX Equalizer). Custom plugin GUIs won't work in Wine. Please report any other issues you may be having with the plugin bridge!</li>
+        <li>The plugin bridge is new and hasn't been tested very much yet. It is known that some plugins don't work in it at all. Custom plugin GUIs are known to not work in Wine. Please report any other issues you may be having with the plugin bridge!</li>
         <li>Far from perfect VST support (no buses for audio / MIDI routing, only a few tracker effects are supported, etc...)</li>
-        <li>Previewing samples from the treeview's file browser stops the playing module.</li>
-        <li>Cannot preview instruments directly from the MIDI Library in the tree view.</li>
+        <li>Previewing samples from the tree view's file browser stops the playing module.</li>
+        <li>Cannot preview soundfont instruments directly from the MIDI Library in the tree view.</li>
         <li>Excessive performance drop when dragging over the graphical parameter editor during playback.</li>
         <li>The Right Alt (or Alt Gr) key is not handled well by the keyboard configuration.</li>
         <li>There is no really <em>convenient</em> way to find out what features of the tracker are supported by the original trackers (Impulse Tracker, Fasttracker 2, etc...) when working with those file formats...</li>
