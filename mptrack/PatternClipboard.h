@@ -69,9 +69,9 @@ public:
 	// Copy a pattern selection to both the system clipboard and the internal clipboard.
 	static bool Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 	// Try pasting a pattern selection from the system clipboard.
-	static bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder);
+	static bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect);
 	// Try pasting a pattern selection from an internal clipboard.
-	static bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, clipindex_t internalClipboard);
+	static bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, clipindex_t internalClipboard);
 	// Copy one of the internal clipboards to the system clipboard.
 	static bool SelectClipboard(clipindex_t which);
 	// Switch to the next internal clipboard.
@@ -95,7 +95,7 @@ protected:
 	static CString CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 
 	// Parse clipboard string and perform the pasting operation.
-	static bool HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CString &data, ORDERINDEX curOrder);
+	static bool HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CString &data, ORDERINDEX curOrder, PatternRect &pasteRect);
 
 	// System-specific clipboard functions
 	static bool ToSystemClipboard(const PatternClipboardElement &clipboard) { return ToSystemClipboard(clipboard.content); };

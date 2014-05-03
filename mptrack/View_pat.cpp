@@ -6837,7 +6837,8 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	pos.row = pastePos.GetRow();
 	pos.channel = pastePos.GetChannel();
 	ORDERINDEX curOrder = GetCurrentOrder();
-	bool result = PatternClipboard::Paste(*GetSoundFile(), pos, mode, curOrder);
+	PatternRect rect;
+	bool result = PatternClipboard::Paste(*GetSoundFile(), pos, mode, curOrder, rect);
 	EndWaitCursor();
 
 	if(pos.pattern != nPattern)
@@ -6850,6 +6851,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 
 	if(result)
 	{
+		SetCurSel(rect);
 		GetDocument()->SetModified();
 		GetDocument()->UpdateAllViews(NULL, HINT_MODSEQUENCE | HINT_PATTERNDATA | (pos.pattern << HINT_SHIFT_PAT), nullptr);
 	}
