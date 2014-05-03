@@ -21,6 +21,7 @@
 #include "MemoryMappedFile.h"
 #include "../soundlib/FileReader.h"
 #include "FileDialog.h"
+#include "Globals.h"
 
 
 CSoundFile *CModTree::m_SongFile = nullptr;
@@ -266,7 +267,29 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 				{
 					if(CMainFrame::GetInputHandler()->CtrlPressed())
 					{
-						EditLabel(hItem);
+						if(IsSampleBrowser())
+						{
+							// Ctrl+Enter: Load sample into currently selected sample or instrument slot
+							CModScrollView *view = static_cast<CModScrollView *>(CMainFrame::GetMainFrame()->GetActiveView());
+							HTREEITEM hItem = GetSelectedItem();
+							const ModItem modItem = GetModItem(hItem);
+							if(view && modItem.type == MODITEM_INSLIB_SAMPLE || modItem.type == MODITEM_INSLIB_INSTRUMENT)
+							{
+								const mpt::PathString file = InsLibGetFullPath(hItem);
+								const char *className = view->GetRuntimeClass()->m_lpszClassName;
+								if(!strcmp("CViewSample", className))
+								{
+									view->SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)&file);
+								} else if(!strcmp("CViewInstrument", className))
+								{
+									view->SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)&file);
+								}
+							}
+						} else
+						{
+							// Ctrl+Enter: Edit item
+							EditLabel(hItem);
+						}
 					} else
 					{
 						if(!ExecuteItem(hItem))
