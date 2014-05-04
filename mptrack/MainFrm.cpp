@@ -828,7 +828,8 @@ bool CMainFrame::audioOpenDevice()
 	}
 	gpSoundDevice->SetMessageReceiver(this);
 	gpSoundDevice->SetSource(this);
-	if(!gpSoundDevice->Open(TrackerSettings::Instance().GetSoundDeviceSettings(deviceID)))
+	SoundDeviceSettings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceID);
+	if(!gpSoundDevice->Open(deviceSettings))
 	{
 		Reporting::Error("Unable to open sound device: Could not open sound device.");
 		return false;
@@ -839,8 +840,8 @@ bool CMainFrame::audioOpenDevice()
 		Reporting::Error("Unable to open sound device: Unknown sample format.");
 		return false;
 	}
-	SoundDeviceSettings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceID);
 	deviceSettings.sampleFormat = actualSampleFormat;
+	TrackerSettings::Instance().MixerSamplerate = gpSoundDevice->GetSettings().Samplerate;
 	TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
 	return true;
 }
