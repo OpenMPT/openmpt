@@ -25,6 +25,15 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.23.03.00 (4 May 2014, revision 4039)
+---------------------------------------
+VST / DMO Plugins
+   [Mod] <js> If an instrument specifies a MIDI program / bank to be used, always re-send this information after restarting playback. Previously, this information was only resent during first play or when it was changed by the user. This fixes some external softsynths controlled through the MIDI I/O plugin.
+
+Audio I/O
+   [Fix] <jh> When upgrading from OpenMPT 1.23.01.00 to OpenMPT 1.23.02.00, it was possible that audio was now playing too slow instead of too fast.
+
+
 v1.23.02.00 (3 May 2014, revision 4035)
 ---------------------------------------
 General tab
@@ -33,7 +42,7 @@ General tab
 Pattern tab
    [Imp] <js> Don't require shift key to be pressed when entering numeric effect letters on French keyboards (https://forum.openmpt.org/index.php?topic=5279.0).
    [Imp] <js> Channel mute / channel mute on pattern transition shortcuts got extended to cover all channels covered by the selection instead of just the channel where the cursor is.
-   [Mod] <js> After pasting pattern data, the pasted area is automatically marked (http://bugs.openmpt.org/view.php?id=498).
+   [Mod] <js> After pasting pattern data, the pasted area is automatically selected (http://bugs.openmpt.org/view.php?id=498).
    [Fix] <js> When "loop pattern" was enabled, jumping between patterns could trigger sample syncing while playback was paused.
    [Fix] <js> Other small fixes in playback adjustment code when jumping around.
    [Fix] <js> Undoing channel deletion didn't work properly.
