@@ -681,6 +681,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	for(int ch = 0; ch < 16; ch++)
 	{
 		m_MidiCh[ch].midiPitchBendPos = EncodePitchBendParam(MIDIEvents::pitchBendCentre); // centre pitch bend on all channels
+		m_MidiCh[ch].ResetProgram();
 	}
 
 	// Update Mix structure
@@ -861,7 +862,7 @@ CVstPlugin::~CVstPlugin()
 	m_pPrev = nullptr;
 	m_pNext = nullptr;
 
-	CVstPlugin::Dispatch(effClose, 0, 0, nullptr, 0);
+	Dispatch(effClose, 0, 0, nullptr, 0);
 	if(m_hLibrary)
 	{
 		FreeLibrary(m_hLibrary);
@@ -1737,6 +1738,7 @@ void CVstPlugin::HardAllNotesOff()
 	for(uint8 mc = 0; mc < CountOf(m_MidiCh); mc++)		//all midi chans
 	{
 		VSTInstrChannel &channel = m_MidiCh[mc];
+		channel.ResetProgram();
 
 		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));		// centre pitch bend
 		if(GetUID() != CCONST('K', 'L', 'W', 'V'))
