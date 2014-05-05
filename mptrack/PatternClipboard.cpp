@@ -762,6 +762,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				if(col == startChan) startPoint.SetColumn(startChan, firstCol);
 				if(endPoint.CompareColumn(PatternCursor(0, col, lastCol)) < 0) endPoint.SetColumn(col, lastCol);
 				if(curRow > endPoint.GetRow()) endPoint.SetRow(curRow);
+				pasteRect = PatternRect(startPoint, endPoint);
 			}
 
 			pos += 11;
@@ -781,7 +782,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				ORDERINDEX nextOrder = sndFile.Order.GetNextOrderIgnoringSkips(curOrder);
 				if(nextOrder == 0 || nextOrder >= sndFile.Order.size()) return success;
 				pattern = sndFile.Order[nextOrder];
-				if(sndFile.Patterns.IsValidPat(pattern) == false) return success;
+				if(!sndFile.Patterns.IsValidPat(pattern)) return success;
 				patData = sndFile.Patterns[pattern];
 				curOrder = nextOrder;
 				prepareUndo = true;
@@ -790,7 +791,6 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		}
 	}
 
-	pasteRect = PatternRect(startPoint, endPoint);
 	return success;
 }
 
