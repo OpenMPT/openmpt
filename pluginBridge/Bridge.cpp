@@ -983,7 +983,10 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		break;
 
 	default:
+#ifdef _DEBUG
 		if(ptr != nullptr) __debugbreak();
+#endif
+		break;
 	}
 
 	if(ptrOut != 0)

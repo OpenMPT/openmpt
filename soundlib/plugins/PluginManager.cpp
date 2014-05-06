@@ -479,7 +479,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	VSTPluginLib *pFound = nullptr;
 
 	// Find plugin in library
-	int match = 0;
+	int8 match = 0;	// "Match quality" of found plugin. Higher value = better match.
 	for(const_iterator p = begin(); p != end(); p++)
 	{
 		VSTPluginLib *plug = *p;
@@ -490,15 +490,20 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		if(matchID && matchName)
 		{
 			pFound = plug;
-			break;
+			if(plug->IsNative(false))
+			{
+				break;
+			}
+			// If the plugin isn't native, first check if a native version can be found.
+			match = 3;
 		} else if(matchID && match < 2)
 		{
-			match = 2;
 			pFound = plug;
+			match = 2;
 		} else if(matchName && match < 1)
 		{
-			match = 1;
 			pFound = plug;
+			match = 1;
 		}
 	}
 
