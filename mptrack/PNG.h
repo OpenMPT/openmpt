@@ -32,8 +32,8 @@ namespace PNG
 		const Pixel *GetPixels() const { ASSERT(width && height && pixels); return pixels; }
 		uint32_t GetNumPixels() const { return width * height; }
 
-		// Create a DIB for the current device from our PNG.
-		bool ToDIB(CBitmap &bitmap, CDC *dc = nullptr) const;
+		// Create a DIB from our PNG.
+		bool ToDIB(CBitmap &bitmap) const { return bitmap.CreateBitmap(width, height, 1, 32, GetPixels()) != FALSE; }
 	};
 
 	Bitmap *ReadPNG(FileReader &file);
