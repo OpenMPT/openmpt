@@ -1292,7 +1292,7 @@ void CSplashScreen::OnPaint()
 BOOL CSplashScreen::OnInitDialog()
 //--------------------------------
 {
-	bitmap->ToDIB(m_Bitmap, GetDC());
+	bitmap->ToDIB(m_Bitmap);
 
 	CRect rect;
 	int cx, cy, newcx, newcy;
