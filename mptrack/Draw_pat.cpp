@@ -1396,18 +1396,42 @@ BOOL CViewPattern::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 	{
 		CRect rect;
 		GetClientRect(&rect);
+		// HACK:
+		// Wine handles ScrollWindow completely sychronously (using RedraWindow).
+		// This causes the window update region to be repainted immediately
+		// before and immediately after the actual copying of the scrolled rect.
+		// Async and sync window painting generally do not mix well at all
+		// (not even on native Windows) and this causes inevitable flickering
+		// on Wine.
+		// Instead, just invalidate the whole scrolled window area and let
+		// WM_PAINT handle the whole mess without ever scrolling any already
+		// painted contents. This causes additional CPU usage (on Wine) but 
+		// avoids totally annoying and distracting flickering of the current-row-
+		// highlight.
 		if (x != m_nXScroll)
 		{
 			rect.left = m_szHeader.cx;
 			rect.top = 0;
-			ScrollWindow((m_nXScroll-x)*GetColumnWidth(), 0, &rect, &rect);
+			if(mpt::Windows::Version::IsWine())
+			{
+				InvalidateRect(&rect, FALSE);
+			} else
+			{
+				ScrollWindow((m_nXScroll-x)*GetColumnWidth(), 0, &rect, &rect);
+			}
 			m_nXScroll = x;
 		}
 		if (y != m_nYScroll)
 		{
 			rect.left = 0;
 			rect.top = m_szHeader.cy;
-			ScrollWindow(0, (m_nYScroll-y)*GetColumnHeight(), &rect, &rect);
+			if(mpt::Windows::Version::IsWine())
+			{
+				InvalidateRect(&rect, FALSE);
+			} else
+			{
+				ScrollWindow(0, (m_nYScroll-y)*GetColumnHeight(), &rect, &rect);
+			}
 			m_nYScroll = y;
 		}
 	}
