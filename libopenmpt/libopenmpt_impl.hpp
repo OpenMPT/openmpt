@@ -58,6 +58,8 @@ protected:
 	std::unique_ptr<CSoundFile> m_sndFile;
 	std::unique_ptr<Dither> m_Dither;
 	float m_Gain;
+	bool m_ctl_load_skip_samples;
+	bool m_ctl_load_skip_patterns;
 	std::vector<std::string> m_loaderMessages;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;
@@ -67,7 +69,7 @@ protected:
 	void apply_mixer_settings( std::int32_t samplerate, int channels );
 	void apply_libopenmpt_defaults();
 	void init( const std::map< std::string, std::string > & ctls );
-	static void load( CSoundFile & sndFile, const FileReader & file );
+	void load( CSoundFile & sndFile, const FileReader & file );
 	void load( const FileReader & file );
 	std::size_t read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
 	std::size_t read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
