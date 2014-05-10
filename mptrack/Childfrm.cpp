@@ -178,11 +178,14 @@ void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 	if (bAddToTitle)
 	{
 		TCHAR szText[256+_MAX_PATH];
-		if (pDocument == NULL)
+		if (pDocument == nullptr)
+		{
 			lstrcpy(szText, m_strTitle);
-		else
+		} else
+		{
 			lstrcpy(szText, pDocument->GetTitle());
-		if (pDocument->IsModified()) lstrcat(szText, "*");
+			if (pDocument->IsModified()) lstrcat(szText, "*");
+		}
 		if (m_nWindow > 0)
 			wsprintf(szText + lstrlen(szText), _T(":%d"), m_nWindow);
 
@@ -274,8 +277,10 @@ void CChildFrame::SavePosition(BOOL bForce)
 	}
 }
 
-//rewbs.varWindowSize
-int CChildFrame::GetSplitterHeight() { 
+
+int CChildFrame::GetSplitterHeight()
+//----------------------------------
+{
 	if (m_hWnd)
 	{
 		CRect rect;
@@ -289,6 +294,7 @@ int CChildFrame::GetSplitterHeight() {
 	}
 	return 15;	// tidy default
 };
+
 
 LRESULT CChildFrame::SendViewMessage(UINT uMsg, LPARAM lParam) const
 //------------------------------------------------------------------
