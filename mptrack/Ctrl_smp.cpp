@@ -2654,7 +2654,7 @@ void CCtrlSamples::OnLoopStartChanged()
 	if ((n >= 0) && (n < sample.nLength) && ((n < sample.nLoopEnd) || !sample.uFlags[CHN_LOOP]))
 	{
 		sample.SetLoop(n, sample.nLoopEnd, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
-		SetModified(HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
 	}
 }
 
@@ -2668,7 +2668,7 @@ void CCtrlSamples::OnLoopEndChanged()
 	if ((n >= 0) && (n <= sample.nLength) && ((n > sample.nLoopStart) || !sample.uFlags[CHN_LOOP]))
 	{
 		sample.SetLoop(sample.nLoopStart, n, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
-		SetModified(HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
 	}
 }
 
@@ -2717,7 +2717,7 @@ void CCtrlSamples::OnSustainStartChanged()
 	 && ((n < sample.nSustainEnd) || !sample.uFlags[CHN_SUSTAINLOOP]))
 	{
 		sample.SetSustainLoop(n, sample.nSustainEnd, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
 	}
 }
 
@@ -2732,7 +2732,7 @@ void CCtrlSamples::OnSustainEndChanged()
 	 && ((n > sample.nSustainStart) || !sample.uFlags[CHN_SUSTAINLOOP]))
 	{
 		sample.SetSustainLoop(sample.nSustainStart, n, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
 	}
 }
 
