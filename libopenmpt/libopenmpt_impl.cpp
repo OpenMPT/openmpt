@@ -319,7 +319,6 @@ void module_impl::load( CSoundFile & sndFile, const FileReader & file ) {
 		load_flags &= ~CSoundFile::loadPatternData;
 	}
 	if ( !sndFile.Create( file, static_cast<CSoundFile::ModLoadingFlags>( load_flags ) ) ) {
-	//if ( !sndFile.Create( file, CSoundFile::loadCompleteModule ) ) {
 		throw openmpt::exception("error loading file");
 	}
 }
