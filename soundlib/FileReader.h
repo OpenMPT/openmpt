@@ -628,23 +628,23 @@ public:
 			return 0;
 		}
 		uint8 buf[sizeof(T)];
-		for(std::size_t i = 0; i < size; ++i)
+		for(std::size_t i = 0; i < sizeof(T); ++i)
 		{
-			Read(buf[i]);
-		}
-		if(std::numeric_limits<T>::is_signed)
-		{
-			for(std::size_t i = size; i < sizeof(T); ++i)
+			if(i < size)
 			{
-				// sign extend
-				buf[i] = (buf[size-1] & 0x80) ? 0xff : 0x00;
-			}
-		} else
-		{
-			for(std::size_t i = size; i < sizeof(T); ++i)
+				Read(buf[i]);
+			} else
 			{
-				// zero extend
-				buf[i] = 0x00;
+				if(std::numeric_limits<T>::is_signed)
+				{
+					// sign extend
+					const bool negative = (i > 0) && ((buf[i-1] & 0x80) != 0x00);
+					buf[i] = negative ? 0xff : 0x00;
+				} else
+				{
+					// zero extend
+					buf[i] = 0x00;
+				}
 			}
 		}
 		T target;
