@@ -52,6 +52,7 @@
 #  (defaults are 0):
 #
 #  NO_ZLIB=1        Avoid using zlib, even if found
+#  USE_MO3=1        Support dynamic loading of unmo3 shared library
 #
 #
 # Build flags for openmpt123 (provide on each `make` invocation)
@@ -264,6 +265,12 @@ NO_ZLIB:=1
 endif
 endif
 
+ifeq ($(USE_MO3),1)
+CPPFLAGS_MO3 := -DMPT_WITH_MO3
+LDLIBS_MO3  := -ldl
+else
+endif
+
 ifeq ($(USE_SDL),1)
 #LDLIBS   += -lsdl
 ifeq ($(shell pkg-config --exists sdl && echo yes),yes)
@@ -313,9 +320,9 @@ LDLIBS_SNDFILE   := $(shell pkg-config --libs-only-l     sndfile )
 endif
 endif
 
-CPPFLAGS += $(CPPFLAGS_ZLIB)
-LDFLAGS += $(LDFLAGS_ZLIB)
-LDLIBS += $(LDLIBS_ZLIB)
+CPPFLAGS += $(CPPFLAGS_ZLIB) $(CPPFLAGS_MO3)
+LDFLAGS += $(LDFLAGS_ZLIB) $(LDFLAGS_MO3)
+LDLIBS += $(LDLIBS_ZLIB) $(LDLIBS_MO3)
 
 CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_WAVPACK) $(CPPFLAGS_SNDFILE)
 LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_WAVPACK) $(LDFLAGS_SNDFILE)

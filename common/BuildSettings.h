@@ -163,8 +163,10 @@
 #define NO_ASIO
 #define NO_VST
 #define NO_PORTAUDIO
-#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86))
+#if !defined(MPT_WITH_MO3) && !(MPT_COMPILER_MSVC)
+#ifndef NO_MO3
 #define NO_MO3
+#endif
 #endif
 #define NO_DSOUND
 #define NO_FLAC
