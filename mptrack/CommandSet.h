@@ -296,6 +296,7 @@ enum CommandID
 	kcEndTranspose = kcDataEntryDownCoarse,
 	kcPatternAmplify,
 	kcPatternInterpolateNote,
+	kcPatternInterpolateInstr,
 	kcPatternInterpolateVol,
 	kcPatternInterpolateEffect,
 	kcPatternVisualizeEffect,
