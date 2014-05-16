@@ -1583,8 +1583,7 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 		if(pSndFile != nullptr && m_nPattern < pSndFile->Patterns.Size())
 		{
 			ROWINDEX row = cursor.GetRow();
-			ROWINDEX max = pSndFile->Patterns[m_nPattern].GetNumRows();
-			if((row) && (row >= max)) row = max - 1;
+			LimitMax(row, pSndFile->Patterns[m_nPattern].GetNumRows() - 1);
 			cursor.SetRow(row);
 		}
 
@@ -4354,7 +4353,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 							}
 		case kcSelectWithCopySelect:
 		case kcSelectWithNav:
-		case kcSelect:			if(!m_Status[psDragnDropEdit | psRowSelection]) m_StartSel = m_Cursor;
+		case kcSelect:			if(!m_Status[psDragnDropEdit | psRowSelection | psChannelSelection | psMouseDragSelect]) m_StartSel = m_Cursor;
 									m_Status.set(psKeyboardDragSelect);
 								return wParam;
 		case kcSelectOffWithCopySelect:
@@ -4363,7 +4362,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								return wParam;
 		case kcCopySelectWithSelect:
 		case kcCopySelectWithNav:
-		case kcCopySelect:		if(!m_Status[psDragnDropEdit | psRowSelection]) m_StartSel = m_Cursor;
+		case kcCopySelect:		if(!m_Status[psDragnDropEdit | psRowSelection | psChannelSelection | psMouseDragSelect]) m_StartSel = m_Cursor;
 									m_Status.set(psCtrlDragSelect); return wParam;
 		case kcCopySelectOffWithSelect:
 		case kcCopySelectOffWithNav:
