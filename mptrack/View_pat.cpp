@@ -113,6 +113,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_INTERPOLATE_VOLUME,	OnInterpolateVolume)
 	ON_COMMAND(ID_PATTERN_INTERPOLATE_EFFECT,	OnInterpolateEffect)
 	ON_COMMAND(ID_PATTERN_INTERPOLATE_NOTE,		OnInterpolateNote)
+	ON_COMMAND(ID_PATTERN_INTERPOLATE_INSTR,	OnInterpolateInstr)
 	ON_COMMAND(ID_PATTERN_VISUALIZE_EFFECT,		OnVisualizeEffect)		//rewbs.fxvis
 	ON_COMMAND(ID_GROW_SELECTION,				OnGrowSelection)
 	ON_COMMAND(ID_SHRINK_SELECTION,				OnShrinkSelection)
@@ -2731,6 +2732,20 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 				}
 				break;
 
+			case PatternCursor::instrColumn:
+				vsrc = srcCmd.instr;
+				vdest = destCmd.instr;
+				verr = (distance * 63) / 128;
+				if(srcCmd.instr == 0)
+				{
+					vsrc = vdest;
+					vcmd = destCmd.instr;
+				} else if(destCmd.instr == 0)
+				{
+					vdest = vsrc;
+				}
+				break;
+
 			case PatternCursor::volumeColumn:
 				vsrc = srcCmd.vol;
 				vdest = destCmd.vol;
@@ -2794,8 +2809,16 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 					if ((pcmd->note == NOTE_NONE) || (pcmd->instr == vcmd))
 					{
 						int note = vsrc + ((vdest - vsrc) * i + verr) / distance;
-						pcmd->note = (BYTE)note;
+						pcmd->note = (ModCommand::NOTE)note;
 						pcmd->instr = vcmd;
+					}
+					break;
+
+				case PatternCursor::instrColumn:
+					if (pcmd->instr == 0)
+					{
+						int instr = vsrc + ((vdest - vsrc) * i + verr) / distance;
+						pcmd->instr = (ModCommand::INSTR)instr;
 					}
 					break;
 
@@ -2803,7 +2826,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 					if ((pcmd->volcmd == VOLCMD_NONE) || (pcmd->volcmd == vcmd))
 					{
 						int vol = vsrc + ((vdest - vsrc) * i + verr) / distance;
-						pcmd->vol = (BYTE)vol;
+						pcmd->vol = (ModCommand::VOL)vol;
 						pcmd->volcmd = vcmd;
 					}
 					break;
@@ -2826,7 +2849,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 						if ((pcmd->command == CMD_NONE) || (pcmd->command == vcmd))
 						{
 							int val = vsrc + ((vdest - vsrc) * i + verr) / distance;
-							pcmd->param = (BYTE)val;
+							pcmd->param = (ModCommand::PARAM)val;
 							pcmd->command = vcmd;
 						}
 					}
@@ -4231,6 +4254,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPatternAmplify:				OnPatternAmplify(); return wParam;
 		case kcPatternSetInstrument:		OnSetSelInstrument(); return wParam;
 		case kcPatternInterpolateNote:		OnInterpolateNote(); return wParam;
+		case kcPatternInterpolateInstr:		OnInterpolateInstr(); return wParam;
 		case kcPatternInterpolateVol:		OnInterpolateVolume(); return wParam;
 		case kcPatternInterpolateEffect:	OnInterpolateEffect(); return wParam;
 		case kcPatternVisualizeEffect:		OnVisualizeEffect(); return wParam;
@@ -6107,6 +6131,7 @@ bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih) con
 
 	HMENU subMenu = CreatePopupMenu();
 	bool possible = BuildInterpolationCtxMenu(subMenu, PatternCursor::noteColumn, CString("Note Column\t") + ih->GetKeyTextFromCommand(kcPatternInterpolateNote), ID_PATTERN_INTERPOLATE_NOTE)
+		| BuildInterpolationCtxMenu(subMenu, PatternCursor::instrColumn, (isPCNote ? CString("Plugin Column\t") : CString("Instrument Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateInstr), ID_PATTERN_INTERPOLATE_INSTR)
 		| BuildInterpolationCtxMenu(subMenu, PatternCursor::volumeColumn, (isPCNote ? CString("Parameter Column\t") : CString("Volume Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateVol), ID_PATTERN_INTERPOLATE_VOLUME)
 		| BuildInterpolationCtxMenu(subMenu, PatternCursor::effectColumn, (isPCNote ? CString("Value Column\t") : CString("Effect Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect), ID_PATTERN_INTERPOLATE_EFFECT);
 	if(possible || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
@@ -6451,12 +6476,10 @@ bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, C
 				|| (ModCommand::IsNoteOrEmpty(startRowCmd) && ModCommand::IsNoteOrEmpty(endRowCmd) && !(startRowCmd == NOTE_NONE && endRowCmd == NOTE_NONE));	// Interpolate between two notes of which one may be empty
 			break;
 
-		case PatternCursor::effectColumn:
-			startRowCmd = startRowMC.command;
-			endRowCmd = endRowMC.command;
-			result = (startRowCmd == endRowCmd && startRowCmd != CMD_NONE)		// Interpolate between two identical commands
-				|| (startRowCmd != CMD_NONE && endRowCmd == CMD_NONE)			// Fill in values from the first row
-				|| (startRowCmd == CMD_NONE && endRowCmd != CMD_NONE);			// Fill in values from the last row
+		case PatternCursor::instrColumn:
+			startRowCmd = startRowMC.instr;
+			endRowCmd = endRowMC.instr;
+			result = startRowCmd != 0 || endRowCmd != 0;
 			break;
 
 		case PatternCursor::volumeColumn:
@@ -6466,6 +6489,15 @@ bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, C
 				|| (startRowCmd != VOLCMD_NONE && endRowCmd == VOLCMD_NONE)		// Fill in values from the first row
 				|| (startRowCmd == VOLCMD_NONE && endRowCmd != VOLCMD_NONE);	// Fill in values from the last row
 			break;
+
+		case PatternCursor::effectColumn:
+			startRowCmd = startRowMC.command;
+			endRowCmd = endRowMC.command;
+			result = (startRowCmd == endRowCmd && startRowCmd != CMD_NONE)		// Interpolate between two identical commands
+				|| (startRowCmd != CMD_NONE && endRowCmd == CMD_NONE)			// Fill in values from the first row
+				|| (startRowCmd == CMD_NONE && endRowCmd != CMD_NONE);			// Fill in values from the last row
+			break;
+
 		default:
 			result = false;
 	}

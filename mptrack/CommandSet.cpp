@@ -661,6 +661,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleTransposeDown, 1908, _T("Transpose -1"));
 	DefineKeyCommand(kcSampleTransposeOctUp, 1909, _T("Transpose +12"));
 	DefineKeyCommand(kcSampleTransposeOctDown, 1910, _T("Transpose -12"));
+	DefineKeyCommand(kcPatternInterpolateInstr, 1911, _T("Interpolate Instrument"));
 
 	// Add new key commands here.
 

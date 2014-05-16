@@ -463,12 +463,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		}
 	}
 
-	if(m_SndFile.GetMixLevels() != mixLevels_compatible)
+	if(m_SndFile.GetMixLevels() != mixLevels_compatible && m_SndFile.GetMixLevels() != mixLevels_compatible_FT2)
 	{
 		AddToLog("Found incorrect mix levels (only compatible mix levels allowed)");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.SetMixLevels(mixLevels_compatible);
+			m_SndFile.SetMixLevels(m_SndFile.GetType() == MOD_TYPE_XM ? mixLevels_compatible_FT2 : mixLevels_compatible);
 	}
 
 	if(autofix && foundHacks)

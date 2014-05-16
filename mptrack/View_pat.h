@@ -402,6 +402,7 @@ protected:
 	afx_msg void OnInterpolateVolume() { Interpolate(PatternCursor::volumeColumn); }
 	afx_msg void OnInterpolateEffect() { Interpolate(PatternCursor::effectColumn); }
 	afx_msg void OnInterpolateNote() { Interpolate(PatternCursor::noteColumn); }
+	afx_msg void OnInterpolateInstr() { Interpolate(PatternCursor::instrColumn); }
 	afx_msg void OnVisualizeEffect();		//rewbs.fxvis
 	afx_msg void OnTransposeUp() { TransposeSelection(1); }
 	afx_msg void OnTransposeDown() { TransposeSelection(-1); }
