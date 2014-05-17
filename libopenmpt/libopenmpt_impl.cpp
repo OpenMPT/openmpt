@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <limits>
 
 #include <cmath>
 #include <cstdlib>
@@ -901,7 +902,7 @@ std::int32_t module_impl::get_order_pattern( std::int32_t o ) const {
 	return m_sndFile->Order[o];
 }
 std::int32_t module_impl::get_pattern_num_rows( std::int32_t p ) const {
-	if ( !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
+	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
 		return 0;
 	}
 	return m_sndFile->Patterns[p].GetNumRows();
@@ -909,7 +910,7 @@ std::int32_t module_impl::get_pattern_num_rows( std::int32_t p ) const {
 
 std::uint8_t module_impl::get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
 	CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
-	if ( !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
+	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
 		return 0;
 	}
 	if ( r < 0 || r >= (std::int32_t)m_sndFile->Patterns[p].GetNumRows() ) {
@@ -950,7 +951,7 @@ f : generic effect column parameter
 
 std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
 	CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
-	if ( !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
+	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
 		return std::make_pair( std::string(), std::string() );
 	}
 	if ( r < 0 || r >= (std::int32_t)m_sndFile->Patterns[p].GetNumRows() ) {
@@ -1020,7 +1021,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	std::string text = pad ? std::string( width, ' ' ) : std::string();
 	std::string high = pad ? std::string( width, ' ' ) : std::string();
 	const CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
-	if ( !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
+	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
 		return std::make_pair( text, high );
 	}
 	if ( r < 0 || r >= (std::int32_t)m_sndFile->Patterns[p].GetNumRows() ) {
