@@ -133,9 +133,9 @@ LIBOPENMPT_CXX_API bool is_extension_supported( const std::string & extension );
 //! Roughly scan the input stream to find out whether libopenmpt might be able to open it
 /*!
   \param stream Input stream to scan.
-  \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less dat to be loaded but only gives a rough estimate answer.
+  \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer.
   \param log Log where warning and errors are written.
-  \return Propability between 0.0 and 1.0.
+  \return Probability between 0.0 and 1.0.
 */
 LIBOPENMPT_CXX_API double could_open_propability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog );
 
@@ -221,7 +221,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has succesfullly been constructed.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -229,7 +229,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has succesfullly been constructed.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -238,7 +238,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has succesfullly been constructed.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -247,7 +247,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has succesfullly been constructed.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -255,7 +255,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has succesfullly been constructed.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -264,7 +264,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has succesfullly been constructed.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const char * beg, const char * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -273,7 +273,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has succesfullly been constructed.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -282,7 +282,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has succesfullly been constructed.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	virtual ~module();
@@ -366,9 +366,9 @@ public:
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param mono Pointer to a buffer of at least count elements that receives the mono/center output.
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
@@ -378,10 +378,10 @@ public:
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param left Pointer to a buffer of at least count elements that receives the left output.
 	  \param right Pointer to a buffer of at least count elements that receives the right output.
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
@@ -391,12 +391,12 @@ public:
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param left Pointer to a buffer of at least count elements that receives the left output.
 	  \param right Pointer to a buffer of at least count elements that receives the right output.
 	  \param rear_left Pointer to a buffer of at least count elements that receives the rear left output.
 	  \param rear_right Pointer to a buffer of at least count elements that receives the rear right output.
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
@@ -406,49 +406,49 @@ public:
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param mono Pointer to a buffer of at least count elements that receives the mono/center output.
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
-	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clippped to that range though and thus might overshoot.
+	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
 	*/
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * mono );
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param left Pointer to a buffer of at least count elements that receives the left output.
 	  \param right Pointer to a buffer of at least count elements that receives the right output.
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
-	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clippped to that range though and thus might overshoot.
+	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
 	*/
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right );
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param left Pointer to a buffer of at least count elements that receives the left output.
 	  \param right Pointer to a buffer of at least count elements that receives the right output.
 	  \param rear_left Pointer to a buffer of at least count elements that receives the rear left output.
 	  \param rear_right Pointer to a buffer of at least count elements that receives the rear right output.
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
-	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clippped to that range though and thus might overshoot.
+	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
 	*/
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param interleaved_stereo Pointer to a buffer of at least count*2 elements that receives the interleaved stereo output in the order (L,R).
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
@@ -458,9 +458,9 @@ public:
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved suad surround output in the order (L,R,RL,RR).
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
@@ -470,25 +470,25 @@ public:
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param interleaved_stereo Pointer to a buffer of at least count*2 elements that receives the interleaved stereo output in the order (L,R).
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
-	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clippped to that range though and thus might overshoot.
+	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
 	*/
 	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, float * interleaved_stereo );
 	//! Render audio data
 	/*!
 	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
-	  \param count Number auf audio frames to render per channel.
+	  \param count Number of audio frames to render per channel.
 	  \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved suad surround output in the order (L,R,RL,RR).
-	  \return The number of frames acutally rendered.
+	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
-	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clippped to that range though and thus might overshoot.
+	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
 	*/
 	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, float * interleaved_quad );
 	/*@}*/
