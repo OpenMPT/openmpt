@@ -124,17 +124,12 @@ template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data)
 //---------------------------------------------------------
 {
-	union {
-		T t;
-		char b[sizeof(T)];
-	} conv;
-	STATIC_ASSERT(sizeof(conv) == sizeof(T));
-	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
-	conv.t = data;
+	char b[sizeof(T)];
+	std::memcpy(b, &data, sizeof(T));
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(conv.b, conv.b+sizeof(T));
+		std::reverse(b, b+sizeof(T));
 	#endif
-	oStrm.write(conv.b, sizeof(data));
+	oStrm.write(b, sizeof(T));
 }
 
 //Write only given number of bytes from the beginning.
@@ -142,17 +137,12 @@ template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data, const std::size_t bytecount)
 //--------------------------------------------------------------------------------------
 {
-	union {
-		T t;
-		char b[sizeof(T)];
-	} conv;
-	STATIC_ASSERT(sizeof(conv) == sizeof(T));
-	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
-	conv.t = data;
+	char b[sizeof(T)];
+	std::memcpy(b, &data, sizeof(T));
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(conv.b, conv.b+sizeof(T));
+		std::reverse(b, b+sizeof(T));
 	#endif
-	oStrm.write(conv.b, std::min(bytecount, sizeof(data)));
+	oStrm.write(b, std::min(bytecount, sizeof(T)));
 }
 
 template <class T>
@@ -178,17 +168,12 @@ template<class T>
 inline void Binaryread(std::istream& iStrm, T& data)
 //--------------------------------------------------
 {
-	union {
-		T t;
-		char b[sizeof(T)];
-	} conv;
-	STATIC_ASSERT(sizeof(conv) == sizeof(T));
-	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
-	iStrm.read(conv.b, sizeof(T));
+	char b[sizeof(T)];
+	iStrm.read(b, sizeof(T));
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(conv.b, conv.b+sizeof(T));
+		std::reverse(b, b+sizeof(T));
 	#endif
-	data = conv.t;
+	std::memcpy(&data, b, sizeof(T));
 }
 
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
@@ -199,18 +184,13 @@ inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
 	#ifdef HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
-	union {
-		T t;
-		char b[sizeof(T)];
-	} conv;
-	STATIC_ASSERT(sizeof(conv) == sizeof(T));
-	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
-	memset(conv.b, 0, sizeof(T));
-	iStrm.read(conv.b, (std::min)((size_t)bytecount, sizeof(data)));
+	char b[sizeof(T)];
+	std::memset(b, 0, sizeof(T));
+	iStrm.read(b, std::min((size_t)bytecount, sizeof(T)));
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(conv.b, conv.b+sizeof(T));
+		std::reverse(b, b+sizeof(T));
 	#endif
-	data = conv.t;
+	std::memcpy(&data, b, sizeof(T));
 }
 
 
@@ -482,20 +462,17 @@ private:
 template<typename T>
 struct IdLE
 {
-	union {
-		char b[sizeof(T)];
-		T t;
-	} conv;
+	char b[sizeof(T)];
 	IdLE(T val)
 	{
-		conv.t = val;
+		std::memcpy(b, &val, sizeof(T));
 		#ifdef MPT_PLATFORM_BIG_ENDIAN
 			std::reverse(conv.b, conv.b+sizeof(T));
 		#endif
 	}
 	const char* GetChars() const
 	{
-		return conv.b;
+		return b;
 	}
 };
 
