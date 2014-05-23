@@ -323,16 +323,6 @@ int sgn(T value)
 }
 
 
-// Convert a variable-length MIDI integer <value> to a normal integer <result>.
-// Function returns how many bytes have been read.
-template <class TIn, class TOut>
-size_t ConvertMIDI2Int(TOut &result, TIn value)
-//---------------------------------------------
-{
-	return ConvertMIDI2Int(result, (uint8 *)(&value), sizeof(TIn));
-}
-
-
 // Convert a variable-length MIDI integer held in the byte buffer <value> to a normal integer <result>.
 // maxLength bytes are read from the byte buffer at max.
 // Function returns how many bytes have been read.
