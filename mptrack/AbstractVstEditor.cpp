@@ -355,7 +355,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
 
 			// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
-			if(ih->KeyEvent(kCtxVSTGUI, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull)
+			if(ih->KeyEvent(kCtxVSTGUI, nChar, nRepCnt, nFlags, kT, this) != kcNull)
 			{
 				return true;
 			}
@@ -460,7 +460,10 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 				return false;
 			} else
 			{
-				return CreateInstrument();
+				CreateInstrument();
+				// Return true since we don't want to trigger the note for which the instrument has been validated yet.
+				// Otherwise, the note might hang forever because the key-up event will go missing.
+				return false;
 			}
 		} else
 		{
