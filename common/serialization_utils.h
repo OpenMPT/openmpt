@@ -467,7 +467,7 @@ struct IdLE
 	{
 		std::memcpy(b, &val, sizeof(T));
 		#ifdef MPT_PLATFORM_BIG_ENDIAN
-			std::reverse(conv.b, conv.b+sizeof(T));
+			std::reverse(b, b+sizeof(T));
 		#endif
 	}
 	const char* GetChars() const
