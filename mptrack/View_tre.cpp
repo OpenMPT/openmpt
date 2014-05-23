@@ -1140,13 +1140,13 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 		hRootParent = GetParentRootItem(hItem);
 	}
 
-	DWORD_PTR itemData = GetItemData(hItem);
-	DWORD_PTR rootItemData = GetItemData(hRootParent);
+	uint32 itemData = static_cast<uint32>(GetItemData(hItem));
+	uint32 rootItemData = static_cast<uint32>(GetItemData(hRootParent));
 
 	// Midi Library
 	if(hRootParent == m_hMidiLib && hRootParent != hItem && !IsSampleBrowser())
 	{
-		return ModItem(static_cast<ModItemType>(itemData >> MIDILIB_SHIFT), static_cast<uint32>(itemData & MIDILIB_MASK));
+		return ModItem(static_cast<ModItemType>(itemData >> MIDILIB_SHIFT), itemData & MIDILIB_MASK);
 	}
 	// Instrument Library
 	if(hRootParent == m_hInsLib || (IsSampleBrowser() && hItem != m_hInsLib))
@@ -1196,7 +1196,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 				}
 			}
 
-			ModItem modItem(MODITEM_NULL, (uint32)itemData);
+			ModItem modItem(MODITEM_NULL, itemData);
 			if (hItemParent == pInfo->hPatterns)
 			{
 				// Pattern
@@ -1220,7 +1220,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 
 	// DLS banks
 	if(itemData < m_tiDLS.size() && hItem == m_tiDLS[itemData])
-		return ModItem(MODITEM_DLSBANK_FOLDER, (uint32)itemData);
+		return ModItem(MODITEM_DLSBANK_FOLDER, itemData);
 
 	// DLS Instruments
 	if(hRootParent != nullptr)
@@ -1402,7 +1402,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 		case MODITEM_MIDIINSTRUMENT:
 			{
 				MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
-				if(modItemID < 256 && !midiLib.MidiMap[modItemID].empty())
+				if(modItemID < CountOf(midiLib.MidiMap) && !midiLib.MidiMap[modItemID].empty())
 				{
 					CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 					if (pMainFrm) pMainFrm->PlaySoundFile(midiLib.MidiMap[modItemID], static_cast<ModCommand::NOTE>(nParam));
@@ -1410,8 +1410,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 			}
 			return TRUE;
 
-		default:
-			if (modItem.type == MODITEM_DLSBANK_INSTRUMENT)
+		case MODITEM_DLSBANK_INSTRUMENT:
 			{
 				const DlsItem &item = *static_cast<const DlsItem *>(&modItem);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
