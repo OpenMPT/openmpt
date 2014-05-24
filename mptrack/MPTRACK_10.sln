@@ -1,6 +1,9 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mptrack", "mptrack_10.vcxproj", "{21D95071-FB97-4E69-B3B1-050D0D4A5021}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8D55AB6B-DAB3-4EFB-9169-7EAF995D5C10} = {8D55AB6B-DAB3-4EFB-9169-7EAF995D5C10}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flac", "..\build\gen\flac.vcxproj", "{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}"
 EndProject
