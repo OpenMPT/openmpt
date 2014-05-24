@@ -41,8 +41,8 @@ std::wstring Dither::GetModeName(DitherMode mode)
 
 #ifdef ENABLE_X86
 
-void X86_Dither(int *pBuffer, UINT nSamples, UINT nBits, DitherModPlugState *state)
-//---------------------------------------------------------------------------------
+void X86_Dither(int *pBuffer, uint32 nSamples, uint32 nBits, DitherModPlugState *state)
+//-------------------------------------------------------------------------------------
 {
 	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
 	{
@@ -99,11 +99,11 @@ static forceinline int32 dither_rand(uint32 &a, uint32 &b)
 	a ^= 0x10204080u;
 	a += 0x78649E7Du + (b * 4);
 	b += ((a << 16 ) | (a >> 16)) * 5;
-	return (int32)b;
+	return static_cast<int32>(b);
 }
 
-static void C_Dither(int *pBuffer, std::size_t count, UINT nBits, DitherModPlugState *state)
-//------------------------------------------------------------------------------------------
+static void C_Dither(int *pBuffer, std::size_t count, uint32 nBits, DitherModPlugState *state)
+//--------------------------------------------------------------------------------------------
 {
 	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
 	{
@@ -127,8 +127,8 @@ static void C_Dither(int *pBuffer, std::size_t count, UINT nBits, DitherModPlugS
 
 }
 
-static void Dither_ModPlug(int *pBuffer, std::size_t count, std::size_t channels, UINT nBits, DitherModPlugState &state)
-//----------------------------------------------------------------------------------------------------------------------
+static void Dither_ModPlug(int *pBuffer, std::size_t count, std::size_t channels, uint32 nBits, DitherModPlugState &state)
+//------------------------------------------------------------------------------------------------------------------------
 {
 	#ifdef ENABLE_X86
 		X86_Dither(pBuffer, count * channels, nBits, &state);

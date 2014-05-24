@@ -222,7 +222,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 		uint32 memPos = blkPos + sizeof(MMCMPBLOCK) + blk.sub_blk * sizeof(MMCMPSUBBLOCK);
 
 #ifdef MMCMP_LOG
-		Log("block %d: flags=%04X sub_blocks=%d", nBlock, (UINT)pblk->flags, (UINT)pblk->sub_blk);
+		Log("block %d: flags=%04X sub_blocks=%d", nBlock, (uint32)pblk->flags, (uint32)pblk->sub_blk);
 		Log(" pksize=%d unpksize=%d", pblk->pk_size, pblk->unpk_size);
 		Log(" tt_entries=%d num_bits=%d\n", pblk->tt_entries, pblk->num_bits);
 #endif
