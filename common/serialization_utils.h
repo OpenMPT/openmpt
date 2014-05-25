@@ -186,7 +186,7 @@ inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
 	#endif
 	char b[sizeof(T)];
 	std::memset(b, 0, sizeof(T));
-	iStrm.read(b, std::min((size_t)bytecount, sizeof(T)));
+	iStrm.read(b, std::min(static_cast<std::size_t>(bytecount), sizeof(T)));
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
 		std::reverse(b, b+sizeof(T));
 	#endif
