@@ -175,7 +175,7 @@ void ReadAdaptive1248(std::istream& iStrm, uint64& val)
 void WriteItemString(std::ostream& oStrm, const char* const pStr, const size_t nSize)
 //--------------------------------------------------------------------------------
 {
-	uint32 id = (uint32)std::min<size_t>(nSize, (uint32_max >> 4)) << 4;
+	uint32 id = static_cast<uint32>(std::min<std::size_t>(nSize, (uint32_max >> 4))) << 4;
 	id |= 12; // 12 == 1100b
 	Binarywrite<uint32>(oStrm, id);
 	id >>= 4;
@@ -209,7 +209,7 @@ void ReadItemString(std::istream& iStrm, std::string& str, const DataSize)
 	for(size_t i = 0; i < str.size(); i++)
 		iStrm.read(&str[i], 1);
 
-	id = (id >> 4) - (uint32)str.size();
+	id = (id >> 4) - static_cast<uint32>(str.size());
 	if(id > 0)
 		iStrm.ignore(id);
 }
@@ -513,10 +513,10 @@ void SsbWrite::OnWroteItem(const char* pId, const size_t nIdSize, const Postype&
 {
 	const Offtype nRawEntrySize = m_pOstrm->tellp() - posBeforeWrite;
 
-	if (nRawEntrySize < 0 || (uint64)nRawEntrySize > std::numeric_limits<DataSize>::max())
+	if (nRawEntrySize < 0 || static_cast<uint64>(nRawEntrySize) > std::numeric_limits<DataSize>::max())
 		{ AddWriteNote(SNW_INSUFFICIENT_DATASIZETYPE); return; }
 
-	if(GetFlag(RwfRMapHasSize) && (nRawEntrySize < 0 || (uint64)nRawEntrySize > (std::numeric_limits<DataSize>::max() >> 2)))
+	if(GetFlag(RwfRMapHasSize) && (nRawEntrySize < 0 || static_cast<uint64>(nRawEntrySize) > (std::numeric_limits<DataSize>::max() >> 2)))
 		{ AddWriteNote(SNW_DATASIZETYPE_OVERFLOW); return; }
 
 	DataSize nEntrySize = static_cast<DataSize>(nRawEntrySize);
@@ -693,7 +693,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 
 	const Offtype rawEndOfHdrData = iStrm.tellg() - m_posStart;
 
-	if (rawEndOfHdrData < 0 || (uint64)rawEndOfHdrData > std::numeric_limits<RposType>::max())
+	if (rawEndOfHdrData < 0 || static_cast<uint64>(rawEndOfHdrData) > std::numeric_limits<RposType>::max())
 		{ AddReadNote(SNR_INSUFFICIENT_RPOSTYPE); return; }
 
 	m_rposEndofHdrData = static_cast<RposType>(rawEndOfHdrData);
