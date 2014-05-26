@@ -174,7 +174,7 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 	WaveFormat.Format.wFormatTag = m_Settings.sampleFormat.IsFloat() ? WAVE_FORMAT_IEEE_FLOAT : WAVE_FORMAT_PCM;
 	WaveFormat.Format.nChannels = (WORD)m_Settings.Channels;
 	WaveFormat.Format.nSamplesPerSec = m_Settings.Samplerate;
-	WaveFormat.Format.nAvgBytesPerSec = m_Settings.GetBytesPerSecond();
+	WaveFormat.Format.nAvgBytesPerSec = (DWORD)m_Settings.GetBytesPerSecond();
 	WaveFormat.Format.nBlockAlign = (WORD)m_Settings.GetBytesPerFrame();
 	WaveFormat.Format.wBitsPerSample = (WORD)m_Settings.sampleFormat.GetBitsPerSample();
 	WaveFormat.Format.cbSize = 0;

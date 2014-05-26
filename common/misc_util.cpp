@@ -417,7 +417,7 @@ std::wstring GUIDToString(GUID guid)
 //----------------------------------
 {
 	std::vector<OLECHAR> tmp(256);
-	::StringFromGUID2(guid, &tmp[0], tmp.size());
+	::StringFromGUID2(guid, &tmp[0], static_cast<int>(tmp.size()));
 	return &tmp[0];
 }
 
