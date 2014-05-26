@@ -707,12 +707,12 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading samples
 	if(loadFlags & loadSampleData)
 	{
-		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+		for(SAMPLEINDEX smp = 1; smp <= 31; smp++) if(Samples[smp].nLength)
 		{
 			SampleIO(
 				SampleIO::_8bit,
 				SampleIO::mono,
-				SampleIO::bigEndian,
+				SampleIO::littleEndian,
 				file.ReadMagic("ADPCM") ? SampleIO::ADPCM : SampleIO::signedPCM)
 				.ReadSample(Samples[smp], file);
 		}
