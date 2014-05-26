@@ -25,7 +25,7 @@ exception::exception( const std::string & text ) throw()
 	: std::exception()
 	, text(0)
 {
-	this->text = (char*)std::malloc( text.length() + 1 );
+	this->text = static_cast<char*>( std::malloc( text.length() + 1 ) );
 	if ( this->text ) {
 		std::memcpy( this->text, text.c_str(), text.length() + 1 );
 	}
