@@ -211,7 +211,7 @@ void module_impl::PushToCSoundFileLog( const std::string & text ) const {
 	m_sndFile->AddToLog( LogError, text );
 }
 void module_impl::PushToCSoundFileLog( int loglevel, const std::string & text ) const {
-	m_sndFile->AddToLog( (LogLevel)loglevel, text );
+	m_sndFile->AddToLog( static_cast<LogLevel>( loglevel ), text );
 }
 
 static ResamplingMode filterlength_to_resamplingmode(std::int32_t length) {
@@ -667,7 +667,7 @@ double module_impl::set_position_order_row( std::int32_t order, std::int32_t row
 	}
 	std::int32_t pattern = m_sndFile->Order[order];
 	if ( m_sndFile->Patterns.IsValidIndex( pattern ) ) {
-		if ( row < 0 || row >= (std::int32_t)m_sndFile->Patterns[pattern].GetNumRows() ) {
+		if ( row < 0 || row >= static_cast<std::int32_t>( m_sndFile->Patterns[pattern].GetNumRows() ) ) {
 			return m_currentPositionSeconds;
 		}
 	} else {
@@ -902,7 +902,7 @@ std::int32_t module_impl::get_order_pattern( std::int32_t o ) const {
 	return m_sndFile->Order[o];
 }
 std::int32_t module_impl::get_pattern_num_rows( std::int32_t p ) const {
-	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
+	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<PATTERNINDEX>( p ) ) ) {
 		return 0;
 	}
 	return m_sndFile->Patterns[p].GetNumRows();
@@ -910,10 +910,10 @@ std::int32_t module_impl::get_pattern_num_rows( std::int32_t p ) const {
 
 std::uint8_t module_impl::get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
 	CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
-	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
+	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<PATTERNINDEX>( p ) ) ) {
 		return 0;
 	}
-	if ( r < 0 || r >= (std::int32_t)m_sndFile->Patterns[p].GetNumRows() ) {
+	if ( r < 0 || r >= static_cast<std::int32_t>( m_sndFile->Patterns[p].GetNumRows() ) ) {
 		return 0;
 	}
 	if ( c < 0 || c >= numchannels ) {
@@ -951,10 +951,10 @@ f : generic effect column parameter
 
 std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
 	CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
-	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
+	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<PATTERNINDEX>( p ) ) ) {
 		return std::make_pair( std::string(), std::string() );
 	}
-	if ( r < 0 || r >= (std::int32_t)m_sndFile->Patterns[p].GetNumRows() ) {
+	if ( r < 0 || r >= static_cast<std::int32_t>( m_sndFile->Patterns[p].GetNumRows() ) ) {
 		return std::make_pair( std::string(), std::string() );
 	}
 	if ( c < 0 || c >= numchannels ) {
@@ -1021,10 +1021,10 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	std::string text = pad ? std::string( width, ' ' ) : std::string();
 	std::string high = pad ? std::string( width, ' ' ) : std::string();
 	const CHANNELINDEX numchannels = m_sndFile->GetNumChannels();
-	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( (PATTERNINDEX)p ) ) {
+	if ( !IsInRange( p, std::numeric_limits<PATTERNINDEX>::min(), std::numeric_limits<PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<PATTERNINDEX>( p ) ) ) {
 		return std::make_pair( text, high );
 	}
-	if ( r < 0 || r >= (std::int32_t)m_sndFile->Patterns[p].GetNumRows() ) {
+	if ( r < 0 || r >= static_cast<std::int32_t>( m_sndFile->Patterns[p].GetNumRows() ) ) {
 		return std::make_pair( text, high );
 	}
 	if ( c < 0 || c >= numchannels ) {
