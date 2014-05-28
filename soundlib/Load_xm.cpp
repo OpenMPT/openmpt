@@ -477,7 +477,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// Sample 15 in dirtysex.xm by J/M/T/M is a 16-bit sample with an odd size of 0x18B according to the header, while the real sample size would be 0x18A.
 					// Always read as many bytes as specified in the header, even if the sample reader would probably read less bytes.
-					FileReader sampleChunk = file.ReadChunk(sampleSize[sample]);
+					FileReader sampleChunk = file.ReadChunk(sampleFlags[sample].GetEncoding() != SampleIO::ADPCM ? sampleSize[sample] : (16 + (sampleSize[sample] + 1) / 2));
 					if(sample < sampleSlots.size())
 					{
 						sampleFlags[sample].ReadSample(Samples[sampleSlots[sample]], sampleChunk);
