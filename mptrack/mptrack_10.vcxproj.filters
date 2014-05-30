@@ -499,9 +499,6 @@
     <ClCompile Include="..\sounddev\SoundDeviceThread.cpp">
       <Filter>Source Files\sounddev</Filter>
     </ClCompile>
-    <ClCompile Include="AppendModule.cpp">
-      <Filter>Header Files\mptrack</Filter>
-    </ClCompile>
     <ClCompile Include="..\pluginBridge\BridgeWrapper.cpp">
       <Filter>Source Files\pluginBridgeWrapper</Filter>
     </ClCompile>
@@ -519,6 +516,9 @@
     </ClCompile>
     <ClCompile Include="AboutDialog.cpp">
       <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="AppendModule.cpp">
+      <Filter>Source Files\mptrack</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
