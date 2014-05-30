@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <deque>
+#include "../common/mutex.h"
+
 // Copied packing options from affectx.h
 #if TARGET_API_MAC_CARBON
 	#ifdef __LP64__
@@ -25,9 +28,6 @@
 	#pragma pack(push)
 	#pragma pack(8)
 #endif
-
-#include <deque>
-#include "../common/mutex.h"
 
 // Alternative, easy to use implementation of VstEvents struct.
 template <size_t N>
