@@ -28,15 +28,8 @@
 #include "soundlib/Sndfile.h"
 #include "soundlib/AudioReadTarget.h"
 #include "soundlib/FileReader.h"
-#include "test/test.h"
 
 namespace openmpt {
-
-#if defined( LIBOPENMPT_BUILD_TEST )
-void run_tests() {
-	mpt::Test::DoTests();
-}
-#endif // LIBOPENMPT_BUILD_TEST
 
 namespace version {
 

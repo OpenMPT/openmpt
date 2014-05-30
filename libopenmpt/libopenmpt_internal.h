@@ -32,12 +32,4 @@
 #endif
 #endif
 
-#if defined( LIBOPENMPT_BUILD_TEST )
-#ifdef __cplusplus
-namespace openmpt {
-LIBOPENMPT_CXX_API void run_tests();
-} // namespace openmpt
-#endif
-#endif
-
 #endif // LIBOPENMPT_INTERNAL_H

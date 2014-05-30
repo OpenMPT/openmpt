@@ -13,11 +13,19 @@
 #include "libopenmpt.hpp"
 #include "libopenmpt.h"
 
+#include "test/test.h"
+
 #include <locale>
 
 #include <clocale>
 
 #if defined( LIBOPENMPT_BUILD_TEST )
+
+namespace openmpt {
+void run_tests() {
+	mpt::Test::DoTests();
+}
+} // namespace openmpt
 
 #if defined(WIN32) && defined(UNICODE)
 #if defined(__GNUC__)
