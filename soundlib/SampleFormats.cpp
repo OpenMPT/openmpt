@@ -30,7 +30,7 @@
 #include <flac/include/FLAC/stream_encoder.h>
 #include <flac/include/FLAC/metadata.h>
 #include "SampleFormatConverters.h"
-#endif !NO_FLAC
+#endif // !NO_FLAC
 
 
 OPENMPT_NAMESPACE_BEGIN
