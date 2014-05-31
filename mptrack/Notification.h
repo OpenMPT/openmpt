@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 // struct Notification requires working copy constructor / copy assignment, keep in mind when extending
 struct Notification
 {
@@ -51,3 +53,5 @@ struct Notification
 };
 
 DECLARE_FLAGSET(Notification::Type);
+
+OPENMPT_NAMESPACE_END

@@ -13,6 +13,9 @@
 #include "StreamEncoder.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define MPT_MP3ENCODER_LAME
 #define MPT_MP3ENCODER_BLADE
 #define MPT_MP3ENCODER_ACM
@@ -67,3 +70,6 @@ public:
 	virtual ~MP3Encoder();
 
 };
+
+
+OPENMPT_NAMESPACE_END

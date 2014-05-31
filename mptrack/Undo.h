@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CModDoc;
 class ModCommand;
 struct ModSample;
@@ -173,3 +175,6 @@ public:
 	};
 
 };
+
+
+OPENMPT_NAMESPACE_END

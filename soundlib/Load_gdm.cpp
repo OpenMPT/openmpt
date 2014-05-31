@@ -16,6 +16,10 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -512,3 +516,6 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	return true;
 
 }
+
+
+OPENMPT_NAMESPACE_END

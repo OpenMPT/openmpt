@@ -20,11 +20,15 @@
 #pragma comment(linker, "/EXPORT:_main=_VSTPluginMain")
 #endif
 
+
 AudioEffect *createEffectInstance(audioMasterCallback audioMaster)
 //----------------------------------------------------------------
 {
-	return new MidiInOut(audioMaster);
+	return new OPENMPT_NAMESPACE::MidiInOut(audioMaster);
 }
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 int MidiInOut::numInstances = 0;
@@ -497,3 +501,6 @@ const char *MidiInOut::GetDeviceName(PmDeviceID index) const
 		return "Unavailable";
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

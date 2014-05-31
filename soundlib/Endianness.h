@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Ending swaps:
 // BigEndian(x) may be used either to:
 // -Convert DWORD x, which is in big endian format(for example read from file),
@@ -147,3 +149,5 @@ static forceinline uint8_4 EncodeFloatLE(float f)
 		return uint8_4().SetLE(EncodeFloatNE(f));
 	#endif
 }
+
+OPENMPT_NAMESPACE_END

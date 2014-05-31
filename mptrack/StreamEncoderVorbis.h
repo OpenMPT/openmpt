@@ -13,6 +13,9 @@
 #include "StreamEncoder.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct VorbisDynBind;
 
 class VorbisEncoder : public EncoderFactoryBase
@@ -34,3 +37,6 @@ public:
 	virtual ~VorbisEncoder();
 
 };
+
+
+OPENMPT_NAMESPACE_END

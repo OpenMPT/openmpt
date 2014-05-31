@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CNoteMapWnd;
 class CCtrlInstruments;
 
@@ -193,3 +195,5 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

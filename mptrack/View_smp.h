@@ -11,9 +11,14 @@
 
 #pragma once
 
+#include "modsmp_ctrl.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define SMP_LEFTBAR_BUTTONS		8
 
-#include "modsmp_ctrl.h"
 
 //======================================
 class CViewSample: public CModScrollView
@@ -171,3 +176,6 @@ protected:
 };
 
 DECLARE_FLAGSET(CViewSample::Flags)
+
+
+OPENMPT_NAMESPACE_END

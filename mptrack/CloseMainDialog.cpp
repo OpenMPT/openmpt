@@ -16,6 +16,9 @@
 #include "CloseMainDialog.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 BEGIN_MESSAGE_MAP(CloseMainDialog, CDialog)
 	ON_COMMAND(IDC_BUTTON1,			OnSaveAll)
 	ON_COMMAND(IDC_BUTTON2,			OnSaveNone)
@@ -160,3 +163,6 @@ void CloseMainDialog::OnSwitchFullPaths()
 		m_List.DeleteString(i);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -11,6 +11,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 class CTreeCtrlW : public CTreeCtrl
 {
 public:
@@ -123,3 +126,6 @@ public:
 	using CTreeCtrl::SetItemText;
 	using CTreeCtrl::InsertItem;
 };
+
+
+OPENMPT_NAMESPACE_END

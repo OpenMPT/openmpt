@@ -21,6 +21,9 @@
 #include "../pluginBridge/BridgeWrapper.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_VST
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -729,3 +732,6 @@ void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 }
 
 #endif // NO_VST
+
+
+OPENMPT_NAMESPACE_END

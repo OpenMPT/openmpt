@@ -27,6 +27,9 @@
 #include <mmreg.h>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 std::wstring SoundDeviceTypeToString(SoundDeviceType type)
 //--------------------------------------------------------
 {
@@ -686,3 +689,6 @@ SoundDevicesManager::~SoundDevicesManager()
 	SndDevPortaudioUnnitialize();
 #endif // NO_PORTAUDIO
 }
+
+
+OPENMPT_NAMESPACE_END

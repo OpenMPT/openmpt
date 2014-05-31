@@ -9,6 +9,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 #define DISPLAY_SLOW		0
 #define DISPLAY_MEDIUM		1
 #define DISPLAY_FAST		2
@@ -118,3 +120,5 @@ protected:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+OPENMPT_NAMESPACE_END

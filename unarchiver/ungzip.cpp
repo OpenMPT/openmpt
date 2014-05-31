@@ -20,6 +20,9 @@
 #endif
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+	
 CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
 //--------------------------------------------------------------
 {
@@ -126,3 +129,6 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 		return false;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

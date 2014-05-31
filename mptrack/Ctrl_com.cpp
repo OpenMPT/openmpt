@@ -18,6 +18,10 @@
 #include "view_com.h"
 #include "InputHandler.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 BEGIN_MESSAGE_MAP(CCtrlComments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlComments)
 	ON_EN_CHANGE(IDC_EDIT_COMMENTS,		OnCommentsChanged)
@@ -213,3 +217,6 @@ void CCtrlComments::OnCommentsChanged()
 		delete[] p;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

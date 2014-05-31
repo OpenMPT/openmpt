@@ -16,6 +16,10 @@
 #include "Moddoc.h"
 #include "../soundlib/modsmp_ctrl.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Functor for fixing hacked patterns
 struct FixHackedPatterns
 //======================
@@ -477,3 +481,5 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	return foundHacks;
 }
 
+
+OPENMPT_NAMESPACE_END

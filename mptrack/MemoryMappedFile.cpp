@@ -12,6 +12,9 @@
 #include "MemoryMappedFile.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 CMappedFile::~CMappedFile()
 //-------------------------
 {
@@ -140,3 +143,6 @@ FileReader CMappedFile::GetFile()
 {
 	return FileReader(Lock(), GetLength());
 }
+
+
+OPENMPT_NAMESPACE_END

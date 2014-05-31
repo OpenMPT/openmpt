@@ -43,6 +43,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CTrackApp object
 
@@ -973,7 +977,7 @@ BOOL CTrackApp::InitInstance()
 
 	EndWaitCursor();
 
-	mpt::Test::DoTests();
+	Test::DoTests();
 
 	if(TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup)
 	{
@@ -1821,3 +1825,6 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 	}
 	return false;
 }
+
+
+OPENMPT_NAMESPACE_END

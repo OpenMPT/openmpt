@@ -11,6 +11,9 @@
 #pragma once
 
 #include "modcommand.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 
 //==============
@@ -59,3 +62,5 @@ public:
 	// Get range information, effect name, etc... from a given effect.
 	bool GetVolCmdInfo(UINT ndx, LPSTR s, ModCommand::VOL *prangeMin = nullptr, ModCommand::VOL *prangeMax = nullptr) const;
 };
+
+OPENMPT_NAMESPACE_END

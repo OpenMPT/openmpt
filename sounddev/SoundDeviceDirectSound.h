@@ -18,6 +18,8 @@
 #include <dsound.h>
 #endif
 
+OPENMPT_NAMESPACE_BEGIN
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // DirectSound device
@@ -59,3 +61,5 @@ public:
 
 #endif // NO_DIRECTSOUND
 
+
+OPENMPT_NAMESPACE_END

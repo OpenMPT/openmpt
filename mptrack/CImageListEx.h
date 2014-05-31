@@ -10,8 +10,12 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CImageListEx : public CImageList
 {
 public:
 	bool Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, bool disabled = false);
 };
+
+OPENMPT_NAMESPACE_END

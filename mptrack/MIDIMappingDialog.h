@@ -14,6 +14,7 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 
+OPENMPT_NAMESPACE_BEGIN
 
 // CMIDIMappingDialog dialog
 
@@ -73,3 +74,5 @@ protected:
 	afx_msg void OnDeltaposSpinmovemapping(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedCheckPatRecord();
 };
+
+OPENMPT_NAMESPACE_END

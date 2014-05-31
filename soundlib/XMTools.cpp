@@ -15,6 +15,9 @@
 #include <algorithm>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Convert all multi-byte numeric values to current platform's endianness or vice versa.
 void XMFileHeader::ConvertEndianness()
 //------------------------------------
@@ -500,3 +503,6 @@ SampleIO XMSample::GetSampleFormat() const
 		SampleIO::littleEndian,
 		SampleIO::deltaPCM);
 }
+
+
+OPENMPT_NAMESPACE_END

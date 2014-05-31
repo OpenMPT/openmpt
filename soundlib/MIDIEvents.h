@@ -11,6 +11,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // MIDI related enums and helper functions
 namespace MIDIEvents
 {
@@ -287,3 +290,6 @@ namespace MIDIEvents
 	uint8 GetDataByte2FromEvent(uint32 midiMsg);
 
 }
+
+
+OPENMPT_NAMESPACE_END

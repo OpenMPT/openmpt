@@ -13,6 +13,8 @@
 #include "../common/serialization_utils.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
 
 const char* CTuningBase::s_TuningDescriptionGeneral = "No ratio restrictions";
 
@@ -469,3 +471,5 @@ bool CTuningBase::DeserializeOLD(std::istream& inStrm)
 	return SERIALIZATION_SUCCESS;
 }
 
+
+OPENMPT_NAMESPACE_END

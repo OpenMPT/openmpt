@@ -13,6 +13,8 @@
 #include <vector>
 #include "BridgeCommon.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class PluginBridge : protected BridgeCommon
 {
 public:
@@ -82,3 +84,6 @@ protected:
 
 	static VstIntPtr VSTCALLBACK MasterCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 };
+
+
+OPENMPT_NAMESPACE_END

@@ -18,6 +18,8 @@
 #include "../common/misc_util.h"
 #include <string>
 
+OPENMPT_NAMESPACE_BEGIN
+
 typedef CTuningRTI::RATIOTYPE RATIOTYPE;
 typedef CTuningRTI::NOTEINDEXTYPE NOTEINDEXTYPE;
 typedef CTuningRTI::UNOTEINDEXTYPE UNOTEINDEXTYPE;
@@ -582,3 +584,6 @@ void WriteStr(std::ostream& oStrm, const std::string& str)
 }
 
 } // namespace CTuningS11n.
+
+
+OPENMPT_NAMESPACE_END

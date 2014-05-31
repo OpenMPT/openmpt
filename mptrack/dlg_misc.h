@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 class CModDoc;
 class CDLSBank;
@@ -272,3 +274,5 @@ enum enMsgBoxHidableMessage
 };
 
 void MsgBoxHidable(enMsgBoxHidableMessage enMsg);
+
+OPENMPT_NAMESPACE_END

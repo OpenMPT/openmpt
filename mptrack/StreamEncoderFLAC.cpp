@@ -25,6 +25,8 @@
 #include <flac/include/FLAC/stream_encoder.h>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
 
 class FLACStreamWriter : public StreamWriterBase
 {
@@ -320,3 +322,6 @@ IAudioStreamEncoder *FLACEncoder::ConstructStreamEncoder(std::ostream &file) con
 	}
 	return new FLACStreamWriter(*this, file);
 }
+
+
+OPENMPT_NAMESPACE_END

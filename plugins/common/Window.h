@@ -13,6 +13,9 @@
 #include "WindowBase.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //==============================
 class Window : public WindowBase
 //==============================
@@ -80,3 +83,6 @@ private:
 	}
 
 }; 
+
+
+OPENMPT_NAMESPACE_END

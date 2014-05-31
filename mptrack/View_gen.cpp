@@ -26,6 +26,9 @@
 #include "../common/StringFixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 IMPLEMENT_SERIAL(CViewGlobals, CFormView, 0)
 
 BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
@@ -1518,3 +1521,6 @@ HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 	}
 	return CFormView::OnCtlColor(pDC, pWnd, nCtlColor);
 }
+
+
+OPENMPT_NAMESPACE_END

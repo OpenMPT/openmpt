@@ -17,6 +17,8 @@
 #include "versionNumber.h"
 #include "svn_version.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace MptVersion {
 
 const VersionNum num = MPT_VERSION_NUMERIC;
@@ -416,3 +418,5 @@ std::string GetFullCreditsString()
 }
 
 } // namespace MptVersion
+
+OPENMPT_NAMESPACE_END

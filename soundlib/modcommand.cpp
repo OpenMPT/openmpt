@@ -13,6 +13,9 @@
 #include "Tables.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 const EffectType effectTypes[] =
 {
 	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,
@@ -1028,3 +1031,6 @@ bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &
 		return false;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

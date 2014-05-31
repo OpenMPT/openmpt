@@ -12,6 +12,8 @@
 #include "Snd_defs.h"
 #include "../common/misc_util.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 MixerSettings::MixerSettings()
 {
 
@@ -50,3 +52,6 @@ void MixerSettings::SetVolumeRampDownSamples(int32 rampDownSamples)
 {
 	VolumeRampDownMicroseconds = Util::muldivr(rampDownSamples, 1000000, gdwMixingFreq);
 }
+
+
+OPENMPT_NAMESPACE_END

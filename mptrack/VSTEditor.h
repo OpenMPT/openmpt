@@ -12,6 +12,8 @@
 
 #include "AbstractVstEditor.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifndef NO_VST
 
 //==============================================
@@ -43,3 +45,5 @@ public:
 };
 
 #endif // NO_VST
+
+OPENMPT_NAMESPACE_END

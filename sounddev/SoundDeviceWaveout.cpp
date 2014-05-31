@@ -21,6 +21,9 @@
 #include <mmreg.h>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings);
 
 
@@ -273,3 +276,6 @@ std::vector<SoundDeviceInfo> CWaveDevice::EnumerateDevices()
 	}
 	return devices;
 }
+
+
+OPENMPT_NAMESPACE_END

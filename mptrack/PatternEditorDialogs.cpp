@@ -18,6 +18,9 @@
 #include "PatternEditorDialogs.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
@@ -1785,3 +1788,6 @@ LRESULT QuickChannelProperties::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 
 	return 0;
 }
+
+
+OPENMPT_NAMESPACE_END

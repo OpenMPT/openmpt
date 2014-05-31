@@ -15,6 +15,9 @@
 #include "../sounddsp/EQ.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define EQ_BANDWIDTH	2.0
 #define EQ_ZERO			0.000001
 
@@ -542,3 +545,6 @@ void CQuadEQ::Process(int *frontBuffer, int *rearBuffer, UINT nCount, UINT nChan
 		rear.ProcessStereo(rearBuffer, EQTempFloatBuffer, nCount);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

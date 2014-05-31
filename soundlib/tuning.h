@@ -12,6 +12,10 @@
 
 #include "tuningbase.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 typedef CTuningBase CTuning;
 
 
@@ -178,3 +182,6 @@ private:
 	
 
 }; //End: CTuningRTI declaration.
+
+
+OPENMPT_NAMESPACE_END

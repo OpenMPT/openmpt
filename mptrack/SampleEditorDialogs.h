@@ -13,6 +13,8 @@
 
 #include "../soundlib/SampleIO.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog
 
@@ -151,3 +153,5 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 };
+
+OPENMPT_NAMESPACE_END

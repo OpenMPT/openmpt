@@ -25,6 +25,9 @@
 #include <algorithm>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_ASIO
 
 
@@ -1418,3 +1421,6 @@ bool CASIODevice::OpenDriverSettings()
 
 
 #endif // NO_ASIO
+
+
+OPENMPT_NAMESPACE_END

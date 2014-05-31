@@ -13,6 +13,9 @@
 #include "ModInstrument.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Convert envelope data between various formats.
 void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 //----------------------------------------------------------------
@@ -261,3 +264,6 @@ void ModInstrument::GetSamples(std::vector<bool> &referencedSamples) const
 		}
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

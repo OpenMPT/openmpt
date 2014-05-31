@@ -11,6 +11,8 @@
 
 #include "archive.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //=====================================
 class CGzipArchive : public ArchiveBase
 //=====================================
@@ -78,3 +80,5 @@ public:
 	CGzipArchive(FileReader &file);
 	virtual ~CGzipArchive();
 };
+
+OPENMPT_NAMESPACE_END

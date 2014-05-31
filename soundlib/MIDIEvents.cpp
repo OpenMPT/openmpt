@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "MIDIEvents.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace MIDIEvents
 {
 
@@ -102,3 +104,6 @@ uint8 GetDataByte2FromEvent(uint32 midiMsg)
 }
 
 }	// End namespace
+
+
+OPENMPT_NAMESPACE_END

@@ -18,6 +18,9 @@
 #include "../common/misc_util.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // Portaudio Device implementation
@@ -478,3 +481,6 @@ bool SndDevPortaudioIsInitialized()
 
 
 #endif // NO_PORTAUDIO
+
+
+OPENMPT_NAMESPACE_END

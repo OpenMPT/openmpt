@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Generic open / save file dialog. Cannot be instanced by the user, use OpenFileDialog / SaveFileDialog instead.
 class FileDialog
 {
@@ -118,3 +120,5 @@ public:
 protected:
 	static int CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData);
 };
+
+OPENMPT_NAMESPACE_END

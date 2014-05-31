@@ -18,6 +18,10 @@
 #include "tuningdialog.h"
 #include "FileDialog.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 const CTuningDialog::TUNINGTREEITEM CTuningDialog::s_notFoundItemTuning = TUNINGTREEITEM();
 const HTREEITEM CTuningDialog::s_notFoundItemTree = NULL;
 
@@ -1568,3 +1572,4 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, LPCTSTR
 }
 
 
+OPENMPT_NAMESPACE_END

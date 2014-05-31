@@ -14,6 +14,9 @@
 #include "../common/version.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 void CSoundFile::S3MConvert(ModCommand &m, bool fromIT) const
 //-----------------------------------------------------------
 {
@@ -903,3 +906,6 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

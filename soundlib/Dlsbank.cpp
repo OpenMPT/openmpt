@@ -21,12 +21,14 @@
 #include "../soundlib/FileReader.h"
 #include "SampleIO.h"
 
+#include <math.h>
+
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef MODPLUG_TRACKER
 
 //#define DLSBANK_LOG
 //#define DLSINSTR_LOG
-
-#include <math.h>
 
 #define F_RGN_OPTION_SELFNONEXCLUSIVE	0x0001
 
@@ -1978,3 +1980,6 @@ const char *CDLSBank::GetRegionName(UINT nIns, UINT nRgn) const
 
 
 #endif // MODPLUG_TRACKER
+
+
+OPENMPT_NAMESPACE_END

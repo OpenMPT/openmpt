@@ -15,6 +15,9 @@
 #include <vector>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //===================================
 class ChunkReader : public FileReader
 //===================================
@@ -126,3 +129,6 @@ public:
 		return result;
 	}
 };
+
+
+OPENMPT_NAMESPACE_END

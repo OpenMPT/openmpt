@@ -14,6 +14,9 @@
 #include "../common/StringFixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Convert all multi-byte numeric values to current platform's endianness or vice versa.
 void S3MFileHeader::ConvertEndianness()
 //-------------------------------------
@@ -139,3 +142,6 @@ SampleIO S3MSampleHeader::GetSampleFormat(bool signedSamples) const
 			signedSamples ? SampleIO::signedPCM : SampleIO::unsignedPCM);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

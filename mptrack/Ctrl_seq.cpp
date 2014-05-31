@@ -19,6 +19,9 @@
 #include "PatternClipboard.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Little helper function to avoid copypasta
 static bool IsSelectionKeyPressed() { return CMainFrame::GetInputHandler()->SelectionPressed(); }
 static bool IsCtrlKeyPressed() { return CMainFrame::GetInputHandler()->CtrlPressed(); }
@@ -1446,3 +1449,6 @@ void COrderList::OnUnlockPlayback()
 	sndFile.m_lockOrderStart = sndFile.m_lockOrderEnd = ORDERINDEX_INVALID;
 	InvalidateRect(NULL, FALSE);
 }
+
+
+OPENMPT_NAMESPACE_END

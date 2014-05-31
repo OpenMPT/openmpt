@@ -13,6 +13,8 @@
 #include "Mixer.h"
 #include "SoundFilePlayConfig.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 CSoundFilePlayConfig::CSoundFilePlayConfig()
 //------------------------------------------
 {
@@ -118,3 +120,6 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 
 	return;
 }
+
+
+OPENMPT_NAMESPACE_END

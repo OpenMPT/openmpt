@@ -11,6 +11,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_AGC
 
 //========
@@ -30,3 +33,6 @@ public:
 };
 
 #endif // NO_AGC
+
+
+OPENMPT_NAMESPACE_END

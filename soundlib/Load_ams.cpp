@@ -20,6 +20,10 @@
 
 #include <iterator>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////
 // Common code for both AMS formats
 
@@ -1123,3 +1127,6 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 
 	delete[] tempBuf;
 }
+
+
+OPENMPT_NAMESPACE_END

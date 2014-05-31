@@ -13,6 +13,9 @@
 #include "WindowBase.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //================================
 class CheckBox : public WindowBase
 //================================
@@ -61,3 +64,6 @@ public:
 	}
 
 };
+
+
+OPENMPT_NAMESPACE_END

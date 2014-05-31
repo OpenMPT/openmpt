@@ -19,6 +19,9 @@
 #include <vector>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 class ISoundDevice;
 class IFillAudioBuffer;
 class ISoundSource;
@@ -587,3 +590,6 @@ public:
 	ISoundDevice * CreateSoundDevice(SoundDeviceID id);
 
 };
+
+
+OPENMPT_NAMESPACE_END

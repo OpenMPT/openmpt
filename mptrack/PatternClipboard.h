@@ -13,6 +13,8 @@
 #include "Snd_defs.h"
 #include "PatternCursor.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 struct ModCommandPos;
 class CSoundFile;
 
@@ -155,3 +157,5 @@ protected:
 	afx_msg void OnEditName();
 	void OnEndEdit(bool apply = true);
 };
+
+OPENMPT_NAMESPACE_END

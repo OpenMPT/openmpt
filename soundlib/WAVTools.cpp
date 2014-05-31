@@ -13,6 +13,9 @@
 #include "WAVTools.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 ///////////////////////////////////////////////////////////
 // WAV Reading
 
@@ -597,3 +600,6 @@ void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, 
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

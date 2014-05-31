@@ -17,6 +17,9 @@
 #include "Sndfile.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 CSoundFile& CPattern::GetSoundFile() { return m_rPatternContainer.GetSoundFile(); }
 const CSoundFile& CPattern::GetSoundFile() const { return m_rPatternContainer.GetSoundFile(); }
 
@@ -638,3 +641,6 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 }
 
 #undef READITEM
+
+
+OPENMPT_NAMESPACE_END

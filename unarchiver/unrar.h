@@ -11,6 +11,8 @@
 
 #include "archive.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 struct RARData;
 
 //====================================
@@ -27,3 +29,5 @@ public:
 	
 	virtual bool ExtractFile(std::size_t index);
 };
+
+OPENMPT_NAMESPACE_END

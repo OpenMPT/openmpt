@@ -10,11 +10,15 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
 struct ModSample;
 struct ModChannel;
+OPENMPT_NAMESPACE_END
 
 #include "Snd_defs.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 namespace ctrlSmp
 {
@@ -98,3 +102,6 @@ void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 					FlagSet<ChannelFlags> resetFlags);
 
 } // namespace ctrlChn
+
+
+OPENMPT_NAMESPACE_END

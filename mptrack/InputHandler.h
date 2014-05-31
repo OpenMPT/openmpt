@@ -12,6 +12,8 @@
 
 #include "CommandSet.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Hook codes
 enum
 {
@@ -61,3 +63,5 @@ public:
 	bool noAltMenu() { return m_bNoAltMenu; };
 	bool SetEffectLetters(const CModSpecifications &modSpecs);
 };
+
+OPENMPT_NAMESPACE_END

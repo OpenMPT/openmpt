@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 class CMainFrame;
 
@@ -219,3 +221,5 @@ protected:
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

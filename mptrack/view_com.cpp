@@ -22,6 +22,10 @@
 #include "view_com.h"
 #include <set>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define DETAILS_TOOLBAR_CY	28
 
 struct LISTCOLHDR
@@ -655,3 +659,6 @@ LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			return CModScrollView::OnModViewMsg(wParam, lParam);
 //	}
 }
+
+
+OPENMPT_NAMESPACE_END

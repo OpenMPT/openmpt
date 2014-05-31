@@ -19,6 +19,10 @@
 #include ".\inputhandler.h"
 #include <Shlwapi.h>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define TRANSITIONBIT 0x8000
 #define REPEATBIT 0x4000
 
@@ -628,3 +632,6 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 
 	return false;
 }
+
+
+OPENMPT_NAMESPACE_END

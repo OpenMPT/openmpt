@@ -13,6 +13,9 @@
 #include <string>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //Creates version number from version parts that appears in version string.
 //For example MAKE_VERSION_NUMERIC(1,17,02,28) gives version number of 
 //version 1.17.02.28. 
@@ -91,3 +94,6 @@ namespace MptVersion
 	std::string GetContactString();
 
 } //namespace MptVersion
+
+
+OPENMPT_NAMESPACE_END

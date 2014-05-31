@@ -10,9 +10,11 @@
 
 #pragma once
 
-#ifndef MODPLUG_NO_FILESAVE
-
 #include <string>
+
+OPENMPT_NAMESPACE_BEGIN
+
+#ifndef MODPLUG_NO_FILESAVE
 
 //=============
 struct FileTags
@@ -39,3 +41,5 @@ struct FileTags
 };
 
 #endif // MODPLUG_NO_FILESAVE
+
+OPENMPT_NAMESPACE_END

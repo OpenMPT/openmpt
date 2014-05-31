@@ -11,6 +11,10 @@
 
 #pragma once
 
+#include "Mixer.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
 /*
   ------------------------------------------------------------------------------------------------
    fir interpolation doc,
@@ -26,8 +30,6 @@
 	then calculate gain and scale filter coefs to have unity gain.
   ------------------------------------------------------------------------------------------------
 */
-
-#include "Mixer.h"
 
 #ifdef MPT_INTMIXER
 // quantizer scale of window coefs - only required for integer mixing
@@ -80,3 +82,5 @@ public:
 	void InitTable(double WFIRCutoff, uint8 WFIRType);
 	WFIR_TYPE lut[WFIR_LUTLEN*WFIR_WIDTH];
 };
+
+OPENMPT_NAMESPACE_END

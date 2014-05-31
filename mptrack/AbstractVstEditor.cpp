@@ -24,6 +24,10 @@
 
 #include <sstream>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_VST
 
 #define PRESETS_PER_COLUMN 32
@@ -919,3 +923,6 @@ int CAbstractVstEditor::GetLearnMacro()
 }
 
 #endif // NO_VST
+
+
+OPENMPT_NAMESPACE_END

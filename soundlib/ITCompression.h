@@ -16,6 +16,9 @@
 #include "FileReader.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //=================
 class ITCompression
 //=================
@@ -96,3 +99,6 @@ protected:
 	template<typename Properties>
 	void Write(int v, int topbit, void *target);
 };
+
+
+OPENMPT_NAMESPACE_END

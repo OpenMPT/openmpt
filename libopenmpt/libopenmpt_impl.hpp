@@ -17,9 +17,11 @@
 #include <ostream>
 
 // forward declarations
+namespace OpenMPT {
 class FileReader;
 class CSoundFile;
 class Dither;
+} // namespace OpenMPT
 
 namespace openmpt {
 
@@ -55,8 +57,8 @@ protected:
 	std::shared_ptr<log_interface> m_Log;
 	std::unique_ptr<log_forwarder> m_LogForwarder;
 	double m_currentPositionSeconds;
-	std::unique_ptr<CSoundFile> m_sndFile;
-	std::unique_ptr<Dither> m_Dither;
+	std::unique_ptr<OpenMPT::CSoundFile> m_sndFile;
+	std::unique_ptr<OpenMPT::Dither> m_Dither;
 	float m_Gain;
 	bool m_ctl_load_skip_samples;
 	bool m_ctl_load_skip_patterns;
@@ -69,8 +71,8 @@ protected:
 	void apply_mixer_settings( std::int32_t samplerate, int channels );
 	void apply_libopenmpt_defaults();
 	void init( const std::map< std::string, std::string > & ctls );
-	void load( CSoundFile & sndFile, const FileReader & file );
-	void load( const FileReader & file );
+	void load( OpenMPT::CSoundFile & sndFile, const OpenMPT::FileReader & file );
+	void load( const OpenMPT::FileReader & file );
 	std::size_t read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
 	std::size_t read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, std::int16_t * interleaved );

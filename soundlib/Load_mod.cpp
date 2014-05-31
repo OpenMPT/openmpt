@@ -13,6 +13,8 @@
 #include "Loaders.h"
 #include "Tables.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 void CSoundFile::ConvertModCommand(ModCommand &m) const
 //-----------------------------------------------------
 {
@@ -1286,3 +1288,6 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

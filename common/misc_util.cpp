@@ -27,6 +27,9 @@
 #endif
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 template<typename T>
 inline T ConvertStrToHelper(const std::string &str)
 {
@@ -1042,3 +1045,6 @@ FuncPtr Library::GetProcAddress(const std::string &symbol) const
 
 
 #endif // MPT_WITH_DYNBIND
+
+
+OPENMPT_NAMESPACE_END

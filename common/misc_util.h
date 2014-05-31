@@ -23,6 +23,9 @@
 #include <time.h>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 bool ConvertStrToBool(const std::string &str);
 signed char ConvertStrToSignedChar(const std::string &str);
 unsigned char ConvertStrToUnsignedChar(const std::string &str);
@@ -830,3 +833,5 @@ public:
 
 #endif // MPT_WITH_DYNBIND
 
+
+OPENMPT_NAMESPACE_END

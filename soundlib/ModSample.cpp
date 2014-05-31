@@ -16,6 +16,9 @@
 #include <cmath>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Translate sample properties between two given formats.
 void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 //-------------------------------------------------------
@@ -318,3 +321,6 @@ void ModSample::FrequencyToTranspose()
 	RelativeTone = static_cast<int8>(transpose);
 	nFineTune = static_cast<int8>(finetune);
 }
+
+
+OPENMPT_NAMESPACE_END

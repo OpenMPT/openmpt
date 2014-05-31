@@ -17,6 +17,9 @@
 #include "ITCompression.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #if MPT_COMPILER_GCC
 #if MPT_GCC_AT_LEAST(4,6,0)
 #pragma GCC diagnostic push
@@ -775,3 +778,6 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

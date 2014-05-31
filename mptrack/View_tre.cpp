@@ -24,6 +24,9 @@
 #include "Globals.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 CSoundFile *CModTree::m_SongFile = nullptr;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3638,3 +3641,6 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 	}
 	*result = FALSE;
 }
+
+
+OPENMPT_NAMESPACE_END

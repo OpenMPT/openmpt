@@ -15,6 +15,9 @@
 #include "SampleFormatConverters.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////
 // WAV file support
 
@@ -238,3 +241,6 @@ bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint1
 	}
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

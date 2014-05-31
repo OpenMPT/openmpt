@@ -13,6 +13,9 @@
 #include "WindowBase.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //===============================
 class EditBox : public WindowBase
 //===============================
@@ -52,3 +55,6 @@ public:
 		Edit_GetText(hwnd, text, length);
 	}
 };
+
+
+OPENMPT_NAMESPACE_END

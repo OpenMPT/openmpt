@@ -11,6 +11,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 enum ConfirmAnswer
 {
 	cnfYes,
@@ -79,3 +82,6 @@ public:
 	static RetryAnswer RetryCancel(const std::wstring &text, const std::wstring &caption, const CWnd *parent = nullptr);
 
 };
+
+
+OPENMPT_NAMESPACE_END

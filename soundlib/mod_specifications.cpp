@@ -13,6 +13,8 @@
 #include "../common/misc_util.h"
 #include <algorithm>
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace ModSpecs
 {
 
@@ -458,3 +460,6 @@ char CModSpecifications::GetEffectLetter(ModCommand::COMMAND cmd) const
 	if(cmd >= MAX_EFFECTS) return '?';
 	return commands[cmd];
 }
+
+
+OPENMPT_NAMESPACE_END

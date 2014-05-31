@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 //Note: Changing this won't increase the number of tabs in general view. Most
 //of the code use plain number 4.
 #define CHANNELS_IN_TAB	4
@@ -156,3 +158,6 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+
+OPENMPT_NAMESPACE_END

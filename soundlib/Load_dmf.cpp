@@ -17,6 +17,8 @@
 #include "Loaders.h"
 #include "ChunkReader.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -1218,3 +1220,5 @@ uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uin
 	return tree.ibuf - ibuf;
 }
 
+
+OPENMPT_NAMESPACE_END

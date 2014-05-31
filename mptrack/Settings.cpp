@@ -23,6 +23,9 @@
 #include <iterator>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 std::wstring SettingValue::FormatTypeAsString() const
 {
 	if(GetType() == SettingTypeNone)
@@ -494,3 +497,4 @@ DefaultSettingsContainer::~DefaultSettingsContainer()
 }
 
 
+OPENMPT_NAMESPACE_END

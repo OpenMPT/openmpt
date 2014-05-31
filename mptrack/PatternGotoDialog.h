@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 
 // CPatternGotoDialog dialog
@@ -44,3 +46,5 @@ protected:
 public:
 	afx_msg void OnEnChangeGotoOrd();
 };
+
+OPENMPT_NAMESPACE_END

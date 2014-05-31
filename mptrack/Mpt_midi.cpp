@@ -16,6 +16,10 @@
 #include "../soundlib/MIDIEvents.h"
 #include "Moptions.h"	// for OPTIONS_PAGE_MIDI
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 //#define MPTMIDI_RECORDLOG
 
 // Midi Input globals
@@ -173,3 +177,6 @@ void CMainFrame::OnUpdateMidiRecord(CCmdUI *pCmdUI)
 {
 	if (pCmdUI) pCmdUI->SetCheck((shMidiIn) ? TRUE : FALSE);
 }
+
+
+OPENMPT_NAMESPACE_END

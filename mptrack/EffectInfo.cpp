@@ -14,6 +14,10 @@
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/Tables.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 ///////////////////////////////////////////////////////////////////////////
 // Effects description
 
@@ -958,3 +962,6 @@ bool EffectInfo::GetVolCmdInfo(UINT ndx, LPSTR s, ModCommand::VOL *prangeMin, Mo
 	}
 	return (gVolCmdInfo[ndx].supportedFormats & sndFile.GetType()) != 0;
 }
+
+
+OPENMPT_NAMESPACE_END

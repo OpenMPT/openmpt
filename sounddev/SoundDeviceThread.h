@@ -16,6 +16,9 @@
 #include "../common/misc_util.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 class CSoundDeviceWithThread;
 
 
@@ -84,3 +87,5 @@ public:
 	virtual void StopFromSoundThread() = 0;
 };
 
+
+OPENMPT_NAMESPACE_END

@@ -20,6 +20,10 @@
 #include <limits>
 #include "../common/typedefs.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 namespace srlztn {class Ssb;}
 
 
@@ -321,3 +325,5 @@ inline bool CTuningBase::SetEditMask(const EDITMASK& em)
 		return true;
 }
 
+
+OPENMPT_NAMESPACE_END

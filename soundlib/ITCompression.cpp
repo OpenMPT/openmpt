@@ -13,6 +13,10 @@
 #include "ITCompression.h"
 #include "../common/misc_util.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Algorithm parameters for 16-Bit samples
 struct IT16BitParams
 {
@@ -428,3 +432,6 @@ void ITDecompression::Write(int v, int topBit, void *target)
 	writePos += mptSample.GetNumChannels();
 	curLength--;
 }
+
+
+OPENMPT_NAMESPACE_END

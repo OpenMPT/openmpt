@@ -14,6 +14,9 @@
 #include "Mixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct ModChannel;
 
 
@@ -36,3 +39,6 @@ void DeinterleaveStereo(const mixsample_t *input, mixsample_t *outputL, mixsampl
 
 void EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSamples);
 void StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rofs, mixsample_t &lofs);
+
+
+OPENMPT_NAMESPACE_END

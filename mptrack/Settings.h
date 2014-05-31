@@ -18,6 +18,9 @@
 #include <set>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define MPT_SETTINGS_CACHE
 #define MPT_SETTINGS_CACHE_STORE_DEFAULTS
 
@@ -859,3 +862,5 @@ public:
 	~DefaultSettingsContainer();
 };
 
+
+OPENMPT_NAMESPACE_END

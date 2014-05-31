@@ -17,6 +17,8 @@
 #include "portaudio/include/pa_win_wasapi.h"
 #endif
 
+OPENMPT_NAMESPACE_BEGIN
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // Protaudio device
@@ -92,3 +94,6 @@ void SndDevPortaudioUnnitialize();
 bool SndDevPortaudioIsInitialized();
 
 #endif // NO_PORTAUDIO
+
+
+OPENMPT_NAMESPACE_END

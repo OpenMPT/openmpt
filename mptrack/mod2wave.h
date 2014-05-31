@@ -13,6 +13,10 @@
 #include "StreamEncoder.h"
 #include "Settings.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Direct To Disk Recording
 
@@ -144,3 +148,4 @@ public:
 };
 
 
+OPENMPT_NAMESPACE_END

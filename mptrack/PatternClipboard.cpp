@@ -15,6 +15,9 @@
 #include "View_pat.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 /* Clipboard format:
  * Hdr: "ModPlug Tracker S3M\r\n"
  * Full:  '|C#401v64A06'
@@ -1112,3 +1115,6 @@ void PatternClipboardDialog::CInlineEdit::OnKillFocus(CWnd *newWnd)
 	parent.OnEndEdit(true);
 	CEdit::OnKillFocus(newWnd);
 }
+
+
+OPENMPT_NAMESPACE_END

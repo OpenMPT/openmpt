@@ -18,6 +18,9 @@
 #include <tchar.h>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //==============
 class WindowBase
 //==============
@@ -52,3 +55,6 @@ public:
 		return hwnd;
 	}
 };
+
+
+OPENMPT_NAMESPACE_END

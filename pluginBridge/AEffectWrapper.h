@@ -14,6 +14,8 @@
 #define VST_FORCE_DEPRECATED 0
 #include "../include/vstsdk2.4/pluginterfaces/vst2.x/aeffectx.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #pragma pack(push, 8)
 
 template<typename ptr_t>
@@ -177,3 +179,6 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 		}
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

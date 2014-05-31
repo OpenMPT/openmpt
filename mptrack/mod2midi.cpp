@@ -15,6 +15,10 @@
 #include "mod2midi.h"
 #include "Wav.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -584,4 +588,4 @@ BOOL CModToMidi::DoConvert()
 }
 
 
-
+OPENMPT_NAMESPACE_END

@@ -10,8 +10,11 @@
 
 #pragma once
 
-#ifndef NO_REVERB
 #include "../soundlib/Mixer.h"	// For MIXBUFFERSIZE
+
+OPENMPT_NAMESPACE_BEGIN
+
+#ifndef NO_REVERB
 
 ////////////////////////////////////////////////////////////////////////
 // Reverberation
@@ -274,3 +277,6 @@ private:
 
 
 #endif // NO_REVERB
+
+
+OPENMPT_NAMESPACE_END

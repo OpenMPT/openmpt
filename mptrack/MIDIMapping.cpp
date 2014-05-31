@@ -15,6 +15,9 @@
 #include "MIDIMapping.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 std::string CMIDIMappingDirective::ToString() const
 //-------------------------------------------------
 {
@@ -170,3 +173,6 @@ bool CMIDIMapper::Swap(const size_t a, const size_t b)
 	}
 	else return true;
 }
+
+
+OPENMPT_NAMESPACE_END

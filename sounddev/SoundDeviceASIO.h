@@ -19,6 +19,8 @@
 #include <iasiodrv.h>
 #endif
 
+OPENMPT_NAMESPACE_BEGIN
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // ASIO device
@@ -143,3 +145,5 @@ protected:
 
 #endif // NO_ASIO
 
+
+OPENMPT_NAMESPACE_END

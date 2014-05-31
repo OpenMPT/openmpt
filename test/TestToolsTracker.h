@@ -16,7 +16,10 @@
 #ifdef MODPLUG_TRACKER
 
 
-namespace mpt { namespace Test {
+OPENMPT_NAMESPACE_BEGIN
+
+	
+namespace Test {
 
 
 #if MPT_COMPILER_MSVC
@@ -53,9 +56,11 @@ namespace mpt { namespace Test {
 /**/
 
 
-} } // namespace mpt::Test
+} // namespace Test
+
+
+OPENMPT_NAMESPACE_END
 
 
 #endif // MODPLUG_TRACKER
 #endif // ENABLE_TESTS
-

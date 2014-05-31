@@ -10,6 +10,10 @@
 
 #pragma once
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct MOD2MIDIINSTR
 {
 	UINT nChannel;
@@ -46,3 +50,6 @@ protected:
 	afx_msg VOID OnProgramChanged();
 	DECLARE_MESSAGE_MAP();
 };
+
+
+OPENMPT_NAMESPACE_END

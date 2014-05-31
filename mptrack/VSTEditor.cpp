@@ -14,6 +14,10 @@
 #include "VstPlug.h"
 #include "VSTEditor.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_VST
 
 BEGIN_MESSAGE_MAP(COwnerVstEditor, CAbstractVstEditor)
@@ -193,3 +197,6 @@ bool COwnerVstEditor::SetSize(int contentWidth, int contentHeight)
 
 
 #endif // NO_VST
+
+
+OPENMPT_NAMESPACE_END

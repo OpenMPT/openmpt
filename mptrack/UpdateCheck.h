@@ -16,6 +16,8 @@
 #include "resource.h"
 #include "../common/thread.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #define DOWNLOAD_BUFFER_SIZE 256
 
 //================
@@ -77,3 +79,6 @@ protected:
 	afx_msg void OnResetURL();
 	DECLARE_MESSAGE_MAP()
 };
+
+
+OPENMPT_NAMESPACE_END

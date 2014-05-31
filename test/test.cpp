@@ -50,7 +50,11 @@
 
 
 
-namespace mpt { namespace Test {
+OPENMPT_NAMESPACE_BEGIN
+
+
+
+namespace Test {
 
 
 
@@ -573,30 +577,30 @@ struct CustomSettingsTestType
 	CustomSettingsTestType(float x_ = 0.0f, float y_ = 0.0f) : x(x_), y(y_) { }
 };
 
-} } // namespace mpt::Test
+} // namespace Test
 
 template <>
-inline mpt::Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
+inline Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
 {
 	ASSERT(val.GetTypeTag() == "myType");
 	std::string xy = val.as<std::string>();
 	if(xy.empty())
 	{
-		return mpt::Test::CustomSettingsTestType(0.0f, 0.0f);
+		return Test::CustomSettingsTestType(0.0f, 0.0f);
 	}
 	std::size_t pos = xy.find("|");
 	std::string x = xy.substr(0, pos);
 	std::string y = xy.substr(pos + 1);
-	return mpt::Test::CustomSettingsTestType(ConvertStrTo<float>(x.c_str()), ConvertStrTo<float>(y.c_str()));
+	return Test::CustomSettingsTestType(ConvertStrTo<float>(x.c_str()), ConvertStrTo<float>(y.c_str()));
 }
 
 template <>
-inline SettingValue ToSettingValue(const mpt::Test::CustomSettingsTestType &val)
+inline SettingValue ToSettingValue(const Test::CustomSettingsTestType &val)
 {
 	return SettingValue(Stringify(val.x) + "|" + Stringify(val.y), "myType");
 }
 
-namespace mpt { namespace Test {
+namespace Test {
 
 #endif // MODPLUG_TRACKER
 
@@ -2112,11 +2116,15 @@ static noinline void TestSampleConversion()
 }
 
 
-} } // namespace mpt::Test
+} // namespace Test
+
+OPENMPT_NAMESPACE_END
 
 #else //Case: ENABLE_TESTS is not defined.
 
-namespace mpt { namespace Test {
+OPENMPT_NAMESPACE_BEGIN
+
+namespace Test {
 
 void DoTests()
 //------------
@@ -2124,7 +2132,8 @@ void DoTests()
 	return;
 }
 
-} } // namespace mpt::Test
+} // namespace Test
+
+OPENMPT_NAMESPACE_END
 
 #endif
-

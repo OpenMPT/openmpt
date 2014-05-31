@@ -14,6 +14,9 @@
 #include "../sounddsp/AGC.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+	
 //////////////////////////////////////////////////////////////////////////////////
 // Automatic Gain Control
 
@@ -133,3 +136,6 @@ void CAGC::Initialize(bool bReset, DWORD MixingFreq)
 
 
 #endif // NO_AGC
+
+
+OPENMPT_NAMESPACE_END

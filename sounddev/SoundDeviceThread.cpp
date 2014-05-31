@@ -22,6 +22,9 @@
 #include <mmsystem.h>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(SoundDevice)
 //------------------------------------------------------------------------------------------
 {
@@ -403,3 +406,5 @@ void CSoundDeviceWithThread::InternalStop()
 	m_AudioThread.Deactivate();
 }
 
+
+OPENMPT_NAMESPACE_END

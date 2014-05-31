@@ -29,6 +29,8 @@
 	#pragma pack(8)
 #endif
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Alternative, easy to use implementation of VstEvents struct.
 template <size_t N>
 //====================
@@ -150,3 +152,6 @@ public:
 #elif defined __BORLANDC__
 	#pragma -a-
 #endif
+
+
+OPENMPT_NAMESPACE_END

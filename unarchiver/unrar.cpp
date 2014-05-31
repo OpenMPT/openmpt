@@ -21,6 +21,9 @@
 #endif
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct RARData
 {
 	CommandData Cmd;
@@ -28,13 +31,13 @@ struct RARData
 	RARFileCallbacks callbacks;
 	int64 firstBlock;
 
-	RARData(FileReader &file) : Arc(&Cmd), callbacks(ReadRaw, Seek, GetPosition, GetLength, file) { }
+	RARData(FileReader &file) : Arc(&Cmd), callbacks(ReadRaw, Seek, GetPosition, GetLength, &file) { }
 
 	// FileReader callbacks
-	static size_t CALLBACK ReadRaw(FileReader &file, char *data, size_t size) { return file.ReadRaw(data, size); };
-	static bool CALLBACK Seek(FileReader &file, size_t offset) { return file.Seek(offset); };
-	static size_t CALLBACK GetPosition(FileReader &file) { return file.GetPosition(); };
-	static size_t CALLBACK GetLength(FileReader &file) { return file.GetLength(); };
+	static size_t CALLBACK ReadRaw(void *file, char *data, size_t size) { return reinterpret_cast<FileReader*>(file)->ReadRaw(data, size); };
+	static bool CALLBACK Seek(void *file, size_t offset) { return reinterpret_cast<FileReader*>(file)->Seek(offset); };
+	static size_t CALLBACK GetPosition(void *file) { return reinterpret_cast<FileReader*>(file)->GetPosition(); };
+	static size_t CALLBACK GetLength(void *file) { return reinterpret_cast<FileReader*>(file)->GetLength(); };
 
 	static int CALLBACK RARCallback(unsigned int msg, LPARAM userData, LPARAM p1, LPARAM p2)
 	{
@@ -150,3 +153,6 @@ bool CRarArchive::ExtractFile(std::size_t index)
 		return false;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

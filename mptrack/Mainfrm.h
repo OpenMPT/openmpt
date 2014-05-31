@@ -16,6 +16,8 @@
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/Dither.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CInputHandler;
 class CModDoc;
 class CAutoSaver;
@@ -267,14 +269,18 @@ enum OptionsPage
 // Player position notification
 
 #define MAX_UPDATE_HISTORY		2000 // 2 seconds with 1 ms updates
+OPENMPT_NAMESPACE_END
 #include "Notification.h"
+OPENMPT_NAMESPACE_BEGIN
 
 #define TIMERID_GUI 1
 #define TIMERID_NOTIFY 2
 
+OPENMPT_NAMESPACE_END
 #include "CImageListEx.h"
 #include "Mainbar.h"
 #include "TrackerSettings.h"
+OPENMPT_NAMESPACE_BEGIN
 struct MODPLUGDIB;
 
 template<> inline SettingValue ToSettingValue(const WINDOWPLACEMENT &val)
@@ -592,3 +598,6 @@ public:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+
+OPENMPT_NAMESPACE_END

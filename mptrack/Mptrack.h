@@ -19,6 +19,8 @@
 #include "../soundlib/modcommand.h"
 #include <vector>
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CModDoc;
 class CVstPluginManager;
 class SoundDevicesManager;
@@ -422,3 +424,6 @@ extern const char *szMidiGroupNames[17];		// 16 groups + Percussions
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+
+OPENMPT_NAMESPACE_END

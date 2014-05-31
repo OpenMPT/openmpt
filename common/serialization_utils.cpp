@@ -20,6 +20,9 @@
 #include "misc_util.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 namespace srlztn
 {
 
@@ -868,3 +871,5 @@ void SsbWrite::FinishWrite()
 
 } // namespace srlztn 
 
+
+OPENMPT_NAMESPACE_END

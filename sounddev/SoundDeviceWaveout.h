@@ -16,6 +16,8 @@
 
 #include <MMSystem.h>
 
+OPENMPT_NAMESPACE_BEGIN
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // MMSYSTEM WaveOut device
@@ -55,3 +57,6 @@ public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
 	static std::vector<SoundDeviceInfo> EnumerateDevices();
 };
+
+
+OPENMPT_NAMESPACE_END

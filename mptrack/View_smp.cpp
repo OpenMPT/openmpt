@@ -28,6 +28,9 @@
 #define new DEBUG_NEW
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Non-client toolbar
 #define SMP_LEFTBAR_CY			29
 #define SMP_LEFTBAR_CXSEP		14
@@ -3105,3 +3108,6 @@ void CViewSample::OnUpdateRedo(CCmdUI *pCmdUI)
 			+ CString("\t") + CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo));
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

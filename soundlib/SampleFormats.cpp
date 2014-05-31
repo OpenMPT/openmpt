@@ -24,6 +24,16 @@
 #include "WAVTools.h"
 #include "../common/version.h"
 #include "ChunkReader.h"
+#ifndef NO_FLAC
+#define FLAC__NO_DLL
+#include <flac/include/FLAC/stream_decoder.h>
+#include <flac/include/FLAC/stream_encoder.h>
+#include <flac/include/FLAC/metadata.h>
+#include "SampleFormatConverters.h"
+#endif !NO_FLAC
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 #ifndef NO_MP3_SAMPLES
@@ -1853,11 +1863,6 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 // FLAC Samples
 
 #ifndef NO_FLAC
-#define FLAC__NO_DLL
-#include <flac/include/FLAC/stream_decoder.h>
-#include <flac/include/FLAC/stream_encoder.h>
-#include <flac/include/FLAC/metadata.h>
-#include "SampleFormatConverters.h"
 
 struct FLACDecoder
 {
@@ -2413,3 +2418,6 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 #endif // NO_MP3_SAMPLES
 	return false;
 }
+
+
+OPENMPT_NAMESPACE_END

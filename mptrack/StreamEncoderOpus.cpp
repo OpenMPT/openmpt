@@ -34,6 +34,10 @@
 
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+
 struct OpusDynBind
 {
 
@@ -588,3 +592,7 @@ IAudioStreamEncoder *OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) 
 	}
 	return new OpusStreamWriter(*m_Opus, file);
 }
+
+
+
+OPENMPT_NAMESPACE_END

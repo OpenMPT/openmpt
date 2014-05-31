@@ -15,6 +15,9 @@
 #include "mainfrm.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // CMIDIMappingDialog dialog
 
 CMIDIMappingDialog::CMIDIMappingDialog(CWnd* pParent /*=NULL*/, CSoundFile& rSndfile)
@@ -424,3 +427,6 @@ void CMIDIMappingDialog::OnDeltaposSpinmovemapping(NMHDR *pNMHDR, LRESULT *pResu
 	
 	*pResult = 0;
 }
+
+
+OPENMPT_NAMESPACE_END

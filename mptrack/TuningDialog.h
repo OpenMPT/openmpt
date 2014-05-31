@@ -18,6 +18,8 @@
 #include "afxwin.h"
 #include "resource.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //==========================
 template<class T1, class T2>
 class CBijectiveMap
@@ -383,3 +385,5 @@ public:
 
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

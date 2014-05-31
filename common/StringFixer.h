@@ -16,6 +16,8 @@
 #include <cstring>
 #include <string.h>
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace mpt { namespace String
 {
 
@@ -416,3 +418,4 @@ namespace mpt { namespace String
 
 } } // namespace mpt::String
 
+OPENMPT_NAMESPACE_END

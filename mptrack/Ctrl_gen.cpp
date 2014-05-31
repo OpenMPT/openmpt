@@ -26,6 +26,10 @@
 #include "ctrl_gen.h"
 // -! NEW_FEATURE#0015
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlGeneral)
 	ON_WM_VSCROLL()
@@ -685,3 +689,5 @@ VOID CVuMeter::DrawVuMeter(CDC &dc, bool /*redraw*/)
 	m_nDisplayedVu = m_nVuMeter;
 }
 
+
+OPENMPT_NAMESPACE_END

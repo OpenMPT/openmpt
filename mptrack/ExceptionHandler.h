@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 //====================
 class ExceptionHandler
 //====================
@@ -25,3 +27,5 @@ protected:
 	static LONG WINAPI UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo);
 
 };
+
+OPENMPT_NAMESPACE_END

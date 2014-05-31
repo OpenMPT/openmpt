@@ -14,6 +14,10 @@
 #include "../common/typedefs.h"
 #include "../common/FlagSet.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 typedef uint32 ROWINDEX;
 	const ROWINDEX ROWINDEX_INVALID = uint32_max;
 typedef uint16 CHANNELINDEX;
@@ -382,3 +386,6 @@ enum VibratoType
 	VIB_RAMP_DOWN,
 	VIB_RANDOM
 };
+
+
+OPENMPT_NAMESPACE_END

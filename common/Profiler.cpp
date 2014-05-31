@@ -12,6 +12,9 @@
 #include "Profiler.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifdef USE_PROFILER
 
 
@@ -209,3 +212,6 @@ void Profile::Leave()
 
 
 #endif // USE_PROFILER
+
+
+OPENMPT_NAMESPACE_END

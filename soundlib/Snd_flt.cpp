@@ -13,14 +13,18 @@
 #include "Sndfile.h"
 #include "Tables.h"
 
-// AWE32: cutoff = reg[0-255] * 31.25 + 100 -> [100Hz-8060Hz]
-// EMU10K1 docs: cutoff = reg[0-127]*62+100
-
 #define _USE_MATH_DEFINES
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.1415926535897932385
 #endif
+
+
+OPENMPT_NAMESPACE_BEGIN
+
+
+// AWE32: cutoff = reg[0-255] * 31.25 + 100 -> [100Hz-8060Hz]
+// EMU10K1 docs: cutoff = reg[0-127]*62+100
 
 
 DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
@@ -143,3 +147,6 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	}
 
 }
+
+
+OPENMPT_NAMESPACE_END

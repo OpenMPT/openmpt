@@ -13,6 +13,8 @@
 #include "Loaders.h"
 #include "../common/StringFixer.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //#define MED_LOG
 
 #define MED_MAX_COMMENT_LENGTH 5*1024 //: Is 5 kB enough?
@@ -958,3 +960,5 @@ bool CSoundFile::ReadMed(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 	return true;
 }
 
+
+OPENMPT_NAMESPACE_END

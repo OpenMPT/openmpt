@@ -10,7 +10,10 @@
 
 
 #pragma once
+
 #include "../soundlib/Mixer.h"	// For MIXBUFFERSIZE
+
+OPENMPT_NAMESPACE_BEGIN
 
 #define MAX_EQ_BANDS	6
 
@@ -60,3 +63,5 @@ public:
 	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq);
 };
 
+
+OPENMPT_NAMESPACE_END

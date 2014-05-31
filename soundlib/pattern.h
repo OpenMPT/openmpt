@@ -14,6 +14,10 @@
 #include "modcommand.h"
 #include "Snd_defs.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 class CPatternContainer;
 class CSoundFile;
 class EffectWriter;
@@ -210,3 +214,6 @@ protected:
 		retry = true;
 	}
 };
+
+
+OPENMPT_NAMESPACE_END

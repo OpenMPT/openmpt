@@ -17,6 +17,8 @@
 #include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef MODPLUG_TRACKER
 
 #pragma warning(disable:4244)
@@ -1204,3 +1206,5 @@ bool CSoundFile::ReadMID(const BYTE * /*lpStream*/, DWORD /*dwMemLength*/, ModLo
 }
 
 #endif
+
+OPENMPT_NAMESPACE_END

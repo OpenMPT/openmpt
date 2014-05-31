@@ -11,10 +11,14 @@
 #pragma once
 
 #ifdef MODPLUG_TRACKER
+OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
+OPENMPT_NAMESPACE_END
 #include "plugins/PlugInterface.h"
 #include "Snd_defs.h"
 #endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_BEGIN
 
 // Parametered macro presets
 enum parameteredMacroType
@@ -162,3 +166,5 @@ STATIC_ASSERT(sizeof(MIDIMacroConfig) == sizeof(MIDIMacroConfigData)); // this i
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
+
+OPENMPT_NAMESPACE_END

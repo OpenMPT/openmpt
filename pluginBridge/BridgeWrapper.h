@@ -12,6 +12,8 @@
 
 #include "BridgeCommon.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 struct VSTPluginLib;
 
 class BridgeWrapper : protected BridgeCommon
@@ -81,3 +83,5 @@ protected:
 	template<typename buf_t>
 	void BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 numInputs, VstInt32 numOutputs, buf_t **inputs, buf_t **outputs, VstInt32 sampleFrames);
 };
+
+OPENMPT_NAMESPACE_END

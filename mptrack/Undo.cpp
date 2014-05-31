@@ -18,6 +18,10 @@
 
 #define new DEBUG_NEW
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // Pattern Undo Functions
 
@@ -622,3 +626,6 @@ const char *CSampleUndo::GetRedoName(const SAMPLEINDEX smp) const
 	}
 	return RedoBuffer[smp - 1].back().description;
 }
+
+
+OPENMPT_NAMESPACE_END

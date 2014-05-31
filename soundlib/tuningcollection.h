@@ -14,6 +14,10 @@
 #include <vector>
 #include <string>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 class CTuningCollection;
 
 namespace CTuningS11n
@@ -155,3 +159,6 @@ private:
 
 //END PRIVATE METHODS.
 };
+
+
+OPENMPT_NAMESPACE_END

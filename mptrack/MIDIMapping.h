@@ -14,6 +14,9 @@
 #include <algorithm>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //=========================
 class CMIDIMappingDirective
 //=========================
@@ -122,3 +125,6 @@ private:
 	CSoundFile& m_rSndFile;
 	std::vector<CMIDIMappingDirective> m_Directives;
 };
+
+
+OPENMPT_NAMESPACE_END

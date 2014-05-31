@@ -14,6 +14,8 @@
 
 #include <algorithm>
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 typedef CPattern MODPATTERN;
 
@@ -120,3 +122,6 @@ const char FileIdPatterns[] = "mptPc";
 
 void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t nSize = 0);
 void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc);
+
+
+OPENMPT_NAMESPACE_END

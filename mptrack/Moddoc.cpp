@@ -44,6 +44,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 const TCHAR FileFilterMOD[]	= _T("ProTracker Modules (*.mod)|*.mod||");
 const TCHAR FileFilterXM[]	= _T("FastTracker Modules (*.xm)|*.xm||");
 const TCHAR FileFilterS3M[] = _T("ScreamTracker Modules (*.s3m)|*.s3m||");
@@ -2969,3 +2973,6 @@ void CModDoc::PrepareUndoForAllPatterns(bool storeChannelInfo, const char *descr
 		}
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

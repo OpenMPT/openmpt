@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //#define MT2DEBUG
 
 #ifdef NEEDS_PRAGMA_PACK
@@ -677,3 +679,6 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 	}
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -15,6 +15,9 @@
 #include "ChannelManagerDlg.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 ///////////////////////////////////////////////////////////
 // CChannelManagerDlg
 
@@ -1175,3 +1178,6 @@ void CChannelManagerDlg::OnRButtonDblClk(UINT nFlags, CPoint point)
 	OnRButtonDown(nFlags, point);
 	CDialog::OnRButtonDblClk(nFlags, point);
 }
+
+
+OPENMPT_NAMESPACE_END

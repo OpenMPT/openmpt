@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 #define INSSTATUS_DRAGGING		0x01
 #define INSSTATUS_NCLBTNDOWN	0x02
 #define INSSTATUS_SPLITCURSOR	0x04
@@ -220,3 +222,6 @@ private:
 	uint16 EnvGetReleaseNodeValue();
 	uint16 EnvGetReleaseNodeTick();
 };
+
+
+OPENMPT_NAMESPACE_END

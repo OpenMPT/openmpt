@@ -19,8 +19,6 @@
 #include "FileReader.h"
 #include <functional>
 
-#define str_SequenceTruncationNote (GetStrI18N("Module has sequence of length %1; it will be truncated to maximum supported length, %2."))
-
 #if defined(MODPLUG_TRACKER)
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -28,6 +26,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 #endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_BEGIN
+
+#define str_SequenceTruncationNote (GetStrI18N("Module has sequence of length %1; it will be truncated to maximum supported length, %2."))
 
 ModSequence::ModSequence(CSoundFile &rSf,
 						 PATTERNINDEX* pArray,
@@ -885,3 +887,5 @@ void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	seq.CopyStorageToCache();
 }
 
+
+OPENMPT_NAMESPACE_END

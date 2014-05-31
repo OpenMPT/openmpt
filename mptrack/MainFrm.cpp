@@ -40,11 +40,16 @@
 #include "FileDialog.h"
 #include <HtmlHelp.h>
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 #define MPTTIMER_PERIOD		200
 
@@ -2870,3 +2875,6 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
 		CBox.SetItemData(CBox.AddString(plug.GetFormattedParamName(i)), i);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

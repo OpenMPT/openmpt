@@ -11,6 +11,8 @@
 
 #include "archive.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //====================================
 class CZipArchive : public ArchiveBase
 //====================================
@@ -23,3 +25,5 @@ public:
 public:
 	virtual bool ExtractFile(std::size_t index);
 };
+
+OPENMPT_NAMESPACE_END

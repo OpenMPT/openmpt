@@ -31,14 +31,17 @@
 #include "../soundlib/FileReader.h"
 #include "../soundlib/SampleFormatConverters.h"
 #include "FileDialog.h"
-
-#ifdef _DEBUG
-	#define new DEBUG_NEW
-#endif
-
 #ifdef _DEBUG
 #include <math.h>
 #endif
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 #define FLOAT_ERROR 1.0e-20f
 
@@ -3242,3 +3245,6 @@ void CCtrlSamples::PropagateAutoVibratoChanges() const
 		}
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

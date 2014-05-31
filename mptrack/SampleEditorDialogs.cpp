@@ -18,6 +18,9 @@
 #include "SampleEditorDialogs.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog
 
@@ -247,3 +250,6 @@ void CSampleXFadeDlg::OnOK()
 	LimitMax(m_nSamples, m_nMaxSamples);
 	CDialog::OnOK();
 }
+
+
+OPENMPT_NAMESPACE_END

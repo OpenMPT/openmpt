@@ -12,6 +12,8 @@
 
 #include <string>
 
+OPENMPT_NAMESPACE_BEGIN
+
 template <typename enum_t, typename store_t = enum_t>
 class FlagSet
 {
@@ -171,3 +173,6 @@ private:
 	inline enum_t &operator &= (enum_t &a, enum_t b) { a = (a & b); return a; } \
 	inline enum_t &operator |= (enum_t &a, enum_t b) { a = (a | b); return a; } \
 	inline enum_t operator ~ (enum_t a) { return static_cast<enum_t>(~(+a)); }
+
+
+OPENMPT_NAMESPACE_END

@@ -10,6 +10,8 @@
 
 #pragma once 
 
+OPENMPT_NAMESPACE_BEGIN
+
 class COptionsKeyboard;
 
 
@@ -138,3 +140,5 @@ protected:
 	afx_msg void OnUndoSizeChanged();
 	DECLARE_MESSAGE_MAP();
 };
+
+OPENMPT_NAMESPACE_END

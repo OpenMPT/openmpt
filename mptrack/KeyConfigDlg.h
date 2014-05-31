@@ -15,6 +15,8 @@
 #include "mpdlgs.h"
 #include "moptions.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Might promote to class so we can add rules 
 // (eg automatically do note off stuff, generate chord keybindings from notes based just on modifier.
 // Would need GUI rules too as options would be different for each category
@@ -155,3 +157,5 @@ protected:
 public:
 	afx_msg void OnDestroy();
 };
+
+OPENMPT_NAMESPACE_END

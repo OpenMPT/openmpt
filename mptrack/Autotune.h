@@ -13,6 +13,8 @@
 #include "../soundlib/Snd_defs.h"
 #include "resource.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //============
 class Autotune
 //============
@@ -79,3 +81,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 
 };
+
+
+OPENMPT_NAMESPACE_END

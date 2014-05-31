@@ -14,6 +14,8 @@
 #include "../soundlib/ModSample.h"
 #include "../soundlib/SampleIO.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -312,3 +314,5 @@ enum IT_ReaderBitMasks
 	IT_bitmask_patternChanEnabled_c = 0x80,
 	IT_bitmask_patternChanUsed_c    = 0x0f
 };
+
+OPENMPT_NAMESPACE_END

@@ -16,6 +16,10 @@
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Default checkbox state
 bool CModCleanupDlg::m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS] =
 {
@@ -906,3 +910,6 @@ bool CModCleanupDlg::MergeSequences()
 {
 	return modDoc.GetSoundFile()->Order.MergeSequences();
 }
+
+
+OPENMPT_NAMESPACE_END

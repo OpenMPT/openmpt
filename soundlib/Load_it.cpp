@@ -27,6 +27,8 @@
 #include <ext/stdio_sync_filebuf.h>
 #endif
 
+OPENMPT_NAMESPACE_BEGIN
+
 #define str_tooMuchPatternData	(GetStrI18N(("Warning: File format limit was reached. Some pattern data may not get written to file.")))
 #define str_pattern				(GetStrI18N(("pattern")))
 #define str_PatternSetTruncationNote (GetStrI18N(("The module contains %1 patterns but only %2 patterns can be loaded in this OpenMPT version.")))
@@ -2305,3 +2307,6 @@ size_t CSoundFile::LoadModularInstrumentData(FileReader &file, ModInstrument &in
 
 	return 8 + modularData.GetLength();
 }
+
+
+OPENMPT_NAMESPACE_END

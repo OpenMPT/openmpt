@@ -13,6 +13,10 @@
 #include "../soundlib/Sndfile.h"
 #include "Reverb.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_REVERB
 
 #pragma warning(disable:4725)	// Pentium fdiv bug
@@ -1121,3 +1125,6 @@ static float mBToLinear(int32 value_mB)
 }
 
 #endif // NO_REVERB
+
+
+OPENMPT_NAMESPACE_END

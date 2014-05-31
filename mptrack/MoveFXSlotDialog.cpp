@@ -13,6 +13,9 @@
 #include "MoveFXSlotDialog.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
 //--------------------------------------------------------
 {
@@ -83,3 +86,6 @@ void CMoveFXSlotDialog::OnOK()
 	moveChain = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 	CDialog::OnOK();
 }
+
+
+OPENMPT_NAMESPACE_END

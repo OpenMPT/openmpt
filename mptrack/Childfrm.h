@@ -10,10 +10,12 @@
 
 #pragma once
 
+#include "PatternCursor.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
 class CModControlDlg;
 class CChildFrame;
-
-#include "PatternCursor.h"
 
 typedef struct _GENERALVIEWSTATE
 {
@@ -152,3 +154,6 @@ public:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+
+OPENMPT_NAMESPACE_END

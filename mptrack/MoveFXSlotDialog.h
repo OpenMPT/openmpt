@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CMoveFXSlotDialog : public CDialog
 {
 protected:
@@ -36,3 +38,5 @@ protected:
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 };
+
+OPENMPT_NAMESPACE_END

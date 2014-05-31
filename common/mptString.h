@@ -19,6 +19,9 @@
 #include <cstring>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 namespace mpt
 {
 
@@ -1091,3 +1094,5 @@ std::wstring PrintW(const std::wstring & format
 }
 
 } } // namespace mpt::String
+
+OPENMPT_NAMESPACE_END

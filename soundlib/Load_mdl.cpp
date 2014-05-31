@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //#define MDL_LOG
 
 #if MPT_COMPILER_MSVC
@@ -702,3 +704,5 @@ uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n)
 	return v;
 }
 
+
+OPENMPT_NAMESPACE_END

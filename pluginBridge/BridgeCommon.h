@@ -10,6 +10,7 @@
 
 #pragma once
 
+
 #if !defined(assert) && defined(ASSERT)
 #define assert ASSERT
 #endif
@@ -27,6 +28,9 @@ static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize
 
 #include "AEffectWrapper.h"
 #include "../common/thread.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 // Internal data structures
@@ -485,3 +489,6 @@ public:
 		return nullptr;
 	}
 };
+
+
+OPENMPT_NAMESPACE_END
