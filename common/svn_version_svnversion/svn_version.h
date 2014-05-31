@@ -1,6 +1,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 #define OPENMPT_VERSION_URL ""
 
 #define OPENMPT_VERSION_DATE __DATE__ " " __TIME__
@@ -11,18 +13,26 @@
 #define OPENMPT_VERSION_IS_PACKAGE false
 #endif
 
+OPENMPT_NAMESPACE_END
+
 #ifndef BUILD_SVNVERSION
+
+OPENMPT_NAMESPACE_BEGIN
 
 #define OPENMPT_VERSION_REVISION 0
 
 #define OPENMPT_VERSION_DIRTY false
 #define OPENMPT_VERSION_MIXEDREVISIONS false
 
+OPENMPT_NAMESPACE_END
+
 #else // BUILD_SVNVERSION
 
 #include <locale>
 #include <sstream>
 #include <string>
+
+OPENMPT_NAMESPACE_BEGIN
 
 #define OPENMPT_VERSION_REVISION mpt::svnversion::parse_svnversion_to_revision( BUILD_SVNVERSION )
 
@@ -107,5 +117,7 @@ static bool parse_svnversion_to_modified( std::string svnversion )
 
 } // namespace svnversion
 } // namespace mpt
+
+OPENMPT_NAMESPACE_END
 
 #endif // !BUILD_SVNVERSION else BUILD_SVNVERSION
