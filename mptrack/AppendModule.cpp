@@ -12,6 +12,9 @@
 #include "Moddoc.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Add samples, instruments, plugins and patterns from another module to the current module
 void CModDoc::AppendModule(const CSoundFile &source)
 //--------------------------------------------------
@@ -297,3 +300,6 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		}
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

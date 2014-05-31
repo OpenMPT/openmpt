@@ -11,12 +11,14 @@
 
 #pragma once
 
+#include <vector>
+#include <bitset>
+
+OPENMPT_NAMESPACE_BEGIN
+
 class CModDoc;
 class CModTree;
 class CSoundFile;
-
-#include <vector>
-#include <bitset>
 
 #define TREESTATUS_RDRAG			0x01
 #define TREESTATUS_LDRAG			0x02
@@ -60,8 +62,11 @@ public:
 };
 
 
+OPENMPT_NAMESPACE_END
 #include "CTreeCtrl.h"
 #include "../common/thread.h"
+OPENMPT_NAMESPACE_BEGIN
+
 
 //===============================
 class CModTree: public CTreeCtrlW
@@ -288,3 +293,6 @@ public:
 	afx_msg void OnKillFocus(CWnd* pNewWnd);	//rewbs.customKeys
 	afx_msg void OnSetFocus(CWnd* pOldWnd);		//rewbs.customKeys
 };
+
+
+OPENMPT_NAMESPACE_END

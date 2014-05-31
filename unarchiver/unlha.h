@@ -15,6 +15,8 @@ typedef struct _LHAInputStream LHAInputStream;
 typedef struct _LHAReader LHAReader;
 typedef struct _LHAFileHeader LHAFileHeader;
 
+OPENMPT_NAMESPACE_BEGIN
+
 //====================================
 class CLhaArchive : public ArchiveBase
 //====================================
@@ -31,3 +33,5 @@ public:
 public:
 	virtual bool ExtractFile(std::size_t index);
 };
+
+OPENMPT_NAMESPACE_END

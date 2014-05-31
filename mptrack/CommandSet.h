@@ -11,6 +11,10 @@
 #pragma once
 #include <string>
 #include "../common/FlagSet.h"
+#include <unordered_map>
+
+OPENMPT_NAMESPACE_BEGIN
+
 struct CModSpecifications;
 
 //#define VK_ALT 0x12
@@ -1209,7 +1213,6 @@ public:
 	static bool IsExtended(UINT code);
 };
 
-#include <unordered_map>
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 typedef std::tr1::unordered_map<KeyCombination, CommandID, KeyCombination::hash> KeyMap;
 #else
@@ -1321,3 +1324,5 @@ public:
 	bool LoadDefaultKeymap();
 
 };
+
+OPENMPT_NAMESPACE_END

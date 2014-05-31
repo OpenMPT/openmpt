@@ -15,6 +15,8 @@
 
 #define new DEBUG_NEW
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace ctrlSmp
 {
 
@@ -758,3 +760,6 @@ void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 }
 
 } // namespace ctrlChn
+
+
+OPENMPT_NAMESPACE_END

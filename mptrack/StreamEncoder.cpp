@@ -18,6 +18,9 @@
 #include <ostream>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 StreamEncoderSettings &StreamEncoderSettings::Instance()
 //------------------------------------------------------
 {
@@ -120,3 +123,5 @@ std::string EncoderFactoryBase::DescribeBitrateCBR(int bitrate) const
 	return mpt::String::Format("CBR %i kbit", bitrate);
 }
 
+
+OPENMPT_NAMESPACE_END

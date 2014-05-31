@@ -13,6 +13,8 @@
 
 #include "../soundlib/SampleIO.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //=======================================
 class CCtrlSamples: public CModControlDlg
 //=======================================
@@ -133,3 +135,5 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

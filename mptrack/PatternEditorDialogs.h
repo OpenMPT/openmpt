@@ -15,6 +15,7 @@
 #include "EffectInfo.h"
 #include "PatternCursor.h"
 
+OPENMPT_NAMESPACE_BEGIN
 
 /////////////////////////////////////////////////////////////////////////
 // Search/Replace
@@ -267,3 +268,5 @@ protected:
 
 	DECLARE_MESSAGE_MAP();
 };
+
+OPENMPT_NAMESPACE_END

@@ -15,6 +15,10 @@
 #include <bitset>
 #include "../common/mptFstream.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /*
 Version history:
 	2->3: Serialization revamp(August 2007)
@@ -361,3 +365,6 @@ std::string CTuningCollection::GetEditMaskString() const
 	std::bitset<16> mask(m_EditMask);
 	return mask.to_string<char, std::char_traits<char>, std::allocator<char> >();
 }
+
+
+OPENMPT_NAMESPACE_END

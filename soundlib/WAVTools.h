@@ -13,6 +13,8 @@
 #include "ChunkReader.h"
 #include "Tagging.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -476,3 +478,5 @@ protected:
 };
 
 #endif // MODPLUG_NO_FILESAVE
+
+OPENMPT_NAMESPACE_END

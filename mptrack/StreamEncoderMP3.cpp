@@ -62,6 +62,10 @@ typedef enum vbr_mode_e {
 
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+
 #define MPT_FORCE_ID3V1_TAGS_IN_CBR_MODE
 
 
@@ -1510,3 +1514,6 @@ std::string MP3Encoder::DescribeBitrateABR(int bitrate) const
 	return EncoderFactoryBase::DescribeBitrateABR(bitrate);
 }
 
+
+
+OPENMPT_NAMESPACE_END

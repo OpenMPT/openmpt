@@ -23,6 +23,10 @@
 #include "EffectInfo.h"
 #include <string>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Headers
 #define ROWHDR_WIDTH		32	// Row header
 #define COLHDR_HEIGHT		16	// Column header
@@ -1763,3 +1767,5 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 	::ReleaseDC(m_hWnd, hdc);
 }
 
+
+OPENMPT_NAMESPACE_END

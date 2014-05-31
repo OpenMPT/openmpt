@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 #define MPT_INTMIXER
 
 #ifdef MPT_INTMIXER
@@ -43,3 +45,4 @@ const float MIXING_SCALEF = static_cast<float>(1 << MIXING_FRACTIONAL_BITS);
 // The biggest sampling point size is currently 16-bit stereo = 2 * 2 bytes.
 #define MaxSamplingPointSize		4u
 
+OPENMPT_NAMESPACE_END

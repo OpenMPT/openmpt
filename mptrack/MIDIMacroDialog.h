@@ -14,6 +14,7 @@
 #include "ColourEdit.h"
 #include "../soundlib/MIDIMacros.h"
 
+OPENMPT_NAMESPACE_BEGIN
 
 //===================================
 class CMidiMacroSetup: public CDialog
@@ -58,3 +59,5 @@ protected:
 	afx_msg void OnSetSFx(UINT id);
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

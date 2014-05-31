@@ -43,6 +43,9 @@
 #include "ModConvert.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define CHANGEMODTYPE_WARNING(x)	warnings.set(x);
 #define CHANGEMODTYPE_CHECK(x, s)	if(warnings[x]) AddToLog(_T(s));
 
@@ -629,3 +632,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 #undef CHANGEMODTYPE_WARNING
 #undef CHANGEMODTYPE_CHECK
+
+
+OPENMPT_NAMESPACE_END

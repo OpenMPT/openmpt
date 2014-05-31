@@ -288,6 +288,46 @@
 
 
 
+#if defined(MODPLUG_TRACKER)
+#ifndef MPT_NO_NAMESPACE
+#define MPT_NO_NAMESPACE
+#endif
+#endif
+
+#if defined(MPT_NO_NAMESPACE)
+
+#ifdef OPENMPT_NAMESPACE
+#undef OPENMPT_NAMESPACE
+#endif
+#define OPENMPT_NAMESPACE
+
+#ifdef OPENMPT_NAMESPACE_BEGIN
+#undef OPENMPT_NAMESPACE_BEGIN
+#endif
+#define OPENMPT_NAMESPACE_BEGIN
+
+#ifdef OPENMPT_NAMESPACE_END
+#undef OPENMPT_NAMESPACE_END
+#endif
+#define OPENMPT_NAMESPACE_END
+
+#else
+
+#ifndef OPENMPT_NAMESPACE
+#define OPENMPT_NAMESPACE OpenMPT
+#endif
+
+#ifndef OPENMPT_NAMESPACE_BEGIN
+#define OPENMPT_NAMESPACE_BEGIN namespace OPENMPT_NAMESPACE {
+#endif
+#ifndef OPENMPT_NAMESPACE_END
+#define OPENMPT_NAMESPACE_END   }
+#endif
+
+#endif
+
+
+
 #if MPT_COMPILER_MSVC
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif

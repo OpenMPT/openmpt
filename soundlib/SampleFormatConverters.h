@@ -12,6 +12,10 @@
 
 #include "../soundlib/Endianness.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct ModSample;
 
 
@@ -915,3 +919,6 @@ void CopyInterleavedToChannel(typename SampleConversion::output_t * MPT_RESTRICT
 		dst++;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

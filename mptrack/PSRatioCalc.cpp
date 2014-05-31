@@ -15,6 +15,10 @@
 #include ".\psratiocalc.h"
 #include "Sndfile.h"		//for tempo mode enum
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 // CPSRatioCalc dialog
 
 IMPLEMENT_DYNAMIC(CPSRatioCalc, CDialog)
@@ -168,3 +172,6 @@ void CPSRatioCalc::OnBnClickedOk()
 	}
 	OnOK();
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -16,6 +16,9 @@
 #include <stdexcept>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //#define MMCMP_LOG
 
 
@@ -848,3 +851,6 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 
 	return result;
 }
+
+
+OPENMPT_NAMESPACE_END

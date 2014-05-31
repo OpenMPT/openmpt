@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 enum
 {
 	NO_ATTENUATION = 1,
@@ -107,3 +109,4 @@ protected:
 	bool m_displayDBValues;
 };
 
+OPENMPT_NAMESPACE_END

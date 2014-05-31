@@ -12,6 +12,8 @@
 
 #include "../soundlib/FileReader.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////
 // File Mapping Class
 
@@ -35,3 +37,5 @@ public:
 	const void *Lock();
 	FileReader GetFile();
 };
+
+OPENMPT_NAMESPACE_END

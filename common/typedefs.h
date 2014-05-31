@@ -12,6 +12,10 @@
 
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+
 #if MPT_COMPILER_MSVC
 #pragma warning(error : 4309) // Treat "truncation of constant value"-warning as error.
 #endif
@@ -129,13 +133,17 @@
 #if defined(_MFC_VER)
 typedef CMemoryException * MPTMemoryException;
 #else
+OPENMPT_NAMESPACE_END
 #include <new>
+OPENMPT_NAMESPACE_BEGIN
 typedef std::bad_alloc & MPTMemoryException;
 #endif
 
 
 
+OPENMPT_NAMESPACE_END
 #include <memory>
+OPENMPT_NAMESPACE_BEGIN
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 #define MPT_SHARED_PTR std::tr1::shared_ptr
 #else
@@ -240,7 +248,9 @@ noinline void AssertHandler(const char *file, int line, const char *function, co
 #endif
 
 
+OPENMPT_NAMESPACE_END
 #include <cstdarg>
+OPENMPT_NAMESPACE_BEGIN
 #if MPT_COMPILER_MSVC
 #ifndef va_copy
 #define va_copy(dst, src) do { (dst) = (src); } while (0)
@@ -254,7 +264,9 @@ noinline void AssertHandler(const char *file, int line, const char *function, co
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 
+OPENMPT_NAMESPACE_END
 #include "stdint.h"
+OPENMPT_NAMESPACE_BEGIN
 
 typedef int8_t   int8;
 typedef int16_t  int16;
@@ -267,7 +279,9 @@ typedef uint64_t uint64;
 
 #else
 
+OPENMPT_NAMESPACE_END
 #include <cstdint>
+OPENMPT_NAMESPACE_BEGIN
 
 typedef std::int8_t   int8;
 typedef std::int16_t  int16;
@@ -282,7 +296,9 @@ typedef std::uint64_t uint64;
 
 #ifdef ANDROID
 
+OPENMPT_NAMESPACE_END
 #include <stdint.h>
+OPENMPT_NAMESPACE_BEGIN
 
 // Android NDK appears to provide a different (and incomplete) <stdint.h> when compiling C++.
 // Provide these macros ourselves if they are not defined by here.
@@ -453,3 +469,6 @@ typedef std::uint32_t UINT;
 #define MPT_UNREFERENCED_PARAMETER(x) (void)(x)
 #endif
 
+
+
+OPENMPT_NAMESPACE_END

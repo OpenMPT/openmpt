@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <vector>
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 class ModSequenceSet;
 class FileReader;
@@ -230,3 +232,6 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t);
 
 void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq);
 void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t);
+
+
+OPENMPT_NAMESPACE_END

@@ -9,12 +9,9 @@
 
 #pragma once
 
-#ifdef MODPLUG_TRACKER
+OPENMPT_NAMESPACE_BEGIN
 
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#define NOMINMAX
-#include <windows.h>
+#ifdef MODPLUG_TRACKER
 
 extern CRITICAL_SECTION g_csAudio;
 extern int g_csAudioLockCount;
@@ -86,3 +83,5 @@ public:
 };
 
 #endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_END

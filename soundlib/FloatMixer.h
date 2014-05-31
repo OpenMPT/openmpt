@@ -14,6 +14,8 @@
 #include "MixerInterface.h"
 #include "Resampler.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 template<int channelsOut, int channelsIn, typename out, typename in, int int2float>
 struct IntToFloatTraits : public MixerTraits<channelsOut, channelsIn, out, in>
 {
@@ -306,3 +308,6 @@ struct ResonantFilter
 
 #undef ClipFilter
 };
+
+
+OPENMPT_NAMESPACE_END

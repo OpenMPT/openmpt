@@ -2,6 +2,8 @@
 
 #include "CreditStatic.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace PNG { struct Bitmap; }
 
 //===============================
@@ -56,3 +58,5 @@ protected:
 	virtual void OnOK();
 	virtual void OnCancel();
 };
+
+OPENMPT_NAMESPACE_END

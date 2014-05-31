@@ -11,8 +11,12 @@
 
 #pragma once
 
-namespace mpt { namespace Test {
+OPENMPT_NAMESPACE_BEGIN
+
+namespace Test {
 
 void DoTests();
 
-} } // namespace mpt::Test
+} // namespace Test
+
+OPENMPT_NAMESPACE_END

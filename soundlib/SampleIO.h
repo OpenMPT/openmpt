@@ -12,6 +12,10 @@
 
 #pragma once
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct ModSample;
 class FileReader;
 
@@ -169,3 +173,6 @@ public:
 	size_t WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples = 0) const;
 #endif // MODPLUG_NO_FILESAVE
 };
+
+
+OPENMPT_NAMESPACE_END

@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 
 #if MPT_COMPILER_MSVC
@@ -217,3 +219,5 @@ struct ALIGN(32) ModChannelSettings
 #if MPT_COMPILER_MSVC
 #pragma warning(default:4324) //structure was padded due to __declspec(align())
 #endif
+
+OPENMPT_NAMESPACE_END

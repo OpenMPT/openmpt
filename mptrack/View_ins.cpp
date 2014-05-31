@@ -24,6 +24,10 @@
 #include "view_ins.h"
 #include "../soundlib/MIDIEvents.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define ENV_ZOOM				4.0f
 #define ENV_MIN_ZOOM			2.0f
 #define ENV_MAX_ZOOM			100.0f
@@ -2502,3 +2506,6 @@ BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -10,10 +10,10 @@
 
 
 #pragma once
-#ifndef SELECTPLUGINDIALOG_H
-#define SELECTPLUGINDIALOG_H
 
 #include "CTreeCtrl.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
 struct SNDMIXPLUGIN;
@@ -62,4 +62,4 @@ protected:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 };
 
-#endif // SELECTPLUGINDIALOG_H
+OPENMPT_NAMESPACE_END

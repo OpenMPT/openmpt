@@ -18,6 +18,9 @@
 #include "../soundlib/FileReader.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // This part of the header is identical for both presets and banks.
 struct ChunkHeader
 {
@@ -283,3 +286,6 @@ const char *VSTPresets::GetErrorMessage(ErrorCode code)
 }
 
 #endif // NO_VST
+
+
+OPENMPT_NAMESPACE_END

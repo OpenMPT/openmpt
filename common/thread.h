@@ -9,6 +9,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace mpt
 {
 
@@ -67,3 +69,5 @@ public:
 #endif // !WIN32
 
 }	// namespace mpt
+
+OPENMPT_NAMESPACE_END

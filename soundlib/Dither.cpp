@@ -16,6 +16,9 @@
 #include "../common/misc_util.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //////////////////////////////////////////////////////////////////////////
 // Noise Shaping (Dithering)
 
@@ -305,3 +308,6 @@ void Dither::Process(int *mixbuffer, std::size_t count, std::size_t channels, in
 			break;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

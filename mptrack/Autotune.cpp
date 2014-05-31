@@ -19,6 +19,9 @@
 #endif
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // The more bins, the more autocorrelations are done and the more precise the result is.
 #define BINS_PER_NOTE 32
 #define MIN_SAMPLE_LENGTH 2
@@ -386,3 +389,6 @@ void CAutotuneDlg::OnCancel()
 {
 	CDialog::OnCancel();
 }
+
+
+OPENMPT_NAMESPACE_END

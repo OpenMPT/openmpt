@@ -26,6 +26,8 @@
 
 #include "../common/typedefs.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace srlztn //SeRiaLiZaTioN
 {
 
@@ -600,3 +602,6 @@ bool StringFromBinaryStream(std::istream& iStrm, std::string& str, const SIZETYP
 
 
 } //namespace srlztn.
+
+
+OPENMPT_NAMESPACE_END

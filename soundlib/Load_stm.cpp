@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 #endif
@@ -327,3 +329,6 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

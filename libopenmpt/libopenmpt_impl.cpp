@@ -29,6 +29,8 @@
 #include "soundlib/AudioReadTarget.h"
 #include "soundlib/FileReader.h"
 
+using namespace OpenMPT;
+
 namespace openmpt {
 
 namespace version {

@@ -25,6 +25,10 @@
 
 #include <algorithm>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define OLD_SOUNDSETUP_REVERSESTEREO         0x20
 #define OLD_SOUNDSETUP_SECONDARY             0x40
 #define OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY 0x80
@@ -1080,3 +1084,6 @@ TrackerDirectories::~TrackerDirectories()
 {
 	return;
 }
+
+
+OPENMPT_NAMESPACE_END

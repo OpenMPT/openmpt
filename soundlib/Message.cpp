@@ -17,6 +17,8 @@
 #include "Message.h"
 #include "FileReader.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Read song message from a mapped file.
 // [in]  data: pointer to the data in memory that is going to be read
 // [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
@@ -207,3 +209,6 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding) const
 	}
 	return comments;
 }
+
+
+OPENMPT_NAMESPACE_END

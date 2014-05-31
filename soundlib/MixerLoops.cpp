@@ -23,6 +23,9 @@
 #include "Sndfile.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 ////////////////////////////////////////////////////////////////////////////////////
 // 3DNow! optimizations
 
@@ -940,3 +943,6 @@ void ApplyGain(float * outputBuffer, float * const *outputBuffers, std::size_t o
 }
 
 #endif // !MODPLUG_TRACKER
+
+
+OPENMPT_NAMESPACE_END

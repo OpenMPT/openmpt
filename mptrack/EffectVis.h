@@ -12,6 +12,9 @@
 
 #include "afxwin.h"
 #include "EffectInfo.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
 class CViewPattern;
 
 #define FXVSTATUS_LDRAGGING		0x01
@@ -133,3 +136,5 @@ protected:
 
 	void MakeChange(ROWINDEX currentRow, int newY);
 };
+
+OPENMPT_NAMESPACE_END

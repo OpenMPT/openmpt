@@ -16,6 +16,9 @@
 #include "Mixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 template<typename Tsample, bool clipOutput = false>
 class AudioReadTargetBuffer
 	: public IAudioReadTarget
@@ -125,3 +128,6 @@ public:
 };
 
 #endif // !MODPLUG_TRACKER
+
+
+OPENMPT_NAMESPACE_END

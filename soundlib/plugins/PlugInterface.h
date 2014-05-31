@@ -15,7 +15,7 @@
 #define VST_FORCE_DEPRECATED 0
 #include <pluginterfaces/vst2.x/aeffect.h>			// VST
 #else
-typedef int32 VstInt32;
+typedef OPENMPT_NAMESPACE::int32 VstInt32;
 typedef intptr_t VstIntPtr;
 #endif
 
@@ -24,6 +24,8 @@ typedef intptr_t VstIntPtr;
 #include "../../soundlib/MIDIEvents.h"
 #include "../../soundlib/Endianness.h"
 #include "../../soundlib/Mixer.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
@@ -225,3 +227,6 @@ struct SNDMIXPLUGIN
 
 class CSoundFile;
 typedef bool (*PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN &, CSoundFile &);
+
+
+OPENMPT_NAMESPACE_END

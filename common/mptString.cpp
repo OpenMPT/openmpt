@@ -35,6 +35,9 @@
 #endif
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 namespace mpt {
 
 
@@ -1489,3 +1492,6 @@ std::wstring PrintImplW(const std::wstring & format
 
 
 } // namespace mpt
+
+
+OPENMPT_NAMESPACE_END

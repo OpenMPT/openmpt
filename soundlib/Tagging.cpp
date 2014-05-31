@@ -12,6 +12,8 @@
 #include "Tagging.h"
 #include "../common/version.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifndef MODPLUG_NO_FILESAVE
 
 FileTags::FileTags()
@@ -21,3 +23,6 @@ FileTags::FileTags()
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

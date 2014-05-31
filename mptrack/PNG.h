@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class FileReader;
 
 namespace PNG
@@ -39,3 +41,5 @@ namespace PNG
 	Bitmap *ReadPNG(FileReader &file);
 	Bitmap *ReadPNG(const TCHAR *resource);
 }
+
+OPENMPT_NAMESPACE_END

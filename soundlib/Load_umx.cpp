@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -352,3 +354,6 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -27,6 +27,10 @@
 #include "FileDialog.h"
 #include "../common/mptFstream.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_VST
 
 //#define VST_LOG
@@ -2397,3 +2401,6 @@ std::string SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
 		return std::string();
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

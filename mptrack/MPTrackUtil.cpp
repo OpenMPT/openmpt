@@ -17,6 +17,8 @@
 #include <time.h>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
 
 namespace mpt
 {
@@ -87,3 +89,6 @@ bool Util::sdOs::IsPathFileAvailable(const mpt::PathString &pszFilePath, FileMod
 {
 	return (_waccess(pszFilePath.AsNative().c_str(), fm) == 0);
 }
+
+
+OPENMPT_NAMESPACE_END

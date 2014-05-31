@@ -32,6 +32,9 @@
 #endif
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //=================================
 class CUnarchiver : public IArchive
 //=================================
@@ -80,3 +83,6 @@ public:
 	bool ExtractBestFile(const std::vector<const char *> &extensions);
 
 };
+
+
+OPENMPT_NAMESPACE_END

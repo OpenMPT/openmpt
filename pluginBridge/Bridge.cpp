@@ -25,6 +25,9 @@
 #define NOMINMAX
 #define VST_FORCE_DEPRECATED 0
 #define MODPLUG_TRACKER
+#define OPENMPT_NAMESPACE
+#define OPENMPT_NAMESPACE_BEGIN
+#define OPENMPT_NAMESPACE_END
 #define CountOf(x) _countof(x)
 #define MPT_FALLTHROUGH __fallthrough
 #include <Windows.h>
@@ -45,6 +48,9 @@
 #include "../common/thread.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 LONG PluginBridge::instanceCount = 0;
 Event PluginBridge::sigQuit;
 
@@ -57,6 +63,9 @@ WNDCLASSEX PluginBridge::windowClass;
 enum { kVstTimeInfoInit = 1 << 31 };
 
 
+OPENMPT_NAMESPACE_END
+
+
 int _tmain(int argc, TCHAR *argv[])
 {
 	if(argc != 2)
@@ -67,11 +76,11 @@ int _tmain(int argc, TCHAR *argv[])
 
 	uint32_t parentProcessId = _ttoi(argv[1]);
 
-	PluginBridge::InitializeStaticVariables();
+	OPENMPT_NAMESPACE::PluginBridge::InitializeStaticVariables();
 
-	new PluginBridge(argv[0], OpenProcess(SYNCHRONIZE, FALSE, parentProcessId));
+	new OPENMPT_NAMESPACE::PluginBridge(argv[0], OpenProcess(SYNCHRONIZE, FALSE, parentProcessId));
 
-	WaitForSingleObject(PluginBridge::sigQuit, INFINITE);
+	WaitForSingleObject(OPENMPT_NAMESPACE::PluginBridge::sigQuit, INFINITE);
 	return 0;
 }
 
@@ -83,6 +92,9 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /
 	argv = CommandLineToArgvW(GetCommandLine(), &argc);
 	return _tmain(argc, argv);
 }
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 // Initialize static stuff like the editor window class
@@ -1123,3 +1135,6 @@ void PluginBridge::MessageHandler()
 		DispatchMessage(&msg);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

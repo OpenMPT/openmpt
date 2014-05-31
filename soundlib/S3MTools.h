@@ -14,6 +14,9 @@
 #include "../soundlib/SampleIO.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -146,3 +149,6 @@ STATIC_ASSERT(sizeof(S3MSampleHeader) == 80);
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
+
+
+OPENMPT_NAMESPACE_END

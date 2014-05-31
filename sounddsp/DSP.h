@@ -12,6 +12,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_DSP
 
 // Buffer Sizes
@@ -87,3 +90,6 @@ private:
 };
 
 #endif // NO_DSP
+
+
+OPENMPT_NAMESPACE_END

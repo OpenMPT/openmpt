@@ -19,6 +19,8 @@
 #include "../mptrack/Vstplug.h"
 #endif // MODPLUG_TRACKER
 
+OPENMPT_NAMESPACE_BEGIN
+
 parameteredMacroType MIDIMacroConfig::GetParameteredMacroType(size_t macroIndex) const
 //------------------------------------------------------------------------------------
 {
@@ -488,3 +490,6 @@ std::string MIDIMacroConfig::GetSafeMacro(const char *macro) const
 
 	return sanitizedMacro;
 }
+
+
+OPENMPT_NAMESPACE_END

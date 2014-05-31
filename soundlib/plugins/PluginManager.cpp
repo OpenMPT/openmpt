@@ -29,6 +29,8 @@
 #include <miniz/miniz.c>
 #endif
 
+OPENMPT_NAMESPACE_BEGIN
+
 char CVstPluginManager::s_szHostProductString[64] = "OpenMPT";
 char CVstPluginManager::s_szHostVendorString[64] = "OpenMPT project";
 VstIntPtr CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
@@ -663,3 +665,6 @@ void CVstPluginManager::ReportPlugException(const std::wstring &msg)
 }
 
 #endif // NO_VST
+
+
+OPENMPT_NAMESPACE_END

@@ -12,6 +12,8 @@
 
 #include "resource.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CModDoc;
 
 class CAutoSaver
@@ -98,3 +100,6 @@ public:
 	BOOL OnSetActive();
 	
 };
+
+
+OPENMPT_NAMESPACE_END

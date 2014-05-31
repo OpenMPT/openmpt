@@ -23,6 +23,8 @@
 #include "Tables.h"
 #include "modsmp_ctrl.h"	// For updating the loop wraparound data with the invert loop effect
 
+OPENMPT_NAMESPACE_BEGIN
+
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4244)
 #endif
@@ -5271,3 +5273,6 @@ void CSoundFile::PortamentoFineMPT(ModChannel* pChn, int param)
 
 	pChn->m_CalculateFreq = true;
 }
+
+
+OPENMPT_NAMESPACE_END

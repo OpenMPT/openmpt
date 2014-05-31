@@ -12,6 +12,10 @@
 #include "unarchiver.h"
 #include "../soundlib/FileReader.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 CUnarchiver::CUnarchiver(FileReader &file)
 //----------------------------------------
 	: impl(nullptr)
@@ -192,3 +196,5 @@ const ArchiveFileInfo & CUnarchiver::operator [] (std::size_t index) const
 	return impl->operator[](index);
 }
 
+
+OPENMPT_NAMESPACE_END

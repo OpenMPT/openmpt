@@ -20,6 +20,8 @@
 #include <vector>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
 
 static const int opus_bitrates [] = {
 	8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 192, 224, 256, 320, 384, 448,      512
@@ -270,3 +272,5 @@ public:
 	virtual bool IsAvailable() const = 0;
 };
 
+
+OPENMPT_NAMESPACE_END

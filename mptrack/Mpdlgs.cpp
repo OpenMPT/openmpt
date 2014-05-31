@@ -21,6 +21,9 @@
 #include "../common/StringFixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 static const char * const PolyphonyNames[] =
 {
 	"133MHz",
@@ -1661,3 +1664,6 @@ BOOL CMidiSetupDlg::OnSetActive()
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
 	return CPropertyPage::OnSetActive();
 }
+
+
+OPENMPT_NAMESPACE_END

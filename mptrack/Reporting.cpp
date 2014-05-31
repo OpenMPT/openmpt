@@ -14,6 +14,9 @@
 #include "../mptrack/InputHandler.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 UINT Reporting::ShowNotification(const char *text, const char *caption, UINT flags, const CWnd *parent)
 //-----------------------------------------------------------------------------------------------------
 {
@@ -266,3 +269,6 @@ RetryAnswer Reporting::RetryCancel(const std::wstring &text, const std::wstring 
 		return rtyCancel;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

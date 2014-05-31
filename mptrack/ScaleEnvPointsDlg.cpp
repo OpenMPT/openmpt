@@ -13,6 +13,10 @@
 #include "ScaleEnvPointsDlg.h"
 #include "ModInstrument.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 float CScaleEnvPointsDlg::m_fFactorX = 1.0f;
 float CScaleEnvPointsDlg::m_fFactorY = 1.0f;
 
@@ -65,3 +69,6 @@ void CScaleEnvPointsDlg::OnOK()
 
 	CDialog::OnOK();
 }
+
+
+OPENMPT_NAMESPACE_END

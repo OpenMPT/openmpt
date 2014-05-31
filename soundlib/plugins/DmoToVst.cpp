@@ -18,6 +18,10 @@
 #include "../Snd_defs.h"
 #include "../../common/misc_util.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define DMO_LOG
 
 
@@ -552,3 +556,6 @@ AEffect *DmoToVst(VSTPluginLib &lib)
 }
 
 #endif // NO_VST
+
+
+OPENMPT_NAMESPACE_END

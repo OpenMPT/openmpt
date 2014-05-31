@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 
 // Sample Struct
@@ -88,3 +90,5 @@ struct ModSample
 	static int FrequencyToTranspose(uint32 freq);
 	void FrequencyToTranspose();
 };
+
+OPENMPT_NAMESPACE_END

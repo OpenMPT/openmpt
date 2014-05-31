@@ -22,6 +22,9 @@
 #include <mmreg.h>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings);
 
 
@@ -436,3 +439,5 @@ void CDSoundDevice::InternalFillAudioBuffer()
 
 #endif // NO_DIRECTSOUND
 
+
+OPENMPT_NAMESPACE_END

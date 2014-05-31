@@ -16,6 +16,8 @@
 
 #include <cstring>
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Note definitions
 #define NOTE_NONE			(ModCommand::NOTE(0))
 #define NOTE_MIN			(ModCommand::NOTE(1))
@@ -210,3 +212,5 @@ public:
 };
 
 typedef ModCommand MODCOMMAND_ORIGINAL;
+
+OPENMPT_NAMESPACE_END

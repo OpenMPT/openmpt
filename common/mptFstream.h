@@ -14,6 +14,8 @@
 #include "../common/mptString.h"
 #include "../common/mptPathString.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #if defined(MPT_WITH_PATHSTRING)
 
 namespace mpt
@@ -197,3 +199,4 @@ public:
 
 #endif // MPT_WITH_PATHSTRING
 
+OPENMPT_NAMESPACE_END

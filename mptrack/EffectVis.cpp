@@ -18,6 +18,9 @@
 #include "EffectVis.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define NODESIZE 7
 #define NODEHALF 3
 #define BOTTOMBORDER 20
@@ -871,3 +874,6 @@ bool CEffectVis::IsPcNote(ROWINDEX row) const
 	else
 		return false;
 }
+
+
+OPENMPT_NAMESPACE_END

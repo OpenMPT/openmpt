@@ -16,6 +16,8 @@
 #include "../common/misc_util.h"
 #include <set>
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Instrument Envelopes
 struct InstrumentEnvelope
 {
@@ -163,3 +165,5 @@ struct ModInstrument
 	void Convert(MODTYPE fromType, MODTYPE toType);
 
 };
+
+OPENMPT_NAMESPACE_END

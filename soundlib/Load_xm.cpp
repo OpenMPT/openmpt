@@ -21,6 +21,9 @@
 #endif // MODPLUG_TRACKER
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Allocate samples for an instrument
 static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEINDEX numSamples)
 //--------------------------------------------------------------------------------------------
@@ -1067,3 +1070,6 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

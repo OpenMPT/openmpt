@@ -24,6 +24,10 @@
 
 #include <bitset>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////////
 // Default directories
 
@@ -532,3 +536,6 @@ protected:
 	void SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&pDirs)[NUM_DIRS], bool bStripFilename);
 
 };
+
+
+OPENMPT_NAMESPACE_END

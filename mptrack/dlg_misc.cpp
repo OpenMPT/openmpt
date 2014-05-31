@@ -21,6 +21,9 @@
 #include "../common/StringFixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 ///////////////////////////////////////////////////////////////////////
 // CModTypeDlg
 
@@ -1305,3 +1308,6 @@ void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, cons
 			combobox.SetItemData(combobox.AddString(szSpecialNoteNamesMPT[nNote - NOTE_MIN_SPECIAL]), nNote);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

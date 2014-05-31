@@ -12,6 +12,8 @@
 
 #include <string>
 
+OPENMPT_NAMESPACE_BEGIN
+
 class FileReader;
 
 //====================================
@@ -57,3 +59,5 @@ public:
 	// [out] returns formatted song message.
 	std::string GetFormatted(const LineEnding lineEnding) const;
 };
+
+OPENMPT_NAMESPACE_END

@@ -20,6 +20,9 @@
 #include "FileDialog.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //////////////////////////////////////////////////////////////
 // COptionsColors
 
@@ -669,7 +672,7 @@ void COptionsGeneral::BrowseForFolder(UINT nID)
 	WCHAR szPath[MAX_PATH] = L"";
 	::GetDlgItemTextW(m_hWnd, nID, szPath, CountOf(szPath));
 
-	::BrowseForFolder dlg(mpt::PathString::FromNative(szPath), TEXT("Select a default folder..."));
+	OPENMPT_NAMESPACE::BrowseForFolder dlg(mpt::PathString::FromNative(szPath), TEXT("Select a default folder..."));
 	if(dlg.Show(this))
 	{
 		::SetDlgItemTextW(m_hWnd, nID, dlg.GetDirectory().AsNative().c_str());
@@ -921,3 +924,6 @@ void COptionsAdvanced::OnOptionDblClick()
 }
 
 #endif // MPT_SETTINGS_CACHE
+
+
+OPENMPT_NAMESPACE_END

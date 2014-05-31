@@ -16,6 +16,9 @@
 #include "../common/StringFixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Display the file dialog.
 bool FileDialog::Show(const CWnd *parent)
 //---------------------------------------
@@ -176,3 +179,6 @@ bool BrowseForFolder::Show(const CWnd *parent)
 	}
 	return false;
 }
+
+
+OPENMPT_NAMESPACE_END

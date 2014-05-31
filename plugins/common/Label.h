@@ -13,6 +13,9 @@
 #include "WindowBase.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //=============================
 class Label : public WindowBase
 //=============================
@@ -39,3 +42,6 @@ public:
 		SendMessage(hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
 	}
 };
+
+
+OPENMPT_NAMESPACE_END

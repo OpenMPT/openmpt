@@ -10,6 +10,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 enum SampleFormatEnum
 {
 	SampleFormatUnsigned8 =  8,       // do not change value (for compatibility with old configuration settings)
@@ -102,3 +105,6 @@ struct SampleFormat
 	operator unsigned long () const { return value; }
 	SampleFormat(unsigned long v) : value(SampleFormatEnum(v)) { }
 };
+
+
+OPENMPT_NAMESPACE_END

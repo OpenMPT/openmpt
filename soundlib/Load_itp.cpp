@@ -24,6 +24,8 @@
 #include "../mptrack/Moddoc.h"
 #endif
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Version changelog:
 // v1.03: - Relative unicode instrument paths instead of absolute ANSI paths
 //        - Per-path variable string length
@@ -553,3 +555,6 @@ bool CSoundFile::SaveITProject(const mpt::PathString &filename)
 }
 
 #endif
+
+
+OPENMPT_NAMESPACE_END

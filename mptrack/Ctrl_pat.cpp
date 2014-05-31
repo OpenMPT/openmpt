@@ -24,6 +24,9 @@
 #include "MIDIMacroDialog.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //////////////////////////////////////////////////////////////
 // CCtrlPatterns
 
@@ -1266,3 +1269,5 @@ void CCtrlPatterns::OnSequenceNumChanged()
 	}
 }
 
+
+OPENMPT_NAMESPACE_END

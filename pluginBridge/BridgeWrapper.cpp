@@ -20,6 +20,9 @@
 #include "../common/StringFixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Check whether we need to load a 32-bit or 64-bit wrapper.
 BridgeWrapper::BinaryType BridgeWrapper::GetPluginBinaryType(const mpt::PathString &pluginPath)
 {
@@ -892,3 +895,6 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 }
 
 #endif //NO_VST
+
+
+OPENMPT_NAMESPACE_END

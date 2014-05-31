@@ -18,6 +18,9 @@
 #include "../common/version.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 bool ExceptionHandler::fullMemDump = false;
 
 
@@ -212,3 +215,5 @@ noinline void AssertHandler(const char *file, int line, const char *function, co
 
 #endif MPT_ASSERT_HANDLER_NEEDED
 
+
+OPENMPT_NAMESPACE_END

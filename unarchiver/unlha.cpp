@@ -12,6 +12,9 @@
 #include "lhasa.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 static int LHAreadFileReader(void *handle, void *buf, size_t buf_len)
 {
 	FileReader *f = reinterpret_cast<FileReader*>(handle);
@@ -148,3 +151,6 @@ bool CLhaArchive::ExtractFile(std::size_t index)
 	CloseArchive();
 	return data.size() > 0;
 }
+
+
+OPENMPT_NAMESPACE_END

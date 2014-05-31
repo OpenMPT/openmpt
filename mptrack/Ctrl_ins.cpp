@@ -26,6 +26,10 @@
 #include "MemoryMappedFile.h"
 #include "FileDialog.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
 /////////////////////////////////////////////////////////////////////////
@@ -2854,3 +2858,6 @@ void CCtrlInstruments::UpdatePluginList()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((pIns) && (pIns->nMixPlug <= MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
 }
+
+
+OPENMPT_NAMESPACE_END

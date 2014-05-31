@@ -31,6 +31,9 @@
 #endif
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // First off, a nice vibrato translation LUT.
 static const uint8 j2bAutoVibratoTrans[] = 
 {
@@ -1037,3 +1040,6 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 #endif
 
 }
+
+
+OPENMPT_NAMESPACE_END

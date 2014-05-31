@@ -11,8 +11,12 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
+OPENMPT_NAMESPACE_END
 #include "Snd_defs.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -168,3 +172,5 @@ public:
 
 #endif // MODPLUG_TRACKER
 
+
+OPENMPT_NAMESPACE_END

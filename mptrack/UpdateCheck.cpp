@@ -19,6 +19,9 @@
 #include "Moptions.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 const CString CUpdateCheck::defaultUpdateURL = "http://update.openmpt.org/check/$VERSION/$GUID";
 
 // Static configuration variables
@@ -335,3 +338,6 @@ void CUpdateSetupDlg::OnResetURL()
 {
 	SetDlgItemText(IDC_EDIT1, CUpdateCheck::defaultUpdateURL);
 }
+
+
+OPENMPT_NAMESPACE_END

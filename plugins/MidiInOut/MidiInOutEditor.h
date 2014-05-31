@@ -10,12 +10,19 @@
 
 #pragma once
 
+#define MODPLUG_TRACKER
+#define OPENMPT_NAMESPACE
+#define OPENMPT_NAMESPACE_BEGIN
+#define OPENMPT_NAMESPACE_END
 #include <vstsdk2.4/public.sdk/source/vst2.x/aeffeditor.h>
 #include <portmidi/pm_common/portmidi.h>
 #include "../common/Window.h"
 #include "../common/Label.h"
 #include "../common/ComboBox.h"
 #include "../common/CheckBox.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 //======================================================
@@ -63,3 +70,6 @@ protected:
 	// Window processing callback function
 	virtual intptr_t WindowCallback(int message, void *param1, void *param2);
 };
+
+
+OPENMPT_NAMESPACE_END

@@ -21,6 +21,9 @@
 #endif
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 //-----------------------------------------
 {
@@ -177,3 +180,6 @@ PNG::Bitmap *PNG::ReadPNG(const TCHAR *resource)
 	FileReader file(pData, nSize);
 	return ReadPNG(file);
 }
+
+
+OPENMPT_NAMESPACE_END

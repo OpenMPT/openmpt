@@ -32,6 +32,9 @@
 #endif // NO_ARCHIVE_SUPPORT
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 
@@ -2389,3 +2392,6 @@ void CSoundFile::UpgradeSong()
 
 	Patterns.ForEachModCommand(UpgradePatternData(*this));
 }
+
+
+OPENMPT_NAMESPACE_END

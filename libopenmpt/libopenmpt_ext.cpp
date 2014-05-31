@@ -11,6 +11,8 @@
 
 #include "soundlib/Sndfile.h"
 
+using namespace OpenMPT;
+
 #ifndef NO_LIBOPENMPT_CXX
 
 namespace openmpt {

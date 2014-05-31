@@ -13,6 +13,8 @@
 #include "WindowedFIR.h"
 #include <math.h>
 
+OPENMPT_NAMESPACE_BEGIN
+
 // -> CODE#0025
 // -> DESC="enable polyphase resampling on stereo samples"
 // -> !!! stolen from modplug-xmms sourceforge project !!!
@@ -95,3 +97,6 @@ void CWindowedFIR::InitTable(double WFIRCutoff, uint8 WFIRType)
 		}
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -10,6 +10,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 enum LogLevel
 {
 	/*LogDebug        = 1,*/
@@ -62,7 +65,7 @@ public:
 	Context(const Context &c);
 }; // class Context
 
-#define MPT_LOG_CURRENTCONTEXT() ::mpt::log::Context( __FILE__ , __LINE__ , __FUNCTION__ )
+#define MPT_LOG_CURRENTCONTEXT() mpt::log::Context( __FILE__ , __LINE__ , __FUNCTION__ )
 
 
 class Logger
@@ -76,7 +79,7 @@ public:
 	void operator () (const std::wstring &text);
 };
 
-#define Log ::mpt::log::Logger(MPT_LOG_CURRENTCONTEXT())
+#define Log mpt::log::Logger(MPT_LOG_CURRENTCONTEXT())
 
 
 #else // !NO_LOGGING
@@ -90,7 +93,7 @@ public:
 	inline void operator () (const std::wstring & /*text*/ ) {}
 };
 
-#define Log if(true) {} else ::mpt::log::Logger() // completely compile out arguments to Log() so that they do not even get evaluated
+#define Log if(true) {} else mpt::log::Logger() // completely compile out arguments to Log() so that they do not even get evaluated
 
 
 #endif // NO_LOGGING
@@ -98,3 +101,6 @@ public:
 
 } // namespace log
 } // namespace mpt
+
+
+OPENMPT_NAMESPACE_END

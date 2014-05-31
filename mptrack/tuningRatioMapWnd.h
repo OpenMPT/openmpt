@@ -12,6 +12,8 @@
 
 #include "../soundlib/tuning.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CTuningDialog;
 
 typedef CTuning::NOTEINDEXTYPE NOTEINDEXTYPE;
@@ -58,3 +60,5 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

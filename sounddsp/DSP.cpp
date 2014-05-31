@@ -14,6 +14,8 @@
 #include "../sounddsp/DSP.h"
 #include <math.h>
 
+OPENMPT_NAMESPACE_BEGIN
+
 #if MPT_COMPILER_MSVC
 #pragma warning(disable: 4725) // instruction may be inaccurate on some Pentiums
 #endif
@@ -468,3 +470,6 @@ bool CDSP::SetSurroundParameters(UINT nDepth, UINT nDelay)
 
 
 #endif // NO_DSP
+
+
+OPENMPT_NAMESPACE_END

@@ -15,6 +15,10 @@
 #include "tuningRatioMapWnd.h"
 #include "tuningdialog.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 BEGIN_MESSAGE_MAP(CTuningRatioMapWnd, CStatic)
 	ON_WM_PAINT()
 	ON_WM_SETFOCUS()
@@ -163,3 +167,6 @@ NOTEINDEXTYPE CTuningRatioMapWnd::GetShownCentre() const
 {
 	return m_nNote - m_nNoteCentre;
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -16,6 +16,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define  DISPLAY_TIMER_ID		150		// timer id
 /////////////////////////////////////////////////////////////////////////////
 // CCreditStatic
@@ -950,3 +954,6 @@ BOOL CCreditStatic::SetBkImage(LPCTSTR lpszResourceName)
 
     return TRUE;
 }
+
+
+OPENMPT_NAMESPACE_END

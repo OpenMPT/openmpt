@@ -23,6 +23,9 @@
 #endif
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #if !defined(NO_ZLIB)
 
 
@@ -314,3 +317,6 @@ bool CZipArchive::ExtractFile(std::size_t index)
 
 
 #endif // NO_ZLIB || NO_MINIZ
+
+
+OPENMPT_NAMESPACE_END

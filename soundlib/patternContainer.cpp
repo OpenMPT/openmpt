@@ -15,6 +15,9 @@
 #include "../common/version.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 void CPatternContainer::ClearPatterns()
 //-------------------------------------
 {
@@ -226,3 +229,5 @@ void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t)
 	}
 }
 
+
+OPENMPT_NAMESPACE_END

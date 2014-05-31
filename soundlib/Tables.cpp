@@ -18,6 +18,9 @@
 #include "WindowedFIR.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Common Tables
 
@@ -947,3 +950,5 @@ void CResampler::InitializeTables(bool force)
 	m_OldSettings = m_Settings;
 }
 
+
+OPENMPT_NAMESPACE_END

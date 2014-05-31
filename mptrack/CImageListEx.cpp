@@ -13,6 +13,10 @@
 #include "CImageListEx.h"
 #include "PNG.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, bool disabled)
 {
 	PNG::Bitmap *bitmap = PNG::ReadPNG(MAKEINTRESOURCE(resourceID));
@@ -92,3 +96,6 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	delete bitmap;
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

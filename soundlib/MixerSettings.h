@@ -10,6 +10,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct MixerSettings
 {
 
@@ -42,3 +45,6 @@ struct MixerSettings
 	MixerSettings();
 
 };
+
+
+OPENMPT_NAMESPACE_END

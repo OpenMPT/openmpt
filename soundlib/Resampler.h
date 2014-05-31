@@ -15,6 +15,9 @@
 #include "MixerSettings.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define SINC_WIDTH       8
 
 #define SINC_PHASES_BITS 12
@@ -91,3 +94,6 @@ public:
 	void InitializeTables(bool force=false);
 	bool IsHQ() const { return m_Settings.SrcMode >= SRCMODE_SPLINE && m_Settings.SrcMode < SRCMODE_DEFAULT; }
 };
+
+
+OPENMPT_NAMESPACE_END

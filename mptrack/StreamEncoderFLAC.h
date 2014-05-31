@@ -13,6 +13,9 @@
 #include "StreamEncoder.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+	
 class FLACEncoder : public EncoderFactoryBase
 {
 
@@ -27,3 +30,6 @@ public:
 	virtual ~FLACEncoder();
 
 };
+
+
+OPENMPT_NAMESPACE_END

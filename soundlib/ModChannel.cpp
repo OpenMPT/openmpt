@@ -12,6 +12,8 @@
 #include "Sndfile.h"
 #include "ModChannel.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel)
 //-------------------------------------------------------------------------------------------------
 {
@@ -89,3 +91,6 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

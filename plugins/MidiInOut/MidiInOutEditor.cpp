@@ -15,6 +15,9 @@
 #include "windows.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 MidiInOutEditor::MidiInOutEditor(AudioEffect *effect) : AEffEditor(effect)
 //------------------------------------------------------------------------
 {
@@ -202,3 +205,6 @@ intptr_t MidiInOutEditor::WindowCallback(int message, void *param1, void *param2
 	}
 	return Window::WindowCallback(message, param1, param2);
 }
+
+
+OPENMPT_NAMESPACE_END

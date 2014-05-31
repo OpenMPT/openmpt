@@ -16,6 +16,9 @@
 #include <cstring>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //#define LOG_TO_FILE
 
 
@@ -196,3 +199,6 @@ void Logger::operator () (const std::wstring &text)
 
 } // namespace log
 } // namespace mpt
+
+
+OPENMPT_NAMESPACE_END

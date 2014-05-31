@@ -19,6 +19,8 @@
 #include "../soundlib/plugins/PluginMixBuffer.h"
 #include "../soundlib/plugins/PlugInterface.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //#define kBuzzMagic	'Buzz'
 #define kDmoMagic	'DXMO'
 
@@ -119,10 +121,12 @@ public:
 };
 
 
+OPENMPT_NAMESPACE_END
 #ifndef NO_VST
 #include "../soundlib/plugins/PluginEventQueue.h"
 #include "../soundlib/Mixer.h"
 #endif // NO_VST
+OPENMPT_NAMESPACE_BEGIN
 
 
 //=================================
@@ -405,3 +409,6 @@ public:
 	void OnIdle() {}
 #endif // NO_VST
 };
+
+
+OPENMPT_NAMESPACE_END

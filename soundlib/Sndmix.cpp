@@ -20,6 +20,8 @@
 #include "../mptrack/TrackerSettings.h"
 #endif
 
+OPENMPT_NAMESPACE_BEGIN
+
 // VU-Meter
 #define VUMETER_DECAY		4
 
@@ -2305,3 +2307,6 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 	}
 
 }
+
+
+OPENMPT_NAMESPACE_END

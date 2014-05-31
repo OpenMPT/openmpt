@@ -12,6 +12,9 @@
 #include "Loaders.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
@@ -121,3 +124,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	return result;
 #endif // NO_MO3
 }
+
+
+OPENMPT_NAMESPACE_END

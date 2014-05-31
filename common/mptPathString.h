@@ -13,6 +13,8 @@
 #include <cstdio>
 #include <stdio.h>
 
+OPENMPT_NAMESPACE_BEGIN
+
 #if defined(MPT_WITH_PATHSTRING)
 
 //#define MPT_DEPRECATED_PATH
@@ -248,3 +250,4 @@ void SanitizeFilename(CString &str);
 
 #endif // MPT_WITH_PATHSTRING
 
+OPENMPT_NAMESPACE_END

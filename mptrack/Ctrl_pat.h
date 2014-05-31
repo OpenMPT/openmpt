@@ -14,6 +14,8 @@
 #include "globals.h"
 #include "PatternCursor.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class COrderList;
 class CCtrlPatterns;
 
@@ -263,3 +265,5 @@ public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg BOOL OnToolTip(UINT id, NMHDR *pTTTStruct, LRESULT *pResult);
 };
+
+OPENMPT_NAMESPACE_END

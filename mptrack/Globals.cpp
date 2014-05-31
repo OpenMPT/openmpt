@@ -28,6 +28,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CModControlDlg
 
@@ -792,3 +796,6 @@ LRESULT CModControlBar::OnHelpHitTest(WPARAM, LPARAM lParam)
 	}
 	return 0;
 }
+
+
+OPENMPT_NAMESPACE_END

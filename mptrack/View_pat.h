@@ -14,6 +14,8 @@
 #include "globals.h"
 #include "PatternCursor.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CModDoc;
 class CEditCommand;
 class CEffectVis;	//rewbs.fxvis
@@ -113,8 +115,10 @@ struct ModCommandPos
 };
 
 
+OPENMPT_NAMESPACE_END
 #include "PatternClipboard.h"
 #include "PatternEditorDialogs.h"
+OPENMPT_NAMESPACE_BEGIN
 
 
 //////////////////////////////////////////////////////////////////
@@ -532,3 +536,5 @@ public:
 
 DECLARE_FLAGSET(CViewPattern::PatternStatus);
 
+
+OPENMPT_NAMESPACE_END

@@ -14,6 +14,10 @@
 #include "view_tre.h"
 #include "moddoc.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////
 // CToolBarEx: custom toolbar base class
 
@@ -1220,3 +1224,6 @@ void CStereoVU::OnLButtonDown(UINT, CPoint)
 	// Reset clip indicator.
 	CMainFrame::gnClipLeft = CMainFrame::gnClipRight = false;
 }
+
+
+OPENMPT_NAMESPACE_END

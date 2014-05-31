@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 //===================================
 class CloseMainDialog: public CDialog
 //===================================
@@ -38,3 +40,5 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 };
+
+OPENMPT_NAMESPACE_END

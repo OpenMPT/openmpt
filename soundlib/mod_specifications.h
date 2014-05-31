@@ -15,6 +15,9 @@
 #include "../soundlib/SoundFilePlayConfig.h"	// mixlevel constants.
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //=======================
 struct CModSpecifications
 //=======================
@@ -86,3 +89,6 @@ namespace ModSpecs
 	extern const CModSpecifications itEx;
 	extern const CModSpecifications *Collection[8];
 }
+
+
+OPENMPT_NAMESPACE_END

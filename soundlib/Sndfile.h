@@ -47,6 +47,12 @@
 #include "plugins/PlugInterface.h"
 #include "RowVisitor.h"
 #include "Message.h"
+#include "pattern.h"
+#include "patternContainer.h"
+#include "ModSequence.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 class FileReader;
@@ -70,10 +76,6 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file);
 bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file);
 
 typedef void (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
-
-#include "pattern.h"
-#include "patternContainer.h"
-#include "ModSequence.h"
 
 
 #ifdef MODPLUG_TRACKER
@@ -940,3 +942,6 @@ void ReadExtendedInstrumentProperties(ModInstrument* pIns, FileReader &file);
 
 // Convert instrument flags which were read from 'dF..' extension to proper internal representation.
 void ConvertReadExtendedFlags(ModInstrument* pIns);
+
+
+OPENMPT_NAMESPACE_END

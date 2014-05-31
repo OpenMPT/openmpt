@@ -4,6 +4,10 @@
 #include "PNG.h"
 #include "../common/version.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 CRippleBitmap *CRippleBitmap::instance = nullptr;
 CAboutDlg *CAboutDlg::instance = nullptr;
 
@@ -243,3 +247,6 @@ BOOL CAboutDlg::OnInitDialog()
 	return TRUE;	// return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
+
+
+OPENMPT_NAMESPACE_END

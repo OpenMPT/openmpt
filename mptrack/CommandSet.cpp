@@ -20,6 +20,10 @@
 
 #include <sstream>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define ENABLE_LOGGING 0
 
 #if(ENABLE_LOGGING)
@@ -1999,3 +2003,6 @@ bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2,
 }
 
 //end rewbs.customKeys
+
+
+OPENMPT_NAMESPACE_END

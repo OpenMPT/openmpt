@@ -19,7 +19,10 @@
 #include "../common/FlagSet.h"
 
 
-namespace mpt { namespace Test {
+OPENMPT_NAMESPACE_BEGIN
+
+
+namespace Test {
 
 
 extern int fail_count;
@@ -49,7 +52,7 @@ public:
 	Context(const Context &c);
 };
 
-#define MPT_TEST_CONTEXT_CURRENT() (::mpt::Test::Context( __FILE__ , __LINE__ ))
+#define MPT_TEST_CONTEXT_CURRENT() (Test::Context( __FILE__ , __LINE__ ))
 
 
 struct TestFailed
@@ -59,7 +62,7 @@ struct TestFailed
 	TestFailed() { }
 };
 
-} } // namespace mpt::Test
+} // namespace Test
 
 template<typename T>
 struct ToStringHelper
@@ -79,9 +82,9 @@ struct ToStringHelper<FlagSet<enum_t, store_t> >
 	}
 };
 
-namespace mpt { namespace Test {
+namespace Test {
 
-class Test
+class Testcase
 {
 
 private:
@@ -93,7 +96,7 @@ private:
 
 public:
 
-	Test(Fatality fatality, Verbosity verbosity, const char * const desc, const Context &context);
+	Testcase(Fatality fatality, Verbosity verbosity, const char * const desc, const Context &context);
 
 public:
 
@@ -146,9 +149,9 @@ public:
 		}
 	}
 
-	#define VERIFY_EQUAL(x,y)	::mpt::Test::Test(::mpt::Test::FatalityContinue, ::mpt::Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
-	#define VERIFY_EQUAL_NONCONT(x,y)	::mpt::Test::Test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
-	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	::mpt::Test::Test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL(x,y)	Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_NONCONT(x,y)	Test::Testcase(Test::FatalityStop, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	Test::Testcase(Test::FatalityStop, Test::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
 
 #else
 
@@ -172,9 +175,9 @@ public:
 		}
 	}
 
-	#define VERIFY_EQUAL(x,y)	::mpt::Test::Test(::mpt::Test::FatalityContinue, ::mpt::Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
-	#define VERIFY_EQUAL_NONCONT(x,y)	::mpt::Test::Test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
-	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	::mpt::Test::Test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL(x,y)	Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_NONCONT(x,y)	Test::Testcase(Test::FatalityStop, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	Test::Testcase(Test::FatalityStop, Test::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
 
 #endif
 
@@ -183,13 +186,13 @@ public:
 
 #define DO_TEST(func) \
 do{ \
-	::mpt::Test::Test test(::mpt::Test::FatalityStop, ::mpt::Test::VerbosityNormal, #func , MPT_TEST_CONTEXT_CURRENT() ); \
+	Test::Testcase test(Test::FatalityStop, Test::VerbosityNormal, #func , MPT_TEST_CONTEXT_CURRENT() ); \
 	try { \
 		test.ShowStart(); \
 		fail_count = 0; \
 		func(); \
 		if(fail_count > 0) { \
-			throw ::mpt::Test::TestFailed(); \
+			throw Test::TestFailed(); \
 		} \
 		test.ReportPassed(); \
 	} catch(...) { \
@@ -198,7 +201,10 @@ do{ \
 }while(0)
 
 
-} } // namespace mpt::Test
+} // namespace Test
+
+
+OPENMPT_NAMESPACE_END
 
 
 #endif // !MODPLUG_TRACKER

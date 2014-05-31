@@ -15,6 +15,8 @@
 #include <vector>
 #include "../soundlib/Snd_defs.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CVstPlugin;
 
 class CAbstractVstEditor: public CDialog
@@ -103,5 +105,6 @@ protected:
 };
 //end rewbs.defaultPlugGUI
 
-#endif // NO_VST
+OPENMPT_NAMESPACE_END
 
+#endif // NO_VST

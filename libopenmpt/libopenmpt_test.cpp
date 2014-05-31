@@ -19,6 +19,8 @@
 
 #include <clocale>
 
+using namespace OpenMPT;
+
 #if defined( LIBOPENMPT_BUILD_TEST )
 
 #if defined(WIN32) && defined(UNICODE)
@@ -33,13 +35,13 @@ int main( int /*argc*/, char * /*argv*/ [] ) {
 	try {
 
 		// run test with "C" / classic() locale
-		mpt::Test::DoTests();
+		Test::DoTests();
 
 		// try setting the C locale to the user locale
 		setlocale( LC_ALL, "" );
 		
 		// run all tests again with a set C locale
-		mpt::Test::DoTests();
+		Test::DoTests();
 		
 		// try to set the C and C++ locales to the user locale
 		try {
@@ -50,7 +52,7 @@ int main( int /*argc*/, char * /*argv*/ [] ) {
 		}
 		
 		// and now, run all tests once again
-		mpt::Test::DoTests();
+		Test::DoTests();
 
 	} catch ( const std::exception & e ) {
 		std::cerr << "TEST ERROR: exception: " << ( e.what() ? e.what() : "" ) << std::endl;

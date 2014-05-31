@@ -23,8 +23,6 @@
 #include "../soundlib/FileReader.h"
 #include <sstream>
 
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -33,7 +31,13 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-// Change the number of channels.
+OPENMPT_NAMESPACE_BEGIN
+
+
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
+
+
+	// Change the number of channels.
 // Return true on success.
 bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancelInRemoveDlg)
 //------------------------------------------------------------------------------------------
@@ -1202,3 +1206,6 @@ bool CModDoc::GlobalVolumeToPattern()
 	m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	return result;
 }
+
+
+OPENMPT_NAMESPACE_END

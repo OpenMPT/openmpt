@@ -19,6 +19,10 @@
 
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+
 struct VorbisDynBind
 {
 
@@ -443,3 +447,6 @@ std::string VorbisEncoder::DescribeQuality(float quality) const
 	return mpt::String::Format("Q%3.1f", quality * 10.0f);
 }
 
+
+
+OPENMPT_NAMESPACE_END

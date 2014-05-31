@@ -20,6 +20,9 @@
 #include "../soundlib/WAVTools.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 class WavStreamWriter : public IAudioStreamEncoder
 {
 private:
@@ -228,3 +231,6 @@ IAudioStreamEncoder *WAVEncoder::ConstructStreamEncoder(std::ostream &file) cons
 	WavStreamWriter *result = new WavStreamWriter(*this, file);
 	return result;
 }
+
+
+OPENMPT_NAMESPACE_END

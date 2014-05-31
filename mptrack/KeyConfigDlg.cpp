@@ -12,6 +12,10 @@
 #include "KeyConfigDlg.h"
 #include "FileDialog.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 //***************************************************************************************//
 // CCustEdit: customised CEdit control to catch keypresses.
 // (does what CHotKeyCtrl does,but better)
@@ -942,3 +946,6 @@ int COptionsKeyboard::GetCategoryFromCommandID(CommandID command) const
 	}
 	return -1;
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -72,5 +72,11 @@
     <ClInclude Include="..\common\WindowBase.h">
       <Filter>Source Files\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\Button.h">
+      <Filter>Source Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\EditBox.h">
+      <Filter>Source Files\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

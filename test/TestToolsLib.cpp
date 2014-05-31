@@ -20,7 +20,10 @@
 #include <iostream>
 
 
-namespace mpt { namespace Test {
+OPENMPT_NAMESPACE_BEGIN
+
+
+namespace Test {
 
 
 int fail_count = 0;
@@ -48,7 +51,7 @@ Context::Context(const Context &c)
 }
 
 
-Test::Test(Fatality fatality, Verbosity verbosity, const char * const desc, const Context &context)
+Testcase::Testcase(Fatality fatality, Verbosity verbosity, const char * const desc, const Context &context)
 	: fatality(fatality)
 	, verbosity(verbosity)
 	, desc(desc)
@@ -58,13 +61,13 @@ Test::Test(Fatality fatality, Verbosity verbosity, const char * const desc, cons
 }
 
 
-std::string Test::AsString() const
+std::string Testcase::AsString() const
 {
 	return mpt::String::Print("Test: %1(%2): %3", context.file, context.line, remove_newlines(desc));
 }
 
 
-void Test::ShowStart() const
+void Testcase::ShowStart() const
 {
 	switch(verbosity)
 	{
@@ -78,7 +81,7 @@ void Test::ShowStart() const
 }
 
 
-void Test::ShowProgress(const char * text) const
+void Testcase::ShowProgress(const char * text) const
 {
 	switch(verbosity)
 	{
@@ -92,7 +95,7 @@ void Test::ShowProgress(const char * text) const
 }
 
 
-void Test::ShowPass() const
+void Testcase::ShowPass() const
 {
 	switch(verbosity)
 	{
@@ -106,7 +109,7 @@ void Test::ShowPass() const
 }
 
 
-void Test::ShowFail(bool exception, const char * const text) const
+void Testcase::ShowFail(bool exception, const char * const text) const
 {
 	std::cout << AsString() << ": FAIL" << std::endl;
 	std::cout.flush();
@@ -133,20 +136,20 @@ void Test::ShowFail(bool exception, const char * const text) const
 }
 
 
-void Test::ReportPassed()
+void Testcase::ReportPassed()
 {
 	ShowPass();
 }
 
 
-void Test::ReportFailed()
+void Testcase::ReportFailed()
 {
 	fail_count++;
 	ReportException();
 }
 
 
-void Test::ReportException()
+void Testcase::ReportException()
 {
 	try
 	{
@@ -170,7 +173,10 @@ void Test::ReportException()
 }
 
 
-} } // namespace mpt::Test
+} // namespace Test
+
+
+OPENMPT_NAMESPACE_END
 
 
 #endif // !MODPLUG_TRACKER

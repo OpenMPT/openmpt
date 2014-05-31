@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+OPENMPT_NAMESPACE_BEGIN
+
 enum ArchiveFileType
 {
 	ArchiveFileInvalid,
@@ -101,3 +103,6 @@ public:
 	virtual const ArchiveFileInfo & at(std::size_t index) const { return contents.at(index); }
 	virtual const ArchiveFileInfo & operator [] (std::size_t index) const { return contents[index]; }
 };
+
+
+OPENMPT_NAMESPACE_END

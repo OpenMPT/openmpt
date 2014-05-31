@@ -26,6 +26,10 @@
 
 #include "../common/mptFstream.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 extern const char *gszChnCfgNames[3];
 
 static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outputBuffer, CSoundFile::samplecount_t count, SampleFormat sampleFormat, Dither &dither)
@@ -1326,3 +1330,5 @@ void CDoWaveConvert::OnButton1()
 	EndDialog(ok);
 }
 
+
+OPENMPT_NAMESPACE_END

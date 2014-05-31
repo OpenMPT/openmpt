@@ -30,6 +30,9 @@
 #endif // MPT_INTMIXER
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 namespace MixFuncTable
 {
 #ifdef MPT_INTMIXER
@@ -621,3 +624,5 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 #endif // MPT_INTMIXER
 }
 
+
+OPENMPT_NAMESPACE_END
