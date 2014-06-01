@@ -2677,11 +2677,11 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 		for(size_t i = 0; i < 2; i++) // 0: app items, 1: user items
 		{
 			// To avoid duplicates, check whether app path and config path are the same.
-			if (i == 1 && mpt::PathString::CompareNoCase(CTrackApp::GetAppDirPath(), theApp.GetConfigPath()) == 0)
+			if (i == 1 && mpt::PathString::CompareNoCase(theApp.GetAppDirPath(), theApp.GetConfigPath()) == 0)
 				break;
 			
 			mpt::PathString basePath;
-			basePath = (i == 0) ? CTrackApp::GetAppDirPath() : theApp.GetConfigPath();
+			basePath = (i == 0) ? theApp.GetAppDirPath() : theApp.GetConfigPath();
 			basePath += pszFolderName;
 			if (Util::sdOs::IsPathFileAvailable(basePath, Util::sdOs::FileModeExists) == false)
 				continue;
