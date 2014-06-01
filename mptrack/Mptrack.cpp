@@ -294,8 +294,6 @@ std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 }
 
 
-mpt::PathString CTrackApp::m_szExePath;
-
 /////////////////////////////////////////////////////////////////////////////
 // MPTRACK Command Line options
 
@@ -700,7 +698,7 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 	// copy a config file from the exe directory to the new config dirs
 	mpt::PathString sOldPath;
 	mpt::PathString sNewPath;
-	sOldPath = m_szExePath;
+	sOldPath = GetAppDirPath();
 	sOldPath += sSubDir;
 	sOldPath += sFileName;
 
@@ -727,18 +725,8 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 void CTrackApp::SetupPaths(bool overridePortable)
 //-----------------------------------------------
 {
-	WCHAR tempExePath[MAX_PATH];
-	if(GetModuleFileNameW(NULL, tempExePath, CountOf(tempExePath)))
-	{
-		mpt::String::SetNullTerminator(tempExePath);
-		m_szExePath = mpt::PathString::FromNative(tempExePath).GetDrive();
-		m_szExePath += mpt::PathString::FromNative(tempExePath).GetDir();
-
-		WCHAR wcsDir[MAX_PATH];
-		GetFullPathNameW(m_szExePath.AsNative().c_str(), CountOf(wcsDir), wcsDir, NULL);
-		m_szExePath = mpt::PathString::FromNative(wcsDir);
-		SetCurrentDirectoryW(wcsDir);
-	}
+	m_szExePath = mpt::GetAppPath();
+	SetCurrentDirectoryW(m_szExePath.AsNative().c_str());
 
 	m_szConfigDirectory = mpt::PathString();
 	// Try to find a nice directory where we should store our settings (default: %APPDATA%)
@@ -755,7 +743,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	m_szConfigDirectory = mpt::PathString::FromNative(tempConfigDirectory);
 
 	// Check if the user prefers to use the app's directory
-	m_szConfigFileName = m_szExePath; // config file
+	m_szConfigFileName = GetAppDirPath(); // config file
 	m_szConfigFileName += MPT_PATHSTRING("mptrack.ini");
 	if(GetPrivateProfileIntW(L"Paths", L"UseAppDataDirectory", 1, m_szConfigFileName.AsNative().c_str()) == 0)
 	{
@@ -780,7 +768,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 		#endif	// WIN32 Legacy Stuff
 	} else
 	{
-		m_szConfigDirectory = m_szExePath;
+		m_szConfigDirectory = GetAppDirPath();
 	}
 
 	// Create tunings dir
@@ -796,7 +784,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	{
 		// Import old tunings
 		mpt::PathString sOldTunings;
-		sOldTunings = m_szExePath;
+		sOldTunings = GetAppDirPath();
 		sOldTunings += MPT_PATHSTRING("tunings\\");
 
 		if(PathIsDirectoryW(sOldTunings.AsNative().c_str()) != 0)

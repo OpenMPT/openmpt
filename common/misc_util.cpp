@@ -751,22 +751,45 @@ namespace mpt
 #endif
 
 
-#if !defined(MODPLUG_TRACKER)
-// For OpenMPT, this is defined in mptrack/MPTrackUtil.cpp .
 mpt::PathString GetAppPath()
 {
+#if defined(MODPLUG_TRACKER)
+	WCHAR exeFileName[MAX_PATH+1];
+	MemsetZero(exeFileName);
+	if(!GetModuleFileNameW(NULL, exeFileName, MAX_PATH))
+	{
+		return mpt::PathString();
+	}
+	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName).GetDrive() + mpt::PathString::FromNative(exeFileName).GetDir());
+#else
 	return mpt::PathString(); // dummy
-}
 #endif
+}
+
 
 mpt::PathString GetSystemPath()
 {
 	WCHAR path[MAX_PATH+1];
 	MemsetZero(path);
-	GetSystemDirectoryW(path, MAX_PATH);
+	if(!GetSystemDirectoryW(path, MAX_PATH))
+	{
+		return mpt::PathString();
+	}
 	return mpt::PathString::FromNative(path) + MPT_PATHSTRING("\\");
 }
 
+
+mpt::PathString GetAbsolutePath(const mpt::PathString &path)
+{
+	WCHAR fullPathName[MAX_PATH+1];
+	MemsetZero(fullPathName);
+	if(!GetFullPathNameW(path.AsNative().c_str(), MAX_PATH, fullPathName, NULL))
+	{
+		return path;
+	}
+	return mpt::PathString::FromNative(fullPathName);
+}
+		
 
 class LibraryHandle
 {

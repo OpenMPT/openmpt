@@ -19,22 +19,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-namespace mpt
-{
-
-
-// declared in misc_util.h
-mpt::PathString GetAppPath()
-//--------------------------
-{
-	return theApp.GetAppDirPath();
-}
-
-
-} // namespace mpt
-
-
 /*
  * Loads resource.
  * [in] lpName and lpType: parameters passed to FindResource().
