@@ -23,7 +23,7 @@ using namespace OpenMPT;
 
 #if defined( LIBOPENMPT_BUILD_TEST )
 
-#if defined(WIN32) && defined(UNICODE)
+#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
 #if defined(__GNUC__)
 // mingw64 does only default to special C linkage for "main", but not for "wmain".
 extern "C"

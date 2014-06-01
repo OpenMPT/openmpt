@@ -39,6 +39,9 @@
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif
 
 #ifdef _DEBUG
 #if MPT_COMPILER_MSVC && defined(_MFC_VER)
@@ -1572,7 +1575,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFla
 		VERIFY_EQUAL_NONCONT(memcmp(&sampleData[0], &sampleDataNew[0], sampleData.size()), 0);
 		fclose(f);
 	}
-	#ifdef WIN32
+	#if MPT_OS_WINDOWS
 		for(int retry=0; retry<10; retry++)
 		{
 			if(DeleteFileW(filename.AsNative().c_str()) != FALSE)

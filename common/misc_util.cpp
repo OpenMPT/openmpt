@@ -22,6 +22,10 @@
 #endif
 #endif
 
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif
+
 #if defined(MODPLUG_TRACKER)
 #include <mmsystem.h>
 #endif
@@ -619,7 +623,7 @@ std::vector<char> HexToBin(const std::wstring &src)
 
 
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 
 namespace mpt
 {
@@ -719,7 +723,7 @@ bool IsAtLeast(mpt::Windows::Version::Number version)
 } // namespace Windows
 } // namespace mpt
 
-#endif // WIN32
+#endif // MPT_OS_WINDOWS
 
 
 #if defined(MPT_WITH_DYNBIND)

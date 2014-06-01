@@ -23,11 +23,11 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt
 {
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 typedef std::wstring RawPathString;
-#else // !WIN32
+#else // !MPT_OS_WINDOWS
 typedef std::string RawPathString;
-#endif // WIN32
+#endif // if MPT_OS_WINDOWS
 
 class PathString
 {
@@ -85,11 +85,8 @@ public:
 	}
 	bool empty() const { return path.empty(); }
 
-#if defined(WIN32)
-	static int CompareNoCase(const PathString & a, const PathString & b)
-	{
-		return lstrcmpiW(a.ToWide().c_str(), b.ToWide().c_str());
-	}
+#if MPT_OS_WINDOWS
+	static int CompareNoCase(const PathString & a, const PathString & b);
 #endif
 
 public:
@@ -117,7 +114,7 @@ public:
 		if(empty())
 			return false;
 		const RawPathString::value_type &c = path[path.length() - 1];
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 		if(c == L'\\' || c == L'/')
 			return true;
 #else
@@ -135,7 +132,7 @@ public:
 
 public:
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 
 	// conversions
 #if defined(MPT_WITH_CHARSET_LOCALE)
@@ -170,7 +167,7 @@ public:
 #endif
 #endif
 
-#else // !WIN32
+#else // !MPT_OS_WINDOWS
 
 	// conversions
 #if defined(MPT_WITH_CHARSET_LOCALE)
@@ -191,7 +188,7 @@ public:
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #endif
 
-#endif // WIN32
+#endif // MPT_OS_WINDOWS
 
 };
 
@@ -202,15 +199,15 @@ static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWid
 
 } // namespace mpt
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 
 #define MPT_PATHSTRING(x) mpt::PathString::FromNative( L ## x )
 
-#else // !WIN32
+#else // !MPT_OS_WINDOWS
 
 #define MPT_PATHSTRING(x) mpt::PathString::FromNative( x )
 
-#endif // WIN32
+#endif // MPT_OS_WINDOWS
 
 FILE * mpt_fopen(const mpt::PathString &filename, const char *mode);
 FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode);

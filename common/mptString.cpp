@@ -30,6 +30,10 @@
 #include <strings.h> // for strncasecmp
 #endif
 
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif
+
 #if defined(MPT_CHARSET_ICONV)
 #include <iconv.h>
 #endif

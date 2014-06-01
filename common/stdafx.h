@@ -38,7 +38,7 @@
 #endif
 
 
-#if defined(_WIN32) && !defined(NO_WINDOWS_H)
+#if defined(MPT_USE_WINDOWS_H)
 #include <windows.h>
 #endif
 

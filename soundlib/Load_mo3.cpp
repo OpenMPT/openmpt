@@ -56,7 +56,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Library loaded successfully.
 		#if MPT_OS_WINDOWS
-			#define UNMO3_API WINAPI
+			#define UNMO3_API __stdcall
 		#else
 			#define UNMO3_API 
 		#endif
