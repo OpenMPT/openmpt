@@ -10,11 +10,30 @@
 #include "stdafx.h"
 #include "mptPathString.h"
 
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif
+
 
 OPENMPT_NAMESPACE_BEGIN
 
 
 #if defined(MPT_WITH_PATHSTRING)
+
+#if MPT_OS_WINDOWS
+
+namespace mpt
+{
+
+int PathString::CompareNoCase(const PathString & a, const PathString & b)
+//-----------------------------------------------------------------------
+{
+	return lstrcmpiW(a.ToWide().c_str(), b.ToWide().c_str());
+}
+
+} // namespace mpt
+
+#endif // MPT_OS_WINDOWS
 
 #if defined(MODPLUG_TRACKER)
 
@@ -142,7 +161,7 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 }
 
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 #if defined(_MFC_VER)
 
 mpt::PathString PathString::TunnelOutofCString(const CString &path)
@@ -189,29 +208,29 @@ CString PathString::TunnelIntoCString(const mpt::PathString &path)
 FILE * mpt_fopen(const mpt::PathString &filename, const char *mode)
 //-----------------------------------------------------------------
 {
-	#if defined(WIN32)
+	#if MPT_OS_WINDOWS
 		#if defined(MPT_WITH_CHARSET_LOCALE)
 			return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetLocale, mode).c_str() : nullptr);
 		#else
 			return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetUTF8, mode).c_str() : nullptr);
 		#endif
-	#else // !WIN32
+	#else // !MPT_OS_WINDOWS
 		return fopen(filename.AsNative().c_str(), mode);
-	#endif // WIN32
+	#endif // MPT_OS_WINDOWS
 }
 
 FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode)
 //--------------------------------------------------------------------
 {
-	#if defined(WIN32)
+	#if MPT_OS_WINDOWS
 		return _wfopen(filename.AsNative().c_str(), mode);
-	#else // !WIN32
+	#else // !MPT_OS_WINDOWS
 		#if defined(MPT_WITH_CHARSET_LOCALE)
 			return fopen(filename.AsNative().c_str(), mode ? mpt::ToLocale(mode).c_str() : nullptr);
 		#else
 			return fopen(filename.AsNative().c_str(), mode ? mpt::To(mpt::CharsetUTF8, mode).c_str() : nullptr);
 		#endif
-	#endif // WIN32
+	#endif // MPT_OS_WINDOWS
 }
 
 

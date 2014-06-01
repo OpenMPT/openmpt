@@ -63,7 +63,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define PACKED __declspec(align(1))
 #define NEEDS_PRAGMA_PACK
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#if MPT_COMPILER_GCC && defined(WIN32)
+#if MPT_COMPILER_GCC && MPT_OS_WINDOWS
 // Some versions of mingw64 need this when windows-hosted. Strange.
 #define NEEDS_PRAGMA_PACK
 #endif
@@ -418,17 +418,20 @@ STATIC_ASSERT(sizeof(FloatInt32) == 4);
 
 
 
-#if !defined(WIN32)
+#if !defined(MPT_USE_WINDOWS_H)
 
 // openmpt assumes these type have exact WIN32 semantics
 
+namespace mpt { namespace Legacy {
 typedef std::uint8_t  BYTE;
 typedef std::uint16_t WORD;
 typedef std::uint32_t DWORD;
 typedef std::int32_t  LONG;
 typedef std::uint32_t UINT;
+} } // namespace mpt::Legacy
+using namespace mpt::Legacy;
 
-#endif // !WIN32
+#endif // !MPT_USE_WINDOWS_H
 
 
 

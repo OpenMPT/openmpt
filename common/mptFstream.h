@@ -31,7 +31,7 @@ namespace mpt
 
 #elif MPT_COMPILER_GCC
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 // GCC C++ library has no wchar_t overloads
 #define MPT_FSTREAM_DO_CONVERSIONS
 #define MPT_FSTREAM_DO_CONVERSIONS_ANSI
@@ -111,7 +111,7 @@ public:
 	{
 		MPT_FSTREAM_OPEN(filename.c_str(), mode);
 	}
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 	MPT_DEPRECATED_PATH void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
 		MPT_FSTREAM_OPEN(filename, mode);
@@ -146,7 +146,7 @@ public:
 	{
 		MPT_FSTREAM_OPEN(filename.c_str(), mode);
 	}
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 	MPT_DEPRECATED_PATH void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
 		MPT_FSTREAM_OPEN(filename, mode);
@@ -181,7 +181,7 @@ public:
 	{
 		MPT_FSTREAM_OPEN(filename.c_str(), mode);
 	}
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 	MPT_DEPRECATED_PATH void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
 		MPT_FSTREAM_OPEN(filename, mode);

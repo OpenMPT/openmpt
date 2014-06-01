@@ -674,7 +674,7 @@ std::vector<char> HexToBin(const std::wstring &src);
 } // namespace Util
 
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 
 namespace mpt
 {
@@ -725,7 +725,7 @@ bool IsAtLeast(mpt::Windows::Version::Number version);
 } // namespace Windows
 } // namespace mpt
 
-#endif // WIN32
+#endif // MPT_OS_WINDOWS
 
 
 #if defined(MPT_WITH_DYNBIND)

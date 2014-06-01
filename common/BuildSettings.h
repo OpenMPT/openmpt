@@ -281,9 +281,8 @@
 #define MPT_WITH_CHARSET_LOCALE // PathString requires locale charset
 #endif
 
-#if !defined(MODPLUG_TRACKER) && defined(MPT_WITH_DYNBIND)
-// For library builds, windows.h is only required for LoadLibrary.
-//#define NO_WINDOWS_H
+#if MPT_OS_WINDOWS && defined(MODPLUG_TRACKER)
+#define MPT_USE_WINDOWS_H
 #endif
 
 
@@ -332,7 +331,7 @@
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
 
-#if defined(_WIN32) && !defined(NO_WINDOWS_H)
+#if defined(_WIN32)
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
 #define _WIN32_WINNT        0x0501 // _WIN32_WINNT_WINXP
