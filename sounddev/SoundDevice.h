@@ -262,7 +262,7 @@ struct SoundDeviceSettings
 		, UpdateIntervalMS(5)
 		, Samplerate(48000)
 		, Channels(2)
-		, sampleFormat(SampleFormatFloat32)
+		, sampleFormat(mpt::Windows::Version::IsWine() ? SampleFormatInt16 : SampleFormatFloat32)
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
 		, KeepDeviceRunning(true)
