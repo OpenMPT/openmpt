@@ -166,7 +166,7 @@ struct DecodeFloat32
 	static const int input_inc = 4;
 	forceinline output_t operator() (const input_t *inBuf)
 	{
-		return DecodeFloatLE(uint8_4(uint8(inBuf[loLoByteIndex]), uint8(inBuf[loHiByteIndex]), uint8(inBuf[hiLoByteIndex]), uint8(inBuf[hiHiByteIndex])));
+		return IEEE754binary32LE(uint8(inBuf[loLoByteIndex]), uint8(inBuf[loHiByteIndex]), uint8(inBuf[hiLoByteIndex]), uint8(inBuf[hiHiByteIndex]));
 	}
 };
 
@@ -179,7 +179,7 @@ struct DecodeScaledFloat32
 	float factor;
 	forceinline output_t operator() (const input_t *inBuf)
 	{
-		return factor * DecodeFloatLE(uint8_4(uint8(inBuf[loLoByteIndex]), uint8(inBuf[loHiByteIndex]), uint8(inBuf[hiLoByteIndex]), uint8(inBuf[hiHiByteIndex])));
+		return factor * IEEE754binary32LE(uint8(inBuf[loLoByteIndex]), uint8(inBuf[loHiByteIndex]), uint8(inBuf[hiLoByteIndex]), uint8(inBuf[hiHiByteIndex]));
 	}
 	forceinline DecodeScaledFloat32(float scaleFactor)
 		: factor(scaleFactor)

@@ -34,10 +34,34 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+#if MPT_COMPILER_GCC || MPT_COMPILER_MSVC
+// Compiler supports type-punning through unions. This is not stricly standard-conforming.
+// For GCC, this is documented, for MSVC this is apparently not documented, but we assume it.
+#define MPT_COMPILER_UNION_TYPE_ALIASES 1
+#endif
+
+#ifndef MPT_COMPILER_UNION_TYPE_ALIASES
+// Compiler does not support type-punning through unions. std::memcpy is used instead.
+// This is the safe fallback and strictly standard-conforming.
+// Another standard-compliant alternative would be casting pointers to a character type pointer.
+// This results in rather unreadable code and,
+// in most cases, compilers generate better code by just inlining the memcpy anyway.
+// (see <http://blog.regehr.org/archives/959>).
+#define MPT_COMPILER_UNION_TYPE_ALIASES 0
+#endif
+
+
+
+// Platform has native IEEE floating point representation.
+// (Currently always assumed)
+#define MPT_PLATFORM_IEEE_FLOAT 1
+
+
+
 #if MPT_COMPILER_MSVC
 
 #if MPT_MSVC_BEFORE(2010,0)
-#define nullptr		0
+#define nullptr 0
 #endif
 
 #elif MPT_COMPILER_GCC
@@ -369,21 +393,21 @@ struct int24
 	explicit int24(int other)
 	{
 		#ifdef MPT_PLATFORM_BIG_ENDIAN
-			bytes[0] = ((unsigned int)other>>16)&0xff;
-			bytes[1] = ((unsigned int)other>> 8)&0xff;
-			bytes[2] = ((unsigned int)other>> 0)&0xff;
+			bytes[0] = (static_cast<unsigned int>(other)>>16)&0xff;
+			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
+			bytes[2] = (static_cast<unsigned int>(other)>> 0)&0xff;
 		#else
-			bytes[0] = ((unsigned int)other>> 0)&0xff;
-			bytes[1] = ((unsigned int)other>> 8)&0xff;
-			bytes[2] = ((unsigned int)other>>16)&0xff;
+			bytes[0] = (static_cast<unsigned int>(other)>> 0)&0xff;
+			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
+			bytes[2] = (static_cast<unsigned int>(other)>>16)&0xff;
 		#endif
 	}
 	operator int() const
 	{
 		#ifdef MPT_PLATFORM_BIG_ENDIAN
-			return ((int8)bytes[0] * 65536) + (bytes[1] * 256) + bytes[2];
+			return (static_cast<int8>(bytes[0]) * 65536) + (bytes[1] * 256) + bytes[2];
 		#else
-			return ((int8)bytes[2] * 65536) + (bytes[1] * 256) + bytes[0];
+			return (static_cast<int8>(bytes[2]) * 65536) + (bytes[1] * 256) + bytes[0];
 		#endif
 	}
 };
@@ -392,29 +416,8 @@ STATIC_ASSERT(sizeof(int24) == 3);
 #define int24_max (0+0x007fffff)
 
 
-// 32-bit wrapper for encoding 32-bit floats
-struct uint8_4
-{
-	uint8 x[4];
-	uint8_4() { }
-	uint8_4(uint8 a, uint8 b, uint8 c, uint8 d) { x[0] = a; x[1] = b; x[2] = c; x[3] = d; }
-	uint32 GetBE() const { return (x[0] << 24) | (x[1] << 16) | (x[2] <<  8) | (x[3] <<  0); }
-	uint32 GetLE() const { return (x[0] <<  0) | (x[1] <<  8) | (x[2] << 16) | (x[3] << 24); }
-	uint8_4 & SetBE(uint32 y) { x[0] = (y >> 24)&0xff; x[1] = (y >> 16)&0xff; x[2] = (y >>  8)&0xff; x[3] = (y >>  0)&0xff; return *this; }
-	uint8_4 & SetLE(uint32 y) { x[0] = (y >>  0)&0xff; x[1] = (y >>  8)&0xff; x[2] = (y >> 16)&0xff; x[3] = (y >> 24)&0xff; return *this; }
-};
-STATIC_ASSERT(sizeof(uint8_4) == 4);
-
-
 typedef float float32;
 STATIC_ASSERT(sizeof(float32) == 4);
-
-union FloatInt32
-{
-	float32 f;
-	uint32 i;
-};
-STATIC_ASSERT(sizeof(FloatInt32) == 4);
 
 
 

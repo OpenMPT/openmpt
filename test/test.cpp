@@ -196,23 +196,6 @@ static noinline void TestTypes()
 }
 
 
-static float AsFloat(uint32 x)
-//----------------------------
-{
-	FloatInt32 conv;
-	conv.i = x;
-	return conv.f;
-}
-
-static uint32 AsInt(float x)
-//--------------------------
-{
-	FloatInt32 conv;
-	conv.f = x;
-	return conv.i;
-}
-
-
 static void TestFloatFormat(double x, const char * format, mpt::FormatFlags f, std::size_t width = 0, int precision = -1)
 {
 #ifdef MODPLUG_TRACKER
@@ -284,18 +267,22 @@ static noinline void TestMisc()
 //-----------------------------
 {
 
-	VERIFY_EQUAL(0x3f800000u, AsInt(1.0f));
-	VERIFY_EQUAL(AsFloat(0x3f800000u),  1.0f);
-	VERIFY_EQUAL(AsFloat(0x00000000u),  0.0f);
-	VERIFY_EQUAL(AsFloat(0xbf800000u), -1.0f);
-	VERIFY_EQUAL(DecodeFloatNE(0x3f800000u), 1.0f);
-	VERIFY_EQUAL(DecodeFloatLE(uint8_4(0x00,0x00,0x80,0x3f)), 1.0f);
-	VERIFY_EQUAL(DecodeFloatBE(uint8_4(0x3f,0x80,0x00,0x00)), 1.0f);
-	VERIFY_EQUAL(EncodeFloatNE(1.0f), 0x3f800000u);
-	VERIFY_EQUAL(EncodeFloatBE(1.0f).GetBE(), 0x3f800000u);
-	VERIFY_EQUAL(EncodeFloatLE(1.0f).GetBE(), 0x0000803fu);
-	VERIFY_EQUAL(EncodeFloatLE(1.0f).GetLE(), 0x3f800000u);
-	VERIFY_EQUAL(EncodeFloatBE(1.0f).GetLE(), 0x0000803fu);
+	VERIFY_EQUAL(EncodeIEEE754binary32(1.0f), 0x3f800000u);
+	VERIFY_EQUAL(EncodeIEEE754binary32(-1.0f), 0xbf800000u);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u), 0.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x41840000u), 16.5f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x3faa0000u),  1.328125f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0xbfaa0000u), -1.328125f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u),  0.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0xbf800000u), -1.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
+	VERIFY_EQUAL(IEEE754binary32LE(1.0f).GetInt32(), 0x3f800000u);
+	VERIFY_EQUAL(IEEE754binary32BE(1.0f).GetInt32(), 0x3f800000u);
+	VERIFY_EQUAL(IEEE754binary32LE(0x00,0x00,0x80,0x3f), 1.0f);
+	VERIFY_EQUAL(IEEE754binary32BE(0x3f,0x80,0x00,0x00), 1.0f);
+	VERIFY_EQUAL(IEEE754binary32LE(1.0f), IEEE754binary32LE(0x00,0x00,0x80,0x3f));
+	VERIFY_EQUAL(IEEE754binary32BE(1.0f), IEEE754binary32BE(0x3f,0x80,0x00,0x00));
 
 	VERIFY_EQUAL(Stringify(1.5f), "1.5");
 	VERIFY_EQUAL(Stringify(true), "1");
@@ -2076,11 +2063,11 @@ static noinline void TestSampleConversion()
 		uint8 *source32 = sourceBuf;
 		for(size_t i = 0; i < 65536; i++)
 		{
-			uint8_4 floatbits = EncodeFloatBE((static_cast<float>(i) / 65536.0f) - 0.5f);
-			source32[i * 4 + 0] = floatbits.x[0];
-			source32[i * 4 + 1] = floatbits.x[1];
-			source32[i * 4 + 2] = floatbits.x[2];
-			source32[i * 4 + 3] = floatbits.x[3];
+			IEEE754binary32BE floatbits = IEEE754binary32BE((static_cast<float>(i) / 65536.0f) - 0.5f);
+			source32[i * 4 + 0] = floatbits.GetByte(0);
+			source32[i * 4 + 1] = floatbits.GetByte(1);
+			source32[i * 4 + 2] = floatbits.GetByte(2);
+			source32[i * 4 + 3] = floatbits.GetByte(3);
 		}
 
 		int16 *truncated16 = static_cast<int16 *>(targetBuf);
