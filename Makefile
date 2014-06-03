@@ -287,6 +287,8 @@ ifeq ($(shell pkg-config --exists portaudio-2.0 && echo yes),yes)
 CPPFLAGS_PORTAUDIO := $(shell pkg-config --cflags-only-I portaudio-2.0 ) -DMPT_WITH_PORTAUDIO
 LDFLAGS_PORTAUDIO  := $(shell pkg-config --libs-only-L   portaudio-2.0 ) $(shell pkg-config --libs-only-other portaudio-2.0 )
 LDLIBS_PORTAUDIO   := $(shell pkg-config --libs-only-l   portaudio-2.0 )
+else
+NO_PORTAUDIO:=1
 endif
 endif
 
@@ -297,6 +299,8 @@ ifeq ($(shell pkg-config --exists flac && echo yes),yes)
 CPPFLAGS_FLAC := $(shell pkg-config --cflags-only-I flac ) -DMPT_WITH_FLAC
 LDFLAGS_FLAC  := $(shell pkg-config --libs-only-L   flac ) $(shell pkg-config --libs-only-other flac )
 LDLIBS_FLAC   := $(shell pkg-config --libs-only-l   flac )
+else
+NO_FLAC:=1
 endif
 endif
 
@@ -307,6 +311,8 @@ ifeq ($(shell pkg-config --exists wavpack && echo yes),yes)
 CPPFLAGS_WAVPACK := $(shell pkg-config --cflags-only-I wavpack ) -DMPT_WITH_WAVPACK
 LDFLAGS_WAVPACK  := $(shell pkg-config --libs-only-L   wavpack ) $(shell pkg-config --libs-only-other wavpack )
 LDLIBS_WAVPACK   := $(shell pkg-config --libs-only-l   wavpack )
+else
+NO_WAVPACK:=1
 endif
 endif
 
@@ -317,6 +323,8 @@ ifeq ($(shell pkg-config --exists sndfile && echo yes),yes)
 CPPFLAGS_SNDFILE := $(shell pkg-config --cflags-only-I   sndfile ) -DMPT_WITH_SNDFILE
 LDFLAGS_SNDFILE  := $(shell pkg-config --libs-only-L     sndfile ) $(shell pkg-config --libs-only-other sndfile )
 LDLIBS_SNDFILE   := $(shell pkg-config --libs-only-l     sndfile )
+else
+NO_SNDFILE:=1
 endif
 endif
 
