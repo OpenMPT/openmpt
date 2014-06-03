@@ -63,7 +63,7 @@ namespace mpt { namespace String
 		SetNullTerminator(buffer);
 		size_t pos = 0;
 		// Find the first null char.
-		while(buffer[pos] != '\0' && pos < size)
+		while(pos < size && buffer[pos] != '\0')
 		{
 			pos++;
 		}
