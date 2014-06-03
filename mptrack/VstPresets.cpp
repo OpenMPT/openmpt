@@ -265,7 +265,7 @@ void VSTPresets::WriteBE(uint32 v, std::ostream &f)
 void VSTPresets::WriteBE(float v, std::ostream &f)
 //------------------------------------------------
 {
-	Write(EncodeFloatBE(v), f);
+	Write(IEEE754binary32BE(v), f);
 }
 
 

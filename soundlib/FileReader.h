@@ -767,10 +767,10 @@ public:
 	// If successful, the file cursor is advanced by the size of the float.
 	float ReadFloatLE()
 	{
-		uint8_4 target;
+		IEEE754binary32LE target;
 		if(Read(target))
 		{
-			return DecodeFloatLE(target);
+			return target;
 		} else
 		{
 			return 0.0f;
@@ -781,10 +781,10 @@ public:
 	// If successful, the file cursor is advanced by the size of the float.
 	float ReadFloatBE()
 	{
-		uint8_4 target;
+		IEEE754binary32BE target;
 		if(Read(target))
 		{
-			return DecodeFloatBE(target);
+			return target;
 		} else
 		{
 			return 0.0f;
