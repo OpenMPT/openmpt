@@ -8,12 +8,16 @@ is just a high-level summary.
 ### libopenmpt svn
 
  *  Add experimental support for building libopenmpt with emscripten.
+ *  Add unmo3 support for non-Windows builds.
  *  Iconv is now completely optional and only used on Linux systems by default.
  *  Added libopenmpt_example_c_stdout.c, an example without requiring
     PortAudio.
  *  Fix ping-pong loop behaviour which broke in beta3.
+ *  Add an example which does not depend on PortAudio.
  *  Smaller playback accuracy improvements.
 
+ *  [Bug] Makefile: Support building with missing optional dependencies without
+    theme being stated explicitely.
  *  [Bug] openmpt123: Crash when quitting while playback is stopped.
  *  [Bug] openmpt123: Crash when writing output to a file in interactive UI
     mode.
