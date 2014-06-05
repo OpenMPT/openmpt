@@ -98,12 +98,48 @@ SoundDeviceCaps CDSoundDevice::GetDeviceCaps()
 	SoundDeviceCaps caps;
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
-	caps.CanExclusiveMode = true;
+	caps.CanExclusiveMode = false;
 	caps.CanBoostThreadPriority = true;
 	caps.CanUseHardwareTiming = false;
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.ExclusiveModeDescription = L"Use primary buffer";
+
+	IDirectSound *dummy = nullptr;
+	IDirectSound *ds = nullptr;
+	if(m_piDS)
+	{
+		ds = m_piDS;
+	} else
+	{
+		const std::wstring internalID = GetDeviceInternalID();
+		GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(internalID);
+		if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &dummy, NULL) != DS_OK)
+		{
+			return caps;
+		}
+		if(!dummy)
+		{
+			return caps;
+		}
+		ds = dummy;
+	}
+	DSCAPS dscaps;
+	MemsetZero(dscaps);
+	dscaps.dwSize = sizeof(dscaps);
+	if(DS_OK != ds->GetCaps(&dscaps))
+	{
+		if(!(dscaps.dwFlags & DSCAPS_EMULDRIVER))
+		{
+			caps.CanExclusiveMode = true;
+		}
+	}
+	if(dummy)
+	{
+		dummy->Release();
+		dummy = nullptr;
+	}
+	ds = nullptr;
 	return caps;
 }
 
@@ -177,7 +213,11 @@ bool CDSoundDevice::InternalOpen()
 	GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(internalID);
 	if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
-	m_piDS->SetCooperativeLevel(m_Settings.hWnd, m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY);
+	if(m_piDS->SetCooperativeLevel(m_Settings.hWnd, m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY) != DS_OK)
+	{
+		Close();
+		return false;
+	}
 	m_bMixRunning = FALSE;
 	m_nDSoundBufferSize = (m_Settings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
 	m_nDSoundBufferSize = (m_nDSoundBufferSize + (bytesPerFrame-1)) / bytesPerFrame * bytesPerFrame; // round up to full frame
@@ -195,7 +235,11 @@ bool CDSoundDevice::InternalOpen()
 			Close();
 			return false;
 		}
-		m_pPrimary->SetFormat(pwfx);
+		if(m_pPrimary->SetFormat(pwfx) != DS_OK)
+		{
+			Close();
+			return false;
+		}
 		///////////////////////////////////////////////////
 		// Create the secondary buffer
 		dsbd.dwSize = sizeof(dsbd);
