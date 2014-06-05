@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  Add experimental support for building libopenmpt with emscripten.
  *  Add unmo3 support for non-Windows builds.
+ *  Namespace all internal functions in order to allow statically linking
+    against libopenmpt without risking duplicate symbols.
  *  Iconv is now completely optional and only used on Linux systems by default.
  *  Added libopenmpt_example_c_stdout.c, an example without requiring
     PortAudio.
@@ -16,6 +18,7 @@ is just a high-level summary.
  *  Add an example which does not depend on PortAudio.
  *  Smaller playback accuracy improvements.
 
+ *  [Bug] Fix crashs when accessing invalid patterns through libopenmpt API.
  *  [Bug] Makefile: Support building with missing optional dependencies without
     theme being stated explicitely.
  *  [Bug] openmpt123: Crash when quitting while playback is stopped.
