@@ -104,7 +104,6 @@ SoundDeviceCaps CDSoundDevice::GetDeviceCaps()
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.ExclusiveModeDescription = L"Use primary buffer";
-
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)
@@ -220,8 +219,8 @@ bool CDSoundDevice::InternalOpen()
 	}
 	m_bMixRunning = FALSE;
 	m_nDSoundBufferSize = (m_Settings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
-	m_nDSoundBufferSize = (m_nDSoundBufferSize + (bytesPerFrame-1)) / bytesPerFrame * bytesPerFrame; // round up to full frame
 	m_nDSoundBufferSize = Clamp(m_nDSoundBufferSize, (DWORD)DSBSIZE_MIN, (DWORD)DSBSIZE_MAX);
+	m_nDSoundBufferSize = (m_nDSoundBufferSize + (bytesPerFrame-1)) / bytesPerFrame * bytesPerFrame; // round up to full frame
 	if(!m_Settings.ExclusiveMode)
 	{
 		// Set the format of the primary buffer
