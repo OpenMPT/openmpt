@@ -82,8 +82,8 @@ bool CWaveDevice::InternalOpen()
 		return false;
 	}
 	m_nWaveBufferSize = m_Settings.UpdateIntervalMS * pwfx->nAvgBytesPerSec / 1000;
-	m_nWaveBufferSize = ((m_nWaveBufferSize + pwfx->nBlockAlign - 1) / pwfx->nBlockAlign) * pwfx->nBlockAlign;
 	m_nWaveBufferSize = Clamp(m_nWaveBufferSize, WAVEOUT_MINBUFFERSIZE, WAVEOUT_MAXBUFFERSIZE);
+	m_nWaveBufferSize = ((m_nWaveBufferSize + pwfx->nBlockAlign - 1) / pwfx->nBlockAlign) * pwfx->nBlockAlign;
 	std::size_t numBuffers = m_Settings.LatencyMS * pwfx->nAvgBytesPerSec / (m_nWaveBufferSize * 1000);
 	numBuffers = Clamp(numBuffers, WAVEOUT_MINBUFFERS, WAVEOUT_MAXBUFFERS);
 	m_nPreparedHeaders = 0;
