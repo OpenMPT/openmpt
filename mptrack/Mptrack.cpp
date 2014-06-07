@@ -1735,7 +1735,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	}
 	if(!nonFoundPlugs.empty())
 	{
-		Reporting::Notification(L"Problems were encountered with plugins:\n" + nonFoundPlugs);
+		Reporting::Notification(L"Problems were encountered with plugins:\n" + nonFoundPlugs, L"OpenMPT", CWnd::GetDesktopWindow());
 	}
 	return FALSE;
 }

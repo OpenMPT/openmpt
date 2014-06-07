@@ -10,12 +10,13 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "View_tre.h"
 #include "InputHandler.h"
-#include "moddoc.h"
-#include "globals.h"
-#include "ctrl_pat.h"
+#include "Moddoc.h"
+#include "Globals.h"
+#include "Ctrl_pat.h"
 #include "PatternClipboard.h"
 
 
@@ -154,6 +155,7 @@ BOOL COrderList::Init(const CRect &rect, HFONT hFont)
 	SendMessage(WM_SETFONT, (WPARAM)m_hFont);
 	SetScrollPos(SB_HORZ, 0);
 	EnableScrollBarCtrl(SB_HORZ, TRUE);
+	SetCurSel(0);
 	return TRUE;
 }
 
@@ -172,7 +174,7 @@ BOOL COrderList::UpdateScrollInfo()
 		UINT nPage;
 
 		int nMax = 0;
-		if(sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))
+		if(!sndFile.GetModSpecifications().hasStopIndex)
 		{
 			// With MOD / XM, cut shown sequence to first '---' item...
 			nMax = sndFile.Order.GetLengthFirstEmpty();
@@ -299,7 +301,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 		{
 			// Must move first shown sequence item to left in order to show
 			// the new active order.
-			m_nXScroll = std::max(ORDERINDEX(0), static_cast<ORDERINDEX>(nOrder - nMargins));
+			m_nXScroll = static_cast<ORDERINDEX>(std::max(0, static_cast<int>(nOrder - nMargins)));
 			SetScrollPos(SB_HORZ, m_nXScroll);
 			InvalidateRect(NULL, FALSE);
 		} else
@@ -1214,11 +1216,9 @@ void COrderList::OnDeleteOrder()
 	InvalidateRect(NULL, FALSE);
 	m_pModDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
 
-	SetCurSel(selection.firstOrd);
-	PATTERNINDEX nNewPat = sndFile.Order[selection.firstOrd];
-	if ((nNewPat < sndFile.Patterns.Size()) && (sndFile.Patterns[nNewPat] != nullptr) && (m_pParent))
+	if(sndFile.m_PlayState.m_nCurrentOrder > selection.lastOrd)
 	{
-		m_pParent.SetCurrentPattern(nNewPat);
+		sndFile.m_PlayState.m_nNextOrder -= selection.GetSelCount();
 	}
 }
 
