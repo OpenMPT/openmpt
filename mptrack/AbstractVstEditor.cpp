@@ -482,6 +482,9 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 }
 
 
+static int GetNumSubMenus(VstInt32 numProgs) { return (numProgs + (PRESETS_PER_GROUP - 1)) / PRESETS_PER_GROUP; }
+
+
 void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
 //------------------------------------------------------------------------------
 {
@@ -497,6 +500,16 @@ void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
 		case 0:
 			// Grey out paste menu item.
 			m_Menu.EnableMenuItem(ID_EDIT_PASTE, MF_BYCOMMAND | (IsClipboardFormatAvailable(clipboardFormat) ? 0 : MF_GRAYED));
+			break;
+		case 1:
+			// If there would be only one sub menu, we add presets directly to the factory menu
+			{
+				const VstInt32 numProgs = m_VstPlugin.GetNumPrograms();
+				if(GetNumSubMenus(numProgs) <= 1)
+				{
+					GeneratePresetMenu(0, m_PresetMenu);
+				}
+			}
 			break;
 		}
 	} else if(hSysMenu == m_Menu.GetSubMenu(1)->m_hMenu)
@@ -514,8 +527,8 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 	const VstInt32 numProgs = m_VstPlugin.GetNumPrograms();
 	const VstInt32 curProg  = m_VstPlugin.GetCurrentProgram();
 
-	if(m_PresetMenu.m_hMenu)						// We rebuild menu from scratch
-	{												// So remove any exiting menus...
+	if(m_PresetMenu.m_hMenu)						// We rebuild the menu from scratch, so remove any exiting menus...
+	{
 		if(curProg == m_nCurProg && !force)			// ... unless menu exists and is accurate,
 			return;									// in which case we are done.
 
@@ -549,7 +562,7 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 		return;
 	}
 
-	const int numSubMenus = (numProgs + (PRESETS_PER_GROUP - 1)) / PRESETS_PER_GROUP;
+	const int numSubMenus = GetNumSubMenus(numProgs);
 
 	if(numSubMenus > 1)
 	{
@@ -568,10 +581,6 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 				| (curProg >= prog && curProg < prog + PRESETS_PER_GROUP ? MF_CHECKED : MF_UNCHECKED),
 				reinterpret_cast<UINT_PTR>(m_pPresetMenuGroup[bank]->m_hMenu), label);
 		}
-	} else
-	{
-		// If there would be only one sub menu, we add presets directly to factory menu
-		GeneratePresetMenu(0, m_PresetMenu);
 	}
 
 	currentPresetMenu = 0;
