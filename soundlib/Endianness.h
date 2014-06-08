@@ -168,7 +168,7 @@ public:
 	{
 		SetInt32(EncodeIEEE754binary32(f));
 	}
-	// b0...b3 are in memroy order, i.e. depend on the endianness of this type
+	// b0...b3 are in memory order, i.e. depend on the endianness of this type
 	// little endian: (0x00,0x00,0x80,0x3f)
 	// big endian:    (0x3f,0x80,0x00,0x00)
 	forceinline explicit IEEE754binary32Emulated(uint8 b0, uint8 b1, uint8 b2, uint8 b3)
@@ -236,7 +236,7 @@ public:
 	{
 		value = f;
 	}
-	// b0...b3 are in memroy order, i.e. depend on the endianness of this type
+	// b0...b3 are in memory order, i.e. depend on the endianness of this type
 	// little endian: (0x00,0x00,0x80,0x3f)
 	// big endian:    (0x3f,0x80,0x00,0x00)
 	forceinline explicit IEEE754binary32Native(uint8 b0, uint8 b1, uint8 b2, uint8 b3)
