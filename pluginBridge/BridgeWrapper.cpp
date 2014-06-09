@@ -377,7 +377,6 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 {
 	// Various dispatch data - depending on the opcode, one of those might be used.
 	std::vector<char> extraData;
-	size_t extraDataSize = 0;
 
 	MappedMemory auxMem;
 
@@ -418,13 +417,8 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		return;
 	}
 
-	if(extraDataSize != 0)
-	{
-		extraData.resize(extraDataSize, 0);
-		ptr = &extraData[0];
-	}
-
-	msg->result = static_cast<int32>(CVstPluginManager::MasterCallBack(&sharedMem->effect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt));
+	VstIntPtr result = CVstPluginManager::MasterCallBack(&sharedMem->effect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt);
+	msg->result = static_cast<int32>(result);
 
 	// Post-fix some opcodes
 	switch(msg->opcode)
@@ -433,7 +427,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		// VstTimeInfo* in [return value]
 		if(msg->result != 0)
 		{
-			MemCopy(sharedMem->timeInfo, *reinterpret_cast<VstTimeInfo *>(msg->result));
+			MemCopy(sharedMem->timeInfo, *FromVstPtr<VstTimeInfo>(result));
 		}
 		break;
 
@@ -442,7 +436,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		if(msg->result != 0)
 		{
 			char *target = static_cast<char *>(ptr);
-			strncpy(target, reinterpret_cast<const char *>(msg->result), static_cast<size_t>(msg->ptr - 1));
+			strncpy(target, FromVstPtr<const char>(result), static_cast<size_t>(msg->ptr - 1));
 			target[msg->ptr - 1] = 0;
 		}
 		break;
