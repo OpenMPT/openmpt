@@ -630,9 +630,6 @@
     <ClInclude Include="..\soundlib\WindowedFIR.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\Endianness.h">
-      <Filter>Header Files\soundlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\soundlib\ITCompression.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
@@ -1019,6 +1016,9 @@
     </ClInclude>
     <ClInclude Include="AboutDialog.h">
       <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Endianness.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

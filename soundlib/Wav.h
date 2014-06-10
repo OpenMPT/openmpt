@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include "Endianness.h"
-
 
 OPENMPT_NAMESPACE_BEGIN
 

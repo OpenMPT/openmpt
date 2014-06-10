@@ -14,7 +14,7 @@
 #include "../common/typedefs.h"
 #include "../common/StringFixer.h"
 #include "../common/misc_util.h"
-#include "Endianness.h"
+#include "../common/Endianness.h"
 #include <algorithm>
 #ifndef NO_FILEREADER_STD_ISTREAM
 #include <ios>
