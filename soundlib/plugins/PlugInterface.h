@@ -22,7 +22,7 @@ typedef intptr_t VstIntPtr;
 #include "../../soundlib/Snd_defs.h"
 #include "../../common/misc_util.h"
 #include "../../soundlib/MIDIEvents.h"
-#include "../../soundlib/Endianness.h"
+#include "../../common/Endianness.h"
 #include "../../soundlib/Mixer.h"
 
 OPENMPT_NAMESPACE_BEGIN

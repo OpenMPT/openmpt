@@ -120,106 +120,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="..\bin\$(PlatformName)\"
-			IntermediateDirectory="..\build\obj\$(ProjectName)\$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			UseOfMFC="1"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-				CommandLine="subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\mptrack\svn_version\svn_version.h || del ..\mptrack\svn_version\svn_version.h || true"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Bin/mptrack.tlb"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;..\mptrack\svn_version;..\common\svn_version_default"
-				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
-				StringPooling="true"
-				ExceptionHandling="2"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="true"
-				EnableFunctionLevelLinking="false"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
-				WarningLevel="3"
-				SuppressStartupBanner="false"
-				DebugInformationFormat="3"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib dsound.lib msacm32.lib ksguid.lib ksuser.lib htmlhelp.lib"
-				Version="5.0"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=""
-				DelayLoadDLLs="OpenMPT_SoundTouch_f32.dll"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				LargeAddressAware="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="2"
-				DataExecutionPrevention="0"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-				AdditionalManifestFiles="$(ProjectDir)res/rt_manif.bin"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
@@ -295,6 +195,106 @@
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+				AdditionalManifestFiles="$(ProjectDir)res/rt_manif.bin"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="..\bin\$(PlatformName)\"
+			IntermediateDirectory="..\build\obj\$(ProjectName)\$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="1"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\mptrack\svn_version\svn_version.h || del ..\mptrack\svn_version\svn_version.h || true"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Bin/mptrack.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="2"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;..\mptrack\svn_version;..\common\svn_version_default"
+				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
+				StringPooling="true"
+				ExceptionHandling="2"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="true"
+				EnableFunctionLevelLinking="false"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdafx.h"
+				WarningLevel="3"
+				SuppressStartupBanner="false"
+				DebugInformationFormat="3"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib dsound.lib msacm32.lib ksguid.lib ksuser.lib htmlhelp.lib"
+				Version="5.0"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories=""
+				DelayLoadDLLs="OpenMPT_SoundTouch_f32.dll"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				LargeAddressAware="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="2"
+				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -791,7 +791,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
+					Name="Debug|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -799,7 +799,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1037,11 +1037,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\mptrack.png"
+				RelativePath=".\res\mptrack.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\mptrack.ico"
+				RelativePath=".\res\mptrack.png"
 				>
 			</File>
 			<File
@@ -1138,6 +1138,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CImageListEx.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CleanupSong.h"
 				>
 			</File>
@@ -1159,10 +1163,6 @@
 			</File>
 			<File
 				RelativePath=".\CTreeCtrl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CImageListEx.h"
 				>
 			</File>
 			<File
@@ -1206,7 +1206,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\Endianness.h"
+				RelativePath="..\common\Endianness.h"
 				>
 			</File>
 			<File
@@ -1382,19 +1382,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\plugins\PluginEventQueue.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\plugins\PluginMixBuffer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\plugins\PlugInterface.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PNG.h"
-				>
-			</File>
-			<File
-				RelativePath=".\soundlib\plugins\PluginEventQueue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\soundlib\plugins\PluginMixBuffer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\soundlib\plugins\PlugInterface.h"
 				>
 			</File>
 			<File
@@ -1514,11 +1514,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\svn_version\svn_version.h"
+				RelativePath="..\common\svn_version_default\svn_version.h"
 				>
 			</File>
 			<File
-				RelativePath="..\common\svn_version_default\svn_version.h"
+				RelativePath=".\svn_version\svn_version.h"
 				>
 			</File>
 			<File

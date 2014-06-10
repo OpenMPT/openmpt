@@ -74,9 +74,6 @@
     <ClInclude Include="..\soundlib\Dlsbank.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\Endianness.h">
-      <Filter>Header Files\soundlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\soundlib\FileReader.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
@@ -265,6 +262,9 @@
     </ClInclude>
     <ClInclude Include="..\test\TestToolsTracker.h">
       <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Endianness.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

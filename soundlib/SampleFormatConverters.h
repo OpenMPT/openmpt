@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include "../soundlib/Endianness.h"
-
 
 OPENMPT_NAMESPACE_BEGIN
 
