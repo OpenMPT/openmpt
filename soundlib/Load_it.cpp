@@ -2019,7 +2019,8 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		fwrite(&mode, sizeof(mode), 1, f);
 	}
 
-	WRITEMODULAR('P','M','M','.', m_nMixLevels);
+	const int32 tmpMixLevels = static_cast<int32>(m_nMixLevels);
+	WRITEMODULAR('P','M','M','.', tmpMixLevels);
 
 	if(m_dwCreatedWithVersion)
 	{
