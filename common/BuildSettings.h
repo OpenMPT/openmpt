@@ -245,10 +245,6 @@
 #define NO_MINIZ
 #endif
 
-#if defined(MPT_PLATFORM_BIG_ENDIAN) && !defined(MODPLUG_NO_FILESAVE)
-#define MODPLUG_NO_FILESAVE // file saving is broken on big endian
-#endif
-
 #if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)
 #define MPT_CHARSET_INTERNAL
 #endif
