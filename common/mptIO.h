@@ -110,6 +110,15 @@ inline bool WriteIntBE(Tfile & f, const T & v)
 	return IO::WriteRaw(f, bytes, sizeof(T));
 }
 
+template <typename T, typename Tfile>
+inline bool WriteConvertEndianness(Tfile & f, const T & v)
+{
+	v.ConvertEndianness();
+	bool result = IO::WriteRaw(f, reinterpret_cast<const uint8 *>(&v), sizeof(T));
+	v.ConvertEndianness();
+	return result;
+}
+
 } // namespace IO
 
 } // namespace mpt
