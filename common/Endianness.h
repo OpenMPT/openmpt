@@ -214,6 +214,13 @@ public:
 	}
 };
 
+namespace mpt {
+
+template <> struct is_binary_safe<IEEE754binary32Emulated<0,1,2,3> > : public mpt::true_type { };
+template <> struct is_binary_safe<IEEE754binary32Emulated<3,2,1,0> > : public mpt::true_type { };
+
+} // namespace mpt
+
 #if MPT_PLATFORM_IEEE_FLOAT
 
 struct IEEE754binary32Native
@@ -281,6 +288,12 @@ public:
 		return value != cmp.value;
 	}
 };
+
+namespace mpt {
+
+template <> struct is_binary_safe<IEEE754binary32Native> : public mpt::true_type { };
+
+} // namespace mpt
 
 #if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 typedef IEEE754binary32Native            IEEE754binary32LE;
