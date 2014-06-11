@@ -421,6 +421,43 @@ STATIC_ASSERT(sizeof(float32) == 4);
 
 
 
+OPENMPT_NAMESPACE_END
+#if defined(HAS_TYPE_TRAITS)
+#include <type_traits>
+#endif
+OPENMPT_NAMESPACE_BEGIN
+
+namespace mpt {
+
+#if defined(HAS_TYPE_TRAITS)
+
+typedef std::true_type true_type;
+typedef std::false_type false_type;
+
+#else // !HAS_TYPE_TRAITS
+
+struct true_type {
+	typedef true_type type;
+	typedef bool value_type;
+	static const value_type value = true;
+	operator value_type () const { return value; }
+	value_type operator () () const { return value; }
+};
+
+struct false_type {
+	typedef true_type type;
+	typedef bool value_type;
+	static const value_type value = false;
+	operator value_type () const { return value; }
+	value_type operator () () const { return value; }
+};
+
+#endif // HAS_TYPE_TRAITS
+
+} // namespace mpt
+
+
+
 #if !defined(MPT_USE_WINDOWS_H)
 
 // openmpt assumes these type have exact WIN32 semantics
@@ -435,7 +472,6 @@ typedef std::uint32_t UINT;
 using namespace mpt::Legacy;
 
 #endif // !MPT_USE_WINDOWS_H
-
 
 
 
