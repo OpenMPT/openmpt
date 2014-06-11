@@ -2285,8 +2285,7 @@ size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns)
 	//write modular data's total size
 	long curPos = ftell(f);			// remember current pos
 	fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
-	SwapBytesLE(modularInstSize);
-	fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
+	mpt::IO::WriteIntLE<uint32>(f, modularInstSize);	// write data
 	fseek(f, curPos, SEEK_SET);		// go back to where we were.
 
 	// Compute the size that we just wasted.
