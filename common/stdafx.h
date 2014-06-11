@@ -47,6 +47,7 @@
 #include "../common/typedefs.h"
 // <memory>
 // <new>
+// <type_traits> // if available
 // <cstdarg>
 // <cstdint>
 // <stdint.h>
