@@ -475,6 +475,23 @@ using namespace mpt::Legacy;
 
 
 
+namespace mpt {
+
+// Tell which types are safe to binary write into files.
+// By default, no types are safe.
+// When a safe type gets defined,
+// also specialize this template so that IO functions will work.
+template <typename T> struct is_binary_safe : public mpt::false_type { }; 
+
+// Specialization for byte types.
+template <> struct is_binary_safe<char>  : public mpt::true_type { };
+template <> struct is_binary_safe<uint8> : public mpt::true_type { };
+template <> struct is_binary_safe<int8>  : public mpt::true_type { };
+
+} // namespace mpt
+
+
+
 #if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_PRINTF_FUNC(formatstringindex,varargsindex) __attribute__((format(printf, formatstringindex, varargsindex)))
 #else
