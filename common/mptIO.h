@@ -36,53 +36,27 @@ namespace IO {
 typedef int64 pos_t;
 typedef int64 off_t;
 
-template <typename Tfile>
-struct Traits
-{
-	// empty
-}; // struct Traits<Tfile>
+template <typename Tstream> inline bool IsValid(Tstream & f) { return f; }
+template <typename Tstream> inline IO::pos_t Tell(Tstream & f) { return f.tellp(); }
+template <typename Tstream> inline bool SeekBegin(Tstream & f) { return f.seekp(0); }
+template <typename Tstream> inline bool SeekEnd(Tstream & f) { return f.seekp(0, std::ios::end); }
+template <typename Tstream> inline bool SeekAbsolute(Tstream & f, IO::pos_t pos) { return f.seekp(pos, std::ios::beg); }
+template <typename Tstream> inline bool SeekRelative(Tstream & f, IO::off_t off) { return f.seekp(off, std::ios::cur); }
+template <typename Tstream> inline bool WriteRaw(Tstream & f, const uint8 * data, std::size_t size) { return f.write(reinterpret_cast<const char *>(data), size); }
+template <typename Tstream> inline bool WriteRaw(Tstream & f, const char * data, std::size_t size) { return f.write(data, size); }
+template <typename Tstream> inline bool WriteRaw(Tstream & f, const void * data, std::size_t size) { return f.write(reinterpret_cast<const char *>(data), size); }
+template <typename Tstream> inline bool Flush(Tstream & f) { return f.flush(); }
 
-template<>
-struct Traits<std::ostream>
-{
-	typedef std::ostream file_t;
-	typedef char byte_t;
-	static inline bool IsValid(file_t & f) { return f; }
-	static inline IO::pos_t Tell(file_t & f) { return f.tellp(); }
-	static inline bool SeekBegin(file_t & f) { return f.seekp(0); }
-	static inline bool SeekEnd(file_t & f) { return f.seekp(0, std::ios::end); }
-	static inline bool SeekAbsolute(file_t & f, IO::pos_t pos) { return f.seekp(pos, std::ios::beg); }
-	static inline bool SeekRelative(file_t & f, IO::off_t off) { return f.seekp(off, std::ios::cur); }
-	static inline bool WriteRaw(file_t & f, const byte_t * data, std::size_t size) { return f.write(data, size); }
-	static inline bool Flush(file_t & f) { return f.flush(); }
-}; // struct Traits<std::ostream&>
-
-template<>
-struct Traits<FILE*>
-{
-	typedef FILE* file_t;
-	typedef char byte_t;
-	static inline bool IsValid(file_t & f) { return f != NULL; }
-	static inline IO::pos_t Tell(file_t & f) { return ftell(f); }
-	static inline bool SeekBegin(file_t & f) { return fseek(f, 0, SEEK_SET) == 0; }
-	static inline bool SeekEnd(file_t & f) { return fseek(f, 0, SEEK_END) == 0; }
-	static inline bool SeekAbsolute(file_t & f, IO::pos_t pos) { return fseek(f, pos, SEEK_SET) == 0; }
-	static inline bool SeekRelative(file_t & f, IO::off_t off) { return fseek(f, off, SEEK_CUR) == 0; }
-	static inline bool WriteRaw(file_t & f, const byte_t * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
-	static inline bool Flush(file_t & f) { return fflush(f); }
-}; // struct Traits<FILE*&>
-
-template<typename Tfile> inline bool IsValid(Tfile & f)                                        { return Traits<Tfile>::IsValid(f); }
-template<typename Tfile> inline IO::pos_t Tell(Tfile & f)                                      { return Traits<Tfile>::Tell(f); }
-template<typename Tfile> inline bool SeekBegin(Tfile & f)                                      { return Traits<Tfile>::SeekBegin(f); }
-template<typename Tfile> inline bool SeekEnd(Tfile & f)                                        { return Traits<Tfile>::SeekEnd(f); }
-template<typename Tfile> inline bool SeekAbsolute(Tfile & f, IO::pos_t pos)                    { return Traits<Tfile>::SeekAbsolute(f, pos); }
-template<typename Tfile> inline bool SeekRelative(Tfile & f, IO::off_t off)                    { return Traits<Tfile>::SeekRelative(f, off); }
-template<typename Tfile> inline bool WriteRaw(Tfile & f, const uint8 * data, std::size_t size) { return Traits<Tfile>::WriteRaw(f, reinterpret_cast<const typename Traits<Tfile>::byte_t *>(data), size); }
-template<typename Tfile> inline bool WriteRaw(Tfile & f, const int8 * data, std::size_t size)  { return Traits<Tfile>::WriteRaw(f, reinterpret_cast<const typename Traits<Tfile>::byte_t *>(data), size); }
-template<typename Tfile> inline bool WriteRaw(Tfile & f, const char * data, std::size_t size)  { return Traits<Tfile>::WriteRaw(f, reinterpret_cast<const typename Traits<Tfile>::byte_t *>(data), size); }
-template<typename Tfile> inline bool WriteRaw(Tfile & f, const void * data, std::size_t size)  { return Traits<Tfile>::WriteRaw(f, reinterpret_cast<const typename Traits<Tfile>::byte_t *>(data), size); }
-template<typename Tfile> inline bool Flush(Tfile & f)                                          { return Traits<Tfile>::Flush(f); }
+inline bool IsValid(FILE* & f) { return f != NULL; }
+inline IO::pos_t Tell(FILE* & f) { return ftell(f); }
+inline bool SeekBegin(FILE* & f) { return fseek(f, 0, SEEK_SET) == 0; }
+inline bool SeekEnd(FILE* & f) { return fseek(f, 0, SEEK_END) == 0; }
+inline bool SeekAbsolute(FILE* & f, IO::pos_t pos) { return fseek(f, pos, SEEK_SET) == 0; }
+inline bool SeekRelative(FILE* & f, IO::off_t off) { return fseek(f, off, SEEK_CUR) == 0; }
+inline bool WriteRaw(FILE* & f, const uint8 * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
+inline bool WriteRaw(FILE* & f, const char * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
+inline bool WriteRaw(FILE* & f, const void * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
+inline bool Flush(FILE* & f) { return fflush(f); }
 
 template <typename Tbinary, typename Tfile>
 inline bool Write(Tfile & f, const Tbinary & v)
