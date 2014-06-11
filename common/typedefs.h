@@ -488,6 +488,28 @@ template <> struct is_binary_safe<char>  : public mpt::true_type { };
 template <> struct is_binary_safe<uint8> : public mpt::true_type { };
 template <> struct is_binary_safe<int8>  : public mpt::true_type { };
 
+template <typename T>
+struct GetRawBytesFunctor
+{
+	inline const uint8 * operator () (const T & v) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		return reinterpret_cast<const uint8 *>(&v);
+	}
+};
+
+// In order to be able to partially specialize it,
+// GetRawBytes is implemented via a class template.
+// Do not overload or specialize GetRawBytes directly.
+// Using a wrapper (by default just around a cast to const uint8 *),
+// allows for implementing raw memroy access
+// via on-demand generating a cached serialized representation.
+template <typename T> inline const uint8 * GetRawBytes(const T & v)
+{
+	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+	return mpt::GetRawBytesFunctor<T>()(v);
+}
+
 } // namespace mpt
 
 
