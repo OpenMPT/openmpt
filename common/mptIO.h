@@ -111,7 +111,7 @@ inline bool WriteIntBE(Tfile & f, const T & v)
 }
 
 template <typename T, typename Tfile>
-inline bool WriteConvertEndianness(Tfile & f, const T & v)
+inline bool WriteConvertEndianness(Tfile & f, T & v)
 {
 	v.ConvertEndianness();
 	bool result = IO::WriteRaw(f, reinterpret_cast<const uint8 *>(&v), sizeof(T));
