@@ -1083,7 +1083,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			//OnPlayerPause();					// pause song - pausing VSTis is too slow
 
 			// All notes off
-			for (UINT i=0; i<MAX_CHANNELS; i++)
+			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 			{
 				if ((i < GetNumChannels()) || (m_SndFile.m_PlayState.Chn[i].nMasterChn))
 				{
@@ -2357,11 +2357,11 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		ord = 0;
 		pat = m_SndFile.Order[ord];
 	}
-	if(pat >= m_SndFile.Patterns.Size())
+	if(!m_SndFile.Patterns.IsValidPat(pat))
 	{
 		pat = 0;
-	}
-	if(row >= m_SndFile.Patterns[pat].GetNumRows())
+		row = 0;
+	} else if(row >= m_SndFile.Patterns[pat].GetNumRows())
 	{
 		row = 0;
 	}

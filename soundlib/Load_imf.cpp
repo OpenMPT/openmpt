@@ -364,7 +364,9 @@ static void ImportIMFEffect(ModCommand &m)
 			break;
 		case 0xC: // note cut
 		case 0xD: // note delay
-			// no change
+			// Apparently, Imago Orpheus doesn't cut samples on tick 0.
+			if(!m.param)
+				m.command = CMD_NONE;
 			break;
 		case 0xE: // ignore envelope
 			/* predicament: we can only disable one envelope at a time.

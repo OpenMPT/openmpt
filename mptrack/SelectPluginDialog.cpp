@@ -458,8 +458,6 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 			m_chkShare.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
 
 			showBoxes = SW_SHOW;
-		} else
-		{
 		}
 	} else
 	{

@@ -347,8 +347,11 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 				nPat = (PATTERNINDEX)(dwHintMask >> HINT_SHIFT_PAT);
 			else
 				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
-			m_sndFile.Patterns[nPat].GetName(s);
-			m_EditPatName.SetWindowText(s);
+			if(m_sndFile.Patterns.IsValidIndex(nPat))
+			{
+				m_sndFile.Patterns[nPat].GetName(s);
+				m_EditPatName.SetWindowText(s);
+			}
 
 			BOOL bXMIT = (m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 			m_ToolBar.EnableButton(ID_PATTERN_MIDIMACRO, bXMIT);

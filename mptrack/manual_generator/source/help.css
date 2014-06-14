@@ -7,10 +7,20 @@ body
     color: #000;
 }
 
+img
+{
+    border: 0;
+}
+
 h1
 {
     background-color: #DFEFFF;
     padding: 0.25em;
+}
+
+h1, h2
+{
+    border-bottom: 1px solid #aaa;
 }
 
 #content

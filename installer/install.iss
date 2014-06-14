@@ -102,7 +102,7 @@ Name: {app}\tunings; Tasks: portable
 
 [Icons]
 ; start menu
-Name: {group}\{cm:LaunchProgram,OpenMPT}; Filename: {app}\mptrack.exe
+Name: {group}\OpenMPT; Filename: {app}\mptrack.exe
 Name: {group}\{cm:UninstallProgram,OpenMPT}; Filename: {uninstallexe}
 Name: {group}\ModPlug Central; Filename: {app}\ModPlug Central.url
 

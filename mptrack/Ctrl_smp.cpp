@@ -46,13 +46,13 @@ OPENMPT_NAMESPACE_BEGIN
 #define FLOAT_ERROR 1.0e-20f
 
 // Float point comparison
-bool EqualTof(const float a, const float b)
+static bool EqualTof(const float a, const float b)
 {
 	return (fabs(a - b) <= FLOAT_ERROR);
 }
 
 // Round floating point value to "digit" number of digits
-float Round(const float value, const int digit)
+static float Round(const float value, const int digit)
 {
 	float v = 0.1f * (value * powf(10.0f, (float)(digit + 1)) + (value < 0.0f ? -5.0f : 5.0f));
 	modff(v, &v);
@@ -60,7 +60,7 @@ float Round(const float value, const int digit)
 }
 
 template<int v>
-int PowerOf2Exponent()
+static int PowerOf2Exponent()
 {
 	if(v <= 1)
 		return 0;
@@ -1564,9 +1564,8 @@ void CCtrlSamples::OnUpsample()
 void CCtrlSamples::OnDownsample()
 //-------------------------------
 {
-	DWORD dwStart, dwEnd, dwRemove, dwNewLen;
-	UINT smplsize;
-	PVOID pOriginal, pNewSample;
+	SmpLength dwStart, dwEnd, dwRemove, dwNewLen;
+	SmpLength smplsize;
 
 	if((!m_sndFile.GetSample(m_nSample).pSample)) return;
 	BeginWaitCursor();
@@ -1583,11 +1582,10 @@ void CCtrlSamples::OnDownsample()
 		dwEnd = sample.nLength;
 	}
 	smplsize = sample.GetBytesPerSample();
-	pOriginal = sample.pSample;
+	void *pOriginal = sample.pSample, *pNewSample = nullptr;
 	dwRemove = (dwEnd-dwStart+1)>>1;
 	dwNewLen = sample.nLength - dwRemove;
 	dwEnd = dwStart+dwRemove*2;
-	pNewSample = NULL;
 	if ((dwNewLen >= 4) && (dwRemove)) pNewSample = ModSample::AllocateSample(dwNewLen, smplsize);
 	if (pNewSample)
 	{
@@ -1808,7 +1806,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 				break;
 			case 3 : _tcscpy(str, _T("Not enough memory..."));
 				break;
-			case 6 : _tcscpy(str, _T("Too short sample"));
+			case 6 : _tcscpy(str, _T("Sample too short"));
 				break;
 			default: _tcscpy(str, _T("Unknown Error..."));
 				break;
@@ -2687,7 +2685,6 @@ void CCtrlSamples::OnSustainTypeChanged()
 	// Loop type index: 0: Off, 1: On, 2: PingPong
 	sample.uFlags.set(CHN_SUSTAINLOOP, n > 0);
 	sample.uFlags.set(CHN_PINGPONGSUSTAIN, n == 2);
-
 
 	// set sustain loop points if theren't any
 	if(wasDisabled && sample.uFlags[CHN_SUSTAINLOOP] && sample.nSustainStart == sample.nSustainEnd)

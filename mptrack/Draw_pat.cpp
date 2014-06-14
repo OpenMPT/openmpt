@@ -484,12 +484,10 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 							pfnt->nNumX, pfnt->nNumY+((val / 10)%10)*COLUMN_HEIGHT);
 		m_Dib.TextBlt(x+pfnt->nVolCmdWidth+pfnt->nVolHiWidth, y, pfnt->nEltWidths[2]-(pfnt->nVolCmdWidth+pfnt->nVolHiWidth), COLUMN_HEIGHT,
 							pfnt->nNumX, pfnt->nNumY+(val % 10)*COLUMN_HEIGHT);
-	}
-	else
+	} else
 	{
-		static_assert(MAX_VOLCMDS <= 16, "Pattern draw code assumes <= 16 volume commands");
-		ModCommand::VOLCMD volcmd = (mc.volcmd & 0x0F);
-		int vol  = (mc.vol & 0x7F);
+		ModCommand::VOLCMD volcmd = std::min<ModCommand::VOLCMD>(mc.volcmd, MAX_VOLCMDS - 1);
+		int vol = (mc.vol & 0x7F);
 
 		if(drawDefaultVolume)
 		{
@@ -541,25 +539,23 @@ void CViewPattern::OnDraw(CDC *pDC)
 	HGDIOBJ oldpen;
 	CRect rcClient, rect, rc;
 	const CModDoc *pModDoc;
-	const CSoundFile *pSndFile;
 	HDC hdc;
 	CHANNELINDEX xofs;
 	ROWINDEX yofs;
-	UINT nColumnWidth, ncols, nrows, ncolhdr;
+	UINT nColumnWidth, ncols, ncolhdr;
 	int xpaint, ypaint, mixPlug;
 
 	ASSERT(pDC);
 	UpdateSizes();
-	if ((pModDoc = GetDocument()) == NULL) return;
+	if ((pModDoc = GetDocument()) == nullptr) return;
 	GetClientRect(&rcClient);
 	hdc = pDC->m_hDC;
 	oldpen = ::SelectObject(hdc, CMainFrame::penDarkGray);
 	xofs = static_cast<CHANNELINDEX>(GetXScrollPos());
 	yofs = static_cast<ROWINDEX>(GetYScrollPos());
-	pSndFile = pModDoc->GetSoundFile();
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	nColumnWidth = m_szCell.cx;
-	nrows = (pSndFile->Patterns[m_nPattern]) ? pSndFile->Patterns[m_nPattern].GetNumRows() : 0;
-	ncols = pSndFile->GetNumChannels();
+	ncols = sndFile.GetNumChannels();
 	xpaint = m_szHeader.cx;
 	ypaint = rcClient.top;
 	ncolhdr = xofs;
@@ -577,24 +573,14 @@ void CViewPattern::OnDraw(CDC *pDC)
 			rect.SetRect(xpaint, ypaint, xpaint+nColumnWidth, ypaint + m_szHeader.cy);
 			if (ncolhdr < ncols)
 			{
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-				const char *pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]? "[Channel %d]" : "Channel %d";
-//				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
-// -! NEW_FEATURE#0012
-				if ((pSndFile->GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] >= ' '))
-					pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr] ? "%d: [%s]" : "%d: %s";
-				else if (m_nDetailLevel < PatternCursor::volumeColumn) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%d]" : "Ch%d";
-				else if (m_nDetailLevel < PatternCursor::effectColumn) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %d]" : "Chn %d";
-				wsprintf(s, pszfmt, ncolhdr + 1, pSndFile->ChnSettings[ncolhdr].szName);
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-//				DrawButtonRect(hdc, &rect, s,
-//					(pSndFile->ChnSettings[ncolhdr].dwFlags & CHN_MUTE) ? TRUE : FALSE,
-//					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
-//				rect.bottom = rect.top + COLHDR_HEIGHT;
+				const char *pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr]? "[Channel %d]" : "Channel %d";
+				if ((sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && sndFile.ChnSettings[ncolhdr].szName[0] != 0)
+					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "%d: [%s]" : "%d: %s";
+				else if (m_nDetailLevel < PatternCursor::volumeColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%d]" : "Ch%d";
+				else if (m_nDetailLevel < PatternCursor::effectColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %d]" : "Chn %d";
+				wsprintf(s, pszfmt, ncolhdr + 1, sndFile.ChnSettings[ncolhdr].szName);
 				DrawButtonRect(hdc, &rect, s,
-					pSndFile->ChnSettings[ncolhdr].dwFlags[CHN_MUTE] ? TRUE : FALSE,
+					sndFile.ChnSettings[ncolhdr].dwFlags[CHN_MUTE] ? TRUE : FALSE,
 					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE,
 					pModDoc->IsChannelRecord(static_cast<CHANNELINDEX>(ncolhdr)) ? DT_RIGHT : DT_CENTER);
 
@@ -617,20 +603,15 @@ void CViewPattern::OnDraw(CDC *pDC)
 
 				CRect insRect;
 				insRect.SetRect(xpaint, ypaint, xpaint+nColumnWidth / 8 + 3, ypaint + 16);
-//				if (MultiRecordMask[ncolhdr>>3] & (1 << (ncolhdr&7)))
 				if (pModDoc->IsChannelRecord1(static_cast<CHANNELINDEX>(ncolhdr)))
 				{
-//					rect.DeflateRect(1, 1);
-//					InvertRect(hdc, &rect);
-//					rect.InflateRect(1, 1);
 					FrameRect(hdc,&rect,CMainFrame::brushGray);
 					InvertRect(hdc, &rect);
 					s[0] = '1';
 					s[1] = '\0';
 					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
 					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
-				}
-				else if (pModDoc->IsChannelRecord2(static_cast<CHANNELINDEX>(ncolhdr)))
+				} else if (pModDoc->IsChannelRecord2(static_cast<CHANNELINDEX>(ncolhdr)))
 				{
 					FrameRect(hdc,&rect,CMainFrame::brushGray);
 					InvertRect(hdc, &rect);
@@ -639,7 +620,6 @@ void CViewPattern::OnDraw(CDC *pDC)
 					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
 					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
 				}
-// -! NEW_FEATURE#0012
 
 				if(m_Status[psShowVUMeters])
 				{
@@ -652,12 +632,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 				{
 					rect.top+=PLUGNAME_HEIGHT;
 					rect.bottom+=PLUGNAME_HEIGHT;
-					mixPlug=pSndFile->ChnSettings[ncolhdr].nMixPlugin;
-					if (mixPlug) {
-						wsprintf(s, "%d: %s", mixPlug, (pSndFile->m_MixPlugins[mixPlug - 1]).pMixPlugin ? (pSndFile->m_MixPlugins[mixPlug - 1]).GetName() : "[empty]");
-					} else {
+					mixPlug = sndFile.ChnSettings[ncolhdr].nMixPlugin;
+					if (mixPlug)
+						wsprintf(s, "%d: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? (sndFile.m_MixPlugins[mixPlug - 1]).GetName() : "[empty]");
+					else
 						wsprintf(s, "---");
-					}
 					DrawButtonRect(hdc, &rect, s, FALSE, 
 						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 				}
@@ -668,6 +647,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		}
 	}
 	ypaint += m_szHeader.cy;
+	
 	if (m_nMidRow)
 	{
 		if (yofs >= m_nMidRow)
@@ -684,24 +664,24 @@ void CViewPattern::OnDraw(CDC *pDC)
 				const ORDERINDEX startOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 				if(startOrder > 0)
 				{
-					ORDERINDEX prevOrder = pSndFile->Order.GetPreviousOrderIgnoringSkips(startOrder);
+					ORDERINDEX prevOrder = sndFile.Order.GetPreviousOrderIgnoringSkips(startOrder);
 					//Skip +++ items
 
-					if(startOrder < pSndFile->Order.size() && pSndFile->Order[startOrder] == m_nPattern)
+					if(startOrder < sndFile.Order.size() && sndFile.Order[startOrder] == m_nPattern)
 					{
-						nPrevPat = pSndFile->Order[prevOrder];
+						nPrevPat = sndFile.Order[prevOrder];
 					}
 				}
 			}
-			if(pSndFile->Patterns.IsValidPat(nPrevPat))
+			if(sndFile.Patterns.IsValidPat(nPrevPat))
 			{
-				ROWINDEX nPrevRows = pSndFile->Patterns[nPrevPat].GetNumRows();
-				ROWINDEX n = MIN(static_cast<ROWINDEX>(nSkip), nPrevRows);
+				ROWINDEX nPrevRows = sndFile.Patterns[nPrevPat].GetNumRows();
+				ROWINDEX n = std::min(static_cast<ROWINDEX>(nSkip), nPrevRows);
 
 				ypaint += (nSkip - n) * m_szCell.cy;
 				rect.SetRect(0, m_szHeader.cy, nColumnWidth * ncols + m_szHeader.cx, ypaint - 1);
 				m_Dib.SetBlendMode(0x80);
-				DrawPatternData(hdc, pSndFile, nPrevPat, false, false,
+				DrawPatternData(hdc, nPrevPat, false, false,
 						nPrevRows - n, nPrevRows, xofs, rcClient, &ypaint);
 				m_Dib.SetBlendMode(0);
 			} else
@@ -718,8 +698,10 @@ void CViewPattern::OnDraw(CDC *pDC)
 			yofs = 0;
 		}
 	}
+
+	UINT nrows = sndFile.Patterns.IsValidPat(m_nPattern) ? sndFile.Patterns[m_nPattern].GetNumRows() : 0;
 	int ypatternend = ypaint + (nrows-yofs)*m_szCell.cy;
-	DrawPatternData(hdc, pSndFile, m_nPattern, TRUE, (pMainFrm->GetModPlaying() == pModDoc),
+	DrawPatternData(hdc, m_nPattern, TRUE, (pMainFrm->GetModPlaying() == pModDoc),
 					yofs, nrows, xofs, rcClient, &ypaint);
 	// Display next pattern
 	if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
@@ -730,22 +712,22 @@ void CViewPattern::OnDraw(CDC *pDC)
 			PATTERNINDEX nNextPat = PATTERNINDEX_INVALID;
 			const ORDERINDEX startOrder= static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 
-			ORDERINDEX nNextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(startOrder);
+			ORDERINDEX nNextOrder = sndFile.Order.GetNextOrderIgnoringSkips(startOrder);
 			if(nNextOrder == startOrder) nNextOrder = ORDERINDEX_INVALID;
 			//Ignore skip items(+++) from sequence.
-			const ORDERINDEX ordCount = pSndFile->Order.GetLength();
+			const ORDERINDEX ordCount = sndFile.Order.GetLength();
 
-			if(nNextOrder < ordCount && pSndFile->Order[startOrder] == m_nPattern)
+			if(nNextOrder < ordCount && sndFile.Order[startOrder] == m_nPattern)
 			{
-				nNextPat = pSndFile->Order[nNextOrder];
+				nNextPat = sndFile.Order[nNextOrder];
 			}
-			if(pSndFile->Patterns.IsValidPat(nNextPat))
+			if(sndFile.Patterns.IsValidPat(nNextPat))
 			{
-				ROWINDEX nNextRows = pSndFile->Patterns[nNextPat].GetNumRows();
-				ROWINDEX n = MIN(static_cast<ROWINDEX>(nVisRows), nNextRows);
+				ROWINDEX nNextRows = sndFile.Patterns[nNextPat].GetNumRows();
+				ROWINDEX n = std::min(static_cast<ROWINDEX>(nVisRows), nNextRows);
 
 				m_Dib.SetBlendMode(0x80);
-				DrawPatternData(hdc, pSndFile, nNextPat, false, false,
+				DrawPatternData(hdc, nNextPat, false, false,
 						0, n, xofs, rcClient, &ypaint);
 				m_Dib.SetBlendMode(0);
 			}
@@ -788,23 +770,29 @@ void CViewPattern::OnDraw(CDC *pDC)
 }
 
 
-void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNINDEX nPattern, bool selEnable,
+void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable,
 	bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint)
 //-------------------------------------------------------------------------------------------------------------
 {
 	uint8 selectedCols[MAX_BASECHANNELS];	// Bit mask of selected channel components
 	static_assert(PatternCursor::lastColumn <= 7, "Columns are used as bitmasks here.");
 
+	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	if(!sndFile.Patterns.IsValidPat(nPattern))
+	{
+		return;
+	}
+
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 	const ModCommand m0 = ModCommand::Empty();
-	const ModCommand *pPattern = pSndFile->Patterns[nPattern];
+	const ModCommand *pPattern = sndFile.Patterns[nPattern];
 	CHAR s[256];
 	CRect rect;
 	int xpaint, ypaint = *pypaint;
 	int row_col, row_bkcol;
 	UINT bSpeedUp, nColumnWidth;
 	
-	CHANNELINDEX ncols = pSndFile->GetNumChannels();
+	CHANNELINDEX ncols = sndFile.GetNumChannels();
 	nColumnWidth = m_szCell.cx;
 	rect.SetRect(m_szHeader.cx, rcClient.top, m_szHeader.cx+nColumnWidth, rcClient.bottom);
 	for(CHANNELINDEX cmk = startChan; cmk < ncols; cmk++)
@@ -819,7 +807,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 	while ((maxcol > startChan) && (selectedCols[maxcol-1] & COLUMN_BITS_INVISIBLE)) maxcol--;
 	// Init bitmap border
 	{
-		UINT maxndx = pSndFile->GetNumChannels() * m_szCell.cx;
+		UINT maxndx = sndFile.GetNumChannels() * m_szCell.cx;
 		UINT ibmp = 0;
 		if (maxndx > FASTBMP_MAXWIDTH) maxndx = FASTBMP_MAXWIDTH;
 		do
@@ -859,15 +847,15 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 		row_bkcol = MODCOLOR_BACKNORMAL;
 
 		// time signature highlighting
-		ROWINDEX nBeat = pSndFile->m_nDefaultRowsPerBeat, nMeasure = pSndFile->m_nDefaultRowsPerMeasure;
-		if(pSndFile->Patterns[nPattern].GetOverrideSignature())
+		ROWINDEX nBeat = sndFile.m_nDefaultRowsPerBeat, nMeasure = sndFile.m_nDefaultRowsPerMeasure;
+		if(sndFile.Patterns[nPattern].GetOverrideSignature())
 		{
-			nBeat = pSndFile->Patterns[nPattern].GetRowsPerBeat();
-			nMeasure = pSndFile->Patterns[nPattern].GetRowsPerMeasure();
+			nBeat = sndFile.Patterns[nPattern].GetRowsPerBeat();
+			nMeasure = sndFile.Patterns[nPattern].GetRowsPerMeasure();
 		}
 		// secondary highlight (beats)
 		if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
-		 && (nBeat) && (nBeat < numRows))
+			&& (nBeat) && (nBeat < numRows))
 		{
 			if(!(compRow % nBeat))
 			{
@@ -975,14 +963,14 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 				{
 					tx_col = MODCOLOR_NOTE;
 
-					if(pSndFile->m_SongFlags[SONG_PT1XMODE] && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
+					if(sndFile.m_SongFlags[SONG_PT1XMODE] && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
 					{
 						// MOD "ProTracker 1.x" flag: Highlight notes that are not supported by Amiga trackers.
 						tx_col = MODCOLOR_DODGY_COMMANDS;
-					} else if(pSndFile->m_SongFlags[SONG_AMIGALIMITS] && m->instr != 0 && m->instr <= pSndFile->GetNumSamples())
+					} else if(sndFile.m_SongFlags[SONG_AMIGALIMITS] && m->instr != 0 && m->instr <= sndFile.GetNumSamples())
 					{
 						// S3M "Force Amiga Limits": Highlight notes that exceed the Amiga's frequency range.
-						UINT period = pSndFile->GetPeriodFromNote(m->note, 0, pSndFile->GetSample(m->instr).nC5Speed);
+						UINT period = sndFile.GetPeriodFromNote(m->note, 0, sndFile.GetSample(m->instr).nC5Speed);
 						if(period < 113 * 4 || period > 856 * 4)
 						{
 							tx_col = MODCOLOR_DODGY_COMMANDS;
@@ -996,8 +984,8 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 				}
 				// Drawing note
 				m_Dib.SetTextColor(tx_col, bk_col);
-				if(pSndFile->m_nType == MOD_TYPE_MPT && m->instr < MAX_INSTRUMENTS && pSndFile->Instruments[m->instr])
-					DrawNote(xbmp+x, 0, m->note, pSndFile->Instruments[m->instr]->pTuning);
+				if(sndFile.GetType() == MOD_TYPE_MPT && m->instr < MAX_INSTRUMENTS && sndFile.Instruments[m->instr])
+					DrawNote(xbmp+x, 0, m->note, sndFile.Instruments[m->instr]->pTuning);
 				else //Original
 					DrawNote(xbmp+x, 0, m->note);
 			}
@@ -1083,7 +1071,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNI
 					{
 						if(m->command != CMD_NONE)
 						{
-							char n = pSndFile->GetModSpecifications().GetEffectLetter(m->command);
+							char n = sndFile.GetModSpecifications().GetEffectLetter(m->command);
 							ASSERT(n > ' ');
 							DrawLetter(xbmp+x, 0, n, pfnt->nEltWidths[3], pfnt->nCmdOfs);
 						} else
@@ -1187,7 +1175,7 @@ void CViewPattern::DrawDragSel(HDC hdc)
 	int x1, y1, x2, y2;
 	int nChannels, nRows;
 
-	if(pSndFile == nullptr) return;
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern)) return;
 
 	// Compute relative movement
 	int dx = (int)m_DragPos.GetChannel() - (int)m_StartSel.GetChannel();
@@ -1307,7 +1295,7 @@ void CViewPattern::UpdateScrollSize()
 //-----------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile)
+	if(pSndFile && pSndFile->Patterns.IsValidIndex(m_nPattern))
 	{
 		CRect rect;
 		SIZE sizeTotal, sizePage, sizeLine;
@@ -1491,7 +1479,7 @@ void CViewPattern::SetCurSel(const PatternCursor &beginSel, const PatternCursor 
 	// Get new selection area
 	m_Selection = PatternRect(beginSel, endSel);
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile != nullptr)
+	if(pSndFile != nullptr && pSndFile->Patterns.IsValidIndex(m_nPattern))
 	{
 		m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 	}
@@ -1542,7 +1530,7 @@ void CViewPattern::InvalidateRow(ROWINDEX n)
 //------------------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile)
+	if(pSndFile && pSndFile->Patterns.IsValidIndex(m_nPattern))
 	{
 		int yofs = GetYScrollPos() - m_nMidRow;
 		if (n == ROWINDEX_INVALID) n = GetCurrentRow();
@@ -1611,8 +1599,8 @@ void CViewPattern::UpdateIndicator()
 			nChn = m_Cursor.GetChannel();
 			s[0] = 0;
 			if(!m_Status[psKeyboardDragSelect]
-				&& (m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()) && (pSndFile->Patterns[m_nPattern])
-				&& (GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->m_nChannels))
+				&& (m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()) && pSndFile->Patterns.IsValidIndex(m_nPattern)
+				&& (GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->GetNumChannels()))
 			{
 				const ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), nChn);
 
@@ -1715,7 +1703,7 @@ void CViewPattern::UpdateXInfoText()
 
 	const CSoundFile *pSndFile = GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm != nullptr && pSndFile != nullptr)
+	if(pMainFrm != nullptr && pSndFile != nullptr && pSndFile->Patterns.IsValidIndex(m_nPattern))
 	{
 		//xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
 		xtraInfo.Format("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s",
@@ -1756,7 +1744,7 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 	bPlaying = (pMainFrm->GetFollowSong(pModDoc) == m_hWnd) ? TRUE : FALSE;
 	x = m_szHeader.cx;
 	nChn = xofs;
-	while ((nChn < pSndFile->m_nChannels) && (x < rcClient.right))
+	while ((nChn < pSndFile->GetNumChannels()) && (x < rcClient.right))
 	{
 		ChnVUMeters[nChn] = (WORD)pnotify->pos[nChn];
 		if ((!bPlaying) || pnotify->type[Notification::Stop]) ChnVUMeters[nChn] = 0;

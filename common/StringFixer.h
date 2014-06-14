@@ -371,7 +371,7 @@ namespace mpt { namespace String
 	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = SIZE_MAX)
 	//----------------------------------------------------------------------------------------------
 	{
-		const size_t copySize = MIN(destSize - 1, srcSize);
+		const size_t copySize = std::min(destSize - 1u, srcSize);
 		std::strncpy(destBuffer, srcBuffer, copySize);
 		destBuffer[copySize] = '\0';
 	}

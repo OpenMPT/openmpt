@@ -80,8 +80,8 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 		}
 
 		CBitmap dib, dibMask;
-		bitmap->ToDIB(dib);
-		bitmapMask.ToDIB(dibMask);
+		bitmap->ToDIB(dib, dc);
+		bitmapMask.ToDIB(dibMask, dc);
 
 		result = CImageList::Create(cx, cy, ILC_COLOR24 | ILC_MASK, nInitial, nGrow)
 			&& CImageList::Add(&dib, &dibMask);
@@ -89,7 +89,7 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	{
 		// 32-bit image on modern system
 		CBitmap dib;
-		bitmap->ToDIB(dib);
+		bitmap->ToDIB(dib, dc);
 		result = CImageList::Create(cx, cy, ILC_COLOR32, nInitial, nGrow)
 			&& CImageList::Add(&dib, RGB(0, 0, 0));
 	}

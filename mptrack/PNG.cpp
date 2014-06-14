@@ -182,4 +182,23 @@ PNG::Bitmap *PNG::ReadPNG(const TCHAR *resource)
 }
 
 
+// Create a DIB for the current device from our PNG.
+bool PNG::Bitmap::ToDIB(CBitmap &bitmap, CDC *dc) const
+//-----------------------------------------------------
+{
+	BITMAPINFOHEADER bi;
+	MemsetZero(bi);
+	bi.biSize = sizeof(BITMAPINFOHEADER);
+	bi.biWidth = width;
+	bi.biHeight = -(int32_t)height;
+	bi.biPlanes = 1;
+	bi.biBitCount = 32;
+	bi.biCompression = BI_RGB;
+	bi.biSizeImage = width * height * 4;
+
+	if(dc == nullptr) dc = CDC::FromHandle(GetDC(NULL));
+	return bitmap.CreateCompatibleBitmap(dc, width, height)
+		&& SetDIBits(dc->GetSafeHdc(), bitmap, 0, height, GetPixels(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
+}
+
 OPENMPT_NAMESPACE_END

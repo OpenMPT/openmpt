@@ -20,12 +20,6 @@
 #include "math.h"
 #include "../common/misc_util.h"
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#include "Ctrl_pat.h"
-#include "ctrl_gen.h"
-// -! NEW_FEATURE#0015
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -193,13 +187,14 @@ void CCtrlGeneral::OnTapTempo()
 	}
 	if(delay)
 	{
-		CModSpecifications specs = m_sndFile.GetModSpecifications();
 		uint32 newTempo = 60000 * numSamples;
 		if(m_sndFile.m_nTempoMode != tempo_mode_modern)
 		{
 			newTempo = (newTempo * m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat) / 24;
 		}
 		newTempo /= delay;
+
+		const CModSpecifications specs = m_sndFile.GetModSpecifications();
 		Limit(newTempo, specs.tempoMin, specs.tempoMax);
 		SetDlgItemInt(IDC_EDIT_TEMPO, newTempo, FALSE);
 	}

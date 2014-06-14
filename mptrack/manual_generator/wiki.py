@@ -12,7 +12,7 @@ import re
 
 base_url = 'http://wiki.openmpt.org'
 
-style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.common%2Cshared|skins.vector&only=styles&*').read()
+style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.common%2Cshared|mediawiki.ui.button|skins.vector.styles&only=styles&skin=vector&*').read()
 # Remove a few unused CSS classes
 style = re.sub(r'\}(\w+)?[\.#]vector([\w >]+)\{.+?\}', '}', style)
 style_file = open('html/style.css', 'w')

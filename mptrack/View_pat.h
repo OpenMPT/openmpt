@@ -20,8 +20,6 @@ class CModDoc;
 class CEditCommand;
 class CEffectVis;	//rewbs.fxvis
 class CPatternGotoDialog;
-class CPatternRandomizer;
-class COpenGLEditor;
 
 // Drag & Drop info
 #define DRAGITEM_VALUEMASK		0x00FFFFFF
@@ -291,7 +289,7 @@ public:
 	void ProcessChar(UINT nChar, UINT nFlags);
 
 public:
-	void DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
+	void DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
 	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
 	void DrawNote(int x, int y, UINT note, CTuning* pTuning = NULL);
 	void DrawInstrument(int x, int y, UINT instr);
