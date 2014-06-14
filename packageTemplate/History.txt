@@ -25,7 +25,7 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.23.04.00 (14 June 2014, revision 4096)
+v1.23.04.00 (14 June 2014, revision 4113)
 -----------------------------------------
 Pattern tab
    [New] <js> Added possibility to interpolate the instrument column.
