@@ -267,7 +267,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 //---------------------------------------------------------------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidIndex(m_nPattern))
 		return false;
 
 	if(wrap && pSndFile->Patterns[m_nPattern].GetNumRows())
@@ -545,7 +545,7 @@ bool CViewPattern::DragToSel(const PatternCursor &cursor, bool scrollHorizontal,
 //----------------------------------------------------------------------------------------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		return false;
 	}
@@ -792,7 +792,7 @@ void CViewPattern::OnGrowSelection()
 //----------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		return;
 	}
@@ -876,7 +876,7 @@ void CViewPattern::OnShrinkSelection()
 //-----------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		return;
 	}
@@ -1560,16 +1560,18 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 		// Double-clicked a pattern cell to select whole channel.
 		// Continue dragging to select more channels.
 		const CSoundFile *pSndFile = GetSoundFile();
-		const ROWINDEX lastRow = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
+		if(pSndFile->Patterns.IsValidPat(m_nPattern))
+		{
+			const ROWINDEX lastRow = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
 
-		CHANNELINDEX startChannel = m_Cursor.GetChannel();
-		CHANNELINDEX endChannel = GetPositionFromPoint(point).GetChannel();
-		
-		m_StartSel = PatternCursor(0, startChannel, (startChannel <= endChannel ? PatternCursor::firstColumn : PatternCursor::lastColumn));
-		PatternCursor endSel = PatternCursor(lastRow, endChannel, (startChannel <= endChannel ? PatternCursor::lastColumn : PatternCursor::firstColumn));
+			CHANNELINDEX startChannel = m_Cursor.GetChannel();
+			CHANNELINDEX endChannel = GetPositionFromPoint(point).GetChannel();
 
-		DragToSel(endSel, true, false, false);
+			m_StartSel = PatternCursor(0, startChannel, (startChannel <= endChannel ? PatternCursor::firstColumn : PatternCursor::lastColumn));
+			PatternCursor endSel = PatternCursor(lastRow, endChannel, (startChannel <= endChannel ? PatternCursor::lastColumn : PatternCursor::firstColumn));
 
+			DragToSel(endSel, true, false, false);
+		}
 	} else if(m_Status[psRowSelection] && point.y > m_szHeader.cy)
 	{
 		// Mark row number => mark whole row (continue)
@@ -1627,7 +1629,7 @@ void CViewPattern::OnEditSelectAll()
 //----------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile != nullptr)
+	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		SetCurSel(PatternCursor(0), PatternCursor(pSndFile->Patterns[m_nPattern].GetNumRows() - 1, pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn));
 	}
@@ -1638,7 +1640,7 @@ void CViewPattern::OnEditSelectColumn()
 //-------------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile != nullptr)
+	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		SetCurSel(PatternCursor(0, m_MenuCursor.GetChannel()), PatternCursor(pSndFile->Patterns[m_nPattern].GetNumRows() - 1, m_MenuCursor.GetChannel(), PatternCursor::lastColumn));
 	}
@@ -1649,7 +1651,7 @@ void CViewPattern::OnSelectCurrentColumn()
 //----------------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile != nullptr)
+	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		PatternCursor beginSel(0, GetCurrentChannel());
 		PatternCursor endSel(pSndFile->Patterns[m_nPattern].GetNumRows() - 1, GetCurrentChannel(), PatternCursor::lastColumn);
@@ -2609,7 +2611,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 //---------------------------------------------------------
 {
 	CSoundFile *sndFile = GetSoundFile();
-	if(sndFile == nullptr)
+	if(sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		return;
 	}
@@ -4143,7 +4145,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_COPYPATTERN:
 		{
 			const CSoundFile *pSndFile = GetSoundFile();
-			if(pSndFile != nullptr)
+			if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
 			{
 				CopyPattern(m_nPattern, PatternRect(PatternCursor(0, 0), PatternCursor(pSndFile->Patterns[m_nPattern].GetNumRows() - 1, pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn)));
 			}
@@ -5402,6 +5404,10 @@ void CViewPattern::TempEnterChord(int note)
 		return;
 	}
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	if(!sndFile.Patterns.IsValidPat(m_nPattern))
+	{
+		return;
+	}
 
 	const CHANNELINDEX chn = GetCurrentChannel();
 	const PatternRow rowBase = sndFile.Patterns[m_nPattern].GetRow(GetCurrentRow());
@@ -5907,7 +5913,7 @@ void CViewPattern::OnSelectPCNoteParam(UINT nID)
 //----------------------------------------------
 {
 	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		return;
 	}
@@ -6457,7 +6463,7 @@ bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, C
 //-------------------------------------------------------------------------------------------------------------------------------------
 {
 	const CSoundFile *sndFile = GetSoundFile();
-	if(startRow == endRow || sndFile == nullptr)
+	if(startRow == endRow || sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
 		return false;
 
 	bool result = false;
@@ -6695,7 +6701,7 @@ ROWINDEX CViewPattern::GetRowsPerBeat() const
 //-------------------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
 		return 0;
 	if(!pSndFile->Patterns[m_nPattern].GetOverrideSignature())
 		return pSndFile->m_nDefaultRowsPerBeat;
@@ -6709,7 +6715,7 @@ ROWINDEX CViewPattern::GetRowsPerMeasure() const
 //----------------------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
 		return 0;
 	if(!pSndFile->Patterns[m_nPattern].GetOverrideSignature())
 		return pSndFile->m_nDefaultRowsPerMeasure;

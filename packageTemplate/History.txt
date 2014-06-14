@@ -25,6 +25,56 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.23.04.00 (14 June 2014, revision 4096)
+-----------------------------------------
+Pattern tab
+   [New] <js> Added possibility to interpolate the instrument column.
+   [Imp] <js> Stay at current order / pattern when removing something from the order list (http://bugs.openmpt.org/view.php?id=511).
+   [Fix] <js> With overflow paste, marking the pasted pattern area was not working when the paste ended exactly in the last pattern row (broke in OpenMPT 1.23.02.00).
+   [Fix] <js> Select / Copy Select keys should no longer interfere with mouse dragging (tx coda).
+   [Fix] <js> Don't crash when the module doesn't have any patterns.
+   [Fix] <jh> Fix flickering of current-row highlight in pattern view on Wine (http://bugs.openmpt.org/view.php?id=522).
+
+Sample tab
+   [Fix] <js> Setting sustain loop points by typing the values in didn't update the waveform display.
+   [Fix] <js> When removing DC offset from a sample, the wrong volume variable on channels currently playing the modified sample was modified.
+
+Tree view
+   [Fix] <js> It was not possible to drag and drop drums from sound banks (http://bugs.openmpt.org/view.php?id=536, x64 only).
+
+VST / DMO Plugins
+   [Imp] <js> Improve preset menu creation in the plugin editor for plugins with less than 128 presets, so that the menu is only created when needed (speeds up e.g. bridged VOPM).
+   [Imp] <js> When trying to load a plugin where both the 32-bit and 64-bit version are registered in OpenMPT, prefer the native version.
+   [Fix] <js> When trying to play notes in a VST GUI with no instrument assigned yet, prevent notes from being stuck after closing the instrument creation confirmation (tx coda).
+
+VST::Plugin Bridge
+   [Fix] <js> Don't crash when a plugin sends an opcode that isn't expected to have a data pointer set (http://bugs.openmpt.org/view.php?id=519).
+   [Fix] <js> Unknown vendor-specific opcodes that send pointers are now rejected, as they cannot work over the bridge.
+
+XM
+   [Fix] <js> More intelligent extraction of the selected MIDI program for files that were not made with ModPlug.
+   [Fix] <js> Loading ADPCM-compressed samples broke in OpenMPT 1.23 (http://bugs.openmpt.org/view.php?id=538).
+
+S3M
+   [Fix] <js> Some files created with Scream Tracker were detected as being made with Velvet Studio.
+
+MOD
+   [Fix] <js> Loading ADPCM-compressed samples was broken ever since OpenMPT 1.22.06.00.
+
+Other formats
+   [Fix] <js> IMF: Ignore note cut with a zero parameter.
+
+Audio I/O
+   [Mod] <jh> Default to 16-bit output on Wine, since some Wine versions apparently have problems with sample formats > 16bit.
+   [Fix] <jh> DirectSound: Emulated drivers do not support primary buffer access. Actually test whether the device is emulated or not and do not advertise primary buffer support if it is.
+   [Fix] <jh> Fix clamping / rounding of WaveOut and DirectSound buffer sizes for 24bit samples (http://bugs.openmpt.org/view.php?id=540).
+
+Misc
+   [Imp] <js> When loading plugins during startup, the error message that was potentially shown didn't appear in the task bar, making it easy to forget about such a half-initialized OpenMPT instance.
+   [Fix] <js> Potential fix for a crash when loading modules through the command-line (tx coda).
+   [Fix] <js> "Find MPT Hacks" erroneously identified FT2 pan law mix mode as a hack (http://bugs.openmpt.org/view.php?id=531).
+
+
 v1.23.03.00 (4 May 2014, revision 4039)
 ---------------------------------------
 VST / DMO Plugins
@@ -40,7 +90,7 @@ General tab
    [Fix] <js> Moving plugins unintentionally broke the plugin chain in many cases (http://bugs.openmpt.org/view.php?id=514).
 
 Pattern tab
-   [Imp] <js> Don't require shift key to be pressed when entering numeric effect letters on French keyboards (https://forum.openmpt.org/index.php?topic=5279.0).
+   [Imp] <js> Don't require shift key to be pressed when entering numeric effect letters on French keyboards (http://forum.openmpt.org/index.php?topic=5279.0).
    [Imp] <js> Channel mute / channel mute on pattern transition shortcuts got extended to cover all channels covered by the selection instead of just the channel where the cursor is.
    [Mod] <js> After pasting pattern data, the pasted area is automatically selected (http://bugs.openmpt.org/view.php?id=498).
    [Fix] <js> When "loop pattern" was enabled, jumping between patterns could trigger sample syncing while playback was paused.
@@ -78,13 +128,13 @@ Module cleanup
    [Fix] <js> Rearranging samples broke in the previous version (http://bugs.openmpt.org/view.php?id=497).
 
 Audio I/O
-   [Fix] <js> With new installations (and probably also upgraded ones), it was possible that OpenMPT was internally rendering at a different sample rate than the sound device was outputting (https://forum.openmpt.org/index.php?topic=5265.0).
+   [Fix] <js> With new installations (and probably also upgraded ones), it was possible that OpenMPT was internally rendering at a different sample rate than the sound device was outputting (http://forum.openmpt.org/index.php?topic=5265.0).
 
 Misc
    [Imp] <js> All parts of the Song Properties dialog are now updated instantly when switching between formats.
    [Imp] <js> Made S3M amiga frequency limits option editable from the Song Properties dialog.
    [Mod] <js> Changed manual format from PDF to CHM. When opening help from certain dialogs, the relevant manual page is automatically opened.
-   [Fix] <js> SF2 sample frequency conversion was broken in 64-bit builds (https://bugs.openmpt.org/view.php?id=508).
+   [Fix] <js> SF2 sample frequency conversion was broken in 64-bit builds (http://bugs.openmpt.org/view.php?id=508).
    [Fix] <js> Modifying patterns, samples, etc. should now always update other views of the same type of the same module properly.
    [Fix] <js> DefaultTemplate option was looking for the template file in the wrong paths.
 

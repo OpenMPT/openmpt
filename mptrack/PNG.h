@@ -35,7 +35,7 @@ namespace PNG
 		uint32_t GetNumPixels() const { return width * height; }
 
 		// Create a DIB from our PNG.
-		bool ToDIB(CBitmap &bitmap) const { return bitmap.CreateBitmap(width, height, 1, 32, GetPixels()) != FALSE; }
+		bool ToDIB(CBitmap &bitmap, CDC *dc) const;
 	};
 
 	Bitmap *ReadPNG(FileReader &file);

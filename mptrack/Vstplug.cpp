@@ -163,7 +163,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 				// Time signature. numerator = rows per beats / rows pear measure (should sound somewhat logical to you).
 				// the denominator is a bit more tricky, since it cannot be set explicitely. so we just assume quarters for now.
-				timeInfo.timeSigNumerator = sndFile.m_PlayState.m_nCurrentRowsPerMeasure / MAX(sndFile.m_PlayState.m_nCurrentRowsPerBeat, 1);
+				timeInfo.timeSigNumerator = sndFile.m_PlayState.m_nCurrentRowsPerMeasure / std::max(sndFile.m_PlayState.m_nCurrentRowsPerBeat, ROWINDEX(1));
 				timeInfo.timeSigDenominator = 4; //gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
 		}
@@ -546,10 +546,10 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				// Multiple paths
 				const FileDialog::PathList &files = dlg.GetFilenames();
 				fileSel->nbReturnPath = files.size();
-				fileSel->returnMultiplePaths = new char *[fileSel->nbReturnPath];
+				fileSel->returnMultiplePaths = new (std::nothrow) char *[fileSel->nbReturnPath];
 				for(size_t i = 0; i < files.size(); i++)
 				{
-					char *fname = new char[files[i].ToLocale().length() + 1];
+					char *fname = new (std::nothrow) char[files[i].ToLocale().length() + 1];
 					strcpy(fname, files[i].ToLocale().c_str());
 					fileSel->returnMultiplePaths[i] = fname;
 				}
@@ -569,7 +569,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 
 					// Provide some memory for the return path.
 					fileSel->sizeReturnPath = dlg.GetFirstFile().ToLocale().length() + 1;
-					fileSel->returnPath = new char[fileSel->sizeReturnPath];
+					fileSel->returnPath = new (std::nothrow) char[fileSel->sizeReturnPath];
 					if(fileSel->returnPath == nullptr)
 					{
 						return 0;

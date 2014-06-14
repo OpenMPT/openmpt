@@ -99,7 +99,7 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 		CMD_GLOBALVOLUME,	// Global volume (0... 127)
 	};
 
-	static ModCommand dummy;
+	ModCommand dummy;
 
 	for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 	{

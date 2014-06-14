@@ -21,12 +21,12 @@ public:
 #ifndef UNICODE
 	BOOL GetItem(TVITEMW *pItem) const
 	{
-		return ::SendMessage(m_hWnd, TVM_GETITEMW, 0, (LPARAM)pItem) ? TRUE : FALSE;
+		return ::SendMessage(m_hWnd, TVM_GETITEMW, 0, (LPARAM)pItem);
 	}
 
 	BOOL SetItem(TVITEMW *pItem)
 	{
-		return ::SendMessage(m_hWnd, TVM_SETITEMW, 0, (LPARAM)pItem) ? TRUE : FALSE;
+		return ::SendMessage(m_hWnd, TVM_SETITEMW, 0, (LPARAM)pItem);
 	}
 	BOOL SetItem(HTREEITEM hItem, UINT nMask, const WCHAR *lpszItem, int nImage, int nSelectedImage, UINT nState, UINT nStateMask, LPARAM lParam)
 	{
@@ -107,7 +107,7 @@ public:
 		tvi.mask = TVIF_TEXT;
 		CStringW str;
 		int nLen = 128;
-		int nRes;
+		size_t nRes;
 		do
 		{
 			nLen *= 2;
@@ -115,7 +115,7 @@ public:
 			tvi.cchTextMax = nLen;
 			::SendMessage(m_hWnd, TVM_GETITEMW, 0, (LPARAM)&tvi);
 			nRes = wcslen(tvi.pszText);
-		} while (nRes >= nLen - 1);
+		} while (nRes >= size_t(nLen - 1));
 		str.ReleaseBuffer();
 		return str;
 #endif // UNICODE
