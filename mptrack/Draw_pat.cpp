@@ -1389,7 +1389,7 @@ BOOL CViewPattern::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 		CRect rect;
 		GetClientRect(&rect);
 		// HACK:
-		// Wine handles ScrollWindow completely sychronously (using RedraWindow).
+		// Wine handles ScrollWindow completely synchronously (using RedrawWindow).
 		// This causes the window update region to be repainted immediately
 		// before and immediately after the actual copying of the scrolled rect.
 		// Async and sync window painting generally do not mix well at all
