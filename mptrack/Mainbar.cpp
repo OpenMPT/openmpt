@@ -69,7 +69,7 @@ CSize CToolBarEx::CalcDynamicLayout(int nLength, DWORD dwMode)
 		}
 
 		sizeResult = CToolBar::CalcDynamicLayout(nLength, dwMode);
-		
+
 		if (bSwitch)
 		{
 			if (bOld)
@@ -130,56 +130,58 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 /////////////////////////////////////////////////////////////////////
 // CMainToolBar
 
+#define SCALEWIDTH(x) (MulDiv(x, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX), 96))
+
 // Play Command
 #define PLAYCMD_INDEX		10
 #define TOOLBAR_IMAGE_PAUSE	8
 #define TOOLBAR_IMAGE_PLAY	12
 // Base octave
 #define EDITOCTAVE_INDEX	13
-#define EDITOCTAVE_WIDTH	55
+#define EDITOCTAVE_WIDTH	SCALEWIDTH(55)
 #define EDITOCTAVE_HEIGHT	20
 #define SPINOCTAVE_INDEX	(EDITOCTAVE_INDEX+1)
-#define SPINOCTAVE_WIDTH	16
+#define SPINOCTAVE_WIDTH	SCALEWIDTH(16)
 #define SPINOCTAVE_HEIGHT	(EDITOCTAVE_HEIGHT)
 // Static "Tempo:"
 #define TEMPOTEXT_INDEX		16
-#define TEMPOTEXT_WIDTH		45
+#define TEMPOTEXT_WIDTH		SCALEWIDTH(45)
 #define TEMPOTEXT_HEIGHT	20
 // Edit Tempo
 #define EDITTEMPO_INDEX		(TEMPOTEXT_INDEX+1)
-#define EDITTEMPO_WIDTH		32
+#define EDITTEMPO_WIDTH		SCALEWIDTH(32)
 #define EDITTEMPO_HEIGHT	20
 // Spin Tempo
 #define SPINTEMPO_INDEX		(EDITTEMPO_INDEX+1)
-#define SPINTEMPO_WIDTH		16
+#define SPINTEMPO_WIDTH		SCALEWIDTH(16)
 #define SPINTEMPO_HEIGHT	(EDITTEMPO_HEIGHT)
 // Static "Speed:"
 #define SPEEDTEXT_INDEX		20
-#define SPEEDTEXT_WIDTH		57
+#define SPEEDTEXT_WIDTH		SCALEWIDTH(57)
 #define SPEEDTEXT_HEIGHT	(TEMPOTEXT_HEIGHT)
 // Edit Speed
 #define EDITSPEED_INDEX		(SPEEDTEXT_INDEX+1)
-#define EDITSPEED_WIDTH		28
+#define EDITSPEED_WIDTH		SCALEWIDTH(28)
 #define EDITSPEED_HEIGHT	(EDITTEMPO_HEIGHT)
 // Spin Speed
 #define SPINSPEED_INDEX		(EDITSPEED_INDEX+1)
-#define SPINSPEED_WIDTH		16
+#define SPINSPEED_WIDTH		SCALEWIDTH(16)
 #define SPINSPEED_HEIGHT	(EDITSPEED_HEIGHT)
 // Static "Rows/Beat:"
 #define RPBTEXT_INDEX		24
-#define RPBTEXT_WIDTH		63
+#define RPBTEXT_WIDTH		SCALEWIDTH(63)
 #define RPBTEXT_HEIGHT		(TEMPOTEXT_HEIGHT)
 // Edit Speed
 #define EDITRPB_INDEX		(RPBTEXT_INDEX+1)
-#define EDITRPB_WIDTH		28
+#define EDITRPB_WIDTH		SCALEWIDTH(28)
 #define EDITRPB_HEIGHT		(EDITTEMPO_HEIGHT)
 // Spin Speed
 #define SPINRPB_INDEX		(EDITRPB_INDEX+1)
-#define SPINRPB_WIDTH		16
+#define SPINRPB_WIDTH		SCALEWIDTH(16)
 #define SPINRPB_HEIGHT		(EDITRPB_HEIGHT)
 // VU Meters
 #define VUMETER_INDEX		(SPINRPB_INDEX+5)
-#define VUMETER_WIDTH		255
+#define VUMETER_WIDTH		SCALEWIDTH(255)
 #define VUMETER_HEIGHT		19
 
 static UINT MainButtons[] =
@@ -452,7 +454,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 				pModDoc->UpdateAllViews(NULL, HINT_SPEEDCHANGE);
 			}
 			//end rewbs.envRowGrid
-				
+
 			if (nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
 			nCurrentSpeed = nSpeed;
 			wsprintf(s, "%d", nCurrentSpeed);
@@ -468,11 +470,11 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		}
 		int nRowsPerBeat = pSndFile->m_PlayState.m_nCurrentRowsPerBeat;
 		if (nRowsPerBeat != nCurrentRowsPerBeat)
-		{	
+		{
 			if (nCurrentRowsPerBeat < 0) m_SpinRowsPerBeat.EnableWindow(TRUE);
 			nCurrentRowsPerBeat = nRowsPerBeat;
 			wsprintf(s, "%d", nCurrentRowsPerBeat);
-			m_EditRowsPerBeat.SetWindowText(s);			
+			m_EditRowsPerBeat.SetWindowText(s);
 		}
 	} else
 	{
@@ -504,7 +506,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 //-------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm;
-	
+
 	CToolBarEx::OnVScroll(nCode, nPos, pScrollBar);
 	short int oct = (short int)m_SpinOctave.GetPos();
 	if ((oct >= MIN_BASEOCTAVE) && ((int)oct != nCurrentOctave))
@@ -524,7 +526,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 					pSndFile->SetTempo(MAX(nCurrentTempo - 1, pSndFile->GetModSpecifications().tempoMin), true);
 				else
 					pSndFile->SetTempo(MIN(nCurrentTempo + 1, pSndFile->GetModSpecifications().tempoMax), true);
-		
+
 				m_SpinTempo.SetPos(0);
 			}
 			if ((n = (short int)m_SpinSpeed.GetPos()) != 0)
@@ -556,7 +558,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 				m_SpinRowsPerBeat.SetPos(0);
 
 				//update pattern editor
-				
+
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if (pMainFrm)
 				{
@@ -841,7 +843,7 @@ VOID CModTreeBar::DoLButtonUp()
 	if (m_dwStatus & MTB_DRAGGING)
 	{
 		CRect rect;
-		
+
 		m_dwStatus &= ~MTB_DRAGGING;
 		if (m_dwStatus & MTB_TRACKER)
 		{
@@ -978,7 +980,7 @@ void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 LRESULT CModTreeBar::OnNcHitTest(CPoint point)
 #else
 UINT CModTreeBar::OnNcHitTest(CPoint point)
-#endif 
+#endif
 //-----------------------------------------
 {
 	CRect rect;
@@ -1026,7 +1028,7 @@ void CModTreeBar::OnNcMouseMove(UINT, CPoint point)
 {
 	CRect rect;
 	CPoint pt = point;
-	
+
 	GetWindowRect(&rect);
 	pt.x -= rect.left;
 	pt.y -= rect.top;
@@ -1046,7 +1048,7 @@ void CModTreeBar::OnNcLButtonDown(UINT, CPoint point)
 {
 	CRect rect;
 	CPoint pt = point;
-	
+
 	GetWindowRect(&rect);
 	pt.x -= rect.left;
 	pt.y -= rect.top;
