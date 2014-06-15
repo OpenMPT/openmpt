@@ -5,26 +5,26 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt svn
+### 2014-06-15 - libopenmpt 0.2-beta5
 
- *  Add experimental support for building libopenmpt with emscripten.
  *  Add unmo3 support for non-Windows builds.
  *  Namespace all internal functions in order to allow statically linking
     against libopenmpt without risking duplicate symbols.
  *  Iconv is now completely optional and only used on Linux systems by default.
  *  Added libopenmpt_example_c_stdout.c, an example without requiring
     PortAudio.
- *  Fix ping-pong loop behaviour which broke in beta3.
- *  Add an example which does not depend on PortAudio.
- *  Smaller playback accuracy improvements.
+ *  Add experimental support for building libopenmpt with emscripten.
 
+ *  [Bug] Fix ping-pong loop behaviour which broke in 0.2-beta3.
  *  [Bug] Fix crashs when accessing invalid patterns through libopenmpt API.
  *  [Bug] Makefile: Support building with missing optional dependencies without
-    theme being stated explicitely.
+    them being stated explicitely.
  *  [Bug] openmpt123: Crash when quitting while playback is stopped.
  *  [Bug] openmpt123: Crash when writing output to a file in interactive UI
     mode.
  *  [Bug] openmpt123: Wrong FLAC output filename in --render mode.
+
+ *  Various smaller playback accuracy improvements.
 
 ### 2014-02-25 - libopenmpt 0.2-beta4
 
