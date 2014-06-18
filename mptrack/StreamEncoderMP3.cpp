@@ -13,11 +13,7 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderMP3.h"
 
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Mainfrm.h"
-#include "../mptrack/Mptrack.h"
-#include "../mptrack/Reporting.h"
-#endif //MODPLUG_TRACKER
+#include "Mptrack.h"
 
 #include "../soundlib/Sndfile.h"
 
@@ -27,8 +23,12 @@
 
 #include <deque>
 #include <iomanip>
+#include <locale>
+#include <sstream>
 
-#include <cstdlib>
+// For ACM debugging purposes
+#define ACMLOG(x, ...)
+//#define ACMLOG Log
 
 #ifdef MPT_MP3ENCODER_LAME
 //#define MPT_USE_LAME_H
@@ -56,8 +56,13 @@ typedef enum vbr_mode_e {
 #endif // MPT_MP3ENCODER_BLADE
 
 #ifdef MPT_MP3ENCODER_ACM
-#include <MSAcm.h>
+#include <mmreg.h>
+#include <msacm.h>
 #endif // MPT_MP3ENCODER_ACM
+
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 
@@ -179,17 +184,17 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags)
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
 
 	// Write TIT2 (Title), TCOM / TPE1 (Composer), TALB (Album), TCON (Genre), TYER / TDRC (Date), WXXX (URL), TENC (Encoder), COMM (Comment)
-	WriteID3v2Frame("TIT2", mpt::String::Encode(tags.title, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TPE1", mpt::String::Encode(tags.artist, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TCOM", mpt::String::Encode(tags.artist, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TALB", mpt::String::Encode(tags.album, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TCON", mpt::String::Encode(tags.genre, mpt::CharsetUTF8), s);
-	//WriteID3v2Frame("TYER", mpt::String::Encode(tags.year, mpt::CharsetUTF8), s);		// Deprecated
-	WriteID3v2Frame("TDRC", mpt::String::Encode(tags.year, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TBPM", mpt::String::Encode(tags.bpm, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("WXXX", mpt::String::Encode(tags.url, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("TENC", mpt::String::Encode(tags.encoder, mpt::CharsetUTF8), s);
-	WriteID3v2Frame("COMM", mpt::String::Encode(tags.comments, mpt::CharsetUTF8), s);
+	WriteID3v2Frame("TIT2", mpt::To(mpt::CharsetUTF8, tags.title), s);
+	WriteID3v2Frame("TPE1", mpt::To(mpt::CharsetUTF8, tags.artist), s);
+	WriteID3v2Frame("TCOM", mpt::To(mpt::CharsetUTF8, tags.artist), s);
+	WriteID3v2Frame("TALB", mpt::To(mpt::CharsetUTF8, tags.album), s);
+	WriteID3v2Frame("TCON", mpt::To(mpt::CharsetUTF8, tags.genre), s);
+	//WriteID3v2Frame("TYER", mpt::To(mpt::CharsetUTF8, tags.year), s);		// Deprecated
+	WriteID3v2Frame("TDRC", mpt::To(mpt::CharsetUTF8, tags.year), s);
+	WriteID3v2Frame("TBPM", mpt::To(mpt::CharsetUTF8, tags.bpm), s);
+	WriteID3v2Frame("WXXX", mpt::To(mpt::CharsetUTF8, tags.url), s);
+	WriteID3v2Frame("TENC", mpt::To(mpt::CharsetUTF8, tags.encoder), s);
+	WriteID3v2Frame("COMM", mpt::To(mpt::CharsetUTF8, tags.comments), s);
 
 	// Write Padding
 	for(size_t i = 0; i < ID3v2_PADDING; i++)
@@ -253,7 +258,7 @@ typedef lame_global_flags *lame_t;
 struct LameDynBind
 {
 
-	HMODULE hLame;
+	mpt::Library hLame;
 
 	const char* (CDECL * get_lame_version)();
 	const char* (CDECL * get_lame_short_version)();
@@ -314,31 +319,27 @@ struct LameDynBind
 
 	void Reset()
 	{
-		std::memset(this, 0, sizeof(*this));
+		return;
 	}
 	LameDynBind()
 	{
 		Reset();
-		if(!hLame) TryLoad("libmp3lame.dll", true);
-		if(!hLame) TryLoad("liblame.dll", true);
-		if(!hLame) TryLoad("mp3lame.dll", true);
-		if(!hLame) TryLoad("lame.dll", true);
-		if(!hLame) TryLoad("lame_enc.dll", false);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("libmp3lame"), true);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("liblame"), true);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("mp3lame"), true);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("lame"), true);
+		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("lame_enc"), false);
 	}
-	void TryLoad(std::string filename, bool warn)
+	void TryLoad(const mpt::PathString &filename, bool warn)
 	{
-		#ifdef MODPLUG_TRACKER
-			filename = std::string(theApp.GetAppDirPath()) + filename;
-		#endif
-		hLame = LoadLibrary(filename.c_str());
-		if(!hLame)
+		hLame = mpt::Library(mpt::LibraryPath::AppFullName(filename));
+		if(!hLame.IsValid())
 		{
 			return;
 		}
 		bool ok = true;
 		#define LAME_BIND(f) do { \
-			FARPROC pf = GetProcAddress(hLame, #f ); \
-			if(!pf) \
+			if(!hLame.Bind( f , #f )) \
 			{ \
 				ok = false; \
 				if(warn) \
@@ -346,7 +347,6 @@ struct LameDynBind
 					Reporting::Error(mpt::String::Format("Your '%s' is missing '%s'.\n\nPlease copy a newer 'libmp3lame.dll' into OpenMPT's root directory.", filename, #f ).c_str(), "OpenMPT - MP3 Export"); \
 				} \
 			} \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
 		} while(0)
 		LAME_BIND(get_lame_version);
 		LAME_BIND(get_lame_short_version);
@@ -389,18 +389,15 @@ struct LameDynBind
 		#undef LAME_BIND
 		if(!ok)
 		{
-			FreeLibrary(hLame);
+			hLame.Unload();
 			Reset();
 			return;
 		}
 	}
-	operator bool () const { return hLame ? true : false; }
+	operator bool () const { return hLame.IsValid() ? true : false; }
 	~LameDynBind()
 	{
-		if(hLame)
-		{
-			FreeLibrary(hLame);
-		}
+		hLame.Unload();
 		Reset();
 	}
 	static void GenreEnumCallback(int num, const char *name, void *cookie)
@@ -420,8 +417,9 @@ struct LameDynBind
 			return traits;
 		}
 		traits.fileExtension = "mp3";
-		traits.fileShortDescription = "MP3";
+		traits.fileShortDescription = "MP3 (Lame)";
 		traits.fileDescription = "MPEG-1/2 Layer 3";
+		traits.encoderSettingsName = "MP3Lame";
 		traits.encoderName = "libMP3Lame";
 		traits.description += "Version: ";
 		traits.description += (get_lame_version()?get_lame_version():"");
@@ -435,10 +433,15 @@ struct LameDynBind
 		traits.canTags = true;
 		traits.genres.clear();
 		id3tag_genre_list(&GenreEnumCallback, &traits);
+#ifdef MPT_FORCE_ID3V1_TAGS_IN_CBR_MODE
+		traits.modesWithFixedGenres = Encoder::ModeCBR;
+#endif
 		traits.maxChannels = 2;
 		traits.samplerates = std::vector<uint32>(layer3_samplerates, layer3_samplerates + CountOf(layer3_samplerates));
 		traits.modes = Encoder::ModeCBR | Encoder::ModeQuality;
 		traits.bitrates = std::vector<int>(layer3_bitrates, layer3_bitrates + CountOf(layer3_bitrates));
+		traits.defaultSamplerate = 44100;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeQuality;
 		traits.defaultBitrate = 256;
 		traits.defaultQuality = 0.8f;
@@ -466,20 +469,21 @@ public:
 	{
 		Finalize();
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
 		if(!gfp)
 		{
 			gfp = lame.lame_init();
 		}
 
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
+
 		lame.lame_set_in_samplerate(gfp, samplerate);
 		lame.lame_set_num_channels(gfp, channels);
 
-#ifdef MODPLUG_TRACKER
-		int lameQuality = CMainFrame::GetPrivateProfileLong("Export", "MP3LameQuality", 3, theApp.GetConfigFileName());
+		int lameQuality = StreamEncoderSettings::Instance().MP3LameQuality;
 		lame.lame_set_quality(gfp, lameQuality);
-#endif // MODPLUG_TRACKER
 
 		if(settings.Mode == Encoder::ModeCBR)
 		{
@@ -553,13 +557,13 @@ public:
 	virtual void WriteMetatags(const FileTags &tags)
 	{
 		// Lame API expects Latin1, which is sad, but we cannot change that.
-		if(!tags.title.empty())    lame.id3tag_set_title(   gfp, mpt::String::Encode(tags.title   , mpt::CharsetISO8859_1).c_str());
-		if(!tags.artist.empty())   lame.id3tag_set_artist(  gfp, mpt::String::Encode(tags.artist  , mpt::CharsetISO8859_1).c_str());
-		if(!tags.album.empty())    lame.id3tag_set_album(   gfp, mpt::String::Encode(tags.album   , mpt::CharsetISO8859_1).c_str());
-		if(!tags.year.empty())     lame.id3tag_set_year(    gfp, mpt::String::Encode(tags.year    , mpt::CharsetISO8859_1).c_str());
-		if(!tags.comments.empty()) lame.id3tag_set_comment( gfp, mpt::String::Encode(tags.comments, mpt::CharsetISO8859_1).c_str());
-		if(!tags.trackno.empty())  lame.id3tag_set_track(   gfp, mpt::String::Encode(tags.trackno , mpt::CharsetISO8859_1).c_str());
-		if(!tags.genre.empty())    lame.id3tag_set_genre(   gfp, mpt::String::Encode(tags.genre   , mpt::CharsetISO8859_1).c_str());
+		if(!tags.title.empty())    lame.id3tag_set_title(   gfp, mpt::To(mpt::CharsetISO8859_1, tags.title   ).c_str());
+		if(!tags.artist.empty())   lame.id3tag_set_artist(  gfp, mpt::To(mpt::CharsetISO8859_1, tags.artist  ).c_str());
+		if(!tags.album.empty())    lame.id3tag_set_album(   gfp, mpt::To(mpt::CharsetISO8859_1, tags.album   ).c_str());
+		if(!tags.year.empty())     lame.id3tag_set_year(    gfp, mpt::To(mpt::CharsetISO8859_1, tags.year    ).c_str());
+		if(!tags.comments.empty()) lame.id3tag_set_comment( gfp, mpt::To(mpt::CharsetISO8859_1, tags.comments).c_str());
+		if(!tags.trackno.empty())  lame.id3tag_set_track(   gfp, mpt::To(mpt::CharsetISO8859_1, tags.trackno ).c_str());
+		if(!tags.genre.empty())    lame.id3tag_set_genre(   gfp, mpt::To(mpt::CharsetISO8859_1, tags.genre   ).c_str());
 	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{
@@ -620,7 +624,7 @@ public:
 struct BladeDynBind
 {
 
-	HMODULE hBlade;
+	mpt::Library hBlade;
 
 	int lame;
 
@@ -632,40 +636,35 @@ struct BladeDynBind
 
 	void Reset()
 	{
-		std::memset(this, 0, sizeof(*this));
+		lame = 0;
 	}
 	BladeDynBind()
 	{
 		Reset();
-		if(!hBlade)
+		if(!hBlade.IsValid())
 		{
-			TryLoad("lame_enc.dll");
-			if(hBlade) lame = 1;
+			TryLoad(MPT_PATHSTRING("lame_enc"));
+			if(hBlade.IsValid()) lame = 1;
 		}
-		if(!hBlade)
+		if(!hBlade.IsValid())
 		{
-			TryLoad("bladeenc.dll");
-			if(hBlade) lame = 0;
+			TryLoad(MPT_PATHSTRING("bladeenc"));
+			if(hBlade.IsValid()) lame = 0;
 		}
 	}
-	void TryLoad(std::string filename)
+	void TryLoad(const mpt::PathString &filename)
 	{
-		#ifdef MODPLUG_TRACKER
-			filename = std::string(theApp.GetAppDirPath()) + filename;
-		#endif
-		hBlade = LoadLibrary(filename.c_str());
-		if(!hBlade)
+		hBlade = mpt::Library(mpt::LibraryPath::AppFullName(filename));
+		if(!hBlade.IsValid())
 		{
 			return;
 		}
 		bool ok = true;
 		#define BLADE_BIND(f) do { \
-			FARPROC pf = GetProcAddress(hBlade, #f ); \
-			if(!pf) \
+			if(!hBlade.Bind( f , #f )) \
 			{ \
 				ok = false; \
 			} \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
 		} while(0)
 		BLADE_BIND(beVersion);
 		BLADE_BIND(beInitStream);
@@ -675,18 +674,15 @@ struct BladeDynBind
 		#undef BLADE_BIND
 		if(!ok)
 		{
-			FreeLibrary(hBlade);
+			hBlade.Unload();
 			Reset();
 			return;
 		}
 	}
-	operator bool () const { return hBlade ? true : false; }
+	operator bool () const { return hBlade.IsValid(); }
 	~BladeDynBind()
 	{
-		if(hBlade)
-		{
-			FreeLibrary(hBlade);
-		}
+		hBlade.Unload();
 		Reset();
 	}
 	Encoder::Traits BuildTraits()
@@ -697,10 +693,12 @@ struct BladeDynBind
 			return traits;
 		}
 		traits.fileExtension = "mp3";
-		traits.fileShortDescription = "MP3";
+		traits.fileShortDescription = std::string("MP3 ") + (lame ? "(Lame_enc)" : "(BladeEnc)");
 		traits.fileDescription = "MPEG-1 Layer 3";
+		traits.encoderSettingsName = "MP3Blade";
 		traits.encoderName = lame ? "Lame_enc.dll" : "BladeEnc.dll";
 		std::ostringstream description;
+		description.imbue(std::locale::classic());
 		BE_VERSION ver;
 		MemsetZero(ver);
 		beVersion(&ver);
@@ -716,6 +714,8 @@ struct BladeDynBind
 		traits.samplerates = std::vector<uint32>(mpeg1layer3_samplerates, mpeg1layer3_samplerates + CountOf(mpeg1layer3_samplerates));;
 		traits.modes = Encoder::ModeABR;
 		traits.bitrates = std::vector<int>(mpeg1layer3_bitrates, mpeg1layer3_bitrates + CountOf(mpeg1layer3_bitrates));
+		traits.defaultSamplerate = 44100;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeABR;
 		traits.defaultBitrate = 256;
 		return traits;
@@ -749,8 +749,11 @@ public:
 	{
 		Finalize();
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
+
 		if(samplerate <= 32000)
 		{
 			samplerate = 32000;
@@ -773,9 +776,6 @@ public:
 		}
 		LimitMax(bitrate, mpeg1layer3_bitrates[CountOf(mpeg1layer3_bitrates)-1]);
 
-		blade_inputsamples = 1024;
-		blade_outputbytes = 1024;
-
 		bestream = HBE_STREAM();
 
 		becfg = new BE_CONFIG();
@@ -788,9 +788,10 @@ public:
 		becfg->format.mp3.bCopyright = FALSE;
 		becfg->format.mp3.bOriginal = TRUE;
 
+		blade_inputsamples = 1152 * channels; // 1 frame
+		blade_outputbytes = 1440; // 320kBit 32kHz frame
 		blade.beInitStream(becfg, &blade_inputsamples, &blade_outputbytes, &bestream);
 
-		blade_sampleBuf.resize(blade_inputsamples);
 	}
 	virtual void WriteMetatags(const FileTags &tags)
 	{
@@ -825,6 +826,7 @@ public:
 			DWORD size = 0;
 			buf.resize(blade_outputbytes);
 			blade.beEncodeChunk(bestream, samples.size(), &samples[0], (PBYTE)&buf[0], &size);
+			ASSERT(size <= buf.size());
 			buf.resize(size);
 			WriteBuffer();
 		}
@@ -837,12 +839,13 @@ public:
 		}
 		if(blade_sampleBuf.size() > 0)
 		{
-			DWORD size = 0;
-			buf.resize(blade_outputbytes);
 			samples.resize(blade_sampleBuf.size());
 			std::copy(blade_sampleBuf.begin(), blade_sampleBuf.end(), samples.begin());
 			blade_sampleBuf.clear();
+			DWORD size = 0;
+			buf.resize(blade_outputbytes);
 			blade.beEncodeChunk(bestream, samples.size(), &samples[0], (PBYTE)&buf[0], &size);
+			ASSERT(size <= buf.size());
 			buf.resize(size);
 			WriteBuffer();
 		}
@@ -905,54 +908,117 @@ struct AcmDynBind
 	}
 	BOOL AcmFormatEnumCB(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD fdwSupport)
 	{
+		ACMLOG("ACM format found:");
+		ACMLOG(mpt::String::Print(" fdwSupport = 0x%1", mpt::fmt::hex0<8>(fdwSupport)));
+
+		if(pafd)
+		{
+			ACMLOG(" ACMFORMATDETAILS:");
+			ACMLOG(mpt::String::Print("  cbStruct = %1", pafd->cbStruct));
+			ACMLOG(mpt::String::Print("  dwFormatIndex = %1", pafd->dwFormatIndex));
+			ACMLOG(mpt::String::Print("  dwFormatTag = %1", pafd->dwFormatTag));
+			ACMLOG(mpt::String::Print("  fdwSupport = 0x%1", mpt::fmt::hex0<8>(pafd->fdwSupport)));
+			std::string str;
+			mpt::String::Read<mpt::String::maybeNullTerminated>(str, pafd->szFormat);
+			ACMLOG(mpt::String::Print("  Format = %1", str));
+		} else
+		{
+			ACMLOG(" ACMFORMATDETAILS = NULL");
+		}
+
 		if(pafd && pafd->pwfx && (fdwSupport & ACMDRIVERDETAILS_SUPPORTF_CODEC) && (pafd->dwFormatTag == WAVE_FORMAT_MPEGLAYER3))
 		{
+			ACMLOG(" MP3 format found!");
+
+			ACMDRIVERDETAILS add;
+			MemsetZero(add);
+			add.cbStruct = sizeof(add);
+			try
+			{
+				if(acmDriverDetails(driver, &add, 0) != MMSYSERR_NOERROR)
+				{
+					ACMLOG(" acmDriverDetails = ERROR");
+					// No driver details? Skip it.
+					return TRUE;
+				}
+				ACMLOG(" ACMDRIVERDETAILS:");
+				ACMLOG(mpt::String::Print("  cbStruct = %1", add.cbStruct));
+				ACMLOG(mpt::String::Print("  fccType = 0x%1", mpt::fmt::hex0<4>(add.fccType)));
+				ACMLOG(mpt::String::Print("  fccComp = 0x%1", mpt::fmt::hex0<4>(add.fccComp)));
+				ACMLOG(mpt::String::Print("  wMid = %1", add.wMid));
+				ACMLOG(mpt::String::Print("  wPid = %1", add.wPid));
+				ACMLOG(mpt::String::Print("  vdwACM = 0x%1", mpt::fmt::hex0<8>(add.vdwACM)));
+				ACMLOG(mpt::String::Print("  vdwDriver = 0x%1", mpt::fmt::hex0<8>(add.vdwDriver)));
+				ACMLOG(mpt::String::Print("  fdwSupport = %1", mpt::fmt::hex0<8>(add.fdwSupport)));
+				ACMLOG(mpt::String::Print("  cFormatTags = %1", add.cFormatTags));
+				ACMLOG(mpt::String::Print("  cFilterTags = %1", add.cFilterTags));
+				std::string str;
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szShortName);
+				ACMLOG(mpt::String::Print("  ShortName = %1", str));
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szLongName);
+				ACMLOG(mpt::String::Print("  LongName = %1", str));
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szCopyright);
+				ACMLOG(mpt::String::Print("  Copyright = %1", str));
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szLicensing);
+				ACMLOG(mpt::String::Print("  Licensing = %1", str));
+				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szFeatures);
+				ACMLOG(mpt::String::Print("  Features = %1", str));
+			} catch(...)
+			{
+				ACMLOG(" acmDriverDetails = EXCEPTION");
+				// Driver crashed? Skip it.
+				return TRUE;
+			}
+
+			std::string driverNameLong;
+			std::string driverNameShort;
+			std::string driverNameCombined;
+			std::ostringstream driverDescription;
+			driverDescription.imbue(std::locale::classic());
+
+			if(add.szLongName[0])
+			{
+				mpt::String::Copy(driverNameLong, add.szLongName);
+			}
+			if(add.szShortName[0])
+			{
+				mpt::String::Copy(driverNameShort, add.szShortName);
+			}
+			if(driverNameShort.empty())
+			{
+				if(driverNameLong.empty())
+				{
+					driverNameCombined = "";
+				} else
+				{
+					driverNameCombined = driverNameLong;
+				}
+			} else
+			{
+				if(driverNameLong.empty())
+				{
+					driverNameCombined = driverNameShort;
+				} else
+				{
+					driverNameCombined = driverNameLong;
+				}
+			}
+
+			AppendField(driverDescription, "Driver", add.szShortName);
+			AppendField(driverDescription, "Description", add.szLongName);
+			AppendField(driverDescription, "Copyright", add.szCopyright);
+			AppendField(driverDescription, "Licensing", add.szLicensing);
+			AppendField(driverDescription, "Features", add.szFeatures);
+
 			for(int i = 0; i < CountOf(layer3_samplerates); ++i)
 			{
 				if(layer3_samplerates[i] == (int)pafd->pwfx->nSamplesPerSec)
 				{
-					std::ostringstream driverDescription;
-					std::string driverNameLong;
-					std::string driverNameShort;
-					std::string driverNameCombined;
+
 					std::string formatName;
-					
-					ACMDRIVERDETAILS add;
-					MemsetZero(add);
-					add.cbStruct = sizeof(add);
+
 					formatName = pafd->szFormat;
-					if(acmDriverDetailsA(driver, &add, 0) != MMSYSERR_NOERROR)
-					{
-						// No driver details? Skip it.
-						continue;
-					}
-					if(add.szLongName[0])
-					{
-						mpt::String::Copy(driverNameLong, add.szLongName);
-					}
-					if(add.szShortName[0])
-					{
-						mpt::String::Copy(driverNameShort, add.szShortName);
-					}
-					if(driverNameShort.empty())
-					{
-						if(driverNameLong.empty())
-						{
-							driverNameCombined = "";
-						} else
-						{
-							driverNameCombined = driverNameLong;
-						}
-					} else
-					{
-						if(driverNameLong.empty())
-						{
-							driverNameCombined = driverNameShort;
-						} else
-						{
-							driverNameCombined = driverNameLong;
-						}
-					}
+					
 					if(!driverNameCombined.empty())
 					{
 						formatName += " (";
@@ -981,11 +1047,6 @@ struct AcmDynBind
 						formats_waveformats.push_back(wfex);
 					}
 
-					AppendField(driverDescription, "Driver", add.szShortName);
-					AppendField(driverDescription, "Description", add.szLongName);
-					AppendField(driverDescription, "Copyright", add.szCopyright);
-					AppendField(driverDescription, "Licensing", add.szLicensing);
-					AppendField(driverDescription, "Features", add.szFeatures);
 					if(!driverDescription.str().empty())
 					{
 						drivers.insert(driverDescription.str());
@@ -1014,7 +1075,7 @@ struct AcmDynBind
 		pwfx->wBitsPerSample = 16;
 		pwfx->nBlockAlign = (WORD)((pwfx->nChannels * pwfx->wBitsPerSample) / 8);
 		pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
-		acmFormatEnumA(NULL, &afd, AcmFormatEnumCallback, reinterpret_cast<DWORD_PTR>(this), ACM_FORMATENUMF_CONVERT);
+		acmFormatEnum(NULL, &afd, AcmFormatEnumCallback, reinterpret_cast<DWORD_PTR>(this), ACM_FORMATENUMF_CONVERT);
 	}
 	void TryLoad()
 	{
@@ -1029,13 +1090,19 @@ struct AcmDynBind
 			{
 				EnumFormats(mpeg1layer3_samplerates[i], 2);
 			}
+		} catch(...)
+		{
+			// continue
+		}
+		try
+		{
 			for(std::size_t i = 0; i < CountOf(mpeg1layer3_samplerates); ++i)
 			{
 				EnumFormats(mpeg1layer3_samplerates[i], 1);
 			}
 		} catch(...)
 		{
-			found_codec = false;
+			// continue
 		}
 		if(!found_codec)
 		{
@@ -1056,9 +1123,10 @@ struct AcmDynBind
 			return traits;
 		}
 		traits.fileExtension = "mp3";
-		traits.fileShortDescription = "MP3";
+		traits.fileShortDescription = "MP3 (ACM)";
 		traits.fileDescription = "MPEG Layer 3";
 		std::ostringstream name;
+		name.imbue(std::locale::classic());
 		DWORD ver = acmGetVersion();
 		if(ver & 0xffff)
 		{
@@ -1067,6 +1135,7 @@ struct AcmDynBind
 		{
 			name << "Microsoft Windows ACM " << ((ver>>24)&0xff) << "." << ((ver>>16)&0xff);
 		}
+		traits.encoderSettingsName = "MP3ACM";
 		traits.encoderName = name.str();
 		for(std::set<std::string>::const_iterator i = drivers.begin(); i != drivers.end(); ++i)
 		{
@@ -1084,6 +1153,8 @@ struct AcmDynBind
 		}
 		traits.modes = Encoder::ModeEnumerated;
 		traits.formats = formats;
+		traits.defaultSamplerate = 44100;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeEnumerated;
 		traits.defaultFormat = 0;
 		traits.defaultBitrate = 256;
@@ -1120,9 +1191,13 @@ public:
 	{
 		Finalize();
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
-		const int format = Clamp(settings.Format, 0, (int)acm.formats.size());
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
+
+		int format = settings.Format;
+		format = Clamp(format, 0, (int)acm.formats.size());
 
 		if(acmDriverOpen(&acmDriver, acm.formats_driverids[format], 0) != MMSYSERR_NOERROR)
 		{
@@ -1142,11 +1217,7 @@ public:
 		wfex.cbSize = 0;
 		LPWAVEFORMATEX pwfexDst = (LPWAVEFORMATEX)&acm.formats_waveformats[format][0];
 
-		bool acmFast = false;
-#ifdef MODPLUG_TRACKER
-		acmFast = CMainFrame::GetPrivateProfileBool("Export", "MP3ACMFast", acmFast, theApp.GetConfigFileName());
-#endif // MODPLUG_TRACKER
-
+		bool acmFast = StreamEncoderSettings::Instance().MP3ACMFast;
 		if(acmStreamOpen(&acmStream, acmDriver, &wfex, pwfexDst, NULL, 0, 0, acmFast ? 0 : ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR)
 		{
 			acmDriverClose(acmDriver, 0);
@@ -1299,6 +1370,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 #ifdef MPT_MP3ENCODER_ACM
 	, m_Acm(nullptr)
 #endif // MPT_MP3ENCODER_ACM
+	, m_Type(MP3EncoderDefault)
 {
 #ifdef MPT_MP3ENCODER_LAME
 	if(type == MP3EncoderDefault || type == MP3EncoderLame)
@@ -1306,6 +1378,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 		m_Lame = new LameDynBind();
 		if(*m_Lame)
 		{
+			m_Type = MP3EncoderLame;
 			SetTraits(m_Lame->BuildTraits());
 			return;
 		}
@@ -1317,6 +1390,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 		m_Blade = new BladeDynBind();
 		if(*m_Blade)
 		{
+			m_Type = MP3EncoderBlade;
 			SetTraits(m_Blade->BuildTraits());
 			return;
 		}
@@ -1328,6 +1402,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 		m_Acm = new AcmDynBind();
 		if(*m_Acm)
 		{
+			m_Type = MP3EncoderACM;
 			SetTraits(m_Acm->BuildTraits());
 			return;
 		}
@@ -1388,23 +1463,20 @@ IAudioStreamEncoder *MP3Encoder::ConstructStreamEncoder(std::ostream &file) cons
 	{
 		// nothing
 #ifdef MPT_MP3ENCODER_LAME
-	} else if(m_Lame && *m_Lame)
+	} else if(m_Type == MP3EncoderLame)
 	{
 		result = new MP3LameStreamWriter(*m_Lame, file);
 #endif // MPT_MP3ENCODER_LAME
 #ifdef MPT_MP3ENCODER_BLADE
-	} else if(m_Blade && *m_Blade)
+	} else if(m_Type == MP3EncoderBlade)
 	{
 		result = new MP3BladeStreamWriter(*m_Blade, file);
 #endif // MPT_MP3ENCODER_BLADE
 #ifdef MPT_MP3ENCODER_ACM
-	} else if(m_Acm && *m_Acm)
+	} else if(m_Type == MP3EncoderACM)
 	{
 		result = new MP3AcmStreamWriter(*m_Acm, file);
 #endif // MPT_MP3ENCODER_ACM
-	} else
-	{
-		return nullptr;
 	}
 	return result;
 }
@@ -1413,13 +1485,35 @@ IAudioStreamEncoder *MP3Encoder::ConstructStreamEncoder(std::ostream &file) cons
 std::string MP3Encoder::DescribeQuality(float quality) const
 //----------------------------------------------------------
 {
-	int q = static_cast<int>((1.0f - quality) * 10.0f);
-	if(q < 0) q = 0;
-	if(q >= 10)
+#ifdef MPT_MP3ENCODER_LAME
+	if(m_Type == MP3EncoderLame)
 	{
-		return "VBR -V9.999";
-	} else
-	{
-		return mpt::String::Format("VBR -V%i", static_cast<int>((1.0f - quality) * 10.0f));
+		int q = static_cast<int>((1.0f - quality) * 10.0f);
+		if(q < 0) q = 0;
+		if(q >= 10)
+		{
+			return "VBR -V9.999";
+		} else
+		{
+			return mpt::String::Format("VBR -V%i", static_cast<int>((1.0f - quality) * 10.0f));
+		}
 	}
+#endif // MPT_MP3ENCODER_LAME
+	return EncoderFactoryBase::DescribeQuality(quality);
 }
+
+std::string MP3Encoder::DescribeBitrateABR(int bitrate) const
+//-----------------------------------------------------------
+{
+#ifdef MPT_MP3ENCODER_BLADE
+	if(m_Type == MP3EncoderBlade)
+	{
+		return mpt::String::Format("%i kbit", bitrate);
+	}
+#endif // MPT_MP3ENCODER_BLADE
+	return EncoderFactoryBase::DescribeBitrateABR(bitrate);
+}
+
+
+
+OPENMPT_NAMESPACE_END

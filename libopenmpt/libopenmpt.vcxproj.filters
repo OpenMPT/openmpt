@@ -27,12 +27,6 @@
     <Filter Include="Source Files\test">
       <UniqueIdentifier>{7e476eee-06d3-440e-89c1-29c78a21daa9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\pugixml">
-      <UniqueIdentifier>{d18c2a3b-8a7c-43e4-b77f-b02eaead5d62}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\pugixml">
-      <UniqueIdentifier>{c229b22b-065f-42fd-81ee-498a859a7c8d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\miniz">
       <UniqueIdentifier>{3800b9bf-c28e-489f-8792-64b1b5a58b40}</UniqueIdentifier>
     </Filter>
@@ -78,9 +72,6 @@
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\Dlsbank.h">
-      <Filter>Header Files\soundlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\soundlib\Endianness.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\FileReader.h">
@@ -200,9 +191,6 @@
     <ClInclude Include="..\common\BuildSettings.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="libopenmpt_interactive.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\versionNumber.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -214,12 +202,6 @@
     </ClInclude>
     <ClInclude Include="..\common\Logging.h">
       <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\pugixml\src\pugiconfig.hpp">
-      <Filter>Header Files\pugixml</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\pugixml\src\pugixml.hpp">
-      <Filter>Header Files\pugixml</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\S3MTools.h">
       <Filter>Header Files\soundlib</Filter>
@@ -242,17 +224,47 @@
     <ClInclude Include="..\soundlib\Tagging.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="libopenmpt_settings.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="libopenmpt_settings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="libopenmpt_stream_callbacks_fd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="libopenmpt_stream_callbacks_file.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\mptFstream.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\mptPathString.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\thread.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="libopenmpt_ext.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\FloatMixer.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\IntMixer.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\Mixer.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\MixerInterface.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test\TestTools.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test\TestToolsLib.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test\TestToolsTracker.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Endianness.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -276,9 +288,6 @@
     </ClCompile>
     <ClCompile Include="..\common\stdafx.cpp">
       <Filter>Source Files\common</Filter>
-    </ClCompile>
-    <ClCompile Include="libopenmpt.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\ITTools.cpp">
       <Filter>Source Files\soundlib</Filter>
@@ -466,25 +475,10 @@
     <ClCompile Include="..\common\version.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="libopenmpt_modplug.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="libopenmpt_winamp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="libopenmpt_c.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="libopenmpt_cxx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="libopenmpt_version.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="libopenmpt_interactive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="libopenmpt_xmplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Load_digi.cpp">
@@ -496,14 +490,8 @@
     <ClCompile Include="libopenmpt_impl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\include\pugixml\src\pugixml.cpp">
-      <Filter>Source Files\pugixml</Filter>
-    </ClCompile>
     <ClCompile Include="..\soundlib\S3MTools.cpp">
       <Filter>Source Files\soundlib</Filter>
-    </ClCompile>
-    <ClCompile Include="libopenmpt_test.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\Dither.cpp">
       <Filter>Source Files\soundlib</Filter>
@@ -516,6 +504,18 @@
     </ClCompile>
     <ClCompile Include="..\include\miniz\miniz.c">
       <Filter>Source Files\miniz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\mptPathString.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="libopenmpt_ext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\Logging.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\test\TestToolsLib.cpp">
+      <Filter>Source Files\test</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

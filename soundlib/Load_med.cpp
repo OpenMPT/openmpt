@@ -13,6 +13,8 @@
 #include "Loaders.h"
 #include "../common/StringFixer.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //#define MED_LOG
 
 #define MED_MAX_COMMENT_LENGTH 5*1024 //: Is 5 kB enough?
@@ -121,8 +123,8 @@ typedef struct PACKED tagMMDSAMPLEHEADER
 		// 3: g723_24
 	BYTE commonflags;	// flags common to all packtypes (none defined so far)
 	BYTE packerflags;	// flags for the specific packtype
-	ULONG leftchlen;	// packed length of left channel in bytes
-	ULONG rightchlen;	// packed length of right channel in bytes (ONLY PRESENT IN STEREO SAMPLES)
+	uint32 leftchlen;	// packed length of left channel in bytes
+	uint32 rightchlen;	// packed length of right channel in bytes (ONLY PRESENT IN STEREO SAMPLES)
 	BYTE SampleData[1];	// Sample Data
 } MMDSAMPLEHEADER;
 
@@ -228,7 +230,7 @@ typedef struct PACKED tagMMD1BLOCKINFO
 STATIC_ASSERT(sizeof(MMD1BLOCKINFO) == 36);
 
 
-// A set of play sequences is stored as an array of ULONG files offsets
+// A set of play sequences is stored as an array of uint32 files offsets
 // Each offset points to the play sequence itself.
 typedef struct PACKED tagMMD2PLAYSEQ
 {
@@ -500,16 +502,16 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 }
 
 
-bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMed(const uint8 *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------------------------------------
 {
 	const MEDMODULEHEADER *pmmh;
 	const MMD0SONGHEADER *pmsh;
 	const MMD2SONGHEADER *pmsh2;
 	const MMD0EXP *pmex;
 	DWORD dwBlockArr, dwSmplArr, dwExpData, wNumBlocks;
-	LPDWORD pdwTable;
-	CHAR version;
+	DWORD *pdwTable;
+	int8 version;
 	UINT deftempo;
 	int playtransp = 0;
 
@@ -548,7 +550,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	InitializeChannels();
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Format("OctaMED (MMD%c)", version);
+	madeWithTracker = mpt::String::Print("OctaMED (MMD%1)", std::string(1, version));
 
 	m_nType = MOD_TYPE_MED;
 	m_nSamplePreAmp = 32;
@@ -700,7 +702,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 
 			if ((playseqtable) && (playseqtable < dwMemLength) && (nplayseq*4 < dwMemLength - playseqtable))
 			{
-				pseq = BigEndian(((LPDWORD)(lpStream+playseqtable))[nplayseq]);
+				pseq = BigEndian(((DWORD*)(lpStream+playseqtable))[nplayseq]);
 			}
 			if ((pseq) && (pseq < dwMemLength - sizeof(MMD2PLAYSEQ)))
 			{
@@ -759,7 +761,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 
 			if ((iinfoptr) && (ientrysz < 256) && (ientries*ientrysz < dwMemLength) && (iinfoptr < dwMemLength - ientries*ientrysz))
 			{
-				LPCSTR psznames = (LPCSTR)(lpStream + iinfoptr);
+				const char *psznames = (const char *)(lpStream + iinfoptr);
 				for (UINT i=0; i<ientries; i++) if (i < m_nSamples)
 				{
 					mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[i + 1], reinterpret_cast<const char *>(psznames + i * ientrysz), ientrysz);
@@ -799,7 +801,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	}
 	// Reading samples
 	if (dwSmplArr > dwMemLength - 4*m_nSamples) return true;
-	pdwTable = (LPDWORD)(lpStream + dwSmplArr);
+	pdwTable = (DWORD*)(lpStream + dwSmplArr);
 	for (UINT iSmp=0; iSmp<m_nSamples; iSmp++) if (pdwTable[iSmp])
 	{
 		UINT dwPos = BigEndian(pdwTable[iSmp]);
@@ -811,7 +813,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	#endif
 		if(dwPos + len + 6 > dwMemLength) len = 0;
 		UINT stype = BigEndianW(psdh->type);
-		LPSTR psdata = (LPSTR)(lpStream + dwPos + 6);
+		char *psdata = (char *)(lpStream + dwPos + 6);
 
 		SampleIO sampleIO(
 			SampleIO::_8bit,
@@ -849,7 +851,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	}
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;
 	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks)) return true;
-	pdwTable = (LPDWORD)(lpStream + dwBlockArr);
+	pdwTable = (DWORD*)(lpStream + dwBlockArr);
 	playtransp += (version == '3') ? 24 : 48;
 	for (PATTERNINDEX iBlk=0; iBlk<wNumBlocks; iBlk++)
 	{
@@ -864,7 +866,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 			if (!tracks) tracks = m_nChannels;
 			if(Patterns.Insert(iBlk, lines)) continue;
 			ModCommand *p = Patterns[iBlk];
-			LPBYTE s = (LPBYTE)(lpStream + dwPos + 2);
+			const uint8 * s = (const uint8 *)(lpStream + dwPos + 2);
 			UINT maxlen = tracks*lines*3;
 			if (maxlen + dwPos > dwMemLength - 2) break;
 			for (UINT y=0; y<lines; y++)
@@ -929,7 +931,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 				}
 			}
 			ModCommand *p = Patterns[iBlk];
-			LPBYTE s = (LPBYTE)(lpStream + dwPos + 8);
+			const uint8 * s = (const uint8 *)(lpStream + dwPos + 8);
 			UINT maxlen = tracks*lines*4;
 			if (maxlen + dwPos > dwMemLength - 8) break;
 			for (UINT y=0; y<lines; y++)
@@ -958,3 +960,5 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	return true;
 }
 
+
+OPENMPT_NAMESPACE_END

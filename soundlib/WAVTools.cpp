@@ -13,6 +13,9 @@
 #include "WAVTools.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 ///////////////////////////////////////////////////////////
 // WAV Reading
 
@@ -252,10 +255,10 @@ void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
 
 
 // Output to file: Initialize with filename.
-WAVWriter::WAVWriter(const char *filename) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
-//----------------------------------------------------------------------------------------------------------------
+WAVWriter::WAVWriter(const mpt::PathString &filename) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
+//---------------------------------------------------------------------------------------------------------------------------
 {
-	f = fopen(filename, "w+b");
+	f = mpt_fopen(filename, "w+b");
 	fileOwned = true;
 	Init();
 }
@@ -504,7 +507,7 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 void WAVWriter::WriteTag(RIFFChunk::id_type id, const std::wstring &wideText)
 //---------------------------------------------------------------------------
 {
-	std::string text = mpt::String::Encode(wideText, mpt::CharsetWindows1252);
+	std::string text = mpt::To(mpt::CharsetWindows1252, wideText);
 	if(!text.empty())
 	{
 		const size_t length = text.length() + 1;
@@ -554,11 +557,17 @@ void WAVWriter::WriteLoopInformation(const ModSample &sample)
 	if(sample.uFlags[CHN_LOOP])
 	{
 		loops[info.numLoops++].ConvertToWAV(sample.nLoopStart, sample.nLoopEnd, sample.uFlags[CHN_PINGPONGLOOP]);
+	} else if(sample.uFlags[CHN_SUSTAINLOOP])
+	{
+		// Since there are no "loop types" to distinguish between sustain and normal loops, OpenMPT assumes
+		// that the first loop is a sustain loop if there are two loops. If we only want a sustain loop,
+		// we will have to write a second bogus loop.
+		loops[info.numLoops++].ConvertToWAV(0, 0, false);
 	}
 
 	info.ConvertEndianness();
 	Write(info);
-	for(size_t i = 0; i < info.numLoops; i++)
+	for(uint32 i = 0; i < info.numLoops; i++)
 	{
 		loops[i].ConvertEndianness();
 		Write(loops[i]);
@@ -591,3 +600,6 @@ void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, 
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

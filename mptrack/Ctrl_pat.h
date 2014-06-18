@@ -14,6 +14,8 @@
 #include "globals.h"
 #include "PatternCursor.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class COrderList;
 class CCtrlPatterns;
 
@@ -61,7 +63,7 @@ public:
 		else if(!isSelectionKeyPressed && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;
 	};
 	// Why VC wants to inline this huge function is beyond my understanding...
-	noinline bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false);
+	noinline bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false, bool setPlayPos = true);
 	BOOL UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
@@ -103,10 +105,6 @@ public:
 
 	// Set given sqeuence and update orderlist display.
 	void SelectSequence(const SEQUENCEINDEX nSeq);
-
-	// Little helper function to avoid copypasta
-	bool IsSelectionKeyPressed() const { return CMainFrame::GetInputHandler()->SelectionPressed(); }
-	bool IsCtrlKeyPressed() const { return CMainFrame::GetInputHandler()->CtrlPressed(); }
 
 	// Clipboard.
 	void OnEditCopy();
@@ -193,7 +191,7 @@ protected:
 
 public:
 	CCtrlPatterns(CModControlView &parent, CModDoc &document);
-	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glPatternWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG>* GetSplitPosRef() {return &TrackerSettings::Instance().glPatternWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	void SetCurrentPattern(PATTERNINDEX nPat);
@@ -267,3 +265,5 @@ public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg BOOL OnToolTip(UINT id, NMHDR *pTTTStruct, LRESULT *pResult);
 };
+
+OPENMPT_NAMESPACE_END

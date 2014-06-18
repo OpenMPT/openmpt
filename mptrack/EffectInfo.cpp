@@ -14,27 +14,31 @@
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/Tables.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 ///////////////////////////////////////////////////////////////////////////
 // Effects description
 
 struct MPTEFFECTINFO
 {
 	ModCommand::COMMAND effect;		// CMD_XXXX
-	DWORD paramMask;				// 0 = default
-	DWORD paramValue;				// 0 = default
-	DWORD paramLimit;				// Parameter Editor limit
-	DWORD supportedFormats;			// MOD_TYPE_XXX combo
-	LPCSTR name;					// e.g. "Tone Portamento"
+	ModCommand::PARAM paramMask;	// 0 = default
+	ModCommand::PARAM paramValue;	// 0 = default
+	ModCommand::PARAM paramLimit;	// Parameter Editor limit
+	MODTYPE supportedFormats;		// MOD_TYPE_XXX combo
+	const char *name;				// e.g. "Tone Portamento"
 };
 
-#define MOD_TYPE_MODXM	(MOD_TYPE_MOD | MOD_TYPE_XM)
-#define MOD_TYPE_S3MIT	(MOD_TYPE_S3M | MOD_TYPE_IT)
-#define MOD_TYPE_S3MITMPT (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_NOMOD	(MOD_TYPE_S3M | MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_XMIT	(MOD_TYPE_XM | MOD_TYPE_IT)
-#define MOD_TYPE_XMITMPT (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_ITMPT (MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_ALL	0xFFFFFFFF
+#define MOD_TYPE_MODXM		(MOD_TYPE_MOD | MOD_TYPE_XM)
+#define MOD_TYPE_S3MIT		(MOD_TYPE_S3M | MOD_TYPE_IT)
+#define MOD_TYPE_S3MITMPT	(MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)
+#define MOD_TYPE_NOMOD		(MOD_TYPE_S3M | MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
+#define MOD_TYPE_XMIT		(MOD_TYPE_XM | MOD_TYPE_IT)
+#define MOD_TYPE_XMITMPT	(MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
+#define MOD_TYPE_ITMPT		(MOD_TYPE_IT | MOD_TYPE_MPT)
+#define MOD_TYPE_ALL		((MODTYPE)~0)
 
 
 const MPTEFFECTINFO gFXInfo[] =
@@ -112,13 +116,13 @@ const MPTEFFECTINFO gFXInfo[] =
 	{CMD_DELAYCUT,		0x00,0x00,	0,	MOD_TYPE_MPT,	"Note Delay and Cut"},
 	// -> CODE#0010
 	// -> DESC="add extended parameter mechanism to pattern effects"
-	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMITMPT,	"Parameter Extension"},
+	{CMD_XPARAM,		0,0,	0,	MOD_TYPE_XMITMPT,	"Parameter Extension"},
 	// -! NEW_FEATURE#0010
-	{CMD_NOTESLIDEUP,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Up"}, // IMF / PTM effect
-	{CMD_NOTESLIDEDOWN,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Down"}, // IMF / PTM effect
-	{CMD_NOTESLIDEUPRETRIG,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Up + Retrigger Note"}, // PTM effect
-	{CMD_NOTESLIDEDOWNRETRIG,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Down+ Retrigger Note"}, // PTM effect
-	{CMD_REVERSEOFFSET,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Revert Sample + Offset"}, // PTM effect
+	{CMD_NOTESLIDEUP,		0,0,	0,	MOD_TYPE_IMF | MOD_TYPE_PTM,	"Note Slide Up"}, // IMF / PTM effect
+	{CMD_NOTESLIDEDOWN,		0,0,	0,	MOD_TYPE_IMF | MOD_TYPE_PTM,	"Note Slide Down"}, // IMF / PTM effect
+	{CMD_NOTESLIDEUPRETRIG,	0,0,	0,	MOD_TYPE_PTM,	"Note Slide Up + Retrigger Note"}, // PTM effect
+	{CMD_NOTESLIDEDOWNRETRIG,0,0,	0,	MOD_TYPE_PTM,	"Note Slide Down + Retrigger Note"}, // PTM effect
+	{CMD_REVERSEOFFSET,		0,0,	0,	MOD_TYPE_PTM,	"Revert Sample + Offset"}, // PTM effect
 };
 
 
@@ -167,9 +171,8 @@ bool EffectInfo::GetEffectName(LPSTR pszDescription, ModCommand::COMMAND command
 			if ((gFXInfo[fxndx].paramMask & 0x0F) == 0x0F) pszDescription[2] = szHexChar[gFXInfo[fxndx].paramValue & 0x0F];
 		}
 		strcat(pszDescription, gFXInfo[fxndx].name);
-		//rewbs.xinfo
 		//Get channel specific info
-		if (nChn < sndFile.m_nChannels)
+		if (nChn < sndFile.GetNumChannels())
 		{
 			CString chanSpec = "";
 			size_t macroIndex = size_t(-1);
@@ -189,8 +192,8 @@ bool EffectInfo::GetEffectName(LPSTR pszDescription, ModCommand::COMMAND command
 			case CMD_SMOOTHMIDI:
 				if (param < 0x80 && nChn != CHANNELINDEX_INVALID)
 				{
-					macroIndex = sndFile.Chn[nChn].nActiveMacro;
-					chanSpec.Format(": currently %d: ", sndFile.Chn[nChn].nActiveMacro);
+					macroIndex = sndFile.m_PlayState.Chn[nChn].nActiveMacro;
+					chanSpec.Format(": currently %d: ", sndFile.m_PlayState.Chn[nChn].nActiveMacro);
 				}
 				else
 				{
@@ -204,13 +207,12 @@ bool EffectInfo::GetEffectName(LPSTR pszDescription, ModCommand::COMMAND command
 				const PLUGINDEX plugin = sndFile.GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted) - 1;
 				chanSpec.Append(sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, plugin, sndFile));
 			}
-			if (chanSpec != "")
+			if (!chanSpec.IsEmpty())
 			{
 				strcat(pszDescription, chanSpec);
 			}
 
 		}
-		//end rewbs.xinfo
 	}
 	return bSupported;
 }
@@ -235,10 +237,9 @@ LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PAR
 
 
 //Returns command and corrects parameter refParam if necessary
-ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, int &refParam) const
-//-------------------------------------------------------------------------------
+ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refParam) const
+//---------------------------------------------------------------------------------------------
 {
-	//if (pParam) *pParam = -1;
 	if (ndx >= CountOf(gFXInfo))
 	{
 		refParam = 0;
@@ -248,10 +249,10 @@ ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, int &refParam) cons
 	// Cap parameter to match FX if necessary.
 	if (gFXInfo[ndx].paramMask)
 	{
-		if (refParam < static_cast<int>(gFXInfo[ndx].paramValue))
+		if (refParam < gFXInfo[ndx].paramValue)
 		{
 			refParam = gFXInfo[ndx].paramValue;	 // for example: delay with param < D0 becomes SD0
-		} else if (refParam > static_cast<int>(gFXInfo[ndx].paramValue) + 15)
+		} else if (refParam > gFXInfo[ndx].paramValue + 15)
 		{
 			refParam = gFXInfo[ndx].paramValue + 15; // for example: delay with param > DF becomes SDF
 		}
@@ -259,7 +260,7 @@ ModCommand::COMMAND EffectInfo::GetEffectFromIndex(UINT ndx, int &refParam) cons
 	if (gFXInfo[ndx].paramLimit)
 	{
 		// used for Zxx macro control in parameter editor: limit to 7F max.
-		LimitMax(refParam, static_cast<int>(gFXInfo[ndx].paramLimit));
+		LimitMax(refParam, gFXInfo[ndx].paramLimit);
 	}
 
 	return gFXInfo[ndx].effect;
@@ -289,8 +290,8 @@ UINT EffectInfo::GetEffectMaskFromIndex(UINT ndx) const
 
 }
 
-bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DWORD *prangeMax) const
-//---------------------------------------------------------------------------------------------------
+bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, ModCommand::PARAM *prangeMin, ModCommand::PARAM *prangeMax) const
+//---------------------------------------------------------------------------------------------------------------------------
 {
 	if (s) s[0] = 0;
 	if (prangeMin) *prangeMin = 0;
@@ -299,7 +300,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DW
 	if (s) GetEffectName(s, gFXInfo[ndx].effect, gFXInfo[ndx].paramValue, bXX);
 	if ((prangeMin) && (prangeMax))
 	{
-		UINT nmin = 0, nmax = 0xFF;
+		ModCommand::PARAM nmin = 0, nmax = 0xFF;
 		if (gFXInfo[ndx].paramMask == 0xF0)
 		{
 			nmin = gFXInfo[ndx].paramValue;
@@ -323,11 +324,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DW
 		case CMD_TEMPO:
 			nmin = 0x20;
 			if (sndFile.GetType() & MOD_TYPE_MOD) nmin = 0x21; else
-				// -> CODE#0010
-				// -> DESC="add extended parameter mechanism to pattern effects"
-				//			if (nType & MOD_TYPE_S3MIT) nmin = 1;
 				if (sndFile.GetType() & MOD_TYPE_S3MITMPT) nmin = 0;
-			// -! NEW_FEATURE#0010
 			break;
 		case CMD_VOLUMESLIDE:
 		case CMD_TONEPORTAVOL:
@@ -409,7 +406,7 @@ UINT EffectInfo::MapValueToPos(UINT ndx, UINT param) const
 	case CMD_PANNING8:
 		if(sndFile.GetType() == MOD_TYPE_S3M)
 		{
-			pos = CLAMP(param, 0, 0x80);
+			pos = Clamp(param, 0u, 0x80u);
 			if(param == 0xA4)
 				pos = 0x81;
 		}
@@ -536,7 +533,9 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 		break;
 
 	case CMD_TEMPO:
-		if (param < 0x10)
+		if (param == 0)
+			strcpy(s, "continue");
+		else if (param < 0x10)
 			wsprintf(s, "-%d bpm (slower)", param & 0x0F);
 		else if (param < 0x20)
 			wsprintf(s, "+%d bpm (faster)", param & 0x0F);
@@ -545,12 +544,10 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 		break;
 
 	case CMD_PANNING8:
-		wsprintf(s, "%d", param);
-		if(sndFile.GetType() == MOD_TYPE_S3M)
-		{
-			if(param == 0xA4)
-				strcpy(s, "Surround");
-		}
+		if(sndFile.GetType() == MOD_TYPE_S3M && param == 0xA4)
+			strcpy(s, "Surround");
+		else
+			wsprintf(s, "%d", param);
 		break;
 
 	case CMD_RETRIG:
@@ -606,27 +603,23 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 		if (!param)
 		{
 			wsprintf(s, "continue");
+		} else if ((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0x0F) == 0x0F) && (param & 0xF0))
+		{
+			wsprintf(s, "fine %s%d", sPlusChar.c_str(), param >> 4);
+		} else if ((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0) && (param & 0x0F))
+		{
+			wsprintf(s, "fine %s%d", sMinusChar.c_str(), param & 0x0F);
+		} else if ((param & 0x0F) != param && (param & 0xF0) != param)	// both nibbles are set.
+		{
+			strcpy(s, "undefined");
+		} else if (param & 0x0F)
+		{
+			wsprintf(s, "%s%d", sMinusChar.c_str(), param & 0x0F);
 		} else
-			if ((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0x0F) == 0x0F) && (param & 0xF0))
-			{
-				wsprintf(s, "fine %s%d", sPlusChar.c_str(), param >> 4);
-			} else
-				if ((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0) && (param & 0x0F))
-				{
-					wsprintf(s, "fine %s%d", sMinusChar.c_str(), param & 0x0F);
-				} else
-					if ((param & 0x0F) != param && (param & 0xF0) != param)	// both nibbles are set.
-					{
-						strcpy(s, "undefined");
-					} else
-						if (param & 0x0F)
-						{
-							wsprintf(s, "%s%d", sMinusChar.c_str(), param & 0x0F);
-						} else
-						{
-							wsprintf(s, "%s%d", sPlusChar.c_str(), param >> 4);
-						}
-						break;
+		{
+			wsprintf(s, "%s%d", sPlusChar.c_str(), param >> 4);
+		}
+		break;
 
 	case CMD_PATTERNBREAK:
 		wsprintf(pszName, "Break to row %d", param);
@@ -638,11 +631,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 
 	case CMD_OFFSET:
 		if (param)
-			// -> CODE#0010
-			// -> DESC="add extended parameter mechanism to pattern effects"
-			//			wsprintf(pszName, "Set Offset to %u", param << 8);
 			wsprintf(pszName, "Set Offset to %u", param);
-		// -! NEW_FEATURE#0010
 		else
 			strcpy(s, "continue");
 		break;
@@ -727,9 +716,10 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 					case 0x0A:	strcpy(s, "7A: Pan Env On"); break;
 					case 0x0B:	strcpy(s, "7B: Pitch Env Off"); break;
 					case 0x0C:	strcpy(s, "7C: Pitch Env On"); break;
-						// intentional fall-through for non-MPT modules follows
 					case 0x0D:	if(sndFile.GetType() == MOD_TYPE_MPT) { strcpy(s, "7D: Force Pitch Env"); break; }
+								MPT_FALLTHROUGH;
 					case 0x0E:	if(sndFile.GetType() == MOD_TYPE_MPT) { strcpy(s, "7E: Force Filter Env"); break; }
+								MPT_FALLTHROUGH;
 					default:	wsprintf(s, "%02X: undefined", param); break;
 					}
 				} else
@@ -860,15 +850,16 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 							strcat(s, " rows");
 							break;
 						case 0xF0:
-							if(sndFile.GetType() == MOD_TYPE_MOD) // invert loop
+							if(sndFile.GetType() == MOD_TYPE_MOD)
 							{
+								// invert loop
 								if((param & 0x0F) == 0)
 									strcpy(s, "Stop");
 								else
 									wsprintf(s, "Speed %d", param & 0x0F); 
-							}
-							else // macro
+							} else
 							{
+								// macro
 								wsprintf(s, "SF%X", param & 0x0F);
 							}
 							break;
@@ -891,12 +882,12 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 ////////////////////////////////////////////////////////////////////////////////////////
 // Volume column effects description
 
-typedef struct MPTVOLCMDINFO
+struct MPTVOLCMDINFO
 {
 	ModCommand::VOLCMD volCmd;		// VOLCMD_XXXX
-	DWORD supportedFormats;			// MOD_TYPE_XXX combo
-	LPCSTR name;					// e.g. "Set Volume"
-} MPTVOLCMDINFO;
+	MODTYPE supportedFormats;		// MOD_TYPE_XXX combo
+	const char *name;				// e.g. "Set Volume"
+};
 
 const MPTVOLCMDINFO gVolCmdInfo[] =
 {
@@ -914,7 +905,7 @@ const MPTVOLCMDINFO gVolCmdInfo[] =
 	{VOLCMD_PORTAUP,		MOD_TYPE_ITMPT,		"Portamento up"},
 	{VOLCMD_PORTADOWN,		MOD_TYPE_ITMPT,		"Portamento down"},
 	{VOLCMD_DELAYCUT,		MOD_TYPE_NONE,		""},
-	{VOLCMD_OFFSET,			MOD_TYPE_ITMPT,		"Offset"},		//rewbs.volOff
+	{VOLCMD_OFFSET,			MOD_TYPE_ITMPT,		"Offset"},
 };
 
 STATIC_ASSERT(CountOf(gVolCmdInfo) == (MAX_VOLCMDS - 1));
@@ -945,8 +936,8 @@ ModCommand::VOLCMD EffectInfo::GetVolCmdFromIndex(UINT ndx) const
 }
 
 
-bool EffectInfo::GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin, DWORD *prangeMax) const
-//-----------------------------------------------------------------------------------------
+bool EffectInfo::GetVolCmdInfo(UINT ndx, LPSTR s, ModCommand::VOL *prangeMin, ModCommand::VOL *prangeMax) const
+//-------------------------------------------------------------------------------------------------------------
 {
 	if (s) s[0] = 0;
 	if (prangeMin) *prangeMin = 0;
@@ -971,3 +962,6 @@ bool EffectInfo::GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin, DWORD *prang
 	}
 	return (gVolCmdInfo[ndx].supportedFormats & sndFile.GetType()) != 0;
 }
+
+
+OPENMPT_NAMESPACE_END

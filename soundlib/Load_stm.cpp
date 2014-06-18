@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #if MPT_COMPILER_MSVC
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 #endif
@@ -109,6 +111,18 @@ struct PACKED STMPatternEntry
 STATIC_ASSERT(sizeof(STMPatternEntry) == 4);
 
 
+struct PACKED STMPatternData
+{
+	STMPatternEntry entry[64 * 4];
+	void ConvertEndianness()
+	{
+		// nothing
+	}
+};
+
+STATIC_ASSERT(sizeof(STMPatternData) == 4*64*4);
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
@@ -132,12 +146,13 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
+	InitializeGlobals();
+	m_nType = MOD_TYPE_STM;
+
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songname);
 
 	// Read STM header
-	InitializeGlobals();
-	madeWithTracker = mpt::String::Format("Scream Tracker %d.%02x", fileHeader.verMajor, fileHeader.verMinor);
-	m_nType = MOD_TYPE_STM;
+	madeWithTracker = mpt::String::Print("Scream Tracker %1.%2", fileHeader.verMajor, mpt::fmt::hex0<2>(fileHeader.verMinor));
 	m_nSamples = 31;
 	m_nChannels = 4;
 	m_nMinPeriod = 64;
@@ -179,9 +194,9 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
-		STMPatternEntry patternData[64 * 4];
+		STMPatternData patternData;
 
-		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64) || !file.ReadArray(patternData))
+		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64) || !file.ReadConvertEndianness(patternData))
 		{
 			file.Skip(sizeof(patternData));
 			continue;
@@ -193,7 +208,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	
 		for(size_t n = 0; n < 64 * 4; n++, m++)
 		{
-			const STMPatternEntry &entry = patternData[n];
+			const STMPatternEntry &entry = patternData.entry[n];
 
 			if(entry.note == 0xFE || entry.note == 0xFC)
 			{
@@ -209,7 +224,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				m->instr = 0;
 			}
 			
-			int8 vol = (entry.insvol & 0x07) | (entry.volcmd >> 1);
+			int8 vol = (entry.insvol & 0x07) | ((entry.volcmd & 0xF0) >> 1);
 			if(vol <= 64)
 			{
 				m->volcmd = VOLCMD_VOLUME;
@@ -265,9 +280,9 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				// natively supporting STM editing, so we just assume the tempo is 125 and
 				// divide the speed by 16 instead. Parameters below 10 might behave weird.
 				m->param >>= 4;
+				MPT_FALLTHROUGH;
 #endif // MODPLUG_TRACKER
 
-				// Intentonal fall-through
 			default:
 				// Anything not listed above is a no-op if there's no value.
 				// (ST2 doesn't have effect memory)
@@ -314,3 +329,6 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

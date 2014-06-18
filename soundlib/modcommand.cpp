@@ -13,6 +13,63 @@
 #include "Tables.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+const EffectType effectTypes[] =
+{
+	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,
+	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_VOLUME, EFFECT_TYPE_VOLUME,
+	EFFECT_TYPE_VOLUME, EFFECT_TYPE_PANNING, EFFECT_TYPE_NORMAL, EFFECT_TYPE_VOLUME,
+	EFFECT_TYPE_GLOBAL, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_GLOBAL, EFFECT_TYPE_NORMAL,
+	EFFECT_TYPE_GLOBAL, EFFECT_TYPE_GLOBAL,  EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
+	EFFECT_TYPE_NORMAL, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_VOLUME, EFFECT_TYPE_GLOBAL,
+	EFFECT_TYPE_GLOBAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PANNING,
+	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PANNING, EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
+	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL, EFFECT_TYPE_PITCH,
+	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_PITCH,  EFFECT_TYPE_NORMAL,
+};
+
+STATIC_ASSERT(CountOf(effectTypes) == MAX_EFFECTS);
+
+
+const EffectType volumeEffectTypes[] =
+{
+	EFFECT_TYPE_NORMAL, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_PANNING, EFFECT_TYPE_VOLUME,
+	EFFECT_TYPE_VOLUME, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_VOLUME,  EFFECT_TYPE_PITCH,
+	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PANNING, EFFECT_TYPE_PANNING, EFFECT_TYPE_PITCH,
+	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL,
+};
+
+STATIC_ASSERT(CountOf(volumeEffectTypes) == MAX_VOLCMDS);
+
+
+EffectType ModCommand::GetEffectType(COMMAND cmd)
+//-----------------------------------------------
+{
+	if(cmd < CountOf(effectTypes))
+	{
+		return effectTypes[cmd];
+	} else
+	{
+		return EFFECT_TYPE_NORMAL;
+	}
+}
+
+
+EffectType ModCommand::GetVolumeEffectType(VOLCMD volcmd)
+//-------------------------------------------------------
+{
+	if(volcmd < CountOf(volumeEffectTypes))
+	{
+		return volumeEffectTypes[volcmd];
+	} else
+	{
+		return EFFECT_TYPE_NORMAL;
+	}
+}
+
+
 // Convert an Exx command (MOD) to Sxx command (S3M)
 void ModCommand::ExtendedMODtoS3MEffect()
 //---------------------------------------
@@ -178,7 +235,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				volcmd = VOLCMD_VOLUME;
 				if(vol > 64) vol = 64;
 				command = CMD_S3MCMDEX;
-				param = 0x80 | ((param * 15 + 32) / 64);	// XM volcol panning is 4-Bit, so we can use 4-Bit panning here.
+				param = 0x80 | (param / 4);	// XM volcol panning is actually 4-Bit, so we can use 4-Bit panning here.
 			}
 			break;
 
@@ -466,7 +523,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	if(newTypeIsMOD)
 	{
 		// convert note off events
-		if(note >= NOTE_MIN_SPECIAL)
+		if(IsSpecialNote())
 		{
 			note = NOTE_NONE;
 			// no effect present, so just convert note off to volume 0
@@ -502,7 +559,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 
 			case VOLCMD_PANNING:
 				command = CMD_PANNING8;
-				param = CLAMP(vol << 2, 0, 0xFF);
+				param = mpt::saturate_cast<uint8>(vol << 2);
 				break;
 
 			case VOLCMD_VOLSLIDEDOWN:
@@ -652,7 +709,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			command = param = 0;
 		}
 
-		if(note >= NOTE_MIN_SPECIAL)
+		if(IsSpecialNote())
 		{
 			// Instrument numbers next to Note Off reset instrument settings
 			instr = 0;
@@ -974,3 +1031,6 @@ bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &
 		return false;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

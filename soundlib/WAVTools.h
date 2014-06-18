@@ -13,6 +13,8 @@
 #include "ChunkReader.h"
 #include "Tagging.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -404,7 +406,7 @@ protected:
 
 public:
 	// Output to file: Initialize with filename. The created FILE* is owned by this instance.
-	WAVWriter(const char *filename);
+	WAVWriter(const mpt::PathString &filename);
 	// Output to file: Initialize with FILE*.
 	WAVWriter(FILE *file);
 	// Output to stream: Initialize with std::ostream*.
@@ -476,3 +478,5 @@ protected:
 };
 
 #endif // MODPLUG_NO_FILESAVE
+
+OPENMPT_NAMESPACE_END

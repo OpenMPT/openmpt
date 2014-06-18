@@ -9,7 +9,10 @@
 
 
 #pragma once
+
 #include "resource.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
 
@@ -17,10 +20,9 @@ class CAutoSaver
 {
 public:
 //Cons/Destr
-	CAutoSaver(void);
-	CAutoSaver(bool enabled, int saveInterval, int backupHistory,
-			   bool useOriginalPath, CString path, CString fileNameTemplate);
-	~CAutoSaver(void);
+	CAutoSaver(bool enabled=true, int saveInterval=10, int backupHistory=3,
+			   bool useOriginalPath=true, mpt::PathString path=mpt::PathString(), mpt::PathString fileNameTemplate=mpt::PathString());
+	~CAutoSaver();
 	
 //Work
 	bool DoSave(DWORD curTime);
@@ -28,13 +30,14 @@ public:
 //Member access
 	void Enable();
 	void Disable();
+	void SetEnabled(bool enabled) { if(enabled) Enable(); else Disable(); }
 	bool IsEnabled();
 	void SetUseOriginalPath(bool useOrgPath);
 	bool GetUseOriginalPath();
-	void SetPath(CString path);
-	CString GetPath();
-	void SetFilenameTemplate(CString path);
-	CString GetFilenameTemplate();
+	void SetPath(mpt::PathString path);
+	mpt::PathString GetPath();
+	void SetFilenameTemplate(mpt::PathString path);
+	mpt::PathString GetFilenameTemplate();
 	void SetHistoryDepth(int);
 	int GetHistoryDepth();
 	void SetSaveInterval(int minutes);
@@ -43,7 +46,7 @@ public:
 //internal implementation
 private: 
 	bool SaveSingleFile(CModDoc &modDoc);
-	CString BuildFileName(CModDoc &modDoc);
+	mpt::PathString BuildFileName(CModDoc &modDoc);
 	void CleanUpBackups(CModDoc &modDoc);
 	bool CheckTimer(DWORD curTime);
 	
@@ -58,11 +61,10 @@ private:
 	DWORD m_nSaveInterval;
 	size_t m_nBackupHistory;
 	bool m_bUseOriginalPath;
-	CString m_csPath;
-	CString m_csFileNameTemplate;
+	mpt::PathString m_csPath;
+	mpt::PathString m_csFileNameTemplate;
 
 };
-#pragma once
 
 
 // CAutoSaverGUI dialog
@@ -98,3 +100,6 @@ public:
 	BOOL OnSetActive();
 	
 };
+
+
+OPENMPT_NAMESPACE_END

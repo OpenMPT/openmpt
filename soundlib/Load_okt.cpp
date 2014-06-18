@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -21,14 +23,14 @@ struct PACKED OktIffChunk
 	// IFF chunk names
 	enum ChunkIdentifiers
 	{
-		idCMOD	= 0x434D4F44,
-		idSAMP	= 0x53414D50,
-		idSPEE	= 0x53504545,
-		idSLEN	= 0x534C454E,
-		idPLEN	= 0x504C454E,
-		idPATT	= 0x50415454,
-		idPBOD	= 0x50424F44,
-		idSBOD	= 0x53424F44,
+		idCMOD	= MAGIC4BE('C','M','O','D'),
+		idSAMP	= MAGIC4BE('S','A','M','P'),
+		idSPEE	= MAGIC4BE('S','P','E','E'),
+		idSLEN	= MAGIC4BE('S','L','E','N'),
+		idPLEN	= MAGIC4BE('P','L','E','N'),
+		idPATT	= MAGIC4BE('P','A','T','T'),
+		idPBOD	= MAGIC4BE('P','B','O','D'),
+		idSBOD	= MAGIC4BE('S','B','O','D'),
 	};
 
 	uint32 signature;	// IFF chunk name
@@ -71,8 +73,8 @@ STATIC_ASSERT(sizeof(OktSample) == 32);
 #endif
 
 // Parse the sample header block
-void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSoundFile *pSndFile)
-//-----------------------------------------------------------------------------------------
+static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSoundFile *pSndFile)
+//------------------------------------------------------------------------------------------------
 {
 	pSndFile->m_nSamples = MIN((SAMPLEINDEX)(chunk.BytesLeft() / sizeof(OktSample)), MAX_SAMPLES - 1);	// typically 36
 	sample7bit.resize(pSndFile->GetNumSamples());
@@ -112,8 +114,8 @@ void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSoundFile
 
 
 // Parse a pattern block
-void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &sndFile)
-//----------------------------------------------------------------------------
+static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &sndFile)
+//-----------------------------------------------------------------------------------
 {
 	if(!chunk.CanRead(2))
 	{
@@ -240,6 +242,7 @@ void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &sndFile)
 						break;
 					}
 					// 0x40 is set volume -- fall through
+					MPT_FALLTHROUGH;
 				case 0: case 1: case 2: case 3:
 					m->volcmd = VOLCMD_VOLUME;
 					m->vol = m->param;
@@ -306,7 +309,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		}
 
-		FileReader chunk = file.GetChunk(iffHead.chunksize);
+		FileReader chunk = file.ReadChunk(iffHead.chunksize);
 		if(!chunk.IsValid())
 		{
 			break;
@@ -448,3 +451,6 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

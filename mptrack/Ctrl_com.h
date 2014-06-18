@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 //========================================
 class CCtrlComments: public CModControlDlg
 //========================================
@@ -21,7 +23,7 @@ protected:
 
 public:
 	CCtrlComments(CModControlView &parent, CModDoc &document);
-	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glCommentsWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG>* GetSplitPosRef() {return &TrackerSettings::Instance().glCommentsWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_DATA(CCtrlComments)
@@ -38,8 +40,9 @@ public:
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlComments)
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);	//rewbs.customKeys
 	afx_msg void OnCommentsChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

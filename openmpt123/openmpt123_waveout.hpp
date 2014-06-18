@@ -51,7 +51,7 @@ public:
 		waveOutOpen( &waveout, flags.device == -1 ? WAVE_MAPPER : flags.device, &wfx, 0, 0, CALLBACK_NULL );
 		num_channels = flags.channels;
 		std::size_t frames_per_buffer = flags.samplerate * flags.buffer / 1000;
-		num_chunks = ( flags.buffer + 9 ) / 10;
+		num_chunks = ( flags.buffer + flags.period - 1 ) / flags.period;
 		if ( num_chunks < 2 ) {
 			num_chunks = 2;
 		}
@@ -63,7 +63,7 @@ public:
 			wavebuffers[i].resize( bytes_per_chunk );
 			waveheaders[i] = WAVEHDR();
 			waveheaders[i].lpData = wavebuffers[i].data();
-			waveheaders[i].dwBufferLength = wavebuffers[i].size();
+			waveheaders[i].dwBufferLength = static_cast<DWORD>( wavebuffers[i].size() );
 			waveheaders[i].dwFlags = 0;
 			waveOutPrepareHeader( waveout, &waveheaders[i], sizeof( WAVEHDR ) );
 		}
@@ -74,7 +74,7 @@ public:
 			drain();
 			waveOutReset( waveout );
 			for ( std::size_t i = 0; i < num_chunks; ++i ) {
-				waveheaders[i].dwBufferLength = wavebuffers[i].size();
+				waveheaders[i].dwBufferLength = static_cast<DWORD>( wavebuffers[i].size() );
 				waveOutUnprepareHeader( waveout, &waveheaders[i], sizeof( WAVEHDR ) );
 			}
 			wavebuffers.clear();
@@ -115,7 +115,7 @@ private:
 	void write_chunk() {
 		std::size_t chunk = wait_for_empty_chunk();
 		std::size_t chunk_bytes = std::min( byte_queue.size(), bytes_per_chunk );
-		waveheaders[chunk].dwBufferLength = chunk_bytes;
+		waveheaders[chunk].dwBufferLength = static_cast<DWORD>( chunk_bytes );
 		for ( std::size_t byte = 0; byte < chunk_bytes; ++byte ) {
 			wavebuffers[chunk][byte] = byte_queue.front();
 			byte_queue.pop_front();
@@ -149,13 +149,23 @@ public:
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		write_buffers( buffers, frames );
 	}
+	bool pause() {
+		waveOutPause( waveout );
+		return true;
+	}
+	bool unpause() {
+		waveOutRestart( waveout );
+		return true;
+	}
+	bool sleep( int ms ) {
+		Sleep( ms );
+		return true;
+	}
 };
 
-static void show_waveout_devices() {
+static std::string show_waveout_devices( std::ostream & /*log*/ ) {
 	std::ostringstream devices;
-	devices << " Available devices:" << std::endl;
-	devices << "    " << "stdout" << ": " << "use standard output" << std::endl;
-	devices << "    " << "default" << ": " << "default" << std::endl;
+	devices << " waveout:" << std::endl;
 	for ( UINT i = 0; i < waveOutGetNumDevs(); ++i ) {
 		devices << "    " << i << ": ";
 		WAVEOUTCAPSW caps;
@@ -164,7 +174,7 @@ static void show_waveout_devices() {
 		devices << wstring_to_utf8( caps.szPname );
 		devices << std::endl;
 	}
-	throw show_help_exception( devices.str() );
+	return devices.str();
 }
 
 } // namespace openmpt123

@@ -15,6 +15,9 @@
 #include "../soundlib/SoundFilePlayConfig.h"	// mixlevel constants.
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //=======================
 struct CModSpecifications
 //=======================
@@ -41,6 +44,7 @@ struct CModSpecifications
 	bool hasNoteFade;					// True if format has notefade.
 	PATTERNINDEX patternsMax;
 	ORDERINDEX ordersMax;
+	SEQUENCEINDEX sequencesMax;
 	CHANNELINDEX channelsMin;			// Minimum number of editable channels in pattern.
 	CHANNELINDEX channelsMax;			// Maximum number of editable channels in pattern.
 	TEMPO tempoMin;
@@ -85,3 +89,6 @@ namespace ModSpecs
 	extern const CModSpecifications itEx;
 	extern const CModSpecifications *Collection[8];
 }
+
+
+OPENMPT_NAMESPACE_END

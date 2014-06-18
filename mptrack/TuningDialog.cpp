@@ -13,9 +13,14 @@
 #include "TuningDialog.h"
 #include "TrackerSettings.h"
 #include <algorithm>
-#include <fstream>
+#include "../common/mptFstream.h"
 #include "../common/misc_util.h"
 #include "tuningdialog.h"
+#include "FileDialog.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 const CTuningDialog::TUNINGTREEITEM CTuningDialog::s_notFoundItemTuning = TUNINGTREEITEM();
 const HTREEITEM CTuningDialog::s_notFoundItemTree = NULL;
@@ -248,7 +253,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditTuningCollectionVersion.SetWindowText(m_pActiveTuningCollection->GetVersionString().c_str());
 		m_EditTuningCollectionEditMask.SetWindowText(m_pActiveTuningCollection->GetEditMaskString().c_str());
 		m_EditTuningCollectionItemNum.SetWindowText(Stringify(m_pActiveTuningCollection->GetNumTunings()).c_str());
-		m_EditTuningCollectionPath.SetWindowText(m_pActiveTuningCollection->GetSaveFilePath().c_str());
+		::SetWindowTextW(m_EditTuningCollectionPath.m_hWnd, m_pActiveTuningCollection->GetSaveFilePath().ToWide().c_str());
 	}
 	//<-- Updating tuning collection part
 
@@ -630,27 +635,29 @@ void CTuningDialog::OnBnClickedButtonExport()
 	if(pTC != NULL)
 		filter += std::string("Tuning collection files (") + CTuningCollection::s_FileExtension + std::string(")|*") + CTuningCollection::s_FileExtension + std::string("|");
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, CTuning::s_FileExtension, "",
-		filter,
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_TUNING));
-	if(files.abort) return;
+	int filterIndex = 0;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension(CTuning::s_FileExtension)
+		.ExtensionFilter(filter)
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_TUNING))
+		.FilterIndex(&filterIndex);
+	if(!dlg.Show(this)) return;
 
 	BeginWaitCursor();
 
 	bool failure = true;
 	
-	std::ofstream fout(files.first_file.c_str(), std::ios::binary);
-	const std::string ext = "." + files.extension;
+	mpt::ofstream fout(dlg.GetFirstFile(), std::ios::binary);
 
-	if(ext == CTuning::s_FileExtension)
+	if(filterIndex == 0)
 	{
 		if(pT != NULL)
 			failure = pT->Serialize(fout);
+	} else //Case: Saving tuning collection.
+	{
+		if(pTC != NULL)
+			failure = pTC->Serialize(fout);
 	}
-	else //Case: Saving tuning collection.
-		if(ext == CTuningCollection::s_FileExtension)
-			if(pTC != NULL)
-				failure = pTC->Serialize(fout);
 
 	fout.close();
 	EndWaitCursor();
@@ -664,34 +671,34 @@ void CTuningDialog::OnBnClickedButtonExport()
 void CTuningDialog::OnBnClickedButtonImport()
 //-------------------------------------------
 {
-	CString sFilter;
-	sFilter.Format(TEXT("Tuning files (*%s, *%s, *.scl)|*%s;*%s;*.scl|"),
-				   CTuning::s_FileExtension,
-				   CTuningCollection::s_FileExtension,
-				   CTuning::s_FileExtension,
-				   CTuningCollection::s_FileExtension);
+	std::string sFilter = mpt::String::Format(TEXT("Tuning files (*%s, *%s, *.scl)|*%s;*%s;*.scl|"),
+		CTuning::s_FileExtension,
+		CTuningCollection::s_FileExtension,
+		CTuning::s_FileExtension,
+		CTuningCollection::s_FileExtension);
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, TEXT(""), TEXT(""),
-		(LPCTSTR)sFilter,
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_TUNING),
-		true);
-	if(files.abort)
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter(sFilter)
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_TUNING));
+	if(!dlg.Show(this))
 		return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_TUNING, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_TUNING);
 
-	CString sLoadReport;
+	std::wstring sLoadReport;
 
-	const size_t nFiles = files.filenames.size();
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	const size_t nFiles = files.size();
 	for(size_t counter = 0; counter < nFiles; counter++)
 	{
-		TCHAR szFileName[_MAX_FNAME], szExt[_MAX_EXT];
-		_tsplitpath(files.filenames[counter].c_str(), nullptr, nullptr, szFileName, szExt);
+		mpt::PathString fileName;
+		mpt::PathString fileExt;
+		files[counter].SplitPath(nullptr, nullptr, &fileName, &fileExt);
+		const std::wstring fileNameExt = (fileName + fileExt).ToWide();
 
-		_tcslwr(szExt); // Convert extension to lower case.
-
-		const bool bIsTun = (_tcscmp(szExt, CTuning::s_FileExtension) == 0);
-		const bool bIsScl = (_tcscmp(szExt, TEXT(".scl")) == 0);
+		const bool bIsTun = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);
+		const bool bIsScl = (mpt::PathString::CompareNoCase(fileExt, MPT_PATHSTRING(".scl")) == 0);
 		
 		if (bIsTun || bIsScl)
 		{
@@ -699,7 +706,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 			if (bIsTun)
 			{
-				std::ifstream fin(files.filenames[counter].c_str(), std::ios::binary);
+				mpt::ifstream fin(files[counter], std::ios::binary);
 				pT = CTuningRTI::DeserializeOLD(fin);
 				if(pT == 0)
 					{fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
@@ -711,44 +718,31 @@ void CTuningDialog::OnBnClickedButtonImport()
 						delete pT; pT = nullptr;
 						if (m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 						{
-							CString sFormat, sMsg;
-							sFormat.LoadString(IDS_TUNING_IMPORT_LIMIT);
-							sMsg.FormatMessage(sFormat, szFileName, szExt, CTuningCollection::s_nMaxTuningCount);
-							sLoadReport += sMsg;
+							sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + StringifyW(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
 						}
 						else // Case: Can't add tuning to tuning collection for unknown reason.
 						{
-							CString sMsg;
-							AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNKNOWN_FAILURE, szFileName, szExt);
-							sLoadReport += sMsg;				
+							sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unknown reason.\n";				
 						}
 					}
 				}
 				else // pT == nullptr
 				{
-					CString sMsg;
-					AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNRECOGNIZED_FILE, szFileName, szExt);
-					sLoadReport += sMsg;
+					sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unrecognized file.\n";				
 				}
 			}
 			else // scl import.
 			{
-				EnSclImport a = ImportScl(files.filenames[counter].c_str(), szFileName);
+				EnSclImport a = ImportScl(files[counter], fileName.ToCString());
 				if (a != enSclImportOk)
 				{
 					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 					{
-						CString sFormat, sMsg;
-						sFormat.LoadString(IDS_TUNING_IMPORT_LIMIT);
-						sMsg.FormatMessage(sFormat, szFileName, szExt, CTuningCollection::s_nMaxTuningCount);
-						sLoadReport += sMsg;
+						sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + StringifyW(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
 					}
 					else
 					{
-						CString sFormat, sMsg;
-						sFormat.LoadString(IDS_TUNING_IMPORT_SCL_FAILURE);
-						sMsg.FormatMessage(sFormat, szFileName, szExt, (LPCTSTR)GetSclImportFailureMsg(a));
-						sLoadReport += sMsg;
+						sLoadReport += L"-Unable to import " + fileNameExt + L": " + mpt::ToWide(GetSclImportFailureMsg(a)) + L".\n";
 					}
 				}
 				else // scl import successful.
@@ -761,19 +755,17 @@ void CTuningDialog::OnBnClickedButtonImport()
 				AddTreeItem(m_pActiveTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(&m_TempTunings)), NULL);
 			}
 		}
-		else if (_tcscmp(szExt, CTuningCollection::s_FileExtension) == 0)
+		else if(mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)) == 0)
 		{
 			// For now only loading tuning collection as 
 			// a separate collection - no possibility to 
 			// directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
-			pNewTCol->SetSavefilePath(files.filenames[counter]);
+			pNewTCol->SetSavefilePath(files[counter]);
 			if (pNewTCol->Deserialize())
 			{
 				delete pNewTCol; pNewTCol = 0;
-				CString sMsg;
-				AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNKNOWN_TC_FAILURE, szFileName, szExt);
-				sLoadReport += sMsg;
+				sLoadReport += L"-Unable to import tuning collection \"" + fileNameExt + L"\": unrecognized file.\n";				
 			}
 			else
 			{
@@ -784,12 +776,10 @@ void CTuningDialog::OnBnClickedButtonImport()
 		}
 		else // Case: Unknown extension (should not happen).
 		{
-			CString sMsg;
-			AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNRECOGNIZED_FILE_EXT, szFileName, szExt);
-			sLoadReport += sMsg;
+			sLoadReport += L"-Unable to load \"" + fileNameExt + L"\": unrecognized file extension.\n";				
 		}
 	}
-	if (sLoadReport.GetLength() > 0)
+	if(sLoadReport.length() > 0)
 		Reporting::Information(sLoadReport);
 	UpdateView();
 }
@@ -1478,20 +1468,14 @@ static inline SclFloat CentToRatio(const SclFloat& val)
 }
 
 
-CTuningDialog::EnSclImport CTuningDialog::ImportScl(LPCTSTR pszPath, LPCTSTR pszName)
-//-----------------------------------------------------------------------------------
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, LPCTSTR pszName)
+//---------------------------------------------------------------------------------------------------
 {
-	CFile file;
-	if (file.Open(pszPath, CFile::modeRead) == 0)
+	mpt::ifstream iStrm(filename, std::ios::in | std::ios::binary);
+	if(!iStrm)
+	{
 		return enSclImportFailUnableToOpenFile;
-
-	size_t nSize = static_cast<size_t>(file.GetLength());
-
-    std::vector<char> data(nSize + 1, 0);
-	nSize = file.Read(&data[0], nSize);
-	file.Close();
-
-    std::istringstream iStrm(std::string(&data[0], nSize));
+	}
 	return ImportScl(iStrm, pszName);
 }
 
@@ -1588,3 +1572,4 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, LPCTSTR
 }
 
 
+OPENMPT_NAMESPACE_END

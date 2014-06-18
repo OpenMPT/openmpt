@@ -17,6 +17,9 @@
 #include "Sndfile.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 CSoundFile& CPattern::GetSoundFile() { return m_rPatternContainer.GetSoundFile(); }
 const CSoundFile& CPattern::GetSoundFile() const { return m_rPatternContainer.GetSoundFile(); }
 
@@ -481,7 +484,7 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t nSize = 0);
 void WriteModPattern(std::ostream& oStrm, const CPattern& pat)
 //------------------------------------------------------------
 {
-	srlztn::Ssb ssb(oStrm);
+	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdPattern, MptVersion::num);
 	ssb.WriteItem(pat, "data", strlen("data"), &WriteData);
 	// pattern time signature
@@ -497,9 +500,9 @@ void WriteModPattern(std::ostream& oStrm, const CPattern& pat)
 void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 //-------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(iStrm);
+	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdPattern, MptVersion::num);
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
 	ssb.ReadItem(pat, "data", strlen("data"), &ReadData);
 	// pattern time signature
@@ -638,3 +641,6 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 }
 
 #undef READITEM
+
+
+OPENMPT_NAMESPACE_END

@@ -18,6 +18,8 @@
 #include "afxwin.h"
 #include "resource.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //==========================
 template<class T1, class T2>
 class CBijectiveMap
@@ -255,7 +257,7 @@ private:
 	bool IsDeletable(const CTuningCollection* const pTC) const;
 
 	// Scl-file import.
-	EnSclImport ImportScl(LPCTSTR pszPath, LPCTSTR pszName);
+	EnSclImport ImportScl(const mpt::PathString &filename, LPCTSTR pszName);
 	EnSclImport ImportScl(std::istream& iStrm, LPCTSTR pszName);
 	
 
@@ -383,3 +385,5 @@ public:
 
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

@@ -15,7 +15,6 @@
 #include "libopenmpt_impl.hpp"
 
 #include <limits>
-#include <sstream>
 #include <stdexcept>
 
 #include <cmath>
@@ -109,25 +108,25 @@ public:
 }; // class logfunc_logger
 
 static std::string format_exception( const char * const function ) {
-	std::ostringstream err;
+	std::string err;
 	try {
 		throw;
 	} catch ( openmpt::exception & e ) {
-		err
-			<< function << ": "
-			<< "ERROR: "
-			<< e.what();
+		err += function;
+		err += ": ";
+		err += "ERROR: ";
+		err += e.what();
 	} catch ( std::exception & e ) {
-		err
-			<< function << ": "
-			<< "INTERNAL ERROR: "
-			<< e.what();
+		err += function;
+		err += ": ";
+		err += "INTERNAL ERROR: ";
+		err += e.what();
 	} catch ( ... ) {
-		err
-			<< function << ": "
-			<< "UNKOWN INTERNAL ERROR";
+		err += function;
+		err += ": ";
+		err += "UNKOWN INTERNAL ERROR";
 	}
-	return err.str();
+	return err;
 }
 
 static void report_exception( const char * const function, openmpt_log_func const logfunc = 0, void * const user = 0, openmpt::module_impl * const impl = 0 ) {
@@ -384,12 +383,20 @@ double openmpt_module_set_position_seconds( openmpt_module * mod, double seconds
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		return mod->impl->set_position_seconds( seconds );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
-	return 0;
+	return 0.0;
 }
 double openmpt_module_get_position_seconds( openmpt_module * mod ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		return mod->impl->get_position_seconds();
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
+
+double openmpt_module_set_position_order_row( openmpt_module * mod, int32_t order, int32_t row ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->set_position_order_row( order, row );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0.0;
 }
@@ -553,6 +560,13 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_playing_channels( openmpt_modu
 	return 0;
 }
 
+LIBOPENMPT_API float openmpt_module_get_current_channel_vu_mono( openmpt_module * mod, int32_t channel ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->get_current_channel_vu_mono( channel );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
 LIBOPENMPT_API float openmpt_module_get_current_channel_vu_left( openmpt_module * mod, int32_t channel ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
@@ -564,6 +578,20 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_right( openmpt_module
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		return mod->impl->get_current_channel_vu_right( channel );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
+LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_left( openmpt_module * mod, int32_t channel ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->get_current_channel_vu_rear_left( channel );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0.0;
+}
+LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_right( openmpt_module * mod, int32_t channel ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return mod->impl->get_current_channel_vu_rear_right( channel );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0.0;
 }
@@ -606,7 +634,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_instruments( openmpt_module * mod 
 LIBOPENMPT_API int32_t openmpt_module_get_num_samples( openmpt_module * mod ) {
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
-		return mod->impl->get_num_channels();
+		return mod->impl->get_num_samples();
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0;
 }
@@ -716,6 +744,22 @@ LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_m
 	try {
 		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
 		return mod->impl->get_pattern_row_channel_command( pattern, row, channel, command );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+
+LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return openmpt::strdup( mod->impl->format_pattern_row_channel_command( pattern, row, channel, command ).c_str() );
+	} OPENMPT_INTERFACE_CATCH_TO_LOG;
+	return 0;
+}
+
+LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
+	try {
+		OPENMPT_INTERFACE_CHECK_SOUNDFILE( mod );
+		return openmpt::strdup( mod->impl->highlight_pattern_row_channel_command( pattern, row, channel, command ).c_str() );
 	} OPENMPT_INTERFACE_CATCH_TO_LOG;
 	return 0;
 }

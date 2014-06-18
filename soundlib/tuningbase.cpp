@@ -13,6 +13,8 @@
 #include "../common/serialization_utils.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
 
 const char* CTuningBase::s_TuningDescriptionGeneral = "No ratio restrictions";
 
@@ -48,7 +50,7 @@ const CTuningBase::SERIALIZATION_RETURN_TYPE CTuningBase::SERIALIZATION_SUCCESS 
 const CTuningBase::SERIALIZATION_RETURN_TYPE CTuningBase::SERIALIZATION_FAILURE = true;
 
 
-const CHAR CTuningBase::s_FileExtension[5] = ".tun";
+const char CTuningBase::s_FileExtension[5] = ".tun";
 
 
 const CTuningBase::EDITMASK CTuningBase::EM_RATIOS = 1; //1b
@@ -469,3 +471,5 @@ bool CTuningBase::DeserializeOLD(std::istream& inStrm)
 	return SERIALIZATION_SUCCESS;
 }
 
+
+OPENMPT_NAMESPACE_END

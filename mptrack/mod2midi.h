@@ -10,6 +10,10 @@
 
 #pragma once
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct MOD2MIDIINSTR
 {
 	UINT nChannel;
@@ -27,11 +31,11 @@ protected:
 	CSoundFile *m_pSndFile;
 	BOOL m_bRmi, m_bPerc;
 	UINT m_nCurrInstr;
-	CHAR m_szFileName[_MAX_PATH];
+	mpt::PathString m_szFileName;
 	MOD2MIDIINSTR m_InstrMap[MAX_SAMPLES];
 
 public:
-	CModToMidi(LPCSTR pszFileName, CSoundFile *pSndFile, CWnd *pWndParent=NULL);
+	CModToMidi(const mpt::PathString &filename, CSoundFile *pSndFile, CWnd *pWndParent=NULL);
 	~CModToMidi() {}
 	BOOL DoConvert();
 
@@ -46,3 +50,6 @@ protected:
 	afx_msg VOID OnProgramChanged();
 	DECLARE_MESSAGE_MAP();
 };
+
+
+OPENMPT_NAMESPACE_END

@@ -16,6 +16,10 @@
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Default checkbox state
 bool CModCleanupDlg::m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS] =
 {
@@ -374,7 +378,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns()
 		if(!patternUsed[pat] && sndFile.Patterns.IsValidPat(pat))
 		{
 			numRemovedPatterns++;
-			modDoc.GetPatternUndo().PrepareUndo(pat, 0, 0, sndFile.GetNumChannels(), sndFile.Patterns[pat].GetNumRows(), numRemovedPatterns != 0, false);
+			modDoc.GetPatternUndo().PrepareUndo(pat, 0, 0, sndFile.GetNumChannels(), sndFile.Patterns[pat].GetNumRows(), "Remove Unused Patterns", numRemovedPatterns != 0, false);
 			sndFile.Patterns.Remove(pat);
 		}
 	}
@@ -499,7 +503,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 		if(!sndFile.IsSampleUsed(smp))
 		{
 			samplesUsed[smp] = false;
-			modDoc.GetSampleUndo().PrepareUndo(smp, sundo_delete);
+			modDoc.GetSampleUndo().PrepareUndo(smp, sundo_delete, "Remove Unused Sample");
 		}
 	}
 
@@ -584,7 +588,7 @@ bool CModCleanupDlg::OptimizeSamples()
 				SmpLength lmax = loopLength + 2;
 				if(lmax < sample.nLength && lmax >= 2)
 				{
-					modDoc.GetSampleUndo().PrepareUndo(nSmp, sundo_delete, lmax, sample.nLength);
+					modDoc.GetSampleUndo().PrepareUndo(nSmp, sundo_delete, "Trim Unused Data", lmax, sample.nLength);
 					ctrlSmp::ResizeSample(sample, lmax, sndFile);
 				}
 			}
@@ -906,3 +910,6 @@ bool CModCleanupDlg::MergeSequences()
 {
 	return modDoc.GetSoundFile()->Order.MergeSequences();
 }
+
+
+OPENMPT_NAMESPACE_END

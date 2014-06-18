@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 //=========================
 class CVuMeter: public CWnd
 //=========================
@@ -45,7 +47,7 @@ class CCtrlGeneral: public CModControlDlg
 {
 public:
 	CCtrlGeneral(CModControlView &parent, CModDoc &document);
-	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glGeneralWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG>* GetSplitPosRef() {return &TrackerSettings::Instance().glGeneralWindowHeight;} 	//rewbs.varWindowSize
 
 private:
 	void setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB);
@@ -84,6 +86,7 @@ protected:
 	//{{AFX_MSG(CCtrlGeneral)
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM);
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
+	afx_msg void OnTapTempo();
 	afx_msg void OnTitleChanged();
 	afx_msg void OnTempoChanged();
 	afx_msg void OnSpeedChanged();
@@ -98,3 +101,5 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

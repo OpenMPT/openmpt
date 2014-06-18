@@ -11,11 +11,14 @@
 
 #pragma once
 
-class CModDoc;
-class CModTree;
-
 #include <vector>
 #include <bitset>
+
+OPENMPT_NAMESPACE_BEGIN
+
+class CModDoc;
+class CModTree;
+class CSoundFile;
 
 #define TREESTATUS_RDRAG			0x01
 #define TREESTATUS_LDRAG			0x02
@@ -27,7 +30,7 @@ struct ModTreeDocInfo
 	// Tree state variables
 	std::vector<std::vector<HTREEITEM> > tiOrders;
 	std::vector<HTREEITEM> tiSequences, tiPatterns;
-	CModDoc *pModDoc;
+	CModDoc &modDoc;
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
 
 	// Module information
@@ -36,19 +39,8 @@ struct ModTreeDocInfo
 
 	std::bitset<MAX_SAMPLES> samplesPlaying;
 	std::bitset<MAX_INSTRUMENTS> instrumentsPlaying;
-	
-	ModTreeDocInfo(const CSoundFile &sndFile)
-	{
-		pModDoc = sndFile.GetpModDoc();
-		nSeqSel = SEQUENCEINDEX_INVALID;
-		nOrdSel = ORDERINDEX_INVALID;
-		hSong = hPatterns = hSamples = hInstruments = hComments = hOrders = hEffects = nullptr;
-		tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
-		tiOrders.resize(sndFile.Order.GetNumSequences());
-		tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
-		samplesPlaying.reset();
-		instrumentsPlaying.reset();
-	}
+
+	ModTreeDocInfo(CModDoc &modDoc);
 };
 
 
@@ -70,9 +62,15 @@ public:
 };
 
 
-//==============================
-class CModTree: public CTreeCtrl
-//==============================
+OPENMPT_NAMESPACE_END
+#include "CTreeCtrl.h"
+#include "../common/thread.h"
+OPENMPT_NAMESPACE_BEGIN
+
+
+//===============================
+class CModTree: public CTreeCtrlW
+//===============================
 {
 protected:
 
@@ -161,19 +159,26 @@ protected:
 	CModTreeDropTarget m_DropTarget;
 	CModTree *m_pDataTree;	// Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
 	HWND m_hDropWnd;
+	volatile HANDLE m_hWatchDir;
+	HANDLE m_hWatchDirKillThread;
+	mpt::thread watchDirThread;
 	ModItem m_itemDrag;
 	DWORD m_dwStatus;
 	UINT m_nDocNdx, m_nDragDocNdx;
 	HTREEITEM m_hItemDrag, m_hItemDrop;
 	HTREEITEM m_hInsLib, m_hMidiLib;
-	HTREEITEM m_tiMidiGrp[17];
 	HTREEITEM m_tiMidi[128];
 	HTREEITEM m_tiPerc[128];
 	std::vector<HTREEITEM> m_tiDLS;
 	std::vector<ModTreeDocInfo *> DocInfo;
+
 	// Instrument library
-	bool m_bShowAllFiles, doLabelEdit;
-	CHAR m_szInstrLibPath[_MAX_PATH], m_szOldPath[_MAX_PATH], m_szSongName[_MAX_PATH];
+	mpt::PathString m_InstrLibPath;				// Current path to be explored
+	mpt::PathString m_InstrLibHighlightPath;	// Folder to highlight in browser after a refresh
+	mpt::PathString m_SongFileName;				// Name of open module, without path (== m_szInstrLibPath).
+	bool m_bShowAllFiles;
+	
+	bool doLabelEdit;
 
 public:
 	CModTree(CModTree *pDataTree);
@@ -182,33 +187,35 @@ public:
 // Attributes
 public:
 	void Init();
-	void InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongFolder);
-	void InsLibGetFullPath(HTREEITEM hItem, LPSTR pszFullPath) const;
+	bool InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songFolder);
+	mpt::PathString InsLibGetFullPath(HTREEITEM hItem) const;
 	void RefreshMidiLibrary();
 	void RefreshDlsBanks();
 	void RefreshInstrumentLibrary();
 	void EmptyInstrumentLibrary();
 	void FillInstrumentLibrary();
+	void MonitorInstrumentLibrary();
 	ModItem GetModItem(HTREEITEM hItem);
-	BOOL SetMidiInstrument(UINT nIns, LPCTSTR lpszFileName);
-	BOOL SetMidiPercussion(UINT nPerc, LPCTSTR lpszFileName);
+	BOOL SetMidiInstrument(UINT nIns, const mpt::PathString &fileName);
+	BOOL SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName);
 	BOOL ExecuteItem(HTREEITEM hItem);
-	BOOL DeleteTreeItem(HTREEITEM hItem);
+	void DeleteTreeItem(HTREEITEM hItem);
 	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam);
 	BOOL OpenTreeItem(HTREEITEM hItem);
 	BOOL OpenMidiInstrument(DWORD dwItem);
-	BOOL InstrumentLibraryChDir(LPCSTR lpszDir);
-	BOOL GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR lpszPath);
+	void InstrumentLibraryChDir(mpt::PathString dir, bool isSong);
+	bool GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath);
 	void OnOptionsChanged();
-	void AddDocument(CModDoc *pModDoc);
-	void RemoveDocument(CModDoc *pModDoc);
-	void UpdateView(ModTreeDocInfo *pInfo, DWORD dwHint);
+	void AddDocument(CModDoc &modDoc);
+	void RemoveDocument(CModDoc &modDoc);
+	void UpdateView(ModTreeDocInfo &info, DWORD dwHint);
 	void OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
-	void UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
+	void UpdatePlayPos(CModDoc &modDoc, Notification *pNotify);
 	bool IsItemExpanded(HTREEITEM hItem);
 	void DeleteChildren(HTREEITEM hItem);
 	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index);
+	HTREEITEM GetParentRootItem(HTREEITEM hItem);
 
 	bool IsSampleBrowser() const { return m_pDataTree == nullptr; }
 
@@ -228,9 +235,10 @@ public:
 protected:
 	static int CALLBACK ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	void ModTreeBuildTVIParam(TV_INSERTSTRUCT &tvis, LPCSTR lpszName, int iImage);
-	CModDoc *GetDocumentFromItem(HTREEITEM hItem);
-	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc *pModDoc);
+	void ModTreeInsert(const WCHAR *name, int image);
+	ModTreeDocInfo *GetDocumentInfoFromItem(HTREEITEM hItem);
+	CModDoc *GetDocumentFromItem(HTREEITEM hItem) { ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem); return info ? &info->modDoc : nullptr; }
+	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc &modDoc);
 
 	void InsertOrDupItem(bool insert);
 
@@ -285,3 +293,6 @@ public:
 	afx_msg void OnKillFocus(CWnd* pNewWnd);	//rewbs.customKeys
 	afx_msg void OnSetFocus(CWnd* pOldWnd);		//rewbs.customKeys
 };
+
+
+OPENMPT_NAMESPACE_END

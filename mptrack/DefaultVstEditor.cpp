@@ -13,6 +13,10 @@
 #include "../soundlib/Sndfile.h"
 #include "Vstplug.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_VST
 
 
@@ -548,3 +552,6 @@ void CDefaultVstEditor::UpdateParamDisplay(PlugParamIndex param)
 }
 
 #endif // NO_VST
+
+
+OPENMPT_NAMESPACE_END

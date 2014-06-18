@@ -14,6 +14,9 @@
 #include <algorithm>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //=========================
 class CMIDIMappingDirective
 //=========================
@@ -46,15 +49,16 @@ public:
 	BYTE GetController() const {return m_MIDIByte1;}
 
 	//Note: Plug index starts from 1.
-	void SetPlugIndex(const int i) {m_PluginIndex = static_cast<BYTE>(i);}
-	BYTE GetPlugIndex() const {return m_PluginIndex;}
+	void SetPlugIndex(const int i) {m_PluginIndex = static_cast<PLUGINDEX>(i);}
+	PLUGINDEX GetPlugIndex() const {return m_PluginIndex;}
 
 	void SetParamIndex(const int i) {m_Parameter = i;}
 	uint32 GetParamIndex() const {return m_Parameter;}
 
 	bool IsDefault() const {return *this == CMIDIMappingDirective();}
 
-	bool operator==(const CMIDIMappingDirective& d) const {return memcmp(this, &d, sizeof(CMIDIMappingDirective)) == 0;}
+	bool operator==(const CMIDIMappingDirective &other) const { return memcmp(this, &other, sizeof(CMIDIMappingDirective)) == 0; }
+	bool operator<(const CMIDIMappingDirective &other) const { return GetController() < other.GetController(); }
 
 	std::string ToString() const;
 
@@ -67,14 +71,13 @@ private:
 	bool m_AnyChannel;
 	uint8 m_ChnEvent; //0-3 channel, 4-7 event
 	BYTE m_MIDIByte1;
-	BYTE m_PluginIndex;
+	PLUGINDEX m_PluginIndex;
 	uint32 m_Parameter;
 };
 
 class CSoundFile;
-inline bool operator<(const CMIDIMappingDirective& a, const CMIDIMappingDirective& b) {return a.GetController() < b.GetController();}
-inline bool operator<(const CMIDIMappingDirective& d, const BYTE& ctrlVal) {return d.GetController() < ctrlVal;}
-inline bool operator<(const BYTE& ctrlVal, const CMIDIMappingDirective& d) {return ctrlVal < d.GetController();}
+class FileReader;
+
 
 //===============
 class CMIDIMapper
@@ -90,7 +93,7 @@ public:
 	//	-paramvalue to parameter value.
 	//In case of multiple mappings, these get the values from the last mapping found.
 	//Returns true if MIDI was 'captured' by some directive, false otherwise.
-	bool OnMIDImsg(const DWORD midimsg, BYTE& mappedIndex, uint32& paramindex, BYTE& paramvalue);
+	bool OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint8 &paramvalue);
 
 	//Swaps the positions of two elements. Returns true if swap was not done.
 	bool Swap(const size_t a, const size_t b);
@@ -111,7 +114,7 @@ public:
 
 	size_t GetSerializationSize() const;
 	void Serialize(FILE* f) const;
-	bool Deserialize(const char *ptr, const size_t size); //Return false if succesful, true otherwise.
+	bool Deserialize(FileReader &file); //Return false if succesful, true otherwise.
 
 	bool AreOrderEqual(const size_t a, const size_t b) {return !(m_Directives[a] < m_Directives[b] || m_Directives[b] < m_Directives[a]);}
 
@@ -122,3 +125,6 @@ private:
 	CSoundFile& m_rSndFile;
 	std::vector<CMIDIMappingDirective> m_Directives;
 };
+
+
+OPENMPT_NAMESPACE_END

@@ -15,6 +15,9 @@
 #include "SampleFormatConverters.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////
 // WAV file support
 
@@ -35,7 +38,6 @@ bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelInd
 
 	const char *inBuf = file.GetRawData();
 	CopySample<SampleConversion>(reinterpret_cast<typename SampleConversion::output_t*>(sample.pSample), sample.nLength, 1, inBuf + offset, file.BytesLeft() - offset, numChannels, conv);
-	CSoundFile::AdjustSampleLoop(sample);
 	return true;
 }
 
@@ -69,7 +71,7 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Setting up module length
 	// Calculate sample length in ticks at tempo 125
-	const uint32 sampleTicks = ((sampleLength * 50) / wavFile.GetSampleRate()) + 1;
+	const uint32 sampleTicks = mpt::saturate_cast<uint32>(((sampleLength * 50) / wavFile.GetSampleRate()) + 1);
 	uint32 ticksPerRow = std::max((sampleTicks + 63u) / 63u, 1u);
 
 	Order.clear();
@@ -172,6 +174,7 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32> > >(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			}
 		}
+		sample.PrecomputeLoops(*this, false);
 
 	}
 
@@ -238,3 +241,6 @@ bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint1
 	}
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

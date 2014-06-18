@@ -18,6 +18,12 @@
 #include "../common/version.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+bool ExceptionHandler::fullMemDump = false;
+
+
 typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
 	CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
 	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
@@ -36,34 +42,33 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 {
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 
-	const CString timestampDir = (CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\");
-	CString baseRescuePath;
+	const mpt::PathString timestampDir = mpt::PathString::FromCStringSilent((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\"));
+	mpt::PathString baseRescuePath;
 	{
 		// Create a crash directory
-		TCHAR tempPath[_MAX_PATH];
-		GetTempPath(CountOf(tempPath), tempPath);
-		baseRescuePath.Format("%sOpenMPT Crash Files\\", tempPath);
-		if(!PathIsDirectory(baseRescuePath))
+		baseRescuePath = Util::GetTempDirectory() + MPT_PATHSTRING("OpenMPT Crash Files\\");
+		if(!PathIsDirectoryW(baseRescuePath.AsNative().c_str()))
 		{
-			CreateDirectory(baseRescuePath, nullptr);
+			CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr);
 		}
-		baseRescuePath.Append(timestampDir);
-		if(!PathIsDirectory(baseRescuePath) && !CreateDirectory(baseRescuePath, nullptr))
+		baseRescuePath += timestampDir;
+		if(!PathIsDirectoryW(baseRescuePath.AsNative().c_str()) && !CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr))
 		{
-			errorMessage.AppendFormat("\n\nCould not create the following directory for saving debug information and modified files to:\n%s", baseRescuePath);
+			errorMessage += "\n\nCould not create the following directory for saving debug information and modified files to:\n"
+				+ mpt::ToCString(baseRescuePath.ToWide());
 		}
 	}
 
 	// Create minidump...
-	HMODULE hDll = ::LoadLibrary("DBGHELP.DLL");
+	HMODULE hDll = ::LoadLibraryW(L"DBGHELP.DLL");
 	if (hDll)
 	{
 		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
 		if (pDump)
 		{
-			const CString filename = baseRescuePath + "crash.dmp";
+			const mpt::PathString filename = baseRescuePath + MPT_PATHSTRING("crash.dmp");
 
-			HANDLE hFile = ::CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			HANDLE hFile = ::CreateFileW(filename.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (hFile != INVALID_HANDLE_VALUE)
 			{
 				_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
@@ -75,10 +80,20 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 					ExInfo.ClientPointers = NULL;
 				}
 
-				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
+				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile,
+					ExceptionHandler::fullMemDump ?
+						(MINIDUMP_TYPE)(MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithThreadInfo | MiniDumpWithProcessThreadData | MiniDumpWithFullMemoryInfo
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
+						| MiniDumpIgnoreInaccessibleMemory | MiniDumpWithTokenInformation
+#endif
+						)
+					:
+						MiniDumpNormal,
+					pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
 				::CloseHandle(hFile);
 
-				errorMessage.AppendFormat("\n\nDebug information has been saved to\n%s", baseRescuePath);
+				errorMessage += "\n\nDebug information has been saved to\n"
+					+ mpt::ToCString(baseRescuePath.ToWide());
 			}
 		}
 		::FreeLibrary(hDll);
@@ -97,8 +112,14 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 				// Show the rescue directory in Explorer...
 				CTrackApp::OpenDirectory(baseRescuePath);
 			}
-			CString filename;
-			filename.Format("%s%d_%s.%s", baseRescuePath, ++numFiles, pModDoc->GetTitle(), pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
+
+			mpt::PathString filename;
+			filename += baseRescuePath;
+			filename += mpt::PathString::FromWide(mpt::ToWString(++numFiles));
+			filename += MPT_PATHSTRING("_");
+			filename += mpt::PathString::FromCStringSilent(pModDoc->GetTitle()).SanitizeComponent();
+			filename += MPT_PATHSTRING(".");
+			filename += mpt::PathString::FromUTF8(pModDoc->GetSoundFile()->GetModSpecifications().fileExtension);
 
 			try
 			{
@@ -131,7 +152,7 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 }
 
 
-// Try to close the audio device and rescue unsaved work if an unhandled exception occours...
+// Try to close the audio device and rescue unsaved work if an unhandled exception occurs...
 LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
 //----------------------------------------------------------------------------------
 {
@@ -141,11 +162,14 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 	{
 		try
 		{
-			// do not take m_SoundDeviceMutex here, just try closing it, no matter what
 			if(pMainFrame->gpSoundDevice)
 			{
-				pMainFrame->gpSoundDevice->Reset();
 				pMainFrame->gpSoundDevice->Close();
+			}
+			if(pMainFrame->m_NotifyTimer)
+			{
+				pMainFrame->KillTimer(pMainFrame->m_NotifyTimer);
+				pMainFrame->m_NotifyTimer = 0;
 			}
 		} catch(...)
 		{
@@ -153,7 +177,7 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 	}
 
 	CString errorMessage;
-	errorMessage.Format("Unhandled exception 0x%X at address %p occoured.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
+	errorMessage.Format("Unhandled exception 0x%X at address %p occurred.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
 
 	GenerateDump(errorMessage, pExceptionInfo);
 
@@ -162,10 +186,10 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 }
 
 
-#ifndef _DEBUG
+#if defined(MPT_ASSERT_HANDLER_NEEDED)
 
-void AlwaysAssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
-//-----------------------------------------------------------------------------------------------------------
+noinline void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+//--------------------------------------------------------------------------------------------------------------
 {
 	if(IsDebuggerPresent())
 	{
@@ -189,5 +213,7 @@ void AlwaysAssertHandler(const char *file, int line, const char *function, const
 	}
 }
 
-#endif
+#endif MPT_ASSERT_HANDLER_NEEDED
 
+
+OPENMPT_NAMESPACE_END

@@ -11,6 +11,10 @@
 #include "stdafx.h"
 #include "colouredit.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CColourEdit
 
@@ -59,3 +63,6 @@ void CColourEdit::SetTextColor(COLORREF rgb)
 	m_crText = rgb;				//set text color ref
 	Invalidate(TRUE);			//redraw
 }
+
+
+OPENMPT_NAMESPACE_END

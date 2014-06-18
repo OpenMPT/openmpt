@@ -10,20 +10,36 @@
 
 #pragma once
 
-#ifndef MODPLUG_NO_FILESAVE
-
 #include <string>
+
+OPENMPT_NAMESPACE_BEGIN
+
+#ifndef MODPLUG_NO_FILESAVE
 
 //=============
 struct FileTags
 //=============
 {
 
-	// Tag data
-	std::wstring title, artist, album, year, comments, genre, url, encoder, bpm, trackno;
+	std::wstring encoder;
+
+	std::wstring title;
+	std::wstring comments;
+
+	std::wstring bpm;
+
+	std::wstring artist;
+	std::wstring album;
+	std::wstring trackno;
+	std::wstring year;
+	std::wstring url;
+
+	std::wstring genre;
 
 	FileTags();
 
 };
 
 #endif // MODPLUG_NO_FILESAVE
+
+OPENMPT_NAMESPACE_END

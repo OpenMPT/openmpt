@@ -15,7 +15,10 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Reporting.h"
 #endif
+#include "../common/misc_util.h"
 #include <string>
+
+OPENMPT_NAMESPACE_BEGIN
 
 typedef CTuningRTI::RATIOTYPE RATIOTYPE;
 typedef CTuningRTI::NOTEINDEXTYPE NOTEINDEXTYPE;
@@ -168,7 +171,7 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x) const
 			//By default, using notation nnP for notes; nn <-> note character starting
 			//from 'A' with char ':' as fill char, and P is period integer. For example:
 			//C:5, D:3, R:7
-			rValue = Stringify(static_cast<char>(pos + 65)); //char 65 == 'A'
+			rValue = std::string(1, pos + 'A');
 
 			rValue += ":";
 
@@ -379,7 +382,7 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 
 	CTuningRTI* pTuning = new CTuningRTI;
 
-	srlztn::Ssb ssb(iStrm);
+	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead("CTB244RTI", (CTuning::GetVersion() << 24) + GetVersion());
 	ssb.ReadItem(pTuning->m_TuningName, "0", 1, ReadStr);
 	ssb.ReadItem(pTuning->m_EditMask, "1");
@@ -395,7 +398,7 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 	ssb.ReadItem(pTuning->m_SerHelperRatiotableSize, "RTI4");
 
 	// If reader status is ok and m_StepMin is somewhat reasonable, process data.
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300) 
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300) 
 	{
 		EDITMASK temp = pTuning->GetEditMask();
 		pTuning->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
@@ -470,7 +473,7 @@ bool VectorFromBinaryStream(std::istream& inStrm, std::vector<T>& v, const SIZET
 CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) const
 //----------------------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(outStrm);
+	srlztn::SsbWrite ssb(outStrm);
 	ssb.BeginWrite("CTB244RTI", (GetVersion() << 24) + GetClassVersion());
 	if (m_TuningName.length() > 0)
 		ssb.WriteItem(m_TuningName, "0", 1, WriteStr);
@@ -502,7 +505,7 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) 
 
 	ssb.FinishWrite();
 
-	return ((ssb.m_Status & srlztn::SNT_FAILURE) != 0) ? SERIALIZATION_FAILURE : SERIALIZATION_SUCCESS;
+	return ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0) ? SERIALIZATION_FAILURE : SERIALIZATION_SUCCESS;
 }
 
 
@@ -581,3 +584,6 @@ void WriteStr(std::ostream& oStrm, const std::string& str)
 }
 
 } // namespace CTuningS11n.
+
+
+OPENMPT_NAMESPACE_END

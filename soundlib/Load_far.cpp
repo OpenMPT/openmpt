@@ -12,6 +12,9 @@
 #include "Loaders.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -214,7 +217,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		FileReader patternChunk = file.GetChunk(orderHeader.patternSize[pat]);
+		FileReader patternChunk = file.ReadChunk(orderHeader.patternSize[pat]);
 
 		// Calculate pattern length in rows (every event is 4 bytes, and we have 16 channels)
 		ROWINDEX numRows = (orderHeader.patternSize[pat] - 2) / (16 * 4);
@@ -319,3 +322,6 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

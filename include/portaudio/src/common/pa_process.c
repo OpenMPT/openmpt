@@ -1,5 +1,5 @@
 /*
- * $Id: pa_process.c 1896 2013-08-06 08:26:55Z rbencina $
+ * $Id: pa_process.c 1913 2013-11-18 11:42:27Z gineera $
  * Portable Audio I/O Library
  * streamCallback <-> host buffer processing adapter
  *
@@ -743,8 +743,10 @@ static unsigned long NonAdaptingProcess( PaUtilBufferProcessor *bp,
                     destSampleStrideSamples = bp->inputChannelCount;
                     destChannelStrideBytes = bp->bytesPerUserInputSample;
 
-                    /* process host buffer directly, or use temp buffer if formats differ or host buffer non-interleaved */
-                    if( bp->userInputSampleFormatIsEqualToHost && bp->hostInputIsInterleaved && bp->hostInputChannels[0][0].data)
+                    /* process host buffer directly, or use temp buffer if formats differ or host buffer non-interleaved,
+                     * or if the number of channels differs between the host (set in stride) and the user */
+                    if( bp->userInputSampleFormatIsEqualToHost && bp->hostInputIsInterleaved
+                        && bp->hostInputChannels[0][0].data && bp->inputChannelCount == hostInputChannels[0].stride )
                     {
                         userInput = hostInputChannels[0].data;
                         destBytePtr = (unsigned char *)hostInputChannels[0].data;
@@ -1683,9 +1685,9 @@ unsigned long PaUtil_CopyInput( PaUtilBufferProcessor* bp,
                                 hostInputChannels[i].stride,
                                 framesToCopy, &bp->ditherGenerator );
 
-            destBytePtr += destChannelStrideBytes;  /* skip to next source channel */
+            destBytePtr += destChannelStrideBytes;  /* skip to next dest channel */
 
-            /* advance dest ptr for next iteration */
+            /* advance source ptr for next iteration */
             hostInputChannels[i].data = ((unsigned char*)hostInputChannels[i].data) +
                     framesToCopy * hostInputChannels[i].stride * bp->bytesPerHostInputSample;
         }
@@ -1715,7 +1717,7 @@ unsigned long PaUtil_CopyInput( PaUtilBufferProcessor* bp,
             destBytePtr += bp->bytesPerUserInputSample * framesToCopy;
             nonInterleavedDestPtrs[i] = destBytePtr;
             
-            /* advance dest ptr for next iteration */
+            /* advance source ptr for next iteration */
             hostInputChannels[i].data = ((unsigned char*)hostInputChannels[i].data) +
                     framesToCopy * hostInputChannels[i].stride * bp->bytesPerHostInputSample;
         }

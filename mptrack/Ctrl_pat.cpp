@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "mainfrm.h"
+#include "InputHandler.h"
 #include "childfrm.h"
 #include "moddoc.h"
 #include "globals.h"
@@ -21,6 +22,9 @@
 #include "ChannelManagerDlg.h"
 #include "../common/StringFixer.h"
 #include "MIDIMacroDialog.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 //////////////////////////////////////////////////////////////
@@ -132,7 +136,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	rcOrderList.right = rect.right - 4;
 	m_OrderList.Init(rcOrderList, pMainFrm->GetGUIFont());
 	// Toolbar buttons
-	m_ToolBar.Init();
+	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar.AddButton(IDC_PATTERN_NEW, TIMAGE_PATTERN_NEW);
 	m_ToolBar.AddButton(IDC_PATTERN_PLAY, TIMAGE_PATTERN_PLAY);
 	m_ToolBar.AddButton(IDC_PATTERN_PLAYFROMSTART, TIMAGE_PATTERN_RESTART);
@@ -192,7 +196,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
-	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.m_sName);
+	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.GetName().c_str());
 
 	m_OrderList.SetFocus(); 
 
@@ -243,7 +247,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 
 	if(dwHintMask & HINT_MODSEQUENCE)
 	{
-		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.m_sName);
+		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.GetName().c_str());
 	}
 	if(dwHintMask & (HINT_MODSEQUENCE|HINT_MODTYPE))
 	{
@@ -260,7 +264,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
 
 		// Enable/disable multisequence controls according the current modtype.
-		BOOL isMultiSeqAvail = (m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE;
+		BOOL isMultiSeqAvail = (m_sndFile.GetModSpecifications().sequencesMax > 1) ? TRUE : FALSE;
 		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
 		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
 		GetDlgItem(IDC_EDIT_SEQNUM)->EnableWindow(isMultiSeqAvail);
@@ -305,7 +309,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 					CString sDisplayName;
 					if (m_modDoc.GetSplitKeyboardSettings().IsSplitActive())
 					{
-						wsprintf(s, szSplitFormat, nSplitIns, GetNoteStr(noteSplit), i,
+						wsprintf(s, szSplitFormat, nSplitIns, m_sndFile.GetNoteName(noteSplit, nSplitIns).c_str(), i,
 								 (LPCTSTR)sSplitInsName, (LPCTSTR)m_modDoc.GetPatternViewInstrumentName(i, true, false));
 						sDisplayName = s;
 					}
@@ -323,7 +327,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 				for(SAMPLEINDEX i = 1; i <= nmax; i++) if (m_sndFile.GetSample(i).pSample)
 				{
 					if (m_modDoc.GetSplitKeyboardSettings().IsSplitActive())
-						wsprintf(s, szSplitFormat, nSplitIns, GetNoteStr(noteSplit), i, m_sndFile.m_szNames[nSplitIns], m_sndFile.m_szNames[i]);
+						wsprintf(s, szSplitFormat, nSplitIns, m_sndFile.GetNoteName(noteSplit, nSplitIns).c_str(), i, m_sndFile.m_szNames[nSplitIns], m_sndFile.m_szNames[i]);
 					else
 						wsprintf(s, "%02u: %s", i, m_sndFile.m_szNames[i]);
 
@@ -334,6 +338,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			}
 			m_CbnInstrument.SetCurSel(nPos);
 			m_CbnInstrument.SetRedraw(TRUE);
+			m_CbnInstrument.Invalidate(FALSE);
 		}
 		if(dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
 		{
@@ -342,8 +347,11 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 				nPat = (PATTERNINDEX)(dwHintMask >> HINT_SHIFT_PAT);
 			else
 				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
-			m_sndFile.Patterns[nPat].GetName(s);
-			m_EditPatName.SetWindowText(s);
+			if(m_sndFile.Patterns.IsValidIndex(nPat))
+			{
+				m_sndFile.Patterns[nPat].GetName(s);
+				m_EditPatName.SetWindowText(s);
+			}
 
 			BOOL bXMIT = (m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 			m_ToolBar.EnableButton(ID_PATTERN_MIDIMACRO, bXMIT);
@@ -449,16 +457,16 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_SETRECORD:
 		if (lParam >= 0) m_bRecord = (BOOL)(lParam); else m_bRecord = !m_bRecord;
 		m_ToolBar.SetState(IDC_PATTERN_RECORD, ((m_bRecord) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
-		TrackerSettings::Instance().gbPatternRecord = m_bRecord;
+		TrackerSettings::Instance().gbPatternRecord = (m_bRecord != 0);
 		SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		break;
 
 	case CTRLMSG_PREVORDER:
-		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd - 1, TRUE);
+		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd - 1, true);
 		break;
 	
 	case CTRLMSG_NEXTORDER:
-		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd + 1, TRUE);
+		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd + 1, true);
 		break;
 
 	//rewbs.customKeys
@@ -943,7 +951,7 @@ void CCtrlPatterns::OnPatternRecord()
 {
 	UINT nState = m_ToolBar.GetState(IDC_PATTERN_RECORD);
 	m_bRecord = ((nState & TBSTATE_CHECKED) != 0);
-	TrackerSettings::Instance().gbPatternRecord = m_bRecord;
+	TrackerSettings::Instance().gbPatternRecord = (m_bRecord != 0);
 	SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 	SwitchToView();
 }
@@ -954,7 +962,7 @@ void CCtrlPatterns::OnPatternVUMeters()
 {
 	UINT nState = m_ToolBar.GetState(ID_PATTERN_VUMETERS);
 	m_bVUMeters = ((nState & TBSTATE_CHECKED) != 0);
-	TrackerSettings::Instance().gbPatternVUMeters = m_bVUMeters;
+	TrackerSettings::Instance().gbPatternVUMeters = (m_bVUMeters != 0);
 	SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
 	SwitchToView();
 }
@@ -965,7 +973,7 @@ void CCtrlPatterns::OnPatternViewPlugNames()
 {
 	UINT nState = m_ToolBar.GetState(ID_VIEWPLUGNAMES);
 	m_bPluginNames = ((nState & TBSTATE_CHECKED) != 0);
-	TrackerSettings::Instance().gbPatternPluginNames = m_bPluginNames;
+	TrackerSettings::Instance().gbPatternPluginNames = (m_bPluginNames != 0);
 	SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
 	SwitchToView();
 }
@@ -1093,9 +1101,9 @@ void CCtrlPatterns::OnSequenceNameChanged()
 {
 	CString str;
 	GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, str);
-	if (str != m_sndFile.Order.m_sName)
+	if(str != m_sndFile.Order.GetName().c_str())
 	{
-		m_sndFile.Order.m_sName = str.GetString();
+		m_sndFile.Order.SetName(str.GetString());
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(NULL, (m_sndFile.Order.GetCurrentSequenceIndex() << HINT_SHIFT_SEQUENCE) | HINT_SEQNAMES, this);
 	}
@@ -1264,3 +1272,5 @@ void CCtrlPatterns::OnSequenceNumChanged()
 	}
 }
 
+
+OPENMPT_NAMESPACE_END

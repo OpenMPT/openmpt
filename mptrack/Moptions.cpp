@@ -15,6 +15,12 @@
 #include "mainfrm.h"
 #include "moptions.h"
 #include "moddoc.h"
+#include "Settings.h"
+#include "dlg_misc.h"
+#include "FileDialog.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 //////////////////////////////////////////////////////////////
@@ -22,10 +28,10 @@
 
 static const struct ColorDescriptions
 {
-	char *name;
+	const char *name;
 	int previewImage;
 	uint32 colorIndex1, colorIndex2, colorIndex3;
-	char *descText1, *descText2, *descText3;
+	const char *descText1, *descText2, *descText3;
 } colorDefs[] =
 {
 	{"Pattern Editor",	0,	MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT, "Background:", "Foreground:", "Highlighted:"},
@@ -485,18 +491,22 @@ void COptionsColors::OnPresetBuzz()
 void COptionsColors::OnLoadColorScheme()
 //--------------------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "mptcolor", "",
-		"OpenMPT Color Schemes|*.mptcolor||",
-		theApp.GetConfigPath());
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.DefaultExtension("mptcolor")
+		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
+		.WorkingDirectory(theApp.GetConfigPath());
+	if(!dlg.Show(this)) return;
 
 	// Ensure that all colours are reset (for outdated colour schemes)
 	OnPresetMPT();
-	for(int i = 0; i < MAX_MODCOLORS; i++)
 	{
-		TCHAR sKeyName[16];
-		wsprintf(sKeyName, "Color%02d", i);
-		CustomColors[i] = CMainFrame::GetPrivateProfileLong("Colors", sKeyName, CustomColors[i], files.first_file.c_str());
+		IniFileSettingsContainer file(dlg.GetFirstFile());
+		for(int i = 0; i < MAX_MODCOLORS; i++)
+		{
+			TCHAR sKeyName[16];
+			wsprintf(sKeyName, "Color%02d", i);
+			CustomColors[i] = file.Read<int32>("Colors", sKeyName, CustomColors[i]);
+		}
 	}
 	OnPreviewChanged();
 }
@@ -504,16 +514,20 @@ void COptionsColors::OnLoadColorScheme()
 void COptionsColors::OnSaveColorScheme()
 //--------------------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mptcolor", "",
-		"OpenMPT Color Schemes|*.mptcolor||",
-		theApp.GetConfigPath());
-	if(files.abort) return;
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension("mptcolor")
+		.ExtensionFilter("OpenMPT Color Schemes|*.mptcolor||")
+		.WorkingDirectory(theApp.GetConfigPath());
+	if(!dlg.Show(this)) return;
 
-	for(int i = 0; i < MAX_MODCOLORS; i++)
 	{
-		TCHAR sKeyName[16];
-		wsprintf(sKeyName, "Color%02d", i);
-		CMainFrame::WritePrivateProfileLong("Colors", sKeyName, CustomColors[i], files.first_file.c_str());
+		IniFileSettingsContainer file(dlg.GetFirstFile());
+		for(int i = 0; i < MAX_MODCOLORS; i++)
+		{
+			TCHAR sKeyName[16];
+			wsprintf(sKeyName, "Color%02d", i);
+			file.Write<int32>("Colors", sKeyName, CustomColors[i]);
+		}
 	}
 }
 
@@ -539,7 +553,7 @@ END_MESSAGE_MAP()
 static const struct GeneralOptionsDescriptions
 {
 	uint32 flag;
-	char *name, *description;
+	const char *name, *description;
 } generalOptionsList[] =
 {
 	{PATTERN_PLAYNEWNOTE,	"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
@@ -561,6 +575,7 @@ static const struct GeneralOptionsDescriptions
 	{PATTERN_MIDIRECORD,	"MIDI record",						"Enable MIDI in record by default."},
 	{PATTERN_OLDCTXMENUSTYLE, "Old style pattern context menu", "Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."},
 	{PATTERN_SYNCMUTE,		"Maintain sample sync on mute",		"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
+	{PATTERN_SYNCSAMPLEPOS,	"Maintain sample sync on seek",		"Sample that are still active from previous patterns are continued to be played after seeking.\nNote: Samples with portamento effects applied are not synced. This feature may slow down seeking."},
 	{PATTERN_AUTODELAY,		"Automatic delay commands",			"Automatically insert appropriate note-delay commands when recording notes during live playback."},
 	{PATTERN_NOTEFADE,		"Note fade on key up",				"Enable to fade / stop notes on key up in pattern tab."},
 	{PATTERN_OVERFLOWPASTE,	"Overflow paste mode",				"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
@@ -596,11 +611,11 @@ BOOL COptionsGeneral::OnInitDialog()
 	m_CheckList.SetCurSel(0);
 	OnOptionSelChanged();
 
-	SetDlgItemText(IDC_OPTIONS_DIR_MODS,		TrackerSettings::Instance().GetDefaultDirectory(DIR_MODS));
-	SetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		TrackerSettings::Instance().GetDefaultDirectory(DIR_SAMPLES));
-	SetDlgItemText(IDC_OPTIONS_DIR_INSTS,		TrackerSettings::Instance().GetDefaultDirectory(DIR_INSTRUMENTS));
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTS,		TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINS));
-	SetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	TrackerSettings::Instance().GetDefaultDirectory(DIR_PLUGINPRESETS));
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_MODS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_MODS).AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_SAMPS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES).AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_INSTS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS).AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS).AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS,	TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINPRESETS).AsNative().c_str());
 
 	return TRUE;
 }
@@ -610,13 +625,13 @@ void COptionsGeneral::OnOK()
 //--------------------------
 {
 	// Default paths
-	TCHAR szModDir[_MAX_PATH], szSmpDir[_MAX_PATH], szInsDir[_MAX_PATH], szVstDir[_MAX_PATH], szPresetDir[_MAX_PATH];
+	WCHAR szModDir[MAX_PATH], szSmpDir[MAX_PATH], szInsDir[MAX_PATH], szVstDir[MAX_PATH], szPresetDir[MAX_PATH];
 	szModDir[0] = szInsDir[0] = szSmpDir[0] = szVstDir[0] = szPresetDir[0] = 0;
-	GetDlgItemText(IDC_OPTIONS_DIR_MODS,		szModDir, _MAX_PATH);
-	GetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		szSmpDir, _MAX_PATH);
-	GetDlgItemText(IDC_OPTIONS_DIR_INSTS,		szInsDir, _MAX_PATH);
-	GetDlgItemText(IDC_OPTIONS_DIR_VSTS,		szVstDir, _MAX_PATH);
-	GetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	szPresetDir, _MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_MODS, szModDir, MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_SAMPS, szSmpDir, MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_INSTS, szInsDir, MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTS, szVstDir, MAX_PATH);
+	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS, szPresetDir, MAX_PATH);
 
 	for(size_t i = 0; i < CountOf(generalOptionsList); i++)
 	{
@@ -629,7 +644,13 @@ void COptionsGeneral::OnOK()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
-		pMainFrm->SetupDirectories(szModDir, szSmpDir, szInsDir, szVstDir, szPresetDir);
+		pMainFrm->SetupDirectories(
+			mpt::PathString::FromNative(szModDir),
+			mpt::PathString::FromNative(szSmpDir),
+			mpt::PathString::FromNative(szInsDir),
+			mpt::PathString::FromNative(szVstDir),
+			mpt::PathString::FromNative(szPresetDir)
+			);
 		pMainFrm->SetupMiscOptions();
 	}
 
@@ -648,20 +669,13 @@ BOOL COptionsGeneral::OnSetActive()
 void COptionsGeneral::BrowseForFolder(UINT nID)
 //---------------------------------------------
 {
-	CHAR szPath[_MAX_PATH] = "";
-	BROWSEINFO bi;
+	WCHAR szPath[MAX_PATH] = L"";
+	::GetDlgItemTextW(m_hWnd, nID, szPath, CountOf(szPath));
 
-	GetDlgItemText(nID, szPath, CountOf(szPath));
-	MemsetZero(bi);
-	bi.hwndOwner = m_hWnd;
-	bi.lpszTitle = "Select a default folder...";
-	bi.pszDisplayName = szPath;
-	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
-	LPITEMIDLIST pid = SHBrowseForFolder(&bi);
-	if (pid != NULL)
+	OPENMPT_NAMESPACE::BrowseForFolder dlg(mpt::PathString::FromNative(szPath), TEXT("Select a default folder..."));
+	if(dlg.Show(this))
 	{
-		SHGetPathFromIDList(pid, szPath);
-		SetDlgItemText(nID, szPath);
+		::SetDlgItemTextW(m_hWnd, nID, dlg.GetDirectory().AsNative().c_str());
 		OnSettingsChanged();
 	}
 }
@@ -678,3 +692,238 @@ void COptionsGeneral::OnOptionSelChanged()
 	}
 	SetDlgItemText(IDC_TEXT1, (pszDesc) ? pszDesc : "");
 }
+
+
+BEGIN_MESSAGE_MAP(COptionsSampleEditor, CPropertyPage)
+	ON_WM_HSCROLL()
+	ON_EN_CHANGE(IDC_EDIT_UNDOSIZE,			OnUndoSizeChanged)
+	ON_EN_CHANGE(IDC_EDIT_FINETUNE,			OnSettingsChanged)
+	ON_EN_CHANGE(IDC_FLAC_COMPRESSION,		OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_DEFAULT_FORMAT,	OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_VOLUME_HANDLING,	OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO1,					OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO2,					OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO3,					OnSettingsChanged)
+	ON_COMMAND(IDC_COMPRESS_ITI,			OnSettingsChanged)
+	ON_COMMAND(IDC_PREVIEW_SAMPLES,			OnSettingsChanged)
+	ON_COMMAND(IDC_NORMALIZE,				OnSettingsChanged)
+END_MESSAGE_MAP()
+
+
+void COptionsSampleEditor::DoDataExchange(CDataExchange* pDX)
+//-----------------------------------------------------------
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(COptionsSampleEditor)
+	DDX_Control(pDX, IDC_DEFAULT_FORMAT,		m_cbnDefaultSampleFormat);
+	DDX_Control(pDX, IDC_VOLUME_HANDLING,		m_cbnDefaultVolumeHandling);
+	//}}AFX_DATA_MAP
+}
+
+
+BOOL COptionsSampleEditor::OnInitDialog()
+//---------------------------------------
+{
+	CPropertyPage::OnInitDialog();
+	SetDlgItemInt(IDC_EDIT_FINETUNE, TrackerSettings::Instance().m_nFinetuneStep);
+	SetDlgItemInt(IDC_EDIT_UNDOSIZE, TrackerSettings::Instance().m_SampleUndoBufferSize.Get().GetSizeInPercent());
+	RecalcUndoSize();
+
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("FLAC"), dfFLAC);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("WAV"), dfWAV);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString("RAW"), dfRAW);
+	m_cbnDefaultSampleFormat.SetCurSel(TrackerSettings::Instance().m_defaultSampleFormat);
+
+	CSliderCtrl *slider = static_cast<CSliderCtrl *>(GetDlgItem(IDC_SLIDER1));
+	slider->SetRange(0, 8);
+	slider->SetTicFreq(1);
+	slider->SetPos(TrackerSettings::Instance().m_FLACCompressionLevel);
+
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + TrackerSettings::Instance().sampleEditorKeyBehaviour);
+
+	CheckDlgButton(IDC_COMPRESS_ITI, TrackerSettings::Instance().compressITI ? MF_CHECKED : MF_UNCHECKED);
+
+	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString("MIDI volume"), PLUGIN_VOLUMEHANDLING_MIDI);
+	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString("Dry/Wet ratio"), PLUGIN_VOLUMEHANDLING_DRYWET);
+	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString("None"), PLUGIN_VOLUMEHANDLING_IGNORE);
+	m_cbnDefaultVolumeHandling.SetCurSel(TrackerSettings::Instance().DefaultPlugVolumeHandling);
+
+	CheckDlgButton(IDC_PREVIEW_SAMPLES, TrackerSettings::Instance().previewInFileDialogs ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_NORMALIZE, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad ? MF_CHECKED : MF_UNCHECKED);
+
+	return TRUE;
+}
+
+
+void COptionsSampleEditor::OnOK()
+//-------------------------------
+{
+	CPropertyPage::OnOK();
+
+	TrackerSettings::Instance().m_nFinetuneStep = GetDlgItemInt(IDC_EDIT_FINETUNE);
+	TrackerSettings::Instance().m_SampleUndoBufferSize = SampleUndoBufferSize(GetDlgItemInt(IDC_EDIT_UNDOSIZE));
+	TrackerSettings::Instance().m_defaultSampleFormat = static_cast<SampleEditorDefaultFormat>(m_cbnDefaultSampleFormat.GetItemData(m_cbnDefaultSampleFormat.GetCurSel()));
+	TrackerSettings::Instance().m_FLACCompressionLevel = static_cast<CSliderCtrl *>(GetDlgItem(IDC_SLIDER1))->GetPos();
+	TrackerSettings::Instance().sampleEditorKeyBehaviour = static_cast<SampleEditorKeyBehaviour>(GetCheckedRadioButton(IDC_RADIO1, IDC_RADIO3) -IDC_RADIO1);
+	TrackerSettings::Instance().compressITI = IsDlgButtonChecked(IDC_COMPRESS_ITI) != MF_UNCHECKED;
+	TrackerSettings::Instance().DefaultPlugVolumeHandling = static_cast<PLUGVOLUMEHANDLING>(m_cbnDefaultVolumeHandling.GetItemData(m_cbnDefaultVolumeHandling.GetCurSel()));
+	TrackerSettings::Instance().previewInFileDialogs = IsDlgButtonChecked(IDC_PREVIEW_SAMPLES) != MF_UNCHECKED;
+	TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad = IsDlgButtonChecked(IDC_NORMALIZE) != MF_UNCHECKED;
+
+	std::vector<CModDoc *> docs = theApp.GetOpenDocuments();
+	for(std::vector<CModDoc *>::iterator i = docs.begin(); i != docs.end(); i++)
+	{
+		(**i).GetSampleUndo().RestrictBufferSize();
+	}
+}
+
+
+BOOL COptionsSampleEditor::OnSetActive()
+//--------------------------------------
+{
+	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_SAMPLEDITOR;
+	return CPropertyPage::OnSetActive();
+}
+
+
+void COptionsSampleEditor::OnUndoSizeChanged()
+//--------------------------------------------
+{
+	RecalcUndoSize();
+	OnSettingsChanged();
+}
+
+
+void COptionsSampleEditor::RecalcUndoSize()
+//-----------------------------------------
+{
+	uint32 sizeMB = mpt::saturate_cast<uint32>(SampleUndoBufferSize(GetDlgItemInt(IDC_EDIT_UNDOSIZE)).GetSizeInBytes() >> 20);
+	CString text;
+	text.Format("%% of physical memory (%u MiB)", sizeMB);
+	SetDlgItemText(IDC_UNDOSIZE, text);
+}
+
+
+#if defined(MPT_SETTINGS_CACHE)
+
+BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
+	ON_LBN_DBLCLK(IDC_LIST4,	OnOptionDblClick)
+	ON_EN_CHANGE(IDC_EDIT1,		OnFindStringChanged)
+END_MESSAGE_MAP()
+
+void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
+//-------------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CModTypeDlg)
+	DDX_Control(pDX, IDC_LIST4,			m_List);
+	//}}AFX_DATA_MAP
+}
+
+
+static CString FormatSetting(const SettingPath &path, const SettingValue &val)
+//----------------------------------------------------------------------------
+{
+	return mpt::ToCString(path.FormatAsString() + L" = " + val.FormatAsString());
+}
+
+
+BOOL COptionsAdvanced::PreTranslateMessage(MSG *msg)
+//--------------------------------------------------
+{
+	if(msg->message == WM_KEYDOWN && msg->wParam == VK_RETURN)
+	{
+		OnOptionDblClick();
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+BOOL COptionsAdvanced::OnInitDialog()
+//-----------------------------------
+{
+	CPropertyPage::OnInitDialog();
+	ReInit();
+	return TRUE;
+}
+
+
+void COptionsAdvanced::ReInit()
+//-----------------------------
+{
+	m_List.SetRedraw(FALSE);
+	m_List.ResetContent();
+	m_IndexToPath.clear();
+	CString findStr;
+	GetDlgItemText(IDC_EDIT1, findStr);
+	findStr.MakeLower();
+	for(SettingsContainer::SettingsMap::const_iterator it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
+	{
+		CString str = FormatSetting(it->first, it->second);
+		bool addString = true;
+		if(!findStr.IsEmpty())
+		{
+			CString strLower = str;
+			addString = strLower.MakeLower().Find(findStr) >= 0;
+		}
+		if(addString)
+		{
+			int index = m_List.AddString(str);
+			m_IndexToPath[index] = it->first;
+		}
+	}
+	m_List.SetRedraw(TRUE);
+	m_List.Invalidate(FALSE);
+}
+
+
+void COptionsAdvanced::OnOK()
+//---------------------------
+{
+	CPropertyPage::OnOK();
+}
+
+
+BOOL COptionsAdvanced::OnSetActive()
+//----------------------------------
+{
+	ReInit();
+	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_ADVANCED;
+	return CPropertyPage::OnSetActive();
+}
+
+
+void COptionsAdvanced::OnOptionDblClick()
+//---------------------------------------
+{
+	const int index = m_List.GetCurSel();
+	if(m_IndexToPath.find(index) == m_IndexToPath.end())
+	{
+		return;
+	}
+	const SettingPath path = m_IndexToPath[index];
+	SettingValue val = theApp.GetSettings().GetMap().find(path)->second;
+	if(val.GetType() == SettingTypeBool)
+	{
+		val = !val.as<bool>();
+	} else
+	{
+		CInputDlg inputDlg(this, mpt::ToCString(path.FormatAsString()), mpt::ToCString(val.FormatValueAsString()));
+		if(inputDlg.DoModal() != IDOK)
+		{
+			return;
+		}
+		val.SetFromString(mpt::ToWide(inputDlg.resultString));
+	}
+	theApp.GetSettings().Write(path, val);
+	m_List.DeleteString(index);
+	m_List.InsertString(index, FormatSetting(path, val));
+	m_List.SetCurSel(index);
+	OnSettingsChanged();
+}
+
+#endif // MPT_SETTINGS_CACHE
+
+
+OPENMPT_NAMESPACE_END

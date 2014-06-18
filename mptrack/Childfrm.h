@@ -10,17 +10,19 @@
 
 #pragma once
 
+#include "PatternCursor.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
 class CModControlDlg;
 class CChildFrame;
-
-#include "PatternCursor.h"
 
 typedef struct _GENERALVIEWSTATE
 {
 	DWORD cbStruct;
+	PlugParamIndex nParam;
+	CHANNELINDEX nTab;
 	PLUGINDEX nPlugin;
-	DWORD nParam;
-	DWORD nTab;
 } GENERALVIEWSTATE;
 
 
@@ -36,7 +38,6 @@ typedef struct PATTERNVIEWSTATE
 
 typedef struct SAMPLEVIEWSTATE
 {
-	DWORD cbStruct;
 	DWORD dwScrollPos;
 	DWORD dwBeginSel;
 	DWORD dwEndSel;
@@ -153,3 +154,6 @@ public:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+
+OPENMPT_NAMESPACE_END

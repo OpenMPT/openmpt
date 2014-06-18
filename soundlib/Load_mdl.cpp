@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //#define MDL_LOG
 
 #if MPT_COMPILER_MSVC
@@ -101,8 +103,8 @@ STATIC_ASSERT(sizeof(MDLSampleHeaderv0) == 57);
 #endif
 
 
-void ConvertMDLCommand(ModCommand *m, UINT eff, UINT data)
-//--------------------------------------------------------
+static void ConvertMDLCommand(ModCommand *m, UINT eff, UINT data)
+//---------------------------------------------------------------
 {
 	UINT command = 0, param = data;
 	switch(eff)
@@ -178,8 +180,8 @@ void ConvertMDLCommand(ModCommand *m, UINT eff, UINT data)
 
 
 // Convert MDL envelope data (env points and flags)
-void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope *pMPTEnv)
-//--------------------------------------------------------------------------------
+static void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope *pMPTEnv)
+//---------------------------------------------------------------------------------------
 {
 	WORD nCurTick = 1;
 	pMPTEnv->nNodes = 15;
@@ -202,8 +204,8 @@ void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope *pMPTEn
 }
 
 
-void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, const BYTE *lpTracks)
-//-------------------------------------------------------------------------------------------------
+static void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, const BYTE *lpTracks)
+//--------------------------------------------------------------------------------------------------------
 {
 	ModCommand cmd, *m = pat;
 	UINT len = *((WORD *)lpTracks);
@@ -286,8 +288,8 @@ void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, co
 
 
 
-bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------------------------------------
 {
 	DWORD dwMemPos, dwPos, blocklen, dwTrackPos;
 	const MDLFileHeader *pmsh = (const MDLFileHeader *)lpStream;
@@ -299,7 +301,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 	BYTE smpinfo[MAX_SAMPLES];
 	BYTE insvolenv[MAX_INSTRUMENTS];
 	BYTE inspanenv[MAX_INSTRUMENTS];
-	LPCBYTE pvolenv, ppanenv, ppitchenv;
+	const uint8 *pvolenv, *ppanenv, *ppitchenv;
 	UINT nvolenv, npanenv, npitchenv;
 	std::vector<ROWINDEX> patternLength;
 
@@ -339,6 +341,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 		#endif
 			pmib = (MDLInfoBlock *)(lpStream+dwMemPos);
 			mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pmib->songname);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(songArtist, pmib->composer);
 
 			norders = pmib->norders;
 			if (norders > MAX_ORDERS) norders = MAX_ORDERS;
@@ -446,9 +449,9 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 						const BYTE *ps = lpStream+dwPos+34+14*j;
 						while ((note < (UINT)(ps[1]+12)) && (note < NOTE_MAX))
 						{
-							if (ps[0] < MAX_SAMPLES)
+							SAMPLEINDEX ismp = ps[0];
+							if(ismp < MAX_SAMPLES)
 							{
-								int ismp = ps[0];
 								pIns->Keyboard[note] = ps[0];
 								Samples[ismp].nVolume = ps[2];
 								Samples[ismp].nPan = ps[4] << 1;
@@ -520,7 +523,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 			for (i = 0; i < nsamples; i++, dwPos += (pmsh->version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0))
 			{
 				const MDLSampleHeaderCommon *info = reinterpret_cast<const MDLSampleHeaderCommon *>(lpStream + dwPos);
-				if(info->sampleIndex >= MAX_SAMPLES || info->sampleIndex == 0)
+				if(!IsInRange(info->sampleIndex, 1, MAX_SAMPLES-1))
 				{
 					continue;
 				}
@@ -659,7 +662,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 		// Setup volume envelope
 		if ((nvolenv) && (pvolenv) && (insvolenv[iIns]))
 		{
-			LPCBYTE pve = pvolenv;
+			const uint8 *pve = pvolenv;
 			for (UINT nve = 0; nve < nvolenv; nve++, pve += 33)
 			{
 				if (pve[0] + 1 == insvolenv[iIns])
@@ -669,7 +672,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength, ModLoadi
 		// Setup panning envelope
 		if ((npanenv) && (ppanenv) && (inspanenv[iIns]))
 		{
-			LPCBYTE ppe = ppanenv;
+			const uint8 *ppe = ppanenv;
 			for (UINT npe = 0; npe < npanenv; npe++, ppe += 33)
 			{
 				if (ppe[0] + 1 == inspanenv[iIns])
@@ -701,3 +704,5 @@ uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n)
 	return v;
 }
 
+
+OPENMPT_NAMESPACE_END

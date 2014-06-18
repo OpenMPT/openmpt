@@ -23,9 +23,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
-#endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_BEGIN
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -39,23 +38,14 @@
 // PSM File Header
 struct PACKED PSMFileHeader
 {
-	// Magic Bytes
-	enum PSMMagic
-	{
-		magicPSM_	= 0x204D5350,
-		magicFILE	= 0x454C4946,
-	};
-
-	uint32 formatID;		// "PSM " (new format)
+	char   formatID[4];		// "PSM " (new format)
 	uint32 fileSize;		// Filesize - 12
-	uint32 fileInfoID;		// "FILE" Start of file info
+	char   fileInfoID[4];	// "FILE"
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
-		SwapBytesLE(formatID);
 		SwapBytesLE(fileSize);
-		SwapBytesLE(fileInfoID);
 	}
 };
 
@@ -67,16 +57,16 @@ struct PACKED PSMChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idTITL	= 0x4C544954,
-		idSDFT	= 0x54464453,
-		idPBOD	= 0x444F4250,
-		idSONG	= 0x474E4F53,
-		idDATE	= 0x45544144,
-		idOPLH	= 0x484C504F,
-		idPPAN	= 0x4E415050,
-		idPATT	= 0x54544150,
-		idDSAM	= 0x4D415344,
-		idDSMP	= 0x504D5344,
+		idTITL	= MAGIC4LE('T','I','T','L'),
+		idSDFT	= MAGIC4LE('S','D','F','T'),
+		idPBOD	= MAGIC4LE('P','B','O','D'),
+		idSONG	= MAGIC4LE('S','O','N','G'),
+		idDATE	= MAGIC4LE('D','A','T','E'),
+		idOPLH	= MAGIC4LE('O','P','L','H'),
+		idPPAN	= MAGIC4LE('P','P','A','N'),
+		idPATT	= MAGIC4LE('P','A','T','T'),
+		idDSAM	= MAGIC4LE('D','S','A','M'),
+		idDSMP	= MAGIC4LE('D','S','M','P'),
 	};
 
 	typedef ChunkIdentifiers id_type;
@@ -253,8 +243,8 @@ struct PSMSubSong // For internal use (pattern conversion)
 
 
 // Portamento effect conversion (depending on format version)
-uint8 ConvertPSMPorta(uint8 param, bool newFormat)
-//------------------------------------------------
+static uint8 ConvertPSMPorta(uint8 param, bool newFormat)
+//-------------------------------------------------------
 {
 	return (newFormat
 		? param
@@ -277,9 +267,9 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	bool newFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
 
 	// Check header
-	if(fileHeader.formatID != PSMFileHeader::magicPSM_ // "PSM "
+	if(memcmp(fileHeader.formatID, "PSM ", 4)
 		|| fileHeader.fileSize != file.BytesLeft()
-		|| fileHeader.fileInfoID != PSMFileHeader::magicFILE) // "FILE"
+		|| memcmp(fileHeader.fileInfoID, "FILE", 4))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -339,9 +329,9 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			newFormat = true;
 			chunk.ReadString<mpt::String::spacePadded>(patternID, 4);
 		}
-		patternIDs.push_back(atoi(&patternID[newFormat ? 0 : 1]));
+		patternIDs.push_back(ConvertStrTo<uint32>(&patternID[newFormat ? 0 : 1]));
 		// We're going to read the rest of the pattern data later.
-		patternChunks.push_back(chunk.GetChunk(chunk.BytesLeft()));
+		patternChunks.push_back(chunk.ReadChunk(chunk.BytesLeft()));
 
 		// Convert later as we have to know how many channels there are.
 	}
@@ -388,7 +378,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					char cversion[7];
 					subChunk.ReadString<mpt::String::maybeNullTerminated>(cversion, 6);
-					int version = atoi(cversion);
+					int version = ConvertStrTo<int>(cversion);
 					// Sinaria song dates (just to go sure...)
 					if(version == 800211 || version == 940902 || version == 940903 ||
 						version == 940906 || version == 940914 || version == 941213)
@@ -431,7 +421,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 									subChunk.Skip(1);
 									subChunk.ReadString<mpt::String::spacePadded>(patternID, 3);
 								}
-								uint32 pat = atoi(patternID);
+								uint32 pat = ConvertStrTo<uint32>(patternID);
 
 								// seek which pattern has this ID
 								for(size_t i = 0; i < patternIDs.size(); i++)
@@ -609,7 +599,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
 				if(smp < MAX_SAMPLES)
 				{
-					m_nSamples = MAX(m_nSamples, smp);
+					m_nSamples = std::max(m_nSamples, smp);
 					mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
@@ -627,7 +617,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
 				if(smp < MAX_SAMPLES)
 				{
-					m_nSamples = MAX(m_nSamples, smp);
+					m_nSamples = std::max(m_nSamples, smp);
 					mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
@@ -698,7 +688,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				continue;
 			}
 
-			FileReader rowChunk = patternChunk.GetChunk(rowSize - 2);
+			FileReader rowChunk = patternChunk.ReadChunk(rowSize - 2);
 
 			while(rowChunk.AreBytesLeft())
 			{
@@ -972,15 +962,13 @@ struct PACKED PSM16FileHeader
 	// 32-Bit chunk identifiers
 	enum PSM16Magic
 	{
-		magicPSM_	= 0xFE4D5350,
-
-		idPORD	= 0x44524f50,
-		idPPAN	= 0x4E415050,
-		idPSAH	= 0x48415350,
-		idPPAT	= 0x54415050,
+		idPORD	= MAGIC4LE('P','O','R','D'),
+		idPPAN	= MAGIC4LE('P','P','A','N'),
+		idPSAH	= MAGIC4LE('P','S','A','H'),
+		idPPAT	= MAGIC4LE('P','P','A','T'),
 	};
 
-	uint32 formatID;		// "PSMþ" (PSM16)
+	char   formatID[4];		// "PSM\xFE" (PSM16)
 	char   songName[59];	// Song title, padded with nulls
 	uint8  lineEnd;			// $1A
 	uint8  songType;		// Song Type bitfield
@@ -1006,7 +994,6 @@ struct PACKED PSM16FileHeader
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
-		SwapBytesLE(formatID);
 		SwapBytesLE(songLength);
 		SwapBytesLE(songOrders);
 		SwapBytesLE(numPatterns);
@@ -1145,7 +1132,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	// Is it a valid PSM16 file?
 	PSM16FileHeader fileHeader;
 	if(!file.ReadConvertEndianness(fileHeader)
-		|| fileHeader.formatID != PSM16FileHeader::magicPSM_ // "PSMþ"
+		|| memcmp(fileHeader.formatID, "PSM\xFE", 4)
 		|| fileHeader.lineEnd != 0x1A
 		|| (fileHeader.formatVersion != 0x10 && fileHeader.formatVersion != 0x01) // why is this sometimes 0x01?
 		|| fileHeader.patternVersion != 0 // 255ch pattern version not supported (did anyone use this?)
@@ -1194,7 +1181,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	// Read samples
 	if(fileHeader.smpOffset > 4 && file.Seek(fileHeader.smpOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPSAH)
 	{
-		FileReader sampleChunk = file.GetChunk(file.BytesLeft());
+		FileReader sampleChunk = file.ReadChunk(file.BytesLeft());
 
 		for(SAMPLEINDEX fileSample = 0; fileSample < fileHeader.numSamples; fileSample++)
 		{
@@ -1205,7 +1192,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			SAMPLEINDEX smp = sampleHeader.sampleNumber;
-			m_nSamples = MAX(m_nSamples, smp);
+			m_nSamples = std::max(m_nSamples, smp);
 
 			mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
 			sampleHeader.ConvertToMPT(Samples[smp]);
@@ -1236,7 +1223,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			// Patterns are padded to 16 Bytes
-			FileReader patternChunk = file.GetChunk(((patternHeader.size + 15) & ~15) - sizeof(PSM16PatternHeader));
+			FileReader patternChunk = file.ReadChunk(((patternHeader.size + 15) & ~15) - sizeof(PSM16PatternHeader));
 
 			if(Patterns.Insert(pat, patternHeader.numRows))
 			{
@@ -1440,5 +1427,14 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+	if(fileHeader.commentsOffset != 0)
+	{
+		file.Seek(fileHeader.commentsOffset);
+		songMessage.Read(file, file.ReadUint16LE(), SongMessage::leAutodetect);
+	}
+
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

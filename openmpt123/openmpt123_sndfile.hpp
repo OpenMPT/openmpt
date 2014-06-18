@@ -154,7 +154,7 @@ private:
 		}
 	}
 public:
-	sndfile_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & log_ = std::cerr ) : flags(flags_), log(log_), sndfile(0) {
+	sndfile_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & log_ ) : flags(flags_), log(log_), sndfile(0) {
 		if ( flags.verbose ) {
 			find_format( "", match_print );
 			log << std::endl;
@@ -176,7 +176,8 @@ public:
 	}
 	void write_metadata( std::map<std::string,std::string> metadata ) {
 		write_metadata_field( SF_STR_TITLE, metadata[ "title" ] );
-		write_metadata_field( SF_STR_ARTIST, metadata[ "author" ] );
+		write_metadata_field( SF_STR_ARTIST, metadata[ "artist" ] );
+		write_metadata_field( SF_STR_DATE, metadata[ "date" ] );
 		write_metadata_field( SF_STR_COMMENT, metadata[ "message" ] );
 		write_metadata_field( SF_STR_SOFTWARE, append_software_tag( metadata[ "tracker" ] ) );
 	}

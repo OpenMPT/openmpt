@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -129,14 +131,20 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 
-	char fileMagic[3][4];
-	file.ReadArray(fileMagic);
-	if(!memcmp(fileMagic[0], "RIFF", 4)
-		&& !memcmp(fileMagic[2], "DSMF", 4))
+	char fileMagic0[4];
+	char fileMagic1[4];
+	char fileMagic2[4];
+
+	if(!file.ReadArray(fileMagic0)) return false;
+	if(!file.ReadArray(fileMagic1)) return false;
+	if(!file.ReadArray(fileMagic2)) return false;
+
+	if(!memcmp(fileMagic0, "RIFF", 4)
+		&& !memcmp(fileMagic2, "DSMF", 4))
 	{
 		// "Normal" DSM files with RIFF header
 		// <RIFF> <file size> <DSMF>
-	} else if(!memcmp(fileMagic[0], "DSMF", 4))
+	} else if(!memcmp(fileMagic0, "DSMF", 4))
 	{
 		// DSM files with alternative header
 		// <DSMF> <4 bytes, usually 4x NUL or RIFF> <file size> <4 bytes, usually DSMF but not always>
@@ -195,7 +203,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 	PATTERNINDEX patNum = 0;
 	while(file.ReadConvertEndianness(chunkHeader))
 	{
-		FileReader chunk = file.GetChunk(chunkHeader.size);
+		FileReader chunk = file.ReadChunk(chunkHeader.size);
 
 		if(!memcmp(chunkHeader.magic, "PATT", 4) && (loadFlags & loadPatternData))
 		{
@@ -303,3 +311,6 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

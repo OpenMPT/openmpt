@@ -12,8 +12,31 @@
 
 #include "StreamEncoder.h"
 
+#include "Mptrack.h"
+#include "TrackerSettings.h"
+
 #include <ostream>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
+StreamEncoderSettings &StreamEncoderSettings::Instance()
+//------------------------------------------------------
+{
+	return TrackerSettings::Instance().ExportStreamEncoderSettings;
+}
+
+
+StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const std::string &section)
+//-----------------------------------------------------------------------------------------------
+	: FLACCompressionLevel(conf, section, "FLACCompressionLevel", 5)
+	, MP3LameQuality(conf, section, "MP3LameQuality", 3)
+	, MP3ACMFast(conf, section, "MP3ACMFast", false)
+	, OpusComplexity(conf, section, "OpusComplexity", -1)
+{
+	return;
+}
 
 
 StreamWriterBase::StreamWriterBase(std::ostream &stream)
@@ -81,3 +104,24 @@ std::string EncoderFactoryBase::DescribeQuality(float quality) const
 {
 	return mpt::String::Format("VBR %i%%", static_cast<int>(quality * 100.0f));
 }
+
+std::string EncoderFactoryBase::DescribeBitrateVBR(int bitrate) const
+//-------------------------------------------------------------------
+{
+	return mpt::String::Format("VBR %i kbit", bitrate);
+}
+
+std::string EncoderFactoryBase::DescribeBitrateABR(int bitrate) const
+//-------------------------------------------------------------------
+{
+	return mpt::String::Format("ABR %i kbit", bitrate);
+}
+
+std::string EncoderFactoryBase::DescribeBitrateCBR(int bitrate) const
+//-------------------------------------------------------------------
+{
+	return mpt::String::Format("CBR %i kbit", bitrate);
+}
+
+
+OPENMPT_NAMESPACE_END

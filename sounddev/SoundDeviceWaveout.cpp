@@ -12,11 +12,19 @@
 #include "stdafx.h"
 
 #include "SoundDevice.h"
-#include "SoundDevices.h"
+#include "SoundDeviceThread.h"
 
 #include "SoundDeviceWaveout.h"
 
 #include "../common/misc_util.h"
+
+#include <mmreg.h>
+
+
+OPENMPT_NAMESPACE_BEGIN
+
+
+bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings);
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -25,27 +33,27 @@
 //
 
 
-#define WAVEOUT_MAXBUFFERS           256
-#define WAVEOUT_MINBUFFERSIZE        1024
-#define WAVEOUT_MAXBUFFERSIZE        65536
+static const std::size_t WAVEOUT_MINBUFFERS = 3;
+static const std::size_t WAVEOUT_MAXBUFFERS = 256;
+static const std::size_t WAVEOUT_MINBUFFERSIZE = 1024;
+static const std::size_t WAVEOUT_MAXBUFFERSIZE = 65536;
 
 
 CWaveDevice::CWaveDevice(SoundDeviceID id, const std::wstring &internalID)
 //------------------------------------------------------------------------
 	: CSoundDeviceWithThread(id, internalID)
 {
+	m_ThreadWakeupEvent;
 	m_hWaveOut = NULL;
 	m_nWaveBufferSize = 0;
+	m_JustStarted = false;
 	m_nPreparedHeaders = 0;
-	m_nBytesPerSec = 0;
-	m_BytesPerSample = 0;
 }
 
 
 CWaveDevice::~CWaveDevice()
 //-------------------------
 {
-	Reset();
 	Close();
 }
 
@@ -54,64 +62,75 @@ bool CWaveDevice::InternalOpen()
 //------------------------------
 {
 	WAVEFORMATEXTENSIBLE wfext;
-	if(!FillWaveFormatExtensible(wfext)) return false;
-	WAVEFORMATEX *pwfx = &wfext.Format;
-
-	LONG nWaveDev;
-
-	if (m_hWaveOut) Close();
-	nWaveDev = GetDeviceIndex();
-	nWaveDev = (nWaveDev) ? nWaveDev-1 : WAVE_MAPPER;
-	if (waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION))
+	if(!FillWaveFormatExtensible(wfext, m_Settings))
 	{
-		sndPlaySound(NULL, 0);
-		LONG err = waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION);
-		if (err) return false;
+		return false;
 	}
-	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
-	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
-	m_nWaveBufferSize = (m_Settings.UpdateIntervalMS * pwfx->nAvgBytesPerSec) / 1000;
-	m_nWaveBufferSize = (m_nWaveBufferSize + 7) & ~7;
-	if (m_nWaveBufferSize < WAVEOUT_MINBUFFERSIZE) m_nWaveBufferSize = WAVEOUT_MINBUFFERSIZE;
-	if (m_nWaveBufferSize > WAVEOUT_MAXBUFFERSIZE) m_nWaveBufferSize = WAVEOUT_MAXBUFFERSIZE;
-	ULONG NumBuffers = m_Settings.LatencyMS * pwfx->nAvgBytesPerSec / ( m_nWaveBufferSize * 1000 );
-	NumBuffers = CLAMP(NumBuffers, 3, WAVEOUT_MAXBUFFERS);
-	m_nPreparedHeaders = 0;
-	m_WaveBuffers.resize(NumBuffers);
-	m_WaveBuffersData.resize(NumBuffers);
-	for(UINT iBuf=0; iBuf<NumBuffers; iBuf++)
+	WAVEFORMATEX *pwfx = &wfext.Format;
+	UINT_PTR nWaveDev = GetDeviceIndex();
+	nWaveDev = (nWaveDev > 0) ? nWaveDev - 1 : WAVE_MAPPER;
+	m_ThreadWakeupEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if(m_ThreadWakeupEvent == INVALID_HANDLE_VALUE)
 	{
-		MemsetZero(m_WaveBuffers[iBuf]);
-		m_WaveBuffersData[iBuf].resize(m_nWaveBufferSize);
-		m_WaveBuffers[iBuf].dwFlags = WHDR_DONE;
-		m_WaveBuffers[iBuf].lpData = &m_WaveBuffersData[iBuf][0];
-		m_WaveBuffers[iBuf].dwBufferLength = m_nWaveBufferSize;
-		if (waveOutPrepareHeader(m_hWaveOut, &m_WaveBuffers[iBuf], sizeof(WAVEHDR)) != 0)
+		InternalClose();
+		return false;
+	}
+	m_hWaveOut = NULL;
+	if(waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+	{
+		InternalClose();
+		return false;
+	}
+	m_nWaveBufferSize = m_Settings.UpdateIntervalMS * pwfx->nAvgBytesPerSec / 1000;
+	m_nWaveBufferSize = Clamp(m_nWaveBufferSize, WAVEOUT_MINBUFFERSIZE, WAVEOUT_MAXBUFFERSIZE);
+	m_nWaveBufferSize = ((m_nWaveBufferSize + pwfx->nBlockAlign - 1) / pwfx->nBlockAlign) * pwfx->nBlockAlign;
+	std::size_t numBuffers = m_Settings.LatencyMS * pwfx->nAvgBytesPerSec / (m_nWaveBufferSize * 1000);
+	numBuffers = Clamp(numBuffers, WAVEOUT_MINBUFFERS, WAVEOUT_MAXBUFFERS);
+	m_nPreparedHeaders = 0;
+	m_WaveBuffers.resize(numBuffers);
+	m_WaveBuffersData.resize(numBuffers);
+	for(std::size_t buf = 0; buf < numBuffers; ++buf)
+	{
+		MemsetZero(m_WaveBuffers[buf]);
+		m_WaveBuffersData[buf].resize(m_nWaveBufferSize);
+		m_WaveBuffers[buf].dwFlags = WHDR_DONE;
+		m_WaveBuffers[buf].lpData = &m_WaveBuffersData[buf][0];
+		m_WaveBuffers[buf].dwBufferLength = m_nWaveBufferSize;
+		if(waveOutPrepareHeader(m_hWaveOut, &m_WaveBuffers[buf], sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
 		{
 			break;
 		}
 		m_nPreparedHeaders++;
 	}
-	if (!m_nPreparedHeaders)
+	if(!m_nPreparedHeaders)
 	{
-		Close();
+		InternalClose();
 		return false;
 	}
-	m_RealLatencyMS = m_nWaveBufferSize * m_nPreparedHeaders * 1000.0f / m_nBytesPerSec;
-	m_RealUpdateIntervalMS = m_nWaveBufferSize * 1000.0f / m_nBytesPerSec;
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
+	SetWakeupEvent(m_ThreadWakeupEvent);
+	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
+	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
+	SoundBufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond();
+	bufferAttributes.UpdateInterval = m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
+	bufferAttributes.NumBuffers = m_nPreparedHeaders;
+	UpdateBufferAttributes(bufferAttributes);
 	return true;
 }
+
 
 bool CWaveDevice::InternalClose()
 //-------------------------------
 {
-	Reset();
-	if (m_hWaveOut)
+	if(m_hWaveOut)
 	{
-		ResetFromOutsideSoundThread(); // always reset so that waveOutClose does not fail if we did only P->Stop() (meaning waveOutPause()) before
-		while (m_nPreparedHeaders > 0)
+		waveOutReset(m_hWaveOut);
+		m_JustStarted = false;
+		InterlockedExchange(&m_nBuffersPending, 0);
+		m_nWriteBuffer = 0;
+		while(m_nPreparedHeaders > 0)
 		{
 			m_nPreparedHeaders--;
 			waveOutUnprepareHeader(m_hWaveOut, &m_WaveBuffers[m_nPreparedHeaders], sizeof(WAVEHDR));
@@ -119,7 +138,11 @@ bool CWaveDevice::InternalClose()
 		MMRESULT err = waveOutClose(m_hWaveOut);
 		ALWAYS_ASSERT(err == MMSYSERR_NOERROR);
 		m_hWaveOut = NULL;
-		Sleep(1); // Linux WINE-friendly
+	}
+	if(m_ThreadWakeupEvent)
+	{
+		CloseHandle(m_ThreadWakeupEvent);
+		m_ThreadWakeupEvent = NULL;
 	}
 	return true;
 }
@@ -130,7 +153,8 @@ void CWaveDevice::StartFromSoundThread()
 {
 	if(m_hWaveOut)
 	{
-		waveOutRestart(m_hWaveOut);
+		m_JustStarted = true;
+		// Actual starting is done in InternalFillAudioBuffer to avoid crackling with tiny buffers.
 	}
 }
 
@@ -141,42 +165,29 @@ void CWaveDevice::StopFromSoundThread()
 	if(m_hWaveOut)
 	{
 		waveOutPause(m_hWaveOut);
+		m_JustStarted = false;
 	}
 }
 
 
-void CWaveDevice::ResetFromOutsideSoundThread()
-//---------------------------------------------
+void CWaveDevice::InternalFillAudioBuffer()
+//-----------------------------------------
 {
-	if(m_hWaveOut)
+	if(!m_hWaveOut)
 	{
-		waveOutReset(m_hWaveOut);
+		return;
 	}
-	InterlockedExchange(&m_nBuffersPending, 0);
-	m_nWriteBuffer = 0;
-}
+	
+	const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
 
+	ULONG oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0); // read
+	ULONG nLatency = oldBuffersPending * m_nWaveBufferSize;
 
-void CWaveDevice::FillAudioBuffer()
-//---------------------------------
-{
-	ULONG nBytesWritten;
-	ULONG nLatency;
-	LONG oldBuffersPending;
-	if (!m_hWaveOut) return;
-	nBytesWritten = 0;
-	oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0); // read
-	nLatency = oldBuffersPending * m_nWaveBufferSize;
-
-	bool wasempty = false;
-	if(oldBuffersPending == 0) wasempty = true;
-	// When there were no pending buffers at all, pause the output, fill the buffers completely and then restart the output.
-	// This avoids buffer underruns which result in audible crackling on stream start with small buffers.
-	if(wasempty) waveOutPause(m_hWaveOut);
-
-	while((ULONG)oldBuffersPending < m_nPreparedHeaders)
+	ULONG nBytesWritten = 0;
+	while(oldBuffersPending < m_nPreparedHeaders)
 	{
-		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize/m_BytesPerSample);
+		SourceAudioPreRead(m_nWaveBufferSize / bytesPerFrame);
+		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize / bytesPerFrame);
 		nLatency += m_nWaveBufferSize;
 		nBytesWritten += m_nWaveBufferSize;
 		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
@@ -185,26 +196,31 @@ void CWaveDevice::FillAudioBuffer()
 		waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR));
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
-		SourceAudioDone(m_nWaveBufferSize/m_BytesPerSample, nLatency/m_BytesPerSample);
+		SourceAudioDone(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
 	}
 
-	if(wasempty) waveOutRestart(m_hWaveOut);
+	if(m_JustStarted)
+	{
+		// Fill the buffers completely before starting the stream.
+		// This avoids buffer underruns which result in audible crackling with small buffers.
+		m_JustStarted = false;
+		waveOutRestart(m_hWaveOut);
+	}
 
 }
 
 
-int64 CWaveDevice::InternalGetStreamPositionSamples() const
+int64 CWaveDevice::InternalGetStreamPositionFrames() const
 //---------------------------------------------------------
 {
-	if(!IsOpen()) return 0;
 	MMTIME mmtime;
 	MemsetZero(mmtime);
 	mmtime.wType = TIME_SAMPLES;
 	if(waveOutGetPosition(m_hWaveOut, &mmtime, sizeof(mmtime)) != MMSYSERR_NOERROR) return 0;
 	switch(mmtime.wType)
 	{
-		case TIME_BYTES:   return mmtime.u.cb / m_BytesPerSample; break;
-		case TIME_MS:      return mmtime.u.ms * m_nBytesPerSec / (1000 * m_BytesPerSample); break;
+		case TIME_BYTES:   return mmtime.u.cb / m_Settings.GetBytesPerFrame(); break;
+		case TIME_MS:      return mmtime.u.ms * m_Settings.GetBytesPerSecond() / (1000 * m_Settings.GetBytesPerFrame()); break;
 		case TIME_SAMPLES: return mmtime.u.sample; break;
 		default: return 0; break;
 	}
@@ -218,6 +234,7 @@ void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_P
 	{
 		CWaveDevice *that = (CWaveDevice *)dwUser;
 		InterlockedDecrement(&that->m_nBuffersPending);
+		SetEvent(that->m_ThreadWakeupEvent);
 	}
 }
 
@@ -235,17 +252,30 @@ std::vector<SoundDeviceInfo> CWaveDevice::EnumerateDevices()
 		}
 		SoundDeviceInfo info;
 		info.id = SoundDeviceID(SNDDEV_WAVEOUT, static_cast<SoundDeviceIndex>(index));
+		info.apiName = SoundDeviceTypeToString(SNDDEV_WAVEOUT);
+		WAVEOUTCAPSW woc;
+		MemsetZero(woc);
 		if(index == 0)
 		{
-			info.name = L"Auto (Wave Mapper)";
+			if(waveOutGetDevCapsW(WAVE_MAPPER, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
+			{
+				info.name = woc.szPname;
+			} else
+			{
+				info.name = L"Auto (Wave Mapper)";
+			}
+			info.isDefault = true;
 		} else
 		{
-			WAVEOUTCAPSW woc;
-			MemsetZero(woc);
-			waveOutGetDevCapsW(index-1, &woc, sizeof(woc));
-			info.name = woc.szPname;
+			if(waveOutGetDevCapsW(index-1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
+			{
+				info.name = woc.szPname;
+			}
 		}
 		devices.push_back(info);
 	}
 	return devices;
 }
+
+
+OPENMPT_NAMESPACE_END

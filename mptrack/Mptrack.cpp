@@ -11,13 +11,12 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "MainFrm.h"
+#include "InputHandler.h"
 #include "ChildFrm.h"
 #include "moddoc.h"
 #include "globals.h"
 #include "Dlsbank.h"
-#include "../sounddev/SoundDevice.h"
 #include "vstplug.h"
-#include "CreditStatic.h"
 #include "commctrl.h"
 #include "../common/version.h"
 #include "../test/test.h"
@@ -27,6 +26,10 @@
 #include "../common/StringFixer.h"
 #include "ExceptionHandler.h"
 #include "CloseMainDialog.h"
+#include "AboutDialog.h"
+#include "AutoSaver.h"
+#include "FileDialog.h"
+#include "PNG.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -40,87 +43,111 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CTrackApp object
 
 CTrackApp theApp;
 
+const char *szSpecialNoteNamesMPT[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~ (Note Fade)"), TEXT("^^ (Note Cut)"), TEXT("== (Note Off)")};
+const char *szSpecialNoteShortDesc[] = {TEXT("Param Control (Smooth)"), TEXT("Param Control"), TEXT("Note Fade"), TEXT("Note Cut"), TEXT("Note Off")};
 
-/////////////////////////////////////////////////////////////////////////////
-// Document Template
+// Make sure that special note arrays include string for every note.
+STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == CountOf(szSpecialNoteNamesMPT)); 
+STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNamesMPT)); 
 
-//=============================================
-class CModDocTemplate: public CMultiDocTemplate
-//=============================================
+const char *szHexChar = "0123456789ABCDEF";
+
+CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru, BOOL makeVisible)
+//------------------------------------------------------------------------------------------------------------
 {
-public:
-	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
-		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
-
-	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-		virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL makeVisible = TRUE);
-	#else
-		virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
-	#endif
-};
-
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-	CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL makeVisible)
-#else
-	CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR path, BOOL addToMru, BOOL makeVisible)
-#endif
-//-----------------------------------------------------------------------------------------
-{
-	if (path)
+	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".dll")))
 	{
-		TCHAR s[_MAX_EXT];
-		_tsplitpath(path, NULL, NULL, NULL, s);
-		if (!_tcsicmp(s, _TEXT(".dll")))
+		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
+		if(pPluginManager && pPluginManager->AddPlugin(filename) != nullptr)
 		{
-			CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-			if (pPluginManager)
-			{
-				pPluginManager->AddPlugin(path);
-				return NULL;
-			}
+			return nullptr;
 		}
 	}
 
+	// First, remove document from MRU list.
+	if(addToMru)
+	{
+		theApp.RemoveMruItem(filename);
+	}
+
 	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, makeVisible);
+		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), makeVisible);
 	#else
-		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(path, addToMru, makeVisible);
+		CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), addToMru, makeVisible);
 	#endif
-	if (pDoc)
+	if(pDoc)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm) pMainFrm->OnDocumentCreated(static_cast<CModDoc *>(pDoc));
-	}
-	else //Case: pDoc == 0, opening document failed.
+	} else //Case: pDoc == 0, opening document failed.
 	{
-		if(path != NULL)
+		if(!filename.empty())
 		{
-			if(PathFileExists(path) == FALSE)
+			if(CMainFrame::GetMainFrame() && addToMru)
 			{
-				CString str;
-				str.Format(GetStrI18N(_TEXT("Unable to open \"%s\": file does not exist.")), path);
-				Reporting::Error(str);
+				CMainFrame::GetMainFrame()->UpdateMRUList();
+			}
+			if(PathFileExistsW(filename.AsNative().c_str()) == FALSE)
+			{
+				Reporting::Error(L"Unable to open \"" + filename.ToWide() + L"\": file does not exist.");
 			}
 			else //Case: Valid path but opening fails.
 			{
 				const int nOdc = theApp.GetOpenDocumentCount();
-				CString str;
-				str.Format(GetStrI18N(_TEXT("Opening \"%s\" failed. This can happen if "
-					"no more documents can be opened or if the file type was not "
-					"recognised. If the former is true, it's "
-					"recommended to close some documents as otherwise crash is likely"
-					"(currently there %s %d document%s open).")),
-					path, (nOdc == 1) ? "is" : "are", nOdc, (nOdc == 1) ? "" : "s");
-				Reporting::Notification(str);
+				Reporting::Notification(mpt::String::PrintW(L"Opening \"%1\" failed. This can happen if "
+					L"no more documents can be opened or if the file type was not "
+					L"recognised. If the former is true, it's "
+					L"recommended to close some documents as otherwise a crash is likely"
+					L"(currently there %2 %3 document%4 open).",
+					filename, (nOdc == 1) ? L"is" : L"are", nOdc, (nOdc == 1) ? L"" : L"s"));
 			}
 		}
 	}
 	return pDoc;
+}
+
+
+CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune)
+//-----------------------------------------------------------------------------------------------
+{
+	CDocument *doc = OpenDocumentFile(filename, isExampleTune ? TRUE : FALSE, TRUE);
+	if(doc)
+	{
+		CModDoc *modDoc = static_cast<CModDoc *>(doc);
+		// Clear path so that saving will not take place in templates/examples folder.
+		modDoc->ClearFilePath();
+		if(!isExampleTune)
+		{
+			CMultiDocTemplate::SetDefaultTitle(modDoc);
+			m_nUntitledCount++;
+			// Name has changed...
+			CMainFrame::GetMainFrame()->UpdateTree(modDoc, HINT_MODGENERAL);
+
+			// Reset edit history for template files
+			modDoc->GetrSoundFile().GetFileHistory().clear();
+			modDoc->GetrSoundFile().m_dwCreatedWithVersion = MptVersion::num;
+			modDoc->GetrSoundFile().m_dwLastSavedWithVersion = 0;
+		} else
+		{
+			// Remove extension from title, so that saving the file will not suggest a filename like e.g. "example.it.it".
+			const CString title = modDoc->GetTitle();
+			const int dotPos = title.ReverseFind('.');
+			if(dotPos >= 0)
+			{
+				modDoc->SetTitle(title.Left(dotPos));
+			}
+		}
+	}
+	return doc;
 }
 
 
@@ -136,6 +163,14 @@ class CModDocManager: public CDocManager
 public:
 	CModDocManager() {}
 	virtual BOOL OnDDECommand(LPTSTR lpszCommand);
+	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName)
+	{
+		return OpenDocumentFile(lpszFileName ? mpt::PathString::TunnelOutofCString(lpszFileName) : mpt::PathString());
+	}
+	virtual CDocument* OpenDocumentFile(const mpt::PathString &filename)
+	{
+		return CDocManager::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString());
+	}
 };
 
 
@@ -180,13 +215,13 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 			{
 				bResult = TRUE;
 				bActivate = TRUE;
-				OpenDocumentFile(pszData);
+				OpenDocumentFile(mpt::PathString::FromCString(pszData));
 			}
 		} else
 		// New
 		if (!lstrcmpi(pszCmd, "New"))
 		{
-			OpenDocumentFile(NULL);
+			OpenDocumentFile(mpt::PathString());
 			bResult = TRUE;
 			bActivate = TRUE;
 		}
@@ -259,8 +294,6 @@ std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 }
 
 
-TCHAR CTrackApp::m_szExePath[_MAX_PATH] = TEXT("");
-
 /////////////////////////////////////////////////////////////////////////////
 // MPTRACK Command Line options
 
@@ -269,152 +302,164 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	bool m_bNoDls, m_bSafeMode, m_bNoPlugins,
+	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly,
 		 m_bPortable, m_bNoSettingsOnNewVersion;
 
 public:
 	CMPTCommandLineInfo()
 	{
-		m_bNoDls = m_bSafeMode =
-		m_bNoPlugins = m_bNoSettingsOnNewVersion = m_bPortable = false;
+		m_bNoDls = m_bNoPlugins = m_bNoAssembly =
+		m_bPortable = m_bNoSettingsOnNewVersion = false;
 	}
-	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
-};
-
-
-void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
-//-----------------------------------------------------------------------------
-{
-	if ((lpszParam) && (bFlag))
+	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 	{
-		if (!lstrcmpi(lpszParam, "nologo")) { m_bShowSplash = FALSE; return; } else
-		if (!lstrcmpi(lpszParam, "nodls")) { m_bNoDls = true; return; } else
-		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; return; } else
-		if (!lstrcmpi(lpszParam, "portable")) { m_bPortable = true; return; } else
-		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = true; return; }
+		if ((lpszParam) && (bFlag))
+		{
+			if (!lstrcmpi(lpszParam, _T("nologo"))) { m_bShowSplash = FALSE; return; }
+			if (!lstrcmpi(lpszParam, _T("nodls"))) { m_bNoDls = true; return; }
+			if (!lstrcmpi(lpszParam, _T("noplugs"))) { m_bNoPlugins = true; return; }
+			if (!lstrcmpi(lpszParam, _T("portable"))) { m_bPortable = true; return; }
+			if (!lstrcmpi(lpszParam, _T("noSettingsOnNewVersion"))) { m_bNoSettingsOnNewVersion = true; return; }
+			if (!lstrcmpi(lpszParam, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
+			if (!lstrcmpi(lpszParam, _T("noAssembly"))) { m_bNoAssembly = true; return; }
+		}
+		CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
 	}
-	CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
-}
+};
 
 
 /////////////////////////////////////////////////////////////////////////////
 // Midi Library
 
-LPMIDILIBSTRUCT CTrackApp::glpMidiLibrary = NULL;
+MIDILIBSTRUCT CTrackApp::midiLibrary;
 
-BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
-//-------------------------------------------------------------------
+BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
+//-----------------------------------------------------------------------------
 {
-	TCHAR szFileName[_MAX_PATH], s[_MAX_PATH], szUltraSndPath[_MAX_PATH];
+	if(filename.empty()) return FALSE;
 
-	if ((!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
-	if (!glpMidiLibrary)
-	{
-		glpMidiLibrary = new MIDILIBSTRUCT;
-		if (!glpMidiLibrary) return FALSE;
-		MemsetZero(*glpMidiLibrary);
-	}
-	if (CDLSBank::IsDLSBank(lpszConfigFile))
+	if (CDLSBank::IsDLSBank(filename))
 	{
 		ConfirmAnswer result = cnfYes;
 		if (!bNoWarn)
 		{
 			result = Reporting::Confirm("You are about to replace the current MIDI library:\n"
-									"Do you want to replace only the missing instruments? (recommended)",
-									"Warning", true);
+				"Do you want to replace only the missing instruments? (recommended)",
+				"Warning", true);
 		}
 		if (result == cnfCancel) return FALSE;
 		const bool bReplaceAll = (result == cnfNo);
 		CDLSBank dlsbank;
-		if (dlsbank.Open(lpszConfigFile))
+		if (dlsbank.Open(filename))
 		{
 			for (UINT iIns=0; iIns<256; iIns++)
 			{
-				if ((bReplaceAll) || (!glpMidiLibrary->MidiMap[iIns]) || (!glpMidiLibrary->MidiMap[iIns][0]))
+				if((bReplaceAll) || midiLibrary.MidiMap[iIns].empty())
 				{
 					DWORD dwProgram = (iIns < 128) ? iIns : 0xFF;
 					DWORD dwKey = (iIns < 128) ? 0xFF : iIns & 0x7F;
 					DWORD dwBank = (iIns < 128) ? 0 : F_INSTRUMENT_DRUMS;
 					if (dlsbank.FindInstrument((iIns < 128) ? FALSE : TRUE,	dwBank, dwProgram, dwKey))
 					{
-						if (!glpMidiLibrary->MidiMap[iIns])
-						{
-							if ((glpMidiLibrary->MidiMap[iIns] = new CHAR[_MAX_PATH]) == NULL) break;
-						}
-						strcpy(glpMidiLibrary->MidiMap[iIns], lpszConfigFile);
+						midiLibrary.MidiMap[iIns] = filename;
 					}
 				}
 			}
 		}
 		return TRUE;
 	}
-	GetPrivateProfileString(_T("Ultrasound"), _T("PatchDir"), _T(""), szUltraSndPath, CountOf(szUltraSndPath), lpszConfigFile);
-	if (!strcmp(szUltraSndPath, _T(".\\"))) szUltraSndPath[0] = 0;
-	if (!szUltraSndPath[0]) GetCurrentDirectory(CountOf(szUltraSndPath), szUltraSndPath);
+
+	IniFileSettingsContainer file(filename);
+	return ImportMidiConfig(file);
+}
+
+BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
+//----------------------------------------------------------------------------
+{
+	mpt::PathString UltraSndPath;
+
+	UltraSndPath = file.Read<mpt::PathString>("Ultrasound", "PatchDir", mpt::PathString());
+	if(forgetSettings) file.Forget("Ultrasound", "PatchDir");
+	if(UltraSndPath == MPT_PATHSTRING(".\\")) UltraSndPath = mpt::PathString();
+	if(UltraSndPath.empty())
+	{
+		WCHAR curDir[MAX_PATH];
+		GetCurrentDirectoryW(CountOf(curDir), curDir);
+		UltraSndPath = mpt::PathString::FromNative(curDir);
+	}
 	for (UINT iMidi=0; iMidi<256; iMidi++)
 	{
-		szFileName[0] = 0;
-		wsprintf(s, (iMidi < 128) ? _T("Midi%d") : _T("Perc%d"), iMidi & 0x7f);
-		GetPrivateProfileString(_T("Midi Library"), s, _T(""), szFileName, CountOf(szFileName), lpszConfigFile);
+		mpt::PathString filename;
+		char section[32];
+		sprintf(section, (iMidi < 128) ? "Midi%d" : "Perc%d", iMidi & 0x7f);
+		filename = file.Read<mpt::PathString>("Midi Library", section, mpt::PathString());
+		if(forgetSettings) file.Forget("Midi Library", section);
 		// Check for ULTRASND.INI
-		if (!szFileName[0])
+		if(filename.empty())
 		{
-			LPCSTR pszSection = (iMidi < 128) ? _T("Melodic Patches") : _T("Drum Patches");
-			wsprintf(s, _T("%d"), iMidi & 0x7f);
-			GetPrivateProfileString(pszSection, s, _T(""), szFileName, CountOf(szFileName), lpszConfigFile);
-			if (!szFileName[0])
+			const char *pszSection = (iMidi < 128) ? "Melodic Patches" : "Drum Patches";
+			sprintf(section, _T("%d"), iMidi & 0x7f);
+			filename = file.Read<mpt::PathString>(pszSection, section, mpt::PathString());
+			if(forgetSettings) file.Forget(pszSection, section);
+			if(filename.empty())
 			{
-				pszSection = (iMidi < 128) ? _T("Melodic Bank 0") : _T("Drum Bank 0");
-				GetPrivateProfileString(pszSection, s, "", szFileName, CountOf(szFileName), lpszConfigFile);
+				pszSection = (iMidi < 128) ? "Melodic Bank 0" : "Drum Bank 0";
+				filename = file.Read<mpt::PathString>(pszSection, section, mpt::PathString());
+				if(forgetSettings) file.Forget(pszSection, section);
 			}
-			if (szFileName[0])
+			if(!filename.empty())
 			{
-				s[0] = 0;
-				if (szUltraSndPath[0])
+				mpt::PathString tmp;
+				if(!UltraSndPath.empty())
 				{
-					strcpy(s, szUltraSndPath);
-					int len = strlen(s)-1;
-					if ((len) && (s[len-1] != '\\')) strcat(s, _T("\\"));
+					tmp = UltraSndPath;
+					if(!tmp.HasTrailingSlash())
+					{
+						tmp += MPT_PATHSTRING("\\");
+					}
 				}
-				_tcsncat(s, szFileName, CountOf(s));
-				_tcsncat(s, ".pat", CountOf(s));
-				_tcscpy(szFileName, s);
+				tmp += filename;
+				tmp += MPT_PATHSTRING(".pat");
+				filename = tmp;
 			}
 		}
-		if (szFileName[0])
+		if(!filename.empty())
 		{
-			if (!glpMidiLibrary->MidiMap[iMidi])
-			{
-				if ((glpMidiLibrary->MidiMap[iMidi] = new TCHAR[_MAX_PATH]) == nullptr) return FALSE;
-			}
-			theApp.RelativePathToAbsolute(szFileName);
-			_tcscpy(glpMidiLibrary->MidiMap[iMidi], szFileName);
+			filename = theApp.RelativePathToAbsolute(filename);
+			midiLibrary.MidiMap[iMidi] = filename;
 		}
 	}
 	return FALSE;
 }
 
 
-BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
-//-----------------------------------------------------
+BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
+//---------------------------------------------------------------
 {
-	TCHAR szFileName[_MAX_PATH], s[128];
+	if(filename.empty()) return FALSE;
+	IniFileSettingsContainer file(filename);
+	return ExportMidiConfig(file);
+}
 
-	if ((!glpMidiLibrary) || (!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
-	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (glpMidiLibrary->MidiMap[iMidi])
+BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
+//-------------------------------------------------------
+{
+	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (!midiLibrary.MidiMap[iMidi].empty())
 	{
-		if (iMidi < 128)
-			wsprintf(s, _T("Midi%d"), iMidi);
-		else
-			wsprintf(s, _T("Perc%d"), iMidi & 0x7F);
+		mpt::PathString szFileName = midiLibrary.MidiMap[iMidi];
 
-		strcpy(szFileName, glpMidiLibrary->MidiMap[iMidi]);
-
-		if(szFileName[0])
+		if(!szFileName.empty())
 		{
 			if(theApp.IsPortableMode())
-				theApp.AbsolutePathToRelative(szFileName);
-			if (!WritePrivateProfileString("Midi Library", s, szFileName, lpszConfigFile)) break;
+				szFileName = theApp.AbsolutePathToRelative(szFileName);
+
+			char s[16];
+			if (iMidi < 128)
+				sprintf(s, _T("Midi%d"), iMidi);
+			else
+				sprintf(s, _T("Perc%d"), iMidi & 0x7F);
+
+			file.Write<mpt::PathString>("Midi Library", s, szFileName);
 		}
 	}
 	return TRUE;
@@ -424,118 +469,83 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 /////////////////////////////////////////////////////////////////////////////
 // DLS Banks support
 
-#define MPTRACK_REG_DLS		"Software\\Olivier Lapicque\\ModPlug Tracker\\DLS Banks"
 std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
 
 
 BOOL CTrackApp::LoadDefaultDLSBanks()
 //-----------------------------------
 {
-	CHAR szFileName[MAX_PATH];
-	HKEY key;
+	mpt::PathString filename;
 
-	CString storedVersion = CMainFrame::GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
-	//If version number stored in INI is 1.17.02.40 or later, load DLS from INI file.
-	//Else load DLS from Registry
-	if (storedVersion >= "1.17.02.40")
+	UINT numBanks = theApp.GetSettings().Read<int32>("DLS Banks", "NumBanks", 0);
+	for(size_t i = 0; i < numBanks; i++)
 	{
-		CHAR s[MAX_PATH];
-		UINT numBanks = CMainFrame::GetPrivateProfileLong("DLS Banks", "NumBanks", 0, theApp.GetConfigFileName());
-		for(size_t i = 0; i < numBanks; i++)
-		{
-			wsprintf(s, _T("Bank%d"), i + 1);
-			TCHAR szPath[_MAX_PATH];
-			GetPrivateProfileString("DLS Banks", s, "", szPath, INIBUFFERSIZE, theApp.GetConfigFileName());
-			theApp.RelativePathToAbsolute(szPath);
-			AddDLSBank(szPath);
-		}
-	} else
-	{
-		LoadRegistryDLS();
+		char s[16];
+		sprintf(s, _T("Bank%d"), i + 1);
+		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", s, mpt::PathString());
+		path = theApp.RelativePathToAbsolute(path);
+		AddDLSBank(path);
 	}
 
 	SaveDefaultDLSBanks(); // This will avoid a crash the next time if we crash while loading the bank
 
-	szFileName[0] = 0;
-	GetSystemDirectory(szFileName, CountOf(szFileName));
-	lstrcat(szFileName, "\\GM.DLS");
-	if (!AddDLSBank(szFileName))
+	WCHAR szFileNameW[MAX_PATH];
+	szFileNameW[0] = 0;
+	GetSystemDirectoryW(szFileNameW, CountOf(szFileNameW));
+	filename = mpt::PathString::FromNative(szFileNameW);
+	filename += MPT_PATHSTRING("\\GM.DLS");
+	if(!AddDLSBank(filename))
 	{
-		GetWindowsDirectory(szFileName, CountOf(szFileName));
-		lstrcat(szFileName, "\\SYSTEM32\\DRIVERS\\GM.DLS");
-		if (!AddDLSBank(szFileName))
+		szFileNameW[0] = 0;
+		GetWindowsDirectoryW(szFileNameW, CountOf(szFileNameW));
+		filename = mpt::PathString::FromNative(szFileNameW);
+		filename += MPT_PATHSTRING("\\SYSTEM32\\DRIVERS\\GM.DLS");
+		if(!AddDLSBank(filename))
 		{
-			if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
+			HKEY key;
+			if(RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
 			{
+				WCHAR szFileName[MAX_PATH];
 				DWORD dwRegType = REG_SZ;
 				DWORD dwSize = sizeof(szFileName);
 				szFileName[0] = 0;
-				if (RegQueryValueEx(key, "GMFilePath", NULL, &dwRegType, (LPBYTE)&szFileName, &dwSize) == ERROR_SUCCESS)
+				if(RegQueryValueExW(key, L"GMFilePath", NULL, &dwRegType, (LPBYTE)&szFileName, &dwSize) == ERROR_SUCCESS)
 				{
-					AddDLSBank(szFileName);
+					AddDLSBank(mpt::PathString::FromNative(szFileName));
 				}
 				RegCloseKey(key);
 			}
 		}
 	}
-	if (glpMidiLibrary) ImportMidiConfig(szFileName, TRUE);
+	ImportMidiConfig(filename, TRUE);
 
 	return TRUE;
-}
-
-void CTrackApp::LoadRegistryDLS()
-//-------------------------------
-{
-	CHAR szFileNameX[_MAX_PATH];
-	HKEY keyX;
-
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MPTRACK_REG_DLS, 0, KEY_READ, &keyX) == ERROR_SUCCESS)
-	{
-		DWORD dwRegType = REG_DWORD;
-		DWORD dwSize = sizeof(DWORD);
-		DWORD d = 0;
-		if (RegQueryValueEx(keyX, "NumBanks", NULL, &dwRegType, (LPBYTE)&d, &dwSize) == ERROR_SUCCESS)
-		{
-			CHAR s[64];
-			for (UINT i=0; i<d; i++)
-			{
-				wsprintf(s, "Bank%d", i+1);
-				szFileNameX[0] = 0;
-				dwRegType = REG_SZ;
-				dwSize = sizeof(szFileNameX);
-				RegQueryValueEx(keyX, s, NULL, &dwRegType, (LPBYTE)szFileNameX, &dwSize);
-				AddDLSBank(szFileNameX);
-			}
-		}
-		RegCloseKey(keyX);
-	}
 }
 
 
 BOOL CTrackApp::SaveDefaultDLSBanks()
 //-----------------------------------
 {
-	TCHAR s[64];
-	TCHAR szPath[_MAX_PATH];
 	DWORD nBanks = 0;
 	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
 
-		if(!gpDLSBanks[i] || !gpDLSBanks[i]->GetFileName() || !gpDLSBanks[i]->GetFileName()[0])
+		if(!gpDLSBanks[i] || gpDLSBanks[i]->GetFileName().empty())
 			continue;
 
-		_tcsncpy(szPath, gpDLSBanks[i]->GetFileName(), CountOf(szPath) - 1);
+		mpt::PathString path = gpDLSBanks[i]->GetFileName();
 		if(theApp.IsPortableMode())
 		{
-			theApp.AbsolutePathToRelative(szPath);
+			path = theApp.AbsolutePathToRelative(path);
 		}
 
-		wsprintf(s, _T("Bank%d"), nBanks+1);
-		WritePrivateProfileString("DLS Banks", s, szPath, theApp.GetConfigFileName());
+		char s[16];
+		sprintf(s, _T("Bank%d"), nBanks + 1);
+		theApp.GetSettings().Write<mpt::PathString>("DLS Banks", s, path);
 		nBanks++;
 
 	}
-	CMainFrame::WritePrivateProfileLong("DLS Banks", "NumBanks", nBanks, theApp.GetConfigFileName());
+	theApp.GetSettings().Write<int32>("DLS Banks", "NumBanks", nBanks);
 	return TRUE;
 }
 
@@ -551,17 +561,17 @@ BOOL CTrackApp::RemoveDLSBank(UINT nBank)
 }
 
 
-BOOL CTrackApp::AddDLSBank(LPCSTR lpszFileName)
-//---------------------------------------------
+BOOL CTrackApp::AddDLSBank(const mpt::PathString &filename)
+//---------------------------------------------------------
 {
-	if(!lpszFileName || !lpszFileName[0] || !CDLSBank::IsDLSBank(lpszFileName)) return FALSE;
+	if(filename.empty() || !CDLSBank::IsDLSBank(filename)) return FALSE;
 	// Check for dupes
 	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
-		if(gpDLSBanks[i] && !lstrcmpi(lpszFileName, gpDLSBanks[i]->GetFileName())) return TRUE;
+		if(gpDLSBanks[i] && !mpt::PathString::CompareNoCase(filename, gpDLSBanks[i]->GetFileName())) return TRUE;
 	}
 	CDLSBank *bank = new CDLSBank;
-	if(bank->Open(lpszFileName))
+	if(bank->Open(filename))
 	{
 		gpDLSBanks.push_back(bank);
 		return TRUE;
@@ -598,10 +608,6 @@ BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 	ON_COMMAND(ID_FILE_OPEN,	OnFileOpen)
 	ON_COMMAND(ID_FILE_CLOSEALL, OnFileCloseAll)
 	ON_COMMAND(ID_APP_ABOUT,	OnAppAbout)
-	ON_COMMAND(ID_HELP_INDEX,	CWinApp::OnHelpIndex)
-	ON_COMMAND(ID_HELP_FINDER,	CWinApp::OnHelpFinder)
-	ON_COMMAND(ID_HELP_USING,	CWinApp::OnHelpUsing)
-	ON_COMMAND(ID_HELP_SEARCH,	OnHelpSearch)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -610,10 +616,19 @@ END_MESSAGE_MAP()
 
 CTrackApp::CTrackApp()
 //--------------------
+	: m_GuiThreadId(0)
+	, m_pTrackerDirectories(nullptr)
+	, m_pUXThemeDLL(nullptr)
+	, m_pSettingsIniFile(nullptr)
+	, m_pSettings(nullptr)
+	, m_pTrackerSettings(nullptr)
+	, m_pPluginCache(nullptr)
 {
 	#if MPT_COMPILER_MSVC
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
+
+	m_GuiThreadId = GetCurrentThreadId();
 
 	ExceptionHandler::Register();
 
@@ -622,7 +637,51 @@ CTrackApp::CTrackApp()
 	m_pPluginManager = NULL;
 	m_pSoundDevicesManager = nullptr;
 	m_bInitialized = FALSE;
-	m_szConfigFileName[0] = 0;
+}
+
+
+void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
+//-------------------------------------------------------
+{
+	AddToRecentFileList(mpt::PathString::TunnelOutofCString(lpszPathName));
+}
+
+
+void CTrackApp::AddToRecentFileList(const mpt::PathString path)
+//-------------------------------------------------------------
+{
+	RemoveMruItem(path);
+	TrackerSettings::Instance().mruFiles.insert(TrackerSettings::Instance().mruFiles.begin(), path);
+	if(TrackerSettings::Instance().mruFiles.size() > TrackerSettings::Instance().mruListLength)
+	{
+		TrackerSettings::Instance().mruFiles.resize(TrackerSettings::Instance().mruListLength);
+	}
+	CMainFrame::GetMainFrame()->UpdateMRUList();
+}
+
+
+void CTrackApp::RemoveMruItem(const size_t item)
+//----------------------------------------------
+{
+	if(item < TrackerSettings::Instance().mruFiles.size())
+	{
+		TrackerSettings::Instance().mruFiles.erase(TrackerSettings::Instance().mruFiles.begin() + item);
+		CMainFrame::GetMainFrame()->UpdateMRUList();
+	}
+}
+
+
+void CTrackApp::RemoveMruItem(const mpt::PathString &path)
+//--------------------------------------------------------
+{
+	for(std::vector<mpt::PathString>::iterator i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
+	{
+		if(!mpt::PathString::CompareNoCase(*i, path))
+		{
+			TrackerSettings::Instance().mruFiles.erase(i);
+			break;
+		}
+	}
 }
 
 
@@ -633,27 +692,29 @@ CTrackApp::CTrackApp()
 // Move a config file called sFileName from the App's directory (or one of its sub directories specified by sSubDir) to
 // %APPDATA%. If specified, it will be renamed to sNewFileName. Existing files are never overwritten.
 // Returns true on success.
-bool CTrackApp::MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH], TCHAR sNewFileName[_MAX_PATH])
-//-----------------------------------------------------------------------------------------------------------------
+bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDir, mpt::PathString sNewFileName)
+//--------------------------------------------------------------------------------------------------------------
 {
 	// copy a config file from the exe directory to the new config dirs
-	TCHAR sOldPath[_MAX_PATH], sNewPath[_MAX_PATH];
-	strcpy(sOldPath, m_szExePath);
-	if(sSubDir[0])
-		strcat(sOldPath, sSubDir);
-	strcat(sOldPath, sFileName);
+	mpt::PathString sOldPath;
+	mpt::PathString sNewPath;
+	sOldPath = GetAppDirPath();
+	sOldPath += sSubDir;
+	sOldPath += sFileName;
 
-	strcpy(sNewPath, m_szConfigDirectory);
-	if(sSubDir[0])
-		strcat(sNewPath, sSubDir);
-	if(sNewFileName[0])
-		strcat(sNewPath, sNewFileName);
-	else
-		strcat(sNewPath, sFileName);
-
-	if(PathFileExists(sNewPath) == 0 && PathFileExists(sOldPath) != 0)
+	sNewPath = m_szConfigDirectory;
+	sNewPath += sSubDir;
+	if(!sNewFileName.empty())
 	{
-		return (MoveFile(sOldPath, sNewPath) != 0);
+		sNewPath += sNewFileName;
+	} else
+	{
+		sNewPath += sFileName;
+	}
+
+	if(PathFileExistsW(sNewPath.AsNative().c_str()) == 0 && PathFileExistsW(sOldPath.AsNative().c_str()) != 0)
+	{
+		return (MoveFileW(sOldPath.AsNative().c_str(), sNewPath.AsNative().c_str()) != 0);
 	}
 	return false;
 }
@@ -664,33 +725,27 @@ bool CTrackApp::MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PA
 void CTrackApp::SetupPaths(bool overridePortable)
 //-----------------------------------------------
 {
-	if(GetModuleFileName(NULL, m_szExePath, CountOf(m_szExePath)))
-	{
-		mpt::String::SetNullTerminator(m_szExePath);
-		TCHAR szDrive[_MAX_DRIVE] = "", szDir[_MAX_PATH] = "";
-		_splitpath(m_szExePath, szDrive, szDir, NULL, NULL);
-		strcpy(m_szExePath, szDrive);
-		strcat(m_szExePath, szDir);
+	m_szExePath = mpt::GetAppPath();
+	SetCurrentDirectoryW(m_szExePath.AsNative().c_str());
 
-		GetFullPathName(m_szExePath, CountOf(szDir), szDir, NULL);
-		strcpy(m_szExePath, szDir);
-	}
-
-	m_szConfigDirectory[0] = 0;
+	m_szConfigDirectory = mpt::PathString();
 	// Try to find a nice directory where we should store our settings (default: %APPDATA%)
 	bool bIsAppDir = overridePortable;
-	if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, m_szConfigDirectory)))
+	WCHAR tempConfigDirectory[MAX_PATH];
+	tempConfigDirectory[0] = 0;
+	if(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) != S_OK)
 	{
-		if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, m_szConfigDirectory)))
+		if(SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) != S_OK)
 		{
 			bIsAppDir = true;
 		}
 	}
+	m_szConfigDirectory = mpt::PathString::FromNative(tempConfigDirectory);
 
 	// Check if the user prefers to use the app's directory
-	strcpy(m_szConfigFileName, m_szExePath); // config file
-	strcat(m_szConfigFileName, "mptrack.ini");
-	if(GetPrivateProfileInt("Paths", "UseAppDataDirectory", 1, m_szConfigFileName) == 0)
+	m_szConfigFileName = GetAppDirPath(); // config file
+	m_szConfigFileName += MPT_PATHSTRING("mptrack.ini");
+	if(GetPrivateProfileIntW(L"Paths", L"UseAppDataDirectory", 1, m_szConfigFileName.AsNative().c_str()) == 0)
 	{
 		bIsAppDir = true;
 	}
@@ -698,72 +753,77 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	if(!bIsAppDir)
 	{
 		// Store our app settings in %APPDATA% or "My Files"
-		strcat(m_szConfigDirectory, "\\OpenMPT\\");
+		m_szConfigDirectory += MPT_PATHSTRING("\\OpenMPT\\");
 
 		// Path doesn't exist yet, so it has to be created
-		if(PathIsDirectory(m_szConfigDirectory) == 0)
+		if(PathIsDirectoryW(m_szConfigDirectory.AsNative().c_str()) == 0)
 		{
-			CreateDirectory(m_szConfigDirectory, 0);
+			CreateDirectoryW(m_szConfigDirectory.AsNative().c_str(), 0);
 		}
 
 		#ifdef WIN32	// Legacy stuff
 		// Move the config files if they're still in the old place.
-		MoveConfigFile("mptrack.ini");
-		MoveConfigFile("plugin.cache");
+		MoveConfigFile(MPT_PATHSTRING("mptrack.ini"));
+		MoveConfigFile(MPT_PATHSTRING("plugin.cache"));
 		#endif	// WIN32 Legacy Stuff
 	} else
 	{
-		strcpy(m_szConfigDirectory, m_szExePath);
+		m_szConfigDirectory = GetAppDirPath();
 	}
 
 	// Create tunings dir
-	CString sTuningPath;
-	sTuningPath.Format(TEXT("%stunings\\"), m_szConfigDirectory);
-	TrackerSettings::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
+	mpt::PathString sTuningPath = m_szConfigDirectory + MPT_PATHSTRING("tunings\\");
+	TrackerDirectories::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
 
-	if(PathIsDirectory(TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING)) == 0)
+	if(PathIsDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str()) == 0)
 	{
-		CreateDirectory(TrackerSettings::Instance().GetDefaultDirectory(DIR_TUNING), 0);
+		CreateDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str(), 0);
 	}
 
 	if(!bIsAppDir)
 	{
 		// Import old tunings
-		TCHAR sOldTunings[_MAX_PATH];
-		strcpy(sOldTunings, m_szExePath);
-		strcat(sOldTunings, "tunings\\");
+		mpt::PathString sOldTunings;
+		sOldTunings = GetAppDirPath();
+		sOldTunings += MPT_PATHSTRING("tunings\\");
 
-		if(PathIsDirectory(sOldTunings) != 0)
+		if(PathIsDirectoryW(sOldTunings.AsNative().c_str()) != 0)
 		{
-			TCHAR sSearchPattern[_MAX_PATH];
-			strcpy(sSearchPattern, sOldTunings);
-			strcat(sSearchPattern, "*.*");
-			WIN32_FIND_DATA FindFileData;
+			mpt::PathString sSearchPattern;
+			sSearchPattern = sOldTunings;
+			sSearchPattern += MPT_PATHSTRING("*.*");
+			WIN32_FIND_DATAW FindFileData;
 			HANDLE hFind;
-			hFind = FindFirstFile(sSearchPattern, &FindFileData);
+			hFind = FindFirstFileW(sSearchPattern.AsNative().c_str(), &FindFileData);
 			if(hFind != INVALID_HANDLE_VALUE)
 			{
 				do
 				{
-					MoveConfigFile(FindFileData.cFileName, "tunings\\");
-				} while(FindNextFile(hFind, &FindFileData) != 0);
+					MoveConfigFile(mpt::PathString::FromNative(FindFileData.cFileName), MPT_PATHSTRING("tunings\\"));
+				} while(FindNextFileW(hFind, &FindFileData) != 0);
 			}
 			FindClose(hFind);
-			RemoveDirectory(sOldTunings);
+			RemoveDirectoryW(sOldTunings.AsNative().c_str());
 		}
 	}
 
 	// Set up default file locations
-	strcpy(m_szConfigFileName, m_szConfigDirectory); // config file
-	strcat(m_szConfigFileName, "mptrack.ini");
+	m_szConfigFileName = m_szConfigDirectory; // config file
+	m_szConfigFileName += MPT_PATHSTRING("mptrack.ini");
 
-	strcpy(m_szPluginCacheFileName, m_szConfigDirectory); // plugin cache
-	strcat(m_szPluginCacheFileName, "plugin.cache");
+	m_szPluginCacheFileName = m_szConfigDirectory + MPT_PATHSTRING("plugin.cache"); // plugin cache
 
-	TCHAR szTemplatePath[MAX_PATH];
-	_tcscpy(szTemplatePath, m_szConfigDirectory);
-	_tcscat(szTemplatePath, _T("TemplateModules\\"));
-	TrackerSettings::Instance().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
+	mpt::PathString szTemplatePath;
+	szTemplatePath = m_szConfigDirectory;
+	szTemplatePath += MPT_PATHSTRING("TemplateModules\\");
+	TrackerDirectories::Instance().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
+
+	//Force use of custom ini file rather than windowsDir\executableName.ini
+	if(m_pszProfileName)
+	{
+		free((void *)m_pszProfileName);
+	}
+	m_pszProfileName = _tcsdup(m_szConfigFileName.ToCString());
 
 	m_bPortableMode = bIsAppDir;
 }
@@ -772,27 +832,18 @@ BOOL CTrackApp::InitInstance()
 //----------------------------
 {
 
+	m_GuiThreadId = GetCurrentThreadId();
+
 	// Initialize OLE MFC support
 	AfxOleInit();
 	// Standard initialization
 
-	// Change the registry key under which our settings are stored.
-	//SetRegistryKey(_T("Olivier Lapicque"));
 	// Start loading
 	BeginWaitCursor();
 
-	MEMORYSTATUS gMemStatus;
-	MemsetZero(gMemStatus);
-	GlobalMemoryStatus(&gMemStatus);
-#if 0
-	Log("Physical: %lu\n", gMemStatus.dwTotalPhys);
-	Log("Page File: %lu\n", gMemStatus.dwTotalPageFile);
-	Log("Virtual: %lu\n", gMemStatus.dwTotalVirtual);
-#endif
-	// Allow allocations of at least 16MB
-	if (gMemStatus.dwTotalPhys < 16*1024*1024) gMemStatus.dwTotalPhys = 16*1024*1024;
-	TrackerSettings::Instance().m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
-	if(TrackerSettings::Instance().m_nSampleUndoMaxBuffer < (1 << 20)) TrackerSettings::Instance().m_nSampleUndoMaxBuffer = (1 << 20);
+	mpt::Windows::Version::Init();
+
+	Log("OpenMPT Start");
 
 	ASSERT(nullptr == m_pDocManager);
 	m_pDocManager = new CModDocManager();
@@ -803,19 +854,34 @@ BOOL CTrackApp::InitInstance()
 	CMPTCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
 
+#ifdef ENABLE_ASM
+	if(cmdInfo.m_bNoAssembly)
+		ProcSupport = 0;
+	else
+		InitProcSupport();
+#endif
+
+	m_pTrackerDirectories = new TrackerDirectories();
+
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
 
-	//Force use of custom ini file rather than windowsDir\executableName.ini
-	if (m_pszProfileName)
-	{
-		free((void *)m_pszProfileName);
-	}
-	m_pszProfileName = _tcsdup(m_szConfigFileName);
+	// Load UXTheme.DLL
+	m_pUXThemeDLL = new mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("uxtheme")));
+	m_pUXThemeDLL->Bind(m_pEnableThemeDialogTexture, "EnableThemeDialogTexture");
 
-	int mruListLength = GetPrivateProfileInt("Misc", "MRUListLength", 10, m_pszProfileName);
-	Limit(mruListLength, 0, 15);
-	LoadStdProfileSettings((UINT)mruListLength);  // Load standard INI file options (including MRU)
+	// Construct auto saver instance, class TrackerSettings expects it being available.
+	CMainFrame::m_pAutoSaver = new CAutoSaver();
+
+	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
+	
+	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
+
+	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
+
+	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
+
+	LoadStdProfileSettings(0);  // Load standard INI file options (without MRU)
 
 	// Register document templates
 	m_pModTemplate = new CModDocTemplate(
@@ -825,27 +891,11 @@ BOOL CTrackApp::InitInstance()
 		RUNTIME_CLASS(CModControlView));
 	AddDocTemplate(m_pModTemplate);
 
-	// Initialize Audio
-#ifdef ENABLE_ASM
-	InitProcSupport();
-	// rough heuristic to select less cpu consuming defaults for old CPUs
-	if(GetProcSupport() & PROCSUPPORT_MMX)
-	{
-		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_SPLINE;
-	}
-	if(GetProcSupport() & PROCSUPPORT_SSE)
-	{
-		TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_POLYPHASE;
-	}
-#else
-	// just use a sane default
-	TrackerSettings::Instance().m_ResamplerSettings.SrcMode = SRCMODE_POLYPHASE;
-#endif
 	// Load Midi Library
-	if (m_szConfigFileName[0]) ImportMidiConfig(m_szConfigFileName);
+	ImportMidiConfig(theApp.GetSettings(), true);
 
 	// create main MDI Frame window
-	CMainFrame* pMainFrame = new CMainFrame(/*cmdInfo.m_csExtension*/);
+	CMainFrame* pMainFrame = new CMainFrame();
 	if (!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
 	m_pMainWnd = pMainFrame;
 
@@ -864,6 +914,16 @@ BOOL CTrackApp::InitInstance()
 
 	// Load sound APIs
 	m_pSoundDevicesManager = new SoundDevicesManager();
+	if(TrackerSettings::Instance().m_SoundDeviceSettingsUseOldDefaults)
+	{
+		// get the old default device
+		TrackerSettings::Instance().m_SoundDeviceIdentifier = m_pSoundDevicesManager->FindDeviceInfo(TrackerSettings::Instance().m_SoundDeviceID_DEPRECATED).GetIdentifier();
+		// apply old global sound device settings to each found device
+		for(std::vector<SoundDeviceInfo>::const_iterator it = m_pSoundDevicesManager->begin(); it != m_pSoundDevicesManager->end(); ++it)
+		{
+			TrackerSettings::Instance().SetSoundDeviceSettings(it->id, TrackerSettings::Instance().GetSoundDeviceSettingsDefaults());
+		}
+	}
 
 	// Load DLS Banks
 	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();
@@ -891,10 +951,9 @@ BOOL CTrackApp::InitInstance()
 	m_dwTimeStarted = timeGetTime();
 	m_bInitialized = TRUE;
 
-	if (CUpdateCheck::GetUpdateCheckPeriod() != 0)
+	if(CUpdateCheck::GetUpdateCheckPeriod() != 0)
 	{
-		CUpdateCheck *updateCheck = CUpdateCheck::Create(true);
-		updateCheck->DoUpdateCheck();
+		CUpdateCheck::DoUpdateCheck(true);
 	}
 
 	// Open settings if the previous execution was with an earlier version.
@@ -906,9 +965,14 @@ BOOL CTrackApp::InitInstance()
 
 	EndWaitCursor();
 
-#ifdef ENABLE_TESTS
-	MptTest::DoTests();
-#endif
+	Test::DoTests();
+
+	if(TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup)
+	{
+		pMainFrame->InitPreview();
+		pMainFrame->PreparePreview(NOTE_NOTECUT);
+		pMainFrame->PlayPreview();
+	}
 
 	return TRUE;
 }
@@ -919,19 +983,7 @@ int CTrackApp::ExitInstance()
 {
 	delete m_pSoundDevicesManager;
 	m_pSoundDevicesManager = nullptr;
-	if (glpMidiLibrary)
-	{
-		if (m_szConfigFileName[0]) ExportMidiConfig(m_szConfigFileName);
-		for (UINT iMidi=0; iMidi<256; iMidi++)
-		{
-			if (glpMidiLibrary->MidiMap[iMidi])
-			{
-				delete[] glpMidiLibrary->MidiMap[iMidi];
-			}
-		}
-		delete glpMidiLibrary;
-		glpMidiLibrary = NULL;
-	}
+	ExportMidiConfig(theApp.GetSettings());
 	SaveDefaultDLSBanks();
 	for(size_t i = 0; i < gpDLSBanks.size(); i++)
 	{
@@ -941,6 +993,20 @@ int CTrackApp::ExitInstance()
 
 	// Uninitialize Plugins
 	UninitializeDXPlugins();
+
+	delete m_pPluginCache;
+	m_pPluginCache = nullptr;
+	delete m_pTrackerSettings;
+	m_pTrackerSettings = nullptr;
+	delete m_pSettings;
+	m_pSettings = nullptr;
+	delete m_pSettingsIniFile;
+	m_pSettingsIniFile = nullptr;
+	m_pEnableThemeDialogTexture = nullptr;
+	delete m_pUXThemeDLL;
+	m_pUXThemeDLL = nullptr;
+	delete m_pTrackerDirectories;
+	m_pTrackerDirectories = nullptr;
 
 	return CWinApp::ExitInstance();
 }
@@ -955,6 +1021,24 @@ void CTrackApp::OnFileNew()
 {
 	if (!m_bInitialized) return;
 
+	// Build from template
+	const mpt::PathString templateFile = TrackerSettings::Instance().defaultTemplateFile;
+	if(!templateFile.empty())
+	{
+		const mpt::PathString dirs[] = { GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\"), mpt::PathString() };
+		for(size_t i = 0; i < CountOf(dirs); i++)
+		{
+			if(Util::sdOs::IsPathFileAvailable(dirs[i] + templateFile, Util::sdOs::FileModeExists))
+			{
+				if(m_pModTemplate->OpenTemplateFile(dirs[i] + templateFile) != nullptr)
+				{
+					return;
+				}
+			}
+		}
+	}
+
+
 	// Default module type
 	MODTYPE nNewType = TrackerSettings::Instance().defaultModType;
 	bool bIsProject = false;
@@ -963,12 +1047,8 @@ void CTrackApp::OnFileNew()
 	CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
 	if(pModDoc != nullptr)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if(pSndFile != nullptr)
-		{
-			nNewType = pSndFile->GetBestSaveFormat();
-			bIsProject = pSndFile->m_SongFlags[SONG_ITPROJECT];
-		}
+		nNewType = pModDoc->GetrSoundFile().GetBestSaveFormat();
+		bIsProject = pModDoc->GetrSoundFile().m_SongFlags[SONG_ITPROJECT];
 	}
 
 	switch(nNewType)
@@ -1005,7 +1085,7 @@ void CTrackApp::OnFileNewMOD()
 // -! NEW_FEATURE#0023
 
 	SetDefaultDocType(MOD_TYPE_MOD);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 
@@ -1018,7 +1098,7 @@ void CTrackApp::OnFileNewS3M()
 // -! NEW_FEATURE#0023
 
 	SetDefaultDocType(MOD_TYPE_S3M);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 
@@ -1031,7 +1111,7 @@ void CTrackApp::OnFileNewXM()
 // -! NEW_FEATURE#0023
 
 	SetDefaultDocType(MOD_TYPE_XM);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 
@@ -1044,7 +1124,7 @@ void CTrackApp::OnFileNewIT()
 // -! NEW_FEATURE#0023
 
 	SetDefaultDocType(MOD_TYPE_IT);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 void CTrackApp::OnFileNewMPT()
@@ -1052,7 +1132,7 @@ void CTrackApp::OnFileNewMPT()
 {
 	SetAsProject(FALSE);
 	SetDefaultDocType(MOD_TYPE_MPT);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 
 
@@ -1064,14 +1144,16 @@ void CTrackApp::OnFileNewITProject()
 {
 	SetAsProject(TRUE);
 	SetDefaultDocType(MOD_TYPE_IT);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
 // -! NEW_FEATURE#0023
 
 
-void CTrackApp::OnFileOpen()
-//--------------------------
+void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
+//--------------------------------------------------------------------
 {
+	files.clear();
+
 	std::vector<const char *> modExtensions = CSoundFile::GetSupportedExtensions(true);
 	std::string exts;
 	for(size_t i = 0; i < modExtensions.size(); i++)
@@ -1080,8 +1162,9 @@ void CTrackApp::OnFileOpen()
 	}
 
 	static int nFilterIndex = 0;
-	FileDlgResult files = ShowOpenSaveFileDialog(true, "", "",
-		"All Modules|" + exts +
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter("All Modules|" + exts +
 		"|"
 		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz"
 #ifndef NO_MO3
@@ -1104,382 +1187,25 @@ void CTrackApp::OnFileOpen()
 		"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b|"
 		"Wave Files (*.wav)|*.wav|"
 		"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
-		"All Files (*.*)|*.*||",
-		TrackerSettings::Instance().GetWorkingDirectory(DIR_MODS),
-		true,
-		&nFilterIndex);
-	if(files.abort) return;
+		"All Files (*.*)|*.*||")
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS))
+		.FilterIndex(&nFilterIndex);
+	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_MODS);
 
-	for(size_t counter = 0; counter < files.filenames.size(); counter++)
+	files = dlg.GetFilenames();
+}
+
+void CTrackApp::OnFileOpen()
+//--------------------------
+{
+	FileDialog::PathList files;
+	OpenModulesDialog(files);
+	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-		OpenDocumentFile(files.filenames[counter].c_str());
+		OpenDocumentFile(files[counter]);
 	}
-}
-
-
-void CTrackApp::RegisterExtensions()
-//----------------------------------
-{
-	HKEY key;
-	CHAR s[512] = "";
-	CHAR exename[512] = "";
-
-	GetModuleFileName(AfxGetInstanceHandle(), s, sizeof(s));
-	GetShortPathName(s, exename, sizeof(exename));
-	if (RegCreateKey(HKEY_CLASSES_ROOT,
-					"OpenMPTFile\\shell\\Edit\\command",
-					&key) == ERROR_SUCCESS)
-	{
-		strcpy(s, exename);
-		strcat(s, " \"%1\"");
-		RegSetValueEx(key, NULL, NULL, REG_SZ, (LPBYTE)s, strlen(s)+1);
-		RegCloseKey(key);
-	}
-	if (RegCreateKey(HKEY_CLASSES_ROOT,
-					"OpenMPTFile\\shell\\Edit\\ddeexec",
-					&key) == ERROR_SUCCESS)
-	{
-		strcpy(s, "[Edit(\"%1\")]");
-		RegSetValueEx(key, NULL, NULL, REG_SZ, (LPBYTE)s, strlen(s)+1);
-		RegCloseKey(key);
-	}
-}
-
-
-void CTrackApp::OnHelpSearch()
-//----------------------------
-{
-	CHAR s[80] = "";
-	WinHelp((DWORD)&s, HELP_KEY);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// CAboutDlg dialog used for App About
-
-//===============================
-class CPaletteBitmap: public CWnd
-//===============================
-{
-protected:
-	LPBITMAPINFO m_lpBmp, m_lpCopy;
-	HPALETTE m_hPal;
-	LPBYTE m_lpRotoZoom;
-	DWORD m_dwStartTime, m_dwFrameTime;
-	UINT m_nRotoWidth, m_nRotoHeight;
-	BOOL m_bFirst;
-
-public:
-	CPaletteBitmap() { m_hPal = NULL; m_lpBmp = NULL; m_lpRotoZoom = NULL; m_lpCopy = NULL; m_bFirst = TRUE; }
-	~CPaletteBitmap();
-	void LoadBitmap(LPCSTR lpszResource);
-	BOOL Animate();
-	UINT GetWidth() const { return (m_lpBmp) ? m_lpBmp->bmiHeader.biWidth : 0; }
-	UINT GetHeight() const { return (m_lpBmp) ? m_lpBmp->bmiHeader.biHeight : 0; }
-
-protected:
-	afx_msg void OnPaint();
-	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
-	afx_msg void OnLButtonDblClk(UINT, CPoint) { m_dwStartTime = timeGetTime(); }
-	DECLARE_MESSAGE_MAP()
-};
-
-static CPaletteBitmap *gpRotoZoom = NULL;
-
-BEGIN_MESSAGE_MAP(CPaletteBitmap, CWnd)
-	ON_WM_PAINT()
-	ON_WM_ERASEBKGND()
-	ON_WM_LBUTTONDBLCLK()
-END_MESSAGE_MAP()
-
-
-void CPaletteBitmap::LoadBitmap(LPCSTR lpszResource)
-//--------------------------------------------------
-{
-	m_hPal = NULL;
-	m_lpBmp = NULL;
-	// True Color Mode ?
-	HDC hdc = ::GetDC(AfxGetApp()->m_pMainWnd->m_hWnd);
-	int nbits = GetDeviceCaps(hdc, BITSPIXEL);
-	::ReleaseDC(AfxGetApp()->m_pMainWnd->m_hWnd, hdc);
-	// Creating palette
-	HINSTANCE hInstance = AfxGetInstanceHandle();
-	HRSRC hrsrc = FindResource(hInstance, lpszResource, RT_BITMAP);
-	HGLOBAL hglb = LoadResource(hInstance, hrsrc);
-	LPBITMAPINFO p = (LPBITMAPINFO)LockResource(hglb);
-	m_lpBmp = p;
-	m_nRotoWidth = m_nRotoHeight = 0;
-	if (p)
-	{
-		char pal_buf[sizeof(LOGPALETTE) + 512*sizeof(PALETTEENTRY)];
-		LPLOGPALETTE pal = (LPLOGPALETTE)&pal_buf[0];
-		for (int i=0; i<256; i++)
-		{
-			pal->palPalEntry[i].peRed = p->bmiColors[i].rgbRed;
-			pal->palPalEntry[i].peGreen = p->bmiColors[i].rgbGreen;
-			pal->palPalEntry[i].peBlue = p->bmiColors[i].rgbBlue;
-			pal->palPalEntry[i].peFlags = 0;
-		}
-		pal->palVersion = 0x300;
-		pal->palNumEntries = 256;
-		if (nbits <= 8) m_hPal = CreatePalette(pal);
-		if ((p->bmiHeader.biWidth == 256) && (p->bmiHeader.biHeight == 128))
-		{
-			UINT n;
-			CRect rect;
-			GetClientRect(&rect);
-			m_nRotoWidth = (rect.Width() + 3) & ~3;
-			m_nRotoHeight = rect.Height();
-			if ((n = m_nRotoWidth - rect.Width()) > 0)
-			{
-				GetWindowRect(&rect);
-				SetWindowPos(NULL, 0,0, rect.Width()+n, rect.Height(), SWP_NOMOVE | SWP_NOZORDER);
-			}
-			m_lpRotoZoom = new BYTE[m_nRotoWidth*m_nRotoHeight];
-			if (m_lpRotoZoom)
-			{
-				memset(m_lpRotoZoom, 0, m_nRotoWidth*m_nRotoHeight);
-				m_lpCopy = (LPBITMAPINFO)(new char [sizeof(BITMAPINFO) + 256*sizeof(RGBQUAD)]);
-				if (m_lpCopy)
-				{
-					memcpy(m_lpCopy, p, sizeof(BITMAPINFO) + 256*sizeof(RGBQUAD));
-					m_lpCopy->bmiHeader.biWidth = m_nRotoWidth;
-					m_lpCopy->bmiHeader.biHeight = m_nRotoHeight;
-					m_lpCopy->bmiHeader.biSizeImage = m_nRotoWidth * m_nRotoHeight;
-				}
-				gpRotoZoom = this;
-			}
-
-		}
-	}
-	m_dwStartTime = timeGetTime();
-	m_dwFrameTime = 0;
-}
-
-
-CPaletteBitmap::~CPaletteBitmap()
-//-------------------------------
-{
-	if (gpRotoZoom == this) gpRotoZoom = NULL;
-	if (m_hPal)
-	{
-		DeleteObject(m_hPal);
-		m_hPal = NULL;
-	}
-	if (m_lpRotoZoom)
-	{
-		delete[] m_lpRotoZoom;
-		m_lpRotoZoom = NULL;
-	}
-	if (m_lpCopy)
-	{
-		delete[] m_lpCopy;
-		m_lpCopy = NULL;
-	}
-}
-
-
-void CPaletteBitmap::OnPaint()
-//----------------------------
-{
-	CPaintDC dc(this);
-	HDC hdc = dc.m_hDC;
-	HPALETTE oldpal = NULL;
-	LPBITMAPINFO lpdib;
-	if (m_hPal)
-	{
-		oldpal = SelectPalette(hdc, m_hPal, FALSE);
-		RealizePalette(hdc);
-	}
-	if ((lpdib = m_lpBmp) != NULL)
-	{
-		if ((m_lpRotoZoom) && (m_lpCopy))
-		{
-			lpdib = m_lpCopy;
-			SetDIBitsToDevice(hdc,
-						0,
-						0,
-						m_nRotoWidth,
-						m_nRotoHeight,
-						0,
-						0,
-						0,
-						lpdib->bmiHeader.biHeight,
-						m_lpRotoZoom,
-						lpdib,
-						DIB_RGB_COLORS);
-		} else
-		{
-			CRect rect;
-			GetClientRect(&rect);
-			StretchDIBits(hdc,
-						0,
-						0,
-						rect.right,
-						rect.bottom,
-						0,
-						0,
-						lpdib->bmiHeader.biWidth,
-						lpdib->bmiHeader.biHeight,
-						&lpdib->bmiColors[256],
-						lpdib,
-						DIB_RGB_COLORS,
-						SRCCOPY);
-		}
-	}
-	if (oldpal) SelectPalette(hdc, oldpal, FALSE);
-}
-
-////////////////////////////////////////////////////////////////////
-// RotoZoomer
-
-const int __SinusTable[256] =
-{
-	   0,   6,  12,  18,  25,  31,  37,  43,  49,  56,  62,  68,  74,  80,  86,  92,
-	  97, 103, 109, 115, 120, 126, 131, 136, 142, 147, 152, 157, 162, 167, 171, 176,
-	 181, 185, 189, 193, 197, 201, 205, 209, 212, 216, 219, 222, 225, 228, 231, 234,
-	 236, 238, 241, 243, 244, 246, 248, 249, 251, 252, 253, 254, 254, 255, 255, 255,
-	 256, 255, 255, 255, 254, 254, 253, 252, 251, 249, 248, 246, 244, 243, 241, 238,
-	 236, 234, 231, 228, 225, 222, 219, 216, 212, 209, 205, 201, 197, 193, 189, 185,
-	 181, 176, 171, 167, 162, 157, 152, 147, 142, 136, 131, 126, 120, 115, 109, 103,
-	  97,  92,  86,  80,  74,  68,  62,  56,  49,  43,  37,  31,  25,  18,  12,   6,
-	   0,  -6, -12, -18, -25, -31, -37, -43, -49, -56, -62, -68, -74, -80, -86, -92,
-	 -97,-103,-109,-115,-120,-126,-131,-136,-142,-147,-152,-157,-162,-167,-171,-176,
-	-181,-185,-189,-193,-197,-201,-205,-209,-212,-216,-219,-222,-225,-228,-231,-234,
-	-236,-238,-241,-243,-244,-246,-248,-249,-251,-252,-253,-254,-254,-255,-255,-255,
-	-256,-255,-255,-255,-254,-254,-253,-252,-251,-249,-248,-246,-244,-243,-241,-238,
-	-236,-234,-231,-228,-225,-222,-219,-216,-212,-209,-205,-201,-197,-193,-189,-185,
-	-181,-176,-171,-167,-162,-157,-152,-147,-142,-136,-131,-126,-120,-115,-109,-103,
-	 -97, -92, -86, -80, -74, -68, -62, -56, -49, -43, -37, -31, -25, -18, -12,  -6
-};
-
-#define Sinus(x)	__SinusTable[(x)&0xFF]
-#define Cosinus(x)	__SinusTable[((x)+0x40)&0xFF]
-
-#define PI	3.14159265358979323f
-BOOL CPaletteBitmap::Animate()
-//----------------------------
-{
-	//included random hacking by rewbs to get funny animation.
-	LPBYTE dest, src;
-	DWORD t = (timeGetTime() - m_dwStartTime) / 10;
-	LONG Dist, Phi, srcx, srcy, spdx, spdy, sizex, sizey;
-	bool dir;
-
-	if ((!m_lpRotoZoom) || (!m_lpBmp) || (!m_nRotoWidth) || (!m_nRotoHeight)) return FALSE;
-	Sleep(2); 	//give away some CPU
-
-	if (t > 256)
-		m_bFirst = FALSE;
-
-	dir = ((t/256) % 2 != 0); //change dir every 256 t
-	t = t%256;
-	if (!dir) t = (256-t);
-
-	sizex = m_nRotoWidth;
-	sizey = m_nRotoHeight;
-	m_dwFrameTime = t;
-	src = (LPBYTE)&m_lpBmp->bmiColors[256];
-	dest = m_lpRotoZoom;
-	Dist = t;
-	Phi = t;
-	spdx = 70000 + Sinus(Phi) * 10000 / 256;
-	spdy = 0;
-	spdx =(Cosinus(Phi)+Sinus(Phi<<2))*(Dist<<9)/sizex;
-	spdy =(Sinus(Phi)+Cosinus(Phi>>2))*(Dist<<9)/sizey;
-	srcx = 0x800000 - ((spdx * sizex) >> 1) + (spdy * sizey);
-	srcy = 0x800000 - ((spdy * sizex) >> 1) + (spdx * sizey);
-	for (UINT y=sizey; y; y--)
-	{
-		UINT oldx = srcx, oldy = srcy;
-		for (UINT x=sizex; x; x--)
-		{
-			srcx += spdx;
-			srcy += spdy;
-			*dest++ = src[((srcy & 0x7F0000) >> 8) | ((srcx & 0xFF0000) >> 16)];
-		}
-		srcx=oldx-spdy;
-		srcy=oldy+spdx;
-	}
-	InvalidateRect(NULL, FALSE);
-	UpdateWindow();
-	return TRUE;
-}
-
-
-//=============================
-class CAboutDlg: public CDialog
-//=============================
-{
-protected:
-	CPaletteBitmap m_bmp;
-	CCreditStatic m_static;
-
-public:
-	CAboutDlg() {}
-	~CAboutDlg();
-
-// Implementation
-protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual void OnCancel();
-	virtual void DoDataExchange(CDataExchange* pDX);
-};
-
-static CAboutDlg *gpAboutDlg = NULL;
-
-
-CAboutDlg::~CAboutDlg()
-//---------------------
-{
-	gpAboutDlg = NULL;
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-//------------------------------------------------------
-{
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CModTypeDlg)
-	//}}AFX_DATA_MAP
-}
-
-void CAboutDlg::OnOK()
-//--------------------
-{
-	gpRotoZoom = NULL;
-	gpAboutDlg = NULL;
-	DestroyWindow();
-	delete this;
-}
-
-
-void CAboutDlg::OnCancel()
-//------------------------
-{
-	OnOK();
-}
-
-
-BOOL CAboutDlg::OnInitDialog()
-//----------------------------
-{
-	CDialog::OnInitDialog();
-	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
-	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
-	SetDlgItemText(IDC_EDIT2, CString("Build Date: ") + MptVersion::GetBuildDateString().c_str());
-	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::GetVersionStringExtended().c_str());
-	m_static.SubclassDlgItem(IDC_CREDITS,this);
-	m_static.SetCredits((mpt::String::Replace(MptVersion::GetFullCreditsString(), "\n", "|") + "|" + mpt::String::Replace(MptVersion::GetContactString(), "\n", "|" ) + "||||||").c_str());
-	m_static.SetSpeed(DISPLAY_SLOW);
-	m_static.SetColor(BACKGROUND_COLOR, RGB(138, 165, 219)); // Background Colour
-	m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent
-	m_static.SetGradient(GRADIENT_LEFT_DARK);  // Background goes from blue to black from left to right
-	// m_static.SetBkImage(IDB_BITMAP1); // Background image
-	m_static.StartScrolling();
-	return TRUE;	// return TRUE unless you set the focus to a control
-					// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 
@@ -1487,9 +1213,9 @@ BOOL CAboutDlg::OnInitDialog()
 void CTrackApp::OnAppAbout()
 //--------------------------
 {
-	if (gpAboutDlg) return;
-	gpAboutDlg = new CAboutDlg();
-	gpAboutDlg->Create(IDD_ABOUTBOX, m_pMainWnd);
+	if (CAboutDlg::instance) return;
+	CAboutDlg::instance = new CAboutDlg();
+	CAboutDlg::instance->Create(IDD_ABOUTBOX, m_pMainWnd);
 }
 
 
@@ -1501,57 +1227,84 @@ class CSplashScreen: public CDialog
 //=================================
 {
 protected:
-	CPaletteBitmap m_Bmp;
+	CBitmap m_Bitmap;
+	PNG::Bitmap *bitmap;
 
 public:
-	CSplashScreen() {}
+	CSplashScreen(CWnd *parent);
 	~CSplashScreen();
-	BOOL Initialize(CWnd *);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	virtual void OnCancel() { OnOK(); }
+	virtual void OnPaint();
+	virtual BOOL OnEraseBkgnd(CDC *) { return TRUE; }
+
+	DECLARE_MESSAGE_MAP()
 };
 
+BEGIN_MESSAGE_MAP(CSplashScreen, CDialog)
+	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
+END_MESSAGE_MAP()
+
 static CSplashScreen *gpSplashScreen = NULL;
+
+CSplashScreen::CSplashScreen(CWnd *parent)
+//----------------------------------------
+{
+	bitmap = PNG::ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
+	Create(IDD_SPLASHSCREEN, parent);
+}
+
 
 CSplashScreen::~CSplashScreen()
 //-----------------------------
 {
-	gpSplashScreen = NULL;
+	gpSplashScreen = nullptr;
+	delete bitmap;
 }
 
 
-BOOL CSplashScreen::Initialize(CWnd *parent)
-//------------------------------------------
+void CSplashScreen::OnPaint()
+//---------------------------
 {
-	Create(IDD_SPLASHSCREEN, parent);
-	return TRUE;
+	CPaintDC dc(this);
+	
+	CDC hdcMem;
+	hdcMem.CreateCompatibleDC(&dc);
+	CBitmap *oldBitmap = hdcMem.SelectObject(&m_Bitmap);
+	dc.BitBlt(0, 0, bitmap->width, bitmap->height, &hdcMem, 0, 0, SRCCOPY);
+	hdcMem.SelectObject(oldBitmap);
+	hdcMem.DeleteDC();
+
+	CDialog::OnPaint();
 }
 
 
 BOOL CSplashScreen::OnInitDialog()
 //--------------------------------
 {
+	bitmap->ToDIB(m_Bitmap, GetDC());
+
 	CRect rect;
 	int cx, cy, newcx, newcy;
 
 	CDialog::OnInitDialog();
-	m_Bmp.SubclassDlgItem(IDC_SPLASH, this);
-	m_Bmp.LoadBitmap(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
+
 	GetWindowRect(&rect);
 	cx = rect.Width();
 	cy = rect.Height();
-	newcx = m_Bmp.GetWidth();
-	newcy = m_Bmp.GetHeight();
-	if ((newcx) && (newcy))
+	newcx = bitmap->width;
+	newcy = bitmap->height;
+	if(newcx && newcy)
 	{
 		LONG ExStyle = GetWindowLong(m_hWnd, GWL_EXSTYLE);
 		ExStyle |= WS_EX_TOPMOST;
 		SetWindowLong(m_hWnd, GWL_EXSTYLE, ExStyle);
 		rect.left -= (newcx - cx) / 2;
 		rect.top -= (newcy - cy) / 2;
-		SetWindowPos(&wndTop, rect.left, rect.top, newcx, newcy, 0);
-		m_Bmp.SetWindowPos(NULL, 0,0, newcx, newcy, SWP_NOZORDER);
+		SetWindowPos(&wndTop, rect.left, rect.top, newcx, newcy, SWP_NOCOPYBITS);
+
 	}
 	return TRUE;
 }
@@ -1575,14 +1328,10 @@ VOID CTrackApp::StartSplashScreen()
 {
 	if (!gpSplashScreen)
 	{
-		gpSplashScreen = new CSplashScreen();
-		if (gpSplashScreen)
-		{
-			gpSplashScreen->Initialize(m_pMainWnd);
-			gpSplashScreen->ShowWindow(SW_SHOW);
-			gpSplashScreen->UpdateWindow();
-			gpSplashScreen->BeginWaitCursor();
-		}
+		gpSplashScreen = new CSplashScreen(m_pMainWnd);
+		gpSplashScreen->ShowWindow(SW_SHOW);
+		gpSplashScreen->UpdateWindow();
+		gpSplashScreen->BeginWaitCursor();
 	}
 }
 
@@ -1594,11 +1343,7 @@ VOID CTrackApp::StopSplashScreen()
 	{
 		gpSplashScreen->EndWaitCursor();
 		gpSplashScreen->DestroyWindow();
-		if (gpSplashScreen)
-		{
-			delete gpSplashScreen;
-			gpSplashScreen = NULL;
-		}
+		delete gpSplashScreen;
 	}
 }
 
@@ -1610,6 +1355,12 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 //---------------------------------
 {
 	BOOL b = CWinApp::OnIdle(lCount);
+
+	if(CMainFrame::GetMainFrame())
+	{
+		CMainFrame::GetMainFrame()->IdleHandlerSounddevice();
+	}
+
 	if ((gpSplashScreen) && (m_bInitialized))
 	{
 		if (timeGetTime() - m_dwTimeStarted > 1000)		//Set splash screen duration here -rewbs
@@ -1617,9 +1368,9 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 			StopSplashScreen();
 		}
 	}
-	if (gpRotoZoom)
+	if (CRippleBitmap::instance)
 	{
-		if (gpRotoZoom->Animate()) return TRUE;
+		if (CRippleBitmap::instance->Animate()) return TRUE;
 	}
 
 	// Call plugins idle routine for open editor
@@ -1699,11 +1450,11 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOO
 //-------------------------------------------------------------------------------------------------------
 {
 	RECT rect;
-	HGDIOBJ oldpen = ::SelectObject(hdc, (bPushed) ? CMainFrame::penDarkGray : CMainFrame::penLightGray);
+	HGDIOBJ oldpen = SelectPen(hdc, (bPushed) ? CMainFrame::penDarkGray : CMainFrame::penLightGray);
 	::MoveToEx(hdc, lpRect->left, lpRect->bottom-1, NULL);
 	::LineTo(hdc, lpRect->left, lpRect->top);
 	::LineTo(hdc, lpRect->right-1, lpRect->top);
-	::SelectObject(hdc, (bPushed) ? CMainFrame::penLightGray : CMainFrame::penDarkGray);
+	SelectPen(hdc, (bPushed) ? CMainFrame::penLightGray : CMainFrame::penDarkGray);
 	::LineTo(hdc, lpRect->right-1, lpRect->bottom-1);
 	::LineTo(hdc, lpRect->left, lpRect->bottom-1);
 	rect.left = lpRect->left + 1;
@@ -1711,7 +1462,7 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOO
 	rect.right = lpRect->right - 1;
 	rect.bottom = lpRect->bottom - 1;
 	::FillRect(hdc, &rect, CMainFrame::brushGray);
-	::SelectObject(hdc, oldpen);
+	SelectPen(hdc, oldpen);
 	if ((lpszText) && (lpszText[0]))
 	{
 		if (bPushed)
@@ -1912,61 +1663,79 @@ void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, LPMO
 BOOL CTrackApp::InitializeDXPlugins()
 //-----------------------------------
 {
-	TCHAR s[_MAX_PATH], tmp[32];
-
 	m_pPluginManager = new CVstPluginManager;
 	if(!m_pPluginManager) return FALSE;
-	const size_t numPlugins = GetPrivateProfileInt("VST Plugins", "NumPlugins", 0, m_szConfigFileName);
+	const size_t numPlugins = theApp.GetSettings().Read<int32>("VST Plugins", "NumPlugins", 0);
 
 	#ifndef NO_VST
-		char buffer[64];
-		GetPrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, buffer, CountOf(buffer), m_szConfigFileName);
+		std::string buffer = theApp.GetSettings().Read<std::string>("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString);
 
 		// Version <= 1.19.03.00 had buggy handling of custom host information. If last open was from
 		// such OpenMPT version, clear the related settings to get a clean start.
-		if(TrackerSettings::Instance().gcsPreviousVersion != 0 && TrackerSettings::Instance().gcsPreviousVersion < MAKE_VERSION_NUMERIC(1, 19, 03, 01) && !strcmp(buffer, "OpenMPT"))
+		if(TrackerSettings::Instance().gcsPreviousVersion != 0 && TrackerSettings::Instance().gcsPreviousVersion < MAKE_VERSION_NUMERIC(1, 19, 03, 01) && buffer == "OpenMPT")
 		{
-			// Remove keys by calling write with nullptr.
-			WritePrivateProfileString(_T("VST Plugins"), _T("HostProductString"), nullptr, m_szConfigFileName);
-			WritePrivateProfileString(_T("VST Plugins"), _T("HostVendorString"), nullptr, m_szConfigFileName);
-			WritePrivateProfileString(_T("VST Plugins"), _T("HostVendorVersion"), nullptr, m_szConfigFileName);
+			theApp.GetSettings().Remove("VST Plugins", "HostProductString");
+			theApp.GetSettings().Remove("VST Plugins", "HostVendorString");
+			theApp.GetSettings().Remove("VST Plugins", "HostVendorVersion");
 		}
 
-		GetPrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, buffer, CountOf(buffer), m_szConfigFileName);
-		strcpy(CVstPluginManager::s_szHostProductString, buffer);
-		GetPrivateProfileString("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString, buffer, CountOf(buffer), m_szConfigFileName);
-		strcpy(CVstPluginManager::s_szHostVendorString, buffer);
-		CVstPluginManager::s_nHostVendorVersion = GetPrivateProfileInt("VST Plugins", "HostVendorVersion", CVstPluginManager::s_nHostVendorVersion, m_szConfigFileName);
+		mpt::String::Copy(CVstPluginManager::s_szHostProductString, theApp.GetSettings().Read<std::string>("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString));
+		mpt::String::Copy(CVstPluginManager::s_szHostVendorString, theApp.GetSettings().Read<std::string>("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString));
+		CVstPluginManager::s_nHostVendorVersion = theApp.GetSettings().Read<int32>("VST Plugins", "HostVendorVersion", CVstPluginManager::s_nHostVendorVersion);
 	#endif
 
 
-	CString nonFoundPlugs;
-	const CString failedPlugin = CMainFrame::GetPrivateProfileCString("VST Plugins", "FailedPlugin", "", m_szConfigFileName);
+	std::wstring nonFoundPlugs;
+	const mpt::PathString failedPlugin = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
 
+	CDialog pluginScanDlg;
+	DWORD scanStart = GetTickCount();
+	bool dialogShown = false;
+
+	m_pPluginManager->reserve(numPlugins);
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
-		s[0] = 0;
-		wsprintf(tmp, "Plugin%d", plug);
-		GetPrivateProfileString("VST Plugins", tmp, "", s, sizeof(s), m_szConfigFileName);
-		if (s[0])
+		char tmp[32];
+		sprintf(tmp, "Plugin%d", plug);
+		mpt::PathString plugPath = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", tmp, MPT_PATHSTRING(""));
+		if(!plugPath.empty())
 		{
-			RelativePathToAbsolute(s);
+			plugPath = RelativePathToAbsolute(plugPath);
 
-			if(!failedPlugin.Compare(s))
+			if(plugPath == failedPlugin)
 			{
-				const CString text = "The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin + "\n\nDo you still want to load it?";
+				const std::wstring text = L"The following plugin has previously crashed OpenMPT during initialisation:\n\n" + failedPlugin.ToWide() + L"\n\nDo you still want to load it?";
 				if(Reporting::Confirm(text, false, true) == cnfNo)
 				{
 					continue;
 				}
 			}
-			m_pPluginManager->AddPlugin(s, true, true, &nonFoundPlugs);
+			m_pPluginManager->AddPlugin(plugPath, true, true, &nonFoundPlugs);
+		}
+
+		if(!dialogShown && GetTickCount() >= scanStart + 2000)
+		{
+			// If this is taking too long, show the user what he's waiting for.
+			dialogShown = true;
+			pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
+			pluginScanDlg.ShowWindow(SW_SHOW);
+			pluginScanDlg.CenterWindow(gpSplashScreen);
+		} else if(dialogShown)
+		{
+			CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
+			std::wstring scanStr = mpt::String::PrintW(L"Scanning Plugin %1 / %2...\n%3", plug, numPlugins, plugPath);
+			SetWindowTextW(text->m_hWnd, scanStr.c_str());
+			MSG msg;
+			while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			{
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+			}
 		}
 	}
-	if(nonFoundPlugs.GetLength() > 0)
+	if(!nonFoundPlugs.empty())
 	{
-		nonFoundPlugs.Insert(0, "Problems were encountered with plugins:\n");
-		Reporting::Notification(nonFoundPlugs);
+		Reporting::Notification(L"Problems were encountered with plugins:\n" + nonFoundPlugs, L"OpenMPT", CWnd::GetDesktopWindow());
 	}
 	return FALSE;
 }
@@ -1978,29 +1747,24 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	if(!m_pPluginManager) return FALSE;
 
 #ifndef NO_VST
-	TCHAR s[_MAX_PATH], tmp[32];
-	VSTPluginLib *pPlug;
 
-	pPlug = m_pPluginManager->GetFirstPlugin();
 	size_t plug = 0;
-	while(pPlug)
+	for(CVstPluginManager::const_iterator pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
 	{
-		if(pPlug->dwPluginId1 != kDmoMagic)
+		if((**pPlug).pluginId1 != kDmoMagic)
 		{
-			s[0] = 0;
-			wsprintf(tmp, "Plugin%d", plug);
-			strcpy(s, pPlug->szDllPath);
+			char tmp[32];
+			sprintf(tmp, "Plugin%d", plug);
+			mpt::PathString plugPath = (**pPlug).dllPath;
 			if(theApp.IsPortableMode())
 			{
-				AbsolutePathToRelative(s);
+				plugPath = AbsolutePathToRelative(plugPath);
 			}
-			WritePrivateProfileString("VST Plugins", tmp, s, m_szConfigFileName);
+			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", tmp, plugPath);
 			plug++;
 		}
-		pPlug = pPlug->pNext;
 	}
-	wsprintf(s, "%d", plug);
-	WritePrivateProfileString("VST Plugins", "NumPlugins", s, m_szConfigFileName);
+	theApp.GetSettings().Write<int32>("VST Plugins", "NumPlugins", plug);
 #endif // NO_VST
 
 	delete m_pPluginManager;
@@ -2012,15 +1776,34 @@ BOOL CTrackApp::UninitializeDXPlugins()
 ///////////////////////////////////////////////////////////////////////////////////
 // Internet-related functions
 
-bool CTrackApp::OpenURL(const LPCSTR lpszURL)
-//-------------------------------------------
+bool CTrackApp::OpenURL(const char *url)
+//--------------------------------------
 {
-	if(lpszURL != nullptr && lpszURL[0] != '\0' && theApp.m_pMainWnd)
+	if(!url) return false;
+	return OpenURL(mpt::PathString::FromUTF8(url));
+}
+
+bool CTrackApp::OpenURL(const std::string &url)
+//---------------------------------------------
+{
+	return OpenURL(mpt::PathString::FromUTF8(url));
+}
+
+bool CTrackApp::OpenURL(const CString &url)
+//-----------------------------------------
+{
+	return OpenURL(mpt::PathString::FromCString(url));
+}
+
+bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
+//-----------------------------------------------------
+{
+	if(!lpszURL.empty() && theApp.m_pMainWnd)
 	{
-		if(reinterpret_cast<int>(ShellExecute(
+		if(reinterpret_cast<int>(ShellExecuteW(
 			theApp.m_pMainWnd->m_hWnd,
-			"open",
-			lpszURL,
+			L"open",
+			lpszURL.AsNative().c_str(),
 			NULL,
 			NULL,
 			SW_SHOW)) >= 32)
@@ -2032,169 +1815,4 @@ bool CTrackApp::OpenURL(const LPCSTR lpszURL)
 }
 
 
-/* Open or save one or multiple files using the system's file dialog
- * Parameter list:
- * - load: true: load dialog. false: save dialog.
- * - defaultExtension: dialog should use this as the default extension for the file(s)
- * - defaultFilename: dialog should use this as the default filename
- * - extFilter: list of possible extensions. format: "description|extensions|...|description|extensions||"
- * - workingDirectory: default directory of the dialog
- * - allowMultiSelect: allow the user to select multiple files? (will be ignored if load == false)
- * - filterIndex: pointer to a variable holding the index of the last extension filter used.
- */
-FileDlgResult CTrackApp::ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory, const bool allowMultiSelect, int *filterIndex)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-{
-	FileDlgResult result;
-	result.workingDirectory = workingDirectory;
-	result.first_file = "";
-	result.filenames.clear();
-	result.extension = defaultExtension;
-	result.abort = true;
-
-	// we can't save multiple files.
-	const bool multiSelect = allowMultiSelect && load;
-
-	// First, set up the dialog...
-	CFileDialog dlg(load ? TRUE : FALSE,
-		defaultExtension.empty() ? NULL : defaultExtension.c_str(),
-		defaultFilename.empty() ? NULL : defaultFilename.c_str(),
-		load ? (OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0))
-		     : (OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN),
-		extFilter.empty() ? NULL : extFilter.c_str(),
-		theApp.m_pMainWnd);
-	if(!workingDirectory.empty())
-		dlg.m_ofn.lpstrInitialDir = workingDirectory.c_str();
-	if(filterIndex != nullptr)
-		dlg.m_ofn.nFilterIndex = (DWORD)(*filterIndex);
-
-	std::vector<TCHAR> filenameBuffer;
-	if(multiSelect)
-	{
-		const size_t bufferSize = 2048; // Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
-		filenameBuffer.resize(bufferSize, 0);
-		dlg.GetOFN().lpstrFile = &filenameBuffer[0];
-		dlg.GetOFN().nMaxFile = bufferSize;
-	}
-
-	// Do it!
-	CMainFrame::GetInputHandler()->Bypass(true);
-	bool doCancel = dlg.DoModal() != IDOK;
-	CMainFrame::GetInputHandler()->Bypass(false);
-	if(doCancel)
-	{
-		return result;
-	}
-
-	// Retrieve variables
-	if(filterIndex != nullptr)
-		*filterIndex = dlg.m_ofn.nFilterIndex;
-
-	if(multiSelect)
-	{
-		// multiple files might have been selected
-		POSITION pos = dlg.GetStartPosition();
-		while(pos != NULL)
-		{
-			std::string filename = dlg.GetNextPathName(pos);
-			result.filenames.push_back(filename);
-		}
-
-	} else
-	{
-		// only one file
-		std::string filename = dlg.GetPathName();
-		result.filenames.push_back(filename);
-	}
-
-	if(!result.filenames.empty())
-	{
-		// some file has been selected.
-		result.workingDirectory = result.filenames.back();
-		result.first_file = result.filenames.front();
-		result.abort = false;
-	}
-
-	result.extension = dlg.GetFileExt();
-
-	return result;
-}
-
-
-// Convert an absolute path to a path that's relative to OpenMPT's directory.
-// Paths are relative to the executable path.
-// nLength specifies the maximum number of character that can be written into szPath,
-// including the trailing null char.
-template <size_t nLength>
-void CTrackApp::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
-//---------------------------------------------------------------
-{
-	STATIC_ASSERT(nLength >= 3);
-
-	if(_tcslen(szPath) == 0)
-		return;
-
-	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
-	TCHAR szExePath[nLength], szTempPath[nLength];
-	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
-	mpt::String::SetNullTerminator(szExePath);
-
-	if(!_tcsncicmp(szExePath, szPath, _tcslen(szExePath)))
-	{
-		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
-		_tcscpy(szTempPath, _T(".\\"));	// ".\"
-		_tcsncat(szTempPath, &szPath[_tcslen(szExePath)], nStrLength - 2);	// "Somepath"
-		_tcscpy(szPath, szTempPath);
-	} else if(!_tcsncicmp(szExePath, szPath, 2))
-	{
-		// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
-		_tcsncpy(szTempPath, &szPath[2], nStrLength);	// "\Somepath"
-		_tcscpy(szPath, szTempPath);
-	}
-	mpt::String::SetNullTerminator(szPath);
-}
-
-
-// Convert a relative path to an absolute path.
-// Paths are relative to the executable path.
-// nLength specifies the maximum number of character that can be written into szPath,
-// including the trailing null char.
-template <size_t nLength>
-void CTrackApp::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
-//---------------------------------------------------------------
-{
-	STATIC_ASSERT(nLength >= 3);
-
-	if(_tcslen(szPath) == 0)
-		return;
-
-	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
-	TCHAR szExePath[nLength], szTempPath[nLength] = _T("");
-	_tcsncpy(szExePath, GetAppDirPath(), nStrLength);
-	mpt::String::SetNullTerminator(szExePath);
-
-	if(!_tcsncicmp(szPath, _T("\\"), 1) && _tcsncicmp(szPath, _T("\\\\"), 2))
-	{
-		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
-		_tcsncat(szTempPath, szExePath, 2);	// "C:"
-		_tcsncat(szTempPath, szPath, nStrLength - 2);	// "\Somepath\"
-		_tcscpy(szPath, szTempPath);
-	} else if(!_tcsncicmp(szPath, _T(".\\"), 2))
-	{
-		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
-		_tcsncpy(szTempPath, szExePath, nStrLength);	// "C:\OpenMPT\"
-		if(_tcslen(szTempPath) < nStrLength)
-		{
-			_tcsncat(szTempPath, &szPath[2], nStrLength - _tcslen(szTempPath));	//	"Somepath"
-		}
-		_tcscpy(szPath, szTempPath);
-	}
-	mpt::String::SetNullTerminator(szPath);
-}
-
-void CTrackApp::RemoveMruItem(const int nItem)
-//--------------------------------------------
-{
-	if (m_pRecentFileList && nItem >= 0 && nItem < m_pRecentFileList->GetSize())
-		m_pRecentFileList->Remove(nItem);
-}
+OPENMPT_NAMESPACE_END

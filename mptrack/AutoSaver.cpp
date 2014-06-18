@@ -14,10 +14,14 @@
 #include "moddoc.h"
 #include "AutoSaver.h"
 #include "moptions.h"
+#include "FileDialog.h"
 #include <algorithm>
 #include <io.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -28,13 +32,9 @@
 // Construction/Destruction
 ///////////////////////////
 
-CAutoSaver::CAutoSaver() : m_bSaveInProgress(false)
-{
-}
-
-CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory,
-					   bool useOriginalPath, CString path, CString fileNameTemplate) :
-	m_bSaveInProgress(false)
+CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory, bool useOriginalPath, mpt::PathString path, mpt::PathString fileNameTemplate)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+	: m_bSaveInProgress(false)
 {
 	m_nLastSave			 = timeGetTime();
 	m_bEnabled			 = enabled;
@@ -45,7 +45,7 @@ CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory,
 	m_csFileNameTemplate = fileNameTemplate;
 }
 
-CAutoSaver::~CAutoSaver(void)
+CAutoSaver::~CAutoSaver()
 {
 }
 
@@ -134,29 +134,29 @@ bool CAutoSaver::GetUseOriginalPath()
 }
 
 
-void CAutoSaver::SetPath(CString path)
-//------------------------------------
+void CAutoSaver::SetPath(mpt::PathString path)
+//--------------------------------------------
 {
 	m_csPath = path;
 }
 
 
-CString CAutoSaver::GetPath()
-//---------------------------
+mpt::PathString CAutoSaver::GetPath()
+//-----------------------------------
 {
 	return m_csPath;
 }
 
 
-void CAutoSaver::SetFilenameTemplate(CString fnTemplate)
-//------------------------------------------------------
+void CAutoSaver::SetFilenameTemplate(mpt::PathString fnTemplate)
+//--------------------------------------------------------------
 {
 	m_csFileNameTemplate = fnTemplate;
 }
 
 
-CString CAutoSaver::GetFilenameTemplate()
-//---------------------------------------
+mpt::PathString CAutoSaver::GetFilenameTemplate()
+//------------------------------------------------
 {
 	return m_csFileNameTemplate;
 }
@@ -206,37 +206,37 @@ bool CAutoSaver::CheckTimer(DWORD curTime)
 }
 
 
-CString CAutoSaver::BuildFileName(CModDoc &modDoc)
-//------------------------------------------------
+mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
+//--------------------------------------------------------
 {
-	CString timeStamp = (CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S");
-	CString name;
+	std::wstring timeStamp = mpt::ToWide((CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S"));
+	mpt::PathString name;
 	
 	if(m_bUseOriginalPath)
 	{
 		if(modDoc.m_bHasValidPath)
 		{
 			// Check that the file has a user-chosen path
-			name = modDoc.GetPathName(); 
+			name = modDoc.GetPathNameMpt();
 		} else
 		{
 			// if it doesnt, put it in settings dir
-			name = theApp.GetConfigPath() + modDoc.GetTitle();
+			name = theApp.GetConfigPath() + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
 		}
 	} else
 	{
-		name = m_csPath+modDoc.GetTitle();
+		name = m_csPath + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
 	}
 	
-	name.Append(".AutoSave.");					//append backup tag
-	name.Append(timeStamp);						//append timestamp
-	name.Append(".");							//append extension
+	name += MPT_PATHSTRING(".AutoSave.");					//append backup tag
+	name += mpt::PathString::FromWide(timeStamp);						//append timestamp
+	name += MPT_PATHSTRING(".");							//append extension
 	if(modDoc.GetrSoundFile().m_SongFlags[SONG_ITPROJECT])
 	{
-		name.Append("itp");
+		name += MPT_PATHSTRING("itp");
 	} else
 	{
-		name.Append(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
+		name += mpt::PathString::FromUTF8(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
 	}
 
 	return name;
@@ -250,7 +250,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 	// list with backups... hence we have duplicated code.. :(
 	CSoundFile &sndFile = modDoc.GetrSoundFile(); 
 	
-	CString fileName = BuildFileName(modDoc);
+	mpt::PathString fileName = BuildFileName(modDoc);
 
 	// We are acutally not going to show the log for autosaved files.
 	ScopedLogCapturer logcapturer(modDoc, "", nullptr, false);
@@ -289,14 +289,14 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 //----------------------------------------------
 {
-	CString path;
+	mpt::PathString path;
 	
 	if (m_bUseOriginalPath)
 	{
 		if (modDoc.m_bHasValidPath)	// Check that the file has a user-chosen path
 		{
-			CString fullPath = modDoc.GetPathName();
-			path = fullPath.Left(fullPath.GetLength() - modDoc.GetTitle().GetLength()); //remove file name if necessary
+			mpt::PathString fullPath = modDoc.GetPathNameMpt();
+			path = fullPath.GetDrive() + fullPath.GetDir(); // remove file name
 		} else
 		{
 			path = theApp.GetConfigPath();
@@ -306,27 +306,29 @@ void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 		path = m_csPath;
 	}
 
-	CString searchPattern = path + modDoc.GetTitle() + ".AutoSave.*";
+	std::vector<mpt::PathString> foundfiles;
+	mpt::PathString searchPattern = path + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent() + MPT_PATHSTRING(".AutoSave.*");
 
-	CFileFind finder;
-	BOOL bResult = finder.FindFile(searchPattern);
-	std::vector<CString> foundfiles;
-	
-	while(bResult)
+	WIN32_FIND_DATAW findData;
+	MemsetZero(findData);
+	HANDLE hFindFile = FindFirstFileW(searchPattern.AsNative().c_str(), &findData);
+	if(hFindFile != INVALID_HANDLE_VALUE)
 	{
-		bResult = finder.FindNextFile();
-		foundfiles.push_back(path + finder.GetFileName());
+		do
+		{
+			if(!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+			{
+				foundfiles.push_back(path + mpt::PathString::FromNative(findData.cFileName));
+			}
+		} while(FindNextFileW(hFindFile, &findData));
+		FindClose(hFindFile);
+		hFindFile = INVALID_HANDLE_VALUE;
 	}
-	finder.Close();
-	
 	std::sort(foundfiles.begin(), foundfiles.end());
+	
 	while(foundfiles.size() > m_nBackupHistory)
 	{
-		try
-		{
-			CString toRemove = foundfiles[0];
-			CFile::Remove(toRemove);
-		} catch (CFileException* /*pEx*/){}
+		DeleteFileW(foundfiles[0].AsNative().c_str());
 		foundfiles.erase(foundfiles.begin());
 	}
 	
@@ -374,7 +376,7 @@ BOOL CAutoSaverGUI::OnInitDialog()
 	CheckDlgButton(IDC_AUTOSAVE_ENABLE, m_pAutoSaver->IsEnabled()?BST_CHECKED:BST_UNCHECKED);
 	//SetDlgItemText(IDC_AUTOSAVE_FNTEMPLATE, m_pAutoSaver->GetFilenameTemplate());
 	SetDlgItemInt(IDC_AUTOSAVE_HISTORY, m_pAutoSaver->GetHistoryDepth()); //TODO
-	SetDlgItemText(IDC_AUTOSAVE_PATH, m_pAutoSaver->GetPath());
+	::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, m_pAutoSaver->GetPath().AsNative().c_str());
 	SetDlgItemInt(IDC_AUTOSAVE_INTERVAL, m_pAutoSaver->GetSaveInterval());
 	CheckDlgButton(IDC_AUTOSAVE_USEORIGDIR, m_pAutoSaver->GetUseOriginalPath()?BST_CHECKED:BST_UNCHECKED);
 	CheckDlgButton(IDC_AUTOSAVE_USECUSTOMDIR, m_pAutoSaver->GetUseOriginalPath()?BST_UNCHECKED:BST_CHECKED);
@@ -389,36 +391,32 @@ BOOL CAutoSaverGUI::OnInitDialog()
 
 void CAutoSaverGUI::OnOK()
 {
-	CString tempPath;
+	WCHAR tempPath[MAX_PATH];
 	IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) ? m_pAutoSaver->Enable() : m_pAutoSaver->Disable();
-	m_pAutoSaver->SetFilenameTemplate(""); //TODO
+	m_pAutoSaver->SetFilenameTemplate(MPT_PATHSTRING("")); //TODO
 	m_pAutoSaver->SetHistoryDepth(GetDlgItemInt(IDC_AUTOSAVE_HISTORY));
 	m_pAutoSaver->SetSaveInterval(GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
 	m_pAutoSaver->SetUseOriginalPath(IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
-	GetDlgItemText(IDC_AUTOSAVE_PATH, tempPath);
-	if (!tempPath.IsEmpty() && (tempPath.Right(1)!="\\"))
-		tempPath.Append("\\");
-	m_pAutoSaver->SetPath(tempPath);
+	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, tempPath, CountOf(tempPath));
+	mpt::PathString path = mpt::PathString::FromNative(tempPath);
+	if(!path.empty() && !path.HasTrailingSlash())
+	{
+		path += MPT_PATHSTRING("\\");
+	}
+	m_pAutoSaver->SetPath(path);
 
 	CPropertyPage::OnOK();
 }
 
 void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 {
-	CHAR szPath[_MAX_PATH] = "";
-	BROWSEINFO bi;
+	WCHAR szPath[MAX_PATH] = L"";
+	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
 
-	GetDlgItemText(IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
-	MemsetZero(bi);
-	bi.hwndOwner = m_hWnd;
-	bi.lpszTitle = "Select a folder to store autosaved files in...";
-	bi.pszDisplayName = szPath;
-	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
-	LPITEMIDLIST pid = SHBrowseForFolder(&bi);
-	if (pid != NULL)
+	BrowseForFolder dlg(mpt::PathString::FromNative(szPath), TEXT("Select a folder to store autosaved files in..."));
+	if(dlg.Show(this))
 	{
-		SHGetPathFromIDList(pid, szPath);
-		SetDlgItemText(IDC_AUTOSAVE_PATH, szPath);
+		::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, dlg.GetDirectory().AsNative().c_str());
 		OnSettingsChanged();
 	}
 }
@@ -478,3 +476,6 @@ BOOL CAutoSaverGUI::OnKillActive()
 
 	return CPropertyPage::OnKillActive();
 }
+
+
+OPENMPT_NAMESPACE_END

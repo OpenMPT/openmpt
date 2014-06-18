@@ -13,6 +13,8 @@
 #include "../soundlib/Snd_defs.h"
 #include "resource.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //============
 class Autotune
 //============
@@ -23,7 +25,7 @@ protected:
 
 	SmpLength selectionStart, selectionEnd;
 
-	int8 *sampleData;
+	int16 *sampleData;
 	SmpLength sampleLength;
 
 public:
@@ -42,15 +44,16 @@ public:
 	bool Apply(double pitchReference, int targetNote);
 
 protected:
-	double FrequencyToNote(double freq, double pitchReference) const;
-	double NoteToFrequency(double note, double pitchReference) const;
-	SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference) const;
+	static double FrequencyToNote(double freq, double pitchReference);
+	static double NoteToFrequency(double note, double pitchReference);
+	static SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference);
 
 	template <class T>
 	void CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLength sampleLoopEnd);
 
 	bool PrepareSample(SmpLength maxShift);
 
+	static DWORD WINAPI AutotuneThread(void *i);
 };
 
 
@@ -78,3 +81,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 
 };
+
+
+OPENMPT_NAMESPACE_END

@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "Settings.h"
+
 #include "soundlib/Tagging.h"
 #include "soundlib/SampleFormat.h"
 
@@ -17,6 +19,8 @@
 #include <string>
 #include <vector>
 
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 static const int opus_bitrates [] = {
@@ -75,18 +79,51 @@ namespace Encoder
 		ModeInvalid    = 0
 	};
 
+} // namespace Encoder
+
+template<> inline SettingValue ToSettingValue(const Encoder::Mode &val)
+{
+	switch(val)
+	{
+		case Encoder::ModeCBR: return SettingValue("CBR", "Encoder::Mode"); break;
+		case Encoder::ModeABR: return SettingValue("ABR", "Encoder::Mode"); break;
+		case Encoder::ModeVBR: return SettingValue("VBR", "Encoder::Mode"); break;
+		case Encoder::ModeQuality: return SettingValue("Quality", "Encoder::Mode"); break;
+		case Encoder::ModeEnumerated: return SettingValue("Enumerated", "Encoder::Mode"); break;
+		default: return SettingValue("Invalid", "Encoder::Mode"); break;
+	}
+}
+template<> inline Encoder::Mode FromSettingValue(const SettingValue &val)
+{
+	ASSERT(val.GetTypeTag() == "Encoder::Mode");
+	if(val.as<std::string>() == "") { return Encoder::ModeInvalid; }
+	else if(val.as<std::string>() == "CBR") { return Encoder::ModeCBR; }
+	else if(val.as<std::string>() == "ABR") { return Encoder::ModeABR; }
+	else if(val.as<std::string>() == "VBR") { return Encoder::ModeVBR; }
+	else if(val.as<std::string>() == "Quality") { return Encoder::ModeQuality; }
+	else if(val.as<std::string>() == "Enumerated") { return Encoder::ModeEnumerated; }
+	else { return Encoder::ModeInvalid; }
+}
+
+namespace Encoder
+{
+
 	struct Traits
 	{
 		
 		std::string fileExtension;
 		std::string fileDescription;
 		std::string fileShortDescription;
+		std::string encoderSettingsName;
 		std::string encoderName;
 		std::string description;
 
 		bool canTags;
 		std::vector<std::string> genres;
+		int modesWithFixedGenres;
 		
+		bool canCues;
+
 		int maxChannels;
 		std::vector<uint32> samplerates;
 		
@@ -94,19 +131,28 @@ namespace Encoder
 		std::vector<int> bitrates;
 		std::vector<Encoder::Format> formats;
 		
+		uint32 defaultSamplerate;
+		uint16 defaultChannels;
+
 		Encoder::Mode defaultMode;
 		int defaultBitrate;
 		float defaultQuality;
 		int defaultFormat;
+		int defaultDitherType;
 
 		Traits()
-			: canTags(false)
+			: canCues(false)
+			, canTags(false)
+			, modesWithFixedGenres(0)
 			, maxChannels(0)
 			, modes(Encoder::ModeInvalid)
+			, defaultSamplerate(44100)
+			, defaultChannels(2)
 			, defaultMode(Encoder::ModeInvalid)
 			, defaultBitrate(0)
 			, defaultQuality(0.0f)
 			, defaultFormat(0)
+			, defaultDitherType(1)
 		{
 			return;
 		}
@@ -116,18 +162,28 @@ namespace Encoder
 	struct Settings
 	{
 		
-		bool Tags;
-		Encoder::Mode Mode;
-		int Bitrate;
-		float Quality;
-		int Format;
+		Setting<bool> Cues;
+		Setting<bool> Tags;
+
+		Setting<uint32> Samplerate;
+		Setting<uint16> Channels;
+
+		Setting<Encoder::Mode> Mode;
+		Setting<int> Bitrate;
+		Setting<float> Quality;
+		Setting<int> Format;
+		Setting<int> Dither;
 		
-		Settings(bool tags, Encoder::Mode mode, int bitrate, float quality, int format)
-			: Tags(tags)
-			, Mode(mode)
-			, Bitrate(bitrate)
-			, Quality(quality)
-			, Format(format)
+		Settings(SettingsContainer &conf, const std::string &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format, int dither)
+			: Cues(conf, "Export", encoderName + "_" + "Cues", cues)
+			, Tags(conf, "Export", encoderName + "_" + "Tags", tags)
+			, Samplerate(conf, "Export", encoderName + "_" + "Samplerate", samplerate)
+			, Channels(conf, "Export", encoderName + "_" + "Channels", channels)
+			, Mode(conf, "Export", encoderName + "_" + "Mode", mode)
+			, Bitrate(conf, "Export", encoderName + "_" + "Bitrate", bitrate)
+			, Quality(conf, "Export", encoderName + "_" + "Quality", quality)
+			, Format(conf, "Export", encoderName + "_" + "Format", format)
+			, Dither(conf, "Export", encoderName + "_" + "Dither", dither)
 		{
 			return;
 		}
@@ -135,6 +191,19 @@ namespace Encoder
 	};
 
 } // namespace Encoder
+
+
+//==========================
+struct StreamEncoderSettings
+//==========================
+{
+	Setting<int32> FLACCompressionLevel;
+	Setting<int32> MP3LameQuality;
+	Setting<bool> MP3ACMFast;
+	Setting<int32> OpusComplexity;
+	StreamEncoderSettings(SettingsContainer &conf, const std::string &section);
+	static StreamEncoderSettings &Instance();
+};
 
 
 //=======================
@@ -147,7 +216,7 @@ public:
 	virtual ~IAudioStreamEncoder() { }
 public:
 	// Call the following functions exactly in this order.
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings) = 0;
+	virtual void SetFormat(const Encoder::Settings &settings) = 0;
 	virtual void WriteMetatags(const FileTags &tags) = 0; // optional
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data) = 0;
@@ -169,7 +238,7 @@ public:
 	StreamWriterBase(std::ostream &stream);
 	virtual ~StreamWriterBase();
 public:
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings) = 0;
+	virtual void SetFormat(const Encoder::Settings &settings) = 0;
 	virtual void WriteMetatags(const FileTags &tags);
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data);
@@ -197,6 +266,11 @@ public:
 		return traits;
 	}
 	virtual std::string DescribeQuality(float quality) const;
+	virtual std::string DescribeBitrateVBR(int bitrate) const;
+	virtual std::string DescribeBitrateABR(int bitrate) const;
+	virtual std::string DescribeBitrateCBR(int bitrate) const;
 	virtual bool IsAvailable() const = 0;
 };
 
+
+OPENMPT_NAMESPACE_END

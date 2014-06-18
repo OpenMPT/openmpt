@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -116,7 +118,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = 31;
 	m_nSamplePreAmp = 256 / m_nChannels;
-	madeWithTracker = mpt::String::Format("Digi Booster %d.%d", fileHeader.versionInt >> 4, fileHeader.versionInt & 0x0F);
+	madeWithTracker = mpt::String::Print("Digi Booster %1.%2", fileHeader.versionInt >> 4, fileHeader.versionInt & 0x0F);
 
 	Order.ReadFromArray(fileHeader.orders, fileHeader.lastOrdIndex + 1);
 
@@ -150,10 +152,10 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 		FileReader patternChunk;
 		if(fileHeader.packEnable)
 		{
-			patternChunk = file.GetChunk(file.ReadUint16BE());
+			patternChunk = file.ReadChunk(file.ReadUint16BE());
 		} else
 		{
-			patternChunk = file.GetChunk(4 * 64 * GetNumChannels());
+			patternChunk = file.ReadChunk(4 * 64 * GetNumChannels());
 		}
 
 		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
@@ -210,3 +212,6 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

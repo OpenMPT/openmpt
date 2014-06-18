@@ -12,41 +12,46 @@
 #include "../soundlib/FileReader.h"
 #include "ungzip.h"
 
+#if !defined(NO_ZLIB)
 #include <zlib/zlib.h>
+#elif !defined(NO_MINIZ)
+#define MINIZ_HEADER_FILE_ONLY
+#include <miniz/miniz.c>
+#endif
 
 
-CGzipArchive::CGzipArchive(FileReader &file) : inFile(file)
-//---------------------------------------------------------
+OPENMPT_NAMESPACE_BEGIN
+
+	
+CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
+//--------------------------------------------------------------
 {
 	inFile.Rewind();
 	inFile.Read(header);
+
+	// Check header data + file size
+	if(header.magic1 != GZ_HMAGIC1 || header.magic2 != GZ_HMAGIC2 || header.method != GZ_HMDEFLATE || (header.flags & GZ_FRESERVED) != 0
+		|| inFile.GetLength() <= sizeof(GZheader) + sizeof(GZtrailer))
+	{
+		return;
+	}
+	ArchiveFileInfo info;
+	info.type = ArchiveFileNormal;
+	contents.push_back(info);
 }
 
 
 CGzipArchive::~CGzipArchive()
 //---------------------------
 {
-	delete[] outFile.GetRawData();
+	return;
 }
 
 
-bool CGzipArchive::IsArchive() const
-//----------------------------------
+bool CGzipArchive::ExtractFile(std::size_t index)
+//-----------------------------------------------
 {
-	// Check header data + file size
-	if(header.magic1 != GZ_HMAGIC1 || header.magic2 != GZ_HMAGIC2 || header.method != GZ_HMDEFLATE || (header.flags & GZ_FRESERVED) != 0
-		|| inFile.GetLength() <= sizeof(GZheader) + sizeof(GZtrailer))
-	{
-		return false;
-	}
-	return true;
-}
-
-
-bool CGzipArchive::ExtractFile()
-//------------------------------
-{
-	if(!IsArchive())
+	if(index >= contents.size())
 	{
 		return false;
 	}
@@ -89,10 +94,9 @@ bool CGzipArchive::ExtractFile()
 		return false;
 	}
 
-	delete[] outFile.GetRawData();
-
-	char *data = new (std::nothrow) char[trailer.isize];
-	if(data == nullptr)
+	try {
+		data.resize(trailer.isize);
+	} catch(...)
 	{
 		return false;
 	}
@@ -109,21 +113,22 @@ bool CGzipArchive::ExtractFile()
 		return false;
 	}
 	strm.avail_out = trailer.isize;
-	strm.next_out = (Bytef *)data;
+	strm.next_out = (Bytef *)&data[0];
 
 	int retVal = inflate(&strm, Z_NO_FLUSH);
 	inflateEnd(&strm);
 
 	// Everything went OK? Check return code, number of written bytes and CRC32.
-	if(retVal == Z_STREAM_END && trailer.isize == strm.total_out && trailer.crc32 == crc32(0, (Bytef *)data, trailer.isize))
+	if(retVal == Z_STREAM_END && trailer.isize == strm.total_out && trailer.crc32_ == crc32(0, (Bytef *)&data[0], trailer.isize))
 	{
 		// Success! :)
-		outFile = FileReader(data, trailer.isize);
 		return true;
 	} else
 	{
 		// Fail :(
-		delete[] outFile.GetRawData();
 		return false;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

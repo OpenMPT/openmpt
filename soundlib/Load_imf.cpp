@@ -11,9 +11,8 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
-#endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_BEGIN
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -365,7 +364,9 @@ static void ImportIMFEffect(ModCommand &m)
 			break;
 		case 0xC: // note cut
 		case 0xD: // note delay
-			// no change
+			// Apparently, Imago Orpheus doesn't cut samples on tick 0.
+			if(!m.param)
+				m.command = CMD_NONE;
 			break;
 		case 0xE: // ignore envelope
 			/* predicament: we can only disable one envelope at a time.
@@ -480,7 +481,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patNum; pat++)
 	{
 		const uint16 length = file.ReadUint16LE(), numRows = file.ReadUint16LE();
-		FileReader patternChunk = file.GetChunk(length - 4);
+		FileReader patternChunk = file.ReadChunk(length - 4);
 
 		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, numRows))
 		{
@@ -609,7 +610,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(sampleHeader.length)
 			{
-				FileReader sampleChunk = file.GetChunk(sampleHeader.length);
+				FileReader sampleChunk = file.ReadChunk(sampleHeader.length);
 				if(loadFlags & loadSampleData)
 				{
 					SampleIO(
@@ -626,3 +627,6 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

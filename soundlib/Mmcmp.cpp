@@ -1,7 +1,7 @@
 /*
  * mmcmp.cpp
  * ---------
- * Purpose: Handling of compressed modules (XPK, PowerPack PP20)
+ * Purpose: Handling of compressed modules (MMCMP, XPK, PowerPack PP20)
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -11,46 +11,106 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
+#include "FileReader.h"
+
+#include <stdexcept>
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 //#define MMCMP_LOG
 
 
-BOOL XPK_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
-BOOL PP20_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(push, 1)
+#endif
 
-typedef struct MMCMPFILEHEADER
+struct PACKED MMCMPFILEHEADER
 {
-	DWORD id_ziRC;	// "ziRC"
-	DWORD id_ONia;	// "ONia"
-	WORD hdrsize;
-} MMCMPFILEHEADER, *LPMMCMPFILEHEADER;
+	char id[8];	// "ziRCONia"
+	uint16 hdrsize;
+	void ConvertEndianness();
+};
 
-typedef struct MMCMPHEADER
-{
-	WORD version;
-	WORD nblocks;
-	DWORD filesize;
-	DWORD blktable;
-	BYTE glb_comp;
-	BYTE fmt_comp;
-} MMCMPHEADER, *LPMMCMPHEADER;
+STATIC_ASSERT(sizeof(MMCMPFILEHEADER) == 10);
 
-typedef struct MMCMPBLOCK
+struct PACKED MMCMPHEADER
 {
-	DWORD unpk_size;
-	DWORD pk_size;
-	DWORD xor_chk;
-	WORD sub_blk;
-	WORD flags;
-	WORD tt_entries;
-	WORD num_bits;
-} MMCMPBLOCK, *LPMMCMPBLOCK;
+	uint16 version;
+	uint16 nblocks;
+	uint32 filesize;
+	uint32 blktable;
+	uint8 glb_comp;
+	uint8 fmt_comp;
+	void ConvertEndianness();
+};
 
-typedef struct MMCMPSUBBLOCK
+STATIC_ASSERT(sizeof(MMCMPHEADER) == 14);
+
+struct PACKED MMCMPBLOCK
 {
-	DWORD unpk_pos;
-	DWORD unpk_size;
-} MMCMPSUBBLOCK, *LPMMCMPSUBBLOCK;
+	uint32 unpk_size;
+	uint32 pk_size;
+	uint32 xor_chk;
+	uint16 sub_blk;
+	uint16 flags;
+	uint16 tt_entries;
+	uint16 num_bits;
+	void ConvertEndianness();
+};
+
+STATIC_ASSERT(sizeof(MMCMPBLOCK) == 20);
+
+struct PACKED MMCMPSUBBLOCK
+{
+	uint32 unpk_pos;
+	uint32 unpk_size;
+	void ConvertEndianness();
+};
+
+STATIC_ASSERT(sizeof(MMCMPSUBBLOCK) == 8);
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
+
+void MMCMPFILEHEADER::ConvertEndianness()
+//---------------------------------------
+{
+	SwapBytesLE(hdrsize);
+}
+
+void MMCMPHEADER::ConvertEndianness()
+//-----------------------------------
+{
+	SwapBytesLE(version);
+	SwapBytesLE(nblocks);
+	SwapBytesLE(filesize);
+	SwapBytesLE(blktable);
+	SwapBytesLE(glb_comp);
+	SwapBytesLE(fmt_comp);
+}
+
+void MMCMPBLOCK::ConvertEndianness()
+//----------------------------------
+{
+	SwapBytesLE(unpk_size);
+	SwapBytesLE(pk_size);
+	SwapBytesLE(xor_chk);
+	SwapBytesLE(sub_blk);
+	SwapBytesLE(flags);
+	SwapBytesLE(tt_entries);
+	SwapBytesLE(num_bits);
+}
+
+void MMCMPSUBBLOCK::ConvertEndianness()
+//-------------------------------------
+{
+	SwapBytesLE(unpk_pos);
+	SwapBytesLE(unpk_size);
+}
+
 
 #define MMCMP_COMP		0x0001
 #define MMCMP_DELTA		0x0002
@@ -59,21 +119,21 @@ typedef struct MMCMPSUBBLOCK
 #define MMCMP_ABS16		0x0200
 #define MMCMP_ENDIAN	0x0400
 
-typedef struct MMCMPBITBUFFER
+struct MMCMPBITBUFFER
 {
-	UINT bitcount;
-	DWORD bitbuffer;
-	LPCBYTE pSrc;
-	LPCBYTE pEnd;
+	uint32 bitcount;
+	uint32 bitbuffer;
+	const uint8 *pSrc;
+	const uint8 *pEnd;
 
-	DWORD GetBits(UINT nBits);
-} MMCMPBITBUFFER;
+	uint32 GetBits(uint32 nBits);
+};
 
 
-DWORD MMCMPBITBUFFER::GetBits(UINT nBits)
-//---------------------------------------
+uint32 MMCMPBITBUFFER::GetBits(uint32 nBits)
+//------------------------------------------
 {
-	DWORD d;
+	uint32 d;
 	if (!nBits) return 0;
 	while (bitcount < 24)
 	{
@@ -86,87 +146,114 @@ DWORD MMCMPBITBUFFER::GetBits(UINT nBits)
 	return d;
 }
 
-const DWORD MMCMP8BitCommands[8] =
+static const uint32 MMCMP8BitCommands[8] =
 {
 	0x01, 0x03,	0x07, 0x0F,	0x1E, 0x3C,	0x78, 0xF8
 };
 
-const UINT MMCMP8BitFetch[8] =
+static const uint32 MMCMP8BitFetch[8] =
 {
 	3, 3, 3, 3, 2, 1, 0, 0
 };
 
-const DWORD MMCMP16BitCommands[16] =
+static const uint32 MMCMP16BitCommands[16] =
 {
 	0x01, 0x03,	0x07, 0x0F,	0x1E, 0x3C,	0x78, 0xF0,
 	0x1F0, 0x3F0, 0x7F0, 0xFF0, 0x1FF0, 0x3FF0, 0x7FF0, 0xFFF0
 };
 
-const UINT MMCMP16BitFetch[16] =
+static const uint32 MMCMP16BitFetch[16] =
 {
 	4, 4, 4, 4, 3, 2, 1, 0,
 	0, 0, 0, 0, 0, 0, 0, 0
 };
 
 
-BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
-//---------------------------------------------------------
+static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, uint32 pos, uint32 len)
+//----------------------------------------------------------------------------------------------
 {
-	DWORD dwMemLength = *pdwMemLength;
-	LPCBYTE lpMemFile = *ppMemFile;
-	LPBYTE pBuffer;
-	LPMMCMPFILEHEADER pmfh = (LPMMCMPFILEHEADER)(lpMemFile);
-	LPMMCMPHEADER pmmh = (LPMMCMPHEADER)(lpMemFile+10);
-	LPDWORD pblk_table;
-	DWORD dwFileSize;
+	if(pos >= unpackedData.size()) return false;
+	if(len > unpackedData.size()) return false;
+	if(len > unpackedData.size() - pos) return false;
+	return true;
+}
 
-	if ((XPK_Unpack(ppMemFile, pdwMemLength))
-	 || (PP20_Unpack(ppMemFile, pdwMemLength)))
-	{
-		return TRUE;
-	}
-	if ((dwMemLength < 256) || (!pmfh) || (pmfh->id_ziRC != 0x4352697A) || (pmfh->id_ONia != 0x61694e4f) || (pmfh->hdrsize < 14)
-	 || (!pmmh->nblocks) || (pmmh->filesize < 16) || (pmmh->filesize > 0x8000000)
-	 || (pmmh->blktable >= dwMemLength) || (pmmh->blktable + 4*pmmh->nblocks > dwMemLength)) return FALSE;
-	dwFileSize = pmmh->filesize;
-	if ((pBuffer = (LPBYTE)calloc(1, (dwFileSize + 31) & ~15)) == NULL) return FALSE;
-	pblk_table = (LPDWORD)(lpMemFile+pmmh->blktable);
-	for (UINT nBlock=0; nBlock<pmmh->nblocks; nBlock++)
-	{
-		DWORD dwMemPos = pblk_table[nBlock];
-		LPMMCMPBLOCK pblk = (LPMMCMPBLOCK)(lpMemFile+dwMemPos);
-		LPMMCMPSUBBLOCK psubblk = (LPMMCMPSUBBLOCK)(lpMemFile+dwMemPos+20);
 
-		if ((dwMemPos + 20 >= dwMemLength) || (dwMemPos + 20 + pblk->sub_blk*8 >= dwMemLength)) break;
-		dwMemPos += 20 + pblk->sub_blk*8;
+static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, const MMCMPSUBBLOCK &subblk)
+//---------------------------------------------------------------------------------------------------
+{
+	return MMCMP_IsDstBlockValid(unpackedData, subblk.unpk_pos, subblk.unpk_size);
+}
+
+
+bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
+//-----------------------------------------------------------------
+{
+	file.Rewind();
+	unpackedData.clear();
+
+	MMCMPFILEHEADER mfh;
+	if(!file.ReadConvertEndianness(mfh)) return false;
+	if(std::memcmp(mfh.id, "ziRCONia", 8) != 0) return false;
+	if(mfh.hdrsize != sizeof(MMCMPHEADER)) return false;
+	MMCMPHEADER mmh;
+	if(!file.ReadConvertEndianness(mmh)) return false;
+	if(mmh.nblocks == 0) return false;
+	if(mmh.filesize == 0) return false;
+	if(mmh.filesize > 0x80000000) return false;
+	if(mmh.blktable > file.GetLength()) return false;
+	if(mmh.blktable + 4 * mmh.nblocks > file.GetLength()) return false;
+
+	unpackedData.resize(mmh.filesize);
+
+	for (uint32 nBlock=0; nBlock<mmh.nblocks; nBlock++)
+	{
+		if(!file.Seek(mmh.blktable + 4*nBlock)) return false;
+		if(!file.CanRead(4)) return false;
+		uint32 blkPos = file.ReadUint32LE();
+		if(!file.Seek(blkPos)) return false;
+		MMCMPBLOCK blk;
+		if(!file.ReadConvertEndianness(blk)) return false;
+		std::vector<MMCMPSUBBLOCK> subblks(blk.sub_blk);
+		for(uint32 i=0; i<blk.sub_blk; ++i)
+		{
+			if(!file.ReadConvertEndianness(subblks[i])) return false;
+		}
+		MMCMPSUBBLOCK *psubblk = blk.sub_blk > 0 ? &(subblks[0]) : nullptr;
+
+		if(blkPos + sizeof(MMCMPBLOCK) + blk.sub_blk * sizeof(MMCMPSUBBLOCK) >= file.GetLength()) return false;
+		uint32 memPos = blkPos + sizeof(MMCMPBLOCK) + blk.sub_blk * sizeof(MMCMPSUBBLOCK);
+
 #ifdef MMCMP_LOG
-		Log("block %d: flags=%04X sub_blocks=%d", nBlock, (UINT)pblk->flags, (UINT)pblk->sub_blk);
+		Log("block %d: flags=%04X sub_blocks=%d", nBlock, (uint32)pblk->flags, (uint32)pblk->sub_blk);
 		Log(" pksize=%d unpksize=%d", pblk->pk_size, pblk->unpk_size);
 		Log(" tt_entries=%d num_bits=%d\n", pblk->tt_entries, pblk->num_bits);
 #endif
 		// Data is not packed
-		if (!(pblk->flags & MMCMP_COMP))
+		if (!(blk.flags & MMCMP_COMP))
 		{
-			for (UINT i=0; i<pblk->sub_blk; i++)
+			for (uint32 i=0; i<blk.sub_blk; i++)
 			{
-				if ((psubblk->unpk_pos > dwFileSize) || (psubblk->unpk_pos + psubblk->unpk_size > dwFileSize)) break;
+				if(!MMCMP_IsDstBlockValid(unpackedData, *psubblk)) return false;
 #ifdef MMCMP_LOG
 				Log("  Unpacked sub-block %d: offset %d, size=%d\n", i, psubblk->unpk_pos, psubblk->unpk_size);
 #endif
-				memcpy(pBuffer+psubblk->unpk_pos, lpMemFile+dwMemPos, psubblk->unpk_size);
-				dwMemPos += psubblk->unpk_size;
+				if(!file.Seek(memPos)) return false;
+				if(file.ReadRaw(&(unpackedData[psubblk->unpk_pos]), psubblk->unpk_size) != psubblk->unpk_size) return false;
 				psubblk++;
 			}
 		} else
 		// Data is 16-bit packed
-		if (pblk->flags & MMCMP_16BIT)
+		if (blk.flags & MMCMP_16BIT)
 		{
 			MMCMPBITBUFFER bb;
-			LPWORD pDest = (LPWORD)(pBuffer + psubblk->unpk_pos);
-			DWORD dwSize = psubblk->unpk_size >> 1;
-			DWORD dwPos = 0;
-			UINT numbits = pblk->num_bits;
-			UINT subblk = 0, oldval = 0;
+			uint32 subblk = 0;
+			if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
+			char *pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
+			uint32 dwSize = psubblk[subblk].unpk_size >> 1;
+			uint32 dwPos = 0;
+			uint32 numbits = blk.num_bits;
+			uint32 oldval = 0;
 
 #ifdef MMCMP_LOG
 			Log("  16-bit block: pos=%d size=%d ", psubblk->unpk_pos, psubblk->unpk_size);
@@ -176,17 +263,19 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 #endif
 			bb.bitcount = 0;
 			bb.bitbuffer = 0;
-			bb.pSrc = lpMemFile+dwMemPos+pblk->tt_entries;
-			bb.pEnd = lpMemFile+dwMemPos+pblk->pk_size;
-			while (subblk < pblk->sub_blk)
+			if(!file.Seek(memPos + blk.tt_entries)) return false;
+			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
+			bb.pSrc = reinterpret_cast<const uint8 *>(file.GetRawData());
+			bb.pEnd = reinterpret_cast<const uint8 *>(file.GetRawData() - blk.tt_entries + blk.pk_size);
+			while (subblk < blk.sub_blk)
 			{
-				UINT newval = 0x10000;
-				DWORD d = bb.GetBits(numbits+1);
+				uint32 newval = 0x10000;
+				uint32 d = bb.GetBits(numbits+1);
 
 				if (d >= MMCMP16BitCommands[numbits])
 				{
-					UINT nFetch = MMCMP16BitFetch[numbits];
-					UINT newbits = bb.GetBits(nFetch) + ((d - MMCMP16BitCommands[numbits]) << nFetch);
+					uint32 nFetch = MMCMP16BitFetch[numbits];
+					uint32 newbits = bb.GetBits(nFetch) + ((d - MMCMP16BitCommands[numbits]) << nFetch);
 					if (newbits != numbits)
 					{
 						numbits = newbits & 0x0F;
@@ -207,50 +296,59 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 				}
 				if (newval < 0x10000)
 				{
-					newval = (newval & 1) ? (UINT)(-(LONG)((newval+1) >> 1)) : (UINT)(newval >> 1);
-					if (pblk->flags & MMCMP_DELTA)
+					newval = (newval & 1) ? (uint32)(-(int32)((newval+1) >> 1)) : (uint32)(newval >> 1);
+					if (blk.flags & MMCMP_DELTA)
 					{
 						newval += oldval;
 						oldval = newval;
 					} else
-					if (!(pblk->flags & MMCMP_ABS16))
+					if (!(blk.flags & MMCMP_ABS16))
 					{
 						newval ^= 0x8000;
 					}
-					pDest[dwPos++] = (WORD)newval;
+					pDest[dwPos*2 + 0] = (uint8)(((uint16)newval) & 0xff);
+					pDest[dwPos*2 + 1] = (uint8)(((uint16)newval) >> 8);
+					dwPos++;
 				}
 				if (dwPos >= dwSize)
 				{
 					subblk++;
 					dwPos = 0;
+					if(!(subblk < blk.sub_blk)) break;
+					if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 					dwSize = psubblk[subblk].unpk_size >> 1;
-					pDest = (LPWORD)(pBuffer + psubblk[subblk].unpk_pos);
+					pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 				}
 			}
 		} else
 		// Data is 8-bit packed
 		{
 			MMCMPBITBUFFER bb;
-			LPBYTE pDest = pBuffer + psubblk->unpk_pos;
-			DWORD dwSize = psubblk->unpk_size;
-			DWORD dwPos = 0;
-			UINT numbits = pblk->num_bits;
-			UINT subblk = 0, oldval = 0;
-			LPCBYTE ptable = lpMemFile+dwMemPos;
+			uint32 subblk = 0;
+			if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
+			char *pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
+			uint32 dwSize = psubblk[subblk].unpk_size;
+			uint32 dwPos = 0;
+			uint32 numbits = blk.num_bits;
+			uint32 oldval = 0;
+			if(!file.Seek(memPos)) return false;
+			const uint8 *ptable = reinterpret_cast<const uint8 *>(file.GetRawData());
 
 			bb.bitcount = 0;
 			bb.bitbuffer = 0;
-			bb.pSrc = lpMemFile+dwMemPos+pblk->tt_entries;
-			bb.pEnd = lpMemFile+dwMemPos+pblk->pk_size;
-			while (subblk < pblk->sub_blk)
+			if(!file.Seek(memPos + blk.tt_entries)) return false;
+			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
+			bb.pSrc = reinterpret_cast<const uint8 *>(file.GetRawData());
+			bb.pEnd = reinterpret_cast<const uint8 *>(file.GetRawData() - blk.tt_entries + blk.pk_size);
+			while (subblk < blk.sub_blk)
 			{
-				UINT newval = 0x100;
-				DWORD d = bb.GetBits(numbits+1);
+				uint32 newval = 0x100;
+				uint32 d = bb.GetBits(numbits+1);
 
 				if (d >= MMCMP8BitCommands[numbits])
 				{
-					UINT nFetch = MMCMP8BitFetch[numbits];
-					UINT newbits = bb.GetBits(nFetch) + ((d - MMCMP8BitCommands[numbits]) << nFetch);
+					uint32 nFetch = MMCMP8BitFetch[numbits];
+					uint32 newbits = bb.GetBits(nFetch) + ((d - MMCMP8BitCommands[numbits]) << nFetch);
 					if (newbits != numbits)
 					{
 						numbits = newbits & 0x07;
@@ -272,26 +370,27 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 				if (newval < 0x100)
 				{
 					int n = ptable[newval];
-					if (pblk->flags & MMCMP_DELTA)
+					if (blk.flags & MMCMP_DELTA)
 					{
 						n += oldval;
 						oldval = n;
 					}
-					pDest[dwPos++] = (BYTE)n;
+					pDest[dwPos++] = (uint8)n;
 				}
 				if (dwPos >= dwSize)
 				{
 					subblk++;
 					dwPos = 0;
+					if(!(subblk < blk.sub_blk)) break;
+					if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 					dwSize = psubblk[subblk].unpk_size;
-					pDest = pBuffer + psubblk[subblk].unpk_pos;
+					pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 				}
 			}
 		}
 	}
-	*ppMemFile = pBuffer;
-	*pdwMemLength = dwFileSize;
-	return TRUE;
+
+	return true;
 }
 
 
@@ -300,19 +399,21 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 // XPK unpacker
 //
 
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
 
-typedef struct PACKED _XPKFILEHEADER
+struct PACKED XPKFILEHEADER
 {
-	DWORD dwXPKF;
-	DWORD dwSrcLen;
-	DWORD dwSQSH;
-	DWORD dwDstLen;
-	CHAR szName[16];
-	DWORD dwReserved;
-} XPKFILEHEADER, *PXPKFILEHEADER;
+	char   XPKF[4];
+	uint32 SrcLen;
+	char   SQSH[4];
+	uint32 DstLen;
+	char   Name[16];
+	uint32 Reserved;
+	void ConvertEndianness();
+};
 
 STATIC_ASSERT(sizeof(XPKFILEHEADER) == 36);
 
@@ -320,54 +421,92 @@ STATIC_ASSERT(sizeof(XPKFILEHEADER) == 36);
 #pragma pack(pop)
 #endif
 
-
-static int bfextu(const BYTE *p,int bo,int bc)
+void XPKFILEHEADER::ConvertEndianness()
+//-------------------------------------
 {
-  int r;
-  
-  p += bo / 8;
-  r = *(p++);
-  r <<= 8;
-  r |= *(p++);
-  r <<= 8;
-  r |= *p;
-  r <<= bo % 8;
-  r &= 0xffffff;
-  r >>= 24 - bc;
-
-  return r;
-}
-
-static int bfexts(const BYTE *p,int bo,int bc)
-{
-  int r;
-  
-  p += bo / 8;
-  r = *(p++);
-  r <<= 8;
-  r |= *(p++);
-  r <<= 8;
-  r |= *p;
-  r <<= (bo % 8) + 8;
-  r >>= 32 - bc;
-
-  return r;
+	SwapBytesBE(SrcLen);
+	SwapBytesBE(DstLen);
+	SwapBytesBE(Reserved);
 }
 
 
-void XPK_DoUnpack(const BYTE *src, UINT, BYTE *dst, int len)
+struct XPK_BufferBounds
 {
-	static BYTE xpk_table[] = { 2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,
-        6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0 };
-	int d0,d1,d2,d3,d4,d5,d6,a2,a5;
-	int cp, cup1, type;
-	const BYTE *c;
-	BYTE *phist;
-	BYTE *dstmax = dst + len;
-   
+	const uint8 *pSrcBeg;
+	const uint8 *pSrcEnd;
+	uint8 *pDstBeg;
+	uint8 *pDstEnd;
+};
+
+struct XPK_error : public std::range_error
+{
+	XPK_error() : std::range_error("invalid XPK data") { }
+};
+
+static int32 bfextu(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
+//-----------------------------------------------------------------------------
+{
+	int32 r;
+
+	p += bo / 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
+	r = *(p++);
+	r <<= 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
+	r |= *(p++);
+	r <<= 8;
+	r |= *p;
+	r <<= bo % 8;
+	r &= 0xffffff;
+	r >>= 24 - bc;
+
+	return r;
+}
+
+static int32 bfexts(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
+//-----------------------------------------------------------------------------
+{
+	int32 r;
+
+	p += bo / 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
+	r = *(p++);
+	r <<= 8;
+	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
+	r |= *(p++);
+	r <<= 8;
+	r |= *p;
+	r <<= (bo % 8) + 8;
+	r >>= 32 - bc;
+
+	return r;
+}
+
+
+static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
+//------------------------------------------------------------------------------
+{
+	if(len <= 0) return false;
+	static const uint8 xpk_table[] = {
+		2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0
+	};
+	int32 d0,d1,d2,d3,d4,d5,d6,a2,a5;
+	int32 cp, cup1, type;
+	const uint8 *c;
+	uint8 *phist = nullptr;
+	uint8 *dstmax = dst + len;
+
+	XPK_BufferBounds bufs;
+	bufs.pSrcBeg = src;
+	bufs.pSrcEnd = src + srcLen;
+	bufs.pDstBeg = dst;
+	bufs.pDstEnd = dst + len;
+
 	c = src;
 	while (len > 0)
 	{
+		if(&(c[0]) < bufs.pSrcBeg || &(c[0]) >= bufs.pSrcEnd) throw XPK_error();
+		if(&(c[7]) < bufs.pSrcBeg || &(c[7]) >= bufs.pSrcEnd) throw XPK_error();
 		type = c[0];
 		cp = (c[4]<<8) | (c[5]); // packed
 		cup1 = (c[6]<<8) | (c[7]); // unpacked
@@ -377,13 +516,17 @@ void XPK_DoUnpack(const BYTE *src, UINT, BYTE *dst, int len)
 		if (type == 0)
 		{
 			// RAW chunk
+			if(c < bufs.pSrcBeg || c >= bufs.pSrcEnd) throw XPK_error();
+			if(c + cp > bufs.pSrcEnd) throw XPK_error();
+			if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
+			if(dst + cp > bufs.pDstEnd) throw XPK_error();
 			memcpy(dst,c,cp);
 			dst+=cp;
 			c+=cp;
 			len -= cp;
 			continue;
 		}
-	  
+
 		if (type != 1)
 		{
 		#ifdef MMCMP_LOG
@@ -397,43 +540,44 @@ void XPK_DoUnpack(const BYTE *src, UINT, BYTE *dst, int len)
 
 		d0 = d1 = d2 = a2 = 0;
 		d3 = *(src++);
-		*dst = (BYTE)d3;
+		if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
+		*dst = (uint8)d3;
 		if (dst < dstmax) dst++;
 		cup1--;
 
 		while (cup1 > 0)
 		{
 			if (d1 >= 8) goto l6dc;
-			if (bfextu(src,d0,1)) goto l75a;
+			if (bfextu(src,d0,1,bufs)) goto l75a;
 			d0 += 1;
 			d5 = 0;
 			d6 = 8;
 			goto l734;
-  
-		l6dc:	
-			if (bfextu(src,d0,1)) goto l726;
+
+		l6dc:
+			if (bfextu(src,d0,1,bufs)) goto l726;
 			d0 += 1;
-			if (! bfextu(src,d0,1)) goto l75a;
+			if (! bfextu(src,d0,1,bufs)) goto l75a;
 			d0 += 1;
-			if (bfextu(src,d0,1)) goto l6f6;
+			if (bfextu(src,d0,1,bufs)) goto l6f6;
 			d6 = 2;
 			goto l708;
 
-		l6f6:	
+		l6f6:
 			d0 += 1;
-			if (!bfextu(src,d0,1)) goto l706;
-			d6 = bfextu(src,d0,3);
+			if (!bfextu(src,d0,1,bufs)) goto l706;
+			d6 = bfextu(src,d0,3,bufs);
 			d0 += 3;
 			goto l70a;
-  
-		l706:	
+
+		l706:
 			d6 = 3;
-		l708:	
+		l708:
 			d0 += 1;
-		l70a:	
+		l70a:
 			d6 = xpk_table[(8*a2) + d6 -17];
 			if (d6 != 8) goto l730;
-		l718:	
+		l718:
 			if (d2 >= 20)
 			{
 				d5 = 1;
@@ -442,80 +586,81 @@ void XPK_DoUnpack(const BYTE *src, UINT, BYTE *dst, int len)
 			d5 = 0;
 			goto l734;
 
-		l726:	
+		l726:
 			d0 += 1;
 			d6 = 8;
 			if (d6 == a2) goto l718;
 			d6 = a2;
-		l730:	
+		l730:
 			d5 = 4;
-		l732:	
+		l732:
 			d2 += 8;
 		l734:
 			while ((d5 >= 0) && (cup1 > 0))
 			{
-				d4 = bfexts(src,d0,d6);
+				d4 = bfexts(src,d0,d6,bufs);
 				d0 += d6;
 				d3 -= d4;
-				*dst = (BYTE)d3;
+				if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
+				*dst = (uint8)d3;
 				if (dst < dstmax) dst++;
 				cup1--;
 				d5--;
 			}
 			if (d1 != 31) d1++;
 			a2 = d6;
-		l74c:	
+		l74c:
 			d6 = d2;
 			d6 >>= 3;
 			d2 -= d6;
 		}
 	}
-	return;
+	return true;
 
-l75a:	
+l75a:
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l766;
+	if (bfextu(src,d0,1,bufs)) goto l766;
 	d4 = 2;
 	goto l79e;
-  
-l766:	
+
+l766:
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l772;
+	if (bfextu(src,d0,1,bufs)) goto l772;
 	d4 = 4;
 	goto l79e;
 
-l772:	
+l772:
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l77e;
+	if (bfextu(src,d0,1,bufs)) goto l77e;
 	d4 = 6;
 	goto l79e;
 
-l77e:	
+l77e:
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l792;
+	if (bfextu(src,d0,1,bufs)) goto l792;
 	d0 += 1;
-	d6 = bfextu(src,d0,3);
+	d6 = bfextu(src,d0,3,bufs);
 	d0 += 3;
 	d6 += 8;
 	goto l7a8;
-  
-l792:	
+
+l792:
 	d0 += 1;
-	d6 = bfextu(src,d0,5);
+	d6 = bfextu(src,d0,5,bufs);
 	d0 += 5;
 	d4 = 16;
 	goto l7a6;
-  
+
 l79e:
 	d0 += 1;
-	d6 = bfextu(src,d0,1);
+	d6 = bfextu(src,d0,1,bufs);
 	d0 += 1;
 l7a6:
 	d6 += d4;
 l7a8:
-	if (bfextu(src,d0,1)) goto l7c4;
+	if (bfextu(src,d0,1,bufs)) goto l7c4;
 	d0 += 1;
-	if (bfextu(src,d0,1)) goto l7bc;
+	if (bfextu(src,d0,1,bufs)) goto l7bc;
 	d5 = 8;
 	a5 = 0;
 	goto l7ca;
@@ -530,7 +675,7 @@ l7c4:
 	a5 = -0x100;
 l7ca:
 	d0 += 1;
-	d4 = bfextu(src,d0,d5);
+	d4 = bfextu(src,d0,d5,bufs);
 	d0 += d5;
 	d6 -= 3;
 	if (d6 >= 0)
@@ -541,11 +686,13 @@ l7ca:
 	}
 	d6 += 2;
 	phist = dst + a5 - d4 - 1;
-	
+
 	while ((d6 >= 0) && (cup1 > 0))
 	{
+		if(phist < bufs.pDstBeg || phist >= bufs.pDstEnd) throw XPK_error();
 		d3 = *phist++;
-		*dst = (BYTE)d3;
+		if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
+		*dst = (uint8)d3;
 		if (dst < dstmax) dst++;
 		cup1--;
 		d6--;
@@ -554,27 +701,34 @@ l7ca:
 }
 
 
-BOOL XPK_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
+bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
+//---------------------------------------------------------------
 {
-	DWORD dwMemLength = *pdwMemLength;
-	LPCBYTE lpMemFile = *ppMemFile;
-	PXPKFILEHEADER pxfh = (PXPKFILEHEADER)lpMemFile;
-	DWORD dwSrcLen, dwDstLen;
-	LPBYTE pBuffer;
+	file.Rewind();
+	unpackedData.clear();
 
-	if ((!pxfh) || (dwMemLength < 256)
-	 || (pxfh->dwXPKF != MULTICHAR4_LE_MSVC('F','K','P','X')) || (pxfh->dwSQSH != MULTICHAR4_LE_MSVC('H','S','Q','S'))) return FALSE;
-	dwSrcLen = BigEndian(pxfh->dwSrcLen);
-	dwDstLen = BigEndian(pxfh->dwDstLen);
-	if ((dwSrcLen+8 > dwMemLength) || (dwSrcLen < 256) || (dwDstLen < 256)) return FALSE;
+	XPKFILEHEADER header;
+	if(!file.ReadConvertEndianness(header)) return false;
+	if(std::memcmp(header.XPKF, "XPKF", 4) != 0) return false;
+	if(std::memcmp(header.SQSH, "SQSH", 4) != 0) return false;
+	if(header.SrcLen == 0) return false;
+	if(header.DstLen == 0) return false;
+	if(!file.CanRead(header.SrcLen + 8 - sizeof(XPKFILEHEADER))) return false;
+
 #ifdef MMCMP_LOG
-	Log("XPK detected (SrcLen=%d DstLen=%d) filesize=%d\n", dwSrcLen, dwDstLen, dwMemLength);
+	Log("XPK detected (SrcLen=%d DstLen=%d) filesize=%d\n", header.SrcLen, header.DstLen, file.GetLength());
 #endif
-	if ((pBuffer = (LPBYTE)calloc(1, (dwDstLen + 31) & ~15)) == NULL) return FALSE;
-	XPK_DoUnpack(lpMemFile+sizeof(XPKFILEHEADER), dwSrcLen+8-sizeof(XPKFILEHEADER), pBuffer, dwDstLen);
-	*ppMemFile = pBuffer;
-	*pdwMemLength = dwDstLen;
-	return TRUE;
+	unpackedData.resize(header.DstLen);
+	bool result = false;
+	try
+	{
+		result = XPK_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), header.SrcLen + 8 - sizeof(XPKFILEHEADER), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
+	} catch(XPK_error&)
+	{
+		return false;
+	}
+
+	return result;
 }
 
 
@@ -583,22 +737,27 @@ BOOL XPK_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 // PowerPack PP20 Unpacker
 //
 
-typedef struct _PPBITBUFFER
+
+static const uint32 PP20_PACKED_SIZE_MIN = 8;
+
+
+struct PPBITBUFFER
 {
-	UINT bitcount;
-	ULONG bitbuffer;
-	LPCBYTE pStart;
-	LPCBYTE pSrc;
+	uint32 bitcount;
+	uint32 bitbuffer;
+	const uint8 *pStart;
+	const uint8 *pSrc;
 
-	ULONG GetBits(UINT n);
-} PPBITBUFFER;
+	uint32 GetBits(uint32 n);
+};
 
 
-ULONG PPBITBUFFER::GetBits(UINT n)
+uint32 PPBITBUFFER::GetBits(uint32 n)
+//-----------------------------------
 {
-	ULONG result = 0;
+	uint32 result = 0;
 
-	for (UINT i=0; i<n; i++)
+	for (uint32 i=0; i<n; i++)
 	{
 		if (!bitcount)
 		{
@@ -609,15 +768,16 @@ ULONG PPBITBUFFER::GetBits(UINT n)
 		result = (result<<1) | (bitbuffer&1);
 		bitbuffer >>= 1;
 		bitcount--;
-    }
-    return result;
+	}
+	return result;
 }
 
 
-void PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
+static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32 nDstLen)
+//---------------------------------------------------------------------------------------
 {
 	PPBITBUFFER BitBuffer;
-	ULONG nBytesLeft;
+	uint32 nBytesLeft;
 
 	BitBuffer.pStart = pSrc;
 	BitBuffer.pSrc = pSrc + nSrcLen - 4;
@@ -629,29 +789,30 @@ void PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
 	{
 		if (!BitBuffer.GetBits(1))
 		{
-			UINT n = 1;
+			uint32 n = 1;
 			while (n < nBytesLeft)
 			{
-				UINT code = BitBuffer.GetBits(2);
+				uint32 code = BitBuffer.GetBits(2);
 				n += code;
 				if (code != 3) break;
 			}
-			for (UINT i=0; i<n; i++)
+			for (uint32 i=0; i<n; i++)
 			{
-				pDst[--nBytesLeft] = (BYTE)BitBuffer.GetBits(8);
+				pDst[--nBytesLeft] = (uint8)BitBuffer.GetBits(8);
 			}
 			if (!nBytesLeft) break;
 		}
 		{
-			UINT n = BitBuffer.GetBits(2)+1;
-			UINT nbits = pSrc[n-1];
-			UINT nofs;
+			uint32 n = BitBuffer.GetBits(2)+1;
+			if(n < 1 || n-1 >= nSrcLen) return false;
+			uint32 nbits = pSrc[n-1];
+			uint32 nofs;
 			if (n==4)
 			{
 				nofs = BitBuffer.GetBits( (BitBuffer.GetBits(1)) ? nbits : 7 );
 				while (n < nBytesLeft)
 				{
-					UINT code = BitBuffer.GetBits(3);
+					uint32 code = BitBuffer.GetBits(3);
 					n += code;
 					if (code != 7) break;
 				}
@@ -659,35 +820,37 @@ void PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
 			{
 				nofs = BitBuffer.GetBits(nbits);
 			}
-			for (UINT i=0; i<=n; i++)
+			for (uint32 i=0; i<=n; i++)
 			{
 				pDst[nBytesLeft-1] = (nBytesLeft+nofs < nDstLen) ? pDst[nBytesLeft+nofs] : 0;
 				if (!--nBytesLeft) break;
 			}
 		}
 	}
+	return true;
 }
 
 
-BOOL PP20_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
+bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
+//----------------------------------------------------------------
 {
-	DWORD dwMemLength = *pdwMemLength;
-	LPCBYTE lpMemFile = *ppMemFile;
-	DWORD dwDstLen;
-	LPBYTE pBuffer;
+	file.Rewind();
+	unpackedData.clear();
 
-	if ((!lpMemFile) || (dwMemLength < 256) || (*(DWORD *)lpMemFile != MULTICHAR4_LE_MSVC('0','2','P','P'))) return FALSE;
-	dwDstLen = (lpMemFile[dwMemLength-4]<<16) | (lpMemFile[dwMemLength-3]<<8) | (lpMemFile[dwMemLength-2]);
-	//Log("PP20 detected: Packed length=%d, Unpacked length=%d\n", dwMemLength, dwDstLen);
-	if ((dwDstLen < 512) || (dwDstLen > 0x400000) || (dwDstLen > 16*dwMemLength)) return FALSE;
-	if ((pBuffer = (LPBYTE)calloc(1, (dwDstLen + 31) & ~15)) == NULL) return FALSE;
-	PP20_DoUnpack(lpMemFile+4, dwMemLength-4, pBuffer, dwDstLen);
-	*ppMemFile = pBuffer;
-	*pdwMemLength = dwDstLen;
-	return TRUE;
+	if(!file.CanRead(PP20_PACKED_SIZE_MIN)) return false;
+	if(!file.ReadMagic("PP20")) return false;
+	file.Seek(file.GetLength() - 4);
+	uint32 dstLen = 0;
+	dstLen |= file.ReadUint8() << 16;
+	dstLen |= file.ReadUint8() << 8;
+	dstLen |= file.ReadUint8() << 0;
+	if(dstLen == 0) return false;
+	unpackedData.resize(dstLen);
+	file.Seek(4);
+	bool result = PP20_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), file.GetLength() - 4, reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
+
+	return result;
 }
 
 
-
-
-
+OPENMPT_NAMESPACE_END

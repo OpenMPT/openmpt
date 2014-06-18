@@ -17,14 +17,15 @@
 #include "Message.h"
 #include "FileReader.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Read song message from a mapped file.
 // [in]  data: pointer to the data in memory that is going to be read
 // [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 // [in]  lineEnding: line ending formatting of the text in memory.
-// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 // [out] returns true on success.
-bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, ConverterFunc pTextConverter)
-//----------------------------------------------------------------------------------------------------------
+bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding)
+//----------------------------------------------------------------------------
 {
 	const char *str = static_cast<const char *>(data);
 	while(length != 0 && str[length - 1] == '\0')
@@ -42,8 +43,6 @@ bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, C
 		for(size_t i = 0; i < length; i++)
 		{
 			char c = str[i];
-			if(pTextConverter != nullptr)
-				pTextConverter(c);
 
 			if(c == '\r') nCR++;
 			else if(c == '\n') nLF++;
@@ -67,8 +66,6 @@ bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, C
 	for(size_t i = 0; i < length; i++)
 	{
 		char c = str[i];
-		if(pTextConverter != nullptr)
-			pTextConverter(c);
 
 		if(c != '\n' || lineEnding != leCRLF)
 			finalLength++;
@@ -80,8 +77,6 @@ bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, C
 	for(size_t i = 0; i < length; i++, cpos++)
 	{
 		char c = str[i];
-		if(pTextConverter != nullptr)
-			pTextConverter(c);
 
 		switch(c)
 		{
@@ -111,11 +106,11 @@ bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding, C
 }
 
 
-bool SongMessage::Read(FileReader &file, const size_t length, LineEnding lineEnding, ConverterFunc pTextConverter)
-//----------------------------------------------------------------------------------------------------------------
+bool SongMessage::Read(FileReader &file, const size_t length, LineEnding lineEnding)
+//----------------------------------------------------------------------------------
 {
 	FileReader::off_t readLength = std::min(static_cast<FileReader::off_t>(length), file.BytesLeft());
-	bool success = Read(file.GetRawData(), readLength, lineEnding, pTextConverter);
+	bool success = Read(file.GetRawData(), readLength, lineEnding);
 	file.Skip(readLength);
 	return success;
 }
@@ -126,10 +121,9 @@ bool SongMessage::Read(FileReader &file, const size_t length, LineEnding lineEnd
 // [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 // [in]  lineLength: The fixed length of a line.
 // [in]  lineEndingLength: The padding space between two fixed lines. (there could for example be a null char after every line)
-// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 // [out] returns true on success.
-bool SongMessage::ReadFixedLineLength(const void *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, ConverterFunc pTextConverter)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool SongMessage::ReadFixedLineLength(const void *data, const size_t length, const size_t lineLength, const size_t lineEndingLength)
+//----------------------------------------------------------------------------------------------------------------------------------
 {
 	const char *str = static_cast<const char *>(data);
 	if(lineLength == 0)
@@ -148,9 +142,6 @@ bool SongMessage::ReadFixedLineLength(const void *data, const size_t length, con
 		// fix weird chars
 		for(size_t lpos = 0; lpos < lineLength; lpos++)
 		{
-			// Pre-process text
-			if(pTextConverter != nullptr) pTextConverter(at(cpos + lpos));
-
 			switch(at(cpos + lpos))
 			{
 			case '\0':
@@ -166,11 +157,11 @@ bool SongMessage::ReadFixedLineLength(const void *data, const size_t length, con
 }
 
 
-bool SongMessage::ReadFixedLineLength(FileReader &file, const size_t length, const size_t lineLength, const size_t lineEndingLength, ConverterFunc pTextConverter)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool SongMessage::ReadFixedLineLength(FileReader &file, const size_t length, const size_t lineLength, const size_t lineEndingLength)
+//----------------------------------------------------------------------------------------------------------------------------------
 {
 	FileReader::off_t readLength = std::min(static_cast<FileReader::off_t>(length), file.BytesLeft());
-	bool success = ReadFixedLineLength(file.GetRawData(), readLength, lineLength, lineEndingLength, pTextConverter);
+	bool success = ReadFixedLineLength(file.GetRawData(), readLength, lineLength, lineEndingLength);
 	file.Skip(readLength);
 	return success;
 }
@@ -178,10 +169,9 @@ bool SongMessage::ReadFixedLineLength(FileReader &file, const size_t length, con
 
 // Retrieve song message.
 // [in]  lineEnding: line ending formatting of the text in memory.
-// [in]  pTextConverter: Pointer to a callback function which can be used to post-process the written characters, if necessary (nullptr otherwise).
 // [out] returns formatted song message.
-std::string SongMessage::GetFormatted(const LineEnding lineEnding, ConverterFunc pTextConverter) const
-//----------------------------------------------------------------------------------------------------
+std::string SongMessage::GetFormatted(const LineEnding lineEnding) const
+//----------------------------------------------------------------------
 {
 	std::string comments;
 
@@ -206,7 +196,7 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding, ConverterFunc
 				break;
 			case leCRLF:
 				comments.at(writePos++) = '\r';
-				// Intentional fall-through
+				MPT_FALLTHROUGH;
 			case leLF:
 				comments.at(writePos++) = '\n';
 				break;
@@ -214,10 +204,11 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding, ConverterFunc
 		} else
 		{
 			char c = at(i);
-			// Pre-process text
-			if(pTextConverter != nullptr) pTextConverter(c);
 			comments.at(writePos++) = c;
 		}
 	}
 	return comments;
 }
+
+
+OPENMPT_NAMESPACE_END

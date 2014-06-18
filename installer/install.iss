@@ -3,12 +3,13 @@
 ; http://openmpt.org/
 ; http://sagamusix.de/
 
-; ISPP is needed for automated version retrieval. Since InnoSetup 5.4.1, ISPP is included in the default InnoSetup installer.
-; Furthermore, either the ISTool IDE or InnoIDE with their downloader extensions are required for "unmo3-free" packages which don't contain unmo3.dll, but download it from a server.
-; Check install-unmo3-free.iss (ISTool) and install-unmo3-free-itd.iss (InnoIDE) for details on this matter.
-; To download and install InnoIDE, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
+; This file cannot be compiled on its own. You need to compile any of these files:
+; win32.iss - For generating the standard Win32 setup.
+; win64.iss - For generating the standard Win64 setup.
+; install-unmo3-free-itd.iss - For generating the unmo3-free setup with InnoTools Downloader.
+; install-unmo3-free.iss - For generating the unmo3-free setup with ISTool downloader.
 
-#define GetAppVersion StringChange(GetFileProductVersion("..\mptrack\bin\mptrack.exe"), ",", ".")
+#define GetAppVersion StringChange(GetFileProductVersion("..\bin\Win32\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
 
 #ifndef BaseNameAddition
@@ -16,10 +17,9 @@
 #endif
 
 [Setup]
-AppId={{67903736-E9BB-4664-B148-F62BCAB4FA42}
-AppVerName=OpenMPT {#GetAppVersionShort}
+AppVerName=OpenMPT {#GetAppVersionShort} ({#PlatformName})
 AppVersion={#GetAppVersion}
-AppName=OpenMPT
+AppName=OpenMPT ({#PlatformName})
 AppPublisher=OpenMPT Devs / Olivier Lapicque
 AppPublisherURL=http://openmpt.org/
 AppSupportURL=http://forum.openmpt.org/
@@ -60,20 +60,23 @@ Name: english; MessagesFile: compiler:Default.isl
 
 ; preserve file type order for best solid compression results (first binary, then text)
 ; home folder
-Source: ..\mptrack\bin\mptrack.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\mptrack\bin\OpenMPT_SoundTouch_i16.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\mptrack.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion
 #ifndef DOWNLOAD_MO3
-Source: ..\mptrack\bin\unmo3.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 #endif
 
 ; Plugins
-Source: ..\packageTemplate\Plugins\*.*; DestDir: {app}\Plugins\; Flags: ignoreversion recursesubdirs createallsubdirs
+;Source: ..\packageTemplate\Plugins\*.*; DestDir: {app}\Plugins\; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ..\bin\{#PlatformFolder}\MIDI Input Output.dll; DestDir: {app}\Plugins\MIDI\; Flags: ignoreversion
 
 Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension
 
 Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
-Source: ..\packageTemplate\OpenMPT Manual.pdf; DestDir: {app}; Flags: ignoreversion
+Source: ..\packageTemplate\OpenMPT Manual.chm; DestDir: {app}; Flags: ignoreversion
 
 ; release notes
 Source: ..\packageTemplate\ReleaseNotesImages\general\*.*; DestDir: {app}\ReleaseNotesImages\general\; Flags: ignoreversion sortfilesbyextension
@@ -99,7 +102,7 @@ Name: {app}\tunings; Tasks: portable
 
 [Icons]
 ; start menu
-Name: {group}\{cm:LaunchProgram,OpenMPT}; Filename: {app}\mptrack.exe
+Name: {group}\OpenMPT; Filename: {app}\mptrack.exe
 Name: {group}\{cm:UninstallProgram,OpenMPT}; Filename: {uninstallexe}
 Name: {group}\ModPlug Central; Filename: {app}\ModPlug Central.url
 
@@ -119,7 +122,6 @@ Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String
 
 [Run]
 ; duh
-Filename: "https://sourceforge.net/projects/kernelex/"; Description: "Download KernelEx (required on Windows 98 / Me)"; Flags: shellexec nowait postinstall skipifsilent; Check: not UsingWinNT();
 Filename: "{app}\OMPT_{#GetAppVersionShort}_ReleaseNotes.html"; Description: "View Release Notes"; Flags: shellexec nowait postinstall skipifsilent
 Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\manwe - evening glow.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 

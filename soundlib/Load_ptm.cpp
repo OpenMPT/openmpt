@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -158,11 +160,12 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
+	InitializeGlobals();
+	m_nType = MOD_TYPE_PTM;
+
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songname);
 
-	InitializeGlobals();
-	madeWithTracker = mpt::String::Format("PolyTracker %d.%02x", fileHeader.versionHi, fileHeader.versionLo);
-	m_nType = MOD_TYPE_PTM;
+	madeWithTracker = mpt::String::Print("PolyTracker %1.%2", fileHeader.versionHi, mpt::fmt::hex0<2>(fileHeader.versionLo));
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nChannels = fileHeader.numChannels;
@@ -177,7 +180,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading samples
-	FileReader sampleHeaderChunk = file.GetChunk(fileHeader.numSamples * sizeof(PTMSampleHeader));
+	FileReader sampleHeaderChunk = file.ReadChunk(fileHeader.numSamples * sizeof(PTMSampleHeader));
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
 		PTMSampleHeader sampleHeader;
@@ -194,7 +197,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading Patterns
-	if(!(loadFlags && loadPatternData))
+	if(!(loadFlags & loadPatternData))
 	{
 		return true;
 	}
@@ -280,3 +283,6 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

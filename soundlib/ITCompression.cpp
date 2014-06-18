@@ -12,9 +12,10 @@
 #include <stdafx.h>
 #include "ITCompression.h"
 #include "../common/misc_util.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Reporting.h"
-#endif
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 // Algorithm parameters for 16-Bit samples
 struct IT16BitParams
@@ -180,7 +181,7 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 int ITCompression::GetWidthChangeSize(int w, bool is16)
 //-----------------------------------------------------
 {
-	ASSERT(w > 0 && w <= CountOf(ITWidthChangeSize));
+	ASSERT(w > 0 && static_cast<unsigned int>(w) <= CountOf(ITWidthChangeSize));
 	int wcs = ITWidthChangeSize[w - 1];
 	if(w <= 6 && is16)
 		wcs++;
@@ -199,7 +200,7 @@ void ITCompression::SquishRecurse(int sWidth, int lWidth, int rWidth, int width,
 		return;
 	}
 
-	ASSERT(width < CountOf(Properties::lowerTab));
+	ASSERT(width >= 0 && static_cast<unsigned int>(width) < CountOf(Properties::lowerTab));
 
 	SmpLength i = offset;
 	SmpLength end = offset + length;
@@ -318,7 +319,7 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 		writtenSamples = writePos = 0;
 		while(writtenSamples < sample.nLength && file.AreBytesLeft())
 		{
-			chunk = file.GetChunk(file.ReadUint16LE());
+			chunk = file.ReadChunk(file.ReadUint16LE());
 
 			// Initialise bit reader
 			dataPos = 0;
@@ -426,8 +427,11 @@ void ITDecompression::Write(int v, int topBit, void *target)
 		v -= (topBit << 1);
 	mem1 += v;
 	mem2 += mem1;
-	static_cast<typename Properties::sample_t *>(target)[writePos] = static_cast<typename Properties::sample_t>(is215 ? mem2 : mem1);
+	static_cast<typename Properties::sample_t *>(target)[writePos] = static_cast<typename Properties::sample_t>(is215 ? (int)mem2 : (int)mem1);
 	writtenSamples++;
 	writePos += mptSample.GetNumChannels();
 	curLength--;
 }
+
+
+OPENMPT_NAMESPACE_END

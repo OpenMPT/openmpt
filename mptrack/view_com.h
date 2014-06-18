@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 enum
 { 
 	LINE_LENGTH = 128,	//was 81. must be larger than visible comment area.
@@ -60,3 +62,6 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+
+OPENMPT_NAMESPACE_END

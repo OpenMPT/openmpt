@@ -16,6 +16,8 @@
 #include <cstring>
 #include <string.h>
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace mpt { namespace String
 {
 
@@ -36,6 +38,21 @@ namespace mpt { namespace String
 		buffer[size - 1] = 0;
 	}
 
+	template <size_t size>
+	void SetNullTerminator(wchar_t (&buffer)[size])
+	//---------------------------------------------
+	{
+		STATIC_ASSERT(size > 0);
+		buffer[size - 1] = 0;
+	}
+
+	inline void SetNullTerminator(wchar_t *buffer, size_t size)
+	//---------------------------------------------------------
+	{
+		ASSERT(size > 0);
+		buffer[size - 1] = 0;
+	}
+
 
 	// Remove any chars after the first null char
 	template <size_t size>
@@ -46,7 +63,7 @@ namespace mpt { namespace String
 		SetNullTerminator(buffer);
 		size_t pos = 0;
 		// Find the first null char.
-		while(buffer[pos] != '\0' && pos < size)
+		while(pos < size && buffer[pos] != '\0')
 		{
 			pos++;
 		}
@@ -95,8 +112,6 @@ namespace mpt { namespace String
 	void Read(std::string &dest, const char *srcBuffer, const size_t srcSize)
 	//-----------------------------------------------------------------------
 	{
-		ASSERT(srcSize > 0);
-
 		dest.clear();
 
 		if(mode == nullTerminated || mode == maybeNullTerminated)
@@ -163,7 +178,6 @@ namespace mpt { namespace String
 	//----------------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
-		//ASSERT(srcSize > 0);
 
 		const size_t maxSize = MIN(destSize, srcSize);
 		char *dst = destBuffer;
@@ -357,7 +371,7 @@ namespace mpt { namespace String
 	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = SIZE_MAX)
 	//----------------------------------------------------------------------------------------------
 	{
-		const size_t copySize = MIN(destSize - 1, srcSize);
+		const size_t copySize = std::min(destSize - 1u, srcSize);
 		std::strncpy(destBuffer, srcBuffer, copySize);
 		destBuffer[copySize] = '\0';
 	}
@@ -389,7 +403,7 @@ namespace mpt { namespace String
 	// Copy from a fixed size char array to a std::string.
 	template <size_t srcSize>
 	void Copy(std::string &dest, const char (&srcBuffer)[srcSize])
-	//----------------------------------------------------------------------------
+	//------------------------------------------------------------
 	{
 		CopyN(dest, srcBuffer, srcSize);
 	}
@@ -404,3 +418,4 @@ namespace mpt { namespace String
 
 } } // namespace mpt::String
 
+OPENMPT_NAMESPACE_END

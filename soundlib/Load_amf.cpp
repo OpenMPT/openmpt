@@ -15,6 +15,9 @@
 #include "Loaders.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -190,8 +193,8 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 
 
 // Read a single AMF track (channel) into a pattern.
-void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &fileChunk)
-//-----------------------------------------------------------------------------
+static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &fileChunk)
+//------------------------------------------------------------------------------------
 {
 	fileChunk.Rewind();
 	ModCommand::INSTR lastInstr = 0;
@@ -526,7 +529,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Track size is a 24-Bit value describing the number of byte triplets in this track.
 		uint32 trackSize = file.ReadUint16LE() | (file.ReadUint8() << 16);
-		trackData[i] = file.GetChunk(trackSize * 3);
+		trackData[i] = file.ReadChunk(trackSize * 3);
 	}
 
 	if(loadFlags & loadSampleData)
@@ -591,3 +594,6 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

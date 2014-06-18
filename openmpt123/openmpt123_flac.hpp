@@ -38,7 +38,7 @@ private:
 		}
 	}
 public:
-	flac_stream_raii( const std::string & filename_, const commandlineflags & flags_ ) : flags(flags_), filename(filename_), called_init(false), encoder(0) {
+	flac_stream_raii( const std::string & filename_, const commandlineflags & flags_, std::ostream & /*log*/ ) : flags(flags_), filename(filename_), called_init(false), encoder(0) {
 		flac_metadata[0] = 0;
 		encoder = FLAC__stream_encoder_new();
 		if ( !encoder ) {
@@ -66,7 +66,8 @@ public:
 		}
 		tags.clear();
 		tags.push_back( std::make_pair( "TITLE", metadata[ "title" ] ) );
-		tags.push_back( std::make_pair( "ARTIST", metadata[ "author" ] ) );
+		tags.push_back( std::make_pair( "ARTIST", metadata[ "artist" ] ) );
+		tags.push_back( std::make_pair( "DATE", metadata[ "date" ] ) );
 		tags.push_back( std::make_pair( "COMMENT", metadata[ "message" ] ) );
 		if ( !metadata[ "type" ].empty() && !metadata[ "tracker" ].empty() ) {
 			tags.push_back( std::make_pair( "SOURCEMEDIA", std::string() + "'" + metadata[ "type" ] + "' tracked music file, made with '" + metadata[ "tracker" ] + "', rendered with '" + get_encoder_tag() + "'" ) );
@@ -108,7 +109,7 @@ public:
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		if ( !called_init ) {
-			FLAC__stream_encoder_init_file( encoder, flags.output_filename.c_str(), NULL, 0 );
+			FLAC__stream_encoder_init_file( encoder, filename.c_str(), NULL, 0 );
 			called_init = true;
 		}
 		interleaved_buffer.clear();

@@ -15,6 +15,10 @@
 #include "mod2midi.h"
 #include "Wav.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -76,7 +80,7 @@ void DYNMIDITRACK::Write(const void *pBuffer, unsigned long nBytes)
 	{
 		UINT nGrow = 4096;
 		if (nBytes >= nGrow) nGrow = nBytes * 2;
-		PUCHAR p = new UCHAR[nAllocatedMem+nGrow];
+		uint8 *p = new uint8[nAllocatedMem+nGrow];
 		if (!p) return;
 		memcpy(p, pTrackData, nTrackSize);
 		delete[] pTrackData;
@@ -150,16 +154,13 @@ void CModToMidi::DoDataExchange(CDataExchange *pDX)
 }
 
 
-CModToMidi::CModToMidi(LPCSTR pszPathName, CSoundFile *pSndFile, CWnd *pWndParent):CDialog(IDD_MOD2MIDI, pWndParent)
-//------------------------------------------------------------------------------------------------------------------
+CModToMidi::CModToMidi(const mpt::PathString &filename, CSoundFile *pSndFile, CWnd *pWndParent):CDialog(IDD_MOD2MIDI, pWndParent)
+//-------------------------------------------------------------------------------------------------------------------------------
 {
-	CHAR fext[_MAX_EXT];
-	
 	m_bRmi = FALSE;
 	m_pSndFile = pSndFile;
-	strcpy(m_szFileName, pszPathName);
-	_splitpath(pszPathName, NULL, NULL, NULL, fext);
-	if (!_stricmp(fext, ".rmi")) m_bRmi = TRUE;
+	m_szFileName = filename;
+	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".rmi"))) m_bRmi = TRUE;
 	MemsetZero(m_InstrMap);
 	for (UINT nIns=1; nIns<=m_pSndFile->m_nInstruments; nIns++)
 	{
@@ -246,7 +247,7 @@ VOID CModToMidi::FillProgramBox(BOOL bPerc)
 		for (UINT i=0; i<61; i++)
 		{
 			UINT note = i+24;
-			wsprintf(s, "%d (%s): %s", note, szDefaultNoteNames[note], szMidiPercussionNames[i]);
+			wsprintf(s, "%d (%s%d): %s", note, szNoteNames[note % 12], note / 12, szMidiPercussionNames[i]);
 			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), note/*+1*/); //+1 removed by rewbs because MIDI drums appear to be offset by 1
 		}
 	} else
@@ -371,9 +372,10 @@ BOOL CModToMidi::DoConvert()
 	CHAR s[256];
 	UINT nTickMultiplier, nClock, nOrder, nRow;
 	UINT nSpeed;
-	CFile f;
+	FILE *f = nullptr;
 
-	if (!f.Open(m_szFileName, CFile::modeCreate | CFile::modeWrite))
+	f = mpt_fopen(m_szFileName, "wb");
+	if(!f)
 	{
 		return FALSE;
 	}
@@ -392,8 +394,8 @@ BOOL CModToMidi::DoConvert()
 	mthd.wTrks = static_cast<uint16>(Tracks.size()); // 1 track/channel
 	mthd.wTrks = BigEndianW(mthd.wTrks); //Convert to big endian value.
 	mthd.wDivision = BigEndianW(wPPQN);
-	if (m_bRmi) f.Write(&rmid, sizeof(rmid));
-	f.Write(&mthd, sizeof(mthd));
+	if (m_bRmi) fwrite(&rmid, 1, sizeof(rmid), f);
+	fwrite(&mthd, 1, sizeof(mthd), f);
 
 	// Add Song Name on track 0
 	const std::string modTitle = m_pSndFile->GetTitle();
@@ -566,11 +568,11 @@ BOOL CModToMidi::DoConvert()
 		Tracks[iTrk].Write(tmp, 4);
 		mtrk.id = 0x6B72544D;
 		mtrk.len = BigEndian(Tracks[iTrk].nTrackSize);
-		f.Write(&mtrk, sizeof(mtrk));
+		fwrite(&mtrk, 1, sizeof(mtrk), f);
 		rmid.filelen += sizeof(mtrk) + Tracks[iTrk].nTrackSize;
 		if (Tracks[iTrk].nTrackSize > 0)
 		{
-			f.Write(Tracks[iTrk].pTrackData, Tracks[iTrk].nTrackSize);
+			fwrite(Tracks[iTrk].pTrackData, 1, Tracks[iTrk].nTrackSize, f);
 			delete[] Tracks[iTrk].pTrackData;
 		}
 	}
@@ -578,12 +580,12 @@ BOOL CModToMidi::DoConvert()
 	if (m_bRmi)
 	{
 		// Update header file size
-		f.SeekToBegin();
-		f.Write(&rmid, sizeof(rmid));
+		fseek(f, 0, SEEK_SET);
+		fwrite(&rmid, 1, sizeof(rmid), f);
 	}
-	f.Close();
+	fclose(f);
 	return TRUE;
 }
 
 
-
+OPENMPT_NAMESPACE_END

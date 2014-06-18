@@ -27,6 +27,7 @@ struct libopenmpt_settings {
 	int repeatcount;
 	int interpolationfilterlength;
 	int ramping;
+	int vis_allow_scroll;
 	changed_func changed;
 };
 

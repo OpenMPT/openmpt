@@ -11,9 +11,12 @@
 
 #pragma once
 
-#include "SoundDevices.h"
+#include "SoundDevice.h"
+#include "SoundDeviceThread.h"
 
 #include <MMSystem.h>
+
+OPENMPT_NAMESPACE_BEGIN
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -25,13 +28,13 @@ class CWaveDevice: public CSoundDeviceWithThread
 //==============================================
 {
 protected:
+	HANDLE m_ThreadWakeupEvent;
 	HWAVEOUT m_hWaveOut;
 	ULONG m_nWaveBufferSize;
+	bool m_JustStarted;
 	ULONG m_nPreparedHeaders;
 	ULONG m_nWriteBuffer;
-	LONG m_nBuffersPending;
-	ULONG m_nBytesPerSec;
-	ULONG m_BytesPerSample;
+	mutable LONG m_nBuffersPending;
 	std::vector<WAVEHDR> m_WaveBuffers;
 	std::vector<std::vector<char> > m_WaveBuffersData;
 
@@ -42,17 +45,18 @@ public:
 public:
 	bool InternalOpen();
 	bool InternalClose();
-	void FillAudioBuffer();
-	void ResetFromOutsideSoundThread();
+	void InternalFillAudioBuffer();
 	void StartFromSoundThread();
 	void StopFromSoundThread();
-	bool IsOpen() const { return (m_hWaveOut != NULL); }
-	UINT GetNumBuffers() { return m_nPreparedHeaders; }
-	float GetCurrentRealLatencyMS() { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1000.0f / m_nBytesPerSec; }
+	bool InternalIsOpen() const { return (m_hWaveOut != NULL); }
+	double GetCurrentLatency() const { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond(); }
 	bool InternalHasGetStreamPosition() const { return true; }
-	int64 InternalGetStreamPositionSamples() const;
+	int64 InternalGetStreamPositionFrames() const;
 
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
 	static std::vector<SoundDeviceInfo> EnumerateDevices();
 };
+
+
+OPENMPT_NAMESPACE_END

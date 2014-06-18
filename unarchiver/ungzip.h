@@ -9,12 +9,15 @@
 
 #pragma once
 
-//================
-class CGzipArchive
-//================
+#include "archive.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
+//=====================================
+class CGzipArchive : public ArchiveBase
+//=====================================
 {
 protected:
-	FileReader inFile, outFile;
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -35,12 +38,12 @@ protected:
 
 	struct PACKED GZtrailer
 	{
-		uint32 crc32;	// CRC32 of decompressed data
+		uint32 crc32_;	// CRC32 of decompressed data
 		uint32 isize;	// Size of decompressed data
 
 		void ConvertEndianness()
 		{
-			SwapBytesLE(crc32);
+			SwapBytesLE(crc32_);
 			SwapBytesLE(isize);
 		}
 	};
@@ -72,10 +75,10 @@ protected:
 
 public:
 
-	FileReader GetOutputFile() const { return outFile; }
-	bool IsArchive() const;
-	bool ExtractFile();
+	bool ExtractFile(std::size_t index);
 
 	CGzipArchive(FileReader &file);
-	~CGzipArchive();
+	virtual ~CGzipArchive();
 };
+
+OPENMPT_NAMESPACE_END

@@ -12,6 +12,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct DitherModPlugState
 {
 	uint32 rng_a;
@@ -23,15 +26,32 @@ struct DitherModPlugState
 	}
 };
 
+struct DitherSimpleState
+{
+	int32 error[4];
+	uint32 rng;
+	DitherSimpleState() {
+		error[0] = 0;
+		error[1] = 0;
+		error[2] = 0;
+		error[3] = 0;
+		rng = 0x12345678;
+	}
+};
+
 struct DitherState
 {
 	DitherModPlugState modplug;
+	DitherSimpleState  simple;
 };
 
 enum DitherMode
 {
 	DitherNone       = 0,
-	DitherModPlug    = 1
+	DitherDefault    = 1, // chosen by OpenMPT code, might change
+	DitherModPlug    = 2, // rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker)
+	DitherSimple     = 3, // rectangular, 1 bit depth, simple 1st order noise shaping
+	NumDitherModes
 };
 
 class Dither
@@ -41,8 +61,12 @@ private:
 	DitherMode mode;
 public:
 	Dither();
-	void SetMode(DitherMode &mode);
+	void SetMode(DitherMode mode);
 	DitherMode GetMode() const;
 	void Reset();
 	void Process(int *mixbuffer, std::size_t count, std::size_t channels, int bits);
+	static std::wstring GetModeName(DitherMode mode);
 };
+
+
+OPENMPT_NAMESPACE_END

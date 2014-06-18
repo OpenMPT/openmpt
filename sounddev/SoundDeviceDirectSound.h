@@ -11,11 +11,14 @@
 
 #pragma once
 
-#include "SoundDevices.h"
+#include "SoundDevice.h"
+#include "SoundDeviceThread.h"
 
 #ifndef NO_DSOUND
 #include <dsound.h>
 #endif
+
+OPENMPT_NAMESPACE_BEGIN
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -30,12 +33,12 @@ class CDSoundDevice: public CSoundDeviceWithThread
 {
 protected:
 	IDirectSound *m_piDS;
-	IDirectSoundBuffer *m_pPrimary, *m_pMixBuffer;
-	ULONG m_nDSoundBufferSize;
-	ULONG m_nBytesPerSec;
-	ULONG m_BytesPerSample;
+	IDirectSoundBuffer *m_pPrimary;
+	IDirectSoundBuffer *m_pMixBuffer;
+	DWORD m_nDSoundBufferSize;
 	BOOL m_bMixRunning;
-	DWORD m_dwWritePos, m_dwLatency;
+	DWORD m_dwWritePos;
+	DWORD m_dwLatency;
 
 public:
 	CDSoundDevice(SoundDeviceID id, const std::wstring &internalID);
@@ -44,18 +47,13 @@ public:
 public:
 	bool InternalOpen();
 	bool InternalClose();
-	void FillAudioBuffer();
-	void ResetFromOutsideSoundThread();
+	void InternalFillAudioBuffer();
 	void StartFromSoundThread();
 	void StopFromSoundThread();
-	bool IsOpen() const { return (m_pMixBuffer != NULL); }
-	UINT GetNumBuffers() { return 1; } // meaning 1 ring buffer
-	float GetCurrentRealLatencyMS() { return m_dwLatency * 1000.0f / m_nBytesPerSec; }
-	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
-
-protected:
-	DWORD LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2);
-	BOOL UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DWORD dwSize2);
+	bool InternalIsOpen() const { return (m_pMixBuffer != NULL); }
+	double GetCurrentLatency() const { return 1.0 * m_dwLatency / m_Settings.GetBytesPerSecond(); }
+	SoundDeviceCaps GetDeviceCaps();
+	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 public:
 	static std::vector<SoundDeviceInfo> EnumerateDevices();
@@ -63,3 +61,5 @@ public:
 
 #endif // NO_DIRECTSOUND
 
+
+OPENMPT_NAMESPACE_END

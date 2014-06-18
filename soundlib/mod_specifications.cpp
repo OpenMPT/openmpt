@@ -13,6 +13,8 @@
 #include "../common/misc_util.h"
 #include <algorithm>
 
+OPENMPT_NAMESPACE_BEGIN
+
 namespace ModSpecs
 {
 
@@ -32,6 +34,7 @@ const CModSpecifications mptm =
 	true,										// Has notefade.
 	4000,										// Pattern max.
 	4000,										// Order max.
+	MAX_SEQUENCES,								// Sequences max
 	1,											// Channel min
 	127,										// Channel max
 	32,											// Min tempo
@@ -77,6 +80,7 @@ const CModSpecifications mod =
 	false,										// No notefade.
 	128,										// Pattern max.
 	128,										// Order max.
+	1,											// Only one order list
 	4,											// Channel min
 	99,											// Channel max
 	32,											// Min tempo
@@ -120,6 +124,7 @@ const CModSpecifications xm =
 	false,										// No notefade.
 	256,										// Pattern max.
 	255,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
 	32,											// Min tempo
@@ -133,7 +138,7 @@ const CModSpecifications xm =
 	0,											// Max instrument filename length
 	128 * 16,									// SamplesMax (actually 16 per instrument)
 	128,										// instrumentMax
-	mixLevels_compatible,						// defaultMixLevels
+	mixLevels_compatible_FT2,					// defaultMixLevels
 	0,											// Max MIDI mapping directives
 	1,											// Min Speed
 	31,											// Max Speed
@@ -163,6 +168,7 @@ const CModSpecifications xmEx =
 	false,										// No notefade.
 	256,										// Pattern max.
 	255,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
 	32,											// Min tempo
@@ -176,7 +182,7 @@ const CModSpecifications xmEx =
 	0,											// Max instrument filename length
 	MAX_SAMPLES - 1,							// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
 	255,										// instrumentMax
-	mixLevels_compatible,						// defaultMixLevels
+	mixLevels_compatible_FT2,					// defaultMixLevels
 	200,										// Max MIDI mapping directives
 	1,											// Min Speed
 	31,											// Max Speed
@@ -205,6 +211,7 @@ const CModSpecifications s3m =
 	false,										// No notefade.
 	100,										// Pattern max.
 	255,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
 	33,											// Min tempo
@@ -248,6 +255,7 @@ const CModSpecifications s3mEx =
 	false,										// No notefade.
 	100,										// Pattern max.
 	255,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
 	33,											// Min tempo
@@ -290,6 +298,7 @@ const CModSpecifications it =
 	true,										// Has notefade.
 	200,										// Pattern max.
 	256,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	64,											// Channel max
 	32,											// Min tempo
@@ -332,6 +341,7 @@ const CModSpecifications itEx =
 	true,										// Has notefade.
 	240,										// Pattern max.
 	256,										// Order max.
+	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
 	32,											// Min tempo
@@ -402,7 +412,7 @@ bool CModSpecifications::HasNote(ModCommand::NOTE note) const
 {
 	if(note >= noteMin && note <= noteMax)
 		return true;
-	else if(note >= NOTE_MIN_SPECIAL && note <= NOTE_MAX_SPECIAL)
+	else if(ModCommand::IsSpecialNote(note))
 	{
 		if(note == NOTE_NOTECUT)
 			return hasNoteCut;
@@ -450,3 +460,6 @@ char CModSpecifications::GetEffectLetter(ModCommand::COMMAND cmd) const
 	if(cmd >= MAX_EFFECTS) return '?';
 	return commands[cmd];
 }
+
+
+OPENMPT_NAMESPACE_END

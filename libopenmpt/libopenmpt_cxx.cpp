@@ -25,7 +25,7 @@ exception::exception( const std::string & text ) throw()
 	: std::exception()
 	, text(0)
 {
-	this->text = (char*)std::malloc( text.length() + 1 );
+	this->text = static_cast<char*>( std::malloc( text.length() + 1 ) );
 	if ( this->text ) {
 		std::memcpy( this->text, text.c_str(), text.length() + 1 );
 	}
@@ -108,6 +108,10 @@ module::module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream
 	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ), ctls );
 }
 
+module::module( const std::uint8_t * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+}
+
 module::module( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
 	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
 }
@@ -149,6 +153,10 @@ double module::set_position_seconds( double seconds ) {
 }
 double module::get_position_seconds() const {
 	return impl->get_position_seconds();
+}
+
+double module::set_position_order_row( std::int32_t order, std::int32_t row ) {
+	return impl->set_position_order_row( order, row );
 }
 
 std::int32_t module::get_render_param( int param ) const {
@@ -215,11 +223,20 @@ std::int32_t module::get_current_playing_channels() const {
 	return impl->get_current_playing_channels();
 }
 
+float module::get_current_channel_vu_mono( std::int32_t channel ) const {
+	return impl->get_current_channel_vu_mono( channel );
+}
 float module::get_current_channel_vu_left( std::int32_t channel ) const {
 	return impl->get_current_channel_vu_left( channel );
 }
 float module::get_current_channel_vu_right( std::int32_t channel ) const {
 	return impl->get_current_channel_vu_right( channel );
+}
+float module::get_current_channel_vu_rear_left( std::int32_t channel ) const {
+	return impl->get_current_channel_vu_rear_left( channel );
+}
+float module::get_current_channel_vu_rear_right( std::int32_t channel ) const {
+	return impl->get_current_channel_vu_rear_right( channel );
 }
 
 std::int32_t module::get_num_subsongs() const {
@@ -269,6 +286,13 @@ std::int32_t module::get_pattern_num_rows( std::int32_t pattern ) const {
 
 std::uint8_t module::get_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const {
 	return impl->get_pattern_row_channel_command( pattern, row, channel, command );
+}
+
+std::string module::format_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const {
+	return impl->format_pattern_row_channel_command( pattern, row, channel, command );
+}
+std::string module::highlight_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const {
+	return impl->highlight_pattern_row_channel_command( pattern, row, channel, command );
 }
 
 std::string module::format_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width, bool pad ) const {

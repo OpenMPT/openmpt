@@ -11,6 +11,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_AGC
 
 //========
@@ -23,10 +26,13 @@ private:
 	UINT m_Timeout;
 public:
 	CAGC();
-	void Initialize(BOOL bReset, DWORD MixingFreq);
+	void Initialize(bool bReset, DWORD MixingFreq);
 public:
 	void Process(int *MixSoundBuffer, int *RearSoundBuffer, int count, UINT nChannels);
 	void Adjust(UINT oldVol, UINT newVol);
 };
 
 #endif // NO_AGC
+
+
+OPENMPT_NAMESPACE_END

@@ -13,15 +13,19 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderFLAC.h"
 
-#include "Mainfrm.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
+
+#include <locale>
+#include <sstream>
 
 #define FLAC__NO_DLL
 #include <flac/include/FLAC/metadata.h>
 #include <flac/include/FLAC/format.h>
 #include <flac/include/FLAC/stream_encoder.h>
 
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 class FLACStreamWriter : public StreamWriterBase
@@ -114,7 +118,7 @@ private:
 		if(!field.empty() && !data.empty())
 		{
 			FLAC__StreamMetadata_VorbisComment_Entry entry;
-			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, field.c_str(), mpt::String::Encode(data, mpt::CharsetUTF8).c_str());
+			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, field.c_str(), mpt::To(mpt::CharsetUTF8, data).c_str());
 			FLAC__metadata_object_vorbiscomment_append_comment(flac_metadata[0], entry, false);
 		}
 	}
@@ -136,11 +140,8 @@ public:
 		FinishStream();
 		ASSERT(!inited && !started);
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
-		MPT_UNREFERENCED_PARAMETER(samplerate);
-		MPT_UNREFERENCED_PARAMETER(channels);
-
 		FinishStream();
 
 		ASSERT(!inited && !started);
@@ -158,11 +159,8 @@ public:
 		FLAC__stream_encoder_set_bits_per_sample(encoder, formatInfo.Sampleformat.GetBitsPerSample());
 		FLAC__stream_encoder_set_sample_rate(encoder, formatInfo.Samplerate);
 
-#ifdef MODPLUG_TRACKER
-		int compressionLevel = 5;
-		compressionLevel = CMainFrame::GetPrivateProfileLong("Export", "FLACCompressionLevel", compressionLevel, theApp.GetConfigFileName());
+		int compressionLevel = StreamEncoderSettings::Instance().FLACCompressionLevel;
 		FLAC__stream_encoder_set_compression_level(encoder, compressionLevel);
-#endif // MODPLUG_TRACKER
 		
 		inited = true;
 
@@ -263,8 +261,10 @@ FLACEncoder::FLACEncoder()
 	traits.fileExtension = "flac";
 	traits.fileShortDescription = "FLAC";
 	traits.fileDescription = "FLAC";
+	traits.encoderSettingsName = "FLAC";
 	traits.encoderName = "libFLAC";
 	std::ostringstream description;
+	description.imbue(std::locale::classic());
 	description << "Free Lossless Audio Codec" << std::endl;
 	description << "Vendor: " << FLAC__VENDOR_STRING << std::endl;
 	description << "Version: " << FLAC__VERSION_STRING << std::endl;
@@ -291,6 +291,8 @@ FLACEncoder::FLACEncoder()
 			}
 		}
 	}
+	traits.defaultSamplerate = 48000;
+	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeEnumerated;
 	traits.defaultFormat = 0;
 	SetTraits(traits);
@@ -320,3 +322,6 @@ IAudioStreamEncoder *FLACEncoder::ConstructStreamEncoder(std::ostream &file) con
 	}
 	return new FLACStreamWriter(*this, file);
 }
+
+
+OPENMPT_NAMESPACE_END

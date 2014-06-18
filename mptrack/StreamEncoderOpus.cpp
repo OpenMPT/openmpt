@@ -13,11 +13,7 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderOpus.h"
 
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Mainfrm.h"
-#include "../mptrack/Mptrack.h"
-#include "../mptrack/Reporting.h"
-#endif //MODPLUG_TRACKER
+#include "Mptrack.h"
 
 #include <deque>
 
@@ -38,11 +34,15 @@
 
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+
 struct OpusDynBind
 {
 
-	HMODULE hOgg;
-	HMODULE hOpus;
+	mpt::Library hOgg;
+	mpt::Library hOpus;
 
 	// ogg
 	int      (*ogg_stream_init)(ogg_stream_state *os,int serialno);
@@ -66,7 +66,7 @@ struct OpusDynBind
 		
 	void Reset()
 	{
-		std::memset(this, 0, sizeof(*this));
+		return;
 	}
 	OpusDynBind()
 	{
@@ -77,50 +77,44 @@ struct OpusDynBind
 		};
 		// start with trying all symbols from a single dll first
 		static const dll_names_t dll_names[] = {
-			{ "libopus-0.dll", "libopus-0.dll"  },
-			{ "libopus.dll"  , "libopus.dll"    },
-			{ "opus.dll"     , "opus.dll"       },
-			{ "libogg-0.dll" , "libopus-0.dll"  }, // official xiph.org builds
-			{ "libogg.dll"   , "libopus.dll"    },
-			{ "ogg.dll"      , "opus.dll"       }
+			{ "libopus-0", "libopus-0"  },
+			{ "libopus"  , "libopus"    },
+			{ "opus"     , "opus"       },
+			{ "libogg-0" , "libopus-0"  }, // official xiph.org builds
+			{ "libogg"   , "libopus"    },
+			{ "ogg"      , "opus"       }
 		};
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
-			if(TryLoad(dll_names[i].ogg, dll_names[i].opus))
+			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].ogg), mpt::PathString::FromUTF8(dll_names[i].opus)))
 			{
 				// success
 				break;
 			}
 		}
 	}
-	bool TryLoad(std::string Ogg_fn, std::string Opus_fn)
+	bool TryLoad(const mpt::PathString &Ogg_fn, const mpt::PathString &Opus_fn)
 	{
-		#ifdef MODPLUG_TRACKER
-			Ogg_fn = std::string(theApp.GetAppDirPath()) + Ogg_fn;
-			Opus_fn = std::string(theApp.GetAppDirPath()) + Opus_fn;
-		#endif
-		hOgg = LoadLibrary(Ogg_fn.c_str());
-		if(!hOgg)
+		hOgg = mpt::Library(mpt::LibraryPath::AppFullName(Ogg_fn));
+		if(!hOgg.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hOpus) { FreeLibrary(hOpus); hOpus = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hOpus.IsValid()) { hOpus.Unload(); }
 			return false;
 		}
-		hOpus = LoadLibrary(Opus_fn.c_str());
-		if(!hOpus)
+		hOpus = mpt::Library(mpt::LibraryPath::AppFullName(Opus_fn));
+		if(!hOpus.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hOpus) { FreeLibrary(hOpus); hOpus = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hOpus.IsValid()) { hOpus.Unload(); }
 			return false;
 		}
 		bool ok = true;
 		#define OPUS_BIND(l,f,req) do { \
-			FARPROC pf = GetProcAddress( l , #f ); \
-			if(!pf && req) \
+			if(!l.Bind( f , #f ) && req) \
 			{ \
 				ok = false; \
 			} \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
 		} while(0)
 		OPUS_BIND(hOgg,ogg_stream_init,true);
 		OPUS_BIND(hOgg,ogg_stream_packetin,true);
@@ -136,18 +130,18 @@ struct OpusDynBind
 		#undef OPUS_BIND
 		if(!ok)
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hOpus) { FreeLibrary(hOpus); hOpus = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hOpus.IsValid()) { hOpus.Unload(); }
 			Reset();
 			return false;
 		}
 		return true;
 	}
-	operator bool () const { return hOgg && hOpus; }
+	operator bool () const { return hOgg.IsValid() && hOpus.IsValid(); }
 	~OpusDynBind()
 	{
-		if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-		if(hOpus) { FreeLibrary(hOpus); hOpus = NULL; }
+		if(hOgg.IsValid()) { hOgg.Unload(); }
+		if(hOpus.IsValid()) { hOpus.Unload(); }
 		Reset();
 	}
 	Encoder::Traits BuildTraits()
@@ -160,6 +154,7 @@ struct OpusDynBind
 		traits.fileExtension = "opus";
 		traits.fileShortDescription = "Opus";
 		traits.fileDescription = "Opus";
+		traits.encoderSettingsName = "Opus";
 		traits.encoderName = "libOpus";
 		traits.description += "Version: ";
 		traits.description += (opus_get_version_string&&opus_get_version_string()?opus_get_version_string():"");
@@ -169,6 +164,8 @@ struct OpusDynBind
 		traits.samplerates = std::vector<uint32>(opus_samplerates, opus_samplerates + CountOf(opus_samplerates));
 		traits.modes = Encoder::ModeCBR | Encoder::ModeVBR;
 		traits.bitrates = std::vector<int>(opus_bitrates, opus_bitrates + CountOf(opus_bitrates));
+		traits.defaultSamplerate = 48000;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeVBR;
 		traits.defaultBitrate = 128;
 		return traits;
@@ -329,7 +326,7 @@ private:
 	{
 		if(!field.empty() && !data.empty())
 		{
-			opus_comments.push_back(field + "=" + mpt::String::Encode(data, mpt::CharsetUTF8));
+			opus_comments.push_back(field + "=" + mpt::To(mpt::CharsetUTF8, data));
 		}
 	}
 public:
@@ -349,12 +346,15 @@ public:
 		FinishStream();
 		ASSERT(!inited && !started);
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
 
 		FinishStream();
 
 		ASSERT(!inited && !started);
+
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
 
 		opus_bitrate = settings.Bitrate * 1000;
 		opus_samplerate = samplerate;
@@ -423,12 +423,11 @@ public:
 			opus.opus_multistream_encoder_ctl(st, OPUS_SET_VBR_CONSTRAINT(ctl_vbrcontraint));
 		}
 
-#ifdef MODPLUG_TRACKER
-		opus_int32 complexity = 0;
-		opus.opus_multistream_encoder_ctl(st, OPUS_GET_COMPLEXITY(&complexity));
-		complexity = CMainFrame::GetPrivateProfileLong("Export", "OpusComplexity", complexity, theApp.GetConfigFileName());
-		opus.opus_multistream_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
-#endif // MODPLUG_TRACKER
+		opus_int32 complexity = StreamEncoderSettings::Instance().OpusComplexity;
+		if(complexity >= 0)
+		{
+			opus.opus_multistream_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
+		}
 
 		OpusHeader header;
 		MemsetZero(header);
@@ -593,3 +592,7 @@ IAudioStreamEncoder *OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) 
 	}
 	return new OpusStreamWriter(*m_Opus, file);
 }
+
+
+
+OPENMPT_NAMESPACE_END

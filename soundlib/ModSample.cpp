@@ -11,8 +11,12 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #include "ModSample.h"
+#include "modsmp_ctrl.h"
 
 #include <cmath>
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 // Translate sample properties between two given formats.
@@ -28,21 +32,19 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	} else if((toType & (MOD_TYPE_MOD | MOD_TYPE_XM)) && (!(fromType & (MOD_TYPE_MOD | MOD_TYPE_XM))))
 	{
 		FrequencyToTranspose();
-		if(toType & MOD_TYPE_MOD)
-		{
-			RelativeTone = 0;
-		}
 	}
 
 	// No ping-pong loop, panning and auto-vibrato for MOD / S3M samples
 	if(toType & (MOD_TYPE_MOD | MOD_TYPE_S3M))
 	{
-		uFlags &= ~(CHN_PINGPONGLOOP | CHN_PANNING);
+		uFlags.reset(CHN_PINGPONGLOOP | CHN_PANNING);
 
 		nVibDepth = 0;
 		nVibRate = 0;
 		nVibSweep = 0;
 		nVibType = VIB_SINE;
+
+		RelativeTone = 0;
 	}
 
 	// No global volume sustain loops for MOD/S3M/XM
@@ -50,30 +52,24 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		nGlobalVol = 64;
 		// Sustain loops - convert to normal loops
-		if((uFlags & CHN_SUSTAINLOOP) != 0)
+		if(uFlags[CHN_SUSTAINLOOP])
 		{
 			// We probably overwrite a normal loop here, but since sustain loops are evaluated before normal loops, this is just correct.
 			nLoopStart = nSustainStart;
 			nLoopEnd = nSustainEnd;
-			uFlags |= CHN_LOOP;
-			if(uFlags & CHN_PINGPONGSUSTAIN)
-			{
-				uFlags |= CHN_PINGPONGLOOP;
-			} else
-			{
-				uFlags &= ~CHN_PINGPONGLOOP;
-			}
+			uFlags.set(CHN_LOOP);
+			uFlags.set(CHN_PINGPONGLOOP, uFlags[CHN_PINGPONGSUSTAIN]);
 		}
 		nSustainStart = nSustainEnd = 0;
-		uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
+		uFlags.reset(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 	}
 
 	// All XM samples have default panning, and XM's autovibrato settings are rather limited.
 	if(toType & MOD_TYPE_XM)
 	{
-		if(!(uFlags & CHN_PANNING))
+		if(!uFlags[CHN_PANNING])
 		{
-			uFlags |= CHN_PANNING;
+			uFlags.set(CHN_PANNING);
 			nPan = 128;
 		}
 
@@ -137,29 +133,128 @@ uint32 ModSample::GetSampleRate(const MODTYPE type) const
 size_t ModSample::AllocateSample()
 //--------------------------------
 {
-	// Prevent overflows...
-	if(nLength > SIZE_MAX - 6u || SIZE_MAX / GetBytesPerSample() < nLength + 6u)
-	{
-		return 0;
-	}
 	FreeSample();
 
-	size_t sampleSize = (nLength + 6u) * GetBytesPerSample();
-	if((pSample = CSoundFile::AllocateSample(sampleSize)) == nullptr)
+	if((pSample = AllocateSample(nLength, GetBytesPerSample())) == nullptr)
 	{
 		return 0;
 	} else
 	{
-		return sampleSize;
+		return GetSampleSizeInBytes();
 	}
+}
+
+
+// Allocate sample memory. On sucess, a pointer to the silenced sample buffer is returned. On failure, nullptr is returned.
+void *ModSample::AllocateSample(SmpLength numSamples, size_t bytesPerSample)
+//--------------------------------------------------------------------------
+{
+	const size_t allocSize = GetRealSampleBufferSize(numSamples, bytesPerSample);
+
+	if(allocSize != 0)
+	{
+		char *p = new (std::nothrow) char[allocSize];
+		if(p != nullptr)
+		{
+			memset(p, 0, allocSize);
+			return p + (InterpolationMaxLookahead * MaxSamplingPointSize);
+		}
+	}
+	return nullptr;
+}
+
+
+// Compute sample buffer size in bytes, including any overhead introduced by pre-computed loops and such. Returns 0 if sample is too big.
+size_t ModSample::GetRealSampleBufferSize(SmpLength numSamples, size_t bytesPerSample)
+//------------------------------------------------------------------------------------
+{
+	// Number of required lookahead samples:
+	// * 1x InterpolationMaxLookahead samples before the actual sample start. NOTE: This is currently hardcoded to 16!
+	// * 1x InterpolationMaxLookahead samples of silence after the sample end (if normal loop end == sample end, this can be optimized out).
+	// * 2x InterpolationMaxLookahead before the loop point (because we start at InterpolationMaxLookahead before the loop point and will look backwards from there as well)
+	// * 2x InterpolationMaxLookahead after the loop point (for wrap-around)
+	// * 4x InterpolationMaxLookahead for the sustain loop (same as the two points above)
+	
+	const SmpLength maxSize = Util::MaxValueOfType(numSamples);
+	const SmpLength lookaheadBufferSize = 16 + (1 + 4 + 4) * InterpolationMaxLookahead;
+
+	if(numSamples > maxSize || lookaheadBufferSize > maxSize - numSamples)
+	{
+		return 0;
+	}
+	numSamples += lookaheadBufferSize;
+
+	if(maxSize / bytesPerSample < numSamples)
+	{
+		return 0;
+	}
+
+	return numSamples * bytesPerSample;
 }
 
 
 void ModSample::FreeSample()
 //--------------------------
 {
-	CSoundFile::FreeSample(pSample);
+	FreeSample(pSample);
 	pSample = nullptr;
+}
+
+
+void ModSample::FreeSample(void *samplePtr)
+//-----------------------------------------
+{
+	if(samplePtr)
+	{
+		delete[] (((char *)samplePtr) - (InterpolationMaxLookahead * MaxSamplingPointSize));
+	}
+}
+
+
+// Set loop points and update loop wrap-around buffer
+void ModSample::SetLoop(SmpLength start, SmpLength end, bool enable, bool pingpong, CSoundFile &sndFile)
+//------------------------------------------------------------------------------------------------------
+{
+	nLoopStart = start;
+	nLoopEnd = end;
+	LimitMax(nLoopEnd, nLength);
+	if(nLoopStart < nLoopEnd)
+	{
+		uFlags.set(CHN_LOOP, enable);
+		uFlags.set(CHN_PINGPONGLOOP, pingpong && enable);
+	} else
+	{
+		nLoopStart = nLoopEnd = 0;
+		uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
+	}
+	PrecomputeLoops(sndFile, true);
+}
+
+
+// Set sustain loop points and update loop wrap-around buffer
+void ModSample::SetSustainLoop(SmpLength start, SmpLength end, bool enable, bool pingpong, CSoundFile &sndFile)
+//-------------------------------------------------------------------------------------------------------------
+{
+	nSustainStart = start;
+	nSustainEnd = end;
+	LimitMax(nLoopEnd, nLength);
+	if(nSustainStart < nSustainEnd)
+	{
+		uFlags.set(CHN_SUSTAINLOOP, enable);
+		uFlags.set(CHN_PINGPONGSUSTAIN, pingpong && enable);
+	} else
+	{
+		nSustainStart = nSustainEnd = 0;
+		uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+	}
+	PrecomputeLoops(sndFile, true);
+}
+
+
+void ModSample::PrecomputeLoops(CSoundFile &sndFile, bool updateChannels)
+//-----------------------------------------------------------------------
+{
+	ctrlSmp::PrecomputeLoops(*this, sndFile, updateChannels);
 }
 
 
@@ -202,7 +297,7 @@ void ModSample::TransposeToFrequency()
 int ModSample::FrequencyToTranspose(uint32 freq)
 //----------------------------------------------
 {
-	const float inv_log_2 = 1.44269504089f; // 1.0f/std::log(2.0f)	
+	const float inv_log_2 = 1.44269504089f; // 1.0f/std::log(2.0f)
 	return Util::Round<int>(std::log(freq * (1.0f / 8363.0f)) * (12.0f * 128.0f * inv_log_2));
 }
 
@@ -210,7 +305,11 @@ int ModSample::FrequencyToTranspose(uint32 freq)
 void ModSample::FrequencyToTranspose()
 //------------------------------------
 {
-	int f2t = FrequencyToTranspose(nC5Speed);
+	int f2t;
+	if(nC5Speed)
+		f2t = FrequencyToTranspose(nC5Speed);
+	else
+		f2t = 0;
 	int transpose = f2t >> 7;
 	int finetune = f2t & 0x7F;	//0x7F == 111 1111
 	if(finetune > 80)			// XXX Why is this 80?
@@ -222,3 +321,6 @@ void ModSample::FrequencyToTranspose()
 	RelativeTone = static_cast<int8>(transpose);
 	nFineTune = static_cast<int8>(finetune);
 }
+
+
+OPENMPT_NAMESPACE_END

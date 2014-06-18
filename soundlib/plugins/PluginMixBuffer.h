@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 // At least this part of the code is ready for double-precision rendering... :>
 // buffer_t: Sample buffer type (float, double, ...)
 // bufferSize: Buffer size in samples
@@ -106,6 +108,17 @@ public:
 		return true;
 	}
 
+	// Silence all input buffers.
+	void ClearInputBuffers(size_t numSamples)
+	//---------------------------------------
+	{
+		ASSERT(numSamples <= bufferSize);
+		for(size_t i = 0; i < inputs; i++)
+		{
+			memset(inputsArray[i], 0, numSamples * sizeof(buffer_t));
+		}
+	}
+
 	// Silence all output buffers.
 	void ClearOutputBuffers(size_t numSamples)
 	//----------------------------------------
@@ -145,3 +158,6 @@ public:
 	buffer_t **GetOutputBufferArray() const { return outputsArray; }
 
 };
+
+
+OPENMPT_NAMESPACE_END

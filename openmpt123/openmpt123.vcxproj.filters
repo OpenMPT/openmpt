@@ -43,5 +43,8 @@
     <ClInclude Include="openmpt123_waveout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="openmpt123_raw.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

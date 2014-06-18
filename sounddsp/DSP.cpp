@@ -14,6 +14,8 @@
 #include "../sounddsp/DSP.h"
 #include <math.h>
 
+OPENMPT_NAMESPACE_BEGIN
+
 #if MPT_COMPILER_MSVC
 #pragma warning(disable: 4725) // instruction may be inaccurate on some Pentiums
 #endif
@@ -31,10 +33,10 @@
 // DSP Effects internal state
 
 
-extern VOID X86_InitMixBuffer(int *pBuffer, UINT nSamples);
+extern void X86_InitMixBuffer(int *pBuffer, UINT nSamples);
 
-static VOID X86_StereoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r);
-static VOID X86_MonoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l);
+static void X86_StereoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r);
+static void X86_MonoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l);
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
@@ -44,7 +46,7 @@ static VOID X86_MonoDCRemoval(int *, UINT count, LONG *nDCRFlt_Y1l, LONG *nDCRFl
 
 #define PI	3.14159265358979323f
 static inline float Sgn(float x) { return (x >= 0) ? 1.0f : -1.0f; }
-static VOID ShelfEQ(LONG scale,
+static void ShelfEQ(LONG scale,
 			 LONG *outA1, LONG *outB0, LONG *outB1,
 			 LONG F_c, LONG F_s, float gainDC, float gainFT, float gainPI)
 {
@@ -52,14 +54,14 @@ static VOID ShelfEQ(LONG scale,
 	float gainFT2, gainDC2, gainPI2;
 	float alpha, beta0, beta1, rho;
 	float wT, quad;
-        
+
 	_asm {
 	// wT = PI*Fc/Fs
 	fild F_c
 	fldpi
 	fmulp ST(1), ST(0)
 	fild F_s
-	fdivp ST(1), ST(0)			
+	fdivp ST(1), ST(0)
 	fstp wT
 	// gain^2
 	fld gainDC
@@ -76,19 +78,19 @@ static VOID ShelfEQ(LONG scale,
 	quad = gainPI2 + gainDC2 - (gainFT2*2);
 
 	alpha = 0;
- 
+
 	if (quad != 0)
 	{
 		float lambda = (gainPI2 - gainDC2) / quad;
 	alpha  = (float)(lambda - Sgn(lambda)*sqrt(lambda*lambda - 1.0f));
 	}
- 
+
 	beta0 = 0.5f * ((gainDC + gainPI) + (gainDC - gainPI) * alpha);
 	beta1 = 0.5f * ((gainDC - gainPI) + (gainDC + gainPI) * alpha);
 	rho   = (float)((sin((wT*0.5f) - (PI/4.0f))) / (sin((wT*0.5f) + (PI/4.0f))));
- 
+
 	quad  = 1.0f / (1.0f + rho*alpha);
-    
+
 	b0 = ((beta0 + rho*beta1) * quad);
 	b1 = ((beta1 + rho*beta0) * quad);
 	a1 = - ((rho + alpha) * quad);
@@ -121,10 +123,6 @@ CDSPSettings::CDSPSettings() : m_nXBassDepth(DEFAULT_XBASS_DEPTH), m_nXBassRange
 
 CDSP::CDSP()
 {
-	// Noise Reduction: simple low-pass filter
-	nLeftNR = 0;
-	nRightNR = 0;
-
 	// Surround Encoding: 1 delay line + low-pass filter + high-pass filter
 	nSurroundSize = 0;
 	nSurroundPos = 0;
@@ -158,15 +156,11 @@ CDSP::CDSP()
 
 }
 
-void CDSP::Initialize(BOOL bReset, DWORD MixingFreq, DWORD DSPMask)
+void CDSP::Initialize(bool bReset, DWORD MixingFreq, DWORD DSPMask)
 //-----------------------------------------------------------------
 {
 	if (!m_Settings.m_nProLogicDelay) m_Settings.m_nProLogicDelay = 20;
-	if (bReset)
-	{
-		// Noise Reduction
-		nLeftNR = nRightNR = 0;
-	}
+
 	// Pro-Logic Surround
 	nSurroundPos = nSurroundSize = 0;
 	if (DSPMask & SNDDSP_SURROUND)
@@ -317,26 +311,8 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nC
 		nXBassFlt_X1 = x1;
 		nXBassFlt_Y1 = y1;
 	}
-	// Noise Reduction
-	if (DSPMask & SNDDSP_NOISEREDUCTION)
-	{
-		int n1 = nLeftNR, n2 = nRightNR;
-		int *pnr = MixSoundBuffer;
-		for (int nr=count; nr; nr--)
-		{
-			int vnr = pnr[0] >> 1;
-			pnr[0] = vnr + n1;
-			n1 = vnr;
-			vnr = pnr[1] >> 1;
-			pnr[1] = vnr + n2;
-			n2 = vnr;
-			pnr += 2;
-		}
-		nLeftNR = n1;
-		nRightNR = n2;
-	}
 
-	
+
 	} else
 	{
 
@@ -361,19 +337,6 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nC
 		nXBassFlt_X1 = x1;
 		nXBassFlt_Y1 = y1;
 	}
-	// Noise Reduction
-	if (DSPMask & SNDDSP_NOISEREDUCTION)
-	{
-		int n = nLeftNR;
-		int *pnr = MixSoundBuffer;
-		for (int nr=count; nr; pnr++, nr--)
-		{
-			int vnr = *pnr >> 1;
-			*pnr = vnr + n;
-			n = vnr;
-		}
-		nLeftNR = n;
-	}
 
 
 	}
@@ -390,7 +353,7 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nC
 
 #define DCR_AMOUNT		9
 
-static VOID X86_StereoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r)
+static void X86_StereoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l, LONG *nDCRFlt_Y1r, LONG *nDCRFlt_X1r)
 {
 	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
 	int y1r=*nDCRFlt_Y1r, x1r=*nDCRFlt_X1r;
@@ -436,7 +399,7 @@ stereodcr:
 }
 
 
-static VOID X86_MonoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l)
+static void X86_MonoDCRemoval(int *pBuffer, UINT nSamples, LONG *nDCRFlt_Y1l, LONG *nDCRFlt_X1l)
 {
 	int y1l=*nDCRFlt_Y1l, x1l=*nDCRFlt_X1l;
 	_asm {
@@ -476,7 +439,7 @@ stereodcr:
 // Clean DSP Effects interface
 
 // [XBass level 0(quiet)-100(loud)], [cutoff in Hz 20-100]
-BOOL CDSP::SetXBassParameters(UINT nDepth, UINT nRange)
+bool CDSP::SetXBassParameters(UINT nDepth, UINT nRange)
 //-----------------------------------------------------
 {
 	if (nDepth > 100) nDepth = 100;
@@ -487,12 +450,12 @@ BOOL CDSP::SetXBassParameters(UINT nDepth, UINT nRange)
 	if (range > 5) range -= 5; else range = 0;
 	if (nRange > 16) nRange = 16;
 	m_Settings.m_nXBassRange = 21 - range;	// filter average on 0.5-1.6ms
-	return TRUE;
+	return true;
 }
 
 
 // [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-50ms]
-BOOL CDSP::SetSurroundParameters(UINT nDepth, UINT nDelay)
+bool CDSP::SetSurroundParameters(UINT nDepth, UINT nDelay)
 //--------------------------------------------------------
 {
 	UINT gain = (nDepth * 16) / 100;
@@ -502,9 +465,11 @@ BOOL CDSP::SetSurroundParameters(UINT nDepth, UINT nDelay)
 	if (nDelay < 4) nDelay = 4;
 	if (nDelay > 50) nDelay = 50;
 	m_Settings.m_nProLogicDelay = nDelay;
-	return TRUE;
+	return true;
 }
 
 
 #endif // NO_DSP
 
+
+OPENMPT_NAMESPACE_END

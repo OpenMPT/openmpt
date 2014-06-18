@@ -248,7 +248,7 @@ namespace libopenmpt {
 			// 
 			this->comboBoxInterpolation->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBoxInterpolation->FormattingEnabled = true;
-			this->comboBoxInterpolation->Items->AddRange(gcnew cli::array< System::Object^  >(4) {L"1 tap (nearest)", L"2 tap (linear)", 
+			this->comboBoxInterpolation->Items->AddRange(gcnew cli::array< System::Object^  >(4) {L"off / 1 tap (nearest)", L"2 tap (linear)", 
 				L"4 tap (cubic)", L"8 tap (polyphase fir)"});
 			this->comboBoxInterpolation->Location = System::Drawing::Point(106, 111);
 			this->comboBoxInterpolation->Name = L"comboBoxInterpolation";

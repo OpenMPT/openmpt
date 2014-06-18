@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -107,7 +109,6 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 		|| fileHeader.lastOrder > 127
 		|| fileHeader.numChannels > 32
 		|| fileHeader.numChannels == 0
-		|| fileHeader.numSamples >= MAX_SAMPLES
 		|| fileHeader.lastPattern >= MAX_PATTERNS
 		|| fileHeader.beatsPerTrack == 0
 		|| !file.CanRead(sizeof(MTMSampleHeader) * fileHeader.numSamples + 128 + 192 * fileHeader.numTracks + 64 * (fileHeader.lastPattern + 1) + fileHeader.commentSize))
@@ -123,7 +124,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nType = MOD_TYPE_MTM;
 	m_nSamples = fileHeader.numSamples;
 	m_nChannels = fileHeader.numChannels;
-	madeWithTracker = mpt::String::Format("MultiTracker %d.%d", fileHeader.version >> 4, fileHeader.version & 0x0F);
+	madeWithTracker = mpt::String::Print("MultiTracker %1.%2", fileHeader.version >> 4, fileHeader.version & 0x0F);
 
 	// Reading instruments
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -147,7 +148,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading Patterns
 	const ROWINDEX rowsPerPat = std::min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS);
-	FileReader tracks = file.GetChunk(192 * fileHeader.numTracks);
+	FileReader tracks = file.ReadChunk(192 * fileHeader.numTracks);
 
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
 	{
@@ -216,3 +217,6 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 32767;
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

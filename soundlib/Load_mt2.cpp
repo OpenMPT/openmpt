@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //#define MT2DEBUG
 
 #ifdef NEEDS_PRAGMA_PACK
@@ -207,7 +209,9 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand *m, MT2COMMAND *p)
 			m->command = p->fxparam2;
 			m->param = p->fxparam1;
 			that->ConvertModCommand(*m);
+#ifdef MODPLUG_TRACKER
 			m->Convert(MOD_TYPE_XM, MOD_TYPE_IT);
+#endif // MODPLUG_TRACKER
 		} else
 		{
 			// TODO: MT2 Effects
@@ -216,8 +220,8 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand *m, MT2COMMAND *p)
 }
 
 
-bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
-//--------------------------------------------------------------------------------------
+bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------------------------------
 {
 	MT2FILEHEADER *pfh = (MT2FILEHEADER *)lpStream;
 	DWORD dwMemPos, dwDrumDataPos, dwExtraDataPos;
@@ -240,7 +244,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 
 	InitializeGlobals();
 	InitializeChannels();
-	madeWithTracker.append(pfh->szTrackerName, CountOf(pfh->szTrackerName));
+	mpt::String::Read<mpt::String::maybeNullTerminated>(madeWithTracker, pfh->szTrackerName);
 	m_nType = MOD_TYPE_MT2;
 	m_nChannels = pfh->wChannels;
 	m_nRestartPos = pfh->wRestart;
@@ -288,7 +292,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 		dwMemPos += 8;
 		if (dwMemPos + dwLen > dwMemLength) return true;
 #ifdef MT2DEBUG
-		CHAR s[5];
+		char s[5];
 		memcpy(s, &dwId, 4);
 		s[4] = 0;
 		Log("pos=0x%04X: %s: %d bytes\n", dwMemPos-8, s, dwLen);
@@ -296,7 +300,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 		switch(dwId)
 		{
 		// MSG
-		case 0x0047534D:
+		case MAGIC4LE('M','S','G','\0'):
 			if (dwLen > 3)
 			{
 				DWORD nTxtLen = dwLen;
@@ -304,11 +308,25 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 				songMessage.Read(lpStream + dwMemPos + 1, nTxtLen - 1, SongMessage::leCRLF);
 			}
 			break;
+		case MAGIC4LE('T','R','K','S'):
+			if (dwLen >= 2)
+			{
+				m_nSamplePreAmp = LittleEndianW(*(uint16 *)(lpStream+dwMemPos)) >> 9;
+				dwMemPos += 2;
+			}
+			for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
+			{
+				ChnSettings[c].Reset();
+				if(dwMemPos + 1030 < dwMemLength)
+				{
+					ChnSettings[c].nVolume = LittleEndianW(*(uint16 *)(lpStream+dwMemPos)) >> 9;
+					LimitMax(ChnSettings[c].nVolume, uint16(64));
+					dwMemPos += 1030;
+				}
+			}
+			break;
 		// SUM -> author name (or "Unregistered")
 		// TMAP
-		// TRKS
-		case 0x534b5254:
-			break;
 		}
 		dwMemPos += dwLen;
 	}
@@ -610,7 +628,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 					{
 						UINT nSmp = pmg->nSmpNo+1;
 						pIns->Keyboard[i + 12] = (SAMPLEINDEX)nSmp;
-						if (nSmp <= m_nSamples)
+						if (nSmp <= m_nSamples && SampleMap[nSmp - 1] != nullptr)
 						{
 							Samples[nSmp].nVibType = pmi->bVibType;
 							Samples[nSmp].nVibSweep = pmi->bVibSweep;
@@ -661,3 +679,6 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength, ModLoadingFlags lo
 	}
 	return true;
 }
+
+
+OPENMPT_NAMESPACE_END

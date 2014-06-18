@@ -13,6 +13,8 @@
 #include "Loaders.h"
 #include "Tables.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 void CSoundFile::ConvertModCommand(ModCommand &m) const
 //-----------------------------------------------------
 {
@@ -370,7 +372,7 @@ struct FixMODPatterns
 static bool IsMagic(const char *magic1, const char *magic2)
 //---------------------------------------------------------
 {
-	return (*reinterpret_cast<const uint32 *>(magic1) == *reinterpret_cast<const uint32 *>(magic2));
+	return std::memcmp(magic1, magic2, 4) == 0;
 }
 
 
@@ -599,6 +601,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// have this weird restart position. I think I've read somewhere that NoiseTracker actually writes 0x78 there.
 	// Files that have restart pos == 0x78: action's batman by DJ Uno (M.K.), 3ddance.mod (M15, so handled by ReadM15),
 	// VALLEY.MOD (M.K.), WormsTDC.MOD (M.K.), ZWARTZ.MOD (M.K.)
+	// Files that have an order list longer than 0x78 with restart pos = 0x78: my_shoe_is_barking.mod, papermix.mod
 	ASSERT(m_nRestartPos != 0x78 || m_nRestartPos + 1u >= realOrders);
 	if(m_nRestartPos >= 128 || m_nRestartPos + 1u >= realOrders || m_nRestartPos == 0x78)
 	{
@@ -706,9 +709,14 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading samples
 	if(loadFlags & loadSampleData)
 	{
-		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+		for(SAMPLEINDEX smp = 1; smp <= 31; smp++) if(Samples[smp].nLength)
 		{
-			MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
+			SampleIO(
+				SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				file.ReadMagic("ADPCM") ? SampleIO::ADPCM : SampleIO::signedPCM)
+				.ReadSample(Samples[smp], file);
 		}
 	}
 
@@ -1086,17 +1094,13 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
-#endif	// MODPLUG_TRACKER
-
-bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
-//-------------------------------------------------
+bool CSoundFile::SaveMod(const mpt::PathString &filename) const
+//-------------------------------------------------------------
 {
 	FILE *f;
 
-	if(m_nChannels == 0 || lpszFileName == nullptr) return false;
-	if((f = fopen(lpszFileName, "wb")) == nullptr) return false;
+	if(m_nChannels == 0 || filename.empty()) return false;
+	if((f = mpt_fopen(filename, "wb")) == nullptr) return false;
 
 	// Write song title
 	{
@@ -1284,3 +1288,6 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName) const
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

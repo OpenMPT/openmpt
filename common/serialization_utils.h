@@ -10,23 +10,28 @@
 
 #pragma once
 
-#include <string>
-#include <sstream>
-#include <vector>
+#include <algorithm>
 #include <bitset>
-#include "../common/misc_util.h"
-#include "../common/typedefs.h"
+#include <istream>
 #include <limits>
+#include <ostream>
+#include <string>
+#include <vector>
+
 #ifdef HAS_TYPE_TRAITS
 #include <type_traits>
 #endif
-#include <algorithm>
-#include <string.h>
+
+#include <cstring>
+
+#include "../common/typedefs.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 namespace srlztn //SeRiaLiZaTioN
 {
 
-typedef std::ostream::off_type Offtype;
+typedef std::ios::off_type Offtype;
 typedef Offtype Postype;
 
 typedef uintptr_t	DataSize;	// Data size type.
@@ -42,8 +47,6 @@ enum
 	SNT_NOTE =			0x20000000, // = 1 << 29
 	SNT_WARNING =		0x10000000, // = 1 << 28
 	SNT_NONE = 0,
-	SNT_ALL_ENABLED = -1,
-	SNT_DEFAULT_MASK = SNT_FAILURE | SNT_WARNING,
 
 	SNRW_BADGIVEN_STREAM =								1	| SNT_FAILURE,
 
@@ -64,16 +67,20 @@ enum
 	// Write failures.
 	SNW_INSUFFICIENT_FIXEDSIZE =						(0x10)	| SNT_FAILURE,
 	SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING =		(0x11)	| SNT_FAILURE,
-	SNW_INSUFFICIENT_MAPSIZE =							(0x12)	| SNT_FAILURE,
 	SNW_DATASIZETYPE_OVERFLOW =							(0x13)	| SNT_FAILURE,
 	SNW_MAX_WRITE_COUNT_REACHED =						(0x14)	| SNT_FAILURE,
-	SNW_SUBENTRY_FAILURE =								(0x15)	| SNT_FAILURE,
 	SNW_INSUFFICIENT_DATASIZETYPE =						(0x16)	| SNT_FAILURE
 };
 
-bool IsPrintableId(const char* pvId, const size_t nLength); // Return true if given id is printable, false otherwise. 
+
+void ReadAdaptive12(std::istream& iStrm, uint16& val);
+void ReadAdaptive1234(std::istream& iStrm, uint32& val);       
 void ReadAdaptive1248(std::istream& iStrm, uint64& val);
+
+void WriteAdaptive12(std::ostream& oStrm, const uint16 num);
+void WriteAdaptive1234(std::ostream& oStrm, const uint32 num);
 void WriteAdaptive1248(std::ostream& oStrm, const uint64& val);
+
 
 enum
 {
@@ -117,42 +124,32 @@ enum Rwf
 
 template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data)
-//------------------------------------------------------
+//---------------------------------------------------------
 {
-	union {
-		T t;
-		char b[sizeof(T)];
-	} conv;
-	STATIC_ASSERT(sizeof(conv) == sizeof(T));
-	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
-	conv.t = data;
+	char b[sizeof(T)];
+	std::memcpy(b, &data, sizeof(T));
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(conv.b, conv.b+sizeof(T));
+		std::reverse(b, b+sizeof(T));
 	#endif
-	oStrm.write(conv.b, sizeof(data));
+	oStrm.write(b, sizeof(T));
 }
 
 //Write only given number of bytes from the beginning.
 template<class T>
-inline void Binarywrite(std::ostream& oStrm, const T& data, const Offtype bytecount)
-//--------------------------------------------------------------------------
+inline void Binarywrite(std::ostream& oStrm, const T& data, const std::size_t bytecount)
+//--------------------------------------------------------------------------------------
 {
-	union {
-		T t;
-		char b[sizeof(T)];
-	} conv;
-	STATIC_ASSERT(sizeof(conv) == sizeof(T));
-	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
-	conv.t = data;
+	char b[sizeof(T)];
+	std::memcpy(b, &data, sizeof(T));
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(conv.b, conv.b+sizeof(T));
+		std::reverse(b, b+sizeof(T));
 	#endif
-	oStrm.write(conv.b, MIN(bytecount, sizeof(data)));
+	oStrm.write(b, std::min(bytecount, sizeof(T)));
 }
 
 template <class T>
 inline void WriteItem(std::ostream& oStrm, const T& data)
-//----------------------------------------------------
+//-------------------------------------------------------
 {
 	#ifdef HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
@@ -166,52 +163,42 @@ template <>
 inline void WriteItem<std::string>(std::ostream& oStrm, const std::string& str) {WriteItemString(oStrm, str.c_str(), str.length());}
 
 template <>
-inline void WriteItem<LPCSTR>(std::ostream& oStrm, const LPCSTR& psz) {WriteItemString(oStrm, psz, strlen(psz));}
+inline void WriteItem<const char *>(std::ostream& oStrm, const char * const & psz) { WriteItemString(oStrm, psz, std::strlen(psz));}
 
 
 template<class T>
 inline void Binaryread(std::istream& iStrm, T& data)
-//----------------------------------------------
+//--------------------------------------------------
 {
-	union {
-		T t;
-		char b[sizeof(T)];
-	} conv;
-	STATIC_ASSERT(sizeof(conv) == sizeof(T));
-	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
-	iStrm.read(conv.b, sizeof(T));
+	char b[sizeof(T)];
+	iStrm.read(b, sizeof(T));
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(conv.b, conv.b+sizeof(T));
+		std::reverse(b, b+sizeof(T));
 	#endif
-	data = conv.t;
+	std::memcpy(&data, b, sizeof(T));
 }
 
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
 template <class T>
 inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
-//-----------------------------------------------------------------------
+//---------------------------------------------------------------------------
 {
 	#ifdef HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
-	union {
-		T t;
-		char b[sizeof(T)];
-	} conv;
-	STATIC_ASSERT(sizeof(conv) == sizeof(T));
-	STATIC_ASSERT(sizeof(conv.b) == sizeof(T));
-	memset(conv.b, 0, sizeof(T));
-	iStrm.read(conv.b, (std::min)((size_t)bytecount, sizeof(data)));
+	char b[sizeof(T)];
+	std::memset(b, 0, sizeof(T));
+	iStrm.read(b, std::min(static_cast<std::size_t>(bytecount), sizeof(T)));
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(conv.b, conv.b+sizeof(T));
+		std::reverse(b, b+sizeof(T));
 	#endif
-	data = conv.t;
+	std::memcpy(&data, b, sizeof(T));
 }
 
 
 template <class T>
 inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
-//------------------------------------------------------------------
+//----------------------------------------------------------------------
 {
 	#ifdef HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
@@ -225,7 +212,7 @@ inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
 // Read specialization for float. If data size is 8, read double and assign it to given float.
 template <>
 inline void ReadItem<float>(std::istream& iStrm, float& f, const DataSize nSize)
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 {
 	if (nSize == 8)
 	{
@@ -240,7 +227,7 @@ inline void ReadItem<float>(std::istream& iStrm, float& f, const DataSize nSize)
 // Read specialization for double. If data size is 4, read float and assign it to given double.
 template <>
 inline void ReadItem<double>(std::istream& iStrm, double& d, const DataSize nSize)
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 {
 	if (nSize == 4)
 	{
@@ -252,21 +239,72 @@ inline void ReadItem<double>(std::istream& iStrm, double& d, const DataSize nSiz
 		Binaryread(iStrm, d);
 }
 
-void ReadItemString(std::istream& iStrm, std::string& str, const DataSize); 
+void ReadItemString(std::istream& iStrm, std::string& str, const DataSize);
 
 template <>
 inline void ReadItem<std::string>(std::istream& iStrm, std::string& str, const DataSize nSize)
-//----------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
 {
 	ReadItemString(iStrm, str, nSize);
 }
 
 
+
 class Ssb
-//=======
 {
+
+protected:
+
+	Ssb();
+
 public:
-	typedef void (*fpLogFunc_t)(const char*, ...);
+
+	// When writing, returns the number of entries written.
+	// When reading, returns the number of entries read not including unrecognized entries.
+	NumType GetCounter() const {return m_nCounter;}
+
+	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
+	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
+
+	SsbStatus GetStatus() const
+	{
+		return m_Status;
+	}
+
+protected:
+
+	// Write given string to log if log func is defined.
+	void AddToLog(const char *psz);
+
+	void AddNote(const SsbStatus s, const char* sz);
+
+protected:
+
+	SsbStatus m_Status;
+
+	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
+
+	Postype m_posStart;					// Read/write: Stream position at the beginning of object.
+
+	uint16 m_nIdbytes;					// Read/Write: Tells map ID entry size in bytes. If size is variable, value is IdSizeVariable.
+	NumType m_nCounter;					// Read/write: Keeps count of entries written/read.
+
+	std::bitset<RwfNumFlags> m_Flags;	// Read/write: Various flags.
+
+protected:
+
+	static const uint8 s_DefaultFlagbyte = 0;
+	static const char s_EntryID[3];
+
+};
+
+
+
+class SsbRead
+	: public Ssb
+{
+
+public:
 
 	enum ReadRv // Read return value.
 	{
@@ -279,69 +317,32 @@ public:
 	};
 	typedef std::vector<ReadEntry>::const_iterator ReadIterator;
 
-	Ssb(std::istream* pIstrm, std::ostream* pOstrm);
-	Ssb(std::iostream& ioStrm);
-	Ssb(std::ostream& oStrm);
-	Ssb(std::istream& iStrm);
+	SsbRead(std::istream& iStrm);
 
-	~Ssb() {delete m_pSubEntry;}
-
-	// Sets map ID size in writing.
-	void SetIdSize(uint16 idSize);
-
-	// Write header
-	void BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion);
-	void BeginWrite(const char* pszId, const uint64& nVersion) {BeginWrite(pszId, strlen(pszId), nVersion);}
-	
 	// Call this to begin reading: must be called before other read functions.
 	void BeginRead(const char* pId, const size_t nLength, const uint64& nVersion);
-	void BeginRead(const char* pszId, const uint64& nVersion) {return BeginRead(pszId, strlen(pszId), nVersion);}
-
-	// Reserves space for map to current position. Call after BeginWrite and before writing any entries.
-	void ReserveMapSize(uint32 nSize);
-
-	// Creates subentry for writing. Use SubEntry() to access the subentry and 
-	// when done, call ReleaseSubEntry. Don't call WriteItem() for 'this' while 
-	// subentry is active.
-	void CreateWriteSubEntry();
-
-	// Returns current write/read subentry. CreateWriteSubEntry/CreateReadSubEntry
-	// must be called before calling this.
-	Ssb& SubEntry() {return *m_pSubEntry;}
-
-	// Releases write subentry and writes corresponding map information.
-	void ReleaseWriteSubEntry(const char* pId, const size_t nIdLength);
-	void ReleaseWriteSubEntry(const char* pszId) {ReleaseWriteSubEntry(pszId, strlen(pszId));}
-
-	// If ID was found, returns pointer to Ssb object, nullptr if not found.
-	// Note: All reading on subentry must be done before calling ReadItem with 'this'.
-	Ssb* CreateReadSubEntry(const char* pId, const size_t nLength);
-	Ssb* CreateReadSubEntry(const char* pszId) {return CreateReadSubEntry(pszId, strlen(pszId));}
+	void BeginRead(const char* pszId, const uint64& nVersion) {return BeginRead(pszId, std::strlen(pszId), nVersion);}
 
 	// After calling BeginRead(), this returns number of entries in the file.
 	NumType GetNumEntries() const {return m_nReadEntrycount;}
 
 	// Returns read iterator to the beginning of entries.
 	// The behaviour of read iterators is undefined if map doesn't
-    // contain entry ids or data begin positions.
+	// contain entry ids or data begin positions.
 	ReadIterator GetReadBegin();
 
 	// Returns read iterator to the end(one past last) of entries.
 	ReadIterator GetReadEnd();
 
 	// Compares given id with read entry id 
-	IdMatchStatus CompareId(const ReadIterator& iter, const char* pszId) {return CompareId(iter, pszId, strlen(pszId));}
+	IdMatchStatus CompareId(const ReadIterator& iter, const char* pszId) {return CompareId(iter, pszId, std::strlen(pszId));}
 	IdMatchStatus CompareId(const ReadIterator& iter, const char* pId, const size_t nIdSize);
-
-	// When writing, returns the number of entries written.
-	// When reading, returns the number of entries read not including unrecognized entries.
-	NumType GetCounter() const {return m_nCounter;}
 
 	uint64 GetReadVersion() {return m_nReadVersion;}
 
 	// Read item using default read implementation.
 	template <class T>
-	ReadRv ReadItem(T& obj, const char* pszId) {return ReadItem(obj, pszId, strlen(pszId), srlztn::ReadItem<T>);}
+	ReadRv ReadItem(T& obj, const char* pszId) {return ReadItem(obj, pszId, std::strlen(pszId), srlztn::ReadItem<T>);}
 
 	template <class T>
 	ReadRv ReadItem(T& obj, const char* pId, const size_t nIdSize) {return ReadItem(obj, pId, nIdSize, srlztn::ReadItem<T>);}
@@ -356,9 +357,64 @@ public:
 	template <class T, class FuncObj>
 	ReadRv ReadItem(const ReadIterator& iter, T& obj, FuncObj func);
 
+private:
+
+	// Reads map to cache.
+	void CacheMap();
+
+	// Compares ID in file with expected ID.
+	void CompareId(std::istream& iStrm, const char* pId, const size_t nLength);
+
+	// Searches for entry with given ID. If found, returns pointer to corresponding entry, else
+	// returns nullptr.
+	const ReadEntry* Find(const char* pId, const size_t nLength);
+	const ReadEntry* Find(const char* pszId) {return Find(pszId, std::strlen(pszId));}
+
+	// Called after reading an object.
+	ReadRv OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin);
+
+	void AddReadNote(const SsbStatus s);
+
+	// Called after reading entry. pRe is a pointer to associated map entry if exists.
+	void AddReadNote(const ReadEntry* const pRe, const NumType nNum);
+
+	void ResetReadstatus();
+
+private:
+
+	std::istream* m_pIstrm;					// Read: Pointer to read stream.
+
+	std::vector<char> m_Idarray;		// Read: Holds entry ids.
+
+	std::vector<ReadEntry> mapData;		// Read: Contains map information.
+	uint64 m_nReadVersion;				// Read: Version is placed here when reading.
+	RposType m_rposMapBegin;			// Read: If map exists, rpos of map begin, else m_rposEndofHdrData.
+	Postype m_posMapEnd;				// Read: If map exists, map end position, else pos of end of hdrData.
+	Postype m_posDataBegin;				// Read: Data begin position.
+	RposType m_rposEndofHdrData;		// Read: rpos of end of header data.
+	NumType m_nReadEntrycount;			// Read: Number of entries.
+
+	NumType m_nNextReadHint;			// Read: Hint where to start looking for the next read entry.
+
+};
+
+
+
+class SsbWrite
+	: public Ssb
+{
+
+public:
+
+	SsbWrite(std::ostream& oStrm);
+
+	// Write header
+	void BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion);
+	void BeginWrite(const char* pszId, const uint64& nVersion) {BeginWrite(pszId, std::strlen(pszId), nVersion);}
+
 	// Write item using default write implementation.
 	template <class T>
-	void WriteItem(const T& obj, const char* pszId) {WriteItem(obj, pszId, strlen(pszId), &srlztn::WriteItem<T>);}
+	void WriteItem(const T& obj, const char* pszId) {WriteItem(obj, pszId, std::strlen(pszId), &srlztn::WriteItem<T>);}
 
 	template <class T>
 	void WriteItem(const T& obj, const char* pId, const size_t nIdSize) {WriteItem(obj, pId, nIdSize, &srlztn::WriteItem<T>);}
@@ -370,52 +426,25 @@ public:
 	// Writes mapping.
 	void FinishWrite();
 
-	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
-	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
-
-	// Write given string to log if log func is defined.
-	void AddToLog(const char *psz) {if (m_fpLogFunc) m_fpLogFunc(psz);}
-
 private:
-	// Reads map to cache.
-	void CacheMap();
-
-	// Compares ID in file with expected ID.
-	void CompareId(std::istream& iStrm, const char* pId, const size_t nLength);
-
-	// Searches for entry with given ID. If found, returns pointer to corresponding entry, else
-	// returns nullptr.
-	const ReadEntry* Find(const char* pId, const size_t nLength);
-	const ReadEntry* Find(const char* pszId) {return Find(pszId, strlen(pszId));}
-
-	// Called after reading an object.
-	ReadRv OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin);
 
 	// Called after writing an item.
 	void OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite);
-	
-	void AddNote(const SsbStatus s, const SsbStatus mask, const char* sz);
-
-	void AddReadNote(const SsbStatus s);
-
-	// Called after reading entry. pRe is a pointer to associated map entry if exists.
-	void AddReadNote(const ReadEntry* const pRe, const NumType nNum);
 
 	void AddWriteNote(const SsbStatus s);
 	void AddWriteNote(const char* pId,
-					  const size_t nIdLength,
-					  const NumType nEntryNum,
-					  const DataSize nBytecount,
-					  const RposType rposStart);
+		const size_t nIdLength,
+		const NumType nEntryNum,
+		const DataSize nBytecount,
+		const RposType rposStart);
 
 	// Writes mapping item to mapstream.
 	void WriteMapItem(const char* pId, 
-				  const size_t nIdSize,
-				  const RposType& rposDataStart,
-				  const DataSize& nDatasize,
-				  const char* pszDesc);
+		const size_t nIdSize,
+		const RposType& rposDataStart,
+		const DataSize& nDatasize,
+		const char* pszDesc);
 
-	void ResetReadstatus();
 	void ResetWritestatus() {m_Status = SNT_NONE;}
 
 	void IncrementWriteCounter();
@@ -423,78 +452,35 @@ private:
 private:
 
 	std::ostream* m_pOstrm;				// Write: Pointer to write stream.
-	std::istream* m_pIstrm;					// Read: Pointer to read stream.
 
-public:
-
-	SsbStatus m_Status;
-	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
-	fpLogFunc_t m_fpLogFunc;			// Pointer to log function.
-
-private:
-
-	SsbStatus m_Readlogmask;			// Read: Controls which read messages will be written to log.
-	SsbStatus m_Writelogmask;			// Write: Controls which write messages will be written to log.
-	
-	std::vector<char> m_Idarray;		// Read: Holds entry ids.
-
-	Postype m_posStart;					// Read/write: Stream position at the beginning of object.
-	std::vector<ReadEntry> mapData;		// Read: Contains map information.
-	uint64 m_nReadVersion;				// Read: Version is placed here when reading.
-	NumType m_nMaxReadEntryCount;		// Read: Limits the number of entries allowed to be read.
-	RposType m_rposMapBegin;			// Read: If map exists, rpos of map begin, else m_rposEndofHdrData.
-	Postype m_posMapEnd;				// Read: If map exists, map end position, else pos of end of hdrData.
-	Postype m_posDataBegin;				// Read: Data begin position.
-	RposType m_rposEndofHdrData;		// Read: rpos of end of header data.
-	NumType m_nReadEntrycount;			// Read: Number of entries.
-
-	uint16 m_nIdbytes;					// Read/Write: Tells map ID entry size in bytes. If size is variable, value is IdSizeVariable.
-	NumType m_nCounter;					// Read/write: Keeps count of entries written/read.
-	NumType m_nNextReadHint;			// Read: Hint where to start looking for the next read entry.
-	std::bitset<RwfNumFlags> m_Flags;	// Read/write: Various flags.
-
-	Ssb* m_pSubEntry;					// Read/Write: Pointer to SubEntry.
-	Postype m_posSubEntryStart;			// Write: Holds data position where SubEntry started.
-	uint32 m_nMapReserveSize;			// Write: Number of bytes to reserve for map if writing it before data.			
 	Postype m_posEntrycount;			// Write: Pos of entrycount field. 
 	Postype m_posMapPosField;			// Write: Pos of map position field.
-	Postype m_posMapStart;				// Write: Pos of map start.
-	std::ostringstream m_MapStream;				// Write: Map stream.
+	std::string m_MapStreamString;				// Write: Map stream string.
 
-public:
-	static const uint8 s_DefaultFlagbyte = 0;
-	static int32 s_DefaultReadLogMask;
-	static int32 s_DefaultWriteLogMask;
-	static fpLogFunc_t s_DefaultLogFunc;
-	static const char s_EntryID[3];
-	static const int32 s_DefaultFlags = (1 << RwfWMapStartPosEntry) +
-										 (1 << RwfWMapSizeEntry) + (1 << RwfWVersionNum) +
-										 (1 << RwfRPartialIdMatch);
 };
+
+
 
 template<typename T>
 struct IdLE
 {
-	union {
-		char b[sizeof(T)];
-		T t;
-	} conv;
+	char b[sizeof(T)];
 	IdLE(T val)
 	{
-		conv.t = val;
+		std::memcpy(b, &val, sizeof(T));
 		#ifdef MPT_PLATFORM_BIG_ENDIAN
-			std::reverse(conv.b, conv.b+sizeof(T));
+			std::reverse(b, b+sizeof(T));
 		#endif
 	}
 	const char* GetChars() const
 	{
-		return conv.b;
+		return b;
 	}
 };
 
 
 template <class T, class FuncObj>
-void Ssb::WriteItem(const T& obj, const char* pId, const size_t nIdSize, FuncObj Func)
+void SsbWrite::WriteItem(const T& obj, const char* pId, const size_t nIdSize, FuncObj Func)
 //------------------------------------------------------------------------------------
 {
 	const Postype pos = m_pOstrm->tellp();
@@ -503,7 +489,7 @@ void Ssb::WriteItem(const T& obj, const char* pId, const size_t nIdSize, FuncObj
 }
 
 template <class T, class FuncObj>
-Ssb::ReadRv Ssb::ReadItem(T& obj, const char* pId, const size_t nIdSize, FuncObj Func)
+SsbRead::ReadRv SsbRead::ReadItem(T& obj, const char* pId, const size_t nIdSize, FuncObj Func)
 //------------------------------------------------------------------------------------
 {
 	const ReadEntry* pE = Find(pId, nIdSize);
@@ -515,7 +501,7 @@ Ssb::ReadRv Ssb::ReadItem(T& obj, const char* pId, const size_t nIdSize, FuncObj
 
 
 template <class T, class FuncObj>
-Ssb::ReadRv Ssb::ReadItem(const ReadIterator& iter, T& obj, FuncObj func)
+SsbRead::ReadRv SsbRead::ReadItem(const ReadIterator& iter, T& obj, FuncObj func)
 //-----------------------------------------------------------------------
 {
 	m_pIstrm->clear();
@@ -527,7 +513,7 @@ Ssb::ReadRv Ssb::ReadItem(const ReadIterator& iter, T& obj, FuncObj func)
 }
 
 
-inline Ssb::IdMatchStatus Ssb::CompareId(const ReadIterator& iter, const char* pId, const size_t nIdSize)
+inline SsbRead::IdMatchStatus SsbRead::CompareId(const ReadIterator& iter, const char* pId, const size_t nIdSize)
 //-------------------------------------------------------------------------------------------------------
 {
 	if (nIdSize == iter->nIdLength && memcmp(&m_Idarray[iter->nIdpos], pId, iter->nIdLength) == 0)
@@ -537,7 +523,7 @@ inline Ssb::IdMatchStatus Ssb::CompareId(const ReadIterator& iter, const char* p
 }
 
 
-inline Ssb::ReadIterator Ssb::GetReadBegin()
+inline SsbRead::ReadIterator SsbRead::GetReadBegin()
 //------------------------------------------
 {
 	ASSERT(GetFlag(RwfRMapHasId) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
@@ -547,7 +533,7 @@ inline Ssb::ReadIterator Ssb::GetReadBegin()
 }
 
 
-inline Ssb::ReadIterator Ssb::GetReadEnd()
+inline SsbRead::ReadIterator SsbRead::GetReadEnd()
 //----------------------------------------
 {
 	if (GetFlag(RwfRMapCached) == false)
@@ -616,3 +602,6 @@ bool StringFromBinaryStream(std::istream& iStrm, std::string& str, const SIZETYP
 
 
 } //namespace srlztn.
+
+
+OPENMPT_NAMESPACE_END

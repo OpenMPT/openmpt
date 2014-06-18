@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="include">
+			<UniqueIdentifier>{0AE0E724-F0F1-354B-9729-A355D4CAC855}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\smbPitchShift">
+			<UniqueIdentifier>{BB110CF0-D863-A94D-9121-DF8CCE946A5A}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\include\smbPitchShift\smbPitchShift.h">
+			<Filter>include\smbPitchShift</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\include\smbPitchShift\smbPitchShift.cpp">
+			<Filter>include\smbPitchShift</Filter>
+		</ClCompile>
+	</ItemGroup>
+</Project>

@@ -19,12 +19,16 @@
 
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+
 struct VorbisDynBind
 {
 
-	HMODULE hOgg;
-	HMODULE hVorbis;
-	HMODULE hVorbisEnc;
+	mpt::Library hOgg;
+	mpt::Library hVorbis;
+	mpt::Library hVorbisEnc;
 
 	// ogg
 	int      (*ogg_stream_init)(ogg_stream_state *os,int serialno);
@@ -59,7 +63,7 @@ struct VorbisDynBind
 
 	void Reset()
 	{
-		std::memset(this, 0, sizeof(*this));
+		return;
 	}
 	VorbisDynBind()
 	{
@@ -71,67 +75,59 @@ struct VorbisDynBind
 		};
 		// start with trying all symbols from a single dll first
 		static const dll_names_t dll_names[] = {
-			{ "libvorbis.dll", "libvorbis.dll"  , "libvorbis.dll"     },
-			{ "vorbis.dll"   , "vorbis.dll"     , "vorbis.dll"        },
-			{ "libogg.dll"   , "libvorbis.dll"  , "libvorbis.dll"     }, // official xiph.org builds
-			{ "ogg.dll"      , "vorbis.dll"     , "vorbis.dll"        },
-			{ "libogg-0.dll" , "libvorbis-0.dll", "libvorbis-0.dll"   }, // mingw builds
-			{ "libogg.dll"   , "libvorbis.dll"  , "libvorbisenc.dll"  },
-			{ "ogg.dll"      , "vorbis.dll"     , "vorbisenc.dll"     },
-			{ "libogg-0.dll" , "libvorbis-0.dll", "libvorbisenc-0.dll"}  // mingw builds
+			{ "libvorbis", "libvorbis"  , "libvorbis"     },
+			{ "vorbis"   , "vorbis"     , "vorbis"        },
+			{ "libogg"   , "libvorbis"  , "libvorbis"     }, // official xiph.org builds
+			{ "ogg"      , "vorbis"     , "vorbis"        },
+			{ "libogg-0" , "libvorbis-0", "libvorbis-0"   }, // mingw builds
+			{ "libogg"   , "libvorbis"  , "libvorbisenc"  },
+			{ "ogg"      , "vorbis"     , "vorbisenc"     },
+			{ "libogg-0" , "libvorbis-0", "libvorbisenc-0"}  // mingw builds
 		};
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
-			if(TryLoad(dll_names[i].ogg, dll_names[i].vorbis, dll_names[i].vorbisenc))
+			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].ogg), mpt::PathString::FromUTF8(dll_names[i].vorbis), mpt::PathString::FromUTF8(dll_names[i].vorbisenc)))
 			{
 				// success
 				break;
 			}
 		}
 	}
-	bool TryLoad(std::string Ogg_fn, std::string Vorbis_fn, std::string VorbisEnc_fn)
+	bool TryLoad(const mpt::PathString &Ogg_fn, const mpt::PathString &Vorbis_fn, const mpt::PathString &VorbisEnc_fn)
 	{
-		#ifdef MODPLUG_TRACKER
-			Ogg_fn = std::string(theApp.GetAppDirPath()) + Ogg_fn;
-			Vorbis_fn = std::string(theApp.GetAppDirPath()) + Vorbis_fn;
-			VorbisEnc_fn = std::string(theApp.GetAppDirPath()) + VorbisEnc_fn;
-		#endif
-		hOgg = LoadLibrary(Ogg_fn.c_str());
-		if(!hOgg)
+		hOgg = mpt::Library(mpt::LibraryPath::AppFullName(Ogg_fn));
+		if(!hOgg.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hVorbis.IsValid()) { hVorbis.Unload(); }
+			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 			return false;
 		}
-		hVorbis = LoadLibrary(Vorbis_fn.c_str());
-		if(!hVorbis)
+		hVorbis = mpt::Library(mpt::LibraryPath::AppFullName(Vorbis_fn));
+		if(!hVorbis.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hVorbis.IsValid()) { hVorbis.Unload(); }
+			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 			return false;
 		}
-		hVorbisEnc = LoadLibrary(VorbisEnc_fn.c_str());
-		if(!hVorbisEnc)
+		hVorbisEnc = mpt::Library(mpt::LibraryPath::AppFullName(VorbisEnc_fn));
+		if(!hVorbisEnc.IsValid())
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hVorbis.IsValid()) { hVorbis.Unload(); }
+			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 			return false;
 		}
 		bool ok = true;
 		#define VORBIS_BIND(l,f) do { \
-			FARPROC pf = GetProcAddress( l , #f ); \
-			if(!pf) \
+			if(!l.Bind( f , #f )) \
 			{ \
 				ok = false; \
 			} \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
 		} while(0)
 		#define VORBIS_BIND_OPTIONAL(l,f) do { \
-			FARPROC pf = GetProcAddress( l , #f ); \
-			*reinterpret_cast<void**>(& f ) = reinterpret_cast<void*>(pf); \
+			l.Bind( f , #f ); \
 		} while(0)
 		VORBIS_BIND(hOgg,ogg_stream_init);
 		VORBIS_BIND(hOgg,ogg_stream_packetin);
@@ -162,20 +158,20 @@ struct VorbisDynBind
 		#undef VORBIS_BIND_OPTIONAL
 		if(!ok)
 		{
-			if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-			if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-			if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+			if(hOgg.IsValid()) { hOgg.Unload(); }
+			if(hVorbis.IsValid()) { hVorbis.Unload(); }
+			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 			Reset();
 			return false;
 		}
 		return true;
 	}
-	operator bool () const { return hOgg && hVorbis && hVorbisEnc; }
+	operator bool () const { return hOgg.IsValid() && hVorbis.IsValid() && hVorbisEnc.IsValid(); }
 	~VorbisDynBind()
 	{
-		if(hOgg) { FreeLibrary(hOgg); hOgg = NULL; }
-		if(hVorbis) { FreeLibrary(hVorbis); hVorbis = NULL; }
-		if(hVorbisEnc) { FreeLibrary(hVorbisEnc); hVorbisEnc = NULL; }
+		if(hOgg.IsValid()) { hOgg.Unload(); }
+		if(hVorbis.IsValid()) { hVorbis.Unload(); }
+		if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 		Reset();
 	}
 	Encoder::Traits BuildTraits()
@@ -188,6 +184,7 @@ struct VorbisDynBind
 		traits.fileExtension = "ogg";
 		traits.fileShortDescription = "Vorbis";
 		traits.fileDescription = "Ogg Vorbis";
+		traits.encoderSettingsName = "Vorbis";
 		traits.encoderName = "libVorbis";
 		traits.description += "Version: ";
 		traits.description += (vorbis_version_string&&vorbis_version_string()?vorbis_version_string():"unknown");
@@ -197,6 +194,8 @@ struct VorbisDynBind
 		traits.samplerates = std::vector<uint32>(vorbis_samplerates, vorbis_samplerates + CountOf(vorbis_samplerates));
 		traits.modes = Encoder::ModeVBR | Encoder::ModeQuality;
 		traits.bitrates = std::vector<int>(vorbis_bitrates, vorbis_bitrates + CountOf(vorbis_bitrates));
+		traits.defaultSamplerate = 48000;
+		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeQuality;
 		traits.defaultBitrate = 160;
 		traits.defaultQuality = 0.5;
@@ -291,7 +290,7 @@ private:
 	{
 		if(!field.empty() && !data.empty())
 		{
-			vorbis.vorbis_comment_add_tag(&vc, field.c_str(), mpt::String::Encode(data, mpt::CharsetUTF8).c_str());
+			vorbis.vorbis_comment_add_tag(&vc, field.c_str(), mpt::To(mpt::CharsetUTF8, data).c_str());
 		}
 	}
 public:
@@ -309,12 +308,15 @@ public:
 		FinishStream();
 		ASSERT(!inited && !started);
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
 
 		FinishStream();
 
 		ASSERT(!inited && !started);
+
+		uint32 samplerate = settings.Samplerate;
+		uint16 channels = settings.Channels;
 
 		vorbis_channels = channels;
 		vorbis_tags = settings.Tags;
@@ -445,3 +447,6 @@ std::string VorbisEncoder::DescribeQuality(float quality) const
 	return mpt::String::Format("Q%3.1f", quality * 10.0f);
 }
 
+
+
+OPENMPT_NAMESPACE_END

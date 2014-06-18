@@ -13,6 +13,9 @@
 #include "ModInstrument.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Convert envelope data between various formats.
 void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 //----------------------------------------------------------------
@@ -74,8 +77,8 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 
 
 // Get envelope value at a given tick. Returns value in range [0.0, 1.0].
-float InstrumentEnvelope::GetValueFromPosition(int position) const
-//----------------------------------------------------------------
+float InstrumentEnvelope::GetValueFromPosition(int position, int range) const
+//---------------------------------------------------------------------------
 {
 	uint32 pt = nNodes - 1u;
 
@@ -95,7 +98,7 @@ float InstrumentEnvelope::GetValueFromPosition(int position) const
 	if(position >= x2)
 	{
 		// Case: current 'tick' is on a envelope point.
-		value = static_cast<float>(Values[pt]) / 64.0f;
+		value = static_cast<float>(Values[pt]) / float(range);
 	} else
 	{
 		// Case: current 'tick' is between two envelope points.
@@ -104,7 +107,7 @@ float InstrumentEnvelope::GetValueFromPosition(int position) const
 		if(pt)
 		{
 			// Get previous node's value and tick.
-			value = static_cast<float>(Values[pt - 1]) / 64.0f;
+			value = static_cast<float>(Values[pt - 1]) / float(range);
 			x1 = Ticks[pt - 1];
 		}
 
@@ -112,7 +115,7 @@ float InstrumentEnvelope::GetValueFromPosition(int position) const
 		{
 			// Linear approximation between the points;
 			// f(x + d) ~ f(x) + f'(x) * d, where f'(x) = (y2 - y1) / (x2 - x1)
-			value += ((position - x1) * (static_cast<float>(Values[pt]) / 64.0f - value)) / (x2 - x1);
+			value += ((position - x1) * (static_cast<float>(Values[pt]) / float(range) - value)) / (x2 - x1);
 		}
 	}
 
@@ -261,3 +264,6 @@ void ModInstrument::GetSamples(std::vector<bool> &referencedSamples) const
 		}
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

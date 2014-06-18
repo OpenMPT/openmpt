@@ -15,6 +15,9 @@
 #include "ChannelManagerDlg.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 ///////////////////////////////////////////////////////////
 // CChannelManagerDlg
 
@@ -124,7 +127,7 @@ CChannelManagerDlg::CChannelManagerDlg(void)
 
 CChannelManagerDlg::~CChannelManagerDlg(void)
 {
-	if(this == CChannelManagerDlg::sharedInstance_) CChannelManagerDlg::sharedInstance_ = NULL;
+	if(this == CChannelManagerDlg::sharedInstance_) CChannelManagerDlg::sharedInstance_ = nullptr;
 	if(bkgnd) DeleteObject(bkgnd);
 }
 
@@ -135,16 +138,16 @@ BOOL CChannelManagerDlg::OnInitDialog()
 	HWND menu = ::GetDlgItem(m_hWnd,IDC_TAB1);
 
 	TCITEM tie;
-	tie.mask = TCIF_TEXT | TCIF_IMAGE; 
-	tie.iImage = -1; 
-	tie.pszText = "Solo/Mute"; 
-	TabCtrl_InsertItem(menu, 0, &tie); 
-	tie.pszText = "Record select"; 
-	TabCtrl_InsertItem(menu, 1, &tie); 
-	tie.pszText = "Fx plugins"; 
-	TabCtrl_InsertItem(menu, 2, &tie); 
-	tie.pszText = "Reorder/Remove"; 
-	TabCtrl_InsertItem(menu, 3, &tie); 
+	tie.mask = TCIF_TEXT | TCIF_IMAGE;
+	tie.iImage = -1;
+	tie.pszText = "Solo/Mute";
+	TabCtrl_InsertItem(menu, 0, &tie);
+	tie.pszText = "Record select";
+	TabCtrl_InsertItem(menu, 1, &tie);
+	tie.pszText = "Fx plugins";
+	TabCtrl_InsertItem(menu, 2, &tie);
+	tie.pszText = "Reorder/Remove";
+	TabCtrl_InsertItem(menu, 3, &tie);
 	currentTab = 0;
 
 	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
@@ -602,42 +605,23 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 	CWnd::OnSize(nType,cx,cy);
 	if(!m_hWnd || !show) return;
 
-	CWnd *button;
-	CRect wnd,btn;
-	GetWindowRect(&wnd);
-
-	if((button = GetDlgItem(IDC_BUTTON1)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON2)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON3)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON4)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON5)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-	if((button = GetDlgItem(IDC_BUTTON6)) != nullptr)
-	{
-		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL, btn.left - wnd.left - 3, wnd.Height() - btn.Height() * 2 - 8, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-	}
-
+	CRect wnd;
 	GetClientRect(&wnd);
+
+	// Move butttons to bottom of the window
+	static const int buttons[] = { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6 };
+	for(size_t i = 0; i < CountOf(buttons); i++)
+	{
+		CWnd *button = GetDlgItem(buttons[i]);
+		if(button != nullptr)
+		{
+			CRect btn;
+			button->GetClientRect(&btn);
+			button->MapWindowPoints(this, &btn);
+			button->SetWindowPos(nullptr, btn.left, wnd.Height() - btn.Height() - 3, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+		}
+	}
+
 	wnd.DeflateRect(10, 38, 8, 30);
 	if(bkgnd) DeleteObject(bkgnd);
 	bkgnd = ::CreateCompatibleBitmap(::GetDC(m_hWnd), wnd.Width(), wnd.Height());
@@ -1194,3 +1178,6 @@ void CChannelManagerDlg::OnRButtonDblClk(UINT nFlags, CPoint point)
 	OnRButtonDown(nFlags, point);
 	CDialog::OnRButtonDblClk(nFlags, point);
 }
+
+
+OPENMPT_NAMESPACE_END

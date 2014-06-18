@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 struct InstrumentEnvelope;
 
 //=======================================
@@ -32,3 +34,5 @@ protected:
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 };
+
+OPENMPT_NAMESPACE_END

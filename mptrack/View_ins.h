@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 #define INSSTATUS_DRAGGING		0x01
 #define INSSTATUS_NCLBTNDOWN	0x02
 #define INSSTATUS_SPLITCURSOR	0x04
@@ -25,7 +27,7 @@ class CViewInstrument: public CModScrollView
 protected:
 	CImageList m_bmpEnvBar;
 	POINT m_ptMenu;
-	RECT m_rcClient;
+	CRect m_rcClient;
 
 	CBitmap m_bmpGrid;
 	CBitmap m_bmpMemMain;
@@ -131,7 +133,7 @@ protected:
 	////////////////////////
 	// Misc stuff
 	void UpdateScrollSize();
-	void SetInstrumentModified();
+	void SetModified(DWORD mask, bool updateAll);
 	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes m_nEnv = ENV_VOLUME);
 	ModInstrument *GetInstrumentPtr() const;
 	InstrumentEnvelope *GetEnvelopePtr() const;
@@ -140,12 +142,11 @@ protected:
 	int TickToScreen(int nTick) const;
 	int PointToScreen(int nPoint) const;
 	int ScreenToTick(int x) const;
-	int QuickScreenToTick(int x, int cachedScrollPos) const;
 	int ScreenToPoint(int x, int y) const;
 	int ValueToScreen(int val) const { return m_rcClient.bottom - 1 - (val * (m_rcClient.bottom - 1)) / 64; }
 	int ScreenToValue(int y) const;
 	void InvalidateEnvelope() { InvalidateRect(NULL, FALSE); }
-	void DrawPositionMarks(HDC hdc);
+	void DrawPositionMarks();
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
@@ -162,7 +163,7 @@ public:
 	virtual void OnInitialUpdate();
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-	virtual BOOL OnDragonDrop(BOOL, LPDRAGONDROP);
+	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
 	virtual LRESULT OnPlayerNotify(Notification *);
 	//}}AFX_VIRTUAL
 
@@ -221,3 +222,6 @@ private:
 	uint16 EnvGetReleaseNodeValue();
 	uint16 EnvGetReleaseNodeTick();
 };
+
+
+OPENMPT_NAMESPACE_END

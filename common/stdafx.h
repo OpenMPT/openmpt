@@ -25,44 +25,52 @@
 #include <afxdlgs.h>
 #include <afxole.h>
 
+#include <windows.h>
 #include <windowsx.h>
-
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4201)
-#endif
+#include <shlwapi.h>
 #include <mmsystem.h>
-#include <mmreg.h>
-#include <msacm.h>
-#if MPT_COMPILER_MSVC
-#pragma warning(default:4201)
-#endif
 
 #endif // MODPLUG_TRACKER
 
 
-#ifndef NO_PCH
+#if MPT_COMPILER_MSVC
+#include <intrin.h>
+#endif
 
-#include <istream>
-#include <ostream>
-#include <sstream>
-#include <string>
-#include <vector>
 
-#endif // NO_PCH
-
+#if defined(MPT_USE_WINDOWS_H)
+#include <windows.h>
+#endif
 
 // this will be available everywhere
+
 #include "../common/typedefs.h"
-// this adds:
 // <memory>
 // <new>
-// <string>
-// <vector>
 // <cstdarg>
 // <cstdint>
+// <stdint.h>
+
+#include "../common/mptString.h"
+// <limits>
+// <string>
+// <type_traits>
+// <cstring>
+
+#include "../common/mptPathString.h"
 // <cstdio>
 // <stdio.h>
-// <windows.h> or just basic typedefs found in there
+
+#include "../common/Logging.h"
+
+#include "../common/misc_util.h"
+// <limits>
+// <string>
+// <type_traits>
+// <vector>
+// <cmath>
+// <cstring>
+// <time.h>
 
 
 //{{AFX_INSERT_LOCATION}}

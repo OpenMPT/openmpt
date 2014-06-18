@@ -20,15 +20,14 @@
 #include "math.h"
 #include "../common/misc_util.h"
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#include "Ctrl_pat.h"
-#include "ctrl_gen.h"
-// -! NEW_FEATURE#0015
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlGeneral)
 	ON_WM_VSCROLL()
+	ON_COMMAND(IDC_BUTTON1,					OnTapTempo)
 	ON_COMMAND(IDC_BUTTON_MODTYPE,			OnSongProperties)
 	ON_COMMAND(IDC_BUTTON_PLAYERPROPS,		OnPlayerProperties)
 	ON_COMMAND(IDC_CHECK_LOOPSONG,			OnLoopSongChanged)
@@ -160,6 +159,48 @@ void CCtrlGeneral::OnDeactivatePage()
 }
 
 
+void CCtrlGeneral::OnTapTempo()
+//-----------------------------
+{
+	static uint32 tapLength[16], lastTap = 0;
+	// Shift back the previously recorded tap history
+	for(size_t i = CountOf(tapLength) - 1; i >= 1; i--)
+	{
+		tapLength[i] = tapLength[i - 1];
+	}
+	const uint32 now = timeGetTime();
+	tapLength[0] = now - lastTap;
+	lastTap = now;
+
+	// Now average over complete tap history
+	uint32 numSamples = 0, delay = 0;
+	for(uint32 i = 0; i < CountOf(tapLength); i++)
+	{
+		if(tapLength[i] < 2000)
+		{
+			numSamples++;
+			delay += tapLength[i];
+		} else
+		{
+			break;
+		}
+	}
+	if(delay)
+	{
+		uint32 newTempo = 60000 * numSamples;
+		if(m_sndFile.m_nTempoMode != tempo_mode_modern)
+		{
+			newTempo = (newTempo * m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat) / 24;
+		}
+		newTempo /= delay;
+
+		const CModSpecifications specs = m_sndFile.GetModSpecifications();
+		Limit(newTempo, specs.tempoMin, specs.tempoMax);
+		SetDlgItemInt(IDC_EDIT_TEMPO, newTempo, FALSE);
+	}
+}
+
+
 void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 //---------------------------------------------------------
 {
@@ -208,12 +249,14 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		const BOOL bIsNotMOD_XM = ((bIsNotMOD) && (m_sndFile.GetType() != MOD_TYPE_XM));
 		m_EditTempo.EnableWindow(bIsNotMOD);
 		m_SpinTempo.EnableWindow(bIsNotMOD);
+		GetDlgItem(IDC_BUTTON1)->EnableWindow(bIsNotMOD);
 		m_SliderTempo.EnableWindow(bIsNotMOD);
 		m_EditSpeed.EnableWindow(bIsNotMOD);
 		m_SpinSpeed.EnableWindow(bIsNotMOD);
-		m_SliderGlobalVol.EnableWindow(bIsNotMOD_XM);
-		m_EditGlobalVol.EnableWindow(bIsNotMOD_XM);
-		m_SpinGlobalVol.EnableWindow(bIsNotMOD_XM);
+		const BOOL globalVol = bIsNotMOD_XM || m_sndFile.m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME;
+		m_SliderGlobalVol.EnableWindow(globalVol);
+		m_EditGlobalVol.EnableWindow(globalVol);
+		m_SpinGlobalVol.EnableWindow(globalVol);
 		m_EditSamplePA.EnableWindow(bIsNotMOD);
 		m_SpinSamplePA.EnableWindow(bIsNotMOD);
 		//m_SliderSamplePreAmp.EnableWindow(bIsNotMOD);
@@ -269,7 +312,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			if ((tempo >= m_sndFile.GetModSpecifications().tempoMin) && (tempo <= m_sndFile.GetModSpecifications().tempoMax) && (tempo != m_sndFile.m_nDefaultTempo))
 			{
 				m_sndFile.m_nDefaultTempo = tempo;
-				m_sndFile.m_nMusicTempo = tempo;
+				m_sndFile.m_PlayState.m_nMusicTempo = tempo;
 				m_modDoc.SetModified();
 
 				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
@@ -281,7 +324,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			const UINT gv = MAX_SLIDER_GLOBAL_VOL - m_SliderGlobalVol.GetPos();
 			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_sndFile.m_nDefaultGlobalVolume))
 			{
-				m_sndFile.m_nGlobalVolume = gv;
+				m_sndFile.m_PlayState.m_nGlobalVolume = gv;
 				m_sndFile.m_nDefaultGlobalVolume = gv;
 				m_modDoc.SetModified();
 
@@ -344,16 +387,16 @@ void CCtrlGeneral::OnTempoChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			n = CLAMP(n, m_sndFile.GetModSpecifications().tempoMin, m_sndFile.GetModSpecifications().tempoMax);
+			n = Clamp(n, m_sndFile.GetModSpecifications().tempoMin, m_sndFile.GetModSpecifications().tempoMax);
 			if (n != m_sndFile.m_nDefaultTempo)
 			{
 				m_bEditsLocked=true;
 				m_EditTempo.SetModify(FALSE);
 				m_sndFile.m_nDefaultTempo = n;
-				m_sndFile.m_nMusicTempo = n;
+				m_sndFile.m_PlayState.m_nMusicTempo = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
-				UpdateView(HINT_MODGENERAL, NULL); 
+				UpdateView(HINT_MODGENERAL, NULL);
 				m_bEditsLocked=false;
 			}
 		}
@@ -371,13 +414,13 @@ void CCtrlGeneral::OnSpeedChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			n = CLAMP(n, m_sndFile.GetModSpecifications().speedMin, m_sndFile.GetModSpecifications().speedMax);
+			n = Clamp(n, m_sndFile.GetModSpecifications().speedMin, m_sndFile.GetModSpecifications().speedMax);
 			if (n != m_sndFile.m_nDefaultSpeed)
 			{
 				m_bEditsLocked=true;
 				m_EditSpeed.SetModify(FALSE);
 				m_sndFile.m_nDefaultSpeed = n;
-				m_sndFile.m_nMusicSpeed = n;
+				m_sndFile.m_PlayState.m_nMusicSpeed = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				m_bEditsLocked=false;
@@ -452,7 +495,7 @@ void CCtrlGeneral::OnGlobalVolChanged()
 				m_bEditsLocked = true;
 				m_EditGlobalVol.SetModify(FALSE);
 				m_sndFile.m_nDefaultGlobalVolume = n;
-				m_sndFile.m_nGlobalVolume = n;
+				m_sndFile.m_PlayState.m_nGlobalVolume = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				UpdateView(HINT_MODGENERAL, NULL);
@@ -491,7 +534,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 void CCtrlGeneral::OnPlayerProperties()
 //-------------------------------------
 {
-	CMainFrame::m_nLastOptionsPage = 2; //OPTIONS_PAGE_PLAYER
+	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIXER;
 	CMainFrame::GetMainFrame()->OnViewOptions();
 }
 
@@ -505,7 +548,7 @@ void CCtrlGeneral::OnSongProperties()
 void CCtrlGeneral::OnLoopSongChanged()
 //------------------------------------
 {
-	TrackerSettings::Instance().gbLoopSong = IsDlgButtonChecked(IDC_CHECK_LOOPSONG);
+	TrackerSettings::Instance().gbLoopSong = (IsDlgButtonChecked(IDC_CHECK_LOOPSONG) != 0);
 	m_sndFile.SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
 }
 
@@ -542,7 +585,7 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText)
 				return TRUE;
 				break;
 			case IDC_SLIDER_GLOBALVOL:
-				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : wsprintf(pszText, moreRecentMixModeNote);
+				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : wsprintf(pszText, moreRecentMixModeNote);
 				return TRUE;
 				break;
 		}
@@ -641,3 +684,5 @@ VOID CVuMeter::DrawVuMeter(CDC &dc, bool /*redraw*/)
 	m_nDisplayedVu = m_nVuMeter;
 }
 
+
+OPENMPT_NAMESPACE_END

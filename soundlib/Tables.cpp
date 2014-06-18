@@ -15,31 +15,19 @@
 #include "Sndfile.h"
 
 #include "Resampler.h"
-// rewbs.resamplerConf
 #include "WindowedFIR.h"
-// end  rewbs.resamplerConf
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 /////////////////////////////////////////////////////////////////////////////
 // Common Tables
 
-const LPCSTR szNoteNames[12] =
+const char szNoteNames[12][4] =
 {
 	"C-", "C#", "D-", "D#", "E-", "F-",
 	"F#", "G-", "G#", "A-", "A#", "B-"
-};
-
-const LPCSTR szDefaultNoteNames[NOTE_MAX] = {
-	"C-0", "C#0", "D-0", "D#0", "E-0", "F-0", "F#0", "G-0", "G#0", "A-0", "A#0", "B-0",
-	"C-1", "C#1", "D-1", "D#1", "E-1", "F-1", "F#1", "G-1", "G#1", "A-1", "A#1", "B-1",
-	"C-2", "C#2", "D-2", "D#2", "E-2", "F-2", "F#2", "G-2", "G#2", "A-2", "A#2", "B-2",
-	"C-3", "C#3", "D-3", "D#3", "E-3", "F-3", "F#3", "G-3", "G#3", "A-3", "A#3", "B-3",
-	"C-4", "C#4", "D-4", "D#4", "E-4", "F-4", "F#4", "G-4", "G#4", "A-4", "A#4", "B-4",
-	"C-5", "C#5", "D-5", "D#5", "E-5", "F-5", "F#5", "G-5", "G#5", "A-5", "A#5", "B-5",
-	"C-6", "C#6", "D-6", "D#6", "E-6", "F-6", "F#6", "G-6", "G#6", "A-6", "A#6", "B-6",
-	"C-7", "C#7", "D-7", "D#7", "E-7", "F-7", "F#7", "G-7", "G#7", "A-7", "A#7", "B-7",
-	"C-8", "C#8", "D-8", "D#8", "E-8", "F-8", "F#8", "G-8", "G#8", "A-8", "A#8", "B-8",
-	"C-9", "C#9", "D-9", "D#9", "E-9", "F-9", "F#9", "G-9", "G#9", "A-9", "A#9", "B-9",
 };
 
 
@@ -48,8 +36,8 @@ const LPCSTR szDefaultNoteNames[NOTE_MAX] = {
 
 struct ModFormatInfo
 {
-	MODTYPE format;		// MOD_TYPE_XXXX
-	const char *name;			// "ProTracker"
+	MODTYPE format;			// MOD_TYPE_XXXX
+	const char *name;		// "ProTracker"
 	const char *extension;	// "mod"
 };
 
@@ -113,11 +101,14 @@ struct ModContainerInfo
 static const ModContainerInfo modContainerInfo[] =
 {
 	// Container formats
-	{ MOD_CONTAINERTYPE_GDM, "General Digital Music", "gdm" },
-	{ MOD_CONTAINERTYPE_UMX, "Unreal Music",          "umx" },
+	{ MOD_CONTAINERTYPE_GDM,   "General Digital Music",    "gdm"   },
+	{ MOD_CONTAINERTYPE_UMX,   "Unreal Music",             "umx"   },
 #ifndef NO_MO3
-	{ MOD_CONTAINERTYPE_MO3, "Un4seen MO3",           "mo3" },
+	{ MOD_CONTAINERTYPE_MO3,   "Un4seen MO3",              "mo3"   },
 #endif // NO_MO3
+	{ MOD_CONTAINERTYPE_XPK,   "XPK packed",               "xpk"   },
+	{ MOD_CONTAINERTYPE_PP20,  "PowerPack PP20",           "ppm"   },
+	{ MOD_CONTAINERTYPE_MMCMP, "Music Module Compressor",  "mmcmp" }
 };
 
 
@@ -134,54 +125,54 @@ static const ModFormatInfo otherFormatInfo[] =
 #endif
 
 
-struct ModCharsetInfo {
+struct ModCharsetInfo
+{
 	MODTYPE type;
-	MOD_CHARSET_CERTAINTY certainty;
-	const char *charset;
+	mpt::Charset charset;
 };
 
 static const ModCharsetInfo ModCharsetInfos[] =
 {
 	// Amiga
-	{ MOD_TYPE_OKT , MOD_CHARSET_IS     , "ISO-8859-1"  },
-	{ MOD_TYPE_DBM , MOD_CHARSET_IS     , "ISO-8859-1"  },
-	{ MOD_TYPE_DIGI, MOD_CHARSET_IS     , "ISO-8859-1"  },
+	{ MOD_TYPE_OKT , mpt::CharsetISO8859_1  },
+	{ MOD_TYPE_DBM , mpt::CharsetISO8859_1  },
+	{ MOD_TYPE_DIGI, mpt::CharsetISO8859_1  },
 	// Amiga // DOS
-	{ MOD_TYPE_MOD , MOD_CHARSET_MAYBE  , "ISO-8859-1"  },
-	{ MOD_TYPE_MED , MOD_CHARSET_MAYBE  , "ISO-8859-1"  },
+	{ MOD_TYPE_MOD , mpt::CharsetISO8859_1  },
+	{ MOD_TYPE_MED , mpt::CharsetISO8859_1  },
 	// DOS
-	{ MOD_TYPE_S3M , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_XM  , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_MTM , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_IT  , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_669 , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_STM , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_FAR , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_AMF , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_AMF0, MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_MDL , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_DMF , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_PTM , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_PSM , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_J2B , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_IMF , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_ULT , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_AMS , MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_AMS2, MOD_CHARSET_IS     , "cp437"       },
-	{ MOD_TYPE_DSM , MOD_CHARSET_IS     , "cp437"       },
+	{ MOD_TYPE_S3M , mpt::CharsetCP437      },
+	{ MOD_TYPE_XM  , mpt::CharsetCP437      },
+	{ MOD_TYPE_MTM , mpt::CharsetCP437      },
+	{ MOD_TYPE_IT  , mpt::CharsetCP437      },
+	{ MOD_TYPE_669 , mpt::CharsetCP437      },
+	{ MOD_TYPE_STM , mpt::CharsetCP437      },
+	{ MOD_TYPE_FAR , mpt::CharsetCP437      },
+	{ MOD_TYPE_AMF , mpt::CharsetCP437      },
+	{ MOD_TYPE_AMF0, mpt::CharsetCP437      },
+	{ MOD_TYPE_MDL , mpt::CharsetCP437      },
+	{ MOD_TYPE_DMF , mpt::CharsetCP437      },
+	{ MOD_TYPE_PTM , mpt::CharsetCP437      },
+	{ MOD_TYPE_PSM , mpt::CharsetCP437      },
+	{ MOD_TYPE_J2B , mpt::CharsetCP437      },
+	{ MOD_TYPE_IMF , mpt::CharsetCP437      },
+	{ MOD_TYPE_ULT , mpt::CharsetCP437      },
+	{ MOD_TYPE_AMS , mpt::CharsetCP437      },
+	{ MOD_TYPE_AMS2, mpt::CharsetCP437      },
+	{ MOD_TYPE_DSM , mpt::CharsetCP437      },
 	// Windows
-	{ MOD_TYPE_MT2 , MOD_CHARSET_MAYBE  , "Windows-1252"},
-	{ MOD_TYPE_MPT , MOD_CHARSET_MAYBE  , "Windows-1252"},
+	{ MOD_TYPE_MT2 , mpt::CharsetWindows1252},
+	{ MOD_TYPE_MPT , mpt::CharsetWindows1252},
 	// random stuff
-	{ MOD_TYPE_MID , MOD_CHARSET_IS     , "US-ASCII"    },
-	{ MOD_TYPE_WAV , MOD_CHARSET_MAYBE  , "US-ASCII"    },
+	{ MOD_TYPE_MID , mpt::CharsetASCII      },
+	{ MOD_TYPE_WAV , mpt::CharsetASCII      },
 	// end
-	{ MOD_TYPE_NONE, MOD_CHARSET_UNKNOWN, ""            }
+	{ MOD_TYPE_NONE, mpt::CharsetASCII      }
 };
 
 
-std::pair<MOD_CHARSET_CERTAINTY, std::string> CSoundFile::GetCharsetFromModType(MODTYPE modtype)
-//----------------------------------------------------------------------------------------------
+mpt::Charset CSoundFile::GetCharsetFromModType(MODTYPE modtype)
+//-------------------------------------------------------------
 {
 	// This is just a rough heuristic.
 	// It could be improved by adjusting the charset according to the tracker that had been used to save the file.
@@ -189,11 +180,11 @@ std::pair<MOD_CHARSET_CERTAINTY, std::string> CSoundFile::GetCharsetFromModType(
 	{
 		if(charsetInfoIt->type == modtype)
 		{
-			return std::make_pair(charsetInfoIt->certainty, charsetInfoIt->charset);
+			return charsetInfoIt->charset;
 		}
 	}
 	// fallback
-	return std::make_pair(MOD_CHARSET_UNKNOWN, "");
+	return mpt::CharsetASCII;
 }
 
 
@@ -392,15 +383,6 @@ const int8 ModRampDownTable[64] =
 	63,59,55,51,47,43,39,35,31,27,23,19,15,11,7,3
 };
 
-// Square wave table
-const int8 ModSquareTable[64] =
-{
-	127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,
-	127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,
-	-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,
-	-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127,-127
-};
-
 // Random wave table
 const int8 ModRandomTable[64] =
 {
@@ -454,26 +436,6 @@ const int8 ITRampDownTable[256] =
 	-56,-57,-57,-58,-58,-59,-59,-60,-60,-61,-61,-62,-62,-63,-63,-64,
 };
 
-// Square wave table
-const int8 ITSquareTable[256] =
-{
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-	 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-	 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-	 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-	 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-	 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-	 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-	 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-	 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-};
 
 // volume fade tables for Retrig Note:
 const int8 retrigTable1[16] =
@@ -497,6 +459,9 @@ const uint16 XMPeriodTable[104] =
 };
 
 
+// floor(8363 * 64 * 2**(-n/768))
+// 768 = 64 period steps for 12 notes
+// Table is for highest possible octave
 const uint32 XMLinearTable[768] = 
 {
 	535232,534749,534266,533784,533303,532822,532341,531861,
@@ -620,6 +585,7 @@ const int8 ft2VibratoTable[256] =
 
 
 
+// Apart from a few small differences, this table seems to contain elements with a difference of 59.
 const uint32 FineLinearSlideUpTable[16] =
 {
 	65536, 65595, 65654, 65714,	65773, 65832, 65892, 65951,
@@ -627,6 +593,7 @@ const uint32 FineLinearSlideUpTable[16] =
 };
 
 
+// Apart from a few small differences, this table seems to contain elements with a difference of 59.
 const uint32 FineLinearSlideDownTable[16] =
 {
 	65535, 65477, 65418, 65359, 65300, 65241, 65182, 65123,
@@ -634,7 +601,10 @@ const uint32 FineLinearSlideDownTable[16] =
 };
 
 
-const uint32 LinearSlideUpTable[256] = 
+// floor(65536 * 2**(n/192))
+// 192 = 16 finetune steps for 12 notes
+// Table content is in 16.16 format
+const uint32 LinearSlideUpTable[256] =
 {
 	65536, 65773, 66010, 66249, 66489, 66729, 66971, 67213, 
 	67456, 67700, 67945, 68190, 68437, 68685, 68933, 69182, 
@@ -671,8 +641,10 @@ const uint32 LinearSlideUpTable[256] =
 };
 
 
-
-const uint32 LinearSlideDownTable[256] = 
+// floor(65536 * 2**(-n/192))
+// 192 = 16 finetune steps for 12 notes
+// Table content is in 16.16 format
+const uint32 LinearSlideDownTable[256] =
 {
 	65536, 65299, 65064, 64830, 64596, 64363, 64131, 63900, 
 	63670, 63440, 63212, 62984, 62757, 62531, 62305, 62081, 
@@ -710,7 +682,7 @@ const uint32 LinearSlideDownTable[256] =
 
 
 // LUT for 2 * damping factor
-const float ITResonanceTable[128] = 
+const float ITResonanceTable[128] =
 {
 	1.0000000000000000f, 0.9786446094512940f, 0.9577452540397644f, 0.9372922182083130f,
 	0.9172759056091309f, 0.8976871371269226f, 0.8785166740417481f, 0.8597555756568909f,
@@ -747,8 +719,30 @@ const float ITResonanceTable[128] =
 };
 
 
-// Reversed sinc coefficients
+// FT2's square root panning law LUT.
+// Formula to generate this table: round(65536 * sqrt(n / 256))
+const uint16 XMPanningTable[256] =
+{
+	0,     4096,  5793,  7094,  8192,  9159,  10033, 10837, 11585, 12288, 12953, 13585, 14189, 14768, 15326, 15864,
+	16384, 16888, 17378, 17854, 18318, 18770, 19212, 19644, 20066, 20480, 20886, 21283, 21674, 22058, 22435, 22806,
+	23170, 23530, 23884, 24232, 24576, 24915, 25249, 25580, 25905, 26227, 26545, 26859, 27170, 27477, 27780, 28081,
+	28378, 28672, 28963, 29251, 29537, 29819, 30099, 30377, 30652, 30924, 31194, 31462, 31727, 31991, 32252, 32511,
+	32768, 33023, 33276, 33527, 33776, 34024, 34270, 34514, 34756, 34996, 35235, 35472, 35708, 35942, 36175, 36406,
+	36636, 36864, 37091, 37316, 37540, 37763, 37985, 38205, 38424, 38642, 38858, 39073, 39287, 39500, 39712, 39923,
+	40132, 40341, 40548, 40755, 40960, 41164, 41368, 41570, 41771, 41972, 42171, 42369, 42567, 42763, 42959, 43154,
+	43348, 43541, 43733, 43925, 44115, 44305, 44494, 44682, 44869, 45056, 45242, 45427, 45611, 45795, 45977, 46160,
+	46341, 46522, 46702, 46881, 47059, 47237, 47415, 47591, 47767, 47942, 48117, 48291, 48465, 48637, 48809, 48981,
+	49152, 49322, 49492, 49661, 49830, 49998, 50166, 50332, 50499, 50665, 50830, 50995, 51159, 51323, 51486, 51649,
+	51811, 51972, 52134, 52294, 52454, 52614, 52773, 52932, 53090, 53248, 53405, 53562, 53719, 53874, 54030, 54185,
+	54340, 54494, 54647, 54801, 54954, 55106, 55258, 55410, 55561, 55712, 55862, 56012, 56162, 56311, 56459, 56608,
+	56756, 56903, 57051, 57198, 57344, 57490, 57636, 57781, 57926, 58071, 58215, 58359, 58503, 58646, 58789, 58931,
+	59073, 59215, 59357, 59498, 59639, 59779, 59919, 60059, 60199, 60338, 60477, 60615, 60753, 60891, 61029, 61166,
+	61303, 61440, 61576, 61712, 61848, 61984, 62119, 62254, 62388, 62523, 62657, 62790, 62924, 63057, 63190, 63323,
+	63455, 63587, 63719, 63850, 63982, 64113, 64243, 64374, 64504, 64634, 64763, 64893, 65022, 65151, 65279, 65408,
+};
 
+
+// Reversed sinc coefficients for 4x256 taps polyphase FIR resampling filter (SchismTracker's lutgen.c should generate a very similar table, but it's more precise)
 const int16 CResampler::FastSincTable[256*4] =
 { // Cubic Spline
     0, 16384,     0,     0,   -31, 16383,    32,     0,   -63, 16381,    65,     0,   -93, 16378,   100,    -1, 
@@ -818,21 +812,18 @@ const int16 CResampler::FastSincTable[256*4] =
 };
 
 
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Compute Bessel function Izero(y) using a series approximation
 static double izero(double y)
 {
-    double s=1, ds=1, d=0;
+	double s=1, ds=1, d=0;
 	do
 	{
-        d = d + 2; ds = ds * (y*y)/(d*d);
-        s = s + ds;
-    } while (ds > 1E-7 * s);
+		d = d + 2; ds = ds * (y*y)/(d*d);
+		s = s + ds;
+	} while (ds > 1E-7 * s);
 	return s;
 }
 
@@ -860,13 +851,16 @@ static void getsinc(SINC_TYPE *psinc, double beta, double lowpass_factor)
 			fsinc = sin(x*kPi) * izero(beta*sqrt(1-x*x*(1.0/16.0))) / (izero_beta*x*kPi); // Kaiser window
 		}
 		double coeff = fsinc * lowpass_factor;
+#ifdef MPT_INTMIXER
 		int n = (int)std::floor(coeff * (1<<SINC_QUANTSHIFT) + 0.5);
 		ASSERT(n <= int16_max);
 		ASSERT(n > int16_min);
 		*psinc++ = static_cast<SINC_TYPE>(n);
+#else
+		*psinc++ = static_cast<SINC_TYPE>(coeff);
+#endif
 	}
 }
-
 
 #if 0
 
@@ -908,30 +902,53 @@ static void getdownsample2x(short int *psinc)
 bool CResampler::StaticTablesInitialized = false;
 SINC_TYPE CResampler::gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
 SINC_TYPE CResampler::gDownsample2x[SINC_PHASES*8];		// Downsample 2x
-#endif
+#ifndef MPT_INTMIXER
+mixsample_t CResampler::FastSincTablef[256 * 4];		// Cubic spline LUT
+mixsample_t CResampler::LinearTablef[256];				// Linear interpolation LUT
+#endif // !defined(MPT_INTMIXER)
+#endif // MODPLUG_TRACKER
 
 
 void CResampler::InitializeTables(bool force)
 {
-	#ifdef MODPLUG_TRACKER
-		if(!StaticTablesInitialized)
-		{
-			//ericus' downsampling improvement.
-			//getsinc(gDownsample13x, 8.5, 3.0/4.0);
-			//getdownsample2x(gDownsample2x);
-			getsinc(gDownsample13x, 8.5, 0.5);	   
-			getsinc(gDownsample2x, 2.7625, 0.425); 
-			//end ericus' downsampling improvement.
-			StaticTablesInitialized = true;
-		}
-	#endif
+#ifdef MODPLUG_TRACKER
+	if((m_OldSettings == m_Settings) && !force && StaticTablesInitialized) return;
+	if(!StaticTablesInitialized)
+#else
 	if((m_OldSettings == m_Settings) && !force) return;
-	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
-	getsinc(gKaiserSinc, 9.6377, m_Settings.gdWFIRCutoff);
-	#ifndef MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER
+	{
+		//ericus' downsampling improvement.
+		//getsinc(gDownsample13x, 8.5, 3.0/4.0);
+		//getdownsample2x(gDownsample2x);
 		getsinc(gDownsample13x, 8.5, 0.5);
 		getsinc(gDownsample2x, 2.7625, 0.425);
-	#endif
+		//end ericus' downsampling improvement.
+
+#ifndef MPT_INTMIXER
+		// Prepare fast sinc coefficients for floating point mixer
+		for(size_t i = 0; i < CountOf(FastSincTable); i++)
+		{
+			FastSincTablef[i] = static_cast<mixsample_t>(FastSincTable[i] * mixsample_t(1.0f / 16384.0f));
+		}
+
+		// Prepare linear interpolation coefficients for floating point mixer
+		for(size_t i = 0; i < CountOf(LinearTablef); i++)
+		{
+			LinearTablef[i] = static_cast<mixsample_t>(i * mixsample_t(1.0f / CountOf(LinearTablef)));
+		}
+#endif // !defined(MPT_INTMIXER)
+	}
+
+	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
+	getsinc(gKaiserSinc, 9.6377, m_Settings.gdWFIRCutoff);
+
+#ifdef MODPLUG_TRACKER
+	StaticTablesInitialized = true;
+#endif // MODPLUG_TRACKER
+
 	m_OldSettings = m_Settings;
 }
 
+
+OPENMPT_NAMESPACE_END

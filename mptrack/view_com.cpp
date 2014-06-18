@@ -10,28 +10,34 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "childfrm.h"
-#include "moddoc.h"
-#include "globals.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
+#include "Childfrm.h"
+#include "Moddoc.h"
+#include "Globals.h"
 #include "ctrl_com.h"
 #include "ChannelManagerDlg.h"
 #include "../common/StringFixer.h"
 #include "view_com.h"
 #include <set>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define DETAILS_TOOLBAR_CY	28
 
-typedef struct LISTCOLHDR
+struct LISTCOLHDR
 {
-	LPCSTR pszName;
+	const TCHAR *pszName;
 	UINT cx;
-} LISTCOLHDR, *PLISTCOLHDR;
+};
 
 
-enum {
-	SMPLIST_SAMPLENAME=0,
+enum
+{
+	SMPLIST_SAMPLENAME = 0,
 	SMPLIST_SAMPLENO,
 	SMPLIST_SIZE,
 	SMPLIST_TYPE,
@@ -42,8 +48,9 @@ enum {
 };
 
 
-enum {
-	INSLIST_INSTRUMENTNAME=0,
+enum
+{
+	INSLIST_INSTRUMENTNAME = 0,
 	INSLIST_INSTRUMENTNO,
 	INSLIST_SAMPLES,
 	INSLIST_ENVELOPES,
@@ -57,35 +64,28 @@ enum {
 };
 
 
-enum {
-	PATLIST_PATTERNNAME=0,
-	PATLIST_PATTERNNO,
-	PATLIST_COLUMNS
+const LISTCOLHDR gSampleHeaders[SMPLIST_COLUMNS] =
+{
+	{ _T("Sample Name"), 192},
+	{ _T("Num"), 45},
+	{ _T("Size"), 72},
+	{ _T("Type"), 45},
+	{ _T("C-5 Freq"), 80},
+	{ _T("Instr"), 64},
+	{ _T("File Name"), 128},
 };
 
-
-LISTCOLHDR gSampleHeaders[SMPLIST_COLUMNS] =
+const LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
 {
-	{"Sample Name", 192},
-	{"Num", 36},
-	{"Size", 72},
-	{"Type", 40},
-	{"C-5 Freq", 80},
-	{"Instr", 64},
-	{"File Name", 128},
-};
-
-LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
-{
-	{"Instrument Name", 192},
-	{"Num", 36},
-	{"Samples", 64},
-	{"Envelopes", 128},
-	{"File Name", 128},
-	{"Plugin", 128},
+	{ _T("Instrument Name"), 192},
+	{ _T("Num"), 45},
+	{ _T("Samples"), 64},
+	{ _T("Envelopes"), 128},
+	{ _T("File Name"), 128},
+	{ _T("Plugin"), 128},
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	{"Path", 128},
+	{ _T("Path"), 128},
 // -! NEW_FEATURE#0023
 };
 
@@ -151,12 +151,12 @@ void CViewComments::OnInitialUpdate()
 	}
 	GetClientRect(&rect);
 	m_ToolBar.Create(WS_CHILD|WS_VISIBLE|CCS_NOPARENTALIGN, rect, this, IDC_TOOLBAR_DETAILS);
-	m_ToolBar.Init();
+	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_MiscIcons, CMainFrame::GetMainFrame()->m_MiscIconsDisabled);
 	m_ItemList.Create(WS_CHILD|WS_VISIBLE|LVS_REPORT|LVS_SINGLESEL|LVS_EDITLABELS|LVS_NOSORTHEADER, rect, this, IDC_LIST_DETAILS);
 	m_ItemList.ModifyStyleEx(0, WS_EX_STATICEDGE);
 	// Add ToolBar Buttons
-	m_ToolBar.AddButton(IDC_LIST_SAMPLES, TIMAGE_TAB_SAMPLES);
-	m_ToolBar.AddButton(IDC_LIST_INSTRUMENTS, TIMAGE_TAB_INSTRUMENTS);
+	m_ToolBar.AddButton(IDC_LIST_SAMPLES, IMAGE_SAMPLES);
+	m_ToolBar.AddButton(IDC_LIST_INSTRUMENTS, IMAGE_INSTRUMENTS);
 	//m_ToolBar.AddButton(IDC_LIST_PATTERNS, TIMAGE_TAB_PATTERNS);
 	m_ToolBar.SetIndent(4);
 	UpdateButtonState();
@@ -198,7 +198,6 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	//CHAR s[256], stmp[256];
 	CHAR s[512], stmp[256]; //rewbs.fix3082
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	LV_COLUMN lvc;
 	LV_ITEM lvi, lvi2;
 
@@ -213,6 +212,11 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 		|HINT_INSNAMES|HINT_INSTRUMENT
 		/*|HINT_PATNAMES|HINT_PATTERNROW*/); // pattern stuff currently unused
 	if (!lHint) return;
+
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+
+	m_ToolBar.ChangeBitmap(IDC_LIST_INSTRUMENTS, sndFile.GetNumInstruments() ? IMAGE_INSTRUMENTS : IMAGE_INSTRMUTE);
+
 	m_ItemList.SetRedraw(FALSE);
 	// Add sample headers
 	if ((m_nListId != m_nCurrentListId) || (lHint & HINT_MODTYPE))
@@ -230,7 +234,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				MemsetZero(lvc);
 				lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 				lvc.fmt = (iSmp) ? LVCFMT_RIGHT : LVCFMT_LEFT;
-				lvc.pszText = (LPSTR)gSampleHeaders[iSmp].pszName;
+				lvc.pszText = (LPTSTR)gSampleHeaders[iSmp].pszName;
 				lvc.cx = gSampleHeaders[iSmp].cx;
 				lvc.iSubItem = iSmp;
 				m_ItemList.InsertColumn(nCol, &lvc);
@@ -246,7 +250,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				MemsetZero(lvc);
 				lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 				lvc.fmt = (i) ? LVCFMT_RIGHT : LVCFMT_LEFT;
-				lvc.pszText = (LPSTR)gInstrumentHeaders[i].pszName;
+				lvc.pszText = (LPTSTR)gInstrumentHeaders[i].pszName;
 				lvc.cx = gInstrumentHeaders[i].cx;
 				lvc.iSubItem = i;
 				m_ItemList.InsertColumn(nCol, &lvc);
@@ -257,25 +261,24 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	}
 	// Add Items
 	UINT nCount = m_ItemList.GetItemCount();
-	pSndFile = pModDoc->GetSoundFile();
 	// Add Samples
 	if ((m_nCurrentListId == IDC_LIST_SAMPLES) && (lHint & (HINT_MODTYPE|HINT_SMPNAMES|HINT_SAMPLEINFO)))
 	{
 		SAMPLEINDEX nMax = static_cast<SAMPLEINDEX>(nCount);
-		if (nMax < pSndFile->GetNumSamples()) nMax = pSndFile->GetNumSamples();
+		if (nMax < sndFile.GetNumSamples()) nMax = sndFile.GetNumSamples();
 		for (SAMPLEINDEX iSmp = 0; iSmp < nMax; iSmp++)
 		{
-			if (iSmp < pSndFile->GetNumSamples())
+			if (iSmp < sndFile.GetNumSamples())
 			{
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<SMPLIST_COLUMNS; iCol++)
 				{
-					const ModSample &sample = pSndFile->GetSample(iSmp + 1);
+					const ModSample &sample = sndFile.GetSample(iSmp + 1);
 					s[0] = 0;
 					switch(iCol)
 					{
 					case SMPLIST_SAMPLENAME:
-						mpt::String::Copy(s, pSndFile->m_szNames[iSmp + 1]);
+						mpt::String::Copy(s, sndFile.m_szNames[iSmp + 1]);
 						break;
 					case SMPLIST_SAMPLENO:
 						wsprintf(s, "%02d", iSmp + 1);
@@ -296,12 +299,12 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						}
 						break;
 					case SMPLIST_INSTR:
-						if (pSndFile->GetNumInstruments())
+						if (sndFile.GetNumInstruments())
 						{
 							bool first = true;
-							for (INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++)
+							for (INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++)
 							{
-								if (pSndFile->IsSampleReferencedByInstrument(iSmp + 1, i))
+								if (sndFile.IsSampleReferencedByInstrument(iSmp + 1, i))
 								{
 									if (!first) strcat(s, ",");
 									first = false;
@@ -321,7 +324,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case SMPLIST_MIDDLEC:
 						if (sample.nLength)
 						{
-							wsprintf(s, "%d Hz", sample.GetSampleRate(pSndFile->GetType()));
+							wsprintf(s, "%d Hz", sample.GetSampleRate(sndFile.GetType()));
 						}
 						break;
 					case SMPLIST_FILENAME:
@@ -362,15 +365,15 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	if ((m_nCurrentListId == IDC_LIST_INSTRUMENTS) && (lHint & (HINT_MODTYPE|HINT_INSNAMES|HINT_INSTRUMENT)))
 	{
 		INSTRUMENTINDEX nMax = static_cast<INSTRUMENTINDEX>(nCount);
-		if (nMax < pSndFile->GetNumInstruments()) nMax = pSndFile->GetNumInstruments();
+		if (nMax < sndFile.GetNumInstruments()) nMax = sndFile.GetNumInstruments();
 		for (INSTRUMENTINDEX iIns = 0; iIns < nMax; iIns++)
 		{
-			if (iIns < pSndFile->GetNumInstruments())
+			if (iIns < sndFile.GetNumInstruments())
 			{
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<INSLIST_COLUMNS; iCol++)
 				{
-					ModInstrument *pIns = pSndFile->Instruments[iIns+1];
+					ModInstrument *pIns = sndFile.Instruments[iIns+1];
 					s[0] = 0;
 					switch(iCol)
 					{
@@ -418,9 +421,9 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						}
 						break;
 					case INSLIST_PLUGIN:
-						if (pIns != nullptr && pIns->nMixPlug > 0 && pSndFile->m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin != nullptr)
+						if (pIns != nullptr && pIns->nMixPlug > 0 && sndFile.m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin != nullptr)
 						{
-							wsprintf(s, "FX%02d: %s", pIns->nMixPlug, pSndFile->m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName());
+							wsprintf(s, "FX%02d: %s", pIns->nMixPlug, mpt::ToLocale(mpt::CharsetUTF8, sndFile.m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName()).c_str());
 						}
 						break;
 // -> CODE#0023
@@ -428,7 +431,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case INSLIST_PATH:
 						if (pIns)
 						{
-							strncpy(s, pSndFile->m_szInstrumentPath[iIns].c_str(), _MAX_PATH);
+							strncpy(s, sndFile.m_szInstrumentPath[iIns].ToLocale().c_str(), _MAX_PATH);
 							s[_MAX_PATH] = 0;
 						}
 						break;
@@ -468,6 +471,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	{
 	}
 	m_ItemList.SetRedraw(TRUE);
+	m_ItemList.Invalidate(FALSE);
 }
 
 
@@ -655,3 +659,6 @@ LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			return CModScrollView::OnModViewMsg(wParam, lParam);
 //	}
 }
+
+
+OPENMPT_NAMESPACE_END

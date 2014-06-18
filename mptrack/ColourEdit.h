@@ -12,6 +12,8 @@
 
 #include "afxwin.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CColourEdit :
 	public CEdit
 {
@@ -33,3 +35,5 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 };
+
+OPENMPT_NAMESPACE_END

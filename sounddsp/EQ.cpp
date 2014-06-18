@@ -15,6 +15,9 @@
 #include "../sounddsp/EQ.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define EQ_BANDWIDTH	2.0
 #define EQ_ZERO			0.000001
 
@@ -27,10 +30,6 @@ static const UINT gEqLinearToDB[33] =
 	64, 76, 88, 100, 112, 124, 136, 148,
 	160, 172, 184, 196, 208, 220, 232, 244, 256
 };
-
-
-static const float32 f2ic = (float32)(1 << 28);
-static const float32 i2fc = (float32)(1.0 / (1 << 28));
 
 static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 {
@@ -401,7 +400,7 @@ CEQ::CEQ()
 }
 
 
-void CEQ::Initialize(BOOL bReset, DWORD MixingFreq)
+void CEQ::Initialize(bool bReset, DWORD MixingFreq)
 //-------------------------------------------------
 {
 	float32 fMixingFreq = (float32)MixingFreq;
@@ -410,7 +409,7 @@ void CEQ::Initialize(BOOL bReset, DWORD MixingFreq)
 	{
 		float32 k, k2, r, f;
 		float32 v0, v1;
-		BOOL b = bReset;
+		bool b = bReset;
 
 		f = gEQ[band].CenterFrequency / fMixingFreq;
 		if (f > 0.45f) gEQ[band].Gain = 1;
@@ -483,7 +482,7 @@ void CEQ::Initialize(BOOL bReset, DWORD MixingFreq)
 }
 
 
-void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq)
+void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq)
 //------------------------------------------------------------------------------------------------------
 {
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
@@ -517,14 +516,14 @@ void CEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL b
 }
 
 
-void CQuadEQ::Initialize(BOOL bReset, DWORD MixingFreq)
+void CQuadEQ::Initialize(bool bReset, DWORD MixingFreq)
 //-----------------------------------------------------
 {
 	front.Initialize(bReset, MixingFreq);
 	rear.Initialize(bReset, MixingFreq);
 }
 
-void CQuadEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq)
+void CQuadEQ::SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq)
 //----------------------------------------------------------------------------------------------------------
 {
 	front.SetEQGains(pGains, nGains, pFreqs, bReset, MixingFreq);
@@ -546,3 +545,6 @@ void CQuadEQ::Process(int *frontBuffer, int *rearBuffer, UINT nCount, UINT nChan
 		rear.ProcessStereo(rearBuffer, EQTempFloatBuffer, nCount);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

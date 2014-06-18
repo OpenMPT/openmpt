@@ -14,6 +14,7 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 
+OPENMPT_NAMESPACE_BEGIN
 
 // CMIDIMappingDialog dialog
 
@@ -21,48 +22,42 @@
 class CMIDIMappingDialog : public CDialog
 //=======================================
 {
-	DECLARE_DYNAMIC(CMIDIMappingDialog)
-
 public:
-	CMIDIMappingDialog(CWnd* pParent, CSoundFile& rSndfile);
-	virtual ~CMIDIMappingDialog();
-
-// Dialog Data
-	enum { IDD = IDD_MIDIPARAMCONTROL };
-
 	CMIDIMappingDirective m_Setting;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	DECLARE_MESSAGE_MAP()
-
-private:
 	CSoundFile& m_rSndFile;
 	CMIDIMapper& m_rMIDIMapper;
 	HWND oldMIDIRecondWnd;
 
-private:
-	void UpdateString();
-	CString CreateListString(const CMIDIMappingDirective& s);
 
-public:
-	virtual BOOL OnInitDialog();
-private:
+	// Dialog Data
+	enum { IDD = IDD_MIDIPARAMCONTROL };
 	CComboBox m_ControllerCBox;
 	CComboBox m_PluginCBox;
 	CComboBox m_PlugParamCBox;
 	CComboBox m_ChannelCBox;
 	CComboBox m_EventCBox;
-
 	CEdit m_EditValue;
-
 	CListBox m_List;
-
 	CSpinButtonCtrl m_SpinMoveMapping;
 
-	
 public:
+	CMIDIMappingDialog(CWnd* pParent, CSoundFile& rSndfile);
+	~CMIDIMappingDialog();
+
+protected:
+	void UpdateDialog();
+	void UpdateEvent();
+	void UpdateParameters();
+	void UpdateString();
+	CString CreateListString(const CMIDIMappingDirective& s);
+
+	virtual BOOL OnInitDialog();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	DECLARE_MESSAGE_MAP()
+
 	afx_msg void OnLbnSelchangeList1();
 	
 	afx_msg void OnBnClickedCheckactive();
@@ -79,3 +74,5 @@ public:
 	afx_msg void OnDeltaposSpinmovemapping(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedCheckPatRecord();
 };
+
+OPENMPT_NAMESPACE_END

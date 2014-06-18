@@ -11,6 +11,9 @@
 #pragma once
 
 #include "afxwin.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
 // CPSRatioCalc dialog
 
 class CPSRatioCalc : public CDialog
@@ -48,3 +51,5 @@ protected:
 public:
 	afx_msg void OnBnClickedOk();
 };
+
+OPENMPT_NAMESPACE_END

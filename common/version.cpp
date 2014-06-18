@@ -10,12 +10,14 @@
 #include "stdafx.h"
 #include "version.h"
 
+#include <iomanip>
+#include <locale>
 #include <sstream>
-
-#include <cstdlib>
 
 #include "versionNumber.h"
 #include "svn_version.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 namespace MptVersion {
 
@@ -23,76 +25,39 @@ const VersionNum num = MPT_VERSION_NUMERIC;
 
 const char * const str = MPT_VERSION_STR;
 
-static int parse_svnversion_to_revision( std::string svnversion )
-{
-	if(svnversion.length() == 0)
-	{
-		return 0;
-	}
-	if(svnversion.find(":") != std::string::npos)
-	{
-		svnversion = svnversion.substr(svnversion.find(":") + 1);
-	}
-	if(svnversion.find("M") != std::string::npos)
-	{
-		svnversion = svnversion.substr(0, svnversion.find("M"));
-	}
-	if(svnversion.find("S") != std::string::npos)
-	{
-		svnversion = svnversion.substr(0, svnversion.find("S"));
-	}
-	if(svnversion.find("P") != std::string::npos)
-	{
-		svnversion = svnversion.substr(0, svnversion.find("P"));
-	}
-	return std::strtol(svnversion.c_str(), 0, 10);
-}
-
-static bool parse_svnversion_to_mixed_revisions( std::string svnversion )
-{
-	if(svnversion.length() == 0)
-	{
-		return false;
-	}
-	if(svnversion.find(":") != std::string::npos)
-	{
-		return true;
-	}
-	if(svnversion.find("S") != std::string::npos)
-	{
-		return true;
-	}
-	if(svnversion.find("P") != std::string::npos)
-	{
-		return true;
-	}
-	return false;
-}
-
-static bool parse_svnversion_to_modified( std::string svnversion )
-{
-	if(svnversion.length() == 0)
-	{
-		return false;
-	}
-	if(svnversion.find("M") != std::string::npos)
-	{
-		return true;
-	}
-	return false;
-}
-
 std::string GetOpenMPTVersionStr()
 {
 	return std::string("OpenMPT ") + std::string(MPT_VERSION_STR);
 }
 
+struct version
+{
+	unsigned int a;
+	unsigned int b;
+	unsigned int c;
+	unsigned int d;
+	version() : a(0),b(0),c(0),d(0) {}
+	VersionNum Get() const
+	{
+		return (((a&0xff) << 24) | ((b&0xff) << 16) | ((c&0xff) << 8) | (d&0xff));
+	}
+};
+
 VersionNum ToNum(const std::string &s_)
 {
-	const char *s = s_.c_str();
-	unsigned int v1, v2, v3, v4; 
-	sscanf(s, "%x.%x.%x.%x", &v1, &v2, &v3, &v4);
-	return ((v1 << 24) |  (v2 << 16) | (v3 << 8) | v4);
+	std::istringstream s(s_);
+	s.imbue(std::locale::classic());
+	version v;
+	char dot = '\0';
+	s >> std::hex >> v.a;
+	s >> dot; if(dot != '.') return v.Get();
+	s >> std::hex >> v.b;
+	s >> dot; if(dot != '.') return v.Get();
+	s >> std::hex >> v.c;
+	s >> dot; if(dot != '.') return v.Get();
+	s >> std::hex >> v.d;
+	s >> dot; if(dot != '.') return v.Get();
+	return v.Get();
 }
 
 std::string ToStr(const VersionNum v)
@@ -104,11 +69,11 @@ std::string ToStr(const VersionNum v)
 	} else if((v & 0xFFFF) == 0)
 	{
 		// Only parts of the version number are known (e.g. when reading the version from the IT or S3M file header)
-		return mpt::String::Format("%X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF);
+		return mpt::String::Print("%1.%2", mpt::fmt::HEX((v >> 24) & 0xFF), mpt::fmt::HEX0<2>((v >> 16) & 0xFF));
 	} else
 	{
 		// Full version info available
-		return mpt::String::Format("%X.%02X.%02X.%02X", (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, (v) & 0xFF);
+		return mpt::String::Print("%1.%2.%3.%4", mpt::fmt::HEX((v >> 24) & 0xFF), mpt::fmt::HEX0<2>((v >> 16) & 0xFF), mpt::fmt::HEX0<2>((v >> 8) & 0xFF), mpt::fmt::HEX0<2>((v) & 0xFF));
 	}
 }
 
@@ -119,7 +84,16 @@ VersionNum RemoveBuildNumber(const VersionNum num)
 
 bool IsTestBuild(const VersionNum num)
 {
-	return ((num > MAKE_VERSION_NUMERIC(1,17,02,54) && num < MAKE_VERSION_NUMERIC(1,18,02,00) && num != MAKE_VERSION_NUMERIC(1,18,00,00)) || (num > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num));
+	return (
+			// Legacy
+			(num > MAKE_VERSION_NUMERIC(1,17,02,54) && num < MAKE_VERSION_NUMERIC(1,18,02,00) && num != MAKE_VERSION_NUMERIC(1,18,00,00))
+		||
+			// Test builds have non-zero VER_MINORMINOR
+			(num > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num)
+		||
+			// Test builds do NOT have zero VER_MINOR
+			(num >= MAKE_VERSION_NUMERIC(1,19,00,00) && ((num & 0x0000ff00) == 0x00000000))
+		);
 }
 
 bool IsDebugBuild()
@@ -144,8 +118,6 @@ int GetRevision()
 {
 	#if defined(OPENMPT_VERSION_REVISION)
 		return OPENMPT_VERSION_REVISION;
-	#elif defined(OPENMPT_VERSION_SVNVERSION)
-		return parse_svnversion_to_revision(OPENMPT_VERSION_SVNVERSION);
 	#else
 		return 0;
 	#endif
@@ -155,8 +127,6 @@ bool IsDirty()
 {
 	#if defined(OPENMPT_VERSION_DIRTY)
 		return OPENMPT_VERSION_DIRTY;
-	#elif defined(OPENMPT_VERSION_SVNVERSION)
-		return parse_svnversion_to_modified(OPENMPT_VERSION_SVNVERSION);
 	#else
 		return false;
 	#endif
@@ -166,8 +136,15 @@ bool HasMixedRevisions()
 {
 	#if defined(OPENMPT_VERSION_MIXEDREVISIONS)
 		return OPENMPT_VERSION_MIXEDREVISIONS;
-	#elif defined(OPENMPT_VERSION_SVNVERSION)
-		return parse_svnversion_to_mixed_revisions(OPENMPT_VERSION_SVNVERSION);
+	#else
+		return false;
+	#endif
+}
+
+bool IsPackage()
+{
+	#if defined(OPENMPT_VERSION_IS_PACKAGE)
+		return OPENMPT_VERSION_IS_PACKAGE;
 	#else
 		return false;
 	#endif
@@ -184,6 +161,10 @@ std::string GetStateString()
 	{
 		retval += "+dirty";
 	}
+	if(IsPackage())
+	{
+		retval += "-pkg";
+	}
 	return retval;
 }
 
@@ -195,14 +176,56 @@ std::string GetBuildDateString()
 std::string GetBuildFlagsString()
 {
 	std::string retval;
+#ifdef MODPLUG_TRACKER
 	if(IsTestBuild())
 	{
 		retval += " TEST";
 	}
+#endif // MODPLUG_TRACKER
 	if(IsDebugBuild())
 	{
 		retval += " DEBUG";
 	}
+	return retval;
+}
+
+std::string GetBuildFeaturesString()
+{
+	std::string retval;
+	#ifdef LIBOPENMPT_BUILD
+		#if MPT_COMPILER_GENERIC
+			retval += "*C++11";
+		#elif MPT_COMPILER_MSVC
+			retval += mpt::String::Print("*MSVC-%1.%2", MPT_COMPILER_MSVC_VERSION / 100, MPT_COMPILER_MSVC_VERSION % 100);
+		#elif MPT_COMPILER_GCC
+			retval += mpt::String::Print("*GCC-%1.%2.%3", MPT_COMPILER_GCC_VERSION / 10000, (MPT_COMPILER_GCC_VERSION / 100) % 100, MPT_COMPILER_GCC_VERSION % 100);
+		#elif MPT_COMPILER_CLANG
+			retval += mpt::String::Print("*Clang-%1.%2.%3", MPT_COMPILER_CLANG_VERSION / 10000, (MPT_COMPILER_CLANG_VERSION / 100) % 100, MPT_COMPILER_CLANG_VERSION % 100);
+		#else
+			retval += "*unknown";
+		#endif
+		#if defined(MPT_CHARSET_WIN32)
+			retval += " +WINAPI";
+		#elif defined(MPT_CHARSET_ICONV)
+			retval += " +ICONV";
+		#elif defined(MPT_CHARSET_CODECVTUTF8)
+			retval += " +CODECVTUTF8";
+		#elif defined(MPT_CHARSET_INTERNAL)
+			retval += " +INTERNALCHARSETS";
+		#endif
+		#if !defined(NO_ZLIB)
+			retval += " +ZLIB";
+		#elif !defined(NO_MINIZ)
+			retval += " +MINIZ";
+		#else
+			retval += " -INFLATE";
+		#endif
+		#if !defined(NO_MO3)
+			retval += " +UNMO3";
+		#else
+			retval += " -UNMO3";
+		#endif
+	#endif
 	#ifdef MODPLUG_TRACKER
 		#ifdef NO_VST
 			retval += " NO_VST";
@@ -219,21 +242,25 @@ std::string GetBuildFlagsString()
 
 std::string GetRevisionString()
 {
+	std::string str;
 	if(GetRevision() == 0)
 	{
-		return "";
+		return str;
 	}
-	std::ostringstream str;
-	str << "-r" << GetRevision();
+	str = std::string("-r") + mpt::ToString(GetRevision());
 	if(HasMixedRevisions())
 	{
-		str << "!";
+		str += "!";
 	}
 	if(IsDirty())
 	{
-		str << "+";
+		str += "+";
 	}
-	return str.str();
+	if(IsPackage())
+	{
+		str += "p";
+	}
+	return str;
 }
 
 std::string GetVersionStringExtended()
@@ -242,7 +269,16 @@ std::string GetVersionStringExtended()
 	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
 	{
 		retval += GetRevisionString();
+	}
+	#ifdef MODPLUG_TRACKER
+		retval += mpt::String::Print(" %1 bit", sizeof(void*) * 8);
+	#endif
+	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
+	{
 		retval += GetBuildFlagsString();
+		#ifdef MODPLUG_TRACKER
+			retval += GetBuildFeaturesString();
+		#endif
 	}
 	return retval;
 }
@@ -263,9 +299,7 @@ std::string GetVersionUrlString()
 	{
 		url = url.substr(baseurl.length());
 	}
-	std::ostringstream str;
-	str << url << "@" << GetRevision() << GetStateString();
-	return str.str();
+	return url + "@" + mpt::ToString(GetRevision()) + GetStateString();
 }
 
 std::string GetContactString()
@@ -285,13 +319,13 @@ std::string GetFullCreditsString()
 #else
 		"libopenmpt (based on OpenMPT / ModPlug Tracker)\n"
 #endif
-		"Copyright © 2004-2013 Contributors\n"
-		"Copyright © 1997-2003 Olivier Lapicque\n"
+		"Copyright \xC2\xA9 2004-2014 Contributors\n"
+		"Copyright \xC2\xA9 1997-2003 Olivier Lapicque\n"
 		"\n"
 		"Contributors:\n"
-		"Johannes Schultz (2008-2013)\n"
-		"Ahti Leppänen (2005-2011, 2013)\n"
-		"Joern Heusipp (2012-2013)\n"
+		"Johannes Schultz (2008-2014)\n"
+		"Joern Heusipp (2012-2014)\n"
+		"Ahti Lepp\xC3\xA4nen (2005-2011)\n"
 		"Robin Fernandes (2004-2007)\n"
 		"Sergiy Pylypenko (2007)\n"
 		"Eric Chavanon (2004-2005)\n"
@@ -300,7 +334,7 @@ std::string GetFullCreditsString()
 		"\n"
 		"Additional patch submitters:\n"
 		"coda (http://coda.s3m.us/)\n"
-		"kode54 (http://kode54.foobar2000.org/)\n"
+		"kode54 (https://kode54.net/)\n"
 		"xaimus (http://xaimus.com/)\n"
 		"\n"
 		"Thanks to:\n"
@@ -338,6 +372,8 @@ std::string GetFullCreditsString()
 #ifndef NO_ARCHIVE_SUPPORT
 		"Simon Howard for lhasa\n"
 		"http://fragglet.github.io/lhasa/\n"
+		"Alexander L. Roshal for UnRAR\n"
+		"http://rarlab.com/\n"
 #endif
 #ifndef NO_PORTAUDIO
 		"PortAudio contributors\n"
@@ -357,20 +393,17 @@ std::string GetFullCreditsString()
 #ifdef MODPLUG_TRACKER
 		"Pel K. Txnder for the scrolling credits control :)\n"
 		"http://tinyurl.com/4yze8\n"
-#endif
-#if defined(LIBOPENMPT_BUILD) && !defined(NO_XMPLAY)
-		"Arseny Kapoulkine for pugixml\n"
-		"http://pugixml.org/\n"
+		"Nobuyuki for application and file icon\n"
+		"http://twitter.com/nobuyukinyuu\n"
 #endif
 		"\n"
 		"The people at ModPlug forums for crucial contribution\n"
 		"in the form of ideas, testing and support; thanks\n"
 		"particularly to:\n"
-		"33, Anboi, BooT-SectoR-ViruZ, Bvanoudtshoorn\n"
+		"33, 8bitbubsy, Anboi, BooT-SectoR-ViruZ, Bvanoudtshoorn\n"
 		"christofori, Diamond, Ganja, Georg, Goor00, jmkz,\n"
 		"KrazyKatz, LPChip, Nofold, Rakib, Sam Zen\n"
 		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Waxhead\n"
-		"\n"
 #ifndef NO_VST
 		"\n"
 		"VST PlugIn Technology by Steinberg Media Technologies GmbH\n"
@@ -385,3 +418,5 @@ std::string GetFullCreditsString()
 }
 
 } // namespace MptVersion
+
+OPENMPT_NAMESPACE_END

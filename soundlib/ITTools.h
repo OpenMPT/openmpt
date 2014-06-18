@@ -14,21 +14,14 @@
 #include "../soundlib/ModSample.h"
 #include "../soundlib/SampleIO.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
 
 struct PACKED ITFileHeader
 {
-	// Magic Bytes
-	enum Magic
-	{
-		itMagic = 0x4D504D49,		// "IMPM" IT Header Magic Bytes
-		mptmMagic = 0x2E6D7074,		// "tpm." Old MPTM header magic bytes
-		omptMagic = 0x54504D4F,		// "OMPT" Magic Bytes for non-standard OpenMPT IT files
-		chibiMagic = 0x49424843,	// "CHBI" Magic Bytes in the IT header to identify ChibiTracker
-	};
-
 	// Header Flags
 	enum ITHeaderFlags
 	{
@@ -52,7 +45,7 @@ struct PACKED ITFileHeader
 		embedMIDIConfiguration	= 0x08,
 	};
 
-	uint32 id;				// Magic Bytes (IMPM)
+	char   id[4];			// Magic Bytes (IMPM)
 	char   songname[26];	// Song Name, null-terminated (but may also contain nulls)
 	uint8  highlight_minor;	// Rows per Beat highlight
 	uint8  highlight_major;	// Rows per Measure highlight
@@ -72,7 +65,7 @@ struct PACKED ITFileHeader
 	uint8  pwd;				// Pitch Wheel Depth
 	uint16 msglength;		// Length of Song Message
 	uint32 msgoffset;		// Offset of Song Message in File (IT crops message after first null)
-	uint32 reserved;		// ChibiTracker writes "CHBI" here. OpenMPT writes "OMPT" here in some cases, see Load_it.cpp
+	char   reserved[4];		// ChibiTracker writes "CHBI" here. OpenMPT writes "OMPT" here in some cases, see Load_it.cpp
 	uint8  chnpan[64];		// Initial Channel Panning
 	uint8  chnvol[64];		// Initial Channel Volume
 
@@ -116,12 +109,6 @@ STATIC_ASSERT(sizeof(ITEnvelope) == 82);
 // Old Impulse Instrument Format (cmwt < 0x200)
 struct PACKED ITOldInstrument
 {
-	// Magic Bytes
-	enum Magic
-	{
-		magic = 0x49504D49,	// "IMPI" IT Instrument Header Magic Bytes
-	};
-
 	enum ITOldInstrFlags
 	{
 		envEnabled	= 0x01,
@@ -129,7 +116,7 @@ struct PACKED ITOldInstrument
 		envSustain	= 0x04,
 	};
 
-	uint32 id;				// Magic Bytes (IMPI)
+	char   id[4];			// Magic Bytes (IMPI)
 	char   filename[13];	// DOS Filename, null-terminated
 	uint8  flags;			// Volume Envelope Flags
 	uint8  vls;				// Envelope Loop Start
@@ -162,12 +149,6 @@ STATIC_ASSERT(sizeof(ITOldInstrument) == 554);
 // Impulse Instrument Format
 struct PACKED ITInstrument
 {
-	// Magic Bytes
-	enum Magic
-	{
-		magic = 0x49504D49,	// "IMPI" IT Instrument Header Magic Bytes
-	};
-
 	enum ITInstrumentFlags
 	{
 		ignorePanning	= 0x80,
@@ -175,7 +156,7 @@ struct PACKED ITInstrument
 		enableResonance	= 0x80,
 	};
 
-	uint32 id;				// Magic Bytes (IMPI)
+	char   id[4];			// Magic Bytes (IMPI)
 	char   filename[13];	// DOS Filename, null-terminated
 	uint8  nna;				// New Note Action
 	uint8  dct;				// Duplicate Note Check Type
@@ -217,11 +198,6 @@ STATIC_ASSERT(sizeof(ITInstrument) == 554);
 // MPT IT Instrument Extension
 struct PACKED ITInstrumentEx
 {
-	enum Magic
-	{
-		mptx	= 0x5854504D,	// "MPTX" Extended Instrument Header Magic Bytes
-	};
-
 	ITInstrument iti;		// Normal IT Instrument
 	uint8 keyboardhi[120];	// High Byte of Sample map
 
@@ -268,7 +244,7 @@ struct PACKED ITSample
 		cvtPTM8to16			= 0x08,
 	};
 
-	uint32 id;				// Magic Bytes (IMPS)
+	char   id[4];			// Magic Bytes (IMPS)
 	char   filename[13];	// DOS Filename, null-terminated
 	uint8  gvl;				// Global Volume
 	uint8  flags;			// Sample Flags
@@ -302,9 +278,7 @@ struct PACKED ITSample
 STATIC_ASSERT(sizeof(ITSample) == 80);
 
 
-#ifdef MODPLUG_TRACKER
 struct FileHistory;
-#endif // MODPLUG_TRACKER
 
 // IT Header extension: Save history
 struct PACKED ITHistoryStruct
@@ -313,8 +287,6 @@ struct PACKED ITHistoryStruct
 	uint16 fattime;	// DOS / FAT time when the file was opened / created in the editor.
 	uint32 runtime;	// The time how long the file was open in the editor, in 1/18.2th seconds. (= ticks of the DOS timer)
 
-#ifdef MODPLUG_TRACKER
-
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness();
 
@@ -322,8 +294,6 @@ struct PACKED ITHistoryStruct
 	void ConvertToMPT(FileHistory &mptHistory) const;
 	// Convert OpenMPT's internal edit history representation to an ITHistoryStruct
 	void ConvertToIT(const FileHistory &mptHistory);
-
-#endif // MODPLUG_TRACKER
 
 };
 
@@ -344,3 +314,5 @@ enum IT_ReaderBitMasks
 	IT_bitmask_patternChanEnabled_c = 0x80,
 	IT_bitmask_patternChanUsed_c    = 0x0f
 };
+
+OPENMPT_NAMESPACE_END

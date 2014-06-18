@@ -2,8 +2,7 @@
  * MidiInOut.cpp
  * -------------
  * Purpose: A VST plugin for sending and receiving MIDI data.
- * Notes  : Compile the static PortMidi library first. PortMidi comes with a Visual Studio solution so this should be simple.
- *          The PortMidi directory should be played in OpenMPT's include folder (./include/portmidi)
+ * Notes  : (currently none)
  * Authors: Johannes Schultz (OpenMPT Devs)
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -13,12 +12,23 @@
 #include "MidiInOutEditor.h"
 #include <algorithm>
 
+#ifdef _WIN64
+#pragma comment(linker, "/EXPORT:VSTPluginMain")
+#pragma comment(linker, "/EXPORT:main=VSTPluginMain")
+#else
+#pragma comment(linker, "/EXPORT:_VSTPluginMain")
+#pragma comment(linker, "/EXPORT:_main=_VSTPluginMain")
+#endif
+
 
 AudioEffect *createEffectInstance(audioMasterCallback audioMaster)
 //----------------------------------------------------------------
 {
-	return new MidiInOut(audioMaster);
+	return new OPENMPT_NAMESPACE::MidiInOut(audioMaster);
 }
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 int MidiInOut::numInstances = 0;
@@ -41,12 +51,14 @@ MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster
 
 	if(!numInstances++)
 	{
+		Pt_Start(1, nullptr, nullptr);
 		Pm_Initialize();
 	}
 
 	chunk = nullptr;
 	isProcessing = false;
 	isBypassed = false;
+	latencyCompensation = true;
 
 	vst_strncpy(programName, "Default", kVstMaxProgNameLen);	// default program name
 }
@@ -62,6 +74,7 @@ MidiInOut::~MidiInOut()
 	{
 		// This terminates MIDI output for all instances of the plugin, so only ever do it if this was the only instance left.
 		Pm_Terminate();
+		Pt_Stop();
 	}
 }
 
@@ -83,11 +96,11 @@ void MidiInOut::getProgramName(char *name)
 VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
 //----------------------------------------------------------
 {
-	const VstInt32 programNameLen = strlen(programName);
-	VstInt32 byteSize = 8 * sizeof(VstInt32)
+	const VstInt32 programNameLen = static_cast<VstInt32>(strlen(programName));
+	VstInt32 byteSize = static_cast<VstInt32>(8 * sizeof(VstInt32)
 		+ programNameLen
 		+ inputDevice.name.size()
-		+ outputDevice.name.size();
+		+ outputDevice.name.size());
 
 	delete[] chunk;
 	(*data) = chunk = new (std::nothrow) char[byteSize];
@@ -98,10 +111,10 @@ VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
 		header[1] = 1;	// Number of programs
 		header[2] = programNameLen;
 		header[3] = inputDevice.index;
-		header[4] = inputDevice.name.size();
+		header[4] = static_cast<VstInt32>(inputDevice.name.size());
 		header[5] = outputDevice.index;
-		header[6] = outputDevice.name.size();
-		header[7] = 0;	// Reserved
+		header[6] = static_cast<VstInt32>(outputDevice.name.size());
+		header[7] = latencyCompensation;
 		strncpy(chunk + 8 * sizeof(VstInt32), programName, programNameLen);
 		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen, inputDevice.name.c_str(), header[4]);
 		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen + header[4], outputDevice.name.c_str(), header[6]);
@@ -139,6 +152,7 @@ VstInt32 MidiInOut::setChunk(void *data, VstInt32 byteSize, bool /*isPreset*/)
 
 	PmDeviceID inID = header[3];
 	PmDeviceID outID = header[5];
+	latencyCompensation = header[7] != 0;
 
 	vst_strncpy(programName, nameStr, std::min(nameStrSize, VstInt32(kVstMaxProgNameLen)));
 
@@ -361,6 +375,8 @@ VstInt32 MidiInOut::processEvents(VstEvents *events)
 		return 1;
 	}
 
+	const PtTimestamp now = (latencyCompensation ? Pt_Time() : 0);
+
 	for(VstInt32 i = 0; i < events->numEvents; i++)
 	{
 		switch(events->events[i]->type)
@@ -372,7 +388,7 @@ VstInt32 MidiInOut::processEvents(VstEvents *events)
 				// Create and send PortMidi event
 				PmEvent event;
 				memcpy(&event.message, midiEvent->midiData, 4);
-				event.timestamp = 0;
+				event.timestamp = now;
 				Pm_Write(outputDevice.stream, &event, 1);
 			}
 			break;
@@ -382,12 +398,19 @@ VstInt32 MidiInOut::processEvents(VstEvents *events)
 				VstMidiSysexEvent *midiEvent = reinterpret_cast<VstMidiSysexEvent *>(events->events[i]);
 
 				// Send a PortMidi sysex event
-				Pm_WriteSysEx(outputDevice.stream, 0, reinterpret_cast<unsigned char*>(midiEvent->sysexDump));
+				Pm_WriteSysEx(outputDevice.stream, now, reinterpret_cast<unsigned char*>(midiEvent->sysexDump));
 			}
 			break;
 		}
 	}
 	return 1;
+}
+
+
+static PmTimestamp PtTimeWrapper(void* /*time_info*/)
+//---------------------------------------------------
+{
+	return Pt_Time();
 }
 
 
@@ -427,7 +450,14 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 			result = Pm_OpenInput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr);
 		} else
 		{
-			result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr, 0);
+			if(latencyCompensation)
+			{
+				// buffer of 10000 events
+				result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 10000, PtTimeWrapper, nullptr, static_cast<PtTimestamp>(1000.0 * getOutputLatency() / getSampleRate()));
+			} else
+			{
+				result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr, 0);
+			}
 		}
 	}
 
@@ -471,3 +501,6 @@ const char *MidiInOut::GetDeviceName(PmDeviceID index) const
 		return "Unavailable";
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

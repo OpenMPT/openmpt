@@ -10,11 +10,15 @@
 #pragma once
 
 #ifdef MODPLUG_TRACKER
-
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #define NOMINMAX
 #include <windows.h>
+#endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_BEGIN
+
+#ifdef MODPLUG_TRACKER
 
 namespace Util {
 
@@ -53,3 +57,5 @@ public:
 } // namespace Util
 
 #endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_END

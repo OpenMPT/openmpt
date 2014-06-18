@@ -16,9 +16,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Moddoc.h"
-#endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_BEGIN
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -44,14 +43,14 @@ struct PACKED DMFChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idCMSG	= 0x47534D43,	// Song message
-		idSEQU	= 0x55514553,	// Order list
-		idPATT	= 0x54544150,	// Patterns
-		idSMPI	= 0x49504D53,	// Sample headers
-		idSMPD	= 0x44504D53,	// Sample data
-		idSMPJ	= 0x4A504D53,	// Sample jump table (XTrakcker 32 only)
-		idENDE	= 0x45444E45,	// Last four bytes of DMF file
-		idSETT	= 0x9C219DE4,	// Probably contains GUI settings
+		idCMSG	= MAGIC4LE('C','M','S','G'),	// Song message
+		idSEQU	= MAGIC4LE('S','E','Q','U'),	// Order list
+		idPATT	= MAGIC4LE('P','A','T','T'),	// Patterns
+		idSMPI	= MAGIC4LE('S','M','P','I'),	// Sample headers
+		idSMPD	= MAGIC4LE('S','M','P','D'),	// Sample data
+		idSMPJ	= MAGIC4LE('S','M','P','J'),	// Sample jump table (XTrakcker 32 only)
+		idENDE	= MAGIC4LE('E','N','D','E'),	// Last four bytes of DMF file
+		idSETT	= MAGIC4LE('S','E','T','T'),	// Probably contains GUI settings
 	};
 
 	typedef ChunkIdentifiers id_type;
@@ -282,8 +281,8 @@ static uint8 DMFtremor2MPT(uint8 val, const uint8 internalTicks)
 {
 	uint8 ontime = (val >> 4);
 	uint8 offtime = (val & 0x0F);
-	ontime = CLAMP(ontime * internalTicks / 15, 1, 15);
-	offtime = CLAMP(offtime * internalTicks / 15, 1, 15);
+	ontime = static_cast<uint8>(Clamp(ontime * internalTicks / 15, 1, 15));
+	offtime = static_cast<uint8>(Clamp(offtime * internalTicks / 15, 1, 15));
 	return (ontime << 4) | offtime;
 }
 
@@ -305,7 +304,7 @@ static uint8 DMFvibrato2MPT(uint8 val, const uint8 internalTicks)
 	// MPT: 1 vibrato period == 64 ticks... we have internalTicks ticks per row.
 	// X-Tracker: Period length specified in rows!
 	const int periodInTicks = MAX(1, (val >> 4)) * internalTicks;
-	const uint8 matchingPeriod = (uint8)CLAMP((128 / periodInTicks), 1, 15);
+	const uint8 matchingPeriod = (uint8)Clamp((128 / periodInTicks), 1, 15);
 	return (matchingPeriod << 4) | MAX(1, (val & 0x0F));
 }
 
@@ -745,7 +744,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 						useMem2 = true;
 						break;
 					case 7:		// Scratch to Note (neat! but we don't have such an effect...)
-						m->note = CLAMP(effectParam2 + 25, NOTE_MIN, NOTE_MAX);
+						m->note = static_cast<ModCommand::NOTE>(Clamp(effectParam2 + 25, NOTE_MIN, NOTE_MAX));
 						effect2 = CMD_TONEPORTAMENTO;
 						effectParam2 = 0xFF;
 						useMem2 = true;
@@ -974,19 +973,15 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals();
 	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songname);
+	mpt::String::Read<mpt::String::spacePadded>(songArtist, fileHeader.composer);
 
-#ifdef MODPLUG_TRACKER
-	if(GetpModDoc() != nullptr)
-	{
-		FileHistory mptHistory;
-		MemsetZero(mptHistory);
-		mptHistory.loadDate.tm_mday = Clamp(fileHeader.creationDay, uint8(0), uint8(31));
-		mptHistory.loadDate.tm_mon = Clamp(fileHeader.creationMonth, uint8(1), uint8(12)) - 1;
-		mptHistory.loadDate.tm_year = fileHeader.creationYear;
-		GetpModDoc()->GetFileHistory().clear();
-		GetpModDoc()->GetFileHistory().push_back(mptHistory);
-	}
-#endif // MODPLUG_TRACKER
+	FileHistory mptHistory;
+	MemsetZero(mptHistory);
+	mptHistory.loadDate.tm_mday = Clamp(fileHeader.creationDay, uint8(0), uint8(31));
+	mptHistory.loadDate.tm_mon = Clamp(fileHeader.creationMonth, uint8(1), uint8(12)) - 1;
+	mptHistory.loadDate.tm_year = fileHeader.creationYear;
+	m_FileHistory.clear();
+	m_FileHistory.push_back(mptHistory);
 
 	// Go through all chunks now
 	ChunkReader chunkFile(file);
@@ -1025,7 +1020,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 			DMFPatternHeader header;
 			chunk.ReadConvertEndianness(header);
 			chunk.SkipBack(sizeof(header));
-			patternChunks.push_back(chunk.GetChunk(sizeof(header) + header.patternLength));
+			patternChunks.push_back(chunk.ReadChunk(sizeof(header) + header.patternLength));
 		}
 
 		// Now go through the order list and load them.
@@ -1055,6 +1050,10 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	chunk = chunks.GetChunk(DMFChunk::idCMSG);
 	if(chunk.IsValid())
 	{
+		// The song message seems to start at a 1 byte offset.
+		// The skipped byte seems to always be 0.
+		// This also matches how XT 1.03 itself displays the song message.
+		chunk.Skip(1);
 		songMessage.ReadFixedLineLength(chunk, chunk.GetLength() - 1, 40, 0);
 	}
 	
@@ -1081,7 +1080,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		chunk.Skip(sizeof(DMFSampleHeaderTail));
 
 		// Now read the sample data from the data chunk
-		FileReader sampleData = sampleDataChunk.GetChunk(sampleDataChunk.ReadUint32LE());
+		FileReader sampleData = sampleDataChunk.ReadChunk(sampleDataChunk.ReadUint32LE());
 		if(sampleData.IsValid() && (loadFlags & loadSampleData))
 		{
 			SampleIO(
@@ -1126,8 +1125,8 @@ struct DMFHTree
 
 
 // DMF Huffman ReadBits
-BYTE DMFReadBits(DMFHTree *tree, uint32 nbits)
-//--------------------------------------------
+static BYTE DMFReadBits(DMFHTree *tree, uint32 nbits)
+//---------------------------------------------------
 {
 	uint8 x = 0, bitv = 1;
 	while(nbits--)
@@ -1151,8 +1150,8 @@ BYTE DMFReadBits(DMFHTree *tree, uint32 nbits)
 // tree: [8-bit value][12-bit index][12-bit index] = 32-bit
 //
 
-void DMFNewNode(DMFHTree *tree)
-//-----------------------------
+static void DMFNewNode(DMFHTree *tree)
+//------------------------------------
 {
 	uint8 isleft, isright;
 	int actnode;
@@ -1186,7 +1185,7 @@ void DMFNewNode(DMFHTree *tree)
 }
 
 
-uintptr_t DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen)
+uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen)
 //-----------------------------------------------------------------------------------------
 {
 	DMFHTree tree;
@@ -1221,3 +1220,5 @@ uintptr_t DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uin
 	return tree.ibuf - ibuf;
 }
 
+
+OPENMPT_NAMESPACE_END

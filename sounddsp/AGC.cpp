@@ -11,9 +11,12 @@
 
 #include "stdafx.h"
 #include "../soundlib/Sndfile.h"
-#include "../sounddsp/DSP.h"
+#include "../sounddsp/AGC.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+	
 //////////////////////////////////////////////////////////////////////////////////
 // Automatic Gain Control
 
@@ -85,7 +88,7 @@ static UINT ProcessAGC(int *pBuffer, int *pRearBuffer, UINT nSamples, UINT nChan
 CAGC::CAGC()
 //----------
 {
-	Initialize(TRUE, 44100);
+	Initialize(true, 44100);
 }
 
 
@@ -120,7 +123,7 @@ void CAGC::Adjust(UINT oldVol, UINT newVol)
 }
 
 
-void CAGC::Initialize(BOOL bReset, DWORD MixingFreq)
+void CAGC::Initialize(bool bReset, DWORD MixingFreq)
 //--------------------------------------------------
 {
 	if(bReset)
@@ -133,3 +136,6 @@ void CAGC::Initialize(BOOL bReset, DWORD MixingFreq)
 
 
 #endif // NO_AGC
+
+
+OPENMPT_NAMESPACE_END

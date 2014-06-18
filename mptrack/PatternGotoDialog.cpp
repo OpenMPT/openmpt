@@ -15,6 +15,9 @@
 #include "Sndfile.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // CPatternGotoDialog dialog
 
 IMPLEMENT_DYNAMIC(CPatternGotoDialog, CDialog)
@@ -146,3 +149,6 @@ void CPatternGotoDialog::OnEnChangeGotoOrd()
 	UpdateData(FALSE);
 	UnlockControls();
 }
+
+
+OPENMPT_NAMESPACE_END

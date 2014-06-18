@@ -15,6 +15,9 @@
 #include "View_pat.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 /* Clipboard format:
  * Hdr: "ModPlug Tracker S3M\r\n"
  * Full:  '|C#401v64A06'
@@ -88,7 +91,7 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 				patList[pattern] = insertedPats++;
 
 				patternData.AppendFormat("Rows: %u\r\n", sndFile.Patterns[pattern].GetNumRows());
-				CString name = sndFile.Patterns[pattern].GetName();
+				CString name = sndFile.Patterns[pattern].GetName().c_str();
 				if(!name.IsEmpty())
 				{
 					patternData.Append("Name: " + name + "\r\n");
@@ -182,17 +185,7 @@ CString PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDE
 			// Note
 			if(selection.ContainsHorizontal(cursor))
 			{
-				switch(m->note)
-				{
-				case NOTE_NONE:		data.Append("..."); break;
-				case NOTE_KEYOFF:	data.Append("==="); break;
-				case NOTE_NOTECUT:	data.Append("^^^"); break;
-				case NOTE_FADE:		data.Append("~~~"); break;
-				case NOTE_PC:		data.Append("PC "); break;
-				case NOTE_PCS:		data.Append("PCS"); break;
-				default:			if(m->IsNote()) data.Append(szDefaultNoteNames[m->note - NOTE_MIN]);
-									else data.Append("...");
-				}
+				data.Append(CSoundFile::GetNoteName(m->note).c_str());
 			} else
 			{
 				// No note
@@ -281,34 +274,34 @@ CString PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDE
 
 
 // Try pasting a pattern selection from the system clipboard.
-bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder)
-//--------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect)
+//--------------------------------------------------------------------------------------------------------------------------------------
 {
 	CString data;
-	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pastePos, mode, data, curOrder))
+	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pastePos, mode, data, curOrder, pasteRect))
 	{
 		// Fall back to internal clipboard if there's no valid pattern data in the system clipboard.
-		return Paste(sndFile, pastePos, mode, curOrder, instance.activeClipboard);
+		return Paste(sndFile, pastePos, mode, curOrder, pasteRect, instance.activeClipboard);
 	}
 	return true;
 }
 
 
 // Try pasting a pattern selection from an internal clipboard.
-bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, clipindex_t internalClipboard)
-//---------------------------------------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, clipindex_t internalClipboard)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(internalClipboard >= instance.clipboards.size())
 	{
 		return false;
 	}
-	return HandlePaste(sndFile, pastePos, mode, instance.clipboards[internalClipboard].content, curOrder);
+	return HandlePaste(sndFile, pastePos, mode, instance.clipboards[internalClipboard].content, curOrder, pasteRect);
 }
 
 
 // Parse clipboard string and perform the pasting operation.
-bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CString &data, ORDERINDEX curOrder)
-//-----------------------------------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CString &data, ORDERINDEX curOrder, PatternRect &pasteRect)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	PATTERNINDEX pattern = pastePos.pattern;
 	if(sndFile.GetpModDoc() == nullptr)
@@ -453,6 +446,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	const bool doMixPaste = (mode == pmMixPaste) || doITStyleMix;
 	const bool clipboardHasS3MCommands = (pasteFormat & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) != 0;
 
+	PatternCursor startPoint(startRow, startChan, PatternCursor::lastColumn), endPoint(startRow, startChan, PatternCursor::firstColumn);
 	ModCommand *patData = sndFile.Patterns[pattern].GetpModCommand(startRow, 0);
 
 	pos = startPos;
@@ -538,7 +532,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		{
 			pos++;
 			// Handle pasting large pattern into smaller pattern (e.g. 128-row pattern into MOD, which only allows 64 rows)
-			static ModCommand dummy;
+			ModCommand dummy;
 			ModCommand &m = curRow < sndFile.Patterns[pattern].GetNumRows() ? patData[col] : dummy;
 
 			// Check valid paste condition. Paste will be skipped if
@@ -555,7 +549,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				// Before changing anything in this pattern, we have to create an undo point.
 				if(prepareUndo)
 				{
-					modDoc.GetPatternUndo().PrepareUndo(pattern, startChan, startRow, sndFile.GetNumChannels(), sndFile.Patterns[pattern].GetNumRows(), !firstUndo);
+					modDoc.GetPatternUndo().PrepareUndo(pattern, startChan, startRow, sndFile.GetNumChannels(), sndFile.Patterns[pattern].GetNumRows(), "Paste", !firstUndo);
 					prepareUndo = false;
 					firstUndo = false;
 				}
@@ -574,10 +568,13 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					m.Clear();
 				}
 
+				PatternCursor::Columns firstCol = PatternCursor::lastColumn, lastCol = PatternCursor::firstColumn;
+
 				// Note
 				if(data[pos] != ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.note == NOTE_NONE) || 
 					(doITStyleMix && origModCmd.note == NOTE_NONE && origModCmd.instr == 0 && origModCmd.volcmd == VOLCMD_NONE))))
 				{
+					firstCol = PatternCursor::noteColumn;
 					m.note = NOTE_NONE;
 					if(data[pos] == '=')
 						m.note = NOTE_KEYOFF;
@@ -587,7 +584,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						m.note = NOTE_FADE;
 					else if(data[pos] == 'P')
 					{
-						if(data[pos + 2] == 'S')
+						if(data[pos + 2] == 'S' || data[pos + 2] == 's')
 							m.note = NOTE_PCS;
 						else
 							m.note = NOTE_PC;
@@ -619,6 +616,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				if(data[pos + 3] > ' ' && (!doMixPaste || ( (!doITStyleMix && origModCmd.instr == 0) || 
 					(doITStyleMix && origModCmd.note == NOTE_NONE && origModCmd.instr == 0 && origModCmd.volcmd == VOLCMD_NONE) ) ))
 				{
+					firstCol = std::min(firstCol, PatternCursor::instrColumn);
+					lastCol = std::max(lastCol, PatternCursor::instrColumn);
 					if(data[pos + 3] >= '0' && data[pos + 3] <= ('0' + (MAX_SAMPLES / 10)))
 					{
 						m.instr = (data[pos + 3] - '0') * 10 + (data[pos + 4] - '0');
@@ -629,6 +628,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				if(data[pos + 5] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.volcmd == VOLCMD_NONE) || 
 					(doITStyleMix && origModCmd.note == NOTE_NONE && origModCmd.instr == 0 && origModCmd.volcmd == VOLCMD_NONE))))
 				{
+					firstCol = std::min(firstCol, PatternCursor::volumeColumn);
+					lastCol = std::max(lastCol, PatternCursor::volumeColumn);
 					if(data[pos + 5] != '.')
 					{
 						if(m.IsPcNote())
@@ -661,6 +662,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				{
 					if(data[pos + 8] != '.' && data[pos + 8] > ' ')
 					{
+						firstCol = std::min(firstCol, PatternCursor::paramColumn);
+						lastCol = std::max(lastCol, PatternCursor::paramColumn);
 						m.SetValueEffectCol(ConvertStrTo<uint16>(data.Mid(pos + 8, 3)));
 					}
 				} else
@@ -668,6 +671,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					if(data[pos + 8] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.command == CMD_NONE) || 
 						(doITStyleMix && origModCmd.command == CMD_NONE && origModCmd.param == 0))))
 					{
+						firstCol = std::min(firstCol, PatternCursor::effectColumn);
+						lastCol = std::max(lastCol, PatternCursor::effectColumn);
 						m.command = CMD_NONE;
 						if(data[pos + 8] != '.')
 						{
@@ -687,6 +692,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					if(data[pos + 9] > ' ' && (!doMixPaste || ((!doITStyleMix && (origModCmd.command == CMD_NONE || origModCmd.param == 0)) || 
 						(doITStyleMix && origModCmd.command == CMD_NONE && origModCmd.param == 0))))
 					{
+						firstCol = std::min(firstCol, PatternCursor::paramColumn);
+						lastCol = std::max(lastCol, PatternCursor::paramColumn);
 						m.param = 0;
 						if(data[pos + 9] != '.')
 						{
@@ -751,8 +758,14 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				// if the original modcommand was empty as otherwise the unchanged parts
 				// of the old modcommand would falsely be interpreted being of type
 				// origFormat and ConvertCommand could change them.
-				if (pasteFormat != sndFile.GetType() && (!doMixPaste || origModCmd.IsEmpty(false)))
+				if(pasteFormat != sndFile.GetType() && (!doMixPaste || origModCmd.IsEmpty(false)))
 					m.Convert(pasteFormat, sndFile.GetType());
+
+				// Adjust pattern selection
+				if(col == startChan) startPoint.SetColumn(startChan, firstCol);
+				if(endPoint.CompareColumn(PatternCursor(0, col, lastCol)) < 0) endPoint.SetColumn(col, lastCol);
+				if(curRow > endPoint.GetRow()) endPoint.SetRow(curRow);
+				pasteRect = PatternRect(startPoint, endPoint);
 			}
 
 			pos += 11;
@@ -772,14 +785,13 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				ORDERINDEX nextOrder = sndFile.Order.GetNextOrderIgnoringSkips(curOrder);
 				if(nextOrder == 0 || nextOrder >= sndFile.Order.size()) return success;
 				pattern = sndFile.Order[nextOrder];
-				if(sndFile.Patterns.IsValidPat(pattern) == false) return success;
+				if(!sndFile.Patterns.IsValidPat(pattern)) return success;
 				patData = sndFile.Patterns[pattern];
 				curOrder = nextOrder;
 				prepareUndo = true;
 				startRow = 0;
 			}
 		}
-
 	}
 
 	return success;
@@ -1103,3 +1115,6 @@ void PatternClipboardDialog::CInlineEdit::OnKillFocus(CWnd *newWnd)
 	parent.OnEndEdit(true);
 	CEdit::OnKillFocus(newWnd);
 }
+
+
+OPENMPT_NAMESPACE_END

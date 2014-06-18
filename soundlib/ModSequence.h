@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <vector>
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 class ModSequenceSet;
 class FileReader;
@@ -112,10 +114,14 @@ public:
 
 #ifdef MODPLUG_TRACKER
 	// Check if a playback position is currently locked (inaccessible)
-	bool IsPositionLocked(ORDERINDEX position);
+	bool IsPositionLocked(ORDERINDEX position) const;
 #endif // MODPLUG_TRACKER
 
-
+	// Sequence name setter
+	void SetName(const std::string &newName);
+	
+	// Sequence name getter
+	std::string GetName() const;
 
 protected:
 	iterator begin() {return m_pArray;}
@@ -123,8 +129,8 @@ protected:
 	iterator end() {return m_pArray + m_nSize;}
 	const_iterator end() const {return m_pArray + m_nSize;}
 
-public:
-	mpt::string m_sName;				// Sequence name.
+protected:
+	std::string m_sName;				// Sequence name.
 
 protected:
 	CSoundFile &m_sndFile;			// Pointer to associated CSoundFile.
@@ -226,3 +232,6 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t);
 
 void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq);
 void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t);
+
+
+OPENMPT_NAMESPACE_END
