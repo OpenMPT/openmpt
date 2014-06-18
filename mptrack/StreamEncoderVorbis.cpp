@@ -82,7 +82,8 @@ struct VorbisDynBind
 			{ "libogg-0" , "libvorbis-0", "libvorbis-0"   }, // mingw builds
 			{ "libogg"   , "libvorbis"  , "libvorbisenc"  },
 			{ "ogg"      , "vorbis"     , "vorbisenc"     },
-			{ "libogg-0" , "libvorbis-0", "libvorbisenc-0"}  // mingw builds
+			{ "libogg-0" , "libvorbis-0", "libvorbisenc-0"}, // mingw builds
+			{ "libogg-0" , "libvorbis-0", "libvorbisenc-2"}  // mingw 64-bit builds
 		};
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
