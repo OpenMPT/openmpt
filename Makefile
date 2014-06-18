@@ -58,7 +58,7 @@
 # Build flags for openmpt123 (provide on each `make` invocation)
 #
 #  (defaults are 0):
-#  USE_SDL=1        Use SDL (in addition to or in place of PortAudio)
+#  NO_SDL=1         Avoid using SDL, even if found
 #  NO_PORTAUDIO=1   Avoid using PortAudio, even if found
 #  NO_FLAC=1        Avoid using FLAC, even if found
 #  NO_WAVPACK=1     Avoid using WavPack, even if found
@@ -271,12 +271,15 @@ LDLIBS_MO3  := -ldl
 else
 endif
 
-ifeq ($(USE_SDL),1)
+ifeq ($(NO_SDL),1)
+else
 #LDLIBS   += -lsdl
 ifeq ($(shell pkg-config --exists sdl && echo yes),yes)
 CPPFLAGS_SDL := $(shell pkg-config --cflags-only-I sdl ) -DMPT_WITH_SDL
 LDFLAGS_SDL  := $(shell pkg-config --libs-only-L   sdl ) $(shell pkg-config --libs-only-other sdl )
 LDLIBS_SDL   := $(shell pkg-config --libs-only-l   sdl )
+else
+NO_SDL:=1
 endif
 endif
 

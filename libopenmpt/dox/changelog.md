@@ -5,6 +5,11 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt svn
+
+ *  openmpt123: SDL is now also used by default if availble, in addition to
+    PortAudio.
+
 ### 2014-06-15 - libopenmpt 0.2-beta5
 
  *  Add unmo3 support for non-Windows builds.

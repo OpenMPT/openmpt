@@ -41,7 +41,7 @@ public:
 		, channels(flags.channels)
 	{
 		double bufferSeconds = flags.buffer * 0.001;
-		check_sdl_error( SDL_InitSubSystem( SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) );
+		check_sdl_error( SDL_Init( SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) );
 		SDL_AudioSpec audiospec;
 		std::memset( &audiospec, 0, sizeof( SDL_AudioSpec ) );
 		audiospec.freq = flags.samplerate;
@@ -59,7 +59,7 @@ public:
 	~sdl_stream_raii() {
 		SDL_PauseAudio( 1 );
 		SDL_CloseAudio();
-		SDL_QuitSubSystem( SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO );
+		SDL_Quit();
 	}
 private:
 	static void sdl_callback_wrapper( void * userdata, Uint8 * stream, int len ) {
