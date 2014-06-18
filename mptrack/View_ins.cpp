@@ -23,6 +23,7 @@
 #include "ScaleEnvPointsDlg.h"
 #include "view_ins.h"
 #include "../soundlib/MIDIEvents.h"
+#include "../common/StringFixer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1918,16 +1919,15 @@ static DWORD nLastNotePlayed = 0;
 static DWORD nLastScanCode = 0;
 
 
-void CViewInstrument::PlayNote(UINT note)
-//---------------------------------------
+void CViewInstrument::PlayNote(ModCommand::NOTE note)
+//---------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (pMainFrm) && (note > 0) && (note<128))
 	{
 		CHAR s[64];
-		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
-		if (note >= 0xFE)
+		if (note >= NOTE_MIN_SPECIAL)
 		{
 			pModDoc->NoteOff(0, (note == NOTE_NOTECUT), m_nInstrument);
 			pMainFrm->SetInfoText("");
@@ -1955,11 +1955,8 @@ void CViewInstrument::PlayNote(UINT note)
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX))
 			{
-				const std::string temp = pModDoc->GetrSoundFile().GetNoteName(static_cast<ModCommand::NOTE>(note), m_nInstrument);
-				if(temp.size() >= sizeofS)
-					wsprintf(s, "%s", "...");
-				else
-					wsprintf(s, "%s", temp.c_str());
+				const std::string temp = pModDoc->GetrSoundFile().GetNoteName(note, m_nInstrument);
+				mpt::String::Copy(s, temp.c_str());
 			}
 			pMainFrm->SetInfoText(s);
 		}
@@ -2218,13 +2215,13 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	}
 	if(wParam >= kcInstrumentStartNotes && wParam <= kcInstrumentEndNotes)
 	{
-		PlayNote(static_cast<UINT>(wParam) - kcInstrumentStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
+		PlayNote(static_cast<ModCommand::NOTE>(wParam - kcInstrumentStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
 		return wParam;
 	}
 	if(wParam >= kcInstrumentStartNoteStops && wParam <= kcInstrumentEndNoteStops)
 	{
-		UINT note = static_cast<UINT>(wParam) - kcInstrumentStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12;
-		m_baPlayingNote[note] = false;
+		ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcInstrumentStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12);
+		if(ModCommand::IsNote(note)) m_baPlayingNote[note] = false;
 		pModDoc->NoteOff(note, false, m_nInstrument);
 		return wParam;
 	}
@@ -2439,7 +2436,6 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
-		CModDoc *pModDoc = GetDocument();	// sanity checks are done in GetEnvelopePtr() already
 		SetModified(HINT_ENVELOPE, true);
 	}
 }
