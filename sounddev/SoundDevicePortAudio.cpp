@@ -209,13 +209,34 @@ SoundDeviceCaps CPortaudioDevice::GetDeviceCaps()
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = true;
+	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
 	{
 		caps.CanExclusiveMode = true;
 		caps.CanDriverPanel = true;
+		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
 	{
 		caps.CanUpdateInterval = false;
+		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound))
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paMME))
+	{
+		if(mpt::Windows::Version::IsWine())
+		{
+			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+		{
+			caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+		} else
+		{
+			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+		}
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paASIO))
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
 	}
 	return caps;
 }

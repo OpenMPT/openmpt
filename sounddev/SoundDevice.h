@@ -262,7 +262,7 @@ struct SoundDeviceSettings
 		, UpdateIntervalMS(5)
 		, Samplerate(48000)
 		, Channels(2)
-		, sampleFormat(mpt::Windows::Version::IsWine() ? SampleFormatInt16 : SampleFormatFloat32)
+		, sampleFormat(SampleFormatFloat32)
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
 		, KeepDeviceRunning(true)
@@ -334,6 +334,7 @@ struct SoundDeviceCaps
 	bool CanDriverPanel;
 	bool HasInternalDither;
 	std::wstring ExclusiveModeDescription;
+	SoundDeviceSettings DefaultSettings;
 	SoundDeviceCaps()
 		: CanUpdateInterval(true)
 		, CanSampleFormat(true)

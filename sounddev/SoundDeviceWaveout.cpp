@@ -58,6 +58,33 @@ CWaveDevice::~CWaveDevice()
 }
 
 
+SoundDeviceCaps CWaveDevice::GetDeviceCaps()
+//------------------------------------------
+{
+	SoundDeviceCaps caps;
+	caps.CanUpdateInterval = true;
+	caps.CanSampleFormat = true;
+	caps.CanExclusiveMode = false;
+	caps.CanBoostThreadPriority = true;
+	caps.CanKeepDeviceRunning = false;
+	caps.CanUseHardwareTiming = false;
+	caps.CanChannelMapping = false;
+	caps.CanDriverPanel = false;
+	caps.HasInternalDither = false;
+	if(mpt::Windows::Version::IsWine())
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+	} else
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+	}
+	return caps;
+}
+
+
 bool CWaveDevice::InternalOpen()
 //------------------------------
 {

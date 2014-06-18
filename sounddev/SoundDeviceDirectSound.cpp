@@ -104,6 +104,7 @@ SoundDeviceCaps CDSoundDevice::GetDeviceCaps()
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.ExclusiveModeDescription = L"Use primary buffer";
+	caps.DefaultSettings.sampleFormat = SampleFormatInt16;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)

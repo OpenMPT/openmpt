@@ -1327,6 +1327,8 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps()
 	caps.CanChannelMapping = true;
 	caps.CanDriverPanel = true;
 
+	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+
 	return caps;
 }
 
