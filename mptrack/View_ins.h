@@ -150,7 +150,7 @@ protected:
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
-	void PlayNote(UINT note);
+	void PlayNote(ModCommand::NOTE note);
 	void DrawGrid(CDC *memDC, UINT speed);
 
 	void OnEnvZoomIn() { EnvSetZoom(m_fZoom + 1); };
