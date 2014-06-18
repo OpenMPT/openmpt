@@ -11,8 +11,12 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
+OPENMPT_NAMESPACE_END
 #include "Snd_defs.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -37,7 +41,7 @@ typedef struct PACKED DLSREGION
 	WORD uPercEnv;
 	WORD usVolume;		// 0..256
 	WORD fuOptions;	// flags + key group
-	SHORT sFineTune;	// 1..100
+	int16 sFineTune;	// 1..100
 	BYTE uKeyMin;
 	BYTE uKeyMax;
 	BYTE uUnityNote;
@@ -66,7 +70,7 @@ typedef struct PACKED DLSINSTRUMENT
 	DWORD ulBank, ulInstrument;
 	UINT nRegions, nMelodicEnv;
 	DLSREGION Regions[DLSMAXREGIONS];
-	CHAR szName[32];
+	char szName[32];
 	// SF2 stuff (DO NOT USE! -> used internally by the SF2 loader)
 	WORD wPresetBagNdx, wPresetBagNum;
 } DLSINSTRUMENT;
@@ -75,13 +79,13 @@ STATIC_ASSERT(sizeof(DLSINSTRUMENT) == 2740);
 
 typedef struct PACKED DLSSAMPLEEX
 {
-	CHAR szName[20];
+	char szName[20];
 	DWORD dwLen;
 	DWORD dwStartloop;
 	DWORD dwEndloop;
 	DWORD dwSampleRate;
 	BYTE byOriginalPitch;
-	CHAR chPitchCorrection;
+	char chPitchCorrection;
 } DLSSAMPLEEX;
 
 STATIC_ASSERT(sizeof(DLSSAMPLEEX) == 38);
@@ -100,12 +104,12 @@ STATIC_ASSERT(sizeof(DLSSAMPLEEX) == 38);
 
 typedef struct SOUNDBANKINFO
 {
-	CHAR szBankName[256];
-	CHAR szCopyRight[256];
-	CHAR szComments[512];
-	CHAR szEngineer[256];
-	CHAR szSoftware[256];		// ISFT: Software
-	CHAR szDescription[256];	// ISBJ: Subject
+	char szBankName[256];
+	char szCopyRight[256];
+	char szComments[512];
+	char szEngineer[256];
+	char szSoftware[256];		// ISFT: Software
+	char szDescription[256];	// ISBJ: Subject
 } SOUNDBANKINFO;
 
 
@@ -115,7 +119,7 @@ class CDLSBank
 {
 protected:
 	SOUNDBANKINFO m_BankInfo;
-	CHAR m_szFileName[_MAX_PATH];
+	mpt::PathString m_szFileName;
 	UINT m_nType;
 	DWORD m_dwWavePoolOffset;
 	// DLS Information
@@ -129,13 +133,13 @@ public:
 	CDLSBank();
 	virtual ~CDLSBank();
 	void Destroy();
-	static BOOL IsDLSBank(LPCSTR lpszFileName);
+	static bool IsDLSBank(const mpt::PathString &filename);
 	static DWORD MakeMelodicCode(UINT bank, UINT instr) { return ((bank << 16) | (instr));}
 	static DWORD MakeDrumCode(UINT rgn, UINT instr) { return (0x80000000 | (rgn << 16) | (instr));}
 
 public:
-	BOOL Open(LPCSTR lpszFileName);
-	LPCSTR GetFileName() const { return m_szFileName; }
+	bool Open(const mpt::PathString &filename);
+	mpt::PathString GetFileName() const { return m_szFileName; }
 	UINT GetBankType() const { return m_nType; }
 	UINT GetBankInfo(SOUNDBANKINFO *pBankInfo=NULL) const { if (pBankInfo) *pBankInfo = m_BankInfo; return m_nType; }
 
@@ -143,19 +147,19 @@ public:
 	UINT GetNumInstruments() const { return m_nInstruments; }
 	UINT GetNumSamples() const { return m_nWaveForms; }
 	DLSINSTRUMENT *GetInstrument(UINT iIns) { return (m_pInstruments) ? &m_pInstruments[iIns] : NULL; }
-	DLSINSTRUMENT *FindInstrument(BOOL bDrum, UINT nBank=0xFF, DWORD dwProgram=0xFF, DWORD dwKey=0xFF, UINT *pInsNo=NULL);
+	DLSINSTRUMENT *FindInstrument(bool bDrum, UINT nBank=0xFF, DWORD dwProgram=0xFF, DWORD dwKey=0xFF, UINT *pInsNo=NULL);
 	UINT GetRegionFromKey(UINT nIns, UINT nKey);
-	BOOL FreeWaveForm(LPBYTE p);
-	BOOL ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen);
-	BOOL ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose=0);
-	BOOL ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn);
-	const CHAR *GetRegionName(UINT nIns, UINT nRgn) const;
+	bool FreeWaveForm(uint8 *p);
+	bool ExtractWaveForm(UINT nIns, UINT nRgn, uint8 **ppWave, DWORD *pLen);
+	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose=0);
+	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn);
+	const char *GetRegionName(UINT nIns, UINT nRgn) const;
 
 // Internal Loader Functions
 protected:
-	BOOL UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, LPVOID pchunk, DWORD dwMaxLen);
-	BOOL UpdateSF2PresetData(LPVOID psf2info, LPVOID pchunk, DWORD dwMaxLen);
-	BOOL ConvertSF2ToDLS(LPVOID psf2info);
+	bool UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pchunk, DWORD dwMaxLen);
+	bool UpdateSF2PresetData(void *psf2info, void *pchunk, DWORD dwMaxLen);
+	bool ConvertSF2ToDLS(void *psf2info);
 
 public:
 	// DLS Unit conversion
@@ -168,3 +172,5 @@ public:
 
 #endif // MODPLUG_TRACKER
 
+
+OPENMPT_NAMESPACE_END

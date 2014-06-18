@@ -10,6 +10,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 enum LogLevel
 {
 	/*LogDebug        = 1,*/
@@ -40,3 +43,64 @@ public:
 	virtual	void AddToLog(LogLevel level, const std::string &text) const = 0;
 };
 
+
+
+namespace mpt
+{
+namespace log
+{
+
+
+#ifndef NO_LOGGING
+
+
+class Context
+{
+public:
+	const char * const file;
+	const int line;
+	const char * const function;
+public:
+	Context(const char *file, int line, const char *function);
+	Context(const Context &c);
+}; // class Context
+
+#define MPT_LOG_CURRENTCONTEXT() mpt::log::Context( __FILE__ , __LINE__ , __FUNCTION__ )
+
+
+class Logger
+{
+private:
+	const Context &context;
+public:
+	Logger(const Context &context) : context(context) {}
+	void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...);
+	void operator () (const std::string &text);
+	void operator () (const std::wstring &text);
+};
+
+#define Log mpt::log::Logger(MPT_LOG_CURRENTCONTEXT())
+
+
+#else // !NO_LOGGING
+
+
+class Logger
+{
+public:
+	inline void MPT_PRINTF_FUNC(2,3) operator () (const char * /*format*/, ...) {}
+	inline void operator () (const std::string & /*text*/ ) {}
+	inline void operator () (const std::wstring & /*text*/ ) {}
+};
+
+#define Log if(true) {} else mpt::log::Logger() // completely compile out arguments to Log() so that they do not even get evaluated
+
+
+#endif // NO_LOGGING
+
+
+} // namespace log
+} // namespace mpt
+
+
+OPENMPT_NAMESPACE_END

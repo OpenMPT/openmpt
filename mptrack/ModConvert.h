@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Warning types
 enum enmWarnings
 {
@@ -40,3 +42,5 @@ enum enmWarnings
 	wFilterVariation,
 	wNumWarnings
 };
+
+OPENMPT_NAMESPACE_END

@@ -13,9 +13,17 @@
 #include "libopenmpt.hpp"
 #include "libopenmpt.h"
 
+#include "test/test.h"
+
+#include <locale>
+
+#include <clocale>
+
+using namespace OpenMPT;
+
 #if defined( LIBOPENMPT_BUILD_TEST )
 
-#if defined(WIN32) && defined(UNICODE)
+#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
 #if defined(__GNUC__)
 // mingw64 does only default to special C linkage for "main", but not for "wmain".
 extern "C"
@@ -25,7 +33,27 @@ int wmain( int /*wargc*/, wchar_t * /*wargv*/ [] ) {
 int main( int /*argc*/, char * /*argv*/ [] ) {
 #endif
 	try {
-		openmpt::run_tests();
+
+		// run test with "C" / classic() locale
+		Test::DoTests();
+
+		// try setting the C locale to the user locale
+		setlocale( LC_ALL, "" );
+		
+		// run all tests again with a set C locale
+		Test::DoTests();
+		
+		// try to set the C and C++ locales to the user locale
+		try {
+			std::locale::global( std::locale( "" ) );
+		} catch ( ... ) {
+			// Setting c++ global locale does not work.
+			// This is no problem for libopenmpt, just continue.
+		}
+		
+		// and now, run all tests once again
+		Test::DoTests();
+
 	} catch ( const std::exception & e ) {
 		std::cerr << "TEST ERROR: exception: " << ( e.what() ? e.what() : "" ) << std::endl;
 		return -1;

@@ -10,16 +10,18 @@
 
 #pragma once
 
+#ifndef NO_VST
+
+#include "mptrack.h"
+#include "AbstractVstEditor.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
 enum
 {
 	PARAM_RESOLUTION = 1000,
 	NUM_PLUGINEDITOR_PARAMETERS = 8,	// Parameters on screen
 };
-
-#ifndef NO_VST
-
-#include "mptrack.h"
-#include "AbstractVstEditor.h"
 
 //===================
 class ParamControlSet
@@ -67,7 +69,7 @@ public:
 	CDefaultVstEditor(CVstPlugin &plugin);
 	virtual ~CDefaultVstEditor();
 
-	void UpdateParamDisplays() { UpdateControls(false); };
+	virtual void UpdateParamDisplays() { CAbstractVstEditor::UpdateParamDisplays(); UpdateControls(false); };
 
 	virtual void OnOK();
 	virtual void OnCancel();
@@ -101,5 +103,6 @@ protected:
 
 };
 
-#endif // NO_VST
+OPENMPT_NAMESPACE_END
 
+#endif // NO_VST

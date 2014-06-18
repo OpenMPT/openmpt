@@ -14,11 +14,16 @@
 #include <vector>
 #include <string>
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 class CTuningCollection;
 
 namespace CTuningS11n
 {
 	void ReadTuning(std::istream& iStrm, CTuningCollection& Tc, const size_t);
+	void WriteTuning(std::ostream& oStrm, const CTuning& t);
 }
 
 
@@ -59,7 +64,7 @@ public:
 		SERIALIZATION_FAILURE = true
 	};
 
-	static const CHAR s_FileExtension[4];
+	static const char s_FileExtension[4];
 	static const size_t s_nMaxTuningCount = 255;
 
 //END PUBLIC STATIC CONSTS
@@ -92,10 +97,12 @@ public:
 
 	size_t GetNumTunings() const {return m_Tunings.size();}
 
-	const std::string& GetName() const {return m_Name;}
+	std::string GetName() const {return m_Name;}
 
-	void SetSavefilePath(const std::string &psz) {m_SavefilePath = psz;}
-	const std::string& GetSaveFilePath() const {return m_SavefilePath;}
+#ifndef MODPLUG_NO_FILESAVE
+	void SetSavefilePath(const mpt::PathString &psz) {m_SavefilePath = psz;}
+	mpt::PathString GetSaveFilePath() const {return m_SavefilePath;}
+#endif // MODPLUG_NO_FILESAVE
 
 	std::string GetVersionString() const {return Stringify(static_cast<int>(s_SerializationVersion));}
 
@@ -103,9 +110,11 @@ public:
 
 	//Serialization/unserialisation
 	bool Serialize(std::ostream&) const;
-	bool Serialize() const;
 	bool Deserialize(std::istream&);
+#ifndef MODPLUG_NO_FILESAVE
+	bool Serialize() const;
 	bool Deserialize();
+#endif // MODPLUG_NO_FILESAVE
 
 	//Transfer tuning pT from pTCsrc to pTCdest
 	static bool TransferTuning(CTuningCollection* pTCsrc, CTuningCollection* pTCdest, CTuning* pT);
@@ -124,7 +133,9 @@ private:
 
 	//BEGIN: NONSERIALIZABLE DATA MEMBERS
 	TUNINGVECTOR m_DeletedTunings; //See Remove()-method for explanation of this.
-	std::string m_SavefilePath;
+#ifndef MODPLUG_NO_FILESAVE
+	mpt::PathString m_SavefilePath;
+#endif // MODPLUG_NO_FILESAVE
 	//END: NONSERIALIZABLE DATA MEMBERS
 	
 //END: DATA MEMBERS
@@ -148,3 +159,6 @@ private:
 
 //END PRIVATE METHODS.
 };
+
+
+OPENMPT_NAMESPACE_END

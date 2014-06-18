@@ -12,6 +12,9 @@
 
 #include <vector>
 #include "Snd_defs.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 
 //==============
@@ -91,3 +94,5 @@ protected:
 	void AddVisitedRow(ORDERINDEX order, ROWINDEX row);
 
 };
+
+OPENMPT_NAMESPACE_END

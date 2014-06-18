@@ -14,11 +14,13 @@
 #include "../common/StringFixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Convert all multi-byte numeric values to current platform's endianness or vice versa.
 void ITFileHeader::ConvertEndianness()
 //------------------------------------
 {
-	SwapBytesLE(id);
 	SwapBytesLE(ordnum);
 	SwapBytesLE(insnum);
 	SwapBytesLE(smpnum);
@@ -29,7 +31,6 @@ void ITFileHeader::ConvertEndianness()
 	SwapBytesLE(special);
 	SwapBytesLE(msglength);
 	SwapBytesLE(msgoffset);
-	SwapBytesLE(reserved);
 }
 
 
@@ -118,7 +119,6 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, int m
 void ITOldInstrument::ConvertEndianness()
 //---------------------------------------
 {
-	SwapBytesLE(id);
 	SwapBytesLE(fadeout);
 	SwapBytesLE(trkvers);
 }
@@ -129,7 +129,7 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 //-------------------------------------------------------------
 {
 	// Header
-	if(id != ITOldInstrument::magic)
+	if(memcmp(id, "IMPI", 4))
 	{
 		return;
 	}
@@ -196,7 +196,6 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 void ITInstrument::ConvertEndianness()
 //------------------------------------
 {
-	SwapBytesLE(id);
 	SwapBytesLE(fadeout);
 	SwapBytesLE(trkvers);
 	SwapBytesLE(mbank);
@@ -210,7 +209,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	MemsetZero(*this);
 
 	// Header
-	id = ITInstrument::magic;
+	memcpy(id, "IMPI", 4);
 	trkvers = 0x0214;
 
 	mpt::String::Write<mpt::String::nullTerminated>(filename, mptIns.filename);
@@ -242,7 +241,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	// MIDI Setup
 	mbank = mptIns.wMidiBank;
 	mpr = mptIns.nMidiProgram;
-	if(mptIns.nMidiChannel || mptIns.nMixPlug == 0 || compatExport)
+	if(mptIns.nMidiChannel != MidiNoChannel || mptIns.nMixPlug == 0 || mptIns.nMixPlug > 127 || compatExport)
 	{
 		// Default. Prefer MIDI channel over mixplug to keep the semantics intact.
 		mch = mptIns.nMidiChannel;
@@ -253,7 +252,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	}
 
 	// Sample Map
-	nos = 0;
+	nos = 0;	// Only really relevant for ITI files
 	std::vector<bool> smpCount(sndFile.GetNumSamples(), false);
 	for(int i = 0; i < 120; i++)
 	{
@@ -289,7 +288,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) const
 //-------------------------------------------------------------------------------
 {
-	if(id != ITInstrument::magic)
+	if(memcmp(id, "IMPI", 4))
 	{
 		return 0;
 	}
@@ -421,7 +420,7 @@ uint32 ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExpor
 	if(usedExtension)
 	{
 		// If we actually had to extend the sample map, update the magic bytes and instrument size.
-		memcpy(iti.dummy, "MPTX", 4);
+		memcpy(iti.dummy, "XTPM", 4);
 		instSize = sizeof(ITInstrumentEx);
 	}
 
@@ -436,7 +435,8 @@ uint32 ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 	uint32 insSize = iti.ConvertToMPT(mptIns, fromType);
 
 	// Is this actually an extended instrument?
-	if(insSize == 0 || memcmp(iti.dummy, "MPTX", 4))
+	// Note: OpenMPT 1.20 - 1.22 accidentally wrote "MPTX" here (since revision 1203), while previous versions wrote the reversed version, "XTPM".
+	if(insSize == 0 || (memcmp(iti.dummy, "MPTX", 4) && memcmp(iti.dummy, "XTPM", 4)))
 	{
 		return insSize;
 	}
@@ -455,7 +455,6 @@ uint32 ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 void ITSample::ConvertEndianness()
 //--------------------------------
 {
-	SwapBytesLE(id);
 	SwapBytesLE(length);
 	SwapBytesLE(loopbegin);
 	SwapBytesLE(loopend);
@@ -473,7 +472,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	MemsetZero(*this);
 
 	// Header
-	id = ITSample::magic;
+	memcpy(id, "IMPS", 4);
 
 	mpt::String::Write<mpt::String::nullTerminated>(filename, mptSmp.filename);
 	//mpt::String::Write<mpt::String::nullTerminated>(name, m_szNames[nsmp]);
@@ -482,22 +481,22 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	gvl = static_cast<uint8>(mptSmp.nGlobalVol);
 	vol = static_cast<uint8>(mptSmp.nVolume / 4);
 	dfp = static_cast<uint8>(mptSmp.nPan / 4);
-	if(mptSmp.uFlags & CHN_PANNING) dfp |= ITSample::enablePanning;
+	if(mptSmp.uFlags[CHN_PANNING]) dfp |= ITSample::enablePanning;
 
 	// Sample Format / Loop Flags
 	if(mptSmp.nLength && mptSmp.pSample)
 	{
 		flags = ITSample::sampleDataPresent;
-		if(mptSmp.uFlags & CHN_LOOP) flags |= ITSample::sampleLoop;
-		if(mptSmp.uFlags & CHN_SUSTAINLOOP) flags |= ITSample::sampleSustain;
-		if(mptSmp.uFlags & CHN_PINGPONGLOOP) flags |= ITSample::sampleBidiLoop;
-		if(mptSmp.uFlags & CHN_PINGPONGSUSTAIN) flags |= ITSample::sampleBidiSustain;
+		if(mptSmp.uFlags[CHN_LOOP]) flags |= ITSample::sampleLoop;
+		if(mptSmp.uFlags[CHN_SUSTAINLOOP]) flags |= ITSample::sampleSustain;
+		if(mptSmp.uFlags[CHN_PINGPONGLOOP]) flags |= ITSample::sampleBidiLoop;
+		if(mptSmp.uFlags[CHN_PINGPONGSUSTAIN]) flags |= ITSample::sampleBidiSustain;
 
-		if(mptSmp.uFlags & CHN_STEREO)
+		if(mptSmp.uFlags[CHN_STEREO])
 		{
 			flags |= ITSample::sampleStereo;
 		}
-		if(mptSmp.uFlags & CHN_16BIT)
+		if(mptSmp.uFlags[CHN_16BIT])
 		{
 			flags |= ITSample::sample16Bit;
 		}
@@ -545,7 +544,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
 //----------------------------------------------------
 {
-	if(id != ITSample::magic)
+	if(memcmp(id, "IMPS", 4))
 	{
 		return 0;
 	}
@@ -560,13 +559,13 @@ uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
 	LimitMax(mptSmp.nGlobalVol, uint16(64));
 	mptSmp.nPan = (dfp & 0x7F) * 4;
 	LimitMax(mptSmp.nPan, uint16(256));
-	if(dfp & ITSample::enablePanning) mptSmp.uFlags |= CHN_PANNING;
+	if(dfp & ITSample::enablePanning) mptSmp.uFlags.set(CHN_PANNING);
 
 	// Loop Flags
-	if(flags & ITSample::sampleLoop) mptSmp.uFlags |= CHN_LOOP;
-	if(flags & ITSample::sampleSustain) mptSmp.uFlags |= CHN_SUSTAINLOOP;
-	if(flags & ITSample::sampleBidiLoop) mptSmp.uFlags |= CHN_PINGPONGLOOP;
-	if(flags & ITSample::sampleBidiSustain) mptSmp.uFlags |= CHN_PINGPONGSUSTAIN;
+	if(flags & ITSample::sampleLoop) mptSmp.uFlags.set(CHN_LOOP);
+	if(flags & ITSample::sampleSustain) mptSmp.uFlags.set(CHN_SUSTAINLOOP);
+	if(flags & ITSample::sampleBidiLoop) mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+	if(flags & ITSample::sampleBidiSustain) mptSmp.uFlags.set(CHN_PINGPONGSUSTAIN);
 
 	// Frequency
 	mptSmp.nC5Speed = C5Speed;
@@ -640,10 +639,6 @@ SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
 }
 
 
-#ifdef MODPLUG_TRACKER
-
-#include "../mptrack/Moddoc.h"
-
 // Convert all multi-byte numeric values to current platform's endianness or vice versa.
 void ITHistoryStruct::ConvertEndianness()
 //---------------------------------------
@@ -680,4 +675,5 @@ void ITHistoryStruct::ConvertToIT(const FileHistory &mptHistory)
 	runtime = static_cast<uint32>(mptHistory.openTime * (18.2f / HISTORY_TIMER_PRECISION));
 }
 
-#endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_END

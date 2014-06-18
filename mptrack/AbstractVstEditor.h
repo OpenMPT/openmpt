@@ -15,20 +15,28 @@
 #include <vector>
 #include "../soundlib/Snd_defs.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CVstPlugin;
 
 class CAbstractVstEditor: public CDialog
 {
-
 protected:
-	//{{AFX_VIRTUAL(CNoteMapWnd)
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	//}}AFX_VIRTUAL
-
+	CMenu m_Menu;
+	CMenu m_PresetMenu;
+	std::vector<CMenu *> m_pPresetMenuGroup;
+	CMenu m_InputMenu;
+	CMenu m_OutputMenu;
+	CMenu m_MacroMenu;
+	CMenu m_OptionsMenu;
+	static UINT clipboardFormat;
+	int32 currentPresetMenu;
+	bool updateDisplay;
 
 public:
 	CVstPlugin &m_VstPlugin;
 	int m_nCurProg;
+
 	CAbstractVstEditor(CVstPlugin &plugin);
 	virtual ~CAbstractVstEditor();
 	void SetupMenu(bool force = false);
@@ -36,6 +44,7 @@ public:
 	void SetLearnMacro(int inMacro);
 	int GetLearnMacro();
 
+	void SetPreset(int32 preset);
 	void UpdatePresetField();
 	bool CreateInstrument();
 
@@ -63,27 +72,21 @@ public:
 	virtual void OnCancel() = 0;
 	virtual bool OpenEditor(CWnd *parent) = 0;
 	virtual void DoClose() = 0;
-	virtual void UpdateParamDisplays() = 0;
+	virtual void UpdateParamDisplays() { if(updateDisplay) { SetupMenu(true); updateDisplay = false; } }
 	virtual afx_msg void OnClose() = 0;
 	virtual void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
 
 	virtual bool IsResizable() const = 0;
 	virtual bool SetSize(int contentWidth, int contentHeight) = 0;
 
+	void UpdateDisplay() { updateDisplay = true; }
+
 	DECLARE_MESSAGE_MAP()
 
-private:
-	CMenu m_Menu;
-	CMenu m_PresetMenu;
-	std::vector<CMenu *> m_pPresetMenuGroup;
-	CMenu m_InputMenu;
-	CMenu m_OutputMenu;
-	CMenu m_MacroMenu;
-	CMenu m_OptionsMenu;
-	static UINT clipboardFormat;
-
-	void FillPresetMenu();
+protected:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	void UpdatePresetMenu(bool force = false);
+	void GeneratePresetMenu(int32 offset, CMenu &parent);
 	void UpdateInputMenu();
 	void UpdateOutputMenu();
 	void UpdateMacroMenu();
@@ -102,5 +105,6 @@ private:
 };
 //end rewbs.defaultPlugGUI
 
-#endif // NO_VST
+OPENMPT_NAMESPACE_END
 
+#endif // NO_VST

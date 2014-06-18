@@ -8,6 +8,7 @@
 #define IDD_DIRECTORIES                 104
 #define IDD_WAVECONVERT                 105
 #define IDD_PROGRESS                    106
+#define IDD_OPTIONS_MIXER               107
 #define IDD_OPTIONS_KEYBOARD            108
 #define IDD_OPTIONS_COLORS              109
 #define IDD_OPTIONS_MIDI                111
@@ -26,12 +27,8 @@
 #define IDD_PATTERN_EDITCOMMAND         124
 #define IDD_SHOWLOG                     125
 #define IDD_VIEW_GLOBALS                126
-#define IDD_PAGEEDITNOTE                127
-#define IDD_PAGEEDITVOLUME              128
-#define IDD_PAGEEDITEFFECT              129
 #define IDD_SAMPLE_AMPLIFY              130
 #define IDD_SAMPLE_RESAMPLE             131
-#define IDD_SETUP_EQ                    132
 #define IDD_OPTIONS_EFFECTS             133
 #define IDD_OPTIONS_AUTHOR              134
 #define IDR_MAINFRAME                   200
@@ -47,10 +44,8 @@
 #define IDS_ERR_NO_TUNING_SELECTION     208
 #define IDS_UNSUPPORTED_TUNING_DnD      209
 #define IDS_OPERATION_FAIL              210
-#define IDS_CANT_OPEN_KEYBINDING_FILE   211
 #define IDS_UNABLE_TO_LOAD_KEYBINDINGS  212
 #define IDS_CANT_OPEN_FILE_FOR_WRITING  213
-#define IDS_CONFIRM_SEQUENCE_DELETE     214
 #define IDS_PATTERN_CLEANUP_UNAVAILABLE 215
 #define IDS_SCL_IMPORT_FAIL_1           216
 #define IDS_SCL_IMPORT_FAIL_2           217
@@ -60,16 +55,7 @@
 #define IDS_SCL_IMPORT_FAIL_6           221
 #define IDS_SCL_IMPORT_FAIL_7           222
 #define IDS_SCL_IMPORT_FAIL_8           223
-#define IDS_TUNING_IMPORT_LIMIT         224
-#define IDS_TUNING_IMPORT_UNKNOWN_FAILURE 225
-#define IDS_TUNING_IMPORT_UNRECOGNIZED_FILE_EXT 226
-#define IDS_TUNING_IMPORT_UNKNOWN_TC_FAILURE 227
-#define IDS_TUNING_IMPORT_SCL_FAILURE   228
-#define IDS_TUNING_IMPORT_UNRECOGNIZED_FILE 229
 #define IDS_SOUNDTOUCH_LOADFAILURE      230
-#define IDS_UNABLE_TO_CREATE_USER_TEMPLATE_FOLDER 231
-#define IDS_FILE_DOES_NOT_EXIST         232
-#define IDS_FILE_EXISTS_BUT_IS_NOT_READABLE 233
 #define IDS_ERR_FILEOPEN                234
 #define IDS_ERR_FILETYPE                235
 #define IDS_ERR_SAVEINS                 236
@@ -108,7 +94,6 @@
 #define IDD_EDITSAMPLEMAP               422
 #define IDD_SELECTMIXPLUGIN             423
 #define IDD_PLUGINEDITOR                424
-#define IDD_SETUP_REVERB                425
 #define IDD_EFFECTVISUALIZER            426
 #define IDB_VISNODE                     427
 #define IDB_SPLASHTEST                  432
@@ -146,6 +131,9 @@
 #define IDD_AUTOTUNE                    531
 #define IDD_INPUT                       532
 #define IDD_CLIPBOARD                   533
+#define IDD_OPTIONS_ADVANCED            534
+#define IDD_OPTIONS_SAMPLEEDITOR        535
+#define IDD_SCANPLUGINS                 536
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -210,6 +198,8 @@
 #define IDC_COMBO5                      1205
 #define IDC_COMBO6                      1206
 #define IDC_COMBO9                      1207
+#define IDC_COMBO10                     1208
+#define IDC_COMBO11                     1209
 #define IDC_NOTEMAP                     1213
 #define IDC_TEXT1                       1301
 #define IDC_TEXT2                       1302
@@ -735,6 +725,7 @@
 #define IDC_SECONDARYHILITE             2227
 #define IDC_GIVEPLUGSIDLETIME           2228
 #define IDC_ROWSPERBEAT                 2229
+#define IDC_RENDERSILENCE               2229
 #define IDC_ROWSPERMEASURE              2230
 #define IDC_GOTO_ROW                    2231
 #define IDC_GOTO_CHAN                   2232
@@ -905,6 +896,7 @@
 #define IDC_CHK_MERGE_SEQUENCES         2408
 #define IDC_CHECK_PT1X                  2409
 #define IDC_STATIC_CHANNEL_NAME         2410
+#define IDC_CHECK_AMIGALIMITS           2410
 #define IDC_FINDHOTKEY                  2411
 #define IDC_STATIC_PATTERNNAME          2412
 #define IDC_EDIT_SAMPLE_LENGTH          2413
@@ -937,12 +929,40 @@
 #define IDC_FIND                        2438
 #define IDC_PITCHWHEELDEPTH             2439
 #define IDC_PROMPT                      2440
+#define IDC_EDIT_FINETUNE               2441
+#define IDC_EDIT_UNDOSIZE               2442
+#define IDC_FLAC_COMPRESSION            2443
+#define IDC_DEFAULT_FORMAT              2444
+#define IDC_COMPRESS_ITI                2445
+#define IDC_PREVIEW_SAMPLES             2446
+#define IDC_VOLUME_HANDLING             2447
+#define IDC_NORMALIZE                   2448
+#define IDC_UNDOSIZE                    2449
 #define IDC_SLIDER_NUMBUFFERS           2454
 #define IDC_EDIT_STATISTICS             2455
 #define IDC_VUMETER                     2456
 #define IDC_STATIC_BUFFERLENGTH         2457
 #define IDC_STATIC_UPDATEINTERVAL       2458
 #define IDC_COMBO_UPDATEINTERVAL        2459
+#define IDC_STATIC_BASECHANNEL          2461
+#define IDC_COMBO_FILTER                2462
+#define IDC_COMBO_POLYPHONY             2463
+#define IDC_SLIDER_STEREOSEP            2464
+#define IDC_CHECK_SOFTPAN               2465
+#define IDC_COMBO_FILTERWINDOW          2466
+#define IDC_TEXT_STEREOSEP              2467
+#define IDC_EDIT_VOLRAMP_SAMPLES_UP     2468
+#define IDC_EDIT_VOLRAMP_SAMPLES_DOWN   2469
+#define IDC_CHECK_KEEPDEVICEOPEN        2470
+#define IDC_STATIC_CHANNEL_FRONTLEFT    2471
+#define IDC_STATIC_CHANNEL_FRONTRIGHT   2472
+#define IDC_STATIC_CHANNEL_REARLEFT     2473
+#define IDC_STATIC_CHANNEL_REARRIGHT    2474
+#define IDC_COMBO_CHANNEL_FRONTLEFT     2475
+#define IDC_COMBO_CHANNEL_FRONTRIGHT    2476
+#define IDC_COMBO_CHANNEL_REARLEFT      2477
+#define IDC_COMBO_CHANNEL_REARRIGHT     2478
+#define IDC_SCANTEXT                    2479
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1073,6 +1093,7 @@
 #define ID_PATTERN_OPEN_RANDOMIZER      32905
 #define ID_PATTERN_INTERPOLATE_NOTE     32906
 #define ID_PATTERN_CHNRESET             32907
+#define ID_PATTERN_INTERPOLATE_INSTR    32908
 #define ID_PRESET_LOAD                  32915
 #define ID_PRESET_SAVE                  32916
 #define ID_PRESET_RANDOM                32917
@@ -1093,7 +1114,7 @@
 #define ID_MODTREE_SAVEITEM             33917
 #define ID_PLUGIN_SETUP                 33918
 #define ID_PRESET_SET                   33920
-// From here: Command range [ID_PRESET_SET, ID_PRESET_SET + MAX_PLUGPRESETS]
+// From here: Command range [ID_PRESET_SET, ID_PRESET_SET + PRESETS_PER_GROUP]
 #define ID_PLUGSELECT                   35000
 // From here: Command range [ID_PLUGSELECT, ID_PLUGSELECT + MAX_MIXPLUGINS]
 #define ID_VSTMACRO_INFO                36002
@@ -1214,15 +1235,18 @@
 #define ID_SAMPLE_MONOCONVERT_SPLIT     44608
 #define ID_SETQUANTIZE                  44609
 #define ID_PLUG_RECORD_MIDIOUT          44610
+#define ID_MRU_LIST_FIRST               44611
+#define ID_MRU_LIST_LAST                44642
+#define ID_FILE_APPENDMODULE            44643
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        539
-#define _APS_NEXT_COMMAND_VALUE         44611
-#define _APS_NEXT_CONTROL_VALUE         2460
+#define _APS_NEXT_RESOURCE_VALUE        537
+#define _APS_NEXT_COMMAND_VALUE         44644
+#define _APS_NEXT_CONTROL_VALUE         2480
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

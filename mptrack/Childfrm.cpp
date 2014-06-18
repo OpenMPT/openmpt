@@ -18,12 +18,15 @@
 #include "view_gen.h"
 #include ".\childfrm.h"
 
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 /////////////////////////////////////////////////////////////////////////////
 // 
@@ -92,7 +95,7 @@ CChildFrame::~CChildFrame()
 {
 	if ((--glMdiOpenCount) == 0)
 	{
-		TrackerSettings::Instance().gbMdiMaximize = m_bMaxWhenClosed;
+		TrackerSettings::Instance().gbMdiMaximize = (m_bMaxWhenClosed != 0);
 	}
 }
 
@@ -178,11 +181,14 @@ void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 	if (bAddToTitle)
 	{
 		TCHAR szText[256+_MAX_PATH];
-		if (pDocument == NULL)
+		if (pDocument == nullptr)
+		{
 			lstrcpy(szText, m_strTitle);
-		else
+		} else
+		{
 			lstrcpy(szText, pDocument->GetTitle());
-		if (pDocument->IsModified()) lstrcat(szText, "*");
+			if (pDocument->IsModified()) lstrcat(szText, "*");
+		}
 		if (m_nWindow > 0)
 			wsprintf(szText + lstrlen(szText), _T(":%d"), m_nWindow);
 
@@ -245,7 +251,7 @@ void CChildFrame::SavePosition(BOOL bForce)
 		CRect rect;
 		
 		m_bMaxWhenClosed = IsZoomed();
-		if (bForce) TrackerSettings::Instance().gbMdiMaximize = m_bMaxWhenClosed;
+		if (bForce) TrackerSettings::Instance().gbMdiMaximize = (m_bMaxWhenClosed != 0);
 		if (!IsIconic())
 		{
 			CWnd *pWnd = m_wndSplitter.GetPane(0, 0);
@@ -274,8 +280,10 @@ void CChildFrame::SavePosition(BOOL bForce)
 	}
 }
 
-//rewbs.varWindowSize
-int CChildFrame::GetSplitterHeight() { 
+
+int CChildFrame::GetSplitterHeight()
+//----------------------------------
+{
 	if (m_hWnd)
 	{
 		CRect rect;
@@ -289,6 +297,7 @@ int CChildFrame::GetSplitterHeight() {
 	}
 	return 15;	// tidy default
 };
+
 
 LRESULT CChildFrame::SendViewMessage(UINT uMsg, LPARAM lParam) const
 //------------------------------------------------------------------
@@ -446,3 +455,5 @@ void CChildFrame::OnSetFocus(CWnd* pOldWnd)
 }
 //end rewbs.customKeysAutoEffects
 
+
+OPENMPT_NAMESPACE_END

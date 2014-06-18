@@ -10,39 +10,24 @@
 
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#define NOMINMAX
-#include "windows.h"
+#include "WindowBase.h"
 
 
-//============
-class ComboBox
-//============
+OPENMPT_NAMESPACE_BEGIN
+
+
+//================================
+class ComboBox : public WindowBase
+//================================
 { 
-protected:
-	HWND combo;
-
 public:
-	ComboBox()
-	{
-		combo = nullptr;
-	}
-
-
-	~ComboBox()
-	{
-		Destroy();
-	}
-
-
 	// Create a new combo box.
 	void Create(HWND parent, int x, int y, int width, int height)
 	{
 		// Remove old instance, if necessary
 		Destroy();
 
-		combo = CreateWindow("COMBOBOX",
+		hwnd = CreateWindow(_T("COMBOBOX"),
 			nullptr,
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST,
 			x,
@@ -54,59 +39,41 @@ public:
 			NULL,
 			0);
 
-		SendMessage(combo, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
+		SendMessage(hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
 	}
 
 
 	// Destroy the combo box.
 	void Destroy()
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
 			ResetContent();
-			DestroyWindow(combo);
+			DestroyWindow(hwnd);
 		}
-		combo = nullptr;
+		hwnd = nullptr;
 	}
 
 
 	// Remove all items in the combo box.
 	void ResetContent()
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			SendMessage(combo,
-				CB_RESETCONTENT,
-				0,
-				0);
+			ComboBox_ResetContent(hwnd);
 		}
 	}
 
 
-	// Get the HWND associated with this combo box.
-	HWND GetHwnd()
-	{
-		return combo;
-	}
-
-
 	// Add a string to the combo box.
-	int AddString(const char *text, const void *data)
+	int AddString(const TCHAR *text, const void *data)
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			LRESULT result = SendMessage(combo,
-				CB_ADDSTRING,
-				0,
-				reinterpret_cast<LPARAM>(text));
-
+			int result = ComboBox_AddString(hwnd, text);
 			if(result != CB_ERR)
 			{
-				SendMessage(combo,
-					CB_SETITEMDATA,
-					result,
-					reinterpret_cast<LPARAM>(data)
-					);
+				ComboBox_SetItemData(hwnd, result, data);
 				return result;
 			}
 		}
@@ -117,12 +84,9 @@ public:
 	// Return number of items in combo box.
 	int GetCount() const
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			return SendMessage(combo,
-				CB_GETCOUNT,
-				0,
-				0);
+			return ComboBox_GetCount(hwnd);
 		}
 		return 0;
 	}
@@ -131,12 +95,9 @@ public:
 	// Select an item.
 	void SetSelection(int index)
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			SendMessage(combo,
-				CB_SETCURSEL,
-				index,
-				0);
+			ComboBox_SetCurSel(hwnd, index);
 		}
 	}
 
@@ -144,12 +105,9 @@ public:
 	// Get the currently selected item.
 	LRESULT GetSelection() const
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			return SendMessage(combo,
-				CB_GETCURSEL,
-				0,
-				0);
+			return ComboBox_GetCurSel(hwnd);
 		}
 		return -1;
 	}
@@ -158,21 +116,46 @@ public:
 	// Get the data associated with the selected item.
 	void *GetSelectionData() const
 	{
-		return GetItemData(GetSelection());
+		return GetItemData(static_cast<int>(GetSelection()));
 	}
 
 
 	// Get item data associated with a list item.
 	void *GetItemData(int index) const
 	{
-		if(combo != nullptr)
+		if(hwnd != nullptr)
 		{
-			return reinterpret_cast<void *>(SendMessage(combo,
-				CB_GETITEMDATA,
-				index,
-				0));
+			return reinterpret_cast<void *>(ComboBox_GetItemData(hwnd, index));
 		}
 		return 0;
 	}
 
+	// Dynamically resize the dropdown list to cover as many items as possible.
+	void SizeDropdownList()
+	{
+		int itemHeight = ComboBox_GetItemHeight(hwnd);
+		int numItems = GetCount();
+		if(numItems < 2) numItems = 2;
+
+		RECT rect;
+		GetWindowRect(hwnd, &rect);
+
+		SIZE sz;
+		sz.cx = rect.right - rect.left;
+		sz.cy = itemHeight * (numItems + 2);
+
+		if(rect.top - sz.cy < 0 || rect.bottom + sz.cy > GetSystemMetrics(SM_CYSCREEN))
+		{
+			// Dropdown exceeds screen height - clamp it.
+			int k = (GetSystemMetrics(SM_CYSCREEN) - rect.bottom) / itemHeight;
+			if(k < rect.top / itemHeight) k = rect.top / itemHeight;
+			if(itemHeight * k < sz.cy) sz.cy = itemHeight * k;
+		}
+
+		SetWindowPos(hwnd, NULL, 0, 0, sz.cx, sz.cy, SWP_NOMOVE | SWP_NOZORDER);
+	}
+
 }; 
+
+
+OPENMPT_NAMESPACE_END

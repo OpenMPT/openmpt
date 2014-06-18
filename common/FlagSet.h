@@ -12,6 +12,8 @@
 
 #include <string>
 
+OPENMPT_NAMESPACE_BEGIN
+
 template <typename enum_t, typename store_t = enum_t>
 class FlagSet
 {
@@ -61,14 +63,14 @@ public:
 	// Set one or more flags.
 	FlagSet &set(enum_t flag)
 	{
-		flags = (flags | static_cast<store_t>(flag));
+		flags = static_cast<store_t>(flags | flag);
 		return *this;
 	}
 
 	// Set or clear one or more flags.
 	FlagSet &set(enum_t flag, bool val)
 	{
-		flags = (val ? (flags | static_cast<store_t>(flag)) : (flags & ~static_cast<store_t>(flag)));
+		flags = static_cast<store_t>(val ? (flags | flag) : (flags & ~flag));
 		return *this;
 	}
 
@@ -82,7 +84,7 @@ public:
 	// Clear one or more flags.
 	FlagSet &reset(enum_t flag)
 	{
-		flags &= ~static_cast<store_t>(flag);
+		flags = static_cast<store_t>(flags & ~flag);
 		return *this;
 	}
 
@@ -96,7 +98,7 @@ public:
 	// Toggle one or more flags.
 	FlagSet &flip(enum_t flag)
 	{
-		flags ^= static_cast<store_t>(flag);
+		flags = static_cast<store_t>(flags ^ flag);
 		return *this;
 	}
 
@@ -171,3 +173,6 @@ private:
 	inline enum_t &operator &= (enum_t &a, enum_t b) { a = (a & b); return a; } \
 	inline enum_t &operator |= (enum_t &a, enum_t b) { a = (a | b); return a; } \
 	inline enum_t operator ~ (enum_t a) { return static_cast<enum_t>(~(+a)); }
+
+
+OPENMPT_NAMESPACE_END

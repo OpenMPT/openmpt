@@ -12,6 +12,9 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifndef NO_DSP
 
 // Buffer Sizes
@@ -40,15 +43,11 @@ public:
 	CDSPSettings m_Settings;
 private:
 
-	// Noise Reduction: simple low-pass filter
-	LONG nLeftNR;
-	LONG nRightNR;
-
 	// Surround Encoding: 1 delay line + low-pass filter + high-pass filter
 	LONG nSurroundSize;
 	LONG nSurroundPos;
 	LONG nDolbyDepth;
-	
+
 	// Surround Biquads
 	LONG nDolbyHP_Y1;
 	LONG nDolbyHP_X1;
@@ -80,10 +79,10 @@ public:
 public:
 	void SetSettings(const CDSPSettings &settings) { m_Settings = settings; }
 	// [XBass level 0(quiet)-100(loud)], [cutoff in Hz 10-100]
-	BOOL SetXBassParameters(UINT nDepth, UINT nRange);
+	bool SetXBassParameters(UINT nDepth, UINT nRange);
 	// [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-40ms]
-	BOOL SetSurroundParameters(UINT nDepth, UINT nDelay);
-	void Initialize(BOOL bReset, DWORD MixingFreq, DWORD DSPMask);
+	bool SetSurroundParameters(UINT nDepth, UINT nDelay);
+	void Initialize(bool bReset, DWORD MixingFreq, DWORD DSPMask);
 	void Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels, DWORD DSPMask);
 private:
 	void ProcessStereoSurround(int * MixSoundBuffer, int count);
@@ -91,3 +90,6 @@ private:
 };
 
 #endif // NO_DSP
+
+
+OPENMPT_NAMESPACE_END

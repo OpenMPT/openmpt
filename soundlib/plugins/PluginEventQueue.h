@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <deque>
+#include "../common/mutex.h"
+
 // Copied packing options from affectx.h
 #if TARGET_API_MAC_CARBON
 	#ifdef __LP64__
@@ -26,8 +29,7 @@
 	#pragma pack(8)
 #endif
 
-#include <deque>
-#include "../common/mutex.h"
+OPENMPT_NAMESPACE_BEGIN
 
 // Alternative, easy to use implementation of VstEvents struct.
 template <size_t N>
@@ -150,3 +152,6 @@ public:
 #elif defined __BORLANDC__
 	#pragma -a-
 #endif
+
+
+OPENMPT_NAMESPACE_END

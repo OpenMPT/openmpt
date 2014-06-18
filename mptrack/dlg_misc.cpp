@@ -9,18 +9,19 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "moddoc.h"
-#include "mainfrm.h"
+#include "Mptrack.h"
+#include "Moddoc.h"
+#include "Mainfrm.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
 #include "ChildFrm.h"
-#include "vstplug.h"
+#include "Vstplug.h"
 #include "ChannelManagerDlg.h"
 #include "../common/version.h"
 #include "../common/StringFixer.h"
 
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -56,6 +57,7 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK5,		m_CheckBox5);
 	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
 	DDX_Control(pDX, IDC_CHECK_PT1X,	m_CheckBoxPT1x);
+	DDX_Control(pDX, IDC_CHECK_AMIGALIMITS,	m_CheckBoxAmigaLimits);
 
 	//}}AFX_DATA_MAP
 }
@@ -67,6 +69,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_nType = sndFile.GetType();
 	m_nChannels = sndFile.GetNumChannels();
+	initialized = false;
 
 	// Mod types
 
@@ -91,46 +94,6 @@ BOOL CModTypeDlg::OnInitDialog()
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
 
-	// Tempo modes
-
-	// Don't show new tempo modes for XM/IT, unless they are currently used
-	const bool showNewTempoModes = (sndFile.GetType() == MOD_TYPE_MPT || (sndFile.m_SongFlags[SONG_ITPROJECT] != 0));
-
-	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
-	if(showNewTempoModes || sndFile.m_nTempoMode == tempo_mode_alternative)
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
-	if(showNewTempoModes || sndFile.m_nTempoMode == tempo_mode_modern)
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
-	m_TempoModeBox.SetCurSel(0);
-	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
-	{
-		if(m_TempoModeBox.GetItemData(i) == sndFile.m_nTempoMode)
-		{
-			m_TempoModeBox.SetCurSel(i);
-			break;
-		}
-	}
-
-	// Mix levels
-
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),		mixLevels_117RC3);
-	if(sndFile.GetMixLevels() == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
-	if(sndFile.GetMixLevels() == mixLevels_117RC1)	// Dito
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),	mixLevels_117RC1);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);
-
-	m_PlugMixBox.SetCurSel(0);
-	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
-	{
-		if(static_cast<mixLevels>(m_PlugMixBox.GetItemData(i)) == sndFile.GetMixLevels())
-		{
-			m_PlugMixBox.SetCurSel(i);
-			break;
-		}
-	}
-
 	// Misc flags
 
 	CheckDlgButton(IDC_CHK_COMPATPLAY, sndFile.GetModFlag(MSF_COMPATIBLE_PLAY));
@@ -146,16 +109,11 @@ BOOL CModTypeDlg::OnInitDialog()
 
 	// Version information
 
-	SetDlgItemText(IDC_TEXT_CREATEDWITH, "Created with:");
-	SetDlgItemText(IDC_TEXT_SAVEDWITH, "Last saved with:");
-
-	SetDlgItemText(IDC_EDIT_CREATEDWITH, FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
-// 	if(sndFile.m_dwLastSavedWithVersion)
-// 		SetDlgItemText(IDC_EDIT_SAVEDWITH, FormatVersionNumber(sndFile.m_dwLastSavedWithVersion));
-// 	else
+	if(sndFile.m_dwCreatedWithVersion) SetDlgItemText(IDC_EDIT_CREATEDWITH, "OpenMPT " + FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
 	SetDlgItemText(IDC_EDIT_SAVEDWITH, sndFile.madeWithTracker.c_str());
 	UpdateDialog();
 
+	initialized = true;
 	EnableToolTips(TRUE);
 	return TRUE;
 }
@@ -172,7 +130,7 @@ void CModTypeDlg::UpdateChannelCBox()
 //-----------------------------------
 {
 	const MODTYPE type = static_cast<MODTYPE>(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()));
-	CHANNELINDEX currChanSel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
+	CHANNELINDEX currChanSel = static_cast<CHANNELINDEX>(m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel()));
 	const CHANNELINDEX minChans = CSoundFile::GetModSpecifications(type).channelsMin;
 	const CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
 	
@@ -210,6 +168,7 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox4.SetCheck(sndFile.m_SongFlags[SONG_ITCOMPATGXX] ? BST_CHECKED : BST_UNCHECKED);
 	m_CheckBox5.SetCheck(sndFile.m_SongFlags[SONG_EXFILTERRANGE] ? BST_CHECKED : BST_UNCHECKED);
 	m_CheckBoxPT1x.SetCheck(sndFile.m_SongFlags[SONG_PT1XMODE] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBoxAmigaLimits.SetCheck(sndFile.m_SongFlags[SONG_AMIGALIMITS] ? BST_CHECKED : BST_UNCHECKED);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -223,6 +182,10 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox4.EnableWindow(allowedFlags[SONG_ITCOMPATGXX]);
 	m_CheckBox5.EnableWindow(allowedFlags[SONG_EXFILTERRANGE]);
 	m_CheckBoxPT1x.EnableWindow(allowedFlags[SONG_PT1XMODE]);
+	m_CheckBoxAmigaLimits.EnableWindow(allowedFlags[SONG_AMIGALIMITS]);
+
+	m_CheckBoxPT1x.ShowWindow(type != MOD_TYPE_S3M ? SW_SHOW : SW_HIDE);
+	m_CheckBoxAmigaLimits.ShowWindow(type == MOD_TYPE_S3M ? SW_SHOW : SW_HIDE);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -252,6 +215,51 @@ void CModTypeDlg::UpdateDialog()
 	GetDlgItem(IDC_CHK_MIDICCBUG)->EnableWindow(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION) ? TRUE : FALSE);
 	GetDlgItem(IDC_CHK_OLDRANDOM)->EnableWindow((ITorMPT && sndFile.GetModFlag(MSF_OLDVOLSWING)) ? TRUE : FALSE);
 	GetDlgItem(IDC_CHK_OLDPITCH)->EnableWindow(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS) ? TRUE : FALSE);
+
+	// Tempo modes
+	const tempoMode oldTempoMode = initialized ? static_cast<tempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
+	m_TempoModeBox.ResetContent();
+	// Don't show new tempo modes for XM/IT, unless they are currently used
+	const bool showNewModes = (type == MOD_TYPE_MPT || (sndFile.m_SongFlags[SONG_ITPROJECT] != 0));
+
+	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
+	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_alternative)
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
+	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_modern)
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
+	m_TempoModeBox.SetCurSel(0);
+	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
+	{
+		if(static_cast<tempoMode>(m_TempoModeBox.GetItemData(i)) == oldTempoMode)
+		{
+			m_TempoModeBox.SetCurSel(i);
+			break;
+		}
+	}
+
+	// Mix levels
+	const mixLevels oldMixLevels = initialized ? static_cast<mixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
+	m_PlugMixBox.ResetContent();
+	if(showNewModes || sndFile.GetMixLevels() == mixLevels_117RC3)	// In XM/IT, this is only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),	mixLevels_117RC3);
+	if(sndFile.GetMixLevels() == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
+	if(sndFile.GetMixLevels() == mixLevels_117RC1)	// Ditto
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),	mixLevels_117RC1);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);
+	if(type == MOD_TYPE_XM)
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible (FT2 Pan Law)"), mixLevels_compatible_FT2);
+
+	m_PlugMixBox.SetCurSel(0);
+	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
+	{
+		if(static_cast<mixLevels>(m_PlugMixBox.GetItemData(i)) == oldMixLevels)
+		{
+			m_PlugMixBox.SetCurSel(i);
+			break;
+		}
+	}
 
 	// Mixmode Box
 	GetDlgItem(IDC_TEXT_MIXMODE)->ShowWindow(XMorITorMPT);
@@ -293,9 +301,9 @@ bool CModTypeDlg::VerifyData()
 
 	int temp_nRPB = GetDlgItemInt(IDC_ROWSPERBEAT);
 	int temp_nRPM = GetDlgItemInt(IDC_ROWSPERMEASURE);
-	if ((temp_nRPB > temp_nRPM))
+	if(temp_nRPB > temp_nRPM)
 	{
-		Reporting::Warning("Error: Rows per measure must be greater than or equal rows per beat.");
+		Reporting::Warning("Error: Rows per measure must be greater than or equal to rows per beat.");
 		GetDlgItem(IDC_ROWSPERMEASURE)->SetFocus();
 		return false;
 	}
@@ -305,7 +313,7 @@ bool CModTypeDlg::VerifyData()
 
 	CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
 
-	if (sel > maxChans)
+	if(sel > maxChans)
 	{
 		CString error;
 		error.Format("Error: Maximum number of channels for this module type is %d.", maxChans);
@@ -349,18 +357,18 @@ void CModTypeDlg::OnOK()
 	sndFile.m_SongFlags.set(SONG_EXFILTERRANGE, m_CheckBox5.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_ITPEMBEDIH, m_CheckBox6.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_PT1XMODE, m_CheckBoxPT1x.GetCheck() != BST_UNCHECKED);
+	sndFile.m_SongFlags.set(SONG_AMIGALIMITS, m_CheckBoxAmigaLimits.GetCheck() != BST_UNCHECKED);
 
 	sel = m_ChannelsBox.GetCurSel();
 	if (sel >= 0)
 	{
 		m_nChannels = static_cast<CHANNELINDEX>(m_ChannelsBox.GetItemData(sel));
-		//if (m_nType & MOD_TYPE_XM) m_nChannels = (m_nChannels+1) & 0xFE;
 	}
 	
 	sel = m_TempoModeBox.GetCurSel();
 	if (sel >= 0)
 	{
-		sndFile.m_nTempoMode = m_TempoModeBox.GetItemData(sel);
+		sndFile.m_nTempoMode = static_cast<tempoMode>(m_TempoModeBox.GetItemData(sel));
 	}
 
 	sel = m_PlugMixBox.GetCurSel();
@@ -451,8 +459,6 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 
 	if(pNMHDR->code == TTN_NEEDTEXTA)
 	{
-		//strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
-		//	strTipText.GetLength() + 1);
 		// 80 chars max?!
 		mpt::String::CopyN(pTTTA->szText, strTipText);
 	} else
@@ -489,22 +495,16 @@ UINT CShowLogDlg::ShowLog(LPCSTR pszLog, LPCSTR lpszTitle)
 ///////////////////////////////////////////////////////////
 // CRemoveChannelsDlg
 
-//rewbs.removeChansDlgCleanup
 void CRemoveChannelsDlg::DoDataExchange(CDataExchange* pDX)
 //--------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CShowLogDlg)
 	DDX_Control(pDX, IDC_REMCHANSLIST,		m_RemChansList);
-    //}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CRemoveChannelsDlg, CDialog)
-	//{{AFX_MSG_MAP(CRemoveChannelsDlg)
 	ON_LBN_SELCHANGE(IDC_REMCHANSLIST,		OnChannelChanged)
-	//}}AFX_MSG_MAP
-//	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -568,39 +568,37 @@ void CRemoveChannelsDlg::OnChannelChanged()
 	nr = m_RemChansList.GetSelCount();
 	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (sndFile.GetNumChannels() >= nr + sndFile.GetModSpecifications().channelsMin) && nr > 0)) ? TRUE : FALSE);
 }
-//end rewbs.removeChansDlgCleanup
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // Sound Bank Information
 
-CSoundBankProperties::CSoundBankProperties(CDLSBank *pBank, CWnd *parent):CDialog(IDD_SOUNDBANK_INFO, parent)
-//-----------------------------------------------------------------------------------------------------------
+CSoundBankProperties::CSoundBankProperties(CDLSBank &bank, CWnd *parent) : CDialog(IDD_SOUNDBANK_INFO, parent)
+//------------------------------------------------------------------------------------------------------------
 {
 	SOUNDBANKINFO bi;
 	
 	m_szInfo[0] = 0;
-	if (pBank)
+
+	fileName = bank.GetFileName();
+
+	UINT nType = bank.GetBankInfo(&bi);
+	wsprintf(&m_szInfo[strlen(m_szInfo)], "Type:\t%s\r\n", (nType & SOUNDBANK_TYPE_SF2) ? "Sound Font (SF2)" : "Downloadable Sound (DLS)");
+	if (bi.szBankName[0])
+		wsprintf(&m_szInfo[strlen(m_szInfo)], "Name:\t\"%s\"\r\n", bi.szBankName);
+	if (bi.szDescription[0])
+		wsprintf(&m_szInfo[strlen(m_szInfo)], "\t\"%s\"\r\n", bi.szDescription);
+	if (bi.szCopyRight[0])
+		wsprintf(&m_szInfo[strlen(m_szInfo)], "Copyright:\t\"%s\"\r\n", bi.szCopyRight);
+	if (bi.szEngineer[0])
+		wsprintf(&m_szInfo[strlen(m_szInfo)], "Author:\t\"%s\"\r\n", bi.szEngineer);
+	if (bi.szSoftware[0])
+		wsprintf(&m_szInfo[strlen(m_szInfo)], "Software:\t\"%s\"\r\n", bi.szSoftware);
+	// Last lines: comments
+	if (bi.szComments[0])
 	{
-		UINT nType = pBank->GetBankInfo(&bi);
-		wsprintf(m_szInfo, "File:\t\"%s\"\r\n", pBank->GetFileName());
-		wsprintf(&m_szInfo[strlen(m_szInfo)], "Type:\t%s\r\n", (nType & SOUNDBANK_TYPE_SF2) ? "Sound Font (SF2)" : "Downloadable Sound (DLS)");
-		if (bi.szBankName[0])
-			wsprintf(&m_szInfo[strlen(m_szInfo)], "Name:\t\"%s\"\r\n", bi.szBankName);
-		if (bi.szDescription[0])
-			wsprintf(&m_szInfo[strlen(m_szInfo)], "\t\"%s\"\r\n", bi.szDescription);
-		if (bi.szCopyRight[0])
-			wsprintf(&m_szInfo[strlen(m_szInfo)], "Copyright:\t\"%s\"\r\n", bi.szCopyRight);
-		if (bi.szEngineer[0])
-			wsprintf(&m_szInfo[strlen(m_szInfo)], "Author:\t\"%s\"\r\n", bi.szEngineer);
-		if (bi.szSoftware[0])
-			wsprintf(&m_szInfo[strlen(m_szInfo)], "Software:\t\"%s\"\r\n", bi.szSoftware);
-		// Last lines: comments
-		if (bi.szComments[0])
-		{
-			strncat(m_szInfo, "\r\nComments:\r\n", strlen(m_szInfo) - sizeof(m_szInfo) - 1);
-			strncat(m_szInfo, bi.szComments, strlen(m_szInfo) - sizeof(m_szInfo) - 1);
-		}
+		strncat(m_szInfo, "\r\nComments:\r\n", strlen(m_szInfo) - CountOf(m_szInfo) - 1);
+		strncat(m_szInfo, bi.szComments, strlen(m_szInfo) - CountOf(m_szInfo) - 1);
 	}
 }
 
@@ -610,6 +608,7 @@ BOOL CSoundBankProperties::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	SetDlgItemText(IDC_EDIT1, m_szInfo);
+	SetWindowTextW(m_hWnd, (fileName.AsNative() + L" - Sound Bank Information").c_str());
 	return TRUE;
 }
 
@@ -858,7 +857,7 @@ BOOL CSampleMapDlg::OnInitDialog()
 }
 
 
-VOID CSampleMapDlg::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pBar)
+void CSampleMapDlg::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pBar)
 //--------------------------------------------------------------------
 {
 	CDialog::OnHScroll(nCode, nPos, pBar);
@@ -867,7 +866,7 @@ VOID CSampleMapDlg::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pBar)
 }
 
 
-VOID CSampleMapDlg::OnUpdateSamples()
+void CSampleMapDlg::OnUpdateSamples()
 //-----------------------------------
 {
 	UINT nOldPos = 0;
@@ -916,7 +915,7 @@ VOID CSampleMapDlg::OnUpdateSamples()
 }
 
 
-VOID CSampleMapDlg::OnUpdateOctave()
+void CSampleMapDlg::OnUpdateOctave()
 //----------------------------------
 {
 	CHAR s[64];
@@ -928,7 +927,7 @@ VOID CSampleMapDlg::OnUpdateOctave()
 
 
 
-VOID CSampleMapDlg::OnUpdateKeyboard()
+void CSampleMapDlg::OnUpdateKeyboard()
 //------------------------------------
 {
 	UINT nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
@@ -956,10 +955,10 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 
 	if ((lParam >= 0) && (lParam < 3*12))
 	{
-		SAMPLEINDEX nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
+		SAMPLEINDEX nSample = static_cast<SAMPLEINDEX>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
 		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
 		
-		const std::string temp = sndFile.GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
+		const std::string temp = sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * nBaseOctave), m_nInstrument).c_str();
 		if(temp.size() >= CountOf(s))
 			wsprintf(s, "%s", "...");
 		else
@@ -1021,7 +1020,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 }
 
 
-VOID CSampleMapDlg::OnOK()
+void CSampleMapDlg::OnOK()
 //------------------------
 {
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
@@ -1064,11 +1063,11 @@ BOOL CEditHistoryDlg::OnInitDialog()
 
 	CString s;
 	uint64 totalTime = 0;
-	const size_t num = m_pModDoc->GetFileHistory().size();
+	const size_t num = m_pModDoc->GetrSoundFile().GetFileHistory().size();
 	
 	for(size_t n = 0; n < num; n++)
 	{
-		const FileHistory *hist = &(m_pModDoc->GetFileHistory().at(n));
+		const FileHistory *hist = &(m_pModDoc->GetrSoundFile().GetFileHistory().at(n));
 		totalTime += hist->openTime;
 
 		// Date
@@ -1098,7 +1097,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		SetWindowText(s);
 	}
 	// Enable or disable Clear button
-	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetFileHistory().empty()) ? FALSE : TRUE);
+	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetrSoundFile().GetFileHistory().empty()) ? FALSE : TRUE);
 
 	return TRUE;
 
@@ -1108,9 +1107,9 @@ BOOL CEditHistoryDlg::OnInitDialog()
 void CEditHistoryDlg::OnClearHistory()
 //------------------------------------
 {
-	if(m_pModDoc != nullptr && !m_pModDoc->GetFileHistory().empty())
+	if(m_pModDoc != nullptr && !m_pModDoc->GetrSoundFile().GetFileHistory().empty())
 	{
-		m_pModDoc->GetFileHistory().clear();
+		m_pModDoc->GetrSoundFile().GetFileHistory().clear();
 		m_pModDoc->SetModified();
 		OnInitDialog();
 	}
@@ -1170,7 +1169,7 @@ BOOL CInputDlg::OnInitDialog()
 	if(minValue != maxValue)
 	{
 		// Numeric
-		spin.SetRange(minValue, maxValue);
+		spin.SetRange32(minValue, maxValue);
 		spin.SetBuddy(GetDlgItem(IDC_EDIT1));
 		SetDlgItemInt(IDC_EDIT1, resultNumber);
 	} else
@@ -1222,11 +1221,11 @@ struct MsgBoxHidableMessage
 
 const MsgBoxHidableMessage HidableMessages[] =
 {
-	{TEXT("Note: First two bytes of oneshot samples is silenced for ProTracker compatibility."), 1, true},
+	{TEXT("Note: First two bytes of oneshot samples are silenced for ProTracker compatibility."), 1, true},
 	{TEXT("Hint: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
 	{TEXT("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false},
 	{TEXT("Hint: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 3, true},
-	{TEXT("Warning: the exported file will not contain any of MPT's file format hacks."), 1 << 4, true},
+	{TEXT("Warning: The exported file will not contain any of MPT's file format hacks."), 1 << 4, true},
 };
 
 STATIC_ASSERT(CountOf(HidableMessages) == enMsgBoxHidableMessage_count);
@@ -1284,53 +1283,31 @@ void CMsgBoxHidable::DoDataExchange(CDataExchange* pDX)
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR szNullNote = TEXT("...");
-const LPCTSTR szUnknownNote = TEXT("???");
 
-
-LPCTSTR GetNoteStr(const ModCommand::NOTE nNote)
-//----------------------------------------------
-{
-	if(nNote == 0)
-		return szNullNote;
-
-	if(nNote >= 1 && nNote <= NOTE_MAX)
-	{
-		return szDefaultNoteNames[nNote-1];
-	}
-	else if(nNote >= NOTE_MIN_SPECIAL && nNote <= NOTE_MAX_SPECIAL)
-	{
-		return szSpecialNoteNames[nNote - NOTE_MIN_SPECIAL];
-	}
-	else
-		return szUnknownNote;
-}
-
-	
 void AppendNotesToControl(CComboBox& combobox, const ModCommand::NOTE noteStart, const ModCommand::NOTE noteEnd)
-//------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------
 {
-	const ModCommand::NOTE upperLimit = MIN(CountOf(szDefaultNoteNames) - 1, noteEnd);
+	const ModCommand::NOTE upperLimit = MIN(NOTE_MAX - NOTE_MIN, noteEnd);
 	for(ModCommand::NOTE note = noteStart; note <= upperLimit; ++note)
-		combobox.SetItemData(combobox.AddString(szDefaultNoteNames[note]), note);
+		combobox.SetItemData(combobox.AddString(CSoundFile::GetNoteName(note + NOTE_MIN).c_str()), note);
 }
 
 
-void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile* const pSndFile /* = nullptr*/, const INSTRUMENTINDEX nInstr/* = MAX_INSTRUMENTS*/)
-//----------------------------------------------------------------------------------------------------------------------------------
+void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, const INSTRUMENTINDEX nInstr/* = MAX_INSTRUMENTS*/)
+//-----------------------------------------------------------------------------------------------------------------------------
 {
-	const ModCommand::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : NOTE_MIN;
-	const ModCommand::NOTE noteEnd = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMax : NOTE_MAX;
+	const ModCommand::NOTE noteStart = sndFile.GetModSpecifications().noteMin;
+	const ModCommand::NOTE noteEnd = sndFile.GetModSpecifications().noteMax;
 	for(ModCommand::NOTE nNote = noteStart; nNote <= noteEnd; nNote++)
 	{
-		if(pSndFile != nullptr && nInstr != MAX_INSTRUMENTS)
-			combobox.SetItemData(combobox.AddString(pSndFile->GetNoteName(nNote, nInstr).c_str()), nNote);
-		else
-			combobox.SetItemData(combobox.AddString(szDefaultNoteNames[nNote - 1]), nNote);
+		combobox.SetItemData(combobox.AddString(sndFile.GetNoteName(nNote, nInstr).c_str()), nNote);
 	}
 	for(ModCommand::NOTE nNote = NOTE_MIN_SPECIAL - 1; nNote++ < NOTE_MAX_SPECIAL;)
 	{
-		if(pSndFile == nullptr || pSndFile->GetModSpecifications().HasNote(nNote) == true)
-			combobox.SetItemData(combobox.AddString(szSpecialNoteNames[nNote-NOTE_MIN_SPECIAL]), nNote);
+		if(sndFile.GetModSpecifications().HasNote(nNote))
+			combobox.SetItemData(combobox.AddString(szSpecialNoteNamesMPT[nNote - NOTE_MIN_SPECIAL]), nNote);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

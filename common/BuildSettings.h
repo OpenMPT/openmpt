@@ -18,15 +18,10 @@
 
 #ifdef MODPLUG_TRACKER
 
-//#define NO_PCH
-
 // Use inline assembly at all
 #define ENABLE_ASM
 
 #else
-
-// Do not use precompiled headers (prevents include of commonly used headers in stdafx.h)
-#define NO_PCH
 
 // Do not use inline asm in library builds. There is just about no codepath which would use it anyway.
 //#define ENABLE_ASM
@@ -36,9 +31,11 @@
 
 
 // inline assembly requires MSVC compiler
-#if defined(ENABLE_ASM) && MPT_COMPILER_MSVC && defined(_M_IX86)
+#if defined(ENABLE_ASM) && MPT_COMPILER_MSVC
 
-// Generate general x86 inline assembly.
+#ifdef _M_IX86
+
+// Generate general x86 inline assembly / intrinsics.
 #define ENABLE_X86
 
 // Generate inline assembly using MMX instructions (only used when the CPU supports it).
@@ -47,8 +44,27 @@
 // Generate inline assembly using SSE instructions (only used when the CPU supports it).
 #define ENABLE_SSE
 
+// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+#define ENABLE_SSE2
+
+// Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
+#define ENABLE_SSE3
+
 // Generate inline assembly using AMD specific instruction set extensions (only used when the CPU supports it).
 #define ENABLE_X86_AMD
+
+#elif defined(_M_X64)
+
+// Generate general x64 inline assembly / intrinsics.
+#define ENABLE_X64
+
+// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+#define ENABLE_SSE2
+
+// Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
+#define ENABLE_SSE3
+
+#endif
 
 #endif // ENABLE_ASM
 
@@ -73,11 +89,16 @@
 #define NO_LOGGING
 #endif
 
-// Disable unarchiving support
-//#define NO_ARCHIVE_SUPPORT
+// Disable all runtime asserts
+#ifndef _DEBUG
+#define NO_ASSERTS
+#endif
 
 // Disable std::istream support in class FileReader (this is generally not needed for the tracker, local files can easily be mmapped as they have been before introducing std::istream support)
 #define NO_FILEREADER_STD_ISTREAM
+
+// Disable unarchiving support
+//#define NO_ARCHIVE_SUPPORT
 
 // Disable the built-in reverb effect
 //#define NO_REVERB
@@ -118,15 +139,6 @@
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
-// Do not build libmodplug emulation layer (only makes sense for library)
-#define NO_LIBMODPLUG
-
-// Do not build xmplay input plugin cod (only makes snse for library)
-#define NO_XMPLAY
-
-// Do not build winamp input plugin code (only makes sense for library)
-#define NO_WINAMP
-
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C
 
@@ -140,9 +152,10 @@
 #else
 #define MODPLUG_NO_FILESAVE
 #endif
+//#define NO_ASSERTS
 //#define NO_LOGGING
-#define NO_ARCHIVE_SUPPORT
 //#define NO_FILEREADER_STD_ISTREAM
+#define NO_ARCHIVE_SUPPORT
 #define NO_REVERB
 #define NO_DSP
 #define NO_EQ
@@ -150,8 +163,10 @@
 #define NO_ASIO
 #define NO_VST
 #define NO_PORTAUDIO
-#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86))
+#if !defined(MPT_WITH_MO3) && !(MPT_COMPILER_MSVC)
+#ifndef NO_MO3
 #define NO_MO3
+#endif
 #endif
 #define NO_DSOUND
 #define NO_FLAC
@@ -162,15 +177,6 @@
 #endif
 //#define NO_MINIZ
 #define NO_MP3_SAMPLES
-#if defined(LIBOPENMPT_BUILD_TEST)
-#define NO_LIBMODPLUG
-#endif
-#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86)) || defined(LIBOPENMPT_BUILD_TEST)
-#define NO_WINAMP
-#endif
-#if !defined(_WIN32) || (defined(_WIN32) && !defined(_M_IX86)) || defined(LIBOPENMPT_BUILD_TEST)
-#define NO_XMPLAY
-#endif
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
@@ -182,15 +188,52 @@
 
 
 
-// fixing stuff up
+#if MPT_OS_WINDOWS
 
-#if !defined(MODPLUG_TRACKER) && defined(NO_MO3)
-// For library builds, windows.h is only required for LoadLibrary.
-//#define NO_WINDOWS_H
+#define MPT_CHARSET_WIN32
+
+#elif MPT_OS_LINUX
+
+#define MPT_CHARSET_ICONV
+
+#elif MPT_OS_ANDROID
+
+#define MPT_CHARSET_INTERNAL
+
+#elif MPT_OS_EMSCRIPTEN
+
+#define MPT_CHARSET_CODECVTUTF8
+#ifndef MPT_LOCALE_ASSUME_CHARSET
+#define MPT_LOCALE_ASSUME_CHARSET CharsetUTF8
 #endif
+
+#elif MPT_OS_MACOSX_OR_IOS
+
+#if defined(MPT_WITH_ICONV)
+#define MPT_CHARSET_ICONV
+#ifndef MPT_ICONV_NO_WCHAR
+#define MPT_ICONV_NO_WCHAR
+#endif
+#else
+#define MPT_CHARSET_CODECVTUTF8
+#endif
+
+#elif defined(MPT_WITH_ICONV)
+
+#define MPT_CHARSET_ICONV
+
+#endif
+
+
+
+// fixing stuff up
 
 #if !defined(ENABLE_MMX) && !defined(NO_REVERB)
 #define NO_REVERB // reverb requires mmx
+#endif
+
+#if !defined(ENABLE_X86) && !defined(NO_DSP)
+#define NO_DSP // DSP requires x86 inline asm
 #endif
 
 #if defined(ENABLE_TESTS) && defined(MODPLUG_NO_FILESAVE)
@@ -206,22 +249,80 @@
 #define MODPLUG_NO_FILESAVE // file saving is broken on big endian
 #endif
 
-#if !defined(NO_LIBMODPLUG)
-#if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && defined(_WIN32) && !defined(LIBOPENMPT_BUILD_DLL))
-#define NO_LIBMODPLUG // libmodplug interface emulation requires libopenmpt dll build on windows
+#if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)
+#define MPT_CHARSET_INTERNAL
+#endif
+
+#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_DYNBIND)
+#define MPT_WITH_DYNBIND // Tracker requires dynamic library loading for export codecs
+#endif
+
+#if (!defined(NO_MO3) || !defined(NO_MP3_SAMPLES)) && !defined(MPT_WITH_DYNBIND)
+#define MPT_WITH_DYNBIND // mpg123 and unmo3 are loaded dynamically
+#endif
+
+#if defined(ENABLE_TESTS) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // Test suite requires PathString for file loading.
+#endif
+
+#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // Tracker requires PathString
+#endif
+
+#if defined(MPT_WITH_DYNBIND) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // dynamic library loading requires PathString
+#endif
+
+#if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // file saving requires PathString
+#endif
+
+#if defined(MPT_WITH_PATHSTRING) && !defined(MPT_WITH_CHARSET_LOCALE)
+#define MPT_WITH_CHARSET_LOCALE // PathString requires locale charset
+#endif
+
+#if MPT_OS_WINDOWS && defined(MODPLUG_TRACKER)
+#define MPT_USE_WINDOWS_H
+#endif
+
+
+
+#if defined(MODPLUG_TRACKER)
+#ifndef MPT_NO_NAMESPACE
+#define MPT_NO_NAMESPACE
 #endif
 #endif
 
-#if !defined(NO_WINAMP)
-#if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && !defined(LIBOPENMPT_BUILD_DLL))
-#define NO_WINAMP // winamp plugin requires libopenmpt dll build
+#if defined(MPT_NO_NAMESPACE)
+
+#ifdef OPENMPT_NAMESPACE
+#undef OPENMPT_NAMESPACE
 #endif
+#define OPENMPT_NAMESPACE
+
+#ifdef OPENMPT_NAMESPACE_BEGIN
+#undef OPENMPT_NAMESPACE_BEGIN
+#endif
+#define OPENMPT_NAMESPACE_BEGIN
+
+#ifdef OPENMPT_NAMESPACE_END
+#undef OPENMPT_NAMESPACE_END
+#endif
+#define OPENMPT_NAMESPACE_END
+
+#else
+
+#ifndef OPENMPT_NAMESPACE
+#define OPENMPT_NAMESPACE OpenMPT
 #endif
 
-#if !defined(NO_XMPLAY)
-#if !defined(LIBOPENMPT_BUILD) || (defined(LIBOPENMPT_BUILD) && !defined(LIBOPENMPT_BUILD_DLL))
-#define NO_XMPLAY // xmplay plugin requires libopenmpt dll build
+#ifndef OPENMPT_NAMESPACE_BEGIN
+#define OPENMPT_NAMESPACE_BEGIN namespace OPENMPT_NAMESPACE {
 #endif
+#ifndef OPENMPT_NAMESPACE_END
+#define OPENMPT_NAMESPACE_END   }
+#endif
+
 #endif
 
 
@@ -230,7 +331,8 @@
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32)
+
 #if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
 #define _WIN32_WINNT        0x0501 // _WIN32_WINNT_WINXP
 #else
@@ -272,8 +374,13 @@
 #endif
 
 #if MPT_COMPILER_MSVC
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS		// Define to disable the "This function or variable may be unsafe" warnings.
+#endif
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES			1
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT	1
+#ifndef _SCL_SECURE_NO_WARNINGS
 #define _SCL_SECURE_NO_WARNINGS
 #endif
+#endif
+

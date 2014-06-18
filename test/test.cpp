@@ -29,19 +29,19 @@
 #include "../mptrack/mptrack.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/MainFrm.h"
+#include "../mptrack/Settings.h"
 #endif // MODPLUG_TRACKER
 #ifndef MODPLUG_TRACKER
-#include <fstream>
+#include "../common/mptFstream.h"
 #endif // !MODPLUG_TRACKER
 #include <limits>
-#ifndef MODPLUG_TRACKER
-#include <memory>
-#include <iostream>
-#endif // !MODPLUG_TRACKER
 #include <istream>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif
 
 #ifdef _DEBUG
 #if MPT_COMPILER_MSVC && defined(_MFC_VER)
@@ -49,266 +49,28 @@
 #endif
 #endif
 
-#ifndef _T
-#define _T MPT_TEXT
-#endif
-
-
-namespace MptTest
-{
+#include "TestTools.h"
 
 
 
-#ifdef THIS_FILE
-#undef THIS_FILE
-#endif
-#ifdef _MSC_VER
-#define THIS_FILE "..\\test\\test.cpp" // __FILE__
-#else
-#define THIS_FILE "test/test.cpp" // __FILE__
-#endif
+OPENMPT_NAMESPACE_BEGIN
 
 
 
-#ifdef MODPLUG_TRACKER
-
-static noinline void ReportError(const char * file, int line, const char * description, bool abort)
-//-------------------------------------------------------------------------------------------------
-{
-	std::string pos = std::string() + file + "(" + Stringify(line) + "):\n";
-	std::string message = pos + "Test failed: '" + description + "'";
-	if(IsDebuggerPresent())
-	{
-		message += "\n";
-		OutputDebugString(message.c_str());
-	} else
-	{
-		if(abort)
-		{
-			throw std::runtime_error(message);
-		} else
-		{
-			Reporting::Error(message.c_str(), "OpenMPT TestSuite");
-		}
-	}
-}
-
-static noinline void ReportExceptionError(const char * file, int line, const char * description, const char * exception_what)
-//---------------------------------------------------------------------------------------------------------------------------
-{
-	std::string pos = std::string() + file + "(" + Stringify(line) + "):\n";
-	std::string message;
-	if(exception_what)
-	{
-		message = pos + "Test '" + description + "' threw an exception, message:\n" + exception_what;
-	} else
-	{
-		message = pos + "Test '" + description + "' threw an unknown exception.";
-	}
-	if(IsDebuggerPresent())
-	{
-		message += "\n";
-		OutputDebugString(message.c_str());
-	} else
-	{
-		Reporting::Error(message.c_str(), "OpenMPT TestSuite");
-	}
-}
-
-static noinline void ReportException(const char * const file, const int line, const char * const description, bool rethrow)
-//-------------------------------------------------------------------------------------------------------------------------
-{
-	try
-	{
-		throw; // get the exception
-	} catch(std::exception &e)
-	{
-		ReportExceptionError(file, line, description, e.what());
-		if(rethrow)
-		{
-			throw;
-		}
-	} catch(...)
-	{
-		ReportExceptionError(file, line, description, nullptr);
-		if(rethrow)
-		{
-			throw;
-		}
-	}
-}
-
-#if defined(_MSC_VER) && defined(_M_IX86)
-// on x86, break directly using asm break interrupt instead of calling DebugBreak which breaks one stackframe deeper than we want
-#define MyDebugBreak() do { __asm { int 3 }; } while(0)
-#else
-#define MyDebugBreak() DebugBreak()
-#endif
-
-#define ReportExceptionAndBreak(file, line, description, rethrow) do { ReportException(file, line, description, rethrow); if(IsDebuggerPresent()) MyDebugBreak(); } while(0)
-#define ReportErrorAndBreak(file, line, description, progress)    do { ReportError(file, line, description, progress);    if(IsDebuggerPresent()) MyDebugBreak(); } while(0)
-
-#define MULTI_TEST_TRY   try {
-#define MULTI_TEST_START 
-#define MULTI_TEST_END   
-#define MULTI_TEST_CATCH } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, description, false); }
-#define TEST_TRY         try {
-#define TEST_CATCH       } catch(...) { ReportExceptionAndBreak(THIS_FILE, __LINE__, description, true); }
-#define TEST_START()     do { } while(0)
-#define TEST_OK()        do { MPT_UNREFERENCED_PARAMETER(description); } while(0)
-#define TEST_FAIL()      ReportErrorAndBreak(THIS_FILE, __LINE__, description, false)
-#define TEST_FAIL_STOP() ReportErrorAndBreak(THIS_FILE, __LINE__, description, true)
-
-#else // !MODPLUG_TRACKER
-
-static std::string remove_newlines(std::string str)
-{
-	return mpt::String::Replace(mpt::String::Replace(str, "\n", " "), "\r", " ");
-}
-
-static noinline void show_start(const char * const file, const int line, const char * const description)
-{
-	std::cout << "Test: " << file << "(" << line << "): " << remove_newlines(description) << ": ";
-}
-
-static noinline void show_ok(const char * const file, const int line, const char * const description)
-{
-	MPT_UNREFERENCED_PARAMETER(file);
-	MPT_UNREFERENCED_PARAMETER(line);
-	MPT_UNREFERENCED_PARAMETER(description);
-	std::cout << "PASS" << std::endl;
-}
-
-static noinline void show_fail(const char * const file, const int line, const char * const description, bool exception = false, const char * const exception_text = nullptr)
-{
-	std::cout << "FAIL" << std::endl;
-	if(!exception)
-	{
-		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << std::endl;
-	} else if(!exception_text || (exception_text && std::string(exception_text).empty()))
-	{
-		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << " EXCEPTION!" << std::endl;
-	} else
-	{
-		std::cerr << "FAIL: " << file << "(" << line << "): " << remove_newlines(description) << " EXCEPTION: " << exception_text << std::endl;
-	}
-}
-
-static int fail_count = 0;
-
-static noinline void ReportException(const char * const file, const int line, const char * const description)
-{
-	try
-	{
-		throw; // get the exception
-	} catch(std::exception & e)
-	{
-		show_fail(file, line, description, true, e.what());
-		throw; // rethrow
-	} catch(...)
-	{
-		show_fail(file, line, description, true);
-		throw; // rethrow
-	}
-}
-
-#define MULTI_TEST_TRY   try { \
-                          fail_count = 0;
-#define MULTI_TEST_START show_start(THIS_FILE, __LINE__, description); std::cout << "..." << std::endl;
-#define MULTI_TEST_END   show_start(THIS_FILE, __LINE__, description);
-#define MULTI_TEST_CATCH  if(fail_count > 0) { \
-                           throw std::runtime_error("Test failed."); \
-                          } \
-                          show_ok(THIS_FILE, __LINE__, description); \
-                         } catch(...) { \
-                          ReportException(THIS_FILE, __LINE__, description); \
-                         }
-#define TEST_TRY         try {
-#define TEST_CATCH       } catch(...) { \
-                          fail_count++; \
-                          ReportException(THIS_FILE, __LINE__, description); \
-                          throw; \
-                         }
-#define TEST_START()     show_start(THIS_FILE, __LINE__, description)
-#define TEST_OK()        show_ok(THIS_FILE, __LINE__, description)
-#define TEST_FAIL()      do { show_fail(THIS_FILE, __LINE__, description); fail_count++; } while(0)
-#define TEST_FAIL_STOP() do { show_fail(THIS_FILE, __LINE__, description); fail_count++; throw std::runtime_error(std::string("Test failed: ") + description); } while(0)
-
-#endif // MODPLUG_TRACKER
+namespace Test {
 
 
 
-//Verify that given parameters are 'equal'(show error message if not).
-//The exact meaning of equality is not specified; for now using operator!=.
-//The macro is active in both 'debug' and 'release' build.
-#define VERIFY_EQUAL(x,y)	\
-do{ \
-	const char * const description = #x " == " #y ; \
-	TEST_TRY \
-	TEST_START(); \
-	if((x) != (y))		\
-	{					\
-		TEST_FAIL(); \
-	} else \
-	{ \
-		TEST_OK(); \
-	} \
-	TEST_CATCH \
-}while(0)
-
-
-// Like VERIFY_EQUAL, but throws exception if comparison fails.
-#define VERIFY_EQUAL_NONCONT(x,y) \
-do{ \
-	const char * const description = #x " == " #y ; \
-	TEST_TRY \
-	TEST_START(); \
-	if((x) != (y))		\
-	{					\
-		TEST_FAIL_STOP(); \
-	} else \
-	{ \
-		TEST_OK(); \
-	} \
-	TEST_CATCH \
-}while(0)
-
-
-// Like VERIFY_EQUAL_NONCONT, but do not show message if test succeeds
-#define VERIFY_EQUAL_QUIET_NONCONT(x,y) \
-do{ \
-	const char * const description = #x " == " #y ; \
-	TEST_TRY \
-	if((x) != (y))		\
-	{					\
-		TEST_FAIL_STOP(); \
-	} \
-	TEST_CATCH \
-}while(0)
-
-
-#define DO_TEST(func) \
-do{ \
-	const char * description = #func ; \
-	MULTI_TEST_TRY \
-	MULTI_TEST_START \
-	func(); \
-	MULTI_TEST_END \
-	MULTI_TEST_CATCH \
-}while(0)
-
-
-
-
-void TestVersion();
-void TestTypes();
-void TestLoadSaveFile();
-void TestPCnoteSerialization();
-void TestMisc();
-void TestMIDIEvents();
-void TestStringIO();
-void TestSampleConversion();
-void TestITCompression();
+static noinline void TestVersion();
+static noinline void TestTypes();
+static noinline void TestMisc();
+static noinline void TestSettings();
+static noinline void TestStringIO();
+static noinline void TestMIDIEvents();
+static noinline void TestSampleConversion();
+static noinline void TestITCompression();
+static noinline void TestPCnoteSerialization();
+static noinline void TestLoadSaveFile();
 
 
 
@@ -319,6 +81,7 @@ void DoTests()
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
 	DO_TEST(TestMisc);
+	DO_TEST(TestSettings);
 	DO_TEST(TestStringIO);
 	DO_TEST(TestMIDIEvents);
 	DO_TEST(TestSampleConversion);
@@ -332,15 +95,18 @@ void DoTests()
 
 
 // Test if functions related to program version data work
-void TestVersion()
-//----------------
+static noinline void TestVersion()
+//--------------------------------
 {
 	//Verify that macros and functions work.
 	{
 		VERIFY_EQUAL( MptVersion::ToNum(MptVersion::ToStr(MptVersion::num)), MptVersion::num );
 		VERIFY_EQUAL( MptVersion::ToStr(MptVersion::ToNum(MptVersion::str)), MptVersion::str );
 		VERIFY_EQUAL( MptVersion::ToStr(18285096), "1.17.02.28" );
-		VERIFY_EQUAL( MptVersion::ToNum("1.17.02.28"), 18285096 );
+		VERIFY_EQUAL( MptVersion::ToNum("1.17.02.28"), MptVersion::VersionNum(18285096) );
+		VERIFY_EQUAL( MptVersion::ToNum("1.fe.02.28"), MptVersion::VersionNum(0x01fe0228) );
+		VERIFY_EQUAL( MptVersion::ToNum("01.fe.02.28"), MptVersion::VersionNum(0x01fe0228) );
+		VERIFY_EQUAL( MptVersion::ToNum("1.22"), MptVersion::VersionNum(0x01220000) );
 		VERIFY_EQUAL( MptVersion::ToNum(MptVersion::str), MptVersion::num );
 		VERIFY_EQUAL( MptVersion::ToStr(MptVersion::num), MptVersion::str );
 		VERIFY_EQUAL( MptVersion::RemoveBuildNumber(MAKE_VERSION_NUMERIC(1,19,02,00)), MAKE_VERSION_NUMERIC(1,19,02,00));
@@ -409,8 +175,8 @@ void TestVersion()
 
 
 // Test if data types are interpreted correctly
-void TestTypes()
-//--------------
+static noinline void TestTypes()
+//------------------------------
 {
 	VERIFY_EQUAL(int8_min, (std::numeric_limits<int8>::min)());
 	VERIFY_EQUAL(int8_max, (std::numeric_limits<int8>::max)());
@@ -430,40 +196,122 @@ void TestTypes()
 }
 
 
-static float AsFloat(uint32 x)
-//----------------------------
+static void TestFloatFormat(double x, const char * format, mpt::FormatFlags f, std::size_t width = 0, int precision = -1)
 {
-	FloatInt32 conv;
-	conv.i = x;
-	return conv.f;
+#ifdef MODPLUG_TRACKER
+	std::string str_sprintf = mpt::String::Format(format, x);
+#endif
+	std::string str_iostreams = mpt::Format().SetFlags(f).SetWidth(width).SetPrecision(precision).ToString(x);
+	std::string str_parsed = mpt::Format().ParsePrintf(format).ToString(x);
+	//Log("%s", str_sprintf.c_str());
+	//Log("%s", str_iostreams.c_str());
+	//Log("%s", str_iostreams.c_str());
+#ifdef MODPLUG_TRACKER
+	VERIFY_EQUAL(str_iostreams, str_sprintf); // this will fail with a set c locale (and there is nothing that can be done about that in libopenmpt)
+#endif
+	VERIFY_EQUAL(str_iostreams, str_parsed);
 }
 
-static uint32 AsInt(float x)
-//--------------------------
+
+static void TestFloatFormats(double x)
 {
-	FloatInt32 conv;
-	conv.f = x;
-	return conv.i;
+
+	TestFloatFormat(x, "%g", mpt::fmt::NotaNrm | mpt::fmt::FillOff);
+	TestFloatFormat(x, "%.8g", mpt::fmt::NotaNrm | mpt::fmt::FillOff, 0, 8);
+
+	TestFloatFormat(x, "%f", mpt::fmt::NotaFix | mpt::fmt::FillOff);
+
+	TestFloatFormat(x, "%.0f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 0);
+	TestFloatFormat(x, "%.1f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 1);
+	TestFloatFormat(x, "%.2f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 2);
+	TestFloatFormat(x, "%.3f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 3);
+	TestFloatFormat(x, "%1.1f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 1, 1);
+	TestFloatFormat(x, "%3.1f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 3, 1);
+	TestFloatFormat(x, "%4.1f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 4, 1);
+	TestFloatFormat(x, "%6.3f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 6, 3);
+	TestFloatFormat(x, "%0.1f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 0, 1);
+	TestFloatFormat(x, "%02.0f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 2, 0);
+
 }
 
-void TestMisc()
-//-------------
+
+
+static bool EndsWith(const std::string &str, const std::string &match)
+{
+	return (str.rfind(match) == (str.length() - match.length()));
+}
+static bool EndsWith(const std::wstring &str, const std::wstring &match)
+{
+	return (str.rfind(match) == (str.length() - match.length()));
+}
+
+static bool BeginsWith(const std::string &str, const std::string &match)
+{
+	return (str.find(match) == 0);
+}
+static bool BeginsWith(const std::wstring &str, const std::wstring &match)
+{
+	return (str.find(match) == 0);
+}
+
+
+#ifdef MODPLUG_TRACKER
+static bool IsEqualUUID(const UUID &lhs, const UUID &rhs)
+{
+	return std::memcmp(&lhs, &rhs, sizeof(UUID)) == 0;
+}
+#endif
+
+
+static noinline void TestMisc()
+//-----------------------------
 {
 
-	VERIFY_EQUAL(0x3f800000u, AsInt(1.0f));
-	VERIFY_EQUAL(AsFloat(0x3f800000u),  1.0f);
-	VERIFY_EQUAL(AsFloat(0x00000000u),  0.0f);
-	VERIFY_EQUAL(AsFloat(0xbf800000u), -1.0f);
-	VERIFY_EQUAL(DecodeFloatNE(0x3f800000u), 1.0f);
-	VERIFY_EQUAL(DecodeFloatLE(uint8_4(0x00,0x00,0x80,0x3f)), 1.0f);
-	VERIFY_EQUAL(DecodeFloatBE(uint8_4(0x3f,0x80,0x00,0x00)), 1.0f);
-	VERIFY_EQUAL(EncodeFloatNE(1.0f), 0x3f800000u);
-	VERIFY_EQUAL(EncodeFloatBE(1.0f).GetBE(), 0x3f800000u);
-	VERIFY_EQUAL(EncodeFloatLE(1.0f).GetBE(), 0x0000803fu);
-	VERIFY_EQUAL(EncodeFloatLE(1.0f).GetLE(), 0x3f800000u);
-	VERIFY_EQUAL(EncodeFloatBE(1.0f).GetLE(), 0x0000803fu);
+	VERIFY_EQUAL(EncodeIEEE754binary32(1.0f), 0x3f800000u);
+	VERIFY_EQUAL(EncodeIEEE754binary32(-1.0f), 0xbf800000u);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u), 0.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x41840000u), 16.5f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x3faa0000u),  1.328125f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0xbfaa0000u), -1.328125f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u),  0.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0xbf800000u), -1.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
+	VERIFY_EQUAL(IEEE754binary32LE(1.0f).GetInt32(), 0x3f800000u);
+	VERIFY_EQUAL(IEEE754binary32BE(1.0f).GetInt32(), 0x3f800000u);
+	VERIFY_EQUAL(IEEE754binary32LE(0x00,0x00,0x80,0x3f), 1.0f);
+	VERIFY_EQUAL(IEEE754binary32BE(0x3f,0x80,0x00,0x00), 1.0f);
+	VERIFY_EQUAL(IEEE754binary32LE(1.0f), IEEE754binary32LE(0x00,0x00,0x80,0x3f));
+	VERIFY_EQUAL(IEEE754binary32BE(1.0f), IEEE754binary32BE(0x3f,0x80,0x00,0x00));
 
-	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586);
+	VERIFY_EQUAL(Stringify(1.5f), "1.5");
+	VERIFY_EQUAL(Stringify(true), "1");
+	VERIFY_EQUAL(Stringify(false), "0");
+	//VERIFY_EQUAL(Stringify('A'), "A"); // deprecated
+	//VERIFY_EQUAL(Stringify(L'A'), "A"); // deprecated
+
+	VERIFY_EQUAL(Stringify(0), "0");
+	VERIFY_EQUAL(Stringify(-23), "-23");
+	VERIFY_EQUAL(Stringify(42), "42");
+
+	VERIFY_EQUAL(mpt::fmt::hex<3>((int32)-1), "ffffffff");
+
+	VERIFY_EQUAL(mpt::fmt::hex(0x123e), "123e");
+	VERIFY_EQUAL(mpt::fmt::hex0<6>(0x123e), "00123e");
+	VERIFY_EQUAL(mpt::fmt::hex0<2>(0x123e), "123e");
+
+	VERIFY_EQUAL(Stringify(-87.0f), "-87");
+	if(Stringify(-0.5e-6) != "-5e-007"
+		&& Stringify(-0.5e-6) != "-5e-07"
+		&& Stringify(-0.5e-6) != "-5e-7"
+		)
+	{
+		VERIFY_EQUAL(true, false);
+	}
+	VERIFY_EQUAL(Stringify(58.65403492763), "58.654");
+	VERIFY_EQUAL(mpt::Format("%3.1f").ToString(23.42), "23.4");
+
+	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586u);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);
 
@@ -471,13 +319,38 @@ void TestMisc()
 	VERIFY_EQUAL(ConvertStrTo<int64>("-159"), -159);
 	VERIFY_EQUAL(ConvertStrTo<int64>("9223372036854775807"), int64_max);
 
-	VERIFY_EQUAL(ConvertStrTo<uint64>("85059"), 85059);
+	VERIFY_EQUAL(ConvertStrTo<uint64>("85059"), 85059u);
 	VERIFY_EQUAL(ConvertStrTo<uint64>("9223372036854775807"), (uint64)int64_max);
 	VERIFY_EQUAL(ConvertStrTo<uint64>("18446744073709551615"), uint64_max);
 
 	VERIFY_EQUAL(ConvertStrTo<float>("-87.0"), -87.0);
 	VERIFY_EQUAL(ConvertStrTo<double>("-0.5e-6"), -0.5e-6);
 	VERIFY_EQUAL(ConvertStrTo<double>("58.65403492763"), 58.65403492763);
+
+	VERIFY_EQUAL(ConvertStrTo<float>(Stringify(-87.0)), -87.0);
+	VERIFY_EQUAL(ConvertStrTo<double>(Stringify(-0.5e-6)), -0.5e-6);
+
+	TestFloatFormats(0.0f);
+	TestFloatFormats(1.0f);
+	TestFloatFormats(-1.0f);
+	TestFloatFormats(0.1f);
+	TestFloatFormats(-0.1f);
+	TestFloatFormats(1000000000.0f);
+	TestFloatFormats(-1000000000.0f);
+	TestFloatFormats(0.0000000001f);
+	TestFloatFormats(-0.0000000001f);
+	TestFloatFormats(6.12345f);
+
+	TestFloatFormats(42.1234567890);
+	TestFloatFormats(0.1234567890);
+	TestFloatFormats(1234567890000000.0);
+	TestFloatFormats(0.0000001234567890);
+
+	VERIFY_EQUAL(mpt::Format().ParsePrintf("%7.3f").ToString(6.12345), "  6.123");
+	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 7, 3), "  6.123");
+	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 7, 3), "  6.123");
+	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 0, 4), "6.123");
+	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 0, 4), "6.1235");
 
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_MAX), false);
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_PC), true);
@@ -554,7 +427,7 @@ void TestMisc()
 	VERIFY_EQUAL( mpt::String::Trim(" "), "" );
 
 	// weird things with std::string containing \0 in the middle and trimming \0
-	VERIFY_EQUAL( std::string("\0\ta\0b ",6).length(), 6 );
+	VERIFY_EQUAL( std::string("\0\ta\0b ",6).length(), (std::size_t)6 );
 	VERIFY_EQUAL( mpt::String::RTrim(std::string("\0\ta\0b ",6)), std::string("\0\ta\0b",5) );
 	VERIFY_EQUAL( mpt::String::Trim(std::string("\0\ta\0b\0",6),std::string("\0",1)), std::string("\ta\0b",4) );
 
@@ -569,16 +442,240 @@ void TestMisc()
 	// Check for completeness of supported effect list in mod specifications
 	for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
 	{
-		ASSERT(strlen(ModSpecs::Collection[i]->commands) == MAX_EFFECTS);
-		ASSERT(strlen(ModSpecs::Collection[i]->volcommands) == MAX_VOLCMDS);
+		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->commands), (size_t)MAX_EFFECTS);
+		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->volcommands), (size_t)MAX_VOLCMDS);
 	}
+	
+	// Charset conversions (basic sanity checks)
+	VERIFY_EQUAL(mpt::To(mpt::CharsetUTF8, L"a"), "a");
+	VERIFY_EQUAL(mpt::To(mpt::CharsetISO8859_1, L"a"), "a");
+	VERIFY_EQUAL(mpt::To(mpt::CharsetASCII, L"a"), "a");
+	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetUTF8, "a"), L"a");
+	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetISO8859_1, "a"), L"a");
+	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetASCII, "a"), L"a");
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(mpt::ToLocale(L"a"), "a");
+	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetLocale, "a"), L"a");
+#endif
+	
+	// Check that some character replacement is done (and not just empty strings or truncated strings are returned)
+	// We test german umlaut-a (U+00E4) and CJK U+5BB6
+
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetASCII,L"abc\u00E4xyz"),"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetISO8859_1,L"abc\u00E4xyz"),"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetCP437,L"abc\u00E4xyz"),"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetUTF8,L"abc\u00E4xyz"),"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetASCII,L"abc\u00E4xyz"),"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetISO8859_1,L"abc\u00E4xyz"),"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetCP437,L"abc\u00E4xyz"),"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetUTF8,L"abc\u00E4xyz"),"abc"),true);
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetLocale,L"abc\u00E4xyz"),"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetLocale,L"abc\u00E4xyz"),"abc"),true);
+#endif
+
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetASCII,L"abc\u5BB6xyz"),"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetISO8859_1,L"abc\u5BB6xyz"),"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetCP437,L"abc\u5BB6xyz"),"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetUTF8,L"abc\u5BB6xyz"),"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetASCII,L"abc\u5BB6xyz"),"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetISO8859_1,L"abc\u5BB6xyz"),"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetCP437,L"abc\u5BB6xyz"),"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetUTF8,L"abc\u5BB6xyz"),"abc"),true);
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(EndsWith(mpt::To(mpt::CharsetLocale,L"abc\u5BB6xyz"),"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::To(mpt::CharsetLocale,L"abc\u5BB6xyz"),"abc"),true);
+#endif
+
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xC3\xA4xyz"),L"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),L"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xC3\xA4xyz"),L"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),L"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xC3\xA4xyz"),L"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),L"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xC3\xA4xyz"),L"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),L"abc"),true);
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xC3\xA4xyz"),L"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xC3\xA4xyz"),L"abc"),true);
+#endif
+
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
+#endif
+
+	// Check that characters are correctly converted
+	// We test german umlaut-a (U+00E4) and CJK U+5BB6
+
+	// cp437
+	VERIFY_EQUAL(mpt::To(mpt::CharsetCP437,L"abc\u00E4xyz"),"abc\x84xyz");
+	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::CharsetCP437,"abc\x84xyz"));
+	
+	// iso8859
+	VERIFY_EQUAL(mpt::To(mpt::CharsetISO8859_1,L"abc\u00E4xyz"),"abc\xE4xyz");
+	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::CharsetISO8859_1,"abc\xE4xyz"));
+
+	// utf8
+	VERIFY_EQUAL(mpt::To(mpt::CharsetUTF8,L"abc\u00E4xyz"),"abc\xC3\xA4xyz");
+	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"));
+	VERIFY_EQUAL(mpt::To(mpt::CharsetUTF8,L"abc\u5BB6xyz"),"abc\xE5\xAE\xB6xyz");
+	VERIFY_EQUAL(L"abc\u5BB6xyz",mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"));
+
+	// Path conversions
+#ifdef MODPLUG_TRACKER
+	const mpt::PathString exePath = MPT_PATHSTRING("C:\\OpenMPT\\");
+	VERIFY_EQUAL(MPT_PATHSTRING("C:\\OpenMPT\\").AbsolutePathToRelative(exePath), MPT_PATHSTRING(".\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING("c:\\OpenMPT\\foo").AbsolutePathToRelative(exePath), MPT_PATHSTRING(".\\foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING("C:\\foo").AbsolutePathToRelative(exePath), MPT_PATHSTRING("\\foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING(".\\").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\OpenMPT\\"));
+	VERIFY_EQUAL(MPT_PATHSTRING(".\\foo").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\OpenMPT\\foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\foo").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\foo"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").AbsolutePathToRelative(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
+	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").RelativePathToAbsolute(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
+#endif
+
+	// UUID
+#ifdef MODPLUG_TRACKER
+	VERIFY_EQUAL(Util::IsValid(Util::CreateGUID()), true);
+	VERIFY_EQUAL(Util::IsValid(Util::CreateUUID()), true);
+	VERIFY_EQUAL(Util::IsValid(Util::CreateLocalUUID()), true);
+	UUID uuid = Util::CreateUUID();
+	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToUUID(Util::UUIDToString(uuid))), true);
+	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToGUID(Util::GUIDToString(uuid))), true);
+	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToIID(Util::IIDToString(uuid))), true);
+	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToCLSID(Util::CLSIDToString(uuid))), true);
+#endif
+
+}
+
+
+#ifdef MODPLUG_TRACKER
+
+struct CustomSettingsTestType
+{
+	float x;
+	float y;
+	CustomSettingsTestType(float x_ = 0.0f, float y_ = 0.0f) : x(x_), y(y_) { }
+};
+
+} // namespace Test
+
+template <>
+inline Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
+{
+	ASSERT(val.GetTypeTag() == "myType");
+	std::string xy = val.as<std::string>();
+	if(xy.empty())
+	{
+		return Test::CustomSettingsTestType(0.0f, 0.0f);
+	}
+	std::size_t pos = xy.find("|");
+	std::string x = xy.substr(0, pos);
+	std::string y = xy.substr(pos + 1);
+	return Test::CustomSettingsTestType(ConvertStrTo<float>(x.c_str()), ConvertStrTo<float>(y.c_str()));
+}
+
+template <>
+inline SettingValue ToSettingValue(const Test::CustomSettingsTestType &val)
+{
+	return SettingValue(Stringify(val.x) + "|" + Stringify(val.y), "myType");
+}
+
+namespace Test {
+
+#endif // MODPLUG_TRACKER
+
+static noinline void TestSettings()
+//---------------------------------
+{
+
+#ifdef MODPLUG_TRACKER
+
+	VERIFY_EQUAL(SettingPath("a","b") < SettingPath("a","c"), true);
+	VERIFY_EQUAL(!(SettingPath("c","b") < SettingPath("a","c")), true);
+
+	{
+		DefaultSettingsContainer conf;
+
+		int32 foobar = conf.Read("Test", "bar", 23, "foobar");
+		conf.Write("Test", "bar", 64);
+		conf.Write("Test", "bar", 42);
+		conf.Read("Test", "baz", 4711);
+		foobar = conf.Read("Test", "bar", 28);
+	}
+
+	{
+		DefaultSettingsContainer conf;
+
+		int32 foobar = conf.Read("Test", "bar", 28, "foobar");
+		VERIFY_EQUAL(foobar, 42);
+		conf.Write("Test", "bar", 43);
+	}
+
+	{
+		DefaultSettingsContainer conf;
+		
+		int32 foobar = conf.Read("Test", "bar", 123, "foobar");
+		VERIFY_EQUAL(foobar, 43);
+		conf.Write("Test", "bar", 88);
+	}
+
+	{
+		DefaultSettingsContainer conf;
+
+		Setting<int> foo(conf, "Test", "bar", 99, "something");
+
+		VERIFY_EQUAL(foo, 88);
+
+		foo = 7;
+
+	}
+
+	{
+		DefaultSettingsContainer conf;
+		Setting<int> foo(conf, "Test", "bar", 99, "something");
+		VERIFY_EQUAL(foo, 7);
+	}
+
+
+	{
+		DefaultSettingsContainer conf;
+		conf.Read("Test", "struct", std::string(""));
+		conf.Write("Test", "struct", std::string(""));
+	}
+
+	{
+		DefaultSettingsContainer conf;
+		CustomSettingsTestType dummy = conf.Read("Test", "struct", CustomSettingsTestType(1.0f, 1.0f));
+		dummy = CustomSettingsTestType(0.125f, 32.0f);
+		conf.Write("Test", "struct", dummy);
+	}
+
+	{
+		DefaultSettingsContainer conf;
+		Setting<CustomSettingsTestType> dummyVar(conf, "Test", "struct", CustomSettingsTestType(1.0f, 1.0f));
+		CustomSettingsTestType dummy = dummyVar;
+		VERIFY_EQUAL(dummy.x, 0.125f);
+		VERIFY_EQUAL(dummy.y, 32.0f);
+	}
+
+#endif // MODPLUG_TRACKER
 
 }
 
 
 // Test MIDI Event generating / reading
-void TestMIDIEvents()
-//-------------------
+static noinline void TestMIDIEvents()
+//-----------------------------------
 {
 	uint32 midiEvent;
 	
@@ -621,8 +718,8 @@ void TestMIDIEvents()
 
 
 // Check if our test file was loaded correctly.
-void TestLoadXMFile(const CSoundFile &sndFile)
-//--------------------------------------------
+static void TestLoadXMFile(const CSoundFile &sndFile)
+//---------------------------------------------------
 {
 #ifdef MODPLUG_TRACKER
 	const CModDoc *pModDoc = sndFile.GetpModDoc();
@@ -633,7 +730,7 @@ void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 139);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nGlobalVolume, 128);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE);
@@ -713,7 +810,7 @@ void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(pIns->nPPC, NOTE_MIDDLEC - 1);
 
 	VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
-	VERIFY_EQUAL_NONCONT(pIns->nResampling, SRCMODE_POLYPHASE);
+	VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_POLYPHASE);
 
 	VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), false);
 	VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0);
@@ -807,7 +904,7 @@ void TestLoadXMFile(const CSoundFile &sndFile)
 	// Test 4-Bit Panning conversion
 	for(int i = 0; i < 16; i++)
 	{
-		VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(10 + i, 0)->vol, ((i * 64 + 8) / 15));
+		VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(10 + i, 0)->vol, i * 4);
 	}
 
 	// Plugins
@@ -820,19 +917,16 @@ void TestLoadXMFile(const CSoundFile &sndFile)
 
 
 // Check if our test file was loaded correctly.
-void TestLoadMPTMFile(const CSoundFile &sndFile)
-//----------------------------------------------
+static void TestLoadMPTMFile(const CSoundFile &sndFile)
+//-----------------------------------------------------
 {
-#ifdef MODPLUG_TRACKER
-	const CModDoc *pModDoc = sndFile.GetpModDoc();
-#endif // MODPLUG_TRACKER
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "Test Module_____________X");
 	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 139);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nGlobalVolume, 128);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_EMBEDMIDICFG | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
@@ -847,10 +941,9 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 1);
 	
-#ifdef MODPLUG_TRACKER
 	// Edit history
-	VERIFY_EQUAL_NONCONT(pModDoc->GetFileHistory().size() > 0, true);
-	const FileHistory &fh = pModDoc->GetFileHistory().at(0);
+	VERIFY_EQUAL_NONCONT(sndFile.GetFileHistory().size() > 0, true);
+	const FileHistory &fh = sndFile.GetFileHistory().at(0);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_year, 111);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mon, 5);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mday, 14);
@@ -858,7 +951,6 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_min, 8);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_sec, 32);
 	VERIFY_EQUAL_NONCONT((uint32)((double)fh.openTime / HISTORY_TIMER_PRECISION), 31);
-#endif // MODPLUG_TRACKER
 
 	// Macros
 	VERIFY_EQUAL_NONCONT(sndFile.m_MidiCfg.GetParameteredMacroType(0), sfx_reso);
@@ -952,7 +1044,7 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->nPPC, (NOTE_MIDDLEC - NOTE_MIN) + 6);	// F#5
 
 		VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
-		VERIFY_EQUAL_NONCONT(pIns->nResampling, SRCMODE_POLYPHASE);
+		VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_POLYPHASE);
 
 		VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), true);
 		VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0x32);
@@ -1013,13 +1105,13 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetNumSequences(), 2);
 
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).GetLengthTailTrimmed(), 3);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).m_sName, "First Sequence");
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0).GetName(), "First Sequence");
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[0], sndFile.Order.GetIgnoreIndex());
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[1], 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(0)[2], sndFile.Order.GetIgnoreIndex());
 
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).GetLengthTailTrimmed(), 2);
-	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).m_sName, "Second Sequence");
+	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1).GetName(), "Second Sequence");
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1)[0], 1);
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetSequence(1)[1], 2);
 
@@ -1046,6 +1138,7 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->instr, 99);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->GetValueVolCol(), 1);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->GetValueEffectCol(), 200);
+
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
@@ -1082,15 +1175,15 @@ void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 
 // Check if our test file was loaded correctly.
-void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
-//-----------------------------------------------------------
+static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
+//------------------------------------------------------------------
 {
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "S3M_Test__________________X");
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 33);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 254);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nGlobalVolume, 32 * 4);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 32 * 4);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 48);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 16);
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
@@ -1208,19 +1301,44 @@ void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 #ifdef MODPLUG_TRACKER
 
-static bool ShouldRunTests()
+static const char * debugPaths [] = { "mptrack\\Debug\\", "bin\\Win32-Debug\\", "bin\\x64-Debug\\" };
+
+static bool PathEndsIn(const mpt::PathString &path_, const mpt::PathString &match_)
 {
-	CString theFile = theApp.GetAppDirPath();
-	// Only run the tests when we're in the project directory structure.
-	return theFile.Mid(theFile.GetLength() - 6, 5) == "Debug";
+	std::wstring path = path_.ToWide();
+	std::wstring match = match_.ToWide();
+	return path.rfind(match) == (path.length() - match.length());
 }
 
-static std::string GetTestFilenameBase()
+static bool ShouldRunTests()
 {
-	CString theFile = theApp.GetAppDirPath();
-	theFile.Delete(theFile.GetLength() - 6, 6);
-	theFile.Append("../test/test.");
-	return theFile.GetString();
+	mpt::PathString theFile = theApp.GetAppDirPath();
+	// Only run the tests when we're in the project directory structure.
+	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
+	{
+		const mpt::PathString debugPath = mpt::PathString::FromUTF8(debugPaths[i]);
+		if(PathEndsIn(theFile, debugPath))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+static mpt::PathString GetTestFilenameBase()
+{
+	mpt::PathString theFile = theApp.GetAppDirPath();
+	for(std::size_t i = 0; i < CountOf(debugPaths); ++i)
+	{
+		const mpt::PathString debugPath = mpt::PathString::FromUTF8(debugPaths[i]);
+		if(PathEndsIn(theFile, debugPath))
+		{
+			theFile = mpt::PathString::FromWide(theFile.ToWide().substr(0, theFile.ToWide().length() - debugPath.ToWide().length()));
+			break;
+		}
+	}
+	theFile += MPT_PATHSTRING("test/test.");
+	return theFile;
 }
 
 typedef CModDoc *TSoundFileContainer;
@@ -1230,9 +1348,9 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 	return sndFile->GetrSoundFile();
 }
 
-static TSoundFileContainer CreateSoundFileContainer(const std::string filename)
+static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
-	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename.c_str(), FALSE);
+	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename, FALSE);
 	return pModDoc;
 }
 
@@ -1241,23 +1359,23 @@ static void DestroySoundFileContainer(TSoundFileContainer &sndFile)
 	sndFile->OnCloseDocument();
 }
 
-static void SaveIT(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveIT(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->DoSave(filename.c_str());
+	sndFile->DoSave(filename);
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }
 
-static void SaveXM(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveXM(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->DoSave(filename.c_str());
+	sndFile->DoSave(filename);
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }
 
-static void SaveS3M(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->DoSave(filename.c_str());
+	sndFile->DoSave(filename);
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }
@@ -1269,9 +1387,9 @@ static bool ShouldRunTests()
 	return true;
 }
 
-static std::string GetTestFilenameBase()
+static mpt::PathString GetTestFilenameBase()
 {
-	return "../test/test.";
+	return MPT_PATHSTRING("./test/test.");
 }
 
 typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
@@ -1281,9 +1399,9 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 	return *sndFile.get();
 }
 
-static TSoundFileContainer CreateSoundFileContainer(const std::string &filename)
+static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
-	std::ifstream stream(filename, std::ios::binary);
+	mpt::ifstream stream(filename, std::ios::binary);
 	FileReader file(&stream);
 	std::shared_ptr<CSoundFile> pSndFile(new CSoundFile());
 	pSndFile->Create(file, CSoundFile::loadCompleteModule);
@@ -1297,19 +1415,19 @@ static void DestroySoundFileContainer(TSoundFileContainer & /* sndFile */ )
 
 #ifndef MODPLUG_NO_FILESAVE
 
-static void SaveIT(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveIT(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->SaveIT(filename.c_str(), false);
+	sndFile->SaveIT(filename, false);
 }
 
-static void SaveXM(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveXM(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->SaveXM(filename.c_str(), false);
+	sndFile->SaveXM(filename, false);
 }
 
-static void SaveS3M(const TSoundFileContainer &sndFile, const std::string &filename)
+static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->SaveS3M(filename.c_str());
+	sndFile->SaveS3M(filename);
 }
 
 #endif
@@ -1319,24 +1437,24 @@ static void SaveS3M(const TSoundFileContainer &sndFile, const std::string &filen
 
 
 // Test file loading and saving
-void TestLoadSaveFile()
-//---------------------
+static noinline void TestLoadSaveFile()
+//-------------------------------------
 {
 	if(!ShouldRunTests())
 	{
 		return;
 	}
-	std::string filenameBase = GetTestFilenameBase();
+	mpt::PathString filenameBase = GetTestFilenameBase();
 
 	// Test MPTM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "mptm");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("mptm"));
 
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			SaveIT(sndFileContainer, filenameBase + "saved.mptm");
+			SaveIT(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.mptm"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -1345,7 +1463,7 @@ void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.mptm");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.mptm"));
 
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 		
@@ -1355,7 +1473,7 @@ void TestLoadSaveFile()
 
 	// Test XM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "xm");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("xm"));
 
 		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
@@ -1369,7 +1487,7 @@ void TestLoadSaveFile()
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			SaveXM(sndFileContainer, filenameBase + "saved.xm");
+			SaveXM(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.xm"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -1378,7 +1496,7 @@ void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.xm");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.xm"));
 
 		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
@@ -1388,13 +1506,13 @@ void TestLoadSaveFile()
 
 	// Test S3M file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "s3m");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("s3m"));
 		
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			SaveS3M(sndFileContainer, filenameBase + "saved.s3m");
+			SaveS3M(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.s3m"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -1403,7 +1521,7 @@ void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + "saved.s3m");
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.s3m"));
 
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), true);
 
@@ -1413,10 +1531,10 @@ void TestLoadSaveFile()
 }
 
 
-void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
-//---------------------------------------------------------------------------------------------------------------
+static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
+//----------------------------------------------------------------------------------------------------------------------
 {
-	std::string filename = GetTestFilenameBase() + "itcomp" + Stringify(testcount) + ".raw";
+	mpt::PathString filename = GetTestFilenameBase() + MPT_PATHSTRING("itcomp") + mpt::PathString::FromWide(StringifyW(testcount)) + MPT_PATHSTRING(".raw");
 
 	ModSample smp;
 	smp.uFlags = smpFormat;
@@ -1424,13 +1542,13 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 	smp.nLength = sampleData.size() / smp.GetBytesPerSample();
 
 	{
-		FILE *f = fopen(filename.c_str(), "wb");
+		FILE *f = mpt_fopen(filename, "wb");
 		ITCompression compression(smp, it215, f);
 		fclose(f);
 	}
 
 	{
-		FILE *f = fopen(filename.c_str(), "rb");
+		FILE *f = mpt_fopen(filename, "rb");
 		fseek(f, 0, SEEK_END);
 		std::vector<int8> fileData(ftell(f), 0);
 		fseek(f, 0, SEEK_SET);
@@ -1444,19 +1562,29 @@ void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpF
 		VERIFY_EQUAL_NONCONT(memcmp(&sampleData[0], &sampleDataNew[0], sampleData.size()), 0);
 		fclose(f);
 	}
-	while(remove(filename.c_str()) == EACCES)
-	{
-		// wait for windows virus scanners
-		#ifdef WIN32
-			Sleep(1);
-		#endif
-	}
+	#if MPT_OS_WINDOWS
+		for(int retry=0; retry<10; retry++)
+		{
+			if(DeleteFileW(filename.AsNative().c_str()) != FALSE)
+			{
+				break;
+			}
+			// wait for windows virus scanners
+			Sleep(10);
+		}
+	#else
+		remove(filename.AsNative().c_str());
+	#endif
 }
 
 
-void TestITCompression()
-//----------------------
+static noinline void TestITCompression()
+//--------------------------------------
 {
+	if(!ShouldRunTests())
+	{
+		return;
+	}
 	// Test loading / saving of IT-compressed samples
 	const int sampleDataSize = 65536;
 	std::vector<int8> sampleData(sampleDataSize, 0);
@@ -1479,15 +1607,15 @@ void TestITCompression()
 }
 
 
-double Rand01() {return rand() / double(RAND_MAX);}
+static double Rand01() {return rand() / double(RAND_MAX);}
 
 template <class T>
 T Rand(const T& min, const T& max) {return Util::Round<T>(min + Rand01() * (max - min));}
 
 
 
-void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc)
-//-------------------------------------------------------------------------------
+static void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc)
+//--------------------------------------------------------------------------------------
 {
 	const double dPcxProb = dProbPcs + dProbPc;
 	const CPattern::const_iterator end = pat.End();
@@ -1512,8 +1640,8 @@ void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc
 
 
 // Test PC note serialization
-void TestPCnoteSerialization()
-//----------------------------
+static noinline void TestPCnoteSerialization()
+//--------------------------------------------
 {
 	FileReader file;
 	MPT_SHARED_PTR<CSoundFile> pSndFile(new CSoundFile());
@@ -1538,7 +1666,7 @@ void TestPCnoteSerialization()
 	pat[1].resize(numCommands[1]);
 	pat[2].resize(numCommands[2]);
 
-	for(size_t i = 0; i < 3; i++) // Copy pattern data for comparison.
+	for(int i = 0; i < 3; i++) // Copy pattern data for comparison.
 	{
 		CPattern::const_iterator iter = sndFile.Patterns[i].Begin();
 		for(size_t j = 0; j < numCommands[i]; j++, iter++) pat[i][j] = *iter;
@@ -1561,7 +1689,7 @@ void TestPCnoteSerialization()
 	VERIFY_EQUAL_NONCONT( sndFile.Patterns[0].GetNumRows(), ModSpecs::mptm.patternRowsMin);
 	VERIFY_EQUAL_NONCONT( sndFile.Patterns[1].GetNumRows(), 64);
 	VERIFY_EQUAL_NONCONT( sndFile.Patterns[2].GetNumRows(), ModSpecs::mptm.patternRowsMax);
-	for(size_t i = 0; i < 3; i++)
+	for(int i = 0; i < 3; i++)
 	{
 		bool bPatternDataMatch = true;
 		CPattern::const_iterator iter = sndFile.Patterns[i].Begin();
@@ -1579,8 +1707,8 @@ void TestPCnoteSerialization()
 
 
 // Test String I/O functionality
-void TestStringIO()
-//-----------------
+static noinline void TestStringIO()
+//---------------------------------
 {
 	char src0[4] = { '\0', 'X', ' ', 'X' };		// Weird empty buffer
 	char src1[4] = { 'X', ' ', '\0', 'X' };		// Weird buffer (hello Impulse Tracker)
@@ -1818,8 +1946,8 @@ void TestStringIO()
 }
 
 
-void TestSampleConversion()
-//-------------------------
+static noinline void TestSampleConversion()
+//-----------------------------------------
 {
 	uint8 *sourceBuf = new uint8[65536 * 4];
 	void *targetBuf = new uint8[65536 * 6];
@@ -1918,8 +2046,8 @@ void TestSampleConversion()
 		ModSample sample;
 		sample.Initialize();
 		sample.nLength = 65536;
-		sample.uFlags |= CHN_16BIT;
-		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
+		sample.uFlags.set(CHN_16BIT);
+		sample.pSample = (static_cast<int16 *>(targetBuf) + 65536);
 		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, reinterpret_cast<const char *>(source24), 3*65536);
 		CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeInt24<0, littleEndian24> > >(truncated16, 65536, 1, reinterpret_cast<const char *>(source24), 65536 * 3, 1);
 
@@ -1935,19 +2063,19 @@ void TestSampleConversion()
 		uint8 *source32 = sourceBuf;
 		for(size_t i = 0; i < 65536; i++)
 		{
-			uint8_4 floatbits = EncodeFloatBE((static_cast<float>(i) / 65536.0f) - 0.5f);
-			source32[i * 4 + 0] = floatbits.x[0];
-			source32[i * 4 + 1] = floatbits.x[1];
-			source32[i * 4 + 2] = floatbits.x[2];
-			source32[i * 4 + 3] = floatbits.x[3];
+			IEEE754binary32BE floatbits = IEEE754binary32BE((static_cast<float>(i) / 65536.0f) - 0.5f);
+			source32[i * 4 + 0] = floatbits.GetByte(0);
+			source32[i * 4 + 1] = floatbits.GetByte(1);
+			source32[i * 4 + 2] = floatbits.GetByte(2);
+			source32[i * 4 + 3] = floatbits.GetByte(3);
 		}
 
 		int16 *truncated16 = static_cast<int16 *>(targetBuf);
 		ModSample sample;
 		sample.Initialize();
 		sample.nLength = 65536;
-		sample.uFlags |= CHN_16BIT;
-		sample.pSample = (LPSTR)(static_cast<int16 *>(targetBuf) + 65536);
+		sample.uFlags.set(CHN_16BIT);
+		sample.pSample = static_cast<int16 *>(targetBuf) + 65536;
 		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, reinterpret_cast<const char *>(source32), 4*65536);
 		CopySample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(truncated16, 65536, 1, reinterpret_cast<const char *>(source32), 65536 * 4, 1);
 
@@ -1978,14 +2106,24 @@ void TestSampleConversion()
 }
 
 
-} // namespace MptTest
+} // namespace Test
+
+OPENMPT_NAMESPACE_END
 
 #else //Case: ENABLE_TESTS is not defined.
 
-namespace MptTest
+OPENMPT_NAMESPACE_BEGIN
+
+namespace Test {
+
+void DoTests()
+//------------
 {
-	void DoTests() {}
+	return;
 }
 
-#endif
+} // namespace Test
 
+OPENMPT_NAMESPACE_END
+
+#endif

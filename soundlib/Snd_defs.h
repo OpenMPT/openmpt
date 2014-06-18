@@ -14,9 +14,9 @@
 #include "../common/typedefs.h"
 #include "../common/FlagSet.h"
 
-#ifndef LPCBYTE
-typedef const BYTE * LPCBYTE;
-#endif
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 typedef uint32 ROWINDEX;
 	const ROWINDEX ROWINDEX_INVALID = uint32_max;
@@ -40,9 +40,6 @@ typedef uint8 SEQUENCEINDEX;
 typedef uintptr_t SmpLength;
 
 
-#define MIXBUFFERSIZE		512
-
-
 #define MOD_AMIGAC2			0x1AB					// Period of Amiga middle-c
 const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// Sample length in *samples*
 													// Note: Sample size in bytes can be more than this (= 256 MB).
@@ -51,8 +48,8 @@ const ROWINDEX MAX_PATTERN_ROWS			= 1024;
 const ORDERINDEX MAX_ORDERS				= 256;
 const PATTERNINDEX MAX_PATTERNS			= 240;
 const SAMPLEINDEX MAX_SAMPLES			= 4000;
-const INSTRUMENTINDEX MAX_INSTRUMENTS	= 256;	//200
-const PLUGINDEX MAX_MIXPLUGINS			= 100;	//50
+const INSTRUMENTINDEX MAX_INSTRUMENTS	= 256;
+const PLUGINDEX MAX_MIXPLUGINS			= 250;
 
 const SEQUENCEINDEX MAX_SEQUENCES		= 50;
 
@@ -65,14 +62,12 @@ const CHANNELINDEX MAX_CHANNELS			= 256;	//200 // Maximum number of mixing chann
 #define FREQ_FRACBITS		4		// Number of fractional bits in return value of CSoundFile::GetFreqFromPeriod()
 
 // String lengths (including trailing null char)
-#define MAX_SAMPLENAME			32	// also affects module name!
+#define MAX_SAMPLENAME			32
 #define MAX_SAMPLEFILENAME		22
 #define MAX_INSTRUMENTNAME		32
 #define MAX_INSTRUMENTFILENAME	32
 #define MAX_PATTERNNAME			32
 #define MAX_CHANNELNAME			20
-
-#define MAX_PLUGPRESETS		1000 //rewbs.plugPresets
 
 enum MODTYPE
 {
@@ -105,8 +100,7 @@ enum MODTYPE
 	MOD_TYPE_IMF	= 0x2000000,
 	MOD_TYPE_AMS2	= 0x4000000,
 	MOD_TYPE_DIGI	= 0x8000000,
-	MOD_TYPE_UAX  = 0x10000000, // sampleset as module
-	// Container formats (not used at the moment)
+	MOD_TYPE_UAX	= 0x10000000, // sampleset as module
 };
 DECLARE_FLAGSET(MODTYPE)
 
@@ -117,14 +111,9 @@ enum MODCONTAINERTYPE
 	MOD_CONTAINERTYPE_MO3  = 0x1,
 	MOD_CONTAINERTYPE_GDM  = 0x2,
 	MOD_CONTAINERTYPE_UMX  = 0x3,
-};
-
-
-enum MOD_CHARSET_CERTAINTY
-{
-	MOD_CHARSET_UNKNOWN,
-	MOD_CHARSET_MAYBE,
-	MOD_CHARSET_IS,
+	MOD_CONTAINERTYPE_XPK  = 0x4,
+	MOD_CONTAINERTYPE_PP20 = 0x5,
+	MOD_CONTAINERTYPE_MMCMP= 0x6,
 };
 
 
@@ -133,7 +122,7 @@ enum MOD_CHARSET_CERTAINTY
 #define TRK_FASTTRACKER2	(MOD_TYPE_XM)
 #define TRK_SCREAMTRACKER	(MOD_TYPE_S3M)
 #define TRK_PROTRACKER		(MOD_TYPE_MOD)
-#define TRK_ALLTRACKERS		(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_SCREAMTRACKER | TRK_PROTRACKER)
+#define TRK_ALLTRACKERS		(MODTYPE(~0))
 
 
 // Channel flags:
@@ -147,7 +136,7 @@ enum ChannelFlags
 	CHN_PINGPONGSUSTAIN	= 0x10,			// sample with bidi sustain loop
 	CHN_PANNING			= 0x20,			// sample with forced panning
 	CHN_STEREO			= 0x40,			// stereo sample
-	CHN_REVRSE			= 0x80,			// start sample playback from sample / loop end (Velvet Studio feature) - this is intentionally the same flag as CHN_PINGPONGFLAG.
+	CHN_REVERSE			= 0x80,			// start sample playback from sample / loop end (Velvet Studio feature) - this is intentionally the same flag as CHN_PINGPONGFLAG.
 	// Channel Flags
 	CHN_PINGPONGFLAG	= 0x80,			// when flag is on, sample is processed backwards
 	CHN_MUTE			= 0x100,		// muted channel
@@ -174,7 +163,7 @@ enum ChannelFlags
 DECLARE_FLAGSET(ChannelFlags)
 
 
-#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVRSE)
+#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVERSE)
 #define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS)
 
 
@@ -195,7 +184,6 @@ DECLARE_FLAGSET(EnvelopeFlags)
 #define ENVELOPE_MID		32		// Vertical middle line
 #define ENVELOPE_MAX		64		// Vertical max value of a point
 #define MAX_ENVPOINTS		240		// Maximum length of each instrument envelope
-#define ENVELOPE_MAX_LENGTH 0x3FFF	// Max envelope length in ticks. note: this value is only really required because too long envelopes won't be displayed properly in the instrument editor (win32 scrollbar issues)
 
 
 // Flags of 'dF..' datafield in extended instrument properties.
@@ -250,7 +238,7 @@ enum enmEnvelopeTypes
 #define DCT_NOTE		1
 #define DCT_SAMPLE		2
 #define DCT_INSTRUMENT	3
-#define DCT_PLUGIN		4 //rewbs.VSTiNNA
+#define DCT_PLUGIN		4
 
 // DNA types (Duplicate Note Action)
 #define DNA_NOTECUT		0
@@ -258,7 +246,7 @@ enum enmEnvelopeTypes
 #define DNA_NOTEFADE	2
 
 
-// Module flags
+// Module flags - note: these are written out as-is in ITP files!
 enum SongFlags
 {
 	SONG_EMBEDMIDICFG	= 0x0001,		// Embed macros in file
@@ -293,9 +281,6 @@ DECLARE_FLAGSET(SongFlags)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)
-#ifndef NO_DSP
-#define SNDDSP_NOISEREDUCTION 0x01	// reduce hiss (do not use, it's just a simple low-pass filter)
-#endif // NO_DSP
 #ifndef NO_AGC
 #define SNDDSP_AGC            0x40	// automatic gain control
 #endif // ~NO_AGC
@@ -313,21 +298,8 @@ DECLARE_FLAGSET(SongFlags)
 #define SNDMIX_SOFTPANNING    0x10	// soft panning mode (this is forced with mixmode RC3 and later)
 
 // Misc Flags (can safely be turned on or off)
-//#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
 #define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
-
-
-enum { MIXING_ATTENUATION = 4 };
-enum { MIXING_FRACTIONAL_BITS = 32 - 1 - MIXING_ATTENUATION };
-
-enum
-{
-	MIXING_CLIPMAX = ((1<<MIXING_FRACTIONAL_BITS)-1),
-	MIXING_CLIPMIN = -(MIXING_CLIPMAX),
-};
-
-const float MIXING_SCALEF = static_cast<float>(1 << MIXING_FRACTIONAL_BITS);
 
 
 #define MAX_GLOBAL_VOLUME 256u
@@ -341,7 +313,7 @@ enum ResamplingMode
 	SRCMODE_LINEAR    = 1,
 	SRCMODE_SPLINE    = 2,
 	SRCMODE_POLYPHASE = 3,
-	SRCMODE_FIRFILTER = 4, //rewbs.resamplerConf
+	SRCMODE_FIRFILTER = 4,
 	SRCMODE_DEFAULT   = 5,
 };
 
@@ -414,3 +386,6 @@ enum VibratoType
 	VIB_RAMP_DOWN,
 	VIB_RANDOM
 };
+
+
+OPENMPT_NAMESPACE_END

@@ -15,6 +15,9 @@
 #include <vector>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 //===================================
 class ChunkReader : public FileReader
 //===================================
@@ -113,7 +116,7 @@ public:
 			}
 
 			size_t dataSize = chunkHeader.GetLength();
-			ChunkListItem<T> resultItem(chunkHeader, GetChunk(dataSize));
+			ChunkListItem<T> resultItem(chunkHeader, ReadChunk(dataSize));
 			result.push_back(resultItem);
 
 			// Skip padding bytes
@@ -126,3 +129,6 @@ public:
 		return result;
 	}
 };
+
+
+OPENMPT_NAMESPACE_END

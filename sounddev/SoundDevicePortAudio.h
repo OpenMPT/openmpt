@@ -10,12 +10,14 @@
 
 #pragma once
 
-#include "SoundDevices.h"
+#include "SoundDevice.h"
 
 #ifndef NO_PORTAUDIO
 #include "portaudio/include/portaudio.h"
 #include "portaudio/include/pa_win_wasapi.h"
 #endif
+
+OPENMPT_NAMESPACE_BEGIN
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -33,10 +35,11 @@ protected:
 	PaStreamParameters m_StreamParameters;
 	PaWasapiStreamInfo m_WasapiStreamInfo;
 	PaStream * m_Stream;
+	const PaStreamInfo * m_StreamInfo;
 	void * m_CurrentFrameBuffer;
 	unsigned long m_CurrentFrameCount;
 
-	float m_CurrentRealLatencyMS;
+	double m_CurrentRealLatency; // seconds
 
 public:
 	CPortaudioDevice(SoundDeviceID id, const std::wstring &internalID);
@@ -45,16 +48,16 @@ public:
 public:
 	bool InternalOpen();
 	bool InternalClose();
-	void FillAudioBuffer();
-	void InternalReset();
-	void InternalStart();
+	void InternalFillAudioBuffer();
+	bool InternalStart();
 	void InternalStop();
-	bool IsOpen() const { return m_Stream ? true : false; }
-	UINT GetNumBuffers() { return 1; }
-	float GetCurrentRealLatencyMS();
+	bool InternalIsOpen() const { return m_Stream ? true : false; }
+	double GetCurrentLatency() const;
 	bool InternalHasGetStreamPosition() const { return false; }
-	int64 InternalGetStreamPositionSamples() const;
-	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
+	int64 InternalGetStreamPositionFrames() const;
+	SoundDeviceCaps GetDeviceCaps();
+	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
+	bool OpenDriverSettings();
 
 	int StreamCallback(
 		const void *input, void *output,
@@ -72,7 +75,7 @@ public:
 		void *userData
 		);
 
-	static std::string HostApiToString(PaHostApiIndex hostapi);
+	static std::wstring HostApiToString(PaHostApiIndex hostapi);
 
 	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi);
 	static SoundDeviceType HostApiToSndDevType(PaHostApiIndex hostapi);
@@ -91,3 +94,6 @@ void SndDevPortaudioUnnitialize();
 bool SndDevPortaudioIsInitialized();
 
 #endif // NO_PORTAUDIO
+
+
+OPENMPT_NAMESPACE_END

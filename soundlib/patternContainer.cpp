@@ -11,11 +11,11 @@
 #include "stdafx.h"
 #include "patternContainer.h"
 #include "Sndfile.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/mainfrm.h"
-#endif
 #include "../common/serialization_utils.h"
 #include "../common/version.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 void CPatternContainer::ClearPatterns()
@@ -53,7 +53,7 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 //---------------------------------------------------------------------------
 {
 	const CModSpecifications& specs = m_rSndFile.GetModSpecifications();
-	if(index >= specs.patternsMax || rows > specs.patternRowsMax || rows == 0)
+	if(index >= specs.patternsMax || rows > MAX_PATTERN_ROWS || rows == 0)
 		return true;
 	if(index < m_Patterns.size() && m_Patterns[index])
 		return true;
@@ -195,7 +195,7 @@ PATTERNINDEX CPatternContainer::GetNumNamedPatterns() const
 void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)
 //----------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(oStrm);
+	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdPatterns, MptVersion::num);
 	const PATTERNINDEX nPatterns = patc.Size();
 	uint16 nCount = 0;
@@ -212,13 +212,13 @@ void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)
 void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t)
 //--------------------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(iStrm);
+	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdPatterns, MptVersion::num);
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
 	PATTERNINDEX nPatterns = patc.Size();
 	uint16 nCount = uint16_max;
-	if (ssb.ReadItem(nCount, "num") != srlztn::Ssb::EntryNotFound)
+	if (ssb.ReadItem(nCount, "num") != srlztn::SsbRead::EntryNotFound)
 		nPatterns = nCount;
 	LimitMax(nPatterns, ModSpecs::mptm.patternsMax);
 	if (nPatterns > patc.Size())
@@ -229,3 +229,5 @@ void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t)
 	}
 }
 
+
+OPENMPT_NAMESPACE_END

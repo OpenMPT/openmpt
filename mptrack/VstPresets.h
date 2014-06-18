@@ -12,6 +12,11 @@
 
 #include <ostream>
 
+OPENMPT_NAMESPACE_BEGIN
+
+class FileReader;
+class CVstPlugin;
+
 class VSTPresets
 {
 public:
@@ -20,7 +25,6 @@ public:
 		noError,
 		invalidFile,
 		wrongPlugin,
-		outdatedPlugin,
 		wrongParameters,
 	};
 
@@ -47,3 +51,5 @@ protected:
 	static const char *GetErrorMessage(ErrorCode) { return "OpenMPT has been built without VST support"; }
 #endif // NO_VST
 };
+
+OPENMPT_NAMESPACE_END

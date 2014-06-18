@@ -28,6 +28,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CModControlDlg
 
@@ -150,7 +154,7 @@ BOOL CModTabCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 	if (!pMainFrm) return FALSE;
 	if (!CTabCtrl::Create(dwStyle, rect, pParentWnd, nID)) return FALSE;
 	SendMessage(WM_SETFONT, (WPARAM)pMainFrm->GetGUIFont());
-	SetImageList(pMainFrm->GetImageList());
+	SetImageList(&pMainFrm->m_MiscIcons);
 	return TRUE;
 }
 
@@ -167,8 +171,8 @@ BOOL CModTabCtrl::InsertItem(int nIndex, LPSTR pszText, LPARAM lParam, int iImag
 }
 
 
-UINT CModTabCtrl::GetItemData(int nIndex)
-//---------------------------------------
+LPARAM CModTabCtrl::GetItemData(int nIndex)
+//-----------------------------------------
 {
 	TC_ITEM tci;
 	tci.mask = TCIF_PARAM;
@@ -187,7 +191,6 @@ BEGIN_MESSAGE_MAP(CModControlView, CView)
 	//{{AFX_MSG_MAP(CModControlView)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
-	ON_WM_ERASEBKGND()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	OnTabSelchange)
 	ON_MESSAGE(WM_MOD_ACTIVATEVIEW,			OnActivateModView)
 	ON_MESSAGE(WM_MOD_CTRLMSG,				OnModCtrlMsg)
@@ -429,12 +432,10 @@ void CModControlView::UpdateView(DWORD lHint, CObject *pObject)
 	// Module type changed: update tabs
 	if (lHint & HINT_MODTYPE)
 	{
-		CSoundFile *pSndFile = pDoc->GetSoundFile();
 		UINT nCount = 4;
-		UINT nType = pSndFile->GetType();
 		UINT mask = 1 | 2 | 4 | 16;
 
-		if (nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if(pDoc->GetrSoundFile().GetModSpecifications().instrumentsMax > 0)
 		{
 			mask |= 8;
 			//mask |= 32; //rewbs.graph
@@ -453,7 +454,7 @@ void CModControlView::UpdateView(DWORD lHint, CObject *pObject)
 			if (mask & 2) m_TabCtrl.InsertItem(count++, "Patterns", IDD_CONTROL_PATTERNS, IMAGE_PATTERNS);
 			if (mask & 4) m_TabCtrl.InsertItem(count++, "Samples", IDD_CONTROL_SAMPLES, IMAGE_SAMPLES);
 			if (mask & 8) m_TabCtrl.InsertItem(count++, "Instruments", IDD_CONTROL_INSTRUMENTS, IMAGE_INSTRUMENTS);
-			if (mask & 32) m_TabCtrl.InsertItem(count++, "Graph", IDD_CONTROL_GRAPH, IMAGE_GRAPH); //rewbs.graph
+			//if (mask & 32) m_TabCtrl.InsertItem(count++, "Graph", IDD_CONTROL_GRAPH, IMAGE_GRAPH); //rewbs.graph
 			if (mask & 16) m_TabCtrl.InsertItem(count++, "Comments", IDD_CONTROL_COMMENTS, IMAGE_COMMENTS);
 		}
 	}
@@ -491,7 +492,7 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 			int nItems = m_TabCtrl.GetItemCount();
 			for (int i=0; i<nItems; i++)
 			{
-				if (m_TabCtrl.GetItemData(i) == nIndex)
+				if ((WPARAM)m_TabCtrl.GetItemData(i) == nIndex)
 				{
 					m_TabCtrl.SetCurSel(i);
 					SetActivePage(i, lParam);
@@ -659,6 +660,72 @@ LRESULT CModScrollView::OnUpdatePosition(WPARAM, LPARAM lParam)
 }
 
 
+BOOL CModScrollView::OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll)
+//------------------------------------------------------------------------
+{
+	SCROLLINFO info;
+	if(LOBYTE(nScrollCode) == SB_THUMBTRACK)
+	{
+		if(GetScrollInfo(SB_HORZ, &info, SIF_TRACKPOS))
+			nPos = info.nTrackPos;
+		m_nScrollPosX = nPos;
+	} else if(HIBYTE(nScrollCode) == SB_THUMBTRACK)
+	{
+		if(GetScrollInfo(SB_VERT, &info, SIF_TRACKPOS))
+			nPos = info.nTrackPos;
+		m_nScrollPosY = nPos;
+	}
+	BOOL ret = CScrollView::OnScroll(nScrollCode, nPos, bDoScroll);
+	return ret;
+}
+
+
+BOOL CModScrollView::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
+//---------------------------------------------------------------
+{
+	BOOL ret = CScrollView::OnScrollBy(sizeScroll, bDoScroll);
+	if(ret)
+	{
+		SCROLLINFO info;
+		if(sizeScroll.cx)
+		{
+			if(GetScrollInfo(SB_HORZ, &info, SIF_POS))
+				m_nScrollPosX = info.nPos;
+		}
+		if(sizeScroll.cy)
+		{
+			if(GetScrollInfo(SB_VERT, &info, SIF_POS))
+				m_nScrollPosY = info.nPos;
+		}
+	}
+	return ret;
+}
+
+
+int CModScrollView::SetScrollPos(int nBar, int nPos, BOOL bRedraw)
+//----------------------------------------------------------------
+{
+	if(nBar == SB_HORZ)
+		m_nScrollPosX = nPos;
+	else if(nBar == SB_VERT)
+		m_nScrollPosY = nPos;
+	return CScrollView::SetScrollPos(nBar, nPos, bRedraw);
+}
+
+
+void CModScrollView::SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& sizePage, const SIZE& sizeLine)
+//-----------------------------------------------------------------------------------------------------------
+{
+	CScrollView::SetScrollSizes(nMapMode, sizeTotal, sizePage, sizeLine);
+	// Fix scroll positions
+	SCROLLINFO info;
+	if(GetScrollInfo(SB_HORZ, &info, SIF_POS))
+		m_nScrollPosX = info.nPos;
+	if(GetScrollInfo(SB_VERT, &info, SIF_POS))
+		m_nScrollPosY = info.nPos;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////
 // 	CModControlBar
 
@@ -667,33 +734,16 @@ BEGIN_MESSAGE_MAP(CModControlBar, CToolBarCtrl)
 END_MESSAGE_MAP()
 
 
-CModControlBar::~CModControlBar()
-//-------------------------------
+BOOL CModControlBar::Init(CImageList &icons, CImageList &disabledIcons)
+//---------------------------------------------------------------------
 {
-	if (m_hBarBmp)
-	{
-		DeleteObject(m_hBarBmp);
-		m_hBarBmp = NULL;
-	}
-}
-
-
-BOOL CModControlBar::Init(UINT nId)
-//---------------------------------
-{
-	HINSTANCE hInstance = AfxGetInstanceHandle();
-	TBADDBITMAP tbab;
-	
 	SetButtonStructSize(sizeof(TBBUTTON));
-	SetBitmapSize(CSize(16, 15));
+	SetBitmapSize(CSize(16, 16));
 	SetButtonSize(CSize(27, 24));
+
 	// Add bitmaps
-	m_hBarBmp = AfxLoadSysColorBitmap(
-					hInstance,
-					::FindResource(hInstance, MAKEINTRESOURCE(nId), RT_BITMAP));
-	tbab.hInst = NULL;
-	tbab.nID = (UINT)m_hBarBmp;
-	::SendMessage(m_hWnd, TB_ADDBITMAP, 16, (LPARAM)&tbab);
+	SetImageList(&icons);
+	SetDisabledImageList(&disabledIcons);
 	UpdateStyle();
 	return TRUE;
 }
@@ -746,3 +796,6 @@ LRESULT CModControlBar::OnHelpHitTest(WPARAM, LPARAM lParam)
 	}
 	return 0;
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 #define CM_BT_LEFT		1
 #define CM_BT_RIGHT		2
 #define CM_NB_COLS		8
@@ -92,3 +94,5 @@ public:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 };
+
+OPENMPT_NAMESPACE_END

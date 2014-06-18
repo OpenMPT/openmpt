@@ -9,10 +9,19 @@
 
 
 #include "stdafx.h"
+
 #include "serialization_utils.h"
-#include "misc_util.h"
-#include <algorithm>
+
+#include <istream>
 #include <iterator> // for back_inserter
+#include <ostream>
+#include <sstream>
+
+#include "misc_util.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 namespace srlztn
 {
@@ -20,18 +29,18 @@ namespace srlztn
 static const uint8 HeaderId_FlagByte = 0;
 
 // Indexing starts from 0.
-inline bool Testbit(uint8 val, uint8 bitindex) {return ((val & (1 << bitindex)) != 0);}
+static inline bool Testbit(uint8 val, uint8 bitindex) {return ((val & (1 << bitindex)) != 0);}
 
-inline void Setbit(uint8& val, uint8 bitindex, bool newval)
-//----------------------------------------------------------
+static inline void Setbit(uint8& val, uint8 bitindex, bool newval)
+//----------------------------------------------------------------
 {
 	if(newval) val |= (1 << bitindex);
 	else val &= ~(1 << bitindex);
 }
 
 
-bool IsPrintableId(const char* pId, const size_t nLength)
-//--------------------------------------------------------
+static bool IsPrintableId(const char* pId, const size_t nLength)
+//--------------------------------------------------------------
 {
 	for(size_t i = 0; i < nLength; i++)
 	{
@@ -42,8 +51,8 @@ bool IsPrintableId(const char* pId, const size_t nLength)
 }
 
 
-uint8 GetByteReq1248(const uint64 size)
-//-------------------------------------
+static uint8 GetByteReq1248(const uint64 size)
+//--------------------------------------------
 {
 	if((size >> 6) == 0) return 1;
 	if((size >> (1*8+6)) == 0) return 2;
@@ -52,8 +61,8 @@ uint8 GetByteReq1248(const uint64 size)
 }
 
 
-uint8 GetByteReq1234(const uint32 num)
-//------------------------------------
+static uint8 GetByteReq1234(const uint32 num)
+//-------------------------------------------
 {
 	if((num >> 6) == 0) return 1;
 	if((num >> (1*8+6)) == 0) return 2;
@@ -63,7 +72,7 @@ uint8 GetByteReq1234(const uint32 num)
 
 
 void WriteAdaptive12(std::ostream& oStrm, const uint16 num)
-//------------------------------------------------------
+//---------------------------------------------------------
 {
 	if(num >> 7 == 0)
 		Binarywrite<uint16>(oStrm, num << 1, 1);
@@ -73,7 +82,7 @@ void WriteAdaptive12(std::ostream& oStrm, const uint16 num)
 
 
 void WriteAdaptive1234(std::ostream& oStrm, const uint32 num)
-//--------------------------------------------------------
+//-----------------------------------------------------------
 {
 	const uint8 bc = GetByteReq1234(num);
 	const uint32 sizeInstruction = (num << 2) | (bc - 1);
@@ -82,8 +91,8 @@ void WriteAdaptive1234(std::ostream& oStrm, const uint32 num)
 
 
 //Format: First bit tells whether the size indicator is 1 or 2 bytes.
-void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
-//------------------------------------------------------------------
+static void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
+//----------------------------------------------------------------------------
 {
 	uint16 s = static_cast<uint16>(str.size());
 	LimitMax(s, uint16(uint16_max / 2));
@@ -93,8 +102,8 @@ void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
 
 
 // Works only for arguments 1,2,4,8
-uint8 Log2(const uint8& val)
-//--------------------------
+static uint8 Log2(const uint8& val)
+//---------------------------------
 {
 	if(val == 1) return 0;
 	else if(val == 2) return 1;
@@ -102,8 +111,9 @@ uint8 Log2(const uint8& val)
 	else return 3;
 }
 
+
 void WriteAdaptive1248(std::ostream& oStrm, const uint64& num)
-//---------------------------------------------------------
+//------------------------------------------------------------
 {
 	const uint8 bc = GetByteReq1248(num);
 	const uint64 sizeInstruction = (num << 2) | Log2(bc);
@@ -112,7 +122,7 @@ void WriteAdaptive1248(std::ostream& oStrm, const uint64& num)
 
 
 void ReadAdaptive12(std::istream& iStrm, uint16& val)
-//-----------------------------------------------
+//---------------------------------------------------
 {
 	Binaryread<uint16>(iStrm, val, 1);
 	if(val & 1)
@@ -127,7 +137,7 @@ void ReadAdaptive12(std::istream& iStrm, uint16& val)
 
 
 void ReadAdaptive1234(std::istream& iStrm, uint32& val)
-//-------------------------------------------------
+//-----------------------------------------------------
 {
 	Binaryread<uint32>(iStrm, val, 1);
 	const uint8 bc = 1 + static_cast<uint8>(val & 3);
@@ -142,16 +152,12 @@ void ReadAdaptive1234(std::istream& iStrm, uint32& val)
 	val >>= 2;
 }
 
-const uint8 pow2xTable[] = {1, 2, 4, 8, 16, 32, 64, 128};
-
-// Returns 2^n. n must be within {0,...,7}.
-inline uint8 Pow2xSmall(const uint8& exp) {ASSERT(exp <= 7); return pow2xTable[exp];}
 
 void ReadAdaptive1248(std::istream& iStrm, uint64& val)
-//-------------------------------------------------
+//-----------------------------------------------------
 {
 	Binaryread<uint64>(iStrm, val, 1);
-	uint8 bc = Pow2xSmall(static_cast<uint8>(val & 3));
+	uint8 bc = 1 << static_cast<uint8>(val & 3);
 	int byte = 1;
 	val &= 0xff;
 	while(bc > 1)
@@ -172,7 +178,7 @@ void ReadAdaptive1248(std::istream& iStrm, uint64& val)
 void WriteItemString(std::ostream& oStrm, const char* const pStr, const size_t nSize)
 //--------------------------------------------------------------------------------
 {
-	uint32 id = (uint32)std::min<size_t>(nSize, (uint32_max >> 4)) << 4;
+	uint32 id = static_cast<uint32>(std::min<std::size_t>(nSize, (uint32_max >> 4))) << 4;
 	id |= 12; // 12 == 1100b
 	Binarywrite<uint32>(oStrm, id);
 	id >>= 4;
@@ -206,14 +212,14 @@ void ReadItemString(std::istream& iStrm, std::string& str, const DataSize)
 	for(size_t i = 0; i < str.size(); i++)
 		iStrm.read(&str[i], 1);
 
-	id = (id >> 4) - (uint32)str.size();
+	id = (id >> 4) - static_cast<uint32>(str.size());
 	if(id > 0)
 		iStrm.ignore(id);
 }
 
 
-std::string IdToString(const char* const pvId, const size_t nLength)
-//-------------------------------------------------------------
+static std::string IdToString(const char* const pvId, const size_t nLength)
+//-------------------------------------------------------------------------
 {
 	const char* pId = static_cast<const char*>(pvId);
 	if (nLength == 0)
@@ -231,9 +237,6 @@ std::string IdToString(const char* const pvId, const size_t nLength)
 }
 
 const char Ssb::s_EntryID[3] = {'2','2','8'};
-int32 Ssb::s_DefaultReadLogMask = SNT_DEFAULT_MASK;
-int32 Ssb::s_DefaultWriteLogMask = SNT_DEFAULT_MASK;
-Ssb::fpLogFunc_t Ssb::s_DefaultLogFunc = nullptr;
 
 const char tstrWriteHeader[] = "Write header with ID = %s\n";
 const char tstrWriteProgress[] = "Wrote entry: {num, id, rpos, size} = {%u, %s, %u, %u}\n";
@@ -250,85 +253,76 @@ const char tstrReadingMap[] = "Reading map from rpos: %u\n";
 const char tstrEndOfMap[] = "End of map(rpos): %u\n";
 const char tstrReadProgress[] = "Read entry: {num, id, rpos, size, desc} = {%u, %s, %u, %s, %s}\n";
 const char tstrNoEntryFound[] = "No entry with id %s found.\n";
-const char tstrCantFindSubEntry[] = "Unable to find subentry with id=%s\n";
 const char strReadNote[] = "Read note: ";
 
 
-#define SSB_INITIALIZATION_LIST					\
-	m_Status(SNT_NONE), \
-	m_nFixedEntrySize(0),						\
-	m_fpLogFunc(s_DefaultLogFunc),				\
-	m_Readlogmask(s_DefaultReadLogMask),		\
-	m_Writelogmask(s_DefaultWriteLogMask),		\
-	m_posStart(0),								\
-	m_nReadVersion(0),							\
-	m_nMaxReadEntryCount(16000),				\
-	m_rposMapBegin(0),							\
-	m_posMapEnd(0),								\
-	m_posDataBegin(0),							\
-	m_rposEndofHdrData(0),						\
-	m_nReadEntrycount(0),						\
-	m_nIdbytes(IdSizeVariable),					\
-	m_nCounter(0),								\
-	m_nNextReadHint(0),							\
-	m_Flags(s_DefaultFlags),					\
-	m_pSubEntry(nullptr),						\
-	m_posSubEntryStart(0),						\
-	m_nMapReserveSize(0),						\
-	m_posEntrycount(0),							\
-	m_posMapPosField(0),						\
-	m_posMapStart(0)							\
+Ssb::Ssb()
+	: m_Status(SNT_NONE)
+	, m_nFixedEntrySize(0)
+	, m_posStart(0)
+	, m_nIdbytes(IdSizeVariable)
+	, m_nCounter(0)
+	, m_Flags((1 << RwfWMapStartPosEntry) + (1 << RwfWMapSizeEntry) + (1 << RwfWVersionNum) + (1 << RwfRPartialIdMatch))
+{
+	return;
+}
 
 
-Ssb::Ssb(std::istream* pIstrm, std::ostream* pOstrm) :
-		m_pOstrm(pOstrm),
-		m_pIstrm(pIstrm),
-		SSB_INITIALIZATION_LIST
-//-----------------------------------------------
-{}
-
-Ssb::Ssb(std::iostream& ioStrm) :
-		m_pOstrm(&ioStrm),
-		m_pIstrm(&ioStrm),
-		SSB_INITIALIZATION_LIST
-//------------------------------
-{}
-
-Ssb::Ssb(std::ostream& oStrm) :
-		m_pOstrm(&oStrm),
-		m_pIstrm(nullptr),
-		SSB_INITIALIZATION_LIST
-//------------------------------
-{}
+SsbWrite::SsbWrite(std::ostream& oStrm)
+	: m_pOstrm(&oStrm)
+	, m_posEntrycount(0)
+	, m_posMapPosField(0)
+{
+	return;
+}
 
 
-Ssb::Ssb(std::istream& iStrm) :
-		m_pOstrm(nullptr),
-		m_pIstrm(&iStrm),
-		SSB_INITIALIZATION_LIST
-//------------------------------
-{}
+SsbRead::SsbRead(std::istream& iStrm)
+	: m_pIstrm(&iStrm)
+	, m_nReadVersion(0)
+	, m_rposMapBegin(0)
+	, m_posMapEnd(0)
+	, m_posDataBegin(0)
+	, m_rposEndofHdrData(0)
+	, m_nReadEntrycount(0)
+	, m_nNextReadHint(0)
+{
+	return;
+}
 
-#undef SSB_INITIALIZATION_LIST
 
-void Ssb::AddNote(const SsbStatus s, const SsbStatus mask, const char* sz)
-//------------------------------------------------------------------------
+typedef void (*fpLogFunc_t)(const char*, ...);
+static fpLogFunc_t const m_fpLogFunc = nullptr;			// Pointer to log function.
+
+
+void Ssb::AddToLog(const char *psz)
+//---------------------------------
+{
+	if(m_fpLogFunc)
+	{
+		m_fpLogFunc("%s", psz);
+	}
+}
+
+
+void Ssb::AddNote(const SsbStatus s, const char* sz)
+//--------------------------------------------------
 {
 	m_Status |= s;
-	if ((s & mask) != 0 && m_fpLogFunc)
+	if (m_fpLogFunc)
 		m_fpLogFunc("%s: 0x%x\n", sz, s);
 }
 
-void Ssb::AddWriteNote(const SsbStatus s) {AddNote(s, m_Writelogmask, strWriteNote);}
-void Ssb::AddReadNote(const SsbStatus s) {AddNote(s, m_Readlogmask, strReadNote);}
+void SsbWrite::AddWriteNote(const SsbStatus s) {AddNote(s, strWriteNote);}
+void SsbRead::AddReadNote(const SsbStatus s) {AddNote(s, strReadNote);}
 
 
-void Ssb::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
+void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 //-------------------------------------------------------------------
 {
 	m_Status |= SNT_PROGRESS;
 
-	if ((m_Readlogmask & SNT_PROGRESS) != 0 && m_fpLogFunc)
+	if (m_fpLogFunc)
 	{
 		m_fpLogFunc(
 				 tstrReadProgress,
@@ -342,13 +336,12 @@ void Ssb::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 
 
 // Called after writing an entry.
-void Ssb::AddWriteNote(const char* pId, const size_t nIdSize, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
+void SsbWrite::AddWriteNote(const char* pId, const size_t nIdSize, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
 //----------------------------------------------------------------------------
 {
 	m_Status |= SNT_PROGRESS;
-	if ((m_Writelogmask & SNT_PROGRESS) != 0 && m_fpLogFunc)
+	if (m_fpLogFunc)
 	{
-		if (nIdSize < 30)
 		{
 			m_fpLogFunc(tstrWriteProgress, nEntryNum, IdToString(pId, nIdSize).c_str(), rposStart, nBytecount);
 		}
@@ -356,7 +349,7 @@ void Ssb::AddWriteNote(const char* pId, const size_t nIdSize, const NumType nEnt
 }
 
 
-void Ssb::ResetReadstatus()
+void SsbRead::ResetReadstatus()
 //-------------------------
 {
 	m_Status = SNT_NONE;
@@ -365,7 +358,7 @@ void Ssb::ResetReadstatus()
 }
 
 
-void Ssb::WriteMapItem( const char* pId, 
+void SsbWrite::WriteMapItem( const char* pId, 
 						const size_t nIdSize,
 						const RposType& rposDataStart,
 						const DataSize& nDatasize,
@@ -378,82 +371,33 @@ void Ssb::WriteMapItem( const char* pId,
 					rposDataStart,
 					nDatasize);
 
+	std::ostringstream mapStream;
+
 	if(m_nIdbytes > 0)
 	{
 		if (m_nIdbytes != IdSizeVariable && nIdSize != m_nIdbytes)
 			{ AddWriteNote(SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING); return; }
 
 		if (m_nIdbytes == IdSizeVariable) //Variablesize ID?
-			WriteAdaptive12(m_MapStream, static_cast<uint16>(nIdSize));
+			WriteAdaptive12(mapStream, static_cast<uint16>(nIdSize));
 
 		if(nIdSize > 0)
-			m_MapStream.write(pId, nIdSize);
+			mapStream.write(pId, nIdSize);
 	}
 
 	if (GetFlag(RwfWMapStartPosEntry)) //Startpos
-		WriteAdaptive1248(m_MapStream, rposDataStart);
+		WriteAdaptive1248(mapStream, rposDataStart);
 	if (GetFlag(RwfWMapSizeEntry)) //Entrysize
-		WriteAdaptive1248(m_MapStream, nDatasize);
+		WriteAdaptive1248(mapStream, nDatasize);
 	if (GetFlag(RwfWMapDescEntry)) //Entry descriptions
-		WriteAdaptive12String(m_MapStream, std::string(pszDesc));
+		WriteAdaptive12String(mapStream, std::string(pszDesc));
+
+	m_MapStreamString.append(mapStream.str());
+
 }
 
 
-void Ssb::ReserveMapSize(uint32 nSize)
-//------------------------------------
-{
-	std::ostream& oStrm = *m_pOstrm;
-	m_nMapReserveSize = nSize;
-	if (nSize > 0)
-	{
-		m_posMapStart = oStrm.tellp();
-		for(size_t i = 0; i < m_nMapReserveSize; i++)
-			oStrm.put(0);
-	}
-}
-
-
-void Ssb::SetIdSize(uint16 nSize)
-//-------------------------------
-{
-	if (nSize == IdSizeVariable || nSize > IdSizeMaxFixedSize)
-		m_nIdbytes = IdSizeVariable;
-	else
-		m_nIdbytes = nSize;
-}
-
-
-void Ssb::CreateWriteSubEntry()
-//-----------------------------
-{
-	m_posSubEntryStart = m_pOstrm->tellp();
-	delete m_pSubEntry;
-	m_pSubEntry = new Ssb(*m_pOstrm);
-	m_pSubEntry->m_fpLogFunc = m_fpLogFunc;
-}
-
-
-Ssb* Ssb::CreateReadSubEntry(const char* pId, const size_t nLength)
-//-----------------------------------------------------------------
-{
-	const ReadEntry* pE = Find(pId, nLength);
-	if (pE && pE->rposStart != 0)
-	{
-		m_nCounter++;
-		delete m_pSubEntry;
-		m_pSubEntry = new Ssb(*m_pIstrm);
-		m_pSubEntry->m_fpLogFunc = m_fpLogFunc;
-		m_pIstrm->seekg(m_posStart + Postype(pE->rposStart));
-		return m_pSubEntry;
-	}
-	else if (m_fpLogFunc)
-		m_fpLogFunc(tstrCantFindSubEntry, IdToString(pId, nLength).c_str());
-
-	return nullptr;
-}
-
-
-void Ssb::IncrementWriteCounter()
+void SsbWrite::IncrementWriteCounter()
 //-------------------------------
 {
 	m_nCounter++;
@@ -465,19 +409,7 @@ void Ssb::IncrementWriteCounter()
 }
 
 
-void Ssb::ReleaseWriteSubEntry(const char* pId, const size_t nIdLength)
-//---------------------------------------------------------------------
-{
-	if ((m_pSubEntry->m_Status & SNT_FAILURE) != 0)
-		m_Status |= SNW_SUBENTRY_FAILURE;
-
-	delete m_pSubEntry; m_pSubEntry = nullptr;
-	WriteMapItem(pId, nIdLength, static_cast<RposType>(m_posSubEntryStart - m_posStart), static_cast<DataSize>(m_pOstrm->tellp() - m_posSubEntryStart), "");
-	IncrementWriteCounter();
-}
-
-
-void Ssb::BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion)
+void SsbWrite::BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion)
 //---------------------------------------------------------------------------------
 {
 	std::ostream& oStrm = *m_pOstrm;
@@ -526,7 +458,7 @@ void Ssb::BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersi
 	if(flags != s_DefaultFlagbyte)
 	{
 		WriteAdaptive1234(oStrm, 2); //Headersize - now it is 2.
-        Binarywrite<uint8>(oStrm, HeaderId_FlagByte);
+		Binarywrite<uint8>(oStrm, HeaderId_FlagByte);
 		Binarywrite<uint8>(oStrm, flags);
 	}
 	else
@@ -556,7 +488,7 @@ void Ssb::BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersi
 }
 
 
-Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin)
+SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin)
 //-------------------------------------------------------------------------------------------------------------------
 {
 	if (pE != nullptr)
@@ -579,15 +511,15 @@ Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const char* pId, const size_t 
 }
 
 
-void Ssb::OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite)
+void SsbWrite::OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite)
 //-----------------------------------------------------------------------------------------
 {
 	const Offtype nRawEntrySize = m_pOstrm->tellp() - posBeforeWrite;
 
-	if (nRawEntrySize > std::numeric_limits<DataSize>::max())
+	if (nRawEntrySize < 0 || static_cast<uint64>(nRawEntrySize) > std::numeric_limits<DataSize>::max())
 		{ AddWriteNote(SNW_INSUFFICIENT_DATASIZETYPE); return; }
 
-	if(GetFlag(RwfRMapHasSize) && nRawEntrySize > (std::numeric_limits<DataSize>::max() >> 2))
+	if(GetFlag(RwfRMapHasSize) && (nRawEntrySize < 0 || static_cast<uint64>(nRawEntrySize) > (std::numeric_limits<DataSize>::max() >> 2)))
 		{ AddWriteNote(SNW_DATASIZETYPE_OVERFLOW); return; }
 
 	DataSize nEntrySize = static_cast<DataSize>(nRawEntrySize);
@@ -613,7 +545,7 @@ void Ssb::OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posB
 }
 
 
-void Ssb::CompareId(std::istream& iStrm, const char* pId, const size_t nIdlength)
+void SsbRead::CompareId(std::istream& iStrm, const char* pId, const size_t nIdlength)
 //---------------------------------------------------------------------------
 {
 	uint8 tempU8 = 0;
@@ -632,7 +564,7 @@ void Ssb::CompareId(std::istream& iStrm, const char* pId, const size_t nIdlength
 }
 
 
-void Ssb::BeginRead(const char* pId, const size_t nLength, const uint64& nVersion)
+void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVersion)
 //---------------------------------------------------------------------------------
 {
 	std::istream& iStrm = *m_pIstrm;
@@ -707,7 +639,7 @@ void Ssb::BeginRead(const char* pId, const size_t nLength, const uint64& nVersio
 
 	if (Testbit(header, 5))
 	{
-        Binaryread<uint8>(iStrm, tempU8);
+		Binaryread<uint8>(iStrm, tempU8);
 		iStrm.ignore(tempU8);
 	}
 
@@ -742,12 +674,12 @@ void Ssb::BeginRead(const char* pId, const size_t nLength, const uint64& nVersio
 		iStrm.ignore(size * (GetFlag(RwfRTwoBytesDescChar) ? 2 : 1));
 	}
 
-    if(Testbit(flagbyte, 3))
+	if(Testbit(flagbyte, 3))
 		iStrm.ignore(5);
 
 	// Read entrycount
 	ReadAdaptive1248(iStrm, tempU64);
-	if(tempU64 > m_nMaxReadEntryCount)
+	if(tempU64 > 16000) // FIXME: 16000 appear like a totally arbitrary limit. May be to avoid out-of-memory DoS.
 		{ AddReadNote(SNR_TOO_MANY_ENTRIES_TO_READ); return; }
 
 	m_nReadEntrycount = static_cast<NumType>(tempU64);
@@ -764,7 +696,7 @@ void Ssb::BeginRead(const char* pId, const size_t nLength, const uint64& nVersio
 
 	const Offtype rawEndOfHdrData = iStrm.tellg() - m_posStart;
 
-	if (rawEndOfHdrData < 0 || rawEndOfHdrData > std::numeric_limits<RposType>::max())
+	if (rawEndOfHdrData < 0 || static_cast<uint64>(rawEndOfHdrData) > std::numeric_limits<RposType>::max())
 		{ AddReadNote(SNR_INSUFFICIENT_RPOSTYPE); return; }
 
 	m_rposEndofHdrData = static_cast<RposType>(rawEndOfHdrData);
@@ -777,7 +709,7 @@ void Ssb::BeginRead(const char* pId, const size_t nLength, const uint64& nVersio
 }
 
 
-void Ssb::CacheMap()
+void SsbRead::CacheMap()
 //------------------
 {
 	std::istream& iStrm = *m_pIstrm;
@@ -871,7 +803,7 @@ void Ssb::CacheMap()
 }
 
 
-const ReadEntry* Ssb::Find(const char* pId, const size_t nIdLength)
+const ReadEntry* SsbRead::Find(const char* pId, const size_t nIdLength)
 //-----------------------------------------------------------------
 {
 	m_pIstrm->clear();
@@ -901,26 +833,20 @@ const ReadEntry* Ssb::Find(const char* pId, const size_t nIdLength)
 }
 
 
-void Ssb::FinishWrite()
+void SsbWrite::FinishWrite()
 //---------------------
 {
 	std::ostream& oStrm = *m_pOstrm;
 	const Postype posDataEnd = oStrm.tellp();
-	std::string mapStreamStr = m_MapStream.str();
-	if (m_posMapStart != Postype(0) && ((uint32)mapStreamStr.length() > m_nMapReserveSize))
-		{ AddWriteNote(SNW_INSUFFICIENT_MAPSIZE); return; }
 		
-	if (m_posMapStart < 1)
-		m_posMapStart = oStrm.tellp();
-	else
-		oStrm.seekp(m_posMapStart);
+	Postype posMapStart = oStrm.tellp();
 
 	if (m_fpLogFunc)
-		m_fpLogFunc(tstrWritingMap, uint32(m_posMapStart - m_posStart));
+		m_fpLogFunc(tstrWritingMap, uint32(posMapStart - m_posStart));
 
 	if (GetFlag(RwfRwHasMap)) //Write map
 	{
-		oStrm.write(mapStreamStr.c_str(), mapStreamStr.length());
+		oStrm.write(m_MapStreamString.c_str(), m_MapStreamString.length());
 	}
 
 	const Postype posMapEnd = oStrm.tellp();
@@ -932,7 +858,7 @@ void Ssb::FinishWrite()
 	if (GetFlag(RwfRwHasMap))
 	{	// Write map start position.
 		oStrm.seekp(m_posMapPosField);
-		const uint64 rposMap = m_posMapStart - m_posStart;
+		const uint64 rposMap = posMapStart - m_posStart;
 		Binarywrite<uint64>(oStrm, rposMap << 2 | 3);
 	}
 
@@ -945,3 +871,5 @@ void Ssb::FinishWrite()
 
 } // namespace srlztn 
 
+
+OPENMPT_NAMESPACE_END

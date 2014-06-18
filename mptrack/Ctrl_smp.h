@@ -13,6 +13,8 @@
 
 #include "../soundlib/SampleIO.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //=======================================
 class CCtrlSamples: public CModControlDlg
 //=======================================
@@ -37,12 +39,9 @@ protected:
 	CButton m_CheckPanning;
 	SAMPLEINDEX m_nSample;
 	double m_dTimeStretchRatio; //rewbs.timeStretchMods
-	uint32 m_nStretchProcessStepLength;
 	uint32 m_nSequenceMs;
 	uint32 m_nSeekWindowMs;
 	uint32 m_nOverlapMs;
-	uint16 m_nFinetuneStep; // Increment finetune by x when using spin control. Default = 25
-	enum {nDefaultStretchChunkSize = 8192};
 	SampleIO m_nPreviousRawFormat;
 	bool rememberRawFormat;
 
@@ -55,7 +54,7 @@ protected:
 
 	// Applies amplification to sample. Negative values
 	// can be used to invert phase.
-	void ApplyAmplify(LONG nAmp, bool bFadeIn = false, bool bFadeOut = false);
+	void ApplyAmplify(int32 nAmp, bool fadeIn = false, bool fadeOut = false);
 
 	SampleSelectionPoints GetSelectionPoints();
 	void SetSelectionPoints(SmpLength nStart, SmpLength nEnd);
@@ -67,9 +66,9 @@ public:
 	~CCtrlSamples();
 
 	bool SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom = -1, bool bUpdNum = true);
-	bool OpenSample(LPCSTR lpszFileName);
+	bool OpenSample(const mpt::PathString &fileName);
 	bool OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample);
-	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG>* GetSplitPosRef() {return &TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_VIRTUAL(CCtrlSamples)
@@ -131,6 +130,10 @@ protected:
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
 
+	void SetModified(DWORD mask, bool updateAll);
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

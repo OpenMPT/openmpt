@@ -17,10 +17,7 @@
 #include "ITCompression.h"
 
 
-// External decompressors
-extern void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
-extern uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n);
-extern uintptr_t DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
+OPENMPT_NAMESPACE_BEGIN
 
 
 #if MPT_COMPILER_GCC
@@ -30,7 +27,11 @@ extern uintptr_t DMFUnpack(LPBYTE psample, const uint8 *ibuf, const uint8 *ibufm
 #pragma GCC diagnostic ignored "-Wswitch"
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
+#if MPT_CLANG_AT_LEAST(3,3,0)
+#pragma clang diagnostic ignored "-Wswitch"
+#else
 #pragma clang diagnostic ignored "-Wswitch-enum"
+#endif
 #endif
 
 // Read a sample from memory
@@ -323,7 +324,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		if(bytesRead)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
-			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(0), uint32(64)));
+			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(1), uint32(64)));
 		}
 	}
 
@@ -343,7 +344,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		if(bytesRead)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
-			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(0), uint32(64)));
+			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(1), uint32(64)));
 		}
 	}
 
@@ -363,7 +364,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		if(bytesRead)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
-			sample.nGlobalVol = Util::Round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 0.0f, 64.0f));
+			sample.nGlobalVol = Util::Round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 1.0f, 64.0f));
 		}
 	}
 
@@ -572,11 +573,6 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		}
 	}
 
-	if(bytesRead > 0)
-	{
-		CSoundFile::AdjustSampleLoop(sample);
-	}
-
 	ASSERT(filePosition + bytesRead <= file.GetLength());
 	file.Seek(filePosition + bytesRead);
 	return bytesRead;
@@ -598,18 +594,21 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 //----------------------------------------------------------------------------------------
 {
 	size_t len = 0, bufcount = 0;
-	char buffer[32768];
-	int8 *pSample = (int8 *)sample.pSample;
+	int8 buffer8[4096];
+	int16 buffer16[4096];
+	const void *const pSampleVoid = (const void *)sample.pSample;
+	const int8 *const pSample8 = (const int8 *)sample.pSample;
+	const int16 *const pSample16 = (const int16 *)sample.pSample;
 	SmpLength numSamples = sample.nLength;
 
 	if(maxSamples && numSamples > maxSamples) numSamples = maxSamples;
-	if(pSample == nullptr || numSamples == 0) return 0;
+	if(sample.pSample == nullptr || numSamples == 0) return 0;
 
 	if(GetBitDepth() == 16 && GetChannelFormat() == mono && GetEndianness() == littleEndian &&
 		(GetEncoding() == signedPCM || GetEncoding() == unsignedPCM || GetEncoding() == deltaPCM))
 	{
-		// 16-bit mono samples
-		int16 *p = (int16 *)pSample;
+		// 16-bit little-endian mono samples
+		const int16 *p = pSample16;
 		int s_old = 0, s_ofs;
 		len = numSamples * 2;
 		s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
@@ -625,20 +624,20 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 			}
 			if(GetEncoding() == deltaPCM)
 			{
-				*((int16 *)(&buffer[bufcount])) = (int16)(s_new - s_old);
+				buffer16[bufcount] = SwapBytesReturnLE((int16)(s_new - s_old));
 				s_old = s_new;
 			} else
 			{
-				*((int16 *)(&buffer[bufcount])) = (int16)(s_new + s_ofs);
+				buffer16[bufcount] = SwapBytesReturnLE((int16)(s_new + s_ofs));
 			}
-			bufcount += 2;
-			if(bufcount >= sizeof(buffer) - 1)
+			bufcount++;
+			if(bufcount >= CountOf(buffer16))
 			{
-				if(f) fwrite(buffer, 1, bufcount, f);
+				if(f) fwrite(buffer16, 1, bufcount * 2, f);
 				bufcount = 0;
 			}
 		}
-		if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
+		if (bufcount) if(f) fwrite(buffer16, 1, bufcount * 2, f);
 	}
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoSplit &&
@@ -648,7 +647,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 		int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
 		for (UINT iCh=0; iCh<2; iCh++)
 		{
-			int8 *p = ((int8 *)pSample) + iCh;
+			const int8 *p = pSample8 + iCh;
 			int s_old = 0;
 
 			bufcount = 0;
@@ -658,19 +657,19 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 				p += 2;
 				if (GetEncoding() == deltaPCM)
 				{
-					buffer[bufcount++] = (int8)(s_new - s_old);
+					buffer8[bufcount++] = (int8)(s_new - s_old);
 					s_old = s_new;
 				} else
 				{
-					buffer[bufcount++] = (int8)(s_new + s_ofs);
+					buffer8[bufcount++] = (int8)(s_new + s_ofs);
 				}
-				if (bufcount >= sizeof(buffer))
+				if(bufcount >= CountOf(buffer8))
 				{
-					if(f) fwrite(buffer, 1, bufcount, f);
+					if(f) fwrite(buffer8, 1, bufcount, f);
 					bufcount = 0;
 				}
 			}
-			if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
+			if (bufcount) if(f) fwrite(buffer8, 1, bufcount, f);
 		}
 		len = numSamples * 2;
 	}
@@ -678,11 +677,11 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	else if(GetBitDepth() == 16 && GetChannelFormat() == stereoSplit && GetEndianness() == littleEndian &&
 		(GetEncoding() == signedPCM || GetEncoding() == unsignedPCM || GetEncoding() == deltaPCM))
 	{
-		// 16-bit Stereo samples (not interleaved)
+		// 16-bit little-endian Stereo samples (not interleaved)
 		int s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
 		for (UINT iCh=0; iCh<2; iCh++)
 		{
-			int16 *p = ((int16 *)pSample) + iCh;
+			const int16 *p = pSample16 + iCh;
 			int s_old = 0;
 
 			bufcount = 0;
@@ -692,20 +691,20 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 				p += 2;
 				if (GetEncoding() == deltaPCM)
 				{
-					*((int16 *)(&buffer[bufcount])) = (int16)(s_new - s_old);
+					buffer16[bufcount] = SwapBytesReturnLE((int16)(s_new - s_old));
 					s_old = s_new;
 				} else
 				{
-					*((int16 *)(&buffer[bufcount])) = (int16)(s_new + s_ofs);
+					buffer16[bufcount] = SwapBytesReturnLE((int16)(s_new + s_ofs));
 				}
-				bufcount += 2;
-				if (bufcount >= sizeof(buffer))
+				bufcount++;
+				if(bufcount >= CountOf(buffer16))
 				{
-					if(f) fwrite(buffer, 1, bufcount, f);
+					if(f) fwrite(buffer16, 1, bufcount * 2, f);
 					bufcount = 0;
 				}
 			}
-			if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
+			if (bufcount) if(f) fwrite(buffer16, 1, bufcount * 2, f);
 		}
 		len = numSamples * 4;
 	}
@@ -714,7 +713,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	{
 		//	Stereo signed interleaved
 		len = sample.GetSampleSizeInBytes();
-		if(f) fwrite(pSample, 1, len, f);
+		if(f) fwrite(pSampleVoid, 1, len, f);
 	}
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoInterleaved && GetEncoding() == unsignedPCM)
@@ -723,15 +722,15 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 		len = numSamples * 2;
 		for(SmpLength j = 0; j < len; j++)
 		{
-			*((uint8 *)(&buffer[bufcount])) = *((uint8 *)(&pSample[j])) + 0x80;
+			buffer8[bufcount] = (int8)(uint8)((uint8)(pSample8[j]) + 0x80);
 			bufcount++;
-			if (bufcount >= sizeof(buffer))
+			if(bufcount >= CountOf(buffer8))
 			{
-				if(f) fwrite(buffer, 1, bufcount, f);
+				if(f) fwrite(buffer8, 1, bufcount, f);
 				bufcount = 0;
 			}
 		}
-		if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
+		if (bufcount) if(f) fwrite(buffer8, 1, bufcount, f);
 	}
 
 	else if(GetEncoding() == IT214 || GetEncoding() == IT215)
@@ -745,7 +744,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	else
 	{
 		len = numSamples;
-		int8 *p = (int8 *)pSample;
+		const int8 *p = pSample8;
 		int sinc = (sample.uFlags & CHN_16BIT) ? 2 : 1;
 		int s_old = 0, s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
 		if (sample.uFlags & CHN_16BIT) p++;
@@ -761,21 +760,24 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 			}
 			if (GetEncoding() == deltaPCM)
 			{
-				buffer[bufcount++] = (int8)(s_new - s_old);
+				buffer8[bufcount++] = (int8)(s_new - s_old);
 				s_old = s_new;
 			} else
 			{
-				buffer[bufcount++] = (int8)(s_new + s_ofs);
+				buffer8[bufcount++] = (int8)(s_new + s_ofs);
 			}
-			if (bufcount >= sizeof(buffer))
+			if(bufcount >= CountOf(buffer8))
 			{
-				if(f) fwrite(buffer, 1, bufcount, f);
+				if(f) fwrite(buffer8, 1, bufcount, f);
 				bufcount = 0;
 			}
 		}
-		if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
+		if (bufcount) if(f) fwrite(buffer8, 1, bufcount, f);
 	}
 	return len;
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

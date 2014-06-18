@@ -10,39 +10,24 @@
 
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#define NOMINMAX
-#include "windows.h"
+#include "WindowBase.h"
 
 
-//=========
-class Label
-//=========
+OPENMPT_NAMESPACE_BEGIN
+
+
+//=============================
+class Label : public WindowBase
+//=============================
 { 
-protected:
-	HWND label;
-
 public:
-	Label()
-	{
-		label = nullptr;
-	}
-
-
-	~Label()
-	{
-		Destroy();
-	}
-
-
 	// Create a new label
-	void Create(HWND parent, const char *text, int x, int y, int width, int height)
+	void Create(HWND parent, const TCHAR *text, int x, int y, int width, int height)
 	{
 		// Remove old instance, if necessary
 		Destroy();
 
-		label = CreateWindow("STATIC",
+		hwnd = CreateWindow(_T("STATIC"),
 			text,
 			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
 			x,
@@ -54,25 +39,9 @@ public:
 			NULL,
 			0);
 
-		SendMessage(label, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
+		SendMessage(hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
 	}
+};
 
 
-	// Destroy the combo box.
-	void Destroy()
-	{
-		if(label != nullptr)
-		{
-			DestroyWindow(label);
-		}
-		label = nullptr;
-	}
-
-
-	// Get the HWND associated with this combo box.
-	HWND GetHwnd()
-	{
-		return label;
-	}
-
-}; 
+OPENMPT_NAMESPACE_END

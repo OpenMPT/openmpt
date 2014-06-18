@@ -11,6 +11,7 @@
 #pragma once
 
 #include "resource.h"       // main symbols
+#include "Settings.h"
 #include <windows.h>
 #include "../mptrack/MpTrackUtil.h"
 #include "../mptrack/Reporting.h"
@@ -18,10 +19,14 @@
 #include "../soundlib/modcommand.h"
 #include <vector>
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CModDoc;
 class CVstPluginManager;
 class SoundDevicesManager;
 class CDLSBank;
+class TrackerDirectories;
+class TrackerSettings;
 
 /////////////////////////////////////////////////////////////////////////////
 // 16-colors DIB
@@ -36,46 +41,99 @@ typedef struct MODPLUGDIB
 /////////////////////////////////////////////////////////////////////////////
 // Midi Library
 
-typedef struct MIDILIBSTRUCT
+struct MIDILIBSTRUCT
 {
-	LPTSTR MidiMap[128*2];	// 128 instruments + 128 percussions
-} MIDILIBSTRUCT, *LPMIDILIBSTRUCT;
+	mpt::PathString MidiMap[128*2];	// 128 instruments + 128 percussions
+};
 
 
 //////////////////////////////////////////////////////////////////////////
 // Dragon Droppings
 
-typedef struct DRAGONDROP
+enum DragonDropType
+{
+	DRAGONDROP_NOTHING=0,	// |------< Drop Type >-------------|--< dwDropItem >---|--< lDropParam >---|
+	DRAGONDROP_DLS,			// | Instrument from a DLS bank     |     DLS Bank #    |   DLS Instrument  |
+	DRAGONDROP_SAMPLE,		// | Sample from a song             |     Sample #      |       NULL        |
+	DRAGONDROP_INSTRUMENT,	// | Instrument from a song         |     Instrument #  |       NULL        |
+	DRAGONDROP_SOUNDFILE,	// | File from instrument library   |        ?          |     File Name     |
+	DRAGONDROP_MIDIINSTR,	// | File from midi library         | Midi Program/Perc |     File Name     |
+	DRAGONDROP_PATTERN,		// | Pattern from a song            |      Pattern #    |       NULL        |
+	DRAGONDROP_ORDER,		// | Pattern index in a song        |       Order #     |       NULL        |
+	DRAGONDROP_SONG,		// | Song file (mod/s3m/xm/it)      |       0           |     File Name     |
+	DRAGONDROP_SEQUENCE		// | Sequence (a set of orders)     |    Sequence #     |       NULL        |
+};
+
+struct DRAGONDROP
 {
 	CModDoc *pModDoc;
-	DWORD dwDropType;
+	DragonDropType dwDropType;
 	DWORD dwDropItem;
 	LPARAM lDropParam;
-} DRAGONDROP, *LPDRAGONDROP;
 
-enum {
-	DRAGONDROP_NOTHING=0,	// |------< Drop Type >-------------|--< dwDropItem >---|--< lDropParam >---|
-	DRAGONDROP_DLS,			// | Instrument from a DLS bank		|	  DLS Bank #	|	DLS Instrument	|
-	DRAGONDROP_SAMPLE,		// | Sample from a song				|     Sample #		|	    NULL		|
-	DRAGONDROP_INSTRUMENT,	// | Instrument from a song			|	  Instrument #	|	    NULL		|
-	DRAGONDROP_SOUNDFILE,	// | File from instrument library	|		?			|	pszFileName		|
-	DRAGONDROP_MIDIINSTR,	// | File from midi library			| Midi Program/Perc	|	pszFileName		|
-	DRAGONDROP_PATTERN,		// | Pattern from a song			|      Pattern #    |       NULL        |
-	DRAGONDROP_ORDER,		// | Pattern index in a song		|       Order #     |       NULL        |
-	DRAGONDROP_SONG,		// | Song file (mod/s3m/xm/it)		|		0			|	pszFileName		|
-	DRAGONDROP_SEQUENCE		// | Sequence (a set of orders)		|    Sequence #     |       NULL        |
+	mpt::PathString GetPath() const
+	{
+		const mpt::PathString *const pPath = reinterpret_cast<const mpt::PathString *>(lDropParam);
+		ASSERT(pPath);
+		if(!pPath)
+		{
+			return mpt::PathString();
+		}
+		return *pPath;
+	}
 };
 
 
 /////////////////////////////////////////////////////////////////////////////
-// File dialog (open/save) results
-struct FileDlgResult
+// Document Template
+
+// OK, this is a really dirty hack for ANSI builds (which are still used because the code is not yet UNICODE compatible).
+// To support wide path names even in ansi builds, we use mpt::PathString everywhere.
+// Except, there is one set of cases, where MFC dictates TCHAR/CString on us: The filename handling for MDI documents.
+// Here, if in ANSI build, we encode the wide string in utf8 and pass it around through MFC. When MFC calls us again,
+// we unpack it again. This works surprisingly well for the hackish nature this has.
+// Rough edges:
+//  - CDocument::GetTitle is still ANSI encoded and returns replacement chars for non-representable chars.
+//  - CWinApp::AddToRecentFileList chokes on filenames it cannot access. We simply avoid passing non-ansi-representable filenames there.
+// Modified MFC functionality:
+//  CTrackApp:
+//   CWinApp::OpenDocument
+//   CWinApp::AddToRecentFileList
+//  CModDocManager:
+//   CDocManager::OpenDocumentFile
+//  CModDocTemplate:
+//   CMultiDocTemplate::OpenDocumentFile
+//  CModDoc:
+//   CDocument::GetPathName
+//   CDocument::SetPathName
+//   CDocument::DoFileSave
+//   CDocument::DoSave
+//   CDocument::OnOpenDocument
+//   CDocument::OnSaveDocument
+
+//=============================================
+class CModDocTemplate: public CMultiDocTemplate
+//=============================================
 {
-	std::string workingDirectory;			// working directory. will include filename, so beware.
-	std::string first_file;					// for some convenience, this will keep the first filename of the filenames vector.
-	std::vector <std::string> filenames;	// all selected filenames in one vector.
-	std::string extension;					// extension used. beware of this when multiple files can be selected!
-	bool abort;								// no selection has been made.
+public:
+	CModDocTemplate(UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass):
+		CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass) {}
+
+	CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru = TRUE, BOOL makeVisible = TRUE);
+	CDocument* OpenTemplateFile(const mpt::PathString &filename, bool isExampleTune = false);
+
+	// inherited members, overload them all
+	#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
+		MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL makeVisible = TRUE)
+		{
+			return OpenDocumentFile(path ? mpt::PathString::TunnelOutofCString(path) : mpt::PathString(), TRUE, makeVisible);
+		}
+	#else
+		MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR path, BOOL addToMru = TRUE, BOOL makeVisible = TRUE)
+		{
+			return OpenDocumentFile(path ? mpt::PathString::TunnelOutofCString(path) : mpt::PathString(), addToMru, makeVisible);
+		}
+	#endif
 };
 
 
@@ -92,35 +150,65 @@ class CTrackApp: public CWinApp
 // static data
 protected:
 	static MODTYPE m_nDefaultDocType;
-	static LPMIDILIBSTRUCT glpMidiLibrary;
 	static BOOL m_nProject;
+	static MIDILIBSTRUCT midiLibrary;
 
 public:
 	static std::vector<CDLSBank *> gpDLSBanks;
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-	virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
+	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
 	{
-		CDocument* pDoc = CWinApp::OpenDocumentFile(lpszFileName);
+		return OpenDocumentFile(lpszFileName ? mpt::PathString::TunnelOutofCString(lpszFileName) : mpt::PathString(), bAddToMRU);
+	}
+	virtual CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
+	{
+		CDocument* pDoc = CWinApp::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString());
 		if (pDoc && bAddToMRU != TRUE)
 			RemoveMruItem(0); // This doesn't result to the same behaviour as not adding to MRU 
 							  // (if the new item got added, it might have already dropped the last item out)
 		return pDoc;
 	}
+#else
+	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
+	{
+		return CWinApp::OpenDocumentFile(lpszFileName, bAddToMRU);
+	}
+	virtual CDocument* OpenDocumentFile(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
+	{
+		return CWinApp::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString(), bAddToMRU);
+	}
 #endif
 
+	MPT_DEPRECATED_PATH virtual void AddToRecentFileList(LPCTSTR lpszPathName);
+	void AddToRecentFileList(const mpt::PathString path);
+	/// Removes item from MRU-list; most recent item has index zero.
+	void RemoveMruItem(const size_t item);
+	void RemoveMruItem(const mpt::PathString &path);
+
 protected:
-	CMultiDocTemplate *m_pModTemplate;
+
+	DWORD m_GuiThreadId;
+
+	TrackerDirectories *m_pTrackerDirectories;
+	mpt::Library *m_pUXThemeDLL;
+	typedef HRESULT (WINAPI * pfEnableThemeDialogTexture)(HWND, DWORD);
+	pfEnableThemeDialogTexture m_pEnableThemeDialogTexture;
+	IniFileSettingsBackend *m_pSettingsIniFile;
+	SettingsContainer *m_pSettings;
+	TrackerSettings *m_pTrackerSettings;
+	IniFileSettingsContainer *m_pPluginCache;
+	CModDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
 	SoundDevicesManager *m_pSoundDevicesManager;
 	BOOL m_bInitialized;
 	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
 	// Default macro configuration
 	MIDIMacroConfig m_MidiCfg;
-	static TCHAR m_szExePath[_MAX_PATH];
-	TCHAR m_szConfigDirectory[_MAX_PATH];
-	TCHAR m_szConfigFileName[_MAX_PATH];
-	TCHAR m_szPluginCacheFileName[_MAX_PATH];
+	mpt::PathString m_szExePath;
+	mpt::PathString m_szConfigDirectory;
+	mpt::PathString m_szConfigFileName;
+	mpt::PathString m_szPluginCacheFileName;
 	bool m_bPortableMode;
 
 public:
@@ -134,47 +222,68 @@ public:
 	static VOID SetAsProject(BOOL n) { m_nProject = n; }
 // -! NEW_FEATURE#0023
 
-	static LPCTSTR GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
+	mpt::PathString GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
-	static LPMIDILIBSTRUCT GetMidiLibrary() { return glpMidiLibrary; }
-	static BOOL ImportMidiConfig(LPCSTR lpszFileName, BOOL bNoWarning=FALSE);
-	static BOOL ExportMidiConfig(LPCSTR lpszFileName);
-	static void RegisterExtensions();
+	static MIDILIBSTRUCT &GetMidiLibrary() { return midiLibrary; }
+	static BOOL ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarning=FALSE);
+	static BOOL ExportMidiConfig(const mpt::PathString &filename);
+	static BOOL ImportMidiConfig(SettingsContainer &file, bool forgetSettings = false);
+	static BOOL ExportMidiConfig(SettingsContainer &file);
 	static BOOL LoadDefaultDLSBanks();
 	static BOOL SaveDefaultDLSBanks();
 	static BOOL RemoveDLSBank(UINT nBank);
-	static BOOL AddDLSBank(LPCSTR);
-	static bool OpenURL(const LPCSTR lpszURL);
-	static bool OpenFile(const LPCSTR file) { return OpenURL(file); };
-	static bool OpenDirectory(const LPCSTR directory) { return OpenURL(directory); };
-
-	static FileDlgResult ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory = "", const bool allowMultiSelect = false, int *filterIndex = nullptr);
+	static BOOL AddDLSBank(const mpt::PathString &filename);
+	static bool OpenURL(const char *url);
+	static bool OpenURL(const std::string &url);
+	static bool OpenURL(const CString &url);
+	static bool OpenURL(const mpt::PathString &lpszURL);
+	static bool OpenFile(const mpt::PathString &file) { return OpenURL(file); };
+	static bool OpenDirectory(const mpt::PathString &directory) { return OpenURL(directory); };
 
 	int GetOpenDocumentCount() const;
-	std::vector<CModDoc *>GetOpenDocuments() const;
+	std::vector<CModDoc *> GetOpenDocuments() const;
 
 public:
-	CDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
+	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
+	HRESULT EnableThemeDialogTexture(HWND hwnd, DWORD dwFlags) { if(m_pEnableThemeDialogTexture) return m_pEnableThemeDialogTexture(hwnd, dwFlags); else return S_OK; }
+	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	SoundDevicesManager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
-	LPCTSTR GetConfigFileName() const { return m_szConfigFileName; }
+	mpt::PathString GetConfigFileName() const { return m_szConfigFileName; }
+	TrackerDirectories & GetTrackerDirectories()
+	{
+		ASSERT(m_pTrackerDirectories);
+		return *m_pTrackerDirectories;
+	}
+	SettingsContainer & GetSettings()
+	{
+		ASSERT(m_pSettings);
+		return *m_pSettings;
+	}
+	TrackerSettings & GetTrackerSettings()
+	{
+		ASSERT(m_pTrackerSettings);
+		return *m_pTrackerSettings;
+	}
 	bool IsPortableMode() { return m_bPortableMode; }
-	LPCTSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
+	SettingsContainer & GetPluginCache()
+	{
+		ASSERT(m_pPluginCache);
+		return *m_pPluginCache;
+	}
 
 	/// Returns path to config folder including trailing '\'.
-	LPCTSTR GetConfigPath() const { return m_szConfigDirectory; }
+	mpt::PathString GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths(bool overridePortable);
-	// Relative / absolute paths conversion
-	template <size_t nLength>
-	void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
-	template <size_t nLength>
-	void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
 
-	/// Removes item from MRU-list; most recent item has index zero.
-	void RemoveMruItem(const int nItem);
+	// Relative / absolute paths conversion
+	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetAppDirPath()); }
+	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetAppDirPath()); }
+
+	static void OpenModulesDialog(std::vector<mpt::PathString> &files);
 
 // Splash Screen
 protected:
@@ -207,14 +316,10 @@ public:
 
 	afx_msg void OnFileOpen();
 	afx_msg void OnAppAbout();
-	afx_msg void OnHelpSearch();
 
 	afx_msg void OnFileCloseAll();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
-protected:
-	static void LoadRegistryDLS();
 
 protected:
 	BOOL InitializeDXPlugins();
@@ -222,7 +327,7 @@ protected:
 
 
 #ifdef WIN32	// Legacy stuff
-	bool MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH] = _T(""), TCHAR sNewFileName[_MAX_PATH] = _T(""));
+	bool MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDir = mpt::PathString(), mpt::PathString sNewFileName = mpt::PathString());
 #endif // WIN32
 
 };
@@ -301,30 +406,24 @@ void AppendNotesToControl(CComboBox& combobox, const ModCommand::NOTE noteStart,
 // Append note names to combobox. If pSndFile != nullprt, appends only notes that are 
 // available in the module type. If nInstr is given, instrument specific note names are used instead of
 // default note names.
-void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile* const pSndFile = nullptr, const INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS);
-
-// Returns note name(such as "C-5") of given note. Regular notes are in range [1,MAX_NOTE].
-LPCTSTR GetNoteStr(const ModCommand::NOTE);
+void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, const INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS);
 
 ///////////////////////////////////////////////////
 // Tables
 
-//const LPCTSTR szSpecialNoteNames[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~"), TEXT("^^"), TEXT("==")};
-const LPCTSTR szSpecialNoteNames[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~ (Note Fade)"), TEXT("^^ (Note Cut)"), TEXT("== (Note Off)")};
-const LPCTSTR szSpecialNoteShortDesc[] = {TEXT("Param Control (Smooth)"), TEXT("Param Control"), TEXT("Note Fade"), TEXT("Note Cut"), TEXT("Note Off")};
-
-// Make sure that special note arrays include string for every note.
-STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == CountOf(szSpecialNoteNames)); 
-STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNames)); 
-
-const LPCSTR szHexChar = "0123456789ABCDEF";
+extern const char *szSpecialNoteNamesMPT[];
+extern const char *szSpecialNoteShortDesc[];
+extern const char *szHexChar;
 
 // Defined in load_mid.cpp
-extern const LPCSTR szMidiProgramNames[128];
-extern const LPCSTR szMidiPercussionNames[61]; // notes 25..85
-extern const LPCSTR szMidiGroupNames[17];		// 16 groups + Percussions
+extern const char *szMidiProgramNames[128];
+extern const char *szMidiPercussionNames[61];	// notes 25..85
+extern const char *szMidiGroupNames[17];		// 16 groups + Percussions
 
 /////////////////////////////////////////////////////////////////////////////
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+
+OPENMPT_NAMESPACE_END

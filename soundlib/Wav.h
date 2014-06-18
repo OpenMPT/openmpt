@@ -10,7 +10,8 @@
 
 #pragma once
 
-#include "Endianness.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 // Standard IFF chunks IDs
@@ -62,3 +63,6 @@ STATIC_ASSERT(sizeof(WAVEDATAHEADER) == 8);
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
+
+
+OPENMPT_NAMESPACE_END

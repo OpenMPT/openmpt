@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 //===================================
 class CloseMainDialog: public CDialog
 //===================================
@@ -21,8 +23,8 @@ protected:
 	CString FormatTitle(const CModDoc *pModDoc, bool fullPath);
 
 public:
-	CloseMainDialog() : CDialog(IDD_CLOSEDOCUMENTS) { CMainFrame::GetInputHandler()->Bypass(true); };
-	~CloseMainDialog() { CMainFrame::GetInputHandler()->Bypass(false); };
+	CloseMainDialog();
+	~CloseMainDialog();
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -38,3 +40,5 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 };
+
+OPENMPT_NAMESPACE_END

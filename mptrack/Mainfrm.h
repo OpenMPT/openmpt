@@ -11,12 +11,12 @@
 #pragma once
 
 #include "Mptrack.h"
-#include "InputHandler.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/mutex.h"
-#include "../sounddev/SoundDevice.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/Dither.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 class CInputHandler;
 class CModDoc;
@@ -25,7 +25,28 @@ class ISoundDevice;
 class ISoundSource;
 
 #define MAINFRAME_TITLE				"Open ModPlug Tracker"
-#define INIBUFFERSIZE				MAX_PATH
+#define MAINFRAME_TITLEW			L"Open ModPlug Tracker"
+
+// Custom window messages
+enum
+{
+	WM_MOD_UPDATEPOSITION	=	(WM_USER+1973),
+	WM_MOD_INVALIDATEPATTERNS,
+	WM_MOD_ACTIVATEVIEW,
+	WM_MOD_CHANGEVIEWCLASS,
+	WM_MOD_UNLOCKCONTROLS,
+	WM_MOD_CTRLMSG,
+	WM_MOD_VIEWMSG,
+	WM_MOD_TREEMSG,
+	WM_MOD_MIDIMSG,
+	WM_MOD_GETTOOLTIPTEXT,
+	WM_MOD_DRAGONDROPPING,
+	WM_MOD_SPECIALKEY,
+	WM_MOD_KBDNOTIFY,
+	WM_MOD_INSTRSELECTED,
+	WM_MOD_KEYCOMMAND,
+	WM_MOD_RECORDPARAM,
+};
 
 enum
 {
@@ -119,31 +140,25 @@ enum
 	IMAGE_PATTERNS,
 	IMAGE_SAMPLES,
 	IMAGE_INSTRUMENTS,
+	IMAGE_PLUGININSTRUMENT = IMAGE_INSTRUMENTS,
 	IMAGE_GENERAL,
 	IMAGE_FOLDER,
 	IMAGE_OPENFOLDER,
 	IMAGE_PARTITION,
 	IMAGE_NOSAMPLE,
-	IMAGE_NOINSTRUMENT,
-	IMAGE_NETWORKDRIVE,
-	IMAGE_CDROMDRIVE,
-	IMAGE_RAMDRIVE,
-	IMAGE_FLOPPYDRIVE,
-	IMAGE_REMOVABLEDRIVE,
-	IMAGE_FIXEDDRIVE,
 	IMAGE_FOLDERPARENT,
 	IMAGE_FOLDERSONG,
 	IMAGE_DIRECTX,
 	IMAGE_WAVEOUT,
+	IMAGE_EFFECTPLUGIN = IMAGE_WAVEOUT,
 	IMAGE_ASIO,
-	IMAGE_GRAPH,
+	IMAGE_CHIP,
 	IMAGE_SAMPLEMUTE,
 	IMAGE_INSTRMUTE,
 	IMAGE_SAMPLEACTIVE,
 	IMAGE_INSTRACTIVE,
 	IMAGE_NOPLUGIN,
-	IMAGE_EFFECTPLUGIN,
-	IMAGE_PLUGININSTRUMENT,
+	IMGLIST_NUMIMAGES
 };
 
 
@@ -155,7 +170,7 @@ enum
 	TIMAGE_PATTERN_PLAY,
 	TIMAGE_PATTERN_RESTART,
 	TIMAGE_PATTERN_RECORD,
-	TIMAGE_MIDI_RECORD, // unused?
+	TIMAGE_SAMPLE_FIXLOOP,
 	TIMAGE_SAMPLE_NEW,
 	TIMAGE_INSTR_NEW,
 	TIMAGE_SAMPLE_NORMALIZE,
@@ -165,7 +180,7 @@ enum
 	TIMAGE_OPEN,
 	TIMAGE_SAVE,
 	TIMAGE_PREVIEW,
-	TIMAGE_PAUSE, // unused?
+	TIMAGE_SAMPLE_AUTOTUNE,
 	TIMAGE_PATTERN_VUMETERS,
 	TIMAGE_MACROEDITOR,
 	TIMAGE_CHORDEDITOR,
@@ -173,9 +188,7 @@ enum
 	TIMAGE_PATTERN_EXPAND,
 	TIMAGE_PATTERN_SHRINK,
 	TIMAGE_SAMPLE_SILENCE,
-	TIMAGE_TAB_SAMPLES,
-	TIMAGE_TAB_INSTRUMENTS,
-	TIMAGE_TAB_PATTERNS,
+	TIMAGE_PATTERN_OVERFLOWPASTE,
 	TIMAGE_UNDO,
 	TIMAGE_REDO,
 	TIMAGE_PATTERN_PLAYROW,
@@ -188,9 +201,7 @@ enum
 	TIMAGE_SAMPLE_INVERT,
 	TIMAGE_SAMPLE_UNSIGN,
 	TIMAGE_SAMPLE_DCOFFSET,
-	TIMAGE_PATTERN_OVERFLOWPASTE,
-	TIMAGE_SAMPLE_FIXLOOP,
-	TIMAGE_SAMPLE_AUTOTUNE,
+	PATTERNIMG_NUMIMAGES
 };
 
 
@@ -200,11 +211,11 @@ enum
 	SIMAGE_CHECKED = 0,
 	SIMAGE_ZOOMUP,
 	SIMAGE_ZOOMDOWN,
-	SIMAGE_NODRAW,
 	SIMAGE_DRAW,
 	SIMAGE_RESIZE,
 	SIMAGE_GENERATE,
 	SIMAGE_GRID,
+	SAMPLEIMG_NUMIMAGES
 };
 
 
@@ -232,19 +243,56 @@ enum
 	IIMAGE_NOZOOMIN,
 	IIMAGE_ZOOMOUT,
 	IIMAGE_NOZOOMOUT,
+	ENVIMG_NUMIMAGES
+};
+
+
+// Tab Order
+enum OptionsPage
+{
+	OPTIONS_PAGE_DEFAULT = 0,
+	OPTIONS_PAGE_GENERAL = OPTIONS_PAGE_DEFAULT,
+	OPTIONS_PAGE_SOUNDCARD,
+	OPTIONS_PAGE_MIXER,
+	OPTIONS_PAGE_PLAYER,
+	OPTIONS_PAGE_SAMPLEDITOR,
+	OPTIONS_PAGE_KEYBOARD,
+	OPTIONS_PAGE_COLORS,
+	OPTIONS_PAGE_MIDI,
+	OPTIONS_PAGE_AUTOSAVE,
+	OPTIONS_PAGE_UPDATE,
+	OPTIONS_PAGE_ADVANCED,
 };
 
 
 /////////////////////////////////////////////////////////////////////////
 // Player position notification
 
-#define MAX_UPDATE_HISTORY		256 // same as SNDDEV_MAXBUFFERS
+#define MAX_UPDATE_HISTORY		2000 // 2 seconds with 1 ms updates
+OPENMPT_NAMESPACE_END
 #include "Notification.h"
+OPENMPT_NAMESPACE_BEGIN
 
+#define TIMERID_GUI 1
+#define TIMERID_NOTIFY 2
 
-#include "mainbar.h"
+OPENMPT_NAMESPACE_END
+#include "CImageListEx.h"
+#include "Mainbar.h"
 #include "TrackerSettings.h"
+OPENMPT_NAMESPACE_BEGIN
 struct MODPLUGDIB;
+
+template<> inline SettingValue ToSettingValue(const WINDOWPLACEMENT &val)
+{
+	return SettingValue(EncodeBinarySetting<WINDOWPLACEMENT>(val), "WINDOWPLACEMENT");
+}
+template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val)
+{
+	ASSERT(val.GetTypeTag() == "WINDOWPLACEMENT");
+	return DecodeBinarySetting<WINDOWPLACEMENT>(val.as<std::vector<char> >());
+}
+
 
 //======================================================================================
 class CMainFrame: public CMDIFrameWnd, public ISoundSource, public ISoundMessageReceiver
@@ -255,7 +303,7 @@ class CMainFrame: public CMDIFrameWnd, public ISoundSource, public ISoundMessage
 public:
 
 	// Globals
-	static UINT m_nLastOptionsPage;
+	static OptionsPage m_nLastOptionsPage;
 	static HHOOK ghKbdHook;
 
 	// GDI
@@ -271,12 +319,13 @@ public:
 public:
 
 	// Low-Level Audio
-	mutable Util::mutex m_SoundDeviceMutex;
 	ISoundDevice *gpSoundDevice;
+	UINT_PTR m_NotifyTimer;
 	Dither m_Dither;
-	HANDLE m_hNotifyWakeUp;
-	HANDLE m_hNotifyThread;
-	DWORD m_dwNotifyThreadId;
+
+	DWORD m_AudioThreadId;
+	bool m_InNotifyHandler;
+
 	static LONG gnLVuMeter, gnRVuMeter;
 	static bool gnClipLeft, gnClipRight;
 
@@ -284,12 +333,17 @@ public:
 public:
 	static HMIDIIN shMidiIn;
 
+public:
+	CImageListEx m_MiscIcons, m_MiscIconsDisabled;			// Misc Icons
+	CImageListEx m_PatternIcons, m_PatternIconsDisabled;	// Pattern icons (includes some from sample editor as well...)
+	CImageListEx m_EnvelopeIcons;							// Instrument editor icons
+	CImageListEx m_SampleIcons;								// Sample editor icons
+
 protected:
 
 	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
-	CImageList m_ImageList;
 	CSoundFile *m_pSndFile; // != NULL only when currently playing or rendering
 	HWND m_hWndMidi;
 	CSoundFile::samplecount_t m_dwTimeSec;
@@ -298,12 +352,12 @@ protected:
 	// Misc
 	CModDoc* m_pJustModifiedDoc;
 	class COptionsSoundcard *m_SoundCardOptionsDialog;
+	DWORD helpCookie;
 	bool m_bOptionsLocked;
 
 	// Notification Buffer
 	Util::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
 	Util::fixed_size_queue<Notification,MAX_UPDATE_HISTORY> m_NotifyBuffer;
-	HANDLE m_PendingNotificationSempahore; // protects the one notification that is in flight from the notification thread to the gui thread from being freed while the gui thread still uses it
 
 	// Instrument preview in tree view
 	CSoundFile m_WaveFile;
@@ -320,27 +374,27 @@ public:
 	static void UpdateDspEffects(CSoundFile &sndFile, bool reset=false);
 	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
-	static DWORD WINAPI NotifyThreadWrapper(LPVOID);
-	DWORD NotifyThread();
 
 	// from ISoundSource
 	void FillAudioBufferLocked(IFillAudioBuffer &callback);
-	void AudioRead(const SoundDeviceSettings &settings, std::size_t numFrames, void *buffer);
-	void AudioDone(const SoundDeviceSettings &settings, std::size_t numFrames, int64 streamPosition);
+	void AudioRead(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer);
+	void AudioDone(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
 	
 	// from ISoundMessageReceiver
 	void AudioMessage(const std::string &str);
 
-	bool audioTryOpeningDevice();
+	bool InGuiThread() const { return theApp.InGuiThread(); }
+	bool InAudioThread() const { return GetCurrentThreadId() == m_AudioThreadId; }
+	bool InNotifyHandler() const { return m_InNotifyHandler; }
+
 	bool audioOpenDevice();
-	bool audioReopenDevice();
 	void audioCloseDevice();
 	bool IsAudioDeviceOpen() const;
 	bool DoNotification(DWORD dwSamplesRead, int64 streamPosition);
 
 // Midi Input Functions
 public:
-	BOOL midiOpenDevice();
+	bool midiOpenDevice(bool showSettings = true);
 	void midiCloseDevice();
 	void midiReceive();
 	void SetMidiRecordWnd(HWND hwnd) { m_hWndMidi = hwnd; }
@@ -361,16 +415,6 @@ public:
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
 
-	static bool WritePrivateProfileBool(const CString section, const CString key, const bool value, const CString iniFile);
-	static bool GetPrivateProfileBool(const CString section, const CString key, const bool defaultValue, const CString iniFile);
-	static bool WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile);
-	static long GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile);
-	static bool WritePrivateProfileDWord(const CString section, const CString key, const DWORD value, const CString iniFile);
-	static DWORD GetPrivateProfileDWord(const CString section, const CString key, const DWORD defaultValue, const CString iniFile);
-	static bool WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile);
-	static CString GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile);
-
-
 	// Misc functions
 public:
 	void SetUserText(LPCSTR lpszText);
@@ -380,7 +424,6 @@ public:
 	UINT GetBaseOctave() const;
 	CModDoc *GetActiveDoc();
 	CView *GetActiveView();  	//rewbs.customKeys
-	CImageList *GetImageList() { return &m_ImageList; }
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
@@ -389,7 +432,7 @@ public:
 	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
 	CWnd* m_pOrderlistHasFocus;
 	double GetApproxBPM();
-	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
+	void ThreadSafeSetModified(CModDoc* modified) { InterlockedExchangePointer(reinterpret_cast<void **>(&m_pJustModifiedDoc), modified); }
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
 
 	CModTree *GetUpperTreeview() { return m_wndTree.m_pModTree; }
@@ -397,6 +440,7 @@ public:
 
 	void CreateExampleModulesMenu();
 	void CreateTemplateModulesMenu();
+	CMenu *GetFileMenu() const;
 
 	/// Creates submenu whose items are filenames of files in both
 	/// AppDirectory\pszFolderName\   (usually C:\program files\OpenMPT\pszFolderName\)
@@ -406,7 +450,7 @@ public:
 	/// [out] vPaths: Receives the full paths of the files added to the menu.
 	/// [in] pszFolderName: Name of the folder (should end with \)
 	/// [in] nIdRangeBegin: First ID for the menu item.
-	static HMENU CreateFileMenu(const size_t nMaxCount, std::vector<CString>& vPaths, const LPCTSTR pszFolderName, const uint16 nIdRangeBegin);
+	static HMENU CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathString>& vPaths, const mpt::PathString &pszFolderName, const uint16 nIdRangeBegin);
 
 // Player functions
 public:
@@ -415,6 +459,7 @@ public:
 	bool PreparePlayback();
 	bool StartPlayback();
 	void StopPlayback();
+	bool RestartPlayback();
 	bool PausePlayback();
 	static bool IsValidSoundFile(CSoundFile &sndFile) { return sndFile.GetType() ? true : false; }
 	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
@@ -428,13 +473,14 @@ public:
 
 	bool StopSoundFile(CSoundFile *);
 	bool PlaySoundFile(CSoundFile *);
-	BOOL PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note);
+	BOOL PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE note);
 	BOOL PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note);
 
 	void InitPreview();
 	void PreparePreview(ModCommand::NOTE note);
 	void StopPreview() { StopSoundFile(&m_WaveFile); }
+	void PlayPreview() { PlaySoundFile(&m_WaveFile); }
 
 	inline bool IsPlaying() const { return m_pSndFile != nullptr; }
 	inline CModDoc *GetModPlaying() const { return m_pSndFile ? m_pSndFile->GetpModDoc() : nullptr; }
@@ -443,13 +489,15 @@ public:
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
 
-	BOOL SetupSoundCard(const SoundDeviceSettings &deviceSettings, SoundDeviceID deviceID);
+	void IdleHandlerSounddevice();
+
+	BOOL ResetSoundCard();
+	BOOL SetupSoundCard(SoundDeviceSettings deviceSettings, SoundDeviceID deviceID, SoundDeviceStopMode stoppedMode, bool forceReset = false);
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer();
 
-	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
+	BOOL SetupDirectories(const mpt::PathString &szModDir, const mpt::PathString &szSampleDir, const mpt::PathString &szInstrDir, const mpt::PathString &szVstDir, const mpt::PathString &szPresetDir);
 	BOOL SetupMidi(DWORD d, LONG n);
-	void SetPreAmp(UINT n);
 	HWND GetFollowSong() const;
 	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? GetFollowSong() : NULL; }
 	void ResetNotificationBuffer();
@@ -468,6 +516,9 @@ protected:
 	/// Opens either template or example menu item.
 	void OpenMenuItemFile(const UINT nId, const bool bTemplateFile);
 
+public:
+	void UpdateMRUList();
+
 // Implementation
 public:
 	virtual ~CMainFrame();
@@ -475,6 +526,9 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
+
+	void OnTimerGUI();
+	void OnTimerNotify();
 
 // Message map functions
 	//{{AFX_MSG(CMainFrame)
@@ -489,12 +543,7 @@ protected:
 	afx_msg void OnTimer(UINT_PTR);
 	afx_msg void OnSongProperties();
 
-// -> CODE#0002
-// -> DESC="list box to choose VST plugin presets (programs)"
 	afx_msg void OnPluginManager();
-// -! NEW_FEATURE#0002
-
-
 
 	afx_msg void OnChannelManager();
 	afx_msg void OnClipboardManager();
@@ -502,8 +551,7 @@ protected:
 	afx_msg void OnUpdateTime(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateUser(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateInfo(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateXInfo(CCmdUI *pCmdUI); //rewbs.xinfo
-	afx_msg void OnUpdateCPU(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateXInfo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMidiRecord(CCmdUI *pCmdUI);
 	afx_msg void OnPlayerPause();
 	afx_msg void OnMidiRecord();
@@ -511,12 +559,13 @@ protected:
 	afx_msg void OnNextOctave();
 	afx_msg void OnOctaveChanged();
 	afx_msg void OnPanic();
-	afx_msg void OnReportBug();	//rewbs.customKeys
+	afx_msg void OnReportBug();
 	afx_msg BOOL OnInternetLink(UINT nID);
-	afx_msg LRESULT OnNotification(WPARAM, LPARAM lParam);
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM lParam);
-	afx_msg void OnExampleSong(UINT nId);
 	afx_msg void OnOpenTemplateModule(UINT nId);
+	afx_msg void OnExampleSong(UINT nId);
+	afx_msg void OnOpenMRUItem(UINT nId);
+	afx_msg void OnUpdateMRUItem(CCmdUI *cmd);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
 	afx_msg LRESULT OnSpecialKey(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
@@ -525,6 +574,7 @@ protected:
 	afx_msg void OnInternetUpdate();
 	afx_msg void OnShowSettingsFolder();
 	afx_msg void OnHelp();
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
@@ -538,9 +588,9 @@ public:
 	static const size_t nMaxItemsInTemplateModulesMenu = 50;
 
 	/// Array of paths of example modules that are available from help menu.
-	static std::vector<CString> s_ExampleModulePaths;
+	static std::vector<mpt::PathString> s_ExampleModulePaths;
 	/// Array of paths of template modules that are available from file menu.
-	static std::vector<CString> s_TemplateModulePaths;
+	static std::vector<mpt::PathString> s_TemplateModulePaths;
 };
 
 
@@ -548,3 +598,6 @@ public:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+
+OPENMPT_NAMESPACE_END

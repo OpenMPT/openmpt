@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="include">
+			<UniqueIdentifier>{C27BC0E9-DCCD-FD4C-8C7C-FB49784B4F55}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portmidi">
+			<UniqueIdentifier>{6D40500A-6BB2-514A-8B91-F3E4607C4BF3}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portmidi\porttime">
+			<UniqueIdentifier>{EBBED6AB-18CD-3F4C-AF01-827C37F2E525}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portmidi\pm_common">
+			<UniqueIdentifier>{284EAE59-DFFA-EB43-8DFF-EAEE7582DE17}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\portmidi\pm_win">
+			<UniqueIdentifier>{955326E8-4777-C641-8F60-F3B33A7AC339}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\include\portmidi\porttime\porttime.h">
+			<Filter>include\portmidi\porttime</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\portmidi\pm_common\pminternal.h">
+			<Filter>include\portmidi\pm_common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\portmidi\pm_common\pmutil.h">
+			<Filter>include\portmidi\pm_common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\portmidi\pm_common\portmidi.h">
+			<Filter>include\portmidi\pm_common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\portmidi\pm_win\pmwinmm.h">
+			<Filter>include\portmidi\pm_win</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\include\portmidi\porttime\porttime.c">
+			<Filter>include\portmidi\porttime</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\portmidi\porttime\ptwinmm.c">
+			<Filter>include\portmidi\porttime</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\portmidi\pm_common\pmutil.c">
+			<Filter>include\portmidi\pm_common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\portmidi\pm_common\portmidi.c">
+			<Filter>include\portmidi\pm_common</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\portmidi\pm_win\pmwin.c">
+			<Filter>include\portmidi\pm_win</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\portmidi\pm_win\pmwinmm.c">
+			<Filter>include\portmidi\pm_win</Filter>
+		</ClCompile>
+	</ItemGroup>
+</Project>

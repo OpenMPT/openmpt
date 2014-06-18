@@ -10,89 +10,79 @@
 
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#define NOMINMAX
-#include "windows.h"
+#include "WindowBase.h"
 
 
-//==========
-class Window
-//==========
-{ 
-private:
-	HWND window;
-	WNDPROC originalWinProc;
+OPENMPT_NAMESPACE_BEGIN
+
+
+//==============================
+class Window : public WindowBase
+//==============================
+{
+protected:
+	const TCHAR *windowClassName;
 
 public:
-	Window() : window(nullptr), originalWinProc(nullptr) { };
-
-
-	~Window()
-	{
-		DestroyWindow();
-	}
-
-
-	// Get system pointer to window
-	HWND GetHwnd() const
-	{
-		return static_cast<HWND>(window);
-	}
-
+	Window() : windowClassName(nullptr) { }
 
 	// Register window callback function and initialize window
-	void InitializeWindow(void *windowHandle)
+	void Create(HWND parent, const ERect &rect, const TCHAR *className)
 	{
-		DestroyWindow();
+		Destroy();
 
-		window = static_cast<HWND>(windowHandle);
+		WNDCLASSEX windowClass;
+		windowClass.cbSize = sizeof(WNDCLASSEX);
+		windowClass.style = CS_HREDRAW | CS_VREDRAW;
+		windowClass.lpfnWndProc = WndProc;
+		windowClass.cbClsExtra = 0;
+		windowClass.cbWndExtra = 0;
+		windowClass.hInstance = GetModuleHandle(NULL);
+		windowClass.hIcon = NULL;
+		windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+		windowClass.hbrBackground  = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
+		windowClass.lpszMenuName = NULL;
+		windowClass.lpszClassName = windowClassName = className;
+		windowClass.hIconSm = NULL;
+		RegisterClassEx(&windowClass);
 
-		// Inject our own window processing function into the window.
-		originalWinProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(window, GWL_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
+		hwnd = CreateWindow(className, nullptr, WS_VISIBLE | WS_CHILD, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, parent, NULL, windowClass.hInstance, NULL);
 
 		// Store pointer to the window object in the window's user data, so we have access to the custom callback function and original window processing function later.
-		SetWindowLongPtr(window, GWL_USERDATA, reinterpret_cast<LONG_PTR>(this));
-
-		// Set background colour (or else, the plugin's background is black in Renoise)
-		SetClassLongPtr(window, GCL_HBRBACKGROUND, reinterpret_cast<LONG_PTR>(GetSysColorBrush(COLOR_3DFACE))); 
+		SetPropA(hwnd, "ptr", reinterpret_cast<HANDLE>(this));
 	}
 
 
-	// Destroy the combo box.
-	void DestroyWindow()
+	// Destroy the window.
+	void Destroy()
 	{
-		// Restore original window processing function.
-		if(window != nullptr)
-		{
-			SetWindowLongPtr(window, GWL_WNDPROC, reinterpret_cast<LONG_PTR>(originalWinProc));
-		}
-		window = nullptr;
-		originalWinProc = nullptr;
+		DestroyWindow(hwnd);
+		UnregisterClass(windowClassName, GetModuleHandle(NULL));
+		hwnd = nullptr;
 	}
 
 protected:
 	// Window processing callback function (to be implemented by user)
-	virtual void WindowCallback(int message, void *param1, void *param2) = 0;
+	virtual intptr_t WindowCallback(int message, void *param1, void *param2)
+	{
+		return DefWindowProc(hwnd, message, reinterpret_cast<WPARAM>(param1), reinterpret_cast<LPARAM>(param2));
+	}
 
 private:
 	// Window processing callback function
-	static INT_PTR CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
-		Window *owner = reinterpret_cast<Window *>(GetWindowLongPtr(hWnd, GWL_USERDATA));
+		Window *owner = reinterpret_cast<Window *>(GetPropA(hWnd, "ptr"));
 
 		if(owner != nullptr)
 		{
 			// Custom callback function
-			owner->WindowCallback(static_cast<int>(msg), reinterpret_cast<void *>(wParam), reinterpret_cast<void *>(lParam));
-
-			if(owner->originalWinProc != nullptr)
-			{
-				// Original callback function
-				return owner->originalWinProc(hWnd, msg, wParam, lParam);
-			}
+			return owner->WindowCallback(static_cast<int>(msg), reinterpret_cast<void *>(wParam), reinterpret_cast<void *>(lParam));
 		}
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
 }; 
+
+
+OPENMPT_NAMESPACE_END

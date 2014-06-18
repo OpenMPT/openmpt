@@ -18,7 +18,15 @@
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/Reverb.h"
 #include "../sounddev/SoundDevice.h"
+#include "StreamEncoder.h"
+#include "../common/version.h"
+#include "Settings.h"
+
 #include <bitset>
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 /////////////////////////////////////////////////////////////////////////
 // Default directories
@@ -75,7 +83,7 @@ enum
 
 // Pattern Setup (contains also non-pattern related settings)
 // Feel free to replace the deprecated flags by new flags, but be sure to
-// update TrackerSettings::LoadINISettings() / TrackerSettings::LoadRegistrySettings() as well.
+// update TrackerSettings::TrackerSettings() as well.
 #define PATTERN_PLAYNEWNOTE			0x01		// play new notes while recording
 #define PATTERN_LARGECOMMENTS		0x02		// use large font in comments
 #define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight (measures)
@@ -107,6 +115,7 @@ enum
 #define PATTERN_SHOWDEFAULTVOLUME	0x10000000	// if there is no volume command next to note+instr, display the sample's default volume.
 #define PATTERN_RESETCHANNELS		0x20000000	// reset channels when looping
 #define PATTERN_LIVEUPDATETREE		0x40000000	// update active sample / instr icons in treeview
+#define PATTERN_SYNCSAMPLEPOS		0x80000000	// sync sample positions when seeking
 
 
 // Midi Setup
@@ -130,10 +139,24 @@ struct PACKED EQPreset
 	UINT Gains[MAX_EQ_BANDS];
 	UINT Freqs[MAX_EQ_BANDS];
 };
+
+static const EQPreset FlatEQPreset = { "Flat", {16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } };
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
 STATIC_ASSERT(sizeof(EQPreset) == 60);
+
+template<> inline SettingValue ToSettingValue(const EQPreset &val)
+{
+	return SettingValue(EncodeBinarySetting<EQPreset>(val), "EQPreset");
+}
+template<> inline EQPreset FromSettingValue(const SettingValue &val)
+{
+	ASSERT(val.GetTypeTag() == "EQPreset");
+	return DecodeBinarySetting<EQPreset>(val.as<std::vector<char> >());
+}
+
 
 
 // Chords
@@ -151,145 +174,368 @@ struct MPTChord
 
 typedef MPTChord MPTChords[3 * 12];	// 3 octaves
 
+// MIDI recording
+enum RecordAftertouchOptions
+{
+	atDoNotRecord = 0,
+	atRecordAsVolume,
+	atRecordAsMacro,
+};
+
+// Sample editor preview behaviour
+enum SampleEditorKeyBehaviour
+{
+	seNoteOffOnNewKey,
+	seNoteOffOnKeyUp,
+	seNoteOffOnKeyRestrike,
+};
+
+enum SampleEditorDefaultFormat
+{
+	dfFLAC,
+	dfWAV,
+	dfRAW,
+};
+
+
+class SampleUndoBufferSize
+{
+protected:
+	size_t sizeByte;
+	int32 sizePercent;
+
+	void CalculateSize();
+
+public:
+	enum
+	{
+		defaultSize = 10,	// In percent
+	};
+
+	SampleUndoBufferSize(int32 percent = defaultSize) : sizePercent(percent) { CalculateSize(); }
+	void Set(int32 percent) { sizePercent = percent; CalculateSize(); }
+
+	int32 GetSizeInPercent() const { return sizePercent; }
+	size_t GetSizeInBytes() const { return sizeByte; }
+};
+
+template<> inline SettingValue ToSettingValue(const SampleUndoBufferSize &val) { return SettingValue(val.GetSizeInPercent()); }
+template<> inline SampleUndoBufferSize FromSettingValue(const SettingValue &val) { return SampleUndoBufferSize(val.as<int32>()); }
+
+
+std::string IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs);
+std::bitset<128> StringToIgnoredCCs(const std::string &in);
+
+std::string SettingsModTypeToString(MODTYPE modtype);
+MODTYPE SettingsStringToModType(const std::string &str);
+
+
+template<> inline SettingValue ToSettingValue(const RecordAftertouchOptions &val) { return SettingValue(int32(val)); }
+template<> inline RecordAftertouchOptions FromSettingValue(const SettingValue &val) { return RecordAftertouchOptions(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const SampleEditorKeyBehaviour &val) { return SettingValue(int32(val)); }
+template<> inline SampleEditorKeyBehaviour FromSettingValue(const SettingValue &val) { return SampleEditorKeyBehaviour(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const MODTYPE &val) { return SettingValue(SettingsModTypeToString(val), "MODTYPE"); }
+template<> inline MODTYPE FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "MODTYPE"); return SettingsStringToModType(val.as<std::string>()); }
+
+template<> inline SettingValue ToSettingValue(const PLUGVOLUMEHANDLING &val)
+{
+	return SettingValue(int32(val), "PLUGVOLUMEHANDLING");
+}
+template<> inline PLUGVOLUMEHANDLING FromSettingValue(const SettingValue &val)
+{
+	ASSERT(val.GetTypeTag() == "PLUGVOLUMEHANDLING");
+	if((uint32)val.as<int32>() > PLUGIN_VOLUMEHANDLING_MAX)
+	{
+		return PLUGIN_VOLUMEHANDLING_IGNORE;
+	}
+	return static_cast<PLUGVOLUMEHANDLING>(val.as<int32>());
+}
+
+template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val); }
+template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val); }
+
+template<> inline SettingValue ToSettingValue(const SoundDeviceID &val) { return SettingValue(int32(val.GetIdRaw())); }
+template<> inline SoundDeviceID FromSettingValue(const SettingValue &val) { return SoundDeviceID::FromIdRaw(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const SampleFormat &val) { return SettingValue(int32(val.value)); }
+template<> inline SampleFormat FromSettingValue(const SettingValue &val) { return SampleFormatEnum(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const SoundChannelMapping &val) { return SettingValue(val.ToString(), "ChannelMapping"); }
+template<> inline SoundChannelMapping FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "ChannelMapping"); return SoundChannelMapping::FromString(val.as<std::string>()); }
+
+template<> inline SettingValue ToSettingValue(const ResamplingMode &val) { return SettingValue(int32(val)); }
+template<> inline ResamplingMode FromSettingValue(const SettingValue &val) { return ResamplingMode(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const std::bitset<128> &val)
+{
+	return SettingValue(IgnoredCCsToString(val), "IgnoredCCs");
+}
+template<> inline std::bitset<128> FromSettingValue(const SettingValue &val)
+{
+	ASSERT(val.GetTypeTag() == "IgnoredCCs");
+	return StringToIgnoredCCs(val.as<std::string>());
+}
+
+template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &val)
+{
+	const char *format;
+	switch(val)
+	{
+	case dfWAV:
+		format = "wav";
+		break;
+	case dfFLAC:
+	default:
+		format = "flac";
+		break;
+	case dfRAW:
+		format = "raw";
+	}
+	return SettingValue(format);
+}
+template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue &val)
+{
+	std::string format = val.as<std::string>();
+	for(std::string::iterator c = format.begin(); c != format.end(); c++) *c = std::string::value_type(::tolower(*c));
+	if(format == "wav")
+		return dfWAV;
+	if(format == "raw")
+		return dfRAW;
+	else // if(format == "flac")
+		return dfFLAC;
+}
+
+template<> inline SettingValue ToSettingValue(const SoundDeviceStopMode &val)
+{
+	return SettingValue(static_cast<int32>(val));
+}
+template<> inline SoundDeviceStopMode FromSettingValue(const SettingValue &val)
+{
+	return static_cast<SoundDeviceStopMode>(static_cast<int32>(val));
+}
+
 
 //===================
 class TrackerSettings
 //===================
 {
 
+private:
+	SettingsContainer &conf;
+
 public:
 
-	// MIDI recording
-	enum RecordAftertouchOptions
-	{
-		atDoNotRecord = 0,
-		atRecordAsVolume,
-		atRecordAsMacro,
-	};
+	// Version
 
-	bool m_ShowSplashScreen;
-	BOOL gbMdiMaximize;
-	bool gbShowHackControls;
-	LONG glTreeWindowWidth, glTreeSplitRatio;
-	LONG glGeneralWindowHeight, glPatternWindowHeight, glSampleWindowHeight, 
-		glInstrumentWindowHeight, glCommentsWindowHeight, glGraphWindowHeight; //rewbs.varWindowSize
-	/*MptVersion::VersionNum*/ uint32 gcsPreviousVersion;
-	CString gcsInstallGUID;
-	MODTYPE defaultModType;
-	DWORD VuMeterUpdateInterval;
+	Setting<std::string> IniVersion;
+	const MptVersion::VersionNum gcsPreviousVersion;
+	Setting<std::wstring> gcsInstallGUID;
 
-	// Audio Setup
-	DWORD gbLoopSong;
-	bool m_MorePortaudio;
-	SoundDeviceID m_nWaveDevice;
-	DWORD m_LatencyMS;
-	DWORD m_UpdateIntervalMS;
-	bool m_SoundDeviceExclusiveMode;
-	bool m_SoundDeviceBoostThreadPriority;
-	SoundDeviceSettings GetSoundDeviceSettings() const;
-	void SetSoundDeviceSettings(const SoundDeviceSettings &settings);
+	// Display
 
-#ifndef NO_EQ
-	EQPreset m_EqSettings;
-#endif
+	Setting<bool> m_ShowSplashScreen;
+	Setting<bool> gbMdiMaximize;
+	Setting<LONG> glTreeSplitRatio;
+	Setting<LONG> glTreeWindowWidth;
+	Setting<LONG> glGeneralWindowHeight;
+	Setting<LONG> glPatternWindowHeight;
+	Setting<LONG> glSampleWindowHeight;
+	Setting<LONG> glInstrumentWindowHeight;
+	Setting<LONG> glCommentsWindowHeight;
+	Setting<LONG> glGraphWindowHeight;
 
-	// MIDI Setup
-	LONG m_nMidiDevice;
-	DWORD m_dwMidiSetup;
-	RecordAftertouchOptions aftertouchBehaviour;
-	uint16 midiVelocityAmp;
-	std::bitset<128> midiIgnoreCCs;
+	Setting<int32> gnPlugWindowX;
+	Setting<int32> gnPlugWindowY;
+	Setting<int32> gnPlugWindowWidth;
+	Setting<int32> gnPlugWindowHeight;
+	Setting<int32> gnPlugWindowLast;	// Last selected plugin ID
 
-	// Pattern Setup
-	UINT gnPatternSpacing;
-	BOOL gbPatternVUMeters, gbPatternPluginNames, gbPatternRecord;
-	DWORD m_dwPatternSetup, m_nKeyboardCfg;
-	DWORD m_nRowHighlightMeasures, m_nRowHighlightBeats;	// primary (measures) and secondary (beats) highlight
-	ROWINDEX recordQuantizeRows;
-	bool m_bHideUnavailableCtxMenuItems;
-	int orderlistMargins;
-	int rowDisplayOffset;
+	Setting<uint32> gnMsgBoxVisiblityFlags;
+	Setting<uint32> GUIUpdateInterval;
+	CachedSetting<uint32> VuMeterUpdateInterval;
 
-	// Sample Editor Setup
-	UINT m_nSampleUndoMaxBuffer;
-	bool m_MayNormalizeSamplesOnLoad;
+	// Misc
 
-	// key config
-	TCHAR m_szKbdFile[_MAX_PATH];
-	COLORREF rgbCustomColors[MAX_MODCOLORS];
+	Setting<bool> gbShowHackControls;
+	Setting<MODTYPE> defaultModType;
+	Setting<PLUGVOLUMEHANDLING> DefaultPlugVolumeHandling;
+	Setting<bool> autoApplySmoothFT2Ramping;
+	Setting<uint32> MiscITCompressionStereo; // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
+	Setting<uint32> MiscITCompressionMono;   // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
 
-	MixerSettings m_MixerSettings;
-	SampleFormat m_SampleFormat;
-	CResamplerSettings m_ResamplerSettings;
+	// Sound Settings
+	
+	Setting<std::vector<uint32> > m_SoundSampleRates;
+	Setting<bool> m_MorePortaudio;
+	Setting<bool> m_SoundSettingsOpenDeviceAtStartup;
+	Setting<SoundDeviceStopMode> m_SoundSettingsStopMode;
+
+	bool m_SoundDeviceSettingsUseOldDefaults;
+	SoundDeviceID m_SoundDeviceID_DEPRECATED;
+	SoundDeviceSettings m_SoundDeviceSettingsDefaults;
+	SoundDeviceSettings GetSoundDeviceSettingsDefaults() const;
+
+	Setting<std::wstring> m_SoundDeviceIdentifier;
+	SoundDeviceID GetSoundDeviceID() const;
+	void SetSoundDeviceID(const SoundDeviceID &id);
+	SoundDeviceSettings GetSoundDeviceSettings(const SoundDeviceID &device) const;
+	void SetSoundDeviceSettings(const SoundDeviceID &device, const SoundDeviceSettings &settings);
+
+	Setting<uint32> MixerMaxChannels;
+	Setting<uint32> MixerDSPMask;
+	Setting<uint32> MixerFlags;
+	Setting<uint32> MixerSamplerate;
+	Setting<uint32> MixerOutputChannels;
+	Setting<uint32> MixerPreAmp;
+	Setting<uint32> MixerStereoSeparation;
+	Setting<uint32> MixerVolumeRampUpMicroseconds;
+	Setting<uint32> MixerVolumeRampDownMicroseconds;
+	MixerSettings GetMixerSettings() const;
+	void SetMixerSettings(const MixerSettings &settings);
+
+	Setting<ResamplingMode> ResamplerMode;
+	Setting<uint8> ResamplerSubMode;
+	Setting<int32> ResamplerCutoffPercent;
+	CResamplerSettings GetResamplerSettings() const;
+	void SetResamplerSettings(const CResamplerSettings &settings);
+
+	// MIDI Settings
+
+	Setting<LONG> m_nMidiDevice;
+	// FIXME: MIDI recording is currently done in its own callback/thread and
+	// accesses settings framework from in there. Work-around the ASSERTs for
+	// now by using cached settings.
+	CachedSetting<uint32> m_dwMidiSetup;
+	CachedSetting<RecordAftertouchOptions> aftertouchBehaviour;
+	CachedSetting<uint16> midiVelocityAmp;
+	CachedSetting<std::bitset<128> > midiIgnoreCCs;
+
+	Setting<int32> midiImportSpeed;
+	Setting<int32> midiImportPatternLen;
+
+	// Pattern Editor
+
+	Setting<bool> gbLoopSong;
+	CachedSetting<UINT> gnPatternSpacing;
+	CachedSetting<bool> gbPatternVUMeters;
+	CachedSetting<bool> gbPatternPluginNames;
+	CachedSetting<bool> gbPatternRecord;
+	CachedSetting<uint32> m_dwPatternSetup;
+	CachedSetting<uint32> m_nRowHighlightMeasures; // primary (measures) and secondary (beats) highlight
+	CachedSetting<uint32> m_nRowHighlightBeats;	// primary (measures) and secondary (beats) highlight
+	CachedSetting<ROWINDEX> recordQuantizeRows;
+	CachedSetting<UINT> gnAutoChordWaitTime;
+	CachedSetting<int32> orderlistMargins;
+	CachedSetting<int32> rowDisplayOffset;
+
+	// Sample Editor
+
+	Setting<SampleUndoBufferSize> m_SampleUndoBufferSize;
+	Setting<SampleEditorKeyBehaviour> sampleEditorKeyBehaviour;
+	Setting<SampleEditorDefaultFormat> m_defaultSampleFormat;
+	Setting<uint32> m_nFinetuneStep;	// Increment finetune by x when using spin control. Default = 25
+	Setting<int32> m_FLACCompressionLevel;	// FLAC compression level for saving (0...8)
+	Setting<bool> compressITI;
+	Setting<bool> m_MayNormalizeSamplesOnLoad;
+	Setting<bool> previewInFileDialogs;
+
+	// Export
+
+	Setting<bool> ExportDefaultToSoundcardSamplerate;
+	StreamEncoderSettings ExportStreamEncoderSettings;
+
+	// Effects
+
 #ifndef NO_REVERB
 	CReverbSettings m_ReverbSettings;
 #endif
 #ifndef NO_DSP
 	CDSPSettings m_DSPSettings;
 #endif
+#ifndef NO_EQ
+	EQPreset m_EqSettings;
+	EQPreset m_EqUserPresets[4];
+#endif
 
-	UINT gnAutoChordWaitTime;
+	// Display (Colors)
 
-	uint32 gnMsgBoxVisiblityFlags;
+	COLORREF rgbCustomColors[MAX_MODCOLORS];
 
-	// MIDI Import
-	int midiImportSpeed, midiImportPatternLen;
+	// Paths
+
+	mpt::PathString m_szKbdFile;
+	// Default template
+	Setting<mpt::PathString> defaultTemplateFile;
+
+	Setting<uint32> mruListLength;
+	std::vector<mpt::PathString> mruFiles;
 
 	// Chords
 	MPTChords Chords;
 
-	// Directory Arrays (default dir + last dir)
-	TCHAR m_szDefaultDirectory[NUM_DIRS][_MAX_PATH];
-	TCHAR m_szWorkingDirectory[NUM_DIRS][_MAX_PATH];
-	// Directory to INI setting translation
-	static const TCHAR *m_szDirectoryToSettingsName[NUM_DIRS];
-
-	uint8 DefaultPlugVolumeHandling;
-
-	int gnPlugWindowX;
-	int gnPlugWindowY;
-	int gnPlugWindowWidth;
-	int gnPlugWindowHeight;
-	int32 gnPlugWindowLast;	// Last selected plugin ID
-
-	bool autoApplySmoothFT2Ramping;
+	// Plugins
+	Setting<bool> bridgeAllPlugins;
 
 public:
 
-	TrackerSettings();
-	void LoadSettings();
+	TrackerSettings(SettingsContainer &conf);
+
 	void SaveSettings();
+
 	static void GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS]);
 
-	// access to default + working directories
-	void SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	LPCTSTR GetWorkingDirectory(Directory dir) const;
-	void SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
-	LPCTSTR GetDefaultDirectory(Directory dir) const;
-
-	std::vector<uint32> GetSampleRates();
+	std::vector<uint32> GetSampleRates() const;
 
 	static MPTChords &GetChords() { return Instance().Chords; }
 
 	// Get settings object singleton
-	static TrackerSettings &Instance() { return settings; }
-
-	std::string IgnoredCCsToString() const;
-	void ParseIgnoredCCs(CString cc);
+	static TrackerSettings &Instance();
 
 protected:
 
-	void LoadINISettings(const CString &iniFile);
+	static std::vector<uint32> GetDefaultSampleRates();
 
-	void LoadRegistryEQ(HKEY key, LPCSTR pszName, EQPreset *pEqSettings);
-	bool LoadRegistrySettings();
+	void FixupEQ(EQPreset *pEqSettings);
 
 	void LoadChords(MPTChords &chords);
 	void SaveChords(MPTChords &chords);
 
-	void SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&pDirs)[NUM_DIRS][_MAX_PATH], bool bStripFilename);
+};
 
-	// The one and only settings object
-	static TrackerSettings settings;
+
+//======================
+class TrackerDirectories
+//======================
+{
+	friend class TrackerSettings;
+private:
+
+	// Directory Arrays (default dir + last dir)
+	mpt::PathString m_szDefaultDirectory[NUM_DIRS];
+	mpt::PathString m_szWorkingDirectory[NUM_DIRS];
+	// Directory to INI setting translation
+	static const TCHAR *m_szDirectoryToSettingsName[NUM_DIRS];
+
+public:
+
+	TrackerDirectories();
+	~TrackerDirectories();
+
+	// access to default + working directories
+	void SetWorkingDirectory(const mpt::PathString &filenameFrom, Directory dir, bool stripFilename = false);
+	mpt::PathString GetWorkingDirectory(Directory dir) const;
+	void SetDefaultDirectory(const mpt::PathString &filenameFrom, Directory dir, bool stripFilename = false);
+	mpt::PathString GetDefaultDirectory(Directory dir) const;
+
+	static TrackerDirectories &Instance();
+
+protected:
+
+	void SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&pDirs)[NUM_DIRS], bool bStripFilename);
 
 };
+
+
+OPENMPT_NAMESPACE_END

@@ -14,6 +14,10 @@
 #include "view_tre.h"
 #include "moddoc.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 /////////////////////////////////////////////////////////////////////
 // CToolBarEx: custom toolbar base class
 
@@ -65,7 +69,7 @@ CSize CToolBarEx::CalcDynamicLayout(int nLength, DWORD dwMode)
 		}
 
 		sizeResult = CToolBar::CalcDynamicLayout(nLength, dwMode);
-		
+
 		if (bSwitch)
 		{
 			if (bOld)
@@ -126,56 +130,58 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 /////////////////////////////////////////////////////////////////////
 // CMainToolBar
 
+#define SCALEWIDTH(x) (MulDiv(x, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX), 96))
+
 // Play Command
 #define PLAYCMD_INDEX		10
 #define TOOLBAR_IMAGE_PAUSE	8
 #define TOOLBAR_IMAGE_PLAY	12
 // Base octave
 #define EDITOCTAVE_INDEX	13
-#define EDITOCTAVE_WIDTH	55
+#define EDITOCTAVE_WIDTH	SCALEWIDTH(55)
 #define EDITOCTAVE_HEIGHT	20
 #define SPINOCTAVE_INDEX	(EDITOCTAVE_INDEX+1)
-#define SPINOCTAVE_WIDTH	16
+#define SPINOCTAVE_WIDTH	SCALEWIDTH(16)
 #define SPINOCTAVE_HEIGHT	(EDITOCTAVE_HEIGHT)
 // Static "Tempo:"
 #define TEMPOTEXT_INDEX		16
-#define TEMPOTEXT_WIDTH		45
+#define TEMPOTEXT_WIDTH		SCALEWIDTH(45)
 #define TEMPOTEXT_HEIGHT	20
 // Edit Tempo
 #define EDITTEMPO_INDEX		(TEMPOTEXT_INDEX+1)
-#define EDITTEMPO_WIDTH		32
+#define EDITTEMPO_WIDTH		SCALEWIDTH(32)
 #define EDITTEMPO_HEIGHT	20
 // Spin Tempo
 #define SPINTEMPO_INDEX		(EDITTEMPO_INDEX+1)
-#define SPINTEMPO_WIDTH		16
+#define SPINTEMPO_WIDTH		SCALEWIDTH(16)
 #define SPINTEMPO_HEIGHT	(EDITTEMPO_HEIGHT)
 // Static "Speed:"
 #define SPEEDTEXT_INDEX		20
-#define SPEEDTEXT_WIDTH		57
+#define SPEEDTEXT_WIDTH		SCALEWIDTH(57)
 #define SPEEDTEXT_HEIGHT	(TEMPOTEXT_HEIGHT)
 // Edit Speed
 #define EDITSPEED_INDEX		(SPEEDTEXT_INDEX+1)
-#define EDITSPEED_WIDTH		28
+#define EDITSPEED_WIDTH		SCALEWIDTH(28)
 #define EDITSPEED_HEIGHT	(EDITTEMPO_HEIGHT)
 // Spin Speed
 #define SPINSPEED_INDEX		(EDITSPEED_INDEX+1)
-#define SPINSPEED_WIDTH		16
+#define SPINSPEED_WIDTH		SCALEWIDTH(16)
 #define SPINSPEED_HEIGHT	(EDITSPEED_HEIGHT)
 // Static "Rows/Beat:"
 #define RPBTEXT_INDEX		24
-#define RPBTEXT_WIDTH		63
+#define RPBTEXT_WIDTH		SCALEWIDTH(63)
 #define RPBTEXT_HEIGHT		(TEMPOTEXT_HEIGHT)
 // Edit Speed
 #define EDITRPB_INDEX		(RPBTEXT_INDEX+1)
-#define EDITRPB_WIDTH		28
+#define EDITRPB_WIDTH		SCALEWIDTH(28)
 #define EDITRPB_HEIGHT		(EDITTEMPO_HEIGHT)
 // Spin Speed
 #define SPINRPB_INDEX		(EDITRPB_INDEX+1)
-#define SPINRPB_WIDTH		16
+#define SPINRPB_WIDTH		SCALEWIDTH(16)
 #define SPINRPB_HEIGHT		(EDITRPB_HEIGHT)
 // VU Meters
 #define VUMETER_INDEX		(SPINRPB_INDEX+5)
-#define VUMETER_WIDTH		255
+#define VUMETER_WIDTH		SCALEWIDTH(255)
 #define VUMETER_HEIGHT		19
 
 static UINT MainButtons[] =
@@ -230,8 +236,17 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY;
 
 	if (!CToolBar::Create(parent, dwStyle)) return FALSE;
-	if (!LoadBitmap(IDB_MAINBAR)) return FALSE;
+
+	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, GetDC());
+	m_ImageListDisabled.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, GetDC(), true);
+	GetToolBarCtrl().SetImageList(&m_ImageList);
+	GetToolBarCtrl().SetDisabledImageList(&m_ImageListDisabled);
+
 	if (!SetButtons(MainButtons, CountOf(MainButtons))) return FALSE;
+
+	CRect temp;
+	GetItemRect(0,&temp);
+	SetSizes(CSize(temp.Width(), temp.Height()), CSize(16, 16));
 
 	nCurrentSpeed = 6;
 	nCurrentTempo = 125;
@@ -430,7 +445,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		// Update play/pause button
 		if (nCurrentTempo == -1) SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
 		// Update Speed
-		int nSpeed = pSndFile->m_nMusicSpeed;
+		int nSpeed = pSndFile->m_PlayState.m_nMusicSpeed;
 		if (nSpeed != nCurrentSpeed)
 		{
 			//rewbs.envRowGrid
@@ -439,13 +454,13 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 				pModDoc->UpdateAllViews(NULL, HINT_SPEEDCHANGE);
 			}
 			//end rewbs.envRowGrid
-				
+
 			if (nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
 			nCurrentSpeed = nSpeed;
 			wsprintf(s, "%d", nCurrentSpeed);
 			m_EditSpeed.SetWindowText(s);
 		}
-		int nTempo = pSndFile->m_nMusicTempo;
+		int nTempo = pSndFile->m_PlayState.m_nMusicTempo;
 		if (nTempo != nCurrentTempo)
 		{
 			if (nCurrentTempo < 0) m_SpinTempo.EnableWindow(TRUE);
@@ -453,13 +468,13 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			wsprintf(s, "%d", nCurrentTempo);
 			m_EditTempo.SetWindowText(s);
 		}
-		int nRowsPerBeat = pSndFile->m_nCurrentRowsPerBeat;
+		int nRowsPerBeat = pSndFile->m_PlayState.m_nCurrentRowsPerBeat;
 		if (nRowsPerBeat != nCurrentRowsPerBeat)
-		{	
+		{
 			if (nCurrentRowsPerBeat < 0) m_SpinRowsPerBeat.EnableWindow(TRUE);
 			nCurrentRowsPerBeat = nRowsPerBeat;
 			wsprintf(s, "%d", nCurrentRowsPerBeat);
-			m_EditRowsPerBeat.SetWindowText(s);			
+			m_EditRowsPerBeat.SetWindowText(s);
 		}
 	} else
 	{
@@ -491,7 +506,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 //-------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm;
-	
+
 	CToolBarEx::OnVScroll(nCode, nPos, pScrollBar);
 	short int oct = (short int)m_SpinOctave.GetPos();
 	if ((oct >= MIN_BASEOCTAVE) && ((int)oct != nCurrentOctave))
@@ -511,17 +526,17 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 					pSndFile->SetTempo(MAX(nCurrentTempo - 1, pSndFile->GetModSpecifications().tempoMin), true);
 				else
 					pSndFile->SetTempo(MIN(nCurrentTempo + 1, pSndFile->GetModSpecifications().tempoMax), true);
-		
+
 				m_SpinTempo.SetPos(0);
 			}
 			if ((n = (short int)m_SpinSpeed.GetPos()) != 0)
 			{
 				if (n < 0)
 				{
-					pSndFile->m_nMusicSpeed = std::max(UINT(nCurrentSpeed - 1), pSndFile->GetModSpecifications().speedMin);
+					pSndFile->m_PlayState.m_nMusicSpeed = std::max(UINT(nCurrentSpeed - 1), pSndFile->GetModSpecifications().speedMin);
 				} else
 				{
-					pSndFile->m_nMusicSpeed = std::min(UINT(nCurrentSpeed + 1), pSndFile->GetModSpecifications().speedMax);
+					pSndFile->m_PlayState.m_nMusicSpeed = std::min(UINT(nCurrentSpeed + 1), pSndFile->GetModSpecifications().speedMax);
 				}
 				m_SpinSpeed.SetPos(0);
 			}
@@ -535,7 +550,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 					}
 				} else
 				{
-					if (static_cast<ROWINDEX>(nCurrentRowsPerBeat) < pSndFile->m_nCurrentRowsPerMeasure)
+					if (static_cast<ROWINDEX>(nCurrentRowsPerBeat) < pSndFile->m_PlayState.m_nCurrentRowsPerMeasure)
 					{
 						SetRowsPerBeat(nCurrentRowsPerBeat + 1);
 					}
@@ -543,7 +558,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 				m_SpinRowsPerBeat.SetPos(0);
 
 				//update pattern editor
-				
+
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if (pMainFrm)
 				{
@@ -568,7 +583,7 @@ void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
 	if(pModDoc == nullptr || pSndFile == nullptr)
 		return;
 
-	pSndFile->m_nCurrentRowsPerBeat = nNewRPB;
+	pSndFile->m_PlayState.m_nCurrentRowsPerBeat = nNewRPB;
 	PATTERNINDEX nPat = pSndFile->GetCurrentPattern();
 	if(pSndFile->Patterns[nPat].GetOverrideSignature())
 	{
@@ -828,7 +843,7 @@ VOID CModTreeBar::DoLButtonUp()
 	if (m_dwStatus & MTB_DRAGGING)
 	{
 		CRect rect;
-		
+
 		m_dwStatus &= ~MTB_DRAGGING;
 		if (m_dwStatus & MTB_TRACKER)
 		{
@@ -921,14 +936,14 @@ void CModTreeBar::OnInvertTracker(UINT x)
 VOID CModTreeBar::OnDocumentCreated(CModDoc *pModDoc)
 //---------------------------------------------------
 {
-	if (m_pModTree) m_pModTree->AddDocument(pModDoc);
+	if (m_pModTree && pModDoc) m_pModTree->AddDocument(*pModDoc);
 }
 
 
 VOID CModTreeBar::OnDocumentClosed(CModDoc *pModDoc)
 //--------------------------------------------------
 {
-	if (m_pModTree) m_pModTree->RemoveDocument(pModDoc);
+	if (m_pModTree && pModDoc) m_pModTree->RemoveDocument(*pModDoc);
 }
 
 
@@ -942,7 +957,7 @@ VOID CModTreeBar::OnUpdate(CModDoc *pModDoc, DWORD lHint, CObject *pHint)
 VOID CModTreeBar::UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify)
 //----------------------------------------------------------------------
 {
-	if (m_pModTree) m_pModTree->UpdatePlayPos(pModDoc, pNotify);
+	if (m_pModTree && pModDoc) m_pModTree->UpdatePlayPos(*pModDoc, pNotify);
 }
 
 
@@ -965,7 +980,7 @@ void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 LRESULT CModTreeBar::OnNcHitTest(CPoint point)
 #else
 UINT CModTreeBar::OnNcHitTest(CPoint point)
-#endif 
+#endif
 //-----------------------------------------
 {
 	CRect rect;
@@ -1013,7 +1028,7 @@ void CModTreeBar::OnNcMouseMove(UINT, CPoint point)
 {
 	CRect rect;
 	CPoint pt = point;
-	
+
 	GetWindowRect(&rect);
 	pt.x -= rect.left;
 	pt.y -= rect.top;
@@ -1033,7 +1048,7 @@ void CModTreeBar::OnNcLButtonDown(UINT, CPoint point)
 {
 	CRect rect;
 	CPoint pt = point;
-	
+
 	GetWindowRect(&rect);
 	pt.x -= rect.left;
 	pt.y -= rect.top;
@@ -1211,3 +1226,6 @@ void CStereoVU::OnLButtonDown(UINT, CPoint)
 	// Reset clip indicator.
 	CMainFrame::gnClipLeft = CMainFrame::gnClipRight = false;
 }
+
+
+OPENMPT_NAMESPACE_END

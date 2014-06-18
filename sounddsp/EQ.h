@@ -11,6 +11,9 @@
 
 #pragma once
 
+#include "../soundlib/Mixer.h"	// For MIXBUFFERSIZE
+
+OPENMPT_NAMESPACE_BEGIN
 
 #define MAX_EQ_BANDS	6
 
@@ -39,10 +42,10 @@ private:
 public:
 	CEQ();
 public:
-	void Initialize(BOOL bReset, DWORD MixingFreq);
+	void Initialize(bool bReset, DWORD MixingFreq);
 	void ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount);
 	void ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount);
-	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq);
+	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq);
 };
 
 
@@ -55,8 +58,10 @@ private:
 	CEQ rear;
 	float EQTempFloatBuffer[MIXBUFFERSIZE * 2];
 public:
-	void Initialize(BOOL bReset, DWORD MixingFreq);
+	void Initialize(bool bReset, DWORD MixingFreq);
 	void Process(int *frontBuffer, int *rearBuffer, UINT nCount, UINT nChannels);
-	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, BOOL bReset, DWORD MixingFreq);
+	void SetEQGains(const UINT *pGains, UINT nGains, const UINT *pFreqs, bool bReset, DWORD MixingFreq);
 };
 
+
+OPENMPT_NAMESPACE_END

@@ -7,6 +7,36 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+static const char * const license =
+"The OpenMPT code is licensed under the BSD license." "\n"
+" " "\n"
+"Copyright (c) 2004-2014, OpenMPT contributors" "\n"
+"Copyright (c) 1997-2003, Olivier Lapicque" "\n"
+"All rights reserved." "\n"
+"" "\n"
+"Redistribution and use in source and binary forms, with or without" "\n"
+"modification, are permitted provided that the following conditions are met:" "\n"
+"    * Redistributions of source code must retain the above copyright" "\n"
+"      notice, this list of conditions and the following disclaimer." "\n"
+"    * Redistributions in binary form must reproduce the above copyright" "\n"
+"      notice, this list of conditions and the following disclaimer in the" "\n"
+"      documentation and/or other materials provided with the distribution." "\n"
+"    * Neither the name of the OpenMPT project nor the" "\n"
+"      names of its contributors may be used to endorse or promote products" "\n"
+"      derived from this software without specific prior written permission." "\n"
+"" "\n"
+"THIS SOFTWARE IS PROVIDED BY THE CONTRIBUTORS ``AS IS'' AND ANY" "\n"
+"EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED" "\n"
+"WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE" "\n"
+"DISCLAIMED. IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY" "\n"
+"DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES" "\n"
+"(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;" "\n"
+"LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND" "\n"
+"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT" "\n"
+"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS" "\n"
+"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." "\n"
+;
+
 #include "openmpt123_config.hpp"
 
 #include <algorithm>
@@ -23,6 +53,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -31,19 +62,21 @@
 #include <conio.h>
 #include <fcntl.h>
 #include <io.h>
-#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <windows.h>
 #include <mmsystem.h>
 #include <mmreg.h>
 #else
+#if defined(MPT_NEEDS_THREADS)
+#include <pthread.h>
+#endif
+#include <termios.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <termios.h>
-#include <unistd.h>
 #endif
 
 #include <libopenmpt/libopenmpt.hpp>
@@ -53,8 +86,10 @@
 #include "openmpt123_flac.hpp"
 #include "openmpt123_mmio.hpp"
 #include "openmpt123_sndfile.hpp"
+#include "openmpt123_raw.hpp"
 #include "openmpt123_stdout.hpp"
 #include "openmpt123_portaudio.hpp"
+#include "openmpt123_sdl.hpp"
 #include "openmpt123_waveout.hpp"
 #include "openmpt123_wavpack.hpp"
 
@@ -64,8 +99,24 @@ struct silent_exit_exception : public std::exception {
 	silent_exit_exception() throw() { }
 };
 
+struct show_license_exception : public std::exception {
+	show_license_exception() throw() { }
+};
+
+struct show_credits_exception : public std::exception {
+	show_credits_exception() throw() { }
+};
+
+struct show_short_version_number_exception : public std::exception {
+	show_short_version_number_exception() throw() { }
+};
+
 struct show_version_number_exception : public std::exception {
 	show_version_number_exception() throw() { }
+};
+
+struct show_long_version_number_exception : public std::exception {
+	show_long_version_number_exception() throw() { }
 };
 
 bool IsTerminal( int fd ) {
@@ -118,17 +169,19 @@ public:
 		}
 		if ( false ) {
 			// nothing
+		} else if ( flags.output_extension == "raw" ) {
+			impl = new raw_stream_raii( filename, flags, log );
 #ifdef MPT_WITH_MMIO
 		} else if ( flags.output_extension == "wav" ) {
-			impl = new mmio_stream_raii( filename, flags );
+			impl = new mmio_stream_raii( filename, flags, log );
 #endif				
 #ifdef MPT_WITH_FLAC
 		} else if ( flags.output_extension == "flac" ) {
-			impl = new flac_stream_raii( filename, flags );
+			impl = new flac_stream_raii( filename, flags, log );
 #endif				
 #ifdef MPT_WITH_WAVPACK
 		} else if ( flags.output_extension == "wv" ) {
-			impl = new wavpack_stream_raii( filename, flags );
+			impl = new wavpack_stream_raii( filename, flags, log );
 #endif
 #ifdef MPT_WITH_SNDFILE
 		} else {
@@ -136,7 +189,7 @@ public:
 #endif
 		}
 		if ( !impl ) {
-			throw show_help_exception();
+			throw args_error_exception();
 		}
 	}
 	virtual ~file_audio_stream_raii() {
@@ -159,7 +212,7 @@ public:
 	}
 };                                                                                                                
 
-std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) {
+static std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) {
 	s << "Quiet: " << flags.quiet << std::endl;
 	s << "Verbose: " << flags.verbose << std::endl;
 	s << "Mode : " << mode_to_string( flags.mode ) << std::endl;
@@ -168,8 +221,10 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Show channel peak meters: " << flags.show_channel_meters << std::endl;
 	s << "Show details: " << flags.show_details << std::endl;
 	s << "Show message: " << flags.show_message << std::endl;
+	s << "Update: " << flags.ui_redraw_interval << "ms" << std::endl;
 	s << "Device: " << flags.device << std::endl;
-	s << "Buffer: " << flags.buffer << std::endl;
+	s << "Buffer: " << flags.buffer << "ms" << std::endl;
+	s << "Period: " << flags.period << "ms" << std::endl;
 	s << "Samplerate: " << flags.samplerate << std::endl;
 	s << "Channels: " << flags.channels << std::endl;
 	s << "Float: " << flags.use_float << std::endl;
@@ -177,6 +232,7 @@ std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) 
 	s << "Stereo separation: " << flags.separation << std::endl;
 	s << "Interpolation filter taps: " << flags.filtertaps << std::endl;
 	s << "Volume ramping strength: " << flags.ramping << std::endl;
+	s << "Output dithering: " << flags.dither << std::endl;
 	s << "Repeat count: " << flags.repeatcount << std::endl;
 	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "Standard output: " << flags.use_stdout << std::endl;
@@ -272,30 +328,81 @@ std::string bytes_to_string( T bytes ) {
 }
 
 static void show_info( std::ostream & log, bool verbose ) {
-	log << "openmpt123" << " version " << OPENMPT123_VERSION_STRING << ", Copyright (c) 2013 OpenMPT developers (http://openmpt.org/)" << std::endl;
-	log << " libopenmpt " << openmpt::string::get( openmpt::string::library_version ) << " (" << "OpenMPT " << openmpt::string::get( openmpt::string::core_version ) << ")" << std::endl;
+	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", libopenmpt " << openmpt::string::get( openmpt::string::library_version ) << " (" << "OpenMPT " << openmpt::string::get( openmpt::string::core_version ) << ")" << std::endl;
+	log << "Copyright (c) 2013-2014 OpenMPT developers <http://openmpt.org/>" << std::endl;
 	if ( !verbose ) {
 		log << std::endl;
 		return;
 	}
-	log << "  (built " << openmpt::string::get( openmpt::string::build ) << ")" << std::endl;
+	log << "  libopenmpt Features: " << openmpt::string::get( openmpt::string::library_features ) << std::endl;
+	log << "  libopenmpt Build: " << openmpt::string::get( openmpt::string::build ) << std::endl;
 #ifdef MPT_WITH_PORTAUDIO
-	log << " " << Pa_GetVersionText() << " (http://portaudio.com/)" << std::endl;
+	log << " " << Pa_GetVersionText() << " (" << Pa_GetVersion() << ") <http://portaudio.com/>" << std::endl;
+#endif
+#ifdef MPT_WITH_SDL
+	const SDL_version * linked_sdlver = SDL_Linked_Version();
+	log << " libSDL ";
+	if ( linked_sdlver ) {
+		log << (int)linked_sdlver->major << "." << (int)linked_sdlver->minor << "." << (int)linked_sdlver->patch << " ";
+	}
+	SDL_version sdlver;
+	std::memset( &sdlver, 0, sizeof( SDL_version ) );
+	SDL_VERSION( &sdlver );
+	log << "(API: " << (int)sdlver.major << "." << (int)sdlver.minor << "." << (int)sdlver.patch << ")";
+	log << " <https://libsdl.org/>" << std::endl;
 #endif
 #ifdef MPT_WITH_FLAC
-	log << " FLAC " << FLAC__VERSION_STRING << ", " << FLAC__VENDOR_STRING << ", API " << FLAC_API_VERSION_CURRENT << "." << FLAC_API_VERSION_REVISION << "." << FLAC_API_VERSION_AGE << " (https://xiph.org/flac/)" << std::endl;
+	log << " FLAC " << FLAC__VERSION_STRING << ", " << FLAC__VENDOR_STRING << ", API " << FLAC_API_VERSION_CURRENT << "." << FLAC_API_VERSION_REVISION << "." << FLAC_API_VERSION_AGE << " <https://xiph.org/flac/>" << std::endl;
 #endif
 #ifdef MPT_WITH_SNDFILE
 	char sndfile_info[128];
+	std::memset( sndfile_info, 0, sizeof( sndfile_info ) );
 	sf_command( 0, SFC_GET_LIB_VERSION, sndfile_info, sizeof( sndfile_info ) );
-	log << " libsndfile " << sndfile_info << " (http://mega-nerd.com/libsndfile/)" << std::endl;
+	sndfile_info[127] = '\0';
+	log << " libsndfile " << sndfile_info << " <http://mega-nerd.com/libsndfile/>" << std::endl;
+#endif
+#ifdef MPT_WITH_WAVPACK
+	std::ostringstream wpver;
+	wpver << std::hex << std::setfill('0') << std::setw(8) << WavpackGetLibraryVersion();
+	log << " WavPack " << WavpackGetLibraryVersionString() << " (" << wpver.str() << ") (http://wavpack.com/)" << std::endl;
 #endif
 	log << std::endl;
 }
 
-static void show_version( textout & log ) {
-	log << OPENMPT123_VERSION_STRING << std::endl;
+static void show_short_version( textout & log ) {
+	log << OPENMPT123_VERSION_STRING << " / " << openmpt::string::get( openmpt::string::library_version ) << " / " << openmpt::string::get( openmpt::string::core_version ) << std::endl;
 	log.writeout();
+}
+
+static void show_version( textout & log ) {
+	show_info( log, false );
+	log.writeout();
+}
+
+static void show_long_version( textout & log ) {
+	show_info( log, true );
+	log.writeout();
+}
+
+static void show_credits( textout & log ) {
+	show_info( log, false );
+	log << openmpt::string::get( openmpt::string::contact ) << std::endl;
+	log << std::endl;
+	log << openmpt::string::get( openmpt::string::credits ) << std::endl;
+	log.writeout();
+}
+
+static void show_license( textout & log ) {
+	show_info( log, false );
+	log << license << std::endl;
+	log.writeout();
+}
+
+static std::string get_driver_string( const std::string & driver ) {
+	if ( driver.empty() ) {
+		return "default";
+	}
+	return driver;
 }
 
 static std::string get_device_string( int device ) {
@@ -307,60 +414,70 @@ static std::string get_device_string( int device ) {
 	return str.str();
 }
 
-static void show_help( textout & log, show_help_exception & e, bool verbose ) {
-	show_info( log, verbose );
+static void show_help( textout & log, bool longhelp = false, const std::string & message = std::string() ) {
+	show_info( log, false );
 	{
 		log << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
 		log << std::endl;
-		log << " -h, --help                Show help" << std::endl;
-		log << "     --help-keyboard       Show keyboard hotkeys in ui mode" << std::endl;
-		log << " -q, --quiet               Suppress non-error screen output" << std::endl;
-		log << " -v, --verbose             Show more screen output" << std::endl;
-		log << "     --version             Show version number and nothing else" << std::endl;
+		log << " -h, --help                 Show help" << std::endl;
+		log << "     --help-keyboard        Show keyboard hotkeys in ui mode" << std::endl;
+		log << " -q, --quiet                Suppress non-error screen output" << std::endl;
+		log << " -v, --verbose              Show more screen output" << std::endl;
+		log << "     --version              Show version information and exit" << std::endl;
+		log << "     --short-version        Show version number and nothing else" << std::endl;
+		log << "     --long-version         Show long version information and exit" << std::endl;
+		log << "     --credits              Show elaborate contributors list" << std::endl;
+		log << "     --license              Show license" << std::endl;
 		log << std::endl;
-		log << " Mode:" << std::endl;
-		log << "     --info                Display information about each file" << std::endl;
-		log << "     --ui                  Interactively play each file" << std::endl;
-		log << "     --batch               Play each file" << std::endl;
-		log << "     --render              Render each file to PCM data" << std::endl;
-		if ( !e.longhelp ) {
+		log << "     --info                 Display information about each file" << std::endl;
+		log << "     --ui                   Interactively play each file" << std::endl;
+		log << "     --batch                Play each file" << std::endl;
+		log << "     --render               Render each file to PCM data" << std::endl;
+		if ( !longhelp ) {
 			log << std::endl;
 			log.writeout();
 			return;
 		}
 		log << std::endl;
-		log << "     --terminal-width n    Assume terminal is n characters wide [default: " << commandlineflags().terminal_width << "]" << std::endl;
-		log << "     --terminal-height n   Assume terminal is n characters high [default: " << commandlineflags().terminal_height << "]" << std::endl;
+		log << "     --terminal-width n     Assume terminal is n characters wide [default: " << commandlineflags().terminal_width << "]" << std::endl;
+		log << "     --terminal-height n    Assume terminal is n characters high [default: " << commandlineflags().terminal_height << "]" << std::endl;
 		log << std::endl;
-		log << "     --[no-]progress       Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
-		log << "     --[no-]meters         Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
-		log << "     --[no-]channel-meters Show channel peak meters [default: " << commandlineflags().show_channel_meters << "]" << std::endl;
-		log << "     --[no-]pattern        Show pattern [default: " << commandlineflags().show_pattern << "]" << std::endl;
+		log << "     --[no-]progress        Show playback progress [default: " << commandlineflags().show_progress << "]" << std::endl;
+		log << "     --[no-]meters          Show peak meters [default: " << commandlineflags().show_meters << "]" << std::endl;
+		log << "     --[no-]channel-meters  Show channel peak meters (EXPERIMENTAL) [default: " << commandlineflags().show_channel_meters << "]" << std::endl;
+		log << "     --[no-]pattern         Show pattern (EXPERIMENTAL) [default: " << commandlineflags().show_pattern << "]" << std::endl;
 		log << std::endl;
-		log << "     --[no-]details        Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
-		log << "     --[no-]message        Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
+		log << "     --[no-]details         Show song details [default: " << commandlineflags().show_details << "]" << std::endl;
+		log << "     --[no-]message         Show song message [default: " << commandlineflags().show_message << "]" << std::endl;
 		log << std::endl;
-		log << "     --samplerate n        Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
-		log << "     --channels n          use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
-		log << "     --[no-]float          Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
+		log << "     --update n             Set output update interval to n ms [default: " << commandlineflags().ui_redraw_interval << "]" << std::endl;
 		log << std::endl;
-		log << "     --gain n              Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
-		log << "     --stereo n            Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
-		log << "     --filter n            Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
-		log << "     --ramping n           Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
+		log << "     --samplerate n         Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << std::endl;
+		log << "     --channels n           use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << std::endl;
+		log << "     --[no-]float           Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << std::endl;
 		log << std::endl;
-		log << "     --repeat n            Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
-		log << "     --seek n              Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
+		log << "     --gain n               Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << std::endl;
+		log << "     --stereo n             Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
+		log << "     --filter n             Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
+		log << "     --ramping n            Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
+		log << "     --dither n             Dither type to use (if applicable for selected output format): [0=off,1=auto,2=0.5bit,3=1bit] [default: " << commandlineflags().dither << "]" << std::endl;
 		log << std::endl;
-		log << "     --device n            Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
-		log << "                           use --device help to show available devices" << std::endl;
-		log << "     --buffer n            Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
-		log << "     --stdout              Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
-		log << "     --output-type t       Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
-		log << " -o, --output f            Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
-		log << "     --force               Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
+		log << "     --[no-]shuffle         Shuffle playlist [default: " << commandlineflags().shuffle << "]" << std::endl;
 		log << std::endl;
-		log << "     --                    Interpret further arguments as filenames" << std::endl;
+		log << "     --repeat n             Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
+		log << "     --seek n               Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
+		log << std::endl;
+		log << "     --driver n             Set output driver [default: " << get_driver_string( commandlineflags().driver ) << "]," << std::endl;
+		log << "     --device n             Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
+		log << "                            use --device help to show available devices" << std::endl;
+		log << "     --buffer n             Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
+		log << "     --period n             Set output period size to n ms [default: " << commandlineflags().period  << "]" << std::endl;
+		log << "     --stdout               Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
+		log << "     --output-type t        Use output format t when writing to a PCM file [default: " << commandlineflags().output_extension << "]" << std::endl;
+		log << " -o, --output f             Write PCM output to file f instead of streaming to audio device [default: " << commandlineflags().output_filename << "]" << std::endl;
+		log << "     --force                Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
+		log << std::endl;
+		log << "     --                     Interpret further arguments as filenames" << std::endl;
 		log << std::endl;
 		log << " Supported file formats: " << std::endl;
 		log << "    ";
@@ -379,8 +496,8 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 
 	log << std::endl;
 
-	if ( e.message.size() > 0 ) {
-		log << e.message;
+	if ( message.size() > 0 ) {
+		log << message;
 		log << std::endl;
 	}
 	log.writeout();
@@ -388,9 +505,10 @@ static void show_help( textout & log, show_help_exception & e, bool verbose ) {
 
 static void show_help_keyboard( textout & log ) {
 	show_info( log, false );
-	log << "Keyboard hotkeys (use 'openmpt --ui'):" << std::endl;
+	log << "Keyboard hotkeys (use 'openmpt123 --ui'):" << std::endl;
 	log << std::endl;
 	log << " [q]     quit" << std::endl;
+	log << " [ ]     pause / unpause" << std::endl;
 	log << " [N]     skip 10 files backward" << std::endl;
 	log << " [n]     prev file" << std::endl;
 	log << " [m]     next file" << std::endl;
@@ -411,34 +529,45 @@ template < typename Tmod >
 static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
 	flags.separation = std::max( flags.separation,  0 );
 	flags.filtertaps = std::max( flags.filtertaps,  1 );
+	flags.filtertaps = std::min( flags.filtertaps,  8 );
 	flags.ramping    = std::max( flags.ramping,    -1 );
+	flags.ramping    = std::min( flags.ramping,    10 );
 	mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
 	mod.set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, flags.separation );
 	mod.set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, flags.filtertaps );
 	mod.set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, flags.ramping );
+	std::ostringstream dither_str;
+	dither_str.imbue( std::locale::classic() );
+	dither_str << flags.dither;
+	mod.ctl_set( "dither", dither_str.str() );
 }
 
 struct prev_file { int count; prev_file( int c ) : count(c) { } };
 struct next_file { int count; next_file( int c ) : count(c) { } };
 
 template < typename Tmod >
-static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod ) {
+static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod, write_buffers_interface & audio_stream ) {
 	switch ( c ) {
 		case 'q': throw silent_exit_exception(); break;
 		case 'N': throw prev_file(10); break;
 		case 'n': throw prev_file(1); break;
+		case ' ': if ( !flags.paused ) { flags.paused = audio_stream.pause(); } else { flags.paused = false; audio_stream.unpause(); } break;
 		case 'h': mod.set_position_seconds( mod.get_position_seconds() - 10.0 ); break;
 		case 'j': mod.set_position_seconds( mod.get_position_seconds() - 1.0 ); break;
 		case 'k': mod.set_position_seconds( mod.get_position_seconds() + 1.0 ); break;
 		case 'l': mod.set_position_seconds( mod.get_position_seconds() + 10.0 ); break;
+		case 'H': mod.set_position_order_row( mod.get_current_order() - 1, 0 ); break;
+		case 'J': mod.set_position_order_row( mod.get_current_order(), mod.get_current_row() - 1 ); break;
+		case 'K': mod.set_position_order_row( mod.get_current_order(), mod.get_current_row() + 1 ); break;
+		case 'L': mod.set_position_order_row( mod.get_current_order() + 1, 0 ); break;
 		case 'm': throw next_file(1); break;
 		case 'M': throw next_file(10); break;
 		case '3': flags.gain       -=100; apply_mod_settings( flags, mod ); break;
 		case '4': flags.gain       +=100; apply_mod_settings( flags, mod ); break;
 		case '5': flags.separation -=  5; apply_mod_settings( flags, mod ); break;
 		case '6': flags.separation +=  5; apply_mod_settings( flags, mod ); break;
-		case '7': flags.filtertaps -=  1; apply_mod_settings( flags, mod ); break;
-		case '8': flags.filtertaps +=  1; apply_mod_settings( flags, mod ); break;
+		case '7': flags.filtertaps /=  2; apply_mod_settings( flags, mod ); break;
+		case '8': flags.filtertaps *=  2; apply_mod_settings( flags, mod ); break;
 		case '9': flags.ramping    -=  1; apply_mod_settings( flags, mod ); break;
 		case '0': flags.ramping    +=  1; apply_mod_settings( flags, mod ); break;
 	}
@@ -677,7 +806,17 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 	log.writeout();
 
-	const std::size_t bufsize = 1024;
+	std::size_t bufsize;
+	if ( flags.mode == ModeUI ) {
+		bufsize = std::min( flags.ui_redraw_interval, flags.period ) * flags.samplerate / 1000;
+	} else if ( flags.mode == ModeBatch ) {
+		bufsize = flags.period * flags.samplerate / 1000;
+	} else {
+		bufsize = 1024;
+	}
+
+	std::int64_t last_redraw_frame = 0 - flags.ui_redraw_interval;
+	std::int64_t rendered_frames = 0;
 
 	std::vector<Tsample> left( bufsize );
 	std::vector<Tsample> right( bufsize );
@@ -701,10 +840,9 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 	if ( multiline ) {
 		lines += 1;
 		if ( flags.show_ui ) {
-			lines += 4;
+			lines += 1;
 		}
 		if ( flags.show_meters ) {
-			lines += 1;
 			for ( int channel = 0; channel < flags.channels; ++channel ) {
 				lines += 1;
 			}
@@ -737,7 +875,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 #if defined( WIN32 )
 	HANDLE hStdErr = NULL;
 	COORD coord_cursor = COORD();
-	if( multiline ) {
+	if ( multiline ) {
 		log.flush();
 		hStdErr = GetStdHandle( STD_ERROR_HANDLE );
 		if ( hStdErr ) {
@@ -761,7 +899,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 			while ( kbhit() ) {
 				int c = getch();
-				if ( !handle_keypress( c, flags, mod ) ) {
+				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
 					return;
 				}
 			}
@@ -780,12 +918,17 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				if ( read( STDIN_FILENO, &c, 1 ) != 1 ) {
 					break;
 				}
-				if ( !handle_keypress( c, flags, mod ) ) {
+				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
 					return;
 				}
 			}
 
 #endif
+
+			if ( flags.paused ) {
+				audio_stream.sleep( flags.ui_redraw_interval );
+				continue;
+			}
 
 		}
 		
@@ -824,6 +967,15 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			audio_stream.write( buffers, count );
 		}
 
+		if ( count > 0 ) {
+			rendered_frames += count;
+			if ( rendered_frames >= last_redraw_frame + ( flags.ui_redraw_interval * flags.samplerate / 1000 ) ) {
+				last_redraw_frame = rendered_frames;
+			} else {
+				continue;
+			}
+		}
+
 		if ( multiline ) {
 #if defined( WIN32 )
 			log.flush();
@@ -836,22 +988,18 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			}
 #endif
 			log << std::endl;
-			if ( flags.show_ui ) {
-				log << "Gain.......: " << flags.gain * 0.01f << " dB   " << std::endl;
-				log << "Stereo.....: " << flags.separation << " %   " << std::endl;
-				log << "Filter.....: " << flags.filtertaps << " taps   " << std::endl;
-				log << "Ramping....: " << flags.ramping << "   " << std::endl;
-			}
 			if ( flags.show_meters ) {
-				log << std::endl;
 				draw_meters( log, meter, flags );
 			}
 			if ( flags.show_channel_meters ) {
-				int width = flags.terminal_width / mod.get_num_channels();
+				int width = ( flags.terminal_width - 3 ) / mod.get_num_channels();
+				if ( width > 11 ) {
+					width = 11;
+				}
 				log << " ";
 				for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 					if ( width >= 3 ) {
-						log << "|";
+						log << ":";
 					}
 					if ( width == 1 ) {
 						draw_channel_meters_tiny( log, ( mod.get_current_channel_vu_left( channel ) + mod.get_current_channel_vu_right( channel ) ) * (1.0f/std::sqrt(2.0f)) );
@@ -862,12 +1010,15 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					}
 				}
 				if ( width >= 3 ) {
-					log << "|";
+					log << ":";
 				}
 				log << std::endl;
 			}
 			if ( flags.show_pattern ) {
-				int width = flags.terminal_width / mod.get_num_channels();
+				int width = ( flags.terminal_width - 3 ) / mod.get_num_channels();
+				if ( width > 11 ) {
+					width = 11;
+				}
 				for ( std::int32_t line = 0; line < pattern_lines; ++line ) {
 					std::int32_t row = mod.get_current_row() - ( pattern_lines / 2 ) + line;
 					if ( row == mod.get_current_row() ) {
@@ -878,24 +1029,39 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					if ( row < 0 || row >= mod.get_pattern_num_rows( mod.get_current_pattern() ) ) {
 						for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 							if ( width >= 3 ) {
-								log << "|";
+								log << ":";
 							}
 							log << std::string( width >= 3 ? width - 1 : width, ' ' );
 						}
 					} else {
 						for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 							if ( width >= 3 ) {
-								log << "|";
+								if ( row == mod.get_current_row() ) {
+									log << "+";
+								} else {
+									log << ":";
+								}
 							}
 							log << mod.format_pattern_row_channel( mod.get_current_pattern(), row, channel, width >= 3 ? width - 1 : width );
 						}
 					}
+					if ( width >= 3 ) {
+						log << ":";
+					}
 					log << std::endl;
 				}
 			}
+			if ( flags.show_ui ) {
+				log << "Settings...: ";
+				log << "Gain: " << flags.gain * 0.01f << " dB" << "   ";
+				log << "Stereo: " << flags.separation << " %" << "   ";
+				log << "Filter: " << flags.filtertaps << " taps" << "   ";
+				log << "Ramping: " << flags.ramping << "   ";
+				log  << std::endl;
+			}
 			if ( flags.show_details ) {
 				log << "Mixer......: ";
-				log << "CPU:" << std::setw(3) << std::setfill(':') << cpu_str;
+				log << "CPU:" << std::setw(6) << std::setfill(':') << cpu_str;
 				log << "   ";
 				log << "Chn:" << std::setw(3) << std::setfill(':') << mod.get_current_playing_channels();
 				log << "   ";
@@ -920,11 +1086,11 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			}
 		} else if ( flags.show_channel_meters ) {
 			if ( flags.show_ui || flags.show_details || flags.show_progress ) {
-				int width = flags.terminal_width / mod.get_num_channels();
+				int width = ( flags.terminal_width - 3 ) / mod.get_num_channels();
 				log << " ";
 				for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 					if ( width >= 3 ) {
-						log << "|";
+						log << ":";
 					}
 					if ( width == 1 ) {
 						draw_channel_meters_tiny( log, ( mod.get_current_channel_vu_left( channel ) + mod.get_current_channel_vu_right( channel ) ) * (1.0f/std::sqrt(2.0f)) );
@@ -935,7 +1101,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					}
 				}
 				if ( width >= 3 ) {
-					log << "|";
+					log << ":";
 				}
 			}
 			log << "   " << "\r";
@@ -956,7 +1122,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			}
 			if ( flags.show_details && flags.show_ui ) {
 				log << " ";
-				log << "CPU:" << std::setw(3) << std::setfill(':') << cpu_str;
+				log << "CPU:" << std::setw(6) << std::setfill(':') << cpu_str;
 				log << "|";
 				log << "Chn:" << std::setw(3) << std::setfill(':') << mod.get_current_playing_channels();
 			}
@@ -1007,6 +1173,40 @@ std::map<std::string,std::string> get_metadata( const Tmod & mod ) {
 	return result;
 }
 
+class set_field : private std::ostringstream {
+private:
+	std::vector<openmpt123::field> & fields;
+public:
+	set_field( std::vector<openmpt123::field> & fields, const std::string & name )
+		: fields(fields)
+	{
+		fields.push_back( name );
+	}
+	std::ostream & ostream() {
+		return *this;
+	}
+	~set_field() {
+		fields.back().val = str();
+	}
+};
+
+static void show_fields( textout & log, const std::vector<field> & fields ) {
+	const std::size_t fw = 11;
+	for ( std::vector<field>::const_iterator it = fields.begin(); it != fields.end(); ++it ) {
+		std::string key = it->key;
+		std::string val = it->val;
+		if ( key.length() < fw ) {
+			key += std::string( fw - key.length(), '.' );
+		}
+		if ( key.length() > fw ) {
+			key = key.substr( 0, fw );
+		}
+		key += ": ";
+		val = prepend_lines( val, std::string( fw, ' ' ) + ": " );
+		log << key << val << std::endl;
+	}
+}
+
 template < typename Tmod >
 void render_mod_file( commandlineflags & flags, const std::string & filename, std::uint64_t filesize, Tmod & mod, textout & log, write_buffers_interface & audio_stream ) {
 
@@ -1018,27 +1218,59 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 	}
 	
 	double duration = mod.get_duration_seconds();
+
+	std::vector<field> fields;
+
+	if ( flags.filenames.size() > 1 ) {
+		set_field( fields, "Playlist" ).ostream() << flags.playlist_index + 1 << "/" << flags.filenames.size();
+		set_field( fields, "Prev/Next" ).ostream()
+		    << "'"
+		    << ( flags.playlist_index > 0 ? get_filename( flags.filenames[ flags.playlist_index - 1 ] ) : std::string() )
+		    << "'"
+		    << " / "
+		    << "['" << get_filename( filename ) << "']"
+		    << " / "
+		    << "'"
+		    << ( flags.playlist_index + 1 < flags.filenames.size() ? get_filename( flags.filenames[ flags.playlist_index + 1 ] ) : std::string() )
+		    << "'"
+		   ;
+	}
 	if ( flags.verbose ) {
-		log << "Path.......: " << filename << std::endl;
+		set_field( fields, "Path" ).ostream() << filename;
 	}
 	if ( flags.show_details ) {
-		log << "Filename...: " << get_filename( filename ) << std::endl;
-		log << "Size.......: " << bytes_to_string( filesize ) << std::endl;
-		log << "Container..: " << ( mod.get_metadata( "container" ).empty() ? std::string("none") : ( mod.get_metadata( "container" ) + " (" + mod.get_metadata( "container_long" ) + ")" ) ) << std::endl;
-		log << "Type.......: " << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")" << std::endl;
-		log << "Tracker....: " << mod.get_metadata( "tracker" ) << std::endl;
+		set_field( fields, "Filename" ).ostream() << get_filename( filename );
+		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
+		if ( !mod.get_metadata( "container" ).empty() ) {
+			set_field( fields, "Container" ).ostream() << mod.get_metadata( "container" ) << " (" << mod.get_metadata( "container_long" ) << ")";
+		}
+		set_field( fields, "Type" ).ostream() << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")";
+		set_field( fields, "Tracker" ).ostream() << mod.get_metadata( "tracker" );
+		if ( !mod.get_metadata( "date" ).empty() ) {
+			set_field( fields, "Date" ).ostream() << mod.get_metadata( "date" );
+		}
+		if ( !mod.get_metadata( "artist" ).empty() ) {
+			set_field( fields, "Artist" ).ostream() << mod.get_metadata( "artist" );
+		}
 	}
 	if ( true ) {
-		log << "Title......: " << mod.get_metadata( "title" ) << std::endl;
-		log << "Duration...: " << seconds_to_string( duration ) << std::endl;
+		set_field( fields, "Title" ).ostream() << mod.get_metadata( "title" );
+		set_field( fields, "Duration" ).ostream() << seconds_to_string( duration );
 	}
 	if ( flags.show_details ) {
-		log << "Channels...: " << mod.get_num_channels() << std::endl;
-		log << "Orders.....: " << mod.get_num_orders() << std::endl;
-		log << "Patterns...: " << mod.get_num_patterns() << std::endl;
-		log << "Instruments: " << mod.get_num_instruments() << std::endl;
-		log << "Samples....: " << mod.get_num_samples() << std::endl;
+		set_field( fields, "Channels" ).ostream() << mod.get_num_channels();
+		set_field( fields, "Orders" ).ostream() << mod.get_num_orders();
+		set_field( fields, "Patterns" ).ostream() << mod.get_num_patterns();
+		set_field( fields, "Instruments" ).ostream() << mod.get_num_instruments();
+		set_field( fields, "Samples" ).ostream() << mod.get_num_samples();
 	}
+	if ( flags.show_message ) {
+		set_field( fields, "Message" ).ostream() << mod.get_metadata( "message" );
+	}
+
+	show_fields( log, fields );
+
+	log.writeout();
 
 	if ( flags.filenames.size() == 1 || flags.mode == ModeRender ) {
 		audio_stream.write_metadata( get_metadata( mod ) );
@@ -1046,10 +1278,6 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		audio_stream.write_updated_metadata( get_metadata( mod ) );
 	}
 
-	if ( flags.show_message ) {
-		log << "Message....: " << prepend_lines( mod.get_metadata( "message" ), "           : " ) << std::endl;
-	}
-	
 	if ( flags.mode == ModeInfo ) {
 		return;
 	}
@@ -1151,15 +1379,16 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 
 static void render_files( commandlineflags & flags, textout & log, write_buffers_interface & audio_stream ) {
+	if ( flags.shuffle ) {
+		std::random_shuffle( flags.filenames.begin(), flags.filenames.end() );
+	}
 	std::vector<std::string>::iterator filename = flags.filenames.begin();
 	while ( true ) {
 		if ( filename == flags.filenames.end() ) {
 			break;
 		}
-		if ( filename == flags.filenames.begin() - 1 ) {
-			filename++;
-		}
 		try {
+			flags.playlist_index = filename - flags.filenames.begin();
 			render_file( flags, *filename, log, audio_stream );
 			filename++;
 			continue;
@@ -1172,7 +1401,7 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 		} catch ( next_file & e ) {
 			while ( filename != flags.filenames.end() && e.count ) {
 				e.count--;
-				++filename++;
+				++filename;
 			}
 			continue;
 		} catch ( ... ) {
@@ -1182,7 +1411,11 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 }
 
 
-static commandlineflags parse_openmpt123( const std::vector<std::string> & args ) {
+static commandlineflags parse_openmpt123( const std::vector<std::string> & args, std::ostream & log ) {
+
+	if ( args.size() <= 1 ) {
+		throw args_error_exception();
+	}
 
 	commandlineflags flags;
 
@@ -1211,6 +1444,14 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.verbose = true;
 			} else if ( arg == "--version" ) {
 				throw show_version_number_exception();
+			} else if ( arg == "--short-version" ) {
+				throw show_short_version_number_exception();
+			} else if ( arg == "--long-version" ) {
+				throw show_long_version_number_exception();
+			} else if ( arg == "--credits" ) {
+				throw show_credits_exception();
+			} else if ( arg == "--license" ) {
+				throw show_license_exception();
 			} else if ( arg == "--info" ) {
 				flags.mode = ModeInfo;
 			} else if ( arg == "--ui" ) {
@@ -1251,17 +1492,43 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				flags.show_message = true;
 			} else if ( arg == "--no-message" ) {
 				flags.show_message = false;
+			} else if ( arg == "--driver" && nextarg != "" ) {
+				if ( false ) {
+					// nothing
+				} else if ( nextarg == "help" ) {
+					std::ostringstream drivers;
+					drivers << " Available drivers:" << std::endl;
+					drivers << "    " << "default" << std::endl;
+#if defined( MPT_WITH_PORTAUDIO )
+					drivers << "    " << "portaudio" << std::endl;
+#endif
+#if defined( MPT_WITH_SDL )
+					drivers << "    " << "sdl" << std::endl;
+#endif
+#if defined( WIN32 )
+					drivers << "    " << "waveout" << std::endl;
+#endif
+					throw show_help_exception( drivers.str() );
+				} else if ( nextarg == "default" ) {
+					flags.driver = "";
+				} else {
+					flags.driver = nextarg;
+				}
+				++i;
 			} else if ( arg == "--device" && nextarg != "" ) {
 				if ( false ) {
 					// nothing
-				} else if ( nextarg == "stdout" ) {
-					flags.use_stdout = true;
 				} else if ( nextarg == "help" ) {
+					std::ostringstream devices;
+					devices << " Available devices:" << std::endl;
+					devices << "    " << "default" << ": " << "default" << std::endl;
 #if defined( MPT_WITH_PORTAUDIO )
-					show_portaudio_devices();
-#elif defined( WIN32 )
-					show_waveout_devices();
+					devices << show_portaudio_devices( log );
 #endif
+#if defined( WIN32 )
+					devices << show_waveout_devices( log );
+#endif
+					throw show_help_exception( devices.str() );
 				} else if ( nextarg == "default" ) {
 					flags.device = -1;
 				} else {
@@ -1272,6 +1539,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 			} else if ( arg == "--buffer" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.buffer;
+				++i;
+			} else if ( arg == "--update" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.ui_redraw_interval;
 				++i;
 			} else if ( arg == "--stdout" ) {
 				flags.use_stdout = true;
@@ -1313,6 +1584,14 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				std::istringstream istr( nextarg );
 				istr >> flags.ramping;
 				++i;
+			} else if ( arg == "--dither" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.dither;
+				++i;
+			} else if ( arg == "--shuffle" ) {
+				flags.shuffle = true;
+			} else if ( arg == "--no-shuffle" ) {
+				flags.shuffle = false;
 			} else if ( arg == "--repeat" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.repeatcount;
@@ -1322,19 +1601,13 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args 
 				istr >> flags.seek_target;
 				++i;
 			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == "-" ) {
-				throw show_help_exception();
+				throw args_error_exception();
 			}
 		}
 	}
 
 	return flags;
 
-}
-
-static void show_credits( std::ostream & s ) {
-	s << openmpt::string::get( openmpt::string::contact ) << std::endl;
-	s << std::endl;
-	s << openmpt::string::get( openmpt::string::credits );
 }
 
 #if defined(WIN32)
@@ -1364,74 +1637,122 @@ static int wmain( int wargc, wchar_t * wargv [] ) {
 #else
 static int main( int argc, char * argv [] ) {
 #endif
-
-	#if defined(WIN32)
-
-		ConsoleCP_utf8_raii console_cp;
-
-	#endif
-
-	textout_dummy dummy_log;
-
-	#if defined(WIN32)
-		textout_console std_log( GetStdHandle( STD_ERROR_HANDLE ) );
+	std::vector<std::string> args;
+	#if defined(WIN32) && defined(UNICODE)
+		for ( int arg = 0; arg < wargc; ++arg ) {
+			args.push_back( wstring_to_utf8( wargv[arg] ) );
+		}
 	#else
-		textout_ostream std_log( std::clog );
+		args = std::vector<std::string>( argv, argv + argc );
 	#endif
+
+#if defined(WIN32)
+	ConsoleCP_utf8_raii console_cp;
+#endif
+	textout_dummy dummy_log;
+#if defined(WIN32)
+	textout_console std_out( GetStdHandle( STD_OUTPUT_HANDLE ) );
+	textout_console std_err( GetStdHandle( STD_ERROR_HANDLE ) );
+#else
+	textout_ostream std_out( std::cout );
+	textout_ostream std_err( std::clog );
+#endif
 
 	commandlineflags flags;
 
 	try {
 
-		std::vector<std::string> args;
-		
-		#if defined(WIN32) && defined(UNICODE)
-			for ( int arg = 0; arg < wargc; ++arg ) {
-				args.push_back( wstring_to_utf8( wargv[arg] ) );
-			}
-		#else
-			args = std::vector<std::string>( argv, argv + argc );
-		#endif
-
-		flags = parse_openmpt123( args );
-
-		if ( args.size() <= 1 ) {
-			throw show_help_exception( "", false );
-		}
+		flags = parse_openmpt123( args, std::cerr );
 
 		flags.check_and_sanitize();
 
-		textout & log = flags.quiet ? *static_cast<textout*>(&dummy_log) : *static_cast<textout*>(&std_log);
+	} catch ( args_error_exception & ) {
+		show_help( std_out );
+		return 1;
+	} catch ( show_help_exception & e ) {
+		show_help( std_out, e.longhelp, e.message );
+		if ( flags.verbose ) {
+			show_credits( std_out );
+		}
+		return 0;
+	} catch ( show_help_keyboard_exception & ) {
+		show_help_keyboard( std_out );
+		return 0;
+	} catch ( show_long_version_number_exception & ) {
+		show_long_version( std_out );
+		return 0;
+	} catch ( show_version_number_exception & ) {
+		show_version( std_out );
+		return 0;
+	} catch ( show_short_version_number_exception & ) {
+		show_short_version( std_out );
+		return 0;
+	} catch ( show_credits_exception & ) {
+		show_credits( std_out );
+		return 0;
+	} catch ( show_license_exception & ) {
+		show_license( std_out );
+		return 0;
+	} catch ( silent_exit_exception & ) {
+		return 0;
+	} catch ( std::exception & e ) {
+		std_err << "error: " << e.what() << std::endl;
+		std_err.writeout();
+		return 1;
+	} catch ( ... ) {
+		std_err << "unknown error" << std::endl;
+		std_err.writeout();
+		return 1;
+	}
+
+	try {
+
+		bool stdin_can_ui = true;
+		for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+			if ( *filename == "-" ) {
+				stdin_can_ui = false;
+				break;
+			}
+		}
+
+		bool stdout_can_ui = true;
+		if ( flags.use_stdout ) {
+			stdout_can_ui = false;
+		}
+
+		// set stdin binary
+		#if defined(WIN32)
+			if ( !stdin_can_ui ) {
+				_setmode( _fileno( stdin ), _O_BINARY );
+			}
+		#endif
+
+		// set stdout binary
+		#if defined(WIN32)
+			if ( !stdout_can_ui ) {
+				_setmode( _fileno( stdout ), _O_BINARY );
+			}
+		#endif
+
+		// setup terminal
+		#if !defined(WIN32)
+			if ( stdin_can_ui ) {
+				if ( flags.mode == ModeUI ) {
+					set_input_mode();
+				}
+			}
+		#endif
+		
+		textout & log = flags.quiet ? *static_cast<textout*>( &dummy_log ) : *static_cast<textout*>( stdout_can_ui ? &std_out : &std_err );
 
 		show_info( log, flags.verbose );
 
 		if ( flags.verbose ) {
-
-			show_credits( log );
-
 			log << flags;
-
 		}
 
-		#if defined(WIN32)
+		std::srand( static_cast<unsigned int>( std::time( NULL ) ) );
 
-			for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
-				if ( *filename == "-" ) {
-					_setmode( _fileno( stdin ), _O_BINARY );
-					break;
-				}
-			}
-
-		#endif
-
-		#if !defined(WIN32)
-
-			if ( flags.mode == ModeUI ) {
-				set_input_mode();
-			}
-
-		#endif
-		
 		switch ( flags.mode ) {
 			case ModeInfo: {
 				void_audio_stream dummy;
@@ -1440,17 +1761,27 @@ static int main( int argc, char * argv [] ) {
 			case ModeUI:
 			case ModeBatch: {
 				if ( flags.use_stdout ) {
+					flags.apply_default_buffer_sizes();
 					stdout_stream_raii stdout_audio_stream;
 					render_files( flags, log, stdout_audio_stream );
 				} else if ( !flags.output_filename.empty() ) {
+					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream );
 #if defined( MPT_WITH_PORTAUDIO )
-				} else {
+				} else if ( flags.driver == "portaudio" || flags.driver.empty() ) {
 					portaudio_stream_raii portaudio_stream( flags, log );
 					render_files( flags, log, portaudio_stream );
-#elif defined( WIN32 )
-				} else {
+#endif
+#if defined( MPT_WITH_SDL )
+				} else if ( flags.driver == "sdl" || flags.driver.empty() ) {
+					flags.apply_default_buffer_sizes();
+					sdl_stream_raii sdl_stream( flags );
+					render_files( flags, log, sdl_stream );
+#endif
+#if defined( WIN32 )
+				} else if ( flags.driver == "waveout" || flags.driver.empty() ) {
+					flags.apply_default_buffer_sizes();
 					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream );
 #endif
@@ -1458,41 +1789,40 @@ static int main( int argc, char * argv [] ) {
 			} break;
 			case ModeRender: {
 				for ( std::vector<std::string>::iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
+					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, *filename + std::string(".") + flags.output_extension, log );
 					render_file( flags, *filename, log, file_audio_stream );
+					flags.playlist_index++;
 				}
 			} break;
 			case ModeNone:
-				throw show_help_exception();
 			break;
 		}
 
-	} catch ( show_help_exception & e ) {
-		show_help( std_log, e, flags.verbose );
-		if ( flags.verbose ) {
-			show_credits( std_log );
-		}
+	} catch ( args_error_exception & ) {
+		show_help( std_out );
 		return 1;
-	} catch ( show_help_keyboard_exception & ) {
-		show_help_keyboard( std_log );
-		return 1;
-	} catch ( show_version_number_exception & ) {
-		show_version( std_log );
-		return 0;
 #ifdef MPT_WITH_PORTAUDIO
 	} catch ( portaudio_exception & e ) {
-		std_log << "PortAudio error: " << e.what() << std::endl;
-		std_log.writeout();
+		std_err << "PortAudio error: " << e.what() << std::endl;
+		std_err.writeout();
+		return 1;
+#endif
+#ifdef MPT_WITH_SDL
+	} catch ( sdl_exception & e ) {
+		std_err << "SDL error: " << e.what() << std::endl;
+		std_err.writeout();
+		return 1;
 #endif
 	} catch ( silent_exit_exception & ) {
 		return 0;
 	} catch ( std::exception & e ) {
-		std_log << "error: " << e.what() << std::endl;
-		std_log.writeout();
+		std_err << "error: " << e.what() << std::endl;
+		std_err.writeout();
 		return 1;
 	} catch ( ... ) {
-		std_log << "unknown error" << std::endl;
-		std_log.writeout();
+		std_err << "unknown error" << std::endl;
+		std_err.writeout();
 		return 1;
 	}
 

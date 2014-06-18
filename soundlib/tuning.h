@@ -12,6 +12,10 @@
 
 #include "tuningbase.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 typedef CTuningBase CTuning;
 
 
@@ -131,7 +135,7 @@ protected:
 	//For example GetRefNote(-1) is to return note :'groupsize-1'.
 	NOTEINDEXTYPE GetRefNote(NOTEINDEXTYPE note) const;
 
-	virtual const std::string& GetDerivedClassID() const {return s_DerivedclassID;}
+	virtual std::string GetDerivedClassID() const {return s_DerivedclassID;}
 
 private:
 	//PRIVATE METHODS:
@@ -158,7 +162,7 @@ private:
 	std::vector<RATIOTYPE> m_RatioTableFine;
 	
 	//The lowest index of note in the table
-	NOTEINDEXTYPE m_StepMin;
+	NOTEINDEXTYPE m_StepMin; // this should REALLY be called 'm_NoteMin' renaming was missed in r192
 	
 	//For groupgeometric tunings, tells the 'group size' and 'group ratio'
 	//m_GroupSize should always be >= 0.
@@ -178,3 +182,6 @@ private:
 	
 
 }; //End: CTuningRTI declaration.
+
+
+OPENMPT_NAMESPACE_END

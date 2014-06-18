@@ -12,12 +12,15 @@
 #include "Sndfile.h"
 #include "ModChannel.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel)
 //-------------------------------------------------------------------------------------------------
 {
 	if(resetMask & resetSetPosBasic)
 	{
-		nNote = nNewNote = nNewIns = nOldIns = 0;
+		nNote = nNewNote = NOTE_NONE;
+		nNewIns = nOldIns = 0;
 		pModSample = nullptr;
 		pModInstrument = nullptr;
 		nPortamentoDest = 0;
@@ -34,17 +37,19 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		}
 		nTremorCount = 0;
 		nEFxSpeed = 0;
+		proTrackerOffset = 0;
+		isFirstTick = false;
 	}
 
 	if(resetMask & resetSetPosAdvanced)
 	{
 		nPeriod = 0;
 		nPos = 0;
+		nPosLo = 0;
 		nLength = 0;
 		nLoopStart = 0;
 		nLoopEnd = 0;
 		nROfs = nLOfs = 0;
-		pSample = nullptr;
 		pModSample = nullptr;
 		pModInstrument = nullptr;
 		nCutOff = 0x7F;
@@ -55,6 +60,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		rightRamp = leftRamp = 0;
 		nVolume = 256;
 		nVibratoPos = nTremoloPos = nPanbrelloPos = 0;
+		nOldHiOffset = 0;
 
 		//-->Custom tuning related
 		m_ReCalculateFreqOnFirstTick = false;
@@ -73,8 +79,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 			dwFlags = sndFile.ChnSettings[sourceChannel].dwFlags;
 			nPan = sndFile.ChnSettings[sourceChannel].nPan;
 			nGlobalVol = sndFile.ChnSettings[sourceChannel].nVolume;
-		}
-		else
+		} else
 		{
 			dwFlags.reset();
 			nPan = 128;
@@ -86,3 +91,6 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

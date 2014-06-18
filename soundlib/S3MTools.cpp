@@ -14,6 +14,9 @@
 #include "../common/StringFixer.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Convert all multi-byte numeric values to current platform's endianness or vice versa.
 void S3MFileHeader::ConvertEndianness()
 //-------------------------------------
@@ -24,7 +27,6 @@ void S3MFileHeader::ConvertEndianness()
 	SwapBytesLE(flags);
 	SwapBytesLE(cwtv);
 	SwapBytesLE(formatVersion);
-	SwapBytesLE(magic);
 }
 
 
@@ -36,7 +38,6 @@ void S3MSampleHeader::ConvertEndianness()
 	SwapBytesLE(loopStart);
 	SwapBytesLE(loopEnd);
 	SwapBytesLE(c5speed);
-	SwapBytesLE(magic);
 }
 
 
@@ -47,7 +48,7 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 	mptSmp.Initialize(MOD_TYPE_S3M);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
 
-	if((sampleType == typePCM || sampleType == typeNone) && magic == idSCRS)
+	if((sampleType == typePCM || sampleType == typeNone) && !memcmp(magic, "SCRS", 4))
 	{
 		// Sample Length and Loops
 		if(sampleType == typePCM)
@@ -118,7 +119,7 @@ SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
 	{
 		c5speed = ModSample::TransposeToFrequency(mptSmp.RelativeTone, mptSmp.nFineTune);
 	}
-	magic = idSCRS;
+	memcpy(magic, "SCRS", 4);
 
 	return smpLength;
 }
@@ -141,3 +142,6 @@ SampleIO S3MSampleHeader::GetSampleFormat(bool signedSamples) const
 			signedSamples ? SampleIO::signedPCM : SampleIO::unsignedPCM);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

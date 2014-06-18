@@ -10,8 +10,10 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
-#include "../soundlib/SoundFilePlayConfig.h"
+#include "Mixer.h"
+#include "SoundFilePlayConfig.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 CSoundFilePlayConfig::CSoundFilePlayConfig()
 //------------------------------------------
@@ -100,12 +102,13 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 		// This is basically derived from mixmode 1.17 RC3, with panning mode and volume levels changed.
 		// Sample attenuation is the same as in Schism Tracker (more attenuation than with RC3, thus VSTi attenuation is also higher).
 		case mixLevels_compatible:
+		case mixLevels_compatible_FT2:
 			setVSTiAttenuation(0.75f);
 			setIntToFloat(1.0f/MIXING_SCALEF);
 			setFloatToInt(MIXING_SCALEF);
 			setGlobalVolumeAppliesToMaster(true);
 			setUseGlobalPreAmp(false);
-			setForcePanningMode(forceNoSoftPanning);
+			setForcePanningMode(mixLevelType == mixLevels_compatible ? forceNoSoftPanning : forceFT2Panning);
 			setDisplayDBValues(true);
 			setNormalSamplePreAmp(256.0);
 			setNormalVSTiVol(256.0);
@@ -119,158 +122,4 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 }
 
 
-
-//getters and setters.
-bool CSoundFilePlayConfig::getGlobalVolumeAppliesToMaster() const
-//---------------------------------------------------------------
-{
-	return m_globalVolumeAppliesToMaster;
-}
-
-
-void CSoundFilePlayConfig::setGlobalVolumeAppliesToMaster(bool inGlobalVolumeAppliesToMaster)
-//-------------------------------------------------------------------------------------------
-{
-	m_globalVolumeAppliesToMaster=inGlobalVolumeAppliesToMaster;
-}
-
-float CSoundFilePlayConfig::getVSTiGainFactor() const
-//---------------------------------------------------
-{
-	return m_VSTiVolume;
-}
-
-float CSoundFilePlayConfig::getVSTiVolume() const
-//-----------------------------------------------
-{
-	return m_VSTiVolume;
-}
-
-void  CSoundFilePlayConfig::setVSTiVolume(float inVSTiVolume)
-//-----------------------------------------------------------
-{
-	m_VSTiVolume = inVSTiVolume;
-}
-
-float CSoundFilePlayConfig::getVSTiAttenuation() const
-//----------------------------------------------------
-{
-	return m_VSTiAttenuation;
-}
-
-void  CSoundFilePlayConfig::setVSTiAttenuation(float inVSTiAttenuation)
-//---------------------------------------------------------------------
-{
-	m_VSTiAttenuation = inVSTiAttenuation;
-}
-
-float CSoundFilePlayConfig::getIntToFloat() const
-//-----------------------------------------------
-{
-	return m_IntToFloat;
-}
-
-void  CSoundFilePlayConfig::setIntToFloat(float inIntToFloat)
-//-----------------------------------------------------------
-{
-	m_IntToFloat = inIntToFloat;
-}
-
-
-float CSoundFilePlayConfig::getFloatToInt() const
-//-----------------------------------------------
-{
-	return m_FloatToInt;
-}
-
-
-void  CSoundFilePlayConfig::setFloatToInt(float inFloatToInt)
-//-----------------------------------------------------------
-{
-	m_FloatToInt = inFloatToInt;
-}
-
-bool CSoundFilePlayConfig::getUseGlobalPreAmp() const
-//---------------------------------------------------
-{
-	return m_ignorePreAmp;
-}
-
-void CSoundFilePlayConfig::setUseGlobalPreAmp(bool inUseGlobalPreAmp)
-//-------------------------------------------------------------------
-{
-	m_ignorePreAmp = inUseGlobalPreAmp;
-}
-
-
-forcePanningMode CSoundFilePlayConfig::getForcePanningMode() const
-//----------------------------------------------------------------
-{
-	return m_forceSoftPanning;
-}
-
-void CSoundFilePlayConfig::setForcePanningMode(forcePanningMode inForceSoftPanning)
-//---------------------------------------------------------------------------------
-{
-	m_forceSoftPanning = inForceSoftPanning;
-}
-
-void CSoundFilePlayConfig::setDisplayDBValues(bool in)
-//----------------------------------------------------
-{
-	m_displayDBValues = in;
-}
-
-void CSoundFilePlayConfig::setNormalSamplePreAmp(double in)
-//---------------------------------------------------------
-{
-	m_normalSamplePreAmp = in;
-}
-
-void CSoundFilePlayConfig::setNormalVSTiVol(double in)
-//----------------------------------------------------
-{
-	m_normalVSTiVol = in;
-}
-
-void CSoundFilePlayConfig::setNormalGlobalVol(double in)
-//------------------------------------------------------
-{
-	m_normalGlobalVol = in;
-}
-
-bool CSoundFilePlayConfig::getDisplayDBValues() const
-//---------------------------------------------------
-{
-	return m_displayDBValues;
-}
-
-double CSoundFilePlayConfig::getNormalSamplePreAmp() const
-//--------------------------------------------------------
-{
-	return m_normalSamplePreAmp;
-}
-
-double CSoundFilePlayConfig::getNormalVSTiVol() const
-//---------------------------------------------------
-{
-	return m_normalVSTiVol;
-}
-
-double CSoundFilePlayConfig::getNormalGlobalVol() const
-//-----------------------------------------------------
-{
-	return m_normalGlobalVol;
-}
-
-void CSoundFilePlayConfig::setExtraSampleAttenuation(int attn)
-//------------------------------------------------------------
-{
-	m_extraAttenuation = attn;
-}
-
-int CSoundFilePlayConfig::getExtraSampleAttenuation() const
-//---------------------------------------------------------
-{
-	return m_extraAttenuation;
-}
+OPENMPT_NAMESPACE_END

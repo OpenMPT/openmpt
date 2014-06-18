@@ -12,12 +12,20 @@
 #include "stdafx.h"
 
 #include "SoundDevice.h"
-#include "SoundDevices.h"
+#include "SoundDeviceThread.h"
 
 #include "SoundDeviceDirectSound.h"
 
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
+
+#include <mmreg.h>
+
+
+OPENMPT_NAMESPACE_BEGIN
+
+
+bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings);
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -26,36 +34,6 @@
 //
 
 #ifndef NO_DSOUND
-
-
-#define DSOUND_MINBUFFERSIZE 1024
-#define DSOUND_MAXBUFFERSIZE SNDDEV_MAXBUFFERSIZE
-
-
-static std::wstring GuidToString(GUID guid)
-//-----------------------------------------
-{
-	std::wstring str;
-	LPOLESTR tmp = nullptr;
-	StringFromIID(guid, &tmp);
-	if(tmp)
-	{
-		str = tmp;
-		CoTaskMemFree(tmp);
-		tmp = nullptr;
-	}
-	return str;
-}
-
-
-static GUID StringToGuid(const std::wstring &str)
-//-----------------------------------------------
-{
-	GUID guid = GUID();
-	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	IIDFromString(&tmp[0], &guid);
-	return guid;
-}
 
 
 static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR, LPVOID lpContext)
@@ -73,9 +51,10 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 	SoundDeviceInfo info;
 	info.id = SoundDeviceID(SNDDEV_DSOUND, static_cast<SoundDeviceIndex>(devices.size()));
 	info.name = lpstrDescription;
+	info.apiName = SoundDeviceTypeToString(SNDDEV_DSOUND);
 	if(lpGuid)
 	{
-		info.internalID = GuidToString(*lpGuid);
+		info.internalID = Util::GUIDToString(*lpGuid);
 	}
 	devices.push_back(info);
 	return TRUE;
@@ -94,37 +73,89 @@ std::vector<SoundDeviceInfo> CDSoundDevice::EnumerateDevices()
 CDSoundDevice::CDSoundDevice(SoundDeviceID id, const std::wstring &internalID)
 //----------------------------------------------------------------------------
 	: CSoundDeviceWithThread(id, internalID)
+	, m_piDS(NULL)
+	, m_pPrimary(NULL)
+	, m_pMixBuffer(NULL)
+	, m_nDSoundBufferSize(0)
+	, m_bMixRunning(FALSE)
+	, m_dwWritePos(0)
+	, m_dwLatency(0)
 {
-	m_piDS = NULL;
-	m_pPrimary = NULL;
-	m_pMixBuffer = NULL;
-	m_bMixRunning = FALSE;
-	m_nBytesPerSec = 0;
-	m_BytesPerSample = 0;
+	return;
 }
 
 
 CDSoundDevice::~CDSoundDevice()
 //-----------------------------
 {
-	Reset();
 	Close();
 }
 
 
-SoundDeviceCaps CDSoundDevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
-//--------------------------------------------------------------------------------------
+SoundDeviceCaps CDSoundDevice::GetDeviceCaps()
+//--------------------------------------------
 {
 	SoundDeviceCaps caps;
+	caps.CanUpdateInterval = true;
+	caps.CanSampleFormat = true;
+	caps.CanExclusiveMode = false;
+	caps.CanBoostThreadPriority = true;
+	caps.CanUseHardwareTiming = false;
+	caps.CanChannelMapping = false;
+	caps.CanDriverPanel = false;
+	caps.ExclusiveModeDescription = L"Use primary buffer";
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
-	if(IsOpen())
+	if(m_piDS)
 	{
 		ds = m_piDS;
 	} else
 	{
 		const std::wstring internalID = GetDeviceInternalID();
-		GUID guid = internalID.empty() ? GUID() : StringToGuid(internalID);
+		GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(internalID);
+		if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &dummy, NULL) != DS_OK)
+		{
+			return caps;
+		}
+		if(!dummy)
+		{
+			return caps;
+		}
+		ds = dummy;
+	}
+	DSCAPS dscaps;
+	MemsetZero(dscaps);
+	dscaps.dwSize = sizeof(dscaps);
+	if(DS_OK != ds->GetCaps(&dscaps))
+	{
+		if(!(dscaps.dwFlags & DSCAPS_EMULDRIVER))
+		{
+			caps.CanExclusiveMode = true;
+		}
+	}
+	if(dummy)
+	{
+		dummy->Release();
+		dummy = nullptr;
+	}
+	ds = nullptr;
+	return caps;
+}
+
+
+SoundDeviceDynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+//----------------------------------------------------------------------------------------------------
+{
+	SoundDeviceDynamicCaps caps;
+	IDirectSound *dummy = nullptr;
+	IDirectSound *ds = nullptr;
+	if(m_piDS)
+	{
+		ds = m_piDS;
+	} else
+	{
+		const std::wstring internalID = GetDeviceInternalID();
+		GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(internalID);
 		if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &dummy, NULL) != DS_OK)
 		{
 			return caps;
@@ -168,26 +199,28 @@ bool CDSoundDevice::InternalOpen()
 //--------------------------------
 {
 	WAVEFORMATEXTENSIBLE wfext;
-	if(!FillWaveFormatExtensible(wfext)) return false;
+	if(!FillWaveFormatExtensible(wfext, m_Settings)) return false;
 	WAVEFORMATEX *pwfx = &wfext.Format;
+
+	const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
 
 	DSBUFFERDESC dsbd;
 	DSBCAPS dsc;
-	UINT nPriorityLevel = (m_Settings.ExclusiveMode) ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY;
 
 	if(m_piDS) return true;
 	const std::wstring internalID = GetDeviceInternalID();
-	GUID guid = internalID.empty() ? GUID() : StringToGuid(internalID);
+	GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(internalID);
 	if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
-	m_piDS->SetCooperativeLevel(m_Settings.hWnd, nPriorityLevel);
+	if(m_piDS->SetCooperativeLevel(m_Settings.hWnd, m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY) != DS_OK)
+	{
+		Close();
+		return false;
+	}
 	m_bMixRunning = FALSE;
 	m_nDSoundBufferSize = (m_Settings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
-	m_nDSoundBufferSize = (m_nDSoundBufferSize + 15) & ~15;
-	if(m_nDSoundBufferSize < DSOUND_MINBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MINBUFFERSIZE;
-	if(m_nDSoundBufferSize > DSOUND_MAXBUFFERSIZE) m_nDSoundBufferSize = DSOUND_MAXBUFFERSIZE;
-	m_nBytesPerSec = pwfx->nAvgBytesPerSec;
-	m_BytesPerSample = (pwfx->wBitsPerSample/8) * pwfx->nChannels;
+	m_nDSoundBufferSize = Clamp(m_nDSoundBufferSize, (DWORD)DSBSIZE_MIN, (DWORD)DSBSIZE_MAX);
+	m_nDSoundBufferSize = (m_nDSoundBufferSize + (bytesPerFrame-1)) / bytesPerFrame * bytesPerFrame; // round up to full frame
 	if(!m_Settings.ExclusiveMode)
 	{
 		// Set the format of the primary buffer
@@ -201,7 +234,11 @@ bool CDSoundDevice::InternalOpen()
 			Close();
 			return false;
 		}
-		m_pPrimary->SetFormat(pwfx);
+		if(m_pPrimary->SetFormat(pwfx) != DS_OK)
+		{
+			Close();
+			return false;
+		}
 		///////////////////////////////////////////////////
 		// Create the secondary buffer
 		dsbd.dwSize = sizeof(dsbd);
@@ -255,9 +292,14 @@ bool CDSoundDevice::InternalOpen()
 		m_pMixBuffer->GetStatus(&dwStat);
 		if (dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
 	}
-	m_RealLatencyMS = m_nDSoundBufferSize * 1000.0f / m_nBytesPerSec;
-	m_RealUpdateIntervalMS = CLAMP(static_cast<float>(m_Settings.UpdateIntervalMS), 1.0f, m_nDSoundBufferSize * 1000.0f / ( 2.0f * m_nBytesPerSec ) );
 	m_dwWritePos = 0xFFFFFFFF;
+	SetWakeupInterval(std::min(m_Settings.UpdateIntervalMS / 1000.0, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
+	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
+	SoundBufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_nDSoundBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
+	bufferAttributes.UpdateInterval = std::min(m_Settings.UpdateIntervalMS / 1000.0, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond()));
+	bufferAttributes.NumBuffers = 1;
+	UpdateBufferAttributes(bufferAttributes);
 	return true;
 }
 
@@ -288,8 +330,7 @@ bool CDSoundDevice::InternalClose()
 void CDSoundDevice::StartFromSoundThread()
 //----------------------------------------
 {
-	if(!m_pMixBuffer) return;
-	// done in FillAudioBuffer for now
+	// done in InternalFillAudioBuffer
 }
 
 
@@ -304,90 +345,92 @@ void CDSoundDevice::StopFromSoundThread()
 }
 
 
-void CDSoundDevice::ResetFromOutsideSoundThread()
-//-----------------------------------------------
+void CDSoundDevice::InternalFillAudioBuffer()
+//-------------------------------------------
 {
-	if(m_pMixBuffer)
+	if(!m_pMixBuffer)
 	{
-		m_pMixBuffer->Stop();
+		RequestClose();
+		return;
 	}
-	m_bMixRunning = FALSE;
-}
-
-
-DWORD CDSoundDevice::LockBuffer(DWORD dwBytes, LPVOID *lpBuf1, LPDWORD lpSize1, LPVOID *lpBuf2, LPDWORD lpSize2)
-//--------------------------------------------------------------------------------------------------------------
-{
-	DWORD d, dwPlay = 0, dwWrite = 0;
-
-	if ((!m_pMixBuffer) || (!m_nDSoundBufferSize)) return 0;
-	if (m_pMixBuffer->GetCurrentPosition(&dwPlay, &dwWrite) != DS_OK) return 0;
-	if ((m_dwWritePos >= m_nDSoundBufferSize) || (!m_bMixRunning))
+	if(m_nDSoundBufferSize == 0)
 	{
-		m_dwWritePos = dwWrite;
-		m_dwLatency = 0;
-		d = m_nDSoundBufferSize/2;
-	} else
-	{
-		dwWrite = m_dwWritePos;
-		m_dwLatency = (m_nDSoundBufferSize + dwWrite - dwPlay) % m_nDSoundBufferSize;
-		if (dwPlay >= dwWrite)
-			d = dwPlay - dwWrite;
-		else
-			d = m_nDSoundBufferSize + dwPlay - dwWrite;
+		RequestClose();
+		return;
 	}
-	if (d > m_nDSoundBufferSize) return FALSE;
-	if (d > m_nDSoundBufferSize/2) d = m_nDSoundBufferSize/2;
-	if (dwBytes)
-	{
-		if (m_dwLatency > dwBytes) return 0;
-		if (m_dwLatency+d > dwBytes) d = dwBytes - m_dwLatency;
-	}
-	d &= ~0x0f;
-	if (d <= 16) return 0;
-	HRESULT hr = m_pMixBuffer->Lock(m_dwWritePos, d, lpBuf1, lpSize1, lpBuf2, lpSize2, 0);
-	if(hr == DSERR_BUFFERLOST)
-	{
-		// buffer lost, restore buffer and try again, fail if it fails again
-		if(m_pMixBuffer->Restore() != DS_OK) return 0;
-		if(m_pMixBuffer->Lock(m_dwWritePos, d, lpBuf1, lpSize1, lpBuf2, lpSize2, 0) != DS_OK) return 0;
-		return d;
-	} else if(hr != DS_OK)
-	{
-		return 0;
-	}
-	return d;
-}
 
-
-BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DWORD dwSize2)
-//------------------------------------------------------------------------------------------
-{
-	if (!m_pMixBuffer) return FALSE;
-	if (m_pMixBuffer->Unlock(lpBuf1, dwSize1, lpBuf2, dwSize2) == DS_OK)
+	for(int refillCount = 0; refillCount < 2; ++refillCount)
 	{
+		// Refill the buffer at most twice so we actually sleep some time when CPU is overloaded.
+		
+		const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
+
+		DWORD dwPlay = 0;
+		DWORD dwWrite = 0;
+		if(m_pMixBuffer->GetCurrentPosition(&dwPlay, &dwWrite) != DS_OK)
+		{
+			RequestClose();
+			return;
+		}
+
+		DWORD dwBytes = m_nDSoundBufferSize/2;
+		if(!m_bMixRunning)
+		{
+			// startup
+			m_dwWritePos = dwWrite;
+			m_dwLatency = 0;
+		} else
+		{
+			// running
+			m_dwLatency = (m_dwWritePos - dwPlay + m_nDSoundBufferSize) % m_nDSoundBufferSize;
+			m_dwLatency = (m_dwLatency + m_nDSoundBufferSize - 1) % m_nDSoundBufferSize + 1;
+			dwBytes = (dwPlay - m_dwWritePos + m_nDSoundBufferSize) % m_nDSoundBufferSize;
+			dwBytes = Clamp(dwBytes, (DWORD)0u, m_nDSoundBufferSize/2); // limit refill amount to half the buffer size
+		}
+		dwBytes = dwBytes / bytesPerFrame * bytesPerFrame; // truncate to full frame
+		if(dwBytes < bytesPerFrame)
+		{
+			// ok, nothing to do
+			return;
+		}
+
+		void *buf1 = nullptr;
+		void *buf2 = nullptr;
+		DWORD dwSize1 = 0;
+		DWORD dwSize2 = 0;
+		HRESULT hr = m_pMixBuffer->Lock(m_dwWritePos, dwBytes, &buf1, &dwSize1, &buf2, &dwSize2, 0);
+		if(hr == DSERR_BUFFERLOST)
+		{
+			// buffer lost, restore buffer and try again, fail if it fails again
+			if(m_pMixBuffer->Restore() != DS_OK)
+			{
+				RequestClose();
+				return;
+			}
+			if(m_pMixBuffer->Lock(m_dwWritePos, dwBytes, &buf1, &dwSize1, &buf2, &dwSize2, 0) != DS_OK)
+			{
+				RequestClose();
+				return;
+			}
+		} else if(hr != DS_OK)
+		{
+			RequestClose();
+			return;
+		}
+
+		SourceAudioPreRead(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame);
+
+		SourceAudioRead(buf1, dwSize1/bytesPerFrame);
+		SourceAudioRead(buf2, dwSize2/bytesPerFrame);
+
+		if(m_pMixBuffer->Unlock(buf1, dwSize1, buf2, dwSize2) != DS_OK)
+		{
+			RequestClose();
+			return;
+		}
 		m_dwWritePos += dwSize1 + dwSize2;
-		if (m_dwWritePos >= m_nDSoundBufferSize) m_dwWritePos -= m_nDSoundBufferSize;
-		return TRUE;
-	}
-	return FALSE;
-}
+		m_dwWritePos %= m_nDSoundBufferSize;
 
-
-void CDSoundDevice::FillAudioBuffer()
-//-----------------------------------
-{
-	LPVOID lpBuf1=NULL, lpBuf2=NULL;
-	DWORD dwSize1=0, dwSize2=0;
-	DWORD dwBytes;
-
-	if (!m_pMixBuffer) return;
-	dwBytes = LockBuffer(m_nDSoundBufferSize, &lpBuf1, &dwSize1, &lpBuf2, &dwSize2);
-	if (dwBytes)
-	{
-		if ((lpBuf1) && (dwSize1)) SourceAudioRead(lpBuf1, dwSize1/m_BytesPerSample);
-		if ((lpBuf2) && (dwSize2)) SourceAudioRead(lpBuf2, dwSize2/m_BytesPerSample);
-		UnlockBuffer(lpBuf1, dwSize1, lpBuf2, dwSize2);
 		DWORD dwStatus = 0;
 		m_pMixBuffer->GetStatus(&dwStatus);
 		if(!m_bMixRunning || !(dwStatus & DSBSTATUS_PLAYING))
@@ -405,18 +448,39 @@ void CDSoundDevice::FillAudioBuffer()
 			if(hr == DSERR_BUFFERLOST)
 			{
 				// buffer lost, restore buffer and try again, fail if it fails again
-				if(m_pMixBuffer->Restore() != DS_OK) return;
-				if(m_pMixBuffer->Play(0, 0, DSBPLAY_LOOPING) != DS_OK) return;
+				if(m_pMixBuffer->Restore() != DS_OK)
+				{
+					RequestClose();
+					return;
+				}
+				if(m_pMixBuffer->Play(0, 0, DSBPLAY_LOOPING) != DS_OK)
+				{
+					RequestClose();
+					return;
+				}
 			} else if(hr != DS_OK)
 			{
+				RequestClose();
 				return;
 			}
 			m_bMixRunning = TRUE; 
 		}
-		SourceAudioDone((dwSize1+dwSize2)/m_BytesPerSample, m_dwLatency/m_BytesPerSample);
+
+		SourceAudioDone(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame, m_dwLatency/bytesPerFrame);
+
+		if(dwBytes < m_nDSoundBufferSize/2)
+		{
+			// Sleep again if we did fill less than half the buffer size.
+			// Otherwise it's a better idea to refill again right away.
+			break;
+		}
+
 	}
+
 }
 
 
 #endif // NO_DIRECTSOUND
 
+
+OPENMPT_NAMESPACE_END

@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifndef WM_HELPHITTEST
 #define WM_HELPHITTEST		0x366
 #endif
@@ -22,20 +24,14 @@
 
 class CModControlView;
 class CModControlBar;
+class CImageListEx;
 
 //=======================================
 class CModControlBar: public CToolBarCtrl
 //=======================================
 {
-protected:
-	HBITMAP m_hBarBmp;
-
 public:
-	CModControlBar() { m_hBarBmp=NULL; }
-	~CModControlBar();
-
-public:
-	BOOL Init(UINT nId=IDB_PATTERNS);
+	BOOL Init(CImageList &icons, CImageList &disabledIcons);
 	void UpdateStyle();
 	BOOL AddButton(UINT nID, int iImage=0, UINT nStyle=TBSTYLE_BUTTON, UINT nState=TBSTATE_ENABLED);
 	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM);
@@ -68,7 +64,7 @@ public:
 	void LockControls() { m_nLockCount++; }
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
 	bool IsLocked() const { return (m_nLockCount > 0); }
-	virtual LONG* GetSplitPosRef() = 0; 	//rewbs.varWindowSize
+	virtual Setting<LONG>* GetSplitPosRef() = 0; 	//rewbs.varWindowSize
 
 protected:
 	//{{AFX_VIRTUAL(CModControlDlg)
@@ -113,7 +109,7 @@ class CModTabCtrl: public CTabCtrl
 public:
 	BOOL InsertItem(int nIndex, LPSTR pszText, LPARAM lParam=0, int iImage=-1);
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
-	UINT GetItemData(int nIndex);
+	LPARAM GetItemData(int nIndex);
 };
 
 
@@ -141,6 +137,7 @@ public:
 	int GetInstrumentChange() const { return m_nInstrumentChanged; }
 	void SetMDIParentFrame(HWND hwnd) { m_hWndMDI = hwnd; }
 	void ForceRefresh();
+	CModControlDlg *GetCurrentControlDlg() { return m_Pages[m_nActiveDlg]; }
 
 protected:
 	void RecalcLayout();
@@ -160,7 +157,6 @@ protected:
 protected:
 	//{{AFX_MSG(CModControlView)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 	afx_msg void OnDestroy();
 	afx_msg void OnTabSelchange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnEditCut() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }
@@ -191,10 +187,11 @@ class CModScrollView: public CScrollView
 {
 protected:
 	HWND m_hWndCtrl;
+	int m_nScrollPosX, m_nScrollPosY;
 
 public:
 	DECLARE_SERIAL(CModScrollView)
-	CModScrollView() { m_hWndCtrl = NULL; }
+	CModScrollView() : m_hWndCtrl(nullptr), m_nScrollPosX(0), m_nScrollPosY(0) { }
 	virtual ~CModScrollView() {}
 
 public:
@@ -210,17 +207,27 @@ public:
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 	virtual void UpdateView(DWORD, CObject *) {}
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
-	virtual BOOL OnDragonDrop(BOOL, LPDRAGONDROP) { return FALSE; }
+	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
 	virtual LRESULT OnPlayerNotify(Notification *) { return 0; }
 	//}}AFX_VIRTUAL
+
+	CModControlDlg *GetControlDlg() { return static_cast<CModControlView *>(CWnd::FromHandle(m_hWndCtrl))->GetCurrentControlDlg(); }
 
 protected:
 	//{{AFX_MSG(CModScrollView)
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnReceiveModViewMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL OnMouseWheel(UINT fFlags, short zDelta, CPoint point);
-	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (LPDRAGONDROP)lParam); }
+	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (const DRAGONDROP *)lParam); }
 	LRESULT OnUpdatePosition(WPARAM, LPARAM);
+
+	// Fixes for 16-bit limitation in MFC's CScrollView
+	virtual BOOL OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll = TRUE);
+	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE);
+	virtual int SetScrollPos(int nBar, int nPos, BOOL bRedraw = TRUE);
+	virtual void SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& sizePage = CScrollView::sizeDefault, const SIZE& sizeLine = CScrollView::sizeDefault);
+
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -230,3 +237,6 @@ protected:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+
+OPENMPT_NAMESPACE_END

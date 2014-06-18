@@ -7,15 +7,17 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#include "BuildSettings.h"
-
 #ifndef NO_LIBMODPLUG
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif /* _MSC_VER */
+#ifdef LIBOPENMPT_BUILD_DLL
+#undef LIBOPENMPT_BUILD_DLL
+#endif
 
-#include "libopenmpt_internal.h"
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#endif /* _MSC_VER */
 
 #include "libopenmpt.h"
 
@@ -26,13 +28,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* define to emulate 0.8.7 API/ABI instead of 0.8.8 API/ABI */
+/* #define LIBOPENMPT_MODPLUG_0_8_7 */
+
 #ifdef _MSC_VER
 /* msvc errors when seeing dllexport declarations after prototypes have been declared in modplug.h */
 #define LIBOPENMPT_MODPLUG_API
 #else /* !_MSC_VER */
-#define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API
+#define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API_HELPER_EXPORT
 #endif /* _MSC_VER */
+#ifdef LIBOPENMPT_MODPLUG_0_8_7
+#include "libmodplug/modplug_0.8.7.h"
+#else
 #include "libmodplug/modplug.h"
+#endif
 
 /* from libmodplug/sndfile.h */
 /* header is not c clean */
@@ -85,9 +94,10 @@ static ModPlug_Settings globalsettings = {
 	16,
 	44100,
 	MODPLUG_RESAMPLE_LINEAR,
+#ifndef LIBOPENMPT_MODPLUG_0_8_7
 	128,
 	256,
-	
+#endif
 	0,
 	0,
 	0,
@@ -131,7 +141,9 @@ LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size)
 	openmpt_module_set_repeat_count(file->mod,file->settings.mLoopCount);
 	file->name = openmpt_module_get_metadata(file->mod,"title");
 	file->message = openmpt_module_get_metadata(file->mod,"message");
+#ifndef LIBOPENMPT_MODPLUG_0_8_7
 	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT,file->settings.mStereoSeparation*100/128);
+#endif
 	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_INTERPOLATIONFILTER_LENGTH,modplugresamplingmode_to_filterlength(file->settings.mResamplingMode));
 	return file;
 }
@@ -334,8 +346,7 @@ LIBOPENMPT_MODPLUG_API int ModPlug_GetPlayingChannels(ModPlugFile* file)
 LIBOPENMPT_MODPLUG_API void ModPlug_SeekOrder(ModPlugFile* file,int order)
 {
 	if(!file) return;
-	// todo: seek exactly to order
-	openmpt_module_set_position_seconds(file->mod,openmpt_module_get_duration_seconds(file->mod)*order/openmpt_module_get_num_orders(file->mod));
+	openmpt_module_set_position_order_row(file->mod,order,0);
 }
 
 LIBOPENMPT_MODPLUG_API int ModPlug_GetModuleType(ModPlugFile* file)

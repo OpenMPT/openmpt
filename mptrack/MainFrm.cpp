@@ -22,12 +22,10 @@
 #include "KeyConfigDlg.h"
 #include "AutoSaver.h"
 #include "MainFrm.h"
-// -> CODE#0015
-// -> DESC="channels management dlg"
+#include "InputHandler.h"
 #include "globals.h"
 #include "ChannelManagerDlg.h"
 #include "MIDIMappingDialog.h"
-// -! NEW_FEATURE#0015
 #include <direct.h>
 #include "../common/version.h"
 #include "ctrl_pat.h"
@@ -39,12 +37,19 @@
 #include "MemoryMappedFile.h"
 #include "soundlib/FileReader.h"
 #include "../common/Profiler.h"
+#include "FileDialog.h"
+#include <HtmlHelp.h>
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 #define MPTTIMER_PERIOD		200
 
@@ -60,6 +65,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_CLOSE()
 	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_DROPFILES()
 	ON_COMMAND(ID_VIEW_OPTIONS,				OnViewOptions)
 
 	ON_COMMAND(ID_PLUGIN_SETUP,				OnPluginManager)
@@ -68,7 +74,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_VIEW_MIDIMAPPING,			OnViewMIDIMapping)
 	//ON_COMMAND(ID_HELP,					CMDIFrameWnd::OnHelp)
 	ON_COMMAND(ID_VIEW_SONGPROPERTIES,		OnSongProperties)
-	ON_COMMAND(ID_REPORT_BUG,				OnReportBug)	//rewbs.reportBug
+	ON_COMMAND(ID_REPORT_BUG,				OnReportBug)
 	ON_COMMAND(ID_NEXTOCTAVE,				OnNextOctave)
 	ON_COMMAND(ID_PREVOCTAVE,				OnPrevOctave)
 	ON_COMMAND_RANGE(ID_FILE_OPENTEMPLATE, ID_FILE_OPENTEMPLATE_LASTINRANGE, OnOpenTemplateModule)
@@ -86,30 +92,31 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME,	OnUpdateTime)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_USER,	OnUpdateUser)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_INFO,	OnUpdateInfo)
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,OnUpdateXInfo) //rewbs.xinfo
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_CPU,  OnUpdateCPU)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,OnUpdateXInfo)
 	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		OnUpdateControlBarMenu)
-	ON_MESSAGE(WM_MOD_NOTIFICATION,		OnNotification)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
 	ON_MESSAGE(WM_MOD_SPECIALKEY,			OnSpecialKey)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg) //rewbs.customKeys
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg)
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
 	ON_COMMAND(ID_HELPSHOW,					OnHelp)
+
+	ON_COMMAND_RANGE(ID_MRU_LIST_FIRST, ID_MRU_LIST_LAST, OnOpenMRUItem)
+	ON_UPDATE_COMMAND_UI(ID_MRU_LIST_FIRST,	OnUpdateMRUItem)
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
-	ON_WM_KILLFOCUS() //rewbs.fix3116
+	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 // Globals
-UINT CMainFrame::m_nLastOptionsPage = 0;
+OptionsPage CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_DEFAULT;
 HHOOK CMainFrame::ghKbdHook = NULL;
 
-std::vector<CString> CMainFrame::s_ExampleModulePaths;
-std::vector<CString> CMainFrame::s_TemplateModulePaths;
+std::vector<mpt::PathString> CMainFrame::s_ExampleModulePaths;
+std::vector<mpt::PathString> CMainFrame::s_TemplateModulePaths;
 
 LONG CMainFrame::gnLVuMeter = 0;
 LONG CMainFrame::gnRVuMeter = 0;
@@ -122,7 +129,7 @@ HFONT CMainFrame::m_hGUIFont = NULL;
 HFONT CMainFrame::m_hFixedFont = NULL;
 HFONT CMainFrame::m_hLargeFixedFont = NULL;
 HPEN CMainFrame::penDarkGray = NULL;
-HPEN CMainFrame::penScratch = NULL; //rewbs.fxVis
+HPEN CMainFrame::penScratch = NULL;
 HPEN CMainFrame::penGray00 = NULL;
 HPEN CMainFrame::penGray33 = NULL;
 HPEN CMainFrame::penGray40 = NULL;
@@ -130,7 +137,7 @@ HPEN CMainFrame::penGray55 = NULL;
 HPEN CMainFrame::penGray80 = NULL;
 HPEN CMainFrame::penGray99 = NULL;
 HPEN CMainFrame::penGraycc = NULL;
-HPEN CMainFrame::penGrayff = NULL; //end rewbs.fxVis
+HPEN CMainFrame::penGrayff = NULL;
 HPEN CMainFrame::penLightGray = NULL;
 HPEN CMainFrame::penBlack = NULL;
 HPEN CMainFrame::penWhite = NULL;
@@ -143,8 +150,6 @@ HBRUSH CMainFrame::brushGray = NULL;
 HBRUSH CMainFrame::brushBlack = NULL;
 HBRUSH CMainFrame::brushWhite = NULL;
 HBRUSH CMainFrame::brushText = NULL;
-//CBrush *CMainFrame::pbrushBlack = NULL;//rewbs.envRowGrid
-//CBrush *CMainFrame::pbrushWhite = NULL;//rewbs.envRowGrid
 
 HBRUSH CMainFrame::brushHighLight = NULL;
 HBRUSH CMainFrame::brushHighLightRed = NULL;
@@ -162,36 +167,34 @@ LPMODPLUGDIB CMainFrame::bmpVisNode = NULL;
 LPMODPLUGDIB CMainFrame::bmpVisPcNode = NULL;
 COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
 
-CInputHandler *CMainFrame::m_InputHandler = nullptr; //rewbs.customKeys
-CAutoSaver *CMainFrame::m_pAutoSaver = nullptr; //rewbs.autosave
+CInputHandler *CMainFrame::m_InputHandler = nullptr;
+CAutoSaver *CMainFrame::m_pAutoSaver = nullptr;
 
 static UINT indicators[] =
 {
 	ID_SEPARATOR,			// status line indicator
-	ID_INDICATOR_XINFO,		//rewbs.xinfo
+	ID_INDICATOR_XINFO,
 	ID_INDICATOR_INFO,
 	ID_INDICATOR_USER,
 	ID_INDICATOR_TIME,
-	ID_INDICATOR_CPU
 };
 
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
-//#include <direct.h>
 CMainFrame::CMainFrame()
 //----------------------
 {
-
-	m_hNotifyThread = NULL;
-	m_dwNotifyThreadId = 0;
-	m_hNotifyWakeUp = NULL;
+	m_NotifyTimer = 0;
 	gpSoundDevice = NULL;
 
-	m_bModTreeHasFocus = false;	//rewbs.customKeys
-	m_pNoteMapHasFocus = nullptr;	//rewbs.customKeys
+	m_AudioThreadId = 0;
+	m_InNotifyHandler = false;
+
+	m_bModTreeHasFocus = false;
+	m_pNoteMapHasFocus = nullptr;
 	m_pOrderlistHasFocus = nullptr;
-	m_bOptionsLocked = false;	//rewbs.customKeys
+	m_bOptionsLocked = false;
 
 	m_SoundCardOptionsDialog = nullptr;
 
@@ -203,9 +206,7 @@ CMainFrame::CMainFrame()
 	m_nAvgMixChn = m_nMixChn = 0;
 	m_szUserText[0] = 0;
 	m_szInfoText[0] = 0;
-	m_szXInfoText[0]= 0;	//rewbs.xinfo
-
-	m_PendingNotificationSempahore = NULL;
+	m_szXInfoText[0]= 0;
 
 	MemsetZero(gcolrefVuMeter);
 
@@ -213,16 +214,14 @@ CMainFrame::CMainFrame()
 	MemsetZero(g_csAudio);
 	InitializeCriticalSection(&g_csAudio);
 
-	TrackerSettings::Instance().LoadSettings();
-
-	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
+	m_InputHandler = new CInputHandler(this);
 
 	//Loading static tunings here - probably not the best place to do that but anyway.
 	CSoundFile::LoadStaticTunings();
 }
 
 
-VOID CMainFrame::Initialize()
+void CMainFrame::Initialize()
 //---------------------------
 {
 	//Adding version number to the frame title
@@ -244,30 +243,26 @@ VOID CMainFrame::Initialize()
 	OnUpdateFrameTitle(false);
 
 	// Check for valid sound device
-	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().m_nWaveDevice))
+	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().GetSoundDeviceID()).IsValid())
 	{
 		// Fall back to default WaveOut device
-		TrackerSettings::Instance().m_nWaveDevice = SoundDeviceID();
+		TrackerSettings::Instance().SetSoundDeviceID(SoundDeviceID());
 	}
-	if(TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq == 0)
+	if(TrackerSettings::Instance().MixerSamplerate == 0)
 	{
-		TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = MixerSettings().gdwMixingFreq;
+		TrackerSettings::Instance().MixerSamplerate = MixerSettings().gdwMixingFreq;
 		#ifndef NO_ASIO
 			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
-			if(TrackerSettings::Instance().m_nWaveDevice.GetType() == SNDDEV_ASIO)
+			if(TrackerSettings::Instance().GetSoundDeviceID().GetType() == SNDDEV_ASIO)
 			{
-				TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq = theApp.GetSoundDevicesManager()->GetDeviceCaps(TrackerSettings::Instance().m_nWaveDevice, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
+				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(TrackerSettings::Instance().GetSoundDeviceID(), TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
 			}
 		#endif // NO_ASIO
 	}
 
-	// Create Notify Thread
-	m_PendingNotificationSempahore = CreateSemaphore(NULL, 0, 1, NULL);
-	m_hNotifyWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
-	m_hNotifyThread = CreateThread(NULL, 0, NotifyThreadWrapper, NULL, 0, &m_dwNotifyThreadId);
 	// Setup timer
 	OnUpdateUser(NULL);
-	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
+	m_nTimer = SetTimer(TIMERID_GUI, MPTTIMER_PERIOD, NULL);
 
 	// Setup Keyboard Hook
 	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());
@@ -277,6 +272,7 @@ VOID CMainFrame::Initialize()
 
 	CreateExampleModulesMenu();
 	CreateTemplateModulesMenu();
+	UpdateMRUList();
 }
 
 
@@ -284,8 +280,8 @@ CMainFrame::~CMainFrame()
 //-----------------------
 {
 	DeleteCriticalSection(&g_csAudio);
-	delete m_InputHandler; 	//rewbs.customKeys
-	delete m_pAutoSaver; //rewbs.autosaver
+	delete m_InputHandler;
+	delete m_pAutoSaver;
 
 	CChannelManagerDlg::DestroySharedInstance();
 	CSoundFile::DeleteStaticdata();
@@ -297,7 +293,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CMDIFrameWnd::OnCreate(lpCreateStruct) == -1) return -1;
 	// Load resources
 	m_hIcon = theApp.LoadIcon(IDR_MAINFRAME);
-	m_ImageList.Create(IDB_IMAGELIST, 16, 0, RGB(0,128,128));
+
+	// Toolbar and other icons
+	m_MiscIcons.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, GetDC());
+	m_MiscIconsDisabled.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, GetDC(), true);
+	m_PatternIcons.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, GetDC());
+	m_PatternIconsDisabled.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, GetDC(), true);
+	m_EnvelopeIcons.Create(IDB_ENVTOOLBAR, 20, 18, ENVIMG_NUMIMAGES, 1, GetDC());
+	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1, GetDC());
+
 	m_hGUIFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	m_hFixedFont = ::CreateFont(12,5, 0,0, 300,
 							FALSE, FALSE, FALSE,
@@ -335,7 +339,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Cursors
 	curDragging = theApp.LoadCursor(IDC_DRAGGING);
 	curArrow = theApp.LoadStandardCursor(IDC_ARROW);
-	curNoDrop = theApp.LoadCursor(IDC_NODROP);
+	curNoDrop = theApp.LoadStandardCursor(IDC_NO);
 	curNoDrop2 = theApp.LoadCursor(IDC_NODRAG);
 	curVSplit = theApp.LoadCursor(AFX_IDC_HSPLITBAR);
 	// bitmaps
@@ -350,6 +354,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!m_wndStatusBar.Create(this)) return -1;
 	if (!m_wndTree.Create(this, IDD_TREEVIEW, CBRS_LEFT|CBRS_BORDER_RIGHT, IDD_TREEVIEW)) return -1;
 	m_wndStatusBar.SetIndicators(indicators, CountOf(indicators));
+	m_wndStatusBar.SetPaneInfo(0, ID_SEPARATOR, SBPS_STRETCH, 256);
 	m_wndToolBar.Init(this);
 	m_wndTree.RecalcLayout();
 
@@ -362,7 +367,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	UpdateColors();
 
-	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MIDIRECORD) OnMidiRecord();
+	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MIDIRECORD) midiOpenDevice(false);
+
+	HtmlHelpW(m_hWnd, nullptr, HH_INITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
 
 	return 0;
 }
@@ -378,6 +385,8 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 BOOL CMainFrame::DestroyWindow()
 //------------------------------
 {
+	HtmlHelpW(m_hWnd, nullptr, HH_UNINITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
+
 	// Uninstall Keyboard Hook
 	if (ghKbdHook)
 	{
@@ -391,23 +400,6 @@ BOOL CMainFrame::DestroyWindow()
 		m_nTimer = 0;
 	}
 	if (shMidiIn) midiCloseDevice();
-	if(m_hNotifyThread != NULL)
-	{
-		PostThreadMessage(m_dwNotifyThreadId, WM_QUIT, 0, 0);
-		WaitForSingleObject(m_hNotifyThread, INFINITE);
-		m_dwNotifyThreadId = 0;
-		m_hNotifyThread = NULL;
-	}
-	if(m_hNotifyWakeUp != NULL)
-	{
-		CloseHandle(m_hNotifyWakeUp);
-		m_hNotifyWakeUp = NULL;
-	}
-	if(m_PendingNotificationSempahore != NULL)
-	{
-		CloseHandle(m_PendingNotificationSempahore);
-		m_PendingNotificationSempahore = NULL;
-	}
 	// Delete bitmaps
 	if (bmpPatterns)
 	{
@@ -480,19 +472,19 @@ void CMainFrame::OnClose()
 	if (IsPlaying()) PauseMod();
 	if (pMDIActive) pMDIActive->SavePosition(TRUE);
 
+	if(gpSoundDevice)
 	{
-		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-		if(gpSoundDevice)
-		{
-			delete gpSoundDevice;
-			gpSoundDevice = nullptr;
-		}
+		gpSoundDevice->Stop();
+		gpSoundDevice->Close();
+		delete gpSoundDevice;
+		gpSoundDevice = nullptr;
 	}
 
 	// Save Settings
 	RemoveControlBar(&m_wndStatusBar); // Remove statusbar so that its state won't get saved.
-	TrackerSettings::Instance().SaveSettings();
+	SaveBarState("Toolbars");
 	AddControlBar(&m_wndStatusBar); // Restore statusbar to mainframe.
+	TrackerSettings::Instance().SaveSettings();
 
 	if(m_InputHandler && m_InputHandler->activeCommandSet)
 	{
@@ -504,77 +496,23 @@ void CMainFrame::OnClose()
 }
 
 
-bool CMainFrame::WritePrivateProfileBool(const CString section, const CString key, const bool value, const CString iniFile)
+// Drop files from Windows
+void CMainFrame::OnDropFiles(HDROP hDropInfo)
+//-------------------------------------------
 {
-	CHAR valueBuffer[INIBUFFERSIZE];
-	wsprintf(valueBuffer, "%li", value?1:0);
-	return (WritePrivateProfileString(section, key, valueBuffer, iniFile) != 0);
+	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	CMainFrame::GetMainFrame()->SetForegroundWindow();
+	for(UINT f = 0; f < nFiles; f++)
+	{
+		WCHAR fileName[MAX_PATH];
+		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
+		{
+			const mpt::PathString file = mpt::PathString::FromNative(fileName);
+			theApp.OpenDocumentFile(file);
+		}
+	}
+	::DragFinish(hDropInfo);
 }
-
-
-bool CMainFrame::GetPrivateProfileBool(const CString section, const CString key, const bool defaultValue, const CString iniFile)
-{
-	CHAR defaultValueBuffer[INIBUFFERSIZE];
-	wsprintf(defaultValueBuffer, "%li", defaultValue?1:0);
-
-	CHAR valueBuffer[INIBUFFERSIZE];
-	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-
-	return atol(valueBuffer)?true:false;
-}
-
-
-bool CMainFrame::WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile)
-{
-	CHAR valueBuffer[INIBUFFERSIZE];
-	wsprintf(valueBuffer, "%li", value);
-	return (WritePrivateProfileString(section, key, valueBuffer, iniFile) != 0);
-}
-
-
-long CMainFrame::GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile)
-{
-	CHAR defaultValueBuffer[INIBUFFERSIZE];
-	wsprintf(defaultValueBuffer, "%li", defaultValue);
-
-	CHAR valueBuffer[INIBUFFERSIZE];
-	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-
-	return ConvertStrTo<long>(valueBuffer);
-}
-
-
-bool CMainFrame::WritePrivateProfileDWord(const CString section, const CString key, const DWORD value, const CString iniFile)
-{
-	CHAR valueBuffer[INIBUFFERSIZE];
-	wsprintf(valueBuffer, "%lu", value);
-	return (WritePrivateProfileString(section, key, valueBuffer, iniFile) != 0);
-}
-
-DWORD CMainFrame::GetPrivateProfileDWord(const CString section, const CString key, const DWORD defaultValue, const CString iniFile)
-{
-	CHAR defaultValueBuffer[INIBUFFERSIZE];
-	wsprintf(defaultValueBuffer, "%lu", defaultValue);
-
-	CHAR valueBuffer[INIBUFFERSIZE];
-	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-	return ConvertStrTo<uint32>(valueBuffer);
-}
-
-bool CMainFrame::WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile)
-{
-	return (WritePrivateProfileString(section, key, value, iniFile) != 0);
-}
-
-CString CMainFrame::GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile)
-{
-	CHAR defaultValueBuffer[INIBUFFERSIZE];
-	strcpy(defaultValueBuffer, defaultValue);
-	CHAR valueBuffer[INIBUFFERSIZE];
-	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
-	return valueBuffer;
-}
-
 
 
 LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam)
@@ -674,66 +612,19 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame Sound Library
 
-// Notify thread
-DWORD WINAPI CMainFrame::NotifyThreadWrapper(LPVOID)
-//--------------------------------------------------
-{
-	return ((CMainFrame*)theApp.m_pMainWnd)->NotifyThread();
-}
 
-
-DWORD CMainFrame::NotifyThread()
+void CMainFrame::OnTimerNotify()
 //------------------------------
 {
-	MSG msg;
-	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);	// initialize thread message queue
-	bool terminate = false;
-	bool cansend = true;
-	while(!terminate)
-	{
-		HANDLE waitHandles[2];
-		waitHandles[0] = m_PendingNotificationSempahore;
-		waitHandles[1] = m_hNotifyWakeUp;
-		switch(MsgWaitForMultipleObjects(2, waitHandles, FALSE, 1000, QS_ALLEVENTS))
-		{
-			case WAIT_OBJECT_0 + 0:
-				// last notification has been handled by gui thread
-				cansend = true;
-			break;
-			case WAIT_OBJECT_0 + 1:
-				if(cansend)
-				{
-					if(PostMessage(WM_MOD_NOTIFICATION, 0, 0))
-					{
-						// message sent, do not send any more until it has been handled
-						cansend = false;
-					}
-				}
-			break;
-			case WAIT_OBJECT_0 + 2:
-				while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-				{
-					if(msg.message == WM_QUIT) terminate = true;
-				}
-			break;
-		}
-	}
-	return 0;
-}
-
-
-LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
-//------------------------------------------------
-{
+	ASSERT(InGuiThread());
+	ASSERT(!InNotifyHandler());
+	m_InNotifyHandler = true;
 	Notification PendingNotification;
 	bool found = false;
 	int64 currenttotalsamples = 0;
+	if(gpSoundDevice)
 	{
-		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-		if(gpSoundDevice)
-		{
-			currenttotalsamples = gpSoundDevice->GetStreamPositionSamples(); 
-		}
+		currenttotalsamples = gpSoundDevice->GetStreamPositionFrames(); 
 	}
 	{
 		// advance to the newest notification, drop the obsolete ones
@@ -755,7 +646,6 @@ LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
 			PendingNotification = *pnotify; // copy notification so that we can free the buffer
 			found = true;
 			{
-				Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
 				m_NotifyBuffer.pop();
 			}
 		}
@@ -764,8 +654,8 @@ LRESULT CMainFrame::OnNotification(WPARAM, LPARAM)
 	{
 		OnUpdatePosition(0, (LPARAM)&PendingNotification);
 	}
-	ReleaseSemaphore(m_PendingNotificationSempahore, 1, NULL);
-	return 0;
+	m_InNotifyHandler = false;
+	ASSERT(!InNotifyHandler());
 }
 
 
@@ -781,7 +671,9 @@ void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
 {
 	CriticalSection cs;
 	ALWAYS_ASSERT(m_pSndFile != nullptr);
+	m_AudioThreadId = GetCurrentThreadId();
 	callback.FillAudioBuffer();
+	m_AudioThreadId = 0;
 }
 
 
@@ -792,11 +684,13 @@ class StereoVuMeterTargetWrapper
 {
 private:
 	const SampleFormat sampleFormat;
+	bool clipFloat;
 	Dither &dither;
 	void *buffer;
 public:
-	StereoVuMeterTargetWrapper(SampleFormat sampleFormat_, Dither &dither_, void *buffer_)
+	StereoVuMeterTargetWrapper(SampleFormat sampleFormat_, bool clipFloat_, Dither &dither_, void *buffer_)
 		: sampleFormat(sampleFormat_)
+		, clipFloat(clipFloat_)
 		, dither(dither_)
 		, buffer(buffer_)
 	{
@@ -836,16 +730,15 @@ public:
 				}
 				break;
 			case SampleFormatFloat32:
+				if(clipFloat)
 				{
 					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					AudioReadTargetBuffer<Tsample, true> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormatFixed5p27:
+				} else
 				{
-					typedef SampleFormatToType<SampleFormatFixed5p27>::type Tsample;
-					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+					AudioReadTargetBuffer<Tsample, false> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
@@ -856,11 +749,19 @@ public:
 };
 
 
-void CMainFrame::AudioRead(const SoundDeviceSettings &settings, std::size_t numFrames, void *buffer)
-//--------------------------------------------------------------------------------------------------
+void CMainFrame::AudioRead(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
-	StereoVuMeterTargetWrapper target(settings.sampleFormat, m_Dither, buffer);
+	TimingInfo timingInfo;
+	timingInfo.OutputLatency = bufferAttributes.Latency;
+	timingInfo.StreamFrames = timeInfo.StreamFrames;
+	timingInfo.SystemTimestamp = timeInfo.SystemTimestamp;
+	timingInfo.Speed = timeInfo.Speed;
+	m_pSndFile->m_TimingInfo = timingInfo;
+	m_Dither.SetMode((DitherMode)settings.DitherType);
+	StereoVuMeterTargetWrapper target(settings.sampleFormat, flags.NeedsClippedFloat, m_Dither, buffer);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(numFrames, target);
 	ASSERT(renderedFrames <= numFrames);
 	CSoundFile::samplecount_t remainingFrames = numFrames - renderedFrames;
@@ -880,43 +781,23 @@ void CMainFrame::AudioRead(const SoundDeviceSettings &settings, std::size_t numF
 }
 
 
-void CMainFrame::AudioDone(const SoundDeviceSettings &settings, std::size_t numFrames, int64 streamPosition)
-//----------------------------------------------------------------------------------------------------------
+void CMainFrame::AudioDone(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(settings);
+	MPT_UNREFERENCED_PARAMETER(flags);
+	MPT_UNREFERENCED_PARAMETER(bufferAttributes);
+	MPT_UNREFERENCED_PARAMETER(timeInfo);
+	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
 	DoNotification(numFrames, streamPosition);
-}
-
-
-bool CMainFrame::audioTryOpeningDevice()
-//--------------------------------------
-{
-	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-	const SoundDeviceID deviceID = TrackerSettings::Instance().m_nWaveDevice;
-	if(gpSoundDevice && (gpSoundDevice->GetDeviceID() != deviceID))
-	{
-		delete gpSoundDevice;
-		gpSoundDevice = nullptr;
-	}
-	if(!gpSoundDevice)
-	{
-		gpSoundDevice = theApp.GetSoundDevicesManager()->CreateSoundDevice(deviceID);
-	}
-	if(!gpSoundDevice)
-	{
-		return false;
-	}
-	gpSoundDevice->SetMessageReceiver(this);
-	gpSoundDevice->SetSource(this);
-	return gpSoundDevice->Open(TrackerSettings::Instance().GetSoundDeviceSettings());
+	//m_pSndFile->m_TimingInfo = TimingInfo(); // reset
 }
 
 
 bool CMainFrame::IsAudioDeviceOpen() const
 //----------------------------------------
 {
-	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
 	return gpSoundDevice && gpSoundDevice->IsOpen();
 }
 
@@ -924,56 +805,66 @@ bool CMainFrame::IsAudioDeviceOpen() const
 bool CMainFrame::audioOpenDevice()
 //--------------------------------
 {
+	if(!TrackerSettings::Instance().GetMixerSettings().IsValid())
+	{
+		Reporting::Error("Unable to open sound device: Invalid mixer settings.");
+		return false;
+	}
+	const SoundDeviceID deviceID = TrackerSettings::Instance().GetSoundDeviceID();
+	if(gpSoundDevice && (gpSoundDevice->GetDeviceID() != deviceID))
+	{
+		gpSoundDevice->Stop();
+		gpSoundDevice->Close();
+		delete gpSoundDevice;
+		gpSoundDevice = nullptr;
+	}
 	if(IsAudioDeviceOpen())
 	{
 		return true;
 	}
-	if(TrackerSettings::Instance().m_MixerSettings.IsValid())
+	if(!gpSoundDevice)
 	{
-		if(audioTryOpeningDevice())
-		{
-			SampleFormat actualSampleFormat = SampleFormatInvalid;
-			{
-				Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-				actualSampleFormat = gpSoundDevice->GetActualSampleFormat();
-			}
-			if(actualSampleFormat.IsValid())
-			{
-				TrackerSettings::Instance().m_SampleFormat = actualSampleFormat;
-				// Device is ready
-				return true;
-			}
-		}
+		gpSoundDevice = theApp.GetSoundDevicesManager()->CreateSoundDevice(deviceID);
 	}
-	// Display error message box
-	Reporting::Error("Unable to open sound device!");
-	return false;
-}
-
-
-bool CMainFrame::audioReopenDevice()
-//----------------------------------
-{
-	audioCloseDevice();
-	return audioOpenDevice();
+	if(!gpSoundDevice)
+	{
+		Reporting::Error("Unable to open sound device: Could not find sound device.");
+		return false;
+	}
+	gpSoundDevice->SetMessageReceiver(this);
+	gpSoundDevice->SetSource(this);
+	SoundDeviceSettings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceID);
+	if(!gpSoundDevice->Open(deviceSettings))
+	{
+		Reporting::Error("Unable to open sound device: Could not open sound device.");
+		return false;
+	}
+	SampleFormat actualSampleFormat = gpSoundDevice->GetActualSampleFormat();
+	if(!actualSampleFormat.IsValid())
+	{
+		Reporting::Error("Unable to open sound device: Unknown sample format.");
+		return false;
+	}
+	deviceSettings.sampleFormat = actualSampleFormat;
+	TrackerSettings::Instance().MixerSamplerate = gpSoundDevice->GetSettings().Samplerate;
+	TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
+	return true;
 }
 
 
 void CMainFrame::audioCloseDevice()
 //---------------------------------
 {
-	Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
 	if(gpSoundDevice)
 	{
-		gpSoundDevice->Reset();
 		gpSoundDevice->Close();
 	}
-
-	// reset notify buffer as timestamps revert here
+	if(m_NotifyTimer)
 	{
-		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-		m_NotifyBuffer.clear();
+		KillTimer(m_NotifyTimer);
+		m_NotifyTimer = 0;
 	}
+	ResetNotificationBuffer();
 }
 
 
@@ -1013,6 +904,7 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 //------------------------------------------------------------------------
 {
+	ASSERT(InAudioThread());
 	if(!m_pSndFile) return false;
 
 	FlagSet<Notification::Type> notifyType(Notification::Default);
@@ -1024,12 +916,9 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		notifyItem = m_pSndFile->m_pModDoc->GetNotificationItem();
 	}
 
-	// Notify Client
-	SetEvent(m_hNotifyWakeUp);
-
 	// Add an entry to the notification history
 
-	Notification notification(notifyType, notifyItem, streamPosition, m_pSndFile->m_nRow, m_pSndFile->m_nTickCount, m_pSndFile->m_nCurrentOrder, m_pSndFile->m_nPattern, m_pSndFile->GetMixStat());
+	Notification notification(notifyType, notifyItem, streamPosition, m_pSndFile->m_PlayState.m_nRow, m_pSndFile->m_PlayState.m_nTickCount, m_pSndFile->m_PlayState.m_nCurrentOrder, m_pSndFile->m_PlayState.m_nPattern, m_pSndFile->GetMixStat());
 
 	m_pSndFile->ResetMixStat();
 
@@ -1043,9 +932,9 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		{
 			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
-				const ModChannel &chn = m_pSndFile->Chn[k];
-				if(chn.pSample == m_pSndFile->GetSample(smp).pSample && chn.nLength != 0	// Corrent sample is set up on this channel
-					&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))						// And it hasn't completely faded out yet, so it's still playing
+				const ModChannel &chn = m_pSndFile->m_PlayState.Chn[k];
+				if(chn.pModSample == &m_pSndFile->GetSample(smp) && chn.nLength != 0	// Corrent sample is set up on this channel
+					&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))					// And it hasn't completely faded out yet, so it's still playing
 				{
 					notification.pos[k] = chn.nPos;
 				} else
@@ -1073,7 +962,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		{
 			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
-				const ModChannel &chn = m_pSndFile->Chn[k];
+				const ModChannel &chn = m_pSndFile->m_PlayState.Chn[k];
 				SmpLength pos = Notification::PosInvalid;
 
 				if(chn.pModInstrument == m_pSndFile->Instruments[ins]				// Correct instrument is set up on this channel
@@ -1106,8 +995,8 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		// Pattern channel VU meters
 		for(CHANNELINDEX k = 0; k < m_pSndFile->GetNumChannels(); k++)
 		{
-			uint32 vul = m_pSndFile->Chn[k].nLeftVU;
-			uint32 vur = m_pSndFile->Chn[k].nRightVU;
+			uint32 vul = m_pSndFile->m_PlayState.Chn[k].nLeftVU;
+			uint32 vur = m_pSndFile->m_PlayState.Chn[k].nRightVU;
 			notification.pos[k] = (vul << 8) | (vur);
 		}
 	}
@@ -1122,7 +1011,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		notification.masterVU[1] = rVu;
 		if(gnClipLeft) notification.masterVU[0] |= Notification::ClipVU;
 		if(gnClipRight) notification.masterVU[1] |= Notification::ClipVU;
-		uint32 dwVuDecay = Util::muldiv(dwSamplesRead, 120000, TrackerSettings::Instance().m_MixerSettings.gdwMixingFreq) + 1;
+		uint32 dwVuDecay = Util::muldiv(dwSamplesRead, 120000, m_pSndFile->m_MixerSettings.gdwMixingFreq) + 1;
 
 		if (lVu >= dwVuDecay) gnLVuMeter = (lVu - dwVuDecay) << 11; else gnLVuMeter = 0;
 		if (rVu >= dwVuDecay) gnRVuMeter = (rVu - dwVuDecay) << 11; else gnRVuMeter = 0;
@@ -1130,11 +1019,13 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 
 	{
 		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-		if(m_NotifyBuffer.write_size() == 0) return FALSE; // drop notification
+		if(m_NotifyBuffer.write_size() == 0)
+		{
+			ASSERT(0);
+			return FALSE; // drop notification
+		}
 		m_NotifyBuffer.push(notification);
 	}
-
-	SetEvent(m_hNotifyWakeUp);
 
 	return true;
 }
@@ -1151,10 +1042,10 @@ void CMainFrame::UpdateDspEffects(CSoundFile &sndFile, bool reset)
 	sndFile.m_DSP.m_Settings = TrackerSettings::Instance().m_DSPSettings;
 #endif
 #ifndef NO_EQ
-	sndFile.SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset?TRUE:FALSE);
+	sndFile.SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset);
 #endif
-	sndFile.SetDspEffects(TrackerSettings::Instance().m_MixerSettings.DSPMask);
-	sndFile.InitPlayer(reset?TRUE:FALSE);
+	sndFile.SetDspEffects(TrackerSettings::Instance().MixerDSPMask);
+	sndFile.InitPlayer(reset);
 }
 
 
@@ -1163,13 +1054,13 @@ void CMainFrame::UpdateAudioParameters(CSoundFile &sndFile, bool reset)
 {
 	CriticalSection cs;
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_MUTECHNMODE;
+		TrackerSettings::Instance().MixerFlags |= SNDMIX_MUTECHNMODE;
 	else
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_MUTECHNMODE;
-	sndFile.SetMixerSettings(TrackerSettings::Instance().m_MixerSettings);
-	sndFile.SetResamplerSettings(TrackerSettings::Instance().m_ResamplerSettings);
+		TrackerSettings::Instance().MixerFlags &= ~SNDMIX_MUTECHNMODE;
+	sndFile.SetMixerSettings(TrackerSettings::Instance().GetMixerSettings());
+	sndFile.SetResamplerSettings(TrackerSettings::Instance().GetResamplerSettings());
 	UpdateDspEffects(sndFile, false); // reset done in next line
-	sndFile.InitPlayer(reset?TRUE:FALSE);
+	sndFile.InitPlayer(reset);
 }
 
 
@@ -1292,14 +1183,6 @@ UINT CMainFrame::GetBaseOctave() const
 }
 
 
-void CMainFrame::SetPreAmp(UINT n)
-//--------------------------------
-{
-	TrackerSettings::Instance().m_MixerSettings.m_nPreAmp = n;
-	if (m_pSndFile) m_pSndFile->SetPreAmp(TrackerSettings::Instance().m_MixerSettings.m_nPreAmp);
-}
-
-
 void CMainFrame::ResetNotificationBuffer()
 //----------------------------------------
 {
@@ -1322,9 +1205,16 @@ bool CMainFrame::StartPlayback()
 {
 	if(!m_pSndFile) return false; // nothing to play
 	if(!IsAudioDeviceOpen()) return false;
+	if(!gpSoundDevice->Start()) return false;
+	if(!m_NotifyTimer)
 	{
-		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-		gpSoundDevice->Start();
+		if(TrackerSettings::Instance().GUIUpdateInterval.Get() > 0)
+		{
+			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, TrackerSettings::Instance().GUIUpdateInterval, NULL);
+		} else
+		{
+			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, std::max<int>(1, Util::Round<int>(gpSoundDevice->GetBufferAttributes().UpdateInterval * 1000.0)), NULL);
+		}
 	}
 	return true;
 }
@@ -1334,11 +1224,34 @@ void CMainFrame::StopPlayback()
 //-----------------------------
 {
 	if(!IsAudioDeviceOpen()) return;
+	gpSoundDevice->Stop();
+	if(m_NotifyTimer)
 	{
-		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-		gpSoundDevice->Stop();
+		KillTimer(m_NotifyTimer);
+		m_NotifyTimer = 0;
 	}
-	audioCloseDevice();
+	ResetNotificationBuffer();
+	if(!gpSoundDevice->GetDeviceCaps().CanKeepDeviceRunning || TrackerSettings::Instance().m_SoundSettingsStopMode == SoundDeviceStopModeClosed)
+	{
+		audioCloseDevice();
+	}
+}
+
+
+bool CMainFrame::RestartPlayback()
+//--------------------------------
+{
+	if(!m_pSndFile) return false; // nothing to play
+	if(!IsAudioDeviceOpen()) return false;
+	if(!gpSoundDevice->IsPlaying()) return false;
+	gpSoundDevice->Stop(true);
+	if(m_NotifyTimer)
+	{
+		KillTimer(m_NotifyTimer);
+		m_NotifyTimer = 0;
+	}
+	ResetNotificationBuffer();
+	return StartPlayback();
 }
 
 
@@ -1346,10 +1259,13 @@ bool CMainFrame::PausePlayback()
 //------------------------------
 {
 	if(!IsAudioDeviceOpen()) return false;
+	gpSoundDevice->Stop();
+	if(m_NotifyTimer)
 	{
-		Util::lock_guard<Util::mutex> lock(m_SoundDeviceMutex);
-		gpSoundDevice->Stop();
+		KillTimer(m_NotifyTimer);
+		m_NotifyTimer = 0;
 	}
+	ResetNotificationBuffer();
 	return true;
 }
 
@@ -1382,19 +1298,16 @@ void CMainFrame::UnsetPlaybackSoundFile()
 			// Stop sample preview channels
 			for(CHANNELINDEX i = m_pSndFile->m_nChannels; i < MAX_CHANNELS; i++)
 			{
-				if(!(m_pSndFile->Chn[i].nMasterChn))
+				if(!(m_pSndFile->m_PlayState.Chn[i].nMasterChn))
 				{
-					m_pSndFile->Chn[i].nPos = m_pSndFile->Chn[i].nPosLo = m_pSndFile->Chn[i].nLength = 0;
+					m_pSndFile->m_PlayState.Chn[i].nPos = m_pSndFile->m_PlayState.Chn[i].nPosLo = m_pSndFile->m_PlayState.Chn[i].nLength = 0;
 				}
 			}
 		}
 	}
 	m_pSndFile = nullptr;
 	m_wndToolBar.SetCurrentSong(nullptr);
-	{
-		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
-		m_NotifyBuffer.clear();
-	}
+	ResetNotificationBuffer();
 }
 
 
@@ -1435,7 +1348,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 	if(!bPatLoop && bPaused) sndFile.m_SongFlags.set(SONG_PAUSED);
 	sndFile.SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
 
-	sndFile.InitPlayer(TRUE);
+	sndFile.InitPlayer(true);
 	sndFile.ResumePlugins();
 
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
@@ -1533,7 +1446,7 @@ bool CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 
 	SetPlaybackSoundFile(pSndFile);
 
-	m_pSndFile->InitPlayer(TRUE);
+	m_pSndFile->InitPlayer(true);
 
 	if(!StartPlayback())
 	{
@@ -1572,22 +1485,22 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 }
 
 
-BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
-//------------------------------------------------------------------------
+BOOL CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE note)
+//------------------------------------------------------------------------------------
 {
 	bool ok = false;
 	BeginWaitCursor();
 	{
 		CriticalSection cs;
-		static CString prevFile;
+		static mpt::PathString prevFile;
 		// Did we already load this file for previewing? Don't load it again if the preview is still running.
-		ok = (prevFile == lpszFileName && m_pSndFile == &m_WaveFile);
+		ok = (prevFile == filename && m_pSndFile == &m_WaveFile);
 
-		if(!ok && lpszFileName)
+		if(!ok && !filename.empty())
 		{
 			CMappedFile f;
 
-			if(f.Open(lpszFileName))
+			if(f.Open(filename))
 			{
 				FileReader file = f.GetFile();
 				if(file.IsValid())
@@ -1612,7 +1525,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, ModCommand::NOTE note)
 		{
 			// Write notes to pattern. Also done if we have previously loaded this file, since we might be previewing another note now.
 			PreparePreview(note);
-			prevFile = lpszFileName;
+			prevFile = filename;
 		}
 	}
 	EndWaitCursor();
@@ -1670,12 +1583,21 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument,
 void CMainFrame::InitPreview()
 //----------------------------
 {
+	const CModDoc *activeDoc = GetActiveDoc();
 	m_WaveFile.Destroy();
 	m_WaveFile.Create(FileReader());
 	// Avoid global volume ramping when trying samples in the treeview.
-	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_WaveFile.SetMixLevels(mixLevels_117RC3);
-	m_WaveFile.m_nSamplePreAmp = static_cast<uint32>(m_WaveFile.GetPlayConfig().getNormalSamplePreAmp());
+	m_WaveFile.m_nDefaultGlobalVolume = m_WaveFile.m_PlayState.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
+	if(activeDoc != nullptr && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD))
+	{
+		m_WaveFile.SetMixLevels(activeDoc->GetrSoundFile().GetMixLevels());
+		m_WaveFile.m_nSamplePreAmp = activeDoc->GetrSoundFile().m_nSamplePreAmp;
+	} else
+	{
+		// Preview at 0dB
+		m_WaveFile.SetMixLevels(mixLevels_117RC3);
+		m_WaveFile.m_nSamplePreAmp = static_cast<uint32>(m_WaveFile.GetPlayConfig().getNormalSamplePreAmp());
+	}
 	m_WaveFile.m_nDefaultTempo = 125;
 	m_WaveFile.m_nDefaultSpeed = 6;
 	m_WaveFile.m_nType = MOD_TYPE_MPT;
@@ -1698,13 +1620,16 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 	ModCommand *m = m_WaveFile.Patterns[0];
 	if(m)
 	{
-		m[0].note = note;
-		m[0].instr = 1;
-
-		if(m_WaveFile.m_nSamples > 1 || m_WaveFile.GetSample(1).uFlags[CHN_LOOP])
+		if(m_WaveFile.GetNumSamples() > 0)
 		{
-			m[48 * 2].note = NOTE_KEYOFF;
-			m[79 * 2].note = NOTE_NOTECUT;
+			m[0].note = note;
+			m[0].instr = 1;
+
+			if(m_WaveFile.GetNumInstruments() != 0 || m_WaveFile.GetSample(1).uFlags[CHN_LOOP])
+			{
+				m[48 * 2].note = NOTE_KEYOFF;
+				m[79 * 2].note = NOTE_NOTECUT;
+			}
 		}
 		m[79 * 2].command = CMD_POSITIONJUMP;
 		m[79 * 2 + 1].command = CMD_PATTERNBREAK;
@@ -1720,25 +1645,77 @@ HWND CMainFrame::GetFollowSong() const
 }
 
 
-BOOL CMainFrame::SetupSoundCard(const SoundDeviceSettings &deviceSettings, SoundDeviceID deviceID)
-//------------------------------------------------------------------------------------------------
+void CMainFrame::IdleHandlerSounddevice()
+//---------------------------------------
 {
-	const bool isPlaying = IsPlaying();
-	if((TrackerSettings::Instance().m_nWaveDevice != deviceID) || (TrackerSettings::Instance().GetSoundDeviceSettings() != deviceSettings))
+	if(gpSoundDevice)
 	{
-		CModDoc *pActiveMod = NULL;
-		if (isPlaying)
+		const LONG requestFlags = gpSoundDevice->GetRequestFlags();
+		if(requestFlags & ISoundDevice::RequestFlagClose)
+		{
+			StopPlayback();
+			audioCloseDevice();
+		} else if(requestFlags & ISoundDevice::RequestFlagReset)
+		{
+			ResetSoundCard();
+		} else if(requestFlags & ISoundDevice::RequestFlagRestart)
+		{
+			RestartPlayback();
+		} else
+		{
+			gpSoundDevice->OnIdle();
+		}
+	}
+}
+
+
+BOOL CMainFrame::ResetSoundCard()
+//-------------------------------
+{
+	return CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceID()), TrackerSettings::Instance().GetSoundDeviceID(), TrackerSettings::Instance().m_SoundSettingsStopMode, true);
+}
+
+
+BOOL CMainFrame::SetupSoundCard(SoundDeviceSettings deviceSettings, SoundDeviceID deviceID, SoundDeviceStopMode stoppedMode, bool forceReset)
+//-------------------------------------------------------------------------------------------------------------------------------------------
+{
+	if(forceReset
+		|| (TrackerSettings::Instance().GetSoundDeviceID() != deviceID)
+		|| (TrackerSettings::Instance().GetSoundDeviceSettings(deviceID) != deviceSettings)
+		|| (TrackerSettings::Instance().m_SoundSettingsStopMode != stoppedMode)
+		)
+	{
+		CModDoc *pActiveMod = nullptr;
+		if(IsPlaying())
 		{
 			if ((m_pSndFile) && (!m_pSndFile->IsPaused())) pActiveMod = GetModPlaying();
 			PauseMod();
 		}
-		TrackerSettings::Instance().m_nWaveDevice = deviceID;
-		TrackerSettings::Instance().SetSoundDeviceSettings(deviceSettings);
+		if(gpSoundDevice)
 		{
-			CriticalSection cs;
-			if (pActiveMod) UpdateAudioParameters(pActiveMod->GetrSoundFile(), FALSE);
+			gpSoundDevice->Close();
 		}
-		if (pActiveMod) PlayMod(pActiveMod);
+		TrackerSettings::Instance().m_SoundSettingsStopMode = stoppedMode;
+		switch(stoppedMode)
+		{
+			case SoundDeviceStopModeClosed:
+				deviceSettings.KeepDeviceRunning = true;
+				break;
+			case SoundDeviceStopModeStopped:
+				deviceSettings.KeepDeviceRunning = false;
+				break;
+			case SoundDeviceStopModePlaying:
+				deviceSettings.KeepDeviceRunning = true;
+				break;
+		}
+		TrackerSettings::Instance().SetSoundDeviceID(deviceID);
+		TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
+		TrackerSettings::Instance().MixerOutputChannels = deviceSettings.Channels;
+		TrackerSettings::Instance().MixerSamplerate = deviceSettings.Samplerate;
+		if(pActiveMod)
+		{
+			PlayMod(pActiveMod);
+		}
 		UpdateWindow();
 	} else
 	{
@@ -1759,15 +1736,15 @@ BOOL CMainFrame::SetupPlayer()
 }
 
 
-BOOL CMainFrame::SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir)
-//---------------------------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::SetupDirectories(const mpt::PathString &szModDir, const mpt::PathString &szSampleDir, const mpt::PathString &szInstrDir, const mpt::PathString &szVstDir, const mpt::PathString &szPresetDir)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	// will also set working directory
-	TrackerSettings::Instance().SetDefaultDirectory(szModDir, DIR_MODS);
-	TrackerSettings::Instance().SetDefaultDirectory(szSampleDir, DIR_SAMPLES);
-	TrackerSettings::Instance().SetDefaultDirectory(szInstrDir, DIR_INSTRUMENTS);
-	TrackerSettings::Instance().SetDefaultDirectory(szVstDir, DIR_PLUGINS);
-	TrackerSettings::Instance().SetDefaultDirectory(szPresetDir, DIR_PLUGINPRESETS);
+	TrackerDirectories::Instance().SetDefaultDirectory(szModDir, DIR_MODS);
+	TrackerDirectories::Instance().SetDefaultDirectory(szSampleDir, DIR_SAMPLES);
+	TrackerDirectories::Instance().SetDefaultDirectory(szInstrDir, DIR_INSTRUMENTS);
+	TrackerDirectories::Instance().SetDefaultDirectory(szVstDir, DIR_PLUGINS);
+	TrackerDirectories::Instance().SetDefaultDirectory(szPresetDir, DIR_PLUGINPRESETS);
 	return TRUE;
 }
 
@@ -1775,9 +1752,9 @@ BOOL CMainFrame::SetupMiscOptions()
 //---------------------------------
 {
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags |= SNDMIX_MUTECHNMODE;
+		TrackerSettings::Instance().MixerFlags |= SNDMIX_MUTECHNMODE;
 	else
-		TrackerSettings::Instance().m_MixerSettings.MixerFlags &= ~SNDMIX_MUTECHNMODE;
+		TrackerSettings::Instance().MixerFlags &= ~SNDMIX_MUTECHNMODE;
 	{
 		CriticalSection cs;
 		if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying());
@@ -1844,7 +1821,7 @@ VOID CMainFrame::SetInfoText(LPCSTR lpszText)
 	}
 }
 
-//rewbs.xinfo
+
 VOID CMainFrame::SetXInfoText(LPCSTR lpszText)
 //-------------------------------------------
 {
@@ -1854,7 +1831,7 @@ VOID CMainFrame::SetXInfoText(LPCSTR lpszText)
 		OnUpdateInfo(NULL);
 	}
 }
-//end rewbs.xinfo
+
 
 VOID CMainFrame::SetHelpText(LPCSTR lpszText)
 //-------------------------------------------
@@ -1867,6 +1844,7 @@ VOID CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 //--------------------------------------------------
 {
 	m_wndTree.OnDocumentCreated(pModDoc);
+	UpdateMRUList();
 }
 
 
@@ -1896,37 +1874,43 @@ VOID CMainFrame::UpdateTree(CModDoc *pModDoc, DWORD lHint, CObject *pHint)
 void CMainFrame::OnViewOptions()
 //------------------------------
 {
-	if (m_bOptionsLocked)	//rewbs.customKeys
+	if (m_bOptionsLocked)
 		return;
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().GetSoundDeviceSettings(), TrackerSettings::Instance().m_nWaveDevice);
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().GetSoundDeviceID());
+	COptionsSampleEditor smpeditor;
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
-	COptionsPlayer playerdlg;
+	COptionsMixer mixerdlg;
 	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().m_nMidiDevice);
-#ifndef NO_EQ
-	CEQSetupDlg eqdlg(&TrackerSettings::Instance().m_EqSettings);
-#endif
-	CAutoSaverGUI autosavedlg(m_pAutoSaver); //rewbs.AutoSaver
+	CAutoSaverGUI autosavedlg(m_pAutoSaver);
 	CUpdateSetupDlg updatedlg;
+#if defined(MPT_SETTINGS_CACHE)
+	COptionsAdvanced advanced;
+#endif // MPT_SETTINGS_CACHE
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
-	dlg.AddPage(&playerdlg);
-#ifndef NO_EQ
-	dlg.AddPage(&eqdlg);
+	dlg.AddPage(&mixerdlg);
+#if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC) || !defined(NO_EQ)
+	COptionsPlayer dspdlg;
+	dlg.AddPage(&dspdlg);
 #endif
+	dlg.AddPage(&smpeditor);
 	dlg.AddPage(&keyboard);
 	dlg.AddPage(&colors);
 	dlg.AddPage(&mididlg);
 	dlg.AddPage(&autosavedlg);
 	dlg.AddPage(&updatedlg);
-	m_bOptionsLocked=true;	//rewbs.customKeys
+#if defined(MPT_SETTINGS_CACHE)
+	dlg.AddPage(&advanced);
+#endif // MPT_SETTINGS_CACHE
+	m_bOptionsLocked = true;
 	m_SoundCardOptionsDialog = &sounddlg;
 	dlg.DoModal();
 	m_SoundCardOptionsDialog = nullptr;
-	m_bOptionsLocked=false;	//rewbs.customKeys
+	m_bOptionsLocked = false;
 	m_wndTree.OnOptionsChanged();
 }
 
@@ -2000,19 +1984,19 @@ void CMainFrame::OnClipboardManager()
 void CMainFrame::OnAddDlsBank()
 //-----------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "dls", "",
-		"All Sound Banks|*.dls;*.sbk;*.sf2;*.mss|"
-		"Downloadable Sounds Banks (*.dls)|*.dls;*.mss|"
-		"SoundFont 2.0 Banks (*.sf2)|*.sbk;*.sf2|"
-		"All Files (*.*)|*.*||",
-		"",
-		true);
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter("All Sound Banks|*.dls;*.sbk;*.sf2;*.mss|"
+			"Downloadable Sounds Banks (*.dls)|*.dls;*.mss|"
+			"SoundFont 2.0 Banks (*.sf2)|*.sbk;*.sf2|"
+			"All Files (*.*)|*.*||");
+	if(!dlg.Show()) return;
 
 	BeginWaitCursor();
-	for(size_t counter = 0; counter < files.filenames.size(); counter++)
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-		CTrackApp::AddDLSBank(files.filenames[counter].c_str());
+		CTrackApp::AddDLSBank(files[counter]);
 	}
 	m_wndTree.RefreshDlsBanks();
 	EndWaitCursor();
@@ -2022,24 +2006,42 @@ void CMainFrame::OnAddDlsBank()
 void CMainFrame::OnImportMidiLib()
 //--------------------------------
 {
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		"Text and INI files (*.txt,*.ini)|*.txt;*.ini;*.dls;*.sf2;*.sbk|"
-		"Downloadable Sound Banks (*.dls)|*.dls;*.mss|"
-		"SoundFont 2.0 banks (*.sf2)|*.sbk;*.sf2|"
-		"Gravis UltraSound (ultrasnd.ini)|ultrasnd.ini|"
-		"All Files (*.*)|*.*||");
-	if(files.abort) return;
+	FileDialog dlg = OpenFileDialog()
+		.ExtensionFilter("Text and INI files (*.txt,*.ini)|*.txt;*.ini;*.dls;*.sf2;*.sbk|"
+			"Downloadable Sound Banks (*.dls)|*.dls;*.mss|"
+			"SoundFont 2.0 banks (*.sf2)|*.sbk;*.sf2|"
+			"Gravis UltraSound (ultrasnd.ini)|ultrasnd.ini|"
+			"All Files (*.*)|*.*||");
+	if(!dlg.Show()) return;
 
 	BeginWaitCursor();
-	CTrackApp::ImportMidiConfig(files.first_file.c_str());
+	CTrackApp::ImportMidiConfig(dlg.GetFirstFile());
 	m_wndTree.RefreshMidiLibrary();
 	EndWaitCursor();
 }
 
 
-void CMainFrame::OnTimer(UINT_PTR)
-//--------------------------------
+void CMainFrame::OnTimer(UINT_PTR timerID)
+//----------------------------------------
 {
+	switch(timerID)
+	{
+		case TIMERID_GUI:
+			OnTimerGUI();
+			break;
+		case TIMERID_NOTIFY:
+			OnTimerNotify();
+			break;
+	}
+}
+
+
+void CMainFrame::OnTimerGUI()
+//---------------------------
+{
+
+	IdleHandlerSounddevice();
+
 	// Display Time in status bar
 	CSoundFile::samplecount_t time = 0;
 	if(m_pSndFile != nullptr && m_pSndFile->GetSampleRate() != 0)
@@ -2138,7 +2140,7 @@ CModDoc *CMainFrame::GetActiveDoc()
 	return NULL;
 }
 
-//rewbs.customKeys
+
 CView *CMainFrame::GetActiveView()
 //---------------------------------
 {
@@ -2148,9 +2150,9 @@ CView *CMainFrame::GetActiveView()
 		return pMDIActive->GetActiveView();
 	}
 
-	return NULL;
+	return nullptr;
 }
-//end rewbs.customKeys
+
 
 void CMainFrame::SwitchToActiveView()
 //-----------------------------------
@@ -2177,7 +2179,7 @@ void CMainFrame::OnUpdateTime(CCmdUI *)
 
 	if(m_pSndFile != nullptr && m_pSndFile != &m_WaveFile && !m_pSndFile->IsPaused())
 	{
-		PATTERNINDEX nPat = m_pSndFile->m_nPattern;
+		PATTERNINDEX nPat = m_pSndFile->m_PlayState.m_nPattern;
 		if(m_pSndFile->Patterns.IsValidIndex(nPat))
 		{
 			if(nPat < 10) strcat(s, " ");
@@ -2204,24 +2206,11 @@ void CMainFrame::OnUpdateInfo(CCmdUI *)
 }
 
 
-void CMainFrame::OnUpdateCPU(CCmdUI *)
-//-------------------------------------
-{
-/*	CString s;
-	double totalCPUPercent = m_dTotalCPU*100;
-	UINT intPart = static_cast<int>(totalCPUPercent);
-	UINT decPart = static_cast<int>(totalCPUPercent-intPart)*100;
-	s.Format("%d.%d%%", intPart, decPart);
-	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_CPU), s, TRUE);*/
-}
-
-//rewbs.xinfo
 void CMainFrame::OnUpdateXInfo(CCmdUI *)
 //-------------------------------------
 {
 	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_XINFO), m_szXInfoText, TRUE);
 }
-//end rewbs.xinfo
 
 void CMainFrame::OnPlayerPause()
 //------------------------------
@@ -2240,46 +2229,20 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 //-------------------------------------------------------------------------
 {
 	const UINT nIdBegin = (bTemplateFile) ? ID_FILE_OPENTEMPLATE : ID_EXAMPLE_MODULES;
-	const std::vector<CString>& vecFilePaths = (bTemplateFile) ? s_TemplateModulePaths : s_ExampleModulePaths;
+	const std::vector<mpt::PathString>& vecFilePaths = (bTemplateFile) ? s_TemplateModulePaths : s_ExampleModulePaths;
 
 	const UINT nIndex = nId - nIdBegin;
 	if (nIndex < vecFilePaths.size())
 	{
-		const CString& sPath = vecFilePaths[nIndex];
+		const mpt::PathString& sPath = vecFilePaths[nIndex];
 		const bool bAvailable = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeRead);
 		if (bAvailable)
 		{
-			CDocument* pDoc = theApp.OpenDocumentFile(sPath, bTemplateFile ? FALSE : TRUE);
-			if (pDoc != nullptr)
-			{
-				ASSERT(pDoc->IsKindOf(RUNTIME_CLASS(CModDoc)) == TRUE);
-				CModDoc* pModDoc = static_cast<CModDoc*>(pDoc);
-				pModDoc->ClearFilePath(); // Clear path so that saving will not take place in templates/examples folder.
-				// Remove extension from title, so that saving the file will not suggest a filename like e.g. "template.mptm.mptm".
-				const CString title = pModDoc->GetTitle();
-				const int dotPos = title.ReverseFind('.');
-				if(dotPos >= 0)
-				{
-					pModDoc->SetTitle(title.Left(dotPos));
-				}
-
-				if (bTemplateFile)
-				{
-					pModDoc->GetFileHistory().clear();	// Reset edit history for template files
-					pModDoc->GetSoundFile()->m_dwCreatedWithVersion = MptVersion::num;
-					pModDoc->GetSoundFile()->m_dwLastSavedWithVersion = 0;
-				}
-			}
-		}
-		else
+			theApp.GetModDocTemplate()->OpenTemplateFile(sPath, !bTemplateFile);
+		} else
 		{
 			const bool bExists = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists);
-			CString str;
-			if (bExists)
-				AfxFormatString1(str, IDS_FILE_EXISTS_BUT_IS_NOT_READABLE, (LPCTSTR)sPath);
-			else
-				AfxFormatString1(str, IDS_FILE_DOES_NOT_EXIST, (LPCTSTR)sPath);
-			Reporting::Notification(str);
+			Reporting::Notification(L"The file '" + sPath.ToWide() + L"' " + (bExists ? L"exists but can't be read" : L"does not exist"));
 		}
 	}
 	else
@@ -2298,7 +2261,21 @@ void CMainFrame::OnExampleSong(UINT nId)
 //--------------------------------------
 {
 	OpenMenuItemFile(nId, false/*open example menu file*/);
+}
 
+
+void CMainFrame::OnOpenMRUItem(UINT nId)
+//--------------------------------------
+{
+	mpt::PathString file = TrackerSettings::Instance().mruFiles[nId - ID_MRU_LIST_FIRST];
+	theApp.OpenDocumentFile(file);
+}
+
+
+void CMainFrame::OnUpdateMRUItem(CCmdUI *cmd)
+//-------------------------------------------
+{
+	cmd->Enable(!TrackerSettings::Instance().mruFiles.empty());
 }
 
 
@@ -2374,14 +2351,14 @@ void CMainFrame::OnOctaveChanged()
 	SwitchToActiveView();
 }
 
-//rewbs.reportBug
+
 void CMainFrame::OnReportBug()
 //----------------------------
 {
 	CTrackApp::OpenURL("http://bugs.openmpt.org/");
 	return;
 }
-//end rewbs.reportBug
+
 
 BOOL CMainFrame::OnInternetLink(UINT nID)
 //---------------------------------------
@@ -2434,7 +2411,7 @@ LRESULT CMainFrame::OnSpecialKey(WPARAM /*vKey*/, LPARAM)
 	return 0;
 }
 
-//rewbs.customKeys
+
 LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------
 {
@@ -2508,14 +2485,23 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				return m_pOrderlistHasFocus->PostMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 
 			//Else send it to the active view
-			CView* pView = GetActiveView();
-			if (pView)
-				return pView->PostMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
+			CMDIChildWnd *pMDIActive = MDIGetActive();
+			CWnd *wnd = nullptr;
+			if(pMDIActive)
+			{
+				wnd = pMDIActive->GetActiveView();
+				// Hack: If the upper view is active, we only get the "container" (the dialog view with the tabs), not the view itself.
+				if(!strcmp(wnd->GetRuntimeClass()->m_lpszClassName, "CModControlView"))
+				{
+					wnd = static_cast<CModControlView *>(wnd)->GetCurrentControlDlg();
+				}
+			}
+			if(wnd) return wnd->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 	}
 
 	return wParam;
 }
-//end rewbs.customKeys
+
 
 void CMainFrame::OnInitMenu(CMenu* pMenu)
 //---------------------------------------
@@ -2561,9 +2547,8 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 	pSndFile->m_bIsRendering = false;
 	return true;
 }
-//end rewbs.VSTTimeInfo
 
-//rewbs.customKeys
+
 // We have swicthed focus to a new module - might need to update effect keys to reflect module type
 bool CMainFrame::UpdateEffectKeys()
 //---------------------------------
@@ -2576,10 +2561,8 @@ bool CMainFrame::UpdateEffectKeys()
 
 	return false;
 }
-//end rewbs.customKeys
 
 
-//rewbs.fix3116
 void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 //-----------------------------------------
 {
@@ -2587,9 +2570,8 @@ void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 
 	//rewbs: ensure modifiers are reset when we leave the window (e.g. alt-tab)
 	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
-	//end rewbs
 }
-//end rewbs.fix3116
+
 
 void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 //---------------------------------------------------------
@@ -2599,10 +2581,9 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 	{
 		firstShow = false;
 		WINDOWPLACEMENT wpl;
-		if (GetPrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), theApp.GetConfigFileName()))
-		{
-			SetWindowPlacement(&wpl);
-		}
+		GetWindowPlacement(&wpl);
+		wpl = theApp.GetSettings().Read<WINDOWPLACEMENT>("Display", "WindowPlacement", wpl);
+		SetWindowPlacement(&wpl);
 	}
 }
 
@@ -2632,8 +2613,7 @@ void CMainFrame::OnViewEditHistory()
 void CMainFrame::OnInternetUpdate()
 //---------------------------------
 {
-	CUpdateCheck *updateCheck = CUpdateCheck::Create(false);
-	updateCheck->DoUpdateCheck();
+	CUpdateCheck::DoUpdateCheck(false);
 }
 
 
@@ -2647,18 +2627,46 @@ void CMainFrame::OnShowSettingsFolder()
 void CMainFrame::OnHelp()
 //-----------------------
 {
-	CString helpFile = theApp.GetAppDirPath();
-	helpFile += "OpenMPT Manual.pdf";
-	if(!theApp.OpenFile(helpFile))
+	CView *view = GetActiveView();
+	const char *page = "";
+	if(m_bOptionsLocked)
 	{
-		helpFile = "Could not find help file:\n" + helpFile;
-		Reporting::Error(helpFile);
+		switch(m_nLastOptionsPage)
+		{
+			case OPTIONS_PAGE_GENERAL:		page = "::/Setup_General.html"; break;
+			case OPTIONS_PAGE_SOUNDCARD:	page = "::/Setup_Soundcard.html"; break;
+			case OPTIONS_PAGE_MIXER:		page = "::/Setup_Mixer.html"; break;
+			case OPTIONS_PAGE_PLAYER:		page = "::/Setup_DSP.html"; break;
+			case OPTIONS_PAGE_SAMPLEDITOR:	page = "::/Setup_Samples.html"; break;
+			case OPTIONS_PAGE_KEYBOARD:		page = "::/Setup_Keyboard.html"; break;
+			case OPTIONS_PAGE_COLORS:		page = "::/Setup_Colours.html"; break;
+			case OPTIONS_PAGE_MIDI:			page = "::/Setup_MIDI.html"; break;
+			case OPTIONS_PAGE_AUTOSAVE:		page = "::/Setup_Autosave.html"; break;
+			case OPTIONS_PAGE_UPDATE:		page = "::/Setup_Update.html"; break;
+			case OPTIONS_PAGE_ADVANCED:		page = "::/Setup_Advanced.html"; break;
+		}
+	} else if(view != nullptr)
+	{
+		const char *className = view->GetRuntimeClass()->m_lpszClassName;
+		if(!strcmp("CViewGlobals", className))			page = "::/General.html";
+		else if(!strcmp("CViewPattern", className))		page = "::/Patterns.html";
+		else if(!strcmp("CViewSample", className))		page = "::/Samples.html";
+		else if(!strcmp("CViewInstrument", className))	page = "::/Instruments.html";
+		else if(!strcmp("CModControlView", className))	page = "::/Comments.html";
 	}
+
+	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + MPT_PATHSTRING(">OpenMPT");
+	if(!HtmlHelpW(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
+	{
+		Reporting::Error(L"Could not find help file:\n" + helpFile.ToWide());
+		return;
+	}
+	//::ShowWindow(hwndHelp, SW_SHOWMAXIMIZED);
 }
 
 
-HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<CString>& vPaths, const LPCTSTR pszFolderName, const uint16 nIdRangeBegin)
-//---------------------------------------------------------------------------------------------------------------------------------------------
+HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathString>& vPaths, const mpt::PathString &pszFolderName, const uint16 nIdRangeBegin)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	vPaths.clear();
 	HMENU hMenu = ::CreatePopupMenu();
@@ -2669,30 +2677,39 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<CString>& v
 		for(size_t i = 0; i < 2; i++) // 0: app items, 1: user items
 		{
 			// To avoid duplicates, check whether app path and config path are the same.
-			if (i == 1 && _tcsicmp(CTrackApp::GetAppDirPath(), theApp.GetConfigPath()) == 0)
+			if (i == 1 && mpt::PathString::CompareNoCase(theApp.GetAppDirPath(), theApp.GetConfigPath()) == 0)
 				break;
-			CFileFind fileFind;
-			CFixedStringT<CString, MAX_PATH> sPath;
-			sPath = (i == 0) ? CTrackApp::GetAppDirPath() : theApp.GetConfigPath();
-			sPath += pszFolderName;
-			if (Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists) == false)
+			
+			mpt::PathString basePath;
+			basePath = (i == 0) ? theApp.GetAppDirPath() : theApp.GetConfigPath();
+			basePath += pszFolderName;
+			if (Util::sdOs::IsPathFileAvailable(basePath, Util::sdOs::FileModeExists) == false)
 				continue;
-			sPath += _T("*");
-
-			BOOL bWorking = fileFind.FindFile(sPath);
-			// Note: The order in which the example files appears in the menu is unspecified.
-			while (bWorking && nAddCounter < nMaxCount)
+			mpt::PathString sPath = basePath + MPT_PATHSTRING("*");
+			
+			WIN32_FIND_DATAW findData;
+			MemsetZero(findData);
+			HANDLE hFindFile = FindFirstFileW(sPath.AsNative().c_str(), &findData);
+			if(hFindFile != INVALID_HANDLE_VALUE)
 			{
-				bWorking = fileFind.FindNextFile();
-				const CString fn = fileFind.GetFileName();
-				if (fileFind.IsDirectory() == FALSE)
+				while(nAddCounter < nMaxCount)
 				{
-					vPaths.push_back(fileFind.GetFilePath());
-					AppendMenu(hMenu, MF_STRING, nIdRangeBegin + nAddCounter, fileFind.GetFileName());
-					++nAddCounter;
+					// Note: The order in which the example files appears in the menu is unspecified.
+					if(!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+					{
+						vPaths.push_back(basePath + mpt::PathString::FromNative(findData.cFileName));
+						AppendMenuW(hMenu, MF_STRING, nIdRangeBegin + nAddCounter, findData.cFileName);
+						++nAddCounter;
+					}
+					if(FindNextFileW(hFindFile, &findData) == FALSE)
+					{
+						break;
+					}
 				}
+				FindClose(hFindFile);
+				hFindFile = INVALID_HANDLE_VALUE;
 			}
-			fileFind.Close();
+			
 		}
 
 		if (nAddCounter == 0)
@@ -2708,7 +2725,7 @@ void CMainFrame::CreateExampleModulesMenu()
 {
 	static_assert(nMaxItemsInExampleModulesMenu == ID_EXAMPLE_MODULES_LASTINRANGE - ID_EXAMPLE_MODULES + 1,
 				  "Make sure that there's a proper range for menu commands in resources.");
-	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, s_ExampleModulePaths, _T("ExampleSongs\\"), ID_EXAMPLE_MODULES);
+	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, s_ExampleModulePaths, MPT_PATHSTRING("ExampleSongs\\"), ID_EXAMPLE_MODULES);
 	CMenu* const pMainMenu = GetMenu();
 	if (hMenu && pMainMenu && m_InputHandler)
 		VERIFY(pMainMenu->ModifyMenu(ID_EXAMPLE_MODULES, MF_BYCOMMAND | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_EXAMPLE_MODULES)));
@@ -2717,24 +2734,105 @@ void CMainFrame::CreateExampleModulesMenu()
 }
 
 
+// Hack-ish way to get the file menu (this is necessary because the MDI document icon next to the File menu is a sub menu, too).
+CMenu *CMainFrame::GetFileMenu() const
+//------------------------------------
+{
+	CMenu *mainMenu = GetMenu();
+	CMenu *fileMenu = mainMenu ? mainMenu->GetSubMenu(0) : nullptr;
+	if(fileMenu)
+	{
+		if(fileMenu->GetMenuItemID(1) != ID_FILE_OPEN)
+			fileMenu = mainMenu->GetSubMenu(1);
+		ASSERT(fileMenu->GetMenuItemID(1) == ID_FILE_OPEN);
+	}
+	ASSERT(fileMenu);
+	return fileMenu;
+}
+
+
 void CMainFrame::CreateTemplateModulesMenu()
 //------------------------------------------
 {
 	static_assert(nMaxItemsInTemplateModulesMenu == ID_FILE_OPENTEMPLATE_LASTINRANGE - ID_FILE_OPENTEMPLATE + 1,
 				  "Make sure that there's a proper range for menu commands in resources.");
-	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, s_TemplateModulePaths, _T("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
-	CMenu* const pMainMenu = GetMenu();
-	CMenu* pFileMenu = (pMainMenu) ? pMainMenu->GetSubMenu(0) : nullptr;
+	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, s_TemplateModulePaths, MPT_PATHSTRING("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
+	CMenu *pFileMenu = GetFileMenu();
 	if (hMenu && pFileMenu && m_InputHandler)
 	{
-		if (pFileMenu->GetMenuItemID(1) != ID_FILE_OPEN)
-			pFileMenu = pMainMenu->GetSubMenu(1);
-		ASSERT(pFileMenu->GetMenuItemID(1) == ID_FILE_OPEN);
 		VERIFY(pFileMenu->RemoveMenu(2, MF_BYPOSITION));
 		VERIFY(pFileMenu->InsertMenu(2, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_FILE_OPENTEMPLATE)));
 	}
 	else
 		ASSERT(false);
+}
+
+
+void CMainFrame::UpdateMRUList()
+//------------------------------
+{
+	CMenu *pMenu = GetFileMenu();
+	static int firstMenu = -1;
+	if(firstMenu == -1)
+	{
+		int numMenus = pMenu->GetMenuItemCount();
+		for(int i = 0; i < numMenus; i++)
+		{
+			if(pMenu->GetMenuItemID(i) == ID_MRU_LIST_FIRST)
+			{
+				firstMenu = i;
+				break;
+			}
+		}
+	}
+
+	for(int i = ID_MRU_LIST_FIRST; i <= ID_MRU_LIST_LAST; i++)
+	{
+		pMenu->DeleteMenu(i, MF_BYCOMMAND);
+	}
+
+	if(TrackerSettings::Instance().mruFiles.empty())
+	{
+		// MFC will automatically ignore if we set MF_GRAYED here because of CFrameWnd::m_bAutoMenuEnable.
+		// So we will have to install a ON_UPDATE_COMMAND_UI callback...
+		pMenu->InsertMenu(firstMenu, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST, _T("Recent File"));
+	} else
+	{
+		const mpt::PathString workDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS);
+
+		for(size_t i = 0; i < TrackerSettings::Instance().mruFiles.size(); i++)
+		{
+			std::wstring s = mpt::ToWString(i + 1) + L" ";
+			// Add mnemonics
+			if(i < 9)
+			{
+				s = L"&" + s;
+			} else if(i == 9)
+			{
+				s = L"1&0 ";
+			}
+
+			const mpt::PathString &pathMPT = TrackerSettings::Instance().mruFiles[i];
+			std::wstring path = pathMPT.ToWide();
+			if(!mpt::PathString::CompareNoCase(workDir, pathMPT.GetPath()))
+			{
+				// Only show filename
+				path = path.substr(workDir.ToWide().length());
+			} else if(path.length() > 30)	// Magic number experimentally determined to be equal to MFC's behaviour
+			{
+				// Shorten path ("C:\Foo\VeryLongString...\Bar.it" => "C:\Foo\...\Bar.it")
+				size_t start = path.find_first_of(L"\\/", path.find_first_of(L"\\/") + 1);
+				size_t end = path.find_last_of(L"\\/");
+				if(start < end)
+				{
+					path = path.substr(0, start + 1) + L"..." + path.substr(end);
+				}
+			}
+			path = mpt::String::Replace(path, L"&", L"&&");
+			s += path;
+			::InsertMenuW(pMenu->m_hMenu, firstMenu + i, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST + i, s.c_str());
+		}
+	}
 }
 
 
@@ -2752,7 +2850,7 @@ void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bo
 		str.Preallocate(80);
 		str.Format(_T("FX%d: "), iPlug + 1);
 		const int size0 = str.GetLength();
-		str += (librarynames) ? plugin.GetLibraryName() : plugin.GetName();
+		str += (librarynames) ? mpt::ToLocale(mpt::CharsetUTF8, plugin.GetLibraryName()).c_str() : plugin.GetName();
 		if(str.GetLength() <= size0) str += _T("undefined");
 
 		CBox.SetItemData(CBox.AddString(str), iPlug + 1);
@@ -2777,3 +2875,6 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
 		CBox.SetItemData(CBox.AddString(plug.GetFormattedParamName(i)), i);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

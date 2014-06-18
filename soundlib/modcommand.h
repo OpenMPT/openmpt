@@ -12,7 +12,11 @@
 
 #include "Snd_defs.h"
 
+#include "../common/misc_util.h"
+
 #include <cstring>
+
+OPENMPT_NAMESPACE_BEGIN
 
 // Note definitions
 #define NOTE_NONE			(ModCommand::NOTE(0))
@@ -86,15 +90,26 @@ enum EffectCommands
 	CMD_PANNINGSLIDE		= 29,
 	CMD_SETENVPOSITION		= 30,
 	CMD_MIDI				= 31,
-	CMD_SMOOTHMIDI			= 32, //rewbs.smoothVST
+	CMD_SMOOTHMIDI			= 32,
 	CMD_DELAYCUT			= 33,
 	CMD_XPARAM				= 34, // -> CODE#0010 -> DESC="add extended parameter mechanism to pattern effects" -! NEW_FEATURE#0010
-	CMD_NOTESLIDEUP			= 35, // IMF Gxy / PTM Jxy (Slide y notes up every ticks)
-	CMD_NOTESLIDEDOWN		= 36, // IMF Hxy / PTM Kxy (Slide y notes down every ticks)
-	CMD_NOTESLIDEUPRETRIG	= 37, // PTM Lxy (Slide y notes up every ticks + retrigger note)
-	CMD_NOTESLIDEDOWNRETRIG	= 38, // PTM Mxy (Slide y notes down every ticks + retrigger note)
+	CMD_NOTESLIDEUP			= 35, // IMF Gxy / PTM Jxy (Slide y notes up every x ticks)
+	CMD_NOTESLIDEDOWN		= 36, // IMF Hxy / PTM Kxy (Slide y notes down every x ticks)
+	CMD_NOTESLIDEUPRETRIG	= 37, // PTM Lxy (Slide y notes up every x ticks + retrigger note)
+	CMD_NOTESLIDEDOWNRETRIG	= 38, // PTM Mxy (Slide y notes down every x ticks + retrigger note)
 	CMD_REVERSEOFFSET		= 39, // PTM Nxx Revert sample + offset
 	MAX_EFFECTS				= 40
+};
+
+
+enum EffectType
+{
+	EFFECT_TYPE_NORMAL  = 0,
+	EFFECT_TYPE_GLOBAL  = 1,
+	EFFECT_TYPE_VOLUME  = 2,
+	EFFECT_TYPE_PANNING = 3,
+	EFFECT_TYPE_PITCH   = 4,
+	MAX_EFFECT_TYPE     = 5
 };
 
 
@@ -153,9 +168,17 @@ public:
 	// Returns true if and only if note is a valid musical note.
 	bool IsNote() const { return note >= NOTE_MIN && note <= NOTE_MAX; }
 	static bool IsNote(NOTE note) { return note >= NOTE_MIN && note <= NOTE_MAX; }
+	// Returns true if and only if note is a valid special note.
+	bool IsSpecialNote() const { return IsInRange(note, NOTE_MIN_SPECIAL, NOTE_MAX_SPECIAL); }
+	static bool IsSpecialNote(NOTE note) { return IsInRange(note, NOTE_MIN_SPECIAL, NOTE_MAX_SPECIAL); }
 	// Returns true if and only if note is a valid musical note or the note entry is empty.
 	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
+
+	static EffectType GetEffectType(COMMAND cmd);
+	EffectType GetEffectType() const { return GetEffectType(command); }
+	static EffectType GetVolumeEffectType(VOLCMD volcmd);
+	EffectType GetVolumeEffectType() const { return GetVolumeEffectType(volcmd); }
 
 	// Convert a complete ModCommand item from one format to another
 	void Convert(MODTYPE fromType, MODTYPE toType);
@@ -189,3 +212,5 @@ public:
 };
 
 typedef ModCommand MODCOMMAND_ORIGINAL;
+
+OPENMPT_NAMESPACE_END

@@ -19,6 +19,9 @@
 #include "../soundlib/MIDIEvents.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 BEGIN_MESSAGE_MAP(CMidiMacroSetup, CDialog)
 	ON_COMMAND(IDC_CHECK1,			OnEmbedMidiCfg)
 	ON_COMMAND(IDC_BUTTON1,			OnSetAsDefault)
@@ -523,3 +526,6 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 		return true;
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

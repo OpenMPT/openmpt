@@ -19,6 +19,8 @@
 #include "../mptrack/Vstplug.h"
 #endif // MODPLUG_TRACKER
 
+OPENMPT_NAMESPACE_BEGIN
+
 parameteredMacroType MIDIMacroConfig::GetParameteredMacroType(size_t macroIndex) const
 //------------------------------------------------------------------------------------
 {
@@ -80,7 +82,11 @@ fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
 #pragma GCC diagnostic ignored "-Wswitch"
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
+#if MPT_CLANG_AT_LEAST(3,3,0)
+#pragma clang diagnostic ignored "-Wswitch"     
+#else
 #pragma clang diagnostic ignored "-Wswitch-enum"
+#endif
 #endif
 
 void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], parameteredMacroType macroType, int subType) const
@@ -134,7 +140,11 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 #pragma GCC diagnostic ignored "-Wswitch"
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
+#if MPT_CLANG_AT_LEAST(3,3,0)
+#pragma clang diagnostic ignored "-Wswitch"     
+#else
 #pragma clang diagnostic ignored "-Wswitch-enum"
+#endif
 #endif
 
 // Create Zxx (Z80 - ZFF) from one out of five presets
@@ -224,23 +234,23 @@ CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX pl
 				}
 				if (paramName.IsEmpty())
 				{
-					return MPT_TEXT("N/A");
+					return TEXT("N/A");
 				}
 
 				CString formattedName;
-				formattedName.Format(MPT_TEXT("Param %d (%s)"), param, paramName);
+				formattedName.Format(TEXT("Param %d (%s)"), param, paramName);
 				return formattedName;
 			} else
 #endif // NO_VST
 			{
-				return MPT_TEXT("N/A - No Plugin");
+				return TEXT("N/A - No Plugin");
 			}
 		}
 
 	case sfx_cc:
 		{
 			CString formattedCC;
-			formattedCC.Format(MPT_TEXT("MIDI CC %d"), MacroToMidiCC(macroIndex));
+			formattedCC.Format(TEXT("MIDI CC %d"), MacroToMidiCC(macroIndex));
 			return formattedCC;
 		}
 
@@ -257,26 +267,26 @@ CString MIDIMacroConfig::GetParameteredMacroName(parameteredMacroType macroType)
 	switch(macroType)
 	{
 	case sfx_unused:
-		return MPT_TEXT("Unused");
+		return TEXT("Unused");
 	case sfx_cutoff:
-		return MPT_TEXT("Set Filter Cutoff");
+		return TEXT("Set Filter Cutoff");
 	case sfx_reso:
-		return MPT_TEXT("Set Filter Resonance");
+		return TEXT("Set Filter Resonance");
 	case sfx_mode:
-		return MPT_TEXT("Set Filter Mode");
+		return TEXT("Set Filter Mode");
 	case sfx_drywet:
-		return MPT_TEXT("Set Plugin Dry/Wet Ratio");
+		return TEXT("Set Plugin Dry/Wet Ratio");
 	case sfx_plug:
-		return MPT_TEXT("Control Plugin Parameter...");
+		return TEXT("Control Plugin Parameter...");
 	case sfx_cc:
-		return MPT_TEXT("MIDI CC...");
+		return TEXT("MIDI CC...");
 	case sfx_channelAT:
-		return MPT_TEXT("Channel Aftertouch");
+		return TEXT("Channel Aftertouch");
 	case sfx_polyAT:
-		return MPT_TEXT("Polyphonic Aftertouch");
+		return TEXT("Polyphonic Aftertouch");
 	case sfx_custom:
 	default:
-		return MPT_TEXT("Custom");
+		return TEXT("Custom");
 	}
 }
 
@@ -288,24 +298,24 @@ CString MIDIMacroConfig::GetFixedMacroName(fixedMacroType macroType) const
 	switch(macroType)
 	{
 	case zxx_unused:
-		return MPT_TEXT("Unused");
+		return TEXT("Unused");
 	case zxx_reso4Bit:
-		return MPT_TEXT("Z80 - Z8F controls Resonant Filter Resonance");
+		return TEXT("Z80 - Z8F controls Resonant Filter Resonance");
 	case zxx_reso7Bit:
-		return MPT_TEXT("Z80 - ZFF controls Resonant Filter Resonance");
+		return TEXT("Z80 - ZFF controls Resonant Filter Resonance");
 	case zxx_cutoff:
-		return MPT_TEXT("Z80 - ZFF controls Resonant Filter Cutoff");
+		return TEXT("Z80 - ZFF controls Resonant Filter Cutoff");
 	case zxx_mode:
-		return MPT_TEXT("Z80 - ZFF controls Resonant Filter Mode");
+		return TEXT("Z80 - ZFF controls Resonant Filter Mode");
 	case zxx_resomode:
-		return MPT_TEXT("Z80 - Z9F controls Resonance + Filter Mode");
+		return TEXT("Z80 - Z9F controls Resonance + Filter Mode");
 	case zxx_channelAT:
-		return MPT_TEXT("Z80 - ZFF controls Channel Aftertouch");
+		return TEXT("Z80 - ZFF controls Channel Aftertouch");
 	case zxx_polyAT:
-		return MPT_TEXT("Z80 - ZFF controls Polyphonic Aftertouch");
+		return TEXT("Z80 - ZFF controls Polyphonic Aftertouch");
 	case zxx_custom:
 	default:
-		return MPT_TEXT("Custom");
+		return TEXT("Custom");
 	}
 }
 
@@ -480,3 +490,6 @@ std::string MIDIMacroConfig::GetSafeMacro(const char *macro) const
 
 	return sanitizedMacro;
 }
+
+
+OPENMPT_NAMESPACE_END

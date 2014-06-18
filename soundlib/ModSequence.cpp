@@ -12,15 +12,12 @@
 #include "Sndfile.h"
 #include "ModSequence.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
 #include "../mptrack/Reporting.h"
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"
 #include "../common/serialization_utils.h"
 #include "FileReader.h"
 #include <functional>
-
-#define str_SequenceTruncationNote (GetStrI18N("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))
 
 #if defined(MODPLUG_TRACKER)
 #ifdef _DEBUG
@@ -29,6 +26,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 #endif // MODPLUG_TRACKER
+
+OPENMPT_NAMESPACE_BEGIN
+
+#define str_SequenceTruncationNote (GetStrI18N("Module has sequence of length %1; it will be truncated to maximum supported length, %2."))
 
 ModSequence::ModSequence(CSoundFile &rSf,
 						 PATTERNINDEX* pArray,
@@ -268,7 +269,7 @@ ORDERINDEX ModSequence::Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX 
 	// Limit number of orders to be inserted.
 	LimitMax(nCount, ORDERINDEX(m_sndFile.GetModSpecifications().ordersMax - nPos));
 	// Calculate new length.
-	const ORDERINDEX nNewLength = MIN(nLengthTt + nCount, m_sndFile.GetModSpecifications().ordersMax);
+	const ORDERINDEX nNewLength = std::min<ORDERINDEX>(nLengthTt + nCount, m_sndFile.GetModSpecifications().ordersMax);
 	// Resize if needed.
 	if (nNewLength > GetLength())
 		resize(nNewLength);
@@ -471,18 +472,17 @@ void ModSequenceSet::RemoveSequence(SEQUENCEINDEX i)
 void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
 //----------------------------------------------------------
 {
-	const MODTYPE newtype = m_sndFile.GetType();
 	const SEQUENCEINDEX nSeqs = GetNumSequences();
 	for(SEQUENCEINDEX n = 0; n < nSeqs; n++)
 	{
 		GetSequence(n).AdjustToNewModType(oldtype);
 	}
 	// Multisequences not suppported by other formats
-	if(oldtype != MOD_TYPE_NONE && newtype != MOD_TYPE_MPT)
+	if(oldtype != MOD_TYPE_NONE && m_sndFile.GetModSpecifications().sequencesMax <= 1)
 		MergeSequences();
 
 	// Convert sequence with separator patterns into multiple sequences?
-	if(oldtype != MOD_TYPE_NONE && newtype == MOD_TYPE_MPT && GetNumSequences() == 1)
+	if(oldtype != MOD_TYPE_NONE && m_sndFile.GetModSpecifications().sequencesMax > 1 && GetNumSequences() == 1)
 		ConvertSubsongsToMultipleSequences();
 }
 
@@ -490,6 +490,7 @@ void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
 bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 //-------------------------------------------------------
 {
+#ifdef MODPLUG_TRACKER
 	// Allow conversion only if there's only one sequence.
 	if(GetNumSequences() != 1 || m_sndFile.GetType() != MOD_TYPE_MPT)
 		return false;
@@ -507,13 +508,8 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 	bool modified = false;
 
 	if(hasSepPatterns &&
-#ifdef MODPLUG_TRACKER
 		Reporting::Confirm("The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
-		"Order list conversion", false, true) == cnfYes
-#else
-		false
-#endif
-		)
+		"Order list conversion", false, true) == cnfYes)
 	{
 
 		SetSequence(0);
@@ -574,6 +570,9 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 		SetSequence(0);
 	}
 	return modified;
+#else
+	return false;
+#endif // MODPLUG_TRACKER
 }
 
 
@@ -602,7 +601,7 @@ bool ModSequenceSet::MergeSequences()
 		const ORDERINDEX nFirstOrder = GetLengthTailTrimmed() + 1; // +1 for separator item
 		if(nFirstOrder + GetSequence(1).GetLengthTailTrimmed() > m_sndFile.GetModSpecifications().ordersMax)
 		{
-			m_sndFile.AddToLog(mpt::String::Format("WARNING: Cannot merge Sequence %d (too long!)", removedSequences));
+			m_sndFile.AddToLog(mpt::String::Print("WARNING: Cannot merge Sequence %1 (too long!)", removedSequences));
 			RemoveSequence(1);
 			continue;
 		}
@@ -637,7 +636,7 @@ bool ModSequenceSet::MergeSequences()
 						} else
 						{
 							// cannot create new pattern: notify the user
-							m_sndFile.AddToLog(mpt::String::Format("CONFLICT: Pattern break commands in Pattern %d might be broken since it has been used in several sequences!", nPat));
+							m_sndFile.AddToLog(mpt::String::Print("CONFLICT: Pattern break commands in Pattern %1 might be broken since it has been used in several sequences!", nPat));
 						}
 					}
 					m->param  = static_cast<BYTE>(m->param + nFirstOrder);
@@ -660,13 +659,27 @@ bool ModSequenceSet::MergeSequences()
 
 #ifdef MODPLUG_TRACKER
 // Check if a playback position is currently locked (inaccessible)
-bool ModSequence::IsPositionLocked(ORDERINDEX position)
-//-----------------------------------------------------
+bool ModSequence::IsPositionLocked(ORDERINDEX position) const
+//-----------------------------------------------------------
 {
 	return(m_sndFile.m_lockOrderStart != ORDERINDEX_INVALID
 		&& (position < m_sndFile.m_lockOrderStart || position > m_sndFile.m_lockOrderEnd));
 }
 #endif // MODPLUG_TRACKER
+
+
+void ModSequence::SetName(const std::string &newName)
+//---------------------------------------------------
+{
+	m_sName = newName;
+}
+
+
+std::string ModSequence::GetName() const
+//--------------------------------------
+{
+	return m_sName;
+}
 
 
 /////////////////////////////////////
@@ -727,6 +740,7 @@ size_t ModSequence::WriteAsByte(FILE* f, const uint16 count) const
 }
 
 
+// TODO: Need a way to declare skip/stop indices?
 bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntries)
 //--------------------------------------------------------------------------------
 {
@@ -746,6 +760,8 @@ bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntrie
 	{
 		(*this)[i] = file.ReadUint8();
 	}
+	std::fill(begin() + readEntries, end(), GetInvalidPatIndex());
+
 	file.Skip(howMany - readEntries);
 	return true;
 }
@@ -765,7 +781,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	srlztn::Binaryread<uint16>(iStrm, size);
 	if(size > ModSpecs::mptm.ordersMax)
 	{
-		seq.m_sndFile.AddToLog(mpt::String::Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax));
+		seq.m_sndFile.AddToLog(mpt::String::Print(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax));
 		size = ModSpecs::mptm.ordersMax;
 	}
 	seq.resize(MAX(size, MAX_ORDERS));
@@ -798,7 +814,7 @@ void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
 void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 //----------------------------------------------------------------
 {
-	srlztn::Ssb ssb(oStrm);
+	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdSequence, MptVersion::num);
 	ssb.WriteItem(seq.m_sName.c_str(), "n");
 	const uint16 nLength = seq.GetLengthTailTrimmed();
@@ -811,9 +827,9 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 //-----------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(iStrm);
+	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequence, MptVersion::num);
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
 	std::string str;
 	ssb.ReadItem(str, "n");
@@ -829,7 +845,7 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 //--------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(oStrm);
+	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdSequences, MptVersion::num);
 	const uint8 nSeqs = seq.GetNumSequences();
 	const uint8 nCurrent = seq.GetCurrentSequenceIndex();
@@ -849,9 +865,9 @@ void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 //---------------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(iStrm);
+	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequences, MptVersion::num);
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
 	uint8 nSeqs = 0;
 	uint8 nCurrent = 0;
@@ -871,3 +887,5 @@ void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	seq.CopyStorageToCache();
 }
 
+
+OPENMPT_NAMESPACE_END

@@ -15,14 +15,17 @@
 #define VST_FORCE_DEPRECATED 0
 #include <pluginterfaces/vst2.x/aeffect.h>			// VST
 #else
-typedef int32 VstInt32;
+typedef OPENMPT_NAMESPACE::int32 VstInt32;
 typedef intptr_t VstIntPtr;
 #endif
 
 #include "../../soundlib/Snd_defs.h"
 #include "../../common/misc_util.h"
 #include "../../soundlib/MIDIEvents.h"
-#include "../../soundlib/Endianness.h"
+#include "../../common/Endianness.h"
+#include "../../soundlib/Mixer.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
@@ -40,6 +43,7 @@ public:
 	virtual void SaveAllParameters() = 0;
 	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
 	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
+	virtual float RenderSilence(size_t numSamples) = 0;
 	virtual bool MidiSend(uint32 dwMidiCode) = 0;
 	virtual bool MidiSysexSend(const char *message, uint32 length) = 0;
 	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
@@ -58,7 +62,7 @@ public:
 	virtual void AutomateParameter(PlugParamIndex param) = 0;
 	virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt) =0; //rewbs.VSTCompliance
 	virtual void NotifySongPlaying(bool) = 0;	//rewbs.VSTCompliance
-	virtual bool IsSongPlaying() = 0;
+	virtual bool IsSongPlaying() const = 0;
 	virtual bool IsResumed() = 0;
 	virtual void Resume() = 0;
 	virtual void Suspend() = 0;
@@ -86,14 +90,14 @@ struct SNDMIXPLUGINSTATE
 	// dwFlags flags
 	enum PluginStateFlags
 	{
-		psfMixReady = 0x01,			// Set when cleared
+		psfMixReady = 0x01,				// Set when cleared
 	};
 
-	int *pMixBuffer;				// Stereo effect send buffer
-	float *pOutBufferL;				// Temp storage for int -> float conversion
+	mixsample_t *pMixBuffer;			// Stereo effect send buffer
+	float *pOutBufferL;					// Temp storage for int -> float conversion
 	float *pOutBufferR;
-	uint32 dwFlags;					// PluginStateFlags
-	LONG nVolDecayL, nVolDecayR;	// Buffer click removal
+	uint32 dwFlags;						// PluginStateFlags
+	mixsample_t nVolDecayL, nVolDecayR;	// Buffer click removal
 };
 
 
@@ -120,8 +124,8 @@ struct PACKED SNDMIXPLUGININFO
 	uint8 reserved;
 	uint32 dwOutputRouting;			// 0 = send to master 0x80 + x = send to plugin x
 	uint32 dwReserved[4];			// Reserved for routing info
-	char szName[32];				// User-chosen plugin name
-	char szLibraryName[64];			// original DLL name
+	char szName[32];				// User-chosen plugin name - this is locale ANSI!
+	char szLibraryName[64];			// original DLL name - this is UTF-8!
 
 	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()
 	void SetBypass(bool bypass = true) { if(bypass) routingFlags |= irBypass; else routingFlags &= ~irBypass; }
@@ -206,7 +210,23 @@ struct SNDMIXPLUGIN
 	void SetOutputPlugin(PLUGINDEX plugin)
 		{ if(plugin < MAX_MIXPLUGINS) Info.dwOutputRouting = plugin + 0x80; else Info.dwOutputRouting = 0; }
 
-}; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
+	void Destroy()
+	{
+		delete[] pPluginData;
+		pPluginData = nullptr;
+		nPluginDataSize = 0;
+
+		pMixState = nullptr;
+		if(pMixPlugin)
+		{
+			pMixPlugin->Release();
+			pMixPlugin = nullptr;
+		}
+	}
+};
 
 class CSoundFile;
 typedef bool (*PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN &, CSoundFile &);
+
+
+OPENMPT_NAMESPACE_END

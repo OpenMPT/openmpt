@@ -16,6 +16,10 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -24,18 +28,11 @@
 // GDM File Header
 struct PACKED GDMFileHeader
 {
-	// Header magic bytes
-	enum HeaderMagic
-	{
-		magicGDM_ = 0xFE4D4447,
-		magicGMFS = 0x53464D47,
-	};
-
-	uint32 magic;					// ID: 'GDMþ'
+	char   magic[4];				// ID: 'GDM\xFE'
 	char   songTitle[32];			// Music's title
 	char   songMusician[32];		// Name of music's composer
 	char   dosEOF[3];				// 13, 10, 26
-	uint32 magic2;					// ID: 'GMFS'
+	char   magic2[4];				// ID: 'GMFS'
 	uint8  formatMajorVer;			// Format major version
 	uint8  formatMinorVer;			// Format minor version
 	uint16 trackerID;				// Composing Tracker ID code (00 = 2GDM)
@@ -66,8 +63,6 @@ struct PACKED GDMFileHeader
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
-		SwapBytesLE(magic);
-		SwapBytesLE(magic2);
 		SwapBytesLE(trackerID);
 		SwapBytesLE(originalFormat);
 		SwapBytesLE(orderOffset);
@@ -143,9 +138,9 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 	GDMFileHeader fileHeader;
 	if(!file.ReadConvertEndianness(fileHeader)
-		|| fileHeader.magic != GDMFileHeader::magicGDM_
+		|| memcmp(fileHeader.magic, "GDM\xFE", 4)
 		|| fileHeader.dosEOF[0] != 13 || fileHeader.dosEOF[1] != 10 || fileHeader.dosEOF[2] != 26
-		|| fileHeader.magic2 != GDMFileHeader::magicGMFS
+		|| memcmp(fileHeader.magic2, "GMFS", 4)
 		|| fileHeader.formatMajorVer != 1 || fileHeader.formatMinorVer != 0
 		|| fileHeader.originalFormat >= CountOf(gdmFormatOrigin)
 		|| fileHeader.originalFormat == 0)
@@ -159,10 +154,13 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	m_nType = gdmFormatOrigin[fileHeader.originalFormat];
 	m_ContainerType = MOD_CONTAINERTYPE_GDM;
-	madeWithTracker = mpt::String::Format("BWSB 2GDM %d.%d (converted from %s)", fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()).c_str());
+	madeWithTracker = mpt::String::Print("BWSB 2GDM %1.%2 (converted from %3)", fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()));
 
 	// Song name
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songTitle);
+
+	// Artist name
+	mpt::String::Read<mpt::String::maybeNullTerminated>(songArtist, fileHeader.songMusician);
 
 	// Read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
@@ -304,7 +302,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 			// Huh, no pattern data present?
 			continue;
 		}
-		FileReader chunk = file.GetChunk(patternLength - 2);
+		FileReader chunk = file.ReadChunk(patternLength - 2);
 
 		if(!(loadFlags & loadPatternData) || !chunk.IsValid() || Patterns.Insert(pat, 64))
 		{
@@ -447,14 +445,11 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 								switch(m.param & 0x0F)
 								{
 								case 0x0:	// Surround Off
-									m.param = 0x90;
-									break;
 								case 0x1:	// Surround On
-									m.command = CMD_PANNING8;
-									m.param = 0xA4;
+									m.param += 0x90;
 									break;
 								case 0x2:	// Set normal loop - not implemented in BWSB or 2GDM.
-								case 0x3:	// Set bidi loop - dito
+								case 0x3:	// Set bidi loop - ditto
 									m.command = CMD_NONE;
 									break;
 								case 0x4:	// Play sample forwards
@@ -466,9 +461,9 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 									m.param = 0x9F;
 									break;
 								case 0x6:	// Monaural sample - also not implemented.
-								case 0x7:	// Stereo sample - dito
-								case 0x8:	// Stop sample on end - dito
-								case 0x9:	// Loop sample on end - dito
+								case 0x7:	// Stereo sample - ditto
+								case 0x8:	// Stop sample on end - ditto
+								case 0x9:	// Loop sample on end - ditto
 								default:
 									m.command = CMD_NONE;
 									break;
@@ -521,3 +516,6 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	return true;
 
 }
+
+
+OPENMPT_NAMESPACE_END

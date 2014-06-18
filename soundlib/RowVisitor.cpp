@@ -24,6 +24,8 @@
 #include "Sndfile.h"
 #include "RowVisitor.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Resize / Clear the row vector.
 // If reset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
 void RowVisitor::Initialize(bool reset)
@@ -201,3 +203,6 @@ void RowVisitor::AddVisitedRow(ORDERINDEX order, ROWINDEX row)
 	// And now add the played row to our memory.
 	visitOrder.push_back(row);
 }
+
+
+OPENMPT_NAMESPACE_END

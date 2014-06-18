@@ -11,7 +11,12 @@
 
 #pragma once
 
-namespace MptTest
-{
-	void DoTests();
-} // namespace MptTest
+OPENMPT_NAMESPACE_BEGIN
+
+namespace Test {
+
+void DoTests();
+
+} // namespace Test
+
+OPENMPT_NAMESPACE_END

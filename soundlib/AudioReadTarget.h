@@ -13,9 +13,13 @@
 #include "SampleFormatConverters.h"
 #include "SampleFormat.h"
 #include "MixerLoops.h"
+#include "Mixer.h"
 
 
-template<typename Tsample>
+OPENMPT_NAMESPACE_BEGIN
+
+
+template<typename Tsample, bool clipOutput = false>
 class AudioReadTargetBuffer
 	: public IAudioReadTarget
 {
@@ -50,7 +54,7 @@ public:
 
 		if(outputBuffer)
 		{
-			ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS>(outputBuffer + (channels * countRendered), MixSoundBuffer, channels, countChunk);
+			ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS, clipOutput>(outputBuffer + (channels * countRendered), MixSoundBuffer, channels, countChunk);
 		}
 		if(outputBuffers)
 		{
@@ -59,7 +63,7 @@ public:
 			{
 				buffers[channel] = outputBuffers[channel] + countRendered;
 			}
-			ConvertInterleavedFixedPointToNonInterleaved<MIXING_FRACTIONAL_BITS>(buffers, MixSoundBuffer, channels, countChunk);
+			ConvertInterleavedFixedPointToNonInterleaved<MIXING_FRACTIONAL_BITS, clipOutput>(buffers, MixSoundBuffer, channels, countChunk);
 		}
 
 		countRendered += countChunk;
@@ -124,3 +128,6 @@ public:
 };
 
 #endif // !MODPLUG_TRACKER
+
+
+OPENMPT_NAMESPACE_END

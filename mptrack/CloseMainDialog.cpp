@@ -11,8 +11,12 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "Moddoc.h"
 #include "CloseMainDialog.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 BEGIN_MESSAGE_MAP(CloseMainDialog, CDialog)
@@ -32,11 +36,26 @@ void CloseMainDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 
-// Format a list entry string
+CloseMainDialog::CloseMainDialog() : CDialog(IDD_CLOSEDOCUMENTS)
+//--------------------------------------------------------------
+{
+	CMainFrame::GetInputHandler()->Bypass(true);
+};
+
+
+CloseMainDialog::~CloseMainDialog()
+//---------------------------------
+{
+	CMainFrame::GetInputHandler()->Bypass(false);
+};
+
+
+// Format a list entry string - apparently list boxes in ANSI windows are ANSI too, so inserted unicode
+// strings are converted to ANSI. Thus, we will keep using CStrings here for ANSI builds.
 CString CloseMainDialog::FormatTitle(const CModDoc *pModDoc, bool fullPath)
 //-------------------------------------------------------------------------
 {
-	const CString &path = (!fullPath || pModDoc->GetPathName().IsEmpty()) ? pModDoc->GetTitle() :  pModDoc->GetPathName();
+	const CString &path = (!fullPath || pModDoc->GetPathNameMpt().empty()) ? pModDoc->GetTitle() : pModDoc->GetPathNameMpt().ToCString();
 	return CString(pModDoc->GetrSoundFile().GetTitle().c_str()) + CString(" (") + path + CString(")");
 }
 
@@ -144,3 +163,6 @@ void CloseMainDialog::OnSwitchFullPaths()
 		m_List.DeleteString(i);
 	}
 }
+
+
+OPENMPT_NAMESPACE_END

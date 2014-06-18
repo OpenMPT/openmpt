@@ -62,11 +62,24 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>bin\</OutDir>
+    <OutDir>..\bin\$(Platform)\</OutDir>
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>bin\</OutDir>
-    <TargetName>$(ProjectName)64</TargetName>
+    <OutDir>..\bin\$(Platform)\</OutDir>
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\bin\$(Platform)-Debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\bin\$(Platform)-Debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>..\build\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -138,10 +151,10 @@
     <ClCompile Include="openmpt123.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\include\flac\flac.vcxproj">
+    <ProjectReference Include="..\build\gen\flac.vcxproj">
       <Project>{e599f5aa-f9a3-46cc-8db0-c8defceb90c5}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\include\portaudio\portaudio.vcxproj">
+    <ProjectReference Include="..\build\gen\portaudio.vcxproj">
       <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
     </ProjectReference>
     <ProjectReference Include="..\libopenmpt\libopenmpt.vcxproj">
@@ -154,6 +167,7 @@
     <ClInclude Include="openmpt123_flac.hpp" />
     <ClInclude Include="openmpt123_mmio.hpp" />
     <ClInclude Include="openmpt123_portaudio.hpp" />
+    <ClInclude Include="openmpt123_raw.hpp" />
     <ClInclude Include="openmpt123_sndfile.hpp" />
     <ClInclude Include="openmpt123_stdout.hpp" />
     <ClInclude Include="openmpt123_waveout.hpp" />

@@ -16,8 +16,14 @@
 #include <vector>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+#if defined(MODPLUG_TRACKER)
+
 //#define USE_PROFILER
 
+#endif
 
 #ifdef USE_PROFILER
 
@@ -114,3 +120,6 @@ public:
 
 
 #endif // USE_PROFILER
+
+
+OPENMPT_NAMESPACE_END

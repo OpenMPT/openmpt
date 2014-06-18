@@ -14,8 +14,9 @@
 #include "../common/misc_util.h"
 #include "Undo.h"
 #include "Notification.h"
-#include "../common/Logging.h"
 #include <time.h>
+
+OPENMPT_NAMESPACE_BEGIN
 
 class EncoderFactoryBase;
 
@@ -94,21 +95,6 @@ STATIC_ASSERT( ((-1 << HINT_SHIFT_SEQUENCE) & HINT_MASK_ITEM) == (-1 << HINT_SHI
 
 
 /////////////////////////////////////////////////////////////////////////
-// File edit history
-
-#define HISTORY_TIMER_PRECISION	18.2f
-
-//================
-struct FileHistory
-//================
-{
-	// Date when the file was loaded in the the tracker or created.
-	tm loadDate;
-	// Time the file was open in the editor, in 1/18.2th seconds (frequency of a standard DOS timer, to keep compatibility with Impulse Tracker easy).
-	uint32 openTime;
-};
-
-/////////////////////////////////////////////////////////////////////////
 // Split Keyboard Settings (pattern editor)
 
 //==========================
@@ -171,6 +157,7 @@ public:
 	~ScopedLogCapturer();
 	void ShowLog(bool force = false);
 	void ShowLog(const std::string &preamble, bool force = false);
+	void ShowLog(const std::wstring &preamble, bool force = false);
 };
 
 
@@ -192,7 +179,6 @@ protected:
 	CPatternUndo m_PatternUndo;
 	CSampleUndo m_SampleUndo;
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
-	std::vector<FileHistory> m_FileHistory;	// File edit history
 	time_t m_creationTime;
 
 	bool bModifiedAutosave; // Modified since last autosave?
@@ -238,6 +224,7 @@ protected:
 	void SetLogMode(LogMode mode) { m_LogMode = mode; }
 	void ClearLog();
 	UINT ShowLog(const std::string &preamble, const std::string &title = "", CWnd *parent = nullptr);
+	UINT ShowLog(const std::wstring &preamble, const std::wstring &title = std::wstring(), CWnd *parent = nullptr);
 	UINT ShowLog(const std::string &title = "", CWnd *parent = nullptr) { return ShowLog("", title, parent); }
 
 public:
@@ -258,13 +245,11 @@ public:
 
 	void SongProperties();
 
-	void PrepareUndoForAllPatterns(bool storeChannelInfo = false);
+	void PrepareUndoForAllPatterns(bool storeChannelInfo = false, const char *description = "");
 	CPatternUndo &GetPatternUndo() { return m_PatternUndo; }
 	CSampleUndo &GetSampleUndo() { return m_SampleUndo; }
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
 
-	std::vector<FileHistory> &GetFileHistory() { return m_FileHistory; }
-	const std::vector<FileHistory> &GetFileHistory() const { return m_FileHistory; }
 	time_t GetCreationTime() const { return m_creationTime; }
 	
 // operations
@@ -282,7 +267,10 @@ public:
 
 	bool ConvertInstrumentsToSamples();
 	bool ConvertSamplesToInstruments();
-	UINT RemovePlugs(const std::vector<bool> &keepMask);
+	PLUGINDEX RemovePlugs(const std::vector<bool> &keepMask);
+
+	void ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source);
+	void AppendModule(const CSoundFile &source);
 
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
 	SAMPLEINDEX InsertSample(bool bLimit = false);
@@ -324,10 +312,9 @@ public:
 
 	CHANNELINDEX GetNumChannels() const { return m_SndFile.m_nChannels; }
 	UINT GetPatternSize(PATTERNINDEX nPat) const;
-	BOOL AdjustEndOfSample(UINT nSample);
 	bool IsChildSample(INSTRUMENTINDEX nIns, SAMPLEINDEX nSmp) const;
 	INSTRUMENTINDEX FindSampleParent(SAMPLEINDEX sample) const;
-	UINT FindInstrumentChild(UINT nIns) const;
+	SAMPLEINDEX FindInstrumentChild(INSTRUMENTINDEX nIns) const;
 	bool MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate = true, bool bCopy = false, SEQUENCEINDEX nSourceSeq = SEQUENCEINDEX_INVALID, SEQUENCEINDEX nDestSeq = SEQUENCEINDEX_INVALID);
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
@@ -340,9 +327,9 @@ public:
 	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord);
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	void TogglePluginEditor(UINT m_nCurrentPlugin);
-	void RecordParamChange(int slot, long param);
-	void LearnMacro(int macro, long param);
-	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow);
+	void RecordParamChange(PLUGINDEX slot, PlugParamIndex param);
+	void LearnMacro(int macro, PlugParamIndex param);
+	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool setSamplePos);
 
 	// Global settings to pattern effect conversion
 	bool RestartPosToPattern();
@@ -356,6 +343,7 @@ public:
 	CSize GetOldPatternScrollbarsPos() const { return m_szOldPatternScrollbarsPos; };
 	void SetOldPatternScrollbarsPos( CSize s ){ m_szOldPatternScrollbarsPos = s; };
 
+	void OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, bool showWarning = false);
 	void OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder);
 	void OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, const std::vector<EncoderFactoryBase*> &encFactories);
 
@@ -379,11 +367,48 @@ protected:
 	//{{AFX_VIRTUAL(CModDoc)
 	public:
 	virtual BOOL OnNewDocument();
-	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
-	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName) {return OnSaveDocument(lpszPathName, false);}
+	MPT_DEPRECATED_PATH virtual BOOL OnOpenDocument(LPCTSTR lpszPathName)
+	{
+		return OnOpenDocument(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString());
+	}
+	virtual BOOL OnOpenDocument(const mpt::PathString &filename);
+	MPT_DEPRECATED_PATH virtual BOOL OnSaveDocument(LPCTSTR lpszPathName)
+	{
+		return OnSaveDocument(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), false);
+	}
+	BOOL OnSaveDocument(const mpt::PathString &filename)
+	{
+		return OnSaveDocument(filename, false);
+	}
 	virtual void OnCloseDocument();
 	void SafeFileClose();
-	BOOL OnSaveDocument(LPCTSTR lpszPathName, const bool bTemplateFile);
+	BOOL OnSaveDocument(const mpt::PathString &filename, const bool bTemplateFile);
+
+	MPT_DEPRECATED_PATH virtual void SetPathName(LPCTSTR lpszPathName, BOOL bAddToMRU = TRUE)
+	{
+		return SetPathName(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), bAddToMRU);
+	}
+	virtual void SetPathName(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
+	{
+		CDocument::SetPathName(mpt::PathString::TunnelIntoCString(filename), bAddToMRU);
+		#ifndef UNICODE
+			// As paths are faked into utf8 when !UNICODE,
+			// explicitly set the title in locale again.
+			// This replaces non-ANSI characters in the title
+			// with replacement character but overall the
+			// unicode handling is sane and consistent this
+			// way.
+			SetTitle(mpt::ToCString((filename.GetFileName() + filename.GetFileExt()).ToWide()));
+		#endif
+	}
+	MPT_DEPRECATED_PATH const CString& GetPathName() const
+	{
+		return CDocument::GetPathName();
+	}
+	mpt::PathString GetPathNameMpt() const
+	{
+		return mpt::PathString::TunnelOutofCString(CDocument::GetPathName());
+	}
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -391,7 +416,17 @@ protected:
 	bool SaveInstrument(INSTRUMENTINDEX instr);
 // -! NEW_FEATURE#0023
 
-	virtual BOOL DoSave(LPCSTR lpszPathName, BOOL bSaveAs=TRUE);
+#ifndef UNICODE
+	// MFC checks for writeable filename in there and issues SaveAs dialog if not.
+	// This fails for our utf8-in-CString hack.
+	virtual BOOL DoFileSave();
+#endif
+
+	MPT_DEPRECATED_PATH virtual BOOL DoSave(LPCSTR lpszPathName, BOOL bSaveAs=TRUE)
+	{
+		return DoSave(lpszPathName ? mpt::PathString::TunnelOutofCString(lpszPathName) : mpt::PathString(), bSaveAs);
+	}
+	virtual BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs=TRUE);
 	virtual void DeleteContents();
 	virtual void SetModifiedFlag(BOOL bModified=TRUE);
 	//}}AFX_VIRTUAL
@@ -442,15 +477,19 @@ public:
 	afx_msg void OnViewEditHistory();
 	afx_msg void OnViewMPTHacks();
 	afx_msg void OnSaveTemplateModule();
+	afx_msg void OnAppendModule();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
 
 	void ChangeFileExtension(MODTYPE nNewType);
-	CHANNELINDEX FindAvailableChannel();
+	CHANNELINDEX FindAvailableChannel() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+
+OPENMPT_NAMESPACE_END

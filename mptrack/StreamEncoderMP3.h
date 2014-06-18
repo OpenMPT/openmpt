@@ -13,6 +13,9 @@
 #include "StreamEncoder.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 #define MPT_MP3ENCODER_LAME
 #define MPT_MP3ENCODER_BLADE
 #define MPT_MP3ENCODER_ACM
@@ -51,10 +54,13 @@ private:
 	AcmDynBind *m_Acm;
 #endif
 
+	MP3EncoderType m_Type;
+
 public:
 
 	IAudioStreamEncoder *ConstructStreamEncoder(std::ostream &file) const;
 	std::string DescribeQuality(float quality) const;
+	std::string DescribeBitrateABR(int bitrate) const;
 	bool IsAvailable() const;
 
 public:
@@ -64,3 +70,6 @@ public:
 	virtual ~MP3Encoder();
 
 };
+
+
+OPENMPT_NAMESPACE_END

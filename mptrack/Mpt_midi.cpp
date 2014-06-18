@@ -10,10 +10,15 @@
 
 #include "stdafx.h"
 #include <mmsystem.h>
-#include "mainfrm.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
 #include "Dlsbank.h"
 #include "../soundlib/MIDIEvents.h"
 #include "Moptions.h"	// for OPTIONS_PAGE_MIDI
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 //#define MPTMIDI_RECORDLOG
 
@@ -26,16 +31,16 @@ int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE mid
 //--------------------------------------------------------------------------------------
 {
 	int nVol = MIDIEvents::GetDataByte2FromEvent(dwParam1);
-	if (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
+	if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
 	{
 		nVol = (CDLSBank::DLSMidiVolumeToLinear(nVol)+255) >> 8;
 		nVol *= TrackerSettings::Instance().midiVelocityAmp / 100;
 		Limit(nVol, 1, 256);
 		if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
 			nVol = static_cast<int>((midivolume / 127.0) * nVol);
-	}
-	else //Case: No velocity record.
-	{	
+	} else
+	{
+		// Case: No velocity record.
 		if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
 			nVol = 4*((midivolume+1)/2);
 		else //Use default volume
@@ -45,8 +50,9 @@ int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE mid
 	return nVol;
 }
 
-void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, DWORD &dwParam1)
-//-----------------------------------------------------------------------
+
+void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, uint32 &dwParam1)
+//------------------------------------------------------------------------
 {
 	if ( (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
 		&& (MIDIEvents::GetChannelFromEvent(dwParam1) != 9) )
@@ -72,8 +78,8 @@ void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, DWORD &dwParam1)
 /////////////////////////////////////////////////////////////////////////////
 // MMSYSTEM Midi Record
 
-void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD, DWORD dwParam1, DWORD dwParam2)
-//-------------------------------------------------------------------------------------
+void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
+//-------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	HWND hWndMidi;
@@ -90,51 +96,55 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD, DWORD dwParam1, DWORD dw
 	hWndMidi = pMainFrm->GetMidiRecordWnd();
 	if(wMsg == MIM_DATA || wMsg == MIM_MOREDATA)
 	{
+		uint32 data = static_cast<uint32>(dwParam1);
 		if(::IsWindow(hWndMidi))
 		{
-			switch(MIDIEvents::GetTypeFromEvent(dwParam1))
+			switch(MIDIEvents::GetTypeFromEvent(data))
 			{
 			case MIDIEvents::evNoteOff:	// Note Off
 			case MIDIEvents::evNoteOn:	// Note On
-				ApplyTransposeKeyboardSetting(*pMainFrm, dwParam1);
-				// Intentional fall-through
-
+				ApplyTransposeKeyboardSetting(*pMainFrm, data);
+				MPT_FALLTHROUGH;
 			default:
-				if(::SendMessage(hWndMidi, WM_MOD_MIDIMSG, dwParam1, dwParam2))
+				if(::SendMessage(hWndMidi, WM_MOD_MIDIMSG, data, dwParam2))
 					return;	// Message has been handled
 				break;
 			}
 		}
 		// Pass MIDI to keyboard handler
-		pMainFrm->GetInputHandler()->HandleMIDIMessage(kCtxAllContexts, dwParam1);
+		pMainFrm->GetInputHandler()->HandleMIDIMessage(kCtxAllContexts, data);
+	} else if(wMsg == MIM_LONGDATA)
+	{
+		// Sysex...
 	}
 }
 
 
-BOOL CMainFrame::midiOpenDevice()
-//-------------------------------
+bool CMainFrame::midiOpenDevice(bool showSettings)
+//------------------------------------------------
 {
-	if (shMidiIn) return TRUE;
-	try
+	if (shMidiIn) return true;
+	
+	if (midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 	{
-		if (midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
-		{
-			shMidiIn = NULL;
+		shMidiIn = NULL;
 
-			// Show MIDI configuration on fail.
+		// Show MIDI configuration on fail.
+		if(showSettings)
+		{
 			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
 			CMainFrame::GetMainFrame()->OnViewOptions();
-
-			// Let's see if the user updated the settings.
-			if(midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
-			{
-				shMidiIn = NULL;
-				return FALSE;
-			}
 		}
-		midiInStart(shMidiIn);
-	} catch (...) {}
-	return TRUE;
+
+		// Let's see if the user updated the settings.
+		if(midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+		{
+			shMidiIn = NULL;
+			return false;
+		}
+	}
+	midiInStart(shMidiIn);
+	return true;
 }
 
 
@@ -167,3 +177,6 @@ void CMainFrame::OnUpdateMidiRecord(CCmdUI *pCmdUI)
 {
 	if (pCmdUI) pCmdUI->SetCheck((shMidiIn) ? TRUE : FALSE);
 }
+
+
+OPENMPT_NAMESPACE_END

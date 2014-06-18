@@ -11,6 +11,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CNoteMapWnd;
 class CCtrlInstruments;
 
@@ -97,16 +99,14 @@ protected:
 	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutSwing, m_SliderResSwing, 
 		        m_SliderCutOff, m_SliderResonance;
 	CNoteMapWnd m_NoteMap;
-	INSTRUMENTINDEX m_nInstrument;
-
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
 	CSliderCtrl m_SliderAttack;
 	CSpinButtonCtrl m_SpinAttack;
-// -! NEW_FEATURE#0027
-
 	//Tuning
 	CComboBox m_ComboTuning;
+
+	INSTRUMENTINDEX m_nInstrument;
+	bool openendPluginListWithMouse;
+
 	void UpdateTuningComboBox();
 	void BuildTuningComboBox();
 
@@ -122,13 +122,13 @@ public:
 	virtual ~CCtrlInstruments();
 
 public:
-	void SetInstrumentModified(const bool modified = true);
+	void SetModified(DWORD mask, bool updateAll, bool modified = true);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
-	BOOL OpenInstrument(LPCSTR lpszFileName);
+	BOOL OpenInstrument(const mpt::PathString &fileName);
 	BOOL OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
 	BOOL EditSample(UINT nSample);
 	VOID UpdateFilterText();
-	LONG* GetSplitPosRef() {return &TrackerSettings::Instance().glInstrumentWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG>* GetSplitPosRef() {return &TrackerSettings::Instance().glInstrumentWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)
@@ -175,6 +175,7 @@ protected:
 	afx_msg void OnPluginVelocityHandlingChanged();
 	afx_msg void OnPluginVolumeHandlingChanged();
 	afx_msg void OnPitchWheelDepthChanged();
+	afx_msg void OnOpenPluginList() { openendPluginListWithMouse = true; }
 
 
 // -> CODE#0027
@@ -194,3 +195,5 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+OPENMPT_NAMESPACE_END

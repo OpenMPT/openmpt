@@ -16,6 +16,10 @@
 #include "Moddoc.h"
 #include "../soundlib/modsmp_ctrl.h"
 
+
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Functor for fixing hacked patterns
 struct FixHackedPatterns
 //======================
@@ -368,7 +372,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		AddToLog(mpt::String::Format("Found incompatible default tempo (must be between %d and %d)", originalSpecs->tempoMin, originalSpecs->tempoMax));
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.m_nDefaultTempo = CLAMP(m_SndFile.m_nDefaultTempo, originalSpecs->tempoMin, originalSpecs->tempoMax);
+			m_SndFile.m_nDefaultTempo = Clamp(m_SndFile.m_nDefaultTempo, originalSpecs->tempoMin, originalSpecs->tempoMax);
 	}
 
 	// Check for invalid default speed
@@ -377,7 +381,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		AddToLog(mpt::String::Format("Found incompatible default speed (must be between %d and %d)", originalSpecs->speedMin, originalSpecs->speedMax));
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.m_nDefaultSpeed = CLAMP(m_SndFile.m_nDefaultSpeed, originalSpecs->speedMin, originalSpecs->speedMax);
+			m_SndFile.m_nDefaultSpeed = Clamp(m_SndFile.m_nDefaultSpeed, originalSpecs->speedMin, originalSpecs->speedMax);
 	}
 
 	// Check for invalid rows per beat / measure values
@@ -387,8 +391,8 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		foundHacks = true;
 		if(autofix)
 		{
-			m_SndFile.m_nDefaultRowsPerBeat = CLAMP(m_SndFile.m_nDefaultRowsPerBeat, 1, (originalSpecs->patternRowsMax - 1));
-			m_SndFile.m_nDefaultRowsPerMeasure = CLAMP(m_SndFile.m_nDefaultRowsPerMeasure, m_SndFile.m_nDefaultRowsPerBeat, (originalSpecs->patternRowsMax - 1));
+			m_SndFile.m_nDefaultRowsPerBeat = Clamp(m_SndFile.m_nDefaultRowsPerBeat, 1u, (originalSpecs->patternRowsMax - 1));
+			m_SndFile.m_nDefaultRowsPerMeasure = Clamp(m_SndFile.m_nDefaultRowsPerMeasure, m_SndFile.m_nDefaultRowsPerBeat, (originalSpecs->patternRowsMax - 1));
 		}
 	}
 
@@ -463,12 +467,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		}
 	}
 
-	if(m_SndFile.GetMixLevels() != mixLevels_compatible)
+	if(m_SndFile.GetMixLevels() != mixLevels_compatible && m_SndFile.GetMixLevels() != mixLevels_compatible_FT2)
 	{
 		AddToLog("Found incorrect mix levels (only compatible mix levels allowed)");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.SetMixLevels(mixLevels_compatible);
+			m_SndFile.SetMixLevels(m_SndFile.GetType() == MOD_TYPE_XM ? mixLevels_compatible_FT2 : mixLevels_compatible);
 	}
 
 	if(autofix && foundHacks)
@@ -477,3 +481,5 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	return foundHacks;
 }
 
+
+OPENMPT_NAMESPACE_END

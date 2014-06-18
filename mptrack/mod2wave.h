@@ -11,26 +11,58 @@
 #pragma once
 
 #include "StreamEncoder.h"
+#include "Settings.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Direct To Disk Recording
 
 
+struct StoredTags
+{
+	Setting<std::wstring> artist;
+	Setting<std::wstring> album;
+	Setting<std::wstring> trackno;
+	Setting<std::wstring> year;
+	Setting<std::wstring> url;
+
+	Setting<std::wstring> genre;
+
+	StoredTags(SettingsContainer &conf);
+
+};
+
+
 struct CWaveConvertSettings
 {
 	std::vector<EncoderFactoryBase*> EncoderFactories;
+	std::vector<MPT_SHARED_PTR<Encoder::Settings> > EncoderSettings;
+
+	Setting<std::string> EncoderName;
 	std::size_t EncoderIndex;
-	bool Normalize;
-	uint32 SampleRate;
-	uint16 Channels;
+
 	SampleFormat FinalSampleFormat;
-	Encoder::Settings EncoderSettings;
+
+	StoredTags storedTags;
 	FileTags Tags;
+
+	int repeatCount;
+	ORDERINDEX minOrder, maxOrder;
+
+	bool Normalize;
+	bool SilencePlugBuffers;
+
+	std::size_t FindEncoder(const std::string &name) const;
 	void SelectEncoder(std::size_t index);
 	EncoderFactoryBase *GetEncoderFactory() const;
 	const Encoder::Traits *GetTraits() const;
-	CWaveConvertSettings(std::size_t defaultEncoder, const std::vector<EncoderFactoryBase*> &encFactories);
+	Encoder::Settings &GetEncoderSettings() const;
+	CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories);
 };
+
 
 //================================
 class CWaveConvert: public CDialog
@@ -39,34 +71,37 @@ class CWaveConvert: public CDialog
 public:
 	CWaveConvertSettings m_Settings;
 	const Encoder::Traits *encTraits;
-	CSoundFile *m_pSndFile;
-	ULONGLONG m_dwFileLimit;
-	DWORD m_dwSongLimit;
-	bool m_bSelectPlay, m_bHighQuality, m_bGivePlugsIdleTime;
-	ORDERINDEX m_nMinOrder, m_nMaxOrder, m_nNumOrders;
-	int loopCount;
+	CSoundFile &m_SndFile;
+	uint64 m_dwFileLimit, m_dwSongLimit;
+	ORDERINDEX m_nNumOrders;
 
-	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnSampleFormat;
+	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnDither, m_CbnSampleFormat;
 	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder;
 
+	bool m_bGivePlugsIdleTime;
 	bool m_bChannelMode;		// Render by channel
-	bool m_bInstrumentMode;	// Render by instrument
+	bool m_bInstrumentMode;		// Render by instrument
 
 	CEdit m_EditTitle, m_EditAuthor, m_EditURL, m_EditAlbum, m_EditYear;
 	CComboBox m_CbnGenre;
-
-	CEdit m_EditInfo;
+	CEdit m_EditGenre;
 
 private:
-	void FillInfo();
+	void OnShowEncoderInfo();
 	void FillFileTypes();
 	void FillSamplerates();
 	void FillChannels();
 	void FillFormats();
+	void FillDither();
 	void FillTags();
 
+	void LoadTags();
+
+	void SaveEncoderSettings();
+	void SaveTags();
+
 public:
-	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile *sndfile, std::size_t defaultEncoder, const std::vector<EncoderFactoryBase*> &encFactories);
+	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile &sndFile, const std::vector<EncoderFactoryBase*> &encFactories);
 
 public:
 	void UpdateDialog();
@@ -80,6 +115,7 @@ public:
 	afx_msg void OnFileTypeChanged();
 	afx_msg void OnSamplerateChanged();
 	afx_msg void OnChannelsChanged();
+	afx_msg void OnDitherChanged();
 	afx_msg void OnFormatChanged();
 	afx_msg void OnPlayerOptions(); //rewbs.resamplerConf
 	DECLARE_MESSAGE_MAP()
@@ -91,22 +127,20 @@ class CDoWaveConvert: public CDialog
 //==================================
 {
 public:
-	CWaveConvertSettings m_Settings;
-	CSoundFile *m_pSndFile;
-	LPCSTR m_lpszFileName;
-	DWORD m_dwFileLimit, m_dwSongLimit;
-	UINT m_nMaxPatterns;
+	const CWaveConvertSettings &m_Settings;
+	CSoundFile &m_SndFile;
+	mpt::PathString m_lpszFileName;
+	uint64 m_dwFileLimit, m_dwSongLimit;
 	bool m_bAbort, m_bGivePlugsIdleTime;
 
 public:
-	CDoWaveConvert(CSoundFile *sndfile, LPCSTR fname, CWaveConvertSettings settings, CWnd *parent = NULL)
+	CDoWaveConvert(CSoundFile &sndFile, const mpt::PathString &filename, const CWaveConvertSettings &settings, CWnd *parent = NULL)
 		: CDialog(IDD_PROGRESS, parent)
+		, m_SndFile(sndFile)
 		, m_Settings(settings)
-		{ m_pSndFile = sndfile; 
-		  m_lpszFileName = fname; 
-		  m_bAbort = false; 
-		  m_dwFileLimit = m_dwSongLimit = 0; 
-		  m_nMaxPatterns = 0; }
+		, m_lpszFileName(filename)
+		, m_bAbort(false)
+		, m_dwFileLimit(0), m_dwSongLimit(0) { }
 	BOOL OnInitDialog();
 	void OnCancel() { m_bAbort = true; }
 	afx_msg void OnButton1();
@@ -114,3 +148,4 @@ public:
 };
 
 
+OPENMPT_NAMESPACE_END

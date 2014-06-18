@@ -10,10 +10,11 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "childfrm.h"
-#include "moddoc.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
+#include "Childfrm.h"
+#include "Moddoc.h"
 #include "globals.h"
 #include "ctrl_ins.h"
 #include "view_ins.h"
@@ -22,6 +23,10 @@
 #include "ScaleEnvPointsDlg.h"
 #include "view_ins.h"
 #include "../soundlib/MIDIEvents.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 #define ENV_ZOOM				4.0f
 #define ENV_MIN_ZOOM			2.0f
@@ -129,7 +134,9 @@ CViewInstrument::CViewInstrument()
 		m_dwNotifyPos[i] = (uint32)Notification::PosInvalid;
 	}
 	MemsetZero(m_NcButtonState);
-	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
+
+	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_EnvelopeIcons);
+
 	m_baPlayingNote.reset();
 	//rewbs.envRowGrid
 	m_bGrid=true;
@@ -146,7 +153,7 @@ void CViewInstrument::OnInitialUpdate()
 //-------------------------------------
 {
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
-	CScrollView::OnInitialUpdate();
+	CModScrollView::OnInitialUpdate();
 	UpdateScrollSize();
 }
 
@@ -162,9 +169,9 @@ void CViewInstrument::UpdateScrollSize()
 		SIZE sizeTotal, sizePage, sizeLine;
 		UINT ntickmax = EnvGetTick(EnvGetLastPoint());
 
-		sizeTotal.cx = (INT)((ntickmax + 2) * m_fZoom);
+		sizeTotal.cx = (int)((ntickmax + 2) * m_fZoom);
 		sizeTotal.cy = 1;
-		sizeLine.cx = (INT)m_fZoom;
+		sizeLine.cx = (int)m_fZoom;
 		sizeLine.cy = 2;
 		sizePage.cx = sizeLine.cx * 4;
 		sizePage.cy = sizeLine.cy;
@@ -174,15 +181,16 @@ void CViewInstrument::UpdateScrollSize()
 
 
 // Set instrument (and moddoc) as modified.
-void CViewInstrument::SetInstrumentModified()
-//-------------------------------------------
+// updateAll: Update all views including this one. Otherwise, only update update other views.
+void CViewInstrument::SetModified(DWORD mask, bool updateAll)
+//-----------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	pModDoc->m_bsInstrumentModified.set(m_nInstrument - 1, true);
-	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES, this);
+	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES | mask, updateAll ? nullptr : this);
 // -! NEW_FEATURE#0023
 	pModDoc->SetModified();
 }
@@ -295,7 +303,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue, bool moveTa
 			tickDiff = envelope->Ticks[nPoint];
 			int mintick = (nPoint) ? envelope->Ticks[nPoint - 1] : 0;
 			int maxtick = envelope->Ticks[nPoint + 1];
-			if(nPoint + 1 == (int)envelope->nNodes || moveTail) maxtick = ENVELOPE_MAX_LENGTH;
+			if(nPoint + 1 == (int)envelope->nNodes || moveTail) maxtick = Util::MaxValueOfType(maxtick);
 
 			// Can't have multiple points on same tick
 			if(nPoint > 0 && mintick < maxtick - 1)
@@ -313,7 +321,8 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue, bool moveTa
 		}
 		if(nValue >= 0)
 		{
-			if(nValue > 64) nValue = 64;
+			const int maxVal = (GetDocument()->GetModType() != MOD_TYPE_XM || m_nEnv != ENV_PANNING) ? 64 : 63;
+			LimitMax(nValue, maxVal);
 			if(nValue != envelope->Values[nPoint])
 			{
 				envelope->Values[nPoint] = (uint8)nValue;
@@ -581,9 +590,9 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile &sndFil
 	// Update mixing flags...
 	for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
 	{
-		if(sndFile.Chn[nChn].pModInstrument == &ins)
+		if(sndFile.m_PlayState.Chn[nChn].pModInstrument == &ins)
 		{
-			sndFile.Chn[nChn].GetEnvelope(envelope).flags.set(flags, enable);
+			sndFile.m_PlayState.Chn[nChn].GetEnvelope(envelope).flags.set(flags, enable);
 		}
 	}
 
@@ -633,7 +642,7 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 int CViewInstrument::TickToScreen(int nTick) const
 //------------------------------------------------
 {
-	return ((int)((nTick + 1) * m_fZoom)) - GetScrollPos(SB_HORZ);
+	return ((int)((nTick + 1) * m_fZoom)) - m_nScrollPosX;
 }
 
 int CViewInstrument::PointToScreen(int nPoint) const
@@ -646,15 +655,9 @@ int CViewInstrument::PointToScreen(int nPoint) const
 int CViewInstrument::ScreenToTick(int x) const
 //--------------------------------------------
 {
-	return (int)(((float)GetScrollPos(SB_HORZ) + (float)x + 1 - m_fZoom) / m_fZoom);
+	return (int)(((float)m_nScrollPosX + (float)x + 1 - m_fZoom) / m_fZoom);
 }
 
-
-int CViewInstrument::QuickScreenToTick(int x, int cachedScrollPos) const
-//----------------------------------------------------------------------
-{
-	return (int)(((float)cachedScrollPos + (float)x + 1 - m_fZoom) / m_fZoom);
-}
 
 int CViewInstrument::ScreenToValue(int y) const
 //---------------------------------------------
@@ -774,9 +777,13 @@ void CViewInstrument::UpdateNcButtonState()
 ////////////////////////////////////////////////////////////////////
 // CViewInstrument drawing
 
-void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
-//-----------------------------------------------------------
+void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *hint)
+//---------------------------------------------------------------
 {
+	if(hint == this)
+	{
+		return;
+	}
 	const INSTRUMENTINDEX updateIns = (dwHintMask >> HINT_SHIFT_INS);
 	if((dwHintMask & (HINT_MPTOPTIONS | HINT_MODTYPE))
 		|| ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == updateIns || updateIns == 0))
@@ -792,7 +799,6 @@ void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 //--------------------------------------------------
 {
-	int cachedScrollPos = GetScrollPos(SB_HORZ);
 	bool windowResized = false;
 
 	if (m_dcGrid.GetSafeHdc())
@@ -804,20 +810,20 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 	}
 
 
-	if (windowResized || m_bGridForceRedraw || (cachedScrollPos != m_GridScrollPos) || (speed != (UINT)m_GridSpeed))
+	if (windowResized || m_bGridForceRedraw || (m_nScrollPosX != m_GridScrollPos) || (speed != (UINT)m_GridSpeed))
 	{
 
 		m_GridSpeed = speed;
-		m_GridScrollPos = cachedScrollPos;
+		m_GridScrollPos = m_nScrollPosX;
 		m_bGridForceRedraw = false;
 
 		// create a memory based dc for drawing the grid
 		m_dcGrid.CreateCompatibleDC(pDC);
-		m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top);
+		m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.Width(), m_rcClient.Height());
 		m_pbmpOldGrid = m_dcGrid.SelectObject(&m_bmpGrid);
 
 		//do draw
-		int width = m_rcClient.right - m_rcClient.left;
+		int width = m_rcClient.Width();
 		int nPrevTick = -1;
 		int nTick, nRow;
 		int nRowsPerBeat = 1, nRowsPerMeasure = 1;
@@ -828,17 +834,20 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 			nRowsPerMeasure = modDoc->GetrSoundFile().m_nDefaultRowsPerMeasure;
 		}
 
+		// Paint it black!
+		m_dcGrid.FillSolidRect(&m_rcClient, 0);
+
 		for (int x = 3; x < width; x++)
 		{
-			nTick = QuickScreenToTick(x, cachedScrollPos);
+			nTick = ScreenToTick(x);
 			if (nTick != nPrevTick && !(nTick%speed))
 			{
 				nPrevTick = nTick;
 				nRow = nTick / speed;
 
-				if (nRow % MAX(1, nRowsPerMeasure) == 0)
+				if (nRowsPerMeasure > 0 && nRow % nRowsPerMeasure == 0)
 					m_dcGrid.SelectObject(CMainFrame::penGray80);
-				else if (nRow % MAX(1, nRowsPerBeat) == 0)
+				else if (nRowsPerBeat > 0 && nRow % nRowsPerBeat == 0)
 					m_dcGrid.SelectObject(CMainFrame::penGray55);
 				else
 					m_dcGrid.SelectObject(CMainFrame::penGray33);
@@ -850,7 +859,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 		}
 	}
 
-	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top, &m_dcGrid, 0, 0, SRCCOPY);
+	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcGrid, 0, 0, SRCCOPY);
 }
 //end rewbs.envRowGrid
 
@@ -858,7 +867,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 //------------------------------------
 {
 	RECT rect;
-	int nScrollPos = GetScrollPos(SB_HORZ);
+	int nScrollPos = m_nScrollPosX;
 	CModDoc *pModDoc = GetDocument();
 	HGDIOBJ oldpen;
 	//HDC hdc;
@@ -888,10 +897,13 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	if ((!pModDoc) || (!pDC)) return;
 	//hdc = pDC->m_hDC;
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
-	m_dcMemMain.FillRect(&m_rcClient, CBrush::FromHandle(CMainFrame::brushBlack));
 	if (m_bGrid)
 	{
-		DrawGrid(&m_dcMemMain, pModDoc->GetrSoundFile().m_nMusicSpeed);
+		DrawGrid(&m_dcMemMain, pModDoc->GetrSoundFile().m_PlayState.m_nMusicSpeed);
+	} else
+	{
+		// Paint it black!
+		m_dcMemMain.FillSolidRect(&m_rcClient, 0);
 	}
 
 	// Middle line (half volume or pitch / panning center)
@@ -962,11 +974,11 @@ void CViewInstrument::OnDraw(CDC *pDC)
 
 		}
 	}
-	DrawPositionMarks(m_dcMemMain.m_hDC);
+	DrawPositionMarks();
 	if (oldpen) m_dcMemMain.SelectObject(oldpen);
 
 	//rewbs.envRowGrid
-	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top, &m_dcMemMain, 0, 0, SRCCOPY);
+	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcMemMain, 0, 0, SRCCOPY);
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -1041,8 +1053,7 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 				envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
 
-			SetInstrumentModified();
-			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+			SetModified(HINT_ENVELOPE, true);
 			return true;
 		}
 	}
@@ -1116,8 +1127,7 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 				if (envelope->nSustainEnd >= i) envelope->nSustainEnd++;
 				if (envelope->nReleaseNode >= i && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode++;
 
-				SetInstrumentModified();
-				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+				SetModified(HINT_ENVELOPE, true);
 				return i + 1;
 			}
 		}
@@ -1127,8 +1137,8 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 
 
 
-void CViewInstrument::DrawPositionMarks(HDC hdc)
-//----------------------------------------------
+void CViewInstrument::DrawPositionMarks()
+//---------------------------------------
 {
 	CRect rect;
 	for(UINT i = 0; i < MAX_CHANNELS; i++) if (m_dwNotifyPos[i] != Notification::PosInvalid)
@@ -1137,7 +1147,7 @@ void CViewInstrument::DrawPositionMarks(HDC hdc)
 		rect.left = TickToScreen(m_dwNotifyPos[i]);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
-		InvertRect(hdc, &rect);
+		InvertRect(m_dcMemMain.m_hDC, &rect);
 	}
 }
 
@@ -1185,14 +1195,15 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 		if (bUpdate)
 		{
 			HDC hdc = ::GetDC(m_hWnd);
-			DrawPositionMarks(hdc);
+			DrawPositionMarks();
 			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 			{
 				//DWORD newpos = (pSndFile->m_SongFlags[SONG_PAUSED]) ? pnotify->dwPos[j] : 0;
 				uint32 newpos = (uint32)pnotify->pos[j];
 				m_dwNotifyPos[j] = newpos;
 			}
-			DrawPositionMarks(hdc);
+			DrawPositionMarks();
+			BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), m_dcMemMain.GetSafeHdc(), 0, 0, SRCCOPY);
 			::ReleaseDC(m_hWnd, hdc);
 		}
 	}
@@ -1317,7 +1328,7 @@ void CViewInstrument::OnNcPaint()
 void CViewInstrument::OnSize(UINT nType, int cx, int cy)
 //------------------------------------------------------
 {
-	CScrollView::OnSize(nType, cx, cy);
+	CModScrollView::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
 	{
 		UpdateScrollSize();
@@ -1513,8 +1524,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			CModDoc *pModDoc = GetDocument();
 			if(pModDoc)
 			{
-				SetInstrumentModified();
-				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+				SetModified(HINT_ENVELOPE, true);
 			}
 			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
 		}
@@ -1772,9 +1782,7 @@ void CViewInstrument::OnEnvLoopChanged()
 			pEnv->nLoopStart = 0;
 			pEnv->nLoopEnd = static_cast<uint8>(pEnv->nNodes - 1);
 		}
-		SetInstrumentModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, true);
 	}
 }
 
@@ -1791,9 +1799,7 @@ void CViewInstrument::OnEnvSustainChanged()
 			// Enabled sustain loop => set sustain loop points if no sustain loop has been specified yet.
 			pEnv->nSustainStart = pEnv->nSustainEnd = static_cast<uint8>(m_nDragItem - 1);
 		}
-		SetInstrumentModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, true);
 	}
 }
 
@@ -1804,8 +1810,7 @@ void CViewInstrument::OnEnvCarryChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetCarry(!EnvGetCarry())))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1814,8 +1819,7 @@ void CViewInstrument::OnEnvToggleReleasNode()
 {
 	if(IsDragItemEnvPoint() && EnvToggleReleaseNode(m_nDragItem - 1))
 	{
-		SetInstrumentModified();
-		InvalidateRect(NULL, FALSE);
+		SetModified(HINT_ENVELOPE, true);
 	}
 }
 
@@ -1825,8 +1829,7 @@ void CViewInstrument::OnEnvVolChanged()
 {
 	if (EnvSetVolEnv(!EnvGetVolEnv()))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1836,8 +1839,7 @@ void CViewInstrument::OnEnvPanChanged()
 {
 	if (EnvSetPanEnv(!EnvGetPanEnv()))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1847,8 +1849,7 @@ void CViewInstrument::OnEnvPitchChanged()
 {
 	if (EnvSetPitchEnv(!EnvGetPitchEnv()))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1858,8 +1859,7 @@ void CViewInstrument::OnEnvFilterChanged()
 {
 	if (EnvSetFilterEnv(!EnvGetFilterEnv()))
 	{
-		SetInstrumentModified();
-		UpdateNcButtonState();
+		SetModified(HINT_ENVELOPE, false);
 	}
 }
 
@@ -1869,10 +1869,10 @@ void CViewInstrument::OnEnvToggleGrid()
 {
 	m_bGrid = !m_bGrid;
 	if (m_bGrid)
-		m_bGridForceRedraw;
+		m_bGridForceRedraw = true;
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE);
 
 }
 //end rewbs.envRowGrid
@@ -1955,7 +1955,7 @@ void CViewInstrument::PlayNote(UINT note)
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX))
 			{
-				const std::string temp = pModDoc->GetrSoundFile().GetNoteName(static_cast<int16>(note), m_nInstrument);
+				const std::string temp = pModDoc->GetrSoundFile().GetNoteName(static_cast<ModCommand::NOTE>(note), m_nInstrument);
 				if(temp.size() >= sizeofS)
 					wsprintf(s, "%s", "...");
 				else
@@ -1980,18 +1980,19 @@ void CViewInstrument::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 }
 
 
+// Drop files from Windows
 void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 //------------------------------------------------
 {
-	const UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
+	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		TCHAR szFileName[_MAX_PATH] = "";
-		CMainFrame::GetMainFrame()->SetForegroundWindow();
-		::DragQueryFile(hDropInfo, f, szFileName, _MAX_PATH);
-		if(szFileName[0])
+		WCHAR fileName[MAX_PATH];
+		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
 		{
-			if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)szFileName) && f < nFiles - 1)
+			const mpt::PathString file = mpt::PathString::FromNative(fileName);
+			if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
 			{
 				// Insert more instrument slots
 				SendCtrlMessage(IDC_INSTRUMENT_NEW);
@@ -2002,8 +2003,8 @@ void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 }
 
 
-BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
-//-----------------------------------------------------------------------
+BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
+//----------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	BOOL bCanDrop = FALSE;
@@ -2033,8 +2034,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 
 	case DRAGONDROP_SOUNDFILE:
 	case DRAGONDROP_MIDIINSTR:
-		bCanDrop = ((lpDropInfo->lDropParam)
-				 && (*((LPCSTR)lpDropInfo->lDropParam)));
+		bCanDrop = !lpDropInfo->GetPath().empty();
 		break;
 	}
 	if ((!bCanDrop) || (!bDoDrop)) return bCanDrop;
@@ -2059,10 +2059,10 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		break;
 
 	case DRAGONDROP_MIDIINSTR:
-		if (CDLSBank::IsDLSBank((LPCSTR)lpDropInfo->lDropParam))
+		if (CDLSBank::IsDLSBank(lpDropInfo->GetPath()))
 		{
 			CDLSBank dlsbank;
-			if (dlsbank.Open((LPCSTR)lpDropInfo->lDropParam))
+			if (dlsbank.Open(lpDropInfo->GetPath()))
 			{
 				DLSINSTRUMENT *pDlsIns;
 				UINT nIns = 0, nRgn = 0xFF;
@@ -2089,6 +2089,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 			}
 		}
 		// Instrument file -> fall through
+		MPT_FALLTHROUGH;
 	case DRAGONDROP_SOUNDFILE:
 		SendCtrlMessage(CTRLMSG_INS_OPENFILE, lpDropInfo->lDropParam);
 		break;
@@ -2117,8 +2118,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 	}
 	if (bUpdate)
 	{
-		SetInstrumentModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES, NULL);
+		SetModified(HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES, true);
 	}
 	CMDIChildWnd *pMDIFrame = (CMDIChildWnd *)GetParentFrame();
 	if (pMDIFrame)
@@ -2138,7 +2138,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM midiData, LPARAM)
 	CModDoc *modDoc = GetDocument();
 	if(modDoc != nullptr)
 	{
-		modDoc->ProcessMIDI(midiData, m_nInstrument, modDoc->GetrSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
+		modDoc->ProcessMIDI(static_cast<uint32>(midiData), m_nInstrument, modDoc->GetrSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
 		return 1;
 	}
 	return 0;
@@ -2218,12 +2218,12 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	}
 	if(wParam >= kcInstrumentStartNotes && wParam <= kcInstrumentEndNotes)
 	{
-		PlayNote(wParam - kcInstrumentStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
+		PlayNote(static_cast<UINT>(wParam) - kcInstrumentStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
 		return wParam;
 	}
 	if(wParam >= kcInstrumentStartNoteStops && wParam <= kcInstrumentEndNoteStops)
 	{
-		int note =wParam - kcInstrumentStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12;
+		UINT note = static_cast<UINT>(wParam) - kcInstrumentStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12;
 		m_baPlayingNote[note] = false;
 		pModDoc->NoteOff(note, false, m_nInstrument);
 		return wParam;
@@ -2249,8 +2249,7 @@ void CViewInstrument::OnEnvelopeScalepoints()
 		CScaleEnvPointsDlg dlg(this, *GetEnvelopePtr(), nOffset);
 		if(dlg.DoModal() == IDOK)
 		{
-			SetInstrumentModified();
-			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+			SetModified(HINT_ENVELOPE, true);
 		}
 	}
 }
@@ -2305,8 +2304,7 @@ void CViewInstrument::EnvKbdMovePointLeft()
 		return;
 	pEnv->Ticks[m_nDragItem - 1]--;
 
-	SetInstrumentModified();
-	InvalidateRect(NULL, FALSE);
+	SetModified(HINT_ENVELOPE, true);
 }
 
 
@@ -2319,8 +2317,7 @@ void CViewInstrument::EnvKbdMovePointRight()
 		return;
 	pEnv->Ticks[m_nDragItem - 1]++;
 
-	SetInstrumentModified();
-	InvalidateRect(NULL, FALSE);
+	SetModified(HINT_ENVELOPE, true);
 }
 
 
@@ -2334,8 +2331,7 @@ void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
 	else
 		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MAX;
 
-	SetInstrumentModified();
-	InvalidateRect(NULL, FALSE);
+	SetModified(HINT_ENVELOPE, true);
 }
 
 
@@ -2349,8 +2345,7 @@ void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
 	else
 		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MIN;
 
-	SetInstrumentModified();
-	InvalidateRect(NULL, FALSE);
+	SetModified(HINT_ENVELOPE, true);
 }
 
 void CViewInstrument::EnvKbdInsertPoint()
@@ -2445,8 +2440,7 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
 		CModDoc *pModDoc = GetDocument();	// sanity checks are done in GetEnvelopePtr() already
-		SetInstrumentModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+		SetModified(HINT_ENVELOPE, true);
 	}
 }
 
@@ -2495,11 +2489,6 @@ bool CViewInstrument::CanMovePoint(UINT envPoint, int step)
 	{
 		return false;
 	}
-	// Limit envelope length
-	if((envPoint == pEnv->nNodes - 1) && pEnv->Ticks[envPoint] + step > ENVELOPE_MAX_LENGTH)
-	{
-		return false;
-	}
 	return true;
 }
 
@@ -2517,3 +2506,6 @@ BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
 }
+
+
+OPENMPT_NAMESPACE_END

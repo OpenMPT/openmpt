@@ -18,6 +18,9 @@
 #include "../soundlib/FileReader.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // This part of the header is identical for both presets and banks.
 struct ChunkHeader
 {
@@ -55,15 +58,21 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 	{
 		return wrongPlugin;
 	}
-	if(header.fxVersion > plugin.GetVersion())
-	{
-		return outdatedPlugin;
-	}
 
 	if(header.fxMagic == fMagic || header.fxMagic == chunkPresetMagic)
 	{
 		// Program
 		PlugParamIndex numParams = file.ReadUint32BE();
+
+		VstPatchChunkInfo info;
+		info.version = 1;
+		info.pluginUniqueID = header.fxID;
+		info.pluginVersion = header.fxVersion;
+		info.numElements = numParams;
+		MemsetZero(info.future);
+		plugin.Dispatch(effBeginLoadProgram, 0, 0, &info, 0.0f);
+		plugin.Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
+
 		char prgName[28];
 		file.ReadString<mpt::String::maybeNullTerminated>(prgName, 28);
 		plugin.Dispatch(effSetProgramName, 0, 0, prgName, 0.0f);
@@ -80,9 +89,10 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 			}
 		} else
 		{
-			FileReader chunk = file.GetChunk(file.ReadUint32BE());
+			FileReader chunk = file.ReadChunk(file.ReadUint32BE());
 			plugin.Dispatch(effSetChunk, 1, chunk.GetLength(), const_cast<char *>(chunk.GetRawData()), 0);
 		}
+		plugin.Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
 	} else if((header.fxMagic == bankMagic || header.fxMagic == chunkBankMagic) && firstChunk)
 	{
 		// Bank - only read if it's the first chunk in the file, not if it's a sub chunk.
@@ -90,22 +100,32 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 		uint32 currentProgram = file.ReadUint32BE();
 		file.Skip(124);
 
+		VstPatchChunkInfo info;
+		info.version = 1;
+		info.pluginUniqueID = header.fxID;
+		info.pluginVersion = header.fxVersion;
+		info.numElements = numProgs;
+		MemsetZero(info.future);
+		plugin.Dispatch(effBeginLoadBank, 0, 0, &info, 0.0f);
+
 		if(header.fxMagic == bankMagic)
 		{
 			VstInt32 oldCurrentProgram = plugin.GetCurrentProgram();
 			for(uint32 p = 0; p < numProgs; p++)
 			{
-				plugin.SetCurrentProgram(p);
+				plugin.Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
+				plugin.Dispatch(effSetProgram, 0, 0, nullptr, 0.0f);
 				ErrorCode retVal = LoadFile(file, plugin);
 				if(retVal != noError)
 				{
 					return retVal;
 				}
+				plugin.Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
 			}
 			plugin.SetCurrentProgram(oldCurrentProgram);
 		} else
 		{
-			FileReader chunk = file.GetChunk(file.ReadUint32BE());
+			FileReader chunk = file.ReadChunk(file.ReadUint32BE());
 			plugin.Dispatch(effSetChunk, 0, chunk.GetLength(), const_cast<char *>(chunk.GetRawData()), 0);
 		}
 		if(header.version >= 2)
@@ -245,7 +265,7 @@ void VSTPresets::WriteBE(uint32 v, std::ostream &f)
 void VSTPresets::WriteBE(float v, std::ostream &f)
 //------------------------------------------------
 {
-	Write(EncodeFloatBE(v), f);
+	Write(IEEE754binary32BE(v), f);
 }
 
 
@@ -259,8 +279,6 @@ const char *VSTPresets::GetErrorMessage(ErrorCode code)
 		return "This does not appear to be a valid preset file.";
 	case VSTPresets::wrongPlugin:
 		return "This file appears to be for a different plugin.";
-	case VSTPresets::outdatedPlugin:
-		return "This file is for a newer version of this plugin.";
 	case VSTPresets::wrongParameters:
 		return "The number of parameters in this file is incompatible with the current plugin.";
 	}
@@ -268,3 +286,6 @@ const char *VSTPresets::GetErrorMessage(ErrorCode code)
 }
 
 #endif // NO_VST
+
+
+OPENMPT_NAMESPACE_END

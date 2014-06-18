@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 //=============================
 class CStereoVU: public CStatic
 //=============================
@@ -74,6 +76,7 @@ class CMainToolBar: public CToolBarEx
 //===================================
 {
 protected:
+	CImageListEx m_ImageList, m_ImageListDisabled;
 	CStatic m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat;
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat;
@@ -177,3 +180,6 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+
+OPENMPT_NAMESPACE_END

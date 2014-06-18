@@ -11,81 +11,94 @@
 
 #pragma once
 
-#define SMPSTATUS_MOUSEDRAG		0x01
-#define SMPSTATUS_KEYDOWN		0x02
-#define SMPSTATUS_NCLBTNDOWN	0x04
+#include "modsmp_ctrl.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 #define SMP_LEFTBAR_BUTTONS		8
 
-#include "modsmp_ctrl.h"
 
 //======================================
 class CViewSample: public CModScrollView
 //======================================
 {
+public:
+	enum Flags
+	{
+		SMPSTATUS_MOUSEDRAG		= 0x01,
+		SMPSTATUS_KEYDOWN		= 0x02,
+		SMPSTATUS_NCLBTNDOWN	= 0x04,
+		SMPSTATUS_DRAWING		= 0x08,
+	};
+
 protected:
 	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
+	HDC offScreenDC;
+	HGDIOBJ offScreenBitmap;
 	SIZE m_sizeTotal;
-	SAMPLEINDEX m_nSample;
-	UINT m_nZoom, m_nScrollPos, m_nScrollFactor, m_nBtnMouseOver;
-	DWORD m_dwStatus;
+	UINT m_nBtnMouseOver;
+	int m_nZoom;
+	FlagSet<Flags> m_dwStatus;
 	SmpLength m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
 	DWORD m_dwMenuParam;
+	SmpLength m_nGridSegments;
+	SAMPLEINDEX m_nSample;
+
+	std::vector<CHANNELINDEX> noteChannel;	// Note -> Preview channel assignment
+
+	// Sample drawing
+	CPoint m_lastDrawPoint;		// For drawing horizontal lines
+	int m_drawChannel;			// Which sample channel are we drawing on?
+
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
-	int m_nGridSegments;
-
-	CPoint m_lastDrawPoint;	// for drawing horizontal lines
-	bool m_bDrawingEnabled;	// sample drawing mode enabled?
-
 	SmpLength m_dwNotifyPos[MAX_CHANNELS];
 
 public:
 	CViewSample();
+	~CViewSample();
 	DECLARE_SERIAL(CViewSample)
 
 protected:
-	void UpdateScrollSize() {UpdateScrollSize(m_nZoom);}
-	void UpdateScrollSize(const UINT nZoomOld);
+	void SetModified(DWORD mask, bool updateAll);
+	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
+	void UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample = SmpLength(-1));
 	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
-	BOOL SetZoom(UINT nZoom);
-	LONG SampleToScreen(LONG n) const;
-	DWORD ScreenToSample(LONG x) const;
-	void PlayNote(UINT note, const uint32 nStartPos = 0); //rewbs.customKeys
+	BOOL SetZoom(int nZoom, SmpLength centeredSample = SmpLength(-1));
+	int32 SampleToScreen(SmpLength pos) const;
+	SmpLength ScreenToSample(int32 x) const;
+	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0, int volume = -1);
+	void NoteOff(ModCommand::NOTE note);
 	void InvalidateSample();
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);
-	void DrawPositionMarks(HDC hdc);
-	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData);
-	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData);
+	void DrawPositionMarks();
+	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData);
+	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData);
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
 
 	// Sets sample data on sample draw.
 	template<class T, class uT>
-	void SetSampleData(void *pSample, const CPoint &point, const DWORD old);
+	void SetSampleData(ModSample &smp, const CPoint &point, const SmpLength old);
 
 	// Sets initial draw point on sample draw.
 	template<class T, class uT>
-	void SetInitialDrawPoint(void *pSample, const CPoint &point);
+	void SetInitialDrawPoint(ModSample &smp, const CPoint &point);
 
 	// Returns sample value corresponding given point in the sample view.
 	template<class T, class uT>
-	T GetSampleValueFromPoint(const CPoint &point);
+	T GetSampleValueFromPoint(const ModSample &smp, const CPoint &point) const;
 
-	// Returns auto-zoom level compared to other zoom levels.
-	// If auto-zoom gives bigger zoom than zoom level N but smaller than zoom level N-1,
-	// return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
-	// if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
-	UINT GetAutoZoomLevel(const ModSample &smp);
+	int GetZoomLevel(SmpLength length) const;
+	void DoZoom(int direction, const CPoint &zoomPoint = CPoint(-1, -1));
+	bool CanZoomSelection() const;
 
-	// Calculate zoom level based on the current selection
-	UINT GetSelectionZoomLevel() const;
-	bool CanZoomSelection() const { return GetSelectionZoomLevel() != 0; }
-
-	UINT ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
-	UINT ScrollPosToSamplePos(UINT nZoom) const {return (nZoom > 0) ? (m_nScrollPos << (nZoom - 1)) : 0;}
+	SmpLength ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
+	inline SmpLength ScrollPosToSamplePos(int nZoom) const;
 
 	void AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, SmpLength length) const;
 
@@ -97,10 +110,10 @@ public:
 	virtual void OnInitialUpdate();
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll=TRUE);
-	virtual BOOL OnDragonDrop(BOOL, LPDRAGONDROP);
+	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
 	virtual LRESULT OnPlayerNotify(Notification *);
 	virtual BOOL PreTranslateMessage(MSG *pMsg); //rewbs.customKeys
+	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE);
 	//}}AFX_VIRTUAL
 
 protected:
@@ -114,7 +127,6 @@ protected:
 	afx_msg UINT OnNcHitTest(CPoint point);
 #endif 
 	afx_msg void OnNcPaint();
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
 	afx_msg void OnNcLButtonDown(UINT, CPoint);
@@ -131,6 +143,7 @@ protected:
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditUndo();
+	afx_msg void OnEditRedo();
 	afx_msg void OnSetLoop();
 	afx_msg void OnSetSustainLoop();
 	afx_msg void On8BitConvert();
@@ -156,6 +169,13 @@ protected:
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+DECLARE_FLAGSET(CViewSample::Flags)
+
+
+OPENMPT_NAMESPACE_END

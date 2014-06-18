@@ -10,21 +10,9 @@
 
 #pragma once 
 
+OPENMPT_NAMESPACE_BEGIN
+
 class COptionsKeyboard;
-
-// Tab Order
-enum {
-	OPTIONS_PAGE_GENERAL=0,
-	OPTIONS_PAGE_SOUNDCARD,
-	OPTIONS_PAGE_PLAYER,
-	OPTIONS_PAGE_EQ,
-	OPTIONS_PAGE_KEYBOARD,
-	OPTIONS_PAGE_COLORS,
-	OPTIONS_PAGE_MIDI,
-	OPTIONS_PAGE_AUTOSAVE,
-	OPTIONS_PAGE_UPDATE,
-};
-
 
 
 //=========================================
@@ -54,6 +42,37 @@ protected:
 //rewbs.customkeys: COptionsKeyboard moved to separate file
 	DECLARE_MESSAGE_MAP();
 };
+
+
+#if defined(MPT_SETTINGS_CACHE)
+
+//==========================================
+class COptionsAdvanced: public CPropertyPage
+//==========================================
+{
+protected:
+	CListBox m_List;
+	std::map<int, SettingPath> m_IndexToPath;
+
+public:
+	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED) {}
+
+protected:
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual BOOL OnSetActive();
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL PreTranslateMessage(MSG *msg);
+	afx_msg void OnOptionDblClick();
+	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnFindStringChanged() { ReInit(); }
+
+	void ReInit();
+
+	DECLARE_MESSAGE_MAP();
+};
+
+#endif // MPT_SETTINGS_CACHE
 
 
 //========================================
@@ -95,3 +114,31 @@ protected:
 	afx_msg void OnPreviewChanged();
 	DECLARE_MESSAGE_MAP();
 };
+
+
+//===============================================
+class COptionsSampleEditor : public CPropertyPage
+//===============================================
+{
+protected:
+	CComboBox m_cbnDefaultSampleFormat, m_cbnDefaultVolumeHandling;
+
+public:
+	COptionsSampleEditor() : CPropertyPage(IDD_OPTIONS_SAMPLEEDITOR) { }
+
+protected:
+
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnSetActive();
+
+	void RecalcUndoSize();
+
+	afx_msg void OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* /*pScrollBar*/) { OnSettingsChanged(); }
+	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnUndoSizeChanged();
+	DECLARE_MESSAGE_MAP();
+};
+
+OPENMPT_NAMESPACE_END

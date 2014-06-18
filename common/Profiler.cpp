@@ -10,7 +10,9 @@
 
 #include "stdafx.h"
 #include "Profiler.h"
-#include <stdlib.h>
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 #ifdef USE_PROFILER
@@ -110,7 +112,7 @@ std::string Profiler::DumpProfiles()
 			case Profiler::Audio: cat = "Audio"; break;
 			case Profiler::Notify: cat = "Notify"; break;
 			}
-			ret += cat + " " + std::string(stats.profile.Name) + ": " + mpt::String::Format("%6.3f", (stats.usage * 100.0)) + "%\r\n";
+			ret += cat + " " + std::string(stats.profile.Name) + ": " + mpt::Format("%6.3f").ToString(stats.usage * 100.0) + "%\r\n";
 		}
 	}
 	ret += "\r\n";
@@ -210,3 +212,6 @@ void Profile::Leave()
 
 
 #endif // USE_PROFILER
+
+
+OPENMPT_NAMESPACE_END

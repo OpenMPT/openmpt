@@ -13,6 +13,9 @@
 #include "StreamEncoder.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 struct OpusDynBind;
 
 class OggOpusEncoder : public EncoderFactoryBase
@@ -33,3 +36,6 @@ public:
 	virtual ~OggOpusEncoder();
 
 };
+
+
+OPENMPT_NAMESPACE_END

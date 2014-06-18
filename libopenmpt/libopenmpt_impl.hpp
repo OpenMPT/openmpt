@@ -17,9 +17,11 @@
 #include <ostream>
 
 // forward declarations
+namespace OpenMPT {
 class FileReader;
 class CSoundFile;
 class Dither;
+} // namespace OpenMPT
 
 namespace openmpt {
 
@@ -55,24 +57,27 @@ protected:
 	std::shared_ptr<log_interface> m_Log;
 	std::unique_ptr<log_forwarder> m_LogForwarder;
 	double m_currentPositionSeconds;
-	std::unique_ptr<CSoundFile> m_sndFile;
-	std::unique_ptr<Dither> m_Dither;
+	std::unique_ptr<OpenMPT::CSoundFile> m_sndFile;
+	std::unique_ptr<OpenMPT::Dither> m_Dither;
 	float m_Gain;
+	bool m_ctl_load_skip_samples;
+	bool m_ctl_load_skip_patterns;
 	std::vector<std::string> m_loaderMessages;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;
 	void PushToCSoundFileLog( int loglevel, const std::string & text ) const;
-private:
+protected:
 	std::string mod_string_to_utf8( const std::string & encoded ) const;
 	void apply_mixer_settings( std::int32_t samplerate, int channels );
 	void apply_libopenmpt_defaults();
 	void init( const std::map< std::string, std::string > & ctls );
-	static void load( CSoundFile & sndFile, const FileReader & file );
-	void load( const FileReader & file );
+	void load( OpenMPT::CSoundFile & sndFile, const OpenMPT::FileReader & file );
+	void load( const OpenMPT::FileReader & file );
 	std::size_t read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
 	std::size_t read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, std::int16_t * interleaved );
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved );
+	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int command ) const;
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
 public:
 	static std::vector<std::string> get_supported_extensions();
@@ -92,6 +97,7 @@ public:
 	double get_duration_seconds() const;
 	double set_position_seconds( double seconds );
 	double get_position_seconds() const;
+	double set_position_order_row( std::int32_t order, std::int32_t row );
 	std::int32_t get_render_param( int param ) const;
 	void set_render_param( int param, std::int32_t value );
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * mono );
@@ -112,8 +118,11 @@ public:
 	std::int32_t get_current_pattern() const;
 	std::int32_t get_current_row() const;
 	std::int32_t get_current_playing_channels() const;
+	float get_current_channel_vu_mono( std::int32_t channel ) const;
 	float get_current_channel_vu_left( std::int32_t channel ) const;
 	float get_current_channel_vu_right( std::int32_t channel ) const;
+	float get_current_channel_vu_rear_left( std::int32_t channel ) const;
+	float get_current_channel_vu_rear_right( std::int32_t channel ) const;
 	std::int32_t get_num_subsongs() const;
 	std::int32_t get_num_channels() const;
 	std::int32_t get_num_orders() const;
@@ -129,6 +138,8 @@ public:
 	std::int32_t get_order_pattern( std::int32_t o ) const;
 	std::int32_t get_pattern_num_rows( std::int32_t p ) const;
 	std::uint8_t get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
+	std::string format_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
+	std::string highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
 	std::string format_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
 	std::string highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
 	std::vector<std::string> get_ctls() const;

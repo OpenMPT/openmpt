@@ -13,12 +13,14 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderWAV.h"
 
-#include "Mainfrm.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
 
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/WAVTools.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 class WavStreamWriter : public IAudioStreamEncoder
@@ -74,10 +76,8 @@ public:
 		FinishStream();
 		ASSERT(!inited && !started);
 	}
-	virtual void SetFormat(int samplerate, int channels, const Encoder::Settings &settings)
+	virtual void SetFormat(const Encoder::Settings &settings)
 	{
-		MPT_UNREFERENCED_PARAMETER(samplerate);
-		MPT_UNREFERENCED_PARAMETER(channels);
 
 		FinishStream();
 
@@ -167,9 +167,11 @@ WAVEncoder::WAVEncoder()
 	traits.fileExtension = "wav";
 	traits.fileShortDescription = "Wave";
 	traits.fileDescription = "Wave";
+	traits.encoderSettingsName = "Wave";
 	traits.encoderName = "OpenMPT";
 	traits.description = "Microsoft RIFF WAVE";
 	traits.canTags = true;
+	traits.canCues = true;
 	traits.maxChannels = 4;
 	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
 	traits.modes = Encoder::ModeEnumerated;
@@ -197,6 +199,8 @@ WAVEncoder::WAVEncoder()
 			}
 		}
 	}
+	traits.defaultSamplerate = 48000;
+	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeEnumerated;
 	traits.defaultFormat = 0;
 	SetTraits(traits);
@@ -227,3 +231,6 @@ IAudioStreamEncoder *WAVEncoder::ConstructStreamEncoder(std::ostream &file) cons
 	WavStreamWriter *result = new WavStreamWriter(*this, file);
 	return result;
 }
+
+
+OPENMPT_NAMESPACE_END

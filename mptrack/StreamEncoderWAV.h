@@ -13,6 +13,9 @@
 #include "StreamEncoder.h"
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+	
 class WavStreamWriter;
 
 
@@ -32,3 +35,6 @@ public:
 	virtual ~WAVEncoder();
 
 };
+
+
+OPENMPT_NAMESPACE_END

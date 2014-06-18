@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|Win32">
+			<Configuration>Debug</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Debug|x64">
+			<Configuration>Debug</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|Win32">
+			<Configuration>Release</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|x64">
+			<Configuration>Release</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="ReleaseNoLTCG|Win32">
+			<Configuration>ReleaseNoLTCG</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="ReleaseNoLTCG|x64">
+			<Configuration>ReleaseNoLTCG</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{95CC809B-03FC-4EDB-BB20-FD07A698C05F}</ProjectGuid>
+		<RootNamespace>UnRAR</RootNamespace>
+		<Keyword>Win32Proj</Keyword>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'" Label="Configuration">
+		<ConfigurationType>StaticLibrary</ConfigurationType>
+		<CharacterSet>MultiByte</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<UseDebugLibraries>false</UseDebugLibraries>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="ExtensionSettings">
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<PropertyGroup Label="UserMacros" />
+	<PropertyGroup>
+		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\x32\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\obj\unrar\x32\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">UnRAR</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\lib\x64\Debug\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\obj\unrar\x64\Debug\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UnRAR</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\lib\x32\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\obj\unrar\x32\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">UnRAR</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\lib\x64\Release\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\obj\unrar\x64\Release\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UnRAR</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\lib\x32\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\obj\unrar\x32\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">UnRAR</TargetName>
+		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\lib\x64\ReleaseNoLTCG\</OutDir>
+		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\obj\unrar\x64\ReleaseNoLTCG\</IntDir>
+		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">UnRAR</TargetName>
+	</PropertyGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+		<ClCompile>
+			<Optimization>Disabled</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>true</MinimalRebuild>
+			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)UnRAR.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<ProgramDataBaseFileName>$(OutDir)UnRAR.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<ClCompile>
+			<Optimization>Disabled</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>true</MinimalRebuild>
+			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<DebugInformationFormat>OldStyle</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)UnRAR.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<ProgramDataBaseFileName>$(OutDir)UnRAR.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+		<ClCompile>
+			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)UnRAR.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)UnRAR.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<ClCompile>
+			<AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)UnRAR.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<ProgramDataBaseFileName>$(OutDir)UnRAR.pdb</ProgramDataBaseFileName>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
+		<ClCompile>
+			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat></DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)UnRAR.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>false</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">
+		<ClCompile>
+			<AdditionalOptions>/GL- /MP %(AdditionalOptions)</AdditionalOptions>
+			<Optimization>Full</Optimization>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<MinimalRebuild>false</MinimalRebuild>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<FunctionLevelLinking>true</FunctionLevelLinking>
+			<PrecompiledHeader></PrecompiledHeader>
+			<WarningLevel>Level3</WarningLevel>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<DebugInformationFormat></DebugInformationFormat>
+		</ClCompile>
+		<ResourceCompile>
+			<PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\unrar;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		</ResourceCompile>
+	<Lib>
+		<OutputFile>$(OutDir)UnRAR.lib</OutputFile>
+	</Lib>
+		<Link>
+			<SubSystem>Windows</SubSystem>
+			<GenerateDebugInformation>false</GenerateDebugInformation>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+		</Link>
+	</ItemDefinitionGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\include\unrar\archive.hpp" />
+		<ClInclude Include="..\..\include\unrar\array.hpp" />
+		<ClInclude Include="..\..\include\unrar\blake2s.hpp" />
+		<ClInclude Include="..\..\include\unrar\cmddata.hpp" />
+		<ClInclude Include="..\..\include\unrar\coder.hpp" />
+		<ClInclude Include="..\..\include\unrar\compress.hpp" />
+		<ClInclude Include="..\..\include\unrar\consio.hpp" />
+		<ClInclude Include="..\..\include\unrar\crc.hpp" />
+		<ClInclude Include="..\..\include\unrar\crypt.hpp" />
+		<ClInclude Include="..\..\include\unrar\dll.hpp" />
+		<ClInclude Include="..\..\include\unrar\encname.hpp" />
+		<ClInclude Include="..\..\include\unrar\errhnd.hpp" />
+		<ClInclude Include="..\..\include\unrar\extinfo.hpp" />
+		<ClInclude Include="..\..\include\unrar\extract.hpp" />
+		<ClInclude Include="..\..\include\unrar\filcreat.hpp" />
+		<ClInclude Include="..\..\include\unrar\file.hpp" />
+		<ClInclude Include="..\..\include\unrar\filefn.hpp" />
+		<ClInclude Include="..\..\include\unrar\filestr.hpp" />
+		<ClInclude Include="..\..\include\unrar\find.hpp" />
+		<ClInclude Include="..\..\include\unrar\getbits.hpp" />
+		<ClInclude Include="..\..\include\unrar\global.hpp" />
+		<ClInclude Include="..\..\include\unrar\hash.hpp" />
+		<ClInclude Include="..\..\include\unrar\headers.hpp" />
+		<ClInclude Include="..\..\include\unrar\headers5.hpp" />
+		<ClInclude Include="..\..\include\unrar\isnt.hpp" />
+		<ClInclude Include="..\..\include\unrar\list.hpp" />
+		<ClInclude Include="..\..\include\unrar\loclang.hpp" />
+		<ClInclude Include="..\..\include\unrar\log.hpp" />
+		<ClInclude Include="..\..\include\unrar\match.hpp" />
+		<ClInclude Include="..\..\include\unrar\model.hpp" />
+		<ClInclude Include="..\..\include\unrar\openmpt.hpp" />
+		<ClInclude Include="..\..\include\unrar\openmpt-callback.hpp" />
+		<ClInclude Include="..\..\include\unrar\options.hpp" />
+		<ClInclude Include="..\..\include\unrar\os.hpp" />
+		<ClInclude Include="..\..\include\unrar\pathfn.hpp" />
+		<ClInclude Include="..\..\include\unrar\qopen.hpp" />
+		<ClInclude Include="..\..\include\unrar\rar.hpp" />
+		<ClInclude Include="..\..\include\unrar\rardefs.hpp" />
+		<ClInclude Include="..\..\include\unrar\rarlang.hpp" />
+		<ClInclude Include="..\..\include\unrar\raros.hpp" />
+		<ClInclude Include="..\..\include\unrar\rartypes.hpp" />
+		<ClInclude Include="..\..\include\unrar\rarvm.hpp" />
+		<ClInclude Include="..\..\include\unrar\rawread.hpp" />
+		<ClInclude Include="..\..\include\unrar\rdwrfn.hpp" />
+		<ClInclude Include="..\..\include\unrar\recvol.hpp" />
+		<ClInclude Include="..\..\include\unrar\resource.hpp" />
+		<ClInclude Include="..\..\include\unrar\rijndael.hpp" />
+		<ClInclude Include="..\..\include\unrar\rs.hpp" />
+		<ClInclude Include="..\..\include\unrar\rs16.hpp" />
+		<ClInclude Include="..\..\include\unrar\savepos.hpp" />
+		<ClInclude Include="..\..\include\unrar\scantree.hpp" />
+		<ClInclude Include="..\..\include\unrar\secpassword.hpp" />
+		<ClInclude Include="..\..\include\unrar\sha1.hpp" />
+		<ClInclude Include="..\..\include\unrar\sha256.hpp" />
+		<ClInclude Include="..\..\include\unrar\smallfn.hpp" />
+		<ClInclude Include="..\..\include\unrar\strfn.hpp" />
+		<ClInclude Include="..\..\include\unrar\strlist.hpp" />
+		<ClInclude Include="..\..\include\unrar\suballoc.hpp" />
+		<ClInclude Include="..\..\include\unrar\system.hpp" />
+		<ClInclude Include="..\..\include\unrar\threadpool.hpp" />
+		<ClInclude Include="..\..\include\unrar\timefn.hpp" />
+		<ClInclude Include="..\..\include\unrar\ulinks.hpp" />
+		<ClInclude Include="..\..\include\unrar\unicode.hpp" />
+		<ClInclude Include="..\..\include\unrar\unpack.hpp" />
+		<ClInclude Include="..\..\include\unrar\version.hpp" />
+		<ClInclude Include="..\..\include\unrar\volume.hpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\include\unrar\archive.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\arcread.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\blake2s.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\cmddata.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\consio.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\crc.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\crypt.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\encname.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\errhnd.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\extinfo.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\extract.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\filcreat.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\file.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\filefn.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\filestr.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\find.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\getbits.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\global.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\hash.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\headers.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\isnt.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\list.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\match.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\options.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\pathfn.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\qopen.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rar.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rarpch.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rarvm.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rawread.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rdwrfn.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\recvol.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\resource.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rijndael.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rs.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\rs16.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\scantree.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\secpassword.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\sha1.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\sha256.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\smallfn.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\strfn.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\strlist.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\system.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\threadpool.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\timefn.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\unicode.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\unpack.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\volume.cpp">
+		</ClCompile>
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets">
+	</ImportGroup>
+</Project>

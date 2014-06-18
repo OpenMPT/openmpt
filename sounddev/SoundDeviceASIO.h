@@ -11,12 +11,15 @@
 
 #pragma once
 
-#include "SoundDevices.h"
+#include "SoundDevice.h"
+
+#include "../common/FlagSet.h"
 
 #ifndef NO_ASIO
 #include <iasiodrv.h>
-#define ASIO_LOG
 #endif
+
+OPENMPT_NAMESPACE_BEGIN
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -25,68 +28,122 @@
 
 #ifndef NO_ASIO
 
+enum AsioFeatures
+{
+	AsioFeatureResetRequest     = 1<<0,
+	AsioFeatureResyncRequest    = 1<<1,
+	AsioFeatureLatenciesChanged = 1<<2,
+	AsioFeatureBufferSizeChange = 1<<3,
+	AsioFeatureOverload         = 1<<4,
+	AsioFeatureNoDirectProcess  = 1<<5,
+	AsioFeatureSampleRateChange = 1<<6,
+	AsioFeatureNone = 0
+};
+DECLARE_FLAGSET(AsioFeatures)
+
 //====================================
 class CASIODevice: public ISoundDevice
 //====================================
 {
-	enum { ASIO_MAX_CHANNELS=4 };
-	enum { ASIO_BLOCK_LEN=1024 };
+	friend class TemporaryASIODriverOpener;
+
 protected:
+
 	IASIO *m_pAsioDrv;
-	UINT m_nAsioBufferLen;
-	UINT m_nAsioSampleSize;
-	bool m_Float;
-	BOOL m_bMixRunning;
-	BOOL m_bPostOutput;
+
+	long m_nAsioBufferLen;
+	std::vector<ASIOBufferInfo> m_BufferInfo;
+	ASIOCallbacks m_Callbacks;
+	static CASIODevice *g_CallbacksInstance; // only 1 opened instance allowed for ASIO
+	bool m_BuffersCreated;
+	std::vector<ASIOChannelInfo> m_ChannelInfo;
+	std::vector<float> m_SampleBufferFloat;
+	std::vector<int16> m_SampleBufferInt16;
+	std::vector<int24> m_SampleBufferInt24;
+	std::vector<int32> m_SampleBufferInt32;
+	bool m_CanOutputReady;
+
+	bool m_DeviceRunning;
+	uint64 m_TotalFramesWritten;
+	long m_BufferIndex;
 	LONG m_RenderSilence;
 	LONG m_RenderingSilence;
-	ASIOCallbacks m_Callbacks;
-	ASIOChannelInfo m_ChannelInfo[ASIO_MAX_CHANNELS];
-	ASIOBufferInfo m_BufferInfo[ASIO_MAX_CHANNELS];
-	int32 m_FrameBuffer[ASIO_BLOCK_LEN];
+
+	int64 m_StreamPositionOffset;
+
+	static const LONG AsioRequestFlagLatenciesChanged = 1<<0;
+	LONG m_AsioRequestFlags;
+
+	FlagSet<AsioFeatures> m_QueriedFeatures;
+	FlagSet<AsioFeatures> m_UsedFeatures;
 
 private:
-	void SetRenderSilence(bool silence, bool wait=false);
+	void UpdateTimeInfo(AsioTimeInfo asioTimeInfo);
 
-public:
-	static int baseChannel;
+	static bool IsSampleTypeFloat(ASIOSampleType sampleType);
+	static bool IsSampleTypeInt16(ASIOSampleType sampleType);
+	static bool IsSampleTypeInt24(ASIOSampleType sampleType);
+	static std::size_t GetSampleSize(ASIOSampleType sampleType);
+	static bool IsSampleTypeBigEndian(ASIOSampleType sampleType);
+	
+	void SetRenderSilence(bool silence, bool wait=false);
 
 public:
 	CASIODevice(SoundDeviceID id, const std::wstring &internalID);
 	~CASIODevice();
 
+private:
+	void Init();
+	bool HandleRequests(); // return true if any work has been done
+	void UpdateLatency();
+
+	void InternalStopImpl(bool force);
+
 public:
 	bool InternalOpen();
 	bool InternalClose();
-	void FillAudioBuffer();
-	void InternalReset();
-	void InternalStart();
+	void InternalFillAudioBuffer();
+	bool InternalStart();
 	void InternalStop();
-	bool IsOpen() const { return (m_pAsioDrv != NULL); }
-	UINT GetNumBuffers() { return 2; }
-	float GetCurrentRealLatencyMS() { return m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate; }
+	void InternalStopForce();
+	bool InternalIsOpen() const { return m_BuffersCreated; }
 
-	SoundDeviceCaps GetDeviceCaps(const std::vector<uint32> &baseSampleRates);
+	bool OnIdle() { return HandleRequests(); }
+
+	SoundDeviceCaps GetDeviceCaps();
+	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
+
+	bool OpenDriverSettings();
+
+	std::string GetStatistics() const;
 
 public:
 	static std::vector<SoundDeviceInfo> EnumerateDevices();
 
 protected:
-	void OpenDevice();
-	void CloseDevice();
+	void OpenDriver();
+	void CloseDriver();
+	bool IsDriverOpen() const { return (m_pAsioDrv != nullptr); }
+
+	bool InternalHasTimeInfo() const;
+	bool InternalHasGetStreamPosition() const;
+	int64 InternalGetStreamPositionFrames() const;
 
 protected:
-	void BufferSwitch(long doubleBufferIndex);
+	long AsioMessage(long selector, long value, void* message, double* opt);
+	void SampleRateDidChange(ASIOSampleRate sRate);
+	void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
+	ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
 
-	static CASIODevice *gpCurrentAsio;
-	static LONG gnFillBuffers;
-	static void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
-	static void SampleRateDidChange(ASIOSampleRate sRate);
-	static long AsioMessage(long selector, long value, void* message, double* opt);
-	static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
+	static long CallbackAsioMessage(long selector, long value, void* message, double* opt);
+	static void CallbackSampleRateDidChange(ASIOSampleRate sRate);
+	static void CallbackBufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
+	static ASIOTime* CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
 	
 	void ReportASIOException(const std::string &str);
 };
 
 #endif // NO_ASIO
 
+
+OPENMPT_NAMESPACE_END

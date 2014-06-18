@@ -10,10 +10,11 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "childfrm.h"
-#include "moddoc.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
+#include "Childfrm.h"
+#include "Moddoc.h"
 #include "globals.h"
 #include "ctrl_gen.h"
 #include "view_gen.h"
@@ -23,6 +24,9 @@
 #include "ChannelManagerDlg.h"
 #include "SelectPluginDialog.h"
 #include "../common/StringFixer.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 IMPLEMENT_SERIAL(CViewGlobals, CFormView, 0)
@@ -35,10 +39,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_WM_DESTROY()
 	ON_WM_CTLCOLOR()
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	ON_WM_ACTIVATE()
-// -! NEW_FEATURE#0015
 	ON_COMMAND(IDC_CHECK1,		OnMute1)
 	ON_COMMAND(IDC_CHECK3,		OnMute2)
 	ON_COMMAND(IDC_CHECK5,		OnMute3)
@@ -55,21 +56,15 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(IDC_BUTTON3,		OnSetParameter)
 	ON_COMMAND(IDC_BUTTON4,		OnNextPlugin)
 	ON_COMMAND(IDC_BUTTON5,		OnPrevPlugin)
-	ON_COMMAND(IDC_MOVEFXSLOT,  OnMovePlugToSlot)
+	ON_COMMAND(IDC_MOVEFXSLOT,	OnMovePlugToSlot)
 	ON_COMMAND(IDC_INSERTFXSLOT,OnInsertSlot)
-	ON_COMMAND(IDC_CLONEPLUG,   OnClonePlug)
+	ON_COMMAND(IDC_CLONEPLUG,	OnClonePlug)
 
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
 	ON_COMMAND(IDC_BUTTON6,		OnLoadParam)
 	ON_COMMAND(IDC_BUTTON8,		OnSaveParam)
-// -! NEW_FEATURE#0002
 
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
 	ON_COMMAND(IDC_BUTTON7,		OnSetWetDry)
-// -! NEW_FEATURE#0014
 	ON_EN_UPDATE(IDC_EDIT1,		OnEditVol1)
 	ON_EN_UPDATE(IDC_EDIT3,		OnEditVol2)
 	ON_EN_UPDATE(IDC_EDIT5,		OnEditVol3)
@@ -94,17 +89,11 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 
 	ON_CBN_SELCHANGE(IDC_COMBO7, OnOutputRoutingChanged)
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
 	ON_CBN_SELCHANGE(IDC_COMBO8, OnProgramChanged)
 	ON_CBN_SETFOCUS(IDC_COMBO8, OnFillProgramCombo)
-// -! NEW_FEATURE#0002
 
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 	ON_COMMAND(IDC_CHECK12,		 OnWetDryExpandChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO9, OnSpecialMixProcessingChanged)
-// -! BEHAVIOUR_CHANGE#0028
 
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	OnTabSelchange)
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		OnUnlockControls)
@@ -128,16 +117,9 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO6,	m_CbnParam);
 	DDX_Control(pDX, IDC_COMBO7,	m_CbnOutput);
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
 	DDX_Control(pDX, IDC_COMBO8,	m_CbnPreset);
-// -! NEW_FEATURE#0002
-
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 	DDX_Control(pDX, IDC_COMBO9,	m_CbnSpecialMixProcessing);
-	DDX_Control(pDX, IDC_SPIN10,	m_SpinMixGain);					// update#02
-// -! BEHAVIOUR_CHANGE#0028
+	DDX_Control(pDX, IDC_SPIN10,	m_SpinMixGain);
 
 	DDX_Control(pDX, IDC_SLIDER1,	m_sbVolume[0]);
 	DDX_Control(pDX, IDC_SLIDER2,	m_sbPan[0]);
@@ -148,7 +130,7 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER7,	m_sbVolume[3]);
 	DDX_Control(pDX, IDC_SLIDER8,	m_sbPan[3]);
 	DDX_Control(pDX, IDC_SLIDER9,	m_sbValue);
-	DDX_Control(pDX, IDC_SLIDER10,  m_sbDryRatio);	//rewbs.VSTdrywet
+	DDX_Control(pDX, IDC_SLIDER10,  m_sbDryRatio);
 	DDX_Control(pDX, IDC_SPIN1,		m_spinVolume[0]);
 	DDX_Control(pDX, IDC_SPIN2,		m_spinPan[0]);
 	DDX_Control(pDX, IDC_SPIN3,		m_spinVolume[1]);
@@ -169,13 +151,9 @@ void CViewGlobals::OnInitialUpdate()
 	int nMapMode = MM_TEXT;
 	SIZE sizeTotal, sizePage, sizeLine;
 
-	m_nActiveTab = -1;
+	m_nActiveTab = CHANNELINDEX(-1);
 	m_nCurrentPlugin = 0;
 	m_nCurrentParam = 0;
-// -> CODE#0002
-// -> DESC="VST plugins presets"
-	m_nCurrentPreset = 0;
-// -! NEW_FEATURE#0002
 	CFormView::OnInitialUpdate();
 
 	if (pFrame)
@@ -210,31 +188,24 @@ void CViewGlobals::OnInitialUpdate()
 	m_sbValue.SetPos(0);
 	m_sbValue.SetRange(0, 100);
 
-	m_sbValue.SetPos(0);			// rewbs.dryRatio 20040122
-	m_sbValue.SetRange(0, 100);		// rewbs.dryRatio 20040122
+	m_sbValue.SetPos(0);
+	m_sbValue.SetRange(0, 100);
 
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 	m_CbnSpecialMixProcessing.AddString("Default");
 	m_CbnSpecialMixProcessing.AddString("Wet subtract");
 	m_CbnSpecialMixProcessing.AddString("Dry subtract");
 	m_CbnSpecialMixProcessing.AddString("Mix subtract");
 	m_CbnSpecialMixProcessing.AddString("Middle subtract");
 	m_CbnSpecialMixProcessing.AddString("LR balance");
-	m_SpinMixGain.SetRange(0,80);		// update#02
-	m_SpinMixGain.SetPos(10);			// update#02
-	SetDlgItemText(IDC_STATIC2, "Gain: x 1.0");	// update#02
-// -! BEHAVIOUR_CHANGE#0028
+	m_SpinMixGain.SetRange(0,80);
+	m_SpinMixGain.SetPos(10);
+	SetDlgItemText(IDC_STATIC2, "Gain: x 1.0");
 
 	UpdateView(HINT_MODTYPE);
 	OnParamChanged();
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-	//OnWetDryChanged();
-// -! NEW_FEATURE#0014
 	m_nLockCount = 0;
 
-	
+
 }
 
 
@@ -254,8 +225,6 @@ void CViewGlobals::OnDestroy()
 }
 
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
 void CViewGlobals::OnDraw(CDC* pDC)
 //---------------------------------
 {
@@ -267,7 +236,6 @@ void CViewGlobals::OnDraw(CDC* pDC)
 	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
 }
-// -! NEW_FEATURE#0015
 
 
 LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData, LPARAM)
@@ -333,7 +301,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
 	int nTabCount, nTabIndex;
-	
+
 	if (!pModDoc) return;
 	if (!(dwHintMask & (HINT_MODTYPE|HINT_MODCHANNELS|HINT_MIXPLUGINS))) return;
 	pSndFile = pModDoc->GetSoundFile();
@@ -354,10 +322,10 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_TabCtrl.InsertItem(iItem, &tci);
 		}
 		if (nOldSel >= (UINT)nTabCount) nOldSel = 0;
-		
+
 		m_TabCtrl.SetRedraw(TRUE);
 		m_TabCtrl.SetCurSel(nOldSel);
-		
+
 		InvalidateRect(NULL, FALSE);
 	}
 	nTabIndex = m_TabCtrl.GetCurSel();
@@ -365,7 +333,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 	if ((m_nActiveTab != nTabIndex) || (dwHintMask & (HINT_MODTYPE|HINT_MODCHANNELS)))
 	{
 		LockControls();
-		m_nActiveTab = nTabIndex;
+		m_nActiveTab = static_cast<CHANNELINDEX>(nTabIndex);
 		for (int ichn=0; ichn<4; ichn++)
 		{
 			const UINT nChn = nTabIndex*4+ichn;
@@ -414,23 +382,24 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 				}
 				m_CbnEffects[ichn].SetRedraw(TRUE);
 				m_CbnEffects[ichn].SetCurSel(fxsel);
+				m_CbnEffects[ichn].Invalidate(FALSE);
 			}
 			else
 				SetDlgItemText(IDC_TEXT1+ichn, "");
 
 			// Enable/Disable controls for this channel
 			BOOL bIT = ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)));
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK1+ichn*2), bEnable);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK2+ichn*2), bIT);
+			GetDlgItem(IDC_CHECK1 + ichn * 2)->EnableWindow(bEnable);
+			GetDlgItem(IDC_CHECK2 + ichn * 2)->EnableWindow(bIT);
 
-			::EnableWindow(m_sbVolume[ichn].m_hWnd, bIT);
-			::EnableWindow(m_spinVolume[ichn], bIT);
+			m_sbVolume[ichn].EnableWindow(bIT);
+			m_spinVolume[ichn].EnableWindow(bIT);
 
-			::EnableWindow(m_sbPan[ichn].m_hWnd, bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
-			::EnableWindow(m_spinPan[ichn], bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1 + ichn*2), bIT);	// channel vol
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2 + ichn*2), bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));	// channel pan
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9 + ichn), ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))));	// channel name
+			m_sbPan[ichn].EnableWindow(bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
+			m_spinPan[ichn].EnableWindow(bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
+			GetDlgItem(IDC_EDIT1 + ichn * 2)->EnableWindow(bIT);	// channel vol
+			GetDlgItem(IDC_EDIT2 + ichn * 2)->EnableWindow(bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));	// channel pan
+			GetDlgItem(IDC_EDIT9 + ichn)->EnableWindow(((bEnable) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))));	// channel name
 			m_CbnEffects[ichn].EnableWindow(bEnable & (pSndFile->GetModSpecifications().supportsPlugins ? TRUE : FALSE));
 		}
 		UnlockControls();
@@ -449,40 +418,33 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		CheckDlgButton(IDC_CHECK9, pPlugin->IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, pPlugin->IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK11, pPlugin->IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
-		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
+		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : nullptr;
 		m_BtnEdit.EnableWindow((pVstPlugin != nullptr && (pVstPlugin->HasEditor() || pVstPlugin->GetNumParameters())) ? TRUE : FALSE);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_MOVEFXSLOT), (pVstPlugin) ? TRUE : FALSE);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSERTFXSLOT), (pVstPlugin) ? TRUE : FALSE);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CLONEPLUG), (pVstPlugin) ? TRUE : FALSE);
-		//rewbs.DryRatio
+		GetDlgItem(IDC_MOVEFXSLOT)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
+		GetDlgItem(IDC_INSERTFXSLOT)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
+		GetDlgItem(IDC_CLONEPLUG)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
 		int n = static_cast<int>(pPlugin->fDryRatio*100);
 		wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
 		SetDlgItemText(IDC_STATIC8, s);
-	m_sbDryRatio.SetPos(n);
-		//end rewbs.DryRatio
-		
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
+		m_sbDryRatio.SetPos(n);
+
 		if(pVstPlugin && pVstPlugin->isInstrument())
 		{
-			// ericus 18/02/2005 : disable mix mode for VSTi
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), FALSE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), FALSE);
-		}
-		else{
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), TRUE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), TRUE);
-			m_CbnSpecialMixProcessing.SetCurSel(pPlugin->GetMixMode()); // update#02 (fix)
+			m_CbnSpecialMixProcessing.EnableWindow(FALSE);
+			GetDlgItem(IDC_CHECK12)->EnableWindow(FALSE);
+		} else
+		{
+			m_CbnSpecialMixProcessing.EnableWindow(TRUE);
+			GetDlgItem(IDC_CHECK12)->EnableWindow(TRUE);
+			m_CbnSpecialMixProcessing.SetCurSel(pPlugin->GetMixMode());
 			CheckDlgButton(IDC_CHECK12, pPlugin->IsExpandedMix() ? BST_CHECKED : BST_UNCHECKED);
 		}
-		// update#02
 		int gain = pPlugin->GetGain();
 		if(gain == 0) gain = 10;
 		float value = 0.1f * (float)gain;
 		sprintf(s,"Gain: x %1.1f", value);
 		SetDlgItemText(IDC_STATIC2, s);
 		m_SpinMixGain.SetPos(gain);
-// -! BEHAVIOUR_CHANGE#0028
 
 		if (pVstPlugin)
 		{
@@ -498,7 +460,6 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 
 			m_CbnParam.SetCurSel(0);
 			m_CbnParam.SetRedraw(TRUE);
-			m_CbnParam.Invalidate();
 			OnParamChanged();
 
 			// Input / Output type
@@ -510,17 +471,14 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			// Some plugins like Synth1 have so many presets that this *does* indeed make a difference,
 			// even on fairly modern CPUs. The rest of the presets are just added when the combo box
 			// gets the focus, i.e. just when they're needed.
-			m_CbnPreset.SetRedraw(FALSE);
-			m_CbnPreset.ResetContent();
-			m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
-			m_CbnPreset.SetRedraw(TRUE);
+			VstInt32 currentProg = pVstPlugin->GetCurrentProgram();
+			FillPluginProgramBox(currentProg, currentProg);
 			m_CbnPreset.SetCurSel(0);
 
 			m_sbValue.EnableWindow(TRUE);
 			m_sbDryRatio.EnableWindow(TRUE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), TRUE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), TRUE);
-
+			GetDlgItem(IDC_EDIT14)->EnableWindow(TRUE);
+			GetDlgItem(IDC_BUTTON3)->EnableWindow(TRUE);
 		} else
 		{
 			s[0] = 0;
@@ -532,13 +490,12 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_CbnPreset.ResetContent();
 			wsprintf(s2, "none");
 			m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), 0);
-			m_nCurrentPreset = 0;
 			m_CbnPreset.SetRedraw(TRUE);
 			m_CbnPreset.SetCurSel(0);
 			m_sbValue.EnableWindow(FALSE);
 			m_sbDryRatio.EnableWindow(FALSE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), FALSE);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), FALSE);
+			GetDlgItem(IDC_EDIT14)->EnableWindow(FALSE);
+			GetDlgItem(IDC_BUTTON3)->EnableWindow(FALSE);
 		}
 		SetDlgItemText(IDC_TEXT6, s);
 		int outputsel = 0;
@@ -550,12 +507,13 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			const SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[iOut];
 			if(plugin.IsValidPlugin())
 			{
-				if(!strcmp(plugin.GetLibraryName(), plugin.GetName()) || !strcmp(plugin.GetName(), ""))
+				std::string libName = mpt::ToLocale(mpt::CharsetUTF8, plugin.GetLibraryName());
+				if(!strcmp(plugin.GetName(), "") || libName != plugin.GetName())
 				{
-					wsprintf(s, "FX%d: %s", iOut + 1, plugin.GetLibraryName());
+					wsprintf(s, "FX%d: %s", iOut + 1, libName.c_str());
 				} else
 				{
-					wsprintf(s, "FX%d: %s (%s)", iOut + 1, plugin.GetLibraryName(), plugin.GetName());
+					wsprintf(s, "FX%d: %s (%s)", iOut + 1, libName.c_str(), plugin.GetName());
 				}
 
 				int n = m_CbnOutput.AddString(s);
@@ -570,6 +528,12 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_CbnOutput.SetRedraw(TRUE);
 		m_CbnOutput.SetCurSel(outputsel);
 	}
+
+	m_CbnPlugin.Invalidate(FALSE);
+	m_CbnParam.Invalidate(FALSE);
+	m_CbnPreset.Invalidate(FALSE);
+	m_CbnSpecialMixProcessing.Invalidate(FALSE);
+	m_CbnOutput.Invalidate(FALSE);
 }
 
 
@@ -599,7 +563,7 @@ void CViewGlobals::OnMute(const CHANNELINDEX chnMod4, const UINT itemID)
 //----------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	
+
 	if (pModDoc)
 	{
 		const bool b = (IsDlgButtonChecked(itemID) != FALSE);
@@ -619,7 +583,7 @@ void CViewGlobals::OnSurround(const CHANNELINDEX chnMod4, const UINT itemID)
 //--------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	
+
 	if (pModDoc)
 	{
 		const bool b = (IsDlgButtonChecked(itemID) != FALSE);
@@ -697,7 +661,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	{
 		BOOL bUpdate = FALSE;
 		short int pos;
-		
+
 		LockControls();
 		const CHANNELINDEX nLoopLimit = MIN(4, pModDoc->GetSoundFile()->GetNumChannels() - nChn);
 		for (CHANNELINDEX iCh = 0; iCh < nLoopLimit; iCh++)
@@ -731,12 +695,12 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
 			int n = m_sbDryRatio.GetPos();
 			if ((n >= 0) && (n <= 100) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
-			{				
+			{
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
 				SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
 
 				if(plugin.pMixPlugin)
-				{	
+				{
 					wsprintf(s, "(%d%% wet, %d%% dry)", 100 - n, n);
 					SetDlgItemText(IDC_STATIC8, s);
 					plugin.fDryRatio = static_cast<float>(n) / 100.0f;
@@ -784,8 +748,6 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //---------------------------------------------------------------------------
 {
-// -> CODE#0028	update#02
-// -> DESC="effect plugin mixing mode combo"
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	CHAR s[32];
@@ -803,7 +765,7 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			if(gain == 0) gain = 1;
 
 			plugin.SetGain(gain);
-			
+
 			float fValue = 0.1f * (float)gain;
 			sprintf(s,"Gain: x %1.1f",fValue);
 			SetDlgItemText(IDC_STATIC2, s);
@@ -812,7 +774,6 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				pModDoc->SetModified();
 		}
 	}
-// -! BEHAVIOUR_CHANGE#0028
 
 	CFormView::OnVScroll(nSBCode, nPos, pScrollBar);
 }
@@ -826,16 +787,15 @@ void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
 	if ((pModDoc) && (!m_nLockCount))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CHAR s[MAX_CHANNELNAME+4];
+		CHAR s[MAX_CHANNELNAME + 2];
 		const UINT nChn = m_nActiveTab * 4 + chnMod4;
-		
-		memset(s, 0, sizeof(s));
-		GetDlgItemText(itemID, s, sizeof(s));
+
+		MemsetZero(s);
+		GetDlgItemText(itemID, s, CountOf(s));
 		s[MAX_CHANNELNAME+1] = 0;
-		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
+		if ((pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->GetNumChannels()) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
 		{
-			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
-			pSndFile->ChnSettings[nChn].szName[CountOf(pSndFile->ChnSettings[nChn].szName)-1] = 0;
+			mpt::String::Copy(pSndFile->ChnSettings[nChn].szName, s);
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
@@ -855,9 +815,9 @@ void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		UINT nChn = m_nActiveTab * 4 + chnMod4;
+		CHANNELINDEX nChn = m_nActiveTab * 4 + chnMod4;
 		int nfx = m_CbnEffects[chnMod4].GetItemData(m_CbnEffects[chnMod4].GetCurSel());
-		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->m_nChannels)
+		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->GetNumChannels())
 		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
 		{
 			pSndFile->ChnSettings[nChn].nMixPlugin = (PLUGINDEX)nfx;
@@ -885,7 +845,7 @@ void CViewGlobals::OnPluginNameChanged()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 
-		GetDlgItemText(IDC_EDIT13, s, 32);
+		GetDlgItemText(IDC_EDIT13, s, CountOf(s));
 		mpt::String::SetNullTerminator(s);
 		if (strcmp(s, pSndFile->m_MixPlugins[m_nCurrentPlugin].GetName()))
 		{
@@ -906,9 +866,6 @@ void CViewGlobals::OnPrevPlugin()
 	{
 		m_nCurrentPlugin--;
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-		//OnWetDryChanged();
 
 	}
 }
@@ -922,9 +879,6 @@ void CViewGlobals::OnNextPlugin()
 	{
 		m_nCurrentPlugin++;
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-		//OnWetDryChanged();
 
 	}
 }
@@ -940,16 +894,7 @@ void CViewGlobals::OnPluginChanged()
 		m_nCurrentPlugin = (PLUGINDEX)nPlugin;
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 	}
-// -> CODE#0002
-// -> DESC="VST plugins presets"
-	m_nCurrentPreset = 0;
 	m_CbnPreset.SetCurSel(0);
-// -! NEW_FEATURE#0002
-
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-	//OnWetDryChanged();
-// -! NEW_FEATURE#0014
 }
 
 
@@ -962,7 +907,7 @@ void CViewGlobals::OnSelectPlugin()
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CSelectPluginDlg dlg(pModDoc, m_nCurrentPlugin, this); 
+		CSelectPluginDlg dlg(pModDoc, m_nCurrentPlugin, this);
 		if (dlg.DoModal() == IDOK)
 		{
 			if(pSndFile->GetModSpecifications().supportsPlugins)
@@ -970,10 +915,6 @@ void CViewGlobals::OnSelectPlugin()
 		}
 		OnPluginChanged();
 		OnParamChanged();
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-		//OnWetDryChanged();
-// -! NEW_FEATURE#0014
 	}
 #endif // NO_VST
 }
@@ -984,7 +925,7 @@ void CViewGlobals::OnParamChanged()
 {
 	int cursel = m_CbnParam.GetItemData(m_CbnParam.GetCurSel());
 	CHAR s[256];
-	
+
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
 	if(pVstPlugin != nullptr && cursel != CB_ERR)
@@ -1008,33 +949,30 @@ void CViewGlobals::OnParamChanged()
 	m_sbValue.SetPos(0);
 }
 
-// -> CODE#0002
-// -> DESC="VST plugins presets"
+
 void CViewGlobals::OnProgramChanged()
 //-----------------------------------
 {
-	int cursel = m_CbnPreset.GetCurSel();
+	VstInt32 curProg = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-	
-	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pSndFile = pModDoc->GetSoundFile();
+
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 
 	if(pVstPlugin != nullptr)
 	{
-		UINT nParams = pVstPlugin->GetNumPrograms();
-		if(cursel > 0 && cursel <= (int)nParams) m_nCurrentPreset = cursel;
-		if(m_nCurrentPreset > 0 && m_nCurrentPreset <= nParams)
+		const VstInt32 numProgs = pVstPlugin->GetNumPrograms();
+		if(curProg <= numProgs)
 		{
-			pVstPlugin->SetCurrentProgram(m_nCurrentPreset - 1);
+			pVstPlugin->SetCurrentProgram(curProg);
 			// Update parameter display
 			OnParamChanged();
+
+			if(pModDoc->GetrSoundFile().GetModSpecifications().supportsPlugins)
+				pModDoc->SetModified();
 		}
-		if(pSndFile->GetModSpecifications().supportsPlugins)
-			pModDoc->SetModified();
 	}
 }
+
 
 void CViewGlobals::OnLoadParam()
 //------------------------------
@@ -1042,11 +980,8 @@ void CViewGlobals::OnLoadParam()
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 	if(pVstPlugin != nullptr && pVstPlugin->LoadProgram())
 	{
-		m_nCurrentPreset = 0;
-		m_CbnPreset.SetRedraw(FALSE);
-		m_CbnPreset.ResetContent();
-		m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
-		m_CbnPreset.SetRedraw(TRUE);
+		VstInt32 currentProg = pVstPlugin->GetCurrentProgram();
+		FillPluginProgramBox(currentProg, currentProg);
 		m_CbnPreset.SetCurSel(0);
 	}
 }
@@ -1067,7 +1002,7 @@ void CViewGlobals::OnSetParameter()
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
-	
+
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
@@ -1089,26 +1024,22 @@ void CViewGlobals::OnSetParameter()
 }
 
 
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
 void CViewGlobals::OnSetWetDry()
 //------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
-	
+
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
 	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
 
 	if (plugin.pMixPlugin != nullptr)
 	{
-		//CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 		UINT value = GetDlgItemIntEx(IDC_EDIT15);
 		plugin.fDryRatio = (float)value / 100.0f;
 		if(pSndFile->GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
-		//OnWetDryChanged();
 	}
 }
 
@@ -1123,7 +1054,7 @@ void CViewGlobals::OnMixModeChanged()
 	pSndFile = pModDoc->GetSoundFile();
 
 	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetMasterEffect(IsDlgButtonChecked(IDC_CHECK9) != BST_UNCHECKED);
-	
+
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
@@ -1145,8 +1076,6 @@ void CViewGlobals::OnBypassChanged()
 }
 
 
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 void CViewGlobals::OnWetDryExpandChanged()
 //----------------------------------------
 {
@@ -1155,9 +1084,9 @@ void CViewGlobals::OnWetDryExpandChanged()
 
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	
+
 	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetExpandedMix(IsDlgButtonChecked(IDC_CHECK12) != BST_UNCHECKED);
-	
+
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
@@ -1176,7 +1105,6 @@ void CViewGlobals::OnSpecialMixProcessingChanged()
 	if(pSndFile->GetModSpecifications().supportsPlugins)
 		pModDoc->SetModified();
 }
-// -! BEHAVIOUR_CHANGE#0028
 
 
 void CViewGlobals::OnDryMixChanged()
@@ -1201,7 +1129,7 @@ void CViewGlobals::OnEditPlugin()
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	pModDoc->TogglePluginEditor(m_nCurrentPlugin);
-	return;	
+	return;
 }
 
 
@@ -1246,37 +1174,59 @@ LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM /*lParam*/)
 void CViewGlobals::OnMovePlugToSlot()
 //-----------------------------------
 {
-	CMoveFXSlotDialog dlg((CWnd*)this);
+	if(GetCurrentPlugin() == nullptr)
+	{
+		return;
+	}
 
 	// If any plugin routes its output to the current plugin, we shouldn't try to move it before that plugin...
 	PLUGINDEX defaultIndex = 0;
-	const CSoundFile *pSndFile = GetDocument() ? (GetDocument()->GetSoundFile()) : nullptr;
-	if(pSndFile)
+	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+	for(PLUGINDEX i = 0; i < m_nCurrentPlugin; i++)
 	{
-		for(PLUGINDEX i = 0; i < m_nCurrentPlugin; i++)
+		if(sndFile.m_MixPlugins[i].GetOutputPlugin() == m_nCurrentPlugin)
 		{
-			if(pSndFile->m_MixPlugins[i].GetOutputPlugin() == m_nCurrentPlugin)
-			{
-				defaultIndex = i + 1;
-			}
+			defaultIndex = i + 1;
 		}
 	}
 
 	std::vector<PLUGINDEX> emptySlots;
 	BuildEmptySlotList(emptySlots);
-	dlg.SetupMove(m_nCurrentPlugin, emptySlots, defaultIndex);
 
-	if (dlg.DoModal() == IDOK)
-	{ 
-		MovePlug(m_nCurrentPlugin, dlg.m_nToSlot);
-		m_CbnPlugin.SetCurSel(dlg.m_nToSlot);
+	CMoveFXSlotDialog dlg(this, m_nCurrentPlugin, emptySlots, defaultIndex, false, !sndFile.m_MixPlugins[m_nCurrentPlugin].IsOutputToMaster());
+
+	if(dlg.DoModal() == IDOK)
+	{
+		size_t toIndex = dlg.GetSlotIndex();
+		do
+		{
+			const SNDMIXPLUGIN &curPlugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
+			SNDMIXPLUGIN &newPlugin = sndFile.m_MixPlugins[emptySlots[toIndex]];
+			const PLUGINDEX nextPlugin = curPlugin.GetOutputPlugin();
+
+			MovePlug(m_nCurrentPlugin, emptySlots[toIndex]);
+
+			if(nextPlugin == PLUGINDEX_INVALID || toIndex == emptySlots.size() - 1)
+			{
+				break;
+			}
+
+			m_nCurrentPlugin = nextPlugin;
+
+			if(dlg.DoMoveChain())
+			{
+				toIndex++;
+				newPlugin.SetOutputPlugin(emptySlots[toIndex]);
+			}
+		} while(dlg.DoMoveChain());
+
+		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
 	}
-
 }
 
 
-// Functor for adjusting plug indexes in modcommands. Adjusts all instrument column values in 
+// Functor for adjusting plug indexes in modcommands. Adjusts all instrument column values in
 // range [m_nInstrMin, m_nInstrMax] by m_nDiff.
 struct PlugIndexModifier
 //======================
@@ -1303,13 +1253,13 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 
 	BeginWaitCursor();
-	
+
 	CriticalSection cs;
-		
+
 	// Move plug data
 	MemCopy(pSndFile->m_MixPlugins[dest], pSndFile->m_MixPlugins[src]);
 	MemsetZero(pSndFile->m_MixPlugins[src]);
-	
+
 	//Prevent plug from pointing backwards.
 	if(!pSndFile->m_MixPlugins[dest].IsOutputToMaster())
 	{
@@ -1319,16 +1269,16 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 			pSndFile->m_MixPlugins[dest].SetOutputToMaster();
 		}
 	}
-	
+
 	// Update current plug
 	if(pSndFile->m_MixPlugins[dest].pMixPlugin)
 	{
 		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->SetSlot(dest);
 		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->UpdateMixStructPtr(&(pSndFile->m_MixPlugins[dest]));
 	}
-	
+
 	// Update all other plugs' outputs
-	for (PLUGINDEX nPlug = 0; nPlug < src; nPlug++) 
+	for (PLUGINDEX nPlug = 0; nPlug < src; nPlug++)
 	{
 		if(!pSndFile->m_MixPlugins[nPlug].IsOutputToMaster())
 		{
@@ -1371,17 +1321,16 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 }
 
 
-void CViewGlobals::BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots) 
+void CViewGlobals::BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots)
 //-----------------------------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile* pSndFile = pModDoc->GetSoundFile();
-	
+	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+
 	emptySlots.clear();
 
 	for(PLUGINDEX nSlot = 0; nSlot < MAX_MIXPLUGINS; nSlot++)
 	{
-		if(pSndFile->m_MixPlugins[nSlot].pMixPlugin == nullptr)
+		if(sndFile.m_MixPlugins[nSlot].pMixPlugin == nullptr)
 		{
 			emptySlots.push_back(nSlot);
 		}
@@ -1394,48 +1343,47 @@ void CViewGlobals::OnInsertSlot()
 {
 	CString prompt;
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	prompt.Format("Insert empty slot before slot FX%d?", m_nCurrentPlugin + 1);
 
 	// If last plugin slot is occupied, move it so that the plugin is not lost.
 	// This could certainly be improved...
 	bool moveLastPlug = false;
 
-	if(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
+	if(sndFile.m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
 	{
-		if(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 2].pMixPlugin == nullptr)
+		if(sndFile.m_MixPlugins[MAX_MIXPLUGINS - 2].pMixPlugin == nullptr)
 		{
 			moveLastPlug = true;
 		} else
 		{
-			prompt.Append("\nWarning: plugin data in last slot will be lost."); 
+			prompt.Append("\nWarning: plugin data in last slot will be lost.");
 		}
 	}
 	if(Reporting::Confirm(prompt) == cnfYes)
 	{
 
 		// Delete last plug...
-		if(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
+		if(sndFile.m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin)
 		{
 			if(moveLastPlug)
 			{
 				MovePlug(MAX_MIXPLUGINS - 1, MAX_MIXPLUGINS - 2, true);
 			} else
 			{
-				pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1].pMixPlugin->Release();
-				memset(&(pSndFile->m_MixPlugins[MAX_MIXPLUGINS - 1]), 0, sizeof(SNDMIXPLUGIN));
-				//possible mem leak here...
+				sndFile.m_MixPlugins[MAX_MIXPLUGINS - 1].Destroy();
+				MemsetZero(sndFile.m_MixPlugins[MAX_MIXPLUGINS - 1].Info);
 			}
 		}
 
 		// Update MODCOMMANDs so that they won't be referring to old indexes (e.g. with NOTE_PC).
-		if(pSndFile->GetType() == MOD_TYPE_MPT)
-			pSndFile->Patterns.ForEachModCommand(PlugIndexModifier(m_nCurrentPlugin + 1, MAX_MIXPLUGINS - 1, 1));
+		if(sndFile.GetModSpecifications().HasNote(NOTE_PC))
+			sndFile.Patterns.ForEachModCommand(PlugIndexModifier(m_nCurrentPlugin + 1, MAX_MIXPLUGINS - 1, 1));
 
 
 		for(PLUGINDEX nSlot = MAX_MIXPLUGINS - 1; nSlot > m_nCurrentPlugin; nSlot--)
 		{
-			if(pSndFile->m_MixPlugins[nSlot-1].pMixPlugin)
+			if(sndFile.m_MixPlugins[nSlot-1].pMixPlugin)
 			{
 				MovePlug(nSlot - 1, nSlot, NoPatternAdjust);
 			}
@@ -1444,7 +1392,7 @@ void CViewGlobals::OnInsertSlot()
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		OnPluginChanged();
 
-		if(pSndFile->GetModSpecifications().supportsPlugins)
+		if(sndFile.GetModSpecifications().supportsPlugins)
 			pModDoc->SetModified();
 	}
 
@@ -1454,7 +1402,48 @@ void CViewGlobals::OnInsertSlot()
 void CViewGlobals::OnClonePlug()
 //------------------------------
 {
-	//Reporting::Notification("Not yet implemented.");
+	if(GetCurrentPlugin() == nullptr)
+	{
+		return;
+	}
+
+	CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+
+	std::vector<PLUGINDEX> emptySlots;
+	BuildEmptySlotList(emptySlots);
+
+	CMoveFXSlotDialog dlg(this, m_nCurrentPlugin, emptySlots, 0, true, !sndFile.m_MixPlugins[m_nCurrentPlugin].IsOutputToMaster());
+
+	if(dlg.DoModal() == IDOK)
+	{
+		size_t toIndex = dlg.GetSlotIndex();
+		do
+		{
+			const SNDMIXPLUGIN &curPlugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
+			SNDMIXPLUGIN &newPlugin = sndFile.m_MixPlugins[emptySlots[toIndex]];
+
+			GetDocument()->ClonePlugin(newPlugin, curPlugin);
+
+			if(curPlugin.IsOutputToMaster() || toIndex == emptySlots.size() - 1)
+			{
+				break;
+			}
+
+			m_nCurrentPlugin = curPlugin.GetOutputPlugin();
+
+			if(dlg.DoMoveChain())
+			{
+				toIndex++;
+				newPlugin.SetOutputPlugin(emptySlots[toIndex]);
+			}
+		} while(dlg.DoMoveChain());
+
+		m_CbnPlugin.SetCurSel(dlg.GetSlot());
+		OnPluginChanged();
+
+		if(sndFile.GetModSpecifications().supportsPlugins)
+			GetDocument()->SetModified();
+	}
 }
 
 
@@ -1481,6 +1470,7 @@ void CViewGlobals::OnFillParamCombo()
 	if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
 	m_CbnParam.SetCurSel(m_nCurrentParam);
 	m_CbnParam.SetRedraw(TRUE);
+	m_CbnParam.Invalidate(FALSE);
 }
 
 
@@ -1495,51 +1485,42 @@ void CViewGlobals::OnFillProgramCombo()
 	CVstPlugin *pVstPlugin = GetCurrentPlugin();
 	if(pVstPlugin == nullptr) return;
 
-	UINT nProg = pVstPlugin->GetNumPrograms();
+	FillPluginProgramBox(0, pVstPlugin->GetNumPrograms() - 1);
+	m_CbnPreset.SetCurSel(pVstPlugin->GetCurrentProgram());
+}
+
+
+void CViewGlobals::FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg)
+//----------------------------------------------------------------------------
+{
+	CVstPlugin *pVstPlugin = GetCurrentPlugin();
+
 	m_CbnPreset.SetRedraw(FALSE);
 	m_CbnPreset.ResetContent();
-	m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
-	for (UINT i = 0; i < nProg; i++)
+	for (VstInt32 i = firstProg; i <= lastProg; i++)
 	{
-		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i + 1);
+		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i);
 	}
-	m_nCurrentPreset = 0;
 	m_CbnPreset.SetRedraw(TRUE);
-	m_CbnPreset.SetCurSel(0);
+	m_CbnPreset.Invalidate(FALSE);
 }
 
 
 // This is used for retrieving the correct background colour for the
 // frames on the general tab when using WinXP Luna or Vista/Win7 Aero.
-typedef HRESULT (__stdcall * ETDT)(HWND, DWORD);
 #include <uxtheme.h>
 
 HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 //-------------------------------------------------------------------
 {
-	static bool bUxInited = false;
-	static ETDT hETDT = NULL;
-
-	if(!bUxInited)
-	{
-		// retrieve path for uxtheme.dll...
-		TCHAR szPath[MAX_PATH];
-		SHGetSpecialFolderPath(0, szPath, CSIDL_SYSTEM, FALSE);
-		strncat(szPath, _TEXT("\\uxtheme.dll"), MAX_PATH - (_tcslen(szPath) + 1));
-
-		// ...and try to load it
-		HMODULE uxlib = LoadLibrary(szPath);
-		if(uxlib)
-			hETDT = (ETDT)GetProcAddress(uxlib, "EnableThemeDialogTexture");
-		bUxInited = true;
-	}
-
 	switch(nCtlColor)
 	{
 	case CTLCOLOR_DLG:
-		if(hETDT)
-			hETDT(*pWnd, ETDT_ENABLETAB);
+		theApp.EnableThemeDialogTexture(*pWnd, ETDT_ENABLETAB);
+		break;
 	}
-
 	return CFormView::OnCtlColor(pDC, pWnd, nCtlColor);
 }
+
+
+OPENMPT_NAMESPACE_END

@@ -14,7 +14,7 @@
     as in test pa_devs.c.
 */
 /*
- * $Id: paqa_devs.c 1756 2011-09-08 06:09:29Z philburk $
+ * $Id: paqa_devs.c 1910 2013-09-07 10:14:52Z gineera $
  *
  * This program uses the PortAudio Portable Audio Library.
  * For more information see: http://www.portaudio.com
@@ -59,6 +59,7 @@
 /****************************************** Definitions ***********/
 #define MODE_INPUT      (0)
 #define MODE_OUTPUT     (1)
+#define MAX_TEST_CHANNELS  4
 
 typedef struct PaQaData
 {
@@ -235,6 +236,8 @@ static void TestDevices( int mode )
         pdi = Pa_GetDeviceInfo( id );
         /* Try 1 to maxChannels on each device. */
         maxChannels = (( mode == MODE_INPUT ) ? pdi->maxInputChannels : pdi->maxOutputChannels);
+        if( maxChannels > MAX_TEST_CHANNELS )
+            maxChannels = MAX_TEST_CHANNELS;
         
         for( jc=1; jc<=maxChannels; jc++ )
         {
@@ -350,7 +353,7 @@ static int TestAdvance( int mode, PaDeviceIndex deviceID, double sampleRate,
             oldStamp = Pa_GetStreamTime(stream);
             Pa_Sleep(msec);
             newStamp = Pa_GetStreamTime(stream);
-            printf("oldStamp = %g, newStamp = %g\n", oldStamp, newStamp ); /**/
+            printf("oldStamp = %9.6f, newStamp = %9.6f\n", oldStamp, newStamp ); /**/
             EXPECT( (oldStamp < newStamp) );
             /* Check to make sure callback is decrementing framesLeft. */
             oldFrames = myData.framesLeft;

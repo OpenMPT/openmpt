@@ -12,6 +12,8 @@
 
 #include "../soundlib/Snd_defs.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //=================
 class PatternCursor
 //=================
@@ -371,3 +373,5 @@ public:
 	}
 
 };
+
+OPENMPT_NAMESPACE_END

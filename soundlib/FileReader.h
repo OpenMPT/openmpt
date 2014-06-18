@@ -14,7 +14,7 @@
 #include "../common/typedefs.h"
 #include "../common/StringFixer.h"
 #include "../common/misc_util.h"
-#include "Endianness.h"
+#include "../common/Endianness.h"
 #include <algorithm>
 #ifndef NO_FILEREADER_STD_ISTREAM
 #include <ios>
@@ -23,6 +23,9 @@
 #include <limits>
 #include <vector>
 #include <cstring>
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 // change to show warnings for functions which trigger pre-caching the whole file for unseekable streams
@@ -100,8 +103,8 @@ class FileDataContainerWindow : public IFileDataContainer
 {
 private:
 	MPT_SHARED_PTR<IFileDataContainer> data;
-	off_t dataOffset;
-	off_t dataLength;
+	const off_t dataOffset;
+	const off_t dataLength;
 public:
 	FileDataContainerWindow(MPT_SHARED_PTR<IFileDataContainer> src, off_t off, off_t len) : data(src), dataOffset(off), dataLength(len) { }
 	virtual ~FileDataContainerWindow() { }
@@ -118,7 +121,11 @@ public:
 	}
 	off_t Read(char *dst, off_t pos, off_t count) const
 	{
-		return data->Read(dst, dataOffset + pos, count);
+		if(pos >= dataLength)
+		{
+			return 0;
+		}
+		return data->Read(dst, dataOffset + pos, std::min(count, dataLength - pos));
 	}
 	const char *GetPartialRawData(off_t pos, off_t length) const
 	{
@@ -129,7 +136,7 @@ public:
 		return data->GetPartialRawData(dataOffset + pos, length);
 	}
 	bool CanRead(off_t pos, off_t length) const {
-		return pos + length <= dataLength;
+		return (pos + length <= dataLength);
 	}
 	off_t GetReadableLength(off_t pos, off_t length) const
 	{
@@ -137,7 +144,7 @@ public:
 		{
 			return 0;
 		}
-		return std::min<off_t>(length, dataLength - pos);
+		return std::min(length, dataLength - pos);
 	}
 };
 
@@ -184,7 +191,7 @@ private:
 		cache.resize(static_cast<std::size_t>(pos));
 		stream->read(&cache[cache.size() - needcount], needcount);
 		std::size_t readcount = static_cast<std::size_t>(stream->gcount());
-		cache.resize(cache.size() - buffer_size + readcount);
+		cache.resize(cache.size() - needcount + readcount);
 		if(*stream)
 		{
 			// can read further
@@ -530,15 +537,15 @@ public:
 			return FileReader();
 		}
 		#ifndef NO_FILEREADER_STD_ISTREAM
-			return FileReader(MPT_SHARED_PTR<IFileDataContainer>(new FileDataContainerWindow(data, position, (std::min)(length, DataContainer().GetLength() - position))));
+			return FileReader(MPT_SHARED_PTR<IFileDataContainer>(new FileDataContainerWindow(data, position, std::min(length, DataContainer().GetLength() - position))));
 		#else
-			return FileReader(DataContainer().GetRawData() + position, (std::min)(length, DataContainer().GetLength() - position));
+			return FileReader(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position));
 		#endif
 	}
 
 	// Create a new FileReader object for parsing a sub chunk at the current position with a given length.
 	// The file cursor is advanced by "length" bytes.
-	FileReader GetChunk(off_t length)
+	FileReader ReadChunk(off_t length)
 	{
 		off_t position = streamPos;
 		Skip(length);
@@ -624,23 +631,23 @@ public:
 			return 0;
 		}
 		uint8 buf[sizeof(T)];
-		for(std::size_t i = 0; i < size; ++i)
+		for(std::size_t i = 0; i < sizeof(T); ++i)
 		{
-			Read(buf[i]);
-		}
-		if(std::numeric_limits<T>::is_signed)
-		{
-			for(std::size_t i = size; i < sizeof(T); ++i)
+			if(i < size)
 			{
-				// sign extend
-				buf[i] = (buf[size-1] & 0x80) ? 0xff : 0x00;
-			}
-		} else
-		{
-			for(std::size_t i = size; i < sizeof(T); ++i)
+				Read(buf[i]);
+			} else
 			{
-				// zero extend
-				buf[i] = 0x00;
+				if(std::numeric_limits<T>::is_signed)
+				{
+					// sign extend
+					const bool negative = (i > 0) && ((buf[i-1] & 0x80) != 0x00);
+					buf[i] = negative ? 0xff : 0x00;
+				} else
+				{
+					// zero extend
+					buf[i] = 0x00;
+				}
 			}
 		}
 		T target;
@@ -760,10 +767,10 @@ public:
 	// If successful, the file cursor is advanced by the size of the float.
 	float ReadFloatLE()
 	{
-		uint8_4 target;
+		IEEE754binary32LE target;
 		if(Read(target))
 		{
-			return DecodeFloatLE(target);
+			return target;
 		} else
 		{
 			return 0.0f;
@@ -774,10 +781,10 @@ public:
 	// If successful, the file cursor is advanced by the size of the float.
 	float ReadFloatBE()
 	{
-		uint8_4 target;
+		IEEE754binary32BE target;
 		if(Read(target))
 		{
-			return DecodeFloatBE(target);
+			return target;
 		} else
 		{
 			return 0.0f;
@@ -869,7 +876,7 @@ public:
 	template<typename T, off_t destSize>
 	bool ReadArray(T (&destArray)[destSize])
 	{
-		//STATIC_ASSERT(sizeof(T) == 1);
+		STATIC_ASSERT(sizeof(T) == 1);
 		if(CanRead(sizeof(destArray)))
 		{
 			for(std::size_t i = 0; i < destSize; ++i)
@@ -1021,3 +1028,6 @@ public:
 	}
 
 };
+
+
+OPENMPT_NAMESPACE_END

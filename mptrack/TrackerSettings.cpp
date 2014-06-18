@@ -14,7 +14,6 @@
 #include "Moddoc.h"
 #include "Mainfrm.h"
 #include "../sounddev/SoundDevice.h"
-#include "../sounddev/SoundDeviceASIO.h"
 #include "../common/version.h"
 #include "UpdateCheck.h"
 #include "Mpdlgs.h"
@@ -23,102 +22,266 @@
 #include "TrackerSettings.h"
 #include "../common/misc_util.h"
 #include "PatternClipboard.h"
-#include "../sounddev/SoundDevice.h"
+
+#include <algorithm>
 
 
-#define OLD_SNDDEV_MINBUFFERLEN			1    // 1ms
-#define OLD_SNDDEV_MAXBUFFERLEN			1000 // 1sec
+OPENMPT_NAMESPACE_BEGIN
+
 
 #define OLD_SOUNDSETUP_REVERSESTEREO         0x20
 #define OLD_SOUNDSETUP_SECONDARY             0x40
 #define OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY 0x80
 
 
-TrackerSettings TrackerSettings::settings;
-const TCHAR *TrackerSettings::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T(""), _T("") };
-
-
-TrackerSettings::TrackerSettings()
-//--------------------------------
+TrackerDirectories &TrackerDirectories::Instance()
+//------------------------------------------------
 {
+	return theApp.GetTrackerDirectories();
+}
 
-	m_ShowSplashScreen = true;
-	gnPatternSpacing = 0;
-	gbPatternRecord = TRUE;
-	gbPatternVUMeters = FALSE;
-	gbPatternPluginNames = TRUE;
-	gbMdiMaximize = TRUE;
-	gbShowHackControls = false;
-	//rewbs.varWindowSize
-	glGeneralWindowHeight = 178;
-	glPatternWindowHeight = 152;
-	glSampleWindowHeight = 188;
-	glInstrumentWindowHeight = 300;
-	glCommentsWindowHeight = 288;
-	glGraphWindowHeight = 288; //rewbs.graph
-	//end rewbs.varWindowSize
-	glTreeWindowWidth = 160;
-	glTreeSplitRatio = 128;
-	VuMeterUpdateInterval = 15;
 
-	gcsPreviousVersion = 0;
-	gcsInstallGUID = "";
-	// Audio Setup
-	gnAutoChordWaitTime = 60;
-	gnMsgBoxVisiblityFlags = uint32_max;
+const TCHAR *TrackerDirectories::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T(""), _T("") };
 
-	// Audio device
-	gbLoopSong = TRUE;
-	m_MorePortaudio = false;
-	m_nWaveDevice = SoundDeviceID();	// Default value will be overridden
-	m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
-	m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
-	m_SoundDeviceExclusiveMode = false;
-	m_SoundDeviceBoostThreadPriority = true;
-	m_SampleFormat = SampleFormatInt16;
 
-#ifndef NO_EQ
-	// Default EQ settings
-	MemCopy(m_EqSettings, CEQSetupDlg::gEQPresets[0]);
+TrackerSettings &TrackerSettings::Instance()
+//------------------------------------------
+{
+	return theApp.GetTrackerSettings();
+}
+
+
+static MptVersion::VersionNum GetStoredVersion(const std::string &iniVersion)
+//---------------------------------------------------------------------------
+{
+	MptVersion::VersionNum result = MptVersion::num;
+	if(!iniVersion.empty())
+	{
+		result = MptVersion::ToNum(iniVersion);
+	}
+	return result;
+}
+
+
+std::string SettingsModTypeToString(MODTYPE modtype)
+//--------------------------------------------------
+{
+	return CSoundFile::GetModSpecifications(modtype).fileExtension;
+}
+
+MODTYPE SettingsStringToModType(const std::string &str)
+//-----------------------------------------------------
+{
+	return CModSpecifications::ExtensionToType(str);
+}
+
+
+static ResamplingMode GetDefaultResamplerMode()
+//---------------------------------------------
+{
+	ResamplingMode result = CResamplerSettings().SrcMode;
+#ifdef ENABLE_ASM
+	// rough heuristic to select less cpu consuming defaults for old CPUs
+	if(GetProcSupport() & PROCSUPPORT_SSE)
+	{
+		result = SRCMODE_POLYPHASE;
+	} else if(GetProcSupport() & PROCSUPPORT_MMX)
+	{
+		result = SRCMODE_SPLINE;
+	} else
+	{
+		result = SRCMODE_LINEAR;
+	}
+#else
+	// just use a sane default
+	result = CResamplerSettings().SrcMode;
 #endif
+	return result;
+}
 
-	// MIDI Setup
-	m_nMidiDevice = 0;
-	m_dwMidiSetup = MIDISETUP_RECORDVELOCITY | MIDISETUP_RECORDNOTEOFF | MIDISETUP_TRANSPOSEKEYBOARD | MIDISETUP_MIDITOPLUG;
-	aftertouchBehaviour = atDoNotRecord;
-	midiVelocityAmp = 100;
-	
-	// MIDI Import
-	midiImportPatternLen = 128;
-	midiImportSpeed = 3;
 
-	// Pattern Setup
-	m_dwPatternSetup = PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
+static uint32 GetDefaultPatternSetup()
+//------------------------------------
+{
+	return PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
 		| PATTERN_SMALLFONT | PATTERN_CENTERROW | PATTERN_DRAGNDROPEDIT
 		| PATTERN_FLATBUTTONS | PATTERN_NOEXTRALOUD | PATTERN_2NDHIGHLIGHT
 		| PATTERN_STDHIGHLIGHT | PATTERN_SHOWPREVIOUS | PATTERN_CONTSCROLL
 		| PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE
 		| PATTERN_LARGECOMMENTS | PATTERN_SHOWDEFAULTVOLUME;
-	m_nRowHighlightMeasures = 16;
-	m_nRowHighlightBeats = 4;
-	recordQuantizeRows = 0;
-	rowDisplayOffset = 0;
+}
 
+
+void SampleUndoBufferSize::CalculateSize()
+//----------------------------------------
+{
+	if(sizePercent < 0)
+		sizePercent = 0;
+	// Don't use GlobalMemoryStatusEx here since we want a percentage of the memory that's actually *available* to OpenMPT, which is a max of 4GB in 32-bit mode.
+	MEMORYSTATUS memStatus;
+	memStatus.dwLength = sizeof(MEMORYSTATUS);
+	GlobalMemoryStatus(&memStatus);
+	sizeByte = mpt::saturate_cast<size_t>(memStatus.dwTotalPhys * uint64(sizePercent) / 100);
+
+	// Pretend there's at least one MiB of memory (haha)
+	if(sizePercent != 0 && sizeByte < 1 * 1024 * 1024)
+	{
+		sizeByte = 1 * 1024 * 1024;
+	}
+}
+
+
+TrackerSettings::TrackerSettings(SettingsContainer &conf)
+//-------------------------------------------------------
+	: conf(conf)
+	// Version
+	, IniVersion(conf, "Version", "Version", "")
+	, gcsPreviousVersion(GetStoredVersion(IniVersion))
+	, gcsInstallGUID(conf, "Version", "InstallGUID", std::wstring())
+	// Display
+	, m_ShowSplashScreen(conf, "Display", "ShowSplashScreen", true)
+	, gbMdiMaximize(conf, "Display", "MDIMaximize", true)
+	, glTreeSplitRatio(conf, "Display", "MDITreeRatio", 128)
+	, glTreeWindowWidth(conf, "Display", "MDITreeWidth", 160)
+	, glGeneralWindowHeight(conf, "Display", "MDIGeneralHeight", 178)
+	, glPatternWindowHeight(conf, "Display", "MDIPatternHeight", 152)
+	, glSampleWindowHeight(conf, "Display", "MDISampleHeight", 188)
+	, glInstrumentWindowHeight(conf, "Display", "MDIInstrumentHeight", 300)
+	, glCommentsWindowHeight(conf, "Display", "MDICommentsHeight", 288)
+	, glGraphWindowHeight(conf, "Display", "MDIGraphHeight", 288)
+	, gnPlugWindowX(conf, "Display", "PlugSelectWindowX", 243)
+	, gnPlugWindowY(conf, "Display", "PlugSelectWindowY", 273)
+	, gnPlugWindowWidth(conf, "Display", "PlugSelectWindowWidth", 400)
+	, gnPlugWindowHeight(conf, "Display", "PlugSelectWindowHeight", 450)
+	, gnPlugWindowLast(conf, "Display", "PlugSelectWindowLast", 0)
+	, gnMsgBoxVisiblityFlags(conf, "Display", "MDIGraphHeight", uint32_max)
+	, GUIUpdateInterval(conf, "Display", "GUIUpdateInterval", 0)
+	, VuMeterUpdateInterval(conf, "Display", "VuMeterUpdateInterval", 15)
+	// Misc
+	, gbShowHackControls(conf, "Misc", "ShowHackControls", false)
+	, defaultModType(conf, "Misc", "DefaultModType", MOD_TYPE_IT)
+	, DefaultPlugVolumeHandling(conf, "Misc", "DefaultPlugVolumeHandling", PLUGIN_VOLUMEHANDLING_IGNORE)
+	, autoApplySmoothFT2Ramping(conf, "Misc", "SmoothFT2Ramping", false)
+	, MiscITCompressionStereo(conf, "Misc", "ITCompressionStereo", 0)
+	, MiscITCompressionMono(conf, "Misc", "ITCompressionMono", 0)
+	// Sound Settings
+	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
+	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
+	, m_SoundSettingsOpenDeviceAtStartup(conf, "Sound Settings", "OpenDeviceAtStartup", false)
+	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDeviceStopModeClosed)
+	, m_SoundDeviceSettingsUseOldDefaults(false)
+	, m_SoundDeviceID_DEPRECATED(SoundDeviceID())
+	, m_SoundDeviceIdentifier(conf, "Sound Settings", "Device", std::wstring())
+	, MixerMaxChannels(conf, "Sound Settings", "MixChannels", MixerSettings().m_nMaxMixChannels)
+	, MixerDSPMask(conf, "Sound Settings", "Quality", MixerSettings().DSPMask)
+	, MixerFlags(conf, "Sound Settings", "SoundSetup", MixerSettings().MixerFlags)
+	, MixerSamplerate(conf, "Sound Settings", "Mixing_Rate", MixerSettings().gdwMixingFreq)
+	, MixerOutputChannels(conf, "Sound Settings", "ChannelMode", MixerSettings().gnChannels)
+	, MixerPreAmp(conf, "Sound Settings", "PreAmp", MixerSettings().m_nPreAmp)
+	, MixerStereoSeparation(conf, "Sound Settings", "StereoSeparation", MixerSettings().m_nStereoSeparation)
+	, MixerVolumeRampUpMicroseconds(conf, "Sound Settings", "VolumeRampUpMicroseconds", MixerSettings().GetVolumeRampUpMicroseconds())
+	, MixerVolumeRampDownMicroseconds(conf, "Sound Settings", "VolumeRampDownMicroseconds", MixerSettings().GetVolumeRampDownMicroseconds())
+	, ResamplerMode(conf, "Sound Settings", "SrcMode", GetDefaultResamplerMode())
+	, ResamplerSubMode(conf, "Sound Settings", "XMMSModplugResamplerWFIRType", CResamplerSettings().gbWFIRType)
+	, ResamplerCutoffPercent(conf, "Sound Settings", "ResamplerWFIRCutoff", Util::Round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
+	// MIDI Settings
+	, m_nMidiDevice(conf, "MIDI Settings", "MidiDevice", 0)
+	, m_dwMidiSetup(conf, "MIDI Settings", "MidiSetup", MIDISETUP_RECORDVELOCITY | MIDISETUP_RECORDNOTEOFF | MIDISETUP_TRANSPOSEKEYBOARD | MIDISETUP_MIDITOPLUG)
+	, aftertouchBehaviour(conf, "MIDI Settings", "AftertouchBehaviour", atDoNotRecord)
+	, midiVelocityAmp(conf, "MIDI Settings", "MidiVelocityAmp", 100)
+	, midiIgnoreCCs(conf, "MIDI Settings", "IgnoredCCs", std::bitset<128>())
+	, midiImportSpeed(conf, "MIDI Settings", "MidiImportSpeed", 3)
+	, midiImportPatternLen(conf, "MIDI Settings", "MidiImportPatLen", 128)
+	// Pattern Editor
+	, gbLoopSong(conf, "Pattern Editor", "LoopSong", true)
+	, gnPatternSpacing(conf, "Pattern Editor", "Spacing", 0)
+	, gbPatternVUMeters(conf, "Pattern Editor", "VU-Meters", false)
+	, gbPatternPluginNames(conf, "Pattern Editor", "Plugin-Names", true)
+	, gbPatternRecord(conf, "Pattern Editor", "Record", true)
+	, m_dwPatternSetup(conf, "Pattern Editor", "PatternSetup", GetDefaultPatternSetup())
+	, m_nRowHighlightMeasures(conf, "Pattern Editor", "RowSpacing", 16)
+	, m_nRowHighlightBeats(conf, "Pattern Editor", "RowSpacing2", 4)
+	, recordQuantizeRows(conf, "Pattern Editor", "RecordQuantize", 0)
+	, gnAutoChordWaitTime(conf, "Pattern Editor", "AutoChordWaitTime", 60)
+	, orderlistMargins(conf, "Pattern Editor", "DefaultSequenceMargins", 0)
+	, rowDisplayOffset(conf, "Pattern Editor", "RowDisplayOffset", 0)
 	// Sample Editor
-	m_nSampleUndoMaxBuffer = 0;	// Real sample buffer undo size will be set later.
-	m_MayNormalizeSamplesOnLoad = true;
+	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
+	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)
+	, m_defaultSampleFormat(conf, "Sample Editor", "DefaultFormat", dfFLAC)
+	, m_nFinetuneStep(conf, "Sample Editor", "FinetuneStep", 25)
+	, m_FLACCompressionLevel(conf, "Sample Editor", "FLACCompressionLevel", 5)
+	, compressITI(conf, "Sample Editor", "CompressITI", true)
+	, m_MayNormalizeSamplesOnLoad(conf, "Sample Editor", "MayNormalizeSamplesOnLoad", true)
+	, previewInFileDialogs(conf, "Sample Editor", "PreviewInFileDialogs", false)
+	// Export
+	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
+	, ExportStreamEncoderSettings(conf, "Export")
+	// Default template
+	, defaultTemplateFile(conf, "Paths", "DefaultTemplate", mpt::PathString())
+	// MRU List
+	, mruListLength(conf, "Misc", "MRUListLength", 10)
+	// Plugins
+	, bridgeAllPlugins(conf, "VST Plugins", "BridgeAllPlugins", false)
+{
+	// Effects
+#ifndef NO_DSP
+	m_DSPSettings.m_nXBassDepth = conf.Read<int32>("Effects", "XBassDepth", m_DSPSettings.m_nXBassDepth);
+	m_DSPSettings.m_nXBassRange = conf.Read<int32>("Effects", "XBassRange", m_DSPSettings.m_nXBassRange);
+#endif
+#ifndef NO_REVERB
+	m_ReverbSettings.m_nReverbDepth = conf.Read<int32>("Effects", "ReverbDepth", m_ReverbSettings.m_nReverbDepth);
+	m_ReverbSettings.m_nReverbType = conf.Read<int32>("Effects", "ReverbType", m_ReverbSettings.m_nReverbType);
+#endif
+#ifndef NO_DSP
+	m_DSPSettings.m_nProLogicDepth = conf.Read<int32>("Effects", "ProLogicDepth", m_DSPSettings.m_nProLogicDepth);
+	m_DSPSettings.m_nProLogicDelay = conf.Read<int32>("Effects", "ProLogicDelay", m_DSPSettings.m_nProLogicDelay);
+#endif
+#ifndef NO_EQ
+	m_EqSettings = conf.Read<EQPreset>("Effects", "EQ_Settings", FlatEQPreset);
+	const EQPreset userPresets[] =
+	{
+		FlatEQPreset,																// User1
+		{ "User 1",	{16,16,16,16,16,16}, { 150, 350, 700, 1500, 4500, 8000 } },		// User2
+		{ "User 2",	{16,16,16,16,16,16}, { 200, 400, 800, 1750, 5000, 9000 } },		// User3
+		{ "User 3",	{16,16,16,16,16,16}, { 250, 450, 900, 2000, 5000, 10000 } }		// User4
+	};
 
+	m_EqUserPresets[0] = conf.Read<EQPreset>("Effects", "EQ_User1", userPresets[0]);
+	m_EqUserPresets[1] = conf.Read<EQPreset>("Effects", "EQ_User2", userPresets[1]);
+	m_EqUserPresets[2] = conf.Read<EQPreset>("Effects", "EQ_User3", userPresets[2]);
+	m_EqUserPresets[3] = conf.Read<EQPreset>("Effects", "EQ_User4", userPresets[3]);
+#endif
+	// Display (Colors)
 	GetDefaultColourScheme(rgbCustomColors);
-
-	// Directory Arrays (Default + Last)
+	for(int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
+	{
+		const std::string colorName = mpt::String::Format("Color%02d", ncol);
+		rgbCustomColors[ncol] = conf.Read<uint32>("Display", colorName, rgbCustomColors[ncol]);
+	}
+	// AutoSave
+	CMainFrame::m_pAutoSaver->SetEnabled(conf.Read<bool>("AutoSave", "Enabled", CMainFrame::m_pAutoSaver->IsEnabled()));
+	CMainFrame::m_pAutoSaver->SetSaveInterval(conf.Read<int32>("AutoSave", "IntervalMinutes", CMainFrame::m_pAutoSaver->GetSaveInterval()));
+	CMainFrame::m_pAutoSaver->SetHistoryDepth(conf.Read<int32>("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth()));
+	CMainFrame::m_pAutoSaver->SetUseOriginalPath(conf.Read<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath()));
+	CMainFrame::m_pAutoSaver->SetPath(theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>("AutoSave", "Path", CMainFrame::m_pAutoSaver->GetPath())));
+	CMainFrame::m_pAutoSaver->SetFilenameTemplate(conf.Read<mpt::PathString>("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate()));
+	// Paths
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
-		if(i == DIR_TUNING) // Hack: Tuning folder is already set so don't reset it.
+		if(TrackerDirectories::Instance().m_szDirectoryToSettingsName[i][0] == '\0')
+		{
 			continue;
-		m_szDefaultDirectory[i][0] = '\0';
-		m_szWorkingDirectory[i][0] = '\0';
+		}
+		const std::string settingKey = TrackerDirectories::Instance().m_szDirectoryToSettingsName[i];
+		mpt::PathString path = conf.Read<mpt::PathString>("Paths", settingKey, TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i)));
+		path = theApp.RelativePathToAbsolute(path);
+		TrackerDirectories::Instance().SetDefaultDirectory(path, static_cast<Directory>(i), false);
 	}
-	m_szKbdFile[0] = '\0';
+	m_szKbdFile = conf.Read<mpt::PathString>("Paths", "Key_Config_File", mpt::PathString());
+
+
+	// init old and messy stuff:
 
 	// Default chords
 	MemsetZero(Chords);
@@ -144,45 +307,429 @@ TrackerSettings::TrackerSettings()
 		}
 	}
 
-	defaultModType = MOD_TYPE_IT;
 
-	DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+	// load old and messy stuff:
 
-	gnPlugWindowX = 243;
-	gnPlugWindowY = 273;
-	gnPlugWindowWidth = 370;
-	gnPlugWindowHeight = 332;
-	gnPlugWindowLast = 0;
+	PatternClipboard::SetClipboardSize(conf.Read<int32>("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize()));
+
+	// Update
+	{
+		tm lastUpdate;
+		MemsetZero(lastUpdate);
+		CString s = conf.Read<CString>("Update", "LastUpdateCheck", "1970-01-01 00:00");
+		if(sscanf(s, "%04d-%02d-%02d %02d:%02d", &lastUpdate.tm_year, &lastUpdate.tm_mon, &lastUpdate.tm_mday, &lastUpdate.tm_hour, &lastUpdate.tm_min) == 5)
+		{
+			lastUpdate.tm_year -= 1900;
+			lastUpdate.tm_mon--;
+		}
+		time_t outTime = Util::MakeGmTime(&lastUpdate);
+		if(outTime < 0) outTime = 0;
+		CUpdateCheck::SetUpdateSettings
+			(
+			outTime,
+			conf.Read<int32>("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod()),
+			conf.Read<CString>("Update", "UpdateURL", CUpdateCheck::GetUpdateURL()),
+			conf.Read<int32>("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0) != 0,
+			conf.Read<int32>("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0) != 0
+			);
+	}
+
+	// Chords
+	LoadChords(Chords);
+
+	// Zxx Macros
+	MIDIMacroConfig macros;
+	theApp.GetDefaultMidiMacro(macros);
+	for(int isfx = 0; isfx < 16; isfx++)
+	{
+		mpt::String::Copy(macros.szMidiSFXExt[isfx], conf.Read<std::string>("Zxx Macros", mpt::String::Format("SF%X", isfx), macros.szMidiSFXExt[isfx]));
+	}
+	for(int izxx = 0; izxx < 128; izxx++)
+	{
+		mpt::String::Copy(macros.szMidiZXXExt[izxx], conf.Read<std::string>("Zxx Macros", mpt::String::Format("Z%02X", izxx | 0x80), macros.szMidiZXXExt[izxx]));
+	}
+
+
+	// MRU list
+	Limit(mruListLength, 0u, 32u);
+	mruFiles.reserve(mruListLength);
+	for(uint32 i = 0; i < mruListLength; i++)
+	{
+		char key[16];
+		sprintf(key, "File%d", i);
+
+		mpt::PathString path = theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>("Recent File List", key, mpt::PathString()));
+		if(!path.empty())
+		{
+			mruFiles.push_back(path);
+		}
+	}
+
+	// Fixups:
+	// -------
+
+	const MptVersion::VersionNum storedVersion = gcsPreviousVersion;
+
+	// Version
+	if(gcsInstallGUID.Get().empty())
+	{
+		// No UUID found - generate one.
+		gcsInstallGUID = Util::UUIDToString(Util::CreateUUID());
+	}
+
+	// Sound Settings
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,30))
+	{
+		if(conf.Read<bool>("Sound Settings", "KeepDeviceOpen", false))
+		{
+			m_SoundSettingsStopMode = SoundDeviceStopModePlaying;
+		} else
+		{
+			m_SoundSettingsStopMode = SoundDeviceStopModeStopped;
+		}
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
+	{
+		std::vector<uint32> sampleRates = m_SoundSampleRates;
+		if(std::count(sampleRates.begin(), sampleRates.end(), MixerSamplerate) == 0)
+		{
+			sampleRates.push_back(MixerSamplerate);
+			std::sort(sampleRates.begin(), sampleRates.end());
+			std::reverse(sampleRates.begin(), sampleRates.end());
+			m_SoundSampleRates = sampleRates;
+		}
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
+	{
+		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDeviceID>("Sound Settings", "WaveDevice", SoundDeviceID());
+		Setting<uint32> m_BufferLength_DEPRECATED(conf, "Sound Settings", "BufferLength", 50);
+		Setting<uint32> m_LatencyMS(conf, "Sound Settings", "Latency", SoundDeviceSettings().LatencyMS);
+		Setting<uint32> m_UpdateIntervalMS(conf, "Sound Settings", "UpdateInterval", SoundDeviceSettings().UpdateIntervalMS);
+		Setting<SampleFormat> m_SampleFormat(conf, "Sound Settings", "BitsPerSample", SoundDeviceSettings().sampleFormat);
+		Setting<bool> m_SoundDeviceExclusiveMode(conf, "Sound Settings", "ExclusiveMode", SoundDeviceSettings().ExclusiveMode);
+		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, "Sound Settings", "BoostThreadPriority", SoundDeviceSettings().BoostThreadPriority);
+		Setting<bool> m_SoundDeviceUseHardwareTiming(conf, "Sound Settings", "UseHardwareTiming", SoundDeviceSettings().UseHardwareTiming);
+		Setting<SoundChannelMapping> m_SoundDeviceChannelMapping(conf, "Sound Settings", "ChannelMapping", SoundDeviceSettings().ChannelMapping);
+		if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
+		{
+			if(m_BufferLength_DEPRECATED != 0)
+			{
+				if(m_BufferLength_DEPRECATED < 1) m_BufferLength_DEPRECATED = 1; // 1ms
+				if(m_BufferLength_DEPRECATED > 1000) m_BufferLength_DEPRECATED = 1000; // 1sec
+				if(m_SoundDeviceID_DEPRECATED.GetType() == SNDDEV_ASIO)
+				{
+					m_LatencyMS = m_BufferLength_DEPRECATED;
+					m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
+				} else
+				{
+					m_LatencyMS = m_BufferLength_DEPRECATED * 3;
+					m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
+				}
+			}
+			conf.Remove(m_BufferLength_DEPRECATED.GetPath());
+		}
+		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+		{
+			m_SoundDeviceExclusiveMode = ((MixerFlags & OLD_SOUNDSETUP_SECONDARY) == 0);
+		}
+		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+		{
+			m_SoundDeviceBoostThreadPriority = ((MixerFlags & OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY) == 0);
+		}
+		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,03))
+		{
+			m_SoundDeviceChannelMapping = SoundChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>("Sound Settings", "ASIOBaseChannel", 0));
+		}
+		m_SoundDeviceSettingsDefaults.LatencyMS = m_LatencyMS;
+		m_SoundDeviceSettingsDefaults.UpdateIntervalMS = m_UpdateIntervalMS;
+		m_SoundDeviceSettingsDefaults.Samplerate = MixerSamplerate;
+		m_SoundDeviceSettingsDefaults.Channels = (uint8)MixerOutputChannels;
+		m_SoundDeviceSettingsDefaults.sampleFormat = m_SampleFormat;
+		m_SoundDeviceSettingsDefaults.ExclusiveMode = m_SoundDeviceExclusiveMode;
+		m_SoundDeviceSettingsDefaults.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
+		m_SoundDeviceSettingsDefaults.UseHardwareTiming = m_SoundDeviceUseHardwareTiming;
+		m_SoundDeviceSettingsDefaults.ChannelMapping = m_SoundDeviceChannelMapping;
+		m_SoundDeviceSettingsUseOldDefaults = true;
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
+	{
+		MixerFlags &= ~OLD_SOUNDSETUP_REVERSESTEREO;
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+	{
+		MixerFlags &= ~OLD_SOUNDSETUP_SECONDARY;
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+	{
+		MixerFlags &= ~OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY;
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,22))
+	{
+		MixerSettings settings = GetMixerSettings();
+		settings.SetVolumeRampUpSamples(conf.Read<int32>("Sound Settings", "VolumeRampSamples", 42));
+		settings.SetVolumeRampDownSamples(conf.Read<int32>("Sound Settings", "VolumeRampSamples", 42));
+		SetMixerSettings(settings);
+		conf.Remove("Sound Settings", "VolumeRampSamples");
+	} else if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,18))
+	{
+		MixerSettings settings = GetMixerSettings();
+		settings.SetVolumeRampUpSamples(conf.Read<int32>("Sound Settings", "VolumeRampUpSamples", MixerSettings().GetVolumeRampUpSamples()));
+		settings.SetVolumeRampDownSamples(conf.Read<int32>("Sound Settings", "VolumeRampDownSamples", MixerSettings().GetVolumeRampDownSamples()));
+		SetMixerSettings(settings);
+	}
+	Limit(ResamplerCutoffPercent, 0, 100);
+
+	// Misc
+	if(defaultModType == MOD_TYPE_NONE)
+	{
+		defaultModType = MOD_TYPE_IT;
+	}
+
+	// MIDI Settings
+	if((m_dwMidiSetup & 0x40) != 0 && storedVersion < MAKE_VERSION_NUMERIC(1,20,00,86))
+	{
+		// This flag used to be "amplify MIDI Note Velocity" - with a fixed amplification factor of 2.
+		midiVelocityAmp = 200;
+		m_dwMidiSetup &= ~0x40;
+	}
+
+	// Pattern Editor
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,17,02,50))
+	{
+		m_dwPatternSetup |= PATTERN_NOTEFADE;
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,17,03,01))
+	{
+		m_dwPatternSetup |= PATTERN_RESETCHANNELS;
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,19,00,07))
+	{
+		m_dwPatternSetup &= ~0x800;					// this was previously deprecated and is now used for something else
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,04))
+	{
+		m_dwPatternSetup &= ~0x200000;				// ditto
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,07))
+	{
+		m_dwPatternSetup &= ~0x400000;				// ditto
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,39))
+	{
+		m_dwPatternSetup &= ~0x10000000;			// ditto
+	}
+
+	// Effects
+#ifndef NO_EQ
+	FixupEQ(&m_EqSettings);
+	FixupEQ(&m_EqUserPresets[0]);
+	FixupEQ(&m_EqUserPresets[1]);
+	FixupEQ(&m_EqUserPresets[2]);
+	FixupEQ(&m_EqUserPresets[3]);
+#endif // !NO_EQ
+
+	// Zxx Macros
+	if((MAKE_VERSION_NUMERIC(1,17,00,00) <= storedVersion) && (storedVersion < MAKE_VERSION_NUMERIC(1,20,00,00)))
+	{
+		// Fix old nasty broken (non-standard) MIDI configs in INI file.
+		macros.UpgradeMacros();
+	}
+	theApp.SetDefaultMidiMacro(macros);
+
+	// Paths
+	for(size_t i = 0; i < NUM_DIRS; i++)
+	{
+		TrackerDirectories::Instance().m_szWorkingDirectory[i] = TrackerDirectories::Instance().m_szDefaultDirectory[i];
+	}
+	m_szKbdFile = theApp.RelativePathToAbsolute(m_szKbdFile);
+
+	// Sample undo buffer size (used to be a hidden, absolute setting in MiB)
+	int64 oldUndoSize = m_SampleUndoBufferSize.Get().GetSizeInPercent();
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,25) && oldUndoSize != SampleUndoBufferSize::defaultSize && oldUndoSize != 0)
+	{
+		m_SampleUndoBufferSize = SampleUndoBufferSize(static_cast<int32>(100 * (oldUndoSize << 20) / SampleUndoBufferSize(100).GetSizeInBytes()));
+	}
+
+	// Last fixup: update config version
+	IniVersion = MptVersion::str;
+
+	// Write updated settings
+	conf.Flush();
 
 }
 
 
-SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings() const
-//-----------------------------------------------------------------
+struct StoredSoundDeviceSettings
 {
-	SoundDeviceSettings settings;
+
+private:
+
+	SettingsContainer &conf;
+	const SoundDeviceInfo deviceInfo;
+	
+public:
+
+	Setting<uint32> LatencyUS;
+	Setting<uint32> UpdateIntervalUS;
+	Setting<uint32> Samplerate;
+	Setting<uint8> Channels;
+	Setting<SampleFormat> sampleFormat;
+	Setting<bool> ExclusiveMode;
+	Setting<bool> BoostThreadPriority;
+	Setting<bool> KeepDeviceRunning;
+	Setting<bool> UseHardwareTiming;
+	Setting<int> DitherType;
+	Setting<SoundChannelMapping> ChannelMapping;
+
+public:
+
+	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDeviceInfo & deviceInfo, const SoundDeviceSettings &defaults = SoundDeviceSettings())
+		: conf(conf)
+		, deviceInfo(deviceInfo)
+		, LatencyUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Latency", defaults.LatencyMS * 1000)
+		, UpdateIntervalUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"UpdateInterval", defaults.UpdateIntervalMS * 1000)
+		, Samplerate(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"SampleRate", defaults.Samplerate)
+		, Channels(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Channels", defaults.Channels)
+		, sampleFormat(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"SampleFormat", defaults.sampleFormat)
+		, ExclusiveMode(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ExclusiveMode", defaults.ExclusiveMode)
+		, BoostThreadPriority(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"BoostThreadPriority", defaults.BoostThreadPriority)
+		, KeepDeviceRunning(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"KeepDeviceRunning", defaults.KeepDeviceRunning)
+		, UseHardwareTiming(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"UseHardwareTiming", defaults.UseHardwareTiming)
+		, DitherType(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"DitherType", defaults.DitherType)
+		, ChannelMapping(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ChannelMapping", defaults.ChannelMapping)
+	{
+		// store informational data (not read back, jsut to allow the user to mock with the raw ini file)
+		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ID", deviceInfo.id);
+		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"InternalID", deviceInfo.internalID);
+		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"API", deviceInfo.apiName);
+		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Name", deviceInfo.name);
+	}
+
+	StoredSoundDeviceSettings & operator = (const SoundDeviceSettings &settings)
+	{
+		LatencyUS = settings.LatencyMS * 1000;
+		UpdateIntervalUS = settings.UpdateIntervalMS * 1000;
+		Samplerate = settings.Samplerate;
+		Channels = settings.Channels;
+		sampleFormat = settings.sampleFormat;
+		ExclusiveMode = settings.ExclusiveMode;
+		BoostThreadPriority = settings.BoostThreadPriority;
+		KeepDeviceRunning = settings.KeepDeviceRunning;
+		UseHardwareTiming = settings.UseHardwareTiming;
+		DitherType = settings.DitherType;
+		ChannelMapping = settings.ChannelMapping;
+		return *this;
+	}
+
+	operator SoundDeviceSettings () const
+	{
+		SoundDeviceSettings settings;
+		settings.LatencyMS = LatencyUS / 1000;
+		settings.UpdateIntervalMS = UpdateIntervalUS / 1000;
+		settings.Samplerate = Samplerate;
+		settings.Channels = Channels;
+		settings.sampleFormat = sampleFormat;
+		settings.ExclusiveMode = ExclusiveMode;
+		settings.BoostThreadPriority = BoostThreadPriority;
+		settings.KeepDeviceRunning = KeepDeviceRunning;
+		settings.UseHardwareTiming = UseHardwareTiming;
+		settings.DitherType = DitherType;
+		settings.ChannelMapping = ChannelMapping;
+		return settings;
+	}
+
+};
+
+SoundDeviceSettings TrackerSettings::GetSoundDeviceSettingsDefaults() const
+//-------------------------------------------------------------------------
+{
+	return m_SoundDeviceSettingsDefaults;
+}
+
+SoundDeviceID TrackerSettings::GetSoundDeviceID() const
+//-----------------------------------------------------
+{
+	return theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_SoundDeviceIdentifier).id;
+}
+
+void TrackerSettings::SetSoundDeviceID(const SoundDeviceID &id)
+//-------------------------------------------------------------
+{
+	m_SoundDeviceIdentifier = theApp.GetSoundDevicesManager()->FindDeviceInfo(id).GetIdentifier();
+}
+
+SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings(const SoundDeviceID &device) const
+//--------------------------------------------------------------------------------------------
+{
+	const SoundDeviceInfo deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
+	if(!deviceInfo.IsValid())
+	{
+		return GetSoundDeviceSettingsDefaults();
+	}
+	SoundDeviceSettings settings = StoredSoundDeviceSettings(conf, deviceInfo);
 	settings.hWnd = CMainFrame::GetMainFrame()->m_hWnd;
-	settings.LatencyMS = m_LatencyMS;
-	settings.UpdateIntervalMS = m_UpdateIntervalMS;
-	settings.Samplerate = m_MixerSettings.gdwMixingFreq;
-	settings.Channels = (uint8)m_MixerSettings.gnChannels;
-	settings.sampleFormat = m_SampleFormat;
-	settings.ExclusiveMode = m_SoundDeviceExclusiveMode;
-	settings.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
 	return settings;
 }
 
-
-void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceSettings &settings)
-//-------------------------------------------------------------------------------
+void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceID &device, const SoundDeviceSettings &settings)
+//------------------------------------------------------------------------------------------------------------
 {
-	m_LatencyMS = settings.LatencyMS;
-	m_UpdateIntervalMS = settings.UpdateIntervalMS;
-	m_MixerSettings.gdwMixingFreq = settings.Samplerate;
-	m_MixerSettings.gnChannels = settings.Channels;
-	m_SampleFormat = settings.sampleFormat;
-	m_SoundDeviceExclusiveMode = settings.ExclusiveMode;
-	m_SoundDeviceBoostThreadPriority = settings.BoostThreadPriority;
+	const SoundDeviceInfo deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
+	if(!deviceInfo.IsValid())
+	{
+		return;
+	}
+	StoredSoundDeviceSettings(conf, deviceInfo) = settings;
+}
+
+
+MixerSettings TrackerSettings::GetMixerSettings() const
+//-----------------------------------------------------
+{
+	MixerSettings settings;
+	settings.m_nMaxMixChannels = MixerMaxChannels;
+	settings.DSPMask = MixerDSPMask;
+	settings.MixerFlags = MixerFlags;
+	settings.gdwMixingFreq = MixerSamplerate;
+	settings.gnChannels = MixerOutputChannels;
+	settings.m_nPreAmp = MixerPreAmp;
+	settings.m_nStereoSeparation = MixerStereoSeparation;
+	settings.VolumeRampUpMicroseconds = MixerVolumeRampUpMicroseconds;
+	settings.VolumeRampDownMicroseconds = MixerVolumeRampDownMicroseconds;
+	return settings;
+}
+
+void TrackerSettings::SetMixerSettings(const MixerSettings &settings)
+//-------------------------------------------------------------------
+{
+	MixerMaxChannels = settings.m_nMaxMixChannels;
+	MixerDSPMask = settings.DSPMask;
+	MixerFlags = settings.MixerFlags;
+	MixerSamplerate = settings.gdwMixingFreq;
+	MixerOutputChannels = settings.gnChannels;
+	MixerPreAmp = settings.m_nPreAmp;
+	MixerStereoSeparation = settings.m_nStereoSeparation;
+	MixerVolumeRampUpMicroseconds = settings.VolumeRampUpMicroseconds;
+	MixerVolumeRampDownMicroseconds = settings.VolumeRampDownMicroseconds;
+}
+
+
+CResamplerSettings TrackerSettings::GetResamplerSettings() const
+//--------------------------------------------------------------
+{
+	CResamplerSettings settings;
+	settings.SrcMode = ResamplerMode;
+	settings.gbWFIRType = ResamplerSubMode;
+	settings.gdWFIRCutoff = ResamplerCutoffPercent * 0.01;
+	return settings;
+}
+
+void TrackerSettings::SetResamplerSettings(const CResamplerSettings &settings)
+//----------------------------------------------------------------------------
+{
+	ResamplerMode = settings.SrcMode;
+	ResamplerSubMode = settings.gbWFIRType;
+	ResamplerCutoffPercent = Util::Round<int32>(settings.gdWFIRCutoff * 100.0);
 }
 
 
@@ -222,588 +769,31 @@ void TrackerSettings::GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS])
 }
 
 
-void TrackerSettings::LoadSettings()
-//----------------------------------
+void TrackerSettings::FixupEQ(EQPreset *pEqSettings)
+//--------------------------------------------------
 {
-	const CString iniFile = theApp.GetConfigFileName();
-
-	CString storedVersion = CMainFrame::GetPrivateProfileCString("Version", "Version", "", iniFile);
-	// If version number stored in INI is 1.17.02.40 or later, always load setting from INI file.
-	// If it isn't, try loading from Registry first, then from the INI file.
-	if (storedVersion >= "1.17.02.40" || !LoadRegistrySettings())
+	for(UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
-		LoadINISettings(iniFile);
-	}
-
-	// The following stuff was also stored in mptrack.ini while the registry was still being used...
-
-	// Load Chords
-	LoadChords(Chords);
-
-	// Load default macro configuration
-	MIDIMacroConfig macros;
-	theApp.GetDefaultMidiMacro(macros);
-	for(int isfx = 0; isfx < 16; isfx++)
-	{
-		CHAR snam[8];
-		wsprintf(snam, "SF%X", isfx);
-		GetPrivateProfileString("Zxx Macros", snam, macros.szMidiSFXExt[isfx], macros.szMidiSFXExt[isfx], CountOf(macros.szMidiSFXExt[isfx]), iniFile);
-		mpt::String::SetNullTerminator(macros.szMidiSFXExt[isfx]);
-	}
-	for(int izxx = 0; izxx < 128; izxx++)
-	{
-		CHAR snam[8];
-		wsprintf(snam, "Z%02X", izxx | 0x80);
-		GetPrivateProfileString("Zxx Macros", snam, macros.szMidiZXXExt[izxx], macros.szMidiZXXExt[izxx], CountOf(macros.szMidiZXXExt[izxx]), iniFile);
-		mpt::String::SetNullTerminator(macros.szMidiZXXExt[izxx]);
-	}
-	// Fix old nasty broken (non-standard) MIDI configs in INI file.
-	if(storedVersion >= "1.17" && storedVersion < "1.20")
-	{
-		macros.UpgradeMacros();
-	}
-	theApp.SetDefaultMidiMacro(macros);
-
-	// Default directory location
-	for(UINT i = 0; i < NUM_DIRS; i++)
-	{
-		_tcscpy(m_szWorkingDirectory[i], m_szDefaultDirectory[i]);
-	}
-	if (m_szDefaultDirectory[DIR_MODS][0]) SetCurrentDirectory(m_szDefaultDirectory[DIR_MODS]);
-}
-
-
-void TrackerSettings::LoadINISettings(const CString &iniFile)
-//----------------------------------------------------------
-{
-	MptVersion::VersionNum vIniVersion;
-
-	vIniVersion = gcsPreviousVersion = MptVersion::ToNum(CMainFrame::GetPrivateProfileCString("Version", "Version", "", iniFile).GetString());
-	if(vIniVersion == 0)
-		vIniVersion = MptVersion::num;
-
-	gcsInstallGUID = CMainFrame::GetPrivateProfileCString("Version", "InstallGUID", "", iniFile);
-	if(gcsInstallGUID == "")
-	{
-		// No GUID found in INI file - generate one.
-		GUID guid;
-		CoCreateGuid(&guid);
-		BYTE* Str;
-		UuidToString((UUID*)&guid, &Str);
-		gcsInstallGUID.Format("%s", (LPTSTR)Str);
-		RpcStringFree(&Str);
-	}
-
-	// GUI Stuff
-	m_ShowSplashScreen = CMainFrame::GetPrivateProfileBool("Display", "ShowSplashScreen", m_ShowSplashScreen, iniFile);
-	gbMdiMaximize = CMainFrame::GetPrivateProfileLong("Display", "MDIMaximize", gbMdiMaximize, iniFile);
-	glTreeWindowWidth = CMainFrame::GetPrivateProfileLong("Display", "MDITreeWidth", glTreeWindowWidth, iniFile);
-	glTreeSplitRatio = CMainFrame::GetPrivateProfileLong("Display", "MDITreeRatio", glTreeSplitRatio, iniFile);
-	glGeneralWindowHeight = CMainFrame::GetPrivateProfileLong("Display", "MDIGeneralHeight", glGeneralWindowHeight, iniFile);
-	glPatternWindowHeight = CMainFrame::GetPrivateProfileLong("Display", "MDIPatternHeight", glPatternWindowHeight, iniFile);
-	glSampleWindowHeight = CMainFrame::GetPrivateProfileLong("Display", "MDISampleHeight", glSampleWindowHeight, iniFile);
-	glInstrumentWindowHeight = CMainFrame::GetPrivateProfileLong("Display", "MDIInstrumentHeight", glInstrumentWindowHeight, iniFile);
-	glCommentsWindowHeight = CMainFrame::GetPrivateProfileLong("Display", "MDICommentsHeight", glCommentsWindowHeight, iniFile);
-	glGraphWindowHeight = CMainFrame::GetPrivateProfileLong("Display", "MDIGraphHeight", glGraphWindowHeight, iniFile); //rewbs.graph
-	gnPlugWindowX = GetPrivateProfileInt("Display", "PlugSelectWindowX", gnPlugWindowX, iniFile);
-	gnPlugWindowY = GetPrivateProfileInt("Display", "PlugSelectWindowY", gnPlugWindowY, iniFile);
-	gnPlugWindowWidth = GetPrivateProfileInt("Display", "PlugSelectWindowWidth", gnPlugWindowWidth, iniFile);
-	gnPlugWindowHeight = GetPrivateProfileInt("Display", "PlugSelectWindowHeight", gnPlugWindowHeight, iniFile);
-	gnPlugWindowLast = CMainFrame::GetPrivateProfileLong("Display", "PlugSelectWindowLast", gnPlugWindowLast, iniFile);
-	gnMsgBoxVisiblityFlags = CMainFrame::GetPrivateProfileDWord("Display", "MsgBoxVisibilityFlags", gnMsgBoxVisiblityFlags, iniFile);
-	VuMeterUpdateInterval = CMainFrame::GetPrivateProfileDWord("Display", "VuMeterUpdateInterval", VuMeterUpdateInterval, iniFile);
-
-	// Internet Update
-	{
-		tm lastUpdate;
-		MemsetZero(lastUpdate);
-		CString s = CMainFrame::GetPrivateProfileCString("Update", "LastUpdateCheck", "1970-01-01 00:00", iniFile);
-		if(sscanf(s, "%04d-%02d-%02d %02d:%02d", &lastUpdate.tm_year, &lastUpdate.tm_mon, &lastUpdate.tm_mday, &lastUpdate.tm_hour, &lastUpdate.tm_min) == 5)
-		{
-			lastUpdate.tm_year -= 1900;
-			lastUpdate.tm_mon--;
-		}
-
-		time_t outTime = Util::sdTime::MakeGmTime(lastUpdate);
-
-		if(outTime < 0) outTime = 0;
-
-		CUpdateCheck::SetUpdateSettings
-			(
-			outTime,
-			GetPrivateProfileInt("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod(), iniFile),
-			CMainFrame::GetPrivateProfileCString("Update", "UpdateURL", CUpdateCheck::GetUpdateURL(), iniFile),
-			GetPrivateProfileInt("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0, iniFile) != 0,
-			GetPrivateProfileInt("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0, iniFile) != 0
-			);
-	}
-
-	CHAR s[16];
-	for (int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
-	{
-		wsprintf(s, "Color%02d", ncol);
-		rgbCustomColors[ncol] = CMainFrame::GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
-	}
-
-	m_MorePortaudio = CMainFrame::GetPrivateProfileBool("Sound Settings", "MorePortaudio", m_MorePortaudio, iniFile);
-#ifndef NO_ASIO
-	CASIODevice::baseChannel = GetPrivateProfileInt("Sound Settings", "ASIOBaseChannel", CASIODevice::baseChannel, iniFile);
-#endif // NO_ASIO
-	m_nWaveDevice = SoundDeviceID::FromIdRaw(CMainFrame::GetPrivateProfileLong("Sound Settings", "WaveDevice", SoundDeviceID().GetIdRaw(), iniFile));
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 03)) m_MixerSettings.MixerFlags |= OLD_SOUNDSETUP_SECONDARY;
-	m_MixerSettings.MixerFlags = CMainFrame::GetPrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.MixerFlags, iniFile);
-	m_SoundDeviceExclusiveMode = CMainFrame::GetPrivateProfileBool("Sound Settings", "ExclusiveMode", m_SoundDeviceExclusiveMode, iniFile);
-	m_SoundDeviceBoostThreadPriority = CMainFrame::GetPrivateProfileBool("Sound Settings", "BoostThreadPriority", m_SoundDeviceBoostThreadPriority, iniFile);
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 21, 01, 26)) m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_REVERSESTEREO;
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 03))
-	{
-		m_SoundDeviceExclusiveMode = ((m_MixerSettings.MixerFlags & OLD_SOUNDSETUP_SECONDARY) == 0);
-		m_SoundDeviceBoostThreadPriority = ((m_MixerSettings.MixerFlags & OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY) == 0);
-		m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_SECONDARY;
-		m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY;
-	}
-	m_MixerSettings.DSPMask = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Quality", m_MixerSettings.DSPMask, iniFile);
-	m_ResamplerSettings.SrcMode = (ResamplingMode)CMainFrame::GetPrivateProfileDWord("Sound Settings", "SrcMode", m_ResamplerSettings.SrcMode, iniFile);
-	m_MixerSettings.gdwMixingFreq = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
-	m_SampleFormat = CMainFrame::GetPrivateProfileLong("Sound Settings", "BitsPerSample", m_SampleFormat, iniFile);
-	m_MixerSettings.gnChannels = CMainFrame::GetPrivateProfileDWord("Sound Settings", "ChannelMode", m_MixerSettings.gnChannels, iniFile);
-	DWORD LatencyMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "Latency", 0, iniFile);
-	DWORD UpdateIntervalMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "UpdateInterval", 0, iniFile);
-	if(LatencyMS == 0 || UpdateIntervalMS == 0)
-	{
-		// old versions have set BufferLength which meant different things than the current ISoundDevice interface wants to know
-		DWORD BufferLengthMS = CMainFrame::GetPrivateProfileDWord("Sound Settings", "BufferLength", 0, iniFile);
-		if(BufferLengthMS != 0)
-		{
-			if(BufferLengthMS < OLD_SNDDEV_MINBUFFERLEN) BufferLengthMS = OLD_SNDDEV_MINBUFFERLEN;
-			if(BufferLengthMS > OLD_SNDDEV_MAXBUFFERLEN) BufferLengthMS = OLD_SNDDEV_MAXBUFFERLEN;
-			if(m_nWaveDevice.GetType() == SNDDEV_ASIO)
-			{
-				m_LatencyMS = BufferLengthMS;
-				m_UpdateIntervalMS = BufferLengthMS / 8;
-			} else
-			{
-				m_LatencyMS = BufferLengthMS * 3;
-				m_UpdateIntervalMS = BufferLengthMS / 8;
-			}
-		} else
-		{
-			// use defaults
-			m_LatencyMS = SNDDEV_DEFAULT_LATENCY_MS;
-			m_UpdateIntervalMS = SNDDEV_DEFAULT_UPDATEINTERVAL_MS;
-		}
-	} else
-	{
-		m_LatencyMS = LatencyMS;
-		m_UpdateIntervalMS = UpdateIntervalMS;
-	}
-
-	m_MixerSettings.m_nPreAmp = CMainFrame::GetPrivateProfileDWord("Sound Settings", "PreAmp", m_MixerSettings.m_nPreAmp, iniFile);
-	m_MixerSettings.m_nStereoSeparation = CMainFrame::GetPrivateProfileLong("Sound Settings", "StereoSeparation", m_MixerSettings.m_nStereoSeparation, iniFile);
-	m_MixerSettings.m_nMaxMixChannels = CMainFrame::GetPrivateProfileLong("Sound Settings", "MixChannels", m_MixerSettings.m_nMaxMixChannels, iniFile);
-	m_ResamplerSettings.gbWFIRType = static_cast<BYTE>(CMainFrame::GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_ResamplerSettings.gbWFIRType, iniFile));
-	//gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", gdWFIRCutoff * 100.0, iniFile)) / 100.0;
-	m_ResamplerSettings.gdWFIRCutoff = static_cast<double>(CMainFrame::GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", Util::Round<long>(m_ResamplerSettings.gdWFIRCutoff * 100.0), iniFile)) / 100.0;
-	Limit(m_ResamplerSettings.gdWFIRCutoff, 0.0, 1.0);
-	
-	// Ramping... first try to read the old setting, then the new ones
-	const long volRamp = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampSamples", -1, iniFile);
-	if(volRamp != -1)
-	{
-		m_MixerSettings.glVolumeRampUpSamples = m_MixerSettings.glVolumeRampDownSamples = volRamp;
-	}
-	m_MixerSettings.glVolumeRampUpSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampUpSamples", m_MixerSettings.glVolumeRampUpSamples, iniFile);
-	m_MixerSettings.glVolumeRampDownSamples = CMainFrame::GetPrivateProfileLong("Sound Settings", "VolumeRampDownSamples", m_MixerSettings.glVolumeRampDownSamples, iniFile);
-
-	// MIDI Setup
-	m_dwMidiSetup = CMainFrame::GetPrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
-	m_nMidiDevice = CMainFrame::GetPrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);
-	aftertouchBehaviour = static_cast<RecordAftertouchOptions>(CMainFrame::GetPrivateProfileDWord("MIDI Settings", "AftertouchBehaviour", aftertouchBehaviour, iniFile));
-	midiVelocityAmp = static_cast<uint16>(CMainFrame::GetPrivateProfileLong("MIDI Settings", "MidiVelocityAmp", midiVelocityAmp, iniFile));
-	midiImportSpeed = CMainFrame::GetPrivateProfileLong("MIDI Settings", "MidiImportSpeed", midiImportSpeed, iniFile);
-	midiImportPatternLen = CMainFrame::GetPrivateProfileLong("MIDI Settings", "MidiImportPatLen", midiImportPatternLen, iniFile);
-	if((m_dwMidiSetup & 0x40) != 0 && vIniVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 86))
-	{
-		// This flag used to be "amplify MIDI Note Velocity" - with a fixed amplification factor of 2.
-		midiVelocityAmp = 200;
-		m_dwMidiSetup &= ~0x40;
-	}
-	ParseIgnoredCCs(CMainFrame::GetPrivateProfileCString("MIDI Settings", "IgnoredCCs", "", iniFile));
-
-	m_dwPatternSetup = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "PatternSetup", m_dwPatternSetup, iniFile);
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 17, 02, 50))
-		m_dwPatternSetup |= PATTERN_NOTEFADE;
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 01))
-		m_dwPatternSetup |= PATTERN_RESETCHANNELS;
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 07))
-		m_dwPatternSetup &= ~0x800;					// this was previously deprecated and is now used for something else
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 04))
-		m_dwPatternSetup &= ~0x200000;				// dito
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 07))
-		m_dwPatternSetup &= ~0x400000;				// dito
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 39))
-		m_dwPatternSetup &= ~0x10000000;			// dito
-
-	m_nRowHighlightMeasures = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "RowSpacing", m_nRowHighlightMeasures, iniFile);
-	m_nRowHighlightBeats = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "RowSpacing2", m_nRowHighlightBeats, iniFile);
-	gbLoopSong = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "LoopSong", gbLoopSong, iniFile);
-	gnPatternSpacing = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "Spacing", gnPatternSpacing, iniFile);
-	gbPatternVUMeters = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "VU-Meters", gbPatternVUMeters, iniFile);
-	gbPatternPluginNames = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "Plugin-Names", gbPatternPluginNames, iniFile);
-	gbPatternRecord = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "Record", gbPatternRecord, iniFile);
-	gnAutoChordWaitTime = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);
-	orderlistMargins = GetPrivateProfileInt("Pattern Editor", "DefaultSequenceMargins", orderlistMargins, iniFile);
-	rowDisplayOffset = GetPrivateProfileInt("Pattern Editor", "RowDisplayOffset", rowDisplayOffset, iniFile);
-	recordQuantizeRows = CMainFrame::GetPrivateProfileDWord("Pattern Editor", "RecordQuantize", recordQuantizeRows, iniFile);
-	gbShowHackControls = (0 != CMainFrame::GetPrivateProfileDWord("Misc", "ShowHackControls", gbShowHackControls ? 1 : 0, iniFile));
-	DefaultPlugVolumeHandling = static_cast<uint8>(GetPrivateProfileInt("Misc", "DefaultPlugVolumeHandling", DefaultPlugVolumeHandling, iniFile));
-	if(DefaultPlugVolumeHandling >= PLUGIN_VOLUMEHANDLING_MAX) DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
-	autoApplySmoothFT2Ramping = (0 != CMainFrame::GetPrivateProfileDWord("Misc", "SmoothFT2Ramping", false, iniFile));
-
-	m_nSampleUndoMaxBuffer = CMainFrame::GetPrivateProfileLong("Sample Editor" , "UndoBufferSize", m_nSampleUndoMaxBuffer >> 20, iniFile);
-	m_nSampleUndoMaxBuffer = MAX(1, m_nSampleUndoMaxBuffer) << 20;
-	m_MayNormalizeSamplesOnLoad = CMainFrame::GetPrivateProfileBool("Sample Editor" , "MayNormalizeSamplesOnLoad", m_MayNormalizeSamplesOnLoad, iniFile);
-
-	PatternClipboard::SetClipboardSize(GetPrivateProfileInt("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize(), iniFile));
-	
-	// Default Paths
-	TCHAR szPath[_MAX_PATH] = "";
-	for(size_t i = 0; i < NUM_DIRS; i++)
-	{
-		if(m_szDirectoryToSettingsName[i][0] == '\0')
-			continue;
-
-		GetPrivateProfileString("Paths", m_szDirectoryToSettingsName[i], GetDefaultDirectory(static_cast<Directory>(i)), szPath, CountOf(szPath), iniFile);
-		theApp.RelativePathToAbsolute(szPath);
-		SetDefaultDirectory(szPath, static_cast<Directory>(i), false);
-
-	}
-	GetPrivateProfileString("Paths", "Key_Config_File", m_szKbdFile, m_szKbdFile, INIBUFFERSIZE, iniFile);
-	theApp.RelativePathToAbsolute(m_szKbdFile);
-
-
-	// Effects Settings
-#ifndef NO_DSP
-	m_DSPSettings.m_nXBassDepth = CMainFrame::GetPrivateProfileLong("Effects", "XBassDepth", m_DSPSettings.m_nXBassDepth, iniFile);
-	m_DSPSettings.m_nXBassRange = CMainFrame::GetPrivateProfileLong("Effects", "XBassRange", m_DSPSettings.m_nXBassRange, iniFile);
-#endif
-#ifndef NO_REVERB
-	m_ReverbSettings.m_nReverbDepth = CMainFrame::GetPrivateProfileLong("Effects", "ReverbDepth", m_ReverbSettings.m_nReverbDepth, iniFile);
-	m_ReverbSettings.m_nReverbType = CMainFrame::GetPrivateProfileLong("Effects", "ReverbType", m_ReverbSettings.m_nReverbType, iniFile);
-#endif
-#ifndef NO_DSP
-	m_DSPSettings.m_nProLogicDepth = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDepth", m_DSPSettings.m_nProLogicDepth, iniFile);
-	m_DSPSettings.m_nProLogicDelay = CMainFrame::GetPrivateProfileLong("Effects", "ProLogicDelay", m_DSPSettings.m_nProLogicDelay, iniFile);
-#endif
-
-
-#ifndef NO_EQ
-	// EQ Settings
-	GetPrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPreset), iniFile);
-	GetPrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPreset), iniFile);
-	GetPrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPreset), iniFile);
-	GetPrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPreset), iniFile);
-	GetPrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPreset), iniFile);
-	mpt::String::SetNullTerminator(m_EqSettings.szName);
-	mpt::String::SetNullTerminator(CEQSetupDlg::gUserPresets[0].szName);
-	mpt::String::SetNullTerminator(CEQSetupDlg::gUserPresets[1].szName);
-	mpt::String::SetNullTerminator(CEQSetupDlg::gUserPresets[2].szName);
-	mpt::String::SetNullTerminator(CEQSetupDlg::gUserPresets[3].szName);
-#endif
-
-
-	// Auto saver settings
-	CMainFrame::m_pAutoSaver = new CAutoSaver();
-	if(CMainFrame::GetPrivateProfileLong("AutoSave", "Enabled", true, iniFile))
-	{
-		CMainFrame::m_pAutoSaver->Enable();
-	} else
-	{
-		CMainFrame::m_pAutoSaver->Disable();
-	}
-	CMainFrame::m_pAutoSaver->SetSaveInterval(CMainFrame::GetPrivateProfileLong("AutoSave", "IntervalMinutes", 10, iniFile));
-	CMainFrame::m_pAutoSaver->SetHistoryDepth(CMainFrame::GetPrivateProfileLong("AutoSave", "BackupHistory", 3, iniFile));
-	CMainFrame::m_pAutoSaver->SetUseOriginalPath(CMainFrame::GetPrivateProfileLong("AutoSave", "UseOriginalPath", true, iniFile) != 0);
-	GetPrivateProfileString("AutoSave", "Path", "", szPath, INIBUFFERSIZE, iniFile);
-	theApp.RelativePathToAbsolute(szPath);
-	CMainFrame::m_pAutoSaver->SetPath(szPath);
-	CMainFrame::m_pAutoSaver->SetFilenameTemplate(CMainFrame::GetPrivateProfileCString("AutoSave", "FileNameTemplate", "", iniFile));
-
-
-	// Default mod type when using the "New" button
-	const MODTYPE oldDefault = defaultModType;
-	defaultModType = CModSpecifications::ExtensionToType(CMainFrame::GetPrivateProfileCString("Misc", "DefaultModType", CSoundFile::GetModSpecifications(defaultModType).fileExtension, iniFile).GetString());
-	if(defaultModType == MOD_TYPE_NONE)
-	{
-		defaultModType = oldDefault;
-	}
-}
-
-
-#define SETTINGS_REGKEY_BASE		"Software\\Olivier Lapicque\\"
-#define SETTINGS_REGKEY_DEFAULT		"ModPlug Tracker"
-#define SETTINGS_REGEXT_WINDOW		"\\Window"
-#define SETTINGS_REGEXT_SETTINGS	"\\Settings"
-
-void TrackerSettings::LoadRegistryEQ(HKEY key, LPCSTR pszName, EQPreset *pEqSettings)
-//-----------------------------------------------------------------------------------
-{
-	DWORD dwType = REG_BINARY;
-	DWORD dwSize = sizeof(EQPreset);
-	RegQueryValueEx(key, pszName, NULL, &dwType, (LPBYTE)pEqSettings, &dwSize);
-	for (UINT i=0; i<MAX_EQ_BANDS; i++)
-	{
-		if (pEqSettings->Gains[i] > 32) pEqSettings->Gains[i] = 16;
-		if ((pEqSettings->Freqs[i] < 100) || (pEqSettings->Freqs[i] > 10000)) pEqSettings->Freqs[i] = CEQSetupDlg::gEQPresets[0].Freqs[i];
+		if(pEqSettings->Gains[i] > 32)
+			pEqSettings->Gains[i] = 16;
+		if((pEqSettings->Freqs[i] < 100) || (pEqSettings->Freqs[i] > 10000))
+			pEqSettings->Freqs[i] = FlatEQPreset.Freqs[i];
 	}
 	mpt::String::SetNullTerminator(pEqSettings->szName);
-}
-
-
-bool TrackerSettings::LoadRegistrySettings()
-//------------------------------------------
-{
-	CString m_csRegKey;
-	CString m_csRegExt;
-	CString m_csRegSettings;
-	CString m_csRegWindow;
-	m_csRegKey.Format("%s%s", SETTINGS_REGKEY_BASE, SETTINGS_REGKEY_DEFAULT);
-	m_csRegSettings.Format("%s%s", m_csRegKey, SETTINGS_REGEXT_SETTINGS);
-	m_csRegWindow.Format("%s%s", m_csRegKey, SETTINGS_REGEXT_WINDOW);
-
-
-	HKEY key;
-	DWORD dwREG_DWORD = REG_DWORD;
-	DWORD dwREG_SZ = REG_SZ;
-	DWORD dwDWORDSize = sizeof(UINT);
-	DWORD dwCRSIZE = sizeof(COLORREF);
-
-
-	bool asEnabled=true;
-	int asInterval=10;
-	int asBackupHistory=3;
-	bool asUseOriginalPath=true;
-	CString asPath ="";
-	CString asFileNameTemplate="";
-
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegWindow, 0, KEY_READ, &key) == ERROR_SUCCESS)
-	{
-		DWORD d = 0;
-		RegQueryValueEx(key, "Maximized", NULL, &dwREG_DWORD, (LPBYTE)&d, &dwDWORDSize);
-		if (d) theApp.m_nCmdShow = SW_SHOWMAXIMIZED;
-		RegQueryValueEx(key, "MDIMaximize", NULL, &dwREG_DWORD, (LPBYTE)&gbMdiMaximize, &dwDWORDSize);
-		RegQueryValueEx(key, "MDITreeWidth", NULL, &dwREG_DWORD, (LPBYTE)&glTreeWindowWidth, &dwDWORDSize);
-		RegQueryValueEx(key, "MDIGeneralHeight", NULL, &dwREG_DWORD, (LPBYTE)&glGeneralWindowHeight, &dwDWORDSize);
-		RegQueryValueEx(key, "MDIPatternHeight", NULL, &dwREG_DWORD, (LPBYTE)&glPatternWindowHeight, &dwDWORDSize);
-		RegQueryValueEx(key, "MDISampleHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glSampleWindowHeight, &dwDWORDSize);
-		RegQueryValueEx(key, "MDIInstrumentHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glInstrumentWindowHeight, &dwDWORDSize);
-		RegQueryValueEx(key, "MDICommentsHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glCommentsWindowHeight, &dwDWORDSize);
-		RegQueryValueEx(key, "MDIGraphHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glGraphWindowHeight, &dwDWORDSize); //rewbs.graph
-		RegQueryValueEx(key, "MDITreeRatio", NULL, &dwREG_DWORD, (LPBYTE)&glTreeSplitRatio, &dwDWORDSize);
-		// Colors
-		for (int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
-		{
-			CHAR s[16];
-			wsprintf(s, "Color%02d", ncol);
-			RegQueryValueEx(key, s, NULL, &dwREG_DWORD, (LPBYTE)&rgbCustomColors[ncol], &dwCRSIZE);
-		}
-		RegCloseKey(key);
-	}
-
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegKey, 0, KEY_READ, &key) == ERROR_SUCCESS)
-	{
-		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.MixerFlags, &dwDWORDSize);
-		m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_REVERSESTEREO;
-		m_SoundDeviceExclusiveMode = ((m_MixerSettings.MixerFlags & OLD_SOUNDSETUP_SECONDARY) == 0);
-		m_MixerSettings.MixerFlags &= ~OLD_SOUNDSETUP_SECONDARY;
-		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.DSPMask, &dwDWORDSize);
-		DWORD dummysrcmode = m_ResamplerSettings.SrcMode;
-		RegQueryValueEx(key, "SrcMode", NULL, &dwREG_DWORD, (LPBYTE)&dummysrcmode, &dwDWORDSize);
-		m_ResamplerSettings.SrcMode = (ResamplingMode)dummysrcmode;
-		RegQueryValueEx(key, "Mixing_Rate", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gdwMixingFreq, &dwDWORDSize);
-		DWORD BufferLengthMS = 0;
-		RegQueryValueEx(key, "BufferLength", NULL, &dwREG_DWORD, (LPBYTE)&BufferLengthMS, &dwDWORDSize);
-		if(BufferLengthMS != 0)
-		{
-			if((BufferLengthMS < OLD_SNDDEV_MINBUFFERLEN) || (BufferLengthMS > OLD_SNDDEV_MAXBUFFERLEN)) BufferLengthMS = 100;
-			if(m_nWaveDevice.GetType() == SNDDEV_ASIO)
-			{
-				m_LatencyMS = BufferLengthMS;
-				m_UpdateIntervalMS = BufferLengthMS / 8;
-			} else
-			{
-				m_LatencyMS = BufferLengthMS * 3;
-				m_UpdateIntervalMS = BufferLengthMS / 8;
-			}
-		}
-		RegQueryValueEx(key, "PreAmp", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.m_nPreAmp, &dwDWORDSize);
-
-		CHAR sPath[_MAX_PATH] = "";
-		DWORD dwSZSIZE = sizeof(sPath);
-		RegQueryValueEx(key, "Songs_Directory", NULL, &dwREG_SZ, (LPBYTE)sPath, &dwSZSIZE);
-		SetDefaultDirectory(sPath, DIR_MODS);
-		dwSZSIZE = sizeof(sPath);
-		RegQueryValueEx(key, "Samples_Directory", NULL, &dwREG_SZ, (LPBYTE)sPath, &dwSZSIZE);
-		SetDefaultDirectory(sPath, DIR_SAMPLES);
-		dwSZSIZE = sizeof(sPath);
-		RegQueryValueEx(key, "Instruments_Directory", NULL, &dwREG_SZ, (LPBYTE)sPath, &dwSZSIZE);
-		SetDefaultDirectory(sPath, DIR_INSTRUMENTS);
-		dwSZSIZE = sizeof(sPath);
-		RegQueryValueEx(key, "Plugins_Directory", NULL, &dwREG_SZ, (LPBYTE)sPath, &dwSZSIZE);
-		SetDefaultDirectory(sPath, DIR_PLUGINS);
-		dwSZSIZE = sizeof(m_szKbdFile);
-		RegQueryValueEx(key, "Key_Config_File", NULL, &dwREG_SZ, (LPBYTE)m_szKbdFile, &dwSZSIZE);
-
-#ifndef NO_DSP
-		RegQueryValueEx(key, "XBassDepth", NULL, &dwREG_DWORD, (LPBYTE)&m_DSPSettings.m_nXBassDepth, &dwDWORDSize);
-		RegQueryValueEx(key, "XBassRange", NULL, &dwREG_DWORD, (LPBYTE)&m_DSPSettings.m_nXBassRange, &dwDWORDSize);
-#endif
-#ifndef NO_REVERB
-		RegQueryValueEx(key, "ReverbDepth", NULL, &dwREG_DWORD, (LPBYTE)&m_ReverbSettings.m_nReverbDepth, &dwDWORDSize);
-		RegQueryValueEx(key, "ReverbType", NULL, &dwREG_DWORD, (LPBYTE)&m_ReverbSettings.m_nReverbType, &dwDWORDSize);
-#endif NO_REVERB
-#ifndef NO_DSP
-		RegQueryValueEx(key, "ProLogicDepth", NULL, &dwREG_DWORD, (LPBYTE)&m_DSPSettings.m_nProLogicDepth, &dwDWORDSize);
-		RegQueryValueEx(key, "ProLogicDelay", NULL, &dwREG_DWORD, (LPBYTE)&m_DSPSettings.m_nProLogicDelay, &dwDWORDSize);
-#endif
-		RegQueryValueEx(key, "StereoSeparation", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.m_nStereoSeparation, &dwDWORDSize);
-		RegQueryValueEx(key, "MixChannels", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.m_nMaxMixChannels, &dwDWORDSize);
-		RegQueryValueEx(key, "MidiSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwMidiSetup, &dwDWORDSize);
-		if((m_dwMidiSetup & 0x40) != 0)
-		{
-			// This flag used to be "amplify MIDI Note Velocity" - with a fixed amplification factor of 2.
-			midiVelocityAmp = 200;
-			m_dwMidiSetup &= ~0x40;
-		}
-		RegQueryValueEx(key, "MidiDevice", NULL, &dwREG_DWORD, (LPBYTE)&m_nMidiDevice, &dwDWORDSize);
-		RegQueryValueEx(key, "PatternSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwPatternSetup, &dwDWORDSize);
-		m_dwPatternSetup &= ~(0x800|0x200000|0x400000);	// various deprecated old options
-		m_dwPatternSetup |= PATTERN_NOTEFADE; // Set flag to maintain old behaviour (was changed in 1.17.02.50).
-		m_dwPatternSetup |= PATTERN_RESETCHANNELS; // Set flag to reset channels on loop was changed in 1.17.03.01).
-		RegQueryValueEx(key, "RowSpacing", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowHighlightMeasures, &dwDWORDSize);
-		RegQueryValueEx(key, "RowSpacing2", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowHighlightBeats, &dwDWORDSize);
-		RegQueryValueEx(key, "LoopSong", NULL, &dwREG_DWORD, (LPBYTE)&gbLoopSong, &dwDWORDSize);
-		DWORD dummy_sampleformat = m_SampleFormat;
-		RegQueryValueEx(key, "BitsPerSample", NULL, &dwREG_DWORD, (LPBYTE)&dummy_sampleformat, &dwDWORDSize);
-		m_SampleFormat = (long)dummy_sampleformat;
-		RegQueryValueEx(key, "ChannelMode", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.gnChannels, &dwDWORDSize);
-		RegQueryValueEx(key, "MidiImportSpeed", NULL, &dwREG_DWORD, (LPBYTE)&midiImportSpeed, &dwDWORDSize);
-		RegQueryValueEx(key, "MidiImportPatLen", NULL, &dwREG_DWORD, (LPBYTE)&midiImportPatternLen, &dwDWORDSize);
-#ifndef NO_EQ
-		// EQ
-		LoadRegistryEQ(key, "EQ_Settings", &m_EqSettings);
-		LoadRegistryEQ(key, "EQ_User1", &CEQSetupDlg::gUserPresets[0]);
-		LoadRegistryEQ(key, "EQ_User2", &CEQSetupDlg::gUserPresets[1]);
-		LoadRegistryEQ(key, "EQ_User3", &CEQSetupDlg::gUserPresets[2]);
-		LoadRegistryEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
-#endif
-
-		//rewbs.resamplerConf
-		dwDWORDSize = sizeof(m_ResamplerSettings.gbWFIRType);
-		RegQueryValueEx(key, "XMMSModplugResamplerWFIRType", NULL, &dwREG_DWORD, (LPBYTE)&m_ResamplerSettings.gbWFIRType, &dwDWORDSize);
-		dwDWORDSize = sizeof(m_ResamplerSettings.gdWFIRCutoff);
-		DWORD tmpWFIRCutoff = Util::Round<DWORD>(100.0 * m_ResamplerSettings.gdWFIRCutoff);
-		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&tmpWFIRCutoff, &dwDWORDSize);
-		m_ResamplerSettings.gdWFIRCutoff = tmpWFIRCutoff / 100.0;
-		Limit(m_ResamplerSettings.gdWFIRCutoff, 0.0, 1.0);
-		dwDWORDSize = sizeof(m_MixerSettings.glVolumeRampUpSamples);
-		RegQueryValueEx(key, "VolumeRampSamples", NULL, &dwREG_DWORD, (LPBYTE)&m_MixerSettings.glVolumeRampUpSamples, &dwDWORDSize);
-		m_MixerSettings.glVolumeRampDownSamples = m_MixerSettings.glVolumeRampUpSamples;
-
-		//end rewbs.resamplerConf
-		//rewbs.autochord
-		dwDWORDSize = sizeof(gnAutoChordWaitTime);
-		RegQueryValueEx(key, "AutoChordWaitTime", NULL, &dwREG_DWORD, (LPBYTE)&gnAutoChordWaitTime, &dwDWORDSize);
-		//end rewbs.autochord
-
-		dwDWORDSize = sizeof(gnPlugWindowX);
-		RegQueryValueEx(key, "PlugSelectWindowX", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowX, &dwDWORDSize);
-		dwDWORDSize = sizeof(gnPlugWindowY);
-		RegQueryValueEx(key, "PlugSelectWindowY", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowY, &dwDWORDSize);
-		dwDWORDSize = sizeof(gnPlugWindowWidth);
-		RegQueryValueEx(key, "PlugSelectWindowWidth", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowWidth, &dwDWORDSize);
-		dwDWORDSize = sizeof(gnPlugWindowHeight);
-		RegQueryValueEx(key, "PlugSelectWindowHeight", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowHeight, &dwDWORDSize);
-		dwDWORDSize = sizeof(gnPlugWindowLast);
-		RegQueryValueEx(key, "PlugSelectWindowLast", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowLast, &dwDWORDSize);
-
-
-		//rewbs.autoSave
-		dwDWORDSize = sizeof(asEnabled);
-		RegQueryValueEx(key, "AutoSave_Enabled", NULL, &dwREG_DWORD, (LPBYTE)&asEnabled, &dwDWORDSize);
-		dwDWORDSize = sizeof(asInterval);
-		RegQueryValueEx(key, "AutoSave_IntervalMinutes", NULL, &dwREG_DWORD, (LPBYTE)&asInterval, &dwDWORDSize);
-		dwDWORDSize = sizeof(asBackupHistory);
-		RegQueryValueEx(key, "AutoSave_BackupHistory", NULL, &dwREG_DWORD, (LPBYTE)&asBackupHistory, &dwDWORDSize);
-		dwDWORDSize = sizeof(asUseOriginalPath);
-		RegQueryValueEx(key, "AutoSave_UseOriginalPath", NULL, &dwREG_DWORD, (LPBYTE)&asUseOriginalPath, &dwDWORDSize);
-
-		dwDWORDSize = MAX_PATH;
-		RegQueryValueEx(key, "AutoSave_Path", NULL, &dwREG_DWORD, (LPBYTE)asPath.GetBuffer(dwDWORDSize/sizeof(TCHAR)), &dwDWORDSize);
-		asPath.ReleaseBuffer();
-
-		dwDWORDSize = MAX_PATH;
-		RegQueryValueEx(key, "AutoSave_FileNameTemplate", NULL, &dwREG_DWORD, (LPBYTE)asFileNameTemplate.GetBuffer(dwDWORDSize/sizeof(TCHAR)), &dwDWORDSize);
-		asFileNameTemplate.ReleaseBuffer();
-
-		//end rewbs.autoSave
-
-		RegCloseKey(key);
-	} else
-	{
-		return false;
-	}
-
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegSettings, 0, KEY_READ, &key) == ERROR_SUCCESS)
-	{
-		// Version
-		dwDWORDSize = sizeof(DWORD);
-		DWORD dwPreviousVersion;
-		RegQueryValueEx(key, "Version", NULL, &dwREG_DWORD, (LPBYTE)&dwPreviousVersion, &dwDWORDSize);
-		gcsPreviousVersion = dwPreviousVersion;
-		RegCloseKey(key);
-	}
-	CMainFrame::m_pAutoSaver = new CAutoSaver(asEnabled, asInterval, asBackupHistory, asUseOriginalPath, asPath, asFileNameTemplate);
-
-	gnPatternSpacing = theApp.GetProfileInt("Pattern Editor", "Spacing", 0);
-	gbPatternVUMeters = theApp.GetProfileInt("Pattern Editor", "VU-Meters", 0);
-	gbPatternPluginNames = theApp.GetProfileInt("Pattern Editor", "Plugin-Names", 1);
-
-	return true;
 }
 
 
 void TrackerSettings::SaveSettings()
 //----------------------------------
 {
-	CString iniFile = theApp.GetConfigFileName();
-
-	CString version = MptVersion::str;
-	WritePrivateProfileString("Version", "Version", version, iniFile);
-	WritePrivateProfileString("Version", "InstallGUID", gcsInstallGUID, iniFile);
 
 	WINDOWPLACEMENT wpl;
 	wpl.length = sizeof(WINDOWPLACEMENT);
 	CMainFrame::GetMainFrame()->GetWindowPlacement(&wpl);
-	WritePrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), iniFile);
+	conf.Write<WINDOWPLACEMENT>("Display", "WindowPlacement", wpl);
 
-	CMainFrame::WritePrivateProfileLong("Display", "MDIMaximize", gbMdiMaximize, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "MDITreeWidth", glTreeWindowWidth, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "MDITreeRatio", glTreeSplitRatio, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "MDIGeneralHeight", glGeneralWindowHeight, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "MDIPatternHeight", glPatternWindowHeight, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "MDISampleHeight", glSampleWindowHeight, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "MDIInstrumentHeight", glInstrumentWindowHeight, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "MDICommentsHeight", glCommentsWindowHeight, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "MDIGraphHeight", glGraphWindowHeight, iniFile); //rewbs.graph
-	CMainFrame::WritePrivateProfileLong("Display", "PlugSelectWindowX", gnPlugWindowX, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "PlugSelectWindowY", gnPlugWindowY, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "PlugSelectWindowWidth", gnPlugWindowWidth, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "PlugSelectWindowHeight", gnPlugWindowHeight, iniFile);
-	CMainFrame::WritePrivateProfileLong("Display", "PlugSelectWindowLast", gnPlugWindowLast, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Display", "MsgBoxVisibilityFlags", gnMsgBoxVisiblityFlags, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Display", "VuMeterUpdateInterval", VuMeterUpdateInterval, iniFile);
-	
+	conf.Write<uint32>("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize());
+
 	// Internet Update
 	{
 		CString outDate;
@@ -813,120 +803,72 @@ void TrackerSettings::SaveSettings()
 		{
 			outDate.Format("%04d-%02d-%02d %02d:%02d", lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
 		}
-		WritePrivateProfileString("Update", "LastUpdateCheck", outDate, iniFile);
-		CMainFrame::WritePrivateProfileLong("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod(), iniFile);
-		WritePrivateProfileString("Update", "UpdateURL", CUpdateCheck::GetUpdateURL(), iniFile);
-		CMainFrame::WritePrivateProfileLong("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0, iniFile);
-		CMainFrame::WritePrivateProfileLong("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0, iniFile);
+		conf.Write<CString>("Update", "LastUpdateCheck", outDate);
+		conf.Write<int32>("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod());
+		conf.Write<CString>("Update", "UpdateURL", CUpdateCheck::GetUpdateURL());
+		conf.Write<int32>("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0);
+		conf.Write<int32>("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0);
 	}
 
-	CHAR s[16];
-	for (int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
+	// Effects
+#ifndef NO_DSP
+	conf.Write<int32>("Effects", "XBassDepth", m_DSPSettings.m_nXBassDepth);
+	conf.Write<int32>("Effects", "XBassRange", m_DSPSettings.m_nXBassRange);
+#endif
+#ifndef NO_REVERB
+	conf.Write<int32>("Effects", "ReverbDepth", m_ReverbSettings.m_nReverbDepth);
+	conf.Write<int32>("Effects", "ReverbType", m_ReverbSettings.m_nReverbType);
+#endif
+#ifndef NO_DSP
+	conf.Write<int32>("Effects", "ProLogicDepth", m_DSPSettings.m_nProLogicDepth);
+	conf.Write<int32>("Effects", "ProLogicDelay", m_DSPSettings.m_nProLogicDelay);
+#endif
+#ifndef NO_EQ
+	conf.Write<EQPreset>("Effects", "EQ_Settings", m_EqSettings);
+	conf.Write<EQPreset>("Effects", "EQ_User1", m_EqUserPresets[0]);
+	conf.Write<EQPreset>("Effects", "EQ_User2", m_EqUserPresets[1]);
+	conf.Write<EQPreset>("Effects", "EQ_User3", m_EqUserPresets[2]);
+	conf.Write<EQPreset>("Effects", "EQ_User4", m_EqUserPresets[3]);
+#endif
+
+	// Display (Colors)
+	for(int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
 	{
-		wsprintf(s, "Color%02d", ncol);
-		CMainFrame::WritePrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
+		conf.Write<uint32>("Display", mpt::String::Format("Color%02d", ncol), rgbCustomColors[ncol]);
 	}
 
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "WaveDevice", m_nWaveDevice.GetIdRaw(), iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SoundSetup", m_MixerSettings.MixerFlags, iniFile);
-	CMainFrame::WritePrivateProfileBool("Sound Settings", "ExclusiveMode", m_SoundDeviceExclusiveMode, iniFile);
-	CMainFrame::WritePrivateProfileBool("Sound Settings", "BoostThreadPriority", m_SoundDeviceBoostThreadPriority, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Quality", m_MixerSettings.DSPMask, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "SrcMode", m_ResamplerSettings.SrcMode, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Mixing_Rate", m_MixerSettings.gdwMixingFreq, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "BitsPerSample", m_SampleFormat, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "ChannelMode", m_MixerSettings.gnChannels, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "Latency", m_LatencyMS, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "UpdateInterval", m_UpdateIntervalMS, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "PreAmp", m_MixerSettings.m_nPreAmp, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "StereoSeparation", m_MixerSettings.m_nStereoSeparation, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "MixChannels", m_MixerSettings.m_nMaxMixChannels, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", m_ResamplerSettings.gbWFIRType, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", static_cast<int>(m_ResamplerSettings.gdWFIRCutoff*100+0.5), iniFile);
-	WritePrivateProfileString("Sound Settings", "VolumeRampSamples", NULL, iniFile);	// deprecated
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampUpSamples", m_MixerSettings.glVolumeRampUpSamples, iniFile);
-	CMainFrame::WritePrivateProfileLong("Sound Settings", "VolumeRampDownSamples", m_MixerSettings.glVolumeRampDownSamples, iniFile);
+	// AutoSave
+	mpt::PathString path = CMainFrame::m_pAutoSaver->GetPath();
+	if(theApp.IsPortableMode())
+	{
+		path = theApp.AbsolutePathToRelative(path);
+	}
+	conf.Write<bool>("AutoSave", "Enabled", CMainFrame::m_pAutoSaver->IsEnabled());
+	conf.Write<int32>("AutoSave", "IntervalMinutes", CMainFrame::m_pAutoSaver->GetSaveInterval());
+	conf.Write<int32>("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth());
+	conf.Write<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath());
+	conf.Write<mpt::PathString>("AutoSave", "Path", path);
+	conf.Write<mpt::PathString>("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate());
 
-	// MIDI Settings
-	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
-	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);
-	CMainFrame::WritePrivateProfileDWord("MIDI Settings", "AftertouchBehaviour", aftertouchBehaviour, iniFile);
-	CMainFrame::WritePrivateProfileLong("MIDI Settings", "MidiVelocityAmp", midiVelocityAmp, iniFile);
-	CMainFrame::WritePrivateProfileLong("MIDI Settings", "MidiImportSpeed", midiImportSpeed, iniFile);
-	CMainFrame::WritePrivateProfileLong("MIDI Settings", "MidiImportPatLen", midiImportPatternLen, iniFile);
-	WritePrivateProfileString("MIDI Settings", "IgnoredCCs", IgnoredCCsToString().c_str(), iniFile);
-
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "PatternSetup", m_dwPatternSetup, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "RowSpacing", m_nRowHighlightMeasures, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "RowSpacing2", m_nRowHighlightBeats, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "LoopSong", gbLoopSong, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "Spacing", gnPatternSpacing, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "VU-Meters", gbPatternVUMeters, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "Plugin-Names", gbPatternPluginNames, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "Record", gbPatternRecord, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "RecordQuantize", recordQuantizeRows, iniFile);
-
-	CMainFrame::WritePrivateProfileDWord("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize(), iniFile);
-
-	CMainFrame::WritePrivateProfileBool("Sample Editor", "MayNormalizeSamplesOnLoad", m_MayNormalizeSamplesOnLoad, iniFile);
-	
-	// Write default paths
-	const bool bConvertPaths = theApp.IsPortableMode();
-	TCHAR szPath[_MAX_PATH] = "";
+	// Paths
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
-		if(m_szDirectoryToSettingsName[i][0] == 0)
-			continue;
-
-		_tcscpy(szPath, GetDefaultDirectory(static_cast<Directory>(i)));
-		if(bConvertPaths)
+		if(TrackerDirectories::Instance().m_szDirectoryToSettingsName[i][0] == '\0')
 		{
-			theApp.AbsolutePathToRelative(szPath);
+			continue;
 		}
-		WritePrivateProfileString("Paths", m_szDirectoryToSettingsName[i], szPath, iniFile);
-
+		mpt::PathString path = TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i));
+		if(theApp.IsPortableMode())
+		{
+			path = theApp.AbsolutePathToRelative(path);
+		}
+		conf.Write<mpt::PathString>("Paths", TrackerDirectories::Instance().m_szDirectoryToSettingsName[i], path);
 	}
 	// Obsolete, since we always write to Keybindings.mkb now.
 	// Older versions of OpenMPT 1.18+ will look for this file if this entry is missing, so removing this entry after having read it is kind of backwards compatible.
-	WritePrivateProfileString("Paths", "Key_Config_File", nullptr, iniFile);
+	conf.Remove("Paths", "Key_Config_File");
 
-#ifndef NO_DSP
-	CMainFrame::WritePrivateProfileLong("Effects", "XBassDepth", m_DSPSettings.m_nXBassDepth, iniFile);
-	CMainFrame::WritePrivateProfileLong("Effects", "XBassRange", m_DSPSettings.m_nXBassRange, iniFile);
-#endif
-#ifndef NO_REVERB
-	CMainFrame::WritePrivateProfileLong("Effects", "ReverbDepth", m_ReverbSettings.m_nReverbDepth, iniFile);
-	CMainFrame::WritePrivateProfileLong("Effects", "ReverbType", m_ReverbSettings.m_nReverbType, iniFile);
-#endif
-#ifndef NO_DSP
-	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDepth", m_DSPSettings.m_nProLogicDepth, iniFile);
-	CMainFrame::WritePrivateProfileLong("Effects", "ProLogicDelay", m_DSPSettings.m_nProLogicDelay, iniFile);
-#endif
-
-#ifndef NO_EQ
-	WritePrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPreset), iniFile);
-	WritePrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPreset), iniFile);
-	WritePrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPreset), iniFile);
-	WritePrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPreset), iniFile);
-	WritePrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPreset), iniFile);
-#endif
-
-	if(CMainFrame::m_pAutoSaver != nullptr)
-	{
-		CMainFrame::WritePrivateProfileLong("AutoSave", "Enabled", CMainFrame::m_pAutoSaver->IsEnabled(), iniFile);
-		CMainFrame::WritePrivateProfileLong("AutoSave", "IntervalMinutes", CMainFrame::m_pAutoSaver->GetSaveInterval(), iniFile);
-		CMainFrame::WritePrivateProfileLong("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth(), iniFile);
-		CMainFrame::WritePrivateProfileLong("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath(), iniFile);
-		_tcscpy(szPath, CMainFrame::m_pAutoSaver->GetPath());
-		if(bConvertPaths)
-		{
-			theApp.AbsolutePathToRelative(szPath);
-		}
-		WritePrivateProfileString("AutoSave", "Path", szPath, iniFile);
-		WritePrivateProfileString("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate(), iniFile);
-	}
-
+	// Chords
 	SaveChords(Chords);
 
 	// Save default macro configuration
@@ -934,43 +876,58 @@ void TrackerSettings::SaveSettings()
 	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
-		CHAR snam[8];
-		wsprintf(snam, "SF%X", isfx);
-		WritePrivateProfileString("Zxx Macros", snam, macros.szMidiSFXExt[isfx], iniFile);
+		conf.Write<std::string>("Zxx Macros", mpt::String::Format("SF%X", isfx), macros.szMidiSFXExt[isfx]);
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
-		CHAR snam[8];
-		wsprintf(snam, "Z%02X", izxx | 0x80);
-		if (!WritePrivateProfileString("Zxx Macros", snam, macros.szMidiZXXExt[izxx], iniFile)) break;
+		conf.Write<std::string>("Zxx Macros", mpt::String::Format("Z%02X", izxx | 0x80), macros.szMidiZXXExt[izxx]);
 	}
 
-	WritePrivateProfileString("Misc", "DefaultModType", CSoundFile::GetModSpecifications(defaultModType).fileExtension, iniFile);
+	// MRU list
+	for(uint32 i = 0; i < (ID_MRU_LIST_LAST - ID_MRU_LIST_FIRST + 1); i++)
+	{
+		char key[16];
+		sprintf(key, "File%d", i);
 
-	CMainFrame::GetMainFrame()->SaveBarState("Toolbars");
+		if(i < mruFiles.size())
+		{
+			mpt::PathString path = mruFiles[i];
+			if(theApp.IsPortableMode())
+			{
+				path = theApp.AbsolutePathToRelative(path);
+			}
+			conf.Write<mpt::PathString>("Recent File List", key, path);
+		} else
+		{
+			conf.Remove("Recent File List", key);
+		}
+	}
 }
 
 
-std::vector<uint32> TrackerSettings::GetSampleRates()
-//---------------------------------------------------
+std::vector<uint32> TrackerSettings::GetSampleRates() const
+//---------------------------------------------------------
+{
+	return m_SoundSampleRates;
+}
+
+
+std::vector<uint32> TrackerSettings::GetDefaultSampleRates()
+//----------------------------------------------------------
 {
 	static const uint32 samplerates [] = {
 		192000,
 		176400,
 		96000,
 		88200,
-		64000,
 		48000,
 		44100,
-		40000,
-		37800,
-		33075,
 		32000,
 		24000,
 		22050,
-		20000,
-		19800,
-		16000
+		16000,
+		11025,
+		8000
 	};
 	return std::vector<uint32>(samplerates, samplerates + CountOf(samplerates));
 }
@@ -985,7 +942,7 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 	for(size_t i = 0; i < CountOf(chords); i++)
 	{
 		uint32 chord;
-		if((chord = GetPrivateProfileInt("Chords", szDefaultNoteNames[i], -1, theApp.GetConfigFileName())) >= 0)
+		if((chord = conf.Read<int32>("Chords", CSoundFile::GetNoteName(ModCommand::NOTE(i + NOTE_MIN)), -1)) != uint32(-1))
 		{
 			if((chord & 0xFFFFFFC0) || (!chords[i].notes[0]))
 			{
@@ -1002,17 +959,16 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 void TrackerSettings::SaveChords(MPTChords &chords)
 //-------------------------------------------------
 {
-	CHAR s[64];
 	for(size_t i = 0; i < CountOf(chords); i++)
 	{
-		wsprintf(s, "%d", (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18));
-		if (!WritePrivateProfileString("Chords", szDefaultNoteNames[i], s, theApp.GetConfigFileName())) break;
+		int32 s = (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18);
+		conf.Write<int32>("Chords", CSoundFile::GetNoteName(ModCommand::NOTE(i + NOTE_MIN)), s);
 	}
 }
 
 
-std::string TrackerSettings::IgnoredCCsToString() const
-//-----------------------------------------------------
+std::string IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
+//-------------------------------------------------------------------
 {
 	std::string cc;
 	bool first = true;
@@ -1032,74 +988,102 @@ std::string TrackerSettings::IgnoredCCsToString() const
 }
 
 
-void TrackerSettings::ParseIgnoredCCs(CString cc)
-//-----------------------------------------------
+std::bitset<128> StringToIgnoredCCs(const std::string &in)
+//--------------------------------------------------------
 {
+	CString cc = in.c_str();
+	std::bitset<128> midiIgnoreCCs;
 	midiIgnoreCCs.reset();
 	int curPos = 0;
-	CString ccToken= cc.Tokenize(_T(", "), curPos);
+	CString ccToken = cc.Tokenize(_T(", "), curPos);
 	while(ccToken != _T(""))
 	{
 		int ccNumber = ConvertStrTo<int>(ccToken);
 		if(ccNumber >= 0 && ccNumber <= 127)
 			midiIgnoreCCs.set(ccNumber);
 		ccToken = cc.Tokenize(_T(", "), curPos);
-	};
+	}
+	return midiIgnoreCCs;
 }
 
 
-// retrieve / set default directory from given string and store it our setup variables
-void TrackerSettings::SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&directories)[NUM_DIRS][_MAX_PATH], bool bStripFilename)
-//---------------------------------------------------------------------------------------------------------------------------------------------
+// Retrieve / set default directory from given string and store it our setup variables
+// If stripFilename is true, the filenameFrom parameter is assumed to be a full path including a filename.
+void TrackerDirectories::SetDirectory(const mpt::PathString &filenameFrom, Directory dir, mpt::PathString (&directories)[NUM_DIRS], bool stripFilename)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	TCHAR szPath[_MAX_PATH], szDir[_MAX_DIR];
+	mpt::PathString path;
 
-	if(bStripFilename)
+	if(stripFilename)
 	{
-		_tsplitpath(szFilenameFrom, szPath, szDir, 0, 0);
-		_tcscat(szPath, szDir);
-	}
-	else
+		path = filenameFrom.GetDrive() + filenameFrom.GetDir();
+	} else
 	{
-		_tcscpy(szPath, szFilenameFrom);
+		path = filenameFrom;
 	}
 
-	TCHAR szOldDir[CountOf(directories[dir])]; // for comparison
-	_tcscpy(szOldDir, directories[dir]);
+	if(!path.empty() && !path.HasTrailingSlash())
+	{
+		path += MPT_PATHSTRING("\\");
+	}
 
-	_tcscpy(directories[dir], szPath);
+	const mpt::PathString oldDir = directories[dir]; // for comparison
+
+	directories[dir] = path;
 
 	// When updating default directory, also update the working directory.
-	if(szPath[0] && directories == m_szDefaultDirectory)
+	if(!path.empty() && directories == m_szDefaultDirectory)
 	{
-		if(_tcscmp(szOldDir, szPath) != 0) // update only if default directory has changed
-			SetWorkingDirectory(szPath, dir);
+		if(oldDir != path) // update only if default directory has changed
+			SetWorkingDirectory(path, dir);
 	}
 }
 
-void TrackerSettings::SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//---------------------------------------------------------------------------------------------------------
+
+void TrackerDirectories::SetDefaultDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename)
+//---------------------------------------------------------------------------------------------------------------------
 {
 	SetDirectory(szFilenameFrom, dir, m_szDefaultDirectory, bStripFilename);
 }
 
 
-void TrackerSettings::SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//---------------------------------------------------------------------------------------------------------
+void TrackerDirectories::SetWorkingDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename)
+//---------------------------------------------------------------------------------------------------------------------
 {
 	SetDirectory(szFilenameFrom, dir, m_szWorkingDirectory, bStripFilename);
 }
 
 
-LPCTSTR TrackerSettings::GetDefaultDirectory(Directory dir) const
-//---------------------------------------------------------------
+// Get slash-terminated default directory of given type.
+mpt::PathString TrackerDirectories::GetDefaultDirectory(Directory dir) const
+//--------------------------------------------------------------------------
 {
 	return m_szDefaultDirectory[dir];
 }
 
 
-LPCTSTR TrackerSettings::GetWorkingDirectory(Directory dir) const
-//---------------------------------------------------------------
+// Get slash-terminated working directory of given type.
+mpt::PathString TrackerDirectories::GetWorkingDirectory(Directory dir) const
+//--------------------------------------------------------------------------
 {
 	return m_szWorkingDirectory[dir];
 }
+
+
+
+
+TrackerDirectories::TrackerDirectories()
+//--------------------------------------
+{
+	return;
+}
+
+
+TrackerDirectories::~TrackerDirectories()
+//---------------------------------------
+{
+	return;
+}
+
+
+OPENMPT_NAMESPACE_END

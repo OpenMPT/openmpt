@@ -11,8 +11,11 @@
 #pragma once
 #include "mptrack.h"
 #include "MainFrm.h"
+#include "InputHandler.h"
 #include "mpdlgs.h"
 #include "moptions.h"
+
+OPENMPT_NAMESPACE_BEGIN
 
 // Might promote to class so we can add rules 
 // (eg automatically do note off stuff, generate chord keybindings from notes based just on modifier.
@@ -103,7 +106,7 @@ protected:
 	CEdit m_eReport, m_eChordWaitTime;
 	UINT m_nKeyboardCfg;
 	int m_nCurHotKey, m_nCurCategory, m_nCurKeyChoice;
-	CString m_sFullPathName;
+	mpt::PathString m_sFullPathName;
 	CCommandSet *plocalCmdSet;
 	bool m_bForceUpdate;
 	bool m_bModified;
@@ -154,3 +157,5 @@ protected:
 public:
 	afx_msg void OnDestroy();
 };
+
+OPENMPT_NAMESPACE_END

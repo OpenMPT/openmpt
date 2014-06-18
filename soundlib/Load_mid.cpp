@@ -17,6 +17,8 @@
 #include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef MODPLUG_TRACKER
 
 #pragma warning(disable:4244)
@@ -92,13 +94,13 @@ typedef struct MIDICHANNELSTATE
 
 typedef struct MIDITRACK
 {
-	LPCBYTE ptracks, ptrmax;
+	const uint8 *ptracks, *ptrmax;
 	DWORD status;
 	LONG nexteventtime;
 } MIDITRACK;
 
 
-extern const LPCSTR szMidiGroupNames[17] =
+extern const char *szMidiGroupNames[17] =
 {
 	"Piano",
 	"Chromatic Percussion",
@@ -120,7 +122,7 @@ extern const LPCSTR szMidiGroupNames[17] =
 };
 
 
-extern const LPCSTR szMidiProgramNames[128] =
+extern const char *szMidiProgramNames[128] =
 {
 	// 1-8: Piano
 	"Acoustic Grand Piano",
@@ -270,7 +272,7 @@ extern const LPCSTR szMidiProgramNames[128] =
 
 
 // Notes 25-85
-extern const LPCSTR szMidiPercussionNames[61] =
+extern const char *szMidiPercussionNames[61] =
 {
 	"Seq Click",
 	"Brush Tap",
@@ -466,8 +468,8 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 #define MIDIGLOBAL_XGSYSTEMON		0x0200
 
 
-bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
-//------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMID(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------------------------------
 {
 	const MIDIFILEHEADER *pmfh = (const MIDIFILEHEADER *)lpStream;
 	const MIDITRACKHEADER *pmth;
@@ -1204,3 +1206,5 @@ bool CSoundFile::ReadMID(const BYTE * /*lpStream*/, DWORD /*dwMemLength*/, ModLo
 }
 
 #endif
+
+OPENMPT_NAMESPACE_END

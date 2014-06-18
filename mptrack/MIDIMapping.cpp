@@ -9,9 +9,13 @@
 
 
 #include "stdafx.h"
-#include "MIDIMapping.h"
 #include "../soundlib/MIDIEvents.h"
 #include "Mainfrm.h"
+#include "../soundlib/FileReader.h"
+#include "MIDIMapping.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 std::string CMIDIMappingDirective::ToString() const
@@ -31,9 +35,9 @@ size_t CMIDIMapper::GetSerializationSize() const
 	size_t s = 0;
 	for(const_iterator citer = Begin(); citer != End(); citer++)
 	{
-		if(citer->GetParamIndex() <= uint8_max) {s += 5; continue;}
-		if(citer->GetParamIndex() <= uint16_max) {s += 6; continue;}
-		s += 8;
+		if(citer->GetParamIndex() <= uint8_max) s += 5;
+		else if(citer->GetParamIndex() <= uint16_max) s += 6;
+		else s += 8;
 	}
 	return s;
 }
@@ -64,7 +68,7 @@ void CMIDIMapper::Serialize(FILE* f) const
 		}
 		else temp8 |= (2 << 6);
 
-		fwrite(&temp8, 1, sizeof(temp8), f);	
+		fwrite(&temp8, 1, sizeof(temp8), f);
 		fwrite(&temp16, 1, sizeof(temp16), f);
 		temp8 = citer->GetPlugIndex();
 		fwrite(&temp8, 1, sizeof(temp8), f);
@@ -73,37 +77,35 @@ void CMIDIMapper::Serialize(FILE* f) const
 }
 
 
-bool CMIDIMapper::Deserialize(const char *ptr, const size_t size)
-//---------------------------------------------------------------
+bool CMIDIMapper::Deserialize(FileReader &file)
+//---------------------------------------------
 {
 	m_Directives.clear();
-	const char* endptr = ptr + size;
-	while(ptr + 5 <= endptr)
+	while(file.AreBytesLeft())
 	{
-		uint8 i8 = 0;
-		uint16 i16 = 0;
-		uint32 i32 = 0;
-		memcpy(&i8, ptr, 1); ptr++;
-		BYTE psize = 0;
+		uint8 i8 = file.ReadUint8();
+		uint8 psize = 0;
+		// Determine size of this event (depends on size of plugin parameter index)
 		switch(i8 >> 6)
 		{
-		case 0: psize = 5; break;
-		case 1: psize = 6; break;
-		case 2: psize = 8; break;
-		case 3: default: psize = 12; break;
+		case 0: psize = 4; break;
+		case 1: psize = 5; break;
+		case 2: psize = 7; break;
+		case 3: default: psize = 11; break;
 		}
 
-		if(ptr + psize - 1 > endptr) return true;
-		if(((i8 >> 2) & 7) != 0) {ptr += psize - 1; continue;} //Skipping unrecognised mapping types.
+		if(!file.CanRead(psize)) return true;
+		if(((i8 >> 2) & 7) != 0) { file.Skip(psize); continue;} //Skipping unrecognised mapping types.
 
 		CMIDIMappingDirective s;
 		s.SetActive((i8 & 1) != 0);
 		s.SetCaptureMIDI((i8 & (1 << 1)) != 0);
 		s.SetAllowPatternEdit((i8 & (1 << 5)) != 0);
-		memcpy(&i16, ptr, 2); ptr += 2; //Channel, event, MIDIbyte1.
-		memcpy(&i8, ptr, 1); ptr++;		//Plugindex
-		const BYTE remainingbytes = psize - 4;
-		memcpy(&i32, ptr, MIN(4, remainingbytes)); ptr += remainingbytes;
+		uint16 i16 = file.ReadUint16LE();	//Channel, event, MIDIbyte1.
+		i8 = file.ReadUint8();		//Plugindex
+		uint32 i32;
+		file.ReadStructPartial(i32, psize - 3);
+		SwapBytesLE(i32);
 
 		s.SetChannel(((i16 & 1) != 0) ? 0 : 1 + ((i16 >> 1) & 0xF));
 		s.SetEvent(static_cast<BYTE>((i16 >> 5) & 0xF));
@@ -117,46 +119,40 @@ bool CMIDIMapper::Deserialize(const char *ptr, const size_t size)
 }
 
 
-bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, BYTE& mappedIndex, uint32& paramindex, BYTE& paramval)
-//-----------------------------------------------------------------------------------------------------
+bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint8 &paramval)
+//-------------------------------------------------------------------------------------------------------------------
 {
 	bool captured = false;
 
-	if(MIDIEvents::GetTypeFromEvent(midimsg) != MIDIEvents::evControllerChange) return captured;
-	//For now only controllers can be mapped so if event is not controller change,
-	//no mapping will be found and thus no search is done.
-	//NOTE: The event value is not checked in code below.
+	const MIDIEvents::EventType eventType = MIDIEvents::GetTypeFromEvent(midimsg);
+	const uint8 controller = MIDIEvents::GetDataByte1FromEvent(midimsg);
+	const uint8 channel = MIDIEvents::GetChannelFromEvent(midimsg);
 
-	const BYTE controller = MIDIEvents::GetDataByte1FromEvent(midimsg);
-
-	const_iterator citer = std::lower_bound(Begin(), End(), controller); 
-
-	const BYTE channel = MIDIEvents::GetChannelFromEvent(midimsg);
-
-	for(; citer != End() && citer->GetController() == controller && !captured; citer++)
+	for(const_iterator citer = Begin(); citer != End() && !captured; citer++)
 	{
 		if(!citer->IsActive()) continue;
-		BYTE plugindex = 0;
-		uint32 param = 0;
-		if( citer->GetAnyChannel() || channel+1 == citer->GetChannel())
-		{
-			plugindex = citer->GetPlugIndex();
-			param = citer->GetParamIndex();
-			if(citer->GetAllowPatternEdit())
-			{
-				mappedIndex = plugindex;
-				paramindex = param;
-				paramval = MIDIEvents::GetDataByte2FromEvent(midimsg);
-			}
-			if(citer->GetCaptureMIDI()) captured = true;
+		if(citer->GetEvent() != eventType) continue;
+		if(eventType == MIDIEvents::evControllerChange && citer->GetController() != controller) continue;
+		if(!citer->GetAnyChannel() && channel + 1 != citer->GetChannel()) continue;
 
-			if(plugindex > 0 && plugindex <= MAX_MIXPLUGINS)
-			{
-				IMixPlugin* pPlug = m_rSndFile.m_MixPlugins[plugindex-1].pMixPlugin;
-				if(!pPlug) continue;
-				pPlug->SetZxxParameter(param, (midimsg >> 16) & 0x7F);
-				CMainFrame::GetMainFrame()->ThreadSafeSetModified(m_rSndFile.GetpModDoc());
-			}
+		const PLUGINDEX plugindex = citer->GetPlugIndex();
+		const uint32 param = citer->GetParamIndex();
+		const uint8 val = (citer->GetEvent() == MIDIEvents::evChannelAftertouch ? controller : MIDIEvents::GetDataByte2FromEvent(midimsg)) & 0x7F;
+
+		if(citer->GetAllowPatternEdit())
+		{
+			mappedIndex = plugindex;
+			paramindex = param;
+			paramval = val;
+		}
+		if(citer->GetCaptureMIDI()) captured = true;
+
+		if(plugindex > 0 && plugindex <= MAX_MIXPLUGINS)
+		{
+			IMixPlugin *pPlug = m_rSndFile.m_MixPlugins[plugindex - 1].pMixPlugin;
+			if(!pPlug) continue;
+			pPlug->SetZxxParameter(param, val);
+			CMainFrame::GetMainFrame()->ThreadSafeSetModified(m_rSndFile.GetpModDoc());
 		}
 	}
 
@@ -177,3 +173,6 @@ bool CMIDIMapper::Swap(const size_t a, const size_t b)
 	}
 	else return true;
 }
+
+
+OPENMPT_NAMESPACE_END

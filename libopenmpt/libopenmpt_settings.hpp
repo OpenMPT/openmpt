@@ -36,7 +36,7 @@ private:
 	}
 	static void write_setting( const std::wstring & subkey, const std::wstring & key, int val ) {
 		HKEY regkey = HKEY();
-		if ( RegOpenKeyEx( HKEY_CURRENT_USER, ( L"Software\\libopenmpt\\" + subkey ).c_str(), 0, KEY_WRITE, &regkey ) == ERROR_SUCCESS ) {
+		if ( RegCreateKeyEx( HKEY_CURRENT_USER, ( L"Software\\libopenmpt\\" + subkey ).c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &regkey, NULL ) == ERROR_SUCCESS ) {
 			DWORD v = val;
 			DWORD type = REG_DWORD;
 			DWORD typesize = sizeof(v);
@@ -60,6 +60,7 @@ public:
 		repeatcount = 0;
 		interpolationfilterlength = 8;
 		ramping = -1;
+		vis_allow_scroll = 1;
 		changed = 0;
 	}
 	void load()
@@ -67,20 +68,22 @@ public:
 		read_setting( subkey, L"Samplerate_Hz", samplerate );
 		read_setting( subkey, L"Channels", channels );
 		read_setting( subkey, L"MasterGain_milliBel", mastergain_millibel );
-		read_setting( subkey, L"SeteroSeparation_Percent", stereoseparation );
+		read_setting( subkey, L"StereoSeparation_Percent", stereoseparation );
 		read_setting( subkey, L"RepeatCount", repeatcount );
 		read_setting( subkey, L"InterpolationFilterLength", interpolationfilterlength );
 		read_setting( subkey, L"VolumeRampingStrength", ramping );
+		read_setting( subkey, L"VisAllowScroll", vis_allow_scroll );
 	}
 	void save()
 	{
 		write_setting( subkey, L"Samplerate_Hz", samplerate );
 		write_setting( subkey, L"Channels", channels );
 		write_setting( subkey, L"MasterGain_milliBel", mastergain_millibel );
-		write_setting( subkey, L"SeteroSeparation_Percent", stereoseparation );
+		write_setting( subkey, L"StereoSeparation_Percent", stereoseparation );
 		write_setting( subkey, L"RepeatCount", repeatcount );
 		write_setting( subkey, L"InterpolationFilterLength", interpolationfilterlength );
 		write_setting( subkey, L"VolumeRampingStrength", ramping );
+		write_setting( subkey, L"VisAllowScroll", vis_allow_scroll );
 	}
 };
 

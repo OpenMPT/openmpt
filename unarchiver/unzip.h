@@ -9,22 +9,21 @@
 
 #pragma once
 
-//===============
-class CZipArchive
-//===============
+#include "archive.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
+//====================================
+class CZipArchive : public ArchiveBase
+//====================================
 {
 protected:
-	FileReader inFile, outFile;
 	void *zipFile;
-	const std::vector<const char *> &extensions;
-	
 public:
-
-	FileReader GetOutputFile() const { return outFile; }
-	bool IsArchive() const;
-	bool ExtractFile();
-	const char *GetComments(bool get);
-
-	CZipArchive(FileReader &file, const std::vector<const char *> &ext);
-	~CZipArchive();
+	CZipArchive(FileReader &file);
+	virtual ~CZipArchive();
+public:
+	virtual bool ExtractFile(std::size_t index);
 };
+
+OPENMPT_NAMESPACE_END

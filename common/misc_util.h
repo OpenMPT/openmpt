@@ -11,60 +11,146 @@
 #pragma once
 
 #include <limits>
-#include <sstream>
 #include <string>
-
-#include <cmath>
-#include <cstdlib>
-
-#include <string.h>
-
-#include "typedefs.h"
-
 #if defined(HAS_TYPE_TRAITS)
 #include <type_traits>
 #endif
+#include <vector>
 
-//Convert object(typically number) to string
-template<class T>
-inline std::string Stringify(const T& x)
-//--------------------------------------
-{
-	std::ostringstream o;
-	if(!(o << x)) return "FAILURE";
-	else return o.str();
-}
+#include <cmath>
+#include <cstring>
 
-template<> inline std::string Stringify(const signed char& x) { return Stringify((signed int)x); }
-template<> inline std::string Stringify(const unsigned char& x) { return Stringify((unsigned int)x); }
+#include <time.h>
 
-//Convert string to number.
-template<class T>
+
+OPENMPT_NAMESPACE_BEGIN
+
+
+bool ConvertStrToBool(const std::string &str);
+signed char ConvertStrToSignedChar(const std::string &str);
+unsigned char ConvertStrToUnsignedChar(const std::string &str);
+signed short ConvertStrToSignedShort(const std::string &str);
+unsigned short ConvertStrToUnsignedShort(const std::string &str);
+signed int ConvertStrToSignedInt(const std::string &str);
+unsigned int ConvertStrToUnsignedInt(const std::string &str);
+signed long ConvertStrToSignedLong(const std::string &str);
+unsigned long ConvertStrToUnsignedLong(const std::string &str);
+signed long long ConvertStrToSignedLongLong(const std::string &str);
+unsigned long long ConvertStrToUnsignedLongLong(const std::string &str);
+float ConvertStrToFloat(const std::string &str);
+double ConvertStrToDouble(const std::string &str);
+long double ConvertStrToLongDouble(const std::string &str);
+
+template<typename T> inline T ConvertStrTo(const std::string &str); // not defined, generates compiler error for non-specialized types
+template<> inline bool ConvertStrTo(const std::string &str) { return ConvertStrToBool(str); }
+template<> inline signed char ConvertStrTo(const std::string &str) { return ConvertStrToSignedChar(str); }
+template<> inline unsigned char ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedChar(str); }
+template<> inline signed short ConvertStrTo(const std::string &str) { return ConvertStrToSignedShort(str); }
+template<> inline unsigned short ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedShort(str); }
+template<> inline signed int ConvertStrTo(const std::string &str) { return ConvertStrToSignedInt(str); }
+template<> inline unsigned int ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedInt(str); }
+template<> inline signed long ConvertStrTo(const std::string &str) { return ConvertStrToSignedLong(str); }
+template<> inline unsigned long ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedLong(str); }
+template<> inline signed long long ConvertStrTo(const std::string &str) { return ConvertStrToSignedLongLong(str); }
+template<> inline unsigned long long ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedLongLong(str); }
+template<> inline float ConvertStrTo(const std::string &str) { return ConvertStrToFloat(str); }
+template<> inline double ConvertStrTo(const std::string &str) { return ConvertStrToDouble(str); }
+template<> inline long double ConvertStrTo(const std::string &str) { return ConvertStrToLongDouble(str); }
+
+bool ConvertStrToBool(const std::wstring &str);
+signed char ConvertStrToSignedChar(const std::wstring &str);
+unsigned char ConvertStrToUnsignedChar(const std::wstring &str);
+signed short ConvertStrToSignedShort(const std::wstring &str);
+unsigned short ConvertStrToUnsignedShort(const std::wstring &str);
+signed int ConvertStrToSignedInt(const std::wstring &str);
+unsigned int ConvertStrToUnsignedInt(const std::wstring &str);
+signed long ConvertStrToSignedLong(const std::wstring &str);
+unsigned long ConvertStrToUnsignedLong(const std::wstring &str);
+signed long long ConvertStrToSignedLongLong(const std::wstring &str);
+unsigned long long ConvertStrToUnsignedLongLong(const std::wstring &str);
+float ConvertStrToFloat(const std::wstring &str);
+double ConvertStrToDouble(const std::wstring &str);
+long double ConvertStrToLongDouble(const std::wstring &str);
+
+template<typename T> inline T ConvertStrTo(const std::wstring &str); // not defined, generates compiler error for non-specialized types
+template<> inline bool ConvertStrTo(const std::wstring &str) { return ConvertStrToBool(str); }
+template<> inline signed char ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedChar(str); }
+template<> inline unsigned char ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedChar(str); }
+template<> inline signed short ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedShort(str); }
+template<> inline unsigned short ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedShort(str); }
+template<> inline signed int ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedInt(str); }
+template<> inline unsigned int ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedInt(str); }
+template<> inline signed long ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedLong(str); }
+template<> inline unsigned long ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedLong(str); }
+template<> inline signed long long ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedLongLong(str); }
+template<> inline unsigned long long ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedLongLong(str); }
+template<> inline float ConvertStrTo(const std::wstring &str) { return ConvertStrToFloat(str); }
+template<> inline double ConvertStrTo(const std::wstring &str) { return ConvertStrToDouble(str); }
+template<> inline long double ConvertStrTo(const std::wstring &str) { return ConvertStrToLongDouble(str); }
+
+template<typename T>
 inline T ConvertStrTo(const char *str)
-//------------------------------------
 {
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_const<T>::value == false && std::is_volatile<T>::value == false, "Const and volatile types are not handled correctly.");
-	#endif
-	if(std::numeric_limits<T>::is_integer)
-		return static_cast<T>(atoi(str));
-	else
-		return static_cast<T>(atof(str));
+	if(!str)
+	{
+		return T();
+	}
+	return ConvertStrTo<T>(std::string(str));
 }
 
-#if MPT_COMPILER_MSVC
-#define cxx11_strtoll  _strtoi64
-#define cxx11_strtoull _strtoui64
-#else
-#define cxx11_strtoll  std::strtoll
-#define cxx11_strtoull std::strtoull
-#endif
-template<> inline signed int       ConvertStrTo(const char *str) {return (signed int)std::strtol(str, nullptr, 10);}
-template<> inline signed long      ConvertStrTo(const char *str) {return std::strtol(str, nullptr, 10);}
-template<> inline signed long long ConvertStrTo(const char *str) {return cxx11_strtoll(str, nullptr, 10);}
-template<> inline unsigned int       ConvertStrTo(const char *str) {return (unsigned int)std::strtoul(str, nullptr, 10);}
-template<> inline unsigned long      ConvertStrTo(const char *str) {return std::strtoul(str, nullptr, 10);}
-template<> inline unsigned long long ConvertStrTo(const char *str) {return cxx11_strtoull(str, nullptr, 10);}
+template<typename T>
+inline T ConvertStrTo(const wchar_t *str)
+{
+	if(!str)
+	{
+		return T();
+	}
+	return ConvertStrTo<T>(std::wstring(str));
+}
+
+
+namespace mpt { namespace String {
+
+// Combine a vector of values into a string, separated with the given separator.
+// No escaping is performed.
+template<typename T>
+std::string Combine(const std::vector<T> &vals, const std::string &sep=",")
+//-------------------------------------------------------------------------
+{
+	std::string str;
+	for(std::size_t i = 0; i < vals.size(); ++i)
+	{
+		if(i > 0)
+		{
+			str += sep;
+		}
+		str += mpt::ToString(vals[i]);
+	}
+	return str;
+}
+
+// Split the given string at separator positions into individual values returned as a vector.
+// An empty string results in an empty vector.
+// Leading or trailing separators result in a default-constructed element being inserted before or after the other elements.
+template<typename T>
+std::vector<T> Split(const std::string &str, const std::string &sep=",")
+//----------------------------------------------------------------------
+{
+	std::vector<T> vals;
+	std::size_t pos = 0;
+	while(str.find(sep, pos) != std::string::npos)
+	{
+		vals.push_back(ConvertStrTo<int>(str.substr(pos, str.find(sep, pos) - pos)));
+		pos = str.find(sep, pos) + sep.length();
+	}
+	if(!vals.empty() || (str.substr(pos).length() > 0))
+	{
+		vals.push_back(ConvertStrTo<T>(str.substr(pos)));
+	}
+	return vals;
+}
+
+} } // namespace mpt::String
 
 
 // Memset given object to zero.
@@ -76,7 +162,7 @@ inline void MemsetZero(T &a)
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
 	static_assert(std::is_pod<T>::value == true, "Won't memset non-pods.");
 #endif
-	memset(&a, 0, sizeof(T));
+	std::memset(&a, 0, sizeof(T));
 }
 
 
@@ -89,7 +175,7 @@ inline T &MemCopy(T &destination, const T &source)
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
 	static_assert(std::is_pod<T>::value == true, "Won't copy non-pods.");
 #endif
-	return *static_cast<T *>(memcpy(&destination, &source, sizeof(T)));
+	return *static_cast<T *>(std::memcpy(&destination, &source, sizeof(T)));
 }
 
 
@@ -190,6 +276,15 @@ inline T Clamp(T val, const C lowerLimit, const C upperLimit)
 	else return val;
 }
 
+// Check if val is in [lo,hi] without causing compiler warnings
+// if theses checks are always true due to the domain of T.
+// GCC does not warn if the type is templated.
+template<typename T, typename C>
+inline bool IsInRange(T val, C lo, C hi)
+//--------------------------------------
+{
+	return lo <= val && val <= hi;
+}
 
 // Like Limit, but with upperlimit only.
 template<class T, class C>
@@ -199,94 +294,6 @@ inline void LimitMax(T& val, const C upperLimit)
 	if(val > upperLimit)
 		val = upperLimit;
 }
-
-
-// Like Limit, but returns value
-#ifndef CLAMP
-#define CLAMP(number, low, high) MIN(high, MAX(low, number))
-#endif
-
-
-static inline char SanitizeFilenameChar(char c)
-//---------------------------------------------
-{
-	if(	c == '\\' ||
-		c == '\"' ||
-		c == '/'  ||
-		c == ':'  ||
-		c == '?'  ||
-		c == '<'  ||
-		c == '>'  ||
-		c == '*')
-	{
-		c = '_';
-	}
-	return c;
-}
-
-static inline wchar_t SanitizeFilenameChar(wchar_t c)
-//---------------------------------------------------
-{
-	if(	c == L'\\' ||
-		c == L'\"' ||
-		c == L'/'  ||
-		c == L':'  ||
-		c == L'?'  ||
-		c == L'<'  ||
-		c == L'>'  ||
-		c == L'*')
-	{
-		c = L'_';
-	}
-	return c;
-}
-
-// Sanitize a filename (remove special chars)
-template <size_t size>
-void SanitizeFilename(char (&buffer)[size])
-//-----------------------------------------
-{
-	STATIC_ASSERT(size > 0);
-	for(size_t i = 0; i < size; i++)
-	{
-		buffer[i] = SanitizeFilenameChar(buffer[i]);
-	}
-}
-template <size_t size>
-void SanitizeFilename(wchar_t (&buffer)[size])
-//--------------------------------------------
-{
-	STATIC_ASSERT(size > 0);
-	for(size_t i = 0; i < size; i++)
-	{
-		buffer[i] = SanitizeFilenameChar(buffer[i]);
-	}
-}
-static inline void SanitizeFilename(std::string &str)
-//---------------------------------------------------
-{
-	for(size_t i = 0; i < str.length(); i++)
-	{
-		str[i] = SanitizeFilenameChar(str[i]);
-	}
-}
-static inline void SanitizeFilename(std::wstring &str)
-//----------------------------------------------------
-{
-	for(size_t i = 0; i < str.length(); i++)
-	{
-		str[i] = SanitizeFilenameChar(str[i]);
-	}
-}
-#ifdef _MFC_VER
-static inline void SanitizeFilename(CString &str)
-//-----------------------------------------------
-{
-	std::basic_string<TCHAR> tmp = str;
-	SanitizeFilename(tmp);
-	str = tmp.c_str();
-}
-#endif
 
 
 // Greatest Common Divisor.
@@ -316,16 +323,6 @@ int sgn(T value)
 //--------------
 {
 	return (value > T(0)) - (value < T(0));
-}
-
-
-// Convert a variable-length MIDI integer <value> to a normal integer <result>.
-// Function returns how many bytes have been read.
-template <class TIn, class TOut>
-size_t ConvertMIDI2Int(TOut &result, TIn value)
-//---------------------------------------------
-{
-	return ConvertMIDI2Int(result, (uint8 *)(&value), sizeof(TIn));
 }
 
 
@@ -390,6 +387,8 @@ size_t ConvertInt2MIDI(uint8 *result, size_t maxLength, TIn value)
 namespace Util
 {
 
+	time_t MakeGmTime(tm *timeUtc);
+
 	// Minimum of 3 values
 	template <class T> inline const T& Min(const T& a, const T& b, const T& c) {return std::min(std::min(a, b), c);}
 
@@ -397,7 +396,7 @@ namespace Util
 	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
 
 	/// Returns value rounded to nearest integer.
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2012,0)
+#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2012,0)) || defined(ANDROID)
 	// revisit this with vs2012
 	inline double Round(const double& val) {if(val >= 0.0) return std::floor(val + 0.5); else return std::ceil(val - 0.5);}
 	inline float Round(const float& val) {if(val >= 0.0f) return std::floor(val + 0.5f); else return std::ceil(val - 0.5f);}
@@ -410,7 +409,6 @@ namespace Util
 	template <class T> inline T Round(const double& val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		static_assert(sizeof(T) <= 4, "Revise the implementation for integers > 32-bits.");
 		const double valRounded = Round(val);
 		ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
 		const T intval = static_cast<T>(valRounded);
@@ -420,11 +418,22 @@ namespace Util
 	template <class T> inline T Round(const float& val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		static_assert(sizeof(T) <= 4, "Revise the implementation for integers > 32-bits.");
 		const float valRounded = Round(val);
 		ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
 		const T intval = static_cast<T>(valRounded);
 		return intval;
+	}
+
+	template<typename T>
+	T Weight(T x)
+	{
+		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+		T c;
+		for(c = 0; x; x >>= 1)
+		{
+			c += x & 1;
+		}
+		return c;
 	}
 	
 }
@@ -454,44 +463,57 @@ namespace Util {
 	inline int32 muldivrfloor(int64 a, uint32 b, uint32 c)
 	{
 		a *= b;
-		a += c/2;
+		a += c / 2;
 		return (a >= 0) ? mpt::saturate_cast<int32>(a / c) : mpt::saturate_cast<int32>((a - (c - 1)) / c);
 	}
 
 	template<typename T, std::size_t n>
-	class fixed_size_queue {
+	class fixed_size_queue
+	{
 	private:
 		T buffer[n+1];
 		std::size_t read_position;
 		std::size_t write_position;
 	public:
-		fixed_size_queue() : read_position(0), write_position(0) {
+		fixed_size_queue() : read_position(0), write_position(0)
+		{
 			return;
 		}
-		void clear() {
+		void clear()
+		{
 			read_position = 0;
 			write_position = 0;
 		}
-		std::size_t read_size() const {
-			if ( write_position > read_position ) {
+		std::size_t read_size() const
+		{
+			if ( write_position > read_position )
+			{
 				return write_position - read_position;
-			} else if ( write_position < read_position ) {
+			} else if ( write_position < read_position )
+			{
 				return write_position - read_position + n + 1;
-			} else {
+			} else
+			{
 				return 0;
 			}
 		}
-		std::size_t write_size() const {
-			if ( write_position > read_position ) {
+		std::size_t write_size() const
+		{
+			if ( write_position > read_position )
+			{
 				return read_position - write_position + n;
-			} else if ( write_position < read_position ) {
+			} else if ( write_position < read_position )
+			{
 				return read_position - write_position - 1;
-			} else {
+			} else
+			{
 				return n;
 			}
 		}
-		bool push( const T & v ) {
-			if ( !write_size() ) {
+		bool push( const T & v )
+		{
+			if ( !write_size() )
+			{
 				return false;
 			}
 			buffer[write_position] = v;
@@ -499,26 +521,32 @@ namespace Util {
 			return true;
 		}
 		bool pop() {
-			if ( !read_size() ) {
+			if ( !read_size() )
+			{
 				return false;
 			}
 			read_position = ( read_position + 1 ) % ( n + 1 );
 			return true;
 		}
 		T peek() {
-			if ( !read_size() ) {
+			if ( !read_size() )
+			{
 				return T();
 			}
 			return buffer[read_position];
 		}
-		const T * peek_p() {
-			if ( !read_size() ) {
+		const T * peek_p()
+		{
+			if ( !read_size() )
+			{
 				return nullptr;
 			}
 			return &(buffer[read_position]);
 		}
-		const T * peek_next_p() {
-			if ( read_size() < 2 ) {
+		const T * peek_next_p()
+		{
+			if ( read_size() < 2 )
+			{
 				return nullptr;
 			}
 			return &(buffer[(read_position+1)%(n+1)]);
@@ -527,6 +555,48 @@ namespace Util {
 
 } // namespace Util
 
+
+#ifdef MODPLUG_TRACKER
+
+namespace Util
+{
+
+// RAII wrapper around timeBeginPeriod/timeEndPeriod/timeGetTime (on Windows).
+// This clock is monotonic, even across changing its resolution.
+// This is needed to synchronize time in Steinberg APIs (ASIO and VST).
+class MultimediaClock
+{
+private:
+	uint32 m_CurrentPeriod;
+private:
+	void Init();
+	void SetPeriod(uint32 ms);
+	void Cleanup();
+public:
+	MultimediaClock();
+	MultimediaClock(uint32 ms);
+	~MultimediaClock();
+public:
+	// Sets the desired resolution in milliseconds, returns the obtained resolution in milliseconds.
+	// A parameter of 0 causes the resolution to be reset to system defaults.
+	// A return value of 0 means the resolution is unknown, but timestamps will still be valid.
+	uint32 SetResolution(uint32 ms);
+	// Returns obtained resolution in milliseconds.
+	// A return value of 0 means the resolution is unknown, but timestamps will still be valid.
+	uint32 GetResolution() const; 
+	// Returns current instantaneous timestamp in milliseconds.
+	// The epoch (offset) of the timestamps is undefined but constant until the next system reboot.
+	// The resolution is the value returned from GetResolution().
+	uint32 Now() const;
+	// Returns current instantaneous timestamp in nanoseconds.
+	// The epoch (offset) of the timestamps is undefined but constant until the next system reboot.
+	// The resolution is the value returned from GetResolution() in milliseconds.
+	uint64 NowNanoseconds() const;
+};
+
+} // namespace Util
+
+#endif
 
 #ifdef ENABLE_ASM
 #define PROCSUPPORT_MMX        0x00001 // Processor supports MMX instructions
@@ -544,3 +614,227 @@ static inline uint32 GetProcSupport()
 }
 #endif // ENABLE_ASM
 
+
+#ifdef MODPLUG_TRACKER
+
+namespace Util
+{
+
+// COM CLSID<->string conversion
+// A CLSID string is not necessarily a standard UUID string,
+// it might also be a symbolic name for the interface.
+// (see CLSIDFromString ( http://msdn.microsoft.com/en-us/library/windows/desktop/ms680589%28v=vs.85%29.aspx ))
+std::wstring CLSIDToString(CLSID clsid);
+CLSID StringToCLSID(const std::wstring &str);
+bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid);
+bool IsCLSID(const std::wstring &str);
+
+// COM IID<->string conversion
+IID StringToIID(const std::wstring &str);
+std::wstring IIDToString(IID iid);
+
+// General GUID<->string conversion.
+// The string must/will be in standard GUID format: {4F9A455D-E7EF-4367-B2F0-0C83A38A5C72}
+GUID StringToGUID(const std::wstring &str);
+std::wstring GUIDToString(GUID guid);
+
+// General UUID<->string conversion.
+// The string must/will be in standard UUID format: 4f9a455d-e7ef-4367-b2f0-0c83a38a5c72
+UUID StringToUUID(const std::wstring &str);
+std::wstring UUIDToString(UUID uuid);
+
+// Checks the UUID against the NULL UUID. Returns false if it is NULL, true otherwise.
+bool IsValid(UUID uuid);
+
+// Create a COM GUID
+GUID CreateGUID();
+
+// Create a UUID
+UUID CreateUUID();
+
+// Create a UUID that contains local, traceable information. Safe for local use.
+UUID CreateLocalUUID();
+
+// Returns temporary directory (with trailing backslash added) (e.g. "C:\TEMP\")
+mpt::PathString GetTempDirectory();
+
+// Returns a new unique absolute path.
+mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
+
+} // namespace Util
+
+#endif // MODPLUG_TRACKER
+
+namespace Util
+{
+
+std::wstring BinToHex(const std::vector<char> &src);
+std::vector<char> HexToBin(const std::wstring &src);
+
+} // namespace Util
+
+
+#if MPT_OS_WINDOWS
+
+namespace mpt
+{
+namespace Windows
+{
+namespace Version
+{
+
+
+enum Number
+{
+
+	// Win9x
+	Win98    = 0x040a,
+	WinME    = 0x045a,
+
+	// WinNT
+	WinNT4   = 0x0400,
+	Win2000  = 0x0500,
+	WinXP    = 0x0501,
+	WinVista = 0x0600,
+	Win7     = 0x0601,
+	Win8     = 0x0602,
+	Win81    = 0x0603,
+
+};
+
+
+#if defined(MODPLUG_TRACKER)
+
+// Initializes version information.
+// Version information is cached in order to be safely available in audio real-time contexts.
+// Checking version information (especially detecting Wine) can be slow.
+void Init();
+
+bool IsAtLeast(mpt::Windows::Version::Number version);
+bool IsNT();
+bool IsWine();
+
+#else // !MODPLUG_TRACKER
+
+bool IsAtLeast(mpt::Windows::Version::Number version);
+
+#endif // MODPLUG_TRACKER
+
+
+} // namespace Version
+} // namespace Windows
+} // namespace mpt
+
+#endif // MPT_OS_WINDOWS
+
+
+#if defined(MPT_WITH_DYNBIND)
+
+namespace mpt
+{
+
+
+#if MPT_OS_WINDOWS
+
+// Returns the application path or an empty string (if unknown), e.g. "C:\mptrack\"
+mpt::PathString GetAppPath();
+
+// Returns the system directory path, e.g. "C:\Windows\System32\"
+mpt::PathString GetSystemPath();
+
+// Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)
+mpt::PathString GetAbsolutePath(const mpt::PathString &path);
+
+#endif // MPT_OS_WINDOWS
+
+
+typedef void* (*FuncPtr)(); // pointer to function returning void*
+
+class LibraryHandle;
+
+enum LibrarySearchPath
+{
+	LibrarySearchPathDefault,
+	LibrarySearchPathApplication,
+	LibrarySearchPathSystem,
+	LibrarySearchPathFullPath,
+};
+
+class LibraryPath
+{
+
+private:
+	
+	mpt::LibrarySearchPath searchPath;
+	mpt::PathString fileName;
+
+private:
+
+	LibraryPath(mpt::LibrarySearchPath searchPath, const mpt::PathString &fileName);
+
+public:
+
+	mpt::LibrarySearchPath GetSearchPath() const;
+
+	mpt::PathString GetFileName() const;
+
+public:
+	
+	// "lib" on Unix-like systems, "" on Windows
+	static mpt::PathString GetDefaultPrefix();
+
+	// ".so" or ".dylib" or ".dll"
+	static mpt::PathString GetDefaultSuffix();
+
+	// Returns the library path in the application directory, with os-specific prefix and suffix added to basename.
+	// e.g.: basename = "unmo3" --> "libunmo3.so" / "apppath/unmo3.dll"
+	static LibraryPath App(const mpt::PathString &basename);
+
+	// Returns the library path in the application directory, with os-specific suffix added to fullname.
+	// e.g.: fullname = "libunmo3" --> "libunmo3.so" / "apppath/libunmo3.dll" 
+	static LibraryPath AppFullName(const mpt::PathString &fullname);
+
+	// Returns a system library name with os-specific prefix and suffix added to basename, but without any full path in order to be searched in the default search path.
+	// e.g.: basename = "unmo3" --> "libunmo3.so" / "unmo3.dll"
+	static LibraryPath System(const mpt::PathString &basename);
+
+	// Returns a system library name with os-specific suffix added to path.
+	// e.g.: path = "somepath/foo" --> "somepath/foo.so" / "somepath/foo.dll"
+	static LibraryPath FullPath(const mpt::PathString &path);
+
+};
+
+class Library
+{
+protected:
+	MPT_SHARED_PTR<LibraryHandle> m_Handle;
+public:
+	Library();
+	Library(const mpt::LibraryPath &path);
+public:
+	void Unload();
+	bool IsValid() const;
+	FuncPtr GetProcAddress(const std::string &symbol) const;
+	template <typename Tfunc>
+	bool Bind(Tfunc * & f, const std::string &symbol) const
+	{
+		#ifdef HAS_TYPE_TRAITS
+			#if (MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2013,0)) || !MPT_COMPILER_MSVC
+				// MSVC std::is_function is always false for non __cdecl functions.
+				// See https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug .
+				// Revisit with VS2013.
+				STATIC_ASSERT(std::is_function<Tfunc>::value);
+			#endif
+		#endif
+		const FuncPtr addr = GetProcAddress(symbol);
+		f = reinterpret_cast<Tfunc*>(addr);
+		return (addr != nullptr);
+	}
+};
+
+} // namespace mpt
+
+#endif // MPT_WITH_DYNBIND
+
+
+OPENMPT_NAMESPACE_END

@@ -12,6 +12,8 @@
 
 #include "../soundlib/FileReader.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////
 // File Mapping Class
 
@@ -20,19 +22,20 @@ class CMappedFile
 //===============
 {
 protected:
-	CFile m_File;
+	HANDLE m_hFile;
 	HANDLE m_hFMap;
 	void *m_pData;
 
 public:
-	CMappedFile() : m_hFMap(nullptr), m_pData(nullptr) { }
+	CMappedFile() : m_hFile(nullptr), m_hFMap(nullptr), m_pData(nullptr) { }
 	~CMappedFile();
 
 public:
-	bool Open(LPCSTR lpszFileName);
+	bool Open(const mpt::PathString &filename);
 	void Close();
 	size_t GetLength();
 	const void *Lock();
 	FileReader GetFile();
-	void Unlock();
 };
+
+OPENMPT_NAMESPACE_END

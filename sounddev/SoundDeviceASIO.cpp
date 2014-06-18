@@ -12,7 +12,6 @@
 #include "stdafx.h"
 
 #include "SoundDevice.h"
-#include "SoundDevices.h"
 
 #include "SoundDeviceASIO.h"
 
@@ -26,117 +25,140 @@
 #include <algorithm>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
+#ifndef NO_ASIO
+
+
+static const double AsioSampleRateTolerance = 0.05;
+
+
+// Helper class to temporarily open a driver for a query.
+class TemporaryASIODriverOpener
+{
+protected:
+	CASIODevice &device;
+	const bool wasOpen;
+
+public:
+	TemporaryASIODriverOpener(CASIODevice &d) : device(d), wasOpen(d.IsDriverOpen())
+	{
+		if(!wasOpen)
+		{
+			device.OpenDriver();
+		}
+	}
+
+	~TemporaryASIODriverOpener()
+	{
+		if(!wasOpen)
+		{
+			device.CloseDriver();
+		}
+	}
+};
+
+
+class ASIOException
+	: public std::runtime_error
+{
+public:
+	ASIOException(const std::string &msg)
+		: std::runtime_error(msg)
+	{
+		return;
+	}
+	ASIOException(const std::string &call, ASIOError err)
+		: std::runtime_error(call + std::string(" failed: ") + mpt::ToString(err))
+	{
+		return;
+	}
+};
+
+
+#define asioCall(asiocall) do { \
+	try { \
+		ASIOError e = m_pAsioDrv-> asiocall ; \
+		if(e != ASE_OK) { \
+			throw ASIOException( #asiocall , e); \
+		} \
+	} catch(const ASIOException &) { \
+		throw; \
+	} catch(...) { \
+		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
+		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
+	} \
+} while(0)
+
+
+#define asioCallUncatched(asiocall) m_pAsioDrv-> asiocall
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // ASIO Device implementation
 //
 
-#ifndef NO_ASIO
-
 #define ASIO_MAXDRVNAMELEN	1024
 
-CASIODevice *CASIODevice::gpCurrentAsio = NULL;
-LONG CASIODevice::gnFillBuffers = 0;
-int CASIODevice::baseChannel = 0;
-
-static DWORD g_dwBuffer = 0;
-
-static int g_asio_startcount = 0;
+CASIODevice *CASIODevice::g_CallbacksInstance = nullptr;
 
 
-static std::wstring CLSIDToString(CLSID clsid)
-//--------------------------------------------
-{
-	std::wstring str;
-	LPOLESTR tmp = nullptr;
-	StringFromCLSID(clsid, &tmp);
-	if(tmp)
-	{
-		str = tmp;
-		CoTaskMemFree(tmp);
-		tmp = nullptr;
-	}
-	return str;
-}
-
-
-static CLSID StringToCLSID(const std::wstring &str)
-//-------------------------------------------------
-{
-	CLSID clsid = CLSID();
-	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	CLSIDFromString(&tmp[0], &clsid);
-	return clsid;
-}
-
-
-static bool IsCLSID(const std::wstring &str)
-{
-	CLSID clsid = CLSID();
-	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
-	return CLSIDFromString(&tmp[0], &clsid) == S_OK;
-}
-
-
-std::vector<SoundDeviceInfo>  CASIODevice::EnumerateDevices()
-//-----------------------------------------------------------
+std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
+//----------------------------------------------------------
 {
 	std::vector<SoundDeviceInfo> devices;
 
 	LONG cr;
 
 	HKEY hkEnum = NULL;
-	cr = RegOpenKey(HKEY_LOCAL_MACHINE, TEXT("software\\asio"), &hkEnum);
+	cr = RegOpenKeyW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\ASIO", &hkEnum);
 
 	for(DWORD index = 0; ; ++index)
 	{
 
-		TCHAR keyname[ASIO_MAXDRVNAMELEN];
-		if((cr = RegEnumKey(hkEnum, index, keyname, ASIO_MAXDRVNAMELEN)) != ERROR_SUCCESS)
+		WCHAR keynameBuf[ASIO_MAXDRVNAMELEN];
+		if((cr = RegEnumKeyW(hkEnum, index, keynameBuf, ASIO_MAXDRVNAMELEN)) != ERROR_SUCCESS)
 		{
 			break;
 		}
-		#ifdef ASIO_LOG
-			Log("ASIO: Found \"%s\":\n", keyname);
-		#endif
+		const std::wstring keyname = keynameBuf;
+		Log(mpt::String::Print("ASIO: Found '%1':", mpt::ToLocale(keyname)));
 
 		HKEY hksub = NULL;
-		if(RegOpenKeyEx(hkEnum, keyname, 0, KEY_READ, &hksub) != ERROR_SUCCESS)
+		if(RegOpenKeyExW(hkEnum, keynameBuf, 0, KEY_READ, &hksub) != ERROR_SUCCESS)
 		{
 			continue;
 		}
 
-		CHAR description[ASIO_MAXDRVNAMELEN];
+		WCHAR descriptionBuf[ASIO_MAXDRVNAMELEN];
 		DWORD datatype = REG_SZ;
-		DWORD datasize = sizeof(description);
-		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("description"), 0, &datatype, (LPBYTE)description, &datasize))
+		DWORD datasize = sizeof(descriptionBuf);
+		std::wstring description;
+		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"Description", 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
 		{
-		#ifdef ASIO_LOG
-			Log("  description =\"%s\":\n", description);
-		#endif
+			Log(mpt::String::Print("ASIO:   description='%1'", mpt::ToLocale(description)));
+			description = descriptionBuf;
 		} else
 		{
-			mpt::String::Copy(description, keyname);
+			description = keyname;
 		}
 
-		CHAR s[256];
+		WCHAR idBuf[256];
 		datatype = REG_SZ;
-		datasize = sizeof(s);
-		if(ERROR_SUCCESS == RegQueryValueEx(hksub, TEXT("clsid"), 0, &datatype, (LPBYTE)s, &datasize))
+		datasize = sizeof(idBuf);
+		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"CLSID", 0, &datatype, (LPBYTE)idBuf, &datasize))
 		{
-			const std::wstring internalID = mpt::String::Decode(s, mpt::CharsetLocale);
-			if(IsCLSID(internalID))
+			const std::wstring internalID = idBuf;
+			if(Util::IsCLSID(internalID))
 			{
-				#ifdef ASIO_LOG
-					Log("  clsid=\"%s\"\n", s);
-				#endif
-
+				Log(mpt::String::Print("ASIO:   clsid=%1", mpt::ToLocale(internalID)));
 				if(SoundDeviceIndexIsValid(devices.size()))
 				{
 					// everything ok
-					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), mpt::String::Decode(description, mpt::CharsetLocale), internalID));
+					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), description, SoundDeviceTypeToString(SNDDEV_ASIO), internalID));
 				}
-
 			}
 		}
 
@@ -159,24 +181,55 @@ CASIODevice::CASIODevice(SoundDeviceID id, const std::wstring &internalID)
 //------------------------------------------------------------------------
 	: ISoundDevice(id, internalID)
 {
-	m_pAsioDrv = NULL;
+	Init();
+	m_QueriedFeatures.reset();
+	m_UsedFeatures.reset();
+}
+
+
+void CASIODevice::Init()
+//----------------------
+{
+	m_pAsioDrv = nullptr;
+
 	m_nAsioBufferLen = 0;
-	m_nAsioSampleSize = 0;
-	m_Float = false;
-	m_Callbacks.bufferSwitch = BufferSwitch;
-	m_Callbacks.sampleRateDidChange = SampleRateDidChange;
-	m_Callbacks.asioMessage = AsioMessage;
-	m_Callbacks.bufferSwitchTimeInfo = BufferSwitchTimeInfo;
-	m_bMixRunning = FALSE;
+	m_BufferInfo.clear();
+	MemsetZero(m_Callbacks);
+	m_BuffersCreated = false;
+	m_ChannelInfo.clear();
+	m_SampleBufferFloat.clear();
+	m_SampleBufferInt16.clear();
+	m_SampleBufferInt24.clear();
+	m_SampleBufferInt32.clear();
+	m_CanOutputReady = false;
+
+	m_DeviceRunning = false;
+	m_TotalFramesWritten = 0;
+	m_BufferIndex = 0;
 	InterlockedExchange(&m_RenderSilence, 0);
 	InterlockedExchange(&m_RenderingSilence, 0);
+
+	InterlockedExchange(&m_AsioRequestFlags, 0);
+}
+
+
+bool CASIODevice::HandleRequests()
+//--------------------------------
+{
+	bool result = false;
+	LONG flags = InterlockedExchange(&m_AsioRequestFlags, 0);
+	if(flags & AsioRequestFlagLatenciesChanged)
+	{
+		UpdateLatency();
+		result = true;
+	}
+	return result;
 }
 
 
 CASIODevice::~CASIODevice()
 //-------------------------
 {
-	Reset();
 	Close();
 }
 
@@ -185,162 +238,251 @@ bool CASIODevice::InternalOpen()
 //------------------------------
 {
 
-	bool bOk = false;
+	ASSERT(!IsDriverOpen());
 
-	if (IsOpen()) Close();
-#ifdef ASIO_LOG
-	Log("CASIODevice::Open(%d:\"%s\"): %d-bit, %d channels, %dHz\n",
-		GetDeviceIndex(), mpt::String::Encode(GetDeviceInternalID(), mpt::CharsetLocale).c_str(), (int)m_Settings.sampleFormat.GetBitsPerSample(), m_Settings.Channels, m_Settings.Samplerate);
-#endif
-	OpenDevice();
+	Init();
 
-	if (IsOpen())
+	Log(mpt::String::Print("ASIO: Open(%1:'%2'): %3-bit, %4 channels, %5Hz, hw-timing=%6"
+		, GetDeviceIndex()
+		, mpt::ToLocale(GetDeviceInternalID())
+		, m_Settings.sampleFormat.GetBitsPerSample()
+		, m_Settings.Channels
+		, m_Settings.Samplerate
+		, m_Settings.UseHardwareTiming
+		));
+
+	try
 	{
-		long nInputChannels = 0, nOutputChannels = 0;
-		long minSize = 0, maxSize = 0, preferredSize = 0, granularity = 0;
 
-		if(m_Settings.Channels > ASIO_MAX_CHANNELS)
+		OpenDriver();
+
+		if(!IsDriverOpen())
 		{
-			goto abort;
+			throw ASIOException("Initializing driver failed.");
 		}
-		m_pAsioDrv->getChannels(&nInputChannels, &nOutputChannels);
-	#ifdef ASIO_LOG
-		Log("  getChannels: %d inputs, %d outputs\n", nInputChannels, nOutputChannels);
-	#endif
-		if (m_Settings.Channels > nOutputChannels) goto abort;
-		if (m_pAsioDrv->setSampleRate(m_Settings.Samplerate) != ASE_OK)
+
+		long inputChannels = 0;
+		long outputChannels = 0;
+		asioCall(getChannels(&inputChannels, &outputChannels));
+		Log(mpt::String::Print("ASIO: getChannels() => inputChannels=%1 outputChannel=%2", inputChannels, outputChannels));
+		if(m_Settings.Channels > outputChannels)
 		{
-		#ifdef ASIO_LOG
-			Log("  setSampleRate(%d) failed (sample rate not supported)!\n", m_Settings.Samplerate);
-		#endif
-			goto abort;
+			throw ASIOException("Not enough output channels.");
 		}
-		for (UINT ich=0; ich<m_Settings.Channels; ich++)
+		if(m_Settings.ChannelMapping.GetRequiredDeviceChannels() > (std::size_t)outputChannels)
 		{
-			m_ChannelInfo[ich].channel = ich;
-			m_ChannelInfo[ich].isInput = ASIOFalse;
-			m_pAsioDrv->getChannelInfo(&m_ChannelInfo[ich]);
-		#ifdef ASIO_LOG
-			Log("  getChannelInfo(%d): isActive=%d channelGroup=%d type=%d name=\"%s\"\n",
-				ich, m_ChannelInfo[ich].isActive, m_ChannelInfo[ich].channelGroup, m_ChannelInfo[ich].type, m_ChannelInfo[ich].name);
-		#endif
-			m_BufferInfo[ich].isInput = ASIOFalse;
-			m_BufferInfo[ich].channelNum = ich + CASIODevice::baseChannel;		// map MPT channel i to ASIO channel i
-			m_BufferInfo[ich].buffers[0] = NULL;
-			m_BufferInfo[ich].buffers[1] = NULL;
-			m_Float = false;
-			switch(m_ChannelInfo[ich].type)
-			{
-				case ASIOSTInt16MSB:
-				case ASIOSTInt16LSB:
-					m_nAsioSampleSize = 2;
-					break;
-				case ASIOSTInt24MSB:
-				case ASIOSTInt24LSB:
-					m_nAsioSampleSize = 3;
-					break;
-				case ASIOSTInt32MSB:
-				case ASIOSTInt32LSB:
-					m_nAsioSampleSize = 4;
-					break;
-				case ASIOSTInt32MSB16:
-				case ASIOSTInt32MSB18:
-				case ASIOSTInt32MSB20:
-				case ASIOSTInt32MSB24:
-				case ASIOSTInt32LSB16:
-				case ASIOSTInt32LSB18:
-				case ASIOSTInt32LSB20:
-				case ASIOSTInt32LSB24:
-					m_nAsioSampleSize = 4;
-					break;
-				case ASIOSTFloat32MSB:
-				case ASIOSTFloat32LSB:
-					m_Float = true;
-					m_nAsioSampleSize = 4;
-					break;
-				case ASIOSTFloat64MSB:
-				case ASIOSTFloat64LSB:
-					m_Float = true;
-					m_nAsioSampleSize = 8;
-					break;
-				default:
-					m_nAsioSampleSize = 0;
-					goto abort;
-					break;
-			}
+			throw ASIOException("Channel mapping requires more channels than available.");
 		}
-		m_Settings.sampleFormat = m_Float ? SampleFormatFloat32 : SampleFormatInt32;
-		m_pAsioDrv->getBufferSize(&minSize, &maxSize, &preferredSize, &granularity);
-	#ifdef ASIO_LOG
-		Log("  getBufferSize(): minSize=%d maxSize=%d preferredSize=%d granularity=%d\n",
-				minSize, maxSize, preferredSize, granularity);
-	#endif
+
+		Log(mpt::String::Print("ASIO: setSampleRate(sampleRate=%1)", m_Settings.Samplerate));
+		asioCall(setSampleRate(m_Settings.Samplerate));
+
+		long minSize = 0;
+		long maxSize = 0;
+		long preferredSize = 0;
+		long granularity = 0;
+		asioCall(getBufferSize(&minSize, &maxSize, &preferredSize, &granularity));
+		Log(mpt::String::Print("ASIO: getBufferSize() => minSize=%1 maxSize=%2 preferredSize=%3 granularity=%4",
+			minSize, maxSize, preferredSize, granularity));
 		m_nAsioBufferLen = ((m_Settings.LatencyMS * m_Settings.Samplerate) / 2000);
-		if (m_nAsioBufferLen < (UINT)minSize) m_nAsioBufferLen = minSize; else
-		if (m_nAsioBufferLen > (UINT)maxSize) m_nAsioBufferLen = maxSize; else
-		if (granularity < 0)
-		{
-			//rewbs.ASIOfix:
-			/*UINT n = (minSize < 32) ? 32 : minSize;
-			if (n % granularity) n = (n + granularity - 1) - (n % granularity);
-			while ((n+(n>>1) < m_nAsioBufferLen) && (n*2 <= (UINT)maxSize))
+		if(minSize <= 0 || maxSize <= 0 || minSize > maxSize)
+		{ // limits make no sense
+			if(preferredSize > 0)
 			{
-				n *= 2;
+				m_nAsioBufferLen = preferredSize;
+			} else
+			{
+				// just leave the user value, perhaps it works
 			}
-			m_nAsioBufferLen = n;*/
-			//end rewbs.ASIOfix
-			m_nAsioBufferLen = preferredSize;
-
+		} else if(granularity < -1)
+		{ // granularity value not allowed, just clamp value
+			m_nAsioBufferLen = Clamp(m_nAsioBufferLen, minSize, maxSize);
+		} else if(granularity == -1 && (Util::Weight(minSize) != 1 || Util::Weight(maxSize) != 1))
+		{ // granularity tells us we need power-of-2 sizes, but min or max sizes are no power-of-2
+			m_nAsioBufferLen = Clamp(m_nAsioBufferLen, minSize, maxSize);
+			// just start at 1 and find a matching power-of-2 in range
+			const long bufTarget = m_nAsioBufferLen;
+			for(long bufSize = 1; bufSize <= maxSize && bufSize <= bufTarget; bufSize *= 2)
+			{
+				if(bufSize >= minSize)
+				{
+					m_nAsioBufferLen = bufSize;
+				}
+			}
+			// if no power-of-2 in range is found, just leave the clamped value alone, perhaps it works
+		} else if(granularity == -1)
+		{ // sane values, power-of-2 size required between min and max
+			m_nAsioBufferLen = Clamp(m_nAsioBufferLen, minSize, maxSize);
+			// get the largest allowed buffer size that is smaller or equal to the target size
+			const long bufTarget = m_nAsioBufferLen;
+			for(long bufSize = minSize; bufSize <= maxSize && bufSize <= bufTarget; bufSize *= 2)
+			{
+				m_nAsioBufferLen = bufSize;
+			}
+		} else if(granularity > 0)
+		{ // buffer size in granularity steps from min to max allowed
+			m_nAsioBufferLen = Clamp(m_nAsioBufferLen, minSize, maxSize);
+			// get the largest allowed buffer size that is smaller or equal to the target size
+			const long bufTarget = m_nAsioBufferLen;
+			for(long bufSize = minSize; bufSize <= maxSize && bufSize <= bufTarget; bufSize += granularity)
+			{
+				m_nAsioBufferLen = bufSize;
+			}
+		} else if(granularity == 0)
+		{ // no granularity given, we should use preferredSize if possible
+			if(preferredSize > 0)
+			{
+				m_nAsioBufferLen = preferredSize;
+			} else if(m_nAsioBufferLen >= maxSize)
+			{ // a large latency was requested, use maxSize
+				m_nAsioBufferLen = maxSize;
+			} else
+			{ // use minSize otherwise
+				m_nAsioBufferLen = minSize;
+			}
 		} else
-		if (granularity > 0)
-		{
-			int n = (minSize < 32) ? 32 : minSize;
-			n = (n + granularity-1);
-			n -= (n % granularity);
-			while ((n+(granularity>>1) < (int)m_nAsioBufferLen) && (n+granularity <= maxSize))
-			{
-				n += granularity;
-			}
-			m_nAsioBufferLen = n;
+		{ // should not happen
+			ASSERT(false);
 		}
-		m_RealLatencyMS = m_nAsioBufferLen * 2 * 1000.0f / m_Settings.Samplerate;
-		m_RealUpdateIntervalMS = m_nAsioBufferLen * 1000.0f / m_Settings.Samplerate;
-	#ifdef ASIO_LOG
-		Log("  Using buffersize=%d samples\n", m_nAsioBufferLen);
-	#endif
-		if (m_pAsioDrv->createBuffers(m_BufferInfo, m_Settings.Channels, m_nAsioBufferLen, &m_Callbacks) == ASE_OK)
+	
+		m_BufferInfo.resize(m_Settings.Channels);
+		for(int channel = 0; channel < m_Settings.Channels; ++channel)
 		{
-			for (UINT iInit=0; iInit<m_Settings.Channels; iInit++)
-			{
-				if (m_BufferInfo[iInit].buffers[0])
-				{
-					memset(m_BufferInfo[iInit].buffers[0], 0, m_nAsioBufferLen * m_nAsioSampleSize);
-				}
-				if (m_BufferInfo[iInit].buffers[1])
-				{
-					memset(m_BufferInfo[iInit].buffers[1], 0, m_nAsioBufferLen * m_nAsioSampleSize);
-				}
-			}
-			m_bPostOutput = (m_pAsioDrv->outputReady() == ASE_OK) ? TRUE : FALSE;
-			bOk = true;
+			MemsetZero(m_BufferInfo[channel]);
+			m_BufferInfo[channel].isInput = ASIOFalse;
+			m_BufferInfo[channel].channelNum = m_Settings.ChannelMapping.ToDevice(channel);
 		}
-	#ifdef ASIO_LOG
-		else Log("  createBuffers failed!\n");
-	#endif
-	}
-abort:
-	if (bOk)
+		m_Callbacks.bufferSwitch = CallbackBufferSwitch;
+		m_Callbacks.sampleRateDidChange = CallbackSampleRateDidChange;
+		m_Callbacks.asioMessage = CallbackAsioMessage;
+		m_Callbacks.bufferSwitchTimeInfo = CallbackBufferSwitchTimeInfo;
+		ALWAYS_ASSERT(g_CallbacksInstance == nullptr);
+		g_CallbacksInstance = this;
+		Log(mpt::String::Print("ASIO: createBuffers(numChannels=%1, bufferSize=%2)", m_Settings.Channels, m_nAsioBufferLen));
+		asioCall(createBuffers(&m_BufferInfo[0], m_Settings.Channels, m_nAsioBufferLen, &m_Callbacks));
+		m_BuffersCreated = true;
+
+		m_ChannelInfo.resize(m_Settings.Channels);
+		for(int channel = 0; channel < m_Settings.Channels; ++channel)
+		{
+			MemsetZero(m_ChannelInfo[channel]);
+			m_ChannelInfo[channel].isInput = ASIOFalse;
+			m_ChannelInfo[channel].channel = m_Settings.ChannelMapping.ToDevice(channel);
+			asioCall(getChannelInfo(&m_ChannelInfo[channel]));
+			ASSERT(m_ChannelInfo[channel].isActive);
+			mpt::String::SetNullTerminator(m_ChannelInfo[channel].name);
+			Log(mpt::String::Print("ASIO: getChannelInfo(isInput=%1 channel=%2) => isActive=%3 channelGroup=%4 type=%5 name='%6'"
+				, ASIOFalse
+				, m_Settings.ChannelMapping.ToDevice(channel)
+				, m_ChannelInfo[channel].isActive
+				, m_ChannelInfo[channel].channelGroup
+				, m_ChannelInfo[channel].type
+				, m_ChannelInfo[channel].name
+				));
+		}
+
+		bool allChannelsAreFloat = true;
+		bool allChannelsAreInt16 = true;
+		bool allChannelsAreInt24 = true;
+		for(int channel = 0; channel < m_Settings.Channels; ++channel)
+		{
+			if(!IsSampleTypeFloat(m_ChannelInfo[channel].type))
+			{
+				allChannelsAreFloat = false;
+			}
+			if(!IsSampleTypeInt16(m_ChannelInfo[channel].type))
+			{
+				allChannelsAreInt16 = false;
+			}
+			if(!IsSampleTypeInt24(m_ChannelInfo[channel].type))
+			{
+				allChannelsAreInt24 = false;
+			}
+		}
+		if(allChannelsAreFloat)
+		{
+			m_Settings.sampleFormat = SampleFormatFloat32;
+			m_SampleBufferFloat.resize(m_nAsioBufferLen * m_Settings.Channels);
+		} else if(allChannelsAreInt16)
+		{
+			m_Settings.sampleFormat = SampleFormatInt16;
+			m_SampleBufferInt16.resize(m_nAsioBufferLen * m_Settings.Channels);
+		} else if(allChannelsAreInt24)
+		{
+			m_Settings.sampleFormat = SampleFormatInt24;
+			m_SampleBufferInt24.resize(m_nAsioBufferLen * m_Settings.Channels);
+		} else
+		{
+			m_Settings.sampleFormat = SampleFormatInt32;
+			m_SampleBufferInt32.resize(m_nAsioBufferLen * m_Settings.Channels);
+		}
+
+		for(int channel = 0; channel < m_Settings.Channels; ++channel)
+		{
+			if(m_BufferInfo[channel].buffers[0])
+			{
+				std::memset(m_BufferInfo[channel].buffers[0], 0, m_nAsioBufferLen * GetSampleSize(m_ChannelInfo[channel].type));
+			}
+			if(m_BufferInfo[channel].buffers[1])
+			{
+				std::memset(m_BufferInfo[channel].buffers[1], 0, m_nAsioBufferLen * GetSampleSize(m_ChannelInfo[channel].type));
+			}
+		}
+
+		m_CanOutputReady = false;
+		try
+		{
+			m_CanOutputReady = (asioCallUncatched(outputReady()) == ASE_OK);
+		} catch(...)
+		{
+			// continue, failure is not fatal here
+			m_CanOutputReady = false;
+		}
+
+		m_StreamPositionOffset = m_nAsioBufferLen;
+
+		UpdateLatency();
+
+		return true;
+
+	} catch(const std::exception &e)
 	{
-		gpCurrentAsio = this;
-		gnFillBuffers = 2;
+		Log(mpt::String::Print("ASIO: Error opening device: %1!", e.what() ? e.what() : ""));
+	} catch(...)
+	{
+		Log("ASIO: Unknown error opening device!");
+	}
+	InternalClose();
+	return false;
+}
+
+
+void CASIODevice::UpdateLatency()
+//-------------------------------
+{
+	SoundBufferAttributes bufferAttributes;
+	long inputLatency = 0;
+	long outputLatency = 0;
+	try
+	{
+		asioCall(getLatencies(&inputLatency, &outputLatency));
+	} catch(...)
+	{
+		// continue, failure is not fatal here
+		inputLatency = 0;
+		outputLatency = 0;
+	}
+	if(outputLatency >= (long)m_nAsioBufferLen)
+	{
+		bufferAttributes.Latency = (double)(outputLatency + m_nAsioBufferLen) / (double)m_Settings.Samplerate; // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
 	} else
 	{
-	#ifdef ASIO_LOG
-		Log("Error opening ASIO device!\n");
-	#endif
-		CloseDevice();
+		// pointless value returned from asio driver, use a sane estimate
+		bufferAttributes.Latency = 2.0 * (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
 	}
-	return bOk;
+	bufferAttributes.UpdateInterval = (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
+	bufferAttributes.NumBuffers = 2;
+	UpdateBufferAttributes(bufferAttributes);
 }
 
 
@@ -383,142 +525,175 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 }
 
 
-void CASIODevice::InternalStart()
+bool CASIODevice::InternalStart()
 //-------------------------------
 {
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while starting ASIO");
 
-		ALWAYS_ASSERT(g_asio_startcount==0);
-		g_asio_startcount++;
-
-		if(!m_bMixRunning)
-		{
-			SetRenderSilence(false);
-			m_bMixRunning = TRUE;
-			try
-			{
-				m_pAsioDrv->start();
-			} catch(...)
-			{
-				CASIODevice::ReportASIOException("ASIO crash in start()\n");
-				m_bMixRunning = FALSE;
-			}
-		} else
+	if(m_Settings.KeepDeviceRunning)
+	{
+		if(m_DeviceRunning)
 		{
 			SetRenderSilence(false, true);
+			return true;
 		}
+	}
+
+	SetRenderSilence(false);
+	try
+	{
+		m_TotalFramesWritten = 0;
+		asioCall(start());
+		m_DeviceRunning = true;
+	} catch(...)
+	{
+		return false;
+	}
+
+	return true;
 }
 
+
+void CASIODevice::InternalStopForce()
+//-----------------------------------
+{
+	InternalStopImpl(true);
+}
 
 void CASIODevice::InternalStop()
 //------------------------------
 {
-	ALWAYS_ASSERT(g_asio_startcount==1);
+	InternalStopImpl(false);
+}
+
+void CASIODevice::InternalStopImpl(bool force)
+//--------------------------------------------
+{
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while stopping ASIO");
 
+	if(m_Settings.KeepDeviceRunning && !force)
+	{
 		SetRenderSilence(true, true);
-		g_asio_startcount--;
-		ALWAYS_ASSERT(g_asio_startcount==0);
+		return;
+	}
+
+	m_DeviceRunning = false;
+	try
+	{
+		asioCall(stop());
+	} catch(...)
+	{
+		// continue
+	}
+	m_TotalFramesWritten = 0;
+	SetRenderSilence(false);
+
 }
 
 
 bool CASIODevice::InternalClose()
 //-------------------------------
 {
-	if (IsOpen())
+	if(m_DeviceRunning)
 	{
-		Stop();
-		if (m_bMixRunning)
-		{
-			m_bMixRunning = FALSE;
-			ALWAYS_ASSERT(g_asio_startcount==0);
-			try
-			{
-				m_pAsioDrv->stop();
-			} catch(...)
-			{
-				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
-			}
-		}
-		g_asio_startcount = 0;
-		SetRenderSilence(false);
+		m_DeviceRunning = false;
 		try
 		{
-			m_pAsioDrv->disposeBuffers();
+			asioCall(stop());
 		} catch(...)
 		{
-			CASIODevice::ReportASIOException("ASIO crash in disposeBuffers()\n");
+			// continue
 		}
-		CloseDevice();
+		m_TotalFramesWritten = 0;
 	}
-	if (gpCurrentAsio == this)
+	SetRenderSilence(false);
+
+	m_CanOutputReady = false;
+	m_SampleBufferFloat.clear();
+	m_SampleBufferInt16.clear();
+	m_SampleBufferInt24.clear();
+	m_SampleBufferInt32.clear();
+	m_ChannelInfo.clear();
+	if(m_BuffersCreated)
 	{
-		gpCurrentAsio = NULL;
+		try
+		{
+			asioCall(disposeBuffers());
+		} catch(...)
+		{
+			// continue
+		}
+		m_BuffersCreated = false;
 	}
+	if(g_CallbacksInstance)
+	{
+		ALWAYS_ASSERT(g_CallbacksInstance == this);
+		g_CallbacksInstance = nullptr;
+	}
+	MemsetZero(m_Callbacks);
+	m_BufferInfo.clear();
+	m_nAsioBufferLen = 0;
+
+	CloseDriver();
+
 	return true;
 }
 
 
-void CASIODevice::InternalReset()
-//-------------------------------
-{
-	if(IsOpen())
-	{
-		Stop();
-		if(m_bMixRunning)
-		{
-			m_bMixRunning = FALSE;
-			ALWAYS_ASSERT(g_asio_startcount==0);
-			try
-			{
-				m_pAsioDrv->stop();
-			} catch(...)
-			{
-				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
-			}
-			g_asio_startcount = 0;
-			SetRenderSilence(false);
-		}
-	}
-}
-
-
-void CASIODevice::OpenDevice()
+void CASIODevice::OpenDriver()
 //----------------------------
 {
-	if (IsOpen())
+	if(IsDriverOpen())
 	{
 		return;
 	}
-
-	CLSID clsid = StringToCLSID(GetDeviceInternalID());
-	if (CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) == S_OK)
+	CLSID clsid = Util::StringToCLSID(GetDeviceInternalID());
+	try
 	{
-		m_pAsioDrv->init((void *)m_Settings.hWnd);
-	} else
+		if(CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) != S_OK)
+		{
+			Log("ASIO: CoCreateInstance failed!");
+			m_pAsioDrv = nullptr;
+			return;
+		}
+	} catch(...)
 	{
-#ifdef ASIO_LOG
-		Log("  CoCreateInstance failed!\n");
-#endif
-		m_pAsioDrv = NULL;
+		Log("ASIO: CoCreateInstance crashed!");
+		m_pAsioDrv = nullptr;
+		return;
+	}
+	try
+	{
+		if(m_pAsioDrv->init((void *)m_Settings.hWnd) != ASIOTrue)
+		{
+			Log("ASIO: init() failed!");
+			CloseDriver();
+			return;
+		}
+	} catch(...)
+	{
+		Log("ASIO: init() crashed!");
+		CloseDriver();
+		return;
 	}
 }
 
 
-void CASIODevice::CloseDevice()
+void CASIODevice::CloseDriver()
 //-----------------------------
 {
-	if (IsOpen())
+	if(!IsDriverOpen())
 	{
-		try
-		{
-			m_pAsioDrv->Release();
-		} catch(...)
-		{
-			CASIODevice::ReportASIOException("ASIO crash in Release()\n");
-		}
-		m_pAsioDrv = NULL;
+		return;
 	}
+	try
+	{
+		m_pAsioDrv->Release();
+	} catch(...)
+	{
+		CASIODevice::ReportASIOException("ASIO crash in Release()\n");
+	}
+	m_pAsioDrv = nullptr;
 }
 
 
@@ -533,36 +708,177 @@ static void SwapEndian(uint8 *buf, std::size_t itemCount, std::size_t itemSize)
 }
 
 
-void CASIODevice::FillAudioBuffer()
-//---------------------------------
+bool CASIODevice::IsSampleTypeFloat(ASIOSampleType sampleType)
+//------------------------------------------------------------
 {
-	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
-
-	const int channels = m_Settings.Channels;
-	std::size_t sampleFrameSize = channels * sizeof(int32);
-	const std::size_t sampleFramesGoal = m_nAsioBufferLen;
-	std::size_t sampleFramesToRender = sampleFramesGoal;
-	std::size_t sampleFramesRendered = 0;
-	const std::size_t countChunkMax = (ASIO_BLOCK_LEN * sizeof(int32)) / sampleFrameSize;
-	
-	g_dwBuffer &= 1;
-	//Log("FillAudioBuffer(%d): dwSampleSize=%d dwSamplesLeft=%d dwFrameLen=%d\n", g_dwBuffer, sampleFrameSize, dwSamplesLeft, dwFrameLen);
-	while(sampleFramesToRender > 0)
+	switch(sampleType)
 	{
-		const std::size_t countChunk = std::min(sampleFramesToRender, countChunkMax);
-		if(rendersilence)
+		case ASIOSTFloat32MSB:
+		case ASIOSTFloat32LSB:
+		case ASIOSTFloat64MSB:
+		case ASIOSTFloat64LSB:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+	}
+}
+
+
+bool CASIODevice::IsSampleTypeInt16(ASIOSampleType sampleType)
+//------------------------------------------------------------
+{
+	switch(sampleType)
+	{
+		case ASIOSTInt16MSB:
+		case ASIOSTInt16LSB:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+	}
+}
+
+
+bool CASIODevice::IsSampleTypeInt24(ASIOSampleType sampleType)
+//------------------------------------------------------------
+{
+	switch(sampleType)
+	{
+		case ASIOSTInt24MSB:
+		case ASIOSTInt24LSB:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+	}
+}
+
+
+std::size_t CASIODevice::GetSampleSize(ASIOSampleType sampleType)
+//---------------------------------------------------------------
+{
+	switch(sampleType)
+	{
+		case ASIOSTInt16MSB:
+		case ASIOSTInt16LSB:
+			return 2;
+			break;
+		case ASIOSTInt24MSB:
+		case ASIOSTInt24LSB:
+			return 3;
+			break;
+		case ASIOSTInt32MSB:
+		case ASIOSTInt32LSB:
+			return 4;
+			break;
+		case ASIOSTInt32MSB16:
+		case ASIOSTInt32MSB18:
+		case ASIOSTInt32MSB20:
+		case ASIOSTInt32MSB24:
+		case ASIOSTInt32LSB16:
+		case ASIOSTInt32LSB18:
+		case ASIOSTInt32LSB20:
+		case ASIOSTInt32LSB24:
+			return 4;
+			break;
+		case ASIOSTFloat32MSB:
+		case ASIOSTFloat32LSB:
+			return 4;
+			break;
+		case ASIOSTFloat64MSB:
+		case ASIOSTFloat64LSB:
+			return 8;
+			break;
+		default:
+			return 0;
+			break;
+	}
+}
+
+
+bool CASIODevice::IsSampleTypeBigEndian(ASIOSampleType sampleType)
+//----------------------------------------------------------------
+{
+	switch(sampleType)
+	{
+		case ASIOSTInt16MSB:
+		case ASIOSTInt24MSB:
+		case ASIOSTInt32MSB:
+		case ASIOSTFloat32MSB:
+		case ASIOSTFloat64MSB:
+		case ASIOSTInt32MSB16:
+		case ASIOSTInt32MSB18:
+		case ASIOSTInt32MSB20:
+		case ASIOSTInt32MSB24:
+			return true;
+			break;
+		default:
+			return false;
+			break;
+	}
+}
+
+
+void CASIODevice::InternalFillAudioBuffer()
+//-----------------------------------------
+{
+	const bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
+	const int channels = m_Settings.Channels;
+	const std::size_t countChunk = m_nAsioBufferLen;
+	if(rendersilence)
+	{
+		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			memset(m_FrameBuffer, 0, countChunk * sampleFrameSize);
+			std::memset(&m_SampleBufferFloat[0], 0, countChunk * channels * sizeof(float));
+		} else if(m_Settings.sampleFormat == SampleFormatInt16)
+		{
+			std::memset(&m_SampleBufferInt16[0], 0, countChunk * channels * sizeof(int16));
+		} else if(m_Settings.sampleFormat == SampleFormatInt24)
+		{
+			std::memset(&m_SampleBufferInt24[0], 0, countChunk * channels * sizeof(int24));
+		} else if(m_Settings.sampleFormat == SampleFormatInt32)
+		{
+			std::memset(&m_SampleBufferInt32[0], 0, countChunk * channels * sizeof(int32));
 		} else
 		{
-			SourceAudioRead(m_FrameBuffer, countChunk);
+			ASSERT(false);
 		}
-		for(int channel = 0; channel < channels; ++channel)
+	} else
+	{
+		SourceAudioPreRead(countChunk);
+		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			const int32 *src = m_FrameBuffer;
-			const float *srcFloat = reinterpret_cast<const float*>(m_FrameBuffer);
-			void *dst = (char*)m_BufferInfo[channel].buffers[g_dwBuffer] + m_nAsioSampleSize * sampleFramesRendered;
-			if(m_Float) switch(m_ChannelInfo[channel].type)
+			SourceAudioRead(&m_SampleBufferFloat[0], countChunk);
+		} else if(m_Settings.sampleFormat == SampleFormatInt16)
+		{
+			SourceAudioRead(&m_SampleBufferInt16[0], countChunk);
+		} else if(m_Settings.sampleFormat == SampleFormatInt24)
+		{
+			SourceAudioRead(&m_SampleBufferInt24[0], countChunk);
+		} else if(m_Settings.sampleFormat == SampleFormatInt32)
+		{
+			SourceAudioRead(&m_SampleBufferInt32[0], countChunk);
+		} else
+		{
+			ASSERT(false);
+		}
+	}
+	for(int channel = 0; channel < channels; ++channel)
+	{
+		void *dst = m_BufferInfo[channel].buffers[(unsigned long)m_BufferIndex & 1];
+		if(!dst)
+		{
+			// Skip if we did get no buffer for this channel
+			continue;
+		}
+		if(m_Settings.sampleFormat == SampleFormatFloat32)
+		{
+			const float *const srcFloat = &m_SampleBufferFloat[0];
+			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTFloat32MSB:
 				case ASIOSTFloat32LSB:
@@ -575,90 +891,161 @@ void CASIODevice::FillAudioBuffer()
 				default:
 					ASSERT(false);
 					break;
-			} else switch(m_ChannelInfo[channel].type)
+			}
+		} else if(m_Settings.sampleFormat == SampleFormatInt16)
+		{
+			const int16 *const srcInt16 = &m_SampleBufferInt16[0];
+			switch(m_ChannelInfo[channel].type)
 			{
 				case ASIOSTInt16MSB:
 				case ASIOSTInt16LSB:
-					CopyInterleavedToChannel<SC::Convert<int16, int32> >(reinterpret_cast<int16*>(dst), src, channels, countChunk, channel);
+						CopyInterleavedToChannel<SC::Convert<int16, int16> >(reinterpret_cast<int16*>(dst), srcInt16, channels, countChunk, channel);
+						break;
+					default:
+						ASSERT(false);
+						break;
+			}
+		} else if(m_Settings.sampleFormat == SampleFormatInt24)
+		{
+			const int24 *const srcInt24 = &m_SampleBufferInt24[0];
+			switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTInt24MSB:
+				case ASIOSTInt24LSB:
+						CopyInterleavedToChannel<SC::Convert<int24, int24> >(reinterpret_cast<int24*>(dst), srcInt24, channels, countChunk, channel);
+						break;
+					default:
+						ASSERT(false);
+						break;
+			}
+		} else if(m_Settings.sampleFormat == SampleFormatInt32)
+		{
+			const int32 *const srcInt32 = &m_SampleBufferInt32[0];
+			switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTInt16MSB:
+				case ASIOSTInt16LSB:
+					CopyInterleavedToChannel<SC::Convert<int16, int32> >(reinterpret_cast<int16*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt24MSB:
 				case ASIOSTInt24LSB:
-					CopyInterleavedToChannel<SC::Convert<int24, int32> >(reinterpret_cast<int24*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int24, int32> >(reinterpret_cast<int24*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB:
 				case ASIOSTInt32LSB:
-					CopyInterleavedToChannel<SC::Convert<int32, int32> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int32, int32> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTFloat32MSB:
 				case ASIOSTFloat32LSB:
-					CopyInterleavedToChannel<SC::Convert<float, int32> >(reinterpret_cast<float*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<float, int32> >(reinterpret_cast<float*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTFloat64MSB:
 				case ASIOSTFloat64LSB:
-					CopyInterleavedToChannel<SC::Convert<double, int32> >(reinterpret_cast<double*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<double, int32> >(reinterpret_cast<double*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB16:
 				case ASIOSTInt32LSB16:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 16> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 16> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB18:
 				case ASIOSTInt32LSB18:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 14> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 14> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB20:
 				case ASIOSTInt32LSB20:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 12> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 12> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				case ASIOSTInt32MSB24:
 				case ASIOSTInt32LSB24:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), src, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				default:
 					ASSERT(false);
 					break;
 			}
-			switch(m_ChannelInfo[channel].type)
-			{
-				case ASIOSTInt16MSB:
-				case ASIOSTInt24MSB:
-				case ASIOSTInt32MSB:
-				case ASIOSTFloat32MSB:
-				case ASIOSTFloat64MSB:
-				case ASIOSTInt32MSB16:
-				case ASIOSTInt32MSB18:
-				case ASIOSTInt32MSB20:
-				case ASIOSTInt32MSB24:
-					SwapEndian(reinterpret_cast<uint8*>(dst), countChunk, m_nAsioSampleSize);
-					break;
-			}
+		} else
+		{
+			ASSERT(false);
 		}
-		sampleFramesToRender -= countChunk;
-		sampleFramesRendered += countChunk;
+		if(IsSampleTypeBigEndian(m_ChannelInfo[channel].type))
+		{
+			SwapEndian(reinterpret_cast<uint8*>(dst), countChunk, GetSampleSize(m_ChannelInfo[channel].type));
+		}
 	}
-	if(m_bPostOutput)
+	if(m_CanOutputReady)
 	{
-		m_pAsioDrv->outputReady();
+		m_pAsioDrv->outputReady(); // do not handle errors, there is nothing we could do about them
 	}
 	if(!rendersilence)
 	{
-		SourceAudioDone(sampleFramesRendered, m_nAsioBufferLen);
+		SourceAudioDone(countChunk, m_nAsioBufferLen);
 	}
-	return;
 }
 
 
-void CASIODevice::BufferSwitch(long doubleBufferIndex)
+bool CASIODevice::InternalHasTimeInfo() const
+//-------------------------------------------
+{
+	return m_Settings.UseHardwareTiming;
+}
+
+
+bool CASIODevice::InternalHasGetStreamPosition() const
 //----------------------------------------------------
 {
-	g_dwBuffer = doubleBufferIndex;
-	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
-	InterlockedExchange(&m_RenderingSilence, rendersilence ? 1 : 0 );
-	if(rendersilence)
+	return m_Settings.UseHardwareTiming;
+}
+
+
+int64 CASIODevice::InternalGetStreamPositionFrames() const
+//--------------------------------------------------------
+{
+	if(m_Settings.UseHardwareTiming)
 	{
-		FillAudioBuffer();
+		const uint64 asioNow = Clock().NowNanoseconds();
+		SoundTimeInfo timeInfo = GetTimeInfo();
+		int64 currentStreamPositionFrames =
+			Util::Round<int64>(
+			timeInfo.StreamFrames + ((double)((int64)(asioNow - timeInfo.SystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate / (1000.0 * 1000.0))
+			)
+			;
+		return currentStreamPositionFrames;
 	} else
 	{
-		SourceFillAudioBufferLocked();
+		return ISoundDevice::InternalGetStreamPositionFrames();
+	}
+}
+
+
+void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
+//---------------------------------------------------------
+{
+	if(m_Settings.UseHardwareTiming)
+	{
+		if((asioTimeInfo.flags & kSamplePositionValid) && (asioTimeInfo.flags & kSystemTimeValid))
+		{
+			double speed = 1.0;
+			if((asioTimeInfo.flags & kSpeedValid) && (asioTimeInfo.speed > 0.0))
+			{
+				speed = asioTimeInfo.speed;
+			} else if((asioTimeInfo.flags & kSampleRateValid) && (asioTimeInfo.sampleRate > 0.0))
+			{
+				speed *= asioTimeInfo.sampleRate / m_Settings.Samplerate;
+			}
+			SoundTimeInfo timeInfo;
+			timeInfo.StreamFrames = ((((uint64)asioTimeInfo.samplePosition.hi) << 32) | asioTimeInfo.samplePosition.lo) - m_StreamPositionOffset;
+			timeInfo.SystemTimestamp = (((uint64)asioTimeInfo.systemTime.hi) << 32) | asioTimeInfo.systemTime.lo;
+			timeInfo.Speed = speed;
+			ISoundDevice::UpdateTimeInfo(timeInfo);
+		} else
+		{ // spec violation or nothing provided at all, better to estimate this stuff ourselves
+			const uint64 asioNow = Clock().NowNanoseconds();
+			SoundTimeInfo timeInfo;
+			timeInfo.StreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
+			timeInfo.SystemTimestamp = asioNow + Util::Round<int64>(GetBufferAttributes().Latency * 1000.0 * 1000.0 * 1000.0);
+			timeInfo.Speed = 1.0;
+			ISoundDevice::UpdateTimeInfo(timeInfo);
+		}
 	}
 }
 
@@ -666,46 +1053,255 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex)
 void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 //----------------------------------------------------------------------------
 {
-	MPT_UNREFERENCED_PARAMETER(directProcess);
-	if(gpCurrentAsio)
-	{
-		gpCurrentAsio->BufferSwitch(doubleBufferIndex);
-	} else
-	{
-		ALWAYS_ASSERT(false && "gpCurrentAsio");
-	}
-}
-
-
-void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
-//---------------------------------------------------------
-{
-	MPT_UNREFERENCED_PARAMETER(sRate);
-}
-
-
-long CASIODevice::AsioMessage(long selector, long value, void* message, double* opt)
-//----------------------------------------------------------------------------------
-{
-	MPT_UNREFERENCED_PARAMETER(value);
-	MPT_UNREFERENCED_PARAMETER(message);
-	MPT_UNREFERENCED_PARAMETER(opt);
-#ifdef ASIO_LOG
-	// Log("AsioMessage(%d, %d)\n", selector, value);
-#endif
-	switch(selector)
-	{
-	case kAsioEngineVersion: return 2;
-	}
-	return 0;
+	BufferSwitchTimeInfo(nullptr, doubleBufferIndex, directProcess); // delegate
 }
 
 
 ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
 //-----------------------------------------------------------------------------------------------------------
 {
-	BufferSwitch(doubleBufferIndex, directProcess);
+	ASSERT(directProcess); // !directProcess is not handled correctly in OpenMPT, would require a separate thread and potentially additional buffering
+	if(!directProcess)
+	{
+		m_UsedFeatures.set(AsioFeatureNoDirectProcess);
+	}
+	if(m_Settings.UseHardwareTiming)
+	{
+		if(params)
+		{
+			UpdateTimeInfo(params->timeInfo);
+		} else
+		{
+			AsioTimeInfo asioTimeInfo;
+			MemsetZero(asioTimeInfo);
+			UpdateTimeInfo(asioTimeInfo);
+			try
+			{
+				ASIOSamples samplePosition;
+				ASIOTimeStamp systemTime;
+				MemsetZero(samplePosition);
+				MemsetZero(systemTime);
+				if(asioCallUncatched(getSamplePosition(&samplePosition, &systemTime)) == ASE_OK)
+				{
+					AsioTimeInfo asioTimeInfoQueried;
+					MemsetZero(asioTimeInfoQueried);
+					asioTimeInfoQueried.flags = kSamplePositionValid | kSystemTimeValid;
+					asioTimeInfoQueried.samplePosition = samplePosition;
+					asioTimeInfoQueried.systemTime = systemTime;
+					asioTimeInfoQueried.speed = 1.0;
+					ASIOSampleRate sampleRate;
+					MemsetZero(sampleRate);
+					if(asioCallUncatched(getSampleRate(&sampleRate)) == ASE_OK)
+					{
+						if(sampleRate >= 0.0)
+						{
+							asioTimeInfoQueried.flags |= kSampleRateValid;
+							asioTimeInfoQueried.sampleRate = sampleRate;
+						}
+					}
+					asioTimeInfo = asioTimeInfoQueried;
+				}
+			} catch(...)
+			{
+				// continue
+			}
+			UpdateTimeInfo(asioTimeInfo);
+		}
+	}
+	m_BufferIndex = doubleBufferIndex;
+	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
+	InterlockedExchange(&m_RenderingSilence, rendersilence ? 1 : 0 );
+	if(rendersilence)
+	{
+		m_StreamPositionOffset += m_nAsioBufferLen;
+		FillAudioBuffer();
+	} else
+	{
+		SourceFillAudioBufferLocked();
+	}
+	m_TotalFramesWritten += m_nAsioBufferLen;
 	return params;
+}
+
+
+void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
+//---------------------------------------------------------
+{
+	if(Util::Round<uint32>(sRate) == m_Settings.Samplerate)
+	{
+		// not different, ignore it
+		return;
+	}
+	m_UsedFeatures.set(AsioFeatureSampleRateChange);
+	if((double)m_Settings.Samplerate * (1.0 - AsioSampleRateTolerance) <= sRate && sRate <= (double)m_Settings.Samplerate * (1.0 + AsioSampleRateTolerance))
+	{
+		// ignore slight differences which might me due to a unstable external ASIO clock source
+		return;
+	}
+	// play safe and close the device
+	RequestClose();
+}
+
+
+static std::string AsioFeaturesToString(FlagSet<AsioFeatures> features)
+//---------------------------------------------------------------------
+{
+	std::string result;
+	bool first = true;
+	if(features[AsioFeatureResetRequest]) { if(!first) { result += ","; } first = false; result += "reset"; }
+	if(features[AsioFeatureResyncRequest]) { if(!first) { result += ","; } first = false; result += "resync"; }
+	if(features[AsioFeatureLatenciesChanged]) { if(!first) { result += ","; } first = false; result += "latency"; }
+	if(features[AsioFeatureBufferSizeChange]) { if(!first) { result += ","; } first = false; result += "buffer"; }
+	if(features[AsioFeatureOverload]) { if(!first) { result += ","; } first = false; result += "load"; }
+	if(features[AsioFeatureNoDirectProcess]) { if(!first) { result += ","; } first = false; result += "nodirect"; }
+	if(features[AsioFeatureSampleRateChange]) { if(!first) { result += ","; } first = false; result += "srate"; }
+	return result;
+}
+
+
+std::string CASIODevice::GetStatistics() const
+//--------------------------------------------
+{
+	const FlagSet<AsioFeatures> unsupported((AsioFeatures)(AsioFeatureNoDirectProcess | AsioFeatureOverload | AsioFeatureBufferSizeChange | AsioFeatureSampleRateChange));
+	FlagSet<AsioFeatures> unsupportedFeatues = m_UsedFeatures;
+	unsupportedFeatues &= unsupported;
+	if(unsupportedFeatues.any())
+	{
+		return mpt::String::Print("WARNING: unsupported features: %1", AsioFeaturesToString(unsupportedFeatues));
+	} else if(m_UsedFeatures.any())
+	{
+		return mpt::String::Print("OK, features used: %1", AsioFeaturesToString(m_UsedFeatures));
+	} else if(m_QueriedFeatures.any())
+	{
+		return mpt::String::Print("OK, features queried: %1", AsioFeaturesToString(m_QueriedFeatures));
+	}
+	return std::string("OK.");
+}
+
+
+long CASIODevice::AsioMessage(long selector, long value, void* message, double* opt)
+//----------------------------------------------------------------------------------
+{
+	long result = 0;
+	switch(selector)
+	{
+	case kAsioSelectorSupported:
+		switch(value)
+		{
+		case kAsioSelectorSupported:
+		case kAsioEngineVersion:
+			result = 1;
+			break;
+		case kAsioSupportsTimeInfo:
+			result = m_Settings.UseHardwareTiming ? 1 : 0;
+			break;
+		case kAsioResetRequest:
+			m_QueriedFeatures.set(AsioFeatureResetRequest);
+			result = 1;
+			break;
+		case kAsioBufferSizeChange:
+			m_QueriedFeatures.set(AsioFeatureBufferSizeChange);
+			result = 0;
+			break;
+		case kAsioResyncRequest:
+			m_QueriedFeatures.set(AsioFeatureResyncRequest);
+			result = 1;
+			break;
+		case kAsioLatenciesChanged:
+			m_QueriedFeatures.set(AsioFeatureLatenciesChanged);
+			result = 1;
+			break;
+		case kAsioOverload:
+			m_QueriedFeatures.set(AsioFeatureOverload);
+			// unsupported
+			result = 0;
+			break;
+		default:
+			// unsupported
+			result = 0;
+			break;
+		}
+		break;
+	case kAsioEngineVersion:
+		result = 2;
+		break;
+	case kAsioSupportsTimeInfo:
+		result = m_Settings.UseHardwareTiming ? 1 : 0;
+		break;
+	case kAsioResetRequest:
+		m_UsedFeatures.set(AsioFeatureResetRequest);
+		RequestReset();
+		result = 1;
+		break;
+	case kAsioBufferSizeChange:
+		m_UsedFeatures.set(AsioFeatureBufferSizeChange);
+		// We do not support kAsioBufferSizeChange.
+		// This should cause a driver to send a kAsioResetRequest.
+		result = 0;
+		break;
+	case kAsioResyncRequest:
+		m_UsedFeatures.set(AsioFeatureResyncRequest);
+		RequestRestart();
+		result = 1;
+		break;
+	case kAsioLatenciesChanged:
+		_InterlockedOr(&m_AsioRequestFlags, AsioRequestFlagLatenciesChanged);
+		result = 1;
+		break;
+	case kAsioOverload:
+		m_UsedFeatures.set(AsioFeatureOverload);
+		// unsupported
+		result = 0;
+		break;
+	default:
+		// unsupported
+		result = 0;
+		break;
+	}
+	Log(mpt::String::Print("ASIO: AsioMessage(selector=%1, value=%2, message=%3, opt=%4) => result=%5"
+		, selector
+		, value
+		, reinterpret_cast<std::size_t>(message)
+		, opt ? mpt::ToString(*opt) : "NULL"
+		, result
+		));
+	return result;
+}
+
+
+long CASIODevice::CallbackAsioMessage(long selector, long value, void* message, double* opt)
+//------------------------------------------------------------------------------------------
+{
+	ALWAYS_ASSERT(g_CallbacksInstance);
+	if(!g_CallbacksInstance) return 0;
+	return g_CallbacksInstance->AsioMessage(selector, value, message, opt);
+}
+
+
+void CASIODevice::CallbackSampleRateDidChange(ASIOSampleRate sRate)
+//-----------------------------------------------------------------
+{
+	ALWAYS_ASSERT(g_CallbacksInstance);
+	if(!g_CallbacksInstance) return;
+	g_CallbacksInstance->SampleRateDidChange(sRate);
+}
+
+
+void CASIODevice::CallbackBufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
+//------------------------------------------------------------------------------------
+{
+	ALWAYS_ASSERT(g_CallbacksInstance);
+	if(!g_CallbacksInstance) return;
+	g_CallbacksInstance->BufferSwitch(doubleBufferIndex, directProcess);
+}
+
+
+ASIOTime* CASIODevice::CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
+//-------------------------------------------------------------------------------------------------------------------
+{
+	ALWAYS_ASSERT(g_CallbacksInstance);
+	if(!g_CallbacksInstance) return params;
+	return g_CallbacksInstance->BufferSwitchTimeInfo(params, doubleBufferIndex, directProcess);
 }
 
 
@@ -717,43 +1313,114 @@ void CASIODevice::ReportASIOException(const std::string &str)
 }
 
 
-SoundDeviceCaps CASIODevice::GetDeviceCaps(const std::vector<uint32> &baseSampleRates)
-//------------------------------------------------------------------------------------
+SoundDeviceCaps CASIODevice::GetDeviceCaps()
+//------------------------------------------
 {
 	SoundDeviceCaps caps;
 
-	const bool wasOpen = (m_pAsioDrv != NULL);
-	if(!wasOpen)
+	caps.CanUpdateInterval = false;
+	caps.CanSampleFormat = false;
+	caps.CanExclusiveMode = false;
+	caps.CanBoostThreadPriority = false;
+	caps.CanKeepDeviceRunning = true;
+	caps.CanUseHardwareTiming = true;
+	caps.CanChannelMapping = true;
+	caps.CanDriverPanel = true;
+
+	return caps;
+}
+
+
+SoundDeviceDynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+//--------------------------------------------------------------------------------------------------
+{
+	SoundDeviceDynamicCaps caps;
+
+	TemporaryASIODriverOpener opener(*this);
+	if(!IsDriverOpen())
 	{
-		OpenDevice();
-		if(m_pAsioDrv == NULL)
-		{
-			return caps;
-		}
+		return caps;
 	}
 
-	ASIOSampleRate samplerate;
-	if(m_pAsioDrv->getSampleRate(&samplerate) != ASE_OK)
+	try
 	{
-		samplerate = 0;
+		ASIOSampleRate samplerate = 0.0;
+		asioCall(getSampleRate(&samplerate));
+		if(samplerate > 0.0)
+		{
+			caps.currentSampleRate = Util::Round<uint32>(samplerate);
+		}
+	} catch(...)
+	{
+		// continue
 	}
-	caps.currentSampleRate = Util::Round<uint32>(samplerate);
 
 	for(size_t i = 0; i < baseSampleRates.size(); i++)
 	{
-		if(m_pAsioDrv->canSampleRate((ASIOSampleRate)baseSampleRates[i]) == ASE_OK)
+		try
 		{
-			caps.supportedSampleRates.push_back(baseSampleRates[i]);
+			if(asioCallUncatched(canSampleRate((ASIOSampleRate)baseSampleRates[i])) == ASE_OK)
+			{
+				caps.supportedSampleRates.push_back(baseSampleRates[i]);
+			}
+		} catch(...)
+		{
+			// continue
 		}
 	}
 
-	if(!wasOpen)
+	try
 	{
-		CloseDevice();
+		long inputChannels = 0;
+		long outputChannels = 0;
+		asioCall(getChannels(&inputChannels, &outputChannels));
+		for(long i = 0; i < outputChannels; ++i)
+		{
+			ASIOChannelInfo channelInfo;
+			MemsetZero(channelInfo);
+			channelInfo.channel = i;
+			channelInfo.isInput = ASIOFalse;
+			std::wstring name = mpt::ToWString(i);
+			try
+			{
+				asioCall(getChannelInfo(&channelInfo));
+				mpt::String::SetNullTerminator(channelInfo.name);
+				name = mpt::ToWide(mpt::CharsetLocale, channelInfo.name);
+			} catch(...)
+			{
+				// continue
+			}
+			caps.channelNames.push_back(name);
+		}
+	} catch(...)
+	{
+		// continue
 	}
 
 	return caps;
 }
 
 
+bool CASIODevice::OpenDriverSettings()
+//------------------------------------
+{
+	TemporaryASIODriverOpener opener(*this);
+	if(!IsDriverOpen())
+	{
+		return false;
+	}
+	try
+	{
+		asioCall(controlPanel());
+	} catch(...)
+	{
+		return false;
+	}
+	return true;
+}
+
+
 #endif // NO_ASIO
+
+
+OPENMPT_NAMESPACE_END

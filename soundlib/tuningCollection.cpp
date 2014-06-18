@@ -13,7 +13,11 @@
 #include "../common/serialization_utils.h"
 #include <algorithm>
 #include <bitset>
-#include <fstream>
+#include "../common/mptFstream.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
+
 
 /*
 Version history:
@@ -27,7 +31,7 @@ TODOS:
 -Handle const-status better(e.g. status check in unserialization)
 */
 
-const CHAR CTuningCollection::s_FileExtension[4] = ".tc";
+const char CTuningCollection::s_FileExtension[4] = ".tc";
 
 namespace CTuningS11n
 {
@@ -46,7 +50,7 @@ using namespace CTuningS11n;
 
 
 CTuningCollection::CTuningCollection(const std::string& name) : m_Name(name), m_EditMask(EM_ALLOWALL)
-//------------------------------------
+//---------------------------------------------------------------------------------------------------
 {
 	if(m_Name.size() > GetNameLengthMax()) m_Name.resize(GetNameLengthMax());
 }
@@ -69,7 +73,7 @@ CTuningCollection::~CTuningCollection()
 }
 
 CTuning* CTuningCollection::FindTuning(const std::string& name) const
-//------------------------------------------------------
+//-------------------------------------------------------------------
 {
 	for(size_t i = 0; i<m_Tunings.size(); i++)
 	{
@@ -87,22 +91,22 @@ size_t CTuningCollection::FindTuning(const CTuning* const pT) const
 
 
 CTuning* CTuningCollection::GetTuning(const std::string& name)
-//----------------------------------------------
+//------------------------------------------------------------
 {
 	return FindTuning(name);
 }
 
 const CTuning* CTuningCollection::GetTuning(const std::string& name) const
-//-------------------------------------------------------------------
+//------------------------------------------------------------------------
 {
 	return FindTuning(name);
 }
 
 
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::ostream& oStrm) const
-//--------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 {
-	srlztn::Ssb ssb(oStrm);
+	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite("TC", s_SerializationVersion);
 	ssb.WriteItem(m_Name, "0", 1, &WriteStr);
 	ssb.WriteItem(m_EditMask, "1");
@@ -112,19 +116,21 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::o
 		ssb.WriteItem(*m_Tunings[i], "2", 1, &WriteTuning);
 	ssb.FinishWrite();
 		
-	if(ssb.m_Status & srlztn::SNT_FAILURE)
+	if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 		return true;
 	else
 		return false;
 }
 
 
+#ifndef MODPLUG_NO_FILESAVE
+
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() const
-//-------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 {
-	if(m_SavefilePath.length() < 1)
+	if(m_SavefilePath.empty())
 		return SERIALIZATION_FAILURE;
-	std::ofstream fout(m_SavefilePath.c_str(), std::ios::binary);
+	mpt::ofstream fout(m_SavefilePath, std::ios::binary);
 	if(!fout.good())
 		return SERIALIZATION_FAILURE;
 
@@ -135,11 +141,11 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() cons
 }
 
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize()
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 {
-	if(m_SavefilePath.length() < 1)
+	if(m_SavefilePath.empty())
 		return SERIALIZATION_FAILURE;
-	std::ifstream fin(m_SavefilePath.c_str(), std::ios::binary);
+	mpt::ifstream fin(m_SavefilePath, std::ios::binary);
 	if(!fin.good())
 		return SERIALIZATION_FAILURE;
 
@@ -149,9 +155,11 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize()
 	return SERIALIZATION_SUCCESS;
 }
 
+#endif // MODPLUG_NO_FILESAVE
+
 
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std::istream& iStrm)
-//---------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 {
 	std::istream::pos_type startpos = iStrm.tellg();
 	bool oldLoadingSuccess = false;
@@ -160,22 +168,22 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std:
 	{	// An old version was not recognised - trying new version.
 		iStrm.clear();
 		iStrm.seekg(startpos);
-		srlztn::Ssb ssb(iStrm);
+		srlztn::SsbRead ssb(iStrm);
 		ssb.BeginRead("TC", s_SerializationVersion);
 
-		const srlztn::Ssb::ReadIterator iterBeg = ssb.GetReadBegin();
-		const srlztn::Ssb::ReadIterator iterEnd = ssb.GetReadEnd();
-		for(srlztn::Ssb::ReadIterator iter = iterBeg; iter != iterEnd; iter++)
+		const srlztn::SsbRead::ReadIterator iterBeg = ssb.GetReadBegin();
+		const srlztn::SsbRead::ReadIterator iterEnd = ssb.GetReadEnd();
+		for(srlztn::SsbRead::ReadIterator iter = iterBeg; iter != iterEnd; iter++)
 		{
-			if (ssb.CompareId(iter, "0") == srlztn::Ssb::IdMatch)
+			if (ssb.CompareId(iter, "0") == srlztn::SsbRead::IdMatch)
 				ssb.ReadItem(iter, m_Name, &ReadStr);
-			else if (ssb.CompareId(iter, "1") == srlztn::Ssb::IdMatch)
+			else if (ssb.CompareId(iter, "1") == srlztn::SsbRead::IdMatch)
 				ssb.ReadItem(iter, m_EditMask);
-			else if (ssb.CompareId(iter, "2") == srlztn::Ssb::IdMatch)
+			else if (ssb.CompareId(iter, "2") == srlztn::SsbRead::IdMatch)
 				ssb.ReadItem(iter, *this, &ReadTuning);
 		}
 
-		if(ssb.m_Status & srlztn::SNT_FAILURE)
+		if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 			return true;
 		else
 			return false;
@@ -192,7 +200,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std:
 //Returns false if stream content was recognised to be right kind of file(by beginmarker),
 //else true, and sets bool parameter to true if loading was successful
 bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSuccessful)
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 {
 	//s_SerializationBeginMarker = 0x54435348;  //ascii of TCSH
 	//s_SerializationEndMarker = 0x54435346; //ascii of TCSF(TuningCollectionSerialisationFooter) in hex.
@@ -254,7 +262,7 @@ bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSucces
 
 
 bool CTuningCollection::Remove(const CTuning* pT)
-//--------------------------------------------
+//-----------------------------------------------
 {
 	TITER iter = find(m_Tunings.begin(), m_Tunings.end(), pT);
 	if(iter != m_Tunings.end())
@@ -264,7 +272,7 @@ bool CTuningCollection::Remove(const CTuning* pT)
 }
 
 bool CTuningCollection::Remove(TITER removable, bool moveToTrashBin)
-//---------------------------------------------
+//------------------------------------------------------------------
 {
 	//Behavior:
 	//By default, moves tuning to carbage bin(m_DeletedTunings) so that
@@ -308,7 +316,7 @@ bool CTuningCollection::AddTuning(CTuning* const pT)
 
 
 bool CTuningCollection::AddTuning(std::istream& inStrm, const bool ignoreEditmask)
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 {
 	if((!ignoreEditmask && (m_EditMask & EM_ADD) == 0) || m_Tunings.size() >= s_nMaxTuningCount)
 		return true;
@@ -352,8 +360,11 @@ bool CTuningCollection::TransferTuning(CTuningCollection* pTCsrc, CTuningCollect
 }
 
 std::string CTuningCollection::GetEditMaskString() const
-//-------------------------------------------------
+//------------------------------------------------------
 {
 	std::bitset<16> mask(m_EditMask);
 	return mask.to_string<char, std::char_traits<char>, std::allocator<char> >();
 }
+
+
+OPENMPT_NAMESPACE_END

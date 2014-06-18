@@ -9,36 +9,34 @@
 
 
 #pragma once
-#include "afxwin.h"
 
-// CMoveFXSlotDialog dialog
+OPENMPT_NAMESPACE_BEGIN
 
 class CMoveFXSlotDialog : public CDialog
 {
-	DECLARE_DYNAMIC(CMoveFXSlotDialog)
-
-public:
-	CMoveFXSlotDialog(CWnd* pParent = NULL);   // standard constructor
-	virtual ~CMoveFXSlotDialog();
-	void SetupMove(PLUGINDEX currentSlot, std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex);
-	PLUGINDEX m_nToSlot;
-	
-
-
-// Dialog Data
-	enum { IDD = IDD_MOVEFXSLOT };
-
 protected:
+	const std::vector<PLUGINDEX> &m_EmptySlots;
 	CString m_csPrompt, m_csTitle;
 	CEdit m_EditPrompt;
-	std::vector<PLUGINDEX> m_EmptySlots;
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	CComboBox m_CbnEmptySlots;
+	size_t m_nToSlot;
 	PLUGINDEX m_nDefaultSlot;
+	bool moveChain;
 
-	DECLARE_MESSAGE_MAP()
-	virtual void OnOK();
+	CComboBox m_CbnEmptySlots;
+
+	enum { IDD = IDD_MOVEFXSLOT };
+
 public:
-	
+	CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone, bool hasChain);
+	PLUGINDEX GetSlot() const { return m_EmptySlots[m_nToSlot]; }
+	size_t GetSlotIndex() const { return m_nToSlot; }
+	bool DoMoveChain() const { return moveChain; }
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 };
+
+OPENMPT_NAMESPACE_END

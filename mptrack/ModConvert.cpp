@@ -38,8 +38,12 @@
 #include "Stdafx.h"
 #include "Moddoc.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "modsmp_ctrl.h"
 #include "ModConvert.h"
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 #define CHANGEMODTYPE_WARNING(x)	warnings.set(x);
@@ -151,17 +155,16 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// Removing all instrument headers from channels
 		for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
 		{
-			m_SndFile.Chn[nChn].pModInstrument = nullptr;
+			m_SndFile.m_PlayState.Chn[nChn].pModInstrument = nullptr;
 		}
 
-		for(INSTRUMENTINDEX nIns = 0; nIns < m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
+		for(INSTRUMENTINDEX nIns = 0; nIns <= m_SndFile.GetNumInstruments(); nIns++) if (m_SndFile.Instruments[nIns])
 		{
 			delete m_SndFile.Instruments[nIns];
 			m_SndFile.Instruments[nIns] = nullptr;
 		}
 		m_SndFile.m_nInstruments = 0;
 
-		cs.Leave();
 		EndWaitCursor();
 	} //End if (((m_SndFile.m_nInstruments) || (b64)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 	BeginWaitCursor();
@@ -170,6 +173,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	/////////////////////////////
 	// Converting pattern data
 
+	// When converting to MOD, get the new sample transpose setting right here so that we can compensate notes in the pattern.
+	if(newTypeIsMOD && !oldTypeIsXM)
+	{
+		for(SAMPLEINDEX smp = 1; smp <= m_SndFile.GetNumSamples(); smp++)
+		{
+			m_SndFile.GetSample(smp).FrequencyToTranspose();
+		}
+	}
+
 	for(PATTERNINDEX pat = 0; pat < m_SndFile.Patterns.Size(); pat++) if (m_SndFile.Patterns[pat])
 	{
 		ModCommand *m = m_SndFile.Patterns[pat];
@@ -177,6 +189,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// This is used for -> MOD/XM conversion
 		std::vector<std::vector<ModCommand::PARAM> > effMemory(GetNumChannels());
 		std::vector<ModCommand::VOL> volMemory(GetNumChannels(), 0);
+		std::vector<ModCommand::INSTR> instrMemory(GetNumChannels(), 0);
 		for(size_t i = 0; i < GetNumChannels(); i++)
 		{
 			effMemory[i].resize(MAX_EFFECTS, 0);
@@ -193,6 +206,10 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				chn = 0;
 				row++;
 			}
+
+			ModCommand::INSTR instr = m->instr;
+			if(m->instr) instrMemory[chn] = instr;
+			else instr = instrMemory[chn];
 
 			// Deal with volume column slide memory (it's not shared with the effect column)
 			if(oldTypeIsIT_MPT && (newTypeIsMOD_XM || newTypeIsS3M))
@@ -245,6 +262,13 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 						effMemory[chn][m->command] = m->param;
 					break;
 
+				}
+
+				// Compensate for loss of transpose information
+				if(m->IsNote() && instr && instr <= GetNumSamples())
+				{
+					const int newNote = m->note + m_SndFile.GetSample(instr).RelativeTone;
+					m->note = static_cast<uint8>(Clamp(newNote, specs.noteMin, specs.noteMax));
 				}
 			}
 
@@ -316,7 +340,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.GetNumSamples(); smp++)
 	{
 		ModSample &sample = m_SndFile.GetSample(smp);
-		GetSampleUndo().PrepareUndo(smp, sundo_none);
+		GetSampleUndo().PrepareUndo(smp, sundo_none, "Song Conversion");
 
 		// Too many samples? Only 31 samples allowed in MOD format...
 		if(newTypeIsMOD && smp > 31 && sample.nLength > 0)
@@ -415,8 +439,22 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	if(newTypeIsMOD)
 	{
 		// Not supported in MOD format
-		m_SndFile.m_nDefaultSpeed = 6;
-		m_SndFile.m_nDefaultTempo = 125;
+		if(m_SndFile.m_nDefaultSpeed != 6)
+		{
+			if(m_SndFile.Order.size() > 0)
+			{
+				m_SndFile.Patterns[m_SndFile.Order[0]].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).Retry(EffectWriter::rmTryNextRow));
+			}
+			m_SndFile.m_nDefaultSpeed = 6;
+		}
+		if(m_SndFile.m_nDefaultTempo != 125)
+		{
+			if(m_SndFile.Order.size() > 0)
+			{
+				m_SndFile.Patterns[m_SndFile.Order[0]].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo)).Retry(EffectWriter::rmTryNextRow));
+			}
+			m_SndFile.m_nDefaultTempo = 125;
+		}
 		m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 		m_SndFile.m_nSamplePreAmp = 48;
 		m_SndFile.m_nVSTiVolume = 48;
@@ -470,7 +508,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	// Check whether the new format supports embedding the edit history in the file.
-	if(oldTypeIsIT_MPT && !newTypeIsIT_MPT && GetFileHistory().size() > 0)
+	if(oldTypeIsIT_MPT && !newTypeIsIT_MPT && GetrSoundFile().GetFileHistory().size() > 0)
 	{
 		CHANGEMODTYPE_WARNING(wEditHistory);
 	}
@@ -482,6 +520,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	CriticalSection cs;
 	m_SndFile.ChangeModTypeTo(nNewType);
+
+	// In case we need to update IT bidi loop handling pre-computation or loops got changed...
+	m_SndFile.PrecomputeSampleLoops(false);
 
 	// Song flags
 	if(!(CSoundFile::GetModSpecifications(nNewType).songFlags & SONG_LINEARSLIDES) && m_SndFile.m_SongFlags[SONG_LINEARSLIDES])
@@ -496,7 +537,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	{
 		m_SndFile.SetMixLevels(mixLevels_compatible);
 	}
-	if(oldTypeIsMPT && m_SndFile.GetMixLevels() != mixLevels_compatible)
+	if(oldTypeIsMPT && m_SndFile.GetMixLevels() != mixLevels_compatible && m_SndFile.GetMixLevels() != mixLevels_compatible_FT2)
 	{
 		CHANGEMODTYPE_WARNING(wMixmode);
 	}
@@ -591,3 +632,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 #undef CHANGEMODTYPE_WARNING
 #undef CHANGEMODTYPE_CHECK
+
+
+OPENMPT_NAMESPACE_END

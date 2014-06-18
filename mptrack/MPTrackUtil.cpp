@@ -10,10 +10,14 @@
 
 #include "stdafx.h"
 #include "MPTrackUtil.h"
+#include "Mptrack.h"
+#include "../common/misc_util.h"
 
 #include <io.h> // for _taccess
 #include <time.h>
 
+
+OPENMPT_NAMESPACE_BEGIN
 
 /*
  * Loads resource.
@@ -65,13 +69,10 @@ std::string GetErrorMessage(DWORD nErrorCode)
 }
 
 
-time_t Util::sdTime::MakeGmTime(tm& timeUtc)
+bool Util::sdOs::IsPathFileAvailable(const mpt::PathString &pszFilePath, FileMode fm)
 {
-	return _mkgmtime(&timeUtc);
+	return (_waccess(pszFilePath.AsNative().c_str(), fm) == 0);
 }
 
 
-bool Util::sdOs::IsPathFileAvailable(LPCTSTR pszFilePath, FileMode fm)
-{
-	return (_taccess(pszFilePath, fm) == 0);
-}
+OPENMPT_NAMESPACE_END

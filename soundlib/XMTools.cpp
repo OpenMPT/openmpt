@@ -15,6 +15,9 @@
 #include <algorithm>
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Convert all multi-byte numeric values to current platform's endianness or vice versa.
 void XMFileHeader::ConvertEndianness()
 //------------------------------------
@@ -49,16 +52,25 @@ void XMInstrument::ConvertEndianness()
 
 
 // Convert OpenMPT's internal envelope representation to XM envelope data.
-void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, uint16 *envData)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, EnvType env)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	numPoints = static_cast<uint8>(std::min(12u, mptEnv.nNodes));
 
 	// Envelope Data
 	for(size_t i = 0; i < numPoints; i++)
 	{
-		envData[i * 2] = std::min(mptEnv.Ticks[i], uint16_max);
-		envData[i * 2 + 1] = mptEnv.Values[i];
+		switch(env)
+		{
+		case EnvTypeVol:
+			volEnv[i * 2] = std::min(mptEnv.Ticks[i], uint16_max);
+			volEnv[i * 2 + 1] = std::min(mptEnv.Values[i], uint8(64));
+			break;
+		case EnvTypePan:
+			panEnv[i * 2] = std::min(mptEnv.Ticks[i], uint16_max);
+			panEnv[i * 2 + 1] = std::min(mptEnv.Values[i], uint8(63));
+			break;
+		}
 	}
 
 	// Envelope Flags
@@ -84,8 +96,8 @@ uint16 XMInstrument::ConvertToXM(const ModInstrument &mptIns, bool compatibility
 	volFade = static_cast<uint16>(std::min(mptIns.nFadeOut, uint32(32767)));
 
 	// Convert envelopes
-	ConvertEnvelopeToXM(mptIns.VolEnv, volPoints, volFlags, volSustain, volLoopStart, volLoopEnd, volEnv);
-	ConvertEnvelopeToXM(mptIns.PanEnv, panPoints, panFlags, panSustain, panLoopStart, panLoopEnd, panEnv);
+	ConvertEnvelopeToXM(mptIns.VolEnv, volPoints, volFlags, volSustain, volLoopStart, volLoopEnd, EnvTypeVol);
+	ConvertEnvelopeToXM(mptIns.PanEnv, panPoints, panFlags, panSustain, panLoopStart, panLoopEnd, EnvTypePan);
 
 	// Create sample assignment table
 	std::vector<SAMPLEINDEX> sampleList = GetSampleList(mptIns, compatibilityExport);
@@ -146,16 +158,25 @@ std::vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns
 
 
 // Convert XM envelope data to an OpenMPT's internal envelope representation.
-void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, const uint16 (&envData)[24]) const
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, EnvType env) const
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	mptEnv.nNodes = MIN(numPoints, 12);
 
 	// Envelope Data
 	for(size_t i = 0; i < 12; i++)
 	{
-		mptEnv.Ticks[i] = envData[i * 2];
-		mptEnv.Values[i] = static_cast<uint8>(envData[i * 2 + 1]);
+		switch(env)
+		{
+		case EnvTypeVol:
+			mptEnv.Ticks[i] = volEnv[i * 2];
+			mptEnv.Values[i] = static_cast<uint8>(volEnv[i * 2 + 1]);
+			break;
+		case EnvTypePan:
+			mptEnv.Ticks[i] = panEnv[i * 2];
+			mptEnv.Values[i] = static_cast<uint8>(panEnv[i * 2 + 1]);
+			break;
+		}
 
 		if(i > 0 && mptEnv.Ticks[i] < mptEnv.Ticks[i - 1])
 		{
@@ -199,8 +220,8 @@ void XMInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	mptIns.nFadeOut = volFade;
 
 	// Convert envelopes
-	ConvertEnvelopeToMPT(mptIns.VolEnv, volPoints, volFlags, volSustain, volLoopStart, volLoopEnd, volEnv);
-	ConvertEnvelopeToMPT(mptIns.PanEnv, panPoints, panFlags, panSustain, panLoopStart, panLoopEnd, panEnv);
+	ConvertEnvelopeToMPT(mptIns.VolEnv, volPoints, volFlags, volSustain, volLoopStart, volLoopEnd, EnvTypeVol);
+	ConvertEnvelopeToMPT(mptIns.PanEnv, panPoints, panFlags, panSustain, panLoopStart, panLoopEnd, EnvTypePan);
 
 	// Create sample assignment table
 	for(size_t i = 0; i < CountOf(sampleMap); i++)
@@ -212,8 +233,8 @@ void XMInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	{
 		mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		Limit(mptIns.nMidiChannel, uint8(MidiFirstChannel), uint8(MidiLastChannel));
+		mptIns.nMidiProgram = static_cast<uint8>(std::min(midiProgram, uint16(127)) + 1);
 	}
-	//mptIns.nMidiProgram = midiProgram + 1;
 	mptIns.midiPWD = static_cast<int8>(pitchWheelRange);
 }
 
@@ -267,6 +288,7 @@ void XMInstrumentHeader::Finalise()
 		sampleHeaderSize = sizeof(XMSample);
 	} else
 	{
+		// TODO: FT2 completely ignores MIDI settings (and also the less important stuff) if not at least one (empty) sample is assigned to this instrument!
 		size -= sizeof(XMInstrument);
 		sampleHeaderSize = 0;
 	}
@@ -280,7 +302,7 @@ void XMInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 	numSamples = instrument.ConvertToXM(mptIns, compatibilityExport);
 	mpt::String::Write<mpt::String::spacePadded>(name, mptIns.name);
 
-	type = mptIns.nMidiProgram;	// If FT2 writes crap here, we can do so, too! (we probably shouldn't, though.)
+	type = mptIns.nMidiProgram;	// If FT2 writes crap here, we can do so, too! (we probably shouldn't, though. This is just for backwards compatibility with old MPT versions.)
 }
 
 
@@ -304,7 +326,11 @@ void XMInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 
 	mpt::String::Read<mpt::String::spacePadded>(mptIns.name, name);
 
-	mptIns.nMidiProgram = type;
+	// Old MPT backwards compatibility
+	if(!instrument.midiEnabled)
+	{
+		mptIns.nMidiProgram = type;
+	}
 }
 
 
@@ -482,3 +508,6 @@ SampleIO XMSample::GetSampleFormat() const
 		SampleIO::littleEndian,
 		SampleIO::deltaPCM);
 }
+
+
+OPENMPT_NAMESPACE_END

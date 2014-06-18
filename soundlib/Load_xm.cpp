@@ -21,6 +21,9 @@
 #endif // MODPLUG_TRACKER
 
 
+OPENMPT_NAMESPACE_BEGIN
+
+
 // Allocate samples for an instrument
 static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEINDEX numSamples)
 //--------------------------------------------------------------------------------------------
@@ -117,8 +120,8 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 
 
 // Read .XM patterns
-void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile &sndFile)
-//----------------------------------------------------------------------------------------
+static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile &sndFile)
+//-----------------------------------------------------------------------------------------------
 {
 	// Reading patterns
 	sndFile.Patterns.ResizeArray(fileHeader.patterns);
@@ -147,7 +150,7 @@ void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile
 		}
 
 		file.Seek(curPos + headerSize);
-		FileReader patternChunk = file.GetChunk(packedSize);
+		FileReader patternChunk = file.ReadChunk(packedSize);
 
 		if(sndFile.Patterns.Insert(pat, numRows) || packedSize == 0)
 		{
@@ -231,7 +234,7 @@ void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile
 
 				if(m->volcmd == VOLCMD_PANNING)
 				{
-					m->vol = ((m->vol * 64 + 8) / 15);
+					m->vol *= 4;	// FT2 does indeed not scale panning symmetrically.
 				}
 			}
 		}
@@ -277,6 +280,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	InitializeChannels();
 	ChangeModTypeTo(MOD_TYPE_XM);
+	m_nMixLevels = mixLevels_compatible_FT2;
 
 	FlagSet<TrackerVersions> madeWith(verUnknown);
 
@@ -304,16 +308,15 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	} else
 	{
 		// Something else!
-		madeWith = verUnknown |verConfirmed;
+		madeWith = verUnknown | verConfirmed;
 
-		madeWithTracker.append(fileHeader.trackerName, CountOf(fileHeader.trackerName));
-		madeWithTracker = mpt::String::RTrim(madeWithTracker);
+		mpt::String::Read<mpt::String::spacePadded>(madeWithTracker, fileHeader.trackerName);
 	}
 
 	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
 
-	m_nMinPeriod = 27;
-	m_nMaxPeriod = 54784;
+	m_nMinPeriod = 1;
+	m_nMaxPeriod = 31999;
 
 	m_nRestartPos = fileHeader.restartPos;
 	m_nChannels = fileHeader.channels;
@@ -475,9 +478,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				for(SAMPLEINDEX sample = 0; sample < instrHeader.numSamples; sample++)
 				{
+					// Sample 15 in dirtysex.xm by J/M/T/M is a 16-bit sample with an odd size of 0x18B according to the header, while the real sample size would be 0x18A.
+					// Always read as many bytes as specified in the header, even if the sample reader would probably read less bytes.
+					FileReader sampleChunk = file.ReadChunk(sampleFlags[sample].GetEncoding() != SampleIO::ADPCM ? sampleSize[sample] : (16 + (sampleSize[sample] + 1) / 2));
 					if(sample < sampleSlots.size())
 					{
-						sampleFlags[sample].ReadSample(Samples[sampleSlots[sample]], file);
+						sampleFlags[sample].ReadSample(Samples[sampleSlots[sample]], sampleChunk);
 					}
 				}
 			}
@@ -624,7 +630,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(m_dwLastSavedWithVersion == 0)
 		{
-			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);	// early versions of OpenMPT had no version indication.
+			// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
+			// when saving a file in OpenMPT for the first time.
+			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
 		}
 	}
 
@@ -648,15 +656,15 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-#define str_tooMuchPatternData	(GetStrI18N((MPT_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
-#define str_pattern				(GetStrI18N((MPT_TEXT("pattern"))))
+#define str_tooMuchPatternData	(GetStrI18N("Warning: File format limit was reached. Some pattern data may not get written to file."))
+#define str_pattern				(GetStrI18N("pattern"))
 
 
-bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
-//--------------------------------------------------------------------
+bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExport)
+//--------------------------------------------------------------------------------
 {
 	FILE *f;
-	if(lpszFileName == nullptr || (f = fopen(lpszFileName, "wb")) == nullptr)
+	if(filename.empty() || (f = mpt_fopen(filename, "wb")) == nullptr)
 	{
 		return false;
 	}
@@ -789,7 +797,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 				case VOLCMD_FINEVOLUP:		vol = 0x90 + (p->vol & 0x0F); break;
 				case VOLCMD_VIBRATOSPEED:	vol = 0xA0 + (p->vol & 0x0F); break;
 				case VOLCMD_VIBRATODEPTH:	vol = 0xB0 + (p->vol & 0x0F); break;
-				case VOLCMD_PANNING:		vol = 0xC0 + ((p->vol * 15 + 32) / 64); if (vol > 0xCF) vol = 0xCF; break;
+				case VOLCMD_PANNING:		vol = 0xC0 + (p->vol / 4); if (vol > 0xCF) vol = 0xCF; break;
 				case VOLCMD_PANSLIDELEFT:	vol = 0xD0 + (p->vol & 0x0F); break;
 				case VOLCMD_PANSLIDERIGHT:	vol = 0xE0 + (p->vol & 0x0F); break;
 				case VOLCMD_TONEPORTAMENTO:	vol = 0xF0 + (p->vol & 0x0F); break;
@@ -865,7 +873,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 		// Reaching the limits of file format?
 		if(len > uint16_max)
 		{
-			AddToLog(mpt::String::Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, pat));
+			AddToLog(mpt::String::Print("%1 (%2 %3)", str_tooMuchPatternData, str_pattern, pat));
 			len = uint16_max;
 		}
 
@@ -1062,3 +1070,6 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, bool compatibilityExport)
 }
 
 #endif // MODPLUG_NO_FILESAVE
+
+
+OPENMPT_NAMESPACE_END

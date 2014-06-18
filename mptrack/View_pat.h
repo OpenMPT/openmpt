@@ -14,22 +14,22 @@
 #include "globals.h"
 #include "PatternCursor.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CModDoc;
 class CEditCommand;
 class CEffectVis;	//rewbs.fxvis
 class CPatternGotoDialog;
-class CPatternRandomizer;
-class COpenGLEditor;
 
 // Drag & Drop info
-#define DRAGITEM_VALUEMASK		0x00FFFF
-#define DRAGITEM_MASK			0xFF0000
-#define DRAGITEM_CHNHEADER		0x010000
-#define DRAGITEM_PATTERNHEADER	0x020000
-#define DRAGITEM_PLUGNAME		0x040000	//rewbs.patPlugName
+#define DRAGITEM_VALUEMASK		0x00FFFFFF
+#define DRAGITEM_MASK			0xFF000000
+#define DRAGITEM_CHNHEADER		0x01000000
+#define DRAGITEM_PATTERNHEADER	0x02000000
+#define DRAGITEM_PLUGNAME		0x04000000
 
 
-// Row Spacing
+// Edit Step aka Row Spacing
 const ROWINDEX MAX_SPACING = 64; // MAX_PATTERN_ROWS
 
 
@@ -113,8 +113,10 @@ struct ModCommandPos
 };
 
 
+OPENMPT_NAMESPACE_END
 #include "PatternClipboard.h"
 #include "PatternEditorDialogs.h"
+OPENMPT_NAMESPACE_BEGIN
 
 
 //////////////////////////////////////////////////////////////////
@@ -135,8 +137,7 @@ public:
 		psFocussed				= 0x04,		// Is the pattern editor focussed
 		psFollowSong			= 0x08,		// Does the cursor follow playback
 		psRecordingEnabled		= 0x10,		// Recording enabled
-		psDragHScroll			= 0x20,		// Some weird dragging stuff (?) - unused
-		psDragVScroll			= 0x40,		// Some weird dragging stuff (?)
+		psDragVScroll			= 0x40,		// Indicates that the vertical scrollbar is being dragged
 		psShowVUMeters			= 0x80,		// Display channel VU meters
 		psChordPlaying			= 0x100,	// Is a chord playing? (pretty much unused)
 		psDragnDropEdit			= 0x200,	// Drag & Drop editing (?)
@@ -150,7 +151,7 @@ public:
 		psShiftDragging			= 0x20000,	// Drag&Drop: Dragging an item around and holding shift
 
 		// All possible drag flags, to test if user is dragging a selection or a scrollbar
-		psDragActive			= psDragVScroll | psDragHScroll | psMouseDragSelect | psRowSelection | psChannelSelection,
+		psDragActive			= psDragVScroll | psMouseDragSelect | psRowSelection | psChannelSelection,
 	};
 
 protected:
@@ -279,15 +280,16 @@ public:
 	bool TransposeSelection(int transp);
 	bool DataEntry(bool up, bool coarse);
 
-	bool PrepareUndo(const PatternRect &selection) { return PrepareUndo(selection.GetUpperLeft(), selection.GetLowerRight()); };
-	bool PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel);
+	bool PrepareUndo(const PatternRect &selection, const char *description) { return PrepareUndo(selection.GetUpperLeft(), selection.GetLowerRight(), description); };
+	bool PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel, const char *description);
+	void UndoRedo(bool undo);
 
 	void DeleteRows(CHANNELINDEX colmin, CHANNELINDEX colmax, ROWINDEX nrows);
 	void OnDropSelection();
 	void ProcessChar(UINT nChar, UINT nFlags);
 
 public:
-	void DrawPatternData(HDC hdc, const CSoundFile *pSndFile, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
+	void DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
 	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
 	void DrawNote(int x, int y, UINT note, CTuning* pTuning = NULL);
 	void DrawInstrument(int x, int y, UINT instr);
@@ -314,9 +316,10 @@ public:
 	void EnterAftertouch(int note, int atValue);
 
 	// Construct a chord from the chord presets. Returns number of notes in chord.
-	static int ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote);
+	int ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote);
 
 	void QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const;
+	PATTERNINDEX GetPrevPattern() const;
 	PATTERNINDEX GetNextPattern() const;
 
 	void SetSpacing(int n);
@@ -366,9 +369,9 @@ protected:
 	afx_msg void OnEditPasteFlood() { ExecutePaste(PatternClipboard::pmPasteFlood); };
 	afx_msg void OnEditPushForwardPaste() { ExecutePaste(PatternClipboard::pmPushForward); };
 
-	afx_msg void OnClearSelection(bool ITStyle = false, RowMask sb = RowMask()); //rewbs.customKeys
-	afx_msg void OnGrowSelection();   //rewbs.customKeys
-	afx_msg void OnShrinkSelection(); //rewbs.customKeys
+	afx_msg void OnClearSelection(bool ITStyle = false, RowMask sb = RowMask());
+	afx_msg void OnGrowSelection();
+	afx_msg void OnShrinkSelection();
 	afx_msg void OnEditSelectAll();
 	afx_msg void OnEditSelectColumn();
 	afx_msg void OnSelectCurrentColumn();
@@ -376,14 +379,15 @@ protected:
 	afx_msg void OnEditGoto();
 	afx_msg void OnEditFindNext();
 	afx_msg void OnEditUndo();
+	afx_msg void OnEditRedo();
 	afx_msg void OnChannelReset();
-	afx_msg void OnMuteFromClick(); //rewbs.customKeys
-	afx_msg void OnSoloFromClick(); //rewbs.customKeys
-	afx_msg void OnTogglePendingMuteFromClick(); //rewbs.customKeys
+	afx_msg void OnMuteFromClick();
+	afx_msg void OnSoloFromClick();
+	afx_msg void OnTogglePendingMuteFromClick();
 	afx_msg void OnPendingSoloChnFromClick();
 	afx_msg void OnPendingUnmuteAllChnFromClick();
-	afx_msg void OnSoloChannel(bool current); //rewbs.customKeys
-	afx_msg void OnMuteChannel(bool current); //rewbs.customKeys
+	afx_msg void OnSoloChannel(CHANNELINDEX chn);
+	afx_msg void OnMuteChannel(CHANNELINDEX chn);
 	afx_msg void OnUnmuteAll();
 	afx_msg void OnRecordSelect();
 	afx_msg void OnSplitRecordSelect();
@@ -400,6 +404,7 @@ protected:
 	afx_msg void OnInterpolateVolume() { Interpolate(PatternCursor::volumeColumn); }
 	afx_msg void OnInterpolateEffect() { Interpolate(PatternCursor::effectColumn); }
 	afx_msg void OnInterpolateNote() { Interpolate(PatternCursor::noteColumn); }
+	afx_msg void OnInterpolateInstr() { Interpolate(PatternCursor::instrColumn); }
 	afx_msg void OnVisualizeEffect();		//rewbs.fxvis
 	afx_msg void OnTransposeUp() { TransposeSelection(1); }
 	afx_msg void OnTransposeDown() { TransposeSelection(-1); }
@@ -417,6 +422,7 @@ protected:
 	afx_msg void OnCursorPaste();
 	afx_msg void OnPatternAmplify();
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	afx_msg void OnSelectPlugin(UINT nID);  //rewbs.patPlugName
 	afx_msg LRESULT OnUpdatePosition(WPARAM nOrd, LPARAM nRow);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
@@ -528,3 +534,5 @@ public:
 
 DECLARE_FLAGSET(CViewPattern::PatternStatus);
 
+
+OPENMPT_NAMESPACE_END
