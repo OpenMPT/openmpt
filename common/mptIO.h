@@ -56,7 +56,7 @@ inline bool SeekRelative(FILE* & f, IO::off_t off) { return fseek(f, off, SEEK_C
 inline bool WriteRaw(FILE* & f, const uint8 * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
 inline bool WriteRaw(FILE* & f, const char * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
 inline bool WriteRaw(FILE* & f, const void * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
-inline bool Flush(FILE* & f) { return fflush(f); }
+inline bool Flush(FILE* & f) { return fflush(f) == 0; }
 
 template <typename Tbinary, typename Tfile>
 inline bool Write(Tfile & f, const Tbinary & v)
