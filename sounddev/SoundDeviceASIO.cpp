@@ -1313,11 +1313,12 @@ void CASIODevice::ReportASIOException(const std::string &str)
 }
 
 
-SoundDeviceCaps CASIODevice::GetDeviceCaps()
-//------------------------------------------
+SoundDeviceCaps CASIODevice::InternalGetDeviceCaps()
+//--------------------------------------------------
 {
 	SoundDeviceCaps caps;
 
+	caps.Available = true;
 	caps.CanUpdateInterval = false;
 	caps.CanSampleFormat = false;
 	caps.CanExclusiveMode = false;

@@ -152,14 +152,6 @@ ISoundDevice::~ISoundDevice()
 }
 
 
-SoundDeviceCaps ISoundDevice::GetDeviceCaps()
-//-------------------------------------------
-{
-	SoundDeviceCaps result;
-	return result;
-}
-
-
 SoundDeviceDynamicCaps ISoundDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
 //---------------------------------------------------------------------------------------------------
 {
@@ -213,6 +205,18 @@ void ISoundDevice::UpdateTimeInfo(SoundTimeInfo timeInfo)
 //-------------------------------------------------------
 {
 	m_TimeInfo = timeInfo;
+}
+
+
+bool ISoundDevice::Init()
+//-----------------------
+{
+	if(IsInited())
+	{
+		return true;
+	}
+	m_Caps = InternalGetDeviceCaps();
+	return m_Caps.Available;
 }
 
 
@@ -671,6 +675,17 @@ ISoundDevice * SoundDevicesManager::CreateSoundDevice(SoundDeviceID id)
 		break;
 #endif // NO_PORTAUDIO
 	}
+	if(!result)
+	{
+		return nullptr;
+	}
+	if(!result->Init())
+	{
+		delete result;
+		result = nullptr;
+		return nullptr;
+	}
+	m_DeviceCaps[id] = result->GetDeviceCaps(); // update cached caps
 	return result;
 }
 

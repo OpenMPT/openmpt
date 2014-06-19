@@ -53,7 +53,7 @@ public:
 	bool InternalHasGetStreamPosition() const { return true; }
 	int64 InternalGetStreamPositionFrames() const;
 
-	SoundDeviceCaps GetDeviceCaps();
+	SoundDeviceCaps InternalGetDeviceCaps();
 
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
