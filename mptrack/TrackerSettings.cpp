@@ -583,7 +583,7 @@ public:
 
 public:
 
-	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDeviceInfo & deviceInfo, const SoundDeviceSettings &defaults = SoundDeviceSettings())
+	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDeviceInfo & deviceInfo, const SoundDeviceSettings & defaults)
 		: conf(conf)
 		, deviceInfo(deviceInfo)
 		, LatencyUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Latency", defaults.LatencyMS * 1000)
@@ -598,7 +598,7 @@ public:
 		, DitherType(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"DitherType", defaults.DitherType)
 		, ChannelMapping(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ChannelMapping", defaults.ChannelMapping)
 	{
-		// store informational data (not read back, jsut to allow the user to mock with the raw ini file)
+		// store informational data (not read back, just to allow the user to mock with the raw ini file)
 		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ID", deviceInfo.id);
 		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"InternalID", deviceInfo.internalID);
 		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"API", deviceInfo.apiName);
@@ -664,9 +664,10 @@ SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings(const SoundDeviceID 
 	const SoundDeviceInfo deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
 	if(!deviceInfo.IsValid())
 	{
-		return GetSoundDeviceSettingsDefaults();
+		return SoundDeviceSettings();
 	}
-	SoundDeviceSettings settings = StoredSoundDeviceSettings(conf, deviceInfo);
+	const SoundDeviceCaps deviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(device, CMainFrame::GetMainFrame()->gpSoundDevice);
+	SoundDeviceSettings settings = StoredSoundDeviceSettings(conf, deviceInfo, deviceCaps.DefaultSettings);
 	settings.hWnd = CMainFrame::GetMainFrame()->m_hWnd;
 	return settings;
 }
@@ -679,7 +680,8 @@ void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceID &device, const 
 	{
 		return;
 	}
-	StoredSoundDeviceSettings(conf, deviceInfo) = settings;
+	const SoundDeviceCaps deviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(device, CMainFrame::GetMainFrame()->gpSoundDevice);
+	StoredSoundDeviceSettings(conf, deviceInfo, deviceCaps.DefaultSettings) = settings;
 }
 
 
