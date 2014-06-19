@@ -415,12 +415,6 @@ void Unpack::UnpackDecode(UnpackThreadData &D)
       CurItem->Length=Filter.Channels;
       CurItem->Distance=Filter.BlockLength;
 
-      CurItem=D.Decoded+D.DecodedSize++;
-
-      CurItem->Type=UNPDT_FILTER;
-      CurItem->Length=Filter.PosR;
-      CurItem->Distance=Filter.Width;
-
       continue;
     }
     if (MainSlot==257)
@@ -457,7 +451,7 @@ bool Unpack::ProcessDecoded(UnpackThreadData &D)
 
     if (Item->Type==UNPDT_LITERAL)
     {
-#if defined(LITTLE_ENDIAN) && defined(PRESENT_INT32) && defined(ALLOW_NOT_ALIGNED_INT)
+#if defined(LITTLE_ENDIAN) && defined(PRESENT_INT32) && defined(ALLOW_MISALIGNED)
       if (Item->Length==3 && UnpPtr<MaxWinSize-4)
       {
         *(uint32 *)(Window+UnpPtr)=*(uint32 *)Item->Literal;
@@ -503,11 +497,6 @@ bool Unpack::ProcessDecoded(UnpackThreadData &D)
 
               Filter.Channels=(byte)Item->Length;
               Filter.BlockLength=Item->Distance;
-
-              Item++;
-
-              Filter.PosR=(byte)Item->Length;
-              Filter.Width=Item->Distance;
 
               AddFilter(Filter);
             }

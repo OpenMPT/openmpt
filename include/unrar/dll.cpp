@@ -65,7 +65,10 @@ HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
     Data->Cmd.Callback=r->Callback;
     Data->Cmd.UserData=r->UserData;
 
-    if (!Data->Arc.Open(ArcName,0))
+    // Open shared mode is added by request of dll users, who need to
+    // browse and unpack archives while downloading.
+    Data->Cmd.OpenShared = true;
+    if (!Data->Arc.Open(ArcName,FMF_OPENSHARED))
     {
       r->OpenResult=ERAR_EOPEN;
       delete Data;
@@ -73,7 +76,16 @@ HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
     }
     if (!Data->Arc.IsArchive(false))
     {
-      r->OpenResult=Data->Cmd.DllError!=0 ? Data->Cmd.DllError:ERAR_BAD_ARCHIVE;
+      if (Data->Cmd.DllError!=0)
+        r->OpenResult=Data->Cmd.DllError;
+      else
+      {
+        RAR_EXIT ErrCode=ErrHandler.GetErrorCode();
+        if (ErrCode!=RARX_SUCCESS && ErrCode!=RARX_WARNING)
+          r->OpenResult=RarErrorToDll(ErrCode);
+        else
+          r->OpenResult=ERAR_BAD_ARCHIVE;
+      }
       delete Data;
       return NULL;
     }
@@ -113,7 +125,7 @@ HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
     }
     else
       r->CmtState=r->CmtSize=0;
-    Data->Extract.ExtractArchiveInit(&Data->Cmd,Data->Arc);
+    Data->Extract.ExtractArchiveInit(Data->Arc);
     return (HANDLE)Data;
   }
   catch (RAR_EXIT ErrCode)
@@ -126,7 +138,7 @@ HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
       delete Data;
     return NULL;
   }
-  catch (std::bad_alloc) // Catch 'new' exception.
+  catch (std::bad_alloc&) // Catch 'new' exception.
   {
     r->OpenResult=ERAR_NO_MEMORY;
     if (Data != NULL)
@@ -186,7 +198,16 @@ int PASCAL RARReadHeaderEx(HANDLE hArcData,struct RARHeaderDataEx *D)
         }
         else
           return ERAR_EOPEN;
-      return(Data->Arc.BrokenHeader ? ERAR_BAD_DATA:ERAR_END_ARCHIVE);
+
+      if (Data->Arc.BrokenHeader)
+        return ERAR_BAD_DATA;
+
+      // Might be necessary if RARSetPassword is still called instead of
+      // open callback for RAR5 archives and if password is invalid.
+      if (Data->Arc.FailedHeaderDecryption)
+        return ERAR_BAD_PASSWORD;
+      
+      return ERAR_END_ARCHIVE;
     }
     FileHeader *hd=&Data->Arc.FileHead;
     if (Data->OpenMode==RAR_OM_LIST && hd->SplitBefore)
@@ -197,7 +218,7 @@ int PASCAL RARReadHeaderEx(HANDLE hArcData,struct RARHeaderDataEx *D)
       else
         return Code;
     }
-    wcsncpy(D->ArcNameW,hd->FileName,ASIZE(D->ArcNameW));
+    wcsncpy(D->ArcNameW,Data->Arc.FileName,ASIZE(D->ArcNameW));
     WideToChar(D->ArcNameW,D->ArcName,ASIZE(D->ArcName));
 
     wcsncpy(D->FileNameW,hd->FileName,ASIZE(D->FileNameW));
@@ -290,10 +311,12 @@ int PASCAL ProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestNa
       if (DestPath!=NULL)
       {
         char ExtrPathA[NM];
-#ifdef _WIN_ALL
-        OemToCharBuffA(DestPath,ExtrPathA,ASIZE(ExtrPathA)-2);
-#else
         strncpyz(ExtrPathA,DestPath,ASIZE(ExtrPathA)-2);
+#ifdef _WIN_ALL
+        // We must not apply OemToCharBuffA directly to DestPath,
+        // because we do not know DestPath length and OemToCharBuffA
+        // does not stop at 0.
+        OemToCharA(ExtrPathA,ExtrPathA);
 #endif
         CharToWide(ExtrPathA,Data->Cmd.ExtrPath,ASIZE(Data->Cmd.ExtrPath));
         AddEndSlash(Data->Cmd.ExtrPath,ASIZE(Data->Cmd.ExtrPath));
@@ -301,10 +324,12 @@ int PASCAL ProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestNa
       if (DestName!=NULL)
       {
         char DestNameA[NM];
-#ifdef _WIN_ALL
-        OemToCharBuffA(DestName,DestNameA,ASIZE(DestNameA)-2);
-#else
         strncpyz(DestNameA,DestName,ASIZE(DestNameA)-2);
+#ifdef _WIN_ALL
+        // We must not apply OemToCharBuffA directly to DestName,
+        // because we do not know DestName length and OemToCharBuffA
+        // does not stop at 0.
+        OemToCharA(DestNameA,DestNameA);
 #endif
         CharToWide(DestNameA,Data->Cmd.DllDestName,ASIZE(Data->Cmd.DllDestName));
       }
@@ -321,7 +346,7 @@ int PASCAL ProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestNa
       wcscpy(Data->Cmd.Command,Operation==RAR_EXTRACT ? L"X":L"T");
       Data->Cmd.Test=Operation!=RAR_EXTRACT;
       bool Repeat=false;
-      Data->Extract.ExtractCurrentFile(&Data->Cmd,Data->Arc,Data->HeaderSize,Repeat);
+      Data->Extract.ExtractCurrentFile(Data->Arc,Data->HeaderSize,Repeat);
 
       // Now we process extra file information if any.
       //
@@ -333,13 +358,13 @@ int PASCAL ProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestNa
       while (Data->Arc.IsOpened() && Data->Arc.ReadHeader()!=0 && 
              Data->Arc.GetHeaderType()==HEAD_SERVICE)
       {
-        Data->Extract.ExtractCurrentFile(&Data->Cmd,Data->Arc,Data->HeaderSize,Repeat);
+        Data->Extract.ExtractCurrentFile(Data->Arc,Data->HeaderSize,Repeat);
         Data->Arc.SeekToNext();
       }
       Data->Arc.Seek(Data->Arc.CurBlockPos,SEEK_SET);
     }
   }
-  catch (std::bad_alloc)
+  catch (std::bad_alloc&)
   {
     return ERAR_NO_MEMORY;
   }
@@ -419,6 +444,8 @@ static int RarErrorToDll(RAR_EXIT ErrCode)
       return ERAR_ECREATE;
     case RARX_MEMORY:
       return ERAR_NO_MEMORY;
+    case RARX_BADPWD:
+      return ERAR_BAD_PASSWORD;
     case RARX_SUCCESS:
       return ERAR_SUCCESS; // 0.
     default:

@@ -120,7 +120,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 		// Rewind...
 		rarData->Arc.Seek(rarData->firstBlock, SEEK_SET);
 		CmdExtract Extract(&rarData->Cmd);
-		Extract.ExtractArchiveInit(&rarData->Cmd, rarData->Arc);
+		Extract.ExtractArchiveInit(rarData->Arc);
 
 		// Don't extract, only test (and use the callback function for writing our data)
 		rarData->Cmd.Test = true;
@@ -137,7 +137,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 			if(rarData->Arc.Solid && index)
 			{
 				// Skip solid files
-				Extract.ExtractCurrentFile(&rarData->Cmd, rarData->Arc, headerSize, repeat);
+				Extract.ExtractCurrentFile(rarData->Arc, headerSize, repeat);
 			}
 			rarData->Arc.SeekToNext();
 		} while(index--);
@@ -146,7 +146,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 		data.clear();
 		data.reserve(static_cast<size_t>(rarData->Arc.FileHead.UnpSize));
 		rarData->Cmd.Callback = RARData::RARCallback;
-		Extract.ExtractCurrentFile(&rarData->Cmd, rarData->Arc, headerSize, repeat);
+		Extract.ExtractCurrentFile(rarData->Arc, headerSize, repeat);
 		return !data.empty();
 	} catch(...)
 	{
