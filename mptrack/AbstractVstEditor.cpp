@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_INITMENU()
 	ON_WM_MENUSELECT()
 	ON_WM_ACTIVATE()
+	ON_WM_DROPFILES()
 	ON_COMMAND(ID_EDIT_COPY,			OnCopyParameters)
 	ON_COMMAND(ID_EDIT_PASTE,			OnPasteParameters)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
@@ -119,6 +120,24 @@ LRESULT CAbstractVstEditor::OnMidiMsg(WPARAM midiData, LPARAM sender)
 		return 1;
 	}
 	return 0;
+}
+
+
+// Drop files from Windows
+void CAbstractVstEditor::OnDropFiles(HDROP hDropInfo)
+//---------------------------------------------------
+{
+	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	CMainFrame::GetMainFrame()->SetForegroundWindow();
+	for(UINT f = 0; f < nFiles; f++)
+	{
+		WCHAR fileName[MAX_PATH];
+		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
+		{
+			m_VstPlugin.LoadProgram(mpt::PathString::FromNative(fileName));
+		}
+	}
+	::DragFinish(hDropInfo);
 }
 
 

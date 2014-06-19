@@ -1032,8 +1032,8 @@ bool CVstPlugin::SaveProgram()
 }
 
 
-bool CVstPlugin::LoadProgram()
-//----------------------------
+bool CVstPlugin::LoadProgram(mpt::PathString fileName)
+//----------------------------------------------------
 {
 	mpt::PathString defaultDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
 	bool useDefaultDir = !defaultDir.empty();
@@ -1042,23 +1042,27 @@ bool CVstPlugin::LoadProgram()
 		defaultDir = m_Factory.dllPath.GetPath();
 	}
 
-	FileDialog dlg = OpenFileDialog()
-		.DefaultExtension("fxp")
-		.ExtensionFilter("VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
-		"VST Plugin Programs (*.fxp)|*.fxp|"
-		"VST Plugin Banks (*.fxb)|*.fxb|"
-		"All Files|*.*||")
-		.WorkingDirectory(defaultDir);
-	if(!dlg.Show(m_pEditor)) return false;
-
-	if(useDefaultDir)
+	if(fileName.empty())
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS);
+		FileDialog dlg = OpenFileDialog()
+			.DefaultExtension("fxp")
+			.ExtensionFilter("VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
+			"VST Plugin Programs (*.fxp)|*.fxp|"
+			"VST Plugin Banks (*.fxb)|*.fxb|"
+			"All Files|*.*||")
+			.WorkingDirectory(defaultDir);
+		if(!dlg.Show(m_pEditor)) return false;
+
+		if(useDefaultDir)
+		{
+			TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS);
+		}
+		fileName = dlg.GetFirstFile();
 	}
 
 	CMappedFile f;
 	const char *errorStr = nullptr;
-	if(f.Open(dlg.GetFirstFile()))
+	if(f.Open(fileName))
 	{
 		FileReader file = f.GetFile();
 		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));
@@ -1979,22 +1983,6 @@ bool CVstPlugin::isPlaying(UINT note, UINT midiChn, UINT trackerChn)
 	note -= NOTE_MIN;
 	return (m_MidiCh[midiChn].noteOnMap[note][trackerChn] != 0);
 }
-
-
-bool CVstPlugin::MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn)
-//---------------------------------------------------------------------------------------------
-{
-	note -= NOTE_MIN;
-	VSTInstrChannel &chn = m_MidiCh[midiChn & 0x0f];
-
-	if(!chn.noteOnMap[note][sourceTrackerChn])
-		return false;
-
-	chn.noteOnMap[note][sourceTrackerChn]--;
-	chn.noteOnMap[note][destTrackerChn]++;
-	return true;
-}
-//end rewbs.introVST
 
 
 void CVstPlugin::SetZxxParameter(UINT nParam, UINT nValue)

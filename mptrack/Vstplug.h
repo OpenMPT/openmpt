@@ -208,7 +208,7 @@ public:
 	VstInt32 GetCurrentProgram();
 	VstInt32 GetNumProgramCategories();
 	CString GetFormattedProgramName(VstInt32 index);
-	bool LoadProgram();
+	bool LoadProgram(mpt::PathString fileName = mpt::PathString());
 	bool SaveProgram();
 	VstInt32 GetUID() const;
 	VstInt32 GetVersion() const;
@@ -274,7 +274,6 @@ public:
 	void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel);
 	void HardAllNotesOff();
 	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);
-	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn);
 	void NotifySongPlaying(bool playing);
 	bool IsSongPlaying() const { return m_bSongPlaying; }
 	bool IsResumed() {return m_bPlugResumed;}
@@ -337,7 +336,7 @@ public:
 	CString GetParamDisplay(PlugParamIndex) { return ""; };
 
 	PlugParamValue GetParameter(PlugParamIndex) { return 0; }
-	bool LoadProgram() { return false; }
+	bool LoadProgram(mpt::PathString = mpt::PathString()) { return false; }
 	bool SaveProgram() { return false; }
 	void SetCurrentProgram(VstInt32) {}
 	void SetSlot(PLUGINDEX) {}

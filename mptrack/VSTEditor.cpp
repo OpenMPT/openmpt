@@ -62,6 +62,7 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 //--------------------------------------------
 {
 	Create(IDD_PLUGINEDITOR, parent);
+	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 
 	// Some plugins (e.g. ProteusVX) need to be planted into another control or else they will break our window proc, making the window unusable.
 	plugWindow.Create(nullptr, WS_CHILD | WS_VISIBLE, CRect(0, 0, 100, 100), this);

@@ -66,6 +66,7 @@ public:
 	afx_msg void OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hMenu);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 
 	//Overridden methods:
 	virtual void OnOK() = 0;
