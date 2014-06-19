@@ -53,7 +53,6 @@ public:
 	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
 	virtual void RecalculateGain() = 0;
 	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
-	virtual bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn) = 0; //rewbs.VSTiNNA
 	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
 	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;

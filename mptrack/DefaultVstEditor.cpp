@@ -402,6 +402,8 @@ bool CDefaultVstEditor::OpenEditor(CWnd *parent)
 //----------------------------------------------
 {
 	Create(IDD_DEFAULTPLUGINEDITOR, parent);
+	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
+
 	SetTitle();
 	SetupMenu();
 
