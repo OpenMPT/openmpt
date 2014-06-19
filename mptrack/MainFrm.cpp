@@ -1343,7 +1343,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 	const bool bPaused = m_pSndFile->IsPaused();
 	const bool bPatLoop = m_pSndFile->m_SongFlags[SONG_PATTERNLOOP];
 
-	m_pSndFile->ResetChannels();
+	m_pSndFile->m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 
 	if(!bPatLoop && bPaused) sndFile.m_SongFlags.set(SONG_PAUSED);
 	sndFile.SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
@@ -1395,6 +1395,7 @@ bool CMainFrame::StopMod(CModDoc *pModDoc)
 	GenerateStopNotification();
 
 	m_pSndFile->SetCurrentPos(0);
+	m_pSndFile->ResetChannels();
 	UnsetPlaybackSoundFile();
 
 	StopPlayback();
