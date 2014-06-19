@@ -358,6 +358,7 @@ public:
 
 	// Misc
 
+	Setting<bool> ShowSettingsOnNewVersion;
 	Setting<bool> gbShowHackControls;
 	Setting<MODTYPE> defaultModType;
 	Setting<PLUGVOLUMEHANDLING> DefaultPlugVolumeHandling;

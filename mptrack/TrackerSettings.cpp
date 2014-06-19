@@ -158,6 +158,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, GUIUpdateInterval(conf, "Display", "GUIUpdateInterval", 0)
 	, VuMeterUpdateInterval(conf, "Display", "VuMeterUpdateInterval", 15)
 	// Misc
+	, ShowSettingsOnNewVersion(conf, "Misc", "ShowSettingsOnNewVersion", true)
 	, gbShowHackControls(conf, "Misc", "ShowHackControls", false)
 	, defaultModType(conf, "Misc", "DefaultModType", MOD_TYPE_IT)
 	, DefaultPlugVolumeHandling(conf, "Misc", "DefaultPlugVolumeHandling", PLUGIN_VOLUMEHANDLING_IGNORE)

@@ -957,7 +957,7 @@ BOOL CTrackApp::InitInstance()
 	}
 
 	// Open settings if the previous execution was with an earlier version.
-	if (!cmdInfo.m_bNoSettingsOnNewVersion && TrackerSettings::Instance().gcsPreviousVersion < MptVersion::num)
+	if(TrackerSettings::Instance().ShowSettingsOnNewVersion && !cmdInfo.m_bNoSettingsOnNewVersion && TrackerSettings::Instance().gcsPreviousVersion < MptVersion::num)
 	{
 		StopSplashScreen();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
