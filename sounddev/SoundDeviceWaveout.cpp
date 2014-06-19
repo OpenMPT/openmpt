@@ -58,10 +58,11 @@ CWaveDevice::~CWaveDevice()
 }
 
 
-SoundDeviceCaps CWaveDevice::GetDeviceCaps()
-//------------------------------------------
+SoundDeviceCaps CWaveDevice::InternalGetDeviceCaps()
+//--------------------------------------------------
 {
 	SoundDeviceCaps caps;
+	caps.Available = true;
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
 	caps.CanExclusiveMode = false;

@@ -197,10 +197,11 @@ double CPortaudioDevice::GetCurrentLatency() const
 }
 
 
-SoundDeviceCaps CPortaudioDevice::GetDeviceCaps()
-//-----------------------------------------------
+SoundDeviceCaps CPortaudioDevice::InternalGetDeviceCaps()
+//-------------------------------------------------------
 {
 	SoundDeviceCaps caps;
+	caps.Available = true;
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
 	caps.CanExclusiveMode = false;

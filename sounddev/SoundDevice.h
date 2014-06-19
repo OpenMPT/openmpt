@@ -324,6 +324,7 @@ struct SoundDeviceFlags
 
 struct SoundDeviceCaps
 {
+	bool Available;
 	bool CanUpdateInterval;
 	bool CanSampleFormat;
 	bool CanExclusiveMode;
@@ -336,7 +337,8 @@ struct SoundDeviceCaps
 	std::wstring ExclusiveModeDescription;
 	SoundDeviceSettings DefaultSettings;
 	SoundDeviceCaps()
-		: CanUpdateInterval(true)
+		: Available(false)
+		, CanUpdateInterval(true)
 		, CanSampleFormat(true)
 		, CanExclusiveMode(false)
 		, CanBoostThreadPriority(true)
@@ -397,6 +399,10 @@ private:
 	const SoundDeviceID m_ID;
 
 	std::wstring m_InternalID;
+
+private:
+
+	SoundDeviceCaps m_Caps;
 
 protected:
 
@@ -460,6 +466,8 @@ protected:
 	virtual void InternalStopForce() { InternalStop(); }
 	virtual bool InternalClose() = 0;
 
+	virtual SoundDeviceCaps InternalGetDeviceCaps() = 0;
+
 public:
 
 	ISoundDevice(SoundDeviceID id, const std::wstring &internalID);
@@ -475,9 +483,10 @@ public:
 	SoundDeviceIndex GetDeviceIndex() const { return m_ID.GetIndex(); }
 	std::wstring GetDeviceInternalID() const { return m_InternalID; }
 
-	virtual SoundDeviceCaps GetDeviceCaps();
+	SoundDeviceCaps GetDeviceCaps() const { return m_Caps; }
 	virtual SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
+	bool Init();
 	bool Open(const SoundDeviceSettings &settings);
 	bool Close();
 	bool Start();
@@ -485,7 +494,8 @@ public:
 
 	LONG GetRequestFlags() const { return InterlockedExchangeAdd(&m_RequestFlags, 0); /* read */ }
 
-	bool IsOpen() const { return InternalIsOpen(); }
+	bool IsInited() const { return m_Caps.Available; }
+	bool IsOpen() const { return IsInited() && InternalIsOpen(); }
 	bool IsPlaying() const { return m_IsPlaying; }
 
 	virtual bool OnIdle() { return false; } // return true if any work has been done
