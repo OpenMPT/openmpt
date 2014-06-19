@@ -15,6 +15,8 @@ ThreadPool::ThreadPool(uint MaxThreads)
   if (MaxAllowedThreads==0)
     MaxAllowedThreads=1;
 
+  ThreadsCreatedCount=0;
+
   // If we have more threads than queue size, we'll hang on pool destroying,
   // not releasing all waiting threads.
   if (MaxAllowedThreads>ASIZE(TaskQueue))
@@ -22,17 +24,15 @@ ThreadPool::ThreadPool(uint MaxThreads)
 
   Closing=false;
 
-  bool Success;
+  bool Success = CriticalSectionCreate(&CritSection);
 #ifdef _WIN_ALL
   QueuedTasksCnt=CreateSemaphore(NULL,0,ASIZE(TaskQueue),NULL);
   NoneActive=CreateEvent(NULL,TRUE,TRUE,NULL);
-  InitializeCriticalSection(&CritSection); 
-  Success=QueuedTasksCnt!=NULL && NoneActive!=NULL;
+  Success=Success && QueuedTasksCnt!=NULL && NoneActive!=NULL;
 #elif defined(_UNIX)
   AnyActive = false;
   QueuedTasksCnt = 0;
-  Success=pthread_mutex_init(&CritSection,NULL)==0 &&
-          pthread_cond_init(&AnyActiveCond,NULL)==0 &&
+  Success=Success && pthread_cond_init(&AnyActiveCond,NULL)==0 &&
           pthread_mutex_init(&AnyActiveMutex,NULL)==0 &&
           pthread_cond_init(&QueuedTasksCntCond,NULL)==0 &&
           pthread_mutex_init(&QueuedTasksCntMutex,NULL)==0;
@@ -41,15 +41,6 @@ ThreadPool::ThreadPool(uint MaxThreads)
   {
     ErrHandler.GeneralErrMsg(L"\nThread pool initialization failed.");
     ErrHandler.Exit(RARX_FATAL);
-  }
-
-  for(uint I=0;I<MaxAllowedThreads;I++)
-  {
-    ThreadHandles[I] = ThreadCreate(PoolThread, this);
-#ifdef _WIN_ALL
-    if (ThreadPool::ThreadPriority!=THREAD_PRIORITY_NORMAL)
-      SetThreadPriority(ThreadHandles[I],ThreadPool::ThreadPriority);
-#endif
   }
 
   QueueTop = 0;
@@ -75,28 +66,41 @@ ThreadPool::~ThreadPool()
   pthread_cond_broadcast(&QueuedTasksCntCond);
 #endif
 
-  for(uint I=0;I<MaxAllowedThreads;I++)
+  for(uint I=0;I<ThreadsCreatedCount;I++)
   {
 #ifdef _WIN_ALL
     // Waiting until the thread terminates.
     CWaitForSingleObject(ThreadHandles[I]);
 #endif
-    // Close the thread handle. In Unix it is results in pthread_join call,
+    // Close the thread handle. In Unix it results in pthread_join call,
     // which also waits for thread termination.
     ThreadClose(ThreadHandles[I]);
   }
 
+  CriticalSectionDelete(&CritSection);
 #ifdef _WIN_ALL
-  DeleteCriticalSection(&CritSection);
   CloseHandle(QueuedTasksCnt);
   CloseHandle(NoneActive);
 #elif defined(_UNIX)
-  pthread_mutex_destroy(&CritSection);
   pthread_cond_destroy(&AnyActiveCond);
   pthread_mutex_destroy(&AnyActiveMutex);
   pthread_cond_destroy(&QueuedTasksCntCond);
   pthread_mutex_destroy(&QueuedTasksCntMutex);
 #endif
+}
+
+
+void ThreadPool::CreateThreads()
+{
+  for(uint I=0;I<MaxAllowedThreads;I++)
+  {
+    ThreadHandles[I] = ThreadCreate(PoolThread, this);
+    ThreadsCreatedCount++;
+#ifdef _WIN_ALL
+    if (ThreadPool::ThreadPriority!=THREAD_PRIORITY_NORMAL)
+      SetThreadPriority(ThreadHandles[I],ThreadPool::ThreadPriority);
+#endif
+  }
 }
 
 
@@ -159,9 +163,12 @@ bool ThreadPool::GetQueuedTask(QueueEntry *Task)
 
 // Add task to queue. We assume that it is always called from main thread,
 // it allows to avoid any locks here. We process collected tasks only
-// when StartWait is called.
+// when WaitDone is called.
 void ThreadPool::AddTask(PTHREAD_PROC Proc,void *Data)
 {
+  if (ThreadsCreatedCount == 0)
+    CreateThreads();
+  
   // If queue is full, wait until it is empty.
   if ((QueueTop + 1) % ASIZE(TaskQueue) == QueueBottom)
     WaitDone();

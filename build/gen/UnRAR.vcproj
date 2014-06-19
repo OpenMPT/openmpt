@@ -678,6 +678,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\unrar\ui.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\unrar\unicode.cpp"
 					>
 				</File>
@@ -935,6 +939,10 @@
 				</File>
 				<File
 					RelativePath="..\..\include\unrar\ulinks.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\unrar\ui.hpp"
 					>
 				</File>
 				<File

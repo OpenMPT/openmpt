@@ -342,6 +342,7 @@
 		<ClInclude Include="..\..\include\unrar\threadpool.hpp" />
 		<ClInclude Include="..\..\include\unrar\timefn.hpp" />
 		<ClInclude Include="..\..\include\unrar\ulinks.hpp" />
+		<ClInclude Include="..\..\include\unrar\ui.hpp" />
 		<ClInclude Include="..\..\include\unrar\unicode.hpp" />
 		<ClInclude Include="..\..\include\unrar\unpack.hpp" />
 		<ClInclude Include="..\..\include\unrar\version.hpp" />
@@ -439,6 +440,8 @@
 		<ClCompile Include="..\..\include\unrar\threadpool.cpp">
 		</ClCompile>
 		<ClCompile Include="..\..\include\unrar\timefn.cpp">
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\ui.cpp">
 		</ClCompile>
 		<ClCompile Include="..\..\include\unrar\unicode.cpp">
 		</ClCompile>

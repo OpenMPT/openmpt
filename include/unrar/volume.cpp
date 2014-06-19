@@ -23,9 +23,7 @@ bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Comma
          hd->UnpVer>=20 && hd->FileHash.CRC32!=0xffffffff;
     if (PackedHashPresent && 
         !DataIO->PackedDataHash.Cmp(&hd->FileHash,hd->UseHashKey ? hd->HashKey:NULL))
-    {
-      Log(Arc.FileName,St(MDataBadCRC),hd->FileName,Arc.FileName);
-    }
+      uiMsg(UIERROR_CHECKSUMPACKED, Arc.FileName, hd->FileName);
   }
 
   int64 PosBeforeClose=Arc.Tell();
@@ -49,12 +47,14 @@ bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Comma
   // In -vp mode we force the pause before next volume even if it is present
   // and even if we are on the hard disk. It is important when user does not
   // want to process partially downloaded volumes preliminary.
-  if (Cmd->VolumePause && !AskNextVol(NextName))
+  if (Cmd->VolumePause && !uiAskNextVolume(NextName,ASIZE(NextName)))
     FailedOpen=true;
 #endif
 
+  uint OpenMode = Cmd->OpenShared ? FMF_OPENSHARED : 0;
+
   if (!FailedOpen)
-    while (!Arc.Open(NextName,0))
+    while (!Arc.Open(NextName,OpenMode))
     {
       // We need to open a new volume which size was not calculated
       // in total size before, so we cannot calculate the total progress
@@ -71,7 +71,7 @@ bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Comma
         wcscpy(AltNextName,Arc.FileName);
         NextVolumeName(AltNextName,ASIZE(AltNextName),true);
         OldSchemeTested=true;
-        if (Arc.Open(AltNextName,0))
+        if (Arc.Open(AltNextName,OpenMode))
         {
           wcscpy(NextName,AltNextName);
           break;
@@ -102,7 +102,7 @@ bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Comma
       }
 #endif
 #ifndef SILENT
-      if (Cmd->AllYes || !AskNextVol(NextName))
+      if (Cmd->AllYes || !uiAskNextVolume(NextName,ASIZE(NextName)))
 #endif
       {
         FailedOpen=true;
@@ -114,10 +114,8 @@ bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Comma
   
   if (FailedOpen)
   {
-#ifndef SILENT
-      Log(Arc.FileName,St(MAbsNextVol),NextName);
-#endif
-    Arc.Open(Arc.FileName,0);
+    uiMsg(UIERROR_MISSINGVOL,NextName);
+    Arc.Open(Arc.FileName,OpenMode);
     Arc.Seek(PosBeforeClose,SEEK_SET);
     return false;
   }
@@ -177,17 +175,6 @@ bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Comma
 
 
 
-#ifndef SILENT
-bool AskNextVol(wchar *ArcName)
-{
-  eprintf(St(MAskNextVol),ArcName);
-  if (Ask(St(MContinueQuit))==2)
-    return false;
-  return true;
-}
-#endif
-
-
 #ifdef RARDLL
 #if defined(RARDLL) && defined(_MSC_VER) && !defined(_WIN_64)
 // Disable the run time stack check for unrar.dll, so we can manipulate
@@ -203,25 +190,28 @@ bool DllVolChange(RAROptions *Cmd,wchar *NextName,size_t NameSize)
 
   if (Cmd->Callback!=NULL)
   {
-    wchar CurName[NM];
-    wcscpy(CurName,NextName);
+    wchar OrgNextName[NM];
+    wcscpy(OrgNextName,NextName);
     if (Cmd->Callback(UCM_CHANGEVOLUMEW,Cmd->UserData,(LPARAM)NextName,RAR_VOL_ASK)==-1)
       DllVolAborted=true;
     else
-      if (wcscmp(CurName,NextName)!=0)
+      if (wcscmp(OrgNextName,NextName)!=0)
         DllVolChanged=true;
       else
       {
-        char NextNameA[NM];
+        char NextNameA[NM],OrgNextNameA[NM];
         WideToChar(NextName,NextNameA,ASIZE(NextNameA));
+        strcpy(OrgNextNameA,NextNameA);
         if (Cmd->Callback(UCM_CHANGEVOLUME,Cmd->UserData,(LPARAM)NextNameA,RAR_VOL_ASK)==-1)
           DllVolAborted=true;
         else
-        {
-          CharToWide(NextNameA,NextName,NameSize);
-          if (wcscmp(CurName,NextName)!=0)
+          if (strcmp(OrgNextNameA,NextNameA)!=0)
+          {
+            // We can damage some Unicode characters by U->A->U conversion,
+            // so set Unicode name only if we see that ANSI name is changed.
+            CharToWide(NextNameA,NextName,NameSize);
             DllVolChanged=true;
-        }
+          }
       }
   }
   if (!DllVolChanged && Cmd->ChangeVolProc!=NULL)
