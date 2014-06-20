@@ -132,8 +132,8 @@ ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 	, m_InternalID(internalID)
 {
 
-	m_BufferAttributes.Latency = m_Settings.LatencyMS / 1000.0;
-	m_BufferAttributes.UpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
+	m_BufferAttributes.Latency = m_Settings.Latency;
+	m_BufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
 	m_BufferAttributes.NumBuffers = 0;
 
 	m_IsPlaying = false;
@@ -228,17 +228,15 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 		Close();
 	}
 	m_Settings = settings;
-	if(m_Settings.LatencyMS < SNDDEV_MINLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MINLATENCY_MS;
-	if(m_Settings.LatencyMS > SNDDEV_MAXLATENCY_MS) m_Settings.LatencyMS = SNDDEV_MAXLATENCY_MS;
-	if(m_Settings.UpdateIntervalMS < SNDDEV_MINUPDATEINTERVAL_MS) m_Settings.UpdateIntervalMS = SNDDEV_MINUPDATEINTERVAL_MS;
-	if(m_Settings.UpdateIntervalMS > SNDDEV_MAXUPDATEINTERVAL_MS) m_Settings.UpdateIntervalMS = SNDDEV_MAXUPDATEINTERVAL_MS;
+	m_Settings.Latency = Clamp(m_Settings.Latency, SoundDeviceLatencyMin, SoundDeviceLatencyMax);
+	m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, SoundDeviceUpdateIntervalMin, SoundDeviceUpdateIntervalMax);
 	if(!m_Settings.ChannelMapping.IsValid(m_Settings.Channels))
 	{
 		return false;
 	}
 	m_Flags = SoundDeviceFlags();
-	m_BufferAttributes.Latency = m_Settings.LatencyMS / 1000.0;
-	m_BufferAttributes.UpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
+	m_BufferAttributes.Latency = m_Settings.Latency;
+	m_BufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
 	m_BufferAttributes.NumBuffers = 0;
 	InterlockedExchange(&m_RequestFlags, 0);
 	return InternalOpen();

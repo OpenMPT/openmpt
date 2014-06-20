@@ -80,9 +80,9 @@ bool CPortaudioDevice::InternalOpen()
 		default: return false; break;
 		}
 	}
-	m_StreamParameters.suggestedLatency = m_Settings.LatencyMS / 1000.0;
+	m_StreamParameters.suggestedLatency = m_Settings.Latency;
 	m_StreamParameters.hostApiSpecificStreamInfo = NULL;
-	unsigned long framesPerBuffer = static_cast<long>(m_Settings.UpdateIntervalMS * m_Settings.Samplerate / 1000.0f);
+	unsigned long framesPerBuffer = static_cast<long>(m_Settings.UpdateInterval * m_Settings.Samplerate);
 	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
 	{
 		if(m_Settings.ExclusiveMode)
@@ -130,7 +130,7 @@ bool CPortaudioDevice::InternalOpen()
 	}
 	SoundBufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_StreamInfo->outputLatency;
-	bufferAttributes.UpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
+	bufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
 	bufferAttributes.NumBuffers = 1;
 	UpdateBufferAttributes(bufferAttributes);
 	return true;

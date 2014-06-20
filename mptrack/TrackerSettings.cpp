@@ -403,8 +403,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDeviceID>("Sound Settings", "WaveDevice", SoundDeviceID());
 		Setting<uint32> m_BufferLength_DEPRECATED(conf, "Sound Settings", "BufferLength", 50);
-		Setting<uint32> m_LatencyMS(conf, "Sound Settings", "Latency", SoundDeviceSettings().LatencyMS);
-		Setting<uint32> m_UpdateIntervalMS(conf, "Sound Settings", "UpdateInterval", SoundDeviceSettings().UpdateIntervalMS);
+		Setting<uint32> m_LatencyMS(conf, "Sound Settings", "Latency", Util::Round<int32>(SoundDeviceSettings().Latency * 1000.0));
+		Setting<uint32> m_UpdateIntervalMS(conf, "Sound Settings", "UpdateInterval", Util::Round<int32>(SoundDeviceSettings().UpdateInterval * 1000.0));
 		Setting<SampleFormat> m_SampleFormat(conf, "Sound Settings", "BitsPerSample", SoundDeviceSettings().sampleFormat);
 		Setting<bool> m_SoundDeviceExclusiveMode(conf, "Sound Settings", "ExclusiveMode", SoundDeviceSettings().ExclusiveMode);
 		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, "Sound Settings", "BoostThreadPriority", SoundDeviceSettings().BoostThreadPriority);
@@ -440,8 +440,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		{
 			m_SoundDeviceChannelMapping = SoundChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>("Sound Settings", "ASIOBaseChannel", 0));
 		}
-		m_SoundDeviceSettingsDefaults.LatencyMS = m_LatencyMS;
-		m_SoundDeviceSettingsDefaults.UpdateIntervalMS = m_UpdateIntervalMS;
+		m_SoundDeviceSettingsDefaults.Latency = m_LatencyMS / 1000.0;
+		m_SoundDeviceSettingsDefaults.UpdateInterval = m_UpdateIntervalMS / 1000.0;
 		m_SoundDeviceSettingsDefaults.Samplerate = MixerSamplerate;
 		m_SoundDeviceSettingsDefaults.Channels = (uint8)MixerOutputChannels;
 		m_SoundDeviceSettingsDefaults.sampleFormat = m_SampleFormat;
@@ -586,8 +586,8 @@ public:
 	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDeviceInfo & deviceInfo, const SoundDeviceSettings & defaults)
 		: conf(conf)
 		, deviceInfo(deviceInfo)
-		, LatencyUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Latency", defaults.LatencyMS * 1000)
-		, UpdateIntervalUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"UpdateInterval", defaults.UpdateIntervalMS * 1000)
+		, LatencyUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Latency", Util::Round<int32>(defaults.Latency * 1000000.0))
+		, UpdateIntervalUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"UpdateInterval", Util::Round<int32>(defaults.UpdateInterval * 1000000.0))
 		, Samplerate(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"SampleRate", defaults.Samplerate)
 		, Channels(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Channels", defaults.Channels)
 		, sampleFormat(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"SampleFormat", defaults.sampleFormat)
@@ -607,8 +607,8 @@ public:
 
 	StoredSoundDeviceSettings & operator = (const SoundDeviceSettings &settings)
 	{
-		LatencyUS = settings.LatencyMS * 1000;
-		UpdateIntervalUS = settings.UpdateIntervalMS * 1000;
+		LatencyUS = Util::Round<int32>(settings.Latency * 1000000.0);
+		UpdateIntervalUS = Util::Round<int32>(settings.UpdateInterval * 1000000.0);
 		Samplerate = settings.Samplerate;
 		Channels = settings.Channels;
 		sampleFormat = settings.sampleFormat;
@@ -624,8 +624,8 @@ public:
 	operator SoundDeviceSettings () const
 	{
 		SoundDeviceSettings settings;
-		settings.LatencyMS = LatencyUS / 1000;
-		settings.UpdateIntervalMS = UpdateIntervalUS / 1000;
+		settings.Latency = LatencyUS / 1000000.0;
+		settings.UpdateInterval = UpdateIntervalUS / 1000000.0;
 		settings.Samplerate = Samplerate;
 		settings.Channels = Channels;
 		settings.sampleFormat = sampleFormat;

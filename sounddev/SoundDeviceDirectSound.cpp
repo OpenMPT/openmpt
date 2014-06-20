@@ -220,7 +220,7 @@ bool CDSoundDevice::InternalOpen()
 		return false;
 	}
 	m_bMixRunning = FALSE;
-	m_nDSoundBufferSize = (m_Settings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
+	m_nDSoundBufferSize = Util::Round<int32>(m_Settings.Latency * pwfx->nAvgBytesPerSec);
 	m_nDSoundBufferSize = Clamp(m_nDSoundBufferSize, (DWORD)DSBSIZE_MIN, (DWORD)DSBSIZE_MAX);
 	m_nDSoundBufferSize = (m_nDSoundBufferSize + (bytesPerFrame-1)) / bytesPerFrame * bytesPerFrame; // round up to full frame
 	if(!m_Settings.ExclusiveMode)
@@ -295,11 +295,11 @@ bool CDSoundDevice::InternalOpen()
 		if (dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
 	}
 	m_dwWritePos = 0xFFFFFFFF;
-	SetWakeupInterval(std::min(m_Settings.UpdateIntervalMS / 1000.0, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
+	SetWakeupInterval(std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
 	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
 	SoundBufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_nDSoundBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
-	bufferAttributes.UpdateInterval = std::min(m_Settings.UpdateIntervalMS / 1000.0, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond()));
+	bufferAttributes.UpdateInterval = std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond()));
 	bufferAttributes.NumBuffers = 1;
 	UpdateBufferAttributes(bufferAttributes);
 	return true;

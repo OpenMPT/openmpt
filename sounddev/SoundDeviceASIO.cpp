@@ -284,7 +284,7 @@ bool CASIODevice::InternalOpen()
 		asioCall(getBufferSize(&minSize, &maxSize, &preferredSize, &granularity));
 		Log(mpt::String::Print("ASIO: getBufferSize() => minSize=%1 maxSize=%2 preferredSize=%3 granularity=%4",
 			minSize, maxSize, preferredSize, granularity));
-		m_nAsioBufferLen = ((m_Settings.LatencyMS * m_Settings.Samplerate) / 2000);
+		m_nAsioBufferLen = Util::Round<int32>(m_Settings.Latency * m_Settings.Samplerate / 2.0);
 		if(minSize <= 0 || maxSize <= 0 || minSize > maxSize)
 		{ // limits make no sense
 			if(preferredSize > 0)

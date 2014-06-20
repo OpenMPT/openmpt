@@ -59,6 +59,33 @@ const char *gszChnCfgNames[3] =
 };
 
 
+static double ParseTime(CString str)
+{
+	return ConvertStrTo<double>(mpt::To(mpt::CharsetASCII, str)) / 1000.0;
+}
+
+
+static CString PrintTime(double seconds)
+{
+	int32 microseconds = Util::Round<int32>(seconds * 1000000.0);
+	int precision = 0;
+	if(microseconds < 1000)
+	{
+		precision = 3;
+	} else if(microseconds < 10000)
+	{
+		precision = 2;
+	} else if(microseconds < 100000)
+	{
+		precision = 1;
+	} else
+	{
+		precision = 0;
+	}
+	return mpt::ToCString(mpt::CharsetASCII, mpt::String::Print("%1 ms", mpt::fmt::fix(seconds * 1000.0, 0, precision)));
+}
+
+
 BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
@@ -176,10 +203,8 @@ void COptionsSoundcard::UpdateLatency()
 {
 	// latency
 	{
-		CHAR s[128];
 		m_CbnLatencyMS.ResetContent();
-		wsprintf(s, "%d ms", m_Settings.LatencyMS);
-		m_CbnLatencyMS.SetWindowText(s);
+		m_CbnLatencyMS.SetWindowText(PrintTime(m_Settings.Latency));
 		m_CbnLatencyMS.AddString("1 ms");
 		m_CbnLatencyMS.AddString("2 ms");
 		m_CbnLatencyMS.AddString("3 ms");
@@ -206,10 +231,8 @@ void COptionsSoundcard::UpdateUpdateInterval()
 {
 	// update interval
 	{
-		CHAR s[128];
 		m_CbnUpdateIntervalMS.ResetContent();
-		wsprintf(s, "%d ms", m_Settings.UpdateIntervalMS);
-		m_CbnUpdateIntervalMS.SetWindowText(s);
+		m_CbnUpdateIntervalMS.SetWindowText(PrintTime(m_Settings.UpdateInterval));
 		m_CbnUpdateIntervalMS.AddString("1 ms");
 		m_CbnUpdateIntervalMS.AddString("2 ms");
 		m_CbnUpdateIntervalMS.AddString("5 ms");
@@ -652,23 +675,21 @@ void COptionsSoundcard::OnOK()
 	const SoundDeviceID dev = m_CurrentDeviceInfo.id;
 	// Latency
 	{
-		CHAR s[32];
-		m_CbnLatencyMS.GetWindowText(s, sizeof(s));
-		m_Settings.LatencyMS = atoi(s);
+		CString s;
+		m_CbnLatencyMS.GetWindowText(s);
+		m_Settings.Latency = ParseTime(s);
 		//Check given value.
-		m_Settings.LatencyMS = Clamp(m_Settings.LatencyMS, SNDDEV_MINLATENCY_MS, SNDDEV_MAXLATENCY_MS);
-		wsprintf(s, "%d ms", m_Settings.LatencyMS);
-		m_CbnLatencyMS.SetWindowText(s);
+		m_Settings.Latency = Clamp(m_Settings.Latency, SoundDeviceLatencyMin, SoundDeviceLatencyMax);
+		m_CbnLatencyMS.SetWindowText(PrintTime(m_Settings.Latency));
 	}
 	// Update Interval
 	{
-		CHAR s[32];
-		m_CbnUpdateIntervalMS.GetWindowText(s, sizeof(s));
-		m_Settings.UpdateIntervalMS = atoi(s);
+		CString s;
+		m_CbnUpdateIntervalMS.GetWindowText(s);
+		m_Settings.UpdateInterval = ParseTime(s);
 		//Check given value.
-		m_Settings.UpdateIntervalMS = Clamp(m_Settings.UpdateIntervalMS, SNDDEV_MINUPDATEINTERVAL_MS, SNDDEV_MAXUPDATEINTERVAL_MS);
-		wsprintf(s, "%d ms", m_Settings.UpdateIntervalMS);
-		m_CbnUpdateIntervalMS.SetWindowText(s);
+		m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, SoundDeviceUpdateIntervalMin, SoundDeviceUpdateIntervalMax);
+		m_CbnUpdateIntervalMS.SetWindowText(PrintTime(m_Settings.UpdateInterval));
 	}
 	// Channel Mapping
 	{
