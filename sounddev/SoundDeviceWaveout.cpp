@@ -65,13 +65,14 @@ SoundDeviceCaps CWaveDevice::InternalGetDeviceCaps()
 	caps.Available = true;
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
-	caps.CanExclusiveMode = false;
+	caps.CanExclusiveMode = (GetDeviceIndex() > 0); // no direct mode for WAVE_MAPPER, makes no sense there
 	caps.CanBoostThreadPriority = true;
 	caps.CanKeepDeviceRunning = false;
 	caps.CanUseHardwareTiming = false;
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
+	caps.ExclusiveModeDescription = L"Use direct mode";
 	if(mpt::Windows::Version::IsWine())
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
@@ -104,7 +105,7 @@ bool CWaveDevice::InternalOpen()
 		return false;
 	}
 	m_hWaveOut = NULL;
-	if(waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+	if(waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION | (m_Settings.ExclusiveMode ? WAVE_FORMAT_DIRECT : 0)) != MMSYSERR_NOERROR)
 	{
 		InternalClose();
 		return false;
