@@ -1,31 +1,28 @@
 
-CC  = gcc 
-CXX = g++
-LD  = g++
-AR  = ar
-
-#CPPFLAGS += -DMPT_COMPILER_GENERIC
-CPPFLAGS += 
-CXXFLAGS += -std=c++0x -fPIC 
-CFLAGS   += -std=c99   -fPIC 
-LDFLAGS  += 
-LDLIBS   += -lm
-ARFLAGS  := rcs
-
-EXESUFFIX=
-
-
 ifeq ($(HOST),unix)
+
 ifeq ($(HOST_FLAVOUR),MACOSX)
 
+include build/make/Makefile.config.clang
 # Mac OS X overrides
-
 DYNLINK=0
-
 # when using iconv
 #CPPFLAGS += -DMPT_WITH_ICONV
 #LDLIBS += -liconv
 
+else ifeq ($(HOST_FLAVOUR),LINUX)
+
+include build/make/Makefile.config.gcc
+
+else
+
+include build/make/Makefile.config.generic
+
 endif
+
+else
+
+include build/make/Makefile.config.generic
+
 endif
 
