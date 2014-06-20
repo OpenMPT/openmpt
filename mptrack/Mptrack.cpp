@@ -899,18 +899,15 @@ BOOL CTrackApp::InitInstance()
 	if (!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
 	m_pMainWnd = pMainFrame;
 
+	// Enable DDE Execute open
+	EnableShellOpen();
+
 	if (cmdInfo.m_bShowSplash && TrackerSettings::Instance().m_ShowSplashScreen)
 	{
 		StartSplashScreen();
 	}
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
-
-	// Enable DDE Execute open
-	EnableShellOpen();
-
-	// Register MOD extensions
-	//RegisterExtensions();
 
 	// Load sound APIs
 	m_pSoundDevicesManager = new SoundDevicesManager();
@@ -1186,7 +1183,7 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
 		"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
 		"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b|"
 		"Wave Files (*.wav)|*.wav|"
-		"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
+		"MIDI Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 		"All Files (*.*)|*.*||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS))
 		.FilterIndex(&nFilterIndex);
