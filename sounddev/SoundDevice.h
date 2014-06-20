@@ -161,10 +161,10 @@ public:
 };
 
 
-#define SNDDEV_MINLATENCY_MS        1u
-#define SNDDEV_MAXLATENCY_MS        500u
-#define SNDDEV_MINUPDATEINTERVAL_MS 1u
-#define SNDDEV_MAXUPDATEINTERVAL_MS 200u
+const double SoundDeviceLatencyMin        = 0.000001; // 1us
+const double SoundDeviceLatencyMax        = 0.5     ; // 500ms
+const double SoundDeviceUpdateIntervalMin = 0.000001; // 1us
+const double SoundDeviceUpdateIntervalMax = 0.2     ; // 200ms
 
 
 struct SoundChannelMapping
@@ -245,8 +245,8 @@ enum SoundDeviceStopMode
 struct SoundDeviceSettings
 {
 	HWND hWnd;
-	uint32 LatencyMS;
-	uint32 UpdateIntervalMS;
+	double Latency; // seconds
+	double UpdateInterval; // seconds
 	uint32 Samplerate;
 	uint8 Channels;
 	SampleFormat sampleFormat;
@@ -258,8 +258,8 @@ struct SoundDeviceSettings
 	SoundChannelMapping ChannelMapping;
 	SoundDeviceSettings()
 		: hWnd(NULL)
-		, LatencyMS(100)
-		, UpdateIntervalMS(5)
+		, Latency(0.1)
+		, UpdateInterval(0.005)
 		, Samplerate(48000)
 		, Channels(2)
 		, sampleFormat(SampleFormatFloat32)
@@ -275,8 +275,8 @@ struct SoundDeviceSettings
 	{
 		return true
 			&& hWnd == cmp.hWnd
-			&& LatencyMS == cmp.LatencyMS
-			&& UpdateIntervalMS == cmp.UpdateIntervalMS
+			&& Util::Round<int64>(Latency * 1000000000.0) == Util::Round<int64>(cmp.Latency * 1000000000.0) // compare in nanoseconds
+			&& Util::Round<int64>(UpdateInterval * 1000000000.0) == Util::Round<int64>(cmp.UpdateInterval * 1000000000.0) // compare in nanoseconds
 			&& Samplerate == cmp.Samplerate
 			&& Channels == cmp.Channels
 			&& sampleFormat == cmp.sampleFormat
