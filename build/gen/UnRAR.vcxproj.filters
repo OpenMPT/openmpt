@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{4CC001D5-E8C8-FB49-AE0F-FCC370246B1D}</UniqueIdentifier>
+			<UniqueIdentifier>{3D2DB508-7F6C-B245-B03C-23D4A9584B7A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\unrar">
-			<UniqueIdentifier>{AE8B1C43-0F76-2F4F-A248-36C2D481521C}</UniqueIdentifier>
+			<UniqueIdentifier>{A13FB596-A6F4-0540-8B8B-F667F6497761}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
@@ -195,6 +195,9 @@
 		<ClInclude Include="..\..\include\unrar\ulinks.hpp">
 			<Filter>include\unrar</Filter>
 		</ClInclude>
+		<ClInclude Include="..\..\include\unrar\ui.hpp">
+			<Filter>include\unrar</Filter>
+		</ClInclude>
 		<ClInclude Include="..\..\include\unrar\unicode.hpp">
 			<Filter>include\unrar</Filter>
 		</ClInclude>
@@ -345,6 +348,9 @@
 			<Filter>include\unrar</Filter>
 		</ClCompile>
 		<ClCompile Include="..\..\include\unrar\timefn.cpp">
+			<Filter>include\unrar</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\unrar\ui.cpp">
 			<Filter>include\unrar</Filter>
 		</ClCompile>
 		<ClCompile Include="..\..\include\unrar\unicode.cpp">
