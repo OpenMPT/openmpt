@@ -210,6 +210,11 @@ SoundDeviceCaps CPortaudioDevice::InternalGetDeviceCaps()
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = true;
+	const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi));
+	if(deviceInfo)
+	{
+		caps.DefaultSettings.Latency = deviceInfo->defaultLowOutputLatency;
+	}
 	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
 	{
