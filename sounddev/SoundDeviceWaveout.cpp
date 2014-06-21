@@ -87,6 +87,42 @@ SoundDeviceCaps CWaveDevice::InternalGetDeviceCaps()
 }
 
 
+SoundDeviceDynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /*baseSampleRates*/ )
+//--------------------------------------------------------------------------------------------------------
+{
+	SoundDeviceDynamicCaps caps;
+	WAVEOUTCAPSW woc;
+	MemsetZero(woc);
+	if(GetDeviceIndex() > 0)
+	{
+		if(waveOutGetDevCapsW(GetDeviceIndex() - 1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
+		{
+			if(woc.dwFormats & (WAVE_FORMAT_96M08 | WAVE_FORMAT_96M16	| WAVE_FORMAT_96S08 | WAVE_FORMAT_96S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(96000);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_48M08 | WAVE_FORMAT_48M16	| WAVE_FORMAT_48S08 | WAVE_FORMAT_48S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(48000);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_4M08 | WAVE_FORMAT_4M16	| WAVE_FORMAT_4S08 | WAVE_FORMAT_4S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(44100);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_2M08 | WAVE_FORMAT_2M16	| WAVE_FORMAT_2S08 | WAVE_FORMAT_2S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(22050);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_1M16	| WAVE_FORMAT_1S08 | WAVE_FORMAT_1S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(11025);
+			}
+		}
+	}
+	return caps;
+}
+
+
 bool CWaveDevice::InternalOpen()
 //------------------------------
 {

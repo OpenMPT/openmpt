@@ -273,6 +273,7 @@ SoundDeviceDynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vector<
 		if(Pa_IsFormatSupported(NULL, &StreamParameters, baseSampleRates[n]) == paFormatIsSupported)
 		{
 			caps.supportedSampleRates.push_back(baseSampleRates[n]);
+			caps.supportedExclusiveSampleRates.push_back(baseSampleRates[n]);
 		}
 	}
 	return caps;

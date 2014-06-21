@@ -184,6 +184,7 @@ SoundDeviceDynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<uin
 			if(dscaps.dwMinSecondarySampleRate <= baseSampleRates[i] && baseSampleRates[i] <= dscaps.dwMaxSecondarySampleRate)
 			{
 				caps.supportedSampleRates.push_back(baseSampleRates[i]);
+				caps.supportedExclusiveSampleRates.push_back(baseSampleRates[i]);
 			}
 		}
 	}

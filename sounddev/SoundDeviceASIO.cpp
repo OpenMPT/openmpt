@@ -1365,6 +1365,7 @@ SoundDeviceDynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uint3
 			if(asioCallUncatched(canSampleRate((ASIOSampleRate)baseSampleRates[i])) == ASE_OK)
 			{
 				caps.supportedSampleRates.push_back(baseSampleRates[i]);
+				caps.supportedExclusiveSampleRates.push_back(baseSampleRates[i]);
 			}
 		} catch(...)
 		{
