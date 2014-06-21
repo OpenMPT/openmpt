@@ -978,7 +978,7 @@ void CCtrlSamples::OnSampleOpen()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter("All Samples|*.wav;*.flac;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3|"
+		.ExtensionFilter("All Samples|*.wav;*.flac;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3|"
 			"Wave Files (*.wav)|*.wav|"
 	#ifndef NO_FLAC
 			"FLAC Files (*.flac)|*.flac|"
@@ -990,7 +990,7 @@ void CCtrlSamples::OnSampleOpen()
 			"Impulse Tracker Samples (*.its)|*.its|"
 			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
 			"GF1 Patches (*.pat)|*.pat|"
-			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.8sv;*.8svx;*.svx|"
+			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx|"
 			"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
 			"All Files (*.*)|*.*||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES))
@@ -2636,7 +2636,7 @@ void CCtrlSamples::OnLoopTypeChanged()
 		{
 			sample.SetLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
-		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA);
+		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA);
 	} else
 	{
 		sample.PrecomputeLoops(m_sndFile);
@@ -2697,7 +2697,7 @@ void CCtrlSamples::OnSustainTypeChanged()
 		{
 			sample.SetSustainLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
-		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA);
+		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA);
 	} else
 	{
 		sample.PrecomputeLoops(m_sndFile);
