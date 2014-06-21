@@ -1158,7 +1158,7 @@ CString CVstPlugin::GetFormattedProgramName(VstInt32 index)
 	index++;
 
 	CString formattedName;
-	if(rawname[0] < ' ')
+	if((unsigned char)rawname[0] < ' ')
 	{
 		formattedName.Format("%02d - Program %d", index, index);
 	}
