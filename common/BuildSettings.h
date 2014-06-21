@@ -369,6 +369,8 @@
 
 #endif
 
+#define _FILE_OFFSET_BITS 64
+
 #if MPT_COMPILER_MSVC
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS		// Define to disable the "This function or variable may be unsafe" warnings.
