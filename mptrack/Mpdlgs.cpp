@@ -89,7 +89,7 @@ static CString PrintTime(double seconds)
 BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
-	ON_COMMAND(IDC_CHECK4,	OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK4,	OnExclusiveModeChanged)
 	ON_COMMAND(IDC_CHECK5,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK7,	OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK9,	OnSettingsChanged)
@@ -514,6 +514,14 @@ void COptionsSoundcard::OnDeviceChanged()
 }
 
 
+void COptionsSoundcard::OnExclusiveModeChanged()
+//----------------------------------------------
+{
+	UpdateSampleRates();
+	OnSettingsChanged();
+}
+
+
 void COptionsSoundcard::OnChannelsChanged()
 //-----------------------------------------
 {
@@ -587,7 +595,15 @@ void COptionsSoundcard::UpdateSampleRates()
 {
 	m_CbnMixingFreq.ResetContent();
 
-	std::vector<uint32> samplerates = m_CurrentDeviceDynamicCaps.supportedSampleRates;
+	std::vector<uint32> samplerates;
+
+	if(IsDlgButtonChecked(IDC_CHECK4))
+	{
+		samplerates = m_CurrentDeviceDynamicCaps.supportedExclusiveSampleRates;
+	} else
+	{
+		samplerates = m_CurrentDeviceDynamicCaps.supportedSampleRates;
+	}
 
 	if(samplerates.empty())
 	{

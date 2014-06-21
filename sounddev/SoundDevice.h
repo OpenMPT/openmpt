@@ -357,7 +357,8 @@ struct SoundDeviceCaps
 struct SoundDeviceDynamicCaps
 {
 	uint32 currentSampleRate;
-	std::vector<uint32> supportedSampleRates;	// Which samplerates are actually supported by the device. Currently only implemented properly for ASIO, DirectSound and PortAudio.
+	std::vector<uint32> supportedSampleRates;
+	std::vector<uint32> supportedExclusiveSampleRates;
 	std::vector<std::wstring> channelNames;
 	SoundDeviceDynamicCaps()
 		: currentSampleRate(0)
