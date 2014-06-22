@@ -516,7 +516,7 @@ void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
 //---------------------------------------------------------------------------------
 {
 	const size_t nWriteCount = MIN(v.size(), m_nWriteCount);
-	srlztn::WriteAdaptive1248(oStrm, nWriteCount);
+	mpt::IO::WriteAdaptiveInt64LE(oStrm, nWriteCount);
 	for(size_t i = 0; i < nWriteCount; i++)
 		srlztn::Binarywrite(oStrm, v[i]);
 }
@@ -526,7 +526,7 @@ void ReadNoteMap(std::istream& iStrm, CTuning::NOTENAMEMAP& m, const size_t)
 //----------------------------------------------------------------------------------
 {
 	uint64 val;
-	srlztn::ReadAdaptive1248(iStrm, val);
+	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
 	LimitMax(val, 256u); // Read 256 at max.
 	for(size_t i = 0; i < val; i++)
 	{
@@ -543,7 +543,7 @@ void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, 
 //------------------------------------------------------------------------------------------
 {
 	uint64 val;
-	srlztn::ReadAdaptive1248(iStrm, val);
+	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
 	v.resize( static_cast<size_t>(MIN(val, 256))); // Read 256 vals at max.
 	for(size_t i = 0; i < v.size(); i++)
 		srlztn::Binaryread(iStrm, v[i]);
@@ -554,7 +554,7 @@ void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 //-------------------------------------------------------------------
 {
 	uint64 val;
-	srlztn::ReadAdaptive1248(iStrm, val);
+	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
 	size_t nSize = (val > 255) ? 255 : static_cast<size_t>(val); // Read 255 characters at max.
 	str.resize(nSize);
 	for(size_t i = 0; i < nSize; i++)
@@ -565,7 +565,7 @@ void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m)
 //---------------------------------------------------------------------------
 {
-	srlztn::WriteAdaptive1248(oStrm, m.size());
+	mpt::IO::WriteAdaptiveInt64LE(oStrm, m.size());
 	CTuning::NNM_CITER iter = m.begin();
 	CTuning::NNM_CITER end = m.end();
 	for(; iter != end; iter++)
@@ -579,7 +579,7 @@ void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m)
 void WriteStr(std::ostream& oStrm, const std::string& str)
 //-----------------------------------------------------------------
 {
-	srlztn::WriteAdaptive1248(oStrm, str.size());
+	mpt::IO::WriteAdaptiveInt64LE(oStrm, str.size());
 	oStrm.write(str.c_str(), str.size());
 }
 

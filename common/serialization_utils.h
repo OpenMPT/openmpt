@@ -75,15 +75,6 @@ enum
 };
 
 
-void ReadAdaptive12(std::istream& iStrm, uint16& val);
-void ReadAdaptive1234(std::istream& iStrm, uint32& val);       
-void ReadAdaptive1248(std::istream& iStrm, uint64& val);
-
-void WriteAdaptive12(std::ostream& oStrm, const uint16 num);
-void WriteAdaptive1234(std::ostream& oStrm, const uint32 num);
-void WriteAdaptive1248(std::ostream& oStrm, const uint64& val);
-
-
 enum
 {
 	IdSizeVariable = uint16_max,
