@@ -743,7 +743,11 @@ void SsbWrite::FinishWrite()
 	// It is not clear why this is always written using a fixed size=2 AdaptiveInt64LE encoding.
 	// This changed in r323 (before that, an AdaptiveInt64LE got written).
 	// Reading appears to parse this correctly as an AdaptiveInt64LE since at least r192.
-	Binarywrite<size_t>(oStrm, (m_nCounter << 2) | 1, 2);
+	// For now:
+	//   Keep backward compatibility for values that fit in the truncated size.
+	//   Write bigger values using the appropriate encoding length.
+	//     These values were previously written in a truncated manner which resulted in totally unparsable files.
+	mpt::IO::WriteAdaptiveInt64LE(oStrm, m_nCounter, 2);
 
 	if (GetFlag(RwfRwHasMap))
 	{	// Write map start position.
@@ -753,7 +757,7 @@ void SsbWrite::FinishWrite()
 		// It is not clear why this is always written using a fixed size=8 AdaptiveInt64LE encoding.
 		// This changed in r323 (before that, a fixed size=8 AdaptiveInt64LE got written).
 		// Reading appears to parse this correctly as an AdaptiveInt64LE since at least r192.
-		Binarywrite<uint64>(oStrm, rposMap << 2 | 3);
+		mpt::IO::WriteAdaptiveInt64LE(oStrm, rposMap, 8);
 
 	}
 

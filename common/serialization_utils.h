@@ -130,14 +130,6 @@ inline void Binarywrite(std::ostream& oStrm, const float& data)
 	mpt::IO::Write(oStrm, tmp);
 }
 
-//Write only given number of bytes from the beginning.
-template<class T>
-inline void Binarywrite(std::ostream& oStrm, const T& data, const std::size_t bytecount)
-//--------------------------------------------------------------------------------------
-{
-	mpt::IO::WriteBinaryTruncatedLE(oStrm, data, static_cast<std::size_t>(bytecount));
-}
-
 template <class T>
 inline void WriteItem(std::ostream& oStrm, const T& data)
 //-------------------------------------------------------
