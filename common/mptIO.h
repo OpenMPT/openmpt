@@ -235,13 +235,15 @@ inline bool WriteIntBE(Tfile & f, const T & v)
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 & v, std::size_t minSize = 0)
+inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 & v, std::size_t minSize = 0, std::size_t maxSize = 0)
 {
 	ASSERT(minSize == 0 || minSize == 1 || minSize == 2);
-	if(v < 0x80 && minSize <= 1)
+	ASSERT(maxSize == 0 || maxSize == 1 || maxSize == 2);
+	ASSERT(maxSize == 0 || maxSize >= minSize);
+	if(v < 0x80 && minSize <= 1 && (1 <= maxSize || maxSize == 0))
 	{
 		return IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 1) | 0x00);
-	} else if(v < 0x8000 && minSize <= 2)
+	} else if(v < 0x8000 && minSize <= 2 && (2 <= maxSize || maxSize == 0))
 	{
 		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 1) | 0x01);
 	} else
@@ -252,16 +254,18 @@ inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 & v, std::size_t minSiz
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v, std::size_t minSize = 0)
+inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v, std::size_t minSize = 0, std::size_t maxSize = 0)
 {
 	ASSERT(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 3 || minSize == 4);
-	if(v < 0x40 && minSize <= 1)
+	ASSERT(maxSize == 0 || maxSize == 1 || maxSize == 2 || maxSize == 3 || maxSize == 4);
+	ASSERT(maxSize == 0 || maxSize >= minSize);
+	if(v < 0x40 && minSize <= 1 && (1 <= maxSize || maxSize == 0))
 	{
 		return IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 2) | 0x00);
-	} else if(v < 0x4000 && minSize <= 2)
+	} else if(v < 0x4000 && minSize <= 2 && (2 <= maxSize || maxSize == 0))
 	{
 		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 2) | 0x01);
-	} else if(v < 0x400000 && minSize <= 3)
+	} else if(v < 0x400000 && minSize <= 3 && (3 <= maxSize || maxSize == 0))
 	{
 		uint32 value = static_cast<uint32>(v << 2) | 0x02;
 		uint8 bytes[3];
@@ -269,7 +273,7 @@ inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v, std::size_t minSiz
 		bytes[1] = static_cast<uint8>(value >>  8);
 		bytes[2] = static_cast<uint8>(value >> 16);
 		return IO::WriteRaw(f, bytes, 3);
-	} else if(v < 0x40000000 && minSize <= 4)
+	} else if(v < 0x40000000 && minSize <= 4 && (4 <= maxSize || maxSize == 0))
 	{
 		return IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x03);
 	} else
@@ -280,19 +284,21 @@ inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v, std::size_t minSiz
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 & v, std::size_t minSize = 0)
+inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 & v, std::size_t minSize = 0, std::size_t maxSize = 0)
 {
 	ASSERT(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 4 || minSize == 8);
-	if(v < 0x40 && minSize <= 1)
+	ASSERT(maxSize == 0 || maxSize == 1 || maxSize == 2 || maxSize == 4 || maxSize == 8);
+	ASSERT(maxSize == 0 || maxSize >= minSize);
+	if(v < 0x40 && minSize <= 1 && (1 <= maxSize || maxSize == 0))
 	{
 		return IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 2) | 0x00);
-	} else if(v < 0x4000 && minSize <= 2)
+	} else if(v < 0x4000 && minSize <= 2 && (2 <= maxSize || maxSize == 0))
 	{
 		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 2) | 0x01);
-	} else if(v < 0x40000000 && minSize <= 4)
+	} else if(v < 0x40000000 && minSize <= 4 && (4 <= maxSize || maxSize == 0))
 	{
 		return IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x02);
-	} else if(v < 0x4000000000000000ull && minSize <= 8)
+	} else if(v < 0x4000000000000000ull && minSize <= 8 && (8 <= maxSize || maxSize == 0))
 	{
 		return IO::WriteIntLE<uint64>(f, static_cast<uint64>(v << 2) | 0x03);
 	} else
