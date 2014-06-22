@@ -22,8 +22,10 @@ OPENMPT_NAMESPACE_BEGIN
 // format.
 
 #if MPT_COMPILER_GCC
-#if MPT_GCC_AT_LEAST(4,3,0)
+#if MPT_GCC_AT_LEAST(4,8,0)
 #define bswap16 __builtin_bswap16
+#endif
+#if MPT_GCC_AT_LEAST(4,3,0)
 #define bswap32 __builtin_bswap32
 #define bswap64 __builtin_bswap64
 #endif
