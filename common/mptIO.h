@@ -110,23 +110,6 @@ inline bool Write(Tfile & f, const Tbinary & v)
 }
 
 template <typename T, typename Tfile>
-inline bool ReadBinaryLE(Tfile & f, T & v)
-{
-	bool result = false;
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
-	uint8 bytes[sizeof(T)];
-	std::memset(bytes, 0, sizeof(T));
-	result = IO::ReadRaw(f, bytes, sizeof(T)) == sizeof(T);
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(bytes, bytes + sizeof(T));
-	#endif
-	std::memcpy(&v, bytes, sizeof(T));
-	return result;
-}
-
-template <typename T, typename Tfile>
 inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 {
 	bool result = false;
@@ -229,22 +212,6 @@ inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v)
 		v |= (static_cast<uint64>(byte) << (((i+1)*8) - 2));		
 	}
 	return result;
-}
-
-template <typename T, typename Tfile>
-inline bool WriteBinaryLE(Tfile & f, const T & v)
-{
-	bool result = false;
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
-	uint8 bytes[sizeof(T)];
-	std::memcpy(bytes, &v, sizeof(T));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(bytes, bytes + sizeof(T));
-	#endif
-	result = IO::WriteRaw(f, bytes, sizeof(T));
-	return result;	
 }
 
 template <typename T, typename Tfile>
