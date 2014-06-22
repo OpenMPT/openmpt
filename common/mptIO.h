@@ -37,9 +37,9 @@ namespace IO {
 typedef int64 Offset;
 
 STATIC_ASSERT(sizeof(std::streamoff) == 8); // Assert 64bit file support.
-inline bool IsValid(std::ostream & f) { f; return !f.fail(); }
-inline bool IsValid(std::istream & f) { f; return !f.fail(); }
-inline bool IsValid(std::iostream & f) { f; return !f.fail(); }
+inline bool IsValid(std::ostream & f) { return !f.fail(); }
+inline bool IsValid(std::istream & f) { return !f.fail(); }
+inline bool IsValid(std::iostream & f) { return !f.fail(); }
 inline IO::Offset TellRead(std::istream & f) { return f.tellg(); }
 inline IO::Offset TellWrite(std::ostream & f) { return f.tellp(); }
 inline bool SeekBegin(std::ostream & f) { f.seekp(0); return !f.fail(); }
