@@ -178,36 +178,6 @@ inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
 		Binaryread(iStrm, data, nSize);
 }
 
-// Read specialization for float. If data size is 8, read double and assign it to given float.
-template <>
-inline void ReadItem<float>(std::istream& iStrm, float& f, const DataSize nSize)
-//------------------------------------------------------------------------------
-{
-	if (nSize == 8)
-	{
-		double d;
-		Binaryread(iStrm, d);
-		f = static_cast<float>(d);
-	}
-	else
-		Binaryread(iStrm, f);
-}
-
-// Read specialization for double. If data size is 4, read float and assign it to given double.
-template <>
-inline void ReadItem<double>(std::istream& iStrm, double& d, const DataSize nSize)
-//--------------------------------------------------------------------------------
-{
-	if (nSize == 4)
-	{
-		float f;
-		Binaryread(iStrm, f);
-		d = f;
-	}
-	else
-		Binaryread(iStrm, d);
-}
-
 void ReadItemString(std::istream& iStrm, std::string& str, const DataSize);
 
 template <>
