@@ -98,7 +98,7 @@ inline bool IsEof(FILE * & f) { return feof(f) != 0; }
 inline bool Flush(FILE* & f) { return fflush(f) == 0; }
 
 template <typename Tbinary, typename Tfile>
-inline bool Read(Tfile & f, const Tbinary & v)
+inline bool Read(Tfile & f, Tbinary & v)
 {
 	return IO::ReadRaw(f, mpt::GetRawBytes(v), sizeof(Tbinary)) == sizeof(Tbinary);
 }
