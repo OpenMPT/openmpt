@@ -23,12 +23,15 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_COMPILER_GCC
 #if MPT_GCC_AT_LEAST(4,3,0)
+#define bswap16 __builtin_bswap16
 #define bswap32 __builtin_bswap32
+#define bswap64 __builtin_bswap64
 #endif
 #elif MPT_COMPILER_MSVC
 #include <intrin.h>
 #define bswap16 _byteswap_ushort
 #define bswap32 _byteswap_ulong
+#define bswap64 _byteswap_uint64
 #endif
 
 // No intrinsics available
@@ -38,6 +41,21 @@ OPENMPT_NAMESPACE_BEGIN
 #ifndef bswap32
 #define bswap32(x) (((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24))
 #endif
+#ifndef bswap64
+#define bswap64(x) \
+	( uint64(0) \
+		| (((x >>  0) & 0xff) << 56) \
+		| (((x >>  8) & 0xff) << 48) \
+		| (((x >> 16) & 0xff) << 40) \
+		| (((x >> 24) & 0xff) << 32) \
+		| (((x >> 32) & 0xff) << 24) \
+		| (((x >> 40) & 0xff) << 16) \
+		| (((x >> 48) & 0xff) <<  8) \
+		| (((x >> 56) & 0xff) <<  0) \
+	) \
+/**/
+#endif
+
 
 // Deprecated. Use "SwapBytesXX" versions below.
 #ifdef MPT_PLATFORM_BIG_ENDIAN
@@ -53,23 +71,31 @@ inline uint16 BigEndianW(uint16 x)	{ return bswap16(x); }
 #endif
 
 #if defined(MPT_PLATFORM_BIG_ENDIAN)
+#define bswap64le(x) bswap64(x)
 #define bswap32le(x) bswap32(x)
 #define bswap16le(x) bswap16(x)
+#define bswap64be(x) (x)
 #define bswap32be(x) (x)
 #define bswap16be(x) (x)
 #elif defined(MPT_PLATFORM_LITTLE_ENDIAN)
+#define bswap64be(x) bswap64(x)
 #define bswap32be(x) bswap32(x)
 #define bswap16be(x) bswap16(x)
+#define bswap64le(x) (x)
 #define bswap32le(x) (x)
 #define bswap16le(x) (x)
 #endif
 
+inline uint64 SwapBytesBE_(uint64 value) { return bswap64be(value); }
 inline uint32 SwapBytesBE_(uint32 value) { return bswap32be(value); }
 inline uint16 SwapBytesBE_(uint16 value) { return bswap16be(value); }
+inline uint64 SwapBytesLE_(uint64 value) { return bswap64le(value); }
 inline uint32 SwapBytesLE_(uint32 value) { return bswap32le(value); }
 inline uint16 SwapBytesLE_(uint16 value) { return bswap16le(value); }
+inline int64  SwapBytesBE_(int64  value) { return bswap64be(value); }
 inline int32  SwapBytesBE_(int32  value) { return bswap32be(value); }
 inline int16  SwapBytesBE_(int16  value) { return bswap16be(value); }
+inline int64  SwapBytesLE_(int64  value) { return bswap64le(value); }
 inline int32  SwapBytesLE_(int32  value) { return bswap32le(value); }
 inline int16  SwapBytesLE_(int16  value) { return bswap16le(value); }
 
@@ -100,10 +126,13 @@ inline char   SwapBytesBE_(char   value) { return value; }
 
 #undef bswap16le
 #undef bswap32le
+#undef bswap64le
 #undef bswap16be
 #undef bswap32be
+#undef bswap64be
 #undef bswap16
 #undef bswap32
+#undef bswap64
 
 
 // 1.0f --> 0x3f800000u
