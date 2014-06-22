@@ -144,6 +144,94 @@ inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 }
 
 template <typename T, typename Tfile>
+inline bool ReadIntLE(Tfile & f, T & v)
+{
+	bool result = false;
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	uint8 bytes[sizeof(T)];
+	std::memset(bytes, 0, sizeof(T));
+	result = (IO::ReadRaw(f, bytes, sizeof(T)) == sizeof(T));
+	T val = 0;
+	std::memcpy(&val, bytes, sizeof(T));
+	v = SwapBytesReturnLE(val);
+	return result;
+}
+
+template <typename T, typename Tfile>
+inline bool ReadIntBE(Tfile & f, T & v)
+{
+	bool result = false;
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	uint8 bytes[sizeof(T)];
+	std::memset(bytes, 0, sizeof(T));
+	result = (IO::ReadRaw(f, bytes, sizeof(T)) == sizeof(T));
+	T val = 0;
+	std::memcpy(&val, bytes, sizeof(T));
+	v = SwapBytesReturnBE(val);
+	return result;
+}
+
+template <typename Tfile>
+inline bool ReadAdaptiveInt16LE(Tfile & f, uint16 & v)
+{
+	bool result = true;
+	uint8 byte = 0;
+	std::size_t additionalBytes = 0;
+	v = 0;
+	byte = 0;
+	if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+	additionalBytes = (byte & 0x01);
+	v = byte >> 1;
+	for(std::size_t i = 0; i < additionalBytes; ++i)
+	{
+		byte = 0;
+		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+		v |= (static_cast<uint16>(byte) << (((i+1)*8) - 1));		
+	}
+	return result;
+}
+
+template <typename Tfile>
+inline bool ReadAdaptiveInt32LE(Tfile & f, uint32 & v)
+{
+	bool result = true;
+	uint8 byte = 0;
+	std::size_t additionalBytes = 0;
+	v = 0;
+	byte = 0;
+	if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+	additionalBytes = (byte & 0x03);
+	v = byte >> 2;
+	for(std::size_t i = 0; i < additionalBytes; ++i)
+	{
+		byte = 0;
+		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+		v |= (static_cast<uint32>(byte) << (((i+1)*8) - 2));		
+	}
+	return result;
+}
+
+template <typename Tfile>
+inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v)
+{
+	bool result = true;
+	uint8 byte = 0;
+	std::size_t additionalBytes = 0;
+	v = 0;
+	byte = 0;
+	if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+	additionalBytes = (1 << (byte & 0x03)) - 1;
+	v = byte >> 2;
+	for(std::size_t i = 0; i < additionalBytes; ++i)
+	{
+		byte = 0;
+		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+		v |= (static_cast<uint64>(byte) << (((i+1)*8) - 2));		
+	}
+	return result;
+}
+
+template <typename T, typename Tfile>
 inline bool WriteBinaryLE(Tfile & f, const T & v)
 {
 	bool result = false;
@@ -193,6 +281,66 @@ inline bool WriteIntBE(Tfile & f, const T & v)
 	uint8 bytes[sizeof(T)];
 	std::memcpy(bytes, &val, sizeof(T));
 	return IO::WriteRaw(f, bytes, sizeof(T));
+}
+
+template <typename Tfile>
+inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 & v)
+{
+	if(v < 0x80)
+	{
+		return IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 1) | 0x00);
+	} else if(v < 0x8000)
+	{
+		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 1) | 0x01);
+	} else
+	{
+		ASSERT(false);
+		return false;
+	}
+}
+
+template <typename Tfile>
+inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v)
+{
+	if(v < 0x40)
+	{
+		return IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 2) | 0x00);
+	} else if(v < 0x4000)
+	{
+		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 2) | 0x01);
+	} else if(v < 0x400000)
+	{
+		return IO::WriteBinaryTruncatedLE<uint32>(f, static_cast<uint32>(v << 2) | 0x02, 3);
+	} else if(v < 0x40000000)
+	{
+		return IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x03);
+	} else
+	{
+		ASSERT(false);
+		return false;
+	}
+}
+
+template <typename Tfile>
+inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 & v)
+{
+	if(v < 0x40)
+	{
+		return IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 2) | 0x00);
+	} else if(v < 0x4000)
+	{
+		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 2) | 0x01);
+	} else if(v < 0x40000000)
+	{
+		return IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x02);
+	} else if(v < 0x4000000000000000ull)
+	{
+		return IO::WriteIntLE<uint64>(f, static_cast<uint64>(v << 2) | 0x03);
+	} else
+	{
+		ASSERT(false);
+		return false;
+	}
 }
 
 template <typename T, typename Tfile>
