@@ -496,6 +496,11 @@ struct GetRawBytesFunctor
 		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 		return reinterpret_cast<const uint8 *>(&v);
 	}
+	inline uint8 * operator () (T & v) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		return reinterpret_cast<uint8 *>(&v);
+	}
 };
 
 // In order to be able to partially specialize it,
@@ -505,6 +510,11 @@ struct GetRawBytesFunctor
 // allows for implementing raw memroy access
 // via on-demand generating a cached serialized representation.
 template <typename T> inline const uint8 * GetRawBytes(const T & v)
+{
+	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+	return mpt::GetRawBytesFunctor<T>()(v);
+}
+template <typename T> inline uint8 * GetRawBytes(T & v)
 {
 	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	return mpt::GetRawBytesFunctor<T>()(v);
