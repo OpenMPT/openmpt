@@ -755,7 +755,7 @@ void SsbWrite::FinishWrite()
 		const uint64 rposMap = posMapStart - m_posStart;
 
 		// It is not clear why this is always written using a fixed size=8 AdaptiveInt64LE encoding.
-		// This changed in r323 (before that, a fixed size=8 AdaptiveInt64LE got written).
+		// This changed in r323 (before that, a fixed size=4 AdaptiveInt64LE got written).
 		// Reading appears to parse this correctly as an AdaptiveInt64LE since at least r192.
 		mpt::IO::WriteAdaptiveInt64LE(oStrm, rposMap, 8);
 
