@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "../common/mptIO.h"
+
 #include <algorithm>
 #include <bitset>
 #include <istream>
@@ -126,12 +128,7 @@ template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data)
 //---------------------------------------------------------
 {
-	char b[sizeof(T)];
-	std::memcpy(b, &data, sizeof(T));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(b, b+sizeof(T));
-	#endif
-	oStrm.write(b, sizeof(T));
+	mpt::IO::WriteBinaryLE(oStrm, data);
 }
 
 //Write only given number of bytes from the beginning.
@@ -139,12 +136,7 @@ template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data, const std::size_t bytecount)
 //--------------------------------------------------------------------------------------
 {
-	char b[sizeof(T)];
-	std::memcpy(b, &data, sizeof(T));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(b, b+sizeof(T));
-	#endif
-	oStrm.write(b, std::min(bytecount, sizeof(T)));
+	mpt::IO::WriteBinaryTruncatedLE(oStrm, data, static_cast<std::size_t>(bytecount));
 }
 
 template <class T>
@@ -170,12 +162,7 @@ template<class T>
 inline void Binaryread(std::istream& iStrm, T& data)
 //--------------------------------------------------
 {
-	char b[sizeof(T)];
-	iStrm.read(b, sizeof(T));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(b, b+sizeof(T));
-	#endif
-	std::memcpy(&data, b, sizeof(T));
+	mpt::IO::ReadBinaryLE(iStrm, data);
 }
 
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
@@ -183,16 +170,7 @@ template <class T>
 inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
 //---------------------------------------------------------------------------
 {
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
-	char b[sizeof(T)];
-	std::memset(b, 0, sizeof(T));
-	iStrm.read(b, std::min(static_cast<std::size_t>(bytecount), sizeof(T)));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(b, b+sizeof(T));
-	#endif
-	std::memcpy(&data, b, sizeof(T));
+	mpt::IO::ReadBinaryTruncatedLE(iStrm, data, static_cast<std::size_t>(bytecount));
 }
 
 
