@@ -10,7 +10,9 @@
 
 #pragma once
 
+#include "../common/typedefs.h"
 #include "../common/mptIO.h"
+#include "../common/Endianness.h"
 
 #include <algorithm>
 #include <bitset>
@@ -25,8 +27,6 @@
 #endif
 
 #include <cstring>
-
-#include "../common/typedefs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -119,7 +119,15 @@ template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data)
 //---------------------------------------------------------
 {
-	mpt::IO::WriteBinaryLE(oStrm, data);
+	mpt::IO::WriteIntLE(oStrm, data);
+}
+
+template<>
+inline void Binarywrite(std::ostream& oStrm, const float& data)
+//-------------------------------------------------------------
+{
+	IEEE754binary32LE tmp = IEEE754binary32LE(data);
+	mpt::IO::Write(oStrm, tmp);
 }
 
 //Write only given number of bytes from the beginning.
@@ -153,7 +161,16 @@ template<class T>
 inline void Binaryread(std::istream& iStrm, T& data)
 //--------------------------------------------------
 {
-	mpt::IO::ReadBinaryLE(iStrm, data);
+	mpt::IO::ReadIntLE(iStrm, data);
+}
+
+template<>
+inline void Binaryread(std::istream& iStrm, float& data)
+//------------------------------------------------------
+{
+	IEEE754binary32LE tmp = IEEE754binary32LE(0.0f);
+	mpt::IO::Read(iStrm, tmp);
+	data = tmp;
 }
 
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
