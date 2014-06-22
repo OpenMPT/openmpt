@@ -739,13 +739,22 @@ void SsbWrite::FinishWrite()
 	
 	// Write entry count.
 	oStrm.seekp(m_posEntrycount);
+
+	// It is not clear why this is always written using a fixed size=2 AdaptiveInt64LE encoding.
+	// This changed in r323 (before that, an AdaptiveInt64LE got written).
+	// Reading appears to parse this correctly as an AdaptiveInt64LE since at least r192.
 	Binarywrite<size_t>(oStrm, (m_nCounter << 2) | 1, 2);
 
 	if (GetFlag(RwfRwHasMap))
 	{	// Write map start position.
 		oStrm.seekp(m_posMapPosField);
 		const uint64 rposMap = posMapStart - m_posStart;
+
+		// It is not clear why this is always written using a fixed size=8 AdaptiveInt64LE encoding.
+		// This changed in r323 (before that, a fixed size=8 AdaptiveInt64LE got written).
+		// Reading appears to parse this correctly as an AdaptiveInt64LE since at least r192.
 		Binarywrite<uint64>(oStrm, rposMap << 2 | 3);
+
 	}
 
 	// Seek to end.
