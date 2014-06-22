@@ -532,8 +532,6 @@ static uint8 CreateDiffMask(const ModCommand &chnMC, const ModCommand &newMC)
 	return mask;
 }
 
-using srlztn::Binarywrite;
-using srlztn::Binaryread;
 
 // Writes pattern data. Adapted from SaveIT.
 void WriteData(std::ostream& oStrm, const CPattern& pat)
@@ -560,21 +558,21 @@ void WriteData(std::ostream& oStrm, const CPattern& pat)
 			if(diffmask != 0)
 				chval |= IT_bitmask_patternChanEnabled_c;
 
-			Binarywrite<uint8>(oStrm, chval);
+			mpt::IO::WriteIntLE<uint8>(oStrm, chval);
 
 			if(diffmask)
 			{
 				lastChnMC[c] = m;
-				Binarywrite<uint8>(oStrm, diffmask);
-				if(diffmask & noteBit) Binarywrite<uint8>(oStrm, m.note);
-				if(diffmask & instrBit) Binarywrite<uint8>(oStrm, m.instr);
-				if(diffmask & volcmdBit) Binarywrite<uint8>(oStrm, m.volcmd);
-				if(diffmask & volBit) Binarywrite<uint8>(oStrm, m.vol);
-				if(diffmask & commandBit) Binarywrite<uint8>(oStrm, m.command);
-				if(diffmask & effectParamBit) Binarywrite<uint8>(oStrm, m.param);
+				mpt::IO::WriteIntLE<uint8>(oStrm, diffmask);
+				if(diffmask & noteBit) mpt::IO::WriteIntLE<uint8>(oStrm, m.note);
+				if(diffmask & instrBit) mpt::IO::WriteIntLE<uint8>(oStrm, m.instr);
+				if(diffmask & volcmdBit) mpt::IO::WriteIntLE<uint8>(oStrm, m.volcmd);
+				if(diffmask & volBit) mpt::IO::WriteIntLE<uint8>(oStrm, m.vol);
+				if(diffmask & commandBit) mpt::IO::WriteIntLE<uint8>(oStrm, m.command);
+				if(diffmask & effectParamBit) mpt::IO::WriteIntLE<uint8>(oStrm, m.param);
 			}
 		}
-		Binarywrite<uint8>(oStrm, 0); // Write end of row marker.
+		mpt::IO::WriteIntLE<uint8>(oStrm, 0); // Write end of row marker.
 	}
 }
 
@@ -582,7 +580,7 @@ void WriteData(std::ostream& oStrm, const CPattern& pat)
 #define READITEM(itembit,id)		\
 if(diffmask & itembit)				\
 {									\
-	Binaryread<uint8>(iStrm, temp);	\
+	mpt::IO::ReadIntLE<uint8>(iStrm, temp);	\
 	if(ch < chns)					\
 		lastChnMC[ch].id = temp;	\
 }									\
@@ -605,7 +603,7 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 	while(row < rows && iStrm.good())
 	{
 		uint8 t = 0;
-		Binaryread<uint8>(iStrm, t);
+		mpt::IO::ReadIntLE<uint8>(iStrm, t);
 		if(t == 0)
 		{
 			row++;
@@ -618,7 +616,7 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 
 		uint8 diffmask = 0;
 		if((t & IT_bitmask_patternChanEnabled_c) != 0)
-			Binaryread<uint8>(iStrm, diffmask);
+			mpt::IO::ReadIntLE<uint8>(iStrm, diffmask);
 		uint8 temp = 0;
 
 		ModCommand dummy;
@@ -634,7 +632,7 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 		{
 			//Ignore additional data.
 			uint8 temp;
-			Binaryread<uint8>(iStrm, temp);
+			mpt::IO::ReadIntLE<uint8>(iStrm, temp);
 			iStrm.ignore(temp);
 		}
 	}
