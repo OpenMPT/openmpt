@@ -32,7 +32,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 	switch (mixLevelType)
 	{
 
-		// Olivier's version gives us floats in [-0.5; 0.5] and slightly saturates VSTis. 
+		// Olivier's version gives us floats in [-0.5; 0.5] and slightly saturates VSTis.
 		case mixLevels_original:
 			setVSTiAttenuation(NO_ATTENUATION);
 			setIntToFloat(1.0f/static_cast<float>(1<<28));
@@ -63,7 +63,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
 			break;
 
-		// 117RC2 gives us floats in [-1.0; 1.0] and hopefully plays VSTis at 
+		// 117RC2 gives us floats in [-1.0; 1.0] and hopefully plays VSTis at
 		// the right volume... but we attenuate by 2x to approx. match sample volume.
 	
 		case mixLevels_117RC2:
@@ -80,7 +80,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setExtraSampleAttenuation(MIXING_ATTENUATION);
 			break;
 
-		// 117RC3 ignores the horrible global, system-specific pre-amp, 
+		// 117RC3 ignores the horrible global, system-specific pre-amp,
 		// treats panning as balance to avoid saturation on loud sample (and because I think it's better :),
 		// and allows display of attenuation in decibels.
 		default:
@@ -110,8 +110,8 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
 			setUseGlobalPreAmp(false);
 			setForcePanningMode(mixLevelType == mixLevels_compatible ? forceNoSoftPanning : forceFT2Panning);
 			setDisplayDBValues(true);
-			setNormalSamplePreAmp(256.0);
-			setNormalVSTiVol(256.0);
+			setNormalSamplePreAmp(mixLevelType == mixLevels_compatible ? 256.0 : 192.0);
+			setNormalVSTiVol(mixLevelType == mixLevels_compatible ? 256.0 : 192.0);
 			setNormalGlobalVol(256.0);
 			setExtraSampleAttenuation(1);
 			break;
