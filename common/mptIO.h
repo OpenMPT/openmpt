@@ -215,22 +215,6 @@ inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v)
 }
 
 template <typename T, typename Tfile>
-inline bool WriteBinaryTruncatedLE(Tfile & f, const T & v, std::size_t size)
-{
-	bool result = false;
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
-	uint8 bytes[sizeof(T)];
-	std::memcpy(bytes, &v, sizeof(T));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(bytes, bytes + sizeof(T));
-	#endif
-	result = IO::WriteRaw(f, bytes, std::min(size, sizeof(T)));
-	return result;	
-}
-
-template <typename T, typename Tfile>
 inline bool WriteIntLE(Tfile & f, const T & v)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
@@ -279,7 +263,12 @@ inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v, std::size_t minSiz
 		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 2) | 0x01);
 	} else if(v < 0x400000 && minSize <= 3)
 	{
-		return IO::WriteBinaryTruncatedLE<uint32>(f, static_cast<uint32>(v << 2) | 0x02, 3);
+		uint32 value = static_cast<uint32>(v << 2) | 0x02;
+		uint8 bytes[3];
+		bytes[0] = static_cast<uint8>(value >>  0);
+		bytes[1] = static_cast<uint8>(value >>  8);
+		bytes[2] = static_cast<uint8>(value >> 16);
+		return IO::WriteRaw(f, bytes, 3);
 	} else if(v < 0x40000000 && minSize <= 4)
 	{
 		return IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x03);
