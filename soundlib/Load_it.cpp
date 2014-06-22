@@ -110,7 +110,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 			else //Case: Using original IT tuning.
 				srlztn::StringToBinaryStream<uint8>(oStrm, "->MPT_ORIGINAL_IT<-");
 
-			srlztn::Binarywrite<uint16>(oStrm, iter->second);
+			mpt::IO::WriteIntLE<uint16>(oStrm, iter->second);
 		}
 
 		//Writing tuning data for instruments.
@@ -122,7 +122,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 				sf.AddToLog("Error: 210807_1");
 				return;
 			}
-			srlztn::Binarywrite(oStrm, iter->second);
+			mpt::IO::WriteIntLE<uint16>(oStrm, iter->second);
 		}
 	}
 }

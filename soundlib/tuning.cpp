@@ -518,7 +518,7 @@ void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
 	const size_t nWriteCount = MIN(v.size(), m_nWriteCount);
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, nWriteCount);
 	for(size_t i = 0; i < nWriteCount; i++)
-		srlztn::Binarywrite(oStrm, v[i]);
+		mpt::IO::Write(oStrm, IEEE754binary32LE(v[i]));
 }
 
 
@@ -531,7 +531,7 @@ void ReadNoteMap(std::istream& iStrm, CTuning::NOTENAMEMAP& m, const size_t)
 	for(size_t i = 0; i < val; i++)
 	{
 		int16 key;
-		srlztn::Binaryread<int16>(iStrm, key);
+		mpt::IO::ReadIntLE<int16>(iStrm, key);
 		std::string str;
 		srlztn::StringFromBinaryStream<uint8>(iStrm, str);
 		m[key] = str;
@@ -546,7 +546,11 @@ void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, 
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
 	v.resize( static_cast<size_t>(MIN(val, 256))); // Read 256 vals at max.
 	for(size_t i = 0; i < v.size(); i++)
-		srlztn::Binaryread(iStrm, v[i]);
+	{
+		IEEE754binary32LE tmp(0.0f);
+		mpt::IO::Read(iStrm, tmp);
+		v[i] = tmp;
+	}
 }
 
 
@@ -558,7 +562,7 @@ void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 	size_t nSize = (val > 255) ? 255 : static_cast<size_t>(val); // Read 255 characters at max.
 	str.resize(nSize);
 	for(size_t i = 0; i < nSize; i++)
-		srlztn::Binaryread(iStrm, str[i]);
+		mpt::IO::ReadIntLE(iStrm, str[i]);
 }
 
 
@@ -570,7 +574,7 @@ void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m)
 	CTuning::NNM_CITER end = m.end();
 	for(; iter != end; iter++)
 	{
-		srlztn::Binarywrite<int16>(oStrm, iter->first);
+		mpt::IO::WriteIntLE<int16>(oStrm, iter->first);
 		srlztn::StringToBinaryStream<uint8>(oStrm, iter->second);
 	}
 }
