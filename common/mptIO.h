@@ -251,12 +251,13 @@ inline bool WriteIntBE(Tfile & f, const T & v)
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 & v)
+inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 & v, std::size_t minSize = 0)
 {
-	if(v < 0x80)
+	ASSERT(minSize == 0 || minSize == 1 || minSize == 2);
+	if(v < 0x80 && minSize <= 1)
 	{
 		return IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 1) | 0x00);
-	} else if(v < 0x8000)
+	} else if(v < 0x8000 && minSize <= 2)
 	{
 		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 1) | 0x01);
 	} else
@@ -267,18 +268,19 @@ inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 & v)
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v)
+inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v, std::size_t minSize = 0)
 {
-	if(v < 0x40)
+	ASSERT(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 3 || minSize == 4);
+	if(v < 0x40 && minSize <= 1)
 	{
 		return IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 2) | 0x00);
-	} else if(v < 0x4000)
+	} else if(v < 0x4000 && minSize <= 2)
 	{
 		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 2) | 0x01);
-	} else if(v < 0x400000)
+	} else if(v < 0x400000 && minSize <= 3)
 	{
 		return IO::WriteBinaryTruncatedLE<uint32>(f, static_cast<uint32>(v << 2) | 0x02, 3);
-	} else if(v < 0x40000000)
+	} else if(v < 0x40000000 && minSize <= 4)
 	{
 		return IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x03);
 	} else
@@ -289,18 +291,19 @@ inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v)
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 & v)
+inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 & v, std::size_t minSize = 0)
 {
-	if(v < 0x40)
+	ASSERT(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 4 || minSize == 8);
+	if(v < 0x40 && minSize <= 1)
 	{
 		return IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 2) | 0x00);
-	} else if(v < 0x4000)
+	} else if(v < 0x4000 && minSize <= 2)
 	{
 		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 2) | 0x01);
-	} else if(v < 0x40000000)
+	} else if(v < 0x40000000 && minSize <= 4)
 	{
 		return IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x02);
-	} else if(v < 0x4000000000000000ull)
+	} else if(v < 0x4000000000000000ull && minSize <= 8)
 	{
 		return IO::WriteIntLE<uint64>(f, static_cast<uint64>(v << 2) | 0x03);
 	} else
