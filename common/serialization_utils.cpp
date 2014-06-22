@@ -565,7 +565,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 
 	// Read entrycount
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
-	if(tempU64 > 16000) // FIXME: 16000 appear like a totally arbitrary limit. May be to avoid out-of-memory DoS.
+	if(tempU64 > 16000) // The current code can only write 16383 entries because it uses a Adaptive64LE with a fixed size=2
 		{ AddReadNote(SNR_TOO_MANY_ENTRIES_TO_READ); return; }
 
 	m_nReadEntrycount = static_cast<NumType>(tempU64);
@@ -740,24 +740,16 @@ void SsbWrite::FinishWrite()
 	// Write entry count.
 	oStrm.seekp(m_posEntrycount);
 
-	// It is not clear why this is always written using a fixed size=2 AdaptiveInt64LE encoding.
-	// This changed in r323 (before that, an AdaptiveInt64LE got written).
-	// Reading appears to parse this correctly as an AdaptiveInt64LE since at least r192.
-	// For now:
-	//   Keep backward compatibility for values that fit in the truncated size.
-	//   Write bigger values using the appropriate encoding length.
-	//     These values were previously written in a truncated manner which resulted in totally unparsable files.
-	mpt::IO::WriteAdaptiveInt64LE(oStrm, m_nCounter, 2);
+	// Write a fixed size=2 Adaptive64LE because space for this value has already been reserved berforehand.
+	mpt::IO::WriteAdaptiveInt64LE(oStrm, m_nCounter, 2, 2);
 
 	if (GetFlag(RwfRwHasMap))
 	{	// Write map start position.
 		oStrm.seekp(m_posMapPosField);
 		const uint64 rposMap = posMapStart - m_posStart;
 
-		// It is not clear why this is always written using a fixed size=8 AdaptiveInt64LE encoding.
-		// This changed in r323 (before that, a fixed size=4 AdaptiveInt64LE got written).
-		// Reading appears to parse this correctly as an AdaptiveInt64LE since at least r192.
-		mpt::IO::WriteAdaptiveInt64LE(oStrm, rposMap, 8);
+		// Write a fixed size=8 Adaptive64LE because space for this value has already been reserved berforehand.
+		mpt::IO::WriteAdaptiveInt64LE(oStrm, rposMap, 8, 8);
 
 	}
 
