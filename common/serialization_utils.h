@@ -207,19 +207,19 @@ protected:
 
 public:
 
-	// When writing, returns the number of entries written.
-	// When reading, returns the number of entries read not including unrecognized entries.
-	NumType GetCounter() const {return m_nCounter;}
-
-	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
-	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
-
 	SsbStatus GetStatus() const
 	{
 		return m_Status;
 	}
 
 protected:
+
+	// When writing, returns the number of entries written.
+	// When reading, returns the number of entries read not including unrecognized entries.
+	NumType GetCounter() const {return m_nCounter;}
+
+	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
+	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
 
 	// Write given string to log if log func is defined.
 	void AddToLog(const char *psz);
