@@ -6683,16 +6683,25 @@ void CViewPattern::OnTogglePCNotePluginEditor()
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr)
 		return;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	if(!sndFile.Patterns.IsValidPat(m_nPattern))
 		return;
 
-	ModCommand *mSelStart = pSndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
-	if(!mSelStart->IsPcNote() || mSelStart->instr < 1 || mSelStart->instr > MAX_MIXPLUGINS)
-		return;
+	const ModCommand &m = *sndFile.Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
+	PLUGINDEX plug = 0;
+	if(!m.IsPcNote())
+	{
+		// No PC note: Toggle instrument's plugin editor
+		if(m.instr && m.instr <= sndFile.GetNumInstruments() && sndFile.Instruments[m.instr])
+		{
+			plug = sndFile.Instruments[m.instr]->nMixPlug;
+		}
+	} else
+	{
+		plug = m.instr;
+	}
 
-	PLUGINDEX nPlg = (PLUGINDEX)(mSelStart->instr - 1);
-	pModDoc->TogglePluginEditor(nPlg);
+	if(plug > 0 && plug <= MAX_MIXPLUGINS) pModDoc->TogglePluginEditor(plug - 1);
 }
 
 
