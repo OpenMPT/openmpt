@@ -113,10 +113,11 @@ static std::string IdToString(const char* const pvId, const size_t nLength)
 	std::string str;
 	if (IsPrintableId(pId, nLength))
 		std::copy(pId, pId + nLength, std::back_inserter<std::string>(str));
-	else if (nLength <= 4) // Interpret ID as integer value.
+	else if (nLength <= 8) // Interpret ID as integer value.
 	{
-		int32 val = 0;
-		memcpy(&val, pId, nLength);
+		int64 val = 0;
+		std::memcpy(&val, pId, nLength);
+		val = SwapBytesReturnLE(val);
 		str = Stringify(val);
 	}
 	return str;
