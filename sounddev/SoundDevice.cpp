@@ -228,8 +228,8 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 		Close();
 	}
 	m_Settings = settings;
-	m_Settings.Latency = Clamp(m_Settings.Latency, SoundDeviceLatencyMin, SoundDeviceLatencyMax);
-	m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, SoundDeviceUpdateIntervalMin, SoundDeviceUpdateIntervalMax);
+	m_Settings.Latency = Clamp(m_Settings.Latency, m_Caps.LatencyMin, m_Caps.LatencyMax);
+	m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, m_Caps.UpdateIntervalMin, m_Caps.UpdateIntervalMax);
 	if(!m_Settings.ChannelMapping.IsValid(m_Settings.Channels))
 	{
 		return false;

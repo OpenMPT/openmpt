@@ -1328,6 +1328,11 @@ SoundDeviceCaps CASIODevice::InternalGetDeviceCaps()
 	caps.CanChannelMapping = true;
 	caps.CanDriverPanel = true;
 
+	caps.LatencyMin = 0.000001; // 1 us
+	caps.LatencyMax = 0.5; // 500 ms
+	caps.UpdateIntervalMin = 0.0; // disabled
+	caps.UpdateIntervalMax = 0.0; // disabled
+
 	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 
 	return caps;
