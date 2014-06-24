@@ -566,7 +566,9 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 
 	// Read entrycount
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
-	if(tempU64 > 16000) // The current code can only write 16383 entries because it uses a Adaptive64LE with a fixed size=2
+	if(tempU64 > 16000)
+		// The current code can only write 16383 entries because it uses a Adaptive64LE with a fixed size=2
+		// Additionally, 16000 is an arbitrary limit to avoid an out-of-memory DoS when caching the map.
 		{ AddReadNote(SNR_TOO_MANY_ENTRIES_TO_READ); return; }
 
 	m_nReadEntrycount = static_cast<NumType>(tempU64);
