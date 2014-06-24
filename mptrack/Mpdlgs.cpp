@@ -203,25 +203,34 @@ void COptionsSoundcard::UpdateLatency()
 {
 	// latency
 	{
+		static const double latencies [] = {
+			0.001,
+			0.002,
+			0.003,
+			0.004,
+			0.005,
+			0.010,
+			0.015,
+			0.020,
+			0.025,
+			0.030,
+			0.040,
+			0.050,
+			0.075,
+			0.100,
+			0.150,
+			0.200,
+			0.250
+		};
 		m_CbnLatencyMS.ResetContent();
 		m_CbnLatencyMS.SetWindowText(PrintTime(m_Settings.Latency));
-		m_CbnLatencyMS.AddString("1 ms");
-		m_CbnLatencyMS.AddString("2 ms");
-		m_CbnLatencyMS.AddString("3 ms");
-		m_CbnLatencyMS.AddString("4 ms");
-		m_CbnLatencyMS.AddString("5 ms");
-		m_CbnLatencyMS.AddString("10 ms");
-		m_CbnLatencyMS.AddString("15 ms");
-		m_CbnLatencyMS.AddString("20 ms");
-		m_CbnLatencyMS.AddString("25 ms");
-		m_CbnLatencyMS.AddString("30 ms");
-		m_CbnLatencyMS.AddString("40 ms");
-		m_CbnLatencyMS.AddString("50 ms");
-		m_CbnLatencyMS.AddString("75 ms");
-		m_CbnLatencyMS.AddString("100 ms");
-		m_CbnLatencyMS.AddString("150 ms");
-		m_CbnLatencyMS.AddString("200 ms");
-		m_CbnLatencyMS.AddString("250 ms");
+		for(std::size_t i = 0; i < CountOf(latencies); ++i)
+		{
+			if(m_CurrentDeviceCaps.LatencyMin <= latencies[i] && latencies[i] <= m_CurrentDeviceCaps.LatencyMax)
+			{
+				m_CbnLatencyMS.AddString(PrintTime(latencies[i]));
+			}
+		}
 	}
 }
 
@@ -231,16 +240,25 @@ void COptionsSoundcard::UpdateUpdateInterval()
 {
 	// update interval
 	{
+		static const double updateIntervals [] = {
+			0.001,
+			0.002,
+			0.005,
+			0.010,
+			0.015,
+			0.020,
+			0.025,
+			0.050
+		};
 		m_CbnUpdateIntervalMS.ResetContent();
 		m_CbnUpdateIntervalMS.SetWindowText(PrintTime(m_Settings.UpdateInterval));
-		m_CbnUpdateIntervalMS.AddString("1 ms");
-		m_CbnUpdateIntervalMS.AddString("2 ms");
-		m_CbnUpdateIntervalMS.AddString("5 ms");
-		m_CbnUpdateIntervalMS.AddString("10 ms");
-		m_CbnUpdateIntervalMS.AddString("15 ms");
-		m_CbnUpdateIntervalMS.AddString("20 ms");
-		m_CbnUpdateIntervalMS.AddString("25 ms");
-		m_CbnUpdateIntervalMS.AddString("50 ms");
+		for(std::size_t i = 0; i < CountOf(updateIntervals); ++i)
+		{
+			if(m_CurrentDeviceCaps.UpdateIntervalMin <= updateIntervals[i] && updateIntervals[i] <= m_CurrentDeviceCaps.UpdateIntervalMax)
+			{
+				m_CbnUpdateIntervalMS.AddString(PrintTime(updateIntervals[i]));
+			}
+		}
 	}
 }
 
@@ -695,7 +713,7 @@ void COptionsSoundcard::OnOK()
 		m_CbnLatencyMS.GetWindowText(s);
 		m_Settings.Latency = ParseTime(s);
 		//Check given value.
-		m_Settings.Latency = Clamp(m_Settings.Latency, SoundDeviceLatencyMin, SoundDeviceLatencyMax);
+		m_Settings.Latency = Clamp(m_Settings.Latency, m_CurrentDeviceCaps.LatencyMin, m_CurrentDeviceCaps.LatencyMax);
 		m_CbnLatencyMS.SetWindowText(PrintTime(m_Settings.Latency));
 	}
 	// Update Interval
@@ -704,7 +722,7 @@ void COptionsSoundcard::OnOK()
 		m_CbnUpdateIntervalMS.GetWindowText(s);
 		m_Settings.UpdateInterval = ParseTime(s);
 		//Check given value.
-		m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, SoundDeviceUpdateIntervalMin, SoundDeviceUpdateIntervalMax);
+		m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, m_CurrentDeviceCaps.UpdateIntervalMin, m_CurrentDeviceCaps.UpdateIntervalMax);
 		m_CbnUpdateIntervalMS.SetWindowText(PrintTime(m_Settings.UpdateInterval));
 	}
 	// Channel Mapping

@@ -161,12 +161,6 @@ public:
 };
 
 
-const double SoundDeviceLatencyMin        = 0.000001; // 1us
-const double SoundDeviceLatencyMax        = 0.5     ; // 500ms
-const double SoundDeviceUpdateIntervalMin = 0.000001; // 1us
-const double SoundDeviceUpdateIntervalMax = 0.2     ; // 200ms
-
-
 struct SoundChannelMapping
 {
 
@@ -335,6 +329,10 @@ struct SoundDeviceCaps
 	bool CanDriverPanel;
 	bool HasInternalDither;
 	std::wstring ExclusiveModeDescription;
+	double LatencyMin;
+	double LatencyMax;
+	double UpdateIntervalMin;
+	double UpdateIntervalMax;
 	SoundDeviceSettings DefaultSettings;
 	SoundDeviceCaps()
 		: Available(false)
@@ -348,6 +346,10 @@ struct SoundDeviceCaps
 		, CanDriverPanel(false)
 		, HasInternalDither(false)
 		, ExclusiveModeDescription(L"Use device exclusively")
+		, LatencyMin(0.002) // 2ms
+		, LatencyMax(0.5) // 500ms
+		, UpdateIntervalMin(0.001) // 1ms
+		, UpdateIntervalMax(0.2) // 200ms
 	{
 		return;
 	}
