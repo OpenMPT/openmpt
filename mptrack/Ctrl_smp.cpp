@@ -2329,7 +2329,7 @@ void CCtrlSamples::OnSilence()
 				int delta = dest - base;
 				for (SmpLength i=0; i<len; i++)
 				{
-					int n = base + (int)(((LONGLONG)delta * (LONGLONG)i) / (len-1));
+					int n = base + (int)(((int64)delta * (int64)i) / int64(len - 1));
 					p[i] = (signed short)n;
 				}
 			} else
@@ -2340,7 +2340,7 @@ void CCtrlSamples::OnSilence()
 				int delta = dest - base;
 				for (SmpLength i=0; i<len; i++)
 				{
-					int n = base + (delta * i) / (len-1);
+					int n = base + (int)(((int64)delta * (int64)i) / int64(len - 1));
 					p[i] = (signed char)n;
 				}
 			}
