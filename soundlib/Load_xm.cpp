@@ -588,6 +588,14 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
 	}
 
+	if(madeWith[verFT2Generic] && !m_SongFlags[SONG_EMBEDMIDICFG])
+	{
+		// FT2 allows typing in arbitrary unsupported effect letters such as Zxx.
+		// Prevent these commands from being interpreted as filter commands by erasing the default MIDI Config.
+		MemsetZero(m_MidiCfg.szMidiSFXExt);
+		MemsetZero(m_MidiCfg.szMidiZXXExt);
+	}
+
 	if(madeWith[verFT2Generic]
 		&& fileHeader.version >= 0x0104	// Old versions of FT2 didn't have (smooth) ramping. Disable it for those versions where we can be sure that there should be no ramping.
 #ifdef MODPLUG_TRACKER
