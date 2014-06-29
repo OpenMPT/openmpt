@@ -533,7 +533,7 @@ void CSampleUndo::DeleteStep(undobuf_t &buffer, const SAMPLEINDEX smp, const siz
 void CSampleUndo::RemoveLastUndoStep(const SAMPLEINDEX smp)
 //---------------------------------------------------------
 {
-	if(CanUndo(smp) == false) return;
+	if(!CanUndo(smp)) return;
 	DeleteStep(UndoBuffer, smp, UndoBuffer[smp - 1].size() - 1);
 }
 
@@ -565,7 +565,7 @@ void CSampleUndo::RestrictBufferSize(undobuf_t &buffer, size_t &capacity)
 				capacity -= (buffer[smp - 1][i].changeEnd - buffer[smp - 1][i].changeStart) * buffer[smp - 1][i].OldSample.GetBytesPerSample();
 				for(size_t j = 0; j <= i; j++)
 				{
-					DeleteStep(buffer, smp, j);
+					DeleteStep(buffer, smp, 0);
 				}
 				// Try to evenly spread out the restriction, i.e. move on to other samples before deleting another step for this sample.
 				break;
