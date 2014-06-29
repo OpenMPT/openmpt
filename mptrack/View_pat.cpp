@@ -6288,7 +6288,6 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 		return false;
 	}
 
-
 	std::vector<CHANNELINDEX> validChans;
 	DWORD greyed = IsColumnSelected(PatternCursor::instrColumn) ? 0 : MF_GRAYED;
 
@@ -6344,7 +6343,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, "Remove instrument");
 			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + GetCurrentInstrument(), "Set to current instrument");
 		}
-		return true;
+		return BuildTogglePlugEditorCtxMenu(hMenu, ih);
 	}
 	return false;
 }
@@ -6397,14 +6396,43 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 			{
 				AppendMenu(paramChangeMenu, MF_STRING | (i == curParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, plug->GetFormattedParamName(i));
 			}
-		}				
-
-		AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, "Toggle Plugin Editor\t" + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
+		}
 	}
 
-	return true;
+	return BuildTogglePlugEditorCtxMenu(hMenu, ih);
 }
 
+
+bool CViewPattern::BuildTogglePlugEditorCtxMenu(HMENU hMenu, CInputHandler *ih) const
+//-----------------------------------------------------------------------------------
+{
+	const CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
+	{
+		return false;
+	}
+
+	PLUGINDEX plug = 0;
+	const ModCommand &selStart = *sndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
+	if(selStart.IsPcNote())
+	{
+		// PC Event
+		plug = selStart.instr;
+	} else if(selStart.instr > 0 && selStart.instr <= sndFile->GetNumInstruments()
+		&& sndFile->Instruments[selStart.instr] != nullptr
+		&& sndFile->Instruments[selStart.instr]->nMixPlug)
+	{
+		// Regular instrument
+		plug = sndFile->Instruments[selStart.instr]->nMixPlug;
+	}
+
+	if(plug && plug <= MAX_MIXPLUGINS && sndFile->m_MixPlugins[plug - 1].pMixPlugin != nullptr)
+	{
+		AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, "Toggle Plugin Editor\t" + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
+		return true;
+	}
+	return false;
+}
 
 // Returns an ordered list of all channels in which a given column type is selected.
 CHANNELINDEX CViewPattern::ListChansWhereColSelected(PatternCursor::Columns colType, std::vector<CHANNELINDEX> &chans) const

@@ -590,7 +590,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInstrumentEnvelopeToggleReleaseNode, 1833, _T("Toggle release node"));
 	DefineKeyCommand(kcInstrumentEnvelopePointMoveUp8, 1834, _T("Move envelope point up (Coarse)"));
 	DefineKeyCommand(kcInstrumentEnvelopePointMoveDown8, 1835, _T("Move envelope point down (Coarse)"));
-	DefineKeyCommand(kcPatternEditPCNotePlugin, 1836, _T("Edit Plugin assigned to PC Event"));
+	DefineKeyCommand(kcPatternEditPCNotePlugin, 1836, _T("Toggle PC Event/instrument plugin editor"));
 	DefineKeyCommand(kcInstrumentEnvelopeZoomIn, 1837, _T("Zoom In"));
 	DefineKeyCommand(kcInstrumentEnvelopeZoomOut, 1838, _T("Zoom Out"));
 	DefineKeyCommand(kcVSTGUIToggleRecordParams, 1839, _T("Toggle Parameter Recording"));

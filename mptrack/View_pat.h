@@ -471,6 +471,7 @@ private:
 	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const;
+	bool BuildTogglePlugEditorCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 
 	// Returns an ordered list of all channels in which a given column type is selected.
 	CHANNELINDEX ListChansWhereColSelected(PatternCursor::Columns colType, std::vector<CHANNELINDEX> &chans) const;
