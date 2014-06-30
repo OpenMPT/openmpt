@@ -1314,7 +1314,9 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 		{
 			// FT2 compatibility: Don't reset portamento target with new notes.
 			// Test case: Porta-Pickup.xm
-			if(bPorta || !IsCompatibleMode(TRK_FASTTRACKER2))
+			// IT compatibility: Portamento target is completely cleared with new notes.
+			// Test case: PortaReset.it
+			if(bPorta || !(IsCompatibleMode(TRK_FASTTRACKER2) || IsCompatibleMode(TRK_IMPULSETRACKER)))
 			{
 				pChn->nPortamentoDest = period;
 			}
