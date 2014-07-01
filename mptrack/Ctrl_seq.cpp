@@ -1144,6 +1144,18 @@ void COrderList::OnInsertOrder()
 			sndFile.Order[insertEnd + i + 1] = sndFile.Order[insertEnd - insertCount + i];
 		}
 	}
+
+	Util::InsertItem(selection.firstOrd, selection.lastOrd, sndFile.m_PlayState.m_nNextOrder);
+	if(sndFile.m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID)
+	{
+		Util::InsertItem(selection.firstOrd, selection.lastOrd, sndFile.m_PlayState.m_nSeqOverride);
+	}
+	// Adjust order lock position
+	if(sndFile.m_lockOrderStart != ORDERINDEX_INVALID)
+	{
+		Util::InsertRange(selection.firstOrd, selection.lastOrd, sndFile.m_lockOrderStart, sndFile.m_lockOrderEnd);
+	}
+
 	m_nScrollPos = std::min(ORDERINDEX(insertEnd + 1), sndFile.Order.GetLastIndex());
 	if(insertCount > 0)
 		m_nScrollPos2nd = std::min(ORDERINDEX(m_nScrollPos + insertCount), sndFile.Order.GetLastIndex());
@@ -1170,7 +1182,7 @@ void COrderList::OnInsertSeparatorPattern()
 	const OrdSelection selection = GetCurSel(true);
 	ORDERINDEX insertPos = selection.firstOrd;
 		
-	if(sndFile.Order[selection.firstOrd] != sndFile.Order.GetInvalidPatIndex())
+	if(sndFile.Order[insertPos] != sndFile.Order.GetInvalidPatIndex())
 	{
 		// If we're not inserting on a stop (---) index, we move on by one position.
 		insertPos++;
@@ -1180,12 +1192,23 @@ void COrderList::OnInsertSeparatorPattern()
 			if(sndFile.Order.GetLength() < sndFile.GetModSpecifications().ordersMax)
 				sndFile.Order.Append();
 		}
-		for(int j = sndFile.Order.GetLastIndex(); j > selection.firstOrd; j--)
+		for(int j = sndFile.Order.GetLastIndex(); j > insertPos; j--)
 			sndFile.Order[j] = sndFile.Order[j - 1];
 
 	}
 
 	sndFile.Order[insertPos] = sndFile.Order.GetIgnoreIndex();
+
+	Util::InsertItem(insertPos, insertPos, sndFile.m_PlayState.m_nNextOrder);
+	if(sndFile.m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID)
+	{
+		Util::InsertItem(insertPos, insertPos, sndFile.m_PlayState.m_nSeqOverride);
+	}
+	// Adjust order lock position
+	if(sndFile.m_lockOrderStart != ORDERINDEX_INVALID)
+	{
+		Util::InsertRange(insertPos, insertPos, sndFile.m_lockOrderStart, sndFile.m_lockOrderEnd);
+	}
 
 	InvalidateRect(NULL, FALSE);
 	m_pModDoc.SetModified();
@@ -1216,9 +1239,16 @@ void COrderList::OnDeleteOrder()
 	InvalidateRect(NULL, FALSE);
 	m_pModDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
 
-	if(sndFile.m_PlayState.m_nCurrentOrder > selection.lastOrd)
+	Util::DeleteItem(selection.firstOrd, selection.lastOrd, sndFile.m_PlayState.m_nNextOrder);
+	if(sndFile.m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID)
 	{
-		sndFile.m_PlayState.m_nNextOrder -= selection.GetSelCount();
+		Util::DeleteItem(selection.firstOrd, selection.lastOrd, sndFile.m_PlayState.m_nSeqOverride);
+	}
+
+	// Adjust order lock position
+	if(sndFile.m_lockOrderStart != ORDERINDEX_INVALID)
+	{
+		Util::DeleteRange(selection.firstOrd, selection.lastOrd, sndFile.m_lockOrderStart, sndFile.m_lockOrderEnd);
 	}
 }
 
