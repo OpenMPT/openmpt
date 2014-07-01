@@ -1973,27 +1973,9 @@ void CViewSample::OnEditSelectAll()
 void CViewSample::AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, SmpLength length) const
 //--------------------------------------------------------------------------------------------------
 {
-	if(m_dwBeginSel < loopStart  && m_dwEndSel < loopStart)
-	{
-		// cut part is before loop start
-		loopStart -= m_dwEndSel - m_dwBeginSel;
-		loopEnd -= m_dwEndSel - m_dwBeginSel;
-	} else if(m_dwBeginSel < loopStart  && m_dwEndSel < loopEnd)
-	{
-		// cut part is partly before loop start
-		loopStart = m_dwBeginSel;
-		loopEnd -= m_dwEndSel - m_dwBeginSel;
-	} else if(m_dwBeginSel >= loopStart && m_dwEndSel < loopEnd)
-	{
-		// cut part is in the loop
-		loopEnd -= m_dwEndSel - m_dwBeginSel;
-	} else if(m_dwBeginSel >= loopStart && m_dwBeginSel < loopEnd && m_dwEndSel > loopEnd)
-	{
-		// cut part is partly before loop end
-		loopEnd = m_dwBeginSel;
-	}
-
-	if(loopEnd > length) loopEnd = length;
+	const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
+	Util::DeleteRange(m_dwBeginSel, m_dwEndSel - 1, loopStart, loopEnd);
+	LimitMax(loopEnd, length);
 	if(loopStart + 4 >= loopEnd)
 	{
 		loopStart = loopEnd = 0;

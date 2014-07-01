@@ -888,11 +888,21 @@ void CCtrlPatterns::OnPatternDuplicate()
 			}
 
 			success = true;
-
 		}
 	}
 	if(success)
 	{
+		Util::InsertItem(selection.firstOrd, selection.lastOrd, m_sndFile.m_PlayState.m_nNextOrder);
+		if(m_sndFile.m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID)
+		{
+			Util::InsertItem(selection.firstOrd, selection.lastOrd, m_sndFile.m_PlayState.m_nSeqOverride);
+		}
+		// Adjust order lock position
+		if(m_sndFile.m_lockOrderStart != ORDERINDEX_INVALID)
+		{
+			Util::InsertRange(selection.firstOrd, selection.lastOrd, m_sndFile.m_lockOrderStart, m_sndFile.m_lockOrderEnd);
+		}
+
 		m_OrderList.InvalidateRect(NULL, FALSE);
 		m_OrderList.SetCurSel(insertWhere);
 
