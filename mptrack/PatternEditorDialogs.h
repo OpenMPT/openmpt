@@ -134,7 +134,7 @@ public:
 	CEditCommand(CSoundFile &sndFile);
 
 public:
-	bool ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor, CWnd *parent);
+	bool ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor);
 
 protected:
 	void InitAll() { InitNote(); InitVolume(); InitEffect(); }

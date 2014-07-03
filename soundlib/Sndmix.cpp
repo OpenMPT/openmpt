@@ -1201,15 +1201,15 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 			}
 			pChn->m_CalculateFreq = true;
 			pChn->m_ReCalculateFreqOnFirstTick = true;
-		}
-		else
+		} else
 		{
-			//IT playback compatibility 01 & 02
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
+				//IT playback compatibility 01 & 02
+
 				// Pattern delay restarts tick counting. Not quite correct yet!
 				const UINT tick = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
-				if(pChn->nArpeggio >> 4 != 0 || (pChn->nArpeggio & 0x0F) != 0)
+				if(pChn->nArpeggio != 0)
 				{
 					switch(tick % 3)
 					{
@@ -1217,9 +1217,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 					case 2: period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F)); break;
 					}
 				}
-			}
-			// FastTracker 2: Swedish tracker logic (TM) arpeggio
-			else if(IsCompatibleMode(TRK_FASTTRACKER2))
+			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
 				uint8 note = pChn->nNote;
 				int arpPos = 0;
@@ -1245,7 +1243,6 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 					note = 108 + NOTE_MIN; // FT2's note limit
 
 				period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
-
 			}
 			// Other trackers
 			else
@@ -1832,7 +1829,15 @@ bool CSoundFile::ReadNote()
 				{
 					// Only recompute this whole thing in case the base period has changed.
 					pChn->cachedPeriod = period;
-					pChn->glissandoPeriod = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC5Speed);
+					for(uint32 i = NOTE_MIN; i < NOTE_MAX; i++)
+					{
+						int32 n = GetPeriodFromNote(i, pChn->nFineTune, pChn->nC5Speed);
+						if(n > 0 && n <= period)
+						{
+							pChn->glissandoPeriod = n;
+							break;
+						}
+					}
 				}
 				period = pChn->glissandoPeriod;
 			}
@@ -2274,23 +2279,23 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 	} 
 
 	// calculate ramping step
-	long step = 0;
+	int32 step = 0;
 	if (m_PlayState.m_nSamplesToGlobalVolRampDest > 0)
 	{
 
 		// Still some ramping left to do.
-		long highResGlobalVolumeDestination = static_cast<long>(m_PlayState.m_nGlobalVolumeDestination) << VOLUMERAMPPRECISION;
+		int32 highResGlobalVolumeDestination = static_cast<int32>(m_PlayState.m_nGlobalVolumeDestination) << VOLUMERAMPPRECISION;
 
 		const long delta = highResGlobalVolumeDestination - m_PlayState.m_lHighResRampingGlobalVolume;
 		step = delta / static_cast<long>(m_PlayState.m_nSamplesToGlobalVolRampDest);
 
 		// Define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
 		// If step is too big (might cause click), extend ramp length.
-		UINT maxStep = MAX(50, (10000 / (m_PlayState.m_nGlobalVolumeRampAmount + 1)));
-		while(static_cast<UINT>(abs(step)) > maxStep)
+		int32 maxStep = std::max(50, (10000 / (m_PlayState.m_nGlobalVolumeRampAmount + 1)));
+		while(abs(step) > maxStep)
 		{
 			m_PlayState.m_nSamplesToGlobalVolRampDest += m_PlayState.m_nGlobalVolumeRampAmount;
-			step = delta / static_cast<long>(m_PlayState.m_nSamplesToGlobalVolRampDest);
+			step = delta / static_cast<int32>(m_PlayState.m_nSamplesToGlobalVolRampDest);
 		}
 	}
 

@@ -643,7 +643,7 @@ bool CViewPattern::ShowEditWindow()
 	}
 	if (m_pEditWnd)
 	{
-		m_pEditWnd->ShowEditWindow(m_nPattern, m_Cursor, this);
+		m_pEditWnd->ShowEditWindow(m_nPattern, m_Cursor);
 		return true;
 	}
 	return false;
