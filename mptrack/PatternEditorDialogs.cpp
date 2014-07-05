@@ -652,8 +652,8 @@ BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 }
 
 
-bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor)
-//------------------------------------------------------------------------------
+bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor, CWnd *parent)
+//--------------------------------------------------------------------------------------------
 {
 	editPos.pattern = pat;
 	const ROWINDEX row = editPos.row = cursor.GetRow();
@@ -702,10 +702,13 @@ bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor)
 	_stprintf(s, _T("Note Properties - Row %d, Channel %d"), row, chn + 1);
 	SetWindowText(s);
 
-	SetParent(CMainFrame::GetMainFrame());
-	// Note: Centering against a child window seems to be buggy.
-	CenterWindow(CMainFrame::GetMainFrame());
-
+	CRect rectParent, rectWnd;
+	parent->GetWindowRect(&rectParent);
+	GetClientRect(&rectWnd);
+	SetWindowPos(CMainFrame::GetMainFrame(),
+		rectParent.left + (rectParent.Width() - rectWnd.right) / 2,
+		rectParent.top + (rectParent.Height() - rectWnd.bottom) / 2,
+		-1, -1, SWP_NOSIZE | SWP_NOACTIVATE);
 	ShowWindow(SW_RESTORE);
 	return true;
 }
