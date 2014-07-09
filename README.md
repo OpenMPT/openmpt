@@ -110,13 +110,19 @@ How to compile
         For sound output in openmpt123, PortAudio or SDL is required.
         openmpt123 can optionally use libflac, libwavpack and libsndfile to
         render PCM files to disk.
-        When using gcc, you should simply do:
+        When using gcc, run:
 
-            make
+            make CONFIG=gcc
 
         When using clang, it is recommended to do:
 
             make CONFIG=clang
+
+        Otherwise, simply run
+
+            make
+
+        which will try to guess the compiler based on your operating system.
 
     The `Makefile` supports some customizations. You might want to read the top
     which should get you some possible make settings, like e.g.

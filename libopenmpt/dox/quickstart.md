@@ -9,12 +9,12 @@ Quick Start {#quickstart}
      -  **GNU make**
      -  **gcc >= 4.4** or **clang >= 3.0**
      -  **pkg-config**
-     -  **portaudio-v19**
-     -  **zlib**
  2. *Optional*:
+     -  **zlib**
+     -  **portaudio-v19**
+     -  **libSDL == 1.2.x**
      -  **doxygen >= 1.8**
      -  **help2man**
-     -  **libSDL**
      -  **libFLAC**
      -  **libsndfile**
      -  **WavPack**
