@@ -666,6 +666,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleTransposeOctUp, 1909, _T("Transpose +12"));
 	DefineKeyCommand(kcSampleTransposeOctDown, 1910, _T("Transpose -12"));
 	DefineKeyCommand(kcPatternInterpolateInstr, 1911, _T("Interpolate Instrument"));
+	DefineKeyCommand(kcDummyShortcut, 1912, _T("Dummy Shortcut"));
 
 	// Add new key commands here.
 
@@ -1441,27 +1442,6 @@ void CCommandSet::Copy(CCommandSet *source)
 }
 
 
-KeyCombination CCommandSet::GetKey(CommandID cmd, UINT key)
-//---------------------------------------------------------
-{
-	return commands[cmd].kcList[key];
-}
-
-
-int CCommandSet::GetKeyListSize(CommandID cmd)
-//--------------------------------------------
-{
-	return  commands[cmd].kcList.size();
-}
-
-
-CString CCommandSet::GetCommandText(CommandID cmd)
-//------------------------------------------------
-{
-	return commands[cmd].Message;
-}
-
-
 bool CCommandSet::SaveFile(const mpt::PathString &filename)
 //---------------------------------------------------------
 { //TODO: Make C++
@@ -1804,14 +1784,6 @@ CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
 	else
 		return "";
 }
-
-
-bool CCommandSet::isHidden(UINT c)
-//--------------------------------
-{
-	return commands[c].isHidden;
-}
-
 
 
 //-------------------------------------------------------

@@ -17,52 +17,29 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-// Might promote to class so we can add rules 
+// Might promote to class so we can add rules
 // (eg automatically do note off stuff, generate chord keybindings from notes based just on modifier.
 // Would need GUI rules too as options would be different for each category
-class CommandCategory 
+class CommandCategory
 {
 public:
-	CommandCategory(CString n, InputTargetContext d)
-	{
-		CommandCategory();
-		name=n;
-		id=d;
-	}
-	
+	CommandCategory(CString n, InputTargetContext d) : name(n), id(d) { }
 
-	//copy constructor; necessary if we want to use arrays of this class
-	CommandCategory(const CommandCategory &copy )
+	bool separatorAt(int c) const
 	{
-		name = copy.name;
-		id = copy.id;
-		commands.Copy(copy.commands);
-		separators.Copy(copy.separators);
-	}
-	void operator=(const CommandCategory& copy)
-	{
-		name = copy.name;
-		id = copy.id;
-		commands.Copy(copy.commands);
-		separators.Copy(copy.separators);
-	}
-	bool separatorAt(int c)
-	{
-		for (int p=0; p<separators.GetSize(); p++)
+		for(std::vector<int>::const_iterator i = separators.begin(); i != separators.end(); i++)
 		{
-			if (separators[p]==c)
+			if (*i == c)
 				return true;
 		}
 		return false;
 	}
 
 
-	CommandCategory() {};
-	~CommandCategory() {};
 	CString name;
 	InputTargetContext id;
-	CArray<int> separators;
-	CArray<int> commands;
+	std::vector<int> separators;
+	std::vector<int> commands;
 };
 
 
@@ -120,7 +97,7 @@ protected:
 public:
 	COptionsKeyboard() : CPropertyPage(IDD_OPTIONS_KEYBOARD), m_eCustHotKey(false), m_eFindHotKey(true), m_nKeyboardCfg(0) { }
 	BOOL SetKey(UINT nId, UINT nChar, UINT nFlags);
-	CArray<CommandCategory, CommandCategory> commandCategories;
+	std::vector<CommandCategory> commandCategories;
 	void DefineCommandCategories();
 
 

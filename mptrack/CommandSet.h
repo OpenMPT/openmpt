@@ -149,7 +149,9 @@ enum CommandID
 	kcPrevOrder,
 	kcNextOrder,
 	kcEndMisc=kcNextOrder,
-	kcGlobalEnd=kcNextOrder,
+
+	kcDummyShortcut,
+	kcGlobalEnd=kcDummyShortcut,
 
 	//Pattern Navigation
 	kcStartPatNavigation,
@@ -1200,13 +1202,13 @@ public:
 	// Key combination to string
 	static CString GetContextText(InputTargetContext ctx);
 	CString GetContextText() const { return GetContextText(Context()); }
-	
+
 	static CString GetModifierText(UINT mod);
 	CString GetModifierText() const { return GetModifierText(Modifier()); }
-	
+
 	static CString GetKeyText(UINT mod, UINT code);
 	CString GetKeyText() const { return GetKeyText(Modifier(), KeyCode()); }
-	
+
 	static CString GetKeyEventText(KeyEventType event);
 	CString GetKeyEventText() const { return GetKeyEventText(EventType()); }
 
@@ -1309,10 +1311,10 @@ public:
 	bool QuickChange_NoNotesRepeat();
 
 	//Communication
-	KeyCombination GetKey(CommandID cmd, UINT key);
-	bool isHidden(UINT c);
-	int GetKeyListSize(CommandID cmd);
-	CString GetCommandText(CommandID cmd);
+	KeyCombination GetKey(CommandID cmd, UINT key) const { return commands[cmd].kcList[key]; }
+	bool isHidden(UINT c) const { return commands[c].isHidden; }
+	int GetKeyListSize(CommandID cmd) const { return commands[cmd].kcList.size(); }
+	CString GetCommandText(CommandID cmd) const { return commands[cmd].Message; }
 	CString GetKeyTextFromCommand(CommandID c, UINT key);
 
 	//Pululation ;)
