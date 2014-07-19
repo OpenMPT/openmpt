@@ -739,9 +739,15 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 							stopNote = true;
 						} else
 						{
+							const SmpLength loopLength = pChn->nLoopEnd - pChn->nLoopStart;
+							if(pChn->nPos >= pChn->nLoopEnd + loopLength)
+							{
+								const SmpLength overshoot = pChn->nPos - pChn->nLoopEnd;
+								pChn->nPos -= (overshoot / loopLength) * loopLength;
+							}
 							while(pChn->nPos >= pChn->nLoopEnd)
 							{
-								pChn->nPos -= (pChn->nLoopEnd - pChn->nLoopStart);
+								pChn->nPos -= loopLength;
 							}
 						}
 					} else if(pChn->nPos >= pChn->nLength)
@@ -4916,7 +4922,7 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period) const
 		return 6*12+36;
 	} else
 	{
-		for (UINT i=1; i<NOTE_MAX; i++)
+		for (UINT i=NOTE_MIN; i<NOTE_MAX; i++)
 		{
 			LONG n = GetPeriodFromNote(i, 0, 0);
 			if ((n > 0) && (n <= (LONG)period)) return i;
