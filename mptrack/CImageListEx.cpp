@@ -88,10 +88,24 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	} else
 	{
 		// 32-bit image on modern system
+
+		// Make fully transparent pixels use the maks color. This should hopefully make the icons look "somewhat" okay
+		// on system where the alpha channel is magically missing in 32-bit mode (http://bugs.openmpt.org/view.php?id=520)
+		PNG::Pixel *pixel = bitmap->GetPixels();
+		for(size_t i = bitmap->GetNumPixels(); i != 0; i--, pixel++)
+		{
+			if(pixel->a == 0)
+			{
+				pixel->r = 255;
+				pixel->g = 0;
+				pixel->b = 255;
+			}
+		}
+
 		CBitmap dib;
 		bitmap->ToDIB(dib, dc);
-		result = CImageList::Create(cx, cy, ILC_COLOR32, nInitial, nGrow)
-			&& CImageList::Add(&dib, RGB(0, 0, 0));
+		result = CImageList::Create(cx, cy, ILC_COLOR32 | ILC_MASK, nInitial, nGrow)
+			&& CImageList::Add(&dib, RGB(255, 0, 255));
 	}
 	delete bitmap;
 	return true;
