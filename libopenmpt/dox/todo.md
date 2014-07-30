@@ -12,8 +12,6 @@ Currently being worked on:
 
 Incomplete list of stuff that needs work / known bugs:
  *  Complete the API documentation.
- *  There are most probably still problems on platforms that do not support
-    unaligned pointer access.
  *  Test on more obscure platforms.
  *  Build system, especially building shared libraries, needs work on Mac OS X
     and on probably all other systems that do not use the GNU linker.

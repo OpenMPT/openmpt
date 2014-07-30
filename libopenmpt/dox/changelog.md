@@ -11,6 +11,9 @@ is just a high-level summary.
     PortAudio.
  *  Support for emscripten is no longer experimental.
 
+ *  [Bug] Fix all known crashes on platforms that do not support unaligned
+    memory access.
+
 ### 2014-06-15 - libopenmpt 0.2-beta5
 
  *  Add unmo3 support for non-Windows builds.

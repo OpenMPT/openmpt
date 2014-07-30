@@ -208,13 +208,13 @@ static void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTr
 //--------------------------------------------------------------------------------------------------------
 {
 	ModCommand cmd, *m = pat;
-	UINT len = *((WORD *)lpTracks);
+	UINT len = *(const_unaligned_ptr_le<WORD>(lpTracks));
 	UINT pos = 0, row = 0, i;
 	lpTracks += 2;
 	for (UINT ntrk=1; ntrk<nTrack; ntrk++)
 	{
 		lpTracks += len;
-		len = *((WORD *)lpTracks);
+		len = *(const_unaligned_ptr_le<WORD>(lpTracks));
 		lpTracks += 2;
 	}
 	cmd.note = cmd.instr = 0;
@@ -324,8 +324,8 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 
 	while (dwMemPos+6 < dwMemLength)
 	{
-		block = *((WORD *)(lpStream+dwMemPos));
-		blocklen = *((DWORD *)(lpStream+dwMemPos+2));
+		block = *(const_unaligned_ptr_le<WORD>(lpStream+dwMemPos));
+		blocklen = *(const_unaligned_ptr_le<DWORD>(lpStream+dwMemPos+2));
 		dwMemPos += 6;
 		if (blocklen > dwMemLength - dwMemPos)
 		{
@@ -384,7 +384,7 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 
 			for (i=0; i<npatterns; i++)
 			{
-				const WORD *pdata;
+				const_unaligned_ptr_le<WORD> pdata;
 				UINT ch;
 
 				if (dwPos+18 >= dwMemLength) break;
@@ -395,11 +395,11 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 					patternLength[i] = pmpd->lastrow + 1;
 					if (m_nChannels < pmpd->channels) m_nChannels = pmpd->channels;
 					dwPos += 18 + 2*pmpd->channels;
-					pdata = pmpd->data;
+					pdata = const_unaligned_ptr_le<WORD>(reinterpret_cast<const uint8*>(pmpd->data));
 					ch = pmpd->channels;
 				} else
 				{
-					pdata = (const WORD *)(lpStream + dwPos);
+					pdata = const_unaligned_ptr_le<WORD>(lpStream + dwPos);
 					//Patterns[i].Resize(64, false);
 					if (m_nChannels < 32) m_nChannels = 32;
 					dwPos += 2*32;
@@ -417,7 +417,7 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 			Log("track data: %d bytes\n", blocklen);
 		#endif
 			if (dwTrackPos) break;
-			ntracks = *((WORD *)(lpStream+dwMemPos));
+			ntracks = *(const_unaligned_ptr_le<WORD>(lpStream+dwMemPos));
 			dwTrackPos = dwMemPos+2;
 			break;
 		// II: Instruments
@@ -621,7 +621,7 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 					dwPos += sampleIO.ReadSample(sample, chunk);
 				} else
 				{
-					DWORD dwLen = *((DWORD *)(lpStream+dwPos));
+					DWORD dwLen = *(const_unaligned_ptr_le<DWORD>(lpStream+dwPos));
 					dwPos += 4;
 					if ( (dwLen <= dwMemLength) && (dwPos <= dwMemLength - dwLen) && (dwLen > 4) )
 					{
