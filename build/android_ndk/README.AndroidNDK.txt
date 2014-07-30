@@ -1,7 +1,7 @@
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-This is preliminarily documentation.
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+This is preliminary documentation.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  1. Copy the whole libopenmpt source tree below your jni directory.
  2. Copy build/android_ndk/* into the root of libopenmpt, i.e. also into the

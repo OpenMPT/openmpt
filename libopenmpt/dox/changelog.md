@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  openmpt123: SDL is now also used by default if availble, in addition to
     PortAudio.
+ *  Support for emscripten is no longer experimental.
 
 ### 2014-06-15 - libopenmpt 0.2-beta5
 
