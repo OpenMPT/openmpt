@@ -266,7 +266,7 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pfh->szSongName);
 
 	dwMemPos = sizeof(MT2FILEHEADER);
-	nDrumDataLen = *(WORD *)(lpStream + dwMemPos);
+	nDrumDataLen = *const_unaligned_ptr_le<WORD>(lpStream + dwMemPos);
 	dwDrumDataPos = dwMemPos + 2;
 	if (nDrumDataLen >= 2) pdd = (MT2DRUMSDATA *)(lpStream+dwDrumDataPos);
 	dwMemPos += 2 + nDrumDataLen;
@@ -276,9 +276,9 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 	Log("Drum Data: %d bytes @%04X\n", nDrumDataLen, dwDrumDataPos);
 #endif
 	if (dwMemPos >= dwMemLength-12) return true;
-	if (!*(DWORD *)(lpStream+dwMemPos)) dwMemPos += 4;
-	if (!*(DWORD *)(lpStream+dwMemPos)) dwMemPos += 4;
-	nExtraDataLen = *(DWORD *)(lpStream+dwMemPos);
+	if (!*const_unaligned_ptr_le<DWORD>(lpStream+dwMemPos)) dwMemPos += 4;
+	if (!*const_unaligned_ptr_le<DWORD>(lpStream+dwMemPos)) dwMemPos += 4;
+	nExtraDataLen = *const_unaligned_ptr_le<DWORD>(lpStream+dwMemPos);
 	dwExtraDataPos = dwMemPos + 4;
 	dwMemPos += 4;
 #ifdef MT2DEBUG
@@ -287,8 +287,8 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 	if (dwMemPos + nExtraDataLen >= dwMemLength) return true;
 	while (dwMemPos+8 < dwExtraDataPos + nExtraDataLen)
 	{
-		DWORD dwId = *(DWORD *)(lpStream+dwMemPos);
-		DWORD dwLen = *(DWORD *)(lpStream+dwMemPos+4);
+		DWORD dwId = *const_unaligned_ptr_le<DWORD>(lpStream+dwMemPos);
+		DWORD dwLen = *const_unaligned_ptr_le<DWORD>(lpStream+dwMemPos+4);
 		dwMemPos += 8;
 		if (dwMemPos + dwLen > dwMemLength) return true;
 #ifdef MT2DEBUG
@@ -311,7 +311,7 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 		case MAGIC4LE('T','R','K','S'):
 			if (dwLen >= 2)
 			{
-				m_nSamplePreAmp = LittleEndianW(*(uint16 *)(lpStream+dwMemPos)) >> 9;
+				m_nSamplePreAmp = LittleEndianW(*const_unaligned_ptr_le<uint16>(lpStream+dwMemPos)) >> 9;
 				dwMemPos += 2;
 			}
 			for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
@@ -319,7 +319,7 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 				ChnSettings[c].Reset();
 				if(dwMemPos + 1030 < dwMemLength)
 				{
-					ChnSettings[c].nVolume = LittleEndianW(*(uint16 *)(lpStream+dwMemPos)) >> 9;
+					ChnSettings[c].nVolume = LittleEndianW(*const_unaligned_ptr_le<uint16>(lpStream+dwMemPos)) >> 9;
 					LimitMax(ChnSettings[c].nVolume, uint16(64));
 					dwMemPos += 1030;
 				}
@@ -423,7 +423,7 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 		for (UINT iDrm=0; iDrm<pdd->wDrumPatterns; iDrm++)
 		{
 			if (dwMemPos > dwMemLength-2) return true;
-			UINT nLines = *(WORD *)(lpStream+dwMemPos);
+			UINT nLines = *const_unaligned_ptr_le<WORD>(lpStream+dwMemPos);
 		#ifdef MT2DEBUG
 			if (nLines != 64) Log("Drum Pattern %d: %d Lines @%04X\n", iDrm, nLines, dwMemPos);
 		#endif
@@ -490,7 +490,7 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 				pIns->nDCT = (pmi->wNNA>>8) & 3;
 				pIns->nDNA = (pmi->wNNA>>12) & 3;
 				MT2ENVELOPE *pehdr[4];
-				WORD *pedata[4];
+				const_unaligned_ptr_le<WORD> pedata[4];
 
 				if (pfh->wVersion <= 0x201)
 				{
@@ -498,9 +498,9 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 					pehdr[0] = (MT2ENVELOPE *)(lpStream+dwEnvPos);
 					pehdr[1] = (MT2ENVELOPE *)(lpStream+dwEnvPos+8);
 					pehdr[2] = pehdr[3] = NULL;
-					pedata[0] = (WORD *)(lpStream+dwEnvPos+16);
-					pedata[1] = (WORD *)(lpStream+dwEnvPos+16+64);
-					pedata[2] = pedata[3] = NULL;
+					pedata[0] = const_unaligned_ptr_le<WORD>(lpStream+dwEnvPos+16);
+					pedata[1] = const_unaligned_ptr_le<WORD>(lpStream+dwEnvPos+16+64);
+					pedata[2] = pedata[3] = const_unaligned_ptr_le<WORD>();
 				} else
 				{
 					DWORD dwEnvPos = dwMemPos + sizeof(MT2INSTRUMENT);
@@ -509,12 +509,12 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 						if (pmi->wEnvFlags1 & (1<<i))
 						{
 							pehdr[i] = (MT2ENVELOPE *)(lpStream+dwEnvPos);
-							pedata[i] = (WORD *)pehdr[i]->EnvData;
+							pedata[i] = const_unaligned_ptr_le<WORD>(pehdr[i]->EnvData);
 							dwEnvPos += sizeof(MT2ENVELOPE);
 						} else
 						{
 							pehdr[i] = NULL;
-							pedata[i] = NULL;
+							pedata[i] = const_unaligned_ptr_le<WORD>();
 						}
 					}
 				}
@@ -551,7 +551,7 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 					// Envelope data
 					if (pedata[iEnv])
 					{
-						WORD *psrc = pedata[iEnv];
+						const_unaligned_ptr_le<WORD> psrc = pedata[iEnv];
 						for (UINT i=0; i<16; i++)
 						{
 							pEnv->Ticks[i] = psrc[i*2];
@@ -672,7 +672,7 @@ bool CSoundFile::ReadMT2(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 		} else
 		if (dwMemPos+4 < dwMemLength)
 		{
-			UINT nNameLen = *(DWORD *)(lpStream+dwMemPos);
+			UINT nNameLen = *const_unaligned_ptr_le<DWORD>(lpStream+dwMemPos);
 			dwMemPos += nNameLen + 16;
 		}
 		if (dwMemPos+4 >= dwMemLength) break;

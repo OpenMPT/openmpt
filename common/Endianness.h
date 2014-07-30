@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <algorithm>
 #if MPT_COMPILER_MSVC
 #include <intrin.h>
 #endif
@@ -302,5 +303,49 @@ typedef IEEE754binary32Emulated<0,1,2,3> IEEE754binary32BE;
 
 STATIC_ASSERT(sizeof(IEEE754binary32LE) == 4);
 STATIC_ASSERT(sizeof(IEEE754binary32BE) == 4);
+
+
+// Small helper class to support unaligned memory access on all platforms.
+// This is only used to make old module loaders work everywhere.
+// Do not use in new code.
+template <typename T>
+class const_unaligned_ptr_le
+{
+public:
+	typedef T value_type;
+private:
+	const uint8 *mem;
+	value_type Read() const
+	{
+		uint8 bytes[sizeof(value_type)];
+		std::memcpy(bytes, mem, sizeof(value_type));
+		#if defined(MPT_PLATFORM_BIG_ENDIAN)
+			std::reverse(bytes, bytes + sizeof(value_type));
+		#endif
+		value_type val = value_type();
+		std::memcpy(&val, bytes, sizeof(value_type));
+		return val;
+	}
+public:
+	const_unaligned_ptr_le() : mem(nullptr) {}
+	const_unaligned_ptr_le(const const_unaligned_ptr_le<value_type> & other) : mem(other.mem) {}
+	const_unaligned_ptr_le & operator = (const const_unaligned_ptr_le<value_type> & other) { mem = other.mem; return *this; }
+	explicit const_unaligned_ptr_le(const uint8 *mem) : mem(mem) {}
+	explicit const_unaligned_ptr_le(const int8 *mem) : mem(reinterpret_cast<const uint8*>(mem)) {}
+	explicit const_unaligned_ptr_le(const char *mem) : mem(reinterpret_cast<const uint8*>(mem)) {}
+	explicit const_unaligned_ptr_le(const void *mem) : mem(reinterpret_cast<const uint8*>(mem)) {}
+	const_unaligned_ptr_le & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
+	const_unaligned_ptr_le & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
+	const_unaligned_ptr_le & operator ++ () { mem += sizeof(value_type); return *this; }
+	const_unaligned_ptr_le & operator -- () { mem -= sizeof(value_type); return *this; }
+	const_unaligned_ptr_le operator ++ (int) { const_unaligned_ptr_le<value_type> result = *this; ++result; return result; }
+	const_unaligned_ptr_le operator -- (int) { const_unaligned_ptr_le<value_type> result = *this; --result; return result; }
+	const_unaligned_ptr_le operator + (std::size_t count) const { const_unaligned_ptr_le<value_type> result = *this; result += count; return result; }
+	const_unaligned_ptr_le operator - (std::size_t count) const { const_unaligned_ptr_le<value_type> result = *this; result -= count; return result; }
+	const value_type operator * () const { return Read(); }
+	const value_type operator [] (std::size_t i) const { return *((*this) + i); }
+	operator bool () const { return mem != nullptr; }
+};
+
 
 OPENMPT_NAMESPACE_END
