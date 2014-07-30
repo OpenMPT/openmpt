@@ -8,7 +8,7 @@
  */
 
 /*
- * This example write raw 48000Hz / stereo / 16bit native endian PCM data to stdout.
+ * This example writes raw 48000Hz / stereo / 16bit native endian PCM data to stdout.
  *
  * Use for example (on little endian platforms):
  *
