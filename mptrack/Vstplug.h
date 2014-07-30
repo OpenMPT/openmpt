@@ -156,7 +156,7 @@ protected:
 		uint16 currentBank;
 		uint8  noteOnMap[128][MAX_CHANNELS];
 
-		void ResetProgram() { currentProgram = uint16(-1); currentBank = uint16(-1); }
+		void ResetProgram() { currentProgram = 0; currentBank = 0; }
 	};
 
 	CVstPlugin *m_pNext, *m_pPrev;
