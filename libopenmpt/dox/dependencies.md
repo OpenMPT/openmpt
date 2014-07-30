@@ -13,6 +13,7 @@ Dependencies
      *  **GCC 4.4** or higher
      *  **Clang 3.0** or higher
      *  **MinGW-W64 4.6** or higher
+     *  **emscripten 1.21** or higher
  *  Required compilers to use libopenmpt:
      *  Any **C89** compatible compiler should work with the C API as long as a C99 compatible **stdint.h** is available.
      *  Any **C++03** compatible compiler should work with the C++ API.

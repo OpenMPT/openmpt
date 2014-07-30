@@ -110,6 +110,7 @@ How to compile
         For sound output in openmpt123, PortAudio or SDL is required.
         openmpt123 can optionally use libflac, libwavpack and libsndfile to
         render PCM files to disk.
+
         When using gcc, run:
 
             make CONFIG=gcc
@@ -127,14 +128,17 @@ How to compile
      -  emscripten (on Unix-like systems):
 
         libopenmpt has been tested and verified to work with emscripten 1.21 or
-        later (earlier versions might or might not work). Run:
+        later (earlier versions might or might not work).
+
+        Run:
 
             make CONFIG=emscripten
 
         Running the test suite on the command line is also supported by using
         node.js. Version 0.10.25 or greater has been tested. Earlier versions
         might or might not work. Depending on how your distribution calls the
-        node.js you might have to edit `build/make/Makefile.config.emscripten`.
+        `node.js` binary, you might have to edit
+        `build/make/Makefile.config.emscripten`.
 
     The `Makefile` supports some customizations. You might want to read the top
     which should get you some possible make settings, like e.g.
