@@ -10,6 +10,10 @@
 
 #pragma once
 
+#if MPT_COMPILER_MSVC
+#include <intrin.h>
+#endif
+
 OPENMPT_NAMESPACE_BEGIN
 
 // Ending swaps:
@@ -26,7 +30,6 @@ OPENMPT_NAMESPACE_BEGIN
 #define bswap32 __builtin_bswap32
 #endif
 #elif MPT_COMPILER_MSVC
-#include <intrin.h>
 #define bswap16 _byteswap_ushort
 #define bswap32 _byteswap_ulong
 #endif
