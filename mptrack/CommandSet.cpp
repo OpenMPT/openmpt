@@ -1437,6 +1437,7 @@ void CCommandSet::Copy(CCommandSet *source)
 //-----------------------------------------
 {
 	// copy constructors should take care of complexity (I hope)
+	oldSpecs = nullptr;
 	for (size_t cmd = 0; cmd < CountOf(commands); cmd++)
 		commands[cmd] = source->commands[cmd];
 }
@@ -1509,6 +1510,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	int commentStart;
 	int l=0;
 	int fileVersion = 0;
+	oldSpecs = nullptr;	// After clearing the key set, need to fix effect letters
 
 	bool fillExistingSet = commandSet != nullptr;
 
