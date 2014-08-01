@@ -4899,8 +4899,9 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 //////////////////////////////////////////////////////
 // Note/Period/Frequency functions
 
-UINT CSoundFile::GetNoteFromPeriod(UINT period) const
-//---------------------------------------------------
+// Find lowest note which has same or lower period as a given period (i.e. the note has the same or higher frequency)
+UINT CSoundFile::GetNoteFromPeriod(UINT period, int nFineTune, UINT nC5Speed) const
+//---------------------------------------------------------------------------------
 {
 	if (!period) return 0;
 	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_OKT|MOD_TYPE_AMF0))
@@ -4922,12 +4923,22 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period) const
 		return 6*12+36;
 	} else
 	{
-		for (UINT i=NOTE_MIN; i<NOTE_MAX; i++)
+		// This essentially implements std::lower_bound, with the difference that we don't need an iterable container.
+		uint32 minNote = NOTE_MIN, maxNote = NOTE_MAX, count = maxNote - minNote + 1;
+		while(count > 0)
 		{
-			LONG n = GetPeriodFromNote(i, 0, 0);
-			if ((n > 0) && (n <= (LONG)period)) return i;
+			const uint32 step = count / 2, midNote = minNote + step;
+			uint32 n = GetPeriodFromNote(midNote, nFineTune, nC5Speed);
+			if(n > period || !n)
+			{
+				minNote = midNote + 1;
+				count -= step + 1;
+			} else
+			{
+				count = step;
+			}
 		}
-		return NOTE_MAX;
+		return minNote;
 	}
 }
 
