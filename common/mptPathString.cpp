@@ -246,6 +246,7 @@ static inline char SanitizeFilenameChar(char c)
 		c == '?'  ||
 		c == '<'  ||
 		c == '>'  ||
+		c == '|'  ||
 		c == '*')
 	{
 		c = '_';
@@ -263,6 +264,7 @@ static inline wchar_t SanitizeFilenameChar(wchar_t c)
 		c == L'?'  ||
 		c == L'<'  ||
 		c == L'>'  ||
+		c == L'|'  ||
 		c == L'*')
 	{
 		c = L'_';
@@ -321,9 +323,10 @@ void SanitizeFilename(std::wstring &str)
 void SanitizeFilename(CString &str)
 //---------------------------------
 {
-	std::basic_string<TCHAR> tmp = str;
-	SanitizeFilename(tmp);
-	str = tmp.c_str();
+	for(int i = 0; i < str.GetLength(); i++)
+	{
+		str.SetAt(i, SanitizeFilenameChar(str.GetAt(i)));
+	}
 }
 #endif
 
