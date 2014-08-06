@@ -2277,15 +2277,15 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 
 	if(!updateSamples && !updateInstruments) return;
 
-	for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+	for(const ModChannel *chn = sndFile.m_PlayState.Chn; chn != sndFile.m_PlayState.Chn + CountOf(sndFile.m_PlayState.Chn); chn++)
 	{
-		if(sndFile.m_PlayState.Chn[nChn].pCurrentSample != nullptr)
+		if(chn->pCurrentSample != nullptr && chn->nLength != 0 && chn->nInc != 0)
 		{
 			if(updateSamples)
 			{
 				for(SAMPLEINDEX nSmp = sndFile.GetNumSamples(); nSmp >= 1; nSmp--)
 				{
-					if(sndFile.m_PlayState.Chn[nChn].pModSample == &sndFile.GetSample(nSmp))
+					if(chn->pModSample == &sndFile.GetSample(nSmp))
 					{
 						pInfo->samplesPlaying.set(nSmp);
 						break;
@@ -2296,7 +2296,7 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 			{
 				for(INSTRUMENTINDEX nIns = sndFile.GetNumInstruments(); nIns >= 1; nIns--)
 				{
-					if(sndFile.m_PlayState.Chn[nChn].pModInstrument == sndFile.Instruments[nIns])
+					if(chn->pModInstrument == sndFile.Instruments[nIns])
 					{
 						pInfo->instrumentsPlaying.set(nIns);
 						break;
