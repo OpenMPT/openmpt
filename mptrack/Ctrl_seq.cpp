@@ -1073,16 +1073,18 @@ void COrderList::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar *)
 	UINT smin, smax;
 	
 	GetScrollRange(SB_HORZ, (LPINT)&smin, (LPINT)&smax);
+	ASSERT(smin >= 0);	// This should never be negative. Otherwise, nPos may be negative too, which we don't account for, because it shouldn't happen... :)
 	m_bScrolling = true;
 	switch(nSBCode)
 	{
-	case SB_LEFT:			nNewPos = 0; break;
 	case SB_LINELEFT:		if (nNewPos) nNewPos--; break;
 	case SB_LINERIGHT:		if (nNewPos < smax) nNewPos++; break;
 	case SB_PAGELEFT:		if (nNewPos > 4) nNewPos -= 4; else nNewPos = 0; break;
-	case SB_PAGERIGHT:		if (nNewPos+4 < smax) nNewPos += 4; else nNewPos = smax; break;
-	case SB_THUMBTRACK:
-	case SB_THUMBPOSITION:	nNewPos = nPos; if (nNewPos & 0xFFFF8000) nNewPos = smin; break;
+	case SB_PAGERIGHT:		if (nNewPos + 4 < smax) nNewPos += 4; else nNewPos = smax; break;
+	case SB_THUMBPOSITION:
+	case SB_THUMBTRACK:		nNewPos = nPos; break;
+	case SB_LEFT:			nNewPos = 0; break;
+	case SB_RIGHT:			nNewPos = smax; break;
 	case SB_ENDSCROLL:		m_bScrolling = false; break;
 	}
 	if (nNewPos > smax) nNewPos = smax;
