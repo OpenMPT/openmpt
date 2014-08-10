@@ -938,9 +938,9 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 					outbuf[i] = 0;
 				}
 				#ifdef MPT_PLATFORM_BIG_ENDIAN
-					outbuf[sizeof(wchar_t)-1 - 1] = 0xff; outbuf[sizeof(wchar_t)-1 - 0] = 0xfd;
+					outbuf[sizeof(wchar_t)-1 - 1] = uint8(0xff); outbuf[sizeof(wchar_t)-1 - 0] = uint8(0xfd);
 				#else
-					outbuf[1] = 0xff; outbuf[0] = 0xfd;
+					outbuf[1] = uint8(0xff); outbuf[0] = uint8(0xfd);
 				#endif
 				outbuf += sizeof(wchar_t);
 				outbytesleft -= sizeof(wchar_t);
@@ -1181,12 +1181,12 @@ inline std::wstring ToWStringHelper(const T & x)
 
 #if defined(MPT_WITH_CHARSET_LOCALE)
 std::string ToString(const std::wstring & x) { return mpt::ToLocale(x); }
-std::string ToString(const wchar_t * const & x) { return mpt::ToLocale(x); };
+std::string ToString(const wchar_t * const & x) { return mpt::ToLocale(x); }
 std::string ToString(const char & x) { return std::string(1, x); }
 std::string ToString(const wchar_t & x) { return mpt::ToLocale(std::wstring(1, x)); }
 #else
 std::string ToString(const std::wstring & x) { return mpt::To(mpt::CharsetUTF8, x); }
-std::string ToString(const wchar_t * const & x) { return mpt::To(mpt::CharsetUTF8, x); };
+std::string ToString(const wchar_t * const & x) { return mpt::To(mpt::CharsetUTF8, x); }
 std::string ToString(const char & x) { return std::string(1, x); }
 std::string ToString(const wchar_t & x) { return mpt::To(mpt::CharsetUTF8, std::wstring(1, x)); }
 #endif

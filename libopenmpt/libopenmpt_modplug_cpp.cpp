@@ -110,7 +110,7 @@ DWORD CSoundFile::gnChannels = 2;
 UINT CSoundFile::gnAGC = 0;
 UINT CSoundFile::gnVolumeRampSamples = 0;
 UINT CSoundFile::gnVUMeter = 0;
-UINT CSoundFile::gnCPUUsage = 0;;
+UINT CSoundFile::gnCPUUsage = 0;
 LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = 0;
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = 0;
 
