@@ -142,6 +142,7 @@ void CSelectPluginDlg::OnOK()
 			MemsetZero(m_pPlugin->Info);
 			m_pPlugin->Info.dwPluginId1 = pFactory->pluginId1;
 			m_pPlugin->Info.dwPluginId2 = pFactory->pluginId2;
+			m_pPlugin->editorX = m_pPlugin->editorY = int32_min;
 
 			switch(m_pPlugin->Info.dwPluginId2)
 			{
