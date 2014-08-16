@@ -409,21 +409,8 @@ bool CDefaultVstEditor::OpenEditor(CWnd *parent)
 
 	CreateControls();
 
-	// Restore previous editor position
-	int editorX, editorY;
-	m_VstPlugin.GetEditorPos(editorX, editorY);
-
-	if((editorX >= 0) && (editorY >= 0))
-	{
-		int cxScreen = GetSystemMetrics(SM_CXSCREEN);
-		int cyScreen = GetSystemMetrics(SM_CYSCREEN);
-		if((editorX + 8 < cxScreen) && (editorY + 8 < cyScreen))
-		{
-			SetWindowPos(NULL, editorX, editorY, 0,0,
-				SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
-		}
-	}
-
+	RestoreWindowPos();
+	
 	ShowWindow(SW_SHOW);
 
 	return true;
@@ -454,13 +441,7 @@ void CDefaultVstEditor::OnCancel()
 void CDefaultVstEditor::DoClose()
 //-------------------------------
 {
-	if(m_hWnd)
-	{
-		CRect rect;
-		GetWindowRect(&rect);
-		m_VstPlugin.SetEditorPos(rect.left, rect.top);
-	}
-
+	StoreWindowPos();
 	m_VstPlugin.Dispatch(effEditClose, 0, 0, NULL, 0);
 
 	DestroyWindow();
