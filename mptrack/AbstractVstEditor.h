@@ -67,6 +67,7 @@ public:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
+	afx_msg void OnMove(int x, int y);
 
 	//Overridden methods:
 	virtual void OnOK() = 0;
@@ -102,6 +103,9 @@ protected:
 	void OnSetInputInstrument(UINT nID);
 	afx_msg void OnInitMenu(CMenu* pMenu);
 	void PrepareToLearnMacro(UINT nID);
+
+	void StoreWindowPos();
+	void RestoreWindowPos();
 
 };
 //end rewbs.defaultPlugGUI

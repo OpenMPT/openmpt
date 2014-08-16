@@ -666,7 +666,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	m_pNext = nullptr;
 	m_pMixStruct = &mixStruct;
 	m_pEditor = nullptr;
-	m_nEditorX = m_nEditorY = -1;
 	m_pProcessFP = nullptr;
 
 	m_MixState.dwFlags = 0;
@@ -976,7 +975,6 @@ bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxPara
 	if (minParam == 0 && maxParam == 0)
 	{
 		maxParam = m_Effect.numParams;
-
 	}
 	LimitMax(maxParam, PlugParamIndex(m_Effect.numParams));
 

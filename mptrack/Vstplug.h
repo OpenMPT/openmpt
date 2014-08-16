@@ -171,7 +171,6 @@ protected:
 	size_t m_nRefCount;
 	uint32 m_nSampleRate;
 	SNDMIXPLUGINSTATE m_MixState;
-	int32 m_nEditorX, m_nEditorY;
 
 	double lastBarStartPos;
 	float m_fGain;
@@ -227,8 +226,8 @@ public:
 	PLUGINDEX GetSlot();
 	void UpdateMixStructPtr(SNDMIXPLUGIN *);
 
-	void SetEditorPos(int x, int y) { m_nEditorX = x; m_nEditorY = y; }
-	void GetEditorPos(int &x, int &y) const { x = m_nEditorX; y = m_nEditorY; }
+	void SetEditorPos(int32 x, int32 y) { m_pMixStruct->editorX= x; m_pMixStruct->editorY = y; }
+	void GetEditorPos(int32 &x, int32 &y) const { x = m_pMixStruct->editorX; y = m_pMixStruct->editorY; }
 
 	void SetCurrentProgram(VstInt32 nIndex);
 	PlugParamValue GetParameter(PlugParamIndex nIndex);
@@ -344,6 +343,9 @@ public:
 	void Bypass(bool = true) { }
 	bool IsBypassed() const { return false; }
 	bool IsSongPlaying() const { return false; }
+
+	void SetEditorPos(int32, int32) { }
+	void GetEditorPos(int32 &x, int32 &y) const { x = y = int32_min; }
 
 #endif // NO_VST
 };

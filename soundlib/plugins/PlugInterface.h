@@ -71,6 +71,8 @@ public:
 	virtual bool isInstrument() = 0;
 	virtual bool CanRecieveMidiEvents() = 0;
 	virtual void SetDryRatio(UINT param) = 0;
+	virtual void SetEditorPos(int32 x, int32 y) = 0;
+	virtual void GetEditorPos(int32 &x, int32 &y) const = 0;
 
 };
 
@@ -159,6 +161,7 @@ struct SNDMIXPLUGIN
 	SNDMIXPLUGININFO Info;
 	float fDryRatio;
 	VstInt32 defaultProgram;
+	int32 editorX, editorY;
 
 	const char *GetName() const
 		{ return Info.szName; }

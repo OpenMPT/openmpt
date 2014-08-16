@@ -1708,8 +1708,9 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 			}
 
 			// rewbs.modularPlugData
-			DWORD MPTxPlugDataSize = 4 + (sizeof(m_MixPlugins[i].fDryRatio)) +     //4 for ID and size of dryRatio
-									 4 + (sizeof(m_MixPlugins[i].defaultProgram)); //rewbs.plugDefaultProgram
+			DWORD MPTxPlugDataSize = 4 + (sizeof(m_MixPlugins[i].fDryRatio)) +			// 4 for ID and size of dryRatio
+									 4 + (sizeof(m_MixPlugins[i].defaultProgram)) +		// rewbs.plugDefaultProgram
+									 4 + 3 * sizeof(int32);								// Editor data
 								// for each extra entity, add 4 for ID, plus size of entity, plus optionally 4 for size of entity.
 
 			nPluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(DWORD) is 4
@@ -1734,19 +1735,34 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 
 				fwrite(&MPTxPlugDataSize, 1, 4, f);
 
-				//write ID for this xPlugData chunk:
+				// Dry/Wet ratio
 				memcpy(id, "DWRT", 4);
 				fwrite(id, 1, 4, f);
-				// DWRT chunk does not include a size, so better make sure we always write 4 bytes here.
-				STATIC_ASSERT(sizeof(float) == 4);
-				fwrite(&(m_MixPlugins[i].fDryRatio), 1, sizeof(float), f);
+				uint32 ratio = IEEE754binary32LE(m_MixPlugins[i].fDryRatio).GetInt32();
+				fwrite(&ratio, 1, sizeof(uint32), f);
 
+				// Default program
 				memcpy(id, "PROG", 4);
 				fwrite(id, 1, 4, f);
 				// PROG chunk does not include a size, so better make sure we always write 4 bytes here.
 				STATIC_ASSERT(sizeof(m_MixPlugins[i].defaultProgram) == sizeof(int32));
-				fwrite(&(m_MixPlugins[i].defaultProgram), 1, sizeof(int32), f);
+				int32 prog = m_MixPlugins[i].defaultProgram;
+				SwapBytesLE(prog);
+				fwrite(&prog, 1, sizeof(int32), f);
 
+				// Editor window parameters
+				memcpy(id, "EWND", 4);
+				fwrite(id, 1, 4, f);
+				uint32 size = 2 * sizeof(int32);
+				SwapBytesLE(size);
+				fwrite(&size, sizeof(uint32), 1, f);
+				int32 x = m_MixPlugins[i].editorX, y = m_MixPlugins[i].editorY;
+				SwapBytesLE(x);
+				SwapBytesLE(y);
+				fwrite(&x, sizeof(int32), 1, f);
+				fwrite(&y, sizeof(int32), 1, f);
+
+				// Please, if you add any more chunks here, don't repeat history (see above) and *do* add a size field for your chunk, mmmkay?
 			}
 			nTotalSize += nPluginSize + 8;
 		}
@@ -1816,6 +1832,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 				chunk.ReadConvertEndianness(m_MixPlugins[plug].Info);
 				mpt::String::SetNullTerminator(m_MixPlugins[plug].Info.szName);
 				mpt::String::SetNullTerminator(m_MixPlugins[plug].Info.szLibraryName);
+				m_MixPlugins[plug].editorX = m_MixPlugins[plug].editorY = int32_min;
 
 				//data for VST setchunk? size lies just after standard plugin data.
 				const uint32 pluginDataChunkSize = chunk.ReadUint32LE();
@@ -1842,19 +1859,26 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 					{
 						// do we recognize this chunk?
 						modularData.ReadArray(code);
-						//rewbs.dryRatio
 						//TODO: turn this into a switch statement like for modular instrument data
 						if(!memcmp(code, "DWRT", 4))
 						{
 							m_MixPlugins[plug].fDryRatio = modularData.ReadFloatLE();
 						}
-						//end rewbs.dryRatio
-						//rewbs.plugDefaultProgram
 						else if(!memcmp(code, "PROG", 4))
 						{
 							m_MixPlugins[plug].defaultProgram = modularData.ReadUint32LE();
 						}
-						//end rewbs.plugDefaultProgram
+						else if(!memcmp(code, "MCRO", 4))
+						{
+							// Read plugin-specific macros
+							//modularData.ReadStructPartial(m_MixPlugins[plug].macros, modularData.ReadUint32LE());
+						}
+						else if(!memcmp(code, "EWND", 4))
+						{
+							FileReader editorChunk = modularData.ReadChunk(modularData.ReadUint32LE());
+							m_MixPlugins[plug].editorX = editorChunk.ReadInt32LE();
+							m_MixPlugins[plug].editorY = editorChunk.ReadInt32LE();
+						}
 						//else if.. (add extra attempts to recognize chunks here)
 						else // otherwise move forward a byte.
 						{
@@ -1950,7 +1974,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 size, FILE* f, UINT nInstruments) const
 //------------------------------------------------------------------------------------------------------------------
 {
-	fwrite(&code, 1, sizeof(uint32), f);		//write code
+	fwrite(&code, 1, sizeof(uint32), f);	//write code
 	fwrite(&size, 1, sizeof(int16), f);		//write size
 	for(UINT nins=1; nins<=nInstruments; nins++)	//for all instruments...
 	{

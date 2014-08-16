@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_MENUSELECT()
 	ON_WM_ACTIVATE()
 	ON_WM_DROPFILES()
+	ON_WM_MOVE()
 	ON_COMMAND(ID_EDIT_COPY,			OnCopyParameters)
 	ON_COMMAND(ID_EDIT_PASTE,			OnPasteParameters)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
@@ -949,6 +950,57 @@ int CAbstractVstEditor::GetLearnMacro()
 {
 	return m_nLearnMacro;
 }
+
+
+void CAbstractVstEditor::OnMove(int, int)
+//---------------------------------------
+{
+	if(IsWindowVisible())
+	{
+		StoreWindowPos();
+	}
+}
+
+
+void CAbstractVstEditor::StoreWindowPos()
+//---------------------------------------
+{
+	if(m_hWnd)
+	{
+		// Translate screen position into percentage (to make it independent of the actual screen resolution)
+		CRect rect;
+		GetWindowRect(&rect);
+		const int cxScreen = GetSystemMetrics(SM_CXSCREEN), cyScreen = GetSystemMetrics(SM_CYSCREEN);
+		int32 editorX = Util::muldivr(rect.left, 1 << 30, cxScreen);
+		int32 editorY = Util::muldivr(rect.top, 1 << 30, cyScreen);
+		m_VstPlugin.SetEditorPos(editorX, editorY);
+	}
+}
+
+
+void CAbstractVstEditor::RestoreWindowPos()
+//-----------------------------------------
+{
+	// Restore previous editor position
+	int32 editorX, editorY;
+	m_VstPlugin.GetEditorPos(editorX, editorY);
+
+	if((editorX >= 0) && (editorY >= 0))
+	{
+		// Translate percentage into screen position (to make it independent of the actual screen resolution)
+		const int cxScreen = GetSystemMetrics(SM_CXSCREEN), cyScreen = GetSystemMetrics(SM_CYSCREEN);
+		editorX = Util::muldivr(editorX, cxScreen, 1 << 30);
+		editorY = Util::muldivr(editorY, cyScreen, 1 << 30);
+
+		if((editorX + 8 < cxScreen) && (editorY + 8 < cyScreen))
+		{
+			SetWindowPos(NULL, editorX, editorY, 0, 0,
+				SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
+		}
+	}
+
+}
+
 
 #endif // NO_VST
 

@@ -84,20 +84,7 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 		SetSize(rect.right - rect.left, rect.bottom - rect.top);
 	}
 
-	// Restore previous editor position
-	int editorX, editorY;
-	m_VstPlugin.GetEditorPos(editorX, editorY);
-
-	if((editorX >= 0) && (editorY >= 0))
-	{
-		int cxScreen = GetSystemMetrics(SM_CXSCREEN);
-		int cyScreen = GetSystemMetrics(SM_CYSCREEN);
-		if((editorX + 8 < cxScreen) && (editorY + 8 < cyScreen))
-		{
-			SetWindowPos(NULL, editorX, editorY, 0, 0,
-				SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
-		}
-	}
+	RestoreWindowPos();
 	SetTitle();
 
 	m_VstPlugin.Dispatch(effEditTop, 0,0, NULL, 0);
@@ -135,12 +122,7 @@ void COwnerVstEditor::OnCancel()
 void COwnerVstEditor::DoClose()
 //-----------------------------
 {
-	if(m_hWnd)
-	{
-		CRect rect;
-		GetWindowRect(&rect);
-		m_VstPlugin.SetEditorPos(rect.left, rect.top);
-	}
+	StoreWindowPos();
 	m_VstPlugin.Dispatch(effEditClose, 0, 0, NULL, 0);
 	if(m_hWnd)
 	{
