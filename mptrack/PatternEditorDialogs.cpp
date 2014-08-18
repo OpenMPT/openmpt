@@ -1269,11 +1269,11 @@ void CChordEditor::UpdateKeyboard()
 	}
 	for(UINT i = 0; i < 2 * 12; i++)
 	{
-		UINT b = 0;
-		if(i == note) b = 1;
-		else if(chord.notes[0] && i + 1 == chord.notes[0]) b = 1;
-		else if(chord.notes[1] && i + 1 == chord.notes[1]) b = 1;
-		else if(chord.notes[2] && i + 1 == chord.notes[2]) b = 1;
+		UINT b = CKeyboardControl::KEYFLAG_NORMAL;
+		if(i == note) b = CKeyboardControl::KEYFLAG_REDDOT;
+		else if(chord.notes[0] && i + 1 == chord.notes[0]) b = CKeyboardControl::KEYFLAG_REDDOT;
+		else if(chord.notes[1] && i + 1 == chord.notes[1]) b = CKeyboardControl::KEYFLAG_REDDOT;
+		else if(chord.notes[2] && i + 1 == chord.notes[2]) b = CKeyboardControl::KEYFLAG_REDDOT;
 		m_Keyboard.SetFlags(i, b);
 	}
 	m_Keyboard.InvalidateRect(NULL, FALSE);
