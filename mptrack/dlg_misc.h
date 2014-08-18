@@ -141,6 +141,8 @@ public:
 	{
 		KEYFLAG_NORMAL=0,
 		KEYFLAG_REDDOT,
+		KEYFLAG_BRIGHTDOT,
+		KEYFLAG_MAX
 	};
 protected:
 	HWND m_hParent;

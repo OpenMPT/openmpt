@@ -634,14 +634,15 @@ void CKeyboardControl::OnPaint()
 	CRect rcClient, rect;
 	CPaintDC dc(this);
 	HDC hdc = dc.m_hDC;
-	HBRUSH brushRed;
+	HBRUSH brushDot[2];
 
 	if (!m_nOctaves) m_nOctaves = 1;
 	GetClientRect(&rcClient);
 	rect = rcClient;
 	oldpen = ::SelectObject(hdc, CMainFrame::penBlack);
 	oldbrush = ::SelectObject(hdc, CMainFrame::brushWhite);
-	brushRed = ::CreateSolidBrush(RGB(0xFF, 0, 0));
+	brushDot[0] = ::CreateSolidBrush(RGB(0xFF, 0, 0));
+	brushDot[1] = ::CreateSolidBrush(RGB(0xFF, 0xC0, 0xC0));
 	// White notes
 	for (UINT note=0; note<m_nOctaves*7; note++)
 	{
@@ -650,9 +651,9 @@ void CKeyboardControl::OnPaint()
 		if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushGray);
 		dc.Rectangle(&rect);
 		if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushWhite);
-		if ((val < NOTE_MAX) && (KeyFlags[val]))
+		if (val < NOTE_MAX && KeyFlags[val] != KEYFLAG_NORMAL && KeyFlags[val] < KEYFLAG_MAX)
 		{
-			::SelectObject(hdc, brushRed);
+			::SelectObject(hdc, brushDot[KeyFlags[val] - 1]);
 			dc.Ellipse(rect.left+2, rect.bottom - (rect.right-rect.left) + 2, rect.right-2, rect.bottom-2);
 			::SelectObject(hdc, CMainFrame::brushWhite);
 		}
@@ -681,9 +682,9 @@ void CKeyboardControl::OnPaint()
 				if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushGray);
 				dc.Rectangle(&rect);
 				if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushBlack);
-				if ((val < NOTE_MAX) && (KeyFlags[val]))
+				if (val < NOTE_MAX && KeyFlags[val] != KEYFLAG_NORMAL && KeyFlags[val] < KEYFLAG_MAX)
 				{
-					::SelectObject(hdc, brushRed);
+					::SelectObject(hdc, brushDot[KeyFlags[val] - 1]);
 					dc.Ellipse(rect.left, rect.bottom - (rect.right-rect.left), rect.right, rect.bottom);
 					::SelectObject(hdc, CMainFrame::brushBlack);
 				}
@@ -693,6 +694,10 @@ void CKeyboardControl::OnPaint()
 	}
 	if (oldpen) ::SelectObject(hdc, oldpen);
 	if (oldbrush) ::SelectObject(hdc, oldbrush);
+	for(int i = 0; i < CountOf(brushDot); i++)
+	{
+		DeleteBrush(brushDot[i]);
+	}
 }
 
 
@@ -937,7 +942,9 @@ void CSampleMapDlg::OnUpdateKeyboard()
 	{
 		UINT nOld = m_Keyboard.GetFlags(iNote);
 		UINT ndx = nBaseOctave*12+iNote;
-		UINT nNew = (KeyboardMap[ndx] == nSample) ? CKeyboardControl::KEYFLAG_REDDOT : CKeyboardControl::KEYFLAG_NORMAL;
+		UINT nNew = CKeyboardControl::KEYFLAG_NORMAL;
+		if(KeyboardMap[ndx] == nSample) nNew = CKeyboardControl::KEYFLAG_REDDOT;
+		else if(KeyboardMap[ndx] != 0) nNew = CKeyboardControl::KEYFLAG_BRIGHTDOT;
 		if (nNew != nOld)
 		{
 			m_Keyboard.SetFlags(iNote, nNew);
