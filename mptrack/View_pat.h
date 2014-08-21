@@ -303,7 +303,7 @@ public:
 
 	void CursorJump(DWORD distance, bool upwards, bool snap);
 
-	void TempEnterNote(int n, bool oldStyle = false, int vol = -1, bool fromMidi = false);
+	void TempEnterNote(int n, int vol = -1, bool fromMidi = false);
 	void TempStopNote(int note, bool fromMidi = false, const bool bChordMode = false);
 	void TempEnterChord(int n);
 	void TempStopChord(int note) {TempStopNote(note, false, true);}
