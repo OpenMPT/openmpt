@@ -3906,7 +3906,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
 			if(nVol < 0) nVol = -1;
 			else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
-			TempEnterNote(nNote, true, nVol, true);
+			TempEnterNote(nNote, nVol, true);
 
 			// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
 			if(sndFile.IsPaused() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
@@ -4407,12 +4407,9 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								return wParam;
 		case kcPatternGoto:		OnEditGoto(); return wParam;
 
-		case kcNoteCut:			TempEnterNote(NOTE_NOTECUT, false); return wParam;
-		case kcNoteCutOld:		TempEnterNote(NOTE_NOTECUT, true);  return wParam;
-		case kcNoteOff:			TempEnterNote(NOTE_KEYOFF, false); return wParam;
-		case kcNoteOffOld:		TempEnterNote(NOTE_KEYOFF, true);  return wParam;
-		case kcNoteFade:		TempEnterNote(NOTE_FADE, false); return wParam;
-		case kcNoteFadeOld:		TempEnterNote(NOTE_FADE, true);  return wParam;
+		case kcNoteCut:			TempEnterNote(NOTE_NOTECUT); return wParam;
+		case kcNoteOff:			TempEnterNote(NOTE_KEYOFF); return wParam;
+		case kcNoteFade:		TempEnterNote(NOTE_FADE); return wParam;
 		case kcNotePC:			TempEnterNote(NOTE_PC); return wParam;
 		case kcNotePCS:			TempEnterNote(NOTE_PCS); return wParam;
 
@@ -5058,8 +5055,8 @@ void CViewPattern::TempEnterIns(int val)
 
 
 // Enter a note in the pattern
-void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi)
-//-------------------------------------------------------------------------------
+void CViewPattern::TempEnterNote(int note, int vol, bool fromMidi)
+//----------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -5214,8 +5211,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol, bool fromMidi
 			}
 		}
 
-		// -- old style note cut/off/fade: erase instrument number
-		if (oldStyle && newcmd.note >= NOTE_MIN_SPECIAL)
+		// Note cut/off/fade: erase instrument number
+		if(newcmd.note >= NOTE_MIN_SPECIAL)
 			newcmd.instr = 0;
 
 	}

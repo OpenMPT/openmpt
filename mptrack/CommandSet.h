@@ -1230,17 +1230,6 @@ struct CommandStruct
 	UINT UID;
 	bool isDummy;
 	bool isHidden;
-
-	bool operator= (const CommandStruct &other)
-	{
-		UID = other.UID;
-		Message = other.Message;
-		isDummy = other.isDummy;
-		isHidden = other.isHidden;
-		kcList = other.kcList;
-		return true;
-	}
-
 };
 
 
@@ -1282,7 +1271,7 @@ class CCommandSet
 {
 protected:
 	//util
-	inline void DefineKeyCommand(CommandID kc, UINT uid, CString message, enmKcVisibility visible = kcVisible, enmKcDummy dummy = kcNoDummy);
+	inline void DefineKeyCommand(CommandID kc, UINT uid, const TCHAR *message, enmKcVisibility visible = kcVisible, enmKcDummy dummy = kcNoDummy);
 	void SetupCommands();
 	void SetupContextHierarchy();
 	bool IsDummyCommand(CommandID cmd);

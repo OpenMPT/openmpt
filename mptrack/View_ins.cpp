@@ -2186,9 +2186,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcNextInstrument:	OnNextInstrument(); return wParam;
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
-		case kcNoteOffOld:
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
-		case kcNoteCutOld:
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
 		case kcInstrumentLoad:	SendCtrlMessage(IDC_INSTRUMENT_OPEN); return wParam;
 		case kcInstrumentSave:	SendCtrlMessage(IDC_INSTRUMENT_SAVEAS); return wParam;
