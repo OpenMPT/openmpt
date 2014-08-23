@@ -2151,8 +2151,8 @@ template<typename T>
 void ReadFieldCast(FileReader &chunk, std::size_t size, T &field)
 //---------------------------------------------------------------
 {
-	STATIC_ASSERT(sizeof(T) <= sizeof(int));
-	field = static_cast<T>(chunk.ReadSizedIntLE<int>(size));
+	STATIC_ASSERT(sizeof(T) <= sizeof(int32));
+	field = static_cast<T>(chunk.ReadSizedIntLE<int32>(size));
 }
 
 
