@@ -135,7 +135,7 @@ LIBOPENMPT_API int openmpt_is_extension_supported( const char * extension );
 
 /*! \brief Read bytes from stream
  *
- * Read byte data from stream to dst.
+ * Read bytes data from stream to dst.
  * \param stream Stream to read data from
  * \param dst Target where to copy data.
  * \param bytes Number of bytes to read.
