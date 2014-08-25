@@ -2022,6 +2022,13 @@ bool CSoundFile::ProcessEffects()
 			bPorta = false;
 		}
 
+		// ProTracker compatibility: Instrument change always happens on the first tick, even when there is a note delay.
+		// Test case: InstrDelay.mod
+		if(instr && !m_PlayState.m_nTickCount && !triggerNote && m_SongFlags[SONG_PT1XMODE])
+		{
+			InstrumentChange(pChn, instr, bPorta, true);
+		}
+
 		// Handles note/instrument/volume changes
 		if(triggerNote)
 		{
@@ -4691,7 +4698,6 @@ void CSoundFile::KeyOff(ModChannel *pChn) const
 {
 	const bool bKeyOn = !pChn->dwFlags[CHN_KEYOFF];
 	pChn->dwFlags.set(CHN_KEYOFF);
-	//if ((!pChn->pModInstrument) || (!(pChn->VolEnv.flags & CHN_VOLENV)))
 	if(pChn->pModInstrument !=  nullptr && !pChn->VolEnv.flags[ENV_ENABLED])
 	{
 		pChn->dwFlags.set(CHN_NOTEFADE);
