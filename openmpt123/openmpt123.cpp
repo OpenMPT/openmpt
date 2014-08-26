@@ -189,7 +189,7 @@ public:
 #endif
 		}
 		if ( !impl ) {
-			throw args_error_exception();
+			throw exception( "file format handler '" + flags.output_extension + "' not found" );
 		}
 	}
 	virtual ~file_audio_stream_raii() {
@@ -1751,6 +1751,8 @@ static int main( int argc, char * argv [] ) {
 			log << flags;
 		}
 
+		log.writeout();
+
 		std::srand( static_cast<unsigned int>( std::time( NULL ) ) );
 
 		switch ( flags.mode ) {
@@ -1785,6 +1787,8 @@ static int main( int argc, char * argv [] ) {
 					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream );
 #endif
+				} else {
+					throw exception( "audio driver '" + flags.driver + "' not found" );
 				}
 			} break;
 			case ModeRender: {
