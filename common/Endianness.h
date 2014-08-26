@@ -28,54 +28,66 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_COMPILER_GCC
 #if MPT_GCC_AT_LEAST(4,3,0)
-#define bswap32 __builtin_bswap32
+#define MPT_bswap32 __builtin_bswap32
 #endif
 #elif MPT_COMPILER_MSVC
-#define bswap16 _byteswap_ushort
-#define bswap32 _byteswap_ulong
+#define MPT_bswap16 _byteswap_ushort
+#define MPT_bswap32 _byteswap_ulong
+#endif
+
+// catch system macros
+#ifndef MPT_bswap16
+#ifdef bswap16
+#define MPT_bswap16 bswap16
+#endif
+#endif
+#ifndef MPT_bswap32
+#ifdef bswap32
+#define MPT_bswap32 bswap32
+#endif
 #endif
 
 // No intrinsics available
-#ifndef bswap16
-#define bswap16(x) (((x >> 8) & 0xFF) | ((x << 8) & 0xFF00))
+#ifndef MPT_bswap16
+#define MPT_bswap16(x) (((x >> 8) & 0xFF) | ((x << 8) & 0xFF00))
 #endif
-#ifndef bswap32
-#define bswap32(x) (((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24))
+#ifndef MPT_bswap32
+#define MPT_bswap32(x) (((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24))
 #endif
 
 // Deprecated. Use "SwapBytesXX" versions below.
 #ifdef MPT_PLATFORM_BIG_ENDIAN
-inline uint32 LittleEndian(uint32 x)	{ return bswap32(x); }
-inline uint16 LittleEndianW(uint16 x)	{ return bswap16(x); }
+inline uint32 LittleEndian(uint32 x)	{ return MPT_bswap32(x); }
+inline uint16 LittleEndianW(uint16 x)	{ return MPT_bswap16(x); }
 #define BigEndian(x)					(x)
 #define BigEndianW(x)					(x)
 #else
-inline uint32 BigEndian(uint32 x)	{ return bswap32(x); }
-inline uint16 BigEndianW(uint16 x)	{ return bswap16(x); }
+inline uint32 BigEndian(uint32 x)	{ return MPT_bswap32(x); }
+inline uint16 BigEndianW(uint16 x)	{ return MPT_bswap16(x); }
 #define LittleEndian(x)				(x)
 #define LittleEndianW(x)			(x)
 #endif
 
 #if defined(MPT_PLATFORM_BIG_ENDIAN)
-#define bswap32le(x) bswap32(x)
-#define bswap16le(x) bswap16(x)
-#define bswap32be(x) (x)
-#define bswap16be(x) (x)
+#define MPT_bswap32le(x) MPT_bswap32(x)
+#define MPT_bswap16le(x) MPT_bswap16(x)
+#define MPT_bswap32be(x) (x)
+#define MPT_bswap16be(x) (x)
 #elif defined(MPT_PLATFORM_LITTLE_ENDIAN)
-#define bswap32be(x) bswap32(x)
-#define bswap16be(x) bswap16(x)
-#define bswap32le(x) (x)
-#define bswap16le(x) (x)
+#define MPT_bswap32be(x) MPT_bswap32(x)
+#define MPT_bswap16be(x) MPT_bswap16(x)
+#define MPT_bswap32le(x) (x)
+#define MPT_bswap16le(x) (x)
 #endif
 
-inline uint32 SwapBytesBE_(uint32 value) { return bswap32be(value); }
-inline uint16 SwapBytesBE_(uint16 value) { return bswap16be(value); }
-inline uint32 SwapBytesLE_(uint32 value) { return bswap32le(value); }
-inline uint16 SwapBytesLE_(uint16 value) { return bswap16le(value); }
-inline int32  SwapBytesBE_(int32  value) { return bswap32be(value); }
-inline int16  SwapBytesBE_(int16  value) { return bswap16be(value); }
-inline int32  SwapBytesLE_(int32  value) { return bswap32le(value); }
-inline int16  SwapBytesLE_(int16  value) { return bswap16le(value); }
+inline uint32 SwapBytesBE_(uint32 value) { return MPT_bswap32be(value); }
+inline uint16 SwapBytesBE_(uint16 value) { return MPT_bswap16be(value); }
+inline uint32 SwapBytesLE_(uint32 value) { return MPT_bswap32le(value); }
+inline uint16 SwapBytesLE_(uint16 value) { return MPT_bswap16le(value); }
+inline int32  SwapBytesBE_(int32  value) { return MPT_bswap32be(value); }
+inline int16  SwapBytesBE_(int16  value) { return MPT_bswap16be(value); }
+inline int32  SwapBytesLE_(int32  value) { return MPT_bswap32le(value); }
+inline int16  SwapBytesLE_(int16  value) { return MPT_bswap16le(value); }
 
 // Do NOT remove these overloads, even if they seem useless.
 // We do not want risking to extend 8bit integers to int and then
@@ -102,12 +114,12 @@ inline char   SwapBytesBE_(char   value) { return value; }
 #define SwapBytesReturnBE(value) SwapBytesBE_((value))
 #define SwapBytesReturnLE(value) SwapBytesLE_((value))
 
-#undef bswap16le
-#undef bswap32le
-#undef bswap16be
-#undef bswap32be
-#undef bswap16
-#undef bswap32
+#undef MPT_bswap16le
+#undef MPT_bswap32le
+#undef MPT_bswap16be
+#undef MPT_bswap32be
+#undef MPT_bswap16
+#undef MPT_bswap32
 
 
 // 1.0f --> 0x3f800000u
