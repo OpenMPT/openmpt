@@ -145,6 +145,7 @@ ifeq ($(PREFIX),)
 PREFIX := /usr/local
 endif
 
+MANDIR ?= $(PREFIX)/share/man
 #DESTDIR := $(DESTDIR)
 #ifeq ($(DESTDIR),)
 #DESTDIR := bin/dest
@@ -604,7 +605,7 @@ endif
 ifeq ($(OPENMPT123),1)
 	$(INSTALL_PROGRAM) bin/openmpt123$(EXESUFFIX).norpath $(DESTDIR)$(PREFIX)/bin/openmpt123$(EXESUFFIX)
 ifeq ($(MPT_WITH_HELP2MAN),1)
-	$(INSTALL_DATA) bin/openmpt123.1 $(DESTDIR)$(PREFIX)/share/man/man.1/openmpt123.1
+	$(INSTALL_DATA) bin/openmpt123.1 $(DESTDIR)$(MANDIR)/man1/openmpt123.1
 endif
 endif
 	$(INSTALL_DATA) LICENSE   $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/LICENSE
