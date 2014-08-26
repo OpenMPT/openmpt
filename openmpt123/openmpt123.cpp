@@ -1788,7 +1788,11 @@ static int main( int argc, char * argv [] ) {
 					render_files( flags, log, waveout_stream );
 #endif
 				} else {
-					throw exception( "audio driver '" + flags.driver + "' not found" );
+					if ( flags.driver.empty() ) {
+						throw exception( "openmpt123 is compiled without any audio driver" );
+					} else {
+						throw exception( "audio driver '" + flags.driver + "' not found" );
+					}
 				}
 			} break;
 			case ModeRender: {
