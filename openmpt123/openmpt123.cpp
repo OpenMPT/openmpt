@@ -1413,6 +1413,8 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 
 static commandlineflags parse_openmpt123( const std::vector<std::string> & args, std::ostream & log ) {
 
+	log.flush();
+
 	if ( args.size() <= 1 ) {
 		throw args_error_exception();
 	}
