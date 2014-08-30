@@ -798,12 +798,20 @@ void CCtrlPatterns::OnPatternNew()
 	ROWINDEX rows = 64;
 	if(m_sndFile.Patterns.IsValidPat(curPat))
 	{
-		curOrd++;	// only if the current oder is already occupied, create a new pattern at the next position.
-		rows = m_sndFile.Patterns[curPat].GetNumRows();
-		rows = Clamp(rows, m_sndFile.GetModSpecifications().patternRowsMin, m_sndFile.GetModSpecifications().patternRowsMax);
+		// Only if the current oder is already occupied, create a new pattern at the next position.
+		curOrd++;
+	} else
+	{
+		// Use currently edited pattern for new pattern length
+		curPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 	}
+	if(m_sndFile.Patterns.IsValidPat(curPat))
+	{
+		rows = m_sndFile.Patterns[curPat].GetNumRows();
+	}
+	rows = Clamp(rows, m_sndFile.GetModSpecifications().patternRowsMin, m_sndFile.GetModSpecifications().patternRowsMax);
 	PATTERNINDEX newPat = m_modDoc.InsertPattern(curOrd, rows);
-	if ((newPat != PATTERNINDEX_INVALID) && (newPat < m_sndFile.Patterns.Size()))
+	if(m_sndFile.Patterns.IsValidPat(newPat))
 	{
 		// update time signature
 		if(m_sndFile.Patterns.IsValidIndex(curPat) && m_sndFile.Patterns[curPat].GetOverrideSignature())
