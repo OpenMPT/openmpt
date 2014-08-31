@@ -2022,7 +2022,7 @@ bool CSoundFile::ProcessEffects()
 		// Test case: InstrDelay.mod
 		if(instr && !m_PlayState.m_nTickCount && !triggerNote && m_SongFlags[SONG_PT1XMODE])
 		{
-			InstrumentChange(pChn, instr, bPorta, true);
+			InstrumentChange(pChn, instr, true, true, false);
 		}
 
 		// Handles note/instrument/volume changes
