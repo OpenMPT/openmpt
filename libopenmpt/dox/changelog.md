@@ -10,6 +10,7 @@ is just a high-level summary.
  *  openmpt123: SDL is now also used by default if availble, in addition to
     PortAudio.
  *  Support for emscripten is no longer experimental.
+ *  libopenmpt itself can now also be compiled with VS2008.
 
  *  [Bug] Fix all known crashes on platforms that do not support unaligned
     memory access.

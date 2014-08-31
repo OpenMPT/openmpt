@@ -426,11 +426,11 @@ STATIC_ASSERT(sizeof(float32) == 4);
 // openmpt assumes these type have exact WIN32 semantics
 
 namespace mpt { namespace Legacy {
-typedef std::uint8_t  BYTE;
-typedef std::uint16_t WORD;
-typedef std::uint32_t DWORD;
-typedef std::int32_t  LONG;
-typedef std::uint32_t UINT;
+typedef uint8  BYTE;
+typedef uint16 WORD;
+typedef uint32 DWORD;
+typedef int32  LONG;
+typedef uint32 UINT;
 } } // namespace mpt::Legacy
 using namespace mpt::Legacy;
 

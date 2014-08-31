@@ -20,7 +20,11 @@
 #include <string>
 #include <vector>
 
+#ifdef MPT_ANCIENT_VS2008
+#include "cstdint.h"
+#else
 #include <cstdint>
+#endif
 
 /*!
  * \page libopenmpt_cpp_overview C++ API

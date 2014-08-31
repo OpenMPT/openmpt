@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt\libopenmpt.vcproj", "{D19450B0-4497-418C-B3EC-10D51967814E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\gen\portaudio.vcproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_example_c.c", "libopenmpt_example_c.c\libopenmpt_example_c.c.vcproj", "{89D1117D-7787-45C1-9240-A24AACF4A414}"
+	ProjectSection(ProjectDependencies) = postProject
+		{189B867F-FF4B-45A1-B741-A97492EE69AF} = {189B867F-FF4B-45A1-B741-A97492EE69AF}
+		{D19450B0-4497-418C-B3EC-10D51967814E} = {D19450B0-4497-418C-B3EC-10D51967814E}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D19450B0-4497-418C-B3EC-10D51967814E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D19450B0-4497-418C-B3EC-10D51967814E}.Debug|Win32.Build.0 = Debug|Win32
+		{D19450B0-4497-418C-B3EC-10D51967814E}.Release|Win32.ActiveCfg = Release|Win32
+		{D19450B0-4497-418C-B3EC-10D51967814E}.Release|Win32.Build.0 = Release|Win32
+		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Debug|Win32.Build.0 = Debug|Win32
+		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|Win32.ActiveCfg = Release|Win32
+		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|Win32.Build.0 = Release|Win32
+		{89D1117D-7787-45C1-9240-A24AACF4A414}.Debug|Win32.ActiveCfg = Debug|Win32
+		{89D1117D-7787-45C1-9240-A24AACF4A414}.Debug|Win32.Build.0 = Debug|Win32
+		{89D1117D-7787-45C1-9240-A24AACF4A414}.Release|Win32.ActiveCfg = Release|Win32
+		{89D1117D-7787-45C1-9240-A24AACF4A414}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
