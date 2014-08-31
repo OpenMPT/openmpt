@@ -797,9 +797,13 @@ void COptionsSampleEditor::OnUndoSizeChanged()
 void COptionsSampleEditor::RecalcUndoSize()
 //-----------------------------------------
 {
-	uint32 sizeMB = mpt::saturate_cast<uint32>(SampleUndoBufferSize(GetDlgItemInt(IDC_EDIT_UNDOSIZE)).GetSizeInBytes() >> 20);
-	CString text;
-	text.Format("%% of physical memory (%u MiB)", sizeMB);
+	UINT sizePercent = GetDlgItemInt(IDC_EDIT_UNDOSIZE);
+	uint32 sizeMB = mpt::saturate_cast<uint32>(SampleUndoBufferSize(sizePercent).GetSizeInBytes() >> 20);
+	CString text = _T("% of physical memory (");
+	if(sizePercent)
+		text.AppendFormat(_T("%u MiB)"), sizeMB);
+	else
+		text.Append(_T("disabled)"));
 	SetDlgItemText(IDC_UNDOSIZE, text);
 }
 
