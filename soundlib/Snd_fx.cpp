@@ -4417,12 +4417,24 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 	}
 // -! NEW_FEATURE#0010
 
+	if(pChn->rowCommand.instr) pChn->proTrackerOffset = 0;
+	pChn->proTrackerOffset += param;
+
 	if(pChn->rowCommand.IsNote())
 	{
-		pChn->nPos = param;
+		if(m_SongFlags[SONG_PT1XMODE])
+		{
+			// ProTracker compatbility: PT1/2-style funky 9xx offset command
+			// Test case: ptoffset.mod
+			pChn->nPos = pChn->proTrackerOffset;
+			pChn->proTrackerOffset += param;
+		} else
+		{
+			pChn->nPos = param;
+		}
 		pChn->nPosLo = 0;
 
-		if (pChn->nPos >= pChn->nLength)
+		if (pChn->nPos >= pChn->nLength || (pChn->dwFlags[CHN_LOOP] && pChn->nPos >= pChn->nLoopEnd))
 		{
 			// Offset beyond sample size
 			if (!(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MOD)))
@@ -4457,11 +4469,6 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 		pChn->nPos = param;
 		pChn->nPosLo = 0;
 	}
-	if(pChn->rowCommand.IsNote()) pChn->proTrackerOffset = param;
-	else if(pChn->rowCommand.instr) pChn->proTrackerOffset = 0;
-	pChn->proTrackerOffset += param;
-
-	return;
 }
 //end rewbs.volOffset:
 
