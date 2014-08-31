@@ -1176,17 +1176,13 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 	if(pChn->dwFlags[CHN_LOOP] && pChn->nLoopEnd < pChn->nLength) pChn->nLength = pChn->nLoopEnd;
 
-	// Fix sample position on instrument change. This is needed for PT1x MOD and IT "on the fly" sample change.
+	// Fix sample position on instrument change. This is needed for IT "on the fly" sample change.
 	// XXX is this actually called? In ProcessEffects(), a note-on effect is emulated if there's an on the fly sample change!
 	if(pChn->nPos >= pChn->nLength)
 	{
 		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 		{
 			pChn->nPos = pChn->nPosLo = 0;
-		} else if((GetType() & MOD_TYPE_MOD))	// TODO does not always seem to work, especially with short chip samples?
-		{
-			pChn->nPos = pChn->nLoopStart;
-			pChn->nPosLo = 0;
 		}
 	}
 }
@@ -2177,7 +2173,7 @@ bool CSoundFile::ProcessEffects()
 			if(retrigEnv) //Case: instrument with no note data.
 			{
 				//IT compatibility: Instrument with no note.
-				if(IsCompatibleMode(TRK_IMPULSETRACKER) || m_SongFlags[SONG_PT1XMODE])
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					if(GetNumInstruments())
 					{
