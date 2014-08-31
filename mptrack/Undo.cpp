@@ -308,6 +308,11 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(smp == 0 || smp >= MAX_SAMPLES) return false;
+	if(!TrackerSettings::Instance().m_SampleUndoBufferSize.Get().GetSizeInBytes())
+	{
+		// Undo/Redo is disabled
+		return false;
+	}
 	if(smp > buffer.size())
 	{
 		buffer.resize(smp);
@@ -424,8 +429,9 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
-	// Select most recent undo slot
-	UndoInfo &undo = fromBuf[smp - 1].back();
+	// Select most recent undo slot and temporarily remove it from the buffer so that it won't get deleted by possible buffer size restrictions in PrepareBuffer()
+	UndoInfo undo = fromBuf[smp - 1].back();
+	fromBuf[smp - 1].pop_back();
 
 	// When turning an undo point into a redo point (and vice versa), some action types need to be adjusted.
 	sampleUndoTypes redoType = undo.changeType;
@@ -510,6 +516,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	}
 	sample.PrecomputeLoops(sndFile, true);
 
+	fromBuf[smp - 1].push_back(undo);
 	DeleteStep(fromBuf, smp, fromBuf[smp - 1].size() - 1);
 
 	modDoc.UpdateAllViews(NULL, HINT_UNDO);
