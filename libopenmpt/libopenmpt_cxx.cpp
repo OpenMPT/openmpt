@@ -77,7 +77,11 @@ bool is_extension_supported( const std::string & extension ) {
 }
 
 double could_open_propability( std::istream & stream, double effort, std::ostream & log ) {
+#ifdef MPT_ANCIENT_VS2008
+	return openmpt::module_impl::could_open_propability( stream, effort, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ) );
+#else
 	return openmpt::module_impl::could_open_propability( stream, effort, std::make_shared<std_ostream_log>( log ) );
+#endif
 }
 
 module::module( const module & ) {
@@ -97,35 +101,67 @@ void module::set_impl( module_impl * i ) {
 }
 
 module::module( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+#ifdef MPT_ANCIENT_VS2008
+	impl = new module_impl( stream, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls );
+#else
 	impl = new module_impl( stream, std::make_shared<std_ostream_log>( log ), ctls );
+#endif
 }
 
 module::module( const std::vector<std::uint8_t> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+#ifdef MPT_ANCIENT_VS2008
+	impl = new module_impl( data, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls );
+#else
 	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
+#endif
 }
 
 module::module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+#ifdef MPT_ANCIENT_VS2008
+	impl = new module_impl( beg, end - beg, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls );
+#else
 	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ), ctls );
+#endif
 }
 
 module::module( const std::uint8_t * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+#ifdef MPT_ANCIENT_VS2008
+	impl = new module_impl( data, size, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls );
+#else
 	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+#endif
 }
 
 module::module( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+#ifdef MPT_ANCIENT_VS2008
+	impl = new module_impl( data, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls );
+#else
 	impl = new module_impl( data, std::make_shared<std_ostream_log>( log ), ctls );
+#endif
 }
 
 module::module( const char * beg, const char * end, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+#ifdef MPT_ANCIENT_VS2008
+	impl = new module_impl( beg, end - beg, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls );
+#else
 	impl = new module_impl( beg, end - beg, std::make_shared<std_ostream_log>( log ), ctls );
+#endif
 }
 
 module::module( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+#ifdef MPT_ANCIENT_VS2008
+	impl = new module_impl( data, size, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls );
+#else
 	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+#endif
 }
 
 module::module( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : impl(0) {
+#ifdef MPT_ANCIENT_VS2008
+	impl = new module_impl( data, size, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls );
+#else
 	impl = new module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls );
+#endif
 }
 
 module::~module() {

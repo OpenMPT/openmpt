@@ -172,9 +172,17 @@ void std_ostream_log::log( const std::string & message ) const {
 
 class log_forwarder : public ILog {
 private:
+#ifdef MPT_ANCIENT_VS2008
+	std::tr1::shared_ptr<log_interface> destination;
+#else
 	std::shared_ptr<log_interface> destination;
+#endif
 public:
+#ifdef MPT_ANCIENT_VS2008
+	log_forwarder( std::tr1::shared_ptr<log_interface> dest ) : destination(dest) {
+#else
 	log_forwarder( std::shared_ptr<log_interface> dest ) : destination(dest) {
+#endif
 		return;
 	}
 	virtual ~log_forwarder() {
@@ -294,9 +302,21 @@ void module_impl::apply_libopenmpt_defaults() {
 	set_render_param( module::RENDER_STEREOSEPARATION_PERCENT, 100 );
 }
 void module_impl::init( const std::map< std::string, std::string > & ctls ) {
+#ifdef MPT_ANCIENT_VS2008
+	m_sndFile = std::tr1::shared_ptr<CSoundFile>(new CSoundFile());
+#else
 	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	m_Dither = std::tr1::shared_ptr<Dither>(new Dither());
+#else
 	m_Dither = std::unique_ptr<Dither>(new Dither());
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	m_LogForwarder = std::tr1::shared_ptr<log_forwarder>(new log_forwarder(m_Log));
+#else
 	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
+#endif
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_currentPositionSeconds = 0.0;
 	m_Gain = 1.0f;
@@ -412,9 +432,21 @@ bool module_impl::is_extension_supported( const std::string & extension ) {
 	std::transform( lowercase_ext.begin(), lowercase_ext.end(), lowercase_ext.begin(), tolower );
 	return std::find( extensions.begin(), extensions.end(), lowercase_ext ) != extensions.end();
 }
+#ifdef MPT_ANCIENT_VS2008
+double module_impl::could_open_propability( std::istream & stream, double effort, std::tr1::shared_ptr<log_interface> log ) {
+#else
 double module_impl::could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log ) {
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	std::tr1::shared_ptr<CSoundFile> sndFile( new CSoundFile() );
+#else
 	std::unique_ptr<CSoundFile> sndFile( new CSoundFile() );
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	std::tr1::shared_ptr<log_forwarder> logForwarder( new log_forwarder( log ) );
+#else
 	std::unique_ptr<log_forwarder> logForwarder( new log_forwarder( log ) );
+#endif
 	sndFile->SetCustomLog( logForwarder.get() );
 
 	try {
@@ -447,32 +479,64 @@ double module_impl::could_open_propability( std::istream & stream, double effort
 
 }
 
+#ifdef MPT_ANCIENT_VS2008
+module_impl::module_impl( std::istream & stream, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#else
 module_impl::module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#endif
 	init( ctls );
 	load( FileReader( &stream ) );
 	apply_libopenmpt_defaults();
 }
+#ifdef MPT_ANCIENT_VS2008
+module_impl::module_impl( const std::vector<std::uint8_t> & data, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#else
 module_impl::module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#endif
 	init( ctls );
+#ifdef MPT_ANCIENT_VS2008
+	load( FileReader( &(data[0]), data.size() ) );
+#else
 	load( FileReader( data.data(), data.size() ) );
+#endif
 	apply_libopenmpt_defaults();
 }
+#ifdef MPT_ANCIENT_VS2008
+module_impl::module_impl( const std::vector<char> & data, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#else
 module_impl::module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#endif
 	init( ctls );
+#ifdef MPT_ANCIENT_VS2008
+	load( FileReader( &(data[0]), data.size() ) );
+#else
 	load( FileReader( data.data(), data.size() ) );
+#endif
 	apply_libopenmpt_defaults();
 }
+#ifdef MPT_ANCIENT_VS2008
+module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#else
 module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#endif
 	init( ctls );
 	load( FileReader( data, size ) );
 	apply_libopenmpt_defaults();
 }
+#ifdef MPT_ANCIENT_VS2008
+module_impl::module_impl( const char * data, std::size_t size, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#else
 module_impl::module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#endif
 	init( ctls );
 	load( FileReader( data, size ) );
 	apply_libopenmpt_defaults();
 }
+#ifdef MPT_ANCIENT_VS2008
+module_impl::module_impl( const void * data, std::size_t size, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#else
 module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#endif
 	init( ctls );
 	load( FileReader( data, size ) );
 	apply_libopenmpt_defaults();

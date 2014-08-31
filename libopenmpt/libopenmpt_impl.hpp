@@ -54,11 +54,27 @@ class log_forwarder;
 
 class module_impl {
 protected:
+#ifdef MPT_ANCIENT_VS2008
+	std::tr1::shared_ptr<log_interface> m_Log;
+#else
 	std::shared_ptr<log_interface> m_Log;
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	std::tr1::shared_ptr<log_forwarder> m_LogForwarder;
+#else
 	std::unique_ptr<log_forwarder> m_LogForwarder;
+#endif
 	double m_currentPositionSeconds;
+#ifdef MPT_ANCIENT_VS2008
+	std::tr1::shared_ptr<OpenMPT::CSoundFile> m_sndFile;
+#else
 	std::unique_ptr<OpenMPT::CSoundFile> m_sndFile;
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	std::tr1::shared_ptr<OpenMPT::Dither> m_Dither;
+#else
 	std::unique_ptr<OpenMPT::Dither> m_Dither;
+#endif
 	float m_Gain;
 	bool m_ctl_load_skip_samples;
 	bool m_ctl_load_skip_patterns;
@@ -82,13 +98,41 @@ protected:
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );
+#ifdef MPT_ANCIENT_VS2008
+	static double could_open_propability( std::istream & stream, double effort, std::tr1::shared_ptr<log_interface> log );
+#else
 	static double could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log );
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	module_impl( std::istream & stream, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#else
 	module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	module_impl( const std::vector<std::uint8_t> & data, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#else
 	module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	module_impl( const std::vector<char> & data, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#else
 	module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	module_impl( const std::uint8_t * data, std::size_t size, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#else
 	module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	module_impl( const char * data, std::size_t size, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#else
 	module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#endif
+#ifdef MPT_ANCIENT_VS2008
+	module_impl( const void * data, std::size_t size, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#else
 	module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls );
+#endif
 	~module_impl();
 public:
 	void select_subsong( std::int32_t subsong );

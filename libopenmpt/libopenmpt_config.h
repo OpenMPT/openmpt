@@ -95,6 +95,12 @@
   @}
 */
 
+#if defined(_MSC_VER)
+#if (_MSC_VER >= 1500) && (_MSC_VER < 1600) // VS2008
+#define MPT_ANCIENT_VS2008
+#endif
+#endif
+
 #include "libopenmpt_version.h"
 
 #endif /* LIBOPENMPT_CONFIG_H */
