@@ -324,6 +324,7 @@ void CSoundFile::CreateStereoMix(int count)
 
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
+			// Render into plugin buffer instead of global buffer
 			SNDMIXPLUGINSTATE *pPlugin = m_MixPlugins[nMixPlugin - 1].pMixState;
 			if ((pPlugin) && (pPlugin->pMixBuffer))
 			{
@@ -373,6 +374,7 @@ void CSoundFile::CreateStereoMix(int count)
 			{
 				if (nrampsamples > chn.nRampLength) nrampsamples = chn.nRampLength;
 			}
+
 			if((nSmpCount = GetSampleCount(chn, nrampsamples, ITPingPongMode)) <= 0)
 			{
 				// Stopping the channel
@@ -388,6 +390,7 @@ void CSoundFile::CreateStereoMix(int count)
 				chn.dwFlags.reset(CHN_PINGPONGFLAG);
 				break;
 			}
+
 			// Should we mix this channel ?
 			if((nchmixed >= m_MixerSettings.m_nMaxMixChannels && realtimeMix)	// Too many channels
 				|| (!chn.nRampLength && !(chn.leftVol | chn.rightVol)))			// Channel is completely silent
@@ -463,6 +466,24 @@ void CSoundFile::CreateStereoMix(int count)
 					chn.nRampLength -= nSmpCount;
 				}
 			}
+
+			// ProTracker compatibility: Instrument changes without a note do not happen instantly, but rather when the sample loop has finished playing.
+			// Test case: PTInstrSwap.mod
+			if(m_SongFlags[SONG_PT1XMODE] && chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP] && chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns])
+			{
+				const ModSample &smp = Samples[chn.nNewIns];
+				chn.pModSample = &smp;
+				chn.pCurrentSample = smp.pSample;
+				chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | smp.uFlags;
+				chn.nLoopStart = smp.nLoopStart;
+				chn.nLoopEnd = smp.nLoopEnd;
+				chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : smp.nLength;
+				chn.nPos = chn.nLoopStart;
+				if(!chn.pCurrentSample)
+				{
+					break;
+				}
+			}
 		} while(nsamples > 0);
 
 		// Restore sample pointer in case it got changed through loop wrap-around
@@ -520,8 +541,8 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 #endif // MPT_INTMIXER
 			} else
 			{
-				memset(pState->pOutBufferL, 0, nCount * sizeof(float));
-				memset(pState->pOutBufferR, 0, nCount * sizeof(float));
+				memset(pState->pOutBufferL, 0, nCount * sizeof(pState->pOutBufferL[0]));
+				memset(pState->pOutBufferR, 0, nCount * sizeof(pState->pOutBufferR[0]));
 			}
 			pState->dwFlags &= ~SNDMIXPLUGINSTATE::psfMixReady;
 		}
