@@ -519,6 +519,11 @@ ifeq ($(SHARED_SONAME),1)
 LIBOPENMPT_LDFLAGS += -Wl,-soname,$(LIBOPENMPT_SONAME)
 endif
 
+MISC_OUTPUTS += bin/openmpt123$(EXESUFFIX).norpath
+MISC_OUTPUTS += bin/libopenmpt_example_c$(EXESUFFIX).norpath
+MISC_OUTPUTS += bin/libopenmpt_example_c_mem$(EXESUFFIX).norpath
+MISC_OUTPUTS += bin/libopenmpt_example_cxx$(EXESUFFIX).norpath
+MISC_OUTPUTS += bin/libopenmpt_example_c_stdout$(EXESUFFIX).norpath
 MISC_OUTPUTS += libopenmpt$(SOSUFFIX)
 MISC_OUTPUTS += bin/.docs
 MISC_OUTPUTS += bin/dist.tar
