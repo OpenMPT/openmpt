@@ -14,6 +14,7 @@ is just a high-level summary.
 
  *  [Bug] Fix all known crashes on platforms that do not support unaligned
     memory access.
+ *  [Bug] openmpt123: Effect column was always missing in pattern display.
 
 ### 2014-06-15 - libopenmpt 0.2-beta5
 
