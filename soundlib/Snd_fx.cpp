@@ -596,6 +596,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				bool porta = p->command == CMD_TONEPORTAMENTO /*|| p->command CMD_TONEPORTAVOL || p->volcmd == VOLCMD_TONEPORTAMENTO*/; // Volume column tone portamento can be crazy, and CMD_TONEPORTAVOL requires volume slides which we don't emulate right now.
 				bool stopNote = patternLoopStartedOnThisRow;	// It's too much trouble to keep those pattern loops in sync...
 
+				if(p->instr) pChn->proTrackerOffset = 0;
 				if(p->IsNote())
 				{
 					pChn->nNewNote = pChn->nLastNote;
@@ -949,10 +950,9 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		if(pSmp)
 		{
 			pChn->nVolume = pSmp->nVolume;
-		} else
+		} else if(pIns && pIns->nMixPlug)
 		{
-			if(pIns && pIns->nMixPlug)
-				pChn->nVolume = pChn->GetVSTVolume();
+			pChn->nVolume = pChn->GetVSTVolume();
 		}
 	}
 
@@ -1340,7 +1340,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			{
 				pChn->proTrackerOffset = 0;
 			}
-			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (static_cast<ChannelFlags>(pSmp->uFlags) & CHN_SAMPLEFLAGS);
+			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 			if(pChn->dwFlags[CHN_SUSTAINLOOP])
 			{
 				pChn->nLoopStart = pSmp->nSustainStart;
@@ -2018,11 +2018,17 @@ bool CSoundFile::ProcessEffects()
 			bPorta = false;
 		}
 
-		// ProTracker compatibility: Instrument change always happens on the first tick, even when there is a note delay.
-		// Test case: InstrDelay.mod
-		if(instr && !m_PlayState.m_nTickCount && !triggerNote && m_SongFlags[SONG_PT1XMODE])
+		if(m_SongFlags[SONG_PT1XMODE] && instr && !m_PlayState.m_nTickCount)
 		{
-			InstrumentChange(pChn, instr, true, true, false);
+			// Instrument number resets the stacked ProTracker offset.
+			// Test case: ptoffset.mod
+			pChn->proTrackerOffset = 0;
+			// ProTracker compatibility: Instrument change always happens on the first tick, even when there is a note delay.
+			// Test case: InstrDelay.mod
+			if(!triggerNote)
+			{
+				InstrumentChange(pChn, instr, true, true, false);
+			}
 		}
 
 		// Handles note/instrument/volume changes
@@ -4417,7 +4423,6 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 	}
 // -! NEW_FEATURE#0010
 
-	if(pChn->rowCommand.instr) pChn->proTrackerOffset = 0;
 	pChn->proTrackerOffset += param;
 
 	if(pChn->rowCommand.IsNote())
