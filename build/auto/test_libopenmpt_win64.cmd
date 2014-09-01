@@ -1,5 +1,9 @@
 @echo off
 
+set BATCH_DIR=%~dp0
+cd %BATCH_DIR%
+cd ..\..
+
 set GOT_REVISION=%1%
 set MY_DIR=%CD%
 
