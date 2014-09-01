@@ -1016,8 +1016,8 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			}
 			if ( flags.show_pattern ) {
 				int width = ( flags.terminal_width - 3 ) / mod.get_num_channels();
-				if ( width > 11 ) {
-					width = 11;
+				if ( width > 13 + 1 ) {
+					width = 13 + 1;
 				}
 				for ( std::int32_t line = 0; line < pattern_lines; ++line ) {
 					std::int32_t row = mod.get_current_row() - ( pattern_lines / 2 ) + line;
