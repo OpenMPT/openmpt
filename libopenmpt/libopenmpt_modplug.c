@@ -29,7 +29,9 @@
 #include <string.h>
 
 /* define to emulate 0.8.7 API/ABI instead of 0.8.8 API/ABI */
-/* #define LIBOPENMPT_MODPLUG_0_8_7 */
+#if 1
+#define LIBOPENMPT_MODPLUG_0_8_7
+#endif
 
 #ifdef _MSC_VER
 /* msvc errors when seeing dllexport declarations after prototypes have been declared in modplug.h */
