@@ -90,9 +90,6 @@ bool IsTestBuild(const VersionNum num)
 		||
 			// Test builds have non-zero VER_MINORMINOR
 			(num > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num)
-		||
-			// Test builds do NOT have zero VER_MINOR
-			(num >= MAKE_VERSION_NUMERIC(1,19,00,00) && ((num & 0x0000ff00) == 0x00000000))
 		);
 }
 
