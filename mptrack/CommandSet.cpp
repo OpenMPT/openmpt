@@ -700,11 +700,10 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 {
 	CString report= "";
 
-	KeyCombination curKc;
 	//Avoid duplicate
 	for(size_t k = 0; k < commands[cmd].kcList.size(); k++)
 	{
-		curKc=commands[cmd].kcList[k];
+		KeyCombination curKc=commands[cmd].kcList[k];
 		if (curKc==kc)
 		{
 			//cm'ed out for perf
@@ -712,38 +711,27 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 			return "";
 		}
 	}
+
 	//Check that this keycombination isn't already assigned (in this context), except for dummy keys
-	for (int curCmd=0; curCmd<kcNumCommands; curCmd++)
-	{ //search all commands
-		if (IsDummyCommand(cmd))    // no need to search if we are adding a dummy key
-			break;
-		if (IsDummyCommand((CommandID)curCmd)) //no need to check against a dummy key
-			continue;
-		for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
-		{ //search all keys for curCommand
-			curKc=commands[curCmd].kcList[k];
-			bool crossContext=false;
-			if (KeyCombinationConflict(curKc, kc, crossContext))
+	std::pair<CommandID, KeyCombination> conflictCmd;
+	if((conflictCmd = IsConflicting(kc, cmd)).first != kcNull)
+	{
+		if (!overwrite)
+		{
+			//cm'ed out for perf
+			//Log("Not adding key: already exists and overwrite disabled\n");
+			return "";
+		} else
+		{
+			if (IsCrossContextConflict(kc, conflictCmd.second))
 			{
-				if (!overwrite)
-				{
-					//cm'ed out for perf
-					//Log("Not adding key: already exists and overwrite disabled\n");
-					return "";
-				}
-				else
-				{
-					if (crossContext)
-					{
-						report += "Warning! the following commands may conflict:\r\n   >" + GetCommandText((CommandID)curCmd) + " in " + curKc.GetContextText() + "\r\n   >" + GetCommandText((CommandID)cmd) + " in " + kc.GetContextText() + "\r\n\r\n";
-						Log("%s", report);
-					} else
-					{
-						Remove(curKc, (CommandID)curCmd);
-						report += "Removed due to conflict in same context:\r\n   >" + GetCommandText((CommandID)curCmd) + " in " + curKc.GetContextText() + "\r\n\r\n";
-						Log("%s", report);
-					}
-				}
+				report += "Warning! the following commands may conflict:\r\n   >" + GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + "\r\n   >" + GetCommandText(cmd) + " in " + kc.GetContextText() + "\r\n\r\n";
+				Log("%s", report);
+			} else
+			{
+				Remove(conflictCmd.second, conflictCmd.first);
+				report += "Removed due to conflict in same context:\r\n   >" + GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + "\r\n\r\n";
+				Log("%s", report);
 			}
 		}
 	}
@@ -758,8 +746,32 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 }
 
 
-bool CCommandSet::IsDummyCommand(CommandID cmd)
-//---------------------------------------------
+std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination kc, CommandID cmd) const
+//-----------------------------------------------------------------------------------------------------
+{
+	if(IsDummyCommand(cmd))    // no need to search if we are adding a dummy key
+		return std::pair<CommandID, KeyCombination>(kcNull, KeyCombination());
+	
+	for(int curCmd = 0; curCmd < kcNumCommands; curCmd++)
+	{
+		if(curCmd == cmd || IsDummyCommand((CommandID)curCmd))
+			continue;
+
+		for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
+		{
+			const KeyCombination &curKc = commands[curCmd].kcList[k];
+			if(KeyCombinationConflict(curKc, kc))
+			{
+				return std::pair<CommandID, KeyCombination>((CommandID)curCmd, curKc);
+			}
+		}
+	}
+	return std::pair<CommandID, KeyCombination>(kcNull, KeyCombination());
+}
+
+
+bool CCommandSet::IsDummyCommand(CommandID cmd) const
+//---------------------------------------------------
 {
 	// e.g. Chord modifier is a dummy command, which serves only to automatically
 	// generate a set of keycombinations for chords (I'm not proud of this design).
@@ -1686,8 +1698,8 @@ bool CCommandSet::LoadDefaultKeymap()
 
 
 //Could do better search algo but this is not perf critical.
-int CCommandSet::FindCmd(int uid)
-//-------------------------------
+int CCommandSet::FindCmd(int uid) const
+//-------------------------------------
 {
 	for (int i=0; i<kcNumCommands; i++)
 	{
@@ -1971,19 +1983,25 @@ void CCommandSet::SetupContextHierarchy()
 
 }
 
-bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict)
+bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2) const
 {
-	bool modConflict     = (kc1.Modifier()==kc2.Modifier());
-	bool codeConflict    = (kc1.KeyCode()==kc2.KeyCode());
-	bool eventConflict   = ((kc1.EventType()&kc2.EventType())!=0);
-	bool ctxConflict     = (kc1.Context() == kc2.Context());
-	crossCxtConflict     = m_isParentContext[kc1.Context()][kc2.Context()] || m_isParentContext[kc2.Context()][kc1.Context()];
-
+	bool modConflict      = (kc1.Modifier()==kc2.Modifier());
+	bool codeConflict     = (kc1.KeyCode()==kc2.KeyCode());
+	bool eventConflict    = ((kc1.EventType()&kc2.EventType())!=0);
+	bool ctxConflict      = (kc1.Context() == kc2.Context());
+	bool crossCxtConflict = m_isParentContext[kc1.Context()][kc2.Context()] || m_isParentContext[kc2.Context()][kc1.Context()];
 
 	bool conflict = modConflict && codeConflict && eventConflict &&
 		(ctxConflict || crossCxtConflict);
 
 	return conflict;
+}
+
+
+bool CCommandSet::IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2) const
+//------------------------------------------------------------------------------------
+{
+	return m_isParentContext[kc1.Context()][kc2.Context()] || m_isParentContext[kc2.Context()][kc1.Context()];
 }
 
 //end rewbs.customKeys
