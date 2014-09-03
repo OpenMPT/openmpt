@@ -767,7 +767,6 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 void COptionsKeyboard::OnSetKeyChoice()
 //-------------------------------------
 {
-	CString report, reportHistory;
 	CommandID cmd = (CommandID)m_nCurHotKey;
 	if (cmd<0)
 	{
@@ -799,17 +798,39 @@ void COptionsKeyboard::OnSetKeyChoice()
 		kc.EventType(kKeyEventDown);
 	}
 
-	//process valid input
-	plocalCmdSet->Remove(m_nCurKeyChoice, cmd);
-	report = plocalCmdSet->Add(kc, cmd, true, m_nCurKeyChoice);
+	bool add = true;
+	std::pair<CommandID, KeyCombination> conflictCmd;
+	if((conflictCmd = plocalCmdSet->IsConflicting(kc, cmd)).first != kcNull
+		&& !plocalCmdSet->IsCrossContextConflict(kc, conflictCmd.second)
+		&& Reporting::Confirm("New shortcut (" + kc.GetKeyText() + ") conflicts with " + plocalCmdSet->GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + ".\nDelete the other shortcut and keep the new one?", "Shortcut Conflict") == cnfNo)
+	{
+		// Restore original choice
+		add = false;
+		if(m_nCurKeyChoice >= 0 && m_nCurKeyChoice < plocalCmdSet->GetKeyListSize(cmd))
+		{
+			KeyCombination origKc = plocalCmdSet->GetKey(cmd, m_nCurKeyChoice);
+			m_eCustHotKey.SetKey(origKc.Modifier(), origKc.KeyCode());
+		} else
+		{
+			m_eCustHotKey.SetWindowText(_T(""));
+		}
+	}
 
-	//Update log
-	m_eReport.GetWindowText(reportHistory);
-	//reportHistory = reportHistory.Mid(6,reportHistory.GetLength()-1);
-	m_eReport.SetWindowText(report + reportHistory);
+	if(add)
+	{
+		CString report, reportHistory;
+		//process valid input
+		plocalCmdSet->Remove(m_nCurKeyChoice, cmd);
+		report = plocalCmdSet->Add(kc, cmd, true, m_nCurKeyChoice);
 
-	ForceUpdateGUI();
-	m_bModified=false;
+		//Update log
+		m_eReport.GetWindowText(reportHistory);
+		//reportHistory = reportHistory.Mid(6,reportHistory.GetLength()-1);
+		m_eReport.SetWindowText(report + reportHistory);
+		ForceUpdateGUI();
+	}
+
+	m_bModified = false;
 	return;
 }
 

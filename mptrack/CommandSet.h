@@ -1151,7 +1151,7 @@ enum Modifiers
 struct KeyCombination
 {
 protected:
-	uint8 ctx;
+	uint8 ctx;	// TODO: This should probably rather be a member of CommandStruct and not of the individual key combinations for consistency's sake.
 	uint8 mod;
 	uint8 code;
 	uint8 event;
@@ -1179,6 +1179,7 @@ public:
 	{
 		size_t operator() (const KeyCombination &kc) const
 		{
+			STATIC_ASSERT(sizeof(KeyCombination) == sizeof(uint32));
 			return *reinterpret_cast<const uint32 *>(&kc);
 		}
 	};
@@ -1274,11 +1275,11 @@ protected:
 	inline void DefineKeyCommand(CommandID kc, UINT uid, const TCHAR *message, enmKcVisibility visible = kcVisible, enmKcDummy dummy = kcNoDummy);
 	void SetupCommands();
 	void SetupContextHierarchy();
-	bool IsDummyCommand(CommandID cmd);
+	bool IsDummyCommand(CommandID cmd) const;
 	CString EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
 
-	int FindCmd(int uid);
-	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict);
+	int FindCmd(int uid) const;
+	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2) const;
 
 	const CModSpecifications *oldSpecs;
 	CommandStruct commands[kcNumCommands];
@@ -1293,6 +1294,9 @@ public:
 	CString Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos = -1);
 	CString Remove(KeyCombination kc, CommandID cmd);
 	CString Remove(int pos, CommandID cmd);
+
+	std::pair<CommandID, KeyCombination> IsConflicting(KeyCombination kc, CommandID cmd) const;
+	bool IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2) const;
 
 	//Tranformation
 	bool QuickChange_SetEffects(const CModSpecifications &modSpecs);
