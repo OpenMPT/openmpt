@@ -1,5 +1,5 @@
-REM del /s html
-REM mkdir html
+del /s html
+mkdir html
 REM wiki.py
 copy source\*.* html\
 "%ProgramFiles%\7-zip\7z" x html.tgz
