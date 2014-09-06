@@ -25,6 +25,70 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.23.05.00 (6 September 2014, revision 4238)
+---------------------------------------------
+Pattern tab
+   [Imp] <js> "Edit Plugin assigned to PC Event" shortcut is now "Toggle PC Event/instrument plugin editor" (can now also be used to toggle the editor of the plugin assigned to the currently selected instrument).
+   [Imp] <js> Deleting and inserting items in the order list automatically adjusts playback, sequence override and play lock positions.
+   [Imp] <js> Greatly improve seek speed when "Maintain sample sync on seek" is enabled and there are samples with very small loops.
+   [Imp] <js> When inserting a new pattern while a +++ or --- pattern is focussed in the order list, use the currently edited pattern for determining the new pattern's length.
+   [Fix] <js> In windowed mode, the note properties dialog was not always visible.
+   [Fix] <js> The order list's scrollbar's "Right Edge" menu entry was not working (http://bugs.openmpt.org/view.php?id=567).
+
+Sample tab
+   [Fix] <js> Enabling a sample loop when there were no loop points didn't update the loop point display.
+   [Fix] <js> Silencing samples was slightly broken (http://bugs.openmpt.org/view.php?id=555).
+   [Fix] <js> Undo could crash in some situations when the total undo buffer size previously exceeded the configured buffer limit.
+   [Fix] <js> It was impossible to call the save dialog for a sample / instrument with a pipe character in the name (also applies to instrument tab, http://bugs.openmpt.org/view.php?id=564)
+   [Fix] <js> Fixed possible crashes when using undo / redo, most notably when sample undo was disabled completely (http://bugs.openmpt.org/view.php?id=584).
+
+Instrument tab
+   [Imp] <js> In the sample map editor, show faint red dots for notes that are already assigned to another sample (http://forum.openmpt.org/index.php?topic=4112.msg37495#msg37495).
+   [Fix] <js> Trying to play notes above B-9 caused a crash (http://bugs.openmpt.org/view.php?id=549).
+
+Tree view
+   [Fix] <js> Stopped voices sometimes still contributed to the active sample / instrument list (http://bugs.openmpt.org/view.php?id=568).
+
+VST / DMO Plugins
+   [New] <js> Plugin editor positions are now stored in module files.
+   [Imp] <js> Allow drag and drop actions on plugin editors to drop preset files from Explorer.
+   [Fix] <js> Program names starting with non-ASCII characters were not formatted properly.
+   [Reg] <js> Partly reverted the behaviour introduced in OpenMPT 1.23.03.00 to only re-send patch numbers if they're not bank 1 patch 1, to fix legacy module playback.
+
+IT::Compatible Playback Mode
+   [Fix] <js> Tone portamento target is now completely cleared with new notes, so that subsequent Gxx effects have no effect.
+
+XM
+   [Fix] <js> Clear MIDI macros for XM files made with FT2 to prevent Zxx effects from doing anything.
+   [Fix] <js> Correct nominal dB values for FT2 pan law mix mode.
+
+XM::Compatible Playback Mode
+   [Fix] <js> Tentatively fix arpeggio after pitch slide behaviour (http://bugs.openmpt.org/view.php?id=542).
+
+MOD
+   [Fix] <js> ProTracker applies instrument changes on the first tick, even if there's a note delay. This is now emulated in ProTracker 1/2 mode. (http://bugs.openmpt.org/view.php?id=574).
+   [Fix] <js> Properly implemented ProTracker-style sample swapping in ProTracker 1/2 mode, which is only supposed to happend at the end of the sample and not instantly.
+   [Fix] <js> Correctly handle a few more edge cases of ProTracker-style 9xx offset handling in ProTracker 1/2 mode.
+
+Playback
+   [Mod] <js> When resuming paused (not stopped) playback, previously playing samples are continued.
+   [Fix] <js> "Maintain sample sync on seek" should now also work when playback was previously stopped.
+   [Fix] <js> Glissando in semitones mode didn't take finetune into account (http://bugs.openmpt.org/view.php?id=585).
+
+Other
+   [New] <jh> Add hidden setting [Misc] ShowSettingsOnNewVersion (default true) which can permanently disable showing of the settings dialog on new versions, in addition to the one-time commandline switch /noSettingsOnNewVersion .
+   [Imp] <js> Add support for 64-bit vorbis library builds from mingw-w64 with slightly different file names.
+   [Imp] <js> When adding a new shortcut that conflicts with an existing shortcut, do not automatically delete the existing shortcut but rather ask the user what to do.
+   [Imp] <js> Add global dummy shortcut keybinding to prevent default keybindings from doing anything into if you don't like them (http://bugs.openmpt.org/view.php?id=550).
+   [Imp] <js> Slightly improved icons for systems with 32-bit display mode but mysteriously missing alpha channel (http://bugs.openmpt.org/view.php?id=520).
+   [Mod] <js> Merge "Note Off/Cut/Fade" and "Note Off/Cut/Fade (without instrument number)" to never write an instrument number next to those events.
+   [Mod] <js> Update UnRAR library to version 5.1.6.
+   [Fix] <js> Scale main toolbar elements according to DPI settings (http://bugs.openmpt.org/view.php?id=513).
+   [Fix] <js> Setting the default MIDI volume behaviour for new instruments in the Options dialog was broken.
+   [Fix] <js> Potential fix for DDE error when launching OpenMPT through an associated file from Explorer (http://bugs.openmpt.org/view.php?id=461).
+   [Fix] <js> After loading a new keybinding file, effect keys were no longer working until the user switched to a module with different effect keys (tx stinkbug).
+
+
 v1.23.04.00 (14 June 2014, revision 4113)
 -----------------------------------------
 Pattern tab
@@ -33,7 +97,7 @@ Pattern tab
    [Fix] <js> With overflow paste, marking the pasted pattern area was not working when the paste ended exactly in the last pattern row (broke in OpenMPT 1.23.02.00).
    [Fix] <js> Select / Copy Select keys should no longer interfere with mouse dragging (tx coda).
    [Fix] <js> Don't crash when the module doesn't have any patterns.
-   [Fix] <jh> Fix flickering of current-row highlight in pattern view on Wine (http://bugs.openmpt.org/view.php?id=522).
+   [Fix] <jh> Fixed flickering of current-row highlight in pattern view on Wine (http://bugs.openmpt.org/view.php?id=522).
 
 Sample tab
    [Fix] <js> Setting sustain loop points by typing the values in didn't update the waveform display.
