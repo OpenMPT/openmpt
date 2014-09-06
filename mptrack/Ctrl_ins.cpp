@@ -1168,8 +1168,8 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), bITandXM);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), bITandXM);
-		m_SliderAttack.EnableWindow(bITandXM);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), bMPTOnly || (pIns && pIns->nVolRampUp));
+		m_SliderAttack.EnableWindow(bMPTOnly || (pIns && pIns->nVolRampUp));	// For legacy modules, keep the attack setting enabled. Otherwise, only allow it in MPTM files.
 		m_EditName.EnableWindow(bITandXM);
 		m_EditFileName.EnableWindow(bITandMPT);
 		m_CbnMidiCh.EnableWindow(bITandXM);
