@@ -227,6 +227,7 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 		wPitchToTempoLock = 0;
 		nCutSwing = nResSwing = 0;
 		nFilterMode = FLTMODE_UNCHANGED;
+		nVolRampUp = 0;
 	}
 }
 
