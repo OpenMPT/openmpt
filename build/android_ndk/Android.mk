@@ -8,7 +8,7 @@ LOCAL_MODULE := openmpt
 LOCAL_CPP_FEATURES += exceptions
 LOCAL_CPP_FEATURES += rtti
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH) $(LOCAL_PATH)/common $(LOCAL_PATH)/common/svn_version_default
+LOCAL_C_INCLUDES := $(LOCAL_PATH) $(LOCAL_PATH)/common $(LOCAL_PATH)/build/svn_version
 
 LOCAL_CFLAGS   :=            -fvisibility=hidden -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB
 LOCAL_CPPFLAGS := -std=c++11 -fvisibility=hidden -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB

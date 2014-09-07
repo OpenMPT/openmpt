@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <locale>
 #include <sstream>
+#include <string>
 
 #include "versionNumber.h"
 #include "svn_version.h"
@@ -117,6 +118,37 @@ int GetRevision()
 {
 	#if defined(OPENMPT_VERSION_REVISION)
 		return OPENMPT_VERSION_REVISION;
+	#elif defined(OPENMPT_VERSION_SVNVERSION)
+		std::string svnversion = OPENMPT_VERSION_SVNVERSION;
+		if(svnversion.length() == 0)
+		{
+			return 0;
+		}
+		if(svnversion.find(":") != std::string::npos)
+		{
+			svnversion = svnversion.substr(svnversion.find(":") + 1);
+		}
+		if(svnversion.find("-") != std::string::npos)
+		{
+			svnversion = svnversion.substr(svnversion.find("-") + 1);
+		}
+		if(svnversion.find("M") != std::string::npos)
+		{
+			svnversion = svnversion.substr(0, svnversion.find("M"));
+		}
+		if(svnversion.find("S") != std::string::npos)
+		{
+			svnversion = svnversion.substr(0, svnversion.find("S"));
+		}
+		if(svnversion.find("P") != std::string::npos)
+		{
+			svnversion = svnversion.substr(0, svnversion.find("P"));
+		}
+		int revision = 0;
+		std::istringstream s( svnversion );
+		s.imbue(std::locale::classic());
+		s >> revision;
+		return revision;	
 	#else
 		return 0;
 	#endif
@@ -126,6 +158,17 @@ bool IsDirty()
 {
 	#if defined(OPENMPT_VERSION_DIRTY)
 		return OPENMPT_VERSION_DIRTY;
+	#elif defined(OPENMPT_VERSION_SVNVERSION)
+		std::string svnversion = OPENMPT_VERSION_SVNVERSION;
+		if(svnversion.length() == 0)
+		{
+			return false;
+		}
+		if(svnversion.find("M") != std::string::npos)
+		{
+			return true;
+		}
+		return false;
 	#else
 		return false;
 	#endif
@@ -135,6 +178,29 @@ bool HasMixedRevisions()
 {
 	#if defined(OPENMPT_VERSION_MIXEDREVISIONS)
 		return OPENMPT_VERSION_MIXEDREVISIONS;
+	#elif defined(OPENMPT_VERSION_SVNVERSION)
+		std::string svnversion = OPENMPT_VERSION_SVNVERSION;
+		if(svnversion.length() == 0)
+		{
+			return false;
+		}
+		if(svnversion.find(":") != std::string::npos)
+		{
+			return true;
+		}
+		if(svnversion.find("-") != std::string::npos)
+		{
+			return true;
+		}
+		if(svnversion.find("S") != std::string::npos)
+		{
+			return true;
+		}
+		if(svnversion.find("P") != std::string::npos)
+		{
+			return true;
+		}
+		return false;
 	#else
 		return false;
 	#endif
@@ -169,7 +235,11 @@ std::string GetStateString()
 
 std::string GetBuildDateString()
 {
-	return OPENMPT_VERSION_DATE;
+	#if defined(OPENMPT_VERSION_DATE)
+		return OPENMPT_VERSION_DATE;
+	#else
+		return __DATE__ " " __TIME__ ;
+	#endif
 }
 
 std::string GetBuildFlagsString()

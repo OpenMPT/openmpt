@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;../../..;../../../common;../../../include/msinttypes/inttypes;../../../include/msinttypes/stdint;../../../common/svn_version_default;../../../include"
+				AdditionalIncludeDirectories=".;../../..;../../../common;../../../include/msinttypes/inttypes;../../../include/msinttypes/stdint;../../../build/svn_version;../../../include"
 				PreprocessorDefinitions="LIBOPENMPT_BUILD"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -103,7 +103,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories=".;../../..;../../../common;../../../include/msinttypes/inttypes;../../../include/msinttypes/stdint;../../../common/svn_version_default;../../../include"
+				AdditionalIncludeDirectories=".;../../..;../../../common;../../../include/msinttypes/inttypes;../../../include/msinttypes/stdint;../../../build/svn_version;../../../include"
 				PreprocessorDefinitions="LIBOPENMPT_BUILD"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"

@@ -179,9 +179,6 @@
     <ClInclude Include="libopenmpt_version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\svn_version_default\svn_version.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\version.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -205,9 +202,6 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\S3MTools.h">
       <Filter>Header Files\soundlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\svn_version_subwcrev\svn_version.template.h">
-      <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\Dither.h">
       <Filter>Header Files\soundlib</Filter>
