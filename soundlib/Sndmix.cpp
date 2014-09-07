@@ -672,7 +672,9 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
 			const int tremattn = ((GetType() & MOD_TYPE_XM) || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
 
-			vol += (GetVibratoDelta(pChn->nTremoloType, trempos) * (int)pChn->nTremoloDepth) >> tremattn;
+			int delta = GetVibratoDelta(pChn->nTremoloType, trempos);
+			if(GetType() == MOD_TYPE_DMF) delta -= 127;
+			vol += (delta * (int)pChn->nTremoloDepth) >> tremattn;
 		}
 		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
 		{
@@ -1978,7 +1980,7 @@ bool CSoundFile::ReadNote()
 #ifdef MODPLUG_TRACKER
 			const UINT kChnMasterVol = pChn->dwFlags[CHN_EXTRALOUD] ? (UINT)m_PlayConfig.getNormalSamplePreAmp() : nMasterVol;
 #else
-#define		kChnMasterVol	nMasterVol
+			const UINT kChnMasterVol = nMasterVol;
 #endif // MODPLUG_TRACKER
 
 			// Adjusting volumes
