@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt svn
+### 2014-09-07 - libopenmpt 0.2-beta7
 
  *  libopenmpt now has an GNU Autotools based build system (in addition to all
     previously supported ways of building libopenmpt). Autotools support is
@@ -15,6 +15,7 @@ is just a high-level summary.
 
  *  [Regression] openmpt123: Support for writing WavPack (.wv) files has been
     removed.
+    
     Reasoning:
      1. WavPack support was incomplete and did not include support for writing
         WavPack metadata at all.
