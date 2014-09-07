@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  libopenmpt now has an GNU Autotools based build system (in addition to all
+    previously supported ways of building libopenmpt). Autotools support is
+    pacakged separately as tarballs ending in `-autotools.tar.gz`.
+
  *  [Bug] The distributed windows .zip file did not include pugixml.
 
  *  [Regression] openmpt123: Support for writing WavPack (.wv) files has been
