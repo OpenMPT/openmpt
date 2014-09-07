@@ -3903,16 +3903,15 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		break;
 
 		case MIDIEvents::evNoteOn: // Note On
+			// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
+			if(!IsLiveRecord() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
+				pModDoc->OnPatternPlayNoLoop();
+
 			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
 			if(nVol < 0) nVol = -1;
 			else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
 			TempEnterNote(nNote, nVol, true);
-
-			// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
-			if(sndFile.IsPaused() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
-				pModDoc->OnPatternPlayNoLoop();
-
-		break;
+			break;
 
 		case MIDIEvents::evPolyAftertouch:	// Polyphonic aftertouch
 			EnterAftertouch(nNote, nVol);
