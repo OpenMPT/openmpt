@@ -82,7 +82,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib dsound.lib msacm32.lib ksguid.lib ksuser.lib htmlhelp.lib"
 				Version="5.0"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -181,7 +180,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib dsound.lib msacm32.lib ksguid.lib ksuser.lib htmlhelp.lib"
 				Version="5.0"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -282,7 +280,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib dsound.lib msacm32.lib ksguid.lib ksuser.lib htmlhelp.lib"
 				Version="5.0"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -381,7 +378,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib version.lib Rpcrt4.lib delayimp.lib wininet.lib dsound.lib msacm32.lib ksuser.lib htmlhelp.lib"
 				Version="5.0"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -677,6 +673,10 @@
 			</File>
 			<File
 				RelativePath=".\mptrack.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\MPTrackLink.cpp"
 				>
 			</File>
 			<File
