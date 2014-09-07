@@ -527,18 +527,25 @@ MISC_OUTPUTS += bin/libopenmpt_example_cxx$(EXESUFFIX).norpath
 MISC_OUTPUTS += bin/libopenmpt_example_c_stdout$(EXESUFFIX).norpath
 MISC_OUTPUTS += libopenmpt$(SOSUFFIX)
 MISC_OUTPUTS += bin/.docs
-MISC_OUTPUTS += bin/dist.tar
-MISC_OUTPUTS += bin/dist.mk
-MISC_OUTPUTS += bin/dist-doc.tar
-MISC_OUTPUTS += bin/svn_version_dist.h
 MISC_OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 MISC_OUTPUTS += bin/made.docs
 MISC_OUTPUTS += bin/$(LIBOPENMPT_SONAME)
 
 MISC_OUTPUTDIRS += bin/dest
-MISC_OUTPUTDIRS += bin/dist
-MISC_OUTPUTDIRS += bin/dist-zip
 MISC_OUTPUTDIRS += bin/docs
+
+DIST_OUTPUTS += bin/dist.mk
+DIST_OUTPUTS += bin/svn_version_dist.h
+DIST_OUTPUTS += bin/dist.tar
+DIST_OUTPUTS += bin/dist-tar.tar
+DIST_OUTPUTS += bin/dist-zip.tar
+DIST_OUTPUTS += bin/dist-doc.tar
+
+DIST_OUTPUTDIRS += bin/dist
+DIST_OUTPUTDIRS += bin/dist-doc
+DIST_OUTPUTDIRS += bin/dist-tar
+DIST_OUTPUTDIRS += bin/dist-zip
+
 
 
 ifeq ($(ONLY_TEST),1)
@@ -651,22 +658,32 @@ ifeq ($(SHARED_LIB),1)
 endif
 
 .PHONY: dist
-dist: bin/dist.tar
+dist: bin/dist-tar.tar bin/dist-zip.tar bin/dist-doc.tar
 
-bin/dist.tar: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
-	rm -rf bin/dist.tar
-	cd bin/ && cp dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip ./
-	cd bin/ && cp dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
-	cd bin/ && tar cvf dist.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
-	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
+.PHONY: dist-tar
+dist-tar: bin/dist-tar.tar
+
+bin/dist-tar.tar: bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
+	rm -rf bin/dist-tar.tar
+	cd bin/ && cp dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
+	cd bin/ && tar cvf dist-tar.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar.gz
+
+.PHONY: dist-zip
+dist-zip: bin/dist-zip.tar
+
+bin/dist-zip.tar: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
+	rm -rf bin/dist-zip.tar
+	cd bin/ && cp dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip ./
+	cd bin/ && tar cvf dist-zip.tar libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
+	rm bin/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
 
 .PHONY: dist-doc
 dist-doc: bin/dist-doc.tar
 
-bin/dist-doc.tar: bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
+bin/dist-doc.tar: bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm -rf bin/dist-doc.tar
-	cd bin/ && cp dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
+	cd bin/ && cp dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz ./
 	cd bin/ && tar cvf dist-doc.tar libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 	rm bin/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 
@@ -686,36 +703,36 @@ bin/svn_version_dist.h:
 	echo '#include "../svn_version_svnversion/svn_version.h"' >> $@.tmp
 	mv $@.tmp $@
 
-.PHONY: bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
-bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar: docs
-	mkdir -p bin/dist
-	rm -rf bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
-	mkdir -p bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
-	cp -Rv bin/docs/html bin/dist/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs
-	cd bin/dist/ && tar cv libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
+.PHONY: bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
+bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar: docs
+	mkdir -p bin/dist-doc
+	rm -rf bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)
+	cp -Rv bin/docs/html bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION)/docs
+	cd bin/dist-doc/ && tar cv libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
 
-.PHONY: bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
-bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_version_dist.h
-	mkdir -p bin/dist
-	rm -rf bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
-	mkdir -p bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
-	mkdir -p bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include
-	svn export ./LICENSE         bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE
-	svn export ./README.md       bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md
-	svn export ./TODO            bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/TODO
-	svn export ./Makefile        bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile
-	svn export ./bin             bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin
-	svn export ./build           bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build
-	svn export ./common          bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common
-	svn export ./soundlib        bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib
-	svn export ./test            bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test
-	svn export ./libopenmpt      bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt
-	svn export ./openmpt123      bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
-	svn export ./include/miniz   bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
-	svn export ./include/modplug bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
-	cp bin/dist.mk bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
-	cp bin/svn_version_dist.h bin/dist/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
-	cd bin/dist/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
+.PHONY: bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
+bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_version_dist.h
+	mkdir -p bin/dist-tar
+	rm -rf bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include
+	svn export ./LICENSE         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE
+	svn export ./README.md       bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md
+	svn export ./TODO            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/TODO
+	svn export ./Makefile        bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile
+	svn export ./bin             bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin
+	svn export ./build           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build
+	svn export ./common          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common
+	svn export ./soundlib        bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib
+	svn export ./test            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test
+	svn export ./libopenmpt      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt
+	svn export ./openmpt123      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
+	svn export ./include/miniz   bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
+	svn export ./include/modplug bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
+	cp bin/dist.mk bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
+	cp bin/svn_version_dist.h bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
+	cd bin/dist-tar/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
 
 .PHONY: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
 bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip: bin/dist.mk bin/svn_version_dist.h
@@ -841,3 +858,9 @@ clean:
 	$(INFO) clean ...
 	$(SILENT)$(RM) $(call FIXPATH,$(OUTPUTS) $(ALL_OBJECTS) $(ALL_DEPENDS) $(MISC_OUTPUTS))
 	$(SILENT)$(RMTREE) $(call FIXPATH,$(MISC_OUTPUTDIRS))
+
+.PHONY: clean-dist
+clean-dist:
+	$(INFO) clean-dist ...
+	$(SILENT)$(RM) $(call FIXPATH,$(DIST_OUTPUTS))
+	$(SILENT)$(RMTREE) $(call FIXPATH,$(DIST_OUTPUTDIRS))
