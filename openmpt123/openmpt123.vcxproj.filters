@@ -37,9 +37,6 @@
     <ClInclude Include="openmpt123_mmio.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="openmpt123_wavpack.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="openmpt123_waveout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

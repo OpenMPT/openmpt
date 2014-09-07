@@ -17,7 +17,6 @@ Quick Start {#quickstart}
      -  **help2man**
      -  **libFLAC**
      -  **libsndfile**
-     -  **WavPack**
  3. Run:
     
         svn checkout http://svn.code.sf.net/p/modplug/code/trunk/OpenMPT/ openmpt-trunk

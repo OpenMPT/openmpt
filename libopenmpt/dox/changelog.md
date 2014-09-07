@@ -9,6 +9,15 @@ is just a high-level summary.
 
  *  [Bug] The distributed windows .zip file did not include pugixml.
 
+ *  [Regression] openmpt123: Support for writing WavPack (.wv) files has been
+    removed.
+    Reasoning:
+     1. WavPack support was incomplete and did not include support for writing
+        WavPack metadata at all.
+     2. openmpt123 already supports libSndFile which can be used to write
+        uncompressed lossless WAV files which can then be encoded to whatever
+        format the user desires with other tools.
+
 ### 2014-09-06 - libopenmpt 0.2-beta6
 
  *  openmpt123: SDL is now also used by default if availble, in addition to

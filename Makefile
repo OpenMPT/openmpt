@@ -61,7 +61,6 @@
 #  NO_SDL=1         Avoid using SDL, even if found
 #  NO_PORTAUDIO=1   Avoid using PortAudio, even if found
 #  NO_FLAC=1        Avoid using FLAC, even if found
-#  NO_WAVPACK=1     Avoid using WavPack, even if found
 #  NO_SNDFILE=1     Avoid using libsndfile, even if found
 #
 #
@@ -312,18 +311,6 @@ NO_FLAC:=1
 endif
 endif
 
-ifeq ($(NO_WAVPACK),1)
-else
-#LDLIBS   += -lwavpack
-ifeq ($(shell pkg-config --exists wavpack && echo yes),yes)
-CPPFLAGS_WAVPACK := $(shell pkg-config --cflags-only-I wavpack ) -DMPT_WITH_WAVPACK
-LDFLAGS_WAVPACK  := $(shell pkg-config --libs-only-L   wavpack ) $(shell pkg-config --libs-only-other wavpack )
-LDLIBS_WAVPACK   := $(shell pkg-config --libs-only-l   wavpack )
-else
-NO_WAVPACK:=1
-endif
-endif
-
 ifeq ($(NO_SNDFILE),1)
 else
 #LDLIBS   += -lsndfile
@@ -340,9 +327,9 @@ CPPFLAGS += $(CPPFLAGS_ZLIB) $(CPPFLAGS_MO3)
 LDFLAGS += $(LDFLAGS_ZLIB) $(LDFLAGS_MO3)
 LDLIBS += $(LDLIBS_ZLIB) $(LDLIBS_MO3)
 
-CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_WAVPACK) $(CPPFLAGS_SNDFILE)
-LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_WAVPACK) $(LDFLAGS_SNDFILE)
-LDLIBS_OPENMPT123   += $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_FLAC) $(LDLIBS_WAVPACK) $(LDLIBS_SNDFILE)
+CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE)
+LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE)
+LDLIBS_OPENMPT123   += $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_FLAC) $(LDLIBS_SNDFILE)
 
 
 %: %.o
