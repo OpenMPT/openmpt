@@ -108,8 +108,8 @@ How to compile
 
         The Makefile requires pkg-config for native builds.
         For sound output in openmpt123, PortAudio or SDL is required.
-        openmpt123 can optionally use libflac, libwavpack and libsndfile to
-        render PCM files to disk.
+        openmpt123 can optionally use libflac and libsndfile to render PCM
+        files to disk.
 
         When using gcc, run:
 

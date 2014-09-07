@@ -56,7 +56,6 @@ Optional dependencies
  *  Rendering to PCM files can use:
      *  **FLAC 1.2** or higher
      *  **libsndfile**
-     *  **WavPack**
      *  **Win32** for WAVE
      *  raw PCM has no external dependencies
  *  **help2man** is required to build the documentation.

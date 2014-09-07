@@ -91,7 +91,6 @@ static const char * const license =
 #include "openmpt123_portaudio.hpp"
 #include "openmpt123_sdl.hpp"
 #include "openmpt123_waveout.hpp"
-#include "openmpt123_wavpack.hpp"
 
 namespace openmpt123 {
 
@@ -179,10 +178,6 @@ public:
 		} else if ( flags.output_extension == "flac" ) {
 			impl = new flac_stream_raii( filename, flags, log );
 #endif				
-#ifdef MPT_WITH_WAVPACK
-		} else if ( flags.output_extension == "wv" ) {
-			impl = new wavpack_stream_raii( filename, flags, log );
-#endif
 #ifdef MPT_WITH_SNDFILE
 		} else {
 			impl = new sndfile_stream_raii( filename, flags, log );
@@ -360,11 +355,6 @@ static void show_info( std::ostream & log, bool verbose ) {
 	sf_command( 0, SFC_GET_LIB_VERSION, sndfile_info, sizeof( sndfile_info ) );
 	sndfile_info[127] = '\0';
 	log << " libsndfile " << sndfile_info << " <http://mega-nerd.com/libsndfile/>" << std::endl;
-#endif
-#ifdef MPT_WITH_WAVPACK
-	std::ostringstream wpver;
-	wpver << std::hex << std::setfill('0') << std::setw(8) << WavpackGetLibraryVersion();
-	log << " WavPack " << WavpackGetLibraryVersionString() << " (" << wpver.str() << ") (http://wavpack.com/)" << std::endl;
 #endif
 	log << std::endl;
 }
