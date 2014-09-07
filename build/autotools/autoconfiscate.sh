@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+set -e
+
+#
+# This script autoconficates the libopenmpt source tree and builds an
+# autotools-based release tarball.
+#
+# WARNING: The script expects the be run from the root of an OpenMPT svn
+#    checkout. The invests no effort in verifying this precondition.
+#
+
+echo "Cleaning local buid ..."
+make clean
+
+echo "Cleaning dist-autotools.tar ..."
+rm -rf bin/dist-autotools.tar || true
+
+echo "Cleaning tmp directory ..."
+if [ -e bin/dist-autotools ]; then
+ chmod -R u+rw bin/dist-autotools || true
+fi
+rm -rf bin/dist-autotools || true
+
+echo "Making tmp directory ..."
+mkdir bin/dist-autotools
+
+echo "Exporting svn ..."
+svn export ./LICENSE         bin/dist-autotools/LICENSE
+svn export ./README.md       bin/dist-autotools/README.md
+svn export ./TODO            bin/dist-autotools/TODO
+svn export ./common          bin/dist-autotools/common
+svn export ./soundlib        bin/dist-autotools/soundlib
+svn export ./test            bin/dist-autotools/test
+svn export ./libopenmpt      bin/dist-autotools/libopenmpt
+mkdir bin/dist-autotools/src
+svn export ./openmpt123      bin/dist-autotools/src/openmpt123
+#svn export ./openmpt123      bin/dist-autotools/openmpt123
+mkdir bin/dist-autotools/build
+mkdir bin/dist-autotools/build/svn_version
+svn export ./build/svn_version/svn_version.h bin/dist-autotools/build/svn_version/svn_version.h
+mkdir bin/dist-autotools/m4
+touch bin/dist-autotools/m4/emptydir
+svn export ./build/autotools/configure.ac bin/dist-autotools/configure.ac
+svn export ./build/autotools/Makefile.am bin/dist-autotools/Makefile.am
+svn export ./build/autotools/ax_cxx_compile_stdcxx_11.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx_11.m4
+
+echo "Querying svn version ..."
+BUILD_SVNVERSION="$(svnversion -n . | tr ':' '-' )"
+
+echo "Building man pages ..."
+make bin/openmpt123.1
+
+echo "Copying man pages ..."
+mkdir bin/dist-autotools/man
+cp bin/openmpt123.1 bin/dist-autotools/man/openmpt123.1
+
+echo "Cleaning local buid ..."
+make clean
+
+echo "Changing to autotools package directory ..."
+OLDDIR="$(pwd)"
+cd bin/dist-autotools/
+
+echo "Setting version in configure.ac ..."
+cat configure.ac | sed "s/!!MPT_SVNVERSION!!/${BUILD_SVNVERSION}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+cat configure.ac | sed "s/!!MPT_PACKAGE!!/true/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+
+echo "Generating 'Doxyfile.in' ..."
+( cat libopenmpt/Doxyfile | grep -v '^PROJECT_NUMBER' | sed 's/INPUT                 += /INPUT += @top_srcdir@\//g' > Doxyfile.in ) && ( echo "PROJECT_NUMBER = @PACKAGE_VERSION@" >> Doxyfile.in ) && rm libopenmpt/Doxyfile
+echo "OUTPUT_DIRECTORY = doxygen-doc" >> Doxyfile.in
+
+echo "Running 'autoreconf -i' ..."
+autoreconf -i
+
+echo "Running './configure' ..."
+./configure
+
+echo "Running 'make dist' ..."
+make dist
+
+echo "Running 'make distcheck' ..."
+make distcheck
+
+echo "Running 'make' ..."
+make
+
+echo "Running 'make check' ..."
+make check
+
+echo "Building dist-autotools.tar ..."
+cd "$OLDDIR"
+cd bin/dist-autotools
+tar cvf dist-autotools.tar *.tar.gz
+cd ../..
+mv bin/dist-autotools/dist-autotools.tar bin/
+

@@ -18,6 +18,7 @@
 #include <locale>
 
 #include <clocale>
+#include <cstdlib>
 
 using namespace OpenMPT;
 
@@ -28,20 +29,29 @@ using namespace OpenMPT;
 // mingw64 does only default to special C linkage for "main", but not for "wmain".
 extern "C"
 #endif
-int wmain( int /*wargc*/, wchar_t * /*wargv*/ [] ) {
+int wmain( int /*argc*/ , wchar_t * /*argv*/ [] ) {
 #else
-int main( int /*argc*/, char * /*argv*/ [] ) {
+int main( int /*argc*/ , char * /*argv*/ [] ) {
 #endif
 	try {
+	
+		// prefix for test suite
+		std::string pathprefix = std::string();
+	
+		// set path prefix for test files (if provided)
+		std::string env_srcdir = std::getenv( "srcdir" ) ? std::getenv( "srcdir" ) : std::string();
+		if ( !env_srcdir.empty() ) {
+			pathprefix = env_srcdir;
+		}
 
 		// run test with "C" / classic() locale
-		Test::DoTests();
+		Test::DoTests( pathprefix );
 
 		// try setting the C locale to the user locale
 		setlocale( LC_ALL, "" );
 		
 		// run all tests again with a set C locale
-		Test::DoTests();
+		Test::DoTests( pathprefix );
 		
 		// try to set the C and C++ locales to the user locale
 		try {
@@ -52,7 +62,7 @@ int main( int /*argc*/, char * /*argv*/ [] ) {
 		}
 		
 		// and now, run all tests once again
-		Test::DoTests();
+		Test::DoTests( pathprefix );
 
 	} catch ( const std::exception & e ) {
 		std::cerr << "TEST ERROR: exception: " << ( e.what() ? e.what() : "" ) << std::endl;

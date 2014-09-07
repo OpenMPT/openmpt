@@ -74,10 +74,31 @@ static noinline void TestLoadSaveFile();
 
 
 
+static mpt::PathString *PathPrefix = nullptr;
 
-void DoTests()
-//------------
+
+
+static mpt::PathString GetPathPrefix()
+//------------------------------------
 {
+	if((*PathPrefix).empty())
+	{
+		return MPT_PATHSTRING("");
+	}
+	return *PathPrefix + MPT_PATHSTRING("/");
+}
+
+
+void DoTests(std::string pathprefix)
+//----------------------------------
+{
+
+	#if MPT_OS_WINDOWS
+		PathPrefix = new mpt::PathString(mpt::PathString::FromLocale(pathprefix));
+	#else
+		PathPrefix = new mpt::PathString(mpt::PathString::FromNative(pathprefix));
+	#endif
+
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
 	DO_TEST(TestMisc);
@@ -91,6 +112,27 @@ void DoTests()
 	DO_TEST(TestPCnoteSerialization);
 	DO_TEST(TestLoadSaveFile);
 
+	delete PathPrefix;
+	PathPrefix = nullptr;
+}
+
+
+void RemoveFile(const mpt::PathString &filename)
+//----------------------------------------------
+{
+	#if MPT_OS_WINDOWS
+		for(int retry=0; retry<10; retry++)
+		{
+			if(DeleteFileW(filename.AsNative().c_str()) != FALSE)
+			{
+				break;
+			}
+			// wait for windows virus scanners
+			Sleep(10);
+		}
+	#else
+		remove(filename.AsNative().c_str());
+	#endif
 }
 
 
@@ -1350,6 +1392,11 @@ static mpt::PathString GetTestFilenameBase()
 	return theFile;
 }
 
+static mpt::PathString GetTempFilenameBase()
+{
+	return GetTestFilenameBase();
+}
+
 typedef CModDoc *TSoundFileContainer;
 
 static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
@@ -1398,7 +1445,12 @@ static bool ShouldRunTests()
 
 static mpt::PathString GetTestFilenameBase()
 {
-	return MPT_PATHSTRING("./test/test.");
+	return Test::GetPathPrefix() + MPT_PATHSTRING("./test/test.");	
+}
+
+static mpt::PathString GetTempFilenameBase()
+{
+	return MPT_PATHSTRING("./test.");	
 }
 
 typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
@@ -1453,11 +1505,12 @@ static noinline void TestLoadSaveFile()
 	{
 		return;
 	}
-	mpt::PathString filenameBase = GetTestFilenameBase();
+	mpt::PathString filenameBaseSrc = GetTestFilenameBase();
+	mpt::PathString filenameBase = GetTempFilenameBase();
 
 	// Test MPTM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("mptm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("mptm"));
 
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 
@@ -1477,12 +1530,14 @@ static noinline void TestLoadSaveFile()
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
 		
 		DestroySoundFileContainer(sndFileContainer);
+		
+		RemoveFile(filenameBase + MPT_PATHSTRING("saved.mptm"));
 	}
 	#endif
 
 	// Test XM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("xm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("xm"));
 
 		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
@@ -1510,12 +1565,14 @@ static noinline void TestLoadSaveFile()
 		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
 		DestroySoundFileContainer(sndFileContainer);
+		
+		RemoveFile(filenameBase + MPT_PATHSTRING("saved.xm"));
 	}
 	#endif
 
 	// Test S3M file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("s3m"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("s3m"));
 		
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
 
@@ -1535,6 +1592,8 @@ static noinline void TestLoadSaveFile()
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), true);
 
 		DestroySoundFileContainer(sndFileContainer);
+		
+		RemoveFile(filenameBase + MPT_PATHSTRING("saved.s3m"));
 	}
 	#endif
 }
@@ -1543,7 +1602,7 @@ static noinline void TestLoadSaveFile()
 static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
 //----------------------------------------------------------------------------------------------------------------------
 {
-	mpt::PathString filename = GetTestFilenameBase() + MPT_PATHSTRING("itcomp") + mpt::PathString::FromWide(StringifyW(testcount)) + MPT_PATHSTRING(".raw");
+	mpt::PathString filename = GetTempFilenameBase() + MPT_PATHSTRING("itcomp") + mpt::PathString::FromWide(StringifyW(testcount)) + MPT_PATHSTRING(".raw");
 
 	ModSample smp;
 	smp.uFlags = smpFormat;
@@ -1571,19 +1630,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFla
 		VERIFY_EQUAL_NONCONT(memcmp(&sampleData[0], &sampleDataNew[0], sampleData.size()), 0);
 		fclose(f);
 	}
-	#if MPT_OS_WINDOWS
-		for(int retry=0; retry<10; retry++)
-		{
-			if(DeleteFileW(filename.AsNative().c_str()) != FALSE)
-			{
-				break;
-			}
-			// wait for windows virus scanners
-			Sleep(10);
-		}
-	#else
-		remove(filename.AsNative().c_str());
-	#endif
+	RemoveFile(filename);
 }
 
 

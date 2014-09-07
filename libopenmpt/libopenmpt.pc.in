@@ -1,0 +1,12 @@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@includedir@
+libdir=@libdir@
+
+Name: libopenmpt
+Description: Tracker module player based on OpenMPT
+Version: @VERSION@
+Libs: -L${libdir} -lopenmpt
+Libs.private: zlib
+Cflags: -I${includedir}

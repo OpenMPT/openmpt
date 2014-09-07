@@ -106,6 +106,14 @@ struct show_credits_exception : public std::exception {
 	show_credits_exception() throw() { }
 };
 
+struct show_man_version_exception : public std::exception {
+	show_man_version_exception() throw() { }
+};
+
+struct show_man_help_exception : public std::exception {
+	show_man_help_exception() throw() { }
+};
+
 struct show_short_version_number_exception : public std::exception {
 	show_short_version_number_exception() throw() { }
 };
@@ -359,6 +367,10 @@ static void show_info( std::ostream & log, bool verbose ) {
 	log << std::endl;
 }
 
+static void show_man_version( textout & log ) {
+	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", " << "Copyright (c) 2013-2014 OpenMPT developers <http://openmpt.org/>" << std::endl;
+}
+
 static void show_short_version( textout & log ) {
 	log << OPENMPT123_VERSION_STRING << " / " << openmpt::string::get( openmpt::string::library_version ) << " / " << openmpt::string::get( openmpt::string::core_version ) << std::endl;
 	log.writeout();
@@ -404,8 +416,10 @@ static std::string get_device_string( int device ) {
 	return str.str();
 }
 
-static void show_help( textout & log, bool longhelp = false, const std::string & message = std::string() ) {
-	show_info( log, false );
+static void show_help( textout & log, bool with_info = true, bool longhelp = false, const std::string & message = std::string() ) {
+	if ( with_info ) {
+		show_info( log, false );
+	}
 	{
 		log << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
 		log << std::endl;
@@ -1434,6 +1448,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				flags.quiet = true;
 			} else if ( arg == "-v" || arg == "--verbose" ) {
 				flags.verbose = true;
+			} else if ( arg == "--man-version" ) {
+				throw show_man_version_exception();
+			} else if ( arg == "--man-help" ) {
+				throw show_man_help_exception();
 			} else if ( arg == "--version" ) {
 				throw show_version_number_exception();
 			} else if ( arg == "--short-version" ) {
@@ -1661,8 +1679,14 @@ static int main( int argc, char * argv [] ) {
 	} catch ( args_error_exception & ) {
 		show_help( std_out );
 		return 1;
+	} catch ( show_man_help_exception & e ) {
+		show_help( std_out, false, true );
+		return 0;
+	} catch ( show_man_version_exception & e ) {
+		show_man_version( std_out );
+		return 0;
 	} catch ( show_help_exception & e ) {
-		show_help( std_out, e.longhelp, e.message );
+		show_help( std_out, true, e.longhelp, e.message );
 		if ( flags.verbose ) {
 			show_credits( std_out );
 		}
