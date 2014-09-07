@@ -2172,8 +2172,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace Test {
 
-void DoTests()
-//------------
+void DoTests(std::string prefix = std::string())
+//----------------------------------------------
 {
 	return;
 }
