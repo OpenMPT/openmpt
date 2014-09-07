@@ -89,7 +89,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../include;$(IntDir)svn_version;../build/svn_version</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -97,7 +97,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
+      <Command>..\build\svn_version\update_svn_version_vs.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <Lib>
       <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
@@ -107,7 +107,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../include;$(IntDir)svn_version;../build/svn_version</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -115,7 +115,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
+      <Command>..\build\svn_version\update_svn_version_vs.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <Lib>
       <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
@@ -130,7 +130,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../include;$(IntDir)svn_version;../build/svn_version</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -142,7 +142,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
+      <Command>..\build\svn_version\update_svn_version_vs.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <Lib>
       <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
@@ -157,7 +157,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;../common;$(IntDir);../common/svn_version_default;../include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../common;../include;$(IntDir)svn_version;../build/svn_version</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -169,7 +169,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
+      <Command>..\build\svn_version\update_svn_version_vs.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <Lib>
       <AdditionalOptions>/ignore:4221 %(AdditionalOptions)</AdditionalOptions>
@@ -191,8 +191,6 @@
     <ClInclude Include="..\common\serialization_utils.h" />
     <ClInclude Include="..\common\stdafx.h" />
     <ClInclude Include="..\common\StringFixer.h" />
-    <ClInclude Include="..\common\svn_version_default\svn_version.h" />
-    <ClInclude Include="..\common\svn_version_subwcrev\svn_version.template.h" />
     <ClInclude Include="..\common\thread.h" />
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\common\version.h" />

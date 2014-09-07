@@ -375,25 +375,24 @@ LDLIBS_OPENMPT123   += $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_FLAC) $(LDLIBS
 
 
 -include build/dist.mk
-ifeq ($(BUILD_SVNVERSION),)
+CPPFLAGS += -Ibuild/svn_version
+ifeq ($(MPT_SVNVERSION),)
 SVN_INFO:=$(shell svn info . > /dev/null 2>&1 ; echo $$? )
 ifeq ($(SVN_INFO),0)
 # in svn checkout
-BUILD_SVNVERSION := $(shell svnversion -n . | tr ':' '-' )
-CPPFLAGS += -Icommon/svn_version_svnversion -D BUILD_SVNVERSION=\"$(BUILD_SVNVERSION)\"
-DIST_OPENMPT_VERSION:=r$(BUILD_SVNVERSION)
-DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(BUILD_SVNVERSION)
+MPT_SVNVERSION := $(shell svnversion -n . | tr ':' '-' )
+CPPFLAGS += -D MPT_SVNVERSION=\"$(MPT_SVNVERSION)\"
+DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
+DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(MPT_SVNVERSION)
 else
 # not in svn checkout
-CPPFLAGS += -Icommon/svn_version_default
 DIST_OPENMPT_VERSION:=rUNKNOWN
 DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR)
 endif
 else
 # in dist package
-CPPFLAGS += -Icommon/svn_version_default
-DIST_OPENMPT_VERSION:=r$(BUILD_SVNVERSION)
-DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(BUILD_SVNVERSION)
+DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
+DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(MPT_SVNVERSION)
 endif
 
 
@@ -690,7 +689,7 @@ bin/dist-doc.tar: bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 .PHONY: bin/dist.mk
 bin/dist.mk:
 	rm -rf $@
-	echo 'BUILD_SVNVERSION=$(BUILD_SVNVERSION)' > $@.tmp
+	echo 'MPT_SVNVERSION=$(MPT_SVNVERSION)' > $@.tmp
 	mv $@.tmp $@
 
 .PHONY: bin/svn_version_dist.h
@@ -698,9 +697,9 @@ bin/svn_version_dist.h:
 	rm -rf $@
 	echo > $@.tmp
 	echo '#pragma once' >> $@.tmp
-	echo '#define BUILD_SVNVERSION "$(BUILD_SVNVERSION)"' >> $@.tmp
-	echo '#define BUILD_PACKAGE true' >> $@.tmp
-	echo '#include "../svn_version_svnversion/svn_version.h"' >> $@.tmp
+	echo '#define OPENMPT_VERSION_SVNVERSION "$(MPT_SVNVERSION)"' >> $@.tmp
+	echo '#define OPENMPT_VERSION_IS_PACKAGE true' >> $@.tmp
+	echo >> $@.tmp
 	mv $@.tmp $@
 
 .PHONY: bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar
@@ -731,7 +730,7 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_vers
 	svn export ./include/miniz   bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
 	svn export ./include/modplug bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
 	cp bin/dist.mk bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
-	cp bin/svn_version_dist.h bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
+	cp bin/svn_version_dist.h bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
 	cd bin/dist-tar/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
 
 .PHONY: bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip
@@ -760,7 +759,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip: bin/dist.mk bin/
 	svn export ./include/xmplay        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/xmplay        --native-eol CRLF
 	svn export ./include/msinttypes    bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/msinttypes    --native-eol CRLF
 	cp bin/dist.mk bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
-	cp bin/svn_version_dist.h bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common/svn_version_default/svn_version.h
+	cp bin/svn_version_dist.h bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
 	cd bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip --compression-method deflate -9 *
 
 .PHONY: bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip

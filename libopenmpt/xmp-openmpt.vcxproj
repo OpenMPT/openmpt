@@ -48,14 +48,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(IntDir);../common/svn_version_default;../include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include;../include/pugixml/src;$(IntDir)svn_version;../build/svn_version</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>..\include\foobar2000sdk\foobar2000\shared\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
+      <Command>..\build\svn_version\update_svn_version_vs.cmd $(IntDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -67,7 +67,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(IntDir);../common/svn_version_default;../include;../include/pugixml/src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include;../include/pugixml/src;$(IntDir)svn_version;../build/svn_version</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -76,7 +76,7 @@
       <AdditionalDependencies>..\include\foobar2000sdk\foobar2000\shared\shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h $(IntDir)svn_version.h || del $(IntDir)svn_version.h || true</Command>
+      <Command>..\build\svn_version\update_svn_version_vs.cmd $(IntDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

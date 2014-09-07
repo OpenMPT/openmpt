@@ -30,7 +30,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\mptrack\svn_version\svn_version.h || del ..\mptrack\svn_version\svn_version.h || true"
+				CommandLine="..\build\svn_version\update_svn_version_vs.cmd $(IntDir)\"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -52,7 +52,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;..\mptrack\svn_version;..\common\svn_version_default"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -130,7 +130,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\mptrack\svn_version\svn_version.h || del ..\mptrack\svn_version\svn_version.h || true"
+				CommandLine="..\build\svn_version\update_svn_version_vs.cmd $(IntDir)\"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -152,7 +152,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;..\mptrack\svn_version;..\common\svn_version_default"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -231,7 +231,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\mptrack\svn_version\svn_version.h || del ..\mptrack\svn_version\svn_version.h || true"
+				CommandLine="..\build\svn_version\update_svn_version_vs.cmd $(IntDir)\"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -254,7 +254,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;..\mptrack\svn_version;..\common\svn_version_default"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -331,7 +331,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="subwcrev .. ..\common\svn_version_subwcrev\svn_version.template.h ..\mptrack\svn_version\svn_version.h || del ..\mptrack\svn_version\svn_version.h || true"
+				CommandLine="..\build\svn_version\update_svn_version_vs.cmd $(IntDir)\"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -354,7 +354,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;..\mptrack\svn_version;..\common\svn_version_default"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -1511,14 +1511,6 @@
 			</File>
 			<File
 				RelativePath="..\common\StringFixer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\svn_version_default\svn_version.h"
-				>
-			</File>
-			<File
-				RelativePath=".\svn_version\svn_version.h"
 				>
 			</File>
 			<File

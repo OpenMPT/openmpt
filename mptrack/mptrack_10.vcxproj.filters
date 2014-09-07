@@ -864,9 +864,6 @@
     <ClInclude Include="Reporting.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\svn_version_default\svn_version.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -956,9 +953,6 @@
     </ClInclude>
     <ClInclude Include="Settings.h">
       <Filter>Header Files\mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="svn_version\svn_version.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\mptFstream.h">
       <Filter>Header Files\common</Filter>

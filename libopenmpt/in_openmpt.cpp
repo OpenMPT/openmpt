@@ -24,7 +24,11 @@
 #include "libopenmpt_settings.hpp"
 
 #include "svn_version.h"
+#if defined(OPENMPT_VERSION_REVISION)
 static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING "." OPENMPT_API_VERSION_STRINGIZE(OPENMPT_VERSION_REVISION);
+#else
+static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING;
+#endif
 
 #define NOMINMAX
 #include <windows.h>
