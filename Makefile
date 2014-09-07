@@ -526,11 +526,13 @@ DIST_OUTPUTS += bin/dist.tar
 DIST_OUTPUTS += bin/dist-tar.tar
 DIST_OUTPUTS += bin/dist-zip.tar
 DIST_OUTPUTS += bin/dist-doc.tar
+DIST_OUTPUTS += bin/dist-autotools.tar
 
 DIST_OUTPUTDIRS += bin/dist
 DIST_OUTPUTDIRS += bin/dist-doc
 DIST_OUTPUTDIRS += bin/dist-tar
 DIST_OUTPUTDIRS += bin/dist-zip
+DIST_OUTPUTDIRS += bin/dist-autotools
 
 
 
@@ -776,7 +778,7 @@ bin/libopenmpt_modplug$(SOSUFFIX): $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPE
 
 bin/openmpt123.1: bin/openmpt123$(EXESUFFIX)
 	$(INFO) [HELP2MAN] $@
-	$(SILENT)help2man --no-discard-stderr --no-info $< > $@
+	$(SILENT)help2man --no-discard-stderr --no-info --version-option=--man-version --help-option=--man-help $< > $@
 
 openmpt123/openmpt123.o: openmpt123/openmpt123.cpp
 	$(INFO) [CXX] $<

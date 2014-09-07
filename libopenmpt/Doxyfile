@@ -733,21 +733,20 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = \
-                         libopenmpt/dox/index.dox \
-                         libopenmpt/dox/quickstart.md \
-                         README.md \
-                         libopenmpt/dox/dependencies.md \
-                         libopenmpt/dox/tests.md \
-                         libopenmpt/dox/changelog.md \
-                         libopenmpt/dox/todo.md \
-                         libopenmpt/libopenmpt.hpp \
-                         libopenmpt/libopenmpt.h \
-                         libopenmpt/libopenmpt_stream_callbacks_fd.h \
-                         libopenmpt/libopenmpt_stream_callbacks_file.h \
-                         libopenmpt/libopenmpt_config.h \
-                         libopenmpt/libopenmpt_version.h \
-                         
+INPUT                  = 
+INPUT                 += libopenmpt/dox/index.dox
+INPUT                 += libopenmpt/dox/quickstart.md
+INPUT                 += README.md
+INPUT                 += libopenmpt/dox/dependencies.md
+INPUT                 += libopenmpt/dox/tests.md
+INPUT                 += libopenmpt/dox/changelog.md
+INPUT                 += libopenmpt/dox/todo.md
+INPUT                 += libopenmpt/libopenmpt.hpp
+INPUT                 += libopenmpt/libopenmpt.h
+INPUT                 += libopenmpt/libopenmpt_stream_callbacks_fd.h
+INPUT                 += libopenmpt/libopenmpt_stream_callbacks_file.h
+INPUT                 += libopenmpt/libopenmpt_config.h
+INPUT                 += libopenmpt/libopenmpt_version.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1022,7 +1021,7 @@ GENERATE_HTML          = YES
 # The default directory is: html.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_OUTPUT            =
+HTML_OUTPUT            = html
 
 # The HTML_FILE_EXTENSION tag can be used to specify the file extension for each
 # generated HTML page (for example: .htm, .php, .asp).

@@ -23,6 +23,10 @@ Dependencies
  *  Building on Unix-like systems requires:
      *  **GNU make**
      *  **pkg-config**
+ *  The Autotools-based build system requires:
+     *  **pkg-config 0.24** or higher
+     *  **zlib**
+     *  **doxygen**
 
 ### openmpt123
 

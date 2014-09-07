@@ -53,6 +53,15 @@ How to compile
 
 ### libopenmpt and openmpt123
 
+ -  Autotools
+
+    Grab a `libopenmpt-VERSION-autotools.tar.gz` tarball.
+
+        ./configure
+        make
+        make check
+        sudo make install
+
  -  Visual Studio 2010 (express version should work, but this is not tested):
 
      -  The libopenmpt solution is in `libopenmpt/libopenmpt.sln`.

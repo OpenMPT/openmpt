@@ -147,6 +147,11 @@
 
 #elif defined(LIBOPENMPT_BUILD)
 
+#if defined(HAVE_CONFIG_H)
+// wrapper for autoconf macros
+#include "config.h"
+#endif // HAVE_CONFIG_H
+
 #if defined(LIBOPENMPT_BUILD_TEST)
 #define ENABLE_TESTS
 #else
