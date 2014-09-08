@@ -35,6 +35,7 @@ svn export ./libopenmpt      bin/dist-autotools/libopenmpt
 mkdir bin/dist-autotools/src
 svn export ./openmpt123      bin/dist-autotools/src/openmpt123
 #svn export ./openmpt123      bin/dist-autotools/openmpt123
+svn export ./include/modplug/include/libmodplug bin/dist-autotools/libmodplug
 mkdir bin/dist-autotools/build
 mkdir bin/dist-autotools/build/svn_version
 svn export ./build/svn_version/svn_version.h bin/dist-autotools/build/svn_version/svn_version.h

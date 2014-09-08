@@ -2,6 +2,7 @@ ACLOCAL_AMFLAGS = -I m4 --install
 EXTRA_DIST = 
 EXTRA_DIST += m4/emptydir
 EXTRA_DIST += libopenmpt/libopenmpt.pc.in
+EXTRA_DIST += libmodplug/libmodplug.pc.in
 EXTRA_DIST += LICENSE
 EXTRA_DIST += README.md
 EXTRA_DIST += Doxyfile.in
@@ -28,6 +29,7 @@ dist_doc_DATA += libopenmpt/examples/libopenmpt_example_c_stdout.c
 
 bin_PROGRAMS = 
 check_PROGRAMS = 
+lib_LTLIBRARIES = 
 TESTS = libopenmpttest
 
 check_PROGRAMS += libopenmpt_example_c_stdout
@@ -59,11 +61,13 @@ libopenmpt_example_cxx_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
 endif
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libopenmpt/libopenmpt.pc
+pkgconfig_DATA = 
+nobase_include_HEADERS = 
 
-lib_LTLIBRARIES = libopenmpt.la
+pkgconfig_DATA += libopenmpt/libopenmpt.pc
+lib_LTLIBRARIES += libopenmpt.la
 libopenmpt_la_LDFLAGS = -version-info 0:7:0
-nobase_include_HEADERS = libopenmpt/libopenmpt.h libopenmpt/libopenmpt.hpp libopenmpt/libopenmpt_version.h libopenmpt/libopenmpt_config.h libopenmpt/libopenmpt_stream_callbacks_fd.h libopenmpt/libopenmpt_stream_callbacks_file.h
+nobase_include_HEADERS += libopenmpt/libopenmpt.h libopenmpt/libopenmpt.hpp libopenmpt/libopenmpt_version.h libopenmpt/libopenmpt_config.h libopenmpt/libopenmpt_stream_callbacks_fd.h libopenmpt/libopenmpt_stream_callbacks_file.h
 libopenmpt_la_CPPFLAGS = -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS)
 libopenmpt_la_CXXFLAGS = $(ZLIB_CFLAGS)
 libopenmpt_la_CFLAGS = $(ZLIB_CFLAGS)
@@ -224,6 +228,32 @@ libopenmpt_la_SOURCES += libopenmpt/libopenmpt_internal.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_fd.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_version.h
+
+if ENABLE_LIBOPENMPT_MODPLUG
+lib_LTLIBRARIES += libopenmpt_modplug.la
+libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0
+libopenmpt_modplug_la_CPPFLAGS = -I$(srcdir)/
+libopenmpt_modplug_la_CXXFLAGS = 
+libopenmpt_modplug_la_CFLAGS = 
+libopenmpt_modplug_la_LIBADD = libopenmpt.la
+libopenmpt_modplug_la_SOURCES = 
+libopenmpt_modplug_la_SOURCES += libopenmpt/libopenmpt_modplug.c
+libopenmpt_modplug_la_SOURCES += libopenmpt/libopenmpt_modplug_cpp.cpp
+endif
+
+if ENABLE_LIBMODPLUG
+pkgconfig_DATA += libmodplug/libmodplug.pc
+lib_LTLIBRARIES += libmodplug.la
+libmodplug_la_LDFLAGS = -version-info 1:0:0
+nobase_include_HEADERS += libmodplug/modplug.h libmodplug/sndfile.h libmodplug/stdafx.h
+libmodplug_la_CPPFLAGS = -I$(srcdir)/
+libmodplug_la_CXXFLAGS = 
+libmodplug_la_CFLAGS = 
+libmodplug_la_LIBADD = libopenmpt.la
+libmodplug_la_SOURCES = 
+libmodplug_la_SOURCES += libopenmpt/libopenmpt_modplug.c
+libmodplug_la_SOURCES += libopenmpt/libopenmpt_modplug_cpp.cpp
+endif
 
 check_PROGRAMS += libopenmpttest
 libopenmpttest_CPPFLAGS = -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS)
@@ -396,7 +426,7 @@ libopenmpttest_SOURCES += libopenmpt/libopenmpt_version.h
 
 bin_PROGRAMS += openmpt123
 openmpt123_CPPFLAGS = -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
-openmpt123_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS)
+openmpt123_LDADD = libopenmpt.la $(PORTAUDIO_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS)
 openmpt123_SOURCES = 
 openmpt123_SOURCES += src/openmpt123/openmpt123_config.hpp
 openmpt123_SOURCES += src/openmpt123/openmpt123.cpp
