@@ -1679,10 +1679,10 @@ static int main( int argc, char * argv [] ) {
 	} catch ( args_error_exception & ) {
 		show_help( std_out );
 		return 1;
-	} catch ( show_man_help_exception & e ) {
+	} catch ( show_man_help_exception & ) {
 		show_help( std_out, false, true );
 		return 0;
-	} catch ( show_man_version_exception & e ) {
+	} catch ( show_man_version_exception & ) {
 		show_man_version( std_out );
 		return 0;
 	} catch ( show_help_exception & e ) {
