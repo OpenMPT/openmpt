@@ -606,7 +606,6 @@ else
 	$(INSTALL_LIB) bin/libopenmpt$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt$(SOSUFFIX)
 endif
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/lib
-	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX)
 endif
 ifeq ($(STATIC_LIB),1)
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/lib
@@ -639,13 +638,22 @@ ifeq ($(MPT_WITH_DOXYGEN),1)
 	#$(INSTALL_DATA_DIR) bin/docs/man $(DESTDIR)$(PREFIX)/share/man
 endif
 
+.PHONY: install-openmpt-modplug
+install-openmpt-modplug: $(OUTPUTS)
+ifeq ($(SHARED_LIB),1)
+	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/lib
+	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX)
+	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX).0
+	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX).0.0.0
+endif
+
 .PHONY: install-modplug
 install-modplug: $(OUTPUTS)
 ifeq ($(SHARED_LIB),1)
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/lib
-	$(INSTALL_DATA) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX)
-	$(INSTALL_DATA) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).0
-	$(INSTALL_DATA) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).0.0.0
+	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX)
+	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).0
+	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).0.0.0
 endif
 
 .PHONY: dist
