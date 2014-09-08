@@ -474,7 +474,7 @@ ifeq ($(SHARED_LIB),1)
 OUTPUTS += bin/libopenmpt$(SOSUFFIX)
 endif
 ifeq ($(STATIC_LIB),1)
-OUTPUTS += bin/openmpt.a
+OUTPUTS += bin/libopenmpt.a
 endif
 ifeq ($(OPENMPT123),1)
 OUTPUTS += bin/openmpt123$(EXESUFFIX)
@@ -516,6 +516,7 @@ MISC_OUTPUTS += bin/.docs
 MISC_OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 MISC_OUTPUTS += bin/made.docs
 MISC_OUTPUTS += bin/$(LIBOPENMPT_SONAME)
+MISC_OUTPUTS += bin/openmpt.a
 
 MISC_OUTPUTDIRS += bin/dest
 MISC_OUTPUTDIRS += bin/docs
@@ -609,7 +610,7 @@ endif
 endif
 ifeq ($(STATIC_LIB),1)
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/lib
-	$(INSTALL_DATA) bin/openmpt.a $(DESTDIR)$(PREFIX)/lib/openmpt.a
+	$(INSTALL_DATA) bin/libopenmpt.a $(DESTDIR)$(PREFIX)/lib/libopenmpt.a
 endif
 ifeq ($(OPENMPT123),1)
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/bin
@@ -762,7 +763,7 @@ bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION).zip: bin/svn_version_dist.h
 	cp bin/svn_version_dist.h bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/common/svn_version_default/svn_version.h
 	cd bin/dist-zip/OpenMPT-src-$(DIST_OPENMPT_VERSION)/ && zip -r ../OpenMPT-src-$(DIST_OPENMPT_VERSION).zip --compression-method deflate -9 *
 
-bin/openmpt.a: $(LIBOPENMPT_OBJECTS)
+bin/libopenmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR] $@
 	$(SILENT)$(AR) $(ARFLAGS) $@ $^
 
