@@ -661,7 +661,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 //-----------------------------------------------------------------------------------------------------------
 {
 	m_hLibrary = hLibrary;
-	m_nRefCount = 1;
 	m_pPrev = nullptr;
 	m_pNext = nullptr;
 	m_pMixStruct = &mixStruct;
@@ -831,9 +830,6 @@ bool CVstPlugin::InitializeIOBuffers()
 CVstPlugin::~CVstPlugin()
 //-----------------------
 {
-#ifdef VST_LOG
-	Log("~CVstPlugin: m_nRefCount=%d\n", m_nRefCount);
-#endif
 	CriticalSection cs;
 
 	if (m_pEditor)
@@ -875,22 +871,16 @@ CVstPlugin::~CVstPlugin()
 }
 
 
-size_t CVstPlugin::Release()
-//--------------------------
+void CVstPlugin::Release()
+//------------------------
 {
-	if(!(--m_nRefCount))
+	try
 	{
-		try
-		{
-			delete this;
-		} catch (...)
-		{
-			ReportPlugException(L"Exception while destroying plugin!");
-		}
-
-		return 0;
+		delete this;
+	} catch (...)
+	{
+		ReportPlugException(L"Exception while destroying plugin!");
 	}
-	return m_nRefCount;
 }
 
 

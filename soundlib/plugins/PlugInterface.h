@@ -38,8 +38,7 @@ class IMixPlugin
 //==============
 {
 public:
-	virtual size_t AddRef() = 0;
-	virtual size_t Release() = 0;
+	virtual void Release() = 0;
 	virtual void SaveAllParameters() = 0;
 	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
 	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
