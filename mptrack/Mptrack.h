@@ -23,7 +23,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
 class CVstPluginManager;
-class SoundDevicesManager;
+namespace SoundDevice {
+class Manager;
+} // namespace SoundDevice
 class CDLSBank;
 class TrackerDirectories;
 class TrackerSettings;
@@ -200,7 +202,7 @@ protected:
 	IniFileSettingsContainer *m_pPluginCache;
 	CModDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
-	SoundDevicesManager *m_pSoundDevicesManager;
+	SoundDevice::Manager *m_pSoundDevicesManager;
 	BOOL m_bInitialized;
 	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
 	// Default macro configuration
@@ -249,7 +251,7 @@ public:
 	HRESULT EnableThemeDialogTexture(HWND hwnd, DWORD dwFlags) { if(m_pEnableThemeDialogTexture) return m_pEnableThemeDialogTexture(hwnd, dwFlags); else return S_OK; }
 	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
-	SoundDevicesManager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }
+	SoundDevice::Manager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
 	mpt::PathString GetConfigFileName() const { return m_szConfigFileName; }

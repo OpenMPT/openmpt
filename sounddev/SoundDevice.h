@@ -23,20 +23,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-class ISoundDevice;
-class IFillAudioBuffer;
-class ISoundSource;
-
-
-////////////////////////////////////////////////////////////////////////////////////
-//
-// ISoundSource: provides streaming audio data to a device
-//
-
-
-struct SoundDeviceSettings;
-struct SoundDeviceFlags;
-struct SoundBufferAttributes;
+namespace SoundDevice {
 
 
 //====================
@@ -48,21 +35,21 @@ public:
 };
 
 
-//=========================
-class ISoundMessageReceiver
-//=========================
+//====================
+class IMessageReceiver
+//====================
 {
 public:
 	virtual void AudioMessage(const std::string &str) = 0;
 };
 
 
-struct SoundTimeInfo
+struct TimeInfo
 {
 	int64 StreamFrames; // can actually be negative (e.g. when starting the stream)
 	uint64 SystemTimestamp;
 	double Speed;
-	SoundTimeInfo()
+	TimeInfo()
 		: StreamFrames(0)
 		, SystemTimestamp(0)
 		, Speed(1.0)
@@ -72,57 +59,62 @@ struct SoundTimeInfo
 };
 
 
-//================
-class ISoundSource
-//================
+struct Settings;
+struct Flags;
+struct BufferAttributes;
+
+
+//===========
+class ISource
+//===========
 {
 public:
-	virtual void FillAudioBufferLocked(IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual void AudioRead(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
-	virtual void AudioDone(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
+	virtual void FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
+	virtual void AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
+	virtual void AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
 };
 
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
-// ISoundDevice Interface
+// SoundDevice::Base Interface
 //
 
-enum SoundDeviceType
+enum Type
 {
 	// do not change old values, these get saved to the ini
-	SNDDEV_INVALID          =-1,
-	SNDDEV_WAVEOUT          = 0,
-	SNDDEV_DSOUND           = 1,
-	SNDDEV_ASIO             = 2,
-	SNDDEV_PORTAUDIO_WASAPI = 3,
-	SNDDEV_PORTAUDIO_WDMKS  = 4,
-	SNDDEV_PORTAUDIO_WMME   = 5,
-	SNDDEV_PORTAUDIO_DS     = 6,
-	SNDDEV_PORTAUDIO_ASIO   = 7,
-	SNDDEV_NUM_DEVTYPES
+	TypeINVALID          =-1,
+	TypeWAVEOUT          = 0,
+	TypeDSOUND           = 1,
+	TypeASIO             = 2,
+	TypePORTAUDIO_WASAPI = 3,
+	TypePORTAUDIO_WDMKS  = 4,
+	TypePORTAUDIO_WMME   = 5,
+	TypePORTAUDIO_DS     = 6,
+	TypePORTAUDIO_ASIO   = 7,
+	TypeNUM_DEVTYPES
 };
 
-std::wstring SoundDeviceTypeToString(SoundDeviceType type);
+std::wstring TypeToString(SoundDevice::Type type);
 
-typedef uint8 SoundDeviceIndex;
+typedef uint8 Index;
 
 template<typename T>
-bool SoundDeviceIndexIsValid(const T & x)
+bool IndexIsValid(const T & x)
 {
-	return 0 <= x && x <= std::numeric_limits<SoundDeviceIndex>::max();
+	return 0 <= x && x <= std::numeric_limits<Index>::max();
 }
 
-//=================
-class SoundDeviceID
-//=================
+//======
+class ID
+//======
 {
 private:
-	SoundDeviceType type;
-	SoundDeviceIndex index;
+	SoundDevice::Type type;
+	SoundDevice::Index index;
 public:
-	SoundDeviceID() : type(SNDDEV_WAVEOUT), index(0) {}
-	SoundDeviceID(SoundDeviceType type, SoundDeviceIndex index)
+	ID() : type(TypeWAVEOUT), index(0) {}
+	ID(SoundDevice::Type type, SoundDevice::Index index)
 		: type(type)
 		, index(index)
 	{
@@ -130,30 +122,30 @@ public:
 	}
 	bool IsValid() const
 	{
-		return (type > SNDDEV_INVALID);
+		return (type > TypeINVALID);
 	}
-	SoundDeviceType GetType() const { return type; }
-	SoundDeviceIndex GetIndex() const { return index; }
-	bool operator == (const SoundDeviceID &cmp) const
+	SoundDevice::Type GetType() const { return type; }
+	SoundDevice::Index GetIndex() const { return index; }
+	bool operator == (const SoundDevice::ID &cmp) const
 	{
 		return (type == cmp.type) && (index == cmp.index);
 	}
 
-	bool operator != (const SoundDeviceID &cmp) const
+	bool operator != (const SoundDevice::ID &cmp) const
 	{
 		return (type != cmp.type) || (index != cmp.index);
 	}
-	bool operator < (const SoundDeviceID &cmp) const
+	bool operator < (const SoundDevice::ID &cmp) const
 	{
 		return (type < cmp.type) || (type == cmp.type && index < cmp.index);
 	}
 public:
 	// Do not change these. These functions are used to manipulate the value that gets stored in the settings.
 	template<typename T>
-	static SoundDeviceID FromIdRaw(T id_)
+	static SoundDevice::ID FromIdRaw(T id_)
 	{
 		uint16 id = static_cast<uint16>(id_);
-		return SoundDeviceID((SoundDeviceType)((id>>8)&0xff), (id>>0)&0xff);
+		return SoundDevice::ID((SoundDevice::Type)((id>>8)&0xff), (id>>0)&0xff);
 	}
 	uint16 GetIdRaw() const
 	{
@@ -162,7 +154,7 @@ public:
 };
 
 
-struct SoundChannelMapping
+struct ChannelMapping
 {
 
 private:
@@ -172,17 +164,17 @@ private:
 public:
 
 	// Construct default identity mapping
-	SoundChannelMapping();
+	ChannelMapping();
 
 	// Construct mapping from given vector.
-	SoundChannelMapping(const std::vector<uint32> &mapping);
+	ChannelMapping(const std::vector<uint32> &mapping);
 
 	// Construct mapping for #channels with a baseChannel offset.
-	static SoundChannelMapping BaseChannel(uint32 channels, uint32 baseChannel);
+	static ChannelMapping BaseChannel(uint32 channels, uint32 baseChannel);
 
 public:
 
-	bool operator == (const SoundChannelMapping &cmp) const
+	bool operator == (const SoundDevice::ChannelMapping &cmp) const
 	{
 		return (ChannelToDeviceChannel == cmp.ChannelToDeviceChannel);
 	}
@@ -224,20 +216,20 @@ public:
 
 	std::string ToString() const;
 
-	static SoundChannelMapping FromString(const std::string &str);
+	static SoundDevice::ChannelMapping FromString(const std::string &str);
 
 };
 
 
-enum SoundDeviceStopMode
+enum StopMode
 {
-	SoundDeviceStopModeClosed  = 0,
-	SoundDeviceStopModeStopped = 1,
-	SoundDeviceStopModePlaying = 2,
+	StopModeClosed  = 0,
+	StopModeStopped = 1,
+	StopModePlaying = 2,
 };
 
 
-struct SoundDeviceSettings
+struct Settings
 {
 	HWND hWnd;
 	double Latency; // seconds
@@ -250,8 +242,8 @@ struct SoundDeviceSettings
 	bool KeepDeviceRunning;
 	bool UseHardwareTiming;
 	int DitherType;
-	SoundChannelMapping ChannelMapping;
-	SoundDeviceSettings()
+	SoundDevice::ChannelMapping ChannelMapping;
+	Settings()
 		: hWnd(NULL)
 		, Latency(0.1)
 		, UpdateInterval(0.005)
@@ -266,7 +258,7 @@ struct SoundDeviceSettings
 	{
 		return;
 	}
-	bool operator == (const SoundDeviceSettings &cmp) const
+	bool operator == (const SoundDevice::Settings &cmp) const
 	{
 		return true
 			&& hWnd == cmp.hWnd
@@ -283,7 +275,7 @@ struct SoundDeviceSettings
 			&& DitherType == cmp.DitherType
 			;
 	}
-	bool operator != (const SoundDeviceSettings &cmp) const
+	bool operator != (const SoundDevice::Settings &cmp) const
 	{
 		return !(*this == cmp);
 	}
@@ -298,7 +290,7 @@ struct SoundDeviceSettings
 };
 
 
-struct SoundDeviceFlags
+struct Flags
 {
 	// Windows since Vista has a limiter/compressor in the audio path that kicks
 	// in as soon as there are samples > 0dBFs (i.e. the absolute float value >
@@ -309,7 +301,7 @@ struct SoundDeviceFlags
 	// affected windows versions and clip them ourselves before handing them to
 	// the APIs.
 	bool NeedsClippedFloat;
-	SoundDeviceFlags()
+	Flags()
 		: NeedsClippedFloat(false)
 	{
 		return;
@@ -317,7 +309,7 @@ struct SoundDeviceFlags
 };
 
 
-struct SoundDeviceCaps
+struct Caps
 {
 	bool Available;
 	bool CanUpdateInterval;
@@ -334,8 +326,8 @@ struct SoundDeviceCaps
 	double LatencyMax;
 	double UpdateIntervalMin;
 	double UpdateIntervalMax;
-	SoundDeviceSettings DefaultSettings;
-	SoundDeviceCaps()
+	SoundDevice::Settings DefaultSettings;
+	Caps()
 		: Available(false)
 		, CanUpdateInterval(true)
 		, CanSampleFormat(true)
@@ -357,13 +349,13 @@ struct SoundDeviceCaps
 };
 
 
-struct SoundDeviceDynamicCaps
+struct DynamicCaps
 {
 	uint32 currentSampleRate;
 	std::vector<uint32> supportedSampleRates;
 	std::vector<uint32> supportedExclusiveSampleRates;
 	std::vector<std::wstring> channelNames;
-	SoundDeviceDynamicCaps()
+	DynamicCaps()
 		: currentSampleRate(0)
 	{
 		return;
@@ -371,15 +363,12 @@ struct SoundDeviceDynamicCaps
 };
 
 
-class SoundDevicesManager;
-
-
-struct SoundBufferAttributes
+struct BufferAttributes
 {
 	double Latency; // seconds
 	double UpdateInterval; // seconds
 	int NumBuffers;
-	SoundBufferAttributes()
+	BufferAttributes()
 		: Latency(0.0)
 		, UpdateInterval(0.0)
 		, NumBuffers(0)
@@ -389,38 +378,37 @@ struct SoundBufferAttributes
 };
 
 
-//=============================================
-class ISoundDevice : protected IFillAudioBuffer
-//=============================================
+//=====================================
+class Base : protected IFillAudioBuffer
+//=====================================
 {
-	friend class SoundDevicesManager;
 
 private:
 
-	ISoundSource *m_Source;
-	ISoundMessageReceiver *m_MessageReceiver;
+	SoundDevice::ISource *m_Source;
+	SoundDevice::IMessageReceiver *m_MessageReceiver;
 
-	const SoundDeviceID m_ID;
+	const SoundDevice::ID m_ID;
 
 	std::wstring m_InternalID;
 
 private:
 
-	SoundDeviceCaps m_Caps;
+	SoundDevice::Caps m_Caps;
 
 protected:
 
-	SoundDeviceSettings m_Settings;
-	SoundDeviceFlags m_Flags;
+	SoundDevice::Settings m_Settings;
+	SoundDevice::Flags m_Flags;
 
 private:
 
-	SoundBufferAttributes m_BufferAttributes;
+	SoundDevice::BufferAttributes m_BufferAttributes;
 
 	bool m_IsPlaying;
 
 	Util::MultimediaClock m_Clock;
-	SoundTimeInfo m_TimeInfo;
+	SoundDevice::TimeInfo m_TimeInfo;
 
 	mutable Util::mutex m_StreamPositionMutex;
 	double m_CurrentUpdateInterval;
@@ -454,8 +442,8 @@ protected:
 
 	const Util::MultimediaClock & Clock() const { return m_Clock; }
 
-	void UpdateBufferAttributes(SoundBufferAttributes attributes);
-	void UpdateTimeInfo(SoundTimeInfo timeInfo);
+	void UpdateBufferAttributes(SoundDevice::BufferAttributes attributes);
+	void UpdateTimeInfo(SoundDevice::TimeInfo timeInfo);
 
 	virtual bool InternalHasTimeInfo() const { return false; }
 
@@ -470,28 +458,31 @@ protected:
 	virtual void InternalStopForce() { InternalStop(); }
 	virtual bool InternalClose() = 0;
 
-	virtual SoundDeviceCaps InternalGetDeviceCaps() = 0;
+	virtual SoundDevice::Caps InternalGetDeviceCaps() = 0;
+
+protected:
+
+	Base(SoundDevice::ID id, const std::wstring &internalID);
 
 public:
 
-	ISoundDevice(SoundDeviceID id, const std::wstring &internalID);
-	virtual ~ISoundDevice();
+	virtual ~Base();
 
-	void SetSource(ISoundSource *source) { m_Source = source; }
-	ISoundSource *GetSource() const { return m_Source; }
-	void SetMessageReceiver(ISoundMessageReceiver *receiver) { m_MessageReceiver = receiver; }
-	ISoundMessageReceiver *GetMessageReceiver() const { return m_MessageReceiver; }
+	void SetSource(SoundDevice::ISource *source) { m_Source = source; }
+	SoundDevice::ISource *GetSource() const { return m_Source; }
+	void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) { m_MessageReceiver = receiver; }
+	SoundDevice::IMessageReceiver *GetMessageReceiver() const { return m_MessageReceiver; }
 
-	SoundDeviceID GetDeviceID() const { return m_ID; }
-	SoundDeviceType GetDeviceType() const { return m_ID.GetType(); }
-	SoundDeviceIndex GetDeviceIndex() const { return m_ID.GetIndex(); }
+	SoundDevice::ID GetDeviceID() const { return m_ID; }
+	SoundDevice::Type GetDeviceType() const { return m_ID.GetType(); }
+	SoundDevice::Index GetDeviceIndex() const { return m_ID.GetIndex(); }
 	std::wstring GetDeviceInternalID() const { return m_InternalID; }
 
-	SoundDeviceCaps GetDeviceCaps() const { return m_Caps; }
-	virtual SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
+	SoundDevice::Caps GetDeviceCaps() const { return m_Caps; }
+	virtual SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 	bool Init();
-	bool Open(const SoundDeviceSettings &settings);
+	bool Open(const SoundDevice::Settings &settings);
 	bool Close();
 	bool Start();
 	void Stop(bool force = false);
@@ -504,11 +495,11 @@ public:
 
 	virtual bool OnIdle() { return false; } // return true if any work has been done
 
-	SoundDeviceSettings GetSettings() const { return m_Settings; }
+	SoundDevice::Settings GetSettings() const { return m_Settings; }
 	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
 
-	SoundBufferAttributes GetBufferAttributes() const { return m_BufferAttributes; }
-	SoundTimeInfo GetTimeInfo() const { return m_TimeInfo; }
+	SoundDevice::BufferAttributes GetBufferAttributes() const { return m_BufferAttributes; }
+	SoundDevice::TimeInfo GetTimeInfo() const { return m_TimeInfo; }
 
 	// Informational only, do not use for timing.
 	// Use GetStreamPositionFrames() for timing
@@ -524,15 +515,15 @@ public:
 };
 
 
-struct SoundDeviceInfo
+struct Info
 {
-	SoundDeviceID id;
+	SoundDevice::ID id;
 	std::wstring name;
 	std::wstring apiName;
 	std::wstring internalID;
 	bool isDefault;
-	SoundDeviceInfo() : id(SNDDEV_INVALID, 0), isDefault(false) { }
-	SoundDeviceInfo(SoundDeviceID id, const std::wstring &name, const std::wstring &apiName, const std::wstring &internalID = std::wstring())
+	Info() : id(TypeINVALID, 0), isDefault(false) { }
+	Info(SoundDevice::ID id, const std::wstring &name, const std::wstring &apiName, const std::wstring &internalID = std::wstring())
 		: id(id)
 		, name(name)
 		, apiName(apiName)
@@ -572,39 +563,42 @@ struct SoundDeviceInfo
 };
 
 
-//=======================
-class SoundDevicesManager
-//=======================
+//===========
+class Manager
+//===========
 {
 private:
-	std::vector<SoundDeviceInfo> m_SoundDevices;
-	std::map<SoundDeviceID, SoundDeviceCaps> m_DeviceCaps;
-	std::map<SoundDeviceID, SoundDeviceDynamicCaps> m_DeviceDynamicCaps;
+	std::vector<SoundDevice::Info> m_SoundDevices;
+	std::map<SoundDevice::ID, SoundDevice::Caps> m_DeviceCaps;
+	std::map<SoundDevice::ID, SoundDevice::DynamicCaps> m_DeviceDynamicCaps;
 
 public:
-	SoundDevicesManager();
-	~SoundDevicesManager();
+	Manager();
+	~Manager();
 
 public:
 
 	void ReEnumerate();
 
-	std::vector<SoundDeviceInfo>::const_iterator begin() const { return m_SoundDevices.begin(); }
-	std::vector<SoundDeviceInfo>::const_iterator end() const { return m_SoundDevices.end(); }
-	const std::vector<SoundDeviceInfo> & GetDeviceInfos() const { return m_SoundDevices; }
+	std::vector<SoundDevice::Info>::const_iterator begin() const { return m_SoundDevices.begin(); }
+	std::vector<SoundDevice::Info>::const_iterator end() const { return m_SoundDevices.end(); }
+	const std::vector<SoundDevice::Info> & GetDeviceInfos() const { return m_SoundDevices; }
 
-	SoundDeviceInfo FindDeviceInfo(SoundDeviceID id) const;
-	SoundDeviceInfo FindDeviceInfo(const std::wstring &identifier) const;
-	SoundDeviceInfo FindDeviceInfoBestMatch(const std::wstring &identifier) const;
+	SoundDevice::Info FindDeviceInfo(SoundDevice::ID id) const;
+	SoundDevice::Info FindDeviceInfo(const std::wstring &identifier) const;
+	SoundDevice::Info FindDeviceInfoBestMatch(const std::wstring &identifier) const;
 
-	bool OpenDriverSettings(SoundDeviceID id, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr);
+	bool OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::Base *currentSoundDevice = nullptr);
 
-	SoundDeviceCaps GetDeviceCaps(SoundDeviceID id, ISoundDevice *currentSoundDevice = nullptr);
-	SoundDeviceDynamicCaps GetDeviceDynamicCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver = nullptr, ISoundDevice *currentSoundDevice = nullptr, bool update = false);
+	SoundDevice::Caps GetDeviceCaps(SoundDevice::ID id, SoundDevice::Base *currentSoundDevice = nullptr);
+	SoundDevice::DynamicCaps GetDeviceDynamicCaps(SoundDevice::ID id, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::Base *currentSoundDevice = nullptr, bool update = false);
 
-	ISoundDevice * CreateSoundDevice(SoundDeviceID id);
+	SoundDevice::Base * CreateSoundDevice(SoundDevice::ID id);
 
 };
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

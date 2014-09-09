@@ -28,6 +28,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+namespace SoundDevice {
+
+
 #ifndef NO_ASIO
 
 
@@ -105,10 +108,10 @@ public:
 CASIODevice *CASIODevice::g_CallbacksInstance = nullptr;
 
 
-std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
+std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 //----------------------------------------------------------
 {
-	std::vector<SoundDeviceInfo> devices;
+	std::vector<SoundDevice::Info> devices;
 
 	LONG cr;
 
@@ -154,10 +157,10 @@ std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
 			if(Util::IsCLSID(internalID))
 			{
 				Log(mpt::String::Print("ASIO:   clsid=%1", mpt::ToLocale(internalID)));
-				if(SoundDeviceIndexIsValid(devices.size()))
+				if(SoundDevice::IndexIsValid(devices.size()))
 				{
 					// everything ok
-					devices.push_back(SoundDeviceInfo(SoundDeviceID(SNDDEV_ASIO, static_cast<SoundDeviceIndex>(devices.size())), description, SoundDeviceTypeToString(SNDDEV_ASIO), internalID));
+					devices.push_back(SoundDevice::Info(SoundDevice::ID(TypeASIO, static_cast<SoundDevice::Index>(devices.size())), description, SoundDevice::TypeToString(TypeASIO), internalID));
 				}
 			}
 		}
@@ -177,9 +180,9 @@ std::vector<SoundDeviceInfo> CASIODevice::EnumerateDevices()
 }
 
 
-CASIODevice::CASIODevice(SoundDeviceID id, const std::wstring &internalID)
+CASIODevice::CASIODevice(SoundDevice::ID id, const std::wstring &internalID)
 //------------------------------------------------------------------------
-	: ISoundDevice(id, internalID)
+	: SoundDevice::Base(id, internalID)
 {
 	Init();
 	m_QueriedFeatures.reset();
@@ -460,7 +463,7 @@ bool CASIODevice::InternalOpen()
 void CASIODevice::UpdateLatency()
 //-------------------------------
 {
-	SoundBufferAttributes bufferAttributes;
+	SoundDevice::BufferAttributes bufferAttributes;
 	long inputLatency = 0;
 	long outputLatency = 0;
 	try
@@ -1003,7 +1006,7 @@ int64 CASIODevice::InternalGetStreamPositionFrames() const
 	if(m_Settings.UseHardwareTiming)
 	{
 		const uint64 asioNow = Clock().NowNanoseconds();
-		SoundTimeInfo timeInfo = GetTimeInfo();
+		SoundDevice::TimeInfo timeInfo = GetTimeInfo();
 		int64 currentStreamPositionFrames =
 			Util::Round<int64>(
 			timeInfo.StreamFrames + ((double)((int64)(asioNow - timeInfo.SystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate / (1000.0 * 1000.0))
@@ -1012,7 +1015,7 @@ int64 CASIODevice::InternalGetStreamPositionFrames() const
 		return currentStreamPositionFrames;
 	} else
 	{
-		return ISoundDevice::InternalGetStreamPositionFrames();
+		return SoundDevice::Base::InternalGetStreamPositionFrames();
 	}
 }
 
@@ -1032,19 +1035,19 @@ void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
 			{
 				speed *= asioTimeInfo.sampleRate / m_Settings.Samplerate;
 			}
-			SoundTimeInfo timeInfo;
+			SoundDevice::TimeInfo timeInfo;
 			timeInfo.StreamFrames = ((((uint64)asioTimeInfo.samplePosition.hi) << 32) | asioTimeInfo.samplePosition.lo) - m_StreamPositionOffset;
 			timeInfo.SystemTimestamp = (((uint64)asioTimeInfo.systemTime.hi) << 32) | asioTimeInfo.systemTime.lo;
 			timeInfo.Speed = speed;
-			ISoundDevice::UpdateTimeInfo(timeInfo);
+			SoundDevice::Base::UpdateTimeInfo(timeInfo);
 		} else
 		{ // spec violation or nothing provided at all, better to estimate this stuff ourselves
 			const uint64 asioNow = Clock().NowNanoseconds();
-			SoundTimeInfo timeInfo;
+			SoundDevice::TimeInfo timeInfo;
 			timeInfo.StreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
 			timeInfo.SystemTimestamp = asioNow + Util::Round<int64>(GetBufferAttributes().Latency * 1000.0 * 1000.0 * 1000.0);
 			timeInfo.Speed = 1.0;
-			ISoundDevice::UpdateTimeInfo(timeInfo);
+			SoundDevice::Base::UpdateTimeInfo(timeInfo);
 		}
 	}
 }
@@ -1313,10 +1316,10 @@ void CASIODevice::ReportASIOException(const std::string &str)
 }
 
 
-SoundDeviceCaps CASIODevice::InternalGetDeviceCaps()
+SoundDevice::Caps CASIODevice::InternalGetDeviceCaps()
 //--------------------------------------------------
 {
-	SoundDeviceCaps caps;
+	SoundDevice::Caps caps;
 
 	caps.Available = true;
 	caps.CanUpdateInterval = false;
@@ -1339,10 +1342,10 @@ SoundDeviceCaps CASIODevice::InternalGetDeviceCaps()
 }
 
 
-SoundDeviceDynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
 //--------------------------------------------------------------------------------------------------
 {
-	SoundDeviceDynamicCaps caps;
+	SoundDevice::DynamicCaps caps;
 
 	TemporaryASIODriverOpener opener(*this);
 	if(!IsDriverOpen())
@@ -1430,6 +1433,9 @@ bool CASIODevice::OpenDriverSettings()
 
 
 #endif // NO_ASIO
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

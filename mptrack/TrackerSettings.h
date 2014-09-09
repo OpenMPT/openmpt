@@ -256,14 +256,14 @@ template<> inline PLUGVOLUMEHANDLING FromSettingValue(const SettingValue &val)
 template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val); }
 template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val); }
 
-template<> inline SettingValue ToSettingValue(const SoundDeviceID &val) { return SettingValue(int32(val.GetIdRaw())); }
-template<> inline SoundDeviceID FromSettingValue(const SettingValue &val) { return SoundDeviceID::FromIdRaw(val.as<int32>()); }
+template<> inline SettingValue ToSettingValue(const SoundDevice::ID &val) { return SettingValue(int32(val.GetIdRaw())); }
+template<> inline SoundDevice::ID FromSettingValue(const SettingValue &val) { return SoundDevice::ID::FromIdRaw(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const SampleFormat &val) { return SettingValue(int32(val.value)); }
 template<> inline SampleFormat FromSettingValue(const SettingValue &val) { return SampleFormatEnum(val.as<int32>()); }
 
-template<> inline SettingValue ToSettingValue(const SoundChannelMapping &val) { return SettingValue(val.ToString(), "ChannelMapping"); }
-template<> inline SoundChannelMapping FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "ChannelMapping"); return SoundChannelMapping::FromString(val.as<std::string>()); }
+template<> inline SettingValue ToSettingValue(const SoundDevice::ChannelMapping &val) { return SettingValue(val.ToString(), "ChannelMapping"); }
+template<> inline SoundDevice::ChannelMapping FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "ChannelMapping"); return SoundDevice::ChannelMapping::FromString(val.as<std::string>()); }
 
 template<> inline SettingValue ToSettingValue(const ResamplingMode &val) { return SettingValue(int32(val)); }
 template<> inline ResamplingMode FromSettingValue(const SettingValue &val) { return ResamplingMode(val.as<int32>()); }
@@ -307,13 +307,13 @@ template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue 
 		return dfFLAC;
 }
 
-template<> inline SettingValue ToSettingValue(const SoundDeviceStopMode &val)
+template<> inline SettingValue ToSettingValue(const SoundDevice::StopMode &val)
 {
 	return SettingValue(static_cast<int32>(val));
 }
-template<> inline SoundDeviceStopMode FromSettingValue(const SettingValue &val)
+template<> inline SoundDevice::StopMode FromSettingValue(const SettingValue &val)
 {
-	return static_cast<SoundDeviceStopMode>(static_cast<int32>(val));
+	return static_cast<SoundDevice::StopMode>(static_cast<int32>(val));
 }
 
 
@@ -371,18 +371,18 @@ public:
 	Setting<std::vector<uint32> > m_SoundSampleRates;
 	Setting<bool> m_MorePortaudio;
 	Setting<bool> m_SoundSettingsOpenDeviceAtStartup;
-	Setting<SoundDeviceStopMode> m_SoundSettingsStopMode;
+	Setting<SoundDevice::StopMode> m_SoundSettingsStopMode;
 
 	bool m_SoundDeviceSettingsUseOldDefaults;
-	SoundDeviceID m_SoundDeviceID_DEPRECATED;
-	SoundDeviceSettings m_SoundDeviceSettingsDefaults;
-	SoundDeviceSettings GetSoundDeviceSettingsDefaults() const;
+	SoundDevice::ID m_SoundDeviceID_DEPRECATED;
+	SoundDevice::Settings m_SoundDeviceSettingsDefaults;
+	SoundDevice::Settings GetSoundDeviceSettingsDefaults() const;
 
 	Setting<std::wstring> m_SoundDeviceIdentifier;
-	SoundDeviceID GetSoundDeviceID() const;
-	void SetSoundDeviceID(const SoundDeviceID &id);
-	SoundDeviceSettings GetSoundDeviceSettings(const SoundDeviceID &device) const;
-	void SetSoundDeviceSettings(const SoundDeviceID &device, const SoundDeviceSettings &settings);
+	SoundDevice::ID GetSoundDeviceID() const;
+	void SetSoundDeviceID(const SoundDevice::ID &id);
+	SoundDevice::Settings GetSoundDeviceSettings(const SoundDevice::ID &device) const;
+	void SetSoundDeviceSettings(const SoundDevice::ID &device, const SoundDevice::Settings &settings);
 
 	Setting<uint32> MixerMaxChannels;
 	Setting<uint32> MixerDSPMask;

@@ -32,14 +32,14 @@ protected:
 	CStatic m_StaticChannelMapping[NUM_CHANNELCOMBOBOXES];
 	CComboBox m_CbnChannelMapping[NUM_CHANNELCOMBOBOXES];
 
-	void SetDevice(SoundDeviceID dev, bool forceReload=false);
-	SoundDeviceInfo m_CurrentDeviceInfo;
-	SoundDeviceCaps m_CurrentDeviceCaps;
-	SoundDeviceDynamicCaps m_CurrentDeviceDynamicCaps;
-	SoundDeviceSettings m_Settings;
+	void SetDevice(SoundDevice::ID dev, bool forceReload=false);
+	SoundDevice::Info m_CurrentDeviceInfo;
+	SoundDevice::Caps m_CurrentDeviceCaps;
+	SoundDevice::DynamicCaps m_CurrentDeviceDynamicCaps;
+	SoundDevice::Settings m_Settings;
 
 public:
-	COptionsSoundcard(SoundDeviceID sd);
+	COptionsSoundcard(SoundDevice::ID sd);
 
 	void UpdateStatistics();
 

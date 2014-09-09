@@ -21,6 +21,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+namespace SoundDevice {
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // ASIO device
@@ -42,7 +44,7 @@ enum AsioFeatures
 DECLARE_FLAGSET(AsioFeatures)
 
 //====================================
-class CASIODevice: public ISoundDevice
+class CASIODevice: public SoundDevice::Base
 //====================================
 {
 	friend class TemporaryASIODriverOpener;
@@ -89,7 +91,7 @@ private:
 	void SetRenderSilence(bool silence, bool wait=false);
 
 public:
-	CASIODevice(SoundDeviceID id, const std::wstring &internalID);
+	CASIODevice(SoundDevice::ID id, const std::wstring &internalID);
 	~CASIODevice();
 
 private:
@@ -110,15 +112,15 @@ public:
 
 	bool OnIdle() { return HandleRequests(); }
 
-	SoundDeviceCaps InternalGetDeviceCaps();
-	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
+	SoundDevice::Caps InternalGetDeviceCaps();
+	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 	bool OpenDriverSettings();
 
 	std::string GetStatistics() const;
 
 public:
-	static std::vector<SoundDeviceInfo> EnumerateDevices();
+	static std::vector<SoundDevice::Info> EnumerateDevices();
 
 protected:
 	void OpenDriver();
@@ -144,6 +146,9 @@ protected:
 };
 
 #endif // NO_ASIO
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

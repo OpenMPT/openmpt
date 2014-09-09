@@ -169,9 +169,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
 	, m_SoundSettingsOpenDeviceAtStartup(conf, "Sound Settings", "OpenDeviceAtStartup", false)
-	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDeviceStopModeClosed)
+	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDevice::StopModeClosed)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
-	, m_SoundDeviceID_DEPRECATED(SoundDeviceID())
+	, m_SoundDeviceID_DEPRECATED(SoundDevice::ID())
 	, m_SoundDeviceIdentifier(conf, "Sound Settings", "Device", std::wstring())
 	, MixerMaxChannels(conf, "Sound Settings", "MixChannels", MixerSettings().m_nMaxMixChannels)
 	, MixerDSPMask(conf, "Sound Settings", "Quality", MixerSettings().DSPMask)
@@ -383,10 +383,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		if(conf.Read<bool>("Sound Settings", "KeepDeviceOpen", false))
 		{
-			m_SoundSettingsStopMode = SoundDeviceStopModePlaying;
+			m_SoundSettingsStopMode = SoundDevice::StopModePlaying;
 		} else
 		{
-			m_SoundSettingsStopMode = SoundDeviceStopModeStopped;
+			m_SoundSettingsStopMode = SoundDevice::StopModeStopped;
 		}
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
@@ -402,22 +402,22 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
 	{
-		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDeviceID>("Sound Settings", "WaveDevice", SoundDeviceID());
+		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDevice::ID>("Sound Settings", "WaveDevice", SoundDevice::ID());
 		Setting<uint32> m_BufferLength_DEPRECATED(conf, "Sound Settings", "BufferLength", 50);
-		Setting<uint32> m_LatencyMS(conf, "Sound Settings", "Latency", Util::Round<int32>(SoundDeviceSettings().Latency * 1000.0));
-		Setting<uint32> m_UpdateIntervalMS(conf, "Sound Settings", "UpdateInterval", Util::Round<int32>(SoundDeviceSettings().UpdateInterval * 1000.0));
-		Setting<SampleFormat> m_SampleFormat(conf, "Sound Settings", "BitsPerSample", SoundDeviceSettings().sampleFormat);
-		Setting<bool> m_SoundDeviceExclusiveMode(conf, "Sound Settings", "ExclusiveMode", SoundDeviceSettings().ExclusiveMode);
-		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, "Sound Settings", "BoostThreadPriority", SoundDeviceSettings().BoostThreadPriority);
-		Setting<bool> m_SoundDeviceUseHardwareTiming(conf, "Sound Settings", "UseHardwareTiming", SoundDeviceSettings().UseHardwareTiming);
-		Setting<SoundChannelMapping> m_SoundDeviceChannelMapping(conf, "Sound Settings", "ChannelMapping", SoundDeviceSettings().ChannelMapping);
+		Setting<uint32> m_LatencyMS(conf, "Sound Settings", "Latency", Util::Round<int32>(SoundDevice::Settings().Latency * 1000.0));
+		Setting<uint32> m_UpdateIntervalMS(conf, "Sound Settings", "UpdateInterval", Util::Round<int32>(SoundDevice::Settings().UpdateInterval * 1000.0));
+		Setting<SampleFormat> m_SampleFormat(conf, "Sound Settings", "BitsPerSample", SoundDevice::Settings().sampleFormat);
+		Setting<bool> m_SoundDeviceExclusiveMode(conf, "Sound Settings", "ExclusiveMode", SoundDevice::Settings().ExclusiveMode);
+		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, "Sound Settings", "BoostThreadPriority", SoundDevice::Settings().BoostThreadPriority);
+		Setting<bool> m_SoundDeviceUseHardwareTiming(conf, "Sound Settings", "UseHardwareTiming", SoundDevice::Settings().UseHardwareTiming);
+		Setting<SoundDevice::ChannelMapping> m_SoundDeviceChannelMapping(conf, "Sound Settings", "ChannelMapping", SoundDevice::Settings().ChannelMapping);
 		if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
 		{
 			if(m_BufferLength_DEPRECATED != 0)
 			{
 				if(m_BufferLength_DEPRECATED < 1) m_BufferLength_DEPRECATED = 1; // 1ms
 				if(m_BufferLength_DEPRECATED > 1000) m_BufferLength_DEPRECATED = 1000; // 1sec
-				if(m_SoundDeviceID_DEPRECATED.GetType() == SNDDEV_ASIO)
+				if(m_SoundDeviceID_DEPRECATED.GetType() == SoundDevice::TypeASIO)
 				{
 					m_LatencyMS = m_BufferLength_DEPRECATED;
 					m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
@@ -439,7 +439,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		}
 		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,03))
 		{
-			m_SoundDeviceChannelMapping = SoundChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>("Sound Settings", "ASIOBaseChannel", 0));
+			m_SoundDeviceChannelMapping = SoundDevice::ChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>("Sound Settings", "ASIOBaseChannel", 0));
 		}
 		m_SoundDeviceSettingsDefaults.Latency = m_LatencyMS / 1000.0;
 		m_SoundDeviceSettingsDefaults.UpdateInterval = m_UpdateIntervalMS / 1000.0;
@@ -566,7 +566,7 @@ struct StoredSoundDeviceSettings
 private:
 
 	SettingsContainer &conf;
-	const SoundDeviceInfo deviceInfo;
+	const SoundDevice::Info deviceInfo;
 	
 public:
 
@@ -580,11 +580,11 @@ public:
 	Setting<bool> KeepDeviceRunning;
 	Setting<bool> UseHardwareTiming;
 	Setting<int> DitherType;
-	Setting<SoundChannelMapping> ChannelMapping;
+	Setting<SoundDevice::ChannelMapping> ChannelMapping;
 
 public:
 
-	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDeviceInfo & deviceInfo, const SoundDeviceSettings & defaults)
+	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDevice::Info & deviceInfo, const SoundDevice::Settings & defaults)
 		: conf(conf)
 		, deviceInfo(deviceInfo)
 		, LatencyUS(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Latency", Util::Round<int32>(defaults.Latency * 1000000.0))
@@ -606,7 +606,7 @@ public:
 		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"Name", deviceInfo.name);
 	}
 
-	StoredSoundDeviceSettings & operator = (const SoundDeviceSettings &settings)
+	StoredSoundDeviceSettings & operator = (const SoundDevice::Settings &settings)
 	{
 		LatencyUS = Util::Round<int32>(settings.Latency * 1000000.0);
 		UpdateIntervalUS = Util::Round<int32>(settings.UpdateInterval * 1000000.0);
@@ -622,9 +622,9 @@ public:
 		return *this;
 	}
 
-	operator SoundDeviceSettings () const
+	operator SoundDevice::Settings () const
 	{
-		SoundDeviceSettings settings;
+		SoundDevice::Settings settings;
 		settings.Latency = LatencyUS / 1000000.0;
 		settings.UpdateInterval = UpdateIntervalUS / 1000000.0;
 		settings.Samplerate = Samplerate;
@@ -641,47 +641,47 @@ public:
 
 };
 
-SoundDeviceSettings TrackerSettings::GetSoundDeviceSettingsDefaults() const
-//-------------------------------------------------------------------------
+SoundDevice::Settings TrackerSettings::GetSoundDeviceSettingsDefaults() const
+//---------------------------------------------------------------------------
 {
 	return m_SoundDeviceSettingsDefaults;
 }
 
-SoundDeviceID TrackerSettings::GetSoundDeviceID() const
-//-----------------------------------------------------
+SoundDevice::ID TrackerSettings::GetSoundDeviceID() const
+//-------------------------------------------------------
 {
 	return theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_SoundDeviceIdentifier).id;
 }
 
-void TrackerSettings::SetSoundDeviceID(const SoundDeviceID &id)
-//-------------------------------------------------------------
+void TrackerSettings::SetSoundDeviceID(const SoundDevice::ID &id)
+//---------------------------------------------------------------
 {
 	m_SoundDeviceIdentifier = theApp.GetSoundDevicesManager()->FindDeviceInfo(id).GetIdentifier();
 }
 
-SoundDeviceSettings TrackerSettings::GetSoundDeviceSettings(const SoundDeviceID &device) const
-//--------------------------------------------------------------------------------------------
+SoundDevice::Settings TrackerSettings::GetSoundDeviceSettings(const SoundDevice::ID &device) const
+//------------------------------------------------------------------------------------------------
 {
-	const SoundDeviceInfo deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
+	const SoundDevice::Info deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
 	if(!deviceInfo.IsValid())
 	{
-		return SoundDeviceSettings();
+		return SoundDevice::Settings();
 	}
-	const SoundDeviceCaps deviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(device, CMainFrame::GetMainFrame()->gpSoundDevice);
-	SoundDeviceSettings settings = StoredSoundDeviceSettings(conf, deviceInfo, deviceCaps.DefaultSettings);
+	const SoundDevice::Caps deviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(device, CMainFrame::GetMainFrame()->gpSoundDevice);
+	SoundDevice::Settings settings = StoredSoundDeviceSettings(conf, deviceInfo, deviceCaps.DefaultSettings);
 	settings.hWnd = CMainFrame::GetMainFrame()->m_hWnd;
 	return settings;
 }
 
-void TrackerSettings::SetSoundDeviceSettings(const SoundDeviceID &device, const SoundDeviceSettings &settings)
-//------------------------------------------------------------------------------------------------------------
+void TrackerSettings::SetSoundDeviceSettings(const SoundDevice::ID &device, const SoundDevice::Settings &settings)
+//----------------------------------------------------------------------------------------------------------------
 {
-	const SoundDeviceInfo deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
+	const SoundDevice::Info deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
 	if(!deviceInfo.IsValid())
 	{
 		return;
 	}
-	const SoundDeviceCaps deviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(device, CMainFrame::GetMainFrame()->gpSoundDevice);
+	const SoundDevice::Caps deviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(device, CMainFrame::GetMainFrame()->gpSoundDevice);
 	StoredSoundDeviceSettings(conf, deviceInfo, deviceCaps.DefaultSettings) = settings;
 }
 

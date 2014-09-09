@@ -19,6 +19,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+namespace SoundDevice {
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // Protaudio device
@@ -27,7 +29,7 @@ OPENMPT_NAMESPACE_BEGIN
 #ifndef NO_PORTAUDIO
 
 //=========================================
-class CPortaudioDevice: public ISoundDevice
+class CPortaudioDevice: public SoundDevice::Base
 //=========================================
 {
 protected:
@@ -42,7 +44,7 @@ protected:
 	double m_CurrentRealLatency; // seconds
 
 public:
-	CPortaudioDevice(SoundDeviceID id, const std::wstring &internalID);
+	CPortaudioDevice(SoundDevice::ID id, const std::wstring &internalID);
 	~CPortaudioDevice();
 
 public:
@@ -55,8 +57,8 @@ public:
 	double GetCurrentLatency() const;
 	bool InternalHasGetStreamPosition() const { return false; }
 	int64 InternalGetStreamPositionFrames() const;
-	SoundDeviceCaps InternalGetDeviceCaps();
-	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
+	SoundDevice::Caps InternalGetDeviceCaps();
+	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 	bool OpenDriverSettings();
 
 	int StreamCallback(
@@ -78,13 +80,13 @@ public:
 	static std::wstring HostApiToString(PaHostApiIndex hostapi);
 
 	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi);
-	static SoundDeviceType HostApiToSndDevType(PaHostApiIndex hostapi);
-	static PaHostApiIndex SndDevTypeToHostApi(SoundDeviceType snddevtype);
+	static SoundDevice::Type HostApiToSndDevType(PaHostApiIndex hostapi);
+	static PaHostApiIndex SndDevTypeToHostApi(SoundDevice::Type snddevtype);
 
-	static std::vector<SoundDeviceInfo> EnumerateDevices(SoundDeviceType type);
+	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::Type type);
 
 private:
-	static bool EnumerateDevices(SoundDeviceInfo &result, SoundDeviceIndex index, PaHostApiIndex hostapi);
+	static bool EnumerateDevices(SoundDevice::Info &result, SoundDevice::Index index, PaHostApiIndex hostapi);
 
 };
 
@@ -94,6 +96,9 @@ void SndDevPortaudioUnnitialize();
 bool SndDevPortaudioIsInitialized();
 
 #endif // NO_PORTAUDIO
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

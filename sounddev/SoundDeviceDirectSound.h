@@ -20,6 +20,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+namespace SoundDevice {
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // DirectSound device
@@ -41,7 +43,7 @@ protected:
 	DWORD m_dwLatency;
 
 public:
-	CDSoundDevice(SoundDeviceID id, const std::wstring &internalID);
+	CDSoundDevice(SoundDevice::ID id, const std::wstring &internalID);
 	~CDSoundDevice();
 
 public:
@@ -52,14 +54,17 @@ public:
 	void StopFromSoundThread();
 	bool InternalIsOpen() const { return (m_pMixBuffer != NULL); }
 	double GetCurrentLatency() const { return 1.0 * m_dwLatency / m_Settings.GetBytesPerSecond(); }
-	SoundDeviceCaps InternalGetDeviceCaps();
-	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
+	SoundDevice::Caps InternalGetDeviceCaps();
+	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 public:
-	static std::vector<SoundDeviceInfo> EnumerateDevices();
+	static std::vector<SoundDevice::Info> EnumerateDevices();
 };
 
 #endif // NO_DIRECTSOUND
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

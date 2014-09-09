@@ -30,43 +30,46 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-std::wstring SoundDeviceTypeToString(SoundDeviceType type)
-//--------------------------------------------------------
+namespace SoundDevice {
+
+
+std::wstring TypeToString(SoundDevice::Type type)
+//-----------------------------------------------
 {
 	switch(type)
 	{
-	case SNDDEV_WAVEOUT: return L"WaveOut"; break;
-	case SNDDEV_DSOUND: return L"DirectSound"; break;
-	case SNDDEV_ASIO: return L"ASIO"; break;
-	case SNDDEV_PORTAUDIO_WASAPI: return L"WASAPI"; break;
-	case SNDDEV_PORTAUDIO_WDMKS: return L"WDM-KS"; break;
-	case SNDDEV_PORTAUDIO_WMME: return L"MME"; break;
-	case SNDDEV_PORTAUDIO_DS: return L"DS"; break;
-	case SNDDEV_PORTAUDIO_ASIO: return L"ASIO"; break;
+	case TypeWAVEOUT: return L"WaveOut"; break;
+	case TypeDSOUND: return L"DirectSound"; break;
+	case TypeASIO: return L"ASIO"; break;
+	case TypePORTAUDIO_WASAPI: return L"WASAPI"; break;
+	case TypePORTAUDIO_WDMKS: return L"WDM-KS"; break;
+	case TypePORTAUDIO_WMME: return L"MME"; break;
+	case TypePORTAUDIO_DS: return L"DS"; break;
+	case TypePORTAUDIO_ASIO: return L"ASIO"; break;
 	}
 	return std::wstring();
 }
 
 
-SoundChannelMapping::SoundChannelMapping()
-//----------------------------------------
+ChannelMapping::ChannelMapping()
+//------------------------------
 {
 	return;
 }
 
 
-SoundChannelMapping::SoundChannelMapping(const std::vector<uint32> &mapping)
-//--------------------------------------------------------------------------
+ChannelMapping::ChannelMapping(const std::vector<uint32> &mapping)
+//----------------------------------------------------------------
 	: ChannelToDeviceChannel(mapping)
 {
 	return;
 }
 
 
-SoundChannelMapping SoundChannelMapping::BaseChannel(uint32 channels, uint32 baseChannel)
-//---------------------------------------------------------------------------------------
+ChannelMapping ChannelMapping::BaseChannel(uint32 channels, uint32 baseChannel)
+//-----------------------------------------------------------------------------
 {
-	SoundChannelMapping result;
+	SoundDevice::ChannelMapping result;
 	result.ChannelToDeviceChannel.clear();
 	if(baseChannel == 0)
 	{
@@ -81,8 +84,8 @@ SoundChannelMapping SoundChannelMapping::BaseChannel(uint32 channels, uint32 bas
 }
 
 
-bool SoundChannelMapping::IsValid(uint32 channels) const
-//------------------------------------------------------
+bool ChannelMapping::IsValid(uint32 channels) const
+//-------------------------------------------------
 {
 	if(ChannelToDeviceChannel.empty())
 	{
@@ -105,27 +108,27 @@ bool SoundChannelMapping::IsValid(uint32 channels) const
 }
 
 
-std::string SoundChannelMapping::ToString() const
-//-----------------------------------------------
+std::string ChannelMapping::ToString() const
+//------------------------------------------
 {
 	return mpt::String::Combine<uint32>(ChannelToDeviceChannel);
 }
 
 
-SoundChannelMapping SoundChannelMapping::FromString(const std::string &str)
-//-------------------------------------------------------------------------
+ChannelMapping ChannelMapping::FromString(const std::string &str)
+//---------------------------------------------------------------
 {
-	return SoundChannelMapping(mpt::String::Split<uint32>(str));
+	return SoundDevice::ChannelMapping(mpt::String::Split<uint32>(str));
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //
-// ISoundDevice base class
+// SoundDevice::Base base class
 //
 
-ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
-//--------------------------------------------------------------------------
+Base::Base(SoundDevice::ID id, const std::wstring &internalID)
+//------------------------------------------------------------
 	: m_Source(nullptr)
 	, m_MessageReceiver(nullptr)
 	, m_ID(id)
@@ -145,24 +148,24 @@ ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 }
 
 
-ISoundDevice::~ISoundDevice()
-//---------------------------
+Base::~Base()
+//-----------
 {
 	return;
 }
 
 
-SoundDeviceDynamicCaps ISoundDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
-//---------------------------------------------------------------------------------------------------
+SoundDevice::DynamicCaps Base::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+//---------------------------------------------------------------------------------------------
 {
-	SoundDeviceDynamicCaps result;
+	SoundDevice::DynamicCaps result;
 	result.supportedSampleRates = baseSampleRates;
 	return result;
 }
 
 
-bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings)
-//----------------------------------------------------------------------------------------------------
+bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings)
+//------------------------------------------------------------------------------------------------------
 {
 	MemsetZero(WaveFormat);
 	if(!m_Settings.sampleFormat.IsValid()) return false;
@@ -194,22 +197,22 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 }
 
 
-void ISoundDevice::UpdateBufferAttributes(SoundBufferAttributes attributes)
+void Base::UpdateBufferAttributes(SoundDevice::BufferAttributes attributes)
 //-------------------------------------------------------------------------
 {
 	m_BufferAttributes = attributes;
 }
 
 
-void ISoundDevice::UpdateTimeInfo(SoundTimeInfo timeInfo)
+void Base::UpdateTimeInfo(SoundDevice::TimeInfo timeInfo)
 //-------------------------------------------------------
 {
 	m_TimeInfo = timeInfo;
 }
 
 
-bool ISoundDevice::Init()
-//-----------------------
+bool Base::Init()
+//---------------
 {
 	if(IsInited())
 	{
@@ -220,8 +223,8 @@ bool ISoundDevice::Init()
 }
 
 
-bool ISoundDevice::Open(const SoundDeviceSettings &settings)
-//----------------------------------------------------------
+bool Base::Open(const SoundDevice::Settings &settings)
+//----------------------------------------------------
 {
 	if(IsOpen())
 	{
@@ -234,7 +237,7 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 	{
 		return false;
 	}
-	m_Flags = SoundDeviceFlags();
+	m_Flags = SoundDevice::Flags();
 	m_BufferAttributes.Latency = m_Settings.Latency;
 	m_BufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
 	m_BufferAttributes.NumBuffers = 0;
@@ -243,8 +246,8 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 }
 
 
-bool ISoundDevice::Close()
-//------------------------
+bool Base::Close()
+//----------------
 {
 	if(!IsOpen()) return true;
 	Stop();
@@ -254,15 +257,15 @@ bool ISoundDevice::Close()
 }
 
 
-void ISoundDevice::FillAudioBuffer()
-//----------------------------------
+void Base::FillAudioBuffer()
+//--------------------------
 {
 	InternalFillAudioBuffer();
 }
 
 
-void ISoundDevice::SourceFillAudioBufferLocked()
-//----------------------------------------------
+void Base::SourceFillAudioBufferLocked()
+//--------------------------------------
 {
 	if(m_Source)
 	{
@@ -271,21 +274,21 @@ void ISoundDevice::SourceFillAudioBufferLocked()
 }
 
 
-void ISoundDevice::SourceAudioPreRead(std::size_t numFrames)
-//----------------------------------------------------------
+void Base::SourceAudioPreRead(std::size_t numFrames)
+//--------------------------------------------------
 {
 	if(!InternalHasTimeInfo())
 	{
 		if(InternalHasGetStreamPosition())
 		{
-			SoundTimeInfo timeInfo;
+			SoundDevice::TimeInfo timeInfo;
 			timeInfo.StreamFrames = InternalHasGetStreamPosition();
 			timeInfo.SystemTimestamp = Clock().NowNanoseconds();
 			timeInfo.Speed = 1.0;
 			UpdateTimeInfo(timeInfo);
 		} else
 		{
-			SoundTimeInfo timeInfo;
+			SoundDevice::TimeInfo timeInfo;
 			{
 				Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
 				timeInfo.StreamFrames = m_StreamPositionRenderFrames + numFrames;
@@ -298,8 +301,8 @@ void ISoundDevice::SourceAudioPreRead(std::size_t numFrames)
 }
 
 
-void ISoundDevice::SourceAudioRead(void *buffer, std::size_t numFrames)
-//---------------------------------------------------------------------
+void Base::SourceAudioRead(void *buffer, std::size_t numFrames)
+//-------------------------------------------------------------
 {
 	if(numFrames <= 0)
 	{
@@ -309,8 +312,8 @@ void ISoundDevice::SourceAudioRead(void *buffer, std::size_t numFrames)
 }
 
 
-void ISoundDevice::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
-//----------------------------------------------------------------------------
+void Base::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
+//--------------------------------------------------------------------
 {
 	if(numFrames <= 0)
 	{
@@ -328,8 +331,8 @@ void ISoundDevice::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 }
 
 
-void ISoundDevice::AudioSendMessage(const std::string &str)
-//---------------------------------------------------------
+void Base::AudioSendMessage(const std::string &str)
+//-------------------------------------------------
 {
 	if(m_MessageReceiver)
 	{
@@ -338,8 +341,8 @@ void ISoundDevice::AudioSendMessage(const std::string &str)
 }
 
 
-bool ISoundDevice::Start()
-//------------------------
+bool Base::Start()
+//----------------
 {
 	if(!IsOpen()) return false; 
 	if(!IsPlaying())
@@ -363,8 +366,8 @@ bool ISoundDevice::Start()
 }
 
 
-void ISoundDevice::Stop(bool force)
-//---------------------------------
+void Base::Stop(bool force)
+//-------------------------
 {
 	if(!IsOpen()) return;
 	if(IsPlaying())
@@ -389,16 +392,16 @@ void ISoundDevice::Stop(bool force)
 }
 
 
-double ISoundDevice::GetCurrentUpdateInterval() const
-//---------------------------------------------------
+double Base::GetCurrentUpdateInterval() const
+//-------------------------------------------
 {
 	Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
 	return m_CurrentUpdateInterval;
 }
 
 
-int64 ISoundDevice::GetStreamPositionFrames() const
-//-------------------------------------------------
+int64 Base::GetStreamPositionFrames() const
+//-----------------------------------------
 {
 	if(!IsOpen()) return 0;
 	if(InternalHasGetStreamPosition())
@@ -418,8 +421,8 @@ int64 ISoundDevice::GetStreamPositionFrames() const
 //
 
 
-void SoundDevicesManager::ReEnumerate()
-//-------------------------------------
+void Manager::ReEnumerate()
+//-------------------------
 {
 	m_SoundDevices.clear();
 	m_DeviceCaps.clear();
@@ -430,22 +433,22 @@ void SoundDevicesManager::ReEnumerate()
 #endif // NO_PORTAUDIO
 
 	{
-		const std::vector<SoundDeviceInfo> infos = CWaveDevice::EnumerateDevices();
+		const std::vector<SoundDevice::Info> infos = CWaveDevice::EnumerateDevices();
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 #ifndef NO_ASIO
 	{
-		const std::vector<SoundDeviceInfo> infos = CASIODevice::EnumerateDevices();
+		const std::vector<SoundDevice::Info> infos = CASIODevice::EnumerateDevices();
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 #endif // NO_ASIO
 #ifndef NO_PORTAUDIO
 	{
-		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_WASAPI);
+		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WASAPI);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 	{
-		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_WDMKS);
+		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WDMKS);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 #endif // NO_PORTAUDIO
@@ -453,7 +456,7 @@ void SoundDevicesManager::ReEnumerate()
 	// kind of deprecated by now
 #ifndef NO_DSOUND
 	{
-		const std::vector<SoundDeviceInfo> infos = CDSoundDevice::EnumerateDevices();
+		const std::vector<SoundDevice::Info> infos = CDSoundDevice::EnumerateDevices();
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 #endif // NO_DSOUND
@@ -461,15 +464,15 @@ void SoundDevicesManager::ReEnumerate()
 	// duplicate devices, only used if [Sound Settings]MorePortaudio=1
 #ifndef NO_PORTAUDIO
 	{
-		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_WMME);
+		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WMME);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 	{
-		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_ASIO);
+		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_ASIO);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 	{
-		const std::vector<SoundDeviceInfo> infos = CPortaudioDevice::EnumerateDevices(SNDDEV_PORTAUDIO_DS);
+		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_DS);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 #endif // NO_PORTAUDIO
@@ -477,85 +480,85 @@ void SoundDevicesManager::ReEnumerate()
 }
 
 
-SoundDeviceInfo SoundDevicesManager::FindDeviceInfo(SoundDeviceID id) const
-//-------------------------------------------------------------------------
+SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::ID id) const
+//-----------------------------------------------------------------
 {
-	for(std::vector<SoundDeviceInfo>::const_iterator it = begin(); it != end(); ++it)
+	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 	{
 		if(it->id == id)
 		{
 			return *it;
 		}
 	}
-	return SoundDeviceInfo();
+	return SoundDevice::Info();
 }
 
 
-SoundDeviceInfo SoundDevicesManager::FindDeviceInfo(const std::wstring &identifier) const
-//---------------------------------------------------------------------------------------
+SoundDevice::Info Manager::FindDeviceInfo(const std::wstring &identifier) const
+//-----------------------------------------------------------------------------
 {
 	if(m_SoundDevices.empty())
 	{
-		return SoundDeviceInfo();
+		return SoundDevice::Info();
 	}
 	if(identifier.empty())
 	{
 		return m_SoundDevices[0];
 	}
-	for(std::vector<SoundDeviceInfo>::const_iterator it = begin(); it != end(); ++it)
+	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 	{
 		if(it->GetIdentifier() == identifier)
 		{
 			return *it;
 		}
 	}
-	return SoundDeviceInfo();
+	return SoundDevice::Info();
 }
 
 
-static SoundDeviceType ParseType(const std::wstring &identifier)
-//--------------------------------------------------------------
+static SoundDevice::Type ParseType(const std::wstring &identifier)
+//----------------------------------------------------------------
 {
-	for(int i = 0; i < SNDDEV_NUM_DEVTYPES; ++i)
+	for(int i = 0; i < TypeNUM_DEVTYPES; ++i)
 	{
-		const std::wstring api = SoundDeviceTypeToString(static_cast<SoundDeviceType>(i));
+		const std::wstring api = SoundDevice::TypeToString(static_cast<SoundDevice::Type>(i));
 		if(identifier.find(api) == 0)
 		{
-			return static_cast<SoundDeviceType>(i);
+			return static_cast<SoundDevice::Type>(i);
 		}
 	}
-	return SNDDEV_INVALID;
+	return TypeINVALID;
 }
 
 
-SoundDeviceInfo SoundDevicesManager::FindDeviceInfoBestMatch(const std::wstring &identifier) const
-//------------------------------------------------------------------------------------------------
+SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifier) const
+//--------------------------------------------------------------------------------------
 {
 	if(m_SoundDevices.empty())
 	{
-		return SoundDeviceInfo();
+		return SoundDevice::Info();
 	}
 	if(identifier.empty())
 	{
 		return m_SoundDevices[0];
 	}
-	for(std::vector<SoundDeviceInfo>::const_iterator it = begin(); it != end(); ++it)
+	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 	{
 		if(it->GetIdentifier() == identifier)
 		{ // exact match
 			return *it;
 		}
 	}
-	const SoundDeviceType type = ParseType(identifier);
+	const SoundDevice::Type type = ParseType(identifier);
 	switch(type)
 	{
-		case SNDDEV_PORTAUDIO_WASAPI:
+		case TypePORTAUDIO_WASAPI:
 			// WASAPI devices might change names if a different connector jack is used.
 			// In order to avoid defaulting to wave mapper in that case,
 			// just find the first WASAPI device.
-			for(std::vector<SoundDeviceInfo>::const_iterator it = begin(); it != end(); ++it)
+			for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 			{
-				if(it->id.GetType() == SNDDEV_PORTAUDIO_WASAPI)
+				if(it->id.GetType() == TypePORTAUDIO_WASAPI)
 				{
 					return *it;
 				}
@@ -563,24 +566,24 @@ SoundDeviceInfo SoundDevicesManager::FindDeviceInfoBestMatch(const std::wstring 
 			// default to first device
 			return *begin();
 			break;
-		case SNDDEV_WAVEOUT:
-		case SNDDEV_DSOUND:
-		case SNDDEV_PORTAUDIO_WMME:
-		case SNDDEV_PORTAUDIO_DS:
-		case SNDDEV_ASIO:
-		case SNDDEV_PORTAUDIO_WDMKS:
-		case SNDDEV_PORTAUDIO_ASIO:
+		case TypeWAVEOUT:
+		case TypeDSOUND:
+		case TypePORTAUDIO_WMME:
+		case TypePORTAUDIO_DS:
+		case TypeASIO:
+		case TypePORTAUDIO_WDMKS:
+		case TypePORTAUDIO_ASIO:
 			// default to first device
 			return *begin();
 			break;
 	}
 	// invalid
-	return SoundDeviceInfo();
+	return SoundDevice::Info();
 }
 
 
-bool SoundDevicesManager::OpenDriverSettings(SoundDeviceID id, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice)
-//--------------------------------------------------------------------------------------------------------------------------------------
+bool Manager::OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::Base *currentSoundDevice)
+//-----------------------------------------------------------------------------------------------------------------------------------------
 {
 	bool result = false;
 	if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
@@ -588,7 +591,7 @@ bool SoundDevicesManager::OpenDriverSettings(SoundDeviceID id, ISoundMessageRece
 		result = currentSoundDevice->OpenDriverSettings();
 	} else
 	{
-		ISoundDevice *dummy = CreateSoundDevice(id);
+		SoundDevice::Base *dummy = CreateSoundDevice(id);
 		if(dummy)
 		{
 			dummy->SetMessageReceiver(messageReceiver);
@@ -600,8 +603,8 @@ bool SoundDevicesManager::OpenDriverSettings(SoundDeviceID id, ISoundMessageRece
 }
 
 
-SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, ISoundDevice *currentSoundDevice)
-//----------------------------------------------------------------------------------------------------
+SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::ID id, SoundDevice::Base *currentSoundDevice)
+//-------------------------------------------------------------------------------------------------
 {
 	if(m_DeviceCaps.find(id) == m_DeviceCaps.end())
 	{
@@ -610,7 +613,7 @@ SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, ISoundDevic
 			m_DeviceCaps[id] = currentSoundDevice->GetDeviceCaps();
 		} else
 		{
-			ISoundDevice *dummy = CreateSoundDevice(id);
+			SoundDevice::Base *dummy = CreateSoundDevice(id);
 			if(dummy)
 			{
 				m_DeviceCaps[id] = dummy->GetDeviceCaps();
@@ -622,8 +625,8 @@ SoundDeviceCaps SoundDevicesManager::GetDeviceCaps(SoundDeviceID id, ISoundDevic
 }
 
 
-SoundDeviceDynamicCaps SoundDevicesManager::GetDeviceDynamicCaps(SoundDeviceID id, const std::vector<uint32> &baseSampleRates, ISoundMessageReceiver *messageReceiver, ISoundDevice *currentSoundDevice, bool update)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::ID id, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::Base *currentSoundDevice, bool update)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if((m_DeviceDynamicCaps.find(id) == m_DeviceDynamicCaps.end()) || update)
 	{
@@ -632,7 +635,7 @@ SoundDeviceDynamicCaps SoundDevicesManager::GetDeviceDynamicCaps(SoundDeviceID i
 			m_DeviceDynamicCaps[id] = currentSoundDevice->GetDeviceDynamicCaps(baseSampleRates);
 		} else
 		{
-			ISoundDevice *dummy = CreateSoundDevice(id);
+			SoundDevice::Base *dummy = CreateSoundDevice(id);
 			if(dummy)
 			{
 				dummy->SetMessageReceiver(messageReceiver);
@@ -645,30 +648,30 @@ SoundDeviceDynamicCaps SoundDevicesManager::GetDeviceDynamicCaps(SoundDeviceID i
 }
 
 
-ISoundDevice * SoundDevicesManager::CreateSoundDevice(SoundDeviceID id)
-//---------------------------------------------------------------------
+SoundDevice::Base * Manager::CreateSoundDevice(SoundDevice::ID id)
+//----------------------------------------------------------------
 {
-	const SoundDeviceInfo info = FindDeviceInfo(id);
+	const SoundDevice::Info info = FindDeviceInfo(id);
 	if(!info.IsValid())
 	{
 		return nullptr;
 	}
-	ISoundDevice *result = nullptr;
+	SoundDevice::Base *result = nullptr;
 	switch(id.GetType())
 	{
-	case SNDDEV_WAVEOUT: result = new CWaveDevice(id, info.internalID); break;
+	case TypeWAVEOUT: result = new CWaveDevice(id, info.internalID); break;
 #ifndef NO_DSOUND
-	case SNDDEV_DSOUND: result = new CDSoundDevice(id, info.internalID); break;
+	case TypeDSOUND: result = new CDSoundDevice(id, info.internalID); break;
 #endif // NO_DSOUND
 #ifndef NO_ASIO
-	case SNDDEV_ASIO: result = new CASIODevice(id, info.internalID); break;
+	case TypeASIO: result = new CASIODevice(id, info.internalID); break;
 #endif // NO_ASIO
 #ifndef NO_PORTAUDIO
-	case SNDDEV_PORTAUDIO_WASAPI:
-	case SNDDEV_PORTAUDIO_WDMKS:
-	case SNDDEV_PORTAUDIO_WMME:
-	case SNDDEV_PORTAUDIO_DS:
-	case SNDDEV_PORTAUDIO_ASIO:
+	case TypePORTAUDIO_WASAPI:
+	case TypePORTAUDIO_WDMKS:
+	case TypePORTAUDIO_WMME:
+	case TypePORTAUDIO_DS:
+	case TypePORTAUDIO_ASIO:
 		result = SndDevPortaudioIsInitialized() ? new CPortaudioDevice(id, info.internalID) : nullptr;
 		break;
 #endif // NO_PORTAUDIO
@@ -688,20 +691,23 @@ ISoundDevice * SoundDevicesManager::CreateSoundDevice(SoundDeviceID id)
 }
 
 
-SoundDevicesManager::SoundDevicesManager()
-//----------------------------------------
+Manager::Manager()
+//----------------
 {
 	ReEnumerate();
 }
 
 
-SoundDevicesManager::~SoundDevicesManager()
-//-----------------------------------------
+Manager::~Manager()
+//-----------------
 {
 #ifndef NO_PORTAUDIO
 	SndDevPortaudioUnnitialize();
 #endif // NO_PORTAUDIO
 }
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END
