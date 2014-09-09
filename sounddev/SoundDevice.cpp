@@ -141,7 +141,7 @@ ISoundDevice::ISoundDevice(SoundDeviceID id, const std::wstring &internalID)
 	m_StreamPositionRenderFrames = 0;
 	m_StreamPositionOutputFrames = 0;
 
-	InterlockedExchange(&m_RequestFlags, 0);
+	m_RequestFlags.store(0);
 }
 
 
@@ -238,7 +238,7 @@ bool ISoundDevice::Open(const SoundDeviceSettings &settings)
 	m_BufferAttributes.Latency = m_Settings.Latency;
 	m_BufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
 	m_BufferAttributes.NumBuffers = 0;
-	InterlockedExchange(&m_RequestFlags, 0);
+	m_RequestFlags.store(0);
 	return InternalOpen();
 }
 
@@ -249,7 +249,7 @@ bool ISoundDevice::Close()
 	if(!IsOpen()) return true;
 	Stop();
 	bool result = InternalClose();
-	InterlockedExchange(&m_RequestFlags, 0);
+	m_RequestFlags.store(0);
 	return result;
 }
 
@@ -351,7 +351,7 @@ bool ISoundDevice::Start()
 			m_StreamPositionOutputFrames = 0;
 		}
 		m_Clock.SetResolution(1);
-		_InterlockedAnd(&m_RequestFlags, ~RequestFlagRestart);
+		m_RequestFlags.fetch_and(~RequestFlagRestart);
 		if(!InternalStart())
 		{
 			m_Clock.SetResolution(0);
@@ -376,7 +376,7 @@ void ISoundDevice::Stop(bool force)
 		{
 			InternalStop();
 		}
-		_InterlockedAnd(&m_RequestFlags, ~RequestFlagRestart);
+		m_RequestFlags.fetch_and(~RequestFlagRestart);
 		m_Clock.SetResolution(0);
 		m_IsPlaying = false;
 		{

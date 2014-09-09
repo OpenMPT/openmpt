@@ -266,6 +266,9 @@
     <ClInclude Include="..\common\Endianness.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\mptAtomic.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp">
