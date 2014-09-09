@@ -151,7 +151,7 @@ int GetRevision()
 		return revision;	
 	#else
 		#if MPT_COMPILER_MSVC
-			#pragma message "SVN revision unknown. Please check your build system."
+			#pragma message("SVN revision unknown. Please check your build system.")
 		#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 			#warning "SVN revision unknown. Please check your build system."
 		#else
