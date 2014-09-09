@@ -58,6 +58,71 @@ CWaveDevice::~CWaveDevice()
 }
 
 
+SoundDeviceCaps CWaveDevice::InternalGetDeviceCaps()
+//--------------------------------------------------
+{
+	SoundDeviceCaps caps;
+	caps.Available = true;
+	caps.CanUpdateInterval = true;
+	caps.CanSampleFormat = true;
+	caps.CanExclusiveMode = (GetDeviceIndex() > 0); // no direct mode for WAVE_MAPPER, makes no sense there
+	caps.CanBoostThreadPriority = true;
+	caps.CanKeepDeviceRunning = false;
+	caps.CanUseHardwareTiming = false;
+	caps.CanChannelMapping = false;
+	caps.CanDriverPanel = false;
+	caps.HasInternalDither = false;
+	caps.ExclusiveModeDescription = L"Use direct mode";
+	if(mpt::Windows::Version::IsWine())
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+	} else
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+	}
+	return caps;
+}
+
+
+SoundDeviceDynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /*baseSampleRates*/ )
+//--------------------------------------------------------------------------------------------------------
+{
+	SoundDeviceDynamicCaps caps;
+	WAVEOUTCAPSW woc;
+	MemsetZero(woc);
+	if(GetDeviceIndex() > 0)
+	{
+		if(waveOutGetDevCapsW(GetDeviceIndex() - 1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
+		{
+			if(woc.dwFormats & (WAVE_FORMAT_96M08 | WAVE_FORMAT_96M16	| WAVE_FORMAT_96S08 | WAVE_FORMAT_96S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(96000);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_48M08 | WAVE_FORMAT_48M16	| WAVE_FORMAT_48S08 | WAVE_FORMAT_48S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(48000);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_4M08 | WAVE_FORMAT_4M16	| WAVE_FORMAT_4S08 | WAVE_FORMAT_4S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(44100);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_2M08 | WAVE_FORMAT_2M16	| WAVE_FORMAT_2S08 | WAVE_FORMAT_2S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(22050);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_1M16	| WAVE_FORMAT_1S08 | WAVE_FORMAT_1S16))
+			{
+				caps.supportedExclusiveSampleRates.push_back(11025);
+			}
+		}
+	}
+	return caps;
+}
+
+
 bool CWaveDevice::InternalOpen()
 //------------------------------
 {
@@ -76,15 +141,15 @@ bool CWaveDevice::InternalOpen()
 		return false;
 	}
 	m_hWaveOut = NULL;
-	if(waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+	if(waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION | (m_Settings.ExclusiveMode ? WAVE_FORMAT_DIRECT : 0)) != MMSYSERR_NOERROR)
 	{
 		InternalClose();
 		return false;
 	}
-	m_nWaveBufferSize = m_Settings.UpdateIntervalMS * pwfx->nAvgBytesPerSec / 1000;
+	m_nWaveBufferSize = Util::Round<int32>(m_Settings.UpdateInterval * pwfx->nAvgBytesPerSec);
 	m_nWaveBufferSize = Clamp(m_nWaveBufferSize, WAVEOUT_MINBUFFERSIZE, WAVEOUT_MAXBUFFERSIZE);
 	m_nWaveBufferSize = ((m_nWaveBufferSize + pwfx->nBlockAlign - 1) / pwfx->nBlockAlign) * pwfx->nBlockAlign;
-	std::size_t numBuffers = m_Settings.LatencyMS * pwfx->nAvgBytesPerSec / (m_nWaveBufferSize * 1000);
+	std::size_t numBuffers = Util::Round<int32>(m_Settings.Latency * pwfx->nAvgBytesPerSec / m_nWaveBufferSize);
 	numBuffers = Clamp(numBuffers, WAVEOUT_MINBUFFERS, WAVEOUT_MAXBUFFERS);
 	m_nPreparedHeaders = 0;
 	m_WaveBuffers.resize(numBuffers);

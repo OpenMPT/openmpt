@@ -284,7 +284,7 @@ bool CASIODevice::InternalOpen()
 		asioCall(getBufferSize(&minSize, &maxSize, &preferredSize, &granularity));
 		Log(mpt::String::Print("ASIO: getBufferSize() => minSize=%1 maxSize=%2 preferredSize=%3 granularity=%4",
 			minSize, maxSize, preferredSize, granularity));
-		m_nAsioBufferLen = ((m_Settings.LatencyMS * m_Settings.Samplerate) / 2000);
+		m_nAsioBufferLen = Util::Round<int32>(m_Settings.Latency * m_Settings.Samplerate / 2.0);
 		if(minSize <= 0 || maxSize <= 0 || minSize > maxSize)
 		{ // limits make no sense
 			if(preferredSize > 0)
@@ -1313,11 +1313,12 @@ void CASIODevice::ReportASIOException(const std::string &str)
 }
 
 
-SoundDeviceCaps CASIODevice::GetDeviceCaps()
-//------------------------------------------
+SoundDeviceCaps CASIODevice::InternalGetDeviceCaps()
+//--------------------------------------------------
 {
 	SoundDeviceCaps caps;
 
+	caps.Available = true;
 	caps.CanUpdateInterval = false;
 	caps.CanSampleFormat = false;
 	caps.CanExclusiveMode = false;
@@ -1326,6 +1327,13 @@ SoundDeviceCaps CASIODevice::GetDeviceCaps()
 	caps.CanUseHardwareTiming = true;
 	caps.CanChannelMapping = true;
 	caps.CanDriverPanel = true;
+
+	caps.LatencyMin = 0.000001; // 1 us
+	caps.LatencyMax = 0.5; // 500 ms
+	caps.UpdateIntervalMin = 0.0; // disabled
+	caps.UpdateIntervalMax = 0.0; // disabled
+
+	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 
 	return caps;
 }
@@ -1362,6 +1370,7 @@ SoundDeviceDynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uint3
 			if(asioCallUncatched(canSampleRate((ASIOSampleRate)baseSampleRates[i])) == ASE_OK)
 			{
 				caps.supportedSampleRates.push_back(baseSampleRates[i]);
+				caps.supportedExclusiveSampleRates.push_back(baseSampleRates[i]);
 			}
 		} catch(...)
 		{
