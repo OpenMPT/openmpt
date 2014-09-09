@@ -25,7 +25,10 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings);
+namespace SoundDevice {
+
+
+bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings);
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -39,19 +42,19 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR, LPVOID lpContext)
 //----------------------------------------------------------------------------------------------------
 {
-	std::vector<SoundDeviceInfo> &devices = *(std::vector<SoundDeviceInfo>*)lpContext;
+	std::vector<SoundDevice::Info> &devices = *(std::vector<SoundDevice::Info>*)lpContext;
 	if(!lpstrDescription)
 	{
 		return TRUE;
 	}
-	if(!SoundDeviceIndexIsValid(devices.size()))
+	if(!SoundDevice::IndexIsValid(devices.size()))
 	{
 		return FALSE;
 	}
-	SoundDeviceInfo info;
-	info.id = SoundDeviceID(SNDDEV_DSOUND, static_cast<SoundDeviceIndex>(devices.size()));
+	SoundDevice::Info info;
+	info.id = SoundDevice::ID(TypeDSOUND, static_cast<SoundDevice::Index>(devices.size()));
 	info.name = lpstrDescription;
-	info.apiName = SoundDeviceTypeToString(SNDDEV_DSOUND);
+	info.apiName = SoundDevice::TypeToString(TypeDSOUND);
 	if(lpGuid)
 	{
 		info.internalID = Util::GUIDToString(*lpGuid);
@@ -61,16 +64,16 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 }
 
 
-std::vector<SoundDeviceInfo> CDSoundDevice::EnumerateDevices()
+std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices()
 //------------------------------------------------------------
 {
-	std::vector<SoundDeviceInfo> devices;
+	std::vector<SoundDevice::Info> devices;
 	DirectSoundEnumerateW(DSEnumCallbackW, &devices);
 	return devices;
 }
 
 
-CDSoundDevice::CDSoundDevice(SoundDeviceID id, const std::wstring &internalID)
+CDSoundDevice::CDSoundDevice(SoundDevice::ID id, const std::wstring &internalID)
 //----------------------------------------------------------------------------
 	: CSoundDeviceWithThread(id, internalID)
 	, m_piDS(NULL)
@@ -92,10 +95,10 @@ CDSoundDevice::~CDSoundDevice()
 }
 
 
-SoundDeviceCaps CDSoundDevice::InternalGetDeviceCaps()
+SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 //----------------------------------------------------
 {
-	SoundDeviceCaps caps;
+	SoundDevice::Caps caps;
 	caps.Available = true;
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
@@ -145,10 +148,10 @@ SoundDeviceCaps CDSoundDevice::InternalGetDeviceCaps()
 }
 
 
-SoundDeviceDynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
 //----------------------------------------------------------------------------------------------------
 {
-	SoundDeviceDynamicCaps caps;
+	SoundDevice::DynamicCaps caps;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)
@@ -298,7 +301,7 @@ bool CDSoundDevice::InternalOpen()
 	m_dwWritePos = 0xFFFFFFFF;
 	SetWakeupInterval(std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
 	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
-	SoundBufferAttributes bufferAttributes;
+	SoundDevice::BufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_nDSoundBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
 	bufferAttributes.UpdateInterval = std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond()));
 	bufferAttributes.NumBuffers = 1;
@@ -484,6 +487,9 @@ void CDSoundDevice::InternalFillAudioBuffer()
 
 
 #endif // NO_DIRECTSOUND
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

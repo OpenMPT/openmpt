@@ -25,6 +25,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+namespace SoundDevice {
+
+
 CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(SoundDevice)
 //------------------------------------------------------------------------------------------
 {
@@ -405,6 +408,9 @@ void CSoundDeviceWithThread::InternalStop()
 {
 	m_AudioThread.Deactivate();
 }
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

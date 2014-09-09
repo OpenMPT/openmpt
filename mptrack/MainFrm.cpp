@@ -246,14 +246,14 @@ void CMainFrame::Initialize()
 	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().GetSoundDeviceID()).IsValid())
 	{
 		// Fall back to default WaveOut device
-		TrackerSettings::Instance().SetSoundDeviceID(SoundDeviceID());
+		TrackerSettings::Instance().SetSoundDeviceID(SoundDevice::ID());
 	}
 	if(TrackerSettings::Instance().MixerSamplerate == 0)
 	{
 		TrackerSettings::Instance().MixerSamplerate = MixerSettings().gdwMixingFreq;
 		#ifndef NO_ASIO
 			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
-			if(TrackerSettings::Instance().GetSoundDeviceID().GetType() == SNDDEV_ASIO)
+			if(TrackerSettings::Instance().GetSoundDeviceID().GetType() == SoundDevice::TypeASIO)
 			{
 				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(TrackerSettings::Instance().GetSoundDeviceID(), TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
 			}
@@ -666,8 +666,8 @@ void CMainFrame::AudioMessage(const std::string &str)
 }
 
 
-void CMainFrame::FillAudioBufferLocked(IFillAudioBuffer &callback)
-//----------------------------------------------------------------
+void CMainFrame::FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback)
+//-----------------------------------------------------------------------------
 {
 	CriticalSection cs;
 	ALWAYS_ASSERT(m_pSndFile != nullptr);
@@ -749,8 +749,8 @@ public:
 };
 
 
-void CMainFrame::AudioRead(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer)
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
@@ -781,8 +781,8 @@ void CMainFrame::AudioRead(const SoundDeviceSettings &settings, const SoundDevic
 }
 
 
-void CMainFrame::AudioDone(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(settings);
 	MPT_UNREFERENCED_PARAMETER(flags);
@@ -810,7 +810,7 @@ bool CMainFrame::audioOpenDevice()
 		Reporting::Error("Unable to open sound device: Invalid mixer settings.");
 		return false;
 	}
-	const SoundDeviceID deviceID = TrackerSettings::Instance().GetSoundDeviceID();
+	const SoundDevice::ID deviceID = TrackerSettings::Instance().GetSoundDeviceID();
 	if(gpSoundDevice && (gpSoundDevice->GetDeviceID() != deviceID))
 	{
 		gpSoundDevice->Stop();
@@ -833,7 +833,7 @@ bool CMainFrame::audioOpenDevice()
 	}
 	gpSoundDevice->SetMessageReceiver(this);
 	gpSoundDevice->SetSource(this);
-	SoundDeviceSettings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceID);
+	SoundDevice::Settings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceID);
 	if(!gpSoundDevice->Open(deviceSettings))
 	{
 		Reporting::Error("Unable to open sound device: Could not open sound device.");
@@ -1231,7 +1231,7 @@ void CMainFrame::StopPlayback()
 		m_NotifyTimer = 0;
 	}
 	ResetNotificationBuffer();
-	if(!gpSoundDevice->GetDeviceCaps().CanKeepDeviceRunning || TrackerSettings::Instance().m_SoundSettingsStopMode == SoundDeviceStopModeClosed)
+	if(!gpSoundDevice->GetDeviceCaps().CanKeepDeviceRunning || TrackerSettings::Instance().m_SoundSettingsStopMode == SoundDevice::StopModeClosed)
 	{
 		audioCloseDevice();
 	}
@@ -1652,14 +1652,14 @@ void CMainFrame::IdleHandlerSounddevice()
 	if(gpSoundDevice)
 	{
 		const LONG requestFlags = gpSoundDevice->GetRequestFlags();
-		if(requestFlags & ISoundDevice::RequestFlagClose)
+		if(requestFlags & SoundDevice::Base::RequestFlagClose)
 		{
 			StopPlayback();
 			audioCloseDevice();
-		} else if(requestFlags & ISoundDevice::RequestFlagReset)
+		} else if(requestFlags & SoundDevice::Base::RequestFlagReset)
 		{
 			ResetSoundCard();
-		} else if(requestFlags & ISoundDevice::RequestFlagRestart)
+		} else if(requestFlags & SoundDevice::Base::RequestFlagRestart)
 		{
 			RestartPlayback();
 		} else
@@ -1677,8 +1677,8 @@ BOOL CMainFrame::ResetSoundCard()
 }
 
 
-BOOL CMainFrame::SetupSoundCard(SoundDeviceSettings deviceSettings, SoundDeviceID deviceID, SoundDeviceStopMode stoppedMode, bool forceReset)
-//-------------------------------------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::ID deviceID, SoundDevice::StopMode stoppedMode, bool forceReset)
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(forceReset
 		|| (TrackerSettings::Instance().GetSoundDeviceID() != deviceID)
@@ -1699,13 +1699,13 @@ BOOL CMainFrame::SetupSoundCard(SoundDeviceSettings deviceSettings, SoundDeviceI
 		TrackerSettings::Instance().m_SoundSettingsStopMode = stoppedMode;
 		switch(stoppedMode)
 		{
-			case SoundDeviceStopModeClosed:
+			case SoundDevice::StopModeClosed:
 				deviceSettings.KeepDeviceRunning = true;
 				break;
-			case SoundDeviceStopModeStopped:
+			case SoundDevice::StopModeStopped:
 				deviceSettings.KeepDeviceRunning = false;
 				break;
-			case SoundDeviceStopModePlaying:
+			case SoundDevice::StopModePlaying:
 				deviceSettings.KeepDeviceRunning = true;
 				break;
 		}

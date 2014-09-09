@@ -24,7 +24,10 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDeviceSettings &m_Settings);
+namespace SoundDevice {
+
+	
+bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings);
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +42,7 @@ static const std::size_t WAVEOUT_MINBUFFERSIZE = 1024;
 static const std::size_t WAVEOUT_MAXBUFFERSIZE = 65536;
 
 
-CWaveDevice::CWaveDevice(SoundDeviceID id, const std::wstring &internalID)
+CWaveDevice::CWaveDevice(SoundDevice::ID id, const std::wstring &internalID)
 //------------------------------------------------------------------------
 	: CSoundDeviceWithThread(id, internalID)
 {
@@ -58,10 +61,10 @@ CWaveDevice::~CWaveDevice()
 }
 
 
-SoundDeviceCaps CWaveDevice::InternalGetDeviceCaps()
+SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 //--------------------------------------------------
 {
-	SoundDeviceCaps caps;
+	SoundDevice::Caps caps;
 	caps.Available = true;
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
@@ -87,10 +90,10 @@ SoundDeviceCaps CWaveDevice::InternalGetDeviceCaps()
 }
 
 
-SoundDeviceDynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /*baseSampleRates*/ )
+SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /*baseSampleRates*/ )
 //--------------------------------------------------------------------------------------------------------
 {
-	SoundDeviceDynamicCaps caps;
+	SoundDevice::DynamicCaps caps;
 	WAVEOUTCAPSW woc;
 	MemsetZero(woc);
 	if(GetDeviceIndex() > 0)
@@ -177,7 +180,7 @@ bool CWaveDevice::InternalOpen()
 	SetWakeupEvent(m_ThreadWakeupEvent);
 	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
 	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
-	SoundBufferAttributes bufferAttributes;
+	SoundDevice::BufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond();
 	bufferAttributes.UpdateInterval = m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
 	bufferAttributes.NumBuffers = m_nPreparedHeaders;
@@ -304,20 +307,20 @@ void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_P
 }
 
 
-std::vector<SoundDeviceInfo> CWaveDevice::EnumerateDevices()
+std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices()
 //----------------------------------------------------------
 {
-	std::vector<SoundDeviceInfo> devices;
+	std::vector<SoundDevice::Info> devices;
 	UINT numDevs = waveOutGetNumDevs();
 	for(UINT index = 0; index <= numDevs; ++index)
 	{
-		if(!SoundDeviceIndexIsValid(index))
+		if(!SoundDevice::IndexIsValid(index))
 		{
 			break;
 		}
-		SoundDeviceInfo info;
-		info.id = SoundDeviceID(SNDDEV_WAVEOUT, static_cast<SoundDeviceIndex>(index));
-		info.apiName = SoundDeviceTypeToString(SNDDEV_WAVEOUT);
+		SoundDevice::Info info;
+		info.id = SoundDevice::ID(TypeWAVEOUT, static_cast<SoundDevice::Index>(index));
+		info.apiName = SoundDevice::TypeToString(TypeWAVEOUT);
 		WAVEOUTCAPSW woc;
 		MemsetZero(woc);
 		if(index == 0)
@@ -341,6 +344,9 @@ std::vector<SoundDeviceInfo> CWaveDevice::EnumerateDevices()
 	}
 	return devices;
 }
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

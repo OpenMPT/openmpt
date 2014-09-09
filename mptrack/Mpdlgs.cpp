@@ -149,8 +149,8 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 }
 
 
-COptionsSoundcard::COptionsSoundcard(SoundDeviceID dev)
-//-----------------------------------------------------
+COptionsSoundcard::COptionsSoundcard(SoundDevice::ID dev)
+//-------------------------------------------------------
 	: CPropertyPage(IDD_OPTIONS_SOUNDCARD)
 	, m_CurrentDeviceInfo(theApp.GetSoundDevicesManager()->FindDeviceInfo(dev))
 	, m_CurrentDeviceCaps(theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice))
@@ -161,8 +161,8 @@ COptionsSoundcard::COptionsSoundcard(SoundDeviceID dev)
 }
 
 
-void COptionsSoundcard::SetDevice(SoundDeviceID dev, bool forceReload)
-//--------------------------------------------------------------------
+void COptionsSoundcard::SetDevice(SoundDevice::ID dev, bool forceReload)
+//----------------------------------------------------------------------
 {
 	bool deviceChanged = (dev != m_CurrentDeviceInfo.id);
 	m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(dev);
@@ -301,14 +301,14 @@ void COptionsSoundcard::UpdateEverything()
 		COMBOBOXEXITEM cbi;
 		UINT iItem = 0;
 
-		for(std::vector<SoundDeviceInfo>::const_iterator it = theApp.GetSoundDevicesManager()->begin(); it != theApp.GetSoundDevicesManager()->end(); ++it)
+		for(std::vector<SoundDevice::Info>::const_iterator it = theApp.GetSoundDevicesManager()->begin(); it != theApp.GetSoundDevicesManager()->end(); ++it)
 		{
 
 			if(!TrackerSettings::Instance().m_MorePortaudio)
 			{
-				if(it->id.GetType() == SNDDEV_PORTAUDIO_ASIO || it->id.GetType() == SNDDEV_PORTAUDIO_DS || it->id.GetType() == SNDDEV_PORTAUDIO_WMME)
+				if(it->id.GetType() == SoundDevice::TypePORTAUDIO_ASIO || it->id.GetType() == SoundDevice::TypePORTAUDIO_DS || it->id.GetType() == SoundDevice::TypePORTAUDIO_WMME)
 				{
-					// skip those portaudio apis that are already implemented via our own ISoundDevice class
+					// skip those portaudio apis that are already implemented via our own SoundDevice class
 					// can be overwritten via [Sound Settings]MorePortaudio=1
 					continue;
 				}
@@ -321,25 +321,25 @@ void COptionsSoundcard::UpdateEverything()
 				cbi.cchTextMax = 0;
 				switch(it->id.GetType())
 				{
-				case SNDDEV_WAVEOUT:
-				case SNDDEV_PORTAUDIO_WMME:
+				case SoundDevice::TypeWAVEOUT:
+				case SoundDevice::TypePORTAUDIO_WMME:
 					cbi.iImage = IMAGE_WAVEOUT;
 					break;
-				case SNDDEV_DSOUND:
-				case SNDDEV_PORTAUDIO_DS:
+				case SoundDevice::TypeDSOUND:
+				case SoundDevice::TypePORTAUDIO_DS:
 					cbi.iImage = IMAGE_DIRECTX;
 					break;
-				case SNDDEV_ASIO:
-				case SNDDEV_PORTAUDIO_ASIO:
+				case SoundDevice::TypeASIO:
+				case SoundDevice::TypePORTAUDIO_ASIO:
 					cbi.iImage = IMAGE_ASIO;
 					break;
-				case SNDDEV_PORTAUDIO_WASAPI:
+				case SoundDevice::TypePORTAUDIO_WASAPI:
 					// No real image available for now,
 					// prepend API name to name and misuse another icon
 					cbi.iImage = IMAGE_SAMPLEMUTE;
 					name = mpt::ToCString(it->apiName) + TEXT(" - ") + name;
 					break;
-				case SNDDEV_PORTAUDIO_WDMKS:
+				case SoundDevice::TypePORTAUDIO_WDMKS:
 					// No real image available for now,
 					// prepend API name to name and misuse another icon.
 					cbi.iImage = IMAGE_CHIP;
@@ -525,7 +525,7 @@ void COptionsSoundcard::OnDeviceChanged()
 	int n = m_CbnDevice.GetCurSel();
 	if(n >= 0)
 	{
-		SetDevice(SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(n)));
+		SetDevice(SoundDevice::ID::FromIdRaw(m_CbnDevice.GetItemData(n)));
 		UpdateDevice();
 		OnSettingsChanged();
 	}
@@ -551,7 +551,7 @@ void COptionsSoundcard::OnChannelsChanged()
 void COptionsSoundcard::OnSoundCardDriverPanel()
 //----------------------------------------------
 {
-	theApp.GetSoundDevicesManager()->OpenDriverSettings(SoundDeviceID::FromIdRaw(m_CbnDevice.GetItemData(m_CbnDevice.GetCurSel())), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice);
+	theApp.GetSoundDevicesManager()->OpenDriverSettings(SoundDevice::ID::FromIdRaw(m_CbnDevice.GetItemData(m_CbnDevice.GetCurSel())), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice);
 }
 
 
@@ -706,7 +706,7 @@ void COptionsSoundcard::OnOK()
 		UINT n = m_CbnDither.GetCurSel();
 		m_Settings.DitherType = (DitherMode)(n);
 	}
-	const SoundDeviceID dev = m_CurrentDeviceInfo.id;
+	const SoundDevice::ID dev = m_CurrentDeviceInfo.id;
 	// Latency
 	{
 		CString s;
@@ -736,13 +736,13 @@ void COptionsSoundcard::OnOK()
 				CComboBox *combo = &m_CbnChannelMapping[mch];
 				channels[mch] = combo->GetItemData(combo->GetCurSel());
 			}
-			m_Settings.ChannelMapping = SoundChannelMapping(channels);
+			m_Settings.ChannelMapping = SoundDevice::ChannelMapping(channels);
 		} else
 		{
-			m_Settings.ChannelMapping = SoundChannelMapping();
+			m_Settings.ChannelMapping = SoundDevice::ChannelMapping();
 		}
 	}
-	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.id, (SoundDeviceStopMode)m_CbnStoppedMode.GetCurSel());
+	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.id, (SoundDevice::StopMode)m_CbnStoppedMode.GetCurSel());
 	SetDevice(m_CurrentDeviceInfo.id, true); // Poll changed ASIO sample format and channel names
 	UpdateDevice();
 	UpdateStatistics();
@@ -757,7 +757,7 @@ void COptionsSoundcard::UpdateStatistics()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm->gpSoundDevice && pMainFrm->IsPlaying())
 	{
-		const SoundBufferAttributes bufferAttributes = pMainFrm->gpSoundDevice->GetBufferAttributes();
+		const SoundDevice::BufferAttributes bufferAttributes = pMainFrm->gpSoundDevice->GetBufferAttributes();
 		const double currentLatency = pMainFrm->gpSoundDevice->GetCurrentLatency();
 		const double currentUpdateInterval = pMainFrm->gpSoundDevice->GetCurrentUpdateInterval();
 		const uint32 samplerate = pMainFrm->gpSoundDevice->GetSettings().Samplerate;

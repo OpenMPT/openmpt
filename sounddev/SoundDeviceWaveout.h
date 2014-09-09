@@ -16,7 +16,12 @@
 
 #include <MMSystem.h>
 
+
 OPENMPT_NAMESPACE_BEGIN
+
+
+namespace SoundDevice {
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 //
@@ -39,7 +44,7 @@ protected:
 	std::vector<std::vector<char> > m_WaveBuffersData;
 
 public:
-	CWaveDevice(SoundDeviceID id, const std::wstring &internalID);
+	CWaveDevice(SoundDevice::ID id, const std::wstring &internalID);
 	~CWaveDevice();
 
 public:
@@ -53,13 +58,16 @@ public:
 	bool InternalHasGetStreamPosition() const { return true; }
 	int64 InternalGetStreamPositionFrames() const;
 
-	SoundDeviceCaps InternalGetDeviceCaps();
-	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
+	SoundDevice::Caps InternalGetDeviceCaps();
+	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
-	static std::vector<SoundDeviceInfo> EnumerateDevices();
+	static std::vector<SoundDevice::Info> EnumerateDevices();
 };
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

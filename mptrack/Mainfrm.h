@@ -21,8 +21,10 @@ OPENMPT_NAMESPACE_BEGIN
 class CInputHandler;
 class CModDoc;
 class CAutoSaver;
-class ISoundDevice;
-class ISoundSource;
+namespace SoundDevice {
+class Base;
+class ISource;
+} // namerspace SoundDevice
 
 #define MAINFRAME_TITLE				"Open ModPlug Tracker"
 #define MAINFRAME_TITLEW			L"Open ModPlug Tracker"
@@ -294,9 +296,9 @@ template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val)
 }
 
 
-//======================================================================================
-class CMainFrame: public CMDIFrameWnd, public ISoundSource, public ISoundMessageReceiver
-//======================================================================================
+//======================================================================================================
+class CMainFrame: public CMDIFrameWnd, public SoundDevice::ISource, public SoundDevice::IMessageReceiver
+//======================================================================================================
 {
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
@@ -319,7 +321,7 @@ public:
 public:
 
 	// Low-Level Audio
-	ISoundDevice *gpSoundDevice;
+	SoundDevice::Base *gpSoundDevice;
 	UINT_PTR m_NotifyTimer;
 	Dither m_Dither;
 
@@ -375,12 +377,12 @@ public:
 	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
 
-	// from ISoundSource
-	void FillAudioBufferLocked(IFillAudioBuffer &callback);
-	void AudioRead(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, void *buffer);
-	void AudioDone(const SoundDeviceSettings &settings, const SoundDeviceFlags &flags, const SoundBufferAttributes &bufferAttributes, SoundTimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
+	// from SoundDevice::ISource
+	void FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback);
+	void AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer);
+	void AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
 	
-	// from ISoundMessageReceiver
+	// from SoundDevice::IMessageReceiver
 	void AudioMessage(const std::string &str);
 
 	bool InGuiThread() const { return theApp.InGuiThread(); }
@@ -492,7 +494,7 @@ public:
 	void IdleHandlerSounddevice();
 
 	BOOL ResetSoundCard();
-	BOOL SetupSoundCard(SoundDeviceSettings deviceSettings, SoundDeviceID deviceID, SoundDeviceStopMode stoppedMode, bool forceReset = false);
+	BOOL SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::ID deviceID, SoundDevice::StopMode stoppedMode, bool forceReset = false);
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer();
 

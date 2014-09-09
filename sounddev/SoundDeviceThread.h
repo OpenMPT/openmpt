@@ -19,6 +19,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+namespace SoundDevice {
+
+
 class CSoundDeviceWithThread;
 
 
@@ -68,7 +71,7 @@ public:
 };
 
 
-class CSoundDeviceWithThread : public ISoundDevice
+class CSoundDeviceWithThread : public SoundDevice::Base
 {
 	friend class CAudioThread;
 protected:
@@ -79,13 +82,16 @@ protected:
 	void SetWakeupEvent(HANDLE ev);
 	void SetWakeupInterval(double seconds);
 public:
-	CSoundDeviceWithThread(SoundDeviceID id, const std::wstring &internalID) : ISoundDevice(id, internalID), m_AudioThread(*this) {}
+	CSoundDeviceWithThread(SoundDevice::ID id, const std::wstring &internalID) : SoundDevice::Base(id, internalID), m_AudioThread(*this) {}
 	virtual ~CSoundDeviceWithThread() {}
 	bool InternalStart();
 	void InternalStop();
 	virtual void StartFromSoundThread() = 0;
 	virtual void StopFromSoundThread() = 0;
 };
+
+
+} // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END
