@@ -55,7 +55,7 @@ public:
 	double GetCurrentLatency() const;
 	bool InternalHasGetStreamPosition() const { return false; }
 	int64 InternalGetStreamPositionFrames() const;
-	SoundDeviceCaps GetDeviceCaps();
+	SoundDeviceCaps InternalGetDeviceCaps();
 	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 	bool OpenDriverSettings();
 

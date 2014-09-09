@@ -161,12 +161,6 @@ public:
 };
 
 
-#define SNDDEV_MINLATENCY_MS        1u
-#define SNDDEV_MAXLATENCY_MS        500u
-#define SNDDEV_MINUPDATEINTERVAL_MS 1u
-#define SNDDEV_MAXUPDATEINTERVAL_MS 200u
-
-
 struct SoundChannelMapping
 {
 
@@ -245,8 +239,8 @@ enum SoundDeviceStopMode
 struct SoundDeviceSettings
 {
 	HWND hWnd;
-	uint32 LatencyMS;
-	uint32 UpdateIntervalMS;
+	double Latency; // seconds
+	double UpdateInterval; // seconds
 	uint32 Samplerate;
 	uint8 Channels;
 	SampleFormat sampleFormat;
@@ -258,11 +252,11 @@ struct SoundDeviceSettings
 	SoundChannelMapping ChannelMapping;
 	SoundDeviceSettings()
 		: hWnd(NULL)
-		, LatencyMS(100)
-		, UpdateIntervalMS(5)
+		, Latency(0.1)
+		, UpdateInterval(0.005)
 		, Samplerate(48000)
 		, Channels(2)
-		, sampleFormat(mpt::Windows::Version::IsWine() ? SampleFormatInt16 : SampleFormatFloat32)
+		, sampleFormat(SampleFormatFloat32)
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
 		, KeepDeviceRunning(true)
@@ -275,8 +269,8 @@ struct SoundDeviceSettings
 	{
 		return true
 			&& hWnd == cmp.hWnd
-			&& LatencyMS == cmp.LatencyMS
-			&& UpdateIntervalMS == cmp.UpdateIntervalMS
+			&& Util::Round<int64>(Latency * 1000000000.0) == Util::Round<int64>(cmp.Latency * 1000000000.0) // compare in nanoseconds
+			&& Util::Round<int64>(UpdateInterval * 1000000000.0) == Util::Round<int64>(cmp.UpdateInterval * 1000000000.0) // compare in nanoseconds
 			&& Samplerate == cmp.Samplerate
 			&& Channels == cmp.Channels
 			&& sampleFormat == cmp.sampleFormat
@@ -324,6 +318,7 @@ struct SoundDeviceFlags
 
 struct SoundDeviceCaps
 {
+	bool Available;
 	bool CanUpdateInterval;
 	bool CanSampleFormat;
 	bool CanExclusiveMode;
@@ -334,8 +329,14 @@ struct SoundDeviceCaps
 	bool CanDriverPanel;
 	bool HasInternalDither;
 	std::wstring ExclusiveModeDescription;
+	double LatencyMin;
+	double LatencyMax;
+	double UpdateIntervalMin;
+	double UpdateIntervalMax;
+	SoundDeviceSettings DefaultSettings;
 	SoundDeviceCaps()
-		: CanUpdateInterval(true)
+		: Available(false)
+		, CanUpdateInterval(true)
 		, CanSampleFormat(true)
 		, CanExclusiveMode(false)
 		, CanBoostThreadPriority(true)
@@ -345,6 +346,10 @@ struct SoundDeviceCaps
 		, CanDriverPanel(false)
 		, HasInternalDither(false)
 		, ExclusiveModeDescription(L"Use device exclusively")
+		, LatencyMin(0.002) // 2ms
+		, LatencyMax(0.5) // 500ms
+		, UpdateIntervalMin(0.001) // 1ms
+		, UpdateIntervalMax(0.2) // 200ms
 	{
 		return;
 	}
@@ -354,7 +359,8 @@ struct SoundDeviceCaps
 struct SoundDeviceDynamicCaps
 {
 	uint32 currentSampleRate;
-	std::vector<uint32> supportedSampleRates;	// Which samplerates are actually supported by the device. Currently only implemented properly for ASIO, DirectSound and PortAudio.
+	std::vector<uint32> supportedSampleRates;
+	std::vector<uint32> supportedExclusiveSampleRates;
 	std::vector<std::wstring> channelNames;
 	SoundDeviceDynamicCaps()
 		: currentSampleRate(0)
@@ -396,6 +402,10 @@ private:
 	const SoundDeviceID m_ID;
 
 	std::wstring m_InternalID;
+
+private:
+
+	SoundDeviceCaps m_Caps;
 
 protected:
 
@@ -459,6 +469,8 @@ protected:
 	virtual void InternalStopForce() { InternalStop(); }
 	virtual bool InternalClose() = 0;
 
+	virtual SoundDeviceCaps InternalGetDeviceCaps() = 0;
+
 public:
 
 	ISoundDevice(SoundDeviceID id, const std::wstring &internalID);
@@ -474,9 +486,10 @@ public:
 	SoundDeviceIndex GetDeviceIndex() const { return m_ID.GetIndex(); }
 	std::wstring GetDeviceInternalID() const { return m_InternalID; }
 
-	virtual SoundDeviceCaps GetDeviceCaps();
+	SoundDeviceCaps GetDeviceCaps() const { return m_Caps; }
 	virtual SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
+	bool Init();
 	bool Open(const SoundDeviceSettings &settings);
 	bool Close();
 	bool Start();
@@ -484,7 +497,8 @@ public:
 
 	LONG GetRequestFlags() const { return InterlockedExchangeAdd(&m_RequestFlags, 0); /* read */ }
 
-	bool IsOpen() const { return InternalIsOpen(); }
+	bool IsInited() const { return m_Caps.Available; }
+	bool IsOpen() const { return IsInited() && InternalIsOpen(); }
 	bool IsPlaying() const { return m_IsPlaying; }
 
 	virtual bool OnIdle() { return false; } // return true if any work has been done

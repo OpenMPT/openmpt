@@ -53,6 +53,9 @@ public:
 	bool InternalHasGetStreamPosition() const { return true; }
 	int64 InternalGetStreamPositionFrames() const;
 
+	SoundDeviceCaps InternalGetDeviceCaps();
+	SoundDeviceDynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
+
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
 	static std::vector<SoundDeviceInfo> EnumerateDevices();

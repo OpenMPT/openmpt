@@ -80,9 +80,9 @@ bool CPortaudioDevice::InternalOpen()
 		default: return false; break;
 		}
 	}
-	m_StreamParameters.suggestedLatency = m_Settings.LatencyMS / 1000.0;
+	m_StreamParameters.suggestedLatency = m_Settings.Latency;
 	m_StreamParameters.hostApiSpecificStreamInfo = NULL;
-	unsigned long framesPerBuffer = static_cast<long>(m_Settings.UpdateIntervalMS * m_Settings.Samplerate / 1000.0f);
+	unsigned long framesPerBuffer = static_cast<long>(m_Settings.UpdateInterval * m_Settings.Samplerate);
 	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
 	{
 		if(m_Settings.ExclusiveMode)
@@ -130,7 +130,7 @@ bool CPortaudioDevice::InternalOpen()
 	}
 	SoundBufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_StreamInfo->outputLatency;
-	bufferAttributes.UpdateInterval = m_Settings.UpdateIntervalMS / 1000.0;
+	bufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
 	bufferAttributes.NumBuffers = 1;
 	UpdateBufferAttributes(bufferAttributes);
 	return true;
@@ -197,10 +197,11 @@ double CPortaudioDevice::GetCurrentLatency() const
 }
 
 
-SoundDeviceCaps CPortaudioDevice::GetDeviceCaps()
-//-----------------------------------------------
+SoundDeviceCaps CPortaudioDevice::InternalGetDeviceCaps()
+//-------------------------------------------------------
 {
 	SoundDeviceCaps caps;
+	caps.Available = true;
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
 	caps.CanExclusiveMode = false;
@@ -209,13 +210,39 @@ SoundDeviceCaps CPortaudioDevice::GetDeviceCaps()
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = true;
+	const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi));
+	if(deviceInfo)
+	{
+		caps.DefaultSettings.Latency = deviceInfo->defaultLowOutputLatency;
+	}
+	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
 	{
 		caps.CanExclusiveMode = true;
 		caps.CanDriverPanel = true;
+		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
 	{
 		caps.CanUpdateInterval = false;
+		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound))
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paMME))
+	{
+		if(mpt::Windows::Version::IsWine())
+		{
+			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+		{
+			caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+		} else
+		{
+			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+		}
+	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paASIO))
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
 	}
 	return caps;
 }
@@ -251,6 +278,7 @@ SoundDeviceDynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vector<
 		if(Pa_IsFormatSupported(NULL, &StreamParameters, baseSampleRates[n]) == paFormatIsSupported)
 		{
 			caps.supportedSampleRates.push_back(baseSampleRates[n]);
+			caps.supportedExclusiveSampleRates.push_back(baseSampleRates[n]);
 		}
 	}
 	return caps;

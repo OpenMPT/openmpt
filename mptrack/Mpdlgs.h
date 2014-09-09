@@ -65,6 +65,7 @@ protected:
 
 	afx_msg void OnDeviceChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnExclusiveModeChanged();
 	afx_msg void OnChannelsChanged();
 	afx_msg void OnSampleFormatChanged();
 	afx_msg void OnSoundCardRescan();

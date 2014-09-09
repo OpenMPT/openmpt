@@ -92,10 +92,11 @@ CDSoundDevice::~CDSoundDevice()
 }
 
 
-SoundDeviceCaps CDSoundDevice::GetDeviceCaps()
-//--------------------------------------------
+SoundDeviceCaps CDSoundDevice::InternalGetDeviceCaps()
+//----------------------------------------------------
 {
 	SoundDeviceCaps caps;
+	caps.Available = true;
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
 	caps.CanExclusiveMode = false;
@@ -104,6 +105,7 @@ SoundDeviceCaps CDSoundDevice::GetDeviceCaps()
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.ExclusiveModeDescription = L"Use primary buffer";
+	caps.DefaultSettings.sampleFormat = SampleFormatInt16;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)
@@ -182,6 +184,7 @@ SoundDeviceDynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<uin
 			if(dscaps.dwMinSecondarySampleRate <= baseSampleRates[i] && baseSampleRates[i] <= dscaps.dwMaxSecondarySampleRate)
 			{
 				caps.supportedSampleRates.push_back(baseSampleRates[i]);
+				caps.supportedExclusiveSampleRates.push_back(baseSampleRates[i]);
 			}
 		}
 	}
@@ -218,7 +221,7 @@ bool CDSoundDevice::InternalOpen()
 		return false;
 	}
 	m_bMixRunning = FALSE;
-	m_nDSoundBufferSize = (m_Settings.LatencyMS * pwfx->nAvgBytesPerSec) / 1000;
+	m_nDSoundBufferSize = Util::Round<int32>(m_Settings.Latency * pwfx->nAvgBytesPerSec);
 	m_nDSoundBufferSize = Clamp(m_nDSoundBufferSize, (DWORD)DSBSIZE_MIN, (DWORD)DSBSIZE_MAX);
 	m_nDSoundBufferSize = (m_nDSoundBufferSize + (bytesPerFrame-1)) / bytesPerFrame * bytesPerFrame; // round up to full frame
 	if(!m_Settings.ExclusiveMode)
@@ -293,11 +296,11 @@ bool CDSoundDevice::InternalOpen()
 		if (dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
 	}
 	m_dwWritePos = 0xFFFFFFFF;
-	SetWakeupInterval(std::min(m_Settings.UpdateIntervalMS / 1000.0, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
+	SetWakeupInterval(std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
 	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
 	SoundBufferAttributes bufferAttributes;
 	bufferAttributes.Latency = m_nDSoundBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
-	bufferAttributes.UpdateInterval = std::min(m_Settings.UpdateIntervalMS / 1000.0, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond()));
+	bufferAttributes.UpdateInterval = std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond()));
 	bufferAttributes.NumBuffers = 1;
 	UpdateBufferAttributes(bufferAttributes);
 	return true;
