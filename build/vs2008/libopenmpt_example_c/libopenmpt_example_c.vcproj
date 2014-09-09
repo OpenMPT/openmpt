@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="libopenmpt_example_c.c"
+	Name="libopenmpt_example_c"
 	ProjectGUID="{89D1117D-7787-45C1-9240-A24AACF4A414}"
 	RootNamespace="libopenmpt_example_cc"
 	TargetFrameworkVersion="196613"
