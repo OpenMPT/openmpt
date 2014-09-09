@@ -168,7 +168,6 @@ protected:
 	CAbstractVstEditor *m_pEditor;
 	CSoundFile &m_SndFile;
 
-	size_t m_nRefCount;
 	uint32 m_nSampleRate;
 	SNDMIXPLUGINSTATE m_MixState;
 
@@ -258,8 +257,7 @@ public:
 	size_t GetInputChannelList(std::vector<CHANNELINDEX> &list);
 
 public:
-	size_t AddRef() { return ++m_nRefCount; }
-	size_t Release();
+	void Release();
 	void SaveAllParameters();
 	void RestoreAllParameters(long nProg=-1);
 	void RecalculateGain();
