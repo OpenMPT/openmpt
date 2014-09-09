@@ -369,7 +369,9 @@
 
 #endif
 
+#ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
+#endif
 
 #if MPT_COMPILER_MSVC
 #ifndef _CRT_SECURE_NO_WARNINGS
