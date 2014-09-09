@@ -287,16 +287,16 @@ public:
 #endif // MPT_COMPILER
 
 #if MPT_COMPILER_CLANG || MPT_COMPILER_GCC
-typedef mpt::atomic_impl<std::uint32_t> atomic_uint32_t;
-typedef mpt::atomic_impl<std::int32_t> atomic_int32_t;
+typedef mpt::atomic_impl<uint32> atomic_uint32_t;
+typedef mpt::atomic_impl<int32> atomic_int32_t;
 #define MPT_ATOMIC_PTR mpt::atomic_impl // use as MPT_ATOMIC_PTR<T*>
 #elif MPT_COMPILER_MSVC
-typedef mpt::atomic_impl_32<std::uint32_t> atomic_uint32_t;
-typedef mpt::atomic_impl_32<std::int32_t> atomic_int32_t;
+typedef mpt::atomic_impl_32<uint32> atomic_uint32_t;
+typedef mpt::atomic_impl_32<int32> atomic_int32_t;
 #define MPT_ATOMIC_PTR mpt::atomic_impl_ptr // use as MPT_ATOMIC_PTR<T*>
 #else // MPT_COMPILER_GENERIC
-typedef std::atomic<std::uint32_t> atomic_uint32_t;
-typedef std::atomic<std::int32_t> atomic_int32_t;
+typedef std::atomic<uint32> atomic_uint32_t;
+typedef std::atomic<int32> atomic_int32_t;
 #define MPT_ATOMIC_PTR std::atomic // use as MPT_ATOMIC_PTR<T*>
 #endif // MPT_COMPILER
 
