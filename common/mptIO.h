@@ -36,7 +36,18 @@ namespace IO {
 
 typedef int64 Offset;
 
-STATIC_ASSERT(sizeof(std::streamoff) == 8); // Assert 64bit file support.
+
+
+// Returns true iff 'off' fits into 'Toff'.
+template < typename Toff >
+inline bool OffsetFits(IO::Offset off)
+{
+	return (static_cast<IO::Offset>(mpt::saturate_cast<Toff>(off)) == off);
+}
+
+
+
+//STATIC_ASSERT(sizeof(std::streamoff) == 8); // Assert 64bit file support.
 inline bool IsValid(std::ostream & f) { return !f.fail(); }
 inline bool IsValid(std::istream & f) { return !f.fail(); }
 inline bool IsValid(std::iostream & f) { return !f.fail(); }
@@ -48,12 +59,12 @@ inline bool SeekBegin(std::iostream & f) { f.seekg(0); f.seekp(0); return !f.fai
 inline bool SeekEnd(std::ostream & f) { f.seekp(0, std::ios::end); return !f.fail(); }
 inline bool SeekEnd(std::istream & f) { f.seekg(0, std::ios::end); return !f.fail(); }
 inline bool SeekEnd(std::iostream & f) { f.seekg(0, std::ios::end); f.seekp(0, std::ios::end); return !f.fail(); }
-inline bool SeekAbsolute(std::ostream & f, IO::Offset pos) { f.seekp(pos, std::ios::beg); return !f.fail(); }
-inline bool SeekAbsolute(std::istream & f, IO::Offset pos) { f.seekg(pos, std::ios::beg); return !f.fail(); }
-inline bool SeekAbsolute(std::iostream & f, IO::Offset pos) { f.seekg(pos, std::ios::beg); f.seekp(pos, std::ios::beg); return !f.fail(); }
-inline bool SeekRelative(std::ostream & f, IO::Offset off) { f.seekp(off, std::ios::cur); return !f.fail(); }
-inline bool SeekRelative(std::istream & f, IO::Offset off) { f.seekg(off, std::ios::cur); return !f.fail(); }
-inline bool SeekRelative(std::iostream & f, IO::Offset off) { f.seekg(off, std::ios::cur); f.seekp(off, std::ios::cur); return !f.fail(); }
+inline bool SeekAbsolute(std::ostream & f, IO::Offset pos) { if(!OffsetFits<std::streamoff>(pos)) { return false; } f.seekp(pos, std::ios::beg); return !f.fail(); }
+inline bool SeekAbsolute(std::istream & f, IO::Offset pos) { if(!OffsetFits<std::streamoff>(pos)) { return false; } f.seekg(pos, std::ios::beg); return !f.fail(); }
+inline bool SeekAbsolute(std::iostream & f, IO::Offset pos) { if(!OffsetFits<std::streamoff>(pos)) { return false; } f.seekg(pos, std::ios::beg); f.seekp(pos, std::ios::beg); return !f.fail(); }
+inline bool SeekRelative(std::ostream & f, IO::Offset off) { if(!OffsetFits<std::streamoff>(off)) { return false; } f.seekp(off, std::ios::cur); return !f.fail(); }
+inline bool SeekRelative(std::istream & f, IO::Offset off) { if(!OffsetFits<std::streamoff>(off)) { return false; } f.seekg(off, std::ios::cur); return !f.fail(); }
+inline bool SeekRelative(std::iostream & f, IO::Offset off) { if(!OffsetFits<std::streamoff>(off)) { return false; } f.seekg(off, std::ios::cur); f.seekp(off, std::ios::cur); return !f.fail(); }
 inline IO::Offset ReadRaw(std::istream & f, uint8 * data, std::size_t size) { return f.read(reinterpret_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
 inline IO::Offset ReadRaw(std::istream & f, char * data, std::size_t size) { return f.read(data, size) ? f.gcount() : std::streamsize(0); }
 inline IO::Offset ReadRaw(std::istream & f, void * data, std::size_t size) { return f.read(reinterpret_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
@@ -63,31 +74,41 @@ inline bool WriteRaw(std::ostream & f, const void * data, std::size_t size) { f.
 inline bool IsEof(std::istream & f) { return f.eof(); }
 inline bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
 
+
+
 inline bool IsValid(FILE* & f) { return f != NULL; }
+
 #if MPT_COMPILER_MSVC
+
 inline IO::Offset TellRead(FILE* & f) { return _ftelli64(f); }
 inline IO::Offset TellWrite(FILE* & f) { return _ftelli64(f); }
 inline bool SeekBegin(FILE* & f) { return _fseeki64(f, 0, SEEK_SET) == 0; }
 inline bool SeekEnd(FILE* & f) { return _fseeki64(f, 0, SEEK_END) == 0; }
 inline bool SeekAbsolute(FILE* & f, IO::Offset pos) { return _fseeki64(f, pos, SEEK_SET) == 0; }
 inline bool SeekRelative(FILE* & f, IO::Offset off) { return _fseeki64(f, off, SEEK_CUR) == 0; }
-#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
-STATIC_ASSERT(sizeof(off_t) == 8);
+
+#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE > 0) 
+
+//STATIC_ASSERT(sizeof(off_t) == 8);
 inline IO::Offset TellRead(FILE* & f) { return ftello(f); }
 inline IO::Offset TellWrite(FILE* & f) { return ftello(f); }
 inline bool SeekBegin(FILE* & f) { return fseeko(f, 0, SEEK_SET) == 0; }
 inline bool SeekEnd(FILE* & f) { return fseeko(f, 0, SEEK_END) == 0; }
-inline bool SeekAbsolute(FILE* & f, IO::Offset pos) { return fseeko(f, pos, SEEK_SET) == 0; }
-inline bool SeekRelative(FILE* & f, IO::Offset off) { return fseeko(f, off, SEEK_CUR) == 0; }
+inline bool SeekAbsolute(FILE* & f, IO::Offset pos) { return OffsetFits<off_t>(pos) && (fseek(f, mpt::saturate_cast<off_t>(pos), SEEK_SET) == 0); }
+inline bool SeekRelative(FILE* & f, IO::Offset off) { return OffsetFits<off_t>(off) && (fseek(f, mpt::saturate_cast<off_t>(off), SEEK_CUR) == 0); }
+
 #else
-STATIC_ASSERT(sizeof(long) == 8); // Fails on 32bit non-POSIX systems for now.
+
+//STATIC_ASSERT(sizeof(long) == 8); // Fails on 32bit non-POSIX systems for now.
 inline IO::Offset TellRead(FILE* & f) { return ftell(f); }
 inline IO::Offset TellWrite(FILE* & f) { return ftell(f); }
 inline bool SeekBegin(FILE* & f) { return fseek(f, 0, SEEK_SET) == 0; }
 inline bool SeekEnd(FILE* & f) { return fseek(f, 0, SEEK_END) == 0; }
-inline bool SeekAbsolute(FILE* & f, IO::Offset pos) { return fseek(f, pos, SEEK_SET) == 0; }
-inline bool SeekRelative(FILE* & f, IO::Offset off) { return fseek(f, off, SEEK_CUR) == 0; }
+inline bool SeekAbsolute(FILE* & f, IO::Offset pos) { return OffsetFits<long>(pos) && (fseek(f, mpt::saturate_cast<long>(pos), SEEK_SET) == 0); }
+inline bool SeekRelative(FILE* & f, IO::Offset off) { return OffsetFits<long>(off) && (fseek(f, mpt::saturate_cast<long>(off), SEEK_CUR) == 0); }
+
 #endif
+
 inline IO::Offset ReadRaw(FILE * & f, uint8 * data, std::size_t size) { return fread(data, 1, size, f); }
 inline IO::Offset ReadRaw(FILE * & f, char * data, std::size_t size) { return fread(data, 1, size, f); }
 inline IO::Offset ReadRaw(FILE * & f, void * data, std::size_t size) { return fread(data, 1, size, f); }
@@ -96,6 +117,8 @@ inline bool WriteRaw(FILE* & f, const char * data, std::size_t size) { return fw
 inline bool WriteRaw(FILE* & f, const void * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
 inline bool IsEof(FILE * & f) { return feof(f) != 0; }
 inline bool Flush(FILE* & f) { return fflush(f) == 0; }
+
+
 
 template <typename Tbinary, typename Tfile>
 inline bool Read(Tfile & f, Tbinary & v)
