@@ -13,6 +13,7 @@
 
 #include "../common/mutex.h"
 #include "../common/misc_util.h"
+#include "../common/mptAtomic.h"
 #include "../soundlib/SampleFormat.h"
 
 #include <map>
@@ -426,11 +427,11 @@ private:
 	int64 m_StreamPositionRenderFrames;
 	int64 m_StreamPositionOutputFrames;
 
-	mutable LONG m_RequestFlags;
+	mpt::atomic_uint32_t m_RequestFlags;
 public:
-	static const LONG RequestFlagClose = 1<<0;
-	static const LONG RequestFlagReset = 1<<1;
-	static const LONG RequestFlagRestart = 1<<2;
+	static const uint32 RequestFlagClose = 1<<0;
+	static const uint32 RequestFlagReset = 1<<1;
+	static const uint32 RequestFlagRestart = 1<<2;
 
 protected:
 
@@ -443,9 +444,9 @@ protected:
 	void SourceAudioRead(void *buffer, std::size_t numFrames);
 	void SourceAudioDone(std::size_t numFrames, int32 framesLatency);
 
-	void RequestClose() { _InterlockedOr(&m_RequestFlags, RequestFlagClose); }
-	void RequestReset() { _InterlockedOr(&m_RequestFlags, RequestFlagReset); }
-	void RequestRestart() { _InterlockedOr(&m_RequestFlags, RequestFlagRestart); }
+	void RequestClose() { m_RequestFlags.fetch_or(RequestFlagClose); }
+	void RequestReset() { m_RequestFlags.fetch_or(RequestFlagReset); }
+	void RequestRestart() { m_RequestFlags.fetch_or(RequestFlagRestart); }
 
 	void AudioSendMessage(const std::string &str);
 
@@ -495,7 +496,7 @@ public:
 	bool Start();
 	void Stop(bool force = false);
 
-	LONG GetRequestFlags() const { return InterlockedExchangeAdd(&m_RequestFlags, 0); /* read */ }
+	uint32 GetRequestFlags() const { return m_RequestFlags.load(); }
 
 	bool IsInited() const { return m_Caps.Available; }
 	bool IsOpen() const { return IsInited() && InternalIsOpen(); }

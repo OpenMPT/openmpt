@@ -1338,6 +1338,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mptAtomic.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\mptFstream.h"
 				>
 			</File>
