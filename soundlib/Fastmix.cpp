@@ -98,6 +98,7 @@ const MixFuncInterface Functions[5 * 16] =
 	BuildMixFuncTable(FIRFilterInterpolation),	// FIR SRC
 };
 
+
 #undef BuildMixFuncTableRamp
 #undef BuildMixFuncTableFilter
 #undef BuildMixFuncTable
@@ -489,6 +490,11 @@ void CSoundFile::CreateStereoMix(int count)
 		// Restore sample pointer in case it got changed through loop wrap-around
 		chn.pCurrentSample = samplePointer;
 		nchmixed += naddmix;
+	
+		if(naddmix && nMixPlugin > 0 && nMixPlugin <= MAX_MIXPLUGINS && m_MixPlugins[nMixPlugin - 1].pMixState)
+		{
+			m_MixPlugins[nMixPlugin - 1].pMixState->ResetSilence();
+		}
 	}
 	m_nMixStat = std::max<CHANNELINDEX>(m_nMixStat, nchmixed);
 }
@@ -497,10 +503,14 @@ void CSoundFile::CreateStereoMix(int count)
 void CSoundFile::ProcessPlugins(UINT nCount)
 //------------------------------------------
 {
+	// If any sample channels are active or any plugin has some input, possibly suspended master plugins need to be woken up.
+	bool masterHasInput = (m_nMixStat > 0);
+
 #ifdef MPT_INTMIXER
 	const float IntToFloat = m_PlayConfig.getIntToFloat();
 	const float FloatToInt = m_PlayConfig.getFloatToInt();
 #endif // MPT_INTMIXER
+
 	// Setup float inputs
 	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
@@ -545,6 +555,11 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 				memset(pState->pOutBufferR, 0, nCount * sizeof(pState->pOutBufferR[0]));
 			}
 			pState->dwFlags &= ~SNDMIXPLUGINSTATE::psfMixReady;
+			
+			if(!plugin.IsMasterEffect() && !(pState->dwFlags & SNDMIXPLUGINSTATE::psfSilenceBypass))
+			{
+				masterHasInput = true;
+			}
 		}
 	}
 	// Convert mix buffer
@@ -565,6 +580,25 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			&& plugin.pMixState->pOutBufferL != nullptr
 			&& plugin.pMixState->pOutBufferR != nullptr)
 		{
+			if(!plugin.IsMasterEffect() && !plugin.pMixPlugin->ShouldProcessSilence() && !(plugin.pMixState->dwFlags & SNDMIXPLUGINSTATE::psfHasInput))
+			{
+				// If plugin has no inputs and isn't a master plugin, we shouldn't let it process silence if possible.
+				// I have yet to encounter a plugin which actually sets this flag.
+				bool hasInput = false;
+				for(PLUGINDEX inPlug = 0; inPlug < plug; inPlug++)
+				{
+					if(m_MixPlugins[inPlug].GetOutputPlugin() == plug)
+					{
+						hasInput = true;
+						break;
+					}
+				}
+				if(!hasInput)
+				{
+					continue;
+				}
+			}
+
 			bool isMasterMix = false;
 			if (pMixL == plugin.pMixState->pOutBufferL)
 			{
@@ -581,9 +615,11 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			{
 				PLUGINDEX nOutput = plugin.GetOutputPlugin();
 				if(nOutput > plug && nOutput != PLUGINDEX_INVALID
-					&& m_MixPlugins[nOutput].pMixState != nullptr)
+					&& m_MixPlugins[nOutput].pMixState != nullptr
+					&& m_MixPlugins[nOutput].pMixPlugin != nullptr)
 				{
 					SNDMIXPLUGINSTATE *pOutState = m_MixPlugins[nOutput].pMixState;
+					if(!(pState->dwFlags & SNDMIXPLUGINSTATE::psfSilenceBypass)) m_MixPlugins[nOutput].pMixPlugin->ResetSilence();
 
 					if(pOutState->pOutBufferL != nullptr && pOutState->pOutBufferR != nullptr)
 					{
@@ -621,9 +657,24 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 				}
 				pMixL = pOutL;
 				pMixR = pOutR;
+
+				if(masterHasInput)
+				{
+					// Samples or plugins are being rendered, so turn off auto-bypass for this master effect.
+					if(plugin.pMixPlugin != nullptr) plugin.pMixPlugin->ResetSilence();
+					SNDMIXPLUGIN *chain = &plugin;
+					while(chain->GetOutputPlugin() != PLUGINDEX_INVALID)
+					{
+						chain = &m_MixPlugins[chain->GetOutputPlugin()];
+						if(chain->pMixPlugin)
+						{
+							chain->pMixPlugin->ResetSilence();
+						}
+					}
+				}
 			}
 
-			if (plugin.IsBypassed())
+			if(plugin.IsBypassed() || (plugin.IsAutoSuspendable() && (pState->dwFlags & SNDMIXPLUGINSTATE::psfSilenceBypass)))
 			{
 				const float * const pInL = pState->pOutBufferL;
 				const float * const pInR = pState->pOutBufferR;
@@ -635,7 +686,30 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			} else
 			{
 				pObject->Process(pOutL, pOutR, nCount);
+
+				pState->inputSilenceCount += nCount;
+				if(plugin.IsAutoSuspendable() && pState->inputSilenceCount >= m_MixerSettings.gdwMixingFreq * 4)
+				{
+					bool isSilent = true;
+					for(uint32_t i = 0; i < nCount; i++)
+					{
+						if(pOutL[i] > FLT_EPSILON || pOutL[i] < -FLT_EPSILON
+							|| pOutR[i] > FLT_EPSILON || pOutR[i] < -FLT_EPSILON)
+						{
+							isSilent = false;
+							break;
+						}
+					}
+					if(isSilent)
+					{
+						pState->dwFlags |= SNDMIXPLUGINSTATE::psfSilenceBypass;
+					} else
+					{
+						pState->inputSilenceCount = 0;
+					}
+				}
 			}
+			pState->dwFlags &= ~SNDMIXPLUGINSTATE::psfHasInput;
 		}
 	}
 #ifdef MPT_INTMIXER

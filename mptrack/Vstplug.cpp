@@ -1209,6 +1209,7 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 			if ((fValue >= 0.0f) && (fValue <= 1.0f))
 				m_Effect.setParameter(&m_Effect, nIndex, fValue);
 		}
+		ResetSilence();
 	} catch (...)
 	{
 		ReportPlugException(mpt::String::PrintW(L"Exception in SetParameter(%1, %2)!", nIndex, fValue));
@@ -1348,6 +1349,7 @@ void CVstPlugin::ProcessVSTEvents()
 		try
 		{
 			m_Effect.dispatcher(&m_Effect, effProcessEvents, 0, 0, &vstEvents, 0);
+			ResetSilence();
 		} catch (...)
 		{
 			ReportPlugException(mpt::String::PrintW(L"Exception in ProcessVSTEvents(numEvents:%1)!",
@@ -1358,13 +1360,15 @@ void CVstPlugin::ProcessVSTEvents()
 
 
 // Receive events from plugin and send them to the next plugin in the chain.
-void CVstPlugin::ReceiveVSTEvents(const VstEvents *events) const
-//--------------------------------------------------------------
+void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
+//--------------------------------------------------------
 {
 	if(m_pMixStruct == nullptr)
 	{
 		return;
 	}
+
+	ResetSilence();
 
 	// I think we should only route events to plugins that are explicitely specified as output plugins of the current plugin.
 	// This should probably use GetOutputPlugList here if we ever get to support multiple output plugins.
@@ -1698,6 +1702,7 @@ bool CVstPlugin::MidiSend(uint32 dwMidiCode)
 		Log("Sending Midi %02X.%02X.%02X\n", event.midiData[0]&0xff, event.midiData[1]&0xff, event.midiData[2]&0xff);
 	#endif
 
+	ResetSilence();
 	return vstEvents.Enqueue(reinterpret_cast<VstEvent *>(&event), insertAtFront);
 }
 
@@ -1715,6 +1720,7 @@ bool CVstPlugin::MidiSysexSend(const char *message, uint32 length)
 	event.sysexDump = const_cast<char *>(message);	// We will make our own copy in VstEventQueue::Enqueue
 	event.resvd2 = 0;
 
+	ResetSilence();
 	return vstEvents.Enqueue(reinterpret_cast<VstEvent *>(&event));
 }
 
