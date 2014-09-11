@@ -23,6 +23,7 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #include "MixerLoops.h"
+#include <cfloat>	// For FLT_EPSILON
 #ifdef MPT_INTMIXER
 #include "IntMixer.h"
 #else
