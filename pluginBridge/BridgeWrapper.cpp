@@ -15,6 +15,7 @@
 #include "misc_util.h"
 #include "../mptrack/Mptrack.h"
 #include "../mptrack/Vstplug.h"
+#include "../mptrack/ExceptionHandler.h"
 #include "../common/mptFstream.h"
 #include "../common/thread.h"
 #include "../common/StringFixer.h"
@@ -211,7 +212,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	otherThread = mpt::thread_member<BridgeWrapper, &BridgeWrapper::MessageThread>(this);
 
 	BridgeMessage initMsg;
-	initMsg.Init(pluginPath.ToWide().c_str(), MIXBUFFERSIZE);
+	initMsg.Init(pluginPath.ToWide().c_str(), MIXBUFFERSIZE, ExceptionHandler::fullMemDump);
 
 	if(!SendToBridge(initMsg))
 	{

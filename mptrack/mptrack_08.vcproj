@@ -1554,6 +1554,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\WriteMemoryDump.h"
+				>
+			</File>
+			<File
 				RelativePath=".\view_com.h"
 				>
 			</File>

@@ -19,6 +19,7 @@ class PluginBridge : protected BridgeCommon
 {
 public:
 	static Event sigQuit;
+	static bool fullMemDump;
 
 protected:
 	static LONG instanceCount;
