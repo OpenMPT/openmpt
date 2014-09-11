@@ -82,7 +82,7 @@ public:
 
 	// Check whether a plugin can be hosted inside OpenMPT or requires bridging
 	uint8 GetDllBits(bool fromCache = true) const;
-	bool IsNative(bool fromCache = true) const { return GetDllBits(fromCache) == sizeof(void *) * 8; }
+	bool IsNative(bool fromCache = true) const { return GetDllBits(fromCache) == sizeof(void *) * CHAR_BIT; }
 
 	void WriteToCache() const;
 
@@ -93,7 +93,7 @@ public:
 			| (category << 1)
 			| (useBridge ? 0x100 : 0)
 			| (shareBridgeInstance ? 0x200 : 0)
-			| (dllBits / 8) << 10;
+			| ((dllBits / 8) << 10);
 	}
 
 	void DecodeCacheFlags(uint32 flags)
@@ -214,6 +214,9 @@ public:
 	bool ProgramsAreChunks() const { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
 	bool GetParams(float* param, VstInt32 min, VstInt32 max);
 	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0);
+	// If true, the plugin produces an output even if silence is being fed into it.
+	bool ShouldProcessSilence() { return m_Effect.numInputs == 0 || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
+	void ResetSilence() { m_MixState.ResetSilence(); }
 #ifdef MODPLUG_TRACKER
 	forceinline CModDoc *GetModDoc();
 	forceinline const CModDoc *GetModDoc() const;
@@ -304,7 +307,7 @@ protected:
 
 	// Process incoming and outgoing VST events.
 	void ProcessVSTEvents();
-	void ReceiveVSTEvents(const VstEvents *events) const;
+	void ReceiveVSTEvents(const VstEvents *events);
 
 	void ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, size_t nSamples);
 
@@ -323,6 +326,8 @@ public:
 	void SetParameter(PlugParamIndex, PlugParamValue) {}
 	VstInt32 GetUID() const { return 0; }
 	VstInt32 GetVersion() const { return 0; }
+	bool ShouldProcessSilence() { return false; }
+	void ResetSilence() { }
 
 	bool CanAutomateParameter(PlugParamIndex) { return false; }
 

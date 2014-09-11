@@ -70,6 +70,8 @@ public:
 	virtual bool isInstrument() = 0;
 	virtual bool CanRecieveMidiEvents() = 0;
 	virtual void SetDryRatio(UINT param) = 0;
+	virtual bool ShouldProcessSilence() = 0;
+	virtual void ResetSilence() = 0;
 	virtual void SetEditorPos(int32 x, int32 y) = 0;
 	virtual void GetEditorPos(int32 &x, int32 &y) const = 0;
 
@@ -91,13 +93,25 @@ struct SNDMIXPLUGINSTATE
 	enum PluginStateFlags
 	{
 		psfMixReady = 0x01,				// Set when cleared
+		psfHasInput = 0x02,				// Set when plugin has non-silent input
+		psfSilenceBypass = 0x04,		// Bypass because of silence detection
 	};
 
 	mixsample_t *pMixBuffer;			// Stereo effect send buffer
 	float *pOutBufferL;					// Temp storage for int -> float conversion
 	float *pOutBufferR;
 	uint32 dwFlags;						// PluginStateFlags
-	mixsample_t nVolDecayL, nVolDecayR;	// Buffer click removal
+	uint32 inputSilenceCount;			// How much silence has been processed? (for plugin auto-turnoff)
+	mixsample_t nVolDecayL, nVolDecayR;	// Buffer click removal - I think these are *always* 0.
+
+	SNDMIXPLUGINSTATE() { memset(this, 0, sizeof(*this)); }
+
+	void ResetSilence()
+	{
+		dwFlags |= psfHasInput;
+		dwFlags &= ~psfSilenceBypass;
+		inputSilenceCount = 0;
+	}
 };
 
 
@@ -114,6 +128,7 @@ struct PACKED SNDMIXPLUGININFO
 		irBypass		= 0x02,		// Bypass effect
 		irWetMix		= 0x04,		// Wet Mix (dry added)
 		irExpandMix		= 0x08,		// [0%,100%] -> [-200%,200%]
+		irAutoSuspend	= 0x10,		// Plugin will automatically suspend on silence
 	};
 
 	VstInt32 dwPluginId1;			// Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
@@ -184,6 +199,8 @@ struct SNDMIXPLUGIN
 		{ return (Info.routingFlags & SNDMIXPLUGININFO::irExpandMix) != 0; }
 	bool IsBypassed() const
 		{ return (Info.routingFlags & SNDMIXPLUGININFO::irBypass) != 0; }
+	bool IsAutoSuspendable() const
+		{ return (Info.routingFlags & SNDMIXPLUGININFO::irAutoSuspend) != 0; }
 
 	// Input routing setters
 	void SetGain(uint8 gain)
@@ -198,6 +215,8 @@ struct SNDMIXPLUGIN
 		{ if(expanded) Info.routingFlags |= SNDMIXPLUGININFO::irExpandMix; else Info.routingFlags &= ~SNDMIXPLUGININFO::irExpandMix; }
 	void SetBypass(bool bypass = true)
 		{ if(pMixPlugin != nullptr) pMixPlugin->Bypass(bypass); else Info.SetBypass(bypass); }
+	void SetAutoSuspend(bool suspend = true)
+		{ if(suspend) Info.routingFlags |= SNDMIXPLUGININFO::irAutoSuspend; else Info.routingFlags &= ~SNDMIXPLUGININFO::irAutoSuspend; }
 
 	// Output routing getters
 	bool IsOutputToMaster() const
