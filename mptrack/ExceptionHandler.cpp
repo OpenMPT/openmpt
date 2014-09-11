@@ -14,7 +14,7 @@
 #include "Moddoc.h"
 #include <shlwapi.h>
 #include "ExceptionHandler.h"
-#include "dbghelp.h"
+#include "../common/WriteMemoryDump.h"
 #include "../common/version.h"
 
 
@@ -23,19 +23,12 @@ OPENMPT_NAMESPACE_BEGIN
 
 bool ExceptionHandler::fullMemDump = false;
 
-
-typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
-	CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-	CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam
-	);
-
-
 enum DumpMode
 {
 	DumpModeCrash   = 0,
 	DumpModeWarning = 1,
 };
+
 
 static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionInfo=NULL, DumpMode mode=DumpModeCrash)
 //--------------------------------------------------------------------------------------------------------------------
@@ -60,43 +53,11 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 	}
 
 	// Create minidump...
-	HMODULE hDll = ::LoadLibraryW(L"DBGHELP.DLL");
-	if (hDll)
+	const mpt::PathString filename = baseRescuePath + MPT_PATHSTRING("crash.dmp");
+	if(WriteMemoryDump(pExceptionInfo, filename.AsNative().c_str(), ExceptionHandler::fullMemDump))
 	{
-		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
-		if (pDump)
-		{
-			const mpt::PathString filename = baseRescuePath + MPT_PATHSTRING("crash.dmp");
-
-			HANDLE hFile = ::CreateFileW(filename.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-			if (hFile != INVALID_HANDLE_VALUE)
-			{
-				_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
-
-				if(pExceptionInfo)
-				{
-					ExInfo.ThreadId = ::GetCurrentThreadId();
-					ExInfo.ExceptionPointers = pExceptionInfo;
-					ExInfo.ClientPointers = NULL;
-				}
-
-				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile,
-					ExceptionHandler::fullMemDump ?
-						(MINIDUMP_TYPE)(MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithThreadInfo | MiniDumpWithProcessThreadData | MiniDumpWithFullMemoryInfo
-#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
-						| MiniDumpIgnoreInaccessibleMemory | MiniDumpWithTokenInformation
-#endif
-						)
-					:
-						MiniDumpNormal,
-					pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
-				::CloseHandle(hFile);
-
-				errorMessage += "\n\nDebug information has been saved to\n"
-					+ mpt::ToCString(baseRescuePath.ToWide());
-			}
-		}
-		::FreeLibrary(hDll);
+		errorMessage += "\n\nDebug information has been saved to\n"
+			+ mpt::ToCString(baseRescuePath.ToWide());
 	}
 
 	// Rescue modified files...
@@ -148,7 +109,6 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 	{
 		Reporting::Error(errorMessage, "OpenMPT Crash", pMainFrame);
 	}
-
 }
 
 

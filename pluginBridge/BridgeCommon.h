@@ -276,6 +276,7 @@ struct InitMsg : public MsgHeader
 	int32_t version;		// Protocol version used by host
 	int32_t hostPtrSize;	// Size of VstIntPtr in host
 	uint32_t mixBufSize;	// Interal mix buffer size (for shared memory audio buffers)
+	uint32_t fullMemDump;	// When crashing, create full memory dumps instead of stack dumps
 	wchar_t str[_MAX_PATH];	// Plugin file to load. Out: Error message if result != 0.
 };
 
@@ -333,13 +334,14 @@ union BridgeMessage
 		wcsncpy(newInstance.memName, memName, CountOf(newInstance.memName) - 1);
 	}
 
-	void Init(const wchar_t *pluginPath, uint32_t mixBufSize)
+	void Init(const wchar_t *pluginPath, uint32_t mixBufSize, bool fullMemDump)
 	{
 		SetType(MsgHeader::init, sizeof(InitMsg));
 
 		init.result = 0;
 		init.hostPtrSize = sizeof(VstIntPtr);
 		init.mixBufSize = mixBufSize;
+		init.fullMemDump = fullMemDump;
 		wcsncpy(init.str, pluginPath, CountOf(init.str) - 1);
 	}
 

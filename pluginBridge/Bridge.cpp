@@ -44,26 +44,33 @@
 #define assert(x)
 #endif
 
+#include "../common/CompilerDetect.h"
+#include "../common/WriteMemoryDump.h"
 #include "Bridge.h"
-#include "../common/thread.h"
 
 
-OPENMPT_NAMESPACE_BEGIN
+// Crash handler for writing memory dumps
+static LONG WINAPI CrashHandler(_EXCEPTION_POINTERS *pExceptionInfo)
+{
+	WCHAR tempPath[MAX_PATH + 2];
+	DWORD result = GetTempPathW(MAX_PATH + 1, tempPath);
+	if(result > 0 && result <= MAX_PATH + 1)
+	{
+		std::wstring filename = tempPath;
+		filename += L"OpenMPT Crash Files\\";
+		CreateDirectoryW(filename.c_str(), nullptr);
 
+		tempPath[0] = 0;
+		const int ch = GetDateFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"'PluginBridge 'yyyy'-'MM'-'dd ", tempPath, CountOf(tempPath));
+		if(ch) GetTimeFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"HH'.'mm'.'ss'.dmp'", tempPath + ch - 1, CountOf(tempPath) - ch + 1);
+		filename += tempPath;
 
-LONG PluginBridge::instanceCount = 0;
-Event PluginBridge::sigQuit;
+		WriteMemoryDump(pExceptionInfo, filename.c_str(), OPENMPT_NAMESPACE::PluginBridge::fullMemDump);
+	}
 
-// This is kind of a back-up pointer in case we couldn't sneak our pointer into the AEffect struct yet.
-// It always points to the last intialized PluginBridge object.
-PluginBridge *PluginBridge::latestInstance = nullptr;
-WNDCLASSEX PluginBridge::windowClass;
-#define WINDOWCLASSNAME _T("OpenMPTPluginBridge")
-
-enum { kVstTimeInfoInit = 1 << 31 };
-
-
-OPENMPT_NAMESPACE_END
+	// Let Windows handle the exception...
+	return EXCEPTION_CONTINUE_SEARCH;
+}
 
 
 int _tmain(int argc, TCHAR *argv[])
@@ -73,6 +80,8 @@ int _tmain(int argc, TCHAR *argv[])
 		MessageBox(NULL, _T("This executable is part of OpenMPT. You do not need to run it by yourself."), _T("OpenMPT Plugin Bridge"), 0);
 		return -1;
 	}
+
+	::SetUnhandledExceptionFilter(CrashHandler);
 
 	uint32_t parentProcessId = _ttoi(argv[1]);
 
@@ -95,6 +104,18 @@ int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+LONG PluginBridge::instanceCount = 0;
+Event PluginBridge::sigQuit;
+bool PluginBridge::fullMemDump = false;
+
+// This is kind of a back-up pointer in case we couldn't sneak our pointer into the AEffect struct yet.
+// It always points to the last intialized PluginBridge object.
+PluginBridge *PluginBridge::latestInstance = nullptr;
+WNDCLASSEX PluginBridge::windowClass;
+#define WINDOWCLASSNAME _T("OpenMPTPluginBridge")
+
+enum { kVstTimeInfoInit = 1 << 31 };
 
 
 // Initialize static stuff like the editor window class
@@ -363,9 +384,10 @@ void PluginBridge::InitBridge(InitMsg *msg)
 {
 	otherPtrSize = msg->hostPtrSize;
 	mixBufSize = msg->mixBufSize;
+	fullMemDump = msg->fullMemDump != 0;
 	msg->result = 0;
 	msg->str[CountOf(msg->str) - 1] = 0;
-	
+
 #ifdef _CONSOLE
 	SetConsoleTitleW(msg->str);
 #endif

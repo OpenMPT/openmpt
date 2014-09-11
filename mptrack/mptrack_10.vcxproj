@@ -659,6 +659,7 @@
     <ClInclude Include="..\common\typedefs.h" />
     <ClInclude Include="..\common\version.h" />
     <ClInclude Include="..\common\versionNumber.h" />
+    <ClInclude Include="..\common\WriteMemoryDump.h" />
     <ClInclude Include="..\pluginBridge\AEffectWrapper.h" />
     <ClInclude Include="..\pluginBridge\BridgeCommon.h" />
     <ClInclude Include="..\pluginBridge\BridgeWrapper.h" />
