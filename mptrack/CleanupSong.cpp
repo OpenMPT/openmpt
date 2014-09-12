@@ -534,13 +534,30 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 }
 
 
+// Check if the stereo channels of a sample contain identical data
+template<typename T>
+static bool ComapreStereoChannels(SmpLength length, const void *sampleData)
+//--------------------------------------------------------
+{
+	const T *data = static_cast<const T *>(sampleData);
+	for(SmpLength i = 0; i < length; i++, data += 2)
+	{
+		if(data[0] != data[1])
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 // Remove unused sample data
 bool CModCleanupDlg::OptimizeSamples()
 //------------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
-	SAMPLEINDEX numLoopOpt = 0;
+	SAMPLEINDEX numLoopOpt = 0, numStereoOpt = 0;
+	std::vector<bool> stereoOptSamples(sndFile.GetNumSamples(), false);
 	
 	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
 	{
@@ -557,48 +574,88 @@ bool CModCleanupDlg::OptimizeSamples()
 			}
 		}
 
-		if(sample.pSample && sample.nLength > loopLength + 2) numLoopOpt++;
-	}
-	if (numLoopOpt == 0) return false;
-
-	char s[512];
-	wsprintf(s, "%d sample%s unused data after the loop end point,\n"
-		"Do you want to optimize %s and remove this unused data?", numLoopOpt, (numLoopOpt == 1) ? " has" : "s have", (numLoopOpt == 1) ? "it" : "them");
-	if(Reporting::Confirm(s, "Sample Optimization", false, false, this) == cnfYes)
-	{
-		for(SAMPLEINDEX nSmp = 1; nSmp <= sndFile.m_nSamples; nSmp++)
+		// Check if the sample contains identical stereo channels
+		if(sample.GetNumChannels() == 2)
 		{
-			ModSample &sample = sndFile.GetSample(nSmp);
-
-			// Determine how much of the sample will be played
-			SmpLength loopLength = sample.nLength;
-			if(sample.uFlags[CHN_LOOP])
+			bool identicalChannels = false;
+			if(sample.GetElementarySampleSize() == 1)
 			{
-				loopLength = sample.nLoopEnd;
-
-				// Sustain loop is played before normal loop, and it can actually be located after the normal loop.
-				if(sample.uFlags[CHN_SUSTAINLOOP])
-				{
-					loopLength = std::max(sample.nLoopEnd, sample.nSustainEnd);
-				}
+				identicalChannels = ComapreStereoChannels<int8>(loopLength, sample.pSample);
+			} else if(sample.GetElementarySampleSize() == 2)
+			{
+				identicalChannels = ComapreStereoChannels<int16>(loopLength, sample.pSample);
 			}
-
-			if(sample.nLength > loopLength + 2)
+			if(identicalChannels)
 			{
-				SmpLength lmax = loopLength + 2;
-				if(lmax < sample.nLength && lmax >= 2)
-				{
-					modDoc.GetSampleUndo().PrepareUndo(nSmp, sundo_delete, "Trim Unused Data", lmax, sample.nLength);
-					ctrlSmp::ResizeSample(sample, lmax, sndFile);
-				}
+				numStereoOpt++;
+				stereoOptSamples[smp - 1] = true;
 			}
 		}
-		wsprintf(s, "%d sample loop%s optimized" ,numLoopOpt, (numLoopOpt == 1) ? "" : "s");
-		modDoc.AddToLog(s);
-		return true;
+
+		if(sample.pSample && sample.nLength > loopLength + 2) numLoopOpt++;
+	}
+	if(!numLoopOpt && !numStereoOpt) return false;
+
+	std::string s;
+	if(numLoopOpt)
+		s = mpt::String::Print("%1 sample%2 unused data after the loop end point.\n", numLoopOpt, (numLoopOpt == 1) ? " has" : "s have");
+	if(numStereoOpt)
+		s += mpt::String::Print("%1 stereo sample%2 actually mono.\n", numStereoOpt, (numStereoOpt == 1) ? " is" : "s are");
+	if(numLoopOpt + numStereoOpt == 1)
+		s += "Do you want to optimize it and remove this unused data?";
+	else
+		s += "Do you want to optimize them and remove this unused data?";
+
+	if(Reporting::Confirm(s.c_str(), "Sample Optimization", false, false, this) != cnfYes)
+	{
+		return false;
 	}
 
-	return false;
+	for(SAMPLEINDEX smp = 1; smp <= sndFile.m_nSamples; smp++)
+	{
+		ModSample &sample = sndFile.GetSample(smp);
+
+		// Determine how much of the sample will be played
+		SmpLength loopLength = sample.nLength;
+		if(sample.uFlags[CHN_LOOP])
+		{
+			loopLength = sample.nLoopEnd;
+
+			// Sustain loop is played before normal loop, and it can actually be located after the normal loop.
+			if(sample.uFlags[CHN_SUSTAINLOOP])
+			{
+				loopLength = std::max(sample.nLoopEnd, sample.nSustainEnd);
+			}
+		}
+
+		if(sample.nLength > loopLength + 2)
+		{
+			SmpLength lmax = loopLength + 2;
+			if(lmax < sample.nLength && lmax >= 2)
+			{
+				modDoc.GetSampleUndo().PrepareUndo(smp, sundo_delete, "Trim Unused Data", lmax, sample.nLength);
+				ctrlSmp::ResizeSample(sample, lmax, sndFile);
+			}
+		}
+
+		// Convert stereo samples with identical channels to mono
+		if(stereoOptSamples[smp - 1])
+		{
+			modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace, "Mono Conversion");
+			ctrlSmp::ConvertToMono(sample, sndFile, ctrlSmp::onlyLeft);
+		}
+	}
+	if(numLoopOpt)
+	{
+		s = mpt::String::Print("%1 sample loop%2 optimized", numLoopOpt, (numLoopOpt == 1) ? "" : "s");
+		modDoc.AddToLog(s);
+	}
+	if(numStereoOpt)
+	{
+		s = mpt::String::Print("%1 sample%2 converted to mono", numStereoOpt, (numStereoOpt == 1) ? "" : "s");
+		modDoc.AddToLog(s);
+	}
+	return true;
 }
 
 // Rearrange sample list

@@ -39,7 +39,7 @@ BEGIN
     CONTROL         "Remove unused",IDC_CHK_CLEANUP_SAMPLES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,54,90,10
     CONTROL         "Remove all",IDC_CHK_REMOVE_SAMPLES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,54,90,10
     CONTROL         "Rearrange",IDC_CHK_REARRANGE_SAMPLES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,66,90,10
-    CONTROL         "Remove data after loop end",IDC_CHK_OPTIMIZE_SAMPLES,
+    CONTROL         "Remove unused sample data",IDC_CHK_OPTIMIZE_SAMPLES,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,66,108,10
     CONTROL         "Remove unused",IDC_CHK_CLEANUP_INSTRUMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,84,90,10
     CONTROL         "Remove all (convert to samples)",IDC_CHK_REMOVE_INSTRUMENTS,
