@@ -149,7 +149,7 @@ Ssb::Ssb()
 	, m_posStart(0)
 	, m_nIdbytes(IdSizeVariable)
 	, m_nCounter(0)
-	, m_Flags((1 << RwfWMapStartPosEntry) + (1 << RwfWMapSizeEntry) + (1 << RwfWVersionNum) + (1 << RwfRPartialIdMatch))
+	, m_Flags((1 << RwfWMapStartPosEntry) + (1 << RwfWMapSizeEntry) + (1 << RwfWVersionNum))
 {
 	return;
 }
@@ -443,9 +443,6 @@ void SsbRead::CompareId(std::istream& iStrm, const char* pId, const size_t nIdle
 
 	if (tempU8 == nIdlength && nIdlength > 0 && memcmp(buffer, pId, nIdlength) == 0)
 		return; // Match.
-	else if (GetFlag(RwfRPartialIdMatch) && tempU8 > nIdlength && nIdlength > 0
-			&& memcmp(buffer, pId, nIdlength) == 0 && buffer[nIdlength] == 0)
-		return; // Partial match.
 
 	AddReadNote(SNR_OBJECTCLASS_IDMISMATCH);
 }

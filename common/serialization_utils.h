@@ -102,7 +102,6 @@ enum Rwf
 	RwfWMapSizeEntry,		// Write. True to include data size entry to map.
 	RwfWMapDescEntry,		// Write. True to include description entry to map.
 	RwfWVersionNum,			// Write. True to include version numeric.
-	RwfRPartialIdMatch,		// Read. True to allow partial ID match.
 	RwfRMapCached,			// Read. True if map has been cached.
 	RwfRMapHasId,			// Read. True if map has IDs
 	RwfRMapHasStartpos,		// Read. True if map data start pos.
