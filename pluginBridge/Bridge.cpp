@@ -21,18 +21,12 @@
 // Re-enable DEP in OpenMPT?
 // Clean up code :)
 
-#define _CRT_SECURE_NO_WARNINGS
-#define NOMINMAX
-#define VST_FORCE_DEPRECATED 0
 #define MODPLUG_TRACKER
-#define OPENMPT_NAMESPACE
-#define OPENMPT_NAMESPACE_BEGIN
-#define OPENMPT_NAMESPACE_END
-#define CountOf(x) _countof(x)
-#define MPT_FALLTHROUGH __fallthrough
+#include "../common/BuildSettings.h"
+#include "../common/typedefs.h"
 #include <Windows.h>
+#include <ShellAPI.h>
 #include <tchar.h>
-#include <cstdint>
 #include <algorithm>
 
 //#include <cassert>
@@ -44,7 +38,6 @@
 #define assert(x)
 #endif
 
-#include "../common/CompilerDetect.h"
 #include "../common/WriteMemoryDump.h"
 #include "Bridge.h"
 
@@ -65,7 +58,7 @@ static LONG WINAPI CrashHandler(_EXCEPTION_POINTERS *pExceptionInfo)
 		if(ch) GetTimeFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"HH'.'mm'.'ss'.dmp'", tempPath + ch - 1, CountOf(tempPath) - ch + 1);
 		filename += tempPath;
 
-		WriteMemoryDump(pExceptionInfo, filename.c_str(), OPENMPT_NAMESPACE::PluginBridge::fullMemDump);
+		OPENMPT_NAMESPACE::WriteMemoryDump(pExceptionInfo, filename.c_str(), OPENMPT_NAMESPACE::PluginBridge::fullMemDump);
 	}
 
 	// Let Windows handle the exception...
