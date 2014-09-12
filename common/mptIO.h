@@ -141,7 +141,14 @@ inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 	#endif
 	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
-	result = IO::ReadRaw(f, bytes, std::min(size, sizeof(T))) == std::min(size, sizeof(T));
+	const IO::Offset readResult = IO::ReadRaw(f, bytes, std::min(size, sizeof(T)));
+	if(readResult < 0)
+	{
+		result = false;
+	} else
+	{
+		result = (static_cast<uint64>(readResult) == std::min(size, sizeof(T)));
+	}
 	#ifdef MPT_PLATFORM_BIG_ENDIAN
 		std::reverse(bytes, bytes + sizeof(T));
 	#endif
@@ -156,7 +163,14 @@ inline bool ReadIntLE(Tfile & f, T & v)
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
-	result = (IO::ReadRaw(f, bytes, sizeof(T)) == sizeof(T));
+	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
+	if(readResult < 0)
+	{
+		result = false;
+	} else
+	{
+		result = (static_cast<uint64>(readResult) == sizeof(T));
+	}
 	T val = 0;
 	std::memcpy(&val, bytes, sizeof(T));
 	v = SwapBytesReturnLE(val);
@@ -170,7 +184,14 @@ inline bool ReadIntBE(Tfile & f, T & v)
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
-	result = (IO::ReadRaw(f, bytes, sizeof(T)) == sizeof(T));
+	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
+	if(readResult < 0)
+	{
+		result = false;
+	} else
+	{
+		result = (static_cast<uint64>(readResult) == sizeof(T));
+	}
 	T val = 0;
 	std::memcpy(&val, bytes, sizeof(T));
 	v = SwapBytesReturnBE(val);
