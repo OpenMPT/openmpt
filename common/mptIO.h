@@ -14,8 +14,8 @@
 
 #include "../common/typedefs.h"
 #include "../common/Endianness.h"
+#include <algorithm>
 #include <ios>
-#include <iostream>
 #include <istream>
 #include <limits>
 #include <ostream>
