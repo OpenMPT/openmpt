@@ -778,7 +778,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 //-----------------------------------------------------------------------------
 {
 	uint16 size;
-	srlztn::Binaryread<uint16>(iStrm, size);
+	mpt::IO::ReadIntLE<uint16>(iStrm, size);
 	if(size > ModSpecs::mptm.ordersMax)
 	{
 		seq.m_sndFile.AddToLog(mpt::String::Print(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax));
@@ -791,7 +791,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	for(size_t i = 0; i < size; i++)
 	{
 		uint16 temp;
-		srlztn::Binaryread<uint16>(iStrm, temp);
+		mpt::IO::ReadIntLE<uint16>(iStrm, temp);
 		seq[i] = temp;
 	}
 }
@@ -801,12 +801,12 @@ void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
 //----------------------------------------------------------------------
 {
 	const uint16 size = seq.GetLength();
-	srlztn::Binarywrite<uint16>(oStrm, size);
+	mpt::IO::WriteIntLE<uint16>(oStrm, size);
 	const ModSequenceSet::const_iterator endIter = seq.end();
 	for(ModSequenceSet::const_iterator citer = seq.begin(); citer != endIter; citer++)
 	{
 		const uint16 temp = static_cast<uint16>(*citer);
-		srlztn::Binarywrite<uint16>(oStrm, temp);
+		mpt::IO::WriteIntLE<uint16>(oStrm, temp);
 	}
 }
 

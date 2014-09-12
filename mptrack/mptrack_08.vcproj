@@ -1346,6 +1346,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mptIO.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\mptPathString.h"
 				>
 			</File>

@@ -27,12 +27,17 @@ OPENMPT_NAMESPACE_BEGIN
 // format.
 
 #if MPT_COMPILER_GCC
+#if MPT_GCC_AT_LEAST(4,8,0)
+#define bswap16 __builtin_bswap16
+#endif
 #if MPT_GCC_AT_LEAST(4,3,0)
 #define MPT_bswap32 __builtin_bswap32
+#define MPT_bswap64 __builtin_bswap64
 #endif
 #elif MPT_COMPILER_MSVC
 #define MPT_bswap16 _byteswap_ushort
 #define MPT_bswap32 _byteswap_ulong
+#define MPT_bswap64 _byteswap_uint64
 #endif
 
 // catch system macros
@@ -46,6 +51,11 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_bswap32 bswap32
 #endif
 #endif
+#ifndef MPT_bswap64
+#ifdef bswap64
+#define MPT_bswap64 bswap64
+#endif
+#endif
 
 // No intrinsics available
 #ifndef MPT_bswap16
@@ -54,6 +64,21 @@ OPENMPT_NAMESPACE_BEGIN
 #ifndef MPT_bswap32
 #define MPT_bswap32(x) (((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24))
 #endif
+#ifndef MPT_bswap64
+#define MPT_bswap64(x) \
+	( uint64(0) \
+		| (((x >>  0) & 0xff) << 56) \
+		| (((x >>  8) & 0xff) << 48) \
+		| (((x >> 16) & 0xff) << 40) \
+		| (((x >> 24) & 0xff) << 32) \
+		| (((x >> 32) & 0xff) << 24) \
+		| (((x >> 40) & 0xff) << 16) \
+		| (((x >> 48) & 0xff) <<  8) \
+		| (((x >> 56) & 0xff) <<  0) \
+	) \
+/**/
+#endif
+
 
 // Deprecated. Use "SwapBytesXX" versions below.
 #ifdef MPT_PLATFORM_BIG_ENDIAN
@@ -69,23 +94,31 @@ inline uint16 BigEndianW(uint16 x)	{ return MPT_bswap16(x); }
 #endif
 
 #if defined(MPT_PLATFORM_BIG_ENDIAN)
+#define MPT_bswap64le(x) MPT_bswap64(x)
 #define MPT_bswap32le(x) MPT_bswap32(x)
 #define MPT_bswap16le(x) MPT_bswap16(x)
+#define MPT_bswap64be(x) (x)
 #define MPT_bswap32be(x) (x)
 #define MPT_bswap16be(x) (x)
 #elif defined(MPT_PLATFORM_LITTLE_ENDIAN)
+#define MPT_bswap64be(x) MPT_bswap64(x)
 #define MPT_bswap32be(x) MPT_bswap32(x)
 #define MPT_bswap16be(x) MPT_bswap16(x)
+#define MPT_bswap64le(x) (x)
 #define MPT_bswap32le(x) (x)
 #define MPT_bswap16le(x) (x)
 #endif
 
+inline uint64 SwapBytesBE_(uint64 value) { return MPT_bswap64be(value); }
 inline uint32 SwapBytesBE_(uint32 value) { return MPT_bswap32be(value); }
 inline uint16 SwapBytesBE_(uint16 value) { return MPT_bswap16be(value); }
+inline uint64 SwapBytesLE_(uint64 value) { return MPT_bswap64le(value); }
 inline uint32 SwapBytesLE_(uint32 value) { return MPT_bswap32le(value); }
 inline uint16 SwapBytesLE_(uint16 value) { return MPT_bswap16le(value); }
+inline int64  SwapBytesBE_(int64  value) { return MPT_bswap64be(value); }
 inline int32  SwapBytesBE_(int32  value) { return MPT_bswap32be(value); }
 inline int16  SwapBytesBE_(int16  value) { return MPT_bswap16be(value); }
+inline int64  SwapBytesLE_(int64  value) { return MPT_bswap64le(value); }
 inline int32  SwapBytesLE_(int32  value) { return MPT_bswap32le(value); }
 inline int16  SwapBytesLE_(int16  value) { return MPT_bswap16le(value); }
 
@@ -116,10 +149,13 @@ inline char   SwapBytesBE_(char   value) { return value; }
 
 #undef MPT_bswap16le
 #undef MPT_bswap32le
+#undef MPT_bswap64le
 #undef MPT_bswap16be
 #undef MPT_bswap32be
+#undef MPT_bswap64be
 #undef MPT_bswap16
 #undef MPT_bswap32
+#undef MPT_bswap64
 
 
 // 1.0f --> 0x3f800000u
@@ -230,6 +266,13 @@ public:
 	}
 };
 
+namespace mpt {
+
+template <> struct is_binary_safe<IEEE754binary32Emulated<0,1,2,3> > : public mpt::true_type { };
+template <> struct is_binary_safe<IEEE754binary32Emulated<3,2,1,0> > : public mpt::true_type { };
+
+} // namespace mpt
+
 #if MPT_PLATFORM_IEEE_FLOAT
 
 struct IEEE754binary32Native
@@ -297,6 +340,12 @@ public:
 		return value != cmp.value;
 	}
 };
+
+namespace mpt {
+
+template <> struct is_binary_safe<IEEE754binary32Native> : public mpt::true_type { };
+
+} // namespace mpt
 
 #if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 typedef IEEE754binary32Native            IEEE754binary32LE;

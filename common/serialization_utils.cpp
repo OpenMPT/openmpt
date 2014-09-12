@@ -50,128 +50,14 @@ static bool IsPrintableId(const char* pId, const size_t nLength)
 	return true;
 }
 
-
-static uint8 GetByteReq1248(const uint64 size)
-//--------------------------------------------
-{
-	if((size >> 6) == 0) return 1;
-	if((size >> (1*8+6)) == 0) return 2;
-	if((size >> (3*8+6)) == 0) return 4;
-	return 8;
-}
-
-
-static uint8 GetByteReq1234(const uint32 num)
-//-------------------------------------------
-{
-	if((num >> 6) == 0) return 1;
-	if((num >> (1*8+6)) == 0) return 2;
-	if((num >> (2*8+6)) == 0) return 3;
-	return 4;
-}
-
-
-void WriteAdaptive12(std::ostream& oStrm, const uint16 num)
-//---------------------------------------------------------
-{
-	if(num >> 7 == 0)
-		Binarywrite<uint16>(oStrm, num << 1, 1);
-	else
-		Binarywrite<uint16>(oStrm, (num << 1) | 1);
-}
-
-
-void WriteAdaptive1234(std::ostream& oStrm, const uint32 num)
-//-----------------------------------------------------------
-{
-	const uint8 bc = GetByteReq1234(num);
-	const uint32 sizeInstruction = (num << 2) | (bc - 1);
-	Binarywrite<uint32>(oStrm, sizeInstruction, bc);
-}
-
-
 //Format: First bit tells whether the size indicator is 1 or 2 bytes.
 static void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
 //----------------------------------------------------------------------------
 {
 	uint16 s = static_cast<uint16>(str.size());
 	LimitMax(s, uint16(uint16_max / 2));
-	WriteAdaptive12(oStrm, s);
+	mpt::IO::WriteAdaptiveInt16LE(oStrm, s);
 	oStrm.write(str.c_str(), s);
-}
-
-
-// Works only for arguments 1,2,4,8
-static uint8 Log2(const uint8& val)
-//---------------------------------
-{
-	if(val == 1) return 0;
-	else if(val == 2) return 1;
-	else if(val == 4) return 2;
-	else return 3;
-}
-
-
-void WriteAdaptive1248(std::ostream& oStrm, const uint64& num)
-//------------------------------------------------------------
-{
-	const uint8 bc = GetByteReq1248(num);
-	const uint64 sizeInstruction = (num << 2) | Log2(bc);
-	Binarywrite<uint64>(oStrm, sizeInstruction, bc);
-}
-
-
-void ReadAdaptive12(std::istream& iStrm, uint16& val)
-//---------------------------------------------------
-{
-	Binaryread<uint16>(iStrm, val, 1);
-	if(val & 1)
-	{
-		uint8 hi = 0;
-		Binaryread(iStrm, hi);
-		val &= 0xff;
-		val |= hi << 8;
-	}
-	val >>= 1;
-}
-
-
-void ReadAdaptive1234(std::istream& iStrm, uint32& val)
-//-----------------------------------------------------
-{
-	Binaryread<uint32>(iStrm, val, 1);
-	const uint8 bc = 1 + static_cast<uint8>(val & 3);
-	uint8 v2 = 0;
-	uint8 v3 = 0;
-	uint8 v4 = 0;
-	if(bc >= 2) Binaryread(iStrm, v2);
-	if(bc >= 3) Binaryread(iStrm, v3);
-	if(bc >= 4) Binaryread(iStrm, v4);
-	val &= 0xff;
-	val |= (v2 << 8) | (v3 << 16) | (v4 << 24);
-	val >>= 2;
-}
-
-
-void ReadAdaptive1248(std::istream& iStrm, uint64& val)
-//-----------------------------------------------------
-{
-	Binaryread<uint64>(iStrm, val, 1);
-	uint8 bc = 1 << static_cast<uint8>(val & 3);
-	int byte = 1;
-	val &= 0xff;
-	while(bc > 1)
-	{
-		uint8 v = 0;
-		Binaryread(iStrm, v);
-		if(byte < 8)
-		{
-			val |= uint64(v) << (byte*8);
-		}
-		byte++;
-		bc--;
-	}
-	val >>= 2;
 }
 
 
@@ -227,10 +113,11 @@ static std::string IdToString(const char* const pvId, const size_t nLength)
 	std::string str;
 	if (IsPrintableId(pId, nLength))
 		std::copy(pId, pId + nLength, std::back_inserter<std::string>(str));
-	else if (nLength <= 4) // Interpret ID as integer value.
+	else if (nLength <= 8) // Interpret ID as integer value.
 	{
-		int32 val = 0;
-		memcpy(&val, pId, nLength);
+		int64 val = 0;
+		std::memcpy(&val, pId, nLength);
+		val = SwapBytesReturnLE(val);
 		str = Stringify(val);
 	}
 	return str;
@@ -379,16 +266,16 @@ void SsbWrite::WriteMapItem( const char* pId,
 			{ AddWriteNote(SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING); return; }
 
 		if (m_nIdbytes == IdSizeVariable) //Variablesize ID?
-			WriteAdaptive12(mapStream, static_cast<uint16>(nIdSize));
+			mpt::IO::WriteAdaptiveInt16LE(mapStream, static_cast<uint16>(nIdSize));
 
 		if(nIdSize > 0)
 			mapStream.write(pId, nIdSize);
 	}
 
 	if (GetFlag(RwfWMapStartPosEntry)) //Startpos
-		WriteAdaptive1248(mapStream, rposDataStart);
+		mpt::IO::WriteAdaptiveInt64LE(mapStream, rposDataStart);
 	if (GetFlag(RwfWMapSizeEntry)) //Entrysize
-		WriteAdaptive1248(mapStream, nDatasize);
+		mpt::IO::WriteAdaptiveInt64LE(mapStream, nDatasize);
 	if (GetFlag(RwfWMapDescEntry)) //Entry descriptions
 		WriteAdaptive12String(mapStream, std::string(pszDesc));
 
@@ -457,15 +344,15 @@ void SsbWrite::BeginWrite(const char* pId, const size_t nIdSize, const uint64& n
 	const uint8 flags = tempU8;
 	if(flags != s_DefaultFlagbyte)
 	{
-		WriteAdaptive1234(oStrm, 2); //Headersize - now it is 2.
+		mpt::IO::WriteAdaptiveInt32LE(oStrm, 2); //Headersize - now it is 2.
 		Binarywrite<uint8>(oStrm, HeaderId_FlagByte);
 		Binarywrite<uint8>(oStrm, flags);
 	}
 	else
-		WriteAdaptive1234(oStrm, 0);
+		mpt::IO::WriteAdaptiveInt32LE(oStrm, 0);
 
 	if(Testbit(header, 4)) // Version(numeric)?
-		WriteAdaptive1248(oStrm, nVersion);
+		mpt::IO::WriteAdaptiveInt64LE(oStrm, nVersion);
 
 	if(Testbit(flags, 0)) // Custom IDbytecount?
 	{
@@ -474,7 +361,7 @@ void SsbWrite::BeginWrite(const char* pId, const size_t nIdSize, const uint64& n
 	}
 
 	if(Testbit(flags, 1)) // Fixedsize entries?
-		WriteAdaptive1234(oStrm, m_nFixedEntrySize);
+		mpt::IO::WriteAdaptiveInt32LE(oStrm, m_nFixedEntrySize);
 
 	//Entrycount. Reserve two bytes(max uint16_max / 4 entries), actual value is written after writing data.
 	m_posEntrycount = oStrm.tellp();
@@ -612,7 +499,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 
 	// Read headerdata size
 	uint32 tempU32 = 0;
-	ReadAdaptive1234(iStrm, tempU32);
+	mpt::IO::ReadAdaptiveInt32LE(iStrm, tempU32);
 	const uint32 headerdatasize = tempU32;
 
 	// If headerdatasize != 0, read known headerdata and ignore rest.
@@ -631,7 +518,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 	// Read version numeric if available.
 	if (Testbit(header, 4))
 	{
-		ReadAdaptive1248(iStrm, tempU64);
+		mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
 		m_nReadVersion = tempU64;
 		if(tempU64 > nVersion)
 			AddReadNote(SNR_LOADING_OBJECT_WITH_LARGER_VERSION);
@@ -656,7 +543,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 
 	m_nFixedEntrySize = 0;
 	if(Testbit(flagbyte, 1)) // Fixedsize entries?
-		ReadAdaptive1234(iStrm, m_nFixedEntrySize);
+		mpt::IO::ReadAdaptiveInt32LE(iStrm, m_nFixedEntrySize);
 
 	SetFlag(RwfRMapHasStartpos, Testbit(header, 2));
 	SetFlag(RwfRMapHasSize, Testbit(header, 3));
@@ -670,7 +557,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 	if (Testbit(flagbyte, 2)) // Object description?
 	{
 		uint16 size = 0;
-		ReadAdaptive12(iStrm, size);
+		mpt::IO::ReadAdaptiveInt16LE(iStrm, size);
 		iStrm.ignore(size * (GetFlag(RwfRTwoBytesDescChar) ? 2 : 1));
 	}
 
@@ -678,8 +565,10 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 		iStrm.ignore(5);
 
 	// Read entrycount
-	ReadAdaptive1248(iStrm, tempU64);
-	if(tempU64 > 16000) // FIXME: 16000 appear like a totally arbitrary limit. May be to avoid out-of-memory DoS.
+	mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
+	if(tempU64 > 16000)
+		// The current code can only write 16383 entries because it uses a Adaptive64LE with a fixed size=2
+		// Additionally, 16000 is an arbitrary limit to avoid an out-of-memory DoS when caching the map.
 		{ AddReadNote(SNR_TOO_MANY_ENTRIES_TO_READ); return; }
 
 	m_nReadEntrycount = static_cast<NumType>(tempU64);
@@ -689,7 +578,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 	// Read map rpos if map exists.
 	if (GetFlag(RwfRwHasMap))
 	{
-		ReadAdaptive1248(iStrm, tempU64);
+		mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
 		if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
 			{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 	}
@@ -735,7 +624,7 @@ void SsbRead::CacheMap()
 			// Read ID.
 			uint16 nIdsize = m_nIdbytes;
 			if(nIdsize == IdSizeVariable) //Variablesize ID
-				ReadAdaptive12(iStrm, nIdsize);
+				mpt::IO::ReadAdaptiveInt16LE(iStrm, nIdsize);
 			const size_t nOldEnd = m_Idarray.size();
 			if (nIdsize > 0 && (Util::MaxValueOfType(nOldEnd) - nOldEnd >= nIdsize))
 			{
@@ -749,7 +638,7 @@ void SsbRead::CacheMap()
 			if(GetFlag(RwfRMapHasStartpos))
 			{
 				uint64 tempU64;
-				ReadAdaptive1248(iStrm, tempU64);
+				mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
 				if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
 					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 				mapData[i].rposStart = static_cast<RposType>(tempU64);
@@ -761,7 +650,7 @@ void SsbRead::CacheMap()
 			else if(GetFlag(RwfRMapHasSize)) // Map has datasize field.
 			{
 				uint64 tempU64;
-				ReadAdaptive1248(iStrm, tempU64);
+				mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
 				if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
 					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 				mapData[i].nSize = static_cast<DataSize>(tempU64);
@@ -775,7 +664,7 @@ void SsbRead::CacheMap()
 			if(GetFlag(RwfRMapHasDesc)) //Map has entrydescriptions?
 			{
 				uint16 size = 0;
-				ReadAdaptive12(iStrm, size);
+				mpt::IO::ReadAdaptiveInt16LE(iStrm, size);
 				if(GetFlag(RwfRTwoBytesDescChar))
 					iStrm.ignore(size * 2);
 				else
@@ -853,13 +742,18 @@ void SsbWrite::FinishWrite()
 	
 	// Write entry count.
 	oStrm.seekp(m_posEntrycount);
-	Binarywrite<size_t>(oStrm, (m_nCounter << 2) | 1, 2);
+
+	// Write a fixed size=2 Adaptive64LE because space for this value has already been reserved berforehand.
+	mpt::IO::WriteAdaptiveInt64LE(oStrm, m_nCounter, 2, 2);
 
 	if (GetFlag(RwfRwHasMap))
 	{	// Write map start position.
 		oStrm.seekp(m_posMapPosField);
 		const uint64 rposMap = posMapStart - m_posStart;
-		Binarywrite<uint64>(oStrm, rposMap << 2 | 3);
+
+		// Write a fixed size=8 Adaptive64LE because space for this value has already been reserved berforehand.
+		mpt::IO::WriteAdaptiveInt64LE(oStrm, rposMap, 8, 8);
+
 	}
 
 	// Seek to end.
