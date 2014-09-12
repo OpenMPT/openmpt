@@ -1020,11 +1020,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				srlztn::SsbRead ssb(iStrm);
 				ssb.BeginRead("mptm", MptVersion::num);
-				ssb.ReadItem(GetTuneSpecificTunings(), "0", 1, &ReadTuningCollection);
-				ssb.ReadItem(*this, "1", 1, &ReadTuningMap);
-				ssb.ReadItem(Order, "2", 1, &ReadModSequenceOld);
-				ssb.ReadItem(Patterns, FileIdPatterns, strlen(FileIdPatterns), &ReadModPatterns);
-				ssb.ReadItem(Order, FileIdSequences, strlen(FileIdSequences), &ReadModSequences);
+				ssb.ReadItem(GetTuneSpecificTunings(), "0", &ReadTuningCollection);
+				ssb.ReadItem(*this, "1", &ReadTuningMap);
+				ssb.ReadItem(Order, "2", &ReadModSequenceOld);
+				ssb.ReadItem(Patterns, FileIdPatterns, &ReadModPatterns);
+				ssb.ReadItem(Order, FileIdSequences, &ReadModSequences);
 
 				if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 				{
@@ -1650,14 +1650,14 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	ssb.BeginWrite("mptm", MptVersion::num);
 
 	if(GetTuneSpecificTunings().GetNumTunings() > 0)
-		ssb.WriteItem(GetTuneSpecificTunings(), "0", 1, &WriteTuningCollection);
+		ssb.WriteItem(GetTuneSpecificTunings(), "0", &WriteTuningCollection);
 	if(AreNonDefaultTuningsUsed(*this))
-		ssb.WriteItem(*this, "1", 1, &WriteTuningMap);
+		ssb.WriteItem(*this, "1", &WriteTuningMap);
 	if(Order.NeedsExtraDatafield())
-		ssb.WriteItem(Order, "2", 1, &WriteModSequenceOld);
+		ssb.WriteItem(Order, "2", &WriteModSequenceOld);
 	if(bNeedsMptPatSave)
-		ssb.WriteItem(Patterns, FileIdPatterns, strlen(FileIdPatterns), &WriteModPatterns);
-	ssb.WriteItem(Order, FileIdSequences, strlen(FileIdSequences), &WriteModSequences);
+		ssb.WriteItem(Patterns, FileIdPatterns, &WriteModPatterns);
+	ssb.WriteItem(Order, FileIdSequences, &WriteModSequences);
 
 	ssb.FinishWrite();
 

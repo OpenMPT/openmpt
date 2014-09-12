@@ -197,6 +197,37 @@ inline void ReadItem<std::string>(std::istream& iStrm, std::string& str, const D
 
 
 
+class ID
+{
+private:
+	std::string m_ID; // NOTE: can contain null characters ('\0')
+public:
+	ID() { }
+	ID(const std::string &id) : m_ID(id) { }
+	ID(const char *beg, const char *end) : m_ID(beg, end) { }
+	ID(const char *id) : m_ID(id?id:"") { }
+	ID(const char * str, std::size_t len) : m_ID(str, str + len) { }
+	template <typename T>
+	static ID FromInt(const T &val)
+	{
+		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+		char bytes[sizeof(T)];
+		std::memcpy(bytes, &val, sizeof(T));
+		#ifdef MPT_PLATFORM_BIG_ENDIAN
+			std::reverse(bytes, bytes + sizeof(T));
+		#endif
+		return ID(bytes, bytes + sizeof(T));
+	}
+	bool IsPrintable() const;
+	std::string AsString() const;
+	const char *GetBytes() const { return m_ID.c_str(); }
+	std::size_t GetSize() const { return m_ID.length(); }
+	bool operator == (const ID &other) const { return m_ID == other.m_ID; }
+	bool operator != (const ID &other) const { return m_ID != other.m_ID; }
+};
+
+
+
 class Ssb
 {
 
@@ -267,8 +298,7 @@ public:
 	SsbRead(std::istream& iStrm);
 
 	// Call this to begin reading: must be called before other read functions.
-	void BeginRead(const char* pId, const size_t nLength, const uint64& nVersion);
-	void BeginRead(const char* pszId, const uint64& nVersion) {return BeginRead(pszId, std::strlen(pszId), nVersion);}
+	void BeginRead(const ID &id, const uint64& nVersion);
 
 	// After calling BeginRead(), this returns number of entries in the file.
 	NumType GetNumEntries() const {return m_nReadEntrycount;}
@@ -282,43 +312,35 @@ public:
 	ReadIterator GetReadEnd();
 
 	// Compares given id with read entry id 
-	IdMatchStatus CompareId(const ReadIterator& iter, const char* pszId) {return CompareId(iter, pszId, std::strlen(pszId));}
-	IdMatchStatus CompareId(const ReadIterator& iter, const char* pId, const size_t nIdSize);
+	IdMatchStatus CompareId(const ReadIterator& iter, const ID &id);
 
 	uint64 GetReadVersion() {return m_nReadVersion;}
 
 	// Read item using default read implementation.
 	template <class T>
-	ReadRv ReadItem(T& obj, const char* pszId) {return ReadItem(obj, pszId, std::strlen(pszId), srlztn::ReadItem<T>);}
-
-	template <class T>
-	ReadRv ReadItem(T& obj, const char* pId, const size_t nIdSize) {return ReadItem(obj, pId, nIdSize, srlztn::ReadItem<T>);}
+	ReadRv ReadItem(T& obj, const ID &id) {return ReadItem(obj, id, srlztn::ReadItem<T>);}
 
 	// Read item using given function.
 	template <class T, class FuncObj>
-	ReadRv ReadItem(T& obj, const char* pId, const size_t nIdSize, FuncObj);
+	ReadRv ReadItem(T& obj, const ID &id, FuncObj);
 
 	// Read item using read iterator.
 	template <class T>
-	ReadRv ReadItem(const ReadIterator& iter, T& obj) {return ReadItem(iter, obj, srlztn::ReadItem<T>);}
+	ReadRv ReadIterItem(const ReadIterator& iter, T& obj) {return ReadIterItem(iter, obj, srlztn::ReadItem<T>);}
 	template <class T, class FuncObj>
-	ReadRv ReadItem(const ReadIterator& iter, T& obj, FuncObj func);
+	ReadRv ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func);
 
 private:
 
 	// Reads map to cache.
 	void CacheMap();
 
-	// Compares ID in file with expected ID.
-	void CompareId(std::istream& iStrm, const char* pId, const size_t nLength);
-
 	// Searches for entry with given ID. If found, returns pointer to corresponding entry, else
 	// returns nullptr.
-	const ReadEntry* Find(const char* pId, const size_t nLength);
-	const ReadEntry* Find(const char* pszId) {return Find(pszId, std::strlen(pszId));}
+	const ReadEntry* Find(const ID &id);
 
 	// Called after reading an object.
-	ReadRv OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin);
+	ReadRv OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posReadBegin);
 
 	void AddReadNote(const SsbStatus s);
 
@@ -356,19 +378,15 @@ public:
 	SsbWrite(std::ostream& oStrm);
 
 	// Write header
-	void BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion);
-	void BeginWrite(const char* pszId, const uint64& nVersion) {BeginWrite(pszId, std::strlen(pszId), nVersion);}
+	void BeginWrite(const ID &id, const uint64& nVersion);
 
 	// Write item using default write implementation.
 	template <class T>
-	void WriteItem(const T& obj, const char* pszId) {WriteItem(obj, pszId, std::strlen(pszId), &srlztn::WriteItem<T>);}
-
-	template <class T>
-	void WriteItem(const T& obj, const char* pId, const size_t nIdSize) {WriteItem(obj, pId, nIdSize, &srlztn::WriteItem<T>);}
+	void WriteItem(const T& obj, const ID &id) {WriteItem(obj, id, &srlztn::WriteItem<T>);}
 
 	// Write item using given function.
 	template <class T, class FuncObj>
-	void WriteItem(const T& obj, const char* pId, const size_t nIdSize, FuncObj);
+	void WriteItem(const T& obj, const ID &id, FuncObj);
 
 	// Writes mapping.
 	void FinishWrite();
@@ -376,18 +394,16 @@ public:
 private:
 
 	// Called after writing an item.
-	void OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite);
+	void OnWroteItem(const ID &id, const Postype& posBeforeWrite);
 
 	void AddWriteNote(const SsbStatus s);
-	void AddWriteNote(const char* pId,
-		const size_t nIdLength,
+	void AddWriteNote(const ID &id,
 		const NumType nEntryNum,
 		const DataSize nBytecount,
 		const RposType rposStart);
 
 	// Writes mapping item to mapstream.
-	void WriteMapItem(const char* pId, 
-		const size_t nIdSize,
+	void WriteMapItem(const ID &id,
 		const RposType& rposDataStart,
 		const DataSize& nDatasize,
 		const char* pszDesc);
@@ -407,66 +423,44 @@ private:
 };
 
 
-
-template<typename T>
-struct IdLE
-{
-	char b[sizeof(T)];
-	IdLE(T val)
-	{
-		std::memcpy(b, &val, sizeof(T));
-		#ifdef MPT_PLATFORM_BIG_ENDIAN
-			std::reverse(b, b+sizeof(T));
-		#endif
-	}
-	const char* GetChars() const
-	{
-		return b;
-	}
-};
-
-
 template <class T, class FuncObj>
-void SsbWrite::WriteItem(const T& obj, const char* pId, const size_t nIdSize, FuncObj Func)
-//------------------------------------------------------------------------------------
+void SsbWrite::WriteItem(const T& obj, const ID &id, FuncObj Func)
+//----------------------------------------------------------------
 {
 	const Postype pos = m_pOstrm->tellp();
 	Func(*m_pOstrm, obj);
-	OnWroteItem(pId, nIdSize, pos);
+	OnWroteItem(id, pos);
 }
 
 template <class T, class FuncObj>
-SsbRead::ReadRv SsbRead::ReadItem(T& obj, const char* pId, const size_t nIdSize, FuncObj Func)
-//------------------------------------------------------------------------------------
+SsbRead::ReadRv SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
+//-------------------------------------------------------------------
 {
-	const ReadEntry* pE = Find(pId, nIdSize);
+	const ReadEntry* pE = Find(id);
 	const Postype pos = m_pIstrm->tellg();
 	if (pE != nullptr || GetFlag(RwfRMapHasId) == false)
 		Func(*m_pIstrm, obj, (pE) ? (pE->nSize) : invalidDatasize);
-	return OnReadEntry(pE, pId, nIdSize, pos);
+	return OnReadEntry(pE, id, pos);
 }
 
 
 template <class T, class FuncObj>
-SsbRead::ReadRv SsbRead::ReadItem(const ReadIterator& iter, T& obj, FuncObj func)
-//-----------------------------------------------------------------------
+SsbRead::ReadRv SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func)
+//-----------------------------------------------------------------------------------
 {
 	m_pIstrm->clear();
 	if (iter->rposStart != 0)
 		m_pIstrm->seekg(m_posStart + Postype(iter->rposStart));
 	const Postype pos = m_pIstrm->tellg();
 	func(*m_pIstrm, obj, iter->nSize);
-	return OnReadEntry(&(*iter), &m_Idarray[iter->nIdpos], iter->nIdLength, pos);
+	return OnReadEntry(&(*iter), ID(&m_Idarray[iter->nIdpos], iter->nIdLength), pos);
 }
 
 
-inline SsbRead::IdMatchStatus SsbRead::CompareId(const ReadIterator& iter, const char* pId, const size_t nIdSize)
-//-------------------------------------------------------------------------------------------------------
+inline SsbRead::IdMatchStatus SsbRead::CompareId(const ReadIterator& iter, const ID &id)
+//--------------------------------------------------------------------------------------
 {
-	if (nIdSize == iter->nIdLength && memcmp(&m_Idarray[iter->nIdpos], pId, iter->nIdLength) == 0)
-		return IdMatch;
-	else
-		return IdMismatch;
+	return (id == ID(&m_Idarray[iter->nIdpos], iter->nIdLength)) ? IdMatch : IdMismatch;
 }
 
 
