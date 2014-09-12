@@ -113,8 +113,7 @@ uint16 CEffectVis::GetParam(ROWINDEX row) const
 		if (m.IsPcNote())
 		{
 			paramValue = m.GetValueEffectCol();
-		}
-		else
+		} else
 		{
 			paramValue = m.param;
 		}
@@ -135,14 +134,12 @@ void CEffectVis::SetParamFromY(ROWINDEX row, int y)
 	if (IsPcNote(row))
 	{
 		uint16 param = ScreenYToPCParam(y);
-		CriticalSection cs;
 		m.SetValueEffectCol(param);
 	} else
 	{
 		ModCommand::PARAM param = ScreenYToFXParam(y);
 		// Cap the parameter value as appropriate, based on effect type (e.g. Zxx gets capped to [0x00,0x7F])
 		effectInfo.GetEffectFromIndex(effectInfo.GetIndexFromEffect(m.command, param), param);
-		CriticalSection cs;
 		m.param = param;
 	}
 }

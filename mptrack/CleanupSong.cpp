@@ -705,7 +705,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 		}
 	} else
 	{
-		Reporting::Information("Samples associated with an used instrument won't be removed in IT Project files.", "Removing unused instruments", this);
+		modDoc.AddToLog("Samples associated with an used instrument won't be removed in IT Project files.");
 	}
 
 	BeginWaitCursor();
@@ -820,9 +820,15 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 
 	}
 
-	UINT nRemoved = modDoc.RemovePlugs(usedmap);
-
-	return (nRemoved > 0);
+	PLUGINDEX numRemoved = modDoc.RemovePlugs(usedmap);
+	if(numRemoved != 0)
+	{
+		char s[64];
+		wsprintf(s, "%d unused plugin%s removed", numRemoved, (numRemoved == 1) ? "" : "s");
+		modDoc.AddToLog(s);
+		return true;
+	}
+	return false;
 }
 
 
@@ -832,7 +838,7 @@ bool CModCleanupDlg::ResetVariables()
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
-	if(Reporting::Confirm(TEXT("WARNING: OpenMPT will convert the module to IT format and reset all song, sample and instrument attributes to default values. Continue?"), TEXT("Resetting variables"), false, false, this) == cnfNo)
+	if(Reporting::Confirm(_T("OpenMPT will convert the module to IT format and reset all song, sample and instrument attributes to default values. Continue?"), TEXT("Resetting variables"), false, false, this) == cnfNo)
 		return false;
 
 	// Stop play.
