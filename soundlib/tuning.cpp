@@ -384,14 +384,14 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead("CTB244RTI", (CTuning::GetVersion() << 24) + GetVersion());
-	ssb.ReadItem(pTuning->m_TuningName, "0", 1, ReadStr);
+	ssb.ReadItem(pTuning->m_TuningName, "0", ReadStr);
 	ssb.ReadItem(pTuning->m_EditMask, "1");
 	ssb.ReadItem(pTuning->m_TuningType, "2");
-	ssb.ReadItem(pTuning->m_NoteNameMap, "3", 1, ReadNoteMap);
+	ssb.ReadItem(pTuning->m_NoteNameMap, "3", ReadNoteMap);
 	ssb.ReadItem(pTuning->m_FineStepCount, "4");
 
 	// RTI entries.
-	ssb.ReadItem(pTuning->m_RatioTable, "RTI0", 4, ReadRatioTable);
+	ssb.ReadItem(pTuning->m_RatioTable, "RTI0", ReadRatioTable);
 	ssb.ReadItem(pTuning->m_StepMin, "RTI1");
 	ssb.ReadItem(pTuning->m_GroupSize, "RTI2");
 	ssb.ReadItem(pTuning->m_GroupRatio, "RTI3");
@@ -476,11 +476,11 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) 
 	srlztn::SsbWrite ssb(outStrm);
 	ssb.BeginWrite("CTB244RTI", (GetVersion() << 24) + GetClassVersion());
 	if (m_TuningName.length() > 0)
-		ssb.WriteItem(m_TuningName, "0", 1, WriteStr);
+		ssb.WriteItem(m_TuningName, "0", WriteStr);
 	ssb.WriteItem(m_EditMask, "1");
 	ssb.WriteItem(m_TuningType, "2");
 	if (m_NoteNameMap.size() > 0)
-		ssb.WriteItem(m_NoteNameMap, "3", 1, WriteNoteMap);
+		ssb.WriteItem(m_NoteNameMap, "3", WriteNoteMap);
 	if (GetFineStepCount() > 0)
 		ssb.WriteItem(m_FineStepCount, "4");
 
@@ -488,9 +488,9 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) 
 	if (GetGroupRatio() > 0)
 		ssb.WriteItem(m_GroupRatio, "RTI3");
 	if (tt == TT_GROUPGEOMETRIC)
-		ssb.WriteItem(m_RatioTable, "RTI0", 4, RatioWriter(GetGroupSize()));
+		ssb.WriteItem(m_RatioTable, "RTI0", RatioWriter(GetGroupSize()));
 	if (tt == TT_GENERAL)
-		ssb.WriteItem(m_RatioTable, "RTI0", 4, RatioWriter());
+		ssb.WriteItem(m_RatioTable, "RTI0", RatioWriter());
 	if (tt == TT_GEOMETRIC)
 		ssb.WriteItem(m_GroupSize, "RTI2");
 

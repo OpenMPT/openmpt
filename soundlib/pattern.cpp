@@ -486,7 +486,7 @@ void WriteModPattern(std::ostream& oStrm, const CPattern& pat)
 {
 	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdPattern, MptVersion::num);
-	ssb.WriteItem(pat, "data", strlen("data"), &WriteData);
+	ssb.WriteItem(pat, "data", &WriteData);
 	// pattern time signature
 	if(pat.GetOverrideSignature())
 	{
@@ -504,7 +504,7 @@ void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 	ssb.BeginRead(FileIdPattern, MptVersion::num);
 	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
-	ssb.ReadItem(pat, "data", strlen("data"), &ReadData);
+	ssb.ReadItem(pat, "data", &ReadData);
 	// pattern time signature
 	uint32 nRPB = 0, nRPM = 0;
 	ssb.ReadItem<uint32>(nRPB, "RPB.");

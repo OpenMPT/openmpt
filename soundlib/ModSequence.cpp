@@ -819,7 +819,7 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 	ssb.WriteItem(seq.m_sName.c_str(), "n");
 	const uint16 nLength = seq.GetLengthTailTrimmed();
 	ssb.WriteItem<uint16>(nLength, "l");
-	ssb.WriteItem(seq.m_pArray, "a", 1, srlztn::ArrayWriter<uint16>(nLength));
+	ssb.WriteItem(seq.m_pArray, "a", srlztn::ArrayWriter<uint16>(nLength));
 	ssb.FinishWrite();
 }
 
@@ -838,7 +838,7 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 	ssb.ReadItem<uint16>(nSize, "l");
 	LimitMax(nSize, ModSpecs::mptm.ordersMax);
 	seq.resize(MAX(nSize, ModSequenceSet::s_nCacheSize));
-	ssb.ReadItem(seq.m_pArray, "a", 1, srlztn::ArrayReader<uint16>(nSize));
+	ssb.ReadItem(seq.m_pArray, "a", srlztn::ArrayReader<uint16>(nSize));
 }
 
 
@@ -854,9 +854,9 @@ void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 	for(uint8 i = 0; i < nSeqs; i++)
 	{
 		if (i == seq.GetCurrentSequenceIndex())
-			ssb.WriteItem(seq, srlztn::IdLE<uint8>(i).GetChars(), sizeof(i), &WriteModSequence);
+			ssb.WriteItem(seq, srlztn::ID::FromInt<uint8>(i), &WriteModSequence);
 		else
-			ssb.WriteItem(seq.m_Sequences[i], srlztn::IdLE<uint8>(i).GetChars(), sizeof(i), &WriteModSequence);
+			ssb.WriteItem(seq.m_Sequences[i], srlztn::ID::FromInt<uint8>(i), &WriteModSequence);
 	}
 	ssb.FinishWrite();
 }
@@ -881,7 +881,7 @@ void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 
 	for(uint8 i = 0; i < nSeqs; i++)
 	{
-		ssb.ReadItem(seq.m_Sequences[i], srlztn::IdLE<uint8>(i).GetChars(), sizeof(i), &ReadModSequence);
+		ssb.ReadItem(seq.m_Sequences[i], srlztn::ID::FromInt<uint8>(i), &ReadModSequence);
 	}
 	seq.m_nCurrentSeq = (nCurrent < seq.GetNumSequences()) ? nCurrent : 0;
 	seq.CopyStorageToCache();

@@ -108,12 +108,12 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(std::o
 {
 	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite("TC", s_SerializationVersion);
-	ssb.WriteItem(m_Name, "0", 1, &WriteStr);
+	ssb.WriteItem(m_Name, "0", &WriteStr);
 	ssb.WriteItem(m_EditMask, "1");
 
 	const size_t tcount = m_Tunings.size();
 	for(size_t i = 0; i<tcount; i++)
-		ssb.WriteItem(*m_Tunings[i], "2", 1, &WriteTuning);
+		ssb.WriteItem(*m_Tunings[i], "2", &WriteTuning);
 	ssb.FinishWrite();
 		
 	if(ssb.GetStatus() & srlztn::SNT_FAILURE)
@@ -176,11 +176,11 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std:
 		for(srlztn::SsbRead::ReadIterator iter = iterBeg; iter != iterEnd; iter++)
 		{
 			if (ssb.CompareId(iter, "0") == srlztn::SsbRead::IdMatch)
-				ssb.ReadItem(iter, m_Name, &ReadStr);
+				ssb.ReadIterItem(iter, m_Name, &ReadStr);
 			else if (ssb.CompareId(iter, "1") == srlztn::SsbRead::IdMatch)
-				ssb.ReadItem(iter, m_EditMask);
+				ssb.ReadIterItem(iter, m_EditMask);
 			else if (ssb.CompareId(iter, "2") == srlztn::SsbRead::IdMatch)
-				ssb.ReadItem(iter, *this, &ReadTuning);
+				ssb.ReadIterItem(iter, *this, &ReadTuning);
 		}
 
 		if(ssb.GetStatus() & srlztn::SNT_FAILURE)

@@ -39,16 +39,19 @@ static inline void Setbit(uint8& val, uint8 bitindex, bool newval)
 }
 
 
-static bool IsPrintableId(const char* pId, const size_t nLength)
-//--------------------------------------------------------------
+bool ID::IsPrintable() const
+//--------------------------
 {
-	for(size_t i = 0; i < nLength; i++)
+	for(std::size_t i = 0; i < m_ID.length(); ++i)
 	{
-		if (pId[i] <= 0 || isprint(pId[i]) == 0)
+		if(m_ID[i] <= 0 || isprint(m_ID[i]) == 0)
+		{
 			return false;
+		}
 	}
 	return true;
 }
+
 
 //Format: First bit tells whether the size indicator is 1 or 2 bytes.
 static void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
@@ -104,24 +107,29 @@ void ReadItemString(std::istream& iStrm, std::string& str, const DataSize)
 }
 
 
-static std::string IdToString(const char* const pvId, const size_t nLength)
-//-------------------------------------------------------------------------
+std::string ID::AsString() const
+//------------------------------
 {
-	const char* pId = static_cast<const char*>(pvId);
-	if (nLength == 0)
-		return "";
-	std::string str;
-	if (IsPrintableId(pId, nLength))
-		std::copy(pId, pId + nLength, std::back_inserter<std::string>(str));
-	else if (nLength <= 8) // Interpret ID as integer value.
+	if(IsPrintable())
 	{
-		int64 val = 0;
-		std::memcpy(&val, pId, nLength);
-		val = SwapBytesReturnLE(val);
-		str = Stringify(val);
+		return m_ID;
 	}
-	return str;
+	if(m_ID.length() > 8)
+	{
+		return std::string();
+	}
+	uint64 val = 0;
+	uint8 bytes[8];
+	std::memset(bytes, 0, 8);
+	for(std::size_t i = 0; i < m_ID.length(); ++i)
+	{
+		bytes[i] = m_ID[i];
+	}
+	std::memcpy(&val, bytes, m_ID.length());
+	val = SwapBytesReturnLE(val);
+	return mpt::ToString(val);
 }
+
 
 const char Ssb::s_EntryID[3] = {'2','2','8'};
 
@@ -214,7 +222,7 @@ void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 		m_fpLogFunc(
 				 tstrReadProgress,
 				 nNum,
-				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  IdToString(&m_Idarray[pRe->nIdpos], pRe->nIdLength).c_str() : "",
+				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  ID(&m_Idarray[pRe->nIdpos], pRe->nIdLength).AsString().c_str() : "",
 				 (pRe) ? pRe->rposStart : 0,
 				 (pRe && pRe->nSize != invalidDatasize) ? Stringify(pRe->nSize).c_str() : "",
 				 "");
@@ -223,14 +231,14 @@ void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 
 
 // Called after writing an entry.
-void SsbWrite::AddWriteNote(const char* pId, const size_t nIdSize, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
-//----------------------------------------------------------------------------
+void SsbWrite::AddWriteNote(const ID &id, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
+//---------------------------------------------------------------------------------------------------------------------
 {
 	m_Status |= SNT_PROGRESS;
 	if (m_fpLogFunc)
 	{
 		{
-			m_fpLogFunc(tstrWriteProgress, nEntryNum, IdToString(pId, nIdSize).c_str(), rposStart, nBytecount);
+			m_fpLogFunc(tstrWriteProgress, nEntryNum, id.AsString().c_str(), rposStart, nBytecount);
 		}
 	}
 }
@@ -245,16 +253,15 @@ void SsbRead::ResetReadstatus()
 }
 
 
-void SsbWrite::WriteMapItem( const char* pId, 
-						const size_t nIdSize,
+void SsbWrite::WriteMapItem(const ID &id,
 						const RposType& rposDataStart,
 						const DataSize& nDatasize,
 						const char* pszDesc)
-//----------------------------------------------
+//----------------------------------------
 {
 	if (m_fpLogFunc)
 		m_fpLogFunc(tstrMapEntryWrite,
-					(nIdSize > 0) ? IdToString(pId, nIdSize).c_str() : "",
+					(id.GetSize() > 0) ? id.AsString().c_str() : "",
 					rposDataStart,
 					nDatasize);
 
@@ -262,14 +269,14 @@ void SsbWrite::WriteMapItem( const char* pId,
 
 	if(m_nIdbytes > 0)
 	{
-		if (m_nIdbytes != IdSizeVariable && nIdSize != m_nIdbytes)
+		if (m_nIdbytes != IdSizeVariable && id.GetSize() != m_nIdbytes)
 			{ AddWriteNote(SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING); return; }
 
 		if (m_nIdbytes == IdSizeVariable) //Variablesize ID?
-			mpt::IO::WriteAdaptiveInt16LE(mapStream, static_cast<uint16>(nIdSize));
+			mpt::IO::WriteAdaptiveInt16LE(mapStream, static_cast<uint16>(id.GetSize()));
 
-		if(nIdSize > 0)
-			mapStream.write(pId, nIdSize);
+		if(id.GetSize() > 0)
+			mapStream.write(id.GetBytes(), id.GetSize());
 	}
 
 	if (GetFlag(RwfWMapStartPosEntry)) //Startpos
@@ -296,13 +303,13 @@ void SsbWrite::IncrementWriteCounter()
 }
 
 
-void SsbWrite::BeginWrite(const char* pId, const size_t nIdSize, const uint64& nVersion)
-//---------------------------------------------------------------------------------
+void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
+//-------------------------------------------------------------
 {
 	std::ostream& oStrm = *m_pOstrm;
 
 	if (m_fpLogFunc)
-		m_fpLogFunc(tstrWriteHeader, IdToString(pId, nIdSize).c_str());
+		m_fpLogFunc(tstrWriteHeader, id.AsString().c_str());
 
 	ResetWritestatus();
 
@@ -316,9 +323,9 @@ void SsbWrite::BeginWrite(const char* pId, const size_t nIdSize, const uint64& n
 
 	// Object ID.
 	{
-		uint8 idsize = static_cast<uint8>(nIdSize);
+		uint8 idsize = static_cast<uint8>(id.GetSize());
 		Binarywrite<uint8>(oStrm, idsize);
-		if(idsize > 0) oStrm.write(pId, nIdSize);
+		if(idsize > 0) oStrm.write(id.GetBytes(), id.GetSize());
 	}
 
 	// Form header.
@@ -375,8 +382,8 @@ void SsbWrite::BeginWrite(const char* pId, const size_t nIdSize, const uint64& n
 }
 
 
-SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const char* pId, const size_t nIdSize, const Postype& posReadBegin)
-//-------------------------------------------------------------------------------------------------------------------
+SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posReadBegin)
+//--------------------------------------------------------------------------------------------------
 {
 	if (pE != nullptr)
 		AddReadNote(pE, m_nCounter);
@@ -390,7 +397,7 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const char* pId, const
 	else // Entry not found.
 	{
 		if (m_fpLogFunc)
-			m_fpLogFunc(tstrNoEntryFound, IdToString(pId, nIdSize).c_str());
+			m_fpLogFunc(tstrNoEntryFound, id.AsString().c_str());
 		return EntryNotFound;
 	}
 	m_nCounter++;
@@ -398,8 +405,8 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const char* pId, const
 }
 
 
-void SsbWrite::OnWroteItem(const char* pId, const size_t nIdSize, const Postype& posBeforeWrite)
-//-----------------------------------------------------------------------------------------
+void SsbWrite::OnWroteItem(const ID &id, const Postype& posBeforeWrite)
+//---------------------------------------------------------------------
 {
 	const Offtype nRawEntrySize = m_pOstrm->tellp() - posBeforeWrite;
 
@@ -424,37 +431,21 @@ void SsbWrite::OnWroteItem(const char* pId, const size_t nIdSize, const Postype&
 			{ AddWriteNote(SNW_INSUFFICIENT_FIXEDSIZE); return; }
 	}
 	if (GetFlag(RwfRwHasMap))
-		WriteMapItem(pId, nIdSize, static_cast<RposType>(posBeforeWrite - m_posStart), nEntrySize, "");
+		WriteMapItem(id, static_cast<RposType>(posBeforeWrite - m_posStart), nEntrySize, "");
 
 	if (m_fpLogFunc != nullptr)
-		AddWriteNote(pId, nIdSize, m_nCounter, nEntrySize, static_cast<RposType>(posBeforeWrite - m_posStart));
+		AddWriteNote(id, m_nCounter, nEntrySize, static_cast<RposType>(posBeforeWrite - m_posStart));
 	IncrementWriteCounter();
 }
 
 
-void SsbRead::CompareId(std::istream& iStrm, const char* pId, const size_t nIdlength)
-//---------------------------------------------------------------------------
-{
-	uint8 tempU8 = 0;
-	Binaryread<uint8>(iStrm, tempU8);
-	char buffer[256];
-	if(tempU8)
-		iStrm.read(buffer, tempU8);
-
-	if (tempU8 == nIdlength && nIdlength > 0 && memcmp(buffer, pId, nIdlength) == 0)
-		return; // Match.
-
-	AddReadNote(SNR_OBJECTCLASS_IDMISMATCH);
-}
-
-
-void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVersion)
-//---------------------------------------------------------------------------------
+void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
+//-----------------------------------------------------------
 {
 	std::istream& iStrm = *m_pIstrm;
 
 	if (m_fpLogFunc)
-		m_fpLogFunc(tstrReadingHeader, IdToString(pId, nLength).c_str());
+		m_fpLogFunc(tstrReadingHeader, id.AsString().c_str());
 
 	ResetReadstatus();
 
@@ -467,7 +458,7 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 	{
 		char temp[sizeof(s_EntryID)];
 		ArrayReader<char>(sizeof(s_EntryID))(iStrm, temp, sizeof(s_EntryID));
-		if (memcmp(temp, s_EntryID, sizeof(s_EntryID)))
+		if(std::memcmp(temp, s_EntryID, sizeof(s_EntryID)))
 		{
 			AddReadNote(SNR_STARTBYTE_MISMATCH);
 			return;
@@ -475,7 +466,18 @@ void SsbRead::BeginRead(const char* pId, const size_t nLength, const uint64& nVe
 	}
 	
 	// Compare IDs.
-	CompareId(iStrm, pId, nLength);
+	uint8 storedIdLen = 0;
+	Binaryread<uint8>(iStrm, storedIdLen);
+	char storedIdBuf[256];
+	MemsetZero(storedIdBuf);
+	if(storedIdLen > 0)
+	{
+		iStrm.read(storedIdBuf, storedIdLen);
+	}
+	if(!(id == ID(storedIdBuf, storedIdLen)))
+	{
+		AddReadNote(SNR_OBJECTCLASS_IDMISMATCH);
+	}
 	if ((m_Status & SNT_FAILURE) != 0)
 	{
 		if (m_fpLogFunc)
@@ -689,8 +691,8 @@ void SsbRead::CacheMap()
 }
 
 
-const ReadEntry* SsbRead::Find(const char* pId, const size_t nIdLength)
-//-----------------------------------------------------------------
+const ReadEntry* SsbRead::Find(const ID &id)
+//------------------------------------------
 {
 	m_pIstrm->clear();
 	if (GetFlag(RwfRMapCached) == false)
@@ -705,8 +707,7 @@ const ReadEntry* SsbRead::Find(const char* pId, const size_t nIdLength)
 		for(size_t i0 = 0; i0 < nEntries; i0++)
 		{
 			const size_t i = (i0 + m_nNextReadHint) % nEntries;
-			if (mapData[i].nIdLength == nIdLength && mapData[i].nIdpos < m_Idarray.size() &&
-				memcmp(&m_Idarray[mapData[i].nIdpos], pId, mapData[i].nIdLength) == 0)
+			if(mapData[i].nIdpos < m_Idarray.size() && id == ID(&m_Idarray[mapData[i].nIdpos], mapData[i].nIdLength))
 			{
 				m_nNextReadHint = (i + 1) % nEntries;
 				if (mapData[i].rposStart != 0)
