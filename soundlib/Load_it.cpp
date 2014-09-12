@@ -16,6 +16,7 @@
 #include "../mptrack/moddoc.h"
 #include "../mptrack/TrackerSettings.h"
 #endif
+#include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #include "../common/mptFstream.h"
 #include <sstream>
@@ -109,7 +110,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 			else //Case: Using original IT tuning.
 				srlztn::StringToBinaryStream<uint8>(oStrm, "->MPT_ORIGINAL_IT<-");
 
-			srlztn::Binarywrite<uint16>(oStrm, iter->second);
+			mpt::IO::WriteIntLE<uint16>(oStrm, iter->second);
 		}
 
 		//Writing tuning data for instruments.
@@ -121,7 +122,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 				sf.AddToLog("Error: 210807_1");
 				return;
 			}
-			srlztn::Binarywrite(oStrm, iter->second);
+			mpt::IO::WriteIntLE<uint16>(oStrm, iter->second);
 		}
 	}
 }
@@ -1269,9 +1270,18 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	itHeader.ConvertEndianness();
 
 	Order.WriteAsByte(f, itHeader.ordnum);
-	if(itHeader.insnum) fwrite(&inspos[0], 4, itHeader.insnum, f);
-	if(itHeader.smpnum) fwrite(&smppos[0], 4, itHeader.smpnum, f);
-	if(itHeader.patnum) fwrite(&patpos[0], 4, itHeader.patnum, f);
+	for(uint16 i = 0; i < itHeader.insnum; ++i)
+	{
+		mpt::IO::WriteIntLE<uint32>(f, inspos[i]);
+	}
+	for(uint16 i = 0; i < itHeader.smpnum; ++i)
+	{
+		mpt::IO::WriteIntLE<uint32>(f, smppos[i]);
+	}
+	for(uint16 i = 0; i < itHeader.patnum; ++i)
+	{
+		mpt::IO::WriteIntLE<uint32>(f, patpos[i]);
+	}
 
 	// Writing edit history information
 	SaveITEditHistory(this, f);
@@ -1288,8 +1298,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		char magic[4];
 		memcpy(magic, "PNAM", 4);
 		fwrite(magic, 4, 1, f);
-		uint32 d = numNamedPats * MAX_PATTERNNAME;
-		fwrite(&d, 4, 1, f);
+		mpt::IO::WriteIntLE<uint32>(f, numNamedPats * MAX_PATTERNNAME);
 
 		for(PATTERNINDEX nPat = 0; nPat < numNamedPats; nPat++)
 		{
@@ -1306,7 +1315,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		char magic[4];
 		memcpy(magic, "CNAM", 4);
 		fwrite(magic, 4, 1, f);
-		fwrite(&dwChnNamLen, 1, 4, f);
+		mpt::IO::WriteIntLE<uint32>(f, dwChnNamLen);
 		UINT nChnNames = dwChnNamLen / MAX_CHANNELNAME;
 		for(UINT inam = 0; inam < nChnNames; inam++)
 		{
@@ -1590,9 +1599,18 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	// Updating offsets
 	fseek(f, dwHdrPos, SEEK_SET);
-	if(itHeader.insnum) fwrite(&inspos[0], 4, itHeader.insnum, f);
-	if(itHeader.smpnum) fwrite(&smppos[0], 4, itHeader.smpnum, f);
-	if(itHeader.patnum) fwrite(&patpos[0], 4, itHeader.patnum, f);
+	for(uint16 i = 0; i < itHeader.insnum; ++i)
+	{
+		mpt::IO::WriteIntLE<uint32>(f, inspos[i]);
+	}
+	for(uint16 i = 0; i < itHeader.smpnum; ++i)
+	{
+		mpt::IO::WriteIntLE<uint32>(f, smppos[i]);
+	}
+	for(uint16 i = 0; i < itHeader.patnum; ++i)
+	{
+		mpt::IO::WriteIntLE<uint32>(f, patpos[i]);
+	}
 
 	if(GetType() == MOD_TYPE_IT)
 	{
@@ -1656,7 +1674,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		fout.clear();
 		success = false;
 	}
-	fout.write(reinterpret_cast<const char*>(&MPTStartPos), sizeof(MPTStartPos));
+	mpt::IO::WriteIntLE<uint32>(fout, MPTStartPos);
 
 	fout.flush();
 #if MPT_COMPILER_MSVC
@@ -1708,7 +1726,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 			}
 
 			// rewbs.modularPlugData
-			DWORD MPTxPlugDataSize = 4 + (sizeof(m_MixPlugins[i].fDryRatio)) +			// 4 for ID and size of dryRatio
+			DWORD MPTxPlugDataSize = 4 + (sizeof(m_MixPlugins[i].fDryRatio)) +     //4 for ID and size of dryRatio
 									 4 + (sizeof(m_MixPlugins[i].defaultProgram)) +		// rewbs.plugDefaultProgram
 									 4 + 3 * sizeof(int32);								// Editor data
 								// for each extra entity, add 4 for ID, plus size of entity, plus optionally 4 for size of entity.
@@ -1725,30 +1743,31 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 				fwrite(id, 1, 4, f);
 
 				// write plugin size:
-				fwrite(&nPluginSize, 1, 4, f);
-				fwrite(&plugin.Info, 1, sizeof(SNDMIXPLUGININFO), f);
-				fwrite(&m_MixPlugins[i].nPluginDataSize, 1, 4, f);
+				mpt::IO::WriteIntLE<uint32>(f, nPluginSize);
+				SNDMIXPLUGININFO tmpPluginInfo = m_MixPlugins[i].Info;
+				tmpPluginInfo.ConvertEndianness();
+				fwrite(&tmpPluginInfo, 1, sizeof(SNDMIXPLUGININFO), f);
+				mpt::IO::WriteIntLE<uint32>(f, m_MixPlugins[i].nPluginDataSize);
 				if(m_MixPlugins[i].pPluginData)
 				{
 					fwrite(m_MixPlugins[i].pPluginData, 1, m_MixPlugins[i].nPluginDataSize, f);
 				}
 
-				fwrite(&MPTxPlugDataSize, 1, 4, f);
+				mpt::IO::WriteIntLE<uint32>(f, MPTxPlugDataSize);
 
 				// Dry/Wet ratio
 				memcpy(id, "DWRT", 4);
 				fwrite(id, 1, 4, f);
-				uint32 ratio = IEEE754binary32LE(m_MixPlugins[i].fDryRatio).GetInt32();
-				fwrite(&ratio, 1, sizeof(uint32), f);
+				// DWRT chunk does not include a size, so better make sure we always write 4 bytes here.
+				STATIC_ASSERT(sizeof(IEEE754binary32LE) == 4);
+				mpt::IO::Write(f, IEEE754binary32LE(m_MixPlugins[i].fDryRatio));
 
 				// Default program
 				memcpy(id, "PROG", 4);
 				fwrite(id, 1, 4, f);
 				// PROG chunk does not include a size, so better make sure we always write 4 bytes here.
 				STATIC_ASSERT(sizeof(m_MixPlugins[i].defaultProgram) == sizeof(int32));
-				int32 prog = m_MixPlugins[i].defaultProgram;
-				SwapBytesLE(prog);
-				fwrite(&prog, 1, sizeof(int32), f);
+				mpt::IO::WriteIntLE<int32>(f, m_MixPlugins[i].defaultProgram);
 
 				// Editor window parameters
 				memcpy(id, "EWND", 4);
@@ -1783,9 +1802,11 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 		{
 			memcpy(id, "CHFX", 4);
 			fwrite(id, 1, 4, f);
-			nPluginSize = nChInfo * 4;
-			fwrite(&nPluginSize, 1, 4, f);
-			fwrite(chinfo, 1, nPluginSize, f);
+			mpt::IO::WriteIntLE<uint32>(f, nChInfo * 4);
+			for(uint32 i = 0; i < nChInfo; ++i)
+			{
+				mpt::IO::WriteIntLE<uint32>(f, chinfo[i]);
+			}
 		}
 		nTotalSize += nChInfo * 4 + 8;
 	}
@@ -1912,7 +1933,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 //---------------------------------------------------------------------------------
 {
 	uint32 code = MAGIC4BE('M','P','T','X');							// write extension header code
-	fwrite(&code, 1, sizeof(uint32), f);
+	mpt::IO::WriteIntLE<uint32>(f, code);
 
 	if (nInstruments == 0)
 		return;
@@ -1974,8 +1995,8 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 size, FILE* f, UINT nInstruments) const
 //------------------------------------------------------------------------------------------------------------------
 {
-	fwrite(&code, 1, sizeof(uint32), f);	//write code
-	fwrite(&size, 1, sizeof(int16), f);		//write size
+	mpt::IO::WriteIntLE<uint32>(f, code);		//write code
+	mpt::IO::WriteIntLE<int16>(f, size);		//write size
 	for(UINT nins=1; nins<=nInstruments; nins++)	//for all instruments...
 	{
 		if (Instruments[nins])
@@ -1998,16 +2019,16 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 
 #define WRITEMODULARHEADER(c1, c2, c3, c4, fsize) \
 	{ \
-	const uint32 code = SwapBytesReturnLE(MAGIC4BE(c1, c2, c3, c4)); \
-	fwrite(&code, 1, sizeof(code), f); \
-	ASSERT(fsize <= uint16_max); \
-	const uint16 size = SwapBytesReturnLE(static_cast<uint16>(fsize)); \
-	fwrite(&size, 1, sizeof(size), f); \
+		const uint32 code = MAGIC4BE(c1, c2, c3, c4); \
+		mpt::IO::WriteIntLE<uint32>(f, code); \
+		ASSERT(fsize <= uint16_max); \
+		const uint16 size = fsize; \
+		mpt::IO::WriteIntLE<uint16>(f, size); \
 	}
 #define WRITEMODULAR(c1, c2, c3, c4, field) \
 	{ \
 		WRITEMODULARHEADER(c1, c2, c3, c4, sizeof(field)) \
-		fwrite(&(field), 1, sizeof(field), f); \
+		mpt::IO::WriteIntLE(f, field); \
 	}
 
 	if(m_nDefaultTempo > 255)
@@ -2068,7 +2089,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	//Additional flags for XM/IT/MPTM
 	if(m_ModFlags)
 	{
-		WRITEMODULAR('M','S','F','.', m_ModFlags);
+		WRITEMODULAR('M','S','F','.', m_ModFlags.GetRaw());
 	}
 
 #ifdef MODPLUG_TRACKER
@@ -2287,8 +2308,7 @@ size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns)
 	//write modular data's total size
 	long curPos = ftell(f);			// remember current pos
 	fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
-	SwapBytesLE(modularInstSize);
-	fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
+	mpt::IO::WriteIntLE<uint32>(f, modularInstSize);	// write data
 	fseek(f, curPos, SEEK_SET);		// go back to where we were.
 
 	// Compute the size that we just wasted.

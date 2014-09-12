@@ -18,6 +18,7 @@
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"
 #include "../common/AudioCriticalSection.h"
+#include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #include "Sndfile.h"
 #include "tuningcollection.h"
@@ -189,8 +190,8 @@ bool IsNegative(const T &val)
 	fsize = sizeof( type );\
 	if(only_this_code == Util::MaxValueOfType(only_this_code)) \
 	{ \
-		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
-		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
+		mpt::IO::WriteIntLE<uint32>(file, fcode); \
+		mpt::IO::WriteIntLE<int16>(file, fsize); \
 	} else if(only_this_code == fcode)\
 	{ \
 		ASSERT(fixedsize == fsize); \
@@ -212,8 +213,8 @@ bool IsNegative(const T &val)
 	fsize = sizeof( type );\
 	if(only_this_code == Util::MaxValueOfType(only_this_code)) \
 	{ \
-		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
-		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
+		mpt::IO::WriteIntLE<uint32>(file, fcode); \
+		mpt::IO::WriteIntLE<int16>(file, fsize); \
 		type tmp = (type)(input-> name ); \
 		tmp = SwapBytesReturnLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
@@ -247,8 +248,8 @@ bool IsNegative(const T &val)
 	fsize = sizeof( type ) * arraysize;\
 	if(only_this_code == Util::MaxValueOfType(only_this_code)) \
 	{ \
-		fwrite(& fcode , 1 , sizeof( uint32 ) , file);\
-		fwrite(& fsize , 1 , sizeof( int16 ) , file);\
+		mpt::IO::WriteIntLE<uint32>(file, fcode); \
+		mpt::IO::WriteIntLE<int16>(file, fsize); \
 	} else if(only_this_code == fcode)\
 	{ \
 		/* ASSERT(fixedsize <= fsize); */ \
@@ -311,8 +312,8 @@ if(only_this_code == Util::MaxValueOfType(only_this_code) || only_this_code == M
 	fsize = sizeof(dwFlags);
 	if(!only_this_code)
 	{
-		fwrite(&fcode, 1, sizeof(int32), file);
-		fwrite(&fsize, 1, sizeof(int16), file);
+		mpt::IO::WriteIntLE<int32>(file, fcode);
+		mpt::IO::WriteIntLE<int16>(file, fsize);
 	}
 	dwFlags = SwapBytesReturnLE(dwFlags);
 	fwrite(&dwFlags, 1, fsize, file);

@@ -193,6 +193,7 @@
     <ClInclude Include="..\common\misc_util.h" />
     <ClInclude Include="..\common\mptAtomic.h" />
     <ClInclude Include="..\common\mptFstream.h" />
+    <ClInclude Include="..\common\mptIO.h" />
     <ClInclude Include="..\common\mptPathString.h" />
     <ClInclude Include="..\common\mptString.h" />
     <ClInclude Include="..\common\mutex.h" />

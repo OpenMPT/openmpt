@@ -10,6 +10,10 @@
 
 #pragma once
 
+#include "../common/typedefs.h"
+#include "../common/mptIO.h"
+#include "../common/Endianness.h"
+
 #include <algorithm>
 #include <bitset>
 #include <istream>
@@ -23,8 +27,6 @@
 #endif
 
 #include <cstring>
-
-#include "../common/typedefs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -73,15 +75,6 @@ enum
 };
 
 
-void ReadAdaptive12(std::istream& iStrm, uint16& val);
-void ReadAdaptive1234(std::istream& iStrm, uint32& val);       
-void ReadAdaptive1248(std::istream& iStrm, uint64& val);
-
-void WriteAdaptive12(std::ostream& oStrm, const uint16 num);
-void WriteAdaptive1234(std::ostream& oStrm, const uint32 num);
-void WriteAdaptive1248(std::ostream& oStrm, const uint64& val);
-
-
 enum
 {
 	IdSizeVariable = uint16_max,
@@ -126,25 +119,15 @@ template<class T>
 inline void Binarywrite(std::ostream& oStrm, const T& data)
 //---------------------------------------------------------
 {
-	char b[sizeof(T)];
-	std::memcpy(b, &data, sizeof(T));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(b, b+sizeof(T));
-	#endif
-	oStrm.write(b, sizeof(T));
+	mpt::IO::WriteIntLE(oStrm, data);
 }
 
-//Write only given number of bytes from the beginning.
-template<class T>
-inline void Binarywrite(std::ostream& oStrm, const T& data, const std::size_t bytecount)
-//--------------------------------------------------------------------------------------
+template<>
+inline void Binarywrite(std::ostream& oStrm, const float& data)
+//-------------------------------------------------------------
 {
-	char b[sizeof(T)];
-	std::memcpy(b, &data, sizeof(T));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(b, b+sizeof(T));
-	#endif
-	oStrm.write(b, std::min(bytecount, sizeof(T)));
+	IEEE754binary32LE tmp = IEEE754binary32LE(data);
+	mpt::IO::Write(oStrm, tmp);
 }
 
 template <class T>
@@ -170,12 +153,16 @@ template<class T>
 inline void Binaryread(std::istream& iStrm, T& data)
 //--------------------------------------------------
 {
-	char b[sizeof(T)];
-	iStrm.read(b, sizeof(T));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(b, b+sizeof(T));
-	#endif
-	std::memcpy(&data, b, sizeof(T));
+	mpt::IO::ReadIntLE(iStrm, data);
+}
+
+template<>
+inline void Binaryread(std::istream& iStrm, float& data)
+//------------------------------------------------------
+{
+	IEEE754binary32LE tmp = IEEE754binary32LE(0.0f);
+	mpt::IO::Read(iStrm, tmp);
+	data = tmp;
 }
 
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
@@ -183,16 +170,7 @@ template <class T>
 inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
 //---------------------------------------------------------------------------
 {
-	#ifdef HAS_TYPE_TRAITS
-		static_assert(std::is_trivial<T>::value == true, "");
-	#endif
-	char b[sizeof(T)];
-	std::memset(b, 0, sizeof(T));
-	iStrm.read(b, std::min(static_cast<std::size_t>(bytecount), sizeof(T)));
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(b, b+sizeof(T));
-	#endif
-	std::memcpy(&data, b, sizeof(T));
+	mpt::IO::ReadBinaryTruncatedLE(iStrm, data, static_cast<std::size_t>(bytecount));
 }
 
 
@@ -207,36 +185,6 @@ inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
 		Binaryread(iStrm, data);
 	else
 		Binaryread(iStrm, data, nSize);
-}
-
-// Read specialization for float. If data size is 8, read double and assign it to given float.
-template <>
-inline void ReadItem<float>(std::istream& iStrm, float& f, const DataSize nSize)
-//------------------------------------------------------------------------------
-{
-	if (nSize == 8)
-	{
-		double d;
-		Binaryread(iStrm, d);
-		f = static_cast<float>(d);
-	}
-	else
-		Binaryread(iStrm, f);
-}
-
-// Read specialization for double. If data size is 4, read float and assign it to given double.
-template <>
-inline void ReadItem<double>(std::istream& iStrm, double& d, const DataSize nSize)
-//--------------------------------------------------------------------------------
-{
-	if (nSize == 4)
-	{
-		float f;
-		Binaryread(iStrm, f);
-		d = f;
-	}
-	else
-		Binaryread(iStrm, d);
 }
 
 void ReadItemString(std::istream& iStrm, std::string& str, const DataSize);
@@ -259,19 +207,19 @@ protected:
 
 public:
 
-	// When writing, returns the number of entries written.
-	// When reading, returns the number of entries read not including unrecognized entries.
-	NumType GetCounter() const {return m_nCounter;}
-
-	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
-	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
-
 	SsbStatus GetStatus() const
 	{
 		return m_Status;
 	}
 
 protected:
+
+	// When writing, returns the number of entries written.
+	// When reading, returns the number of entries read not including unrecognized entries.
+	NumType GetCounter() const {return m_nCounter;}
+
+	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
+	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
 
 	// Write given string to log if log func is defined.
 	void AddToLog(const char *psz);
