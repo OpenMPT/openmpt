@@ -500,6 +500,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug)
 		{ kEffectMagic, CCONST('f', 'V', '2', 's'), true, true },	// Single instances of V2 can communicate (I think)
 		{ kEffectMagic, CCONST('f', 'r', 'V', '2'), true, false },
 		{ kEffectMagic, CCONST('S', 'K', 'V', '3'), false, true },	// SideKick v3 always has to run in a shared instance
+		{ kEffectMagic, CCONST('Y', 'W', 'S', '!'), false, true },	// You Wa Shock ! always has to run in a shared instance
 	};
 
 	for(size_t p = 0; p < CountOf(problemPlugs); p++)
