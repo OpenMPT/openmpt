@@ -801,6 +801,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	bool add = true;
 	std::pair<CommandID, KeyCombination> conflictCmd;
 	if((conflictCmd = plocalCmdSet->IsConflicting(kc, cmd)).first != kcNull
+		&& conflictCmd.first != cmd
 		&& !plocalCmdSet->IsCrossContextConflict(kc, conflictCmd.second)
 		&& Reporting::Confirm("New shortcut (" + kc.GetKeyText() + ") conflicts with " + plocalCmdSet->GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + ".\nDelete the other shortcut and keep the new one?", "Shortcut Conflict") == cnfNo)
 	{

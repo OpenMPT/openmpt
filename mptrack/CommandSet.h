@@ -1279,7 +1279,7 @@ protected:
 	CString EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
 
 	int FindCmd(int uid) const;
-	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2) const;
+	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
 
 	const CModSpecifications *oldSpecs;
 	CommandStruct commands[kcNumCommands];
@@ -1291,11 +1291,11 @@ public:
 	CCommandSet();
 
 	//Population
-	CString Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos = -1);
+	CString Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos = -1, bool checkEventConflict = true);
 	CString Remove(KeyCombination kc, CommandID cmd);
 	CString Remove(int pos, CommandID cmd);
 
-	std::pair<CommandID, KeyCombination> IsConflicting(KeyCombination kc, CommandID cmd) const;
+	std::pair<CommandID, KeyCombination> IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict = true) const;
 	bool IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2) const;
 
 	//Tranformation

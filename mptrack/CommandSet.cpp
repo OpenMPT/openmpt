@@ -695,8 +695,8 @@ void CCommandSet::SetupCommands()
 //-------------------------------------------------------
 
 
-CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos)
-//---------------------------------------------------------------------------------
+CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos, bool checkEventConflict)
+//----------------------------------------------------------------------------------------------------------
 {
 	CString report= "";
 
@@ -714,7 +714,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 
 	//Check that this keycombination isn't already assigned (in this context), except for dummy keys
 	std::pair<CommandID, KeyCombination> conflictCmd;
-	if((conflictCmd = IsConflicting(kc, cmd)).first != kcNull)
+	if((conflictCmd = IsConflicting(kc, cmd, checkEventConflict)).first != kcNull)
 	{
 		if (!overwrite)
 		{
@@ -746,21 +746,21 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 }
 
 
-std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination kc, CommandID cmd) const
-//-----------------------------------------------------------------------------------------------------
+std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict) const
+//------------------------------------------------------------------------------------------------------------------------------
 {
 	if(IsDummyCommand(cmd))    // no need to search if we are adding a dummy key
 		return std::pair<CommandID, KeyCombination>(kcNull, KeyCombination());
 	
 	for(int curCmd = 0; curCmd < kcNumCommands; curCmd++)
 	{
-		if(curCmd == cmd || IsDummyCommand((CommandID)curCmd))
+		if(IsDummyCommand((CommandID)curCmd))
 			continue;
 
 		for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
 		{
 			const KeyCombination &curKc = commands[curCmd].kcList[k];
-			if(KeyCombinationConflict(curKc, kc))
+			if(KeyCombinationConflict(curKc, kc, checkEventConflict))
 			{
 				return std::pair<CommandID, KeyCombination>((CommandID)curCmd, curKc);
 			}
@@ -1534,7 +1534,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 	int fileVersion = 0;
 	oldSpecs = nullptr;	// After clearing the key set, need to fix effect letters
 
-	bool fillExistingSet = commandSet != nullptr;
+	const bool fillExistingSet = commandSet != nullptr;
 
 	// If commandSet is valid, add new commands to it (this is used for adding the default shortcuts to existing keymaps)
 	CCommandSet *pTempCS = fillExistingSet ? commandSet : new CCommandSet();
@@ -1637,7 +1637,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 				}
 			} else
 			{
-				pTempCS->Add(kc, cmd, commandSet == nullptr);
+				pTempCS->Add(kc, cmd, !fillExistingSet, -1, !fillExistingSet);
 			}
 		}
 	}
@@ -1983,15 +1983,17 @@ void CCommandSet::SetupContextHierarchy()
 
 }
 
-bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2) const
+
+bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict) const
+//-------------------------------------------------------------------------------------------------------------
 {
 	bool modConflict      = (kc1.Modifier()==kc2.Modifier());
 	bool codeConflict     = (kc1.KeyCode()==kc2.KeyCode());
 	bool eventConflict    = ((kc1.EventType()&kc2.EventType())!=0);
 	bool ctxConflict      = (kc1.Context() == kc2.Context());
-	bool crossCxtConflict = m_isParentContext[kc1.Context()][kc2.Context()] || m_isParentContext[kc2.Context()][kc1.Context()];
+	bool crossCxtConflict = IsCrossContextConflict(kc1, kc2);
 
-	bool conflict = modConflict && codeConflict && eventConflict &&
+	bool conflict = modConflict && codeConflict && (eventConflict || !checkEventConflict) &&
 		(ctxConflict || crossCxtConflict);
 
 	return conflict;
