@@ -971,6 +971,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
+		uint8 autoSlide[4] = { 0, 0, 0, 0 };
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			PatternRow rowBase = Patterns[pat].GetpModCommand(row, 0);
@@ -981,6 +982,11 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 				if(m.command || m.param)
 				{
+					if(m.command != 0x0E && autoSlide[chn] != 0)
+					{
+						m.volcmd = (autoSlide[chn] & 0xF0) ? VOLCMD_VOLSLIDEUP : VOLCMD_VOLSLIDEDOWN;
+						m.vol = (autoSlide[chn] & 0xF0) ? (autoSlide[chn] >> 4) : (autoSlide[chn] & 0x0F);
+					}
 					if(m.command == 0x0D)
 					{
 						if((m.param != 0 && minVersion != ST2_00_with_Bxx) || minVersion < ST_IX)
@@ -1001,8 +1007,9 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 						m.param &= 0x7F;
 					} else if(m.command == 0x0E && (m.param > 0x01 || minVersion < ST_IX))
 					{
-						// Import auto-slides as normal slides and ignore their extended behaviour.
+						// Import auto-slides as normal slides and fake them using volume column slides.
 						m.command = 0x0A;
+						autoSlide[chn] = m.param;
 					} else if(m.command == 0x0F)
 					{
 						// Only the low nibble is evaluated in Soundtracker.
@@ -1042,6 +1049,9 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						ConvertModCommand(m);
 					}
+				} else
+				{
+					autoSlide[chn] = 0;
 				}
 			}
 		}
