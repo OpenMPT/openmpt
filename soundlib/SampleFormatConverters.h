@@ -337,7 +337,7 @@ struct Convert<int24, int8>
 	typedef int24 output_t;
 	forceinline output_t operator() (input_t val)
 	{
-		return int24(val << 8);
+		return int24(val << 16);
 	}
 };
 
