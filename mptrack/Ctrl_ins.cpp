@@ -807,6 +807,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_PITCHTEMPOLOCK, OnEnChangeEditPitchtempolock)
 	ON_BN_CLICKED(IDC_CHECK_PITCHTEMPOLOCK, OnBnClickedCheckPitchtempolock)
 	ON_EN_KILLFOCUS(IDC_EDIT_PITCHTEMPOLOCK, OnEnKillfocusEditPitchtempolock)
+	ON_EN_KILLFOCUS(IDC_EDIT7, OnEnKillfocusEditFadeOut)
 END_MESSAGE_MAP()
 
 void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
@@ -1181,6 +1182,13 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinFadeOut.EnableWindow(bITandXM);
 		m_SpinFadeOut.SetRange(0, extendedFadeoutRange ? 32767 : 8192);
 		m_EditFadeOut.SetLimitText(extendedFadeoutRange ? 5 : 4);
+		// XM-style fade-out is 32 times more precise than IT
+		UDACCEL accell[2];
+		accell[0].nSec = 0;
+		accell[0].nInc = (m_sndFile.GetType() == MOD_TYPE_IT ? 32 : 1);
+		accell[1].nSec = 2;
+		accell[1].nInc = 5 * accell[0].nInc;
+		m_SpinFadeOut.SetAccel(CountOf(accell), accell);
 
 		// Panning ranges (0...64 for IT, 0...256 for MPTM)
 		m_SpinPanning.SetRange(0, (m_sndFile.GetType() & MOD_TYPE_IT) ? 64 : 256);
@@ -2462,7 +2470,7 @@ void CCtrlInstruments::OnEditSampleMap()
 	}
 }
 
-//rewbs.instroVSTi
+
 void CCtrlInstruments::TogglePluginEditor()
 //----------------------------------------
 {
@@ -2471,7 +2479,7 @@ void CCtrlInstruments::TogglePluginEditor()
 		m_modDoc.TogglePluginEditor(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel())-1);
 	}
 }
-//end rewbs.instroVSTi
+
 
 //rewbs.customKeys
 BOOL CCtrlInstruments::PreTranslateMessage(MSG *pMsg)
@@ -2807,6 +2815,23 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 }
 
 
+void CCtrlInstruments::OnEnKillfocusEditFadeOut()
+//-----------------------------------------------
+{
+	if(IsLocked() || !m_nInstrument || !m_sndFile.Instruments[m_nInstrument]) return;
+
+	if(m_modDoc.GetModType() == MOD_TYPE_IT)
+	{
+		BOOL success;
+		uint32 fadeout = (GetDlgItemInt(IDC_EDIT7, &success, FALSE) + 16) & ~31;
+		if(success && fadeout != m_sndFile.Instruments[m_nInstrument]->nFadeOut)
+		{
+			SetDlgItemInt(IDC_EDIT7, fadeout, FALSE);
+		}
+	}
+}
+
+
 void CCtrlInstruments::BuildTuningComboBox()
 //------------------------------------------
 {
@@ -2834,7 +2859,6 @@ void CCtrlInstruments::BuildTuningComboBox()
 void CCtrlInstruments::UpdatePluginList()
 //---------------------------------------
 {
-	//Update plugin list
 	m_CbnMixPlug.Clear();
 	m_CbnMixPlug.ResetContent();
 	CHAR s[64];

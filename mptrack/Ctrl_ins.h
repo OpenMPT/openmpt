@@ -192,6 +192,7 @@ protected:
 	afx_msg void OnEnChangeEditPitchtempolock();
 	afx_msg void OnBnClickedCheckPitchtempolock();
 	afx_msg void OnEnKillfocusEditPitchtempolock();
+	afx_msg void OnEnKillfocusEditFadeOut();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
