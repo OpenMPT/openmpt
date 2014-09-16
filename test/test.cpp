@@ -117,8 +117,8 @@ void DoTests(std::string pathprefix)
 }
 
 
-void RemoveFile(const mpt::PathString &filename)
-//----------------------------------------------
+static void RemoveFile(const mpt::PathString &filename)
+//-----------------------------------------------------
 {
 	#if MPT_OS_WINDOWS
 		for(int retry=0; retry<10; retry++)
