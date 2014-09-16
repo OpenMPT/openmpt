@@ -491,6 +491,7 @@ void COptionsSoundcard::UpdateChannelMapping()
 //--------------------------------------------
 {
 	int usedChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+	GetDlgItem(IDC_STATIC_CHANNELMAPPING)->EnableWindow(m_CurrentDeviceCaps.CanChannelMapping ? TRUE : FALSE);
 	for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)	// Host channels
 	{
 		CStatic *statictext = &m_StaticChannelMapping[mch];
