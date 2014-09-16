@@ -963,6 +963,7 @@
 #define IDC_COMBO_CHANNEL_REARLEFT      2477
 #define IDC_COMBO_CHANNEL_REARRIGHT     2478
 #define IDC_SCANTEXT                    2479
+#define IDC_STATIC_CHANNELMAPPING       2480
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1246,7 +1247,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        537
 #define _APS_NEXT_COMMAND_VALUE         44644
-#define _APS_NEXT_CONTROL_VALUE         2480
+#define _APS_NEXT_CONTROL_VALUE         2481
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
