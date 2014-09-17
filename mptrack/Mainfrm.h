@@ -321,7 +321,7 @@ public:
 public:
 
 	// Low-Level Audio
-	SoundDevice::Base *gpSoundDevice;
+	SoundDevice::IBase *gpSoundDevice;
 	UINT_PTR m_NotifyTimer;
 	Dither m_Dither;
 
